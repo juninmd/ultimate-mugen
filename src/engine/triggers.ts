@@ -214,8 +214,8 @@ export const resolver: TriggerResolver<Fighter> = {
       case 'const240p': return F((h) => a0(h) * h.def.localW / 320);
       case 'const480p': return F((h) => a0(h) * h.def.localW / 640);
       case 'const720p': return F((h) => a0(h) * h.def.localW / 1280);
-      case 'random': return I(() => Math.floor(Math.random() * 1000));
-      case 'randomrange': return I((h) => { const lo = a0(h), hi = args[1]?.f(h) ?? lo; return lo + Math.floor(Math.random() * (hi - lo + 1)); });
+      case 'random': return I((h) => Math.floor(h.match.random() * 1000));
+      case 'randomrange': return I((h) => { const lo = a0(h), hi = args[1]?.f(h) ?? lo; return lo + Math.floor(h.match.random() * (hi - lo + 1)); });
       case 'roundstate': return I((h) => h.match.roundState);
       case 'roundno': return I((h) => h.match.roundNo);
       case 'roundsexisted': return I((h) => h.match.roundNo - 1);

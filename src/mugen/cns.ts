@@ -70,15 +70,19 @@ export function buildController(s: IniSection): StateController | null {
 }
 
 /** Read [Data] [Size] [Velocity] [Movement] constants into map */
-export function parseConstants(text: string, into: Map<string, number>) {
+export function parseConstants(text: string, into: Map<string, number>, provided?: Set<string>) {
   for (const s of parseIni(text)) {
     const sec = s.lname;
     if (!['data', 'size', 'velocity', 'movement'].includes(sec)) continue;
     for (const [k, v] of s.entries) {
       const parts = v.split(',').map((x) => parseFloat(x));
       const key = `${sec}.${k}`;
-      if (parts.length === 1) into.set(key, Number.isFinite(parts[0]) ? parts[0] : 0);
-      else {
+      provided?.add(key);
+      if (parts.length === 1) {
+        into.set(key, Number.isFinite(parts[0]) ? parts[0] : 0);
+        if (sec === 'velocity') { into.set(key + '.x', into.get(key)!); provided?.add(key + '.x'); }
+      } else {
+        for (const c of ['x', 'y', 'z']) provided?.add(`${key}.${c}`);
         // vectors: .x .y (.z)
         const comps = ['x', 'y', 'z'];
         parts.forEach((p, i) => into.set(`${key}.${comps[i] ?? i}`, Number.isFinite(p) ? p : 0));
@@ -86,6 +90,21 @@ export function parseConstants(text: string, into: Map<string, number>) {
       }
       // scalar keys like "size.xscale" are already fine
     }
+  }
+  // MUGEN aliases: velocity.jump.y = jump.neu y, runjump.y, airjump.y
+  const alias = (to: string, from: string) => { if (into.has(from) && (!provided || provided.has(from))) { into.set(to, into.get(from)!); provided?.add(to); } };
+  alias('velocity.jump.y', 'velocity.jump.neu.y');
+  alias('velocity.runjump.y', 'velocity.runjump.fwd.y');
+  alias('velocity.airjump.y', 'velocity.airjump.neu.y');
+}
+
+/** Scale engine defaults (320x240 based) for constants a hi-res character did not provide. */
+export function scaleDefaultConstants(into: Map<string, number>, provided: Set<string>, factor: number) {
+  if (factor === 1) return;
+  const unitless = /(xscale|yscale|friction$|airjump\.num|doscale|data\.|recover\.mul)/;
+  for (const [k, v] of into) {
+    if (provided.has(k) || unitless.test(k)) continue;
+    if (k.startsWith('size.') || k.startsWith('velocity.') || k.startsWith('movement.')) into.set(k, v * factor);
   }
 }
 

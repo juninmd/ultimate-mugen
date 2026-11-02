@@ -116,3 +116,32 @@ describe.skipIf(!fs.existsSync(KFM))('KFM advanced', () => {
     expect(p1.power).toBeLessThan(3000);
   });
 });
+
+const KFM720 = path.join(SP, 'chars/kfm720');
+describe.skipIf(!fs.existsSync(KFM720))('HD character (localcoord 1280x720)', () => {
+  it('kfm720 moves/jumps at the same engine scale as kfm', () => {
+    const d1 = loadMugenCharacter(vfsFromDir(KFM, 'kfm'), 'kfm/kfm.def', { makeImage: () => null });
+    const d2 = loadMugenCharacter(vfsFromDir(KFM720, 'kfm720'), 'kfm720/kfm720.def', { makeImage: () => null });
+    expect(d2.localW).toBe(1280);
+    const m = new Match(commonDef(), null, flatStage());
+    const s1 = new Script(), s2 = new Script();
+    const a = m.addPlayer(d1, 0, s1), b = m.addPlayer(d2, 1, s2);
+    m.startRound();
+    for (let i = 0; i < 110; i++) m.tick();
+    const ax = a.pos.x, bx = b.pos.x;
+    for (let i = 0; i < 30; i++) { s1.seq.push(K.R); s2.seq.push(K.L); }
+    for (let i = 0; i < 30; i++) m.tick();
+    const da = a.pos.x - ax, db = bx - b.pos.x;
+    console.log('walk dist', da.toFixed(1), db.toFixed(1));
+    expect(Math.abs(da - db)).toBeLessThan(15);
+    let minY = 0;
+    s2.seq.push(K.U, K.U);
+    for (let i = 0; i < 60; i++) { m.tick(); minY = Math.min(minY, b.pos.y); }
+    console.log('jump height hd', minY.toFixed(1));
+    expect(minY).toBeLessThan(-50); expect(minY).toBeGreaterThan(-120);
+    // HD hitboxes scaled
+    const hb = b.boxes(2);
+    const hgt = Math.max(...hb.map((x) => b.pos.y - x[1]));
+    expect(hgt).toBeGreaterThan(60); expect(hgt).toBeLessThan(140);
+  });
+});

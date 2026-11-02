@@ -120,7 +120,14 @@ export class Match {
   announce: { text: string; time: number; sub?: string } | null = null;
   koTime = 0;
   onEvent?: (type: string, data?: any) => void;
-  rngState = 1;
+  rngState = 0x2545f491;
+  /** Deterministic PRNG (xorshift32) so matches can be replayed / rolled back. */
+  random(): number {
+    let x = this.rngState;
+    x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+    this.rngState = x >>> 0;
+    return this.rngState / 4294967296;
+  }
 
   constructor(common: CharacterDef, fx: CharacterDef | null, stage: StageInfo) {
     this.common = common;
@@ -631,7 +638,7 @@ export class Match {
     else if (postype === 'back') { x = this.camera.x + (f.facing > 0 ? -this.viewW / 2 : this.viewW / 2) + px * f.facing; y = py + this.camera.y; }
     else if (postype === 'left') { x = this.camera.x - this.viewW / 2 + px; y = py + this.camera.y; facing = fac; screen = false; }
     else if (postype === 'right') { x = this.camera.x + this.viewW / 2 + px; y = py + this.camera.y; facing = fac; }
-    if (has('random')) { x += (Math.random() - 0.5) * num('random', 0, 0) * f.lscl; y += (Math.random() - 0.5) * num('random', 0, 1) * f.lscl; }
+    if (has('random')) { x += (this.random() - 0.5) * num('random', 0, 0) * f.lscl; y += (this.random() - 0.5) * num('random', 0, 1) * f.lscl; }
     const e = this.makeExplod(f, def, anim, x, y);
     e.id = num('id', -1);
     e.facing = facing;

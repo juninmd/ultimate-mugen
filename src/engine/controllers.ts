@@ -129,7 +129,7 @@ const C: Record<string, Ctl> = {
     let lo = 0, hi = 1000;
     if (r && r.length === 1) hi = r[0].f(f);
     else if (r && r.length >= 2) { lo = r[0].f(f); hi = r[1].f(f); }
-    f.vars[idx] = lo + Math.floor(Math.random() * (hi - lo + 1));
+    f.vars[idx] = lo + Math.floor(f.match.random() * (hi - lo + 1));
   },
   varrangeset(f, sc) {
     const first = num(f, sc, 'first', 0) | 0;

@@ -4,7 +4,7 @@ import { decodeSnd } from './snd';
 import { decodeAct } from './act';
 import { spriteToRGBA, type DecodedSff } from './sprite';
 import { findSection, parseIni, sectionGet, unquote, nums } from './ini';
-import { parseCmd, parseConstants, parseStates } from './cns';
+import { parseCmd, parseConstants, parseStates, scaleDefaultConstants } from './cns';
 import { defaultConstants, type CharacterDef, type Sprite } from '../engine/chardef';
 import { parseCommand } from '../engine/commands';
 import type { StageInfo, Match } from '../engine/match';
@@ -81,7 +81,9 @@ export function loadMugenCharacter(vfs: VFS, defPath: string, opt: LoadCharOptio
   const states = new Map();
   // constants + states
   const cnsText = text(resolveFile(vfs, baseDir, f('cns') ?? ''));
-  parseConstants(cnsText, constants);
+  const provided = new Set<string>();
+  parseConstants(cnsText, constants, provided);
+  scaleDefaultConstants(constants, provided, (lc[0] || 320) / 320);
   parseStates(cnsText, states);
   for (const k of ['st', 'st0', 'st1', 'st2', 'st3', 'st4', 'st5', 'st6', 'st7', 'st8', 'st9']) {
     const fn = f(k);

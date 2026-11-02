@@ -1,0 +1,22 @@
+// Embeds every UMF character JSON in assets/chars/ (order: index.json first, then the rest alphabetically).
+use std::{env, fs, path::Path};
+fn main() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/chars");
+    println!("cargo:rerun-if-changed={}", dir.display());
+    let mut ids: Vec<String> = fs::read_to_string(dir.join("index.json")).ok()
+        .and_then(|s| { let s = s.trim().trim_start_matches('[').trim_end_matches(']').to_string(); Some(s.split(',').map(|x| x.trim().trim_matches('"').to_string()).filter(|x| !x.is_empty()).collect()) })
+        .unwrap_or_default();
+    let mut rest: Vec<String> = fs::read_dir(&dir).unwrap().filter_map(|e| e.ok()).map(|e| e.file_name().to_string_lossy().to_string())
+        .filter(|n| n.ends_with(".json") && n != "index.json").map(|n| n.trim_end_matches(".json").to_string()).filter(|id| !ids.contains(id)).collect();
+    rest.sort();
+    ids.retain(|id| dir.join(format!("{id}.json")).exists());
+    ids.extend(rest);
+    let mut out = String::from("pub const BUILTIN: &[(&str, &str)] = &[\n");
+    for id in &ids {
+        let p = dir.join(format!("{id}.json"));
+        println!("cargo:rerun-if-changed={}", p.display());
+        out += &format!("    ({id:?}, include_str!({:?})),\n", p.display().to_string());
+    }
+    out += "];\n";
+    fs::write(Path::new(&env::var("OUT_DIR").unwrap()).join("chars_gen.rs"), out).unwrap();
+}

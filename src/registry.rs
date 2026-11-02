@@ -10,13 +10,7 @@ use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::stage::load_stage;
 use ume_formats::vfs::{find_char_defs, find_stage_defs, text, Vfs};
 
-pub const BUILTIN: [(&str, &str); 10] = [
-    ("kaito", include_str!("../assets/chars/kaito.json")), ("shion", include_str!("../assets/chars/shion.json")),
-    ("akio", include_str!("../assets/chars/akio.json")), ("suzume", include_str!("../assets/chars/suzume.json")),
-    ("bruno", include_str!("../assets/chars/bruno.json")), ("sylene", include_str!("../assets/chars/sylene.json")),
-    ("volta", include_str!("../assets/chars/volta.json")), ("lian", include_str!("../assets/chars/lian.json")),
-    ("garan", include_str!("../assets/chars/garan.json")), ("marlow", include_str!("../assets/chars/marlow.json")),
-];
+include!(concat!(env!("OUT_DIR"), "/chars_gen.rs"));
 
 pub enum Src { Native(Box<NativeChar>), Mugen { vfs: Arc<Vfs>, def: String } }
 
@@ -48,7 +42,7 @@ fn hex3(h: &str) -> [u8; 3] { let v = u32::from_str_radix(h.trim_start_matches('
 impl Registry {
     pub fn new() -> Self {
         let mut chars = vec![];
-        for (_, json) in BUILTIN {
+        for (_, json) in BUILTIN.iter() {
             match serde_json::from_str::<NativeChar>(json) {
                 Ok(nc) => chars.push(CharEntry {
                     id: format!("umf:{}", nc.id), name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color),

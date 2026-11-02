@@ -13,13 +13,12 @@
 //! (coverage rendered to a temporary pixmap, 3-pass box blur, tinted and composited).
 use super::types::{ActiveSpec, Box4};
 use crate::chardef::ImageData;
-use crate::raster::pixmap_to_image;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Arc;
 use tiny_skia::{
-    BlendMode, Color, FillRule, FilterQuality, GradientStop, LineCap, LineJoin, LinearGradient, Mask, Paint, Path, PathBuilder, Pixmap, PixmapPaint, Point,
+    BlendMode, Color, FillRule, GradientStop, LineCap, LineJoin, LinearGradient, Mask, Paint, Path, PathBuilder, Pixmap, Point,
     RadialGradient, Rect, Shader, SpreadMode, Stroke, Transform,
 };
 
@@ -152,12 +151,6 @@ impl Ctx {
     fn new(w: u32, h: u32) -> Option<Ctx> {
         Some(Ctx { pm: Pixmap::new(w.max(1), h.max(1))?, st: St { m: Aff::I, alpha: 1.0, blend: BlendMode::SourceOver, shadow: None, lw: 1.0, clip: None }, stack: vec![], pb: PathBuilder::new(), open: false })
     }
-    /// sub-canvas covering the device rect (x0, y0, w, h) of this one, same user transform
-    fn sub(&self, x0: i32, y0: i32, w: u32, h: u32) -> Option<Ctx> {
-        let mut c = Ctx::new(w, h)?;
-        c.st.m = Aff { e: self.st.m.e - x0 as f64, f: self.st.m.f - y0 as f64, ..self.st.m };
-        Some(c)
-    }
     fn save(&mut self) { self.stack.push(self.st.clone()); }
     fn restore(&mut self) { if let Some(s) = self.stack.pop() { self.st = s; } }
     fn translate(&mut self, x: f64, y: f64) { let m = &mut self.st.m; m.e += m.a * x + m.c * y; m.f += m.b * x + m.d * y; }
@@ -235,60 +228,287 @@ impl Ctx {
         self.pb = saved.0; self.open = saved.1;
     }
     fn draw(&mut self, path: &Path, f: &Fill, stroke: bool) {
-        let Some(paint) = self.paint(f, self.st.blend) else { return };
-        let sk = self.stroke_style();
+        let outline;
+        let geom: &Path = if stroke { outline = match path.stroke(&self.stroke_style(), 1.0) { Some(p) => p, None => return }; &outline } else { path };
         if let Some((sc, blur)) = self.st.shadow {
-            let b = path.bounds();
-            let hw = if stroke { sk.width / 2.0 + 1.0 } else { 1.0 };
-            let bounds = Rect::from_ltrb(b.left() - hw, b.top() - hw, b.right() + hw, b.bottom() + hw);
-            let mut p2 = paint.clone();
-            p2.blend_mode = BlendMode::SourceOver;
-            if let Some(bounds) = bounds {
-                self.shadow_with(bounds, sc, blur, &|pm: &mut Pixmap, tr: Transform| {
-                    if stroke { pm.stroke_path(path, &p2, &sk, tr, None) } else { pm.fill_path(path, &p2, FillRule::Winding, tr, None) }
-                }, 1.0);
+            let alpha = match f { Fill::Solid(c) => c.alpha() * self.st.alpha, _ => self.st.alpha };
+            self.shadow_paths(&[geom], alpha, sc, blur, 1.0);
+        }
+        match f {
+            Fill::Solid(c) => self.fill_solid(geom, *c),
+            _ => {
+                let Some(paint) = self.paint(f, self.st.blend) else { return };
+                let clip = self.st.clip.clone();
+                self.pm.fill_path(geom, &paint, FillRule::Winding, Transform::identity(), clip.as_deref());
             }
         }
-        let clip = self.st.clip.clone();
-        if stroke { self.pm.stroke_path(path, &paint, &sk, Transform::identity(), clip.as_deref()) } else { self.pm.fill_path(path, &paint, FillRule::Winding, Transform::identity(), clip.as_deref()) }
     }
-    /// canvas `shadowBlur`: render coverage, gaussian-ish blur (sigma = blur / 2), tint and composite
-    fn shadow_with(&mut self, bounds: Rect, col: Color, blur: f32, draw: &dyn Fn(&mut Pixmap, Transform), gain: f32) {
-        if col.alpha() <= 0.0 || blur <= 0.0 { return; }
-        let sigma = blur / 2.0;
-        let m = (sigma * 3.0).ceil() + 1.0;
-        let (pw, ph) = (self.pm.width() as f32, self.pm.height() as f32);
-        let x0 = (bounds.left() - m).floor().max(0.0) as i32;
-        let y0 = (bounds.top() - m).floor().max(0.0) as i32;
-        let x1 = (bounds.right() + m).ceil().min(pw) as i32;
-        let y1 = (bounds.bottom() + m).ceil().min(ph) as i32;
-        if x1 <= x0 || y1 <= y0 { return; }
-        let (w, h) = ((x1 - x0) as usize, (y1 - y0) as usize);
-        let Some(mut tmp) = Pixmap::new(w as u32, h as u32) else { return };
-        draw(&mut tmp, Transform::from_translate(-x0 as f32, -y0 as f32));
-        let mut a: Vec<f32> = tmp.data().chunks_exact(4).map(|p| p[3] as f32 / 255.0).collect();
-        box_blur(&mut a, w, h, sigma);
-        let (r, g, b, ca) = (col.red(), col.green(), col.blue(), col.alpha() * gain);
-        for (px, &v) in tmp.data_mut().chunks_exact_mut(4).zip(a.iter()) {
-            let al = (v * ca).clamp(0.0, 1.0);
-            px[0] = (r * al * 255.0 + 0.5) as u8;
-            px[1] = (g * al * 255.0 + 0.5) as u8;
-            px[2] = (b * al * 255.0 + 0.5) as u8;
-            px[3] = (al * 255.0 + 0.5) as u8;
-        }
+    /// non-zero fill of a device-space path with a solid colour (fast rasterizer + own compositing)
+    fn fill_solid(&mut self, geom: &Path, c: Color) {
+        let Some((x0, y0, w, h)) = region(geom.bounds(), 1.0, self.pm.width(), self.pm.height()) else { return };
+        let cov = coverage(&[geom], x0, y0, w, h, 1.0, false);
         let clip = self.st.clip.clone();
-        self.pm.draw_pixmap(x0, y0, tmp.as_ref(), &PixmapPaint { opacity: 1.0, blend_mode: self.st.blend, quality: FilterQuality::Nearest }, Transform::identity(), clip.as_deref());
+        composite(&mut self.pm, &cov, x0, y0, w, h, [c.red() * 255.0, c.green() * 255.0, c.blue() * 255.0], c.alpha() * self.st.alpha, self.st.blend, clip.as_deref());
+    }
+    /// canvas `shadowBlur` for filled geometry: coverage (union of `geoms`, at reduced resolution
+    /// for wide blurs), gaussian-ish 3-pass box blur (sigma = blur / 2), tinted and composited
+    /// with bilinear upsampling.
+    fn shadow_paths(&mut self, geoms: &[&Path], alpha: f32, col: Color, blur: f32, gain: f32) {
+        if col.alpha() <= 0.0 || blur <= 0.0 || alpha <= 0.0 || geoms.is_empty() { return; }
+        let sigma = blur / 2.0;
+        let m = (sigma * 2.6).ceil() + 1.0;
+        let mut bd = geoms[0].bounds();
+        for g in &geoms[1..] { let b = g.bounds(); bd = Rect::from_ltrb(bd.left().min(b.left()), bd.top().min(b.top()), bd.right().max(b.right()), bd.bottom().max(b.bottom())).unwrap_or(bd); }
+        let Some((x0, y0, w, h)) = region(bd, m, self.pm.width(), self.pm.height()) else { return };
+        let f = (sigma / 4.0).floor().clamp(1.0, 4.0) as usize;
+        let (sw, sh) = (w.div_ceil(f), h.div_ceil(f));
+        let k = 1.0 / f as f32;
+        let mut a = coverage(geoms, x0, y0, sw, sh, k, true);
+        box_blur(&mut a, sw, sh, sigma / f as f32);
+        let (r, g, b, ca) = (col.red(), col.green(), col.blue(), col.alpha() * gain * alpha);
+        let blend = self.st.blend;
+        let clip = self.st.clip.clone();
+        let stride = self.pm.width() as usize;
+        let data = self.pm.data_mut();
+        // separable bilinear upsampling: rows first, then columns
+        let map = |x: usize, n: usize| -> (usize, usize, f32) {
+            let u = ((x as f32 + 0.5) * k - 0.5).max(0.0);
+            let i = (u as usize).min(n - 1);
+            (i, (i + 1).min(n - 1), u - i as f32)
+        };
+        let cols: Vec<(usize, usize, f32)> = (0..w).map(|x| map(x, sw)).collect();
+        let mut hz = vec![0f32; sh * w];
+        for j in 0..sh {
+            let row = &a[j * sw..(j + 1) * sw];
+            for (x, &(i0, i1, fu)) in cols.iter().enumerate() { hz[j * w + x] = row[i0] + (row[i1] - row[i0]) * fu; }
+        }
+        for y in 0..h {
+            let (j0, j1, fv) = map(y, sh);
+            let (r0, r1) = (&hz[j0 * w..(j0 + 1) * w], &hz[j1 * w..(j1 + 1) * w]);
+            let drow = (y0 + y) * stride + x0;
+            for x in 0..w {
+                let mut al = ((r0[x] + (r1[x] - r0[x]) * fv) * ca).min(1.0);
+                if al < 1.0 / 512.0 { continue; }
+                let di = drow + x;
+                if let Some(cm) = &clip { al *= cm.data()[di] as f32 * (1.0 / 255.0); }
+                blend_px(&mut data[di * 4..di * 4 + 4], [r * al * 255.0, g * al * 255.0, b * al * 255.0, al * 255.0], blend);
+            }
+        }
     }
     fn clip(&mut self) {
-        let (w, h) = (self.pm.width(), self.pm.height());
+        let (pw, ph) = (self.pm.width(), self.pm.height());
+        let Some(mut m) = Mask::new(pw, ph) else { return };
         let path = self.path();
-        let mask = match (&self.st.clip, path) {
-            (_, None) => Mask::new(w, h),
-            (None, Some(p)) => Mask::new(w, h).map(|mut m| { m.fill_path(&p, FillRule::Winding, true, Transform::identity()); m }),
-            (Some(c), Some(p)) => { let mut m = (**c).clone(); m.intersect_path(&p, FillRule::Winding, true, Transform::identity()); Some(m) }
-        };
-        if let Some(m) = mask { self.st.clip = Some(Rc::new(m)); }
+        if let Some((x0, y0, w, h)) = path.as_ref().and_then(|p| region(p.bounds(), 1.0, pw, ph)) {
+            let cov = coverage(&[path.as_ref().unwrap()], x0, y0, w, h, 1.0, false);
+            let old = self.st.clip.clone();
+            let stride = pw as usize;
+            let md = m.data_mut();
+            for y in 0..h {
+                for x in 0..w {
+                    let di = (y0 + y) * stride + x0 + x;
+                    let c = cov[y * w + x] * old.as_ref().map_or(1.0, |o| o.data()[di] as f32 * (1.0 / 255.0));
+                    md[di] = (c * 255.0 + 0.5) as u8;
+                }
+            }
+        }
+        self.st.clip = Some(Rc::new(m));
     }
+}
+
+/// composite one premultiplied source pixel (0..255 floats) onto a premultiplied RGBA8 pixel
+#[inline]
+fn blend_px(d: &mut [u8], s: [f32; 4], mode: BlendMode) {
+    match mode {
+        BlendMode::Plus => { for i in 0..4 { d[i] = (d[i] as f32 + s[i] + 0.5).min(255.0) as u8; } }
+        BlendMode::SourceAtop => {
+            let (da, ia) = (d[3] as f32 * (1.0 / 255.0), 1.0 - s[3] * (1.0 / 255.0));
+            for i in 0..3 { d[i] = (s[i] * da + d[i] as f32 * ia + 0.5).min(255.0) as u8; }
+        }
+        _ => {
+            let ia = 1.0 - s[3] * (1.0 / 255.0);
+            for i in 0..4 { d[i] = (s[i] + d[i] as f32 * ia + 0.5).min(255.0) as u8; }
+        }
+    }
+}
+
+/// composite a coverage buffer (region x0,y0,w,h of the pixmap) with a solid colour
+#[allow(clippy::too_many_arguments)]
+fn composite(pm: &mut Pixmap, cov: &[f32], x0: usize, y0: usize, w: usize, h: usize, rgb: [f32; 3], alpha: f32, mode: BlendMode, clip: Option<&Mask>) {
+    if alpha <= 0.0 { return; }
+    let stride = pm.width() as usize;
+    let data = pm.data_mut();
+    let [r, g, b] = rgb;
+    for y in 0..h {
+        let crow = &cov[y * w..(y + 1) * w];
+        let drow = (y0 + y) * stride + x0;
+        let dst = &mut data[drow * 4..(drow + w) * 4];
+        let mrow = clip.map(|m| &m.data()[drow..drow + w]);
+        match (mode, mrow) {
+            (BlendMode::SourceOver, None) => {
+                for (d, &c) in dst.chunks_exact_mut(4).zip(crow) {
+                    if c <= 0.0 { continue; }
+                    let a = c * alpha;
+                    let ia = 1.0 - a;
+                    d[0] = (r * a + d[0] as f32 * ia + 0.5) as u8;
+                    d[1] = (g * a + d[1] as f32 * ia + 0.5) as u8;
+                    d[2] = (b * a + d[2] as f32 * ia + 0.5) as u8;
+                    d[3] = (255.0 * a + d[3] as f32 * ia + 0.5) as u8;
+                }
+            }
+            _ => {
+                for (x, (d, &c)) in dst.chunks_exact_mut(4).zip(crow).enumerate() {
+                    if c <= 0.0 { continue; }
+                    let mut a = c * alpha;
+                    if let Some(m) = mrow { a *= m[x] as f32 * (1.0 / 255.0); }
+                    if a < 1.0 / 512.0 { continue; }
+                    blend_px(d, [r * a, g * a, b * a, a * 255.0], mode);
+                }
+            }
+        }
+    }
+}
+
+/// integer pixel region covering `b` expanded by `m`, clamped to the pixmap
+fn region(b: Rect, m: f32, pw: u32, ph: u32) -> Option<(usize, usize, usize, usize)> {
+    let x0 = (b.left() - m).floor().max(0.0);
+    let y0 = (b.top() - m).floor().max(0.0);
+    let x1 = (b.right() + m).ceil().min(pw as f32);
+    let y1 = (b.bottom() + m).ceil().min(ph as f32);
+    if !(x1 > x0 && y1 > y0) { return None; }
+    Some((x0 as usize, y0 as usize, (x1 - x0) as usize, (y1 - y0) as usize))
+}
+
+// ------------------------------------------------------------------ fast AA rasterizer
+/// Signed-area accumulation rasterizer (font-rs style): exact-area anti-aliasing, non-zero rule.
+/// Rows are padded by 2 cells so geometry clamped to the right edge never leaks into the next row.
+struct Acc { w: usize, h: usize, stride: usize, a: Vec<f32> }
+impl Acc {
+    fn new(w: usize, h: usize) -> Acc { Acc { w, h, stride: w + 2, a: vec![0.0; (w + 2) * h] } }
+    fn line(&mut self, x0: f32, y0: f32, x1: f32, y1: f32) {
+        if y0 == y1 || !(x0.is_finite() && y0.is_finite() && x1.is_finite() && y1.is_finite()) { return; }
+        let (dir, ax, ay, bx, by) = if y0 < y1 { (1.0, x0, y0, x1, y1) } else { (-1.0, x1, y1, x0, y0) };
+        let hf = self.h as f32;
+        if by <= 0.0 || ay >= hf { return; }
+        let wf = self.w as f32;
+        let dxdy = (bx - ax) / (by - ay);
+        let ys = ay.max(0.0);
+        let ye = by.min(hf);
+        let mut x = ax + (ys - ay) * dxdy;
+        let mut yi = ys.floor() as usize;
+        while (yi as f32) < ye && yi < self.h {
+            let top = (yi as f32).max(ys);
+            let bot = ((yi + 1) as f32).min(ye);
+            let dy = bot - top;
+            let xn = x + dxdy * dy;
+            if dy > 0.0 { self.span(yi, x.clamp(0.0, wf), xn.clamp(0.0, wf), dy * dir); }
+            x = xn;
+            yi += 1;
+        }
+    }
+    #[inline]
+    fn span(&mut self, y: usize, xa: f32, xb: f32, d: f32) {
+        let ls = y * self.stride;
+        let a = &mut self.a;
+        let (x0, x1) = if xa < xb { (xa, xb) } else { (xb, xa) };
+        let x0f = x0.floor();
+        let x0i = x0f as usize;
+        let x1c = x1.ceil();
+        let x1i = x1c as usize;
+        if x1i <= x0i + 1 {
+            let xmf = 0.5 * (xa + xb) - x0f;
+            a[ls + x0i] += d - d * xmf;
+            a[ls + x0i + 1] += d * xmf;
+        } else {
+            let s = 1.0 / (x1 - x0);
+            let fr0 = x0 - x0f;
+            let a0 = 0.5 * s * (1.0 - fr0) * (1.0 - fr0);
+            let fr1 = x1 - x1c + 1.0;
+            let am = 0.5 * s * fr1 * fr1;
+            a[ls + x0i] += d * a0;
+            if x1i == x0i + 2 {
+                a[ls + x0i + 1] += d * (1.0 - a0 - am);
+            } else {
+                let a1 = s * (1.5 - fr0);
+                a[ls + x0i + 1] += d * (a1 - a0);
+                for xi in x0i + 2..x1i - 1 { a[ls + xi] += d * s; }
+                let a2 = a1 + (x1i - x0i - 3) as f32 * s;
+                a[ls + x1i - 1] += d * (1.0 - a2 - am);
+            }
+            a[ls + x1i] += d * am;
+        }
+    }
+    fn path(&mut self, path: &Path, ox: f32, oy: f32, k: f32) {
+        use tiny_skia::PathSegment as Seg;
+        let tf = |p: Point| ((p.x - ox) * k, (p.y - oy) * k);
+        let (mut start, mut last, mut open) = ((0.0, 0.0), (0.0, 0.0), false);
+        const TOL: f32 = 0.15;
+        for seg in path.segments() {
+            match seg {
+                Seg::MoveTo(p) => { if open { self.line(last.0, last.1, start.0, start.1); } start = tf(p); last = start; open = true; }
+                Seg::LineTo(p) => { let q = tf(p); self.line(last.0, last.1, q.0, q.1); last = q; }
+                Seg::QuadTo(c, p) => {
+                    let (c, q) = (tf(c), tf(p));
+                    let dd = ((last.0 - 2.0 * c.0 + q.0).powi(2) + (last.1 - 2.0 * c.1 + q.1).powi(2)).sqrt();
+                    let n = ((dd / (8.0 * TOL)).sqrt().ceil() as usize).clamp(1, 64);
+                    let p0 = last;
+                    for i in 1..=n {
+                        let t = i as f32 / n as f32;
+                        let u = 1.0 - t;
+                        let nx = (u * u * p0.0 + 2.0 * u * t * c.0 + t * t * q.0, u * u * p0.1 + 2.0 * u * t * c.1 + t * t * q.1);
+                        self.line(last.0, last.1, nx.0, nx.1);
+                        last = nx;
+                    }
+                }
+                Seg::CubicTo(c1, c2, p) => {
+                    let (c1, c2, q) = (tf(c1), tf(c2), tf(p));
+                    let p0 = last;
+                    let d1 = ((p0.0 - 2.0 * c1.0 + c2.0).powi(2) + (p0.1 - 2.0 * c1.1 + c2.1).powi(2)).sqrt();
+                    let d2 = ((c1.0 - 2.0 * c2.0 + q.0).powi(2) + (c1.1 - 2.0 * c2.1 + q.1).powi(2)).sqrt();
+                    let n = ((0.75 * d1.max(d2) / TOL).sqrt().ceil() as usize).clamp(1, 64);
+                    for i in 1..=n {
+                        let t = i as f32 / n as f32;
+                        let u = 1.0 - t;
+                        let (b0, b1, b2, b3) = (u * u * u, 3.0 * u * u * t, 3.0 * u * t * t, t * t * t);
+                        let nx = (b0 * p0.0 + b1 * c1.0 + b2 * c2.0 + b3 * q.0, b0 * p0.1 + b1 * c1.1 + b2 * c2.1 + b3 * q.1);
+                        self.line(last.0, last.1, nx.0, nx.1);
+                        last = nx;
+                    }
+                }
+                Seg::Close => { self.line(last.0, last.1, start.0, start.1); last = start; }
+            }
+        }
+        if open { self.line(last.0, last.1, start.0, start.1); }
+    }
+    /// prefix-sum the accumulation rows into coverage, compacting to a dense w*h buffer in place
+    fn into_coverage(mut self) -> Vec<f32> {
+        let (w, st) = (self.w, self.stride);
+        for y in 0..self.h {
+            let mut acc = 0.0f32;
+            for x in 0..w {
+                acc += self.a[y * st + x];
+                self.a[y * w + x] = acc.abs().min(1.0);
+            }
+        }
+        self.a.truncate(w * self.h);
+        self.a
+    }
+}
+
+/// coverage (0..1, w*h) of device-space paths over the region at (x0, y0), scaled by `k`
+/// (k < 1: low resolution grid). Several paths are combined as a union ("source-over").
+fn coverage(paths: &[&Path], x0: usize, y0: usize, w: usize, h: usize, k: f32, union: bool) -> Vec<f32> {
+    let mut out: Option<Vec<f32>> = None;
+    for p in paths {
+        let mut acc = Acc::new(w, h);
+        acc.path(p, x0 as f32, y0 as f32, k);
+        let c = acc.into_coverage();
+        out = Some(match out {
+            Some(mut o) if union => { for (d, v) in o.iter_mut().zip(&c) { *d = *d + v - *d * v; } o }
+            _ => c,
+        });
+    }
+    out.unwrap_or_else(|| vec![0.0; w * h])
 }
 
 /// box sizes approximating a gaussian with `n` passes (Kovesi)
@@ -1392,64 +1612,108 @@ fn glow_orb(ctx: &mut Ctx, p: P, r: f64, col: Rgb, phase: f64) {
 const AURA_GAIN: f32 = 1.6;
 
 fn draw_layer(ctx: &mut Ctx, ly: &Layer, rig: &Rig) {
-    let ol_w = 1.15 * 2.0;
-    let outline = rig.c.c("outline");
+    let outline = rgba(rig.c.c("outline"), 1.0);
     if !ly.shapes.is_empty() {
         ctx.save();
-        ctx.st.lw = ol_w;
-        let paths: Vec<Path> = ly.shapes.iter().filter(|s| !s.no_outline).filter_map(|s| { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); ctx.path() }).collect();
-        let paint = ctx.paint(&sol(outline, 1.0), BlendMode::SourceOver);
+        ctx.st.lw = 1.15 * 2.0;
         let sk = ctx.stroke_style();
-        if let (Some(aura), Some(paint)) = (ly.aura, &paint) {
+        let geoms: Vec<Path> = ly.shapes.iter().filter(|s| !s.no_outline).filter_map(|s| { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); ctx.path()?.stroke(&sk, 1.0) }).collect();
+        if let Some(aura) = ly.aura {
             // canvas: shadowColor = aura, shadowBlur = 14 * RES on every outline stroke (batched here)
-            let mut b: Option<Rect> = None;
-            for p in &paths {
-                let pb = p.bounds();
-                b = Some(match b { None => pb, Some(o) => Rect::from_ltrb(o.left().min(pb.left()), o.top().min(pb.top()), o.right().max(pb.right()), o.bottom().max(pb.bottom())).unwrap_or(o) });
-            }
-            if let Some(b) = b.and_then(|b| Rect::from_ltrb(b.left() - sk.width, b.top() - sk.width, b.right() + sk.width, b.bottom() + sk.width)) {
-                ctx.shadow_with(b, rgba(aura, 1.0), (14.0 * RES) as f32, &|pm: &mut Pixmap, tr: Transform| { for p in &paths { pm.stroke_path(p, paint, &sk, tr, None); } }, AURA_GAIN);
-            }
+            let refs: Vec<&Path> = geoms.iter().collect();
+            ctx.shadow_paths(&refs, 1.0, rgba(aura, 1.0), (14.0 * RES) as f32, AURA_GAIN);
         }
-        if let Some(paint) = &paint {
-            for p in &paths { ctx.pm.stroke_path(p, paint, &sk, Transform::identity(), None); }
-        }
+        for g in &geoms { ctx.fill_solid(g, outline); }
         ctx.restore();
         for s in &ly.shapes { fill_shape(ctx, s); }
-        for s in ly.shapes.iter().filter(|s| s.line) { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); ctx.stroke_w(&sol(outline, 1.0), 0.45); }
+        for s in ly.shapes.iter().filter(|s| s.line) { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); ctx.stroke_w(&Fill::Solid(outline), 0.45); }
     }
     if let Some(a) = &ly.after { ctx.save(); rig.draw_after(ctx, a); ctx.restore(); }
 }
 
-/// two-tone cel shading with a rim light, rendered in a small sub-canvas around the shape
+/// two-tone cel shading with a rim light. Canvas version: clip(shape); fill shade; fill the
+/// light-offset copy in the light colour (rim); clip(light-offset copy); fill the rim-offset copy
+/// with the base colour. Here the three coverages are rasterized as small masks and the colours
+/// are resolved per pixel, then composited (source-over) onto the canvas.
 fn fill_shape(ctx: &mut Ctx, s: &Shape) {
     ctx.begin();
     s.geo.emit(ctx, 0.0, 0.0);
     if s.flat { ctx.fill(&sol(s.fill, 1.0)); return; }
     let Some(path) = ctx.path() else { return };
-    let b = path.bounds();
-    let x0 = ((b.left() - 2.0).floor() as i32).max(0);
-    let y0 = ((b.top() - 2.0).floor() as i32).max(0);
-    let x1 = ((b.right() + 2.0).ceil() as i32).min(ctx.pm.width() as i32);
-    let y1 = ((b.bottom() + 2.0).ceil() as i32).min(ctx.pm.height() as i32);
-    if x1 <= x0 || y1 <= y0 { return; }
-    let Some(mut sc) = ctx.sub(x0, y0, (x1 - x0) as u32, (y1 - y0) as u32) else { return };
-    sc.begin();
-    s.geo.emit(&mut sc, 0.0, 0.0);
-    sc.clip();
-    sc.fill(&sol(shade_of(s.fill), 1.0));
+    let Some((x0, y0, w, h)) = region(path.bounds(), 1.0, ctx.pm.width(), ctx.pm.height()) else { return };
+    let ca = coverage(&[&path], x0, y0, w, h, 1.0, false);
+    // offset copies of the shape = the coverage shifted by the (device-space) offset, resampled bilinearly
     let d = s.shade.unwrap_or(2.0);
+    let rim = s.rim.unwrap_or(if lum(s.fill) < 0.2 { 0.55 } else { 0.0 });
     let light = light();
-    let h = s.rim.unwrap_or(if lum(s.fill) < 0.2 { 0.55 } else { 0.0 });
-    if d > 0.0 {
-        if h > 0.0 { sc.begin(); s.geo.emit(&mut sc, light.x * d, light.y * d); sc.fill(&sol(light_of(s.fill), 1.0)); }
-        sc.begin(); s.geo.emit(&mut sc, light.x * d, light.y * d); sc.clip();
-        sc.begin(); s.geo.emit(&mut sc, -light.x * h, -light.y * h); sc.fill(&sol(s.fill, 1.0));
-    } else {
-        sc.begin(); s.geo.emit(&mut sc, 0.0, 0.0); sc.fill(&sol(s.fill, 1.0));
-    }
+    // zero-padded copy of the coverage so shifted lookups need no bounds checks
+    let m = ctx.st.m;
+    let dev = |ox: f64, oy: f64| ((m.a * ox + m.c * oy) as f32, (m.b * ox + m.d * oy) as f32);
+    let (sd, sr) = (dev(light.x * d.max(0.0), light.y * d.max(0.0)), dev(-light.x * rim.max(0.0), -light.y * rim.max(0.0)));
+    let pad = (sd.0.abs().max(sd.1.abs()).max(sr.0.abs()).max(sr.1.abs()).ceil() as usize) + 2;
+    let pw = w + 2 * pad;
+    let padded: Vec<f32> = if d > 0.0 {
+        let mut v = vec![0.0f32; pw * (h + 2 * pad)];
+        for y in 0..h { v[(y + pad) * pw + pad..(y + pad) * pw + pad + w].copy_from_slice(&ca[y * w..(y + 1) * w]); }
+        v
+    } else { vec![] };
+    let shifted = |(dx, dy): (f32, f32)| -> Vec<f32> {
+        let (ix, iy) = (dx.floor(), dy.floor());
+        let (fx, fy) = (dx - ix, dy - iy);
+        let (ix, iy) = (ix as isize, iy as isize);
+        let mut out = Vec::with_capacity(w * h);
+        let off = (pad as isize - ix) as usize;
+        for y in 0..h {
+            let sy = (y as isize - iy + pad as isize) as usize;
+            let r0 = &padded[sy * pw + off - 1..sy * pw + off + w];
+            let r1 = &padded[(sy - 1) * pw + off - 1..(sy - 1) * pw + off + w];
+            out.extend((0..w).map(|x| {
+                let top = r0[x + 1] + (r0[x] - r0[x + 1]) * fx;
+                let bot = r1[x + 1] + (r1[x] - r1[x + 1]) * fx;
+                top + (bot - top) * fy
+            }));
+        }
+        out
+    };
+    let (cb, cc) = if d > 0.0 { (Some(shifted(sd)), if rim > 0.0 { Some(shifted(sr)) } else { None }) } else { (None, None) };
+    let f3 = |c: Rgb| [c[0] as f32, c[1] as f32, c[2] as f32];
+    let (shade, lightc, base) = (f3(shade_of(s.fill)), f3(light_of(s.fill)), f3(s.fill));
+    let has_rim = d > 0.0 && rim > 0.0;
     let clip = ctx.st.clip.clone();
-    ctx.pm.draw_pixmap(x0, y0, sc.pm.as_ref(), &PixmapPaint::default(), Transform::identity(), clip.as_deref());
+    let stride = ctx.pm.width() as usize;
+    let data = ctx.pm.data_mut();
+    for y in 0..h {
+        for x in 0..w {
+            let i = y * w + x;
+            let mut a = ca[i];
+            if a <= 0.0 { continue; }
+            let di = (y0 + y) * stride + x0 + x;
+            if let Some(cm) = &clip { a *= cm.data()[di] as f32 * (1.0 / 255.0); if a <= 0.0 { continue; } }
+            let col = if let Some(cb) = &cb {
+                let bb = cb[i];
+                let mut c = shade;
+                if has_rim { for k in 0..3 { c[k] += (lightc[k] - c[k]) * bb; } }
+                let t = bb * cc.as_ref().map_or(1.0, |cc| cc[i]);
+                for k in 0..3 { c[k] += (base[k] - c[k]) * t; }
+                c
+            } else { base };
+            blend_px(&mut data[di * 4..di * 4 + 4], [col[0] * a, col[1] * a, col[2] * a, a * 255.0], BlendMode::SourceOver);
+        }
+    }
+}
+
+/// straight-alpha RGBA image of a premultiplied pixmap (fast paths for empty / opaque pixels)
+fn to_image(p: &Pixmap) -> Arc<ImageData> {
+    let src = p.data();
+    let mut out = vec![0u8; src.len()];
+    for (d, s) in out.chunks_exact_mut(4).zip(src.chunks_exact(4)) {
+        match s[3] {
+            0 => {}
+            255 => d.copy_from_slice(s),
+            a => { let a = a as u32; for i in 0..3 { d[i] = ((s[i] as u32 * 255 + a / 2) / a).min(255) as u8; } d[3] = a as u8; }
+        }
+    }
+    ImageData::new(p.width(), p.height(), out)
 }
 
 fn to_box4(b: &B4) -> Box4 { [b[0] as f32, b[1] as f32, b[2] as f32, b[3] as f32] }
@@ -1509,7 +1773,7 @@ pub fn render_pose(style: &Value, pose: &Value, active: Option<&ActiveSpec>, wit
                 ctx.st.blend = BlendMode::SourceAtop;
                 ctx.fill_rect(x1, y1, x2 - x1, y2 - y1, &sol(fc, 0.55));
             }
-            image = Some(pixmap_to_image(&ctx.pm));
+            image = Some(to_image(&ctx.pm));
         }
     }
     RigRender { image, width: width as f32, height: height as f32, axis_x: axis_x as f32, axis_y: axis_y as f32, scale: (1.0 / RES) as f32, hurt: hurt.iter().map(to_box4).collect(), hit: hit.iter().map(to_box4).collect() }
@@ -1549,7 +1813,7 @@ pub fn render_effect(effect: &Value, with_images: bool, palette: Option<&Value>)
             ctx.translate(axis_x, axis_y);
             ctx.scale(RES, RES);
             draw_effect(&mut ctx, ty, size, ph, col, col2, e);
-            image = Some(pixmap_to_image(&ctx.pm));
+            image = Some(to_image(&ctx.pm));
         }
     }
     RigRender { image, width: width as f32, height: height as f32, axis_x: axis_x as f32, axis_y: axis_y as f32, scale: (1.0 / RES) as f32, hit: boxes.clone(), hurt: boxes }

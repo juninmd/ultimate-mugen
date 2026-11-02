@@ -221,7 +221,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 if let Some(v) = sc.raw(k) {
                     let fl = v.trim().to_ascii_lowercase();
                     let bit = asf::from_name(&fl);
-                    if bit != 0 { m.fighters[i].asserts |= bit; } else if fl == "timerfreeze" { m.global_asserts |= 1; }
+                    if bit != 0 { m.fighters[i].asserts |= bit; } else if fl == "timerfreeze" { m.global_asserts |= 1; } else if fl == "intro" { m.global_asserts |= 2; } else if fl == "roundnotover" { m.global_asserts |= 4; }
                 }
             }
         }

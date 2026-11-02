@@ -60,6 +60,13 @@ impl App {
     pub async fn new(touch: bool, audio_on: bool) -> Self {
         let mut reg = Registry::new();
         reg.add_bundled_mugen();
+        // Community MUGEN pack (original, freely redistributable characters/stages) loaded at runtime (file or HTTP)
+        for path in ["assets/mugen/community.zip", "community.zip"] {
+            if let Ok(bytes) = macroquad::file::load_file(path).await {
+                let mut vfs = ume_formats::vfs::Vfs::new();
+                if ume_formats::vfs::add_zip(&mut vfs, &bytes, "").is_ok() { reg.add_vfs_lazy(vfs, "community"); break; }
+            }
+        }
         #[cfg(not(target_arch = "wasm32"))]
         reg.scan_folders();
         App {
@@ -300,21 +307,21 @@ impl App {
         let n = self.reg.stages.len() + 1;
         if self.c.pressed(nav::RIGHT) { cur = (cur + 1) % n; self.audio.sfx("select"); }
         if self.c.pressed(nav::LEFT) { cur = (cur + n - 1) % n; self.audio.sfx("select"); }
-        if self.c.pressed(nav::DOWN) { cur = (cur + 3).min(n - 1); }
-        if self.c.pressed(nav::UP) { cur = cur.saturating_sub(3); }
+        if self.c.pressed(nav::DOWN) { cur = (cur + 4).min(n - 1); }
+        if self.c.pressed(nav::UP) { cur = cur.saturating_sub(4); }
         let mut ok = self.c.pressed(nav::OK | nav::START);
         self.ui.background();
         self.ui.text("ESCOLHA O CENÁRIO", 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
-        let (cw, ch) = (380.0, 214.0);
+        let (cw, ch) = (290.0, 134.0);
         for i in 0..n {
-            let (x, y) = (40.0 + (i % 3) as f32 * (cw + 22.0), 100.0 + (i / 3) as f32 * (ch + 22.0));
+            let (x, y) = (40.0 + (i % 4) as f32 * (cw + 13.0), 88.0 + (i / 4) as f32 * (ch + 14.0));
             if y > VH { continue; }
             if self.clicked_rect(x, y, cw, ch) { if cur == i { ok = true; } cur = i; }
             let (name, th, mugen) = if i == 0 { ("Aleatório".to_string(), [[255, 47, 208], [34, 232, 255], [255, 226, 58]], false) } else { let s = &self.reg.stages[i - 1]; (s.name.clone(), s.thumb, s.mugen) };
             self.ui.gradient_v(x, y, cw, ch * 0.5, rgb(th[0]), rgb(th[1]));
             self.ui.gradient_v(x, y + ch * 0.5, cw, ch * 0.5, rgb(th[1]), rgb(th[2]));
-            self.ui.rect(x, y + ch - 34.0, cw, 34.0, Color::new(0.0, 0.0, 0.0, 0.6));
-            self.ui.text(&name, x + 12.0, y + ch - 10.0, 18.0, WHITE, Align::Left, true);
+            self.ui.rect(x, y + ch - 30.0, cw, 30.0, Color::new(0.0, 0.0, 0.0, 0.6));
+            self.ui.text(&name.chars().take(28).collect::<String>(), x + 10.0, y + ch - 9.0, 16.0, WHITE, Align::Left, true);
             if mugen { self.ui.rect(x + cw - 60.0, y + 6.0, 54.0, 16.0, hex("#22e8ff")); self.ui.text("MUGEN", x + cw - 33.0, y + 19.0, 12.0, BLACK, Align::Center, true); }
             if cur == i { self.ui.rect_lines(x - 3.0, y - 3.0, cw + 6.0, ch + 6.0, 4.0, hex("#ffcc33")); }
         }

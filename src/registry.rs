@@ -12,6 +12,19 @@ use ume_formats::vfs::{find_char_defs, find_stage_defs, text, Vfs};
 
 include!(concat!(env!("OUT_DIR"), "/chars_gen.rs"));
 
+/// "true_z_license_free_chara" -> "True Z", "Thunder_horse_GGX" -> "Thunder Horse GGX"
+pub fn pretty_name(n: &str) -> String {
+    let mut s = n.replace(['_', '-'], " ");
+    for junk in ["license free mugen chara for official", "license free chara", "license free", "for official"] {
+        if let Some(i) = s.to_ascii_lowercase().find(junk) { s.replace_range(i..i + junk.len(), ""); }
+    }
+    let words: Vec<String> = s.split_whitespace().map(|w| {
+        if w.chars().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit()) && w.len() > 1 { w.to_string() }
+        else { let mut c = w.chars(); c.next().map(|f| f.to_uppercase().collect::<String>() + c.as_str()).unwrap_or_default() }
+    }).collect();
+    if words.is_empty() { n.to_string() } else { words.join(" ") }
+}
+
 pub enum Src { Native(Box<NativeChar>), Mugen { vfs: Arc<Vfs>, def: String } }
 
 pub struct CharEntry {
@@ -24,7 +37,7 @@ impl CharEntry {
         if let Some(d) = self.cache.borrow().get(&pal) { return Ok(d.clone()); }
         let d = Arc::new(match &self.src {
             Src::Native(nc) => compile_native(nc, pal, true),
-            Src::Mugen { vfs, def } => load_mugen_char(vfs, def, pal, true)?,
+            Src::Mugen { vfs, def } => { let mut d = load_mugen_char(vfs, def, pal, true)?; d.display_name = self.name.clone(); d }
         });
         self.cache.borrow_mut().insert(pal, d.clone());
         Ok(d)
@@ -81,6 +94,7 @@ impl Registry {
             let secs = parse_ini(&text(vfs.get(&def).map(|v| v.as_slice()).unwrap_or(&[])));
             let info = find_section(&secs, "info");
             let mut name = info.and_then(|s| s.get("displayname").or(s.get("name"))).map(unquote).filter(|s| !s.is_empty()).unwrap_or(def.clone());
+            name = pretty_name(&name);
             if ume_formats::ini::nums(info.and_then(|s| s.get("localcoord")), &[320.0])[0] > 320.0 { name.push_str(" HD"); }
             let author = info.and_then(|s| s.get("author")).map(unquote).unwrap_or_default();
             let id = format!("mugen:{tag}:{def}");

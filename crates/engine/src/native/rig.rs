@@ -905,8 +905,7 @@ fn compute_boxes(sk: &Skel, active: Option<&ActiveSpec>, wg: Option<&WeaponGeo>)
         if let Some(b) = a.bx { hit.push([b[0] as f64, b[1] as f64, b[2] as f64, b[3] as f64]); } else {
             let part = part_alias(&a.part);
             let rad = a.radius.map(|x| x as f64).filter(|x| x.is_finite()).unwrap_or(9.0);
-            if part == "weapon" && wg.is_some() {
-                let wg = wg.unwrap();
+            if let (true, Some(wg)) = (part == "weapon", wg) {
                 let mut pts = wg.blade.clone();
                 pts.push(wg.tip);
                 let pd = (rad * 0.35).max(1.0);
@@ -945,6 +944,7 @@ impl<'a> Rig<'a> {
     fn t(&self, v: f64, u: f64) -> P { add(add(self.sk.hip, self.sk.fwd, v), self.sk.up, u) }
     fn hair_type(&self) -> Option<&str> { gstr(&self.hair, "type") }
 
+    #[allow(clippy::too_many_arguments)]
     fn flap(&self, hip_p: P, th_a: f64, sh_a: f64, length: f64, w0: f64, w1: f64, ph: f64, gravity: f64) -> Vec<P> {
         let d1 = norm(lerp(dir(th_a), dir(0.0), gravity));
         let mid_l = length.min(self.sk.l.thigh);
@@ -1194,7 +1194,7 @@ impl<'a> Rig<'a> {
                 let wst = add(sk.hip, sk.up, 3.0);
                 let p1 = reg(bb, self.flap(add(wst, sk.fwd, -3.0 * w), sk.th_ab - 12.0, sk.sh_ab - 20.0, sl, 6.0 * w, 9.0 * w, 0.0, 0.5), 0.0);
                 back_l.push(shp(poly(p1, true), back_of(col), 3.0).line(true));
-                let p2 = reg(bb, self.flap(add(wst, sk.fwd, -1.0 * w), sk.th_af * 0.5 - 14.0, sk.sh_af * 0.5 - 22.0, sl * 0.97, 6.0 * w, 9.0 * w, 1.4, 0.5), 0.0);
+                let p2 = reg(bb, self.flap(add(wst, sk.fwd, -w), sk.th_af * 0.5 - 14.0, sk.sh_af * 0.5 - 22.0, sl * 0.97, 6.0 * w, 9.0 * w, 1.4, 0.5), 0.0);
                 back_l.push(shp(poly(p2, true), back_of(col), 3.0).line(true));
             }
         }

@@ -51,13 +51,11 @@ fn main() {
     let moves = ch["moves"].as_array().cloned().unwrap_or_default();
     let projs = |m: &Value| -> Vec<Value> { match &m["projectile"] { Value::Array(a) => a.clone(), Value::Null => vec![], v => vec![v.clone()] } };
 
-    let mut list: Vec<String> = if let Some(k) = &key_anims { k.clone() } else { vec![] };
     let mut defaults: Vec<String> = ["idle", "walk", "crouch", "jumpUp", "jumpFwd", "jumpDown", "run", "hop", "guard", "crouchGuard", "airGuard"].iter().map(|s| s.to_string()).collect();
-    let list_ = &mut defaults;
-    list_.extend(moves.iter().filter_map(|m| m["anim"].as_str().map(str::to_string)));
-    list_.extend(moves.iter().flat_map(|m| projs(m)).filter_map(|p| p["anim"].as_str().map(str::to_string)));
-    list_.extend(["hitLight", "hitHeavy", "hitLowHeavy", "hitCrouch", "hitAir", "fall", "bounce", "lieDown", "getUp", "trip", "win", "lose", "intro"].iter().map(|s| s.to_string()));
-    if key_anims.is_none() { list = defaults; }
+    defaults.extend(moves.iter().filter_map(|m| m["anim"].as_str().map(str::to_string)));
+    defaults.extend(moves.iter().flat_map(projs).filter_map(|p| p["anim"].as_str().map(str::to_string)));
+    defaults.extend(["hitLight", "hitHeavy", "hitLowHeavy", "hitCrouch", "hitAir", "fall", "bounce", "lieDown", "getUp", "trip", "win", "lose", "intro"].iter().map(|s| s.to_string()));
+    let list = key_anims.clone().unwrap_or(defaults);
 
     let t0 = Instant::now();
     let mut seen = HashSet::new();
@@ -95,8 +93,7 @@ fn main() {
     }
     let sheet_h = (y + row_h + 10.0).ceil() as u32;
     let mut pm = Pixmap::new(sheet_w as u32, sheet_h).unwrap();
-    let mut bg = Paint::default();
-    bg.shader = LinearGradient::new(Point::from_xy(0.0, 0.0), Point::from_xy(0.0, sheet_h as f32), vec![GradientStop::new(0.0, Color::from_rgba8(0x3a, 0x4a, 0x66, 255)), GradientStop::new(1.0, Color::from_rgba8(0x1e, 0x24, 0x36, 255))], SpreadMode::Pad, Transform::identity()).unwrap();
+    let bg = Paint { shader: LinearGradient::new(Point::from_xy(0.0, 0.0), Point::from_xy(0.0, sheet_h as f32), vec![GradientStop::new(0.0, Color::from_rgba8(0x3a, 0x4a, 0x66, 255)), GradientStop::new(1.0, Color::from_rgba8(0x1e, 0x24, 0x36, 255))], SpreadMode::Pad, Transform::identity()).unwrap(), ..Default::default() };
     pm.fill_rect(Rect::from_xywh(0.0, 0.0, sheet_w, sheet_h as f32).unwrap(), &bg, Transform::identity(), None);
 
     for ((is_fx, r), &(px, py)) in cells.iter().zip(&pos) {

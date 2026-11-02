@@ -45,6 +45,7 @@ function rgb(c: string): [number, number, number] {
 const toHex = (r: number, g: number, b: number) => '#' + [r, g, b].map((x) => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0')).join('');
 function mix(a: string, b: string, t: number): string { const x = rgb(a), y = rgb(b); return toHex(x[0] + (y[0] - x[0]) * t, x[1] + (y[1] - x[1]) * t, x[2] + (y[2] - x[2]) * t); }
 function rgba(c: string, a: number) { const x = rgb(c); return `rgba(${x[0]},${x[1]},${x[2]},${a})`; }
+const lum = (c: string) => { const x = rgb(c); return (0.3 * x[0] + 0.59 * x[1] + 0.11 * x[2]) / 255; };
 const shadeOf = (c: string) => mix(c, '#2b1748', 0.42);
 const lightOf = (c: string) => mix(c, '#fffaf0', 0.38);
 const backOf = (c: string) => mix(c, '#120a22', 0.3);
@@ -184,7 +185,7 @@ function solve(style: Record<string, any>, pose: Record<string, any>): Skel {
     neck: num(pr.neck, 3.5) * S, up: num(pr.upperArm, fem ? 15.5 : 16.5) * S, fore: num(pr.foreArm, fem ? 14.5 : 15) * S,
     hand: 3.9 * S * Math.pow(b, 0.4), foot: 1 * S,
   };
-  const r = num(pr.head, fem ? 8.4 : 8.8) * S;
+  const r = num(pr.head, fem ? 8.9 : 9.3) * S;
   const W = b * S;
   const rot = num(pose.rot, 0), lean = num(pose.lean, 0);
   const torsoA = 180 - lean - rot;
@@ -209,7 +210,27 @@ function solve(style: Record<string, any>, pose: Record<string, any>): Skel {
     return { upA, el, foreA, wr, hand };
   };
   const aF = arm(shF, num(pose.shoulderF, 20), num(pose.elbowF, 70), num(pose.wristF, 0));
-  const aB = arm(shB, num(pose.shoulderB, 25), num(pose.elbowB, 80), num(pose.wristB, 0));
+  let aB = arm(shB, num(pose.shoulderB, 25), num(pose.elbowB, 80), num(pose.wristB, 0));
+  const wpn = style.weapon;
+  if (wpn && wpn.twoHand && !pose.oneHand && pose.weapon !== false && !pose.noWeapon) {
+    // two-handed grip: back hand reaches the handle just behind the front hand (2-bone IK)
+    const ang = typeof pose.blade === 'number' ? pose.blade - rot : aF.foreA + num(pose.weapon, num(wpn.angle, 75));
+    const tgt = add(aF.hand, dir(ang), -6.5 * S);
+    const a = L.up, bl = L.fore + L.hand * 0.85;
+    const Dv = sub(tgt, shB);
+    const dist = Math.max(Math.abs(a - bl) + 0.1, Math.min(a + bl - 0.05, len(Dv)));
+    const base = angOf(Dv);
+    const A = Math.acos(Math.max(-1, Math.min(1, (a * a + dist * dist - bl * bl) / (2 * a * dist)))) / D2R;
+    let best: any = null;
+    for (const sgn of [1, -1]) {
+      const upA = base + sgn * A;
+      const el = add(shB, dir(upA), a);
+      const foreA = angOf(sub(tgt, el));
+      const cand = { upA, el, foreA, wr: add(el, dir(foreA), L.fore), hand: add(el, dir(foreA), bl) };
+      if (!best || cand.el.y > best.el.y) best = cand;
+    }
+    aB = best;
+  }
   const leg = (hp: P, ta: number, ka: number, an: any) => {
     const thA = ta - rot;
     const kn = add(hp, dir(thA), L.thigh);
@@ -223,7 +244,7 @@ function solve(style: Record<string, any>, pose: Record<string, any>): Skel {
   const footPts = (an: P, fa: number) => {
     const f = dir(fa), dn = perp(f);
     const k = S;
-    const loc: [number, number][] = [[-3.2, -1.2], [-3.4, 3.2], [-2.4, 5], [8.6, 5], [10.2, 3.8], [8.6, 1.6], [3.2, -1.4], [1, -3]];
+    const loc: [number, number][] = [[-2.6, -1.6], [-3.2, 2.6], [-2.4, 4.4], [8.8, 4.4], [10.4, 3.6], [9.2, 2.2], [4, 0.2], [1.6, -2.2]];
     return loc.map(([s, t]) => add(add(an, f, s * k), dn, t * k));
   };
   const footF = footPts(lF.ank, lF.ftA), footB = footPts(lB.ank, lB.ftA);
@@ -238,9 +259,9 @@ function solve(style: Record<string, any>, pose: Record<string, any>): Skel {
   let maxY = -Infinity;
   const consider = (p: P, rr = 0) => { maxY = Math.max(maxY, p.y + rr); };
   for (const p of [...footF, ...footB, ...torsoPts]) consider(p);
-  consider(head, r); consider(knF, 4 * W); consider(knB, 4 * W); consider(elF, 3 * W); consider(elB, 3 * W);
+  consider(head, r); consider(lF.kn, 4 * W); consider(lB.kn, 4 * W); consider(aF.el, 3 * W); consider(aB.el, 3 * W);
   consider(aF.hand, L.hand); consider(aB.hand, L.hand);
-  const dy = -maxY + num(pose.y, 0) + (pose.sink ? num(pose.sink, 0) : 0);
+  const dy = pose.free ? -num(pose.hipH, 34) * S + num(pose.y, 0) : -maxY + num(pose.y, 0);
   const dx = num(pose.x, 0);
   shiftSkel(sk, dx, dy);
   return sk;
@@ -377,7 +398,7 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
   const layers: Layer[] = [];
   const wind = num(pose.wind, 0.35);
   const phase = num(pose.phase, 0);
-  const trail = -(25 + wind * 60) - sk.rot * 0.3; // trailing angle for cloth / hair (dir() convention, negative = backwards)
+  const trail = Math.abs(sk.rot) > 50 && Math.abs(sk.rot) < 130 ? -92 : -(25 + wind * 60) - sk.rot * 0.3; // trailing angle for cloth / hair (dir() convention, negative = backwards)
   const reg = (pts: P[], rr = 0) => { bb.addPts(pts, rr); return pts; };
   const H = (x: number, y: number): P => {
     const c = Math.cos(sk.headTh), s = Math.sin(sk.headTh);
@@ -413,7 +434,7 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
     const e1 = sp1[sp1.length - 1], e2 = sp2[sp2.length - 1];
     for (let i = 0; i < 4; i++) { const t = (i + 0.5) / 4; const base = lerpP(e1, e2, t); tips.push(add(base, dir(trail * 0.5), 6 + hash(i + 3) * 6)); tips.push(lerpP(e1, e2, (i + 1) / 4)); }
     const pts = reg([...sp1, ...tips, ...sp2.reverse()]);
-    backL.push({ path: polyPath(pts, true), fill: backOf(hcol), shade: 4 });
+    backL.push({ path: polyPath(pts, true), fill: mix(hcol, shadeOf(hcol), 0.35), shade: 4, rim: 0.8 });
   }
   if (hair.type === 'ponytail') {
     const hl = num(hair.length, 40) * S;
@@ -424,7 +445,7 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
   }
   if (style.headband) {
     const hb = style.headband;
-    const knot = H(-0.95 * r, -0.3 * r);
+    const knot = H(-0.95 * r, -0.48 * r);
     const l1 = num(hb.tail, 26) * S;
     for (let i = 0; i < 2; i++) {
       const sp = waveSpine(knot, trail * (0.95 + i * 0.12) + i * 8, l1 * (1 - i * 0.18), 18, phase + i * 1.7, 7);
@@ -450,7 +471,8 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
     const d1 = norm(lerpP(dir(thA), dir(0), gravity));
     const midL = Math.min(length, sk.L.thigh * 1.0);
     const kneeP = add(hipP, d1, midL);
-    const d2 = norm(lerpP(dir(shA), dir(trail * 0.4), 0.55));
+    let d2 = norm(lerpP(dir(shA), dir(trail * 0.4), 0.55));
+    if (d2.y < 0.45) d2 = norm(lerpP(d2, { x: d2.x * 0.3, y: 1 }, 0.7)); // cloth never flows upwards
     const rest = Math.max(0, length - midL);
     const end = add(kneeP, d2, rest);
     const n1 = norm(perp(d1)), n2 = norm(perp(d2));
@@ -542,7 +564,7 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
     out.push({ path: capsulePath(kn, an, shR0 * (legSkin ? 1 : baggy * 0.98), shR1 * (legSkin ? 1 : baggy * (pantsT === 'gi' ? 1.15 : 1))), fill: dk(legCol), shade: 2.4 });
     if (legSkin) out.push({ path: ellipsePath(calf, shR0 * 1.02, shR0 * 1.25, Math.atan2(an.y - kn.y, an.x - kn.x) + Math.PI / 2), fill: dk(legCol), shade: 2.2 });
     if (pantsT === 'trunks' || pantsT === 'shorts') {
-      out.push({ path: capsulePath(hp, lerpP(hp, kn, pantsT === 'shorts' ? 0.5 : 0.28), thR0 * 1.12, thR0 * 1.05), fill: dk(pantsC), shade: 2.6, line: true });
+      out.push({ path: capsulePath(hp, lerpP(hp, kn, pantsT === 'shorts' ? 0.5 : 0.2), thR0 * 1.04, thR0 * 1.0), fill: dk(pantsC), shade: 2.6, line: true });
     }
     // boots / feet
     const boot = style.boots ?? 'boot';
@@ -593,7 +615,10 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
     const wst = add(hp, sk.up, 4);
     const thA = side === 'F' ? sk.thAF : sk.thAB, shA = side === 'F' ? sk.shAF : sk.shAB;
     const fw = num(skirt.width, 1);
-    const pts = reg(flap(wst, thA, shA, sl, 6.5 * W * fw, 9.5 * W * fw, side === 'F' ? 0 : 2, 0.3));
+    // raised legs (kicks) make the cloth drape more instead of following the leg
+    const rel = thA + sk.rot;
+    const grav = 0.25 + 0.6 * Math.max(0, Math.min(1, (Math.abs(rel) - 25) / 80));
+    const pts = reg(flap(wst, thA, shA, sl, 6 * W * fw, 8.6 * W * fw, side === 'F' ? 0 : 2, grav));
     return { path: polyPath(pts, true), fill: side === 'B' ? backOf(col) : col, shade: 3, line: true } as Shape;
   };
   const fb = robeFlap('B');
@@ -605,7 +630,7 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
   const T = (v: number, u: number) => add(add(sk.hip, sk.fwd, v), sk.up, u);
   const torsoCol = top === 'bare' ? skinF : topC;
   // pelvis / pants seat
-  body.push({ path: ellipsePath(add(sk.hip, sk.up, 1), 8.2 * W * (pantsT === 'gi' ? 1.1 : 1), 6.5 * W, Math.atan2(sk.fwd.y, sk.fwd.x)), fill: pantsT === 'trunks' || pantsT === 'shorts' ? pantsC : legSkinOr(pantsT, pantsC, C), shade: 2.5 });
+  body.push({ path: ellipsePath(add(sk.hip, sk.up, 2), (pantsT === 'trunks' ? 6.3 : 7.6) * W * (pantsT === 'gi' ? 1.1 : 1), (pantsT === 'trunks' || pantsT === 'shorts' ? 4.2 : 6.2) * W, Math.atan2(sk.fwd.y, sk.fwd.x)), fill: pantsT === 'trunks' || pantsT === 'shorts' ? pantsC : legSkinOr(pantsT, pantsC, C), shade: 2.5 });
   body.push({ path: polyPath(sk.torsoPts, true), fill: torsoCol, shade: 4.2, rim: 0.9 });
   const neckR = 2.9 * Math.pow(W, 0.8);
   body.push({ path: capsulePath(sk.neck, H(-0.05 * r, 0.45 * r), neckR * 1.05, neckR), fill: skinF, shade: 1.8 });
@@ -674,13 +699,6 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
       for (const u of [8, 4]) line([T(-6 * W, u * TL), T(7 * W, u * TL)], rgba(shadeOf(topC), 0.9), 0.5);
     }
     ctx.restore();
-    // shoulder pads
-    if (style.shoulderPads) {
-      const p = sk.shF;
-      const d = dir(sk.upAF);
-      ctx.beginPath(); ellipsePath(add(p, d, 2), 6.4 * W, 4.6 * W, Math.atan2(d.y, d.x))(ctx, 0, 0);
-      ctx.fillStyle = C.metal; ctx.strokeStyle = OL; ctx.lineWidth = 1.1; ctx.stroke(); ctx.fill();
-    }
   };
   layers.push({ shapes: body, after: bodyAfter });
 
@@ -698,7 +716,7 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
     if (tails) {
       for (let i = 0; i < 2; i++) {
         const sp = waveSpine(knot, 10 + i * 18 + trail * 0.15, (10 + i * 2) * S, 8, phase + i, 4);
-        shapes.push({ path: polyPath(reg(ribbonPts(sp, 3 * S, 2.6 * S)), false), fill: i ? backOf(bc) : bc, shade: 0.8, line: true });
+        shapes.push({ path: polyPath(reg(ribbonPts(sp, 2.2 * S, 1.8 * S)), false), fill: i ? backOf(bc) : bc, shade: 0.8, line: true });
       }
       shapes.push({ path: ellipsePath(knot, 2.2 * S, 1.8 * S), fill: bc, shade: 0.8 });
     }
@@ -848,7 +866,7 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
     const bangs = num(hair.bangs, ht === 'spiky' ? 3 : ht === 'short' ? 2 : 3);
     for (let i = 0; i < bangs; i++) {
       const bx = 0.22 + i * 0.26, by = -0.62 - (i === 0 ? 0.1 : 0);
-      const tipL = num(hair.bangLen, ht === 'long' || ht === 'flowing' || ht === 'ponytail' ? 0.85 : 0.6) * (1 - i * 0.12);
+      const tipL = num(hair.bangLen, ht === 'long' || ht === 'flowing' || ht === 'ponytail' ? 0.55 : 0.42) * (1 - i * 0.15);
       const tip: [number, number] = [bx + 0.18 + i * 0.05, by + tipL + 0.15];
       const bp = Hp([[bx - 0.2, by - 0.15], [bx + 0.25, by - 0.05], tip]);
       hairShapes.push({ path: mixedPath(bp.map((p, k) => ({ p, c: k === 2 }))), fill: hcol, shade: 1.6, noOutline: false });
@@ -890,9 +908,9 @@ function buildLayers(style: Record<string, any>, sk: Skel, C: Record<string, str
   const topShapes: Shape[] = [];
   if (style.headband) {
     const hb = style.headband;
-    const band = Hp([[-0.98, -0.42], [-0.3, -0.62], [0.5, -0.6], [1.0, -0.42], [1.02, -0.18], [0.5, -0.34], [-0.3, -0.36], [-0.98, -0.16]]);
+    const band = Hp([[-0.98, -0.6], [-0.3, -0.8], [0.5, -0.78], [0.97, -0.6], [1.0, -0.38], [0.5, -0.53], [-0.3, -0.55], [-0.98, -0.36]]);
     topShapes.push({ path: polyPath(reg(band), true), fill: C[hb.color ?? 'top2'] ?? hb.color, shade: 1, line: true });
-    topShapes.push({ path: ellipsePath(H(-0.98 * r, -0.3 * r), 2.0 * S, 1.6 * S), fill: C[hb.color ?? 'top2'] ?? hb.color, shade: 0.6 });
+    topShapes.push({ path: ellipsePath(H(-0.98 * r, -0.48 * r), 2.0 * S, 1.6 * S), fill: C[hb.color ?? 'top2'] ?? hb.color, shade: 0.6 });
   }
   if (style.horns) {
     const hc = C.horn;
@@ -969,7 +987,7 @@ function drawLayer(ctx: CanvasRenderingContext2D, ly: Layer, C: Record<string, s
       ctx.clip();
       ctx.fillStyle = shadeOf(s.fill); ctx.fill();
       const d = s.shade ?? 2;
-      const h = s.rim ?? 0;
+      const h = s.rim ?? (lum(s.fill) < 0.2 ? 0.55 : 0);
       if (d > 0) {
         if (h > 0) { ctx.beginPath(); s.path(ctx, LIGHT.x * d, LIGHT.y * d); ctx.fillStyle = lightOf(s.fill); ctx.fill(); }
         ctx.save();
@@ -1251,13 +1269,22 @@ function drawEffect(ctx: CanvasRenderingContext2D, type: string, s: number, ph: 
       break;
     }
     case 'petal': default: {
-      radial(ctx, 0, 0, s * 1.6, [[0, rgba(W, 0.9)], [0.4, rgba(col2, 0.8)], [1, rgba(col, 0)]]);
-      for (let i = 0; i < 5; i++) {
-        const a = (i / 5) * Math.PI * 2 + ph * 2;
-        ctx.save(); ctx.rotate(a);
-        glowFill(ctx, rgba(col, 0.85), 5, () => { ctx.moveTo(0, 0); ctx.quadraticCurveTo(s * 0.5, -s * 0.4, s * 1.1, 0); ctx.quadraticCurveTo(s * 0.5, s * 0.4, 0, 0); });
+      // lotus / petal burst: trailing petals, a ring of petals and a hot core
+      for (let i = 0; i < 7; i++) {
+        const x = -s * (0.8 + hash(i + 1) * 1.8), y = (hash(i + 7) * 2 - 1) * s * 0.8, a = ph * 3 + i;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+        glowFill(ctx, rgba(col, 0.7 - i * 0.07), 3, () => { ctx.moveTo(-s * 0.2, 0); ctx.quadraticCurveTo(0, -s * 0.16, s * 0.2, 0); ctx.quadraticCurveTo(0, s * 0.16, -s * 0.2, 0); });
         ctx.restore();
       }
+      radial(ctx, 0, 0, s * 1.5, [[0, rgba(col, 0.55)], [1, rgba(col, 0)]]);
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2 + ph * 1.5;
+        ctx.save(); ctx.rotate(a);
+        glowFill(ctx, rgba(col, 0.9), 5, () => { ctx.moveTo(s * 0.15, 0); ctx.quadraticCurveTo(s * 0.55, -s * 0.38, s * 1.05, 0); ctx.quadraticCurveTo(s * 0.55, s * 0.38, s * 0.15, 0); });
+        ctx.fillStyle = rgba(col2, 0.9); ctx.beginPath(); ctx.moveTo(s * 0.2, 0); ctx.quadraticCurveTo(s * 0.5, -s * 0.16, s * 0.85, 0); ctx.quadraticCurveTo(s * 0.5, s * 0.16, s * 0.2, 0); ctx.fill();
+        ctx.restore();
+      }
+      radial(ctx, 0, 0, s * 0.55, [[0, rgba(W, 1)], [0.6, rgba(col2, 0.9)], [1, rgba(col, 0)]]);
     }
   }
   void angOf;

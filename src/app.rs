@@ -59,6 +59,7 @@ const MENU: [(&str, &str); 8] = [
 impl App {
     pub async fn new(touch: bool, audio_on: bool) -> Self {
         let mut reg = Registry::new();
+        reg.add_bundled_mugen();
         #[cfg(not(target_arch = "wasm32"))]
         reg.scan_folders();
         App {
@@ -233,7 +234,7 @@ impl App {
                 }
             }
             self.ui.rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.65));
-            let nm: String = ename.split_whitespace().next().unwrap_or("").chars().take(12).collect();
+            let nm: String = if emugen { ename.chars().take(13).collect() } else { ename.split_whitespace().next().unwrap_or("").chars().take(12).collect() };
             self.ui.text(&nm.to_uppercase(), cx + cw / 2.0, cy + ch - 4.0, 12.0, WHITE, Align::Center, true);
             if emugen { self.ui.rect(cx + cw - 44.0, cy + 3.0, 41.0, 13.0, hex("#22e8ff")); self.ui.text("MUGEN", cx + cw - 23.5, cy + 14.0, 10.0, BLACK, Align::Center, true); }
             let c1 = cur[0] == i && (picking == 0 || picked[0].is_some());

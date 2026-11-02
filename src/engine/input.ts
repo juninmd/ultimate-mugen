@@ -1,10 +1,10 @@
 /** Input bits (absolute directions; converted to relative B/F at command check time). */
 export const K = {
   U: 1, D: 2, L: 4, R: 8,
-  a: 16, b: 32, c: 64, x: 128, y: 256, z: 512, s: 1024, d: 2048, w: 4096,
+  a: 16, b: 32, c: 64, x: 128, y: 256, z: 512, s: 1024, d: 2048, w: 4096, e: 8192,
 } as const;
 export type KeyName = keyof typeof K;
-export const BUTTONS: KeyName[] = ['a', 'b', 'c', 'x', 'y', 'z', 's', 'd', 'w'];
+export const BUTTONS: KeyName[] = ['a', 'b', 'c', 'x', 'y', 'z', 's', 'd', 'w', 'e'];
 
 export interface InputSource {
   /** Called once per tick; returns the bitmask held this tick. */

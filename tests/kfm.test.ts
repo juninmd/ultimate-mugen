@@ -78,3 +78,41 @@ describe.skipIf(!fs.existsSync(KFM))('KFM headless match', () => {
     expect(p2.life).toBeLessThan(500);
   });
 });
+
+describe.skipIf(!fs.existsSync(KFM))('KFM advanced', () => {
+  const vfs = vfsFromDir(KFM, 'kfm');
+  const def = loadMugenCharacter(vfs, 'kfm/kfm.def', { makeImage: () => null });
+  it('throw puts P2 in a custom state and damages', () => {
+    const m = new Match(commonDef(), null, flatStage());
+    const s1 = new Script(), s2 = new Script();
+    const p1 = m.addPlayer(def, 0, s1), p2 = m.addPlayer(def, 1, s2);
+    m.startRound();
+    for (let i = 0; i < 110; i++) m.tick();
+    for (let i = 0; i < 60; i++) s1.seq.push(K.R);
+    for (let i = 0; i < 60; i++) m.tick();
+    s1.seq.push(K.R | K.y, K.R);
+    let custom = false;
+    const st = new Set<number>();
+    for (let i = 0; i < 120; i++) { m.tick(); st.add(p1.stateNo); if (p2.stDef === p1.def && p2.stateNo >= 800) custom = true; }
+    console.log('p1 states', [...st].join(','), 'p2 life', p2.life);
+    expect(custom).toBe(true);
+    expect(p2.life).toBeLessThan(1000);
+  });
+  it('super: Triple Kung Fu Palm with power', () => {
+    const m = new Match(commonDef(), null, flatStage());
+    const s1 = new Script(), s2 = new Script();
+    const p1 = m.addPlayer(def, 0, s1), p2 = m.addPlayer(def, 1, s2);
+    m.startRound();
+    for (let i = 0; i < 110; i++) m.tick();
+    p1.power = 3000;
+    for (let i = 0; i < 40; i++) s1.seq.push(K.R);
+    for (let i = 0; i < 40; i++) m.tick();
+    const qcf = [K.D, K.D, K.D | K.R, K.D | K.R, K.R, K.R];
+    s1.seq.push(...qcf, 0, ...qcf.slice(0, 5), K.R | K.x, 0);
+    let paused = false; const st = new Set<number>();
+    for (let i = 0; i < 150; i++) { m.tick(); if (m.pauseState) paused = true; st.add(p1.stateNo); }
+    console.log('super states', [...st].join(','), 'power', p1.power, 'p2 life', p2.life);
+    expect(paused).toBe(true);
+    expect(p1.power).toBeLessThan(3000);
+  });
+});

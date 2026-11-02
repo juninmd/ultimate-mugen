@@ -3,3 +3,4 @@ dist
 .vite
 test-assets/
 screenshots/tmp
+vite.stub.config.mjs

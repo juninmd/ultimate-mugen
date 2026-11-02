@@ -46,6 +46,11 @@ type = ChangeState
 trigger1 = AnimTime = 0
 value = 11
 
+[State 10, release]
+type = ChangeState
+trigger1 = command != "holddown" && Time > 0
+value = 12
+
 [Statedef 11]
 type = C
 physics = C

@@ -244,7 +244,7 @@ impl App {
         // previews
         for side in 0..2 {
             let idx = picked[side].or(if side == picking { Some(cur[side]) } else { None });
-            let x = if side == 0 { 160.0 } else { VW - 160.0 };
+            let x = if side == 0 { 170.0 } else { VW - 170.0 };
             let col = if side == 0 { Color::new(0.25, 0.66, 1.0, 0.18) } else { Color::new(1.0, 0.3, 0.43, 0.18) };
             glow(self.ui.x(x), self.ui.y(540.0), 200.0 * self.ui.s, Color::new(col.r, col.g, col.b, 0.9));
             draw_ellipse(self.ui.x(x), self.ui.y(600.0), 80.0 * self.ui.s, 12.0 * self.ui.s, 0.0, Color::new(0.0, 0.0, 0.0, 0.4));
@@ -256,7 +256,7 @@ impl App {
                 }
                 let e = &self.reg.chars[i];
                 self.ui.text_bold(&e.name.to_uppercase(), x, 650.0, if e.name.len() > 16 { 20.0 } else { 26.0 }, if picked[side].is_some() { hex("#ffcc33") } else { WHITE }, BLACK, Align::Center);
-                self.ui.text(&format!("{} · {}", e.series, e.author), x, 676.0, 16.0, hex("#a49cc0"), Align::Center, false);
+                self.ui.text(&e.series, x, 676.0, 15.0, hex("#a49cc0"), Align::Center, false);
             } else { self.ui.text_bold("???", x, 650.0, 30.0, hex("#a49cc0"), BLACK, Align::Center); }
         }
         let desc = &self.reg.chars[cur[picking]].description;

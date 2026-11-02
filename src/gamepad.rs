@@ -5,7 +5,7 @@ use ume_engine::input::k;
 #[derive(Clone, Debug, Default)]
 pub struct PadInfo { pub name: String, pub bits: u32, pub sony: bool, pub connected: bool, pub menu_bits: u32 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
 mod native {
     use super::*;
     use gilrs::ff::{BaseEffect, BaseEffectType, EffectBuilder, Replay, Ticks};
@@ -166,7 +166,23 @@ mod web {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
 pub use native::Pads;
+
+/// Android / iOS: touch controls only (Bluetooth pads arrive as keyboard events through the OS).
+#[cfg(any(target_os = "android", target_os = "ios"))]
+mod mobile {
+    use super::*;
+    pub struct Pads;
+    impl Pads {
+        pub fn new() -> Self { Pads }
+        pub fn update(&mut self) -> Vec<PadInfo> { vec![] }
+        pub fn rumble(&mut self, _pad: usize, _s: f32, _w: f32, _ms: u32) {}
+        pub fn set_light(&mut self, _pad: usize, _rgb: [u8; 3]) {}
+        pub fn sony_count(&self) -> usize { 0 }
+    }
+}
+#[cfg(any(target_os = "android", target_os = "ios"))]
+pub use mobile::Pads;
 #[cfg(target_arch = "wasm32")]
 pub use web::Pads;

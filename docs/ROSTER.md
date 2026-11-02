@@ -1,7 +1,7 @@
 # Elenco
 
 ## Lutadores originais (inclusos)
-Os 10 lutadores do jogo são criações originais no formato UMF (`src/chars/`). Veja a tela de seleção para nomes, estilos e listas de golpes (pausa → *Golpes*).
+Os 10 lutadores do jogo são criações originais no formato UMF (`assets/chars/*.json`). Veja a tela de seleção para nomes, estilos e listas de golpes (pausa → *Golpes*).
 
 ## Personagens MUGEN populares para importar
 Personagens de anime e jogos feitos pela comunidade MUGEN usam sprites e marcas de terceiros, por isso **não são incluídos**. O Ultimate MUGEN lê esses pacotes diretamente: baixe-os das fontes da comunidade (MUGEN Archive, Mugen Free For All, MugenGuild) e use **Menu → Importar MUGEN**. O autor exibido vem do campo `[Info] author=` do próprio personagem.

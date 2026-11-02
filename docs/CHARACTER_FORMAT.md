@@ -1,6 +1,6 @@
 # Formato UMF — criando um personagem
 
-O UMF (*Ultimate Mugen Format*) troca os ~6 arquivos do MUGEN (DEF/SFF/AIR/CMD/CNS/SND) e as centenas de linhas de CNS por **um objeto** tipado (`src/native/types.ts`). O compilador (`src/native/compile.ts`) gera automaticamente comandos, `[Statedef -1]`, estados de golpe, HitDefs, projéteis, super pause, cancelamentos e hitboxes.
+O UMF (*Ultimate Mugen Format*) troca os ~6 arquivos do MUGEN (DEF/SFF/AIR/CMD/CNS/SND) e as centenas de linhas de CNS por **um objeto** tipado (`crates/engine/src/native/types.rs`, JSON). O compilador (`crates/engine/src/native/compile.rs`) gera automaticamente comandos, `[Statedef -1]`, estados de golpe, HitDefs, projéteis, super pause, cancelamentos e hitboxes.
 
 ## Estrutura
 ```ts

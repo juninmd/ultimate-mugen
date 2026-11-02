@@ -32,7 +32,7 @@
 
 // Touch detection + MUGEN .zip import from the page (drag & drop or button), persisted in IndexedDB.
 miniquad_add_plugin({
-  register_plugin: function (imp) { imp.env.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0; },
+  register_plugin: function (imp) { imp.env.ume_set_import_visible = (v) => { const b = document.getElementById('imp'); if (b) b.style.display = v ? '' : 'none'; }; imp.env.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0; },
   on_init: function () {
     const DB = 'ultimate-mugen', ST = 'packs';
     function db() { return new Promise((res, rej) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(ST); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }

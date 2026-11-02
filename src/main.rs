@@ -18,7 +18,18 @@ fn conf() -> Conf {
 }
 
 #[cfg(target_arch = "wasm32")]
-extern "C" { fn ume_is_touch() -> i32; }
+extern "C" { fn ume_is_touch() -> i32; fn ume_set_import_visible(v: i32); }
+
+/// Show the page's "Importar MUGEN" button only outside fights (web).
+pub fn set_import_button(visible: bool) {
+    #[cfg(target_arch = "wasm32")]
+    {
+        static mut LAST: i32 = -1;
+        let v = visible as i32;
+        unsafe { if LAST != v { LAST = v; ume_set_import_visible(v); } }
+    }
+    let _ = visible;
+}
 
 /// Browser imports: JS writes a .zip into wasm memory and queues it for the registry.
 #[cfg(target_arch = "wasm32")]

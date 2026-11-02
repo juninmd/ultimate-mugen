@@ -84,6 +84,12 @@ pub async fn run(app: &mut App, dir: &str) {
             fight(app, dir, "13c-community-vs-original", &a, "jin", "rugen_ink_dojo", 300, "hit").await;
         }
     }
+    if let Some(a) = app.reg.chars.iter().find(|c| c.id.contains("suave")).map(|c| c.id.clone()) {
+        fight(app, dir, "13g-suave-dude", &a, "kaito", "stage1.def", 260, "hit").await;
+    }
+    for (n, st) in [("13d-stage-ikemen-z", "stagez.def"), ("13f-stage-ikemen-training", "stage1.def")] {
+        if app.reg.stages.iter().any(|s| s.id.ends_with(st)) { fight(app, dir, n, "akio", "lian", st, 240, "hit").await; }
+    }
     app.session = None;
     app.screen = Screen::Controls; screen(app, dir, "14-controls", 5).await;
     // phone landscape with touch controls

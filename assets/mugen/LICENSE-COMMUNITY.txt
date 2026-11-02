@@ -44,3 +44,24 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
+
+-------------------------------------------------------------------------------
+3) Cenários do screenpack padrão do Ikemen GO
+   Training Stage (autor: Gacel), Training Stage Z (Phantom.of.the.Server)
+   Fonte: https://github.com/ikemen-engine/Ikemen_GO-Elecbyte-Screenpack (stages/)
+   Licença: Creative Commons Attribution 3.0 Unported (CC BY 3.0) —
+   "almost everything here was made for Ikemen GO and is licensed under CC BY 3.0 (attribution)"
+   (README do screenpack; a exceção é o conteúdo da Elecbyte, tratado em LICENSE-ELECBYTE.txt).
+   https://creativecommons.org/licenses/by/3.0/
+
+-------------------------------------------------------------------------------
+4) Suave Dude — personagem de Masukenpu-kun (2010)
+   Fonte: https://github.com/CableDorado2/Ikemen-Plus-Ultra (commit 7304f253, chars/Suave Dude)
+   Permissão (readme.txt do autor, incluído no pacote):
+     "The copyright of other pictures and files belongs to his Masukenpukun.
+      You are free to use them as you wish.
+      However, the character ``Suave Dude'' itself belongs to his Elecbyte"
+   O som (sd.snd) vem do Kung Fu Man e o personagem "Suave Dude" é da Elecbyte
+   (Creative Commons não comercial, como o KFM) — uso apenas não comercial.
+   Removidos desta cópia: retratos 9000,2–9000,6 (fan-art de terceiros listada pelo upstream),
+   o sub-personagem Minion, a música de intro e a galeria (sem licença).

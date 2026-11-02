@@ -368,14 +368,15 @@ impl Match {
     fn round_logic(&mut self) {
         match self.round_state {
             0 if self.round_time > 40 => { self.round_state = 1; self.round_time = 0; }
-            1 if self.round_time > 60 => {
+            // MUGEN: "FIGHT!" waits while any player asserts the Intro flag (capped for safety)
+            1 if self.round_time > 60 && (self.global_asserts & 2 == 0 || self.round_time > 600) => {
                 self.round_state = 2; self.round_time = 0;
                 self.announce = Some(Announce { text: "FIGHT!".into(), time: 50, total: 50 });
                 self.events.push(Event::Fight);
                 for f in self.fighters.iter_mut() { if !f.is_helper && (f.state_no == 0 || f.state_no == 5900) { f.ctrl = true; } }
             }
             2 => {
-                if !self.training && self.pause.is_none() { self.timer = (self.timer - 1).max(0); }
+                if !self.training && self.pause.is_none() && self.global_asserts & 1 == 0 { self.timer = (self.timer - 1).max(0); }
                 let roots = self.root_indices();
                 if self.training {
                     for &i in &roots { if self.fighters[i].life <= 0.0 { self.fighters[i].life = 1.0; } if self.fighters[i].move_type != 'H' && self.fighters[i].state_time > 90 && self.fighters[i].life < self.fighters[i].life_max { self.fighters[i].life = self.fighters[i].life_max; } }
@@ -400,7 +401,7 @@ impl Match {
             }
             3 => {
                 let settled = self.roots().all(|f| if f.alive { f.move_type != 'H' && (f.ctrl || f.state_no == 0) } else { f.state_no == 5150 || f.state_no == 5110 });
-                if (settled && self.round_time > 90) || self.round_time > 300 {
+                if ((settled && self.round_time > 90) || self.round_time > 300) && (self.global_asserts & 4 == 0 || self.round_time > 900) {
                     self.round_state = 4; self.round_time = 0;
                     for i in self.root_indices() {
                         if !self.fighters[i].alive { continue; }
@@ -438,6 +439,7 @@ impl Match {
         self.game_time += 1;
         self.round_time += 1;
         self.round_logic();
+        self.global_asserts = 0;
         let mut k = 0;
         for f in self.fighters.iter_mut() {
             if f.is_helper { continue; }

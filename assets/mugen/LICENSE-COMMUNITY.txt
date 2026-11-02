@@ -1,0 +1,46 @@
+Conteúdo da comunidade incluído (assets/mugen/community.zip)
+==========================================================
+
+1) Personagens originais de Balito (GitHub: yusuke928 / lambdathank)
+   Restaze, Kokirin, Dog, Rinp_GGX, Thunder_horse_GGX, Nich_chara, True-Z
+   Fontes: https://github.com/yusuke928/mugen_charactor
+           https://github.com/lambdathank/true_z_license_free_mugen_chara
+   Licença declarada pelo autor:
+     - .def: author = "Balito(license_free)"  (Restaze, Kokirin, Dog, Rinp_GGX, Thunder_horse_GGX)
+     - pastas/arquivos publicados como "*_license_free" (Nich_chara, Dog, Rinp_GGX, Thunder_horse_GGX, True-Z)
+     - README do True-Z: "True-Z is license free mugen chara."
+     - readme de Rinp_GGX / Thunder_horse_GGX: "You use this chara free."
+   Partes de código/sons derivados do Kung Fu Man da Elecbyte (readme 2001: "You may freely modify
+   and/or distribute KFM and his work files").
+   "GGX" no nome indica o estilo de jogo; os desenhos são originais do autor.
+
+2) Cenários do projeto rugen (Ink Dojo, Night Festival, Training Room EX)
+   Fonte: https://github.com/rugen-dev/rugen-engine (motif/stages/), gerados por código ("rugen stage-gen")
+   Licença: MIT OR Apache-2.0 — texto MIT incluído abaixo e em stages/LICENSE-MIT-rugen.txt dentro do zip.
+
+-------------------------------------------------------------------------------
+Copyright (c) 2026 rugen contributors
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

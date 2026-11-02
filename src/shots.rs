@@ -77,6 +77,12 @@ pub async fn run(app: &mut App, dir: &str) {
         let ms = app.reg.stages.iter().find(|s| s.mugen && s.id.ends_with("kfm.def")).or(app.reg.stages.iter().find(|s| s.mugen)).map(|s| s.id.clone());
         fight(app, dir, "12-mugen-kfm-vs-native", &kfm, "suzume", "plains", 300, "hit").await;
         if let Some(ms) = ms { fight(app, dir, "13-native-on-mugen-stage", "marlow", &kfm, &ms, 300, "hit").await; }
+        if let (Some(a), Some(b)) = (app.reg.chars.iter().find(|c| c.id.contains("true_z")).map(|c| c.id.clone()), app.reg.chars.iter().find(|c| c.id.contains("thunder_horse")).map(|c| c.id.clone())) {
+            fight(app, dir, "13b-community-mugen", &a, &b, "rugen_night_festival", 300, "hit").await;
+        }
+        if let Some(a) = app.reg.chars.iter().find(|c| c.id.contains("restaze")).map(|c| c.id.clone()) {
+            fight(app, dir, "13c-community-vs-original", &a, "jin", "rugen_ink_dojo", 300, "hit").await;
+        }
     }
     app.session = None;
     app.screen = Screen::Controls; screen(app, dir, "14-controls", 5).await;

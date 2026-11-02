@@ -21,6 +21,16 @@
 | **Valdric Morn** | Crônicas do Império da Estrela Rubra | O orgulhoso príncipe herdeiro de um império guerreiro extinto, envolto em armadura carmesim, que jura superar qualquer rival com seu canhão de energia escarlate. | Crimson Royal Lance, Sovereign Rise, Throne Breaker, Scarlet Dominion Cannon |
 | **Haruki Sumi** | Arquivos da Biblioteca do Crepúsculo | Um jovem estudioso gentil que prefere livros a brigas — até que alguém ameace seus amigos e o poder adormecido em seus selos desperte. | Sealed Sigil Spark, Ascending Theorem, Marginalia Rush, Unsealed: Unwritten Fury |
 
+## Conteúdo M.U.G.E.N incluído (licenças que permitem redistribuir)
+| Item | Autor | Licença | Arquivo |
+|---|---|---|---|
+| Kung Fu Man, Kung Fu Man HD | Elecbyte | Creative Commons não comercial | `assets/mugen/elecbyte.zip` |
+| Cenários Mountainside Temple, Training Room, Training Room HD | Elecbyte | Creative Commons não comercial | `assets/mugen/elecbyte.zip` |
+| Restaze, Kokirin, Dog, Rinp GGX, Thunder Horse GGX, Nich Chara, True Z (personagens originais) | Balito | "license free" declarado pelo autor | `assets/mugen/community.zip` |
+| Cenários Ink Dojo, Night Festival, Training Room EX | projeto rugen | MIT / Apache-2.0 | `assets/mugen/community.zip` |
+
+Detalhes e textos das licenças: `assets/mugen/LICENSE-ELECBYTE.txt` e `assets/mugen/LICENSE-COMMUNITY.txt`.
+
 ## Personagens MUGEN populares para importar
 Personagens de anime e jogos feitos pela comunidade MUGEN usam sprites e marcas de terceiros, por isso **não são incluídos**. O Ultimate MUGEN lê esses pacotes diretamente: baixe-os das fontes da comunidade (MUGEN Archive, Mugen Free For All, MugenGuild) e use **Menu → Importar MUGEN**. O autor exibido vem do campo `[Info] author=` do próprio personagem.
 

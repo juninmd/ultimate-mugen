@@ -1,0 +1,16 @@
+Conteúdo M.U.G.E.N incluído (assets/mugen/elecbyte.zip)
+=======================================================
+
+Personagens: Kung Fu Man (clássico) e Kung Fu Man 720
+Cenários:    Mountainside Temple (kfm.def), Training Room (stage0.def), Training Room 720 (stage0-720.def)
+Autor:       (c) 2009 Elecbyte — http://www.elecbyte.com
+Origem:      Ikemen GO screenpack (https://github.com/ikemen-engine/Ikemen_GO-Elecbyte-Screenpack)
+
+Licença (texto do readme do Kung Fu Man):
+  "KFM is licensed under the Creative Commons Noncommercial License. Attribution is optional.
+   This means you may freely build upon or use parts of KFM for non-commercial puposes."
+
+O screenpack do Ikemen GO informa que o conteúdo da Elecbyte (personagens chars/kfm*, cenários
+stages/kfm.*, stages/stage0.*, stages/stage0-720.*) segue os termos não comerciais da Elecbyte.
+
+O Ultimate MUGEN é gratuito e não comercial. Este conteúdo NÃO pode ser usado em versões comerciais.

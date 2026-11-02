@@ -22,7 +22,7 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, mul
 ## Destaques
 - **Compatibilidade MUGEN** (`crates/formats` + `crates/engine`): `.def`, `.sff` v1/v2 (PCX, RLE8, RLE5, LZ5, PNG8/24/32), `.air`, `.cmd`, `.cns`, `.snd`, `.act`, cenários com parallax/tiles/animação. Linguagem de triggers completa (inteiro vs float, intervalos, redirecionamentos), ~90 state controllers, HitDef completo, arremessos (custom states), helpers, projéteis, explods, super pause, after images, `localcoord` HD. Validado com o Kung Fu Man oficial (SD e 720p).
 - **Formato UMF**: um personagem = 1 JSON com golpes declarativos; hitboxes automáticas pelo esqueleto; botão "especial simples" no celular. Compila para a mesma VM do MUGEN — UMF e MUGEN lutam entre si.
-- **15 lutadores originais** + **9 personagens M.U.G.E.N incluídos** (Kung Fu Man SD/HD da Elecbyte e 7 originais da comunidade com licença livre) e **12 cenários** (6 originais + 6 MUGEN) procedurais (sem assets de terceiros), música e efeitos sonoros sintetizados.
+- **15 lutadores originais** + **10 personagens M.U.G.E.N incluídos** (Kung Fu Man SD/HD e cenários da Elecbyte, Suave Dude, 7 originais da comunidade com licença livre) e **14 cenários** (6 originais + 8 MUGEN) procedurais (sem assets de terceiros), música e efeitos sonoros sintetizados.
 - Modos **Arcade, Versus CPU, 2 Jogadores, Treino (hitboxes), CPU vs CPU**; IA compatível com qualquer personagem.
 - **Controles**: teclado, gamepads (DualShock/DualSense com vibração em golpes, defesa, super e K.O.; lightbar azul/vermelha por jogador), toque com analógico virtual e SP1/SP2/SP3/SUPER de um toque.
 

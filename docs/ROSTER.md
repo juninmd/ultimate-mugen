@@ -28,6 +28,11 @@
 | Cenários Mountainside Temple, Training Room, Training Room HD | Elecbyte | Creative Commons não comercial | `assets/mugen/elecbyte.zip` |
 | Restaze, Kokirin, Dog, Rinp GGX, Thunder Horse GGX, Nich Chara, True Z (personagens originais) | Balito | "license free" declarado pelo autor | `assets/mugen/community.zip` |
 | Cenários Ink Dojo, Night Festival, Training Room EX | projeto rugen | MIT / Apache-2.0 | `assets/mugen/community.zip` |
+| Suave Dude | Masukenpu-kun (personagem/sons: Elecbyte) | "free to use them as you wish" + CC não comercial | `assets/mugen/community.zip` |
+| Cenários Training Stage, Training Stage Z | Gacel, Phantom.of.the.Server (screenpack Ikemen GO) | CC BY 3.0 | `assets/mugen/community.zip` |
+
+### Compilações MUGEN famosas (pesquisadas)
+Hyper Dragon Ball Z (Team Z2), Anime Supreme Battle (mugen_master335), packs "MUGEN Ultimate/Anime", packs estilo JUS, Mortal Kombat Project, Super Marvel vs Capcom: Eternity of Heroes, KOF Zillion/Wing/Ultimate MUGEN e Scott Pilgrim Versus (Ikemen) usam personagens e cenários de franquias (Toei/Shueisha, Midway/WB, Marvel/Capcom, SNK, Ubisoft) — **não podem ser redistribuídos** e não estão incluídos; podem ser importados pelo próprio jogador. Das compilações abertas (Ikemen GO, Ikemen Plus Ultra, fiiight) foi aproveitado o conteúdo com licença explícita listado acima.
 
 Detalhes e textos das licenças: `assets/mugen/LICENSE-ELECBYTE.txt` e `assets/mugen/LICENSE-COMMUNITY.txt`.
 

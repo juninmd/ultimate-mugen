@@ -205,7 +205,8 @@ impl App {
     fn select(&mut self) {
         let Screen::Select { mut cur, mut picking, mut picked } = self.screen else { return };
         let n = self.reg.chars.len();
-        let cols = 6usize;
+        // adaptive grid: at most 4 rows, between 6 and 9 columns, centered in a 640px-wide area
+        let cols = n.div_ceil(4).clamp(6, 9);
         let two = self.mode == Mode::Versus;
         let mut confirm = false;
         // input: P1 picks with menu nav; P2 in versus uses pad 2 / arrows
@@ -221,7 +222,11 @@ impl App {
         let hint = if picking == 0 { "JOGADOR 1: escolha seu lutador" } else if two { "JOGADOR 2: escolha" } else { "Escolha o oponente" };
         self.ui.text(hint, VW - 40.0, 56.0, 22.0, hex("#a49cc0"), Align::Right, false);
         // grid
-        let (gx, gy, cw, ch, gap) = (330.0, 110.0, 96.0, 112.0, 8.0);
+        let gap = 6.0;
+        let cw = ((640.0 - (cols as f32 - 1.0) * gap) / cols as f32).min(96.0);
+        let ch = cw * 1.17;
+        let gx = (VW - (cols as f32 * cw + (cols as f32 - 1.0) * gap)) / 2.0;
+        let gy = 110.0;
         let mut click = None;
         for i in 0..n {
             let (cx, cy) = (gx + (i % cols) as f32 * (cw + gap), gy + (i / cols) as f32 * (ch + gap));
@@ -242,7 +247,7 @@ impl App {
             }
             self.ui.rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.65));
             let nm: String = if emugen { ename.chars().take(13).collect() } else { ename.split_whitespace().next().unwrap_or("").chars().take(12).collect() };
-            self.ui.text(&nm.to_uppercase(), cx + cw / 2.0, cy + ch - 4.0, 12.0, WHITE, Align::Center, true);
+            self.ui.text(&nm.to_uppercase(), cx + cw / 2.0, cy + ch - 4.0, (cw * 0.125).min(12.0), WHITE, Align::Center, true);
             if emugen { self.ui.rect(cx + cw - 44.0, cy + 3.0, 41.0, 13.0, hex("#22e8ff")); self.ui.text("MUGEN", cx + cw - 23.5, cy + 14.0, 10.0, BLACK, Align::Center, true); }
             let c1 = cur[0] == i && (picking == 0 || picked[0].is_some());
             let c2 = cur[1] == i && picking == 1;

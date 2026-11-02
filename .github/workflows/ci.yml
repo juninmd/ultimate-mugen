@@ -1,0 +1,30 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with: { targets: wasm32-unknown-unknown }
+      - run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace --release
+      - run: cargo build --release --target wasm32-unknown-unknown
+  desktop:
+    strategy:
+      matrix: { os: [ubuntu-latest, windows-latest, macos-latest] }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ultimate-mugen-${{ matrix.os }}
+          path: |
+            target/release/ultimate-mugen
+            target/release/ultimate-mugen.exe

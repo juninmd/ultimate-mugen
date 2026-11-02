@@ -1,0 +1,994 @@
+//! Match simulation: round flow, state machine driver, collision/hit system, entities, camera.
+use crate::chardef::{Animation, Box4, CharDef, Controller, Source};
+use crate::expr::{eval, Expr};
+use crate::fighter::*;
+use crate::triggers::Ctx;
+use std::cell::RefCell;
+use std::sync::Arc;
+
+#[derive(Clone, Debug)]
+pub struct StageInfo {
+    pub name: String,
+    pub bound_left: f32, pub bound_right: f32, pub bound_high: f32, pub bound_low: f32,
+    pub p1x: f32, pub p2x: f32, pub zoffset: f32, pub vertical_follow: f32, pub tension: f32,
+}
+impl Default for StageInfo {
+    fn default() -> Self { StageInfo { name: "Flat".into(), bound_left: -200.0, bound_right: 200.0, bound_high: -60.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 210.0, vertical_follow: 0.2, tension: 60.0 } }
+}
+
+#[derive(Clone)]
+pub struct AnimCursor { pub def: Arc<CharDef>, pub anim: i32, pub elem: usize, pub elem_time: i32, pub elapsed: i32 }
+impl AnimCursor {
+    pub fn new(def: Arc<CharDef>, anim: i32) -> Self { AnimCursor { def, anim, elem: 0, elem_time: 0, elapsed: 0 } }
+    pub fn a(&self) -> Option<&Animation> { self.def.anims.get(&self.anim) }
+    pub fn frame(&self) -> Option<&crate::chardef::AnimFrame> { self.a().and_then(|a| a.frames.get(self.elem)) }
+    pub fn done(&self) -> bool { self.a().is_none_or(|a| a.total_time >= 0 && self.elapsed >= a.total_time) }
+    pub fn advance(&mut self) {
+        let Some(a) = self.def.anims.get(&self.anim) else { return };
+        if a.frames.is_empty() { return; }
+        if a.total_time >= 0 && self.elapsed >= a.total_time { self.elapsed = a.frames.iter().take(a.loop_start).map(|f| f.time.max(0)).sum(); }
+        let ft = a.frames[self.elem].time;
+        self.elapsed += 1;
+        if ft < 0 { return; }
+        self.elem_time += 1;
+        if self.elem_time >= ft { self.elem_time = 0; self.elem += 1; if self.elem >= a.frames.len() { self.elem = a.loop_start; } }
+    }
+}
+
+#[derive(Clone)]
+pub struct Explod {
+    pub owner: u32, pub id: i32, pub cur: AnimCursor, pub pos: V2, pub vel: V2, pub accel: V2, pub facing: f32, pub vfacing: f32,
+    pub bind_time: i32, pub bind_to: Option<u32>, pub bind_off: V2, pub remove_time: i32, pub time: i32, pub spr_priority: i32,
+    pub on_top: bool, pub under: bool, pub scale: [f32; 2], pub add: bool, pub remove_on_get_hit: bool, pub super_move: i32, pub pause_move: i32, pub lscl: f32,
+}
+
+#[derive(Clone)]
+pub struct Projectile {
+    pub owner: u32, pub side: usize, pub id: i32, pub cur: AnimCursor, pub hit_anim: i32, pub rem_anim: i32, pub cancel_anim: i32,
+    pub pos: V2, pub vel: V2, pub accel: V2, pub vel_mul: V2, pub rem_vel: V2, pub facing: f32, pub hits: i32, pub miss_time: i32, pub miss_cd: i32,
+    pub priority: i32, pub spr_priority: i32, pub edge_bound: f32, pub height_bound: [f32; 2], pub remove_time: i32, pub time: i32,
+    pub hitdef: HitDefData, pub dying: bool, pub guard_dist: f32, pub scale: [f32; 2], pub remove: bool, pub lscl: f32,
+}
+
+/// Events for the presentation layer (audio, rumble, UI).
+#[derive(Clone)]
+pub enum Event {
+    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str> },
+    Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool },
+    Super { side: usize },
+    Ko { loser_side: usize },
+    RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
+}
+
+pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_super: bool, pub darken: bool }
+pub struct Announce { pub text: String, pub time: i32, pub total: i32 }
+
+pub struct Match {
+    pub fighters: Vec<Fighter>,
+    pub explods: Vec<Explod>,
+    pub projectiles: Vec<Projectile>,
+    pub common: Arc<CharDef>,
+    pub fx: Option<Arc<CharDef>>,
+    pub stage: StageInfo,
+    pub camera: V2,
+    pub view_w: f32, pub view_h: f32,
+    pub game_time: i64,
+    pub round_state: i32, pub round_no: i32, pub round_time: i32,
+    pub timer: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
+    pub global_asserts: u32,
+    pub pause: Option<PauseState>,
+    pub shake_time: i32, pub shake_ampl: f32,
+    pub flash: Option<(i32, [f32; 3])>,
+    pub slow_mo: i32,
+    pub events: Vec<Event>,
+    pub announce: Option<Announce>,
+    pub rng: u32,
+    pub next_id: u32,
+    pub assigns: RefCell<Vec<(usize, String, i32, f64)>>,
+}
+
+impl Match {
+    pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
+        Match {
+            fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: 426.67, view_h: 240.0,
+            game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, flash: None, slow_mo: 0,
+            events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]),
+        }
+    }
+    pub fn random(&mut self) -> f32 {
+        let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x;
+        x as f32 / 4294967296.0
+    }
+    pub fn add_player(&mut self, def: Arc<CharDef>, side: usize, ai_level: i32, pal_no: i32) -> usize {
+        let id = self.next_id; self.next_id += 1;
+        let n = self.roots().count() + 1;
+        let mut f = Fighter::new(id, def, side, n);
+        f.ai_level = ai_level; f.pal_no = pal_no;
+        self.fighters.push(f);
+        self.fighters.len() - 1
+    }
+    pub fn roots(&self) -> impl Iterator<Item = &Fighter> { self.fighters.iter().filter(|f| !f.is_helper) }
+    pub fn root_indices(&self) -> Vec<usize> { (0..self.fighters.len()).filter(|&i| !self.fighters[i].is_helper).collect() }
+    pub fn idx(&self, id: u32) -> Option<usize> { self.fighters.iter().position(|f| f.id == id && !f.destroyed) }
+    pub fn enemy(&self, i: usize, n: usize) -> Option<usize> {
+        let me = &self.fighters[i];
+        let mut list: Vec<usize> = (0..self.fighters.len()).filter(|&j| { let f = &self.fighters[j]; !f.is_helper && f.side != me.side && !f.destroyed }).collect();
+        list.sort_by(|&a, &b| (self.fighters[a].pos.x - me.pos.x).abs().partial_cmp(&(self.fighters[b].pos.x - me.pos.x).abs()).unwrap());
+        list.get(n).copied()
+    }
+    pub fn ground_y(&self) -> f32 { self.stage.zoffset }
+
+    // ---------------------------------------------------------------- evaluation helpers
+    pub fn ev(&self, i: usize, e: &Expr) -> f64 { eval(&e.node, &Ctx { m: self, i }) }
+    pub fn num(&self, i: usize, sc: &Controller, k: &str, d: f64, idx: usize) -> f64 {
+        match sc.param(k).and_then(|p| p.exprs.get(idx)) { Some(e) => self.ev(i, e), None => d }
+    }
+    fn apply_assigns(&mut self) {
+        let list: Vec<_> = self.assigns.borrow_mut().drain(..).collect();
+        for (i, name, idx, v) in list {
+            let Some(f) = self.fighters.get_mut(i) else { continue };
+            let u = idx as usize;
+            match name.as_str() {
+                "var" if u < 60 => f.vars[u] = v as i32,
+                "fvar" if u < 40 => f.fvars[u] = v,
+                "sysvar" if u < 5 => f.sysvars[u] = v as i32,
+                "sysfvar" if u < 5 => f.sysfvars[u] = v,
+                _ => {}
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- state machine
+    pub fn change_state(&mut self, i: usize, no: i32, owner: Arc<CharDef>) {
+        let common = self.common.clone();
+        {
+            let f = &mut self.fighters[i];
+            f.prev_state_no = f.state_no;
+            f.state_no = no;
+            f.st_def = owner.clone();
+            f.state_time = 0;
+            f.persist.clear();
+        }
+        let sd = owner.states.get(&no).or_else(|| common.states.get(&no)).cloned();
+        let Some(sd) = sd else { return };
+        let raw = |k: &str| sd.param(k).map(|p| p.raw.trim().to_ascii_uppercase());
+        let ev = |m: &Match, k: &str, idx: usize| sd.param(k).and_then(|p| p.exprs.get(idx)).map(|e| m.ev(i, e));
+        {
+            let f = &mut self.fighters[i];
+            match raw("type") { Some(t) if !t.starts_with('U') && !t.is_empty() => f.state_type = t.chars().next().unwrap(), None => f.state_type = 'S', _ => {} }
+            match raw("movetype") { Some(t) if !t.starts_with('U') && !t.is_empty() => f.move_type = t.chars().next().unwrap(), None => f.move_type = 'I', _ => {} }
+            match raw("physics") { Some(t) if !t.starts_with('U') && !t.is_empty() => f.physics = t.chars().next().unwrap(), None => f.physics = 'N', _ => {} }
+        }
+        if let Some(a) = ev(self, "anim", 0) { let d = self.fighters[i].def.clone(); self.fighters[i].change_anim(a as i32, &d, 1); }
+        let vx = ev(self, "velset", 0); let vy = ev(self, "velset", 1);
+        let ctrl = ev(self, "ctrl", 0); let pa = ev(self, "poweradd", 0); let sp = ev(self, "sprpriority", 0); let fp = ev(self, "facep2", 0);
+        let hdp = ev(self, "hitdefpersist", 0).unwrap_or(0.0); let mhp = ev(self, "movehitpersist", 0).unwrap_or(0.0); let hcp = ev(self, "hitcountpersist", 0).unwrap_or(0.0);
+        if fp.is_some_and(|v| v != 0.0) { self.face_enemy(i); }
+        if let Some(p) = pa { self.add_power(i, p as f32); }
+        let f = &mut self.fighters[i];
+        if let Some(v) = vx { f.vel.x = v as f32 * f.lscl; }
+        if let Some(v) = vy { f.vel.y = v as f32 * f.lscl; }
+        if let Some(c) = ctrl { f.ctrl = c != 0.0; }
+        if let Some(s) = sp { f.spr_priority = s as i32; }
+        if hdp == 0.0 { f.hitdef_active = false; }
+        if mhp == 0.0 { f.move_contact = 0; f.move_hit = 0; f.move_guarded = 0; f.move_reversed = 0; }
+        if hcp == 0.0 { f.hit_count = 0; }
+    }
+    pub fn face_enemy(&mut self, i: usize) {
+        if let Some(e) = self.enemy(i, 0) {
+            let ex = self.fighters[e].pos.x; let f = &mut self.fighters[i];
+            if ex != f.pos.x { f.facing = if ex > f.pos.x { 1.0 } else { -1.0 }; }
+        }
+    }
+    pub fn add_power(&mut self, i: usize, v: f32) {
+        let root = self.fighters[i].root;
+        if let Some(r) = self.idx(root) { self.fighters[r].add_power_local(v); }
+    }
+
+    fn triggered(&self, i: usize, sc: &Controller) -> bool {
+        for e in &sc.trigger_all { if self.ev(i, e) == 0.0 { return false; } }
+        if sc.triggers.is_empty() { return false; }
+        sc.triggers.iter().any(|g| g.iter().all(|e| self.ev(i, e) != 0.0))
+    }
+
+    /// Run a state's controllers. Returns true if the state changed.
+    fn run_state(&mut self, i: usize, sd_owner: &Arc<CharDef>, no: i32, in_pause: bool) -> bool {
+        let common = self.common.clone();
+        let sd = match sd_owner.states.get(&no).or_else(|| if no >= 0 { common.states.get(&no) } else { None }) { Some(s) => s, None => return false };
+        for sc in &sd.controllers {
+            if i >= self.fighters.len() || self.fighters[i].destroyed { return true; }
+            if in_pause && !sc.ignore_hitpause { continue; }
+            if !self.triggered(i, sc) { self.apply_assigns(); continue; }
+            self.apply_assigns();
+            if sc.persistent != 1 {
+                let f = &mut self.fighters[i];
+                if let Some(&last) = f.persist.get(&sc.uid) {
+                    if sc.persistent == 0 || f.state_time - last < sc.persistent { continue; }
+                }
+                f.persist.insert(sc.uid, f.state_time);
+            }
+            let (sno, sdef, st) = { let f = &self.fighters[i]; (f.state_no, f.st_def.clone(), f.state_time) };
+            let id = self.fighters[i].id;
+            crate::controllers::run(self, i, sc);
+            self.apply_assigns();
+            let Some(i2) = self.idx(id) else { return true };
+            if i2 != i { return true; }
+            let f = &self.fighters[i];
+            if f.state_no != sno || !Arc::ptr_eq(&f.st_def, &sdef) || (f.state_time == 0 && st != 0) { return true; }
+        }
+        false
+    }
+
+    fn run_states(&mut self, i: usize) {
+        let in_pause = self.fighters[i].hit_pause > 0 || self.fighters[i].hit_shake > 0;
+        self.fighters[i].asserts = 0;
+        let own = self.fighters[i].def.clone();
+        let custom = !Arc::ptr_eq(&self.fighters[i].st_def, &own);
+        let helper = self.fighters[i].is_helper;
+        let id = self.fighters[i].id;
+        if !helper && !custom { self.run_state(i, &own, -3, in_pause); }
+        let Some(i) = self.idx(id) else { return };
+        self.run_state(i, &own, -2, in_pause);
+        let Some(i) = self.idx(id) else { return };
+        if (!helper || self.fighters[i].key_ctrl) && !custom {
+            self.run_state(i, &own, -1, in_pause);
+            let Some(i) = self.idx(id) else { return };
+            if !in_pause { self.builtin_transitions(i); }
+        }
+        for _ in 0..16 {
+            let Some(i) = self.idx(id) else { return };
+            let (owner, no) = { let f = &self.fighters[i]; (f.st_def.clone(), f.state_no) };
+            if !self.run_state(i, &owner, no, in_pause) { break; }
+        }
+    }
+
+    pub fn has_command(&self, i: usize, name: &str) -> bool {
+        let f = &self.fighters[i];
+        let src = if f.is_helper { if f.key_ctrl { self.idx(f.root) } else { None } } else { Some(i) };
+        let Some(s) = src else { return false };
+        if self.round_state != 2 && self.round_state != 3 && !self.training { return false; }
+        self.fighters[s].cmd.active.contains(name)
+    }
+
+    fn builtin_transitions(&mut self, i: usize) {
+        if !self.fighters[i].ctrl || (self.round_state != 2 && !self.training) { return; }
+        let cmd = |m: &Match, n: &str| m.fighters[i].cmd.active.contains(n);
+        let s = self.fighters[i].state_no;
+        let st = self.fighters[i].state_type;
+        if let Some(e) = self.enemy(i, 0) {
+            let ex = self.fighters[e].pos.x;
+            let f = &mut self.fighters[i];
+            if !f.has_assert(asf::NOAUTOTURN) && matches!(s, 0 | 11 | 20 | 52) && st != 'A' {
+                let should = if ex >= f.pos.x { 1.0 } else { -1.0 };
+                if should != f.facing && (ex - f.pos.x).abs() > 1.0 {
+                    f.facing = should;
+                    let d = f.def.clone();
+                    if s == 0 && d.anims.contains_key(&5) { f.change_anim(5, &d, 1); }
+                    if s == 11 && d.anims.contains_key(&6) { f.change_anim(6, &d, 1); }
+                }
+            }
+        }
+        let own = self.fighters[i].def.clone();
+        if st == 'S' || st == 'C' {
+            if cmd(self, "holdback") && self.in_guard_dist(i) && !(120..=155).contains(&s) { self.change_state(i, 120, own); return; }
+            if st == 'S' {
+                if cmd(self, "holdup") && !self.fighters[i].has_assert(asf::NOJUMP) { self.change_state(i, 40, own); return; }
+                if cmd(self, "holddown") && s != 10 && s != 11 { self.change_state(i, 10, own); return; }
+                if (cmd(self, "holdfwd") || cmd(self, "holdback")) && s != 20 && !self.fighters[i].has_assert(asf::NOWALK) && (s == 0 || s == 52) { self.change_state(i, 20, own); }
+            } else if !cmd(self, "holddown") && s == 11 { self.change_state(i, 12, own); }
+        } else if st == 'A' {
+            let f = &self.fighters[i];
+            let maxj = f.c("movement.airjump.num", 1.0) as i32;
+            let h = &f.history;
+            let pressed_up = h.at(h.tick) & 1 != 0 && h.at(h.tick - 1) & 1 == 0;
+            if s == 50 && f.air_jumps < maxj && pressed_up && f.pos.y < -f.c("movement.airjump.height", 35.0) * f.lscl {
+                self.fighters[i].air_jumps += 1;
+                self.change_state(i, 45, own);
+            }
+        }
+    }
+
+    pub fn in_guard_dist(&self, i: usize) -> bool {
+        let me = &self.fighters[i];
+        for e in &self.fighters {
+            if e.side == me.side || e.destroyed { continue; }
+            if e.move_type == 'A' && e.hitdef_active { if let Some(h) = &e.hitdef { if (e.pos.x - me.pos.x).abs() <= h.guard_dist * e.lscl { return true; } } }
+        }
+        self.projectiles.iter().any(|p| p.side != me.side && !p.dying && (p.pos.x - me.pos.x).abs() <= p.guard_dist)
+    }
+
+    fn physics_step(&mut self, i: usize) {
+        if self.fighters[i].pos_freeze { self.fighters[i].pos_freeze = false; self.update_bind(i); return; }
+        if self.fighters[i].bind.is_some() { self.update_bind(i); return; }
+        let mut land = false;
+        {
+            let f = &mut self.fighters[i];
+            f.pos.x += f.vel.x * f.facing;
+            f.pos.y += f.vel.y;
+            match f.physics {
+                'S' | 'C' => {
+                    let sliding = f.move_type == 'H' && f.slide_time > 0;
+                    if !sliding {
+                        let fr = if f.physics == 'S' { f.c("movement.stand.friction", 0.85) } else { f.c("movement.crouch.friction", 0.82) };
+                        f.vel.x *= fr;
+                        if f.vel.x.abs() < 0.05 { f.vel.x = 0.0; }
+                    }
+                    if f.pos.y > 0.0 { f.pos.y = 0.0; }
+                    if f.state_type != 'A' { f.vel.y = 0.0; }
+                }
+                'A' => {
+                    f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl;
+                    if f.pos.y >= 0.0 && f.vel.y > 0.0 { f.pos.y = 0.0; f.vel.y = 0.0; f.air_jumps = 0; if f.move_type != 'H' { land = true; } }
+                }
+                _ => {}
+            }
+            if f.slide_time > 0 { f.slide_time -= 1; }
+        }
+        if land { let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); }
+    }
+    pub fn update_bind(&mut self, i: usize) {
+        let Some(b) = self.fighters[i].bind.clone() else { return };
+        let Some(t) = self.idx(b.to) else { self.fighters[i].bind = None; return };
+        if b.time == 0 { self.fighters[i].bind = None; return; }
+        let (tx, ty, tf) = (self.fighters[t].pos.x, self.fighters[t].pos.y, self.fighters[t].facing);
+        let f = &mut self.fighters[i];
+        f.pos.x = tx + b.x * tf;
+        f.pos.y = ty + b.y;
+        if b.time > 0 { f.bind.as_mut().unwrap().time -= 1; }
+    }
+
+    // ---------------------------------------------------------------- round flow
+    pub fn start_round(&mut self) {
+        self.round_state = 0; self.round_time = 0; self.timer = 99 * 60; self.winner_side = -1; self.slow_mo = 0;
+        self.explods.clear(); self.projectiles.clear(); self.pause = None;
+        self.fighters.retain(|f| !f.is_helper);
+        self.camera = V2::default();
+        for i in 0..self.fighters.len() {
+            {
+                let p1x = self.stage.p1x; let p2x = self.stage.p2x; let first = self.round_no == 1;
+                let f = &mut self.fighters[i];
+                f.destroyed = false;
+                f.pos = V2 { x: if f.side == 0 { p1x } else { p2x }, y: 0.0 };
+                f.vel = V2::default();
+                f.facing = if f.side == 0 { 1.0 } else { -1.0 };
+                f.life = f.life_max; f.alive = true;
+                if first { f.power = 0.0; }
+                f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false;
+                f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5];
+            }
+            let d = self.fighters[i].def.clone();
+            self.change_state(i, 5900, d);
+            self.fighters[i].ctrl = false;
+        }
+        self.announce = Some(Announce { text: format!("ROUND {}", self.round_no), time: 70, total: 70 });
+        self.events.push(Event::RoundStart(self.round_no));
+    }
+
+    fn round_logic(&mut self) {
+        match self.round_state {
+            0 if self.round_time > 40 => { self.round_state = 1; self.round_time = 0; }
+            1 if self.round_time > 60 => {
+                self.round_state = 2; self.round_time = 0;
+                self.announce = Some(Announce { text: "FIGHT!".into(), time: 50, total: 50 });
+                self.events.push(Event::Fight);
+                for f in self.fighters.iter_mut() { if !f.is_helper && (f.state_no == 0 || f.state_no == 5900) { f.ctrl = true; } }
+            }
+            2 => {
+                if !self.training && self.pause.is_none() { self.timer = (self.timer - 1).max(0); }
+                let roots = self.root_indices();
+                if self.training {
+                    for &i in &roots { if self.fighters[i].life <= 0.0 { self.fighters[i].life = 1.0; } if self.fighters[i].move_type != 'H' && self.fighters[i].state_time > 90 && self.fighters[i].life < self.fighters[i].life_max { self.fighters[i].life = self.fighters[i].life_max; } }
+                    for &i in &roots { self.fighters[i].power = self.fighters[i].power_max; }
+                    return;
+                }
+                let dead: Vec<usize> = roots.iter().copied().filter(|&i| self.fighters[i].life <= 0.0).collect();
+                if !dead.is_empty() || self.timer <= 0 {
+                    self.round_state = 3; self.round_time = 0;
+                    if !dead.is_empty() {
+                        for &i in &dead { self.fighters[i].alive = false; }
+                        self.winner_side = if dead.len() == roots.len() { -2 } else { 1 - self.fighters[dead[0]].side as i32 };
+                        self.slow_mo = 75;
+                        self.announce = Some(Announce { text: "K.O.".into(), time: 110, total: 110 });
+                        self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side });
+                    } else {
+                        let r: Vec<f32> = roots.iter().map(|&i| self.fighters[i].life / self.fighters[i].life_max).collect();
+                        self.winner_side = if r.len() < 2 || r[0] == r[1] { -2 } else if r[0] > r[1] { self.fighters[roots[0]].side as i32 } else { self.fighters[roots[1]].side as i32 };
+                        self.announce = Some(Announce { text: "TIME OVER".into(), time: 110, total: 110 });
+                    }
+                }
+            }
+            3 => {
+                let settled = self.roots().all(|f| if f.alive { f.move_type != 'H' && (f.ctrl || f.state_no == 0) } else { f.state_no == 5150 || f.state_no == 5110 });
+                if (settled && self.round_time > 90) || self.round_time > 300 {
+                    self.round_state = 4; self.round_time = 0;
+                    for i in self.root_indices() {
+                        if !self.fighters[i].alive { continue; }
+                        self.fighters[i].ctrl = false;
+                        let d = self.fighters[i].def.clone();
+                        let s = self.fighters[i].side as i32;
+                        let no = if self.winner_side == s { 180 } else if self.winner_side == -2 { 175 } else { 170 };
+                        self.change_state(i, no, d);
+                    }
+                    if self.winner_side >= 0 { self.wins[self.winner_side as usize] += 1; }
+                    let w = self.roots().find(|f| f.side as i32 == self.winner_side).map(|f| f.def.display_name.to_uppercase());
+                    self.announce = Some(Announce { text: w.map(|n| format!("{n} WINS")).unwrap_or("DRAW".into()), time: 150, total: 150 });
+                    self.events.push(Event::RoundEnd(self.winner_side));
+                }
+            }
+            4 if self.round_time > 170 => {
+                if self.wins[0] >= self.rounds_to_win || self.wins[1] >= self.rounds_to_win {
+                    if !self.match_over {
+                        self.match_over = true;
+                        self.events.push(Event::MatchOver(if self.wins[0] > self.wins[1] { 0 } else { 1 }));
+                    }
+                } else { self.round_no += 1; self.start_round(); }
+            }
+            _ => {}
+        }
+    }
+
+    // ---------------------------------------------------------------- tick
+    /// Advance one 1/60s tick. `inputs[k]` = bits for the k-th root player.
+    pub fn tick(&mut self, inputs: &[u32]) {
+        if self.slow_mo > 0 {
+            self.slow_mo -= 1;
+            if self.slow_mo % 3 != 0 { self.visual_timers(); return; }
+        }
+        self.game_time += 1;
+        self.round_time += 1;
+        self.round_logic();
+        let mut k = 0;
+        for f in self.fighters.iter_mut() {
+            if f.is_helper { continue; }
+            let bits = inputs.get(k).copied().unwrap_or(0);
+            k += 1;
+            f.history.push(bits, f.facing as i32);
+            let cmds = f.def.commands.clone();
+            f.cmd.update(&f.history, &cmds);
+        }
+        let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time));
+        let frozen_by_pause = |f: &Fighter| match paused_by { None => false, Some((by, mt)) => !(f.id == by && mt > 0) };
+        let ids: Vec<u32> = self.fighters.iter().map(|f| f.id).collect();
+        for &id in &ids {
+            let Some(i) = self.idx(id) else { continue };
+            if frozen_by_pause(&self.fighters[i]) { continue; }
+            let f = &mut self.fighters[i];
+            let frozen = f.hit_pause > 0 || f.hit_shake > 0;
+            f.width_override = None; f.player_push = true;
+            if !frozen { f.advance_anim(); }
+            self.run_states(i);
+        }
+        if let Some(p) = self.pause.as_mut() { if p.move_time > 0 { p.move_time -= 1; } }
+        for &id in &ids {
+            let Some(i) = self.idx(id) else { continue };
+            if frozen_by_pause(&self.fighters[i]) { continue; }
+            {
+                let f = &mut self.fighters[i];
+                if f.hit_pause > 0 || f.hit_shake > 0 {
+                    if f.hit_pause > 0 { f.hit_pause -= 1; }
+                    if f.hit_shake > 0 { f.hit_shake -= 1; }
+                    continue;
+                }
+            }
+            self.physics_step(i);
+            let f = &mut self.fighters[i];
+            f.state_time += 1;
+            if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; }
+            if f.move_contact > 0 { f.move_contact += 1; }
+            if f.move_hit > 0 { f.move_hit += 1; }
+            if f.move_guarded > 0 { f.move_guarded += 1; }
+            for n in f.not_hit_by.iter_mut() { n.1 -= 1; }
+            f.not_hit_by.retain(|n| n.1 > 0);
+            for n in f.hit_by.iter_mut() { n.1 -= 1; }
+            f.hit_by.retain(|n| n.1 > 0);
+            if let Some(p) = f.palfx.as_mut() { if p.time > 0 { p.time -= 1; if p.time == 0 { f.palfx = None; } } }
+            let tp = f.frame().map(|fr| TrailPoint { x: f.pos.x, y: f.pos.y, group: fr.group, index: fr.index, fx: fr.x, fy: fr.y, flip_h: fr.flip_h, facing: f.facing });
+            if let Some(ai) = f.after_image.as_mut() {
+                if let Some(tp) = tp { ai.trail.insert(0, tp); }
+                ai.trail.truncate(ai.length);
+                if ai.time > 0 { ai.time -= 1; if ai.time == 0 { f.after_image = None; } }
+            }
+        }
+        self.push_and_bound();
+        self.detect_hits();
+        let paused = self.pause.is_some();
+        self.update_projectiles(paused);
+        self.update_explods(paused);
+        self.update_camera();
+        self.visual_timers();
+        if let Some(p) = self.pause.as_mut() { p.time -= 1; if p.time <= 0 { self.pause = None; } }
+        // drop stale targets
+        let alive_ids: Vec<(u32, char)> = self.fighters.iter().map(|f| (f.id, f.move_type)).collect();
+        for f in self.fighters.iter_mut() {
+            let (st, mc) = (f.state_time, f.move_contact);
+            f.targets.retain(|(t, _)| alive_ids.iter().any(|(id, mt)| id == t && (*mt == 'H' || st < 2 || mc > 0)));
+        }
+    }
+
+    fn visual_timers(&mut self) {
+        if self.shake_time > 0 { self.shake_time -= 1; }
+        if let Some((t, _)) = self.flash.as_mut() { *t -= 1; if *t <= 0 { self.flash = None; } }
+        if let Some(a) = self.announce.as_mut() { a.time -= 1; if a.time <= 0 { self.announce = None; } }
+    }
+
+    fn push_and_bound(&mut self) {
+        let n = self.fighters.len();
+        for a in 0..n {
+            for b in a + 1..n {
+                let (fa, fb) = (&self.fighters[a], &self.fighters[b]);
+                let pushable = |f: &Fighter| !f.destroyed && (!f.is_helper || f.helper_player) && f.player_push && f.state_type != 'L';
+                if fa.side == fb.side || !pushable(fa) || !pushable(fb) { continue; }
+                let ha = fa.c("size.height", 60.0) * fa.lscl; let hb = fb.c("size.height", 60.0) * fb.lscl;
+                if fa.pos.y - ha > fb.pos.y || fb.pos.y - hb > fa.pos.y { continue; }
+                let (l, r) = if fa.pos.x <= fb.pos.x { (a, b) } else { (b, a) };
+                let (fl, fr) = (&self.fighters[l], &self.fighters[r]);
+                let lw = if fl.facing > 0.0 { fl.front_width() } else { fl.back_width() };
+                let rw = if fr.facing < 0.0 { fr.front_width() } else { fr.back_width() };
+                let overlap = fl.pos.x + lw - (fr.pos.x - rw);
+                if overlap > 0.0 {
+                    let (mut lp, mut rp) = (overlap / 2.0, overlap / 2.0);
+                    if fl.state_type == 'A' && fr.state_type != 'A' { lp = overlap; rp = 0.0; } else if fr.state_type == 'A' && fl.state_type != 'A' { rp = overlap; lp = 0.0; }
+                    self.fighters[l].pos.x -= lp; self.fighters[r].pos.x += rp;
+                }
+            }
+        }
+        let left = self.camera.x - self.view_w / 2.0; let right = self.camera.x + self.view_w / 2.0;
+        let (bl, br, vw) = (self.stage.bound_left, self.stage.bound_right, self.view_w);
+        for f in self.fighters.iter_mut() {
+            if f.destroyed || (f.is_helper && !f.helper_player) { continue; }
+            if !f.screen_bound { f.screen_bound = true; continue; }
+            let lw = if f.facing > 0.0 { f.back_width() } else { f.front_width() };
+            let rw = if f.facing > 0.0 { f.front_width() } else { f.back_width() };
+            let minx = left.max(bl - vw / 2.0) + lw; let maxx = right.min(br + vw / 2.0) - rw;
+            f.pos.x = f.pos.x.clamp(minx, maxx.max(minx));
+        }
+    }
+
+    fn update_camera(&mut self) {
+        let xs: Vec<(f32, f32)> = self.roots().filter(|f| !f.destroyed).map(|f| (f.pos.x, f.pos.y)).collect();
+        if xs.is_empty() { return; }
+        let minx = xs.iter().map(|p| p.0).fold(f32::MAX, f32::min); let maxx = xs.iter().map(|p| p.0).fold(f32::MIN, f32::max);
+        let half = self.view_w / 2.0; let t = self.stage.tension;
+        let mut target = ((minx + maxx) / 2.0).clamp(self.stage.bound_left, self.stage.bound_right);
+        if maxx - minx < self.view_w - 2.0 * t {
+            if minx < target - half + t { target = minx + half - t; }
+            if maxx > target + half - t { target = maxx - half + t; }
+        }
+        target = target.clamp(self.stage.bound_left, self.stage.bound_right);
+        self.camera.x += (target - self.camera.x) * 0.5;
+        let highest = xs.iter().map(|p| p.1).fold(f32::MAX, f32::min);
+        let ty = (highest * self.stage.vertical_follow).min(0.0).clamp(self.stage.bound_high, self.stage.bound_low);
+        self.camera.y += (ty - self.camera.y) * 0.3;
+    }
+
+    // ---------------------------------------------------------------- hits
+    pub fn overlap(a: &[Box4], b: &[Box4]) -> Option<(f32, f32)> {
+        for x in a { for y in b {
+            if x[0] <= y[2] && x[2] >= y[0] && x[1] <= y[3] && x[3] >= y[1] {
+                return Some(((x[0].max(y[0]) + x[2].min(y[2])) / 2.0, (x[1].max(y[1]) + x[3].min(y[3])) / 2.0));
+            }
+        } }
+        None
+    }
+    fn attr_match(hd: &HitDefData, spec: &str) -> bool {
+        let spec = spec.replace(char::is_whitespace, "").to_ascii_uppercase();
+        let mut it = spec.split(',');
+        let s = it.next().unwrap_or("");
+        let my = hd.attr_state.chars().find(|c| "SCA".contains(*c)).unwrap_or('S');
+        if !s.contains(my) { return false; }
+        let kinds: Vec<&str> = it.collect();
+        if kinds.is_empty() { return true; }
+        hd.attr_kind.iter().any(|ak| kinds.iter().any(|k| *k == ak || (k.len() == 2 && k.starts_with('A') && ak.ends_with(&k[1..]))))
+    }
+    pub fn can_be_hit(&self, d: usize, hd: &HitDefData, side: usize) -> bool {
+        let f = &self.fighters[d];
+        if f.destroyed || f.side == side { return false; }
+        if self.round_state != 2 && !(self.round_state == 3 && f.alive) { return false; }
+        if f.state_no == 5150 { return false; }
+        let hf = &hd.hitflag; let st = f.state_type;
+        if hf.contains('+') && f.move_type != 'H' { return false; }
+        if hf.contains('-') && f.move_type == 'H' { return false; }
+        let falling = f.move_type == 'H' && f.ghv.fall && st == 'A';
+        if st == 'S' && !(hf.contains('H') || hf.contains('M')) { return false; }
+        if st == 'C' && !(hf.contains('L') || hf.contains('M')) { return false; }
+        if st == 'A' && !hf.contains('A') && !(falling && hf.contains('F')) { return false; }
+        if falling && !hf.contains('F') { return false; }
+        if st == 'L' && !hf.contains('D') { return false; }
+        if f.not_hit_by.iter().any(|(a, _)| Self::attr_match(hd, a)) { return false; }
+        if f.hit_by.iter().any(|(a, _)| !Self::attr_match(hd, a)) { return false; }
+        true
+    }
+    fn is_guarding(&self, d: usize, hd: &HitDefData) -> bool {
+        let f = &self.fighters[d];
+        if f.has_assert(asf::UNGUARDABLE) || hd.guardflag.is_empty() { return false; }
+        let gf = &hd.guardflag; let st = f.state_type;
+        let ok = (st == 'S' && (gf.contains('H') || gf.contains('M'))) || (st == 'C' && (gf.contains('L') || gf.contains('M'))) || (st == 'A' && gf.contains('A'));
+        if !ok { return false; }
+        if (120..=155).contains(&f.state_no) { return true; }
+        f.ctrl && f.move_type != 'H' && st != 'A' && !f.is_helper && self.has_command(d, "holdback")
+    }
+
+    fn detect_hits(&mut self) {
+        let mut pending = vec![];
+        for a in 0..self.fighters.len() {
+            let fa = &self.fighters[a];
+            if fa.destroyed || !fa.hitdef_active || (fa.move_type != 'A' && !fa.is_helper) { continue; }
+            let Some(hd) = fa.hitdef.as_ref() else { continue };
+            let c1 = fa.boxes(1);
+            if c1.is_empty() { continue; }
+            for d in 0..self.fighters.len() {
+                let fd = &self.fighters[d];
+                if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) { continue; }
+                if !self.can_be_hit(d, hd, fa.side) { continue; }
+                if let Some(at) = Self::overlap(&c1, &fd.boxes(2)) { pending.push((a, d, hd.clone(), at)); }
+            }
+        }
+        for (a, d, hd, at) in pending {
+            let did = self.fighters[d].id;
+            self.fighters[a].hitdef_targets.push(did);
+            self.apply_hit(a, d, &hd, at, None);
+        }
+    }
+
+    pub fn apply_hit(&mut self, a: usize, d: usize, hd: &HitDefData, at: (f32, f32), proj: Option<(i32, f32)>) {
+        let guarded = self.is_guarding(d, hd);
+        let from_proj = proj.is_some();
+        let a_facing = proj.map(|p| p.1).unwrap_or(self.fighters[a].facing);
+        let (aid, aside, apos, aroot) = { let f = &self.fighters[a]; (f.id, f.side, f.pos, f.root) };
+        let did = self.fighters[d].id;
+        if !from_proj {
+            let fa = &mut self.fighters[a];
+            fa.move_contact = 1;
+            if !fa.targets.iter().any(|t| t.0 == did) { fa.targets.push((did, hd.id)); }
+        }
+        let attack_mul = self.idx(aroot).map(|r| self.fighters[r].attack_mul).unwrap_or(1.0);
+        {
+            let fd = &mut self.fighters[d];
+            fd.last_hit_by = Some(aid);
+            if fd.bind.as_ref().is_some_and(|b| b.kind == BindKind::Target) { fd.bind = None; }
+            if !from_proj && hd.p2facing == 0 && fd.state_type != 'A' { fd.facing = if apos.x >= fd.pos.x { 1.0 } else { -1.0 }; }
+            else if hd.p2facing == 1 { fd.facing = -a_facing; } else if hd.p2facing == -1 { fd.facing = a_facing; }
+            fd.hitdef_active = false;
+        }
+        let dir = if self.fighters[d].facing == -a_facing { 1.0 } else { -1.0 };
+        let gt = self.game_time;
+        if guarded {
+            let dmg = (hd.guard_damage * attack_mul).round();
+            let pause_p1 = hd.guard_pause_p1;
+            {
+                let fd = &mut self.fighters[d];
+                fd.life = if hd.guard_kill { (fd.life - dmg).max(0.0) } else { (fd.life - dmg).max(fd.life.min(1.0)) };
+                let gc = fd.ghv.guardcount;
+                fd.ghv = GetHitVars::default();
+                let g = &mut fd.ghv;
+                g.guarded = true; g.hittime = hd.guard_hit_time; g.slidetime = hd.guard_slide_time; g.ctrltime = hd.guard_ctrl_time;
+                g.xvel = (if fd.state_type == 'A' { hd.air_guard_vel[0] } else { hd.guard_vel }) * dir;
+                g.yvel = if fd.state_type == 'A' { hd.air_guard_vel[1] } else { 0.0 };
+                g.yaccel = hd.yaccel; g.damage = dmg; g.guardcount = gc + 1;
+                fd.hit_shake = hd.guard_pause_p2; fd.hit_over_time = hd.guard_hit_time; fd.slide_time = hd.guard_slide_time;
+                fd.ctrl = false; fd.move_type = 'H';
+            }
+            if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('g', pid, gt)); } else { self.fighters[a].move_guarded = 1; self.fighters[a].hit_pause = pause_p1; }
+            let st = self.fighters[d].state_type;
+            let dd = self.fighters[d].def.clone();
+            self.change_state(d, if st == 'A' { 154 } else if st == 'C' { 152 } else { 150 }, dd);
+            self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
+            self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false);
+            if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
+        } else {
+            let dmg = (hd.damage * attack_mul / self.fighters[d].defence_mul.max(0.01)).round();
+            let was_hit = self.fighters[d].move_type == 'H';
+            let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
+            let prev_fall = self.fighters[d].ghv.fall;
+            {
+                let fd = &mut self.fighters[d];
+                let mut nl = fd.life - dmg;
+                if !hd.kill && nl < 1.0 { nl = fd.life.min(1.0); }
+                fd.life = nl.max(0.0);
+                let air = fd.state_type == 'A';
+                fd.ghv = GetHitVars::default();
+                let g = &mut fd.ghv;
+                g.attacker_id = aid; g.damage = dmg; g.hitcount = prev_hc + 1;
+                g.animtype = if air { hd.air_animtype } else { hd.animtype };
+                g.groundtype = hd.ground_type; g.airtype = hd.air_type; g.kind = if air { 3 } else { hd.ground_type };
+                g.fall = (if air { hd.air_fall } else { hd.fall }) || (was_hit && prev_fall);
+                g.hittime = if air { hd.air_hit_time } else { hd.ground_hit_time };
+                g.slidetime = hd.ground_slide_time; g.ctrltime = hd.ground_hit_time;
+                let v = if air { hd.air_vel } else { hd.ground_vel };
+                g.xvel = v[0] * dir; g.yvel = v[1]; g.yaccel = hd.yaccel;
+                g.fall_xvel = hd.fall_xvel.map(|x| x * dir).unwrap_or(g.xvel); g.fall_yvel = hd.fall_yvel;
+                g.fall_recover = hd.fall_recover; g.fall_recover_time = hd.fall_recover_time; g.fall_damage = hd.fall_damage; g.fall_kill = hd.fall_kill; g.kill = hd.kill;
+                g.chainid = hd.chain_id;
+                if fd.life <= 0.0 {
+                    g.fall = true;
+                    if g.yvel == 0.0 { g.yvel = -5.0 * fd.lscl; g.xvel = g.xvel.min(-2.5 * fd.lscl); }
+                    fd.alive = false;
+                }
+                fd.hit_shake = hd.pause_p2; fd.hit_over_time = fd.ghv.hittime; fd.slide_time = fd.ghv.slidetime; fd.fall_time = 0;
+                fd.ctrl = false; fd.move_type = 'H'; fd.spr_priority = hd.p2sprpriority;
+            }
+            if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('h', pid, gt)); }
+            else { let fa = &mut self.fighters[a]; fa.move_hit = 1; fa.hit_count += hd.num_hits; fa.hit_pause = hd.pause_p1; fa.spr_priority = hd.p1sprpriority; }
+            let st = self.fighters[d].state_type;
+            if hd.p2stateno >= 0 {
+                let owner = if hd.p2getp1state { self.fighters[a].def.clone() } else { self.fighters[d].def.clone() };
+                self.change_state(d, hd.p2stateno, owner);
+            } else {
+                let dd = self.fighters[d].def.clone();
+                let no = if st == 'A' || st == 'L' { 5020 } else if st == 'C' && !hd.forcestand { 5010 } else { 5000 };
+                self.change_state(d, no, dd);
+            }
+            if hd.p1stateno >= 0 && !from_proj { let ad = self.fighters[a].def.clone(); self.change_state(a, hd.p1stateno, ad); }
+            self.add_power(a, hd.get_power); self.add_power(d, hd.give_power);
+            if let Some(r) = self.idx(aroot) {
+                let fr = &mut self.fighters[r];
+                fr.combo_count = prev_hc + 1;
+                fr.combo_damage = if was_hit { fr.combo_damage + dmg } else { dmg };
+            }
+            let heavy = hd.animtype >= 2 || dmg >= 70.0;
+            self.spawn_spark(a, hd.spark_no, hd.spark_own, at.0, at.1, false, heavy);
+            if let Some(s) = hd.hit_sound { self.sound(a, s.0, s.1, s.2, Some(if heavy { "hitheavy" } else { "hit" })); }
+            if hd.envshake_time > 0 { self.do_shake(hd.envshake_time, 4.0); }
+            let droot = self.fighters[d].root;
+            self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
+        }
+        let dmg = self.fighters[d].ghv.damage;
+        self.events.push(Event::Hit { attacker_side: aside, defender_side: self.fighters[d].side, damage: dmg, guarded, heavy: hd.animtype >= 2 });
+    }
+
+    // ---------------------------------------------------------------- effects
+    fn sound(&mut self, i: usize, g: i32, n: i32, own: bool, builtin: Option<&'static str>) {
+        let f = &self.fighters[i];
+        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin });
+    }
+    pub fn do_shake(&mut self, t: i32, ampl: f32) { self.shake_time = self.shake_time.max(t); self.shake_ampl = if ampl.abs() > 0.0 { ampl.abs() } else { 4.0 }; }
+
+    fn make_explod(&self, owner: &Fighter, def: Arc<CharDef>, anim: i32, x: f32, y: f32, lscl: f32) -> Explod {
+        Explod { owner: owner.id, id: -1, cur: AnimCursor::new(def, anim), pos: V2 { x, y }, vel: V2::default(), accel: V2::default(), facing: owner.facing, vfacing: 1.0,
+            bind_time: 0, bind_to: None, bind_off: V2::default(), remove_time: -2, time: 0, spr_priority: 5, on_top: true, under: false, scale: [1.0, 1.0],
+            add: false, remove_on_get_hit: false, super_move: 0, pause_move: 0, lscl }
+    }
+    pub fn spawn_spark(&mut self, a: usize, no: i32, own: bool, x: f32, y: f32, guard: bool, heavy: bool) {
+        let f = &self.fighters[a];
+        if own && f.def.anims.contains_key(&no) {
+            let e = self.make_explod(f, f.def.clone(), no, x, y, f.lscl);
+            self.explods.push(e);
+            return;
+        }
+        let Some(fx) = self.fx.clone() else { return };
+        let mut n = if guard { 40 } else if heavy { 2 } else { no };
+        if !fx.anims.contains_key(&n) { n = if guard { 40 } else if heavy { 2 } else { 0 }; }
+        if !fx.anims.contains_key(&n) { return; }
+        let e = self.make_explod(f, fx, n, x, y, 1.0);
+        self.explods.push(e);
+    }
+    pub fn spawn_fx(&mut self, i: usize, no: i32, x: f32, y: f32, under: bool) {
+        let Some(fx) = self.fx.clone() else { return };
+        let n = if fx.anims.contains_key(&no) { no } else { 0 };
+        let mut e = self.make_explod(&self.fighters[i], fx, n, x, y, 1.0);
+        e.under = under; e.on_top = !under;
+        self.explods.push(e);
+    }
+    pub fn spawn_super_fx(&mut self, i: usize, ox: f32, oy: f32, own_anim: i32) {
+        let f = &self.fighters[i];
+        let (def, no, l) = if own_anim >= 0 { (f.def.clone(), own_anim, f.lscl) } else { match self.fx.clone() { Some(fx) => (fx, 30, 1.0), None => return } };
+        if !def.anims.contains_key(&no) { return; }
+        let mut e = self.make_explod(f, def, no, f.pos.x + ox * f.facing, f.pos.y + oy, l);
+        e.super_move = 9999; e.add = true;
+        self.explods.push(e);
+    }
+    pub fn spawn_dust(&mut self, i: usize, x: f32, y: f32) {
+        let Some(fx) = self.fx.clone() else { return };
+        if !fx.anims.contains_key(&120) { return; }
+        let mut e = self.make_explod(&self.fighters[i], fx, 120, x, y, 1.0);
+        e.on_top = false; e.spr_priority = -3;
+        self.explods.push(e);
+    }
+
+    pub fn spawn_explod(&mut self, i: usize, sc: &Controller) {
+        let num = |m: &Match, k: &str, d: f64, idx: usize| m.num(i, sc, k, d, idx) as f32;
+        let anim_raw = sc.raw("anim").unwrap_or("0").trim().to_string();
+        let from_fx = anim_raw.starts_with(['f', 'F']);
+        let anim_no = anim_raw.trim_start_matches(['f', 'F', 's', 'S']).trim().parse::<i32>().unwrap_or_else(|_| num(self, "anim", 0.0, 0) as i32);
+        let f = &self.fighters[i];
+        let def = if from_fx { match self.fx.clone() { Some(x) => x, None => return } } else { f.def.clone() };
+        if !def.anims.contains_key(&anim_no) { return; }
+        let postype = sc.raw("postype").unwrap_or("p1").to_ascii_lowercase();
+        let (px, py) = (num(self, "pos", 0.0, 0) * f.lscl, num(self, "pos", 0.0, 1) * f.lscl);
+        let fac = if num(self, "facing", 1.0, 0) < 0.0 { -1.0 } else { 1.0 };
+        let (mut x, mut y, mut facing) = (f.pos.x, f.pos.y, f.facing * fac);
+        let mut bind_to = None;
+        let half = self.view_w / 2.0;
+        match postype.as_str() {
+            "p2" => { let e = self.enemy(i, 0).unwrap_or(i); let fe = &self.fighters[e]; x = fe.pos.x + px * fe.facing; y = fe.pos.y + py; bind_to = Some(fe.id); facing = fe.facing * fac; }
+            "front" => { x = self.camera.x + half * f.facing + px * f.facing; y = py + self.camera.y; }
+            "back" => { x = self.camera.x - half * f.facing + px * f.facing; y = py + self.camera.y; }
+            "left" => { x = self.camera.x - half + px; y = py + self.camera.y; facing = fac; }
+            "right" => { x = self.camera.x + half + px; y = py + self.camera.y; facing = fac; }
+            _ => { x = f.pos.x + px * f.facing; y = f.pos.y + py; bind_to = Some(f.id); }
+        }
+        let lscl = if from_fx { 1.0 } else { f.lscl };
+        let mut e = self.make_explod(f, def, anim_no, x, y, lscl);
+        e.id = num(self, "id", -1.0, 0) as i32;
+        e.facing = facing;
+        e.vfacing = if num(self, "vfacing", 1.0, 0) < 0.0 { -1.0 } else { 1.0 };
+        e.vel = V2 { x: num(self, "vel", 0.0, 0) * f.lscl, y: num(self, "vel", 0.0, 1) * f.lscl };
+        e.accel = V2 { x: num(self, "accel", 0.0, 0) * f.lscl, y: num(self, "accel", 0.0, 1) * f.lscl };
+        e.bind_time = num(self, "bindtime", 0.0, 0) as i32;
+        if e.bind_time != 0 { e.bind_to = bind_to; e.bind_off = V2 { x: px, y: py }; }
+        e.remove_time = num(self, "removetime", -2.0, 0) as i32;
+        e.spr_priority = num(self, "sprpriority", 0.0, 0) as i32;
+        e.on_top = num(self, "ontop", 0.0, 0) != 0.0;
+        e.under = num(self, "under", 0.0, 0) != 0.0;
+        e.scale = [num(self, "scale", 1.0, 0), num(self, "scale", 1.0, 1)];
+        e.remove_on_get_hit = num(self, "removeongethit", 0.0, 0) != 0.0;
+        e.super_move = num(self, "supermove", num(self, "supermovetime", 0.0, 0) as f64, 0) as i32;
+        e.pause_move = num(self, "pausemovetime", 0.0, 0) as i32;
+        e.add = sc.raw("trans").is_some_and(|t| t.to_ascii_lowercase().starts_with("add"));
+        self.explods.push(e);
+    }
+
+    fn update_explods(&mut self, paused: bool) {
+        let ps = self.pause.as_ref().map(|p| p.is_super);
+        let fighters: Vec<(u32, V2, f32, i32)> = self.fighters.iter().map(|f| (f.id, f.pos, f.facing, f.hit_pause)).collect();
+        self.explods.retain_mut(|e| {
+            if paused {
+                let allowed = if ps == Some(true) { e.super_move > 0 } else { e.pause_move > 0 };
+                if !allowed { return true; }
+                if ps == Some(true) { e.super_move -= 1; } else { e.pause_move -= 1; }
+            }
+            let bound = e.bind_to.and_then(|b| fighters.iter().find(|f| f.0 == b));
+            if let Some(b) = bound { if b.3 > 0 && b.0 == e.owner { return true; } }
+            e.time += 1;
+            e.cur.advance();
+            match bound {
+                Some(b) if e.bind_time > 0 || e.bind_time == -1 => {
+                    e.pos.x = b.1.x + e.bind_off.x * b.2; e.pos.y = b.1.y + e.bind_off.y;
+                    if e.bind_time > 0 { e.bind_time -= 1; }
+                }
+                _ => { e.pos.x += e.vel.x * e.facing; e.pos.y += e.vel.y; e.vel.x += e.accel.x; e.vel.y += e.accel.y; }
+            }
+            match e.remove_time { -2 => !e.cur.done(), -1 => true, t => e.time < t }
+        });
+    }
+
+    pub fn spawn_helper(&mut self, i: usize, sc: &Controller) {
+        if self.fighters.len() > 60 { return; }
+        let num = |m: &Match, k: &str, d: f64, idx: usize| m.num(i, sc, k, d, idx) as f32;
+        let root_i = self.idx(self.fighters[i].root).unwrap_or(i);
+        let root = self.fighters[root_i].clone();
+        let f = &self.fighters[i];
+        let id = self.next_id;
+        let mut h = Fighter::new(id, root.def.clone(), f.side, f.player_no);
+        h.is_helper = true;
+        h.helper_id = num(self, "id", 0.0, 0) as i32;
+        h.parent = Some(f.id); h.root = root.id;
+        h.key_ctrl = num(self, "keyctrl", 0.0, 0) != 0.0;
+        h.helper_player = sc.raw("helpertype").is_some_and(|t| t.trim().eq_ignore_ascii_case("player"));
+        h.pal_no = f.pal_no; h.ai_level = root.ai_level; h.life = root.life_max; h.life_max = root.life_max;
+        let postype = sc.raw("postype").unwrap_or("p1").to_ascii_lowercase();
+        let (px, py) = (num(self, "pos", 0.0, 0) * f.lscl, num(self, "pos", 0.0, 1) * f.lscl);
+        let fac = if num(self, "facing", 1.0, 0) < 0.0 { -1.0 } else { 1.0 };
+        h.facing = f.facing * fac;
+        h.pos = match postype.as_str() {
+            "p2" => { let e = self.enemy(i, 0).unwrap_or(i); let fe = &self.fighters[e]; V2 { x: fe.pos.x + px * fe.facing, y: fe.pos.y + py } }
+            "front" | "back" | "left" | "right" => {
+                let edge = match postype.as_str() { "left" => -1.0, "right" => 1.0, "front" => f.facing, _ => -f.facing };
+                V2 { x: self.camera.x + edge * self.view_w / 2.0 + px, y: py }
+            }
+            _ => V2 { x: f.pos.x + px * f.facing, y: f.pos.y + py },
+        };
+        h.state_no = -1; h.ctrl = false;
+        let owner = if Arc::ptr_eq(&f.st_def, &f.def) { h.def.clone() } else { f.st_def.clone() };
+        let st = num(self, "stateno", 0.0, 0) as i32;
+        self.next_id += 1;
+        self.fighters.push(h);
+        let hi = self.fighters.len() - 1;
+        self.change_state(hi, st, owner);
+    }
+    pub fn destroy_helper(&mut self, i: usize) {
+        if !self.fighters[i].is_helper { return; }
+        let id = self.fighters[i].id;
+        self.fighters[i].destroyed = true;
+        self.fighters.remove(i);
+        for e in self.explods.iter_mut() { if e.bind_to == Some(id) { e.bind_to = None; } }
+    }
+
+    pub fn spawn_projectile(&mut self, i: usize, sc: &Controller) {
+        let num = |m: &Match, k: &str, d: f64, idx: usize| m.num(i, sc, k, d, idx) as f32;
+        let f = &self.fighters[i];
+        let anim = num(self, "projanim", 0.0, 0) as i32;
+        if !f.def.anims.contains_key(&anim) { return; }
+        let hd = crate::hitdef::build(self, i, sc);
+        let f = &self.fighters[i];
+        let (ox, oy) = (num(self, "offset", 0.0, 0) * f.lscl, num(self, "offset", 0.0, 1) * f.lscl);
+        let (mut x, mut y) = (f.pos.x + ox * f.facing, f.pos.y + oy);
+        if sc.raw("postype").is_some_and(|p| p.trim().eq_ignore_ascii_case("p2")) {
+            if let Some(e) = self.enemy(i, 0) { x = self.fighters[e].pos.x + ox * f.facing; y = self.fighters[e].pos.y + oy; }
+        }
+        let has = |k: &str| sc.has(k, 0);
+        let hit_anim = if has("projhitanim") { num(self, "projhitanim", -1.0, 0) as i32 } else { -1 };
+        let p = Projectile {
+            owner: f.id, side: f.side, id: num(self, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
+            hit_anim, rem_anim: if has("projremanim") { num(self, "projremanim", -1.0, 0) as i32 } else { hit_anim },
+            cancel_anim: if has("projcancelanim") { num(self, "projcancelanim", -1.0, 0) as i32 } else { -1 },
+            pos: V2 { x, y }, vel: V2 { x: num(self, "velocity", 0.0, 0) * f.lscl, y: num(self, "velocity", 0.0, 1) * f.lscl },
+            accel: V2 { x: num(self, "accel", 0.0, 0) * f.lscl, y: num(self, "accel", 0.0, 1) * f.lscl },
+            vel_mul: V2 { x: num(self, "velmul", 1.0, 0), y: num(self, "velmul", 1.0, 1) },
+            rem_vel: V2 { x: num(self, "remvelocity", 0.0, 0) * f.lscl, y: num(self, "remvelocity", 0.0, 1) * f.lscl },
+            facing: f.facing, hits: num(self, "projhits", 1.0, 0) as i32, miss_time: num(self, "projmisstime", 0.0, 0) as i32, miss_cd: 0,
+            priority: num(self, "projpriority", 1.0, 0) as i32, spr_priority: num(self, "projsprpriority", 3.0, 0) as i32,
+            edge_bound: num(self, "projedgebound", 40.0, 0) * f.lscl,
+            height_bound: [num(self, "projheightbound", -240.0, 0) * f.lscl, num(self, "projheightbound", 1.0, 1) * f.lscl],
+            remove_time: num(self, "projremovetime", -1.0, 0) as i32, time: 0, guard_dist: hd.guard_dist * f.lscl, hitdef: hd, dying: false,
+            scale: [num(self, "projscale", 1.0, 0), num(self, "projscale", 1.0, 1)], remove: false, lscl: f.lscl,
+        };
+        self.projectiles.push(p);
+    }
+    pub fn proj_boxes(p: &Projectile, kind: u8) -> Vec<Box4> {
+        let Some(fr) = p.cur.frame() else { return vec![] };
+        let list = if kind == 1 { &fr.clsn1 } else { &fr.clsn2 };
+        list.iter().map(|b| {
+            let (mut x1, mut x2) = (b[0] * p.lscl * p.scale[0], b[2] * p.lscl * p.scale[0]);
+            if p.facing < 0.0 { let t = -x2; x2 = -x1; x1 = t; }
+            [p.pos.x + x1, p.pos.y + b[1] * p.lscl * p.scale[1], p.pos.x + x2, p.pos.y + b[3] * p.lscl * p.scale[1]]
+        }).collect()
+    }
+    fn kill_proj(p: &mut Projectile, anim: i32) {
+        if anim >= 0 && p.cur.def.anims.contains_key(&anim) { p.cur = AnimCursor::new(p.cur.def.clone(), anim); p.dying = true; } else { p.remove = true; }
+    }
+    fn update_projectiles(&mut self, paused: bool) {
+        if paused { return; }
+        let (left, right) = (self.camera.x - self.view_w / 2.0, self.camera.x + self.view_w / 2.0);
+        for p in self.projectiles.iter_mut() {
+            p.cur.advance(); p.time += 1;
+            if p.dying {
+                p.pos.x += p.rem_vel.x * p.facing; p.pos.y += p.rem_vel.y;
+                if p.cur.done() || p.cur.a().is_none_or(|a| a.total_time < 0) { p.remove = true; }
+                continue;
+            }
+            p.pos.x += p.vel.x * p.facing; p.pos.y += p.vel.y;
+            p.vel.x = p.vel.x * p.vel_mul.x + p.accel.x; p.vel.y = p.vel.y * p.vel_mul.y + p.accel.y;
+            if p.miss_cd > 0 { p.miss_cd -= 1; }
+            if p.pos.x < left - p.edge_bound || p.pos.x > right + p.edge_bound { p.remove = true; }
+            if p.pos.y < p.height_bound[0] - 240.0 || p.pos.y > p.height_bound[1] + 20.0 { p.remove = true; }
+            if p.remove_time >= 0 && p.time >= p.remove_time { let a = p.rem_anim; Self::kill_proj(p, a); }
+        }
+        let n = self.projectiles.len();
+        for a in 0..n { for b in 0..n {
+            if a == b { continue; }
+            let (pa, pb) = (&self.projectiles[a], &self.projectiles[b]);
+            if pa.dying || pb.dying || pa.remove || pb.remove || pa.side == pb.side { continue; }
+            let ba: Vec<Box4> = Self::proj_boxes(pa, 1).into_iter().chain(Self::proj_boxes(pa, 2)).collect();
+            let bb: Vec<Box4> = Self::proj_boxes(pb, 1).into_iter().chain(Self::proj_boxes(pb, 2)).collect();
+            if Self::overlap(&ba, &bb).is_some() {
+                let (pra, prb) = (pa.priority, pb.priority);
+                if pra <= prb { let p = &mut self.projectiles[a]; let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); }
+                if prb <= pra { let p = &mut self.projectiles[b]; let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); }
+            }
+        } }
+        for pi in 0..self.projectiles.len() {
+            for d in 0..self.fighters.len() {
+                let p = &self.projectiles[pi];
+                if p.dying || p.remove || p.miss_cd > 0 { break; }
+                let Some(oi) = self.idx(p.owner) else { break };
+                if self.fighters[d].root == self.fighters[oi].root { continue; }
+                if !self.can_be_hit(d, &p.hitdef, p.side) { continue; }
+                let c1 = Self::proj_boxes(p, 1);
+                if c1.is_empty() { break; }
+                let Some(at) = Self::overlap(&c1, &self.fighters[d].boxes(2)) else { continue };
+                let (hd, pid, pf) = (p.hitdef.clone(), p.id, p.facing);
+                self.apply_hit(oi, d, &hd, at, Some((pid, pf)));
+                let gt = self.game_time;
+                self.fighters[oi].proj_contacts.push(('c', pid, gt));
+                let p = &mut self.projectiles[pi];
+                p.hits -= 1;
+                if p.hits <= 0 { let a = p.hit_anim; Self::kill_proj(p, a); } else { p.miss_cd = p.miss_time.max(1); }
+            }
+        }
+        self.projectiles.retain(|p| !p.remove);
+    }
+
+    pub fn is_mugen(&self, i: usize) -> bool { self.fighters[i].def.source == Source::Mugen }
+}

@@ -1,0 +1,45 @@
+[workspace]
+members = ["crates/formats", "crates/engine", "."]
+resolver = "2"
+
+[package]
+name = "ultimate-mugen"
+version = "0.2.0"
+edition = "2021"
+description = "Ultimate MUGEN — motor de luta 2D moderno em Rust, compatível com personagens M.U.G.E.N"
+license = "MIT"
+
+[[bin]]
+name = "ultimate-mugen"
+path = "src/main.rs"
+
+[dependencies]
+ume-formats = { path = "crates/formats" }
+ume-engine = { path = "crates/engine" }
+macroquad = { version = "0.4", default-features = false, features = ["audio"] }
+tiny-skia = "0.11"
+serde_json = "1"
+
+[target.'cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))'.dependencies]
+gilrs = "0.11"
+hidapi = { version = "2", default-features = false, features = ["linux-static-hidraw"] }
+
+[profile.dev]
+opt-level = 1
+[profile.dev.package."*"]
+opt-level = 3
+[profile.release]
+opt-level = 3
+lto = "thin"
+
+# Android: `cargo quad-apk build --release` (docker image notfl3/cargo-apk)
+[package.metadata.android]
+package_name = "dev.ultimatemugen.app"
+label = "Ultimate MUGEN"
+fullscreen = true
+min_sdk_version = 26
+target_sdk_version = 33
+build_targets = ["armv7-linux-androideabi", "aarch64-linux-android"]
+
+[package.metadata.android.activity_attributes]
+"android:screenOrientation" = "userLandscape"

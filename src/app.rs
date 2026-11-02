@@ -94,6 +94,7 @@ impl App {
             Screen::Mugen => self.mugen_screen(),
         }
         self.audio.process().await;
+        crate::set_import_button(!matches!(self.screen, Screen::Fight | Screen::Vs { .. } | Screen::Results { .. }));
         for (i, zip) in crate::take_imports().into_iter().enumerate() {
             let mut vfs = ume_formats::vfs::Vfs::new();
             match ume_formats::vfs::add_zip(&mut vfs, &zip, "") {
@@ -360,7 +361,7 @@ impl App {
         let pilots = match self.mode {
             Mode::Watch => [Pilot::Cpu(Ai::new(lvl, 11)), Pilot::Cpu(Ai::new(lvl, 77))],
             Mode::Versus => [Pilot::Human(0), Pilot::Human(1)],
-            Mode::Training => [Pilot::Human(0), Pilot::Cpu(Ai::new(0, 3))],
+            Mode::Training => [Pilot::Human(0), Pilot::Dummy],
             _ => [Pilot::Human(0), Pilot::Cpu(Ai::new(lvl, 99))],
         };
         let mut sess = Session::new(d1, d2, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus);

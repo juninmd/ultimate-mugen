@@ -13,7 +13,7 @@ use ume_engine::fx::build_fx;
 use ume_engine::input::{k, InputSource};
 use ume_engine::matchs::{Event, Match};
 
-pub enum Pilot { Human(usize), Cpu(Ai) }
+pub enum Pilot { Human(usize), Cpu(Ai), Dummy }
 
 pub struct Session {
     pub m: Match,
@@ -62,6 +62,7 @@ impl Session {
             let Some(&fi) = roots.get(slot) else { continue };
             bits[slot] = match p {
                 Pilot::Cpu(ai) => ai.poll(&self.m, fi),
+                Pilot::Dummy => 0,
                 Pilot::Human(s) => {
                     let mut b = c.player_bits(*s, self.duo);
                     // simple-mode buttons for MUGEN characters become motion macros

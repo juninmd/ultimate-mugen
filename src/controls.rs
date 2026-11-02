@@ -3,12 +3,12 @@ use crate::gamepad::{PadInfo, Pads};
 use macroquad::prelude::*;
 use ume_engine::input::k;
 
-pub struct TouchPad { pub enabled: bool, pub bits: u32, pub macro_q: std::collections::VecDeque<u32>, stick_center: Option<Vec2>, pub stick_pos: Vec2, pub pressed: [bool; 8] }
+pub struct TouchPad { pub enabled: bool, pub bits: u32, pub macro_q: std::collections::VecDeque<u32>, stick_center: Option<Vec2>, pub stick_pos: Vec2, pub pressed: [bool; 8], hold: [u8; 8] }
 
 pub const TOUCH_BUTTONS: [(&str, u32); 8] = [("LP", k::X), ("HP", k::Y), ("SP1", k::D2), ("LK", k::A), ("HK", k::B), ("SP2", k::W), ("SP3", k::E), ("SUPER", k::D2 | k::W)];
 
 impl TouchPad {
-    pub fn new(enabled: bool) -> Self { TouchPad { enabled, bits: 0, macro_q: Default::default(), stick_center: None, stick_pos: Vec2::ZERO, pressed: [false; 8] } }
+    pub fn new(enabled: bool) -> Self { TouchPad { enabled, bits: 0, macro_q: Default::default(), stick_center: None, stick_pos: Vec2::ZERO, pressed: [false; 8], hold: [0; 8] } }
     /// Button centers in screen space (right side), radius.
     pub fn layout() -> (Vec<Vec2>, f32, Vec2, f32) {
         let (w, h) = (screen_width(), screen_height());
@@ -22,15 +22,25 @@ impl TouchPad {
     pub fn update(&mut self) {
         if !self.enabled { self.bits = 0; return; }
         let (btns, r, stick, sr) = Self::layout();
-        let mut points: Vec<Vec2> = touches().iter().filter(|t| t.phase != TouchPhase::Ended && t.phase != TouchPhase::Cancelled).map(|t| t.position).collect();
-        if points.is_empty() && is_mouse_button_down(MouseButton::Left) { points.push(mouse_position().into()); }
+        // macroquad reports touches in physical pixels while layout/screen_width() are logical (dpi-scaled)
+        let dpi = macroquad::miniquad::window::dpi_scale().max(0.01);
+        let all: Vec<(Vec2, bool)> = touches().iter().map(|t| (t.position / dpi, matches!(t.phase, TouchPhase::Ended | TouchPhase::Cancelled))).collect();
+        let mut points: Vec<(Vec2, bool)> = all;
+        if points.is_empty() && is_mouse_button_down(MouseButton::Left) { points.push((mouse_position().into(), false)); }
         let mut bits = 0;
         self.pressed = [false; 8];
         let mut stick_touch = None;
-        for p in &points {
-            if p.x < screen_width() * 0.45 && p.y > screen_height() * 0.3 { stick_touch = Some(*p); continue; }
-            for (i, c) in btns.iter().enumerate() { if c.distance(*p) < r * 1.15 { bits |= TOUCH_BUTTONS[i].1; self.pressed[i] = true; } }
+        for h in self.hold.iter_mut() { *h = h.saturating_sub(1); }
+        for (p, ended) in &points {
+            if p.x < screen_width() * 0.45 && p.y > screen_height() * 0.3 { if !ended { stick_touch = Some(*p); } continue; }
+            for (i, c) in btns.iter().enumerate() {
+                if c.distance(*p) < r * 1.15 {
+                    // latch: a tap that starts and ends within one frame still registers for a few frames
+                    if *ended { self.hold[i] = self.hold[i].max(3); } else { self.hold[i] = self.hold[i].max(1); }
+                }
+            }
         }
+        for i in 0..8 { if self.hold[i] > 0 { bits |= TOUCH_BUTTONS[i].1; self.pressed[i] = true; } }
         if let Some(p) = stick_touch {
             let c = *self.stick_center.get_or_insert(stick);
             let d = p - c;

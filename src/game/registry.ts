@@ -79,7 +79,24 @@ export class Registry {
     for (const s of STAGES) this.stages.push({ id: `native:${s.id}`, name: s.name, thumb: s.thumb, kind: 'native', build: s.build });
   }
 
+  /** Register (or replace) a user-made UMF character. */
+  addNative(nc: NativeChar): CharEntry {
+    const e = nativeEntry(nc);
+    const i = this.chars.findIndex((c) => c.id === e.id);
+    if (i >= 0) this.chars[i] = e; else this.chars.push(e);
+    try {
+      const all = JSON.parse(localStorage.getItem('ume-custom') ?? '{}');
+      all[nc.id] = nc;
+      localStorage.setItem('ume-custom', JSON.stringify(all));
+    } catch { /* storage unavailable */ }
+    return e;
+  }
+
   async loadStored() {
+    try {
+      const all = JSON.parse(localStorage.getItem('ume-custom') ?? '{}');
+      for (const nc of Object.values(all) as NativeChar[]) { const e = nativeEntry(nc); if (!this.chars.some((c) => c.id === e.id)) this.chars.push(e); }
+    } catch { /* ignore */ }
     const packs = await loadPacks();
     for (const p of packs) this.registerVfs(p, false);
   }

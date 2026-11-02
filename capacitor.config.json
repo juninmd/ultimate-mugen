@@ -1,0 +1,7 @@
+{
+  "appId": "dev.ultimatemugen.app",
+  "appName": "Ultimate MUGEN",
+  "webDir": "dist",
+  "android": { "backgroundColor": "#0b0716" },
+  "ios": { "backgroundColor": "#0b0716" }
+}

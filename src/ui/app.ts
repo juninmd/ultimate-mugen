@@ -467,9 +467,45 @@ export class App {
           <li>Personagens MUGEN continuam funcionando lado a lado — mesma VM, mesma colisão.</li>
         </ul>
         <p>Veja <code>docs/CHARACTER_FORMAT.md</code> e os 10 lutadores em <code>src/chars/</code> como exemplos.</p>
+        <h3>Playground</h3>
+        <p>Escolha um lutador como base, edite o JSON (nome, cores, dano, comandos, velocidades…) e teste na hora no modo Treino.</p>
+        <div class="pg-row"><select class="pg-base">${this.reg.chars.filter((c) => c.kind === 'native').map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select>
+          <button class="btn pg-test">▶ Testar no Treino</button><button class="btn pg-dl">⬇ Baixar JSON</button><label class="btn">⬆ Abrir JSON<input type="file" accept=".json" hidden class="pg-open"></label></div>
+        <textarea class="pg-json" spellcheck="false"></textarea>
+        <div class="pg-err"></div>
       </div></div>`);
     this.setScreen(el);
     (el.querySelector('.back') as HTMLElement).addEventListener('click', () => this.showMenu());
+    const ta = el.querySelector('.pg-json') as HTMLTextAreaElement;
+    const sel = el.querySelector('.pg-base') as HTMLSelectElement;
+    const err = el.querySelector('.pg-err') as HTMLElement;
+    const loadBase = async () => {
+      const { ROSTER } = await import('../chars');
+      const id = sel.value.replace(/^umf:/, '');
+      const nc = ROSTER.find((r) => r.id === id) ?? JSON.parse(localStorage.getItem('ume-custom') ?? '{}')[id];
+      if (nc) ta.value = JSON.stringify({ ...nc, id: nc.id.endsWith('-custom') ? nc.id : nc.id + '-custom', name: nc.name.endsWith('+') ? nc.name : nc.name + '+' }, null, 1);
+    };
+    sel.addEventListener('change', loadBase);
+    loadBase();
+    (el.querySelector('.pg-test') as HTMLElement).addEventListener('click', async () => {
+      try {
+        const nc = JSON.parse(ta.value);
+        if (nc.format !== 'umf/1' || !nc.id || !nc.anims || !nc.moves) throw new Error('JSON precisa de format "umf/1", id, anims e moves');
+        const e = this.reg.addNative(nc);
+        e.load(1);
+        this.mode = 'training';
+        this.sel.p1 = e; this.sel.p2 = this.reg.chars.find((c) => c.id !== e.id && c.kind === 'native') ?? e;
+        this.sel.stage = this.reg.stages[3] ?? this.reg.stages[0];
+        this.startFight();
+      } catch (x) { err.textContent = 'Erro: ' + (x as Error).message; }
+    });
+    (el.querySelector('.pg-dl') as HTMLElement).addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([ta.value], { type: 'application/json' }));
+      a.download = (JSON.parse(ta.value).id ?? 'personagem') + '.umf.json'; a.click();
+    });
+    (el.querySelector('.pg-open') as HTMLInputElement).addEventListener('change', async (ev) => { const f = (ev.target as HTMLInputElement).files?.[0]; if (f) ta.value = await f.text(); });
+    ta.addEventListener('keydown', (ev) => ev.stopPropagation());
     this.navHandler = (e) => { if (e.code === 'Escape') this.showMenu(); };
   }
 

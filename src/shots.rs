@@ -31,6 +31,9 @@ async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &st
     match want {
         "super" => {
             for f in s.m.fighters.iter_mut() { f.power = 3000.0; }
+            for _ in 0..600 { if s.m.fighters[0].ctrl && s.m.fighters[0].state_no == 0 { break; } s.step(c, audio); }
+            let d = s.m.fighters[0].def.clone();
+            if d.states.contains_key(&3000) { s.m.change_state(0, 3000, d); }
             let mut ok = false;
             for _ in 0..1500 { s.step(c, audio); if s.m.pause.as_ref().is_some_and(|p| p.is_super && p.time < 24) { ok = true; break; } }
             if ok { for _ in 0..16 { s.step(c, audio); } }
@@ -52,7 +55,7 @@ pub async fn run(app: &mut App, dir: &str) {
     cap(app, Screen::Menu { cur: 1 });
     screen(app, dir, "02-menu", 10).await;
     app.mode = Mode::Cpu;
-    cap(app, Screen::Select { cur: [find(app, "akio"), find(app, "shion")], picking: 1, picked: [Some(find(app, "akio")), None] });
+    cap(app, Screen::Select { cur: [find(app, "kaname"), find(app, "valdric")], picking: 1, picked: [Some(find(app, "kaname")), None] });
     screen(app, dir, "03-select", 40).await;
     cap(app, Screen::Stages { cur: 2 });
     screen(app, dir, "04-stages", 5).await;
@@ -66,6 +69,9 @@ pub async fn run(app: &mut App, dir: &str) {
     fight(app, dir, "09-fight-bamboo", "lian", "sylene", "bamboo", 400, "proj").await;
     fight(app, dir, "10-fight-volcano", "garan", "marlow", "volcano", 500, "hit").await;
     fight(app, dir, "11-hitboxes", "shion", "kaito", "plains", 200, "boxes").await;
+    fight(app, dir, "11b-fight-kaname-valdric", "kaname", "valdric", "spirit", 300, "hit").await;
+    fight(app, dir, "11c-fight-daichi-jin", "daichi", "jin", "plains", 300, "proj").await;
+    fight(app, dir, "11d-super-haruki", "haruki", "daichi", "neon", 100, "super").await;
     if app.reg.chars.iter().any(|c| c.mugen) {
         let kfm = app.reg.chars.iter().find(|c| c.mugen).map(|c| c.id.clone()).unwrap();
         let ms = app.reg.stages.iter().find(|s| s.mugen && s.id.ends_with("kfm.def")).or(app.reg.stages.iter().find(|s| s.mugen)).map(|s| s.id.clone());

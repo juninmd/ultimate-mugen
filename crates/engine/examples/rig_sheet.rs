@@ -7,13 +7,11 @@
 use serde_json::Value;
 use std::collections::HashSet;
 use std::time::Instant;
-use tiny_skia::{BlendMode, Color, FillRule, FilterQuality, GradientStop, LinearGradient, Paint, PathBuilder, Pixmap, PixmapPaint, Point, Rect, SpreadMode, Stroke, Transform};
+use tiny_skia::{BlendMode, Color, FilterQuality, GradientStop, LinearGradient, Paint, PathBuilder, Pixmap, PixmapPaint, Point, Rect, SpreadMode, Stroke, Transform};
 use ume_engine::chardef::ImageData;
 use ume_engine::native::rig::{render_effect, render_pose, RigRender};
 use ume_engine::native::ActiveSpec;
 
-const SC: f32 = 1.6;
-const SHEET_W: f32 = 1800.0;
 
 fn to_pixmap(img: &ImageData) -> Option<Pixmap> {
     let mut pm = Pixmap::new(img.w, img.h)?;
@@ -37,6 +35,11 @@ fn stroke_rect(pm: &mut Pixmap, x: f32, y: f32, w: f32, h: f32, c: Color, width:
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    // optional overrides (same meaning as the TS harness query params): RIG_SCALE, RIG_W, RIG_ANIMS=a,b,c, RIG_BOXES=0
+    let env_f = |k: &str, d: f32| std::env::var(k).ok().and_then(|v| v.parse().ok()).unwrap_or(d);
+    let (sc, sheet_w) = (env_f("RIG_SCALE", 1.6), env_f("RIG_W", 1800.0));
+    let show_boxes = std::env::var("RIG_BOXES").map(|v| v != "0").unwrap_or(true);
+    let key_anims: Option<Vec<String>> = std::env::var("RIG_ANIMS").ok().map(|v| v.split(',').map(str::to_string).collect());
     let id = args.get(1).map(String::as_str).unwrap_or("kaito");
     let out = args.get(2).cloned().unwrap_or_else(|| format!("sheet-{id}.png"));
     let path = format!("{}/../../assets/chars/{id}.json", env!("CARGO_MANIFEST_DIR"));
@@ -48,10 +51,13 @@ fn main() {
     let moves = ch["moves"].as_array().cloned().unwrap_or_default();
     let projs = |m: &Value| -> Vec<Value> { match &m["projectile"] { Value::Array(a) => a.clone(), Value::Null => vec![], v => vec![v.clone()] } };
 
-    let mut list: Vec<String> = ["idle", "walk", "crouch", "jumpUp", "jumpFwd", "jumpDown", "run", "hop", "guard", "crouchGuard", "airGuard"].iter().map(|s| s.to_string()).collect();
-    list.extend(moves.iter().filter_map(|m| m["anim"].as_str().map(str::to_string)));
-    list.extend(moves.iter().flat_map(|m| projs(m)).filter_map(|p| p["anim"].as_str().map(str::to_string)));
-    list.extend(["hitLight", "hitHeavy", "hitLowHeavy", "hitCrouch", "hitAir", "fall", "bounce", "lieDown", "getUp", "trip", "win", "lose", "intro"].iter().map(|s| s.to_string()));
+    let mut list: Vec<String> = if let Some(k) = &key_anims { k.clone() } else { vec![] };
+    let mut defaults: Vec<String> = ["idle", "walk", "crouch", "jumpUp", "jumpFwd", "jumpDown", "run", "hop", "guard", "crouchGuard", "airGuard"].iter().map(|s| s.to_string()).collect();
+    let list_ = &mut defaults;
+    list_.extend(moves.iter().filter_map(|m| m["anim"].as_str().map(str::to_string)));
+    list_.extend(moves.iter().flat_map(|m| projs(m)).filter_map(|p| p["anim"].as_str().map(str::to_string)));
+    list_.extend(["hitLight", "hitHeavy", "hitLowHeavy", "hitCrouch", "hitAir", "fall", "bounce", "lieDown", "getUp", "trip", "win", "lose", "intro"].iter().map(|s| s.to_string()));
+    if key_anims.is_none() { list = defaults; }
 
     let t0 = Instant::now();
     let mut seen = HashSet::new();
@@ -63,7 +69,7 @@ fn main() {
         };
         for f in a["frames"].as_array().into_iter().flatten() {
             let key = serde_json::to_string(&(&f["pose"], &f["effect"], &f["hit"])).unwrap();
-            if !seen.insert(key) { continue; }
+            if !seen.insert(key) && key_anims.is_none() { continue; }
             let r = if !f["effect"].is_null() {
                 (true, render_effect(&f["effect"], true, palette.as_ref()))
             } else {
@@ -80,23 +86,23 @@ fn main() {
     let (mut x, mut y, mut row_h) = (10.0f32, 30.0f32, 0.0f32);
     let mut pos = vec![];
     for (_, r) in &cells {
-        let w = (r.width * r.scale * SC).max(70.0) + 12.0;
-        let h = (r.height * r.scale * SC).max(150.0 * SC / 1.6) + 26.0;
-        if x + w > SHEET_W { x = 10.0; y += row_h; row_h = 0.0; }
+        let w = (r.width * r.scale * sc).max(70.0) + 12.0;
+        let h = (r.height * r.scale * sc).max(150.0 * sc / 1.6) + 26.0;
+        if x + w > sheet_w { x = 10.0; y += row_h; row_h = 0.0; }
         pos.push((x, y));
         x += w;
         row_h = row_h.max(h);
     }
     let sheet_h = (y + row_h + 10.0).ceil() as u32;
-    let mut pm = Pixmap::new(SHEET_W as u32, sheet_h).unwrap();
+    let mut pm = Pixmap::new(sheet_w as u32, sheet_h).unwrap();
     let mut bg = Paint::default();
     bg.shader = LinearGradient::new(Point::from_xy(0.0, 0.0), Point::from_xy(0.0, sheet_h as f32), vec![GradientStop::new(0.0, Color::from_rgba8(0x3a, 0x4a, 0x66, 255)), GradientStop::new(1.0, Color::from_rgba8(0x1e, 0x24, 0x36, 255))], SpreadMode::Pad, Transform::identity()).unwrap();
-    pm.fill_rect(Rect::from_xywh(0.0, 0.0, SHEET_W, sheet_h as f32).unwrap(), &bg, Transform::identity(), None);
+    pm.fill_rect(Rect::from_xywh(0.0, 0.0, sheet_w, sheet_h as f32).unwrap(), &bg, Transform::identity(), None);
 
     for ((is_fx, r), &(px, py)) in cells.iter().zip(&pos) {
-        let k = r.scale * SC;
+        let k = r.scale * sc;
         let w = (r.width * k).max(70.0);
-        let h = (r.height * k).max(150.0 * SC / 1.6);
+        let h = (r.height * k).max(150.0 * sc / 1.6);
         let ox = px + r.axis_x * k;
         let gy = if *is_fx { py + r.axis_y * k } else { py + h - (r.height - r.axis_y) * k };
         // ground line
@@ -111,12 +117,12 @@ fn main() {
             let paint = PixmapPaint { opacity: 1.0, blend_mode: if *is_fx { BlendMode::Plus } else { BlendMode::SourceOver }, quality: FilterQuality::Bilinear };
             pm.draw_pixmap(0, 0, src.as_ref(), &paint, Transform::from_row(k, 0.0, 0.0, k, dx, dy), None);
         }
-        for b in &r.hurt { stroke_rect(&mut pm, ox + b[0] * SC, gy + b[1] * SC, (b[2] - b[0]) * SC, (b[3] - b[1]) * SC, Color::from_rgba(80.0 / 255.0, 160.0 / 255.0, 1.0, 0.9).unwrap(), 1.0); }
-        for b in &r.hit { stroke_rect(&mut pm, ox + b[0] * SC, gy + b[1] * SC, (b[2] - b[0]) * SC, (b[3] - b[1]) * SC, Color::from_rgba8(255, 60, 60, 255), 1.0); }
+        if !show_boxes { continue; }
+        for b in &r.hurt { stroke_rect(&mut pm, ox + b[0] * sc, gy + b[1] * sc, (b[2] - b[0]) * sc, (b[3] - b[1]) * sc, Color::from_rgba(80.0 / 255.0, 160.0 / 255.0, 1.0, 0.9).unwrap(), 1.0); }
+        for b in &r.hit { stroke_rect(&mut pm, ox + b[0] * sc, gy + b[1] * sc, (b[2] - b[0]) * sc, (b[3] - b[1]) * sc, Color::from_rgba8(255, 60, 60, 255), 1.0); }
         let mut yp = Paint::default();
         yp.set_color(Color::from_rgba8(255, 255, 0, 255));
         pm.fill_rect(Rect::from_xywh(ox - 2.0, gy - 2.0, 4.0, 4.0).unwrap(), &yp, Transform::identity(), None);
-        let _ = FillRule::Winding;
     }
     pm.save_png(&out).expect("write png");
     println!("{id}: {} cells rendered in {:?} -> {out}", cells.len(), render_time);

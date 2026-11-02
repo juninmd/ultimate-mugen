@@ -7,10 +7,14 @@
 //! All geometry (hit/hurt boxes, size, axis) is computed without rasterizing so that headless code
 //! (tests, servers) gets identical collision data.
 //!
-//! Canvas2D features missing from tiny-skia are emulated by a tiny canvas-like context (`Ctx`):
-//! path building in device space (arcs/ellipses as cubics), save/restore, AA clip masks,
-//! global alpha, 'lighter' (Plus) / 'source-atop' compositing and `shadowBlur` glows
-//! (coverage rendered to a temporary pixmap, 3-pass box blur, tinted and composited).
+//! Canvas2D is emulated by a small canvas-like context (`Ctx`): paths are built in device space
+//! with tiny-skia's `PathBuilder` (arcs/ellipses as cubics) and stroked with tiny-skia's stroker;
+//! solid fills/strokes, clip masks and glow coverage go through a fast exact-area accumulation
+//! rasterizer (`Acc`) with our own compositing (source-over, 'lighter' = additive,
+//! 'source-atop'); gradients use tiny-skia shaders. `shadowBlur` glows are emulated by rendering
+//! the coverage (downsampled for wide blurs), a 3-pass box blur (sigma = blur / 2), then tinting
+//! and compositing. Cel shading resolves the three canvas clip/fill passes per pixel from one
+//! coverage mask and its shifted copies.
 use super::types::{ActiveSpec, Box4};
 use crate::chardef::ImageData;
 use serde_json::Value;
@@ -246,9 +250,11 @@ impl Ctx {
     /// non-zero fill of a device-space path with a solid colour (fast rasterizer + own compositing)
     fn fill_solid(&mut self, geom: &Path, c: Color) {
         let Some((x0, y0, w, h)) = region(geom.bounds(), 1.0, self.pm.width(), self.pm.height()) else { return };
-        let cov = coverage(&[geom], x0, y0, w, h, 1.0, false);
+        let mut acc = Acc::new(w, h);
+        acc.path(geom, x0 as f32, y0 as f32, 1.0);
+        acc.prefix();
         let clip = self.st.clip.clone();
-        composite(&mut self.pm, &cov, x0, y0, w, h, [c.red() * 255.0, c.green() * 255.0, c.blue() * 255.0], c.alpha() * self.st.alpha, self.st.blend, clip.as_deref());
+        composite(&mut self.pm, &acc.a, acc.stride, x0, y0, w, h, [c.red() * 255.0, c.green() * 255.0, c.blue() * 255.0], c.alpha() * self.st.alpha, self.st.blend, clip.as_deref());
     }
     /// canvas `shadowBlur` for filled geometry: coverage (union of `geoms`, at reduced resolution
     /// for wide blurs), gaussian-ish 3-pass box blur (sigma = blur / 2), tinted and composited
@@ -316,31 +322,35 @@ impl Ctx {
     }
 }
 
+/// fast round-to-nearest of a value in [0, 255] (float magic-number trick, no saturating cast)
+#[inline(always)]
+fn q8(x: f32) -> u8 { ((x.min(255.0) + 12582912.0).to_bits() & 0xff) as u8 }
+
 /// composite one premultiplied source pixel (0..255 floats) onto a premultiplied RGBA8 pixel
 #[inline]
 fn blend_px(d: &mut [u8], s: [f32; 4], mode: BlendMode) {
     match mode {
-        BlendMode::Plus => { for i in 0..4 { d[i] = (d[i] as f32 + s[i] + 0.5).min(255.0) as u8; } }
+        BlendMode::Plus => { for i in 0..4 { d[i] = q8(d[i] as f32 + s[i]); } }
         BlendMode::SourceAtop => {
             let (da, ia) = (d[3] as f32 * (1.0 / 255.0), 1.0 - s[3] * (1.0 / 255.0));
-            for i in 0..3 { d[i] = (s[i] * da + d[i] as f32 * ia + 0.5).min(255.0) as u8; }
+            for i in 0..3 { d[i] = q8(s[i] * da + d[i] as f32 * ia); }
         }
         _ => {
             let ia = 1.0 - s[3] * (1.0 / 255.0);
-            for i in 0..4 { d[i] = (s[i] + d[i] as f32 * ia + 0.5).min(255.0) as u8; }
+            for i in 0..4 { d[i] = q8(s[i] + d[i] as f32 * ia); }
         }
     }
 }
 
 /// composite a coverage buffer (region x0,y0,w,h of the pixmap) with a solid colour
 #[allow(clippy::too_many_arguments)]
-fn composite(pm: &mut Pixmap, cov: &[f32], x0: usize, y0: usize, w: usize, h: usize, rgb: [f32; 3], alpha: f32, mode: BlendMode, clip: Option<&Mask>) {
+fn composite(pm: &mut Pixmap, cov: &[f32], cstride: usize, x0: usize, y0: usize, w: usize, h: usize, rgb: [f32; 3], alpha: f32, mode: BlendMode, clip: Option<&Mask>) {
     if alpha <= 0.0 { return; }
     let stride = pm.width() as usize;
     let data = pm.data_mut();
     let [r, g, b] = rgb;
     for y in 0..h {
-        let crow = &cov[y * w..(y + 1) * w];
+        let crow = &cov[y * cstride..y * cstride + w];
         let drow = (y0 + y) * stride + x0;
         let dst = &mut data[drow * 4..(drow + w) * 4];
         let mrow = clip.map(|m| &m.data()[drow..drow + w]);
@@ -350,10 +360,10 @@ fn composite(pm: &mut Pixmap, cov: &[f32], x0: usize, y0: usize, w: usize, h: us
                     if c <= 0.0 { continue; }
                     let a = c * alpha;
                     let ia = 1.0 - a;
-                    d[0] = (r * a + d[0] as f32 * ia + 0.5) as u8;
-                    d[1] = (g * a + d[1] as f32 * ia + 0.5) as u8;
-                    d[2] = (b * a + d[2] as f32 * ia + 0.5) as u8;
-                    d[3] = (255.0 * a + d[3] as f32 * ia + 0.5) as u8;
+                    d[0] = q8(r * a + d[0] as f32 * ia);
+                    d[1] = q8(g * a + d[1] as f32 * ia);
+                    d[2] = q8(b * a + d[2] as f32 * ia);
+                    d[3] = q8(255.0 * a + d[3] as f32 * ia);
                 }
             }
             _ => {
@@ -383,8 +393,21 @@ fn region(b: Rect, m: f32, pw: u32, ph: u32) -> Option<(usize, usize, usize, usi
 /// Signed-area accumulation rasterizer (font-rs style): exact-area anti-aliasing, non-zero rule.
 /// Rows are padded by 2 cells so geometry clamped to the right edge never leaks into the next row.
 struct Acc { w: usize, h: usize, stride: usize, a: Vec<f32> }
+thread_local! { static POOL: std::cell::RefCell<Vec<Vec<f32>>> = const { std::cell::RefCell::new(Vec::new()) }; }
+impl Drop for Acc {
+    fn drop(&mut self) {
+        let a = std::mem::take(&mut self.a);
+        if a.capacity() > 0 { POOL.with(|p| { let mut p = p.borrow_mut(); if p.len() < 8 { p.push(a); } }); }
+    }
+}
 impl Acc {
-    fn new(w: usize, h: usize) -> Acc { Acc { w, h, stride: w + 2, a: vec![0.0; (w + 2) * h] } }
+    fn new(w: usize, h: usize) -> Acc {
+        let n = (w + 2) * h;
+        let mut a = POOL.with(|p| p.borrow_mut().pop()).unwrap_or_default();
+        a.clear();
+        a.resize(n, 0.0);
+        Acc { w, h, stride: w + 2, a }
+    }
     fn line(&mut self, x0: f32, y0: f32, x1: f32, y1: f32) {
         if y0 == y1 || !(x0.is_finite() && y0.is_finite() && x1.is_finite() && y1.is_finite()) { return; }
         let (dir, ax, ay, bx, by) = if y0 < y1 { (1.0, x0, y0, x1, y1) } else { (-1.0, x1, y1, x0, y0) };
@@ -411,10 +434,12 @@ impl Acc {
         let ls = y * self.stride;
         let a = &mut self.a;
         let (x0, x1) = if xa < xb { (xa, xb) } else { (xb, xa) };
-        let x0f = x0.floor();
-        let x0i = x0f as usize;
-        let x1c = x1.ceil();
-        let x1i = x1c as usize;
+        // x0, x1 >= 0 (clamped): truncation is floor; avoids libm calls on targets without SSE4.1
+        let x0i = x0 as usize;
+        let x0f = x0i as f32;
+        let x1t = x1 as usize;
+        let x1i = if (x1t as f32) < x1 { x1t + 1 } else { x1t };
+        let x1c = x1i as f32;
         if x1i <= x0i + 1 {
             let xmf = 0.5 * (xa + xb) - x0f;
             a[ls + x0i] += d - d * xmf;
@@ -480,6 +505,14 @@ impl Acc {
         }
         if open { self.line(last.0, last.1, start.0, start.1); }
     }
+    /// prefix-sum the accumulation rows into coverage in place (row stride kept)
+    fn prefix(&mut self) {
+        let (w, st) = (self.w, self.stride);
+        for y in 0..self.h {
+            let mut acc = 0.0f32;
+            for v in self.a[y * st..y * st + w].iter_mut() { acc += *v; *v = acc.abs().min(1.0); }
+        }
+    }
     /// prefix-sum the accumulation rows into coverage, compacting to a dense w*h buffer in place
     fn into_coverage(mut self) -> Vec<f32> {
         let (w, st) = (self.w, self.stride);
@@ -490,8 +523,9 @@ impl Acc {
                 self.a[y * w + x] = acc.abs().min(1.0);
             }
         }
-        self.a.truncate(w * self.h);
-        self.a
+        let mut a = std::mem::take(&mut self.a);
+        a.truncate(w * self.h);
+        a
     }
 }
 
@@ -1617,18 +1651,18 @@ fn draw_layer(ctx: &mut Ctx, ly: &Layer, rig: &Rig) {
         ctx.save();
         ctx.st.lw = 1.15 * 2.0;
         let sk = ctx.stroke_style();
-        let geoms: Vec<Path> = ly.shapes.iter().filter(|s| !s.no_outline).filter_map(|s| { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); if std::env::var("NOE").is_ok() { return None; } ctx.path()?.stroke(&sk, 1.0) }).collect();
+        let geoms: Vec<Path> = ly.shapes.iter().filter(|s| !s.no_outline).filter_map(|s| { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); ctx.path()?.stroke(&sk, 1.0) }).collect();
         if let Some(aura) = ly.aura {
             // canvas: shadowColor = aura, shadowBlur = 14 * RES on every outline stroke (batched here)
             let refs: Vec<&Path> = geoms.iter().collect();
             ctx.shadow_paths(&refs, 1.0, rgba(aura, 1.0), (14.0 * RES) as f32, AURA_GAIN);
         }
-        if std::env::var("NOA").is_err() { for g in &geoms { ctx.fill_solid(g, outline); } }
+        for g in &geoms { ctx.fill_solid(g, outline); }
         ctx.restore();
-        if std::env::var("NOB").is_err() { for s in &ly.shapes { fill_shape(ctx, s); } }
-        if std::env::var("NOD").is_err() { for s in ly.shapes.iter().filter(|s| s.line) { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); ctx.stroke_w(&Fill::Solid(outline), 0.45); } }
+        for s in &ly.shapes { fill_shape(ctx, s); }
+        for s in ly.shapes.iter().filter(|s| s.line) { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); ctx.stroke_w(&Fill::Solid(outline), 0.45); }
     }
-    if std::env::var("NOC").is_err() { if let Some(a) = &ly.after { ctx.save(); rig.draw_after(ctx, a); ctx.restore(); } }
+    if let Some(a) = &ly.after { ctx.save(); rig.draw_after(ctx, a); ctx.restore(); }
 }
 
 /// two-tone cel shading with a rim light. Canvas version: clip(shape); fill shade; fill the
@@ -1641,41 +1675,30 @@ fn fill_shape(ctx: &mut Ctx, s: &Shape) {
     if s.flat { ctx.fill(&sol(s.fill, 1.0)); return; }
     let Some(path) = ctx.path() else { return };
     let Some((x0, y0, w, h)) = region(path.bounds(), 1.0, ctx.pm.width(), ctx.pm.height()) else { return };
-    let ca = coverage(&[&path], x0, y0, w, h, 1.0, false);
-    // offset copies of the shape = the coverage shifted by the (device-space) offset, resampled bilinearly
+    // offset copies of the shape = its coverage shifted by the (device-space) offset, resampled bilinearly
     let d = s.shade.unwrap_or(2.0);
     let rim = s.rim.unwrap_or(if lum(s.fill) < 0.2 { 0.55 } else { 0.0 });
     let light = light();
-    // zero-padded copy of the coverage so shifted lookups need no bounds checks
     let m = ctx.st.m;
     let dev = |ox: f64, oy: f64| ((m.a * ox + m.c * oy) as f32, (m.b * ox + m.d * oy) as f32);
     let (sd, sr) = (dev(light.x * d.max(0.0), light.y * d.max(0.0)), dev(-light.x * rim.max(0.0), -light.y * rim.max(0.0)));
     let pad = (sd.0.abs().max(sd.1.abs()).max(sr.0.abs()).max(sr.1.abs()).ceil() as usize) + 2;
-    let pw = w + 2 * pad;
-    let padded: Vec<f32> = if d > 0.0 {
-        let mut v = vec![0.0f32; pw * (h + 2 * pad)];
-        for y in 0..h { v[(y + pad) * pw + pad..(y + pad) * pw + pad + w].copy_from_slice(&ca[y * w..(y + 1) * w]); }
-        v
-    } else { vec![] };
-    let shifted = |(dx, dy): (f32, f32)| -> Vec<f32> {
-        let (ix, iy) = (dx.floor(), dy.floor());
-        let (fx, fy) = (dx - ix, dy - iy);
-        let (ix, iy) = (ix as isize, iy as isize);
-        let mut out = Vec::with_capacity(w * h);
-        let off = (pad as isize - ix) as usize;
-        for y in 0..h {
-            let sy = (y as isize - iy + pad as isize) as usize;
-            let r0 = &padded[sy * pw + off - 1..sy * pw + off + w];
-            let r1 = &padded[(sy - 1) * pw + off - 1..(sy - 1) * pw + off + w];
-            out.extend((0..w).map(|x| {
-                let top = r0[x + 1] + (r0[x] - r0[x + 1]) * fx;
-                let bot = r1[x + 1] + (r1[x] - r1[x + 1]) * fx;
-                top + (bot - top) * fy
-            }));
-        }
-        out
+    // coverage rasterized with a zero margin of `pad` cells so shifted lookups need no bounds checks
+    let mut acc = Acc::new(w + 2 * pad, h + 2 * pad);
+    acc.path(&path, x0 as f32 - pad as f32, y0 as f32 - pad as f32, 1.0);
+    acc.prefix();
+    let pw = acc.stride;
+    let padded = &acc.a;
+    let shift = |(dx, dy): (f32, f32)| { let (ix, iy) = (dx.floor(), dy.floor()); (dx - ix, dy - iy, (pad as isize - ix as isize) as usize, (pad as isize - iy as isize) as usize) };
+    // bilinear sample of the coverage shifted by (dx, dy) at (x, y)
+    let sample = |&(fx, fy, ox, oy): &(f32, f32, usize, usize), x: usize, y: usize| -> f32 {
+        let r0 = (y + oy) * pw + x + ox;
+        let r1 = r0 - pw;
+        let top = padded[r0] + (padded[r0 - 1] - padded[r0]) * fx;
+        let bot = padded[r1] + (padded[r1 - 1] - padded[r1]) * fx;
+        top + (bot - top) * fy
     };
-    let (cb, cc) = if d > 0.0 { (Some(shifted(sd)), if rim > 0.0 { Some(shifted(sr)) } else { None }) } else { (None, None) };
+    let (sb, sc) = (shift(sd), shift(sr));
     let f3 = |c: Rgb| [c[0] as f32, c[1] as f32, c[2] as f32];
     let (shade, lightc, base) = (f3(shade_of(s.fill)), f3(light_of(s.fill)), f3(s.fill));
     let has_rim = d > 0.0 && rim > 0.0;
@@ -1684,36 +1707,37 @@ fn fill_shape(ctx: &mut Ctx, s: &Shape) {
     let data = ctx.pm.data_mut();
     for y in 0..h {
         for x in 0..w {
-            let i = y * w + x;
-            let mut a = ca[i];
+            let mut a = padded[(y + pad) * pw + x + pad];
             if a <= 0.0 { continue; }
             let di = (y0 + y) * stride + x0 + x;
             if let Some(cm) = &clip { a *= cm.data()[di] as f32 * (1.0 / 255.0); if a <= 0.0 { continue; } }
-            let col = if let Some(cb) = &cb {
-                let bb = cb[i];
+            let col = if d > 0.0 {
+                let bb = sample(&sb, x, y);
                 let mut c = shade;
                 if has_rim { for k in 0..3 { c[k] += (lightc[k] - c[k]) * bb; } }
-                let t = bb * cc.as_ref().map_or(1.0, |cc| cc[i]);
+                let t = if has_rim { bb * sample(&sc, x, y) } else { bb };
                 for k in 0..3 { c[k] += (base[k] - c[k]) * t; }
                 c
             } else { base };
-            blend_px(&mut data[di * 4..di * 4 + 4], [col[0] * a, col[1] * a, col[2] * a, a * 255.0], BlendMode::SourceOver);
+            let d_ = &mut data[di * 4..di * 4 + 4];
+            let ia = 1.0 - a;
+            d_[0] = q8(col[0] * a + d_[0] as f32 * ia);
+            d_[1] = q8(col[1] * a + d_[1] as f32 * ia);
+            d_[2] = q8(col[2] * a + d_[2] as f32 * ia);
+            d_[3] = q8(255.0 * a + d_[3] as f32 * ia);
         }
     }
 }
 
-/// straight-alpha RGBA image of a premultiplied pixmap (fast paths for empty / opaque pixels)
-fn to_image(p: &Pixmap) -> Arc<ImageData> {
-    let src = p.data();
-    let mut out = vec![0u8; src.len()];
-    for (d, s) in out.chunks_exact_mut(4).zip(src.chunks_exact(4)) {
-        match s[3] {
-            0 => {}
-            255 => d.copy_from_slice(s),
-            a => { let a = a as u32; for i in 0..3 { d[i] = ((s[i] as u32 * 255 + a / 2) / a).min(255) as u8; } d[3] = a as u8; }
-        }
+/// straight-alpha RGBA image of a premultiplied pixmap, demultiplied in place
+fn to_image(p: Pixmap) -> Arc<ImageData> {
+    let (w, h) = (p.width(), p.height());
+    let mut data = p.take();
+    for d in data.chunks_exact_mut(4) {
+        let a = d[3] as u32;
+        if a != 0 && a != 255 { for v in d.iter_mut().take(3) { *v = ((*v as u32 * 255 + a / 2) / a).min(255) as u8; } }
     }
-    ImageData::new(p.width(), p.height(), out)
+    ImageData::new(w, h, data)
 }
 
 fn to_box4(b: &B4) -> Box4 { [b[0] as f32, b[1] as f32, b[2] as f32, b[3] as f32] }
@@ -1773,7 +1797,7 @@ pub fn render_pose(style: &Value, pose: &Value, active: Option<&ActiveSpec>, wit
                 ctx.st.blend = BlendMode::SourceAtop;
                 ctx.fill_rect(x1, y1, x2 - x1, y2 - y1, &sol(fc, 0.55));
             }
-            if std::env::var("NOF").is_err() { image = Some(to_image(&ctx.pm)); }
+            image = Some(to_image(ctx.pm));
         }
     }
     RigRender { image, width: width as f32, height: height as f32, axis_x: axis_x as f32, axis_y: axis_y as f32, scale: (1.0 / RES) as f32, hurt: hurt.iter().map(to_box4).collect(), hit: hit.iter().map(to_box4).collect() }
@@ -1813,7 +1837,7 @@ pub fn render_effect(effect: &Value, with_images: bool, palette: Option<&Value>)
             ctx.translate(axis_x, axis_y);
             ctx.scale(RES, RES);
             draw_effect(&mut ctx, ty, size, ph, col, col2, e);
-            image = Some(to_image(&ctx.pm));
+            image = Some(to_image(ctx.pm));
         }
     }
     RigRender { image, width: width as f32, height: height as f32, axis_x: axis_x as f32, axis_y: axis_y as f32, scale: (1.0 / RES) as f32, hit: boxes.clone(), hurt: boxes }

@@ -2,7 +2,13 @@
 
 Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, multiplataforma (Windows, Linux, macOS, **navegador/WASM**, **Android/iOS**), **compatível com personagens M.U.G.E.N** e com um formato novo, muito mais simples, para criar lutadores. Suporte nativo a **DualShock 4 / DualSense com vibração**.
 
-![Luta](screenshots/06-fight-dojo.png)
+![Luta](screenshots/06-fight-dojo.jpg)
+
+| | |
+|---|---|
+| ![Super](screenshots/08-fight-super.jpg) | ![Seleção](screenshots/03-select.jpg) |
+| ![MUGEN KFM vs original](screenshots/12-mugen-kfm-vs-native.jpg) | ![Cenário MUGEN](screenshots/13-native-on-mugen-stage.jpg) |
+| ![Kaname vs Valdric](screenshots/11b-fight-kaname-valdric.jpg) | ![Celular](screenshots/15-mobile-fight.jpg) |
 
 ## Por que Rust + macroquad
 | Requisito | Escolha |
@@ -16,7 +22,7 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, mul
 ## Destaques
 - **Compatibilidade MUGEN** (`crates/formats` + `crates/engine`): `.def`, `.sff` v1/v2 (PCX, RLE8, RLE5, LZ5, PNG8/24/32), `.air`, `.cmd`, `.cns`, `.snd`, `.act`, cenários com parallax/tiles/animação. Linguagem de triggers completa (inteiro vs float, intervalos, redirecionamentos), ~90 state controllers, HitDef completo, arremessos (custom states), helpers, projéteis, explods, super pause, after images, `localcoord` HD. Validado com o Kung Fu Man oficial (SD e 720p).
 - **Formato UMF**: um personagem = 1 JSON com golpes declarativos; hitboxes automáticas pelo esqueleto; botão "especial simples" no celular. Compila para a mesma VM do MUGEN — UMF e MUGEN lutam entre si.
-- **10 lutadores originais** e **6 cenários originais** procedurais (sem assets de terceiros), música e efeitos sonoros sintetizados.
+- **15 lutadores originais** e **6 cenários originais** procedurais (sem assets de terceiros), música e efeitos sonoros sintetizados.
 - Modos **Arcade, Versus CPU, 2 Jogadores, Treino (hitboxes), CPU vs CPU**; IA compatível com qualquer personagem.
 - **Controles**: teclado, gamepads (DualShock/DualSense com vibração em golpes, defesa, super e K.O.; lightbar azul/vermelha por jogador), toque com analógico virtual e SP1/SP2/SP3/SUPER de um toque.
 

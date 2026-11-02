@@ -2,7 +2,6 @@ node_modules
 dist
 .vite
 test-assets/
-screenshots/tmp
 vite.stub.config.mjs
 target/
 web/dist/

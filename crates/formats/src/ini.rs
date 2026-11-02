@@ -1,0 +1,234 @@
+//! Generic MUGEN-style INI parser (keeps duplicate keys & order; used by
+//! DEF/CNS/CMD/AIR/stage files). Port of `src/mugen/ini.ts`.
+
+#[derive(Clone, Debug, Default)]
+pub struct Section {
+    /// Original case, trimmed.
+    pub name: String,
+    /// Lowercase name.
+    pub lname: String,
+    /// `(lowercase key, trimmed raw value)` in file order (duplicates kept).
+    pub entries: Vec<(String, String)>,
+    /// Every non-empty, comment-stripped, trimmed line of the section
+    /// (including `key = value` lines; AIR frames etc. live here).
+    pub lines: Vec<String>,
+}
+
+impl Section {
+    /// First value for `key` (case-insensitive).
+    pub fn get(&self, key: &str) -> Option<&str> {
+        self.get_all(key).next()
+    }
+
+    /// All values for `key` (case-insensitive), in file order.
+    pub fn get_all<'a>(&'a self, key: &str) -> impl Iterator<Item = &'a str> + 'a {
+        let key = key.to_lowercase();
+        self.entries.iter().filter(move |(k, _)| *k == key).map(|(_, v)| v.as_str())
+    }
+}
+
+/// Remove a `;` comment (ignoring `;` inside double quotes).
+pub fn strip_comment(line: &str) -> &str {
+    let mut in_q = false;
+    for (i, c) in line.bytes().enumerate() {
+        if c == b'"' {
+            in_q = !in_q;
+        } else if c == b';' && !in_q {
+            return &line[..i];
+        }
+    }
+    line
+}
+
+/// Split text into lines on `\r\n`, `\n` or `\r` (empty lines may appear
+/// in place of `\r\n`; every consumer skips empty lines). Strips a leading BOM.
+pub(crate) fn split_lines(text: &str) -> impl Iterator<Item = &str> {
+    text.strip_prefix('\u{feff}').unwrap_or(text).split(['\n', '\r'])
+}
+
+/// True for JS `/^-?\d/`.
+pub(crate) fn starts_with_number(line: &str) -> bool {
+    let b = line.as_bytes();
+    match b.first() {
+        Some(b'-') => b.get(1).is_some_and(|c| c.is_ascii_digit()),
+        Some(c) => c.is_ascii_digit(),
+        None => false,
+    }
+}
+
+pub fn parse_ini(text: &str) -> Vec<Section> {
+    let mut out: Vec<Section> = Vec::new();
+    for raw in split_lines(text) {
+        let line = strip_comment(raw).trim();
+        if line.is_empty() {
+            continue;
+        }
+        if let Some(rest) = line.strip_prefix('[') {
+            let name = match rest.find(']') {
+                Some(e) => &rest[..e],
+                None => rest,
+            }
+            .trim();
+            out.push(Section {
+                name: name.to_string(),
+                lname: name.to_lowercase(),
+                entries: Vec::new(),
+                lines: Vec::new(),
+            });
+            continue;
+        }
+        if out.is_empty() {
+            out.push(Section::default());
+        }
+        let cur = out.last_mut().unwrap();
+        if let Some(eq) = line.find('=') {
+            if eq > 0 && !starts_with_number(line) {
+                cur.entries.push((line[..eq].trim().to_lowercase(), line[eq + 1..].trim().to_string()));
+            }
+        }
+        cur.lines.push(line.to_string());
+    }
+    out
+}
+
+/// First section whose name equals `name` (case-insensitive).
+pub fn find_section<'a>(secs: &'a [Section], name: &str) -> Option<&'a Section> {
+    let l = name.to_lowercase();
+    secs.iter().find(|s| s.lname == l)
+}
+
+/// Trim and remove surrounding double quotes (text up to the closing quote).
+pub fn unquote(v: &str) -> String {
+    let v = v.trim();
+    if let Some(rest) = v.strip_prefix('"') {
+        match rest.find('"') {
+            Some(e) => rest[..e].to_string(),
+            None => rest.to_string(),
+        }
+    } else {
+        v.to_string()
+    }
+}
+
+/// Comma separated numbers (JS `parseFloat` semantics per item). Missing
+/// value -> `def`; unparsable items -> `def[i]` or 0.
+pub fn nums(v: Option<&str>, def: &[f32]) -> Vec<f32> {
+    let Some(v) = v else { return def.to_vec() };
+    if v.trim().is_empty() {
+        return def.to_vec();
+    }
+    v.split(',')
+        .enumerate()
+        .map(|(i, p)| match parse_float(p) {
+            Some(n) if n.is_finite() => n as f32,
+            _ => def.get(i).copied().unwrap_or(0.0),
+        })
+        .collect()
+}
+
+/// Split on top-level commas (respecting parens/brackets/quotes); items trimmed.
+pub fn split_top(v: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let (mut depth, mut in_q, mut start) = (0i32, false, 0usize);
+    for (i, c) in v.bytes().enumerate() {
+        if c == b'"' {
+            in_q = !in_q;
+        } else if in_q {
+            continue;
+        } else if c == b'(' || c == b'[' {
+            depth += 1;
+        } else if c == b')' || c == b']' {
+            depth -= 1;
+        } else if c == b',' && depth == 0 {
+            out.push(v[start..i].trim().to_string());
+            start = i + 1;
+        }
+    }
+    out.push(v[start..].trim().to_string());
+    out
+}
+
+fn trim_js_ws(s: &str) -> &str {
+    s.trim_start_matches(|c: char| c.is_whitespace() || c == '\u{feff}')
+}
+
+/// JavaScript `parseFloat`: parses the longest numeric prefix (after leading
+/// whitespace). Returns `None` where JS would return `NaN`.
+pub fn parse_float(s: &str) -> Option<f64> {
+    let s = trim_js_ws(s);
+    let b = s.as_bytes();
+    let mut i = 0;
+    if matches!(b.first(), Some(b'+') | Some(b'-')) {
+        i = 1;
+    }
+    if s[i..].starts_with("Infinity") {
+        return Some(if b[0] == b'-' { f64::NEG_INFINITY } else { f64::INFINITY });
+    }
+    let ds = i;
+    while i < b.len() && b[i].is_ascii_digit() {
+        i += 1;
+    }
+    let mut nd = i - ds;
+    if i < b.len() && b[i] == b'.' {
+        i += 1;
+        let fs = i;
+        while i < b.len() && b[i].is_ascii_digit() {
+            i += 1;
+        }
+        nd += i - fs;
+    }
+    if nd == 0 {
+        return None;
+    }
+    if i < b.len() && (b[i] | 0x20) == b'e' {
+        let mut k = i + 1;
+        if matches!(b.get(k), Some(b'+') | Some(b'-')) {
+            k += 1;
+        }
+        let es = k;
+        while k < b.len() && b[k].is_ascii_digit() {
+            k += 1;
+        }
+        if k > es {
+            i = k;
+        }
+    }
+    s[..i].parse::<f64>().ok()
+}
+
+/// JavaScript `parseInt(s)` (radix 10, or 16 with a `0x` prefix). Returns
+/// `None` where JS would return `NaN`. Saturates on overflow.
+pub fn parse_int(s: &str) -> Option<i64> {
+    let s = trim_js_ws(s);
+    let b = s.as_bytes();
+    let mut i = 0;
+    let mut neg = false;
+    if let Some(&c) = b.first() {
+        if c == b'+' || c == b'-' {
+            neg = c == b'-';
+            i = 1;
+        }
+    }
+    let mut radix = 10u32;
+    if b.len() >= i + 2 && b[i] == b'0' && (b[i + 1] | 0x20) == b'x' {
+        radix = 16;
+        i += 2;
+    }
+    let mut v: i64 = 0;
+    let mut nd = 0;
+    while i < b.len() {
+        let Some(d) = (b[i] as char).to_digit(radix) else { break };
+        v = v.saturating_mul(radix as i64).saturating_add(d as i64);
+        nd += 1;
+        i += 1;
+    }
+    if nd == 0 {
+        return None;
+    }
+    Some(if neg { -v } else { v })
+}
+
+/// `parse_int` clamped to `i32`.
+pub(crate) fn parse_i32(s: &str) -> Option<i32> {
+    parse_int(s).map(|v| v.clamp(i32::MIN as i64, i32::MAX as i64) as i32)
+}

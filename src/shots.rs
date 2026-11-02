@@ -1,0 +1,93 @@
+//! Automated screenshot tour (`--shots <dir>`): renders real frames of every screen and fights.
+use crate::app::{App, Mode, Screen};
+use macroquad::prelude::*;
+
+async fn frames(app: &mut App, n: usize) { for _ in 0..n { app.frame().await; next_frame().await; } }
+async fn screen(app: &mut App, dir: &str, name: &str, warm: usize) {
+    frames(app, warm).await;
+    app.frame().await;
+    get_screen_data().export_png(&format!("{dir}/{name}.png"));
+    println!("shot {name}");
+    next_frame().await;
+}
+async fn snap(app: &mut App, dir: &str, name: &str, draw: impl Fn(&mut App)) {
+    // draw twice (first frame warms textures), capture the second
+    for i in 0..2 {
+        draw(app);
+        if i == 1 { get_screen_data().export_png(&format!("{dir}/{name}.png")); println!("shot {name}"); }
+        next_frame().await;
+    }
+}
+fn find(app: &App, id: &str) -> usize { app.reg.chars.iter().position(|c| c.id.ends_with(id)).unwrap_or(0) }
+fn stage(app: &App, id: &str) -> usize { app.reg.stages.iter().position(|s| s.id.contains(id)).unwrap_or(0) }
+
+async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &str, ticks: usize, want: &str) {
+    app.mode = Mode::Watch;
+    app.sel = (find(app, p1), find(app, p2), stage(app, st));
+    app.start_fight().await;
+    let App { session, c, audio, .. } = app;
+    let s = session.as_mut().unwrap();
+    for _ in 0..ticks { s.step(c, audio); }
+    match want {
+        "super" => {
+            for f in s.m.fighters.iter_mut() { f.power = 3000.0; }
+            let mut ok = false;
+            for _ in 0..1500 { s.step(c, audio); if s.m.pause.as_ref().is_some_and(|p| p.is_super && p.time < 24) { ok = true; break; } }
+            if ok { for _ in 0..16 { s.step(c, audio); } }
+            println!("{name}: super caught = {ok}");
+        }
+        "hit" => { for _ in 0..1200 { s.step(c, audio); if !s.m.explods.is_empty() && s.m.fighters.iter().any(|f| f.move_type == 'H' && f.hit_shake > 2 && !f.ghv.guarded) { break; } } }
+        "proj" => { for _ in 0..1500 { s.step(c, audio); if s.m.projectiles.iter().any(|p| !p.dying && p.time > 8) { break; } } }
+        "boxes" => { s.r.debug = true; for _ in 0..900 { s.step(c, audio); if s.m.fighters.iter().any(|f| !f.boxes(1).is_empty()) { break; } } }
+        _ => {}
+    }
+    snap(app, dir, name, |a| a.draw_session_only()).await;
+}
+
+pub async fn run(app: &mut App, dir: &str) {
+    let _ = std::fs::create_dir_all(dir);
+    app.screen = Screen::Title;
+    screen(app, dir, "01-title", 30).await;
+    let cap = |app: &mut App, s: Screen| { app.screen = s; };
+    cap(app, Screen::Menu { cur: 1 });
+    screen(app, dir, "02-menu", 10).await;
+    app.mode = Mode::Cpu;
+    cap(app, Screen::Select { cur: [find(app, "akio"), find(app, "shion")], picking: 1, picked: [Some(find(app, "akio")), None] });
+    screen(app, dir, "03-select", 40).await;
+    cap(app, Screen::Stages { cur: 2 });
+    screen(app, dir, "04-stages", 5).await;
+    app.sel = (find(app, "kaito"), find(app, "garan"), 0);
+    cap(app, Screen::Vs { t: 0.0 });
+    screen(app, dir, "05-vs", 70).await;
+    app.screen = Screen::Fight;
+    fight(app, dir, "06-fight-dojo", "kaito", "shion", "dojo", 240, "hit").await;
+    fight(app, dir, "07-fight-neon", "volta", "suzume", "neon", 300, "proj").await;
+    fight(app, dir, "08-fight-super", "akio", "bruno", "spirit", 120, "super").await;
+    fight(app, dir, "09-fight-bamboo", "lian", "sylene", "bamboo", 400, "proj").await;
+    fight(app, dir, "10-fight-volcano", "garan", "marlow", "volcano", 500, "hit").await;
+    fight(app, dir, "11-hitboxes", "shion", "kaito", "plains", 200, "boxes").await;
+    if app.reg.chars.iter().any(|c| c.mugen) {
+        let kfm = app.reg.chars.iter().find(|c| c.mugen).map(|c| c.id.clone()).unwrap();
+        let ms = app.reg.stages.iter().find(|s| s.mugen && s.id.ends_with("kfm.def")).or(app.reg.stages.iter().find(|s| s.mugen)).map(|s| s.id.clone());
+        fight(app, dir, "12-mugen-kfm-vs-native", &kfm, "suzume", "plains", 300, "hit").await;
+        if let Some(ms) = ms { fight(app, dir, "13-native-on-mugen-stage", "marlow", &kfm, &ms, 300, "hit").await; }
+    }
+    app.session = None;
+    app.screen = Screen::Controls; screen(app, dir, "14-controls", 5).await;
+    // phone landscape with touch controls
+    request_new_screen_size(844.0, 390.0);
+    frames(app, 10).await;
+    app.c.touch.enabled = true;
+    app.mode = Mode::Cpu;
+    app.sel = (find(app, "suzume"), find(app, "kaito"), stage(app, "dojo"));
+    app.start_fight().await;
+    app.mode = Mode::Cpu;
+    {
+        let App { session, c, audio, .. } = app;
+        let s = session.as_mut().unwrap();
+        for _ in 0..260 { s.step(c, audio); }
+    }
+    snap(app, dir, "15-mobile-fight", |a| a.draw_session_only()).await;
+    app.session = None;
+    app.screen = Screen::Menu { cur: 0 }; screen(app, dir, "16-mobile-menu", 5).await;
+}

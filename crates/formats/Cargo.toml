@@ -1,0 +1,13 @@
+[package]
+name = "ume-formats"
+version = "0.2.0"
+edition = "2021"
+description = "M.U.G.E.N file format decoders (INI/DEF, AIR, SFF v1/v2, PCX, PNG, SND, ACT, zip VFS, stage .def)"
+license = "MIT"
+
+[lib]
+name = "ume_formats"
+path = "src/lib.rs"
+
+[dependencies]
+miniz_oxide = "0.8"

@@ -5,6 +5,16 @@ fn main() {
     let id = std::env::args().nth(1).unwrap_or("shion".into());
     let ch: Value = serde_json::from_str(&std::fs::read_to_string(format!("{}/../../assets/chars/{id}.json", env!("CARGO_MANIFEST_DIR"))).unwrap()).unwrap();
     let style = &ch["art"]["style"];
+    if let Ok(pn) = std::env::var("POSE") {
+        let pose = ch["art"]["poses"][&pn].clone();
+        let t = Instant::now();
+        for _ in 0..200 { render_pose(style, &pose, None, true, None); }
+        println!("{pn}: {:.3} ms/iter", t.elapsed().as_secs_f64() * 1000.0 / 200.0);
+        let t = Instant::now();
+        for _ in 0..200 { render_pose(style, &pose, None, false, None); }
+        println!("{pn} geometry only: {:.4} ms/iter", t.elapsed().as_secs_f64() * 1000.0 / 200.0);
+        return;
+    }
     let mut v: Vec<(f64, String)> = vec![];
     let mut seen = std::collections::HashSet::new();
     let mut tot = 0.0;
@@ -28,3 +38,5 @@ fn main() {
     for x in v.iter().take(12) { println!("{:.2} {}", x.0, x.1); }
     println!("median {:.2}", v[v.len() / 2].0);
 }
+#[allow(dead_code)]
+pub fn micro() {}

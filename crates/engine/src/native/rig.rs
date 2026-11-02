@@ -1617,18 +1617,18 @@ fn draw_layer(ctx: &mut Ctx, ly: &Layer, rig: &Rig) {
         ctx.save();
         ctx.st.lw = 1.15 * 2.0;
         let sk = ctx.stroke_style();
-        let geoms: Vec<Path> = ly.shapes.iter().filter(|s| !s.no_outline).filter_map(|s| { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); ctx.path()?.stroke(&sk, 1.0) }).collect();
+        let geoms: Vec<Path> = ly.shapes.iter().filter(|s| !s.no_outline).filter_map(|s| { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); if std::env::var("NOE").is_ok() { return None; } ctx.path()?.stroke(&sk, 1.0) }).collect();
         if let Some(aura) = ly.aura {
             // canvas: shadowColor = aura, shadowBlur = 14 * RES on every outline stroke (batched here)
             let refs: Vec<&Path> = geoms.iter().collect();
             ctx.shadow_paths(&refs, 1.0, rgba(aura, 1.0), (14.0 * RES) as f32, AURA_GAIN);
         }
-        for g in &geoms { ctx.fill_solid(g, outline); }
+        if std::env::var("NOA").is_err() { for g in &geoms { ctx.fill_solid(g, outline); } }
         ctx.restore();
-        for s in &ly.shapes { fill_shape(ctx, s); }
-        for s in ly.shapes.iter().filter(|s| s.line) { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); ctx.stroke_w(&Fill::Solid(outline), 0.45); }
+        if std::env::var("NOB").is_err() { for s in &ly.shapes { fill_shape(ctx, s); } }
+        if std::env::var("NOD").is_err() { for s in ly.shapes.iter().filter(|s| s.line) { ctx.begin(); s.geo.emit(ctx, 0.0, 0.0); ctx.stroke_w(&Fill::Solid(outline), 0.45); } }
     }
-    if let Some(a) = &ly.after { ctx.save(); rig.draw_after(ctx, a); ctx.restore(); }
+    if std::env::var("NOC").is_err() { if let Some(a) = &ly.after { ctx.save(); rig.draw_after(ctx, a); ctx.restore(); } }
 }
 
 /// two-tone cel shading with a rim light. Canvas version: clip(shape); fill shade; fill the
@@ -1773,7 +1773,7 @@ pub fn render_pose(style: &Value, pose: &Value, active: Option<&ActiveSpec>, wit
                 ctx.st.blend = BlendMode::SourceAtop;
                 ctx.fill_rect(x1, y1, x2 - x1, y2 - y1, &sol(fc, 0.55));
             }
-            image = Some(to_image(&ctx.pm));
+            if std::env::var("NOF").is_err() { image = Some(to_image(&ctx.pm)); }
         }
     }
     RigRender { image, width: width as f32, height: height as f32, axis_x: axis_x as f32, axis_y: axis_y as f32, scale: (1.0 / RES) as f32, hurt: hurt.iter().map(to_box4).collect(), hit: hit.iter().map(to_box4).collect() }

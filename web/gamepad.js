@@ -30,17 +30,23 @@
   });
 })();
 
-// Touch detection + MUGEN .zip import from the page (drag & drop or button).
+// Touch detection + MUGEN .zip import from the page (drag & drop or button), persisted in IndexedDB.
 miniquad_add_plugin({
   register_plugin: function (imp) { imp.env.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0; },
   on_init: function () {
-    async function send(file) {
-      const buf = new Uint8Array(await file.arrayBuffer());
+    const DB = 'ultimate-mugen', ST = 'packs';
+    function db() { return new Promise((res, rej) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(ST); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+    async function store(name, buf) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).put(buf, name); } catch (e) {} }
+    async function all() { try { const d = await db(); return await new Promise((res) => { const out = []; const rq = d.transaction(ST).objectStore(ST).openCursor(); rq.onsuccess = () => { const c = rq.result; if (c) { out.push(c.value); c.continue(); } else res(out); }; rq.onerror = () => res(out); }); } catch (e) { return []; } }
+    function sendBytes(buf) {
       const ptr = wasm_exports.ume_alloc(buf.length);
       new Uint8Array(wasm_memory.buffer, ptr, buf.length).set(buf);
       wasm_exports.ume_import(ptr, buf.length);
     }
+    async function send(file) { const buf = new Uint8Array(await file.arrayBuffer()); sendBytes(buf); store(file.name + ':' + file.size, buf); }
     window.umeImport = (files) => { for (const f of files) send(f); };
+    window.umeClearImports = async () => { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).clear(); };
+    all().then((bufs) => bufs.forEach((b) => sendBytes(new Uint8Array(b))));
     const input = document.getElementById('ume-file');
     if (input) input.addEventListener('change', () => window.umeImport(input.files));
     window.addEventListener('dragover', (e) => e.preventDefault());

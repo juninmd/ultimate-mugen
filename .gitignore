@@ -6,3 +6,5 @@ screenshots/tmp
 vite.stub.config.mjs
 target/
 web/dist/
+# personagens/cenários MUGEN locais do jogador (não versionar)
+/mugen/

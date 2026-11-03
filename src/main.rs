@@ -16,6 +16,7 @@ mod stagefx;
 mod stages;
 mod texgen;
 mod ui;
+mod update;
 mod vfx;
 
 use macroquad::prelude::*;
@@ -23,6 +24,17 @@ use macroquad::prelude::*;
 fn conf() -> Conf {
     // window size: saved setting, overridable with `--res 3840x2160`, `--4k`, `--fullscreen`
     let args: Vec<String> = std::env::args().collect();
+    // headless probes (no window): used by the release pipeline to verify the stamped version and the published manifest
+    if args.iter().any(|a| a == "--version") { println!("ultimate-mugen {}", update::VERSION); std::process::exit(0); }
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    if args.iter().any(|a| a == "--check-update") {
+        match update::fetch_latest(update::VERSION) {
+            Ok(Some(u)) => println!("update available: {} -> {} ({})", update::VERSION, u.version, update::RELEASES_URL),
+            Ok(None) => println!("up to date: {}", update::VERSION),
+            Err(e) => { eprintln!("update check failed: {e}"); std::process::exit(1); }
+        }
+        std::process::exit(0);
+    }
     let st = settings::Settings::load();
     let (mut w, mut h, _) = settings::RESOLUTIONS[st.res.min(settings::RESOLUTIONS.len() - 1)];
     if let Some(r) = args.iter().position(|a| a == "--res").and_then(|i| args.get(i + 1)) {

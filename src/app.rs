@@ -89,6 +89,7 @@ pub struct App {
     sel_dwell: f32,
     stage_row: usize,
     quality_check: f32,
+    updater: crate::update::Checker,
     pub trans: f32,
     screen_t: f32,
     last_disc: Option<std::mem::Discriminant<Screen>>,
@@ -141,6 +142,7 @@ impl App {
             reg, ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
             settings, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
+            updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
 
@@ -226,6 +228,11 @@ impl App {
         self.ui.text("ENGINE DE LUTA · RUST · DESKTOP · WEB · MOBILE", VW / 2.0, 420.0, 20.0, hex("#a49cc0"), Align::Center, true);
         if (self.ui.t * 2.0) as i32 % 2 == 0 { self.ui.text_bold("PRESSIONE START / ENTER", VW / 2.0, 540.0, 30.0, WHITE, hex("#12051f"), Align::Center); }
         self.ui.text("Compatível com personagens M.U.G.E.N  ·  DualShock 4 / DualSense com vibração", VW / 2.0, 690.0, 18.0, hex("#a49cc0"), Align::Center, false);
+        let line = match self.updater.poll() {
+            Some(u) => format!("v{} · nova versão v{} disponível: {}", crate::update::VERSION, u.version, crate::update::RELEASES_URL),
+            None => format!("v{}", crate::update::VERSION),
+        };
+        self.ui.text(&line, VW - 14.0, VH - 12.0, 14.0, hex("#a49cc0"), Align::Right, false);
         if self.c.pressed(nav::OK | nav::START) || is_mouse_button_pressed(MouseButton::Left) || !touches().is_empty() && touches()[0].phase == TouchPhase::Started { self.go(Screen::Menu { cur: 0 }); }
     }
 

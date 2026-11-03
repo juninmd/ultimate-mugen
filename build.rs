@@ -1,6 +1,11 @@
 // Embeds every UMF character JSON in assets/chars/ (order: index.json first, then the rest alphabetically).
 use std::{env, fs, path::Path};
 fn main() {
+    // the release tag is the version source of truth: CI exports it, local builds are marked `-dev`
+    println!("cargo:rerun-if-env-changed=UME_RELEASE_VERSION");
+    let version = env::var("UME_RELEASE_VERSION").ok().filter(|v| !v.is_empty())
+        .unwrap_or_else(|| format!("{}-dev", env::var("CARGO_PKG_VERSION").unwrap()));
+    println!("cargo:rustc-env=UME_VERSION={version}");
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/chars");
     println!("cargo:rerun-if-changed={}", dir.display());
     let mut ids: Vec<String> = fs::read_to_string(dir.join("index.json")).ok()

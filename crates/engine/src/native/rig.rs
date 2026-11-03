@@ -21,6 +21,9 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Arc;
+mod body;
+mod detail;
+mod face;
 use tiny_skia::{
     BlendMode, Color, FillRule, GradientStop, LineCap, LineJoin, LinearGradient, Mask, Paint, Path, PathBuilder, Pixmap, Point,
     RadialGradient, Rect, Shader, SpreadMode, Stroke, Transform,
@@ -145,8 +148,27 @@ enum Fill { Solid(Color), Lin(f64, f64, f64, f64, Vec<(f32, Color)>), Rad(f64, f
 fn sol(c: Rgb, a: f64) -> Fill { Fill::Solid(rgba(c, a)) }
 fn stops(v: &[(f32, Color)]) -> Vec<GradientStop> { v.iter().map(|(o, c)| GradientStop::new(*o, *c)).collect() }
 
+/// clip mask whose buffer is recycled (only the rectangle that was written is cleared again)
+struct Clip { m: Option<Mask>, rect: (usize, usize, usize, usize) }
+impl std::ops::Deref for Clip { type Target = Mask; fn deref(&self) -> &Mask { self.m.as_ref().expect("clip mask") } }
+thread_local! { static MASKS: std::cell::RefCell<Vec<Mask>> = const { std::cell::RefCell::new(Vec::new()) }; }
+impl Drop for Clip {
+    fn drop(&mut self) {
+        if let Some(mut m) = self.m.take() {
+            let (x0, y0, w, h) = self.rect;
+            let pw = m.width() as usize;
+            let d = m.data_mut();
+            for y in y0..y0 + h { d[y * pw + x0..y * pw + x0 + w].fill(0); }
+            MASKS.with(|p| { let mut p = p.borrow_mut(); if p.len() < 6 { p.push(m); } });
+        }
+    }
+}
+fn new_mask(pw: u32, ph: u32) -> Option<Mask> {
+    MASKS.with(|p| { let mut p = p.borrow_mut(); p.iter().position(|m| m.width() == pw && m.height() == ph).map(|i| p.swap_remove(i)) }).or_else(|| Mask::new(pw, ph))
+}
+
 #[derive(Clone)]
-struct St { m: Aff, alpha: f32, blend: BlendMode, shadow: Option<(Color, f32)>, lw: f64, clip: Option<Rc<Mask>> }
+struct St { m: Aff, alpha: f32, blend: BlendMode, shadow: Option<(Color, f32)>, lw: f64, clip: Option<Rc<Clip>>, butt: bool }
 
 struct Ctx { pm: Pixmap, st: St, stack: Vec<St>, pb: PathBuilder, open: bool }
 
@@ -157,7 +179,7 @@ fn arc_sweep(a0: f64, a1: f64) -> f64 {
 
 impl Ctx {
     fn new(w: u32, h: u32) -> Option<Ctx> {
-        Some(Ctx { pm: Pixmap::new(w.max(1), h.max(1))?, st: St { m: Aff::I, alpha: 1.0, blend: BlendMode::SourceOver, shadow: None, lw: 1.0, clip: None }, stack: vec![], pb: PathBuilder::new(), open: false })
+        Some(Ctx { pm: Pixmap::new(w.max(1), h.max(1))?, st: St { m: Aff::I, alpha: 1.0, blend: BlendMode::SourceOver, shadow: None, lw: 1.0, clip: None, butt: false }, stack: vec![], pb: PathBuilder::new(), open: false })
     }
     fn save(&mut self) { self.stack.push(self.st.clone()); }
     fn restore(&mut self) { if let Some(s) = self.stack.pop() { self.st = s; } }
@@ -224,7 +246,7 @@ impl Ctx {
         if self.st.alpha < 1.0 { shader.apply_opacity(self.st.alpha); }
         Some(Paint { shader, blend_mode: blend, anti_alias: true, force_hq_pipeline: false })
     }
-    fn stroke_style(&self) -> Stroke { Stroke { width: (self.st.lw * self.st.m.scale_factor()) as f32, line_cap: LineCap::Round, line_join: LineJoin::Round, ..Default::default() } }
+    fn stroke_style(&self) -> Stroke { Stroke { width: (self.st.lw * self.st.m.scale_factor()) as f32, line_cap: if self.st.butt { LineCap::Butt } else { LineCap::Round }, line_join: if self.st.butt { LineJoin::Bevel } else { LineJoin::Round }, ..Default::default() } }
     fn fill(&mut self, f: &Fill) { if let Some(p) = self.path() { self.draw(&p, f, false); } }
     fn stroke(&mut self, f: &Fill) { if let Some(p) = self.path() { self.draw(&p, f, true); } }
     fn stroke_w(&mut self, f: &Fill, w: f64) { self.st.lw = w; self.stroke(f); }
@@ -247,7 +269,7 @@ impl Ctx {
             _ => {
                 let Some(paint) = self.paint(f, self.st.blend) else { return };
                 let clip = self.st.clip.clone();
-                self.pm.fill_path(geom, &paint, FillRule::Winding, Transform::identity(), clip.as_deref());
+                self.pm.fill_path(geom, &paint, FillRule::Winding, Transform::identity(), clip.as_deref().map(|c| &**c));
             }
         }
     }
@@ -258,7 +280,7 @@ impl Ctx {
         acc.path(geom, x0 as f32, y0 as f32, 1.0);
         acc.prefix();
         let clip = self.st.clip.clone();
-        composite(&mut self.pm, &acc.a, acc.stride, x0, y0, w, h, [c.red() * 255.0, c.green() * 255.0, c.blue() * 255.0], c.alpha() * self.st.alpha, self.st.blend, clip.as_deref());
+        composite(&mut self.pm, &acc.a, acc.stride, x0, y0, w, h, [c.red() * 255.0, c.green() * 255.0, c.blue() * 255.0], c.alpha() * self.st.alpha, self.st.blend, clip.as_deref(), &acc.rows);
     }
     /// canvas `shadowBlur` for filled geometry: coverage (union of `geoms`, at reduced resolution
     /// for wide blurs), gaussian-ish 3-pass box blur (sigma = blur / 2), tinted and composited
@@ -305,24 +327,119 @@ impl Ctx {
             }
         }
     }
+    /// hairline polylines (width in units) as independent butt-capped quads rasterized straight into the
+    /// coverage accumulator: no stroker, no path building (the hot path of the optional detail pass)
+    fn stroke_quads(&mut self, ls: &[Vec<P>], width: f64, c: Rgb, alpha: f64) {
+        let m = self.st.m;
+        let hw = (width * m.scale_factor() * 0.5) as f32;
+        let mut quads: Vec<[(f32, f32); 4]> = Vec::new();
+        let (mut mnx, mut mny, mut mxx, mut mxy) = (f32::MAX, f32::MAX, f32::MIN, f32::MIN);
+        for l in ls {
+            for w in l.windows(2) {
+                let (p, q) = (m.apply(w[0].x, w[0].y), m.apply(w[1].x, w[1].y));
+                let (dx, dy) = (q.0 - p.0, q.1 - p.1);
+                let ln = dx.hypot(dy);
+                if !(ln > 1e-4) || !ln.is_finite() { continue; }
+                let (nx, ny) = (-dy / ln * hw, dx / ln * hw);
+                let qd = [(p.0 + nx, p.1 + ny), (q.0 + nx, q.1 + ny), (q.0 - nx, q.1 - ny), (p.0 - nx, p.1 - ny)];
+                for v in &qd { mnx = mnx.min(v.0); mny = mny.min(v.1); mxx = mxx.max(v.0); mxy = mxy.max(v.1); }
+                quads.push(qd);
+            }
+        }
+        if quads.is_empty() { return; }
+        let Some(b) = Rect::from_ltrb(mnx, mny, mxx.max(mnx + 0.01), mxy.max(mny + 0.01)) else { return };
+        let Some((x0, y0, w, h)) = region(b, 1.0, self.pm.width(), self.pm.height()) else { return };
+        let mut acc = Acc::new(w, h);
+        let (ox, oy) = (x0 as f32, y0 as f32);
+        for q in &quads { for i in 0..4 { let (a, b) = (q[i], q[(i + 1) % 4]); acc.line(a.0 - ox, a.1 - oy, b.0 - ox, b.1 - oy); } }
+        acc.prefix();
+        let clip = self.st.clip.clone();
+        let col = rgba(c, 1.0);
+        composite(&mut self.pm, &acc.a, acc.stride, x0, y0, w, h, [col.red() * 255.0, col.green() * 255.0, col.blue() * 255.0], alpha as f32 * self.st.alpha, self.st.blend, clip.as_deref(), &acc.rows);
+    }
+    /// fill the geometry in the path builder with a repeating `tile` anchored at `o` (unit space) and rotated by
+    /// `rot` radians: exact-area coverage like `fill_solid`, texels fetched nearest-neighbour per covered pixel.
+    fn fill_tile(&mut self, tile: &Pixmap, o: P, rot: f64, opacity: f64) {
+        let Some(geom) = self.path() else { return };
+        let Some((x0, y0, w, h)) = region(geom.bounds(), 1.0, self.pm.width(), self.pm.height()) else { return };
+        let m = self.st.m;
+        let det = m.a * m.d - m.b * m.c;
+        if det.abs() < 1e-12 { return; }
+        // device -> unit -> rotated frame at `o` -> tile pixels
+        let (sr, cr) = rot.sin_cos();
+        let k = res();
+        let (ia, ib, ic, id) = (m.d / det, -m.b / det, -m.c / det, m.a / det);
+        let (ie, iff) = (-(ia * m.e + ic * m.f), -(ib * m.e + id * m.f));
+        let tx = |ux: f64, uy: f64| ((ux - o.x) * cr + (uy - o.y) * sr) * k;
+        let ty = |ux: f64, uy: f64| (-(ux - o.x) * sr + (uy - o.y) * cr) * k;
+        let (dxx, dxy) = (tx(ia, ib) - tx(0.0, 0.0), ty(ia, ib) - ty(0.0, 0.0));
+        let (dyx, dyy) = (tx(ic, id) - tx(0.0, 0.0), ty(ic, id) - ty(0.0, 0.0));
+        // large positive offsets (multiples of the tile size) make truncation behave like floor
+        let (tw, th) = (tile.width() as i32, tile.height() as i32);
+        let (bx, by) = (tx(ie, iff) + (tw * 20000) as f64, ty(ie, iff) + (th * 20000) as f64);
+        let mut acc = Acc::new(w, h);
+        acc.path(&geom, x0 as f32, y0 as f32, 1.0);
+        acc.prefix();
+        let td = tile.data();
+        let clip = self.st.clip.clone();
+        let (stride, blend) = (self.pm.width() as usize, self.st.blend);
+        let op = opacity as f32 * self.st.alpha;
+        let data = self.pm.data_mut();
+        let over = blend == BlendMode::SourceOver;
+        for y in 0..h {
+            let (lo, hi) = acc.rows[y];
+            let (xs, xe) = (lo as usize, (hi as usize + 1).min(w));
+            if lo > hi || xs >= xe { continue; }
+            let py = (y0 + y) as f64 + 0.5;
+            let px = (x0 + xs) as f64 + 0.5;
+            let (mut u, mut v) = (bx + dxx * px + dyx * py, by + dxy * px + dyy * py);
+            let crow = &acc.a[y * acc.stride..y * acc.stride + w];
+            for x in xs..xe {
+                let (cu, cv) = (u, v);
+                u += dxx;
+                v += dxy;
+                let c = crow[x];
+                if c <= 0.0 { continue; }
+                let t = &td[((((cv as i32) % th) * tw + (cu as i32) % tw) * 4) as usize..][..4];
+                if t[3] == 0 { continue; }
+                let di = (y0 + y) * stride + x0 + x;
+                let mut a = c * op;
+                if let Some(cm) = &clip { a *= cm.data()[di] as f32 * (1.0 / 255.0); }
+                if a < 1.0 / 512.0 { continue; }
+                let s = [t[0] as f32 * a, t[1] as f32 * a, t[2] as f32 * a, t[3] as f32 * a];
+                let d = &mut data[di * 4..di * 4 + 4];
+                if over {
+                    let ia = 1.0 - s[3] * (1.0 / 255.0);
+                    for k in 0..4 { d[k] = q8(s[k] + d[k] as f32 * ia); }
+                } else { blend_px(d, s, blend); }
+            }
+        }
+    }
     fn clip(&mut self) {
         let (pw, ph) = (self.pm.width(), self.pm.height());
-        let Some(mut m) = Mask::new(pw, ph) else { return };
+        let Some(mut m) = new_mask(pw, ph) else { return };
         let path = self.path();
-        if let Some((x0, y0, w, h)) = path.as_ref().and_then(|p| region(p.bounds(), 1.0, pw, ph)) {
-            let cov = coverage(&[path.as_ref().unwrap()], x0, y0, w, h, 1.0, false);
+        let mut rect = (0, 0, 0, 0);
+        if let Some((p, (x0, y0, w, h))) = path.as_ref().and_then(|p| region(p.bounds(), 1.0, pw, ph).map(|r| (p, r))) {
+            rect = (x0, y0, w, h);
+            let mut acc = Acc::new(w, h);
+            acc.path(p, x0 as f32, y0 as f32, 1.0);
+            acc.prefix();
             let old = self.st.clip.clone();
             let stride = pw as usize;
             let md = m.data_mut();
             for y in 0..h {
-                for x in 0..w {
+                let (lo, hi) = acc.rows[y];
+                let (xs, xe) = (lo as usize, (hi as usize + 1).min(w));
+                if lo > hi || xs >= xe { continue; }
+                for x in xs..xe {
                     let di = (y0 + y) * stride + x0 + x;
-                    let c = cov[y * w + x] * old.as_ref().map_or(1.0, |o| o.data()[di] as f32 * (1.0 / 255.0));
+                    let c = acc.a[y * acc.stride + x] * old.as_ref().map_or(1.0, |o| o.data()[di] as f32 * (1.0 / 255.0));
                     md[di] = (c * 255.0 + 0.5) as u8;
                 }
             }
         }
-        self.st.clip = Some(Rc::new(m));
+        self.st.clip = Some(Rc::new(Clip { m: Some(m), rect }));
     }
 }
 
@@ -348,16 +465,19 @@ fn blend_px(d: &mut [u8], s: [f32; 4], mode: BlendMode) {
 
 /// composite a coverage buffer (region x0,y0,w,h of the pixmap) with a solid colour
 #[allow(clippy::too_many_arguments)]
-fn composite(pm: &mut Pixmap, cov: &[f32], cstride: usize, x0: usize, y0: usize, w: usize, h: usize, rgb: [f32; 3], alpha: f32, mode: BlendMode, clip: Option<&Mask>) {
+fn composite(pm: &mut Pixmap, cov: &[f32], cstride: usize, x0: usize, y0: usize, w: usize, h: usize, rgb: [f32; 3], alpha: f32, mode: BlendMode, clip: Option<&Clip>, rows: &[(u32, u32)]) {
     if alpha <= 0.0 { return; }
     let stride = pm.width() as usize;
     let data = pm.data_mut();
     let [r, g, b] = rgb;
     for y in 0..h {
-        let crow = &cov[y * cstride..y * cstride + w];
-        let drow = (y0 + y) * stride + x0;
-        let dst = &mut data[drow * 4..(drow + w) * 4];
-        let mrow = clip.map(|m| &m.data()[drow..drow + w]);
+        let (lo, hi) = rows[y];
+        let (xs, xe) = (lo as usize, (hi as usize + 1).min(w));
+        if lo > hi || xs >= xe { continue; }
+        let crow = &cov[y * cstride + xs..y * cstride + xe];
+        let drow = (y0 + y) * stride + x0 + xs;
+        let dst = &mut data[drow * 4..(drow + xe - xs) * 4];
+        let mrow = clip.map(|m| &m.data()[drow..drow + xe - xs]);
         match (mode, mrow) {
             (BlendMode::SourceOver, None) => {
                 for (d, &c) in dst.chunks_exact_mut(4).zip(crow) {
@@ -396,21 +516,27 @@ fn region(b: Rect, m: f32, pw: u32, ph: u32) -> Option<(usize, usize, usize, usi
 // ------------------------------------------------------------------ fast AA rasterizer
 /// Signed-area accumulation rasterizer (font-rs style): exact-area anti-aliasing, non-zero rule.
 /// Rows are padded by 2 cells so geometry clamped to the right edge never leaks into the next row.
-struct Acc { w: usize, h: usize, stride: usize, a: Vec<f32> }
+/// `rows` keeps the touched cell range of every row so that prefix-summing / compositing / clearing only visit
+/// cells a shape actually reached (sparse shapes in big boxes: thin strokes, hatching, seams). Pool buffers are all-zero.
+struct Acc { w: usize, h: usize, stride: usize, a: Vec<f32>, rows: Vec<(u32, u32)> }
 thread_local! { static POOL: std::cell::RefCell<Vec<Vec<f32>>> = const { std::cell::RefCell::new(Vec::new()) }; }
 impl Drop for Acc {
     fn drop(&mut self) {
-        let a = std::mem::take(&mut self.a);
-        if a.capacity() > 0 { POOL.with(|p| { let mut p = p.borrow_mut(); if p.len() < 8 { p.push(a); } }); }
+        let mut a = std::mem::take(&mut self.a);
+        if a.capacity() > 0 {
+            for (y, &(lo, hi)) in self.rows.iter().enumerate() {
+                if lo <= hi { let s = y * self.stride; let e = (s + hi as usize + 1).min(a.len()); a[s + lo as usize..e].fill(0.0); }
+            }
+            POOL.with(|p| { let mut p = p.borrow_mut(); if p.len() < 8 { p.push(a); } });
+        }
     }
 }
 impl Acc {
     fn new(w: usize, h: usize) -> Acc {
         let n = (w + 2) * h;
         let mut a = POOL.with(|p| p.borrow_mut().pop()).unwrap_or_default();
-        a.clear();
-        a.resize(n, 0.0);
-        Acc { w, h, stride: w + 2, a }
+        if a.len() < n { a.resize(n, 0.0); }
+        Acc { w, h, stride: w + 2, a, rows: vec![(u32::MAX, 0); h] }
     }
     fn line(&mut self, x0: f32, y0: f32, x1: f32, y1: f32) {
         if y0 == y1 || !(x0.is_finite() && y0.is_finite() && x1.is_finite() && y1.is_finite()) { return; }
@@ -436,13 +562,16 @@ impl Acc {
     #[inline]
     fn span(&mut self, y: usize, xa: f32, xb: f32, d: f32) {
         let ls = y * self.stride;
-        let a = &mut self.a;
         let (x0, x1) = if xa < xb { (xa, xb) } else { (xb, xa) };
         // x0, x1 >= 0 (clamped): truncation is floor; avoids libm calls on targets without SSE4.1
         let x0i = x0 as usize;
         let x0f = x0i as f32;
         let x1t = x1 as usize;
         let x1i = if (x1t as f32) < x1 { x1t + 1 } else { x1t };
+        let r = &mut self.rows[y];
+        r.0 = r.0.min(x0i as u32);
+        r.1 = r.1.max(x1i.max(x0i + 1) as u32);
+        let a = &mut self.a;
         let x1c = x1i as f32;
         if x1i <= x0i + 1 {
             let xmf = 0.5 * (xa + xb) - x0f;
@@ -513,8 +642,11 @@ impl Acc {
     fn prefix(&mut self) {
         let (w, st) = (self.w, self.stride);
         for y in 0..self.h {
+            let (lo, hi) = self.rows[y];
+            let end = (hi as usize + 1).min(w);
+            if lo > hi || lo as usize >= end { continue; }
             let mut acc = 0.0f32;
-            for v in self.a[y * st..y * st + w].iter_mut() { acc += *v; *v = acc.abs().min(1.0); }
+            for v in self.a[y * st + lo as usize..y * st + end].iter_mut() { acc += *v; *v = acc.abs().min(1.0); }
         }
     }
     /// prefix-sum the accumulation rows into coverage, compacting to a dense w*h buffer in place
@@ -660,7 +792,11 @@ impl Shape {
 }
 fn poly(pts: Vec<P>, smooth: bool) -> Geo { Geo::Poly(pts, smooth) }
 
-enum After { Body, Head, Hair, Charge(Vec<P>, f64) }
+enum After {
+    Body, Head, Hair(Option<Geo>), Charge(Vec<P>, f64),
+    /// optional physical detail layers (`rig/detail.rs`, `body.rs`, `face.rs`)
+    Arm(bool), Leg(bool), Belt, Flap(Vec<P>, Rgb, bool), Cape(Vec<P>, Vec<P>, Rgb), Strands(Vec<P>, Vec<P>, Rgb, usize, Geo),
+}
 struct Layer { shapes: Vec<Shape>, after: Option<After>, aura: Option<Rgb> }
 fn layer(shapes: Vec<Shape>) -> Layer { Layer { shapes, after: None, aura: None } }
 
@@ -937,6 +1073,8 @@ fn light() -> P { norm(pt(0.55, -0.85)) }
 struct Rig<'a> {
     style: &'a Value, pose: &'a Value, sk: Skel, c: Colors, trail: f64, phase: f64, wind: f64,
     hair: Value, ht: String, helmet: bool, top: String, sleeves: String, pants: String,
+    /// visual torso outline (chest / waist multipliers); equals `sk.torso_pts` by default
+    vt: Vec<P>,
 }
 
 impl<'a> Rig<'a> {
@@ -967,13 +1105,13 @@ impl<'a> Rig<'a> {
         let sk = &self.sk;
         let (sh, el, wr, hd, fa) = if front { (sk.sh_f, sk.el_f, sk.wr_f, sk.hand_f, sk.fore_af) } else { (sk.sh_b, sk.el_b, sk.wr_b, sk.hand_b, sk.fore_ab) };
         let dk = |c: Rgb| if front { c } else { back_of(c) };
-        let (w, s) = (sk.w, sk.s);
+        let _ = sk.s;
+        let w = sk.w;
         let skin = self.c.c("skin");
         let top_c = self.c.c("top");
         let sleeves = self.sleeves.as_str();
         let mut out = vec![];
-        let fm = |a: f64, b: f64| if sk.fem { a } else { b };
-        let (up_r0, up_r1, fo_r0, fo_r1) = (3.8 * w * fm(0.82, 1.0), 3.0 * w * fm(0.82, 1.0), 3.2 * w * fm(0.82, 1.0), 2.5 * w * fm(0.85, 1.0));
+        let (up_r0, up_r1, fo_r0, fo_r1) = self.arm_radii();
         reg(bb, vec![sh, el, wr, hd], 6.0 * w);
         // upper arm + deltoid
         out.push(shp(Geo::Capsule(sh, el, up_r0, up_r1), dk(if matches!(sleeves, "none" | "wide" | "short") { skin } else { top_c }), 2.2));
@@ -995,13 +1133,7 @@ impl<'a> Rig<'a> {
             }
         }
         if sleeves == "wide" {
-            let g = pt(0.0, 1.0);
-            let d = norm(sub(wr, el));
-            let n = norm(perp(sub(el, sh)));
-            let s_end = add(el, d, sk.l.fore * 0.55);
-            let n2 = norm(perp(d));
-            let hang = add(g, dir(self.trail), 0.3);
-            let pts = reg(bb, vec![add(sh, n, 4.5 * w), add(el, n, 5.0 * w), add(s_end, n2, 6.5 * w), add(add(s_end, n2, -6.5 * w), hang, 7.0 * s), add(add(el, n, -5.5 * w), hang, 4.0 * s), add(sh, n, -4.5 * w)], 0.0);
+            let pts = reg(bb, self.wide_sleeve(front), 0.0);
             out.push(shp(poly(pts, true), dk(top_c), 3.0).line(true));
         }
         // gloves / wraps
@@ -1045,7 +1177,8 @@ impl<'a> Rig<'a> {
         reg(bb, foot.clone(), 1.0);
         let baggy = match pt_ { "gi" => 1.28, "hakama" => 1.5, "baggy" => 1.35, _ => 1.0 };
         let leg_skin = matches!(pt_, "trunks" | "skirt" | "shorts");
-        let (th_r0, th_r1, sh_r0, sh_r1) = (6.0 * w * if sk.fem { 0.92 } else { 1.0 }, 4.3 * w, 4.4 * w, 2.9 * w);
+        let lk = self.leg_scale();
+        let (th_r0, th_r1, sh_r0, sh_r1) = (6.0 * w * if sk.fem { 0.92 } else { 1.0 } * lk, 4.3 * w * lk, 4.4 * w * lk, 2.9 * w * lk);
         let leg_col = if leg_skin { self.c.get("legs").unwrap_or(skin) } else { pants_c };
         let bg = if leg_skin { 1.0 } else { baggy };
         out.push(shp(Geo::Capsule(hp, kn, th_r0 * bg, th_r1 * bg), dk(leg_col), 2.8));
@@ -1084,6 +1217,12 @@ impl<'a> Rig<'a> {
         out
     }
 
+    /// the flap shape plus its (optional) detail overlay
+    fn flap_layer(&self, sh: Shape, front: bool) -> Layer {
+        let after = match &sh.geo { Geo::Poly(pts, _) => Some(After::Flap(pts.clone(), sh.fill, front)), _ => None };
+        Layer { shapes: vec![sh], after, aura: None }
+    }
+
     fn robe_flap(&self, bb: &mut BBox, front: bool) -> Option<Shape> {
         let skirt = gv(self.style, "skirt").filter(|v| truthy(Some(v)))?;
         if gstr(skirt, "type") == Some("coat") { return None; }
@@ -1116,6 +1255,7 @@ impl<'a> Rig<'a> {
 
         // ---------------- back accessories
         let mut back_l = vec![];
+        let mut back_extra: Vec<Layer> = vec![];
         if gt(style, "cape") {
             let cp = gv(style, "cape").unwrap();
             let clen = gnum(cp, "length", 55.0) * s;
@@ -1123,10 +1263,13 @@ impl<'a> Rig<'a> {
             let b2 = add(sk.sh_f, sk.up, 1.0);
             let mut pts = wave_spine(a, trail * 0.6, clen, 10.0, phase, 6, 0.0);
             let mut sp_b = wave_spine(b2, trail * 0.45, clen * 0.95, 9.0, phase + 1.3, 6, 0.0);
+            let cape_rails = (pts.clone(), sp_b.clone());
             sp_b.reverse();
             pts.extend(sp_b);
             let pts = reg(bb, pts, 0.0);
-            back_l.push(shp(poly(pts, true), back_of(c.cref(gv(cp, "color"), "cloth")), 4.0));
+            let cape_col = back_of(c.cref(gv(cp, "color"), "cloth"));
+            back_l.push(shp(poly(pts, true), cape_col, 4.0));
+            back_extra.push(Layer { shapes: vec![], after: Some(After::Cape(cape_rails.0, cape_rails.1, cape_col)), aura: None });
         }
         let hair = &self.hair;
         let hcol = c.c("hair");
@@ -1146,18 +1289,30 @@ impl<'a> Rig<'a> {
                 tips.push(add(base, dir(trail * 0.5), 6.0 + hash(i as f64 + 3.0) * 6.0));
                 tips.push(lerp(e1, e2, (i as f64 + 1.0) / 4.0));
             }
+            let rails = (sp1.clone(), sp2.clone());
             let mut pts = sp1;
             pts.extend(tips);
             sp2.reverse();
             pts.extend(sp2);
             let pts = reg(bb, pts, 0.0);
-            back_l.push(shp(poly(pts, true), mix(hcol, shade_of(hcol), 0.35), 4.0).rim(0.8));
+            let hc2 = mix(hcol, shade_of(hcol), 0.35);
+            let ns = gnum(hair, "strands", 0.0) as usize;
+            if ns > 0 { back_extra.push(Layer { shapes: vec![], after: Some(After::Strands(rails.0, rails.1, hc2, ns + 2, Geo::Poly(pts.clone(), true))), aura: None }); }
+            back_l.push(shp(poly(pts, true), hc2, 4.0).rim(0.8));
         }
         if htype == Some("ponytail") {
             let hl = gnum(hair, "length", 40.0) * s;
             let root = self.h(-0.75 * r, -0.65 * r);
             let sp = wave_spine(root, trail * 0.9 - 5.0, hl, 16.0, phase, 8, -10.0);
             let pts = reg(bb, ribbon_pts(&sp, 8.0 * s, 1.5), 0.0);
+            let ns = gnum(hair, "strands", 0.0) as usize;
+            if ns > 0 {
+                let n = sp.len();
+                let ra: Vec<P> = pts[..n].to_vec();
+                let mut rb: Vec<P> = pts[n..].to_vec();
+                rb.reverse();
+                back_extra.push(Layer { shapes: vec![], after: Some(After::Strands(ra, rb, hcol, ns, Geo::Poly(pts.clone(), true))), aura: None });
+            }
             back_l.push(shp(poly(pts, true), hcol, 2.2));
         }
         if gt(style, "headband") {
@@ -1197,12 +1352,15 @@ impl<'a> Rig<'a> {
                 let col = c.cref(gv(sk_, "color"), "top");
                 let wst = add(sk.hip, sk.up, 3.0);
                 let p1 = reg(bb, self.flap(add(wst, sk.fwd, -3.0 * w), sk.th_ab - 12.0, sk.sh_ab - 20.0, sl, 6.0 * w, 9.0 * w, 0.0, 0.5), 0.0);
+                back_extra.push(Layer { shapes: vec![], after: Some(After::Flap(p1.clone(), back_of(col), false)), aura: None });
                 back_l.push(shp(poly(p1, true), back_of(col), 3.0).line(true));
                 let p2 = reg(bb, self.flap(add(wst, sk.fwd, -w), sk.th_af * 0.5 - 14.0, sk.sh_af * 0.5 - 22.0, sl * 0.97, 6.0 * w, 9.0 * w, 1.4, 0.5), 0.0);
+                back_extra.push(Layer { shapes: vec![], after: Some(After::Flap(p2.clone(), back_of(col), false)), aura: None });
                 back_l.push(shp(poly(p2, true), back_of(col), 3.0).line(true));
             }
         }
         if !back_l.is_empty() { layers.push(layer(back_l)); }
+        layers.extend(back_extra);
 
         // weapon
         let wl = wg.map(|wg| {
@@ -1229,9 +1387,10 @@ impl<'a> Rig<'a> {
         let weapon_back = gv(style, "weapon").is_some_and(|wp| truthy(Some(wp)) && gstr(wp, "hand").unwrap_or("F") == "B");
         let mut wl = wl;
         if weapon_back { if let Some(l) = wl.take() { layers.push(l); } }
-        layers.push(layer(self.arm_shapes(bb, false)));
-        layers.push(layer(self.leg_shapes(bb, false)));
-        if let Some(fb) = self.robe_flap(bb, false) { layers.push(layer(vec![fb])); }
+        layers.push(Layer { shapes: self.arm_shapes(bb, false), after: Some(After::Arm(false)), aura: None });
+        if self.sv("pauldron").is_some() && gt(style, "shoulderPads") { layers.push(layer(self.pauldron_shapes(false))); }
+        layers.push(Layer { shapes: self.leg_shapes(bb, false), after: Some(After::Leg(false)), aura: None });
+        if let Some(fb) = self.robe_flap(bb, false) { layers.push(self.flap_layer(fb, false)); }
 
         // ---------------- body
         let mut body = vec![];
@@ -1242,7 +1401,7 @@ impl<'a> Rig<'a> {
             Geo::Ellipse(add(sk.hip, sk.up, 2.0), (if pants_t == "trunks" { 6.3 } else { 7.6 }) * w * (if pants_t == "gi" { 1.1 } else { 1.0 }), (if tr_sh { 4.2 } else { 6.2 }) * w, sk.fwd.y.atan2(sk.fwd.x)),
             if tr_sh { pants_c } else if pants_t == "skirt" { c.c("top") } else { pants_c }, 2.5,
         ));
-        body.push(shp(poly(sk.torso_pts.clone(), true), torso_col, 4.2).rim(0.9));
+        body.push(shp(poly(self.vt.clone(), true), torso_col, 4.2).rim(0.9));
         let neck_r = 2.9 * w.powf(0.8);
         body.push(shp(Geo::Capsule(sk.neck, self.h(-0.05 * r, 0.45 * r), neck_r * 1.05, neck_r), skin, 1.8));
         layers.push(Layer { shapes: body, after: Some(After::Body), aura: None });
@@ -1265,12 +1424,12 @@ impl<'a> Rig<'a> {
                 }
                 shapes.push(shp(Geo::Ellipse(knot, 2.2 * s, 1.8 * s, 0.0), bc, 0.8));
             }
-            Some(layer(shapes))
+            Some(Layer { shapes, after: Some(After::Belt), aura: None })
         } else { None };
 
         // ---------------- front leg + front flap + belt
-        layers.push(layer(self.leg_shapes(bb, true)));
-        if let Some(ff) = self.robe_flap(bb, true) { layers.push(layer(vec![ff])); }
+        layers.push(Layer { shapes: self.leg_shapes(bb, true), after: Some(After::Leg(true)), aura: None });
+        if let Some(ff) = self.robe_flap(bb, true) { layers.push(self.flap_layer(ff, true)); }
         if let Some(bl) = belt_layer { layers.push(bl); }
         if gt(style, "cape") && gt(gv(style, "cape").unwrap(), "collar") {
             let cp = gv(style, "cape").unwrap();
@@ -1301,6 +1460,7 @@ impl<'a> Rig<'a> {
 
         // ---------------- hair
         let mut hair_shapes = vec![];
+        let mut hair_geo: Option<Geo> = None;
         let ht = self.ht.as_str();
         if ht != "none" && ht != "bald" && !helmet {
             let n = gnum(hair, "spikes", match ht { "spiky" => 8.0, "wild" | "mane" => 9.0, "short" => 7.0, _ => 6.0 });
@@ -1331,7 +1491,9 @@ impl<'a> Rig<'a> {
             pts.push((a_e.cos() * 1.04 * 0.95, a_e.sin() * 1.04));
             if matches!(ht, "mane" | "wild" | "long" | "flowing") { pts.extend([(-0.7, 0.95), (-0.45, 0.6)]); } else { pts.extend([(-0.62, 0.72), (-0.42, 0.45)]); }
             let hp = reg(bb, self.hp(&pts), 1.0);
-            hair_shapes.push(shp(Geo::Mixed(hp.into_iter().enumerate().map(|(i, p)| (p, i >= 5 && (i - 5) % 2 == 1)).collect()), hcol, 3.0).rim(0.9));
+            let hg = Geo::Mixed(hp.into_iter().enumerate().map(|(i, p)| (p, i >= 5 && (i - 5) % 2 == 1)).collect());
+            hair_geo = Some(hg.clone());
+            hair_shapes.push(shp(hg, hcol, 3.0).rim(0.9));
             // bangs
             let bangs = gnum(hair, "bangs", match ht { "spiky" => 3.0, "short" => 2.0, _ => 3.0 });
             let mut i = 0.0;
@@ -1356,7 +1518,7 @@ impl<'a> Rig<'a> {
             let fin = self.hp(&[(-0.5, -0.95), (-1.45, -1.3), (-1.6, -1.1), (-0.85, -0.55)]);
             hair_shapes.push(shp(poly(reg(bb, fin, 0.0), false), c.c("accent"), 0.8));
         }
-        if !hair_shapes.is_empty() { layers.push(Layer { shapes: hair_shapes, after: Some(After::Hair), aura: None }); }
+        if !hair_shapes.is_empty() { layers.push(Layer { shapes: hair_shapes, after: Some(After::Hair(hair_geo)), aura: None }); }
 
         // headband / horns / hat
         let mut top_shapes = vec![];
@@ -1392,12 +1554,15 @@ impl<'a> Rig<'a> {
             b.no_outline = true;
             top_shapes.push(b);
         }
+        top_shapes.extend(self.head_gear());
         if !top_shapes.is_empty() { layers.push(layer(top_shapes)); }
 
         // ---------------- front arm (+weapon in front hand before it)
         if let Some(l) = wl.take() { layers.push(l); }
-        layers.push(layer(self.arm_shapes(bb, true)));
-        if gt(style, "shoulderPads") {
+        layers.push(Layer { shapes: self.arm_shapes(bb, true), after: Some(After::Arm(true)), aura: None });
+        if gt(style, "shoulderPads") && self.sv("pauldron").is_some() {
+            layers.push(layer(self.pauldron_shapes(true)));
+        } else if gt(style, "shoulderPads") {
             let d = dir(sk.up_af);
             layers.push(layer(vec![shp(Geo::Ellipse(add(sk.sh_f, d, 1.5), 6.2 * w, 4.4 * w, d.y.atan2(d.x) + PI / 2.0), c.c("metal"), 1.8).rim(0.6).line(true)]));
         }
@@ -1417,7 +1582,13 @@ impl<'a> Rig<'a> {
         match a {
             After::Body => self.draw_body(ctx),
             After::Head => self.draw_head(ctx),
-            After::Hair => self.draw_hair(ctx),
+            After::Hair(g) => { self.draw_hair(ctx); if let Some(g) = g { self.hair_detail(ctx, g); } }
+            After::Arm(f) => self.arm_detail(ctx, *f),
+            After::Leg(f) => self.leg_detail(ctx, *f),
+            After::Belt => self.belt_detail(ctx),
+            After::Flap(pts, col, f) => self.flap_detail(ctx, pts, *col, *f),
+            After::Cape(a, b, col) => self.cape_detail(ctx, a, b, *col),
+            After::Strands(a, b, col, n, g) => self.rail_strands(ctx, a, b, *col, *n, g),
             After::Charge(ps, rr) => { for p in ps { glow_orb(ctx, *p, *rr, self.c.c("energy"), self.phase); } }
         }
     }
@@ -1435,7 +1606,7 @@ impl<'a> Rig<'a> {
         let dot = |ctx: &mut Ctx, p: P, r: f64, col: Rgb| { ctx.begin(); ctx.arc(p.x, p.y, r, 0.0, PI * 2.0); ctx.fill(&sol(col, 1.0)); };
         ctx.save();
         ctx.begin();
-        poly(sk.torso_pts.clone(), true).emit(ctx, 0.0, 0.0);
+        poly(self.vt.clone(), true).emit(ctx, 0.0, 0.0);
         ctx.clip();
         let top = self.top.as_str();
         if top == "gi" || top == "robe" {
@@ -1511,6 +1682,7 @@ impl<'a> Rig<'a> {
             }
             for u in [8.0, 4.0] { line(ctx, &[t(-6.0 * w, u * tl), t(7.0 * w, u * tl)], sol(shade_of(top_c), 0.9), 0.5); }
         }
+        if self.any_body_detail() { self.draw_body_detail(ctx); }
         ctx.restore();
     }
 
@@ -1531,6 +1703,7 @@ impl<'a> Rig<'a> {
             ctx.begin(); ctx.arc(-0.12, 0.22, 0.12, -1.2, 1.6); ctx.stroke_w(&sol(shade_of(skin), 1.0), 0.06);
             // blush / cheek shade
             ctx.begin(); ctx.ellipse(0.55, 0.52, 0.16, 0.07, 0.0, 0.0, PI * 2.0); ctx.fill(&sol([255, 0x80, 0x80], if sk.fem { 0.35 } else { 0.12 }));
+            self.face_pre(ctx);
         }
         let eye = |ctx: &mut Ctx, cx: f64, cy: f64, w: f64, far: bool| {
             let ang = if eyes_t == "fierce" || face == "shout" || face == "angry" { 0.22 } else if eyes_t == "cute" { -0.05 } else { 0.08 };
@@ -1600,10 +1773,11 @@ impl<'a> Rig<'a> {
             }
         }
         if gt(style, "scar") { ctx.begin(); ctx.move_to(0.5, -0.05); ctx.line_to(0.75, 0.42); ctx.stroke_w(&sol([0xa0, 0x30, 0x40], 0.9), 0.06); }
-        if gt(style, "facePaint") {
+        if gv(style, "facePaint").is_some_and(|v| !v.is_object()) && gt(style, "facePaint") {
             ctx.begin(); ctx.move_to(0.25, 0.42); ctx.line_to(0.62, 0.4); ctx.move_to(0.3, 0.52); ctx.line_to(0.6, 0.5);
             ctx.stroke_w(&sol(c.cref(gv(style, "facePaint"), ""), 1.0), 0.07);
         }
+        self.face_post(ctx);
         ctx.restore();
     }
 
@@ -1709,8 +1883,12 @@ fn fill_shape(ctx: &mut Ctx, s: &Shape) {
     let clip = ctx.st.clip.clone();
     let stride = ctx.pm.width() as usize;
     let data = ctx.pm.data_mut();
+    let prow = &acc.rows;
     for y in 0..h {
-        for x in 0..w {
+        let (lo, hi) = prow[y + pad];
+        if lo > hi { continue; }
+        let (xs, xe) = ((lo as usize).saturating_sub(pad), ((hi as usize) + 1).saturating_sub(pad).min(w));
+        for x in xs..xe {
             let mut a = padded[(y + pad) * pw + x + pad];
             if a <= 0.0 { continue; }
             let di = (y0 + y) * stride + x0 + x;
@@ -1757,8 +1935,9 @@ pub fn render_pose(style: &Value, pose: &Value, active: Option<&ActiveSpec>, wit
     let hair = gv(style, "hair").cloned().unwrap_or_else(|| serde_json::json!({ "type": "short" }));
     let top = gstr(style, "top").unwrap_or("gi").to_string();
     let sleeves = gstr(style, "sleeves").map(str::to_string).unwrap_or_else(|| (if top == "tank" || top == "bare" { "none" } else if top == "robe" { "wide" } else { "long" }).to_string());
+    let vt = Rig::vis_torso(&sk, style);
     let rig = Rig {
-        style, pose, c, trail, phase: gnum(pose, "phase", 0.0), wind,
+        vt, style, pose, c, trail, phase: gnum(pose, "phase", 0.0), wind,
         ht: gstr(&hair, "type").unwrap_or("short").to_string(), helmet: gstr(&hair, "type") == Some("helmet"), hair,
         top, sleeves, pants: gstr(style, "pants").unwrap_or("gi").to_string(), sk,
     };

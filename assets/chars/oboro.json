@@ -93,7 +93,40 @@
    },
    "undershirt": "undershirt",
    "scale": 1.04,
-   "scar": true
+   "scar": true,
+   "facePaint": {
+    "type": "tears",
+    "color": "#c8102e",
+    "alpha": 0.8
+   },
+   "brow": {
+    "thick": 0.8,
+    "shape": "angry"
+   },
+   "faceShade": true,
+   "emblem": {
+    "type": "moon",
+    "color": "#c8102e",
+    "where": "back",
+    "size": 2.1
+   },
+   "weave": "hatch",
+   "folds": 1.4,
+   "hem": true,
+   "stitch": true,
+   "sash": {
+    "color": "#c8102e",
+    "rounds": true
+   },
+   "pauldron": "layered",
+   "earring": true,
+   "footwear": {
+    "sole": true,
+    "split": true
+   },
+   "strands": true,
+   "shine": true,
+   "veins": false
   },
   "poses": {
    "idle0": {

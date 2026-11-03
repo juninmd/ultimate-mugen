@@ -37,6 +37,10 @@ pub enum Screen {
 #[derive(Default)]
 pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, sess: Option<Session> }
 
+/// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
+#[derive(Clone)]
+pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>> }
+
 /// Team battle state: sequence (KOF-style turns, winner keeps its remaining life) or parallel (2v2 simultaneous).
 #[derive(Clone)]
 pub struct Team { pub members: [Vec<usize>; 2], pub idx: [usize; 2], pub life: [f32; 2], /** KOF XV: the team shares one super meter */ pub power: [f32; 2], pub ko: [Vec<bool>; 2], pub simul: bool }
@@ -65,6 +69,9 @@ pub struct App {
     pub settings: Settings,
     pending: Pending,
     pub team: Option<Team>,
+    /// last finished fight (replayable) and the replay being played now
+    last_fight: Option<Replay>,
+    pub replaying: Option<Replay>,
     /// fighters per team in the team modes (2..=5)
     pub team_n: usize,
     pub team_pick: Vec<usize>,
@@ -126,7 +133,7 @@ impl App {
         App {
             reg, ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, pending: Pending::default(), team: None, team_n: 3, team_pick: vec![], sel_filter: 0, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
+            settings, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
         }
     }
 
@@ -609,7 +616,9 @@ impl App {
                 (_, 0) => Pilot::Human(0), _ => Pilot::Cpu(Ai::new(lvl, 99)),
             } };
             let mut pilots = vec![];
+            let replay = self.replaying.clone();
             for k in 0..teams[0].len().max(teams[1].len()) { for side in 0..2 { if teams[side].get(k).is_some() { pilots.push(if k == 0 { leader(side) } else { Pilot::Cpu(Ai::new((lvl - 1).max(1), 31 + (side * 7 + k) as u32)) }); } } }
+            if let Some(r) = &replay { for (slot, p) in pilots.iter_mut().enumerate() { *p = Pilot::Replay(r.rec.iter().map(|b| b.get(slot).copied().unwrap_or(0)).collect(), 0); } }
             let (simul, seq) = (self.team.as_ref().is_some_and(|t| t.simul), self.team.as_ref().is_some_and(|t| !t.simul));
             let life = self.team.as_ref().filter(|t| !t.simul).map(|t| t.life).unwrap_or([1.0, 1.0]);
             let info = self.team.as_ref().map(|t| crate::session::TeamInfo {
@@ -618,6 +627,7 @@ impl App {
             });
             let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, seq, life);
             sess.team = info;
+            sess.is_replay = replay.is_some();
             if seq { if let Some(t) = &self.team { for side in 0..2 { if let Some(f) = sess.m.fighters.iter_mut().find(|f| !f.is_helper && f.side == side) { f.power = t.power[side].min(f.power_max); } } } }
             sess.r.debug = self.debug_boxes;
             if seq && self.team.as_ref().is_some_and(|t| t.idx != [0, 0]) { sess.vfx.banner("PRÓXIMO LUTADOR", &format!("{} vs {}", self.reg.chars[self.sel.0].name, self.reg.chars[self.sel.1].name), [0.4, 0.9, 1.0]); }
@@ -761,7 +771,11 @@ impl App {
         if self.c.touch.enabled { self.ui.rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.0, 0.0, 0.0, 0.35)); self.ui.text("II", VW / 2.0, pb.1 + 30.0, 20.0, WHITE, Align::Center, true); }
         let s = self.session.as_mut().unwrap();
         if s.paused { self.pause_menu().await; return; }
-        if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) { self.screen = Screen::Results { winner: w, cur: 0 }; } } }
+        if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
+                // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
+                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.simul) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone() }); } }
+                self.screen = Screen::Results { winner: w, cur: 0 };
+            } } }
     }
 
     /// Sequence mode: after a bout the winner keeps (most of) its life and the loser's next teammate steps in.
@@ -846,25 +860,41 @@ impl App {
         let pal = if winner == 1 && self.sel.0 == self.sel.1 { 2 } else { 1 };
         if let Ok(d) = e.load(pal) { let t = self.preview_t; self.draw_char(&d, if d.anims.contains_key(&181) { 181 } else { 0 }, t, 330.0, 480.0, 260.0, false); }
         self.ui.text_bold(&title, 480.0, 300.0, 44.0, hex("#ffcc33"), BLACK, Align::Left);
-        let items = ["Revanche", "Personagens", "Menu"];
-        if self.c.pressed(nav::RIGHT) { cur = (cur + 1) % 3; }
-        if self.c.pressed(nav::LEFT) { cur = (cur + 2) % 3; }
+        let can_replay = self.last_fight.is_some();
+        let items: Vec<&str> = if can_replay { vec!["Revanche", "Replay", "Personagens", "Menu"] } else { vec!["Revanche", "Personagens", "Menu"] };
+        let nitems = items.len();
+        if self.c.pressed(nav::RIGHT) { cur = (cur + 1) % nitems; }
+        if self.c.pressed(nav::LEFT) { cur = (cur + nitems - 1) % nitems; }
         let mut ok = self.c.pressed(nav::OK | nav::START);
         for (i, it) in items.iter().enumerate() {
-            let (bx, by) = (480.0 + i as f32 * 210.0, 380.0);
-            if self.clicked_rect(bx, by, 190.0, 50.0) { cur = i; ok = true; }
-            self.ui.rect(bx, by, 190.0, 50.0, if i == cur { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.08) });
-            self.ui.text(it, bx + 95.0, by + 33.0, 22.0, WHITE, Align::Center, true);
+            let (bx, by) = (480.0 + i as f32 * 160.0, 380.0);
+            if self.clicked_rect(bx, by, 150.0, 50.0) { cur = i; ok = true; }
+            self.ui.rect(bx, by, 150.0, 50.0, if i == cur { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.08) });
+            self.ui.text(it, bx + 75.0, by + 33.0, 20.0, WHITE, Align::Center, true);
         }
         self.screen = Screen::Results { winner, cur };
         if ok {
             self.audio.stop_music();
-            match cur {
-                0 => { if let Some((_, i)) = self.arcade.as_mut() { *i = (*i).min(5); } self.reset_team(); self.start_fight().await; }
-                1 => { self.session = None; self.team = None; self.team_pick.clear(); self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }; }
-                _ => { self.session = None; self.team = None; self.screen = Screen::Menu { cur: 0 }; }
+            // with a replay available the menu is Revanche / Replay / Personagens / Menu; without it Revanche / Personagens / Menu
+            let choice = if can_replay { cur } else if cur >= 1 { cur + 1 } else { 0 };
+            match choice {
+                0 => { self.replaying = None; if let Some((_, i)) = self.arcade.as_mut() { *i = (*i).min(5); } self.reset_team(); self.start_fight().await; }
+                1 => { self.start_replay().await; }
+                2 => { self.replaying = None; self.session = None; self.team = None; self.team_pick.clear(); self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }; }
+                _ => { self.replaying = None; self.session = None; self.team = None; self.screen = Screen::Menu { cur: 0 }; }
             }
         }
+    }
+
+    /// Snapshot the running session as the replayable "last fight" (used by the screenshot tour's determinism check).
+    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone() }); } }
+
+    /// Re-simulate the last finished fight from its recorded inputs (deterministic engine → identical fight).
+    pub async fn start_replay(&mut self) {
+        let Some(r) = self.last_fight.clone() else { return };
+        self.mode = r.mode; self.team = r.team.clone(); self.sel = r.sel;
+        self.replaying = Some(r);
+        self.start_fight().await;
     }
 
     fn controls_screen(&mut self) {

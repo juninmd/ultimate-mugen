@@ -6,10 +6,10 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use crate::session::TeamInfo;
 
-pub struct Hud { pub inputs: Vec<(u32, u16)>, trail: [f32; 2], combo: [(i32, f32, i32); 2], pop: [f32; 2], last_hits: [i32; 2] }
+pub struct Hud { pub replay: bool, pub inputs: Vec<(u32, u16)>, trail: [f32; 2], combo: [(i32, f32, i32); 2], pop: [f32; 2], last_hits: [i32; 2] }
 
 impl Hud {
-    pub fn new() -> Self { Hud { inputs: vec![], trail: [1.0, 1.0], combo: [(0, 0.0, 0); 2], pop: [0.0; 2], last_hits: [0; 2] } }
+    pub fn new() -> Self { Hud { replay: false, inputs: vec![], trail: [1.0, 1.0], combo: [(0, 0.0, 0); 2], pop: [0.0; 2], last_hits: [0; 2] } }
 
     /// Test/demo hook: pretend a combo just finished (shows in the training "last combo" line).
     pub fn inject_last_combo(&mut self, hits: i32, dmg: f32) { self.combo[0] = (hits, dmg, 0); }
@@ -194,6 +194,11 @@ impl Hud {
             for (dx, dy) in [(-o, 0.0), (o, 0.0), (0.0, -o), (0.0, o), (-o, -o), (o, o), (-o, o), (o, -o), (o, o * 2.0)] { text(&a.text, w / 2.0 + dx, m.view_h * 0.42 + size * 0.35 + dy, size, Color::new(0.07, 0.02, 0.12, al), Align::Center, true); }
             let col = if ko { Color::new(1.0, 0.25, 0.25, al) } else { Color::new(1.0, 0.82, 0.25, al) };
             text(&a.text, w / 2.0, m.view_h * 0.42 + size * 0.35, size, col, Align::Center, true);
+        }
+        if self.replay {
+            let a = 0.6 + 0.4 * (gt * 3.0).sin().abs();
+            draw_circle(p(w / 2.0 - 22.0, 49.0).x, p(0.0, 49.0).y, 2.4 * s, Color::new(1.0, 0.2, 0.25, a));
+            text("REPLAY", w / 2.0 + 2.0, 51.5, 7.0, Color::new(1.0, 1.0, 1.0, 0.9), Align::Center, true);
         }
         if m.training {
             text("TREINO", w / 2.0, 46.0, 7.0, Color::new(1.0, 1.0, 1.0, 0.8), Align::Center, true);

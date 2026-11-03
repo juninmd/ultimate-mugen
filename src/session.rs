@@ -14,7 +14,8 @@ use ume_engine::fx::build_fx;
 use ume_engine::input::{k, InputSource};
 use ume_engine::matchs::{Event, Match};
 
-pub enum Pilot { Human(usize), Cpu(Ai), Dummy }
+/// `Replay(inputs, cursor)`: feeds back recorded inputs (the simulation is deterministic, so this reproduces the fight exactly).
+pub enum Pilot { Human(usize), Cpu(Ai), Dummy, Replay(Vec<u32>, usize) }
 
 /// Team roster shown by the HUD (sequence / parallel team modes).
 #[derive(Clone, Default)]
@@ -35,6 +36,9 @@ pub struct Session {
     pub over_timer: f32,
     /// last inputs of the human player as (bits, frames held) — shown in training mode (SF6-style input history)
     pub inputs: Vec<(u32, u16)>,
+    /// inputs of every root slot for every simulated tick (the data a replay is rebuilt from)
+    pub rec: Vec<Vec<u32>>,
+    pub is_replay: bool,
 }
 
 thread_local! { static FX: Arc<CharDef> = build_fx(true); }
@@ -66,7 +70,7 @@ impl Session {
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![] }
+        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false }
     }
 
     fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {
@@ -90,6 +94,7 @@ impl Session {
             bits[slot] = match p {
                 Pilot::Cpu(ai) => ai.poll(&self.m, fi),
                 Pilot::Dummy => 0,
+                Pilot::Replay(v, i) => { let b = v.get(*i).copied().unwrap_or(0); *i += 1; b }
                 Pilot::Human(s) => {
                     let mut b = c.player_bits(*s, self.duo);
                     // simple-mode buttons for MUGEN characters become motion macros
@@ -106,6 +111,7 @@ impl Session {
             let b = bits.get(slot).copied().unwrap_or(0);
             match self.inputs.last_mut() { Some(l) if l.0 == b => l.1 = (l.1 + 1).min(99), _ => { self.inputs.push((b, 1)); if self.inputs.len() > 14 { self.inputs.remove(0); } } }
         }
+        self.rec.push(bits.clone());
         self.vfx.pre_tick(&self.m);
         self.m.tick(&bits);
         self.vfx.tick(&self.m);
@@ -185,6 +191,7 @@ impl Session {
         let p = self.r.draw(g, &self.m, &self.stage, &mut self.vfx, ui);
         g.post.end(&p, ui.t);
         let human = self.human_ids();
+        self.hud.replay = self.is_replay;
         self.hud.inputs = if self.m.training { self.inputs.clone() } else { vec![] };
         self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human);
         self.vfx.draw_banners(ui);

@@ -12,3 +12,6 @@ temp_*.zip
 temp_extract/
 .tmp/
 *.tmp
+
+# Claude Code local
+.claude/settings.local.json

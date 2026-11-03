@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo build:*)",
+      "Bash(cargo test:*)",
+      "Bash(cargo clippy:*)",
+      "Bash(cargo check:*)",
+      "Bash(cargo run --release -p ume-engine --example:*)",
+      "Bash(node --test scripts/*.test.mjs)",
+      "Bash(xvfb-run:*)"
+    ]
+  }
+}

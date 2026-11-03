@@ -952,7 +952,7 @@ impl Match {
             self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
         }
         // cornered defenders push the attacker back instead of absorbing all the knock-back (SF/Tekken/GG behaviour)
-        if !from_proj && self.fighters[a].state_type != 'A' && self.at_corner(d) {
+        if !from_proj && self.fighters[a].def.source == Source::Native && self.fighters[a].state_type != 'A' && self.at_corner(d) {
             let push = corner_push(self.fighters[d].ghv.xvel);
             let away = if apos.x <= self.fighters[d].pos.x { -1.0 } else { 1.0 };
             self.fighters[a].pos.x += away * push;

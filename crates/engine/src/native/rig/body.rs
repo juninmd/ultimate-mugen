@@ -70,7 +70,7 @@ impl<'a> Rig<'a> {
     pub(super) fn draw_body_detail(&self, ctx: &mut Ctx) {
         let (sk, c, style) = (&self.sk, &self.c, self.style);
         let (w, s) = (sk.w, sk.s);
-        let tl = sk.l.torso / 29.0;
+        let _tl = sk.l.torso / 29.0;
         let q = |v: f64, u: f64| self.q(v, u);
         let skin = c.c("skin");
         let top_c = c.c("top");
@@ -296,7 +296,7 @@ impl<'a> Rig<'a> {
         let arc = qc(a, low, b, 14);
         match kind {
             "beads" => {
-                let ps: Vec<P> = (0..=12).map(|i| arc[i + (i > 5) as usize * 0]).collect();
+                let ps: Vec<P> = (0..=12).map(|i| arc[i]).collect();
                 dots(ctx, &ps, 0.72 * s, shade_of(col), 0.95);
                 dots(ctx, &ps.iter().map(|p| add(*p, light(), 0.12)).collect::<Vec<_>>(), 0.5 * s, col, 1.0);
                 dots(ctx, &ps.iter().map(|p| add(*p, light(), 0.3)).collect::<Vec<_>>(), 0.16 * s, WHITE, 0.7);

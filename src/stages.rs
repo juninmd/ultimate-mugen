@@ -171,7 +171,7 @@ fn sakura(pm: &mut Pixmap, t: Transform, r: &mut Rng, x: f32, by: f32, h: f32) {
     for (ex, ey) in tips {
         fill(pm, t, ellipse(ex, ey + 3.0, 27.0, 20.0), &solid(rgba("#a8406a", 0.9)));
         for _ in 0..70 {
-            let (a, d) = (r.f() * 6.283, r.f().sqrt() * 25.0);
+            let (a, d) = (r.f() * std::f32::consts::TAU, r.f().sqrt() * 25.0);
             let (px, py) = (ex + a.cos() * d * 1.1, ey + a.sin() * d * 0.8);
             let lit = (1.0 - ((py - (ey - 18.0)) / 36.0).clamp(0.0, 1.0)) * 4.0 + (r.f() - 0.5) * 1.6;
             let k = (4.0 - lit).clamp(0.0, 4.0) as usize;
@@ -638,7 +638,7 @@ fn spirit() -> Stage {
             // rune glyph rings every 270 units
             for k in 0..4 { let cx = 120.0 + k as f32 * 290.0; let cy = 74.0;
                 for (rx, ry) in [(52.0, 11.0), (36.0, 7.5)] { stroke(pm, t, ellipse(cx, cy, rx, ry), &solid(rgba("#5affea", 0.28)), 0.8); }
-                for q in 0..12 { let a = q as f32 / 12.0 * 6.283; let (x, y) = (cx + a.cos() * 44.0, cy + a.sin() * 9.0); stroke(pm, t, line(x - 1.5, y - 1.0, x + 1.5, y + 1.0 + (q % 3) as f32), &solid(rgba("#7affee", 0.5)), 0.7); } }
+                for q in 0..12 { let a = q as f32 / 12.0 * std::f32::consts::TAU; let (x, y) = (cx + a.cos() * 44.0, cy + a.sin() * 9.0); stroke(pm, t, line(x - 1.5, y - 1.0, x + 1.5, y + 1.0 + (q % 3) as f32), &solid(rgba("#7affee", 0.5)), 0.7); } }
             shade_v(pm, rr, (0.0, 28.0, w, h - 28.0), 0.86, 1.0);
             // top: low stone wall + steps
             rect(pm, t, 0.0, 12.0, w, 18.0, &lin(12.0, 30.0, &[(0.0, "#5a7a78"), (1.0, "#1c3030")]));

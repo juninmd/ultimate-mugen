@@ -1,72 +1,72 @@
-# Customizar a engine
+# Customizing the engine
 
-## Arquitetura
+## Architecture
 
-| Caminho | Responsabilidade |
+| Path | Responsibility |
 |---|---|
-| `crates/formats` | Leitura de arquivos M.U.G.E.N: INI, SFF, AIR, SND, ACT, PCX, PNG, stages, sistema de arquivos virtual (pastas e zip). Sem dependência de plataforma |
-| `crates/engine` | Máquina de estados: expressões (`expr.rs`), triggers (`triggers.rs`), controllers (`controllers.rs`), HitDef (`hitdef.rs`), luta (`matchs.rs`), comandos e entrada, compilador UMF (`native/`) |
-| `src/` | Aplicação: janela, render, HUD, áudio, menus, cenários nativos, efeitos visuais, controles e gamepad |
-| `web/` | Página, service worker e ponte JS da versão navegador |
-| `assets/chars` | Lutadores UMF embutidos |
+| `crates/formats` | M.U.G.E.N file readers: INI, SFF, AIR, SND, ACT, PCX, PNG, stages, virtual file system (folders and zips). No platform dependencies |
+| `crates/engine` | State machine: expressions (`expr.rs`), triggers (`triggers.rs`), controllers (`controllers.rs`), HitDef (`hitdef.rs`), fight (`matchs.rs`), commands and input, UMF compiler (`native/`) |
+| `src/` | Application: window, render, HUD, audio, menus, native stages, visual effects, controls and gamepad |
+| `web/` | Page, service worker and the browser JS bridge |
+| `assets/chars` | Bundled UMF fighters |
 
-Fluxo de um tick: entradas → `Match::tick` → para cada lutador, `[Statedef -3/-2/-1]` e estado atual → controllers cujos triggers são verdadeiros → física → colisão e `apply_hit` → câmera. A simulação roda a 60 ticks por segundo, é determinística e não depende do render.
+Tick flow: inputs → `Match::tick` → for each fighter, `[Statedef -3/-2/-1]` and the current state → controllers whose triggers are true → physics → collision and `apply_hit` → camera. Simulation runs at 60 ticks per second, is deterministic and independent from rendering.
 
-## Adicionar um state controller
+## Add a state controller
 
-1. Em `crates/engine/src/controllers.rs`, dentro de `run`, adicione um ramo com o nome em minúsculas:
+1. In `crates/engine/src/controllers.rs`, inside `run`, add a branch with the lowercase name:
 
 ```rust
 "victoryquote" => { let v = n(m, "value", -1.0) as i32; m.fighters[i].victory_quote = v; }
 ```
 
-`victory_quote` é um campo novo que você cria em `Fighter`.
+`victory_quote` is a new field you add to `Fighter`.
 
+2. `n(m, "param", default)` reads a numeric parameter; `n2(m, "param", default, index)` reads the Nth value; `sc.has("param", 0)` tests presence; `sc.raw("param")` returns the text.
+3. Add the field in `fighter.rs` if you need new state.
+4. Write a test in `crates/engine/tests/combat_logic.rs` calling `ume_engine::controllers::run`.
 
-2. `n(m, "param", padrão)` lê um parâmetro numérico; `n2(m, "param", padrão, índice)` lê o N-ésimo valor; `sc.has("param", 0)` testa presença; `sc.raw("param")` devolve o texto.
-3. Crie o campo em `fighter.rs` se precisar de estado novo.
-4. Escreva um teste em `crates/engine/tests/combat_logic.rs` chamando `ume_engine::controllers::run`.
+## Add a trigger
 
-## Adicionar um trigger
-
-Em `crates/engine/src/triggers.rs`, adicione um ramo no `match` de nomes:
+In `crates/engine/src/triggers.rs`, add a branch to the name `match`:
 
 ```rust
 "winko" => b(m.match_over && m.winner_side == f.side as i32 && m.won_by_ko),
 ```
 
-`f` é o lutador avaliado e `m` a luta. `won_by_ko` seria um campo novo em `Match`. `b(bool)` converte para 0/1. Triggers que retornam float precisam aparecer em `is_float` de `expr.rs`.
+`f` is the evaluated fighter and `m` the match. `won_by_ko` would be a new field on `Match`. `b(bool)` converts to 0/1. Triggers returning floats must appear in `is_float` in `expr.rs`.
 
-## Adicionar um formato de arquivo
+## Add a file format
 
-Coloque o decoder em `crates/formats/src/<formato>.rs`, exporte em `lib.rs` e teste com arquivos reais em `crates/formats/tests/real_files.rs`. O crate precisa continuar compilando para `wasm32-unknown-unknown`.
+Put the decoder in `crates/formats/src/<format>.rs`, export it in `lib.rs` and test it with real files in `crates/formats/tests/real_files.rs`. The crate must keep compiling for `wasm32-unknown-unknown`.
 
-## Testes
+## Tests
 
-| Comando | Cobre |
+| Command | Covers |
 |---|---|
-| `cargo test --workspace --release` | Tudo |
-| `cargo test -p ume-engine --test kfm` | Kung Fu Man de referência |
-| `cargo test -p ume-engine --test combat_logic` | Regras de combate |
+| `cargo test --workspace --release` | Everything |
+| `cargo test -p ume-engine --test kfm` | Reference Kung Fu Man |
+| `cargo test -p ume-engine --test combat_logic` | Combat rules |
 | `cargo test -p ume-formats` | Decoders |
 | `cargo clippy --workspace -- -D warnings` | Lint |
-| `node scripts/web-smoke.js web/dist` | Versão web no Chromium |
+| `node scripts/web-smoke.js web/dist` | Web build in Chromium |
 
-## Regras de código
+## Code rules
 
-- Sem comentários no código: nomes de funções, tipos e variáveis devem explicar a intenção. Explicações ficam nesta wiki.
-- A simulação (`crates/engine`) não usa relógio, threads nem aleatoriedade fora de `Match::random`, para manter replays e rollback.
-- Nada de alocação dentro de `Match::tick` em código novo.
-- Mensagens de commit no padrão Conventional Commits (`feat:`, `fix:`), validadas por `scripts/commit-lint.mjs`.
+- No code comments: names of functions, types and variables must explain intent. Explanations live in this wiki.
+- Code, commits, issues and documentation are written in English. Portuguese translations live in `*.pt-BR.md` files and `docs/wiki/pt-BR/`.
+- The simulation (`crates/engine`) uses no clock, threads or randomness outside `Match::random`, to keep replays and rollback working.
+- No allocation inside `Match::tick` in new code.
+- Conventional Commits (`feat:`, `fix:`), validated by `scripts/commit-lint.mjs`.
 
-## Decisões de arquitetura
+## Architecture decisions
 
-| Tema | Escolha |
+| Topic | Choice |
 |---|---|
-| Render | `wgpu` (Vulkan, Metal, DX12, WebGPU, WebGL2), paleta aplicada em shader |
-| Scripts | CNS e ZSS para lutadores, UMF JSON para o formato nativo; sem Lua |
-| Expressões | Bytecode de pilha |
-| Áudio | `kira` + `symphonia` |
-| Rede | `ggrs` (rollback) + `matchbox` (WebRTC) |
+| Render | `wgpu` (Vulkan, Metal, DX12, WebGPU, WebGL2), palette in the shader |
+| Scripts | CNS and ZSS for fighters, UMF JSON for the native format; no Lua |
+| Expressions | Stack bytecode |
+| Audio | `kira` + `symphonia` |
+| Network | `ggrs` (rollback) + `matchbox` (WebRTC) |
 
-A migração está descrita em [`docs/ROADMAP.md`](../ROADMAP.md).
+The migration is described in [`docs/ROADMAP.md`](../ROADMAP.md).

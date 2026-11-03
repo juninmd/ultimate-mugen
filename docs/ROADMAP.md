@@ -1,111 +1,93 @@
-# Roadmap de Desenvolvimento: Ultimate MUGEN
+# Development Roadmap: Ultimate MUGEN
 
-Este documento descreve as prioridades arquiteturais, melhorias de compatibilidade e novas funcionalidades planejadas para o **Ultimate MUGEN**.
+[Português (BR)](ROADMAP.pt-BR.md)
 
----
-
-## 1. Netcode com Rollback (Determinismo & Multiplayer Online)
-
-A arquitetura do motor foi concebida com um loop de simulação estritamente determinístico a 60 ticks fixos por segundo, com PRNG controlado e sem Garbage Collection, fornecendo a fundação ideal para netcode com Rollback.
-
-- [ ] **Serialização do Estado de Partida (`MatchStateSnapshot`)**:
-  - Implementar serialização compacta e rápida em memória do estado de `Match`, `Fighter`, `Projectile` e `Explod`.
-  - Criar pool de estados para restore/rollback de até 10-15 frames sem alocações dinâmicas a cada tick.
-- [ ] **Camada de Transporte Multiplataforma**:
-  - **Web**: Conexão peer-to-peer determinística através de WebRTC DataChannels (não confiável e ordenado/não ordenado com baixa latência).
-  - **Nativo (Desktop)**: Socket UDP puro ou integração com bibliotecas de rollback abertas (como GGPO/GGRS em Rust).
-- [ ] **Sincronização de Entradas e Janela de Predição**:
-  - Buffering de inputs locais e remotos com predição e resimulação (*rewind & replay*) instantânea em caso de descompasso.
-  - Indicadores na interface para ping, jitter e contagem de frames de rollback.
+Architectural priorities, compatibility improvements and planned features for **Ultimate MUGEN**.
 
 ---
 
-## 2. Sistema de Replays e Tournaments
+## 1. Rollback Netcode (Determinism and Online Multiplayer)
 
-- [ ] **Gravador de Replays Determinísticos**:
-  - Gravação de semente inicial (`seed`), IDs de lutadores/paletas, cenário escolhido e fluxo sequencial de entradas compactadas por bitfield.
-  - Como a simulação é determinística, um arquivo de replay de vários minutos ocupará apenas alguns kilobytes.
-- [ ] **Player de Replay**:
-  - Reprodução em velocidade normal, acelerada (2x, 4x), pausa e avanço quadro a quadro.
-  - Capacidade de assumir o controle do personagem em qualquer ponto do replay ("Takeover / Replay Take").
+The engine runs a strictly deterministic simulation loop at a fixed 60 ticks per second, with a controlled PRNG and no garbage collection, which is the ideal foundation for rollback netcode.
 
----
-
-## 3. Compatibilidade Estendida M.U.G.E.N
-
-Embora Kung Fu Man e personagens clássicos rodem com fidelidade, há funcionalidades avançadas do padrão Elecbyte e extensões do Ikemen GO a serem integradas:
-
-- [ ] **State Controllers (sctrls) Adicionais e Raros**:
-  - Suporte completo a `Zoom` / zoom dinâmico de câmera durante ataques e supers.
-  - Controladores avançados de `PalFX` com curvas senoidais de interpolação e efeitos de inversão de cores.
-  - `RemapPal` e troca dinâmica de paletas durante a luta.
-- [ ] **Modos de Equipe (Team Modes)**:
-  - Modo **Simul** (2 vs 2 simultâneo na mesma tela com suporte a 4 jogadores).
-  - Modo **Tag** (troca dinâmica de lutador com assistências).
-  - Modo **Turns** (estilo The King of Fighters, com vencedor continuando para o próximo oponente).
-- [ ] **Compatibilidade Expandida de Áudio e Mídia**:
-  - Suporte a reprodução de trilhas musicais de fundo em formato MP3/OGG para cenários (atualmente apenas sons WAV embutidos e sintetizados).
-  - Suporte a vídeo de introdução e telas de vitória customizadas por personagem (`intro.storyboard` / `ending.storyboard`).
+- [ ] **Match state serialization (`MatchStateSnapshot`)**:
+  - Compact, fast in-memory serialization of `Match`, `Fighter`, `Projectile` and `Explod` state.
+  - State pool for restore/rollback of up to 10-15 frames without per-tick allocations.
+- [ ] **Cross-platform transport**:
+  - **Web**: deterministic peer-to-peer over WebRTC DataChannels.
+  - **Native**: plain UDP or an open rollback library such as GGRS.
+- [ ] **Input synchronization and prediction window**:
+  - Local and remote input buffering with prediction and instant rewind and replay on mismatch.
+  - UI indicators for ping, jitter and rollback frame count.
 
 ---
 
-## 4. Ferramentas e Ecossistema UMF (Ultimate Mugen Fighter)
+## 2. Replays and Tournaments
 
-O formato UMF simplifica a criação de lutadores eliminando a necessidade de dezenas de ferramentas antigas (como Fighter Factory).
-
-- [ ] **Editor Visual Baseado na Web**:
-  - Editor visual em WebGL/WASM para edição de esqueletos, poses e timing de animações em tempo real no navegador.
-  - Pré-visualização instantânea de hitboxes e hurtboxes geradas automaticamente.
-  - Exportação e importação direta em formato `.json`.
-- [ ] **Efeitos Visuais Particulares e Shaders**:
-  - Criação de efeitos procedurais de partículas declarativos em JSON (raios, fogo, ondas de choque) acoplados aos membros do esqueleto.
-  - Shaders customizados para auras, sombras dinâmicas e distorções de calor.
+- [ ] **Deterministic replay recorder**: initial `seed`, fighter and palette IDs, chosen stage and a bitfield-packed input stream. A multi-minute replay takes only a few kilobytes.
+- [ ] **Replay player**: normal and fast playback (2x, 4x), pause, frame stepping and takeover of a character at any point.
 
 ---
 
-## 5. Novos Modos de Jogo e Experiência do Usuário
+## 3. Extended M.U.G.E.N Compatibility
 
-- [ ] **Modo Survival / Sobrevivência**:
-  - Enfrentar ondas consecutivas de lutadores com barra de vida persistente ou recuperação parcial por round.
-- [ ] **Boss Rush & Desafios de Combo (Trials)**:
-  - Modo dedicado para demonstrar e treinar combos específicos com feedback em tempo real de acerto de inputs e timing.
-- [ ] **Localização e Acessibilidade**:
-  - Suporte a múltiplos idiomas (Português, Inglês, Espanhol, Japonês) em toda a interface e menus.
-  - Mapeamento configurável de botões dentro do próprio jogo com persistência em `LocalStorage` (Web) ou arquivo de configuração local (Desktop).
+Classic characters such as Kung Fu Man run faithfully, but advanced Elecbyte features and Ikemen GO extensions remain to be integrated:
+
+- [ ] **Additional and rare state controllers**: full `Zoom`, advanced `PalFX` with sinusoidal interpolation and color inversion, `RemapPal` and dynamic palette swaps.
+- [ ] **Team modes**: Simul (2v2 on the same screen), Tag (dynamic swaps with assists) and Turns (KOF style).
+- [ ] **Audio and media**: MP3/OGG stage music, intro video and per-character ending screens (`intro.storyboard` / `ending.storyboard`).
 
 ---
 
-## 6. Otimizações de Desempenho e Memória
+## 4. UMF Tools and Ecosystem
 
-- [ ] **Streaming e Cache Assíncrono de Sprites SFF**:
-  - Carregamento assíncrono sob demanda de grupos de sprites não essenciais para reduzir o pico de memória inicial em personagens com SFFs superiores a 100 MB.
-- [ ] **Aceleração por Hardware de Rasterização**:
-  - Otimização do pipeline de renderização tiny-skia usando SIMD/AVX2 e conversão direta para texturas na GPU.
+UMF removes the need for dozens of legacy tools such as Fighter Factory.
+
+- [ ] **Web-based visual editor**: WebGL/WASM editor for skeletons, poses and animation timing, with instant hitbox and hurtbox preview and direct `.json` import and export.
+- [ ] **Particle effects and shaders**: declarative JSON particle effects (lightning, fire, shock waves) attached to skeleton limbs, plus custom shaders for auras, dynamic shadows and heat distortion.
 
 ---
 
-## 7. Decisões de arquitetura e fases (nov/2026)
+## 5. New Game Modes and User Experience
 
-### Decisões de arquitetura
+- [ ] **Survival mode**: consecutive waves of fighters with persistent life or partial recovery per round.
+- [ ] **Boss Rush and combo trials**: practice specific combos with real-time input and timing feedback.
+- [ ] **Localization and accessibility**:
+  - In-game language selection (English default, Portuguese, Spanish, Japanese) for all UI and menus. Documentation already has English and Portuguese.
+  - In-game button remapping persisted in `LocalStorage` (web) or a local config file (desktop).
 
-| Tema | Decisão | Motivo |
+---
+
+## 6. Performance and Memory
+
+- [ ] **Asynchronous SFF sprite streaming and cache**: load non-essential sprite groups on demand to cut the initial memory peak for characters with SFFs above 100 MB.
+- [ ] **Hardware-accelerated rasterization**: SIMD/AVX2 in the tiny-skia pipeline and direct GPU texture conversion.
+
+---
+
+## 7. Architecture Decisions and Phases (Nov 2026)
+
+### Decisions
+
+| Topic | Decision | Reason |
 |---|---|---|
-| Render | `wgpu` + `winit`, shaders WGSL, paleta no shader, batching por atlas | Um código só para Vulkan, Metal, DX12, WebGPU e WebGL2 |
-| Scripts de lutador | CNS + ZSS (compatibilidade) e UMF JSON, compilados para o mesmo bytecode | Sem Lua: binário menor, WASM simples, determinismo para rollback |
-| Menus e modos | Rust + dados (screenpack M.U.G.E.N ou TOML) | Tipado e testável, sem camada Lua |
-| Expressões | Bytecode de pilha com constantes dobradas na carga | Sem percorrer AST a cada tick |
-| Áudio | `kira` + `symphonia` (OGG, MP3, FLAC, WAV) | Mesmo comportamento no navegador e no nativo |
-| Rede | `ggrs` + `matchbox` (WebRTC) | Netplay também no navegador e no celular |
-| Código | Sem comentários; documentação na wiki (`docs/wiki`) | Menos texto para manter sincronizado |
+| Renderer | `wgpu` + `winit`, WGSL shaders, palette applied in the shader, atlas batching | One codebase for Vulkan, Metal, DX12, WebGPU and WebGL2 |
+| Fighter scripting | CNS + ZSS (compatibility) and UMF JSON, compiled to the same bytecode | No Lua: smaller binary, simple WASM, determinism for rollback |
+| Menus and modes | Rust + data (M.U.G.E.N screenpack or TOML) | Typed and testable, no Lua layer |
+| Expressions | Stack bytecode with constants folded at load | No AST walk every tick |
+| Audio | `kira` + `symphonia` (OGG, MP3, FLAC, WAV) | Same behavior in browser and native |
+| Netplay | `ggrs` + `matchbox` (WebRTC) | Netplay in the browser and on phones too |
+| Code style | No code comments; documentation lives in the wiki (`docs/wiki`) | Less text to keep in sync |
+| Language | English by default, Portuguese translations alongside | Wider contributor base without losing the Portuguese-speaking community |
 
-### Fases
+### Phases
 
-| Fase | Entrega | Aceite |
+| Phase | Deliverable | Acceptance |
 |---|---|---|
-| 0 | Suíte de conformidade, log de parâmetros desconhecidos, tolerância de sintaxe, `mugenversion` | Relatório de cobertura de controllers e triggers no `cargo test` |
-| 1 | Paridade MUGEN 1.1: controllers faltantes, HitDef completo, triggers de vitória, projéteis, helpers; ajustes AAA só para UMF | ≥ 95% de igualdade por tick com gravações do MUGEN 1.1 |
-| 2 | Migração para `wgpu`; paletas, PalFX, AfterImage, `[BGCtrl]`, sombras, reflexos, explods | Testes visuais por captura |
-| 3 | `.fnt`, `system.def`, `select.def`, storyboards, `fight.def`, áudio com loop e pan | Screenpacks populares abrem sem erro |
-| 4 | Snapshot de `Match`, rollback, sync-test em CI, replays em arquivo | 50 lutas a 100 ms sem dessincronizar |
-| 5 | Extensões Ikemen: Map, RedLife, Dizzy, GuardBreak, Tag, Modify*, Clsn, Text, ZSS | Personagens Ikemen populares carregam |
-| 6 | Bytecode, atlas, zero alocação por tick, carga assíncrona | Tick com 10 lutadores abaixo de 1 ms |
+| 0 | Conformance suite, logging of unknown parameters, syntax tolerance, `mugenversion` | Controller and trigger coverage report in `cargo test` |
+| 1 | M.U.G.E.N 1.1 parity: missing controllers, full HitDef, win triggers, projectiles, helpers; AAA tweaks only for UMF | ≥ 95% per-tick match with M.U.G.E.N 1.1 recordings |
+| 2 | Migration to `wgpu`; palettes, PalFX, AfterImage, `[BGCtrl]`, shadows, reflections, explods | Visual capture tests |
+| 3 | `.fnt`, `system.def`, `select.def`, storyboards, `fight.def`, audio with loop and pan | Popular screenpacks open without errors |
+| 4 | `Match` snapshot, rollback, CI sync-test, replays on disk | 50 fights at 100 ms without desync |
+| 5 | Extensions: Map, RedLife, Dizzy, GuardBreak, Tag, Modify*, Clsn, Text, ZSS | Popular extended characters load |
+| 6 | Bytecode, atlas, zero per-tick allocation, async loading | 10-fighter tick under 1 ms |

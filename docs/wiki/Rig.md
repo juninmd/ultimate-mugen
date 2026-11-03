@@ -1,35 +1,35 @@
-# Arte do esqueleto (rig)
+# Skeleton art (rig)
 
-Com `"art": { "type": "rig" }` o lutador é desenhado por vetor em tempo de carga (`crates/engine/src/native/rig.rs`). Fica nítido em qualquer resolução e cada paleta é gratuita.
+With `"art": { "type": "rig" }` the fighter is drawn as vectors at load time (`crates/engine/src/native/rig.rs`). It stays sharp at any resolution and every palette is free.
 
-## `style`: aparência
+## `style`: appearance
 
-| Chave | Valores encontrados nos lutadores inclusos |
+| Key | Values found in the bundled fighters |
 |---|---|
-| `build`, `muscle`, `arms`, `waist`, `scale` | Proporções (1.0 = padrão) |
+| `build`, `muscle`, `arms`, `waist`, `scale` | Proportions (1.0 = default) |
 | `female` | `true` / `false` |
 | `torsoShape` | `heavy` |
 | `top` | `gi` `bare` `tank` `jacket` `coat` `robe` `suit` `qipao` `armor` |
 | `sleeves` | `none` `short` `long` `wide` `gi` |
 | `pants` | `gi` `baggy` `tight` `hakama` `trunks` |
 | `skirt` | `coat` `robe` |
-| `belt` | `true` ou cor: `belt` `cloth` `metal` `accent` `top2` |
+| `belt` | `true` or color: `belt` `cloth` `metal` `accent` `top2` |
 | `gloves` | `wrap` `glove` `long` `gauntlet` |
 | `boots` | `barefoot` `shoe` `boot` `tall` `tabi` `wrap` `greave` |
-| `hair` | Objeto `{ "type": "spiky", ... }`; tipos `short` `spiky` `long` `ponytail` `topknot` `mane` `wild` `helmet` |
+| `hair` | Object `{ "type": "spiky", ... }`; types `short` `spiky` `long` `ponytail` `topknot` `mane` `wild` `helmet` |
 | `eyes` | `normal` `fierce` `cute` `glow` |
 | `weapon` | `katana` `greatsword` `cutlass` `kunai` |
-| `emblem` | `{ "type": "bolt", "color": "#f2b233", "where": "back", "size": 1.3 }`; tipos `bolt` `crest` `glyph` `lotus` `moon` `star` `wave` |
-| `weave`, `pantsWeave` | Textura do tecido: `weave` `check` `dots` `hatch` `quilt` `rib` `stripes` |
-| Acessórios | `headband` `scarf` `cape` `sash` `mask` `glasses` `goggles` `hat` `horns` `crown` `earring` `necklace` `pauldron` `shoulderPads` `pouches` `tattoo` `scars` `bandages` `beard` `facePaint` `eyepatch` `talisman` |
-| Detalhes | `veins` `knuckles` `stitch` `folds` `faceShade` `brow` `shine` |
-| `colors` | Mapa de cores nomeadas, abaixo |
+| `emblem` | `{ "type": "bolt", "color": "#f2b233", "where": "back", "size": 1.3 }`; types `bolt` `crest` `glyph` `lotus` `moon` `star` `wave` |
+| `weave`, `pantsWeave` | Fabric texture: `weave` `check` `dots` `hatch` `quilt` `rib` `stripes` |
+| Accessories | `headband` `scarf` `cape` `sash` `mask` `glasses` `goggles` `hat` `horns` `crown` `earring` `necklace` `pauldron` `shoulderPads` `pouches` `tattoo` `scars` `bandages` `beard` `facePaint` `eyepatch` `talisman` |
+| Details | `veins` `knuckles` `stitch` `folds` `faceShade` `brow` `shine` |
+| `colors` | Map of named colors, below |
 
 ### `colors`
 
-Chaves usadas: `skin` `hair` `eye` `lips` `top` `top2` `trim` `pants` `belt` `glove` `boot` `wrap` `cloth` `accent` `metal` `weapon` `weapon2` `hilt` `visor` `mask` `hat` `horn` `undershirt` `legs` `beard` `aura` `energy`.
+Keys in use: `skin` `hair` `eye` `lips` `top` `top2` `trim` `pants` `belt` `glove` `boot` `wrap` `cloth` `accent` `metal` `weapon` `weapon2` `hilt` `visor` `mask` `hat` `horn` `undershirt` `legs` `beard` `aura` `energy`.
 
-`palettes` troca qualquer uma delas:
+`palettes` overrides any of them:
 
 ```json
 "palettes": [
@@ -38,7 +38,7 @@ Chaves usadas: `skin` `hair` `eye` `lips` `top` `top2` `trim` `pants` `belt` `gl
 ]
 ```
 
-## `poses`: ângulos das articulações
+## `poses`: joint angles
 
 ```json
 "poses": {
@@ -47,38 +47,38 @@ Chaves usadas: `skin` `hair` `eye` `lips` `top` `top2` `trim` `pants` `belt` `gl
 }
 ```
 
-`F` = membro da frente, `B` = de trás. Ângulos em graus.
+`F` = front limb, `B` = back limb. Angles in degrees.
 
-| Chave | Descrição |
+| Key | Description |
 |---|---|
-| `shoulderF/B`, `elbowF/B`, `wristF/B` | Braços |
-| `thighF/B`, `kneeF/B`, `ankleF/B` | Pernas |
-| `lean`, `head`, `rot` | Inclinação do tronco, da cabeça e rotação do corpo inteiro |
-| `y`, `hipH` | Altura do quadril |
+| `shoulderF/B`, `elbowF/B`, `wristF/B` | Arms |
+| `thighF/B`, `kneeF/B`, `ankleF/B` | Legs |
+| `lean`, `head`, `rot` | Torso lean, head angle and whole-body rotation |
+| `y`, `hipH` | Hip height |
 | `handF/B` | `fist` `open` |
 | `face` | `smile` `shout` `hurt` `ko` ... |
-| `blade`, `weapon`, `noWeapon` | Ângulo e visibilidade da arma |
-| `aura`, `glow`, `charge`, `chargeSize` | Brilhos de energia |
-| `wind`, `hairWind`, `phase`, `free` | Vento na roupa/cabelo e fase da animação secundária |
+| `blade`, `weapon`, `noWeapon` | Weapon angle and visibility |
+| `aura`, `glow`, `charge`, `chargeSize` | Energy glows |
+| `wind`, `hairWind`, `phase`, `free` | Cloth/hair wind and secondary animation phase |
 
-Partes usáveis em `hit.part`: `handF` `handB` `footF` `footB` `heelF` `heelB` `elbowF` `elbowB` `kneeF` `kneeB` `head` `shoulder` `body` `hip` `weapon`. Apelidos: `handR`/`handL`, `footR`/`footL`, `fist`, `blade`, `sword`, `tip`.
+Parts usable in `hit.part`: `handF` `handB` `footF` `footB` `heelF` `heelB` `elbowF` `elbowB` `kneeF` `kneeB` `head` `shoulder` `body` `hip` `weapon`. Aliases: `handR`/`handL`, `footR`/`footL`, `fist`, `blade`, `sword`, `tip`.
 
-## Efeitos
+## Effects
 
-Um quadro com `effect` desenha um efeito no lugar do corpo. Use em projéteis e faíscas.
+A frame with `effect` draws an effect in place of the body. Use it for projectiles and sparks.
 
 ```json
 { "effect": { "type": "slash", "size": 26, "color": "#ff3a5c", "color2": "#ffd0d8", "phase": 0 }, "ticks": 3 }
 ```
 
-| `type` | Formato |
+| `type` | Shape |
 |---|---|
-| `orb` (padrão), `burst` | Bola de energia / explosão |
-| `beam` (`length`) | Raio horizontal |
-| `pillar` (`length`) | Coluna vertical |
-| `shockwave` | Onda no chão |
-| `slash`, `wave`, `water` | Corte em arco |
-| `kunai`, `shuriken` | Arremessáveis |
-| `ice`, `fire`, `darkfire`, `lightning`, `petal` | Elementos |
+| `orb` (default), `burst` | Energy ball / explosion |
+| `beam` (`length`) | Horizontal ray |
+| `pillar` (`length`) | Vertical column |
+| `shockwave` | Ground wave |
+| `slash`, `wave`, `water` | Arc cut |
+| `kunai`, `shuriken` | Throwables |
+| `ice`, `fire`, `darkfire`, `lightning`, `petal` | Elements |
 
-Sem `color`, o efeito usa a cor `energy` da paleta. A caixa de acerto do efeito é gerada sozinha a partir do formato.
+Without `color`, the effect uses the palette's `energy` color. The effect hitbox is generated from its shape.

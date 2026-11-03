@@ -1,32 +1,34 @@
-# Wiki do Ultimate MUGEN
+# Ultimate MUGEN Wiki
 
-Guia para jogadores e criadores que querem customizar a engine: instalar, configurar, criar lutadores, cenários e scripts.
+**English** · [Português (BR)](pt-BR/Home.md)
 
-| Página | Para quem | O que ensina |
+A guide for players and creators who want to customize the engine: install, configure, create fighters, stages and scripts.
+
+| Page | Audience | Covers |
 |---|---|---|
-| [Instalação e execução](Instalacao.md) | Jogadores | Baixar, compilar, rodar no PC, navegador e celular |
-| [Configuração e controles](Configuracao.md) | Jogadores | Arquivo `.cfg`, flags de linha de comando, variáveis de ambiente, controles |
-| [Adicionar conteúdo M.U.G.E.N](Conteudo-MUGEN.md) | Jogadores | Instalar personagens e cenários `.def`/`.zip` e validar |
-| [Criar personagem UMF](Personagem-UMF.md) | Criadores | Lutador completo em um único JSON |
-| [Arte do esqueleto (rig)](Rig.md) | Criadores | Estilo, poses, articulações e paletas |
-| [Scripts CNS](Scripts-CNS.md) | Criadores | Estados, controllers, triggers e comandos suportados |
-| [Criar cenários](Cenarios.md) | Criadores | Cenário M.U.G.E.N `.def` e cenário nativo |
-| [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
-| [Solução de problemas](Problemas.md) | Todos | Erros comuns e ferramentas de diagnóstico |
+| [Installation](Installation.md) | Players | Download, build, run on desktop, browser and phone |
+| [Configuration and controls](Configuration.md) | Players | `.cfg` file, command-line flags, environment variables, controls |
+| [Adding M.U.G.E.N content](MUGEN-Content.md) | Players | Install `.def`/`.zip` characters and stages, and validate them |
+| [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
+| [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
+| [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |
+| [Creating stages](Stages.md) | Creators | M.U.G.E.N `.def` stages and native stages |
+| [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
+| [Troubleshooting](Troubleshooting.md) | Everyone | Common errors and diagnostic tools |
 
-## Formatos aceitos
+## Accepted formats
 
-| Formato | Uso | Arquivos |
+| Format | Use | Files |
 |---|---|---|
-| UMF | Lutador nativo, declarativo | `assets/chars/<id>.json` |
-| M.U.G.E.N | Lutadores e cenários clássicos | `.def`, `.sff` v1/v2, `.air`, `.cmd`, `.cns`, `.snd`, `.act` |
+| UMF | Native declarative fighter | `assets/chars/<id>.json` |
+| M.U.G.E.N | Classic fighters and stages | `.def`, `.sff` v1/v2, `.air`, `.cmd`, `.cns`, `.snd`, `.act` |
 
-Lutadores UMF e M.U.G.E.N rodam na mesma máquina de estados e podem se enfrentar.
+UMF and M.U.G.E.N fighters run on the same state machine and can fight each other.
 
 ## Roadmap
 
-O plano de compatibilidade e as decisões de arquitetura estão em [`docs/ROADMAP.md`](../ROADMAP.md). Itens marcados como **planejado** nesta wiki ainda não existem na versão atual.
+Compatibility plans and architecture decisions are in [`docs/ROADMAP.md`](../ROADMAP.md). Items marked **planned** in this wiki do not exist in the current version yet.
 
-## Agradecimentos
+## Acknowledgments
 
-Obrigado à equipe do [Ikemen GO](https://github.com/ikemen-engine/Ikemen-GO) e à Elecbyte, criadora do M.U.G.E.N, pela inspiração.
+Thanks to the [Ikemen GO](https://github.com/ikemen-engine/Ikemen-GO) team and to Elecbyte, creator of M.U.G.E.N, for the inspiration.

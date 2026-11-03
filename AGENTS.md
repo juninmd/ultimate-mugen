@@ -6,6 +6,7 @@
 
 ## Code Style
 - No comments in code: names must explain intent. Explanations go to the wiki in `docs/wiki/`.
+- English is the default language for code, commits, issues and docs. Portuguese lives in `*.pt-BR.md` files and `docs/wiki/pt-BR/`; keep both in sync.
 - Update `docs/wiki/` whenever a format, controller, trigger, flag or folder layout changes.
 
 ## Character Directories

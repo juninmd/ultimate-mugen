@@ -4,6 +4,10 @@
 - Engine: 2D fighting game engine written in Rust using `macroquad`, `miniquad`, `tiny-skia`.
 - Formats: Native UMF (`assets/chars/*.json`) and legacy M.U.G.E.N (`.def`, `.sff`, `.air`, `.cmd`, `.cns`, `.snd`).
 
+## Code Style
+- No comments in code: names must explain intent. Explanations go to the wiki in `docs/wiki/`.
+- Update `docs/wiki/` whenever a format, controller, trigger, flag or folder layout changes.
+
 ## Character Directories
 - Built-in UMF: `assets/chars/` (embedded at compile time via `build.rs` and `index.json`).
 - MUGEN Chars: `mugen/chars/<char_name>/` (auto-scanned by `scan_folders()` at startup, git-ignored).

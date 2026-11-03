@@ -81,3 +81,31 @@ O formato UMF simplifica a criação de lutadores eliminando a necessidade de de
   - Carregamento assíncrono sob demanda de grupos de sprites não essenciais para reduzir o pico de memória inicial em personagens com SFFs superiores a 100 MB.
 - [ ] **Aceleração por Hardware de Rasterização**:
   - Otimização do pipeline de renderização tiny-skia usando SIMD/AVX2 e conversão direta para texturas na GPU.
+
+---
+
+## 7. Superar o Ikemen-GO: decisões e fases (nov/2026)
+
+### Decisões de arquitetura
+
+| Tema | Decisão | Motivo |
+|---|---|---|
+| Render | `wgpu` + `winit`, shaders WGSL, paleta no shader, batching por atlas | Um código só para Vulkan, Metal, DX12, WebGPU e WebGL2; o Ikemen mantém três renderers |
+| Scripts de lutador | CNS + ZSS (compatibilidade) e UMF JSON, compilados para o mesmo bytecode | Sem Lua: binário menor, WASM simples, determinismo para rollback |
+| Menus e modos | Rust + dados (screenpack M.U.G.E.N ou TOML) | Tipado e testável, sem camada Lua |
+| Expressões | Bytecode de pilha com constantes dobradas na carga | Sem percorrer AST a cada tick |
+| Áudio | `kira` + `symphonia` (OGG, MP3, FLAC, WAV) | Mesmo comportamento no navegador e no nativo |
+| Rede | `ggrs` + `matchbox` (WebRTC) | Netplay também no navegador e no celular |
+| Código | Sem comentários; documentação na wiki (`docs/wiki`) | Menos texto para manter sincronizado |
+
+### Fases
+
+| Fase | Entrega | Aceite |
+|---|---|---|
+| 0 | Suíte de conformidade, log de parâmetros desconhecidos, tolerância de sintaxe, `mugenversion` | Relatório de cobertura de controllers e triggers no `cargo test` |
+| 1 | Paridade MUGEN 1.1: controllers faltantes, HitDef completo, triggers de vitória, projéteis, helpers; ajustes AAA só para UMF | ≥ 95% de igualdade por tick com gravações do MUGEN 1.1 |
+| 2 | Migração para `wgpu`; paletas, PalFX, AfterImage, `[BGCtrl]`, sombras, reflexos, explods | Testes visuais por captura |
+| 3 | `.fnt`, `system.def`, `select.def`, storyboards, `fight.def`, áudio com loop e pan | Screenpacks populares abrem sem erro |
+| 4 | Snapshot de `Match`, rollback, sync-test em CI, replays em arquivo | 50 lutas a 100 ms sem dessincronizar |
+| 5 | Extensões Ikemen: Map, RedLife, Dizzy, GuardBreak, Tag, Modify*, Clsn, Text, ZSS | Personagens Ikemen populares carregam |
+| 6 | Bytecode, atlas, zero alocação por tick, carga assíncrona | Tick com 10 lutadores abaixo de 1 ms |

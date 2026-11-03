@@ -321,6 +321,8 @@ Primeiro release (histórico antigo sem commits semânticos) ou release forçado
 
 ## Documentação Adicional
 
+- **[Wiki](docs/wiki/Home.md)**: instalar, configurar, criar personagens UMF, scripts CNS, cenários e customizar a engine.
+
 - [`docs/PESQUISA.md`](docs/PESQUISA.md) — Pesquisa aprofundada sobre a engenharia reversa do M.U.G.E.N, comparação com o Ikemen GO e desafios arquiteturais.
 - [`docs/CHARACTER_FORMAT.md`](docs/CHARACTER_FORMAT.md) — Manual do formato nativo UMF (criação de golpes, poses e esqueletos vetoriais).
 - [`docs/ROSTER.md`](docs/ROSTER.md) — Guia do elenco de lutadores nativos e catálogo de personagens compatíveis.

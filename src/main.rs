@@ -6,6 +6,7 @@ mod netlink;
 mod sound_mix;
 mod controls;
 mod gamepad;
+mod keybinds;
 mod hud;
 mod registry;
 mod render;

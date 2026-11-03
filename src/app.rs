@@ -13,6 +13,8 @@ use ume_engine::ai::Ai;
 use ume_engine::chardef::CharDef;
 
 mod cutscene;
+mod keyedit;
+pub(crate) use keyedit::KeyEdit;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul }
@@ -71,6 +73,9 @@ pub struct App {
     pub msg: String,
     preview_t: f32,
     pub settings: Settings,
+    pub(crate) key_edit: Option<keyedit::KeyEdit>,
+    /** page of the pause-screen move list (14 moves per page) */
+    move_page: usize,
     pending: Pending,
     pub team: Option<Team>,
     /// last finished fight (replayable) and the replay being played now
@@ -134,7 +139,7 @@ impl App {
         App {
             reg, ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
+            settings, key_edit: None, move_page: 0, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -780,7 +785,7 @@ impl App {
         if self.c.pressed(nav::AUX) { s.r.debug = !s.r.debug; self.debug_boxes = s.r.debug; }
         let pause_btn = self.c.pressed(nav::START) || is_key_pressed(KeyCode::Escape) || is_key_pressed(KeyCode::P);
         let (paused, accept_back) = pause_step(s.paused, pause_btn);
-        if pause_btn { self.pause_cur = 0; self.audio.sfx("select"); }
+        if pause_btn { self.pause_cur = 0; self.move_page = 0; self.audio.sfx("select"); }
         s.paused = paused;
         #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
         if s.net.is_some() { s.paused = false; }
@@ -850,12 +855,19 @@ impl App {
         }
         let f = &s.m.fighters[0];
         self.ui.text(&format!("GOLPES — {}", f.def.display_name.to_uppercase()), x + 400.0, y + 52.0, 22.0, hex("#22e8ff"), Align::Left, true);
-        if f.def.movelist.is_empty() { self.ui.text("Personagem MUGEN: comandos definidos no .cmd do autor", x + 400.0, y + 90.0, 18.0, WHITE, Align::Left, false); }
-        for (i, mv) in f.def.movelist.iter().enumerate().take(14) {
-            let yy = y + 90.0 + i as f32 * 29.0;
-            self.ui.text(&mv.name, x + 400.0, yy, 18.0, WHITE, Align::Left, false);
+        const PER_PAGE: usize = 14;
+        let total = f.def.movelist.len();
+        let pages = total.div_ceil(PER_PAGE).max(1);
+        if self.c.pressed(nav::RIGHT) { self.move_page = (self.move_page + 1) % pages; }
+        if self.c.pressed(nav::LEFT) { self.move_page = (self.move_page + pages - 1) % pages; }
+        self.move_page = self.move_page.min(pages - 1);
+        if total == 0 { self.ui.text("Este personagem não define comandos no .cmd", x + 400.0, y + 90.0, 18.0, WHITE, Align::Left, false); }
+        for (i, mv) in f.def.movelist.iter().enumerate().skip(self.move_page * PER_PAGE).take(PER_PAGE) {
+            let yy = y + 90.0 + (i - self.move_page * PER_PAGE) as f32 * 29.0;
+            self.ui.text(&mv.name.chars().take(34).collect::<String>(), x + 400.0, yy, 18.0, WHITE, Align::Left, false);
             self.ui.text(&pretty_input(&mv.input), x + 1010.0, yy, 16.0, hex("#ffcc33"), Align::Right, true);
         }
+        if pages > 1 { self.ui.text(&format!("< > página {}/{} · {} comandos", self.move_page + 1, pages, total), x + 400.0, y + 505.0, 16.0, hex("#a49cc0"), Align::Left, false); }
         if accept_back && self.c.pressed(nav::BACK) { self.session.as_mut().unwrap().paused = false; return; }
         if ok {
             match self.pause_cur {
@@ -959,14 +971,22 @@ impl App {
     }
 
     fn controls_screen(&mut self) {
+        if self.key_edit.is_some() { self.key_editor(); return; }
         self.ui.background();
         self.ui.text("CONTROLES", 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
         let col = |app: &App, x: f32, title: &str, lines: &[&str]| {
             app.ui.text(title, x, 120.0, 24.0, hex("#22e8ff"), Align::Left, true);
             for (i, l) in lines.iter().enumerate() { app.ui.text(l, x, 156.0 + i as f32 * 28.0, 19.0, WHITE, Align::Left, false); }
         };
-        col(self, 40.0, "Teclado", &["Mover: WASD ou setas", "Socos: U fraco · I forte · O", "Chutes: J fraco · K forte · L", "Especial simples: 1 · 2 · 3", "Super simples: 1 + 2", "Pausa: Esc · Hitboxes: F2", "", "2 Jogadores (P2):", "Setas + Num4/5/6 · Num1/2/3"]);
-        col(self, 450.0, "DualShock 4 / DualSense", &["□ soco fraco · △ soco forte · R1 soco 3", "✕ chute fraco · ○ chute forte · R2 chute 3", "L1 / L2: especiais simples", "OPTIONS: pausa", "Vibração: golpes recebidos, defesa,", "super e K.O. (USB e Bluetooth)", "Lightbar: P1 azul · P2 vermelho", "Xbox e genéricos também funcionam"]);
+        let kl = |slot: usize, idx: &[usize]| idx.iter().map(|&i| crate::keybinds::label(self.c.keys.slots[slot][i])).collect::<Vec<_>>();
+        let (mv, p1a, p1b, sp, p2m, p2a) = (kl(0, &[0, 1, 2, 3]).join(" "), kl(0, &[4, 5, 6]).join(" · "), kl(0, &[7, 8, 9]).join(" · "), kl(0, &[10, 11, 12]).join(" · "), kl(1, &[0, 1, 2, 3]).join(" "), format!("{} · {}", kl(1, &[4, 5, 6]).join("/"), kl(1, &[7, 8, 9]).join("/")));
+        let lines = [format!("Mover: {mv} (ou setas)"), format!("Socos: {p1a}"), format!("Chutes: {p1b}"), format!("Especiais: {sp}"), format!("Super simples: {} + {}", kl(0, &[10])[0], kl(0, &[11])[0]), "Pausa: Esc · Hitboxes: F2".into(), String::new(), "2 Jogadores (P2):".into(), format!("{p2m} + {p2a}")];
+        let refs: Vec<&str> = lines.iter().map(|l| l.as_str()).collect();
+        col(self, 40.0, "Teclado", &refs);
+        self.ui.rect(40.0, 398.0, 320.0, 34.0, hex("#ff4d6d"));
+        self.ui.text("Personalizar teclado (Tab)", 200.0, 421.0, 19.0, WHITE, Align::Center, true);
+        if is_key_pressed(KeyCode::Tab) || self.clicked_rect(40.0, 398.0, 320.0, 34.0) { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); }
+        col(self, 450.0, "DualShock 4 / DualSense", &["Quadrado: soco fraco · Triângulo: soco forte · R1: soco 3", "X: chute fraco · Bola: chute forte · R2: chute 3", "L1 / L2: especiais simples", "OPTIONS: pausa", "Vibração: golpes recebidos, defesa,", "super e K.O. (USB e Bluetooth)", "Lightbar: P1 azul · P2 vermelho", "Xbox e genéricos também funcionam"]);
         col(self, 880.0, "Celular / Tablet", &["Analógico virtual à esquerda", "LP / HP / LK / HK à direita", "SP1–SP3 e SUPER com um toque", "(funcionam também com MUGEN)", "Vibração do aparelho no navegador"]);
         self.ui.text("Controles detectados:", 40.0, 470.0, 22.0, hex("#ffcc33"), Align::Left, true);
         let pads = self.c.pad_info.clone();
@@ -978,7 +998,7 @@ impl App {
             self.ui.rect(700.0, y - 22.0, 220.0, 30.0, hex("#ff4d6d"));
             self.ui.text("Testar vibração", 810.0, y, 18.0, WHITE, Align::Center, true);
         }
-        self.ui.text("Pressione ✕/A no controle para testar a vibração · Esc para voltar", 40.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
+        self.ui.text("Pressione X/A no controle para testar a vibração · Esc para voltar", 40.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
         for (i, p) in pads.iter().enumerate() { if p.bits & ume_engine::input::k::A != 0 && self.c.pressed(nav::OK) { self.c.rumble(i, 0.8, 0.8, 300); } }
         if self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 8 }; }
     }

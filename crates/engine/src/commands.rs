@@ -5,7 +5,7 @@ use crate::input::{button_bit, rel_dirs, InputHistory};
 pub struct CmdSymbol { pub release: bool, pub hold: bool, pub four: bool, pub strict: bool, pub charge: i32, pub dir: u32, pub btns: u32 }
 
 #[derive(Clone, Debug)]
-pub struct CommandDef { pub name: String, pub steps: Vec<CmdSymbol>, pub time: i32, pub buffer_time: i32 }
+pub struct CommandDef { pub name: String, /** source text of the `command =` line (shown in the move list) */ pub raw: String, pub steps: Vec<CmdSymbol>, pub time: i32, pub buffer_time: i32 }
 
 fn dir_bits(s: &str) -> Option<u32> {
     Some(match s { "U" => 1, "D" => 2, "B" => 4, "F" => 8, "UB" => 5, "UF" => 9, "DB" => 6, "DF" => 10, _ => return None })
@@ -39,7 +39,7 @@ pub fn parse_command(name: &str, s: &str, time: i32, buffer_time: i32) -> Comman
         }
         steps.push(sym);
     }
-    CommandDef { name: name.to_string(), steps, time: if time > 0 { time } else { 15 }, buffer_time: buffer_time.max(1) }
+    CommandDef { name: name.to_string(), raw: s.trim().to_string(), steps, time: if time > 0 { time } else { 15 }, buffer_time: buffer_time.max(1) }
 }
 
 fn held(h: &InputHistory, t: i64, s: &CmdSymbol) -> bool {

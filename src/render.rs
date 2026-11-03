@@ -218,6 +218,18 @@ impl MatchRenderer {
             if p.add.iter().sum::<f32>() > 200.0 { o.flash = 0.6; } else if p.add[0] > p.add[2] + 40.0 { o.tint = Color::new(1.0, 0.7, 0.6, 1.0); } else if p.add[2] > p.add[0] + 40.0 { o.tint = Color::new(0.6, 0.8, 1.0, 1.0); }
         }
         if let Some((mode, a, _)) = &f.trans { if mode.starts_with("add") { o.add = true; o.alpha = a / 256.0; } }
+        // awakened form: warm tint + pulsing halo in the form colour
+        if f.form > 0 && f.alive && g.fx_gain > 0.0 {
+            let c = crate::vfx::Vfx::form_color(f);
+            let k = 0.3;
+            o.tint = Color::new(1.0 + (c[0] - 1.0) * k, 1.0 + (c[1] - 1.0) * k, 1.0 + (c[2] - 1.0) * k, 1.0);
+            let pulse = 0.38 + 0.14 * (m.game_time as f32 * 0.3).sin();
+            for (dx, dy) in [(-1.8, 0.0), (1.8, 0.0), (0.0, -1.8), (0.0, 1.8)] {
+                Self::draw_sprite(g, m, &f.anim_def, fr, x + dx, f.pos.y + dy, f.facing, f.lscl, f.draw_scale, &DrawOpts { add: true, alpha: pulse, tint: Color::new(c[0], c[1], c[2], 1.0), ..Default::default() }, shx, shy);
+            }
+        }
+        // the fallen fighter loses its colour once the round is decided (the match-deciding defeat even more)
+        if !f.alive && m.round_state >= 3 { let k = if f.state_no == 5193 { 0.52 } else { 0.76 }; o.tint = Color::new(k, k, k * 1.06, 1.0); }
         // owner of an active super: pulsing golden outline glow (sprite re-drawn additively around itself)
         if m.pause.as_ref().is_some_and(|p| p.is_super && (p.by == f.id || p.by == f.root)) {
             let pulse = 0.55 + 0.35 * (m.game_time as f32 * 0.35).sin();

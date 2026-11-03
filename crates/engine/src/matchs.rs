@@ -58,6 +58,8 @@ pub enum Event {
     /// `fighter` = id of the root fighter that fired it (teams can have many per side)
     Super { side: usize, fighter: u32 },
     Ko { loser_side: usize },
+    /// a fighter awakened into its transformed form (id of the root fighter)
+    Transform { fighter: u32 },
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
 }
 
@@ -69,6 +71,9 @@ pub fn combo_scale(hits_before: i32) -> f32 {
 }
 /// How far (game px) the attacker is shoved back when the defender is cornered, given the hit's knock-back speed.
 pub fn corner_push(xvel: f32) -> f32 { (xvel.abs() * 0.5).clamp(1.2, 4.5) }
+
+pub const BASE_W: f32 = 426.67;
+pub const BASE_H: f32 = 240.0;
 
 pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_super: bool, pub darken: bool }
 pub struct Announce { pub text: String, pub time: i32, pub total: i32 }
@@ -82,12 +87,19 @@ pub struct Match {
     pub stage: StageInfo,
     pub camera: V2,
     pub view_w: f32, pub view_h: f32,
+    /// Zoom-out for big teams: the play field is `zoom` × the base 426×240 view (so 5v5 has room to fight). Driven by `update_camera`
+    /// between `zoom_min` (formation size) and `zoom_max`, depending on how far apart the fighters are.
+    pub zoom: f32, pub zoom_min: f32, pub zoom_max: f32,
+    /// where the ground sits in the zoomed view: `zoffset0 + (view_h - 240) * ground_k`
+    pub zoffset0: f32, pub ground_k: f32,
     pub game_time: i64,
     pub round_state: i32, pub round_no: i32, pub round_time: i32,
     /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
     pub team_simul: bool,
     /// how many times an attacker was pushed back because the defender was cornered (diagnostics / tests)
     pub corner_pushes: u32,
+    /// extra ticks the first round waits before "FIGHT!" so the fighters can face off / trade lines (0 = none)
+    pub intro_ticks: i32,
     pub timer: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
@@ -104,8 +116,8 @@ pub struct Match {
 impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
-            fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: 426.67, view_h: 240.0,
-            team_simul: false, corner_pushes: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
+            team_simul: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, flash: None, slow_mo: 0,
             events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]),
         }
@@ -353,6 +365,16 @@ impl Match {
     }
 
     // ---------------------------------------------------------------- round flow
+    /// Zoom limits from the team sizes (call before `start_round`): 1v1 = no zoom-out, 5v5 = up to 1.8× the field.
+    pub fn set_zoom_for_teams(&mut self, per_side: usize, ground_k: f32) {
+        let n = per_side.max(1) as f32 - 1.0;
+        self.zoom_min = 1.0 + 0.1 * n; self.zoom_max = 1.0 + 0.2 * n; self.zoom = self.zoom_min; self.zoffset0 = self.stage.zoffset; self.ground_k = ground_k;
+        self.apply_zoom();
+    }
+    fn apply_zoom(&mut self) {
+        self.view_w = BASE_W * self.zoom; self.view_h = BASE_H * self.zoom;
+        if self.zoffset0 != 0.0 { self.stage.zoffset = self.zoffset0 + (self.view_h - BASE_H) * self.ground_k; }
+    }
     pub fn start_round(&mut self) {
         self.round_state = 0; self.round_time = 0; self.timer = 99 * 60; self.winner_side = -1; self.slow_mo = 0;
         self.explods.clear(); self.projectiles.clear(); self.pause = None;
@@ -372,6 +394,7 @@ impl Match {
                 f.vel = V2::default();
                 f.facing = if f.side == 0 { 1.0 } else { -1.0 };
                 f.life = f.life_max; f.alive = true;
+                if f.form > 0 { f.attack_mul /= 1.3; f.defence_mul /= 1.25; f.form = 0; f.form_time = 0; }
                 if first { f.power = 0.0; }
                 f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false;
                 f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5];
@@ -388,13 +411,26 @@ impl Match {
 
     fn round_logic(&mut self) {
         match self.round_state {
-            0 if self.round_time > 40 => { self.round_state = 1; self.round_time = 0; }
+            0 if self.round_time > 40 => {
+                self.round_state = 1; self.round_time = 0;
+                if self.intro_ticks > 0 && self.round_no == 1 {
+                    // face-off: the first fighter of each side poses, the rest of the team stands ready
+                    let mut seen = [false; 2];
+                    for i in self.root_indices() {
+                        let s = self.fighters[i].side.min(1);
+                        if seen[s] || !self.fighters[i].def.anims.contains_key(&190) { continue; }
+                        seen[s] = true;
+                        let d = self.fighters[i].def.clone();
+                        self.change_state(i, if s == 1 && self.fighters[i].def.anims.contains_key(&195) { 194 } else { 192 }, d);
+                    }
+                }
+            }
             // MUGEN: "FIGHT!" waits while any player asserts the Intro flag (capped for safety)
-            1 if self.round_time > 60 && (self.global_asserts & 2 == 0 || self.round_time > 600) => {
+            1 if self.round_time > 60 + if self.round_no == 1 { self.intro_ticks } else { 0 } && (self.global_asserts & 2 == 0 || self.round_time > 600) => {
                 self.round_state = 2; self.round_time = 0;
                 self.announce = Some(Announce { text: "FIGHT!".into(), time: 50, total: 50 });
                 self.events.push(Event::Fight);
-                for f in self.fighters.iter_mut() { if !f.is_helper && (f.state_no == 0 || f.state_no == 5900) { f.ctrl = true; } }
+                for f in self.fighters.iter_mut() { if !f.is_helper && (f.state_no == 0 || f.state_no == 5900 || f.state_no == 192 || f.state_no == 194) { f.ctrl = true; } }
             }
             2 => {
                 if !self.training && self.pause.is_none() && self.global_asserts & 1 == 0 { self.timer = (self.timer - 1).max(0); }
@@ -434,8 +470,14 @@ impl Match {
                 let settled = self.roots().all(|f| if f.alive { f.move_type != 'H' && (f.ctrl || f.state_no == 0) } else { f.state_no == 5150 || f.state_no == 5110 });
                 if ((settled && self.round_time > 90) || self.round_time > 300) && (self.global_asserts & 4 == 0 || self.round_time > 900) {
                     self.round_state = 4; self.round_time = 0;
-                    for i in self.root_indices() {
-                        if !self.fighters[i].alive { continue; }
+                    let decides = self.winner_side >= 0 && self.wins[self.winner_side as usize] + 1 >= self.rounds_to_win;
+                    for (k, i) in self.root_indices().into_iter().enumerate() {
+                        if !self.fighters[i].alive {
+                            // every KO plays its own defeat sequence: a different one each round, the longest on the match-deciding one
+                            let v = if decides { 3 } else { (self.round_no as usize - 1 + k) % 3 };
+                            if self.fighters[i].def.anims.contains_key(&(197 + v as i32)) { let d = self.fighters[i].def.clone(); self.change_state(i, 5190 + v as i32, d); }
+                            continue;
+                        }
                         self.fighters[i].ctrl = false;
                         let d = self.fighters[i].def.clone();
                         let s = self.fighters[i].side as i32;
@@ -448,7 +490,7 @@ impl Match {
                     self.events.push(Event::RoundEnd(self.winner_side));
                 }
             }
-            4 if self.round_time > 170 => {
+            4 if self.round_time > if self.wins[0] >= self.rounds_to_win || self.wins[1] >= self.rounds_to_win { 250 } else { 170 } => {
                 if self.wins[0] >= self.rounds_to_win || self.wins[1] >= self.rounds_to_win {
                     if !self.match_over {
                         self.match_over = true;
@@ -469,17 +511,23 @@ impl Match {
         }
         self.game_time += 1;
         self.round_time += 1;
+        // any attack button skips the first-round face-off (inputs are recorded, so replays skip identically)
+        if self.round_state == 1 && self.round_no == 1 && self.intro_ticks > 0 && self.round_time > 8 && self.round_time < 60 + self.intro_ticks
+            && inputs.iter().any(|b| b & (crate::input::k::A | crate::input::k::B | crate::input::k::C | crate::input::k::X | crate::input::k::Y | crate::input::k::Z) != 0) { self.round_time = 60 + self.intro_ticks; }
         self.round_logic();
         self.global_asserts = 0;
         let mut k = 0;
-        for f in self.fighters.iter_mut() {
+        let mut awaken: Vec<usize> = vec![];
+        for (fi, f) in self.fighters.iter_mut().enumerate() {
             if f.is_helper { continue; }
             let bits = inputs.get(k).copied().unwrap_or(0);
+            if bits & crate::input::k::T != 0 { awaken.push(fi); }
             k += 1;
             f.history.push(bits, f.facing as i32);
             let cmds = f.def.commands.clone();
             f.cmd.update(&f.history, &cmds);
         }
+        for fi in awaken { self.try_transform(fi); }
         let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time));
         let frozen_by_pause = |f: &Fighter| match paused_by { None => false, Some((by, mt)) => !(f.id == by && mt > 0) };
         let ids: Vec<u32> = self.fighters.iter().map(|f| f.id).collect();
@@ -507,6 +555,7 @@ impl Match {
             self.physics_step(i);
             let f = &mut self.fighters[i];
             f.state_time += 1;
+            if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); }
             if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; }
             if f.move_contact > 0 { f.move_contact += 1; }
             if f.move_hit > 0 { f.move_hit += 1; }
@@ -537,6 +586,26 @@ impl Match {
             let (st, mc) = (f.state_time, f.move_contact);
             f.targets.retain(|(t, _)| alive_ids.iter().any(|(id, mt)| id == t && (*mt == 'H' || st < 2 || mc > 0)));
         }
+    }
+
+    /// Transformation ("awakening"): costs one super bar, once per round, lasts until the round ends — stronger hits, tougher, regenerating
+    /// meter and a small life refill, with a cinematic pause. Native characters only (they carry the power-up animation).
+    pub fn try_transform(&mut self, i: usize) -> bool {
+        let f = &self.fighters[i];
+        if f.is_helper || f.form > 0 || !f.alive || !f.ctrl || f.state_type == 'A' || f.power < 1000.0 || self.round_state != 2 || self.pause.is_some() || !f.def.anims.contains_key(&196) { return false; }
+        let id = f.id;
+        let d = f.def.clone();
+        {
+            let f = &mut self.fighters[i];
+            f.power -= 1000.0; f.form = 1; f.form_time = 0; f.attack_mul *= 1.3; f.defence_mul *= 1.25;
+            f.life = (f.life + f.life_max * 0.1).min(f.life_max);
+        }
+        self.change_state(i, 193, d);
+        self.fighters[i].ctrl = false;
+        self.pause = Some(PauseState { by: id, time: 80, move_time: 80, is_super: true, darken: true });
+        self.do_shake(40, 5.0);
+        self.events.push(Event::Transform { fighter: id });
+        true
     }
 
     fn visual_timers(&mut self) {
@@ -582,6 +651,14 @@ impl Match {
         let xs: Vec<(f32, f32)> = self.roots().filter(|f| !f.destroyed).map(|f| (f.pos.x, f.pos.y)).collect();
         if xs.is_empty() { return; }
         let minx = xs.iter().map(|p| p.0).fold(f32::MAX, f32::min); let maxx = xs.iter().map(|p| p.0).fold(f32::MIN, f32::max);
+        if self.zoom_max > 1.0 {
+            let live: Vec<f32> = self.roots().filter(|f| f.alive && !f.destroyed).map(|f| f.pos.x).collect();
+            let spread = live.iter().cloned().fold(f32::MIN, f32::max) - live.iter().cloned().fold(f32::MAX, f32::min);
+            let need = if live.is_empty() { self.zoom_min } else { (spread + 150.0) / BASE_W };
+            let target = need.clamp(self.zoom_min, self.zoom_max);
+            self.zoom += (target - self.zoom) * 0.04;
+            self.apply_zoom();
+        }
         let half = self.view_w / 2.0; let t = self.stage.tension;
         let mut target = ((minx + maxx) / 2.0).clamp(self.stage.bound_left, self.stage.bound_right);
         if maxx - minx < self.view_w - 2.0 * t {

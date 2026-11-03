@@ -82,7 +82,7 @@ fn kb_bits(p2_layout: bool, solo: bool) -> u32 {
     if !p2_layout {
         map(&[KeyCode::W], k::U); map(&[KeyCode::S], k::D); map(&[KeyCode::A], k::L); map(&[KeyCode::D], k::R);
         map(&[KeyCode::U], k::X); map(&[KeyCode::I], k::Y); map(&[KeyCode::O], k::Z); map(&[KeyCode::J], k::A); map(&[KeyCode::K], k::B); map(&[KeyCode::L], k::C);
-        map(&[KeyCode::Key1], k::D2); map(&[KeyCode::Key2], k::W); map(&[KeyCode::Key3], k::E);
+        map(&[KeyCode::Key1], k::D2); map(&[KeyCode::Key2], k::W); map(&[KeyCode::Key3], k::E); map(&[KeyCode::T], k::T);
         if solo {
             map(&[KeyCode::Up], k::U); map(&[KeyCode::Down], k::D); map(&[KeyCode::Left], k::L); map(&[KeyCode::Right], k::R);
             map(&[KeyCode::Z], k::A); map(&[KeyCode::X], k::B); map(&[KeyCode::C], k::C); map(&[KeyCode::V], k::X); map(&[KeyCode::B], k::Y); map(&[KeyCode::N], k::Z);
@@ -90,7 +90,7 @@ fn kb_bits(p2_layout: bool, solo: bool) -> u32 {
     } else {
         map(&[KeyCode::Up], k::U); map(&[KeyCode::Down], k::D); map(&[KeyCode::Left], k::L); map(&[KeyCode::Right], k::R);
         map(&[KeyCode::Kp4], k::X); map(&[KeyCode::Kp5], k::Y); map(&[KeyCode::Kp6], k::Z); map(&[KeyCode::Kp1], k::A); map(&[KeyCode::Kp2], k::B); map(&[KeyCode::Kp3], k::C);
-        map(&[KeyCode::Kp7], k::D2); map(&[KeyCode::Kp8], k::W); map(&[KeyCode::Kp9], k::E);
+        map(&[KeyCode::Kp7], k::D2); map(&[KeyCode::Kp8], k::W); map(&[KeyCode::Kp9], k::E); map(&[KeyCode::Kp0], k::T);
     }
     b
 }

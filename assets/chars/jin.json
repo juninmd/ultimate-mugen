@@ -6,7 +6,7 @@
  "author": "Ultimate MUGEN",
  "description": "Um jovem shinobi de cachecol vermelho que gira chakrams de vento e se move tão rápido que deixa miragens de si mesmo para trás.",
  "color": "#1aa8a0",
- "winQuote": "Viu só? O vento sempre chega primeiro!",
+ "winQuote": "Viu só? O vento sempre chega primeiro!", "intro": "Tente me acompanhar, se conseguir!", "taunt": "Lento demais! O vento nem te notou!", "form": "Tufão",
  "stats": {
   "life": 950,
   "power": 3000,

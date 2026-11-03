@@ -6,7 +6,7 @@
  "author": "Ultimate MUGEN",
  "description": "O orgulhoso príncipe herdeiro de um império guerreiro extinto, envolto em armadura carmesim, que jura superar qualquer rival com seu canhão de energia escarlate.",
  "color": "#b81c34",
- "winQuote": "Ajoelhe-se. Um príncipe não perde para plebeus.",
+ "winQuote": "Ajoelhe-se. Um príncipe não perde para plebeus.", "intro": "Um príncipe não luta com plebeus. Hoje abro exceção.", "taunt": "Patético. Tente de novo.", "form": "Dominância Escarlate",
  "stats": {
   "life": 1020,
   "power": 3000,

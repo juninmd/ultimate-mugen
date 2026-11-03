@@ -3,6 +3,8 @@ pub mod k {
     pub const U: u32 = 1; pub const D: u32 = 2; pub const L: u32 = 4; pub const R: u32 = 8;
     pub const A: u32 = 16; pub const B: u32 = 32; pub const C: u32 = 64; pub const X: u32 = 128; pub const Y: u32 = 256; pub const Z: u32 = 512;
     pub const S: u32 = 1024; pub const D2: u32 = 2048; pub const W: u32 = 4096; pub const E: u32 = 8192;
+    /// transformation (awakening) button
+    pub const T: u32 = 16384;
 }
 
 /// Button symbol (as used in CMD files) to bit.

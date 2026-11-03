@@ -16,6 +16,7 @@ pub const STANDARD_ANIMS: &[(&str, i32)] = &[
     ("hitLight", 5000), ("hitMedium", 5001), ("hitHeavy", 5002), ("hitLowLight", 5010), ("hitLowMedium", 5011), ("hitLowHeavy", 5012),
     ("hitCrouch", 5020), ("hitAir", 5030), ("fall", 5050), ("bounce", 5100), ("bounceAir", 5101), ("lieDown", 5110), ("getUp", 5120), ("dead", 5150),
     ("trip", 5070), ("airRecover", 5040),
+    ("taunt", 195), ("powerUp", 196), ("defeat1", 197), ("defeat2", 198), ("defeat3", 199), ("defeat4", 200),
 ];
 
 struct Lv { stop: i32, stun: i32, kb: f32, anim: &'static str }
@@ -90,7 +91,22 @@ fn render_all(nc: &NativeChar, jobs: Vec<(String, &NativeFrame)>, with_images: b
     jobs.into_iter().map(|(k, fr)| { let r = render_frame(nc, fr, with_images, palette); (k, r) }).collect()
 }
 
+/// Shared poses/animations every native character gets when it does not define its own: taunt, power-up (transformation)
+/// and the four defeat sequences (see `defaults.json`).
+fn with_defaults(nc: &NativeChar) -> NativeChar {
+    let d: Value = serde_json::from_str(include_str!("defaults.json")).unwrap_or(Value::Null);
+    let mut out = nc.clone();
+    if let Some(ps) = d.get("poses").and_then(|v| v.as_object()) { for (k, v) in ps { out.art.poses.entry(k.clone()).or_insert_with(|| v.clone()); } }
+    if let Some(an) = d.get("anims").and_then(|v| v.as_object()) {
+        for (k, v) in an {
+            if out.anims.get(k).is_none() { if let Ok(a) = serde_json::from_value::<NativeAnim>(v.clone()) { out.anims.0.push((k.clone(), a)); } }
+        }
+    }
+    out
+}
+
 pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only: Option<&[i32]>) -> CharDef {
+    let nc = &with_defaults(nc);
     let palette = if pal_no > 1 && !nc.palettes.is_empty() { Some(&nc.palettes[(pal_no as usize - 2) % nc.palettes.len()]) } else { None };
     let mut sprites = HashMap::new();
     let mut anims = HashMap::new();
@@ -195,7 +211,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let pa = if cost > 0.0 { -cost } else if m.kind == "special" { 30.0 } else { 15.0 };
         cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" });
         if m.kind == "super" {
-            cns += &format!("[State {sid}, super]\ntype = SuperPause\ntrigger1 = Time = 0\ntime = 40\nanim = 30\npos = 0, -60\nsound = -1\n\n[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\ntime = 60\nlength = 10\n\n");
+            cns += &format!("[State {sid}, super]\ntype = SuperPause\ntrigger1 = Time = 0\ntime = 55\nanim = 30\npos = 0, -60\nsound = -1\n\n[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\ntime = 60\nlength = 10\n\n");
         } else if m.fx.as_deref() == Some("aura") {
             cns += &format!("[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\ntime = 20\nlength = 6\n\n");
         }
@@ -207,10 +223,12 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         if ph == 'N' && when != "air" {
             cns += &format!("[State {sid}, grav]\ntype = VelAdd\ntrigger1 = Pos Y < 0 || Vel Y < 0\ny = const(movement.yaccel)\n\n[State {sid}, land]\ntype = ChangeState\ntrigger1 = Pos Y >= 0 && Vel Y > 0\nvalue = 52\n\n[State {sid}, fix]\ntype = PosSet\ntrigger1 = Pos Y > 0\ny = 0\n\n");
         }
+        // supers hit 30 % harder than their data (grander, deadlier finishers)
+        let sm = if m.kind == "super" { 1.3 } else { 1.0 };
         let attr = format!("{st}, {}A", match m.kind.as_str() { "normal" => "N", "special" => "S", _ => "H" });
         for h in &m.hits {
             cns += &format!("[State {sid}, hit]\ntype = HitDef\ntrigger1 = AnimElem = {}\n{}\n", h.at,
-                hitdef_lines(h.damage, h.guard_damage, h.level.as_deref(), h.guard.as_deref(), h.knockback, h.air_knockback, h.launch.unwrap_or(false), h.hitstop, h.hitstun, h.shake, false, &attr));
+                hitdef_lines(h.damage * sm, h.guard_damage.map(|g| g * sm), h.level.as_deref(), h.guard.as_deref(), h.knockback, h.air_knockback, h.launch.unwrap_or(false), h.hitstop, h.hitstun, h.shake, false, &attr));
         }
         let mut pid = sid;
         for p in m.projectile.as_ref().map(|p| p.to_vec()).unwrap_or_default() {
@@ -220,7 +238,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
             cns += &format!("[State {sid}, proj]\ntype = Projectile\ntrigger1 = AnimElem = {}\nprojid = {pid}\nprojanim = {pa}\n{ph2}offset = {}, {}\nvelocity = {}, {}\n{}projhits = {}\nprojmisstime = 6\nprojpriority = {}\nprojremovetime = {}\n{}\n",
                 p.at, p.offset[0], p.offset[1], p.speed[0], p.speed[1], p.accel.map(|a| format!("accel = {}, {}\n", a[0], a[1])).unwrap_or_default(),
                 p.hits.unwrap_or(1), p.priority.unwrap_or(1), p.remove_time.unwrap_or(-1),
-                hitdef_lines(p.damage, None, Some(p.level.as_deref().unwrap_or("medium")), None, p.knockback, None, p.launch.unwrap_or(false), None, None, None, true, &pattr));
+                hitdef_lines(p.damage * sm, None, Some(p.level.as_deref().unwrap_or("medium")), None, p.knockback, None, p.launch.unwrap_or(false), None, None, None, true, &pattr));
             pid += 1;
         }
         if when != "air" { cns += &format!("[State {sid}, end]\ntype = ChangeState\ntrigger1 = AnimTime = 0\nvalue = {}\nctrl = 1\n\n", if when == "crouch" { 11 } else { 0 }); }
@@ -235,6 +253,8 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     d.constants = k; d.sprites = sprites; d.anims = anims; d.commands = commands; d.states = states; d.portrait = portrait;
     d.ai_commands = movelist.iter().map(|m: &MoveInfo| m.command.clone()).collect(); d.movelist = movelist;
     d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.description = nc.description.clone().unwrap_or_default();
+    d.intro = nc.intro.clone().unwrap_or_default(); d.taunt = nc.taunt.clone().unwrap_or_default(); d.win_quote = nc.win_quote.clone().unwrap_or_default();
+    d.form_name = nc.form.clone().unwrap_or_default(); d.boss = nc.boss;
     let _ = Arc::new(());
     d
 }

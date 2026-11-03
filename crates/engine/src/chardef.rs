@@ -82,6 +82,8 @@ pub struct CharDef {
     pub color: [u8; 3],
     pub series: String,
     pub description: String,
+    /// story lines (round-start face-off, victory) and the transformed form's name; `boss` = arcade final boss
+    pub intro: String, pub taunt: String, pub win_quote: String, pub form_name: String, pub boss: bool,
 }
 impl CharDef {
     pub fn empty(id: &str) -> Self {
@@ -89,6 +91,7 @@ impl CharDef {
             id: id.into(), name: id.into(), display_name: id.into(), author: String::new(), source: Source::Native, local_w: 320.0, local_h: 240.0,
             constants: default_constants(), sprites: HashMap::new(), anims: HashMap::new(), commands: vec![], states: HashMap::new(), sounds: HashMap::new(),
             portrait: None, movelist: vec![], ai_commands: vec![], color: [90, 100, 140], series: String::new(), description: String::new(),
+            intro: String::new(), taunt: String::new(), win_quote: String::new(), form_name: String::new(), boss: false,
         }
     }
     pub fn c(&self, k: &str, d: f64) -> f64 { *self.constants.get(k).unwrap_or(&d) }

@@ -6,7 +6,7 @@
  "author": "Ultimate MUGEN",
  "description": "Um guardião de haori branco cuja katana desperta como uma lâmina de gelo espiritual quando sua determinação congela o campo de batalha.",
  "color": "#3a7ad8",
- "winQuote": "Minha lâmina não corta só a carne. Corta a hesitação.",
+ "winQuote": "Minha lâmina não corta só a carne. Corta a hesitação.", "intro": "Meu aço está sedento. Desembainhe o seu.", "taunt": "Hesitar é perder. Você já perdeu.", "form": "Lâmina Espiritual",
  "stats": {
   "life": 990,
   "power": 3000,

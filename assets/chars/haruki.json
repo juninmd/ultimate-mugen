@@ -6,7 +6,7 @@
  "author": "Ultimate MUGEN",
  "description": "Um jovem estudioso gentil que prefere livros a brigas — até que alguém ameace seus amigos e o poder adormecido em seus selos desperte.",
  "color": "#6a3aa8",
- "winQuote": "Desculpe... eu realmente não queria ter que ir tão longe.",
+ "winQuote": "Desculpe... eu realmente não queria ter que ir tão longe.", "intro": "Por favor... não me obrigue a lutar.", "taunt": "Eu avisei... não quero te machucar.", "form": "Fúria Contida",
  "stats": {
   "life": 960,
   "power": 3000,

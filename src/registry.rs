@@ -28,7 +28,7 @@ pub fn pretty_name(n: &str) -> String {
 pub enum Src { Native(Box<NativeChar>), Mugen { vfs: Arc<Vfs>, def: String } }
 
 pub struct CharEntry {
-    pub id: String, pub name: String, pub series: String, pub author: String, pub color: [u8; 3], pub description: String, pub mugen: bool,
+    pub id: String, pub name: String, pub series: String, pub author: String, pub color: [u8; 3], pub description: String, pub mugen: bool, /** final boss: hidden from the roster */ pub boss: bool,
     pub src: Src,
     cache: RefCell<HashMap<i32, Arc<CharDef>>>,
     /// idle/win only (native fighters): ~10x cheaper than a full compile, used by the select grid and VS screen
@@ -86,7 +86,7 @@ impl Registry {
             match serde_json::from_str::<NativeChar>(json) {
                 Ok(nc) => chars.push(CharEntry {
                     id: format!("umf:{}", nc.id), name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color),
-                    description: nc.description.clone().unwrap_or_default(), mugen: false, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()),
+                    description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()),
                 }),
                 Err(e) => eprintln!("bad builtin char: {e}"),
             }
@@ -107,7 +107,7 @@ impl Registry {
         let id = format!("umf:{}", nc.id);
         self.chars.retain(|c| c.id != id);
         let name = nc.name.clone();
-        self.chars.push(CharEntry { id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) });
+        self.chars.push(CharEntry { id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) });
         Ok(name)
     }
     /// Like add_vfs but skips the full validation decode (fast startup for trusted bundled content).
@@ -126,7 +126,7 @@ impl Registry {
             let author = info.and_then(|s| s.get("author")).map(unquote).unwrap_or_default();
             let id = format!("mugen:{tag}:{def}");
             if self.chars.iter().any(|c| c.id == id) { continue; }
-            let e = CharEntry { id, name: name.clone(), series: "M.U.G.E.N".into(), author, color: [90, 110, 150], description: "Personagem M.U.G.E.N importado".into(), mugen: true, src: Src::Mugen { vfs: vfs.clone(), def: def.clone() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) };
+            let e = CharEntry { id, name: name.clone(), series: "M.U.G.E.N".into(), author, color: [90, 110, 150], description: "Personagem M.U.G.E.N importado".into(), mugen: true, boss: false, src: Src::Mugen { vfs: vfs.clone(), def: def.clone() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) };
             if !validate { self.chars.push(e); cs.push(name); continue; }
             match e.load(1) { Ok(_) => { e.unload(); self.chars.push(e); cs.push(name); } Err(x) => errs.push(format!("{def}: {x}")) }
         }

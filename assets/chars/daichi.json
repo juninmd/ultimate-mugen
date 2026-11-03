@@ -6,7 +6,7 @@
  "author": "Ultimate MUGEN",
  "description": "Um lutador incansável criado nas montanhas, de cabelo prateado selvagem, que transforma o próprio espírito de luta em uma aura dourada ardente.",
  "color": "#2a9a4a",
- "winQuote": "Haha! Essa foi boa! Bora de novo, mais forte dessa vez!",
+ "winQuote": "Haha! Essa foi boa! Bora de novo, mais forte dessa vez!", "intro": "Haha! Essa luta vai ser demais!", "taunt": "Só isso? Me empolguei à toa!", "form": "Instinto Lupino",
  "stats": {
   "life": 1000,
   "power": 3000,

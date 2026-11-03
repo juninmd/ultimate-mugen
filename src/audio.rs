@@ -46,7 +46,7 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
     let mut nz = Noise(0x1234_5678 ^ v.wrapping_mul(0x9e37_79b9) ^ (kind.len() as u32 * 7919));
     let p = 1.0 + (v as f32 - 1.0) * 0.07;
     let sec = |s: f32| (s * SR as f32) as usize;
-    let total = match kind { "ko" => 1.9, "super" => 1.4, "round" | "fight" | "win" | "perfect" => 1.1, "hitheavy" | "counter" => 0.6, "meter" => 0.5, _ => 0.4 };
+    let total = match kind { "transform" => 2.6, "ko" => 1.9, "super" => 2.1, "defeat" => 1.7, "round" | "fight" | "win" | "perfect" => 1.1, "hitheavy" | "counter" => 0.6, "meter" => 0.5, _ => 0.4 };
     let mut out = vec![0.0f32; sec(total)];
     // pitch-swept oscillator with attack/decay envelope; wave 0 sine · 1 triangle · 2 saw · 3 square
     let tone = |out: &mut Vec<f32>, at: f32, f0: f32, f1: f32, dur: f32, g: f32, wave: u8| {
@@ -87,7 +87,20 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
         "jump" => { noise(&mut out, 0.0, 0.1, 0.25, 1, 700.0, 1800.0, 0.5, 1.0); tone(&mut out, 0.0, 280.0, 520.0, 0.08, 0.12, 1); }
         "super" => {
             tone(&mut out, 0.0, 90.0, 900.0, 0.55, 0.28, 2); noise(&mut out, 0.0, 0.55, 0.5, 1, 300.0, 4200.0, 0.4, 0.8);
-            tone(&mut out, 0.55, 80.0, 24.0, 0.7, 1.2, 0); noise(&mut out, 0.55, 0.5, 0.8, 1, 1600.0, 200.0, 0.3, 0.0); metal(&mut out, 520.0, 0.5, 0.0); reverb(&mut out, 0.3, 0.3);
+            tone(&mut out, 0.55, 80.0, 24.0, 0.7, 1.2, 0); noise(&mut out, 0.55, 0.5, 0.8, 1, 1600.0, 200.0, 0.3, 0.0); metal(&mut out, 520.0, 0.5, 0.0);
+            // grander finish: a second, deeper boom with a rumbling tail
+            tone(&mut out, 1.05, 60.0, 18.0, 0.95, 1.1, 0); noise(&mut out, 1.05, 0.9, 0.7, 0, 900.0, 90.0, 0.3, 0.0); metal(&mut out, 340.0, 1.0, 0.0);
+            tone(&mut out, 0.0, 40.0, 160.0, 1.0, 0.35, 0); reverb(&mut out, 0.38, 0.4);
+        }
+        "transform" => {
+            for (i, r) in [1.0f32, 1.5, 2.0, 3.0].iter().enumerate() { tone(&mut out, 0.0, 70.0 * r, 700.0 * r, 1.3, 0.16 - i as f32 * 0.025, 2); }
+            noise(&mut out, 0.0, 1.3, 0.55, 1, 200.0, 5200.0, 0.4, 0.8);
+            tone(&mut out, 1.3, 90.0, 20.0, 1.1, 1.3, 0); tone(&mut out, 1.3, 220.0, 50.0, 0.5, 0.7, 0);
+            noise(&mut out, 1.3, 0.9, 0.9, 1, 2200.0, 160.0, 0.3, 0.0); metal(&mut out, 420.0, 1.2, 0.0); reverb(&mut out, 0.42, 0.5);
+        }
+        "defeat" => {
+            tone(&mut out, 0.0, 440.0, 220.0, 0.6, 0.22, 1); tone(&mut out, 0.25, 330.0, 110.0, 0.9, 0.22, 1); tone(&mut out, 0.0, 120.0, 40.0, 1.2, 0.5, 0);
+            noise(&mut out, 0.0, 0.8, 0.25, 0, 900.0, 120.0, 0.3, 0.0); reverb(&mut out, 0.4, 0.5);
         }
         "ko" => {
             noise(&mut out, 0.0, 0.03, 1.0, 2, 2000.0, 2000.0, 0.7, 0.0); tone(&mut out, 0.0, 80.0, 22.0, 0.9, 1.3, 0); tone(&mut out, 0.0, 200.0, 40.0, 0.4, 0.8, 0);
@@ -162,7 +175,7 @@ impl Audio {
         let mut a = Audio { enabled, builtin: HashMap::new(), rr: std::cell::Cell::new(0), duck: 1.0, duck_now: 1.0, samples: HashMap::new(), pending: vec![], music: HashMap::new(), playing: None, volume: 0.8 };
         if enabled {
             // hits / guards / swings get 3 variants (round-robin) so repeated impacts don't sound identical
-            for (k, n) in [("hit", 3u32), ("hitheavy", 3), ("counter", 1), ("guard", 3), ("swing", 3), ("swingh", 2), ("land", 2), ("dash", 1), ("jump", 1), ("super", 1), ("ko", 1), ("round", 1), ("fight", 1), ("win", 1),
+            for (k, n) in [("hit", 3u32), ("hitheavy", 3), ("counter", 1), ("guard", 3), ("swing", 3), ("swingh", 2), ("land", 2), ("dash", 1), ("jump", 1), ("super", 1), ("transform", 1), ("defeat", 1), ("ko", 1), ("round", 1), ("fight", 1), ("win", 1),
                 ("perfect", 1), ("meter", 1), ("select", 1), ("back", 1), ("confirm", 1), ("combo1", 1), ("combo2", 1), ("combo3", 1), ("combo4", 1), ("combo5", 1), ("combo6", 1)] {
                 for v in 0..n {
                     if let Ok(s) = load_sound_from_bytes(&wav(&synth(k, v))).await { a.builtin.entry(k).or_default().push(s); }
@@ -224,7 +237,7 @@ mod tests {
     fn energy(v: &[f32]) -> f32 { v.iter().map(|x| x * x).sum::<f32>() / v.len().max(1) as f32 }
     #[test]
     fn every_effect_is_audible_finite_and_clipped() {
-        for k in ["hit", "hitheavy", "counter", "guard", "swing", "swingh", "land", "dash", "jump", "super", "ko", "round", "fight", "win", "perfect", "meter", "select", "back", "confirm", "combo1", "combo6"] {
+        for k in ["hit", "hitheavy", "counter", "guard", "swing", "swingh", "land", "dash", "jump", "super", "transform", "defeat", "ko", "round", "fight", "win", "perfect", "meter", "select", "back", "confirm", "combo1", "combo6"] {
             let s = synth(k, 0);
             assert!(!s.is_empty() && s.iter().all(|x| x.is_finite() && x.abs() <= 1.0), "{k}: finite, within [-1,1]");
             assert!(energy(&s) > 1e-5, "{k}: not silent");

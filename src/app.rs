@@ -12,6 +12,8 @@ use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::chardef::CharDef;
 
+mod cutscene;
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul }
 impl Mode {
@@ -31,6 +33,8 @@ pub enum Screen {
     Controls,
     Mugen,
     Video { cur: usize },
+    /// story scene: 0 arcade opening · 1 before the boss · 2 ending
+    Cutscene { kind: u8, page: usize, t: f32 },
 }
 
 /// Fight assets prepared step by step behind the VS screen.
@@ -77,6 +81,9 @@ pub struct App {
     pub team_pick: Vec<usize>,
     /// select-screen state: filter (0 all · 1 originals · 2 MUGEN), first visible row, cursor dwell timer
     sel_filter: u8,
+    ending_shown: bool,
+    /// colour multiplier for `draw_char` (cutscenes dim the character who is not speaking)
+    char_tint: Color,
     sel_row: usize,
     sel_last: [usize; 2],
     sel_dwell: f32,
@@ -133,7 +140,7 @@ impl App {
         App {
             reg, ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
+            settings, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
         }
     }
 
@@ -177,6 +184,7 @@ impl App {
             Screen::Results { .. } => self.results().await,
             Screen::Controls => self.controls_screen(),
             Screen::Mugen => self.mugen_screen(),
+            Screen::Cutscene { .. } => self.cutscene(),
         }
         if is_key_pressed(KeyCode::F11) { self.toggle_fullscreen(); }
         if is_key_pressed(KeyCode::F3) { self.settings.fps = !self.settings.fps; self.settings.save(); }
@@ -194,7 +202,7 @@ impl App {
         self.screen_t += dt;
         if self.trans > 0.0 { self.ui.wipe(self.trans); self.trans = (self.trans - dt * 2.6).max(0.0); }
         self.audio.process().await;
-        crate::set_import_button(!matches!(self.screen, Screen::Fight | Screen::Vs { .. } | Screen::Results { .. }));
+        crate::set_import_button(!matches!(self.screen, Screen::Fight | Screen::Vs { .. } | Screen::Results { .. } | Screen::Cutscene { .. }));
         for (i, zip) in crate::take_imports().into_iter().enumerate() {
             let mut vfs = ume_formats::vfs::Vfs::new();
             match ume_formats::vfs::add_zip(&mut vfs, &zip, "") {
@@ -249,7 +257,7 @@ impl App {
             self.ui.text(t, x + off + 26.0, y + h * 0.54, 22.0, WHITE, Align::Left, true);
             self.ui.text(d, x + off + 26.0, y + h * 0.88, 14.0, if f { WHITE } else { hex("#a49cc0") }, Align::Left, false);
         }
-        let (nm, nn) = (self.reg.chars.iter().filter(|c| c.mugen).count(), self.reg.chars.len());
+        let (nm, nn) = (self.reg.chars.iter().filter(|c| c.mugen).count(), self.playable().len());
         let sx = 960.0;
         self.ui.text(&format!("{nn}"), sx, 200.0, 40.0, hex("#ffcc33"), Align::Left, true);
         self.ui.text("lutadores", sx + 70.0, 196.0, 22.0, hex("#a49cc0"), Align::Left, false);
@@ -298,20 +306,25 @@ impl App {
         let px = self.ui.x(x) + fr.x * l * k * if mirror { -1.0 } else { 1.0 };
         let py = self.ui.y(y) + fr.y * l * k;
         let left = if flip { px - (spr.width - spr.axis_x) * ks } else { px - spr.axis_x * ks };
-        draw_texture_ex(&tex, left, py - spr.axis_y * ks, WHITE, DrawTextureParams { dest_size: Some(vec2(w, h)), flip_x: flip, ..Default::default() });
+        draw_texture_ex(&tex, left, py - spr.axis_y * ks, self.char_tint, DrawTextureParams { dest_size: Some(vec2(w, h)), flip_x: flip, ..Default::default() });
     }
+
+    /// Everyone you can pick (the arcade final boss stays hidden).
+    fn playable(&self) -> Vec<usize> { (0..self.reg.chars.len()).filter(|&i| !self.reg.chars[i].boss).collect() }
+    /// Registry index of the arcade final boss, if present.
+    fn boss_idx(&self) -> Option<usize> { (0..self.reg.chars.len()).find(|&i| self.reg.chars[i].boss && !self.reg.chars[i].broken.get()) }
 
     /// Registry indices visible under the current filter (never empty).
     fn char_view(&self) -> Vec<usize> {
-        let v: Vec<usize> = (0..self.reg.chars.len()).filter(|&i| match self.sel_filter { 1 => !self.reg.chars[i].mugen, 2 => self.reg.chars[i].mugen, _ => true }).collect();
-        if v.is_empty() { (0..self.reg.chars.len()).collect() } else { v }
+        let v: Vec<usize> = self.playable().into_iter().filter(|&i| match self.sel_filter { 1 => !self.reg.chars[i].mugen, 2 => self.reg.chars[i].mugen, _ => true }).collect();
+        if v.is_empty() { self.playable() } else { v }
     }
 
     fn select(&mut self) {
         let Screen::Select { mut cur, mut picking, mut picked } = self.screen else { return };
         let dt = get_frame_time();
         let mut view = self.char_view();
-        if self.sel_filter != 0 && view.len() == self.reg.chars.len() { self.sel_filter = 0; }
+        if self.sel_filter != 0 && view.len() == self.playable().len() { self.sel_filter = 0; }
         let m = view.len();
         let pos_of = |view: &[usize], i: usize| view.iter().position(|&v| v == i).unwrap_or(0);
         let cols = m.div_ceil(VIEW_ROWS).clamp(6, 9);
@@ -335,7 +348,7 @@ impl App {
         if is_key_pressed(KeyCode::Tab) {
             self.sel_filter = (self.sel_filter + 1) % 3;
             view = self.char_view();
-            if view.len() == self.reg.chars.len() { self.sel_filter = 0; }
+            if view.len() == self.playable().len() { self.sel_filter = 0; }
             pos = pos_of(&view, cur[p]).min(view.len() - 1);
             self.sel_row = 0;
             self.audio.sfx("select");
@@ -476,7 +489,7 @@ impl App {
                 let n = self.team_n;
                 if self.team_pick.len() < n { self.screen = Screen::Select { cur, picking: 0, picked: [None, None] }; return; }
                 // opponents: random distinct fighters (originals first), then straight to the stage
-                let mut pool: Vec<usize> = (0..self.reg.chars.len()).filter(|i| !self.team_pick.contains(i) && !self.reg.chars[*i].broken.get()).collect();
+                let mut pool: Vec<usize> = (0..self.reg.chars.len()).filter(|i| !self.team_pick.contains(i) && !self.reg.chars[*i].broken.get() && !self.reg.chars[*i].boss).collect();
                 let seed = (get_time() * 1000.0) as usize;
                 if !pool.is_empty() { let l = pool.len(); pool.rotate_left(seed % l); }
                 pool.sort_by_key(|&i| self.reg.chars[i].mugen as u8);
@@ -492,7 +505,7 @@ impl App {
             if picking == 0 && self.mode == Mode::Arcade {
                 let me = cur[0];
                 let n = self.reg.chars.len();
-                let mut ladder: Vec<usize> = (0..n).filter(|&i| i != me && !self.reg.chars[i].broken.get()).collect();
+                let mut ladder: Vec<usize> = (0..n).filter(|&i| i != me && !self.reg.chars[i].broken.get() && !self.reg.chars[i].boss).collect();
                 let seed = (get_time() * 1000.0) as usize;
                 let ll = ladder.len().max(1);
                 ladder.rotate_left(seed % ll);
@@ -500,9 +513,12 @@ impl App {
                 ladder.sort_by_key(|&i| self.reg.chars[i].mugen as u8);
                 ladder.truncate(8);
                 if ladder.is_empty() { ladder.push(me); }
+                // the ladder ends with the hidden final boss
+                let has_boss = self.boss_idx().filter(|&b| b != me).map(|b| ladder.push(b)).is_some();
                 self.sel = (me, ladder[0], self.sel.2);
                 self.arcade = Some((ladder, 0));
-                self.screen = Screen::Stages { cur: 1 };
+                self.ending_shown = false;
+                self.screen = if has_boss { Screen::Cutscene { kind: 0, page: 0, t: 0.0 } } else { Screen::Stages { cur: 1 } };
                 return;
             }
             if picking == 0 { picking = 1; } else { self.sel = (picked[0].unwrap(), picked[1].unwrap(), self.sel.2); self.screen = Screen::Stages { cur: self.sel.2 + 1 }; return; }
@@ -846,9 +862,15 @@ impl App {
         if let Some(s) = self.session.as_mut() { s.draw(&mut self.g, &self.ui); }
         // arcade progression
         if self.mode == Mode::Arcade && winner == 0 {
+            let boss = self.boss_idx();
             if let Some((ladder, i)) = self.arcade.as_mut() {
                 *i += 1;
-                if *i < ladder.len() { self.sel.1 = ladder[*i]; self.sel.2 = (*i * 3 + 1) % self.reg.stages.len(); self.audio.stop_music(); self.screen = Screen::Vs { t: 0.0, step: 0 }; return; }
+                if *i < ladder.len() {
+                    self.sel.1 = ladder[*i]; self.sel.2 = (*i * 3 + 1) % self.reg.stages.len(); self.audio.stop_music();
+                    self.screen = if Some(ladder[*i]) == boss { Screen::Cutscene { kind: 1, page: 0, t: 0.0 } } else { Screen::Vs { t: 0.0, step: 0 } };
+                    return;
+                }
+                if *i == ladder.len() && !self.ending_shown && boss.is_some_and(|b| ladder.last() == Some(&b)) { self.ending_shown = true; self.audio.stop_music(); self.screen = Screen::Cutscene { kind: 2, page: 0, t: 0.0 }; return; }
             }
         }
         draw_rectangle(0.0, 0.0, screen_width(), screen_height(), Color::new(0.02, 0.01, 0.06, 0.6));

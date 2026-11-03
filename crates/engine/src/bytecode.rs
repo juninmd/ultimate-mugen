@@ -1,0 +1,306 @@
+use crate::expr::{eval, is_float, Host, Node};
+
+const STACK: usize = 32;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Op {
+    Const(f64),
+    Host(u32),
+    Not,
+    BitNot,
+    Neg,
+    Add,
+    Sub,
+    MulI,
+    MulF,
+    DivI,
+    DivF,
+    Mod,
+    PowI,
+    PowF,
+    Eq,
+    Ne,
+    Lt,
+    Le,
+    Gt,
+    Ge,
+    Xor,
+    BitAnd,
+    BitOr,
+    BitXor,
+    Second,
+    Truthy,
+    AndJump(u32),
+    OrJump(u32),
+    JumpIfZero(u32),
+    Jump(u32),
+    Interval { neg: bool, lo_inc: bool, hi_inc: bool },
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct Code { ops: Vec<Op>, host: Vec<Node>, depth: usize }
+
+impl Code {
+    pub fn compile(n: &Node) -> Code {
+        let mut c = Code::default();
+        let folded = fold(n);
+        let mut d = 0;
+        c.emit(&folded, &mut d);
+        c
+    }
+
+    pub fn constant(&self) -> Option<f64> {
+        match self.ops.as_slice() { [Op::Const(v)] => Some(*v), _ => None }
+    }
+
+    pub fn len(&self) -> usize { self.ops.len() }
+
+    pub fn is_empty(&self) -> bool { self.ops.is_empty() }
+
+    fn push(&mut self, op: Op, d: &mut usize, delta: isize) {
+        self.ops.push(op);
+        *d = (*d as isize + delta) as usize;
+        self.depth = self.depth.max(*d);
+    }
+
+    fn host_call(&mut self, n: &Node, d: &mut usize) {
+        self.host.push(n.clone());
+        self.push(Op::Host(self.host.len() as u32 - 1), d, 1);
+    }
+
+    fn patch(&mut self, at: usize) {
+        let to = self.ops.len() as u32;
+        match &mut self.ops[at] {
+            Op::AndJump(t) | Op::OrJump(t) | Op::JumpIfZero(t) | Op::Jump(t) => *t = to,
+            _ => {}
+        }
+    }
+
+    fn emit(&mut self, n: &Node, d: &mut usize) {
+        match n {
+            Node::Num(v, _) => self.push(Op::Const(*v), d, 1),
+            Node::Un(op, a) => {
+                self.emit(a, d);
+                let o = match *op { "!" => Op::Not, "~" => Op::BitNot, _ => Op::Neg };
+                self.push(o, d, 0);
+            }
+            Node::Bin(op, a, b) if *op == "&&" || *op == "||" => {
+                self.emit(a, d);
+                let at = self.ops.len();
+                self.push(if *op == "&&" { Op::AndJump(0) } else { Op::OrJump(0) }, d, -1);
+                self.emit(b, d);
+                self.push(Op::Truthy, d, 0);
+                self.patch(at);
+            }
+            Node::Bin(op, a, b) => {
+                let fl = is_float(a) || is_float(b);
+                let o = match *op {
+                    "+" => Op::Add,
+                    "-" => Op::Sub,
+                    "*" => if fl { Op::MulF } else { Op::MulI },
+                    "/" => if fl { Op::DivF } else { Op::DivI },
+                    "%" => Op::Mod,
+                    "**" => if fl { Op::PowF } else { Op::PowI },
+                    "=" => Op::Eq,
+                    "!=" => Op::Ne,
+                    "<" => Op::Lt,
+                    "<=" => Op::Le,
+                    ">" => Op::Gt,
+                    ">=" => Op::Ge,
+                    "^^" => Op::Xor,
+                    "&" => Op::BitAnd,
+                    "|" => Op::BitOr,
+                    "^" => Op::BitXor,
+                    ":=" => Op::Second,
+                    _ => { self.push(Op::Const(0.0), d, 1); return; }
+                };
+                self.emit(a, d);
+                self.emit(b, d);
+                self.push(o, d, -1);
+            }
+            Node::Interval { a, neg, lo, hi, lo_inc, hi_inc } => {
+                self.emit(a, d);
+                self.emit(lo, d);
+                self.emit(hi, d);
+                self.push(Op::Interval { neg: *neg, lo_inc: *lo_inc, hi_inc: *hi_inc }, d, -2);
+            }
+            Node::Trig { name, args, .. } if name == "ifelse" || name == "cond" => {
+                if args.len() < 3 { self.push(Op::Const(0.0), d, 1); return; }
+                self.emit(&args[0], d);
+                let jz = self.ops.len();
+                self.push(Op::JumpIfZero(0), d, -1);
+                self.emit(&args[1], d);
+                let jmp = self.ops.len();
+                self.push(Op::Jump(0), d, -1);
+                self.patch(jz);
+                self.emit(&args[2], d);
+                self.patch(jmp);
+            }
+            _ => self.host_call(n, d),
+        }
+    }
+
+    pub fn run<H: Host>(&self, h: &H) -> f64 {
+        if self.depth > STACK { return 0.0; }
+        let mut s = [0.0f64; STACK];
+        let mut sp = 0usize;
+        let mut pc = 0usize;
+        let ops = self.ops.as_slice();
+        let ib = |c: bool| c as i32 as f64;
+        let it = |x: f64| x.trunc() as i64;
+        while pc < ops.len() {
+            match ops[pc] {
+                Op::Const(v) => { s[sp] = v; sp += 1; }
+                Op::Host(i) => { s[sp] = eval(&self.host[i as usize], h); sp += 1; }
+                Op::Not => s[sp - 1] = ib(s[sp - 1] == 0.0),
+                Op::BitNot => s[sp - 1] = !(s[sp - 1].trunc() as i32) as f64,
+                Op::Neg => s[sp - 1] = -s[sp - 1],
+                Op::Truthy => s[sp - 1] = ib(s[sp - 1] != 0.0),
+                Op::AndJump(t) => { sp -= 1; if s[sp] == 0.0 { s[sp] = 0.0; sp += 1; pc = t as usize; continue; } }
+                Op::OrJump(t) => { sp -= 1; if s[sp] != 0.0 { s[sp] = 1.0; sp += 1; pc = t as usize; continue; } }
+                Op::JumpIfZero(t) => { sp -= 1; if s[sp] == 0.0 { pc = t as usize; continue; } }
+                Op::Jump(t) => { pc = t as usize; continue; }
+                Op::Interval { neg, lo_inc, hi_inc } => {
+                    sp -= 2;
+                    let (v, l, u) = (s[sp - 1], s[sp], s[sp + 1]);
+                    let inside = (if lo_inc { v >= l } else { v > l }) && (if hi_inc { v <= u } else { v < u });
+                    s[sp - 1] = ib(inside != neg);
+                }
+                op => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = binary(op, x, y, it);
+                }
+            }
+            pc += 1;
+        }
+        if sp == 0 { 0.0 } else { s[sp - 1] }
+    }
+}
+
+#[inline]
+fn binary(op: Op, x: f64, y: f64, it: impl Fn(f64) -> i64) -> f64 {
+    let ib = |c: bool| c as i32 as f64;
+    match op {
+        Op::Add => x + y,
+        Op::Sub => x - y,
+        Op::MulF => x * y,
+        Op::MulI => it(x).wrapping_mul(it(y)) as i32 as f64,
+        Op::DivF => if y == 0.0 { 0.0 } else { x / y },
+        Op::DivI => if y == 0.0 { 0.0 } else { (x / y).trunc() },
+        Op::Mod => { let m = it(y); if m == 0 { 0.0 } else { (it(x) % m) as f64 } }
+        Op::PowF => x.powf(y),
+        Op::PowI => x.powf(y).trunc(),
+        Op::Eq => ib(x == y),
+        Op::Ne => ib(x != y),
+        Op::Lt => ib(x < y),
+        Op::Le => ib(x <= y),
+        Op::Gt => ib(x > y),
+        Op::Ge => ib(x >= y),
+        Op::Xor => ib((x != 0.0) != (y != 0.0)),
+        Op::BitAnd => (it(x) & it(y)) as f64,
+        Op::BitOr => (it(x) | it(y)) as f64,
+        Op::BitXor => (it(x) ^ it(y)) as f64,
+        _ => y,
+    }
+}
+
+struct NoHost;
+impl Host for NoHost {
+    fn trigger(&self, _: &str, _: &[Node], _: Option<char>, _: Option<&str>) -> f64 { 0.0 }
+    fn redirect(&self, _: &str, _: Option<f64>) -> Option<Self> { None }
+    fn cmpstr(&self, _: &str, _: bool, _: &[String]) -> bool { false }
+    fn special(&self, _: &str, _: &str, _: f64, _: Option<&str>, _: Option<f64>) -> bool { false }
+    fn assign(&self, _: &str, _: i32, v: f64) -> f64 { v }
+}
+
+fn num(n: &Node) -> Option<f64> { if let Node::Num(v, _) = n { Some(*v) } else { None } }
+
+pub fn fold(n: &Node) -> Node {
+    match n {
+        Node::Un(op, a) => {
+            let a = fold(a);
+            let constant = num(&a).is_some();
+            let r = Node::Un(op, Box::new(a));
+            if constant { Node::Num(eval(&r, &NoHost), is_float(&r)) } else { r }
+        }
+        Node::Bin(op, a, b) => {
+            let (a, b) = (fold(a), fold(b));
+            let both = num(&a).is_some() && num(&b).is_some();
+            let r = Node::Bin(op, Box::new(a), Box::new(b));
+            if both && *op != ":=" { Node::Num(eval(&r, &NoHost), is_float(&r)) } else { r }
+        }
+        Node::Interval { a, neg, lo, hi, lo_inc, hi_inc } => {
+            let r = Node::Interval { a: Box::new(fold(a)), neg: *neg, lo: Box::new(fold(lo)), hi: Box::new(fold(hi)), lo_inc: *lo_inc, hi_inc: *hi_inc };
+            if let Node::Interval { a, lo, hi, .. } = &r {
+                if num(a).is_some() && num(lo).is_some() && num(hi).is_some() { return Node::Num(eval(&r, &NoHost), false); }
+            }
+            r
+        }
+        Node::Trig { name, args, comp, raw } if name == "ifelse" || name == "cond" => {
+            let args: Vec<Node> = args.iter().map(fold).collect();
+            if args.len() >= 3 {
+                if let Some(c) = num(&args[0]) { return if c != 0.0 { args[1].clone() } else { args[2].clone() }; }
+            }
+            Node::Trig { name: name.clone(), args, comp: *comp, raw: raw.clone() }
+        }
+        Node::Trig { name, args, comp, raw } => Node::Trig { name: name.clone(), args: args.iter().map(fold).collect(), comp: *comp, raw: raw.clone() },
+        Node::Redir { kind, arg, e } => Node::Redir { kind: kind.clone(), arg: arg.as_ref().map(|x| Box::new(fold(x))), e: Box::new(fold(e)) },
+        Node::Special { name, op, a, op2, b } => Node::Special { name: name.clone(), op, a: Box::new(fold(a)), op2: *op2, b: b.as_ref().map(|x| Box::new(fold(x))) },
+        Node::Assign { name, idx, v } => Node::Assign { name: name.clone(), idx: Box::new(fold(idx)), v: Box::new(fold(v)) },
+        other => other.clone(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::expr::{parse, Expr};
+
+    struct H;
+    impl Host for H {
+        fn trigger(&self, name: &str, args: &[Node], comp: Option<char>, _: Option<&str>) -> f64 {
+            let a: f64 = args.iter().map(|n| eval(n, self)).sum();
+            let k = name.bytes().fold(7u32, |h, b| h.wrapping_mul(31).wrapping_add(b as u32)) % 23;
+            k as f64 - 6.0 + a * 0.5 + if comp == Some('y') { -1.25 } else { 0.0 }
+        }
+        fn redirect(&self, _: &str, _: Option<f64>) -> Option<Self> { Some(H) }
+        fn cmpstr(&self, name: &str, neg: bool, v: &[String]) -> bool { ((name.len() + v.len()) % 2 == 0) != neg }
+        fn special(&self, _: &str, op: &str, a: f64, _: Option<&str>, _: Option<f64>) -> bool { (a as i64 % 2 == 0) == (op == "=") }
+        fn assign(&self, _: &str, _: i32, v: f64) -> f64 { v }
+    }
+
+    fn same(src: &str) {
+        let n = parse(src).unwrap();
+        let tree = eval(&n, &H);
+        let code = Expr::new(n).eval(&H);
+        assert!(tree == code || (tree.is_nan() && code.is_nan()), "{src}: tree {tree} != code {code}");
+    }
+
+    #[test]
+    fn matches_tree_on_samples() {
+        for s in ["1 + 2 * 3", "7/2", "7.0/2", "-7/2", "2**3", "2.0**0.5", "7%3", "time = [5, 7]", "time != (7, 9]", "!time || 0", "time && var(1)", "ifelse(time > 3, 10, 20)", "cond(0, 1, 2.5)", "vel y < 0 && pos x", "~5", "3 ^^ 0", "6 & 3 | 8 ^ 1", "var(3) := 4 + 1", "p2, life > 0", "statetype = S", "animelem = 3, >= 2", "1/0", "5 % 0", "-(2 + 3) * 2.5"] { same(s); }
+    }
+
+    #[test]
+    fn matches_tree_on_common1() {
+        let src = include_str!("common1.cns");
+        let mut n = 0;
+        for line in src.lines() {
+            let l = line.split(';').next().unwrap_or("");
+            let Some((k, v)) = l.split_once('=') else { continue };
+            let k = k.trim().to_ascii_lowercase();
+            if !(k.starts_with("trigger") || k == "value" || k == "x" || k == "y") { continue; }
+            if parse(v.trim()).is_ok() { same(v.trim()); n += 1; }
+        }
+        assert!(n > 100, "only {n} expressions");
+    }
+
+    #[test]
+    fn folds_constants() {
+        assert_eq!(Code::compile(&parse("2 * (3 + 4) - 1").unwrap()).constant(), Some(13.0));
+        assert_eq!(Code::compile(&parse("ifelse(1, 5, time)").unwrap()).constant(), Some(5.0));
+        assert_eq!(Code::compile(&parse("10 = [5, 15]").unwrap()).constant(), Some(1.0));
+        assert!(Code::compile(&parse("time + 1").unwrap()).constant().is_none());
+    }
+}

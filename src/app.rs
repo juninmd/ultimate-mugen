@@ -15,9 +15,8 @@ use ume_engine::chardef::CharDef;
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul }
 impl Mode {
-    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA 3v3", Mode::TeamSimul => "EQUIPE · PARALELO 2v2" } }
+    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO" } }
     /// Team size (1 for the regular modes).
-    pub fn team_size(self) -> usize { match self { Mode::TeamSeq => 3, Mode::TeamSimul => 2, _ => 1 } }
     pub fn is_team(self) -> bool { matches!(self, Mode::TeamSeq | Mode::TeamSimul) }
 }
 
@@ -66,6 +65,8 @@ pub struct App {
     pub settings: Settings,
     pending: Pending,
     pub team: Option<Team>,
+    /// fighters per team in the team modes (2..=5)
+    pub team_n: usize,
     pub team_pick: Vec<usize>,
     /// select-screen state: filter (0 all · 1 originals · 2 MUGEN), first visible row, cursor dwell timer
     sel_filter: u8,
@@ -85,8 +86,8 @@ const MENU: [(&str, &str); 11] = [
     ("2 Jogadores", "Teclado compartilhado ou dois controles"),
     ("Treino", "Boneco de treino, barra infinita, hitboxes"),
     ("CPU vs CPU", "Assista a IA lutar"),
-    ("Equipe · Sequência", "3 contra 3, um de cada vez; o vencedor mantém a vida"),
-    ("Equipe · Paralelo", "2 contra 2 ao mesmo tempo, com parceiro controlado pela IA"),
+    ("Equipe · Sequência", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida"),
+    ("Equipe · Paralelo", "Até 5 contra 5 ao mesmo tempo; parceiros controlados pela IA"),
     ("Personagens MUGEN", "Como adicionar personagens e cenários"),
     ("Controles", "Teclado, DualShock/DualSense, toque e vibração"),
     ("Vídeo", "Tela cheia, resolução até 4K e qualidade da arte"),
@@ -125,7 +126,7 @@ impl App {
         App {
             reg, ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, pending: Pending::default(), team: None, team_pick: vec![], sel_filter: 0, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
+            settings, pending: Pending::default(), team: None, team_n: 3, team_pick: vec![], sel_filter: 0, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
         }
     }
 
@@ -345,21 +346,27 @@ impl App {
         self.sel_row = self.sel_row.min(total_rows.saturating_sub(VIEW_ROWS));
 
         self.ui.background();
-        self.ui.text(self.mode.label(), 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
-        let hint = if self.mode.is_team() { "Monte sua equipe — o adversário é sorteado" } else if picking == 0 { "JOGADOR 1: escolha seu lutador" } else if two { "JOGADOR 2: escolha" } else { "Escolha o oponente" };
+        if self.mode.is_team() {
+            if is_key_pressed(KeyCode::E) { self.team_n = (self.team_n + 1).min(5); self.audio.sfx("select"); }
+            if is_key_pressed(KeyCode::Q) { self.team_n = (self.team_n - 1).max(2).max(self.team_pick.len() + 1); self.audio.sfx("select"); }
+        }
+        let title = if self.mode.is_team() { format!("{} {}v{}", self.mode.label(), self.team_n, self.team_n) } else { self.mode.label().to_string() };
+        self.ui.text(&title, 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
+        let hint = if self.mode.is_team() { "Monte sua equipe (Q/E: tamanho) — o adversário é sorteado" } else if picking == 0 { "JOGADOR 1: escolha seu lutador" } else if two { "JOGADOR 2: escolha" } else { "Escolha o oponente" };
         self.ui.text(hint, VW - 40.0, 56.0, 22.0, hex("#a49cc0"), Align::Right, false);
         let flabel = ["TODOS", "ORIGINAIS", "M.U.G.E.N"][self.sel_filter as usize % 3];
         self.ui.text(&format!("[Tab] {flabel} · {}/{m} · [R] aleatório · PgUp/PgDn", pos + 1), 640.0, 92.0, 15.0, hex("#a49cc0"), Align::Center, false);
 
         if self.mode.is_team() {
-            let n = self.mode.team_size();
+            let n = self.team_n;
             self.ui.text("SUA EQUIPE", 40.0, 90.0, 16.0, hex("#a49cc0"), Align::Left, true);
             for k in 0..n {
-                let x = 150.0 + k as f32 * 108.0;
+                let cw = (470.0 / n as f32).min(100.0) - 6.0;
+                let x = 150.0 + k as f32 * (cw + 6.0);
                 let filled = self.team_pick.get(k).copied();
-                self.ui.rect(x, 74.0, 100.0, 24.0, if filled.is_some() { alpha(rgb(self.reg.chars[filled.unwrap()].color), 0.9) } else if k == self.team_pick.len() { Color::new(1.0, 0.8, 0.2, 0.25 + 0.15 * (self.ui.t * 6.0).sin()) } else { Color::new(1.0, 1.0, 1.0, 0.08) });
+                self.ui.rect(x, 74.0, cw, 24.0, if filled.is_some() { alpha(rgb(self.reg.chars[filled.unwrap()].color), 0.9) } else if k == self.team_pick.len() { Color::new(1.0, 0.8, 0.2, 0.25 + 0.15 * (self.ui.t * 6.0).sin()) } else { Color::new(1.0, 1.0, 1.0, 0.08) });
                 let label = filled.map(|i| self.reg.chars[i].name.split_whitespace().next().unwrap_or("").to_uppercase()).unwrap_or_else(|| format!("{}º", k + 1));
-                self.ui.text(&label, x + 50.0, 92.0, 14.0, WHITE, Align::Center, true);
+                self.ui.text(&label, x + cw / 2.0, 92.0, if n > 4 { 12.0 } else { 14.0 }, WHITE, Align::Center, true);
             }
         }
         // cursor dwell: heavy loads (MUGEN) wait until the cursor rests; light previews (UMF) load almost immediately
@@ -458,7 +465,7 @@ impl App {
                 let me = cur[0];
                 if self.team_pick.contains(&me) { self.msg = "Este lutador já está na equipe.".into(); self.screen = Screen::Select { cur, picking: 0, picked: [None, None] }; return; }
                 self.team_pick.push(me);
-                let n = self.mode.team_size();
+                let n = self.team_n;
                 if self.team_pick.len() < n { self.screen = Screen::Select { cur, picking: 0, picked: [None, None] }; return; }
                 // opponents: random distinct fighters (originals first), then straight to the stage
                 let mut pool: Vec<usize> = (0..self.reg.chars.len()).filter(|i| !self.team_pick.contains(i) && !self.reg.chars[*i].broken.get()).collect();

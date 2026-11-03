@@ -104,18 +104,21 @@ impl Hud {
                 if lv >= 3 { let c = p(px + pw / 2.0, py + ph / 2.0); let a = 0.08 + 0.06 * (gt * 9.0).sin().abs(); draw_rectangle(c.x - pw * s * 0.62, c.y - ph * s * 1.6, pw * s * 1.24, ph * s * 3.2, Color::new(1.0, 0.3, 0.85, a)); }
             }
             // partners (parallel team mode): compact bar under the leader's
+            let mut row = [0usize; 2];
             for f in &partners {
                 let side = f.side.min(1);
-                let bw = (w / 2.0 - 34.0) * 0.6; let (bh, y) = (4.5, 35.0);
+                let j = row[side]; row[side] += 1;
+                let bw = (w / 2.0 - 34.0) * 0.55; let bh = 4.0; let y = 34.0 + j as f32 * 8.6;
                 let x = if side == 0 { 10.0 } else { w - 10.0 - bw };
                 let ratio = (f.life / f.life_max).clamp(0.0, 1.0);
                 draw_rectangle(p(x - 1.0, y - 1.0).x, p(0.0, y - 1.0).y, (bw + 2.0) * s, (bh + 2.0) * s, Color::new(0.04, 0.04, 0.08, 0.85));
                 let fw = bw * ratio;
                 let fx = if side == 0 { x + bw - fw } else { x };
                 draw_rectangle(p(fx, y).x, p(0.0, y).y, fw * s, bh * s, if f.alive { if ratio < 0.25 { hex("#ff7a2a") } else { hex("#33d6a0") } } else { hex("#555566") });
-                let al = if side == 0 { Align::Right } else { Align::Left };
-                text(&f.def.display_name.to_uppercase(), if side == 0 { x + bw } else { x }, y + bh + 6.5, 5.5, if f.alive { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.4) }, al, true);
-                let _ = al;
+                // name sits just outside the bar, towards the screen centre
+                let (nx, al) = if side == 0 { (x + bw + 3.0, Align::Left) } else { (x - 3.0, Align::Right) };
+                let nm = f.def.display_name.split_whitespace().next().unwrap_or("").to_uppercase();
+                text(&nm, nx, y + bh, 5.0, if f.alive { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.4) }, al, true);
             }
             // sequence roster: portraits of every team member (KO'd ones greyed out, current one highlighted)
             if let Some(t) = team.filter(|t| !t.simul) {

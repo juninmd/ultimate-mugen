@@ -55,7 +55,8 @@ pub struct Projectile {
 pub enum Event {
     Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str> },
     Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool, attacker: usize, defender: usize },
-    Super { side: usize },
+    /// `fighter` = id of the root fighter that fired it (teams can have many per side)
+    Super { side: usize, fighter: u32 },
     Ko { loser_side: usize },
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
 }
@@ -347,14 +348,16 @@ impl Match {
         self.fighters.retain(|f| !f.is_helper);
         self.camera = V2::default();
         let mut slot = [0usize; 2];
+        let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()];
         for i in 0..self.fighters.len() {
             {
                 let p1x = self.stage.p1x; let p2x = self.stage.p2x; let first = self.round_no == 1;
                 let f = &mut self.fighters[i];
                 let k = { let s = f.side.min(1); slot[s] += 1; (slot[s] - 1) as f32 };
                 f.destroyed = false;
-                // teammates line up behind the leader
-                f.pos = V2 { x: if f.side == 0 { p1x - 52.0 * k } else { p2x + 52.0 * k }, y: 0.0 };
+                // teammates line up behind the leader; big teams (up to 5) are packed tighter so everyone starts on screen
+                let gap = if team_n[f.side.min(1)] <= 2 { 52.0 } else { 130.0 / (team_n[f.side.min(1)] - 1) as f32 };
+                f.pos = V2 { x: if f.side == 0 { p1x - gap * k } else { p2x + gap * k }, y: 0.0 };
                 f.vel = V2::default();
                 f.facing = if f.side == 0 { 1.0 } else { -1.0 };
                 f.life = f.life_max; f.alive = true;

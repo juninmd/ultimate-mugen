@@ -48,13 +48,13 @@ pub enum BindKind { Target, Parent, Root }
 #[derive(Clone, Debug)]
 pub struct Bind { pub to: u32, pub time: i32, pub x: f32, pub y: f32, pub kind: BindKind }
 
-#[derive(Clone, Debug)]
-pub struct PalFx { pub time: i32, pub add: [f32; 3], pub mul: [f32; 3] }
+pub use crate::palette::PalFx;
+use crate::palette::{AfterImageParams, Trans};
 
 #[derive(Clone, Debug)]
 pub struct TrailPoint { pub x: f32, pub y: f32, pub group: i32, pub index: i32, pub fx: f32, pub fy: f32, pub flip_h: bool, pub facing: f32 }
 #[derive(Clone, Debug)]
-pub struct AfterImage { pub time: i32, pub length: usize, pub trail: Vec<TrailPoint> }
+pub struct AfterImage { pub time: i32, pub length: usize, pub trail: Vec<TrailPoint>, pub params: AfterImageParams, pub ticks: i32 }
 
 /// AssertSpecial flags
 pub mod asf {
@@ -119,7 +119,8 @@ pub struct Fighter {
     pub air_jumps: i32,
     pub bind: Option<Bind>,
     pub palfx: Option<PalFx>,
-    pub trans: Option<(String, f32, f32)>,
+    pub trans: Option<Trans>,
+    pub remap: Vec<((i32, i32), (i32, i32))>,
     pub angle: f32, pub angle_draw: bool, pub draw_scale: [f32; 2],
     pub after_image: Option<AfterImage>,
     pub proj_contacts: Vec<(char, i32, i64)>,
@@ -147,7 +148,7 @@ impl Fighter {
             ghv: GetHitVars::default(), juggle_used: 0, hit_pause: 0, hit_shake: 0, hit_over_time: 0, slide_time: 0, fall_time: 0, asserts: 0,
             width_override: None, player_push: true, screen_bound: true, pos_freeze: false, spr_priority: 0, targets: vec![],
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
-            persist: HashMap::new(), air_jumps: 0, bind: None, palfx: None, trans: None, angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
+            persist: HashMap::new(), air_jumps: 0, bind: None, palfx: None, trans: None, remap: vec![], angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
             after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), cmd: CommandState::default(),
             combo_count: 0, combo_damage: 0.0, form: 0, form_time: 0, def,
         }

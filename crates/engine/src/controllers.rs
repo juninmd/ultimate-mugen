@@ -1,6 +1,7 @@
 //! State controller implementations (~90 MUGEN sctrls).
 use crate::chardef::Controller;
 use crate::fighter::{asf, AfterImage, Bind, BindKind, PalFx};
+use crate::palette::{AfterImageParams, Trans};
 use crate::hitdef::{build, parse_sound_ref};
 use crate::matchs::{Event, Match, PauseState};
 use std::sync::Arc;
@@ -254,19 +255,40 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 m.events.push(Event::Super { side, fighter: who });
             }
         }
-        "afterimage" => { let (t, len) = (n(m, "time", 1.0) as i32, n(m, "length", 20.0) as usize); m.fighters[i].after_image = Some(AfterImage { time: t, length: len.min(30), trail: vec![] }); }
-        "afterimagetime" => { let t = if sc.has("time", 0) { n(m, "time", 0.0) } else { n(m, "value", 0.0) } as i32; if let Some(a) = m.fighters[i].after_image.as_mut() { a.time = t; } }
-        "palfx" => {
-            let p = PalFx { time: n(m, "time", 0.0) as i32, add: [n2(m, "add", 0.0, 0) as f32, n2(m, "add", 0.0, 1) as f32, n2(m, "add", 0.0, 2) as f32], mul: [n2(m, "mul", 256.0, 0) as f32, n2(m, "mul", 256.0, 1) as f32, n2(m, "mul", 256.0, 2) as f32] };
-            m.fighters[i].palfx = Some(p);
+        "afterimage" => {
+            let (t, len) = (n(m, "time", 1.0) as i32, n(m, "length", 20.0) as usize);
+            let d = AfterImageParams::default();
+            let tri = |m: &Match, k: &str, d: [f32; 3]| [0, 1, 2].map(|c| n2(m, k, d[c] as f64, c) as f32);
+            let trans = sc.raw("trans").map(|t| Trans::parse(t, if sc.has("alpha", 0) { Some((n2(m, "alpha", 256.0, 0) as f32, n2(m, "alpha", 0.0, 1) as f32)) } else { None })).unwrap_or(d.trans);
+            let params = AfterImageParams {
+                time_gap: n(m, "timegap", 1.0) as i32, frame_gap: n(m, "framegap", 4.0) as i32, trans,
+                pal_color: n(m, "palcolor", 256.0) as f32, pal_invert: n(m, "palinvertall", 0.0) != 0.0,
+                pal_bright: tri(m, "palbright", d.pal_bright), pal_contrast: tri(m, "palcontrast", d.pal_contrast), pal_post_bright: tri(m, "palpostbright", d.pal_post_bright),
+                pal_add: tri(m, "paladd", d.pal_add), pal_mul: tri(m, "palmul", d.pal_mul),
+            };
+            m.fighters[i].after_image = Some(AfterImage { time: t, length: len.clamp(1, 60), trail: vec![], params, ticks: 0 });
         }
-        "allpalfx" | "bgpalfx" | "envcolor" => {
-            let (k, d) = if sc.kind == "envcolor" { ("value", 255.0) } else { ("add", 0.0) };
-            let t = n(m, "time", if sc.kind == "envcolor" { 1.0 } else { 0.0 }) as i32;
-            let c = [n2(m, k, d, 0) as f32, n2(m, k, d, 1) as f32, n2(m, k, d, 2) as f32];
+        "afterimagetime" => { let t = if sc.has("time", 0) { n(m, "time", 0.0) } else { n(m, "value", 0.0) } as i32; if let Some(a) = m.fighters[i].after_image.as_mut() { a.time = t; } }
+        "palfx" => { let p = PalFx::from_controller(m, i, sc, ""); m.fighters[i].palfx = Some(p); }
+        "allpalfx" => { let p = PalFx::from_controller(m, i, sc, ""); m.all_palfx = Some(p); }
+        "bgpalfx" => { let p = PalFx::from_controller(m, i, sc, ""); m.bg_palfx = Some(p); }
+        "envcolor" => {
+            let t = n(m, "time", 1.0) as i32;
+            let c = [n2(m, "value", 255.0, 0) as f32, n2(m, "value", 255.0, 1) as f32, n2(m, "value", 255.0, 2) as f32];
             if t > 0 { m.flash = Some((t, c)); }
         }
-        "trans" => { let t = sc.raw("trans").unwrap_or("none").to_ascii_lowercase(); let (a, b) = (n2(m, "alpha", 256.0, 0) as f32, n2(m, "alpha", 0.0, 1) as f32); m.fighters[i].trans = Some((t, a, b)); }
+        "remappal" => {
+            let src = (n2(m, "source", 1.0, 0) as i32, n2(m, "source", 1.0, 1) as i32);
+            let dst = (n2(m, "dest", 1.0, 0) as i32, n2(m, "dest", 1.0, 1) as i32);
+            let f = &mut m.fighters[i];
+            f.remap.retain(|(s, _)| *s != src);
+            if dst.0 >= 0 && dst != src { f.remap.push((src, dst)); }
+        }
+        "trans" => {
+            let alpha = if sc.has("alpha", 0) { Some((n2(m, "alpha", 256.0, 0) as f32, n2(m, "alpha", 0.0, 1) as f32)) } else { None };
+            let t = Trans::parse(sc.raw("trans").unwrap_or("none"), alpha);
+            m.fighters[i].trans = Some(t);
+        }
         "angledraw" => {
             let v = if sc.has("value", 0) { Some(n(m, "value", 0.0) as f32) } else { None };
             let s = if sc.has("scale", 0) { Some([n2(m, "scale", 1.0, 0) as f32, n2(m, "scale", 1.0, 1) as f32]) } else { None };

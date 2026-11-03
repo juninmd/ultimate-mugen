@@ -3,7 +3,7 @@ use crate::commands::CommandDef;
 use crate::expr::{parse, parse_list, Expr, Node};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 pub use ume_formats::air::{AnimFrame, Animation, Blend, Box4};
 
 static IMG_ID: AtomicU64 = AtomicU64::new(1);
@@ -84,6 +84,8 @@ pub struct CharDef {
     pub description: String,
     /// story lines (round-start face-off, victory) and the transformed form's name; `boss` = arcade final boss
     pub intro: String, pub taunt: String, pub win_quote: String, pub form_name: String, pub boss: bool,
+    pub palettes: HashMap<PalKey, Arc<Vec<u8>>>, pub indexed: HashMap<(i32, i32), IndexedSprite>,
+    pub remap_cache: Mutex<HashMap<((i32, i32), PalKey), Arc<ImageData>>>,
 }
 impl CharDef {
     pub fn empty(id: &str) -> Self {
@@ -92,10 +94,35 @@ impl CharDef {
             constants: default_constants(), sprites: HashMap::new(), anims: HashMap::new(), commands: vec![], states: HashMap::new(), sounds: HashMap::new(),
             portrait: None, movelist: vec![], ai_commands: vec![], color: [90, 100, 140], series: String::new(), description: String::new(),
             intro: String::new(), taunt: String::new(), win_quote: String::new(), form_name: String::new(), boss: false,
+            palettes: HashMap::new(), indexed: HashMap::new(), remap_cache: Mutex::new(HashMap::new()),
         }
     }
     pub fn c(&self, k: &str, d: f64) -> f64 { *self.constants.get(k).unwrap_or(&d) }
+
+    pub fn remapped(&self, sprite: (i32, i32), remap: &[(PalKey, PalKey)]) -> Option<Arc<ImageData>> {
+        let ix = self.indexed.get(&sprite)?;
+        let dst = remap.iter().rev().find(|(src, _)| *src == ix.pal)?.1;
+        if dst == ix.pal { return None; }
+        let pal = self.palettes.get(&dst)?;
+        let mut cache = self.remap_cache.lock().ok()?;
+        if let Some(img) = cache.get(&(sprite, dst)) { return Some(img.clone()); }
+        let mut rgba = vec![0u8; ix.pixels.len() * 4];
+        for (o, &c) in rgba.chunks_exact_mut(4).zip(ix.pixels.iter()) {
+            if c == 0 { continue; }
+            let p = c as usize * 4;
+            o[..3].copy_from_slice(&pal[p..p + 3]);
+            o[3] = 255;
+        }
+        let img = ImageData::new(ix.w, ix.h, rgba);
+        cache.insert((sprite, dst), img.clone());
+        Some(img)
+    }
 }
+
+pub type PalKey = (i32, i32);
+
+#[derive(Clone, Debug)]
+pub struct IndexedSprite { pub w: u32, pub h: u32, pub pixels: Arc<Vec<u8>>, pub pal: PalKey }
 
 pub fn default_constants() -> HashMap<String, f64> {
     let mut m = HashMap::new();

@@ -105,6 +105,7 @@ pub struct Match {
     pub pause: Option<PauseState>,
     pub shake_time: i32, pub shake_ampl: f32,
     pub flash: Option<(i32, [f32; 3])>,
+    pub all_palfx: Option<PalFx>, pub bg_palfx: Option<PalFx>,
     pub slow_mo: i32,
     pub events: Vec<Event>,
     pub announce: Option<Announce>,
@@ -118,7 +119,7 @@ impl Match {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
-            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, flash: None, slow_mo: 0,
+            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, flash: None, all_palfx: None, bg_palfx: None, slow_mo: 0,
             events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]),
         }
     }
@@ -522,6 +523,7 @@ impl Match {
             && inputs.iter().any(|b| b & (crate::input::k::A | crate::input::k::B | crate::input::k::C | crate::input::k::X | crate::input::k::Y | crate::input::k::Z) != 0) { self.round_time = 60 + self.intro_ticks; }
         self.round_logic();
         self.global_asserts = 0;
+        for p in [&mut self.all_palfx, &mut self.bg_palfx] { if p.as_ref().is_some_and(|fx| fx.expired()) { *p = None; } }
         let mut k = 0;
         let mut awaken: Vec<usize> = vec![];
         for (fi, f) in self.fighters.iter_mut().enumerate() {
@@ -542,7 +544,8 @@ impl Match {
             if frozen_by_pause(&self.fighters[i]) { continue; }
             let f = &mut self.fighters[i];
             let frozen = f.hit_pause > 0 || f.hit_shake > 0;
-            f.width_override = None; f.player_push = true;
+            f.width_override = None; f.player_push = true; f.trans = None;
+            if f.palfx.as_ref().is_some_and(|p| p.expired()) { f.palfx = None; }
             if !frozen { f.advance_anim(); }
             self.run_states(i);
         }
@@ -572,10 +575,11 @@ impl Match {
             f.not_hit_by.retain(|n| n.1 > 0);
             for n in f.hit_by.iter_mut() { n.1 -= 1; }
             f.hit_by.retain(|n| n.1 > 0);
-            if let Some(p) = f.palfx.as_mut() { if p.time > 0 { p.time -= 1; if p.time == 0 { f.palfx = None; } } }
+            if let Some(p) = f.palfx.as_mut() { p.elapsed += 1; }
             let tp = f.frame().map(|fr| TrailPoint { x: f.pos.x, y: f.pos.y, group: fr.group, index: fr.index, fx: fr.x, fy: fr.y, flip_h: fr.flip_h, facing: f.facing });
             if let Some(ai) = f.after_image.as_mut() {
-                if let Some(tp) = tp { ai.trail.insert(0, tp); }
+                ai.ticks += 1;
+                if let Some(tp) = tp.filter(|_| (ai.ticks - 1) % ai.params.time_gap.max(1) == 0) { ai.trail.insert(0, tp); }
                 ai.trail.truncate(ai.length);
                 if ai.time > 0 { ai.time -= 1; if ai.time == 0 { f.after_image = None; } }
             }
@@ -616,7 +620,16 @@ impl Match {
         true
     }
 
+    pub fn fighter_pal(&self, i: usize) -> crate::palette::PalParams {
+        let own = self.fighters[i].palfx.as_ref().map(|p| p.params()).unwrap_or_default();
+        match &self.all_palfx { Some(a) => own.combine(a.params()), None => own }
+    }
+    pub fn stage_pal(&self) -> crate::palette::PalParams {
+        let bg = self.bg_palfx.as_ref().map(|p| p.params()).unwrap_or_default();
+        match &self.all_palfx { Some(a) => bg.combine(a.params()), None => bg }
+    }
     fn visual_timers(&mut self) {
+        for p in [&mut self.all_palfx, &mut self.bg_palfx] { if let Some(fx) = p.as_mut() { fx.elapsed += 1; } }
         if self.shake_time > 0 { self.shake_time -= 1; }
         if let Some((t, _)) = self.flash.as_mut() { *t -= 1; if *t <= 0 { self.flash = None; } }
         if let Some(a) = self.announce.as_mut() { a.time -= 1; if a.time <= 0 { self.announce = None; } }

@@ -1,5 +1,5 @@
 //! Build a CharDef from a MUGEN character inside a VFS.
-use crate::chardef::{default_constants, CharDef, ImageData, MoveInfo, Source, Sprite};
+use crate::chardef::{default_constants, CharDef, ImageData, IndexedSprite, MoveInfo, Source, Sprite};
 use crate::cns::{parse_cmd, parse_constants, parse_states, scale_default_constants};
 use crate::commands::parse_command;
 use std::collections::{HashMap, HashSet};
@@ -52,6 +52,8 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     let anims = resolve(vfs, &base, &fget("anim").unwrap_or_default()).map(|b| parse_air(&text(b))).unwrap_or_default();
 
     let mut sprites = HashMap::new();
+    let mut palettes = HashMap::new();
+    let mut indexed = HashMap::new();
     if let Some(buf) = resolve(vfs, &base, &fget("sprite").unwrap_or_default()) {
         let sff = decode_sff(buf)?;
         let mut counts: HashMap<i32, usize> = HashMap::new();
@@ -67,9 +69,23 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
         // v1 sprites without an embedded PCX palette rely on the character's own palette (the .act / first SFF palette)
         let fallback: Option<Vec<u8>> = over.clone().or_else(|| fget("pal1").and_then(|p| resolve(vfs, &base, &p)).filter(|a| a.len() >= 768).map(decode_act))
             .or_else(|| sff.palettes.first().map(|p| p.data.to_vec()));
+        let shared_key = |s: &ume_formats::sff::DecodedSprite| -> (i32, i32) {
+            if sff.version == 1 { return if s.palette_index == target || s.palette.is_none() { (1, 1) } else { (-1, s.palette_index) }; }
+            sff.palettes.get(s.palette_index.max(0) as usize).map(|p| (p.group, p.index)).unwrap_or((1, 1))
+        };
+        if with_images {
+            for (k, p) in sff.palettes.iter().enumerate() { palettes.insert(if sff.version == 1 { (-1, k as i32) } else { (p.group, p.index) }, p.data.clone()); }
+            for k in 1..=12 {
+                if palettes.contains_key(&(1, k)) { continue; }
+                if let Some(a) = fget(&format!("pal{k}")).and_then(|p| resolve(vfs, &base, &p)).filter(|a| a.len() >= 768) { palettes.insert((1, k), Arc::new(decode_act(a))); }
+            }
+            let selected = over.clone().or_else(|| fallback.clone()).or_else(|| palettes.get(&(1, 1)).map(|p| p.to_vec()));
+            if let Some(sel) = selected { palettes.insert(if sff.version == 1 { (1, 1) } else { sff.palettes.get(target.max(0) as usize).map(|p| (p.group, p.index)).unwrap_or((1, 1)) }, Arc::new(sel)); }
+        }
         for s in &sff.sprites {
             let key = (s.group, s.index);
             if sprites.contains_key(&key) { continue; }
+            if let (true, Some(px)) = (with_images, s.indexed.as_ref()) { indexed.insert(key, IndexedSprite { w: s.width, h: s.height, pixels: Arc::new(px.clone()), pal: shared_key(s) }); }
             let paletteless = s.palette.is_none() && s.rgba.is_none();
             let pal = if paletteless { fallback.as_deref() } else if over.is_some() && s.palette_index == target && s.group != 9000 { over.as_deref() } else { None };
             let image = if with_images && s.width > 0 && s.height > 0 { Some(ImageData::new(s.width, s.height, sprite_to_rgba(s, pal))) } else { None };
@@ -84,6 +100,7 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     d.local_w = local_w; d.local_h = lc[1];
     d.constants = constants; d.portrait = sprites.get(&(9000, 0)).cloned(); d.sprites = sprites; d.anims = anims;
     d.commands = commands; d.states = states; d.sounds = sounds; d.ai_commands = ai_commands; d.series = "M.U.G.E.N".into();
+    d.palettes = palettes; d.indexed = indexed;
     let _ = Vec::<MoveInfo>::new;
     let _ = Arc::new(0);
     Ok(d)

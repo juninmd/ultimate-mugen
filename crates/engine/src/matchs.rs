@@ -118,6 +118,7 @@ pub struct Match {
     pub rng: u32,
     pub next_id: u32,
     pub assigns: RefCell<Vec<(usize, String, i32, f64)>>,
+    pub tick_ids: Vec<u32>,
 }
 
 impl Match {
@@ -126,7 +127,7 @@ impl Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, slow_mo: 0,
-            events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]),
+            events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
     }
     pub fn random(&mut self) -> f32 {
@@ -142,11 +143,25 @@ impl Match {
         self.fighters.len() - 1
     }
     pub fn roots(&self) -> impl Iterator<Item = &Fighter> { self.fighters.iter().filter(|f| !f.is_helper) }
+    pub fn root_index_buf(&self) -> ([usize; 32], usize) {
+        let mut buf = [0usize; 32];
+        let mut n = 0;
+        for (i, f) in self.fighters.iter().enumerate() { if !f.is_helper && n < buf.len() { buf[n] = i; n += 1; } }
+        (buf, n)
+    }
     pub fn root_indices(&self) -> Vec<usize> { (0..self.fighters.len()).filter(|&i| !self.fighters[i].is_helper).collect() }
     pub fn idx(&self, id: u32) -> Option<usize> { self.fighters.iter().position(|f| f.id == id && !f.destroyed) }
     pub fn enemy(&self, i: usize, n: usize) -> Option<usize> {
         let me = &self.fighters[i];
-        let mut list: Vec<usize> = (0..self.fighters.len()).filter(|&j| { let f = &self.fighters[j]; !f.is_helper && f.side != me.side && !f.destroyed }).collect();
+        let mut buf = [0usize; 16];
+        let mut len = 0;
+        for (j, f) in self.fighters.iter().enumerate() {
+            if f.is_helper || f.side == me.side || f.destroyed { continue; }
+            if len == buf.len() { break; }
+            buf[len] = j;
+            len += 1;
+        }
+        let list = &mut buf[..len];
         list.sort_by(|&a, &b| (!self.fighters[a].alive).cmp(&!self.fighters[b].alive).then((self.fighters[a].pos.x - me.pos.x).abs().partial_cmp(&(self.fighters[b].pos.x - me.pos.x).abs()).unwrap()));
         list.get(n).copied()
     }
@@ -183,15 +198,14 @@ impl Match {
             f.state_time = 0;
             f.persist.clear();
         }
-        let sd = owner.states.get(&no).or_else(|| common.states.get(&no)).cloned();
-        let Some(sd) = sd else { return };
-        let raw = |k: &str| sd.param(k).map(|p| p.raw.trim().to_ascii_uppercase());
+        let Some(sd) = owner.states.get(&no).or_else(|| common.states.get(&no)) else { return };
+        let kind = |k: &str| sd.param(k).map(|p| p.raw.trim().chars().next().map(|c| c.to_ascii_uppercase()));
         let ev = |m: &Match, k: &str, idx: usize| sd.param(k).and_then(|p| p.exprs.get(idx)).map(|e| m.ev(i, e));
         {
             let f = &mut self.fighters[i];
-            match raw("type") { Some(t) if !t.starts_with('U') && !t.is_empty() => f.state_type = t.chars().next().unwrap(), None => f.state_type = 'S', _ => {} }
-            match raw("movetype") { Some(t) if !t.starts_with('U') && !t.is_empty() => f.move_type = t.chars().next().unwrap(), None => f.move_type = 'I', _ => {} }
-            match raw("physics") { Some(t) if !t.starts_with('U') && !t.is_empty() => f.physics = t.chars().next().unwrap(), None => f.physics = 'N', _ => {} }
+            match kind("type") { Some(Some(c)) if c != 'U' => f.state_type = c, None => f.state_type = 'S', _ => {} }
+            match kind("movetype") { Some(Some(c)) if c != 'U' => f.move_type = c, None => f.move_type = 'I', _ => {} }
+            match kind("physics") { Some(Some(c)) if c != 'U' => f.physics = c, None => f.physics = 'N', _ => {} }
         }
         if let Some(a) = ev(self, "anim", 0) { let d = self.fighters[i].def.clone(); self.fighters[i].change_anim(a as i32, &d, 1); }
         let vx = ev(self, "velset", 0); let vy = ev(self, "velset", 1);
@@ -447,10 +461,11 @@ impl Match {
             }
             2 => {
                 if !self.training && self.pause.is_none() && self.global_asserts & 1 == 0 { self.timer = (self.timer - 1).max(0); }
-                let roots = self.root_indices();
+                let (root_buf, root_len) = self.root_index_buf();
+                let roots = &root_buf[..root_len];
                 if self.training {
-                    for &i in &roots { if self.fighters[i].life <= 0.0 { self.fighters[i].life = 1.0; } if self.fighters[i].move_type != 'H' && self.fighters[i].state_time > 90 && self.fighters[i].life < self.fighters[i].life_max { self.fighters[i].life = self.fighters[i].life_max; } }
-                    for &i in &roots { self.fighters[i].power = self.fighters[i].power_max; }
+                    for &i in roots { if self.fighters[i].life <= 0.0 { self.fighters[i].life = 1.0; } if self.fighters[i].move_type != 'H' && self.fighters[i].state_time > 90 && self.fighters[i].life < self.fighters[i].life_max { self.fighters[i].life = self.fighters[i].life_max; } }
+                    for &i in roots { self.fighters[i].power = self.fighters[i].power_max; }
                     return;
                 }
                 let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| self.fighters[i].life <= 0.0).collect();
@@ -537,13 +552,15 @@ impl Match {
             if bits & crate::input::k::T != 0 { awaken.push(fi); }
             k += 1;
             f.history.push(bits, f.facing as i32);
-            let cmds = f.def.commands.clone();
-            f.cmd.update(&f.history, &cmds);
+            let def = f.def.clone();
+            f.cmd.update(&f.history, &def.commands);
         }
         for fi in awaken { self.try_transform(fi); }
         let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time));
         let frozen_by_pause = |f: &Fighter| match paused_by { None => false, Some((by, mt)) => !(f.id == by && mt > 0) };
-        let ids: Vec<u32> = self.fighters.iter().map(|f| f.id).collect();
+        let mut ids = std::mem::take(&mut self.tick_ids);
+        ids.clear();
+        ids.extend(self.fighters.iter().map(|f| f.id));
         for &id in &ids {
             let Some(i) = self.idx(id) else { continue };
             if frozen_by_pause(&self.fighters[i]) { continue; }
@@ -587,6 +604,7 @@ impl Match {
                 if ai.time > 0 { ai.time -= 1; if ai.time == 0 { f.after_image = None; } }
             }
         }
+        self.tick_ids = ids;
         self.push_and_bound();
         self.detect_hits();
         for f in self.fighters.iter_mut() {
@@ -600,10 +618,11 @@ impl Match {
         if let Some(p) = self.pause.as_mut() { p.time -= 1; if p.time <= 0 { self.pause = None; } }
         for f in self.fighters.iter_mut() { if f.unhittable > 0 { f.unhittable -= 1; } }
         // drop stale targets
-        let alive_ids: Vec<(u32, char)> = self.fighters.iter().map(|f| (f.id, f.move_type)).collect();
-        for f in self.fighters.iter_mut() {
-            let (st, mc) = (f.state_time, f.move_contact);
-            f.targets.retain(|(t, _)| alive_ids.iter().any(|(id, mt)| id == t && (*mt == 'H' || st < 2 || mc > 0)));
+        for k in 0..self.fighters.len() {
+            let (st, mc) = (self.fighters[k].state_time, self.fighters[k].move_contact);
+            let mut targets = std::mem::take(&mut self.fighters[k].targets);
+            targets.retain(|(t, _)| self.fighters.iter().any(|f| f.id == *t && (f.move_type == 'H' || st < 2 || mc > 0)));
+            self.fighters[k].targets = targets;
         }
     }
 
@@ -667,13 +686,13 @@ impl Match {
     }
 
     fn update_camera(&mut self) {
-        let xs: Vec<(f32, f32)> = self.roots().filter(|f| !f.destroyed).map(|f| (f.pos.x, f.pos.y)).collect();
-        if xs.is_empty() { return; }
-        let minx = xs.iter().map(|p| p.0).fold(f32::MAX, f32::min); let maxx = xs.iter().map(|p| p.0).fold(f32::MIN, f32::max);
+        let (mut minx, mut maxx, mut highest, mut any) = (f32::MAX, f32::MIN, f32::MAX, false);
+        for f in self.roots().filter(|f| !f.destroyed) { minx = minx.min(f.pos.x); maxx = maxx.max(f.pos.x); highest = highest.min(f.pos.y); any = true; }
+        if !any { return; }
         if self.zoom_max > 1.0 {
-            let live: Vec<f32> = self.roots().filter(|f| f.alive && !f.destroyed).map(|f| f.pos.x).collect();
-            let spread = live.iter().cloned().fold(f32::MIN, f32::max) - live.iter().cloned().fold(f32::MAX, f32::min);
-            let need = if live.is_empty() { self.zoom_min } else { (spread + 150.0) / BASE_W };
+            let (mut lo, mut hi, mut live) = (f32::MAX, f32::MIN, false);
+            for f in self.roots().filter(|f| f.alive && !f.destroyed) { lo = lo.min(f.pos.x); hi = hi.max(f.pos.x); live = true; }
+            let need = if !live { self.zoom_min } else { (hi - lo + 150.0) / BASE_W };
             let target = need.clamp(self.zoom_min, self.zoom_max);
             self.zoom += (target - self.zoom) * 0.04;
             self.apply_zoom();
@@ -686,7 +705,6 @@ impl Match {
         }
         target = target.clamp(self.stage.bound_left, self.stage.bound_right);
         self.camera.x += (target - self.camera.x) * 0.5;
-        let highest = xs.iter().map(|p| p.1).fold(f32::MAX, f32::min);
         let ty = (highest * self.stage.vertical_follow).min(0.0).clamp(self.stage.bound_high, self.stage.bound_low);
         self.camera.y += (ty - self.camera.y) * 0.3;
     }
@@ -952,7 +970,7 @@ impl Match {
             self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
         }
         // cornered defenders push the attacker back instead of absorbing all the knock-back (SF/Tekken/GG behaviour)
-        if !from_proj && self.fighters[a].state_type != 'A' && self.at_corner(d) {
+        if !from_proj && self.fighters[a].def.source == Source::Native && self.fighters[a].state_type != 'A' && self.at_corner(d) {
             let push = corner_push(self.fighters[d].ghv.xvel);
             let away = if apos.x <= self.fighters[d].pos.x { -1.0 } else { 1.0 };
             self.fighters[a].pos.x += away * push;
@@ -1111,14 +1129,14 @@ impl Match {
 
     fn update_explods(&mut self, paused: bool) {
         let ps = self.pause.as_ref().map(|p| p.is_super);
-        let fighters: Vec<(u32, V2, f32, i32)> = self.fighters.iter().map(|f| (f.id, f.pos, f.facing, f.hit_pause)).collect();
+        let fighters = &self.fighters;
         self.explods.retain_mut(|e| {
             if paused {
                 let allowed = if ps == Some(true) { e.super_move > 0 } else { e.pause_move > 0 };
                 if !allowed { return true; }
                 if ps == Some(true) { e.super_move -= 1; } else { e.pause_move -= 1; }
             }
-            let bound = e.bind_to.and_then(|b| fighters.iter().find(|f| f.0 == b));
+            let bound = e.bind_to.and_then(|b| fighters.iter().find(|f| f.id == b)).map(|f| (f.id, f.pos, f.facing, f.hit_pause));
             if let Some(b) = bound { if b.3 > 0 && b.0 == e.owner { return true; } }
             e.time += 1;
             e.cur.advance();

@@ -33,7 +33,7 @@ pub enum Phase { Started, Moved, Ended, Cancelled }
 pub struct Touch { pub id: u64, pub phase: Phase, pub position: [f32; 2] }
 
 #[derive(Default)]
-pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode>, pub mouse: [f32; 2], pub mouse_delta: [f32; 2], pub wheel: [f32; 2], pub mouse_down: bool, pub mouse_pressed: bool, pub touches: Vec<Touch> }
+pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode>, pub pressed_order: Vec<KeyCode>, pub mouse: [f32; 2], pub mouse_delta: [f32; 2], pub wheel: [f32; 2], pub mouse_down: bool, pub mouse_pressed: bool, pub touches: Vec<Touch> }
 
 impl Input {
     pub fn is_down(&self, k: KeyCode) -> bool { self.down.contains(&k) }
@@ -41,6 +41,7 @@ impl Input {
 
     fn end_frame(&mut self) {
         self.pressed.clear();
+        self.pressed_order.clear();
         self.mouse_pressed = false;
         self.mouse_delta = [0.0; 2];
         self.wheel = [0.0; 2];
@@ -175,7 +176,7 @@ impl<G: Game> ApplicationHandler for Shell<G> {
             },
             WindowEvent::KeyboardInput { event, .. } => if let PhysicalKey::Code(k) = event.physical_key {
                 match event.state {
-                    ElementState::Pressed => { if !event.repeat { self.input.pressed.insert(k); } self.input.down.insert(k); }
+                    ElementState::Pressed => { if !event.repeat { self.input.pressed.insert(k); self.input.pressed_order.push(k); } self.input.down.insert(k); }
                     ElementState::Released => { self.input.down.remove(&k); }
                 }
             },

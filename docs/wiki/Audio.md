@@ -10,7 +10,9 @@ Character sounds come from the `.snd` file. Music files can be WAV, OGG Vorbis, 
 
 - Sounds play from where the fighter stands: a fighter on the left of the screen is heard on the left speaker.
 - `channel` works as in M.U.G.E.N: a new sound on the same channel of the same fighter replaces the old one; `lowpriority = 1` keeps the old one if it is still playing.
+- `PlaySnd` reads `pan`, `abspan`, `loop`, `freqmul`, `volumescale`, `channel` and `lowpriority`. `StopSnd` stops one channel, or every sound of the character with `channel = -1`.
 - Looping sounds keep playing until the channel is stopped or the fight ends.
+- `SndPan` moves sounds that are already playing on that channel (or every channel and looping sound of the character with `channel = -1`); playback continues from the same point.
 - A sound that fails to decode still plays, without panning.
 
 ## Stage music

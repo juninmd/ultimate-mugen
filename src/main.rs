@@ -7,6 +7,7 @@ mod sound_mix;
 mod controls;
 mod gfx;
 mod gamepad;
+mod keybinds;
 mod hud;
 mod registry;
 mod render;

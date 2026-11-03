@@ -16,6 +16,7 @@ thread_local! {
     static RNG: Cell<u64> = const { Cell::new(0x9e37_79b9_7f4a_7c15) };
     static GENERATION: Cell<u32> = const { Cell::new(0) };
     static ATLAS_FULL: Cell<bool> = const { Cell::new(false) };
+    static KEY_QUEUE: RefCell<Vec<KeyCode>> = const { RefCell::new(Vec::new()) };
 }
 
 fn generation() -> u32 { GENERATION.with(|g| g.get()) }
@@ -40,6 +41,7 @@ struct AsyncGame { main: Option<Pin<Box<dyn Future<Output = ()>>>> }
 impl Game for AsyncGame {
     fn frame(&mut self, f: &mut Frame) {
         if ATLAS_FULL.with(|a| a.get()) { reset_atlas(f); }
+        KEY_QUEUE.with(|q| { let mut q = q.borrow_mut(); q.clear(); q.extend(f.input.pressed_order.iter().filter_map(|k| KeyCode::from_winit(*k))); });
         FRAME.with(|c| c.set(f as *mut Frame as *mut ()));
         let done = match self.main.as_mut() {
             Some(m) => m.as_mut().poll(&mut Context::from_waker(Waker::noop())).is_ready(),
@@ -294,37 +296,41 @@ pub fn draw_text(text: &str, x: f32, y: f32, font_size: f32, color: Color) -> Te
     draw_text_ex(text, x, y, TextParams { font_size: font_size.max(1.0) as u16, color, ..Default::default() })
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum KeyCode {
-    A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
-    Key0, Key1, Key2, Key3, Key4, Key5, Key6, Key7, Key8, Key9,
-    Kp0, Kp1, Kp2, Kp3, Kp4, Kp5, Kp6, Kp7, Kp8, Kp9,
-    F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
-    Up, Down, Left, Right, Enter, Escape, Space, Tab, Backspace, Home, End, PageUp, PageDown, LeftShift, RightShift, LeftControl, RightControl,
+macro_rules! keys {
+    ($($ours:ident => $theirs:ident),* $(,)?) => {
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+        pub enum KeyCode { $($ours),* }
+
+        impl KeyCode {
+            pub const ALL: &'static [KeyCode] = &[$(KeyCode::$ours),*];
+            pub fn winit(self) -> crate::Key { match self { $(KeyCode::$ours => crate::Key::$theirs),* } }
+            pub fn from_winit(k: crate::Key) -> Option<KeyCode> { match k { $(crate::Key::$theirs => Some(KeyCode::$ours),)* _ => None } }
+        }
+    };
 }
 
-impl KeyCode {
-    pub fn winit(self) -> crate::Key {
-        use crate::Key as W;
-        use KeyCode::*;
-        match self {
-            A => W::KeyA, B => W::KeyB, C => W::KeyC, D => W::KeyD, E => W::KeyE, F => W::KeyF, G => W::KeyG, H => W::KeyH, I => W::KeyI,
-            J => W::KeyJ, K => W::KeyK, L => W::KeyL, M => W::KeyM, N => W::KeyN, O => W::KeyO, P => W::KeyP, Q => W::KeyQ, R => W::KeyR,
-            S => W::KeyS, T => W::KeyT, U => W::KeyU, V => W::KeyV, W => W::KeyW, X => W::KeyX, Y => W::KeyY, Z => W::KeyZ,
-            Key0 => W::Digit0, Key1 => W::Digit1, Key2 => W::Digit2, Key3 => W::Digit3, Key4 => W::Digit4,
-            Key5 => W::Digit5, Key6 => W::Digit6, Key7 => W::Digit7, Key8 => W::Digit8, Key9 => W::Digit9,
-            Kp0 => W::Numpad0, Kp1 => W::Numpad1, Kp2 => W::Numpad2, Kp3 => W::Numpad3, Kp4 => W::Numpad4,
-            Kp5 => W::Numpad5, Kp6 => W::Numpad6, Kp7 => W::Numpad7, Kp8 => W::Numpad8, Kp9 => W::Numpad9,
-            F1 => W::F1, F2 => W::F2, F3 => W::F3, F4 => W::F4, F5 => W::F5, F6 => W::F6, F7 => W::F7, F8 => W::F8, F9 => W::F9, F10 => W::F10, F11 => W::F11, F12 => W::F12,
-            Up => W::ArrowUp, Down => W::ArrowDown, Left => W::ArrowLeft, Right => W::ArrowRight, Enter => W::Enter, Escape => W::Escape,
-            Space => W::Space, Tab => W::Tab, Backspace => W::Backspace, Home => W::Home, End => W::End, PageUp => W::PageUp, PageDown => W::PageDown,
-            LeftShift => W::ShiftLeft, RightShift => W::ShiftRight, LeftControl => W::ControlLeft, RightControl => W::ControlRight,
-        }
-    }
+keys! {
+    A => KeyA, B => KeyB, C => KeyC, D => KeyD, E => KeyE, F => KeyF,
+    G => KeyG, H => KeyH, I => KeyI, J => KeyJ, K => KeyK, L => KeyL,
+    M => KeyM, N => KeyN, O => KeyO, P => KeyP, Q => KeyQ, R => KeyR,
+    S => KeyS, T => KeyT, U => KeyU, V => KeyV, W => KeyW, X => KeyX,
+    Y => KeyY, Z => KeyZ, Key0 => Digit0, Key1 => Digit1, Key2 => Digit2, Key3 => Digit3,
+    Key4 => Digit4, Key5 => Digit5, Key6 => Digit6, Key7 => Digit7, Key8 => Digit8, Key9 => Digit9,
+    Kp0 => Numpad0, Kp1 => Numpad1, Kp2 => Numpad2, Kp3 => Numpad3, Kp4 => Numpad4, Kp5 => Numpad5,
+    Kp6 => Numpad6, Kp7 => Numpad7, Kp8 => Numpad8, Kp9 => Numpad9, F1 => F1, F2 => F2,
+    F3 => F3, F4 => F4, F5 => F5, F6 => F6, F7 => F7, F8 => F8,
+    F9 => F9, F10 => F10, F11 => F11, F12 => F12, Up => ArrowUp, Down => ArrowDown,
+    Left => ArrowLeft, Right => ArrowRight, Enter => Enter, Escape => Escape, Space => Space, Tab => Tab,
+    Backspace => Backspace, Delete => Delete, Insert => Insert, Home => Home, End => End, PageUp => PageUp,
+    PageDown => PageDown, LeftShift => ShiftLeft, RightShift => ShiftRight, LeftControl => ControlLeft, RightControl => ControlRight, LeftAlt => AltLeft,
+    RightAlt => AltRight, Apostrophe => Quote, Backslash => Backslash, Comma => Comma, Equal => Equal, Minus => Minus,
+    Period => Period, Semicolon => Semicolon, Slash => Slash, LeftBracket => BracketLeft, RightBracket => BracketRight, GraveAccent => Backquote,
+    KpAdd => NumpadAdd, KpSubtract => NumpadSubtract, KpMultiply => NumpadMultiply, KpDivide => NumpadDivide, KpDecimal => NumpadDecimal, KpEnter => NumpadEnter,
 }
 
 pub fn is_key_down(k: KeyCode) -> bool { with(|f| f.input.is_down(k.winit())) }
 pub fn is_key_pressed(k: KeyCode) -> bool { with(|f| f.input.is_pressed(k.winit())) }
+pub fn get_last_key_pressed() -> Option<KeyCode> { KEY_QUEUE.with(|q| q.borrow_mut().pop()) }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MouseButton { Left }

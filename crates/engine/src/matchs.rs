@@ -75,9 +75,12 @@ pub fn corner_push(xvel: f32) -> f32 { (xvel.abs() * 0.5).clamp(1.2, 4.5) }
 pub const BASE_W: f32 = 426.67;
 pub const BASE_H: f32 = 240.0;
 
+#[derive(Clone)]
 pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_super: bool, pub darken: bool }
+#[derive(Clone)]
 pub struct Announce { pub text: String, pub time: i32, pub total: i32 }
 
+#[derive(Clone)]
 pub struct Match {
     pub fighters: Vec<Fighter>,
     pub explods: Vec<Explod>,
@@ -147,7 +150,7 @@ impl Match {
     pub fn ground_y(&self) -> f32 { self.stage.zoffset }
 
     // ---------------------------------------------------------------- evaluation helpers
-    pub fn ev(&self, i: usize, e: &Expr) -> f64 { eval(&e.node, &Ctx { m: self, i }) }
+    pub fn ev(&self, i: usize, e: &Expr) -> f64 { e.eval(&Ctx { m: self, i }) }
     pub fn num(&self, i: usize, sc: &Controller, k: &str, d: f64, idx: usize) -> f64 {
         match sc.param(k).and_then(|p| p.exprs.get(idx)).map(|e| self.ev(i, e)) { Some(v) if !v.is_nan() => v, _ => d }
     }
@@ -736,7 +739,7 @@ impl Match {
         for a in 0..self.fighters.len() {
             let fa = &self.fighters[a];
             if fa.destroyed || !fa.hitdef_active || (fa.move_type != 'A' && !fa.is_helper) { continue; }
-            let Some(hd) = fa.hitdef.as_ref() else { continue };
+            let Some(hd) = fa.hitdef.as_ref() else { continue; }
             let c1 = fa.boxes(1);
             if c1.is_empty() { continue; }
             for d in 0..self.fighters.len() {

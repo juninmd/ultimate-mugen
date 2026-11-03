@@ -14,7 +14,21 @@ thread_local! {
     static FRAME: Cell<*mut ()> = const { Cell::new(std::ptr::null_mut()) };
     static DEFAULT_FONT: RefCell<Option<Font>> = const { RefCell::new(None) };
     static RNG: Cell<u64> = const { Cell::new(0x9e37_79b9_7f4a_7c15) };
+    static GENERATION: Cell<u32> = const { Cell::new(0) };
+    static ATLAS_FULL: Cell<bool> = const { Cell::new(false) };
+    static KEY_QUEUE: RefCell<Vec<KeyCode>> = const { RefCell::new(Vec::new()) };
 }
+
+fn generation() -> u32 { GENERATION.with(|g| g.get()) }
+
+fn reset_atlas(f: &mut Frame) {
+    f.gpu.rgba_atlas.clear();
+    if let Some(c) = ume_render::Canvas::new(&f.gpu.renderer, &f.gpu.queue, &mut f.gpu.rgba_atlas) { *f.canvas = c; }
+    GENERATION.with(|g| g.set(g.get().wrapping_add(1)));
+    ATLAS_FULL.with(|a| a.set(false));
+}
+
+pub fn reset_textures() { ATLAS_FULL.with(|a| a.set(true)); }
 
 fn with<R>(f: impl FnOnce(&mut Frame<'static>) -> R) -> R {
     let p = FRAME.with(|c| c.get());
@@ -26,6 +40,8 @@ struct AsyncGame { main: Option<Pin<Box<dyn Future<Output = ()>>>> }
 
 impl Game for AsyncGame {
     fn frame(&mut self, f: &mut Frame) {
+        if ATLAS_FULL.with(|a| a.get()) { reset_atlas(f); }
+        KEY_QUEUE.with(|q| { let mut q = q.borrow_mut(); q.clear(); q.extend(f.input.pressed_order.iter().filter_map(|k| KeyCode::from_winit(*k))); });
         FRAME.with(|c| c.set(f as *mut Frame as *mut ()));
         let done = match self.main.as_mut() {
             Some(m) => m.as_mut().poll(&mut Context::from_waker(Waker::noop())).is_ready(),
@@ -84,7 +100,8 @@ impl Rect {
 
 pub fn screen_width() -> f32 { with(|f| f.size[0]) }
 pub fn screen_height() -> f32 { with(|f| f.size[1]) }
-pub fn dpi_scale() -> f32 { with(|f| f.scale) }
+pub fn dpi_scale() -> f32 { 1.0 }
+pub fn window_scale() -> f32 { with(|f| f.scale) }
 pub fn get_time() -> f64 { with(|f| f.time) }
 pub fn get_frame_time() -> f32 { with(|f| f.dt) }
 pub fn get_fps() -> i32 { with(|f| if f.dt > 0.0 { (1.0 / f.dt).round() as i32 } else { 0 }) }
@@ -93,6 +110,17 @@ pub fn set_fullscreen(on: bool) { with(|f| f.fullscreen = Some(on)) }
 pub fn set_post(p: Option<PostParams>) { with(|f| f.post = p) }
 pub fn set_blend(b: Blend) { with(|f| f.canvas.blend = b) }
 pub fn quit() { with(|f| f.quit = true) }
+pub fn set_scissor(r: Option<(i32, i32, i32, i32)>) { with(|f| f.canvas.batch.scissor = r.map(|(x, y, w, h)| [x.max(0) as u32, y.max(0) as u32, w.max(0) as u32, h.max(0) as u32])) }
+pub fn mouse_wheel() -> (f32, f32) { with(|f| (f.input.wheel[0], f.input.wheel[1])) }
+pub fn mouse_delta_position() -> Vec2 { with(|f| Vec2::from(f.input.mouse_delta)) }
+
+pub struct ScreenData;
+
+impl ScreenData {
+    pub fn export_png(&self, path: &str) { with(|f| f.screenshot = Some(path.to_string())) }
+}
+
+pub fn get_screen_data() -> ScreenData { ScreenData }
 
 pub fn clear_background(c: Color) {
     with(|f| {
@@ -134,7 +162,7 @@ fn draw_ellipse_poly(x: f32, y: f32, rx: f32, ry: f32, rot: f32, n: u32, c: Colo
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FilterMode { Linear, Nearest }
 
-struct TexInner { rect: Option<ume_render::Rect>, w: u32, h: u32 }
+struct TexInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Rc<[u8]>, w: u32, h: u32 }
 
 #[derive(Clone)]
 pub struct Texture2D(Rc<TexInner>);
@@ -142,18 +170,23 @@ pub struct Texture2D(Rc<TexInner>);
 impl Texture2D {
     pub fn from_rgba8(w: u16, h: u16, rgba: &[u8]) -> Texture2D {
         let (w, h) = (w as u32, h as u32);
-        let rect = with(|f| {
-            let r = f.gpu.rgba_atlas.alloc(w, h)?;
-            f.gpu.renderer.upload_rgba(&f.gpu.queue, r, &rgba[..(w * h * 4) as usize]);
-            Some(r)
-        });
-        Texture2D(Rc::new(TexInner { rect, w, h }))
+        Texture2D(Rc::new(TexInner { slot: Cell::new(None), pixels: rgba[..(w * h * 4) as usize].into(), w, h }))
     }
+
+    fn rect(&self, f: &mut Frame) -> Option<ume_render::Rect> {
+        let gen = generation();
+        if let Some((g, r)) = self.0.slot.get() { if g == gen { return Some(r); } }
+        let Some(r) = f.gpu.rgba_atlas.alloc(self.0.w, self.0.h) else { ATLAS_FULL.with(|a| a.set(true)); return None };
+        f.gpu.renderer.upload_rgba(&f.gpu.queue, r, &self.0.pixels);
+        self.0.slot.set(Some((gen, r)));
+        Some(r)
+    }
+
     pub fn width(&self) -> f32 { self.0.w as f32 }
     pub fn height(&self) -> f32 { self.0.h as f32 }
     pub fn size(&self) -> Vec2 { vec2(self.width(), self.height()) }
     pub fn set_filter(&self, _: FilterMode) {}
-    pub fn is_resident(&self) -> bool { self.0.rect.is_some() }
+    pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == generation()) }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -162,10 +195,10 @@ pub struct DrawTextureParams { pub dest_size: Option<Vec2>, pub source: Option<R
 pub fn draw_texture(t: &Texture2D, x: f32, y: f32, c: Color) { draw_texture_ex(t, x, y, c, DrawTextureParams::default()) }
 
 pub fn draw_texture_ex(t: &Texture2D, x: f32, y: f32, c: Color, p: DrawTextureParams) {
-    let Some(r) = t.0.rect else { return };
     let src = p.source.unwrap_or(Rect::new(0.0, 0.0, t.width(), t.height()));
     let size = p.dest_size.unwrap_or(vec2(src.w, src.h));
     with(|f| {
+        let Some(r) = t.rect(f) else { return };
         let [aw, ah] = f.gpu.renderer.atlas_size.map(|v| v as f32);
         let (mut u0, mut v0) = ((r.x as f32 + src.x) / aw, (r.y as f32 + src.y) / ah);
         let (mut u1, mut v1) = ((r.x as f32 + src.x + src.w) / aw, (r.y as f32 + src.y + src.h) / ah);
@@ -201,8 +234,8 @@ pub struct Mesh { pub vertices: Vec<Vertex>, pub indices: Vec<u16>, pub texture:
 pub fn draw_mesh(m: &Mesh) {
     with(|f| {
         let [aw, ah] = f.gpu.renderer.atlas_size.map(|v| v as f32);
+        let rect = match m.texture.as_ref() { Some(t) => match t.rect(f) { Some(r) => Some(r), None => return }, None => None };
         let white = f.canvas.white_uv();
-        let rect = m.texture.as_ref().and_then(|t| t.0.rect);
         let verts: Vec<ume_render::Vertex> = m.vertices.iter().map(|v| {
             let uv = match rect { Some(r) => [(r.x as f32 + v.uv.x * r.w as f32) / aw, (r.y as f32 + v.uv.y * r.h as f32) / ah], None => white };
             ume_render::Vertex { pos: [v.position.x, v.position.y], uv, pal: RGBA_SPRITE, mul: v.color.map(|c| c as f32 / 255.0), add: [0.0; 4] }
@@ -214,13 +247,13 @@ pub fn draw_mesh(m: &Mesh) {
 }
 
 #[derive(Clone)]
-pub struct Font(Rc<RefCell<text::Font>>);
+pub struct Font(Rc<RefCell<(text::Font, u32)>>);
 
 impl Font {
     pub fn set_filter(&mut self, _: FilterMode) {}
 }
 
-pub fn load_ttf_font_from_bytes(bytes: &[u8]) -> Result<Font, String> { text::Font::from_bytes(bytes).map(|f| Font(Rc::new(RefCell::new(f)))) }
+pub fn load_ttf_font_from_bytes(bytes: &[u8]) -> Result<Font, String> { text::Font::from_bytes(bytes).map(|f| Font(Rc::new(RefCell::new((f, generation()))))) }
 
 pub fn set_default_font(f: Font) { DEFAULT_FONT.with(|d| *d.borrow_mut() = Some(f)); }
 
@@ -238,7 +271,7 @@ impl Default for TextParams<'_> {
 
 pub fn measure_text(text: &str, font: Option<&Font>, font_size: u16, font_scale: f32) -> TextDimensions {
     let Some(f) = font_or_default(font) else { return TextDimensions::default() };
-    let f = f.0.borrow();
+    let f = &f.0.borrow().0;
     let px = font_size as f32 * font_scale;
     let [width, height] = f.measure(text, px);
     TextDimensions { width, height, offset_y: f.ascent(px) }
@@ -247,8 +280,15 @@ pub fn measure_text(text: &str, font: Option<&Font>, font_size: u16, font_scale:
 pub fn draw_text_ex(text: &str, x: f32, y: f32, p: TextParams) -> TextDimensions {
     let Some(font) = font_or_default(p.font) else { return TextDimensions::default() };
     let px = p.font_size as f32 * p.font_scale;
-    let width = with(|f| font.0.borrow_mut().draw(f.gpu, f.canvas, text, x, y, px, p.color.render()));
-    let fb = font.0.borrow();
+    let width = with(|f| {
+        let mut fb = font.0.borrow_mut();
+        let gen = generation();
+        if fb.1 != gen { fb.0.clear_cache(); fb.1 = gen; }
+        let w = fb.0.draw(f.gpu, f.canvas, text, x, y, px, p.color.render());
+        if fb.0.atlas_full() { ATLAS_FULL.with(|a| a.set(true)); }
+        w
+    });
+    let fb = &font.0.borrow().0;
     TextDimensions { width, height: fb.measure("", px)[1], offset_y: fb.ascent(px) }
 }
 
@@ -256,37 +296,41 @@ pub fn draw_text(text: &str, x: f32, y: f32, font_size: f32, color: Color) -> Te
     draw_text_ex(text, x, y, TextParams { font_size: font_size.max(1.0) as u16, color, ..Default::default() })
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum KeyCode {
-    A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
-    Key0, Key1, Key2, Key3, Key4, Key5, Key6, Key7, Key8, Key9,
-    Kp0, Kp1, Kp2, Kp3, Kp4, Kp5, Kp6, Kp7, Kp8, Kp9,
-    F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
-    Up, Down, Left, Right, Enter, Escape, Space, Tab, Backspace, Home, End, PageUp, PageDown, LeftShift, RightShift, LeftControl, RightControl,
+macro_rules! keys {
+    ($($ours:ident => $theirs:ident),* $(,)?) => {
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+        pub enum KeyCode { $($ours),* }
+
+        impl KeyCode {
+            pub const ALL: &'static [KeyCode] = &[$(KeyCode::$ours),*];
+            pub fn winit(self) -> crate::Key { match self { $(KeyCode::$ours => crate::Key::$theirs),* } }
+            pub fn from_winit(k: crate::Key) -> Option<KeyCode> { match k { $(crate::Key::$theirs => Some(KeyCode::$ours),)* _ => None } }
+        }
+    };
 }
 
-impl KeyCode {
-    pub fn winit(self) -> crate::Key {
-        use crate::Key as W;
-        use KeyCode::*;
-        match self {
-            A => W::KeyA, B => W::KeyB, C => W::KeyC, D => W::KeyD, E => W::KeyE, F => W::KeyF, G => W::KeyG, H => W::KeyH, I => W::KeyI,
-            J => W::KeyJ, K => W::KeyK, L => W::KeyL, M => W::KeyM, N => W::KeyN, O => W::KeyO, P => W::KeyP, Q => W::KeyQ, R => W::KeyR,
-            S => W::KeyS, T => W::KeyT, U => W::KeyU, V => W::KeyV, W => W::KeyW, X => W::KeyX, Y => W::KeyY, Z => W::KeyZ,
-            Key0 => W::Digit0, Key1 => W::Digit1, Key2 => W::Digit2, Key3 => W::Digit3, Key4 => W::Digit4,
-            Key5 => W::Digit5, Key6 => W::Digit6, Key7 => W::Digit7, Key8 => W::Digit8, Key9 => W::Digit9,
-            Kp0 => W::Numpad0, Kp1 => W::Numpad1, Kp2 => W::Numpad2, Kp3 => W::Numpad3, Kp4 => W::Numpad4,
-            Kp5 => W::Numpad5, Kp6 => W::Numpad6, Kp7 => W::Numpad7, Kp8 => W::Numpad8, Kp9 => W::Numpad9,
-            F1 => W::F1, F2 => W::F2, F3 => W::F3, F4 => W::F4, F5 => W::F5, F6 => W::F6, F7 => W::F7, F8 => W::F8, F9 => W::F9, F10 => W::F10, F11 => W::F11, F12 => W::F12,
-            Up => W::ArrowUp, Down => W::ArrowDown, Left => W::ArrowLeft, Right => W::ArrowRight, Enter => W::Enter, Escape => W::Escape,
-            Space => W::Space, Tab => W::Tab, Backspace => W::Backspace, Home => W::Home, End => W::End, PageUp => W::PageUp, PageDown => W::PageDown,
-            LeftShift => W::ShiftLeft, RightShift => W::ShiftRight, LeftControl => W::ControlLeft, RightControl => W::ControlRight,
-        }
-    }
+keys! {
+    A => KeyA, B => KeyB, C => KeyC, D => KeyD, E => KeyE, F => KeyF,
+    G => KeyG, H => KeyH, I => KeyI, J => KeyJ, K => KeyK, L => KeyL,
+    M => KeyM, N => KeyN, O => KeyO, P => KeyP, Q => KeyQ, R => KeyR,
+    S => KeyS, T => KeyT, U => KeyU, V => KeyV, W => KeyW, X => KeyX,
+    Y => KeyY, Z => KeyZ, Key0 => Digit0, Key1 => Digit1, Key2 => Digit2, Key3 => Digit3,
+    Key4 => Digit4, Key5 => Digit5, Key6 => Digit6, Key7 => Digit7, Key8 => Digit8, Key9 => Digit9,
+    Kp0 => Numpad0, Kp1 => Numpad1, Kp2 => Numpad2, Kp3 => Numpad3, Kp4 => Numpad4, Kp5 => Numpad5,
+    Kp6 => Numpad6, Kp7 => Numpad7, Kp8 => Numpad8, Kp9 => Numpad9, F1 => F1, F2 => F2,
+    F3 => F3, F4 => F4, F5 => F5, F6 => F6, F7 => F7, F8 => F8,
+    F9 => F9, F10 => F10, F11 => F11, F12 => F12, Up => ArrowUp, Down => ArrowDown,
+    Left => ArrowLeft, Right => ArrowRight, Enter => Enter, Escape => Escape, Space => Space, Tab => Tab,
+    Backspace => Backspace, Delete => Delete, Insert => Insert, Home => Home, End => End, PageUp => PageUp,
+    PageDown => PageDown, LeftShift => ShiftLeft, RightShift => ShiftRight, LeftControl => ControlLeft, RightControl => ControlRight, LeftAlt => AltLeft,
+    RightAlt => AltRight, Apostrophe => Quote, Backslash => Backslash, Comma => Comma, Equal => Equal, Minus => Minus,
+    Period => Period, Semicolon => Semicolon, Slash => Slash, LeftBracket => BracketLeft, RightBracket => BracketRight, GraveAccent => Backquote,
+    KpAdd => NumpadAdd, KpSubtract => NumpadSubtract, KpMultiply => NumpadMultiply, KpDivide => NumpadDivide, KpDecimal => NumpadDecimal, KpEnter => NumpadEnter,
 }
 
 pub fn is_key_down(k: KeyCode) -> bool { with(|f| f.input.is_down(k.winit())) }
 pub fn is_key_pressed(k: KeyCode) -> bool { with(|f| f.input.is_pressed(k.winit())) }
+pub fn get_last_key_pressed() -> Option<KeyCode> { KEY_QUEUE.with(|q| q.borrow_mut().pop()) }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MouseButton { Left }

@@ -7,7 +7,7 @@ use crate::session::{Pilot, Session};
 use crate::settings::{Settings, FX_LEVELS, IMPACT, QUALITY, RESOLUTIONS};
 use crate::stages::Stage;
 use crate::ui::*;
-use macroquad::prelude::*;
+use crate::gfx::*;
 use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::chardef::CharDef;
@@ -191,7 +191,7 @@ impl App {
         // auto art quality follows the display (checked outside fights so live sprites are never swapped)
         self.quality_check += dt;
         if self.quality_check > 0.7 && matches!(self.screen, Screen::Menu { .. } | Screen::Title | Screen::Video { .. } | Screen::Select { .. } | Screen::Stages { .. }) { self.quality_check = 0.0; self.apply_quality(); }
-        if self.settings.fps { self.ui.text(&format!("{} FPS · {}×{} · arte {:.1}×", get_fps(), (screen_width() * macroquad::miniquad::window::dpi_scale()) as i32, Settings::physical_h() as i32, ume_engine::native::rig::art_res()), 10.0, 20.0, 16.0, hex("#6dff9e"), Align::Left, false); }
+        if self.settings.fps { self.ui.text(&format!("{} FPS · {}×{} · arte {:.1}×", get_fps(), (screen_width() * dpi_scale()) as i32, Settings::physical_h() as i32, ume_engine::native::rig::art_res()), 10.0, 20.0, 16.0, hex("#6dff9e"), Align::Left, false); }
         // screen transition: diagonal wipe whenever the screen changes (not into/out of the fight itself)
         let disc = std::mem::discriminant(&self.screen);
         if self.last_disc != Some(disc) {
@@ -540,13 +540,9 @@ impl App {
 
     fn ui_clip(&mut self, x: f32, y: f32, w: f32, h: f32, f: impl FnOnce(&mut App)) {
         let (sx, sy, sw, sh) = (self.ui.x(x), self.ui.y(y), w * self.ui.s, h * self.ui.s);
-        let mut gl = unsafe { get_internal_gl() };
-        gl.flush();
-        gl.quad_gl.scissor(Some((sx as i32, sy as i32, sw as i32, sh as i32)));
+        set_scissor(Some((sx as i32, sy as i32, sw as i32, sh as i32)));
         f(self);
-        let mut gl = unsafe { get_internal_gl() };
-        gl.flush();
-        gl.quad_gl.scissor(None);
+        set_scissor(None);
     }
 
     fn stages(&mut self) {
@@ -774,7 +770,7 @@ impl App {
             self.ui.text(&format!("◀ {v} ▶"), x + w - 24.0, y + 40.0, 24.0, hex("#ffcc33"), Align::Right, true);
             y += 72.0;
         }
-        let (pw, ph) = ((screen_width() * macroquad::miniquad::window::dpi_scale()) as i32, Settings::physical_h() as i32);
+        let (pw, ph) = ((screen_width() * dpi_scale()) as i32, Settings::physical_h() as i32);
         self.ui.text(&format!("Tela atual: {pw}×{ph} · arte rasterizada a {:.1}× · {} lutadores · {} cenários", ume_engine::native::rig::art_res(), self.reg.chars.len(), self.reg.stages.len()), 160.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
         if self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 9 }; return; }
         self.screen = Screen::Video { cur };

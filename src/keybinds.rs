@@ -1,6 +1,6 @@
 //! Keyboard bindings for the fighting inputs (P1 / P2), persisted next to the executable.
 //! Menu navigation (arrows / WASD / Enter / Esc) is deliberately not rebindable so a bad mapping can never lock the player out.
-use macroquad::prelude::KeyCode;
+use crate::gfx::KeyCode;
 use ume_engine::input::k;
 
 /// Rebindable fighting actions: label and engine input bit.

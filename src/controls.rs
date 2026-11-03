@@ -1,7 +1,7 @@
 //! Input hub: keyboard maps, gamepads (with rumble), touch controls; menu navigation.
 use crate::gamepad::{PadInfo, Pads};
 use crate::keybinds::KeyMap;
-use macroquad::prelude::*;
+use crate::gfx::*;
 use ume_engine::input::k;
 
 pub struct TouchPad { pub enabled: bool, pub bits: u32, pub macro_q: std::collections::VecDeque<u32>, stick_center: Option<Vec2>, pub stick_pos: Vec2, pub pressed: [bool; 9], hold: [u8; 9] }
@@ -24,7 +24,7 @@ impl TouchPad {
         if !self.enabled { self.bits = 0; return; }
         let (btns, r, stick, sr) = Self::layout();
         // macroquad reports touches in physical pixels while layout/screen_width() are logical (dpi-scaled)
-        let dpi = macroquad::miniquad::window::dpi_scale().max(0.01);
+        let dpi = dpi_scale().max(0.01);
         let all: Vec<(Vec2, bool)> = touches().iter().map(|t| (t.position / dpi, matches!(t.phase, TouchPhase::Ended | TouchPhase::Cancelled))).collect();
         let mut points: Vec<(Vec2, bool)> = all;
         if points.is_empty() && is_mouse_button_down(MouseButton::Left) { points.push((mouse_position().into(), false)); }

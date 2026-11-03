@@ -16,8 +16,7 @@ mod scenes;
 use crate::render::Gfx;
 use crate::stages::{dojo_lanterns, lava_cracks, neon_signs, skyline, toro_xs, Layer, StageKind, NEON};
 use crate::texgen::{hash, nz};
-use macroquad::models::{draw_mesh, Mesh, Vertex};
-use macroquad::prelude::*;
+use crate::gfx::*;
 use ume_engine::matchs::Match;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -73,7 +72,7 @@ fn ring_e(c: Vec2, rx: f32, ry: f32, th: f32, col: Color) {
     draw_mesh(&Mesh { vertices, indices, texture: None });
 }
 fn rot(p: Vec2, a: f32) -> Vec2 { let (s, c) = a.sin_cos(); vec2(p.x * c - p.y * s, p.x * s + p.y * c) }
-fn additive(g: &Gfx, f: impl FnOnce()) { gl_use_material(&g.add); f(); gl_use_default_material(); }
+fn additive(_: &Gfx, f: impl FnOnce()) { set_blend(GfxBlend::Add); f(); set_blend(GfxBlend::Alpha); }
 
 /// Parallax-aware mapping from stage coordinates to screen pixels (same transform as the baked layers).
 pub struct Ctx<'a> { pub s: f32, ox: f32, oy: f32, cam_x: f32, cam_y: f32, vw: f32, vh: f32, zoff: f32, shx: f32, shy: f32, layers: &'a [Layer] }

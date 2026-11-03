@@ -1,4 +1,5 @@
 pub mod sprites;
+pub mod audio;
 pub mod quad;
 pub mod text;
 

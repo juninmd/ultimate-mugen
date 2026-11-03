@@ -341,7 +341,11 @@ impl Match {
                         if f.vel.x.abs() < 0.05 { f.vel.x = 0.0; }
                     }
                     if f.pos.y > 0.0 { f.pos.y = 0.0; }
-                    if f.state_type != 'A' { f.vel.y = 0.0; }
+                    // idle/hit states with ground physics cannot hold a fighter in mid-air: let it drop back to the floor
+                    // (attack states keep their scripted height, e.g. hover or teleport moves)
+                    if f.pos.y < 0.0 && f.state_type != 'A' && f.move_type != 'A' {
+                        f.vel.y = f.vel.y.max(0.0) + f.c("movement.yaccel", 0.44) * f.lscl;
+                    } else if f.state_type != 'A' { f.vel.y = 0.0; }
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl;
@@ -349,6 +353,8 @@ impl Match {
                 }
                 _ => {}
             }
+            // hit/fall states with physics N (common1's 5030/5035/5050) must never sink below the floor
+            if f.move_type == 'H' && f.pos.y > 0.0 { f.pos.y = 0.0; }
             if f.slide_time > 0 { f.slide_time -= 1; }
         }
         if land { let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); }
@@ -558,7 +564,7 @@ impl Match {
             if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); }
             // the final boss keeps charging on its own (a super every ~10 s even when not hitting)
             if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + 0.35).min(f.power_max); }
-            if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; }
+            if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_used = 0; }
             if f.move_contact > 0 { f.move_contact += 1; }
             if f.move_hit > 0 { f.move_hit += 1; }
             if f.move_guarded > 0 { f.move_guarded += 1; }
@@ -702,6 +708,8 @@ impl Match {
         if hf.contains('+') && f.move_type != 'H' { return false; }
         if hf.contains('-') && f.move_type == 'H' { return false; }
         let falling = f.move_type == 'H' && f.ghv.fall && st == 'A';
+        // air juggle budget: a falling, airborne target can only absorb `airjuggle` points of moves in a row
+        if falling && f.juggle_used + hd.juggle > hd.airjuggle { return false; }
         if st == 'S' && !(hf.contains('H') || hf.contains('M')) { return false; }
         if st == 'C' && !(hf.contains('L') || hf.contains('M')) { return false; }
         if st == 'A' && !hf.contains('A') && !(falling && hf.contains('F')) { return false; }
@@ -793,7 +801,7 @@ impl Match {
                 fd.ctrl = false; fd.move_type = 'H';
             }
             if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('g', pid, gt)); } else { self.fighters[a].move_guarded = 1; self.fighters[a].hit_pause = pause_p1; }
-            let st = self.fighters[d].state_type;
+            let st = if self.fighters[d].pos.y < -1.0 { 'A' } else { self.fighters[d].state_type };
             let dd = self.fighters[d].def.clone();
             self.change_state(d, if st == 'A' { 154 } else if st == 'C' { 152 } else { 150 }, dd);
             self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
@@ -806,12 +814,13 @@ impl Match {
             let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].defence_mul.max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             let prev_fall = self.fighters[d].ghv.fall;
+            if was_hit && prev_fall && (self.fighters[d].state_type == 'A' || self.fighters[d].pos.y < -1.0) { self.fighters[d].juggle_used += hd.juggle; }
             {
                 let fd = &mut self.fighters[d];
                 let mut nl = fd.life - dmg;
                 if !hd.kill && nl < 1.0 { nl = fd.life.min(1.0); }
                 fd.life = nl.max(0.0);
-                let air = fd.state_type == 'A';
+                let air = fd.state_type == 'A' || fd.pos.y < -1.0;
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
                 g.attacker_id = aid; g.damage = dmg; g.hitcount = prev_hc + 1;
@@ -835,7 +844,7 @@ impl Match {
             }
             if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('h', pid, gt)); }
             else { let fa = &mut self.fighters[a]; fa.move_hit = 1; fa.hit_count += hd.num_hits; fa.hit_pause = hd.pause_p1; fa.spr_priority = hd.p1sprpriority; }
-            let st = self.fighters[d].state_type;
+            let st = if self.fighters[d].pos.y < -1.0 && self.fighters[d].state_type != 'L' { 'A' } else { self.fighters[d].state_type };
             if hd.p2stateno >= 0 {
                 let owner = if hd.p2getp1state { self.fighters[a].def.clone() } else { self.fighters[d].def.clone() };
                 self.change_state(d, hd.p2stateno, owner);

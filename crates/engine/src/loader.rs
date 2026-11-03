@@ -64,10 +64,14 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
             if let Some(p) = sff.palettes.iter().find(|p| p.group == 1 && p.index == pal_no) { over = Some(p.data.to_vec()); }
             else if let Some(a) = fget(&format!("pal{pal_no}")).and_then(|p| resolve(vfs, &base, &p)) { if a.len() >= 768 { over = Some(decode_act(a)); } }
         }
+        // v1 sprites without an embedded PCX palette rely on the character's own palette (the .act / first SFF palette)
+        let fallback: Option<Vec<u8>> = over.clone().or_else(|| fget("pal1").and_then(|p| resolve(vfs, &base, &p)).filter(|a| a.len() >= 768).map(decode_act))
+            .or_else(|| sff.palettes.first().map(|p| p.data.to_vec()));
         for s in &sff.sprites {
             let key = (s.group, s.index);
             if sprites.contains_key(&key) { continue; }
-            let pal = if over.is_some() && s.palette_index == target && s.group != 9000 { over.as_deref() } else { None };
+            let paletteless = s.palette.is_none() && s.rgba.is_none();
+            let pal = if paletteless { fallback.as_deref() } else if over.is_some() && s.palette_index == target && s.group != 9000 { over.as_deref() } else { None };
             let image = if with_images && s.width > 0 && s.height > 0 { Some(ImageData::new(s.width, s.height, sprite_to_rgba(s, pal))) } else { None };
             sprites.insert(key, Sprite { image, width: s.width as f32, height: s.height as f32, axis_x: s.axis_x as f32, axis_y: s.axis_y as f32, scale: 1.0 });
         }
@@ -83,4 +87,32 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     let _ = Vec::<MoveInfo>::new;
     let _ = Arc::new(0);
     Ok(d)
+}
+
+/// Select-screen thumbnail: the 9000,1 / 9000,0 portrait, else the first idle frame (anim 0).
+/// Decodes the SFF but converts a single sprite to RGBA, so it is far cheaper than a full character load and
+/// the result can outlive the (size-capped) `CharDef` cache.
+pub fn load_mugen_portrait(vfs: &Vfs, def_path: &str) -> Option<Sprite> {
+    let def_path = norm_path(def_path);
+    let base = def_path.rsplit_once('/').map(|(b, _)| b.to_string()).unwrap_or_default();
+    let secs = parse_ini(&text(vfs.get(&def_path)?));
+    let files = find_section(&secs, "files")?;
+    let fget = |k: &str| files.get(k).map(|s| s.to_string());
+    let sff = decode_sff(resolve(vfs, &base, &fget("sprite")?)?).ok()?;
+    let find = |g: i32, i: i32| sff.sprites.iter().find(|s| s.group == g && s.index == i && s.width > 0 && s.height > 0);
+    let idle = || {
+        let air = parse_air(&text(resolve(vfs, &base, &fget("anim")?)?));
+        let fr = air.get(&0)?.frames.first()?.clone();
+        find(fr.group, fr.index)
+    };
+    let act = fget("pal1").and_then(|p| resolve(vfs, &base, &p)).filter(|a| a.len() >= 768).map(decode_act);
+    let fallback = act.or_else(|| sff.palettes.first().map(|p| p.data.to_vec()));
+    // first candidate that actually has visible pixels (some packs ship blank 9000,x placeholders)
+    let picked = [find(9000, 1), find(9000, 0), idle()].into_iter().flatten().find_map(|spr| {
+        let use_act = spr.group != 9000 && sff.version == 1 || spr.palette.is_none() && spr.rgba.is_none();
+        let rgba = sprite_to_rgba(spr, if use_act { fallback.as_deref() } else { None });
+        if rgba.chunks_exact(4).all(|p| p[3] == 0) { return None; }
+        Some(Sprite { image: Some(ImageData::new(spr.width, spr.height, rgba)), width: spr.width as f32, height: spr.height as f32, axis_x: spr.axis_x as f32, axis_y: spr.axis_y as f32, scale: 1.0 })
+    });
+    picked
 }

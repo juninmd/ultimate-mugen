@@ -123,14 +123,7 @@ impl App {
         let mut reg = Registry::new();
         Self::boot(&mut ui, 0.35, "Pacote Elecbyte (Kung Fu Man)…").await;
         reg.add_bundled_mugen();
-        Self::boot(&mut ui, 0.55, "Pacote da comunidade…").await;
-        // Community MUGEN pack (original, freely redistributable characters/stages) loaded at runtime (file or HTTP)
-        for path in ["assets/mugen/community.zip", "community.zip"] {
-            if let Ok(bytes) = macroquad::file::load_file(path).await {
-                let mut vfs = ume_formats::vfs::Vfs::new();
-                if ume_formats::vfs::add_zip(&mut vfs, &bytes, "").is_ok() { reg.add_vfs_lazy(vfs, "community"); break; }
-            }
-        }
+
         Self::boot(&mut ui, 0.75, "Procurando pasta mugen/…").await;
         #[cfg(not(target_arch = "wasm32"))]
         reg.scan_folders();
@@ -430,13 +423,16 @@ impl App {
             self.ui.gradient_v(cx, cy, cw, ch, alpha(col, 0.95), hex("#120a22"));
             let mut got = self.reg.chars[i].peek(1);
             if got.is_none() && !emugen && !loaded_one && !broken { got = self.reg.chars[i].load_preview(1).ok(); loaded_one = got.is_some(); }
-            if let Some(d) = got {
-                let por = d.sprites.get(&(9000, 1)).or(d.sprites.get(&(9000, 0))).filter(|_| emugen).and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)));
+            // MUGEN tiles use a thumbnail cached apart from the (size-capped) definition cache, decoded one per frame once the cursor rests
+            if emugen && !loaded_one && !broken && self.sel_dwell > 0.15 && !self.reg.chars[i].has_portrait_attempt() { self.reg.chars[i].ensure_portrait(); loaded_one = true; }
+            let thumb = if emugen { self.reg.chars[i].portrait() } else { None };
+            if thumb.is_some() || got.is_some() {
+                let por = thumb.and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)));
                 if let Some((im, pw, ph)) = por {
                     let tex = self.g.texture(&im, true);
                     let kk = ((cw - 8.0) / pw).min((ch - 26.0) / ph);
                     draw_texture_ex(&tex, self.ui.x(cx + (cw - pw * kk) / 2.0), self.ui.y(cy + 4.0), WHITE, DrawTextureParams { dest_size: Some(vec2(pw * kk * self.ui.s, ph * kk * self.ui.s)), ..Default::default() });
-                } else {
+                } else if let Some(d) = got {
                     self.ui_clip(cx, cy, cw, ch - 18.0, |app| app.draw_char(&d, 0, 0.0, cx + cw / 2.0, cy + ch * 1.55, 260.0, false));
                 }
             } else {
@@ -781,7 +777,9 @@ impl App {
         let Some(s) = self.session.as_mut() else { self.screen = Screen::Menu { cur: 0 }; return };
         if self.c.pressed(nav::AUX) { s.r.debug = !s.r.debug; self.debug_boxes = s.r.debug; }
         let pause_btn = self.c.pressed(nav::START) || is_key_pressed(KeyCode::Escape) || is_key_pressed(KeyCode::P);
-        if pause_btn { s.paused = !s.paused; self.pause_cur = 0; self.audio.sfx("select"); }
+        let (paused, accept_back) = pause_step(s.paused, pause_btn);
+        if pause_btn { self.pause_cur = 0; self.audio.sfx("select"); }
+        s.paused = paused;
         // pause button (touch) top-center
         let pb = (VW / 2.0 - 22.0, 92.0, 44.0, 44.0);
         if !s.paused && self.c.touch.enabled && is_mouse_button_pressed(MouseButton::Left) {
@@ -794,7 +792,7 @@ impl App {
         self.c.touch.draw();
         if self.c.touch.enabled { self.ui.rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.0, 0.0, 0.0, 0.35)); self.ui.text("II", VW / 2.0, pb.1 + 30.0, 20.0, WHITE, Align::Center, true); }
         let s = self.session.as_mut().unwrap();
-        if s.paused { self.pause_menu().await; return; }
+        if s.paused { self.pause_menu(accept_back).await; return; }
         if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
                 if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.simul) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone() }); } }
@@ -827,7 +825,7 @@ impl App {
         if let Some(t) = self.team.as_mut() { *t = Team::new(t.members[0].clone(), t.members[1].clone(), t.simul); self.sel = (t.members[0][0], t.members[1][0], self.sel.2); }
     }
 
-    async fn pause_menu(&mut self) {
+    async fn pause_menu(&mut self, accept_back: bool) {
         let items = ["Continuar", "Hitboxes", "Reiniciar luta", "Trocar personagens", "Menu principal"];
         if self.c.pressed(nav::DOWN) { self.pause_cur = (self.pause_cur + 1) % items.len(); }
         if self.c.pressed(nav::UP) { self.pause_cur = (self.pause_cur + items.len() - 1) % items.len(); }
@@ -852,7 +850,7 @@ impl App {
             self.ui.text(&mv.name, x + 400.0, yy, 18.0, WHITE, Align::Left, false);
             self.ui.text(&pretty_input(&mv.input), x + 1010.0, yy, 16.0, hex("#ffcc33"), Align::Right, true);
         }
-        if self.c.pressed(nav::BACK) { self.session.as_mut().unwrap().paused = false; return; }
+        if accept_back && self.c.pressed(nav::BACK) { self.session.as_mut().unwrap().paused = false; return; }
         if ok {
             match self.pause_cur {
                 0 => self.session.as_mut().unwrap().paused = false,
@@ -981,6 +979,15 @@ impl App {
     pub fn renderer_new(st: &crate::stages::Stage) -> MatchRenderer { MatchRenderer::new(st) }
 }
 
+/// Pause state for this frame and whether the pause menu may act on `nav::BACK`.
+///
+/// Esc is both the pause key and `nav::BACK`. Without this guard the same key press
+/// opens the menu in `fight()` and closes it again in `pause_menu()` on the same frame,
+/// so the pause menu never shows. The opening frame therefore consumes that edge.
+fn pause_step(was_paused: bool, toggle: bool) -> (bool, bool) {
+    (was_paused ^ toggle, was_paused)
+}
+
 /// Numpad notation (2 = down, 6 = forward, 236 = quarter-circle forward).
 pub fn pretty_input(s: &str) -> String {
     let mut dirs = String::new();
@@ -995,4 +1002,22 @@ pub fn pretty_input(s: &str) -> String {
         btn = parts.join("+");
     }
     if dirs.is_empty() { btn } else { format!("{dirs} {btn}") }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::pause_step;
+
+    #[test]
+    fn esc_opening_the_pause_menu_does_not_close_it_on_the_same_frame() {
+        // Esc is both the pause key and nav::BACK, so the opening frame consumes the edge.
+        assert_eq!(pause_step(false, true), (true, false));
+    }
+
+    #[test]
+    fn pause_menu_is_navigable_once_open() {
+        assert_eq!(pause_step(true, false), (true, true)); // paused, no toggle: BACK accepted
+        assert_eq!(pause_step(true, true), (false, true)); // Esc while paused closes the menu
+        assert_eq!(pause_step(false, false), (false, false)); // idle
+    }
 }

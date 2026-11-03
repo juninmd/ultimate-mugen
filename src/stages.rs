@@ -4,6 +4,7 @@
 //! sky/cloud noise, brick, wood grain, stone, sand, water... Layers flagged `dynamic` are empty placeholders that only carry a
 //! parallax transform: the animated parts (flags, foliage, crowd, lava, neon flicker...) are drawn per frame by `stagefx`.
 use std::sync::Arc;
+use crate::audio::MusicLoop;
 use ume_engine::chardef::ImageData;
 use ume_engine::matchs::StageInfo;
 use ume_engine::raster::*;
@@ -25,7 +26,7 @@ pub enum StageArt {
     Procedural { back: Vec<Layer>, particles: Vec<Particle>, tint: Option<[f32; 4]> },
     Mugen(Box<MugenBg>),
 }
-pub struct Stage { pub info: StageInfo, pub art: StageArt, pub music: u32, pub kind: StageKind }
+pub struct Stage { pub info: StageInfo, pub art: StageArt, pub music: u32, pub kind: StageKind, pub bgm: Option<Arc<(Vec<u8>, MusicLoop)>> }
 
 pub struct Rng(u32);
 impl Rng { pub fn f(&mut self) -> f32 { self.0 = self.0.wrapping_mul(1664525).wrapping_add(1013904223); self.0 as f32 / 4294967296.0 } }
@@ -282,7 +283,7 @@ fn dojo() -> Stage {
         dynamic(560.0, 240.0, 0.0, 1.22, 1.0, true),
     ];
     let particles = parts(5, 24, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: 0.3 + r.f() * 0.5, vy: 0.25 + r.f() * 0.4, s: 0.8 + r.f() * 1.1, a: 0.6 + r.f() * 0.4, c: if r.f() < 0.5 { [255, 192, 216] } else { [255, 158, 192] } });
-    Stage { info: info("Telhado do Dojo — Pôr do Sol"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.55, 0.2, 0.04]) }, music: 0, kind: StageKind::Dojo }
+    Stage { info: info("Telhado do Dojo — Pôr do Sol"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.55, 0.2, 0.04]) }, music: 0, kind: StageKind::Dojo, bgm: None }
 }
 
 // ───────────────────────────────────────────── NEON ─────────────────────────────────────────────
@@ -381,7 +382,7 @@ fn neon() -> Stage {
         dynamic(560.0, 240.0, 0.0, 1.2, 1.0, true),
     ];
     let particles = parts(9, 24, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: -0.6, vy: 5.0 + r.f() * 2.0, s: 0.35, a: 0.35, c: [154, 216, 255] });
-    Stage { info: info("Neo-Metrópole 2099"), art: StageArt::Procedural { back, particles, tint: None }, music: 1, kind: StageKind::Neon }
+    Stage { info: info("Neo-Metrópole 2099"), art: StageArt::Procedural { back, particles, tint: None }, music: 1, kind: StageKind::Neon, bgm: None }
 }
 
 // ───────────────────────────────────────────── BAMBOO ─────────────────────────────────────────────
@@ -444,7 +445,7 @@ fn bamboo() -> Stage {
         dynamic(560.0, 260.0, -10.0, 1.28, 1.0, true),
     ];
     let particles = parts(3, 20, |r| Particle { x: r.f() * 470.0, y: 80.0 + r.f() * 140.0, vx: (r.f() - 0.5) * 0.3, vy: (r.f() - 0.5) * 0.2, s: 0.9, a: 0.8, c: [217, 255, 122] });
-    Stage { info: info("Bambuzal ao Luar"), art: StageArt::Procedural { back, particles, tint: Some([0.16, 0.47, 0.55, 0.06]) }, music: 2, kind: StageKind::Bamboo }
+    Stage { info: info("Bambuzal ao Luar"), art: StageArt::Procedural { back, particles, tint: Some([0.16, 0.47, 0.55, 0.06]) }, music: 2, kind: StageKind::Bamboo, bgm: None }
 }
 
 // ───────────────────────────────────────────── PLAINS ─────────────────────────────────────────────
@@ -546,7 +547,7 @@ fn plains() -> Stage {
         dynamic(560.0, 240.0, 0.0, 1.25, 1.0, true),
     ];
     let particles = parts(4, 14, |r| Particle { x: r.f() * 470.0, y: 150.0 + r.f() * 80.0, vx: 0.8 + r.f(), vy: -0.05, s: 0.6, a: 0.4, c: [232, 200, 160] });
-    Stage { info: info("Planalto Rochoso"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.85, 0.5, 0.025]) }, music: 3, kind: StageKind::Plains }
+    Stage { info: info("Planalto Rochoso"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.85, 0.5, 0.025]) }, music: 3, kind: StageKind::Plains, bgm: None }
 }
 
 // ───────────────────────────────────────────── SPIRIT ─────────────────────────────────────────────
@@ -650,7 +651,7 @@ fn spirit() -> Stage {
         dynamic(560.0, 240.0, 0.0, 1.2, 1.0, true),
     ];
     let particles = parts(6, 22, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: (r.f() - 0.5) * 0.2, vy: -0.3 - r.f() * 0.4, s: 0.7 + r.f(), a: 0.5, c: [184, 255, 240] });
-    Stage { info: info("Portão dos Espíritos"), art: StageArt::Procedural { back, particles, tint: None }, music: 4, kind: StageKind::Spirit }
+    Stage { info: info("Portão dos Espíritos"), art: StageArt::Procedural { back, particles, tint: None }, music: 4, kind: StageKind::Spirit, bgm: None }
 }
 
 // ───────────────────────────────────────────── VOLCANO ─────────────────────────────────────────────
@@ -735,7 +736,7 @@ fn volcano() -> Stage {
         }),
     ];
     let particles = parts(8, 36, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: (r.f() - 0.5) * 0.4, vy: -0.5 - r.f() * 0.8, s: 0.5 + r.f() * 0.8, a: 0.9, c: if r.f() < 0.5 { [255, 176, 48] } else { [255, 90, 16] } });
-    Stage { info: info("Cratera Vulcânica"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.24, 0.0, 0.05]) }, music: 5, kind: StageKind::Volcano }
+    Stage { info: info("Cratera Vulcânica"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.24, 0.0, 0.05]) }, music: 5, kind: StageKind::Volcano, bgm: None }
 }
 
 pub struct StageEntry { pub id: String, pub name: String, pub thumb: [[u8; 3]; 3], pub build: Box<dyn Fn() -> Stage> }
@@ -758,5 +759,5 @@ pub fn from_mugen(st: MugenStage) -> Stage {
         p1x: st.p1x * scl, p2x: st.p2x * scl, zoffset: st.zoffset * scl, vertical_follow: st.vertical_follow, tension: st.tension * scl,
     };
     let images = st.sprites.iter().filter(|(_, im)| im.w > 0 && im.h > 0).map(|(k, im)| (*k, ImageData::new(im.w, im.h, im.rgba.clone()))).collect();
-    Stage { info, art: StageArt::Mugen(Box::new(MugenBg { stage: st, images, scl })), music: 0, kind: StageKind::Custom }
+    Stage { info, art: StageArt::Mugen(Box::new(MugenBg { stage: st, images, scl })), music: 0, kind: StageKind::Custom, bgm: None }
 }

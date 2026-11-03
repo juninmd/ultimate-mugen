@@ -249,9 +249,11 @@ pub fn is_float(n: &Node) -> bool {
 
 /// A compiled expression: the AST plus its static float-ness.
 #[derive(Clone, Debug)]
-pub struct Expr { pub node: Node, pub float: bool }
+pub struct Expr { pub node: Node, pub float: bool, pub code: crate::bytecode::Code }
 impl Expr {
-    pub fn new(node: Node) -> Self { let float = is_float(&node); Expr { node, float } }
+    pub fn new(node: Node) -> Self { let float = is_float(&node); let code = crate::bytecode::Code::compile(&node); Expr { node, float, code } }
+    #[inline]
+    pub fn eval<H: Host>(&self, h: &H) -> f64 { self.code.run(h) }
     pub fn num(v: f64) -> Self { Expr::new(Node::Num(v, v.fract() != 0.0)) }
 }
 

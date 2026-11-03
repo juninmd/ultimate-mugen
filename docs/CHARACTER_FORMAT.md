@@ -49,3 +49,9 @@ Animações com nomes padrão (`idle`, `walk`, `hitLight`, `fall`, `lieDown`, `w
 
 ## E se eu quiser usar CNS?
 Personagens MUGEN completos continuam funcionando: importe o `.zip`. A VM é a mesma.
+
+## Loading without rebuilding / Carregar sem recompilar
+
+Drop `<id>.json` files into a `umf/` folder (next to the executable, in the working directory, inside `mugen/umf/`, or in the folder named by `UME_UMF_DIR`). They are loaded at startup next to the built-in fighters; a file with the same `id` as a built-in one replaces it.
+
+Coloque arquivos `<id>.json` numa pasta `umf/` (ao lado do executável, no diretório atual, em `mugen/umf/` ou na pasta indicada por `UME_UMF_DIR`). Eles carregam na inicialização junto dos lutadores embutidos; um arquivo com o mesmo `id` de um embutido o substitui.

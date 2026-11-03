@@ -3,7 +3,7 @@ use crate::render::Gfx;
 use crate::ui::{alpha, hex, Align, Ui};
 use macroquad::prelude::*;
 use ume_engine::fighter::Fighter;
-use ume_engine::matchs::Match;
+use ume_engine::matchs::{Match, BASE_H, BASE_W};
 use crate::poly;
 use crate::session::TeamInfo;
 
@@ -16,6 +16,8 @@ impl Hud {
     pub fn inject_last_combo(&mut self, hits: i32, dmg: f32) { self.combo[0] = (hits, dmg, 0); }
 
     pub fn draw(&mut self, ui: &Ui, g: &mut Gfx, m: &Match, gt: f32, team: Option<&TeamInfo>, human: &[u32]) {
+        // the world may be zoomed out (big teams) — the HUD always lays out on the base 426×240 view
+        g.fit(BASE_W, BASE_H);
         let s = g.view_scale;
         let (gox, goy) = (g.ox, g.oy);
         let p = |x: f32, y: f32| vec2(gox + x * s, goy + y * s);
@@ -27,7 +29,7 @@ impl Hud {
         };
         let roots: Vec<&Fighter> = (0..2).filter_map(main_of).collect();
         let partners: Vec<&Fighter> = m.roots().filter(|f| !roots.iter().any(|r| r.id == f.id)).collect();
-        let w = m.view_w;
+        let w = BASE_W;
         let text = |t: &str, x: f32, y: f32, size: f32, c: Color, al: Align, disp: bool| {
             let font = if disp { &ui.display } else { &ui.body };
             let fs = (size * s).max(4.0) as u16;
@@ -90,6 +92,18 @@ impl Hud {
                 { let (l0, l1) = (plate[3], plate[2]); draw_line(l0.x, l0.y, l1.x, l1.y, 0.7 * s, poly::with_a(cc, 0.9)); }
                 text(&f.def.display_name.to_uppercase(), nx + 0.6, y + bh + 9.6, 7.0, BLACK, al, true);
                 text(&f.def.display_name.to_uppercase(), nx, y + bh + 9.0, 7.0, WHITE, al, true);
+                // awakened form: glowing tag under the name plate
+                if f.form > 0 && f.alive {
+                    let fc = crate::vfx::Vfx::form_color(f);
+                    let fcol = Color::new(fc[0], fc[1], fc[2], 1.0);
+                    let pulse = 0.75 + 0.25 * (gt * 6.0).sin();
+                    let label = if f.def.form_name.is_empty() { "DESPERTO".to_string() } else { f.def.form_name.to_uppercase() };
+                    let tw = measure_text(&label, Some(&ui.display), (5.4 * s) as u16, 1.0).width / s + 18.0;
+                    let tx = if side == 0 { x + 12.0 } else { x + bw - 12.0 - tw };
+                    poly::grad_h(&sp(poly::slanted(tx, y + bh + 12.5, tw, 7.0, skew * 0.5)), poly::with_a(poly::shade(fcol, 0.5), 0.9 * pulse), poly::with_a(fcol, 0.9 * pulse));
+                    poly::solid(&poly::regular(p(tx + 5.0, y + bh + 16.0), 1.9 * s, 4, std::f32::consts::FRAC_PI_2), Color::new(1.0, 1.0, 1.0, pulse));
+                    text(&label, tx + 9.0, y + bh + 17.8, 5.0, WHITE, Align::Left, true);
+                }
                 // round pips: diamonds
                 for i in 0..m.rounds_to_win {
                     let won = m.wins[side] > i;
@@ -100,7 +114,7 @@ impl Hud {
                     poly::outline(&dia, 0.6 * s, if won { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.45) });
                 }
                 // super meter: three slanted cells (one per level) + hexagonal level badge
-                let (cw, gap, ph, py) = (28.0, 3.0, 5.2, m.view_h - 14.0);
+                let (cw, gap, ph, py) = (28.0, 3.0, 5.2, BASE_H - 14.0);
                 let pw = cw * 3.0 + gap * 2.0;
                 let px = if side == 0 { 12.0 } else { w - 12.0 - pw };
                 let lvl = (f.power / 1000.0).floor() as i32;
@@ -161,7 +175,7 @@ impl Hud {
                 let tot = |sd: usize| m.roots().filter(|f| f.side == sd).count();
                 outlined(&format!("{}/{}", alive(0), tot(0)), w / 2.0 - 24.0, 40.0, 8.0, hex("#22e8ff"), Align::Center);
                 outlined(&format!("{}/{}", alive(1), tot(1)), w / 2.0 + 24.0, 40.0, 8.0, hex("#ff4d6d"), Align::Center);
-                if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 { text("TAB · TROCAR DE LUTADOR", 10.0, m.view_h - 20.0, 5.2, Color::new(1.0, 1.0, 1.0, 0.55), Align::Left, true); }
+                if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 { text("TAB · TROCAR DE LUTADOR", 10.0, BASE_H - 20.0, 5.2, Color::new(1.0, 1.0, 1.0, 0.55), Align::Left, true); }
             }
             // sequence roster: portraits of every team member (KO'd ones greyed out, current one highlighted)
             if let Some(t) = team.filter(|t| !t.simul) {
@@ -227,19 +241,70 @@ impl Hud {
             let size = if a.text.len() > 10 { 24.0 } else { 38.0 } * sc;
             let ko = a.text == "K.O.";
             let glow = if ko { Color::new(1.0, 0.12, 0.25, 0.25 * al) } else { Color::new(1.0, 0.6, 0.0, 0.22 * al) };
-            let cc = p(w / 2.0, m.view_h * 0.42);
+            let cc = p(w / 2.0, BASE_H * 0.42);
             for i in 0..7 { let t = 1.0 - i as f32 / 7.0; draw_circle(cc.x, cc.y, size * 1.9 * t * s, Color::new(glow.r, glow.g, glow.b, glow.a * 0.28)); }
             // sweeping accent slashes behind the text
             let sweep = (age / 14.0).min(1.0);
             let hw = w * 0.5 * sweep;
-            let yy = m.view_h * 0.42;
+            let yy = BASE_H * 0.42;
             let sl = if ko { Color::new(0.9, 0.1, 0.2, 0.45 * al) } else { Color::new(1.0, 0.55, 0.1, 0.4 * al) };
             for (dy, th) in [(-size * 0.55, 1.6), (size * 0.62, 1.0)] { let a0 = p(w / 2.0 - hw, yy + dy); draw_rectangle(a0.x, a0.y, hw * 2.0 * s, th * s, sl); }
             let band = p(w / 2.0 - hw, yy - size * 0.5); draw_rectangle(band.x, band.y, hw * 2.0 * s, size * 1.05 * s, Color::new(0.04, 0.0, 0.1, 0.35 * al));
             let o = size * 0.08;
-            for (dx, dy) in [(-o, 0.0), (o, 0.0), (0.0, -o), (0.0, o), (-o, -o), (o, o), (-o, o), (o, -o), (o, o * 2.0)] { text(&a.text, w / 2.0 + dx, m.view_h * 0.42 + size * 0.35 + dy, size, Color::new(0.07, 0.02, 0.12, al), Align::Center, true); }
+            for (dx, dy) in [(-o, 0.0), (o, 0.0), (0.0, -o), (0.0, o), (-o, -o), (o, o), (-o, o), (o, -o), (o, o * 2.0)] { text(&a.text, w / 2.0 + dx, BASE_H * 0.42 + size * 0.35 + dy, size, Color::new(0.07, 0.02, 0.12, al), Align::Center, true); }
             let col = if ko { Color::new(1.0, 0.25, 0.25, al) } else { Color::new(1.0, 0.82, 0.25, al) };
-            text(&a.text, w / 2.0, m.view_h * 0.42 + size * 0.35, size, col, Align::Center, true);
+            text(&a.text, w / 2.0, BASE_H * 0.42 + size * 0.35, size, col, Align::Center, true);
+        }
+        // face-off at the start of the first round: speech bubbles (side 0 speaks first, side 1 answers)
+        if m.round_state == 1 && m.round_no == 1 && m.intro_ticks > 0 && !m.training {
+            let rt = m.round_time as f32;
+            let lead: Vec<&Fighter> = (0..2).filter_map(|sd| m.roots().find(|f| f.side == sd)).collect();
+            if lead.len() == 2 {
+                for (side, f) in lead.iter().enumerate() {
+                    let (t0, t1) = if side == 0 { (8.0, 108.0) } else { (100.0, 210.0) };
+                    if rt < t0 || rt > t1 { continue; }
+                    let txt = face_off_line(f, side == 1);
+                    let shown: String = txt.chars().take(((rt - t0) * 1.5) as usize + 1).collect();
+                    let a = ((rt - t0) / 6.0).min(1.0).min((t1 - rt) / 8.0).clamp(0.0, 1.0);
+                    // wrap into at most two lines
+                    let words: Vec<&str> = txt.split(' ').collect();
+                    let mut cut = words.len();
+                    if txt.chars().count() > 26 { let mut acc = 0; for (i, wd) in words.iter().enumerate() { acc += wd.chars().count() + 1; if acc * 2 >= txt.chars().count() { cut = i + 1; break; } } }
+                    let (l1, l2) = (words[..cut.min(words.len())].join(" "), words[cut.min(words.len())..].join(" "));
+                    let full1 = l1.chars().count();
+                    let sh1: String = shown.chars().take(full1).collect();
+                    let sh2: String = shown.chars().skip(full1 + 1).collect();
+                    let fs = 7.4;
+                    let wdt = measure_text(&l1, Some(&ui.body), (fs * s) as u16, 1.0).width.max(measure_text(&l2, Some(&ui.body), (fs * s) as u16, 1.0).width) / s + 14.0;
+                    let hgt = if l2.is_empty() { 17.0 } else { 27.0 };
+                    let bx = if side == 0 { (BASE_W * 0.27 - wdt / 2.0).max(6.0) } else { (BASE_W * 0.73 - wdt / 2.0).min(BASE_W - wdt - 6.0) };
+                    let by = 60.0 + side as f32 * 14.0;
+                    let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
+                    let sp = |v: Vec<Vec2>| -> Vec<Vec2> { v.into_iter().map(|q| p(q.x, q.y)).collect() };
+                    poly::solid(&sp(poly::chamfer(bx + 1.5, by + 1.8, wdt, hgt, 3.5)), Color::new(0.0, 0.0, 0.0, 0.35 * a));
+                    poly::grad_v(&sp(poly::chamfer(bx, by, wdt, hgt, 3.5)), Color::new(1.0, 1.0, 1.0, 0.96 * a), Color::new(0.86, 0.88, 0.96, 0.96 * a));
+                    poly::outline(&sp(poly::chamfer(bx, by, wdt, hgt, 3.5)), 1.1 * s, poly::with_a(col, a));
+                    let tx = if side == 0 { bx + wdt * 0.28 } else { bx + wdt * 0.72 };
+                    poly::solid(&[p(tx - 4.0, by + hgt - 0.3), p(tx + 4.0, by + hgt - 0.3), p(tx + if side == 0 { -2.0 } else { 2.0 }, by + hgt + 9.0)], Color::new(0.93, 0.94, 0.98, 0.96 * a));
+                    // name tab
+                    let nm = f.def.display_name.split_whitespace().next().unwrap_or("").to_uppercase();
+                    let nw = measure_text(&nm, Some(&ui.display), (5.6 * s) as u16, 1.0).width / s + 8.0;
+                    poly::solid(&sp(poly::slanted(bx + 2.0, by - 7.5, nw, 7.5, 2.0)), poly::with_a(col, 0.95 * a));
+                    text(&nm, bx + 5.0, by - 1.7, 5.6, Color::new(1.0, 1.0, 1.0, a), Align::Left, true);
+                    let ink = Color::new(0.08, 0.06, 0.16, a);
+                    text(&sh1, bx + 7.0, by + 10.4, fs, ink, Align::Left, false);
+                    if !l2.is_empty() { text(&sh2, bx + 7.0, by + 20.4, fs, ink, Align::Left, false); }
+                }
+            }
+        }
+        // awakening hint: one super bar is enough
+        if m.round_state == 2 && human.len() == 1 {
+            if let Some(f) = m.roots().find(|f| human.contains(&f.id)) {
+                if f.form == 0 && f.alive && f.power >= 1000.0 && f.def.anims.contains_key(&196) {
+                    let a = 0.55 + 0.45 * (gt * 5.0).sin().abs();
+                    text("T · DESPERTAR", BASE_W / 2.0, BASE_H - 8.0, 6.0, Color::new(1.0, 0.85, 0.3, a), Align::Center, true);
+                }
+            }
         }
         if self.replay {
             let a = 0.6 + 0.4 * (gt * 3.0).sin().abs();
@@ -275,6 +340,16 @@ impl Hud {
         }
         let _ = gt;
     }
+}
+
+/// Round-start line of a fighter: its own `intro` (first speaker) / `taunt` (answer), or a generic one.
+fn face_off_line(f: &Fighter, answer: bool) -> String {
+    let own = if answer { &f.def.taunt } else { &f.def.intro };
+    if !own.is_empty() { return own.clone(); }
+    const A: [&str; 5] = ["Vamos ver do que você é capaz!", "Prepare-se!", "Não vou pegar leve!", "Que vença o melhor!", "Mostre sua força!"];
+    const B: [&str; 5] = ["Só isso?", "Você não me assusta.", "Venha com tudo!", "Hmpf... entediante.", "Vai se arrepender."];
+    let h = f.def.display_name.bytes().fold(7usize, |a, b| a.wrapping_mul(31).wrapping_add(b as usize));
+    (if answer { B } else { A })[h % 5].to_string()
 }
 
 fn shade_gold() -> Color { hex("#7a5208") }

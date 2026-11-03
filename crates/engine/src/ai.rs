@@ -43,6 +43,8 @@ impl InputSource for Ai {
         if m.round_state != 2 { return 0; }
         let Some(ei) = m.enemy(me, 0) else { return 0 };
         let e = &m.fighters[ei];
+        // awakening when hurt and the meter allows it
+        if f.form == 0 && f.ctrl && f.power >= 1000.0 && f.life < f.life_max * 0.45 && self.level >= 3 && f.def.anims.contains_key(&196) { return k::T; }
         if self.hold_ticks > 0 { self.hold_ticks -= 1; return self.hold; }
         let dist = (e.pos.x - f.pos.x).abs();
         let fwd = if f.facing > 0.0 { k::R } else { k::L };

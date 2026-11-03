@@ -115,6 +115,7 @@ mod native {
                 if gp.is_pressed(Button::LeftTrigger) { b |= k::D2; }
                 if gp.is_pressed(Button::LeftTrigger2) { b |= k::W; }
                 if gp.is_pressed(Button::Start) { b |= k::S; }
+                if gp.is_pressed(Button::RightThumb) || gp.is_pressed(Button::Select) { b |= k::T; }
                 let name = gp.name().to_string();
                 let sony = name.to_ascii_lowercase().contains("sony") || name.contains("DualShock") || name.contains("DualSense") || name.contains("Wireless Controller") || name.contains("PS4") || name.contains("PS5");
                 PadInfo { name, bits: b, sony, connected: gp.is_connected(), menu_bits: b }

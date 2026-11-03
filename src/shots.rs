@@ -18,8 +18,8 @@ async fn snap(app: &mut App, dir: &str, name: &str, draw: impl Fn(&mut App)) {
         next_frame().await;
     }
 }
-fn find(app: &App, id: &str) -> usize { app.reg.chars.iter().position(|c| c.id.ends_with(id)).unwrap_or(0) }
-fn stage(app: &App, id: &str) -> usize { app.reg.stages.iter().position(|s| s.id.contains(id)).unwrap_or(0) }
+pub(crate) fn find(app: &App, id: &str) -> usize { app.reg.chars.iter().position(|c| c.id.ends_with(id)).unwrap_or(0) }
+pub(crate) fn stage(app: &App, id: &str) -> usize { app.reg.stages.iter().position(|s| s.id.contains(id)).unwrap_or(0) }
 
 async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &str, ticks: usize, want: &str) {
     app.mode = Mode::Watch;
@@ -29,11 +29,26 @@ async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &st
     let s = session.as_mut().unwrap();
     for _ in 0..ticks { s.step_visual(c, audio); }
     match want {
-        "super" | "impact" => {
+        "faceoff" => {}
+        "transform" | "awake" => {
+            for _ in 0..600 { if s.m.round_state == 2 && s.m.fighters[0].ctrl { break; } s.step_visual(c, audio); }
+            s.m.fighters[0].power = 3000.0; s.m.fighters[0].life = s.m.fighters[0].life_max * 0.4;
+            s.m.try_transform(0);
+            for _ in 0..(if want == "awake" { 140 } else { 34 }) { s.step_visual(c, audio); }
+        }
+        "defeat" | "defeatfinal" => {
+            for _ in 0..600 { if s.m.round_state == 2 { break; } s.step_visual(c, audio); }
+            if want == "defeatfinal" { s.m.wins = [1, 0]; }
+            for f in s.m.fighters.iter_mut() { f.pos.x = if f.side == 0 { -40.0 } else { 40.0 }; }
+            s.m.fighters[1].life = 0.0;
+            for _ in 0..1500 { s.step_visual(c, audio); if (5190..=5193).contains(&s.m.fighters[1].state_no) && s.m.fighters[1].state_time >= if want == "defeatfinal" { 96 } else { 78 } { break; } }
+        }
+        "super" | "super2" | "impact" => {
             for f in s.m.fighters.iter_mut() { f.power = 3000.0; }
             for _ in 0..600 { if s.m.fighters[0].ctrl && s.m.fighters[0].state_no == 0 { break; } s.step_visual(c, audio); }
             let d = s.m.fighters[0].def.clone();
-            if d.states.contains_key(&3000) { s.m.change_state(0, 3000, d); }
+            let no = if want == "super2" { 3001 } else { 3000 };
+            if d.states.contains_key(&no) { s.m.change_state(0, no, d); }
             let mut ok = false;
             for _ in 0..1500 { s.step_visual(c, audio); if s.m.pause.as_ref().is_some_and(|p| p.is_super && p.time < 24) { ok = true; break; } }
             if ok { for _ in 0..16 { s.step_visual(c, audio); } }
@@ -75,8 +90,32 @@ async fn team_fight(app: &mut App, dir: &str, name: &str, simul: bool, n: usize,
     app.team = None;
 }
 
+/// Story / cinematic features: face-off, awakening, defeats, boss, cutscenes, zoomed-out 5v5.
+async fn story(app: &mut App, dir: &str) {
+    fight(app, dir, "50-faceoff-1", "kaito", "shion", "dojo", 82, "faceoff").await;
+    fight(app, dir, "51-faceoff-2", "kaito", "shion", "dojo", 195, "faceoff").await;
+    fight(app, dir, "52-transform-start", "valdric", "kaito", "spirit", 100, "transform").await;
+    fight(app, dir, "53-transformed", "valdric", "kaito", "spirit", 100, "awake").await;
+    fight(app, dir, "54-defeat-round", "kaito", "shion", "dojo", 100, "defeat").await;
+    fight(app, dir, "55-defeat-final", "kaito", "shion", "bamboo", 100, "defeatfinal").await;
+    fight(app, dir, "56-boss-susanoo", "oboro", "kaito", "volcano", 120, "super").await;
+    fight(app, dir, "57-boss-kyoka", "oboro", "kaito", "spirit", 120, "super2").await;
+    fight(app, dir, "58-boss-awakened", "oboro", "kaito", "volcano", 100, "awake").await;
+    fight(app, dir, "59-boss-fight", "kaito", "oboro", "spirit", 400, "hit").await;
+    team_fight(app, dir, "60-5v5-zoomout", true, 5, "dojo", 330, true).await;
+    team_fight(app, dir, "61-5v5-zoomout-neon", true, 5, "neon", 420, true).await;
+    app.sel = (find(app, "kaito"), find(app, "oboro"), 0);
+    app.arcade = Some((vec![find(app, "oboro")], 0));
+    for (kind, page, name) in [(0u8, 1usize, "62-cutscene-opening"), (1, 3, "63-cutscene-boss"), (2, 1, "64-cutscene-ending")] {
+        app.screen = Screen::Cutscene { kind, page, t: 0.0 };
+        screen(app, dir, name, 70).await;
+    }
+}
+
 pub async fn run(app: &mut App, dir: &str) {
     let _ = std::fs::create_dir_all(dir);
+    if std::env::var("UME_TOUR").as_deref() == Ok("story") { story(app, dir).await; return; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stages") { app.screen = Screen::Fight; crate::stage_tour::run(app, dir).await; return; }
     app.screen = Screen::Title;
     screen(app, dir, "01-title", 30).await;
     let cap = |app: &mut App, s: Screen| { app.screen = s; };
@@ -199,4 +238,7 @@ pub async fn run(app: &mut App, dir: &str) {
     snap(app, dir, "15-mobile-fight", |a| a.draw_session_only()).await;
     app.session = None;
     app.screen = Screen::Menu { cur: 0 }; screen(app, dir, "16-mobile-menu", 5).await;
+    request_new_screen_size(1280.0, 720.0);
+    frames(app, 10).await;
+    story(app, dir).await;
 }

@@ -3,19 +3,19 @@ use crate::gamepad::{PadInfo, Pads};
 use macroquad::prelude::*;
 use ume_engine::input::k;
 
-pub struct TouchPad { pub enabled: bool, pub bits: u32, pub macro_q: std::collections::VecDeque<u32>, stick_center: Option<Vec2>, pub stick_pos: Vec2, pub pressed: [bool; 8], hold: [u8; 8] }
+pub struct TouchPad { pub enabled: bool, pub bits: u32, pub macro_q: std::collections::VecDeque<u32>, stick_center: Option<Vec2>, pub stick_pos: Vec2, pub pressed: [bool; 9], hold: [u8; 9] }
 
-pub const TOUCH_BUTTONS: [(&str, u32); 8] = [("LP", k::X), ("HP", k::Y), ("SP1", k::D2), ("LK", k::A), ("HK", k::B), ("SP2", k::W), ("SP3", k::E), ("SUPER", k::D2 | k::W)];
+pub const TOUCH_BUTTONS: [(&str, u32); 9] = [("LP", k::X), ("HP", k::Y), ("SP1", k::D2), ("LK", k::A), ("HK", k::B), ("SP2", k::W), ("SP3", k::E), ("SUPER", k::D2 | k::W), ("AWAKE", k::T)];
 
 impl TouchPad {
-    pub fn new(enabled: bool) -> Self { TouchPad { enabled, bits: 0, macro_q: Default::default(), stick_center: None, stick_pos: Vec2::ZERO, pressed: [false; 8], hold: [0; 8] } }
+    pub fn new(enabled: bool) -> Self { TouchPad { enabled, bits: 0, macro_q: Default::default(), stick_center: None, stick_pos: Vec2::ZERO, pressed: [false; 9], hold: [0; 9] } }
     /// Button centers in screen space (right side), radius.
     pub fn layout() -> (Vec<Vec2>, f32, Vec2, f32) {
         let (w, h) = (screen_width(), screen_height());
         let r = (h * 0.075).min(46.0).max(22.0);
         let gap = r * 2.35;
         let bx = w - r * 1.4 - gap * 2.0; let by = h - r * 1.4 - gap;
-        let v = (0..8).map(|i| vec2(bx + (i % 3) as f32 * gap, by + ((i / 3) as f32 - 1.0) * gap)).collect();
+        let v = (0..9).map(|i| vec2(bx + (i % 3) as f32 * gap, by + ((i / 3) as f32 - 1.0) * gap)).collect();
         let stick = vec2(r * 3.2, h - r * 3.2);
         (v, r, stick, r * 2.3)
     }
@@ -28,7 +28,7 @@ impl TouchPad {
         let mut points: Vec<(Vec2, bool)> = all;
         if points.is_empty() && is_mouse_button_down(MouseButton::Left) { points.push((mouse_position().into(), false)); }
         let mut bits = 0;
-        self.pressed = [false; 8];
+        self.pressed = [false; 9];
         let mut stick_touch = None;
         for h in self.hold.iter_mut() { *h = h.saturating_sub(1); }
         for (p, ended) in &points {
@@ -40,7 +40,7 @@ impl TouchPad {
                 }
             }
         }
-        for i in 0..8 { if self.hold[i] > 0 { bits |= TOUCH_BUTTONS[i].1; self.pressed[i] = true; } }
+        for i in 0..9 { if self.hold[i] > 0 { bits |= TOUCH_BUTTONS[i].1; self.pressed[i] = true; } }
         if let Some(p) = stick_touch {
             let c = *self.stick_center.get_or_insert(stick);
             let d = p - c;
@@ -63,7 +63,7 @@ impl TouchPad {
         draw_circle(c.x + self.stick_pos.x, c.y + self.stick_pos.y, sr * 0.42, Color::new(1.0, 1.0, 1.0, 0.3));
         for (i, p) in btns.iter().enumerate() {
             let (label, _) = TOUCH_BUTTONS[i];
-            let base = match label { "LP" | "HP" => Color::new(0.25, 0.66, 1.0, 0.3), "LK" | "HK" => Color::new(1.0, 0.3, 0.43, 0.3), "SUPER" => Color::new(0.6, 0.2, 0.9, 0.45), _ => Color::new(1.0, 0.8, 0.2, 0.25) };
+            let base = match label { "LP" | "HP" => Color::new(0.25, 0.66, 1.0, 0.3), "LK" | "HK" => Color::new(1.0, 0.3, 0.43, 0.3), "SUPER" => Color::new(0.6, 0.2, 0.9, 0.45), "AWAKE" => Color::new(1.0, 0.45, 0.1, 0.45), _ => Color::new(1.0, 0.8, 0.2, 0.25) };
             draw_circle(p.x, p.y, r, if self.pressed[i] { Color::new(1.0, 1.0, 1.0, 0.5) } else { base });
             draw_circle_lines(p.x, p.y, r, 2.0, Color::new(1.0, 1.0, 1.0, 0.4));
             let fs = (r * 0.55) as u16;
@@ -82,7 +82,7 @@ fn kb_bits(p2_layout: bool, solo: bool) -> u32 {
     if !p2_layout {
         map(&[KeyCode::W], k::U); map(&[KeyCode::S], k::D); map(&[KeyCode::A], k::L); map(&[KeyCode::D], k::R);
         map(&[KeyCode::U], k::X); map(&[KeyCode::I], k::Y); map(&[KeyCode::O], k::Z); map(&[KeyCode::J], k::A); map(&[KeyCode::K], k::B); map(&[KeyCode::L], k::C);
-        map(&[KeyCode::Key1], k::D2); map(&[KeyCode::Key2], k::W); map(&[KeyCode::Key3], k::E);
+        map(&[KeyCode::Key1], k::D2); map(&[KeyCode::Key2], k::W); map(&[KeyCode::Key3], k::E); map(&[KeyCode::T], k::T);
         if solo {
             map(&[KeyCode::Up], k::U); map(&[KeyCode::Down], k::D); map(&[KeyCode::Left], k::L); map(&[KeyCode::Right], k::R);
             map(&[KeyCode::Z], k::A); map(&[KeyCode::X], k::B); map(&[KeyCode::C], k::C); map(&[KeyCode::V], k::X); map(&[KeyCode::B], k::Y); map(&[KeyCode::N], k::Z);
@@ -90,7 +90,7 @@ fn kb_bits(p2_layout: bool, solo: bool) -> u32 {
     } else {
         map(&[KeyCode::Up], k::U); map(&[KeyCode::Down], k::D); map(&[KeyCode::Left], k::L); map(&[KeyCode::Right], k::R);
         map(&[KeyCode::Kp4], k::X); map(&[KeyCode::Kp5], k::Y); map(&[KeyCode::Kp6], k::Z); map(&[KeyCode::Kp1], k::A); map(&[KeyCode::Kp2], k::B); map(&[KeyCode::Kp3], k::C);
-        map(&[KeyCode::Kp7], k::D2); map(&[KeyCode::Kp8], k::W); map(&[KeyCode::Kp9], k::E);
+        map(&[KeyCode::Kp7], k::D2); map(&[KeyCode::Kp8], k::W); map(&[KeyCode::Kp9], k::E); map(&[KeyCode::Kp0], k::T);
     }
     b
 }

@@ -31,7 +31,8 @@ fn rig_boxes_match_typescript_reference() {
             let r = &reference[id][pal.to_string()];
             let d = compile_native(&nc, pal, false);
             let ranims = r["anims"].as_object().unwrap();
-            assert_eq!(ranims.len(), d.anims.len(), "{id}: anim count");
+            // the engine adds shared taunt / power-up / defeat animations (195..=200) that the TypeScript reference does not know
+            assert_eq!(ranims.len(), d.anims.keys().filter(|k| !(195..=200).contains(*k)).count(), "{id}: anim count");
             for (no, frames) in ranims {
                 let a = d.anims.get(&no.parse::<i32>().unwrap()).unwrap_or_else(|| panic!("{id}: anim {no} missing"));
                 let frames = frames.as_array().unwrap();

@@ -1,11 +1,11 @@
 //! Character & stage registry: built-in UMF fighters (embedded JSON) + MUGEN content (chars/ and stages/ folders, imports).
 use crate::stages::{self, Stage};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::sync::Arc;
 use ume_engine::chardef::CharDef;
 use ume_engine::loader::load_mugen_char;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_engine::native::{compile_native, compile_native_preview, NativeChar};
 use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::stage::load_stage;
 use ume_formats::vfs::{find_char_defs, find_stage_defs, text, Vfs};
@@ -30,22 +30,46 @@ pub enum Src { Native(Box<NativeChar>), Mugen { vfs: Arc<Vfs>, def: String } }
 pub struct CharEntry {
     pub id: String, pub name: String, pub series: String, pub author: String, pub color: [u8; 3], pub description: String, pub mugen: bool,
     pub src: Src,
-    cache: RefCell<HashMap<i32, Result<Arc<CharDef>, String>>>,
+    cache: RefCell<HashMap<i32, Arc<CharDef>>>,
+    /// idle/win only (native fighters): ~10x cheaper than a full compile, used by the select grid and VS screen
+    preview: RefCell<HashMap<i32, Arc<CharDef>>>,
+    last_use: Cell<u64>,
+    pub broken: Cell<bool>,
+    /// failed loads are remembered (no retry storm every frame)
+    errs: RefCell<HashMap<i32, String>>,
 }
 impl CharEntry {
     pub fn load(&self, pal: i32) -> Result<Arc<CharDef>, String> {
-        if let Some(res) = self.cache.borrow().get(&pal) { return res.clone(); }
-        let res = match &self.src {
-            Src::Native(nc) => Ok(Arc::new(compile_native(nc, pal, true))),
-            Src::Mugen { vfs, def } => load_mugen_char(vfs, def, pal, true).map(|mut d| {
-                d.display_name = self.name.clone();
-                Arc::new(d)
-            }),
-        };
-        self.cache.borrow_mut().insert(pal, res.clone());
-        res
+        if let Some(d) = self.cache.borrow().get(&pal) { return Ok(d.clone()); }
+        if let Some(e) = self.errs.borrow().get(&pal) { return Err(e.clone()); }
+        let d = Arc::new(match &self.src {
+            Src::Native(nc) => compile_native(nc, pal, true),
+            Src::Mugen { vfs, def } => match load_mugen_char(vfs, def, pal, true) {
+                Ok(mut d) => { d.display_name = self.name.clone(); d }
+                Err(e) => { self.broken.set(true); self.errs.borrow_mut().insert(pal, e.clone()); return Err(e); }
+            },
+        });
+        self.cache.borrow_mut().insert(pal, d.clone());
+        self.preview.borrow_mut().remove(&pal);
+        self.touch();
+        Ok(d)
     }
-    pub fn unload(&self) { self.cache.borrow_mut().clear(); }
+    /// Cheap definition for menus: full if already loaded, else preview (natives) or a full load (MUGEN).
+    pub fn load_preview(&self, pal: i32) -> Result<Arc<CharDef>, String> {
+        if let Some(d) = self.peek(pal) { self.touch(); return Ok(d); }
+        match &self.src {
+            Src::Native(nc) => { let d = Arc::new(compile_native_preview(nc, pal)); self.preview.borrow_mut().insert(pal, d.clone()); self.touch(); Ok(d) }
+            Src::Mugen { .. } => self.load(pal),
+        }
+    }
+    /// Already-loaded definition (full or preview), never loads.
+    pub fn peek(&self, pal: i32) -> Option<Arc<CharDef>> {
+        if let Some(d) = self.cache.borrow().get(&pal) { return Some(d.clone()); }
+        self.preview.borrow().get(&pal).cloned()
+    }
+    pub fn is_loaded(&self) -> bool { !self.cache.borrow().is_empty() || !self.preview.borrow().is_empty() }
+    fn touch(&self) { thread_local! { static CLOCK: Cell<u64> = const { Cell::new(0) }; } CLOCK.with(|c| { c.set(c.get() + 1); self.last_use.set(c.get()); }); }
+    pub fn unload(&self) { self.cache.borrow_mut().clear(); self.preview.borrow_mut().clear(); }
 }
 
 pub enum StageSrc { Builtin(usize), Mugen { vfs: Arc<Vfs>, def: String } }
@@ -62,7 +86,7 @@ impl Registry {
             match serde_json::from_str::<NativeChar>(json) {
                 Ok(nc) => chars.push(CharEntry {
                     id: format!("umf:{}", nc.id), name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color),
-                    description: nc.description.clone().unwrap_or_default(), mugen: false, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()),
+                    description: nc.description.clone().unwrap_or_default(), mugen: false, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()),
                 }),
                 Err(e) => eprintln!("bad builtin char: {e}"),
             }
@@ -83,7 +107,7 @@ impl Registry {
         let id = format!("umf:{}", nc.id);
         self.chars.retain(|c| c.id != id);
         let name = nc.name.clone();
-        self.chars.push(CharEntry { id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()) });
+        self.chars.push(CharEntry { id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) });
         Ok(name)
     }
     /// Like add_vfs but skips the full validation decode (fast startup for trusted bundled content).
@@ -102,7 +126,7 @@ impl Registry {
             let author = info.and_then(|s| s.get("author")).map(unquote).unwrap_or_default();
             let id = format!("mugen:{tag}:{def}");
             if self.chars.iter().any(|c| c.id == id) { continue; }
-            let e = CharEntry { id, name: name.clone(), series: "M.U.G.E.N".into(), author, color: [90, 110, 150], description: "Personagem M.U.G.E.N importado".into(), mugen: true, src: Src::Mugen { vfs: vfs.clone(), def: def.clone() }, cache: RefCell::new(HashMap::new()) };
+            let e = CharEntry { id, name: name.clone(), series: "M.U.G.E.N".into(), author, color: [90, 110, 150], description: "Personagem M.U.G.E.N importado".into(), mugen: true, src: Src::Mugen { vfs: vfs.clone(), def: def.clone() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) };
             if !validate { self.chars.push(e); cs.push(name); continue; }
             match e.load(1) { Ok(_) => { e.unload(); self.chars.push(e); cs.push(name); } Err(x) => errs.push(format!("{def}: {x}")) }
         }
@@ -123,6 +147,25 @@ impl Registry {
             }
         }
         (cs, ss, errs)
+    }
+    /// Keep memory bounded with hundreds of fighters: drop the least-recently-used definitions beyond the caps (never `keep`).
+    pub fn trim_cache(&self, keep: &[usize]) {
+        const CAP_MUGEN: usize = 6; const CAP_NATIVE: usize = 40;
+        for (mugen, cap) in [(true, CAP_MUGEN), (false, CAP_NATIVE)] {
+            let total = self.chars.iter().filter(|c| c.mugen == mugen && c.is_loaded()).count();
+            if total <= cap { continue; }
+            let mut cand: Vec<(u64, usize)> = self.chars.iter().enumerate().filter(|(i, c)| c.mugen == mugen && c.is_loaded() && !keep.contains(i)).map(|(i, c)| (c.last_use.get(), i)).collect();
+            cand.sort();
+            for (_, i) in cand.into_iter().take(total - cap) { self.chars[i].unload(); }
+        }
+    }
+    /// Free every cached definition (e.g. when the art quality changes → sprites must be re-rasterized).
+    pub fn unload_all(&self) { for c in &self.chars { c.unload(); } }
+    /// Imported fighters sorted by name (stable, natives keep their curated order).
+    pub fn sort_mugen(&mut self) {
+        let n = self.chars.iter().take_while(|c| !c.mugen).count();
+        self.chars[n..].sort_by_key(|c| c.name.to_lowercase());
+        self.stages.sort_by_key(|s| (s.mugen, if s.mugen { s.name.to_lowercase() } else { String::new() }));
     }
     pub fn build_stage(&self, i: usize) -> Stage {
         match &self.stages[i].src {

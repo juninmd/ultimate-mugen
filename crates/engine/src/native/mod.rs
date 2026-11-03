@@ -2,5 +2,5 @@
 pub mod types;
 pub mod compile;
 pub mod rig;
-pub use compile::{compile_native, STANDARD_ANIMS};
+pub use compile::{compile_native, compile_native_preview, compile_native_with, STANDARD_ANIMS};
 pub use types::*;

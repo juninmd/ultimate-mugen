@@ -7,6 +7,7 @@ mod hud;
 mod registry;
 mod render;
 mod session;
+mod settings;
 mod shots;
 mod stages;
 mod ui;
@@ -14,7 +15,16 @@ mod ui;
 use macroquad::prelude::*;
 
 fn conf() -> Conf {
-    Conf { window_title: "Ultimate MUGEN".into(), window_width: 1280, window_height: 720, high_dpi: true, sample_count: 4, window_resizable: true, ..Default::default() }
+    // window size: saved setting, overridable with `--res 3840x2160`, `--4k`, `--fullscreen`
+    let args: Vec<String> = std::env::args().collect();
+    let st = settings::Settings::load();
+    let (mut w, mut h, _) = settings::RESOLUTIONS[st.res.min(settings::RESOLUTIONS.len() - 1)];
+    if let Some(r) = args.iter().position(|a| a == "--res").and_then(|i| args.get(i + 1)) {
+        if let Some((a, b)) = r.split_once(['x', 'X']) { if let (Ok(a), Ok(b)) = (a.parse(), b.parse()) { (w, h) = (a, b); } }
+    }
+    if args.iter().any(|a| a == "--4k") { (w, h) = (3840, 2160); }
+    let fullscreen = st.fullscreen || args.iter().any(|a| a == "--fullscreen");
+    Conf { window_title: "Ultimate MUGEN".into(), window_width: w as i32, window_height: h as i32, fullscreen, high_dpi: true, sample_count: 4, window_resizable: true, ..Default::default() }
 }
 
 #[cfg(target_arch = "wasm32")]

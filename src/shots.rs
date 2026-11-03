@@ -60,7 +60,8 @@ pub async fn run(app: &mut App, dir: &str) {
     cap(app, Screen::Stages { cur: 2 });
     screen(app, dir, "04-stages", 5).await;
     app.sel = (find(app, "kaito"), find(app, "garan"), 0);
-    cap(app, Screen::Vs { t: 0.0 });
+    cap(app, Screen::Vs { t: 0.0, step: 0 });
+    screen(app, dir, "05a-vs-loading", 3).await;
     screen(app, dir, "05-vs", 70).await;
     app.screen = Screen::Fight;
     fight(app, dir, "06-fight-dojo", "kaito", "shion", "dojo", 240, "hit").await;
@@ -91,6 +92,8 @@ pub async fn run(app: &mut App, dir: &str) {
         if app.reg.stages.iter().any(|s| s.id.ends_with(st)) { fight(app, dir, n, "akio", "lian", st, 240, "hit").await; }
     }
     app.session = None;
+    cap(app, Screen::Video { cur: 2 }); screen(app, dir, "17-video", 5).await;
+    app.ui.begin(); app.ui.loading_screen(0.62, "Carregando lutador 2…"); get_screen_data().export_png(&format!("{dir}/18-loading.png")); println!("shot 18-loading"); next_frame().await;
     app.screen = Screen::Controls; screen(app, dir, "14-controls", 5).await;
     // phone landscape with touch controls
     request_new_screen_size(844.0, 390.0);

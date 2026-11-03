@@ -75,7 +75,7 @@ impl<'a> Host for Ctx<'a> {
         Some(Ctx { m, i })
     }
     fn cmpstr(&self, name: &str, neg: bool, values: &[String]) -> bool {
-        let v0 = values.first().map(|s| s.to_ascii_lowercase()).unwrap_or_default();
+        let v0 = values.first().map(|s| s.as_str()).unwrap_or("");
         let c0 = v0.chars().next().unwrap_or(' ').to_ascii_uppercase();
         let f = self.f();
         let r = match name {
@@ -85,9 +85,9 @@ impl<'a> Host for Ctx<'a> {
             "physics" => f.physics == c0,
             "p2statetype" => self.enemy().is_some_and(|e| e.state_type == c0),
             "p2movetype" => self.enemy().is_some_and(|e| e.move_type == c0),
-            "name" | "p1name" => f.def.name.to_ascii_lowercase() == v0,
-            "p2name" => self.enemy().is_some_and(|e| e.def.name.to_ascii_lowercase() == v0),
-            "authorname" => f.def.author.to_ascii_lowercase() == v0,
+            "name" | "p1name" => f.def.name.eq_ignore_ascii_case(v0),
+            "p2name" => self.enemy().is_some_and(|e| e.def.name.eq_ignore_ascii_case(v0)),
+            "authorname" => f.def.author.eq_ignore_ascii_case(v0),
             "hitdefattr" => {
                 let Some(hd) = f.hitdef.as_ref() else { return neg };
                 if f.move_type != 'A' { return neg; }

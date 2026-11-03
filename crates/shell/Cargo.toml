@@ -17,6 +17,9 @@ web-time = "1"
 pollster = "0.4"
 quad-snd = "0.2"
 
+[target.'cfg(target_os = "android")'.dependencies]
+winit = { version = "=0.30.13", features = ["android-native-activity"] }
+
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wgpu = { version = "30", features = ["webgl"] }
 wasm-bindgen = "0.2"

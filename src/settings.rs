@@ -19,7 +19,11 @@ pub fn auto_quality(h: f32) -> f32 { if h <= 900.0 { 3.0 } else if h <= 1300.0 {
 impl Settings {
     pub fn art_res(&self, physical_h: f32) -> f32 { let q = QUALITY[self.quality.min(QUALITY.len() - 1)].0; if q <= 0.0 { auto_quality(physical_h) } else { q } }
     #[cfg(not(target_arch = "wasm32"))]
-    fn path() -> std::path::PathBuf { std::env::current_exe().ok().and_then(|p| p.parent().map(|d| d.join("ultimate-mugen.cfg"))).unwrap_or_else(|| "ultimate-mugen.cfg".into()) }
+    fn path() -> std::path::PathBuf {
+        #[cfg(target_os = "android")]
+        if let Some(d) = ume_shell::ANDROID_APP.get().and_then(|a| a.internal_data_path()) { return d.join("ultimate-mugen.cfg"); }
+        std::env::current_exe().ok().and_then(|p| p.parent().map(|d| d.join("ultimate-mugen.cfg"))).unwrap_or_else(|| "ultimate-mugen.cfg".into())
+    }
     pub fn load() -> Self {
         let mut s = Settings::default();
         #[cfg(not(target_arch = "wasm32"))]

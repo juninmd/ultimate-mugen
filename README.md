@@ -23,7 +23,7 @@ A 2D fighting game engine **built from scratch in Rust**, inspired by M.U.G.E.N:
 ---
 
 ## Contents
-- [Why Rust + macroquad?](#why-rust--macroquad)
+- [Why Rust + wgpu?](#why-rust--wgpu)
 - [Highlights](#highlights)
 - [Prerequisites](#prerequisites)
 - [Build and Run](#build-and-run)
@@ -38,11 +38,11 @@ A 2D fighting game engine **built from scratch in Rust**, inspired by M.U.G.E.N:
 
 ---
 
-## Why Rust + macroquad?
+## Why Rust + wgpu?
 
 | Requirement | Technical choice |
 |---|---|
-| **Single codebase** (desktop, web, mobile) | **macroquad/miniquad** (OpenGL 2.1+, GLES2/3, WebGL 1/2; Windows, Linux, macOS, WASM, Android, iOS). |
+| **Single codebase** (desktop, web, mobile) | **wgpu + winit** (Vulkan, Metal, DX12, GLES, WebGL2; Windows, Linux, macOS, WASM, Android). iOS still uses macroquad. |
 | **Performance and determinism** (basis for rollback netcode and replays) | Rust with fixed-step simulation (60 ticks/s), deterministic PRNG and no garbage collector. |
 | **Advanced controls and rumble** | **gilrs** for cross-platform input + direct HID reports for DualShock 4/DualSense (USB and Bluetooth, CRC32 checksum) + HTML5 Gamepad API with `vibrationActuator` on the web. |
 | **Crisp procedural art** | **tiny-skia** (antialiased vector rasterization with gradients) for procedural skeletons at any scale. |
@@ -131,8 +131,8 @@ Open `http://localhost:8080`. On the web you can drag character `.zip` files in 
 
 - **Android**:
   ```bash
-  cargo install cargo-quad-apk
-  cargo quad-apk build --release
+  cargo install cargo-apk --version 0.9.6 --locked
+  cargo apk build --lib --release --target aarch64-linux-android
   ```
 - **iOS**: follow the [Macroquad iOS packaging guide](https://macroquad.rs/articles/ios/) with the `aarch64-apple-ios` target.
 

@@ -23,7 +23,7 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, det
 ---
 
 ## Índice
-- [Por que Rust + macroquad?](#por-que-rust--macroquad)
+- [Por que Rust + wgpu?](#por-que-rust--wgpu)
 - [Destaques](#destaques)
 - [Pré-requisitos](#pré-requisitos)
 - [Build e Execução](#build-e-execução)
@@ -46,11 +46,11 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, det
 
 ---
 
-## Por que Rust + macroquad?
+## Por que Rust + wgpu?
 
 | Requisito | Escolha Técnica |
 |---|---|
-| **Base de código unificada** (desktop, web e mobile) | **macroquad/miniquad** (OpenGL 2.1+, GLES2/3, WebGL 1/2; Windows, Linux, macOS, WASM, Android, iOS). |
+| **Base de código unificada** (desktop, web e mobile) | **wgpu + winit** (Vulkan, Metal, DX12, GLES, WebGL2; Windows, Linux, macOS, WASM, Android). O iOS ainda usa macroquad. |
 | **Desempenho e determinismo** (base para rollback netcode e replays) | Rust com simulação em passo fixo (60 ticks/s), PRNG determinístico e ausência de Garbage Collector. |
 | **Controles & Vibração avançada** | **gilrs** para entrada multiplataforma + relatórios HID diretos para DualShock 4/DualSense (USB e Bluetooth, com checksum CRC32) + HTML5 Gamepad API com `vibrationActuator` na web. |
 | **Arte procedural nítida** | **tiny-skia** (rasterização vetorial com antialiasing e gradientes) para esqueletos procedurais em qualquer escala. |
@@ -161,10 +161,10 @@ Acesse `http://localhost:8080` no navegador. Na versão web, você pode arrastar
 ### Build Mobile (Android & iOS)
 
 - **Android**:
-  Utilize a ferramenta `cargo quad-apk` com a imagem oficial do Android SDK/NDK:
+  Com o Android SDK e NDK instalados (`ANDROID_HOME` e `ANDROID_NDK_ROOT`):
   ```bash
-  cargo install cargo-quad-apk
-  cargo quad-apk build --release
+  cargo install cargo-apk --version 0.9.6 --locked
+  cargo apk build --lib --release --target aarch64-linux-android
   ```
 - **iOS**:
   Siga o [guia de empacotamento do Macroquad para iOS](https://macroquad.rs/articles/ios/) usando o target `aarch64-apple-ios`.

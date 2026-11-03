@@ -219,6 +219,10 @@ impl<G: Game> ApplicationHandler for Shell<G> {
         wasm_bindgen_futures::spawn_local(task);
     }
 
+    fn suspended(&mut self, _: &ActiveEventLoop) {
+        if cfg!(target_os = "android") { self.live = None; self.pending = None; }
+    }
+
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _: WindowId, event: WindowEvent) {
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
@@ -257,8 +261,25 @@ impl<G: Game> ApplicationHandler for Shell<G> {
     }
 }
 
+#[cfg(target_os = "android")]
+pub use winit::platform::android::activity::AndroidApp;
+
+#[cfg(target_os = "android")]
+pub static ANDROID_APP: std::sync::OnceLock<AndroidApp> = std::sync::OnceLock::new();
+
+fn event_loop() -> Result<EventLoop<()>, String> {
+    #[cfg(target_os = "android")]
+    {
+        use winit::platform::android::EventLoopBuilderExtAndroid;
+        let app = ANDROID_APP.get().ok_or("ANDROID_APP not set")?.clone();
+        return EventLoop::builder().with_android_app(app).build().map_err(|e| e.to_string());
+    }
+    #[allow(unreachable_code)]
+    EventLoop::new().map_err(|e| e.to_string())
+}
+
 pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
-    let event_loop = EventLoop::new().map_err(|e| e.to_string())?;
+    let event_loop = event_loop()?;
     event_loop.set_control_flow(ControlFlow::Poll);
     let now = Instant::now();
     let mut shell = Shell { cfg, game, live: None, pending: None, input: Input::default(), start: now, last: now, frames: 0, error: None };

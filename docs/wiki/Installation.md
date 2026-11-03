@@ -19,7 +19,7 @@ sudo apt-get install -y pkg-config libudev-dev libasound2-dev libx11-dev libxi-d
 | Desktop | `cargo run --release` |
 | Tests | `cargo test --workspace --release` |
 | Web (PWA) | `rustup target add wasm32-unknown-unknown`, then `./scripts/build-web.sh` and `python3 -m http.server -d web/dist 8080` |
-| Android | `cargo install cargo-quad-apk`, then `cargo quad-apk build --release` |
+| Android | `cargo install cargo-apk --version 0.9.6 --locked`, then `cargo apk build --lib --release --target aarch64-linux-android` |
 | iOS | `aarch64-apple-ios` target, guide at [macroquad.rs/articles/ios](https://macroquad.rs/articles/ios/) |
 
 ## Folder layout next to the executable

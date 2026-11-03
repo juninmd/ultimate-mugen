@@ -157,3 +157,20 @@ Fontes (resumos de busca): [Dustloop — Damage Scaling](https://www.dustloop.co
 O motor é 2D (sprites rasterizados); o ganho de geometria está nas camadas desenhadas por malha, via `src/poly.rs` (preenchimentos convexos com **cor por vértice**, chanfros, paralelogramos, hexágonos, círculos/anéis com facetas adaptativas à resolução):
 - **HUD v3**: moldura metálica inclinada com bisel dourado, barra de vida em gradiente vertical + brilho + borda quente + 10 marcas de segmento, rastro de dano, retratos em **moldura octogonal**, timer **hexagonal duplo**, pips de round em **losango**, medidor de super em **três células** com **hexágono** de nível, plaquetas de nome com a cor do lutador.
 - **VFX**: faíscas em **lâmina afilada** (cabeça clara, cauda que some), estilhaços **irregulares de 5 pontas** com luz/sombra, brasas em losango giratório, anéis de choque e brilhos com facetas que aumentam com a resolução.
+
+---
+
+# Rodada 10 — história, cinemáticas, despertar, chefe final
+
+## O que entrou
+- **Face-off no início do round 1** (`Match::intro_ticks`, estados `192`/`194`): os dois lutadores posam (anim. *intro* / *taunt*), câmera avança e **balões de fala** (HUD, polígonos) trocam `intro` (lado 1) e `taunt` (lado 2) — falas por personagem no JSON (`intro`, `taunt`, `form`), genéricas para MUGEN. Qualquer botão de ataque pula (a entrada é gravada → o replay pula igual).
+- **Cutscenes** (`src/app/cutscene.rs`): abertura do Arcade, confronto antes do chefe e final — letterbox, eclipse escarlate em polígonos, corvos, retratos vivos (quem fala fica iluminado), caixa de diálogo com *typewriter*; `Esc` pula.
+- **Transformação / despertar** (`T`, clique do analógico direito, `Kp0`; IA desperta com < 45 % de vida): custa 1 barra, uma vez por round, **×1,3 de dano, ×1,25 de defesa, regeneração de medidor, +10 % de vida**, pausa cinematográfica (pilar de luz, anéis, relâmpagos, brasas), chamas e halo na cor do lutador até o fim do round, etiqueta no HUD com o nome da forma. Estados `193`, anim. `powerUp`.
+- **Derrotas por round**: 4 sequências (`defeat1..4`, estados `5190..5193`) — tenta levantar e cai · senta derrotado · ajoelha · mão ao céu; varia a cada round, a mais longa (com câmera lenta no derrotado e cores apagadas) no KO que decide a luta.
+- **Zoom-out para equipes** (`Match::zoom`, `set_zoom_for_teams`): o campo cresce de 1× (1v1) até 1,8× (5v5) conforme a distância entre os lutadores; HUD continua no layout base. Fundos procedurais escalam junto.
+- **Supers maiores**: +30 % de dano (compilador), pausa de 55 ticks, 3 anéis, tempestade radial de faíscas, tremor contínuo, letterbox, nome do golpe, som em duas camadas.
+- **Chefe final** *Mikazuki Oboro* (mistura Itachi × Aizen — ilusionista calmo, olhos escarlates, corvos, chama negra, espelho partido, Susanoo espectral e hipnose absoluta): oculto na seleção, fecha a escada do Arcade, 1750 de vida, começa com 1 barra, nível de IA 8 e desperta (*Mangekyo Desperto*).
+
+## Testes
+`awakening_costs_a_bar_boosts_stats_and_ends_with_the_round`, `first_round_waits_for_the_face_off_and_a_button_skips_it`, `every_ko_plays_a_defeat_sequence_and_the_deciding_one_is_the_longest`, `big_teams_zoom_out_and_everyone_stays_inside_the_field`, `final_boss_is_complete_and_formidable`. Tour de capturas: `UME_TOUR=story ./target/release/ultimate-mugen --shots <dir>`.
+

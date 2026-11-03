@@ -39,7 +39,7 @@ impl<'a> Ctx<'a> {
         let f = self.f();
         let mut best = -1i64;
         for &(k, pid, t) in &f.proj_contacts {
-            if kind != 'c' && k != kind { continue; }
+            if (kind == 'c' && k == 'x') || (kind != 'c' && k != kind) { continue; }
             if id != 0 && pid != id { continue; }
             let dt = self.m.game_time - t;
             if best < 0 || dt < best { best = dt; }
@@ -53,6 +53,11 @@ fn cmp(x: f64, op: &str, y: f64) -> bool {
     match op { "=" => x == y, "!=" => x != y, "<" => x < y, "<=" => x <= y, ">" => x > y, ">=" => x >= y, _ => false }
 }
 fn b(x: bool) -> f64 { x as i32 as f64 }
+fn attr_kind_match(want: &str, have: &[String]) -> bool {
+    let w = want.as_bytes();
+    if w.len() != 2 { return false; }
+    have.iter().any(|k| { let k = k.as_bytes(); k.len() == 2 && (w[0] == b'A' || w[0] == k[0]) && w[1] == k[1] })
+}
 
 impl<'a> Host for Ctx<'a> {
     fn redirect(&self, kind: &str, arg: Option<f64>) -> Option<Self> {
@@ -85,9 +90,11 @@ impl<'a> Host for Ctx<'a> {
             "authorname" => f.def.author.eq_ignore_ascii_case(v0),
             "hitdefattr" => {
                 let Some(hd) = f.hitdef.as_ref() else { return neg };
-                if !(f.hitdef_active || f.move_type == 'A') { return neg; }
-                let ok_state = hd.attr_state.chars().any(|c| v0.chars().any(|x| x.eq_ignore_ascii_case(&c)));
-                ok_state && (values.len() == 1 || values[1..].iter().any(|v| hd.attr_kind.iter().any(|k| k.eq_ignore_ascii_case(v))))
+                if f.move_type != 'A' { return neg; }
+                let st = v0.to_ascii_uppercase();
+                if st.is_empty() || !st.chars().all(|c| "SCA".contains(c)) { return neg; }
+                let ok_state = hd.attr_state.chars().any(|c| st.contains(c));
+                ok_state && (values.len() == 1 || values[1..].iter().any(|v| attr_kind_match(&v.to_ascii_uppercase(), &hd.attr_kind)))
             }
             _ => false,
         };
@@ -201,6 +208,13 @@ impl<'a> Host for Ctx<'a> {
             "numpartner" => 0.0,
             "win" => b(m.winner_side == f.side as i32),
             "lose" => b(m.winner_side >= 0 && m.winner_side != f.side as i32),
+            "winko" => b(m.winner_side == f.side as i32 && m.won_by_ko),
+            "wintime" => b(m.winner_side == f.side as i32 && !m.won_by_ko),
+            "winperfect" => b(m.winner_side == f.side as i32 && m.roots().filter(|r| r.side == f.side).all(|r| r.life >= r.life_max)),
+            "loseko" => b(m.winner_side >= 0 && m.winner_side != f.side as i32 && m.won_by_ko),
+            "losetime" => b(m.winner_side >= 0 && m.winner_side != f.side as i32 && !m.won_by_ko),
+            "projcanceltime" => self.proj_time('x', a0() as i32) as f64,
+            "mugenversion" => f.def.mugen_version as f64,
             "drawgame" => b(m.winner_side == -2),
             "palno" => f.pal_no as f64,
             "majorversion" => 1.0,

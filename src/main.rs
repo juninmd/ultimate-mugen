@@ -3,6 +3,7 @@ mod app;
 mod audio;
 mod controls;
 mod gamepad;
+mod keybinds;
 mod hud;
 mod registry;
 mod render;

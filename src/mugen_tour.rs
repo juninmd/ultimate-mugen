@@ -41,4 +41,18 @@ pub async fn run(app: &mut App, dir: &str) {
         }
         grab(app, dir, &format!("m-fight-{shots:02}")).await;
     }
+    // pause screen (move list) and the keyboard rebinding screen
+    app.session.as_mut().unwrap().paused = true;
+    for _ in 0..4 { app.frame().await; next_frame().await; }
+    app.frame().await;
+    get_screen_data().export_png(&format!("{dir}/m-pause.png"));
+    println!("shot m-pause");
+    next_frame().await;
+    app.session.as_mut().unwrap().paused = false;
+    app.screen = Screen::Controls;
+    app.key_edit = Some(crate::app::KeyEdit { slot: 0, cur: 4, waiting: false, msg: String::new() });
+    for _ in 0..45 { app.frame().await; next_frame().await; }
+    app.frame().await;
+    get_screen_data().export_png(&format!("{dir}/m-keys.png"));
+    println!("shot m-keys");
 }

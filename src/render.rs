@@ -264,7 +264,7 @@ impl MatchRenderer {
         if hit { x += if f.hit_shake % 2 == 1 { 1.5 } else { -1.5 }; }
         let mut o = DrawOpts { angle: if f.angle_draw { f.angle } else { 0.0 }, tint: self.fx.ambient(f.pos.x, m.camera.x), ..Default::default() };
         if hit && f.hit_shake % 4 < 2 && !f.ghv.guarded && g.fx_gain > 0.2 { o.flash = 0.55; }
-        if let Some(p) = &f.palfx {
+        if let Some(p) = m.palfx_of(fi) {
             if p.add.iter().sum::<f32>() > 200.0 { o.flash = 0.6; } else if p.add[0] > p.add[2] + 40.0 { o.tint = Color::new(1.0, 0.7, 0.6, 1.0); } else if p.add[2] > p.add[0] + 40.0 { o.tint = Color::new(0.6, 0.8, 1.0, 1.0); }
         }
         if let Some((mode, a, _)) = &f.trans { if mode.starts_with("add") { o.add = true; o.alpha = a / 256.0; } else if mode.starts_with("sub") { o.sub = true; o.alpha = a / 256.0; } }

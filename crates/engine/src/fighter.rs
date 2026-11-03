@@ -129,6 +129,7 @@ pub struct Fighter {
     pub combo_count: i32, pub combo_damage: f32,
     /// 0 = base form, 1 = transformed (awakened) until the round ends
     pub form: u8, pub form_time: i32,
+    pub pause_move_time: i32, pub super_move_time: i32, pub preserve: bool, pub own_pal: bool, pub state_giver: Option<u32>,
 }
 
 impl Fighter {
@@ -149,7 +150,8 @@ impl Fighter {
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
             persist: HashMap::new(), air_jumps: 0, bind: None, palfx: None, trans: None, angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
             after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), cmd: CommandState::default(),
-            combo_count: 0, combo_damage: 0.0, form: 0, form_time: 0, def,
+            combo_count: 0, combo_damage: 0.0, form: 0, form_time: 0,
+            pause_move_time: 0, super_move_time: 0, preserve: false, own_pal: true, state_giver: None, def,
         }
     }
     pub fn c(&self, k: &str, d: f64) -> f32 { self.def.c(k, d) as f32 }

@@ -30,17 +30,20 @@ pub enum Src { Native(Box<NativeChar>), Mugen { vfs: Arc<Vfs>, def: String } }
 pub struct CharEntry {
     pub id: String, pub name: String, pub series: String, pub author: String, pub color: [u8; 3], pub description: String, pub mugen: bool,
     pub src: Src,
-    cache: RefCell<HashMap<i32, Arc<CharDef>>>,
+    cache: RefCell<HashMap<i32, Result<Arc<CharDef>, String>>>,
 }
 impl CharEntry {
     pub fn load(&self, pal: i32) -> Result<Arc<CharDef>, String> {
-        if let Some(d) = self.cache.borrow().get(&pal) { return Ok(d.clone()); }
-        let d = Arc::new(match &self.src {
-            Src::Native(nc) => compile_native(nc, pal, true),
-            Src::Mugen { vfs, def } => { let mut d = load_mugen_char(vfs, def, pal, true)?; d.display_name = self.name.clone(); d }
-        });
-        self.cache.borrow_mut().insert(pal, d.clone());
-        Ok(d)
+        if let Some(res) = self.cache.borrow().get(&pal) { return res.clone(); }
+        let res = match &self.src {
+            Src::Native(nc) => Ok(Arc::new(compile_native(nc, pal, true))),
+            Src::Mugen { vfs, def } => load_mugen_char(vfs, def, pal, true).map(|mut d| {
+                d.display_name = self.name.clone();
+                Arc::new(d)
+            }),
+        };
+        self.cache.borrow_mut().insert(pal, res.clone());
+        res
     }
     pub fn unload(&self) { self.cache.borrow_mut().clear(); }
 }
@@ -137,7 +140,7 @@ impl Registry {
         for d in dirs {
             if !d.is_dir() { continue; }
             let mut vfs = Vfs::new();
-            if ume_formats::vfs::add_dir(&mut vfs, &d, "").is_ok() { let (c, s, _) = self.add_vfs(vfs, &d.to_string_lossy()); n += c.len() + s.len(); }
+            if ume_formats::vfs::add_dir(&mut vfs, &d, "").is_ok() { let (c, s, _) = self.add_vfs_lazy(vfs, &d.to_string_lossy()); n += c.len() + s.len(); }
             break;
         }
         n

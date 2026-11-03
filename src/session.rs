@@ -39,6 +39,8 @@ pub struct Session {
     /// inputs of every root slot for every simulated tick (the data a replay is rebuilt from)
     pub rec: Vec<Vec<u32>>,
     pub is_replay: bool,
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    pub net: Option<crate::netlink::NetLink>,
 }
 
 thread_local! { static FX: Arc<CharDef> = build_fx(true); }
@@ -76,7 +78,7 @@ impl Session {
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false }
+        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
     }
 
     fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {
@@ -91,6 +93,8 @@ impl Session {
     }
 
     pub fn step(&mut self, c: &mut Controls, audio: &mut Audio) {
+        #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+        if self.net.is_some() { self.net_step(c, audio); return; }
         let roots = self.m.root_indices();
         if self.m.team_simul { if let Some(cur) = self.pilots.iter().position(|p| matches!(p, Pilot::Human(0))) { if roots.get(cur).is_some_and(|&fi| !self.m.fighters[fi].alive) { self.switch_control(); } } }
         let mut bits = vec![0u32; roots.len()];
@@ -121,6 +125,30 @@ impl Session {
         self.vfx.pre_tick(&self.m);
         self.m.tick(&bits);
         self.vfx.tick(&self.m);
+        self.drain_events(c, audio);
+    }
+
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    fn net_step(&mut self, c: &mut Controls, audio: &mut Audio) {
+        let Some(mut link) = self.net.take() else { return };
+        let bits = c.player_bits(0, false);
+        let (vfx, rec) = (&mut self.vfx, &mut self.rec);
+        let advanced = link.step(&mut self.m, bits, |m, inputs, newest| {
+            if newest {
+                rec.push(inputs.to_vec());
+                vfx.pre_tick(m);
+                m.tick(inputs);
+                vfx.tick(m);
+            } else {
+                m.tick(inputs);
+            }
+        });
+        if link.lost.is_some() && self.over.is_none() { self.over = Some(link.local); }
+        self.net = Some(link);
+        if advanced { self.drain_events(c, audio); }
+    }
+
+    fn drain_events(&mut self, c: &mut Controls, audio: &mut Audio) {
         for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
         for ev in std::mem::take(&mut self.m.events) {
             self.vfx.event(&ev, &self.m);

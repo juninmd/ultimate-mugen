@@ -25,6 +25,8 @@ symphonia = { version = "=0.5.5", default-features = false, features = ["ogg", "
 gilrs = "0.11"
 # pinned: newer 3.x releases are younger than the 2-week supply-chain maturity window
 ureq = "=3.4.2"
+ume-netplay = { path = "crates/netplay" }
+ggrs = "=0.13.0"
 hidapi = { version = "2", default-features = false, features = ["linux-static-hidraw"] }
 
 [profile.dev]

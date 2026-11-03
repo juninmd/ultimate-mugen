@@ -1186,6 +1186,7 @@ dependencies = [
 name = "ultimate-mugen"
 version = "0.2.0"
 dependencies = [
+ "ggrs",
  "gilrs",
  "hidapi",
  "macroquad",
@@ -1194,6 +1195,7 @@ dependencies = [
  "tiny-skia",
  "ume-engine",
  "ume-formats",
+ "ume-netplay",
  "ureq",
 ]
 

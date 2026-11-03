@@ -23,10 +23,20 @@ pub struct HitDefData {
     pub fall: bool, pub air_fall: bool, pub fall_xvel: Option<f32>, pub fall_yvel: f32, pub fall_recover: bool, pub fall_recover_time: i32,
     pub fall_damage: f32, pub fall_kill: bool, pub kill: bool, pub guard_kill: bool,
     pub get_power: f32, pub give_power: f32, pub guard_get_power: f32, pub guard_give_power: f32,
-    pub id: i32, pub chain_id: i32, pub envshake_time: i32, pub num_hits: i32,
+    pub id: i32, pub chain_id: Option<i32>, pub envshake_time: i32, pub num_hits: i32,
     /** juggle points this move costs on an airborne, falling target (its Statedef `juggle`) and the attacker's `data.airjuggle` budget */
     pub juggle: i32, pub airjuggle: i32,
+    pub no_chain_id: [Option<i32>; 2], pub hit_once: bool, pub snap: Option<V2>, pub min_dist: [Option<f32>; 2], pub max_dist: [Option<f32>; 2], pub affect_team: char,
+    pub down_vel: [f32; 2], pub down_hit_time: i32, pub down_bounce: bool, pub fall_env_shake: Shake, pub env_shake: Shake,
+    pub ground_corner_push: f32, pub air_corner_push: f32, pub guard_corner_push: f32, pub air_guard_corner_push: f32,
+    pub target_palfx: Option<PalFx>,
 }
+
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Shake { pub time: i32, pub freq: f32, pub ampl: f32, pub phase: f32 }
+
+#[derive(Clone, Debug)]
+pub struct HitOverride { pub attr: String, pub state_no: i32, pub time: i32, pub force_air: bool }
 
 #[derive(Clone, Debug)]
 pub struct GetHitVars {
@@ -34,12 +44,14 @@ pub struct GetHitVars {
     pub hittime: i32, pub slidetime: i32, pub ctrltime: i32, pub xvel: f32, pub yvel: f32, pub yaccel: f32, pub chainid: i32,
     pub guarded: bool, pub fall: bool, pub fall_damage: f32, pub fall_xvel: f32, pub fall_yvel: f32, pub fall_recover: bool,
     pub fall_recover_time: i32, pub fall_kill: bool, pub kill: bool, pub attacker_id: u32, pub attacker_no: usize,
+    pub hit_id: i32, pub fall_env_shake: Shake, pub down_bounce: bool,
 }
 impl Default for GetHitVars {
     fn default() -> Self {
         GetHitVars { kind: 0, animtype: 0, airtype: 0, groundtype: 0, damage: 0.0, hitcount: 0, guardcount: 0, hittime: 0, slidetime: 0, ctrltime: 0,
             xvel: 0.0, yvel: 0.0, yaccel: 0.44, chainid: -1, guarded: false, fall: false, fall_damage: 0.0, fall_xvel: 0.0, fall_yvel: -4.5,
-            fall_recover: true, fall_recover_time: 4, fall_kill: true, kill: true, attacker_id: 0, attacker_no: 0 }
+            fall_recover: true, fall_recover_time: 4, fall_kill: true, kill: true, attacker_id: 0, attacker_no: 0,
+            hit_id: -1, fall_env_shake: Shake::default(), down_bounce: false }
     }
 }
 
@@ -129,6 +141,8 @@ pub struct Fighter {
     pub combo_count: i32, pub combo_damage: f32,
     /// 0 = base form, 1 = transformed (awakened) until the round ends
     pub form: u8, pub form_time: i32,
+    pub reversal: Option<(String, HitDefData)>, pub hit_overrides: [Option<HitOverride>; 8],
+    pub ikemen: crate::ikemen::IkemenState,
 }
 
 impl Fighter {
@@ -149,7 +163,7 @@ impl Fighter {
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
             persist: HashMap::new(), air_jumps: 0, bind: None, palfx: None, trans: None, angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
             after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), cmd: CommandState::default(),
-            combo_count: 0, combo_damage: 0.0, form: 0, form_time: 0, def,
+            combo_count: 0, combo_damage: 0.0, form: 0, form_time: 0, reversal: None, hit_overrides: Default::default(), ikemen: crate::ikemen::IkemenState::new(&def), def,
         }
     }
     pub fn c(&self, k: &str, d: f64) -> f32 { self.def.c(k, d) as f32 }

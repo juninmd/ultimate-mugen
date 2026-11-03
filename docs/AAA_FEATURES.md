@@ -74,3 +74,13 @@ Motor: `Match::team_simul`, jogadores adicionados intercalados (P1, P2, P3, P4) 
 
 ## Ideias futuras
 Assistências estilo Kameo (botão de chamar parceiro com recarga), troca de personagem (tag) no meio do combo, seleção da ordem da equipe por arrastar, modo espectador de torneio.
+
+---
+
+# Rodada 4 — equipes de até 5v5 e HUD v2
+
+- **Equipe · Paralelo** agora abre em **5v5** (2 a 5 com Q/E na seleção): 10 lutadores na tela, formação compactada para todos começarem dentro do cenário, câmera e zoom seguem todos os vivos, VFX por lutador (poeira, counter, aura de super de qualquer um). Simulação de 600 ticks com 10 lutadores em ~40 ms.
+- **Troca de controle**: `TAB` passa o controle ao próximo companheiro vivo; se o seu cair, o controle passa sozinho. A IA que dirigia o lutador é reiniciada na troca.
+- **HUD v2**: barra principal acompanha o lutador que você controla (lado inimigo: o da linha de frente); *tiles* de retrato com barra de vida para cada companheiro (o seu em dourado, caídos escurecidos com ✕); contadores vivos/total ao lado do timer; dica `TAB · TROCAR DE LUTADOR`.
+- **Na arena** (mais de 2 lutadores): barra de vida flutuante sobre cada lutador e marcador ▼ saltitante sobre o seu.
+- Fontes com filtro linear (texto escalado deixou de ficar serrilhado) e *slam* de banner mais suave.

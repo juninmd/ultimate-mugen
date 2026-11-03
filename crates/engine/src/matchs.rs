@@ -1,6 +1,6 @@
 //! Match simulation: round flow, state machine driver, collision/hit system, entities, camera.
 use crate::chardef::{Animation, Box4, CharDef, Controller, Source};
-use crate::expr::{eval, Expr};
+use crate::expr::{eval, truthy, Expr};
 use crate::fighter::*;
 use crate::triggers::Ctx;
 use std::cell::RefCell;
@@ -100,6 +100,7 @@ pub struct Match {
     pub corner_pushes: u32,
     /// extra ticks the first round waits before "FIGHT!" so the fighters can face off / trade lines (0 = none)
     pub intro_ticks: i32,
+    pub won_by_ko: bool,
     pub timer: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
@@ -117,7 +118,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, flash: None, slow_mo: 0,
             events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]),
         }
@@ -148,7 +149,7 @@ impl Match {
     // ---------------------------------------------------------------- evaluation helpers
     pub fn ev(&self, i: usize, e: &Expr) -> f64 { eval(&e.node, &Ctx { m: self, i }) }
     pub fn num(&self, i: usize, sc: &Controller, k: &str, d: f64, idx: usize) -> f64 {
-        match sc.param(k).and_then(|p| p.exprs.get(idx)) { Some(e) => self.ev(i, e), None => d }
+        match sc.param(k).and_then(|p| p.exprs.get(idx)).map(|e| self.ev(i, e)) { Some(v) if !v.is_nan() => v, _ => d }
     }
     fn apply_assigns(&mut self) {
         let list: Vec<_> = self.assigns.borrow_mut().drain(..).collect();
@@ -213,9 +214,9 @@ impl Match {
     }
 
     fn triggered(&self, i: usize, sc: &Controller) -> bool {
-        for e in &sc.trigger_all { if self.ev(i, e) == 0.0 { return false; } }
+        for e in &sc.trigger_all { if !truthy(self.ev(i, e)) { return false; } }
         if sc.triggers.is_empty() { return false; }
-        sc.triggers.iter().any(|g| g.iter().all(|e| self.ev(i, e) != 0.0))
+        sc.triggers.iter().any(|g| g.iter().all(|e| truthy(self.ev(i, e))))
     }
 
     /// Run a state's controllers. Returns true if the state changed.
@@ -382,7 +383,7 @@ impl Match {
         if self.zoffset0 != 0.0 { self.stage.zoffset = self.zoffset0 + (self.view_h - BASE_H) * self.ground_k; }
     }
     pub fn start_round(&mut self) {
-        self.round_state = 0; self.round_time = 0; self.timer = 99 * 60; self.winner_side = -1; self.slow_mo = 0;
+        self.round_state = 0; self.round_time = 0; self.timer = 99 * 60; self.winner_side = -1; self.slow_mo = 0; self.won_by_ko = false;
         self.explods.clear(); self.projectiles.clear(); self.pause = None;
         self.fighters.retain(|f| !f.is_helper);
         self.camera = V2::default();
@@ -457,6 +458,7 @@ impl Match {
                 }
                 if !dead.is_empty() || self.timer <= 0 {
                     self.round_state = 3; self.round_time = 0;
+                    self.won_by_ko = !dead.is_empty();
                     if !dead.is_empty() {
                         for &i in &dead { self.fighters[i].alive = false; }
                         let sides_dead = [dead.iter().any(|&i| self.fighters[i].side == 0), dead.iter().any(|&i| self.fighters[i].side == 1)];
@@ -1136,8 +1138,13 @@ impl Match {
             let bb: Vec<Box4> = Self::proj_boxes(pb, 1).into_iter().chain(Self::proj_boxes(pb, 2)).collect();
             if Self::overlap(&ba, &bb).is_some() {
                 let (pra, prb) = (pa.priority, pb.priority);
-                if pra <= prb { let p = &mut self.projectiles[a]; let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); }
-                if prb <= pra { let p = &mut self.projectiles[b]; let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); }
+                let gt = self.game_time;
+                for (k, lost) in [(a, pra <= prb), (b, prb <= pra)] {
+                    if !lost { continue; }
+                    let p = &mut self.projectiles[k]; let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an);
+                    let (owner, pid) = (p.owner, p.id);
+                    if let Some(o) = self.idx(owner) { self.fighters[o].proj_contacts.push(('x', pid, gt)); }
+                }
             }
         } }
         for pi in 0..self.projectiles.len() {

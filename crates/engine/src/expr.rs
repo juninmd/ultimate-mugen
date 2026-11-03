@@ -264,6 +264,7 @@ pub trait Host {
     fn assign(&self, name: &str, idx: i32, v: f64) -> f64;
 }
 
+pub fn truthy(v: f64) -> bool { v != 0.0 && !v.is_nan() }
 #[inline]
 fn trunc(x: f64) -> f64 { x.trunc() }
 
@@ -272,14 +273,16 @@ pub fn eval<H: Host>(n: &Node, h: &H) -> f64 {
         Node::Num(v, _) => *v,
         Node::Un(op, a) => {
             let v = eval(a, h);
+            if v.is_nan() { return v; }
             match *op { "!" => (v == 0.0) as i32 as f64, "~" => !(trunc(v) as i32) as f64, _ => -v }
         }
         Node::Bin(op, a, b) => {
             let op = *op;
-            if op == "&&" { return (eval(a, h) != 0.0 && eval(b, h) != 0.0) as i32 as f64; }
-            if op == "||" { return (eval(a, h) != 0.0 || eval(b, h) != 0.0) as i32 as f64; }
+            if op == "&&" { return (truthy(eval(a, h)) && truthy(eval(b, h))) as i32 as f64; }
+            if op == "||" { return (truthy(eval(a, h)) || truthy(eval(b, h))) as i32 as f64; }
             let x = eval(a, h);
             let y = eval(b, h);
+            if x.is_nan() || y.is_nan() { return f64::NAN; }
             let fl = is_float(a) || is_float(b);
             let bo = |c: bool| c as i32 as f64;
             match op {
@@ -305,12 +308,13 @@ pub fn eval<H: Host>(n: &Node, h: &H) -> f64 {
         }
         Node::Interval { a, neg, lo, hi, lo_inc, hi_inc } => {
             let v = eval(a, h); let l = eval(lo, h); let u = eval(hi, h);
+            if v.is_nan() || l.is_nan() || u.is_nan() { return f64::NAN; }
             let inside = (if *lo_inc { v >= l } else { v > l }) && (if *hi_inc { v <= u } else { v < u });
             (inside != *neg) as i32 as f64
         }
         Node::Redir { kind, arg, e } => {
             let a = arg.as_ref().map(|x| eval(x, h));
-            match h.redirect(kind, a) { Some(t) => eval(e, &t), None => 0.0 }
+            match h.redirect(kind, a) { Some(t) => eval(e, &t), None => f64::NAN }
         }
         Node::CmpStr { name, neg, values } => h.cmpstr(name, *neg, values) as i32 as f64,
         Node::Special { name, op, a, op2, b } => {
@@ -346,5 +350,5 @@ mod tests {
     #[test] fn ints() { assert_eq!(ev("7/2"), 3.0); assert_eq!(ev("7.0/2"), 3.5); assert_eq!(ev("-7/2"), -3.0); assert_eq!(ev("2**3"), 8.0); assert_eq!(ev("7%3"), 1.0); }
     #[test] fn logic() { assert_eq!(ev("1 + 2 * 3"), 7.0); assert_eq!(ev("time = 7 && var(1) = 5"), 1.0); assert_eq!(ev("!time || 0"), 0.0); }
     #[test] fn intervals() { assert_eq!(ev("time = [5, 7]"), 1.0); assert_eq!(ev("time = [5, 7)"), 0.0); assert_eq!(ev("time != (7, 9]"), 1.0); }
-    #[test] fn misc() { assert_eq!(ev("vel y < 0"), 1.0); assert_eq!(ev("ifelse(time > 3, 10, 20)"), 10.0); assert_eq!(ev("statetype = S"), 1.0); assert_eq!(ev("statetype != A"), 1.0); assert_eq!(ev("p2, time"), 0.0); }
+    #[test] fn misc() { assert_eq!(ev("vel y < 0"), 1.0); assert_eq!(ev("ifelse(time > 3, 10, 20)"), 10.0); assert_eq!(ev("statetype = S"), 1.0); assert_eq!(ev("statetype != A"), 1.0); assert!(ev("p2, time").is_nan()); assert!(!truthy(ev("p2, time = 0"))); assert!(!truthy(ev("p2, time != [1, 5]"))); assert!(!truthy(ev("!(p2, time)"))); assert_eq!(ev("(p2, time) || 1"), 1.0); }
 }

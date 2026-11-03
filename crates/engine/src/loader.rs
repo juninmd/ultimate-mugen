@@ -82,6 +82,7 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     let mut d = CharDef::empty(&format!("mugen:{def_path}"));
     d.name = name; d.display_name = display; d.author = author; d.source = Source::Mugen;
     d.local_w = local_w; d.local_h = lc[1];
+    d.mugen_version = crate::chardef::parse_mugen_version(info.and_then(|s| s.get("mugenversion")));
     d.constants = constants; d.portrait = sprites.get(&(9000, 0)).cloned(); d.sprites = sprites; d.anims = anims;
     d.commands = commands; d.states = states; d.sounds = sounds; d.ai_commands = ai_commands; d.series = "M.U.G.E.N".into();
     let _ = Vec::<MoveInfo>::new;

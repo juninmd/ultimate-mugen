@@ -34,10 +34,11 @@ pub fn super_pause(m: &mut Match, i: usize, sc: &Controller) {
     let (px, py) = (n(m, "pos", 0.0, 0) as f32 * l, n(m, "pos", 0.0, 1) as f32 * l);
     if no >= 0 { m.spawn_super_fx(i, px, py, if own { no } else { -1 }); }
     let snd = sc.raw("sound").map(|s| s.to_string());
+    let pan = crate::sctrl::sound_pan(m, i, 0.0, false);
     let f = &m.fighters[i];
     let ev = match parse_sound_ref(snd.as_deref()) {
-        Some((g, idx, own)) if g >= 0 => Event::Sound { def: Some(f.def.clone()), group: g, index: idx, own, volume: 1.0, channel: -1, owner: f.id, builtin: None },
-        _ => Event::Sound { def: None, group: -1, index: 0, own: false, volume: 1.0, channel: -1, owner: f.id, builtin: Some("super") },
+        Some((g, idx, own)) if g >= 0 => Event::Sound { def: Some(f.def.clone()), group: g, index: idx, own, volume: 1.0, channel: -1, owner: f.id, builtin: None, pan, looping: false, freq_mul: 1.0 },
+        _ => Event::Sound { def: None, group: -1, index: 0, own: false, volume: 1.0, channel: -1, owner: f.id, builtin: Some("super"), pan, looping: false, freq_mul: 1.0 },
     };
     let (side, fighter) = (f.side, f.root);
     m.events.push(ev);

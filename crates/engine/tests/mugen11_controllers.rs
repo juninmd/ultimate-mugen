@@ -152,3 +152,25 @@ fn clipboard_formatting() {
     assert_eq!(format_clipboard("%d%% of %f\\n", &[50.7, 2.0]), "50% of 2.000000\n");
     assert_eq!(format_clipboard("no args %d", &[]), "no args ");
 }
+
+#[test]
+fn playsnd_carries_pan_loop_and_freqmul() {
+    let cns = "
+[Statedef 340]
+type = S
+physics = S
+
+[State 340, snd]
+type = PlaySnd
+trigger1 = Time = 0
+value = 5, 0
+abspan = 0
+loop = 1
+freqmul = 1.5
+";
+    let mut m = duel(mugen_char("p1", cns), mugen_char("p2", ""));
+    m.events.clear();
+    enter(&mut m, 0, 340);
+    m.tick(&[0, 0]);
+    assert!(m.events.iter().any(|e| matches!(e, Event::Sound { looping: true, freq_mul, pan, .. } if *freq_mul == 1.5 && pan.abs() < 1e-3)));
+}

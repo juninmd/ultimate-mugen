@@ -126,8 +126,12 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 let own = !r.trim().starts_with(['f', 'F']);
                 let vol = n(m, "volumescale", 100.0) as f32 / 100.0;
                 let ch = n(m, "channel", -1.0) as i32;
+                let (pv, abs) = if sc.has("abspan", 0) { (n(m, "abspan", 0.0), true) } else { (n(m, "pan", 0.0), false) };
+                let pan = crate::sctrl::sound_pan(m, i, pv as f32, abs);
+                let looping = n(m, "loop", 0.0) != 0.0;
+                let freq_mul = n(m, "freqmul", 1.0) as f32;
                 let f = &m.fighters[i];
-                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None };
+                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul };
                 m.events.push(ev);
             }
         }

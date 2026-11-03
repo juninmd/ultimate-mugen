@@ -53,7 +53,7 @@ pub struct Projectile {
 /// Events for the presentation layer (audio, rumble, UI).
 #[derive(Clone)]
 pub enum Event {
-    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str> },
+    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str>, pan: f32, looping: bool, freq_mul: f32 },
     Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool, attacker: usize, defender: usize },
     /// `fighter` = id of the root fighter that fired it (teams can have many per side)
     Super { side: usize, fighter: u32 },
@@ -885,8 +885,9 @@ impl Match {
 
     // ---------------------------------------------------------------- effects
     fn sound(&mut self, i: usize, g: i32, n: i32, own: bool, builtin: Option<&'static str>) {
+        let pan = crate::sctrl::sound_pan(self, i, 0.0, false);
         let f = &self.fighters[i];
-        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin });
+        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0 });
     }
     pub fn do_shake(&mut self, t: i32, ampl: f32) { self.shake(t, 60.0, -ampl.abs(), 0.0); }
     pub fn shake(&mut self, t: i32, freq: f32, ampl: f32, phase: f32) {

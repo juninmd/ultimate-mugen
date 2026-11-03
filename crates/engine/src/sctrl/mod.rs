@@ -3,6 +3,7 @@ mod pause;
 mod sound;
 
 pub use debug::format_clipboard;
+pub use sound::sound_pan;
 use crate::chardef::Controller;
 use crate::matchs::{Event, Match};
 

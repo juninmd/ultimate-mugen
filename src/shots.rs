@@ -1,5 +1,5 @@
 //! Automated screenshot tour (`--shots <dir>`): renders real frames of every screen and fights.
-use crate::app::{App, Mode, Screen};
+use crate::app::{App, Mode, Screen, Team};
 use macroquad::prelude::*;
 
 async fn frames(app: &mut App, n: usize) { for _ in 0..n { app.frame().await; next_frame().await; } }
@@ -29,7 +29,7 @@ async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &st
     let s = session.as_mut().unwrap();
     for _ in 0..ticks { s.step_visual(c, audio); }
     match want {
-        "super" => {
+        "super" | "impact" => {
             for f in s.m.fighters.iter_mut() { f.power = 3000.0; }
             for _ in 0..600 { if s.m.fighters[0].ctrl && s.m.fighters[0].state_no == 0 { break; } s.step_visual(c, audio); }
             let d = s.m.fighters[0].def.clone();
@@ -38,6 +38,7 @@ async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &st
             for _ in 0..1500 { s.step_visual(c, audio); if s.m.pause.as_ref().is_some_and(|p| p.is_super && p.time < 24) { ok = true; break; } }
             if ok { for _ in 0..16 { s.step_visual(c, audio); } }
             println!("{name}: super caught = {ok}");
+            if want == "impact" { s.vfx.force_impact(); }
         }
         "hit" => { for _ in 0..1200 { s.step_visual(c, audio); if !s.m.explods.is_empty() && s.m.fighters.iter().any(|f| f.move_type == 'H' && f.hit_shake > 2 && !f.ghv.guarded) { break; } } }
         "proj" => { for _ in 0..1500 { s.step_visual(c, audio); if s.m.projectiles.iter().any(|p| !p.dying && p.time > 8) { break; } } }
@@ -52,6 +53,29 @@ async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &st
     snap(app, dir, name, |a| a.draw_session_only()).await;
 }
 
+/// Team battle shot: `simul` = 2v2 on the field together, otherwise sequence (3v3, second bout with carried life).
+async fn team_fight(app: &mut App, dir: &str, name: &str, simul: bool, stage_id: &str, ticks: usize) {
+    let (a_ids, b_ids) = (["kaito", "akio", "lian"], ["suzume", "bruno", "sylene"]);
+    let n = if simul { 2 } else { 3 };
+    let a: Vec<usize> = a_ids.iter().take(n).map(|i| find(app, i)).collect();
+    let b: Vec<usize> = b_ids.iter().take(n).map(|i| find(app, i)).collect();
+    let mut t = Team::new(a.clone(), b.clone(), simul);
+    let mut foe = 0;
+    if !simul { t.ko[1][0] = true; t.idx[1] = 1; t.life = [0.62, 1.0]; foe = 1; }
+    app.mode = Mode::Watch;
+    app.sel = (a[0], b[foe], stage(app, stage_id));
+    app.team = Some(t);
+    app.start_fight().await;
+    {
+        let App { session, c, audio, .. } = app;
+        let s = session.as_mut().unwrap();
+        for _ in 0..ticks { s.step_visual(c, audio); }
+        for _ in 0..1500 { s.step_visual(c, audio); if s.m.fighters.iter().any(|f| f.move_type == 'H' && f.hit_shake > 2) { break; } }
+    }
+    snap(app, dir, name, |a| a.draw_session_only()).await;
+    app.team = None;
+}
+
 pub async fn run(app: &mut App, dir: &str) {
     let _ = std::fs::create_dir_all(dir);
     app.screen = Screen::Title;
@@ -62,6 +86,10 @@ pub async fn run(app: &mut App, dir: &str) {
     app.mode = Mode::Cpu;
     cap(app, Screen::Select { cur: [find(app, "kaname"), find(app, "valdric")], picking: 1, picked: [Some(find(app, "kaname")), None] });
     screen(app, dir, "03-select", 40).await;
+    app.mode = Mode::TeamSeq; app.team_pick = vec![find(app, "kaito"), find(app, "lian")];
+    cap(app, Screen::Select { cur: [find(app, "akio"), find(app, "valdric")], picking: 0, picked: [None, None] });
+    screen(app, dir, "32-team-select", 20).await;
+    app.mode = Mode::Cpu; app.team_pick.clear();
     cap(app, Screen::Stages { cur: 2 });
     screen(app, dir, "04-stages", 5).await;
     app.sel = (find(app, "kaito"), find(app, "garan"), 0);
@@ -75,7 +103,11 @@ pub async fn run(app: &mut App, dir: &str) {
     fight(app, dir, "09-fight-bamboo", "lian", "sylene", "bamboo", 400, "proj").await;
     fight(app, dir, "10-fight-volcano", "garan", "marlow", "volcano", 500, "hit").await;
     fight(app, dir, "20-fx-ko", "daichi", "valdric", "dojo", 200, "ko").await;
+    fight(app, dir, "23-impact-frame", "akio", "bruno", "spirit", 120, "impact").await;
+    fight(app, dir, "24-paint-splash", "kaito", "garan", "plains", 240, "hit").await;
     fight(app, dir, "21-fx-neon-hit", "volta", "kaito", "neon", 200, "hit").await;
+    team_fight(app, dir, "30-team-sequence", false, "dojo", 200).await;
+    team_fight(app, dir, "31-team-parallel", true, "neon", 260).await;
     fight(app, dir, "11-hitboxes", "shion", "kaito", "plains", 200, "boxes").await;
     fight(app, dir, "11b-fight-kaname-valdric", "kaname", "valdric", "spirit", 300, "hit").await;
     fight(app, dir, "11c-fight-daichi-jin", "daichi", "jin", "plains", 300, "proj").await;

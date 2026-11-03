@@ -108,6 +108,7 @@ impl MatchRenderer {
         let s = g.view_scale;
         self.draw_stage(g, m, stage, false, shx, shy);
         if m.pause.as_ref().is_some_and(|p| p.darken) { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(0.0, 0.0, 0.04, 0.62)); }
+        if gain > 0.0 { vfx.draw_back(g, m, shx, shy); }
         // soft contact shadows (3 layered ellipses)
         for f in &m.fighters {
             if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE) { continue; }
@@ -149,7 +150,7 @@ impl MatchRenderer {
         g.view_scale = s0; g.ox = ox0; g.oy = oy0;
         let s = g.view_scale;
         let focus_screen = (ox0 + fvx * s0, oy0 + fvy * s0);
-        if gain > 0.0 { vfx.draw_lines(focus_screen, gain); }
+        if gain > 0.0 { vfx.draw_weather(gain); vfx.draw_lines(focus_screen, gain); }
         if let Some((t, c)) = m.flash { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(c[0] / 255.0, c[1] / 255.0, c[2] / 255.0, (t as f32 / 10.0).min(0.85))); }
         // letterbox bars
         let (w, h) = (screen_width(), screen_height());
@@ -188,6 +189,13 @@ impl MatchRenderer {
             if p.add.iter().sum::<f32>() > 200.0 { o.flash = 0.6; } else if p.add[0] > p.add[2] + 40.0 { o.tint = Color::new(1.0, 0.7, 0.6, 1.0); } else if p.add[2] > p.add[0] + 40.0 { o.tint = Color::new(0.6, 0.8, 1.0, 1.0); }
         }
         if let Some((mode, a, _)) = &f.trans { if mode.starts_with("add") { o.add = true; o.alpha = a / 256.0; } }
+        // owner of an active super: pulsing golden outline glow (sprite re-drawn additively around itself)
+        if m.pause.as_ref().is_some_and(|p| p.is_super && (p.by == f.id || p.by == f.root)) {
+            let pulse = 0.55 + 0.35 * (m.game_time as f32 * 0.35).sin();
+            for (dx, dy) in [(-1.6, 0.0), (1.6, 0.0), (0.0, -1.6), (0.0, 1.6), (-1.2, -1.2), (1.2, 1.2), (-1.2, 1.2), (1.2, -1.2)] {
+                Self::draw_sprite(g, m, &f.anim_def, fr, x + dx, f.pos.y + dy, f.facing, f.lscl, f.draw_scale, &DrawOpts { add: true, alpha: pulse * 0.28, tint: Color::new(1.0, 0.8, 0.3, 1.0), ..Default::default() }, shx, shy);
+            }
+        }
         Self::draw_sprite(g, m, &f.anim_def, fr, x, f.pos.y, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
     }
 

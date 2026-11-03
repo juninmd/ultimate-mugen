@@ -76,3 +76,48 @@ fn preview_is_light_and_art_res_scales() {
     set_art_res(base);
     assert!(s2.scale < s1 && s2.width > w1 * 0.9, "6x art is denser than the default");
 }
+
+fn team_match(simul: bool) -> Match {
+    let ids = ["kaito", "shion", "akio", "suzume"];
+    let mut m = Match::new(common_def(), None, flat_stage());
+    m.team_simul = simul;
+    // interleaved: P1, P2, P3 (P1's partner), P4 (P2's partner)
+    for (k, side) in [(0, 0), (1, 1), (2, 0), (3, 1)] { m.add_player(Arc::new(compile_native(&load(ids[k]), 1, false)), side, 0, 1); }
+    m.start_round();
+    for _ in 0..140 { m.tick(&[0, 0, 0, 0]); }
+    m
+}
+
+#[test]
+fn simul_team_round_ends_only_when_whole_team_is_down() {
+    let mut m = team_match(true);
+    assert_eq!(m.round_state, 2, "fight started");
+    let roots = m.root_indices();
+    assert_eq!(roots.len(), 4);
+    // teammates line up behind their leader, same facing
+    assert!(m.fighters[roots[2]].pos.x < m.fighters[roots[0]].pos.x, "P3 stands behind P1");
+    assert!(m.fighters[roots[3]].pos.x > m.fighters[roots[1]].pos.x, "P4 stands behind P2");
+    // one member of team 1 falls → round keeps going, the fallen can't be hit and is no longer targeted
+    m.fighters[roots[1]].life = 0.0;
+    for _ in 0..5 { m.tick(&[0, 0, 0, 0]); }
+    assert_eq!(m.round_state, 2, "partner still standing → round continues");
+    assert!(!m.fighters[roots[1]].alive);
+    assert_eq!(m.enemy(roots[0], 0), Some(roots[3]), "living enemy is targeted first");
+    // the partner falls too → team 0 wins
+    m.fighters[roots[3]].life = 0.0;
+    for _ in 0..5 { m.tick(&[0, 0, 0, 0]); }
+    assert_eq!(m.round_state, 3);
+    assert_eq!(m.winner_side, 0);
+}
+
+#[test]
+fn single_fights_still_end_on_first_ko() {
+    let mut m = Match::new(common_def(), None, flat_stage());
+    m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 0, 0, 1);
+    m.add_player(Arc::new(compile_native(&load("shion"), 1, false)), 1, 0, 1);
+    m.start_round();
+    for _ in 0..140 { m.tick(&[0, 0]); }
+    m.fighters[0].life = 0.0;
+    for _ in 0..5 { m.tick(&[0, 0]); }
+    assert_eq!((m.round_state, m.winner_side), (3, 1));
+}

@@ -4,16 +4,20 @@ use crate::ui::{alpha, hex, Align, Ui};
 use macroquad::prelude::*;
 use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
+use crate::session::TeamInfo;
 
 pub struct Hud { trail: [f32; 2], combo: [(i32, f32, i32); 2], pop: [f32; 2], last_hits: [i32; 2] }
 
 impl Hud {
     pub fn new() -> Self { Hud { trail: [1.0, 1.0], combo: [(0, 0.0, 0); 2], pop: [0.0; 2], last_hits: [0; 2] } }
 
-    pub fn draw(&mut self, ui: &Ui, g: &Gfx, m: &Match, gt: f32) {
+    pub fn draw(&mut self, ui: &Ui, g: &mut Gfx, m: &Match, gt: f32, team: Option<&TeamInfo>) {
         let s = g.view_scale;
-        let p = |x: f32, y: f32| vec2(g.ox + x * s, g.oy + y * s);
-        let roots: Vec<&Fighter> = m.roots().collect();
+        let (gox, goy) = (g.ox, g.oy);
+        let p = |x: f32, y: f32| vec2(gox + x * s, goy + y * s);
+        // team leaders (first fighter of each side); partners get compact bars
+        let roots: Vec<&Fighter> = (0..2).filter_map(|sd| m.roots().find(|f| f.side == sd)).collect();
+        let partners: Vec<&Fighter> = m.roots().filter(|f| !roots.iter().any(|r| r.id == f.id)).collect();
         let w = m.view_w;
         let text = |t: &str, x: f32, y: f32, size: f32, c: Color, al: Align, disp: bool| {
             let font = if disp { &ui.display } else { &ui.body };
@@ -50,12 +54,27 @@ impl Hud {
                 // low-life alarm: pulsing red glow around the bar
                 if low && ratio > 0.0 { let pul = 0.12 + 0.12 * (gt * 11.0).sin().abs(); quad(x - 3.0, bw + 6.0, y - 3.0, bh + 6.0, Color::new(1.0, 0.1, 0.1, pul)); }
                 // portrait
-                let pc = p(if side == 0 { 11.0 } else { w - 11.0 }, y + 18.0);
+                let pc = p(if side == 0 { 12.0 } else { w - 12.0 }, y + 19.0);
                 let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
-                draw_circle(pc.x, pc.y, 10.0 * s, col);
-                draw_circle_lines(pc.x, pc.y, 10.0 * s, 1.2 * s, WHITE);
-                text(&f.def.display_name.chars().next().unwrap_or('?').to_uppercase().to_string(), if side == 0 { 11.0 } else { w - 11.0 }, y + 22.0, 11.0, WHITE, Align::Center, true);
-                let nx = if side == 0 { x + 14.0 } else { x + bw - 14.0 };
+                let half = 11.0 * s;
+                // slanted-free square portrait: head crop of the idle sprite (MUGEN: 9000,x portrait), team-colour frame
+                draw_rectangle(pc.x - half - 1.5 * s, pc.y - half - 1.5 * s, half * 2.0 + 3.0 * s, half * 2.0 + 3.0 * s, Color::new(0.04, 0.04, 0.08, 0.95));
+                draw_rectangle(pc.x - half, pc.y - half, half * 2.0, half * 2.0, alpha(col, 0.85));
+                let por = f.def.sprites.get(&(9000, 1)).or(f.def.sprites.get(&(9000, 0))).filter(|sp| f.def.source == ume_engine::chardef::Source::Mugen && sp.image.is_some()).map(|sp| (sp.clone(), true))
+                    .or_else(|| f.def.anims.get(&0).and_then(|a| a.frames.first()).and_then(|fr| f.def.sprites.get(&(fr.group, fr.index))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), false)));
+                if let Some((sp, full)) = por {
+                    let img = sp.image.clone().unwrap();
+                    let tex = g.texture(&img, sp.scale >= 0.99);
+                    let (iw, ih) = (img.w as f32, img.h as f32);
+                    // source square in image pixels
+                    let src = if full { let sd = iw.min(ih); Rect::new((iw - sd) / 2.0, 0.0, sd, sd) } else { let sd = (ih * 0.40).min(iw); let cx = sp.axis_x.clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
+                    let (dx, dy) = (pc.x - half, pc.y - half);
+                    draw_texture_ex(&tex, dx, dy, WHITE, DrawTextureParams { dest_size: Some(vec2(half * 2.0, half * 2.0)), source: Some(src), flip_x: side == 1 && !full, ..Default::default() });
+                } else {
+                    text(&f.def.display_name.chars().next().unwrap_or('?').to_uppercase().to_string(), if side == 0 { 12.0 } else { w - 12.0 }, y + 23.0, 12.0, WHITE, Align::Center, true);
+                }
+                draw_rectangle_lines(pc.x - half, pc.y - half, half * 2.0, half * 2.0, 1.4 * s, if low { hex("#ff4d4d") } else { WHITE });
+                let nx = if side == 0 { x + 16.0 } else { x + bw - 16.0 };
                 let al = if side == 0 { Align::Left } else { Align::Right };
                 text(&f.def.display_name.to_uppercase(), nx + 0.6, y + bh + 9.6, 7.0, BLACK, al, true);
                 text(&f.def.display_name.to_uppercase(), nx, y + bh + 9.0, 7.0, WHITE, al, true);
@@ -83,6 +102,35 @@ impl Hud {
                 let bump = if lv >= 1 { 1.0 + 0.12 * (gt * 8.0).sin().abs() } else { 1.0 };
                 outlined(&lab, if side == 0 { px + pw + 11.0 } else { px - 11.0 }, py + 6.0, 10.0 * bump, colors[(lv.max(1) - 1).min(3) as usize], Align::Center);
                 if lv >= 3 { let c = p(px + pw / 2.0, py + ph / 2.0); let a = 0.08 + 0.06 * (gt * 9.0).sin().abs(); draw_rectangle(c.x - pw * s * 0.62, c.y - ph * s * 1.6, pw * s * 1.24, ph * s * 3.2, Color::new(1.0, 0.3, 0.85, a)); }
+            }
+            // partners (parallel team mode): compact bar under the leader's
+            for f in &partners {
+                let side = f.side.min(1);
+                let bw = (w / 2.0 - 34.0) * 0.6; let (bh, y) = (4.5, 35.0);
+                let x = if side == 0 { 10.0 } else { w - 10.0 - bw };
+                let ratio = (f.life / f.life_max).clamp(0.0, 1.0);
+                draw_rectangle(p(x - 1.0, y - 1.0).x, p(0.0, y - 1.0).y, (bw + 2.0) * s, (bh + 2.0) * s, Color::new(0.04, 0.04, 0.08, 0.85));
+                let fw = bw * ratio;
+                let fx = if side == 0 { x + bw - fw } else { x };
+                draw_rectangle(p(fx, y).x, p(0.0, y).y, fw * s, bh * s, if f.alive { if ratio < 0.25 { hex("#ff7a2a") } else { hex("#33d6a0") } } else { hex("#555566") });
+                let al = if side == 0 { Align::Right } else { Align::Left };
+                text(&f.def.display_name.to_uppercase(), if side == 0 { x + bw } else { x }, y + bh + 6.5, 5.5, if f.alive { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.4) }, al, true);
+                let _ = al;
+            }
+            // sequence roster: portraits of every team member (KO'd ones greyed out, current one highlighted)
+            if let Some(t) = team.filter(|t| !t.simul) {
+                for side in 0..2 {
+                    for (k, (name, col)) in t.names[side].iter().enumerate() {
+                        let ko = t.ko[side].get(k).copied().unwrap_or(false);
+                        let cur = t.idx[side] == k;
+                        let x = if side == 0 { 10.0 + k as f32 * 15.0 } else { w - 10.0 - 13.0 - k as f32 * 15.0 };
+                        let c = p(x + 6.5, 45.5);
+                        let col = if ko { Color::from_rgba(70, 70, 80, 255) } else { Color::from_rgba(col[0], col[1], col[2], 255) };
+                        draw_circle(c.x, c.y, (if cur { 7.2 } else { 5.6 }) * s, col);
+                        draw_circle_lines(c.x, c.y, (if cur { 7.2 } else { 5.6 }) * s, (if cur { 1.4 } else { 0.7 }) * s, if cur { hex("#ffcc33") } else { Color::new(1.0, 1.0, 1.0, 0.6) });
+                        text(if ko { "✕" } else { name.chars().next().map(|_| &name[..name.chars().next().unwrap().len_utf8()]).unwrap_or("?") }, x + 6.5, 47.9, if cur { 7.0 } else { 5.5 }, WHITE, Align::Center, true);
+                    }
+                }
             }
             // timer
             let (cx, cy) = (w / 2.0, 18.0);

@@ -54,7 +54,7 @@ pub struct Projectile {
 #[derive(Clone)]
 pub enum Event {
     Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str> },
-    Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool },
+    Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool, attacker: usize, defender: usize },
     Super { side: usize },
     Ko { loser_side: usize },
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
@@ -74,6 +74,8 @@ pub struct Match {
     pub view_w: f32, pub view_h: f32,
     pub game_time: i64,
     pub round_state: i32, pub round_no: i32, pub round_time: i32,
+    /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
+    pub team_simul: bool,
     pub timer: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
@@ -91,7 +93,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: 426.67, view_h: 240.0,
-            game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, flash: None, slow_mo: 0,
             events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]),
         }
@@ -114,7 +116,7 @@ impl Match {
     pub fn enemy(&self, i: usize, n: usize) -> Option<usize> {
         let me = &self.fighters[i];
         let mut list: Vec<usize> = (0..self.fighters.len()).filter(|&j| { let f = &self.fighters[j]; !f.is_helper && f.side != me.side && !f.destroyed }).collect();
-        list.sort_by(|&a, &b| (self.fighters[a].pos.x - me.pos.x).abs().partial_cmp(&(self.fighters[b].pos.x - me.pos.x).abs()).unwrap());
+        list.sort_by(|&a, &b| (!self.fighters[a].alive).cmp(&!self.fighters[b].alive).then((self.fighters[a].pos.x - me.pos.x).abs().partial_cmp(&(self.fighters[b].pos.x - me.pos.x).abs()).unwrap()));
         list.get(n).copied()
     }
     pub fn ground_y(&self) -> f32 { self.stage.zoffset }
@@ -344,12 +346,15 @@ impl Match {
         self.explods.clear(); self.projectiles.clear(); self.pause = None;
         self.fighters.retain(|f| !f.is_helper);
         self.camera = V2::default();
+        let mut slot = [0usize; 2];
         for i in 0..self.fighters.len() {
             {
                 let p1x = self.stage.p1x; let p2x = self.stage.p2x; let first = self.round_no == 1;
                 let f = &mut self.fighters[i];
+                let k = { let s = f.side.min(1); slot[s] += 1; (slot[s] - 1) as f32 };
                 f.destroyed = false;
-                f.pos = V2 { x: if f.side == 0 { p1x } else { p2x }, y: 0.0 };
+                // teammates line up behind the leader
+                f.pos = V2 { x: if f.side == 0 { p1x - 52.0 * k } else { p2x + 52.0 * k }, y: 0.0 };
                 f.vel = V2::default();
                 f.facing = if f.side == 0 { 1.0 } else { -1.0 };
                 f.life = f.life_max; f.alive = true;
@@ -383,18 +388,28 @@ impl Match {
                     for &i in &roots { self.fighters[i].power = self.fighters[i].power_max; }
                     return;
                 }
-                let dead: Vec<usize> = roots.iter().copied().filter(|&i| self.fighters[i].life <= 0.0).collect();
+                let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| self.fighters[i].life <= 0.0).collect();
+                let team_life = |m: &Match, s: usize| -> (f32, f32) { roots.iter().filter(|&&i| m.fighters[i].side == s).fold((0.0, 0.0), |a, &i| (a.0 + m.fighters[i].life.max(0.0), a.1 + m.fighters[i].life_max)) };
+                if self.team_simul {
+                    // a fallen teammate stays down; the round ends only when a whole team is KO'd
+                    for &i in &dead { self.fighters[i].alive = false; }
+                    let out = |m: &Match, s: usize| roots.iter().filter(|&&i| m.fighters[i].side == s).all(|&i| m.fighters[i].life <= 0.0);
+                    let (o0, o1) = (out(self, 0), out(self, 1));
+                    dead = roots.iter().copied().filter(|&i| (self.fighters[i].side == 0 && o0) || (self.fighters[i].side == 1 && o1)).collect();
+                }
                 if !dead.is_empty() || self.timer <= 0 {
                     self.round_state = 3; self.round_time = 0;
                     if !dead.is_empty() {
                         for &i in &dead { self.fighters[i].alive = false; }
-                        self.winner_side = if dead.len() == roots.len() { -2 } else { 1 - self.fighters[dead[0]].side as i32 };
+                        let sides_dead = [dead.iter().any(|&i| self.fighters[i].side == 0), dead.iter().any(|&i| self.fighters[i].side == 1)];
+                        self.winner_side = if sides_dead[0] && sides_dead[1] { -2 } else if sides_dead[0] { 1 } else { 0 };
                         self.slow_mo = 75;
                         self.announce = Some(Announce { text: "K.O.".into(), time: 110, total: 110 });
                         self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side });
                     } else {
-                        let r: Vec<f32> = roots.iter().map(|&i| self.fighters[i].life / self.fighters[i].life_max).collect();
-                        self.winner_side = if r.len() < 2 || r[0] == r[1] { -2 } else if r[0] > r[1] { self.fighters[roots[0]].side as i32 } else { self.fighters[roots[1]].side as i32 };
+                        let (l0, l1) = (team_life(self, 0), team_life(self, 1));
+                        let (r0, r1) = (l0.0 / l0.1.max(1.0), l1.0 / l1.1.max(1.0));
+                        self.winner_side = if (r0 - r1).abs() < 1e-6 { -2 } else if r0 > r1 { 0 } else { 1 };
                         self.announce = Some(Announce { text: "TIME OVER".into(), time: 110, total: 110 });
                     }
                 }
@@ -585,7 +600,7 @@ impl Match {
     }
     pub fn can_be_hit(&self, d: usize, hd: &HitDefData, side: usize) -> bool {
         let f = &self.fighters[d];
-        if f.destroyed || f.side == side { return false; }
+        if f.destroyed || f.side == side || !f.alive { return false; }
         if self.round_state != 2 && !(self.round_state == 3 && f.alive) { return false; }
         if f.state_no == 5150 { return false; }
         let hf = &hd.hitflag; let st = f.state_type;
@@ -736,7 +751,7 @@ impl Match {
             self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
         }
         let dmg = self.fighters[d].ghv.damage;
-        self.events.push(Event::Hit { attacker_side: aside, defender_side: self.fighters[d].side, damage: dmg, guarded, heavy: hd.animtype >= 2 });
+        self.events.push(Event::Hit { attacker_side: aside, defender_side: self.fighters[d].side, damage: dmg, guarded, heavy: hd.animtype >= 2, attacker: self.idx(aroot).unwrap_or(a), defender: d });
     }
 
     // ---------------------------------------------------------------- effects

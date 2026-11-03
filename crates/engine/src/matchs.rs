@@ -75,9 +75,12 @@ pub fn corner_push(xvel: f32) -> f32 { (xvel.abs() * 0.5).clamp(1.2, 4.5) }
 pub const BASE_W: f32 = 426.67;
 pub const BASE_H: f32 = 240.0;
 
+#[derive(Clone)]
 pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_super: bool, pub darken: bool }
+#[derive(Clone)]
 pub struct Announce { pub text: String, pub time: i32, pub total: i32 }
 
+#[derive(Clone)]
 pub struct Match {
     pub fighters: Vec<Fighter>,
     pub explods: Vec<Explod>,

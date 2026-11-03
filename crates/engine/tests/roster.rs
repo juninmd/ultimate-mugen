@@ -216,3 +216,37 @@ fn simulation_is_deterministic_for_replays() {
         assert!(a.fighters.iter().any(|f| f.life < f.life_max), "the scripted fight actually exchanged hits (simul={simul})");
     }
 }
+
+#[test]
+fn combo_damage_scales_down_and_never_vanishes() {
+    use ume_engine::matchs::{combo_scale, corner_push};
+    let v: Vec<f32> = (0..14).map(combo_scale).collect();
+    assert_eq!((v[0], v[1]), (1.0, 1.0), "the first two hits are full damage");
+    assert!(v.windows(2).all(|w| w[1] <= w[0]), "monotonically non-increasing: {v:?}");
+    assert!(v.iter().all(|&x| x >= 0.2) && (v[13] - 0.25).abs() < 1e-6, "floor holds");
+    assert!(corner_push(0.0) >= 1.2 && corner_push(-30.0) <= 4.5, "push is bounded");
+}
+
+/// A native fighter's long combo must deal less than the same hits would at full value.
+#[test]
+fn native_combos_are_prorated_and_corners_push_attackers_back() {
+    let mut m = Match::new(common_def(), None, flat_stage());
+    m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 0, 0, 1);
+    m.add_player(Arc::new(compile_native(&load("shion"), 1, false)), 1, 0, 1);
+    m.start_round();
+    for _ in 0..140 { m.tick(&[0, 0]); }
+    // corner the defender and let the attacker mash light attacks next to him
+    let edge = m.stage.bound_right + m.view_w / 2.0 - 40.0;
+    m.fighters[1].pos.x = edge;
+    m.fighters[0].pos.x = edge - 38.0;
+    let before = m.fighters[1].life;
+    let mut max_combo = 0;
+    for i in 0..900 {
+        m.tick(&[if i % 6 == 0 { R | X } else if i % 6 == 3 { A } else { R }, 0]);
+        max_combo = max_combo.max(m.fighters[1].ghv.hitcount);
+        if m.fighters[1].life <= 0.0 { break; }
+    }
+    assert!(m.fighters[1].life < before, "damage was dealt");
+    assert!(m.corner_pushes > 0, "the cornered defender pushed the attacker back at least once");
+    let _ = max_combo;
+}

@@ -4,6 +4,7 @@ use crate::ui::{alpha, hex, Align, Ui};
 use macroquad::prelude::*;
 use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
+use crate::poly;
 use crate::session::TeamInfo;
 
 pub struct Hud { pub replay: bool, pub inputs: Vec<(u32, u16)>, trail: [f32; 2], combo: [(i32, f32, i32); 2], pop: [f32; 2], last_hits: [i32; 2] }
@@ -46,53 +47,89 @@ impl Hud {
                 let x = if side == 0 { 10.0 } else { w / 2.0 + 24.0 };
                 let ratio = (f.life / f.life_max).max(0.0);
                 if !(f.move_type == 'H' && f.hit_shake > 0) { self.trail[side] = if self.trail[side] > ratio { (self.trail[side] - 0.006).max(ratio) } else { ratio }; }
-                let quad = |xx: f32, ww: f32, yy: f32, hh: f32, c: Color| {
-                    let pts = if side == 0 { [p(xx + 4.0, yy), p(xx + ww, yy), p(xx + ww - 4.0, yy + hh), p(xx, yy + hh)] } else { [p(xx, yy), p(xx + ww - 4.0, yy), p(xx + ww, yy + hh), p(xx + 4.0, yy + hh)] };
-                    draw_triangle(pts[0], pts[1], pts[2], c); draw_triangle(pts[0], pts[2], pts[3], c);
-                };
-                quad(x - 2.0, bw + 4.0, y - 2.0, bh + 4.0, Color::new(0.04, 0.04, 0.08, 0.85));
-                quad(x, bw, y, bh, hex("#3a0d12"));
-                let seg = |r: f32, c: Color| { let ww = bw * r; if ww > 0.5 { if side == 0 { quad(x + bw - ww, ww, y, bh, c) } else { quad(x, ww, y, bh, c) } } };
-                seg(self.trail[side], hex("#e8283a"));
+                let skew = if side == 0 { 4.5 } else { -4.5 };
                 let low = ratio < 0.25;
-                seg(ratio, if low { hex("#ff7a2a") } else { hex("#ffc928") });
-                // highlight
-                let ww = bw * ratio;
-                if ww > 1.0 { let hx = if side == 0 { x + bw - ww } else { x }; draw_rectangle(p(hx + 2.0, y + 1.0).x, p(0.0, y + 1.0).y, (ww - 4.0).max(0.0) * s, 2.5 * s, Color::new(1.0, 1.0, 0.85, if low { 0.3 } else { 0.55 })); }
+                let gold = hex("#ffcc33");
+                // view-space polygon → screen space
+                let sp = |pts: Vec<Vec2>| -> Vec<Vec2> { pts.into_iter().map(|q| p(q.x, q.y)).collect() };
+                // 1 drop shadow, 2 metallic frame, 3 gold bevel (bright top edge / dark bottom edge), 4 recessed well
+                poly::solid(&sp(poly::slanted(x - 1.0, y - 0.2, bw + 6.0, bh + 6.0, skew)), Color::new(0.0, 0.0, 0.03, 0.45));
+                let frame = sp(poly::slanted(x - 2.5, y - 2.5, bw + 5.0, bh + 5.0, skew));
+                poly::grad_v(&frame, hex("#3b4166"), hex("#0a0c1a"));
+                { let (a0, a1, b0, b1) = (frame[0], frame[1], frame[3], frame[2]); draw_line(a0.x, a0.y, a1.x, a1.y, 1.1 * s, gold); draw_line(b0.x, b0.y, b1.x, b1.y, 1.1 * s, shade_gold()); }
+                let well = sp(poly::slanted(x - 0.8, y - 0.8, bw + 1.6, bh + 1.6, skew));
+                poly::grad_v(&well, hex("#16060b"), hex("#3a0d12"));
+                // damage trail (what you just lost), life fill with a vertical gradient, gloss and a hot leading edge
+                let fillp = |r: f32| -> Vec<Vec2> { let ww = (bw * r).max(0.0); if side == 0 { poly::slanted(x + bw - ww, y, ww, bh, skew) } else { poly::slanted(x, y, ww, bh, skew) } };
+                if self.trail[side] > ratio + 0.002 { poly::grad_v(&sp(fillp(self.trail[side])), hex("#ff8a8a"), hex("#c01428")); }
+                if ratio > 0.002 {
+                    let (top, bot) = if low { (hex("#ffb066"), hex("#e0501a")) } else { (hex("#fff0a0"), hex("#e8a010")) };
+                    let fp = sp(fillp(ratio));
+                    poly::grad_v(&fp, top, bot);
+                    // gloss: upper half, white fading to nothing
+                    let gl = sp(if side == 0 { poly::slanted(x + bw - bw * ratio, y, bw * ratio, bh * 0.5, skew * 0.5) } else { poly::slanted(x, y, bw * ratio, bh * 0.5, skew * 0.5) });
+                    poly::grad_v(&gl, Color::new(1.0, 1.0, 1.0, if low { 0.28 } else { 0.5 }), Color::new(1.0, 1.0, 1.0, 0.0));
+                    // hot leading edge = the fill's inner/outer end edge
+                    let (e0, e1) = if side == 0 { (fp[0], fp[3]) } else { (fp[1], fp[2]) };
+                    draw_line(e0.x, e0.y, e1.x, e1.y, 1.0 * s, Color::new(1.0, 1.0, 0.9, 0.9));
+                }
+                // 10 segment ticks, following the slant of the well
+                for i in 1..10 { let t = i as f32 / 10.0; let (t0, t1) = (well[0].lerp(well[1], t), well[3].lerp(well[2], t)); draw_line(t0.x, t0.y, t1.x, t1.y, 0.5 * s, Color::new(0.0, 0.0, 0.0, 0.35)); }
                 // low-life alarm: pulsing red glow around the bar
-                if low && ratio > 0.0 { let pul = 0.12 + 0.12 * (gt * 11.0).sin().abs(); quad(x - 3.0, bw + 6.0, y - 3.0, bh + 6.0, Color::new(1.0, 0.1, 0.1, pul)); }
-                // portrait
+                if low && ratio > 0.0 { let pul = 0.12 + 0.12 * (gt * 11.0).sin().abs(); poly::solid(&sp(poly::slanted(x - 3.5, y - 3.5, bw + 7.0, bh + 7.0, skew)), Color::new(1.0, 0.1, 0.1, pul)); }
+                // portrait (octagonal frame)
                 let pc = p(if side == 0 { 12.0 } else { w - 12.0 }, y + 19.0);
-                portrait(g, f, pc, 11.0 * s, side, s, if low { hex("#ff4d4d") } else if human.contains(&f.id) { hex("#ffcc33") } else { WHITE });
-                if human.contains(&f.id) { text(if side == 0 { "P1" } else { "P2" }, if side == 0 { 12.0 } else { w - 12.0 }, y + 36.0, 5.5, hex("#ffcc33"), Align::Center, true); }
+                portrait(g, f, pc, 11.0 * s, side, s, if low { hex("#ff4d4d") } else if human.contains(&f.id) { gold } else { hex("#d8dcf0") });
+                if human.contains(&f.id) { text(if side == 0 { "P1" } else { "P2" }, if side == 0 { 12.0 } else { w - 12.0 }, y + 36.0, 5.5, gold, Align::Center, true); }
+                // name plate: slanted polygon fading out from the portrait side, in the character colour
                 let nx = if side == 0 { x + 16.0 } else { x + bw - 16.0 };
                 let al = if side == 0 { Align::Left } else { Align::Right };
+                let cc = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
+                let plate = sp(poly::slanted(if side == 0 { x + 12.0 } else { x + bw - 150.0 }, y + bh + 2.0, 138.0, 9.0, skew));
+                if side == 0 { poly::grad_h(&plate, poly::with_a(poly::shade(cc, 0.55), 0.92), poly::with_a(cc, 0.0)); } else { poly::grad_h(&plate, poly::with_a(cc, 0.0), poly::with_a(poly::shade(cc, 0.55), 0.92)); }
+                { let (l0, l1) = (plate[3], plate[2]); draw_line(l0.x, l0.y, l1.x, l1.y, 0.7 * s, poly::with_a(cc, 0.9)); }
                 text(&f.def.display_name.to_uppercase(), nx + 0.6, y + bh + 9.6, 7.0, BLACK, al, true);
                 text(&f.def.display_name.to_uppercase(), nx, y + bh + 9.0, 7.0, WHITE, al, true);
+                // round pips: diamonds
                 for i in 0..m.rounds_to_win {
                     let won = m.wins[side] > i;
-                    let cx = if side == 0 { x + bw - 6.0 - i as f32 * 8.0 } else { x + 6.0 + i as f32 * 8.0 };
-                    let c = p(cx, y + bh + 6.0);
-                    draw_circle(c.x, c.y, 2.6 * s, if won { hex("#ffcc33") } else { Color::new(0.0, 0.0, 0.0, 0.6) });
-                    draw_circle_lines(c.x, c.y, 2.6 * s, 0.5 * s, WHITE);
+                    let cx = if side == 0 { x + bw - 6.0 - i as f32 * 9.0 } else { x + 6.0 + i as f32 * 9.0 };
+                    let c = p(cx, y + bh + 7.2);
+                    let dia = poly::regular(c, 3.4 * s, 4, std::f32::consts::FRAC_PI_2);
+                    if won { poly::circle(c, 5.0 * s, Color::new(1.0, 0.8, 0.2, 0.25)); poly::grad_v(&dia, hex("#fff3a0"), hex("#e8a010")); } else { poly::solid(&dia, Color::new(0.02, 0.02, 0.06, 0.8)); }
+                    poly::outline(&dia, 0.6 * s, if won { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.45) });
                 }
-                // power bar
-                let (pw, ph, py) = (90.0, 5.0, m.view_h - 14.0);
+                // super meter: three slanted cells (one per level) + hexagonal level badge
+                let (cw, gap, ph, py) = (28.0, 3.0, 5.2, m.view_h - 14.0);
+                let pw = cw * 3.0 + gap * 2.0;
                 let px = if side == 0 { 12.0 } else { w - 12.0 - pw };
-                let lv = (f.power / 1000.0).floor() as i32;
-                let frac = (f.power % 1000.0) / 1000.0;
+                let lvl = (f.power / 1000.0).floor() as i32;
                 let colors = [hex("#2fa8ff"), hex("#33e07a"), hex("#ffcc33"), hex("#ff4fd8")];
-                draw_rectangle(p(px - 1.0, py - 1.0).x, p(0.0, py - 1.0).y, (pw + 2.0) * s, (ph + 2.0) * s, Color::new(0.0, 0.0, 0.0, 0.7));
-                if lv > 0 { draw_rectangle(p(px, py).x, p(0.0, py).y, pw * s, ph * s, alpha(colors[((lv - 1) % 4) as usize], 0.45)); }
-                let fw = if lv >= 3 { pw } else { pw * frac };
-                let fx = if side == 0 { px } else { px + pw - fw };
-                draw_rectangle(p(fx, py).x, p(0.0, py).y, fw * s, ph * s, colors[lv.min(3) as usize]);
-                draw_rectangle(p(fx, py).x, p(0.0, py).y, fw * s, 1.5 * s, Color::new(1.0, 1.0, 1.0, 0.6));
-                if lv >= 1 && (m.game_time >> 3) % 2 == 1 { draw_rectangle(p(px, py).x, p(0.0, py).y, pw * s, ph * s, Color::new(1.0, 1.0, 1.0, 0.2)); }
-                let lab = if lv >= 3 { "MAX".to_string() } else { lv.to_string() };
-                let bump = if lv >= 1 { 1.0 + 0.12 * (gt * 8.0).sin().abs() } else { 1.0 };
-                outlined(&lab, if side == 0 { px + pw + 11.0 } else { px - 11.0 }, py + 6.0, 10.0 * bump, colors[(lv.max(1) - 1).min(3) as usize], Align::Center);
-                if lv >= 3 { let c = p(px + pw / 2.0, py + ph / 2.0); let a = 0.08 + 0.06 * (gt * 9.0).sin().abs(); draw_rectangle(c.x - pw * s * 0.62, c.y - ph * s * 1.6, pw * s * 1.24, ph * s * 3.2, Color::new(1.0, 0.3, 0.85, a)); }
+                for i in 0..3 {
+                    let cxp = if side == 0 { px + i as f32 * (cw + gap) } else { px + pw - (i as f32 + 1.0) * cw - i as f32 * gap };
+                    let col = colors[i.min(3)];
+                    poly::grad_v(&sp(poly::slanted(cxp - 0.8, py - 0.8, cw + 1.6, ph + 1.6, 3.0)), hex("#2a2f4a"), hex("#05060e"));
+                    poly::solid(&sp(poly::slanted(cxp, py, cw, ph, 3.0)), Color::new(0.0, 0.0, 0.03, 0.85));
+                    let fr = if lvl >= 3 { 1.0 } else { (f.power / 1000.0 - i as f32).clamp(0.0, 1.0) };
+                    if fr > 0.01 {
+                        let fw = cw * fr;
+                        let fx = if side == 0 { cxp } else { cxp + cw - fw };
+                        let cell = sp(poly::slanted(fx, py, fw, ph, 3.0));
+                        poly::grad_v(&cell, poly::shade(col, 1.35), poly::shade(col, 0.7));
+                        let gl = sp(poly::slanted(fx, py, fw, ph * 0.45, 3.0 * 0.45));
+                        poly::grad_v(&gl, Color::new(1.0, 1.0, 1.0, 0.55), Color::new(1.0, 1.0, 1.0, 0.0));
+                        if fr >= 0.999 && (m.game_time >> 3) % 2 == 1 { poly::solid(&cell, Color::new(1.0, 1.0, 1.0, 0.25)); }
+                    }
+                }
+                let lab = if lvl >= 3 { "MAX".to_string() } else { lvl.to_string() };
+                let bump = if lvl >= 1 { 1.0 + 0.1 * (gt * 8.0).sin().abs() } else { 1.0 };
+                let bc = p(if side == 0 { px + pw + 9.5 } else { px - 9.5 }, py + ph / 2.0);
+                let bcol = colors[(lvl.max(1) - 1).min(3) as usize];
+                let hexa = poly::regular(bc, 6.6 * s * bump, 6, 0.0);
+                poly::grad_v(&hexa, poly::shade(bcol, 1.2), poly::shade(bcol, 0.45));
+                poly::outline(&hexa, 0.8 * s, WHITE);
+                text(&lab, if side == 0 { px + pw + 9.5 } else { px - 9.5 }, py + ph / 2.0 + if lvl >= 3 { 1.6 } else { 2.2 }, if lvl >= 3 { 4.6 } else { 7.0 }, WHITE, Align::Center, true);
+                if lvl >= 3 { let a = 0.1 + 0.08 * (gt * 9.0).sin().abs(); poly::solid(&sp(poly::slanted(px - 3.0, py - 3.0, pw + 6.0, ph + 6.0, 3.0)), Color::new(1.0, 0.3, 0.85, a)); }
             }
             // partner tiles: portrait + life bar for every other fighter on the team; yours is highlighted, fallen ones greyed out
             let mut col_idx = [0usize; 2];
@@ -143,11 +180,13 @@ impl Hud {
             }
             // timer
             let (cx, cy) = (w / 2.0, 18.0);
-            let mut pts = vec![];
-            for i in 0..6 { let a = std::f32::consts::PI / 6.0 + i as f32 * std::f32::consts::PI / 3.0; pts.push(p(cx + a.cos() * 13.0, cy + a.sin() * 13.0)); }
             let c = p(cx, cy);
-            for i in 0..6 { draw_triangle(c, pts[i], pts[(i + 1) % 6], hex("#161a2e")); }
-            for i in 0..6 { draw_line(pts[i].x, pts[i].y, pts[(i + 1) % 6].x, pts[(i + 1) % 6].y, 1.0 * s, hex("#ffcc33")); }
+            poly::circle(c, 17.0 * s, Color::new(0.0, 0.0, 0.03, 0.35));
+            let (outer, inner) = (poly::regular(c, 14.8 * s, 6, std::f32::consts::FRAC_PI_6), poly::regular(c, 12.3 * s, 6, std::f32::consts::FRAC_PI_6));
+            poly::grad_v(&outer, hex("#ffe08a"), hex("#a8700a"));
+            poly::grad_v(&inner, hex("#2b3358"), hex("#080a18"));
+            poly::outline(&inner, 0.6 * s, Color::new(0.0, 0.0, 0.0, 0.6));
+            for v in poly::regular(c, 13.5 * s, 6, std::f32::consts::FRAC_PI_6) { poly::circle(v, 0.9 * s, hex("#fff3c0")); }
             let t = if m.training { "--".to_string() } else { format!("{:02}", (m.timer + 59) / 60) };
             let urgent = !m.training && m.timer > 0 && m.timer <= 10 * 60;
             let pulse = if urgent { 1.0 + 0.18 * (1.0 - ((m.timer % 60) as f32 / 60.0)) } else { 1.0 };
@@ -231,11 +270,17 @@ impl Hud {
     }
 }
 
-/// Square portrait: head crop of the idle sprite (M.U.G.E.N.: the 9000,x portrait) on the character colour, with a frame.
+fn shade_gold() -> Color { hex("#7a5208") }
+
+/// Portrait in an octagonal (chamfered) frame: head crop of the idle sprite (M.U.G.E.N.: the 9000,x portrait) on the character colour.
 fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, frame: Color) {
     let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
-    draw_rectangle(pc.x - half - 1.5 * s, pc.y - half - 1.5 * s, half * 2.0 + 3.0 * s, half * 2.0 + 3.0 * s, Color::new(0.04, 0.04, 0.08, 0.95));
-    draw_rectangle(pc.x - half, pc.y - half, half * 2.0, half * 2.0, alpha(col, 0.85));
+    let (x0, y0, d) = (pc.x - half, pc.y - half, half * 2.0);
+    let cut = d * 0.24;
+    let dark = Color::new(0.03, 0.04, 0.09, 1.0);
+    // backing plate + coloured field
+    poly::grad_v(&poly::chamfer(x0 - 2.2 * s, y0 - 2.2 * s, d + 4.4 * s, d + 4.4 * s, cut + 1.6 * s), hex("#4a5078"), hex("#0a0c1a"));
+    poly::grad_v(&poly::chamfer(x0, y0, d, d, cut), poly::shade(col, 1.15), poly::shade(col, 0.55));
     let por = f.def.sprites.get(&(9000, 1)).or(f.def.sprites.get(&(9000, 0))).filter(|sp| f.def.source == ume_engine::chardef::Source::Mugen && sp.image.is_some()).map(|sp| (sp.clone(), true))
         .or_else(|| f.def.anims.get(&0).and_then(|a| a.frames.first()).and_then(|fr| f.def.sprites.get(&(fr.group, fr.index))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), false)));
     if let Some((sp, full)) = por {
@@ -243,7 +288,15 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
         let tex = g.texture(&img, sp.scale >= 0.99);
         let (iw, ih) = (img.w as f32, img.h as f32);
         let src = if full { let sd = iw.min(ih); Rect::new((iw - sd) / 2.0, 0.0, sd, sd) } else { let sd = (ih * 0.40).min(iw); let cx = sp.axis_x.clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
-        draw_texture_ex(&tex, pc.x - half, pc.y - half, WHITE, DrawTextureParams { dest_size: Some(vec2(half * 2.0, half * 2.0)), source: Some(src), flip_x: side == 1 && !full, ..Default::default() });
+        draw_texture_ex(&tex, x0, y0, WHITE, DrawTextureParams { dest_size: Some(vec2(d, d)), source: Some(src), flip_x: side == 1 && !full, ..Default::default() });
     }
-    draw_rectangle_lines(pc.x - half, pc.y - half, half * 2.0, half * 2.0, 1.4 * s, frame);
+    // mask the four image corners so the picture follows the chamfer
+    let pad = 2.2 * s;
+    for (corner, dx, dy) in [(vec2(x0, y0), 1.0, 1.0), (vec2(x0 + d, y0), -1.0, 1.0), (vec2(x0 + d, y0 + d), -1.0, -1.0), (vec2(x0, y0 + d), 1.0, -1.0)] {
+        let (a, b, c2) = (corner + vec2(-dx * pad, -dy * pad), corner + vec2(dx * (cut + 0.4 * s), -dy * pad), corner + vec2(-dx * pad, dy * (cut + 0.4 * s)));
+        poly::solid(&[a, b, vec2(corner.x + dx * cut, corner.y), vec2(corner.x, corner.y + dy * cut), c2], dark);
+    }
+    // inner shine along the top edge, then the frame
+    poly::outline(&poly::chamfer(x0, y0, d, d, cut), 1.4 * s, frame);
+    draw_line(x0 + cut, y0 + 1.0 * s, x0 + d - cut, y0 + 1.0 * s, 0.7 * s, Color::new(1.0, 1.0, 1.0, 0.35));
 }

@@ -6,6 +6,7 @@ mod gamepad;
 mod hud;
 mod registry;
 mod render;
+mod poly;
 mod postfx;
 mod session;
 mod settings;

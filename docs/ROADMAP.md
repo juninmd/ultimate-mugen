@@ -84,13 +84,13 @@ O formato UMF simplifica a criação de lutadores eliminando a necessidade de de
 
 ---
 
-## 7. Superar o Ikemen-GO: decisões e fases (nov/2026)
+## 7. Decisões de arquitetura e fases (nov/2026)
 
 ### Decisões de arquitetura
 
 | Tema | Decisão | Motivo |
 |---|---|---|
-| Render | `wgpu` + `winit`, shaders WGSL, paleta no shader, batching por atlas | Um código só para Vulkan, Metal, DX12, WebGPU e WebGL2; o Ikemen mantém três renderers |
+| Render | `wgpu` + `winit`, shaders WGSL, paleta no shader, batching por atlas | Um código só para Vulkan, Metal, DX12, WebGPU e WebGL2 |
 | Scripts de lutador | CNS + ZSS (compatibilidade) e UMF JSON, compilados para o mesmo bytecode | Sem Lua: binário menor, WASM simples, determinismo para rollback |
 | Menus e modos | Rust + dados (screenpack M.U.G.E.N ou TOML) | Tipado e testável, sem camada Lua |
 | Expressões | Bytecode de pilha com constantes dobradas na carga | Sem percorrer AST a cada tick |

@@ -25,4 +25,8 @@ Lutadores UMF e M.U.G.E.N rodam na mesma máquina de estados e podem se enfrenta
 
 ## Roadmap
 
-O plano de compatibilidade com o Ikemen-GO e as decisões de arquitetura estão em [`docs/ROADMAP.md`](../ROADMAP.md). Itens marcados como **planejado** nesta wiki ainda não existem na versão atual.
+O plano de compatibilidade e as decisões de arquitetura estão em [`docs/ROADMAP.md`](../ROADMAP.md). Itens marcados como **planejado** nesta wiki ainda não existem na versão atual.
+
+## Agradecimentos
+
+Obrigado à equipe do [Ikemen GO](https://github.com/ikemen-engine/Ikemen-GO) e à Elecbyte, criadora do M.U.G.E.N, pela inspiração.

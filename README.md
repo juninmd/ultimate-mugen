@@ -331,6 +331,10 @@ Primeiro release (histórico antigo sem commits semânticos) ou release forçado
 
 ---
 
+## Agradecimentos
+
+Obrigado à equipe do [Ikemen GO](https://github.com/ikemen-engine/Ikemen-GO) e à Elecbyte, criadora do M.U.G.E.N, pela inspiração.
+
 ## Aviso Legal
 
 Personagens protegidos por direitos autorais pertencentes a terceiros (franquias como Dragon Ball, Naruto, Street Fighter, etc.) **não são incluídos nem distribuídos** com o executável deste motor. O Ultimate MUGEN é um interpretador de motor de jogo de código aberto capaz de carregar e renderizar conteúdos MUGEN importados pelos próprios usuários.

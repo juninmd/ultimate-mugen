@@ -211,6 +211,13 @@ impl Hud {
                 outlined(&c.0.to_string(), x, 80.0 + 4.0 * (sc - 1.0), 24.0 * sc, col, al);
                 outlined("HITS", x, 90.0, 9.0, Color::new(1.0, 1.0, 1.0, a), al);
                 outlined(&format!("{} DMG", c.1 as i32), x, 99.0, 6.5, Color::new(1.0, 0.9, 0.6, a), al);
+                // modern-fighter proration: the next hit of this combo is worth this much
+                if att.def.source == ume_engine::chardef::Source::Native {
+                    let pct = (ume_engine::matchs::combo_scale(c.0) * 100.0).round() as i32;
+                    let tag = [poly_pt(p, x - if side == 0 { 2.0 } else { 52.0 }, 102.0), poly_pt(p, x + if side == 0 { 52.0 } else { 2.0 }, 102.0), poly_pt(p, x + if side == 0 { 49.0 } else { -1.0 }, 108.5), poly_pt(p, x - if side == 0 { 5.0 } else { 49.0 }, 108.5)];
+                    poly::grad_h(&tag, Color::new(0.5, 0.1, 0.1, 0.8 * a), Color::new(0.1, 0.02, 0.05, 0.5 * a));
+                    text(&format!("DANO {pct}%"), x + if side == 0 { 1.0 } else { -1.0 }, 107.0, 5.2, Color::new(1.0, 0.8, 0.75, a), al, true);
+                }
             }
         }
         if let Some(a) = &m.announce {
@@ -300,3 +307,5 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
     poly::outline(&poly::chamfer(x0, y0, d, d, cut), 1.4 * s, frame);
     draw_line(x0 + cut, y0 + 1.0 * s, x0 + d - cut, y0 + 1.0 * s, 0.7 * s, Color::new(1.0, 1.0, 1.0, 0.35));
 }
+
+fn poly_pt(p: impl Fn(f32, f32) -> Vec2, x: f32, y: f32) -> Vec2 { p(x, y) }

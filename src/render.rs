@@ -49,12 +49,12 @@ impl Gfx {
 pub struct DrawOpts { pub alpha: f32, pub add: bool, pub flash: f32, pub tint: Color, pub angle: f32, pub vflip: bool }
 impl Default for DrawOpts { fn default() -> Self { DrawOpts { alpha: 1.0, add: false, flash: 0.0, tint: WHITE, angle: 0.0, vflip: false } } }
 
-pub struct MatchRenderer { pub debug: bool, pub particles: Vec<Particle>, /** ids of human-controlled fighters (get the ▼ marker) */ pub human: Vec<u32> }
+pub struct MatchRenderer { pub debug: bool, pub particles: Vec<Particle>, /** ids of human-controlled fighters (get the ▼ marker) */ pub human: Vec<u32>, pub squash: Vec<[f32; 2]> }
 
 impl MatchRenderer {
     pub fn new(stage: &Stage) -> Self {
         let particles = match &stage.art { StageArt::Procedural { particles, .. } => particles.clone(), _ => vec![] };
-        MatchRenderer { debug: false, particles, human: vec![] }
+        MatchRenderer { debug: false, particles, human: vec![], squash: vec![] }
     }
     fn sx(m: &Match, x: f32) -> f32 { x - m.camera.x + m.view_w / 2.0 }
     fn sy(m: &Match, y: f32) -> f32 { y - m.camera.y + m.stage.zoffset }
@@ -101,6 +101,7 @@ impl MatchRenderer {
         shx += tx; shy += ty;
         // cinematic camera: punch-in on hits, KO / super zoom about the action
         let (s0, ox0, oy0) = (g.view_scale, g.ox, g.oy);
+        self.squash = (0..m.fighters.len()).map(|i| if gain > 0.0 { vfx.squash_scale(i) } else { [1.0, 1.0] }).collect();
         let (zoom, focus) = vfx.camera(m, gain);
         let (fvx, fvy) = (focus.0 - m.camera.x + m.view_w / 2.0, focus.1 - m.camera.y + m.stage.zoffset);
         let (px, py) = (ox0 + fvx * s0, oy0 + fvy * s0);
@@ -138,7 +139,7 @@ impl MatchRenderer {
         items.sort_by_key(|x| (x.0, x.1));
         for (_, _, it) in items {
             match it {
-                It::F(i) => self.draw_fighter(g, m, &m.fighters[i], shx, shy),
+                It::F(i) => self.draw_fighter(g, m, &m.fighters[i], i, shx, shy),
                 It::P(i) => { let p = &m.projectiles[i]; if let Some(fr) = p.cur.frame() { Self::draw_sprite(g, m, &p.cur.def, fr, p.pos.x, p.pos.y, p.facing, p.lscl, p.scale, &DrawOpts::default(), shx, shy); } }
                 It::E(i) => { let e = &m.explods[i]; if let Some(fr) = e.cur.frame() { Self::draw_sprite(g, m, &e.cur.def, fr, e.pos.x, e.pos.y, e.facing, e.lscl, e.scale, &DrawOpts { add: e.add, vflip: e.vfacing < 0.0, ..Default::default() }, shx, shy); } }
             }
@@ -194,7 +195,7 @@ impl MatchRenderer {
         Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
     }
 
-    fn draw_fighter(&self, g: &mut Gfx, m: &Match, f: &Fighter, shx: f32, shy: f32) {
+    fn draw_fighter(&self, g: &mut Gfx, m: &Match, f: &Fighter, fi: usize, shx: f32, shy: f32) {
         if f.has_assert(ume_engine::fighter::asf::INVISIBLE) { return; }
         if let Some(ai) = &f.after_image {
             let n = ai.trail.len();
@@ -221,7 +222,9 @@ impl MatchRenderer {
                 Self::draw_sprite(g, m, &f.anim_def, fr, x + dx, f.pos.y + dy, f.facing, f.lscl, f.draw_scale, &DrawOpts { add: true, alpha: pulse * 0.28, tint: Color::new(1.0, 0.8, 0.3, 1.0), ..Default::default() }, shx, shy);
             }
         }
-        Self::draw_sprite(g, m, &f.anim_def, fr, x, f.pos.y, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
+        let sq = self.squash.get(fi).copied().unwrap_or([1.0, 1.0]);
+        let ds = [f.draw_scale[0] * sq[0], f.draw_scale[1] * sq[1]];
+        Self::draw_sprite(g, m, &f.anim_def, fr, x, f.pos.y, f.facing, f.lscl, ds, &o, shx, shy);
     }
 
     fn draw_stage(&mut self, g: &mut Gfx, m: &Match, st: &Stage, front: bool, shx: f32, shy: f32) {

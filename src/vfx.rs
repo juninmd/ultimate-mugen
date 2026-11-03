@@ -7,9 +7,21 @@ use macroquad::prelude::*;
 use ume_engine::matchs::{Event, Match};
 
 #[derive(Clone, Copy, PartialEq)]
-enum Kind { Spark, Glow, Dust, Debris, Ember }
+enum Kind { Spark, Glow, Dust, Debris, Ember, Slash }
 struct P { k: Kind, x: f32, y: f32, vx: f32, vy: f32, g: f32, life: f32, max: f32, size: f32, col: [f32; 3], rot: f32, vrot: f32 }
 struct Ring { x: f32, y: f32, r0: f32, r1: f32, t: f32, dur: f32, w: f32, col: [f32; 3] }
+/// SF6-style colour paint splash: irregular blob + droplets, spawned *behind the attacker* so the source of the hit reads clearly.
+struct Splat { x: f32, y: f32, dir: f32, t: f32, dur: f32, col: [f32; 3], radii: [f32; 14], drops: [(f32, f32, f32); 7], size: f32 }
+/// Dynamic stage lighting from impacts (Tekken 8: hit effects "light up the stage like fireworks").
+struct Light { x: f32, y: f32, r: f32, t: f32, dur: f32, col: [f32; 3] }
+#[derive(Clone, Copy, PartialEq, Default)]
+pub enum Weather { #[default] None, Rain, Fireflies, Wisps, Wind }
+impl Weather {
+    pub fn for_stage(name: &str) -> Weather {
+        let n = name.to_lowercase();
+        if n.contains("neo-metr") || n.contains("neon") { Weather::Rain } else if n.contains("bambu") { Weather::Fireflies } else if n.contains("espírit") || n.contains("espirit") { Weather::Wisps } else if n.contains("planalto") { Weather::Wind } else { Weather::None }
+    }
+}
 struct Float { x: f32, y: f32, t: f32, text: String, size: f32, col: [f32; 3] }
 pub struct Banner { pub text: String, pub t: f32, pub col: [f32; 3], pub sub: String }
 
@@ -18,9 +30,10 @@ struct Snap { grounded: bool, vy: f32, vx: f32, move_type: char }
 
 /// What the post-processing pass should do this frame.
 #[derive(Clone, Copy, Default)]
-pub struct FxParams { pub chroma: f32, pub vignette: f32, pub bloom: f32, pub saturation: f32, pub flash: f32, pub radial: f32, pub center: [f32; 2], pub tint: [f32; 3] }
+pub struct FxParams { pub invert: f32, pub chroma: f32, pub vignette: f32, pub bloom: f32, pub saturation: f32, pub flash: f32, pub radial: f32, pub center: [f32; 2], pub tint: [f32; 3] }
 
 pub struct Vfx {
+    splats: Vec<Splat>, lights: Vec<Light>, pub weather: Weather, clock: f32, invert_t: f32, dist_zoom: f32, dist_target: f32,
     parts: Vec<P>, rings: Vec<Ring>, floats: Vec<Float>, pub banners: Vec<Banner>,
     pub trauma: f32, punch: f32, ko_t: f32, ko_focus: (f32, f32), pub slow_t: f32,
     chroma: f32, flash: f32, radial: f32, vig: f32, lines: f32, lines_col: [f32; 3], sat_pulse: f32,
@@ -32,7 +45,7 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 { a + (b - a) * t }
 
 impl Vfx {
     pub fn new() -> Self {
-        Vfx { parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
+        Vfx { splats: vec![], lights: vec![], weather: Weather::None, clock: 0.0, invert_t: 0.0, dist_zoom: 0.0, dist_target: 0.0, parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
             lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, snap: [Snap::default(); 2], pre_mt: [' '; 2], rng: 0x9e37_79b9, tick: 0 }
     }
     fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
@@ -72,6 +85,23 @@ impl Vfx {
             self.parts.push(P { k: Kind::Debris, x, y, vx, vy, g: 0.22, life, max: life, size: sz, col, rot: 0.0, vrot: vr });
         }
     }
+    fn splat(&mut self, x: f32, y: f32, dir: f32, size: f32, col: [f32; 3]) {
+        let mut radii = [0.0; 14];
+        for (i, r) in radii.iter_mut().enumerate() { *r = if i % 2 == 0 { self.rr(0.75, 1.15) } else { self.rr(0.35, 0.65) }; }
+        let mut drops = [(0.0, 0.0, 0.0); 7];
+        for d in drops.iter_mut() { *d = (self.rr(-1.2, 1.2), self.rr(1.1, 1.9), self.rr(0.04, 0.12)); }
+        self.splats.push(Splat { x, y, dir, t: 0.0, dur: 0.6, col, radii, drops, size });
+    }
+    fn light(&mut self, x: f32, y: f32, r: f32, dur: f32, col: [f32; 3]) { self.lights.push(Light { x, y, r, t: 0.0, dur, col }); }
+    /// Anime "impact frame" (colour inversion for a few ms) — used on super activation and KO.
+    pub fn force_impact(&mut self) { self.invert_t = 0.075; }
+    fn slashes(&mut self, x: f32, y: f32, dir: f32, n: usize, len: f32, col: [f32; 3]) {
+        for i in 0..n {
+            let a = (if dir >= 0.0 { 0.0 } else { std::f32::consts::PI }) + self.rr(-0.9, 0.9) + if i % 2 == 0 { 0.0 } else { 3.14159 };
+            let l = len * self.rr(0.6, 1.2);
+            self.parts.push(P { k: Kind::Slash, x, y, vx: 0.0, vy: 0.0, g: 0.0, life: 0.13, max: 0.13, size: l, col, rot: a, vrot: 0.0 });
+        }
+    }
     fn ring(&mut self, x: f32, y: f32, r1: f32, dur: f32, w: f32, col: [f32; 3]) { self.rings.push(Ring { x, y, r0: 2.0, r1, t: 0.0, dur, w, col }); }
     fn glow(&mut self, x: f32, y: f32, size: f32, life: f32, col: [f32; 3]) { self.parts.push(P { k: Kind::Glow, x, y, vx: 0.0, vy: 0.0, g: 0.0, life, max: life, size, col, rot: 0.0, vrot: 0.0 }); }
     fn float(&mut self, x: f32, y: f32, text: String, size: f32, col: [f32; 3]) { self.floats.push(Float { x, y, t: 0.0, text, size, col }); }
@@ -107,6 +137,8 @@ impl Vfx {
                 self.spark_burst(x, y, dir, n, 3.0 + mag * 4.5, [1.0, 0.62, 0.15], 1.0);
                 self.spark_burst(x, y, dir, 4, 5.5, [1.0, 1.0, 0.9], 0.4);
                 self.glow(x, y, 16.0 + mag * 14.0, 0.14, [1.0, 0.75, 0.35]);
+                self.slashes(x, y, dir, 3 + (mag * 3.0) as usize, 22.0 + mag * 16.0, [1.0, 0.95, 0.8]);
+                self.light(x, y - 6.0, 70.0 + mag * 70.0, 0.2, [1.0, 0.7, 0.35]);
                 self.ring(x, y, 20.0 + mag * 26.0, 0.28, 1.8, [1.0, 0.85, 0.5]);
                 self.trauma = (self.trauma + 0.16 + mag * 0.22).min(1.0);
                 self.punch = self.punch.max(0.012 + mag * 0.018);
@@ -115,6 +147,9 @@ impl Vfx {
                     self.ring(x, y, 52.0, 0.4, 2.6, [1.0, 1.0, 1.0]);
                     self.debris(x, y + 10.0, 8, [0.8, 0.72, 0.6]);
                     self.lines = 1.0; self.lines_col = [1.0, 0.95, 0.8];
+                    // SF6-style colour paint, built behind the attacker so the source of the hit is readable
+                    let (ax, scol) = (m.roots().nth(*attacker_side).map(|a| a.pos.x).unwrap_or(x - dir * 30.0), if *attacker_side == 0 { [0.13, 0.78, 1.0] } else { [1.0, 0.25, 0.55] });
+                    self.splat(ax - dir * 6.0, y + 6.0, dir, 34.0 + mag * 22.0, scol);
                     self.flash = self.flash.max(0.18);
                     self.punch = self.punch.max(0.04);
                 }
@@ -132,6 +167,8 @@ impl Vfx {
                 }
                 self.flash = self.flash.max(0.55); self.chroma = self.chroma.max(1.0); self.radial = 1.0; self.trauma = (self.trauma + 0.4).min(1.0);
                 self.lines = 1.4; self.lines_col = [1.0, 0.85, 0.4];
+                self.invert_t = 0.075;
+                if let Some((x, y, f)) = Self::chest(m, *side) { self.splat(x - f * 10.0, y + 8.0, f, 80.0, if *side == 0 { [0.13, 0.78, 1.0] } else { [1.0, 0.25, 0.55] }); self.light(x, y, 190.0, 0.45, [1.0, 0.85, 0.45]); }
                 self.banner("SUPER ARTS", "", [1.0, 0.82, 0.3]);
             }
             Event::Ko { loser_side } => {
@@ -141,10 +178,11 @@ impl Vfx {
                     self.ring(x, y, 130.0, 0.9, 4.0, [1.0, 0.25, 0.3]);
                     self.ring(x, y, 80.0, 0.6, 2.5, [1.0, 1.0, 1.0]);
                     self.glow(x, y, 60.0, 0.5, [1.0, 0.3, 0.3]);
+                    self.light(x, y, 220.0, 0.6, [1.0, 0.3, 0.3]);
                     self.spark_burst(x, y, 1.0, 26, 8.0, [1.0, 0.4, 0.3], 3.14);
                     self.debris(x, y + 12.0, 14, [0.7, 0.6, 0.55]);
                 }
-                self.flash = 0.9; self.chroma = 1.0; self.radial = 1.0; self.trauma = 1.0; self.vig = 1.0; self.lines = 1.6; self.lines_col = [1.0, 0.35, 0.3];
+                self.invert_t = 0.075; self.flash = 0.9; self.chroma = 1.0; self.radial = 1.0; self.trauma = 1.0; self.vig = 1.0; self.lines = 1.6; self.lines_col = [1.0, 0.35, 0.3];
                 let w = 1 - loser_side;
                 if m.roots().nth(w).is_some_and(|f| f.life >= f.life_max - 0.5) { self.banner("PERFECT!", "vitória sem sofrer dano", [1.0, 0.85, 0.2]); }
             }
@@ -157,6 +195,7 @@ impl Vfx {
     /// Per simulation tick: landing / run dust, super aura.
     pub fn tick(&mut self, m: &Match) {
         self.tick = self.tick.wrapping_add(1);
+        { let mut it = m.roots().take(2); if let (Some(a), Some(b)) = (it.next(), it.next()) { let d = (a.pos.x - b.pos.x).abs(); self.dist_target = ((260.0 - d) / 260.0).clamp(0.0, 1.0) * 0.07; } }
         for (side, f) in m.roots().enumerate().take(2) {
             let now = Snap { grounded: f.state_type != 'A', vy: f.vel.y, vx: f.vel.x, move_type: f.move_type };
             let prev = self.snap[side];
@@ -192,6 +231,13 @@ impl Vfx {
             if p.k == Kind::Dust { p.vx *= 0.94f32.powf(k); p.size += 0.05 * k; }
         }
         self.parts.retain(|p| p.life > 0.0);
+        self.clock += dt;
+        self.invert_t = (self.invert_t - dt).max(0.0);
+        self.dist_zoom += (self.dist_target - self.dist_zoom) * (3.0 * dt).min(1.0);
+        for sp in &mut self.splats { sp.t += dt; }
+        self.splats.retain(|s| s.t < s.dur);
+        for l in &mut self.lights { l.t += dt; }
+        self.lights.retain(|l| l.t < l.dur);
         for r in &mut self.rings { r.t += dt; }
         self.rings.retain(|r| r.t < r.dur);
         for f in &mut self.floats { f.t += dt; f.y -= 0.35 * k * (1.0 - (f.t / 0.9).min(1.0)); }
@@ -220,7 +266,7 @@ impl Vfx {
         };
         let ko = if self.ko_t > 0.0 { let e = (self.ko_t.min(1.0)).powf(0.6); e * 0.28 } else { 0.0 };
         let sup = self.super_t * 0.07;
-        let z = 1.0 + (self.punch + ko + sup) * gain;
+        let z = 1.0 + (self.punch + ko + sup + self.dist_zoom) * gain;
         let focus = if self.ko_t > 0.0 { let e = self.ko_t.min(1.0); (lerp(mid.0, self.ko_focus.0, e), lerp(mid.1, self.ko_focus.1, e)) } else { mid };
         (z, focus)
     }
@@ -233,6 +279,7 @@ impl Vfx {
 
     pub fn params(&self, gain: f32, focus_screen: (f32, f32), bloom: f32) -> FxParams {
         FxParams {
+            invert: if self.invert_t > 0.0 { gain.min(1.0) } else { 0.0 },
             chroma: (self.chroma * gain).min(1.5),
             vignette: 0.32 + self.vig * 0.45 * gain + self.super_t * 0.25 * gain,
             bloom: bloom * (0.55 + self.flash * 0.6 * gain),
@@ -241,6 +288,81 @@ impl Vfx {
             radial: (self.radial * 0.9 + self.super_t * 0.45) * gain,
             center: [focus_screen.0, focus_screen.1],
             tint: [1.0 + self.super_t * 0.05, 1.0 + self.super_t * 0.02 - self.sat_pulse * 0.04, 1.0 - self.sat_pulse * 0.08],
+        }
+    }
+
+    /// Behind the fighters: colour paint splashes.
+    pub fn draw_back(&self, g: &Gfx, m: &Match, shx: f32, shy: f32) {
+        let s = g.view_scale;
+        let tp = |x: f32, y: f32| vec2(g.ox + (x - m.camera.x + m.view_w / 2.0 + shx) * s, g.oy + (y - m.camera.y + m.stage.zoffset + shy) * s);
+        for sp in &self.splats {
+            let t = sp.t / sp.dur;
+            let e = 1.0 - (1.0 - (t * 3.0).min(1.0)).powi(3);
+            let a = if t < 0.55 { 1.0 } else { 1.0 - (t - 0.55) / 0.45 };
+            let c = tp(sp.x + sp.dir * sp.size * 0.35 * e, sp.y);
+            let n = sp.radii.len();
+            let pt = |i: usize, k: f32| { let ang = i as f32 / n as f32 * 6.2832 + if sp.dir < 0.0 { 3.14159 } else { 0.0 }; let stretch = 1.0 + 0.7 * ang.cos().max(0.0); vec2(c.x + ang.cos() * sp.radii[i % n] * sp.size * e * k * stretch * s, c.y + ang.sin() * sp.radii[i % n] * sp.size * e * k * 0.8 * s) };
+            for (k, col) in [(1.12, Color::new(0.06, 0.02, 0.12, 0.85 * a)), (1.0, Color::new(sp.col[0], sp.col[1], sp.col[2], 0.8 * a)), (0.55, Color::new(lerp(sp.col[0], 1.0, 0.55), lerp(sp.col[1], 1.0, 0.55), lerp(sp.col[2], 1.0, 0.55), 0.6 * a))] {
+                for i in 0..n { draw_triangle(c, pt(i, k), pt((i + 1) % n, k), col); }
+            }
+            for (ang, dist, rs) in sp.drops.iter() {
+                let a2 = ang + if sp.dir < 0.0 { 3.14159 } else { 0.0 };
+                let p = vec2(c.x + a2.cos() * dist * sp.size * e * s * 1.2, c.y + a2.sin() * dist * sp.size * e * s * 0.9);
+                draw_circle(p.x, p.y, rs * sp.size * s * 0.5 * e.min(1.0), Color::new(sp.col[0], sp.col[1], sp.col[2], 0.85 * a));
+            }
+        }
+    }
+
+    /// Screen-space ambient weather per stage: rain, fireflies, spirit wisps, wind streaks.
+    pub fn draw_weather(&self, gain: f32) {
+        if self.weather == Weather::None || gain <= 0.0 { return; }
+        let (w, h) = (screen_width(), screen_height());
+        let u = h / 720.0;
+        let t = self.clock;
+        let hash = |i: f32, k: f32| ((i * 12.9898 + k * 78.233).sin() * 43758.5453).fract().abs();
+        match self.weather {
+            Weather::Rain => {
+                gl_use_default_material();
+                for i in 0..170 {
+                    let f = i as f32;
+                    let (hx, hy, hs) = (hash(f, 1.0), hash(f, 2.0), hash(f, 3.0));
+                    let sp = (900.0 + hs * 500.0) * u;
+                    let len = (14.0 + hs * 22.0) * u;
+                    let y = (hy * h + t * sp) % (h + len) - len;
+                    let x = (hx * (w + 200.0) - t * 140.0 * u).rem_euclid(w + 200.0) - 100.0 + (y / h) * 90.0 * u;
+                    draw_line(x, y, x - len * 0.16, y + len, (1.0 * u).max(1.0), Color::new(0.7, 0.85, 1.0, 0.16 + hs * 0.14));
+                }
+                // ground splashes
+                for i in 0..22 {
+                    let f = i as f32 + 300.0;
+                    let ph = (t * (1.2 + hash(f, 4.0)) + hash(f, 5.0)).fract();
+                    let x = hash(f, 6.0) * w; let y = h * (0.80 + hash(f, 7.0) * 0.17);
+                    draw_circle_lines(x, y, (2.0 + ph * 9.0) * u, (1.0 * u).max(1.0), Color::new(0.75, 0.9, 1.0, (1.0 - ph) * 0.35));
+                }
+            }
+            Weather::Fireflies | Weather::Wisps => {
+                let col = if self.weather == Weather::Fireflies { (0.85, 1.0, 0.4) } else { (0.45, 0.95, 0.9) };
+                gl_use_default_material();
+                for i in 0..26 {
+                    let f = i as f32;
+                    let (hx, hy, hs) = (hash(f, 8.0), hash(f, 9.0), hash(f, 10.0));
+                    let x = hx * w + (t * (0.3 + hs) + f).sin() * 40.0 * u;
+                    let y = if self.weather == Weather::Wisps { h - ((hy * h + t * (18.0 + hs * 26.0) * u) % h) } else { hy * h * 0.8 + h * 0.1 + (t * (0.4 + hs * 0.5) + f * 1.7).cos() * 30.0 * u };
+                    let blink = 0.5 + 0.5 * (t * (1.5 + hs * 2.5) + f * 2.3).sin();
+                    for k in 0..4 { draw_circle(x, y, (6.0 - k as f32 * 1.4) * u * (0.8 + hs * 0.6), Color::new(col.0, col.1, col.2, 0.05 * blink + 0.06 * k as f32 * blink)); }
+                }
+            }
+            Weather::Wind => {
+                for i in 0..24 {
+                    let f = i as f32;
+                    let (hy, hs) = (hash(f, 11.0), hash(f, 12.0));
+                    let len = (60.0 + hs * 140.0) * u;
+                    let x = ((hash(f, 13.0) * (w + 400.0)) + t * (260.0 + hs * 360.0) * u) % (w + 400.0) - 200.0;
+                    let y = hy * h * 0.85 + (t * 0.8 + f).sin() * 6.0 * u;
+                    draw_line(x, y, x - len, y + len * 0.05, (1.0 * u).max(1.0), Color::new(1.0, 0.95, 0.85, 0.08 + hs * 0.08));
+                }
+            }
+            Weather::None => {}
         }
     }
 
@@ -267,6 +389,21 @@ impl Vfx {
                 Kind::Ember => draw_circle(c.x, c.y, p.size * s * (0.6 + 0.4 * a), Color::new(p.col[0], p.col[1], p.col[2], a * 0.9)),
                 _ => { for i in 0..6 { let t = i as f32 / 6.0; draw_circle(c.x, c.y, p.size * s * (1.0 - t * 0.85), Color::new(p.col[0], p.col[1], p.col[2], a * 0.11)); } }
             }
+        }
+        for p in self.parts.iter().filter(|p| p.k == Kind::Slash) {
+            let a = (p.life / p.max).clamp(0.0, 1.0);
+            let c = tp(p.x, p.y);
+            let (sn, cs) = p.rot.sin_cos();
+            let l = p.size * s * (1.3 - 0.3 * a);
+            let w = (1.4 * a + 0.3) * s;
+            let tip = vec2(c.x + cs * l, c.y + sn * l);
+            let (nx, ny) = (-sn * w, cs * w);
+            draw_triangle(vec2(c.x + nx, c.y + ny), vec2(c.x - nx, c.y - ny), tip, Color::new(p.col[0], p.col[1], p.col[2], a));
+        }
+        for l in &self.lights {
+            let t = l.t / l.dur; let a = (1.0 - t).powi(2);
+            let c = tp(l.x, l.y);
+            for i in 0..9 { let k = 1.0 - i as f32 / 9.0; draw_circle(c.x, c.y, l.r * s * k, Color::new(l.col[0], l.col[1], l.col[2], 0.032 * a)); }
         }
         for r in &self.rings {
             let t = r.t / r.dur; let e = 1.0 - (1.0 - t).powi(3);

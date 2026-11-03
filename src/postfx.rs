@@ -37,6 +37,7 @@ uniform vec4 P0; // chroma, vignette, bloom, grain
 uniform vec4 P1; // saturation, contrast, flash, time
 uniform vec4 P2; // radial, cx, cy, aspect
 uniform vec4 P3; // tint rgb, bloom flip
+uniform vec4 P4; // invert (anime impact frame)
 float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 void main() {
   vec2 c = uv - P2.yz;
@@ -63,6 +64,7 @@ void main() {
   col *= P3.xyz;
   col *= 1.0 - smoothstep(0.30, 0.95, r) * P0.y;
   col += vec3(P1.z);
+  if (P4.x > 0.5) { float l2 = dot(col, vec3(0.299, 0.587, 0.114)); col = mix(vec3(1.0) - col, vec3(smoothstep(0.35, 0.65, 1.0 - l2)), 0.55); }
   col += (hash(uv * 1024.0 + P1.w) - 0.5) * P0.w;
   gl_FragColor = vec4(col, 1.0);
 }";
@@ -90,7 +92,7 @@ impl PostFx {
             scene: None, half: None, size: (0, 0),
             bright: mat(BRIGHT, vec![], vec![]),
             blur: mat(BLUR, vec![("Dir", UniformType::Float2)], vec![]),
-            comp: mat(COMPOSITE, vec![("P0", UniformType::Float4), ("P1", UniformType::Float4), ("P2", UniformType::Float4), ("P3", UniformType::Float4)], vec!["Bloom"]),
+            comp: mat(COMPOSITE, vec![("P0", UniformType::Float4), ("P1", UniformType::Float4), ("P2", UniformType::Float4), ("P3", UniformType::Float4), ("P4", UniformType::Float4)], vec!["Bloom"]),
             level: 2, active: false,
         }
     }
@@ -155,6 +157,7 @@ impl PostFx {
         self.comp.set_uniform("P1", vec4(p.saturation, 1.07, p.flash, (t * 60.0).floor() % 97.0));
         self.comp.set_uniform("P2", vec4(p.radial, p.center[0], p.center[1], w / h));
         self.comp.set_uniform("P3", vec4(p.tint[0], p.tint[1], p.tint[2], BLOOM_FLIP));
+        self.comp.set_uniform("P4", vec4(p.invert, 0.0, 0.0, 0.0));
         gl_use_material(&self.comp);
         draw_texture_ex(&scene.texture, 0.0, 0.0, WHITE, DrawTextureParams { dest_size: Some(vec2(w, h)), flip_y: SCENE_FLIP, ..Default::default() });
         gl_use_default_material();

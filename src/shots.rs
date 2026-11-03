@@ -29,7 +29,7 @@ async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &st
     let s = session.as_mut().unwrap();
     for _ in 0..ticks { s.step_visual(c, audio); }
     match want {
-        "super" => {
+        "super" | "impact" => {
             for f in s.m.fighters.iter_mut() { f.power = 3000.0; }
             for _ in 0..600 { if s.m.fighters[0].ctrl && s.m.fighters[0].state_no == 0 { break; } s.step_visual(c, audio); }
             let d = s.m.fighters[0].def.clone();
@@ -38,6 +38,7 @@ async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &st
             for _ in 0..1500 { s.step_visual(c, audio); if s.m.pause.as_ref().is_some_and(|p| p.is_super && p.time < 24) { ok = true; break; } }
             if ok { for _ in 0..16 { s.step_visual(c, audio); } }
             println!("{name}: super caught = {ok}");
+            if want == "impact" { s.vfx.force_impact(); }
         }
         "hit" => { for _ in 0..1200 { s.step_visual(c, audio); if !s.m.explods.is_empty() && s.m.fighters.iter().any(|f| f.move_type == 'H' && f.hit_shake > 2 && !f.ghv.guarded) { break; } } }
         "proj" => { for _ in 0..1500 { s.step_visual(c, audio); if s.m.projectiles.iter().any(|p| !p.dying && p.time > 8) { break; } } }
@@ -75,6 +76,8 @@ pub async fn run(app: &mut App, dir: &str) {
     fight(app, dir, "09-fight-bamboo", "lian", "sylene", "bamboo", 400, "proj").await;
     fight(app, dir, "10-fight-volcano", "garan", "marlow", "volcano", 500, "hit").await;
     fight(app, dir, "20-fx-ko", "daichi", "valdric", "dojo", 200, "ko").await;
+    fight(app, dir, "23-impact-frame", "akio", "bruno", "spirit", 120, "impact").await;
+    fight(app, dir, "24-paint-splash", "kaito", "garan", "plains", 240, "hit").await;
     fight(app, dir, "21-fx-neon-hit", "volta", "kaito", "neon", 200, "hit").await;
     fight(app, dir, "11-hitboxes", "shion", "kaito", "plains", 200, "boxes").await;
     fight(app, dir, "11b-fight-kaname-valdric", "kaname", "valdric", "spirit", 300, "hit").await;

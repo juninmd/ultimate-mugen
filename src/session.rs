@@ -43,7 +43,9 @@ impl Session {
         m.add_player(p2, 1, lv(&pilots[1]), if same { 2 } else { 1 });
         m.start_round();
         let r = MatchRenderer::new(&stage);
-        Session { m, stage, r, hud: Hud::new(), vfx: Vfx::new(), pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0 }
+        let mut vfx = Vfx::new();
+        vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
+        Session { m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0 }
     }
 
     fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {

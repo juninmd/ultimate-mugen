@@ -1,6 +1,6 @@
 //! Audio: procedurally synthesized SFX + battle music (WAV generated at runtime), MUGEN .snd samples.
 use crate::sound_mix::{decode, pan_bucket, Pcm};
-use macroquad::audio::{load_sound_from_bytes, play_sound, set_sound_volume, stop_sound, PlaySoundParams, Sound};
+use crate::gfx::audio::{load_sound_from_bytes, play_sound, set_sound_volume, stop_sound, PlaySoundParams, Sound};
 use std::collections::HashMap;
 use std::f32::consts::PI;
 
@@ -271,7 +271,7 @@ impl Audio {
         }
     }
     fn start(&mut self, s: &Sound, secs: f64, o: SoundOpts) {
-        let now = macroquad::time::get_time();
+        let now = crate::gfx::get_time();
         if o.channel >= 0 && o.low_priority && self.channels.get(&(o.owner, o.channel)).is_some_and(|(_, end)| *end > now) { return; }
         let slot = if o.channel >= 0 { Some(o.channel) } else if o.looping { self.loop_seq -= 1; Some(self.loop_seq) } else { None };
         if let Some(ch) = slot {
@@ -288,7 +288,7 @@ impl Audio {
             self.duck_now += (self.duck - self.duck_now) * 0.12;
             let v = self.volume * 0.35 * self.duck_now;
             if let Some(at) = m.switch_at {
-                if macroquad::time::get_time() >= at {
+                if crate::gfx::get_time() >= at {
                     m.switch_at = None;
                     if let Some(i) = m.intro.take() { stop_sound(&i); }
                     play_sound(&m.body, PlaySoundParams { looped: true, volume: v });
@@ -346,7 +346,7 @@ impl Audio {
         let intro_pcm = p.slice(0, end);
         let (Ok(intro), Ok(body)) = (load_sound_from_bytes(&intro_pcm.to_wav()).await, load_sound_from_bytes(&p.slice(lp.start, end).to_wav()).await) else { return false };
         play_sound(&intro, PlaySoundParams { looped: false, volume: v });
-        let at = macroquad::time::get_time() + intro_pcm.seconds();
+        let at = crate::gfx::get_time() + intro_pcm.seconds();
         self.playing = Some(Music { intro: Some(intro), body, switch_at: Some(at) });
         self.duck_now = 1.0;
         true

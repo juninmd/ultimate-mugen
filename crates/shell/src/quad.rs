@@ -14,7 +14,20 @@ thread_local! {
     static FRAME: Cell<*mut ()> = const { Cell::new(std::ptr::null_mut()) };
     static DEFAULT_FONT: RefCell<Option<Font>> = const { RefCell::new(None) };
     static RNG: Cell<u64> = const { Cell::new(0x9e37_79b9_7f4a_7c15) };
+    static GENERATION: Cell<u32> = const { Cell::new(0) };
+    static ATLAS_FULL: Cell<bool> = const { Cell::new(false) };
 }
+
+fn generation() -> u32 { GENERATION.with(|g| g.get()) }
+
+fn reset_atlas(f: &mut Frame) {
+    f.gpu.rgba_atlas.clear();
+    if let Some(c) = ume_render::Canvas::new(&f.gpu.renderer, &f.gpu.queue, &mut f.gpu.rgba_atlas) { *f.canvas = c; }
+    GENERATION.with(|g| g.set(g.get().wrapping_add(1)));
+    ATLAS_FULL.with(|a| a.set(false));
+}
+
+pub fn reset_textures() { ATLAS_FULL.with(|a| a.set(true)); }
 
 fn with<R>(f: impl FnOnce(&mut Frame<'static>) -> R) -> R {
     let p = FRAME.with(|c| c.get());
@@ -26,6 +39,7 @@ struct AsyncGame { main: Option<Pin<Box<dyn Future<Output = ()>>>> }
 
 impl Game for AsyncGame {
     fn frame(&mut self, f: &mut Frame) {
+        if ATLAS_FULL.with(|a| a.get()) { reset_atlas(f); }
         FRAME.with(|c| c.set(f as *mut Frame as *mut ()));
         let done = match self.main.as_mut() {
             Some(m) => m.as_mut().poll(&mut Context::from_waker(Waker::noop())).is_ready(),
@@ -84,7 +98,8 @@ impl Rect {
 
 pub fn screen_width() -> f32 { with(|f| f.size[0]) }
 pub fn screen_height() -> f32 { with(|f| f.size[1]) }
-pub fn dpi_scale() -> f32 { with(|f| f.scale) }
+pub fn dpi_scale() -> f32 { 1.0 }
+pub fn window_scale() -> f32 { with(|f| f.scale) }
 pub fn get_time() -> f64 { with(|f| f.time) }
 pub fn get_frame_time() -> f32 { with(|f| f.dt) }
 pub fn get_fps() -> i32 { with(|f| if f.dt > 0.0 { (1.0 / f.dt).round() as i32 } else { 0 }) }
@@ -93,6 +108,17 @@ pub fn set_fullscreen(on: bool) { with(|f| f.fullscreen = Some(on)) }
 pub fn set_post(p: Option<PostParams>) { with(|f| f.post = p) }
 pub fn set_blend(b: Blend) { with(|f| f.canvas.blend = b) }
 pub fn quit() { with(|f| f.quit = true) }
+pub fn set_scissor(r: Option<(i32, i32, i32, i32)>) { with(|f| f.canvas.batch.scissor = r.map(|(x, y, w, h)| [x.max(0) as u32, y.max(0) as u32, w.max(0) as u32, h.max(0) as u32])) }
+pub fn mouse_wheel() -> (f32, f32) { with(|f| (f.input.wheel[0], f.input.wheel[1])) }
+pub fn mouse_delta_position() -> Vec2 { with(|f| Vec2::from(f.input.mouse_delta)) }
+
+pub struct ScreenData;
+
+impl ScreenData {
+    pub fn export_png(&self, path: &str) { with(|f| f.screenshot = Some(path.to_string())) }
+}
+
+pub fn get_screen_data() -> ScreenData { ScreenData }
 
 pub fn clear_background(c: Color) {
     with(|f| {
@@ -134,7 +160,7 @@ fn draw_ellipse_poly(x: f32, y: f32, rx: f32, ry: f32, rot: f32, n: u32, c: Colo
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FilterMode { Linear, Nearest }
 
-struct TexInner { rect: Option<ume_render::Rect>, w: u32, h: u32 }
+struct TexInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Rc<[u8]>, w: u32, h: u32 }
 
 #[derive(Clone)]
 pub struct Texture2D(Rc<TexInner>);
@@ -142,18 +168,23 @@ pub struct Texture2D(Rc<TexInner>);
 impl Texture2D {
     pub fn from_rgba8(w: u16, h: u16, rgba: &[u8]) -> Texture2D {
         let (w, h) = (w as u32, h as u32);
-        let rect = with(|f| {
-            let r = f.gpu.rgba_atlas.alloc(w, h)?;
-            f.gpu.renderer.upload_rgba(&f.gpu.queue, r, &rgba[..(w * h * 4) as usize]);
-            Some(r)
-        });
-        Texture2D(Rc::new(TexInner { rect, w, h }))
+        Texture2D(Rc::new(TexInner { slot: Cell::new(None), pixels: rgba[..(w * h * 4) as usize].into(), w, h }))
     }
+
+    fn rect(&self, f: &mut Frame) -> Option<ume_render::Rect> {
+        let gen = generation();
+        if let Some((g, r)) = self.0.slot.get() { if g == gen { return Some(r); } }
+        let Some(r) = f.gpu.rgba_atlas.alloc(self.0.w, self.0.h) else { ATLAS_FULL.with(|a| a.set(true)); return None };
+        f.gpu.renderer.upload_rgba(&f.gpu.queue, r, &self.0.pixels);
+        self.0.slot.set(Some((gen, r)));
+        Some(r)
+    }
+
     pub fn width(&self) -> f32 { self.0.w as f32 }
     pub fn height(&self) -> f32 { self.0.h as f32 }
     pub fn size(&self) -> Vec2 { vec2(self.width(), self.height()) }
     pub fn set_filter(&self, _: FilterMode) {}
-    pub fn is_resident(&self) -> bool { self.0.rect.is_some() }
+    pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == generation()) }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -162,10 +193,10 @@ pub struct DrawTextureParams { pub dest_size: Option<Vec2>, pub source: Option<R
 pub fn draw_texture(t: &Texture2D, x: f32, y: f32, c: Color) { draw_texture_ex(t, x, y, c, DrawTextureParams::default()) }
 
 pub fn draw_texture_ex(t: &Texture2D, x: f32, y: f32, c: Color, p: DrawTextureParams) {
-    let Some(r) = t.0.rect else { return };
     let src = p.source.unwrap_or(Rect::new(0.0, 0.0, t.width(), t.height()));
     let size = p.dest_size.unwrap_or(vec2(src.w, src.h));
     with(|f| {
+        let Some(r) = t.rect(f) else { return };
         let [aw, ah] = f.gpu.renderer.atlas_size.map(|v| v as f32);
         let (mut u0, mut v0) = ((r.x as f32 + src.x) / aw, (r.y as f32 + src.y) / ah);
         let (mut u1, mut v1) = ((r.x as f32 + src.x + src.w) / aw, (r.y as f32 + src.y + src.h) / ah);
@@ -201,8 +232,8 @@ pub struct Mesh { pub vertices: Vec<Vertex>, pub indices: Vec<u16>, pub texture:
 pub fn draw_mesh(m: &Mesh) {
     with(|f| {
         let [aw, ah] = f.gpu.renderer.atlas_size.map(|v| v as f32);
+        let rect = match m.texture.as_ref() { Some(t) => match t.rect(f) { Some(r) => Some(r), None => return }, None => None };
         let white = f.canvas.white_uv();
-        let rect = m.texture.as_ref().and_then(|t| t.0.rect);
         let verts: Vec<ume_render::Vertex> = m.vertices.iter().map(|v| {
             let uv = match rect { Some(r) => [(r.x as f32 + v.uv.x * r.w as f32) / aw, (r.y as f32 + v.uv.y * r.h as f32) / ah], None => white };
             ume_render::Vertex { pos: [v.position.x, v.position.y], uv, pal: RGBA_SPRITE, mul: v.color.map(|c| c as f32 / 255.0), add: [0.0; 4] }
@@ -214,13 +245,13 @@ pub fn draw_mesh(m: &Mesh) {
 }
 
 #[derive(Clone)]
-pub struct Font(Rc<RefCell<text::Font>>);
+pub struct Font(Rc<RefCell<(text::Font, u32)>>);
 
 impl Font {
     pub fn set_filter(&mut self, _: FilterMode) {}
 }
 
-pub fn load_ttf_font_from_bytes(bytes: &[u8]) -> Result<Font, String> { text::Font::from_bytes(bytes).map(|f| Font(Rc::new(RefCell::new(f)))) }
+pub fn load_ttf_font_from_bytes(bytes: &[u8]) -> Result<Font, String> { text::Font::from_bytes(bytes).map(|f| Font(Rc::new(RefCell::new((f, generation()))))) }
 
 pub fn set_default_font(f: Font) { DEFAULT_FONT.with(|d| *d.borrow_mut() = Some(f)); }
 
@@ -238,7 +269,7 @@ impl Default for TextParams<'_> {
 
 pub fn measure_text(text: &str, font: Option<&Font>, font_size: u16, font_scale: f32) -> TextDimensions {
     let Some(f) = font_or_default(font) else { return TextDimensions::default() };
-    let f = f.0.borrow();
+    let f = &f.0.borrow().0;
     let px = font_size as f32 * font_scale;
     let [width, height] = f.measure(text, px);
     TextDimensions { width, height, offset_y: f.ascent(px) }
@@ -247,8 +278,15 @@ pub fn measure_text(text: &str, font: Option<&Font>, font_size: u16, font_scale:
 pub fn draw_text_ex(text: &str, x: f32, y: f32, p: TextParams) -> TextDimensions {
     let Some(font) = font_or_default(p.font) else { return TextDimensions::default() };
     let px = p.font_size as f32 * p.font_scale;
-    let width = with(|f| font.0.borrow_mut().draw(f.gpu, f.canvas, text, x, y, px, p.color.render()));
-    let fb = font.0.borrow();
+    let width = with(|f| {
+        let mut fb = font.0.borrow_mut();
+        let gen = generation();
+        if fb.1 != gen { fb.0.clear_cache(); fb.1 = gen; }
+        let w = fb.0.draw(f.gpu, f.canvas, text, x, y, px, p.color.render());
+        if fb.0.atlas_full() { ATLAS_FULL.with(|a| a.set(true)); }
+        w
+    });
+    let fb = &font.0.borrow().0;
     TextDimensions { width, height: fb.measure("", px)[1], offset_y: fb.ascent(px) }
 }
 

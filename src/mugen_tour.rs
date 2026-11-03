@@ -2,7 +2,7 @@
 //! Captures the select grid, then CPU-vs-CPU frames whenever a projectile / effect / airborne hit is on screen.
 use crate::app::{App, Mode, Screen};
 use crate::shots::{find, stage};
-use macroquad::prelude::*;
+use crate::gfx::*;
 
 async fn grab(app: &mut App, dir: &str, name: &str) {
     for i in 0..2 {

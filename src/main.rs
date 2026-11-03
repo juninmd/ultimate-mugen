@@ -1,15 +1,17 @@
-//! Ultimate MUGEN — modern 2D fighting engine (Rust + macroquad), MUGEN-compatible.
+//! Ultimate MUGEN — modern 2D fighting engine (Rust + wgpu on desktop), MUGEN-compatible.
 mod app;
 mod audio;
 #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
 mod netlink;
 mod sound_mix;
 mod controls;
+mod gfx;
 mod gamepad;
 mod hud;
 mod registry;
 mod render;
 mod poly;
+#[cfg_attr(any(target_arch = "wasm32", target_os = "android", target_os = "ios"), path = "postfx_gl.rs")]
 mod postfx;
 mod session;
 mod settings;
@@ -23,9 +25,14 @@ mod ui;
 mod update;
 mod vfx;
 
-use macroquad::prelude::*;
+use crate::gfx::*;
 
-fn conf() -> Conf {
+#[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+type WindowConf = ume_shell::Config;
+#[cfg(any(target_arch = "wasm32", target_os = "android", target_os = "ios"))]
+type WindowConf = Conf;
+
+fn conf() -> WindowConf {
     // window size: saved setting, overridable with `--res 3840x2160`, `--4k`, `--fullscreen`
     let args: Vec<String> = std::env::args().collect();
     // headless probes (no window): used by the release pipeline to verify the stamped version and the published manifest
@@ -46,6 +53,9 @@ fn conf() -> Conf {
     }
     if args.iter().any(|a| a == "--4k") { (w, h) = (3840, 2160); }
     let fullscreen = st.fullscreen || args.iter().any(|a| a == "--fullscreen");
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    return ume_shell::Config { title: "Ultimate MUGEN".into(), width: w, height: h, fullscreen, max_frames: std::env::var("UME_FRAMES").ok().and_then(|v| v.parse().ok()) };
+    #[cfg(any(target_arch = "wasm32", target_os = "android", target_os = "ios"))]
     Conf { window_title: "Ultimate MUGEN".into(), window_width: w as i32, window_height: h as i32, fullscreen, high_dpi: true, sample_count: 4, window_resizable: true, ..Default::default() }
 }
 
@@ -80,8 +90,16 @@ pub fn take_imports() -> Vec<Vec<u8>> {
     vec![]
 }
 
+#[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+fn main() {
+    if let Err(e) = run_async(conf(), game()) { eprintln!("{e}"); std::process::exit(1); }
+}
+
+#[cfg(any(target_arch = "wasm32", target_os = "android", target_os = "ios"))]
 #[macroquad::main(conf)]
-async fn main() {
+async fn main() { game().await }
+
+async fn game() {
     let args: Vec<String> = std::env::args().collect();
     let has = |f: &str| args.iter().any(|a| a == f);
     let shots = args.iter().position(|a| a == "--shots").and_then(|i| args.get(i + 1)).cloned();

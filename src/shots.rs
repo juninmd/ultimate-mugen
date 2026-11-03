@@ -1,6 +1,6 @@
 //! Automated screenshot tour (`--shots <dir>`): renders real frames of every screen and fights.
 use crate::app::{App, Mode, Screen, Team};
-use macroquad::prelude::*;
+use crate::gfx::*;
 
 async fn frames(app: &mut App, n: usize) { for _ in 0..n { app.frame().await; next_frame().await; } }
 async fn screen(app: &mut App, dir: &str, name: &str, warm: usize) {

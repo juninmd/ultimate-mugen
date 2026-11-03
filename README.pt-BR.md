@@ -217,8 +217,10 @@ O projeto é dividido em um Workspace Cargo com separação estrita entre parsin
 ultimate-mugen/
 ├── crates/
 │   ├── formats/      # Parsers e decodificadores puros de formatos MUGEN (zero dependências de tela)
-│   └── engine/       # VM de luta determinística, física, colisões, IA e compilador UMF
-├── src/              # Camada da aplicação (macroquad, renderização, áudio, HID/gamepads e HUD)
+│   ├── engine/       # VM de luta determinística, física, colisões, IA e compilador UMF
+│   ├── render/       # Renderer wgpu: atlas, sprites em lote com paletas em WGSL, pós-processamento
+│   └── shell/        # Janela winit, entrada, texto, áudio e a API imediata usada pelo app
+├── src/              # Camada da aplicação (telas, renderização, áudio, HID/gamepads e HUD); wgpu no desktop, macroquad na web/mobile até esses alvos migrarem
 ├── assets/           # Fontes OFL, definições UMF (.json) e pacotes de assets
 ├── docs/             # Documentação técnica detalhada, roadmap e pesquisa
 └── web/              # Shell HTML, PWA, service worker e glue code JS

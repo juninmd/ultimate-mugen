@@ -1,5 +1,5 @@
 //! UI helpers: fonts, virtual-resolution layout (1280x720 letterboxed), text & widgets.
-use macroquad::prelude::*;
+use crate::gfx::*;
 
 pub const VW: f32 = 1280.0;
 pub const VH: f32 = 720.0;

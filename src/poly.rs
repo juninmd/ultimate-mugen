@@ -1,7 +1,6 @@
 //! Polygon toolkit: convex fills with per-vertex colour (gradients), chamfered / slanted / hexagonal panels, bevel outlines and
 //! adaptive circles. The HUD and the effects are built from these so edges stay crisp and shapes keep their facets at 4K.
-use macroquad::models::{draw_mesh, Mesh, Vertex};
-use macroquad::prelude::*;
+use crate::gfx::*;
 
 /// Fill a convex polygon; `color_at` decides each vertex colour (and the centre), the GPU interpolates → smooth gradients.
 pub fn fill(pts: &[Vec2], color_at: impl Fn(Vec2) -> Color) {

@@ -73,3 +73,23 @@ fn draws_palettes_rgba_and_blending() {
     assert_eq!(px(&img, 36, 36), [0, 255, 0, 255]);
     assert_eq!(px(&img, 60, 60), [0, 0, 0, 255]);
 }
+
+#[test]
+fn canvas_shapes_render() {
+    let Some((device, queue)) = gpu() else { eprintln!("no GPU adapter, skipping"); return; };
+    let mut r = Renderer::new(&device, wgpu::TextureFormat::Rgba8Unorm, [64, 64]);
+    let mut atlas = ume_render::Atlas::new(64, 64);
+    let mut c = ume_render::Canvas::new(&r, &queue, &mut atlas).unwrap();
+    c.rect(2.0, 2.0, 10.0, 10.0, ume_render::Color::rgba(255, 0, 0, 255));
+    c.circle([40.0, 10.0], 6.0, ume_render::Color::rgba(0, 255, 0, 255));
+    c.line([0.0, 40.0], [64.0, 40.0], 4.0, ume_render::Color::rgba(0, 0, 255, 255));
+    c.triangle([10.0, 50.0], [30.0, 50.0], [10.0, 63.0], ume_render::Color::rgba(255, 255, 255, 128));
+    let img = render(&device, &queue, &mut r, &c.batch, wgpu::Color::BLACK);
+    assert_eq!(px(&img, 6, 6), [255, 0, 0, 255]);
+    assert_eq!(px(&img, 40, 10), [0, 255, 0, 255]);
+    assert_eq!(px(&img, 46, 2), [0, 0, 0, 255]);
+    assert_eq!(px(&img, 20, 40), [0, 0, 255, 255]);
+    assert_eq!(px(&img, 20, 45), [0, 0, 0, 255]);
+    let half = px(&img, 12, 52);
+    assert!((126..=130).contains(&half[0]), "{half:?}");
+}

@@ -106,7 +106,7 @@ impl MatchRenderer {
         let gain = g.fx_gain;
         clear_background(BLACK);
         let (mut shx, mut shy) = (0.0, 0.0);
-        if m.shake_time > 0 { shy = if m.shake_time % 2 == 1 { 1.0 } else { -1.0 } * m.shake_ampl * 0.5; shx = (rand::gen_range(-0.5, 0.5)) * m.shake_ampl * 0.3; }
+        if m.shake_time > 0 { shy = m.shake_offset(); shx = (rand::gen_range(-0.5, 0.5)) * m.shake_ampl.abs() * 0.3; }
         let (tx, ty) = vfx.shake(gain);
         shx += tx; shy += ty;
         // cinematic camera: punch-in on hits, KO / super zoom about the action
@@ -259,7 +259,7 @@ impl MatchRenderer {
             }
         }
         let Some(fr) = f.frame() else { return };
-        let mut x = f.pos.x;
+        let mut x = f.pos.x + f.draw_offset.x * f.facing;
         let hit = f.hit_shake > 0 && f.move_type == 'H';
         if hit { x += if f.hit_shake % 2 == 1 { 1.5 } else { -1.5 }; }
         let mut o = DrawOpts { angle: if f.angle_draw { f.angle } else { 0.0 }, tint: self.fx.ambient(f.pos.x, m.camera.x), ..Default::default() };
@@ -290,7 +290,7 @@ impl MatchRenderer {
         }
         let sq = self.squash.get(fi).copied().unwrap_or([1.0, 1.0]);
         let ds = [f.draw_scale[0] * sq[0], f.draw_scale[1] * sq[1]];
-        Self::draw_sprite(g, m, &f.anim_def, fr, x, f.pos.y, f.facing, f.lscl, ds, &o, shx, shy);
+        Self::draw_sprite(g, m, &f.anim_def, fr, x, f.pos.y + f.draw_offset.y, f.facing, f.lscl, ds, &o, shx, shy);
     }
 
     fn draw_stage(&mut self, g: &mut Gfx, m: &Match, st: &Stage, front: bool, shx: f32, shy: f32) {

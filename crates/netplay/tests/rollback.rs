@@ -162,3 +162,50 @@ fn bots_actually_fight() {
     }
     assert!(m.fighters.iter().any(|f| f.life < f.life_max) || m.round_no > 1);
 }
+
+#[test]
+fn udp_localhost_fight_stays_in_sync() {
+    use ggrs::UdpNonBlockingSocket;
+    use std::net::SocketAddr;
+    let d = kfm();
+    let ports = [47311u16, 47312];
+    let addr = |p: u16| -> SocketAddr { format!("127.0.0.1:{p}").parse().unwrap() };
+    let mut peers: Vec<_> = (0..2)
+        .map(|me| {
+            let other = 1 - me;
+            let s = SessionBuilder::<Netplay<SocketAddr>>::new()
+                .with_num_players(2)
+                .unwrap()
+                .with_input_delay(2)
+                .with_desync_detection_mode(DesyncDetection::On { interval: 10 })
+                .add_player(PlayerType::Local, me)
+                .unwrap()
+                .add_player(PlayerType::Remote(addr(ports[other])), other)
+                .unwrap()
+                .start_p2p_session(UdpNonBlockingSocket::bind_to_port(ports[me]).unwrap())
+                .unwrap();
+            (me, s, Rollback::new(new_match(&d)))
+        })
+        .collect();
+    let target = 600;
+    let start = std::time::Instant::now();
+    while peers.iter().any(|(_, s, _)| s.confirmed_frame() < target) {
+        assert!(start.elapsed().as_secs() < 60, "udp session stalled");
+        for (me, s, rb) in peers.iter_mut() {
+            s.poll_remote_clients();
+            for e in s.events() {
+                assert!(!matches!(e, GgrsEvent::DesyncDetected { .. }), "desync over udp");
+            }
+            if s.current_state() != SessionState::Running {
+                continue;
+            }
+            let frame = s.current_frame().max(0) as u64;
+            s.add_local_input(*me, bot(9, *me, frame)).unwrap();
+            if let Ok(r) = s.advance_frame() {
+                rb.handle(r);
+            }
+        }
+        std::thread::sleep(std::time::Duration::from_millis(1));
+    }
+    assert_eq!(peers[0].2.checksum_at(target), peers[1].2.checksum_at(target));
+}

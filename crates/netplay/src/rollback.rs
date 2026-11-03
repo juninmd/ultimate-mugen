@@ -36,41 +36,62 @@ impl Rollback {
     }
 
     pub fn handle<A: Clone + PartialEq + Eq + Hash + Debug + 'static>(&mut self, requests: Vec<GgrsRequest<Netplay<A>>>) -> Vec<Event> {
-        let advances = requests.iter().filter(|r| matches!(r, GgrsRequest::AdvanceFrame { .. })).count();
-        let mut seen = 0;
-        let mut events = Vec::new();
-        for r in requests {
-            match r {
-                GgrsRequest::SaveGameState { cell, frame } => {
-                    let sum = checksum(&self.game);
-                    cell.save(frame, Some(self.game.clone()), Some(sum));
-                    self.saves.retain(|(f, _)| *f < frame);
-                    self.saves.push_back((frame, sum));
-                    if self.saves.len() > SAVE_HISTORY {
-                        self.saves.pop_front();
-                    }
-                }
-                GgrsRequest::LoadGameState { cell, .. } => {
-                    if let Some(m) = cell.load() {
-                        self.game = m;
-                        self.rollbacks += 1;
-                    }
-                }
-                GgrsRequest::AdvanceFrame { inputs } => {
-                    seen += 1;
-                    let keys: Vec<u32> = inputs.iter().map(|(i, _)| *i).collect();
-                    self.game.events.clear();
-                    self.game.tick(&keys);
-                    if seen < advances {
-                        self.resimulated += 1;
-                    } else {
-                        events = std::mem::take(&mut self.game.events);
-                    }
+        let mut saves = std::mem::take(&mut self.saves);
+        let stats = drive(&mut self.game, requests, |m, inputs, _| m.tick(inputs), |frame, sum| {
+            saves.retain(|(f, _)| *f < frame);
+            saves.push_back((frame, sum));
+            if saves.len() > SAVE_HISTORY {
+                saves.pop_front();
+            }
+        });
+        self.saves = saves;
+        self.rollbacks += stats.rollbacks;
+        self.resimulated += stats.resimulated;
+        std::mem::take(&mut self.game.events)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct DriveStats {
+    pub rollbacks: u64,
+    pub resimulated: u64,
+    pub advanced: u64,
+}
+
+pub fn drive<A, T, S>(game: &mut Match, requests: Vec<GgrsRequest<Netplay<A>>>, mut tick: T, mut saved: S) -> DriveStats
+where
+    A: Clone + PartialEq + Eq + Hash + Debug + 'static,
+    T: FnMut(&mut Match, &[u32], bool),
+    S: FnMut(i32, u128),
+{
+    let advances = requests.iter().filter(|r| matches!(r, GgrsRequest::AdvanceFrame { .. })).count();
+    let mut stats = DriveStats::default();
+    for r in requests {
+        match r {
+            GgrsRequest::SaveGameState { cell, frame } => {
+                let sum = checksum(game);
+                cell.save(frame, Some(game.clone()), Some(sum));
+                saved(frame, sum);
+            }
+            GgrsRequest::LoadGameState { cell, .. } => {
+                if let Some(m) = cell.load() {
+                    *game = m;
+                    stats.rollbacks += 1;
                 }
             }
+            GgrsRequest::AdvanceFrame { inputs } => {
+                stats.advanced += 1;
+                let newest = stats.advanced as usize == advances;
+                if !newest {
+                    stats.resimulated += 1;
+                }
+                let keys: Vec<u32> = inputs.iter().map(|(i, _)| *i).collect();
+                game.events.clear();
+                tick(game, &keys, newest);
+            }
         }
-        events
     }
+    stats
 }
 
 pub fn run_sync_test(game: Match, inputs: &[[u32; 2]], check_distance: usize) -> Result<Rollback, GgrsError> {

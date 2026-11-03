@@ -2,6 +2,26 @@
 
 > 🇧🇷 O netplay usa rollback (GGRS): cada jogador roda a luta localmente, prevê o controle do adversário e corrige quando o controle real chega. Replays guardam só os controles de cada frame.
 
+## Playing online (desktop)
+
+Both players use the same build and the same characters and stage files. Each one opens UDP port 7000 (player 1) or 7001 (player 2), or the port given with `--port`.
+
+```
+ultimate-mugen --netplay 1 --peer <friend-ip>:7001 --chars kfm,kfm --stage dojo
+ultimate-mugen --netplay 2 --peer <friend-ip>:7000 --chars kfm,kfm --stage dojo
+```
+
+| Flag | Meaning |
+|---|---|
+| `--netplay 1\|2` | your side |
+| `--peer ip:port` | the other player's address |
+| `--port n` | local UDP port (default 7000 / 7001) |
+| `--chars a,b` | character ids or names for P1 and P2 (same on both sides) |
+| `--stage id` | stage id or name |
+| `--delay n` | input delay in frames (default 2) |
+
+The bottom of the screen shows the connection state and ping. Pause is disabled online. Browser and mobile netplay arrive with the WebRTC transport after the wgpu/winit migration.
+
 ## How rollback works here
 
 - The whole fight state is `Match`. Saving a frame is `match.clone()`; character data (`CharDef`) is shared through `Arc`, so a snapshot only copies the moving parts.

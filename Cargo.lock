@@ -2612,7 +2612,9 @@ name = "ume-shell"
 version = "0.2.0"
 dependencies = [
  "fontdue",
+ "glam",
  "pollster",
+ "quad-snd",
  "ume-engine",
  "ume-formats",
  "ume-render",

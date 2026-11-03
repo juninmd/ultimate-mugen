@@ -2612,6 +2612,8 @@ name = "ume-shell"
 version = "0.2.0"
 dependencies = [
  "pollster",
+ "ume-engine",
+ "ume-formats",
  "ume-render",
  "wgpu",
  "winit",

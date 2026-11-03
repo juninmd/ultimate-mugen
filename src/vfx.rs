@@ -38,6 +38,9 @@ pub struct Vfx {
     pub trauma: f32, punch: f32, ko_t: f32, ko_focus: (f32, f32), pub slow_t: f32,
     chroma: f32, flash: f32, radial: f32, vig: f32, lines: f32, lines_col: [f32; 3], sat_pulse: f32,
     super_t: f32, super_owner: usize,
+    /// sound requests produced by the effects layer (drained by the session)
+    pub sfx: Vec<&'static str>,
+    combo: [i32; 2], meter: [i32; 2],
     snap: [Snap; 2], pre_mt: [char; 2], rng: u32, tick: u32,
 }
 
@@ -46,7 +49,7 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 { a + (b - a) * t }
 impl Vfx {
     pub fn new() -> Self {
         Vfx { splats: vec![], lights: vec![], weather: Weather::None, clock: 0.0, invert_t: 0.0, dist_zoom: 0.0, dist_target: 0.0, parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
-            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, snap: [Snap::default(); 2], pre_mt: [' '; 2], rng: 0x9e37_79b9, tick: 0 }
+            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sfx: vec![], combo: [0; 2], meter: [0; 2], snap: [Snap::default(); 2], pre_mt: [' '; 2], rng: 0x9e37_79b9, tick: 0 }
     }
     fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
     fn rr(&mut self, a: f32, b: f32) -> f32 { a + (b - a) * self.r() }
@@ -105,23 +108,29 @@ impl Vfx {
     fn ring(&mut self, x: f32, y: f32, r1: f32, dur: f32, w: f32, col: [f32; 3]) { self.rings.push(Ring { x, y, r0: 2.0, r1, t: 0.0, dur, w, col }); }
     fn glow(&mut self, x: f32, y: f32, size: f32, life: f32, col: [f32; 3]) { self.parts.push(P { k: Kind::Glow, x, y, vx: 0.0, vy: 0.0, g: 0.0, life, max: life, size, col, rot: 0.0, vrot: 0.0 }); }
     fn float(&mut self, x: f32, y: f32, text: String, size: f32, col: [f32; 3]) { self.floats.push(Float { x, y, t: 0.0, text, size, col }); }
-    pub fn banner(&mut self, text: &str, sub: &str, col: [f32; 3]) { self.banners.push(Banner { text: text.into(), sub: sub.into(), t: 0.0, col }); }
+    pub fn banner(&mut self, text: &str, sub: &str, col: [f32; 3]) {
+        // never stack the same banner twice (e.g. both fighters landing a counter in the same exchange)
+        if self.banners.iter().any(|b| b.text == text && b.t < 0.8) { return; }
+        self.banners.push(Banner { text: text.into(), sub: sub.into(), t: 0.0, col });
+    }
 
     /// Call right before `Match::tick`: remember who was attacking (for COUNTER detection).
     pub fn pre_tick(&mut self, m: &Match) {
-        for (side, f) in m.roots().enumerate().take(2) { self.pre_mt[side] = f.move_type; }
+        for side in 0..2 { if let Some(f) = m.roots().find(|f| f.side == side) { self.pre_mt[side] = f.move_type; } }
     }
 
     fn chest(m: &Match, side: usize) -> Option<(f32, f32, f32)> {
-        m.roots().nth(side).map(|f| (f.pos.x, f.pos.y - f.def.c("size.height", 60.0) as f32 * 0.55, f.facing))
+        m.roots().find(|f| f.side == side).map(|f| Self::chest_of(f))
     }
+    fn chest_of(f: &ume_engine::fighter::Fighter) -> (f32, f32, f32) { (f.pos.x, f.pos.y - f.def.c("size.height", 60.0) as f32 * 0.55, f.facing) }
 
     /// Feed one simulation event.
     pub fn event(&mut self, ev: &Event, m: &Match) {
         match ev {
-            Event::Hit { attacker_side, defender_side, damage, guarded, heavy } => {
-                let Some((dx, dy, dface)) = Self::chest(m, *defender_side) else { return };
-                let dir = if m.roots().nth(*attacker_side).is_some_and(|a| a.pos.x <= dx) { 1.0 } else { -1.0 };
+            Event::Hit { attacker_side, defender_side, damage, guarded, heavy, attacker, defender } => {
+                let Some(df) = m.fighters.get(*defender) else { return };
+                let (dx, dy, dface) = Self::chest_of(df);
+                let dir = if m.fighters.get(*attacker).is_some_and(|a| a.pos.x <= dx) { 1.0 } else { -1.0 };
                 let (x, y) = (dx + dface * 7.0, dy);
                 let mag = (damage / 90.0).clamp(0.2, 1.4);
                 if *guarded {
@@ -148,7 +157,7 @@ impl Vfx {
                     self.debris(x, y + 10.0, 8, [0.8, 0.72, 0.6]);
                     self.lines = 1.0; self.lines_col = [1.0, 0.95, 0.8];
                     // SF6-style colour paint, built behind the attacker so the source of the hit is readable
-                    let (ax, scol) = (m.roots().nth(*attacker_side).map(|a| a.pos.x).unwrap_or(x - dir * 30.0), if *attacker_side == 0 { [0.13, 0.78, 1.0] } else { [1.0, 0.25, 0.55] });
+                    let (ax, scol) = (m.fighters.get(*attacker).map(|a| a.pos.x).unwrap_or(x - dir * 30.0), if *attacker_side == 0 { [0.13, 0.78, 1.0] } else { [1.0, 0.25, 0.55] });
                     self.splat(ax - dir * 6.0, y + 6.0, dir, 34.0 + mag * 22.0, scol);
                     self.flash = self.flash.max(0.18);
                     self.punch = self.punch.max(0.04);
@@ -156,7 +165,7 @@ impl Vfx {
                 let counter = self.pre_mt[*defender_side] == 'A';
                 let col = if counter { [1.0, 0.35, 0.3] } else { [1.0, 0.92, 0.55] };
                 self.float(x + dir * 12.0, y - 10.0, format!("{}", *damage as i32), 8.0 + mag * 6.0, col);
-                if counter { self.banner("COUNTER!", "", [1.0, 0.3, 0.25]); self.glow(x, y, 26.0, 0.2, [1.0, 0.3, 0.2]); self.chroma = self.chroma.max(0.9); }
+                if counter { self.sfx.push("counter"); self.banner("COUNTER!", "", [1.0, 0.3, 0.25]); self.glow(x, y, 26.0, 0.2, [1.0, 0.3, 0.2]); self.chroma = self.chroma.max(0.9); }
             }
             Event::Super { side } => {
                 self.super_t = 1.0; self.super_owner = *side;
@@ -184,7 +193,7 @@ impl Vfx {
                 }
                 self.invert_t = 0.075; self.flash = 0.9; self.chroma = 1.0; self.radial = 1.0; self.trauma = 1.0; self.vig = 1.0; self.lines = 1.6; self.lines_col = [1.0, 0.35, 0.3];
                 let w = 1 - loser_side;
-                if m.roots().nth(w).is_some_and(|f| f.life >= f.life_max - 0.5) { self.banner("PERFECT!", "vitória sem sofrer dano", [1.0, 0.85, 0.2]); }
+                if m.roots().find(|f| f.side == w).is_some_and(|f| f.life >= f.life_max - 0.5) { self.sfx.push("perfect"); self.banner("PERFECT!", "vitória sem sofrer dano", [1.0, 0.85, 0.2]); }
             }
             Event::Fight => { self.ring(m.camera.x, m.stage.zoffset - 60.0, 160.0, 0.6, 3.0, [1.0, 0.8, 0.3]); self.flash = self.flash.max(0.35); self.chroma = self.chroma.max(0.7); self.trauma = (self.trauma + 0.25).min(1.0); self.radial = 0.6; }
             Event::RoundStart(_) => { self.slow_t = 0.0; self.ko_t = 0.0; }
@@ -199,11 +208,24 @@ impl Vfx {
         for (side, f) in m.roots().enumerate().take(2) {
             let now = Snap { grounded: f.state_type != 'A', vy: f.vel.y, vx: f.vel.x, move_type: f.move_type };
             let prev = self.snap[side];
-            if !prev.grounded && now.grounded { let n = 6 + (prev.vy.abs() * 1.6) as usize; self.dust(f.pos.x, f.pos.y, n.min(16), 1.6, 0.5, [0.85, 0.82, 0.78]); if prev.vy > 5.0 { self.ring(f.pos.x, f.pos.y - 1.0, 26.0, 0.25, 1.2, [0.9, 0.9, 0.9]); self.trauma = (self.trauma + 0.1).min(1.0); } }
-            if prev.grounded && !now.grounded && now.vy < -2.0 { self.dust(f.pos.x, f.pos.y, 5, 1.2, 0.3, [0.85, 0.82, 0.78]); }
+            if !prev.grounded && now.grounded { let n = 6 + (prev.vy.abs() * 1.6) as usize; self.dust(f.pos.x, f.pos.y, n.min(16), 1.6, 0.5, [0.85, 0.82, 0.78]); if prev.vy > 3.0 { self.sfx.push("land"); }
+ if prev.vy > 5.0 { self.ring(f.pos.x, f.pos.y - 1.0, 26.0, 0.25, 1.2, [0.9, 0.9, 0.9]); self.trauma = (self.trauma + 0.1).min(1.0); } }
+            if prev.grounded && !now.grounded && now.vy < -2.0 { self.sfx.push("jump"); self.dust(f.pos.x, f.pos.y, 5, 1.2, 0.3, [0.85, 0.82, 0.78]); }
+            if now.grounded && now.vx.abs() > 3.2 && prev.vx.abs() <= 3.2 && f.state_type == 'S' { self.sfx.push("dash"); }
             if now.grounded && now.vx.abs() > 3.2 && self.tick % 4 == 0 && f.state_type == 'S' { let b = -f.facing; self.dust(f.pos.x + b * 6.0, f.pos.y, 2, 0.6, 0.25, [0.85, 0.82, 0.78]); }
             if f.move_type == 'H' && f.state_type == 'L' && !prev.grounded == false && prev.move_type != 'H' { self.dust(f.pos.x, f.pos.y, 9, 2.0, 0.4, [0.85, 0.82, 0.78]); }
             self.snap[side] = now;
+        }
+        // combo pings (rising pitch) and super-meter level-up chime
+        for side in 0..2 {
+            let Some(att) = m.roots().find(|f| f.side == side) else { continue };
+            let Some(def) = m.roots().find(|f| f.side != side) else { continue };
+            let hits = if def.move_type == 'H' && def.ghv.hitcount >= 2 { def.ghv.hitcount } else { 0 };
+            if hits > self.combo[side] && hits >= 2 { let n = hits.min(6); self.sfx.push(["combo1", "combo1", "combo2", "combo3", "combo4", "combo5", "combo6"][n as usize]); }
+            self.combo[side] = hits;
+            let lv = (att.power / 1000.0).floor() as i32;
+            if lv > self.meter[side] && m.round_state == 2 { self.sfx.push("meter"); }
+            self.meter[side] = lv;
         }
         // super aura: rising energy motes while the super pause runs
         if let Some(p) = &m.pause { if p.is_super {
@@ -433,7 +455,7 @@ impl Vfx {
     pub fn draw_banners(&self, ui: &Ui) {
         for (i, b) in self.banners.iter().enumerate() {
             let t = b.t;
-            let sc = if t < 0.12 { lerp(2.6, 1.0, t / 0.12) } else if t < 0.2 { lerp(1.0, 1.08, (t - 0.12) / 0.08) } else { lerp(1.08, 1.0, ((t - 0.2) / 0.3).min(1.0)) };
+            let sc = if t < 0.12 { lerp(1.9, 1.0, t / 0.12) } else if t < 0.2 { lerp(1.0, 1.08, (t - 0.12) / 0.08) } else { lerp(1.08, 1.0, ((t - 0.2) / 0.3).min(1.0)) };
             let a = if t > 1.2 { ((1.6 - t) / 0.4).max(0.0) } else { (t / 0.06).min(1.0) };
             let slide = if t < 0.12 { (1.0 - t / 0.12) * 120.0 } else { 0.0 };
             let y = 300.0 + i as f32 * 70.0;

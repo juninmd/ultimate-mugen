@@ -16,13 +16,18 @@ use ume_engine::matchs::{Event, Match};
 
 pub enum Pilot { Human(usize), Cpu(Ai), Dummy }
 
+/// Team roster shown by the HUD (sequence / parallel team modes).
+#[derive(Clone, Default)]
+pub struct TeamInfo { pub names: [Vec<(String, [u8; 3])>; 2], pub idx: [usize; 2], pub ko: [Vec<bool>; 2], pub simul: bool }
+
 pub struct Session {
+    pub team: Option<TeamInfo>,
     pub m: Match,
     pub stage: Stage,
     pub r: MatchRenderer,
     pub hud: Hud,
     pub vfx: Vfx,
-    pub pilots: [Pilot; 2],
+    pub pilots: Vec<Pilot>,
     pub duo: bool,
     pub paused: bool,
     acc: f32,
@@ -33,19 +38,33 @@ pub struct Session {
 thread_local! { static FX: Arc<CharDef> = build_fx(true); }
 
 impl Session {
-    pub fn new(p1: Arc<CharDef>, p2: Arc<CharDef>, stage: Stage, pilots: [Pilot; 2], training: bool, duo: bool) -> Self {
+    /// `teams[side]` = fighters of that side (leader first). Players are added interleaved (P1, P2, P3, P4) so that
+    /// `roots()[0]`/`roots()[1]` are always the two team leaders. `life` = leader life ratios (sequence carry-over).
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(teams: [Vec<Arc<CharDef>>; 2], stage: Stage, pilots: Vec<Pilot>, training: bool, duo: bool, simul: bool, single_round: bool, life: [f32; 2]) -> Self {
         let fx = FX.with(|f| f.clone());
         let mut m = Match::new(common_def(), Some(fx), stage.info.clone());
         m.training = training;
-        let lv = |p: &Pilot| if let Pilot::Cpu(a) = p { a.level } else { 0 };
-        m.add_player(p1.clone(), 0, lv(&pilots[0]), 1);
-        let same = p1.id == p2.id;
-        m.add_player(p2, 1, lv(&pilots[1]), if same { 2 } else { 1 });
+        m.team_simul = simul;
+        if single_round { m.rounds_to_win = 1; }
+        let n = teams[0].len().max(teams[1].len());
+        let mut slot = 0;
+        for k in 0..n {
+            for side in 0..2 {
+                let Some(d) = teams[side].get(k) else { continue };
+                let lv = if let Some(Pilot::Cpu(a)) = pilots.get(slot) { a.level } else { 0 };
+                // same character on the field twice → alternate palette
+                let dup = teams[1 - side].iter().any(|o| o.id == d.id) && side == 1 || teams[side][..k].iter().any(|o| o.id == d.id);
+                m.add_player(d.clone(), side, lv, if dup { 2 } else { 1 });
+                slot += 1;
+            }
+        }
         m.start_round();
+        for side in 0..2 { if life[side] < 0.999 { if let Some(f) = m.fighters.iter_mut().find(|f| !f.is_helper && f.side == side) { f.life = (f.life_max * life[side]).max(1.0); } } }
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0 }
+        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0 }
     }
 
     fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {
@@ -61,9 +80,10 @@ impl Session {
 
     pub fn step(&mut self, c: &mut Controls, audio: &mut Audio) {
         let roots = self.m.root_indices();
-        let mut bits = [0u32; 2];
+        let mut bits = vec![0u32; roots.len()];
         for (slot, p) in self.pilots.iter_mut().enumerate() {
             let Some(&fi) = roots.get(slot) else { continue };
+            if !self.m.fighters[fi].alive { continue; }
             bits[slot] = match p {
                 Pilot::Cpu(ai) => ai.poll(&self.m, fi),
                 Pilot::Dummy => 0,
@@ -82,18 +102,20 @@ impl Session {
         self.vfx.pre_tick(&self.m);
         self.m.tick(&bits);
         self.vfx.tick(&self.m);
+        for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
         for ev in std::mem::take(&mut self.m.events) {
             self.vfx.event(&ev, &self.m);
+            for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
             match ev {
                 Event::Sound { def, group, index, own, volume, builtin, .. } => {
                     if let (true, Some(d)) = (own, def.as_ref()) {
                         if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), volume); continue; }
                     }
-                    let kind = builtin.unwrap_or(match group { 5 => if index >= 2 { "hitheavy" } else { "hit" }, 6 => "guard", 7 => "land", _ => "swing" });
+                    let kind = builtin.unwrap_or(match group { 5 => if index >= 2 { "hitheavy" } else { "hit" }, 6 => "guard", 7 => "land", _ => if index >= 2 { "swingh" } else { "swing" } });
                     if group >= 0 || builtin.is_some() { audio.sfx(kind); }
                 }
-                Event::Hit { attacker_side, defender_side, damage, guarded, heavy } => {
-                    let human = |s: usize, p: &[Pilot; 2]| if let Pilot::Human(slot) = p[s] { Some(slot) } else { None };
+                Event::Hit { attacker_side, defender_side, damage, guarded, heavy, .. } => {
+                    let human = |s: usize, p: &[Pilot]| match p.get(s) { Some(Pilot::Human(slot)) => Some(*slot), _ => None };
                     let mag = (damage / 120.0).clamp(0.15, 1.0);
                     if let Some(sl) = human(defender_side, &self.pilots) { if guarded { c.rumble(sl, 0.0, 0.35, 70); } else { c.rumble(sl, mag, (mag + 0.2).min(1.0), if heavy { 220 } else { 120 }); } }
                     if let Some(sl) = human(attacker_side, &self.pilots) { c.rumble(sl, 0.0, if guarded { 0.15 } else { mag * 0.6 }, 60); }
@@ -101,7 +123,9 @@ impl Session {
                 Event::Super { side } => { for (s, p) in self.pilots.iter().enumerate() { if let Pilot::Human(sl) = p { c.rumble(*sl, if s == side { 0.6 } else { 0.3 }, 0.6, 400); } } }
                 Event::Ko { .. } => { audio.sfx("ko"); for p in &self.pilots { if let Pilot::Human(sl) = p { c.rumble(*sl, 1.0, 1.0, 700); } } }
                 Event::MatchOver(w) => { self.over = Some(w); }
-                Event::Fight => audio.sfx("confirm"),
+                Event::Fight => audio.sfx("fight"),
+                Event::RoundStart(_) => audio.sfx("round"),
+                Event::RoundEnd(w) if w >= 0 => audio.sfx("win"),
                 _ => {}
             }
         }
@@ -119,13 +143,15 @@ impl Session {
         let mut n = 0;
         while self.acc >= step && n < 5 { self.step(c, audio); self.acc -= step; n += 1; }
         if n == 5 { self.acc = 0.0; }
+        // pull the music down under supers and the KO slow-motion so the effects punch through
+        audio.duck = if self.m.pause.as_ref().is_some_and(|p| p.is_super) || self.vfx.slow_t > 0.0 { 0.28 } else { 1.0 };
         if self.over.is_some() { self.over_timer += dt; }
     }
     pub fn draw(&mut self, g: &mut Gfx, ui: &Ui) {
         g.post.begin();
         let p = self.r.draw(g, &self.m, &self.stage, &mut self.vfx, ui);
         g.post.end(&p, ui.t);
-        self.hud.draw(ui, g, &self.m, ui.t);
+        self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref());
         self.vfx.draw_banners(ui);
     }
 }

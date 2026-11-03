@@ -42,3 +42,35 @@ Tudo é **apenas apresentação**: a simulação determinística (60 Hz) não mu
 
 ## Ideias futuras
 Hit-stop com *freeze-frame* no zoom, pintura de tinta/aquarela estilo SF6 como sprites de efeito, lightning/vento por cenário, replay do KO, câmera de vitória por personagem, oclusão ambiente dos sprites (normal maps), trilha dinâmica por vida/round.
+
+---
+
+# Rodada 3 — modos de equipe, áudio e HUD
+
+## Referências (vídeos)
+Não consigo assistir vídeos nesta sessão; busquei descrições e artigos que descrevem os vídeos/gameplay. Padrões extraídos:
+- **King of Fighters XV** ([Time Extension](https://timeextension.com/games/ps5/king_of_fighters_xv), [Xbox Addict](https://xboxaddict.com/Staff-Review/Xbox-One/14638/KING-OF-FIGHTERS-XV,-THE.html)): 3v3 em que **a ordem da equipe é escolhida antes da luta**, cada lutador tem a própria barra de vida e **a equipe compartilha uma barra de super**; o time recupera um pouco de vida ao vencer → *Equipe · Sequência*: ordem de seleção = ordem de entrada, vida do vencedor carregada (+12 %), medidor de super compartilhado, roster com retratos (atual destacado, KO riscado).
+- **Mortal Kombat 1 — Kameos** ([SI](https://www.si.com/esports/fgc/everything-we-know-about-kameo-fighters-in-mortal-kombat-1), [SRK wiki](https://srk.shib.live/w/Mortal_Kombat_1/Kameo)): parceiro simultâneo que você controla *junto* do lutador principal, com HUD de medidor único e retrato escurecido em recarga → *Equipe · Paralelo*: o parceiro luta ao mesmo tempo (IA), barra compacta sob a do líder; ao cair fica no chão e deixa de ser alvo.
+- **Marvel vs. Capcom: Infinite** ([Event Hubs](https://www.eventhubs.com/news/2017/apr/27/four-button-layout-tagging-anytime-counter-switching-while-getting-hit-and-more-heres-breakdown-marvel-vs-capcom-infinites-mechanics)): equipes simultâneas com barras por membro; o round termina quando a **equipe inteira** cai → regra do modo paralelo.
+
+## Modos de equipe
+| Modo | Regras |
+|---|---|
+| **Equipe · Sequência (3v3)** | monte 3 lutadores (ordem = ordem de entrada); o adversário é sorteado. Um de cada vez, um round por duelo; o vencedor segue com a vida restante (+12 %) e o medidor de super; o derrotado é substituído. Vence quem derrubar toda a equipe. |
+| **Equipe · Paralelo (2v2)** | 2 de cada lado ao mesmo tempo; o parceiro é controlado pela IA. Quem cai fica no chão; o inimigo vivo mais próximo é o alvo; o round acaba quando uma equipe inteira cai (tempo esgotado: soma das vidas). |
+
+Motor: `Match::team_simul`, jogadores adicionados intercalados (P1, P2, P3, P4) para `roots()[0..2]` serem sempre os líderes; companheiros se alinham atrás do líder; `can_be_hit` ignora quem já caiu; `enemy()` prioriza vivos. Cobertos por testes (`simul_team_round_ends_only_when_whole_team_is_down`, `single_fights_still_end_on_first_ko`).
+
+## Áudio
+- Síntese em camadas (transiente de ruído + corpo com queda de pitch + "crunch" em banda + cauda), filtro de estado variável (passa-baixa/banda/alta), reverb Schroeder de 3 combs, *soft clip* tanh.
+- **3 variações por golpe/defesa/whoosh** em rodízio (evita a fadiga de sons idênticos); 32 kHz.
+- Novos sons: counter, whooshes (leve/pesado), dash, pulo, aterrissagem, riser + boom do super, KO com cauda, stingers de ROUND / FIGHT / vitória / PERFECT, ping de medidor, **pings de combo com altura crescente (combo1…6)**, UI (tick, voltar, confirmar).
+- **Ducking da música** (−72 %) durante o super e a câmera lenta do KO.
+- Não pude auditionar os sons (sem saída de áudio no ambiente): validados por testes de energia, finitude e limites.
+
+## HUD
+- Retratos reais (recorte da cabeça do sprite idle; retrato 9000,x em M.U.G.E.N.) com moldura que fica vermelha em vida baixa.
+- Barras compactas do parceiro, roster de equipe (sequência), alarme de vida baixa, medidor "MAX", timer pulsante, combo com *pop*.
+
+## Ideias futuras
+Assistências estilo Kameo (botão de chamar parceiro com recarga), troca de personagem (tag) no meio do combo, seleção da ordem da equipe por arrastar, modo espectador de torneio.

@@ -534,7 +534,7 @@ impl App {
         let (sx, sy, sw, sh) = (self.ui.x(x), self.ui.y(y), w * self.ui.s, h * self.ui.s);
         let mut gl = unsafe { get_internal_gl() };
         gl.flush();
-        gl.quad_gl.scissor(Some((sx as i32, (screen_height() - sy - sh) as i32 * 0 + sy as i32, sw as i32, sh as i32)));
+        gl.quad_gl.scissor(Some((sx as i32, sy as i32, sw as i32, sh as i32)));
         f(self);
         let mut gl = unsafe { get_internal_gl() };
         gl.flush();

@@ -126,7 +126,7 @@ impl Vfx {
     #[cfg(test)] pub fn flash_level(&self) -> f32 { self.flash }
     fn slashes(&mut self, x: f32, y: f32, dir: f32, n: usize, len: f32, col: [f32; 3]) {
         for i in 0..n {
-            let a = (if dir >= 0.0 { 0.0 } else { std::f32::consts::PI }) + self.rr(-0.9, 0.9) + if i % 2 == 0 { 0.0 } else { 3.14159 };
+            let a = (if dir >= 0.0 { 0.0 } else { std::f32::consts::PI }) + self.rr(-0.9, 0.9) + if i % 2 == 0 { 0.0 } else { std::f32::consts::PI };
             let l = len * self.rr(0.6, 1.2);
             self.parts.push(P { k: Kind::Slash, x, y, vx: 0.0, vy: 0.0, g: 0.0, life: 0.13, max: 0.13, size: l, col, rot: a, vrot: 0.0 });
         }
@@ -204,8 +204,8 @@ impl Vfx {
                     self.glow(x, y, 50.0, 0.4, [1.0, 0.8, 0.3]);
                     // grander: staggered shock-rings, a radial storm of sparks, a ground quake and a column of light
                     for (i, r) in [140.0f32, 200.0, 280.0].iter().enumerate() { self.ring(x, y, *r, 0.7 + i as f32 * 0.2, 3.2 - i as f32 * 0.7, [1.0, 0.8 - i as f32 * 0.15, 0.35]); }
-                    self.spark_burst(x, y, 1.0, 64, 11.0, [1.0, 0.85, 0.4], 3.14);
-                    self.spark_burst(x, y, 1.0, 22, 14.0, [1.0, 1.0, 1.0], 3.14);
+                    self.spark_burst(x, y, 1.0, 64, 11.0, [1.0, 0.85, 0.4], std::f32::consts::PI);
+                    self.spark_burst(x, y, 1.0, 22, 14.0, [1.0, 1.0, 1.0], std::f32::consts::PI);
                     self.debris(x, y + 18.0, 20, [0.75, 0.68, 0.6]);
                     self.light(x, y, 300.0, 0.9, [1.0, 0.8, 0.35]);
                     self.sfx.push("super");
@@ -225,7 +225,7 @@ impl Vfx {
                     self.ring(x, y, 80.0, 0.6, 2.5, [1.0, 1.0, 1.0]);
                     self.glow(x, y, 60.0, 0.5, [1.0, 0.3, 0.3]);
                     self.light(x, y, 220.0, 0.6, [1.0, 0.3, 0.3]);
-                    self.spark_burst(x, y, 1.0, 26, 8.0, [1.0, 0.4, 0.3], 3.14);
+                    self.spark_burst(x, y, 1.0, 26, 8.0, [1.0, 0.4, 0.3], std::f32::consts::PI);
                     self.debris(x, y + 12.0, 14, [0.7, 0.6, 0.55]);
                 }
                 self.invert_add(); self.flash_add(0.9); self.chroma = 1.0; self.radial = 1.0; self.trauma = 1.0; self.vig = 1.0; self.lines = 1.6; self.lines_col = [1.0, 0.35, 0.3];
@@ -246,7 +246,7 @@ impl Vfx {
                         let (vy, sz, c) = (-self.rr(1.2, 4.5), self.rr(1.0, 2.4), if self.r() > 0.4 { col } else { [1.0, 1.0, 1.0] });
                         let vx = self.rr(-0.3, 0.3); self.ember(px, f.pos.y, vx, vy, -0.01, life, sz, c);
                     }
-                    self.spark_burst(x, y, 1.0, 56, 10.0, col, 3.14);
+                    self.spark_burst(x, y, 1.0, 56, 10.0, col, std::f32::consts::PI);
                     self.slashes(x, y, 1.0, 10, 70.0, col);
                     self.debris(f.pos.x, f.pos.y, 26, [0.7, 0.65, 0.6]);
                     self.dust(f.pos.x, f.pos.y, 28, 3.2, 1.0, [0.85, 0.8, 0.75]);
@@ -318,7 +318,7 @@ impl Vfx {
                 self.trauma = self.trauma.max(0.42);
                 if self.tick % 5 == 0 { self.slashes(x, y, 1.0, 2, 60.0, [1.0, 0.9, 0.5]); }
                 for _ in 0..6 {
-                    let ang = self.rr(0.0, 6.283); let rr = self.rr(14.0, 34.0);
+                    let ang = self.rr(0.0, std::f32::consts::TAU); let rr = self.rr(14.0, 34.0);
                     let c = if self.r() > 0.5 { [1.0, 0.85, 0.35] } else { [0.5, 0.85, 1.0] };
                     let life = self.rr(0.4, 0.8);
                     let (px, py, vy) = (x + ang.cos() * rr, y + 26.0 + self.rr(-6.0, 14.0), -self.rr(0.8, 2.2));
@@ -449,12 +449,12 @@ impl Vfx {
             let a = if t < 0.55 { 1.0 } else { 1.0 - (t - 0.55) / 0.45 };
             let c = tp(sp.x + sp.dir * sp.size * 0.35 * e, sp.y);
             let n = sp.radii.len();
-            let pt = |i: usize, k: f32| { let ang = i as f32 / n as f32 * 6.2832 + if sp.dir < 0.0 { 3.14159 } else { 0.0 }; let stretch = 1.0 + 0.7 * ang.cos().max(0.0); vec2(c.x + ang.cos() * sp.radii[i % n] * sp.size * e * k * stretch * s, c.y + ang.sin() * sp.radii[i % n] * sp.size * e * k * 0.8 * s) };
+            let pt = |i: usize, k: f32| { let ang = i as f32 / n as f32 * std::f32::consts::TAU + if sp.dir < 0.0 { std::f32::consts::PI } else { 0.0 }; let stretch = 1.0 + 0.7 * ang.cos().max(0.0); vec2(c.x + ang.cos() * sp.radii[i % n] * sp.size * e * k * stretch * s, c.y + ang.sin() * sp.radii[i % n] * sp.size * e * k * 0.8 * s) };
             for (k, col) in [(1.12, Color::new(0.06, 0.02, 0.12, 0.85 * a)), (1.0, Color::new(sp.col[0], sp.col[1], sp.col[2], 0.8 * a)), (0.55, Color::new(lerp(sp.col[0], 1.0, 0.55), lerp(sp.col[1], 1.0, 0.55), lerp(sp.col[2], 1.0, 0.55), 0.6 * a))] {
                 for i in 0..n { draw_triangle(c, pt(i, k), pt((i + 1) % n, k), col); }
             }
             for (ang, dist, rs) in sp.drops.iter() {
-                let a2 = ang + if sp.dir < 0.0 { 3.14159 } else { 0.0 };
+                let a2 = ang + if sp.dir < 0.0 { std::f32::consts::PI } else { 0.0 };
                 let p = vec2(c.x + a2.cos() * dist * sp.size * e * s * 1.2, c.y + a2.sin() * dist * sp.size * e * s * 0.9);
                 poly::circle(p, rs * sp.size * s * 0.5 * e.min(1.0), Color::new(sp.col[0], sp.col[1], sp.col[2], 0.85 * a));
             }
@@ -618,7 +618,7 @@ pub fn speed_lines(focus: (f32, f32), a: f32, col: [f32; 3], seed: u32, n: usize
     for i in 0..n {
         let h1 = ((i as f32 * 12.9898 + seed * 7.13).sin() * 43758.5453).fract().abs();
         let h2 = ((i as f32 * 78.233 + seed * 3.7).sin() * 12543.1).fract().abs();
-        let ang = (i as f32 + h1 * 0.8) / n as f32 * 6.2832;
+        let ang = (i as f32 + h1 * 0.8) / n as f32 * std::f32::consts::TAU;
         let (r0, r1, wd) = (reach * (0.28 + h2 * 0.18), reach * (0.75 + h1 * 0.3), 0.012 + h2 * 0.018);
         let (c, s) = (ang.cos(), ang.sin());
         let (pc, ps) = ((ang + wd).cos(), (ang + wd).sin());

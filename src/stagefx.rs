@@ -272,7 +272,7 @@ impl StageReact {
             let (vx, vy, life, size, vr) = (dirx * self.rr(0.8, 2.6) * (0.5 + power), if from_top { self.rr(0.1, 0.5) } else { -self.rr(0.8, 2.6) * (0.5 + power * 0.5) }, self.rr(2.2, 4.2), self.rr(1.4, 2.4), self.rr(-0.25, 0.25));
             let col = if self.r() < 0.5 { self.look.leaf } else { self.look.leaf2 };
             let (y, gr) = (if from_top { self.rr(-170.0, -60.0) } else { self.rr(-6.0, -1.0) }, self.rr(0.0, 22.0));
-            { let b = Bit { k: BitKind::Leaf, x: x + self.rr(-14.0, 14.0), y, vx, vy, g: 0.022, life, max: life, size, rot: self.rr(0.0, 6.28), vrot: vr, col, ground: gr }; self.push_bit(b); } }
+            { let b = Bit { k: BitKind::Leaf, x: x + self.rr(-14.0, 14.0), y, vx, vy, g: 0.022, life, max: life, size, rot: self.rr(0.0, std::f32::consts::TAU), vrot: vr, col, ground: gr }; self.push_bit(b); } }
     }
     fn sparks(&mut self, x: f32, y: f32, n: usize, col: Color, power: f32) {
         for _ in 0..n { let a = self.rr(-3.1, 0.0); let s = self.rr(0.8, 3.6) * (0.6 + power);
@@ -571,7 +571,7 @@ impl StageReact {
                 // god rays fanning out of the setting sun
                 let c = cx.l(0, 260.0, 150.0);
                 for k in 0..7 {
-                    let a = -3.14159 + (k as f32 + 0.5) / 7.0 * 3.14159 + (t * 0.05 + k as f32).sin() * 0.04;
+                    let a = -std::f32::consts::PI + (k as f32 + 0.5) / 7.0 * std::f32::consts::PI + (t * 0.05 + k as f32).sin() * 0.04;
                     let wd = 0.07 + 0.03 * (t * 0.4 + k as f32 * 2.0).sin();
                     let (p1, p2) = (c + vec2((a - wd).cos(), (a - wd).sin()) * 260.0 * s, c + vec2((a + wd).cos(), (a + wd).sin()) * 260.0 * s);
                     tr([c, p1, p2], [hx(0xffe8b0, 0.085 + 0.025 * (t + k as f32).sin()), hx(0xffb070, 0.0), hx(0xffb070, 0.0)]);
@@ -605,7 +605,7 @@ impl StageReact {
                 // students watching behind the railing; they jump and cheer on supers / KOs
                 for k in 0..20u32 {
                     let x = 40.0 + k as f32 * 48.0 + hash(k, 1) * 14.0;
-                    let ph = hash(k, 2) * 6.28;
+                    let ph = hash(k, 2) * std::f32::consts::TAU;
                     let jump = self.cheer * (0.5 + 0.5 * (t * 9.0 + ph).sin().abs()) * 8.0 + (t * 1.7 + ph).sin().max(0.0) * 0.4;
                     let base = [hx(0xe8e0d8, 1.0), hx(0xd0c8c0, 1.0), hx(0xf0e8e0, 1.0), hx(0x40306a, 1.0)][(hash(k, 3) * 4.0) as usize % 4];
                     let dark = crate::poly::shade(base, 0.55);

@@ -102,7 +102,7 @@ impl StageReact {
             3 => {
                 // fans behind the barrier waving glow sticks
                 for k in 0..24u32 {
-                    let x = 24.0 + k as f32 * 46.0 + hash(k, 1) * 14.0; let ph = hash(k, 2) * 6.28;
+                    let x = 24.0 + k as f32 * 46.0 + hash(k, 1) * 14.0; let ph = hash(k, 2) * std::f32::consts::TAU;
                     let jump = self.cheer * (0.5 + 0.5 * (t * 10.0 + ph).sin().abs()) * 8.0 + (t * 2.0 + ph).sin().max(0.0) * 0.5;
                     let body = lerpc(hx(0x120a26, 1.0), hx(0x2a1a50, 1.0), hash(k, 3));
                     let st = hx(NEON_RGB[(hash(k, 4) * 5.0) as usize % 5], 1.0);
@@ -144,7 +144,7 @@ impl StageReact {
             let mut prev: Option<Vec2> = None;
             for k in 0..=14 {
                 let f = k as f32 / 14.0;
-                let y = y0 + (y1 - y0) * f + sag * 4.0 * f * (1.0 - f) + (t * 1.1 + f * 3.0 + ci as f32).sin() * 0.9 + self.swing * 7.0 * (f * 3.14).sin() + self.shake * (t * 30.0 + f * 9.0).sin() * 1.1;
+                let y = y0 + (y1 - y0) * f + sag * 4.0 * f * (1.0 - f) + (t * 1.1 + f * 3.0 + ci as f32).sin() * 0.9 + self.swing * 7.0 * (f * std::f32::consts::PI).sin() + self.shake * (t * 30.0 + f * 9.0).sin() * 1.1;
                 let p = cx.l(5, -10.0 + f * 580.0, y);
                 if let Some(q) = prev { seg(q, p, 1.1 * s, hx(0x0a0612, 1.0), hx(0x0a0612, 1.0)); }
                 prev = Some(p);
@@ -185,13 +185,13 @@ impl StageReact {
             }
             2 => {
                 for k in 0..26u32 {
-                    let x = hash(k, 11) * 900.0; let ph = hash(k, 12) * 6.28;
+                    let x = hash(k, 11) * 900.0; let ph = hash(k, 12) * std::f32::consts::TAU;
                     self.stalk(cx, 2, x, 252.0, 232.0 + hash(k, 13) * 28.0, 3.4 + hash(k, 14) * 1.6, ph, hx(0x2c7a70, 1.0), hx(0x0e3636, 1.0), hx(0x3a8a86, 1.0), 0.65, true);
                 }
             }
             3 => {
                 for k in 0..11u32 {
-                    let x = 30.0 + k as f32 * 98.0 + hash(k, 21) * 40.0; let ph = hash(k, 22) * 6.28;
+                    let x = 30.0 + k as f32 * 98.0 + hash(k, 21) * 40.0; let ph = hash(k, 22) * std::f32::consts::TAU;
                     self.stalk(cx, 3, x, 252.0, 250.0, 7.0 + hash(k, 23) * 2.5, ph, hx(0x2a6e64, 1.0), hx(0x051e1e, 1.0), hx(0x2a6a68, 1.0), 0.3, true);
                 }
             }
@@ -256,7 +256,7 @@ impl StageReact {
                 let hub = top + vec2(0.0, -3.0 * s);
                 seg(hub, hub + vec2(34.0 * s, 1.0 * s), 1.0 * s, leg, leg);
                 qd([hub + vec2(26.0 * s, -5.0 * s), hub + vec2(46.0 * s, -3.0 * s), hub + vec2(46.0 * s, 5.0 * s), hub + vec2(26.0 * s, 3.0 * s)], [hx(0xb88a60, 1.0), hx(0xa07850, 1.0), hx(0x7a5a40, 1.0), hx(0x8a6848, 1.0)]);
-                for k in 0..18 { let a = self.rotor * 1.6 + k as f32 / 18.0 * 6.283; let (d0, d1) = (rot(vec2(6.0, 0.0), a), rot(vec2(26.0, 0.0), a)); let nrm = rot(vec2(0.0, 1.0), a) * 1.8 * s;
+                for k in 0..18 { let a = self.rotor * 1.6 + k as f32 / 18.0 * std::f32::consts::TAU; let (d0, d1) = (rot(vec2(6.0, 0.0), a), rot(vec2(26.0, 0.0), a)); let nrm = rot(vec2(0.0, 1.0), a) * 1.8 * s;
                     qd([hub + d0 * s - nrm, hub + d1 * s - nrm * 1.5, hub + d1 * s + nrm * 1.5, hub + d0 * s + nrm], [hx(0xc8a888, 1.0), hx(0xe8d0b0, 1.0), hx(0xe8d0b0, 1.0), hx(0xc8a888, 1.0)]); }
                 crate::poly::circle(hub, 2.2 * s, hx(0x3a2418, 1.0));
                 // tumbleweed bouncing across
@@ -324,7 +324,7 @@ impl StageReact {
                 fan(c, 100.0 * s, 70.0 * s, 20, hx(0x70fff0, 0.13 * boost), hx(0x70fff0, 0.0));
                 for ring in 0..3 {
                     let r = 28.0 + ring as f32 * 20.0; let dir = if ring % 2 == 0 { 1.0 } else { -1.0 };
-                    for d in 0..18 { let a0 = t * (0.4 + ring as f32 * 0.2) * dir + d as f32 / 18.0 * 6.283;
+                    for d in 0..18 { let a0 = t * (0.4 + ring as f32 * 0.2) * dir + d as f32 / 18.0 * std::f32::consts::TAU;
                         let (p, q) = (c + vec2(a0.cos() * r * s * 0.95, a0.sin() * r * s * 1.1), c + vec2((a0 + 0.2).cos() * r * s * 0.95, (a0 + 0.2).sin() * r * s * 1.1));
                         seg(p, q, 1.1 * s, ca(hx(0x8affee, 1.0), 0.32 * boost.min(2.0)), ca(hx(0x8affee, 1.0), 0.32 * boost.min(2.0))); }
                 }
@@ -371,7 +371,7 @@ impl StageReact {
                         if !vis(c, 120.0 * s) { continue; }
                         let a = (0.12 + 0.12 * (t * 1.7 + k as f32 * 1.3).sin()) * boost;
                         ring_e(c, 52.0 * s, 11.0 * s, 0.8 * s, hx(0x5affea, a.min(0.8))); ring_e(c, 36.0 * s, 7.5 * s, 0.7 * s, hx(0x5affea, (a * 0.9).min(0.8)));
-                        for q in 0..12 { let ang = q as f32 / 12.0 * 6.283 + t * 0.2; let p = c + vec2(ang.cos() * 44.0 * s, ang.sin() * 9.0 * s); fan(p, 3.0 * s, 1.5 * s, 6, hx(0x7affee, a.min(0.7)), hx(0x7affee, 0.0)); }
+                        for q in 0..12 { let ang = q as f32 / 12.0 * std::f32::consts::TAU + t * 0.2; let p = c + vec2(ang.cos() * 44.0 * s, ang.sin() * 9.0 * s); fan(p, 3.0 * s, 1.5 * s, 6, hx(0x7affee, a.min(0.7)), hx(0x7affee, 0.0)); }
                         fan(c, 56.0 * s, 12.0 * s, 16, hx(0x5affea, 0.07 * boost.min(3.0)), hx(0x5affea, 0.0));
                     }
                     for (n, x) in toro_xs().into_iter().enumerate() { let p = vec2(cx.l(3, x, 0.0).x, cx.w(0.0, 8.0).y); if vis(p, 80.0) { fan(p, 40.0 * s, 7.0 * s, 12, hx(0x5affea, 0.10 * self.flick(200 + n as u32)), hx(0x5affea, 0.0)); } }
@@ -387,7 +387,7 @@ impl StageReact {
         let (s, t) = (cx.s, self.t);
         // hanging strings of paper charms (ofuda) under the top edge
         for (n, x0) in [20.0f32, 400.0].iter().enumerate() {
-            let rope_y = |f: f32| 6.0 + 9.0 * 4.0 * f * (1.0 - f) + self.swing * 4.0 * (f * 3.14).sin();
+            let rope_y = |f: f32| 6.0 + 9.0 * 4.0 * f * (1.0 - f) + self.swing * 4.0 * (f * std::f32::consts::PI).sin();
             let mut prev: Option<Vec2> = None;
             for k in 0..=10 { let f = k as f32 / 10.0; let p = cx.l(5, x0 + f * 140.0, rope_y(f)); if let Some(q) = prev { seg(q, p, 0.8 * s, hx(0xc8b88a, 1.0), hx(0xc8b88a, 1.0)); } prev = Some(p); }
             for k in 1..8u32 { let f = k as f32 / 8.0; let top = cx.l(5, x0 + f * 140.0, rope_y(f));

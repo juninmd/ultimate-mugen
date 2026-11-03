@@ -123,5 +123,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         guard_give_power: if has("givepower", 1) { num("givepower", 0.0, 1) } else { damage / 2.0 },
         id: num("id", 0.0, 0) as i32, chain_id: num("chainid", -1.0, 0) as i32,
         envshake_time: num("envshake.time", 0.0, 0) as i32, num_hits: num("numhits", 1.0, 0) as i32,
+        juggle: f.st_def.states.get(&f.state_no).and_then(|sd| sd.param("juggle")).and_then(|p| p.exprs.first()).map(|e| m.ev(i, e) as i32).unwrap_or(0),
+        airjuggle: if f.has_assert(crate::fighter::asf::NOJUGGLE) { i32::MAX / 2 } else { f.def.c("data.airjuggle", 15.0) as i32 },
     }
 }

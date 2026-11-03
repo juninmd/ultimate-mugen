@@ -3,8 +3,8 @@ use crate::stages::{self, Stage};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::sync::Arc;
-use ume_engine::chardef::CharDef;
-use ume_engine::loader::load_mugen_char;
+use ume_engine::chardef::{CharDef, Sprite};
+use ume_engine::loader::{load_mugen_char, load_mugen_portrait};
 use ume_engine::native::{compile_native, compile_native_preview, NativeChar};
 use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::stage::load_stage;
@@ -34,6 +34,8 @@ pub struct CharEntry {
     /// idle/win only (native fighters): ~10x cheaper than a full compile, used by the select grid and VS screen
     preview: RefCell<HashMap<i32, Arc<CharDef>>>,
     last_use: Cell<u64>,
+    /// select-grid thumbnail (MUGEN): survives `unload()` so tiles keep their picture after the cache is trimmed; `Some(None)` = none available
+    portrait: RefCell<Option<Option<Sprite>>>,
     pub broken: Cell<bool>,
     /// failed loads are remembered (no retry storm every frame)
     errs: RefCell<HashMap<i32, String>>,
@@ -49,6 +51,7 @@ impl CharEntry {
                 Err(e) => { self.broken.set(true); self.errs.borrow_mut().insert(pal, e.clone()); return Err(e); }
             },
         });
+        if self.mugen && self.portrait.borrow().is_none() { *self.portrait.borrow_mut() = Some(portrait_of(&d)); }
         self.cache.borrow_mut().insert(pal, d.clone());
         self.preview.borrow_mut().remove(&pal);
         self.touch();
@@ -62,6 +65,15 @@ impl CharEntry {
             Src::Mugen { .. } => self.load(pal),
         }
     }
+    /// Cached select-grid thumbnail (MUGEN only); `None` until [`Self::ensure_portrait`] ran or when the character has no usable sprite.
+    pub fn portrait(&self) -> Option<Sprite> { self.portrait.borrow().clone().flatten() }
+    pub fn has_portrait_attempt(&self) -> bool { self.portrait.borrow().is_some() }
+    /// Decode the thumbnail without a full character load (cheap enough for one per frame).
+    pub fn ensure_portrait(&self) {
+        if self.portrait.borrow().is_some() { return; }
+        let p = match &self.src { Src::Mugen { vfs, def } => load_mugen_portrait(vfs, def), Src::Native(_) => None };
+        *self.portrait.borrow_mut() = Some(p);
+    }
     /// Already-loaded definition (full or preview), never loads.
     pub fn peek(&self, pal: i32) -> Option<Arc<CharDef>> {
         if let Some(d) = self.cache.borrow().get(&pal) { return Some(d.clone()); }
@@ -70,6 +82,11 @@ impl CharEntry {
     pub fn is_loaded(&self) -> bool { !self.cache.borrow().is_empty() || !self.preview.borrow().is_empty() }
     fn touch(&self) { thread_local! { static CLOCK: Cell<u64> = const { Cell::new(0) }; } CLOCK.with(|c| { c.set(c.get() + 1); self.last_use.set(c.get()); }); }
     pub fn unload(&self) { self.cache.borrow_mut().clear(); self.preview.borrow_mut().clear(); }
+}
+
+fn portrait_of(d: &CharDef) -> Option<Sprite> {
+    let pick = |k: (i32, i32)| d.sprites.get(&k).filter(|s| s.image.as_ref().is_some_and(|i| i.rgba.chunks_exact(4).any(|p| p[3] > 0))).cloned();
+    pick((9000, 1)).or_else(|| pick((9000, 0))).or_else(|| d.anims.get(&0).and_then(|a| a.frames.first()).and_then(|f| pick((f.group, f.index))))
 }
 
 pub enum StageSrc { Builtin(usize), Mugen { vfs: Arc<Vfs>, def: String } }
@@ -86,7 +103,7 @@ impl Registry {
             match serde_json::from_str::<NativeChar>(json) {
                 Ok(nc) => chars.push(CharEntry {
                     id: format!("umf:{}", nc.id), name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color),
-                    description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()),
+                    description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()),
                 }),
                 Err(e) => eprintln!("bad builtin char: {e}"),
             }
@@ -107,7 +124,7 @@ impl Registry {
         let id = format!("umf:{}", nc.id);
         self.chars.retain(|c| c.id != id);
         let name = nc.name.clone();
-        self.chars.push(CharEntry { id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) });
+        self.chars.push(CharEntry { id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) });
         Ok(name)
     }
     /// Like add_vfs but skips the full validation decode (fast startup for trusted bundled content).
@@ -126,7 +143,7 @@ impl Registry {
             let author = info.and_then(|s| s.get("author")).map(unquote).unwrap_or_default();
             let id = format!("mugen:{tag}:{def}");
             if self.chars.iter().any(|c| c.id == id) { continue; }
-            let e = CharEntry { id, name: name.clone(), series: "M.U.G.E.N".into(), author, color: [90, 110, 150], description: "Personagem M.U.G.E.N importado".into(), mugen: true, boss: false, src: Src::Mugen { vfs: vfs.clone(), def: def.clone() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) };
+            let e = CharEntry { id, name: name.clone(), series: "M.U.G.E.N".into(), author, color: [90, 110, 150], description: "Personagem M.U.G.E.N importado".into(), mugen: true, boss: false, src: Src::Mugen { vfs: vfs.clone(), def: def.clone() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) };
             if !validate { self.chars.push(e); cs.push(name); continue; }
             match e.load(1) { Ok(_) => { e.unload(); self.chars.push(e); cs.push(name); } Err(x) => errs.push(format!("{def}: {x}")) }
         }
@@ -178,7 +195,10 @@ impl Registry {
         let mut n = 0;
         let exe_dir = std::env::current_exe().ok().and_then(|p| p.parent().map(|p| p.to_path_buf()));
         let mut dirs = vec![std::path::PathBuf::from("mugen")];
-        if let Some(d) = exe_dir { dirs.push(d.join("mugen")); }
+        if let Some(d) = exe_dir {
+            dirs.push(d.join("mugen"));
+            if let Some(p) = d.parent().and_then(|p| p.parent()) { dirs.push(p.join("mugen")); }
+        }
         if let Ok(extra) = std::env::var("UME_MUGEN_DIR") { dirs.insert(0, extra.into()); }
         for d in dirs {
             if !d.is_dir() { continue; }

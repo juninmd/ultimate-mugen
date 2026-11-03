@@ -22,7 +22,7 @@ const FS: &str = "#version 100
 varying lowp vec4 color; varying lowp vec2 uv; uniform sampler2D Texture;
 void main() { gl_FragColor = color * texture2D(Texture, uv); }";
 
-pub struct Gfx { tex: HashMap<u64, Texture2D>, pub add: Material, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
+pub struct Gfx { tex: HashMap<u64, Texture2D>, pub add: Material, /** M.U.G.E.N. `S` blend: dest minus src */ pub sub: Material, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
 
 impl Gfx {
     pub fn new() -> Self {
@@ -30,7 +30,11 @@ impl Gfx {
             pipeline_params: PipelineParams { color_blend: Some(BlendState::new(Equation::Add, BlendFactor::Value(BlendValue::SourceAlpha), BlendFactor::One)), ..Default::default() },
             ..Default::default()
         }).unwrap();
-        Gfx { tex: HashMap::new(), add, view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), flush_cache: false, fx_gain: 1.0 }
+        let sub = load_material(ShaderSource::Glsl { vertex: VS, fragment: FS }, MaterialParams {
+            pipeline_params: PipelineParams { color_blend: Some(BlendState::new(Equation::ReverseSubtract, BlendFactor::Value(BlendValue::SourceAlpha), BlendFactor::One)), ..Default::default() },
+            ..Default::default()
+        }).unwrap();
+        Gfx { tex: HashMap::new(), add, sub, view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), flush_cache: false, fx_gain: 1.0 }
     }
     pub fn texture(&mut self, img: &Arc<ImageData>, nearest: bool) -> Texture2D {
         self.tex.entry(img.id).or_insert_with(|| {
@@ -51,8 +55,8 @@ impl Gfx {
     }
 }
 
-pub struct DrawOpts { pub alpha: f32, pub add: bool, pub flash: f32, pub tint: Color, pub angle: f32, pub vflip: bool }
-impl Default for DrawOpts { fn default() -> Self { DrawOpts { alpha: 1.0, add: false, flash: 0.0, tint: WHITE, angle: 0.0, vflip: false } } }
+pub struct DrawOpts { pub alpha: f32, pub add: bool, pub sub: bool, pub flash: f32, pub tint: Color, pub angle: f32, pub vflip: bool }
+impl Default for DrawOpts { fn default() -> Self { DrawOpts { alpha: 1.0, add: false, sub: false, flash: 0.0, tint: WHITE, angle: 0.0, vflip: false } } }
 
 pub struct MatchRenderer { pub debug: bool, pub particles: Vec<Particle>, /** ids of human-controlled fighters (get the ▼ marker) */ pub human: Vec<u32>, pub squash: Vec<[f32; 2]>, /** animated + reactive stage layer (see `stagefx`: `fx.react(&[Impulse])`) */ pub fx: StageReact }
 
@@ -82,12 +86,13 @@ impl MatchRenderer {
         let left = if flip { px - (spr.width - spr.axis_x) * kx } else { px - spr.axis_x * kx };
         let top = if vflip { py - (spr.height - spr.axis_y) * ky } else { py - spr.axis_y * ky };
         let params = DrawTextureParams { dest_size: Some(vec2(w * s, h * s)), flip_x: flip, flip_y: vflip, rotation: -o.angle.to_radians() * facing, pivot: Some(vec2(g.ox + px * s, g.oy + py * s)), ..Default::default() };
-        let add = o.add || matches!(fr.blend, Blend::Add | Blend::Add1);
+        let sub = o.sub || (matches!(fr.blend, Blend::Sub) && !o.add);
+        let add = !sub && (o.add || matches!(fr.blend, Blend::Add | Blend::Add1));
         let mut c = o.tint; c.a *= o.alpha;
         if let Some((sa, _)) = fr.alpha { c.a *= (sa as f32 / 256.0).min(1.0); }
-        if add { gl_use_material(&g.add); }
+        if add { gl_use_material(&g.add); } else if sub { gl_use_material(&g.sub); }
         draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, c, params.clone());
-        if add { gl_use_default_material(); }
+        if add || sub { gl_use_default_material(); }
         if o.flash > 0.0 {
             gl_use_material(&g.add);
             draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, Color::new(1.0, 1.0, 1.0, o.flash), params);
@@ -118,7 +123,7 @@ impl MatchRenderer {
         if gain > 0.0 { vfx.draw_back(g, m, shx, shy); }
         // soft contact shadows (3 layered ellipses)
         for f in &m.fighters {
-            if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE) { continue; }
+            if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE | ume_engine::fighter::asf::NOSHADOW) { continue; }
             let hgt = (-f.pos.y).max(0.0);
             let r = 22.0 * (1.0 - hgt / 200.0).max(0.4);
             let a = 0.17 * (1.0 - hgt / 150.0).max(0.3);
@@ -130,7 +135,7 @@ impl MatchRenderer {
         // floor reflections (procedural stages)
         if matches!(stage.art, StageArt::Procedural { .. }) && gain > 0.0 {
             for f in &m.fighters {
-                if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE) { continue; }
+                if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE | ume_engine::fighter::asf::NOSHADOW) { continue; }
                 self.draw_reflection(g, m, f, shx, shy);
             }
         }
@@ -216,8 +221,12 @@ impl MatchRenderer {
         let py = Self::sy(m, -f.pos.y) + fr.y * f.lscl * ys + shy;
         let (w, h) = (spr.width * kx, spr.height * ky);
         let left = if flip { px - (spr.width - spr.axis_x) * kx } else { px - spr.axis_x * kx };
-        let top = py - (spr.height - spr.axis_y) * ky;
-        let reach = (py + 46.0 - top).clamp(1.0, h);
+        // mirror about the floor line (not about the feet): a jumping fighter's image must not hang in mid-air
+        let floor = Self::sy(m, 0.0) + shy;
+        let bottom = py + (spr.height - spr.axis_y) * ky;
+        let top = 2.0 * floor - bottom;
+        if bottom > floor + 46.0 { return; }
+        let reach = (floor + 46.0 - top).clamp(1.0, h);
         let rows = 12usize;
         let tint = self.fx.ambient(f.pos.x, m.camera.x);
         let (u0, u1) = if flip { (1.0, 0.0) } else { (0.0, 1.0) };
@@ -226,9 +235,9 @@ impl MatchRenderer {
         for j in 0..=rows {
             let q = j as f32 / rows as f32;
             let y = top + q * reach;
-            let d = ((y - py) / 46.0).clamp(0.0, 1.0);
-            let a = a0 * (1.0 - d * d * (3.0 - 2.0 * d)) * if y < py { 0.9 } else { 1.0 };
-            let wob = wobble * (t * 4.0 + (y - py) * 0.5).sin() * (0.5 + d * 1.6);
+            let d = ((y - floor) / 46.0).clamp(0.0, 1.0);
+            let a = a0 * (1.0 - d * d * (3.0 - 2.0 * d)) * if y < floor { 0.0 } else { 1.0 };
+            let wob = wobble * (t * 4.0 + (y - floor) * 0.5).sin() * (0.5 + d * 1.6);
             let v = 1.0 - q * reach / h;
             let c = Color::new(tint.r * 0.8, tint.g * 0.9, tint.b, a);
             vertices.push(Vertex::new(g.ox + (left + wob) * s, g.oy + y * s, 0.0, u0, v, c));
@@ -258,7 +267,7 @@ impl MatchRenderer {
         if let Some(p) = &f.palfx {
             if p.add.iter().sum::<f32>() > 200.0 { o.flash = 0.6; } else if p.add[0] > p.add[2] + 40.0 { o.tint = Color::new(1.0, 0.7, 0.6, 1.0); } else if p.add[2] > p.add[0] + 40.0 { o.tint = Color::new(0.6, 0.8, 1.0, 1.0); }
         }
-        if let Some((mode, a, _)) = &f.trans { if mode.starts_with("add") { o.add = true; o.alpha = a / 256.0; } }
+        if let Some((mode, a, _)) = &f.trans { if mode.starts_with("add") { o.add = true; o.alpha = a / 256.0; } else if mode.starts_with("sub") { o.sub = true; o.alpha = a / 256.0; } }
         // awakened form: warm tint + pulsing halo in the form colour
         if (f.form > 0 || f.def.boss) && f.alive && g.fx_gain > 0.0 {
             let c = crate::vfx::Vfx::form_color(f);

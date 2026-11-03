@@ -10,6 +10,7 @@ mod poly;
 mod postfx;
 mod session;
 mod settings;
+mod mugen_tour;
 mod shots;
 mod stage_tour;
 mod stagefx;

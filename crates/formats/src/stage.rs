@@ -25,7 +25,28 @@ pub struct BgLayer {
     pub mask: bool,
     /// For `type = anim`: the `actionno` animation from the same .def.
     pub anim: Option<Animation>,
+    pub id: i32,
+    pub position_link: bool,
+    pub window: Option<[f32; 4]>,
+    pub sin_x: [f32; 3],
+    pub sin_y: [f32; 3],
+    pub alpha: [f32; 2],
 }
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum BgCtrlKind { Null, Visible(bool), Enable(bool), VelSet(Option<f32>, Option<f32>), VelAdd(Option<f32>, Option<f32>), PosSet(Option<f32>, Option<f32>), PosAdd(Option<f32>, Option<f32>), Anim(i32), SinX([f32; 3]), SinY([f32; 3]) }
+
+#[derive(Clone, Debug)]
+pub struct BgCtrl { pub kind: BgCtrlKind, pub start: i32, pub end: i32, pub loop_time: i32, pub ids: Vec<i32> }
+
+#[derive(Clone, Debug)]
+pub struct BgCtrlDef { pub loop_time: i32, pub ids: Vec<i32>, pub ctrls: Vec<BgCtrl> }
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct StageMusic { pub file: String, pub volume: f32, pub loop_start: i64, pub loop_end: i64 }
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct StageShadow { pub intensity: f32, pub color: [f32; 3], pub yscale: f32, pub fade_range: [f32; 2] }
 
 #[derive(Clone)]
 pub struct StageImage {
@@ -65,7 +86,57 @@ pub struct MugenStage {
     pub tension: f32,
     pub layers: Vec<BgLayer>,
     pub sprites: HashMap<(i32, i32), StageImage>,
+    pub anims: HashMap<i32, Animation>,
+    pub ctrl_defs: Vec<BgCtrlDef>,
+    pub music: Option<StageMusic>,
+    pub shadow: StageShadow,
+    pub reflection: f32,
+    pub start_x: f32,
+    pub start_y: f32,
+    pub zoom_out: f32,
+    pub zoom_in: f32,
 }
+
+fn bgctrl_kind(s: &Section) -> Option<BgCtrlKind> {
+    let f = |k: &str| s.get(k).and_then(|v| v.split(',').next()).and_then(|v| v.trim().parse::<f32>().ok());
+    let v = || nums(s.get("value"), &[0.0])[0];
+    let tri = || { let v = nums(s.get("value"), &[0.0, 0.0, 0.0]); [v[0], v.get(1).copied().unwrap_or(0.0), v.get(2).copied().unwrap_or(0.0)] };
+    Some(match s.get("type")?.trim().to_ascii_lowercase().as_str() {
+        "null" => BgCtrlKind::Null,
+        "visible" => BgCtrlKind::Visible(v() != 0.0),
+        "enable" | "enabled" => BgCtrlKind::Enable(v() != 0.0),
+        "velset" => BgCtrlKind::VelSet(f("x"), f("y")),
+        "veladd" => BgCtrlKind::VelAdd(f("x"), f("y")),
+        "posset" => BgCtrlKind::PosSet(f("x"), f("y")),
+        "posadd" => BgCtrlKind::PosAdd(f("x"), f("y")),
+        "anim" => BgCtrlKind::Anim(v() as i32),
+        "sinx" => BgCtrlKind::SinX(tri()),
+        "siny" => BgCtrlKind::SinY(tri()),
+        _ => return None,
+    })
+}
+
+fn ids(s: &Section) -> Vec<i32> { s.get("ctrlid").map(|v| v.split(',').filter_map(|x| x.trim().parse().ok()).collect()).unwrap_or_default() }
+
+fn parse_bgctrls(secs: &[Section]) -> Vec<BgCtrlDef> {
+    let mut defs: Vec<BgCtrlDef> = vec![];
+    for s in secs {
+        if s.lname.starts_with("bgctrldef") {
+            defs.push(BgCtrlDef { loop_time: nums(s.get("looptime"), &[-1.0])[0] as i32, ids: ids(s), ctrls: vec![] });
+        } else if s.lname.starts_with("bgctrl") {
+            let (Some(def), Some(kind)) = (defs.last_mut(), bgctrl_kind(s)) else { continue };
+            let t = nums(s.get("time"), &[0.0]);
+            let start = t[0] as i32;
+            let end = t.get(1).map(|v| *v as i32).unwrap_or(start);
+            let loop_time = t.get(2).map(|v| *v as i32).unwrap_or(-1);
+            let own = ids(s);
+            def.ctrls.push(BgCtrl { kind, start, end, loop_time, ids: if own.is_empty() { def.ids.clone() } else { own } });
+        }
+    }
+    defs
+}
+
+fn pair3(v: Vec<f32>) -> [f32; 3] { [v.first().copied().unwrap_or(0.0), v.get(1).copied().unwrap_or(0.0), v.get(2).copied().unwrap_or(0.0)] }
 
 fn pair(v: Vec<f32>, def: [f32; 2]) -> [f32; 2] {
     [v.first().copied().unwrap_or(def[0]), v.get(1).copied().unwrap_or(def[1])]
@@ -122,6 +193,9 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         let delta = [delta_v[0], delta_v.get(1).copied().unwrap_or(delta_v[0])];
         let tile = pair(n("tile", &[0.0, 0.0]), [0.0, 0.0]);
         let anim = if kind == "anim" { anims.get(&(n("actionno", &[0.0])[0] as i32)).cloned() } else { None };
+        let win = if s.get("window").is_some() { Some(n("window", &[0.0, 0.0, 0.0, 0.0])) } else if s.get("maskwindow").is_some() { Some(n("maskwindow", &[0.0, 0.0, 0.0, 0.0])) } else { None };
+        let three = |k: &str| { let v = n(k, &[0.0, 0.0, 0.0]); [v[0], v.get(1).copied().unwrap_or(0.0), v.get(2).copied().unwrap_or(0.0)] };
+        let alpha = n("alpha", &[256.0, 0.0]);
         layers.push(BgLayer {
             sprite: (sp[0] as i32, sp[1] as i32),
             start: pair(n("start", &[0.0, 0.0]), [0.0, 0.0]),
@@ -133,6 +207,12 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
             trans: s.get("trans").unwrap_or("none").to_lowercase(),
             mask: n("mask", &[0.0])[0] != 0.0,
             anim,
+            id: n("id", &[0.0])[0] as i32,
+            position_link: n("positionlink", &[0.0])[0] != 0.0,
+            window: win.filter(|w| w.len() >= 4).map(|w| [w[0], w[1], w[2], w[3]]),
+            sin_x: three("sin.x"),
+            sin_y: three("sin.y"),
+            alpha: [alpha[0], alpha.get(1).copied().unwrap_or(0.0)],
             kind,
         });
     }
@@ -151,5 +231,24 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         tension: g("camera", "tension", 50.0),
         layers,
         sprites,
+        ctrl_defs: parse_bgctrls(&secs),
+        music: get("music", "bgmusic").map(unquote).filter(|f| !f.is_empty()).map(|file| StageMusic {
+            file,
+            volume: g("music", "bgvolume", 0.0),
+            loop_start: g("music", "bgmloopstart", 0.0) as i64,
+            loop_end: g("music", "bgmloopend", 0.0) as i64,
+        }),
+        shadow: StageShadow {
+            intensity: g("shadow", "intensity", 128.0).clamp(0.0, 256.0),
+            color: pair3(nums(get("shadow", "color"), &[0.0, 0.0, 0.0])),
+            yscale: g("shadow", "yscale", 0.4),
+            fade_range: pair(nums(get("shadow", "fade.range"), &[0.0, 0.0]), [0.0, 0.0]),
+        },
+        reflection: g("reflection", "intensity", 0.0).clamp(0.0, 256.0),
+        start_x: g("camera", "startx", 0.0),
+        start_y: g("camera", "starty", 0.0),
+        zoom_out: g("camera", "zoomout", 1.0),
+        zoom_in: g("camera", "zoomin", 1.0),
+        anims,
     })
 }

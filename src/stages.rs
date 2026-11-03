@@ -15,7 +15,7 @@ pub struct Layer { pub image: Arc<ImageData>, pub w: f32, pub h: f32, pub y: f32
 #[derive(Clone)]
 pub struct Particle { pub x: f32, pub y: f32, pub vx: f32, pub vy: f32, pub s: f32, pub a: f32, pub c: [u8; 3] }
 
-pub struct MugenBg { pub stage: MugenStage, pub images: std::collections::HashMap<(i32, i32), Arc<ImageData>>, pub scl: f32 }
+pub struct MugenBg { pub stage: Arc<MugenStage>, pub images: std::collections::HashMap<(i32, i32), Arc<ImageData>>, pub scl: f32 }
 
 /// Which built-in look a stage has (drives the animated / reactive layer in `stagefx`); `Custom` = MUGEN stages (untouched).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
@@ -101,7 +101,7 @@ fn ridge(pm: &mut Pixmap, t: Transform, w: f32, base: f32, amp: f32, top: &str, 
     fill(pm, t, b.finish(), &lin(base - amp, base + 50.0, &[(0.0, top), (1.0, bot)]));
 }
 fn parts(seed: u32, n: usize, f: impl Fn(&mut Rng) -> Particle) -> Vec<Particle> { let mut r = Rng(seed); (0..n).map(|_| f(&mut r)).collect() }
-fn info(name: &str) -> StageInfo { StageInfo { name: name.into(), bound_left: -230.0, bound_right: 230.0, bound_high: -80.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 205.0, vertical_follow: 0.25, tension: 60.0 } }
+fn info(name: &str) -> StageInfo { StageInfo { start_x: 0.0, start_y: 0.0, zoom_out: 1.0, name: name.into(), bound_left: -230.0, bound_right: 230.0, bound_high: -80.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 205.0, vertical_follow: 0.25, tension: 60.0 } }
 
 /// Deterministic skyline: (x, width, height) of each tower, shared by the baked art and the animated blink lights.
 pub fn skyline(seed: u32, total: f32, wmin: f32, wmax: f32, hmin: f32, hmax: f32, gap: f32) -> Vec<(f32, f32, f32)> {
@@ -756,7 +756,8 @@ pub fn from_mugen(st: MugenStage) -> Stage {
     let info = StageInfo {
         name: st.name.clone(), bound_left: st.bound_left * scl, bound_right: st.bound_right * scl, bound_high: st.bound_high * scl, bound_low: st.bound_low * scl,
         p1x: st.p1x * scl, p2x: st.p2x * scl, zoffset: st.zoffset * scl, vertical_follow: st.vertical_follow, tension: st.tension * scl,
+        start_x: st.start_x * scl, start_y: st.start_y * scl, zoom_out: st.zoom_out,
     };
     let images = st.sprites.iter().filter(|(_, im)| im.w > 0 && im.h > 0).map(|(k, im)| (*k, ImageData::new(im.w, im.h, im.rgba.clone()))).collect();
-    Stage { info, art: StageArt::Mugen(Box::new(MugenBg { stage: st, images, scl })), music: 0, kind: StageKind::Custom }
+    Stage { info, art: StageArt::Mugen(Box::new(MugenBg { stage: Arc::new(st), images, scl })), music: 0, kind: StageKind::Custom }
 }

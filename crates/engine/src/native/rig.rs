@@ -28,7 +28,11 @@ use tiny_skia::{
 
 pub struct RigRender { pub image: Option<Arc<ImageData>>, pub width: f32, pub height: f32, pub axis_x: f32, pub axis_y: f32, pub scale: f32, pub hurt: Vec<Box4>, pub hit: Vec<Box4> }
 
-const RES: f64 = 3.0;
+/// Art quality: sprites are rasterized at `res()` pixels per game unit (3 = default, 6 for 4K displays).
+static ART_RES_X100: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(300);
+pub fn set_art_res(r: f32) { ART_RES_X100.store((r.clamp(1.0, 8.0) * 100.0) as u32, std::sync::atomic::Ordering::Relaxed); }
+pub fn art_res() -> f32 { ART_RES_X100.load(std::sync::atomic::Ordering::Relaxed) as f32 / 100.0 }
+fn res() -> f64 { art_res() as f64 }
 const PAD: f64 = 7.0;
 const PI: f64 = std::f64::consts::PI;
 const D2R: f64 = PI / 180.0;
@@ -1655,7 +1659,7 @@ fn draw_layer(ctx: &mut Ctx, ly: &Layer, rig: &Rig) {
         if let Some(aura) = ly.aura {
             // canvas: shadowColor = aura, shadowBlur = 14 * RES on every outline stroke (batched here)
             let refs: Vec<&Path> = geoms.iter().collect();
-            ctx.shadow_paths(&refs, 1.0, rgba(aura, 1.0), (14.0 * RES) as f32, AURA_GAIN);
+            ctx.shadow_paths(&refs, 1.0, rgba(aura, 1.0), (14.0 * res()) as f32, AURA_GAIN);
         }
         for g in &geoms { ctx.fill_solid(g, outline); }
         ctx.restore();
@@ -1763,13 +1767,13 @@ pub fn render_pose(style: &Value, pose: &Value, active: Option<&ActiveSpec>, wit
     let aura = if gt(pose, "aura") { Some(rig.c.c("aura")) } else { None };
     let pad = PAD + if aura.is_some() { 5.0 } else { 0.0 };
     let (x1, y1, x2, y2) = ((bb.x1 - pad).floor(), (bb.y1 - pad).floor(), (bb.x2 + pad).ceil(), (bb.y2.max(0.0) + pad).ceil());
-    let (width, height) = ((x2 - x1) * RES, (y2 - y1) * RES);
-    let (axis_x, axis_y) = (-x1 * RES, -y1 * RES);
+    let (width, height) = ((x2 - x1) * res(), (y2 - y1) * res());
+    let (axis_x, axis_y) = (-x1 * res(), -y1 * res());
     let mut image = None;
     if with_images {
         if let Some(mut ctx) = Ctx::new(width as u32, height as u32) {
             ctx.translate(axis_x, axis_y);
-            ctx.scale(RES, RES);
+            ctx.scale(res(), res());
             let sk = &rig.sk;
             if let Some(aura) = aura {
                 // aura flame behind the body
@@ -1800,7 +1804,7 @@ pub fn render_pose(style: &Value, pose: &Value, active: Option<&ActiveSpec>, wit
             image = Some(to_image(ctx.pm));
         }
     }
-    RigRender { image, width: width as f32, height: height as f32, axis_x: axis_x as f32, axis_y: axis_y as f32, scale: (1.0 / RES) as f32, hurt: hurt.iter().map(to_box4).collect(), hit: hit.iter().map(to_box4).collect() }
+    RigRender { image, width: width as f32, height: height as f32, axis_x: axis_x as f32, axis_y: axis_y as f32, scale: (1.0 / res()) as f32, hurt: hurt.iter().map(to_box4).collect(), hit: hit.iter().map(to_box4).collect() }
 }
 
 // ------------------------------------------------------------------ effects
@@ -1828,19 +1832,19 @@ pub fn render_effect(effect: &Value, with_images: bool, palette: Option<&Value>)
     };
     let body = body.map(jround);
     let (x1, y1, x2, y2) = ((draw[0] - 4.0).floor(), (draw[1] - 4.0).floor(), (draw[2] + 4.0).ceil(), (draw[3] + 4.0).ceil());
-    let (width, height, axis_x, axis_y) = ((x2 - x1) * RES, (y2 - y1) * RES, -x1 * RES, -y1 * RES);
+    let (width, height, axis_x, axis_y) = ((x2 - x1) * res(), (y2 - y1) * res(), -x1 * res(), -y1 * res());
     let nohit = gt(e, "nohit");
     let boxes = if nohit { vec![] } else { vec![to_box4(&body)] };
     let mut image = None;
     if with_images {
         if let Some(mut ctx) = Ctx::new(width as u32, height as u32) {
             ctx.translate(axis_x, axis_y);
-            ctx.scale(RES, RES);
+            ctx.scale(res(), res());
             draw_effect(&mut ctx, ty, size, ph, col, col2, e);
             image = Some(to_image(ctx.pm));
         }
     }
-    RigRender { image, width: width as f32, height: height as f32, axis_x: axis_x as f32, axis_y: axis_y as f32, scale: (1.0 / RES) as f32, hit: boxes.clone(), hurt: boxes }
+    RigRender { image, width: width as f32, height: height as f32, axis_x: axis_x as f32, axis_y: axis_y as f32, scale: (1.0 / res()) as f32, hit: boxes.clone(), hurt: boxes }
 }
 
 fn radial(ctx: &mut Ctx, x: f64, y: f64, r: f64, st: &[(f32, Color)]) {
@@ -1849,10 +1853,10 @@ fn radial(ctx: &mut Ctx, x: f64, y: f64, r: f64, st: &[(f32, Color)]) {
     ctx.fill(&Fill::Rad(x, y, 0.0, r, st.to_vec()));
 }
 fn glow_stroke(ctx: &mut Ctx, col: Color, w: f64, blur: f64, f: impl FnOnce(&mut Ctx)) {
-    ctx.save(); ctx.set_shadow(col, blur * RES); ctx.st.lw = w; ctx.begin(); f(ctx); ctx.stroke(&Fill::Solid(col)); ctx.restore();
+    ctx.save(); ctx.set_shadow(col, blur * res()); ctx.st.lw = w; ctx.begin(); f(ctx); ctx.stroke(&Fill::Solid(col)); ctx.restore();
 }
 fn glow_fill(ctx: &mut Ctx, col: Color, blur: f64, f: impl FnOnce(&mut Ctx)) {
-    ctx.save(); ctx.set_shadow(col, blur * RES); ctx.begin(); f(ctx); ctx.fill(&Fill::Solid(col)); ctx.restore();
+    ctx.save(); ctx.set_shadow(col, blur * res()); ctx.begin(); f(ctx); ctx.fill(&Fill::Solid(col)); ctx.restore();
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1966,7 +1970,7 @@ fn draw_effect(ctx: &mut Ctx, ty: &str, s: f64, ph: f64, col: Rgb, col2: Rgb, e:
             ctx.st.blend = BlendMode::SourceOver;
             let dark = [0x14, 0x10, 0x18];
             if ty == "kunai" {
-                ctx.save(); ctx.set_shadow(rgba(col, 1.0), 5.0 * RES);
+                ctx.save(); ctx.set_shadow(rgba(col, 1.0), 5.0 * res());
                 ctx.st.lw = 0.6;
                 ctx.begin(); ctx.move_to(s * 0.9, 0.0); ctx.line_to(0.0, -s * 0.28); ctx.line_to(-s * 0.1, 0.0); ctx.line_to(0.0, s * 0.28); ctx.close();
                 ctx.fill(&sol([0xdf, 0xe6, 0xf0], 1.0)); ctx.stroke(&sol(dark, 1.0));
@@ -1975,7 +1979,7 @@ fn draw_effect(ctx: &mut Ctx, ty: &str, s: f64, ph: f64, col: Rgb, col2: Rgb, e:
                 ctx.fill_rect(-s * 0.55, -s * 0.08, s * 0.45, s * 0.16, &sol([0x2a, 0x22, 0x30], 1.0));
                 ctx.begin(); ctx.arc(-s * 0.7, 0.0, s * 0.14, 0.0, PI * 2.0); ctx.stroke_w(&sol([0x2a, 0x22, 0x30], 1.0), 0.8);
             } else {
-                ctx.save(); ctx.rotate(ph * 4.0); ctx.set_shadow(rgba(col, 1.0), 5.0 * RES);
+                ctx.save(); ctx.rotate(ph * 4.0); ctx.set_shadow(rgba(col, 1.0), 5.0 * res());
                 ctx.st.lw = 0.6;
                 ctx.begin();
                 for i in 0..8 { let a = (i as f64 / 8.0) * PI * 2.0; let rr = if i % 2 == 1 { s * 0.18 } else { s * 0.6 }; ctx.line_to(a.cos() * rr, a.sin() * rr); }

@@ -9,6 +9,14 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, det
 | ![Super](screenshots/08-fight-super.jpg) | ![Seleção](screenshots/03-select.jpg) |
 | ![MUGEN KFM vs original](screenshots/12-mugen-kfm-vs-native.jpg) | ![Cenário MUGEN](screenshots/13-native-on-mugen-stage.jpg) |
 | ![Kaname vs Valdric](screenshots/11b-fight-kaname-valdric.jpg) | ![Celular](screenshots/15-mobile-fight.jpg) |
+| ![Seleção com muitos lutadores](screenshots/03b-select-many.jpg) | ![Loading no VS](screenshots/05a-vs-loading.jpg) |
+| ![Vídeo](screenshots/17-video.jpg) | ![4K](screenshots/19-fight-4k.jpg) |
+| ![KO cinematográfico](screenshots/20-fx-ko.jpg) | ![Super](screenshots/08-fight-super.jpg) |
+| ![Impacto neon](screenshots/21-fx-neon-hit.jpg) | ![Transição](screenshots/22-transition.jpg) |
+| ![Equipe sequência](screenshots/30-team-sequence.jpg) | ![Equipe paralelo](screenshots/31-team-parallel.jpg) |
+| ![Seleção de equipe](screenshots/32-team-select.jpg) | ![Quadro de impacto](screenshots/23-impact-frame.jpg) |
+| ![5v5 paralelo](screenshots/33-team-5v5-parallel.jpg) | ![5v5 sequência](screenshots/34-team-5v5-sequence.jpg) |
+| ![4K · HUD 5v5](screenshots/35-4k-5v5-hud.jpg) | ![4K · super](screenshots/36-4k-super.jpg) |
 
 ---
 
@@ -48,6 +56,14 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, det
 ---
 
 ## Destaques
+- **4K de verdade**: tela cheia (F11), janela até 5K, e a arte procedural (lutadores UMF e cenários) é rasterizada em densidade proporcional à tela — *Automática*: 3× até 900 px de altura, 4× até 1300, 4,5× até 1700, **6× em 4K** (menu **Vídeo**; flags `--res 3840x2160`, `--4k`, `--fullscreen`). Texto e UI escalam sem re-rasterizar fontes a cada quadro.
+- **Muitos personagens e cenários**: seleção com rolagem, filtro (Tab: todos/originais/M.U.G.E.N), PgUp/PgDn, roda do mouse, `R` aleatório; só as linhas visíveis são desenhadas e só o que está sob o cursor é carregado (cache LRU limita a memória). Pastas/zips importados são registrados sem decodificar tudo (centenas em segundos).
+- **Loadings rápidos**: tela de carregamento na inicialização, pré-carga por etapas atrás da tela de VS (barra de progresso), prévia leve (idle/vitória) nos menus, rasterização dos lutadores em paralelo (≈3× mais rápido) e música sintetizada antes da luta.
+- **Visual AAA** ([`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md)): pós-processamento (bloom, aberração cromática, blur radial, vinheta, grade de cor), partículas e anéis de choque em cada golpe, números de dano, *camera punch*, KO em câmera lenta com zoom, super cinematográfico com linhas de velocidade e aura, reflexos no chão, HUD animado, transições de tela e fundo vivo. Opção de acessibilidade para reduzir efeitos (Vídeo → Efeitos de impacto).
+- **Modos de equipe**: *Sequência 3v3* (estilo KOF: ordem de entrada, vencedor mantém a vida e o medidor de super compartilhado) e *Paralelo até **5v5*** (10 lutadores na tela; companheiros por IA, `Tab` troca o lutador que você controla; o round acaba quando a equipe inteira cai). Ver [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md).
+- **Áudio em camadas**: SFX sintetizados com transiente + corpo + crunch, 3 variações por golpe, reverb, stingers de round/KO/vitória, pings de combo e *ducking* da música. **HUD** com retratos reais, barras de parceiro, roster de equipe e alarmes.
+- **Replay** da última luta (tela de resultado → Replay): o motor é determinístico e o replay re-simula as entradas gravadas, com teste. Ver o *roadmap* de features em [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md).
+- **Motor/jogabilidade**: escala de dano em combos (nativos), empurrão no canto, squash & stretch; **HUD v3** e efeitos construídos com polígonos (gradiente por vértice, chanfros, hexágonos). Ver rodada 9 em [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md).
 
 - **Compatibilidade MUGEN completa** (`crates/formats` + `crates/engine`):
   - Suporte a `.def`, `.sff` v1 e v2 (PCX 8-bit, RLE8, RLE5, LZ5, PNG8/24/32), `.air`, `.cmd`, `.cns`, `.snd` e `.act`.
@@ -118,6 +134,9 @@ Modos especiais de inicialização por linha de comando:
 cargo run --release -- --touch          # Força exibição dos controles virtuais de toque na tela
 cargo run --release -- --mute           # Inicializa sem áudio
 cargo run --release -- --shots out/     # Executa tour automatizado gerando capturas de tela em out/
+cargo run --release -- --4k             # Janela 3840×2160 (ou --res 2560x1440, --fullscreen)
+cargo run --release -p ume-engine --example load_bench   # Tempo de carga dos lutadores (completo vs. prévia)
+node scripts/web-smoke.js web/dist      # Teste de fumaça da versão web (Chromium headless; precisa do pacote playwright)
 ```
 
 ### Build Web / PWA (WebAssembly)
@@ -149,7 +168,6 @@ Acesse `http://localhost:8080` no navegador. Na versão web, você pode arrastar
 ---
 
 ## Controles
-
 O motor aceita simultaneamente teclado, múltiplos gamepads e toque na tela.
 
 ### Tabela de Controles em Luta
@@ -166,6 +184,9 @@ O motor aceita simultaneamente teclado, múltiplos gamepads e toque na tela.
 | **Especiais Rápidos** | `1`, `2`, `3` | Teclado Numérico `7`, `8`, `9` | `L1`, `L2` | Botões **SP1**, **SP2**, **SP3** |
 | **Super Movimento** | `1` + `2` | Teclado Numérico `7` + `8` | `L1` + `L2` | Botão **SUPER** |
 | **Pausa / Hitboxes** | `Esc` / `F2` | `Esc` / `F2` | Botão `OPTIONS` / `START` | Botão `❚❚` (canto superior) |
+| **Tela cheia / FPS** | `F11` / `F3` | — | — | — |
+| **Trocar de lutador (equipe paralela)** | `Tab` | — | — | — |
+| **Lista de lutadores** | `Tab` (filtro), `PgUp`/`PgDn`, `R` (aleatório) | — | — | — |
 
 ### Navegação nos Menus
 - **Navegar**: Setas direcionais / `W` `A` `S` `D` / D-Pad do Gamepad.

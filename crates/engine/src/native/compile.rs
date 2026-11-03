@@ -48,7 +48,49 @@ fn hitdef_lines(damage: f32, gd: Option<f32>, lvl: Option<&str>, guard: Option<&
     s
 }
 
-pub fn compile_native(nc: &NativeChar, pal_no: i32, with_images: bool) -> CharDef {
+/// Full compile (all animations).
+pub fn compile_native(nc: &NativeChar, pal_no: i32, with_images: bool) -> CharDef { compile_native_with(nc, pal_no, with_images, None) }
+/// Fast compile for menus (select grid, VS screen): rasterizes only idle + win animations (~10x cheaper than the full set).
+pub fn compile_native_preview(nc: &NativeChar, pal_no: i32) -> CharDef { compile_native_with(nc, pal_no, true, Some(&[0, 181])) }
+
+fn frame_key(fr: &NativeFrame) -> String { serde_json::to_string(&(&fr.pose, &fr.effect, &fr.hit, &fr.sprite)).unwrap_or_default() }
+
+fn render_frame(nc: &NativeChar, fr: &NativeFrame, with_images: bool, palette: Option<&Value>) -> RigRender {
+    if nc.art.kind != "rig" {
+        RigRender { image: None, width: 0.0, height: 0.0, axis_x: 0.0, axis_y: 0.0, scale: 1.0, hurt: vec![], hit: vec![] }
+    } else if let Some(e) = &fr.effect {
+        render_effect(e, with_images, palette)
+    } else {
+        let pose = match &fr.pose { Some(Value::String(s)) => nc.art.poses.get(s).cloned().unwrap_or(Value::Null), Some(v) => v.clone(), None => Value::Null };
+        render_pose(&nc.art.style, &pose, fr.hit.as_ref(), with_images, palette)
+    }
+}
+
+/// Rasterize every unique frame, spread over all cores on native targets (single-threaded on wasm).
+fn render_all(nc: &NativeChar, jobs: Vec<(String, &NativeFrame)>, with_images: bool, palette: Option<&Value>) -> HashMap<String, RigRender> {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let n = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(1).min(jobs.len().max(1)).min(8);
+        if n > 1 {
+            let next = std::sync::atomic::AtomicUsize::new(0);
+            let out = std::sync::Mutex::new(HashMap::with_capacity(jobs.len()));
+            std::thread::scope(|sc| {
+                for _ in 0..n {
+                    sc.spawn(|| loop {
+                        let i = next.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                        let Some((k, fr)) = jobs.get(i) else { break };
+                        let r = render_frame(nc, fr, with_images, palette);
+                        out.lock().unwrap().insert(k.clone(), r);
+                    });
+                }
+            });
+            return out.into_inner().unwrap();
+        }
+    }
+    jobs.into_iter().map(|(k, fr)| { let r = render_frame(nc, fr, with_images, palette); (k, r) }).collect()
+}
+
+pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only: Option<&[i32]>) -> CharDef {
     let palette = if pal_no > 1 && !nc.palettes.is_empty() { Some(&nc.palettes[(pal_no as usize - 2) % nc.palettes.len()]) } else { None };
     let mut sprites = HashMap::new();
     let mut anims = HashMap::new();
@@ -58,23 +100,25 @@ pub fn compile_native(nc: &NativeChar, pal_no: i32, with_images: bool) -> CharDe
         let no = STANDARD_ANIMS.iter().find(|(n, _)| n == name).map(|(_, v)| *v).unwrap_or_else(|| { next += 1; next - 1 });
         anim_no.insert(name.clone(), no);
     }
+    let wanted = |no: i32| only.is_none_or(|o| o.contains(&no));
+    // pass 1: unique frames to rasterize (in parallel)
+    let mut seen = std::collections::HashSet::new();
+    let mut jobs: Vec<(String, &NativeFrame)> = vec![];
+    for (name, a) in nc.anims.iter() {
+        if !wanted(anim_no[name]) { continue; }
+        for fr in &a.frames { let k = frame_key(fr); if seen.insert(k.clone()) { jobs.push((k, fr)); } }
+    }
+    let mut rendered = render_all(nc, jobs, with_images, palette);
     let mut cache: HashMap<String, ((i32, i32), Vec<[f32; 4]>, Vec<[f32; 4]>)> = HashMap::new();
     let mut idx = 0;
-    let is_rig = nc.art.kind == "rig";
     for (name, a) in nc.anims.iter() {
         let no = anim_no[name];
+        if !wanted(no) { continue; }
         let mut frames = vec![];
         for fr in &a.frames {
-            let key = serde_json::to_string(&(&fr.pose, &fr.effect, &fr.hit, &fr.sprite)).unwrap_or_default();
-            let entry = cache.entry(key).or_insert_with(|| {
-                let r: RigRender = if !is_rig {
-                    RigRender { image: None, width: 0.0, height: 0.0, axis_x: 0.0, axis_y: 0.0, scale: 1.0, hurt: vec![], hit: vec![] }
-                } else if let Some(e) = &fr.effect {
-                    render_effect(e, with_images, palette)
-                } else {
-                    let pose = match &fr.pose { Some(Value::String(s)) => nc.art.poses.get(s).cloned().unwrap_or(Value::Null), Some(v) => v.clone(), None => Value::Null };
-                    render_pose(&nc.art.style, &pose, fr.hit.as_ref(), with_images, palette)
-                };
+            let key = frame_key(fr);
+            let entry = cache.entry(key.clone()).or_insert_with(|| {
+                let r = rendered.remove(&key).expect("frame rendered");
                 let k = (1, idx);
                 idx += 1;
                 sprites.insert(k, Sprite { image: r.image, width: r.width, height: r.height, axis_x: r.axis_x, axis_y: r.axis_y, scale: r.scale });
@@ -193,4 +237,18 @@ pub fn compile_native(nc: &NativeChar, pal_no: i32, with_images: bool) -> CharDe
     d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.description = nc.description.clone().unwrap_or_default();
     let _ = Arc::new(());
     d
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    /// Light/medium/heavy hit-stop follows the genre norm (~9/11/13 frames across games; SF V uses 8/12/15):
+    /// heavier hits must freeze longer and the values stay in the researched band.
+    #[test]
+    fn hitstop_scales_with_attack_strength() {
+        let (l, m, h) = (level(Some("light")), level(Some("medium")), level(Some("heavy")));
+        assert!(l.stop < m.stop && m.stop < h.stop);
+        assert_eq!((l.stop, m.stop, h.stop), (9, 11, 13));
+        assert!(l.stun < m.stun && m.stun < h.stun, "hit-stun also scales");
+    }
 }

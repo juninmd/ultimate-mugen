@@ -26,8 +26,11 @@ pub fn glow(x: f32, y: f32, r: f32, c: Color) {
 
 impl Ui {
     pub fn new() -> Self {
-        let display = load_ttf_font_from_bytes(include_bytes!("../assets/fonts/RussoOne.ttf")).unwrap();
-        let body = load_ttf_font_from_bytes(include_bytes!("../assets/fonts/Rajdhani.ttf")).unwrap();
+        let mut display = load_ttf_font_from_bytes(include_bytes!("../assets/fonts/RussoOne.ttf")).unwrap();
+        let mut body = load_ttf_font_from_bytes(include_bytes!("../assets/fonts/Rajdhani.ttf")).unwrap();
+        // macroquad creates the glyph atlas with Nearest sampling; text drawn at a non-1:1 scale (4K, animated sizes) looked stair-stepped
+        display.set_filter(FilterMode::Linear);
+        body.set_filter(FilterMode::Linear);
         Ui { display, body, s: 1.0, ox: 0.0, oy: 0.0, t: 0.0 }
     }
     pub fn begin(&mut self) {
@@ -51,12 +54,18 @@ impl Ui {
             self.rect(x, y + h * t, w, h / steps as f32 + 0.6, c);
         }
     }
+    /// Font size snapped to ~4% steps: the glyph atlas stays small (4K!) and animated sizes do not re-rasterize every frame.
+    fn quant(fs: f32) -> (u16, f32) {
+        let fs = fs.max(4.0);
+        let q = (2f32.powf((fs.log2() * 12.0).round() / 12.0)).round().max(4.0);
+        (q as u16, fs / q)
+    }
     pub fn text(&self, s: &str, x: f32, y: f32, size: f32, c: Color, align: Align, display: bool) -> f32 {
         let font = if display { &self.display } else { &self.body };
-        let fs = (size * self.s).max(4.0) as u16;
-        let dim = measure_text(s, Some(font), fs, 1.0);
+        let (fq, sc) = Self::quant(size * self.s);
+        let dim = measure_text(s, Some(font), fq, sc);
         let px = match align { Align::Left => self.x(x), Align::Center => self.x(x) - dim.width / 2.0, Align::Right => self.x(x) - dim.width };
-        draw_text_ex(s, px, self.y(y), TextParams { font: Some(font), font_size: fs, color: c, ..Default::default() });
+        draw_text_ex(s, px, self.y(y), TextParams { font: Some(font), font_size: fq, font_scale: sc, color: c, ..Default::default() });
         dim.width / self.s
     }
     /// Text with outline + drop shadow (fighting-game style).
@@ -67,7 +76,8 @@ impl Ui {
     }
     pub fn measure(&self, s: &str, size: f32, display: bool) -> f32 {
         let font = if display { &self.display } else { &self.body };
-        measure_text(s, Some(font), (size * self.s).max(4.0) as u16, 1.0).width / self.s
+        let (fq, sc) = Self::quant(size * self.s);
+        measure_text(s, Some(font), fq, sc).width / self.s
     }
     pub fn quad(&self, p: [Vec2; 4], c: Color) {
         let v: Vec<Vec2> = p.iter().map(|q| vec2(self.x(q.x), self.y(q.y))).collect();
@@ -86,9 +96,55 @@ impl Ui {
         glow(w * 0.1, h * 0.05, h * 0.5, Color::new(0.13, 0.9, 1.0, 0.22));
         glow(w * 0.9, h * 0.12, h * 0.45, Color::new(1.0, 0.8, 0.2, 0.18));
         let t = self.t * 20.0;
-        let mut x = -(t % 40.0) - h;
-        while x < w { draw_line(x, h, x + h * 0.47, 0.0, 1.0, Color::new(1.0, 1.0, 1.0, 0.025)); x += 40.0; }
-        for y in (0..h as i32).step_by(3) { draw_line(0.0, y as f32, w, y as f32, 1.0, Color::new(0.0, 0.0, 0.0, 0.1)); }
+        let gap = 40.0 * self.s;
+        let mut x = -((t * self.s) % gap) - h;
+        while x < w { draw_line(x, h, x + h * 0.47, 0.0, self.s.max(1.0), Color::new(1.0, 1.0, 1.0, 0.025)); x += gap; }
+        self.motes(46, 1.0);
+        // slow rotating light beams
+        for i in 0..3 {
+            let a = self.t * 0.12 + i as f32 * 2.1;
+            let (bx, by) = (w * (0.2 + 0.3 * i as f32), -20.0);
+            let sp = (a.sin()) * w * 0.25;
+            draw_triangle(vec2(bx, by), vec2(bx + sp - h * 0.13, h), vec2(bx + sp + h * 0.13, h), Color::new(1.0, 0.85, 0.6, 0.018));
+        }
+        // scanlines scale with the display so they stay subtle at 4K
+        let (step, th) = ((3.0 * self.s).max(2.0), self.s.max(1.0));
+        let mut y = 0.0;
+        while y < h { draw_line(0.0, y, w, y, th, Color::new(0.0, 0.0, 0.0, 0.1)); y += step; }
+    }
+    /// Floating light motes drifting upward (deterministic; `warm` 1 = gold/pink, 0 = cool).
+    pub fn motes(&self, n: usize, strength: f32) {
+        let (w, h) = (screen_width(), screen_height());
+        for i in 0..n {
+            let f = i as f32;
+            let h1 = ((f * 12.9898).sin() * 43758.5453).fract().abs();
+            let h2 = ((f * 78.233 + 3.0).sin() * 12543.1).fract().abs();
+            let h3 = ((f * 39.346 + 7.0).sin() * 9871.7).fract().abs();
+            let sp = (14.0 + h2 * 34.0) * self.s;
+            let y = h - ((self.t * sp + h3 * h) % (h * 1.1)) + h * 0.05;
+            let x = h1 * w + (self.t * 0.7 + f).sin() * 18.0 * self.s;
+            let tw = 0.5 + 0.5 * (self.t * (1.5 + h2 * 2.0) + f).sin();
+            let c = if i % 3 == 0 { (0.35, 0.9, 1.0) } else if i % 3 == 1 { (1.0, 0.45, 0.6) } else { (1.0, 0.85, 0.4) };
+            let r = (1.0 + h2 * 2.2) * self.s;
+            draw_circle(x, y, r * 3.2, Color::new(c.0, c.1, c.2, 0.05 * tw * strength));
+            draw_circle(x, y, r, Color::new(c.0, c.1, c.2, (0.2 + 0.4 * tw) * strength));
+        }
+    }
+    /// Diagonal wipe used between screens: `q` goes 1 → 0 (covering → revealed).
+    pub fn wipe(&self, q: f32) {
+        if q <= 0.0 { return; }
+        let (w, h) = (screen_width(), screen_height());
+        let e = q * q * (3.0 - 2.0 * q);
+        let slant = h * 0.28;
+        let x0 = (1.0 - e) * (w + slant * 2.0) - slant;
+        for (k, (off, col)) in [(0.0, Color::new(0.03, 0.02, 0.09, 1.0)), (34.0, Color::new(1.0, 0.3, 0.43, 1.0)), (62.0, Color::new(0.13, 0.9, 1.0, 1.0))].iter().enumerate().rev() {
+            // the cyan / magenta edges lead the dark panel
+            let lead = *off * self.s * (1.0 - (1.0 - q).powi(2));
+            let a = x0 - lead; let b = w + slant * 2.0;
+            let _ = k;
+            draw_triangle(vec2(a + slant, 0.0), vec2(b, 0.0), vec2(b, h), *col);
+            draw_triangle(vec2(a + slant, 0.0), vec2(b, h), vec2(a, h), *col);
+        }
     }
     pub fn logo(&self, cx: f32, cy: f32, size: f32) {
         let pulse = (self.t * 2.0).sin() * 0.05 + 1.0;
@@ -100,4 +156,41 @@ impl Ui {
         }
         self.text("MUGEN", cx - size * 0.01, cy - size * 0.01, s, hex("#fff7c0"), Align::Center, true);
     }
+
+    /// Progress bar + spinner (virtual coordinates).
+    pub fn progress_bar(&self, x: f32, y: f32, w: f32, p: f32, label: &str) {
+        let p = p.clamp(0.0, 1.0);
+        self.rect(x - 2.0, y - 2.0, w + 4.0, 16.0, Color::new(0.0, 0.0, 0.0, 0.55));
+        self.rect(x, y, w, 12.0, Color::new(1.0, 1.0, 1.0, 0.10));
+        self.rect(x, y, w * p, 12.0, hex("#ff4d6d"));
+        self.rect(x, y, w * p, 5.0, Color::new(1.0, 1.0, 1.0, 0.25));
+        let a = self.t * 6.0;
+        for i in 0..8 {
+            let ang = a - i as f32 * 0.5;
+            let r = 12.0;
+            let c = Color::new(1.0, 0.8, 0.2, 1.0 - i as f32 / 8.0);
+            draw_circle(self.x(x - 30.0 + ang.cos() * r), self.y(y + 6.0 + ang.sin() * r), (3.2 - i as f32 * 0.25).max(1.0) * self.s, c);
+        }
+        self.text(label, x, y + 36.0, 18.0, hex("#d8d0f0"), Align::Left, false);
+        self.text(&format!("{}%", (p * 100.0) as i32), x + w, y + 36.0, 18.0, hex("#ffcc33"), Align::Right, true);
+    }
+    /// Full-screen loading view with rotating tips.
+    pub fn loading_screen(&self, p: f32, label: &str) {
+        self.background();
+        self.logo(VW / 2.0, 300.0, 150.0);
+        let tip = LOADING_TIPS[((self.t / 3.5) as usize) % LOADING_TIPS.len()];
+        self.text(tip, VW / 2.0, 480.0, 20.0, hex("#a49cc0"), Align::Center, false);
+        self.progress_bar(VW / 2.0 - 260.0, 560.0, 520.0, p, label);
+    }
 }
+
+pub const LOADING_TIPS: [&str; 8] = [
+    "Dica: F11 alterna tela cheia · F3 mostra o FPS.",
+    "Dica: arraste um .zip de personagens M.U.G.E.N para a janela para importar.",
+    "Dica: no Treino, F2 exibe as hitboxes.",
+    "Dica: SP1/SP2/SP3 executam especiais com um único botão.",
+    "Dica: Vídeo → Qualidade da arte aumenta a nitidez em telas 4K.",
+    "Dica: PageUp/PageDown e a roda do mouse rolam a lista de lutadores.",
+    "Dica: DualShock/DualSense vibram em golpes, defesa e K.O.",
+    "Dica: Tab filtra a seleção entre todos, originais e M.U.G.E.N.",
+];

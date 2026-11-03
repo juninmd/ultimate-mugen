@@ -1,4 +1,5 @@
 pub mod sprites;
+pub mod text;
 
 use std::collections::HashSet;
 use std::sync::Arc;

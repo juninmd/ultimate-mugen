@@ -1,6 +1,9 @@
 //! Ultimate MUGEN — modern 2D fighting engine (Rust + macroquad), MUGEN-compatible.
 mod app;
 mod audio;
+#[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+mod netlink;
+mod sound_mix;
 mod controls;
 mod gamepad;
 mod hud;
@@ -88,6 +91,12 @@ async fn main() {
     let touch_dev = cfg!(any(target_os = "android", target_os = "ios"));
     let mut app = app::App::new(has("--touch") || touch_dev, shots.is_none() && !has("--mute")).await;
     if let Some(dir) = shots { shots::run(&mut app, &dir).await; return; }
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    match netlink::NetArgs::parse(&args) {
+        Ok(Some(n)) => app.start_netplay(&n).await,
+        Ok(None) => {}
+        Err(e) => app.msg = e,
+    }
     loop {
         app.frame().await;
         if app.quit { break; }

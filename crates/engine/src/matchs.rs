@@ -1,6 +1,6 @@
 //! Match simulation: round flow, state machine driver, collision/hit system, entities, camera.
 use crate::chardef::{Animation, Box4, CharDef, Controller, Source};
-use crate::expr::{eval, Expr};
+use crate::expr::Expr;
 use crate::fighter::*;
 use crate::triggers::Ctx;
 use std::cell::RefCell;
@@ -48,6 +48,7 @@ pub struct Projectile {
     pub pos: V2, pub vel: V2, pub accel: V2, pub vel_mul: V2, pub rem_vel: V2, pub facing: f32, pub hits: i32, pub miss_time: i32, pub miss_cd: i32,
     pub priority: i32, pub spr_priority: i32, pub edge_bound: f32, pub height_bound: [f32; 2], pub remove_time: i32, pub time: i32,
     pub hitdef: HitDefData, pub dying: bool, pub guard_dist: f32, pub scale: [f32; 2], pub remove: bool, pub lscl: f32,
+    pub remove_on_hit: bool, pub stage_bound: f32, pub super_move: i32, pub pause_move: i32,
 }
 
 /// Events for the presentation layer (audio, rumble, UI).
@@ -78,10 +79,12 @@ pub fn corner_push(xvel: f32) -> f32 { (xvel.abs() * 0.5).clamp(1.2, 4.5) }
 pub const BASE_W: f32 = 426.67;
 pub const BASE_H: f32 = 240.0;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_super: bool, pub darken: bool, pub unhittable: bool, pub p2_def_mul: f32, pub end_cmd_buf_time: i32, pub pause_bg: bool }
+#[derive(Clone)]
 pub struct Announce { pub text: String, pub time: i32, pub total: i32 }
 
+#[derive(Clone)]
 pub struct Match {
     pub fighters: Vec<Fighter>,
     pub explods: Vec<Explod>,
@@ -150,7 +153,7 @@ impl Match {
     pub fn ground_y(&self) -> f32 { self.stage.zoffset }
 
     // ---------------------------------------------------------------- evaluation helpers
-    pub fn ev(&self, i: usize, e: &Expr) -> f64 { eval(&e.node, &Ctx { m: self, i }) }
+    pub fn ev(&self, i: usize, e: &Expr) -> f64 { e.eval(&Ctx { m: self, i }) }
     pub fn num(&self, i: usize, sc: &Controller, k: &str, d: f64, idx: usize) -> f64 {
         match sc.param(k).and_then(|p| p.exprs.get(idx)) { Some(e) => self.ev(i, e), None => d }
     }
@@ -201,7 +204,7 @@ impl Match {
         if let Some(v) = vy { f.vel.y = v as f32 * f.lscl; }
         if let Some(c) = ctrl { f.ctrl = c != 0.0; }
         if let Some(s) = sp { f.spr_priority = s as i32; }
-        if hdp == 0.0 { f.hitdef_active = false; }
+        if hdp == 0.0 { f.hitdef_active = false; f.reversal = None; }
         if mhp == 0.0 { f.move_contact = 0; f.move_hit = 0; f.move_guarded = 0; f.move_reversed = 0; }
         if hcp == 0.0 { f.hit_count = 0; }
     }
@@ -586,6 +589,9 @@ impl Match {
         }
         self.push_and_bound();
         self.detect_hits();
+        for f in self.fighters.iter_mut() {
+            for o in f.hit_overrides.iter_mut() { if let Some(h) = o { if h.time > 0 { h.time -= 1; if h.time == 0 { *o = None; } } } }
+        }
         let paused = self.pause.is_some();
         self.update_projectiles(paused);
         self.update_explods(paused);
@@ -706,7 +712,12 @@ impl Match {
     }
     pub fn can_be_hit(&self, d: usize, hd: &HitDefData, side: usize) -> bool {
         let f = &self.fighters[d];
-        if f.destroyed || f.side == side || !f.alive { return false; }
+        let team_ok = match hd.affect_team { 'B' => true, 'F' => f.side == side, _ => f.side != side };
+        if f.destroyed || !team_ok || !f.alive { return false; }
+        if f.move_type == 'H' {
+            if hd.chain_id.is_some_and(|c| f.ghv.hit_id != c) { return false; }
+            if f.ghv.hit_id >= 0 && hd.no_chain_id.contains(&Some(f.ghv.hit_id)) { return false; }
+        }
         if self.round_state != 2 && !(self.round_state == 3 && f.alive) { return false; }
         if f.state_no == 5150 || f.unhittable > 0 { return false; }
         let hf = &hd.hitflag; let st = f.state_type;
@@ -734,7 +745,42 @@ impl Match {
         f.ctrl && f.move_type != 'H' && st != 'A' && !f.is_helper && self.has_command(d, "holdback")
     }
 
+    fn detect_reversals(&mut self) {
+        let mut found = vec![];
+        for r in 0..self.fighters.len() {
+            let fr = &self.fighters[r];
+            let Some((attr, _)) = fr.reversal.as_ref() else { continue };
+            if fr.destroyed { continue; }
+            let c1r = fr.boxes(1);
+            if c1r.is_empty() { continue; }
+            for a in 0..self.fighters.len() {
+                let fa = &self.fighters[a];
+                if a == r || fa.side == fr.side || fa.destroyed || !fa.hitdef_active || fa.move_type != 'A' { continue; }
+                let Some(hd) = fa.hitdef.as_ref() else { continue };
+                if !Self::attr_match(hd, attr) { continue; }
+                if let Some(at) = Self::overlap(&c1r, &fa.boxes(1)) { found.push((r, a, at)); break; }
+            }
+        }
+        for (r, a, at) in found {
+            let Some((_, rd)) = self.fighters[r].reversal.take() else { continue };
+            let aid = self.fighters[a].id;
+            {
+                let fr = &mut self.fighters[r];
+                fr.hitdef_active = false;
+                if !fr.targets.iter().any(|t| t.0 == aid) { fr.targets.push((aid, rd.id)); }
+            }
+            self.spawn_spark(r, rd.spark_no, rd.spark_own, at.0 + rd.spark_x * self.fighters[r].facing, at.1 + rd.spark_y, false, false);
+            if let Some(snd) = rd.hit_sound { self.sound(r, snd.0, snd.1, snd.2, Some("hit")); }
+            if rd.p2stateno >= 0 { let owner = if rd.p2getp1state { self.fighters[r].def.clone() } else { self.fighters[a].def.clone() }; self.change_state(a, rd.p2stateno, owner); }
+            if rd.p1stateno >= 0 { let d = self.fighters[r].def.clone(); self.change_state(r, rd.p1stateno, d); }
+            { let fr = &mut self.fighters[r]; fr.move_contact = 1; fr.move_hit = 1; fr.hit_pause = rd.pause_p1; fr.spr_priority = rd.p1sprpriority; }
+            let fa = &mut self.fighters[a];
+            fa.hitdef_active = false; fa.move_reversed = 1; fa.hit_pause = rd.pause_p2; fa.spr_priority = rd.p2sprpriority;
+        }
+    }
+
     fn detect_hits(&mut self) {
+        self.detect_reversals();
         let mut pending = vec![];
         for a in 0..self.fighters.len() {
             let fa = &self.fighters[a];
@@ -745,15 +791,22 @@ impl Match {
             for d in 0..self.fighters.len() {
                 let fd = &self.fighters[d];
                 if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) { continue; }
+                if hd.hit_once && !fa.hitdef_targets.is_empty() { continue; }
                 if !self.can_be_hit(d, hd, fa.side) { continue; }
                 if let Some(at) = Self::overlap(&c1, &fd.boxes(2)) { pending.push((a, d, hd.clone(), at)); }
             }
         }
+        let mut struck: Vec<usize> = vec![];
         for (a, d, hd, at) in pending {
+            if hd.hit_once && struck.contains(&a) { continue; }
+            if !self.fighters[a].hitdef_active { continue; }
             let did = self.fighters[d].id;
             self.fighters[a].hitdef_targets.push(did);
+            if hd.hit_once { self.fighters[a].targets.retain(|t| t.0 == did); }
             self.apply_hit(a, d, &hd, at, None);
+            struck.push(a);
         }
+        for a in struck { if self.fighters.get(a).is_some_and(|f| f.def.source == Source::Mugen) { self.fighters[a].hitdef_active = false; } }
     }
 
     /// Is fighter `i` standing against the edge of the playable area (screen / stage bound)?
@@ -767,8 +820,13 @@ impl Match {
         f.pos.x <= minx + 2.0 || f.pos.x >= maxx - 2.0
     }
 
+    fn hit_override(&self, d: usize, hd: &HitDefData) -> Option<(i32, bool)> {
+        self.fighters[d].hit_overrides.iter().flatten().find(|o| o.time != 0 && Self::attr_match(hd, &o.attr)).map(|o| (o.state_no, o.force_air))
+    }
+
     pub fn apply_hit(&mut self, a: usize, d: usize, hd: &HitDefData, at: (f32, f32), proj: Option<(i32, f32)>) {
         let guarded = self.is_guarding(d, hd);
+        let overridden = if guarded { None } else { self.hit_override(d, hd) };
         let from_proj = proj.is_some();
         let a_facing = proj.map(|p| p.1).unwrap_or(self.fighters[a].facing);
         let (aid, aside, apos, aroot) = { let f = &self.fighters[a]; (f.id, f.side, f.pos, f.root) };
@@ -789,6 +847,21 @@ impl Match {
         }
         let dir = if self.fighters[d].facing == -a_facing { 1.0 } else { -1.0 };
         let gt = self.game_time;
+        let cornered = !from_proj && self.at_corner(d);
+        let d_air = self.fighters[d].state_type == 'A' || self.fighters[d].pos.y < -1.0;
+        if let Some((state_no, force_air)) = overridden {
+            {
+                let fd = &mut self.fighters[d];
+                fd.ghv = GetHitVars { attacker_id: aid, hit_id: hd.id, chainid: hd.chain_id.unwrap_or(-1), hittime: hd.ground_hit_time, ..GetHitVars::default() };
+                fd.hit_shake = hd.pause_p2; fd.move_type = 'H';
+                if force_air { fd.state_type = 'A'; fd.ghv.fall = true; }
+            }
+            if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('h', pid, gt)); } else { let fa = &mut self.fighters[a]; fa.move_hit = 1; fa.hit_pause = hd.pause_p1; }
+            let dd = self.fighters[d].def.clone();
+            self.change_state(d, state_no, dd);
+            self.events.push(Event::Hit { attacker_side: aside, defender_side: self.fighters[d].side, damage: 0.0, guarded: false, heavy: false, attacker: self.idx(aroot).unwrap_or(a), defender: d });
+            return;
+        }
         if guarded {
             let dmg = (hd.guard_damage * attack_mul).round();
             let pause_p1 = hd.guard_pause_p1;
@@ -812,6 +885,7 @@ impl Match {
             self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
             self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false);
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
+            if cornered && self.fighters[a].def.source == Source::Mugen { self.fighters[a].vel.x = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; }
         } else {
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
@@ -826,19 +900,21 @@ impl Match {
                 if !hd.kill && nl < 1.0 { nl = fd.life.min(1.0); }
                 fd.life = nl.max(0.0);
                 let air = fd.state_type == 'A' || fd.pos.y < -1.0;
+                let down = fd.state_type == 'L';
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
                 g.attacker_id = aid; g.damage = dmg; g.hitcount = prev_hc + 1;
                 g.animtype = if air { hd.air_animtype } else { hd.animtype };
                 g.groundtype = hd.ground_type; g.airtype = hd.air_type; g.kind = if air { 3 } else { hd.ground_type };
                 g.fall = (if air { hd.air_fall } else { hd.fall }) || (was_hit && prev_fall);
-                g.hittime = if air { hd.air_hit_time } else { hd.ground_hit_time };
+                g.hittime = if down { hd.down_hit_time } else if air { hd.air_hit_time } else { hd.ground_hit_time };
                 g.slidetime = hd.ground_slide_time; g.ctrltime = hd.ground_hit_time;
-                let v = if air { hd.air_vel } else { hd.ground_vel };
+                let v = if down { hd.down_vel } else if air { hd.air_vel } else { hd.ground_vel };
+                g.hit_id = hd.id; g.fall_env_shake = hd.fall_env_shake; g.down_bounce = hd.down_bounce;
                 g.xvel = v[0] * dir; g.yvel = v[1]; g.yaccel = hd.yaccel;
                 g.fall_xvel = hd.fall_xvel.map(|x| x * dir).unwrap_or(g.xvel); g.fall_yvel = hd.fall_yvel;
                 g.fall_recover = hd.fall_recover; g.fall_recover_time = hd.fall_recover_time; g.fall_damage = hd.fall_damage; g.fall_kill = hd.fall_kill; g.kill = hd.kill;
-                g.chainid = hd.chain_id;
+                g.chainid = hd.chain_id.unwrap_or(-1);
                 if fd.life <= 0.0 {
                     g.fall = true;
                     if g.yvel == 0.0 { g.yvel = -5.0 * fd.lscl; g.xvel = g.xvel.min(-2.5 * fd.lscl); }
@@ -868,7 +944,10 @@ impl Match {
             let heavy = hd.animtype >= 2 || dmg >= 70.0;
             self.spawn_spark(a, hd.spark_no, hd.spark_own, at.0, at.1, false, heavy);
             if let Some(s) = hd.hit_sound { self.sound(a, s.0, s.1, s.2, Some(if heavy { "hitheavy" } else { "hit" })); }
-            if hd.envshake_time > 0 { self.do_shake(hd.envshake_time, 4.0); }
+            if hd.env_shake.time > 0 { self.shake(hd.env_shake.time, hd.env_shake.freq, hd.env_shake.ampl, hd.env_shake.phase); }
+            if let Some(p) = hd.target_palfx.clone() { self.fighters[d].palfx = Some(p); }
+            if cornered && self.fighters[a].def.source == Source::Mugen { self.fighters[a].vel.x = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; }
+            self.place_target(a, d, hd);
             let droot = self.fighters[d].root;
             self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
         }
@@ -881,6 +960,19 @@ impl Match {
         }
         let dmg = self.fighters[d].ghv.damage;
         self.events.push(Event::Hit { attacker_side: aside, defender_side: self.fighters[d].side, damage: dmg, guarded, heavy: hd.animtype >= 2, attacker: self.idx(aroot).unwrap_or(a), defender: d });
+    }
+
+    fn place_target(&mut self, a: usize, d: usize, hd: &HitDefData) {
+        let (ax, ay, af) = { let f = &self.fighters[a]; (f.pos.x, f.pos.y, f.facing) };
+        let fd = &mut self.fighters[d];
+        if let Some(s) = hd.snap { fd.pos.x = ax + s.x * af; fd.pos.y = ay + s.y; return; }
+        let mut rel = [(fd.pos.x - ax) * af, fd.pos.y - ay];
+        for k in 0..2 {
+            if let Some(lo) = hd.min_dist[k] { rel[k] = rel[k].max(lo); }
+            if let Some(hi) = hd.max_dist[k] { rel[k] = rel[k].min(hi); }
+        }
+        fd.pos.x = ax + rel[0] * af;
+        if hd.min_dist[1].is_some() || hd.max_dist[1].is_some() { fd.pos.y = ay + rel[1]; }
     }
 
     // ---------------------------------------------------------------- effects
@@ -1111,6 +1203,8 @@ impl Match {
             height_bound: [num(self, "projheightbound", -240.0, 0) * f.lscl, num(self, "projheightbound", 1.0, 1) * f.lscl],
             remove_time: num(self, "projremovetime", -1.0, 0) as i32, time: 0, guard_dist: hd.guard_dist * f.lscl, hitdef: hd, dying: false,
             scale: [num(self, "projscale", 1.0, 0), num(self, "projscale", 1.0, 1)], remove: false, lscl: f.lscl,
+            remove_on_hit: num(self, "projremove", 1.0, 0) != 0.0, stage_bound: num(self, "projstagebound", 40.0, 0) * f.lscl,
+            super_move: num(self, "supermovetime", 0.0, 0) as i32, pause_move: num(self, "pausemovetime", 0.0, 0) as i32,
         };
         self.projectiles.push(p);
     }
@@ -1127,9 +1221,16 @@ impl Match {
         if anim >= 0 && p.cur.def.anims.contains_key(&anim) { p.cur = AnimCursor::new(p.cur.def.clone(), anim); p.dying = true; } else { p.remove = true; }
     }
     fn update_projectiles(&mut self, paused: bool) {
-        if paused { return; }
+        let super_pause = self.pause.as_ref().is_some_and(|p| p.is_super);
         let (left, right) = (self.camera.x - self.view_w / 2.0, self.camera.x + self.view_w / 2.0);
-        for p in self.projectiles.iter_mut() {
+        let (stage_l, stage_r) = (self.stage.bound_left - self.view_w / 2.0, self.stage.bound_right + self.view_w / 2.0);
+        let mut frozen = vec![false; self.projectiles.len()];
+        for (k, p) in self.projectiles.iter_mut().enumerate() {
+            if paused {
+                let budget = if super_pause { &mut p.super_move } else { &mut p.pause_move };
+                if *budget <= 0 { frozen[k] = true; continue; }
+                *budget -= 1;
+            }
             p.cur.advance(); p.time += 1;
             if p.dying {
                 p.pos.x += p.rem_vel.x * p.facing; p.pos.y += p.rem_vel.y;
@@ -1140,23 +1241,27 @@ impl Match {
             p.vel.x = p.vel.x * p.vel_mul.x + p.accel.x; p.vel.y = p.vel.y * p.vel_mul.y + p.accel.y;
             if p.miss_cd > 0 { p.miss_cd -= 1; }
             if p.pos.x < left - p.edge_bound || p.pos.x > right + p.edge_bound { p.remove = true; }
-            if p.pos.y < p.height_bound[0] - 240.0 || p.pos.y > p.height_bound[1] + 20.0 { p.remove = true; }
+            if p.pos.x < stage_l - p.stage_bound || p.pos.x > stage_r + p.stage_bound { p.remove = true; }
+            if p.pos.y < p.height_bound[0] || p.pos.y > p.height_bound[1] { p.remove = true; }
             if p.remove_time >= 0 && p.time >= p.remove_time { let a = p.rem_anim; Self::kill_proj(p, a); }
         }
         let n = self.projectiles.len();
         for a in 0..n { for b in 0..n {
-            if a == b { continue; }
+            if a == b || frozen[a] || frozen[b] { continue; }
             let (pa, pb) = (&self.projectiles[a], &self.projectiles[b]);
             if pa.dying || pb.dying || pa.remove || pb.remove || pa.side == pb.side { continue; }
             let ba: Vec<Box4> = Self::proj_boxes(pa, 1).into_iter().chain(Self::proj_boxes(pa, 2)).collect();
             let bb: Vec<Box4> = Self::proj_boxes(pb, 1).into_iter().chain(Self::proj_boxes(pb, 2)).collect();
             if Self::overlap(&ba, &bb).is_some() {
                 let (pra, prb) = (pa.priority, pb.priority);
-                if pra <= prb { let p = &mut self.projectiles[a]; let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); }
-                if prb <= pra { let p = &mut self.projectiles[b]; let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); }
+                for (k, lost) in [(a, pra <= prb), (b, prb <= pra)] {
+                    let p = &mut self.projectiles[k];
+                    if lost { let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); } else { p.priority -= 1; }
+                }
             }
         } }
         for pi in 0..self.projectiles.len() {
+            if frozen[pi] { continue; }
             for d in 0..self.fighters.len() {
                 let p = &self.projectiles[pi];
                 if p.dying || p.remove || p.miss_cd > 0 { break; }
@@ -1172,7 +1277,7 @@ impl Match {
                 self.fighters[oi].proj_contacts.push(('c', pid, gt));
                 let p = &mut self.projectiles[pi];
                 p.hits -= 1;
-                if p.hits <= 0 { let a = p.hit_anim; Self::kill_proj(p, a); } else { p.miss_cd = p.miss_time.max(1); }
+                if p.hits <= 0 && p.remove_on_hit { let a = p.hit_anim; Self::kill_proj(p, a); } else { p.miss_cd = p.miss_time.max(1); }
             }
         }
         self.projectiles.retain(|p| !p.remove);

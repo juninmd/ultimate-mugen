@@ -1,0 +1,72 @@
+# Customizing the engine
+
+## Architecture
+
+| Path | Responsibility |
+|---|---|
+| `crates/formats` | M.U.G.E.N file readers: INI, SFF, AIR, SND, ACT, PCX, PNG, stages, virtual file system (folders and zips). No platform dependencies |
+| `crates/engine` | State machine: expressions (`expr.rs`), triggers (`triggers.rs`), controllers (`controllers.rs`), HitDef (`hitdef.rs`), fight (`matchs.rs`), commands and input, UMF compiler (`native/`) |
+| `src/` | Application: window, render, HUD, audio, menus, native stages, visual effects, controls and gamepad |
+| `web/` | Page, service worker and the browser JS bridge |
+| `assets/chars` | Bundled UMF fighters |
+
+Tick flow: inputs → `Match::tick` → for each fighter, `[Statedef -3/-2/-1]` and the current state → controllers whose triggers are true → physics → collision and `apply_hit` → camera. Simulation runs at 60 ticks per second, is deterministic and independent from rendering.
+
+## Add a state controller
+
+1. In `crates/engine/src/controllers.rs`, inside `run`, add a branch with the lowercase name:
+
+```rust
+"victoryquote" => { let v = n(m, "value", -1.0) as i32; m.fighters[i].victory_quote = v; }
+```
+
+`victory_quote` is a new field you add to `Fighter`.
+
+2. `n(m, "param", default)` reads a numeric parameter; `n2(m, "param", default, index)` reads the Nth value; `sc.has("param", 0)` tests presence; `sc.raw("param")` returns the text.
+3. Add the field in `fighter.rs` if you need new state.
+4. Write a test in `crates/engine/tests/combat_logic.rs` calling `ume_engine::controllers::run`.
+
+## Add a trigger
+
+In `crates/engine/src/triggers.rs`, add a branch to the name `match`:
+
+```rust
+"winko" => b(m.match_over && m.winner_side == f.side as i32 && m.won_by_ko),
+```
+
+`f` is the evaluated fighter and `m` the match. `won_by_ko` would be a new field on `Match`. `b(bool)` converts to 0/1. Triggers returning floats must appear in `is_float` in `expr.rs`.
+
+## Add a file format
+
+Put the decoder in `crates/formats/src/<format>.rs`, export it in `lib.rs` and test it with real files in `crates/formats/tests/real_files.rs`. The crate must keep compiling for `wasm32-unknown-unknown`.
+
+## Tests
+
+| Command | Covers |
+|---|---|
+| `cargo test --workspace --release` | Everything |
+| `cargo test -p ume-engine --test kfm` | Reference Kung Fu Man |
+| `cargo test -p ume-engine --test combat_logic` | Combat rules |
+| `cargo test -p ume-formats` | Decoders |
+| `cargo clippy --workspace -- -D warnings` | Lint |
+| `node scripts/web-smoke.js web/dist` | Web build in Chromium |
+
+## Code rules
+
+- No code comments: names of functions, types and variables must explain intent. Explanations live in this wiki.
+- Code, commits, issues and documentation are written in English. Portuguese translations live in `*.pt-BR.md` files and `docs/wiki/pt-BR/`.
+- The simulation (`crates/engine`) uses no clock, threads or randomness outside `Match::random`, to keep replays and rollback working.
+- No allocation inside `Match::tick` in new code.
+- Conventional Commits (`feat:`, `fix:`), validated by `scripts/commit-lint.mjs`.
+
+## Architecture decisions
+
+| Topic | Choice |
+|---|---|
+| Render | `wgpu` (Vulkan, Metal, DX12, WebGPU, WebGL2), palette in the shader |
+| Scripts | CNS and ZSS for fighters, UMF JSON for the native format; no Lua |
+| Expressions | Stack bytecode |
+| Audio | `kira` + `symphonia` |
+| Network | `ggrs` (rollback) + `matchbox` (WebRTC) |
+
+The migration is described in [`docs/ROADMAP.md`](../ROADMAP.md).

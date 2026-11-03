@@ -1,6 +1,6 @@
 //! State controller implementations (~90 MUGEN sctrls).
 use crate::chardef::Controller;
-use crate::fighter::{asf, AfterImage, Bind, BindKind, PalFx};
+use crate::fighter::{asf, AfterImage, Bind, BindKind, HitOverride, PalFx};
 use crate::hitdef::{build, parse_sound_ref};
 use crate::matchs::{Event, Match};
 use std::sync::Arc;
@@ -105,6 +105,21 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         }
         "turn" => { m.fighters[i].facing *= -1.0; }
         "hitdef" => { let hd = build(m, i, sc); let f = &mut m.fighters[i]; f.hitdef = Some(hd); f.hitdef_active = true; f.hitdef_targets.clear(); }
+        "reversaldef" => {
+            let attr = sc.raw("reversal.attr").unwrap_or("SCA").to_string();
+            let hd = build(m, i, sc);
+            m.fighters[i].reversal = Some((attr, hd));
+        }
+        "hitoverride" => {
+            let attr = sc.raw("attr").unwrap_or("SCA,AA,AT,AP").to_string();
+            let slot = (n(m, "slot", 0.0) as usize).min(7);
+            let (state_no, time, force_air) = (n(m, "stateno", -1.0) as i32, n(m, "time", 1.0) as i32, n(m, "forceair", 0.0) != 0.0);
+            m.fighters[i].hit_overrides[slot] = if state_no < 0 { None } else { Some(HitOverride { attr, state_no, time, force_air }) };
+        }
+        "fallenvshake" => {
+            let s = m.fighters[i].ghv.fall_env_shake;
+            if s.time > 0 { m.shake(s.time, s.freq, s.ampl, s.phase); m.fighters[i].ghv.fall_env_shake.time = 0; }
+        }
         "hitvelset" => {
             let (x, y) = (n(m, "x", 1.0) != 0.0, n(m, "y", 1.0) != 0.0);
             let f = &mut m.fighters[i];

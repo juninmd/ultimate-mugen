@@ -1,6 +1,6 @@
 //! HitDef parameter parsing.
 use crate::chardef::Controller;
-use crate::fighter::HitDefData;
+use crate::fighter::{HitDefData, PalFx, Shake, V2};
 use crate::matchs::Match;
 
 fn animtype(s: &str) -> Option<i32> {
@@ -77,6 +77,16 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     let gvx = num("ground.velocity", 0.0, 0) * l; let gvy = num("ground.velocity", 0.0, 1) * l;
     let fall = num("fall", 0.0, 0) != 0.0;
     let ght = num("ground.hittime", 0.0, 0) as i32;
+    let guard_vel = if has("guard.velocity", 0) { num("guard.velocity", 0.0, 0) * l } else { gvx };
+    let ground_corner_push = if has("ground.cornerpush.veloff", 0) { num("ground.cornerpush.veloff", 0.0, 0) * l } else if attr_state.contains('A') && !attr_state.contains('S') && !attr_state.contains('C') { 0.0 } else { 1.3 * guard_vel };
+    let shake = |prefix: &str, time_default: f64| -> Shake {
+        let freq = num(&format!("{prefix}.freq"), 60.0, 0).clamp(0.0, 180.0);
+        Shake { time: num(&format!("{prefix}.time"), time_default, 0) as i32, freq, ampl: num(&format!("{prefix}.ampl"), -4.0, 0) * l, phase: num(&format!("{prefix}.phase"), if freq >= 90.0 { 90.0 } else { 0.0 }, 0) }
+    };
+    let opt = |k: &str, idx: usize| if has(k, idx) { Some(num(k, 0.0, idx) * l) } else { None };
+    let target_palfx = if has("palfx.time", 0) || has("palfx.add", 0) || has("palfx.mul", 0) {
+        Some(PalFx { time: num("palfx.time", 0.0, 0) as i32, add: [num("palfx.add", 0.0, 0), num("palfx.add", 0.0, 1), num("palfx.add", 0.0, 2)], mul: [num("palfx.mul", 256.0, 0), num("palfx.mul", 256.0, 1), num("palfx.mul", 256.0, 2)] })
+    } else { None };
     let gst = num("ground.slidetime", 0.0, 0) as i32;
     HitDefData {
         attr_state: attr_state.clone(), attr_kind: attr_kind.clone(),
@@ -102,7 +112,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         guard_dist: num("guard.dist", f.c("size.attack.dist", 160.0) as f64, 0),
         yaccel: num("yaccel", f.c("movement.yaccel", 0.44) as f64, 0) * l,
         ground_vel: [gvx, gvy],
-        guard_vel: if has("guard.velocity", 0) { num("guard.velocity", 0.0, 0) * l } else { gvx },
+        guard_vel,
         air_vel: if has("air.velocity", 0) { [num("air.velocity", 0.0, 0) * l, num("air.velocity", 0.0, 1) * l] } else { [gvx, gvy] },
         air_guard_vel: if has("airguard.velocity", 0) { [num("airguard.velocity", 0.0, 0) * l, num("airguard.velocity", 0.0, 1) * l] } else { [gvx * 1.5, gvy / 2.0] },
         p1sprpriority: num("p1sprpriority", 1.0, 0) as i32, p2sprpriority: num("p2sprpriority", 0.0, 0) as i32,
@@ -121,9 +131,23 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         give_power: if has("givepower", 0) { num("givepower", 0.0, 0) } else { damage },
         guard_get_power: if has("getpower", 1) { num("getpower", 0.0, 1) } else { damage / 2.0 },
         guard_give_power: if has("givepower", 1) { num("givepower", 0.0, 1) } else { damage / 2.0 },
-        id: num("id", 0.0, 0) as i32, chain_id: num("chainid", -1.0, 0) as i32,
+        id: num("id", 0.0, 0) as i32, chain_id: Some(num("chainid", -1.0, 0) as i32).filter(|v| *v >= 0),
         envshake_time: num("envshake.time", 0.0, 0) as i32, num_hits: num("numhits", 1.0, 0) as i32,
         juggle: f.st_def.states.get(&f.state_no).and_then(|sd| sd.param("juggle")).and_then(|p| p.exprs.first()).map(|e| m.ev(i, e) as i32).unwrap_or(0),
+        no_chain_id: [0, 1].map(|k| Some(num("nochainid", -1.0, k) as i32).filter(|v| *v >= 0)),
+        hit_once: num("hitonce", if attr_kind.iter().any(|k| k.ends_with('T')) { 1.0 } else { 0.0 }, 0) != 0.0,
+        snap: if has("snap", 0) { Some(V2 { x: num("snap", 0.0, 0) * l, y: num("snap", 0.0, 1) * l }) } else { None },
+        min_dist: [opt("mindist", 0), opt("mindist", 1)], max_dist: [opt("maxdist", 0), opt("maxdist", 1)],
+        affect_team: raw("affectteam").and_then(|s| s.chars().next()).map(|c| c.to_ascii_uppercase()).unwrap_or('E'),
+        down_vel: if has("down.velocity", 0) { [num("down.velocity", 0.0, 0) * l, num("down.velocity", 0.0, 1) * l] } else { [gvx, gvy] },
+        down_hit_time: if has("down.hittime", 0) { num("down.hittime", 0.0, 0) as i32 } else { ght },
+        down_bounce: num("down.bounce", 0.0, 0) != 0.0,
+        fall_env_shake: shake("fall.envshake", 0.0), env_shake: shake("envshake", 0.0),
+        ground_corner_push,
+        air_corner_push: if has("air.cornerpush.veloff", 0) { num("air.cornerpush.veloff", 0.0, 0) * l } else { ground_corner_push },
+        guard_corner_push: if has("guard.cornerpush.veloff", 0) { num("guard.cornerpush.veloff", 0.0, 0) * l } else { ground_corner_push },
+        air_guard_corner_push: if has("airguard.cornerpush.veloff", 0) { num("airguard.cornerpush.veloff", 0.0, 0) * l } else { ground_corner_push },
+        target_palfx,
         airjuggle: if f.has_assert(crate::fighter::asf::NOJUGGLE) { i32::MAX / 2 } else { f.def.c("data.airjuggle", 15.0) as i32 },
     }
 }

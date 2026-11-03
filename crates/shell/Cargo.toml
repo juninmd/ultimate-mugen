@@ -9,6 +9,7 @@ ume-render = { path = "../render" }
 wgpu = "30"
 winit = "=0.30.13"
 pollster = "0.4"
+fontdue = "0.9"
 
 [dev-dependencies]
 ume-engine = { path = "../engine" }

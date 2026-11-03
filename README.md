@@ -9,6 +9,10 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, mul
 | ![Super](screenshots/08-fight-super.jpg) | ![Seleção](screenshots/03-select.jpg) |
 | ![MUGEN KFM vs original](screenshots/12-mugen-kfm-vs-native.jpg) | ![Cenário MUGEN](screenshots/13-native-on-mugen-stage.jpg) |
 | ![Kaname vs Valdric](screenshots/11b-fight-kaname-valdric.jpg) | ![Celular](screenshots/15-mobile-fight.jpg) |
+| ![Seleção com muitos lutadores](screenshots/03b-select-many.jpg) | ![Loading no VS](screenshots/05a-vs-loading.jpg) |
+| ![Vídeo](screenshots/17-video.jpg) | ![4K](screenshots/19-fight-4k.jpg) |
+| ![KO cinematográfico](screenshots/20-fx-ko.jpg) | ![Super](screenshots/08-fight-super.jpg) |
+| ![Impacto neon](screenshots/21-fx-neon-hit.jpg) | ![Transição](screenshots/22-transition.jpg) |
 
 ## Por que Rust + macroquad
 | Requisito | Escolha |
@@ -23,6 +27,10 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, mul
 - **Compatibilidade MUGEN** (`crates/formats` + `crates/engine`): `.def`, `.sff` v1/v2 (PCX, RLE8, RLE5, LZ5, PNG8/24/32), `.air`, `.cmd`, `.cns`, `.snd`, `.act`, cenários com parallax/tiles/animação. Linguagem de triggers completa (inteiro vs float, intervalos, redirecionamentos), ~90 state controllers, HitDef completo, arremessos (custom states), helpers, projéteis, explods, super pause, after images, `localcoord` HD. Validado com o Kung Fu Man oficial (SD e 720p).
 - **Formato UMF**: um personagem = 1 JSON com golpes declarativos; hitboxes automáticas pelo esqueleto; botão "especial simples" no celular. Compila para a mesma VM do MUGEN — UMF e MUGEN lutam entre si.
 - **15 lutadores originais** + **10 personagens M.U.G.E.N incluídos** (Kung Fu Man SD/HD e cenários da Elecbyte, Suave Dude, 7 originais da comunidade com licença livre) e **14 cenários** (6 originais + 8 MUGEN) procedurais (sem assets de terceiros), música e efeitos sonoros sintetizados.
+- **4K de verdade**: tela cheia (F11), janela até 5K, e a arte procedural (lutadores UMF e cenários) é rasterizada em densidade proporcional à tela — *Automática*: 3× até 900 px de altura, 4× até 1300, 4,5× até 1700, **6× em 4K** (menu **Vídeo**; flags `--res 3840x2160`, `--4k`, `--fullscreen`). Texto e UI escalam sem re-rasterizar fontes a cada quadro.
+- **Muitos personagens e cenários**: seleção com rolagem, filtro (Tab: todos/originais/M.U.G.E.N), PgUp/PgDn, roda do mouse, `R` aleatório; só as linhas visíveis são desenhadas e só o que está sob o cursor é carregado (cache LRU limita a memória). Pastas/zips importados são registrados sem decodificar tudo (centenas em segundos).
+- **Loadings rápidos**: tela de carregamento na inicialização, pré-carga por etapas atrás da tela de VS (barra de progresso), prévia leve (idle/vitória) nos menus, rasterização dos lutadores em paralelo (≈3× mais rápido) e música sintetizada antes da luta.
+- **Visual AAA** ([`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md)): pós-processamento (bloom, aberração cromática, blur radial, vinheta, grade de cor), partículas e anéis de choque em cada golpe, números de dano, *camera punch*, KO em câmera lenta com zoom, super cinematográfico com linhas de velocidade e aura, reflexos no chão, HUD animado, transições de tela e fundo vivo. Opção de acessibilidade para reduzir efeitos (Vídeo → Efeitos de impacto).
 - Modos **Arcade, Versus CPU, 2 Jogadores, Treino (hitboxes), CPU vs CPU**; IA compatível com qualquer personagem.
 - **Controles**: teclado, gamepads (DualShock/DualSense com vibração em golpes, defesa, super e K.O.; lightbar azul/vermelha por jogador), toque com analógico virtual e SP1/SP2/SP3/SUPER de um toque.
 
@@ -32,6 +40,8 @@ cargo run --release                      # desktop
 cargo test --workspace --release         # testes (parsers, VM, KFM headless se disponível, elenco)
 ./scripts/build-web.sh                   # web/dist → sirva com qualquer servidor HTTP estático (PWA)
 cargo run --release -- --shots out/      # tour automático de capturas de tela
+cargo run --release -- --4k              # janela 3840×2160 (ou --res 2560x1440, --fullscreen)
+cargo run --release -p ume-engine --example load_bench   # tempo de carga dos lutadores (completo vs. prévia)
 ```
 Linux precisa de: `libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev`.
 
@@ -48,6 +58,8 @@ Desktop: coloque pastas ou `.zip` em `mugen/` ao lado do executável (ex.: `muge
 | Chutes | J · K · L | ✕ · ○ · R2 | LK · HK |
 | Especiais simples | 1 · 2 · 3 (Super: 1+2) | L1 · L2 | SP1–SP3 · SUPER |
 | Pausa / Hitboxes | Esc / F2 | OPTIONS | ❚❚ |
+| Tela cheia / FPS | F11 / F3 | — | — |
+| Lista de lutadores | Tab (filtro) · PgUp/PgDn · R (aleatório) | — | — |
 
 ## Estrutura
 ```

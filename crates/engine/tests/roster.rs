@@ -58,3 +58,21 @@ fn smoke(p1: &str, p2: &str) {
     for _ in 0..60 { m.tick(&[0, 0]); if m.fighters[0].state_no >= 3000 { sup = true; } }
     assert!(sup, "{p1}: simple-mode super");
 }
+
+#[test]
+fn preview_is_light_and_art_res_scales() {
+    use ume_engine::native::{compile_native_preview, rig::{art_res, set_art_res}};
+    let nc = load("kaito");
+    let full = compile_native(&nc, 1, true);
+    let pv = compile_native_preview(&nc, 1);
+    assert!(pv.anims.contains_key(&0) && pv.anims.contains_key(&181), "idle + win present");
+    assert!(pv.anims.len() <= 2 && pv.sprites.len() * 3 < full.sprites.len(), "preview rasterizes far fewer frames");
+    // higher art resolution → denser sprites, same on-screen size (scale = 1/res)
+    let base = art_res();
+    let (s1, w1) = { let s = full.sprites.values().find(|s| s.image.is_some()).unwrap(); (s.scale, s.width) };
+    set_art_res(6.0);
+    let hi = compile_native_preview(&nc, 1);
+    let s2 = hi.sprites.values().find(|s| s.image.is_some()).unwrap();
+    set_art_res(base);
+    assert!(s2.scale < s1 && s2.width > w1 * 0.9, "6x art is denser than the default");
+}

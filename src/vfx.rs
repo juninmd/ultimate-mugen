@@ -1,0 +1,348 @@
+//! AAA-style impact feedback: layered particles (sparks, glows, dust, debris), shockwave rings, damage numbers, banners,
+//! camera punch/KO zoom, slow-motion, screen-shake "trauma", and the parameters fed to the post-processing pass.
+//! Everything here is presentation only — the deterministic simulation is untouched.
+use crate::render::Gfx;
+use crate::ui::Ui;
+use macroquad::prelude::*;
+use ume_engine::matchs::{Event, Match};
+
+#[derive(Clone, Copy, PartialEq)]
+enum Kind { Spark, Glow, Dust, Debris, Ember }
+struct P { k: Kind, x: f32, y: f32, vx: f32, vy: f32, g: f32, life: f32, max: f32, size: f32, col: [f32; 3], rot: f32, vrot: f32 }
+struct Ring { x: f32, y: f32, r0: f32, r1: f32, t: f32, dur: f32, w: f32, col: [f32; 3] }
+struct Float { x: f32, y: f32, t: f32, text: String, size: f32, col: [f32; 3] }
+pub struct Banner { pub text: String, pub t: f32, pub col: [f32; 3], pub sub: String }
+
+#[derive(Default, Clone, Copy)]
+struct Snap { grounded: bool, vy: f32, vx: f32, move_type: char }
+
+/// What the post-processing pass should do this frame.
+#[derive(Clone, Copy, Default)]
+pub struct FxParams { pub chroma: f32, pub vignette: f32, pub bloom: f32, pub saturation: f32, pub flash: f32, pub radial: f32, pub center: [f32; 2], pub tint: [f32; 3] }
+
+pub struct Vfx {
+    parts: Vec<P>, rings: Vec<Ring>, floats: Vec<Float>, pub banners: Vec<Banner>,
+    pub trauma: f32, punch: f32, ko_t: f32, ko_focus: (f32, f32), pub slow_t: f32,
+    chroma: f32, flash: f32, radial: f32, vig: f32, lines: f32, lines_col: [f32; 3], sat_pulse: f32,
+    super_t: f32, super_owner: usize,
+    snap: [Snap; 2], pre_mt: [char; 2], rng: u32, tick: u32,
+}
+
+fn lerp(a: f32, b: f32, t: f32) -> f32 { a + (b - a) * t }
+
+impl Vfx {
+    pub fn new() -> Self {
+        Vfx { parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
+            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, snap: [Snap::default(); 2], pre_mt: [' '; 2], rng: 0x9e37_79b9, tick: 0 }
+    }
+    fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
+    fn rr(&mut self, a: f32, b: f32) -> f32 { a + (b - a) * self.r() }
+
+    pub fn ko_active(&self) -> bool { self.ko_t > 0.0 }
+    /// Real-time scale applied to the fixed-step accumulator (KO slow motion).
+    pub fn time_scale(&self) -> f32 {
+        if self.slow_t <= 0.0 { return 1.0 }
+        // hold at 25% speed, then ease back to normal
+        let t = self.slow_t;
+        if t > 0.5 { 0.25 } else { lerp(1.0, 0.25, t / 0.5) }
+    }
+
+    fn spark_burst(&mut self, x: f32, y: f32, dir: f32, n: usize, speed: f32, col: [f32; 3], spread: f32) {
+        for _ in 0..n {
+            let a = (self.rr(-spread, spread)) + if dir >= 0.0 { 0.0 } else { std::f32::consts::PI };
+            let s = self.rr(0.4, 1.0) * speed;
+            let life = self.rr(0.18, 0.42);
+            let c = [lerp(col[0], 1.0, self.r() * 0.5), lerp(col[1], 1.0, self.r() * 0.5), lerp(col[2], 1.0, self.r() * 0.4)];
+            let size = self.rr(0.6, 1.3);
+            self.parts.push(P { k: Kind::Spark, x, y, vx: a.cos() * s, vy: a.sin() * s - 0.4, g: 0.12, life, max: life, size, col: c, rot: 0.0, vrot: 0.0 });
+        }
+    }
+    fn dust(&mut self, x: f32, y: f32, n: usize, spread: f32, up: f32, col: [f32; 3]) {
+        for _ in 0..n {
+            let life = self.rr(0.35, 0.7);
+            let (vx, vy, sz) = (self.rr(-spread, spread), -self.rr(0.1, up), self.rr(2.0, 4.5));
+            let jx = self.rr(-4.0, 4.0);
+            self.parts.push(P { k: Kind::Dust, x: x + jx, y, vx, vy, g: -0.004, life, max: life, size: sz, col, rot: 0.0, vrot: 0.0 });
+        }
+    }
+    fn debris(&mut self, x: f32, y: f32, n: usize, col: [f32; 3]) {
+        for _ in 0..n {
+            let life = self.rr(0.5, 0.95);
+            let (vx, vy, sz, vr) = (self.rr(-2.2, 2.2), -self.rr(1.5, 4.2), self.rr(0.8, 1.8), self.rr(-0.4, 0.4));
+            self.parts.push(P { k: Kind::Debris, x, y, vx, vy, g: 0.22, life, max: life, size: sz, col, rot: 0.0, vrot: vr });
+        }
+    }
+    fn ring(&mut self, x: f32, y: f32, r1: f32, dur: f32, w: f32, col: [f32; 3]) { self.rings.push(Ring { x, y, r0: 2.0, r1, t: 0.0, dur, w, col }); }
+    fn glow(&mut self, x: f32, y: f32, size: f32, life: f32, col: [f32; 3]) { self.parts.push(P { k: Kind::Glow, x, y, vx: 0.0, vy: 0.0, g: 0.0, life, max: life, size, col, rot: 0.0, vrot: 0.0 }); }
+    fn float(&mut self, x: f32, y: f32, text: String, size: f32, col: [f32; 3]) { self.floats.push(Float { x, y, t: 0.0, text, size, col }); }
+    pub fn banner(&mut self, text: &str, sub: &str, col: [f32; 3]) { self.banners.push(Banner { text: text.into(), sub: sub.into(), t: 0.0, col }); }
+
+    /// Call right before `Match::tick`: remember who was attacking (for COUNTER detection).
+    pub fn pre_tick(&mut self, m: &Match) {
+        for (side, f) in m.roots().enumerate().take(2) { self.pre_mt[side] = f.move_type; }
+    }
+
+    fn chest(m: &Match, side: usize) -> Option<(f32, f32, f32)> {
+        m.roots().nth(side).map(|f| (f.pos.x, f.pos.y - f.def.c("size.height", 60.0) as f32 * 0.55, f.facing))
+    }
+
+    /// Feed one simulation event.
+    pub fn event(&mut self, ev: &Event, m: &Match) {
+        match ev {
+            Event::Hit { attacker_side, defender_side, damage, guarded, heavy } => {
+                let Some((dx, dy, dface)) = Self::chest(m, *defender_side) else { return };
+                let dir = if m.roots().nth(*attacker_side).is_some_and(|a| a.pos.x <= dx) { 1.0 } else { -1.0 };
+                let (x, y) = (dx + dface * 7.0, dy);
+                let mag = (damage / 90.0).clamp(0.2, 1.4);
+                if *guarded {
+                    self.spark_burst(x, y, dir, 7, 3.2, [0.45, 0.75, 1.0], 0.9);
+                    self.ring(x, y, 16.0, 0.22, 1.4, [0.5, 0.8, 1.0]);
+                    self.glow(x, y, 12.0, 0.12, [0.5, 0.8, 1.0]);
+                    self.trauma = (self.trauma + 0.08).min(1.0);
+                    self.float(x, y - 14.0, "GUARD".into(), 6.5, [0.55, 0.8, 1.0]);
+                    return;
+                }
+                // 5-8 micro-responses at once: burst, glow, ring, dust, shake, punch, chroma, number
+                let n = 9 + (mag * 14.0) as usize;
+                self.spark_burst(x, y, dir, n, 3.0 + mag * 4.5, [1.0, 0.62, 0.15], 1.0);
+                self.spark_burst(x, y, dir, 4, 5.5, [1.0, 1.0, 0.9], 0.4);
+                self.glow(x, y, 16.0 + mag * 14.0, 0.14, [1.0, 0.75, 0.35]);
+                self.ring(x, y, 20.0 + mag * 26.0, 0.28, 1.8, [1.0, 0.85, 0.5]);
+                self.trauma = (self.trauma + 0.16 + mag * 0.22).min(1.0);
+                self.punch = self.punch.max(0.012 + mag * 0.018);
+                self.chroma = self.chroma.max(0.35 + mag * 0.4);
+                if *heavy || mag > 0.75 {
+                    self.ring(x, y, 52.0, 0.4, 2.6, [1.0, 1.0, 1.0]);
+                    self.debris(x, y + 10.0, 8, [0.8, 0.72, 0.6]);
+                    self.lines = 1.0; self.lines_col = [1.0, 0.95, 0.8];
+                    self.flash = self.flash.max(0.18);
+                    self.punch = self.punch.max(0.04);
+                }
+                let counter = self.pre_mt[*defender_side] == 'A';
+                let col = if counter { [1.0, 0.35, 0.3] } else { [1.0, 0.92, 0.55] };
+                self.float(x + dir * 12.0, y - 10.0, format!("{}", *damage as i32), 8.0 + mag * 6.0, col);
+                if counter { self.banner("COUNTER!", "", [1.0, 0.3, 0.25]); self.glow(x, y, 26.0, 0.2, [1.0, 0.3, 0.2]); self.chroma = self.chroma.max(0.9); }
+            }
+            Event::Super { side } => {
+                self.super_t = 1.0; self.super_owner = *side;
+                if let Some((x, y, _)) = Self::chest(m, *side) {
+                    self.ring(x, y, 90.0, 0.7, 3.5, [1.0, 0.9, 0.4]);
+                    self.ring(x, y, 60.0, 0.5, 2.0, [1.0, 1.0, 1.0]);
+                    self.glow(x, y, 50.0, 0.4, [1.0, 0.8, 0.3]);
+                }
+                self.flash = self.flash.max(0.55); self.chroma = self.chroma.max(1.0); self.radial = 1.0; self.trauma = (self.trauma + 0.4).min(1.0);
+                self.lines = 1.4; self.lines_col = [1.0, 0.85, 0.4];
+                self.banner("SUPER ARTS", "", [1.0, 0.82, 0.3]);
+            }
+            Event::Ko { loser_side } => {
+                self.slow_t = 1.7; self.ko_t = 1.0;
+                if let Some((x, y, _)) = Self::chest(m, *loser_side) {
+                    self.ko_focus = (x, y);
+                    self.ring(x, y, 130.0, 0.9, 4.0, [1.0, 0.25, 0.3]);
+                    self.ring(x, y, 80.0, 0.6, 2.5, [1.0, 1.0, 1.0]);
+                    self.glow(x, y, 60.0, 0.5, [1.0, 0.3, 0.3]);
+                    self.spark_burst(x, y, 1.0, 26, 8.0, [1.0, 0.4, 0.3], 3.14);
+                    self.debris(x, y + 12.0, 14, [0.7, 0.6, 0.55]);
+                }
+                self.flash = 0.9; self.chroma = 1.0; self.radial = 1.0; self.trauma = 1.0; self.vig = 1.0; self.lines = 1.6; self.lines_col = [1.0, 0.35, 0.3];
+                let w = 1 - loser_side;
+                if m.roots().nth(w).is_some_and(|f| f.life >= f.life_max - 0.5) { self.banner("PERFECT!", "vitória sem sofrer dano", [1.0, 0.85, 0.2]); }
+            }
+            Event::Fight => { self.ring(m.camera.x, m.stage.zoffset - 60.0, 160.0, 0.6, 3.0, [1.0, 0.8, 0.3]); self.flash = self.flash.max(0.35); self.chroma = self.chroma.max(0.7); self.trauma = (self.trauma + 0.25).min(1.0); self.radial = 0.6; }
+            Event::RoundStart(_) => { self.slow_t = 0.0; self.ko_t = 0.0; }
+            _ => {}
+        }
+    }
+
+    /// Per simulation tick: landing / run dust, super aura.
+    pub fn tick(&mut self, m: &Match) {
+        self.tick = self.tick.wrapping_add(1);
+        for (side, f) in m.roots().enumerate().take(2) {
+            let now = Snap { grounded: f.state_type != 'A', vy: f.vel.y, vx: f.vel.x, move_type: f.move_type };
+            let prev = self.snap[side];
+            if !prev.grounded && now.grounded { let n = 6 + (prev.vy.abs() * 1.6) as usize; self.dust(f.pos.x, f.pos.y, n.min(16), 1.6, 0.5, [0.85, 0.82, 0.78]); if prev.vy > 5.0 { self.ring(f.pos.x, f.pos.y - 1.0, 26.0, 0.25, 1.2, [0.9, 0.9, 0.9]); self.trauma = (self.trauma + 0.1).min(1.0); } }
+            if prev.grounded && !now.grounded && now.vy < -2.0 { self.dust(f.pos.x, f.pos.y, 5, 1.2, 0.3, [0.85, 0.82, 0.78]); }
+            if now.grounded && now.vx.abs() > 3.2 && self.tick % 4 == 0 && f.state_type == 'S' { let b = -f.facing; self.dust(f.pos.x + b * 6.0, f.pos.y, 2, 0.6, 0.25, [0.85, 0.82, 0.78]); }
+            if f.move_type == 'H' && f.state_type == 'L' && !prev.grounded == false && prev.move_type != 'H' { self.dust(f.pos.x, f.pos.y, 9, 2.0, 0.4, [0.85, 0.82, 0.78]); }
+            self.snap[side] = now;
+        }
+        // super aura: rising energy motes while the super pause runs
+        if let Some(p) = &m.pause { if p.is_super {
+            if let Some((x, y, _)) = Self::chest(m, self.super_owner) {
+                for _ in 0..3 {
+                    let ang = self.rr(0.0, 6.283); let rr = self.rr(14.0, 34.0);
+                    let c = if self.r() > 0.5 { [1.0, 0.85, 0.35] } else { [0.5, 0.85, 1.0] };
+                    let life = self.rr(0.4, 0.8);
+                    let (px, py, vy) = (x + ang.cos() * rr, y + 26.0 + self.rr(-6.0, 14.0), -self.rr(0.8, 2.2));
+                    let size = self.rr(0.8, 1.8);
+                    self.parts.push(P { k: Kind::Ember, x: px, y: py, vx: 0.0, vy, g: -0.01, life, max: life, size, col: c, rot: 0.0, vrot: 0.0 });
+                }
+                if self.tick % 14 == 0 { self.ring(x, y, 46.0, 0.45, 1.6, [1.0, 0.9, 0.5]); }
+            }
+            self.lines = self.lines.max(0.7);
+        } }
+    }
+
+    /// Per rendered frame (real time).
+    pub fn update(&mut self, dt: f32) {
+        let k = dt * 60.0;
+        for p in &mut self.parts {
+            p.life -= dt; p.x += p.vx * k; p.y += p.vy * k; p.vy += p.g * k; p.rot += p.vrot * k;
+            if p.k == Kind::Spark { p.vx *= 0.96f32.powf(k); }
+            if p.k == Kind::Dust { p.vx *= 0.94f32.powf(k); p.size += 0.05 * k; }
+        }
+        self.parts.retain(|p| p.life > 0.0);
+        for r in &mut self.rings { r.t += dt; }
+        self.rings.retain(|r| r.t < r.dur);
+        for f in &mut self.floats { f.t += dt; f.y -= 0.35 * k * (1.0 - (f.t / 0.9).min(1.0)); }
+        self.floats.retain(|f| f.t < 0.9);
+        for b in &mut self.banners { b.t += dt; }
+        self.banners.retain(|b| b.t < 1.6);
+        self.trauma = (self.trauma - dt * 1.6).max(0.0);
+        self.punch -= self.punch * (9.0 * dt).min(1.0);
+        self.chroma = (self.chroma - dt * 3.2).max(0.0);
+        self.flash = (self.flash - dt * 2.6).max(0.0);
+        self.radial = (self.radial - dt * 2.4).max(0.0);
+        self.vig = (self.vig - dt * 0.5).max(0.0);
+        self.lines = (self.lines - dt * 3.0).max(0.0);
+        self.super_t = (self.super_t - dt * 1.2).max(0.0);
+        if self.slow_t > 0.0 { self.slow_t = (self.slow_t - dt).max(0.0); }
+        if self.slow_t <= 0.0 { self.ko_t = (self.ko_t - dt * 1.5).max(0.0); }
+        self.sat_pulse = if self.ko_t > 0.0 { self.ko_t } else { 0.0 };
+        self.parts.truncate(900);
+    }
+
+    /// Camera: zoom factor and focus in game-view coordinates.
+    pub fn camera(&self, m: &Match, gain: f32) -> (f32, (f32, f32)) {
+        let mid = {
+            let mut it = m.roots().take(2);
+            match (it.next(), it.next()) { (Some(a), Some(b)) => ((a.pos.x + b.pos.x) / 2.0, (a.pos.y + b.pos.y) / 2.0 - 35.0), (Some(a), None) => (a.pos.x, a.pos.y - 35.0), _ => (m.camera.x, -35.0) }
+        };
+        let ko = if self.ko_t > 0.0 { let e = (self.ko_t.min(1.0)).powf(0.6); e * 0.28 } else { 0.0 };
+        let sup = self.super_t * 0.07;
+        let z = 1.0 + (self.punch + ko + sup) * gain;
+        let focus = if self.ko_t > 0.0 { let e = self.ko_t.min(1.0); (lerp(mid.0, self.ko_focus.0, e), lerp(mid.1, self.ko_focus.1, e)) } else { mid };
+        (z, focus)
+    }
+
+    pub fn shake(&mut self, gain: f32) -> (f32, f32) {
+        let t = self.trauma * self.trauma * gain;
+        if t <= 0.001 { return (0.0, 0.0); }
+        (self.rr(-1.0, 1.0) * t * 5.0, self.rr(-1.0, 1.0) * t * 4.0)
+    }
+
+    pub fn params(&self, gain: f32, focus_screen: (f32, f32), bloom: f32) -> FxParams {
+        FxParams {
+            chroma: (self.chroma * gain).min(1.5),
+            vignette: 0.32 + self.vig * 0.45 * gain + self.super_t * 0.25 * gain,
+            bloom: bloom * (0.55 + self.flash * 0.6 * gain),
+            saturation: 1.06 - self.sat_pulse * 0.45 * gain,
+            flash: self.flash * 0.35 * gain,
+            radial: (self.radial * 0.9 + self.super_t * 0.45) * gain,
+            center: [focus_screen.0, focus_screen.1],
+            tint: [1.0 + self.super_t * 0.05, 1.0 + self.super_t * 0.02 - self.sat_pulse * 0.04, 1.0 - self.sat_pulse * 0.08],
+        }
+    }
+
+    /// World-space particles and rings (call inside the zoomed transform).
+    pub fn draw_world(&self, g: &Gfx, m: &Match, shx: f32, shy: f32, ui: &Ui) {
+        let s = g.view_scale;
+        let tp = |x: f32, y: f32| vec2(g.ox + (x - m.camera.x + m.view_w / 2.0 + shx) * s, g.oy + (y - m.camera.y + m.stage.zoffset + shy) * s);
+        // normal blend
+        for p in self.parts.iter().filter(|p| matches!(p.k, Kind::Dust | Kind::Debris)) {
+            let a = (p.life / p.max).clamp(0.0, 1.0);
+            let c = tp(p.x, p.y);
+            match p.k {
+                Kind::Dust => draw_circle(c.x, c.y, p.size * s, Color::new(p.col[0], p.col[1], p.col[2], 0.35 * a)),
+                _ => { let r = p.size * s; let (sn, cs) = p.rot.sin_cos(); let pts = [vec2(-r, -r * 0.6), vec2(r, -r * 0.6), vec2(r, r * 0.6), vec2(-r, r * 0.6)].map(|q| c + vec2(q.x * cs - q.y * sn, q.x * sn + q.y * cs)); let col = Color::new(p.col[0], p.col[1], p.col[2], a); draw_triangle(pts[0], pts[1], pts[2], col); draw_triangle(pts[0], pts[2], pts[3], col); }
+            }
+        }
+        // additive
+        gl_use_material(&g.add);
+        for p in self.parts.iter().filter(|p| matches!(p.k, Kind::Spark | Kind::Glow | Kind::Ember)) {
+            let a = (p.life / p.max).clamp(0.0, 1.0);
+            let c = tp(p.x, p.y);
+            match p.k {
+                Kind::Spark => { let t = tp(p.x - p.vx * 2.6, p.y - p.vy * 2.6); draw_line(c.x, c.y, t.x, t.y, (p.size * s).max(1.0), Color::new(p.col[0], p.col[1], p.col[2], a)); }
+                Kind::Ember => draw_circle(c.x, c.y, p.size * s * (0.6 + 0.4 * a), Color::new(p.col[0], p.col[1], p.col[2], a * 0.9)),
+                _ => { for i in 0..6 { let t = i as f32 / 6.0; draw_circle(c.x, c.y, p.size * s * (1.0 - t * 0.85), Color::new(p.col[0], p.col[1], p.col[2], a * 0.11)); } }
+            }
+        }
+        for r in &self.rings {
+            let t = r.t / r.dur; let e = 1.0 - (1.0 - t).powi(3);
+            let c = tp(r.x, r.y);
+            draw_circle_lines(c.x, c.y, lerp(r.r0, r.r1, e) * s, (r.w * (1.0 - t) + 0.4) * s, Color::new(r.col[0], r.col[1], r.col[2], (1.0 - t) * 0.9));
+        }
+        gl_use_default_material();
+        // damage numbers / labels
+        for f in &self.floats {
+            let t = f.t / 0.9;
+            let pop = if t < 0.15 { 0.6 + t / 0.15 * 0.7 } else { 1.3 - (t - 0.15).min(0.3) };
+            let a = if t > 0.7 { (1.0 - t) / 0.3 } else { 1.0 };
+            let c = tp(f.x, f.y);
+            let v = ui.to_virtual(c);
+            let sz = f.size * s / ui.s * pop;
+            ui.text_bold(&f.text, v.x, v.y, sz, Color::new(f.col[0], f.col[1], f.col[2], a), Color::new(0.1, 0.02, 0.08, a), crate::ui::Align::Center);
+        }
+    }
+
+    /// Screen-space speed lines (radial) around `focus` (screen px).
+    pub fn draw_lines(&self, focus: (f32, f32), gain: f32) {
+        if self.lines <= 0.02 { return; }
+        speed_lines(focus, (self.lines.min(1.0)) * 0.55 * gain.min(1.2), self.lines_col, self.tick / 2, 46);
+    }
+
+    /// Big banner texts (COUNTER!, PERFECT!, SUPER ARTS…), slammed in with overshoot.
+    pub fn draw_banners(&self, ui: &Ui) {
+        for (i, b) in self.banners.iter().enumerate() {
+            let t = b.t;
+            let sc = if t < 0.12 { lerp(2.6, 1.0, t / 0.12) } else if t < 0.2 { lerp(1.0, 1.08, (t - 0.12) / 0.08) } else { lerp(1.08, 1.0, ((t - 0.2) / 0.3).min(1.0)) };
+            let a = if t > 1.2 { ((1.6 - t) / 0.4).max(0.0) } else { (t / 0.06).min(1.0) };
+            let slide = if t < 0.12 { (1.0 - t / 0.12) * 120.0 } else { 0.0 };
+            let y = 300.0 + i as f32 * 70.0;
+            let (x0, y0, x1, y1) = (0.0, y - 56.0, 1280.0, y + 28.0);
+            ui.quad([vec2(x0, y0 + 12.0), vec2(x1, y0), vec2(x1, y1 - 12.0), vec2(x0, y1)], Color::new(b.col[0] * 0.25, b.col[1] * 0.2, b.col[2] * 0.25, 0.55 * a));
+            ui.rect(0.0, y - 56.0 + 8.0, 1280.0, 2.0, Color::new(b.col[0], b.col[1], b.col[2], 0.8 * a));
+            ui.text_bold(&b.text, 640.0 - slide, y, 64.0 * sc, Color::new(b.col[0], b.col[1], b.col[2], a), Color::new(0.1, 0.02, 0.1, a), crate::ui::Align::Center);
+            if !b.sub.is_empty() { ui.text(&b.sub, 640.0, y + 22.0, 18.0, Color::new(1.0, 1.0, 1.0, a * 0.8), crate::ui::Align::Center, false); }
+        }
+    }
+}
+
+/// Radial manga-style speed lines converging on `focus` (screen px). `seed` animates them in steps.
+pub fn speed_lines(focus: (f32, f32), a: f32, col: [f32; 3], seed: u32, n: usize) {
+    let (w, h) = (screen_width(), screen_height());
+    let reach = (w * w + h * h).sqrt();
+    let seed = seed as f32;
+    gl_use_default_material();
+    for i in 0..n {
+        let h1 = ((i as f32 * 12.9898 + seed * 7.13).sin() * 43758.5453).fract().abs();
+        let h2 = ((i as f32 * 78.233 + seed * 3.7).sin() * 12543.1).fract().abs();
+        let ang = (i as f32 + h1 * 0.8) / n as f32 * 6.2832;
+        let (r0, r1, wd) = (reach * (0.28 + h2 * 0.18), reach * (0.75 + h1 * 0.3), 0.012 + h2 * 0.018);
+        let (c, s) = (ang.cos(), ang.sin());
+        let (pc, ps) = ((ang + wd).cos(), (ang + wd).sin());
+        draw_triangle(vec2(focus.0 + c * r0, focus.1 + s * r0), vec2(focus.0 + c * r1, focus.1 + s * r1), vec2(focus.0 + pc * r1, focus.1 + ps * r1), Color::new(col[0], col[1], col[2], a * (0.4 + h1 * 0.6)));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn slow_motion_eases_back_to_normal() {
+        let mut v = Vfx::new();
+        assert_eq!(v.time_scale(), 1.0);
+        v.slow_t = 1.5; assert!((v.time_scale() - 0.25).abs() < 1e-6, "held at 25%");
+        v.slow_t = 0.25; let mid = v.time_scale(); assert!(mid > 0.25 && mid < 1.0, "easing out");
+        v.slow_t = 0.0; assert_eq!(v.time_scale(), 1.0);
+    }
+    #[test]
+    fn trauma_shake_is_quadratic_and_decays() {
+        let mut v = Vfx::new();
+        v.trauma = 0.2; let weak = { let (x, y) = v.shake(1.0); x.abs().max(y.abs()) };
+        assert!(weak <= 0.2 * 0.2 * 5.0 + 1e-4, "light hits barely nudge");
+        v.trauma = 1.0; v.update(0.1); assert!(v.trauma < 1.0);
+        v.trauma = 0.0; assert_eq!(v.shake(1.0), (0.0, 0.0));
+    }
+}

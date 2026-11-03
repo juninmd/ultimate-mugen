@@ -136,12 +136,15 @@ impl Audio {
             }
         }
     }
+    /// Synthesize + decode a track ahead of time (done behind the VS/loading screen so the fight starts instantly).
+    pub async fn prepare_music(&mut self, id: u32) {
+        if !self.enabled || self.music.contains_key(&id) { return; }
+        if let Ok(s) = load_sound_from_bytes(&wav(&music(id))).await { self.music.insert(id, s); }
+    }
     pub async fn play_music(&mut self, id: u32) {
         if !self.enabled { return; }
         self.stop_music();
-        if !self.music.contains_key(&id) {
-            if let Ok(s) = load_sound_from_bytes(&wav(&music(id))).await { self.music.insert(id, s); }
-        }
+        self.prepare_music(id).await;
         if let Some(s) = self.music.get(&id) { play_sound(s, PlaySoundParams { looped: true, volume: self.volume * 0.35 }); self.playing = Some(id); }
     }
     pub fn stop_music(&mut self) {

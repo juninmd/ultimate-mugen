@@ -5,7 +5,6 @@ use ume_engine::matchs::StageInfo;
 use ume_engine::raster::*;
 use ume_formats::stage::MugenStage;
 
-const R: f32 = 3.0;
 
 pub struct Layer { pub image: Arc<ImageData>, pub w: f32, pub h: f32, pub y: f32, pub delta: f32, pub dy: f32 }
 #[derive(Clone)]
@@ -24,9 +23,11 @@ impl Rng { fn f(&mut self) -> f32 { self.0 = self.0.wrapping_mul(1664525).wrappi
 
 type Painter<'a> = &'a dyn Fn(&mut Pixmap, Transform, f32, f32, &mut Rng);
 fn layer(w: f32, h: f32, y: f32, delta: f32, seed: u32, dy: f32, paint: Painter) -> Layer {
-    let mut pm = Pixmap::new((w * R) as u32, (h * R) as u32).unwrap();
+    // pixels per game unit follows the art-quality setting (4K → 2x), capped so no layer exceeds 8192 px (GPU texture limit)
+    let r = ume_engine::native::rig::art_res().min(8192.0 / w.max(h).max(1.0));
+    let mut pm = Pixmap::new(((w * r) as u32).max(1), ((h * r) as u32).max(1)).unwrap();
     let mut rng = Rng(seed);
-    paint(&mut pm, Transform::from_scale(R, R), w, h, &mut rng);
+    paint(&mut pm, Transform::from_scale(r, r), w, h, &mut rng);
     Layer { image: pixmap_to_image(&pm), w, h, y, delta, dy }
 }
 

@@ -27,7 +27,7 @@ impl<'a> Ctx<'a> {
             "type" => g.kind as f64, "animtype" => g.animtype as f64, "airtype" => g.airtype as f64, "groundtype" => g.groundtype as f64,
             "damage" => g.damage as f64, "hitcount" => g.hitcount as f64, "guardcount" => g.guardcount as f64, "hitshaketime" => f.hit_shake as f64,
             "hittime" => g.hittime as f64, "slidetime" => g.slidetime as f64, "ctrltime" => g.ctrltime as f64, "recovertime" => 0.0,
-            "xvel" => g.xvel as f64 / l, "yvel" => g.yvel as f64 / l, "yaccel" => g.yaccel as f64 / l, "chainid" => g.chainid as f64,
+            "xvel" => g.xvel as f64 / l, "yvel" => g.yvel as f64 / l, "yaccel" => g.yaccel as f64 / l, "chainid" => g.hit_id as f64,
             "guarded" => g.guarded as i32 as f64, "fall" => g.fall as i32 as f64, "fall.damage" => g.fall_damage as f64,
             "fall.xvel" => g.fall_xvel as f64 / l, "fall.yvel" => g.fall_yvel as f64 / l, "fall.recover" => g.fall_recover as i32 as f64,
             "fall.time" => f.fall_time as f64, "fall.recovertime" => g.fall_recover_time as f64, "fall.kill" => g.fall_kill as i32 as f64,

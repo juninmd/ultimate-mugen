@@ -145,6 +145,7 @@ pub struct Fighter {
     pub draw_offset: V2, pub victory_quote: i32, pub clipboard: Vec<String>, pub unhittable: i32, pub super_defence_mul: f32,
     pub reversal: Option<(String, HitDefData)>, pub hit_overrides: [Option<HitOverride>; 8],
     pub ikemen: crate::ikemen::IkemenState,
+    pub pause_move_time: i32, pub super_move_time: i32, pub preserve: bool, pub own_pal: bool, pub state_giver: Option<u32>,
 }
 
 impl Fighter {
@@ -166,6 +167,7 @@ impl Fighter {
             persist: HashMap::new(), air_jumps: 0, bind: None, palfx: None, trans: None, remap: vec![], angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
             after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), cmd: CommandState::default(),
             combo_count: 0, combo_damage: 0.0, form: 0, form_time: 0, reversal: None, hit_overrides: Default::default(), ikemen: crate::ikemen::IkemenState::new(&def),
+            pause_move_time: 0, super_move_time: 0, preserve: false, own_pal: true, state_giver: None,
             draw_offset: V2::default(), victory_quote: -1, clipboard: vec![], unhittable: 0, super_defence_mul: 1.0, def,
         }
     }

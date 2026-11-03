@@ -1,6 +1,6 @@
 //! Match simulation: round flow, state machine driver, collision/hit system, entities, camera.
 use crate::chardef::{Animation, Box4, CharDef, Controller, Source};
-use crate::expr::Expr;
+use crate::expr::{truthy, Expr};
 use crate::fighter::*;
 use crate::triggers::Ctx;
 use std::cell::RefCell;
@@ -107,6 +107,7 @@ pub struct Match {
     pub corner_pushes: u32,
     /// extra ticks the first round waits before "FIGHT!" so the fighters can face off / trade lines (0 = none)
     pub intro_ticks: i32,
+    pub won_by_ko: bool,
     pub timer: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
@@ -126,7 +127,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, slow_mo: 0,
             events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
@@ -171,7 +172,7 @@ impl Match {
     // ---------------------------------------------------------------- evaluation helpers
     pub fn ev(&self, i: usize, e: &Expr) -> f64 { e.eval(&Ctx { m: self, i }) }
     pub fn num(&self, i: usize, sc: &Controller, k: &str, d: f64, idx: usize) -> f64 {
-        match sc.param(k).and_then(|p| p.exprs.get(idx)) { Some(e) => self.ev(i, e), None => d }
+        match sc.param(k).and_then(|p| p.exprs.get(idx)).map(|e| self.ev(i, e)) { Some(v) if !v.is_nan() => v, _ => d }
     }
     fn apply_assigns(&mut self) {
         let list: Vec<_> = self.assigns.borrow_mut().drain(..).collect();
@@ -195,6 +196,7 @@ impl Match {
             let f = &mut self.fighters[i];
             f.prev_state_no = f.state_no;
             f.state_no = no;
+            if Arc::ptr_eq(&owner, &f.def) { f.state_giver = None; }
             f.st_def = owner.clone();
             f.state_time = 0;
             f.persist.clear();
@@ -235,9 +237,9 @@ impl Match {
     }
 
     fn triggered(&self, i: usize, sc: &Controller) -> bool {
-        for e in &sc.trigger_all { if self.ev(i, e) == 0.0 { return false; } }
+        for e in &sc.trigger_all { if !truthy(self.ev(i, e)) { return false; } }
         if sc.triggers.is_empty() { return false; }
-        sc.triggers.iter().any(|g| g.iter().all(|e| self.ev(i, e) != 0.0))
+        sc.triggers.iter().any(|g| g.iter().all(|e| truthy(self.ev(i, e))))
     }
 
     /// Run a state's controllers. Returns true if the state changed.
@@ -381,6 +383,32 @@ impl Match {
         }
         if land { let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); }
     }
+    fn rebind(&mut self) {
+        for i in 0..self.fighters.len() {
+            let Some(b) = self.fighters[i].bind.clone() else { continue };
+            let Some(t) = self.idx(b.to) else { continue };
+            let (tx, ty, tf) = (self.fighters[t].pos.x, self.fighters[t].pos.y, self.fighters[t].facing);
+            let f = &mut self.fighters[i];
+            f.pos.x = tx + b.x * tf;
+            f.pos.y = ty + b.y;
+        }
+    }
+    fn orphan_custom_states(&mut self) {
+        for i in 0..self.fighters.len() {
+            let Some(giver) = self.fighters[i].state_giver else { continue };
+            if self.idx(giver).is_some() || Arc::ptr_eq(&self.fighters[i].st_def, &self.fighters[i].def) { continue; }
+            let d = self.fighters[i].def.clone();
+            self.fighters[i].state_giver = None;
+            self.change_state(i, 5050, d);
+            let f = &mut self.fighters[i];
+            f.state_type = 'A'; f.move_type = 'H'; f.physics = 'A';
+        }
+    }
+    pub fn palfx_of(&self, i: usize) -> Option<&PalFx> {
+        let f = &self.fighters[i];
+        if f.own_pal || !f.is_helper { return f.palfx.as_ref(); }
+        f.palfx.as_ref().or_else(|| f.parent.and_then(|p| self.idx(p)).and_then(|p| self.palfx_of(p)))
+    }
     pub fn update_bind(&mut self, i: usize) {
         let Some(b) = self.fighters[i].bind.clone() else { return };
         let Some(t) = self.idx(b.to) else { self.fighters[i].bind = None; return };
@@ -404,13 +432,14 @@ impl Match {
         if self.zoffset0 != 0.0 { self.stage.zoffset = self.zoffset0 + (self.view_h - BASE_H) * self.ground_k; }
     }
     pub fn start_round(&mut self) {
-        self.round_state = 0; self.round_time = 0; self.timer = 99 * 60; self.winner_side = -1; self.slow_mo = 0;
+        self.round_state = 0; self.round_time = 0; self.timer = 99 * 60; self.winner_side = -1; self.slow_mo = 0; self.won_by_ko = false;
         self.explods.clear(); self.projectiles.clear(); self.pause = None;
-        self.fighters.retain(|f| !f.is_helper);
+        self.fighters.retain(|f| !f.is_helper || f.preserve);
         self.camera = V2::default();
         let mut slot = [0usize; 2];
         let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()];
         for i in 0..self.fighters.len() {
+            if self.fighters[i].is_helper { continue; }
             {
                 let p1x = self.stage.p1x; let p2x = self.stage.p2x; let first = self.round_no == 1;
                 let f = &mut self.fighters[i];
@@ -480,6 +509,7 @@ impl Match {
                 }
                 if !dead.is_empty() || self.timer <= 0 {
                     self.round_state = 3; self.round_time = 0;
+                    self.won_by_ko = !dead.is_empty();
                     if !dead.is_empty() {
                         for &i in &dead { self.fighters[i].alive = false; }
                         let sides_dead = [dead.iter().any(|&i| self.fighters[i].side == 0), dead.iter().any(|&i| self.fighters[i].side == 1)];
@@ -558,8 +588,11 @@ impl Match {
             f.cmd.update(&f.history, &def.commands);
         }
         for fi in awaken { self.try_transform(fi); }
-        let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time));
-        let frozen_by_pause = |f: &Fighter| match paused_by { None => false, Some((by, mt)) => !(f.id == by && mt > 0) };
+        let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time, p.is_super));
+        let frozen_by_pause = |f: &Fighter| match paused_by {
+            None => false,
+            Some((by, mt, sup)) => !(f.id == by && mt > 0) && (if sup { f.super_move_time } else { f.pause_move_time }) <= 0,
+        };
         let mut ids = std::mem::take(&mut self.tick_ids);
         ids.clear();
         ids.extend(self.fighters.iter().map(|f| f.id));
@@ -574,6 +607,9 @@ impl Match {
             self.run_states(i);
         }
         if let Some(p) = self.pause.as_mut() { if p.move_time > 0 { p.move_time -= 1; } }
+        if let Some((_, _, sup)) = paused_by {
+            for f in self.fighters.iter_mut() { let t = if sup { &mut f.super_move_time } else { &mut f.pause_move_time }; if *t > 0 { *t -= 1; } }
+        }
         for &id in &ids {
             let Some(i) = self.idx(id) else { continue };
             if frozen_by_pause(&self.fighters[i]) { continue; }
@@ -610,6 +646,8 @@ impl Match {
         }
         self.tick_ids = ids;
         self.push_and_bound();
+        self.rebind();
+        self.orphan_custom_states();
         self.detect_hits();
         for f in self.fighters.iter_mut() {
             for o in f.hit_overrides.iter_mut() { if let Some(h) = o { if h.time > 0 { h.time -= 1; if h.time == 0 { *o = None; } } } }
@@ -651,7 +689,7 @@ impl Match {
     }
 
     pub fn fighter_pal(&self, i: usize) -> crate::palette::PalParams {
-        let own = self.fighters[i].palfx.as_ref().map(|p| p.params()).unwrap_or_default();
+        let own = self.palfx_of(i).map(|p| p.params()).unwrap_or_default();
         match &self.all_palfx { Some(a) => own.combine(a.params()), None => own }
     }
     pub fn stage_pal(&self) -> crate::palette::PalParams {
@@ -959,7 +997,9 @@ impl Match {
             let st = if self.fighters[d].pos.y < -1.0 && self.fighters[d].state_type != 'L' { 'A' } else { self.fighters[d].state_type };
             if hd.p2stateno >= 0 {
                 let owner = if hd.p2getp1state { self.fighters[a].def.clone() } else { self.fighters[d].def.clone() };
+                let giver = if hd.p2getp1state { Some(self.fighters[a].id) } else { None };
                 self.change_state(d, hd.p2stateno, owner);
+                if giver.is_some() { self.fighters[d].state_giver = giver; }
             } else {
                 let dd = self.fighters[d].def.clone();
                 let no = if st == 'A' || st == 'L' { 5020 } else if st == 'C' && !hd.forcestand { 5010 } else { 5000 };
@@ -1176,6 +1216,10 @@ impl Match {
         h.helper_id = num(self, "id", 0.0, 0) as i32;
         h.parent = Some(f.id); h.root = root.id;
         h.key_ctrl = num(self, "keyctrl", 0.0, 0) != 0.0;
+        h.pause_move_time = num(self, "pausemovetime", 0.0, 0) as i32;
+        h.super_move_time = num(self, "supermovetime", 0.0, 0) as i32;
+        h.preserve = num(self, "preserve", 0.0, 0) != 0.0;
+        h.own_pal = num(self, "ownpal", 0.0, 0) != 0.0;
         h.helper_player = sc.raw("helpertype").is_some_and(|t| t.trim().eq_ignore_ascii_case("player"));
         h.pal_no = f.pal_no; h.ai_level = root.ai_level; h.life = root.life_max; h.life_max = root.life_max;
         let postype = sc.raw("postype").unwrap_or("p1").to_ascii_lowercase();
@@ -1285,9 +1329,12 @@ impl Match {
             let bb: Vec<Box4> = Self::proj_boxes(pb, 1).into_iter().chain(Self::proj_boxes(pb, 2)).collect();
             if Self::overlap(&ba, &bb).is_some() {
                 let (pra, prb) = (pa.priority, pb.priority);
+                let gt = self.game_time;
                 for (k, lost) in [(a, pra <= prb), (b, prb <= pra)] {
-                    let p = &mut self.projectiles[k];
-                    if lost { let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); } else { p.priority -= 1; }
+                    if !lost { self.projectiles[k].priority -= 1; continue; }
+                    let p = &mut self.projectiles[k]; let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an);
+                    let (owner, pid) = (p.owner, p.id);
+                    if let Some(o) = self.idx(owner) { self.fighters[o].proj_contacts.push(('x', pid, gt)); }
                 }
             }
         } }

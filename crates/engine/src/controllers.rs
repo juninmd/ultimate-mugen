@@ -61,7 +61,8 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "targetstate" => {
             let v = n(m, "value", 0.0) as i32;
             let d = m.fighters[i].def.clone();
-            for t in target_indices(m, i, sc) { m.change_state(t, v, d.clone()); }
+            let giver = m.fighters[i].id;
+            for t in target_indices(m, i, sc) { m.change_state(t, v, d.clone()); m.fighters[t].state_giver = Some(giver); }
         }
         "changeanim" | "changeanim2" => {
             let v = n(m, "value", 0.0) as i32;

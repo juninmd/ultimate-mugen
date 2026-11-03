@@ -143,7 +143,7 @@ impl App {
         if (r - ume_engine::native::rig::art_res()).abs() > 0.01 {
             ume_engine::native::rig::set_art_res(r);
             self.reg.unload_all();
-            self.g.trim(0);
+            self.g.trim_next_frame();
         }
     }
     fn toggle_fullscreen(&mut self) { self.settings.fullscreen = !self.settings.fullscreen; self.settings.apply_window(); self.settings.save(); }
@@ -159,6 +159,7 @@ impl App {
     }
 
     pub async fn frame(&mut self) {
+        self.g.begin_frame();
         self.ui.begin();
         self.g.post.level = self.settings.fx as u8;
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;

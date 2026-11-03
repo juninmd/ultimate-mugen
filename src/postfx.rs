@@ -96,9 +96,12 @@ impl PostFx {
             level: 2, active: false,
         }
     }
+    /// Size of the offscreen scene target: screen pixels, supersampled 1.5× on small desktop windows (not on the web / at 1440p+).
     fn phys() -> (u32, u32) {
         let d = macroquad::miniquad::window::dpi_scale();
-        (((screen_width() * d) as u32).max(16), ((screen_height() * d) as u32).max(16))
+        let (w, h) = ((screen_width() * d).max(16.0), (screen_height() * d).max(16.0));
+        let ss = if cfg!(target_arch = "wasm32") || h > 1200.0 { 1.0 } else { 1.5 };
+        (((w * ss) as u32).max(16), ((h * ss) as u32).max(16))
     }
     fn cam(rt: &RenderTarget, w: f32, h: f32) -> Camera2D { Camera2D { render_target: Some(rt.clone()), ..Camera2D::from_display_rect(Rect::new(0.0, 0.0, w, h)) } }
 
@@ -109,7 +112,9 @@ impl PostFx {
         let size = Self::phys();
         if self.scene.is_none() || self.size != size {
             self.size = size;
-            let rt = render_target_msaa(size.0, size.1);
+            // plain (non-multisampled) target: `renderbufferStorageMultisample` does not exist on WebGL1 and some GL drivers → black screen / panic.
+            // Smoothness comes from rendering the scene slightly larger than the screen and letting the linear filter downsample it (SSAA).
+            let rt = render_target(size.0, size.1);
             rt.texture.set_filter(FilterMode::Linear);
             self.scene = Some(rt);
             let (hw, hh) = ((size.0 / 4).max(8), (size.1 / 4).max(8));

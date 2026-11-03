@@ -20,7 +20,7 @@ const FS: &str = "#version 100
 varying lowp vec4 color; varying lowp vec2 uv; uniform sampler2D Texture;
 void main() { gl_FragColor = color * texture2D(Texture, uv); }";
 
-pub struct Gfx { tex: HashMap<u64, Texture2D>, pub add: Material, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
+pub struct Gfx { tex: HashMap<u64, Texture2D>, pub add: Material, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
 
 impl Gfx {
     pub fn new() -> Self {
@@ -28,7 +28,7 @@ impl Gfx {
             pipeline_params: PipelineParams { color_blend: Some(BlendState::new(Equation::Add, BlendFactor::Value(BlendValue::SourceAlpha), BlendFactor::One)), ..Default::default() },
             ..Default::default()
         }).unwrap();
-        Gfx { tex: HashMap::new(), add, view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), fx_gain: 1.0 }
+        Gfx { tex: HashMap::new(), add, view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), flush_cache: false, fx_gain: 1.0 }
     }
     pub fn texture(&mut self, img: &Arc<ImageData>, nearest: bool) -> Texture2D {
         self.tex.entry(img.id).or_insert_with(|| {
@@ -38,6 +38,9 @@ impl Gfx {
         }).clone()
     }
     pub fn trim(&mut self, keep: usize) { if self.tex.len() > keep { self.tex.clear(); } }
+    /// Ask for a texture-cache flush at the start of the next frame (never mid-frame: pending draw batches still reference the textures).
+    pub fn trim_next_frame(&mut self) { self.flush_cache = true; }
+    pub fn begin_frame(&mut self) { if self.flush_cache { self.flush_cache = false; self.tex.clear(); } }
     pub fn fit(&mut self, vw: f32, vh: f32) {
         let (w, h) = (screen_width(), screen_height());
         self.view_scale = (w / vw).min(h / vh);

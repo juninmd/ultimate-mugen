@@ -302,7 +302,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "attackdist" => { let v = n(m, "value", 160.0) as f32; if let Some(h) = m.fighters[i].hitdef.as_mut() { h.guard_dist = v; } }
         "makedust" => { let (px, py) = (n2(m, "pos", 0.0, 0) as f32, n2(m, "pos", 0.0, 1) as f32); let f = &m.fighters[i]; let (x, y) = (f.pos.x + px * f.facing, f.pos.y + py); m.spawn_dust(i, x, y); }
         "stopsnd" => {}
-        _ => {}
+        _ => { crate::ikemen::run(m, i, sc); }
     }
     let _ = Arc::strong_count(&m.common);
 }

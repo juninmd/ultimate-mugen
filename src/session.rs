@@ -172,6 +172,10 @@ impl Session {
                 }
                 Event::Super { side, .. } => { for (s, p) in self.pilots.iter().enumerate() { if let Pilot::Human(sl) = p { c.rumble(*sl, if s == side { 0.6 } else { 0.3 }, 0.6, 400); } } }
                 Event::Ko { .. } => { audio.sfx("ko"); for p in &self.pilots { if let Pilot::Human(sl) = p { c.rumble(*sl, 1.0, 1.0, 700); } } }
+                Event::Rumble { fighter, strong, weak, ms } => {
+                    let roots = self.m.root_indices();
+                    if let Some(Pilot::Human(sl)) = roots.iter().position(|&r| self.m.fighters[r].id == fighter).and_then(|k| self.pilots.get(k)) { c.rumble(*sl, strong, weak, ms); }
+                }
                 Event::MatchOver(w) => { self.over = Some(w); }
                 Event::Fight => audio.sfx("fight"),
                 Event::RoundStart(_) => audio.sfx("round"),

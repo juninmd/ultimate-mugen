@@ -2,7 +2,7 @@
 use std::time::Instant;
 use ume_engine::native::{compile_native, NativeChar};
 fn main() {
-    let dir = format!("{}/../../assets/chars", env!("CARGO_MANIFEST_DIR"));
+    let dir = std::env::args().nth(1).unwrap_or_else(|| format!("{}/../../assets/chars", env!("CARGO_MANIFEST_DIR")));
     let mut tot = 0.0;
     for e in std::fs::read_dir(&dir).unwrap().flatten() {
         let p = e.path();

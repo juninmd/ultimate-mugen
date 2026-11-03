@@ -60,6 +60,7 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, det
 - **Muitos personagens e cenários**: seleção com rolagem, filtro (Tab: todos/originais/M.U.G.E.N), PgUp/PgDn, roda do mouse, `R` aleatório; só as linhas visíveis são desenhadas e só o que está sob o cursor é carregado (cache LRU limita a memória). Pastas/zips importados são registrados sem decodificar tudo (centenas em segundos).
 - **Loadings rápidos**: tela de carregamento na inicialização, pré-carga por etapas atrás da tela de VS (barra de progresso), prévia leve (idle/vitória) nos menus, rasterização dos lutadores em paralelo (≈3× mais rápido) e música sintetizada antes da luta.
 - **Visual AAA** ([`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md)): pós-processamento (bloom, aberração cromática, blur radial, vinheta, grade de cor), partículas e anéis de choque em cada golpe, números de dano, *camera punch*, KO em câmera lenta com zoom, super cinematográfico com linhas de velocidade e aura, reflexos no chão, HUD animado, transições de tela e fundo vivo. Opção de acessibilidade para reduzir efeitos (Vídeo → Efeitos de impacto).
+- **História e cinema**: face-off com balões de fala no início do round 1, cutscenes no Arcade (abertura, confronto e final), **transformação** (`T`), animações de derrota diferentes a cada round, supers maiores, campo com **zoom-out** em equipes grandes e o **chefe final Mikazuki Oboro** (Itachi × Aizen) no fim do Arcade. Ver [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md) (rodada 10).
 - **Modos de equipe**: *Sequência 3v3* (estilo KOF: ordem de entrada, vencedor mantém a vida e o medidor de super compartilhado) e *Paralelo até **5v5*** (10 lutadores na tela; companheiros por IA, `Tab` troca o lutador que você controla; o round acaba quando a equipe inteira cai). Ver [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md).
 - **Áudio em camadas**: SFX sintetizados com transiente + corpo + crunch, 3 variações por golpe, reverb, stingers de round/KO/vitória, pings de combo e *ducking* da música. **HUD** com retratos reais, barras de parceiro, roster de equipe e alarmes.
 - **Replay** da última luta (tela de resultado → Replay): o motor é determinístico e o replay re-simula as entradas gravadas, com teste. Ver o *roadmap* de features em [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md).
@@ -183,6 +184,7 @@ O motor aceita simultaneamente teclado, múltiplos gamepads e toque na tela.
 | **Chute Extra (C)** | `L` (ou `C`) | Teclado Numérico `3` | `R2` / `RT` | — |
 | **Especiais Rápidos** | `1`, `2`, `3` | Teclado Numérico `7`, `8`, `9` | `L1`, `L2` | Botões **SP1**, **SP2**, **SP3** |
 | **Super Movimento** | `1` + `2` | Teclado Numérico `7` + `8` | `L1` + `L2` | Botão **SUPER** |
+| **Despertar (transformação)** | `T` | Teclado Numérico `0` | Clique do analógico direito / `SELECT` | — |
 | **Pausa / Hitboxes** | `Esc` / `F2` | `Esc` / `F2` | Botão `OPTIONS` / `START` | Botão `❚❚` (canto superior) |
 | **Tela cheia / FPS** | `F11` / `F3` | — | — | — |
 | **Trocar de lutador (equipe paralela)** | `Tab` | — | — | — |

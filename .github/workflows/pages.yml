@@ -1,6 +1,7 @@
 name: Deploy Web (GitHub Pages)
 on:
-  push: { branches: [main] }
+  # the web build is always deployed from master (the principal branch)
+  push: { branches: [master] }
   workflow_dispatch:
 permissions: { contents: write }
 concurrency: { group: pages, cancel-in-progress: true }

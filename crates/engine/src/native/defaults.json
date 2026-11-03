@@ -1,0 +1,26 @@
+{
+ "poses": {
+  "taunt0": {"shoulderF":95,"elbowF":70,"handF":"open","shoulderB":12,"elbowB":30,"thighF":18,"kneeF":6,"thighB":-16,"kneeB":6,"lean":-8,"head":-6,"face":"smile","wind":0.5},
+  "taunt1": {"shoulderF":88,"elbowF":52,"handF":"open","shoulderB":12,"elbowB":30,"thighF":20,"kneeF":8,"thighB":-16,"kneeB":6,"lean":-10,"head":-10,"face":"smile","wind":0.55},
+  "powerup0": {"shoulderF":18,"elbowF":70,"shoulderB":8,"elbowB":80,"handF":"fist","handB":"fist","thighF":26,"kneeF":10,"thighB":-26,"kneeB":10,"lean":10,"head":4,"face":"shout","aura":true,"wind":1.0},
+  "powerup1": {"shoulderF":42,"elbowF":125,"shoulderB":40,"elbowB":130,"handF":"fist","handB":"fist","thighF":30,"kneeF":14,"thighB":-30,"kneeB":14,"lean":-8,"head":-12,"face":"shout","aura":true,"wind":1.0},
+  "powerup2": {"shoulderF":10,"elbowF":14,"shoulderB":-4,"elbowB":10,"handF":"fist","handB":"fist","thighF":34,"kneeF":16,"thighB":-34,"kneeB":16,"lean":-4,"head":-20,"face":"shout","aura":true,"wind":1.0},
+  "dfLie": {"rot":-90,"thighF":10,"kneeF":18,"thighB":4,"kneeB":10,"ankleF":30,"ankleB":20,"shoulderF":30,"elbowF":40,"shoulderB":165,"elbowB":25,"head":-4,"face":"ko","handF":"open","handB":"open","wind":0,"hairWind":0},
+  "dfProp": {"rot":-62,"lean":-6,"thighF":14,"kneeF":22,"thighB":6,"kneeB":14,"ankleF":30,"ankleB":20,"shoulderF":-40,"elbowF":10,"shoulderB":150,"elbowB":30,"head":12,"face":"hurt","handF":"open","handB":"open","wind":0,"hairWind":0},
+  "dfProp2": {"rot":-48,"lean":-2,"thighF":24,"kneeF":40,"thighB":8,"kneeB":30,"ankleF":30,"ankleB":20,"shoulderF":-55,"elbowF":6,"shoulderB":140,"elbowB":40,"head":22,"face":"hurt","handF":"open","handB":"open","wind":0,"hairWind":0},
+  "dfSit0": {"rot":-24,"lean":12,"thighF":78,"kneeF":8,"thighB":70,"kneeB":20,"ankleF":20,"ankleB":20,"shoulderF":25,"elbowF":30,"shoulderB":10,"elbowB":40,"head":28,"face":"hurt","handF":"open","handB":"open","wind":0,"hairWind":0},
+  "dfSit1": {"rot":-14,"lean":30,"thighF":80,"kneeF":10,"thighB":74,"kneeB":24,"ankleF":20,"ankleB":20,"shoulderF":10,"elbowF":20,"shoulderB":0,"elbowB":28,"head":46,"face":"ko","handF":"open","handB":"open","wind":0,"hairWind":0},
+  "dfKneel0": {"rot":20,"lean":30,"thighF":84,"kneeF":96,"thighB":-6,"kneeB":104,"ankleB":70,"shoulderF":70,"elbowF":18,"shoulderB":58,"elbowB":16,"head":24,"face":"hurt","handF":"open","handB":"open","wind":0,"hairWind":0},
+  "dfKneel1": {"rot":0,"lean":38,"thighF":80,"kneeF":92,"thighB":-6,"kneeB":104,"ankleB":70,"shoulderF":6,"elbowF":14,"shoulderB":-4,"elbowB":12,"head":52,"face":"ko","handF":"open","handB":"open","wind":0,"hairWind":0},
+  "dfReach0": {"rot":-90,"thighF":16,"kneeF":24,"thighB":2,"kneeB":12,"ankleF":30,"ankleB":20,"shoulderF":150,"elbowF":20,"shoulderB":165,"elbowB":25,"head":14,"face":"hurt","handF":"open","handB":"open","wind":0,"hairWind":0},
+  "dfReach1": {"rot":-88,"thighF":16,"kneeF":24,"thighB":2,"kneeB":12,"ankleF":30,"ankleB":20,"shoulderF":178,"elbowF":6,"shoulderB":165,"elbowB":25,"head":18,"face":"hurt","handF":"open","handB":"open","wind":0,"hairWind":0}
+ },
+ "anims": {
+  "taunt": {"frames":[{"pose":"taunt0","ticks":10},{"pose":"taunt1","ticks":10},{"pose":"taunt0","ticks":10},{"pose":"taunt1","ticks":10}],"loop":0},
+  "powerUp": {"frames":[{"pose":"powerup0","ticks":6},{"pose":"powerup1","ticks":6},{"pose":"powerup2","ticks":6}],"loop":0},
+  "defeat1": {"frames":[{"pose":"dfLie","ticks":50},{"pose":"dfProp","ticks":14},{"pose":"dfProp2","ticks":36},{"pose":"dfProp","ticks":10},{"pose":"dfLie","ticks":-1}]},
+  "defeat2": {"frames":[{"pose":"dfLie","ticks":50},{"pose":"dfSit0","ticks":24},{"pose":"dfSit1","ticks":-1}]},
+  "defeat3": {"frames":[{"pose":"dfLie","ticks":50},{"pose":"dfKneel0","ticks":24},{"pose":"dfKneel1","ticks":-1}]},
+  "defeat4": {"frames":[{"pose":"dfLie","ticks":40},{"pose":"dfReach0","ticks":24},{"pose":"dfReach1","ticks":50},{"pose":"dfReach0","ticks":10},{"pose":"dfLie","ticks":-1}]}
+ }
+}

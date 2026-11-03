@@ -1,8 +1,10 @@
 //! Match renderer (macroquad): stages, fighters, effects, debug boxes.
 use crate::postfx::PostFx;
+use crate::stagefx::{Ctx, StageReact};
 use crate::stages::{Particle, Stage, StageArt};
 use crate::ui::Ui;
 use crate::vfx::{FxParams, Vfx};
+use macroquad::models::{draw_mesh, Mesh, Vertex};
 use macroquad::prelude::*;
 use macroquad::miniquad::{BlendFactor, BlendState, BlendValue, Equation, PipelineParams};
 use std::collections::HashMap;
@@ -52,12 +54,12 @@ impl Gfx {
 pub struct DrawOpts { pub alpha: f32, pub add: bool, pub flash: f32, pub tint: Color, pub angle: f32, pub vflip: bool }
 impl Default for DrawOpts { fn default() -> Self { DrawOpts { alpha: 1.0, add: false, flash: 0.0, tint: WHITE, angle: 0.0, vflip: false } } }
 
-pub struct MatchRenderer { pub debug: bool, pub particles: Vec<Particle>, /** ids of human-controlled fighters (get the ▼ marker) */ pub human: Vec<u32>, pub squash: Vec<[f32; 2]> }
+pub struct MatchRenderer { pub debug: bool, pub particles: Vec<Particle>, /** ids of human-controlled fighters (get the ▼ marker) */ pub human: Vec<u32>, pub squash: Vec<[f32; 2]>, /** animated + reactive stage layer (see `stagefx`: `fx.react(&[Impulse])`) */ pub fx: StageReact }
 
 impl MatchRenderer {
     pub fn new(stage: &Stage) -> Self {
         let particles = match &stage.art { StageArt::Procedural { particles, .. } => particles.clone(), _ => vec![] };
-        MatchRenderer { debug: false, particles, human: vec![], squash: vec![] }
+        MatchRenderer { debug: false, particles, human: vec![], squash: vec![], fx: StageReact::new(stage.kind) }
     }
     fn sx(m: &Match, x: f32) -> f32 { x - m.camera.x + m.view_w / 2.0 }
     fn sy(m: &Match, y: f32) -> f32 { y - m.camera.y + m.stage.zoffset }
@@ -110,6 +112,7 @@ impl MatchRenderer {
         let (px, py) = (ox0 + fvx * s0, oy0 + fvy * s0);
         g.view_scale = s0 * zoom; g.ox = px + (ox0 - px) * zoom; g.oy = py + (oy0 - py) * zoom;
         let s = g.view_scale;
+        self.fx.begin_frame(m, gain);
         self.draw_stage(g, m, stage, false, shx, shy);
         if m.pause.as_ref().is_some_and(|p| p.darken) { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(0.0, 0.0, 0.04, 0.62)); }
         if gain > 0.0 { vfx.draw_back(g, m, shx, shy); }
@@ -162,7 +165,9 @@ impl MatchRenderer {
         if g.ox > 0.0 { draw_rectangle(0.0, 0.0, g.ox, h, BLACK); draw_rectangle(w - g.ox, 0.0, g.ox, h, BLACK); }
         if g.oy > 0.0 { draw_rectangle(0.0, 0.0, w, g.oy, BLACK); draw_rectangle(0.0, h - g.oy, w, g.oy, BLACK); }
         let bloom = if matches!(stage.art, StageArt::Mugen(_)) { 0.35 } else { 0.5 };
-        vfx.params(gain.max(0.0), (focus_screen.0 / w, focus_screen.1 / h), bloom)
+        let mut p = vfx.params(gain.max(0.0), (focus_screen.0 / w, focus_screen.1 / h), bloom);
+        self.fx.grade(&mut p, gain);
+        p
     }
 
     /// Team brawls (more than 2 fighters): a floating life bar over every fighter and a bobbing ▼ over the one you control.
@@ -189,13 +194,49 @@ impl MatchRenderer {
         }
     }
 
+    /// Glossy floor reflection: the sprite mirrored about the floor line as a vertex-coloured strip mesh — it fades out with distance
+    /// from the feet (per-vertex alpha) and wobbles horizontally on water / wet stages. Strength comes from the stage look.
     fn draw_reflection(&self, g: &mut Gfx, m: &Match, f: &Fighter, shx: f32, shy: f32) {
         let Some(fr) = f.frame() else { return };
+        let (gloss, wobble) = self.fx.gloss();
         let hgt = (-f.pos.y).max(0.0);
-        let a = 0.2 * (1.0 - hgt / 160.0).max(0.0);
-        if a <= 0.01 { return; }
-        let o = DrawOpts { alpha: a, vflip: true, tint: Color::new(0.75, 0.85, 1.0, 1.0), ..Default::default() };
-        Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
+        let a0 = gloss.max(0.12) * (1.0 - hgt / 170.0).max(0.0);
+        if a0 <= 0.01 { return; }
+        let def = &f.anim_def;
+        let Some(spr) = def.sprites.get(&(fr.group, fr.index)) else { return };
+        let Some(img) = spr.image.as_ref() else { return };
+        let s = g.view_scale;
+        let tex = g.texture(img, spr.scale >= 0.99);
+        let (xs, ys) = (def.c("size.xscale", 1.0) as f32, def.c("size.yscale", 1.0) as f32);
+        let k = spr.scale * f.lscl;
+        let (kx, ky) = (k * xs * f.draw_scale[0] * fr.xscale, k * ys * f.draw_scale[1] * fr.yscale);
+        let mut flip = f.facing < 0.0;
+        if fr.flip_h { flip = !flip; }
+        let px = Self::sx(m, f.pos.x) + fr.x * f.lscl * xs * f.facing + shx;
+        let py = Self::sy(m, -f.pos.y) + fr.y * f.lscl * ys + shy;
+        let (w, h) = (spr.width * kx, spr.height * ky);
+        let left = if flip { px - (spr.width - spr.axis_x) * kx } else { px - spr.axis_x * kx };
+        let top = py - (spr.height - spr.axis_y) * ky;
+        let reach = (py + 46.0 - top).clamp(1.0, h);
+        let rows = 12usize;
+        let tint = self.fx.ambient(f.pos.x, m.camera.x);
+        let (u0, u1) = if flip { (1.0, 0.0) } else { (0.0, 1.0) };
+        let t = self.fx.time();
+        let mut vertices = Vec::with_capacity((rows + 1) * 2);
+        for j in 0..=rows {
+            let q = j as f32 / rows as f32;
+            let y = top + q * reach;
+            let d = ((y - py) / 46.0).clamp(0.0, 1.0);
+            let a = a0 * (1.0 - d * d * (3.0 - 2.0 * d)) * if y < py { 0.9 } else { 1.0 };
+            let wob = wobble * (t * 4.0 + (y - py) * 0.5).sin() * (0.5 + d * 1.6);
+            let v = 1.0 - q * reach / h;
+            let c = Color::new(tint.r * 0.8, tint.g * 0.9, tint.b, a);
+            vertices.push(Vertex::new(g.ox + (left + wob) * s, g.oy + y * s, 0.0, u0, v, c));
+            vertices.push(Vertex::new(g.ox + (left + w + wob) * s, g.oy + y * s, 0.0, u1, v, c));
+        }
+        let mut indices = Vec::with_capacity(rows * 6);
+        for j in 0..rows { let b = (j * 2) as u16; indices.extend([b, b + 1, b + 2, b + 1, b + 3, b + 2]); }
+        draw_mesh(&Mesh { vertices, indices, texture: Some(tex) });
     }
 
     fn draw_fighter(&self, g: &mut Gfx, m: &Match, f: &Fighter, fi: usize, shx: f32, shy: f32) {
@@ -212,12 +253,25 @@ impl MatchRenderer {
         let mut x = f.pos.x;
         let hit = f.hit_shake > 0 && f.move_type == 'H';
         if hit { x += if f.hit_shake % 2 == 1 { 1.5 } else { -1.5 }; }
-        let mut o = DrawOpts { angle: if f.angle_draw { f.angle } else { 0.0 }, ..Default::default() };
+        let mut o = DrawOpts { angle: if f.angle_draw { f.angle } else { 0.0 }, tint: self.fx.ambient(f.pos.x, m.camera.x), ..Default::default() };
         if hit && f.hit_shake % 4 < 2 && !f.ghv.guarded && g.fx_gain > 0.2 { o.flash = 0.55; }
         if let Some(p) = &f.palfx {
             if p.add.iter().sum::<f32>() > 200.0 { o.flash = 0.6; } else if p.add[0] > p.add[2] + 40.0 { o.tint = Color::new(1.0, 0.7, 0.6, 1.0); } else if p.add[2] > p.add[0] + 40.0 { o.tint = Color::new(0.6, 0.8, 1.0, 1.0); }
         }
         if let Some((mode, a, _)) = &f.trans { if mode.starts_with("add") { o.add = true; o.alpha = a / 256.0; } }
+        // awakened form: warm tint + pulsing halo in the form colour
+        if (f.form > 0 || f.def.boss) && f.alive && g.fx_gain > 0.0 {
+            let c = crate::vfx::Vfx::form_color(f);
+            let amb = if f.form > 0 { 1.0 } else { 0.55 };
+            let k = 0.3 * amb;
+            o.tint = Color::new(1.0 + (c[0] - 1.0) * k, 1.0 + (c[1] - 1.0) * k, 1.0 + (c[2] - 1.0) * k, 1.0);
+            let pulse = (0.38 + 0.14 * (m.game_time as f32 * 0.3).sin()) * amb;
+            for (dx, dy) in [(-1.8, 0.0), (1.8, 0.0), (0.0, -1.8), (0.0, 1.8)] {
+                Self::draw_sprite(g, m, &f.anim_def, fr, x + dx, f.pos.y + dy, f.facing, f.lscl, f.draw_scale, &DrawOpts { add: true, alpha: pulse, tint: Color::new(c[0], c[1], c[2], 1.0), ..Default::default() }, shx, shy);
+            }
+        }
+        // the fallen fighter loses its colour once the round is decided (the match-deciding defeat even more)
+        if !f.alive && m.round_state >= 3 { let k = if f.state_no == 5193 { 0.52 } else { 0.76 }; o.tint = Color::new(k, k, k * 1.06, 1.0); }
         // owner of an active super: pulsing golden outline glow (sprite re-drawn additively around itself)
         if m.pause.as_ref().is_some_and(|p| p.is_super && (p.by == f.id || p.by == f.root)) {
             let pulse = 0.55 + 0.35 * (m.game_time as f32 * 0.35).sin();
@@ -234,12 +288,24 @@ impl MatchRenderer {
         let s = g.view_scale;
         match &st.art {
             StageArt::Procedural { back, tint, .. } => {
+                let animated = self.fx.active();
+                let cx = Ctx::new(g, m, back, shx, shy);
+                let draw_layer = |g: &mut Gfx, l: &crate::stages::Layer| {
+                    if l.dynamic { return; }
+                    // zoomed-out field (big teams): layers scale about the ground line so the backdrop still fills the wider view
+                    let z = m.zoom;
+                    let x = m.view_w / 2.0 - l.w * z / 2.0 - m.camera.x * l.delta * z + shx;
+                    let mut y = m.stage.zoffset + (l.y + l.trim - m.camera.y * l.dy - 205.0) * z + shy;
+                    let mut h = (l.h - l.trim) * z;
+                    // the sky (first layer) stretches up to the top edge
+                    if std::ptr::eq(l, &back[0]) && y > 0.0 { h += y; y = 0.0; }
+                    let t = g.texture(&l.image, false);
+                    draw_texture_ex(&t, g.ox + x * s, g.oy + y * s, WHITE, DrawTextureParams { dest_size: Some(vec2(l.w * z * s, h * s)), ..Default::default() });
+                };
                 if !front {
-                    for l in back {
-                        let x = m.view_w / 2.0 - l.w / 2.0 - m.camera.x * l.delta + shx;
-                        let y = l.y - m.camera.y * l.dy + (m.stage.zoffset - 205.0) + shy;
-                        let t = g.texture(&l.image, false);
-                        draw_texture_ex(&t, g.ox + x * s, g.oy + y * s, WHITE, DrawTextureParams { dest_size: Some(vec2(l.w * s, l.h * s)), ..Default::default() });
+                    for (i, l) in back.iter().enumerate().filter(|(_, l)| !l.front) {
+                        draw_layer(g, l);
+                        if animated { self.fx.draw_layer(i, &cx, g, m); }
                     }
                 } else {
                     let w = m.view_w + 40.0;
@@ -248,6 +314,8 @@ impl MatchRenderer {
                         let px = ((p.x - m.camera.x * 0.9) % w + w) % w - 20.0;
                         draw_circle(g.ox + px * s, g.oy + p.y * s, p.s * s, Color::from_rgba(p.c[0], p.c[1], p.c[2], (p.a * 255.0) as u8));
                     }
+                    for l in back.iter().filter(|l| l.front) { draw_layer(g, l); }
+                    if animated { self.fx.draw_front(&cx, g); }
                     if let Some(t) = tint { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(t[0], t[1], t[2], t[3])); }
                 }
             }

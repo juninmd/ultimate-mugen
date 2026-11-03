@@ -105,6 +105,14 @@ pub struct NativeChar {
     pub moves: Vec<NativeMove>,
     #[serde(default)] pub palettes: Vec<Value>,
     #[serde(default, rename = "winQuote")] pub win_quote: Option<String>,
+    /// round-start lines: `intro` is said first, `taunt` is the reply / provocation
+    #[serde(default)] pub intro: Option<String>, #[serde(default)] pub taunt: Option<String>,
+    /// name of the transformed form (shown when the fighter awakens)
+    #[serde(default)] pub form: Option<String>,
+    /// final boss: hidden from the select screen, closes the arcade ladder
+    #[serde(default)] pub boss: bool,
+    /// animation speed multiplier (> 1 = every timed frame is shorter: faster moves, startup and recovery)
+    #[serde(default)] pub speed: Option<f32>,
 }
 
 /// Minimal insertion-ordered map for deterministic animation numbering.

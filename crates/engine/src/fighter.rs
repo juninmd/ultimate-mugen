@@ -72,7 +72,7 @@ pub fn anim_fallback(no: i32) -> &'static [i32] {
         44 => &[41, 40, 0], 45 => &[42, 41, 40, 0], 46 => &[43, 41, 40, 0], 47 => &[40, 0], 100 => &[20, 0], 105 => &[43, 41, 0], 106 => &[47, 0],
         120 => &[130, 0], 121 => &[131, 11, 0], 122 => &[132, 41, 0], 130 => &[120, 0], 131 => &[121, 11], 132 => &[122, 41],
         140 => &[130, 0], 141 => &[131, 11], 142 => &[132, 41], 150 => &[130, 5000, 0], 151 => &[150, 130, 0], 152 => &[131, 5010, 11], 153 => &[152, 131, 11], 154 => &[132, 5030, 41], 155 => &[154, 132, 41],
-        170 | 175 | 181 | 190 | 191 => &[0], 180 => &[181, 0],
+        170 | 175 | 181 | 190 | 191 | 195 | 196 => &[0], 197..=200 => &[5150, 5110], 180 => &[181, 0],
         5000 => &[5001, 5002, 0], 5001 => &[5000, 0], 5002 => &[5001, 5000, 0], 5005 => &[5000, 0], 5006 => &[5005, 5001, 5000], 5007 => &[5006, 5005, 5002, 5000],
         5010 => &[5000, 0], 5011 => &[5010, 5001, 5000], 5012 => &[5011, 5010, 5002, 5000], 5020 => &[5010, 5000, 11], 5021 => &[5020, 5011, 5001], 5022 => &[5021, 5012, 5002],
         5030 => &[5000, 0], 5035 => &[5030, 5000], 5040 => &[5030, 41, 0], 5050 => &[5030, 5000], 5051 | 5052 => &[5050], 5060 => &[5050, 5030], 5061 => &[5060, 5050],
@@ -125,6 +125,8 @@ pub struct Fighter {
     pub history: InputHistory,
     pub cmd: CommandState,
     pub combo_count: i32, pub combo_damage: f32,
+    /// 0 = base form, 1 = transformed (awakened) until the round ends
+    pub form: u8, pub form_time: i32,
 }
 
 impl Fighter {
@@ -145,7 +147,7 @@ impl Fighter {
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
             persist: HashMap::new(), air_jumps: 0, bind: None, palfx: None, trans: None, angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
             after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), cmd: CommandState::default(),
-            combo_count: 0, combo_damage: 0.0, def,
+            combo_count: 0, combo_damage: 0.0, form: 0, form_time: 0, def,
         }
     }
     pub fn c(&self, k: &str, d: f64) -> f32 { self.def.c(k, d) as f32 }

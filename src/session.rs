@@ -53,6 +53,11 @@ impl Session {
         m.training = training;
         m.team_simul = simul;
         if single_round { m.rounds_to_win = 1; }
+        // big teams get a zoomed-out field (room to fight); the ground keeps its place in the picture
+        let ground_k = if matches!(stage.art, crate::stages::StageArt::Procedural { .. }) { stage.info.zoffset / ume_engine::matchs::BASE_H } else { 0.5 };
+        m.set_zoom_for_teams(if simul { teams[0].len().max(teams[1].len()) } else { 1 }, ground_k);
+        // face-off at the start of the first round (fighters trade lines before "FIGHT!")
+        if !training { m.intro_ticks = 170; }
         let n = teams[0].len().max(teams[1].len());
         let mut slot = 0;
         for k in 0..n {
@@ -66,6 +71,7 @@ impl Session {
             }
         }
         m.start_round();
+        for f in m.fighters.iter_mut().filter(|f| !f.is_helper && f.def.boss) { f.power = 2000.0; }
         for side in 0..2 { if life[side] < 0.999 { if let Some(f) = m.fighters.iter_mut().find(|f| !f.is_helper && f.side == side) { f.life = (f.life_max * life[side]).max(1.0); } } }
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
@@ -176,6 +182,8 @@ impl Session {
     pub fn update(&mut self, dt: f32, c: &mut Controls, audio: &mut Audio) {
         if self.paused { return; }
         self.vfx.update(dt);
+        // face-off camera push-in
+        self.vfx.intro_target = if self.m.round_state == 1 && self.m.round_no == 1 && self.m.intro_ticks > 0 && self.m.round_time > 10 { 0.2 } else { 0.0 };
         self.acc += dt.min(0.1) * self.vfx.time_scale();
         let step = 1.0 / 60.0;
         let mut n = 0;

@@ -1,34 +1,60 @@
-//! Original procedural stages (parallax layers rasterized with tiny-skia) + MUGEN stage adapter.
+//! Original procedural stages + MUGEN stage adapter.
+//!
+//! Every built-in stage is a stack of parallax layers rasterized once with tiny-skia plus procedural noise passes (`texgen`):
+//! sky/cloud noise, brick, wood grain, stone, sand, water... Layers flagged `dynamic` are empty placeholders that only carry a
+//! parallax transform: the animated parts (flags, foliage, crowd, lava, neon flicker...) are drawn per frame by `stagefx`.
 use std::sync::Arc;
 use ume_engine::chardef::ImageData;
 use ume_engine::matchs::StageInfo;
 use ume_engine::raster::*;
 use ume_formats::stage::MugenStage;
+use crate::texgen::{blobs, grain, haze, hash, n1, shade_v};
 
-
-pub struct Layer { pub image: Arc<ImageData>, pub w: f32, pub h: f32, pub y: f32, pub delta: f32, pub dy: f32 }
+/// One parallax layer. `front` layers are drawn after the fighters; `dynamic` layers have no bitmap (animated by `stagefx`).
+pub struct Layer { pub image: Arc<ImageData>, pub w: f32, pub h: f32, pub y: f32, pub delta: f32, pub dy: f32, pub front: bool, pub dynamic: bool, /** empty rows (units) cropped off the top of the bitmap: draw at `y + trim` */ pub trim: f32 }
 #[derive(Clone)]
 pub struct Particle { pub x: f32, pub y: f32, pub vx: f32, pub vy: f32, pub s: f32, pub a: f32, pub c: [u8; 3] }
 
 pub struct MugenBg { pub stage: MugenStage, pub images: std::collections::HashMap<(i32, i32), Arc<ImageData>>, pub scl: f32 }
 
+/// Which built-in look a stage has (drives the animated / reactive layer in `stagefx`); `Custom` = MUGEN stages (untouched).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum StageKind { Dojo, Neon, Bamboo, Plains, Spirit, Volcano, #[default] Custom }
+
 pub enum StageArt {
     Procedural { back: Vec<Layer>, particles: Vec<Particle>, tint: Option<[f32; 4]> },
     Mugen(Box<MugenBg>),
 }
-pub struct Stage { pub info: StageInfo, pub art: StageArt, pub music: u32 }
+pub struct Stage { pub info: StageInfo, pub art: StageArt, pub music: u32, pub kind: StageKind }
 
-struct Rng(u32);
-impl Rng { fn f(&mut self) -> f32 { self.0 = self.0.wrapping_mul(1664525).wrapping_add(1013904223); self.0 as f32 / 4294967296.0 } }
+pub struct Rng(u32);
+impl Rng { pub fn f(&mut self) -> f32 { self.0 = self.0.wrapping_mul(1664525).wrapping_add(1013904223); self.0 as f32 / 4294967296.0 } }
 
 type Painter<'a> = &'a dyn Fn(&mut Pixmap, Transform, f32, f32, &mut Rng);
-fn layer(w: f32, h: f32, y: f32, delta: f32, seed: u32, dy: f32, paint: Painter) -> Layer {
+/// `cap` limits the pixels-per-unit of soft / distant layers (memory at 4K); `front` layers draw over the fighters.
+#[allow(clippy::too_many_arguments)]
+fn lay(cap: f32, front: bool, w: f32, h: f32, y: f32, delta: f32, seed: u32, dy: f32, paint: Painter) -> Layer {
     // pixels per game unit follows the art-quality setting (4K → 2x), capped so no layer exceeds 8192 px (GPU texture limit)
-    let r = ume_engine::native::rig::art_res().min(8192.0 / w.max(h).max(1.0));
+    let r = ume_engine::native::rig::art_res().min(cap).min(8192.0 / w.max(h).max(1.0));
     let mut pm = Pixmap::new(((w * r) as u32).max(1), ((h * r) as u32).max(1)).unwrap();
     let mut rng = Rng(seed);
     paint(&mut pm, Transform::from_scale(r, r), w, h, &mut rng);
-    Layer { image: pixmap_to_image(&pm), w, h, y, delta, dy }
+    // crop the transparent rows at the top: skipping them saves fill-rate every frame (far silhouette layers are half empty)
+    let (pw, ph) = (pm.width() as usize, pm.height() as usize);
+    let first = pm.data().chunks(pw * 4).position(|row| row.chunks(4).any(|px| px[3] > 3)).unwrap_or(ph.saturating_sub(1));
+    let first = first.saturating_sub(2);
+    if first > 4 && !front {
+        let cropped = pm.data()[first * pw * 4..].to_vec();
+        if let Some(sz) = tiny_skia::IntSize::from_wh(pw as u32, (ph - first) as u32) {
+            if let Some(c) = Pixmap::from_vec(cropped, sz) { return Layer { image: pixmap_to_image(&c), w, h, y, delta, dy, front, dynamic: false, trim: first as f32 / r }; }
+        }
+    }
+    Layer { image: pixmap_to_image(&pm), w, h, y, delta, dy, front, dynamic: false, trim: 0.0 }
+}
+fn layer(w: f32, h: f32, y: f32, delta: f32, seed: u32, dy: f32, paint: Painter) -> Layer { lay(99.0, false, w, h, y, delta, seed, dy, paint) }
+/// Transparent placeholder: carries only the parallax transform of animated content drawn by `stagefx`.
+fn dynamic(w: f32, h: f32, y: f32, delta: f32, dy: f32, front: bool) -> Layer {
+    Layer { image: ImageData::new(1, 1, vec![0, 0, 0, 0]), w, h, y, delta, dy, front, dynamic: true, trim: 0.0 }
 }
 
 fn lin(y0: f32, y1: f32, stops: &[(f32, &str)]) -> Paint<'static> {
@@ -37,259 +63,679 @@ fn lin(y0: f32, y1: f32, stops: &[(f32, &str)]) -> Paint<'static> {
     p.shader = LinearGradient::new(Point::from_xy(0.0, y0), Point::from_xy(0.0, y1), st, SpreadMode::Pad, Transform::identity()).unwrap();
     p.anti_alias = true; p
 }
+fn lin_a(y0: f32, y1: f32, stops: &[(f32, &str, f32)]) -> Paint<'static> {
+    let st = stops.iter().map(|(o, c, a)| GradientStop::new(*o, rgba(c, *a))).collect();
+    let mut p = Paint::default();
+    p.shader = LinearGradient::new(Point::from_xy(0.0, y0), Point::from_xy(0.0, y1), st, SpreadMode::Pad, Transform::identity()).unwrap();
+    p.anti_alias = true; p
+}
+fn lin_h(x0: f32, x1: f32, stops: &[(f32, &str, f32)]) -> Paint<'static> {
+    let st = stops.iter().map(|(o, c, a)| GradientStop::new(*o, rgba(c, *a))).collect();
+    let mut p = Paint::default();
+    p.shader = LinearGradient::new(Point::from_xy(x0, 0.0), Point::from_xy(x1, 0.0), st, SpreadMode::Pad, Transform::identity()).unwrap();
+    p.anti_alias = true; p
+}
 fn rect(pm: &mut Pixmap, t: Transform, x: f32, y: f32, w: f32, h: f32, p: &Paint) {
     if let Some(r) = tiny_skia::Rect::from_xywh(x, y, w.max(0.01), h.max(0.01)) { pm.fill_rect(r, p, t, None); }
 }
 fn fill(pm: &mut Pixmap, t: Transform, path: Option<tiny_skia::Path>, p: &Paint) { if let Some(pa) = path { pm.fill_path(&pa, p, FillRule::Winding, t, None); } }
-fn stroke(pm: &mut Pixmap, t: Transform, path: Option<tiny_skia::Path>, p: &Paint, w: f32) { if let Some(pa) = path { pm.stroke_path(&pa, p, &Stroke { width: w, line_cap: LineCap::Round, ..Default::default() }, t, None); } }
+fn stroke(pm: &mut Pixmap, t: Transform, path: Option<tiny_skia::Path>, p: &Paint, w: f32) { if let Some(pa) = path { pm.stroke_path(&pa, p, &Stroke { width: w, line_cap: LineCap::Round, line_join: LineJoin::Round, ..Default::default() }, t, None); } }
 fn ellipse(x: f32, y: f32, rx: f32, ry: f32) -> Option<tiny_skia::Path> { tiny_skia::Rect::from_xywh(x - rx, y - ry, rx * 2.0, ry * 2.0).and_then(PathBuilder::from_oval) }
 fn line(x0: f32, y0: f32, x1: f32, y1: f32) -> Option<tiny_skia::Path> { let mut b = PathBuilder::new(); b.move_to(x0, y0); b.line_to(x1, y1); b.finish() }
+fn poly(pts: &[(f32, f32)]) -> Option<tiny_skia::Path> { let mut b = PathBuilder::new(); for (i, p) in pts.iter().enumerate() { if i == 0 { b.move_to(p.0, p.1) } else { b.line_to(p.0, p.1) } } b.close(); b.finish() }
 fn radial(cx: f32, cy: f32, r: f32, stops: &[(f32, &str, f32)]) -> Paint<'static> {
     let st = stops.iter().map(|(o, c, a)| GradientStop::new(*o, rgba(c, *a))).collect();
     let mut p = Paint::default();
     p.shader = RadialGradient::new(Point::from_xy(cx, cy), Point::from_xy(cx, cy), r, st, SpreadMode::Pad, Transform::identity()).unwrap();
     p.anti_alias = true; p
 }
-fn mountains(pm: &mut Pixmap, t: Transform, w: f32, base: f32, amp: f32, color: &str, r: &mut Rng, step: f32) {
+fn glowc(pm: &mut Pixmap, t: Transform, x: f32, y: f32, r: f32, col: &str, a: f32) { fill(pm, t, circle(x, y, r), &radial(x, y, r, &[(0.0, col, a), (0.4, col, a * 0.45), (1.0, col, 0.0)])); }
+/// Noise-driven ridge line filled with a vertical gradient (hills, mesas, distant mountains).
+#[allow(clippy::too_many_arguments)]
+fn ridge(pm: &mut Pixmap, t: Transform, w: f32, base: f32, amp: f32, top: &str, bot: &str, seed: f32, freq: f32) {
     let mut b = PathBuilder::new();
-    b.move_to(0.0, base + 100.0);
-    let mut y = base - amp * r.f();
+    b.move_to(0.0, base + 260.0);
     let mut x = 0.0;
-    while x <= w + step { y = (y + (r.f() - 0.5) * amp * 0.8).clamp(base - amp, base); b.line_to(x, y); x += step; }
-    b.line_to(w, base + 100.0); b.close();
-    fill(pm, t, b.finish(), &solid(rgba(color, 1.0)));
-}
-fn floor_planks(pm: &mut Pixmap, t: Transform, w: f32, h: f32, c1: &str, c2: &str, lines: Color) {
-    rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, c1), (1.0, c2)]));
-    let p = solid(lines);
-    for i in 0..12 { let y = (i as f32 / 12.0).powf(1.6) * h; stroke(pm, t, line(0.0, y, w, y), &p, 0.6); }
-    let mut x = -w;
-    while x < w * 2.0 { stroke(pm, t, line(w / 2.0 + (x - w / 2.0) * 0.55, 0.0, w / 2.0 + (x - w / 2.0) * 1.6, h), &p, 0.6); x += 28.0; }
+    while x <= w + 3.0 { let n = n1(x * freq, seed); b.line_to(x, base - amp * (n * n * (3.0 - 2.0 * n)).powf(1.3)); x += 2.5; }
+    b.line_to(w + 3.0, base + 260.0); b.close();
+    fill(pm, t, b.finish(), &lin(base - amp, base + 50.0, &[(0.0, top), (1.0, bot)]));
 }
 fn parts(seed: u32, n: usize, f: impl Fn(&mut Rng) -> Particle) -> Vec<Particle> { let mut r = Rng(seed); (0..n).map(|_| f(&mut r)).collect() }
 fn info(name: &str) -> StageInfo { StageInfo { name: name.into(), bound_left: -230.0, bound_right: 230.0, bound_high: -80.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 205.0, vertical_follow: 0.25, tension: 60.0 } }
 
+/// Deterministic skyline: (x, width, height) of each tower, shared by the baked art and the animated blink lights.
+pub fn skyline(seed: u32, total: f32, wmin: f32, wmax: f32, hmin: f32, hmax: f32, gap: f32) -> Vec<(f32, f32, f32)> {
+    let (mut x, mut i, mut v) = (0.0, 0u32, vec![]);
+    while x < total { let w = wmin + hash(i, seed) * (wmax - wmin); let h = hmin + hash(i, seed + 1) * (hmax - hmin); v.push((x, w, h)); x += w + hash(i, seed + 2) * gap; i += 1; }
+    v
+}
+/// Neon signs on the mid city layer: (x, y, w, h, colour index). Baked glow + animated flicker use the same list.
+pub fn neon_signs() -> Vec<(f32, f32, f32, f32, usize)> {
+    skyline(41, 1000.0, 28.0, 56.0, 90.0, 190.0, 54.0).iter().enumerate().filter(|(i, _)| hash(*i as u32, 7) < 0.85).map(|(i, (x, w, h))| {
+        let sw = 9.0 + hash(i as u32, 8) * 7.0;
+        (x + w / 2.0 - sw / 2.0, 205.0 - h + 10.0 + hash(i as u32, 9) * 40.0, sw, 24.0 + hash(i as u32, 10) * 34.0, (hash(i as u32, 11) * 5.0) as usize % 5)
+    }).collect()
+}
+pub const NEON: [&str; 5] = ["#ff2fd0", "#22e8ff", "#ffe23a", "#7d5bff", "#3dff8a"];
+/// Floor glow cracks (obsidian): polylines in the floor layer's coordinates, shared by the baked seams and the animated pulse.
+pub fn lava_cracks(w: f32) -> Vec<Vec<(f32, f32)>> {
+    (0..22u32).map(|i| {
+        let (mut x, mut y) = (hash(i, 61) * w, 36.0 + hash(i, 62) * 76.0);
+        let mut v = vec![(x, y)];
+        for k in 0..5u32 { x += (hash(i, 70 + k) - 0.3) * 24.0; y = (y + (hash(i, 80 + k) - 0.5) * 14.0).clamp(33.0, 118.0); v.push((x, y)); }
+        v
+    }).collect()
+}
+/// Stone-lantern x positions on the spirit stage's lantern layer.
+pub fn toro_xs() -> Vec<f32> { let (mut x, mut v, mut i) = (40.0, vec![], 0u32); while x < 1000.0 { v.push(x); x += 80.0 + hash(i, 3) * 36.0; i += 1; } v }
+/// Rail lantern x positions on the dojo floor layer.
+pub fn dojo_lanterns() -> Vec<f32> { (0..16).map(|k| 10.0 + 70.0 * k as f32 + 2.5).collect() }
+
+// ───────────────────────────────────────────── DOJO ─────────────────────────────────────────────
+
+fn pagoda(pm: &mut Pixmap, t: Transform, x: f32, by: f32, bw: f32, tiers: i32, col: &str, win: f32) {
+    let dark = solid(rgba(col, 1.0));
+    rect(pm, t, x - bw * 0.35, by - 30.0, bw * 0.7, 30.0, &dark);
+    for k in 0..tiers {
+        let ty = by - 30.0 - k as f32 * 22.0; let tw = bw * (1.0 - k as f32 * 0.2);
+        let mut b = PathBuilder::new();
+        b.move_to(x - tw / 2.0 - 11.0, ty + 7.0); b.quad_to(x - tw / 4.0, ty - 2.0, x, ty - 13.0); b.quad_to(x + tw / 4.0, ty - 2.0, x + tw / 2.0 + 11.0, ty + 7.0);
+        b.quad_to(x + tw / 2.0, ty + 3.0, x + tw / 2.0 - 4.0, ty + 3.0); b.line_to(x - tw / 2.0 + 4.0, ty + 3.0); b.quad_to(x - tw / 2.0, ty + 3.0, x - tw / 2.0 - 11.0, ty + 7.0); b.close();
+        fill(pm, t, b.finish(), &dark);
+        rect(pm, t, x - tw * 0.3, ty + 2.0, tw * 0.6, 18.0, &dark);
+        if win > 0.0 { for q in 0..3 { rect(pm, t, x - tw * 0.22 + q as f32 * tw * 0.18, ty + 7.0, 3.0, 6.0, &solid(rgba("#ffbe5a", win))); } }
+    }
+    let top = by - 30.0 - tiers as f32 * 22.0;
+    stroke(pm, t, line(x, top - 6.0, x, top - 26.0), &dark, 1.4);
+    for q in 0..3 { fill(pm, t, ellipse(x, top - 10.0 - q as f32 * 5.0, 3.0, 1.0), &dark); }
+}
+fn pine(pm: &mut Pixmap, t: Transform, x: f32, by: f32, h: f32, col: &str) {
+    let p = solid(rgba(col, 1.0));
+    rect(pm, t, x - 1.0, by - h * 0.25, 2.0, h * 0.25, &p);
+    for k in 0..5 { let f = k as f32 / 5.0; let y = by - h * 0.18 - f * h * 0.8; let w = h * 0.28 * (1.0 - f * 0.8); fill(pm, t, poly(&[(x - w, y + h * 0.16), (x, y - h * 0.1), (x + w, y + h * 0.16)]), &p); }
+}
+fn sakura(pm: &mut Pixmap, t: Transform, r: &mut Rng, x: f32, by: f32, h: f32) {
+    let bark = solid(rgba("#241218", 1.0));
+    fill(pm, t, poly(&[(x - 7.0, by), (x - 4.0, by - h * 0.4), (x - 2.0, by - h * 0.62), (x + 3.0, by - h * 0.62), (x + 5.0, by - h * 0.4), (x + 9.0, by)]), &bark);
+    let mut tips = vec![];
+    for k in 0..7 {
+        let a = -1.57 + (k as f32 - 3.0) * 0.42 + (r.f() - 0.5) * 0.3; let l = h * (0.35 + r.f() * 0.25);
+        let (sx, sy) = (x + 0.5, by - h * (0.45 + r.f() * 0.2));
+        let (ex, ey) = (sx + a.cos() * l, sy + a.sin() * l);
+        let mut b = PathBuilder::new(); b.move_to(sx, sy); b.quad_to(sx + a.cos() * l * 0.4 + (r.f() - 0.5) * 10.0, sy + a.sin() * l * 0.6, ex, ey);
+        stroke(pm, t, b.finish(), &bark, 3.4 - k as f32 * 0.2);
+        tips.push((ex, ey));
+    }
+    stroke(pm, t, line(x - 3.0, by, x - 2.0, by - h * 0.55), &solid(rgba("#8a4a50", 0.4)), 0.8);
+    let pal = ["#ffd4e0", "#ffbcd0", "#f8a4c0", "#e87aa0", "#b84e80"];
+    for (ex, ey) in tips {
+        fill(pm, t, ellipse(ex, ey + 3.0, 27.0, 20.0), &solid(rgba("#a8406a", 0.9)));
+        for _ in 0..70 {
+            let (a, d) = (r.f() * std::f32::consts::TAU, r.f().sqrt() * 25.0);
+            let (px, py) = (ex + a.cos() * d * 1.1, ey + a.sin() * d * 0.8);
+            let lit = (1.0 - ((py - (ey - 18.0)) / 36.0).clamp(0.0, 1.0)) * 4.0 + (r.f() - 0.5) * 1.6;
+            let k = (4.0 - lit).clamp(0.0, 4.0) as usize;
+            fill(pm, t, circle(px, py, 2.2 + r.f() * 3.6), &solid(rgba(pal[k], 1.0)));
+        }
+        for _ in 0..10 { fill(pm, t, circle(ex + (r.f() - 0.5) * 36.0, ey - 12.0 + r.f() * 6.0, 1.4 + r.f()), &solid(rgba("#fff0f4", 0.9))); }
+    }
+}
+fn deck(pm: &mut Pixmap, t: Transform, w: f32, h: f32, rng: &mut Rng) {
+    let top = 30.0;
+    rect(pm, t, 0.0, 24.0, w, h, &solid(rgba("#2a1410", 1.0)));
+    let n = 8;
+    let tones = ["#b8754f", "#a96a44", "#c58259", "#9c5f3c", "#b06d48"];
+    for i in 0..n {
+        let (y0, y1) = (top + (i as f32 / n as f32).powf(1.6) * (h - top), top + ((i + 1) as f32 / n as f32).powf(1.6) * (h - top));
+        let scale = 0.6 + (i as f32 / n as f32) * 1.5; let bw = 95.0 * scale;
+        let mut x = -rng.f() * bw;
+        while x < w {
+            let c = tones[(rng.f() * 5.0) as usize % 5];
+            rect(pm, t, x + 0.5, y0 + 0.2, bw - 1.0, y1 - y0 - 0.4, &lin(y0, y1, &[(0.0, c), (1.0, "#8a5434")]));
+            rect(pm, t, x + 0.5, y0 + 0.2, bw - 1.0, 0.9, &solid(rgba("#ffe0b0", 0.28)));
+            rect(pm, t, x, y0, 0.9, y1 - y0, &solid(rgba("#1a0a08", 0.8)));
+            for nx in [x + 5.0, x + bw - 6.0] { fill(pm, t, circle(nx, (y0 + y1) / 2.0, 0.7 * scale.max(0.7)), &solid(rgba("#2a1008", 0.8))); }
+            if rng.f() < 0.25 { stroke(pm, t, ellipse(x + bw * (0.2 + rng.f() * 0.6), (y0 + y1) / 2.0, 3.0 * scale, 1.1 * scale), &solid(rgba("#4a2410", 0.6)), 0.6); }
+            x += bw;
+        }
+        rect(pm, t, 0.0, y1 - 0.5, w, 1.0, &solid(rgba("#1a0a08", 0.75)));
+    }
+    let r = t.sx;
+    grain(pm, r, (0.0, top, w, h - top), 0.07, 5.0, 0.6, 3.0);
+    blobs(pm, r, (0.0, top, w, h - top), 0.12, 3.5, 5.0, 0.55, 0.25, "#2a1008", 0.5, 0.0, true);
+    blobs(pm, r, (0.0, top, w, h - top), 0.2, 3.0, 8.0, 0.7, 0.2, "#ffd9a8", 0.28, 0.0, true);
+    shade_v(pm, r, (0.0, top, w, h - top), 0.72, 1.15);
+    // railing: beams, posts with caps, kick-board, hanging paper lanterns
+    let wood = lin(0.0, 30.0, &[(0.0, "#5c3226"), (1.0, "#2c1612")]);
+    rect(pm, t, 0.0, 22.0, w, 8.0, &solid(rgba("#2a1410", 1.0)));
+    rect(pm, t, 0.0, 14.0, w, 3.4, &wood); rect(pm, t, 0.0, 14.0, w, 0.8, &solid(rgba("#ffb088", 0.35)));
+    rect(pm, t, 0.0, 22.0, w, 2.0, &wood);
+    for x in dojo_lanterns() {
+        let px = x - 2.5;
+        rect(pm, t, px, 3.0, 5.0, 29.0, &lin(3.0, 32.0, &[(0.0, "#4a2a20"), (1.0, "#22100c")]));
+        rect(pm, t, px - 1.2, 1.6, 7.4, 2.6, &solid(rgba("#6a3a2c", 1.0)));
+        rect(pm, t, px + 3.6, 3.0, 1.0, 29.0, &solid(rgba("#ffb088", 0.2)));
+        glowc(pm, t, x, 12.0, 17.0, "#ff8a3a", 0.35);
+        stroke(pm, t, line(x, 4.0, x, 6.0), &solid(rgba("#1a0c0a", 1.0)), 0.6);
+        fill(pm, t, ellipse(x, 12.0, 5.2, 7.0), &radial(x, 12.0, 7.0, &[(0.0, "#fff0b0", 1.0), (0.45, "#ff7a30", 1.0), (1.0, "#b8281c", 1.0)]));
+        for k in 0..4 { stroke(pm, t, line(x - 5.0 + k as f32 * 3.3, 12.0 - 6.0 * (1.0 - ((k as f32 - 1.5) / 2.0).powi(2)).sqrt(), x - 5.0 + k as f32 * 3.3, 12.0 + 6.0 * (1.0 - ((k as f32 - 1.5) / 2.0).powi(2)).sqrt()), &solid(rgba("#7a1810", 0.5)), 0.35); }
+        rect(pm, t, x - 3.0, 4.6, 6.0, 1.4, &solid(rgba("#1c0c0a", 1.0))); rect(pm, t, x - 3.0, 18.4, 6.0, 1.4, &solid(rgba("#1c0c0a", 1.0)));
+    }
+}
 fn dojo() -> Stage {
     let back = vec![
-        layer(520.0, 240.0, 0.0, 0.05, 3, 0.05, &|pm, t, w, h, _| {
-            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#2a1e5c"), (0.45, "#d4507a"), (0.7, "#ff9a4a"), (1.0, "#ffd38a")]));
-            fill(pm, t, circle(w / 2.0, 150.0, 70.0), &radial(w / 2.0, 150.0, 70.0, &[(0.0, "#fffad2", 1.0), (0.3, "#ffdc8c", 0.8), (1.0, "#ffa050", 0.0)]));
-            fill(pm, t, circle(w / 2.0, 150.0, 22.0), &solid(rgba("#fff0c8", 0.9)));
-            for i in 0..6 { rect(pm, t, 0.0, 60.0 + i as f32 * 14.0, w, 3.0, &solid(rgba("#782a5a", 0.25))); }
+        // 0 sunset sky with banded cloud noise
+        lay(1.6, false, 520.0, 240.0, 0.0, 0.05, 3, 0.05, &|pm, t, w, h, _| {
+            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#1b1450"), (0.3, "#5a2a72"), (0.5, "#d4507a"), (0.7, "#ff8f4a"), (1.0, "#ffd38a")]));
+            let r = t.sx;
+            blobs(pm, r, (0.0, 10.0, w, 150.0), 0.7, 2.6, 1.0, 0.5, 0.28, "#ff9a6a", 0.6, 0.0, false);
+            blobs(pm, r, (0.0, 20.0, w, 110.0), 0.9, 3.2, 2.0, 0.56, 0.2, "#3d1858", 0.6, 0.0, false);
+            blobs(pm, r, (0.0, 50.0, w, 110.0), 0.8, 3.4, 3.0, 0.6, 0.16, "#ffe6b0", 0.55, 0.0, false);
+            glowc(pm, t, w / 2.0, 150.0, 110.0, "#ffd890", 0.85);
+            fill(pm, t, circle(w / 2.0, 150.0, 25.0), &radial(w / 2.0, 150.0, 25.0, &[(0.0, "#ffffff", 1.0), (0.8, "#fff2c0", 1.0), (1.0, "#ffd890", 1.0)]));
+            blobs(pm, r, (0.0, 100.0, w, 80.0), 0.5, 4.0, 4.0, 0.52, 0.2, "#3d1858", 0.5, 0.0, false);
         }),
-        layer(700.0, 240.0, 0.0, 0.18, 7, 0.18, &|pm, t, w, _, r| { mountains(pm, t, w, 175.0, 70.0, "#6a3570", r, 25.0); mountains(pm, t, w, 190.0, 40.0, "#4a2558", r, 18.0); }),
-        layer(900.0, 240.0, 0.0, 0.4, 11, 0.4, &|pm, t, _, _, r| {
-            let dark = solid(rgba("#2b1736", 1.0));
-            for i in 0..9 {
-                let x = 40.0 + i as f32 * 100.0 + r.f() * 30.0; let by = 200.0 - r.f() * 15.0; let bw = 60.0 + r.f() * 30.0;
-                rect(pm, t, x - bw * 0.35, by - 30.0, bw * 0.7, 30.0, &dark);
-                let tiers = 2 + (r.f() * 2.0) as i32;
-                for k in 0..tiers {
-                    let ty = by - 30.0 - k as f32 * 22.0; let tw = bw * (1.0 - k as f32 * 0.2);
-                    let mut b = PathBuilder::new();
-                    b.move_to(x - tw / 2.0 - 8.0, ty + 4.0); b.quad_to(x - tw / 4.0, ty - 4.0, x, ty - 12.0); b.quad_to(x + tw / 4.0, ty - 4.0, x + tw / 2.0 + 8.0, ty + 4.0); b.close();
-                    fill(pm, t, b.finish(), &dark);
-                    rect(pm, t, x - tw * 0.3, ty, tw * 0.6, 18.0, &dark);
-                    for q in 0..3 { rect(pm, t, x - tw * 0.22 + q as f32 * tw * 0.18, ty + 6.0, 3.0, 5.0, &solid(rgba("#ffbe5a", 0.6))); }
-                }
+        // 1 far mountains in haze
+        lay(2.0, false, 700.0, 240.0, 0.0, 0.18, 7, 0.18, &|pm, t, w, _, _| {
+            ridge(pm, t, w, 150.0, 70.0, "#8a4488", "#c8647a", 1.0, 0.55);
+            ridge(pm, t, w, 178.0, 52.0, "#6a3070", "#a84a72", 2.0, 0.8);
+            ridge(pm, t, w, 198.0, 34.0, "#4a2458", "#82406a", 3.0, 1.1);
+            haze(pm, t.sx, (0.0, 130.0, w, 110.0), "#ffa070", 0.0, 0.5);
+            blobs(pm, t.sx, (0.0, 120.0, w, 100.0), 0.5, 3.5, 6.0, 0.55, 0.3, "#ffb888", 0.3, 0.0, true);
+        }),
+        // 2 village of pagodas and pines
+        lay(3.5, false, 900.0, 240.0, 0.0, 0.4, 11, 0.4, &|pm, t, w, _, r| {
+            for i in 0..14 { pine(pm, t, 20.0 + i as f32 * 66.0 + r.f() * 30.0, 214.0, 40.0 + r.f() * 26.0, "#35203e"); }
+            for i in 0..8 {
+                let x = 50.0 + i as f32 * 112.0 + r.f() * 30.0;
+                pagoda(pm, t, x, 212.0 - r.f() * 8.0, 54.0 + r.f() * 30.0, 2 + (r.f() * 2.0) as i32, "#2b1736", 0.7);
             }
+            for i in 0..14 { let x = r.f() * w; rect(pm, t, x, 196.0, 22.0 + r.f() * 14.0, 20.0, &solid(rgba("#2b1736", 1.0))); fill(pm, t, poly(&[(x - 3.0, 196.0), (x + 14.0, 188.0), (x + 32.0, 196.0)]), &solid(rgba("#24122e", 1.0))); let _ = i; }
+            haze(pm, t.sx, (0.0, 150.0, w, 70.0), "#d4507a", 0.0, 0.55);
+            grain(pm, t.sx, (0.0, 130.0, w, 90.0), 3.0, 3.0, 0.2, 5.0);
         }),
-        layer(1100.0, 120.0, 175.0, 1.0, 13, 1.0, &|pm, t, w, h, _| {
-            rect(pm, t, 0.0, 22.0, w, h, &solid(rgba("#3b2420", 1.0)));
-            floor_planks(pm, t.pre_translate(0.0, 30.0), w, h - 30.0, "#a8694a", "#5a3022", rgba("#280f0a", 0.45));
-            rect(pm, t, 0.0, 26.0, w, 4.0, &solid(rgba("#5c3a2c", 1.0)));
-            let mut x = 10.0;
-            while x < w {
-                rect(pm, t, x, 0.0, 5.0, 28.0, &solid(rgba("#2a1712", 1.0)));
-                fill(pm, t, ellipse(x + 2.5, 8.0, 6.0, 8.0), &solid(rgba("#e64632", 1.0)));
-                fill(pm, t, ellipse(x + 2.5, 8.0, 3.0, 5.0), &solid(rgba("#ffe696", 0.55)));
-                x += 70.0;
-            }
+        // 3 temple wall with sakura trees (students are drawn on top by stagefx)
+        lay(3.5, false, 1000.0, 240.0, 0.0, 0.72, 13, 0.72, &|pm, t, w, _, r| {
+            sakura(pm, t, r, 250.0, 208.0, 118.0);
+            sakura(pm, t, r, 730.0, 208.0, 104.0);
+            sakura(pm, t, r, 940.0, 208.0, 90.0);
+            rect(pm, t, 0.0, 168.0, w, 44.0, &lin(168.0, 212.0, &[(0.0, "#4e2c3c"), (1.0, "#2a1624")]));
+            grain(pm, t.sx, (0.0, 168.0, w, 44.0), 3.0, 3.0, 0.55, 1.0);
+            blobs(pm, t.sx, (0.0, 168.0, w, 44.0), 0.35, 0.8, 9.0, 0.6, 0.2, "#1c0e18", 0.5, 0.0, true);
+            let mut x = 0.0;
+            while x < w { fill(pm, t, ellipse(x + 3.5, 165.0, 3.8, 5.0), &solid(rgba("#1e1018", 1.0))); rect(pm, t, x, 164.0, 7.0, 4.0, &solid(rgba("#1e1018", 1.0))); x += 7.0; }
+            rect(pm, t, 0.0, 168.0, w, 1.2, &solid(rgba("#ff9a6a", 0.4)));
+            let mut x = 40.0; while x < w { rect(pm, t, x, 168.0, 6.0, 44.0, &lin(168.0, 212.0, &[(0.0, "#4a2224"), (1.0, "#2a1214")])); rect(pm, t, x + 4.5, 168.0, 1.0, 44.0, &solid(rgba("#ff9a6a", 0.2))); x += 120.0; }
         }),
+        // 4 wooden engawa deck with railing and paper lanterns
+        layer(1100.0, 120.0, 175.0, 1.0, 13, 1.0, &|pm, t, w, h, r| deck(pm, t, w, h, r)),
+        // 5 front: temple eave across the top (dark beam + tile row), the lanterns hang from it
+        lay(3.0, true, 580.0, 36.0, -2.0, 0.1, 17, 0.0, &|pm, t, w, h, _| {
+            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#120810"), (0.6, "#1e0e16"), (1.0, "#2a1420")]));
+            let mut x = 0.0; while x < w { fill(pm, t, ellipse(x + 5.0, 12.0, 5.2, 8.0), &lin(4.0, 20.0, &[(0.0, "#2c1620"), (1.0, "#0e060a")])); x += 10.0; }
+            rect(pm, t, 0.0, 19.0, w, 6.0, &lin(19.0, 25.0, &[(0.0, "#3a1c1c"), (1.0, "#1a0c0c")]));
+            rect(pm, t, 0.0, 19.0, w, 0.8, &solid(rgba("#ff9a6a", 0.45)));
+            grain(pm, t.sx, (0.0, 19.0, w, 6.0), 0.1, 4.0, 0.6, 2.0);
+            rect(pm, t, 0.0, 25.0, w, 11.0, &lin_a(25.0, 36.0, &[(0.0, "#120810", 0.6), (1.0, "#120810", 0.0)]));
+        }),
+        // 6 dynamic placeholder for foreground banners
+        dynamic(560.0, 240.0, 0.0, 1.22, 1.0, true),
     ];
-    let particles = parts(5, 40, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: 0.3 + r.f() * 0.5, vy: 0.25 + r.f() * 0.4, s: 0.8 + r.f() * 1.1, a: 0.6 + r.f() * 0.4, c: if r.f() < 0.5 { [255, 192, 216] } else { [255, 158, 192] } });
-    Stage { info: info("Telhado do Dojo — Pôr do Sol"), art: StageArt::Procedural { back, particles, tint: None }, music: 0 }
+    let particles = parts(5, 24, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: 0.3 + r.f() * 0.5, vy: 0.25 + r.f() * 0.4, s: 0.8 + r.f() * 1.1, a: 0.6 + r.f() * 0.4, c: if r.f() < 0.5 { [255, 192, 216] } else { [255, 158, 192] } });
+    Stage { info: info("Telhado do Dojo — Pôr do Sol"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.55, 0.2, 0.04]) }, music: 0, kind: StageKind::Dojo }
 }
 
-fn neon() -> Stage {
-    let back = vec![
-        layer(520.0, 240.0, 0.0, 0.05, 2, 0.05, &|pm, t, w, h, r| {
-            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#05030f"), (0.6, "#1d0b3a"), (1.0, "#4a1460")]));
-            for _ in 0..80 { let a = r.f() * 0.6; rect(pm, t, r.f() * w, r.f() * 120.0, 0.7, 0.7, &solid(rgba("#ffffff", a))); }
-            fill(pm, t, circle(w * 0.7, 60.0, 30.0), &solid(rgba("#ff3cc8", 0.15)));
-        }),
-        layer(760.0, 240.0, 0.0, 0.2, 4, 0.2, &|pm, t, w, _, r| {
-            let mut x = 0.0;
-            while x < w {
-                let bh = 60.0 + r.f() * 110.0; let bw = 16.0 + r.f() * 18.0;
-                rect(pm, t, x, 200.0 - bh, bw, bh + 40.0, &solid(rgba("#120a26", 1.0)));
-                let mut y = 200.0 - bh + 4.0;
-                while y < 200.0 { let mut xx = x + 2.0; while xx < x + bw - 2.0 { if r.f() < 0.3 { let c = if r.f() < 0.5 { rgba("#78c8ff", 0.5) } else { rgba("#ff8cdc", 0.4) }; rect(pm, t, xx, y, 1.6, 2.0, &solid(c)); } xx += 4.0; } y += 5.0; }
-                x += 18.0 + r.f() * 14.0;
-            }
-        }),
-        layer(1000.0, 240.0, 0.0, 0.5, 9, 0.5, &|pm, t, w, _, r| {
-            let neon = ["#ff2fd0", "#22e8ff", "#ffe23a", "#7d5bff", "#3dff8a"];
-            let mut x = 0.0;
-            while x < w {
-                let bh = 90.0 + r.f() * 90.0; let bw = 30.0 + r.f() * 30.0;
-                rect(pm, t, x, 205.0 - bh, bw, bh + 40.0, &solid(rgba("#0b0618", 1.0)));
-                if r.f() < 0.8 {
-                    let c = neon[(r.f() * 5.0) as usize % 5];
-                    let sy = 205.0 - bh + 10.0 + r.f() * 40.0; let sw = 8.0 + r.f() * 6.0; let sh = 20.0 + r.f() * 30.0;
-                    let rp = tiny_skia::Rect::from_xywh(x + bw / 2.0 - sw / 2.0, sy, sw, sh).map(PathBuilder::from_rect);
-                    stroke(pm, t, rp.clone(), &solid(rgba(c, 0.25)), 4.0);
-                    stroke(pm, t, rp, &solid(rgba(c, 1.0)), 1.2);
-                    for q in 0..3 { stroke(pm, t, line(x + bw / 2.0 - 2.0, sy + 4.0 + q as f32 * sh / 3.3, x + bw / 2.0 + 2.0, sy + 6.0 + q as f32 * sh / 3.3), &solid(rgba(c, 1.0)), 1.2); }
-                }
-                x += 40.0 + r.f() * 40.0;
-            }
-        }),
-        layer(1100.0, 120.0, 175.0, 1.0, 12, 1.0, &|pm, t, w, h, _| {
-            rect(pm, t, 0.0, 30.0, w, h, &lin(30.0, h, &[(0.0, "#1a1030"), (1.0, "#05020c")]));
-            rect(pm, t, 0.0, 28.0, w, 3.0, &solid(rgba("#2a1a48", 1.0)));
-            let cs = [rgba("#ff2fd0", 0.25), rgba("#22e8ff", 0.22), rgba("#ffe23a", 0.15)];
-            let mut x = 0.0; let mut i = 0;
-            while x < w { rect(pm, t, x, 34.0, 3.0 + (i % 7) as f32, 40.0 + (i * 13 % 30) as f32, &solid(cs[i % 3])); x += 23.0; i += 1; }
-            let mut x = 0.0;
-            while x < w { rect(pm, t, x, 6.0, 1.5, 22.0, &solid(rgba("#33255a", 1.0))); x += 16.0; }
-            rect(pm, t, 0.0, 6.0, w, 2.0, &solid(rgba("#4c3a80", 1.0)));
-        }),
-    ];
-    let particles = parts(9, 70, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: -0.6, vy: 5.0 + r.f() * 2.0, s: 0.35, a: 0.35, c: [154, 216, 255] });
-    Stage { info: info("Neo-Metrópole 2099"), art: StageArt::Procedural { back, particles, tint: None }, music: 1 }
+// ───────────────────────────────────────────── NEON ─────────────────────────────────────────────
+
+fn tower(pm: &mut Pixmap, t: Transform, x: f32, w: f32, h: f32, base: f32, body: &str, seed: u32, win_p: f32) {
+    rect(pm, t, x, base - h, w, h + 40.0, &lin(base - h, base + 30.0, &[(0.0, body), (1.0, "#05030c")]));
+    let mut y = base - h + 4.0; let mut row = 0u32;
+    while y < base { let mut xx = x + 2.0; let mut col = 0u32; while xx < x + w - 2.0 {
+        if hash(row * 31 + col, seed) < win_p { let c = if hash(row, col + seed) < 0.55 { rgba("#8fd4ff", 0.55) } else if hash(col, row + seed) < 0.5 { rgba("#ff9ae0", 0.5) } else { rgba("#ffe4a0", 0.45) }; rect(pm, t, xx, y, 1.8, 2.2, &solid(c)); }
+        xx += 3.8; col += 1; } y += 4.6; row += 1; }
 }
+fn neon() -> Stage {
+    let signs = neon_signs();
+    let back = vec![
+        // 0 smoggy night sky with a ringed planet
+        lay(1.6, false, 520.0, 240.0, 0.0, 0.05, 2, 0.05, &|pm, t, w, h, r| {
+            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#04020e"), (0.5, "#1a0a38"), (0.8, "#3d1260"), (1.0, "#6a1c70")]));
+            let rr = t.sx;
+            for _ in 0..90 { let a = r.f() * 0.7; rect(pm, t, r.f() * w, r.f() * 120.0, 0.7, 0.7, &solid(rgba("#ffffff", a))); }
+            glowc(pm, t, w * 0.72, 62.0, 56.0, "#ff3cc8", 0.4);
+            fill(pm, t, circle(w * 0.72, 62.0, 22.0), &radial(w * 0.72 - 6.0, 56.0, 28.0, &[(0.0, "#ffb0e8", 1.0), (0.6, "#a02a98", 1.0), (1.0, "#3a0e50", 1.0)]));
+            stroke(pm, t, ellipse(w * 0.72, 62.0, 40.0, 7.0), &solid(rgba("#ffd0f4", 0.5)), 1.4);
+            blobs(pm, rr, (0.0, 20.0, w, 200.0), 0.6, 2.6, 2.0, 0.5, 0.3, "#ff3cc8", 0.22, 0.0, false);
+            blobs(pm, rr, (0.0, 60.0, w, 160.0), 0.7, 2.8, 5.0, 0.55, 0.25, "#22d8ff", 0.16, 0.0, false);
+        }),
+        // 1 far skyline
+        lay(2.5, false, 760.0, 240.0, 0.0, 0.2, 4, 0.2, &|pm, t, w, _, _| {
+            for (x, bw, bh) in skyline(21, w, 16.0, 34.0, 60.0, 170.0, 8.0) { tower(pm, t, x, bw, bh, 200.0, "#1c1040", 3, 0.38); }
+            haze(pm, t.sx, (0.0, 60.0, w, 160.0), "#7a1c88", 0.0, 0.55);
+        }),
+        // 2 mid city with neon sign boards
+        lay(3.5, false, 1000.0, 240.0, 0.0, 0.5, 9, 0.5, &|pm, t, w, _, _| {
+            for (x, bw, bh) in skyline(41, w, 28.0, 56.0, 90.0, 190.0, 54.0) {
+                tower(pm, t, x, bw, bh, 205.0, "#150c2c", 5, 0.2);
+                rect(pm, t, x, 205.0 - bh, bw, 1.4, &solid(rgba("#6a50b0", 0.5)));
+                grain(pm, t.sx, (x, 205.0 - bh, bw, bh), 4.0, 4.0, 0.3, 2.0);
+                for k in 0..2 { rect(pm, t, x + 4.0 + k as f32 * (bw - 12.0), 205.0 - bh - 5.0, 1.2, 5.0, &solid(rgba("#33255a", 1.0))); }
+            }
+            for (x, y, sw, sh, c) in &signs {
+                let col = NEON[*c];
+                glowc(pm, t, x + sw / 2.0, y + sh / 2.0, sh.max(*sw) * 1.1, col, 0.42);
+                let rp = tiny_skia::Rect::from_xywh(*x, *y, *sw, *sh).map(PathBuilder::from_rect);
+                rect(pm, t, *x, *y, *sw, *sh, &solid(rgba("#0a0618", 0.9)));
+                stroke(pm, t, rp.clone(), &solid(rgba(col, 0.3)), 4.0);
+                stroke(pm, t, rp, &solid(rgba(col, 1.0)), 1.2);
+                for q in 0..3 { stroke(pm, t, line(x + 2.0, y + 4.0 + q as f32 * sh / 3.3, x + sw - 2.0, y + 6.0 + q as f32 * sh / 3.3), &solid(rgba(col, 1.0)), 1.1); }
+            }
+            haze(pm, t.sx, (0.0, 130.0, w, 90.0), "#5a1c80", 0.0, 0.38);
+        }),
+        // 3 street-level shop fronts (awnings, lit windows, vending machines); the balcony crowd is drawn by stagefx
+        lay(3.5, false, 1100.0, 240.0, 0.0, 0.8, 15, 0.8, &|pm, t, w, _, r| {
+            let mut x = 0.0; let mut i = 0u32;
+            while x < w {
+                let bw = 64.0 + r.f() * 50.0; let top = 130.0 + r.f() * 36.0;
+                rect(pm, t, x, top, bw, 210.0 - top, &lin(top, 210.0, &[(0.0, "#1a1038"), (1.0, "#0a0618")]));
+                grain(pm, t.sx, (x, top, bw, 210.0 - top), 3.0, 3.0, 0.35, 3.0);
+                let c = NEON[(hash(i, 3) * 5.0) as usize % 5];
+                rect(pm, t, x + 6.0, 176.0, bw - 12.0, 30.0, &lin(176.0, 206.0, &[(0.0, "#fff2c8"), (1.0, "#ffb870")]));
+                rect(pm, t, x + 6.0, 176.0, bw - 12.0, 30.0, &lin_a(176.0, 206.0, &[(0.0, "#000000", 0.5), (0.35, "#000000", 0.0), (1.0, "#000000", 0.35)]));
+                for q in 0..(bw / 14.0) as i32 { rect(pm, t, x + 10.0 + q as f32 * 14.0, 184.0, 1.0, 22.0, &solid(rgba("#1a0c20", 0.7))); }
+                rect(pm, t, x + 2.0, 164.0, bw - 4.0, 12.0, &lin(164.0, 176.0, &[(0.0, c), (1.0, "#150a28")]));
+                for q in 0..((bw - 8.0) / 6.0) as i32 { rect(pm, t, x + 4.0 + q as f32 * 6.0, 164.0, 3.0, 12.0, &solid(rgba("#000000", 0.18))); }
+                glowc(pm, t, x + bw / 2.0, 190.0, bw * 0.8, "#ffa060", 0.22);
+                stroke(pm, t, line(x + 4.0, top + 6.0, x + bw - 4.0, top + 6.0), &solid(rgba(c, 0.9)), 1.0);
+                x += bw + r.f() * 12.0; i += 1;
+            }
+            haze(pm, t.sx, (0.0, 120.0, w, 100.0), "#3a1060", 0.0, 0.3);
+        }),
+        // 4 wet asphalt street with puddles, lane paint, manholes and a barrier
+        layer(1100.0, 120.0, 175.0, 1.0, 12, 1.0, &|pm, t, w, h, r| {
+            let rr = t.sx;
+            rect(pm, t, 0.0, 28.0, w, h, &lin(28.0, h, &[(0.0, "#2a1c48"), (0.35, "#160c2c"), (1.0, "#080414")]));
+            grain(pm, rr, (0.0, 28.0, w, h - 28.0), 6.0, 6.0, 0.7, 1.0);
+            blobs(pm, rr, (0.0, 28.0, w, h - 28.0), 0.25, 0.8, 4.0, 0.58, 0.25, "#000000", 0.4, 0.0, true);
+            for _ in 0..380 { let a = 0.1 + r.f() * 0.25; rect(pm, t, r.f() * w, 30.0 + r.f() * 88.0, 0.7, 0.7, &solid(rgba(if r.f() < 0.5 { "#8a7ac8" } else { "#000000" }, a))); }
+            for _ in 0..16 { let x = r.f() * w; let y = 40.0 + r.f() * 70.0; let mut b = PathBuilder::new(); b.move_to(x, y); for _ in 0..3 { b.line_to(x + (r.f() - 0.2) * 30.0, y + (r.f() - 0.5) * 8.0); } stroke(pm, t, b.finish(), &solid(rgba("#000000", 0.5)), 0.5); }
+            // curb + lane markings
+            rect(pm, t, 0.0, 26.0, w, 4.0, &lin(26.0, 30.0, &[(0.0, "#4a3a78"), (1.0, "#1c1236")]));
+            let mut x = 8.0; while x < w { rect(pm, t, x, 70.0, 34.0, 2.4, &solid(rgba("#e8e0ff", 0.55))); x += 78.0; }
+            rect(pm, t, 0.0, 104.0, w, 2.0, &solid(rgba("#ffe23a", 0.35)));
+            for i in 0..3 { let x = 200.0 + i as f32 * 380.0; fill(pm, t, ellipse(x, 62.0, 13.0, 3.6), &solid(rgba("#0c0618", 1.0))); stroke(pm, t, ellipse(x, 62.0, 13.0, 3.6), &solid(rgba("#6a5aa8", 0.6)), 0.6); for k in 0..4 { rect(pm, t, x - 9.0 + k as f32 * 4.6, 61.0, 0.7, 2.2, &solid(rgba("#4a3a78", 0.8))); } }
+            // puddles reflecting the neon sky
+            for i in 0..11 {
+                let (x, y) = (r.f() * w, 44.0 + r.f() * 66.0); let (pw, ph) = (22.0 + r.f() * 40.0, 3.0 + r.f() * 4.5);
+                fill(pm, t, ellipse(x, y, pw, ph), &radial(x, y, pw, &[(0.0, if i % 2 == 0 { "#ff6ad8" } else { "#52e8ff" }, 0.8), (0.5, "#6a40c0", 0.65), (1.0, "#1a0c38", 0.5)]));
+                stroke(pm, t, ellipse(x, y, pw, ph), &solid(rgba("#c0b0ff", 0.4)), 0.5);
+                rect(pm, t, x - pw * 0.5, y - 0.6, pw, 0.8, &solid(rgba("#ffffff", 0.35)));
+            }
+            // barrier
+            rect(pm, t, 0.0, 6.0, w, 2.0, &solid(rgba("#4c3a80", 1.0)));
+            rect(pm, t, 0.0, 6.0, w, 0.7, &solid(rgba("#a898ff", 0.6)));
+            let mut x = 0.0; while x < w { rect(pm, t, x, 6.0, 1.6, 22.0, &lin(6.0, 28.0, &[(0.0, "#4a3a80"), (1.0, "#1a1234")])); x += 15.0; }
+            let mut x = 0.0; while x < w { rect(pm, t, x, 20.0, 12.0, 1.0, &solid(rgba("#33255a", 0.9))); x += 15.0; }
+        }),
+        // 5 dynamic: hanging cables + street lamps in front
+        dynamic(560.0, 240.0, 0.0, 1.2, 1.0, true),
+    ];
+    let particles = parts(9, 24, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: -0.6, vy: 5.0 + r.f() * 2.0, s: 0.35, a: 0.35, c: [154, 216, 255] });
+    Stage { info: info("Neo-Metrópole 2099"), art: StageArt::Procedural { back, particles, tint: None }, music: 1, kind: StageKind::Neon }
+}
+
+// ───────────────────────────────────────────── BAMBOO ─────────────────────────────────────────────
 
 fn bamboo() -> Stage {
-    let mut back = vec![layer(520.0, 240.0, 0.0, 0.04, 2, 0.04, &|pm, t, w, h, _| {
-        rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#04101c"), (0.6, "#123a4a"), (1.0, "#2c6a6a")]));
-        fill(pm, t, circle(w * 0.35, 55.0, 60.0), &radial(w * 0.35, 55.0, 60.0, &[(0.0, "#f0fffa", 1.0), (0.25, "#c8f0e6", 0.6), (1.0, "#64b4b4", 0.0)]));
-        fill(pm, t, circle(w * 0.35, 55.0, 16.0), &solid(rgba("#f2fffa", 1.0)));
-    })];
-    for (li, d) in [0.2f32, 0.45, 0.75].iter().enumerate() {
-        let col = ["#0e3a3a", "#0a2c2a", "#06201c"][li];
-        back.push(layer(700.0 + li as f32 * 300.0, 260.0, -10.0, *d, 20 + li as u32, *d, &move |pm, t, w, _, r| {
+    let back = vec![
+        // 0 moonlit sky: moon, stars, thin clouds
+        lay(1.6, false, 520.0, 240.0, 0.0, 0.04, 2, 0.04, &|pm, t, w, h, r| {
+            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#030d1a"), (0.55, "#0f3646"), (1.0, "#2c6a6a")]));
+            for _ in 0..110 { let a = 0.2 + r.f() * 0.7; fill(pm, t, circle(r.f() * w, r.f() * 130.0, 0.35 + r.f() * 0.5), &solid(rgba("#dffcff", a))); }
+            glowc(pm, t, w * 0.35, 55.0, 90.0, "#bff4ee", 0.55);
+            fill(pm, t, circle(w * 0.35, 55.0, 17.0), &radial(w * 0.35 - 4.0, 51.0, 20.0, &[(0.0, "#ffffff", 1.0), (0.7, "#e6fff8", 1.0), (1.0, "#b8e8e0", 1.0)]));
+            for (dx, dy, rr) in [(-5.0, -4.0, 3.2), (4.0, 3.0, 4.2), (-2.0, 7.0, 2.0), (6.0, -6.0, 2.2)] { fill(pm, t, circle(w * 0.35 + dx, 55.0 + dy, rr), &solid(rgba("#9fd0c8", 0.4))); }
+            blobs(pm, t.sx, (0.0, 20.0, w, 140.0), 0.6, 2.8, 4.0, 0.56, 0.22, "#0a2a3a", 0.5, 0.0, false);
+            blobs(pm, t.sx, (0.0, 20.0, w, 140.0), 0.6, 2.8, 4.0, 0.64, 0.2, "#9fe6e0", 0.22, 0.0, false);
+        }),
+        // 1 far bamboo silhouettes in mist
+        lay(2.0, false, 900.0, 260.0, -10.0, 0.18, 21, 0.18, &|pm, t, w, _, r| {
             let mut x = 0.0;
             while x < w {
-                let bw = 3.0 + li as f32 * 2.0 + r.f() * 2.0;
-                rect(pm, t, x, 0.0, bw, 260.0, &solid(rgba(col, 1.0)));
-                rect(pm, t, x + bw * 0.6, 0.0, bw * 0.25, 260.0, &solid(rgba("#a0e6c8", 0.12)));
-                let mut y = 20.0 + r.f() * 30.0;
-                while y < 230.0 {
-                    rect(pm, t, x - 1.0, y, bw + 2.0, 1.6, &solid(rgba(col, 1.0)));
-                    if r.f() < 0.4 { fill(pm, t.pre_translate(x + bw + 8.0, y - 3.0).pre_rotate(-23.0), ellipse(0.0, 0.0, 9.0, 2.0), &solid(rgba(col, 1.0))); }
-                    y += 26.0 + r.f() * 10.0;
-                }
-                x += 10.0 + r.f() * 22.0;
+                let bw = 2.5 + r.f() * 2.0; let c = solid(rgba("#194a4a", 1.0));
+                rect(pm, t, x, 0.0, bw, 260.0, &c);
+                rect(pm, t, x + bw * 0.6, 0.0, bw * 0.3, 260.0, &solid(rgba("#a0e6dc", 0.22)));
+                let mut y = 24.0 + r.f() * 24.0; while y < 240.0 { rect(pm, t, x - 0.6, y, bw + 1.2, 1.2, &solid(rgba("#0e3434", 1.0))); y += 22.0 + r.f() * 10.0; }
+                x += 8.0 + r.f() * 14.0;
             }
-        }));
-    }
-    back.push(layer(1100.0, 120.0, 175.0, 1.0, 5, 1.0, &|pm, t, w, h, _| {
-        rect(pm, t, 0.0, 28.0, w, h, &lin(28.0, h, &[(0.0, "#2e4a3a"), (1.0, "#0c1a14")]));
-        for i in 0..6 { rect(pm, t, 0.0, 30.0 + i as f32 * 3.0, w, 1.0, &solid(rgba("#c8fff0", 0.08))); }
-        let mut x = 0.0;
-        while x < w { let mut b = PathBuilder::new(); b.move_to(x, 30.0); b.line_to(x + 2.0, 22.0 - (x as i32 % 5) as f32); b.line_to(x + 4.0, 30.0); b.close(); fill(pm, t, b.finish(), &solid(rgba("#1b3328", 1.0))); x += 7.0; }
-    }));
-    let particles = parts(3, 30, |r| Particle { x: r.f() * 470.0, y: 80.0 + r.f() * 140.0, vx: (r.f() - 0.5) * 0.3, vy: (r.f() - 0.5) * 0.2, s: 0.9, a: 0.8, c: [217, 255, 122] });
-    Stage { info: info("Bambuzal ao Luar"), art: StageArt::Procedural { back, particles, tint: Some([0.16, 0.47, 0.55, 0.06]) }, music: 2 }
+            haze(pm, t.sx, (0.0, 0.0, w, 260.0), "#3a8a88", 0.35, 0.6);
+        }),
+        // 2 dynamic swaying mid grove, 3 dynamic near grove
+        dynamic(900.0, 260.0, -10.0, 0.42, 0.42, false),
+        dynamic(1100.0, 260.0, -10.0, 0.72, 0.72, false),
+        // 4 shallow pond with stepping stones, lily pads, reeds
+        layer(1100.0, 120.0, 175.0, 1.0, 5, 1.0, &|pm, t, w, h, r| {
+            let rr = t.sx;
+            rect(pm, t, 0.0, 28.0, w, h, &lin(28.0, h, &[(0.0, "#2f6a66"), (0.4, "#14403f"), (1.0, "#082220")]));
+            blobs(pm, rr, (0.0, 28.0, w, h - 28.0), 0.18, 0.9, 3.0, 0.5, 0.3, "#0a2a2c", 0.5, 0.0, true);
+            blobs(pm, rr, (0.0, 28.0, w, h - 28.0), 0.3, 1.4, 7.0, 0.62, 0.2, "#8fe8d8", 0.2, 0.0, true);
+            for _ in 0..90 { let y = 32.0 + r.f() * 84.0; let x = r.f() * w; let l = 6.0 + r.f() * 26.0; rect(pm, t, x, y, l, 0.5, &solid(rgba("#c8fff4", 0.1 + r.f() * 0.18))); }
+            // pebbles under shallow water
+            for _ in 0..70 { fill(pm, t, ellipse(r.f() * w, 40.0 + r.f() * 74.0, 1.5 + r.f() * 2.5, 0.8 + r.f()), &solid(rgba(if r.f() < 0.5 { "#6a8a80" } else { "#3a5a56" }, 0.35))); }
+            // stepping stones
+            for i in 0..7 { let x = 60.0 + i as f32 * 150.0 + r.f() * 40.0; let y = 60.0 + r.f() * 40.0; let (sw, sh) = (18.0 + r.f() * 10.0, 3.6 + r.f() * 1.5);
+                fill(pm, t, ellipse(x, y + 1.6, sw, sh), &solid(rgba("#07201f", 0.6)));
+                fill(pm, t, ellipse(x, y, sw, sh), &lin(y - sh, y + sh, &[(0.0, "#8aa8a0"), (1.0, "#3a5a56")]));
+                stroke(pm, t, ellipse(x, y, sw, sh), &solid(rgba("#d8fff0", 0.35)), 0.5); }
+            grain(pm, rr, (0.0, 28.0, w, h - 28.0), 6.0, 6.0, 0.35, 2.0);
+            // lily pads and flowers
+            for _ in 0..22 { let (x, y, lr) = (r.f() * w, 38.0 + r.f() * 78.0, 3.0 + r.f() * 3.4);
+                let mut b = PathBuilder::new(); b.move_to(x, y); b.push_oval(tiny_skia::Rect::from_xywh(x - lr * 1.8, y - lr * 0.5, lr * 3.6, lr).unwrap());
+                fill(pm, t, ellipse(x, y, lr * 1.8, lr * 0.5), &lin(y - lr * 0.5, y + lr * 0.5, &[(0.0, "#5aa860"), (1.0, "#2a6a46")]));
+                stroke(pm, t, line(x, y, x + lr * 1.6, y - lr * 0.1), &solid(rgba("#0e3a2a", 0.8)), 0.35);
+                if r.f() < 0.3 { fill(pm, t, ellipse(x - lr, y - lr * 0.4, 1.4, 1.0), &solid(rgba("#ffd0e8", 0.95))); } }
+            // far bank with ferns and rocks
+            rect(pm, t, 0.0, 0.0, w, 30.0, &lin(0.0, 30.0, &[(0.0, "#071c1c"), (1.0, "#0e3030")]));
+            let mut x = 0.0; while x < w { let hh = 8.0 + r.f() * 18.0; let mut b = PathBuilder::new(); b.move_to(x, 30.0); b.quad_to(x + 2.0, 30.0 - hh * 0.8, x + 5.0 + r.f() * 6.0, 30.0 - hh); b.quad_to(x + 5.0, 30.0 - hh * 0.5, x + 7.0, 30.0); b.close(); fill(pm, t, b.finish(), &solid(rgba(if r.f() < 0.5 { "#0e3a30" } else { "#164a3a" }, 1.0))); x += 3.0 + r.f() * 3.0; }
+            for _ in 0..16 { let x = r.f() * w; fill(pm, t, ellipse(x, 28.0, 7.0 + r.f() * 9.0, 4.0 + r.f() * 3.0), &lin(22.0, 32.0, &[(0.0, "#4a6e66"), (1.0, "#14302c")])); }
+            rect(pm, t, 0.0, 29.0, w, 1.4, &solid(rgba("#b0fff0", 0.25)));
+        }),
+        // 5 dynamic foreground stalks
+        dynamic(560.0, 260.0, -10.0, 1.28, 1.0, true),
+    ];
+    let particles = parts(3, 20, |r| Particle { x: r.f() * 470.0, y: 80.0 + r.f() * 140.0, vx: (r.f() - 0.5) * 0.3, vy: (r.f() - 0.5) * 0.2, s: 0.9, a: 0.8, c: [217, 255, 122] });
+    Stage { info: info("Bambuzal ao Luar"), art: StageArt::Procedural { back, particles, tint: Some([0.16, 0.47, 0.55, 0.06]) }, music: 2, kind: StageKind::Bamboo }
 }
 
+// ───────────────────────────────────────────── PLAINS ─────────────────────────────────────────────
+
+fn cactus(pm: &mut Pixmap, t: Transform, x: f32, by: f32, h: f32) {
+    let g = lin(by - h, by, &[(0.0, "#5a7a3a"), (1.0, "#2e4a24")]);
+    rect(pm, t, x - 3.0, by - h, 6.0, h, &g);
+    fill(pm, t, ellipse(x, by - h, 3.0, 3.0), &g);
+    for (dx, up) in [(-9.0, h * 0.55), (9.0, h * 0.4)] {
+        rect(pm, t, x.min(x + dx), by - up, dx.abs(), 3.4, &g);
+        rect(pm, t, x + dx - 1.7, by - up - 12.0, 3.4, 12.0 + 3.0, &g);
+        fill(pm, t, ellipse(x + dx, by - up - 12.0, 1.7, 1.7), &g);
+    }
+    rect(pm, t, x + 1.2, by - h, 1.0, h, &solid(rgba("#c8e8a0", 0.3)));
+}
+fn rockform(pm: &mut Pixmap, t: Transform, r: &mut Rng, x: f32, by: f32, w: f32, h: f32, c1: &str, c2: &str) {
+    let n = 7; let mut pts = vec![(x, by)];
+    for i in 0..=n { let f = i as f32 / n as f32; let hh = h * (0.45 + 0.55 * (1.0 - (f * 2.0 - 1.0).powi(2))) * (0.75 + 0.25 * r.f()); pts.push((x + f * w, by - hh)); }
+    pts.push((x + w, by));
+    fill(pm, t, poly(&pts), &lin(by - h, by, &[(0.0, c1), (1.0, c2)]));
+    // lit edge on the sun side + strata
+    let mut b = PathBuilder::new(); for (i, p) in pts.iter().enumerate().skip(1).take(n + 1) { if i == 1 { b.move_to(p.0, p.1) } else { b.line_to(p.0, p.1) } }
+    stroke(pm, t, b.finish(), &solid(rgba("#ffe6c0", 0.55)), 0.8);
+    for k in 1..4 { let y = by - h * k as f32 * 0.22; stroke(pm, t, line(x + w * 0.1, y, x + w * 0.9, y + (r.f() - 0.5) * 3.0), &solid(rgba("#3a1a0e", 0.25)), 0.7); }
+}
 fn plains() -> Stage {
     let back = vec![
-        layer(520.0, 240.0, 0.0, 0.04, 8, 0.04, &|pm, t, w, h, r| {
-            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#2c6fd6"), (0.6, "#8cc6f2"), (1.0, "#e8f2f0")]));
-            for _ in 0..9 { let x = r.f() * w; let y = 30.0 + r.f() * 70.0; for k in 0..5 { let rr = 8.0 + r.f() * 6.0; fill(pm, t, circle(x + k as f32 * 9.0, y + (k as f32).sin() * 3.0, rr), &solid(rgba("#ffffff", 0.8))); } }
+        // 0 desert sky: gradient, sun, cloud noise
+        lay(1.6, false, 520.0, 240.0, 0.0, 0.04, 8, 0.04, &|pm, t, w, h, _| {
+            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#1f5fc8"), (0.45, "#6ab0ee"), (0.8, "#c8e4f4"), (1.0, "#f4ecd8")]));
+            let r = t.sx;
+            glowc(pm, t, w * 0.78, 40.0, 100.0, "#fff4c0", 0.8);
+            fill(pm, t, circle(w * 0.78, 40.0, 11.0), &solid(rgba("#ffffff", 1.0)));
+            blobs(pm, r, (0.0, 10.0, w, 170.0), 0.7, 2.4, 1.0, 0.55, 0.22, "#ffffff", 0.85, 0.0, false);
+            blobs(pm, r, (0.0, 10.0, w, 170.0), 0.7, 2.4, 1.0, 0.7, 0.2, "#9ab0d0", 0.35, 0.0, false);
         }),
-        layer(760.0, 240.0, 0.0, 0.15, 31, 0.15, &|pm, t, w, _, r| mountains(pm, t, w, 170.0, 60.0, "#8aa0b8", r, 30.0)),
-        layer(1000.0, 240.0, 0.0, 0.4, 33, 0.4, &|pm, t, w, _, r| {
+        // 1 far mesas
+        lay(2.0, false, 760.0, 240.0, 0.0, 0.14, 31, 0.14, &|pm, t, w, _, r| {
             let mut x = 0.0;
+            while x < w { let mw = 60.0 + r.f() * 120.0; let mh = 24.0 + r.f() * 44.0; let by = 178.0;
+                fill(pm, t, poly(&[(x, by + 30.0), (x + 6.0, by - mh * 0.7), (x + 10.0, by - mh), (x + mw - 10.0, by - mh), (x + mw - 4.0, by - mh * 0.6), (x + mw, by + 30.0)]), &lin(by - mh, by + 10.0, &[(0.0, "#c9a898"), (1.0, "#a8847c")]));
+                for k in 0..4 { rect(pm, t, x + 6.0, by - mh + 6.0 + k as f32 * (mh / 4.0), mw - 12.0, 1.0, &solid(rgba("#8a6a64", 0.4))); }
+                x += mw * 0.7 + r.f() * 60.0; }
+            ridge(pm, t, w, 196.0, 26.0, "#bf9a86", "#d8c0a8", 4.0, 0.7);
+            haze(pm, t.sx, (0.0, 120.0, w, 120.0), "#e8e0d0", 0.2, 0.7);
+        }),
+        // 2 mid canyon walls: lit / shadow faces, strata, erosion grooves
+        lay(3.5, false, 1000.0, 240.0, 0.0, 0.4, 33, 0.4, &|pm, t, w, _, r| {
+            let mut x = -20.0;
             while x < w {
-                let mh = 50.0 + r.f() * 70.0; let mw = 40.0 + r.f() * 50.0;
-                let mut b = PathBuilder::new(); b.move_to(x, 205.0); b.line_to(x + 6.0, 200.0 - mh); b.line_to(x + mw - 4.0, 196.0 - mh); b.line_to(x + mw, 205.0); b.close();
-                fill(pm, t, b.finish(), &lin(200.0 - mh, 205.0, &[(0.0, "#c98a5a"), (1.0, "#7a4a30")]));
-                rect(pm, t, x + 6.0, 200.0 - mh, 6.0, mh, &solid(rgba("#ffe6be", 0.25)));
-                let mut y = 205.0 - mh + 10.0;
-                while y < 205.0 { stroke(pm, t, line(x + 3.0, y, x + mw - 2.0, y + 1.0), &solid(rgba("#502814", 0.4)), 0.8); y += 9.0; }
-                x += 80.0 + r.f() * 90.0;
+                let mh = 60.0 + r.f() * 86.0; let mw = 56.0 + r.f() * 56.0;
+                let top = 198.0 - mh; let split = x + mw * (0.45 + r.f() * 0.15);
+                let sil = [(x, 212.0), (x + 4.0, 196.0 - mh * 0.85), (x + 13.0, top + 2.0), (split, top), (x + mw - 7.0, 196.0 - mh * 0.7), (x + mw, 212.0)];
+                fill(pm, t, poly(&[sil[0], sil[1], sil[2], sil[3], (split - 2.0, 212.0)]), &lin(top, 212.0, &[(0.0, "#e8a874"), (0.5, "#c47c50"), (1.0, "#8a5036")]));
+                fill(pm, t, poly(&[(split - 2.0, 212.0), sil[3], sil[4], sil[5]]), &lin(top, 212.0, &[(0.0, "#a8684a"), (0.5, "#8a4c34"), (1.0, "#5a3022")]));
+                let mut y = top + 8.0; let mut k = 0;
+                while y < 210.0 {
+                    let col = if k % 2 == 0 { rgba("#4a2214", 0.4) } else { rgba("#f4cc9c", 0.25) };
+                    stroke(pm, t, line(x + mw * 0.12, y, x + mw * 0.88, y + (r.f() - 0.5) * 2.0), &solid(col), 0.9);
+                    y += 4.0 + r.f() * 7.0; k += 1;
+                }
+                for _ in 0..3 { let gx = x + mw * (0.2 + r.f() * 0.6); let gy = top + 8.0 + r.f() * mh * 0.4; stroke(pm, t, line(gx, gy, gx + (r.f() - 0.5) * 4.0, gy + 10.0 + r.f() * 16.0), &solid(rgba("#3a1a0e", 0.22)), 0.7); }
+                stroke(pm, t, poly(&[sil[1], sil[2], sil[3]]), &solid(rgba("#ffe6c0", 0.6)), 0.9);
+                x += mw * 0.8 + r.f() * 60.0;
             }
+            grain(pm, t.sx, (0.0, 80.0, w, 140.0), 6.0, 6.0, 0.35, 2.0);
+            haze(pm, t.sx, (0.0, 100.0, w, 112.0), "#f0e0c8", 0.0, 0.22);
         }),
+        // 3 near rocks, cacti, dry shrubs (windmill is animated by stagefx)
+        lay(3.5, false, 1100.0, 240.0, 0.0, 0.7, 35, 0.7, &|pm, t, w, _, r| {
+            for i in 0..5 { let x = 40.0 + i as f32 * 230.0 + r.f() * 60.0; if i != 2 { let (rw, rh) = (46.0 + r.f() * 40.0, 30.0 + r.f() * 36.0); rockform(pm, t, r, x, 211.0, rw, rh, "#c8845a", "#6a3a26"); } }
+            for i in 0..6 { cactus(pm, t, 120.0 + i as f32 * 170.0 + r.f() * 60.0, 210.0, 22.0 + r.f() * 20.0); }
+            for _ in 0..40 { let x = r.f() * w; let hh = 4.0 + r.f() * 8.0; for k in 0..5 { stroke(pm, t, line(x, 210.0, x + (k as f32 - 2.0) * 2.2, 210.0 - hh), &solid(rgba(if r.f() < 0.5 { "#8a7a3a" } else { "#a89448" }, 0.9)), 0.6); } }
+            grain(pm, t.sx, (0.0, 150.0, w, 70.0), 3.0, 3.0, 0.4, 5.0);
+            haze(pm, t.sx, (0.0, 160.0, w, 60.0), "#f4e4c8", 0.0, 0.25);
+        }),
+        // 4 cracked dry earth
         layer(1100.0, 120.0, 175.0, 1.0, 35, 1.0, &|pm, t, w, h, r| {
-            rect(pm, t, 0.0, 28.0, w, h, &lin(28.0, h, &[(0.0, "#d8b080"), (1.0, "#8a6040")]));
-            for _ in 0..120 { let a = 0.2 + r.f() * 0.3; fill(pm, t, ellipse(r.f() * w, 34.0 + r.f() * 80.0, 1.0 + r.f() * 4.0, 0.6 + r.f()), &solid(rgba("#5a3c28", a))); }
-            for _ in 0..4 { let x = r.f() * w; let y = 60.0 + r.f() * 30.0; stroke(pm, t, ellipse(x, y, 30.0, 6.0), &solid(rgba("#462814", 0.5)), 0.8); }
+            let rr = t.sx;
+            rect(pm, t, 0.0, 28.0, w, h, &lin(28.0, h, &[(0.0, "#e0bc8c"), (0.5, "#c89c6c"), (1.0, "#9a7048")]));
+            grain(pm, rr, (0.0, 28.0, w, h - 28.0), 7.0, 7.0, 0.55, 1.0);
+            blobs(pm, rr, (0.0, 28.0, w, h - 28.0), 0.3, 1.0, 2.0, 0.55, 0.3, "#8a5a38", 0.45, 0.0, true);
+            blobs(pm, rr, (0.0, 28.0, w, h - 28.0), 0.4, 1.4, 6.0, 0.66, 0.2, "#fff0cc", 0.35, 0.0, true);
+            // sand ripples
+            for _ in 0..60 { let x = r.f() * w; let y = 36.0 + r.f() * 80.0; let l = 20.0 + r.f() * 60.0; stroke(pm, t, line(x, y, x + l, y + (r.f() - 0.5) * 3.0), &solid(rgba("#7a4c2c", 0.14)), 0.7); }
+            // dried-mud cracks (polygon network)
+            for _ in 0..34 { let (mut x, mut y) = (r.f() * w, 36.0 + r.f() * 80.0); let mut b = PathBuilder::new(); b.move_to(x, y);
+                for _ in 0..5 { x += (r.f() - 0.5) * 22.0; y += (r.f() - 0.5) * 8.0; b.line_to(x, y); }
+                let p = b.finish(); stroke(pm, t, p.clone(), &solid(rgba("#3a2010", 0.55)), 0.8); }
+            for _ in 0..180 { fill(pm, t, ellipse(r.f() * w, 34.0 + r.f() * 84.0, 0.8 + r.f() * 2.8, 0.5 + r.f() * 1.0), &solid(rgba(if r.f() < 0.5 { "#5a3c28" } else { "#f4dcb0" }, 0.4 + r.f() * 0.3))); }
+            shade_v(pm, rr, (0.0, 28.0, w, h - 28.0), 0.78, 1.05);
+            // far edge: scattered stones and tufts
+            rect(pm, t, 0.0, 0.0, w, 30.0, &lin_a(0.0, 30.0, &[(0.0, "#e0bc8c", 0.0), (1.0, "#e0bc8c", 1.0)]));
+            for _ in 0..40 { let x = r.f() * w; let hh = 3.0 + r.f() * 8.0; for k in 0..4 { stroke(pm, t, line(x, 29.0, x + (k as f32 - 1.5) * 1.6, 29.0 - hh), &solid(rgba("#a88c4a", 0.9)), 0.5); } }
+            for _ in 0..22 { fill(pm, t, ellipse(r.f() * w, 28.0, 2.0 + r.f() * 5.0, 1.4 + r.f() * 2.0), &lin(24.0, 30.0, &[(0.0, "#b88a68"), (1.0, "#6a4630")])); }
+            rect(pm, t, 0.0, 29.0, w, 1.0, &solid(rgba("#fff0cc", 0.3)));
         }),
+        // 5 dynamic foreground grass
+        dynamic(560.0, 240.0, 0.0, 1.25, 1.0, true),
     ];
-    let particles = parts(4, 18, |r| Particle { x: r.f() * 470.0, y: 150.0 + r.f() * 80.0, vx: 0.8 + r.f(), vy: -0.05, s: 0.6, a: 0.4, c: [232, 200, 160] });
-    Stage { info: info("Planalto Rochoso"), art: StageArt::Procedural { back, particles, tint: None }, music: 3 }
+    let particles = parts(4, 14, |r| Particle { x: r.f() * 470.0, y: 150.0 + r.f() * 80.0, vx: 0.8 + r.f(), vy: -0.05, s: 0.6, a: 0.4, c: [232, 200, 160] });
+    Stage { info: info("Planalto Rochoso"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.85, 0.5, 0.025]) }, music: 3, kind: StageKind::Plains }
 }
 
+// ───────────────────────────────────────────── SPIRIT ─────────────────────────────────────────────
+
+fn gate(pm: &mut Pixmap, t: Transform, cx: f32) {
+    let stone = lin(60.0, 214.0, &[(0.0, "#2a4a50"), (1.0, "#0c1c22")]);
+    // pillars with round bases, stacked beams (kasagi + nuki), shimenawa rope
+    for sx in [-1.0f32, 1.0] {
+        let px = cx + sx * 98.0;
+        rect(pm, t, px - 11.0, 62.0, 22.0, 150.0, &stone);
+        rect(pm, t, px - 14.0, 190.0, 28.0, 24.0, &lin(190.0, 214.0, &[(0.0, "#305458"), (1.0, "#0e2228")]));
+        rect(pm, t, px - 11.0 + if sx < 0.0 { 15.0 } else { 0.0 }, 62.0, 4.0, 130.0, &solid(rgba("#9ad8d0", 0.16)));
+    }
+    let mut b = PathBuilder::new(); b.move_to(cx - 154.0, 54.0); b.quad_to(cx, 24.0, cx + 154.0, 54.0); b.line_to(cx + 142.0, 68.0); b.quad_to(cx, 44.0, cx - 142.0, 68.0); b.close();
+    fill(pm, t, b.finish(), &lin(30.0, 68.0, &[(0.0, "#3a6068"), (1.0, "#12282e")]));
+    rect(pm, t, cx - 124.0, 80.0, 248.0, 11.0, &lin(80.0, 91.0, &[(0.0, "#2e5258"), (1.0, "#10242a")]));
+    rect(pm, t, cx - 124.0, 80.0, 248.0, 1.0, &solid(rgba("#a0fff0", 0.35)));
+    let mut b = PathBuilder::new(); b.move_to(cx - 98.0, 97.0); b.quad_to(cx, 116.0, cx + 98.0, 97.0);
+    stroke(pm, t, b.finish(), &solid(rgba("#c8b88a", 1.0)), 4.0);
+    for k in 0..7 { let f = k as f32 / 6.0; let x = cx - 98.0 + f * 196.0; let y = 97.0 + 19.0 * 2.0 * f * (1.0 - f) * 0.9; fill(pm, t, poly(&[(x - 2.5, y + 2.0), (x + 2.5, y + 2.0), (x + 1.5, y + 11.0), (x - 1.5, y + 8.0)]), &solid(rgba("#f4fff8", 0.85))); }
+    // inner portal
+    rect(pm, t, cx - 87.0, 91.0, 174.0, 123.0, &radial(cx, 150.0, 96.0, &[(0.0, "#d8fffa", 0.6), (0.5, "#5ac8c8", 0.3), (1.0, "#2a8898", 0.0)]));
+    grain(pm, t.sx, (cx - 160.0, 24.0, 320.0, 190.0), 4.0, 4.0, 0.35, 3.0);
+    blobs(pm, t.sx, (cx - 160.0, 24.0, 320.0, 190.0), 0.5, 1.8, 3.0, 0.6, 0.2, "#10303a", 0.45, 0.0, true);
+    // moss
+    blobs(pm, t.sx, (cx - 160.0, 150.0, 320.0, 64.0), 0.6, 1.6, 9.0, 0.5, 0.25, "#2a7a5a", 0.4, 0.0, true);
+}
+fn toro(pm: &mut Pixmap, t: Transform, x: f32, by: f32) {
+    let c = lin(by - 50.0, by, &[(0.0, "#4a7078"), (1.0, "#1a343a")]);
+    rect(pm, t, x - 5.0, by - 12.0, 10.0, 12.0, &c);
+    rect(pm, t, x - 2.5, by - 26.0, 5.0, 16.0, &c);
+    rect(pm, t, x - 8.0, by - 30.0, 16.0, 4.0, &c);
+    rect(pm, t, x - 6.0, by - 42.0, 12.0, 12.0, &solid(rgba("#142a30", 1.0)));
+    rect(pm, t, x - 4.0, by - 40.0, 8.0, 8.0, &radial(x, by - 36.0, 6.0, &[(0.0, "#ffffff", 1.0), (0.5, "#b8fff0", 1.0), (1.0, "#4ad8c8", 1.0)]));
+    fill(pm, t, poly(&[(x - 11.0, by - 42.0), (x, by - 52.0), (x + 11.0, by - 42.0)]), &c);
+    fill(pm, t, circle(x, by - 54.0, 1.8), &c);
+}
 fn spirit() -> Stage {
     let back = vec![
-        layer(520.0, 240.0, 0.0, 0.04, 40, 0.04, &|pm, t, w, h, r| {
-            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#0a1420"), (0.5, "#1d4a52"), (1.0, "#9ad0c8")]));
-            for _ in 0..50 { let a = r.f() * 0.5; fill(pm, t, circle(r.f() * w, r.f() * 140.0, r.f() * 1.2), &solid(rgba("#b4fff0", a))); }
+        // 0 night sky (aurora is animated)
+        lay(1.6, false, 520.0, 240.0, 0.0, 0.04, 40, 0.04, &|pm, t, w, h, r| {
+            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#050c18"), (0.45, "#12363e"), (1.0, "#7ac0b8")]));
+            for _ in 0..120 { let a = r.f() * 0.8; fill(pm, t, circle(r.f() * w, r.f() * 150.0, r.f() * 1.1), &solid(rgba("#c8fff4", a))); }
+            glowc(pm, t, w * 0.62, 70.0, 80.0, "#a8fff0", 0.45);
+            fill(pm, t, circle(w * 0.62, 70.0, 26.0), &radial(w * 0.62 - 6.0, 64.0, 30.0, &[(0.0, "#ffffff", 1.0), (0.7, "#d8fff8", 1.0), (1.0, "#9ad8d0", 1.0)]));
+            blobs(pm, t.sx, (0.0, 30.0, w, 160.0), 0.6, 2.6, 3.0, 0.58, 0.25, "#0a2630", 0.5, 0.0, false);
+            blobs(pm, t.sx, (0.0, 30.0, w, 160.0), 0.6, 2.6, 3.0, 0.67, 0.2, "#a8fff0", 0.2, 0.0, false);
         }),
-        layer(800.0, 240.0, 0.0, 0.25, 41, 0.25, &|pm, t, w, _, _| {
-            let cx = w / 2.0; let c = solid(rgba("#0d2228", 1.0));
-            rect(pm, t, cx - 110.0, 60.0, 22.0, 150.0, &c); rect(pm, t, cx + 88.0, 60.0, 22.0, 150.0, &c);
-            let mut b = PathBuilder::new(); b.move_to(cx - 150.0, 52.0); b.quad_to(cx, 30.0, cx + 150.0, 52.0); b.line_to(cx + 140.0, 64.0); b.quad_to(cx, 46.0, cx - 140.0, 64.0); b.close();
-            fill(pm, t, b.finish(), &c);
-            rect(pm, t, cx - 120.0, 84.0, 240.0, 10.0, &c);
-            rect(pm, t, cx - 90.0, 94.0, 180.0, 120.0, &radial(cx, 140.0, 90.0, &[(0.0, "#c8fffa", 0.55), (1.0, "#78dcdc", 0.0)]));
+        // 1 far mountains + mist
+        lay(2.0, false, 760.0, 240.0, 0.0, 0.14, 45, 0.14, &|pm, t, w, _, _| {
+            ridge(pm, t, w, 150.0, 70.0, "#1c4a52", "#3c8a88", 5.0, 0.5);
+            ridge(pm, t, w, 180.0, 46.0, "#143a42", "#2a6a6c", 6.0, 0.8);
+            haze(pm, t.sx, (0.0, 120.0, w, 120.0), "#9ad8d0", 0.0, 0.6);
+            blobs(pm, t.sx, (0.0, 130.0, w, 90.0), 0.4, 3.0, 2.0, 0.5, 0.3, "#c8fff4", 0.3, 0.0, true);
         }),
-        layer(1000.0, 240.0, 0.0, 0.5, 43, 0.5, &|pm, t, w, _, r| {
-            let mut x = 20.0;
-            while x < w {
-                rect(pm, t, x, 150.0, 10.0, 60.0, &solid(rgba("#16323a", 1.0))); rect(pm, t, x - 5.0, 145.0, 20.0, 6.0, &solid(rgba("#16323a", 1.0)));
-                fill(pm, t, circle(x + 5.0, 140.0, 14.0), &radial(x + 5.0, 140.0, 14.0, &[(0.0, "#a0fff0", 0.9), (1.0, "#a0fff0", 0.0)]));
-                x += 60.0 + r.f() * 30.0;
+        // 2 the great gate
+        lay(3.5, false, 800.0, 240.0, 0.0, 0.25, 41, 0.25, &|pm, t, w, _, _| {
+            // spirit forest silhouette behind the gate
+            for i in 0..22 { let x = i as f32 * 38.0 + hash(i, 1) * 16.0; pine(pm, t, x, 214.0, 70.0 + hash(i, 2) * 50.0, "#0c2228"); }
+            gate(pm, t, w / 2.0);
+            haze(pm, t.sx, (0.0, 170.0, w, 60.0), "#7ad8d0", 0.0, 0.5);
+        }),
+        // 3 stone lantern row, twisted spirit trees
+        lay(3.5, false, 1000.0, 240.0, 0.0, 0.5, 43, 0.5, &|pm, t, w, _, _| {
+            for (i, x) in toro_xs().into_iter().enumerate() { toro(pm, t, x, 212.0); if i % 2 == 1 { let tx = x + 30.0; let bark = solid(rgba("#0c1e22", 1.0)); let mut b = PathBuilder::new(); b.move_to(tx, 214.0); b.quad_to(tx - 6.0, 170.0, tx + 4.0, 140.0); b.quad_to(tx + 10.0, 120.0, tx - 2.0, 100.0); stroke(pm, t, b.finish(), &bark, 5.0);
+                for k in 0..4 { let a = -1.2 + k as f32 * 0.8; stroke(pm, t, line(tx + 2.0, 130.0, tx + 2.0 + a.cos() * 28.0, 130.0 + a.sin() * 24.0), &bark, 2.0); } }
             }
+            grain(pm, t.sx, (0.0, 90.0, w, 130.0), 4.0, 4.0, 0.3, 3.0);
+            haze(pm, t.sx, (0.0, 160.0, w, 60.0), "#6ad0c8", 0.0, 0.3);
         }),
-        layer(1100.0, 120.0, 175.0, 1.0, 44, 1.0, &|pm, t, w, h, _| {
-            rect(pm, t, 0.0, 28.0, w, h, &lin(28.0, h, &[(0.0, "#c8d4d0"), (1.0, "#5a6a68")]));
-            let p = solid(rgba("#283c3c", 0.35));
-            for i in 0..8 { let y = 30.0 + (i as f32 / 8.0).powf(1.5) * 90.0; stroke(pm, t, line(0.0, y, w, y), &p, 0.6); }
-            let mut x = 0.0; while x < w { stroke(pm, t, line(x, 30.0, w / 2.0 + (x - w / 2.0) * 1.8, h), &p, 0.6); x += 40.0; }
+        // 4 polished stone floor with carved runes
+        layer(1100.0, 120.0, 175.0, 1.0, 44, 1.0, &|pm, t, w, h, r| {
+            let rr = t.sx;
+            rect(pm, t, 0.0, 28.0, w, h, &lin(28.0, h, &[(0.0, "#a8c0bc"), (0.2, "#6a8684"), (1.0, "#2a3c3c")]));
+            // stone slabs
+            let n = 7;
+            for i in 0..n {
+                let (y0, y1) = (30.0 + (i as f32 / n as f32).powf(1.5) * 90.0, 30.0 + ((i + 1) as f32 / n as f32).powf(1.5) * 90.0);
+                let sw = 70.0 * (0.7 + i as f32 * 0.25); let mut x = -(hash(i, 5) * sw);
+                while x < w { let tone = hash((x / 7.0) as u32, i as u32 + 9); rect(pm, t, x + 0.4, y0 + 0.2, sw - 0.8, y1 - y0 - 0.4, &solid(rgba(if tone < 0.5 { "#aac4c0" } else { "#8aa8a6" }, 0.18 * (1.0 + i as f32 * 0.1))));
+                    rect(pm, t, x, y0, 0.9, y1 - y0, &solid(rgba("#10262a", 0.7))); x += sw; }
+                rect(pm, t, 0.0, y1 - 0.4, w, 0.9, &solid(rgba("#10262a", 0.7)));
+                rect(pm, t, 0.0, y0 + 0.5, w, 0.6, &solid(rgba("#e8fffa", 0.28)));
+            }
+            grain(pm, rr, (0.0, 28.0, w, h - 28.0), 6.0, 6.0, 0.5, 2.0);
+            blobs(pm, rr, (0.0, 28.0, w, h - 28.0), 0.25, 1.1, 4.0, 0.55, 0.3, "#16302e", 0.5, 0.0, true);
+            blobs(pm, rr, (0.0, 28.0, w, h - 28.0), 0.45, 1.6, 9.0, 0.6, 0.25, "#2a8a6a", 0.35, 0.0, true);
+            for _ in 0..24 { let x = r.f() * w; let y = 34.0 + r.f() * 80.0; let mut b = PathBuilder::new(); b.move_to(x, y); b.line_to(x + (r.f() - 0.5) * 20.0, y + (r.f() - 0.5) * 6.0); stroke(pm, t, b.finish(), &solid(rgba("#0a1c20", 0.6)), 0.5); }
+            // rune glyph rings every 270 units
+            for k in 0..4 { let cx = 120.0 + k as f32 * 290.0; let cy = 74.0;
+                for (rx, ry) in [(52.0, 11.0), (36.0, 7.5)] { stroke(pm, t, ellipse(cx, cy, rx, ry), &solid(rgba("#5affea", 0.28)), 0.8); }
+                for q in 0..12 { let a = q as f32 / 12.0 * std::f32::consts::TAU; let (x, y) = (cx + a.cos() * 44.0, cy + a.sin() * 9.0); stroke(pm, t, line(x - 1.5, y - 1.0, x + 1.5, y + 1.0 + (q % 3) as f32), &solid(rgba("#7affee", 0.5)), 0.7); } }
+            shade_v(pm, rr, (0.0, 28.0, w, h - 28.0), 0.86, 1.0);
+            // top: low stone wall + steps
+            rect(pm, t, 0.0, 12.0, w, 18.0, &lin(12.0, 30.0, &[(0.0, "#5a7a78"), (1.0, "#1c3030")]));
+            let mut x = 0.0; while x < w { rect(pm, t, x, 12.0, 0.8, 18.0, &solid(rgba("#0a1c20", 0.7))); x += 30.0 + hash((x / 30.0) as u32, 6) * 24.0; }
+            rect(pm, t, 0.0, 12.0, w, 1.6, &solid(rgba("#d8fff8", 0.4)));
+            grain(pm, rr, (0.0, 12.0, w, 18.0), 5.0, 5.0, 0.5, 4.0);
         }),
+        // 5 dynamic foreground: hanging charms
+        dynamic(560.0, 240.0, 0.0, 1.2, 1.0, true),
     ];
-    let particles = parts(6, 35, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: (r.f() - 0.5) * 0.2, vy: -0.3 - r.f() * 0.4, s: 0.7 + r.f(), a: 0.5, c: [184, 255, 240] });
-    Stage { info: info("Portão dos Espíritos"), art: StageArt::Procedural { back, particles, tint: None }, music: 4 }
+    let particles = parts(6, 22, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: (r.f() - 0.5) * 0.2, vy: -0.3 - r.f() * 0.4, s: 0.7 + r.f(), a: 0.5, c: [184, 255, 240] });
+    Stage { info: info("Portão dos Espíritos"), art: StageArt::Procedural { back, particles, tint: None }, music: 4, kind: StageKind::Spirit }
 }
 
+// ───────────────────────────────────────────── VOLCANO ─────────────────────────────────────────────
+
+fn basalt(pm: &mut Pixmap, t: Transform, r: &mut Rng, x: f32, by: f32, w: f32, h: f32, glow: bool) {
+    let n = 4; let cw = w / n as f32;
+    for i in 0..n {
+        let hh = h * (0.55 + r.f() * 0.45); let cx = x + i as f32 * cw;
+        fill(pm, t, poly(&[(cx, by), (cx + 1.0, by - hh), (cx + cw * 0.5, by - hh - 3.0), (cx + cw, by - hh + 1.0), (cx + cw + 1.0, by)]), &lin_h(cx, cx + cw, &[(0.0, "#3a1a14", 1.0), (0.5, "#241008", 1.0), (1.0, "#0e0504", 1.0)]));
+        rect(pm, t, cx, by - hh, 1.0, hh, &solid(rgba("#ff7a30", if glow { 0.7 } else { 0.35 })));
+        stroke(pm, t, line(cx + cw * 0.5, by - hh - 3.0, cx + cw, by - hh + 1.0), &solid(rgba("#ff9a50", 0.5)), 0.8);
+        for k in 1..4 { rect(pm, t, cx + 1.0, by - hh * k as f32 / 4.0, cw - 1.5, 0.6, &solid(rgba("#0a0302", 0.6))); }
+    }
+}
 fn volcano() -> Stage {
+    let cracks = lava_cracks(1100.0);
     let back = vec![
-        layer(520.0, 240.0, 0.0, 0.04, 50, 0.04, &|pm, t, w, h, _| rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#120404"), (0.5, "#4a0e08"), (1.0, "#c8381a")]))),
-        layer(760.0, 240.0, 0.0, 0.18, 51, 0.18, &|pm, t, w, _, r| {
-            mountains(pm, t, w, 180.0, 90.0, "#240806", r, 35.0);
-            rect(pm, t, 0.0, 100.0, w, 100.0, &{ let mut p = lin(100.0, 200.0, &[(0.0, "#ff5a14"), (1.0, "#ff781e")]); if let tiny_skia::Shader::LinearGradient(_) = p.shader {} p.blend_mode = tiny_skia::BlendMode::Screen; p });
+        // 0 ash sky glowing from below
+        lay(1.6, false, 520.0, 240.0, 0.0, 0.04, 50, 0.04, &|pm, t, w, h, _| {
+            rect(pm, t, 0.0, 0.0, w, h, &lin(0.0, h, &[(0.0, "#080202"), (0.45, "#3a0c06"), (0.8, "#a82a10"), (1.0, "#e8581e")]));
+            let r = t.sx;
+            blobs(pm, r, (0.0, 0.0, w, h), 0.6, 2.2, 1.0, 0.5, 0.3, "#140404", 0.75, 0.0, false);
+            blobs(pm, r, (0.0, 60.0, w, 180.0), 0.7, 2.6, 6.0, 0.6, 0.2, "#ff6a1e", 0.35, 0.0, false);
         }),
-        layer(1000.0, 240.0, 0.0, 0.45, 52, 0.45, &|pm, t, w, _, r| {
+        // 1 far volcano cone with crater glow and lava streaks
+        lay(2.0, false, 760.0, 240.0, 0.0, 0.14, 51, 0.14, &|pm, t, w, _, r| {
+            ridge(pm, t, w, 190.0, 50.0, "#2c0c08", "#4a1810", 2.0, 0.6);
+            let cx = w * 0.55;
+            fill(pm, t, poly(&[(cx - 190.0, 215.0), (cx - 40.0, 96.0), (cx - 18.0, 90.0), (cx + 18.0, 90.0), (cx + 44.0, 98.0), (cx + 200.0, 215.0)]), &lin(90.0, 215.0, &[(0.0, "#2a0a06"), (1.0, "#4a1a10")]));
+            glowc(pm, t, cx, 90.0, 80.0, "#ff7a2a", 0.9);
+            fill(pm, t, ellipse(cx, 91.0, 20.0, 4.0), &solid(rgba("#ffd070", 1.0)));
+            for k in 0..9 { let (mut x, mut y) = (cx + (r.f() - 0.5) * 24.0, 92.0); let mut b = PathBuilder::new(); b.move_to(x, y); for _ in 0..5 { x += (r.f() - 0.5) * 22.0 + (k as f32 - 4.0) * 3.0; y += 14.0 + r.f() * 10.0; b.line_to(x, y); } let p = b.finish(); stroke(pm, t, p.clone(), &solid(rgba("#ff5000", 0.35)), 3.0); stroke(pm, t, p, &solid(rgba("#ffa040", 0.95)), 0.9); }
+            grain(pm, t.sx, (0.0, 80.0, w, 140.0), 3.0, 3.0, 0.5, 2.0);
+            haze(pm, t.sx, (0.0, 150.0, w, 90.0), "#c8381a", 0.0, 0.5);
+        }),
+        // 2 lava river + jagged ridge
+        lay(3.5, false, 1000.0, 240.0, 0.0, 0.45, 52, 0.45, &|pm, t, w, _, r| {
+            ridge(pm, t, w, 196.0, 56.0, "#1c0806", "#2c0e0a", 7.0, 0.9);
             let mut x = 0.0;
-            while x < w {
-                let hh = 30.0 + r.f() * 60.0;
-                let mut b = PathBuilder::new(); b.move_to(x, 210.0); b.line_to(x + 15.0, 205.0 - hh); b.line_to(x + 30.0, 210.0); b.close();
-                fill(pm, t, b.finish(), &solid(rgba("#1a0605", 1.0)));
-                let mut b = PathBuilder::new(); b.move_to(x + 15.0, 210.0 - hh); b.line_to(x + 12.0, 205.0 - hh / 2.0); b.line_to(x + 17.0, 208.0);
-                let path = b.finish();
-                stroke(pm, t, path.clone(), &solid(rgba("#ff4a00", 0.3)), 3.0);
-                stroke(pm, t, path, &solid(rgba("#ff6a1a", 1.0)), 0.8);
-                x += 50.0 + r.f() * 70.0;
-            }
+            while x < w { let hh = 30.0 + r.f() * 60.0;
+                fill(pm, t, poly(&[(x, 214.0), (x + 12.0, 204.0 - hh), (x + 16.0, 207.0 - hh), (x + 32.0, 214.0)]), &lin(205.0 - hh, 214.0, &[(0.0, "#2a0e0a"), (1.0, "#120504")]));
+                stroke(pm, t, line(x + 12.0, 204.0 - hh, x + 16.0, 207.0 - hh), &solid(rgba("#ff8a40", 0.6)), 0.9);
+                x += 40.0 + r.f() * 60.0; }
+            // lava river band
+            let mut b = PathBuilder::new(); b.move_to(0.0, 214.0); let mut xx = 0.0; while xx <= w { b.line_to(xx, 200.0 + n1(xx * 0.3, 9.0) * 8.0); xx += 4.0; } b.line_to(w, 220.0); b.line_to(0.0, 220.0); b.close();
+            fill(pm, t, b.finish(), &lin(196.0, 220.0, &[(0.0, "#ffe070"), (0.4, "#ff8a1e"), (1.0, "#b82a0a")]));
+            blobs(pm, t.sx, (0.0, 195.0, w, 25.0), 0.5, 3.0, 4.0, 0.55, 0.25, "#3a0a04", 0.5, 0.0, true);
+            glowc(pm, t, w * 0.25, 204.0, 70.0, "#ff6a1e", 0.5); glowc(pm, t, w * 0.75, 204.0, 70.0, "#ff6a1e", 0.5);
+            grain(pm, t.sx, (0.0, 100.0, w, 120.0), 3.0, 3.0, 0.4, 7.0);
         }),
-        layer(1100.0, 120.0, 175.0, 1.0, 53, 1.0, &|pm, t, w, h, r| {
-            rect(pm, t, 0.0, 28.0, w, h, &lin(28.0, h, &[(0.0, "#3a1610"), (1.0, "#120504")]));
-            for _ in 0..25 {
-                let mut x = r.f() * w; let mut y = 34.0 + r.f() * 70.0;
-                let mut b = PathBuilder::new(); b.move_to(x, y);
-                for _ in 0..4 { x += 6.0 + r.f() * 10.0; y += (r.f() - 0.5) * 8.0; b.line_to(x, y); }
-                let p = b.finish();
-                stroke(pm, t, p.clone(), &solid(rgba("#ff5000", 0.3)), 3.0);
-                stroke(pm, t, p, &solid(rgba("#ff7a1a", 1.0)), 1.0);
+        // 3 near basalt pillars with glowing seams
+        lay(3.5, false, 1100.0, 240.0, 0.0, 0.75, 54, 0.75, &|pm, t, w, _, r| {
+            let mut x = 20.0; while x < w { let ww = 34.0 + r.f() * 40.0; let (bh, gl) = (34.0 + r.f() * 60.0, r.f() < 0.5); basalt(pm, t, r, x, 212.0, ww, bh, gl); x += ww + 70.0 + r.f() * 160.0; }
+            glowc(pm, t, w * 0.5, 214.0, 140.0, "#ff6a1e", 0.25);
+            grain(pm, t.sx, (0.0, 100.0, w, 120.0), 4.0, 4.0, 0.45, 8.0);
+        }),
+        // 4 obsidian slab floor with glowing seams
+        layer(1100.0, 120.0, 175.0, 1.0, 53, 1.0, &move |pm, t, w, h, r| {
+            let rr = t.sx;
+            rect(pm, t, 0.0, 28.0, w, h, &lin(28.0, h, &[(0.0, "#3a1c16"), (0.35, "#1c0a08"), (1.0, "#0a0302")]));
+            // hexagonal basalt slabs
+            let n = 6;
+            for i in 0..n { let (y0, y1) = (30.0 + (i as f32 / n as f32).powf(1.5) * 90.0, 30.0 + ((i + 1) as f32 / n as f32).powf(1.5) * 90.0); let sw = 60.0 * (0.7 + i as f32 * 0.3); let mut x = -hash(i, 4) * sw;
+                while x < w { let tone = hash((x / 5.0) as u32, i as u32); rect(pm, t, x + 0.5, y0 + 0.3, sw - 1.0, y1 - y0 - 0.6, &lin(y0, y1, &[(0.0, if tone < 0.5 { "#4a2a24" } else { "#3a201c" }), (1.0, "#160807")])); rect(pm, t, x + 0.5, y0 + 0.3, sw - 1.0, 0.8, &solid(rgba("#ffb080", 0.18))); x += sw; } }
+            grain(pm, rr, (0.0, 28.0, w, h - 28.0), 6.0, 6.0, 0.7, 2.0);
+            blobs(pm, rr, (0.0, 28.0, w, h - 28.0), 0.3, 1.0, 4.0, 0.6, 0.3, "#000000", 0.5, 0.0, true);
+            for pl in &cracks {
+                let mut b = PathBuilder::new(); b.move_to(pl[0].0, pl[0].1); for p in &pl[1..] { b.line_to(p.0, p.1); }
+                let path = b.finish();
+                stroke(pm, t, path.clone(), &solid(rgba("#ff4a00", 0.22)), 4.0); stroke(pm, t, path.clone(), &solid(rgba("#ff8a30", 0.7)), 1.5); stroke(pm, t, path, &solid(rgba("#ffe090", 0.95)), 0.5);
             }
+            shade_v(pm, rr, (0.0, 28.0, w, h - 28.0), 0.9, 1.0);
+            // far edge: cooled lava ridge
+            rect(pm, t, 0.0, 6.0, w, 24.0, &lin(6.0, 30.0, &[(0.0, "#1c0a08"), (1.0, "#3a1a14")]));
+            let mut x = 0.0; while x < w { let hh = 6.0 + r.f() * 14.0; fill(pm, t, poly(&[(x, 30.0), (x + 3.0, 30.0 - hh), (x + 9.0 + r.f() * 6.0, 30.0)]), &solid(rgba("#140807", 1.0))); x += 7.0; }
+            rect(pm, t, 0.0, 28.5, w, 1.4, &solid(rgba("#ff7a30", 0.8)));
+        }),
+        // 5 front: basalt silhouettes rimmed with lava light
+        lay(3.5, true, 560.0, 240.0, 0.0, 1.25, 55, 1.0, &|pm, t, w, h, r| {
+            basalt(pm, t, r, -10.0, h + 4.0, 56.0, 84.0, true);
+            basalt(pm, t, r, w - 50.0, h + 4.0, 56.0, 96.0, true);
         }),
     ];
-    let particles = parts(8, 45, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: (r.f() - 0.5) * 0.4, vy: -0.5 - r.f() * 0.8, s: 0.5 + r.f() * 0.8, a: 0.9, c: if r.f() < 0.5 { [255, 176, 48] } else { [255, 90, 16] } });
-    Stage { info: info("Cratera Vulcânica"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.24, 0.0, 0.05]) }, music: 5 }
+    let particles = parts(8, 36, |r| Particle { x: r.f() * 470.0, y: r.f() * 240.0, vx: (r.f() - 0.5) * 0.4, vy: -0.5 - r.f() * 0.8, s: 0.5 + r.f() * 0.8, a: 0.9, c: if r.f() < 0.5 { [255, 176, 48] } else { [255, 90, 16] } });
+    Stage { info: info("Cratera Vulcânica"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.24, 0.0, 0.05]) }, music: 5, kind: StageKind::Volcano }
 }
 
 pub struct StageEntry { pub id: String, pub name: String, pub thumb: [[u8; 3]; 3], pub build: Box<dyn Fn() -> Stage> }
@@ -312,5 +758,5 @@ pub fn from_mugen(st: MugenStage) -> Stage {
         p1x: st.p1x * scl, p2x: st.p2x * scl, zoffset: st.zoffset * scl, vertical_follow: st.vertical_follow, tension: st.tension * scl,
     };
     let images = st.sprites.iter().filter(|(_, im)| im.w > 0 && im.h > 0).map(|(k, im)| (*k, ImageData::new(im.w, im.h, im.rgba.clone()))).collect();
-    Stage { info, art: StageArt::Mugen(Box::new(MugenBg { stage: st, images, scl })), music: 0 }
+    Stage { info, art: StageArt::Mugen(Box::new(MugenBg { stage: st, images, scl })), music: 0, kind: StageKind::Custom }
 }

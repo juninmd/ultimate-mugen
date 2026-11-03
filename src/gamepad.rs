@@ -2,6 +2,56 @@
 //! Sony DualShock 4 / DualSense (rumble + lightbar over USB and Bluetooth). Web: Gamepad API via JS plugin.
 use ume_engine::input::k;
 
+/// Physical pad buttons (backend independent) → fighting-game input bits. Pure so the mapping can be unit-tested.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum Btn { DUp, DDown, DLeft, DRight, West, North, South, East, R1, R2, L1, L2, Start, R3, Select }
+#[allow(dead_code)]
+pub fn pad_bits(ax: f32, ay: f32, pressed: impl Fn(Btn) -> bool) -> u32 {
+    let mut b = 0u32;
+    if ay > 0.5 || pressed(Btn::DUp) { b |= k::U; }
+    if ay < -0.5 || pressed(Btn::DDown) { b |= k::D; }
+    if ax < -0.5 || pressed(Btn::DLeft) { b |= k::L; }
+    if ax > 0.5 || pressed(Btn::DRight) { b |= k::R; }
+    // Sony layout: Square=West X(LP), Triangle=North Y(HP), R1=Z; Cross=South A(LK), Circle=East B(HK), R2=C
+    if pressed(Btn::West) { b |= k::X; }
+    if pressed(Btn::North) { b |= k::Y; }
+    if pressed(Btn::R1) { b |= k::Z; }
+    if pressed(Btn::South) { b |= k::A; }
+    if pressed(Btn::East) { b |= k::B; }
+    if pressed(Btn::R2) { b |= k::C; }
+    if pressed(Btn::L1) { b |= k::D2; }
+    if pressed(Btn::L2) { b |= k::W; }
+    if pressed(Btn::Start) { b |= k::S; }
+    // awakening: click the right stick (or SELECT)
+    if pressed(Btn::R3) || pressed(Btn::Select) { b |= k::T; }
+    b
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn right_stick_click_and_select_awaken_and_nothing_else_does() {
+        assert_eq!(pad_bits(0.0, 0.0, |b| b == Btn::R3), k::T);
+        assert_eq!(pad_bits(0.0, 0.0, |b| b == Btn::Select), k::T);
+        for b in [Btn::West, Btn::North, Btn::South, Btn::East, Btn::R1, Btn::R2, Btn::L1, Btn::L2, Btn::Start, Btn::DUp] {
+            assert_eq!(pad_bits(0.0, 0.0, |x| x == b) & k::T, 0, "{b:?} must not awaken");
+        }
+        assert_eq!(pad_bits(0.0, 0.0, |_| false), 0);
+    }
+    #[test]
+    fn face_buttons_sticks_and_dpad_map_as_documented() {
+        assert_eq!(pad_bits(0.0, 0.0, |b| b == Btn::West), k::X);
+        assert_eq!(pad_bits(0.0, 0.0, |b| b == Btn::South), k::A);
+        assert_eq!(pad_bits(0.0, 0.0, |b| b == Btn::L1), k::D2);
+        assert_eq!(pad_bits(0.9, 0.0, |_| false), k::R);
+        assert_eq!(pad_bits(-0.9, 0.9, |_| false), k::L | k::U);
+        assert_eq!(pad_bits(0.2, -0.2, |_| false), 0, "dead zone");
+        // awakening together with a direction and an attack
+        assert_eq!(pad_bits(0.0, -0.9, |b| b == Btn::R3 || b == Btn::East), k::D | k::B | k::T);
+    }
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct PadInfo { pub name: String, pub bits: u32, pub sony: bool, pub connected: bool, pub menu_bits: u32 }
 
@@ -99,22 +149,13 @@ mod native {
             for (id, _) in g.gamepads() { if !self.order.contains(&id) { self.order.push(id); } }
             self.order.iter().map(|&id| {
                 let gp = g.gamepad(id);
-                let mut b = 0u32;
                 let (ax, ay) = (gp.value(Axis::LeftStickX), gp.value(Axis::LeftStickY));
-                if ay > 0.5 || gp.is_pressed(Button::DPadUp) { b |= k::U; }
-                if ay < -0.5 || gp.is_pressed(Button::DPadDown) { b |= k::D; }
-                if ax < -0.5 || gp.is_pressed(Button::DPadLeft) { b |= k::L; }
-                if ax > 0.5 || gp.is_pressed(Button::DPadRight) { b |= k::R; }
-                // Sony layout: Square=West X(LP), Triangle=North Y(HP), R1=Z; Cross=South A(LK), Circle=East B(HK), R2=C
-                if gp.is_pressed(Button::West) { b |= k::X; }
-                if gp.is_pressed(Button::North) { b |= k::Y; }
-                if gp.is_pressed(Button::RightTrigger) { b |= k::Z; }
-                if gp.is_pressed(Button::South) { b |= k::A; }
-                if gp.is_pressed(Button::East) { b |= k::B; }
-                if gp.is_pressed(Button::RightTrigger2) { b |= k::C; }
-                if gp.is_pressed(Button::LeftTrigger) { b |= k::D2; }
-                if gp.is_pressed(Button::LeftTrigger2) { b |= k::W; }
-                if gp.is_pressed(Button::Start) { b |= k::S; }
+                let b = super::pad_bits(ax, ay, |btn| gp.is_pressed(match btn {
+                    Btn::DUp => Button::DPadUp, Btn::DDown => Button::DPadDown, Btn::DLeft => Button::DPadLeft, Btn::DRight => Button::DPadRight,
+                    Btn::West => Button::West, Btn::North => Button::North, Btn::South => Button::South, Btn::East => Button::East,
+                    Btn::R1 => Button::RightTrigger, Btn::R2 => Button::RightTrigger2, Btn::L1 => Button::LeftTrigger, Btn::L2 => Button::LeftTrigger2,
+                    Btn::Start => Button::Start, Btn::R3 => Button::RightThumb, Btn::Select => Button::Select,
+                }));
                 let name = gp.name().to_string();
                 let sony = name.to_ascii_lowercase().contains("sony") || name.contains("DualShock") || name.contains("DualSense") || name.contains("Wireless Controller") || name.contains("PS4") || name.contains("PS5");
                 PadInfo { name, bits: b, sony, connected: gp.is_connected(), menu_bits: b }

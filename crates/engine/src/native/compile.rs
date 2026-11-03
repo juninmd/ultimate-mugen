@@ -238,3 +238,17 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     let _ = Arc::new(());
     d
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    /// Light/medium/heavy hit-stop follows the genre norm (~9/11/13 frames across games; SF V uses 8/12/15):
+    /// heavier hits must freeze longer and the values stay in the researched band.
+    #[test]
+    fn hitstop_scales_with_attack_strength() {
+        let (l, m, h) = (level(Some("light")), level(Some("medium")), level(Some("heavy")));
+        assert!(l.stop < m.stop && m.stop < h.stop);
+        assert_eq!((l.stop, m.stop, h.stop), (9, 11, 13));
+        assert!(l.stun < m.stun && m.stun < h.stun, "hit-stun also scales");
+    }
+}

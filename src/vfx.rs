@@ -37,11 +37,13 @@ pub struct Vfx {
     parts: Vec<P>, rings: Vec<Ring>, floats: Vec<Float>, pub banners: Vec<Banner>,
     pub trauma: f32, punch: f32, ko_t: f32, ko_focus: (f32, f32), pub slow_t: f32,
     chroma: f32, flash: f32, radial: f32, vig: f32, lines: f32, lines_col: [f32; 3], sat_pulse: f32,
-    super_t: f32, super_owner: usize,
+    super_t: f32, super_owner: u32,
+    /// cinematic super camera 0..1 (eased in while the super pause runs, eased out afterwards: build-up + follow-through)
+    sz: f32, super_active: bool,
     /// sound requests produced by the effects layer (drained by the session)
     pub sfx: Vec<&'static str>,
     combo: [i32; 2], meter: [i32; 2],
-    snap: [Snap; 2], pre_mt: [char; 2], rng: u32, tick: u32,
+    snap: Vec<Snap>, pre_mt: Vec<char>, rng: u32, tick: u32,
 }
 
 fn lerp(a: f32, b: f32, t: f32) -> f32 { a + (b - a) * t }
@@ -49,7 +51,7 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 { a + (b - a) * t }
 impl Vfx {
     pub fn new() -> Self {
         Vfx { splats: vec![], lights: vec![], weather: Weather::None, clock: 0.0, invert_t: 0.0, dist_zoom: 0.0, dist_target: 0.0, parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
-            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sfx: vec![], combo: [0; 2], meter: [0; 2], snap: [Snap::default(); 2], pre_mt: [' '; 2], rng: 0x9e37_79b9, tick: 0 }
+            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sz: 0.0, super_active: false, sfx: vec![], combo: [0; 2], meter: [0; 2], snap: vec![], pre_mt: vec![], rng: 0x9e37_79b9, tick: 0 }
     }
     fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
     fn rr(&mut self, a: f32, b: f32) -> f32 { a + (b - a) * self.r() }
@@ -116,7 +118,7 @@ impl Vfx {
 
     /// Call right before `Match::tick`: remember who was attacking (for COUNTER detection).
     pub fn pre_tick(&mut self, m: &Match) {
-        for side in 0..2 { if let Some(f) = m.roots().find(|f| f.side == side) { self.pre_mt[side] = f.move_type; } }
+        self.pre_mt = m.fighters.iter().map(|f| f.move_type).collect();
     }
 
     fn chest(m: &Match, side: usize) -> Option<(f32, f32, f32)> {
@@ -162,14 +164,15 @@ impl Vfx {
                     self.flash = self.flash.max(0.18);
                     self.punch = self.punch.max(0.04);
                 }
-                let counter = self.pre_mt[*defender_side] == 'A';
+                let counter = self.pre_mt.get(*defender).copied() == Some('A');
+                let _ = defender_side;
                 let col = if counter { [1.0, 0.35, 0.3] } else { [1.0, 0.92, 0.55] };
                 self.float(x + dir * 12.0, y - 10.0, format!("{}", *damage as i32), 8.0 + mag * 6.0, col);
                 if counter { self.sfx.push("counter"); self.banner("COUNTER!", "", [1.0, 0.3, 0.25]); self.glow(x, y, 26.0, 0.2, [1.0, 0.3, 0.2]); self.chroma = self.chroma.max(0.9); }
             }
-            Event::Super { side } => {
-                self.super_t = 1.0; self.super_owner = *side;
-                if let Some((x, y, _)) = Self::chest(m, *side) {
+            Event::Super { side, fighter } => {
+                self.super_t = 1.0; self.super_owner = *fighter;
+                if let Some((x, y, _)) = m.fighters.iter().find(|f| f.id == *fighter).map(Self::chest_of) {
                     self.ring(x, y, 90.0, 0.7, 3.5, [1.0, 0.9, 0.4]);
                     self.ring(x, y, 60.0, 0.5, 2.0, [1.0, 1.0, 1.0]);
                     self.glow(x, y, 50.0, 0.4, [1.0, 0.8, 0.3]);
@@ -177,7 +180,7 @@ impl Vfx {
                 self.flash = self.flash.max(0.55); self.chroma = self.chroma.max(1.0); self.radial = 1.0; self.trauma = (self.trauma + 0.4).min(1.0);
                 self.lines = 1.4; self.lines_col = [1.0, 0.85, 0.4];
                 self.invert_t = 0.075;
-                if let Some((x, y, f)) = Self::chest(m, *side) { self.splat(x - f * 10.0, y + 8.0, f, 80.0, if *side == 0 { [0.13, 0.78, 1.0] } else { [1.0, 0.25, 0.55] }); self.light(x, y, 190.0, 0.45, [1.0, 0.85, 0.45]); }
+                if let Some((x, y, f)) = m.fighters.iter().find(|f| f.id == *fighter).map(Self::chest_of) { self.splat(x - f * 10.0, y + 8.0, f, 80.0, if *side == 0 { [0.13, 0.78, 1.0] } else { [1.0, 0.25, 0.55] }); self.light(x, y, 190.0, 0.45, [1.0, 0.85, 0.45]); }
                 self.banner("SUPER ARTS", "", [1.0, 0.82, 0.3]);
             }
             Event::Ko { loser_side } => {
@@ -204,17 +207,19 @@ impl Vfx {
     /// Per simulation tick: landing / run dust, super aura.
     pub fn tick(&mut self, m: &Match) {
         self.tick = self.tick.wrapping_add(1);
-        { let mut it = m.roots().take(2); if let (Some(a), Some(b)) = (it.next(), it.next()) { let d = (a.pos.x - b.pos.x).abs(); self.dist_target = ((260.0 - d) / 260.0).clamp(0.0, 1.0) * 0.07; } }
-        for (side, f) in m.roots().enumerate().take(2) {
+        { let xs: Vec<f32> = m.roots().filter(|f| f.alive).map(|f| f.pos.x).collect(); if xs.len() >= 2 { let (lo, hi) = (xs.iter().cloned().fold(f32::MAX, f32::min), xs.iter().cloned().fold(f32::MIN, f32::max)); self.dist_target = ((260.0 - (hi - lo)) / 260.0).clamp(0.0, 1.0) * 0.07; } }
+        self.snap.resize(m.fighters.len(), Snap::default());
+        for (side, (fi, f)) in m.fighters.iter().enumerate().filter(|(_, f)| !f.is_helper).enumerate() {
+            let _ = side;
             let now = Snap { grounded: f.state_type != 'A', vy: f.vel.y, vx: f.vel.x, move_type: f.move_type };
-            let prev = self.snap[side];
+            let prev = self.snap[fi];
             if !prev.grounded && now.grounded { let n = 6 + (prev.vy.abs() * 1.6) as usize; self.dust(f.pos.x, f.pos.y, n.min(16), 1.6, 0.5, [0.85, 0.82, 0.78]); if prev.vy > 3.0 { self.sfx.push("land"); }
  if prev.vy > 5.0 { self.ring(f.pos.x, f.pos.y - 1.0, 26.0, 0.25, 1.2, [0.9, 0.9, 0.9]); self.trauma = (self.trauma + 0.1).min(1.0); } }
             if prev.grounded && !now.grounded && now.vy < -2.0 { self.sfx.push("jump"); self.dust(f.pos.x, f.pos.y, 5, 1.2, 0.3, [0.85, 0.82, 0.78]); }
             if now.grounded && now.vx.abs() > 3.2 && prev.vx.abs() <= 3.2 && f.state_type == 'S' { self.sfx.push("dash"); }
             if now.grounded && now.vx.abs() > 3.2 && self.tick % 4 == 0 && f.state_type == 'S' { let b = -f.facing; self.dust(f.pos.x + b * 6.0, f.pos.y, 2, 0.6, 0.25, [0.85, 0.82, 0.78]); }
             if f.move_type == 'H' && f.state_type == 'L' && !prev.grounded == false && prev.move_type != 'H' { self.dust(f.pos.x, f.pos.y, 9, 2.0, 0.4, [0.85, 0.82, 0.78]); }
-            self.snap[side] = now;
+            self.snap[fi] = now;
         }
         // combo pings (rising pitch) and super-meter level-up chime
         for side in 0..2 {
@@ -227,9 +232,10 @@ impl Vfx {
             if lv > self.meter[side] && m.round_state == 2 { self.sfx.push("meter"); }
             self.meter[side] = lv;
         }
+        self.super_active = m.pause.as_ref().is_some_and(|p| p.is_super);
         // super aura: rising energy motes while the super pause runs
         if let Some(p) = &m.pause { if p.is_super {
-            if let Some((x, y, _)) = Self::chest(m, self.super_owner) {
+            if let Some((x, y, _)) = m.fighters.iter().find(|f| f.id == self.super_owner).map(Self::chest_of) {
                 for _ in 0..3 {
                     let ang = self.rr(0.0, 6.283); let rr = self.rr(14.0, 34.0);
                     let c = if self.r() > 0.5 { [1.0, 0.85, 0.35] } else { [0.5, 0.85, 1.0] };
@@ -254,6 +260,9 @@ impl Vfx {
         }
         self.parts.retain(|p| p.life > 0.0);
         self.clock += dt;
+        // DBFZ-style: slow ease-in to the close-up, even slower pull-back
+        let (target, rate) = if self.super_active { (1.0, 5.0) } else { (0.0, 2.2) };
+        self.sz += (target - self.sz) * (rate * dt).min(1.0);
         self.invert_t = (self.invert_t - dt).max(0.0);
         self.dist_zoom += (self.dist_target - self.dist_zoom) * (3.0 * dt).min(1.0);
         for sp in &mut self.splats { sp.t += dt; }
@@ -283,12 +292,14 @@ impl Vfx {
     /// Camera: zoom factor and focus in game-view coordinates.
     pub fn camera(&self, m: &Match, gain: f32) -> (f32, (f32, f32)) {
         let mid = {
-            let mut it = m.roots().take(2);
-            match (it.next(), it.next()) { (Some(a), Some(b)) => ((a.pos.x + b.pos.x) / 2.0, (a.pos.y + b.pos.y) / 2.0 - 35.0), (Some(a), None) => (a.pos.x, a.pos.y - 35.0), _ => (m.camera.x, -35.0) }
+            let live: Vec<_> = m.roots().filter(|f| f.alive).collect();
+            let all: Vec<_> = if live.is_empty() { m.roots().collect() } else { live };
+            if all.is_empty() { (m.camera.x, -35.0) } else { let n = all.len() as f32; (all.iter().map(|f| f.pos.x).sum::<f32>() / n, all.iter().map(|f| f.pos.y).sum::<f32>() / n - 35.0) }
         };
         let ko = if self.ko_t > 0.0 { let e = (self.ko_t.min(1.0)).powf(0.6); e * 0.28 } else { 0.0 };
-        let sup = self.super_t * 0.07;
+        let sup = self.sz * self.sz * (3.0 - 2.0 * self.sz) * 0.2;
         let z = 1.0 + (self.punch + ko + sup + self.dist_zoom) * gain;
+        let mid = if self.sz > 0.01 { match m.fighters.iter().find(|f| f.id == self.super_owner).map(Self::chest_of) { Some((x, y, _)) => (lerp(mid.0, x, self.sz), lerp(mid.1, y, self.sz)), None => mid } } else { mid };
         let focus = if self.ko_t > 0.0 { let e = self.ko_t.min(1.0); (lerp(mid.0, self.ko_focus.0, e), lerp(mid.1, self.ko_focus.1, e)) } else { mid };
         (z, focus)
     }
@@ -455,7 +466,7 @@ impl Vfx {
     pub fn draw_banners(&self, ui: &Ui) {
         for (i, b) in self.banners.iter().enumerate() {
             let t = b.t;
-            let sc = if t < 0.12 { lerp(1.9, 1.0, t / 0.12) } else if t < 0.2 { lerp(1.0, 1.08, (t - 0.12) / 0.08) } else { lerp(1.08, 1.0, ((t - 0.2) / 0.3).min(1.0)) };
+            let sc = if t < 0.12 { lerp(1.4, 1.0, t / 0.12) } else if t < 0.2 { lerp(1.0, 1.08, (t - 0.12) / 0.08) } else { lerp(1.08, 1.0, ((t - 0.2) / 0.3).min(1.0)) };
             let a = if t > 1.2 { ((1.6 - t) / 0.4).max(0.0) } else { (t / 0.06).min(1.0) };
             let slide = if t < 0.12 { (1.0 - t / 0.12) * 120.0 } else { 0.0 };
             let y = 300.0 + i as f32 * 70.0;

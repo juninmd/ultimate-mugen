@@ -121,3 +121,36 @@ fn single_fights_still_end_on_first_ko() {
     for _ in 0..5 { m.tick(&[0, 0]); }
     assert_eq!((m.round_state, m.winner_side), (3, 1));
 }
+
+#[test]
+fn five_vs_five_simul_runs_and_ends_only_when_whole_team_falls() {
+    let mut m = Match::new(common_def(), None, flat_stage());
+    m.team_simul = true;
+    let chars: Vec<Arc<_>> = IDS.iter().take(10).map(|id| Arc::new(compile_native(&load(id), 1, false))).collect();
+    // interleaved like the app: P1, P2, P3, ... so roots()[0..2] are the two leaders
+    for k in 0..5 { for side in 0..2 { m.add_player(chars[k * 2 + side].clone(), side, 0, 1); } }
+    m.start_round();
+    let (bl, br) = (m.stage.bound_left, m.stage.bound_right);
+    for f in m.fighters.iter() { assert!(f.pos.x >= bl && f.pos.x <= br, "everyone starts inside the stage bounds ({})", f.pos.x); }
+    for _ in 0..140 { m.tick(&[0; 10]); }
+    assert_eq!(m.round_state, 2);
+    assert_eq!(m.root_indices().len(), 10);
+    // 10 fighters brawling (everybody mashes): must stay far faster than real time (600 ticks = 10 s of game)
+    let t0 = std::time::Instant::now();
+    for i in 0..600 { let b: Vec<u32> = (0..10).map(|k| if (i + k * 3) % 7 < 3 { R | if (i / 5 + k) % 2 == 0 { X } else { A } } else { 0 }).collect(); m.tick(&b); }
+    let el = t0.elapsed().as_secs_f32();
+    eprintln!("5v5: 600 ticks in {el:.3}s");
+    assert!(el < 5.0, "10-fighter simulation must run well above real time (took {el}s for 10 s of game)");
+    for f in m.fighters.iter_mut().filter(|f| !f.is_helper) { f.life = f.life_max; f.alive = true; }
+    // knock out four of five on side 1: the round must continue
+    let roots = m.root_indices();
+    let side1: Vec<usize> = roots.iter().copied().filter(|&i| m.fighters[i].side == 1).collect();
+    assert_eq!(side1.len(), 5);
+    for &i in side1.iter().take(4) { m.fighters[i].life = 0.0; }
+    for _ in 0..5 { m.tick(&[0; 10]); }
+    assert_eq!(m.round_state, 2, "one defender left → still fighting");
+    assert_eq!(m.enemy(roots[0], 0), Some(side1[4]), "the survivor is targeted first");
+    m.fighters[side1[4]].life = 0.0;
+    for _ in 0..5 { m.tick(&[0; 10]); }
+    assert_eq!((m.round_state, m.winner_side), (3, 0));
+}

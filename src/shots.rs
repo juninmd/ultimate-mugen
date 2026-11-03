@@ -54,15 +54,14 @@ async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &st
 }
 
 /// Team battle shot: `simul` = 2v2 on the field together, otherwise sequence (3v3, second bout with carried life).
-async fn team_fight(app: &mut App, dir: &str, name: &str, simul: bool, stage_id: &str, ticks: usize) {
-    let (a_ids, b_ids) = (["kaito", "akio", "lian"], ["suzume", "bruno", "sylene"]);
-    let n = if simul { 2 } else { 3 };
+async fn team_fight(app: &mut App, dir: &str, name: &str, simul: bool, n: usize, stage_id: &str, ticks: usize, human: bool) {
+    let (a_ids, b_ids) = (["kaito", "akio", "lian", "daichi", "jin"], ["suzume", "bruno", "sylene", "garan", "marlow"]);
     let a: Vec<usize> = a_ids.iter().take(n).map(|i| find(app, i)).collect();
     let b: Vec<usize> = b_ids.iter().take(n).map(|i| find(app, i)).collect();
     let mut t = Team::new(a.clone(), b.clone(), simul);
     let mut foe = 0;
     if !simul { t.ko[1][0] = true; t.idx[1] = 1; t.life = [0.62, 1.0]; foe = 1; }
-    app.mode = Mode::Watch;
+    app.mode = if human { if simul { Mode::TeamSimul } else { Mode::TeamSeq } } else { Mode::Watch };
     app.sel = (a[0], b[foe], stage(app, stage_id));
     app.team = Some(t);
     app.start_fight().await;
@@ -106,8 +105,10 @@ pub async fn run(app: &mut App, dir: &str) {
     fight(app, dir, "23-impact-frame", "akio", "bruno", "spirit", 120, "impact").await;
     fight(app, dir, "24-paint-splash", "kaito", "garan", "plains", 240, "hit").await;
     fight(app, dir, "21-fx-neon-hit", "volta", "kaito", "neon", 200, "hit").await;
-    team_fight(app, dir, "30-team-sequence", false, "dojo", 200).await;
-    team_fight(app, dir, "31-team-parallel", true, "neon", 260).await;
+    team_fight(app, dir, "30-team-sequence", false, 3, "dojo", 200, false).await;
+    team_fight(app, dir, "31-team-parallel", true, 2, "neon", 260, false).await;
+    team_fight(app, dir, "33-team-5v5-parallel", true, 5, "plains", 330, true).await;
+    team_fight(app, dir, "34-team-5v5-sequence", false, 5, "volcano", 200, true).await;
     fight(app, dir, "11-hitboxes", "shion", "kaito", "plains", 200, "boxes").await;
     fight(app, dir, "11b-fight-kaname-valdric", "kaname", "valdric", "spirit", 300, "hit").await;
     fight(app, dir, "11c-fight-daichi-jin", "daichi", "jin", "plains", 300, "proj").await;

@@ -15,6 +15,8 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, mul
 | ![Impacto neon](screenshots/21-fx-neon-hit.jpg) | ![Transição](screenshots/22-transition.jpg) |
 | ![Equipe sequência](screenshots/30-team-sequence.jpg) | ![Equipe paralelo](screenshots/31-team-parallel.jpg) |
 | ![Seleção de equipe](screenshots/32-team-select.jpg) | ![Quadro de impacto](screenshots/23-impact-frame.jpg) |
+| ![5v5 paralelo](screenshots/33-team-5v5-parallel.jpg) | ![5v5 sequência](screenshots/34-team-5v5-sequence.jpg) |
+| ![4K · HUD 5v5](screenshots/35-4k-5v5-hud.jpg) | ![4K · super](screenshots/36-4k-super.jpg) |
 
 ## Por que Rust + macroquad
 | Requisito | Escolha |
@@ -33,7 +35,7 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, mul
 - **Muitos personagens e cenários**: seleção com rolagem, filtro (Tab: todos/originais/M.U.G.E.N), PgUp/PgDn, roda do mouse, `R` aleatório; só as linhas visíveis são desenhadas e só o que está sob o cursor é carregado (cache LRU limita a memória). Pastas/zips importados são registrados sem decodificar tudo (centenas em segundos).
 - **Loadings rápidos**: tela de carregamento na inicialização, pré-carga por etapas atrás da tela de VS (barra de progresso), prévia leve (idle/vitória) nos menus, rasterização dos lutadores em paralelo (≈3× mais rápido) e música sintetizada antes da luta.
 - **Visual AAA** ([`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md)): pós-processamento (bloom, aberração cromática, blur radial, vinheta, grade de cor), partículas e anéis de choque em cada golpe, números de dano, *camera punch*, KO em câmera lenta com zoom, super cinematográfico com linhas de velocidade e aura, reflexos no chão, HUD animado, transições de tela e fundo vivo. Opção de acessibilidade para reduzir efeitos (Vídeo → Efeitos de impacto).
-- **Modos de equipe**: *Sequência 3v3* (estilo KOF: ordem de entrada, vencedor mantém a vida e o medidor de super compartilhado) e *Paralelo 2v2* (parceiro IA luta ao seu lado; o round acaba quando a equipe inteira cai). Ver [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md).
+- **Modos de equipe**: *Sequência 3v3* (estilo KOF: ordem de entrada, vencedor mantém a vida e o medidor de super compartilhado) e *Paralelo até **5v5*** (10 lutadores na tela; companheiros por IA, `Tab` troca o lutador que você controla; o round acaba quando a equipe inteira cai). Ver [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md).
 - **Áudio em camadas**: SFX sintetizados com transiente + corpo + crunch, 3 variações por golpe, reverb, stingers de round/KO/vitória, pings de combo e *ducking* da música. **HUD** com retratos reais, barras de parceiro, roster de equipe e alarmes.
 - Modos **Arcade, Versus CPU, 2 Jogadores, Treino (hitboxes), CPU vs CPU**; IA compatível com qualquer personagem.
 - **Controles**: teclado, gamepads (DualShock/DualSense com vibração em golpes, defesa, super e K.O.; lightbar azul/vermelha por jogador), toque com analógico virtual e SP1/SP2/SP3/SUPER de um toque.
@@ -63,6 +65,7 @@ Desktop: coloque pastas ou `.zip` em `mugen/` ao lado do executável (ex.: `muge
 | Especiais simples | 1 · 2 · 3 (Super: 1+2) | L1 · L2 | SP1–SP3 · SUPER |
 | Pausa / Hitboxes | Esc / F2 | OPTIONS | ❚❚ |
 | Tela cheia / FPS | F11 / F3 | — | — |
+| Trocar de lutador (equipe paralela) | Tab | — | — |
 | Lista de lutadores | Tab (filtro) · PgUp/PgDn · R (aleatório) | — | — |
 
 ## Estrutura

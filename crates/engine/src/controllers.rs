@@ -249,9 +249,9 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                     Some((g, idx, own)) if g >= 0 => Event::Sound { def: Some(f.def.clone()), group: g, index: idx, own, volume: 1.0, channel: -1, owner: f.id, builtin: None },
                     _ => Event::Sound { def: None, group: -1, index: 0, own: false, volume: 1.0, channel: -1, owner: f.id, builtin: Some("super") },
                 };
-                let side = f.side;
+                let (side, who) = (f.side, f.root);
                 m.events.push(ev);
-                m.events.push(Event::Super { side });
+                m.events.push(Event::Super { side, fighter: who });
             }
         }
         "afterimage" => { let (t, len) = (n(m, "time", 1.0) as i32, n(m, "length", 20.0) as usize); m.fighters[i].after_image = Some(AfterImage { time: t, length: len.min(30), trail: vec![] }); }

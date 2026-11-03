@@ -109,6 +109,22 @@ pub async fn run(app: &mut App, dir: &str) {
     team_fight(app, dir, "31-team-parallel", true, 2, "neon", 260, false).await;
     team_fight(app, dir, "33-team-5v5-parallel", true, 5, "plains", 330, true).await;
     team_fight(app, dir, "34-team-5v5-sequence", false, 5, "volcano", 200, true).await;
+    // deciding round → "FINAL ROUND" announcer
+    {
+        app.mode = Mode::Watch;
+        app.sel = (find(app, "kaito"), find(app, "shion"), stage(app, "bamboo"));
+        app.team = None;
+        app.start_fight().await;
+        let App { session, c, audio, .. } = app;
+        let s = session.as_mut().unwrap();
+        s.m.wins = [1, 1]; s.m.round_no = 3; s.m.start_round();
+        for _ in 0..22 { s.step_visual(c, audio); }
+    }
+    snap(app, dir, "41-final-round", |a| a.draw_session_only()).await;
+    // photosensitivity mode (impact effects = Mínimo): same kind of exchange with every flash / shake / VFX layer off
+    app.g.fx_gain = 0.0;
+    fight(app, dir, "42-photosensitive-mode", "volta", "kaito", "neon", 200, "hit").await;
+    app.g.fx_gain = 1.0;
     // training mode: SF6-style input history + last-combo data (inputs injected, there is no keyboard in the tour)
     {
         use ume_engine::input::k;

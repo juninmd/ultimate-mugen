@@ -154,3 +154,17 @@ fn five_vs_five_simul_runs_and_ends_only_when_whole_team_falls() {
     for _ in 0..5 { m.tick(&[0; 10]); }
     assert_eq!((m.round_state, m.winner_side), (3, 0));
 }
+
+#[test]
+fn deciding_round_is_announced_as_final() {
+    let mut m = Match::new(common_def(), None, flat_stage());
+    m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 0, 0, 1);
+    m.add_player(Arc::new(compile_native(&load("shion"), 1, false)), 1, 0, 1);
+    m.start_round();
+    assert_eq!(m.announce.as_ref().unwrap().text, "ROUND 1");
+    m.wins = [1, 1]; m.round_no = 3; m.start_round();
+    assert_eq!(m.announce.as_ref().unwrap().text, "FINAL ROUND");
+    // single-round bouts (team sequence) never say "final"
+    m.rounds_to_win = 1; m.wins = [0, 0]; m.start_round();
+    assert!(m.announce.as_ref().unwrap().text.starts_with("ROUND"));
+}

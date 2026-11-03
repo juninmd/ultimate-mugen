@@ -154,7 +154,7 @@ impl App {
     pub async fn frame(&mut self) {
         self.ui.begin();
         self.g.post.level = self.settings.fx as u8;
-        self.g.fx_gain = IMPACT[self.settings.impact.min(2)].0;
+        self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;
         self.c.update();
         self.preview_t += get_frame_time();
         let dt = get_frame_time();
@@ -720,7 +720,7 @@ impl App {
             (1, "Resolução da janela", RESOLUTIONS[self.settings.res.min(RESOLUTIONS.len() - 1)].2.into(), "Até 5K · o jogo escala a imagem para qualquer tamanho"),
             (2, "Qualidade da arte", q.1.into(), "Rasteriza lutadores e cenários em maior densidade de pixels (4K = Ultra)"),
             (3, "Pós-processamento", FX_LEVELS[self.settings.fx.min(2)].into(), "Bloom, aberração cromática, vinheta, correção de cor e blur radial"),
-            (4, "Efeitos de impacto", IMPACT[self.settings.impact.min(2)].1.into(), "Tremor, zoom, flashes e linhas de velocidade — Reduzido ajuda quem é sensível a flashes"),
+            (4, "Efeitos de impacto", IMPACT[self.settings.impact.min(IMPACT.len() - 1)].1.into(), "Tremor, zoom, flashes e linhas de velocidade — flashes grandes ficam limitados a 3/s; Mínimo desliga tudo (fotossensibilidade)"),
             (5, "Contador de FPS", on(self.settings.fps).into(), "Alterna também com F3"),
             (6, "Voltar", String::new(), ""),
         ];

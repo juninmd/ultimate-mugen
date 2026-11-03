@@ -105,3 +105,15 @@ Fontes (resumos de busca; sites primários bloqueados pela política de rede da 
 - **Modo treino moderno** — [EventHubs](https://www.eventhubs.com/news/2022/sep/16/sf6-training-visual-frame-data/), [Fighters Generation](https://www.fightersgeneration.com/news1/sf6-sep22-6.htm): **histórico de inputs**, dados do ataque (dano do combo), HUD configurável → no **Treino**: histórico dos últimos 14 inputs (seta de direção, botões, frames segurados) e linha "ÚLTIMO COMBO · hits · dano".
 - **Design de som** — [guia Pixflow](https://pixflow.net/blog/punch-impact-sound-effects-for-fight-scenes/), [SoundBridge](https://www.soundbridge.io/game-audio-soundbridge-fighting-game-scene): soco = **transiente curto + corpo grave + (voz)**, 2–4 camadas **separadas por faixa de frequência**, variações e **ducking da música** nos impactos → já implementado (transiente em passa-alta, corpo em queda de pitch, crunch em banda, 3 variações em rodízio, ducking em super/KO).
 - Tekken 8: nada confiável sobre HUD/treino nas buscas; tratado como não verificado.
+
+---
+
+# Rodada 7 — acessibilidade (fotossensibilidade) e anúncio de round
+
+Fontes (resumos de busca): [Xbox Accessibility Guideline 117](https://learn.microsoft.com/en-us/xbox/accessibility/xbox-accessibility-guidelines/117) (tremor e blur radial desligáveis ou numa escala 0–100 %), [Guideline 118](https://learn.microsoft.com/en-us/xbox/accessibility/xbox-accessibility-guidelines/118) (flash = variação de ~10 % de luminância, ~20 % da tela; testar gatilhos fotossensíveis), WCAG 2.1 e [guia da Unity](https://unity.com/blog/video-game-accessibility-basics) (no máximo **3 flashes por segundo**); [Guilty Gear — Heaven or Hell](https://guiltygear.fandom.com/wiki/Heaven_or_Hell) (anúncio ciente da contagem de rounds: "Final" no duelo decisivo); [GameDesignSkills](https://gamedesignskills.com/game-design/combat-design/) e [TV Tropes](https://tvtropes.org/pmwiki/pmwiki.php/Main/HitSpark) (faísca de defesa suave e azul, golpe pesado maior e caótico, o VFX precisa cair exatamente no hit-stop — já era o caso).
+
+Implementado:
+- **Limite de 3 flashes grandes por segundo** (`Vfx::flash_add` / `invert_add`, espaçamento mínimo de 0,34 s, com teste) — vale em todos os níveis.
+- **Efeitos de impacto → "Mínimo (fotossensibilidade)"**: desliga flashes, quadro de impacto, tremor, zoom, blur radial, aberração, partículas/clima, o flash branco no sprite atingido e o flash de tela do M.U.G.E.N. (os níveis Reduzido/Normal/Intenso continuam escalando em 40/100/130 %). Config salva em `impact_lv`.
+- **Anúncio "FINAL ROUND"** no round decisivo (1×1 em melhor de 3); lutas de round único (sequência de equipe) nunca dizem "final". Coberto por teste.
+- Os níveis de pós-processamento já permitem desligar bloom/aberração (Vídeo → Pós-processamento); no celular o padrão é Médio.

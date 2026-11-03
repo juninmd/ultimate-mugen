@@ -1,5 +1,4 @@
 use std::alloc::{GlobalAlloc, Layout, System};
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::loader::load_mugen_char;
@@ -7,11 +6,13 @@ use ume_engine::matchs::Match;
 use ume_formats::vfs::{add_zip, find_char_defs, Vfs};
 
 struct Counting;
-static ALLOCS: AtomicUsize = AtomicUsize::new(0);
+thread_local! { static ALLOCS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) }; }
+fn count() { ALLOCS.with(|c| c.set(c.get() + 1)); }
+fn allocs() -> usize { ALLOCS.with(|c| c.get()) }
 unsafe impl GlobalAlloc for Counting {
-    unsafe fn alloc(&self, l: Layout) -> *mut u8 { ALLOCS.fetch_add(1, Ordering::Relaxed); System.alloc(l) }
+    unsafe fn alloc(&self, l: Layout) -> *mut u8 { count(); System.alloc(l) }
     unsafe fn dealloc(&self, p: *mut u8, l: Layout) { System.dealloc(p, l) }
-    unsafe fn realloc(&self, p: *mut u8, l: Layout, n: usize) -> *mut u8 { ALLOCS.fetch_add(1, Ordering::Relaxed); System.realloc(p, l, n) }
+    unsafe fn realloc(&self, p: *mut u8, l: Layout, n: usize) -> *mut u8 { count(); System.realloc(p, l, n) }
 }
 #[global_allocator]
 static A: Counting = Counting;
@@ -27,10 +28,10 @@ fn tick_allocations() {
     m.add_player(d, 1, 8, 2);
     m.start_round();
     for _ in 0..200 { m.tick(&[0, 0]); }
-    let before = ALLOCS.load(Ordering::Relaxed);
+    let before = allocs();
     let n = 600;
     for _ in 0..n { m.tick(&[0, 0]); }
-    let per = (ALLOCS.load(Ordering::Relaxed) - before) as f64 / n as f64;
+    let per = (allocs() - before) as f64 / n as f64;
     println!("allocations per tick: {per:.2}");
     assert!(per <= 0.5, "match tick allocates {per:.2} times per tick");
 }

@@ -10,6 +10,7 @@ pub mod loader;
 pub mod fighter;
 pub mod triggers;
 pub mod controllers;
+pub mod sctrl;
 pub mod hitdef;
 pub mod matchs;
 pub mod common;

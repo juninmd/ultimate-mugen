@@ -16,12 +16,15 @@ path = "src/main.rs"
 [dependencies]
 ume-formats = { path = "crates/formats" }
 ume-engine = { path = "crates/engine" }
-macroquad = { version = "0.4", default-features = false, features = ["audio"] }
 tiny-skia = "0.11"
 serde_json = "1"
 symphonia = { version = "=0.5.5", default-features = false, features = ["ogg", "vorbis", "mp3", "flac", "wav", "pcm", "adpcm"] }
 
+[target.'cfg(any(target_arch = "wasm32", target_os = "android", target_os = "ios"))'.dependencies]
+macroquad = { version = "0.4", default-features = false, features = ["audio"] }
+
 [target.'cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))'.dependencies]
+ume-shell = { path = "crates/shell" }
 gilrs = "0.11"
 # pinned: newer 3.x releases are younger than the 2-week supply-chain maturity window
 ureq = "=3.4.2"

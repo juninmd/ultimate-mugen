@@ -152,24 +152,25 @@ impl Code {
             match ops[pc] {
                 Op::Const(v) => { s[sp] = v; sp += 1; }
                 Op::Host(i) => { s[sp] = eval(&self.host[i as usize], h); sp += 1; }
-                Op::Not => s[sp - 1] = ib(s[sp - 1] == 0.0),
-                Op::BitNot => s[sp - 1] = !(s[sp - 1].trunc() as i32) as f64,
+                Op::Not => if !s[sp - 1].is_nan() { s[sp - 1] = ib(s[sp - 1] == 0.0) },
+                Op::BitNot => if !s[sp - 1].is_nan() { s[sp - 1] = !(s[sp - 1].trunc() as i32) as f64 },
                 Op::Neg => s[sp - 1] = -s[sp - 1],
-                Op::Truthy => s[sp - 1] = ib(s[sp - 1] != 0.0),
-                Op::AndJump(t) => { sp -= 1; if s[sp] == 0.0 { s[sp] = 0.0; sp += 1; pc = t as usize; continue; } }
-                Op::OrJump(t) => { sp -= 1; if s[sp] != 0.0 { s[sp] = 1.0; sp += 1; pc = t as usize; continue; } }
+                Op::Truthy => s[sp - 1] = ib(truthy(s[sp - 1])),
+                Op::AndJump(t) => { sp -= 1; if !truthy(s[sp]) { s[sp] = 0.0; sp += 1; pc = t as usize; continue; } }
+                Op::OrJump(t) => { sp -= 1; if truthy(s[sp]) { s[sp] = 1.0; sp += 1; pc = t as usize; continue; } }
                 Op::JumpIfZero(t) => { sp -= 1; if s[sp] == 0.0 { pc = t as usize; continue; } }
                 Op::Jump(t) => { pc = t as usize; continue; }
                 Op::Interval { neg, lo_inc, hi_inc } => {
                     sp -= 2;
                     let (v, l, u) = (s[sp - 1], s[sp], s[sp + 1]);
+                    if v.is_nan() || l.is_nan() || u.is_nan() { s[sp - 1] = f64::NAN; pc += 1; continue; }
                     let inside = (if lo_inc { v >= l } else { v > l }) && (if hi_inc { v <= u } else { v < u });
                     s[sp - 1] = ib(inside != neg);
                 }
                 op => {
                     sp -= 1;
                     let (x, y) = (s[sp - 1], s[sp]);
-                    s[sp - 1] = binary(op, x, y, it);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() { f64::NAN } else { binary(op, x, y, it) };
                 }
             }
             pc += 1;
@@ -177,6 +178,9 @@ impl Code {
         if sp == 0 { 0.0 } else { s[sp - 1] }
     }
 }
+
+#[inline]
+pub fn truthy(v: f64) -> bool { v != 0.0 && !v.is_nan() }
 
 #[inline]
 fn binary(op: Op, x: f64, y: f64, it: impl Fn(f64) -> i64) -> f64 {
@@ -294,6 +298,29 @@ mod tests {
             if parse(v.trim()).is_ok() { same(v.trim()); n += 1; }
         }
         assert!(n > 100, "only {n} expressions");
+    }
+
+    struct Bottom;
+    impl Host for Bottom {
+        fn trigger(&self, name: &str, _: &[Node], _: Option<char>, _: Option<&str>) -> f64 { if name == "time" { f64::NAN } else { 1.0 } }
+        fn redirect(&self, _: &str, _: Option<f64>) -> Option<Self> { None }
+        fn cmpstr(&self, _: &str, _: bool, _: &[String]) -> bool { false }
+        fn special(&self, _: &str, _: &str, _: f64, _: Option<&str>, _: Option<f64>) -> bool { false }
+        fn assign(&self, _: &str, _: i32, v: f64) -> f64 { v }
+    }
+
+    #[test]
+    fn propagates_bottom() {
+        let run = |s: &str| Expr::new(parse(s).unwrap()).eval(&Bottom);
+        assert!(run("time").is_nan());
+        assert!(run("time = 0").is_nan());
+        assert!(run("time != [1, 5]").is_nan());
+        assert!(run("!time").is_nan());
+        assert!(run("-time + 1").is_nan());
+        assert_eq!(run("time && 1"), 0.0);
+        assert_eq!(run("time || 1"), 1.0);
+        assert_eq!(run("1 || time"), 1.0);
+        assert!(!truthy(run("time")));
     }
 
     #[test]

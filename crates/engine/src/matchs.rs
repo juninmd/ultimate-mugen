@@ -48,6 +48,7 @@ pub struct Projectile {
     pub pos: V2, pub vel: V2, pub accel: V2, pub vel_mul: V2, pub rem_vel: V2, pub facing: f32, pub hits: i32, pub miss_time: i32, pub miss_cd: i32,
     pub priority: i32, pub spr_priority: i32, pub edge_bound: f32, pub height_bound: [f32; 2], pub remove_time: i32, pub time: i32,
     pub hitdef: HitDefData, pub dying: bool, pub guard_dist: f32, pub scale: [f32; 2], pub remove: bool, pub lscl: f32,
+    pub remove_on_hit: bool, pub stage_bound: f32, pub super_move: i32, pub pause_move: i32,
 }
 
 /// Events for the presentation layer (audio, rumble, UI).
@@ -1188,6 +1189,8 @@ impl Match {
             height_bound: [num(self, "projheightbound", -240.0, 0) * f.lscl, num(self, "projheightbound", 1.0, 1) * f.lscl],
             remove_time: num(self, "projremovetime", -1.0, 0) as i32, time: 0, guard_dist: hd.guard_dist * f.lscl, hitdef: hd, dying: false,
             scale: [num(self, "projscale", 1.0, 0), num(self, "projscale", 1.0, 1)], remove: false, lscl: f.lscl,
+            remove_on_hit: num(self, "projremove", 1.0, 0) != 0.0, stage_bound: num(self, "projstagebound", 40.0, 0) * f.lscl,
+            super_move: num(self, "supermovetime", 0.0, 0) as i32, pause_move: num(self, "pausemovetime", 0.0, 0) as i32,
         };
         self.projectiles.push(p);
     }
@@ -1204,9 +1207,16 @@ impl Match {
         if anim >= 0 && p.cur.def.anims.contains_key(&anim) { p.cur = AnimCursor::new(p.cur.def.clone(), anim); p.dying = true; } else { p.remove = true; }
     }
     fn update_projectiles(&mut self, paused: bool) {
-        if paused { return; }
+        let super_pause = self.pause.as_ref().is_some_and(|p| p.is_super);
         let (left, right) = (self.camera.x - self.view_w / 2.0, self.camera.x + self.view_w / 2.0);
-        for p in self.projectiles.iter_mut() {
+        let (stage_l, stage_r) = (self.stage.bound_left - self.view_w / 2.0, self.stage.bound_right + self.view_w / 2.0);
+        let mut frozen = vec![false; self.projectiles.len()];
+        for (k, p) in self.projectiles.iter_mut().enumerate() {
+            if paused {
+                let budget = if super_pause { &mut p.super_move } else { &mut p.pause_move };
+                if *budget <= 0 { frozen[k] = true; continue; }
+                *budget -= 1;
+            }
             p.cur.advance(); p.time += 1;
             if p.dying {
                 p.pos.x += p.rem_vel.x * p.facing; p.pos.y += p.rem_vel.y;
@@ -1217,23 +1227,27 @@ impl Match {
             p.vel.x = p.vel.x * p.vel_mul.x + p.accel.x; p.vel.y = p.vel.y * p.vel_mul.y + p.accel.y;
             if p.miss_cd > 0 { p.miss_cd -= 1; }
             if p.pos.x < left - p.edge_bound || p.pos.x > right + p.edge_bound { p.remove = true; }
-            if p.pos.y < p.height_bound[0] - 240.0 || p.pos.y > p.height_bound[1] + 20.0 { p.remove = true; }
+            if p.pos.x < stage_l - p.stage_bound || p.pos.x > stage_r + p.stage_bound { p.remove = true; }
+            if p.pos.y < p.height_bound[0] || p.pos.y > p.height_bound[1] { p.remove = true; }
             if p.remove_time >= 0 && p.time >= p.remove_time { let a = p.rem_anim; Self::kill_proj(p, a); }
         }
         let n = self.projectiles.len();
         for a in 0..n { for b in 0..n {
-            if a == b { continue; }
+            if a == b || frozen[a] || frozen[b] { continue; }
             let (pa, pb) = (&self.projectiles[a], &self.projectiles[b]);
             if pa.dying || pb.dying || pa.remove || pb.remove || pa.side == pb.side { continue; }
             let ba: Vec<Box4> = Self::proj_boxes(pa, 1).into_iter().chain(Self::proj_boxes(pa, 2)).collect();
             let bb: Vec<Box4> = Self::proj_boxes(pb, 1).into_iter().chain(Self::proj_boxes(pb, 2)).collect();
             if Self::overlap(&ba, &bb).is_some() {
                 let (pra, prb) = (pa.priority, pb.priority);
-                if pra <= prb { let p = &mut self.projectiles[a]; let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); }
-                if prb <= pra { let p = &mut self.projectiles[b]; let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); }
+                for (k, lost) in [(a, pra <= prb), (b, prb <= pra)] {
+                    let p = &mut self.projectiles[k];
+                    if lost { let an = if p.cancel_anim >= 0 { p.cancel_anim } else { p.rem_anim }; Self::kill_proj(p, an); } else { p.priority -= 1; }
+                }
             }
         } }
         for pi in 0..self.projectiles.len() {
+            if frozen[pi] { continue; }
             for d in 0..self.fighters.len() {
                 let p = &self.projectiles[pi];
                 if p.dying || p.remove || p.miss_cd > 0 { break; }
@@ -1249,7 +1263,7 @@ impl Match {
                 self.fighters[oi].proj_contacts.push(('c', pid, gt));
                 let p = &mut self.projectiles[pi];
                 p.hits -= 1;
-                if p.hits <= 0 { let a = p.hit_anim; Self::kill_proj(p, a); } else { p.miss_cd = p.miss_time.max(1); }
+                if p.hits <= 0 && p.remove_on_hit { let a = p.hit_anim; Self::kill_proj(p, a); } else { p.miss_cd = p.miss_time.max(1); }
             }
         }
         self.projectiles.retain(|p| !p.remove);

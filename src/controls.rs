@@ -1,6 +1,7 @@
 //! Input hub: keyboard maps, gamepads (with rumble), touch controls; menu navigation.
 use crate::gamepad::{PadInfo, Pads};
-use macroquad::prelude::*;
+use crate::keybinds::KeyMap;
+use crate::gfx::*;
 use ume_engine::input::k;
 
 pub struct TouchPad { pub enabled: bool, pub bits: u32, pub macro_q: std::collections::VecDeque<u32>, stick_center: Option<Vec2>, pub stick_pos: Vec2, pub pressed: [bool; 9], hold: [u8; 9] }
@@ -23,7 +24,7 @@ impl TouchPad {
         if !self.enabled { self.bits = 0; return; }
         let (btns, r, stick, sr) = Self::layout();
         // macroquad reports touches in physical pixels while layout/screen_width() are logical (dpi-scaled)
-        let dpi = macroquad::miniquad::window::dpi_scale().max(0.01);
+        let dpi = dpi_scale().max(0.01);
         let all: Vec<(Vec2, bool)> = touches().iter().map(|t| (t.position / dpi, matches!(t.phase, TouchPhase::Ended | TouchPhase::Cancelled))).collect();
         let mut points: Vec<(Vec2, bool)> = all;
         if points.is_empty() && is_mouse_button_down(MouseButton::Left) { points.push((mouse_position().into(), false)); }
@@ -73,24 +74,15 @@ impl TouchPad {
     }
 }
 
-pub struct Controls { pub pads: Pads, pub pad_info: Vec<PadInfo>, prev_menu: u32, pub menu_pressed: u32, pub touch: TouchPad }
+pub struct Controls { pub keys: KeyMap, pub pads: Pads, pub pad_info: Vec<PadInfo>, prev_menu: u32, pub menu_pressed: u32, pub touch: TouchPad }
 
-/// Keyboard maps
-fn kb_bits(p2_layout: bool, solo: bool) -> u32 {
-    let mut b = 0;
-    let mut map = |keys: &[KeyCode], bit: u32| { if keys.iter().any(|kc| is_key_down(*kc)) { b |= bit; } };
-    if !p2_layout {
-        map(&[KeyCode::W], k::U); map(&[KeyCode::S], k::D); map(&[KeyCode::A], k::L); map(&[KeyCode::D], k::R);
-        map(&[KeyCode::U], k::X); map(&[KeyCode::I], k::Y); map(&[KeyCode::O], k::Z); map(&[KeyCode::J], k::A); map(&[KeyCode::K], k::B); map(&[KeyCode::L], k::C);
-        map(&[KeyCode::Key1], k::D2); map(&[KeyCode::Key2], k::W); map(&[KeyCode::Key3], k::E); map(&[KeyCode::T], k::T);
-        if solo {
-            map(&[KeyCode::Up], k::U); map(&[KeyCode::Down], k::D); map(&[KeyCode::Left], k::L); map(&[KeyCode::Right], k::R);
-            map(&[KeyCode::Z], k::A); map(&[KeyCode::X], k::B); map(&[KeyCode::C], k::C); map(&[KeyCode::V], k::X); map(&[KeyCode::B], k::Y); map(&[KeyCode::N], k::Z);
-        }
-    } else {
-        map(&[KeyCode::Up], k::U); map(&[KeyCode::Down], k::D); map(&[KeyCode::Left], k::L); map(&[KeyCode::Right], k::R);
-        map(&[KeyCode::Kp4], k::X); map(&[KeyCode::Kp5], k::Y); map(&[KeyCode::Kp6], k::Z); map(&[KeyCode::Kp1], k::A); map(&[KeyCode::Kp2], k::B); map(&[KeyCode::Kp3], k::C);
-        map(&[KeyCode::Kp7], k::D2); map(&[KeyCode::Kp8], k::W); map(&[KeyCode::Kp9], k::E); map(&[KeyCode::Kp0], k::T);
+/// Keyboard bits for a slot from the (rebindable) map; a lone player also gets the fixed arrows + ZXCVBN layout as aliases.
+fn kb_bits(keys: &KeyMap, slot: usize, solo: bool) -> u32 {
+    let mut b = keys.bits(slot, is_key_down);
+    if slot == 0 && solo {
+        let mut map = |kc: KeyCode, bit: u32| { if is_key_down(kc) { b |= bit; } };
+        map(KeyCode::Up, k::U); map(KeyCode::Down, k::D); map(KeyCode::Left, k::L); map(KeyCode::Right, k::R);
+        map(KeyCode::Z, k::A); map(KeyCode::X, k::B); map(KeyCode::C, k::C); map(KeyCode::V, k::X); map(KeyCode::B, k::Y); map(KeyCode::N, k::Z);
     }
     b
 }
@@ -99,7 +91,7 @@ fn kb_bits(p2_layout: bool, solo: bool) -> u32 {
 pub mod nav { pub const UP: u32 = 1; pub const DOWN: u32 = 2; pub const LEFT: u32 = 4; pub const RIGHT: u32 = 8; pub const OK: u32 = 16; pub const BACK: u32 = 32; pub const START: u32 = 64; pub const AUX: u32 = 128; }
 
 impl Controls {
-    pub fn new(touch: bool) -> Self { Controls { pads: Pads::new(), pad_info: vec![], prev_menu: 0, menu_pressed: 0, touch: TouchPad::new(touch) } }
+    pub fn new(touch: bool) -> Self { Controls { keys: KeyMap::load(), pads: Pads::new(), pad_info: vec![], prev_menu: 0, menu_pressed: 0, touch: TouchPad::new(touch) } }
     pub fn update(&mut self) {
         self.pad_info = self.pads.update();
         self.touch.update();
@@ -123,7 +115,7 @@ impl Controls {
     pub fn pressed(&self, a: u32) -> bool { self.menu_pressed & a != 0 }
     /// Fighting input bits for a human player slot (0/1). `duo` = two humans share the keyboard.
     pub fn player_bits(&mut self, slot: usize, duo: bool) -> u32 {
-        let mut b = kb_bits(slot == 1, !duo);
+        let mut b = kb_bits(&self.keys, slot, !duo);
         if let Some(p) = self.pad_info.get(slot) { b |= p.bits; }
         if slot == 0 {
             b |= self.touch.bits;

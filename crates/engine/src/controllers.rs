@@ -145,8 +145,9 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 let pan = crate::sctrl::sound_pan(m, i, pv as f32, abs);
                 let looping = n(m, "loop", 0.0) != 0.0;
                 let freq_mul = n(m, "freqmul", 1.0) as f32;
+                let low_priority = n(m, "lowpriority", 0.0) != 0.0;
                 let f = &m.fighters[i];
-                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul };
+                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul, low_priority };
                 m.events.push(ev);
             }
         }

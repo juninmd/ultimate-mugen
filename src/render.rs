@@ -4,37 +4,18 @@ use crate::stagefx::{Ctx, StageReact};
 use crate::stages::{Particle, Stage, StageArt};
 use crate::ui::Ui;
 use crate::vfx::{FxParams, Vfx};
-use macroquad::models::{draw_mesh, Mesh, Vertex};
-use macroquad::prelude::*;
-use macroquad::miniquad::{BlendFactor, BlendState, BlendValue, Equation, PipelineParams};
+use crate::gfx::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 use ume_engine::chardef::{AnimFrame, Blend, CharDef, ImageData};
 use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 
-const VS: &str = "#version 100
-attribute vec3 position; attribute vec2 texcoord; attribute vec4 color0;
-varying lowp vec2 uv; varying lowp vec4 color;
-uniform mat4 Model; uniform mat4 Projection;
-void main() { gl_Position = Projection * Model * vec4(position, 1); color = color0 / 255.0; uv = texcoord; }";
-const FS: &str = "#version 100
-varying lowp vec4 color; varying lowp vec2 uv; uniform sampler2D Texture;
-void main() { gl_FragColor = color * texture2D(Texture, uv); }";
-
-pub struct Gfx { tex: HashMap<u64, Texture2D>, pub add: Material, /** M.U.G.E.N. `S` blend: dest minus src */ pub sub: Material, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
+pub struct Gfx { tex: HashMap<u64, Texture2D>, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
 
 impl Gfx {
     pub fn new() -> Self {
-        let add = load_material(ShaderSource::Glsl { vertex: VS, fragment: FS }, MaterialParams {
-            pipeline_params: PipelineParams { color_blend: Some(BlendState::new(Equation::Add, BlendFactor::Value(BlendValue::SourceAlpha), BlendFactor::One)), ..Default::default() },
-            ..Default::default()
-        }).unwrap();
-        let sub = load_material(ShaderSource::Glsl { vertex: VS, fragment: FS }, MaterialParams {
-            pipeline_params: PipelineParams { color_blend: Some(BlendState::new(Equation::ReverseSubtract, BlendFactor::Value(BlendValue::SourceAlpha), BlendFactor::One)), ..Default::default() },
-            ..Default::default()
-        }).unwrap();
-        Gfx { tex: HashMap::new(), add, sub, view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), flush_cache: false, fx_gain: 1.0 }
+        Gfx { tex: HashMap::new(), view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), flush_cache: false, fx_gain: 1.0 }
     }
     pub fn texture(&mut self, img: &Arc<ImageData>, nearest: bool) -> Texture2D {
         self.tex.entry(img.id).or_insert_with(|| {
@@ -90,13 +71,13 @@ impl MatchRenderer {
         let add = !sub && (o.add || matches!(fr.blend, Blend::Add | Blend::Add1));
         let mut c = o.tint; c.a *= o.alpha;
         if let Some((sa, _)) = fr.alpha { c.a *= (sa as f32 / 256.0).min(1.0); }
-        if add { gl_use_material(&g.add); } else if sub { gl_use_material(&g.sub); }
+        if add { set_blend(GfxBlend::Add); } else if sub { set_blend(GfxBlend::Sub); }
         draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, c, params.clone());
-        if add || sub { gl_use_default_material(); }
+        if add || sub { set_blend(GfxBlend::Alpha); }
         if o.flash > 0.0 {
-            gl_use_material(&g.add);
+            set_blend(GfxBlend::Add);
             draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, Color::new(1.0, 1.0, 1.0, o.flash), params);
-            gl_use_default_material();
+            set_blend(GfxBlend::Alpha);
         }
     }
 
@@ -351,9 +332,9 @@ impl MatchRenderer {
                     let xs: Vec<f32> = match l.tile[0] { 1 => { let st = x0 - (x0 / stx).ceil() * stx; let mut v = vec![]; let mut x = st; while x < m.view_w { v.push(x); x += stx; } v } n if n > 1 => (0..n).map(|i| x0 + i as f32 * stx).collect(), _ => vec![x0] };
                     let ys: Vec<f32> = match l.tile[1] { 1 => { let st = y0 - (y0 / sty).ceil() * sty; let mut v = vec![]; let mut y = st; while y < m.view_h { v.push(y); y += sty; } v } n if n > 1 => (0..n).map(|i| y0 + i as f32 * sty).collect(), _ => vec![y0] };
                     let add = l.trans.starts_with("add");
-                    if add { gl_use_material(&g.add); }
+                    if add { set_blend(GfxBlend::Add); }
                     for &x in &xs { for &y in &ys { draw_texture_ex(&t, g.ox + x * s, g.oy + y * s, WHITE, DrawTextureParams { dest_size: Some(vec2(w * s + 0.5, h * s + 0.5)), ..Default::default() }); } }
-                    if add { gl_use_default_material(); }
+                    if add { set_blend(GfxBlend::Alpha); }
                 }
             }
         }

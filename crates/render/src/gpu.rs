@@ -156,7 +156,11 @@ impl Renderer {
         pass.set_bind_group(0, &self.bind_group, &[]);
         pass.set_vertex_buffer(0, self.vbuf.slice(..));
         pass.set_index_buffer(self.ibuf.slice(..), wgpu::IndexFormat::Uint32);
+        let (tw, th) = (screen[0].max(1.0) as u32, screen[1].max(1.0) as u32);
         for c in &batch.calls {
+            let [x, y, w, h] = c.scissor.map(|[x, y, w, h]| { let (x, y) = (x.min(tw), y.min(th)); [x, y, w.min(tw - x), h.min(th - y)] }).unwrap_or([0, 0, tw, th]);
+            if w == 0 || h == 0 { continue; }
+            pass.set_scissor_rect(x, y, w, h);
             pass.set_pipeline(&self.pipelines[c.blend as usize]);
             pass.draw_indexed(c.first_index..c.first_index + c.index_count, 0, 0..1);
         }

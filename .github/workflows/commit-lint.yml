@@ -1,0 +1,14 @@
+name: Conventional commits
+# Releases are derived from commit messages, so a PR must carry a conventional title (squash) or conventional commits (merge).
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+permissions: { contents: read }
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - env: { TITLE: "${{ github.event.pull_request.title }}", BASE: "${{ github.event.pull_request.base.sha }}", HEAD: "${{ github.event.pull_request.head.sha }}" }
+        run: node scripts/commit-lint.mjs --title "$TITLE" --range "$BASE..$HEAD"

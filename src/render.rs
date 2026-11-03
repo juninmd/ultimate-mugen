@@ -291,10 +291,15 @@ impl MatchRenderer {
                 let cx = Ctx::new(g, m, back, shx, shy);
                 let draw_layer = |g: &mut Gfx, l: &crate::stages::Layer| {
                     if l.dynamic { return; }
-                    let x = m.view_w / 2.0 - l.w / 2.0 - m.camera.x * l.delta + shx;
-                    let y = l.y + l.trim - m.camera.y * l.dy + (m.stage.zoffset - 205.0) + shy;
+                    // zoomed-out field (big teams): layers scale about the ground line so the backdrop still fills the wider view
+                    let z = m.zoom;
+                    let x = m.view_w / 2.0 - l.w * z / 2.0 - m.camera.x * l.delta * z + shx;
+                    let mut y = m.stage.zoffset + (l.y + l.trim - m.camera.y * l.dy - 205.0) * z + shy;
+                    let mut h = (l.h - l.trim) * z;
+                    // the sky (first layer) stretches up to the top edge
+                    if std::ptr::eq(l, &back[0]) && y > 0.0 { h += y; y = 0.0; }
                     let t = g.texture(&l.image, false);
-                    draw_texture_ex(&t, g.ox + x * s, g.oy + y * s, WHITE, DrawTextureParams { dest_size: Some(vec2(l.w * s, (l.h - l.trim) * s)), ..Default::default() });
+                    draw_texture_ex(&t, g.ox + x * s, g.oy + y * s, WHITE, DrawTextureParams { dest_size: Some(vec2(l.w * z * s, h * s)), ..Default::default() });
                 };
                 if !front {
                     for (i, l) in back.iter().enumerate().filter(|(_, l)| !l.front) {

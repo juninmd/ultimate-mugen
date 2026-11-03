@@ -1,4 +1,5 @@
 pub mod sprites;
+pub mod quad;
 pub mod text;
 
 use std::collections::HashSet;
@@ -8,7 +9,7 @@ use ume_render::{Atlas, Canvas, PostFx, Renderer, Target};
 pub use ume_render::PostParams;
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
-use winit::event::{ElementState, WindowEvent};
+use winit::event::{ElementState, MouseButton, TouchPhase, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
 use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{Fullscreen, Window, WindowId};
@@ -22,12 +23,32 @@ impl Default for Config {
     fn default() -> Self { Config { title: "Ultimate MUGEN".into(), width: 1280, height: 720, fullscreen: false, max_frames: None } }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Phase { Started, Moved, Ended, Cancelled }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Touch { pub id: u64, pub phase: Phase, pub position: [f32; 2] }
+
 #[derive(Default)]
-pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode> }
+pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode>, pub mouse: [f32; 2], pub mouse_down: bool, pub mouse_pressed: bool, pub touches: Vec<Touch> }
 
 impl Input {
     pub fn is_down(&self, k: KeyCode) -> bool { self.down.contains(&k) }
     pub fn is_pressed(&self, k: KeyCode) -> bool { self.pressed.contains(&k) }
+
+    fn end_frame(&mut self) {
+        self.pressed.clear();
+        self.mouse_pressed = false;
+        self.touches.retain(|t| !matches!(t.phase, Phase::Ended | Phase::Cancelled));
+        for t in &mut self.touches { if t.phase == Phase::Started { t.phase = Phase::Moved; } }
+    }
+
+    fn touch(&mut self, id: u64, phase: Phase, position: [f32; 2]) {
+        match self.touches.iter_mut().find(|t| t.id == id) {
+            Some(t) => { t.position = position; if t.phase != Phase::Started || phase != Phase::Moved { t.phase = phase; } }
+            None => self.touches.push(Touch { id, phase, position }),
+        }
+    }
 }
 
 pub struct Gpu { pub device: wgpu::Device, pub queue: wgpu::Queue, pub renderer: Renderer, pub rgba_atlas: Atlas, pub index_atlas: Atlas }
@@ -41,6 +62,9 @@ pub struct Frame<'a> {
     pub time: f64,
     pub clear: [f64; 4],
     pub post: Option<PostParams>,
+    pub scale: f32,
+    pub resize: Option<[u32; 2]>,
+    pub fullscreen: Option<bool>,
     pub quit: bool,
 }
 
@@ -89,9 +113,11 @@ impl<G: Game> Shell<G> {
         self.last = now;
         live.canvas.clear();
         let size = [live.config.width as f32, live.config.height as f32];
-        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, quit: false };
+        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, scale: live.window.scale_factor() as f32, resize: None, fullscreen: None, quit: false };
         self.game.frame(&mut f);
-        let (quit, c, post) = (f.quit, f.clear, f.post);
+        let (quit, c, post, resize, fullscreen) = (f.quit, f.clear, f.post, f.resize, f.fullscreen);
+        if let Some([w, h]) = resize { let _ = live.window.request_inner_size(PhysicalSize::new(w, h)); }
+        if let Some(fs) = fullscreen { live.window.set_fullscreen(fs.then_some(Fullscreen::Borderless(None))); }
         let view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let gpu = &mut live.gpu;
         let mut enc = gpu.device.create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
@@ -107,7 +133,7 @@ impl<G: Game> Shell<G> {
         gpu.queue.submit([enc.finish()]);
         live.window.pre_present_notify();
         live.gpu.queue.present(frame);
-        self.input.pressed.clear();
+        self.input.end_frame();
         self.frames += 1;
         if quit || self.cfg.max_frames.is_some_and(|m| self.frames >= m) { event_loop.exit(); return; }
         live.window.request_redraw();
@@ -137,6 +163,16 @@ impl<G: Game> ApplicationHandler for Shell<G> {
                     ElementState::Released => { self.input.down.remove(&k); }
                 }
             },
+            WindowEvent::CursorMoved { position, .. } => self.input.mouse = [position.x as f32, position.y as f32],
+            WindowEvent::MouseInput { state, button: MouseButton::Left, .. } => {
+                let down = state == ElementState::Pressed;
+                if down && !self.input.mouse_down { self.input.mouse_pressed = true; }
+                self.input.mouse_down = down;
+            }
+            WindowEvent::Touch(t) => {
+                let phase = match t.phase { TouchPhase::Started => Phase::Started, TouchPhase::Moved => Phase::Moved, TouchPhase::Ended => Phase::Ended, TouchPhase::Cancelled => Phase::Cancelled };
+                self.input.touch(t.id, phase, [t.location.x as f32, t.location.y as f32]);
+            }
             WindowEvent::RedrawRequested => self.redraw(event_loop),
             _ => {}
         }

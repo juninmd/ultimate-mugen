@@ -152,7 +152,7 @@ impl MatchRenderer {
         let s = g.view_scale;
         let focus_screen = (ox0 + fvx * s0, oy0 + fvy * s0);
         if gain > 0.0 { vfx.draw_weather(gain); vfx.draw_lines(focus_screen, gain); }
-        if let Some((t, c)) = m.flash { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(c[0] / 255.0, c[1] / 255.0, c[2] / 255.0, (t as f32 / 10.0).min(0.85))); }
+        if let Some((t, c)) = m.flash.filter(|_| gain > 0.2) { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(c[0] / 255.0, c[1] / 255.0, c[2] / 255.0, (t as f32 / 10.0).min(0.85))); }
         // letterbox bars
         let (w, h) = (screen_width(), screen_height());
         if g.ox > 0.0 { draw_rectangle(0.0, 0.0, g.ox, h, BLACK); draw_rectangle(w - g.ox, 0.0, g.ox, h, BLACK); }
@@ -209,7 +209,7 @@ impl MatchRenderer {
         let hit = f.hit_shake > 0 && f.move_type == 'H';
         if hit { x += if f.hit_shake % 2 == 1 { 1.5 } else { -1.5 }; }
         let mut o = DrawOpts { angle: if f.angle_draw { f.angle } else { 0.0 }, ..Default::default() };
-        if hit && f.hit_shake % 4 < 2 && !f.ghv.guarded { o.flash = 0.55; }
+        if hit && f.hit_shake % 4 < 2 && !f.ghv.guarded && g.fx_gain > 0.2 { o.flash = 0.55; }
         if let Some(p) = &f.palfx {
             if p.add.iter().sum::<f32>() > 200.0 { o.flash = 0.6; } else if p.add[0] > p.add[2] + 40.0 { o.tint = Color::new(1.0, 0.7, 0.6, 1.0); } else if p.add[2] > p.add[0] + 40.0 { o.tint = Color::new(0.6, 0.8, 1.0, 1.0); }
         }

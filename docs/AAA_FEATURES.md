@@ -95,3 +95,48 @@ Fontes (resumos de busca; as páginas primárias de Capcom/Epic/GDC não resolve
 - **Game feel**: manter feedback separado da lógica e oferecer opção de reduzir efeitos (já em *Vídeo → Efeitos de impacto*).
 
 Correção visual desta rodada: o glifo "✕" não existe na fonte de exibição; caídos agora são marcados com uma cruz desenhada.
+
+---
+
+# Rodada 6 — pesquisa de HUD, som e modo treino
+
+Fontes (resumos de busca; sites primários bloqueados pela política de rede da sessão):
+- **HUD do SF6** — [SuperCombo Wiki](https://wiki.supercombo.gg/w/Street_Fighter_6/HUD), [manual oficial](https://game.capcom.com/manual/SF6/en/ps5/page/3/3), [guia de HUD](https://www.argentics.io/game-hud-design): avisos pop-up para **first attack, counter hit**, throw escape e reversal; estados sinalizados por **cor** (o Drive Gauge fica cinza vazio); a leitura do HUD precisa **sobreviver a blur, tremor, pós-processamento e escalas menores** → nosso HUD é desenhado *depois* do pós-processo (nunca recebe blur/aberração) e ganhou o banner **FIRST ATTACK** (uma vez por round, fora do treino).
+- **Modo treino moderno** — [EventHubs](https://www.eventhubs.com/news/2022/sep/16/sf6-training-visual-frame-data/), [Fighters Generation](https://www.fightersgeneration.com/news1/sf6-sep22-6.htm): **histórico de inputs**, dados do ataque (dano do combo), HUD configurável → no **Treino**: histórico dos últimos 14 inputs (seta de direção, botões, frames segurados) e linha "ÚLTIMO COMBO · hits · dano".
+- **Design de som** — [guia Pixflow](https://pixflow.net/blog/punch-impact-sound-effects-for-fight-scenes/), [SoundBridge](https://www.soundbridge.io/game-audio-soundbridge-fighting-game-scene): soco = **transiente curto + corpo grave + (voz)**, 2–4 camadas **separadas por faixa de frequência**, variações e **ducking da música** nos impactos → já implementado (transiente em passa-alta, corpo em queda de pitch, crunch em banda, 3 variações em rodízio, ducking em super/KO).
+- Tekken 8: nada confiável sobre HUD/treino nas buscas; tratado como não verificado.
+
+---
+
+# Rodada 7 — acessibilidade (fotossensibilidade) e anúncio de round
+
+Fontes (resumos de busca): [Xbox Accessibility Guideline 117](https://learn.microsoft.com/en-us/xbox/accessibility/xbox-accessibility-guidelines/117) (tremor e blur radial desligáveis ou numa escala 0–100 %), [Guideline 118](https://learn.microsoft.com/en-us/xbox/accessibility/xbox-accessibility-guidelines/118) (flash = variação de ~10 % de luminância, ~20 % da tela; testar gatilhos fotossensíveis), WCAG 2.1 e [guia da Unity](https://unity.com/blog/video-game-accessibility-basics) (no máximo **3 flashes por segundo**); [Guilty Gear — Heaven or Hell](https://guiltygear.fandom.com/wiki/Heaven_or_Hell) (anúncio ciente da contagem de rounds: "Final" no duelo decisivo); [GameDesignSkills](https://gamedesignskills.com/game-design/combat-design/) e [TV Tropes](https://tvtropes.org/pmwiki/pmwiki.php/Main/HitSpark) (faísca de defesa suave e azul, golpe pesado maior e caótico, o VFX precisa cair exatamente no hit-stop — já era o caso).
+
+Implementado:
+- **Limite de 3 flashes grandes por segundo** (`Vfx::flash_add` / `invert_add`, espaçamento mínimo de 0,34 s, com teste) — vale em todos os níveis.
+- **Efeitos de impacto → "Mínimo (fotossensibilidade)"**: desliga flashes, quadro de impacto, tremor, zoom, blur radial, aberração, partículas/clima, o flash branco no sprite atingido e o flash de tela do M.U.G.E.N. (os níveis Reduzido/Normal/Intenso continuam escalando em 40/100/130 %). Config salva em `impact_lv`.
+- **Anúncio "FINAL ROUND"** no round decisivo (1×1 em melhor de 3); lutas de round único (sequência de equipe) nunca dizem "final". Coberto por teste.
+- Os níveis de pós-processamento já permitem desligar bloom/aberração (Vídeo → Pós-processamento); no celular o padrão é Médio.
+
+---
+
+# Rodada 8 — pesquisa de *features* (netcode, controles simples, seleção) e replay
+
+Fontes (resumos de busca; sites primários bloqueados pela rede da sessão):
+- **Rollback netcode** — [Push Square](https://www.pushsquare.com/news/2022/06/rejoice-street-fighter-6-has-rollback-netcode-and-cross-play), [Gematsu](https://www.gematsu.com/2022/06/street-fighter-6-supports-rollback-netcode-cross-play), [Sportskeeda (MK1)](https://sportskeeda.com/esports/mortal-kombat-1-connectivity-guide-does-rollback-netcode), [GameBrief](https://www.gamebrief.net/glossary/rollback-netcode): rollback (GGPO, 2006) virou padrão do gênero (Strive, SF6, MK1, Tekken 8). Exige **simulação determinística em passo fixo + estado serializável**.
+- **Controles simples** — [Capcom (manual SF6)](https://game.capcom.com/manual/SF6/en/ps5/page/2/3), [Red Bull](https://www.redbull.com/int-en/street-fighter-6-modern-vs-classic-controls), [EventHubs](https://www.eventhubs.com/news/2023/jul/27/sf6-director-game-classic-controls/), [DashFight (GBVS Rising)](https://dashfight.com/news/control-scheme-in-granblue-fantasy-versus-rising-4481): SF6 *Modern* faz especiais com um botão e **paga com ~20 % menos dano**; GBVS permite **misturar** inputs simples e técnicos na mesma luta, com **recarga maior** nos simples e **+10 % de dano** nos técnicos.
+- **Seleção de personagem** — [ResetEra](https://www.resetera.com/threads/which-relatively-recent-1-year-old-fighting-game-has-the-best-character-select-screen.809688/): a do SF6 é elogiada pelas **animações idle** que mostram personalidade antes de escolher; grandes elencos exigem layout em camadas/rolagem → já feito (idle animado na prévia, grade com rolagem, filtro, aleatório, até 5 por equipe).
+
+## O que isso gerou
+- **Prova de determinismo** (pré-requisito de replay e rollback): teste `simulation_is_deterministic_for_replays` — mesmas entradas → mesmo estado a cada 100 ticks, 1v1 e 2v2 simultâneo, com golpes realmente trocados.
+- **Replay da última luta** (novo item *Replay* na tela de resultado; indicador ● REPLAY no HUD): grava as entradas de todos os lutadores por tick e re-simula. Verificado de ponta a ponta no app (carregar → gravar → reproduzir 700 ticks → mesmo estado final: `replay-check: identical=true`). Não grava duelos da sequência de equipe.
+
+## Roadmap priorizado (não implementado)
+| Prioridade | Feature | Base / observação |
+|---|---|---|
+| Alta | **Rollback netcode** | motor já é determinístico e de passo fixo (provado); falta serializar/restaurar o estado do `Match` e transporte UDP/WebRTC |
+| Alta | **Compensação dos controles simples** (SP1–SP3) | pesquisa: ~−20 % de dano (SF6) ou recarga maior (GBVS); hoje os especiais simples não têm custo |
+| Média | **Assistências estilo Kameo** | MK1: parceiro chamado por botão, recarga de ~7 s com retrato escurecido |
+| Média | **Tag / troca no combo** | MvCI: troca a qualquer momento |
+| Média | **Frame meter / hitboxes no treino** | SF6 tem barra de frames; já há hitboxes (F2) e histórico de inputs |
+| Baixa | **Replay salvo em arquivo / compartilhável** | as entradas já são gravadas; falta serializar com versão e hash dos pacotes |

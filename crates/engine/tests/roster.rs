@@ -154,3 +154,65 @@ fn five_vs_five_simul_runs_and_ends_only_when_whole_team_falls() {
     for _ in 0..5 { m.tick(&[0; 10]); }
     assert_eq!((m.round_state, m.winner_side), (3, 0));
 }
+
+#[test]
+fn deciding_round_is_announced_as_final() {
+    let mut m = Match::new(common_def(), None, flat_stage());
+    m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 0, 0, 1);
+    m.add_player(Arc::new(compile_native(&load("shion"), 1, false)), 1, 0, 1);
+    m.start_round();
+    assert_eq!(m.announce.as_ref().unwrap().text, "ROUND 1");
+    m.wins = [1, 1]; m.round_no = 3; m.start_round();
+    assert_eq!(m.announce.as_ref().unwrap().text, "FINAL ROUND");
+    // single-round bouts (team sequence) never say "final"
+    m.rounds_to_win = 1; m.wins = [0, 0]; m.start_round();
+    assert!(m.announce.as_ref().unwrap().text.starts_with("ROUND"));
+}
+
+/// Hash of everything gameplay-relevant, to compare two simulations tick by tick.
+fn state_hash(m: &Match) -> u64 {
+    let mut h: u64 = 1469598103934665603;
+    let mut mix = |v: u64| { h ^= v; h = h.wrapping_mul(1099511628211); };
+    for f in &m.fighters {
+        mix(f.id as u64); mix(f.life.to_bits() as u64); mix(f.power.to_bits() as u64); mix(f.pos.x.to_bits() as u64); mix(f.pos.y.to_bits() as u64);
+        mix(f.state_no as u64); mix(f.state_time as u64); mix(f.anim_no as u64); mix(f.hit_pause as u64);
+    }
+    mix(m.projectiles.len() as u64); mix(m.explods.len() as u64); mix(m.round_state as u64); mix(m.timer as u64);
+    h
+}
+
+fn scripted(i: usize, k: usize) -> u32 { // deterministic "button masher" for fighter k
+    let x = (i.wrapping_mul(2654435761).wrapping_add(k * 40503) >> 7) as u32;
+    let dirs = [0, R, L, D, D | R, U];
+    let btn = [0, X, Y, A, B, X | Y, D2, W, 0, 0];
+    dirs[(x % 6) as usize] | btn[((x >> 3) % 10) as usize]
+}
+
+/// Replays and rollback netcode both need a bit-for-bit deterministic simulation: the same inputs must give the same state.
+#[test]
+fn simulation_is_deterministic_for_replays() {
+    for (ids, simul) in [(&["kaito", "shion"][..], false), (&["kaito", "shion", "akio", "suzume"][..], true)] {
+        let build = || {
+            let mut m = Match::new(common_def(), None, flat_stage());
+            m.team_simul = simul;
+            for (k, id) in ids.iter().enumerate() { m.add_player(Arc::new(compile_native(&load(id), 1, false)), k % 2, 0, 1); }
+            m.start_round();
+            m
+        };
+        let (mut a, mut rec) = (build(), vec![]);
+        let n = ids.len();
+        let mut hashes = vec![];
+        for i in 0..900 {
+            let bits: Vec<u32> = (0..n).map(|k| scripted(i, k)).collect();
+            a.tick(&bits);
+            rec.push(bits);
+            if i % 100 == 99 { hashes.push(state_hash(&a)); }
+        }
+        let mut b = build();
+        for (i, bits) in rec.iter().enumerate() {
+            b.tick(bits);
+            if i % 100 == 99 { assert_eq!(state_hash(&b), hashes[i / 100], "simul={simul}: replay diverged at tick {i}"); }
+        }
+        assert!(a.fighters.iter().any(|f| f.life < f.life_max), "the scripted fight actually exchanged hits (simul={simul})");
+    }
+}

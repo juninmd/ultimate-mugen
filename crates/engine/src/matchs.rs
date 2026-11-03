@@ -369,7 +369,9 @@ impl Match {
             self.change_state(i, 5900, d);
             self.fighters[i].ctrl = false;
         }
-        self.announce = Some(Announce { text: format!("ROUND {}", self.round_no), time: 70, total: 70 });
+        // round-count-aware announcer (Guilty Gear: "Final" for the deciding duel)
+        let decider = self.rounds_to_win > 1 && self.wins[0] == self.rounds_to_win - 1 && self.wins[1] == self.rounds_to_win - 1;
+        self.announce = Some(Announce { text: if decider { "FINAL ROUND".into() } else { format!("ROUND {}", self.round_no) }, time: 70, total: 70 });
         self.events.push(Event::RoundStart(self.round_no));
     }
 

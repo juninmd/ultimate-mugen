@@ -42,7 +42,9 @@ pub struct Vfx {
     sz: f32, super_active: bool,
     /// sound requests produced by the effects layer (drained by the session)
     pub sfx: Vec<&'static str>,
-    combo: [i32; 2], meter: [i32; 2],
+    combo: [i32; 2], meter: [i32; 2], first_hit: bool,
+    /// seconds since the last large full-screen flash / colour inversion (WCAG: no more than 3 flashes per second)
+    flash_clock: f32,
     snap: Vec<Snap>, pre_mt: Vec<char>, rng: u32, tick: u32,
 }
 
@@ -51,7 +53,7 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 { a + (b - a) * t }
 impl Vfx {
     pub fn new() -> Self {
         Vfx { splats: vec![], lights: vec![], weather: Weather::None, clock: 0.0, invert_t: 0.0, dist_zoom: 0.0, dist_target: 0.0, parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
-            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sz: 0.0, super_active: false, sfx: vec![], combo: [0; 2], meter: [0; 2], snap: vec![], pre_mt: vec![], rng: 0x9e37_79b9, tick: 0 }
+            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sz: 0.0, super_active: false, sfx: vec![], combo: [0; 2], meter: [0; 2], first_hit: false, flash_clock: 1.0, snap: vec![], pre_mt: vec![], rng: 0x9e37_79b9, tick: 0 }
     }
     fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
     fn rr(&mut self, a: f32, b: f32) -> f32 { a + (b - a) * self.r() }
@@ -99,7 +101,14 @@ impl Vfx {
     }
     fn light(&mut self, x: f32, y: f32, r: f32, dur: f32, col: [f32; 3]) { self.lights.push(Light { x, y, r, t: 0.0, dur, col }); }
     /// Anime "impact frame" (colour inversion for a few ms) — used on super activation and KO.
-    pub fn force_impact(&mut self) { self.invert_t = 0.075; }
+    pub fn force_impact(&mut self) { self.invert_t = 0.075; self.flash_clock = 0.0; }
+    /// Large flashes are spaced >= 0.34 s apart (<= 3 per second); small ones pass through.
+    fn flash_add(&mut self, v: f32) {
+        if v >= 0.3 { if self.flash_clock < 0.34 { return; } self.flash_clock = 0.0; }
+        self.flash = self.flash.max(v);
+    }
+    fn invert_add(&mut self) { if self.flash_clock >= 0.34 { self.invert_t = 0.075; self.flash_clock = 0.0; } }
+    #[cfg(test)] pub fn flash_level(&self) -> f32 { self.flash }
     fn slashes(&mut self, x: f32, y: f32, dir: f32, n: usize, len: f32, col: [f32; 3]) {
         for i in 0..n {
             let a = (if dir >= 0.0 { 0.0 } else { std::f32::consts::PI }) + self.rr(-0.9, 0.9) + if i % 2 == 0 { 0.0 } else { 3.14159 };
@@ -161,9 +170,11 @@ impl Vfx {
                     // SF6-style colour paint, built behind the attacker so the source of the hit is readable
                     let (ax, scol) = (m.fighters.get(*attacker).map(|a| a.pos.x).unwrap_or(x - dir * 30.0), if *attacker_side == 0 { [0.13, 0.78, 1.0] } else { [1.0, 0.25, 0.55] });
                     self.splat(ax - dir * 6.0, y + 6.0, dir, 34.0 + mag * 22.0, scol);
-                    self.flash = self.flash.max(0.18);
+                    self.flash_add(0.18);
                     self.punch = self.punch.max(0.04);
                 }
+                // SF6-style pop-up notice for the first clean hit of the round
+                if !self.first_hit && m.round_state == 2 && !m.training { self.first_hit = true; self.banner("FIRST ATTACK", "", [0.4, 0.9, 1.0]); }
                 let counter = self.pre_mt.get(*defender).copied() == Some('A');
                 let _ = defender_side;
                 let col = if counter { [1.0, 0.35, 0.3] } else { [1.0, 0.92, 0.55] };
@@ -177,9 +188,9 @@ impl Vfx {
                     self.ring(x, y, 60.0, 0.5, 2.0, [1.0, 1.0, 1.0]);
                     self.glow(x, y, 50.0, 0.4, [1.0, 0.8, 0.3]);
                 }
-                self.flash = self.flash.max(0.55); self.chroma = self.chroma.max(1.0); self.radial = 1.0; self.trauma = (self.trauma + 0.4).min(1.0);
+                self.flash_add(0.55); self.chroma = self.chroma.max(1.0); self.radial = 1.0; self.trauma = (self.trauma + 0.4).min(1.0);
                 self.lines = 1.4; self.lines_col = [1.0, 0.85, 0.4];
-                self.invert_t = 0.075;
+                self.invert_add();
                 if let Some((x, y, f)) = m.fighters.iter().find(|f| f.id == *fighter).map(Self::chest_of) { self.splat(x - f * 10.0, y + 8.0, f, 80.0, if *side == 0 { [0.13, 0.78, 1.0] } else { [1.0, 0.25, 0.55] }); self.light(x, y, 190.0, 0.45, [1.0, 0.85, 0.45]); }
                 self.banner("SUPER ARTS", "", [1.0, 0.82, 0.3]);
             }
@@ -194,12 +205,12 @@ impl Vfx {
                     self.spark_burst(x, y, 1.0, 26, 8.0, [1.0, 0.4, 0.3], 3.14);
                     self.debris(x, y + 12.0, 14, [0.7, 0.6, 0.55]);
                 }
-                self.invert_t = 0.075; self.flash = 0.9; self.chroma = 1.0; self.radial = 1.0; self.trauma = 1.0; self.vig = 1.0; self.lines = 1.6; self.lines_col = [1.0, 0.35, 0.3];
+                self.invert_add(); self.flash_add(0.9); self.chroma = 1.0; self.radial = 1.0; self.trauma = 1.0; self.vig = 1.0; self.lines = 1.6; self.lines_col = [1.0, 0.35, 0.3];
                 let w = 1 - loser_side;
                 if m.roots().find(|f| f.side == w).is_some_and(|f| f.life >= f.life_max - 0.5) { self.sfx.push("perfect"); self.banner("PERFECT!", "vitória sem sofrer dano", [1.0, 0.85, 0.2]); }
             }
-            Event::Fight => { self.ring(m.camera.x, m.stage.zoffset - 60.0, 160.0, 0.6, 3.0, [1.0, 0.8, 0.3]); self.flash = self.flash.max(0.35); self.chroma = self.chroma.max(0.7); self.trauma = (self.trauma + 0.25).min(1.0); self.radial = 0.6; }
-            Event::RoundStart(_) => { self.slow_t = 0.0; self.ko_t = 0.0; }
+            Event::Fight => { self.ring(m.camera.x, m.stage.zoffset - 60.0, 160.0, 0.6, 3.0, [1.0, 0.8, 0.3]); self.flash_add(0.35); self.chroma = self.chroma.max(0.7); self.trauma = (self.trauma + 0.25).min(1.0); self.radial = 0.6; }
+            Event::RoundStart(_) => { self.slow_t = 0.0; self.ko_t = 0.0; self.first_hit = false; }
             _ => {}
         }
     }
@@ -264,6 +275,7 @@ impl Vfx {
         let (target, rate) = if self.super_active { (1.0, 5.0) } else { (0.0, 2.2) };
         self.sz += (target - self.sz) * (rate * dt).min(1.0);
         self.invert_t = (self.invert_t - dt).max(0.0);
+        self.flash_clock += dt;
         self.dist_zoom += (self.dist_target - self.dist_zoom) * (3.0 * dt).min(1.0);
         for sp in &mut self.splats { sp.t += dt; }
         self.splats.retain(|s| s.t < s.dur);
@@ -499,6 +511,18 @@ pub fn speed_lines(focus: (f32, f32), a: f32, col: [f32; 3], seed: u32, n: usize
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn big_flashes_are_limited_to_three_per_second() {
+        let mut v = Vfx::new();
+        let mut fired = 0;
+        for i in 0..60 { // one second at 60 fps, a big flash requested every frame
+            let before = v.flash_level();
+            v.flash = 0.0; v.flash_add(0.9); if v.flash_level() > before { fired += 1; }
+            v.update(1.0 / 60.0);
+        }
+        assert!(fired <= 3, "{fired} large flashes in one second");
+        assert!(fired >= 2, "but they are not suppressed entirely");
+    }
     #[test]
     fn slow_motion_eases_back_to_normal() {
         let mut v = Vfx::new();

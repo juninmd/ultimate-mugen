@@ -50,11 +50,22 @@ impl Batch {
         for (px, py, u, v) in [(x, y, u0, v0), (x + w, y, u1, v0), (x + w, y + h, u1, v1), (x, y + h, u0, v1)] {
             self.vertices.push(Vertex { pos: [px, py], uv: [u, v], pal: q.palette, mul: q.mul, add });
         }
-        let first = self.indices.len() as u32;
         self.indices.extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
+        self.extend_call(q.blend, 6);
+    }
+
+    pub fn push_tris(&mut self, verts: &[Vertex], indices: &[u32], blend: Blend) {
+        let base = self.vertices.len() as u32;
+        self.vertices.extend_from_slice(verts);
+        self.indices.extend(indices.iter().map(|i| base + i));
+        self.extend_call(blend, indices.len() as u32);
+    }
+
+    fn extend_call(&mut self, blend: Blend, count: u32) {
+        let first = self.indices.len() as u32 - count;
         match self.calls.last_mut() {
-            Some(c) if c.blend == q.blend => c.index_count += 6,
-            _ => self.calls.push(DrawCall { blend: q.blend, first_index: first, index_count: 6 }),
+            Some(c) if c.blend == blend => c.index_count += count,
+            _ => self.calls.push(DrawCall { blend, first_index: first, index_count: count }),
         }
     }
 }

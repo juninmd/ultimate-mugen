@@ -374,7 +374,7 @@ fn final_boss_is_complete_and_formidable() {
     let nc = load("oboro");
     assert!(nc.boss && nc.intro.is_some() && nc.taunt.is_some() && nc.form.is_some());
     let d = compile_native(&nc, 1, false);
-    assert!(d.boss && d.c("data.life", 0.0) >= 1500.0);
+    assert!(d.boss && d.c("data.life", 0.0) >= 2200.0, "tougher than the 1000-life roster");
     for no in [195, 196, 197, 198, 199, 200] { assert!(d.anims.contains_key(&no), "default anim {no}"); }
     let supers = nc.moves.iter().filter(|m| m.kind == "super").count();
     let specials = nc.moves.iter().filter(|m| m.kind == "special").count();
@@ -400,4 +400,64 @@ fn final_boss_is_complete_and_formidable() {
     }
     assert!(reached.iter().filter(|s| (1000..1100).contains(*s)).count() >= 3, "specials reachable: {reached:?}");
     assert!(reached.iter().filter(|s| **s >= 3000).count() >= 2, "both supers reachable: {reached:?}");
+}
+
+#[test]
+fn final_boss_is_faster_and_hits_harder_than_the_roster() {
+    let boss = compile_native(&load("oboro"), 1, false);
+    let reg = compile_native(&load("kaname"), 1, false); // same katana base kit
+    let total = |d: &ume_engine::chardef::CharDef, no: i32| d.anims.get(&no).map(|a| a.frames.iter().filter(|f| f.time > 0).map(|f| f.time).sum::<i32>()).unwrap_or(0);
+    // every timed frame is shorter (speed ×1.3): walk cycle, run cycle and the hit-reaction recover sooner
+    for no in [20, 100, 0] {
+        let (b, r) = (total(&boss, no), total(&reg, no));
+        assert!(r > 0 && b as f32 <= r as f32 * 0.85, "anim {no}: boss {b} ticks vs regular {r}");
+    }
+    assert!(boss.c("velocity.run.fwd.x", 0.0) > reg.c("velocity.run.fwd.x", 0.0) * 1.25, "runs faster");
+    assert!(boss.c("velocity.walk.fwd.x", 0.0) > reg.c("velocity.walk.fwd.x", 0.0) * 1.25, "walks faster");
+    assert!(boss.c("data.attack", 0.0) >= 125.0, "hits harder");
+    // the boss keeps charging its meter on its own
+    let mut m = Match::new(common_def(), None, flat_stage());
+    m.add_player(Arc::new(boss), 0, 0, 1);
+    m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 1, 0, 1);
+    m.start_round();
+    for _ in 0..140 { m.tick(&[0, 0]); }
+    let p0 = m.fighters[0].power;
+    for _ in 0..600 { m.tick(&[0, 0]); }
+    assert!(m.fighters[0].power > p0 + 150.0, "passive charge ({p0} -> {})", m.fighters[0].power);
+}
+
+#[test]
+fn final_boss_beats_a_competent_cpu_most_of_the_time() {
+    // baseline: a regular fighter at the same AI level against the same opponent, to show how much stronger the boss is
+    let base = duel_stats("kaname", false);
+    let (wins, hp_boss, hp_foe) = duel_stats("oboro", true);
+    eprintln!("baseline kaname(L8): wins {}/8, own life {:.2}, foe life {:.2}", base.0, base.1, base.2);
+    eprintln!("boss oboro(L8):      wins {wins}/8, own life {hp_boss:.2}, foe life {hp_foe:.2}");
+    assert!(wins >= 6, "the boss should beat a level-6 CPU in most matches ({wins}/8)");
+    assert!(hp_boss > base.1, "and more convincingly than a regular fighter");
+}
+
+fn duel_stats(id: &str, boss: bool) -> (u32, f32, f32) {
+    use ume_engine::ai::Ai;
+    use ume_engine::input::InputSource;
+    let mut boss_wins = 0;
+    let (mut boss_hp, mut foe_hp) = (0.0f32, 0.0f32);
+    let seeds = 8u32;
+    for seed in 0..seeds {
+        let mut m = Match::new(common_def(), None, flat_stage());
+        m.rounds_to_win = 1;
+        m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 0, 6, 1);
+        m.add_player(Arc::new(compile_native(&load(id), 1, false)), 1, 8, 1);
+        m.start_round();
+        if boss { for f in m.fighters.iter_mut().filter(|f| f.def.boss) { f.power = 2000.0; } }
+        let mut ais = [Ai::new(6, 11 + seed * 7), Ai::new(8, 99 + seed * 13)];
+        for _ in 0..(60 * 100) {
+            let b = [ais[0].poll(&m, 0), ais[1].poll(&m, 1)];
+            m.tick(&b);
+            if m.round_state >= 4 { break; }
+        }
+        boss_hp += m.fighters[1].life / m.fighters[1].life_max; foe_hp += m.fighters[0].life / m.fighters[0].life_max;
+        if m.winner_side == 1 { boss_wins += 1; }
+    }
+    (boss_wins, boss_hp / seeds as f32, foe_hp / seeds as f32)
 }

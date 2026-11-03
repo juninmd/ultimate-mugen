@@ -256,7 +256,7 @@ impl Vfx {
                 self.flash_add(0.8); self.invert_add(); self.chroma = 1.0; self.radial = 1.0; self.trauma = 1.0; self.vig = 0.6;
                 self.lines = 1.5; self.lines_col = col; self.sfx.push("transform");
             }
-            Event::Fight => { self.ring(m.camera.x, m.stage.zoffset - 60.0, 160.0, 0.6, 3.0, [1.0, 0.8, 0.3]); self.flash_add(0.35); self.chroma = self.chroma.max(0.7); self.trauma = (self.trauma + 0.25).min(1.0); self.radial = 0.6; }
+            Event::Fight => { if m.roots().any(|f| f.def.boss) { self.banner("CHEFE FINAL", "MIKAZUKI OBORO", [1.0, 0.15, 0.3]); self.sfx.push("ko"); } self.ring(m.camera.x, m.stage.zoffset - 60.0, 160.0, 0.6, 3.0, [1.0, 0.8, 0.3]); self.flash_add(0.35); self.chroma = self.chroma.max(0.7); self.trauma = (self.trauma + 0.25).min(1.0); self.radial = 0.6; }
             Event::RoundStart(_) => { self.slow_t = 0.0; self.ko_t = 0.0; self.first_hit = false; }
             _ => {}
         }
@@ -295,7 +295,7 @@ impl Vfx {
         self.super_active = m.pause.as_ref().is_some_and(|p| p.is_super);
         // awakened fighters burn with rising embers and crackling arcs; defeats get their own beat
         for f in m.fighters.iter().filter(|f| !f.is_helper) {
-            if f.form > 0 && f.alive && self.tick % 2 == 0 {
+            if (f.form > 0 || f.def.boss) && f.alive && self.tick % if f.form > 0 { 2 } else { 4 } == 0 {
                 let col = Self::form_color(f);
                 let (px, life) = (f.pos.x + self.rr(-14.0, 14.0), self.rr(0.5, 1.0));
                 let (vy, sz) = (-self.rr(0.8, 2.4), self.rr(0.7, 1.6));
@@ -412,12 +412,14 @@ impl Vfx {
     pub fn draw_back(&self, g: &Gfx, m: &Match, shx: f32, shy: f32) {
         let s = g.view_scale;
         let tp = |x: f32, y: f32| vec2(g.ox + (x - m.camera.x + m.view_w / 2.0 + shx) * s, g.oy + (y - m.camera.y + m.stage.zoffset + shy) * s);
-        for f in m.fighters.iter().filter(|f| !f.is_helper && f.form > 0 && f.alive) {
+        for f in m.fighters.iter().filter(|f| !f.is_helper && (f.form > 0 || f.def.boss) && f.alive) {
             let col = Self::form_color(f);
+            // the final boss always smoulders; awakening makes it blaze
+            let amb = if f.form > 0 { 1.0 } else { 0.55 };
             let hgt = f.def.c("size.height", 60.0) as f32 * 1.35;
             let t = self.clock;
             // light pillar while the awakening plays
-            if f.form_time < 85 {
+            if f.form > 0 && f.form_time < 85 {
                 let k = (f.form_time as f32 / 85.0).min(1.0);
                 let a = (1.0 - k).powf(0.6) * (f.form_time as f32 / 8.0).min(1.0);
                 let (l, r, top, bot) = (tp(f.pos.x - 26.0 * (1.0 - k * 0.4), f.pos.y), tp(f.pos.x + 26.0 * (1.0 - k * 0.4), f.pos.y), tp(f.pos.x, f.pos.y - 600.0).y, tp(f.pos.x, f.pos.y).y);
@@ -437,7 +439,7 @@ impl Vfx {
                     let (a, b) = (vec2(a.x - w, a.y), vec2(b.x + w, b.y));
                     let (topy, boty) = (tip.y, a.y);
                     let c = if layer == 0 { col } else { [1.0, 0.95, 0.85] };
-                    poly::fill(&[a, tip, b], |q| { let k = ((boty - q.y) / (boty - topy).abs().max(1.0)).clamp(0.0, 1.0); Color::new(c[0], c[1], c[2], (0.95 - layer as f32 * 0.2) * (1.0 - k).powf(1.1)) });
+                    poly::fill(&[a, tip, b], |q| { let k = ((boty - q.y) / (boty - topy).abs().max(1.0)).clamp(0.0, 1.0); Color::new(c[0], c[1], c[2], (0.95 - layer as f32 * 0.2) * amb * (1.0 - k).powf(1.1)) });
                 }
             }
         }

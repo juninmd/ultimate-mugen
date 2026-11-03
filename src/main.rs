@@ -11,7 +11,10 @@ mod postfx;
 mod session;
 mod settings;
 mod shots;
+mod stage_tour;
+mod stagefx;
 mod stages;
+mod texgen;
 mod ui;
 mod vfx;
 

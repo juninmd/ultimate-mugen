@@ -38,6 +38,7 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, det
   - [2. Formato Nativo UMF (JSON)](#2-formato-nativo-umf-json)
   - [3. Áudio e Fontes](#3-áudio-e-fontes)
 - [Como Contribuir](#como-contribuir)
+- [Releases e Atualização Automática](#releases-e-atualização-automática)
 - [Documentação Adicional](#documentação-adicional)
 - [Aviso Legal](#aviso-legal)
 
@@ -297,6 +298,24 @@ Contribuições são muito bem-vindas! Para garantir estabilidade e qualidade, s
 4. **Adicionando Novos Lutadores**:
    - Crie o arquivo `<nome>.json` em `assets/chars/`.
    - Adicione o novo lutador na lista de elenco em `src/registry.rs` e no teste de fumaça em `crates/engine/tests/roster.rs`.
+5. **Commits semânticos** (geram os releases, veja abaixo): `feat: …`, `fix: …`, `perf: …`; `feat!:` ou rodapé `BREAKING CHANGE:` para quebra de compatibilidade. `docs`, `chore`, `ci`, `test`, `refactor`, `style`, `build` não geram release. O título do PR (squash) **ou** todos os commits devem seguir o padrão — o check *Conventional commits* valida.
+
+---
+
+## Releases e Atualização Automática
+
+A **tag git é a fonte da verdade da versão** (o `version` do `Cargo.toml` é só a base antes da primeira tag). A cada push na `master`, o workflow `Release` (`.github/workflows/release.yml`):
+
+1. **Planeja** (`scripts/release-plan.mjs`): lê os commits desde a última tag `vX.Y.Z` — `feat` → minor, `fix`/`perf` → patch, `!`/`BREAKING CHANGE` → major (antes da 1.0, major vira minor; a 1.0.0 é uma decisão explícita). Só `docs/chore/ci/…` ⇒ nenhum release.
+2. **Compila** em Linux, Windows e macOS (`cargo build --release --locked`) com a versão carimbada via `UME_RELEASE_VERSION` e confere `ultimate-mugen --version`.
+3. **Publica** como *draft*: sobe os pacotes + `latest.json` (URLs e SHA-256) + `SHA256SUMS.txt`, **verifica** o draft contra o manifesto e só então publica — o que cria a tag `vX.Y.Z` no commit planejado. Reexecutar retoma o draft (idempotente); uma tag publicada nunca é sobrescrita.
+4. **Health check**: confirma que `releases/latest/download/latest.json` já expõe a nova versão.
+
+Primeiro release (histórico antigo sem commits semânticos) ou release forçado: *Actions → Release → Run workflow* e escolha `bump`. **Rollback:** `gh release delete vX.Y.Z --cleanup-tag --yes`.
+
+**No jogo (desktop):** ao abrir, uma verificação em segundo plano lê o `latest.json` público (HTTPS apenas, timeout de 8 s, falha silenciosa offline) e, havendo versão mais nova, mostra o aviso na tela de título. É **somente notificação** — nada é baixado nem executado automaticamente; o pacote vem da página de releases e pode ser conferido com o SHA-256 do manifesto. Desative com `--no-update-check` ou `UME_NO_UPDATE_CHECK=1`; builds locais (`…-dev`) não verificam. Diagnóstico sem janela: `ultimate-mugen --version` e `ultimate-mugen --check-update`.
+
+> Instalação automática exigiria assinar os pacotes (minisign/certificado) e embutir a chave pública no jogo; hoje o manifesto garante integridade, não autoria.
 
 ---
 

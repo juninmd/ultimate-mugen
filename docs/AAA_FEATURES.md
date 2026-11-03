@@ -140,3 +140,20 @@ Fontes (resumos de busca; sites primários bloqueados pela rede da sessão):
 | Média | **Tag / troca no combo** | MvCI: troca a qualquer momento |
 | Média | **Frame meter / hitboxes no treino** | SF6 tem barra de frames; já há hitboxes (F2) e histórico de inputs |
 | Baixa | **Replay salvo em arquivo / compartilhável** | as entradas já são gravadas; falta serializar com versão e hash dos pacotes |
+
+---
+
+# Rodada 9 — motor, jogabilidade e HUD v3 em polígonos
+
+Fontes (resumos de busca): [Dustloop — Damage Scaling](https://www.dustloop.com/w/GBVS/Damage), [Dustloop — GGAC Damage](https://www.dustloop.com/w/GGAC/Damage), [Giant Bomb — Proration](https://giantbomb.com/wiki/Concepts/Proration): a escala de dano existe para **combos não matarem de vida cheia**, cada golpe tem a sua taxa, golpes rápidos escalam mais, e **supers mantêm um piso de dano**. Sobre o empurrão no canto (*corner push-back*), as buscas não trouxeram fonte — é um padrão do gênero implementado por conhecimento geral, não verificado nesta sessão.
+
+## Motor / jogabilidade
+- **Escala de dano em combos** (`matchs::combo_scale`): 100 % nos dois primeiros golpes, depois 90 → 80 → 70 → 60 → 50 → 40 → 30 → 25 %, piso de 20 % e dano mínimo de 1; vale para lutadores nativos (M.U.G.E.N. mantém as próprias regras). O HUD mostra "DANO xx %" do próximo golpe.
+- **Empurrão no canto** (`corner_push`, `Match::at_corner`): defensor encostado na borda empurra o atacante para trás (1,2 a 4,5 px conforme o knock-back) em vez de absorver tudo.
+- **Squash & stretch**: aterrissagens achatam o lutador, saltos o esticam (pés plantados, decai em ~0,3 s).
+- Testes: `combo_damage_scales_down_and_never_vanishes`, `native_combos_are_prorated_and_corners_push_attackers_back`.
+
+## "Mais polígonos"
+O motor é 2D (sprites rasterizados); o ganho de geometria está nas camadas desenhadas por malha, via `src/poly.rs` (preenchimentos convexos com **cor por vértice**, chanfros, paralelogramos, hexágonos, círculos/anéis com facetas adaptativas à resolução):
+- **HUD v3**: moldura metálica inclinada com bisel dourado, barra de vida em gradiente vertical + brilho + borda quente + 10 marcas de segmento, rastro de dano, retratos em **moldura octogonal**, timer **hexagonal duplo**, pips de round em **losango**, medidor de super em **três células** com **hexágono** de nível, plaquetas de nome com a cor do lutador.
+- **VFX**: faíscas em **lâmina afilada** (cabeça clara, cauda que some), estilhaços **irregulares de 5 pontas** com luz/sombra, brasas em losango giratório, anéis de choque e brilhos com facetas que aumentam com a resolução.

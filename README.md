@@ -38,6 +38,7 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, mul
 - **Modos de equipe**: *Sequência 3v3* (estilo KOF: ordem de entrada, vencedor mantém a vida e o medidor de super compartilhado) e *Paralelo até **5v5*** (10 lutadores na tela; companheiros por IA, `Tab` troca o lutador que você controla; o round acaba quando a equipe inteira cai). Ver [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md).
 - **Áudio em camadas**: SFX sintetizados com transiente + corpo + crunch, 3 variações por golpe, reverb, stingers de round/KO/vitória, pings de combo e *ducking* da música. **HUD** com retratos reais, barras de parceiro, roster de equipe e alarmes.
 - **Replay** da última luta (tela de resultado → Replay): o motor é determinístico e o replay re-simula as entradas gravadas, com teste. Ver o *roadmap* de features em [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md).
+- **Motor/jogabilidade**: escala de dano em combos (nativos), empurrão no canto, squash & stretch; **HUD v3** e efeitos construídos com polígonos (gradiente por vértice, chanfros, hexágonos). Ver rodada 9 em [`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md).
 - Modos **Arcade, Versus CPU, 2 Jogadores, Treino (hitboxes), CPU vs CPU**; IA compatível com qualquer personagem.
 - **Controles**: teclado, gamepads (DualShock/DualSense com vibração em golpes, defesa, super e K.O.; lightbar azul/vermelha por jogador), toque com analógico virtual e SP1/SP2/SP3/SUPER de um toque.
 

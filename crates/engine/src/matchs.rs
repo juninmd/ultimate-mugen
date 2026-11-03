@@ -61,6 +61,15 @@ pub enum Event {
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
 }
 
+/// Modern-fighter damage proration: every hit of a combo deals less than the one before (never below 20 %).
+/// `hits_before` = hits already landed in the combo. Applies to native (UMF) attackers; M.U.G.E.N. characters keep their own rules.
+pub fn combo_scale(hits_before: i32) -> f32 {
+    const T: [f32; 10] = [1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25];
+    T[(hits_before.max(0) as usize).min(T.len() - 1)].max(0.2)
+}
+/// How far (game px) the attacker is shoved back when the defender is cornered, given the hit's knock-back speed.
+pub fn corner_push(xvel: f32) -> f32 { (xvel.abs() * 0.5).clamp(1.2, 4.5) }
+
 pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_super: bool, pub darken: bool }
 pub struct Announce { pub text: String, pub time: i32, pub total: i32 }
 
@@ -77,6 +86,8 @@ pub struct Match {
     pub round_state: i32, pub round_no: i32, pub round_time: i32,
     /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
     pub team_simul: bool,
+    /// how many times an attacker was pushed back because the defender was cornered (diagnostics / tests)
+    pub corner_pushes: u32,
     pub timer: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
@@ -94,7 +105,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: 426.67, view_h: 240.0,
-            team_simul: false, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, corner_pushes: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, flash: None, slow_mo: 0,
             events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]),
         }
@@ -653,6 +664,17 @@ impl Match {
         }
     }
 
+    /// Is fighter `i` standing against the edge of the playable area (screen / stage bound)?
+    pub fn at_corner(&self, i: usize) -> bool {
+        let f = &self.fighters[i];
+        let left = self.camera.x - self.view_w / 2.0; let right = self.camera.x + self.view_w / 2.0;
+        let (bl, br, vw) = (self.stage.bound_left, self.stage.bound_right, self.view_w);
+        let lw = if f.facing > 0.0 { f.back_width() } else { f.front_width() };
+        let rw = if f.facing > 0.0 { f.front_width() } else { f.back_width() };
+        let (minx, maxx) = (left.max(bl - vw / 2.0) + lw, right.min(br + vw / 2.0) - rw);
+        f.pos.x <= minx + 2.0 || f.pos.x >= maxx - 2.0
+    }
+
     pub fn apply_hit(&mut self, a: usize, d: usize, hd: &HitDefData, at: (f32, f32), proj: Option<(i32, f32)>) {
         let guarded = self.is_guarding(d, hd);
         let from_proj = proj.is_some();
@@ -699,9 +721,11 @@ impl Match {
             self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false);
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
         } else {
-            let dmg = (hd.damage * attack_mul / self.fighters[d].defence_mul.max(0.01)).round();
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
+            let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale(prev_hc) } else { 1.0 };
+            let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].defence_mul.max(0.01)).round();
+            if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             let prev_fall = self.fighters[d].ghv.fall;
             {
                 let fd = &mut self.fighters[d];
@@ -754,6 +778,13 @@ impl Match {
             if hd.envshake_time > 0 { self.do_shake(hd.envshake_time, 4.0); }
             let droot = self.fighters[d].root;
             self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
+        }
+        // cornered defenders push the attacker back instead of absorbing all the knock-back (SF/Tekken/GG behaviour)
+        if !from_proj && self.fighters[a].state_type != 'A' && self.at_corner(d) {
+            let push = corner_push(self.fighters[d].ghv.xvel);
+            let away = if apos.x <= self.fighters[d].pos.x { -1.0 } else { 1.0 };
+            self.fighters[a].pos.x += away * push;
+            self.corner_pushes += 1;
         }
         let dmg = self.fighters[d].ghv.damage;
         self.events.push(Event::Hit { attacker_side: aside, defender_side: self.fighters[d].side, damage: dmg, guarded, heavy: hd.animtype >= 2, attacker: self.idx(aroot).unwrap_or(a), defender: d });

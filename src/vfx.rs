@@ -1,6 +1,7 @@
 //! AAA-style impact feedback: layered particles (sparks, glows, dust, debris), shockwave rings, damage numbers, banners,
 //! camera punch/KO zoom, slow-motion, screen-shake "trauma", and the parameters fed to the post-processing pass.
 //! Everything here is presentation only — the deterministic simulation is untouched.
+use crate::poly;
 use crate::render::Gfx;
 use crate::ui::Ui;
 use macroquad::prelude::*;
@@ -40,6 +41,8 @@ pub struct Vfx {
     super_t: f32, super_owner: u32,
     /// cinematic super camera 0..1 (eased in while the super pause runs, eased out afterwards: build-up + follow-through)
     sz: f32, super_active: bool,
+    /// per-fighter squash (>0) / stretch (<0) amount, decays to 0 — landings squash, take-offs stretch
+    squash: Vec<f32>,
     /// sound requests produced by the effects layer (drained by the session)
     pub sfx: Vec<&'static str>,
     combo: [i32; 2], meter: [i32; 2], first_hit: bool,
@@ -53,11 +56,13 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 { a + (b - a) * t }
 impl Vfx {
     pub fn new() -> Self {
         Vfx { splats: vec![], lights: vec![], weather: Weather::None, clock: 0.0, invert_t: 0.0, dist_zoom: 0.0, dist_target: 0.0, parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
-            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sz: 0.0, super_active: false, sfx: vec![], combo: [0; 2], meter: [0; 2], first_hit: false, flash_clock: 1.0, snap: vec![], pre_mt: vec![], rng: 0x9e37_79b9, tick: 0 }
+            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sz: 0.0, super_active: false, squash: vec![], sfx: vec![], combo: [0; 2], meter: [0; 2], first_hit: false, flash_clock: 1.0, snap: vec![], pre_mt: vec![], rng: 0x9e37_79b9, tick: 0 }
     }
     fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
     fn rr(&mut self, a: f32, b: f32) -> f32 { a + (b - a) * self.r() }
 
+    /// Scale factors (x, y) for fighter `i` from its squash/stretch state; feet stay planted (sprites are anchored at the axis).
+    pub fn squash_scale(&self, i: usize) -> [f32; 2] { let q = self.squash.get(i).copied().unwrap_or(0.0); [1.0 + 0.09 * q, 1.0 - 0.12 * q] }
     pub fn ko_active(&self) -> bool { self.ko_t > 0.0 }
     /// Real-time scale applied to the fixed-step accumulator (KO slow motion).
     pub fn time_scale(&self) -> f32 {
@@ -220,13 +225,15 @@ impl Vfx {
         self.tick = self.tick.wrapping_add(1);
         { let xs: Vec<f32> = m.roots().filter(|f| f.alive).map(|f| f.pos.x).collect(); if xs.len() >= 2 { let (lo, hi) = (xs.iter().cloned().fold(f32::MAX, f32::min), xs.iter().cloned().fold(f32::MIN, f32::max)); self.dist_target = ((260.0 - (hi - lo)) / 260.0).clamp(0.0, 1.0) * 0.07; } }
         self.snap.resize(m.fighters.len(), Snap::default());
+        self.squash.resize(m.fighters.len(), 0.0);
         for (side, (fi, f)) in m.fighters.iter().enumerate().filter(|(_, f)| !f.is_helper).enumerate() {
             let _ = side;
             let now = Snap { grounded: f.state_type != 'A', vy: f.vel.y, vx: f.vel.x, move_type: f.move_type };
             let prev = self.snap[fi];
             if !prev.grounded && now.grounded { let n = 6 + (prev.vy.abs() * 1.6) as usize; self.dust(f.pos.x, f.pos.y, n.min(16), 1.6, 0.5, [0.85, 0.82, 0.78]); if prev.vy > 3.0 { self.sfx.push("land"); }
+            if let Some(q) = self.squash.get_mut(fi) { *q = (prev.vy / 7.0).clamp(0.35, 1.0); }
  if prev.vy > 5.0 { self.ring(f.pos.x, f.pos.y - 1.0, 26.0, 0.25, 1.2, [0.9, 0.9, 0.9]); self.trauma = (self.trauma + 0.1).min(1.0); } }
-            if prev.grounded && !now.grounded && now.vy < -2.0 { self.sfx.push("jump"); self.dust(f.pos.x, f.pos.y, 5, 1.2, 0.3, [0.85, 0.82, 0.78]); }
+            if prev.grounded && !now.grounded && now.vy < -2.0 { self.sfx.push("jump"); if let Some(q) = self.squash.get_mut(fi) { *q = -0.8; } self.dust(f.pos.x, f.pos.y, 5, 1.2, 0.3, [0.85, 0.82, 0.78]); }
             if now.grounded && now.vx.abs() > 3.2 && prev.vx.abs() <= 3.2 && f.state_type == 'S' { self.sfx.push("dash"); }
             if now.grounded && now.vx.abs() > 3.2 && self.tick % 4 == 0 && f.state_type == 'S' { let b = -f.facing; self.dust(f.pos.x + b * 6.0, f.pos.y, 2, 0.6, 0.25, [0.85, 0.82, 0.78]); }
             if f.move_type == 'H' && f.state_type == 'L' && !prev.grounded == false && prev.move_type != 'H' { self.dust(f.pos.x, f.pos.y, 9, 2.0, 0.4, [0.85, 0.82, 0.78]); }
@@ -271,6 +278,7 @@ impl Vfx {
         }
         self.parts.retain(|p| p.life > 0.0);
         self.clock += dt;
+        for q in &mut self.squash { *q *= 0.80f32.powf(dt * 60.0); if q.abs() < 0.01 { *q = 0.0; } }
         // DBFZ-style: slow ease-in to the close-up, even slower pull-back
         let (target, rate) = if self.super_active { (1.0, 5.0) } else { (0.0, 2.2) };
         self.sz += (target - self.sz) * (rate * dt).min(1.0);
@@ -353,7 +361,7 @@ impl Vfx {
             for (ang, dist, rs) in sp.drops.iter() {
                 let a2 = ang + if sp.dir < 0.0 { 3.14159 } else { 0.0 };
                 let p = vec2(c.x + a2.cos() * dist * sp.size * e * s * 1.2, c.y + a2.sin() * dist * sp.size * e * s * 0.9);
-                draw_circle(p.x, p.y, rs * sp.size * s * 0.5 * e.min(1.0), Color::new(sp.col[0], sp.col[1], sp.col[2], 0.85 * a));
+                poly::circle(p, rs * sp.size * s * 0.5 * e.min(1.0), Color::new(sp.col[0], sp.col[1], sp.col[2], 0.85 * a));
             }
         }
     }
@@ -420,8 +428,15 @@ impl Vfx {
             let a = (p.life / p.max).clamp(0.0, 1.0);
             let c = tp(p.x, p.y);
             match p.k {
-                Kind::Dust => draw_circle(c.x, c.y, p.size * s, Color::new(p.col[0], p.col[1], p.col[2], 0.35 * a)),
-                _ => { let r = p.size * s; let (sn, cs) = p.rot.sin_cos(); let pts = [vec2(-r, -r * 0.6), vec2(r, -r * 0.6), vec2(r, r * 0.6), vec2(-r, r * 0.6)].map(|q| c + vec2(q.x * cs - q.y * sn, q.x * sn + q.y * cs)); let col = Color::new(p.col[0], p.col[1], p.col[2], a); draw_triangle(pts[0], pts[1], pts[2], col); draw_triangle(pts[0], pts[2], pts[3], col); }
+                Kind::Dust => poly::circle(c, p.size * s, Color::new(p.col[0], p.col[1], p.col[2], 0.35 * a)),
+                _ => {
+                    // irregular 5-point shard, lit on one side
+                    let r = p.size * s * 1.4; let (sn, cs) = p.rot.sin_cos();
+                    let pts: Vec<Vec2> = [vec2(-r, -r * 0.4), vec2(-r * 0.1, -r * 0.9), vec2(r, -r * 0.2), vec2(r * 0.5, r * 0.8), vec2(-r * 0.6, r * 0.5)].iter().map(|q| c + vec2(q.x * cs - q.y * sn, q.x * sn + q.y * cs)).collect();
+                    let base = Color::new(p.col[0], p.col[1], p.col[2], a);
+                    poly::fill(&pts, |q| if q.x + q.y < c.x + c.y { poly::shade(base, 1.25) } else { poly::shade(base, 0.7) });
+                    poly::outline(&pts, 0.5 * s, Color::new(0.1, 0.05, 0.08, a * 0.6));
+                }
             }
         }
         // additive
@@ -430,9 +445,15 @@ impl Vfx {
             let a = (p.life / p.max).clamp(0.0, 1.0);
             let c = tp(p.x, p.y);
             match p.k {
-                Kind::Spark => { let t = tp(p.x - p.vx * 2.6, p.y - p.vy * 2.6); draw_line(c.x, c.y, t.x, t.y, (p.size * s).max(1.0), Color::new(p.col[0], p.col[1], p.col[2], a)); }
-                Kind::Ember => draw_circle(c.x, c.y, p.size * s * (0.6 + 0.4 * a), Color::new(p.col[0], p.col[1], p.col[2], a * 0.9)),
-                _ => { for i in 0..6 { let t = i as f32 / 6.0; draw_circle(c.x, c.y, p.size * s * (1.0 - t * 0.85), Color::new(p.col[0], p.col[1], p.col[2], a * 0.11)); } }
+                Kind::Spark => {
+                    let t = tp(p.x - p.vx * 2.8, p.y - p.vy * 2.8);
+                    let d = (t - c).normalize_or_zero(); let n = vec2(-d.y, d.x) * (p.size * s).max(1.0) * 0.9;
+                    let head = Color::new(1.0, 1.0, 0.92, a); let tail = Color::new(p.col[0], p.col[1], p.col[2], 0.0);
+                    // 4-point blade: wide bright head, long tapering tail
+                    poly::fill(&[c - d * (p.size * s * 0.6), c + n, t, c - n], |q| if (q - t).length() < 0.001 { tail } else if (q - c).length() < 0.001 { head } else { Color::new(p.col[0], p.col[1], p.col[2], a) });
+                }
+                Kind::Ember => { let r = p.size * s * (0.6 + 0.4 * a); poly::solid(&poly::regular(c, r * 1.5, 4, p.rot + p.life * 6.0), Color::new(p.col[0], p.col[1], p.col[2], a * 0.9)); }
+                _ => { for i in 0..6 { let t = i as f32 / 6.0; poly::circle(c, p.size * s * (1.0 - t * 0.85), Color::new(p.col[0], p.col[1], p.col[2], a * 0.11)); } }
             }
         }
         for p in self.parts.iter().filter(|p| p.k == Kind::Slash) {
@@ -448,12 +469,12 @@ impl Vfx {
         for l in &self.lights {
             let t = l.t / l.dur; let a = (1.0 - t).powi(2);
             let c = tp(l.x, l.y);
-            for i in 0..9 { let k = 1.0 - i as f32 / 9.0; draw_circle(c.x, c.y, l.r * s * k, Color::new(l.col[0], l.col[1], l.col[2], 0.032 * a)); }
+            for i in 0..9 { let k = 1.0 - i as f32 / 9.0; poly::circle(c, l.r * s * k, Color::new(l.col[0], l.col[1], l.col[2], 0.032 * a)); }
         }
         for r in &self.rings {
             let t = r.t / r.dur; let e = 1.0 - (1.0 - t).powi(3);
             let c = tp(r.x, r.y);
-            draw_circle_lines(c.x, c.y, lerp(r.r0, r.r1, e) * s, (r.w * (1.0 - t) + 0.4) * s, Color::new(r.col[0], r.col[1], r.col[2], (1.0 - t) * 0.9));
+            poly::ring(c, lerp(r.r0, r.r1, e) * s, (r.w * (1.0 - t) + 0.4) * s, Color::new(r.col[0], r.col[1], r.col[2], (1.0 - t) * 0.9));
         }
         gl_use_default_material();
         // damage numbers / labels

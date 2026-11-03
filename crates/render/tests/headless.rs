@@ -93,3 +93,50 @@ fn canvas_shapes_render() {
     let half = px(&img, 12, 52);
     assert!((126..=130).contains(&half[0]), "{half:?}");
 }
+
+fn post_render(device: &wgpu::Device, queue: &wgpu::Queue, p: &ume_render::PostParams) -> Vec<u8> {
+    let (w, h) = (64u32, 64u32);
+    let fmt = wgpu::TextureFormat::Rgba8Unorm;
+    let mut r = Renderer::new(device, fmt, [64, 64]);
+    let mut atlas = ume_render::Atlas::new(64, 64);
+    let mut canvas = ume_render::Canvas::new(&r, queue, &mut atlas).unwrap();
+    canvas.rect(0.0, 0.0, 32.0, 64.0, ume_render::Color::rgba(255, 0, 0, 255));
+    let mut post = ume_render::PostFx::new(device, fmt);
+    let target = device.create_texture(&wgpu::TextureDescriptor {
+        label: None, size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 }, mip_level_count: 1, sample_count: 1,
+        dimension: wgpu::TextureDimension::D2, format: fmt,
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC, view_formats: &[],
+    });
+    let view = target.create_view(&Default::default());
+    let out = device.create_buffer(&wgpu::BufferDescriptor { label: None, size: (w * h * 4) as u64, usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ, mapped_at_creation: false });
+    let mut enc = device.create_command_encoder(&Default::default());
+    let scene = post.scene_view(device, [w, h]).clone();
+    r.draw(device, queue, &mut enc, Target { view: &scene, size: [w as f32, h as f32], clear: Some(wgpu::Color::BLACK) }, &canvas.batch);
+    post.apply(queue, &mut enc, &view, p);
+    enc.copy_texture_to_buffer(
+        wgpu::TexelCopyTextureInfo { texture: &target, mip_level: 0, origin: wgpu::Origin3d::ZERO, aspect: wgpu::TextureAspect::All },
+        wgpu::TexelCopyBufferInfo { buffer: &out, layout: wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(w * 4), rows_per_image: Some(h) } },
+        wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+    );
+    queue.submit([enc.finish()]);
+    out.slice(..).map_async(wgpu::MapMode::Read, |_| {});
+    device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
+    let data = out.slice(..).get_mapped_range().unwrap().to_vec();
+    data
+}
+
+#[test]
+fn post_effects_composite() {
+    let Some((device, queue)) = gpu() else { eprintln!("no GPU adapter, skipping"); return; };
+    let near = |a: [u8; 4], b: [u8; 3]| (0..3).all(|i| (a[i] as i32 - b[i] as i32).abs() <= 3);
+    let plain = post_render(&device, &queue, &ume_render::PostParams::default());
+    assert!(near(px(&plain, 8, 32), [255, 0, 0]), "{:?}", px(&plain, 8, 32));
+    assert!(near(px(&plain, 56, 32), [0, 0, 0]), "{:?}", px(&plain, 56, 32));
+    let flash = post_render(&device, &queue, &ume_render::PostParams { flash: 0.5, ..Default::default() });
+    assert!(near(px(&flash, 56, 32), [128, 128, 128]), "{:?}", px(&flash, 56, 32));
+    let grey = post_render(&device, &queue, &ume_render::PostParams { saturation: 0.0, ..Default::default() });
+    let g = px(&grey, 8, 32);
+    assert!(g[0] == g[1] && g[1] == g[2] && (74..=80).contains(&g[0]), "{g:?}");
+    let glow = post_render(&device, &queue, &ume_render::PostParams { bloom: 1.0, ..Default::default() });
+    assert!(px(&glow, 36, 32)[0] > px(&plain, 36, 32)[0], "bloom should spill past the edge");
+}

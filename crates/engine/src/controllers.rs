@@ -2,7 +2,7 @@
 use crate::chardef::Controller;
 use crate::fighter::{asf, AfterImage, Bind, BindKind, HitOverride, PalFx};
 use crate::hitdef::{build, parse_sound_ref};
-use crate::matchs::{Event, Match, PauseState};
+use crate::matchs::{Event, Match};
 use std::sync::Arc;
 
 fn set_vars(m: &mut Match, i: usize, sc: &Controller, add: bool, target: usize) {
@@ -142,8 +142,12 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 let own = !r.trim().starts_with(['f', 'F']);
                 let vol = n(m, "volumescale", 100.0) as f32 / 100.0;
                 let ch = n(m, "channel", -1.0) as i32;
+                let (pv, abs) = if sc.has("abspan", 0) { (n(m, "abspan", 0.0), true) } else { (n(m, "pan", 0.0), false) };
+                let pan = crate::sctrl::sound_pan(m, i, pv as f32, abs);
+                let looping = n(m, "loop", 0.0) != 0.0;
+                let freq_mul = n(m, "freqmul", 1.0) as f32;
                 let f = &m.fighters[i];
-                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None };
+                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul };
                 m.events.push(ev);
             }
         }
@@ -243,33 +247,6 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         }
         "playerpush" => { let v = n(m, "value", 1.0) != 0.0; m.fighters[i].player_push = v; }
         "screenbound" => { let v = n(m, "value", 0.0) != 0.0; m.fighters[i].screen_bound = v; }
-        "envshake" => { let (t, a) = (n(m, "time", 1.0) as i32, n(m, "ampl", -4.0) as f32); m.do_shake(t, a); }
-        "pause" | "superpause" => {
-            let is_super = sc.kind == "superpause";
-            let time = n(m, "time", if is_super { 30.0 } else { 0.0 }) as i32;
-            let mt = n(m, "movetime", 0.0) as i32;
-            let darken = n(m, "darken", 1.0) != 0.0;
-            let by = m.fighters[i].id;
-            m.pause = Some(PauseState { by, time, move_time: mt, is_super, darken: is_super && darken });
-            if is_super {
-                let pa = n(m, "poweradd", 0.0) as f32;
-                m.add_power(i, pa);
-                let anim = sc.raw("anim").map(|s| s.trim().to_string());
-                let own = anim.as_ref().is_some_and(|a| a.starts_with(['s', 'S']));
-                let no = anim.as_ref().and_then(|a| a.trim_start_matches(['s', 'S', 'f', 'F']).trim().parse::<i32>().ok()).unwrap_or(30);
-                let (px, py) = (n2(m, "pos", 0.0, 0) as f32 * l, n2(m, "pos", 0.0, 1) as f32 * l);
-                if no >= 0 { m.spawn_super_fx(i, px, py, if own { no } else { -1 }); }
-                let snd = sc.raw("sound").map(|s| s.to_string());
-                let f = &m.fighters[i];
-                let ev = match parse_sound_ref(snd.as_deref()) {
-                    Some((g, idx, own)) if g >= 0 => Event::Sound { def: Some(f.def.clone()), group: g, index: idx, own, volume: 1.0, channel: -1, owner: f.id, builtin: None },
-                    _ => Event::Sound { def: None, group: -1, index: 0, own: false, volume: 1.0, channel: -1, owner: f.id, builtin: Some("super") },
-                };
-                let (side, who) = (f.side, f.root);
-                m.events.push(ev);
-                m.events.push(Event::Super { side, fighter: who });
-            }
-        }
         "afterimage" => { let (t, len) = (n(m, "time", 1.0) as i32, n(m, "length", 20.0) as usize); m.fighters[i].after_image = Some(AfterImage { time: t, length: len.min(30), trail: vec![] }); }
         "afterimagetime" => { let t = if sc.has("time", 0) { n(m, "time", 0.0) } else { n(m, "value", 0.0) } as i32; if let Some(a) = m.fighters[i].after_image.as_mut() { a.time = t; } }
         "palfx" => {
@@ -302,8 +279,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "defencemulset" => { let v = n(m, "value", 1.0) as f32; m.fighters[i].defence_mul = v; }
         "attackdist" => { let v = n(m, "value", 160.0) as f32; if let Some(h) = m.fighters[i].hitdef.as_mut() { h.guard_dist = v; } }
         "makedust" => { let (px, py) = (n2(m, "pos", 0.0, 0) as f32, n2(m, "pos", 0.0, 1) as f32); let f = &m.fighters[i]; let (x, y) = (f.pos.x + px * f.facing, f.pos.y + py); m.spawn_dust(i, x, y); }
-        "stopsnd" => {}
-        _ => { crate::ikemen::run(m, i, sc); }
+        _ => { if !crate::sctrl::run(m, i, sc) { crate::ikemen::run(m, i, sc); } }
     }
     let _ = Arc::strong_count(&m.common);
 }

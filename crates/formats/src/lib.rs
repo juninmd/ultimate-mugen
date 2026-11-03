@@ -16,10 +16,12 @@
 
 pub mod act;
 pub mod air;
+pub mod fnt;
 pub mod ini;
 pub mod pcx;
 pub mod png;
 pub mod sff;
+pub mod screenpack;
 pub mod snd;
 pub mod stage;
 pub mod vfs;

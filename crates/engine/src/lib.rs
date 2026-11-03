@@ -5,6 +5,7 @@ pub mod commands;
 pub mod input;
 pub mod chardef;
 pub mod cns;
+pub mod zss;
 pub mod loader;
 pub mod fighter;
 pub mod triggers;

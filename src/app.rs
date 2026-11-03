@@ -715,13 +715,15 @@ impl App {
     async fn finish_fight(&mut self) {
         let Some(sess) = self.pending.sess.take() else { self.screen = Screen::Menu { cur: 0 }; return };
         let music = sess.stage.music;
+        let bgm = sess.stage.bgm.clone();
         // DualShock/DualSense lightbars: P1 blue, P2 red
         self.c.pads.set_light(0, [30, 90, 255]);
         self.c.pads.set_light(1, [255, 40, 60]);
         self.session = Some(sess);
         self.g.trim(4000);
         self.screen = Screen::Fight;
-        self.audio.play_music(music).await;
+        let custom = match bgm { Some(b) => self.audio.play_music_file(&b.0, b.1).await, None => false };
+        if !custom { self.audio.play_music(music).await; }
     }
 
     fn video_screen(&mut self) {
@@ -785,6 +787,8 @@ impl App {
         let (paused, accept_back) = pause_step(s.paused, pause_btn);
         if pause_btn { self.pause_cur = 0; self.move_page = 0; self.audio.sfx("select"); }
         s.paused = paused;
+        #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+        if s.net.is_some() { s.paused = false; }
         // pause button (touch) top-center
         let pb = (VW / 2.0 - 22.0, 92.0, 44.0, 44.0);
         if !s.paused && self.c.touch.enabled && is_mouse_button_pressed(MouseButton::Left) {
@@ -796,6 +800,8 @@ impl App {
         s.draw(&mut self.g, &self.ui);
         self.c.touch.draw();
         if self.c.touch.enabled { self.ui.rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.0, 0.0, 0.0, 0.35)); self.ui.text("II", VW / 2.0, pb.1 + 30.0, 20.0, WHITE, Align::Center, true); }
+        #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+        if let Some(n) = self.session.as_ref().and_then(|s| s.net.as_ref()) { self.net_overlay(n); }
         let s = self.session.as_mut().unwrap();
         if s.paused { self.pause_menu(accept_back).await; return; }
         if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
@@ -928,6 +934,33 @@ impl App {
 
     /// Snapshot the running session as the replayable "last fight" (used by the screenshot tour's determinism check).
     pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone() }); } }
+
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    pub async fn start_netplay(&mut self, a: &crate::netlink::NetArgs) {
+        let find_char = |id: &str| self.reg.chars.iter().position(|c| c.id.eq_ignore_ascii_case(id) || c.name.eq_ignore_ascii_case(id));
+        let (c1, c2) = match &a.chars { Some((x, y)) => (find_char(x), find_char(y)), None => (Some(0), Some(1.min(self.reg.chars.len() - 1))) };
+        let (Some(c1), Some(c2)) = (c1, c2) else { self.msg = format!("Netplay: personagem não encontrado ({:?})", a.chars); return };
+        let stage = a.stage.as_ref().map_or(Some(0), |id| self.reg.stages.iter().position(|s| s.id.eq_ignore_ascii_case(id) || s.name.eq_ignore_ascii_case(id)));
+        let Some(stage) = stage else { self.msg = format!("Netplay: cenário não encontrado ({:?})", a.stage); return };
+        let link = match crate::netlink::NetLink::connect(a) { Ok(l) => l, Err(e) => { self.msg = format!("Netplay: {e}"); return } };
+        self.mode = Mode::Versus; self.team = None; self.arcade = None; self.replaying = None;
+        self.sel = (c1, c2, stage);
+        self.start_fight().await;
+        if let Some(s) = self.session.as_mut() { s.net = Some(link); }
+    }
+
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    fn net_overlay(&self, n: &crate::netlink::NetLink) {
+        use crate::netlink::NetStatus;
+        let (text, color) = match n.status() {
+            NetStatus::Connecting => ("CONECTANDO AO ADVERSÁRIO…".to_string(), hex("#ffcc33")),
+            NetStatus::Waiting => ("SINCRONIZANDO…".to_string(), hex("#ffcc33")),
+            NetStatus::Lost(e) => (format!("CONEXÃO PERDIDA: {e}"), hex("#ff4d6d")),
+            NetStatus::Running => (format!("ONLINE P{} · {} ms", n.local + 1, n.ping_ms().unwrap_or(0)), hex("#a49cc0")),
+        };
+        self.ui.text(&text, VW / 2.0, VH - 16.0, 18.0, color, Align::Center, true);
+        if n.desyncs > 0 { self.ui.text(&format!("DESSINCRONIZADO ({})", n.desyncs), VW / 2.0, VH - 40.0, 18.0, hex("#ff4d6d"), Align::Center, true); }
+    }
 
     /// Re-simulate the last finished fight from its recorded inputs (deterministic engine → identical fight).
     pub async fn start_replay(&mut self) {

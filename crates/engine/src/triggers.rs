@@ -27,7 +27,7 @@ impl<'a> Ctx<'a> {
             "type" => g.kind as f64, "animtype" => g.animtype as f64, "airtype" => g.airtype as f64, "groundtype" => g.groundtype as f64,
             "damage" => g.damage as f64, "hitcount" => g.hitcount as f64, "guardcount" => g.guardcount as f64, "hitshaketime" => f.hit_shake as f64,
             "hittime" => g.hittime as f64, "slidetime" => g.slidetime as f64, "ctrltime" => g.ctrltime as f64, "recovertime" => 0.0,
-            "xvel" => g.xvel as f64 / l, "yvel" => g.yvel as f64 / l, "yaccel" => g.yaccel as f64 / l, "chainid" => g.chainid as f64,
+            "xvel" => g.xvel as f64 / l, "yvel" => g.yvel as f64 / l, "yaccel" => g.yaccel as f64 / l, "chainid" => g.hit_id as f64,
             "guarded" => g.guarded as i32 as f64, "fall" => g.fall as i32 as f64, "fall.damage" => g.fall_damage as f64,
             "fall.xvel" => g.fall_xvel as f64 / l, "fall.yvel" => g.fall_yvel as f64 / l, "fall.recover" => g.fall_recover as i32 as f64,
             "fall.time" => f.fall_time as f64, "fall.recovertime" => g.fall_recover_time as f64, "fall.kill" => g.fall_kill as i32 as f64,
@@ -70,7 +70,7 @@ impl<'a> Host for Ctx<'a> {
         Some(Ctx { m, i })
     }
     fn cmpstr(&self, name: &str, neg: bool, values: &[String]) -> bool {
-        let v0 = values.first().map(|s| s.to_ascii_lowercase()).unwrap_or_default();
+        let v0 = values.first().map(|s| s.as_str()).unwrap_or("");
         let c0 = v0.chars().next().unwrap_or(' ').to_ascii_uppercase();
         let f = self.f();
         let r = match name {
@@ -80,14 +80,13 @@ impl<'a> Host for Ctx<'a> {
             "physics" => f.physics == c0,
             "p2statetype" => self.enemy().is_some_and(|e| e.state_type == c0),
             "p2movetype" => self.enemy().is_some_and(|e| e.move_type == c0),
-            "name" | "p1name" => f.def.name.to_ascii_lowercase() == v0,
-            "p2name" => self.enemy().is_some_and(|e| e.def.name.to_ascii_lowercase() == v0),
-            "authorname" => f.def.author.to_ascii_lowercase() == v0,
+            "name" | "p1name" => f.def.name.eq_ignore_ascii_case(v0),
+            "p2name" => self.enemy().is_some_and(|e| e.def.name.eq_ignore_ascii_case(v0)),
+            "authorname" => f.def.author.eq_ignore_ascii_case(v0),
             "hitdefattr" => {
                 let Some(hd) = f.hitdef.as_ref() else { return neg };
                 if !(f.hitdef_active || f.move_type == 'A') { return neg; }
-                let st = v0.to_ascii_uppercase();
-                let ok_state = hd.attr_state.chars().any(|c| st.contains(c));
+                let ok_state = hd.attr_state.chars().any(|c| v0.chars().any(|x| x.eq_ignore_ascii_case(&c)));
                 ok_state && (values.len() == 1 || values[1..].iter().any(|v| hd.attr_kind.iter().any(|k| k.eq_ignore_ascii_case(v))))
             }
             _ => false,
@@ -220,7 +219,7 @@ impl<'a> Host for Ctx<'a> {
             "min" => a0().min(self.a(args, 1)), "max" => a0().max(self.a(args, 1)),
             "clamp" => a0().max(self.a(args, 1)).min(self.a(args, 2)),
             "sign" => a0().signum(), "e" => std::f64::consts::E, "pi" => std::f64::consts::PI,
-            _ => 0.0,
+            _ => crate::ikemen::trigger(self, name, args).unwrap_or(0.0),
         }
     }
 }

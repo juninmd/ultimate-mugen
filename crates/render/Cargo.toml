@@ -1,0 +1,13 @@
+[package]
+name = "ume-render"
+version = "0.2.0"
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+wgpu = "30"
+bytemuck = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+naga = { version = "30", features = ["wgsl-in"] }
+pollster = "0.4"

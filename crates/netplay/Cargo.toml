@@ -1,0 +1,17 @@
+[package]
+name = "ume-netplay"
+version = "0.2.0"
+edition = "2021"
+description = "Rollback netplay, sync-test and replays for Ultimate MUGEN"
+license = "MIT"
+
+[lib]
+name = "ume_netplay"
+path = "src/lib.rs"
+
+[dependencies]
+ume-engine = { path = "../engine" }
+ggrs = "=0.13.0"
+
+[dev-dependencies]
+ume-formats = { path = "../formats" }

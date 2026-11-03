@@ -1,0 +1,112 @@
+use crate::atlas::Rect;
+use bytemuck::{Pod, Zeroable};
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Pod, Zeroable)]
+pub struct Vertex { pub pos: [f32; 2], pub uv: [f32; 2], pub pal: u32, pub mul: [f32; 4], pub add: [f32; 4] }
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub enum Blend { #[default] Alpha, Add, Sub }
+
+#[derive(Clone, Copy, Debug)]
+pub struct Quad {
+    pub dst: [f32; 4],
+    pub src: Rect,
+    pub atlas: [u32; 2],
+    pub palette: u32,
+    pub flip_h: bool,
+    pub flip_v: bool,
+    pub mul: [f32; 4],
+    pub add: [f32; 3],
+    pub blend: Blend,
+}
+
+impl Quad {
+    pub fn new(dst: [f32; 4], src: Rect, atlas: [u32; 2], palette: u32) -> Self {
+        Quad { dst, src, atlas, palette, flip_h: false, flip_v: false, mul: [1.0; 4], add: [0.0; 3], blend: Blend::Alpha }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct DrawCall { pub blend: Blend, pub first_index: u32, pub index_count: u32 }
+
+#[derive(Default)]
+pub struct Batch { pub vertices: Vec<Vertex>, pub indices: Vec<u32>, pub calls: Vec<DrawCall> }
+
+impl Batch {
+    pub fn new() -> Self { Batch::default() }
+
+    pub fn clear(&mut self) { self.vertices.clear(); self.indices.clear(); self.calls.clear(); }
+
+    pub fn push(&mut self, q: &Quad) {
+        let [x, y, w, h] = q.dst;
+        let (aw, ah) = (q.atlas[0] as f32, q.atlas[1] as f32);
+        let (mut u0, mut v0) = (q.src.x as f32 / aw, q.src.y as f32 / ah);
+        let (mut u1, mut v1) = ((q.src.x + q.src.w) as f32 / aw, (q.src.y + q.src.h) as f32 / ah);
+        if q.flip_h { std::mem::swap(&mut u0, &mut u1); }
+        if q.flip_v { std::mem::swap(&mut v0, &mut v1); }
+        let add = [q.add[0], q.add[1], q.add[2], 0.0];
+        let base = self.vertices.len() as u32;
+        for (px, py, u, v) in [(x, y, u0, v0), (x + w, y, u1, v0), (x + w, y + h, u1, v1), (x, y + h, u0, v1)] {
+            self.vertices.push(Vertex { pos: [px, py], uv: [u, v], pal: q.palette, mul: q.mul, add });
+        }
+        self.indices.extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
+        self.extend_call(q.blend, 6);
+    }
+
+    pub fn push_tris(&mut self, verts: &[Vertex], indices: &[u32], blend: Blend) {
+        let base = self.vertices.len() as u32;
+        self.vertices.extend_from_slice(verts);
+        self.indices.extend(indices.iter().map(|i| base + i));
+        self.extend_call(blend, indices.len() as u32);
+    }
+
+    fn extend_call(&mut self, blend: Blend, count: u32) {
+        let first = self.indices.len() as u32 - count;
+        match self.calls.last_mut() {
+            Some(c) if c.blend == blend => c.index_count += count,
+            _ => self.calls.push(DrawCall { blend, first_index: first, index_count: count }),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn merges_calls_with_same_blend() {
+        let mut b = Batch::new();
+        let r = Rect { x: 0, y: 0, w: 8, h: 8 };
+        let mut q = Quad::new([0.0, 0.0, 8.0, 8.0], r, [64, 64], 0);
+        b.push(&q);
+        b.push(&q);
+        q.blend = Blend::Add;
+        b.push(&q);
+        q.blend = Blend::Alpha;
+        b.push(&q);
+        assert_eq!(b.vertices.len(), 16);
+        assert_eq!(b.calls, vec![
+            DrawCall { blend: Blend::Alpha, first_index: 0, index_count: 12 },
+            DrawCall { blend: Blend::Add, first_index: 12, index_count: 6 },
+            DrawCall { blend: Blend::Alpha, first_index: 18, index_count: 6 },
+        ]);
+    }
+
+    #[test]
+    fn flips_uvs() {
+        let mut b = Batch::new();
+        let mut q = Quad::new([10.0, 20.0, 4.0, 2.0], Rect { x: 8, y: 16, w: 8, h: 16 }, [32, 32], 3);
+        q.flip_h = true;
+        b.push(&q);
+        assert_eq!(b.vertices[0].uv, [0.5, 0.5]);
+        assert_eq!(b.vertices[1].uv, [0.25, 0.5]);
+        assert_eq!(b.vertices[2].pos, [14.0, 22.0]);
+        assert_eq!(b.vertices[2].uv, [0.25, 1.0]);
+        let mut again = Batch::new();
+        again.push(&q);
+        b.clear();
+        assert!(b.vertices.is_empty() && b.calls.is_empty());
+        assert_eq!(again.vertices[3].pal, 3);
+    }
+}

@@ -1,0 +1,52 @@
+struct Globals { screen: vec2<f32>, pad: vec2<f32> }
+
+@group(0) @binding(0) var<uniform> g: Globals;
+@group(0) @binding(1) var index_tex: texture_2d<f32>;
+@group(0) @binding(2) var rgba_tex: texture_2d<f32>;
+@group(0) @binding(3) var palette: texture_2d<f32>;
+@group(0) @binding(4) var samp: sampler;
+
+struct VIn {
+    @location(0) pos: vec2<f32>,
+    @location(1) uv: vec2<f32>,
+    @location(2) pal: u32,
+    @location(3) mul: vec4<f32>,
+    @location(4) add: vec4<f32>,
+}
+
+struct VOut {
+    @builtin(position) clip: vec4<f32>,
+    @location(0) uv: vec2<f32>,
+    @location(1) @interpolate(flat) pal: u32,
+    @location(2) mul: vec4<f32>,
+    @location(3) add: vec4<f32>,
+}
+
+@vertex
+fn vs_main(v: VIn) -> VOut {
+    var o: VOut;
+    o.clip = vec4<f32>(v.pos.x / g.screen.x * 2.0 - 1.0, 1.0 - v.pos.y / g.screen.y * 2.0, 0.0, 1.0);
+    o.uv = v.uv;
+    o.pal = v.pal;
+    o.mul = v.mul;
+    o.add = v.add;
+    return o;
+}
+
+@fragment
+fn fs_main(v: VOut) -> @location(0) vec4<f32> {
+    let direct = textureSample(rgba_tex, samp, v.uv);
+    var c = direct;
+    if v.pal != 0xffffffffu {
+        let dims = vec2<f32>(textureDimensions(index_tex));
+        let texel = vec2<i32>(floor(v.uv * dims));
+        let idx = i32(textureLoad(index_tex, texel, 0).r * 255.0 + 0.5);
+        if idx == 0 {
+            discard;
+        }
+        c = textureLoad(palette, vec2<i32>(idx, i32(v.pal)), 0);
+    }
+    let rgb = clamp(c.rgb * v.mul.rgb + v.add.rgb, vec3<f32>(0.0), vec3<f32>(1.0));
+    let a = c.a * v.mul.a;
+    return vec4<f32>(rgb * a, a);
+}

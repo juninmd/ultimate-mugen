@@ -1,5 +1,5 @@
 //! A running fight: fixed 60 Hz simulation, AI/human inputs, events → audio + rumble.
-use crate::audio::Audio;
+use crate::audio::{Audio, SoundOpts};
 use crate::controls::Controls;
 use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
@@ -39,6 +39,8 @@ pub struct Session {
     /// inputs of every root slot for every simulated tick (the data a replay is rebuilt from)
     pub rec: Vec<Vec<u32>>,
     pub is_replay: bool,
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    pub net: Option<crate::netlink::NetLink>,
 }
 
 thread_local! { static FX: Arc<CharDef> = build_fx(true); }
@@ -76,7 +78,7 @@ impl Session {
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false }
+        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
     }
 
     fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {
@@ -91,6 +93,8 @@ impl Session {
     }
 
     pub fn step(&mut self, c: &mut Controls, audio: &mut Audio) {
+        #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+        if self.net.is_some() { self.net_step(c, audio); return; }
         let roots = self.m.root_indices();
         if self.m.team_simul { if let Some(cur) = self.pilots.iter().position(|p| matches!(p, Pilot::Human(0))) { if roots.get(cur).is_some_and(|&fi| !self.m.fighters[fi].alive) { self.switch_control(); } } }
         let mut bits = vec![0u32; roots.len()];
@@ -121,17 +125,41 @@ impl Session {
         self.vfx.pre_tick(&self.m);
         self.m.tick(&bits);
         self.vfx.tick(&self.m);
+        self.drain_events(c, audio);
+    }
+
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    fn net_step(&mut self, c: &mut Controls, audio: &mut Audio) {
+        let Some(mut link) = self.net.take() else { return };
+        let bits = c.player_bits(0, false);
+        let (vfx, rec) = (&mut self.vfx, &mut self.rec);
+        let advanced = link.step(&mut self.m, bits, |m, inputs, newest| {
+            if newest {
+                rec.push(inputs.to_vec());
+                vfx.pre_tick(m);
+                m.tick(inputs);
+                vfx.tick(m);
+            } else {
+                m.tick(inputs);
+            }
+        });
+        if link.lost.is_some() && self.over.is_none() { self.over = Some(link.local); }
+        self.net = Some(link);
+        if advanced { self.drain_events(c, audio); }
+    }
+
+    fn drain_events(&mut self, c: &mut Controls, audio: &mut Audio) {
         for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
         for ev in std::mem::take(&mut self.m.events) {
             self.vfx.event(&ev, &self.m);
             for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
             match ev {
-                Event::Sound { def, group, index, own, volume, builtin, .. } => {
+                Event::Sound { def, group, index, own, volume, builtin, channel, owner, pan, looping, freq_mul } => {
                     if let (true, Some(d)) = (own, def.as_ref()) {
-                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), volume); continue; }
+                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), SoundOpts { volume, pan, owner, channel, looping, rate: freq_mul, low_priority: false }); continue; }
                     }
                     let kind = builtin.unwrap_or(match group { 5 => if index >= 2 { "hitheavy" } else { "hit" }, 6 => "guard", 7 => "land", _ => if index >= 2 { "swingh" } else { "swing" } });
-                    if group >= 0 || builtin.is_some() { audio.sfx(kind); }
+                    if group >= 0 || builtin.is_some() { audio.sfx_at(kind, pan); }
                 }
                 Event::Hit { damage, guarded, heavy, attacker, defender, .. } => {
                     let roots = self.m.root_indices();
@@ -143,7 +171,12 @@ impl Session {
                 }
                 Event::Super { side, .. } => { for (s, p) in self.pilots.iter().enumerate() { if let Pilot::Human(sl) = p { c.rumble(*sl, if s == side { 0.6 } else { 0.3 }, 0.6, 400); } } }
                 Event::Ko { .. } => { audio.sfx("ko"); for p in &self.pilots { if let Pilot::Human(sl) = p { c.rumble(*sl, 1.0, 1.0, 700); } } }
+                Event::Rumble { fighter, strong, weak, ms } => {
+                    let roots = self.m.root_indices();
+                    if let Some(Pilot::Human(sl)) = roots.iter().position(|&r| self.m.fighters[r].id == fighter).and_then(|k| self.pilots.get(k)) { c.rumble(*sl, strong, weak, ms); }
+                }
                 Event::MatchOver(w) => { self.over = Some(w); }
+                Event::StopSound { owner, channel } => audio.stop(owner, channel),
                 Event::Fight => audio.sfx("fight"),
                 Event::RoundStart(_) => audio.sfx("round"),
                 Event::RoundEnd(w) if w >= 0 => audio.sfx("win"),

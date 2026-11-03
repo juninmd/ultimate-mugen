@@ -192,6 +192,20 @@ impl Registry {
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
+    pub fn scan_umf_dir(&mut self, dir: &std::path::Path) -> usize {
+        let Ok(rd) = std::fs::read_dir(dir) else { return 0 };
+        let mut files: Vec<std::path::PathBuf> = rd.filter_map(|e| e.ok()).map(|e| e.path()).filter(|p| p.extension().is_some_and(|x| x.eq_ignore_ascii_case("json")) && p.file_name().is_some_and(|f| f != "index.json")).collect();
+        files.sort();
+        let mut n = 0;
+        for f in files {
+            match std::fs::read_to_string(&f).map_err(|e| e.to_string()).and_then(|j| self.add_native_json(&j)) {
+                Ok(_) => n += 1,
+                Err(e) => eprintln!("umf {}: {e}", f.display()),
+            }
+        }
+        n
+    }
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn scan_folders(&mut self) -> usize {
         let mut n = 0;
         let exe_dir = std::env::current_exe().ok().and_then(|p| p.parent().map(|p| p.to_path_buf()));
@@ -201,6 +215,10 @@ impl Registry {
             if let Some(p) = d.parent().and_then(|p| p.parent()) { dirs.push(p.join("mugen")); }
         }
         if let Ok(extra) = std::env::var("UME_MUGEN_DIR") { dirs.insert(0, extra.into()); }
+        let mut umf_dirs: Vec<std::path::PathBuf> = dirs.iter().map(|d| d.join("umf")).collect();
+        umf_dirs.insert(0, "umf".into());
+        if let Ok(extra) = std::env::var("UME_UMF_DIR") { umf_dirs.insert(0, extra.into()); }
+        for d in umf_dirs { n += self.scan_umf_dir(&d); }
         for d in dirs {
             if !d.is_dir() { continue; }
             let mut vfs = Vfs::new();
@@ -220,4 +238,28 @@ pub fn stage_bgm(vfs: &Vfs, def: &str) -> Option<(Vec<u8>, MusicLoop)> {
     let bytes = ume_formats::vfs::resolve(vfs, base, &name).or_else(|| ume_formats::vfs::resolve(vfs, "", &name))?;
     let n = |k: &str| m.get(k).and_then(|v| v.trim().parse::<usize>().ok()).unwrap_or(0);
     Some((bytes.to_vec(), MusicLoop { start: n("bgmloopstart"), end: n("bgmloopend") }))
+}
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn loads_umf_json_from_folder_without_rebuild() {
+        let dir = std::env::temp_dir().join(format!("ume-umf-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let mut v: serde_json::Value = serde_json::from_str(BUILTIN[0].1).unwrap();
+        v["id"] = "folder_test".into();
+        v["name"] = "Folder Test".into();
+        std::fs::write(dir.join("folder_test.json"), v.to_string()).unwrap();
+        std::fs::write(dir.join("broken.json"), "{").unwrap();
+        let mut reg = Registry::new();
+        let before = reg.chars.len();
+        assert_eq!(reg.scan_umf_dir(&dir), 1);
+        assert_eq!(reg.chars.len(), before + 1);
+        let e = reg.chars.iter().find(|c| c.id == "umf:folder_test").unwrap();
+        assert_eq!(e.name, "Folder Test");
+        assert!(e.load(1).is_ok());
+        std::fs::remove_dir_all(&dir).ok();
+    }
 }

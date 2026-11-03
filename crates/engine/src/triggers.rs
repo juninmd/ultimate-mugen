@@ -220,7 +220,7 @@ impl<'a> Host for Ctx<'a> {
             "min" => a0().min(self.a(args, 1)), "max" => a0().max(self.a(args, 1)),
             "clamp" => a0().max(self.a(args, 1)).min(self.a(args, 2)),
             "sign" => a0().signum(), "e" => std::f64::consts::E, "pi" => std::f64::consts::PI,
-            _ => 0.0,
+            _ => crate::ikemen::trigger(self, name, args).unwrap_or(0.0),
         }
     }
 }

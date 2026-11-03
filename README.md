@@ -16,6 +16,7 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, mul
 | ![Equipe sequência](screenshots/30-team-sequence.jpg) | ![Equipe paralelo](screenshots/31-team-parallel.jpg) |
 | ![Seleção de equipe](screenshots/32-team-select.jpg) | ![Quadro de impacto](screenshots/23-impact-frame.jpg) |
 | ![5v5 paralelo](screenshots/33-team-5v5-parallel.jpg) | ![5v5 sequência](screenshots/34-team-5v5-sequence.jpg) |
+| ![4K · HUD 5v5](screenshots/35-4k-5v5-hud.jpg) | ![4K · super](screenshots/36-4k-super.jpg) |
 
 ## Por que Rust + macroquad
 | Requisito | Escolha |

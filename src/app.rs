@@ -710,13 +710,15 @@ impl App {
     async fn finish_fight(&mut self) {
         let Some(sess) = self.pending.sess.take() else { self.screen = Screen::Menu { cur: 0 }; return };
         let music = sess.stage.music;
+        let bgm = sess.stage.bgm.clone();
         // DualShock/DualSense lightbars: P1 blue, P2 red
         self.c.pads.set_light(0, [30, 90, 255]);
         self.c.pads.set_light(1, [255, 40, 60]);
         self.session = Some(sess);
         self.g.trim(4000);
         self.screen = Screen::Fight;
-        self.audio.play_music(music).await;
+        let custom = match bgm { Some(b) => self.audio.play_music_file(&b.0, b.1).await, None => false };
+        if !custom { self.audio.play_music(music).await; }
     }
 
     fn video_screen(&mut self) {

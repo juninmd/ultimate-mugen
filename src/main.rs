@@ -3,6 +3,7 @@ mod app;
 mod audio;
 #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
 mod netlink;
+mod sound_mix;
 mod controls;
 mod gamepad;
 mod hud;

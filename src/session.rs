@@ -1,5 +1,5 @@
 //! A running fight: fixed 60 Hz simulation, AI/human inputs, events → audio + rumble.
-use crate::audio::Audio;
+use crate::audio::{Audio, SoundOpts};
 use crate::controls::Controls;
 use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
@@ -154,12 +154,13 @@ impl Session {
             self.vfx.event(&ev, &self.m);
             for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
             match ev {
-                Event::Sound { def, group, index, own, volume, builtin, .. } => {
+                Event::Sound { def, group, index, own, volume, builtin, channel, owner, .. } => {
+                    let pan = self.m.idx(owner).map_or(0.0, |i| ((self.m.fighters[i].pos.x - self.m.camera.x) / (self.m.view_w / 2.0)).clamp(-1.0, 1.0));
                     if let (true, Some(d)) = (own, def.as_ref()) {
-                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), volume); continue; }
+                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), SoundOpts { volume, pan, owner, channel, ..SoundOpts::default() }); continue; }
                     }
                     let kind = builtin.unwrap_or(match group { 5 => if index >= 2 { "hitheavy" } else { "hit" }, 6 => "guard", 7 => "land", _ => if index >= 2 { "swingh" } else { "swing" } });
-                    if group >= 0 || builtin.is_some() { audio.sfx(kind); }
+                    if group >= 0 || builtin.is_some() { audio.sfx_at(kind, pan); }
                 }
                 Event::Hit { damage, guarded, heavy, attacker, defender, .. } => {
                     let roots = self.m.root_indices();

@@ -1,5 +1,6 @@
 //! Audio: procedurally synthesized SFX + battle music (WAV generated at runtime), MUGEN .snd samples.
-use macroquad::audio::{load_sound_from_bytes, play_sound, stop_sound, PlaySoundParams, Sound};
+use crate::sound_mix::{decode, pan_bucket, Pcm};
+use macroquad::audio::{load_sound_from_bytes, play_sound, set_sound_volume, stop_sound, PlaySoundParams, Sound};
 use std::collections::HashMap;
 use std::f32::consts::PI;
 
@@ -157,65 +158,164 @@ fn music(seed: u32) -> Vec<f32> {
     out
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SoundOpts {
+    pub volume: f32,
+    pub pan: f32,
+    pub rate: f32,
+    pub looping: bool,
+    pub owner: u32,
+    pub channel: i32,
+    pub low_priority: bool,
+}
+
+impl Default for SoundOpts {
+    fn default() -> Self {
+        SoundOpts { volume: 1.0, pan: 0.0, rate: 1.0, looping: false, owner: 0, channel: -1, low_priority: false }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct MusicLoop {
+    pub start: usize,
+    pub end: usize,
+}
+
+type SampleKey = (String, i32, i32);
+type VoiceKey = (SampleKey, i8, u16);
+
+enum Source {
+    Pcm(Pcm),
+    Raw(Vec<u8>),
+}
+
+struct Music {
+    intro: Option<Sound>,
+    body: Sound,
+    switch_at: Option<f64>,
+}
+
 pub struct Audio {
     pub enabled: bool,
     builtin: HashMap<&'static str, Vec<Sound>>,
+    builtin_pcm: HashMap<(&'static str, u32), Pcm>,
+    builtin_pan: HashMap<(&'static str, u32, i8), Option<Sound>>,
     rr: std::cell::Cell<u32>,
-    /// music ducking (1 = full): lowered during supers / KO, eased back each frame
     pub duck: f32, duck_now: f32,
-    samples: HashMap<(String, i32, i32), Option<Sound>>,
-    pending: Vec<(String, i32, i32, Vec<u8>, f32)>,
+    sources: HashMap<SampleKey, Option<Source>>,
+    voices: HashMap<VoiceKey, Option<(Sound, f64)>>,
+    pending: Vec<(VoiceKey, SoundOpts)>,
+    pending_sfx: Vec<(&'static str, u32, i8)>,
+    channels: HashMap<(u32, i32), (Sound, f64)>,
+    loop_seq: i32,
     music: HashMap<u32, Sound>,
-    playing: Option<u32>,
+    playing: Option<Music>,
     pub volume: f32,
+}
+
+fn rate_key(rate: f32) -> u16 {
+    (rate.clamp(0.05, 8.0) * 100.0).round() as u16
 }
 
 impl Audio {
     pub async fn new(enabled: bool) -> Self {
-        let mut a = Audio { enabled, builtin: HashMap::new(), rr: std::cell::Cell::new(0), duck: 1.0, duck_now: 1.0, samples: HashMap::new(), pending: vec![], music: HashMap::new(), playing: None, volume: 0.8 };
+        let mut a = Audio {
+            enabled, builtin: HashMap::new(), builtin_pcm: HashMap::new(), builtin_pan: HashMap::new(), rr: std::cell::Cell::new(0), duck: 1.0, duck_now: 1.0,
+            sources: HashMap::new(), voices: HashMap::new(), pending: vec![], pending_sfx: vec![], channels: HashMap::new(), loop_seq: -1, music: HashMap::new(), playing: None, volume: 0.8,
+        };
         if enabled {
-            // hits / guards / swings get 3 variants (round-robin) so repeated impacts don't sound identical
             for (k, n) in [("hit", 3u32), ("hitheavy", 3), ("counter", 1), ("guard", 3), ("swing", 3), ("swingh", 2), ("land", 2), ("dash", 1), ("jump", 1), ("super", 1), ("transform", 1), ("defeat", 1), ("ko", 1), ("round", 1), ("fight", 1), ("win", 1),
                 ("perfect", 1), ("meter", 1), ("select", 1), ("back", 1), ("confirm", 1), ("combo1", 1), ("combo2", 1), ("combo3", 1), ("combo4", 1), ("combo5", 1), ("combo6", 1)] {
                 for v in 0..n {
-                    if let Ok(s) = load_sound_from_bytes(&wav(&synth(k, v))).await { a.builtin.entry(k).or_default().push(s); }
+                    let mono = synth(k, v);
+                    if let Ok(s) = load_sound_from_bytes(&wav(&mono)).await { a.builtin.entry(k).or_default().push(s); }
+                    a.builtin_pcm.insert((k, v), Pcm { rate: SR, frames: mono.iter().map(|&x| [x, x]).collect() });
                 }
             }
         }
         a
     }
-    pub fn sfx(&self, k: &str) {
+    pub fn sfx(&mut self, k: &str) {
+        self.sfx_at(k, 0.0);
+    }
+    pub fn sfx_at(&mut self, k: &str, pan: f32) {
         if !self.enabled { return; }
-        if let Some(v) = self.builtin.get(k) {
-            let i = self.rr.get().wrapping_mul(1664525).wrapping_add(1013904223); self.rr.set(i);
-            play_sound(&v[(i >> 16) as usize % v.len()], PlaySoundParams { looped: false, volume: self.volume });
+        let Some((&name, v)) = self.builtin.get_key_value(k) else { return };
+        let i = self.rr.get().wrapping_mul(1664525).wrapping_add(1013904223); self.rr.set(i);
+        let variant = (i >> 16) % v.len() as u32;
+        let bucket = pan_bucket(pan);
+        if bucket == 0 {
+            play_sound(&v[variant as usize], PlaySoundParams { looped: false, volume: self.volume });
+            return;
+        }
+        match self.builtin_pan.get(&(name, variant, bucket)) {
+            Some(Some(s)) => play_sound(s, PlaySoundParams { looped: false, volume: self.volume }),
+            Some(None) => {}
+            None => { self.builtin_pan.insert((name, variant, bucket), None); self.pending_sfx.push((name, variant, bucket)); }
         }
     }
-    /// Play a MUGEN sample (decoded lazily; first play is deferred to `process`).
-    pub fn sample(&mut self, def_id: &str, g: i32, n: i32, wavb: Option<&Vec<u8>>, vol: f32) {
+    pub fn sample(&mut self, def_id: &str, g: i32, n: i32, wavb: Option<&Vec<u8>>, opts: SoundOpts) {
         if !self.enabled { return; }
-        let key = (def_id.to_string(), g, n);
-        match self.samples.get(&key) {
-            Some(Some(s)) => play_sound(s, PlaySoundParams { looped: false, volume: self.volume * vol.min(1.5) }),
-            Some(None) => {}
-            None => if let Some(b) = wavb { self.pending.push((key.0.clone(), g, n, b.clone(), vol)); self.samples.insert(key, None); },
+        let key: SampleKey = (def_id.to_string(), g, n);
+        if !self.sources.contains_key(&key) {
+            let Some(b) = wavb else { return };
+            let src = decode(b).map(Source::Pcm).unwrap_or_else(|| Source::Raw(b.clone()));
+            self.sources.insert(key.clone(), Some(src));
         }
+        let raw = matches!(self.sources.get(&key), Some(Some(Source::Raw(_))));
+        let vkey = (key, if raw { 0 } else { pan_bucket(opts.pan) }, if raw { 100 } else { rate_key(opts.rate) });
+        match self.voices.get(&vkey) {
+            Some(Some((s, secs))) => { let (s, secs) = (s.clone(), *secs); self.start(&s, secs, opts); }
+            Some(None) => {}
+            None => { self.voices.insert(vkey.clone(), None); self.pending.push((vkey, opts)); }
+        }
+    }
+    fn start(&mut self, s: &Sound, secs: f64, o: SoundOpts) {
+        let now = macroquad::time::get_time();
+        if o.channel >= 0 && o.low_priority && self.channels.get(&(o.owner, o.channel)).is_some_and(|(_, end)| *end > now) { return; }
+        let slot = if o.channel >= 0 { Some(o.channel) } else if o.looping { self.loop_seq -= 1; Some(self.loop_seq) } else { None };
+        if let Some(ch) = slot {
+            let end = if o.looping { f64::INFINITY } else { now + secs };
+            if let Some((old, _)) = self.channels.insert((o.owner, ch), (s.clone(), end)) { stop_sound(&old); }
+        }
+        play_sound(s, PlaySoundParams { looped: o.looping, volume: self.volume * o.volume.clamp(0.0, 1.5) });
+    }
+    pub fn stop_all(&mut self) {
+        for (_, (s, _)) in self.channels.drain() { stop_sound(&s); }
     }
     pub async fn process(&mut self) {
-        // ease the music toward the ducking target (supers / KO pull it down so the effects hit harder)
-        if self.playing.is_some() {
+        if let Some(m) = self.playing.as_mut() {
             self.duck_now += (self.duck - self.duck_now) * 0.12;
-            if let Some(s) = self.playing.and_then(|id| self.music.get(&id)) { macroquad::audio::set_sound_volume(s, self.volume * 0.35 * self.duck_now); }
+            let v = self.volume * 0.35 * self.duck_now;
+            if let Some(at) = m.switch_at {
+                if macroquad::time::get_time() >= at {
+                    m.switch_at = None;
+                    if let Some(i) = m.intro.take() { stop_sound(&i); }
+                    play_sound(&m.body, PlaySoundParams { looped: true, volume: v });
+                }
+            }
+            set_sound_volume(m.intro.as_ref().unwrap_or(&m.body), v);
         }
-        let list: Vec<_> = self.pending.drain(..).collect();
-        for (id, g, n, bytes, vol) in list {
+        for (name, variant, bucket) in std::mem::take(&mut self.pending_sfx) {
+            let Some(p) = self.builtin_pcm.get(&(name, variant)) else { continue };
+            let bytes = p.render(1.0, bucket as f32 / 5.0, 1.0).to_wav();
             if let Ok(s) = load_sound_from_bytes(&bytes).await {
-                play_sound(&s, PlaySoundParams { looped: false, volume: self.volume * vol.min(1.5) });
-                self.samples.insert((id, g, n), Some(s));
+                play_sound(&s, PlaySoundParams { looped: false, volume: self.volume });
+                self.builtin_pan.insert((name, variant, bucket), Some(s));
+            }
+        }
+        for (vkey, opts) in std::mem::take(&mut self.pending) {
+            let (bytes, secs) = match self.sources.get(&vkey.0) {
+                Some(Some(Source::Pcm(p))) => { let r = p.render(1.0, vkey.1 as f32 / 5.0, vkey.2 as f32 / 100.0); (r.to_wav(), r.seconds()) }
+                Some(Some(Source::Raw(b))) => (b.clone(), 0.5),
+                _ => continue,
+            };
+            if let Ok(s) = load_sound_from_bytes(&bytes).await {
+                self.start(&s, secs, opts);
+                self.voices.insert(vkey, Some((s, secs)));
             }
         }
     }
-    /// Synthesize + decode a track ahead of time (done behind the VS/loading screen so the fight starts instantly).
     pub async fn prepare_music(&mut self, id: u32) {
         if !self.enabled || self.music.contains_key(&id) { return; }
         if let Ok(s) = load_sound_from_bytes(&wav(&music(id))).await { self.music.insert(id, s); }
@@ -224,10 +324,39 @@ impl Audio {
         if !self.enabled { return; }
         self.stop_music();
         self.prepare_music(id).await;
-        if let Some(s) = self.music.get(&id) { play_sound(s, PlaySoundParams { looped: true, volume: self.volume * 0.35 }); self.playing = Some(id); }
+        if let Some(s) = self.music.get(&id).cloned() {
+            play_sound(&s, PlaySoundParams { looped: true, volume: self.volume * 0.35 });
+            self.playing = Some(Music { intro: None, body: s, switch_at: None });
+            self.duck_now = 1.0;
+        }
+    }
+    pub async fn play_music_file(&mut self, bytes: &[u8], lp: MusicLoop) -> bool {
+        if !self.enabled { return false; }
+        self.stop_music();
+        let v = self.volume * 0.35;
+        let pcm = decode(bytes);
+        let looped = pcm.as_ref().filter(|_| lp.start > 0 || lp.end > lp.start);
+        let Some(p) = looped else {
+            let Ok(s) = load_sound_from_bytes(bytes).await else { return false };
+            play_sound(&s, PlaySoundParams { looped: true, volume: v });
+            self.playing = Some(Music { intro: None, body: s, switch_at: None });
+            return true;
+        };
+        let end = if lp.end > lp.start { lp.end.min(p.frames.len()) } else { p.frames.len() };
+        let intro_pcm = p.slice(0, end);
+        let (Ok(intro), Ok(body)) = (load_sound_from_bytes(&intro_pcm.to_wav()).await, load_sound_from_bytes(&p.slice(lp.start, end).to_wav()).await) else { return false };
+        play_sound(&intro, PlaySoundParams { looped: false, volume: v });
+        let at = macroquad::time::get_time() + intro_pcm.seconds();
+        self.playing = Some(Music { intro: Some(intro), body, switch_at: Some(at) });
+        self.duck_now = 1.0;
+        true
     }
     pub fn stop_music(&mut self) {
-        if let Some(id) = self.playing.take() { if let Some(s) = self.music.get(&id) { stop_sound(s); } }
+        self.stop_all();
+        if let Some(m) = self.playing.take() {
+            if let Some(i) = m.intro { stop_sound(&i); }
+            stop_sound(&m.body);
+        }
     }
 }
 

@@ -54,13 +54,16 @@ pub struct Projectile {
 /// Events for the presentation layer (audio, rumble, UI).
 #[derive(Clone)]
 pub enum Event {
-    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str> },
+    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str>, pan: f32, looping: bool, freq_mul: f32 },
     Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool, attacker: usize, defender: usize },
     /// `fighter` = id of the root fighter that fired it (teams can have many per side)
     Super { side: usize, fighter: u32 },
     Ko { loser_side: usize },
     /// a fighter awakened into its transformed form (id of the root fighter)
     Transform { fighter: u32 },
+    StopSound { owner: u32, channel: i32 },
+    SoundPan { owner: u32, channel: i32, pan: f32 },
+    Rumble { fighter: u32, strong: f32, weak: f32, ms: u32 },
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
 }
 
@@ -76,8 +79,8 @@ pub fn corner_push(xvel: f32) -> f32 { (xvel.abs() * 0.5).clamp(1.2, 4.5) }
 pub const BASE_W: f32 = 426.67;
 pub const BASE_H: f32 = 240.0;
 
-#[derive(Clone)]
-pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_super: bool, pub darken: bool }
+#[derive(Default, Clone)]
+pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_super: bool, pub darken: bool, pub unhittable: bool, pub p2_def_mul: f32, pub end_cmd_buf_time: i32, pub pause_bg: bool }
 #[derive(Clone)]
 pub struct Announce { pub text: String, pub time: i32, pub total: i32 }
 
@@ -107,7 +110,7 @@ pub struct Match {
     pub timer: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
-    pub shake_time: i32, pub shake_ampl: f32,
+    pub shake_time: i32, pub shake_ampl: f32, pub shake_freq: f32, pub shake_phase: f32, pub shake_elapsed: i32,
     pub flash: Option<(i32, [f32; 3])>,
     pub slow_mo: i32,
     pub events: Vec<Event>,
@@ -122,7 +125,7 @@ impl Match {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
-            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, flash: None, slow_mo: 0,
+            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, slow_mo: 0,
             events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]),
         }
     }
@@ -546,7 +549,7 @@ impl Match {
             if frozen_by_pause(&self.fighters[i]) { continue; }
             let f = &mut self.fighters[i];
             let frozen = f.hit_pause > 0 || f.hit_shake > 0;
-            f.width_override = None; f.player_push = true;
+            f.width_override = None; f.player_push = true; f.draw_offset = V2::default();
             if !frozen { f.advance_anim(); }
             self.run_states(i);
         }
@@ -568,7 +571,7 @@ impl Match {
             if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); }
             // the final boss keeps charging on its own (a super every ~10 s even when not hitting)
             if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + 0.35).min(f.power_max); }
-            if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_used = 0; }
+            if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_used = 0; f.super_defence_mul = 1.0; }
             if f.move_contact > 0 { f.move_contact += 1; }
             if f.move_hit > 0 { f.move_hit += 1; }
             if f.move_guarded > 0 { f.move_guarded += 1; }
@@ -595,6 +598,7 @@ impl Match {
         self.update_camera();
         self.visual_timers();
         if let Some(p) = self.pause.as_mut() { p.time -= 1; if p.time <= 0 { self.pause = None; } }
+        for f in self.fighters.iter_mut() { if f.unhittable > 0 { f.unhittable -= 1; } }
         // drop stale targets
         let alive_ids: Vec<(u32, char)> = self.fighters.iter().map(|f| (f.id, f.move_type)).collect();
         for f in self.fighters.iter_mut() {
@@ -617,14 +621,14 @@ impl Match {
         }
         self.change_state(i, 193, d);
         self.fighters[i].ctrl = false;
-        self.pause = Some(PauseState { by: id, time: 80, move_time: 80, is_super: true, darken: true });
+        self.pause = Some(PauseState { by: id, time: 80, move_time: 80, is_super: true, darken: true, unhittable: true, p2_def_mul: 1.0, pause_bg: true, ..Default::default() });
         self.do_shake(40, 5.0);
         self.events.push(Event::Transform { fighter: id });
         true
     }
 
     fn visual_timers(&mut self) {
-        if self.shake_time > 0 { self.shake_time -= 1; }
+        if self.shake_time > 0 { self.shake_time -= 1; self.shake_elapsed += 1; }
         if let Some((t, _)) = self.flash.as_mut() { *t -= 1; if *t <= 0 { self.flash = None; } }
         if let Some(a) = self.announce.as_mut() { a.time -= 1; if a.time <= 0 { self.announce = None; } }
     }
@@ -715,7 +719,7 @@ impl Match {
             if f.ghv.hit_id >= 0 && hd.no_chain_id.contains(&Some(f.ghv.hit_id)) { return false; }
         }
         if self.round_state != 2 && !(self.round_state == 3 && f.alive) { return false; }
-        if f.state_no == 5150 { return false; }
+        if f.state_no == 5150 || f.unhittable > 0 { return false; }
         let hf = &hd.hitflag; let st = f.state_type;
         if hf.contains('+') && f.move_type != 'H' { return false; }
         if hf.contains('-') && f.move_type == 'H' { return false; }
@@ -886,7 +890,7 @@ impl Match {
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
             let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale(prev_hc) } else { 1.0 };
-            let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].defence_mul.max(0.01)).round();
+            let mut dmg = (hd.damage * attack_mul * scale / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             let prev_fall = self.fighters[d].ghv.fall;
             if was_hit && prev_fall && (self.fighters[d].state_type == 'A' || self.fighters[d].pos.y < -1.0) { self.fighters[d].juggle_used += hd.juggle; }
@@ -973,11 +977,21 @@ impl Match {
 
     // ---------------------------------------------------------------- effects
     fn sound(&mut self, i: usize, g: i32, n: i32, own: bool, builtin: Option<&'static str>) {
+        let pan = crate::sctrl::sound_pan(self, i, 0.0, false);
         let f = &self.fighters[i];
-        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin });
+        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0 });
     }
-    pub fn do_shake(&mut self, t: i32, ampl: f32) { self.shake_time = self.shake_time.max(t); self.shake_ampl = if ampl.abs() > 0.0 { ampl.abs() } else { 4.0 }; }
-    pub fn shake(&mut self, t: i32, _freq: f32, ampl: f32, _phase: f32) { self.do_shake(t, ampl); }
+    pub fn do_shake(&mut self, t: i32, ampl: f32) { self.shake(t, 60.0, -ampl.abs(), 0.0); }
+    pub fn shake(&mut self, t: i32, freq: f32, ampl: f32, phase: f32) {
+        if t <= 0 { return; }
+        self.shake_time = t; self.shake_elapsed = 0; self.shake_freq = freq; self.shake_phase = phase;
+        self.shake_ampl = if ampl != 0.0 { ampl } else { -4.0 };
+    }
+    pub fn shake_offset(&self) -> f32 {
+        if self.shake_time <= 0 { return 0.0; }
+        let decay = 1.0 - self.shake_elapsed as f32 / (self.shake_elapsed + self.shake_time) as f32;
+        self.shake_ampl * decay * (self.shake_phase + self.shake_freq * self.shake_elapsed as f32).to_radians().sin()
+    }
 
     fn make_explod(&self, owner: &Fighter, def: Arc<CharDef>, anim: i32, x: f32, y: f32, lscl: f32) -> Explod {
         Explod { owner: owner.id, id: -1, cur: AnimCursor::new(def, anim), pos: V2 { x, y }, vel: V2::default(), accel: V2::default(), facing: owner.facing, vfacing: 1.0,

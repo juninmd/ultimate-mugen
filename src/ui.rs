@@ -26,8 +26,11 @@ pub fn glow(x: f32, y: f32, r: f32, c: Color) {
 
 impl Ui {
     pub fn new() -> Self {
-        let display = load_ttf_font_from_bytes(include_bytes!("../assets/fonts/RussoOne.ttf")).unwrap();
-        let body = load_ttf_font_from_bytes(include_bytes!("../assets/fonts/Rajdhani.ttf")).unwrap();
+        let mut display = load_ttf_font_from_bytes(include_bytes!("../assets/fonts/RussoOne.ttf")).unwrap();
+        let mut body = load_ttf_font_from_bytes(include_bytes!("../assets/fonts/Rajdhani.ttf")).unwrap();
+        // macroquad creates the glyph atlas with Nearest sampling; text drawn at a non-1:1 scale (4K, animated sizes) looked stair-stepped
+        display.set_filter(FilterMode::Linear);
+        body.set_filter(FilterMode::Linear);
         Ui { display, body, s: 1.0, ox: 0.0, oy: 0.0, t: 0.0 }
     }
     pub fn begin(&mut self) {

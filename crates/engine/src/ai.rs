@@ -7,6 +7,8 @@ pub struct Ai { pub level: i32, queue: std::collections::VecDeque<u32>, hold: u3
 
 impl Ai {
     pub fn new(level: i32, seed: u32) -> Self { Ai { level, queue: Default::default(), hold: 0, hold_ticks: 0, cooldown: 0, rng: seed | 1, attack: vec![], init: false } }
+    /// Forget cached per-character data (when a CPU pilot is handed another fighter, e.g. control switching in team battles).
+    pub fn reset(&mut self) { self.init = false; self.queue.clear(); self.hold = 0; self.hold_ticks = 0; self.cooldown = 0; self.attack.clear(); }
     fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
     fn abs(rel: u32, facing: f32) -> u32 {
         let mut b = rel & 3;

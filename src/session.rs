@@ -80,6 +80,7 @@ impl Session {
 
     pub fn step(&mut self, c: &mut Controls, audio: &mut Audio) {
         let roots = self.m.root_indices();
+        if self.m.team_simul { if let Some(cur) = self.pilots.iter().position(|p| matches!(p, Pilot::Human(0))) { if roots.get(cur).is_some_and(|&fi| !self.m.fighters[fi].alive) { self.switch_control(); } } }
         let mut bits = vec![0u32; roots.len()];
         for (slot, p) in self.pilots.iter_mut().enumerate() {
             let Some(&fi) = roots.get(slot) else { continue };
@@ -114,8 +115,10 @@ impl Session {
                     let kind = builtin.unwrap_or(match group { 5 => if index >= 2 { "hitheavy" } else { "hit" }, 6 => "guard", 7 => "land", _ => if index >= 2 { "swingh" } else { "swing" } });
                     if group >= 0 || builtin.is_some() { audio.sfx(kind); }
                 }
-                Event::Hit { attacker_side, defender_side, damage, guarded, heavy, .. } => {
-                    let human = |s: usize, p: &[Pilot]| match p.get(s) { Some(Pilot::Human(slot)) => Some(*slot), _ => None };
+                Event::Hit { damage, guarded, heavy, attacker, defender, .. } => {
+                    let roots = self.m.root_indices();
+                    let (attacker_side, defender_side) = (attacker, defender);
+                    let human = |fi: usize, p: &[Pilot]| roots.iter().position(|&r| r == fi).and_then(|sl| match p.get(sl) { Some(Pilot::Human(slot)) => Some(*slot), _ => None });
                     let mag = (damage / 120.0).clamp(0.15, 1.0);
                     if let Some(sl) = human(defender_side, &self.pilots) { if guarded { c.rumble(sl, 0.0, 0.35, 70); } else { c.rumble(sl, mag, (mag + 0.2).min(1.0), if heavy { 220 } else { 120 }); } }
                     if let Some(sl) = human(attacker_side, &self.pilots) { c.rumble(sl, 0.0, if guarded { 0.15 } else { mag * 0.6 }, 60); }
@@ -127,6 +130,29 @@ impl Session {
                 Event::RoundStart(_) => audio.sfx("round"),
                 Event::RoundEnd(w) if w >= 0 => audio.sfx("win"),
                 _ => {}
+            }
+        }
+    }
+
+    /// Ids of the root fighters currently driven by a human (the P1 fighter you control, P2 in versus).
+    pub fn human_ids(&self) -> Vec<u32> {
+        let roots = self.m.root_indices();
+        self.pilots.iter().enumerate().filter(|(_, p)| matches!(p, Pilot::Human(_))).filter_map(|(slot, _)| roots.get(slot).map(|&fi| self.m.fighters[fi].id)).collect()
+    }
+    /// Parallel teams: hand your controller to the next living teammate (Tab / automatically when yours falls).
+    pub fn switch_control(&mut self) {
+        let roots = self.m.root_indices();
+        let Some(cur) = self.pilots.iter().position(|p| matches!(p, Pilot::Human(0))) else { return };
+        let side = self.m.fighters[roots[cur]].side;
+        let mates: Vec<usize> = (0..roots.len()).filter(|&sl| self.m.fighters[roots[sl]].side == side).collect();
+        let at = mates.iter().position(|&sl| sl == cur).unwrap_or(0);
+        for k in 1..mates.len() {
+            let cand = mates[(at + k) % mates.len()];
+            if self.m.fighters[roots[cand]].alive && cand < self.pilots.len() {
+                self.pilots.swap(cur, cand);
+                // the AI that used to drive the new fighter now drives the old one: drop its cached per-character data
+                if let Pilot::Cpu(a) = &mut self.pilots[cur] { a.reset(); }
+                return;
             }
         }
     }
@@ -148,10 +174,12 @@ impl Session {
         if self.over.is_some() { self.over_timer += dt; }
     }
     pub fn draw(&mut self, g: &mut Gfx, ui: &Ui) {
+        self.r.human = self.human_ids();
         g.post.begin();
         let p = self.r.draw(g, &self.m, &self.stage, &mut self.vfx, ui);
         g.post.end(&p, ui.t);
-        self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref());
+        let human = self.human_ids();
+        self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human);
         self.vfx.draw_banners(ui);
     }
 }

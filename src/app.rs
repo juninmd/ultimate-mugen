@@ -87,7 +87,7 @@ const MENU: [(&str, &str); 11] = [
     ("Treino", "Boneco de treino, barra infinita, hitboxes"),
     ("CPU vs CPU", "Assista a IA lutar"),
     ("Equipe · Sequência", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida"),
-    ("Equipe · Paralelo", "Até 5 contra 5 ao mesmo tempo; parceiros controlados pela IA"),
+    ("Equipe · Paralelo", "5 contra 5 ao mesmo tempo (2 a 5) · TAB troca de lutador"),
     ("Personagens MUGEN", "Como adicionar personagens e cenários"),
     ("Controles", "Teclado, DualShock/DualSense, toque e vibração"),
     ("Vídeo", "Tela cheia, resolução até 4K e qualidade da arte"),
@@ -260,7 +260,7 @@ impl App {
         if let Some(i) = chosen {
             let mode = [Mode::Arcade, Mode::Cpu, Mode::Versus, Mode::Training, Mode::Watch, Mode::TeamSeq, Mode::TeamSimul];
             match i {
-                0..=6 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
+                0..=6 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); if self.mode == Mode::TeamSimul { self.team_n = 5; } else if self.mode == Mode::TeamSeq { self.team_n = 3; } self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
                 7 => self.go(Screen::Mugen),
                 8 => self.go(Screen::Controls),
                 9 => self.go(Screen::Video { cur: 0 }),
@@ -754,6 +754,7 @@ impl App {
             let p = self.ui.to_virtual(mouse_position().into());
             if p.x > pb.0 && p.x < pb.0 + pb.2 && p.y > pb.1 && p.y < pb.1 + pb.3 { s.paused = true; }
         }
+        if is_key_pressed(KeyCode::Tab) && !s.paused { s.switch_control(); }
         s.update(dt, &mut self.c, &mut self.audio);
         s.draw(&mut self.g, &self.ui);
         self.c.touch.draw();

@@ -49,12 +49,12 @@ impl Gfx {
 pub struct DrawOpts { pub alpha: f32, pub add: bool, pub flash: f32, pub tint: Color, pub angle: f32, pub vflip: bool }
 impl Default for DrawOpts { fn default() -> Self { DrawOpts { alpha: 1.0, add: false, flash: 0.0, tint: WHITE, angle: 0.0, vflip: false } } }
 
-pub struct MatchRenderer { pub debug: bool, pub particles: Vec<Particle> }
+pub struct MatchRenderer { pub debug: bool, pub particles: Vec<Particle>, /** ids of human-controlled fighters (get the ▼ marker) */ pub human: Vec<u32> }
 
 impl MatchRenderer {
     pub fn new(stage: &Stage) -> Self {
         let particles = match &stage.art { StageArt::Procedural { particles, .. } => particles.clone(), _ => vec![] };
-        MatchRenderer { debug: false, particles }
+        MatchRenderer { debug: false, particles, human: vec![] }
     }
     fn sx(m: &Match, x: f32) -> f32 { x - m.camera.x + m.view_w / 2.0 }
     fn sy(m: &Match, y: f32) -> f32 { y - m.camera.y + m.stage.zoffset }
@@ -144,6 +144,7 @@ impl MatchRenderer {
             }
         }
         self.draw_stage(g, m, stage, true, shx, shy);
+        self.draw_markers(g, m, shx, shy);
         if gain > 0.0 { vfx.draw_world(g, m, shx, shy, ui); }
         if self.debug { self.draw_debug(g, m); }
         // back to the plain view transform for screen-space overlays
@@ -158,6 +159,30 @@ impl MatchRenderer {
         if g.oy > 0.0 { draw_rectangle(0.0, 0.0, w, g.oy, BLACK); draw_rectangle(0.0, h - g.oy, w, g.oy, BLACK); }
         let bloom = if matches!(stage.art, StageArt::Mugen(_)) { 0.35 } else { 0.5 };
         vfx.params(gain.max(0.0), (focus_screen.0 / w, focus_screen.1 / h), bloom)
+    }
+
+    /// Team brawls (more than 2 fighters): a floating life bar over every fighter and a bobbing ▼ over the one you control.
+    fn draw_markers(&self, g: &Gfx, m: &Match, shx: f32, shy: f32) {
+        let roots: Vec<&Fighter> = m.roots().collect();
+        if roots.len() <= 2 { return; }
+        let s = g.view_scale;
+        for f in roots {
+            if !f.alive || f.destroyed || f.has_assert(ume_engine::fighter::asf::INVISIBLE) { continue; }
+            let hgt = f.def.c("size.height", 60.0) as f32 * f.lscl + 14.0;
+            let (cx, cy) = (g.ox + (Self::sx(m, f.pos.x) + shx) * s, g.oy + (Self::sy(m, f.pos.y - hgt) + shy) * s);
+            let mine = self.human.contains(&f.id);
+            let (w, h) = ((if mine { 26.0 } else { 20.0 }) * s, (if mine { 3.0 } else { 2.2 }) * s);
+            let ratio = (f.life / f.life_max).clamp(0.0, 1.0);
+            let team = if f.side == 0 { Color::new(0.13, 0.9, 1.0, 1.0) } else { Color::new(1.0, 0.3, 0.43, 1.0) };
+            draw_rectangle(cx - w / 2.0 - s * 0.6, cy - s * 0.6, w + s * 1.2, h + s * 1.2, Color::new(0.03, 0.03, 0.08, 0.85));
+            draw_rectangle(cx - w / 2.0, cy, w * ratio, h, if ratio < 0.25 { Color::new(1.0, 0.48, 0.16, 1.0) } else { team });
+            if mine {
+                let bob = (m.game_time as f32 * 0.25).sin() * 1.6 * s;
+                let (ty, a) = (cy - 4.0 * s + bob, 4.4 * s);
+                draw_triangle(vec2(cx - a, ty - a), vec2(cx + a, ty - a), vec2(cx, ty + a * 0.4), Color::new(1.0, 0.8, 0.2, 1.0));
+                draw_triangle(vec2(cx - a * 0.55, ty - a * 0.8), vec2(cx + a * 0.55, ty - a * 0.8), vec2(cx, ty), Color::new(1.0, 0.95, 0.6, 1.0));
+            }
+        }
     }
 
     fn draw_reflection(&self, g: &mut Gfx, m: &Match, f: &Fighter, shx: f32, shy: f32) {

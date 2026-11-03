@@ -11,12 +11,17 @@ pub struct Hud { trail: [f32; 2], combo: [(i32, f32, i32); 2], pop: [f32; 2], la
 impl Hud {
     pub fn new() -> Self { Hud { trail: [1.0, 1.0], combo: [(0, 0.0, 0); 2], pop: [0.0; 2], last_hits: [0; 2] } }
 
-    pub fn draw(&mut self, ui: &Ui, g: &mut Gfx, m: &Match, gt: f32, team: Option<&TeamInfo>) {
+    pub fn draw(&mut self, ui: &Ui, g: &mut Gfx, m: &Match, gt: f32, team: Option<&TeamInfo>, human: &[u32]) {
         let s = g.view_scale;
         let (gox, goy) = (g.ox, g.oy);
         let p = |x: f32, y: f32| vec2(gox + x * s, goy + y * s);
         // team leaders (first fighter of each side); partners get compact bars
-        let roots: Vec<&Fighter> = (0..2).filter_map(|sd| m.roots().find(|f| f.side == sd)).collect();
+        // Main bar per side: the fighter you control (side 0) / the front-line fighter still standing (side 1); everyone else gets a portrait tile.
+        let main_of = |sd: usize| -> Option<&Fighter> {
+            let all: Vec<&Fighter> = m.roots().filter(|f| f.side == sd).collect();
+            all.iter().copied().find(|f| human.contains(&f.id) && f.alive).or_else(|| all.iter().copied().find(|f| f.alive)).or_else(|| all.first().copied())
+        };
+        let roots: Vec<&Fighter> = (0..2).filter_map(main_of).collect();
         let partners: Vec<&Fighter> = m.roots().filter(|f| !roots.iter().any(|r| r.id == f.id)).collect();
         let w = m.view_w;
         let text = |t: &str, x: f32, y: f32, size: f32, c: Color, al: Align, disp: bool| {
@@ -55,25 +60,8 @@ impl Hud {
                 if low && ratio > 0.0 { let pul = 0.12 + 0.12 * (gt * 11.0).sin().abs(); quad(x - 3.0, bw + 6.0, y - 3.0, bh + 6.0, Color::new(1.0, 0.1, 0.1, pul)); }
                 // portrait
                 let pc = p(if side == 0 { 12.0 } else { w - 12.0 }, y + 19.0);
-                let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
-                let half = 11.0 * s;
-                // slanted-free square portrait: head crop of the idle sprite (MUGEN: 9000,x portrait), team-colour frame
-                draw_rectangle(pc.x - half - 1.5 * s, pc.y - half - 1.5 * s, half * 2.0 + 3.0 * s, half * 2.0 + 3.0 * s, Color::new(0.04, 0.04, 0.08, 0.95));
-                draw_rectangle(pc.x - half, pc.y - half, half * 2.0, half * 2.0, alpha(col, 0.85));
-                let por = f.def.sprites.get(&(9000, 1)).or(f.def.sprites.get(&(9000, 0))).filter(|sp| f.def.source == ume_engine::chardef::Source::Mugen && sp.image.is_some()).map(|sp| (sp.clone(), true))
-                    .or_else(|| f.def.anims.get(&0).and_then(|a| a.frames.first()).and_then(|fr| f.def.sprites.get(&(fr.group, fr.index))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), false)));
-                if let Some((sp, full)) = por {
-                    let img = sp.image.clone().unwrap();
-                    let tex = g.texture(&img, sp.scale >= 0.99);
-                    let (iw, ih) = (img.w as f32, img.h as f32);
-                    // source square in image pixels
-                    let src = if full { let sd = iw.min(ih); Rect::new((iw - sd) / 2.0, 0.0, sd, sd) } else { let sd = (ih * 0.40).min(iw); let cx = sp.axis_x.clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
-                    let (dx, dy) = (pc.x - half, pc.y - half);
-                    draw_texture_ex(&tex, dx, dy, WHITE, DrawTextureParams { dest_size: Some(vec2(half * 2.0, half * 2.0)), source: Some(src), flip_x: side == 1 && !full, ..Default::default() });
-                } else {
-                    text(&f.def.display_name.chars().next().unwrap_or('?').to_uppercase().to_string(), if side == 0 { 12.0 } else { w - 12.0 }, y + 23.0, 12.0, WHITE, Align::Center, true);
-                }
-                draw_rectangle_lines(pc.x - half, pc.y - half, half * 2.0, half * 2.0, 1.4 * s, if low { hex("#ff4d4d") } else { WHITE });
+                portrait(g, f, pc, 11.0 * s, side, s, if low { hex("#ff4d4d") } else if human.contains(&f.id) { hex("#ffcc33") } else { WHITE });
+                if human.contains(&f.id) { text(if side == 0 { "P1" } else { "P2" }, if side == 0 { 12.0 } else { w - 12.0 }, y + 36.0, 5.5, hex("#ffcc33"), Align::Center, true); }
                 let nx = if side == 0 { x + 16.0 } else { x + bw - 16.0 };
                 let al = if side == 0 { Align::Left } else { Align::Right };
                 text(&f.def.display_name.to_uppercase(), nx + 0.6, y + bh + 9.6, 7.0, BLACK, al, true);
@@ -103,22 +91,35 @@ impl Hud {
                 outlined(&lab, if side == 0 { px + pw + 11.0 } else { px - 11.0 }, py + 6.0, 10.0 * bump, colors[(lv.max(1) - 1).min(3) as usize], Align::Center);
                 if lv >= 3 { let c = p(px + pw / 2.0, py + ph / 2.0); let a = 0.08 + 0.06 * (gt * 9.0).sin().abs(); draw_rectangle(c.x - pw * s * 0.62, c.y - ph * s * 1.6, pw * s * 1.24, ph * s * 3.2, Color::new(1.0, 0.3, 0.85, a)); }
             }
-            // partners (parallel team mode): compact bar under the leader's
-            let mut row = [0usize; 2];
+            // partner tiles: portrait + life bar for every other fighter on the team; yours is highlighted, fallen ones greyed out
+            let mut col_idx = [0usize; 2];
             for f in &partners {
                 let side = f.side.min(1);
-                let j = row[side]; row[side] += 1;
-                let bw = (w / 2.0 - 34.0) * 0.55; let bh = 4.0; let y = 34.0 + j as f32 * 8.6;
-                let x = if side == 0 { 10.0 } else { w - 10.0 - bw };
+                let j = col_idx[side]; col_idx[side] += 1;
+                let (tw, gap) = (19.0, 3.0);
+                let tx = if side == 0 { 10.0 + j as f32 * (tw + gap) } else { w - 10.0 - tw - j as f32 * (tw + gap) };
+                let ty = 35.0;
+                let c = p(tx + tw / 2.0, ty + tw / 2.0);
                 let ratio = (f.life / f.life_max).clamp(0.0, 1.0);
-                draw_rectangle(p(x - 1.0, y - 1.0).x, p(0.0, y - 1.0).y, (bw + 2.0) * s, (bh + 2.0) * s, Color::new(0.04, 0.04, 0.08, 0.85));
-                let fw = bw * ratio;
-                let fx = if side == 0 { x + bw - fw } else { x };
-                draw_rectangle(p(fx, y).x, p(0.0, y).y, fw * s, bh * s, if f.alive { if ratio < 0.25 { hex("#ff7a2a") } else { hex("#33d6a0") } } else { hex("#555566") });
-                // name sits just outside the bar, towards the screen centre
-                let (nx, al) = if side == 0 { (x + bw + 3.0, Align::Left) } else { (x - 3.0, Align::Right) };
-                let nm = f.def.display_name.split_whitespace().next().unwrap_or("").to_uppercase();
-                text(&nm, nx, y + bh, 5.0, if f.alive { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.4) }, al, true);
+                let mine = human.contains(&f.id);
+                portrait(g, f, c, tw / 2.0 * s, side, s, if mine { hex("#ffcc33") } else if f.alive { Color::new(1.0, 1.0, 1.0, 0.75) } else { Color::new(1.0, 1.0, 1.0, 0.25) });
+                if !f.alive {
+                    draw_rectangle(c.x - tw / 2.0 * s, c.y - tw / 2.0 * s, tw * s, tw * s, Color::new(0.0, 0.0, 0.05, 0.62));
+                    text("✕", tx + tw / 2.0, ty + tw / 2.0 + 3.5, 11.0, Color::new(1.0, 0.3, 0.3, 0.9), Align::Center, true);
+                }
+                // life bar under the tile
+                let by = ty + tw + 1.5;
+                draw_rectangle(p(tx, by).x, p(0.0, by).y, tw * s, 2.6 * s, Color::new(0.04, 0.04, 0.08, 0.9));
+                draw_rectangle(p(tx, by).x, p(0.0, by).y, tw * ratio * s, 2.6 * s, if !f.alive { hex("#555566") } else if ratio < 0.25 { hex("#ff7a2a") } else { hex("#33d6a0") });
+                if mine { text(&f.def.display_name.split_whitespace().next().unwrap_or("").to_uppercase(), tx + tw / 2.0, by + 9.5, 4.8, hex("#ffcc33"), Align::Center, true); }
+            }
+            // alive counters beside the timer + control-switch hint (parallel team mode)
+            if m.team_simul {
+                let alive = |sd: usize| m.roots().filter(|f| f.side == sd && f.alive).count();
+                let tot = |sd: usize| m.roots().filter(|f| f.side == sd).count();
+                outlined(&format!("{}/{}", alive(0), tot(0)), w / 2.0 - 24.0, 40.0, 8.0, hex("#22e8ff"), Align::Center);
+                outlined(&format!("{}/{}", alive(1), tot(1)), w / 2.0 + 24.0, 40.0, 8.0, hex("#ff4d6d"), Align::Center);
+                if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 { text("TAB · TROCAR DE LUTADOR", 10.0, m.view_h - 20.0, 5.2, Color::new(1.0, 1.0, 1.0, 0.55), Align::Left, true); }
             }
             // sequence roster: portraits of every team member (KO'd ones greyed out, current one highlighted)
             if let Some(t) = team.filter(|t| !t.simul) {
@@ -192,4 +193,21 @@ impl Hud {
         if m.training { text("TREINO", w / 2.0, 46.0, 7.0, Color::new(1.0, 1.0, 1.0, 0.8), Align::Center, true); }
         let _ = gt;
     }
+}
+
+/// Square portrait: head crop of the idle sprite (M.U.G.E.N.: the 9000,x portrait) on the character colour, with a frame.
+fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, frame: Color) {
+    let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
+    draw_rectangle(pc.x - half - 1.5 * s, pc.y - half - 1.5 * s, half * 2.0 + 3.0 * s, half * 2.0 + 3.0 * s, Color::new(0.04, 0.04, 0.08, 0.95));
+    draw_rectangle(pc.x - half, pc.y - half, half * 2.0, half * 2.0, alpha(col, 0.85));
+    let por = f.def.sprites.get(&(9000, 1)).or(f.def.sprites.get(&(9000, 0))).filter(|sp| f.def.source == ume_engine::chardef::Source::Mugen && sp.image.is_some()).map(|sp| (sp.clone(), true))
+        .or_else(|| f.def.anims.get(&0).and_then(|a| a.frames.first()).and_then(|fr| f.def.sprites.get(&(fr.group, fr.index))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), false)));
+    if let Some((sp, full)) = por {
+        let img = sp.image.clone().unwrap();
+        let tex = g.texture(&img, sp.scale >= 0.99);
+        let (iw, ih) = (img.w as f32, img.h as f32);
+        let src = if full { let sd = iw.min(ih); Rect::new((iw - sd) / 2.0, 0.0, sd, sd) } else { let sd = (ih * 0.40).min(iw); let cx = sp.axis_x.clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
+        draw_texture_ex(&tex, pc.x - half, pc.y - half, WHITE, DrawTextureParams { dest_size: Some(vec2(half * 2.0, half * 2.0)), source: Some(src), flip_x: side == 1 && !full, ..Default::default() });
+    }
+    draw_rectangle_lines(pc.x - half, pc.y - half, half * 2.0, half * 2.0, 1.4 * s, frame);
 }

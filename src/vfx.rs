@@ -459,7 +459,7 @@ impl Vfx {
     pub fn draw_banners(&self, ui: &Ui) {
         for (i, b) in self.banners.iter().enumerate() {
             let t = b.t;
-            let sc = if t < 0.12 { lerp(1.9, 1.0, t / 0.12) } else if t < 0.2 { lerp(1.0, 1.08, (t - 0.12) / 0.08) } else { lerp(1.08, 1.0, ((t - 0.2) / 0.3).min(1.0)) };
+            let sc = if t < 0.12 { lerp(1.4, 1.0, t / 0.12) } else if t < 0.2 { lerp(1.0, 1.08, (t - 0.12) / 0.08) } else { lerp(1.08, 1.0, ((t - 0.2) / 0.3).min(1.0)) };
             let a = if t > 1.2 { ((1.6 - t) / 0.4).max(0.0) } else { (t / 0.06).min(1.0) };
             let slide = if t < 0.12 { (1.0 - t / 0.12) * 120.0 } else { 0.0 };
             let y = 300.0 + i as f32 * 70.0;

@@ -280,6 +280,13 @@ impl Audio {
         }
         play_sound(s, PlaySoundParams { looped: o.looping, volume: self.volume * o.volume.clamp(0.0, 1.5) });
     }
+    pub fn stop(&mut self, owner: u32, channel: i32) {
+        self.channels.retain(|&(o, ch), (s, _)| {
+            let hit = o == owner && (channel < 0 || ch == channel);
+            if hit { stop_sound(s); }
+            !hit
+        });
+    }
     pub fn stop_all(&mut self) {
         for (_, (s, _)) in self.channels.drain() { stop_sound(&s); }
     }

@@ -1,6 +1,7 @@
 //! Ultimate MUGEN — modern 2D fighting engine (Rust + macroquad), MUGEN-compatible.
 mod app;
 mod audio;
+mod sound_mix;
 mod controls;
 mod gamepad;
 mod hud;

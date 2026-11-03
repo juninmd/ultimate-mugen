@@ -1,4 +1,5 @@
 //! Character & stage registry: built-in UMF fighters (embedded JSON) + MUGEN content (chars/ and stages/ folders, imports).
+use crate::audio::MusicLoop;
 use crate::stages::{self, Stage};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -187,7 +188,7 @@ impl Registry {
     pub fn build_stage(&self, i: usize) -> Stage {
         match &self.stages[i].src {
             StageSrc::Builtin(b) => (self.builtin_stages[*b].build)(),
-            StageSrc::Mugen { vfs, def } => match load_stage(vfs, def) { Ok(s) => stages::from_mugen(s), Err(_) => (self.builtin_stages[0].build)() },
+            StageSrc::Mugen { vfs, def } => match load_stage(vfs, def) { Ok(s) => { let mut st = stages::from_mugen(s); st.bgm = stage_bgm(vfs, def).map(Arc::new); st } Err(_) => (self.builtin_stages[0].build)() },
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -208,4 +209,15 @@ impl Registry {
         }
         n
     }
+}
+
+pub fn stage_bgm(vfs: &Vfs, def: &str) -> Option<(Vec<u8>, MusicLoop)> {
+    let secs = parse_ini(&text(vfs.get(&ume_formats::vfs::norm_path(def))?));
+    let m = find_section(&secs, "music")?;
+    let name = unquote(m.get("bgmusic")?);
+    if name.is_empty() { return None; }
+    let base = def.rfind('/').map(|i| &def[..i]).unwrap_or("");
+    let bytes = ume_formats::vfs::resolve(vfs, base, &name).or_else(|| ume_formats::vfs::resolve(vfs, "", &name))?;
+    let n = |k: &str| m.get(k).and_then(|v| v.trim().parse::<usize>().ok()).unwrap_or(0);
+    Some((bytes.to_vec(), MusicLoop { start: n("bgmloopstart"), end: n("bgmloopend") }))
 }

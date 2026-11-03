@@ -92,6 +92,8 @@ async fn team_fight(app: &mut App, dir: &str, name: &str, simul: bool, n: usize,
 
 /// Story / cinematic features: face-off, awakening, defeats, boss, cutscenes, zoomed-out 5v5.
 async fn story(app: &mut App, dir: &str) {
+    // "CHEFE FINAL" banner right when the boss fight starts (the face-off ends ~270 ticks in)
+    if std::env::var("UME_STORY_SHOT").as_deref() == Ok("banner") { fight(app, dir, "68-boss-banner", "kaito", "oboro", "volcano", 280, "faceoff").await; return; }
     fight(app, dir, "50-faceoff-1", "kaito", "shion", "dojo", 82, "faceoff").await;
     fight(app, dir, "51-faceoff-2", "kaito", "shion", "dojo", 195, "faceoff").await;
     fight(app, dir, "52-transform-start", "valdric", "kaito", "spirit", 100, "transform").await;

@@ -105,7 +105,9 @@ impl Hud {
                 portrait(g, f, c, tw / 2.0 * s, side, s, if mine { hex("#ffcc33") } else if f.alive { Color::new(1.0, 1.0, 1.0, 0.75) } else { Color::new(1.0, 1.0, 1.0, 0.25) });
                 if !f.alive {
                     draw_rectangle(c.x - tw / 2.0 * s, c.y - tw / 2.0 * s, tw * s, tw * s, Color::new(0.0, 0.0, 0.05, 0.62));
-                    text("✕", tx + tw / 2.0, ty + tw / 2.0 + 3.5, 11.0, Color::new(1.0, 0.3, 0.3, 0.9), Align::Center, true);
+                    let r = tw * 0.28 * s;
+                    draw_line(c.x - r, c.y - r, c.x + r, c.y + r, 2.0 * s, Color::new(1.0, 0.3, 0.3, 0.95));
+                    draw_line(c.x - r, c.y + r, c.x + r, c.y - r, 2.0 * s, Color::new(1.0, 0.3, 0.3, 0.95));
                 }
                 // life bar under the tile
                 let by = ty + tw + 1.5;
@@ -132,7 +134,7 @@ impl Hud {
                         let col = if ko { Color::from_rgba(70, 70, 80, 255) } else { Color::from_rgba(col[0], col[1], col[2], 255) };
                         draw_circle(c.x, c.y, (if cur { 7.2 } else { 5.6 }) * s, col);
                         draw_circle_lines(c.x, c.y, (if cur { 7.2 } else { 5.6 }) * s, (if cur { 1.4 } else { 0.7 }) * s, if cur { hex("#ffcc33") } else { Color::new(1.0, 1.0, 1.0, 0.6) });
-                        text(if ko { "✕" } else { name.chars().next().map(|_| &name[..name.chars().next().unwrap().len_utf8()]).unwrap_or("?") }, x + 6.5, 47.9, if cur { 7.0 } else { 5.5 }, WHITE, Align::Center, true);
+                        if ko { let r = 3.2 * s; draw_line(c.x - r, c.y - r, c.x + r, c.y + r, 1.6 * s, Color::new(1.0, 0.3, 0.3, 0.95)); draw_line(c.x - r, c.y + r, c.x + r, c.y - r, 1.6 * s, Color::new(1.0, 0.3, 0.3, 0.95)); } else { text(name.chars().next().map(|_| &name[..name.chars().next().unwrap().len_utf8()]).unwrap_or("?"), x + 6.5, 47.9, if cur { 7.0 } else { 5.5 }, WHITE, Align::Center, true); }
                     }
                 }
             }

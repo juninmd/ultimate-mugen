@@ -38,6 +38,8 @@ pub struct Vfx {
     pub trauma: f32, punch: f32, ko_t: f32, ko_focus: (f32, f32), pub slow_t: f32,
     chroma: f32, flash: f32, radial: f32, vig: f32, lines: f32, lines_col: [f32; 3], sat_pulse: f32,
     super_t: f32, super_owner: u32,
+    /// cinematic super camera 0..1 (eased in while the super pause runs, eased out afterwards: build-up + follow-through)
+    sz: f32, super_active: bool,
     /// sound requests produced by the effects layer (drained by the session)
     pub sfx: Vec<&'static str>,
     combo: [i32; 2], meter: [i32; 2],
@@ -49,7 +51,7 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 { a + (b - a) * t }
 impl Vfx {
     pub fn new() -> Self {
         Vfx { splats: vec![], lights: vec![], weather: Weather::None, clock: 0.0, invert_t: 0.0, dist_zoom: 0.0, dist_target: 0.0, parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
-            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sfx: vec![], combo: [0; 2], meter: [0; 2], snap: vec![], pre_mt: vec![], rng: 0x9e37_79b9, tick: 0 }
+            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sz: 0.0, super_active: false, sfx: vec![], combo: [0; 2], meter: [0; 2], snap: vec![], pre_mt: vec![], rng: 0x9e37_79b9, tick: 0 }
     }
     fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
     fn rr(&mut self, a: f32, b: f32) -> f32 { a + (b - a) * self.r() }
@@ -230,6 +232,7 @@ impl Vfx {
             if lv > self.meter[side] && m.round_state == 2 { self.sfx.push("meter"); }
             self.meter[side] = lv;
         }
+        self.super_active = m.pause.as_ref().is_some_and(|p| p.is_super);
         // super aura: rising energy motes while the super pause runs
         if let Some(p) = &m.pause { if p.is_super {
             if let Some((x, y, _)) = m.fighters.iter().find(|f| f.id == self.super_owner).map(Self::chest_of) {
@@ -257,6 +260,9 @@ impl Vfx {
         }
         self.parts.retain(|p| p.life > 0.0);
         self.clock += dt;
+        // DBFZ-style: slow ease-in to the close-up, even slower pull-back
+        let (target, rate) = if self.super_active { (1.0, 5.0) } else { (0.0, 2.2) };
+        self.sz += (target - self.sz) * (rate * dt).min(1.0);
         self.invert_t = (self.invert_t - dt).max(0.0);
         self.dist_zoom += (self.dist_target - self.dist_zoom) * (3.0 * dt).min(1.0);
         for sp in &mut self.splats { sp.t += dt; }
@@ -291,8 +297,9 @@ impl Vfx {
             if all.is_empty() { (m.camera.x, -35.0) } else { let n = all.len() as f32; (all.iter().map(|f| f.pos.x).sum::<f32>() / n, all.iter().map(|f| f.pos.y).sum::<f32>() / n - 35.0) }
         };
         let ko = if self.ko_t > 0.0 { let e = (self.ko_t.min(1.0)).powf(0.6); e * 0.28 } else { 0.0 };
-        let sup = self.super_t * 0.07;
+        let sup = self.sz * self.sz * (3.0 - 2.0 * self.sz) * 0.2;
         let z = 1.0 + (self.punch + ko + sup + self.dist_zoom) * gain;
+        let mid = if self.sz > 0.01 { match m.fighters.iter().find(|f| f.id == self.super_owner).map(Self::chest_of) { Some((x, y, _)) => (lerp(mid.0, x, self.sz), lerp(mid.1, y, self.sz)), None => mid } } else { mid };
         let focus = if self.ko_t > 0.0 { let e = self.ko_t.min(1.0); (lerp(mid.0, self.ko_focus.0, e), lerp(mid.1, self.ko_focus.1, e)) } else { mid };
         (z, focus)
     }

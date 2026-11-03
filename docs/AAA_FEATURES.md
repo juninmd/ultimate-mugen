@@ -84,3 +84,14 @@ Assistências estilo Kameo (botão de chamar parceiro com recarga), troca de per
 - **HUD v2**: barra principal acompanha o lutador que você controla (lado inimigo: o da linha de frente); *tiles* de retrato com barra de vida para cada companheiro (o seu em dourado, caídos escurecidos com ✕); contadores vivos/total ao lado do timer; dica `TAB · TROCAR DE LUTADOR`.
 - **Na arena** (mais de 2 lutadores): barra de vida flutuante sobre cada lutador e marcador ▼ saltitante sobre o seu.
 - Fontes com filtro linear (texto escalado deixou de ficar serrilhado) e *slam* de banner mais suave.
+
+---
+
+# Rodada 5 — pesquisa complementar (câmera de super e hit-stop)
+
+Fontes (resumos de busca; as páginas primárias de Capcom/Epic/GDC não resolvem na rede da sessão):
+- **Dragon Ball FighterZ** — [Famitsu via DBZGames](https://www.dbzgames.org/news/dragon-ball-fighterz-arcsys-director-and-game-producer-talk-about-technical-aspects/), [PC Gamer](https://pcgamer.com/uk/dragon-ball-fighterz-review), [ComicBook.com](https://comicbook.com/gaming/2018/02/12/dragon-ball-fighterz-video-without-cinematic-effects), [Kotaku sobre a palestra GDC](https://kotaku.com/breaking-down-the-animation-of-guilty-gear-and-dragonba-1836849279): o diretor Motomura explica que a **câmera se move durante certos supers** para o 3D "ficar bonito"; os supers têm **build-up e follow-through** e a *transição* entre a câmera de jogo e o close é o que vende o efeito (um vídeo sem os cinematics mostrou isso). → **câmera de super cinematográfica**: zoom que entra devagar até o lutador que ativa (até +20 %), segura durante a pausa e sai ainda mais devagar (`Vfx::sz`, ease-in 5/s, ease-out 2,2/s).
+- **Hit-stop** — [Sonic Hurricane](https://sonichurricane.com/?p=1043), [GameFAQs (SF V)](https://gamefaqs.gamespot.com/boards/895976-street-fighter-v/74812570?page=2), [Shoryuken](http://shoryuken.com/2016/06/07/hitstop-in-street-fighter-v-kens-not-so-little-secret/), [SmashWiki](https://www.ssbwiki.com/Hitlag): SF V trava **8/12/15 frames** (leve/médio/pesado); média entre jogos **≈ 9/11/13**; no Smash o hitlag cresce com o dano. O motor já usa **9/11/13** nos golpes nativos — agora travado por teste (`hitstop_scales_with_attack_strength`).
+- **Game feel**: manter feedback separado da lógica e oferecer opção de reduzir efeitos (já em *Vídeo → Efeitos de impacto*).
+
+Correção visual desta rodada: o glifo "✕" não existe na fonte de exibição; caídos agora são marcados com uma cruz desenhada.

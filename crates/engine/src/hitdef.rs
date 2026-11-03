@@ -18,6 +18,43 @@ pub fn parse_sound_ref(raw: Option<&str>) -> Option<(i32, i32, bool)> {
     Some((g, n, own))
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_animtype_and_groundtype() {
+        assert_eq!(animtype("light"), Some(0));
+        assert_eq!(animtype("MEDIUM"), Some(1));
+        assert_eq!(animtype("med"), Some(1));
+        assert_eq!(animtype("hard"), Some(2));
+        assert_eq!(animtype("heavy"), Some(2));
+        assert_eq!(animtype("back"), Some(3));
+        assert_eq!(animtype("up"), Some(4));
+        assert_eq!(animtype("diagup"), Some(5));
+        assert_eq!(animtype("unknown"), None);
+
+        assert_eq!(groundtype("none"), Some(0));
+        assert_eq!(groundtype("high"), Some(1));
+        assert_eq!(groundtype("LOW"), Some(2));
+        assert_eq!(groundtype("trip"), Some(3));
+        assert_eq!(groundtype("air"), None);
+    }
+
+    #[test]
+    fn test_parse_sound_ref() {
+        assert_eq!(parse_sound_ref(None), None);
+        assert_eq!(parse_sound_ref(Some("")), None);
+        assert_eq!(parse_sound_ref(Some("5, 0")), Some((5, 0, false)));
+        assert_eq!(parse_sound_ref(Some("s5, 2")), Some((5, 2, true)));
+        assert_eq!(parse_sound_ref(Some("S10, 3")), Some((10, 3, true)));
+        assert_eq!(parse_sound_ref(Some("f6, 1")), Some((6, 1, false)));
+        assert_eq!(parse_sound_ref(Some("F8, 4")), Some((8, 4, false)));
+        assert_eq!(parse_sound_ref(Some("7")), Some((7, 0, false)));
+        assert_eq!(parse_sound_ref(Some("invalid")), None);
+    }
+}
+
 pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     let f = &m.fighters[i];
     let l = f.lscl;

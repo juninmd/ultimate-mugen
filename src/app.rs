@@ -4,7 +4,7 @@ use crate::controls::{nav, Controls};
 use crate::registry::Registry;
 use crate::render::{Gfx, MatchRenderer, DrawOpts};
 use crate::session::{Pilot, Session};
-use crate::settings::{Settings, QUALITY, RESOLUTIONS};
+use crate::settings::{Settings, FX_LEVELS, IMPACT, QUALITY, RESOLUTIONS};
 use crate::stages::Stage;
 use crate::ui::*;
 use macroquad::prelude::*;
@@ -62,6 +62,9 @@ pub struct App {
     sel_dwell: f32,
     stage_row: usize,
     quality_check: f32,
+    pub trans: f32,
+    screen_t: f32,
+    last_disc: Option<std::mem::Discriminant<Screen>>,
 }
 
 const MENU: [(&str, &str); 9] = [
@@ -83,7 +86,8 @@ impl App {
     pub async fn new(touch: bool, audio_on: bool) -> Self {
         let mut ui = Ui::new();
         Self::boot(&mut ui, 0.05, "Iniciando…").await;
-        let settings = Settings::load();
+        let mut settings = Settings::load();
+        if touch { settings.fx = settings.fx.min(1); } // phones: no bloom passes
         ume_engine::native::rig::set_art_res(settings.art_res(Settings::physical_h()));
         Self::boot(&mut ui, 0.15, "Lutadores originais…").await;
         let mut reg = Registry::new();
@@ -107,7 +111,7 @@ impl App {
         App {
             reg, ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, pending: Pending::default(), sel_filter: 0, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0,
+            settings, pending: Pending::default(), sel_filter: 0, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
         }
     }
 
@@ -134,6 +138,8 @@ impl App {
 
     pub async fn frame(&mut self) {
         self.ui.begin();
+        self.g.post.level = self.settings.fx as u8;
+        self.g.fx_gain = IMPACT[self.settings.impact.min(2)].0;
         self.c.update();
         self.preview_t += get_frame_time();
         let dt = get_frame_time();
@@ -155,6 +161,15 @@ impl App {
         self.quality_check += dt;
         if self.quality_check > 0.7 && matches!(self.screen, Screen::Menu { .. } | Screen::Title | Screen::Video { .. } | Screen::Select { .. } | Screen::Stages { .. }) { self.quality_check = 0.0; self.apply_quality(); }
         if self.settings.fps { self.ui.text(&format!("{} FPS · {}×{} · arte {:.1}×", get_fps(), (screen_width() * macroquad::miniquad::window::dpi_scale()) as i32, Settings::physical_h() as i32, ume_engine::native::rig::art_res()), 10.0, 20.0, 16.0, hex("#6dff9e"), Align::Left, false); }
+        // screen transition: diagonal wipe whenever the screen changes (not into/out of the fight itself)
+        let disc = std::mem::discriminant(&self.screen);
+        if self.last_disc != Some(disc) {
+            if self.last_disc.is_some() && !matches!(self.screen, Screen::Fight) { self.trans = 1.0; }
+            self.last_disc = Some(disc);
+            self.screen_t = 0.0;
+        }
+        self.screen_t += dt;
+        if self.trans > 0.0 { self.ui.wipe(self.trans); self.trans = (self.trans - dt * 2.6).max(0.0); }
         self.audio.process().await;
         crate::set_import_button(!matches!(self.screen, Screen::Fight | Screen::Vs { .. } | Screen::Results { .. }));
         for (i, zip) in crate::take_imports().into_iter().enumerate() {
@@ -194,12 +209,17 @@ impl App {
         self.ui.background();
         self.ui.logo(250.0, 330.0, 120.0);
         for (i, (t, d)) in MENU.iter().enumerate() {
-            let (x, y, w, h) = (460.0, 120.0 + i as f32 * 64.0, 440.0, 56.0);
+            let k_in = ((self.screen_t - 0.12 - i as f32 * 0.05) / 0.3).clamp(0.0, 1.0);
+            let k_in = 1.0 - (1.0 - k_in).powi(3);
+            let (x, y, w, h) = (460.0 - (1.0 - k_in) * 90.0, 120.0 + i as f32 * 64.0, 440.0, 56.0);
             if self.hover_rect(x, y, w, h) && (mouse_delta_position().length() > 0.0) { cur_v = i; }
             if self.clicked_rect(x, y, w, h) { chosen = Some(i); }
             let f = i == cur_v;
             let off = if f { 14.0 } else { 0.0 };
-            let col = if f { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) };
+            let pulse = if f { 0.85 + 0.15 * (self.ui.t * 6.0).sin() } else { 1.0 };
+            let mut col = if f { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) };
+            col.r *= pulse; col.g *= pulse; col.b *= pulse; col.a *= k_in;
+            if f { self.ui.quad([vec2(x + off + 8.0, y - 3.0), vec2(x + off + w + 6.0, y - 3.0), vec2(x + off + w - 8.0, y + h + 3.0), vec2(x + off - 6.0, y + h + 3.0)], Color::new(1.0, 0.3, 0.43, 0.22 * k_in)); }
             self.ui.quad([vec2(x + off + 14.0, y), vec2(x + off + w, y), vec2(x + off + w - 14.0, y + h), vec2(x + off, y + h)], col);
             if f { self.ui.quad([vec2(x + off + w - 60.0, y), vec2(x + off + w, y), vec2(x + off + w - 14.0, y + h), vec2(x + off + w - 74.0, y + h)], hex("#8a2be2")); }
             self.ui.text(t, x + off + 26.0, y + 30.0, 24.0, WHITE, Align::Left, true);
@@ -366,10 +386,11 @@ impl App {
             let nm: String = if emugen { ename.chars().take(13).collect() } else { ename.split_whitespace().next().unwrap_or("").chars().take(12).collect() };
             self.ui.text(&nm.to_uppercase(), cx + cw / 2.0, cy + ch - 4.0, (cw * 0.125).min(12.0), WHITE, Align::Center, true);
             if emugen { self.ui.rect(cx + cw - 44.0, cy + 3.0, 41.0, 13.0, hex("#22e8ff")); self.ui.text("MUGEN", cx + cw - 23.5, cy + 14.0, 10.0, BLACK, Align::Center, true); }
+            let pulse = 4.0 + 1.5 * (self.ui.t * 8.0).sin();
             let c1 = cur[0] == i && (picking == 0 || picked[0].is_some());
             let c2 = cur[1] == i && picking == 1;
-            if c1 { self.ui.rect_lines(cx - 2.0, cy - 2.0, cw + 4.0, ch + 4.0, 4.0, hex("#3fa9ff")); }
-            if c2 { self.ui.rect_lines(cx - 6.0, cy - 6.0, cw + 12.0, ch + 12.0, 4.0, hex("#ff4d6d")); }
+            if c1 { self.ui.rect_lines(cx - 2.0, cy - 2.0, cw + 4.0, ch + 4.0, pulse, hex("#3fa9ff")); }
+            if c2 { self.ui.rect_lines(cx - 6.0, cy - 6.0, cw + 12.0, ch + 12.0, pulse, hex("#ff4d6d")); }
         }
         // scrollbar
         if total_rows > VIEW_ROWS {
@@ -534,6 +555,7 @@ impl App {
         let ca = rgb(self.reg.chars[a].color); let cb = rgb(self.reg.chars[b].color);
         self.ui.gradient_v(-(1.0 - k) * 640.0, 0.0, 640.0, VH, ca, BLACK);
         self.ui.gradient_v(640.0 + (1.0 - k) * 640.0, 0.0, 640.0, VH, cb, BLACK);
+        crate::vfx::speed_lines((screen_width() / 2.0, screen_height() * 0.46), 0.10 + 0.08 * (self.ui.t * 3.0).sin().abs(), [1.0, 0.8, 0.5], (self.ui.t * 12.0) as u32, 40);
         let pt = self.preview_t;
         // previews: whatever is already loaded (full or idle-only), so this screen itself never stalls
         if let Some(d) = self.reg.chars[a].peek(1) { self.draw_char(&d, 0, pt, 320.0 - (1.0 - k) * 640.0, 560.0, 420.0, false); }
@@ -575,7 +597,7 @@ impl App {
     fn video_screen(&mut self) {
         let Screen::Video { mut cur } = self.screen else { return };
         let web = cfg!(target_arch = "wasm32");
-        let rows: Vec<usize> = if web { vec![0, 2, 3, 4] } else { vec![0, 1, 2, 3, 4] };
+        let rows: Vec<usize> = if web { vec![0, 2, 3, 4, 5, 6] } else { vec![0, 1, 2, 3, 4, 5, 6] };
         let mut pos = rows.iter().position(|&r| r == cur).unwrap_or(0);
         if self.c.pressed(nav::DOWN) { pos = (pos + 1) % rows.len(); self.audio.sfx("select"); }
         if self.c.pressed(nav::UP) { pos = (pos + rows.len() - 1) % rows.len(); self.audio.sfx("select"); }
@@ -587,8 +609,10 @@ impl App {
             0 if ok || dir != 0 => { self.settings.fullscreen = !self.settings.fullscreen; changed = true; }
             1 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.res = ((self.settings.res as i32 + d).rem_euclid(RESOLUTIONS.len() as i32)) as usize; self.settings.fullscreen = false; changed = true; }
             2 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.quality = ((self.settings.quality as i32 + d).rem_euclid(QUALITY.len() as i32)) as usize; changed = true; }
-            3 if ok || dir != 0 => { self.settings.fps = !self.settings.fps; changed = true; }
-            4 if ok => { self.screen = Screen::Menu { cur: 7 }; return; }
+            3 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.fx = ((self.settings.fx as i32 + d).rem_euclid(FX_LEVELS.len() as i32)) as usize; changed = true; }
+            4 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.impact = ((self.settings.impact as i32 + d).rem_euclid(IMPACT.len() as i32)) as usize; changed = true; }
+            5 if ok || dir != 0 => { self.settings.fps = !self.settings.fps; changed = true; }
+            6 if ok => { self.screen = Screen::Menu { cur: 7 }; return; }
             _ => {}
         }
         if changed { self.audio.sfx("select"); self.settings.apply_window(); self.settings.save(); self.apply_quality(); }
@@ -596,28 +620,30 @@ impl App {
         self.ui.text("VÍDEO", 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
         let on = |b: bool| if b { "LIGADO" } else { "DESLIGADO" };
         let q = QUALITY[self.settings.quality.min(QUALITY.len() - 1)];
-        let items: [(usize, &str, String, &str); 5] = [
+        let items: [(usize, &str, String, &str); 7] = [
             (0, "Tela cheia", on(self.settings.fullscreen).into(), "Alterna também com F11"),
             (1, "Resolução da janela", RESOLUTIONS[self.settings.res.min(RESOLUTIONS.len() - 1)].2.into(), "Até 5K · o jogo escala a imagem para qualquer tamanho"),
             (2, "Qualidade da arte", q.1.into(), "Rasteriza lutadores e cenários em maior densidade de pixels (4K = Ultra)"),
-            (3, "Contador de FPS", on(self.settings.fps).into(), "Alterna também com F3"),
-            (4, "Voltar", String::new(), ""),
+            (3, "Pós-processamento", FX_LEVELS[self.settings.fx.min(2)].into(), "Bloom, aberração cromática, vinheta, correção de cor e blur radial"),
+            (4, "Efeitos de impacto", IMPACT[self.settings.impact.min(2)].1.into(), "Tremor, zoom, flashes e linhas de velocidade — Reduzido ajuda quem é sensível a flashes"),
+            (5, "Contador de FPS", on(self.settings.fps).into(), "Alterna também com F3"),
+            (6, "Voltar", String::new(), ""),
         ];
         let mut y = 120.0;
         for (id, t, v, d) in items {
             if !rows.contains(&id) { continue; }
             let f = id == cur;
-            let (x, w, h) = (160.0, 960.0, 64.0);
+            let (x, w, h) = (160.0, 960.0, 62.0);
             if self.hover_rect(x, y, w, h) && mouse_delta_position().length() > 0.0 { cur = id; }
-            if self.clicked_rect(x, y, w, h) { cur = id; self.screen = Screen::Video { cur }; if id == 4 { self.screen = Screen::Menu { cur: 7 }; return; } }
+            if self.clicked_rect(x, y, w, h) { cur = id; self.screen = Screen::Video { cur }; if id == 6 { self.screen = Screen::Menu { cur: 7 }; return; } }
             self.ui.rect(x, y, w, h, if f { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) });
             self.ui.text(t, x + 24.0, y + 30.0, 26.0, WHITE, Align::Left, true);
             self.ui.text(d, x + 24.0, y + 52.0, 16.0, if f { WHITE } else { hex("#a49cc0") }, Align::Left, false);
             self.ui.text(&format!("◀ {v} ▶"), x + w - 24.0, y + 40.0, 24.0, hex("#ffcc33"), Align::Right, true);
-            y += 80.0;
+            y += 72.0;
         }
         let (pw, ph) = ((screen_width() * macroquad::miniquad::window::dpi_scale()) as i32, Settings::physical_h() as i32);
-        self.ui.text(&format!("Tela atual: {pw}×{ph} · arte rasterizada a {:.1}× · {} lutadores · {} cenários", ume_engine::native::rig::art_res(), self.reg.chars.len(), self.reg.stages.len()), 160.0, 660.0, 18.0, hex("#a49cc0"), Align::Left, false);
+        self.ui.text(&format!("Tela atual: {pw}×{ph} · arte rasterizada a {:.1}× · {} lutadores · {} cenários", ume_engine::native::rig::art_res(), self.reg.chars.len(), self.reg.stages.len()), 160.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
         if self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 7 }; return; }
         self.screen = Screen::Video { cur };
     }
@@ -690,6 +716,7 @@ impl App {
             }
         }
         draw_rectangle(0.0, 0.0, screen_width(), screen_height(), Color::new(0.02, 0.01, 0.06, 0.6));
+        self.ui.motes(70, 1.6);
         let w = if winner == 0 { self.sel.0 } else { self.sel.1 };
         let e = &self.reg.chars[w];
         self.ui.gradient_v(160.0, 200.0, 960.0, 300.0, alpha(rgb(e.color), 0.9), Color::new(0.08, 0.05, 0.16, 0.95));

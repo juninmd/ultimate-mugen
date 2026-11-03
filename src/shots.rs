@@ -27,21 +27,26 @@ async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &st
     app.start_fight().await;
     let App { session, c, audio, .. } = app;
     let s = session.as_mut().unwrap();
-    for _ in 0..ticks { s.step(c, audio); }
+    for _ in 0..ticks { s.step_visual(c, audio); }
     match want {
         "super" => {
             for f in s.m.fighters.iter_mut() { f.power = 3000.0; }
-            for _ in 0..600 { if s.m.fighters[0].ctrl && s.m.fighters[0].state_no == 0 { break; } s.step(c, audio); }
+            for _ in 0..600 { if s.m.fighters[0].ctrl && s.m.fighters[0].state_no == 0 { break; } s.step_visual(c, audio); }
             let d = s.m.fighters[0].def.clone();
             if d.states.contains_key(&3000) { s.m.change_state(0, 3000, d); }
             let mut ok = false;
-            for _ in 0..1500 { s.step(c, audio); if s.m.pause.as_ref().is_some_and(|p| p.is_super && p.time < 24) { ok = true; break; } }
-            if ok { for _ in 0..16 { s.step(c, audio); } }
+            for _ in 0..1500 { s.step_visual(c, audio); if s.m.pause.as_ref().is_some_and(|p| p.is_super && p.time < 24) { ok = true; break; } }
+            if ok { for _ in 0..16 { s.step_visual(c, audio); } }
             println!("{name}: super caught = {ok}");
         }
-        "hit" => { for _ in 0..1200 { s.step(c, audio); if !s.m.explods.is_empty() && s.m.fighters.iter().any(|f| f.move_type == 'H' && f.hit_shake > 2 && !f.ghv.guarded) { break; } } }
-        "proj" => { for _ in 0..1500 { s.step(c, audio); if s.m.projectiles.iter().any(|p| !p.dying && p.time > 8) { break; } } }
-        "boxes" => { s.r.debug = true; for _ in 0..900 { s.step(c, audio); if s.m.fighters.iter().any(|f| !f.boxes(1).is_empty()) { break; } } }
+        "hit" => { for _ in 0..1200 { s.step_visual(c, audio); if !s.m.explods.is_empty() && s.m.fighters.iter().any(|f| f.move_type == 'H' && f.hit_shake > 2 && !f.ghv.guarded) { break; } } }
+        "proj" => { for _ in 0..1500 { s.step_visual(c, audio); if s.m.projectiles.iter().any(|p| !p.dying && p.time > 8) { break; } } }
+        "ko" => {
+            if let Some(f) = s.m.fighters.get_mut(1) { f.life = 1.0; }
+            for _ in 0..3000 { s.step_visual(c, audio); if s.vfx.ko_active() { break; } }
+            for _ in 0..14 { s.step_visual(c, audio); }
+        }
+        "boxes" => { s.r.debug = true; for _ in 0..900 { s.step_visual(c, audio); if s.m.fighters.iter().any(|f| !f.boxes(1).is_empty()) { break; } } }
         _ => {}
     }
     snap(app, dir, name, |a| a.draw_session_only()).await;
@@ -69,6 +74,8 @@ pub async fn run(app: &mut App, dir: &str) {
     fight(app, dir, "08-fight-super", "akio", "bruno", "spirit", 120, "super").await;
     fight(app, dir, "09-fight-bamboo", "lian", "sylene", "bamboo", 400, "proj").await;
     fight(app, dir, "10-fight-volcano", "garan", "marlow", "volcano", 500, "hit").await;
+    fight(app, dir, "20-fx-ko", "daichi", "valdric", "dojo", 200, "ko").await;
+    fight(app, dir, "21-fx-neon-hit", "volta", "kaito", "neon", 200, "hit").await;
     fight(app, dir, "11-hitboxes", "shion", "kaito", "plains", 200, "boxes").await;
     fight(app, dir, "11b-fight-kaname-valdric", "kaname", "valdric", "spirit", 300, "hit").await;
     fight(app, dir, "11c-fight-daichi-jin", "daichi", "jin", "plains", 300, "proj").await;
@@ -92,7 +99,8 @@ pub async fn run(app: &mut App, dir: &str) {
         if app.reg.stages.iter().any(|s| s.id.ends_with(st)) { fight(app, dir, n, "akio", "lian", st, 240, "hit").await; }
     }
     app.session = None;
-    cap(app, Screen::Video { cur: 2 }); screen(app, dir, "17-video", 5).await;
+    cap(app, Screen::Menu { cur: 3 }); frames(app, 30).await; app.trans = 0.62; screen(app, dir, "22-transition", 0).await;
+    cap(app, Screen::Video { cur: 3 }); screen(app, dir, "17-video", 5).await;
     app.ui.begin(); app.ui.loading_screen(0.62, "Carregando lutador 2…"); get_screen_data().export_png(&format!("{dir}/18-loading.png")); println!("shot 18-loading"); next_frame().await;
     app.screen = Screen::Controls; screen(app, dir, "14-controls", 5).await;
     // phone landscape with touch controls
@@ -106,7 +114,7 @@ pub async fn run(app: &mut App, dir: &str) {
     {
         let App { session, c, audio, .. } = app;
         let s = session.as_mut().unwrap();
-        for _ in 0..260 { s.step(c, audio); }
+        for _ in 0..260 { s.step_visual(c, audio); }
     }
     snap(app, dir, "15-mobile-fight", |a| a.draw_session_only()).await;
     app.session = None;

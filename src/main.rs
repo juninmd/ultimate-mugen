@@ -6,11 +6,13 @@ mod gamepad;
 mod hud;
 mod registry;
 mod render;
+mod postfx;
 mod session;
 mod settings;
 mod shots;
 mod stages;
 mod ui;
+mod vfx;
 
 use macroquad::prelude::*;
 

@@ -5,6 +5,7 @@ use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
 use crate::stages::Stage;
 use crate::ui::Ui;
+use crate::vfx::Vfx;
 use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::chardef::{CharDef, Source};
@@ -20,6 +21,7 @@ pub struct Session {
     pub stage: Stage,
     pub r: MatchRenderer,
     pub hud: Hud,
+    pub vfx: Vfx,
     pub pilots: [Pilot; 2],
     pub duo: bool,
     pub paused: bool,
@@ -41,7 +43,7 @@ impl Session {
         m.add_player(p2, 1, lv(&pilots[1]), if same { 2 } else { 1 });
         m.start_round();
         let r = MatchRenderer::new(&stage);
-        Session { m, stage, r, hud: Hud::new(), pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0 }
+        Session { m, stage, r, hud: Hud::new(), vfx: Vfx::new(), pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0 }
     }
 
     fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {
@@ -75,8 +77,11 @@ impl Session {
                 }
             };
         }
+        self.vfx.pre_tick(&self.m);
         self.m.tick(&bits);
+        self.vfx.tick(&self.m);
         for ev in std::mem::take(&mut self.m.events) {
+            self.vfx.event(&ev, &self.m);
             match ev {
                 Event::Sound { def, group, index, own, volume, builtin, .. } => {
                     if let (true, Some(d)) = (own, def.as_ref()) {
@@ -100,10 +105,14 @@ impl Session {
         }
     }
 
+    /// One simulation tick plus its visual effects update (used by the screenshot tour).
+    pub fn step_visual(&mut self, c: &mut Controls, audio: &mut Audio) { self.step(c, audio); self.vfx.update(1.0 / 60.0); }
+
     /// Advance in real time (fixed step).
     pub fn update(&mut self, dt: f32, c: &mut Controls, audio: &mut Audio) {
         if self.paused { return; }
-        self.acc += dt.min(0.1);
+        self.vfx.update(dt);
+        self.acc += dt.min(0.1) * self.vfx.time_scale();
         let step = 1.0 / 60.0;
         let mut n = 0;
         while self.acc >= step && n < 5 { self.step(c, audio); self.acc -= step; n += 1; }
@@ -111,7 +120,10 @@ impl Session {
         if self.over.is_some() { self.over_timer += dt; }
     }
     pub fn draw(&mut self, g: &mut Gfx, ui: &Ui) {
-        self.r.draw(g, &self.m, &self.stage);
+        g.post.begin();
+        let p = self.r.draw(g, &self.m, &self.stage, &mut self.vfx, ui);
+        g.post.end(&p, ui.t);
         self.hud.draw(ui, g, &self.m, ui.t);
+        self.vfx.draw_banners(ui);
     }
 }

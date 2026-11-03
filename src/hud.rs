@@ -5,10 +5,10 @@ use macroquad::prelude::*;
 use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 
-pub struct Hud { trail: [f32; 2], combo: [(i32, f32, i32); 2] }
+pub struct Hud { trail: [f32; 2], combo: [(i32, f32, i32); 2], pop: [f32; 2], last_hits: [i32; 2] }
 
 impl Hud {
-    pub fn new() -> Self { Hud { trail: [1.0, 1.0], combo: [(0, 0.0, 0); 2] } }
+    pub fn new() -> Self { Hud { trail: [1.0, 1.0], combo: [(0, 0.0, 0); 2], pop: [0.0; 2], last_hits: [0; 2] } }
 
     pub fn draw(&mut self, ui: &Ui, g: &Gfx, m: &Match, gt: f32) {
         let s = g.view_scale;
@@ -47,6 +47,8 @@ impl Hud {
                 // highlight
                 let ww = bw * ratio;
                 if ww > 1.0 { let hx = if side == 0 { x + bw - ww } else { x }; draw_rectangle(p(hx + 2.0, y + 1.0).x, p(0.0, y + 1.0).y, (ww - 4.0).max(0.0) * s, 2.5 * s, Color::new(1.0, 1.0, 0.85, if low { 0.3 } else { 0.55 })); }
+                // low-life alarm: pulsing red glow around the bar
+                if low && ratio > 0.0 { let pul = 0.12 + 0.12 * (gt * 11.0).sin().abs(); quad(x - 3.0, bw + 6.0, y - 3.0, bh + 6.0, Color::new(1.0, 0.1, 0.1, pul)); }
                 // portrait
                 let pc = p(if side == 0 { 11.0 } else { w - 11.0 }, y + 18.0);
                 let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
@@ -77,7 +79,10 @@ impl Hud {
                 draw_rectangle(p(fx, py).x, p(0.0, py).y, fw * s, ph * s, colors[lv.min(3) as usize]);
                 draw_rectangle(p(fx, py).x, p(0.0, py).y, fw * s, 1.5 * s, Color::new(1.0, 1.0, 1.0, 0.6));
                 if lv >= 1 && (m.game_time >> 3) % 2 == 1 { draw_rectangle(p(px, py).x, p(0.0, py).y, pw * s, ph * s, Color::new(1.0, 1.0, 1.0, 0.2)); }
-                outlined(&lv.to_string(), if side == 0 { px + pw + 9.0 } else { px - 9.0 }, py + 6.0, 10.0, colors[(lv.max(1) - 1).min(3) as usize], Align::Center);
+                let lab = if lv >= 3 { "MAX".to_string() } else { lv.to_string() };
+                let bump = if lv >= 1 { 1.0 + 0.12 * (gt * 8.0).sin().abs() } else { 1.0 };
+                outlined(&lab, if side == 0 { px + pw + 11.0 } else { px - 11.0 }, py + 6.0, 10.0 * bump, colors[(lv.max(1) - 1).min(3) as usize], Align::Center);
+                if lv >= 3 { let c = p(px + pw / 2.0, py + ph / 2.0); let a = 0.08 + 0.06 * (gt * 9.0).sin().abs(); draw_rectangle(c.x - pw * s * 0.62, c.y - ph * s * 1.6, pw * s * 1.24, ph * s * 3.2, Color::new(1.0, 0.3, 0.85, a)); }
             }
             // timer
             let (cx, cy) = (w / 2.0, 18.0);
@@ -87,20 +92,29 @@ impl Hud {
             for i in 0..6 { draw_triangle(c, pts[i], pts[(i + 1) % 6], hex("#161a2e")); }
             for i in 0..6 { draw_line(pts[i].x, pts[i].y, pts[(i + 1) % 6].x, pts[(i + 1) % 6].y, 1.0 * s, hex("#ffcc33")); }
             let t = if m.training { "--".to_string() } else { format!("{:02}", (m.timer + 59) / 60) };
-            text(&t, cx, cy + 5.0, 14.0, WHITE, Align::Center, true);
+            let urgent = !m.training && m.timer > 0 && m.timer <= 10 * 60;
+            let pulse = if urgent { 1.0 + 0.18 * (1.0 - ((m.timer % 60) as f32 / 60.0)) } else { 1.0 };
+            text(&t, cx, cy + 5.0 * pulse, 14.0 * pulse, if urgent { hex("#ff4d4d") } else { WHITE }, Align::Center, true);
             // combos
             for (side, att) in roots.iter().enumerate().take(2) {
                 let def = roots[1 - side];
                 let c = &mut self.combo[side];
                 if def.move_type == 'H' && def.ghv.hitcount >= 2 && def.last_hit_by.is_some_and(|id| m.fighters.iter().any(|f| f.id == id && f.root == att.id)) { *c = (def.ghv.hitcount, att.combo_damage, 70); }
                 else if c.2 > 0 { c.2 -= 1; }
-                if c.2 <= 0 || c.0 < 2 { continue; }
+                if c.2 <= 0 || c.0 < 2 { self.last_hits[side] = 0; continue; }
+                if c.0 > self.last_hits[side] { self.pop[side] = 1.0; self.last_hits[side] = c.0; }
+                self.pop[side] = (self.pop[side] - 0.06).max(0.0);
                 let a = (c.2 as f32 / 20.0).min(1.0);
                 let x = if side == 0 { 18.0 } else { w - 18.0 };
                 let al = if side == 0 { Align::Left } else { Align::Right };
-                outlined(&c.0.to_string(), x, 80.0, 24.0, Color::new(1.0, 0.75, 0.25, a), al);
+                let heat = (c.0 as f32 / 12.0).min(1.0);
+                let col = Color::new(1.0, 0.75 - 0.5 * heat, 0.25 - 0.1 * heat, a);
+                let sc = 1.0 + 0.55 * self.pop[side] * self.pop[side];
+                let ax = if side == 0 { x - 6.0 } else { x + 6.0 };
+                for k in 0..3 { let ww = (60.0 - k as f32 * 14.0) * (0.6 + 0.4 * a); let o = if side == 0 { 0.0 } else { -ww }; let a0 = p(ax + o, 58.0 + k as f32 * 3.0); draw_rectangle(a0.x, a0.y, ww * s, 1.2 * s, Color::new(1.0, 0.7, 0.2, a * (0.5 - 0.15 * k as f32))); }
+                outlined(&c.0.to_string(), x, 80.0 + 4.0 * (sc - 1.0), 24.0 * sc, col, al);
                 outlined("HITS", x, 90.0, 9.0, Color::new(1.0, 1.0, 1.0, a), al);
-                outlined(&format!("{} DMG", c.1 as i32), x, 99.0, 6.5, Color::new(1.0, 1.0, 1.0, a), al);
+                outlined(&format!("{} DMG", c.1 as i32), x, 99.0, 6.5, Color::new(1.0, 0.9, 0.6, a), al);
             }
         }
         if let Some(a) = &m.announce {
@@ -111,7 +125,14 @@ impl Hud {
             let ko = a.text == "K.O.";
             let glow = if ko { Color::new(1.0, 0.12, 0.25, 0.25 * al) } else { Color::new(1.0, 0.6, 0.0, 0.22 * al) };
             let cc = p(w / 2.0, m.view_h * 0.42);
-            draw_circle(cc.x, cc.y, size * 1.6 * s, glow);
+            for i in 0..7 { let t = 1.0 - i as f32 / 7.0; draw_circle(cc.x, cc.y, size * 1.9 * t * s, Color::new(glow.r, glow.g, glow.b, glow.a * 0.28)); }
+            // sweeping accent slashes behind the text
+            let sweep = (age / 14.0).min(1.0);
+            let hw = w * 0.5 * sweep;
+            let yy = m.view_h * 0.42;
+            let sl = if ko { Color::new(0.9, 0.1, 0.2, 0.45 * al) } else { Color::new(1.0, 0.55, 0.1, 0.4 * al) };
+            for (dy, th) in [(-size * 0.55, 1.6), (size * 0.62, 1.0)] { let a0 = p(w / 2.0 - hw, yy + dy); draw_rectangle(a0.x, a0.y, hw * 2.0 * s, th * s, sl); }
+            let band = p(w / 2.0 - hw, yy - size * 0.5); draw_rectangle(band.x, band.y, hw * 2.0 * s, size * 1.05 * s, Color::new(0.04, 0.0, 0.1, 0.35 * al));
             let o = size * 0.08;
             for (dx, dy) in [(-o, 0.0), (o, 0.0), (0.0, -o), (0.0, o), (-o, -o), (o, o), (-o, o), (o, -o), (o, o * 2.0)] { text(&a.text, w / 2.0 + dx, m.view_h * 0.42 + size * 0.35 + dy, size, Color::new(0.07, 0.02, 0.12, al), Align::Center, true); }
             let col = if ko { Color::new(1.0, 0.25, 0.25, al) } else { Color::new(1.0, 0.82, 0.25, al) };

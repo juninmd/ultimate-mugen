@@ -11,6 +11,8 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, mul
 | ![Kaname vs Valdric](screenshots/11b-fight-kaname-valdric.jpg) | ![Celular](screenshots/15-mobile-fight.jpg) |
 | ![Seleção com muitos lutadores](screenshots/03b-select-many.jpg) | ![Loading no VS](screenshots/05a-vs-loading.jpg) |
 | ![Vídeo](screenshots/17-video.jpg) | ![4K](screenshots/19-fight-4k.jpg) |
+| ![KO cinematográfico](screenshots/20-fx-ko.jpg) | ![Super](screenshots/08-fight-super.jpg) |
+| ![Impacto neon](screenshots/21-fx-neon-hit.jpg) | ![Transição](screenshots/22-transition.jpg) |
 
 ## Por que Rust + macroquad
 | Requisito | Escolha |
@@ -28,6 +30,7 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, mul
 - **4K de verdade**: tela cheia (F11), janela até 5K, e a arte procedural (lutadores UMF e cenários) é rasterizada em densidade proporcional à tela — *Automática*: 3× até 900 px de altura, 4× até 1300, 4,5× até 1700, **6× em 4K** (menu **Vídeo**; flags `--res 3840x2160`, `--4k`, `--fullscreen`). Texto e UI escalam sem re-rasterizar fontes a cada quadro.
 - **Muitos personagens e cenários**: seleção com rolagem, filtro (Tab: todos/originais/M.U.G.E.N), PgUp/PgDn, roda do mouse, `R` aleatório; só as linhas visíveis são desenhadas e só o que está sob o cursor é carregado (cache LRU limita a memória). Pastas/zips importados são registrados sem decodificar tudo (centenas em segundos).
 - **Loadings rápidos**: tela de carregamento na inicialização, pré-carga por etapas atrás da tela de VS (barra de progresso), prévia leve (idle/vitória) nos menus, rasterização dos lutadores em paralelo (≈3× mais rápido) e música sintetizada antes da luta.
+- **Visual AAA** ([`docs/AAA_FEATURES.md`](docs/AAA_FEATURES.md)): pós-processamento (bloom, aberração cromática, blur radial, vinheta, grade de cor), partículas e anéis de choque em cada golpe, números de dano, *camera punch*, KO em câmera lenta com zoom, super cinematográfico com linhas de velocidade e aura, reflexos no chão, HUD animado, transições de tela e fundo vivo. Opção de acessibilidade para reduzir efeitos (Vídeo → Efeitos de impacto).
 - Modos **Arcade, Versus CPU, 2 Jogadores, Treino (hitboxes), CPU vs CPU**; IA compatível com qualquer personagem.
 - **Controles**: teclado, gamepads (DualShock/DualSense com vibração em golpes, defesa, super e K.O.; lightbar azul/vermelha por jogador), toque com analógico virtual e SP1/SP2/SP3/SUPER de um toque.
 

@@ -1,5 +1,8 @@
 //! Match renderer (macroquad): stages, fighters, effects, debug boxes.
+use crate::postfx::PostFx;
 use crate::stages::{Particle, Stage, StageArt};
+use crate::ui::Ui;
+use crate::vfx::{FxParams, Vfx};
 use macroquad::prelude::*;
 use macroquad::miniquad::{BlendFactor, BlendState, BlendValue, Equation, PipelineParams};
 use std::collections::HashMap;
@@ -17,7 +20,7 @@ const FS: &str = "#version 100
 varying lowp vec4 color; varying lowp vec2 uv; uniform sampler2D Texture;
 void main() { gl_FragColor = color * texture2D(Texture, uv); }";
 
-pub struct Gfx { tex: HashMap<u64, Texture2D>, pub add: Material, pub view_scale: f32, pub ox: f32, pub oy: f32 }
+pub struct Gfx { tex: HashMap<u64, Texture2D>, pub add: Material, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
 
 impl Gfx {
     pub fn new() -> Self {
@@ -25,7 +28,7 @@ impl Gfx {
             pipeline_params: PipelineParams { color_blend: Some(BlendState::new(Equation::Add, BlendFactor::Value(BlendValue::SourceAlpha), BlendFactor::One)), ..Default::default() },
             ..Default::default()
         }).unwrap();
-        Gfx { tex: HashMap::new(), add, view_scale: 3.0, ox: 0.0, oy: 0.0 }
+        Gfx { tex: HashMap::new(), add, view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), fx_gain: 1.0 }
     }
     pub fn texture(&mut self, img: &Arc<ImageData>, nearest: bool) -> Texture2D {
         self.tex.entry(img.id).or_insert_with(|| {
@@ -87,20 +90,41 @@ impl MatchRenderer {
         }
     }
 
-    pub fn draw(&mut self, g: &mut Gfx, m: &Match, stage: &Stage) {
+    /// Draws the world (stage, reflections, fighters, particles) with the cinematic camera; returns the post-processing parameters.
+    pub fn draw(&mut self, g: &mut Gfx, m: &Match, stage: &Stage, vfx: &mut Vfx, ui: &Ui) -> FxParams {
         g.fit(m.view_w, m.view_h);
-        let s = g.view_scale;
+        let gain = g.fx_gain;
         clear_background(BLACK);
         let (mut shx, mut shy) = (0.0, 0.0);
         if m.shake_time > 0 { shy = if m.shake_time % 2 == 1 { 1.0 } else { -1.0 } * m.shake_ampl * 0.5; shx = (rand::gen_range(-0.5, 0.5)) * m.shake_ampl * 0.3; }
+        let (tx, ty) = vfx.shake(gain);
+        shx += tx; shy += ty;
+        // cinematic camera: punch-in on hits, KO / super zoom about the action
+        let (s0, ox0, oy0) = (g.view_scale, g.ox, g.oy);
+        let (zoom, focus) = vfx.camera(m, gain);
+        let (fvx, fvy) = (focus.0 - m.camera.x + m.view_w / 2.0, focus.1 - m.camera.y + m.stage.zoffset);
+        let (px, py) = (ox0 + fvx * s0, oy0 + fvy * s0);
+        g.view_scale = s0 * zoom; g.ox = px + (ox0 - px) * zoom; g.oy = py + (oy0 - py) * zoom;
+        let s = g.view_scale;
         self.draw_stage(g, m, stage, false, shx, shy);
         if m.pause.as_ref().is_some_and(|p| p.darken) { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(0.0, 0.0, 0.04, 0.62)); }
-        // shadows
+        // soft contact shadows (3 layered ellipses)
         for f in &m.fighters {
             if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE) { continue; }
             let hgt = (-f.pos.y).max(0.0);
             let r = 22.0 * (1.0 - hgt / 200.0).max(0.4);
-            draw_ellipse(g.ox + (Self::sx(m, f.pos.x) + shx) * s, g.oy + (Self::sy(m, 0.0) + shy) * s, r * s, r * 0.22 * s, 0.0, Color::new(0.0, 0.0, 0.0, 0.35 * (1.0 - hgt / 150.0).max(0.3)));
+            let a = 0.17 * (1.0 - hgt / 150.0).max(0.3);
+            for (k, m2) in [(1.0, 1.0), (0.72, 1.0), (0.45, 1.0)].iter().enumerate() {
+                let _ = m2;
+                draw_ellipse(g.ox + (Self::sx(m, f.pos.x) + shx) * s, g.oy + (Self::sy(m, 0.0) + shy) * s, r * (1.0 + 0.25 * (2 - k) as f32) * s, r * 0.22 * (1.0 + 0.25 * (2 - k) as f32) * s, 0.0, Color::new(0.0, 0.0, 0.0, a));
+            }
+        }
+        // floor reflections (procedural stages)
+        if matches!(stage.art, StageArt::Procedural { .. }) && gain > 0.0 {
+            for f in &m.fighters {
+                if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE) { continue; }
+                self.draw_reflection(g, m, f, shx, shy);
+            }
         }
         // ordered draw list
         enum It { F(usize), P(usize), E(usize) }
@@ -119,12 +143,29 @@ impl MatchRenderer {
             }
         }
         self.draw_stage(g, m, stage, true, shx, shy);
+        if gain > 0.0 { vfx.draw_world(g, m, shx, shy, ui); }
         if self.debug { self.draw_debug(g, m); }
+        // back to the plain view transform for screen-space overlays
+        g.view_scale = s0; g.ox = ox0; g.oy = oy0;
+        let s = g.view_scale;
+        let focus_screen = (ox0 + fvx * s0, oy0 + fvy * s0);
+        if gain > 0.0 { vfx.draw_lines(focus_screen, gain); }
         if let Some((t, c)) = m.flash { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(c[0] / 255.0, c[1] / 255.0, c[2] / 255.0, (t as f32 / 10.0).min(0.85))); }
         // letterbox bars
         let (w, h) = (screen_width(), screen_height());
         if g.ox > 0.0 { draw_rectangle(0.0, 0.0, g.ox, h, BLACK); draw_rectangle(w - g.ox, 0.0, g.ox, h, BLACK); }
         if g.oy > 0.0 { draw_rectangle(0.0, 0.0, w, g.oy, BLACK); draw_rectangle(0.0, h - g.oy, w, g.oy, BLACK); }
+        let bloom = if matches!(stage.art, StageArt::Mugen(_)) { 0.35 } else { 0.5 };
+        vfx.params(gain.max(0.0), (focus_screen.0 / w, focus_screen.1 / h), bloom)
+    }
+
+    fn draw_reflection(&self, g: &mut Gfx, m: &Match, f: &Fighter, shx: f32, shy: f32) {
+        let Some(fr) = f.frame() else { return };
+        let hgt = (-f.pos.y).max(0.0);
+        let a = 0.2 * (1.0 - hgt / 160.0).max(0.0);
+        if a <= 0.01 { return; }
+        let o = DrawOpts { alpha: a, vflip: true, tint: Color::new(0.75, 0.85, 1.0, 1.0), ..Default::default() };
+        Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
     }
 
     fn draw_fighter(&self, g: &mut Gfx, m: &Match, f: &Fighter, shx: f32, shy: f32) {

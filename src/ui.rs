@@ -96,10 +96,52 @@ impl Ui {
         let gap = 40.0 * self.s;
         let mut x = -((t * self.s) % gap) - h;
         while x < w { draw_line(x, h, x + h * 0.47, 0.0, self.s.max(1.0), Color::new(1.0, 1.0, 1.0, 0.025)); x += gap; }
+        self.motes(46, 1.0);
+        // slow rotating light beams
+        for i in 0..3 {
+            let a = self.t * 0.12 + i as f32 * 2.1;
+            let (bx, by) = (w * (0.2 + 0.3 * i as f32), -20.0);
+            let sp = (a.sin()) * w * 0.25;
+            draw_triangle(vec2(bx, by), vec2(bx + sp - h * 0.13, h), vec2(bx + sp + h * 0.13, h), Color::new(1.0, 0.85, 0.6, 0.018));
+        }
         // scanlines scale with the display so they stay subtle at 4K
         let (step, th) = ((3.0 * self.s).max(2.0), self.s.max(1.0));
         let mut y = 0.0;
         while y < h { draw_line(0.0, y, w, y, th, Color::new(0.0, 0.0, 0.0, 0.1)); y += step; }
+    }
+    /// Floating light motes drifting upward (deterministic; `warm` 1 = gold/pink, 0 = cool).
+    pub fn motes(&self, n: usize, strength: f32) {
+        let (w, h) = (screen_width(), screen_height());
+        for i in 0..n {
+            let f = i as f32;
+            let h1 = ((f * 12.9898).sin() * 43758.5453).fract().abs();
+            let h2 = ((f * 78.233 + 3.0).sin() * 12543.1).fract().abs();
+            let h3 = ((f * 39.346 + 7.0).sin() * 9871.7).fract().abs();
+            let sp = (14.0 + h2 * 34.0) * self.s;
+            let y = h - ((self.t * sp + h3 * h) % (h * 1.1)) + h * 0.05;
+            let x = h1 * w + (self.t * 0.7 + f).sin() * 18.0 * self.s;
+            let tw = 0.5 + 0.5 * (self.t * (1.5 + h2 * 2.0) + f).sin();
+            let c = if i % 3 == 0 { (0.35, 0.9, 1.0) } else if i % 3 == 1 { (1.0, 0.45, 0.6) } else { (1.0, 0.85, 0.4) };
+            let r = (1.0 + h2 * 2.2) * self.s;
+            draw_circle(x, y, r * 3.2, Color::new(c.0, c.1, c.2, 0.05 * tw * strength));
+            draw_circle(x, y, r, Color::new(c.0, c.1, c.2, (0.2 + 0.4 * tw) * strength));
+        }
+    }
+    /// Diagonal wipe used between screens: `q` goes 1 → 0 (covering → revealed).
+    pub fn wipe(&self, q: f32) {
+        if q <= 0.0 { return; }
+        let (w, h) = (screen_width(), screen_height());
+        let e = q * q * (3.0 - 2.0 * q);
+        let slant = h * 0.28;
+        let x0 = (1.0 - e) * (w + slant * 2.0) - slant;
+        for (k, (off, col)) in [(0.0, Color::new(0.03, 0.02, 0.09, 1.0)), (34.0, Color::new(1.0, 0.3, 0.43, 1.0)), (62.0, Color::new(0.13, 0.9, 1.0, 1.0))].iter().enumerate().rev() {
+            // the cyan / magenta edges lead the dark panel
+            let lead = *off * self.s * (1.0 - (1.0 - q).powi(2));
+            let a = x0 - lead; let b = w + slant * 2.0;
+            let _ = k;
+            draw_triangle(vec2(a + slant, 0.0), vec2(b, 0.0), vec2(b, h), *col);
+            draw_triangle(vec2(a + slant, 0.0), vec2(b, h), vec2(a, h), *col);
+        }
     }
     pub fn logo(&self, cx: f32, cy: f32, size: f32) {
         let pulse = (self.t * 2.0).sin() * 0.05 + 1.0;

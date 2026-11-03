@@ -109,6 +109,21 @@ pub async fn run(app: &mut App, dir: &str) {
     team_fight(app, dir, "31-team-parallel", true, 2, "neon", 260, false).await;
     team_fight(app, dir, "33-team-5v5-parallel", true, 5, "plains", 330, true).await;
     team_fight(app, dir, "34-team-5v5-sequence", false, 5, "volcano", 200, true).await;
+    // training mode: SF6-style input history + last-combo data (inputs injected, there is no keyboard in the tour)
+    {
+        use ume_engine::input::k;
+        app.mode = Mode::Training;
+        app.sel = (find(app, "kaito"), find(app, "suzume"), stage(app, "dojo"));
+        app.team = None;
+        app.start_fight().await;
+        let App { session, c, audio, .. } = app;
+        let s = session.as_mut().unwrap();
+        for _ in 0..160 { s.step_visual(c, audio); }
+        s.inputs = vec![(0, 20), (k::D, 3), (k::D | k::R, 3), (k::R, 4), (k::R | k::X, 2), (0, 12), (k::X, 2), (0, 8), (k::Y, 2), (k::D, 5), (k::D | k::A, 2), (0, 9), (k::R, 6), (k::R | k::W, 2)];
+        for _ in 0..3 { s.step_visual(c, audio); }
+        s.hud.inject_last_combo(7, 214.0);
+    }
+    snap(app, dir, "40-training-hud", |a| a.draw_session_only()).await;
     fight(app, dir, "11-hitboxes", "shion", "kaito", "plains", 200, "boxes").await;
     fight(app, dir, "11b-fight-kaname-valdric", "kaname", "valdric", "spirit", 300, "hit").await;
     fight(app, dir, "11c-fight-daichi-jin", "daichi", "jin", "plains", 300, "proj").await;

@@ -42,7 +42,7 @@ pub struct Vfx {
     sz: f32, super_active: bool,
     /// sound requests produced by the effects layer (drained by the session)
     pub sfx: Vec<&'static str>,
-    combo: [i32; 2], meter: [i32; 2],
+    combo: [i32; 2], meter: [i32; 2], first_hit: bool,
     snap: Vec<Snap>, pre_mt: Vec<char>, rng: u32, tick: u32,
 }
 
@@ -51,7 +51,7 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 { a + (b - a) * t }
 impl Vfx {
     pub fn new() -> Self {
         Vfx { splats: vec![], lights: vec![], weather: Weather::None, clock: 0.0, invert_t: 0.0, dist_zoom: 0.0, dist_target: 0.0, parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
-            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sz: 0.0, super_active: false, sfx: vec![], combo: [0; 2], meter: [0; 2], snap: vec![], pre_mt: vec![], rng: 0x9e37_79b9, tick: 0 }
+            lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, sz: 0.0, super_active: false, sfx: vec![], combo: [0; 2], meter: [0; 2], first_hit: false, snap: vec![], pre_mt: vec![], rng: 0x9e37_79b9, tick: 0 }
     }
     fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
     fn rr(&mut self, a: f32, b: f32) -> f32 { a + (b - a) * self.r() }
@@ -164,6 +164,8 @@ impl Vfx {
                     self.flash = self.flash.max(0.18);
                     self.punch = self.punch.max(0.04);
                 }
+                // SF6-style pop-up notice for the first clean hit of the round
+                if !self.first_hit && m.round_state == 2 && !m.training { self.first_hit = true; self.banner("FIRST ATTACK", "", [0.4, 0.9, 1.0]); }
                 let counter = self.pre_mt.get(*defender).copied() == Some('A');
                 let _ = defender_side;
                 let col = if counter { [1.0, 0.35, 0.3] } else { [1.0, 0.92, 0.55] };
@@ -199,7 +201,7 @@ impl Vfx {
                 if m.roots().find(|f| f.side == w).is_some_and(|f| f.life >= f.life_max - 0.5) { self.sfx.push("perfect"); self.banner("PERFECT!", "vitória sem sofrer dano", [1.0, 0.85, 0.2]); }
             }
             Event::Fight => { self.ring(m.camera.x, m.stage.zoffset - 60.0, 160.0, 0.6, 3.0, [1.0, 0.8, 0.3]); self.flash = self.flash.max(0.35); self.chroma = self.chroma.max(0.7); self.trauma = (self.trauma + 0.25).min(1.0); self.radial = 0.6; }
-            Event::RoundStart(_) => { self.slow_t = 0.0; self.ko_t = 0.0; }
+            Event::RoundStart(_) => { self.slow_t = 0.0; self.ko_t = 0.0; self.first_hit = false; }
             _ => {}
         }
     }

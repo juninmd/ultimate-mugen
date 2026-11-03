@@ -33,6 +33,8 @@ pub struct Session {
     acc: f32,
     pub over: Option<usize>,
     pub over_timer: f32,
+    /// last inputs of the human player as (bits, frames held) — shown in training mode (SF6-style input history)
+    pub inputs: Vec<(u32, u16)>,
 }
 
 thread_local! { static FX: Arc<CharDef> = build_fx(true); }
@@ -64,7 +66,7 @@ impl Session {
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0 }
+        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![] }
     }
 
     fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {
@@ -99,6 +101,10 @@ impl Session {
                     b
                 }
             };
+        }
+        if let Some(slot) = self.pilots.iter().position(|p| matches!(p, Pilot::Human(0))) {
+            let b = bits.get(slot).copied().unwrap_or(0);
+            match self.inputs.last_mut() { Some(l) if l.0 == b => l.1 = (l.1 + 1).min(99), _ => { self.inputs.push((b, 1)); if self.inputs.len() > 14 { self.inputs.remove(0); } } }
         }
         self.vfx.pre_tick(&self.m);
         self.m.tick(&bits);
@@ -179,6 +185,7 @@ impl Session {
         let p = self.r.draw(g, &self.m, &self.stage, &mut self.vfx, ui);
         g.post.end(&p, ui.t);
         let human = self.human_ids();
+        self.hud.inputs = if self.m.training { self.inputs.clone() } else { vec![] };
         self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human);
         self.vfx.draw_banners(ui);
     }

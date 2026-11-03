@@ -95,3 +95,13 @@ Fontes (resumos de busca; as páginas primárias de Capcom/Epic/GDC não resolve
 - **Game feel**: manter feedback separado da lógica e oferecer opção de reduzir efeitos (já em *Vídeo → Efeitos de impacto*).
 
 Correção visual desta rodada: o glifo "✕" não existe na fonte de exibição; caídos agora são marcados com uma cruz desenhada.
+
+---
+
+# Rodada 6 — pesquisa de HUD, som e modo treino
+
+Fontes (resumos de busca; sites primários bloqueados pela política de rede da sessão):
+- **HUD do SF6** — [SuperCombo Wiki](https://wiki.supercombo.gg/w/Street_Fighter_6/HUD), [manual oficial](https://game.capcom.com/manual/SF6/en/ps5/page/3/3), [guia de HUD](https://www.argentics.io/game-hud-design): avisos pop-up para **first attack, counter hit**, throw escape e reversal; estados sinalizados por **cor** (o Drive Gauge fica cinza vazio); a leitura do HUD precisa **sobreviver a blur, tremor, pós-processamento e escalas menores** → nosso HUD é desenhado *depois* do pós-processo (nunca recebe blur/aberração) e ganhou o banner **FIRST ATTACK** (uma vez por round, fora do treino).
+- **Modo treino moderno** — [EventHubs](https://www.eventhubs.com/news/2022/sep/16/sf6-training-visual-frame-data/), [Fighters Generation](https://www.fightersgeneration.com/news1/sf6-sep22-6.htm): **histórico de inputs**, dados do ataque (dano do combo), HUD configurável → no **Treino**: histórico dos últimos 14 inputs (seta de direção, botões, frames segurados) e linha "ÚLTIMO COMBO · hits · dano".
+- **Design de som** — [guia Pixflow](https://pixflow.net/blog/punch-impact-sound-effects-for-fight-scenes/), [SoundBridge](https://www.soundbridge.io/game-audio-soundbridge-fighting-game-scene): soco = **transiente curto + corpo grave + (voz)**, 2–4 camadas **separadas por faixa de frequência**, variações e **ducking da música** nos impactos → já implementado (transiente em passa-alta, corpo em queda de pitch, crunch em banda, 3 variações em rodízio, ducking em super/KO).
+- Tekken 8: nada confiável sobre HUD/treino nas buscas; tratado como não verificado.

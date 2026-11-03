@@ -6,10 +6,13 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use crate::session::TeamInfo;
 
-pub struct Hud { trail: [f32; 2], combo: [(i32, f32, i32); 2], pop: [f32; 2], last_hits: [i32; 2] }
+pub struct Hud { pub inputs: Vec<(u32, u16)>, trail: [f32; 2], combo: [(i32, f32, i32); 2], pop: [f32; 2], last_hits: [i32; 2] }
 
 impl Hud {
-    pub fn new() -> Self { Hud { trail: [1.0, 1.0], combo: [(0, 0.0, 0); 2], pop: [0.0; 2], last_hits: [0; 2] } }
+    pub fn new() -> Self { Hud { inputs: vec![], trail: [1.0, 1.0], combo: [(0, 0.0, 0); 2], pop: [0.0; 2], last_hits: [0; 2] } }
+
+    /// Test/demo hook: pretend a combo just finished (shows in the training "last combo" line).
+    pub fn inject_last_combo(&mut self, hits: i32, dmg: f32) { self.combo[0] = (hits, dmg, 0); }
 
     pub fn draw(&mut self, ui: &Ui, g: &mut Gfx, m: &Match, gt: f32, team: Option<&TeamInfo>, human: &[u32]) {
         let s = g.view_scale;
@@ -192,7 +195,33 @@ impl Hud {
             let col = if ko { Color::new(1.0, 0.25, 0.25, al) } else { Color::new(1.0, 0.82, 0.25, al) };
             text(&a.text, w / 2.0, m.view_h * 0.42 + size * 0.35, size, col, Align::Center, true);
         }
-        if m.training { text("TREINO", w / 2.0, 46.0, 7.0, Color::new(1.0, 1.0, 1.0, 0.8), Align::Center, true); }
+        if m.training {
+            text("TREINO", w / 2.0, 46.0, 7.0, Color::new(1.0, 1.0, 1.0, 0.8), Align::Center, true);
+            // attack data: last combo (hits + damage) stays on screen
+            let (hits, dmg) = (self.combo[0].0, self.combo[0].1);
+            if hits >= 2 { text(&format!("ÚLTIMO COMBO  {hits} HITS · {} DMG", dmg as i32), w / 2.0, 56.0, 6.0, hex("#ffcc33"), Align::Center, true); }
+            // input history (newest at the bottom): direction arrow, buttons, frames held
+            let n = self.inputs.len();
+            draw_rectangle(p(6.0, 74.0).x, p(0.0, 74.0).y, 62.0 * s, (n as f32 * 8.2 + 8.0) * s, Color::new(0.02, 0.02, 0.06, 0.55));
+            text("INPUTS", 10.0, 80.0, 5.0, Color::new(1.0, 1.0, 1.0, 0.6), Align::Left, true);
+            use ume_engine::input::k;
+            for (i, (bits, fr)) in self.inputs.iter().enumerate() {
+                let y = 86.0 + i as f32 * 8.2;
+                let a = 0.45 + 0.55 * (i as f32 + 1.0) / n.max(1) as f32;
+                let (dx, dy) = ((bits & k::R != 0) as i32 - (bits & k::L != 0) as i32, (bits & k::D != 0) as i32 - (bits & k::U != 0) as i32);
+                let c = p(14.0, y - 2.0);
+                if dx != 0 || dy != 0 {
+                    let ang = (dy as f32).atan2(dx as f32);
+                    let r = 3.0 * s;
+                    let (tip, l, rr) = (c + vec2(ang.cos(), ang.sin()) * r, c + vec2((ang + 2.5).cos(), (ang + 2.5).sin()) * r, c + vec2((ang - 2.5).cos(), (ang - 2.5).sin()) * r);
+                    draw_triangle(tip, l, rr, Color::new(0.4, 0.9, 1.0, a));
+                } else { draw_circle(c.x, c.y, 0.9 * s, Color::new(1.0, 1.0, 1.0, a * 0.5)); }
+                let names = [(k::X, "LP"), (k::Y, "HP"), (k::A, "LK"), (k::B, "HK"), (k::D2, "S1"), (k::W, "S2"), (k::E, "S3")];
+                let btn: Vec<&str> = names.iter().filter(|(b, _)| bits & b != 0).map(|(_, n)| *n).collect();
+                if !btn.is_empty() { text(&btn.join("+"), 22.0, y, 5.0, Color::new(1.0, 0.85, 0.3, a), Align::Left, true); }
+                text(&fr.to_string(), 64.0, y, 4.6, Color::new(1.0, 1.0, 1.0, a * 0.55), Align::Right, true);
+            }
+        }
         let _ = gt;
     }
 }

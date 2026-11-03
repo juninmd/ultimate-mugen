@@ -1,6 +1,6 @@
 //! Match simulation: round flow, state machine driver, collision/hit system, entities, camera.
 use crate::chardef::{Animation, Box4, CharDef, Controller, Source};
-use crate::expr::{eval, Expr};
+use crate::expr::Expr;
 use crate::fighter::*;
 use crate::triggers::Ctx;
 use std::cell::RefCell;
@@ -146,7 +146,7 @@ impl Match {
     pub fn ground_y(&self) -> f32 { self.stage.zoffset }
 
     // ---------------------------------------------------------------- evaluation helpers
-    pub fn ev(&self, i: usize, e: &Expr) -> f64 { eval(&e.node, &Ctx { m: self, i }) }
+    pub fn ev(&self, i: usize, e: &Expr) -> f64 { e.eval(&Ctx { m: self, i }) }
     pub fn num(&self, i: usize, sc: &Controller, k: &str, d: f64, idx: usize) -> f64 {
         match sc.param(k).and_then(|p| p.exprs.get(idx)) { Some(e) => self.ev(i, e), None => d }
     }

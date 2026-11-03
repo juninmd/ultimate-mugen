@@ -850,16 +850,47 @@ impl Match {
         let postype = sc.raw("postype").unwrap_or("p1").to_ascii_lowercase();
         let (px, py) = (num(self, "pos", 0.0, 0) * f.lscl, num(self, "pos", 0.0, 1) * f.lscl);
         let fac = if num(self, "facing", 1.0, 0) < 0.0 { -1.0 } else { 1.0 };
-        let (mut x, mut y, mut facing) = (f.pos.x, f.pos.y, f.facing * fac);
-        let mut bind_to = None;
+        let (x, y, facing, bind_to);
         let half = self.view_w / 2.0;
         match postype.as_str() {
-            "p2" => { let e = self.enemy(i, 0).unwrap_or(i); let fe = &self.fighters[e]; x = fe.pos.x + px * fe.facing; y = fe.pos.y + py; bind_to = Some(fe.id); facing = fe.facing * fac; }
-            "front" => { x = self.camera.x + half * f.facing + px * f.facing; y = py + self.camera.y; }
-            "back" => { x = self.camera.x - half * f.facing + px * f.facing; y = py + self.camera.y; }
-            "left" => { x = self.camera.x - half + px; y = py + self.camera.y; facing = fac; }
-            "right" => { x = self.camera.x + half + px; y = py + self.camera.y; facing = fac; }
-            _ => { x = f.pos.x + px * f.facing; y = f.pos.y + py; bind_to = Some(f.id); }
+            "p2" => {
+                let e = self.enemy(i, 0).unwrap_or(i);
+                let fe = &self.fighters[e];
+                x = fe.pos.x + px * fe.facing;
+                y = fe.pos.y + py;
+                bind_to = Some(fe.id);
+                facing = fe.facing * fac;
+            }
+            "front" => {
+                x = self.camera.x + half * f.facing + px * f.facing;
+                y = py + self.camera.y;
+                bind_to = None;
+                facing = f.facing * fac;
+            }
+            "back" => {
+                x = self.camera.x - half * f.facing + px * f.facing;
+                y = py + self.camera.y;
+                bind_to = None;
+                facing = f.facing * fac;
+            }
+            "left" => {
+                x = self.camera.x - half + px;
+                y = py + self.camera.y;
+                bind_to = None;
+                facing = fac;
+            }
+            "right" => {
+                x = self.camera.x + half + px;
+                y = py + self.camera.y;
+                bind_to = None;
+                facing = fac;
+            }
+            _ => {
+                x = f.pos.x + px * f.facing;
+                y = f.pos.y + py;
+                bind_to = Some(f.id);
+                facing = f.facing * fac;
+            }
         }
         let lscl = if from_fx { 1.0 } else { f.lscl };
         let mut e = self.make_explod(f, def, anim_no, x, y, lscl);

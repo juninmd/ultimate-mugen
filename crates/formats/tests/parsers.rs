@@ -174,6 +174,91 @@ fn zip_round_trip_and_discovery() {
     assert!(load_stage(&vfs, "nope.def").is_err());
 }
 
+#[test]
+fn stage_multi_layer_and_camera_bounds() {
+    let stage_def = br#"
+[Info]
+name = "Dojo"
+displayname = "The Great Dojo"
+
+[StageInfo]
+zoffset = 215
+localcoord = 640, 480
+
+[Camera]
+boundleft = -220
+boundright = 220
+boundhigh = -80
+boundlow = 10
+verticalfollow = 0.5
+tension = 75
+
+[PlayerInfo]
+p1startx = -80
+p2startx = 80
+
+[BGdef]
+spr = dojo.sff
+
+[BG Background]
+type = normal
+spriteno = 0, 0
+start = 0, 0
+delta = 0.75, 0.75
+mask = 1
+tile = 1, 0
+tilespacing = 0, 0
+
+[BG AnimatedLantern]
+type = anim
+actionno = 5
+start = 50, -40
+delta = 1.0, 1.0
+layerno = 1
+trans = add
+
+[Begin Action 5]
+0,1, 0,0, 5
+0,2, 0,0, 5
+"#;
+
+    let mut vfs = Vfs::new();
+    vfs.insert("stages/dojo.def".into(), stage_def.to_vec());
+
+    let st = load_stage(&vfs, "stages/dojo.def").unwrap();
+    assert_eq!(st.name, "The Great Dojo");
+    assert_eq!(st.local_w, 640.0);
+    assert_eq!(st.zoffset, 215.0);
+    assert_eq!(st.bound_left, -220.0);
+    assert_eq!(st.bound_right, 220.0);
+    assert_eq!(st.bound_high, -80.0);
+    assert_eq!(st.bound_low, 10.0);
+    assert_eq!(st.vertical_follow, 0.5);
+    assert_eq!(st.tension, 75.0);
+    assert_eq!(st.p1x, -80.0);
+    assert_eq!(st.p2x, 80.0);
+
+    assert_eq!(st.layers.len(), 2);
+
+    // Layer 0: Normal static BG
+    assert_eq!(st.layers[0].kind, "normal");
+    assert_eq!(st.layers[0].sprite, (0, 0));
+    assert_eq!(st.layers[0].delta, [0.75, 0.75]);
+    assert!(st.layers[0].mask);
+    assert_eq!(st.layers[0].tile, [1, 0]);
+    assert_eq!(st.layers[0].layer, 0);
+
+    // Layer 1: Animated BG
+    assert_eq!(st.layers[1].kind, "anim");
+    assert_eq!(st.layers[1].start, [50.0, -40.0]);
+    assert_eq!(st.layers[1].layer, 1);
+    assert_eq!(st.layers[1].trans, "add");
+    assert!(st.layers[1].anim.is_some());
+    let anim = st.layers[1].anim.as_ref().unwrap();
+    assert_eq!(anim.frames.len(), 2);
+    assert_eq!(anim.total_time, 10);
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn add_dir_expands_zips() {

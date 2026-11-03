@@ -92,6 +92,8 @@ async fn team_fight(app: &mut App, dir: &str, name: &str, simul: bool, n: usize,
 
 /// Story / cinematic features: face-off, awakening, defeats, boss, cutscenes, zoomed-out 5v5.
 async fn story(app: &mut App, dir: &str) {
+    // "CHEFE FINAL" banner right when the boss fight starts (the face-off ends ~270 ticks in)
+    if std::env::var("UME_STORY_SHOT").as_deref() == Ok("banner") { fight(app, dir, "68-boss-banner", "kaito", "oboro", "volcano", 280, "faceoff").await; return; }
     fight(app, dir, "50-faceoff-1", "kaito", "shion", "dojo", 82, "faceoff").await;
     fight(app, dir, "51-faceoff-2", "kaito", "shion", "dojo", 195, "faceoff").await;
     fight(app, dir, "52-transform-start", "valdric", "kaito", "spirit", 100, "transform").await;
@@ -104,6 +106,55 @@ async fn story(app: &mut App, dir: &str) {
     fight(app, dir, "59-boss-fight", "kaito", "oboro", "spirit", 400, "hit").await;
     team_fight(app, dir, "60-5v5-zoomout", true, 5, "dojo", 330, true).await;
     team_fight(app, dir, "61-5v5-zoomout-neon", true, 5, "neon", 420, true).await;
+    // the real arcade path to the final boss: last win on the ladder → pre-boss cutscene → VS → face-off → fight against the CPU boss
+    {
+        use crate::session::Pilot;
+        use ume_engine::ai::Ai;
+        let boss = find(app, "oboro");
+        let mut ladder: Vec<usize> = (0..app.reg.chars.len()).filter(|&i| !app.reg.chars[i].boss && !app.reg.chars[i].mugen).take(8).collect();
+        let others = ladder.len();
+        ladder.push(boss);
+        app.mode = Mode::Arcade; app.team = None;
+        app.sel = (find(app, "kaito"), ladder[others - 1], stage(app, "volcano"));
+        app.arcade = Some((ladder, others - 1));
+        app.ending_shown = false;
+        app.screen = Screen::Results { winner: 0, cur: 0 };
+        frames(app, 3).await;
+        println!("arcade → screen is cutscene: {}", matches!(app.screen, Screen::Cutscene { kind: 1, .. }));
+        if let Screen::Cutscene { .. } = app.screen { app.screen = Screen::Cutscene { kind: 1, page: 1, t: 0.0 }; }
+        screen(app, dir, "65-arcade-preboss-cutscene", 80).await;
+        app.screen = Screen::Vs { t: 0.0, step: 0 };
+        app.sel.2 = stage(app, "volcano");
+        app.start_fight().await;
+        {
+            let App { session, c, audio, .. } = app;
+            let s = session.as_mut().unwrap();
+            println!("boss fight: boss={} level={}", s.m.roots().any(|f| f.def.boss), match &s.pilots[1] { Pilot::Cpu(a) => a.level, _ => -1 });
+            s.pilots[0] = Pilot::Cpu(Ai::new(6, 5));
+            drop(s);
+        }
+        let (mut seen, mut awakened, mut shot_super, mut shot_awake) = (std::collections::BTreeSet::new(), false, false, false);
+        for t in 0..2400 {
+            let (st, form, ft, sup, rs) = {
+                let App { session, c, audio, .. } = app;
+                let s = session.as_mut().unwrap();
+                s.step_visual(c, audio);
+                let f = s.m.fighters.iter().find(|f| f.def.boss).unwrap();
+                (f.state_no, f.form, f.form_time, s.m.pause.as_ref().is_some_and(|p| p.is_super && p.time < 30), s.m.round_state)
+            };
+            seen.insert(st);
+            if form > 0 { awakened = true; }
+            if st >= 3000 && !shot_super && sup { shot_super = true; snap(app, dir, "66-arcade-boss-super", |a| a.draw_session_only()).await; }
+            if form > 0 && !shot_awake && ft > 90 { shot_awake = true; snap(app, dir, "67-arcade-boss-awakened", |a| a.draw_session_only()).await; }
+            if rs >= 3 && t > 300 { break; }
+        }
+        {
+            let App { session, .. } = app;
+            let s = session.as_mut().unwrap();
+            println!("boss fight: states used {:?}, awakened={awakened}, round_state={}, boss life {:.0}/{:.0}", seen.iter().filter(|n| **n >= 1000).collect::<Vec<_>>(), s.m.round_state, s.m.fighters.iter().find(|f| f.def.boss).map(|f| f.life).unwrap_or(0.0), s.m.fighters.iter().find(|f| f.def.boss).map(|f| f.life_max).unwrap_or(0.0));
+        }
+        app.session = None;
+    }
     app.sel = (find(app, "kaito"), find(app, "oboro"), 0);
     app.arcade = Some((vec![find(app, "oboro")], 0));
     for (kind, page, name) in [(0u8, 1usize, "62-cutscene-opening"), (1, 3, "63-cutscene-boss"), (2, 1, "64-cutscene-ending")] {

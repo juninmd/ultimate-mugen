@@ -44,28 +44,31 @@ impl InputSource for Ai {
         let Some(ei) = m.enemy(me, 0) else { return 0 };
         let e = &m.fighters[ei];
         // awakening when hurt and the meter allows it
-        if f.form == 0 && f.ctrl && f.power >= 1000.0 && f.life < f.life_max * 0.45 && self.level >= 3 && f.def.anims.contains_key(&196) { return k::T; }
+        if f.form == 0 && f.ctrl && f.power >= 1000.0 && f.life < f.life_max * if f.def.boss { 0.6 } else { 0.45 } && self.level >= 3 && f.def.anims.contains_key(&196) { return k::T; }
         if self.hold_ticks > 0 { self.hold_ticks -= 1; return self.hold; }
         let dist = (e.pos.x - f.pos.x).abs();
         let fwd = if f.facing > 0.0 { k::R } else { k::L };
         let back = if f.facing > 0.0 { k::L } else { k::R };
-        let skill = self.level as f32 / 8.0;
+        // the final boss is relentless: sharper than level 8, attacks from further away and recovers faster, but still guards only part of the time
+        let boss = f.def.boss;
+        let skill = if boss { 1.15 } else { self.level as f32 / 8.0 };
         let r = self.r();
         let threat = e.move_type == 'A' || m.projectiles.iter().any(|p| p.side == e.side);
-        if threat && dist < 140.0 && r < 0.25 + skill * 0.6 && f.move_type != 'H' {
+        if threat && dist < 140.0 && r < (0.25 + skill * 0.6).min(if boss { 0.55 } else { 1.0 }) && f.move_type != 'H' {
             self.hold = back | if e.state_type == 'C' || self.r() < 0.3 { k::D } else { 0 };
             self.hold_ticks = 8 + (self.r() * 10.0) as i32;
             return self.hold;
         }
+        let near = if boss { 105.0 } else { 70.0 };
         if self.cooldown > 0 { self.cooldown -= 1; return self.idle(dist, fwd, back); }
         if !f.ctrl { return 0; }
-        if !self.attack.is_empty() && (dist < 70.0 || (dist > 110.0 && self.r() < 0.08 + skill * 0.06)) && self.r() < 0.2 + skill * 0.5 {
-            let pool: Vec<usize> = (0..self.attack.len()).filter(|&i| dist < 70.0 || self.attack[i].steps.len() > 1).collect();
+        if !self.attack.is_empty() && (dist < near || (dist > 110.0 && self.r() < 0.08 + skill * if boss { 0.2 } else { 0.06 })) && self.r() < 0.2 + skill * 0.5 {
+            let pool: Vec<usize> = (0..self.attack.len()).filter(|&i| dist < near || self.attack[i].steps.len() > 1).collect();
             if !pool.is_empty() {
                 let pick = (self.r() * pool.len() as f32) as usize % pool.len();
                 let c = &self.attack[pool[pick]];
                 self.queue = Self::seq(c, f.facing).into();
-                self.cooldown = (20.0 + (1.0 - skill) * 40.0 + self.r() * 20.0) as i32;
+                self.cooldown = if boss { (8.0 + self.r() * 12.0) as i32 } else { (20.0 + (1.0 - skill) * 40.0 + self.r() * 20.0) as i32 };
                 return self.queue.pop_front().unwrap_or(0);
             }
         }

@@ -81,7 +81,7 @@ pub struct App {
     pub team_pick: Vec<usize>,
     /// select-screen state: filter (0 all · 1 originals · 2 MUGEN), first visible row, cursor dwell timer
     sel_filter: u8,
-    ending_shown: bool,
+    pub ending_shown: bool,
     /// colour multiplier for `draw_char` (cutscenes dim the character who is not speaking)
     char_tint: Color,
     sel_row: usize,

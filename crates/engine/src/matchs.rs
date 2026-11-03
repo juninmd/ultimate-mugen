@@ -556,6 +556,8 @@ impl Match {
             let f = &mut self.fighters[i];
             f.state_time += 1;
             if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); }
+            // the final boss keeps charging on its own (a super every ~10 s even when not hitting)
+            if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + 0.35).min(f.power_max); }
             if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; }
             if f.move_contact > 0 { f.move_contact += 1; }
             if f.move_hit > 0 { f.move_hit += 1; }

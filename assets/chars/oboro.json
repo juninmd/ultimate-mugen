@@ -8,23 +8,23 @@
  "color": "#c8102e",
  "winQuote": "Uma ilusão... desde o primeiro golpe.",
  "stats": {
-  "life": 1750,
+  "life": 2300,
   "power": 3000,
-  "attack": 112,
-  "defense": 108,
+  "attack": 128,
+  "defense": 116,
   "walk": [
-   2.5,
-   2.2
+   3.3,
+   2.9
   ],
   "run": [
-   5.7,
-   4.9
+   7.4,
+   6.4
   ],
   "jump": [
-   -8.5,
-   -2.5,
+   -9.4,
+   -2.7,
    0,
-   2.6
+   2.7
   ],
   "height": 106,
   "width": [
@@ -3591,5 +3591,6 @@
  "boss": true,
  "intro": "Você chegou até aqui... exatamente como eu havia previsto.",
  "taunt": "Tudo isso já aconteceu — dentro da sua mente.",
- "form": "Mangekyo Desperto"
+ "form": "Mangekyo Desperto",
+ "speed": 1.3
 }

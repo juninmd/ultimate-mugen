@@ -71,7 +71,7 @@ impl Session {
             }
         }
         m.start_round();
-        for f in m.fighters.iter_mut().filter(|f| !f.is_helper && f.def.boss) { f.power = 1000.0; }
+        for f in m.fighters.iter_mut().filter(|f| !f.is_helper && f.def.boss) { f.power = 2000.0; }
         for side in 0..2 { if life[side] < 0.999 { if let Some(f) = m.fighters.iter_mut().find(|f| !f.is_helper && f.side == side) { f.life = (f.life_max * life[side]).max(1.0); } } }
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();

@@ -4,7 +4,8 @@ pub mod text;
 use std::collections::HashSet;
 use std::sync::Arc;
 use std::time::Instant;
-use ume_render::{Atlas, Canvas, Renderer, Target};
+use ume_render::{Atlas, Canvas, PostFx, Renderer, Target};
+pub use ume_render::PostParams;
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
 use winit::event::{ElementState, WindowEvent};
@@ -39,6 +40,7 @@ pub struct Frame<'a> {
     pub dt: f32,
     pub time: f64,
     pub clear: [f64; 4],
+    pub post: Option<PostParams>,
     pub quit: bool,
 }
 
@@ -47,7 +49,7 @@ pub trait Game {
     fn frame(&mut self, f: &mut Frame);
 }
 
-struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas }
+struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas, post: PostFx }
 
 struct Shell<G: Game> { cfg: Config, game: G, live: Option<Live>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String> }
 
@@ -70,8 +72,9 @@ fn init_live(event_loop: &ActiveEventLoop, cfg: &Config) -> Result<Live, String>
     let renderer = Renderer::new(&device, config.format, [side, side]);
     let mut rgba_atlas = Atlas::new(side, side);
     let canvas = Canvas::new(&renderer, &queue, &mut rgba_atlas).ok_or("atlas too small")?;
+    let post = PostFx::new(&device, config.format);
     let gpu = Gpu { device, queue, renderer, rgba_atlas, index_atlas: Atlas::new(side, side) };
-    Ok(Live { window, surface, config, gpu, canvas })
+    Ok(Live { window, surface, config, gpu, canvas, post })
 }
 
 impl<G: Game> Shell<G> {
@@ -86,13 +89,21 @@ impl<G: Game> Shell<G> {
         self.last = now;
         live.canvas.clear();
         let size = [live.config.width as f32, live.config.height as f32];
-        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], quit: false };
+        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, quit: false };
         self.game.frame(&mut f);
-        let (quit, c) = (f.quit, f.clear);
+        let (quit, c, post) = (f.quit, f.clear, f.post);
         let view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let gpu = &mut live.gpu;
         let mut enc = gpu.device.create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
-        gpu.renderer.draw(&gpu.device, &gpu.queue, &mut enc, Target { view: &view, size, clear: Some(wgpu::Color { r: c[0], g: c[1], b: c[2], a: c[3] }) }, &live.canvas.batch);
+        let clear = Some(wgpu::Color { r: c[0], g: c[1], b: c[2], a: c[3] });
+        match post {
+            Some(p) => {
+                let scene = live.post.scene_view(&gpu.device, [live.config.width, live.config.height]).clone();
+                gpu.renderer.draw(&gpu.device, &gpu.queue, &mut enc, Target { view: &scene, size, clear }, &live.canvas.batch);
+                live.post.apply(&gpu.queue, &mut enc, &view, &p);
+            }
+            None => gpu.renderer.draw(&gpu.device, &gpu.queue, &mut enc, Target { view: &view, size, clear }, &live.canvas.batch),
+        }
         gpu.queue.submit([enc.finish()]);
         live.window.pre_present_notify();
         live.gpu.queue.present(frame);

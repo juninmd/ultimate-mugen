@@ -189,6 +189,14 @@ enum Source {
     Raw(Vec<u8>),
 }
 
+struct Voice {
+    sound: Sound,
+    end: f64,
+    start: f64,
+    key: Option<SampleKey>,
+    opts: SoundOpts,
+}
+
 struct Music {
     intro: Option<Sound>,
     body: Sound,
@@ -206,7 +214,8 @@ pub struct Audio {
     voices: HashMap<VoiceKey, Option<(Sound, f64)>>,
     pending: Vec<(VoiceKey, SoundOpts)>,
     pending_sfx: Vec<(&'static str, u32, i8)>,
-    channels: HashMap<(u32, i32), (Sound, f64)>,
+    channels: HashMap<(u32, i32), Voice>,
+    repan: Vec<((u32, i32), f32)>,
     loop_seq: i32,
     music: HashMap<u32, Sound>,
     playing: Option<Music>,
@@ -221,7 +230,7 @@ impl Audio {
     pub async fn new(enabled: bool) -> Self {
         let mut a = Audio {
             enabled, builtin: HashMap::new(), builtin_pcm: HashMap::new(), builtin_pan: HashMap::new(), rr: std::cell::Cell::new(0), duck: 1.0, duck_now: 1.0,
-            sources: HashMap::new(), voices: HashMap::new(), pending: vec![], pending_sfx: vec![], channels: HashMap::new(), loop_seq: -1, music: HashMap::new(), playing: None, volume: 0.8,
+            sources: HashMap::new(), voices: HashMap::new(), pending: vec![], pending_sfx: vec![], channels: HashMap::new(), repan: vec![], loop_seq: -1, music: HashMap::new(), playing: None, volume: 0.8,
         };
         if enabled {
             for (k, n) in [("hit", 3u32), ("hitheavy", 3), ("counter", 1), ("guard", 3), ("swing", 3), ("swingh", 2), ("land", 2), ("dash", 1), ("jump", 1), ("super", 1), ("transform", 1), ("defeat", 1), ("ko", 1), ("round", 1), ("fight", 1), ("win", 1),
@@ -265,32 +274,58 @@ impl Audio {
         let raw = matches!(self.sources.get(&key), Some(Some(Source::Raw(_))));
         let vkey = (key, if raw { 0 } else { pan_bucket(opts.pan) }, if raw { 100 } else { rate_key(opts.rate) });
         match self.voices.get(&vkey) {
-            Some(Some((s, secs))) => { let (s, secs) = (s.clone(), *secs); self.start(&s, secs, opts); }
+            Some(Some((s, secs))) => { let (s, secs) = (s.clone(), *secs); self.start(&s, secs, opts, Some(vkey.0.clone())); }
             Some(None) => {}
             None => { self.voices.insert(vkey.clone(), None); self.pending.push((vkey, opts)); }
         }
     }
-    fn start(&mut self, s: &Sound, secs: f64, o: SoundOpts) {
+    fn start(&mut self, s: &Sound, secs: f64, o: SoundOpts, key: Option<SampleKey>) {
         let now = macroquad::time::get_time();
-        if o.channel >= 0 && o.low_priority && self.channels.get(&(o.owner, o.channel)).is_some_and(|(_, end)| *end > now) { return; }
+        if o.channel >= 0 && o.low_priority && self.channels.get(&(o.owner, o.channel)).is_some_and(|v| v.end > now) { return; }
         let slot = if o.channel >= 0 { Some(o.channel) } else if o.looping { self.loop_seq -= 1; Some(self.loop_seq) } else { None };
         if let Some(ch) = slot {
             let end = if o.looping { f64::INFINITY } else { now + secs };
-            if let Some((old, _)) = self.channels.insert((o.owner, ch), (s.clone(), end)) { stop_sound(&old); }
+            let voice = Voice { sound: s.clone(), end, start: now, key, opts: o };
+            if let Some(old) = self.channels.insert((o.owner, ch), voice) { stop_sound(&old.sound); }
         }
         play_sound(s, PlaySoundParams { looped: o.looping, volume: self.volume * o.volume.clamp(0.0, 1.5) });
     }
     pub fn stop(&mut self, owner: u32, channel: i32) {
-        self.channels.retain(|&(o, ch), (s, _)| {
+        self.channels.retain(|&(o, ch), v| {
             let hit = o == owner && (channel < 0 || ch == channel);
-            if hit { stop_sound(s); }
+            if hit { stop_sound(&v.sound); }
             !hit
         });
     }
     pub fn stop_all(&mut self) {
-        for (_, (s, _)) in self.channels.drain() { stop_sound(&s); }
+        for (_, v) in self.channels.drain() { stop_sound(&v.sound); }
+    }
+    pub fn pan(&mut self, owner: u32, channel: i32, pan: f32) {
+        let now = macroquad::time::get_time();
+        for (&k, v) in self.channels.iter_mut() {
+            if k.0 == owner && (channel < 0 || k.1 == channel) && v.end > now && pan_bucket(pan) != pan_bucket(v.opts.pan) {
+                v.opts.pan = pan;
+                self.repan.push((k, pan));
+            }
+        }
+    }
+    async fn apply_repan(&mut self) {
+        let now = macroquad::time::get_time();
+        for (k, pan) in std::mem::take(&mut self.repan) {
+            let Some(v) = self.channels.get(&k) else { continue };
+            let Some(Some(Source::Pcm(p))) = v.key.as_ref().and_then(|key| self.sources.get(key)) else { continue };
+            let rendered = p.render(1.0, pan, v.opts.rate);
+            let elapsed = ((now - v.start) * rendered.rate as f64).max(0.0) as usize;
+            let Some(clip) = rendered.resume_at(elapsed, v.opts.looping) else { continue };
+            let Ok(s) = load_sound_from_bytes(&clip.to_wav()).await else { continue };
+            let Some(v) = self.channels.get_mut(&k) else { continue };
+            stop_sound(&v.sound);
+            play_sound(&s, PlaySoundParams { looped: v.opts.looping, volume: self.volume * v.opts.volume.clamp(0.0, 1.5) });
+            v.sound = s;
+        }
     }
     pub async fn process(&mut self) {
+        self.apply_repan().await;
         if let Some(m) = self.playing.as_mut() {
             self.duck_now += (self.duck - self.duck_now) * 0.12;
             let v = self.volume * 0.35 * self.duck_now;
@@ -318,7 +353,7 @@ impl Audio {
                 _ => continue,
             };
             if let Ok(s) = load_sound_from_bytes(&bytes).await {
-                self.start(&s, secs, opts);
+                self.start(&s, secs, opts, Some(vkey.0.clone()));
                 self.voices.insert(vkey, Some((s, secs)));
             }
         }

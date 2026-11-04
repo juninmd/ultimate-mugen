@@ -41,6 +41,11 @@ pub struct Explod {
     pub owner: u32, pub id: i32, pub cur: AnimCursor, pub pos: V2, pub vel: V2, pub accel: V2, pub facing: f32, pub vfacing: f32,
     pub bind_time: i32, pub bind_to: Option<u32>, pub bind_off: V2, pub remove_time: i32, pub time: i32, pub spr_priority: i32,
     pub on_top: bool, pub under: bool, pub scale: [f32; 2], pub add: bool, pub remove_on_get_hit: bool, pub super_move: i32, pub pause_move: i32, pub lscl: f32,
+    pub ignore_hit_pause: bool, pub screen: bool,
+}
+
+impl Explod {
+    pub fn world_pos(&self, camera: V2) -> V2 { if self.screen { V2 { x: camera.x + self.pos.x, y: camera.y + self.pos.y } } else { self.pos } }
 }
 
 #[derive(Clone)]
@@ -1094,7 +1099,7 @@ impl Match {
     fn make_explod(&self, owner: &Fighter, def: Arc<CharDef>, anim: i32, x: f32, y: f32, lscl: f32) -> Explod {
         Explod { owner: owner.id, id: -1, cur: AnimCursor::new(def, anim), pos: V2 { x, y }, vel: V2::default(), accel: V2::default(), facing: owner.facing, vfacing: 1.0,
             bind_time: 0, bind_to: None, bind_off: V2::default(), remove_time: -2, time: 0, spr_priority: 5, on_top: true, under: false, scale: [1.0, 1.0],
-            add: false, remove_on_get_hit: false, super_move: 0, pause_move: 0, lscl }
+            add: false, remove_on_get_hit: false, super_move: 0, pause_move: 0, lscl, ignore_hit_pause: true, screen: false }
     }
     pub fn spawn_spark(&mut self, a: usize, no: i32, own: bool, x: f32, y: f32, guard: bool, heavy: bool) {
         let f = &self.fighters[a];
@@ -1142,6 +1147,7 @@ impl Match {
         let def = if from_fx { match self.fx.clone() { Some(x) => x, None => return } } else { f.def.clone() };
         if !def.anims.contains_key(&anim_no) { return; }
         let postype = sc.raw("postype").unwrap_or("p1").to_ascii_lowercase();
+        let screen_space = matches!(postype.as_str(), "front" | "back" | "left" | "right");
         let (px, py) = (num(self, "pos", 0.0, 0) * f.lscl, num(self, "pos", 0.0, 1) * f.lscl);
         let fac = if num(self, "facing", 1.0, 0) < 0.0 { -1.0 } else { 1.0 };
         let (x, y, facing, bind_to);
@@ -1156,26 +1162,26 @@ impl Match {
                 facing = fe.facing * fac;
             }
             "front" => {
-                x = self.camera.x + half * f.facing + px * f.facing;
-                y = py + self.camera.y;
+                x = half * f.facing + px * f.facing;
+                y = py;
                 bind_to = None;
                 facing = f.facing * fac;
             }
             "back" => {
-                x = self.camera.x - half * f.facing + px * f.facing;
-                y = py + self.camera.y;
+                x = -half * f.facing + px * f.facing;
+                y = py;
                 bind_to = None;
                 facing = f.facing * fac;
             }
             "left" => {
-                x = self.camera.x - half + px;
-                y = py + self.camera.y;
+                x = -half + px;
+                y = py;
                 bind_to = None;
                 facing = fac;
             }
             "right" => {
-                x = self.camera.x + half + px;
-                y = py + self.camera.y;
+                x = half + px;
+                y = py;
                 bind_to = None;
                 facing = fac;
             }
@@ -1204,6 +1210,9 @@ impl Match {
         e.super_move = num(self, "supermove", num(self, "supermovetime", 0.0, 0) as f64, 0) as i32;
         e.pause_move = num(self, "pausemovetime", 0.0, 0) as i32;
         e.add = sc.raw("trans").is_some_and(|t| t.to_ascii_lowercase().starts_with("add"));
+        e.ignore_hit_pause = num(self, "ignorehitpause", 1.0, 0) != 0.0;
+        e.screen = screen_space || sc.raw("space").is_some_and(|s| s.trim().eq_ignore_ascii_case("screen"));
+        if e.screen && !screen_space { e.pos.x -= self.camera.x; e.pos.y -= self.camera.y; e.bind_to = None; }
         self.explods.push(e);
     }
 
@@ -1216,13 +1225,14 @@ impl Match {
                 if !allowed { return true; }
                 if ps == Some(true) { e.super_move -= 1; } else { e.pause_move -= 1; }
             }
-            let bound = e.bind_to.and_then(|b| fighters.iter().find(|f| f.id == b)).map(|f| (f.id, f.pos, f.facing, f.hit_pause));
-            if let Some(b) = bound { if b.3 > 0 && b.0 == e.owner { return true; } }
+            let owner_hit_pause = fighters.iter().find(|f| f.id == e.owner).is_some_and(|f| f.hit_pause > 0);
+            if owner_hit_pause && !e.ignore_hit_pause { return true; }
+            let bound = if e.screen { None } else { e.bind_to.and_then(|b| fighters.iter().find(|f| f.id == b)).map(|f| (f.pos, f.facing)) };
             e.time += 1;
             e.cur.advance();
             match bound {
                 Some(b) if e.bind_time > 0 || e.bind_time == -1 => {
-                    e.pos.x = b.1.x + e.bind_off.x * b.2; e.pos.y = b.1.y + e.bind_off.y;
+                    e.pos.x = b.0.x + e.bind_off.x * b.1; e.pos.y = b.0.y + e.bind_off.y;
                     if e.bind_time > 0 { e.bind_time -= 1; }
                 }
                 _ => { e.pos.x += e.vel.x * e.facing; e.pos.y += e.vel.y; e.vel.x += e.accel.x; e.vel.y += e.accel.y; }

@@ -30,11 +30,11 @@
   <div id="rot">Gire o aparelho para jogar na horizontal ↻</div>
   <script src="gamepad.js"></script>
   <script type="module">
-    import init, * as ume from './ultimate-mugen.js';
+    import init, * as ume from './ultimate-mugen.js?v=__BUILD__';
     const boot = document.getElementById('boot'), bar = document.querySelector('#bar i'), msg = document.getElementById('bootmsg');
     const hide = () => { boot.classList.add('done'); setTimeout(() => boot.remove(), 400); };
     async function load() {
-      const url = new URL('./ultimate-mugen_bg.wasm', import.meta.url);
+      const url = new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url);
       const res = await fetch(url);
       const total = +res.headers.get('content-length') || 0;
       let got = 0;
@@ -43,7 +43,7 @@
       return new Response(body, { headers: { 'content-type': 'application/wasm' } });
     }
     try {
-      await init({ module_or_path: await load().catch(() => new URL('./ultimate-mugen_bg.wasm', import.meta.url)) });
+      await init({ module_or_path: await load().catch(() => new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url)) });
     } catch (e) { msg.textContent = 'Falha ao carregar: ' + (e && e.message || e); throw e; }
     bar.style.width = '100%';
     window.umeStartImports(ume);

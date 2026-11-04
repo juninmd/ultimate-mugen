@@ -50,7 +50,6 @@ Referência (4 núcleos, release): `kfm720` caiu de 85 ms para 27 ms, `kfm` de 1
 | `ControlFlow::Wait` na web | `ume_shell::run` | O `Poll` do winit gira um laço `postTask`/`AbortController` ao lado do `requestAnimationFrame`; o profile mostrou cerca de 75% do tempo da main thread (mais GC) gasto aí. Os redraws são auto-solicitados, então `Wait` basta |
 | Zerar atlas | `Renderer::new` | Texturas de atlas e paleta são inicializadas uma vez, então `texSubImage2D` não força mais limpeza lazy (aviso do Firefox) |
 | Retry da surface | `Shell::redraw` | Falha em `get_current_texture` pede novo frame em vez de travar o laço (tela preta) |
-| Loader + cache | `web/index.html`, `web/sw.js` | Progresso do download do wasm, cache stale-while-revalidate (sem baixar o wasm a cada visita) e recarga automática se o contexto WebGL for perdido |
-| Wasm sem símbolos | `.cargo/config.toml` | `strip=symbols` remove a seção de nomes (36 MB para 32 MB) |
+| Loader + cache | `web/index.html`, `web/sw.js` | Progresso do download do wasm, JS e wasm buscados como `?v=<build>` (carimbado pelo `build-web.sh`) e cacheados de forma imutável, então o cache nunca mistura dois builds e recarga automática se o contexto WebGL for perdido |
 
 Sonda: `NODE_PATH=$(npm root -g) node scripts/web-profile.js Enter Enter Enter` (Chromium headless, rode `./scripts/build-web.sh` antes).

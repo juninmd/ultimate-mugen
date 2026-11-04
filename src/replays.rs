@@ -7,6 +7,36 @@ pub const FORMAT: &str = "ultimate-mugen-replay";
 pub const VERSION: u32 = 1;
 pub const SUPERSEDED: &str = "Replay incompatível: este arquivo foi gravado por outra versão do jogo.";
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct NetplayConfig {
+    pub side: i32,
+    pub peer: String,
+    pub port: u16,
+    pub delay: usize,
+    pub rollback_window: i32,
+    pub players: u8,
+    pub spectate: bool,
+}
+
+impl NetplayConfig {
+    pub fn to_json(&self) -> serde_json::Value {
+        json!({ "side": self.side, "peer": self.peer, "port": self.port, "delay": self.delay, "rollback_window": self.rollback_window, "players": self.players, "spectate": self.spectate })
+    }
+
+    pub fn from_json(v: &Value) -> Option<Self> {
+        let o = v.as_object()?;
+        Some(NetplayConfig {
+            side: o.get("side").and_then(Value::as_i64).unwrap_or(0) as i32,
+            peer: o.get("peer").and_then(Value::as_str).unwrap_or_default().to_string(),
+            port: o.get("port").and_then(Value::as_u64).unwrap_or(0) as u16,
+            delay: o.get("delay").and_then(Value::as_u64).unwrap_or(0) as usize,
+            rollback_window: o.get("rollback_window").and_then(Value::as_i64).unwrap_or(0) as i32,
+            players: o.get("players").and_then(Value::as_u64).unwrap_or(2) as u8,
+            spectate: o.get("spectate").and_then(Value::as_bool).unwrap_or(false),
+        })
+    }
+}
+
 /// One recorded fight, exactly as stored on disk.
 #[derive(Clone, Debug, PartialEq)]
 pub struct StoredReplay {
@@ -25,6 +55,8 @@ pub struct StoredReplay {
     pub simul: bool,
     pub tag: bool,
     pub rules: StoredRules,
+    /// Netplay session configuration when the fight was played online
+    pub netplay: Option<NetplayConfig>,
     /// run-length encoded input stream: (repeat count, one input per root slot)
     pub runs: Vec<(u32, Vec<u32>)>,
 }
@@ -83,6 +115,7 @@ impl StoredReplay {
             "member_palettes": self.member_palettes,
             "seed": self.seed,
             "life": self.life,
+            "netplay": self.netplay.as_ref().map(NetplayConfig::to_json),
             "teams": teams,
             "simul": self.simul,
             "tag": self.tag,
@@ -160,6 +193,7 @@ impl StoredReplay {
             simul: o.get("simul").and_then(Value::as_bool).unwrap_or(false),
             tag: o.get("tag").and_then(Value::as_bool).unwrap_or(false),
             rules,
+            netplay: o.get("netplay").and_then(NetplayConfig::from_json),
             runs,
         })
     }
@@ -259,6 +293,25 @@ pub fn prune(dir: &Path, keep: usize) {
     for e in list(dir).into_iter().skip(keep) { let _ = std::fs::remove_file(&e.path); }
 }
 
+/// Write a desync report (netplay config + checksum + recent inputs) so an online desync can be reproduced.
+pub fn save_desync(dir: &Path, config: Option<&NetplayConfig>, frame: u32, checksum: u64, ticks: usize, rec: &[Vec<u32>]) -> Result<PathBuf, String> {
+    std::fs::create_dir_all(dir).map_err(|e| format!("Não foi possível criar {}: {e}", dir.display()))?;
+    let path = dir.join(format!("desync-{}.json", now()));
+    let tail: Vec<Vec<u32>> = rec.iter().rev().take(120).rev().cloned().collect();
+    let body = json!({
+        "kind": "ultimate-mugen-desync",
+        "version": VERSION,
+        "saved_at": now(),
+        "config": config.map(NetplayConfig::to_json),
+        "frame": frame,
+        "checksum": checksum,
+        "ticks": ticks,
+        "inputs": tail,
+    });
+    std::fs::write(&path, body.to_string()).map_err(|e| format!("Não foi possível gravar o relatório: {e}"))?;
+    Ok(path)
+}
+
 pub fn now() -> u64 {
     std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
 }
@@ -290,6 +343,7 @@ mod tests {
             chars: ["umf:kfm".into(), "umf:kfm".into()], stage: "dojo".into(), palettes: [1, 2], member_palettes: vec![3, 4], seed: 0x2545_f491, life: [0.55, 1.0],
             teams: None, simul: false, tag: false,
             rules: StoredRules { rounds_to_win: 2, round_ticks: 5940, life_percent: 100, single_round: false, classic_pushbox: true, team_life_share: true, game_speed: 1.0 },
+            netplay: Some(NetplayConfig { side: 0, peer: "127.0.0.1:7001".into(), port: 7000, delay: 2, rollback_window: 12, players: 2, spectate: false }),
             runs: StoredReplay::from_stream(&rec),
         }
     }
@@ -403,6 +457,31 @@ mod tests {
         let entries = list(&dir);
         assert_eq!(entries.len(), 2);
         assert_eq!(entries[0].replay.label, "luta 4");
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn netplay_config_survives_the_round_trip() {
+        let r = sample();
+        let back = StoredReplay::from_json(&r.to_json()).unwrap();
+        assert_eq!(back.netplay, r.netplay);
+        assert_eq!(back.netplay.as_ref().unwrap().rollback_window, 12);
+        assert_eq!(back.netplay.as_ref().unwrap().peer, "127.0.0.1:7001");
+    }
+
+    #[test]
+    fn a_desync_report_records_the_config_checksum_and_recent_inputs() {
+        let dir = scratch("desync");
+        let cfg = NetplayConfig { side: 1, peer: "10.0.0.2:7000".into(), port: 7001, delay: 3, rollback_window: 12, players: 2, spectate: false };
+        let rec: Vec<Vec<u32>> = (0..300).map(|i| vec![i % 8, i % 5]).collect();
+        let path = save_desync(&dir, Some(&cfg), 900, 0xdead_beef, rec.len(), &rec).unwrap();
+        let text = std::fs::read_to_string(&path).unwrap();
+        let v: Value = serde_json::from_str(&text).unwrap();
+        assert_eq!(v["frame"], 900);
+        assert_eq!(v["checksum"], 0xdead_beef_u64);
+        assert_eq!(v["config"]["peer"], "10.0.0.2:7000");
+        assert_eq!(v["config"]["delay"], 3);
+        assert_eq!(v["inputs"].as_array().unwrap().len(), 120, "the report keeps the last 120 frames");
         std::fs::remove_dir_all(&dir).unwrap();
     }
 

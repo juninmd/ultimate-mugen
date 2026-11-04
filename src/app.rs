@@ -61,7 +61,7 @@ pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, stage_j
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
 #[derive(Clone)]
-pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>>, rules: Rules, seed: u32, life: [f32; 2], pal: [i32; 2], team_pal: Vec<i32> }
+pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>>, rules: Rules, seed: u32, life: [f32; 2], pal: [i32; 2], team_pal: Vec<i32>, net: Option<crate::replays::NetplayConfig> }
 
 /// Team battle state: sequence (KOF-style turns, winner keeps its remaining life) or parallel (2v2 simultaneous).
 #[derive(Clone)]
@@ -165,6 +165,8 @@ pub struct App {
     replay_rename: Option<String>,
     replay_confirm: bool,
     replay_by_name: bool,
+    /// a desync report was already written for the current online match
+    desync_reported: bool,
 }
 
 const MENU: [(&str, &str); 15] = [
@@ -216,7 +218,7 @@ impl App {
             reg, market: crate::market::Market::open(), market_ui: market::MarketUi::default(), ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: settings.difficulty, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: import_msg, preview_t: 0.0,
             settings, key_edit: None, move_page: 0, pending: Pending::default(), import_jobs: vec![], window_watch: WindowWatch::default(), window_pinned: false, team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
-            replay_list: vec![], replay_problems: vec![], replay_rename: None, replay_confirm: false, replay_by_name: false,
+            replay_list: vec![], replay_problems: vec![], replay_rename: None, replay_confirm: false, replay_by_name: false, desync_reported: false,
             survival: None,
             coop: false,
             sp: crate::screenpack::probe(),
@@ -1187,12 +1189,23 @@ impl App {
         self.c.touch.draw();
         if self.c.touch.enabled { self.ui.rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.0, 0.0, 0.0, 0.35)); self.ui.text("II", VW / 2.0, pb.1 + 30.0, 20.0, WHITE, Align::Center, true); }
         #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
-        if let Some(n) = self.session.as_ref().and_then(|s| s.net.as_ref()) { self.net_overlay(n); }
+        if let Some(n) = self.session.as_ref().and_then(|s| s.net.as_ref()) {
+            self.net_overlay(n);
+            if n.desyncs > 0 && !self.desync_reported {
+                self.desync_reported = true;
+                let frame = n.rollbacks.min(u32::MAX as u64) as u32;
+                let (checksum, rec) = self.session.as_ref().map(|s| (s.m.checksum(), s.rec.clone())).unwrap_or((0, vec![]));
+                match crate::replays::save_desync(&crate::replays::dir(), Some(&n.config), frame, checksum, rec.len(), &rec) {
+                    Ok(p) => self.msg = format!("Dessincronização: relatório em {}", p.file_name().map(|f| f.to_string_lossy().into_owned()).unwrap_or_default()),
+                    Err(e) => self.msg = e,
+                }
+            }
+        }
         let s = self.session.as_mut().unwrap();
         if s.paused { if !replaying { self.pause_menu(accept_back).await; } return; }
         if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
-                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed, life: self.survival_life(), pal: self.pal, team_pal: self.team_pal.clone() }); } self.archive_last_fight(); }
+                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed, life: self.survival_life(), pal: self.pal, team_pal: self.team_pal.clone(), net: self.session.as_ref().and_then(|s| s.net.as_ref()).map(|n| n.config.clone()) }); } self.archive_last_fight(); }
                 self.screen = Screen::Results { winner: w, cur: 0 };
             } } }
     }
@@ -1337,7 +1350,7 @@ impl App {
     }
 
     /// Snapshot the running session as the replayable "last fight" (used by the screenshot tour's determinism check).
-    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed, life: self.survival_life(), pal: self.pal, team_pal: self.team_pal.clone() }); } }
+    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed, life: self.survival_life(), pal: self.pal, team_pal: self.team_pal.clone(), net: self.session.as_ref().and_then(|s| s.net.as_ref()).map(|n| n.config.clone()) }); } }
 
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub async fn start_netplay(&mut self, a: &crate::netlink::NetArgs) {
@@ -1347,7 +1360,7 @@ impl App {
         let stage = a.stage.as_ref().map_or(Some(0), |id| self.reg.stages.iter().position(|s| s.id.eq_ignore_ascii_case(id) || s.name.eq_ignore_ascii_case(id)));
         let Some(stage) = stage else { self.msg = format!("Netplay: cenário não encontrado ({:?})", a.stage); return };
         let link = match crate::netlink::NetLink::connect(a) { Ok(l) => l, Err(e) => { self.msg = format!("Netplay: {e}"); return } };
-        self.mode = Mode::Versus; self.team = None; self.arcade = None; self.replaying = None;
+        self.mode = if a.spectate { Mode::Watch } else { Mode::Versus }; self.team = None; self.arcade = None; self.replaying = None; self.desync_reported = false;
         self.sel = (c1, c2, stage);
         let saved = self.settings;
         self.settings = Settings { round_time: 0, rounds: 1, life: 2, ..saved };
@@ -1363,7 +1376,7 @@ impl App {
             NetStatus::Connecting => ("CONECTANDO AO ADVERSÁRIO…".to_string(), hex("#ffcc33")),
             NetStatus::Waiting => ("SINCRONIZANDO…".to_string(), hex("#ffcc33")),
             NetStatus::Lost(e) => (format!("CONEXÃO PERDIDA: {e}"), hex("#ff4d6d")),
-            NetStatus::Running => (format!("ONLINE P{} · {} ms", n.local + 1, n.ping_ms().unwrap_or(0)), hex("#a49cc0")),
+            NetStatus::Running => if n.spectate { (format!("ESPECTADOR · {} ms · {} atrás", n.ping_ms().unwrap_or(0), n.frames_behind()), hex("#a49cc0")) } else { (format!("ONLINE P{} · {} ms", n.local + 1, n.ping_ms().unwrap_or(0)), hex("#a49cc0")) },
         };
         self.ui.text(&text, VW / 2.0, VH - 16.0, 18.0, color, Align::Center, true);
         if n.desyncs > 0 { self.ui.text(&format!("DESSINCRONIZADO ({})", n.desyncs), VW / 2.0, VH - 40.0, 18.0, hex("#ff4d6d"), Align::Center, true); }

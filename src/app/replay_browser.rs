@@ -39,7 +39,7 @@ impl App {
             label, saved_at: replays::now(), mode: r.mode.key().to_string(), chars, stage,
             palettes: r.pal, member_palettes: r.team_pal.clone(), seed: r.seed, life: r.life, teams,
             simul: r.team.as_ref().is_some_and(|t| t.simul), tag: r.team.as_ref().is_some_and(|t| t.tag),
-            rules: stored_rules(r.rules), runs: StoredReplay::from_stream(&r.rec),
+            rules: stored_rules(r.rules), netplay: r.net.clone(), runs: StoredReplay::from_stream(&r.rec),
         })
     }
 
@@ -58,7 +58,7 @@ impl App {
                 Some(if s.tag { Team::tagged(members[0].clone(), members[1].clone()) } else { Team::new(members[0].clone(), members[1].clone(), s.simul) })
             }
         };
-        Ok(Replay { sel: (first, second, stage), mode: crate::app::Mode::from_key(&s.mode), team, rec: s.stream(), rules: rules_of(s.rules), seed: s.seed, life: s.life, pal: s.palettes, team_pal: s.member_palettes.clone() })
+        Ok(Replay { sel: (first, second, stage), mode: crate::app::Mode::from_key(&s.mode), team, rec: s.stream(), rules: rules_of(s.rules), seed: s.seed, life: s.life, pal: s.palettes, team_pal: s.member_palettes.clone(), net: s.netplay.clone() })
     }
 
     /// Write the just-finished fight to `replays/` (desktop). Older files are pruned so the folder stays small.

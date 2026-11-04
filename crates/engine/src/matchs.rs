@@ -91,6 +91,9 @@ pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_s
 #[derive(Clone)]
 pub struct Announce { pub text: String, pub time: i32, pub total: i32 }
 
+pub const MAX_EXPLODS: usize = 256;
+pub const MAX_PROJECTILES: usize = 256;
+
 #[derive(Clone)]
 pub struct Match {
     pub fighters: Vec<Fighter>,
@@ -1122,6 +1125,12 @@ impl Match {
         self.shake_ampl * decay * (self.shake_phase + self.shake_freq * self.shake_elapsed as f32).to_radians().sin()
     }
 
+    fn push_explod(&mut self, e: Explod) {
+        if self.explods.len() < MAX_EXPLODS {
+            self.explods.push(e);
+        }
+    }
+
     fn make_explod(&self, owner: &Fighter, def: Arc<CharDef>, anim: i32, x: f32, y: f32, lscl: f32) -> Explod {
         Explod { owner: owner.id, id: -1, cur: AnimCursor::new(def, anim), pos: V2 { x, y }, vel: V2::default(), accel: V2::default(), facing: owner.facing, vfacing: 1.0,
             bind_time: 0, bind_to: None, bind_off: V2::default(), remove_time: -2, time: 0, spr_priority: 5, on_top: true, under: false, scale: [1.0, 1.0],
@@ -1131,7 +1140,7 @@ impl Match {
         let f = &self.fighters[a];
         if own && f.def.anims.contains_key(&no) {
             let e = self.make_explod(f, f.def.clone(), no, x, y, f.lscl);
-            self.explods.push(e);
+            self.push_explod(e);
             return;
         }
         let Some(fx) = self.fx.clone() else { return };
@@ -1139,14 +1148,14 @@ impl Match {
         if !fx.anims.contains_key(&n) { n = if guard { 40 } else if heavy { 2 } else { 0 }; }
         if !fx.anims.contains_key(&n) { return; }
         let e = self.make_explod(f, fx, n, x, y, 1.0);
-        self.explods.push(e);
+        self.push_explod(e);
     }
     pub fn spawn_fx(&mut self, i: usize, no: i32, x: f32, y: f32, under: bool) {
         let Some(fx) = self.fx.clone() else { return };
         let n = if fx.anims.contains_key(&no) { no } else { 0 };
         let mut e = self.make_explod(&self.fighters[i], fx, n, x, y, 1.0);
         e.under = under; e.on_top = !under;
-        self.explods.push(e);
+        self.push_explod(e);
     }
     pub fn spawn_super_fx(&mut self, i: usize, ox: f32, oy: f32, own_anim: i32) {
         let f = &self.fighters[i];
@@ -1154,14 +1163,14 @@ impl Match {
         if !def.anims.contains_key(&no) { return; }
         let mut e = self.make_explod(f, def, no, f.pos.x + ox * f.facing, f.pos.y + oy, l);
         e.super_move = 9999; e.add = true;
-        self.explods.push(e);
+        self.push_explod(e);
     }
     pub fn spawn_dust(&mut self, i: usize, x: f32, y: f32) {
         let Some(fx) = self.fx.clone() else { return };
         if !fx.anims.contains_key(&120) { return; }
         let mut e = self.make_explod(&self.fighters[i], fx, 120, x, y, 1.0);
         e.on_top = false; e.spr_priority = -3;
-        self.explods.push(e);
+        self.push_explod(e);
     }
 
     pub fn spawn_explod(&mut self, i: usize, sc: &Controller) {
@@ -1239,7 +1248,7 @@ impl Match {
         e.ignore_hit_pause = num(self, "ignorehitpause", 1.0, 0) != 0.0;
         e.screen = screen_space || sc.raw("space").is_some_and(|s| s.trim().eq_ignore_ascii_case("screen"));
         if e.screen && !screen_space { e.pos.x -= self.camera.x; e.pos.y -= self.camera.y; e.bind_to = None; }
-        self.explods.push(e);
+        self.push_explod(e);
     }
 
     fn update_explods(&mut self, paused: bool) {
@@ -1344,7 +1353,9 @@ impl Match {
             remove_on_hit: num(self, "projremove", 1.0, 0) != 0.0, stage_bound: num(self, "projstagebound", 40.0, 0) * f.lscl,
             super_move: num(self, "supermovetime", 0.0, 0) as i32, pause_move: num(self, "pausemovetime", 0.0, 0) as i32,
         };
-        self.projectiles.push(p);
+        if self.projectiles.len() < MAX_PROJECTILES {
+            self.projectiles.push(p);
+        }
     }
     pub fn proj_boxes(p: &Projectile, kind: u8) -> Vec<Box4> {
         let Some(fr) = p.cur.frame() else { return vec![] };

@@ -82,6 +82,14 @@ impl Session {
         Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
     }
 
+    pub fn apply_rules(&mut self, r: crate::settings::Rules) {
+        if self.m.rounds_to_win != 1 { self.m.rounds_to_win = r.rounds_to_win; }
+        self.m.round_ticks = r.round_ticks;
+        self.m.timer = if r.round_ticks > 0 { r.round_ticks } else { 99 * 60 };
+        let k = r.life_percent as f32 / 100.0;
+        for f in self.m.fighters.iter_mut().filter(|f| !f.is_helper) { f.life_max *= k; f.life *= k; }
+    }
+
     fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {
         let (f, b, d) = (if facing >= 0.0 { k::R } else { k::L }, if facing >= 0.0 { k::L } else { k::R }, k::D);
         let qcf = [d, d, d | f, d | f, f, f];

@@ -383,7 +383,7 @@ pub async fn run(app: &mut App, dir: &str) {
     }
     app.session = None;
     cap(app, Screen::Menu { cur: 3 }); frames(app, 30).await; app.trans = 0.62; screen(app, dir, "22-transition", 0).await;
-    cap(app, Screen::Video { cur: 3 }); screen(app, dir, "17-video", 40).await;
+    cap(app, Screen::Settings { tab: 0, cur: 3, from_fight: false }); screen(app, dir, "17-video", 40).await;
     app.ui.begin(); app.ui.loading_screen(0.62, "Carregando lutador 2…"); get_screen_data().export_png(&format!("{dir}/18-loading.png")); println!("shot 18-loading"); next_frame().await;
     app.screen = Screen::Controls; screen(app, dir, "14-controls", 5).await;
     // phone landscape with touch controls

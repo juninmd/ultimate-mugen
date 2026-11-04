@@ -108,7 +108,7 @@ impl MatchRenderer {
         if m.pause.as_ref().is_some_and(|p| p.darken) { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(0.0, 0.0, 0.04, 0.62)); }
         if gain > 0.0 { vfx.draw_back(g, m, shx, shy); }
         // soft contact shadows (3 layered ellipses)
-        for f in m.fighters.iter().filter(|_| matches!(stage.art, StageArt::Procedural { .. })) {
+        for f in m.fighters.iter().filter(|_| matches!(stage.art, StageArt::Procedural { .. } | StageArt::Illustrated { .. })) {
             if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE | ume_engine::fighter::asf::NOSHADOW) { continue; }
             let hgt = (-f.pos.y).max(0.0);
             let r = 22.0 * (1.0 - hgt / 200.0).max(0.4);
@@ -135,7 +135,7 @@ impl MatchRenderer {
             }
         }
         // floor reflections (procedural stages)
-        if matches!(stage.art, StageArt::Procedural { .. }) && gain > 0.0 {
+        if matches!(stage.art, StageArt::Procedural { .. } | StageArt::Illustrated { .. }) && gain > 0.0 {
             for f in &m.fighters {
                 if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE | ume_engine::fighter::asf::NOSHADOW) { continue; }
                 self.draw_reflection(g, m, f, shx, shy);
@@ -341,6 +341,18 @@ impl MatchRenderer {
                     if animated { self.fx.draw_front(&cx, g); }
                     if let Some(t) = tint { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(t[0], t[1], t[2], t[3])); }
                 }
+            }
+            StageArt::Illustrated { image } => {
+                if front { return; }
+                let ground = m.stage.zoffset - m.camera.y;
+                let top_ground = m.stage.zoffset - m.stage.bound_high.min(0.0);
+                let bottom_ground = m.stage.zoffset - m.stage.bound_low.max(0.0);
+                let h = (top_ground / 0.85).max((m.view_h - bottom_ground) / 0.15).max(m.view_h);
+                let w = (h * image.w as f32 / image.h as f32).max(m.view_w);
+                let x = ((m.view_w - w) * 0.5 - m.camera.x * 0.12 * m.zoom).clamp(m.view_w - w, 0.0);
+                let y = ground - h * 0.85;
+                let texture = g.texture(image, true);
+                draw_texture_ex(&texture, g.ox + (x + shx) * s, g.oy + (y + shy) * s, WHITE, DrawTextureParams { dest_size: Some(vec2(w * s, h * s)), ..Default::default() });
             }
             StageArt::Mugen(bg) => {
                 let scl = bg.scl;

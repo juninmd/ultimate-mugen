@@ -19,7 +19,7 @@ async fn draw_frames(app: &mut App, n: usize, shot: Option<String>) {
 
 pub async fn run(app: &mut App, dir: &str) {
     let only = std::env::var("UME_STAGE").ok();
-    for (st, p1, p2) in [("dojo", "kaito", "shion"), ("neon", "volta", "suzume"), ("bamboo", "lian", "sylene"), ("plains", "daichi", "jin"), ("spirit", "akio", "bruno"), ("volcano", "garan", "marlow")] {
+    for (st, p1, p2) in [("dojo", "kaito", "shion"), ("neon", "volta", "suzume"), ("bamboo", "lian", "sylene"), ("plains", "daichi", "jin"), ("spirit", "akio", "bruno"), ("volcano", "garan", "marlow"), ("brazil", "bruno", "lian")] {
         if only.as_deref().is_some_and(|o| o != st) { continue; }
         app.mode = Mode::Watch;
         app.sel = (find(app, p1), find(app, p2), stage(app, st));
@@ -45,5 +45,18 @@ pub async fn run(app: &mut App, dir: &str) {
         draw_frames(app, 14, Some(format!("{dir}/S-{st}-3-super.png"))).await;
         app.session.as_mut().unwrap().r.fx.react(&[Impulse { x: x1, strength: 1.0, kind: ImpulseKind::Ko }]);
         draw_frames(app, 26, Some(format!("{dir}/S-{st}-4-ko.png"))).await;
+        {
+            let m = &mut app.session.as_mut().unwrap().m;
+            m.camera.y = m.stage.bound_high;
+            m.camera.x = m.stage.bound_left;
+        }
+        draw_frames(app, 2, Some(format!("{dir}/S-{st}-5-camera-high-left.png"))).await;
+        {
+            let m = &mut app.session.as_mut().unwrap().m;
+            m.camera.y = m.stage.bound_low;
+            m.camera.x = m.stage.bound_right;
+        }
+        draw_frames(app, 2, Some(format!("{dir}/S-{st}-6-camera-low-right.png"))).await;
+
     }
 }

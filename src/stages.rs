@@ -24,6 +24,7 @@ pub enum StageKind { Dojo, Neon, Bamboo, Plains, Spirit, Volcano, #[default] Cus
 
 pub enum StageArt {
     Procedural { back: Vec<Layer>, particles: Vec<Particle>, tint: Option<[f32; 4]> },
+    Illustrated { image: Arc<ImageData> },
     Mugen(Box<MugenBg>),
 }
 pub struct Stage { pub info: StageInfo, pub art: StageArt, pub music: u32, pub kind: StageKind, pub bgm: Option<Arc<(Vec<u8>, MusicLoop)>> }
@@ -739,16 +740,43 @@ fn volcano() -> Stage {
     Stage { info: info("Cratera Vulcânica"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.24, 0.0, 0.05]) }, music: 5, kind: StageKind::Volcano, bgm: None }
 }
 
+pub fn illustration(id: &str) -> Option<Arc<ImageData>> {
+    use std::sync::OnceLock;
+    static IMAGES: OnceLock<Vec<Arc<ImageData>>> = OnceLock::new();
+    let ids = ["dojo", "neon", "bamboo", "plains", "spirit", "volcano", "brazil"];
+    let index = ids.iter().position(|name| *name == id)?;
+    Some(IMAGES.get_or_init(|| {
+        let bytes: [&[u8]; 7] = [
+            include_bytes!("../assets/stages/dojo.png"),
+            include_bytes!("../assets/stages/neon.png"),
+            include_bytes!("../assets/stages/bamboo.png"),
+            include_bytes!("../assets/stages/plains.png"),
+            include_bytes!("../assets/stages/spirit.png"),
+            include_bytes!("../assets/stages/volcano.png"),
+            include_bytes!("../assets/stages/brazil.png"),
+        ];
+        bytes.iter().map(|data| {
+            let png = ume_formats::png::decode_png(data).expect("embedded stage PNG");
+            ImageData::new(png.width, png.height, png.rgba.expect("truecolor stage PNG"))
+        }).collect()
+    })[index].clone())
+}
+
+fn illustrated(id: &str, name: &str, music: u32, kind: StageKind) -> Stage {
+    Stage { info: info(name), art: StageArt::Illustrated { image: illustration(id).expect("builtin stage image") }, music, kind, bgm: None }
+}
+
 pub struct StageEntry { pub id: String, pub name: String, pub thumb: [[u8; 3]; 3], pub build: Box<dyn Fn() -> Stage> }
 
 pub fn builtin() -> Vec<StageEntry> {
     vec![
-        StageEntry { id: "dojo".into(), name: "Telhado do Dojo — Pôr do Sol".into(), thumb: [[42, 30, 92], [212, 80, 122], [255, 154, 74]], build: Box::new(dojo) },
-        StageEntry { id: "neon".into(), name: "Neo-Metrópole 2099".into(), thumb: [[5, 3, 15], [29, 11, 58], [255, 47, 208]], build: Box::new(neon) },
-        StageEntry { id: "bamboo".into(), name: "Bambuzal ao Luar".into(), thumb: [[4, 16, 28], [18, 58, 74], [44, 106, 106]], build: Box::new(bamboo) },
-        StageEntry { id: "plains".into(), name: "Planalto Rochoso".into(), thumb: [[44, 111, 214], [140, 198, 242], [216, 176, 128]], build: Box::new(plains) },
-        StageEntry { id: "spirit".into(), name: "Portão dos Espíritos".into(), thumb: [[10, 20, 32], [29, 74, 82], [154, 208, 200]], build: Box::new(spirit) },
-        StageEntry { id: "volcano".into(), name: "Cratera Vulcânica".into(), thumb: [[18, 4, 4], [74, 14, 8], [200, 56, 26]], build: Box::new(volcano) },
+        StageEntry { id: "dojo".into(), name: "Telhado do Dojo — Pôr do Sol".into(), thumb: [[42, 30, 92], [212, 80, 122], [255, 154, 74]], build: Box::new(|| if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") { dojo() } else { illustrated("dojo", "Telhado do Dojo — Pôr do Sol", 0, StageKind::Dojo) }) },
+        StageEntry { id: "neon".into(), name: "Neo-Metrópole 2099".into(), thumb: [[5, 3, 15], [29, 11, 58], [255, 47, 208]], build: Box::new(|| if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") { neon() } else { illustrated("neon", "Neo-Metrópole 2099", 1, StageKind::Neon) }) },
+        StageEntry { id: "bamboo".into(), name: "Bambuzal ao Luar".into(), thumb: [[4, 16, 28], [18, 58, 74], [44, 106, 106]], build: Box::new(|| if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") { bamboo() } else { illustrated("bamboo", "Bambuzal ao Luar", 2, StageKind::Bamboo) }) },
+        StageEntry { id: "plains".into(), name: "Planalto Rochoso".into(), thumb: [[44, 111, 214], [140, 198, 242], [216, 176, 128]], build: Box::new(|| if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") { plains() } else { illustrated("plains", "Planalto Rochoso", 3, StageKind::Plains) }) },
+        StageEntry { id: "spirit".into(), name: "Portão dos Espíritos".into(), thumb: [[10, 20, 32], [29, 74, 82], [154, 208, 200]], build: Box::new(|| if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") { spirit() } else { illustrated("spirit", "Portão dos Espíritos", 4, StageKind::Spirit) }) },
+        StageEntry { id: "volcano".into(), name: "Cratera Vulcânica".into(), thumb: [[18, 4, 4], [74, 14, 8], [200, 56, 26]], build: Box::new(|| if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") { volcano() } else { illustrated("volcano", "Cratera Vulcânica", 5, StageKind::Volcano) }) },
+        StageEntry { id: "brazil".into(), name: "Praça do Interior — Brasil".into(), thumb: [[97, 59, 132], [238, 163, 69], [166, 106, 70]], build: Box::new(|| illustrated("brazil", "Praça do Interior — Brasil", 3, StageKind::Custom)) },
     ]
 }
 

@@ -573,6 +573,10 @@ impl App {
             let (name, th, mugen) = if i == 0 { ("Aleatório".to_string(), [[255, 47, 208], [34, 232, 255], [255, 226, 58]], false) } else { let s = &self.reg.stages[i - 1]; (s.name.clone(), s.thumb, s.mugen) };
             self.ui.gradient_v(x, y, cw, ch * 0.5, rgb(th[0]), rgb(th[1]));
             self.ui.gradient_v(x, y + ch * 0.5, cw, ch * 0.5, rgb(th[1]), rgb(th[2]));
+            if let Some(image) = i.checked_sub(1).and_then(|index| self.reg.stage_preview(index)) {
+                let texture = self.g.texture(&image, true);
+                draw_texture_ex(&texture, self.ui.x(x), self.ui.y(y), WHITE, DrawTextureParams { dest_size: Some(vec2(cw * self.ui.s, ch * self.ui.s)), source: Some(Rect::new(0.0, (image.h as f32 - image.w as f32 * ch / cw) * 0.5, image.w as f32, image.w as f32 * ch / cw)), ..Default::default() });
+            }
             self.ui.rect(x, y + ch - 30.0, cw, 30.0, Color::new(0.0, 0.0, 0.0, 0.6));
             self.ui.text(&name.chars().take(28).collect::<String>(), x + 10.0, y + ch - 9.0, 16.0, WHITE, Align::Left, true);
             if mugen { self.ui.rect(x + cw - 60.0, y + 6.0, 54.0, 16.0, hex("#22e8ff")); self.ui.text("MUGEN", x + cw - 33.0, y + 19.0, 12.0, BLACK, Align::Center, true); }

@@ -148,8 +148,11 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 let low_priority = n(m, "lowpriority", 0.0) != 0.0;
                 let stop_on_get_hit = n(m, "stopongethit", 0.0) != 0.0;
                 let stop_on_change_state = n(m, "stoponchangestate", 0.0) != 0.0;
+                let loop_start = n(m, "loopstart", 0.0).max(0.0) as u32;
+                let loop_end = n(m, "loopend", 0.0).max(0.0) as u32;
+                let loop_count = n(m, "loopcount", 0.0) as i32;
                 let f = &m.fighters[i];
-                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul, low_priority, stop_on_get_hit, stop_on_change_state };
+                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul, low_priority, stop_on_get_hit, stop_on_change_state, loop_start, loop_end, loop_count };
                 m.events.push(ev);
             }
         }

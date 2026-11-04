@@ -416,6 +416,51 @@ time = 2
 }
 
 #[test]
+fn playsnd_loop_points_and_modifysnd_retune_emit_events() {
+    let cns = "
+[Statedef 340]
+type = S
+physics = S
+
+[State 340, snd]
+type = PlaySnd
+trigger1 = Time = 0
+value = 0, 0
+channel = 2
+loop = 1
+loopstart = 100
+loopend = 500
+loopcount = 3
+
+[Statedef 341]
+type = S
+physics = S
+
+[State 341, retune]
+type = ModifySnd
+trigger1 = Time = 0
+channel = 2
+loopstart = 200
+loopend = 400
+";
+    let mut m = duel(mugen_char("a", cns), mugen_char("b", ""));
+    enter(&mut m, 0, 340);
+    m.tick(&[0, 0]);
+    let sound = m.events.iter().find_map(|e| match e {
+        ume_engine::matchs::Event::Sound { channel: 2, loop_start, loop_end, loop_count, looping, .. } => Some((*loop_start, *loop_end, *loop_count, *looping)),
+        _ => None,
+    });
+    assert_eq!(sound, Some((100, 500, 3, true)), "PlaySnd carries the loop window and count");
+    enter(&mut m, 0, 341);
+    m.tick(&[0, 0]);
+    let retune = m.events.iter().find_map(|e| match e {
+        ume_engine::matchs::Event::SoundLoop { channel: 2, start, end, .. } => Some((*start, *end)),
+        _ => None,
+    });
+    assert_eq!(retune, Some((200, 400)), "ModifySnd retunes a live channel");
+}
+
+#[test]
 fn playsnd_flags_are_exposed_for_stop_on_hit_and_state_change() {
     let cns = "
 [Statedef 400]

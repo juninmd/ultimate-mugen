@@ -105,6 +105,11 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
             let paletteless = s.palette.is_none() && s.rgba.is_none();
             if paletteless { fallback.as_deref() } else if over.is_some() && s.palette_index == target && s.group != 9000 { over.as_deref() } else { None }
         };
+        let (over_arc, fallback_arc) = (over.clone().map(Arc::new), fallback.clone().map(Arc::new));
+        let draw_palette = |s: &ume_formats::sff::DecodedSprite| -> Option<Arc<Vec<u8>>> {
+            let paletteless = s.palette.is_none() && s.rgba.is_none();
+            if paletteless { fallback_arc.clone() } else if over.is_some() && s.palette_index == target && s.group != 9000 { over_arc.clone() } else { s.palette.clone() }
+        };
         let pixels_id = |s: &ume_formats::sff::DecodedSprite| s.indexed.as_ref().map(|p| Arc::as_ptr(p) as usize).or_else(|| s.rgba.as_ref().map(|p| Arc::as_ptr(p) as usize));
         let mut owners: HashMap<(usize, usize, u32, u32), usize> = HashMap::new();
         let mut owner_of = Vec::with_capacity(unique.len());
@@ -117,7 +122,7 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
         let image_of: HashMap<usize, Arc<ImageData>> = renders.into_iter().zip(images).collect();
         for (i, s) in unique.iter().enumerate() {
             let key = (s.group, s.index);
-            if let (true, Some(px)) = (with_images, s.indexed.as_ref()) { indexed.insert(key, IndexedSprite { w: s.width, h: s.height, pixels: px.clone(), pal: shared_key(s) }); }
+            if let (true, Some(px)) = (with_images, s.indexed.as_ref()) { indexed.insert(key, IndexedSprite::new(s.width, s.height, px.clone(), shared_key(s), draw_palette(s))); }
             let image = if with_images && s.width > 0 && s.height > 0 { image_of.get(&owner_of[i]).cloned() } else { None };
             sprites.insert(key, Sprite { image, width: s.width as f32, height: s.height as f32, axis_x: s.axis_x as f32, axis_y: s.axis_y as f32, scale: 1.0 });
         }

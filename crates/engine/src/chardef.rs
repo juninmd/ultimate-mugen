@@ -100,6 +100,13 @@ impl CharDef {
     }
     pub fn c(&self, k: &str, d: f64) -> f64 { *self.constants.get(k).unwrap_or(&d) }
 
+    pub fn remap_palette(&self, sprite: (i32, i32), remap: &[(PalKey, PalKey)]) -> Option<&Arc<Vec<u8>>> {
+        let ix = self.indexed.get(&sprite)?;
+        let dst = remap.iter().rev().find(|(src, _)| *src == ix.pal)?.1;
+        if dst == ix.pal { return None; }
+        self.palettes.get(&dst)
+    }
+
     pub fn remapped(&self, sprite: (i32, i32), remap: &[(PalKey, PalKey)]) -> Option<Arc<ImageData>> {
         let ix = self.indexed.get(&sprite)?;
         let dst = remap.iter().rev().find(|(src, _)| *src == ix.pal)?.1;
@@ -123,7 +130,13 @@ impl CharDef {
 pub type PalKey = (i32, i32);
 
 #[derive(Clone, Debug)]
-pub struct IndexedSprite { pub w: u32, pub h: u32, pub pixels: Arc<Vec<u8>>, pub pal: PalKey }
+pub struct IndexedSprite { pub w: u32, pub h: u32, pub pixels: Arc<Vec<u8>>, pub pal: PalKey, pub palette: Option<Arc<Vec<u8>>>, pub id: u64 }
+
+impl IndexedSprite {
+    pub fn new(w: u32, h: u32, pixels: Arc<Vec<u8>>, pal: PalKey, palette: Option<Arc<Vec<u8>>>) -> Self {
+        IndexedSprite { w, h, pixels, pal, palette, id: IMG_ID.fetch_add(1, Ordering::Relaxed) }
+    }
+}
 
 pub fn parse_mugen_version(raw: Option<&str>) -> f32 {
     let Some(v) = raw.map(str::trim).filter(|v| !v.is_empty()) else { return 1.0 };

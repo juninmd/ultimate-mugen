@@ -4,7 +4,8 @@ use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll, Waker};
-use ume_render::RGBA_SPRITE;
+use std::sync::Arc;
+use ume_render::{PALETTE_ROWS, RGBA_SPRITE};
 
 pub use crate::PostParams;
 pub use glam::{vec2, vec3, vec4, Vec2, Vec3, Vec4};
@@ -16,10 +17,22 @@ thread_local! {
     static RNG: Cell<u64> = const { Cell::new(0x9e37_79b9_7f4a_7c15) };
     static GENERATION: Cell<u32> = const { Cell::new(0) };
     static ATLAS_FULL: Cell<bool> = const { Cell::new(false) };
+    static PALETTES_USED: Cell<u32> = const { Cell::new(0) };
+    static INDEX_GENERATION: Cell<u32> = const { Cell::new(0) };
+    static INDEX_FULL: Cell<bool> = const { Cell::new(false) };
     static KEY_QUEUE: RefCell<Vec<KeyCode>> = const { RefCell::new(Vec::new()) };
 }
 
 fn generation() -> u32 { GENERATION.with(|g| g.get()) }
+
+fn index_generation() -> u32 { INDEX_GENERATION.with(|g| g.get()) }
+
+fn reset_index_atlas(f: &mut Frame) {
+    f.gpu.index_atlas.clear();
+    PALETTES_USED.with(|p| p.set(0));
+    INDEX_GENERATION.with(|g| g.set(g.get().wrapping_add(1)));
+    INDEX_FULL.with(|a| a.set(false));
+}
 
 fn reset_atlas(f: &mut Frame) {
     f.gpu.rgba_atlas.clear();
@@ -28,7 +41,7 @@ fn reset_atlas(f: &mut Frame) {
     ATLAS_FULL.with(|a| a.set(false));
 }
 
-pub fn reset_textures() { ATLAS_FULL.with(|a| a.set(true)); }
+pub fn reset_textures() { ATLAS_FULL.with(|a| a.set(true)); INDEX_FULL.with(|a| a.set(true)); }
 
 fn with<R>(f: impl FnOnce(&mut Frame<'static>) -> R) -> R {
     let p = FRAME.with(|c| c.get());
@@ -42,6 +55,7 @@ impl Game for AsyncGame {
     fn init(&mut self, _: &mut crate::Gpu) { reset_textures(); }
     fn frame(&mut self, f: &mut Frame) {
         if ATLAS_FULL.with(|a| a.get()) { reset_atlas(f); }
+        if INDEX_FULL.with(|a| a.get()) { reset_index_atlas(f); }
         KEY_QUEUE.with(|q| { let mut q = q.borrow_mut(); q.clear(); q.extend(f.input.pressed_order.iter().filter_map(|k| KeyCode::from_winit(*k))); });
         FRAME.with(|c| c.set(f as *mut Frame as *mut ()));
         let done = match self.main.as_mut() {
@@ -200,32 +214,101 @@ pub struct DrawTextureParams { pub dest_size: Option<Vec2>, pub source: Option<R
 pub fn draw_texture(t: &Texture2D, x: f32, y: f32, c: Color) { draw_texture_ex(t, x, y, c, DrawTextureParams::default()) }
 
 pub fn draw_texture_ex(t: &Texture2D, x: f32, y: f32, c: Color, p: DrawTextureParams) {
-    let src = p.source.unwrap_or(Rect::new(0.0, 0.0, t.width(), t.height()));
-    let size = p.dest_size.unwrap_or(vec2(src.w, src.h));
     with(|f| {
         let Some(r) = t.rect(f) else { return };
-        let [aw, ah] = f.gpu.renderer.atlas_size.map(|v| v as f32);
-        let (mut u0, mut v0) = ((r.x as f32 + src.x) / aw, (r.y as f32 + src.y) / ah);
-        let (mut u1, mut v1) = ((r.x as f32 + src.x + src.w) / aw, (r.y as f32 + src.y + src.h) / ah);
-        if p.flip_x { std::mem::swap(&mut u0, &mut u1); }
-        if p.flip_y { std::mem::swap(&mut v0, &mut v1); }
-        let pivot = p.pivot.unwrap_or(vec2(x + size.x * 0.5, y + size.y * 0.5));
-        let (s, co) = p.rotation.sin_cos();
-        let corner = |cx: f32, cy: f32| {
-            let (dx, dy) = (cx - pivot.x, cy - pivot.y);
-            [pivot.x + dx * co - dy * s, pivot.y + dx * s + dy * co]
-        };
-        let (mul, add) = match p.pal_fx { Some(fx) => fx.vertex(c.to_array()), None => (c.to_array(), [0.0; 4]) };
-        let v = |pos: [f32; 2], uv: [f32; 2]| ume_render::Vertex { pos, uv, pal: RGBA_SPRITE, mul, add };
-        let verts = [
-            v(corner(x, y), [u0, v0]),
-            v(corner(x + size.x, y), [u1, v0]),
-            v(corner(x + size.x, y + size.y), [u1, v1]),
-            v(corner(x, y + size.y), [u0, v1]),
-        ];
-        let blend = f.canvas.blend;
-        f.canvas.batch.push_tris(&verts, &[0, 1, 2, 0, 2, 3], blend);
+        push_textured(f, r, RGBA_SPRITE, [t.width(), t.height()], x, y, c, p);
     })
+}
+
+pub fn draw_indexed_ex(t: &IndexedTexture, palette: &Palette, x: f32, y: f32, c: Color, p: DrawTextureParams) {
+    with(|f| {
+        let (Some(r), Some(row)) = (t.rect(f), palette.row(f)) else { return };
+        push_textured(f, r, row, [t.0.w as f32, t.0.h as f32], x, y, c, p);
+    })
+}
+
+#[allow(clippy::too_many_arguments)]
+fn push_textured(f: &mut Frame, r: ume_render::Rect, pal: u32, tex_size: [f32; 2], x: f32, y: f32, c: Color, p: DrawTextureParams) {
+    let src = p.source.unwrap_or(Rect::new(0.0, 0.0, tex_size[0], tex_size[1]));
+    let size = p.dest_size.unwrap_or(vec2(src.w, src.h));
+    let [aw, ah] = f.gpu.renderer.atlas_size.map(|v| v as f32);
+    let (mut u0, mut v0) = ((r.x as f32 + src.x) / aw, (r.y as f32 + src.y) / ah);
+    let (mut u1, mut v1) = ((r.x as f32 + src.x + src.w) / aw, (r.y as f32 + src.y + src.h) / ah);
+    if p.flip_x { std::mem::swap(&mut u0, &mut u1); }
+    if p.flip_y { std::mem::swap(&mut v0, &mut v1); }
+    let pivot = p.pivot.unwrap_or(vec2(x + size.x * 0.5, y + size.y * 0.5));
+    let (s, co) = p.rotation.sin_cos();
+    let corner = |cx: f32, cy: f32| {
+        let (dx, dy) = (cx - pivot.x, cy - pivot.y);
+        [pivot.x + dx * co - dy * s, pivot.y + dx * s + dy * co]
+    };
+    let (mul, add) = match p.pal_fx { Some(fx) => fx.vertex(c.to_array()), None => (c.to_array(), [0.0; 4]) };
+    let v = |pos: [f32; 2], uv: [f32; 2]| ume_render::Vertex { pos, uv, pal, mul, add };
+    let verts = [
+        v(corner(x, y), [u0, v0]),
+        v(corner(x + size.x, y), [u1, v0]),
+        v(corner(x + size.x, y + size.y), [u1, v1]),
+        v(corner(x, y + size.y), [u0, v1]),
+    ];
+    let blend = f.canvas.blend;
+    f.canvas.batch.push_tris(&verts, &[0, 1, 2, 0, 2, 3], blend);
+}
+
+struct IndexedInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Arc<Vec<u8>>, w: u32, h: u32 }
+
+#[derive(Clone)]
+pub struct IndexedTexture(Rc<IndexedInner>);
+
+impl IndexedTexture {
+    pub fn new(w: u32, h: u32, pixels: Arc<Vec<u8>>) -> IndexedTexture {
+        let n = (w * h) as usize;
+        let pixels = if pixels.len() == n { pixels } else { let mut v = pixels[..pixels.len().min(n)].to_vec(); v.resize(n, 0); Arc::new(v) };
+        IndexedTexture(Rc::new(IndexedInner { slot: Cell::new(None), pixels, w, h }))
+    }
+
+    fn rect(&self, f: &mut Frame) -> Option<ume_render::Rect> {
+        let gen = index_generation();
+        if let Some((g, r)) = self.0.slot.get() { if g == gen { return Some(r); } }
+        let Some(r) = f.gpu.index_atlas.alloc(self.0.w, self.0.h) else { INDEX_FULL.with(|a| a.set(true)); return None };
+        f.gpu.renderer.upload_indexed(&f.gpu.queue, r, &self.0.pixels);
+        self.0.slot.set(Some((gen, r)));
+        Some(r)
+    }
+
+    pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == index_generation()) }
+
+    pub fn prefetch(&self, max_occupancy: f32) -> bool {
+        with(|f| self.is_resident() || (f.gpu.index_atlas.occupancy() < max_occupancy && self.rect(f).is_some()))
+    }
+}
+
+struct PaletteInner { slot: Cell<Option<(u32, u32)>>, colors: Box<[[u8; 4]; 256]> }
+
+#[derive(Clone)]
+pub struct Palette(Rc<PaletteInner>);
+
+impl Palette {
+    pub fn from_rgba(pal: &[u8]) -> Palette {
+        let mut colors = Box::new([[0u8; 4]; 256]);
+        for (i, c) in colors.iter_mut().enumerate().skip(1) {
+            let at = |k: usize| pal.get(i * 4 + k).copied().unwrap_or(0);
+            *c = [at(0), at(1), at(2), 255];
+        }
+        Palette(Rc::new(PaletteInner { slot: Cell::new(None), colors }))
+    }
+
+    fn row(&self, f: &mut Frame) -> Option<u32> {
+        let gen = index_generation();
+        if let Some((g, row)) = self.0.slot.get() { if g == gen { return Some(row); } }
+        let row = PALETTES_USED.with(|p| p.get());
+        if row >= PALETTE_ROWS { INDEX_FULL.with(|a| a.set(true)); return None; }
+        PALETTES_USED.with(|p| p.set(row + 1));
+        f.gpu.renderer.set_palette(&f.gpu.queue, row, &self.0.colors);
+        self.0.slot.set(Some((gen, row)));
+        Some(row)
+    }
+
+    pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == index_generation()) }
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]

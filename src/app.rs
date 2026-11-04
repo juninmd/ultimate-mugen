@@ -4,7 +4,7 @@ use crate::controls::{nav, Controls};
 use crate::registry::Registry;
 use crate::render::{Gfx, MatchRenderer, DrawOpts};
 use crate::session::{Pilot, Session};
-use crate::settings::{Settings, FX_LEVELS, IMPACT, QUALITY, RESOLUTIONS};
+use crate::settings::{Settings, WindowWatch, FX_LEVELS, IMPACT, QUALITY, RESOLUTIONS};
 use crate::stages::Stage;
 use crate::ui::*;
 use crate::gfx::*;
@@ -98,6 +98,8 @@ pub struct App {
     sel_dwell: f32,
     stage_row: usize,
     quality_check: f32,
+    window_watch: WindowWatch,
+    window_pinned: bool,
     updater: crate::update::Checker,
     pub trans: f32,
     screen_t: f32,
@@ -145,7 +147,7 @@ impl App {
         App {
             reg, market: crate::market::Market::open(), market_ui: market::MarketUi::default(), ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, key_edit: None, move_page: 0, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
+            settings, key_edit: None, move_page: 0, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, window_watch: WindowWatch::default(), window_pinned: std::env::args().any(|a| a == "--res" || a == "--4k"), trans: 0.0, screen_t: 0.0, last_disc: None,
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -158,6 +160,11 @@ impl App {
             self.reg.unload_all();
             self.g.trim_next_frame();
         }
+    }
+    fn remember_window_size(&mut self, dt: f32) {
+        if self.window_pinned || cfg!(any(target_arch = "wasm32", target_os = "android", target_os = "ios")) { return; }
+        let (w, h) = window_size();
+        if let Some(size) = self.window_watch.observe((w as u32, h as u32), dt, self.settings.fullscreen, self.settings.window) { self.settings.window = size; self.settings.save(); }
     }
     fn toggle_fullscreen(&mut self) { self.settings.fullscreen = !self.settings.fullscreen; self.settings.apply_window(); self.settings.save(); }
 
@@ -175,6 +182,8 @@ impl App {
         self.g.begin_frame();
         self.ui.begin();
         self.g.post.level = self.settings.fx as u8;
+        set_keep_aspect(self.settings.keep_aspect);
+        set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;
         self.c.update();
         self.preview_t += get_frame_time();
@@ -194,6 +203,7 @@ impl App {
             Screen::Cutscene { .. } => self.cutscene(),
         }
         if is_key_pressed(KeyCode::F11) { self.toggle_fullscreen(); }
+        self.remember_window_size(dt);
         if is_key_pressed(KeyCode::F3) { self.settings.fps = !self.settings.fps; self.settings.save(); }
         // auto art quality follows the display (checked outside fights so live sprites are never swapped)
         self.quality_check += dt;
@@ -790,7 +800,7 @@ impl App {
     fn video_screen(&mut self) {
         let Screen::Video { mut cur } = self.screen else { return };
         let web = cfg!(target_arch = "wasm32");
-        let rows: Vec<usize> = if web { vec![0, 2, 3, 4, 5, 6] } else { vec![0, 1, 2, 3, 4, 5, 6] };
+        let rows: Vec<usize> = if web { vec![0, 2, 3, 4, 5, 6, 7, 8] } else { vec![0, 1, 2, 3, 4, 5, 6, 7, 8] };
         let mut pos = rows.iter().position(|&r| r == cur).unwrap_or(0);
         if self.c.pressed(nav::DOWN) { pos = (pos + 1) % rows.len(); self.audio.sfx("select"); }
         if self.c.pressed(nav::UP) { pos = (pos + rows.len() - 1) % rows.len(); self.audio.sfx("select"); }
@@ -800,12 +810,14 @@ impl App {
         let mut changed = false;
         match cur {
             0 if ok || dir != 0 => { self.settings.fullscreen = !self.settings.fullscreen; changed = true; }
-            1 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.res = ((self.settings.res as i32 + d).rem_euclid(RESOLUTIONS.len() as i32)) as usize; self.settings.fullscreen = false; changed = true; }
+            1 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.res = ((self.settings.res as i32 + d).rem_euclid(RESOLUTIONS.len() as i32)) as usize; self.settings.window = (0, 0); self.settings.fullscreen = false; changed = true; }
             2 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.quality = ((self.settings.quality as i32 + d).rem_euclid(QUALITY.len() as i32)) as usize; changed = true; }
             3 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.fx = ((self.settings.fx as i32 + d).rem_euclid(FX_LEVELS.len() as i32)) as usize; changed = true; }
             4 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.impact = ((self.settings.impact as i32 + d).rem_euclid(IMPACT.len() as i32)) as usize; changed = true; }
             5 if ok || dir != 0 => { self.settings.fps = !self.settings.fps; changed = true; }
-            6 if ok => { self.screen = Screen::Menu { cur: 10 }; return; }
+            6 if ok || dir != 0 => { self.settings.keep_aspect = !self.settings.keep_aspect; changed = true; }
+            7 if ok || dir != 0 => { self.settings.linear = !self.settings.linear; changed = true; }
+            8 if ok => { self.screen = Screen::Menu { cur: 10 }; return; }
             _ => {}
         }
         if changed { self.audio.sfx("select"); self.settings.apply_window(); self.settings.save(); self.apply_quality(); }
@@ -813,27 +825,29 @@ impl App {
         self.ui.text("VÍDEO", 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
         let on = |b: bool| if b { "LIGADO" } else { "DESLIGADO" };
         let q = QUALITY[self.settings.quality.min(QUALITY.len() - 1)];
-        let items: [(usize, &str, String, &str); 7] = [
+        let items: [(usize, &str, String, &str); 9] = [
             (0, "Tela cheia", on(self.settings.fullscreen).into(), "Alterna também com F11"),
             (1, "Resolução da janela", RESOLUTIONS[self.settings.res.min(RESOLUTIONS.len() - 1)].2.into(), "Até 5K · o jogo escala a imagem para qualquer tamanho"),
             (2, "Qualidade da arte", q.1.into(), "Rasteriza lutadores e cenários em maior densidade de pixels (4K = Ultra)"),
             (3, "Pós-processamento", FX_LEVELS[self.settings.fx.min(2)].into(), "Bloom, aberração cromática, vinheta, correção de cor e blur radial"),
             (4, "Efeitos de impacto", IMPACT[self.settings.impact.min(IMPACT.len() - 1)].1.into(), "Tremor, zoom e flashes (máx. 3/s) · Mínimo desliga tudo"),
             (5, "Contador de FPS", on(self.settings.fps).into(), "Alterna também com F3"),
-            (6, "Voltar", String::new(), ""),
+            (6, "Manter proporção", on(self.settings.keep_aspect).into(), "Desligado estica a imagem 16:9 até preencher a janela redimensionada"),
+            (7, "Filtro de imagem", (if self.settings.linear { "BILINEAR" } else { "PIXEL (NEAREST)" }).into(), "Suavização dos sprites ao ampliar"),
+            (8, "Voltar", String::new(), ""),
         ];
         let mut y = 120.0;
         for (id, t, v, d) in items {
             if !rows.contains(&id) { continue; }
             let f = id == cur;
-            let (x, w, h) = (160.0, 960.0, 62.0);
+            let (x, w, h) = (160.0, 960.0, 56.0);
             if self.hover_rect(x, y, w, h) && mouse_delta_position().length() > 0.0 { cur = id; }
-            if self.clicked_rect(x, y, w, h) { cur = id; self.screen = Screen::Video { cur }; if id == 6 { self.screen = Screen::Menu { cur: 10 }; return; } }
+            if self.clicked_rect(x, y, w, h) { cur = id; self.screen = Screen::Video { cur }; if id == 8 { self.screen = Screen::Menu { cur: 10 }; return; } }
             self.ui.rect(x, y, w, h, if f { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) });
-            self.ui.text(t, x + 24.0, y + 30.0, 26.0, WHITE, Align::Left, true);
-            self.ui.text(d, x + 24.0, y + 52.0, 16.0, if f { WHITE } else { hex("#a49cc0") }, Align::Left, false);
-            if !v.is_empty() { self.ui.text(&format!("‹ {v} ›"), x + w - 24.0, y + 40.0, 24.0, hex("#ffcc33"), Align::Right, true); }
-            y += 72.0;
+            self.ui.text(t, x + 24.0, y + 27.0, 25.0, WHITE, Align::Left, true);
+            self.ui.text(d, x + 24.0, y + 47.0, 16.0, if f { WHITE } else { hex("#a49cc0") }, Align::Left, false);
+            if !v.is_empty() { self.ui.text(&format!("‹ {v} ›"), x + w - 24.0, y + 36.0, 24.0, hex("#ffcc33"), Align::Right, true); }
+            y += 64.0;
         }
         let (pw, ph) = ((screen_width() * dpi_scale()) as i32, Settings::physical_h() as i32);
         self.ui.text(&format!("Tela atual: {pw}×{ph} · arte rasterizada a {:.1}× · {} lutadores · {} cenários", ume_engine::native::rig::art_res(), self.reg.chars.len(), self.reg.stages.len()), 160.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);

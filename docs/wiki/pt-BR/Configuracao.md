@@ -12,6 +12,13 @@ Fica ao lado do executável e é gravado pelo menu **Vídeo**. Pode ser editado 
 | `fps` | `0` / `1` | Mostra FPS |
 | `fx` | `0` a `2` | Pós-processamento (bloom, vinheta etc.) |
 | `impact_lv` | `0` mínimo (fotossensibilidade), `1` reduzido, `2` normal, `3` intenso | Força dos efeitos de impacto |
+| `keep_aspect` | `1` (padrão) / `0` | `1` coloca barras pretas e mantém a imagem 16:9 em qualquer janela; `0` estica a imagem até preencher a janela |
+| `filter` | `nearest` (padrão) / `linear` | Amostragem dos sprites ao ampliar: pixels nítidos ou suavização bilinear |
+| `window` | `LARGURAxALTURA`, `0x0` sem valor | Tamanho da janela, gravado automaticamente cerca de um segundo depois de parar de redimensionar; vale mais que `res` até você escolher um tamanho no menu Vídeo |
+
+## Janela redimensionável
+
+A janela pode ser arrastada para qualquer tamanho. O jogo desenha em um espaço lógico fixo 16:9 que é escalado para a janela, então a área de luta, o HUD e os menus ficam consistentes em todos os tamanhos e o tamanho da janela é independente da resolução do jogo. Com **Manter proporção** ligado, a sobra fica preta; desligado, a imagem é esticada e o mouse e o toque são mapeados de volta ao espaço esticado. A flag `--res LxA` continua definindo o tamanho inicial e tem prioridade sobre o valor salvo em `window`.
 
 ## Linha de comando
 

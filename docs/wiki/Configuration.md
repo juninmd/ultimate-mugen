@@ -12,6 +12,13 @@ Lives next to the executable and is written by the **Video** menu. It can be edi
 | `fps` | `0` / `1` | Show FPS |
 | `fx` | `0` to `2` | Post-processing (bloom, vignette, etc.) |
 | `impact_lv` | `0` minimum (photosensitivity), `1` reduced, `2` normal, `3` intense | Impact effect strength |
+| `keep_aspect` | `1` (default) / `0` | `1` letterboxes the 16:9 picture inside any window shape; `0` stretches it to fill the window |
+| `filter` | `nearest` (default) / `linear` | Sprite sampling when scaled: crisp pixels or bilinear smoothing |
+| `window` | `WIDTHxHEIGHT`, `0x0` when unset | Windowed size, saved automatically about one second after you stop resizing; overrides `res` until you pick a size in the Video menu |
+
+## Resizable window
+
+The window can be dragged to any size. The game draws into a fixed 16:9 logical space that is scaled to the window, so the fight area, HUD and menus stay consistent at every size and the window size is independent from the game resolution. With **Keep aspect** on, the unused strip is black; with it off, the picture is stretched and mouse and touch input are mapped back to the stretched space. The `--res WxH` flag still sets the starting window size and takes priority over the saved `window` value.
 
 ## Command line
 

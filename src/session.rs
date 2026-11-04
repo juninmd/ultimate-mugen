@@ -193,6 +193,10 @@ impl Session {
         let roots = self.m.root_indices();
         self.pilots.iter().enumerate().filter(|(_, p)| matches!(p, Pilot::Human(_))).filter_map(|(slot, _)| roots.get(slot).map(|&fi| self.m.fighters[fi].id)).collect()
     }
+    pub fn cpu_ids(&self) -> Vec<u32> {
+        let roots = self.m.root_indices();
+        self.pilots.iter().enumerate().filter(|(_, p)| matches!(p, Pilot::Cpu(_))).filter_map(|(slot, _)| roots.get(slot).map(|&fi| self.m.fighters[fi].id)).collect()
+    }
     /// Parallel teams: hand your controller to the next living teammate (Tab / automatically when yours falls).
     pub fn switch_control(&mut self) {
         let roots = self.m.root_indices();
@@ -238,7 +242,8 @@ impl Session {
         self.hud.replay = self.is_replay;
         self.hud.inputs = if self.m.training { self.inputs.clone() } else { vec![] };
         self.vfx.draw_cinema_bars(ui);
-        self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human);
+        let cpu = self.cpu_ids();
+        self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human, &cpu);
         self.vfx.draw_banners(ui);
     }
 }

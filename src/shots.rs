@@ -90,6 +90,52 @@ async fn team_fight(app: &mut App, dir: &str, name: &str, simul: bool, n: usize,
     app.team = None;
 }
 
+async fn duel(app: &mut App, dir: &str, name: &str, mode: Mode, ticks: usize) {
+    app.mode = mode; app.team = None;
+    app.sel = (find(app, "kaito"), find(app, "shion"), stage(app, "dojo"));
+    app.start_fight().await;
+    {
+        let App { session, c, audio, .. } = app;
+        let s = session.as_mut().unwrap();
+        for _ in 0..ticks { s.step_visual(c, audio); }
+        s.m.fighters[1].life *= 0.55;
+        for f in s.m.fighters.iter_mut() { f.power = 1400.0; }
+    }
+    snap(app, dir, name, |a| a.draw_session_only()).await;
+}
+
+async fn team_win(app: &mut App, dir: &str, name: &str, simul: bool, n: usize) {
+    let (a_ids, b_ids) = (["kaito", "akio", "lian", "daichi", "jin"], ["suzume", "bruno", "sylene", "garan", "marlow"]);
+    let a: Vec<usize> = a_ids.iter().take(n).map(|i| find(app, i)).collect();
+    let b: Vec<usize> = b_ids.iter().take(n).map(|i| find(app, i)).collect();
+    let mut t = Team::new(a.clone(), b.clone(), simul);
+    let foe = if simul { 0 } else { t.ko[1][0] = true; t.idx[1] = 1; 1 };
+    let cur = if simul { 0 } else { t.idx[0] = 2; t.ko[0][0] = true; t.ko[0][1] = true; 2 };
+    app.mode = if simul { Mode::TeamSimul } else { Mode::TeamSeq };
+    app.sel = (a[cur], b[foe], stage(app, "plains"));
+    app.team = Some(t);
+    app.start_fight().await;
+    {
+        let App { session, c, audio, .. } = app;
+        let s = session.as_mut().unwrap();
+        for _ in 0..600 { if s.m.round_state == 2 { break; } s.step_visual(c, audio); }
+        for f in s.m.fighters.iter_mut().filter(|f| f.side == 1 && !f.is_helper) { f.life = 0.0; }
+        for _ in 0..1500 { s.step_visual(c, audio); if s.m.round_state == 4 && s.m.round_time > 30 { break; } }
+    }
+    snap(app, dir, name, |a| a.draw_session_only()).await;
+    app.team = None;
+}
+
+async fn hud_tour(app: &mut App, dir: &str) {
+    duel(app, dir, "h1-p1-vs-cpu", Mode::Cpu, 330).await;
+    duel(app, dir, "h2-p1-vs-p2", Mode::Versus, 330).await;
+    team_fight(app, dir, "h3-3v3-parallel", true, 3, "neon", 330, true).await;
+    team_fight(app, dir, "h4-5v5-parallel", true, 5, "plains", 330, true).await;
+    team_fight(app, dir, "h5-5v5-sequence", false, 5, "volcano", 200, true).await;
+    team_win(app, dir, "h6-team-win-parallel", true, 5).await;
+    team_win(app, dir, "h7-team-win-sequence", false, 5).await;
+}
+
 /// Story / cinematic features: face-off, awakening, defeats, boss, cutscenes, zoomed-out 5v5.
 async fn story(app: &mut App, dir: &str) {
     // "CHEFE FINAL" banner right when the boss fight starts (the face-off ends ~270 ticks in)
@@ -172,6 +218,7 @@ pub async fn run(app: &mut App, dir: &str) {
         screen(app, dir, "stage-select", 8).await;
         return;
     }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") { hud_tour(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stages") { app.screen = Screen::Fight; crate::stage_tour::run(app, dir).await; return; }
     app.screen = Screen::Title;
     screen(app, dir, "01-title", 30).await;

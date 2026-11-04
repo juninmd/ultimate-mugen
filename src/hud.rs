@@ -15,7 +15,7 @@ impl Hud {
     /// Test/demo hook: pretend a combo just finished (shows in the training "last combo" line).
     pub fn inject_last_combo(&mut self, hits: i32, dmg: f32) { self.combo[0] = (hits, dmg, 0); }
 
-    pub fn draw(&mut self, ui: &Ui, g: &mut Gfx, m: &Match, gt: f32, team: Option<&TeamInfo>, human: &[u32]) {
+    pub fn draw(&mut self, ui: &Ui, g: &mut Gfx, m: &Match, gt: f32, team: Option<&TeamInfo>, human: &[u32], cpu: &[u32]) {
         // the world may be zoomed out (big teams) — the HUD always lays out on the base 426×240 view
         g.fit(BASE_W, BASE_H);
         let s = g.view_scale;
@@ -87,7 +87,7 @@ impl Hud {
                 // portrait (octagonal frame)
                 let pc = p(if side == 0 { 12.0 } else { w - 12.0 }, y + 19.0);
                 portrait(g, f, pc, 11.0 * s, side, s, if low { hex("#ff4d4d") } else if human.contains(&f.id) { gold } else { hex("#d8dcf0") });
-                if human.contains(&f.id) { text(if side == 0 { "P1" } else { "P2" }, if side == 0 { 12.0 } else { w - 12.0 }, y + 36.0, 5.5, gold, Align::Center, true); }
+                if let Some((tag, tc)) = side_tag(f.id, side, human, cpu) { outlined(tag, if side == 0 { 12.0 } else { w - 12.0 }, y + 37.0, 6.0, if tc { gold } else { hex("#c9cde6") }, Align::Center); }
                 // name plate: slanted polygon fading out from the portrait side, in the character colour
                 let nx = if side == 0 { x + 16.0 } else { x + bw - 16.0 };
                 let al = if side == 0 { Align::Left } else { Align::Right };
@@ -155,9 +155,9 @@ impl Hud {
             for f in &partners {
                 let side = f.side.min(1);
                 let j = col_idx[side]; col_idx[side] += 1;
-                let (tw, gap) = (19.0, 3.0);
-                let tx = if side == 0 { 10.0 + j as f32 * (tw + gap) } else { w - 10.0 - tw - j as f32 * (tw + gap) };
-                let ty = 35.0;
+                let (tw, gap) = (TILE_W, TILE_GAP);
+                let tx = if side == 0 { ROW_X + j as f32 * (tw + gap) } else { w - ROW_X - tw - j as f32 * (tw + gap) };
+                let ty = 34.0;
                 let c = p(tx + tw / 2.0, ty + tw / 2.0);
                 let ratio = (f.life / f.life_max).clamp(0.0, 1.0);
                 let mine = human.contains(&f.id);
@@ -188,7 +188,7 @@ impl Hud {
                     for (k, (name, col)) in t.names[side].iter().enumerate() {
                         let ko = t.ko[side].get(k).copied().unwrap_or(false);
                         let cur = t.idx[side] == k;
-                        let x = if side == 0 { 10.0 + k as f32 * 15.0 } else { w - 10.0 - 13.0 - k as f32 * 15.0 };
+                        let x = if side == 0 { ROW_X - 1.5 + k as f32 * 15.0 } else { w - ROW_X + 1.5 - 13.0 - k as f32 * 15.0 };
                         let c = p(x + 6.5, 45.5);
                         let col = if ko { Color::from_rgba(70, 70, 80, 255) } else { Color::from_rgba(col[0], col[1], col[2], 255) };
                         draw_circle(c.x, c.y, (if cur { 7.2 } else { 5.6 }) * s, col);
@@ -196,6 +196,13 @@ impl Hud {
                         if ko { let r = 3.2 * s; draw_line(c.x - r, c.y - r, c.x + r, c.y + r, 1.6 * s, Color::new(1.0, 0.3, 0.3, 0.95)); draw_line(c.x - r, c.y + r, c.x + r, c.y - r, 1.6 * s, Color::new(1.0, 0.3, 0.3, 0.95)); } else { text(name.chars().next().map(|_| &name[..name.chars().next().unwrap().len_utf8()]).unwrap_or("?"), x + 6.5, 47.9, if cur { 7.0 } else { 5.5 }, WHITE, Align::Center, true); }
                     }
                 }
+            }
+            for side in 0..2 {
+                let Some(lead) = team_label(m, team, side) else { continue };
+                let n = if team.is_some_and(|t| !t.simul) { team.map_or(0, |t| t.names[side].len()) as f32 * 15.0 - 2.0 } else { partners.iter().filter(|f| f.side.min(1) == side).count() as f32 * (TILE_W + TILE_GAP) - TILE_GAP };
+                let off = ROW_X + n.max(0.0) + 4.0;
+                let (x, al) = if side == 0 { (off, Align::Left) } else { (w - off, Align::Right) };
+                outlined(&format!("TIME {lead}"), x, 46.0, 6.4, if side == 0 { hex("#22e8ff") } else { hex("#ff4d6d") }, al);
             }
             // timer
             let (cx, cy) = (w / 2.0, 18.0);
@@ -210,6 +217,8 @@ impl Hud {
             let urgent = !m.training && m.timer > 0 && m.timer <= 10 * 60;
             let pulse = if urgent { 1.0 + 0.18 * (1.0 - ((m.timer % 60) as f32 / 60.0)) } else { 1.0 };
             text(&t, cx, cy + 5.0 * pulse, 14.0 * pulse, if urgent { hex("#ff4d4d") } else { WHITE }, Align::Center, true);
+            let team_rows = !partners.is_empty() || team.is_some();
+            let cy0 = if team_rows { 14.0 } else { 0.0 };
             // combos
             for (side, att) in roots.iter().enumerate().take(2) {
                 let def = roots[1 - side];
@@ -226,16 +235,16 @@ impl Hud {
                 let col = Color::new(1.0, 0.75 - 0.5 * heat, 0.25 - 0.1 * heat, a);
                 let sc = 1.0 + 0.55 * self.pop[side] * self.pop[side];
                 let ax = if side == 0 { x - 6.0 } else { x + 6.0 };
-                for k in 0..3 { let ww = (60.0 - k as f32 * 14.0) * (0.6 + 0.4 * a); let o = if side == 0 { 0.0 } else { -ww }; let a0 = p(ax + o, 58.0 + k as f32 * 3.0); draw_rectangle(a0.x, a0.y, ww * s, 1.2 * s, Color::new(1.0, 0.7, 0.2, a * (0.5 - 0.15 * k as f32))); }
-                outlined(&c.0.to_string(), x, 80.0 + 4.0 * (sc - 1.0), 24.0 * sc, col, al);
-                outlined("HITS", x, 90.0, 9.0, Color::new(1.0, 1.0, 1.0, a), al);
-                outlined(&format!("{} DMG", c.1 as i32), x, 99.0, 6.5, Color::new(1.0, 0.9, 0.6, a), al);
+                for k in 0..3 { let ww = (60.0 - k as f32 * 14.0) * (0.6 + 0.4 * a); let o = if side == 0 { 0.0 } else { -ww }; let a0 = p(ax + o, cy0 + 58.0 + k as f32 * 3.0); draw_rectangle(a0.x, a0.y, ww * s, 1.2 * s, Color::new(1.0, 0.7, 0.2, a * (0.5 - 0.15 * k as f32))); }
+                outlined(&c.0.to_string(), x, cy0 + 80.0 + 4.0 * (sc - 1.0), 24.0 * sc, col, al);
+                outlined("HITS", x, cy0 + 90.0, 9.0, Color::new(1.0, 1.0, 1.0, a), al);
+                outlined(&format!("{} DMG", c.1 as i32), x, cy0 + 99.0, 6.5, Color::new(1.0, 0.9, 0.6, a), al);
                 // modern-fighter proration: the next hit of this combo is worth this much
                 if att.def.source == ume_engine::chardef::Source::Native {
                     let pct = (ume_engine::matchs::combo_scale(c.0) * 100.0).round() as i32;
-                    let tag = [poly_pt(p, x - if side == 0 { 2.0 } else { 52.0 }, 102.0), poly_pt(p, x + if side == 0 { 52.0 } else { 2.0 }, 102.0), poly_pt(p, x + if side == 0 { 49.0 } else { -1.0 }, 108.5), poly_pt(p, x - if side == 0 { 5.0 } else { 49.0 }, 108.5)];
+                    let tag = [poly_pt(p, x - if side == 0 { 2.0 } else { 52.0 }, cy0 + 102.0), poly_pt(p, x + if side == 0 { 52.0 } else { 2.0 }, cy0 + 102.0), poly_pt(p, x + if side == 0 { 49.0 } else { -1.0 }, cy0 + 108.5), poly_pt(p, x - if side == 0 { 5.0 } else { 49.0 }, cy0 + 108.5)];
                     poly::grad_h(&tag, Color::new(0.5, 0.1, 0.1, 0.8 * a), Color::new(0.1, 0.02, 0.05, 0.5 * a));
-                    text(&format!("DANO {pct}%"), x + if side == 0 { 1.0 } else { -1.0 }, 107.0, 5.2, Color::new(1.0, 0.8, 0.75, a), al, true);
+                    text(&format!("DANO {pct}%"), x + if side == 0 { 1.0 } else { -1.0 }, cy0 + 107.0, 5.2, Color::new(1.0, 0.8, 0.75, a), al, true);
                 }
             }
         }
@@ -355,6 +364,21 @@ fn face_off_line(f: &Fighter, answer: bool) -> String {
     const B: [&str; 5] = ["Só isso?", "Você não me assusta.", "Venha com tudo!", "Hmpf... entediante.", "Vai se arrepender."];
     let h = f.def.display_name.bytes().fold(7usize, |a, b| a.wrapping_mul(31).wrapping_add(b as usize));
     (if answer { B } else { A })[h % 5].to_string()
+}
+
+const ROW_X: f32 = 27.0;
+const TILE_W: f32 = 17.0;
+const TILE_GAP: f32 = 3.0;
+
+fn side_tag(id: u32, side: usize, human: &[u32], cpu: &[u32]) -> Option<(&'static str, bool)> {
+    if human.contains(&id) { return Some((if side == 0 { "P1" } else { "P2" }, true)); }
+    if cpu.contains(&id) { return Some(("CPU", false)); }
+    None
+}
+
+fn team_label(m: &Match, team: Option<&TeamInfo>, side: usize) -> Option<String> {
+    if let Some(n) = team.and_then(|t| t.names[side].first()) { if team.is_some_and(|t| t.names[side].len() > 1) { return Some(n.0.clone()); } }
+    m.team_leader(side)
 }
 
 fn shade_gold() -> Color { hex("#7a5208") }

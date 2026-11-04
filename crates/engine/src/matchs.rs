@@ -110,6 +110,7 @@ pub struct Match {
     pub round_state: i32, pub round_no: i32, pub round_time: i32,
     /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
     pub team_simul: bool,
+    pub team_lead: [String; 2],
     /// how many times an attacker was pushed back because the defender was cornered (diagnostics / tests)
     pub corner_pushes: u32,
     /// extra ticks the first round waits before "FIGHT!" so the fighters can face off / trade lines (0 = none)
@@ -136,7 +137,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
@@ -154,6 +155,16 @@ impl Match {
         self.fighters.len() - 1
     }
     pub fn roots(&self) -> impl Iterator<Item = &Fighter> { self.fighters.iter().filter(|f| !f.is_helper) }
+    pub fn team_leader(&self, side: usize) -> Option<String> {
+        if let Some(n) = self.team_lead.get(side).filter(|n| !n.is_empty()) { return Some(n.to_uppercase()); }
+        let mut members = self.roots().filter(|f| f.side == side);
+        let first = members.next()?;
+        members.next().map(|_| first.def.display_name.split_whitespace().next().unwrap_or("").to_uppercase())
+    }
+    pub fn winner_text(&self, side: usize) -> String {
+        if let Some(lead) = self.team_leader(side) { return format!("TEAM {lead} WINS"); }
+        self.roots().find(|f| f.side == side).map(|f| format!("{} WINS", f.def.display_name.to_uppercase())).unwrap_or_else(|| "DRAW".into())
+    }
     pub fn root_index_buf(&self) -> ([usize; 32], usize) {
         let mut buf = [0usize; 32];
         let mut n = 0;
@@ -553,8 +564,8 @@ impl Match {
                         self.change_state(i, no, d);
                     }
                     if self.winner_side >= 0 { self.wins[self.winner_side as usize] += 1; }
-                    let w = self.roots().find(|f| f.side as i32 == self.winner_side).map(|f| f.def.display_name.to_uppercase());
-                    self.announce = Some(Announce { text: w.map(|n| format!("{n} WINS")).unwrap_or("DRAW".into()), time: 150, total: 150 });
+                    let text = if self.winner_side >= 0 { self.winner_text(self.winner_side as usize) } else { "DRAW".into() };
+                    self.announce = Some(Announce { text, time: 150, total: 150 });
                     self.events.push(Event::RoundEnd(self.winner_side));
                 }
             }

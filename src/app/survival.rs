@@ -1,5 +1,5 @@
 //! Survival mode: endless opponents, escalating AI, partial life recovery and a score.
-use crate::app::{App, Mode, Screen};
+use crate::app::{App, Mode, Screen, Team};
 use crate::controls::nav;
 use crate::gfx::*;
 use crate::settings::SURVIVAL_RECOVERY;
@@ -47,12 +47,12 @@ impl App {
     }
 
     /// Called when the player confirms a character in the Survival select screen.
-    pub(crate) fn survival_begin(&mut self, me: usize) {
+    pub(crate) fn survival_begin(&mut self, me: usize, mate: Option<usize>) {
         self.survival = Some(Survival::default());
         self.sel.0 = me;
-        self.sel.1 = self.survival_opponent(me, None);
+        self.sel.1 = self.survival_opponent(me, mate);
         self.arcade = None;
-        self.team = None;
+        self.team = mate.map(|m| Team::new(vec![me, m], vec![self.sel.1], true));
         self.team_pick.clear();
         self.ending_shown = false;
         self.screen = Screen::Stages { cur: 1 };
@@ -72,6 +72,7 @@ impl App {
         let round = s.round;
         let me = self.sel.0;
         self.sel.1 = self.survival_opponent(me, Some(self.sel.1));
+        if let Some(t) = self.team.as_mut() { t.members[1] = vec![self.sel.1]; }
         self.sel.2 = (self.sel.2 + 3 + round) % self.reg.stages.len().max(1);
         self.session = None;
         self.audio.stop_music();
@@ -120,6 +121,7 @@ impl App {
                     self.replaying = None;
                     self.survival = Some(Survival::default());
                     self.sel.1 = self.survival_opponent(self.sel.0, None);
+                    if let Some(t) = self.team.as_mut() { t.members[1] = vec![self.sel.1]; }
                     self.screen = Screen::Vs { t: 0.0, step: 0 };
                 }
                 "Ver replay" => { self.screen = Screen::Results { winner: 1, cur: 0 }; }

@@ -23,6 +23,22 @@ O menu principal oferece lutas individuais (Arcade, Versus CPU, 2 Jogadores, Tre
 
 Estatísticas de pontuação usadas: `Fighter::score` e `Fighter::score_total`, preenchidas por `HitDef.score` e pelos controladores `ScoreAdd`/`TargetScoreAdd` e lidas pelos triggers `Score`/`ScoreTotal`.
 
+## Cooperativo de 2 jogadores (Arcade e Sobrevivência)
+
+Aperte `V` na tela de seleção (ou clique no botão **CO-OP 2P**) para começar Arcade ou Sobrevivência com dois
+jogadores humanos **no mesmo lado**:
+
+- P1 e P2 escolhem um lutador cada; os dois ficam em campo juntos (2 contra 1) usando o suporte a equipe simultânea
+  da engine, então pushboxes, mira e câmera normais valem.
+- O lado só perde o round/sequência quando **os dois** lutadores caem (regra de KO `team_simul`).
+- As entradas são independentes: P1 usa as teclas/controle do jogador 1, P2 as do jogador 2 (sem precisar de `Tab`).
+  O HUD marca cada lutador como `P1` / `P2` pelo slot do piloto, não pelo lado.
+- O Arcade mantém os dois lutadores pela escada e troca o oponente a cada rodada; a Sobrevivência faz o mesmo a cada onda.
+- Replays gravam os dois slots, então uma luta cooperativa se repete exatamente.
+
+Chaves da engine: `Match::team_simul`. Os slots entram intercalados (`P1`, oponente, `P2`), então `roots()[0]` e
+`roots()[2]` são o par humano.
+
 ## Equipe Tag
 
 Cada lado tem 2 ou 3 lutadores. No início de todo round só o primeiro está em campo; os outros esperam.

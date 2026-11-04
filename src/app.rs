@@ -118,6 +118,8 @@ pub struct App {
     pub team: Option<Team>,
     /// Survival run in progress (round, score, carried life)
     survival: Option<survival::Survival>,
+    /// Arcade/Survival with a second human on the same side (couch co-op)
+    pub coop: bool,
     /// last finished fight (replayable) and the replay being played now
     last_fight: Option<Replay>,
     pub replaying: Option<Replay>,
@@ -208,6 +210,7 @@ impl App {
             settings, key_edit: None, move_page: 0, pending: Pending::default(), import_jobs: vec![], window_watch: WindowWatch::default(), window_pinned: false, team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
             replay_list: vec![], replay_problems: vec![], replay_rename: None, replay_confirm: false, replay_by_name: false,
             survival: None,
+            coop: false,
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -471,6 +474,27 @@ impl App {
     /// Registry index of the arcade final boss, if present.
     fn boss_idx(&self) -> Option<usize> { (0..self.reg.chars.len()).find(|&i| self.reg.chars[i].boss && !self.reg.chars[i].broken.get()) }
 
+    /// Start an Arcade run for `me` (plus an optional second human `mate` on the same side).
+    fn arcade_start(&mut self, me: usize, mate: Option<usize>) {
+        let n = self.reg.chars.len();
+        let mut ladder: Vec<usize> = (0..n).filter(|&i| i != me && Some(i) != mate && !self.reg.chars[i].broken.get() && !self.reg.chars[i].boss).collect();
+        let seed = (get_time() * 1000.0) as usize;
+        let ll = ladder.len().max(1);
+        ladder.rotate_left(seed % ll);
+        // originals first (guaranteed to work), MUGEN fighters mixed in later rounds
+        ladder.sort_by_key(|&i| self.reg.chars[i].mugen as u8);
+        ladder.truncate(8);
+        if ladder.is_empty() { ladder.push(me); }
+        // the ladder ends with the hidden final boss
+        let has_boss = self.boss_idx().filter(|&b| b != me && Some(b) != mate).map(|b| ladder.push(b)).is_some();
+        self.sel = (me, ladder[0], self.sel.2);
+        self.team = mate.map(|m| Team::new(vec![me, m], vec![ladder[0]], true));
+        self.arcade = Some((ladder, 0));
+        self.survival = None;
+        self.ending_shown = false;
+        self.screen = if has_boss { Screen::Cutscene { kind: 0, page: 0, t: 0.0 } } else { Screen::Stages { cur: 1 } };
+    }
+
     /// Registry indices visible under the current filter (never empty).
     fn char_view(&self) -> Vec<usize> {
         let v: Vec<usize> = self.playable().into_iter().filter(|&i| match self.sel_filter { 1 => !self.reg.chars[i].mugen, 2 => self.reg.chars[i].mugen, _ => true }).collect();
@@ -487,6 +511,7 @@ impl App {
         let cols = m.div_ceil(VIEW_ROWS).clamp(6, 9);
         let total_rows = m.div_ceil(cols);
         let two = self.mode == Mode::Versus;
+        let coop_mode = self.coop && matches!(self.mode, Mode::Arcade | Mode::Survival);
         let mut confirm = false;
         let p = picking;
         let mut pos = pos_of(&view, cur[p]);
@@ -515,6 +540,7 @@ impl App {
             return;
         }
         if pos != old { cur[p] = view[pos]; self.audio.sfx("select"); }
+        if matches!(self.mode, Mode::Arcade | Mode::Survival) && is_key_pressed(KeyCode::V) { self.coop = !self.coop; self.audio.sfx("select"); }
         if self.c.pressed(nav::OK | nav::START) { confirm = true; }
         let back = self.c.pressed(nav::BACK);
         // keep the cursor row on screen
@@ -550,7 +576,7 @@ impl App {
         self.sel_buf.clear();
         if team_mode { let _ = write!(self.sel_buf, "{} {}v{}", self.mode.label(), self.team_n, self.team_n); } else { self.sel_buf.push_str(self.mode.label()); }
         self.ui.text(&self.sel_buf, 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
-        let hint = if team_mode { "Monte sua equipe · Q/E: tamanho" } else if picking == 0 { "JOGADOR 1: escolha seu lutador" } else if two { "JOGADOR 2: escolha" } else { "Escolha o oponente" };
+        let hint = if team_mode { "Monte sua equipe · Q/E: tamanho" } else if picking == 0 { "JOGADOR 1: escolha seu lutador" } else if two { "JOGADOR 2: escolha" } else if coop_mode { "JOGADOR 2 (PARCEIRO): escolha" } else { "Escolha o oponente" };
         self.ui.text(hint, VW - 40.0, 56.0, 20.0, hex("#d8d0f0"), Align::Right, false);
         if ns > 0 {
             let (sx, sy, sw, sh) = (500.0, 10.0, 280.0, 62.0);
@@ -704,6 +730,13 @@ impl App {
         }
 
         crate::menu_art::glass(&self.ui, 0.0, 652.0, VW, 68.0, 1.0);
+        if matches!(self.mode, Mode::Arcade | Mode::Survival) {
+            let (bx, by, bw, bh) = (990.0, 664.0, 250.0, 42.0);
+            let on = self.coop;
+            if self.clicked_rect(bx, by, bw, bh) { self.coop = !self.coop; self.audio.sfx("select"); }
+            self.ui.rect(bx, by, bw, bh, if on { alpha(hex("#3fa9ff"), 0.65) } else { Color::new(1.0, 1.0, 1.0, 0.08) });
+            self.ui.text(if on { "CO-OP 2P: LIGADO [V]" } else { "CO-OP 2P: DESLIGADO [V]" }, bx + bw / 2.0, by + 27.0, 15.0, WHITE, Align::Center, true);
+        }
         self.ui.rect(0.0, 652.0, VW, 1.5, alpha(accents[picking.min(1)], 0.7));
         let desc = &self.reg.chars[cur[picking]].description;
         self.ui.text(desc, VW / 2.0, 680.0, 18.0, hex("#d8d0f0"), Align::Center, false);
@@ -738,27 +771,17 @@ impl App {
                 return;
             }
             picked[picking] = Some(cur[picking]);
-            if picking == 0 && self.mode == Mode::Arcade {
-                let me = cur[0];
-                let n = self.reg.chars.len();
-                let mut ladder: Vec<usize> = (0..n).filter(|&i| i != me && !self.reg.chars[i].broken.get() && !self.reg.chars[i].boss).collect();
-                let seed = (get_time() * 1000.0) as usize;
-                let ll = ladder.len().max(1);
-                ladder.rotate_left(seed % ll);
-                // originals first (guaranteed to work), MUGEN fighters mixed in later rounds
-                ladder.sort_by_key(|&i| self.reg.chars[i].mugen as u8);
-                ladder.truncate(8);
-                if ladder.is_empty() { ladder.push(me); }
-                // the ladder ends with the hidden final boss
-                let has_boss = self.boss_idx().filter(|&b| b != me).map(|b| ladder.push(b)).is_some();
-                self.sel = (me, ladder[0], self.sel.2);
-                self.arcade = Some((ladder, 0));
-                self.ending_shown = false;
-                self.screen = if has_boss { Screen::Cutscene { kind: 0, page: 0, t: 0.0 } } else { Screen::Stages { cur: 1 } };
+            let coop = self.coop && matches!(self.mode, Mode::Arcade | Mode::Survival);
+            if picking == 0 && coop { picking = 1; }
+            else if picking == 0 && self.mode == Mode::Arcade { self.arcade_start(cur[0], None); return; }
+            else if picking == 0 && self.mode == Mode::Survival { self.survival_begin(cur[0], None); return; }
+            else if picking == 1 && coop {
+                let Some(me) = picked[0] else { self.screen = Screen::Select { cur, picking: 0, picked: [None, None] }; return };
+                if cur[1] == me { self.msg = "O parceiro precisa ser outro lutador.".into(); self.screen = Screen::Select { cur, picking: 1, picked: [Some(me), None] }; return; }
+                if self.mode == Mode::Arcade { self.arcade_start(me, Some(cur[1])); } else { self.survival_begin(me, Some(cur[1])); }
                 return;
             }
-            if picking == 0 && self.mode == Mode::Survival { self.survival_begin(cur[0]); return; }
-            if picking == 0 { picking = 1; } else { self.sel = (picked[0].unwrap(), picked[1].unwrap(), self.sel.2); self.screen = Screen::Stages { cur: self.sel.2 + 1 }; return; }
+            else if picking == 0 { picking = 1; } else { self.sel = (picked[0].unwrap(), picked[1].unwrap(), self.sel.2); self.screen = Screen::Stages { cur: self.sel.2 + 1 }; return; }
         }
         if back {
             if self.mode.is_team() && !self.team_pick.is_empty() { self.team_pick.pop(); self.screen = Screen::Select { cur, picking: 0, picked: [None, None] }; return; }
@@ -954,7 +977,9 @@ impl App {
             } };
             let mut pilots = vec![];
             let replay = self.replaying.clone();
+            let coop = self.coop && matches!(self.mode, Mode::Arcade | Mode::Survival);
             for k in 0..teams[0].len().max(teams[1].len()) { for side in 0..2 { if teams[side].get(k).is_some() { pilots.push(if k == 0 { leader(side) } else { Pilot::Cpu(Ai::new((lvl - 1).max(1), 31 + (side * 7 + k) as u32)) }); } } }
+            if coop && teams[0].len() > 1 && pilots.len() > 2 { pilots[2] = Pilot::Human(1); }
             if let Some(r) = &replay { for (slot, p) in pilots.iter_mut().enumerate() { *p = Pilot::Replay(r.rec.iter().map(|b| b.get(slot).copied().unwrap_or(0)).collect(), 0); } }
             let (simul, tag, seq) = (self.team.as_ref().is_some_and(|t| t.simul), self.team.as_ref().is_some_and(|t| t.tag), self.team.as_ref().is_some_and(|t| !t.whole_squad()));
             let life = if let Some(r) = &replay { r.life } else if self.mode == Mode::Survival { self.survival_life() } else { self.team.as_ref().filter(|t| !t.whole_squad()).map(|t| t.life).unwrap_or([1.0, 1.0]) };
@@ -963,7 +988,7 @@ impl App {
                 idx: t.idx, ko: t.ko.clone(), simul: t.whole_squad(),
             });
             self.c.clear_macros();
-            let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, tag, seq, life);
+            let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus || coop, simul, tag, seq, life);
             if let Some(t) = &info { sess.m.team_lead = [0, 1].map(|sd| t.names[sd].first().map(|n| n.0.clone()).unwrap_or_default()); }
             if let Some(t) = &info { sess.m.team_turns = seq; sess.m.team_size = [t.names[0].len(), t.names[1].len()]; sess.m.team_member = t.idx; }
             sess.team = info;
@@ -1190,6 +1215,7 @@ impl App {
                 *i += 1;
                 if *i < ladder.len() {
                     self.sel.1 = ladder[*i]; self.sel.2 = (*i * 3 + 1) % self.reg.stages.len(); self.audio.stop_music();
+                    if self.coop { if let Some(t) = self.team.as_mut() { t.members[1] = vec![ladder[*i]]; } }
                     self.screen = if Some(ladder[*i]) == boss { Screen::Cutscene { kind: 1, page: 0, t: 0.0 } } else { Screen::Vs { t: 0.0, step: 0 } };
                     return;
                 }

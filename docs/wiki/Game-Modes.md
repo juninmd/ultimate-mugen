@@ -23,6 +23,22 @@ The main menu offers single fights (Arcade, Versus CPU, 2 Players, Training, CPU
 
 Engine score stats used: `Fighter::score` and `Fighter::score_total`, filled by `HitDef.score` and the `ScoreAdd`/`TargetScoreAdd` controllers and read by the `Score`/`ScoreTotal` triggers.
 
+## Two-player co-op (Arcade and Survival)
+
+Press `V` on the character select screen (or click the **CO-OP 2P** button) to start Arcade or Survival with two
+human players **on the same side**:
+
+- P1 and P2 pick one fighter each; both are on the field together (2 versus 1) using the engine's simultaneous-team
+  support, so the normal pushboxes, targeting and camera work apply.
+- The side only loses the round/run when **both** fighters are KO'd (`team_simul` KO rule).
+- Inputs are independent: P1 uses the player-1 keys/pad, P2 the player-2 ones (`Tab` is not needed). The HUD tags
+  each fighter `P1` / `P2` by its pilot slot instead of by side.
+- Arcade keeps both fighters across the ladder and swaps the opponent each round; Survival does the same each wave.
+- Replays record both slots, so a co-op fight replays exactly.
+
+Engine switches: `Match::team_simul`. Slots are added interleaved (`P1`, opponent, `P2`), so `roots()[0]` and
+`roots()[2]` are the human pair.
+
 ## Tag team
 
 Each side lists 2 or 3 fighters. Only the first one is in play at the start of every round; the others wait on standby.

@@ -172,7 +172,7 @@ pub async fn run(app: &mut App, dir: &str) {
     screen(app, dir, "01-title", 30).await;
     let cap = |app: &mut App, s: Screen| { app.screen = s; };
     cap(app, Screen::Menu { cur: 1 });
-    screen(app, dir, "02-menu", 10).await;
+    screen(app, dir, "02-menu", 45).await;
     app.mode = Mode::Cpu;
     cap(app, Screen::Select { cur: [find(app, "kaname"), find(app, "valdric")], picking: 1, picked: [Some(find(app, "kaname")), None] });
     screen(app, dir, "03-select", 40).await;
@@ -181,7 +181,7 @@ pub async fn run(app: &mut App, dir: &str) {
     screen(app, dir, "32-team-select", 20).await;
     app.mode = Mode::Cpu; app.team_pick.clear();
     cap(app, Screen::Stages { cur: 2 });
-    screen(app, dir, "04-stages", 5).await;
+    screen(app, dir, "04-stages", 40).await;
     app.sel = (find(app, "kaito"), find(app, "garan"), 0);
     cap(app, Screen::Vs { t: 0.0, step: 0 });
     screen(app, dir, "05a-vs-loading", 3).await;
@@ -271,7 +271,7 @@ pub async fn run(app: &mut App, dir: &str) {
     }
     app.session = None;
     cap(app, Screen::Menu { cur: 3 }); frames(app, 30).await; app.trans = 0.62; screen(app, dir, "22-transition", 0).await;
-    cap(app, Screen::Video { cur: 3 }); screen(app, dir, "17-video", 5).await;
+    cap(app, Screen::Video { cur: 3 }); screen(app, dir, "17-video", 40).await;
     app.ui.begin(); app.ui.loading_screen(0.62, "Carregando lutador 2…"); get_screen_data().export_png(&format!("{dir}/18-loading.png")); println!("shot 18-loading"); next_frame().await;
     app.screen = Screen::Controls; screen(app, dir, "14-controls", 5).await;
     // phone landscape with touch controls
@@ -289,7 +289,7 @@ pub async fn run(app: &mut App, dir: &str) {
     }
     snap(app, dir, "15-mobile-fight", |a| a.draw_session_only()).await;
     app.session = None;
-    app.screen = Screen::Menu { cur: 0 }; screen(app, dir, "16-mobile-menu", 5).await;
+    app.screen = Screen::Menu { cur: 0 }; screen(app, dir, "16-mobile-menu", 45).await;
     request_new_screen_size(1280.0, 720.0);
     frames(app, 10).await;
     story(app, dir).await;

@@ -176,7 +176,7 @@ fn sound_marked_stop_on_get_hit_is_stopped_when_its_owner_is_hit() {
     let stopped = stopped_channels(&m, owner);
     assert!(stopped.contains(&3), "channel 3 stops on the hit");
     assert!(!stopped.contains(&4), "an unmarked channel keeps playing");
-    assert!(!stopped.contains(&auto), "stoponchangestate alone does not react to hits");
+    assert!(stopped.contains(&auto), "being hit changes the state, which also releases stoponchangestate sounds");
 }
 
 #[test]

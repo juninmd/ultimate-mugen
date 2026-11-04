@@ -109,6 +109,8 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         Some(PalFx::new(num("palfx.time", 0.0, 0) as i32, [num("palfx.add", 0.0, 0), num("palfx.add", 0.0, 1), num("palfx.add", 0.0, 2)], [num("palfx.mul", 256.0, 0), num("palfx.mul", 256.0, 1), num("palfx.mul", 256.0, 2)]))
     } else { None };
     let gst = num("ground.slidetime", 0.0, 0) as i32;
+    let hyper = attr_kind.iter().any(|k| k.starts_with('H'));
+    let life_mul = |name: &str| f.def.c(&format!("{}.{name}", if hyper { "super" } else { "default" }), 0.0) as f32;
     HitDefData {
         attr_state: attr_state.clone(), attr_kind: attr_kind.clone(),
         hitflag: raw("hitflag").unwrap_or("MAF".into()).to_ascii_uppercase(),
@@ -169,9 +171,12 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         guard_corner_push: if has("guard.cornerpush.veloff", 0) { num("guard.cornerpush.veloff", 0.0, 0) * l } else { ground_corner_push },
         air_guard_corner_push: if has("airguard.cornerpush.veloff", 0) { num("airguard.cornerpush.veloff", 0.0, 0) * l } else { ground_corner_push },
         target_palfx,
-        dizzy_points: num("dizzypoints", damage as f64, 0),
-        guard_points: num("guardpoints", num("damage", 0.0, 1) as f64, 0),
-        red_life: [num("redlife", damage as f64, 0), num("redlife", num("damage", 0.0, 1) as f64, 1)],
+        dizzy_points: num("dizzypoints", (life_mul("lifetodizzypointsmul") * damage) as f64, 0),
+        guard_points: num("guardpoints", (life_mul("lifetoguardpointsmul") * damage) as f64, 0),
+        red_life: [
+            num("redlife", (life_mul("lifetoredlifemul") * damage) as f64, 0),
+            num("redlife", (life_mul("lifetoredlifemul") * num("damage", 0.0, 1)) as f64, 1),
+        ],
         score: [num("score", 0.0, 0), num("score", 0.0, 1)],
         down_recover: num("down.recover", 1.0, 0) != 0.0,
         miss_on_override: num("missonoverride", 0.0, 0) != 0.0,

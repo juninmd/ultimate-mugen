@@ -459,7 +459,7 @@ impl Match {
     }
 
     fn builtin_transitions(&mut self, i: usize) {
-        if !self.fighters[i].ctrl || (self.round_state != 2 && !self.training) { return; }
+        if !self.fighters[i].ctrl || self.fighters[i].ikemen.dizzy || self.fighters[i].ikemen.guard_break || (self.round_state != 2 && !self.training) { return; }
         let cmd = |m: &Match, n: &str| m.fighters[i].cmd.active.contains(n);
         let s = self.fighters[i].state_no;
         let st = self.fighters[i].state_type;
@@ -628,6 +628,7 @@ impl Match {
                 f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false;
                 f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5];
             }
+            crate::ikemen::life::reset_for_round(self, i);
             let d = self.fighters[i].def.clone();
             self.change_state(i, 5900, d);
             self.fighters[i].ctrl = false;
@@ -849,6 +850,7 @@ impl Match {
         self.rebind();
         self.orphan_custom_states();
         self.detect_hits();
+        crate::ikemen::life::maintain(self);
         for f in self.fighters.iter_mut() {
             for o in f.hit_overrides.iter_mut() { if let Some(h) = o { if h.time > 0 { h.time -= 1; if h.time == 0 { *o = None; } } } }
         }
@@ -1217,8 +1219,6 @@ impl Match {
         let gt = self.game_time;
         let cornered = !from_proj && self.at_corner(d);
         let d_air = self.fighters[d].state_type == 'A' || self.fighters[d].air_height() < -1.0;
-        let mut dizzy_now = false;
-        let mut guard_broke = false;
         if let Some((state_no, force_air)) = overridden {
             {
                 let fd = &mut self.fighters[d];
@@ -1248,11 +1248,6 @@ impl Match {
                 let fd = &mut self.fighters[d];
                 fd.life = if hd.guard_kill && !training && !fd.has_assert(asf::NOGUARDKO) { (fd.life - dmg).max(0.0) } else { (fd.life - dmg).max(fd.life.min(1.0)) };
                 fd.received_damage += dmg; fd.received_hits += 1;
-                if !fd.has_assert(asf::NOGUARDPOINTSDAMAGE) {
-                    fd.ikemen.guard_points = (fd.ikemen.guard_points - hd.guard_points).max(0.0);
-                    if fd.ikemen.guard_points <= 0.0 { fd.ikemen.guard_break = true; guard_broke = true; }
-                }
-                fd.ikemen.red_life = (fd.life + hd.red_life[1]).min(fd.life_max).max(fd.life);
                 let gc = fd.ghv.guardcount;
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
@@ -1268,16 +1263,13 @@ impl Match {
             let st = if self.fighters[d].air_height() < -1.0 { 'A' } else { self.fighters[d].state_type };
             let dd = self.fighters[d].def.clone();
             self.change_state(d, if st == 'A' { 154 } else if st == 'C' { 152 } else { 150 }, dd);
+            let point_mul = attack_mul / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01);
+            crate::ikemen::life::apply_hit_points(self, d, hd, true, point_mul);
+            crate::ikemen::life::enter_stun_states(self, d, true);
             self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
             self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false, hd.spark_scale);
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
             if cornered && self.fighters[a].def.source == Source::Mugen && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; self.fighters[a].vel.x = corner_pushed; }
-            if guard_broke {
-                self.fighters[d].ikemen.guard_break = true;
-                let dd = self.fighters[d].def.clone();
-                if dd.states.contains_key(&5400) { self.change_state(d, 5400, dd); self.fighters[d].ikemen.guard_points = self.fighters[d].ikemen.guard_max; }
-                else if self.common.states.contains_key(&5400) { self.change_state(d, 5400, self.common.clone()); self.fighters[d].ikemen.guard_points = self.fighters[d].ikemen.guard_max; }
-            }
         } else {
             let training = self.training;
             let was_hit = self.fighters[d].move_type == 'H';
@@ -1295,11 +1287,6 @@ impl Match {
                 if (!hd.kill || training) && nl < 1.0 { nl = fd.life.min(1.0); }
                 fd.life = nl.max(0.0);
                 fd.received_damage += dmg; fd.received_hits += 1;
-                fd.ikemen.red_life = (fd.life + hd.red_life[0]).min(fd.life_max).max(fd.life);
-                if !fd.has_assert(asf::NODIZZYPOINTSDAMAGE) {
-                    fd.ikemen.dizzy_points = (fd.ikemen.dizzy_points - hd.dizzy_points).max(0.0);
-                    if fd.ikemen.dizzy_points <= 0.0 { fd.ikemen.dizzy = true; dizzy_now = true; }
-                }
                 if hd.unhittable_time > 0 { fd.unhittable = fd.unhittable.max(hd.unhittable_time); }
                 let air = fd.state_type == 'A' || fd.air_height() < -1.0;
                 let down = fd.state_type == 'L';
@@ -1340,12 +1327,9 @@ impl Match {
                 let no = if st == 'A' || st == 'L' { 5020 } else if st == 'C' && !hd.forcestand { 5010 } else { 5000 };
                 self.change_state(d, no, dd);
             }
-            if dizzy_now {
-                self.fighters[d].ikemen.dizzy = true;
-                let dd = self.fighters[d].def.clone();
-                if dd.states.contains_key(&5300) { self.change_state(d, 5300, dd); self.fighters[d].ikemen.dizzy_points = self.fighters[d].ikemen.dizzy_max; }
-                else if self.common.states.contains_key(&5300) { self.change_state(d, 5300, self.common.clone()); self.fighters[d].ikemen.dizzy_points = self.fighters[d].ikemen.dizzy_max; }
-            }
+            let point_mul = attack_mul * scale / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01);
+            crate::ikemen::life::apply_hit_points(self, d, hd, false, point_mul);
+            if hd.p2stateno < 0 { crate::ikemen::life::enter_stun_states(self, d, false); }
             if hd.p1stateno >= 0 && !from_proj { let ad = self.fighters[a].def.clone(); self.change_state(a, hd.p1stateno, ad); }
             self.add_power(a, hd.get_power); self.add_power(d, hd.give_power);
             if self.first_attack.is_none() { self.first_attack = Some(aside); }
@@ -1357,11 +1341,15 @@ impl Match {
                 fr.combo_damage = if chained { fr.combo_damage + dmg } else { dmg };
                 fr.combo_target = Some(did);
                 fr.combo_timer = COMBO_WINDOW;
-                fr.score += hd.score[0] as f64;
-                fr.score_total += hd.score[0] as f64;
+                if fr.asserts & asf::NOSCORE == 0 {
+                    fr.score += hd.score[0] as f64;
+                    fr.score_total += hd.score[0] as f64;
+                }
             }
-            self.fighters[d].score += hd.score[1] as f64;
-            self.fighters[d].score_total += hd.score[1] as f64;
+            if self.fighters[d].asserts & asf::NOSCORE == 0 {
+                self.fighters[d].score += hd.score[1] as f64;
+                self.fighters[d].score_total += hd.score[1] as f64;
+            }
             let heavy = hd.animtype >= 2 || dmg >= 70.0;
             self.spawn_spark(a, hd.spark_no, hd.spark_own, at.0, at.1, false, heavy, hd.spark_scale);
             if let Some(s) = hd.hit_sound { self.sound(a, s.0, s.1, s.2, Some(if heavy { "hitheavy" } else { "hit" })); }

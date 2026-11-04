@@ -16,6 +16,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
 | [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |
 | [AssertSpecial flags](AssertSpecial.md) | Creators | All 77 Ikemen flags and what each one does |
+| [Red life, dizzy and guard points](Life-Systems.md) | Creators | RedLife, DizzyPoints, GuardPoints, states 5300/5400 and HitDef defaults |
 | [Creating stages](Stages.md) | Creators | M.U.G.E.N `.def` stages and native stages |
 | [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
 | [Performance](Performance.md) | Developers | Parallel loading, frame pacing, benchmarks |

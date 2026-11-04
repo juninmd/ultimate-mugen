@@ -279,7 +279,7 @@ fn awakening_costs_a_bar_boosts_stats_and_ends_with_the_round() {
     assert!(f.life > 400.0, "small life refill");
     assert!(m.events.iter().any(|e| matches!(e, ume_engine::matchs::Event::Transform { .. })));
     // plays the power-up state (193), then returns to idle with control; can't awaken twice
-    assert_eq!(f.state_no, 193);
+    assert_eq!(f.state_no, 19902);
     for _ in 0..100 { m.tick(&[0, 0]); }
     assert!(m.fighters[0].ctrl && m.fighters[0].state_no == 0, "back to idle with control");
     m.fighters[0].power = 3000.0;

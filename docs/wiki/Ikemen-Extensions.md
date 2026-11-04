@@ -23,6 +23,18 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `TagOut` / `TagIn` | `self`, `stateno`, `ctrl`, `partnerstateno`, `partnerctrl` | Moves the player to or from standby (hidden, cannot be hit or pushed); `partnerstateno` swaps with the first teammate |
 | `ModifyProjectile` | `id`, `velocity`, `accel`, `velmul`, `removetime`, `projhits`, `projpriority`, `projscale` | Changes the player's live projectiles |
 | `ModifySnd` | `channel`, `pan`, `abspan`, `volumescale` | Changes sounds already playing on a channel |
+| `RunState` | `value` | Runs the controllers of state `value` (from the state owner) once, in the current tick, without changing `stateno` or `Time`; variables are shared, `persistent` and `ignorehitpause` of the inner controllers are respected, nesting stops after 8 levels |
+| `Height` | `value = top[, bottom]` | Sets the body height for the current tick (default `size.height`, bottom 0); used by player push and as the hurtbox of frames that have none |
+| `GetHitVarSet` | `hittype`, `animtype`, `airtype`, `groundtype`, `damage`, `hitcount`, `guardcount`, `hitshaketime`, `hittime`, `slidetime`, `ctrltime`, `xvel`, `yvel`, `yaccel`, `chainid`, `guarded`, `fall`, `fall.damage`, `fall.xvel`, `fall.yvel`, `fall.recover`, `fall.time`, `fall.recovertime`, `fall.kill`, `kill`, `id`, `playerno` | Writes the listed `GetHitVar` fields (`type` is spelled `hittype` because `type` names the controller); `GetHitVar(attr)` is not available yet |
+| `ModifyHitDef` | any `HitDef` parameter | Overwrites only the listed fields of the HitDef that is active; nothing happens without one |
+| `ModifyReversalDef` | any `ReversalDef` parameter, `reversal.attr` | Same for the pending `ReversalDef` |
+| `OverrideClsn` | `clsn` (1 attack, 2 hurt, default 2), `index` (-1 replaces the whole list), `value = x1, y1, x2, y2`, `time` (default 1, -1 = until replaced) | Replaces a collision box in animation units |
+| `ResizeClsn` | `clsn`, `index` (-1 = all boxes), `value = dx1, dy1, dx2, dy2`, `time` | Moves each edge of the box by the given deltas |
+| `TransformClsn` | `clsn`, `scale = sx[, sy]`, `offset = x, y`, `time` | Scales then shifts every box of that type |
+
+Collision modifiers apply in the order they were added, are replaced when the same kind of change is issued again for the same box type (and `index`), count down once per tick, and are reflected by the F2 box view. `time = -1` keeps a modifier until another one replaces it.
+
+PT-BR: `RunState` executa os controllers de outro state sem trocar de state; `Height` ajusta a altura do corpo no tick; `GetHitVarSet` grava campos do `GetHitVar` (`hittype` no lugar de `type`); `ModifyHitDef` e `ModifyReversalDef` alteram só os campos listados; `OverrideClsn`, `ResizeClsn` e `TransformClsn` (`clsn` = 1 ataque, 2 corpo) mudam as caixas de colisão e aparecem no F2.
 
 | Trigger | Returns |
 |---|---|

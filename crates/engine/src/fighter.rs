@@ -143,7 +143,7 @@ pub struct Fighter {
     pub move_contact: i32, pub move_hit: i32, pub move_guarded: i32, pub move_reversed: i32, pub hit_count: i32, pub uniq_hit_count: i32, pub uniq_hit_keys: Vec<(u32, i32)>,
     pub ghv: GetHitVars, /** juggle points already spent on this fighter in the current air combo */ pub juggle_used: i32, /** consecutive ticks without control during the fight (stuck-state watchdog) */ pub no_ctrl_ticks: i32, pub hit_pause: i32, pub hit_shake: i32, pub hit_over_time: i32, pub slide_time: i32, pub fall_time: i32,
     pub asserts: u32,
-    pub width_override: Option<(f32, f32)>, pub player_push: bool, pub screen_bound: bool, pub pos_freeze: bool, pub spr_priority: i32,
+    pub width_override: Option<(f32, f32)>, pub height_override: Option<(f32, f32)>, pub clsn_mods: Vec<crate::sctrl::clsn::ClsnMod>, pub run_state_depth: u8, pub player_push: bool, pub screen_bound: bool, pub pos_freeze: bool, pub spr_priority: i32,
     pub targets: Vec<(u32, i32)>,
     pub not_hit_by: Vec<(String, i32)>, pub hit_by: Vec<(String, i32)>,
     pub attack_mul: f32, pub defence_mul: f32,
@@ -182,7 +182,7 @@ impl Fighter {
             anim_no: -1, anim_real: -1, elem: 0, elem_time: 0, anim_elapsed: 0, anim_changed: false,
             hitdef: None, hitdef_active: false, hitdef_targets: vec![], move_contact: 0, move_hit: 0, move_guarded: 0, move_reversed: 0, hit_count: 0, uniq_hit_count: 0, uniq_hit_keys: vec![],
             ghv: GetHitVars::default(), juggle_used: 0, no_ctrl_ticks: 0, hit_pause: 0, hit_shake: 0, hit_over_time: 0, slide_time: 0, fall_time: 0, asserts: 0,
-            width_override: None, player_push: true, screen_bound: true, pos_freeze: false, spr_priority: 0, targets: vec![],
+            width_override: None, height_override: None, clsn_mods: vec![], run_state_depth: 0, player_push: true, screen_bound: true, pos_freeze: false, spr_priority: 0, targets: vec![],
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
             persist: HashMap::new(), air_jumps: 0, bind: None, palfx: None, trans: None, remap: vec![], angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
             after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), cmd: CommandState::default(),
@@ -278,21 +278,32 @@ impl Fighter {
         if let Some((_, b)) = self.width_override { return b; }
         (if self.state_type == 'A' { self.c("size.air.back", 12.0) } else { self.c("size.ground.back", 15.0) }) * self.lscl
     }
+    pub fn height_top(&self) -> f32 { self.height_override.map(|h| h.0).unwrap_or_else(|| self.c("size.height", 60.0) * self.lscl) }
+    pub fn height_bottom(&self) -> f32 { self.height_override.map(|h| h.1).unwrap_or(0.0) }
     pub fn add_power_local(&mut self, v: f32) { self.power = (self.power + v).clamp(0.0, self.power_max); }
 
     /// Collision boxes in world space (kind 1 = attack, 2 = hurt).
     pub fn boxes(&self, kind: u8) -> Vec<Box4> {
         let Some(fr) = self.frame() else { return vec![] };
         let list = if kind == 1 { &fr.clsn1 } else { &fr.clsn2 };
+        let modified;
+        let list: &[Box4] = if self.clsn_mods.iter().any(|c| c.kind == kind) { modified = crate::sctrl::clsn::apply(&self.clsn_mods, kind, list); &modified } else { list };
         let s = self.lscl * self.draw_scale[0];
         let sx = self.def.c("size.xscale", 1.0) as f32;
         let sy = self.def.c("size.yscale", 1.0) as f32;
-        list.iter().map(|b| {
+        let mut out: Vec<Box4> = list.iter().map(|b| {
             let (mut x1, mut x2) = (b[0] * sx * s, b[2] * sx * s);
             if fr.flip_h { let t = -x2; x2 = -x1; x1 = t; }
             if self.facing < 0.0 { let t = -x2; x2 = -x1; x1 = t; }
             [self.pos.x + x1, self.pos.y + b[1] * sy * s, self.pos.x + x2, self.pos.y + b[3] * sy * s]
-        }).collect()
+        }).collect();
+        if out.is_empty() && kind == 2 {
+            if let Some((top, bottom)) = self.height_override {
+                let (a, b) = (self.pos.x - self.back_width() * self.facing, self.pos.x + self.front_width() * self.facing);
+                out.push([a.min(b), self.pos.y - top, a.max(b), self.pos.y + bottom]);
+            }
+        }
+        out
     }
     pub fn has_assert(&self, f: u32) -> bool { self.asserts & f != 0 }
     /// True while nothing legitimately freezes this fighter (round running, no super pause, no hit pause/shake, not bound).

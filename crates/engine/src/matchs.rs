@@ -119,6 +119,7 @@ pub struct Match {
     pub camera: V2,
     pub camera_target_y: f32,
     pub zoom_request: Option<crate::camera::ZoomRequest>,
+    pub warnings: Vec<String>,
     pub view_w: f32, pub view_h: f32,
     /// Zoom-out for big teams: the play field is `zoom` × the base 426×240 view (so 5v5 has room to fight). Driven by `update_camera`
     /// between `zoom_min` (formation size) and `zoom_max`, depending on how far apart the fighters are.
@@ -156,7 +157,7 @@ pub struct Match {
 impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
-            fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
+            fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
@@ -412,16 +413,16 @@ impl Match {
                         f.vel.x *= fr;
                         if f.vel.x.abs() < 0.05 { f.vel.x = 0.0; }
                     }
-                    if f.pos.y > 0.0 { f.pos.y = 0.0; }
+                    if f.pos.y > f.ground_level { f.pos.y = f.ground_level; }
                     // idle/hit states with ground physics cannot hold a fighter in mid-air: let it drop back to the floor
                     // (attack states keep their scripted height, e.g. hover or teleport moves)
-                    if f.pos.y < 0.0 && f.state_type != 'A' && f.move_type != 'A' {
+                    if f.pos.y < f.ground_level && f.state_type != 'A' && f.move_type != 'A' {
                         f.vel.y = f.vel.y.max(0.0) + f.c("movement.yaccel", 0.44) * f.lscl;
                     } else if f.state_type != 'A' { f.vel.y = 0.0; }
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl;
-                    if f.pos.y >= 0.0 && f.vel.y > 0.0 { f.pos.y = 0.0; f.vel.y = 0.0; f.air_jumps = 0; if f.move_type != 'H' { land = true; } }
+                    if f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; if f.move_type != 'H' { land = true; } }
                 }
                 _ => {}
             }
@@ -499,6 +500,7 @@ impl Match {
                 let gap = if team_n[f.side.min(1)] <= 2 { 52.0 } else { 130.0 / (team_n[f.side.min(1)] - 1) as f32 };
                 f.pos = V2 { x: if f.side == 0 { p1x - gap * k } else { p2x + gap * k }, y: 0.0 };
                 f.vel = V2::default();
+                f.ground_level = 0.0;
                 f.facing = if f.side == 0 { 1.0 } else { -1.0 };
                 f.life = f.life_max; f.alive = true;
                 if f.form > 0 { f.attack_mul /= 1.3; f.defence_mul /= 1.25; f.form = 0; f.form_time = 0; }
@@ -996,7 +998,7 @@ impl Match {
         let dir = if self.fighters[d].facing == -a_facing { 1.0 } else { -1.0 };
         let gt = self.game_time;
         let cornered = !from_proj && self.at_corner(d);
-        let d_air = self.fighters[d].state_type == 'A' || self.fighters[d].pos.y < -1.0;
+        let d_air = self.fighters[d].state_type == 'A' || self.fighters[d].air_height() < -1.0;
         if let Some((state_no, force_air)) = overridden {
             {
                 let fd = &mut self.fighters[d];
@@ -1030,7 +1032,7 @@ impl Match {
                 fd.ctrl = false; fd.move_type = 'H';
             }
             if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('g', pid, gt)); } else { self.fighters[a].move_guarded = 1; self.fighters[a].hit_pause = pause_p1; }
-            let st = if self.fighters[d].pos.y < -1.0 { 'A' } else { self.fighters[d].state_type };
+            let st = if self.fighters[d].air_height() < -1.0 { 'A' } else { self.fighters[d].state_type };
             let dd = self.fighters[d].def.clone();
             self.change_state(d, if st == 'A' { 154 } else if st == 'C' { 152 } else { 150 }, dd);
             self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
@@ -1045,13 +1047,13 @@ impl Match {
             let mut dmg = (hd.damage * attack_mul * scale / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             let prev_fall = self.fighters[d].ghv.fall;
-            if was_hit && prev_fall && (self.fighters[d].state_type == 'A' || self.fighters[d].pos.y < -1.0) { self.fighters[d].juggle_used += hd.juggle; }
+            if was_hit && prev_fall && (self.fighters[d].state_type == 'A' || self.fighters[d].air_height() < -1.0) { self.fighters[d].juggle_used += hd.juggle; }
             {
                 let fd = &mut self.fighters[d];
                 let mut nl = fd.life - dmg;
                 if (!hd.kill || training) && nl < 1.0 { nl = fd.life.min(1.0); }
                 fd.life = nl.max(0.0);
-                let air = fd.state_type == 'A' || fd.pos.y < -1.0;
+                let air = fd.state_type == 'A' || fd.air_height() < -1.0;
                 let down = fd.state_type == 'L';
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
@@ -1078,7 +1080,7 @@ impl Match {
             }
             if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('h', pid, gt)); }
             else { let fa = &mut self.fighters[a]; fa.move_hit = 1; fa.hit_count += hd.num_hits; if !fa.uniq_hit_keys.contains(&(did, hd.id)) { fa.uniq_hit_keys.push((did, hd.id)); fa.uniq_hit_count += 1; } fa.hit_pause = hd.pause_p1; fa.spr_priority = hd.p1sprpriority; }
-            let st = if self.fighters[d].pos.y < -1.0 && self.fighters[d].state_type != 'L' { 'A' } else { self.fighters[d].state_type };
+            let st = if self.fighters[d].air_height() < -1.0 && self.fighters[d].state_type != 'L' { 'A' } else { self.fighters[d].state_type };
             if hd.p2stateno >= 0 {
                 let owner = if hd.p2getp1state { self.fighters[a].def.clone() } else { self.fighters[d].def.clone() };
                 let giver = if hd.p2getp1state { Some(self.fighters[a].id) } else { None };

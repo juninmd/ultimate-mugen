@@ -24,6 +24,12 @@ impl Match {
         (nearest, farthest)
     }
 
+    pub fn warn_once(&mut self, message: &str) {
+        if self.warnings.iter().any(|w| w == message) { return; }
+        eprintln!("{message}");
+        self.warnings.push(message.to_string());
+    }
+
     pub fn request_zoom(&mut self, request: ZoomRequest) { self.zoom_request = Some(request); }
 
     pub(crate) fn step_zoom(&mut self, natural: f32) -> (V2, bool) {

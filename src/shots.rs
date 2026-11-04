@@ -209,8 +209,51 @@ async fn story(app: &mut App, dir: &str) {
     }
 }
 
+async fn native_coverage(app: &mut App, dir: &str) {
+    let selected: Vec<String> = std::env::var("UME_CHARS").unwrap_or_default().split(',').filter(|id| !id.is_empty()).map(str::to_string).collect();
+    let fighters: Vec<String> = app.reg.chars.iter().filter(|fighter| !fighter.mugen).map(|fighter| fighter.id.trim_start_matches("umf:").to_string()).filter(|id| selected.is_empty() || selected.contains(id)).collect();
+    for id in fighters {
+        app.mode = Mode::Watch;
+        app.team = None;
+        app.sel = (find(app, &id), find(app, "kaito"), stage(app, "brazil"));
+        app.start_fight().await;
+        {
+            let session = app.session.as_mut().unwrap();
+            session.m.round_state = 2;
+            session.m.announce = None;
+            session.m.round_time = 300;
+            session.m.intro_ticks = 0;
+            session.m.camera.x = 0.0;
+            session.m.camera.y = 0.0;
+            for (index, fighter) in session.m.fighters.iter_mut().enumerate() {
+                fighter.pos.x = if index == 0 { -70.0 } else { 70.0 };
+                fighter.pos.y = 0.0;
+                fighter.vel.x = 0.0;
+                fighter.vel.y = 0.0;
+                fighter.change_anim(0, &fighter.def.clone(), 1);
+            }
+        }
+        snap(app, dir, &format!("height-{id}"), |app| app.draw_session_only()).await;
+        for (label, animation) in [("idle", 0), ("walk", 20), ("walk-back", 21), ("run", 100), ("damage", 5000), ("transform", 196)] {
+            let definition = app.session.as_ref().unwrap().m.fighters[0].def.clone();
+            let anim = definition.anims.get(&animation).unwrap_or_else(|| panic!("{id}: required {label} animation {animation} is missing"));
+            let count = anim.frames.len();
+            for frame in 0..count {
+                {
+                    let fighter = &mut app.session.as_mut().unwrap().m.fighters[0];
+                    fighter.change_anim(animation, &definition, 1);
+                    fighter.elem = frame;
+                    fighter.elem_time = 0;
+                }
+                snap(app, dir, &format!("pose-{id}-{label}-{frame}"), |app| app.draw_session_only()).await;
+            }
+        }
+    }
+}
+
 pub async fn run(app: &mut App, dir: &str) {
     let _ = std::fs::create_dir_all(dir);
+    if std::env::var("UME_TOUR").as_deref() == Ok("native-coverage") { native_coverage(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("mugen") { crate::mugen_tour::run(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("story") { story(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stage-select") {

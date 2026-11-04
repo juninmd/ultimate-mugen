@@ -430,7 +430,7 @@ impl App {
             if got.is_none() && !emugen && !loaded_one && !broken { got = self.reg.chars[i].load_preview(1).ok(); loaded_one = got.is_some(); }
             // MUGEN tiles use a thumbnail cached apart from the (size-capped) definition cache, decoded one per frame once the cursor rests
             if emugen && !loaded_one && !broken && self.sel_dwell > 0.15 && !self.reg.chars[i].has_portrait_attempt() { self.reg.chars[i].ensure_portrait(); loaded_one = true; }
-            let thumb = if emugen { self.reg.chars[i].portrait() } else { None };
+            let thumb = if emugen { self.reg.chars[i].portrait() } else { got.as_ref().and_then(|d| d.sprites.get(&(9000, 1)).cloned()) };
             if thumb.is_some() || got.is_some() {
                 let por = thumb.and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)));
                 if let Some((im, pw, ph)) = por {

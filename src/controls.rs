@@ -23,7 +23,6 @@ impl TouchPad {
     pub fn update(&mut self) {
         if !self.enabled { self.bits = 0; return; }
         let (btns, r, stick, sr) = Self::layout();
-        // macroquad reports touches in physical pixels while layout/screen_width() are logical (dpi-scaled)
         let dpi = dpi_scale().max(0.01);
         let all: Vec<(Vec2, bool)> = touches().iter().map(|t| (t.position / dpi, matches!(t.phase, TouchPhase::Ended | TouchPhase::Cancelled))).collect();
         let mut points: Vec<(Vec2, bool)> = all;

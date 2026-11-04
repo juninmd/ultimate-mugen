@@ -277,6 +277,15 @@ pub async fn run(app: &mut App, dir: &str) {
         return;
     }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("fx") { fx_tour(app, dir).await; return; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("menu") {
+        app.screen = Screen::Title;
+        screen(app, dir, "menu-title", 30).await;
+        for (n, cur) in [(0, 0usize), (1, 1), (2, 3), (3, 7), (4, 9)] {
+            app.screen = Screen::Menu { cur };
+            screen(app, dir, &format!("menu-{n}"), 40).await;
+        }
+        return;
+    }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") { hud_tour(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("market") { market_tour(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("pixel") { crate::pixel_tour::run(app, dir).await; return; }

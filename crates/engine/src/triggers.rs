@@ -271,11 +271,6 @@ impl<'a> Host for Ctx<'a> {
             "inrunstate" => b(matches!(f.state_no, 100 | 105)),
             "incustomstate" => b(!std::sync::Arc::ptr_eq(&f.st_def, &f.def)),
             "incustomanim" => b(!std::sync::Arc::ptr_eq(&f.anim_def, &f.def)),
-            "isasserted" => match crate::flags::lookup(raw.unwrap_or("")) {
-                Some(crate::flags::FlagTarget::Character(bit)) => b(f.asserts & bit != 0),
-                Some(crate::flags::FlagTarget::Global(bit)) => b(m.global_asserts & bit != 0),
-                None => 0.0,
-            },
             "jugglepoints" => {
                 let budget = f.last_hit_by.and_then(|id| m.idx(id)).filter(|_| f.move_type == 'H').map(|k| m.fighters[k].def.c("data.airjuggle", 15.0)).unwrap_or_else(|| f.def.c("data.airjuggle", 15.0));
                 (budget - f.juggle_used as f64).max(0.0)
@@ -349,7 +344,7 @@ impl<'a> Host for Ctx<'a> {
             "min" => a0().min(self.a(args, 1)), "max" => a0().max(self.a(args, 1)),
             "clamp" => a0().max(self.a(args, 1)).min(self.a(args, 2)),
             "sign" => a0().signum(), "e" => std::f64::consts::E, "pi" => std::f64::consts::PI,
-            _ => crate::ikemen::introspect::trigger(self, name, args, raw).or_else(|| crate::ikemen::trigger(self, name, args)).unwrap_or_else(|| { crate::diagnostics::note_unsupported(crate::diagnostics::Category::Trigger, name); 0.0 }),
+            _ => crate::scene_triggers::trigger(self, name, args, comp, raw).or_else(|| crate::ikemen::introspect::trigger(self, name, args, raw)).or_else(|| crate::ikemen::trigger(self, name, args)).unwrap_or_else(|| { crate::diagnostics::note_unsupported(crate::diagnostics::Category::Trigger, name); 0.0 }),
         }
     }
 }

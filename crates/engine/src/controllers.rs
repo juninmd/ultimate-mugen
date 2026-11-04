@@ -263,7 +263,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                         match crate::flags::lookup(&name) {
                             Some(crate::flags::FlagTarget::Character(bit)) => m.fighters[i].asserts |= bit,
                             Some(crate::flags::FlagTarget::Global(bit)) => m.global_asserts |= bit,
-                            None => {}
+                            None => { crate::diagnostics::note_unsupported(crate::diagnostics::Category::AssertFlag, &name); }
                         }
                     }
                 }

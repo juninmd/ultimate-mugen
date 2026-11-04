@@ -158,8 +158,7 @@ impl Code {
                 self.emit(&args[2], d);
                 self.patch(jmp);
             }
-            Node::Trig { name, args, comp, raw: None } if args.len() == 1 => {
-                if name == "map" || name == "teammap" { self.host_call(n, d); return; }
+            Node::Trig { name, args, comp, raw: None } if args.len() == 1 && !matches!(name.as_str(), "isasserted" | "map" | "teammap") => {
                 self.emit(&args[0], d);
                 let o = match name.as_str() {
                     "abs" => Some(Op::Abs), "floor" => Some(Op::Floor), "ceil" => Some(Op::Ceil),

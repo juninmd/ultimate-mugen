@@ -324,7 +324,7 @@ fn is_asserted_shares_the_assert_special_table() {
     assert_eq!(ev(&m, 0, "IsAsserted(NoJump)"), 0.0);
     assert_eq!(ev(&m, 1, "IsAsserted(NoWalk)"), 0.0);
     assert_eq!(ev(&m, 0, "IsAsserted(Intro)"), 0.0);
-    m.global_asserts |= 2;
+    m.global_asserts |= ume_engine::flags::gsf::INTRO;
     assert_eq!(ev(&m, 0, "IsAsserted(Intro)"), 1.0);
     assert_eq!(ev(&m, 0, "IsAsserted(NotAFlag)"), 0.0);
 }

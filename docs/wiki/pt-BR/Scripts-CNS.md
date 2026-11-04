@@ -87,31 +87,86 @@ Extras de comando (Ikemen GO 1.0):
 
 ## State controllers suportados
 
-`AfterImage` `AfterImageTime` `AllPalFX` `AngleAdd` `AngleDraw` `AngleMul` `AngleSet` `AssertSpecial` `AttackDist` `AttackMulSet` `BGPalFX` `BindToParent` `BindToRoot` `BindToTarget` `ChangeAnim` `ChangeAnim2` `ChangeState` `CtrlSet` `DefenceMulSet` `DestroySelf` `EnvColor` `EnvShake` `Explod` `ExplodBindTime` `GameMakeAnim` `Gravity` `Helper` `HitAdd` `HitBy` `HitDef` `HitFallDamage` `HitFallSet` `HitFallVel` `HitVelSet` `LifeAdd` `LifeSet` `MakeDust` `ModifyExplod` `MoveHitReset` `NotHitBy` `PalFX` `ParentVarAdd` `ParentVarSet` `Pause` `PlayerPush` `PlaySnd` `PosAdd` `PosFreeze` `PosSet` `PowerAdd` `PowerSet` `Projectile` `RemoveExplod` `ScreenBound` `SelfState` `SprPriority` `StateTypeSet` `SuperPause` `TargetBind` `TargetDrop` `TargetFacing` `TargetLifeAdd` `TargetPowerAdd` `TargetState` `TargetVelAdd` `TargetVelSet` `Trans` `Turn` `VarAdd` `VarRandom` `VarRangeSet` `VarSet` `VelAdd` `VelMul` `VelSet` `Width`
+`AfterImage` `AfterImageTime` `AllPalFX` `AngleAdd` `AngleDraw` `AngleMul` `AngleSet` `AppendToClipboard` `AssertSpecial` `AttackDist` `AttackMulSet` `BGPalFX` `BindToParent` `BindToRoot` `BindToTarget` `ChangeAnim` `ChangeAnim2` `ChangeState` `ClearClipboard` `CtrlSet` `DefenceMulSet` `DestroySelf` `DisplayToClipboard` `DizzyPointsAdd` `DizzyPointsSet` `DizzySet` `EnvColor` `EnvShake` `Explod` `ExplodBindTime` `FallEnvShake` `ForceFeedback` `GameMakeAnim` `Gravity` `GuardBreakSet` `GuardPointsAdd` `GuardPointsSet` `Helper` `HitAdd` `HitBy` `HitDef` `HitFallDamage` `HitFallSet` `HitFallVel` `HitOverride` `HitVelSet` `LifeAdd` `LifeSet` `MakeDust` `MapAdd` `MapReset` `MapSet` `ModifyExplod` `ModifyProjectile` `ModifySnd` `MoveHitReset` `NotHitBy` `Null` `Offset` `PalFX` `ParentVarAdd` `ParentVarSet` `Pause` `PlayerPush` `PlaySnd` `PosAdd` `PosFreeze` `PosSet` `PowerAdd` `PowerSet` `Projectile` `RedLifeAdd` `RedLifeSet` `RemapPal` `RemoveExplod` `RemoveText` `ReversalDef` `RootVarAdd` `RootVarSet` `ScreenBound` `SelfState` `SndPan` `SprPriority` `StateTypeSet` `StopSnd` `SuperPause` `TagIn` `TagOut` `TargetBind` `TargetDrop` `TargetFacing` `TargetLifeAdd` `TargetPowerAdd` `TargetState` `TargetVelAdd` `TargetVelSet` `Text` `Trans` `Turn` `VarAdd` `VarRandom` `VarRangeSet` `VarSet` `VelAdd` `VelMul` `VelSet` `VictoryQuote` `Width`
 
-Também suportados: `ReversalDef` `HitOverride` `FallEnvShake` `RemapPal` `StopSnd` `SndPan` `VictoryQuote` `ForceFeedback` `Offset` `Null` `DisplayToClipboard` `AppendToClipboard` `ClearClipboard`.
+Também suportados: `Zoom` `Camera` `GroundLevelOffset` `Depth` `DepthBound` `ReversalDef` `HitOverride` `FallEnvShake` `RemapPal` `StopSnd` `SndPan` `VictoryQuote` `ForceFeedback` `Offset` `Null` `DisplayToClipboard` `AppendToClipboard` `ClearClipboard`.
+Limites dos controladores mais simples: `Offset` desloca somente o sprite desenhado, nunca as caixas de colisão nem a posição; `Null` não faz nada; `VictoryQuote` guarda o seu `value` no lutador para a apresentação da frase de vitória; `ForceFeedback` vira um evento de vibração para o personagem (`self = 1`) ou para o oponente; `StopSnd` e `SndPan` agem nos canais de som iniciados pelo personagem; `DisplayToClipboard`, `AppendToClipboard` e `ClearClipboard` guardam as últimas 10 linhas no lutador (`%d`, `%i`, `%f`, `%%`, `\n` e `\t` no texto, até 5 `params`).
 
 Notas sobre Explod: `ignorehitpause` vale 1 por padrão (use 0 para congelar junto com o hit pause do dono). `postype = left/right/front/back` e `space = screen` mantêm o explod fixo na tela enquanto a câmera se move. `ModifyExplod` aceita `vel`, `accel`, `pos`, `scale`, `bindtime`, `removetime`, `sprpriority`, `ontop`, `under`, `removeongethit`, `ignorehitpause`, `facing`, `vfacing`, `supermovetime`, `pausemovetime` e `trans`; `facing` é relativo ao dono. `ExplodBindTime` só altera o tempo de vínculo.
 
+Notas de helper: um helper congela durante `Pause` e `SuperPause`, a menos que ainda tenha ticks de `pausemovetime` / `supermovetime` ou tenha nascido com `pausebool = 1`, que o faz ignorar qualquer pausa. Helpers com `keyctrl = 1` só recebem os comandos do root enquanto o round é lutado; decidido o round, não recebem nenhum. Na tela de vitória (estado de round 4) os helpers ficam congelados e ocultos.
+
+## Controllers Ikemen, de cenário e de jogador
+
+`PlayBGM` `StopBGM` `ModifyBGM` `ModifyStageVar` `ModifyStageBG` `ModifyBGCtrl` `ModifyPlayer` `PrintToConsole` `RunState` `Height` `GetHitVarSet` `ModifyHitDef` `ModifyReversalDef` `OverrideClsn` `ResizeClsn` `TransformClsn`
+
+Parâmetros e comportamento em [Ikemen extensions](../Ikemen-Extensions.md).
+
 ## Triggers suportados
 
-`Abs` `ACos` `AILevel` `Alive` `Anim` `AnimElem` `AnimElemNo` `AnimElemTime` `AnimExist` `AnimTime` `ASin` `ATan` `AuthorName` `BackEdge` `BackEdgeBodyDist` `BackEdgeDist` `BottomEdge` `CameraPos` `CameraZoom` `CanRecover` `Ceil` `Command` `Cond` `Const` `Const240p` `Const480p` `Const720p` `Cos` `Ctrl` `DrawGame` `E` `Exp` `Facing` `Floor` `FrontEdge` `FrontEdgeBodyDist` `FrontEdgeDist` `FVar` `GameHeight` `GameTime` `GameWidth` `GetHitVar` `HitCount` `HitDefAttr` `HitFall` `HitOver` `HitPauseTime` `HitShakeOver` `HitVel` `ID` `IfElse` `InGuardDist` `IsHelper` `IsHomeTeam` `LeftEdge` `Life` `LifeMax` `Ln` `Log` `Lose` `MatchNo` `MatchOver` `MoveContact` `MoveGuarded` `MoveHit` `MoveReversed` `MoveType` `Name` `NumEnemy` `NumExplod` `NumHelper` `NumPartner` `NumProj` `NumProjID` `NumTarget` `P1Name` `P2BodyDist` `P2Command` `P2Dist` `P2Life` `P2MoveType` `P2Name` `P2StateNo` `P2StateType` `P3Name` `P4Name` `P5Name` `P6Name` `P7Name` `P8Name` `PalNo` `ParentDist` `Pi` `PlayerID` `PlayerIDExist` `Pos` `Power` `PowerMax` `PrevStateNo` `ProjContact` `ProjContactTime` `ProjGuarded` `ProjGuardedTime` `ProjHit` `ProjHitTime` `Random` `RightEdge` `RootDist` `RoundNo` `RoundsExisted` `RoundState` `ScreenPos` `SelfAnimExist` `Sin` `StageVar` `StateNo` `StateType` `SysFVar` `SysVar` `Tan` `TeamMode` `TeamSide` `TicksPerSecond` `Time` `TimeMod` `TopEdge` `UniqHitCount` `Var` `Vel` `Win`
+`Abs` `ACos` `AILevel` `Alive` `Anim` `AnimElem` `AnimElemNo` `AnimElemTime` `AnimElemVar` `AnimExist` `AnimLength` `AnimPlayerNo` `AnimTime` `ASin` `ATan` `AuthorName` `BackEdge` `BackEdgeBodyDist` `BackEdgeDist` `BottomEdge` `CameraPos` `CameraZoom` `CanRecover` `Ceil` `Clamp` `ClsnOverlap` `ClsnVar` `Command` `Cond` `Const` `Const240p` `Const480p` `Const720p` `Cos` `Ctrl` `DisplayName` `Dizzy` `DizzyPoints` `DizzyPointsMax` `DrawGame` `E` `Exp` `ExplodVar` `facing` `Floor` `FrontEdge` `FrontEdgeBodyDist` `FrontEdgeDist` `FVar` `GameHeight` `GameTime` `GameWidth` `GetHitVar` `GuardBreak` `GuardPoints` `GuardPointsMax` `HelperIndexExist` `HelperVar` `HitCount` `HitDefAttr` `HitFall` `HitOver` `HitPauseTime` `HitShakeOver` `ID` `IfElse` `IkemenVersion` `Index` `InGuardDist` `InputTime` `IsHelper` `IsHomeTeam` `LeftEdge` `Life` `LifeMax` `Ln` `Log` `Lose` `LoseKO` `LoseTime` `MajorVersion` `Map` `MatchNo` `MatchOver` `Max` `Min` `MoveContact` `MoveGuarded` `MoveHit` `MoveReversed` `MoveType` `MugenVersion` `Name` `NumEnemy` `NumExplod` `NumHelper` `NumPartner` `NumProj` `NumProjID` `NumTarget` `NumText` `P1Dist` `P1Name` `P2BodyDist` `P2Command` `P2Ctrl` `P2Dist` `P2Life` `P2MoveType` `P2Name` `P2Power` `P2StateNo` `P2StateType` `P3Name` `P4Name` `P5Name` `P6Name` `P7Name` `P8Name` `PalFXVar` `PalNo` `ParentDist` `Physics` `Pi` `PlayerIDExist` `pos` `Power` `PowerMax` `PrevStateNo` `ProjCancelTime` `ProjClsnOverlap` `ProjContact` `ProjContactTime` `ProjGuarded` `ProjGuardedTime` `ProjHit` `ProjHitTime` `ProjVar` `Random` `RandomRange` `RedLife` `RightEdge` `RootDist` `RoundNo` `RoundsExisted` `RoundState` `RunOrder` `ScreenPos` `SelfAnimExist` `SelfCommand` `Sign` `Sin` `SpritePlayerNo` `SpriteVar` `Sqrt` `Standby` `StateNo` `StateTime` `StateType` `SysFVar` `SysVar` `Tan` `TeamMap` `TeamMode` `TeamSide` `TicksPerSecond` `Time` `TimeMod` `TopEdge` `UniqHitCount` `Var` `vel` `Win` `WinKO` `WinPerfect` `WinTime` `AirJumpCount` `Alpha` `Angle` `BotBoundBodyDist` `BotBoundDist` `Const1080p` `HitByAttr` `HitDefVar` `HitOverridden` `HitVel` `InCustomAnim` `InCustomState` `InRunState` `IntroState` `IsAsserted` `JugglePoints` `LastPlayerID` `LayerNo` `LocalCoord` `MemberNo` `MoveCountered` `MoveHitVar` `NumPlayer` `NumStageBG` `OutroState` `ParentExist` `PlayerIndexExist` `PlayerNo` `PrevAnim` `PrevMoveType` `PrevStateType` `Scale` `ScreenHeight` `ScreenWidth` `SelfStateNoExist` `SprPriority` `StageBackEdgeDist` `StageBGVar` `StageConst` `StageFrontEdgeDist` `StageVar` `TeamLeader` `TeamSize` `TopBoundBodyDist` `TopBoundDist` `XAngle` `XShear` `YAngle` `ZoomVar`
 
 Notas de projétil: o projétil guarda o lado do time e o jogador raiz no momento em que nasce. Virar, ou o dono mudar de lado depois, não altera quem ele pode acertar. `NumProj` e `NumProjID` contam todos os projéteis do root do jogador, inclusive os disparados por helpers, e continuam contando depois que o helper é destruído. Um projétil cujo helper sumiu ainda acerta e é creditado ao root.
 
-Faltam (planejado): `WinKO` `WinTime` `WinPerfect` `LoseKO` `LoseTime` `ProjCancelTime` `MugenVersion`.
+Faltam (planejado): `PlayerID`.
 
-`P3Name` a `P8Name` comparam com o jogador daquele slot (ordem de slot da partida, não de lado); um slot sem jogador nunca coincide. `P2Command` lê o buffer de comandos do oponente mais próximo, como `Command` faz para o próprio personagem.
+## Triggers de borda da tela
 
-Funções extras: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
+`LeftEdge` e `RightEdge` são absolutos: sempre devolvem a borda esquerda e a direita da tela. `FrontEdge` e `BackEdge` dependem de `Facing`: quem olha para a direita lê `FrontEdge = RightEdge` e `BackEdge = LeftEdge`, e quem olha para a esquerda lê o contrário. Os quatro usam as unidades do `localcoord` do personagem e as mesmas bordas de `FrontEdgeDist` e `BackEdgeDist`, então `(FrontEdge - X) * Facing` é igual a `FrontEdgeDist` (com `X` a posição do personagem no mundo).
 
-`HitCount` soma os `numhits` de cada golpe que o atacante acerta. `UniqHitCount` conta cada par distinto `(alvo, id do HitDef)` uma única vez, então três golpes de um mesmo HitDef dão `HitCount = 3` e `UniqHitCount = 1`. Ambos são zerados juntos nas trocas de estado, a menos que `HitCountPersist = 1`.
+## Distâncias entre localcoords diferentes
 
-`GetHitVar(<nome>)` lê os dados do último golpe sofrido (após `HitDef`, defesa ou `HitOverride`). Além dos nomes do MUGEN 1.1 (`type`, `animtype`, `airtype`, `groundtype`, `damage`, `hitcount`, `guardcount`, `hitshaketime`, `hittime`, `slidetime`, `ctrltime`, `xvel`, `yvel`, `yaccel`, `chainid`, `guarded`, `fall`, `fall.*`, `kill`, `id`, `playerno`), estes nomes do Ikemen retornam valores reais: `recovertime` (ticks restantes até `fall.recovertime` permitir a recuperação, 0 fora de queda), `down.recover` (o `down.recover` do HitDef, padrão 1), `priority`, `facing` (direção do atacante, 1 ou -1), `power` (poder recebido pelo alvo), `isbound` (ao vivo, 1 enquanto o alvo está preso), `attr` (máscara de bits: S=1 C=2 A=4 L=8, NA=64 NT=128 NP=256 SA=512 ST=1024 SP=2048 HA=4096 HT=8192 HP=16384), `guardflag` (máscara de bits: H=1 L=2 A=4), `hitdamage`, `guarddamage`, `hitpower`, `guardpower`, `dizzypoints` (`dizzypoints` do HitDef, padrão o dano do golpe), `guardpoints` (`guardpoints` do HitDef, padrão o dano na defesa), `redlife` (`redlife` do HitDef, valor de golpe ou defesa), `score` (`score` do HitDef, valor de golpe ou defesa), `teamside` (lado do atacante, 1 ou 2), `projid` (-1 se não foi projétil), `playerid` (ID do atacante, igual a `id`), `p1stateno` e `p2stateno` (-1 quando o HitDef não define). Qualquer outro nome registra um aviso no stderr ao carregar a expressão e vale 0.
+Todo trigger de posição e distância converte o resultado do espaço do mundo para o localcoord do personagem que o avalia (`P2Dist`, `P2BodyDist`, `RootDist`, `ParentDist`, `ScreenPos`, `LeftEdge`/`RightEdge`/`FrontEdge`/`BackEdge` e a família `...EdgeDist`). Numa luta 1280x720 contra 320x240, o mesmo vão aparece 4 vezes maior para o personagem HD. `P2BodyDist` subtrai as larguras frontais dos dois depois de convertê-las para o mundo, então vale 0 quando as caixas se tocam, seja qual for o localcoord de cada personagem. `P2Dist` e `P2BodyDist` dependem apenas das duas posições: a câmera nunca interfere, inclusive nos estados customizados de um arremesso.
+## Zoom da câmera
+
+`Zoom` muda a escala da câmera (1 = normal, acima de 1 = mais perto). A câmera é determinística: avança um passo por tick, sem relógio.
+
+| Parâmetro | Padrão | Significado |
+| --- | --- | --- |
+| `scale` | 1 | Escala pedida |
+| `time` | 1 | Ticks em que o pedido continua ativo; dispare a cada tick para mantê-lo |
+| `delta` | 0 | Somado à escala pedida a cada tick do pedido (uma rampa) |
+| `pos` | 0, 0 | Deslocamento do foco da câmera no localcoord do jogador |
+| `lag` | 0 | 0 vai à escala pedida em um tick; valores próximos de 1 suavizam (`1 - lag` da distância restante por tick) |
+| `zoomindelay` | 0 | Ticks de espera antes de um zoom-in (`scale > 1`) começar |
+| `bound` | 1 | 1 mantém a escala dentro dos limites do cenário (`zoomin` como maior escala, `1 / zoomout` como menor, ampliada pelo zoom-out de equipes) e o deslocamento dentro dos limites do cenário; 0 só limita a escala a 0.25..4 e ignora os limites do cenário |
+
+Quando o pedido termina, a câmera volta à escala normal usando `zoominspeed` / `zoomoutspeed` do cenário.
+
+`CameraZoom` devolve a escala atual da câmera. `ZoomVar(<nome>)` expõe o estado do zoom: `scale` (atual), `target` (escala pedida), `active`, `time` (ticks restantes), `posx`, `posy`, `lag`, `delta`, `delay`, `bound`, `min` e `max` (limites de escala permitidos pelo cenário agora). Todos os nomes valem 0 (ou a escala atual em `target`) quando nenhum `Zoom` está ativo.
+
+## Controladores de câmera e nível do chão
+
+O motor é 2D, então não há eixo Z: `Pos Z`, `Vel Z` e os outros componentes Z sempre valem 0.
+
+- `Camera` (`pos`, `zoom`, `bound`, `lag`, `time`): move o foco da câmera por `pos` (localcoord do jogador) e, opcionalmente, define a escala da câmera com `zoom`. Usa o mesmo mecanismo do `Zoom` (veja acima): `bound = 1` mantém o deslocamento dentro dos limites do cenário e a escala dentro dos limites de zoom do cenário, `lag` suaviza o zoom, `time` é o número de ticks em que o pedido fica ativo. Sem `zoom`, a escala atual é mantida.
+- `GroundLevelOffset value = n`: eleva em `n` pixels o chão sob este personagem (negativo cava), que passa a ficar sobre o chão elevado com pouso, física de chão e detecção de golpe no chão/ar normais. `Pos Y` é medido a partir do chão do próprio personagem (0 enquanto está sobre ele); `ScreenPos Y` e a altura de criação de projéteis, explods e helpers incluem o deslocamento. O deslocamento zera no início do round.
+- `Depth` e `DepthBound` são aceitos mas ignorados (Z está fora do escopo); o primeiro uso imprime um aviso (`depth is accepted but ignored: the engine has no Z axis`) e o personagem não é alterado.
+
+## Triggers de tela, câmera e cenário
+
+Todas as distâncias e tamanhos usam o localcoord do jogador que avalia. Triggers "relativos ao zoom" mudam quando a câmera dá zoom (o zoom-out de 5v5, `Zoom`, `Camera`).
+
+| Trigger | Relativo ao zoom | Significado |
+| --- | --- | --- |
+| `ScreenWidth`, `ScreenHeight` | sim | Tamanho da área visível (`GameWidth` / `GameHeight` continuam devolvendo o tamanho bruto da vista em pixels do jogo) |
+| `TopBoundDist` | sim | Distância da posição do jogador até o ponto mais alto que o cenário deixa a câmera mostrar (`boundhigh`, elevado por `dynamicboundhigh`) |
+| `TopBoundBodyDist` | sim | O mesmo, menos o `size.height` do jogador (cabeça até o teto) |
+| `BotBoundDist`, `BotBoundBodyDist` | sim | Distância dos pés até o ponto mais baixo que a câmera mostra (`boundlow` mais a altura da vista); iguais porque a origem fica nos pés |
+| `StageFrontEdgeDist`, `StageBackEdgeDist` | sim | Distância até os limites laterais do cenário (`boundleft` / `boundright` ampliados por meia vista) à frente / atrás do jogador, conforme `Facing` |
+| `NumStageBG` / `NumStageBG(id)` | não | Número de camadas de fundo do cenário, opcionalmente só as com o `id` dado |
+| `StageBGVar(id, nome)` | não | Valor atual da primeira camada com esse `id`: `pos.x`, `pos.y` (início mais rolagem e senoide), `start.x/y`, `delta.x/y`, `velocity.x/y`, `tile.x/y`, `layerno`, `id`, `visible`, `enabled`, `sprite.group`, `sprite.index`; id ou nome desconhecido dá 0 |
+| `StageConst(nome)` | não | Número do grupo `[Constants]` do cenário (0 se faltar ou nos cenários nativos) |
+| `Const1080p(n)` | não | `n` convertido de um desenho com 1920 pixels de largura para o localcoord do jogador |
+| `LocalCoord X` / `LocalCoord Y` | não | Largura / altura do localcoord do jogador |
+| `Angle`, `Scale X/Y`, `Alpha X/Y`, `SprPriority`, `LayerNo` | não | O estado de desenho atual do jogador (`Alpha` é origem / destino, 256 / 0 quando opaco). `XAngle`, `YAngle` e `XShear` valem 0: o renderizador 2D não tem inclinação nem cisalhamento |
+| `ZoomVar(nome)`, `CameraZoom` | sim | Veja "Zoom da câmera" |
 
 ## Redirecionamentos
 
-`parent`, `root`, `helper(id)`, `target(id)`, `partner(n)` (o n-ésimo outro jogador não-helper do mesmo lado, padrão 0; um helper redireciona pelo seu root; NaN quando não existe), `enemy(n)`, `enemynear(n)`, `playerid(id)`, `p2`. Exemplo: `trigger1 = enemynear, life < 200`.
+`parent` `root` `helper` `target` `partner` `enemy` `enemynear` `playerid` `p2` `stateowner`
+
+`helper(id)` e `target(id)` aceitam um ID opcional; `partner(n)` é o n-ésimo outro jogador não-helper do mesmo lado (padrão 0; um helper redireciona pelo seu root; NaN quando não existe); `enemy(n)` e `enemynear(n)` escolhem o n-ésimo oponente. Exemplo: `trigger1 = enemynear, life < 200`.
 
 ## Expressões
 
@@ -160,3 +215,26 @@ cargo run --release -p ume-engine --example mugen_check -- --strict mugen/chars/
 ```
 
 O CI roda com `--strict` sobre `crates/engine/tests/data/chars`; um recurso usado pelos personagens de teste que a engine não implementa quebra o build. No código, `ume_engine::diagnostics::audit_cns(arquivo, texto)` devolve os achados de um trecho e `CharDef::diagnostics()` os de um personagem carregado.
+
+## Triggers de introspecção
+
+Triggers que leem de volta o que o personagem criou ou o que ele está desenhando. O último argumento é o nome da variável escrito sem aspas, como no Ikemen GO; um eixo é uma segunda palavra (`pos x`). Uma consulta que não encontra nada (explod, projétil ou caixa inexistente) é indefinida (NaN): qualquer comparação com ela continua indefinida e conta como falsa, então teste a existência com `NumExplod`, `NumProj` ou `HelperIndexExist` quando a diferença importar. Posições e velocidades usam as coordenadas do próprio personagem; as posições seguem a convenção de `Pos` (`x` relativo à câmera, `y` relativo ao chão).
+
+| Trigger | Variáveis |
+|---|---|
+| `ExplodVar(id, índice, var)` | `id` `time` `removetime` `bindtime` `bindid` `anim` `animelem` `animelemtime` `animtime` `animplayerno` `spriteplayerno` `facing` `ignorehitpause` `layerno` `pausemovetime` `supermovetime` `sprpriority` `pos x/y/z` `vel x/y/z` `accel x/y/z` `scale x/y`. Lê o `índice`-ésimo explod do chamador com esse `id` (`id` abaixo de 0 vale qualquer um) |
+| `ProjVar(id, índice, var)` | `projid` `time` `projremovetime` `projhits` `projmisstime` `projpriority` `projsprpriority` `projedgebound` `projstagebound` `lowbound` `highbound` `projhitanim` `projremanim` `projcancelanim` `projremove` `anim` `animelem` `facing` `teamside` `pausemovetime` `supermovetime` `pos x/y/z` `vel x/y/z` `accel x/y/z` `velmul x/y` `remvelocity x/y/z` `scale x/y`. Lê o `índice`-ésimo projétil vivo do chamador com esse `id` |
+| `PalFXVar(var)` | `time` (ticks restantes) `add.r/g/b` `mul.r/g/b` `color` `invertall`; prefixo `bg.` ou `all.` para os efeitos de fundo e global. Sem efeito ativo vale a identidade (`add` 0, `mul` 256, `color` 256) |
+| `ClsnVar(tipo, índice, borda)` | `tipo` é `clsn1`, `clsn2`, `size` ou `dummy`; `borda` é `back`, `front`, `top` ou `bottom`, relativa ao personagem e à sua direção. `size` é a caixa de corpo de `size.ground.back/front` e `size.height`; `dummy` não tem caixas |
+| `ClsnOverlap(tipo, playerid, tipo)` | agora aceita `size` (nos dois lados) e `dummy` (no primeiro, nunca sobrepõe) além de `clsn1` e `clsn2` |
+| `ProjClsnOverlap(índice, playerid, tipo)` | a caixa de ataque do `índice`-ésimo projétil do chamador contra uma caixa daquele jogador |
+| `HelperVar(var)` | num helper: `id` `helpertype` `keyctrl` `ownpal` `preserve`; indefinido fora de um helper |
+| `SpriteVar(var)` | o sprite atual: `group` `image` `width` `height` `xoffset` `yoffset` |
+| `AnimElemVar(var)` | o elemento atual da animação: `group` `image` `time` `hflip` `vflip` `xoffset` `yoffset` `xscale` `yscale` `angle` `alphasource` `alphadest` `numclsn1` `numclsn2` |
+| `InputTime(tecla)` | ticks em que a tecla está pressionada: `U` `D` `L` `R`, relativas `F` `B`, `N` (nada pressionado) e os botões `a` `b` `c` `x` `y` `z` `s` (maiúscula importa: `B` é trás, `b` é o botão) |
+| `AnimLength` `AnimPlayerNo` `SpritePlayerNo` | total de ticks da animação (-1 se nunca termina); número do jogador dono da animação e dos sprites |
+| `Index` `RunOrder` `HelperIndexExist(n)` | posição do personagem entre o root e seus helpers (o root é 0); ordem de atualização na partida, começando em 1; se o root tem o `n`-ésimo helper (base 0) |
+| `IkemenVersion(major)` `IkemenVersion(minor)` | versão do comportamento do Ikemen GO seguida: 1 e 0 |
+| `DisplayName = "x"` `SelfCommand = "x"` | comparações de texto com o nome de exibição e com o buffer de comandos do próprio personagem |
+
+Ainda não implementados, e apontados pelo diagnóstico de carregamento: `BGMVar`, `SoundVar` (o núcleo da engine não guarda estado de áudio), `AnimLoopCount`, `AnimPrefix`, `HelperName`, as variáveis `angle`, `friction`, `xshear`, `drawpal.*` e `shader` de `ExplodVar`, e `attr`, `guardflag`, `hitflag`, `shadow` de `ProjVar`. Um nome de variável desconhecido é apontado uma vez por carregamento como `explodvar(nome)` e vale 0.

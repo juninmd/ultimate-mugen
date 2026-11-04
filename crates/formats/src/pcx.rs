@@ -38,6 +38,9 @@ pub fn read_pcx_header(buf: &[u8]) -> Result<PcxHeader, String> {
     let (xmin, ymin, xmax, ymax) = (u16(4), u16(6), u16(8), u16(10));
     let width = (xmax - xmin + 1).max(0) as u32;
     let height = (ymax - ymin + 1).max(0) as u32;
+    if !crate::pixels_within_limit(width, height) {
+        return Err(format!("PCX: {width}x{height} exceeds the pixel limit"));
+    }
     let mut bytes_per_line = u16(66) as u32;
     if bytes_per_line < width {
         bytes_per_line = width; // broken headers: never drop real pixels

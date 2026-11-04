@@ -102,28 +102,48 @@ No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíra
 ## Sprites M.U.G.E.N., miniaturas e o orçamento de carregamento na web
 
 Um pacote de 371 MB com oito personagens HD (429 MB de SFF e 176 MB de SND depois de descompactado) travava a
-tela de seleção por 6 a 24 segundos. `CharEntry::ensure_portrait` chama `decode_sff_only` pedindo os sprites 9000,0,
-9000,1 e o quadro parado, mas o decodificador SFF v1 ignorava esse filtro e decodificava todos os subarquivos PCX
-do arquivo. Agora ele respeita o filtro: um personagem de 673 sprites decodifica a miniatura em cerca de 1,8 ms
-(`cargo run --release -p ume-engine -- example mugen_load_bench -- <zip>`), e alternar o filtro da seleção não
-registra mais nenhuma tarefa longa no `PerformanceObserver` do Chrome.
+seleção por 6 a 24 segundos e o início da luta por 8 a 13 segundos. Três mudanças eliminaram quase tudo.
 
-Sprites com paleta também deixaram de ser convertidos para RGBA no carregamento: eles ficam no atlas de índices de
-8 bits e são coloridos por uma linha de paleta no shader. `CharDef::rgba_sprite` materializa uma cópia RGBA apenas
-para os caminhos que precisam dos pixels (reflexo no chão, miniaturas), então um personagem HD não aloca mais um
-buffer 4x por sprite.
+### Uma miniatura decodifica três sprites, não o arquivo inteiro
 
-Custo que ainda existe na web: `registry::read_zip` descompacta o arquivo inteiro para a VFS (3 a 4 s e cerca de
-610 MB nesse pacote) e a primeira luta ainda decodifica o SFF completo (aproximadamente 5 s para um personagem de
-54 MB). Esses dois são os próximos alvos: uma VFS preguiçosa e decodificação por sprite.
+`decode_sff_only` respeitava o filtro apenas em SFF v2: em SFF v1 todos os subarquivos PCX eram decodificados. Um
+retrato agora decodifica `9000,0`, `9000,1` e o quadro parado via `decode_sff_selected`, que ignora o resto do
+arquivo. Um personagem de 673 sprites cai de "decodificar tudo" para cerca de 1,8 ms
+(`cargo run --release -p ume-engine --example mugen_load_bench -- <zip>`).
+
+### Arquivos de sprite grandes são indexados, não decodificados
+
+`loader::LAZY_SFF_BYTES` (8 MB) faz o carregador manter o arquivo de sprites e preencher `CharDef.sprites` apenas com
+tamanhos e eixos (`decode_sff_metadata` é uma passada de cabeçalhos, sem tocar nos pixels). `CharDef::sprite_indexed`
+decodifica os pixels na primeira vez que o sprite é desenhado e guarda o resultado; o sprite pedido traz junto a sua
+origem de link, e a paleta e a chave de paleta são escolhidas exatamente como numa decodificação completa
+(garantido por `crates/engine/tests/lazy_sff.rs`, que carrega todos os personagens embutidos com o limite forçado para
+os dois lados e compara metadados, pixels, paletas e chaves, em duas paletas). Sprites com paleta continuam saindo do
+atlas de índices de 8 bits, e `CharDef::rgba_sprite` materializa uma cópia RGBA só nos caminhos que precisam dos
+pixels (reflexo no chão, miniaturas). Um personagem de 80 MB / 3252 sprites carrega em 93 ms em vez de 219 ms nativo;
+um de 54 MB na web caiu de 5,4-13 s para 2-58 ms de indexação.
+
+### Importar um pacote é varrer o diretório
+
+`Vfs` agora é uma struct: arquivos pequenos (`.def`, `.cns`, `.air`, `.cmd`, `.act`) são descompactados na hora, e
+entradas acima de `LAZY_ENTRY_BYTES` (1 MB, na prática `.sff` e `.snd`) ficam compactadas dentro do arquivo
+(`Arc<Vec<u8>>`) e são infladas no primeiro `get` (`OnceLock`). `char_key` usa o CRC da entrada em vez do conteúdo,
+então importar não descompacta nada só para identificar um lutador. Importar o pacote de 371 MB caiu de 3,5-4,5 s e
+cerca de 610 MB de heap para 12 ms e 5,6 MB; o arquivo continua em memória e alimenta as entradas preguiçosas.
+
+### Pré-carregamento de sons na web
+
+`Audio::preload_match` não decodifica mais todas as amostras atrás da tela de VS (1,2 s nesse pacote); cada amostra é
+decodificada na primeira reprodução, alguns milissegundos. No desktop continua a thread de trabalho.
 
 | Sonda | O que mostra |
 |---|---|
 | F3 | segunda linha do overlay: vértices, chamadas de desenho, uploads do atlas (quantidade e KB) e ocupação dos atlas RGBA/índice |
-| `?perf=1` | log no console com tamanho do arquivo, tamanho da VFS por extensão e tempo de importação, além das fases por personagem (`sff:decode`, `snd:decode`, `cns:parse`, `air:parse`, `sff:rgba`) |
+| `?perf=1` | log no console com tamanho do arquivo, quanto foi descompactado, fases por personagem (`sff:index`, `snd:decode`, `cns:parse`, `air:parse`, `sff:rgba`) e as etapas de áudio |
 | `?p1=<lutador>&p2=<lutador>&luta=1` | link direto para uma luta |
 | `?tela=select` | abre a seleção (usado para QA da tela de seleção) |
 | `?cenario=<n>&modo=cpu\|versus\|treino\|watch` | índice do cenário e modo do link |
 
 Os links diretos são resolvidos depois que os pacotes importados chegam ao registro, então um link compartilhado
-continua funcionando enquanto o pacote ainda está sendo importado.
+continua funcionando enquanto o pacote ainda está sendo importado. O único travamento que resta na web é a síntese da
+música quando a luta começa (cerca de 1,1 s para a faixa sintetizada), que roda atrás da tela de VS.

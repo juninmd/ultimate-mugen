@@ -101,28 +101,49 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
 
 ## M.U.G.E.N. sprites, thumbnails and the web loading budget
 
-A 371 MB pack of eight HD characters (429 MB of SFF and 176 MB of SND once decompressed) used to freeze the
-select screen for 6 to 24 seconds. `CharEntry::ensure_portrait` calls `decode_sff_only` with a filter that asks
-for sprites 9000,0, 9000,1 and the idle frame, but the SFF v1 decoder ignored that filter and decoded every PCX
-subfile in the file. It now honours it, so a 673-sprite character decodes its thumbnail in about 1.8 ms
-(`cargo run --release -p ume-engine --example mugen_load_bench -- <zip>`), and switching the roster filter no
-longer registers a single long task in Chrome's `PerformanceObserver`.
+A 371 MB pack of eight HD characters (429 MB of SFF and 176 MB of SND once unpacked) used to freeze the roster for
+6 to 24 seconds and the start of a fight for 8 to 13 seconds. Three changes removed almost all of it.
 
-Paletted sprites also stopped being baked into RGBA at load time: they live in the 8-bit index atlas and are
-coloured by a palette row in the shader. `CharDef::rgba_sprite` materialises an RGBA copy only for the paths that
-must own pixels (floor reflections, thumbnails), so a HD character no longer allocates a 4x buffer per sprite.
+### A thumbnail decodes three sprites, not a whole file
 
-Remaining cost on the web: `registry::read_zip` still decompresses the whole archive into the VFS (3 to 4 s and
-about 610 MB for that pack) and the first fight still decodes the complete SFF (roughly 5 s for a 54 MB
-character). Those two are the next targets: a lazy VFS and per-sprite decoding.
+`decode_sff_only` honoured its filter for SFF v2 only: SFF v1 decoded every PCX subfile in the file. A portrait now
+decodes `9000,0`, `9000,1` and the idle frame through `decode_sff_selected`, which leaves the rest of the file
+untouched. A 673-sprite character goes from decoding everything to about 1.8 ms
+(`cargo run --release -p ume-engine --example mugen_load_bench -- <zip>`).
+
+### Large sprite files are indexed, not decoded
+
+`loader::LAZY_SFF_BYTES` (8 MB) makes the loader keep the sprite file and fill `CharDef.sprites` with sizes and axes
+only (`decode_sff_metadata` is a header pass that never touches pixel data). `CharDef::sprite_indexed` decodes the
+pixels of a sprite the first time it is drawn and caches them; a requested sprite pulls its link source along, and the
+palette and palette key are chosen exactly as a full decode would (asserted by `crates/engine/tests/lazy_sff.rs`,
+which loads every bundled character with the threshold forced both ways and compares metadata, pixels, palettes and
+palette keys for two palettes). Paletted sprites are still drawn from the 8-bit index atlas, and
+`CharDef::rgba_sprite` materialises an RGBA copy only for the paths that need real pixels (floor reflections,
+thumbnails). An 80 MB / 3252-sprite character loads in 93 ms instead of 219 ms natively; a 54 MB character on the web
+went from 5.4-13 s to 2-58 ms of indexing.
+
+### Importing a pack is a directory scan
+
+`Vfs` is a struct: small files (`.def`, `.cns`, `.air`, `.cmd`, `.act`) are decompressed eagerly, entries above
+`LAZY_ENTRY_BYTES` (1 MB, in practice `.sff` and `.snd`) stay packed inside the archive (`Arc<Vec<u8>>`) and are
+inflated on the first `get` (`OnceLock`). `char_key` folds the archive CRC instead of the payload, so importing does
+not decompress anything just to identify a fighter. Importing the 371 MB pack went from 3.5-4.5 s and about 610 MB of
+heap to 12 ms and 5.6 MB; the archive itself stays in memory and feeds the lazy entries.
+
+### Sound preload on the web
+
+`Audio::preload_match` no longer decodes every sample behind the VS screen (1.2 s for that pack); samples decode on
+first play, a few milliseconds each. The desktop build keeps the worker thread.
 
 | Probe | What it shows |
 |---|---|
 | F3 | second overlay line: vertices, draw calls, atlas uploads (count and KB) and RGBA/index atlas fill |
-| `?perf=1` | console log with the archive size, the VFS size per extension and the import time, plus per-character phases (`sff:decode`, `snd:decode`, `cns:parse`, `air:parse`, `sff:rgba`) |
+| `?perf=1` | console log with the archive size, how much was unpacked, per-character phases (`sff:index`, `snd:decode`, `cns:parse`, `air:parse`, `sff:rgba`) and the audio steps |
 | `?p1=<fighter>&p2=<fighter>&luta=1` | deep link straight into a fight |
 | `?tela=select` | opens the roster (used for QA of the select screen) |
 | `?cenario=<n>&modo=cpu\|versus\|treino\|watch` | stage index and mode for the link |
 
 Deep links resolve after the imported packs reach the registry, so a shared link keeps working while the pack is
-still importing.
+still importing. The one remaining stall on the web is music synthesis when a fight starts (about 1.1 s for the
+synthesized track); it runs behind the VS screen.

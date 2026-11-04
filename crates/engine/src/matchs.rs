@@ -730,7 +730,7 @@ impl Match {
     /// stands it up itself, many characters' own common1.cns has no exit from 5110) or without control for 15 s goes back to a
     /// controllable state instead of freezing the character for the rest of the match.
     fn rescue_stuck(&mut self) {
-        const NO_CTRL_LIMIT: i32 = 900;
+        const NO_CTRL_LIMIT: i32 = 400;
         for i in 0..self.fighters.len() {
             let free = { let f = &self.fighters[i]; f.alive && !f.is_helper && f.round_free(self.round_state == 2, self.pause.is_some()) };
             let f = &mut self.fighters[i];

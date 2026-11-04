@@ -101,6 +101,8 @@ Faltam (planejado): `WinKO` `WinTime` `WinPerfect` `LoseKO` `LoseTime` `ProjCanc
 
 `P3Name` a `P8Name` comparam com o jogador daquele slot (ordem de slot da partida, não de lado); um slot sem jogador nunca coincide. `P2Command` lê o buffer de comandos do oponente mais próximo, como `Command` faz para o próprio personagem.
 
+`TeamMode` retorna 0 (single), 1 (simul, modo Paralelo), 2 (turns, modo Sequência) ou 3 (tag, reservado). Aceita também `TeamMode = Simul`, `TeamMode = turns` e `TeamMode = 1`; no `Text`, `%s` com `TeamMode` puro imprime o nome do modo.
+
 Funções extras: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 
 `HitCount` soma os `numhits` de cada golpe que o atacante acerta. `UniqHitCount` conta cada par distinto `(alvo, id do HitDef)` uma única vez, então três golpes de um mesmo HitDef dão `HitCount = 3` e `UniqHitCount = 1`. Ambos são zerados juntos nas trocas de estado, a menos que `HitCountPersist = 1`.

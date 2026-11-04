@@ -724,6 +724,7 @@ impl App {
             self.c.clear_macros();
             let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, seq, life);
             if let Some(t) = &info { sess.m.team_lead = [0, 1].map(|sd| t.names[sd].first().map(|n| n.0.clone()).unwrap_or_default()); }
+            if let Some(t) = &info { sess.m.team_turns = seq; sess.m.team_size = [t.names[0].len(), t.names[1].len()]; sess.m.team_member = t.idx; }
             sess.team = info;
             sess.is_replay = replay.is_some();
             self.fight_rules = replay.as_ref().map(|r| r.rules).unwrap_or_else(|| self.settings.rules());

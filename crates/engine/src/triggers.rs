@@ -102,6 +102,7 @@ impl<'a> Host for Ctx<'a> {
         let c0 = v0.chars().next().unwrap_or(' ').to_ascii_uppercase();
         let f = self.f();
         let r = match name {
+            "teammode" => crate::matchs::TeamMode::parse(v0).is_some_and(|t| t == self.m.team_mode()),
             "command" => self.m.has_command(self.i, values.first().map(|s| s.as_str()).unwrap_or("")),
             "statetype" => f.state_type == c0,
             "movetype" => f.move_type == c0,
@@ -225,7 +226,16 @@ impl<'a> Host for Ctx<'a> {
             "ishelper" => b(f.is_helper && (args.is_empty() || f.helper_id == a0() as i32)),
             "ishometeam" => b(f.side == 0),
             "teamside" => (f.side + 1) as f64,
-            "teammode" => 0.0,
+            "teammode" => m.team_mode().number() as f64,
+            "teamsize" => m.team_size_of(f.side) as f64,
+            "teamleader" => m.team_leader_no(f.side) as f64,
+            "numplayer" => m.num_players() as f64,
+            "playerno" => m.slot_no(self.i) as f64,
+            "memberno" => m.member_no(self.i) as f64,
+            "playerindexexist" => { let n = a0(); b(n >= 0.0 && m.fighters.get(n as usize).is_some_and(|h| !h.destroyed)) }
+            "lastplayerid" => m.next_id.saturating_sub(1) as f64,
+            "introstate" => match m.round_state { 0 => 1.0, 1 => 2.0, _ => 0.0 },
+            "outrostate" => match m.round_state { 3 => 1.0, 4 => 2.0, _ => 0.0 },
             "id" => f.id as f64,
             "playeridexist" => b(m.idx(a0() as u32).is_some()),
             "numhelper" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; m.fighters.iter().filter(|h| h.is_helper && h.root == f.root && !h.destroyed && (id < 0 || h.helper_id == id)).count() as f64 }

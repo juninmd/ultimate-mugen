@@ -19,21 +19,29 @@ pub struct TextItem {
 
 fn unquote(s: &str) -> String { s.trim().trim_matches('"').to_string() }
 
-pub fn format_text(fmt: &str, vals: &[f64]) -> String {
+pub fn format_text(fmt: &str, vals: &[f64]) -> String { format_text_named(fmt, vals, &[]) }
+
+pub fn format_text_named(fmt: &str, vals: &[f64], names: &[Option<&'static str>]) -> String {
     let mut out = String::with_capacity(fmt.len() + 8);
-    let mut it = vals.iter();
+    let mut at = 0usize;
+    let mut next = || { let k = at; at += 1; (vals.get(k).copied().unwrap_or(0.0), names.get(k).copied().flatten()) };
     let mut chars = fmt.chars().peekable();
     while let Some(c) = chars.next() {
         if c != '%' { out.push(c); continue; }
         match chars.next() {
-            Some('d') | Some('i') => out.push_str(&(it.next().copied().unwrap_or(0.0) as i64).to_string()),
-            Some('f') => out.push_str(&format!("{:.6}", it.next().copied().unwrap_or(0.0))),
+            Some('d') | Some('i') => out.push_str(&(next().0 as i64).to_string()),
+            Some('f') => out.push_str(&format!("{:.6}", next().0)),
+            Some('s') => { let (v, n) = next(); match n { Some(n) => out.push_str(n), None => out.push_str(&(v as i64).to_string()) } }
             Some('%') => out.push('%'),
             Some(o) => { out.push('%'); out.push(o); }
             None => out.push('%'),
         }
     }
     out.replace("\\n", "\n")
+}
+
+fn param_names(m: &Match, sc: &Controller, k: &str) -> Vec<Option<&'static str>> {
+    sc.param(k).map(|p| p.exprs.iter().map(|e| match &e.node { Node::Trig { name, args, .. } if name == "teammode" && args.is_empty() => Some(m.team_mode().name()), _ => None }).collect()).unwrap_or_default()
 }
 
 fn vals(m: &Match, i: usize, sc: &Controller, k: &str) -> Vec<f64> {
@@ -67,7 +75,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
     let n = |m: &Match, k: &str, d: f64, x: usize| m.num(i, sc, k, d, x) as f32;
     match sc.kind.as_str() {
         "text" => {
-            let text = format_text(&sc.raw("text").map(unquote).unwrap_or_default(), &vals(m, i, sc, "params"));
+            let text = format_text_named(&sc.raw("text").map(unquote).unwrap_or_default(), &vals(m, i, sc, "params"), &param_names(m, sc, "params"));
             let c = [n(m, "color", 255.0, 0), n(m, "color", 255.0, 1), n(m, "color", 255.0, 2)].map(|v| v.clamp(0.0, 255.0) as u8);
             let item = TextItem {
                 owner: m.fighters[i].root, id: n(m, "id", -1.0, 0) as i32, text,

@@ -50,6 +50,8 @@ pub fn enter_stun_states(m: &mut Match, d: usize, guarded: bool) {
     m.fighters[d].ikemen.stun_by_hit = true;
     let def: Arc<_> = m.fighters[d].def.clone();
     m.change_state(d, target, def);
+    let f = &mut m.fighters[d];
+    if guarded { f.ikemen.guard_points = f.ikemen.guard_max; } else { f.ikemen.dizzy_points = f.ikemen.dizzy_max; }
 }
 
 pub fn maintain(m: &mut Match) {

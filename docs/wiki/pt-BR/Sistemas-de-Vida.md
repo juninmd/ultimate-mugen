@@ -17,7 +17,7 @@ Todo lutador carrega três sistemas de vida do Ikemen GO ao lado de `Life`. Eles
 
 - Um golpe não defendido subtrai o valor `dizzypoints` do HitDef, multiplicado pelo multiplicador de defesa do alvo.
 - Em 0 o alvo entra no estado comum 5300 (tontura) com `Dizzy` ligado e sem controle. Alvos no ar ou caindo não ficam tontos.
-- Quando o estado de tontura termina e o alvo sai do estado de golpe, `Dizzy` desliga e os pontos enchem de novo.
+- Os pontos enchem quando o estado começa; `Dizzy` desliga quando o estado termina e o alvo sai do estado de golpe.
 - `NoDizzyPointsDamage` impede que golpes reduzam os pontos.
 
 ## Pontos de defesa
@@ -26,7 +26,7 @@ Todo lutador carrega três sistemas de vida do Ikemen GO ao lado de `Life`. Eles
 
 - Um golpe defendido subtrai o valor `guardpoints` do HitDef, multiplicado pelo multiplicador de defesa do alvo.
 - Em 0 o alvo entra no estado comum 5400 (quebra de defesa) com `GuardBreak` ligado e sem controle.
-- Quando o estado termina e o alvo sai do estado de golpe, `GuardBreak` desliga e os pontos enchem de novo.
+- Os pontos enchem quando o estado começa; `GuardBreak` desliga quando o estado termina e o alvo sai do estado de golpe.
 - `NoGuardPointsDamage` impede que golpes defendidos reduzam os pontos.
 
 ## Estados comuns

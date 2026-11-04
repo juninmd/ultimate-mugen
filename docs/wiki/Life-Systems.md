@@ -17,7 +17,7 @@ Every fighter carries three Ikemen GO life systems next to `Life`. They are alwa
 
 - A hit that is not guarded subtracts the HitDef `dizzypoints` value, multiplied by the defender's defence multiplier.
 - At 0 the defender enters common state 5300 (dizzy) with `Dizzy` set and control removed. Airborne or falling defenders do not become dizzy.
-- When the dizzy state ends and the defender is out of hit state, `Dizzy` clears and the points refill.
+- The points refill as the state starts; `Dizzy` clears when the state ends and the defender is out of hit state.
 - `NoDizzyPointsDamage` stops hits from lowering the points.
 
 ## Guard points
@@ -26,7 +26,7 @@ Every fighter carries three Ikemen GO life systems next to `Life`. They are alwa
 
 - A guarded hit subtracts the HitDef `guardpoints` value, multiplied by the defender's defence multiplier.
 - At 0 the defender enters common state 5400 (guard break) with `GuardBreak` set and control removed.
-- When the state ends and the defender is out of hit state, `GuardBreak` clears and the points refill.
+- The points refill as the state starts; `GuardBreak` clears when the state ends and the defender is out of hit state.
 - `NoGuardPointsDamage` stops guarded hits from lowering the points.
 
 ## Common states

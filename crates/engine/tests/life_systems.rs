@@ -83,7 +83,7 @@ fn five_hits_make_the_defender_dizzy() {
     assert_eq!(m.fighters[1].ikemen.dizzy_points, 20.0);
     m.apply_hit(0, 1, &hd, (0.0, 0.0), None);
     let defender = &m.fighters[1];
-    assert_eq!(defender.ikemen.dizzy_points, 0.0);
+    assert_eq!(defender.ikemen.dizzy_points, defender.ikemen.dizzy_max);
     assert!(defender.ikemen.dizzy);
     assert_eq!(defender.state_no, 5300);
     assert!(!defender.ctrl);
@@ -120,7 +120,7 @@ fn five_guarded_hits_break_the_guard() {
     assert_eq!(m.fighters[1].ikemen.guard_points, 40.0);
     m.apply_hit(0, 1, &hd, (0.0, 0.0), None);
     let defender = &m.fighters[1];
-    assert_eq!(defender.ikemen.guard_points, 0.0);
+    assert_eq!(defender.ikemen.guard_points, defender.ikemen.guard_max);
     assert!(defender.ikemen.guard_break);
     assert_eq!(defender.state_no, 5400);
     assert_eq!(m.ev(1, &ume_engine::chardef::safe_expr("GuardBreak")), 1.0);

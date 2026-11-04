@@ -4,6 +4,7 @@ pub mod quad;
 mod screenshot;
 use screenshot::Save;
 pub mod text;
+pub mod watchdog;
 
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -92,7 +93,7 @@ pub trait Game {
 
 struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas, post: PostFx }
 
-struct Shell<G: Game> { cfg: Config, game: G, live: Option<Live>, pending: Option<Pending>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String>, pacer: Pacer, frame_cap: u32 }
+struct Shell<G: Game> { cfg: Config, game: G, live: Option<Live>, pending: Option<Pending>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String>, pacer: Pacer, frame_cap: u32, watchdog: watchdog::Watchdog }
 
 #[derive(Default)]
 pub struct Pacer { debt: f32 }
@@ -229,13 +230,14 @@ impl<G: Game> Shell<G> {
         }
         self.input.end_frame();
         self.frames += 1;
+        self.watchdog.record((Instant::now() - now).as_secs_f32() * 1000.0);
         #[cfg(not(target_arch = "wasm32"))]
         if self.frame_cap > 0 {
             let budget = std::time::Duration::from_secs_f32(1.0 / self.frame_cap as f32);
             let spent = Instant::now() - now;
             if spent < budget { std::thread::sleep(budget - spent); }
         }
-        if quit || self.cfg.max_frames.is_some_and(|m| self.frames >= m) { event_loop.exit(); return; }
+        if quit || self.cfg.max_frames.is_some_and(|m| self.frames >= m) { if self.watchdog.log { eprintln!("[watchdog] {}", self.watchdog.summary()); } event_loop.exit(); return; }
         live.window.request_redraw();
     }
 }
@@ -330,7 +332,7 @@ pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
     // on the web `Poll` makes winit spin a postTask/AbortController loop next to requestAnimationFrame (GC churn, starved frames); redraws are already self-requested
     event_loop.set_control_flow(if cfg!(target_arch = "wasm32") { ControlFlow::Wait } else { ControlFlow::Poll });
     let now = Instant::now();
-    let mut shell = Shell { cfg, game, live: None, pending: None, input: Input::default(), start: now, last: now, frames: 0, error: None, pacer: Pacer::default(), frame_cap: 0 };
+    let mut shell = Shell { cfg, game, live: None, pending: None, input: Input::default(), start: now, last: now, frames: 0, error: None, pacer: Pacer::default(), frame_cap: 0, watchdog: watchdog::Watchdog::from_env() };
     #[cfg(target_arch = "wasm32")]
     {
         use winit::platform::web::EventLoopExtWebSys;

@@ -18,9 +18,9 @@ pub struct DecodedSprite {
     pub width: u32,
     pub height: u32,
     /// Indexed pixels (8-bit) when paletted; `None` for true-color.
-    pub indexed: Option<Vec<u8>>,
+    pub indexed: Option<Arc<Vec<u8>>>,
     /// RGBA pixels for true-color (PNG 24/32, raw 24/32) sprites.
-    pub rgba: Option<Vec<u8>>,
+    pub rgba: Option<Arc<Vec<u8>>>,
     /// RGBA 256*4 palette used by this sprite (own or shared), when paletted.
     pub palette: Option<Arc<Vec<u8>>>,
     /// Index into [`DecodedSff::palettes`], or -1.
@@ -62,7 +62,7 @@ const SIGNATURE: &[u8; 12] = b"ElecbyteSpr\0";
 /// is transparent. True-color sprites return a copy of their RGBA data.
 pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
     if let Some(rgba) = &s.rgba {
-        return rgba.clone();
+        return rgba.to_vec();
     }
     let n = s.width as usize * s.height as usize;
     let mut out = vec![0u8; n * 4];
@@ -169,10 +169,10 @@ fn decode_sff_v1(buf: &[u8]) -> DecodedSff {
                 let data_end;
                 if h.encoding == 1 {
                     let (px, end) = decode_pcx_rle(pcx, h.width, h.height, h.bytes_per_line, PCX_HEADER_SIZE, pcx.len());
-                    spr.indexed = Some(px);
+                    spr.indexed = Some(Arc::new(px));
                     data_end = end;
                 } else {
-                    spr.indexed = Some(raw_rows(pcx, h.width as usize, h.height as usize, h.bytes_per_line as usize));
+                    spr.indexed = Some(Arc::new(raw_rows(pcx, h.width as usize, h.height as usize, h.bytes_per_line as usize)));
                     data_end = PCX_HEADER_SIZE + h.height as usize * h.bytes_per_line as usize;
                 }
                 let mut pal: Option<Arc<Vec<u8>>> = None;
@@ -269,6 +269,8 @@ fn decode_sff_v2(buf: &[u8]) -> DecodedSff {
 
     // --- sprites
     let mut sprites: Vec<DecodedSprite> = Vec::with_capacity(spr_count.min(buf.len() / 28 + 1));
+    let mut links: Vec<Option<usize>> = Vec::with_capacity(sprites.capacity());
+    let mut jobs: Vec<(usize, u8, u8, &[u8])> = Vec::new();
     for i in 0..spr_count {
         let o = spr_ofs.saturating_add(i.saturating_mul(28));
         if o.saturating_add(28) > buf.len() {
@@ -285,25 +287,48 @@ fn decode_sff_v2(buf: &[u8]) -> DecodedSff {
         spr.height = r.u16(o + 6) as u32;
         spr.palette_index = pal_idx as i32;
         if d_len == 0 {
-            if let Some(src) = sprites.get(link) {
-                spr.width = src.width;
-                spr.height = src.height;
-                spr.indexed = src.indexed.clone();
-                spr.rgba = src.rgba.clone();
-            }
+            links.push(Some(link).filter(|&l| l < i));
         } else {
             let start = (if flags & 1 == 0 { ldata } else { tdata }).saturating_add(d_ofs);
             let s = start.min(buf.len());
             let e = start.saturating_add(d_len).min(buf.len());
-            let data = &buf[s..e.max(s)];
-            decode_v2_image(&mut spr, fmt, depth, data, palettes.get(pal_idx).is_some());
+            jobs.push((i, fmt, depth, &buf[s..e.max(s)]));
+            links.push(None);
         }
+        sprites.push(spr);
+    }
+    let decoded = crate::par::map(&jobs, |&(i, fmt, depth, data)| {
+        let mut spr = empty_sprite(0, 0, 0, 0);
+        spr.width = sprites[i].width;
+        spr.height = sprites[i].height;
+        spr.palette_index = sprites[i].palette_index;
+        let has_palette = palettes.get(spr.palette_index as usize).is_some();
+        decode_v2_image(&mut spr, fmt, depth, data, has_palette);
+        spr
+    });
+    for ((i, ..), d) in jobs.iter().zip(decoded) {
+        let spr = &mut sprites[*i];
+        spr.width = d.width;
+        spr.height = d.height;
+        spr.indexed = d.indexed;
+        spr.rgba = d.rgba;
+        spr.palette = d.palette;
+    }
+    for i in 0..sprites.len() {
+        if let Some(l) = links[i] {
+            let (w, h, idx, rgba) = (sprites[l].width, sprites[l].height, sprites[l].indexed.clone(), sprites[l].rgba.clone());
+            let spr = &mut sprites[i];
+            spr.width = w;
+            spr.height = h;
+            spr.indexed = idx;
+            spr.rgba = rgba;
+        }
+        let spr = &mut sprites[i];
         if spr.rgba.is_some() {
             spr.palette_index = -1;
         } else if let Some(p) = usize::try_from(spr.palette_index).ok().and_then(|i| palettes.get(i)) {
             spr.palette = Some(p.data.clone());
         }
-        sprites.push(spr);
     }
     DecodedSff { version: 2, sprites, palettes }
 }
@@ -324,17 +349,17 @@ fn decode_v2_image(spr: &mut DecodedSprite, fmt: u8, depth: u8, data: &[u8], has
                     o[2] = g(2);
                     o[3] = if bpp == 4 { g(3) } else { 255 };
                 }
-                spr.rgba = Some(out);
+                spr.rgba = Some(Arc::new(out));
             } else {
                 let mut out = vec![0u8; n];
                 let k = n.min(data.len());
                 out[..k].copy_from_slice(&data[..k]);
-                spr.indexed = Some(out);
+                spr.indexed = Some(Arc::new(out));
             }
         }
-        format::RLE8 => spr.indexed = Some(decode_rle8(body, n)),
-        format::RLE5 => spr.indexed = Some(decode_rle5(body, n)),
-        format::LZ5 => spr.indexed = Some(decode_lz5(body, n)),
+        format::RLE8 => spr.indexed = Some(Arc::new(decode_rle8(body, n))),
+        format::RLE5 => spr.indexed = Some(Arc::new(decode_rle5(body, n))),
+        format::LZ5 => spr.indexed = Some(Arc::new(decode_lz5(body, n))),
         format::PNG8 | format::PNG24 | format::PNG32 => match decode_png(body) {
             Ok(png) => {
                 spr.width = png.width;
@@ -343,18 +368,18 @@ fn decode_v2_image(spr: &mut DecodedSprite, fmt: u8, depth: u8, data: &[u8], has
                     if !has_sff_palette {
                         spr.palette = png.palette.clone().map(Arc::new);
                     }
-                    spr.indexed = png.indexed;
+                    spr.indexed = png.indexed.map(Arc::new);
                 } else if png.rgba.is_some() {
-                    spr.rgba = png.rgba;
+                    spr.rgba = png.rgba.map(Arc::new);
                 } else {
-                    spr.rgba = Some(png_indexed_to_rgba(&png));
+                    spr.rgba = Some(Arc::new(png_indexed_to_rgba(&png)));
                 }
             }
             // broken PNG: keep an empty (transparent) sprite instead of failing the file
-            Err(_) => spr.indexed = Some(vec![0u8; n]),
+            Err(_) => spr.indexed = Some(Arc::new(vec![0u8; n])),
         },
         // INVALID (1) or unknown: empty sprite
-        _ => spr.indexed = Some(vec![0u8; n]),
+        _ => spr.indexed = Some(Arc::new(vec![0u8; n])),
     }
 }
 

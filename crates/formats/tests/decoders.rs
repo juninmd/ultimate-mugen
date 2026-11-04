@@ -158,7 +158,7 @@ fn png_indexed_8bit_and_4bit() {
     let plte = &pal[..16 * 3];
     let trns = [0u8, 128];
     let png = decode_png(&encode_png(PngOpts { w: PW, h: PH, color_type: 3, bit_depth: 8, data: &idx, plte: Some(plte), trns: Some(&trns) })).unwrap();
-    assert_eq!(png.indexed.as_ref().unwrap(), &idx);
+    assert_eq!(png.indexed.as_deref().unwrap(), &idx);
     let p = png.palette.unwrap();
     assert_eq!(p[3], 0);
     assert_eq!(p[7], 128);
@@ -230,14 +230,14 @@ fn sff_v1_round_trip() {
     assert_eq!(sff.sprites.len(), 4);
     let (s0, s1, s2, s3) = (&sff.sprites[0], &sff.sprites[1], &sff.sprites[2], &sff.sprites[3]);
     assert_eq!((s0.group, s0.index, s0.axis_x, s0.axis_y, s0.width, s0.height), (0, 0, 10, 29, 21, 30));
-    assert_eq!(s0.indexed.as_ref().unwrap(), &px0);
+    assert_eq!(s0.indexed.as_deref().unwrap(), &px0);
     assert_eq!(s0.palette.as_ref().unwrap()[4], pal_a[3]);
     assert_eq!((s1.axis_x, s1.axis_y, s1.width, s1.height), (-3, 4, 8, 8));
-    assert_eq!(s1.indexed.as_ref().unwrap(), &px1);
+    assert_eq!(s1.indexed.as_deref().unwrap(), &px1);
     assert!(Arc::ptr_eq(s1.palette.as_ref().unwrap(), s0.palette.as_ref().unwrap()));
     assert_eq!((s2.group, s2.index, s2.axis_x, s2.axis_y, s2.width, s2.height), (5, 2, 7, 8, 21, 30));
     assert_eq!(s2.indexed, s0.indexed);
-    assert_eq!(s3.indexed.as_ref().unwrap(), &px3);
+    assert_eq!(s3.indexed.as_deref().unwrap(), &px3);
     assert_eq!(s3.palette.as_ref().unwrap()[255 * 4 + 1], pal_b[766]);
     assert_eq!(sff.palettes.len(), 2);
     assert_eq!(s3.palette_index, 1);
@@ -300,13 +300,13 @@ fn sff_v2_synthetic() {
     let s = &sff.sprites;
     assert_eq!(s.len(), 7);
     assert_eq!((s[1].axis_x, s[1].axis_y), (1, -2));
-    assert_eq!(s[0].indexed.as_ref().unwrap(), &px_raw);
-    assert_eq!(s[1].indexed.as_ref().unwrap(), &px_rle8);
-    assert_eq!(s[2].indexed.as_ref().unwrap(), &vec![9u8; 24]);
-    assert_eq!(s[3].indexed.as_ref().unwrap(), &vec![3u8; 24]);
-    assert_eq!(s[4].indexed.as_ref().unwrap(), &px_raw);
+    assert_eq!(s[0].indexed.as_deref().unwrap(), &px_raw);
+    assert_eq!(s[1].indexed.as_deref().unwrap(), &px_rle8);
+    assert_eq!(s[2].indexed.as_deref().unwrap(), &vec![9u8; 24]);
+    assert_eq!(s[3].indexed.as_deref().unwrap(), &vec![3u8; 24]);
+    assert_eq!(s[4].indexed.as_deref().unwrap(), &px_raw);
     assert!(Arc::ptr_eq(s[4].palette.as_ref().unwrap(), &sff.palettes[1].data)); // SFF palette wins over PLTE
-    assert_eq!(s[5].rgba.as_ref().unwrap(), &rgba_data);
+    assert_eq!(s[5].rgba.as_deref().unwrap(), &rgba_data);
     assert_eq!(s[5].palette_index, -1);
     assert_eq!(s[6].indexed, s[0].indexed);
     assert_eq!((s[6].group, s[6].width, s[6].height), (2, w as u32, h as u32));

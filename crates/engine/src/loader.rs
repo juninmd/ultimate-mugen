@@ -99,13 +99,26 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
             let selected = over.clone().or_else(|| fallback.clone()).or_else(|| palettes.get(&(1, 1)).map(|p| p.to_vec()));
             if let Some(sel) = selected { palettes.insert(if sff.version == 1 { (1, 1) } else { sff.palettes.get(target.max(0) as usize).map(|p| (p.group, p.index)).unwrap_or((1, 1)) }, Arc::new(sel)); }
         }
-        for s in &sff.sprites {
-            let key = (s.group, s.index);
-            if sprites.contains_key(&key) { continue; }
-            if let (true, Some(px)) = (with_images, s.indexed.as_ref()) { indexed.insert(key, IndexedSprite { w: s.width, h: s.height, pixels: Arc::new(px.clone()), pal: shared_key(s) }); }
+        let mut seen = std::collections::HashSet::new();
+        let unique: Vec<&ume_formats::sff::DecodedSprite> = sff.sprites.iter().filter(|s| seen.insert((s.group, s.index))).collect();
+        let pal_of = |s: &ume_formats::sff::DecodedSprite| -> Option<&[u8]> {
             let paletteless = s.palette.is_none() && s.rgba.is_none();
-            let pal = if paletteless { fallback.as_deref() } else if over.is_some() && s.palette_index == target && s.group != 9000 { over.as_deref() } else { None };
-            let image = if with_images && s.width > 0 && s.height > 0 { Some(ImageData::new(s.width, s.height, sprite_to_rgba(s, pal))) } else { None };
+            if paletteless { fallback.as_deref() } else if over.is_some() && s.palette_index == target && s.group != 9000 { over.as_deref() } else { None }
+        };
+        let pixels_id = |s: &ume_formats::sff::DecodedSprite| s.indexed.as_ref().map(|p| Arc::as_ptr(p) as usize).or_else(|| s.rgba.as_ref().map(|p| Arc::as_ptr(p) as usize));
+        let mut owners: HashMap<(usize, usize, u32, u32), usize> = HashMap::new();
+        let mut owner_of = Vec::with_capacity(unique.len());
+        for (i, s) in unique.iter().enumerate() {
+            let shared = pixels_id(s).map(|px| (px, pal_of(s).or(s.palette.as_deref().map(|v| v.as_slice())).map_or(0, |p| p.as_ptr() as usize), s.width, s.height));
+            owner_of.push(match shared { Some(k) => *owners.entry(k).or_insert(i), None => i });
+        }
+        let renders: Vec<usize> = (0..unique.len()).filter(|&i| with_images && owner_of[i] == i && unique[i].width > 0 && unique[i].height > 0).collect();
+        let images = ume_formats::par::map(&renders, |&i| ImageData::new(unique[i].width, unique[i].height, sprite_to_rgba(unique[i], pal_of(unique[i]))));
+        let image_of: HashMap<usize, Arc<ImageData>> = renders.into_iter().zip(images).collect();
+        for (i, s) in unique.iter().enumerate() {
+            let key = (s.group, s.index);
+            if let (true, Some(px)) = (with_images, s.indexed.as_ref()) { indexed.insert(key, IndexedSprite { w: s.width, h: s.height, pixels: px.clone(), pal: shared_key(s) }); }
+            let image = if with_images && s.width > 0 && s.height > 0 { image_of.get(&owner_of[i]).cloned() } else { None };
             sprites.insert(key, Sprite { image, width: s.width as f32, height: s.height as f32, axis_x: s.axis_x as f32, axis_y: s.axis_y as f32, scale: 1.0 });
         }
     }

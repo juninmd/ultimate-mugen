@@ -68,7 +68,7 @@ impl Explod {
 
 #[derive(Clone)]
 pub struct Projectile {
-    pub owner: u32, pub side: usize, pub id: i32, pub cur: AnimCursor, pub hit_anim: i32, pub rem_anim: i32, pub cancel_anim: i32,
+    pub owner: u32, pub side: usize, pub teamside: usize, pub root: u32, pub id: i32, pub cur: AnimCursor, pub hit_anim: i32, pub rem_anim: i32, pub cancel_anim: i32,
     pub pos: V2, pub vel: V2, pub accel: V2, pub vel_mul: V2, pub rem_vel: V2, pub facing: f32, pub hits: i32, pub miss_time: i32, pub miss_cd: i32,
     pub priority: i32, pub spr_priority: i32, pub edge_bound: f32, pub height_bound: [f32; 2], pub remove_time: i32, pub time: i32,
     pub hitdef: HitDefData, pub dying: bool, pub guard_dist: f32, pub scale: [f32; 2], pub remove: bool, pub lscl: f32,
@@ -88,7 +88,9 @@ pub enum BgmAction {
 /// Events for the presentation layer (audio, rumble, UI).
 #[derive(Clone)]
 pub enum Event {
-    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str>, pan: f32, looping: bool, freq_mul: f32, low_priority: bool },
+    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str>, pan: f32, looping: bool, freq_mul: f32, low_priority: bool, stop_on_get_hit: bool, stop_on_change_state: bool },
+    /// the fighter `fighter` entered a new state (used to stop flagged sound channels)
+    StateChange { fighter: u32 },
     Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool, attacker: usize, defender: usize },
     /// `fighter` = id of the root fighter that fired it (teams can have many per side)
     Super { side: usize, fighter: u32 },
@@ -107,6 +109,8 @@ pub enum Event {
 
 /// Modern-fighter damage proration: every hit of a combo deals less than the one before (never below 20 %).
 /// `hits_before` = hits already landed in the combo. Applies to native (UMF) attackers; M.U.G.E.N. characters keep their own rules.
+/// How long (ticks) the combo accumulator survives without a new hit to the same defender.
+pub const COMBO_WINDOW: i32 = 70;
 pub fn combo_scale(hits_before: i32) -> f32 {
     const T: [f32; 10] = [1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25];
     T[(hits_before.max(0) as usize).min(T.len() - 1)].max(0.2)
@@ -160,6 +164,8 @@ pub struct Match {
     /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
     pub team_simul: bool,
     pub team_tag: bool,
+    /// MUGEN-style pushbox: an attacking fighter does not get pushed back by the defender; off = symmetric split.
+    pub classic_pushbox: bool,
     pub tag_cooldown: [i32; 2],
     pub tag_cooldown_max: i32,
     pub tag_cancel_window: i32,
@@ -176,7 +182,7 @@ pub struct Match {
     pub timer: i32, pub round_ticks: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
-    pub shake_time: i32, pub shake_ampl: f32, pub shake_freq: f32, pub shake_phase: f32, pub shake_elapsed: i32,
+    pub shake_time: i32, pub shake_ampl: f32, pub shake_freq: f32, pub shake_phase: f32, pub shake_elapsed: i32, pub shake_dir: u8,
     pub flash: Option<(i32, [f32; 3])>,
     pub bg: Option<crate::stage_bg::BgState>,
     pub all_palfx: Option<PalFx>, pub bg_palfx: Option<PalFx>,
@@ -196,8 +202,8 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, team_tag: false, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
-            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
+            team_simul: false, team_tag: false, classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
     }
@@ -307,6 +313,7 @@ impl Match {
         {
             let f = &mut self.fighters[i];
             f.prev_state_no = f.state_no; f.prev_state_type = f.state_type; f.prev_move_type = f.move_type;
+            if f.state_no != no { self.events.push(Event::StateChange { fighter: f.id }); }
             f.state_no = no;
             if Arc::ptr_eq(&owner, &f.def) { f.state_giver = None; }
             f.st_def = owner.clone();
@@ -808,7 +815,13 @@ impl Match {
         self.visual_timers();
         self.skip_asserted_announcements();
         if let Some(p) = self.pause.as_mut() { p.time -= 1; if p.time <= 0 { self.pause = None; } }
-        for f in self.fighters.iter_mut() { if f.unhittable > 0 { f.unhittable -= 1; } }
+        for f in self.fighters.iter_mut() {
+            if f.unhittable > 0 { f.unhittable -= 1; }
+            if f.combo_timer > 0 {
+                f.combo_timer -= 1;
+                if f.combo_timer == 0 { f.combo_count = 0; f.combo_damage = 0.0; f.combo_target = None; }
+            }
+        }
         // drop stale targets
         for k in 0..self.fighters.len() {
             let (st, mc) = (self.fighters[k].state_time, self.fighters[k].move_contact);
@@ -917,7 +930,9 @@ impl Match {
                 let overlap = fl.pos.x + lw - (fr.pos.x - rw);
                 if overlap > 0.0 {
                     let (mut lp, mut rp) = (overlap / 2.0, overlap / 2.0);
-                    if fl.state_type == 'A' && fr.state_type != 'A' { lp = overlap; rp = 0.0; } else if fr.state_type == 'A' && fl.state_type != 'A' { rp = overlap; lp = 0.0; }
+                    if self.classic_pushbox {
+                        if fl.state_type == 'A' && fr.state_type != 'A' { lp = overlap; rp = 0.0; } else if fr.state_type == 'A' && fl.state_type != 'A' { rp = overlap; lp = 0.0; }
+                    }
                     match (fl.has_assert(asf::IMMOVABLE), fr.has_assert(asf::IMMOVABLE)) {
                         (true, false) => { lp = 0.0; rp = overlap; }
                         (false, true) => { lp = overlap; rp = 0.0; }
@@ -1239,14 +1254,18 @@ impl Match {
             if hd.p1stateno >= 0 && !from_proj { let ad = self.fighters[a].def.clone(); self.change_state(a, hd.p1stateno, ad); }
             self.add_power(a, hd.get_power); self.add_power(d, hd.give_power);
             if let Some(r) = self.idx(aroot) {
+                let did = self.fighters[d].id;
                 let fr = &mut self.fighters[r];
+                let chained = was_hit && fr.combo_target == Some(did) && fr.combo_timer > 0;
                 fr.combo_count = prev_hc + 1;
-                fr.combo_damage = if was_hit { fr.combo_damage + dmg } else { dmg };
+                fr.combo_damage = if chained { fr.combo_damage + dmg } else { dmg };
+                fr.combo_target = Some(did);
+                fr.combo_timer = COMBO_WINDOW;
             }
             let heavy = hd.animtype >= 2 || dmg >= 70.0;
             self.spawn_spark(a, hd.spark_no, hd.spark_own, at.0, at.1, false, heavy);
             if let Some(s) = hd.hit_sound { self.sound(a, s.0, s.1, s.2, Some(if heavy { "hitheavy" } else { "hit" })); }
-            if hd.env_shake.time > 0 { self.shake(hd.env_shake.time, hd.env_shake.freq, hd.env_shake.ampl, hd.env_shake.phase); }
+            if hd.env_shake.time > 0 { self.shake_with_dir(hd.env_shake.time, hd.env_shake.freq, hd.env_shake.ampl, hd.env_shake.phase, hd.env_shake.dir); }
             if let Some(p) = hd.target_palfx.clone() { self.fighters[d].palfx = Some(p); }
             if cornered && self.fighters[a].def.source == Source::Mugen && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; self.fighters[a].vel.x = corner_pushed; }
             self.place_target(a, d, hd);
@@ -1290,7 +1309,7 @@ impl Match {
     fn sound(&mut self, i: usize, g: i32, n: i32, own: bool, builtin: Option<&'static str>) {
         let pan = crate::sctrl::sound_pan(self, i, 0.0, false);
         let f = &self.fighters[i];
-        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0, low_priority: false });
+        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0, low_priority: false, stop_on_get_hit: false, stop_on_change_state: false });
     }
     pub fn do_shake(&mut self, t: i32, ampl: f32) { self.shake(t, 60.0, -ampl.abs(), 0.0); }
     pub fn shake(&mut self, t: i32, freq: f32, ampl: f32, phase: f32) {
@@ -1298,6 +1317,13 @@ impl Match {
         self.shake_time = t; self.shake_elapsed = 0; self.shake_freq = freq; self.shake_phase = phase;
         self.shake_ampl = if ampl != 0.0 { ampl } else { -4.0 };
     }
+    pub fn shake_with_dir(&mut self, t: i32, freq: f32, ampl: f32, phase: f32, dir: u8) {
+        self.shake_dir = dir.min(2);
+        self.shake(t, freq, ampl, phase);
+    }
+    /// `dir`: 0 = both axes (default), 1 = horizontal only, 2 = vertical only.
+    pub fn shake_horizontal(&self) -> bool { self.shake_dir != 2 }
+    pub fn shake_vertical(&self) -> bool { self.shake_dir != 1 }
     pub fn shake_offset(&self) -> f32 {
         if self.shake_time <= 0 { return 0.0; }
         let decay = 1.0 - self.shake_elapsed as f32 / (self.shake_elapsed + self.shake_time) as f32;
@@ -1520,7 +1546,7 @@ impl Match {
         let has = |k: &str| sc.has(k, 0);
         let hit_anim = if has("projhitanim") { num(self, "projhitanim", -1.0, 0) as i32 } else { -1 };
         let p = Projectile {
-            owner: f.id, side: f.side, id: num(self, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
+            owner: f.id, side: f.side, teamside: f.side, root: f.root, id: num(self, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
             hit_anim, rem_anim: if has("projremanim") { num(self, "projremanim", -1.0, 0) as i32 } else { hit_anim },
             cancel_anim: if has("projcancelanim") { num(self, "projcancelanim", -1.0, 0) as i32 } else { -1 },
             pos: V2 { x, y }, vel: V2 { x: num(self, "velocity", 0.0, 0) * f.lscl, y: num(self, "velocity", 0.0, 1) * f.lscl },

@@ -8,12 +8,16 @@ mod gfx;
 mod gamepad;
 mod keybinds;
 mod hud;
+mod market;
+mod menu_art;
 mod registry;
 mod render;
 mod poly;
 mod postfx;
 mod session;
 mod settings;
+mod storage;
+mod i18n;
 mod mugen_tour;
 mod pixel_tour;
 mod shots;
@@ -44,7 +48,7 @@ fn conf() -> WindowConf {
         std::process::exit(0);
     }
     let st = settings::Settings::load();
-    let (mut w, mut h, _) = settings::RESOLUTIONS[st.res.min(settings::RESOLUTIONS.len() - 1)];
+    let (mut w, mut h) = st.window_size();
     if let Some(r) = args.iter().position(|a| a == "--res").and_then(|i| args.get(i + 1)) {
         if let Some((a, b)) = r.split_once(['x', 'X']) { if let (Ok(a), Ok(b)) = (a.parse(), b.parse()) { (w, h) = (a, b); } }
     }

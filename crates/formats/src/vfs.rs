@@ -10,6 +10,18 @@ pub type Vfs = BTreeMap<String, Vec<u8>>;
 
 /// `\` -> `/`, strip a leading `./`, collapse repeated `/`, lowercase.
 pub fn norm_path(p: &str) -> String {
+    if p.is_ascii() {
+        let p = p.strip_prefix("./").or_else(|| p.strip_prefix(".\\")).unwrap_or(p);
+        let mut out = String::with_capacity(p.len());
+        let mut last_slash = false;
+        for b in p.bytes() {
+            let b = if b == b'\\' { b'/' } else { b.to_ascii_lowercase() };
+            if b == b'/' && last_slash { continue; }
+            last_slash = b == b'/';
+            out.push(b as char);
+        }
+        return out;
+    }
     let s = p.replace('\\', "/");
     let s = s.strip_prefix("./").unwrap_or(&s);
     let mut out = String::with_capacity(s.len());
@@ -143,6 +155,9 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         }
         let data_start = local + 30 + r.u16(local + 26) as usize + r.u16(local + 28) as usize;
         let csize = usize::try_from(csize).map_err(|_| "zip: entry too large")?;
+        if method == 0 && csize > MAX_ENTRY_BYTES {
+            return Err(format!("zip: {name}: entry too large"));
+        }
         let data = bytes
             .get(data_start..data_start.saturating_add(csize))
             .ok_or_else(|| format!("zip: {name}: truncated data"))?;
@@ -161,7 +176,7 @@ fn inflate_raw(data: &[u8], size_hint: usize) -> Result<Vec<u8>, String> {
     use miniz_oxide::inflate::core::{decompress, inflate_flags, DecompressorOxide};
     use miniz_oxide::inflate::TINFLStatus;
     // fast path: exact-size output buffer from the declared size
-    if size_hint > 0 && size_hint <= MAX_ENTRY_BYTES {
+    if size_hint > 0 && size_hint <= MAX_ENTRY_BYTES && size_hint <= data.len().saturating_mul(64).max(1 << 20) {
         let mut out = vec![0u8; size_hint];
         let mut st = DecompressorOxide::new();
         let (status, _, written) =
@@ -235,8 +250,11 @@ pub fn resolve<'a>(vfs: &'a Vfs, base_dir: &str, name: &str) -> Option<&'a [u8]>
     // fallback: basename anywhere in the folder, then anywhere
     let base = n.rsplit('/').next().unwrap_or(&n);
     let suffix = format!("/{base}");
-    if let Some((_, v)) = vfs.iter().find(|(k, _)| k.starts_with(&base_dir) && k.ends_with(&suffix)) {
-        return Some(v);
+    if !base_dir.is_empty() {
+        let folder = format!("{base_dir}/");
+        if let Some((_, v)) = vfs.range(folder.clone()..).take_while(|(k, _)| k.starts_with(&folder)).find(|(k, _)| k.ends_with(&suffix)) {
+            return Some(v);
+        }
     }
     vfs.iter().find(|(k, _)| k.ends_with(&suffix) || k.as_str() == base).map(|(_, v)| v.as_slice())
 }
@@ -286,4 +304,62 @@ pub fn find_stage_defs(vfs: &Vfs) -> Vec<String> {
         })
         .map(|(k, _)| k.clone())
         .collect()
+}
+
+const FNV_OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
+const FNV_PRIME: u64 = 0x0000_0100_0000_01b3;
+
+fn fnv(mut h: u64, bytes: &[u8]) -> u64 {
+    for &b in bytes {
+        h ^= b as u64;
+        h = h.wrapping_mul(FNV_PRIME);
+    }
+    h
+}
+
+/// Stable 64-bit hash (hex) of arbitrary bytes, for deduplicating persisted or repeated imports.
+pub fn content_hash(bytes: &[u8]) -> String {
+    format!("{:016x}", fnv(FNV_OFFSET, bytes))
+}
+
+fn canonical_def_text(def_bytes: &[u8]) -> String {
+    text(def_bytes)
+        .lines()
+        .map(|l| l.split(';').next().unwrap_or("").trim().to_lowercase())
+        .filter(|l| !l.is_empty())
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn def_key(vfs: &Vfs, def: &str, section: &str, sprite_key: &str) -> String {
+    let def = norm_path(def);
+    let Some(def_bytes) = vfs.get(&def) else {
+        return format!("path:{def}");
+    };
+    let secs = crate::ini::parse_ini(&text(def_bytes));
+    let sprite = crate::ini::find_section(&secs, section)
+        .and_then(|s| s.get(sprite_key))
+        .map(|v| unquote(v))
+        .unwrap_or_default();
+    let base = def.rfind('/').map(|i| &def[..i]).unwrap_or("");
+    let mut h = fnv(FNV_OFFSET, canonical_def_text(def_bytes).as_bytes());
+    match resolve(vfs, base, &sprite) {
+        Some(b) => {
+            h = fnv(h, &(b.len() as u64).to_le_bytes());
+            h = fnv(h, b);
+        }
+        None => h = fnv(h, norm_path(&sprite).as_bytes()),
+    }
+    format!("{h:016x}")
+}
+
+/// Identity of a character independent of where it was found: hash of its normalized `.def` and sprite file.
+/// The same fighter imported twice, from another path, or with different letter case yields the same key.
+pub fn char_key(vfs: &Vfs, def: &str) -> String {
+    def_key(vfs, def, "files", "sprite")
+}
+
+/// Identity of a stage, same idea as [`char_key`] (uses `[BGdef] spr`).
+pub fn stage_key(vfs: &Vfs, def: &str) -> String {
+    def_key(vfs, def, "bgdef", "spr")
 }

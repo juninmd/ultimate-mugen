@@ -5,6 +5,7 @@ pub mod k {
     pub const S: u32 = 1024; pub const D2: u32 = 2048; pub const W: u32 = 4096; pub const E: u32 = 8192;
     /// transformation (awakening) button
     pub const T: u32 = 16384;
+    pub const TAG: u32 = 32768;
 }
 
 /// Button symbol (as used in CMD files) to bit.

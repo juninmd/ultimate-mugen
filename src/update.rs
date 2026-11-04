@@ -6,6 +6,11 @@ use std::sync::mpsc::Receiver;
 
 /// Release version stamped by CI (`UME_RELEASE_VERSION`); `<cargo version>-dev` for local builds.
 pub const VERSION: &str = env!("UME_VERSION");
+pub const GIT_HASH: &str = env!("UME_GIT_HASH");
+
+pub fn build_label() -> String {
+    if GIT_HASH.is_empty() { format!("v{VERSION}") } else { format!("v{VERSION} · {GIT_HASH}") }
+}
 pub const MANIFEST_URL: &str = "https://github.com/juninmd/ultimate-mugen/releases/latest/download/latest.json";
 pub const RELEASES_URL: &str = "https://github.com/juninmd/ultimate-mugen/releases/latest";
 

@@ -88,12 +88,17 @@ pub fn scale_default_constants(into: &mut HashMap<String, f64>, provided: &HashS
     }
 }
 
+fn pause_buffer_of(s: &Section) -> Option<i32> {
+    ["pausebuffer", "command.pausebuffer", "buffer.pausetime", "command.buffer.pausetime"].iter().find_map(|k| s.get(k).and_then(|v| v.trim().parse().ok()))
+}
+
 pub fn parse_cmd(text: &str) -> (Vec<CommandDef>, HashMap<i32, StateDef>) {
     let secs = parse_ini(text);
-    let (mut dt, mut db) = (15, 1);
+    let (mut dt, mut db, mut dp) = (15, 1, 0);
     if let Some(d) = secs.iter().find(|s| s.lname == "defaults") {
         dt = d.get("command.time").and_then(|v| v.trim().parse().ok()).unwrap_or(15);
         db = d.get("command.buffer.time").and_then(|v| v.trim().parse().ok()).unwrap_or(1);
+        dp = pause_buffer_of(d).unwrap_or(0);
     }
     let mut cmds = vec![];
     for s in &secs {
@@ -103,7 +108,9 @@ pub fn parse_cmd(text: &str) -> (Vec<CommandDef>, HashMap<i32, StateDef>) {
         if name.is_empty() { continue; }
         let t = s.get("time").and_then(|v| v.trim().parse().ok()).unwrap_or(dt);
         let b = s.get("buffer.time").and_then(|v| v.trim().parse().ok()).unwrap_or(db);
-        cmds.push(parse_command(&name, c, t, b));
+        let mut def = parse_command(&name, c, t, b);
+        def.pause_buffer = pause_buffer_of(s).unwrap_or(dp).max(0);
+        cmds.push(def);
     }
     let mut states = HashMap::new();
     parse_states(text, &mut states, true);

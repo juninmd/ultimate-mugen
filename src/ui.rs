@@ -175,7 +175,7 @@ impl Ui {
         measure_text(s, Some(font), fq, sc).width / self.s
     }
     pub fn quad(&self, p: [Vec2; 4], c: Color) {
-        let v: Vec<Vec2> = p.iter().map(|q| vec2(self.x(q.x), self.y(q.y))).collect();
+        let v = p.map(|q| vec2(self.x(q.x), self.y(q.y)));
         draw_triangle(v[0], v[1], v[2], c);
         draw_triangle(v[0], v[2], v[3], c);
     }

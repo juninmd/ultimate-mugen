@@ -87,3 +87,83 @@ fn format_text_specifiers() {
     assert_eq!(crate::ikemen::format_text("%d%% %f", &[50.0, 1.5]), "50% 1.500000");
     assert_eq!(crate::ikemen::format_text("x\\ny", &[]), "x\ny");
 }
+
+fn team_setup() -> (Match, usize, usize, usize) {
+    let (mut m, a) = setup();
+    let cd = m.fighters[a].def.clone();
+    let b = m.add_player(cd, 0, 0, 3);
+    let h = m.fighters.len();
+    let mut helper = crate::fighter::Fighter::new(900, m.fighters[a].def.clone(), 0, 1);
+    helper.is_helper = true;
+    helper.parent = Some(m.fighters[a].id);
+    helper.root = m.fighters[a].id;
+    m.fighters.push(helper);
+    (m, a, b, h)
+}
+
+#[test]
+fn team_map_is_shared_between_teammates_only() {
+    let (mut m, a, b, _) = team_setup();
+    crate::controllers::run(&mut m, a, &sctrl("teammapset", &[("map", "\"Meter\""), ("value", "4")]));
+    crate::controllers::run(&mut m, b, &sctrl("teammapadd", &[("map", "meter"), ("value", "3")]));
+    assert_eq!(ev(&m, a, "teammap(meter)"), 7.0);
+    assert_eq!(ev(&m, b, "teammap(meter)"), 7.0);
+    assert_eq!(ev(&m, a, "map(meter)"), 0.0);
+    assert_eq!(ev(&m, 1, "teammap(meter)"), 0.0);
+}
+
+#[test]
+fn root_and_parent_maps_write_to_other_fighters() {
+    let (mut m, a, b, h) = team_setup();
+    crate::controllers::run(&mut m, h, &sctrl("rootmapset", &[("map", "k"), ("value", "9")]));
+    crate::controllers::run(&mut m, h, &sctrl("parentmapadd", &[("map", "p"), ("value", "2")]));
+    assert_eq!(ev(&m, a, "map(k)"), 9.0);
+    assert_eq!(ev(&m, a, "map(p)"), 2.0);
+    assert_eq!(ev(&m, h, "map(k)"), 0.0);
+    assert_eq!(ev(&m, b, "map(k)"), 0.0);
+    assert_eq!(ev(&m, h, "root, map(k)"), 9.0);
+    crate::controllers::run(&mut m, a, &sctrl("parentmapset", &[("map", "orphan"), ("value", "1")]));
+    assert_eq!(ev(&m, a, "map(orphan)"), 0.0);
+}
+
+#[test]
+fn map_reset_clears_one_key_or_whole_scope() {
+    let (mut m, a, b, _) = team_setup();
+    crate::controllers::run(&mut m, a, &sctrl("mapset", &[("map", "x"), ("value", "1")]));
+    crate::controllers::run(&mut m, a, &sctrl("mapset", &[("map", "y"), ("value", "2")]));
+    crate::controllers::run(&mut m, b, &sctrl("mapset", &[("map", "x"), ("value", "5")]));
+    crate::controllers::run(&mut m, a, &sctrl("mapreset", &[("map", "x")]));
+    assert_eq!(ev(&m, a, "map(x)"), 0.0);
+    assert_eq!(ev(&m, a, "map(y)"), 2.0);
+    assert_eq!(ev(&m, b, "map(x)"), 5.0);
+    crate::controllers::run(&mut m, a, &sctrl("mapreset", &[]));
+    assert_eq!(ev(&m, a, "map(y)"), 0.0);
+    crate::controllers::run(&mut m, a, &sctrl("teammapset", &[("map", "t1"), ("value", "1")]));
+    crate::controllers::run(&mut m, a, &sctrl("teammapset", &[("map", "t2"), ("value", "2")]));
+    crate::controllers::run(&mut m, b, &sctrl("teammapreset", &[("map", "t1")]));
+    assert_eq!(ev(&m, a, "teammap(t1)"), 0.0);
+    assert_eq!(ev(&m, a, "teammap(t2)"), 2.0);
+    crate::controllers::run(&mut m, b, &sctrl("teammapreset", &[]));
+    assert_eq!(ev(&m, a, "teammap(t2)"), 0.0);
+}
+
+#[test]
+fn map_store_bounds_keys() {
+    let mut s = crate::ikemen::MapStore::default();
+    for k in 0..crate::ikemen::MAP_MAX_KEYS + 20 { s.set(&format!("k{k}"), 1.0, false); }
+    assert_eq!(s.len(), crate::ikemen::MAP_MAX_KEYS);
+    s.set(&"a".repeat(crate::ikemen::MAP_MAX_KEY_LEN + 1), 1.0, false);
+    assert_eq!(s.len(), crate::ikemen::MAP_MAX_KEYS);
+    s.set("k0", 5.0, true);
+    assert_eq!(s.get("k0"), 6.0);
+}
+
+#[test]
+fn root_var_set_and_add_write_to_root() {
+    let (mut m, a, _, h) = team_setup();
+    crate::controllers::run(&mut m, h, &sctrl("rootvarset", &[("var(3)", "10"), ("fvar(2)", "1.5")]));
+    crate::controllers::run(&mut m, h, &sctrl("rootvaradd", &[("v", "3"), ("value", "5")]));
+    assert_eq!(m.fighters[a].vars[3], 15);
+    assert_eq!(m.fighters[a].fvars[2], 1.5);
+    assert_eq!(m.fighters[h].vars[3], 0);
+}

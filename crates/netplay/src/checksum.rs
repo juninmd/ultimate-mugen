@@ -69,7 +69,7 @@ pub fn checksum(m: &Match) -> u128 {
         for v in [f.state_no, f.prev_state_no, f.state_time, f.anim_no, f.anim_real, f.elem as i32, f.elem_time, f.anim_elapsed] {
             h.i32(v);
         }
-        for v in [f.hit_pause, f.hit_shake, f.hit_over_time, f.slide_time, f.fall_time, f.juggle_used, f.move_contact, f.move_hit, f.hit_count, f.combo_count] {
+        for v in [f.hit_pause, f.hit_shake, f.hit_over_time, f.slide_time, f.fall_time, f.juggle_used, f.move_contact, f.move_hit, f.hit_count, f.uniq_hit_count, f.combo_count] {
             h.i32(v);
         }
         h.bytes(&[f.state_type as u8, f.move_type as u8, f.physics as u8, f.ctrl as u8, f.alive as u8, f.hitdef_active as u8]);
@@ -85,7 +85,8 @@ pub fn checksum(m: &Match) -> u128 {
         for v in f.sysvars {
             h.i32(v);
         }
-        h.u32(f.asserts);
+        h.u32(f.asserts as u32);
+        h.u32((f.asserts >> 32) as u32);
         h.i64(f.history.tick);
     }
     for e in &m.explods {

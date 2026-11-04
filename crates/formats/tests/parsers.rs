@@ -277,3 +277,29 @@ fn add_dir_expands_zips() {
     assert_eq!(find_char_defs(&vfs), vec!["my/root/chars/pack/guy/guy.def"]);
     let _ = std::fs::remove_dir_all(&root);
 }
+
+#[test]
+fn path_normalization_preserves_unicode_and_separator_rules() {
+    for (input, expected) in [
+        ("", ""),
+        ("./", ""),
+        (".\\\\KFM///", "/kfm/"),
+        ("././DATA//COMMON.CNS", "./data/common.cns"),
+        ("C:\\Chars\\KFM.DEF", "c:/chars/kfm.def"),
+        (".\\Chars\\AİΟΣ//É.DEF", "chars/ai̇ος/é.def"),
+    ] {
+        assert_eq!(norm_path(input), expected, "{input:?}");
+    }
+}
+
+#[test]
+fn folder_fallback_prefers_character_subtree_over_prefix_siblings() {
+    let vfs = Vfs::from([
+        ("chars/kfm-extra/anims/fight.air".into(), vec![1]),
+        ("chars/kfm/nested/fight.air".into(), vec![2]),
+        ("shared/common.cns".into(), vec![3]),
+    ]);
+    assert_eq!(resolve(&vfs, "Chars\\KFM", "wrong/fight.air"), Some(&[2][..]));
+    assert_eq!(resolve(&vfs, "chars/kfm", "common.cns"), Some(&[3][..]));
+    assert_eq!(resolve(&vfs, "", "fight.air"), Some(&[1][..]));
+}

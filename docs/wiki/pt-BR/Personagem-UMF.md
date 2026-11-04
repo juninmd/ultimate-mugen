@@ -172,6 +172,7 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `/` | Segurar | `/B, F, x` |
 | `$` | Direção inclusiva (`$D` aceita DB, D, DF) | `$D, x` |
 | `>` | Sem nenhuma outra entrada entre os passos | `F, >F` |
+| `N` | Direção neutra (nenhuma direção pressionada) | `N, x` |
 
 ## Sprites pixel art (opcional)
 

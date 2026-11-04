@@ -39,7 +39,10 @@ pub struct Controller {
     pub uid: u32,
 }
 impl Controller {
-    pub fn param(&self, k: &str) -> Option<&Param> { self.params.iter().find(|(n, _)| n == k).map(|(_, p)| p) }
+    pub fn param(&self, k: &str) -> Option<&Param> {
+        crate::diagnostics::note_param_read(k);
+        self.params.iter().find(|(n, _)| n == k).map(|(_, p)| p)
+    }
     pub fn has(&self, k: &str, i: usize) -> bool { self.param(k).is_some_and(|p| p.exprs.len() > i) }
     pub fn raw(&self, k: &str) -> Option<&str> { self.param(k).map(|p| p.raw.as_str()) }
 }
@@ -58,7 +61,7 @@ pub fn safe_expr(src: &str) -> Expr { Expr::new(parse(src).unwrap_or(Node::Num(0
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Source { Mugen, Native }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct MoveInfo { pub name: String, pub input: String, pub command: String }
 
 #[derive(Debug)]
@@ -69,7 +72,7 @@ pub struct CharDef {
     pub author: String,
     pub source: Source,
     pub local_w: f32,
-    pub local_h: f32,
+    pub local_h: f64,
     pub constants: HashMap<String, f64>,
     pub sprites: HashMap<(i32, i32), Sprite>,
     pub anims: HashMap<i32, Animation>,
@@ -82,22 +85,50 @@ pub struct CharDef {
     pub color: [u8; 3],
     pub series: String,
     pub description: String,
-    /// story lines (round-start face-off, victory) and the transformed form's name; `boss` = arcade final boss
     pub intro: String, pub taunt: String, pub win_quote: String, pub form_name: String, pub boss: bool,
-    pub palettes: HashMap<PalKey, Arc<Vec<u8>>>, pub indexed: HashMap<(i32, i32), IndexedSprite>,
-    pub remap_cache: Mutex<HashMap<((i32, i32), PalKey), Arc<ImageData>>>,
     pub mugen_version: f32,
     pub unknown_asserts: Vec<String>,
+    pub source_spans: crate::diagnostics::SourceSpans,
+    pub diagnostics_cache: std::sync::OnceLock<crate::diagnostics::Diagnostics>,
 }
 impl CharDef {
     pub fn empty(id: &str) -> Self {
         CharDef {
-            id: id.into(), name: id.into(), display_name: id.into(), author: String::new(), source: Source::Native, local_w: 320.0, local_h: 240.0,
-            constants: default_constants(), sprites: HashMap::new(), anims: HashMap::new(), commands: vec![], states: HashMap::new(), sounds: HashMap::new(),
-            portrait: None, movelist: vec![], ai_commands: vec![], color: [90, 100, 140], series: String::new(), description: String::new(),
-            intro: String::new(), taunt: String::new(), win_quote: String::new(), form_name: String::new(), boss: false, mugen_version: 1.0, unknown_asserts: vec![],
-            palettes: HashMap::new(), indexed: HashMap::new(), remap_cache: Mutex::new(HashMap::new()),
+            id: id.into(),
+            name: id.into(),
+            display_name: id.into(),
+            author: String::new(),
+            source: Source::Native,
+            local_w: 320.0,
+            local_h: 240.0,
+            constants: default_constants(),
+            sprites: HashMap::new(),
+            anims: HashMap::new(),
+            commands: vec![],
+            states: HashMap::new(),
+            sounds: HashMap::new(),
+            portrait: None,
+            movelist: vec![],
+            ai_commands: vec![],
+            color: [90, 100, 140],
+            series: String::new(),
+            description: String::new(),
+            intro: String::new(),
+            taunt: String::new(),
+            win_quote: String::new(),
+            form_name: String::new(),
+            boss: false,
+            mugen_version: 1.0,
+            unknown_asserts: vec![],
+            source_spans: Default::default(),
+            diagnostics_cache: Default::default(),
+            palettes: HashMap::new(),
+            indexed: HashMap::new(),
+            remap_cache: Mutex::new(HashMap::new()),
         }
+    }
+    pub fn diagnostics(&self) -> &crate::diagnostics::Diagnostics {
+        self.diagnostics_cache.get_or_init(|| crate::diagnostics::audit_char(self, &self.source_spans))
     }
     pub fn c(&self, k: &str, d: f64) -> f64 { *self.constants.get(k).unwrap_or(&d) }
 

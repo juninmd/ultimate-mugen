@@ -276,6 +276,19 @@ pub async fn run(app: &mut App, dir: &str) {
         screen(app, dir, "stage-select", 8).await;
         return;
     }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("select") {
+        app.mode = Mode::Cpu;
+        let ids = ["kaname", "valdric", "akio", "kaito"];
+        let cur = [find(app, ids[0]), find(app, ids[1])];
+        app.screen = Screen::Select { cur, picking: 0, picked: [None, None] };
+        screen(app, dir, "select-1p", 60).await;
+        app.screen = Screen::Select { cur: [find(app, ids[2]), find(app, ids[1])], picking: 1, picked: [Some(find(app, ids[2])), None] };
+        screen(app, dir, "select-2p", 60).await;
+        app.mode = Mode::TeamSimul; app.team_n = 5; app.team_pick = vec![find(app, "kaito"), find(app, "lian"), find(app, ids[0])];
+        app.screen = Screen::Select { cur: [find(app, ids[3]), 0], picking: 0, picked: [None, None] };
+        screen(app, dir, "select-team5", 60).await;
+        return;
+    }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("fx") { fx_tour(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("menu") {
         app.screen = Screen::Title;

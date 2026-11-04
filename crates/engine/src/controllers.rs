@@ -1,4 +1,3 @@
-//! State controller implementations (~90 MUGEN sctrls).
 use crate::chardef::Controller;
 use crate::fighter::{asf, AfterImage, Bind, BindKind, HitOverride, PalFx};
 use crate::palette::{AfterImageParams, Trans};
@@ -325,7 +324,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "defencemulset" => { let v = n(m, "value", 1.0) as f32; m.fighters[i].defence_mul = v; }
         "attackdist" => { let v = n(m, "value", 160.0) as f32; if let Some(h) = m.fighters[i].hitdef.as_mut() { h.guard_dist = v; } }
         "makedust" => { let (px, py) = (n2(m, "pos", 0.0, 0) as f32, n2(m, "pos", 0.0, 1) as f32); let f = &m.fighters[i]; let (x, y) = (f.pos.x + px * f.facing, f.pos.y + py); m.spawn_dust(i, x, y); }
-        _ => { if !crate::sctrl::run(m, i, sc) { crate::ikemen::run(m, i, sc); } }
+        _ => { if !crate::sctrl::run(m, i, sc) && !crate::ikemen::run(m, i, sc) { crate::diagnostics::note_unsupported(crate::diagnostics::Category::Controller, &sc.kind); } }
     }
     let _ = Arc::strong_count(&m.common);
 }

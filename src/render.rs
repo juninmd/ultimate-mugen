@@ -305,6 +305,12 @@ impl MatchRenderer {
             }
         }
         let Some(fr) = f.frame() else { return };
+        let mut frame = fr.clone();
+        if let Some((_, to, t)) = f.sprite_remap.iter().find(|(from, _, t)| *t != 0 && *from == (frame.group, frame.index)) { frame.group = to.0; frame.index = to.1; }
+        let mut extra = f.draw_scale;
+        let mut angle_extra = 0.0;
+        if let Some((scale, angle, _, t)) = f.sprite_transform { if t != 0 { extra = [extra[0] * scale, extra[1] * scale]; angle_extra = angle; } }
+        let fr = &frame;
         let mut x = f.pos.x + f.draw_offset.x * f.facing;
         let hit = f.hit_shake > 0 && f.move_type == 'H';
         if hit { x += if f.hit_shake % 2 == 1 { 1.5 } else { -1.5 }; }
@@ -328,7 +334,7 @@ impl MatchRenderer {
             o.tint = Color::new(1.0 + (c[0] - 1.0) * k, 1.0 + (c[1] - 1.0) * k, 1.0 + (c[2] - 1.0) * k, 1.0);
             let pulse = (0.38 + 0.14 * (m.game_time as f32 * 0.3).sin()) * amb;
             for (dx, dy) in [(-1.8, 0.0), (1.8, 0.0), (0.0, -1.8), (0.0, 1.8)] {
-                Self::draw_sprite(g, m, &f.anim_def, fr, x + dx, f.pos.y + dy, f.facing, f.lscl, f.draw_scale, &DrawOpts { add: true, alpha: pulse, tint: Color::new(c[0], c[1], c[2], 1.0), ..Default::default() }, shx, shy);
+                Self::draw_sprite(g, m, &f.anim_def, fr, x + dx, f.pos.y + dy, f.facing, f.lscl, extra, &DrawOpts { angle: angle_extra, add: true, alpha: pulse, tint: Color::new(c[0], c[1], c[2], 1.0), ..Default::default() }, shx, shy);
             }
         }
         // the fallen fighter loses its colour once the round is decided (the match-deciding defeat even more)
@@ -337,11 +343,12 @@ impl MatchRenderer {
         if m.pause.as_ref().is_some_and(|p| p.is_super && (p.by == f.id || p.by == f.root)) {
             let pulse = 0.55 + 0.35 * (m.game_time as f32 * 0.35).sin();
             for (dx, dy) in [(-1.6, 0.0), (1.6, 0.0), (0.0, -1.6), (0.0, 1.6), (-1.2, -1.2), (1.2, 1.2), (-1.2, 1.2), (1.2, -1.2)] {
-                Self::draw_sprite(g, m, &f.anim_def, fr, x + dx, f.pos.y + dy, f.facing, f.lscl, f.draw_scale, &DrawOpts { add: true, alpha: pulse * 0.28, tint: Color::new(1.0, 0.8, 0.3, 1.0), ..Default::default() }, shx, shy);
+                Self::draw_sprite(g, m, &f.anim_def, fr, x + dx, f.pos.y + dy, f.facing, f.lscl, extra, &DrawOpts { angle: angle_extra, add: true, alpha: pulse * 0.28, tint: Color::new(1.0, 0.8, 0.3, 1.0), ..Default::default() }, shx, shy);
             }
         }
         let sq = self.squash.get(fi).copied().unwrap_or([1.0, 1.0]);
-        let ds = [f.draw_scale[0] * sq[0], f.draw_scale[1] * sq[1]];
+        let ds = [extra[0] * sq[0], extra[1] * sq[1]];
+        o.angle += angle_extra;
         Self::draw_sprite(g, m, &f.anim_def, fr, x, f.pos.y + f.draw_offset.y, f.facing, f.lscl, ds, &o, shx, shy);
     }
 

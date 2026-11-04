@@ -78,6 +78,172 @@ fn combo_accumulator_clears_after_the_window() {
 }
 
 #[test]
+fn stats_score_and_round_time_follow_the_match() {
+    let stats = "
+[Statedef 200]
+type = S
+movetype = A
+physics = S
+anim = 200
+ctrl = 0
+
+[State 200, hit]
+type = HitDef
+trigger1 = Time = 0
+attr = S, NA
+damage = 40
+hitflag = MAF
+pausetime = 0, 0
+ground.velocity = -2
+ground.hittime = 10
+";
+    let mut m = duel(mugen_char("a", stats), mugen_char("b", ""));
+    face_off(&mut m, 55.0);
+    enter(&mut m, 0, 200);
+    for _ in 0..40 { m.tick(&[0, 0]); if m.fighters[1].received_hits > 0 { break; } }
+    assert_eq!(m.fighters[1].received_hits, 1);
+    assert!(m.fighters[1].received_damage > 0.0);
+    assert_eq!(m.first_attack, Some(0));
+    let ev = |m: &Match, i: usize, e: &str| m.ev(i, &ume_engine::expr::Expr::new(ume_engine::expr::parse(e).unwrap()));
+    assert!(ev(&m, 0, "FirstAttack") == 1.0);
+    assert!(ev(&m, 0, "Round") > 0.0);
+    assert!(ev(&m, 0, "TimeElapsed") >= 0.0);
+
+    let scorer = "
+[Statedef 450]
+type = S
+physics = S
+
+[State 450, score]
+type = ScoreAdd
+trigger1 = Time = 0
+value = 25
+
+[State 450, timer]
+type = RoundTimeSet
+trigger1 = Time = 0
+value = 30
+";
+    let mut m = duel(mugen_char("a", scorer), mugen_char("b", ""));
+    enter(&mut m, 0, 450);
+    m.tick(&[0, 0]);
+    assert!((m.fighters[0].score - 25.0).abs() < 1e-6, "score {}", m.fighters[0].score);
+    assert_eq!(m.timer, 30 * 60);
+    assert!((ev(&m, 0, "Score") - 25.0).abs() < 1e-6);
+    assert!((ev(&m, 0, "TimeRemaining") - 30.0).abs() < 1e-6, "remaining {}", ev(&m, 0, "TimeRemaining"));
+}
+
+#[test]
+fn input_override_controllers_act_deterministically() {
+    let asserted = "
+[Statedef 500]
+type = S
+physics = S
+
+[State 500, cmd]
+type = AssertCommand
+trigger1 = Time = 0
+value = hadou
+time = 5
+
+[State 500, input]
+type = AssertInput
+trigger1 = Time = 0
+value = 32
+time = 3
+
+[State 500, shift]
+type = ShiftInput
+trigger1 = Time = 0
+value = 2
+";
+    let mut m = duel(mugen_char("a", asserted), mugen_char("b", ""));
+    enter(&mut m, 0, 500);
+    m.tick(&[0, 0]);
+    assert!(m.has_command(0, "hadou"), "AssertCommand makes the command visible");
+    let t1 = m.fighters[0].history.tick;
+    m.tick(&[0, 0]);
+    assert_eq!(m.fighters[0].history.tick - t1, 3, "ShiftInput pushes two extra history ticks before the current one");
+    assert!(m.fighters[0].history.at(m.fighters[0].history.tick) & 32 != 0, "AssertInput injects the button bits");
+    for _ in 0..6 { m.tick(&[0, 0]); }
+    assert!(!m.has_command(0, "hadou"), "the assertion expires after its time");
+}
+
+#[test]
+fn hitdef_life_parameters_feed_the_life_systems() {
+    let striker = "
+[Statedef 200]
+type = S
+movetype = A
+physics = S
+anim = 200
+ctrl = 0
+
+[State 200, hit]
+type = HitDef
+trigger1 = Time = 0
+attr = S, NA
+damage = 40
+hitflag = MAF
+pausetime = 0, 0
+ground.velocity = -2
+ground.hittime = 10
+redlife = 50
+dizzypoints = 60
+guardpoints = 60
+score = 10
+sparkscale = 2
+unhittabletime = 8
+";
+    let mut m = duel(mugen_char("a", striker), mugen_char("b", ""));
+    m.fighters[1].ikemen.dizzy_points = 5.0;
+    m.fighters[1].ikemen.guard_points = 5.0;
+    face_off(&mut m, 55.0);
+    enter(&mut m, 0, 200);
+    for _ in 0..40 { m.tick(&[0, 0]); if m.fighters[1].received_hits > 0 { break; } }
+    let d = &m.fighters[1];
+    assert_eq!(d.received_hits, 1);
+    assert!(d.ikemen.red_life > d.life, "red life {} > life {}", d.ikemen.red_life, d.life);
+    assert!(d.ikemen.dizzy, "the dizzy meter was drained");
+    assert!(d.unhittable > 0, "unhittabletime grants invincibility ticks");
+    assert!((m.fighters[0].score - 10.0).abs() < 1e-6, "attacker score {}", m.fighters[0].score);
+}
+
+#[test]
+fn sprite_sctrls_register_overrides() {
+    let cns = "
+[Statedef 510]
+type = S
+physics = S
+
+[State 510, remap]
+type = RemapSprite
+trigger1 = Time = 0
+from = 0, 0
+to = 9000, 1
+time = 3
+
+[State 510, transform]
+type = TransformSprite
+trigger1 = Time = 0
+scale = 2
+angle = 90
+time = 2
+";
+    let mut m = duel(mugen_char("a", cns), mugen_char("b", ""));
+    enter(&mut m, 0, 510);
+    m.tick(&[0, 0]);
+    let remap = m.fighters[0].sprite_remap.first().copied().expect("a remap is registered");
+    assert_eq!((remap.0, remap.1), ((0, 0), (9000, 1)));
+    assert!(remap.2 > 0);
+    let (scale, angle, _, life) = m.fighters[0].sprite_transform.expect("a transform is registered");
+    assert!((scale - 2.0).abs() < 1e-6 && (angle - 90.0).abs() < 1e-6 && life > 0);
+    for _ in 0..6 { m.tick(&[0, 0]); }
+    assert!(m.fighters[0].sprite_remap.is_empty(), "the remap expires");
+    assert!(m.fighters[0].sprite_transform.is_none(), "the transform expires");
+}
+
+#[test]
 fn playsnd_flags_are_exposed_for_stop_on_hit_and_state_change() {
     let cns = "
 [Statedef 400]

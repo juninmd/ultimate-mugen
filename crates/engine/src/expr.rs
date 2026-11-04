@@ -332,6 +332,25 @@ pub fn eval<H: Host>(n: &Node, h: &H) -> f64 {
                 if args.len() < 3 { return 0.0; }
                 if eval(&args[0], h) != 0.0 { eval(&args[1], h) } else { eval(&args[2], h) }
             }
+            "__str" => 0.0,
+            "e" => std::f64::consts::E,
+            "pi" => std::f64::consts::PI,
+            "abs" if args.len() == 1 => eval(&args[0], h).abs(),
+            "floor" if args.len() == 1 => eval(&args[0], h).floor(),
+            "ceil" if args.len() == 1 => eval(&args[0], h).ceil(),
+            "sin" if args.len() == 1 => eval(&args[0], h).sin(),
+            "cos" if args.len() == 1 => eval(&args[0], h).cos(),
+            "tan" if args.len() == 1 => eval(&args[0], h).tan(),
+            "asin" if args.len() == 1 => eval(&args[0], h).asin(),
+            "acos" if args.len() == 1 => eval(&args[0], h).acos(),
+            "atan" if args.len() == 1 => eval(&args[0], h).atan(),
+            "exp" if args.len() == 1 => eval(&args[0], h).exp(),
+            "ln" if args.len() == 1 => eval(&args[0], h).ln(),
+            "sqrt" if args.len() == 1 => eval(&args[0], h).sqrt(),
+            "sign" if args.len() == 1 => eval(&args[0], h).signum(),
+            "min" if args.len() == 2 => { let (x, y) = (eval(&args[0], h), eval(&args[1], h)); if x.is_nan() || y.is_nan() { f64::NAN } else { x.min(y) } }
+            "max" if args.len() == 2 => { let (x, y) = (eval(&args[0], h), eval(&args[1], h)); if x.is_nan() || y.is_nan() { f64::NAN } else { x.max(y) } }
+            "clamp" if args.len() == 3 => { let (v, lo, hi) = (eval(&args[0], h), eval(&args[1], h), eval(&args[2], h)); if v.is_nan() || lo.is_nan() || hi.is_nan() { f64::NAN } else { v.max(lo).min(hi) } }
             _ => h.trigger(name, args, *comp, raw.as_deref()),
         },
     }

@@ -8,7 +8,8 @@ pub struct Ctx<'a> { pub m: &'a Match, pub i: usize }
 const HIT_VARS: &[&str] = &[
     "type", "animtype", "airtype", "groundtype", "damage", "hitcount", "guardcount", "hitshaketime", "hittime", "slidetime", "ctrltime",
     "recovertime", "xvel", "yvel", "yaccel", "chainid", "guarded", "fall", "fall.damage", "fall.xvel", "fall.yvel", "fall.recover",
-    "fall.time", "fall.recovertime", "fall.kill", "kill", "id", "playerid", "playerno", "down.recover", "priority", "facing", "power",
+    "fall.time", "fall.recovertime", "fall.kill", "fall.envshake.time", "fall.envshake.freq", "fall.envshake.ampl", "fall.envshake.phase",
+    "kill", "id", "playerid", "playerno", "down.recover", "priority", "facing", "power",
     "isbound", "attr", "guardflag", "hitdamage", "guarddamage", "hitpower", "guardpower", "dizzypoints", "guardpoints", "redlife",
     "score", "teamside", "projid", "p1stateno", "p2stateno",
 ];
@@ -47,6 +48,8 @@ impl<'a> Ctx<'a> {
             "guarded" => g.guarded as i32 as f64, "fall" => g.fall as i32 as f64, "fall.damage" => g.fall_damage as f64,
             "fall.xvel" => g.fall_xvel as f64 / l, "fall.yvel" => g.fall_yvel as f64 / l, "fall.recover" => g.fall_recover as i32 as f64,
             "fall.time" => f.fall_time as f64, "fall.recovertime" => g.fall_recover_time as f64, "fall.kill" => g.fall_kill as i32 as f64,
+            "fall.envshake.time" => g.fall_env_shake.time as f64, "fall.envshake.freq" => g.fall_env_shake.freq as f64,
+            "fall.envshake.ampl" => (g.fall_env_shake.ampl / f.lscl) as f64, "fall.envshake.phase" => g.fall_env_shake.phase as f64,
             "kill" => g.kill as i32 as f64, "id" | "playerid" => g.attacker_id as f64, "playerno" => g.attacker_no as f64, "down.recover" => g.down_recover as i32 as f64,
             "recovertime" => if g.fall && g.fall_recover { (g.fall_recover_time - f.fall_time).max(0) as f64 } else { 0.0 },
             "priority" => g.priority as f64, "facing" => g.facing as f64, "power" => g.power as f64, "isbound" => b(f.bind.is_some()),
@@ -78,7 +81,8 @@ fn b(x: bool) -> f64 { x as i32 as f64 }
 fn attr_kind_match(want: &str, have: &[String]) -> bool {
     let w = want.as_bytes();
     if w.len() != 2 { return false; }
-    have.iter().any(|k| { let k = k.as_bytes(); k.len() == 2 && (w[0] == b'A' || w[0] == k[0]) && w[1] == k[1] })
+    let (w0, w1) = (w[0].to_ascii_uppercase(), w[1].to_ascii_uppercase());
+    have.iter().any(|k| { let k = k.as_bytes(); k.len() == 2 && (w0 == b'A' || w0 == k[0].to_ascii_uppercase()) && w1 == k[1].to_ascii_uppercase() })
 }
 
 impl<'a> Host for Ctx<'a> {
@@ -119,10 +123,9 @@ impl<'a> Host for Ctx<'a> {
             "hitdefattr" => {
                 let Some(hd) = f.hitdef.as_ref() else { return neg };
                 if f.move_type != 'A' { return neg; }
-                let st = v0.to_ascii_uppercase();
-                if st.is_empty() || !st.chars().all(|c| "SCA".contains(c)) { return neg; }
-                let ok_state = hd.attr_state.chars().any(|c| st.contains(c));
-                ok_state && (values.len() == 1 || values[1..].iter().any(|v| attr_kind_match(&v.to_ascii_uppercase(), &hd.attr_kind)))
+                if v0.is_empty() || !v0.chars().all(|c| "SCAsca".contains(c)) { return neg; }
+                let ok_state = hd.attr_state.chars().any(|c| v0.chars().any(|v| v.eq_ignore_ascii_case(&c)));
+                ok_state && (values.len() == 1 || values[1..].iter().any(|v| attr_kind_match(v, &hd.attr_kind)))
             }
             _ => { crate::diagnostics::note_unsupported(crate::diagnostics::Category::StringTrigger, name); false }
         };

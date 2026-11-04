@@ -200,8 +200,8 @@ impl Match {
         match sc.param(k).and_then(|p| p.exprs.get(idx)).map(|e| self.ev(i, e)) { Some(v) if !v.is_nan() => v, _ => d }
     }
     fn apply_assigns(&mut self) {
-        let list: Vec<_> = self.assigns.borrow_mut().drain(..).collect();
-        for (i, name, idx, v) in list {
+        if self.assigns.get_mut().is_empty() { return; }
+        for (i, name, idx, v) in self.assigns.get_mut().drain(..) {
             let Some(f) = self.fighters.get_mut(i) else { continue };
             let u = idx as usize;
             match name.as_str() {
@@ -617,9 +617,8 @@ impl Match {
             if bits & crate::input::k::T != 0 { awaken.push(fi); }
             k += 1;
             f.history.push(bits, f.facing as i32);
-            let def = f.def.clone();
             let paused = f.hit_pause > 0 || f.hit_shake > 0 || frozen_by_pause(f);
-            f.cmd.update(&f.history, &def.commands, paused);
+            f.cmd.update(&f.history, &f.def.commands, paused);
         }
         for fi in awaken { self.try_transform(fi); }
         let mut ids = std::mem::take(&mut self.tick_ids);
@@ -822,14 +821,19 @@ impl Match {
         None
     }
     fn attr_match(hd: &HitDefData, spec: &str) -> bool {
-        let spec = spec.replace(char::is_whitespace, "").to_ascii_uppercase();
         let mut it = spec.split(',');
         let s = it.next().unwrap_or("");
         let my = hd.attr_state.chars().find(|c| "SCA".contains(*c)).unwrap_or('S');
-        if !s.contains(my) { return false; }
-        let kinds: Vec<&str> = it.collect();
-        if kinds.is_empty() { return true; }
-        hd.attr_kind.iter().any(|ak| kinds.iter().any(|k| *k == ak || (k.len() == 2 && k.starts_with('A') && ak.ends_with(&k[1..]))))
+        if !s.chars().any(|c| c.to_ascii_uppercase() == my) { return false; }
+        let mut has_kinds = false;
+        for raw in it {
+            let k = raw.trim();
+            if k.is_empty() { continue; }
+            has_kinds = true;
+            let kb = k.as_bytes();
+            if hd.attr_kind.iter().any(|ak| ak.eq_ignore_ascii_case(k) || (kb.len() == 2 && kb[0].eq_ignore_ascii_case(&b'A') && ak.as_bytes().last().is_some_and(|l| l.eq_ignore_ascii_case(&kb[1])))) { return true; }
+        }
+        !has_kinds
     }
     pub fn can_be_hit(&self, d: usize, hd: &HitDefData, side: usize) -> bool {
         let f = &self.fighters[d];
@@ -907,12 +911,14 @@ impl Match {
             let fa = &self.fighters[a];
             if fa.destroyed || !fa.hitdef_active || (fa.move_type != 'A' && !fa.is_helper) { continue; }
             let Some(hd) = fa.hitdef.as_ref() else { continue };
+            let Some(fr) = fa.frame() else { continue };
+            if fr.clsn1.is_empty() { continue; }
             let c1 = fa.boxes(1);
-            if c1.is_empty() { continue; }
             for d in 0..self.fighters.len() {
                 let fd = &self.fighters[d];
                 if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) { continue; }
                 if hd.hit_once && !fa.hitdef_targets.is_empty() { continue; }
+                if fd.frame().is_none_or(|f| f.clsn2.is_empty()) { continue; }
                 if !self.can_be_hit(d, hd, fa.side) { continue; }
                 if let Some(at) = Self::overlap(&c1, &fd.boxes(2)) { pending.push((a, d, hd.clone(), at)); }
             }
@@ -1165,6 +1171,7 @@ impl Match {
     }
 
     pub fn spawn_explod(&mut self, i: usize, sc: &Controller) {
+        if self.explods.len() >= 512 { return; }
         let num = |m: &Match, k: &str, d: f64, idx: usize| m.num(i, sc, k, d, idx) as f32;
         let anim_raw = sc.raw("anim").unwrap_or("0").trim().to_string();
         let from_fx = anim_raw.starts_with(['f', 'F']);
@@ -1243,6 +1250,7 @@ impl Match {
     }
 
     fn update_explods(&mut self, paused: bool) {
+        if self.explods.is_empty() { return; }
         let ps = self.pause.as_ref().map(|p| p.is_super);
         let fighters = &self.fighters;
         self.explods.retain_mut(|e| {
@@ -1314,6 +1322,7 @@ impl Match {
     }
 
     pub fn spawn_projectile(&mut self, i: usize, sc: &Controller) {
+        if self.projectiles.len() >= 256 { return; }
         let num = |m: &Match, k: &str, d: f64, idx: usize| m.num(i, sc, k, d, idx) as f32;
         let f = &self.fighters[i];
         let anim = num(self, "projanim", 0.0, 0) as i32;
@@ -1359,6 +1368,7 @@ impl Match {
         if anim >= 0 && p.cur.def.anims.contains_key(&anim) { p.cur = AnimCursor::new(p.cur.def.clone(), anim); p.dying = true; } else { p.remove = true; }
     }
     fn update_projectiles(&mut self, paused: bool) {
+        if self.projectiles.is_empty() { return; }
         let super_pause = self.pause.as_ref().is_some_and(|p| p.is_super);
         let (left, right) = (self.camera.x - self.view_w / 2.0, self.camera.x + self.view_w / 2.0);
         let (stage_l, stage_r) = (self.stage.bound_left - self.view_w / 2.0, self.stage.bound_right + self.view_w / 2.0);

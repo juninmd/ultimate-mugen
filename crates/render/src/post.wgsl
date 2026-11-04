@@ -1,9 +1,10 @@
-struct Params { p0: vec4<f32>, p1: vec4<f32>, p2: vec4<f32>, p3: vec4<f32>, p4: vec4<f32> }
+struct Params { p0: vec4<f32>, p1: vec4<f32>, p2: vec4<f32>, p3: vec4<f32>, p4: vec4<f32>, glass: array<vec4<f32>, 32> }
 
 @group(0) @binding(0) var<uniform> u: Params;
 @group(0) @binding(1) var src: texture_2d<f32>;
 @group(0) @binding(2) var bloom: texture_2d<f32>;
 @group(0) @binding(3) var samp: sampler;
+@group(0) @binding(4) var frost: texture_2d<f32>;
 
 struct VOut { @builtin(position) clip: vec4<f32>, @location(0) uv: vec2<f32> }
 
@@ -32,6 +33,50 @@ fn fs_blur(v: VOut) -> @location(0) vec4<f32> {
     return vec4<f32>(s, 1.0);
 }
 
+@fragment
+fn fs_copy(v: VOut) -> @location(0) vec4<f32> {
+    let d = u.p0.zw;
+    let s = textureSample(src, samp, v.uv + vec2<f32>(d.x, d.y)).rgb + textureSample(src, samp, v.uv + vec2<f32>(-d.x, d.y)).rgb + textureSample(src, samp, v.uv + vec2<f32>(d.x, -d.y)).rgb + textureSample(src, samp, v.uv + vec2<f32>(-d.x, -d.y)).rgb;
+    return vec4<f32>(s * 0.25, 1.0);
+}
+
+fn rounded_box(p: vec2<f32>, c: vec2<f32>, h: vec2<f32>, r: f32) -> f32 {
+    let q = abs(p - c) - h + vec2<f32>(r);
+    return length(max(q, vec2<f32>(0.0))) + min(max(q.x, q.y), 0.0) - r;
+}
+
+fn glass_layer(base: vec3<f32>, uv: vec2<f32>, blurred: vec3<f32>) -> vec3<f32> {
+    let px = uv * u.p4.yz;
+    let th = u.p4.w;
+    let luma = dot(blurred, vec3<f32>(0.299, 0.587, 0.114));
+    let frosted = mix(vec3<f32>(luma), blurred, 1.3);
+    var col = base;
+    let n = i32(u.p3.w);
+    for (var i = 0; i < n; i++) {
+        let a = u.glass[2 * i];
+        let b = u.glass[2 * i + 1];
+        let c = (a.xy + a.zw) * 0.5;
+        let h = (a.zw - a.xy) * 0.5;
+        let d = rounded_box(px, c, h, b.x);
+        let reach = b.x * 1.2 + 9.0 * th;
+        let ds = rounded_box(px, c + vec2<f32>(0.0, 3.0 * th), h, b.x);
+        let shadow = (1.0 - smoothstep(-reach * 0.15, reach, ds)) * 0.42 * step(0.0, d);
+        col = col * (1.0 - shadow);
+        let inside = 1.0 - smoothstep(-0.75, 0.75, d);
+        let ty = clamp((px.y - a.y) / max(a.w - a.y, 1.0), 0.0, 1.0);
+        let tx = clamp((px.x - a.x) / max(a.z - a.x, 1.0), 0.0, 1.0);
+        var fr = frosted * 0.6 + b.yzw * 0.17 * (1.0 - ty * 0.5) + vec3<f32>(0.02);
+        fr *= mix(1.07, 0.88, ty);
+        let streak = 1.0 - smoothstep(0.0, 0.18, abs(tx - 0.22 - ty * 0.45));
+        fr += vec3<f32>(0.06) * streak * (1.0 - ty * 0.6);
+        col = mix(col, fr, inside * 0.94);
+        let rim = 1.0 - smoothstep(0.0, 1.3 * th, abs(d + 0.7 * th));
+        let rim_c = mix(vec3<f32>(0.95, 0.97, 1.0), vec3<f32>(0.55, 0.62, 0.8), pow(ty, 0.7));
+        col = mix(col, rim_c, rim * mix(0.6, 0.22, ty));
+    }
+    return col;
+}
+
 fn hash(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(12.9898, 78.233))) * 43758.5453); }
 
 @fragment
@@ -56,5 +101,7 @@ fn fs_composite(v: VOut) -> @location(0) vec4<f32> {
     let l2 = dot(col, vec3<f32>(0.299, 0.587, 0.114));
     col = select(col, mix(vec3<f32>(1.0) - col, vec3<f32>(smoothstep(0.35, 0.65, 1.0 - l2)), 0.55), u.p4.x > 0.5);
     col += (hash(v.uv * 1024.0 + u.p1.w) - 0.5) * u.p0.w;
+    let blurred = textureSample(frost, samp, v.uv).rgb;
+    if (u.p3.w > 0.5) { col = glass_layer(col, v.uv, blurred); }
     return vec4<f32>(col, 1.0);
 }

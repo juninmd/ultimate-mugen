@@ -99,7 +99,7 @@ fn render_all(nc: &NativeChar, jobs: Vec<(String, &NativeFrame)>, with_images: b
 
 /// Shared poses/animations every native character gets when it does not define its own: taunt, power-up (transformation)
 /// and the four defeat sequences (see `defaults.json`).
-fn with_defaults(nc: &NativeChar) -> NativeChar {
+pub(super) fn with_defaults(nc: &NativeChar) -> NativeChar {
     let d: Value = serde_json::from_str(include_str!("defaults.json")).unwrap_or(Value::Null);
     let mut out = nc.clone();
     if let Some(ps) = d.get("poses").and_then(|v| v.as_object()) { for (k, v) in ps { out.art.poses.entry(k.clone()).or_insert_with(|| v.clone()); } }
@@ -251,7 +251,12 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     }
     let mut states = HashMap::new();
     parse_states(&(minus1 + &cns), &mut states, true);
-    let portrait = anims.get(&0).and_then(|a: &Animation| a.frames.first()).and_then(|f| sprites.get(&(f.group, f.index)).cloned());
+    if with_images && std::env::var("UME_FORCE_RIG").is_err() {
+        if let Some(avatar) = super::pixel::portrait(nc) {
+            sprites.insert((9000, 1), avatar);
+        }
+    }
+    let portrait = sprites.get(&(9000, 1)).cloned().or_else(|| anims.get(&0).and_then(|a: &Animation| a.frames.first()).and_then(|f| sprites.get(&(f.group, f.index)).cloned()));
     let hex = nc.color.trim_start_matches('#');
     let cv = u32::from_str_radix(hex, 16).unwrap_or(0x5a648c);
     let mut d = CharDef::empty(&format!("umf:{}", nc.id));

@@ -1,1 +1,215 @@
-{"refHeight": 333}
+{
+  "frames": {
+    "airGuard": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "airGuardHit": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "bounce": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "crouch": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "crouch0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "crouch1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "crouchGuard": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "crouchGuardHit": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "fall1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "fall2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "guard": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "guardHit": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitAir1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitAir2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitH1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitH2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitH3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitL1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitL2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitL3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jumpStart": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jumpTop": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jumpUp": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "lk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "lk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "run0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "run1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "run2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "run3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "runStart": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "runStop": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "str0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "str1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "trip": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk4": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    }
+  },
+  "refHeight": 333
+}

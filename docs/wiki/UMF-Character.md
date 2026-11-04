@@ -172,6 +172,7 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `/` | Hold | `/B, F, x` |
 | `$` | Inclusive direction (`$D` accepts DB, D, DF) | `$D, x` |
 | `>` | No other input between steps | `F, >F` |
+| `N` | Neutral direction (no direction held) | `N, x` |
 
 ## Pixel-art sprites (optional)
 

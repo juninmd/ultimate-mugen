@@ -1,0 +1,25 @@
+[package]
+name = "ume-market"
+version = "0.2.0"
+edition = "2021"
+description = "GitHub marketplace for characters, stages and music: repository listing, safe download and local persistence"
+license = "MIT"
+
+[lib]
+name = "ume_market"
+path = "src/lib.rs"
+
+[dependencies]
+ume-formats = { path = "../formats" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+ureq = "=3.4.2"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+futures-util = { version = "0.3", default-features = false, features = ["alloc"] }
+web-sys = { version = "0.3", features = ["Window", "WorkerGlobalScope", "Request", "RequestInit", "RequestMode", "Response", "Headers", "AbortController", "AbortSignal"] }

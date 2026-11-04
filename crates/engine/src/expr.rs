@@ -61,9 +61,10 @@ pub enum Node {
 }
 
 const REDIRS: [&str; 10] = ["parent", "root", "helper", "target", "partner", "enemy", "enemynear", "playerid", "p2", "stateowner"];
-const STRCMP: [&str; 15] = ["command", "statetype", "movetype", "p2statetype", "p2movetype", "name", "p1name", "p2name", "p3name", "p4name", "authorname", "hitdefattr", "physics", "stagevar", "p2command"];
-const COMPONENT: [&str; 13] = ["vel", "pos", "p2dist", "p2bodydist", "p1dist", "rootdist", "parentdist", "screenpos", "camerapos", "hitvel", "camerazoom", "scale", "offset"];
-const RAWARG: [&str; 7] = ["const", "gethitvar", "stagevar", "const240p", "const480p", "const720p", "constcoord"];
+const STRCMP: &[&str] = &["command", "statetype", "movetype", "p2statetype", "p2movetype", "name", "p1name", "p2name", "p3name", "p4name", "p5name", "p6name", "p7name", "p8name", "authorname", "hitdefattr", "physics", "stagevar", "p2command", "hitbyattr", "prevstatetype", "prevmovetype", "displayname", "helpername", "selfcommand", "teammode"];
+const COMPONENT: [&str; 15] = ["vel", "pos", "p2dist", "p2bodydist", "p1dist", "rootdist", "parentdist", "screenpos", "camerapos", "hitvel", "camerazoom", "scale", "offset", "localcoord", "alpha"];
+const RAWARG: [&str; 12] = ["const", "gethitvar", "hitdefvar", "movehitvar", "stagevar", "zoomvar", "stagebgvar", "stageconst", "const240p", "const480p", "const720p", "constcoord"];
+const VARSPEC: &[&str] = &["explodvar", "projvar", "palfxvar", "clsnvar", "helpervar", "bgmvar", "spritevar", "animelemvar", "inputtime", "ikemenversion"];
 const LEVELS: [&[&str]; 11] = [&["||"], &["^^"], &["&&"], &["|"], &["^"], &["&"], &["=", "!=", ":="], &["<", "<=", ">", ">="], &["+", "-"], &["*", "/", "%"], &["**"]];
 
 struct Parser { t: Vec<Tok>, p: usize }
@@ -116,6 +117,30 @@ impl Parser {
         }
         self.primary()
     }
+    fn var_spec(&mut self, name: String) -> Result<Node, String> {
+        self.p += 1;
+        let mut segments: Vec<Vec<Tok>> = vec![vec![]];
+        let mut depth = 1;
+        loop {
+            let t = self.next();
+            match &t {
+                Tok::Eof => return Err("unterminated variable trigger".into()),
+                Tok::Op("(") => depth += 1,
+                Tok::Op(")") => { depth -= 1; if depth == 0 { break; } }
+                Tok::Op(",") if depth == 1 => { segments.push(vec![]); continue; }
+                _ => {}
+            }
+            if let Some(last) = segments.last_mut() { last.push(t); }
+        }
+        let spec = segments.pop().unwrap_or_default();
+        let raw = spec.iter().filter_map(|t| match t { Tok::Id(s) | Tok::Num(s, _) => Some(if name == "inputtime" { s.clone() } else { s.to_ascii_lowercase() }), _ => None }).collect::<Vec<_>>().join(".");
+        let mut args = vec![];
+        for mut tokens in segments {
+            tokens.push(Tok::Eof);
+            args.push(Parser { t: tokens, p: 0 }.expr(0)?);
+        }
+        Ok(Node::Trig { name, args, comp: None, raw: Some(raw) })
+    }
     fn primary(&mut self) -> Result<Node, String> {
         let t = self.next();
         let name = match t {
@@ -144,7 +169,7 @@ impl Parser {
             let neg = self.next() == Tok::Op("!=");
             let mut values = vec![];
             match self.next() { Tok::Id(s) | Tok::Str(s) | Tok::Num(s, _) => values.push(s), _ => {} }
-            if name == "hitdefattr" {
+            if name == "hitdefattr" || name == "hitbyattr" {
                 while self.is_op(",", 0) {
                     if let Tok::Id(s) = self.peek(1).clone() {
                         let u = s.to_ascii_uppercase();
@@ -176,6 +201,7 @@ impl Parser {
                 if lc == "x" || lc == "y" || lc == "z" { self.p += 1; return Ok(Node::Trig { name, args: vec![], comp: lc.chars().next(), raw: None }); }
             }
         }
+        if VARSPEC.contains(&name.as_str()) && self.is_op("(", 0) { return self.var_spec(name); }
         if self.is_op("(", 0) {
             self.p += 1;
             if RAWARG.contains(&name.as_str()) {
@@ -190,7 +216,19 @@ impl Parser {
                     }
                     match x { Tok::Id(s) | Tok::Num(s, _) | Tok::Str(s) => raw.push_str(&s), Tok::Op(o) => raw.push_str(o), Tok::Eof => {} }
                 }
-                return Ok(Node::Trig { name, args: vec![], comp: None, raw: Some(raw.to_ascii_lowercase()) });
+                let raw = raw.to_ascii_lowercase();
+                if name == "gethitvar" { crate::triggers::note_hit_var(&raw); }
+                if name == "stagevar" {
+                    crate::stagevar::warn_unknown_once(&raw);
+                    if self.is_op("=", 0) || self.is_op("!=", 0) {
+                        if let Tok::Str(text) = self.peek(1).clone() {
+                            let neg = self.is_op("!=", 0);
+                            self.p += 2;
+                            return Ok(Node::CmpStr { name, neg, values: vec![raw, text] });
+                        }
+                    }
+                }
+                return Ok(Node::Trig { name, args: vec![], comp: None, raw: Some(raw) });
             }
             let mut args = vec![];
             if !self.is_op(")", 0) {
@@ -233,10 +271,14 @@ pub fn is_float(n: &Node) -> bool {
         Node::Num(_, f) => *f,
         Node::Bin(op, a, b) => match *op { "+" | "-" | "*" | "/" | "**" => is_float(a) || is_float(b), ":=" => is_float(b), _ => false },
         Node::Un(op, a) => *op == "-" && is_float(a),
-        Node::Trig { name, args, .. } => match name.as_str() {
+        Node::Trig { name, args, raw, .. } => match name.as_str() {
             "vel" | "pos" | "screenpos" | "camerapos" | "p2dist" | "p1dist" | "p2bodydist" | "rootdist" | "parentdist" | "frontedgedist" | "backedgedist"
             | "frontedgebodydist" | "backedgebodydist" | "fvar" | "sysfvar" | "const" | "gethitvar" | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" | "exp" | "ln"
             | "log" | "sqrt" | "e" | "pi" | "const240p" | "const480p" | "const720p" | "camerazoom" | "backedge" | "frontedge" | "leftedge" | "rightedge" | "topedge" | "bottomedge" => true,
+            "stagevar" => raw.as_deref().is_some_and(crate::stagevar::is_float),
+            "zoomvar" => raw.as_deref().is_some_and(crate::camera::zoom_var_is_float),
+            "screenwidth" | "screenheight" | "topbounddist" | "topboundbodydist" | "botbounddist" | "botboundbodydist" | "stagefrontedgedist" | "stagebackedgedist"
+            | "stageconst" | "const1080p" | "angle" | "xangle" | "yangle" | "xshear" | "scale" => true,
             "abs" | "min" | "max" | "clamp" => args.iter().any(is_float),
             "ifelse" | "cond" => args.iter().skip(1).any(is_float),
             _ => false,
@@ -330,6 +372,25 @@ pub fn eval<H: Host>(n: &Node, h: &H) -> f64 {
                 if args.len() < 3 { return 0.0; }
                 if eval(&args[0], h) != 0.0 { eval(&args[1], h) } else { eval(&args[2], h) }
             }
+            "__str" => 0.0,
+            "e" => std::f64::consts::E,
+            "pi" => std::f64::consts::PI,
+            "abs" if args.len() == 1 => eval(&args[0], h).abs(),
+            "floor" if args.len() == 1 => eval(&args[0], h).floor(),
+            "ceil" if args.len() == 1 => eval(&args[0], h).ceil(),
+            "sin" if args.len() == 1 => eval(&args[0], h).sin(),
+            "cos" if args.len() == 1 => eval(&args[0], h).cos(),
+            "tan" if args.len() == 1 => eval(&args[0], h).tan(),
+            "asin" if args.len() == 1 => eval(&args[0], h).asin(),
+            "acos" if args.len() == 1 => eval(&args[0], h).acos(),
+            "atan" if args.len() == 1 => eval(&args[0], h).atan(),
+            "exp" if args.len() == 1 => eval(&args[0], h).exp(),
+            "ln" if args.len() == 1 => eval(&args[0], h).ln(),
+            "sqrt" if args.len() == 1 => eval(&args[0], h).sqrt(),
+            "sign" if args.len() == 1 => eval(&args[0], h).signum(),
+            "min" if args.len() == 2 => { let (x, y) = (eval(&args[0], h), eval(&args[1], h)); if x.is_nan() || y.is_nan() { f64::NAN } else { x.min(y) } }
+            "max" if args.len() == 2 => { let (x, y) = (eval(&args[0], h), eval(&args[1], h)); if x.is_nan() || y.is_nan() { f64::NAN } else { x.max(y) } }
+            "clamp" if args.len() == 3 => { let (v, lo, hi) = (eval(&args[0], h), eval(&args[1], h), eval(&args[2], h)); if v.is_nan() || lo.is_nan() || hi.is_nan() { f64::NAN } else { v.max(lo).min(hi) } }
             _ => h.trigger(name, args, *comp, raw.as_deref()),
         },
     }

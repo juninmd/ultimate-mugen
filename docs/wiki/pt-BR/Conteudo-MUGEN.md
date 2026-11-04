@@ -5,7 +5,7 @@
 1. Coloque a pasta em `mugen/chars/<nome>/` com o `.def` dentro, ou jogue o `.zip` direto em `mugen/`.
 2. Abra o jogo: o personagem aparece na seleção. `Tab` filtra entre todos, originais e M.U.G.E.N.
 
-Na versão web, use o botão **Importar MUGEN (.zip)** ou arraste o `.zip` para a janela.
+Na versão web, use o botão **Importar MUGEN (.zip)** ou arraste o `.zip` para a janela. A importação é idempotente: o mesmo arquivo, ou o mesmo lutador ou cenário encontrado de novo em outro caminho, nome ou caixa de letras, é registrado uma única vez (a identidade é um hash do `.def` normalizado mais o arquivo de sprites). Pacotes salvos no navegador por versões antigas são deduplicados automaticamente no próximo carregamento.
 
 Centenas de personagens são registradas sem decodificar tudo; só o que está sob o cursor é carregado, e um cache LRU limita a memória.
 
@@ -35,7 +35,7 @@ cargo run --release -p ume-engine --example hover_check -- mugen/chars/kfm
 
 | Ferramenta | Mostra |
 |---|---|
-| `mugen_check` | Carrega e simula uma luta sem janela; lista erros de parse e estados inválidos |
+| `mugen_check` | Carrega e simula uma luta sem janela; lista erros de parse, estados inválidos e controladores, triggers e parâmetros não suportados (`--strict` falha neles) |
 | `sprite_audit` | Sprites ausentes ou em branco referenciados pelo `.air` |
 | `hover_check` | Lutador preso fora do chão (`TRACE=1` mostra as transições) |
 

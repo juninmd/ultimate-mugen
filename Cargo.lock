@@ -2479,11 +2479,13 @@ dependencies = [
  "ggrs",
  "gilrs",
  "hidapi",
+ "js-sys",
  "serde_json",
  "symphonia",
  "tiny-skia",
  "ume-engine",
  "ume-formats",
+ "ume-market",
  "ume-netplay",
  "ume-shell",
  "ureq",
@@ -2505,6 +2507,21 @@ name = "ume-formats"
 version = "0.2.0"
 dependencies = [
  "miniz_oxide 0.8.9",
+]
+
+[[package]]
+name = "ume-market"
+version = "0.2.0"
+dependencies = [
+ "futures-util",
+ "js-sys",
+ "serde",
+ "serde_json",
+ "ume-formats",
+ "ureq",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

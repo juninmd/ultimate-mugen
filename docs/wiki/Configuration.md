@@ -2,7 +2,7 @@
 
 ## `ultimate-mugen.cfg`
 
-Lives next to the executable and is written by the **Video** menu. It can be edited by hand.
+Lives next to the executable and is written by the **Settings** menu (main menu or pause menu: Video, Audio, Controls, Gameplay, Language, About). It can be edited by hand. On the web the same text is kept in `localStorage`, on Android in the app's private storage.
 
 | Key | Values | Effect |
 |---|---|---|
@@ -12,6 +12,23 @@ Lives next to the executable and is written by the **Video** menu. It can be edi
 | `fps` | `0` / `1` | Show FPS |
 | `fx` | `0` to `2` | Post-processing (bloom, vignette, etc.) |
 | `impact_lv` | `0` minimum (photosensitivity), `1` reduced, `2` normal, `3` intense | Impact effect strength |
+| `version` | `2` | File format version (older files without it still load) |
+| `vsync` | `0` / `1` | V-Sync (native) |
+| `fps_cap` | `0` unlimited, `1` 30, `2` 60, `3` 120, `4` 144 | Frame limiter (native) |
+| `master` `music` `sfx` | `0` to `10` | Volume steps |
+| `mute` | `0` / `1` | Silence everything |
+| `difficulty` | `1` to `8` | CPU level |
+| `round_time` | `0` 99 s, `1` 60 s, `2` 30 s, `3` infinite | Round timer |
+| `rounds` | `0` first to 1, `1` first to 2, `2` first to 3 | Rounds needed to win |
+| `life` | `0` 50%, `1` 75%, `2` 100%, `3` 150%, `4` 200% | Life bar multiplier |
+| `lang` | `pt` / `en` | Language of the settings and versus screens |
+| `keep_aspect` | `1` (default) / `0` | `1` letterboxes the 16:9 picture inside any window shape; `0` stretches it to fill the window |
+| `filter` | `nearest` (default) / `linear` | Sprite sampling when scaled: crisp pixels or bilinear smoothing |
+| `window` | `WIDTHxHEIGHT`, `0x0` when unset | Windowed size, saved automatically about one second after you stop resizing; overrides `res` until you pick a size in the Video menu |
+
+## Resizable window
+
+The window can be dragged to any size. The game draws into a fixed 16:9 logical space that is scaled to the window, so the fight area, HUD and menus stay consistent at every size and the window size is independent from the game resolution. With **Keep aspect** on, the unused strip is black; with it off, the picture is stretched and mouse and touch input are mapped back to the stretched space. The `--res WxH` flag still sets the starting window size and takes priority over the saved `window` value.
 
 ## Command line
 
@@ -31,6 +48,8 @@ Lives next to the executable and is written by the **Video** menu. It can be edi
 | Variable | Effect |
 |---|---|
 | `UME_MUGEN_DIR` | Alternative M.U.G.E.N content folder |
+| `UME_MARKET_HOME` | Folder for [marketplace](Marketplace.md) downloads and state |
+| `UME_GITHUB_TOKEN` / `GITHUB_TOKEN` | Optional GitHub token for the marketplace (raises the API rate limit) |
 | `UME_NO_UPDATE_CHECK=1` | Skip update checks |
 | `UME_NOFX=1` | Disable the animated stage layer (performance testing) |
 | `UME_TOUR=mugen` + `UME_CHARS=a,b` + `UME_STAGE=<id>` | With `--shots`, photograph imported fighters |
@@ -45,6 +64,7 @@ Lives next to the executable and is written by the **Video** menu. It can be edi
 | Quick specials | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | ESPECIAL, SUPER |
 | Super | `1`+`2` | Num `7`+`8` | L1+L2 | SUPER |
 | Awakening | `T` | Num `0` | R3 / SELECT | — |
+| Tag swap (Tag mode) | `R` | Num Enter | R3 / SELECT | awaken button |
 | Pause / hitboxes | `Esc` / `F2` | `Esc` / `F2` | START | ❚❚ |
 | Fullscreen / FPS | `F11` / `F3` | — | — | — |
 

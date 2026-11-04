@@ -9,6 +9,27 @@ fn animtype(s: &str) -> Option<i32> {
 fn groundtype(s: &str) -> Option<i32> {
     Some(match s.trim().to_ascii_lowercase().as_str() { "none" => 0, "high" => 1, "low" => 2, "trip" => 3, _ => return None })
 }
+pub fn attr_bits(state: &str, kinds: &[String]) -> i32 {
+    let mut bits = 0;
+    for c in state.chars() { bits |= match c { 'S' => 1, 'C' => 2, 'A' => 4, 'L' => 8, _ => 0 }; }
+    for k in kinds {
+        bits |= match k.as_str() { "NA" => 64, "NT" => 128, "NP" => 256, "SA" => 512, "ST" => 1024, "SP" => 2048, "HA" => 4096, "HT" => 8192, "HP" => 16384, _ => 0 };
+    }
+    bits
+}
+pub fn attr_kind_mask(want: &str) -> i32 {
+    let w = want.as_bytes();
+    if w.len() != 2 { return 0; }
+    let columns: &[i32] = match w[0] { b'N' => &[0], b'S' => &[3], b'H' => &[6], b'A' => &[0, 3, 6], _ => return 0 };
+    let row = match w[1] { b'A' => 0, b'T' => 1, b'P' => 2, _ => return 0 };
+    columns.iter().fold(0, |mask, c| mask | (1 << (6 + c + row)))
+}
+pub fn state_mask(state: &str) -> i32 {
+    state.chars().fold(0, |bits, c| bits | match c { 'S' => 1, 'C' => 2, 'A' => 4, 'L' => 8, _ => 0 })
+}
+pub fn guardflag_bits(flags: &str) -> i32 {
+    flags.chars().fold(0, |bits, c| bits | match c { 'H' => 1, 'L' => 2, 'A' => 4, 'M' => 3, _ => 0 })
+}
 pub fn parse_sound_ref(raw: Option<&str>) -> Option<(i32, i32, bool)> {
     let s = raw?.trim();
     let (own, rest) = if let Some(r) = s.strip_prefix(['s', 'S']) { (true, r) } else if let Some(r) = s.strip_prefix(['f', 'F']) { (false, r) } else { (false, s) };
@@ -148,6 +169,11 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         guard_corner_push: if has("guard.cornerpush.veloff", 0) { num("guard.cornerpush.veloff", 0.0, 0) * l } else { ground_corner_push },
         air_guard_corner_push: if has("airguard.cornerpush.veloff", 0) { num("airguard.cornerpush.veloff", 0.0, 0) * l } else { ground_corner_push },
         target_palfx,
-        airjuggle: if f.has_assert(crate::fighter::asf::NOJUGGLE) { i32::MAX / 2 } else { f.def.c("data.airjuggle", 15.0) as i32 },
+        dizzy_points: num("dizzypoints", damage as f64, 0),
+        guard_points: num("guardpoints", num("damage", 0.0, 1) as f64, 0),
+        red_life: [num("redlife", damage as f64, 0), num("redlife", num("damage", 0.0, 1) as f64, 1)],
+        score: [num("score", 0.0, 0), num("score", 0.0, 1)],
+        down_recover: num("down.recover", 1.0, 0) != 0.0,
+        airjuggle: if f.has_assert(crate::fighter::asf::NOJUGGLECHECK) { i32::MAX / 2 } else { f.def.c("data.airjuggle", 15.0) as i32 },
     }
 }

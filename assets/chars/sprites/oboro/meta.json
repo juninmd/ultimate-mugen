@@ -1,1 +1,105 @@
-{"refHeight": 393}
+{
+  "frames": {
+    "airGuard": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "crouchGuard": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "guard": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "guardHit": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitH1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitH2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "str0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "str1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "strong0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "strong1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sweep0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sweep1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk4": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    }
+  },
+  "refHeight": 393
+}

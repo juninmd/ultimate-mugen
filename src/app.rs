@@ -4,24 +4,28 @@ use crate::controls::{nav, Controls};
 use crate::registry::Registry;
 use crate::render::{Gfx, MatchRenderer, DrawOpts};
 use crate::session::{Pilot, Session};
-use crate::settings::{Settings, FX_LEVELS, IMPACT, QUALITY, RESOLUTIONS};
+use crate::settings::{Rules, Settings, WindowWatch, FX_LEVELS, IMPACT, QUALITY, RESOLUTIONS};
 use crate::stages::Stage;
 use crate::ui::*;
 use crate::gfx::*;
+use std::fmt::Write;
 use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::chardef::CharDef;
 
 mod cutscene;
 mod keyedit;
+mod market;
+mod settings_screen;
+mod versus;
 pub(crate) use keyedit::KeyEdit;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul }
+pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul, TeamTag }
 impl Mode {
-    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO" } }
+    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO", Mode::TeamTag => "EQUIPE · TAG" } }
     /// Team size (1 for the regular modes).
-    pub fn is_team(self) -> bool { matches!(self, Mode::TeamSeq | Mode::TeamSimul) }
+    pub fn is_team(self) -> bool { matches!(self, Mode::TeamSeq | Mode::TeamSimul | Mode::TeamTag) }
 }
 
 pub enum Screen {
@@ -34,29 +38,53 @@ pub enum Screen {
     Results { winner: usize, cur: usize },
     Controls,
     Mugen,
-    Video { cur: usize },
+    Market,
+    Settings { tab: usize, cur: usize, from_fight: bool },
     /// story scene: 0 arcade opening · 1 before the boss · 2 ending
     Cutscene { kind: u8, page: usize, t: f32 },
 }
 
 /// Fight assets prepared step by step behind the VS screen.
 #[derive(Default)]
-pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, sess: Option<Session>, jobs: Vec<crate::registry::LoadJob> }
+pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, stage_job: Option<crate::registry::StageJob>, sess: Option<Session>, jobs: Vec<crate::registry::LoadJob> }
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
 #[derive(Clone)]
-pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>> }
+pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>>, rules: Rules }
 
 /// Team battle state: sequence (KOF-style turns, winner keeps its remaining life) or parallel (2v2 simultaneous).
 #[derive(Clone)]
-pub struct Team { pub members: [Vec<usize>; 2], pub idx: [usize; 2], pub life: [f32; 2], /** KOF XV: the team shares one super meter */ pub power: [f32; 2], pub ko: [Vec<bool>; 2], pub simul: bool }
+pub struct Team { pub members: [Vec<usize>; 2], pub idx: [usize; 2], pub life: [f32; 2], /** KOF XV: the team shares one super meter */ pub power: [f32; 2], pub ko: [Vec<bool>; 2], pub simul: bool, pub tag: bool }
 impl Team {
-    pub fn new(a: Vec<usize>, b: Vec<usize>, simul: bool) -> Self { let (la, lb) = (a.len(), b.len()); Team { members: [a, b], idx: [0, 0], life: [1.0, 1.0], power: [0.0, 0.0], ko: [vec![false; la], vec![false; lb]], simul } }
+    pub fn new(a: Vec<usize>, b: Vec<usize>, simul: bool) -> Self { let (la, lb) = (a.len(), b.len()); Team { members: [a, b], idx: [0, 0], life: [1.0, 1.0], power: [0.0, 0.0], ko: [vec![false; la], vec![false; lb]], simul, tag: false } }
+    pub fn tagged(a: Vec<usize>, b: Vec<usize>) -> Self { Team { tag: true, ..Team::new(a, b, false) } }
+    pub fn whole_squad(&self) -> bool { self.simul || self.tag }
 }
 const VIEW_ROWS: usize = 4;
+const NUMS: [&str; 5] = ["1", "2", "3", "4", "5"];
+
+fn opaque_box(s: &ume_engine::chardef::Sprite) -> (f32, f32, f32, f32) {
+    let Some(im) = s.image.as_ref() else { return (0.0, 0.0, s.width, s.height) };
+    let (iw, ih) = (im.w as usize, im.h as usize);
+    if iw == 0 || ih == 0 { return (0.0, 0.0, s.width, s.height); }
+    let (mut x0, mut y0, mut x1, mut y1) = (iw, ih, 0, 0);
+    for y in 0..ih {
+        let row = &im.rgba[y * iw * 4..(y + 1) * iw * 4];
+        for x in 0..iw {
+            if row[x * 4 + 3] > 16 { x0 = x0.min(x); x1 = x1.max(x + 1); y0 = y0.min(y); y1 = y1.max(y + 1); }
+        }
+    }
+    if x0 >= x1 || y0 >= y1 { return (0.0, 0.0, s.width, s.height); }
+    let (kx, ky) = (s.width / iw as f32, s.height / ih as f32);
+    (x0 as f32 * kx, y0 as f32 * ky, (x1 - x0) as f32 * kx, (y1 - y0) as f32 * ky)
+}
+
+fn clip(s: &str, n: usize) -> &str { s.char_indices().nth(n).map_or(s, |(i, _)| &s[..i]) }
 
 pub struct App {
     pub reg: Registry,
+    pub market: crate::market::Market,
+    pub(crate) market_ui: market::MarketUi,
     pub ui: Ui,
     pub g: Gfx,
     pub c: Controls,
@@ -77,6 +105,7 @@ pub struct App {
     /** page of the pause-screen move list (14 moves per page) */
     move_page: usize,
     pending: Pending,
+    import_jobs: Vec<std::thread::JoinHandle<Result<(String, ume_formats::vfs::Vfs), String>>>,
     pub team: Option<Team>,
     /// last finished fight (replayable) and the replay being played now
     last_fight: Option<Replay>,
@@ -92,15 +121,26 @@ pub struct App {
     sel_row: usize,
     sel_last: [usize; 2],
     sel_dwell: f32,
+    sel_buf: String,
+    names_up: Vec<String>,
+    fit: std::collections::HashMap<String, [f32; 4]>,
+    sel_cur: [(f32, f32); 2],
+    sel_flash: (usize, f32),
     stage_row: usize,
     quality_check: f32,
+    window_watch: WindowWatch,
+    window_pinned: bool,
     updater: crate::update::Checker,
     pub trans: f32,
     screen_t: f32,
+    menu_art: crate::menu_art::MenuArt,
     last_disc: Option<std::mem::Discriminant<Screen>>,
+    applied: Option<Settings>,
+    settings_back: Option<(usize, bool)>,
+    fight_rules: Rules,
 }
 
-const MENU: [(&str, &str); 11] = [
+const MENU: [(&str, &str); 13] = [
     ("Arcade", "Enfrente uma sequência de oponentes"),
     ("Versus CPU", "Você contra o computador"),
     ("2 Jogadores", "Teclado compartilhado ou dois controles"),
@@ -108,9 +148,11 @@ const MENU: [(&str, &str); 11] = [
     ("CPU vs CPU", "Assista a IA lutar"),
     ("Equipe · Sequência", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida"),
     ("Equipe · Paralelo", "5 contra 5 ao mesmo tempo (2 a 5) · TAB troca de lutador"),
+    ("Equipe · Tag", "Um em campo, o parceiro espera e entra na troca (2 a 3 por lado)"),
     ("Personagens MUGEN", "Como adicionar personagens e cenários"),
+    ("Mercado GitHub", "Baixe personagens, cenários e músicas de repositórios"),
     ("Controles", "Teclado, Xbox, PlayStation, toque e vibração"),
-    ("Vídeo", "Tela cheia, resolução até 4K e qualidade da arte"),
+    ("Configurações", "Vídeo, áudio, controles, jogabilidade e idioma"),
     ("Sair", "Fechar o jogo"),
 ];
 
@@ -132,14 +174,15 @@ impl App {
         Self::boot(&mut ui, 0.75, "Procurando pasta mugen/…").await;
         #[cfg(not(target_arch = "wasm32"))]
         reg.scan_folders();
+        reg.dedupe();
         reg.sort_mugen();
         Self::boot(&mut ui, 0.9, "Áudio…").await;
         let audio = Audio::new(audio_on).await;
         Self::boot(&mut ui, 1.0, "Pronto!").await;
         App {
-            reg, ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
-            ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, key_edit: None, move_page: 0, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
+            reg, market: crate::market::Market::open(), market_ui: market::MarketUi::default(), ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
+            ai_level: settings.difficulty, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
+            settings, key_edit: None, move_page: 0, pending: Pending::default(), import_jobs: vec![], window_watch: WindowWatch::default(), window_pinned: false, team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -152,6 +195,11 @@ impl App {
             self.reg.unload_all();
             self.g.trim_next_frame();
         }
+    }
+    fn remember_window_size(&mut self, dt: f32) {
+        if self.window_pinned || cfg!(any(target_arch = "wasm32", target_os = "android", target_os = "ios")) { return; }
+        let (w, h) = window_size();
+        if let Some(size) = self.window_watch.observe((w as u32, h as u32), dt, self.settings.fullscreen, self.settings.window) { self.settings.window = size; self.settings.save(); }
     }
     fn toggle_fullscreen(&mut self) { self.settings.fullscreen = !self.settings.fullscreen; self.settings.apply_window(); self.settings.save(); }
 
@@ -168,7 +216,15 @@ impl App {
     pub async fn frame(&mut self) {
         self.g.begin_frame();
         self.ui.begin();
+        if self.ai_level != self.settings.difficulty { self.settings.difficulty = self.ai_level; self.settings.save(); }
+        if self.applied != Some(self.settings) {
+            self.settings.apply_runtime();
+            self.audio.set_levels(self.settings.master_gain(), self.settings.music_gain(), self.settings.sfx_gain());
+            self.applied = Some(self.settings);
+        }
         self.g.post.level = self.settings.fx as u8;
+        set_keep_aspect(self.settings.keep_aspect);
+        set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;
         self.c.update();
         self.preview_t += get_frame_time();
@@ -179,18 +235,20 @@ impl App {
             Screen::Select { .. } => self.select(),
             Screen::Stages { .. } => self.stages(),
             Screen::Vs { .. } => self.vs(dt).await,
-            Screen::Video { .. } => self.video_screen(),
+            Screen::Settings { .. } => self.settings_screen(),
             Screen::Fight => self.fight(dt).await,
             Screen::Results { .. } => self.results().await,
             Screen::Controls => self.controls_screen(),
             Screen::Mugen => self.mugen_screen(),
+            Screen::Market => self.market_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
         }
         if is_key_pressed(KeyCode::F11) { self.toggle_fullscreen(); }
+        self.remember_window_size(dt);
         if is_key_pressed(KeyCode::F3) { self.settings.fps = !self.settings.fps; self.settings.save(); }
         // auto art quality follows the display (checked outside fights so live sprites are never swapped)
         self.quality_check += dt;
-        if self.quality_check > 0.7 && matches!(self.screen, Screen::Menu { .. } | Screen::Title | Screen::Video { .. } | Screen::Select { .. } | Screen::Stages { .. }) { self.quality_check = 0.0; self.apply_quality(); }
+        if self.quality_check > 0.7 && matches!(self.screen, Screen::Menu { .. } | Screen::Title | Screen::Settings { from_fight: false, .. } | Screen::Select { .. } | Screen::Stages { .. }) { self.quality_check = 0.0; self.apply_quality(); }
         if self.settings.fps { self.ui.text(&format!("{} FPS · {}×{} · arte {:.1}×", get_fps(), (screen_width() * dpi_scale()) as i32, Settings::physical_h() as i32, ume_engine::native::rig::art_res()), 10.0, 20.0, 16.0, hex("#6dff9e"), Align::Left, false); }
         // screen transition: diagonal wipe whenever the screen changes (not into/out of the fight itself)
         let disc = std::mem::discriminant(&self.screen);
@@ -200,15 +258,25 @@ impl App {
             self.screen_t = 0.0;
         }
         self.screen_t += dt;
+        self.menu_art.tick(dt);
         if self.trans > 0.0 { self.ui.wipe(self.trans); self.trans = (self.trans - dt * 2.6).max(0.0); }
         self.audio.process().await;
+        self.market.poll();
+        if self.market.has_registry_work() && matches!(self.screen, Screen::Title | Screen::Menu { .. } | Screen::Market | Screen::Settings { .. } | Screen::Controls | Screen::Mugen) && self.market.apply_to(&mut self.reg) {
+            self.after_registry_change();
+        }
         crate::set_import_button(!matches!(self.screen, Screen::Fight | Screen::Vs { .. } | Screen::Results { .. } | Screen::Cutscene { .. }));
-        for (i, zip) in crate::take_imports().into_iter().enumerate() {
-            let mut vfs = ume_formats::vfs::Vfs::new();
-            match ume_formats::vfs::add_zip(&mut vfs, &zip, "") {
-                Ok(_) => { let (c, s, e) = self.reg.add_vfs_lazy(vfs, &format!("web{}-{i}", get_time() as u64)); self.reg.sort_mugen(); self.sel = (self.sel.0.min(self.reg.chars.len() - 1), self.sel.1.min(self.reg.chars.len() - 1), self.sel.2.min(self.reg.stages.len() - 1)); self.msg = format!("Importado: {} personagem(ns), {} cenário(s){}", c.len(), s.len(), if e.is_empty() { String::new() } else { format!(" · {} erro(s)", e.len()) }); }
-                Err(e) => self.msg = format!("Zip inválido: {e}"),
-            }
+        ume_shell::watchdog::label("import");
+        for zip in crate::take_imports() {
+            #[cfg(not(target_arch = "wasm32"))]
+            { if let Ok(h) = std::thread::Builder::new().name("zip-import".into()).spawn(move || crate::registry::read_zip(&zip)) { self.import_jobs.push(h); self.msg = "Importando pacote…".into(); } }
+            #[cfg(target_arch = "wasm32")]
+            { let r = crate::registry::read_zip(&zip); self.finish_import(r); }
+        }
+        if self.import_jobs.iter().any(|h| h.is_finished()) {
+            let (done, rest): (Vec<_>, Vec<_>) = std::mem::take(&mut self.import_jobs).into_iter().partition(|h| h.is_finished());
+            self.import_jobs = rest;
+            for h in done { let r = h.join().unwrap_or_else(|_| Err("import thread panicked".into())); self.finish_import(r); }
         }
         if !self.msg.is_empty() {
             self.ui.rect(0.0, VH - 36.0, VW, 36.0, Color::new(0.0, 0.0, 0.0, 0.7));
@@ -217,18 +285,33 @@ impl App {
         }
     }
 
+    fn after_registry_change(&mut self) {
+        let (nc, ns) = (self.reg.chars.len().max(1), self.reg.stages.len().max(1));
+        self.sel = (self.sel.0.min(nc - 1), self.sel.1.min(nc - 1), self.sel.2.min(ns - 1));
+        self.arcade = None;
+        self.team_pick.clear();
+        self.last_fight = None;
+        self.replaying = None;
+        self.sel_last = [usize::MAX; 2];
+        self.sel_cur = [(-1.0, 0.0); 2];
+        self.sel_row = 0;
+        self.stage_row = 0;
+    }
+    fn menu_art_fade(&self) -> f32 { self.menu_art.fade_in() }
+
     fn go(&mut self, s: Screen) { self.audio.sfx("confirm"); self.screen = s; }
 
     // ------------------------------------------------------------ title / menu
     fn title(&mut self) {
-        self.ui.background();
+        self.menu_art.select(0);
+        self.menu_art.draw(&self.ui);
         self.ui.logo(VW / 2.0, 330.0, 200.0);
         self.ui.text("ENGINE DE LUTA · RUST · DESKTOP · WEB · MOBILE", VW / 2.0, 420.0, 20.0, hex("#a49cc0"), Align::Center, true);
         if (self.ui.t * 2.0) as i32 % 2 == 0 { self.ui.text_bold("PRESSIONE START / ENTER", VW / 2.0, 540.0, 30.0, WHITE, hex("#12051f"), Align::Center); }
         self.ui.text("Compatível com personagens M.U.G.E.N  ·  DualShock 4 / DualSense com vibração", VW / 2.0, 690.0, 18.0, hex("#a49cc0"), Align::Center, false);
         let line = match self.updater.poll() {
-            Some(u) => format!("v{} · nova versão v{} disponível: {}", crate::update::VERSION, u.version, crate::update::RELEASES_URL),
-            None => format!("v{}", crate::update::VERSION),
+            Some(u) => format!("{} · nova versão v{} disponível: {}", crate::update::build_label(), u.version, crate::update::RELEASES_URL),
+            None => crate::update::build_label(),
         };
         self.ui.text(&line, VW - 14.0, VH - 12.0, 14.0, hex("#a49cc0"), Align::Right, false);
         if self.c.pressed(nav::OK | nav::START) || is_mouse_button_pressed(MouseButton::Left) || !touches().is_empty() && touches()[0].phase == TouchPhase::Started { self.go(Screen::Menu { cur: 0 }); }
@@ -242,49 +325,60 @@ impl App {
         if self.c.pressed(nav::LEFT) { self.ai_level = (self.ai_level - 1).max(1); }
         if self.c.pressed(nav::RIGHT) { self.ai_level = (self.ai_level + 1).min(8); }
         let mut chosen = if self.c.pressed(nav::OK | nav::START) { Some(cur_v) } else { None };
-        self.ui.background();
-        self.ui.logo(240.0, 330.0, 108.0);
-        for (i, (t, d)) in MENU.iter().enumerate() {
-            let k_in = ((self.screen_t - 0.12 - i as f32 * 0.05) / 0.3).clamp(0.0, 1.0);
+        self.menu_art.select(cur_v);
+        self.menu_art.draw(&self.ui);
+        let ui = &self.ui;
+        let accent = crate::menu_art::accent_of(cur_v);
+        crate::menu_art::glass(ui, -400.0, 0.0, 400.0 + 600.0, VH, 1.0);
+        ui.rect(-400.0, 0.0, 400.0 + 600.0, VH, Color::new(0.0, 0.0, 0.0, 0.18));
+        ui.rect(600.0, 0.0, 3.0, VH, Color::new(accent.r, accent.g, accent.b, 0.8));
+        ui.logo(250.0, 118.0, 74.0);
+        let n = MENU.len();
+        let step = 456.0 / n as f32;
+        for (i, (t, _)) in MENU.iter().enumerate() {
+            let k_in = ((self.screen_t - 0.05 - i as f32 * 0.04) / 0.28).clamp(0.0, 1.0);
             let k_in = 1.0 - (1.0 - k_in).powi(3);
-            let step_y = 590.0 / MENU.len() as f32;
-            let (x, y, w, h) = (460.0 - (1.0 - k_in) * 90.0, 104.0 + i as f32 * step_y, 440.0, step_y - 6.0);
+            let (x, y, w, h) = (40.0 - (1.0 - k_in) * 120.0, 196.0 + i as f32 * step, 520.0, step - 4.0);
             if self.hover_rect(x, y, w, h) && (mouse_delta_position().length() > 0.0) { cur_v = i; }
-            if self.clicked_rect(x, y, w, h) { chosen = Some(i); }
+            if self.clicked_rect(x, y, w, h) { cur_v = i; chosen = Some(i); }
             let f = i == cur_v;
-            let off = if f { 14.0 } else { 0.0 };
-            let pulse = if f { 0.85 + 0.15 * (self.ui.t * 6.0).sin() } else { 1.0 };
-            let mut col = if f { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) };
-            col.r *= pulse; col.g *= pulse; col.b *= pulse; col.a *= k_in;
-            if f { self.ui.quad([vec2(x + off + 8.0, y - 3.0), vec2(x + off + w + 6.0, y - 3.0), vec2(x + off + w - 8.0, y + h + 3.0), vec2(x + off - 6.0, y + h + 3.0)], Color::new(1.0, 0.3, 0.43, 0.22 * k_in)); }
-            self.ui.quad([vec2(x + off + 14.0, y), vec2(x + off + w, y), vec2(x + off + w - 14.0, y + h), vec2(x + off, y + h)], col);
-            if f { self.ui.quad([vec2(x + off + w - 60.0, y), vec2(x + off + w, y), vec2(x + off + w - 14.0, y + h), vec2(x + off + w - 74.0, y + h)], hex("#8a2be2")); }
-            self.ui.text(t, x + off + 26.0, y + h * 0.54, 22.0, WHITE, Align::Left, true);
-            self.ui.text(d, x + off + 26.0, y + h * 0.88, 14.0, if f { WHITE } else { hex("#a49cc0") }, Align::Left, false);
+            let off = if f { 22.0 } else { 0.0 };
+            if f {
+                let pulse = 0.8 + 0.2 * (ui.t * 5.0).sin();
+                ui.quad([vec2(x + off + 18.0, y), vec2(x + off + w, y), vec2(x + off + w - 18.0, y + h), vec2(x + off, y + h)], Color::new(accent.r * pulse, accent.g * pulse, accent.b * pulse, 0.92 * k_in));
+                ui.quad([vec2(x + off - 14.0, y), vec2(x + off - 4.0, y), vec2(x + off - 18.0, y + h), vec2(x + off - 28.0, y + h)], Color::new(1.0, 1.0, 1.0, k_in));
+                ui.text(t, x + off + 30.0, y + h * 0.72, 24.0, hex("#12051f"), Align::Left, true);
+            } else {
+                ui.quad([vec2(x + 18.0, y), vec2(x + w - 80.0, y), vec2(x + w - 98.0, y + h), vec2(x, y + h)], Color::new(1.0, 1.0, 1.0, 0.07 * k_in));
+                ui.text(t, x + 30.0, y + h * 0.72, 22.0, Color::new(1.0, 1.0, 1.0, 0.82 * k_in), Align::Left, true);
+            }
         }
+        let (title, desc) = MENU[cur_v];
+        let ta = ((self.menu_art_fade()) * 1.0).clamp(0.0, 1.0);
+        ui.text_bold(&title.to_uppercase(), VW - 60.0, 590.0, if title.chars().count() > 12 { 44.0 } else { 64.0 }, Color::new(1.0, 1.0, 1.0, ta), Color::new(0.05, 0.02, 0.1, ta), Align::Right);
+        ui.rect(VW - 460.0, 608.0, 400.0, 4.0, Color::new(accent.r, accent.g, accent.b, ta));
+        ui.text(desc, VW - 60.0, 646.0, 22.0, Color::new(1.0, 1.0, 1.0, 0.9 * ta), Align::Right, false);
         let (nm, nn) = (self.reg.chars.iter().filter(|c| c.mugen).count(), self.playable().len());
-        let sx = 960.0;
-        self.ui.text(&format!("{nn}"), sx, 200.0, 40.0, hex("#ffcc33"), Align::Left, true);
-        self.ui.text("lutadores", sx + 70.0, 196.0, 22.0, hex("#a49cc0"), Align::Left, false);
-        self.ui.text(&format!("{}", self.reg.stages.len()), sx, 250.0, 40.0, hex("#ffcc33"), Align::Left, true);
-        self.ui.text("cenários", sx + 70.0, 246.0, 22.0, hex("#a49cc0"), Align::Left, false);
-        self.ui.text(&format!("{nm}"), sx, 300.0, 40.0, hex("#ffcc33"), Align::Left, true);
-        self.ui.text("MUGEN importados", sx + 70.0, 296.0, 22.0, hex("#a49cc0"), Align::Left, false);
-        self.ui.text("Dificuldade CPU (esq./dir.)", sx, 370.0, 20.0, hex("#a49cc0"), Align::Left, false);
-        for i in 0..8 { self.ui.rect(sx + i as f32 * 26.0, 384.0, 20.0, 14.0, if i < self.ai_level { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.12) }); }
+        let stats = format!("{nn} lutadores · {} cenários · {nm} MUGEN", self.reg.stages.len());
+        ui.text(&stats, VW - 40.0, 44.0, 20.0, Color::new(1.0, 1.0, 1.0, 0.85), Align::Right, false);
+        if cur_v <= 6 {
+            ui.text("Dificuldade CPU (esq./dir.)", VW - 40.0, 86.0, 16.0, hex("#d8d0f0"), Align::Right, false);
+            for i in 0..8 { ui.rect(VW - 40.0 - 8.0 * 26.0 + i as f32 * 26.0, 96.0, 20.0, 12.0, if i < self.ai_level { accent } else { Color::new(1.0, 1.0, 1.0, 0.18) }); }
+        }
+        ui.text(&crate::update::build_label(), 40.0, VH - 20.0, 16.0, hex("#a49cc0"), Align::Left, false);
         let pads = &self.c.pad_info;
-        self.ui.text("Controles conectados", sx, 450.0, 20.0, hex("#a49cc0"), Align::Left, false);
-        if pads.is_empty() { self.ui.text("nenhum (teclado)", sx, 476.0, 18.0, WHITE, Align::Left, false); }
-        for (i, p) in pads.iter().enumerate().take(4) { self.ui.text(&format!("P{} · {}{}", i + 1, p.name.chars().take(26).collect::<String>(), match p.kind { crate::gamepad::PadKind::Generic => String::new(), k => format!(" ({})", k.label()) }), sx, 476.0 + i as f32 * 24.0, 18.0, WHITE, Align::Left, false); }
+        let pad_line = if pads.is_empty() { "teclado".to_string() } else { format!("{} controle(s)", pads.len()) };
+        ui.text(&pad_line, 560.0, VH - 20.0, 16.0, hex("#a49cc0"), Align::Right, false);
         self.screen = Screen::Menu { cur: cur_v };
         if self.c.pressed(nav::BACK) { self.screen = Screen::Title; }
         if let Some(i) = chosen {
-            let mode = [Mode::Arcade, Mode::Cpu, Mode::Versus, Mode::Training, Mode::Watch, Mode::TeamSeq, Mode::TeamSimul];
+            let mode = [Mode::Arcade, Mode::Cpu, Mode::Versus, Mode::Training, Mode::Watch, Mode::TeamSeq, Mode::TeamSimul, Mode::TeamTag];
             match i {
-                0..=6 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); if self.mode == Mode::TeamSimul { self.team_n = 5; } else if self.mode == Mode::TeamSeq { self.team_n = 3; } self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
-                7 => self.go(Screen::Mugen),
-                8 => self.go(Screen::Controls),
-                9 => self.go(Screen::Video { cur: 0 }),
+                0..=7 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); if self.mode == Mode::TeamSimul { self.team_n = 5; } else if self.mode == Mode::TeamSeq { self.team_n = 3; } else if self.mode == Mode::TeamTag { self.team_n = 2; } self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
+                8 => self.go(Screen::Mugen),
+                9 => self.go(Screen::Market),
+                10 => { self.settings_back = None; self.go(Screen::Controls) }
+                11 => self.go(Screen::Settings { tab: 0, cur: 0, from_fight: false }),
                 _ => self.quit = true,
             }
         }
@@ -292,6 +386,11 @@ impl App {
 
     // ------------------------------------------------------------ select
     pub fn draw_char(&mut self, d: &Arc<CharDef>, anim: i32, t: f32, x: f32, y: f32, height_px: f32, mirror: bool) {
+        let base_h = (d.c("size.height", 60.0) as f32 * 1.7).max(90.0);
+        self.draw_char_k(d, anim, t, x, y, height_px / base_h, mirror);
+    }
+
+    fn draw_char_k(&mut self, d: &Arc<CharDef>, anim: i32, t: f32, x: f32, y: f32, kv: f32, mirror: bool) {
         let Some(a) = d.anims.get(&anim).or(d.anims.get(&0)) else { return };
         if a.frames.is_empty() { return; }
         let tot = a.total_time.max(1);
@@ -303,8 +402,7 @@ impl App {
         let Some(img) = spr.image.clone() else { return };
         let tex = self.g.texture(&img, spr.scale >= 0.99);
         let l = 320.0 / d.local_w;
-        let base_h = (d.c("size.height", 60.0) as f32 * 1.7).max(90.0);
-        let k = height_px / base_h * self.ui.s;
+        let k = kv * self.ui.s;
         let ks = k * spr.scale * l;
         let flip = mirror ^ fr.flip_h;
         let w = spr.width * ks; let h = spr.height * ks;
@@ -312,6 +410,32 @@ impl App {
         let py = self.ui.y(y) + fr.y * l * k;
         let left = if flip { px - (spr.width - spr.axis_x) * ks } else { px - spr.axis_x * ks };
         draw_texture_ex(&tex, left, py - spr.axis_y * ks, self.char_tint, DrawTextureParams { dest_size: Some(vec2(w, h)), flip_x: flip, ..Default::default() });
+    }
+
+    fn char_extent(&mut self, d: &Arc<CharDef>) -> [f32; 4] {
+        if let Some(e) = self.fit.get(d.id.as_str()) { return *e; }
+        let l = 320.0 / d.local_w;
+        let mut e = [f32::MAX, f32::MIN, f32::MAX, f32::MIN];
+        if let Some(a) = d.anims.get(&0) {
+            for fr in &a.frames {
+                let Some(s) = d.sprites.get(&(fr.group, fr.index)) else { continue };
+                let sc = s.scale * l;
+                let (ox, oy, ow, oh) = opaque_box(s);
+                let (top, left) = (fr.y * l + (oy - s.axis_y) * sc, if fr.flip_h { fr.x * l + (s.width - ow - ox - s.axis_x) * sc } else { fr.x * l + (ox - s.axis_x) * sc });
+                e = [e[0].min(top), e[1].max(top + oh * sc), e[2].min(left), e[3].max(left + ow * sc)];
+            }
+        }
+        if e[0] >= e[1] || e[2] >= e[3] { e = [-150.0, 0.0, -60.0, 60.0]; }
+        self.fit.insert(d.id.clone(), e);
+        e
+    }
+
+    /// Draws a fighter scaled so its idle bounding box fits `fw` x `fh`, feet on `bottom`, centred on `cx`.
+    pub fn draw_char_fit(&mut self, d: &Arc<CharDef>, anim: i32, t: f32, cx: f32, bottom: f32, fw: f32, fh: f32, mirror: bool) {
+        let e = self.char_extent(d);
+        let k = (fh / (e[1] - e[0])).min(fw / (e[3] - e[2])).min(6.0);
+        let sgn = if mirror { -1.0 } else { 1.0 };
+        self.draw_char_k(d, anim, t, cx - sgn * (e[2] + e[3]) * 0.5 * k, bottom - e[1] * k, k, mirror);
     }
 
     /// Everyone you can pick (the arcade final boss stays hidden).
@@ -373,49 +497,79 @@ impl App {
 
         self.ui.background();
         if self.mode.is_team() {
-            if is_key_pressed(KeyCode::E) { self.team_n = (self.team_n + 1).min(5); self.audio.sfx("select"); }
+            if is_key_pressed(KeyCode::E) { self.team_n = (self.team_n + 1).min(if self.mode == Mode::TeamTag { 3 } else { 5 }); self.audio.sfx("select"); }
             if is_key_pressed(KeyCode::Q) { self.team_n = (self.team_n - 1).max(2).max(self.team_pick.len() + 1); self.audio.sfx("select"); }
         }
-        let title = if self.mode.is_team() { format!("{} {}v{}", self.mode.label(), self.team_n, self.team_n) } else { self.mode.label().to_string() };
-        self.ui.text(&title, 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
-        let hint = if self.mode.is_team() { "Monte sua equipe (Q/E: tamanho) — o adversário é sorteado" } else if picking == 0 { "JOGADOR 1: escolha seu lutador" } else if two { "JOGADOR 2: escolha" } else { "Escolha o oponente" };
-        self.ui.text(hint, VW - 40.0, 56.0, 22.0, hex("#a49cc0"), Align::Right, false);
-        let flabel = ["TODOS", "ORIGINAIS", "M.U.G.E.N"][self.sel_filter as usize % 3];
-        self.ui.text(&format!("[Tab] {flabel} · {}/{m} · [R] aleatório · PgUp/PgDn", pos + 1), 640.0, 92.0, 15.0, hex("#a49cc0"), Align::Center, false);
-
-        if self.mode.is_team() {
-            let n = self.team_n;
-            self.ui.text("SUA EQUIPE", 40.0, 90.0, 16.0, hex("#a49cc0"), Align::Left, true);
-            for k in 0..n {
-                let cw = (470.0 / n as f32).min(100.0) - 6.0;
-                let x = 150.0 + k as f32 * (cw + 6.0);
-                let filled = self.team_pick.get(k).copied();
-                self.ui.rect(x, 74.0, cw, 24.0, if filled.is_some() { alpha(rgb(self.reg.chars[filled.unwrap()].color), 0.9) } else if k == self.team_pick.len() { Color::new(1.0, 0.8, 0.2, 0.25 + 0.15 * (self.ui.t * 6.0).sin()) } else { Color::new(1.0, 1.0, 1.0, 0.08) });
-                let label = filled.map(|i| self.reg.chars[i].name.split_whitespace().next().unwrap_or("").to_uppercase()).unwrap_or_else(|| format!("{}º", k + 1));
-                self.ui.text(&label, x + cw / 2.0, 92.0, if n > 4 { 12.0 } else { 14.0 }, WHITE, Align::Center, true);
-            }
+        if self.names_up.len() != self.reg.chars.len() { self.names_up = self.reg.chars.iter().map(|c| c.name.to_uppercase()).collect(); }
+        let ns = self.reg.stages.len();
+        if ns > 0 {
+            if is_key_pressed(KeyCode::RightBracket) || self.clicked_rect(742.0, 10.0, 38.0, 62.0) { self.sel.2 = (self.sel.2 + 1) % ns; self.audio.sfx("select"); }
+            if is_key_pressed(KeyCode::LeftBracket) || self.clicked_rect(500.0, 10.0, 38.0, 62.0) { self.sel.2 = (self.sel.2 + ns - 1) % ns; self.audio.sfx("select"); }
+            self.sel.2 = self.sel.2.min(ns - 1);
         }
-        // cursor dwell: heavy loads (MUGEN) wait until the cursor rests; light previews (UMF) load almost immediately
+        let accents = [hex("#3fa9ff"), hex("#ff4d6d")];
+        let active = [picking == 0 || picked[0].is_some(), picking == 1];
+        let s_ui = self.ui.s;
+        for side in 0..2 {
+            let Some(i) = picked[side].or(if side == picking { Some(cur[side]) } else { None }) else { continue };
+            let c = rgb(self.reg.chars[i].color);
+            glow(self.ui.x(if side == 0 { 190.0 } else { VW - 190.0 }), self.ui.y(430.0), 420.0 * s_ui, Color::new(c.r, c.g, c.b, 0.5));
+        }
+
+        crate::menu_art::glass(&self.ui, 0.0, 0.0, VW, 84.0, 1.0);
+        self.ui.rect(0.0, 82.0, VW, 2.0, alpha(accents[picking.min(1)], 0.85));
+        let team_mode = self.mode.is_team();
+        self.sel_buf.clear();
+        if team_mode { let _ = write!(self.sel_buf, "{} {}v{}", self.mode.label(), self.team_n, self.team_n); } else { self.sel_buf.push_str(self.mode.label()); }
+        self.ui.text(&self.sel_buf, 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
+        let hint = if team_mode { "Monte sua equipe · Q/E: tamanho" } else if picking == 0 { "JOGADOR 1: escolha seu lutador" } else if two { "JOGADOR 2: escolha" } else { "Escolha o oponente" };
+        self.ui.text(hint, VW - 40.0, 56.0, 20.0, hex("#d8d0f0"), Align::Right, false);
+        if ns > 0 {
+            let (sx, sy, sw, sh) = (500.0, 10.0, 280.0, 62.0);
+            crate::menu_art::glass(&self.ui, sx, sy, sw, sh, 1.0);
+            self.ui.rect_lines(sx, sy, sw, sh, 1.0, Color::new(1.0, 1.0, 1.0, 0.18));
+            if let Some(image) = self.reg.stage_preview(self.sel.2) {
+                let texture = self.g.texture(&image, true);
+                let (iw, ih) = (image.w as f32, image.h as f32);
+                let ch_src = (iw * 50.0 / 72.0).min(ih);
+                let cw_src = ch_src * 72.0 / 50.0;
+                draw_texture_ex(&texture, self.ui.x(sx + 44.0), self.ui.y(sy + 6.0), WHITE, DrawTextureParams { dest_size: Some(vec2(72.0 * s_ui, 50.0 * s_ui)), source: Some(Rect::new((iw - cw_src) * 0.5, (ih - ch_src) * 0.5, cw_src, ch_src)), ..Default::default() });
+            }
+            let ar = |this: &Self, x: f32, dir: f32| draw_triangle(vec2(this.ui.x(x + dir * 7.0), this.ui.y(sy + sh * 0.5)), vec2(this.ui.x(x - dir * 5.0), this.ui.y(sy + sh * 0.5 - 9.0)), vec2(this.ui.x(x - dir * 5.0), this.ui.y(sy + sh * 0.5 + 9.0)), hex("#ffcc33"));
+            ar(self, sx + 18.0, -1.0);
+            ar(self, sx + sw - 18.0, 1.0);
+            self.ui.text("CENÁRIO", sx + 126.0, sy + 22.0, 12.0, hex("#a49cc0"), Align::Left, true);
+            let stage_name = &self.reg.stages[self.sel.2].name;
+            self.ui.text(clip(stage_name, 15), sx + 126.0, sy + 46.0, 15.0, WHITE, Align::Left, true);
+        }
+
         let focus = cur[picking];
         if self.sel_last[picking] != focus { self.sel_last[picking] = focus; self.sel_dwell = 0.0; } else { self.sel_dwell += dt; }
         let pal_of = |side: usize, i: usize, picked: [Option<usize>; 2]| if side == 1 && picked[0] == Some(i) { 2 } else { 1 };
         let mut want: Vec<(usize, i32)> = vec![(focus, pal_of(picking, focus, picked))];
         for side in 0..2 { if let Some(i) = picked[side] { want.push((i, pal_of(side, i, picked))); } }
+        ume_shell::watchdog::label("select:preview");
+        self.reg.reap_streams();
         let mut loaded_one = false;
         for (i, pal) in want {
+            if i == usize::MAX { continue; }
             let e = &self.reg.chars[i];
             if e.peek(pal).is_some() || e.broken.get() { continue; }
             if self.sel_dwell < if e.mugen { 0.18 } else { 0.03 } { continue; }
-            if e.load_preview(pal).is_err() { self.msg = format!("Falha ao carregar {}", e.name); }
+            e.stream_preview(pal);
+            if e.errs_has(pal) { self.msg = format!("Falha ao carregar {}", e.name); }
             loaded_one = true;
         }
 
-        // grid: only the visible rows are drawn and only they stream their portraits (one UMF preview per frame)
         let gap = 6.0;
         let cw = ((640.0 - (cols as f32 - 1.0) * gap) / cols as f32).min(96.0);
         let ch = cw * 1.17;
-        let gx = (VW - (cols as f32 * cw + (cols as f32 - 1.0) * gap)) / 2.0;
+        let gw = cols as f32 * cw + (cols as f32 - 1.0) * gap;
+        let gx = (VW - gw) / 2.0;
         let gy = 110.0;
+        let gh = VIEW_ROWS as f32 * (ch + gap) - gap;
+        crate::menu_art::glass(&self.ui, gx - 12.0, gy - 12.0, gw + 24.0, gh + 24.0, 1.0);
+        self.ui.rect_lines(gx - 12.0, gy - 12.0, gw + 24.0, gh + 24.0, 1.0, Color::new(1.0, 1.0, 1.0, 0.14));
         let mut click = None;
         let first = self.sel_row * cols;
         let last = ((self.sel_row + VIEW_ROWS) * cols).min(m);
@@ -423,14 +577,16 @@ impl App {
             let i = view[k];
             let (cx, cy) = (gx + (k % cols) as f32 * (cw + gap), gy + ((k / cols) - self.sel_row) as f32 * (ch + gap));
             if self.clicked_rect(cx, cy, cw, ch) { click = Some(i); }
-            let (ecol, emugen, ename, broken) = { let e = &self.reg.chars[i]; (e.color, e.mugen, e.name.clone(), e.broken.get()) };
+            let (ecol, emugen, broken) = { let e = &self.reg.chars[i]; (e.color, e.mugen, e.broken.get()) };
             let col = rgb(ecol);
-            self.ui.gradient_v(cx, cy, cw, ch, alpha(col, 0.95), hex("#120a22"));
+            self.ui.rect(cx, cy, cw, ch, Color::new(0.06, 0.04, 0.12, 0.92));
+            self.ui.rect(cx, cy, cw, ch * 0.62, alpha(col, 0.5));
+            self.ui.rect(cx, cy + ch * 0.62, cw, ch * 0.38, alpha(col, 0.18));
             let mut got = self.reg.chars[i].peek(1);
             if got.is_none() && !emugen && !loaded_one && !broken { got = self.reg.chars[i].load_preview(1).ok(); loaded_one = got.is_some(); }
             // MUGEN tiles use a thumbnail cached apart from the (size-capped) definition cache, decoded one per frame once the cursor rests
-            if emugen && !loaded_one && !broken && self.sel_dwell > 0.15 && !self.reg.chars[i].has_portrait_attempt() { self.reg.chars[i].ensure_portrait(); loaded_one = true; }
-            let thumb = if emugen { self.reg.chars[i].portrait() } else { None };
+            if emugen && !loaded_one && !broken && self.sel_dwell > 0.15 && !self.reg.chars[i].has_portrait_attempt() { self.reg.chars[i].stream_portrait(); loaded_one = true; }
+            let thumb = if emugen { self.reg.chars[i].portrait() } else { got.as_ref().and_then(|d| d.sprites.get(&(9000, 1)).cloned()) };
             if thumb.is_some() || got.is_some() {
                 let por = thumb.and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)));
                 if let Some((im, pw, ph)) = por {
@@ -438,58 +594,102 @@ impl App {
                     let kk = ((cw - 8.0) / pw).min((ch - 26.0) / ph);
                     draw_texture_ex(&tex, self.ui.x(cx + (cw - pw * kk) / 2.0), self.ui.y(cy + 4.0), WHITE, DrawTextureParams { dest_size: Some(vec2(pw * kk * self.ui.s, ph * kk * self.ui.s)), ..Default::default() });
                 } else if let Some(d) = got {
-                    self.ui_clip(cx, cy, cw, ch - 18.0, |app| app.draw_char(&d, 0, 0.0, cx + cw / 2.0, cy + ch * 1.55, 260.0, false));
+                    self.ui_clip(cx, cy, cw, ch - 18.0, |app| app.draw_char_fit(&d, 0, 0.0, cx + cw / 2.0, cy + ch - 20.0, cw - 8.0, ch - 30.0, false));
                 }
             } else {
-                let init: String = ename.chars().next().map(|c| c.to_uppercase().collect()).unwrap_or_default();
-                self.ui.text(if broken { "X" } else { &init }, cx + cw / 2.0, cy + ch * 0.58, cw * 0.55, Color::new(1.0, 1.0, 1.0, if broken { 0.5 } else { 0.28 }), Align::Center, true);
+                let init = self.names_up[i].chars().next().map(|c| c.len_utf8()).unwrap_or(0);
+                self.ui.text(if broken { "X" } else { &self.names_up[i][..init] }, cx + cw / 2.0, cy + ch * 0.58, cw * 0.55, Color::new(1.0, 1.0, 1.0, if broken { 0.5 } else { 0.28 }), Align::Center, true);
             }
-            self.ui.rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.65));
-            let nm: String = if emugen { ename.chars().take(13).collect() } else { ename.split_whitespace().next().unwrap_or("").chars().take(12).collect() };
-            self.ui.text(&nm.to_uppercase(), cx + cw / 2.0, cy + ch - 4.0, (cw * 0.125).min(12.0), WHITE, Align::Center, true);
+            self.ui.rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.7));
+            let up = self.names_up[i].as_str();
+            let nm = if emugen { clip(up, 13) } else { clip(up.split_whitespace().next().unwrap_or(""), 12) };
+            self.ui.text(nm, cx + cw / 2.0, cy + ch - 4.0, (cw * 0.125).min(12.0), WHITE, Align::Center, true);
             if emugen { self.ui.rect(cx + cw - 44.0, cy + 3.0, 41.0, 13.0, hex("#22e8ff")); self.ui.text("MUGEN", cx + cw - 23.5, cy + 14.0, 10.0, BLACK, Align::Center, true); }
-            let pulse = 4.0 + 1.5 * (self.ui.t * 8.0).sin();
-            let c1 = cur[0] == i && (picking == 0 || picked[0].is_some());
-            let c2 = cur[1] == i && picking == 1;
-            if c1 { self.ui.rect_lines(cx - 2.0, cy - 2.0, cw + 4.0, ch + 4.0, pulse, hex("#3fa9ff")); }
-            if c2 { self.ui.rect_lines(cx - 6.0, cy - 6.0, cw + 12.0, ch + 12.0, pulse, hex("#ff4d6d")); }
+            let cursored = (cur[0] == i && active[0]) || (cur[1] == i && active[1]);
+            if !cursored { self.ui.rect(cx, cy, cw, ch, Color::new(0.0, 0.0, 0.08, 0.25)); }
+            for side in 0..2 {
+                if picked[side] == Some(i) { self.ui.rect(cx, cy, 24.0, 14.0, accents[side]); self.ui.text(if side == 0 { "P1" } else { "P2" }, cx + 12.0, cy + 12.0, 11.0, BLACK, Align::Center, true); }
+            }
+            if let Some(n) = self.team_pick.iter().position(|&t| t == i) {
+                self.ui.rect(cx, cy, 20.0, 18.0, hex("#ffcc33"));
+                self.ui.text(NUMS[n.min(4)], cx + 10.0, cy + 14.0, 14.0, BLACK, Align::Center, true);
+            }
         }
-        // scrollbar
         if total_rows > VIEW_ROWS {
-            let (bx, bh) = (gx + cols as f32 * (cw + gap) + 2.0, VIEW_ROWS as f32 * (ch + gap) - gap);
-            self.ui.rect(bx, gy, 5.0, bh, Color::new(1.0, 1.0, 1.0, 0.1));
-            let th = (bh * VIEW_ROWS as f32 / total_rows as f32).max(18.0);
-            self.ui.rect(bx, gy + (bh - th) * self.sel_row as f32 / (total_rows - VIEW_ROWS) as f32, 5.0, th, hex("#ff4d6d"));
+            let bx = gx + gw + 3.0;
+            self.ui.rect(bx, gy, 5.0, gh, Color::new(1.0, 1.0, 1.0, 0.1));
+            let th = (gh * VIEW_ROWS as f32 / total_rows as f32).max(18.0);
+            self.ui.rect(bx, gy + (gh - th) * self.sel_row as f32 / (total_rows - VIEW_ROWS) as f32, 5.0, th, hex("#ff4d6d"));
+        }
+        let pulse = 0.5 + 0.5 * (self.ui.t * 7.0).sin();
+        for side in 0..2 {
+            if !active[side] { continue; }
+            let kpos = pos_of(&view, cur[side]);
+            if kpos < first || kpos >= last { continue; }
+            let target = (gx + (kpos % cols) as f32 * (cw + gap), gy + ((kpos / cols) - self.sel_row) as f32 * (ch + gap));
+            let c = &mut self.sel_cur[side];
+            if c.0 < 0.0 { *c = target; } else { let f = 1.0 - (-dt * 24.0).exp(); c.0 += (target.0 - c.0) * f; c.1 += (target.1 - c.1) * f; }
+            let (rx, ry) = (self.sel_cur[side].0, self.sel_cur[side].1);
+            let a = accents[side];
+            let pad = 2.0 + 2.0 * pulse + side as f32 * 3.0;
+            self.ui.rect(rx - pad, ry - pad, cw + pad * 2.0, ch + pad * 2.0, alpha(a, 0.10 + 0.08 * pulse));
+            self.ui.rect_lines(rx - pad, ry - pad, cw + pad * 2.0, ch + pad * 2.0, 2.0, alpha(a, 0.9));
+            let (bl, bt) = (16.0, 4.0);
+            for (ox, oy, dx, dy) in [(rx - pad, ry - pad, 1.0, 1.0), (rx + cw + pad, ry - pad, -1.0, 1.0), (rx - pad, ry + ch + pad, 1.0, -1.0), (rx + cw + pad, ry + ch + pad, -1.0, -1.0)] {
+                self.ui.rect(ox.min(ox + dx * bl), oy + if dy > 0.0 { -2.0 } else { 2.0 - bt }, bl, bt, WHITE);
+                self.ui.rect(ox + if dx > 0.0 { -2.0 } else { 2.0 - bt }, oy.min(oy + dy * bl), bt, bl, WHITE);
+            }
+            if picked[side].is_none() { self.ui.rect(rx - pad, ry - pad - 15.0, 26.0, 15.0, a);
+            self.ui.text(if side == 0 { "P1" } else if two { "P2" } else { "CPU" }, rx - pad + 13.0, ry - pad - 3.0, 12.0, BLACK, Align::Center, true); }
         }
         if let Some(i) = click { if cur[picking] == i { confirm = true; } else { cur[picking] = i; self.audio.sfx("select"); } }
-        // previews
+
         for side in 0..2 {
             let idx = picked[side].or(if side == picking { Some(cur[side]) } else { None });
-            let x = if side == 0 { 170.0 } else { VW - 170.0 };
-            let col = if side == 0 { Color::new(0.25, 0.66, 1.0, 0.18) } else { Color::new(1.0, 0.3, 0.43, 0.18) };
-            glow(self.ui.x(x), self.ui.y(540.0), 200.0 * self.ui.s, Color::new(col.r, col.g, col.b, 0.9));
-            draw_ellipse(self.ui.x(x), self.ui.y(600.0), 80.0 * self.ui.s, 12.0 * self.ui.s, 0.0, Color::new(0.0, 0.0, 0.0, 0.4));
-            if let Some(i) = idx {
-                if let Some(d) = self.reg.chars[i].peek(pal_of(side, i, picked)) {
-                    let anim = if picked[side].is_some() && d.anims.contains_key(&181) { 181 } else { 0 };
-                    let t = self.preview_t;
-                    self.draw_char(&d, anim, t, x, 600.0, 330.0, side == 1);
-                } else if !self.reg.chars[i].broken.get() {
-                    self.ui.progress_bar(x - 90.0, 520.0, 180.0, (self.sel_dwell / 0.4).min(0.95), "Carregando…");
-                }
-                let e = &self.reg.chars[i];
-                self.ui.text_bold(&e.name.to_uppercase(), x, 650.0, if e.name.len() > 16 { 20.0 } else { 26.0 }, if picked[side].is_some() { hex("#ffcc33") } else { WHITE }, BLACK, Align::Center);
-                self.ui.text(&e.series, x, 676.0, 15.0, hex("#a49cc0"), Align::Center, false);
-            } else { self.ui.text_bold("???", x, 650.0, 30.0, hex("#a49cc0"), BLACK, Align::Center); }
+            let label = if side == 0 { "P1" } else if two { "P2" } else { "CPU" };
+            let pal = idx.map(|i| pal_of(side, i, picked)).unwrap_or(1);
+            self.select_side(side, idx, picked[side].is_some(), side == picking, pal, label);
         }
+        self.sel_flash.1 = (self.sel_flash.1 - dt * 3.0).max(0.0);
+
+        if team_mode {
+            let n = self.team_n;
+            let sw = ((640.0 - (n as f32 - 1.0) * 6.0) / n as f32).min(118.0);
+            let x0 = (VW - (n as f32 * sw + (n as f32 - 1.0) * 6.0)) / 2.0;
+            for k in 0..n {
+                let x = x0 + k as f32 * (sw + 6.0);
+                let y = 598.0;
+                crate::menu_art::glass(&self.ui, x, y, sw, 46.0, 1.0);
+                match self.team_pick.get(k).copied() {
+                    Some(i) => {
+                        self.ui.rect(x, y, sw, 46.0, alpha(rgb(self.reg.chars[i].color), 0.5));
+                        self.portrait_fit(i, x + 2.0, y + 2.0, 42.0, 42.0);
+                        self.ui.text(clip(self.names_up[i].split_whitespace().next().unwrap_or(""), 7), x + 46.0, y + 28.0, if n > 4 { 11.0 } else { 13.0 }, WHITE, Align::Left, true);
+                    }
+                    None => {
+                        let now = k == self.team_pick.len();
+                        if now { self.ui.rect(x, y, sw, 46.0, Color::new(1.0, 0.8, 0.2, 0.14 + 0.12 * pulse)); self.ui.rect_lines(x, y, sw, 46.0, 2.0, hex("#ffcc33")); }
+                        self.ui.text(NUMS[k.min(4)], x + sw / 2.0, y + 31.0, 20.0, Color::new(1.0, 1.0, 1.0, if now { 0.9 } else { 0.3 }), Align::Center, true);
+                    }
+                }
+            }
+        }
+
+        crate::menu_art::glass(&self.ui, 0.0, 652.0, VW, 68.0, 1.0);
+        self.ui.rect(0.0, 652.0, VW, 1.5, alpha(accents[picking.min(1)], 0.7));
         let desc = &self.reg.chars[cur[picking]].description;
-        self.ui.text(desc, VW / 2.0, 700.0, 18.0, hex("#d8d0f0"), Align::Center, false);
+        self.ui.text(desc, VW / 2.0, 680.0, 18.0, hex("#d8d0f0"), Align::Center, false);
+        let flabel = ["TODOS", "ORIGINAIS", "M.U.G.E.N"][self.sel_filter as usize % 3];
+        self.sel_buf.clear();
+        let _ = write!(self.sel_buf, "[Tab] {flabel} · {}/{m} · [R] aleatório · [ ] cenário · PgUp/PgDn", pos + 1);
+        self.ui.text(&self.sel_buf, VW / 2.0, 706.0, 14.0, hex("#a49cc0"), Align::Center, false);
         // bound memory with hundreds of fighters
         let mut keep: Vec<usize> = cur.to_vec(); keep.extend(picked.iter().flatten());
         self.reg.trim_cache(&keep);
         if confirm {
             if self.reg.chars[cur[picking]].broken.get() { self.msg = "Este personagem não pôde ser carregado.".into(); self.screen = Screen::Select { cur, picking, picked }; return; }
             self.audio.sfx("confirm");
+            self.sel_flash = (picking, 1.0);
             if self.mode.is_team() {
                 let me = cur[0];
                 if self.team_pick.contains(&me) { self.msg = "Este lutador já está na equipe.".into(); self.screen = Screen::Select { cur, picking: 0, picked: [None, None] }; return; }
@@ -503,7 +703,7 @@ impl App {
                 pool.sort_by_key(|&i| self.reg.chars[i].mugen as u8);
                 let mut foes: Vec<usize> = pool.into_iter().take(n).collect();
                 while foes.len() < n { foes.push(self.team_pick[foes.len() % self.team_pick.len()]); }
-                let t = Team::new(self.team_pick.clone(), foes, self.mode == Mode::TeamSimul);
+                let t = if self.mode == Mode::TeamTag { Team::tagged(self.team_pick.clone(), foes) } else { Team::new(self.team_pick.clone(), foes, self.mode == Mode::TeamSimul) };
                 self.sel = (t.members[0][0], t.members[1][0], self.sel.2);
                 self.team = Some(t);
                 self.screen = Screen::Stages { cur: 1 };
@@ -536,6 +736,64 @@ impl App {
             if picking == 1 { picking = 0; picked = [None, None]; } else { self.screen = Screen::Menu { cur: 0 }; return; }
         }
         self.screen = Screen::Select { cur, picking, picked };
+    }
+
+    fn portrait_fit(&mut self, i: usize, x: f32, y: f32, w: f32, h: f32) {
+        let e = &self.reg.chars[i];
+        let por = if e.mugen { e.portrait() } else { e.peek(1).and_then(|d| d.sprites.get(&(9000, 1)).cloned()) };
+        let Some((im, pw, ph)) = por.and_then(|p| p.image.clone().map(|im| (im, p.width, p.height))) else { return };
+        let tex = self.g.texture(&im, true);
+        let kk = (w / pw).min(h / ph);
+        draw_texture_ex(&tex, self.ui.x(x + (w - pw * kk) / 2.0), self.ui.y(y + (h - ph * kk) / 2.0), WHITE, DrawTextureParams { dest_size: Some(vec2(pw * kk * self.ui.s, ph * kk * self.ui.s)), ..Default::default() });
+    }
+
+    fn select_side(&mut self, side: usize, idx: Option<usize>, locked: bool, hovering: bool, pal: i32, label: &str) {
+        let acc = if side == 0 { hex("#3fa9ff") } else { hex("#ff4d6d") };
+        let (px, py, pw, ph) = (if side == 0 { 24.0 } else { VW - 304.0 }, 100.0, 280.0, 540.0);
+        let cx = px + pw / 2.0;
+        crate::menu_art::glass(&self.ui, px, py, pw, ph, 1.0);
+        self.ui.rect(px, py, pw, 3.0, acc);
+        self.ui.rect(if side == 0 { px } else { px + pw - 3.0 }, py, 3.0, ph, alpha(acc, 0.55));
+        self.ui.rect_lines(px, py, pw, ph, 1.0, Color::new(1.0, 1.0, 1.0, 0.14));
+        let s = self.ui.s;
+        let Some(i) = idx else {
+            self.ui.text("?", cx, py + 340.0, 220.0, Color::new(1.0, 1.0, 1.0, 0.07), Align::Center, true);
+            self.ui.text(if self.mode.is_team() { "ADVERSÁRIOS SORTEADOS" } else { "AGUARDANDO" }, cx, py + ph - 24.0, 15.0, hex("#a49cc0"), Align::Center, true);
+            self.ui.rect(px + 12.0, py + 12.0, 44.0, 20.0, acc);
+            self.ui.text(label, px + 34.0, py + 28.0, 15.0, BLACK, Align::Center, true);
+            return;
+        };
+        let col = rgb(self.reg.chars[i].color);
+        let t = self.preview_t;
+        let ease = if hovering && !locked { 1.0 - (1.0 - (self.sel_dwell / 0.3).min(1.0)).powi(3) } else { 1.0 };
+        glow(self.ui.x(cx), self.ui.y(py + 340.0), 230.0 * s, alpha(col, 0.55));
+        draw_ellipse(self.ui.x(cx), self.ui.y(py + 488.0), 105.0 * s, 13.0 * s, 0.0, Color::new(0.0, 0.0, 0.0, 0.5));
+        draw_ellipse(self.ui.x(cx), self.ui.y(py + 488.0), 105.0 * s, 13.0 * s, 0.0, alpha(acc, 0.12));
+        if let Some(d) = self.reg.chars[i].peek(pal) {
+            let anim = if locked && d.anims.contains_key(&181) { 181 } else { 0 };
+            self.char_tint = Color::new(1.0, 1.0, 1.0, ease);
+            let slide = (1.0 - ease) * if side == 0 { -60.0 } else { 60.0 };
+            self.draw_char_fit(&d, anim, t, cx + slide, py + 478.0, 270.0, 450.0, side == 1);
+            self.char_tint = WHITE;
+        } else if !self.reg.chars[i].broken.get() {
+            self.ui.progress_bar(cx - 90.0, py + 300.0, 180.0, (self.sel_dwell / 0.4).min(0.95), "Carregando…");
+        }
+        if self.sel_flash.0 == side && self.sel_flash.1 > 0.0 {
+            let f = self.sel_flash.1;
+            self.ui.rect(px, py, pw, ph, Color::new(1.0, 1.0, 1.0, 0.45 * f * f));
+            draw_circle_lines(self.ui.x(cx), self.ui.y(py + 300.0), (1.0 - f) * 320.0 * s, 4.0 * s, alpha(acc, f));
+        }
+        let e = &self.reg.chars[i];
+        let by = py + ph - 56.0;
+        self.ui.rect(px, by, pw, 56.0, Color::new(0.0, 0.0, 0.05, 0.7));
+        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9));
+        let nm = self.names_up[i].as_str();
+        self.ui.text_bold(nm, cx, by + 28.0, if nm.chars().count() > 14 { 19.0 } else { 26.0 }, if locked { hex("#ffcc33") } else { WHITE }, BLACK, Align::Center);
+        self.ui.text(&e.series, cx, by + 48.0, 14.0, hex("#a49cc0"), Align::Center, false);
+        self.ui.rect(px + 12.0, py + 12.0, 44.0, 20.0, acc);
+        self.ui.text(label, px + 34.0, py + 28.0, 15.0, BLACK, Align::Center, true);
+        if locked { self.ui.rect(px + pw - 82.0, py + 12.0, 70.0, 20.0, hex("#ffcc33")); self.ui.text("PRONTO", px + pw - 47.0, py + 28.0, 14.0, BLACK, Align::Center, true); }
+        else if e.mugen { self.ui.rect(px + pw - 62.0, py + 12.0, 50.0, 16.0, hex("#22e8ff")); self.ui.text("MUGEN", px + pw - 37.0, py + 25.0, 12.0, BLACK, Align::Center, true); }
     }
 
     fn ui_clip(&mut self, x: f32, y: f32, w: f32, h: f32, f: impl FnOnce(&mut App)) {
@@ -601,7 +859,7 @@ impl App {
     fn load_plan(&self) -> Vec<(usize, usize, usize)> {
         let mut v = vec![];
         match &self.team {
-            Some(t) if t.simul => { for k in 0..t.members[0].len().max(t.members[1].len()) { for side in 0..2 { if let Some(&r) = t.members[side].get(k) { v.push((side, k, r)); } } } }
+            Some(t) if t.whole_squad() => { for k in 0..t.members[0].len().max(t.members[1].len()) { for side in 0..2 { if let Some(&r) = t.members[side].get(k) { v.push((side, k, r)); } } } }
             _ => { v.push((0, 0, self.sel.0)); v.push((1, 0, self.sel.1)); }
         }
         v
@@ -628,6 +886,7 @@ impl App {
         let n = plan.len();
         let st = step as usize;
         if st < n {
+            ume_shell::watchdog::label("load:character");
             if st == 0 && self.pending.jobs.is_empty() {
                 let keep: Vec<usize> = plan.iter().map(|p| p.2).collect();
                 self.reg.trim_cache(&keep);
@@ -644,9 +903,17 @@ impl App {
             let d = self.reg.chars[r].finish_load(Self::pal_for(&plan, st), job)?;
             self.pending.defs[side].push(d);
         } else if st == n {
+            ume_shell::watchdog::label("load:stage");
             self.pending.jobs.clear();
+            let job = self.pending.stage_job.get_or_insert_with(|| self.reg.prepare_stage(s));
+            match job.as_mut().poll(&mut std::task::Context::from_waker(std::task::Waker::noop())) {
+                std::task::Poll::Pending => return Ok(false),
+                std::task::Poll::Ready(result) => result?,
+            }
+            self.pending.stage_job = None;
             self.pending.stage = Some(self.reg.build_stage(s));
         } else if st == n + 1 {
+            ume_shell::watchdog::label("load:session");
             let stage = self.pending.stage.take().ok_or("stage")?;
             let teams = std::mem::take(&mut self.pending.defs);
             let lvl = match &self.arcade { Some((_, i)) if self.mode == Mode::Arcade => (2 + *i as i32 + self.ai_level / 3).min(8), _ => self.ai_level };
@@ -660,30 +927,46 @@ impl App {
             let replay = self.replaying.clone();
             for k in 0..teams[0].len().max(teams[1].len()) { for side in 0..2 { if teams[side].get(k).is_some() { pilots.push(if k == 0 { leader(side) } else { Pilot::Cpu(Ai::new((lvl - 1).max(1), 31 + (side * 7 + k) as u32)) }); } } }
             if let Some(r) = &replay { for (slot, p) in pilots.iter_mut().enumerate() { *p = Pilot::Replay(r.rec.iter().map(|b| b.get(slot).copied().unwrap_or(0)).collect(), 0); } }
-            let (simul, seq) = (self.team.as_ref().is_some_and(|t| t.simul), self.team.as_ref().is_some_and(|t| !t.simul));
-            let life = self.team.as_ref().filter(|t| !t.simul).map(|t| t.life).unwrap_or([1.0, 1.0]);
+            let (simul, tag, seq) = (self.team.as_ref().is_some_and(|t| t.simul), self.team.as_ref().is_some_and(|t| t.tag), self.team.as_ref().is_some_and(|t| !t.whole_squad()));
+            let life = self.team.as_ref().filter(|t| !t.whole_squad()).map(|t| t.life).unwrap_or([1.0, 1.0]);
             let info = self.team.as_ref().map(|t| crate::session::TeamInfo {
                 names: [0, 1].map(|sd| t.members[sd].iter().map(|&r| (self.reg.chars[r].name.split_whitespace().next().unwrap_or("").to_uppercase(), self.reg.chars[r].color)).collect()),
-                idx: t.idx, ko: t.ko.clone(), simul: t.simul,
+                idx: t.idx, ko: t.ko.clone(), simul: t.whole_squad(),
             });
-            let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, seq, life);
+            self.c.clear_macros();
+            let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, tag, seq, life);
             if let Some(t) = &info { sess.m.team_lead = [0, 1].map(|sd| t.names[sd].first().map(|n| n.0.clone()).unwrap_or_default()); }
+            if let Some(t) = &info { sess.m.team_turns = seq; sess.m.team_size = [t.names[0].len(), t.names[1].len()]; sess.m.team_member = t.idx; }
             sess.team = info;
             sess.is_replay = replay.is_some();
+            self.fight_rules = replay.as_ref().map(|r| r.rules).unwrap_or_else(|| self.settings.rules());
+            sess.apply_rules(self.fight_rules);
             if seq { if let Some(t) = &self.team { for side in 0..2 { if let Some(f) = sess.m.fighters.iter_mut().find(|f| !f.is_helper && f.side == side) { f.power = t.power[side].min(f.power_max); } } } }
             sess.r.debug = self.debug_boxes;
             if seq && self.team.as_ref().is_some_and(|t| t.idx != [0, 0]) { sess.vfx.banner("PRÓXIMO LUTADOR", &format!("{} vs {}", self.reg.chars[self.sel.0].name, self.reg.chars[self.sel.1].name), [0.4, 0.9, 1.0]); }
             self.pending.sess = Some(sess);
         } else {
+            ume_shell::watchdog::label("load:audio");
             let music = self.pending.sess.as_ref().map(|s| s.stage.music).unwrap_or(0);
+            let mut sfx_ready = true;
             if let Some(sess) = &self.pending.sess {
                 let mut chars: Vec<crate::audio::CharSounds> = vec![];
                 for f in &sess.m.fighters { if !chars.iter().any(|(id, _)| *id == f.def.id) { chars.push((&f.def.id, &f.def.sounds)); } }
-                self.audio.preload_match(&chars);
+                sfx_ready = self.audio.preload_match(&chars);
             }
+            let music_ready = self.audio.music_ready(music);
+            if !sfx_ready || !music_ready { if wait { std::thread::sleep(std::time::Duration::from_millis(2)); return Box::pin(self.load_step(step, wait)).await; } return Ok(false); }
             self.audio.prepare_music(music).await;
         }
         Ok(true)
+    }
+
+    fn finish_import(&mut self, read: Result<(String, ume_formats::vfs::Vfs), String>) {
+        match read.map(|(pack, vfs)| self.reg.finish_import(pack, vfs)) {
+            Ok(r) if r.duplicate_pack || (r.chars + r.stages == 0 && r.errors == 0) => self.msg = "Pacote já importado".into(),
+            Ok(r) => { self.reg.sort_mugen(); self.sel = (self.sel.0.min(self.reg.chars.len() - 1), self.sel.1.min(self.reg.chars.len() - 1), self.sel.2.min(self.reg.stages.len() - 1)); self.msg = format!("Importado: {} personagem(ns), {} cenário(s){}", r.chars, r.stages, if r.errors == 0 { String::new() } else { format!(" · {} erro(s)", r.errors) }); }
+            Err(e) => self.msg = format!("Zip inválido: {e}"),
+        }
     }
 
     fn abort_load(&mut self, e: String) { self.msg = e; self.pending = Pending::default(); self.screen = Screen::Menu { cur: 0 }; }
@@ -703,28 +986,9 @@ impl App {
             }
         }
         let ready = step_now >= total;
-        let (a, b) = (self.sel.0, self.sel.1);
-        let k = (t / 0.4).min(1.0);
-        clear_background(BLACK);
-        let ca = rgb(self.reg.chars[a].color); let cb = rgb(self.reg.chars[b].color);
-        self.ui.gradient_v(-(1.0 - k) * 640.0, 0.0, 640.0, VH, ca, BLACK);
-        self.ui.gradient_v(640.0 + (1.0 - k) * 640.0, 0.0, 640.0, VH, cb, BLACK);
-        crate::vfx::speed_lines((screen_width() / 2.0, screen_height() * 0.46), 0.10 + 0.08 * (self.ui.t * 3.0).sin().abs(), [1.0, 0.8, 0.5], (self.ui.t * 12.0) as u32, 40);
-        let pt = self.preview_t;
-        // previews: whatever is already loaded (full or idle-only), so this screen itself never stalls
-        if let Some(d) = self.reg.chars[a].peek(1) { self.draw_char(&d, 0, pt, 320.0 - (1.0 - k) * 640.0, 560.0, 420.0, false); }
-        if let Some(d) = self.reg.chars[b].peek(if a == b { 2 } else { 1 }).or_else(|| self.reg.chars[b].load_preview(if a == b { 2 } else { 1 }).ok().filter(|_| !self.reg.chars[b].mugen)) { self.draw_char(&d, 0, pt, 960.0 + (1.0 - k) * 640.0, 560.0, 420.0, true); }
-        self.ui.text_bold(&self.reg.chars[a].name.to_uppercase(), 320.0, 630.0, 40.0, WHITE, BLACK, Align::Center);
-        self.ui.text_bold(&self.reg.chars[b].name.to_uppercase(), 960.0, 630.0, 40.0, WHITE, BLACK, Align::Center);
-        self.ui.text(&self.reg.chars[a].series, 320.0, 662.0, 20.0, hex("#dddddd"), Align::Center, false);
-        self.ui.text(&self.reg.chars[b].series, 960.0, 662.0, 20.0, hex("#dddddd"), Align::Center, false);
-        let vs_s = 170.0 * (if t < 0.6 { 3.0 - 2.0 * (t / 0.6) } else { 1.0 });
-        glow(self.ui.x(640.0), self.ui.y(330.0), 220.0 * self.ui.s, Color::new(1.0, 0.5, 0.1, 0.7));
-        self.ui.text_bold("VS", 640.0, 330.0 + vs_s * 0.35, vs_s, hex("#ffcc33"), hex("#5a0a10"), Align::Center);
-        let sub = if let Some(t) = &self.team { let (ia, ib) = (t.idx[0] + 1, t.idx[1] + 1); if t.simul { format!("EQUIPE PARALELO · {} + {} vs {} + {}", self.reg.chars[t.members[0][0]].name, self.reg.chars[t.members[0][1.min(t.members[0].len() - 1)]].name, self.reg.chars[t.members[1][0]].name, self.reg.chars[t.members[1][1.min(t.members[1].len() - 1)]].name) } else { format!("EQUIPE SEQUÊNCIA · {}º vs {}º lutador", ia, ib) } } else if let Some((l, i)) = &self.arcade { format!("ARCADE · LUTA {}/{}", i + 1, l.len()) } else { self.reg.stages[self.sel.2].name.clone() };
-        self.ui.text(&sub, 640.0, 700.0, 20.0, hex("#a49cc0"), Align::Center, true);
+        self.draw_versus(t);
         if !ready {
-            self.ui.progress_bar(440.0, 28.0, 400.0, step_now as f32 / total as f32, &self.load_label(step_now));
+            self.ui.progress_bar(440.0, 84.0, 400.0, step_now as f32 / total as f32, &self.load_label(step_now));
         } else if t > 1.8 || self.c.pressed(nav::OK | nav::START) || is_mouse_button_pressed(MouseButton::Left) {
             self.finish_fight().await;
         }
@@ -739,10 +1003,11 @@ impl App {
     async fn finish_fight(&mut self) {
         let Some(sess) = self.pending.sess.take() else { self.screen = Screen::Menu { cur: 0 }; return };
         let music = sess.stage.music;
-        let bgm = sess.stage.bgm.clone();
+        let bgm = sess.stage.bgm.clone().or_else(|| self.market.pick_track());
         // DualShock/DualSense lightbars: P1 blue, P2 red
         self.c.pads.set_light(0, [30, 90, 255]);
         self.c.pads.set_light(1, [255, 40, 60]);
+        ume_shell::watchdog::label("fight:prefetch");
         self.g.trim(4000);
         let mut warmed: Vec<&str> = vec![];
         for f in &sess.m.fighters {
@@ -752,62 +1017,10 @@ impl App {
         }
         self.session = Some(sess);
         self.screen = Screen::Fight;
+        self.audio.reset_bgm();
+        if let Some(b) = bgm.as_ref() { self.audio.register_music_file("stage", b.0.clone(), b.1); }
         let custom = match bgm { Some(b) => self.audio.play_music_file(&b.0, b.1).await, None => false };
         if !custom { self.audio.play_music(music).await; }
-    }
-
-    fn video_screen(&mut self) {
-        let Screen::Video { mut cur } = self.screen else { return };
-        let web = cfg!(target_arch = "wasm32");
-        let rows: Vec<usize> = if web { vec![0, 2, 3, 4, 5, 6] } else { vec![0, 1, 2, 3, 4, 5, 6] };
-        let mut pos = rows.iter().position(|&r| r == cur).unwrap_or(0);
-        if self.c.pressed(nav::DOWN) { pos = (pos + 1) % rows.len(); self.audio.sfx("select"); }
-        if self.c.pressed(nav::UP) { pos = (pos + rows.len() - 1) % rows.len(); self.audio.sfx("select"); }
-        cur = rows[pos];
-        let dir = (self.c.pressed(nav::RIGHT) as i32) - (self.c.pressed(nav::LEFT) as i32);
-        let ok = self.c.pressed(nav::OK | nav::START);
-        let mut changed = false;
-        match cur {
-            0 if ok || dir != 0 => { self.settings.fullscreen = !self.settings.fullscreen; changed = true; }
-            1 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.res = ((self.settings.res as i32 + d).rem_euclid(RESOLUTIONS.len() as i32)) as usize; self.settings.fullscreen = false; changed = true; }
-            2 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.quality = ((self.settings.quality as i32 + d).rem_euclid(QUALITY.len() as i32)) as usize; changed = true; }
-            3 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.fx = ((self.settings.fx as i32 + d).rem_euclid(FX_LEVELS.len() as i32)) as usize; changed = true; }
-            4 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.impact = ((self.settings.impact as i32 + d).rem_euclid(IMPACT.len() as i32)) as usize; changed = true; }
-            5 if ok || dir != 0 => { self.settings.fps = !self.settings.fps; changed = true; }
-            6 if ok => { self.screen = Screen::Menu { cur: 9 }; return; }
-            _ => {}
-        }
-        if changed { self.audio.sfx("select"); self.settings.apply_window(); self.settings.save(); self.apply_quality(); }
-        self.ui.background();
-        self.ui.text("VÍDEO", 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
-        let on = |b: bool| if b { "LIGADO" } else { "DESLIGADO" };
-        let q = QUALITY[self.settings.quality.min(QUALITY.len() - 1)];
-        let items: [(usize, &str, String, &str); 7] = [
-            (0, "Tela cheia", on(self.settings.fullscreen).into(), "Alterna também com F11"),
-            (1, "Resolução da janela", RESOLUTIONS[self.settings.res.min(RESOLUTIONS.len() - 1)].2.into(), "Até 5K · o jogo escala a imagem para qualquer tamanho"),
-            (2, "Qualidade da arte", q.1.into(), "Rasteriza lutadores e cenários em maior densidade de pixels (4K = Ultra)"),
-            (3, "Pós-processamento", FX_LEVELS[self.settings.fx.min(2)].into(), "Bloom, aberração cromática, vinheta, correção de cor e blur radial"),
-            (4, "Efeitos de impacto", IMPACT[self.settings.impact.min(IMPACT.len() - 1)].1.into(), "Tremor, zoom e flashes (máx. 3/s) · Mínimo desliga tudo"),
-            (5, "Contador de FPS", on(self.settings.fps).into(), "Alterna também com F3"),
-            (6, "Voltar", String::new(), ""),
-        ];
-        let mut y = 120.0;
-        for (id, t, v, d) in items {
-            if !rows.contains(&id) { continue; }
-            let f = id == cur;
-            let (x, w, h) = (160.0, 960.0, 62.0);
-            if self.hover_rect(x, y, w, h) && mouse_delta_position().length() > 0.0 { cur = id; }
-            if self.clicked_rect(x, y, w, h) { cur = id; self.screen = Screen::Video { cur }; if id == 6 { self.screen = Screen::Menu { cur: 9 }; return; } }
-            self.ui.rect(x, y, w, h, if f { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) });
-            self.ui.text(t, x + 24.0, y + 30.0, 26.0, WHITE, Align::Left, true);
-            self.ui.text(d, x + 24.0, y + 52.0, 16.0, if f { WHITE } else { hex("#a49cc0") }, Align::Left, false);
-            if !v.is_empty() { self.ui.text(&format!("‹ {v} ›"), x + w - 24.0, y + 40.0, 24.0, hex("#ffcc33"), Align::Right, true); }
-            y += 72.0;
-        }
-        let (pw, ph) = ((screen_width() * dpi_scale()) as i32, Settings::physical_h() as i32);
-        self.ui.text(&format!("Tela atual: {pw}×{ph} · arte rasterizada a {:.1}× · {} lutadores · {} cenários", ume_engine::native::rig::art_res(), self.reg.chars.len(), self.reg.stages.len()), 160.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
-        if self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 9 }; return; }
-        self.screen = Screen::Video { cur };
     }
 
     async fn fight(&mut self, dt: f32) {
@@ -836,7 +1049,7 @@ impl App {
         if s.paused { self.pause_menu(accept_back).await; return; }
         if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
-                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.simul) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone() }); } }
+                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules }); } }
                 self.screen = Screen::Results { winner: w, cur: 0 };
             } } }
     }
@@ -845,7 +1058,7 @@ impl App {
     /// Returns true when another bout was queued (false → the team match is over / not a sequence).
     fn team_next(&mut self, w: usize) -> bool {
         let Some(t) = self.team.as_mut() else { return false };
-        if t.simul { return false; }
+        if t.whole_squad() { return false; }
         let Some(s) = self.session.as_ref() else { return false };
         let ratio = s.m.roots().find(|f| f.side == w).map(|f| (f.life / f.life_max).clamp(0.0, 1.0)).unwrap_or(1.0);
         // shared team meter carries over to the next fighter
@@ -863,11 +1076,11 @@ impl App {
         true
     }
     fn reset_team(&mut self) {
-        if let Some(t) = self.team.as_mut() { *t = Team::new(t.members[0].clone(), t.members[1].clone(), t.simul); self.sel = (t.members[0][0], t.members[1][0], self.sel.2); }
+        if let Some(t) = self.team.as_mut() { *t = Team { tag: t.tag, ..Team::new(t.members[0].clone(), t.members[1].clone(), t.simul) }; self.sel = (t.members[0][0], t.members[1][0], self.sel.2); }
     }
 
     async fn pause_menu(&mut self, accept_back: bool) {
-        let items = ["Continuar", "Hitboxes", "Reiniciar luta", "Trocar personagens", "Menu principal"];
+        let items = ["Continuar", "Hitboxes", "Reiniciar luta", "Trocar personagens", "Configurações", "Menu principal"];
         if self.c.pressed(nav::DOWN) { self.pause_cur = (self.pause_cur + 1) % items.len(); }
         if self.c.pressed(nav::UP) { self.pause_cur = (self.pause_cur + items.len() - 1) % items.len(); }
         let mut ok = self.c.pressed(nav::OK);
@@ -915,6 +1128,7 @@ impl App {
                 1 => { let s = self.session.as_mut().unwrap(); s.r.debug = !s.r.debug; self.debug_boxes = s.r.debug; }
                 2 => { self.reset_team(); self.start_fight().await; }
                 3 => { self.audio.stop_music(); self.session = None; self.team = None; self.team_pick.clear(); self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }; }
+                4 => self.screen = Screen::Settings { tab: 0, cur: 0, from_fight: true },
                 _ => { self.audio.stop_music(); self.session = None; self.team = None; self.screen = Screen::Menu { cur: 0 }; }
             }
         }
@@ -944,7 +1158,7 @@ impl App {
         let done = self.mode == Mode::Arcade && self.arcade.as_ref().is_some_and(|(l, i)| *i >= l.len());
         let title = if done { "ARCADE COMPLETO!".to_string() } else if self.team.is_some() { { let lead = self.team.as_ref().and_then(|t| t.members[winner.min(1)].first().copied()).unwrap_or(w); format!("TIME {} VENCEU!", self.reg.chars[lead].name.split_whitespace().next().unwrap_or("").to_uppercase()) } } else { format!("{} VENCE!", e.name.to_uppercase()) };
         let pal = if winner == 1 && self.sel.0 == self.sel.1 { 2 } else { 1 };
-        if let Ok(d) = e.load(pal) { let t = self.preview_t; self.draw_char(&d, if d.anims.contains_key(&181) { 181 } else { 0 }, t, 330.0, 480.0, 260.0, false); }
+        if let Some(d) = e.peek(pal) { let t = self.preview_t; self.draw_char(&d, if d.anims.contains_key(&181) { 181 } else { 0 }, t, 330.0, 480.0, 260.0, false); }
         self.ui.text_bold(&title, 480.0, 300.0, 44.0, hex("#ffcc33"), BLACK, Align::Left);
         let can_replay = self.last_fight.is_some();
         let items: Vec<&str> = if can_replay { vec!["Revanche", "Replay", "Personagens", "Menu"] } else { vec!["Revanche", "Personagens", "Menu"] };
@@ -973,7 +1187,7 @@ impl App {
     }
 
     /// Snapshot the running session as the replayable "last fight" (used by the screenshot tour's determinism check).
-    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone() }); } }
+    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules }); } }
 
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub async fn start_netplay(&mut self, a: &crate::netlink::NetArgs) {
@@ -985,7 +1199,10 @@ impl App {
         let link = match crate::netlink::NetLink::connect(a) { Ok(l) => l, Err(e) => { self.msg = format!("Netplay: {e}"); return } };
         self.mode = Mode::Versus; self.team = None; self.arcade = None; self.replaying = None;
         self.sel = (c1, c2, stage);
+        let saved = self.settings;
+        self.settings = Settings { round_time: 0, rounds: 1, life: 2, ..saved };
         self.start_fight().await;
+        self.settings = saved;
         if let Some(s) = self.session.as_mut() { s.net = Some(link); }
     }
 
@@ -1059,7 +1276,7 @@ impl App {
             self.ui.text("Personalizar teclado (Tab)", 480.0, 649.0, 22.0, WHITE, Align::Center, true);
             if is_key_pressed(KeyCode::Tab) || self.clicked_rect(300.0, 610.0, 360.0, 60.0) { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); }
         }
-        if back || self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 8 }; }
+        if back || self.c.pressed(nav::BACK) { self.screen = match self.settings_back.take() { Some((tab, from_fight)) => Screen::Settings { tab, cur: 1, from_fight }, None => Screen::Menu { cur: 9 } }; }
     }
 
     fn mugen_screen(&mut self) {
@@ -1082,7 +1299,7 @@ impl App {
         let found: Vec<String> = self.reg.chars.iter().filter(|c| c.mugen).map(|c| format!("{} ({})", c.name, c.author)).collect();
         self.ui.text(&format!("Encontrados: {} personagens MUGEN, {} cenários MUGEN", found.len(), self.reg.stages.iter().filter(|s| s.mugen).count()), 40.0, 520.0, 22.0, hex("#ffcc33"), Align::Left, true);
         for (i, f) in found.iter().enumerate().take(4) { self.ui.text(f, 60.0, 556.0 + i as f32 * 26.0, 19.0, WHITE, Align::Left, false); }
-        if self.c.pressed(nav::BACK | nav::OK) { self.screen = Screen::Menu { cur: 7 }; }
+        if self.c.pressed(nav::BACK | nav::OK) { self.screen = Screen::Menu { cur: 8 }; }
     }
 
     // used by the screenshot tour

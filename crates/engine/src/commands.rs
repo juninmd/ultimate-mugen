@@ -2,10 +2,10 @@
 use crate::input::{button_bit, rel_dirs, InputHistory};
 
 #[derive(Clone, Debug, Default)]
-pub struct CmdSymbol { pub release: bool, pub hold: bool, pub four: bool, pub strict: bool, pub charge: i32, pub dir: u32, pub btns: u32 }
+pub struct CmdSymbol { pub release: bool, pub hold: bool, pub four: bool, pub strict: bool, pub neutral: bool, pub charge: i32, pub dir: u32, pub btns: u32 }
 
 #[derive(Clone, Debug)]
-pub struct CommandDef { pub name: String, /** source text of the `command =` line (shown in the move list) */ pub raw: String, pub steps: Vec<CmdSymbol>, pub time: i32, pub buffer_time: i32 }
+pub struct CommandDef { pub name: String, pub key: std::sync::Arc<str>, /** source text of the `command =` line (shown in the move list) */ pub raw: String, pub steps: Vec<CmdSymbol>, pub time: i32, pub buffer_time: i32, pub pause_buffer: i32 }
 
 fn dir_bits(s: &str) -> Option<u32> {
     Some(match s { "U" => 1, "D" => 2, "B" => 4, "F" => 8, "UB" => 5, "UF" => 9, "DB" => 6, "DF" => 10, _ => return None })
@@ -35,15 +35,16 @@ pub fn parse_command(name: &str, s: &str, time: i32, buffer_time: i32) -> Comman
                 match c { '/' => sym.hold = true, '$' => sym.four = true, '>' => sym.strict = true, '~' => sym.release = true, _ => break }
                 t = &t[1..];
             }
-            if let Some(d) = dir_bits(t) { sym.dir |= d; } else if let Some(b) = button_bit(t) { sym.btns |= b; }
+            if t == "N" { sym.neutral = true; } else if let Some(d) = dir_bits(t) { sym.dir |= d; } else if let Some(b) = button_bit(t) { sym.btns |= b; }
         }
         steps.push(sym);
     }
-    CommandDef { name: name.to_string(), raw: s.trim().to_string(), steps, time: if time > 0 { time } else { 15 }, buffer_time: buffer_time.max(1) }
+    CommandDef { name: name.to_string(), key: name.into(), raw: s.trim().to_string(), steps, time: if time > 0 { time } else { 15 }, buffer_time: buffer_time.max(1), pause_buffer: 0 }
 }
 
 fn held(h: &InputHistory, t: i64, s: &CmdSymbol) -> bool {
     let bits = h.at(t);
+    if s.neutral && bits & 15 != 0 { return false; }
     if s.dir != 0 {
         let rel = rel_dirs(bits, h.face_at(t));
         let ok = if s.four { rel & s.dir == s.dir } else { rel == s.dir };
@@ -52,13 +53,14 @@ fn held(h: &InputHistory, t: i64, s: &CmdSymbol) -> bool {
     if s.btns != 0 && bits & s.btns != s.btns { return false; }
     true
 }
+fn is_state_step(s: &CmdSymbol) -> bool { s.hold || (s.neutral && s.btns == 0 && s.dir == 0) }
 fn held_dur(h: &InputHistory, t: i64, s: &CmdSymbol) -> i32 {
     let mut n = 0;
     while t - (n as i64) >= 0 && n < 240 && held(h, t - n as i64, s) { n += 1; }
     n
 }
 fn fires(h: &InputHistory, t: i64, s: &CmdSymbol) -> bool {
-    if s.hold { return held(h, t, s); }
+    if is_state_step(s) { return held(h, t, s); }
     if s.release {
         if held(h, t, s) || !held(h, t - 1, s) { return false; }
         return s.charge == 0 || held_dur(h, t - 1, s) >= s.charge;
@@ -93,10 +95,10 @@ pub fn match_command(h: &InputHistory, c: &CommandDef) -> bool {
                 let s = &c.steps[i];
                 let strict_next = c.steps[i + 1].strict;
                 let mut found = -1i64;
-                let mut x = t - if s.hold || s.release { 0 } else { 1 };
+                let mut x = t - if is_state_step(s) || s.release { 0 } else { 1 };
                 while x >= limit.max(0) {
                     if fires(h, x, s) { found = x; break; }
-                    if strict_next && x < t && h.at(x) != h.at(x - 1) && !s.hold { break; }
+                    if strict_next && x < t && h.at(x) != h.at(x - 1) && !is_state_step(s) { break; }
                     x -= 1;
                 }
                 if found < 0 { ok = false; break; }
@@ -110,11 +112,21 @@ pub fn match_command(h: &InputHistory, c: &CommandDef) -> bool {
 }
 
 #[derive(Clone, Default)]
-pub struct CommandState { pub active: std::collections::HashSet<String> }
+pub struct CommandState { pub active: std::collections::HashSet<std::sync::Arc<str>>, pause_hold: std::collections::HashMap<std::sync::Arc<str>, i32> }
 impl CommandState {
-    pub fn update(&mut self, h: &InputHistory, cmds: &[CommandDef]) {
+    pub fn update(&mut self, h: &InputHistory, cmds: &[CommandDef], paused: bool) {
         self.active.clear();
-        for c in cmds { if !self.active.contains(&c.name) && match_command(h, c) { self.active.insert(c.name.clone()); } }
+        for v in self.pause_hold.values_mut() { *v -= 1; }
+        self.pause_hold.retain(|_, v| *v > 0);
+        for c in cmds {
+            if self.active.contains(c.name.as_str()) { continue; }
+            if match_command(h, c) {
+                if paused && c.pause_buffer > 0 { self.pause_hold.insert(c.key.clone(), c.pause_buffer); }
+                self.active.insert(c.key.clone());
+            } else if self.pause_hold.contains_key(c.name.as_str()) {
+                self.active.insert(c.key.clone());
+            }
+        }
     }
 }
 
@@ -136,5 +148,45 @@ mod tests {
         let q = [D, D, D | R, D | R, R, R];
         let mut v = vec![0]; v.extend(q); v.push(0); v.extend(&q[..5]); v.push(R | X);
         assert!(match_command(&feed(&v, 1), &parse_command("s", "~D, DF, F, D, DF, F, x", 20, 1)));
+    }
+    #[test] fn neutral_step() {
+        assert!(match_command(&feed(&[0, R, 0, 0, X], 1), &parse_command("n", "N, x", 15, 1)));
+        let mut held_forward = vec![0]; held_forward.extend(std::iter::repeat(R).take(20)); held_forward.push(R | X);
+        assert!(!match_command(&feed(&held_forward, 1), &parse_command("n", "N, x", 15, 1)));
+        assert!(match_command(&feed(&[0, 0, X], 1), &parse_command("n", "N, x", 15, 1)));
+        assert!(match_command(&feed(&[0, D, D | R, 0, X], 1), &parse_command("n", "~D, N, x", 15, 1)));
+        assert!(match_command(&feed(&[0, 0], 1), &parse_command("n", "N", 1, 1)));
+        assert!(!match_command(&feed(&[0, U], 1), &parse_command("n", "N", 1, 1)));
+    }
+    #[test] fn neutral_with_button_in_one_step() {
+        assert!(match_command(&feed(&[0, 0, X], 1), &parse_command("n", "N+x", 1, 1)));
+        assert!(!match_command(&feed(&[0, 0, R | X], 1), &parse_command("n", "N+x", 1, 1)));
+    }
+    fn pausing_state(c: &CommandDef, h: &InputHistory, ticks: usize) -> Vec<bool> {
+        let mut st = CommandState::default();
+        let mut h = h.clone();
+        let mut out = vec![];
+        st.update(&h, std::slice::from_ref(c), true);
+        out.push(st.active.contains(c.name.as_str()));
+        for _ in 0..ticks { h.push(0, 1); st.update(&h, std::slice::from_ref(c), true); out.push(st.active.contains(c.name.as_str())); }
+        out
+    }
+    #[test] fn pause_buffer_keeps_command_while_paused() {
+        let h = feed(&[0, X], 1);
+        let mut c = parse_command("p", "x", 15, 1);
+        assert_eq!(pausing_state(&c, &h, 4), [true, false, false, false, false]);
+        c.pause_buffer = 3;
+        assert_eq!(pausing_state(&c, &h, 5), [true, true, true, false, false, false]);
+    }
+    #[test] fn pause_buffer_only_arms_during_pause() {
+        let mut c = parse_command("p", "x", 15, 1);
+        c.pause_buffer = 3;
+        let mut st = CommandState::default();
+        let mut h = feed(&[0, X], 1);
+        st.update(&h, std::slice::from_ref(&c), false);
+        assert!(st.active.contains("p"));
+        h.push(0, 1);
+        st.update(&h, std::slice::from_ref(&c), false);
+        assert!(!st.active.contains("p"));
     }
 }

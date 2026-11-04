@@ -125,7 +125,7 @@ Linux needs a few system packages first:
 sudo apt-get install -y pkg-config libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev
 ```
 
-**Bring your M.U.G.E.N content:** put characters in `mugen/chars/` (folder or `.zip`) and stages in `mugen/stages/`, or point `UME_MUGEN_DIR` to an existing install.
+**Bring your M.U.G.E.N content:** put characters in `mugen/chars/` (folder or `.zip`) and stages in `mugen/stages/`, or point `UME_MUGEN_DIR` to an existing install. You can also install characters, stages and music from any public GitHub repository in **Mercado GitHub** (main menu); see the [marketplace guide](docs/wiki/Marketplace.md).
 
 <details>
 <summary><b>More build targets and flags</b></summary>
@@ -169,12 +169,12 @@ Keyboard, multiple gamepads and touch work at the same time. Move lists show the
 | Action | Keyboard (P1) | Keyboard (P2) | DualShock 4 / DualSense / XInput | Touch |
 |---|---|---|---|---|
 | **Move / Jump / Crouch** | Arrow keys | `I` `K` `J` `L` | D-Pad or left stick | Virtual stick |
-| **Light Punch** | `Q` (or `V`) | Numpad `4` | `□` / `X` | **LP** |
-| **Heavy Punch** | `W` (or `B`) | Numpad `5` | `△` / `Y` | **HP** |
-| **Extra Punch (Z)** | `E` (or `N`) | Numpad `6` | `R1` / `RB` | — |
-| **Light Kick** | `A` (or `Z`) | Numpad `1` | `✕` / `A` | **LK** |
-| **Heavy Kick** | `S` (or `X`) | Numpad `2` | `○` / `B` | **HK** |
-| **Extra Kick (C)** | `D` (or `C`) | Numpad `3` | `R2` / `RT` | — |
+| **Light Punch** | `Q` | Numpad `4` | `□` / `X` | **LP** |
+| **Heavy Punch** | `W` | Numpad `5` | `△` / `Y` | **HP** |
+| **Extra Punch (Z)** | `E` | Numpad `6` | `R1` / `RB` | — |
+| **Light Kick** | `A` | Numpad `1` | `✕` / `A` | **LK** |
+| **Heavy Kick** | `S` | Numpad `2` | `○` / `B` | **HK** |
+| **Extra Kick (C)** | `D` | Numpad `3` | `R2` / `RT` | — |
 | **Quick specials** | `1`, `2`, `3` | Numpad `7`, `8`, `9` | `L1`, `L2` | **ESPECIAL**, **SUPER** |
 | **Super** | `1` + `2` | Numpad `7` + `8` | `L1` + `L2` | **SUPER** |
 | **Transformation** | `T` | Numpad `0` | Right stick / `SELECT` | — |

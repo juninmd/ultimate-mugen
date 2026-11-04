@@ -1,6 +1,14 @@
+pub mod bgm;
+pub mod console;
 pub mod debug;
+mod camera;
+mod player;
 mod pause;
 mod targets;
+mod stage;
+pub mod clsn;
+mod hitmod;
+mod state;
 pub(crate) mod sound;
 
 pub use debug::format_clipboard;
@@ -19,10 +27,20 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         "scoreadd" => targets::score_add(m, i, sc),
         "roundtimeset" => targets::round_time(m, i, sc, false),
         "roundtimeadd" => targets::round_time(m, i, sc, true),
+        "runstate" => state::run_state(m, i, sc),
+        "height" => state::height(m, i, sc),
+        "gethitvarset" => hitmod::get_hit_var_set(m, i, sc),
+        "modifyhitdef" => hitmod::modify_hitdef(m, i, sc),
+        "modifyreversaldef" => hitmod::modify_reversaldef(m, i, sc),
+        "overrideclsn" | "transformclsn" | "resizeclsn" => clsn::run(m, i, sc),
         "offset" => offset(m, i, sc),
         "victoryquote" => { let v = m.num(i, sc, "value", -1.0, 0) as i32; m.fighters[i].victory_quote = v; }
         "forcefeedback" => force_feedback(m, i, sc),
         "envshake" => env_shake(m, i, sc),
+        "zoom" => camera::zoom(m, i, sc),
+        "camera" => camera::camera(m, i, sc),
+        "groundleveloffset" => camera::ground_level_offset(m, i, sc),
+        "depth" | "depthbound" => camera::unsupported_depth(m, sc),
         "pause" => pause::pause(m, i, sc),
         "superpause" => pause::super_pause(m, i, sc),
         "stopsnd" => sound::stop(m, i, sc),
@@ -30,6 +48,14 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         "displaytoclipboard" => debug::display(m, i, sc, false),
         "appendtoclipboard" => debug::display(m, i, sc, true),
         "clearclipboard" => m.fighters[i].clipboard.clear(),
+        "playbgm" => bgm::play_bgm(m, i, sc),
+        "stopbgm" => bgm::stop_bgm(m),
+        "modifybgm" => bgm::modify_bgm(m, i, sc),
+        "modifystagevar" => stage::modify_stage_var(m, i, sc),
+        "modifystagebg" => stage::modify_stage_bg(m, i, sc),
+        "modifybgctrl" => stage::modify_bg_ctrl(m, i, sc),
+        "modifyplayer" => player::modify_player(m, i, sc),
+        "printtoconsole" => console::print_to_console(m, i, sc),
         _ => return false,
     }
     true

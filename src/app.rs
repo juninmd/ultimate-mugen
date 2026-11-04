@@ -666,6 +666,7 @@ impl App {
                 names: [0, 1].map(|sd| t.members[sd].iter().map(|&r| (self.reg.chars[r].name.split_whitespace().next().unwrap_or("").to_uppercase(), self.reg.chars[r].color)).collect()),
                 idx: t.idx, ko: t.ko.clone(), simul: t.simul,
             });
+            self.c.clear_macros();
             let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, seq, life);
             if let Some(t) = &info { sess.m.team_lead = [0, 1].map(|sd| t.names[sd].first().map(|n| n.0.clone()).unwrap_or_default()); }
             sess.team = info;

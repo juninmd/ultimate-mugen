@@ -59,7 +59,7 @@ pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, stage_j
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
 #[derive(Clone)]
-pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>>, rules: Rules, seed: u32, life: [f32; 2] }
+pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>>, rules: Rules, seed: u32, life: [f32; 2], pal: [i32; 2], team_pal: Vec<i32> }
 
 /// Team battle state: sequence (KOF-style turns, winner keeps its remaining life) or parallel (2v2 simultaneous).
 #[derive(Clone)]
@@ -120,6 +120,10 @@ pub struct App {
     survival: Option<survival::Survival>,
     /// Arcade/Survival with a second human on the same side (couch co-op)
     pub coop: bool,
+    /// Palette chosen per side (1..=PALETTE_COUNT) and per team member in pick order
+    pub pal: [i32; 2],
+    pub pal_pick: i32,
+    pub team_pal: Vec<i32>,
     /// last finished fight (replayable) and the replay being played now
     last_fight: Option<Replay>,
     pub replaying: Option<Replay>,
@@ -211,6 +215,7 @@ impl App {
             replay_list: vec![], replay_problems: vec![], replay_rename: None, replay_confirm: false, replay_by_name: false,
             survival: None,
             coop: false,
+            pal: [settings.pal1 as i32, settings.pal2 as i32], pal_pick: 1, team_pal: vec![],
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -489,6 +494,7 @@ impl App {
         let has_boss = self.boss_idx().filter(|&b| b != me && Some(b) != mate).map(|b| ladder.push(b)).is_some();
         self.sel = (me, ladder[0], self.sel.2);
         self.team = mate.map(|m| Team::new(vec![me, m], vec![ladder[0]], true));
+        self.team_pal = if mate.is_some() { vec![self.side_pal(0), self.side_pal(1)] } else { vec![] };
         self.arcade = Some((ladder, 0));
         self.survival = None;
         self.ending_shown = false;
@@ -573,6 +579,19 @@ impl App {
         crate::menu_art::glass(&self.ui, 0.0, 0.0, VW, 84.0, 1.0);
         self.ui.rect(0.0, 82.0, VW, 2.0, alpha(accents[picking.min(1)], 0.85));
         let team_mode = self.mode.is_team();
+        let pal_dir = if is_key_pressed(KeyCode::Period) { 1 } else if is_key_pressed(KeyCode::Comma) { -1 } else { 0 };
+        if pal_dir != 0 {
+            if team_mode { self.pal_pick = cycle_palette(self.pal_pick, pal_dir); } else { self.pal[picking.min(1)] = cycle_palette(self.pal[picking.min(1)], pal_dir); }
+            self.audio.sfx("select");
+        }
+        if is_key_pressed(KeyCode::P) {
+            let p = 1 + ((get_time() * 7919.0) as i32).rem_euclid(crate::settings::PALETTE_COUNT as i32);
+            if team_mode { self.pal_pick = p; } else { self.pal[picking.min(1)] = p; }
+            self.audio.sfx("select");
+        }
+        if pal_dir != 0 || is_key_pressed(KeyCode::P) { self.settings.pal1 = self.side_pal(0) as usize; self.settings.pal2 = self.side_pal(1) as usize; self.settings.save(); }
+        let pal_side0 = if team_mode { self.pal_pick.clamp(1, crate::settings::PALETTE_COUNT as i32) } else { self.pal_for_side(0, picked) };
+        let pal_side1 = self.pal_for_side(1, picked);
         self.sel_buf.clear();
         if team_mode { let _ = write!(self.sel_buf, "{} {}v{}", self.mode.label(), self.team_n, self.team_n); } else { self.sel_buf.push_str(self.mode.label()); }
         self.ui.text(&self.sel_buf, 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
@@ -599,9 +618,8 @@ impl App {
 
         let focus = cur[picking];
         if self.sel_last[picking] != focus { self.sel_last[picking] = focus; self.sel_dwell = 0.0; } else { self.sel_dwell += dt; }
-        let pal_of = |side: usize, i: usize, picked: [Option<usize>; 2]| if side == 1 && picked[0] == Some(i) { 2 } else { 1 };
-        let mut want: Vec<(usize, i32)> = vec![(focus, pal_of(picking, focus, picked))];
-        for side in 0..2 { if let Some(i) = picked[side] { want.push((i, pal_of(side, i, picked))); } }
+        let mut want: Vec<(usize, i32)> = vec![(focus, if picking == 0 { pal_side0 } else { pal_side1 })];
+        for side in 0..2 { if let Some(i) = picked[side] { want.push((i, if side == 0 { pal_side0 } else { pal_side1 })); } }
         ume_shell::watchdog::label("select:preview");
         self.reg.reap_streams();
         let mut loaded_one = false;
@@ -701,8 +719,25 @@ impl App {
         for side in 0..2 {
             let idx = picked[side].or(if side == picking { Some(cur[side]) } else { None });
             let label = if side == 0 { "P1" } else if two { "P2" } else { "CPU" };
-            let pal = idx.map(|i| pal_of(side, i, picked)).unwrap_or(1);
+            let pal = if side == 0 { pal_side0 } else { pal_side1 };
             self.select_side(side, idx, picked[side].is_some(), side == picking, pal, label);
+            if idx.is_some() {
+                let (px, py) = (if side == 0 { 24.0 } else { VW - 304.0 }, 100.0);
+                let y = py + 470.0;
+                self.ui.rect(px + 12.0, y, 256.0, 46.0, Color::new(0.0, 0.0, 0.0, 0.42));
+                self.ui.text(&format!("PALETA {pal}/{} · , . ciclo · P aleatória", crate::settings::PALETTE_COUNT), px + 20.0, y + 16.0, 12.0, hex("#d8d0f0"), Align::Left, true);
+                for n in 1..=crate::settings::PALETTE_COUNT as i32 {
+                    let bx = px + 14.0 + (n - 1) as f32 * 20.0;
+                    let by = y + 22.0;
+                    let on = n == pal;
+                    if self.clicked_rect(bx, by, 18.0, 20.0) {
+                        if team_mode { self.pal_pick = n; } else { self.pal[side.min(1)] = n; }
+                        self.settings.pal1 = self.side_pal(0) as usize; self.settings.pal2 = self.side_pal(1) as usize; self.settings.save();
+                    }
+                    self.ui.rect(bx, by, 18.0, 20.0, if on { hex("#ffcc33") } else { Color::new(1.0, 1.0, 1.0, 0.12) });
+                    self.ui.text(&n.to_string(), bx + 9.0, by + 15.0, 11.0, if on { BLACK } else { WHITE }, Align::Center, true);
+                }
+            }
         }
         self.sel_flash.1 = (self.sel_flash.1 - dt * 3.0).max(0.0);
 
@@ -755,6 +790,7 @@ impl App {
                 let me = cur[0];
                 if self.team_pick.contains(&me) { self.msg = "Este lutador já está na equipe.".into(); self.screen = Screen::Select { cur, picking: 0, picked: [None, None] }; return; }
                 self.team_pick.push(me);
+                self.team_pal.push(self.pal_pick.clamp(1, crate::settings::PALETTE_COUNT as i32));
                 let n = self.team_n;
                 if self.team_pick.len() < n { self.screen = Screen::Select { cur, picking: 0, picked: [None, None] }; return; }
                 // opponents: random distinct fighters (originals first), then straight to the stage
@@ -784,7 +820,7 @@ impl App {
             else if picking == 0 { picking = 1; } else { self.sel = (picked[0].unwrap(), picked[1].unwrap(), self.sel.2); self.screen = Screen::Stages { cur: self.sel.2 + 1 }; return; }
         }
         if back {
-            if self.mode.is_team() && !self.team_pick.is_empty() { self.team_pick.pop(); self.screen = Screen::Select { cur, picking: 0, picked: [None, None] }; return; }
+            if self.mode.is_team() && !self.team_pick.is_empty() { self.team_pick.pop(); self.team_pal.pop(); self.screen = Screen::Select { cur, picking: 0, picked: [None, None] }; return; }
             if picking == 1 { picking = 0; picked = [None, None]; } else { self.screen = Screen::Menu { cur: 0 }; return; }
         }
         self.screen = Screen::Select { cur, picking, picked };
@@ -926,13 +962,29 @@ impl App {
     }
 
     /// One unit of fight preparation (runs behind the VS screen, one per frame, so the bar animates and the UI never freezes).
-    fn pal_for(plan: &[(usize, usize, usize)], st: usize) -> i32 {
+    /// Palette for a planned fighter: explicit team/player choice, with the classic duplicate-fighter fallback.
+    fn pal_for(&self, plan: &[(usize, usize, usize)], st: usize) -> i32 {
         let (side, k, r) = plan[st];
+        if let Some(p) = self.team_pal.get(k).copied().filter(|_| side == 0 && self.team.is_some()) { return p.clamp(1, crate::settings::PALETTE_COUNT as i32); }
+        let mut pal = self.side_pal(side);
         let dup = (side == 1 && plan.iter().any(|p| p.0 == 0 && p.2 == r)) || plan.iter().any(|p| p.0 == side && p.1 < k && p.2 == r);
-        if dup { 2 } else { 1 }
+        if dup && pal == self.side_pal(0) { pal = (pal % crate::settings::PALETTE_COUNT as i32) + 1; }
+        pal
+    }
+
+    pub(crate) fn side_pal(&self, side: usize) -> i32 { self.pal[side.min(1)].clamp(1, crate::settings::PALETTE_COUNT as i32) }
+
+    /// Palette shown for a side on the select screen (duplicate fighters get a different palette by default).
+    pub(crate) fn pal_for_side(&self, side: usize, picked: [Option<usize>; 2]) -> i32 {
+        let pal = self.side_pal(side);
+        if side == 1 && picked[0].is_some() && picked[0] == picked[1] && pal == self.side_pal(0) { (pal % crate::settings::PALETTE_COUNT as i32) + 1 } else { pal }
     }
 
     async fn load_step(&mut self, step: u8, wait: bool) -> Result<bool, String> {
+        self.load_step_inner(step, wait).await
+    }
+
+    async fn load_step_inner(&mut self, step: u8, wait: bool) -> Result<bool, String> {
         let plan = self.load_plan();
         let s = self.sel.2;
         let n = plan.len();
@@ -945,14 +997,14 @@ impl App {
                 self.pending = Pending::default();
                 let mut seen: Vec<(usize, i32)> = vec![];
                 for k in 0..n {
-                    let key = (plan[k].2, Self::pal_for(&plan, k));
+                    let key = (plan[k].2, self.pal_for(&plan, k));
                     self.pending.jobs.push(if seen.contains(&key) { None } else { seen.push(key); self.reg.chars[key.0].spawn_load(key.1) });
                 }
             }
             if !wait && self.pending.jobs.get(st).is_some_and(|j| j.as_ref().is_some_and(|h| !h.is_finished())) { return Ok(false); }
             let (side, _, r) = plan[st];
             let job = self.pending.jobs.get_mut(st).and_then(|j| j.take());
-            let d = self.reg.chars[r].finish_load(Self::pal_for(&plan, st), job)?;
+            let d = self.reg.chars[r].finish_load(self.pal_for(&plan, st), job)?;
             self.pending.defs[side].push(d);
         } else if st == n {
             ume_shell::watchdog::label("load:stage");
@@ -1114,7 +1166,7 @@ impl App {
         if s.paused { if !replaying { self.pause_menu(accept_back).await; } return; }
         if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
-                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed, life: self.survival_life() }); } self.archive_last_fight(); }
+                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed, life: self.survival_life(), pal: self.pal, team_pal: self.team_pal.clone() }); } self.archive_last_fight(); }
                 self.screen = Screen::Results { winner: w, cur: 0 };
             } } }
     }
@@ -1259,7 +1311,7 @@ impl App {
     }
 
     /// Snapshot the running session as the replayable "last fight" (used by the screenshot tour's determinism check).
-    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed, life: self.survival_life() }); } }
+    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed, life: self.survival_life(), pal: self.pal, team_pal: self.team_pal.clone() }); } }
 
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub async fn start_netplay(&mut self, a: &crate::netlink::NetArgs) {
@@ -1295,6 +1347,7 @@ impl App {
     pub async fn start_replay(&mut self) {
         let Some(r) = self.last_fight.clone() else { return };
         self.mode = r.mode; self.team = r.team.clone(); self.sel = r.sel;
+        self.pal = r.pal; self.team_pal = r.team_pal.clone();
         self.replaying = Some(r);
         self.start_fight().await;
     }
@@ -1389,11 +1442,28 @@ fn pause_step(was_paused: bool, toggle: bool) -> (bool, bool) {
     (was_paused ^ toggle, was_paused)
 }
 
+/// Cycle a palette number (1..=PALETTE_COUNT) wrapping on both ends.
+pub(crate) fn cycle_palette(cur: i32, dir: i32) -> i32 {
+    let n = crate::settings::PALETTE_COUNT as i32;
+    let cur = cur.clamp(1, n);
+    ((cur - 1 + dir).rem_euclid(n)) + 1
+}
+
 /// Numpad notation (2 = down, 6 = forward, 236 = quarter-circle forward).
 
 #[cfg(test)]
 mod tests {
-    use super::pause_step;
+    use super::{cycle_palette, pause_step};
+
+    #[test]
+    fn palette_cycling_wraps_on_both_ends() {
+        assert_eq!(cycle_palette(1, 1), 2);
+        assert_eq!(cycle_palette(12, 1), 1, "forward from the last palette wraps to the first");
+        assert_eq!(cycle_palette(1, -1), 12, "backward from the first palette wraps to the last");
+        assert_eq!(cycle_palette(7, 0), 7, "no direction keeps the current palette");
+        assert_eq!(cycle_palette(0, 1), 2, "an invalid palette is clamped before cycling");
+        assert_eq!(cycle_palette(99, -1), 11, "palettes above the range are clamped");
+    }
 
     #[test]
     fn esc_opening_the_pause_menu_does_not_close_it_on_the_same_frame() {

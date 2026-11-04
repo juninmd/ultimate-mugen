@@ -53,6 +53,7 @@ impl App {
         self.sel.1 = self.survival_opponent(me, mate);
         self.arcade = None;
         self.team = mate.map(|m| Team::new(vec![me, m], vec![self.sel.1], true));
+        self.team_pal = if mate.is_some() { vec![self.side_pal(0), self.side_pal(1)] } else { vec![] };
         self.team_pick.clear();
         self.ending_shown = false;
         self.screen = Screen::Stages { cur: 1 };

@@ -16,6 +16,8 @@ pub struct StoredReplay {
     pub chars: [String; 2],
     pub stage: String,
     pub palettes: [i32; 2],
+    /// Per-member palettes of side 0 in team modes (empty for single fights)
+    pub member_palettes: Vec<i32>,
     pub seed: u32,
     /// life ratios the fight started with (Survival carries life between fights)
     pub life: [f32; 2],
@@ -78,6 +80,7 @@ impl StoredReplay {
             "chars": self.chars,
             "stage": self.stage,
             "palettes": self.palettes,
+            "member_palettes": self.member_palettes,
             "seed": self.seed,
             "life": self.life,
             "teams": teams,
@@ -119,6 +122,7 @@ impl StoredReplay {
         if runs.is_empty() { return Err("Replay inválido: nenhuma entrada gravada".into()); }
         let chars = pair_strings(o.get("chars"))?;
         let palettes = pair_ints(o.get("palettes")).unwrap_or([1, 1]);
+        let member_palettes = o.get("member_palettes").and_then(Value::as_array).map(|v| v.iter().map(|x| x.as_i64().unwrap_or(1) as i32).collect()).unwrap_or_default();
         let life = pair_floats(o.get("life")).unwrap_or([1.0, 1.0]);
         let teams = match o.get("teams") {
             None | Some(Value::Null) => None,
@@ -149,6 +153,7 @@ impl StoredReplay {
             chars,
             stage: o.get("stage").and_then(Value::as_str).unwrap_or_default().to_string(),
             palettes,
+            member_palettes,
             seed: o.get("seed").and_then(Value::as_u64).unwrap_or(0) as u32,
             life,
             teams,
@@ -282,7 +287,7 @@ mod tests {
         for i in 0..1200u32 { rec.push(vec![if i % 7 == 0 { 4 } else { 0 }, if i % 11 == 0 { 8 } else { 0 }]); }
         StoredReplay {
             label: "Kung Fu Man vs Kung Fu Man".into(), saved_at: 1_700_000_000, mode: "Cpu".into(),
-            chars: ["umf:kfm".into(), "umf:kfm".into()], stage: "dojo".into(), palettes: [1, 2], seed: 0x2545_f491, life: [0.55, 1.0],
+            chars: ["umf:kfm".into(), "umf:kfm".into()], stage: "dojo".into(), palettes: [1, 2], member_palettes: vec![3, 4], seed: 0x2545_f491, life: [0.55, 1.0],
             teams: None, simul: false, tag: false,
             rules: StoredRules { rounds_to_win: 2, round_ticks: 5940, life_percent: 100, single_round: false, classic_pushbox: true, team_life_share: true, game_speed: 1.0 },
             runs: StoredReplay::from_stream(&rec),

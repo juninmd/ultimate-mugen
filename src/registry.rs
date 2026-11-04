@@ -29,6 +29,8 @@ pub fn pretty_name(n: &str) -> String {
 #[derive(Clone)]
 pub enum Src { Native(Arc<NativeChar>), Mugen { vfs: Arc<Vfs>, def: String } }
 
+pub type StageJob = std::pin::Pin<Box<dyn std::future::Future<Output = Result<(), String>>>>;
+
 pub type LoadJob = Option<std::thread::JoinHandle<Result<CharDef, String>>>;
 
 fn build(src: &Src, pal: i32, name: &str) -> Result<CharDef, String> {
@@ -208,7 +210,7 @@ impl Registry {
     }
     pub fn stage_preview(&self, i: usize) -> Option<Arc<ume_engine::chardef::ImageData>> {
         match &self.stages.get(i)?.src {
-            StageSrc::Builtin(b) => stages::illustration(&self.builtin_stages[*b].id),
+            StageSrc::Builtin(b) => stages::illustration_preview(&self.builtin_stages[*b].id),
             StageSrc::Mugen { vfs, def } => {
                 if let Some(p) = self.stages[i].preview.borrow().as_ref() { return p.clone(); }
                 let p = load_stage(vfs, def).ok().and_then(|st| stages::mugen_preview(&st));
@@ -216,6 +218,15 @@ impl Registry {
                 p
             }
         }
+    }
+    pub fn prepare_stage(&self, i: usize) -> StageJob {
+        #[cfg(target_arch = "wasm32")]
+        if let StageSrc::Builtin(b) = &self.stages[i].src {
+            let id = self.builtin_stages[*b].id.clone();
+            return Box::pin(async move { stages::prepare_illustration(&id).await });
+        }
+        let _ = i;
+        Box::pin(async { Ok(()) })
     }
     pub fn build_stage(&self, i: usize) -> Stage {
         match &self.stages[i].src {

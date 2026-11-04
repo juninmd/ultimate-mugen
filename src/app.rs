@@ -41,7 +41,7 @@ pub enum Screen {
 
 /// Fight assets prepared step by step behind the VS screen.
 #[derive(Default)]
-pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, sess: Option<Session>, jobs: Vec<crate::registry::LoadJob> }
+pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, stage_job: Option<crate::registry::StageJob>, sess: Option<Session>, jobs: Vec<crate::registry::LoadJob> }
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
 #[derive(Clone)]
@@ -645,6 +645,12 @@ impl App {
             self.pending.defs[side].push(d);
         } else if st == n {
             self.pending.jobs.clear();
+            let job = self.pending.stage_job.get_or_insert_with(|| self.reg.prepare_stage(s));
+            match job.as_mut().poll(&mut std::task::Context::from_waker(std::task::Waker::noop())) {
+                std::task::Poll::Pending => return Ok(false),
+                std::task::Poll::Ready(result) => result?,
+            }
+            self.pending.stage_job = None;
             self.pending.stage = Some(self.reg.build_stage(s));
         } else if st == n + 1 {
             let stage = self.pending.stage.take().ok_or("stage")?;

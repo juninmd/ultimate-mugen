@@ -2479,6 +2479,7 @@ dependencies = [
  "ggrs",
  "gilrs",
  "hidapi",
+ "js-sys",
  "serde_json",
  "symphonia",
  "tiny-skia",

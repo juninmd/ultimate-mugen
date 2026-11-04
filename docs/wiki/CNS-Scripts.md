@@ -134,3 +134,27 @@ Extra functions: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 
 - `F2` in training shows hitboxes.
 - `cargo run --release -p ume-engine --example mugen_check -- <folder>` lists states and expressions with errors.
+
+## Load diagnostics
+
+Every character load audits the controllers, triggers and parameters it parsed against what the engine actually implements. Nothing is hardcoded in a list: each unknown name is run once against a throw-away match and flagged when the dispatch falls through, so the report follows the engine as controllers and triggers are added.
+
+The audit reports, per source file and state (`.cns`, `.cmd`, `.st`, `.zss`):
+
+| Finding | Meaning |
+|---|---|
+| unsupported controller | the `type` has no implementation |
+| unknown trigger | the trigger name is not evaluated by the engine |
+| unsupported redirection / string trigger | a redirection kind (`partner`, ...) or a string comparison (`p3name = ...`) the engine does not resolve |
+| unknown parameter | no code path of the controller reads that parameter |
+| unknown AssertSpecial flag | the flag is not recognised |
+
+Each load prints one summary on stderr (`n unsupported controllers, m unknown triggers, ...`), deduplicated by name; `TRACE=1` adds the names with the files and states that use them. Set `UME_QUIET_DIAGNOSTICS=1` to silence it.
+
+`mugen_check` prints the summary per character and, with `--strict`, prints the details and exits with a non-zero status when any character has findings:
+
+```bash
+cargo run --release -p ume-engine --example mugen_check -- --strict mugen/chars/kfm
+```
+
+CI runs it with `--strict` over `crates/engine/tests/data/chars`, so a feature used by the fixture characters that the engine does not implement fails the build. In code, `ume_engine::diagnostics::audit_cns(file, text)` returns the findings for a snippet and `CharDef::diagnostics()` for a loaded character.

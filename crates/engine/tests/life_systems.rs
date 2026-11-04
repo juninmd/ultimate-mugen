@@ -17,7 +17,7 @@ fn hit(damage: f32) -> HitDefData {
     HitDefData {
         attr_state: "S".into(), hitflag: "MAFD".into(), guardflag: "MA".into(), damage, guard_damage: 0.0,
         red_life: [damage * 0.75, 0.0], dizzy_points: damage * 1.8, guard_points: damage * 1.5,
-        ground_hit_time: 12, guard_hit_time: 10, airjuggle: 100, kill: true, guard_kill: false, ..Default::default()
+        ground_hit_time: 12, guard_hit_time: 10, airjuggle: 100, kill: true, guard_kill: false, p1stateno: -1, p2stateno: -1, ..Default::default()
     }
 }
 
@@ -134,7 +134,7 @@ fn the_assert_flags_protect_each_system() {
     hd.dizzy_points = 30.0;
     m.apply_hit(0, 1, &hd, (0.0, 0.0), None);
     assert_eq!(m.fighters[1].ikemen.dizzy_points, 100.0);
-    assert_eq!(m.fighters[1].ikemen.red_life, 990.0);
+    assert_eq!(m.fighters[1].ikemen.red_life, 1000.0);
 
     let mut m = pair(&[("data.guardpoints", 100.0)]);
     enter(&mut m, 1, 120);

@@ -106,7 +106,9 @@ Helper notes: a helper freezes during `Pause` and `SuperPause` unless it has `pa
 
 ## Ikemen, stage and player controllers
 
-`PlayBGM` `StopBGM` `ModifyBGM` `ModifyStageVar` `ModifyStageBG` `ModifyBGCtrl` `ModifyPlayer` `PrintToConsole` `RunState` `Height` `GetHitVarSet` `ModifyHitDef` `ModifyReversalDef` `OverrideClsn` `ResizeClsn` `TransformClsn` `TargetAdd` `TargetScoreAdd` `TargetRedLifeAdd` `TargetDizzyPointsAdd` `TargetGuardPointsAdd` `ScoreAdd` `RoundTimeSet` `RoundTimeAdd` `AssertCommand` `AssertInput` `ShiftInput` `RemapSprite` `TransformSprite`
+`PlayBGM` `StopBGM` `ModifyBGM` `ModifyStageVar` `ModifyStageBG` `ModifyBGCtrl` `ModifyPlayer` `PrintToConsole` `RunState` `Height` `GetHitVarSet` `ModifyHitDef` `ModifyReversalDef` `OverrideClsn` `ResizeClsn` `TransformClsn` `TargetAdd` `TargetScoreAdd` `TargetRedLifeAdd` `TargetDizzyPointsAdd` `TargetGuardPointsAdd` `ScoreAdd` `RoundTimeSet` `RoundTimeAdd` `AssertCommand` `AssertInput` `ShiftInput` `RemapSprite` `TransformSprite` `MatchRestart`
+
+Missing (planned or rejected by design, parsed and ignored with one warning): `Storyboard` `RemoveStoryboard` `Dialogue` `SaveState` `LoadState` `LifebarAction` `ChangeMovelist` `LoadFile` `SaveFile` `ShaderSet`
 
 Their parameters and behaviours are listed in [Ikemen extensions](Ikemen-Extensions.md).
 

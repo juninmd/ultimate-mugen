@@ -260,8 +260,11 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             for k in ["flag", "flag2", "flag3", "flag4", "flag5"] {
                 if let Some(v) = sc.raw(k) {
                     let fl = v.trim().to_ascii_lowercase();
-                    let bit = asf::from_name(&fl);
-                    if bit != 0 { m.fighters[i].asserts |= bit; } else if fl == "timerfreeze" { m.global_asserts |= 1; } else if fl == "intro" { m.global_asserts |= 2; } else if fl == "roundnotover" { m.global_asserts |= 4; } else { crate::diagnostics::note_unsupported(crate::diagnostics::Category::AssertFlag, &fl); }
+                    match asf::resolve(&fl) {
+                        Some(crate::fighter::AssertFlag::Char(bit)) => m.fighters[i].asserts |= bit,
+                        Some(crate::fighter::AssertFlag::Global(bit)) => m.global_asserts |= bit,
+                        None => {}
+                    }
                 }
             }
         }

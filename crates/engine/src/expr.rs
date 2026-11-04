@@ -61,9 +61,9 @@ pub enum Node {
 }
 
 const REDIRS: [&str; 10] = ["parent", "root", "helper", "target", "partner", "enemy", "enemynear", "playerid", "p2", "stateowner"];
-const STRCMP: [&str; 19] = ["command", "statetype", "movetype", "p2statetype", "p2movetype", "name", "p1name", "p2name", "p3name", "p4name", "p5name", "p6name", "p7name", "p8name", "authorname", "hitdefattr", "physics", "stagevar", "p2command"];
+const STRCMP: [&str; 22] = ["command", "statetype", "movetype", "p2statetype", "p2movetype", "name", "p1name", "p2name", "p3name", "p4name", "p5name", "p6name", "p7name", "p8name", "authorname", "hitdefattr", "physics", "stagevar", "p2command", "hitbyattr", "prevstatetype", "prevmovetype"];
 const COMPONENT: [&str; 13] = ["vel", "pos", "p2dist", "p2bodydist", "p1dist", "rootdist", "parentdist", "screenpos", "camerapos", "hitvel", "camerazoom", "scale", "offset"];
-const RAWARG: [&str; 7] = ["const", "gethitvar", "stagevar", "const240p", "const480p", "const720p", "constcoord"];
+const RAWARG: [&str; 10] = ["const", "gethitvar", "hitdefvar", "movehitvar", "isasserted", "stagevar", "const240p", "const480p", "const720p", "constcoord"];
 const LEVELS: [&[&str]; 11] = [&["||"], &["^^"], &["&&"], &["|"], &["^"], &["&"], &["=", "!=", ":="], &["<", "<=", ">", ">="], &["+", "-"], &["*", "/", "%"], &["**"]];
 
 struct Parser { t: Vec<Tok>, p: usize }
@@ -144,7 +144,7 @@ impl Parser {
             let neg = self.next() == Tok::Op("!=");
             let mut values = vec![];
             match self.next() { Tok::Id(s) | Tok::Str(s) | Tok::Num(s, _) => values.push(s), _ => {} }
-            if name == "hitdefattr" {
+            if name == "hitdefattr" || name == "hitbyattr" {
                 while self.is_op(",", 0) {
                     if let Tok::Id(s) = self.peek(1).clone() {
                         let u = s.to_ascii_uppercase();

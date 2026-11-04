@@ -10,6 +10,35 @@ The main menu offers single fights (Arcade, Versus CPU, 2 Players, Training, CPU
 | Team · Parallel | the whole team at once (2 to 5); `Tab` hands your controller to the next teammate | every member of a side is KO'd |
 | Team · Tag | 1 active + the rest on standby (2 or 3 per side) | every member of a side is KO'd |
 
+## Survival
+
+`Sobrevivência` in the main menu is an endless run against the whole roster:
+
+- **Opponents.** After you pick your fighter, the game picks the opponent each round (never the hidden boss, never a broken pack). The stage rotates every round.
+- **Escalation.** The CPU level climbs every two fights, starting from your difficulty setting and capped at 8.
+- **Life carries over.** The bar you end a fight with is the bar you start the next one with, plus the recovery configured under Gameplay › *Life recovered (Survival)* (0 / 20 / 35 / 50 / 100 %). A KO ends the run.
+- **Score.** Each win banks the engine's own `Score`/`ScoreTotal` for your side plus a `1000 × round` clear bonus, so the number is deterministic and comes from the simulation itself.
+- **Game over.** The end screen shows the score, how many fights you won and the local best; the best is persisted in `ultimate-mugen.cfg` (`survival_best`) and a new record is highlighted.
+- **Replays.** The last fight is archived like any other and can be watched from the game-over screen (R button) or the Replays browser; the replay keeps the starting life so the re-simulation matches exactly.
+
+Engine score stats used: `Fighter::score` and `Fighter::score_total`, filled by `HitDef.score` and the `ScoreAdd`/`TargetScoreAdd` controllers and read by the `Score`/`ScoreTotal` triggers.
+
+## Two-player co-op (Arcade and Survival)
+
+Press `V` on the character select screen (or click the **CO-OP 2P** button) to start Arcade or Survival with two
+human players **on the same side**:
+
+- P1 and P2 pick one fighter each; both are on the field together (2 versus 1) using the engine's simultaneous-team
+  support, so the normal pushboxes, targeting and camera work apply.
+- The side only loses the round/run when **both** fighters are KO'd (`team_simul` KO rule).
+- Inputs are independent: P1 uses the player-1 keys/pad, P2 the player-2 ones (`Tab` is not needed). The HUD tags
+  each fighter `P1` / `P2` by its pilot slot instead of by side.
+- Arcade keeps both fighters across the ladder and swaps the opponent each round; Survival does the same each wave.
+- Replays record both slots, so a co-op fight replays exactly.
+
+Engine switches: `Match::team_simul`. Slots are added interleaved (`P1`, opponent, `P2`), so `roots()[0]` and
+`roots()[2]` are the human pair.
+
 ## Tag team
 
 Each side lists 2 or 3 fighters. Only the first one is in play at the start of every round; the others wait on standby.

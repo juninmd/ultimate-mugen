@@ -6,7 +6,7 @@ pub struct Ctx<'a> { pub m: &'a Match, pub i: usize }
 
 const HIT_VARS: &[&str] = &[
     "type", "animtype", "airtype", "groundtype", "damage", "hitcount", "guardcount", "hitshaketime", "hittime", "slidetime", "ctrltime",
-    "recovertime", "xvel", "yvel", "yaccel", "chainid", "guarded", "fall", "fall.damage", "fall.xvel", "fall.yvel", "fall.recover",
+    "recovertime", "xvel", "yvel", "yaccel", "xaccel", "chainid", "guarded", "fall", "fall.damage", "fall.xvel", "fall.yvel", "fall.recover",
     "fall.time", "fall.recovertime", "fall.kill", "fall.envshake.time", "fall.envshake.freq", "fall.envshake.ampl", "fall.envshake.phase",
     "kill", "id", "playerid", "playerno", "down.recover", "priority", "facing", "power",
     "isbound", "attr", "guardflag", "hitdamage", "guarddamage", "hitpower", "guardpower", "dizzypoints", "guardpoints", "redlife",
@@ -52,7 +52,7 @@ impl<'a> Ctx<'a> {
             "type" => g.kind as f64, "animtype" => g.animtype as f64, "airtype" => g.airtype as f64, "groundtype" => g.groundtype as f64,
             "damage" => g.damage as f64, "hitcount" => g.hitcount as f64, "guardcount" => g.guardcount as f64, "hitshaketime" => f.hit_shake as f64,
             "hittime" => g.hittime as f64, "slidetime" => g.slidetime as f64, "ctrltime" => g.ctrltime as f64,
-            "xvel" => g.xvel as f64 / l, "yvel" => g.yvel as f64 / l, "yaccel" => g.yaccel as f64 / l, "chainid" => g.hit_id as f64,
+            "xvel" => g.xvel as f64 / l, "yvel" => g.yvel as f64 / l, "yaccel" => g.yaccel as f64 / l, "xaccel" => g.xaccel as f64 / l, "chainid" => g.hit_id as f64,
             "guarded" => g.guarded as i32 as f64, "fall" => g.fall as i32 as f64, "fall.damage" => g.fall_damage as f64,
             "fall.xvel" => g.fall_xvel as f64 / l, "fall.yvel" => g.fall_yvel as f64 / l, "fall.recover" => g.fall_recover as i32 as f64,
             "fall.time" => f.fall_time as f64, "fall.recovertime" => g.fall_recover_time as f64, "fall.kill" => g.fall_kill as i32 as f64,
@@ -220,7 +220,7 @@ impl<'a> Host for Ctx<'a> {
             "animexist" | "selfanimexist" => b(f.def.anims.contains_key(&(a0() as i32))),
             "stateno" => f.state_no as f64,
             "prevstateno" => f.prev_state_no as f64,
-            "ctrl" => b(f.ctrl),
+            "ctrl" => b(f.ctrl && !f.ikemen.dizzy && !f.ikemen.guard_break),
             "alive" => b(f.alive),
             "life" => f.life as f64, "lifemax" => f.life_max as f64,
             "power" => m.idx(f.root).map(|r| m.fighters[r].power).unwrap_or(f.power) as f64,

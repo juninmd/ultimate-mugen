@@ -20,7 +20,10 @@ impl Pcm {
 
     pub fn slice(&self, start: usize, end: usize) -> Pcm {
         let end = end.min(self.frames.len());
-        Pcm { rate: self.rate, frames: self.frames.get(start.min(end)..end).unwrap_or(&[]).to_vec() }
+        Pcm {
+            rate: self.rate,
+            frames: self.frames.get(start.min(end)..end).unwrap_or(&[]).to_vec(),
+        }
     }
 
     pub fn resume_at(&self, frame: usize, looping: bool) -> Option<Pcm> {
@@ -32,9 +35,39 @@ impl Pcm {
             let at = frame % n;
             let mut frames = self.frames[at..].to_vec();
             frames.extend_from_slice(&self.frames[..at]);
-            return Some(Pcm { rate: self.rate, frames });
+            return Some(Pcm {
+                rate: self.rate,
+                frames,
+            });
         }
         (frame < n).then(|| self.slice(frame, n))
+    }
+
+    /// Restart a looping clip between `start` and `end` frames, keeping the intro up to `end` on the first pass.
+    pub fn resume_segment(
+        &self,
+        frame: usize,
+        looping: bool,
+        start: usize,
+        end: usize,
+    ) -> Option<Pcm> {
+        let n = self.frames.len();
+        if n == 0 {
+            return None;
+        }
+        let start = start.min(n);
+        let end = end.min(n).max(start);
+        if !looping || end <= start {
+            return self.resume_at(frame, looping);
+        }
+        let span = end - start;
+        let at = start + frame % span;
+        let mut frames = self.frames[at..end].to_vec();
+        frames.extend_from_slice(&self.frames[start..at]);
+        Some(Pcm {
+            rate: self.rate,
+            frames,
+        })
     }
 
     pub fn render(&self, gain: f32, pan: f32, rate: f32) -> Pcm {
@@ -51,7 +84,10 @@ impl Pcm {
             let mix = |c: usize| s0[c] + (s1[c] - s0[c]) * t;
             frames.push([mix(0) * gain * l, mix(1) * gain * r]);
         }
-        Pcm { rate: self.rate, frames }
+        Pcm {
+            rate: self.rate,
+            frames,
+        }
     }
 
     pub fn to_wav(&self) -> Vec<u8> {
@@ -80,7 +116,10 @@ impl Pcm {
 
 pub fn pan_gains(pan: f32) -> (f32, f32) {
     let a = (pan.clamp(-1.0, 1.0) + 1.0) * std::f32::consts::FRAC_PI_4;
-    (a.cos() * std::f32::consts::SQRT_2, a.sin() * std::f32::consts::SQRT_2)
+    (
+        a.cos() * std::f32::consts::SQRT_2,
+        a.sin() * std::f32::consts::SQRT_2,
+    )
 }
 
 pub fn pan_bucket(pan: f32) -> i8 {
@@ -89,12 +128,24 @@ pub fn pan_bucket(pan: f32) -> i8 {
 
 pub fn decode(bytes: &[u8]) -> Option<Pcm> {
     let mss = MediaSourceStream::new(Box::new(Cursor::new(bytes.to_vec())), Default::default());
-    let probed = symphonia::default::get_probe().format(&Hint::new(), mss, &FormatOptions::default(), &MetadataOptions::default()).ok()?;
+    let probed = symphonia::default::get_probe()
+        .format(
+            &Hint::new(),
+            mss,
+            &FormatOptions::default(),
+            &MetadataOptions::default(),
+        )
+        .ok()?;
     let mut format = probed.format;
     let track = format.default_track()?;
     let id = track.id;
-    let mut dec = symphonia::default::get_codecs().make(&track.codec_params, &DecoderOptions::default()).ok()?;
-    let mut out = Pcm { rate: track.codec_params.sample_rate.unwrap_or(22050), frames: vec![] };
+    let mut dec = symphonia::default::get_codecs()
+        .make(&track.codec_params, &DecoderOptions::default())
+        .ok()?;
+    let mut out = Pcm {
+        rate: track.codec_params.sample_rate.unwrap_or(22050),
+        frames: vec![],
+    };
     let mut samples: Option<SampleBuffer<f32>> = None;
     while let Ok(packet) = format.next_packet() {
         if packet.track_id() != id {
@@ -105,7 +156,10 @@ pub fn decode(bytes: &[u8]) -> Option<Pcm> {
                 let spec = *buf.spec();
                 out.rate = spec.rate;
                 let ch = spec.channels.count().max(1);
-                if samples.as_ref().is_none_or(|sb| sb.capacity() < buf.capacity() * ch) {
+                if samples
+                    .as_ref()
+                    .is_none_or(|sb| sb.capacity() < buf.capacity() * ch)
+                {
                     samples = Some(SampleBuffer::new(buf.capacity() as u64, spec));
                 }
                 let sb = samples.as_mut().unwrap();
@@ -127,7 +181,10 @@ mod tests {
     use super::*;
 
     fn tone(n: usize) -> Pcm {
-        Pcm { rate: 22050, frames: (0..n).map(|i| [(i as f32 * 0.05).sin() * 0.5; 2]).collect() }
+        Pcm {
+            rate: 22050,
+            frames: (0..n).map(|i| [(i as f32 * 0.05).sin() * 0.5; 2]).collect(),
+        }
     }
 
     #[test]
@@ -160,6 +217,28 @@ mod tests {
     }
 
     #[test]
+    fn resume_segment_loops_between_the_loop_points() {
+        let p = tone(100);
+        let looped = p.resume_segment(10, true, 40, 80).unwrap();
+        assert_eq!(
+            looped.frames.len(),
+            40,
+            "the loop wraps inside the 40..80 window"
+        );
+        assert_eq!(looped.frames[0], p.frames[50]);
+        assert_eq!(looped.frames[29], p.frames[79]);
+        assert_eq!(looped.frames[30], p.frames[40]);
+        assert_eq!(looped.frames[39], p.frames[49]);
+        let once = p.resume_segment(10, false, 40, 80).unwrap();
+        assert_eq!(
+            once.frames.len(),
+            90,
+            "without looping it plays out from the elapsed frame"
+        );
+        assert_eq!(once.frames[0], p.frames[10]);
+    }
+
+    #[test]
     fn resume_keeps_phase() {
         let p = tone(100);
         let once = p.resume_at(30, false).unwrap();
@@ -179,12 +258,19 @@ mod tests {
 
     #[test]
     fn multiple_packets_preserve_stereo_samples_and_partial_tail() {
-        let p = Pcm { rate: 44100, frames: (0..100_003).map(|i| [(i as f32 * 0.05).sin() * 0.5, (i as f32 * 0.03).cos() * 0.4]).collect() };
+        let p = Pcm {
+            rate: 44100,
+            frames: (0..100_003)
+                .map(|i| [(i as f32 * 0.05).sin() * 0.5, (i as f32 * 0.03).cos() * 0.4])
+                .collect(),
+        };
         let back = decode(&p.to_wav()).unwrap();
         assert_eq!(back.rate, p.rate);
         assert_eq!(back.frames.len(), p.frames.len());
         for (actual, expected) in back.frames.iter().zip(&p.frames) {
-            for c in 0..2 { assert!((actual[c] - expected[c]).abs() < 1e-4); }
+            for c in 0..2 {
+                assert!((actual[c] - expected[c]).abs() < 1e-4);
+            }
         }
     }
 
@@ -199,7 +285,9 @@ mod tests {
         mono[28..32].copy_from_slice(&(p.rate * 2).to_le_bytes());
         mono[32..34].copy_from_slice(&2u16.to_le_bytes());
         mono[40..44].copy_from_slice(&size.to_le_bytes());
-        for frame in stereo[44..].chunks_exact(4) { mono.extend_from_slice(&frame[..2]); }
+        for frame in stereo[44..].as_chunks::<4>().0 {
+            mono.extend_from_slice(&frame[..2]);
+        }
         let back = decode(&mono).unwrap();
         assert_eq!(back.rate, p.rate);
         assert_eq!(back.frames.len(), p.frames.len());

@@ -12,6 +12,7 @@ struct VIn {
     @location(2) pal: u32,
     @location(3) mul: vec4<f32>,
     @location(4) add: vec4<f32>,
+    @location(5) hue: f32,
 }
 
 struct VOut {
@@ -20,6 +21,7 @@ struct VOut {
     @location(1) @interpolate(flat) pal: u32,
     @location(2) mul: vec4<f32>,
     @location(3) add: vec4<f32>,
+    @location(4) @interpolate(flat) hue: f32,
 }
 
 @vertex
@@ -30,6 +32,7 @@ fn vs_main(v: VIn) -> VOut {
     o.pal = v.pal;
     o.mul = v.mul;
     o.add = v.add;
+    o.hue = v.hue;
     return o;
 }
 
@@ -53,6 +56,13 @@ fn fs_main(v: VOut) -> @location(0) vec4<f32> {
         src = vec3<f32>(1.0) - src;
     }
     src = mix(src, vec3<f32>((src.r + src.g + src.b) / 3.0), desat);
+    let ang = radians(v.hue);
+    if abs(ang) > 0.0001 {
+        let k = vec3<f32>(0.57735027);
+        let ca = cos(ang);
+        let sa = sin(ang);
+        src = src * ca + cross(k, src) * sa + k * dot(k, src) * (1.0 - ca);
+    }
     let rgb = clamp(src * v.mul.rgb + v.add.rgb, vec3<f32>(0.0), vec3<f32>(1.0));
     let a = c.a * v.mul.a;
     return vec4<f32>(rgb * a, a);

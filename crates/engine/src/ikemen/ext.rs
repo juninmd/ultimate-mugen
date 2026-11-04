@@ -118,6 +118,10 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
             let owner = m.fighters[i].id;
             if sc.has("pan", 0) || sc.has("abspan", 0) { crate::sctrl::sound::pan(m, i, sc); }
             if sc.has("volumescale", 0) { let volume = n(m, "volumescale", 100.0, 0) / 100.0; m.events.push(Event::SoundVolume { owner, channel, volume }); }
+            if sc.has("loopstart", 0) || sc.has("loopend", 0) {
+                let (start, end) = (n(m, "loopstart", 0.0, 0).max(0.0) as u32, n(m, "loopend", 0.0, 0).max(0.0) as u32);
+                m.events.push(Event::SoundLoop { owner, channel, start, end });
+            }
         }
         _ => return false,
     }

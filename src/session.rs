@@ -15,11 +15,21 @@ use ume_engine::input::{k, InputSource};
 use ume_engine::matchs::{Event, Match};
 
 /// `Replay(inputs, cursor)`: feeds back recorded inputs (the simulation is deterministic, so this reproduces the fight exactly).
-pub enum Pilot { Human(usize), Cpu(Ai), Dummy, Replay(Vec<u32>, usize) }
+pub enum Pilot {
+    Human(usize),
+    Cpu(Ai),
+    Dummy,
+    Replay(Vec<u32>, usize),
+}
 
 /// Team roster shown by the HUD (sequence / parallel team modes).
 #[derive(Clone, Default)]
-pub struct TeamInfo { pub names: [Vec<(String, [u8; 3])>; 2], pub idx: [usize; 2], pub ko: [Vec<bool>; 2], pub simul: bool }
+pub struct TeamInfo {
+    pub names: [Vec<(String, [u8; 3])>; 2],
+    pub idx: [usize; 2],
+    pub ko: [Vec<bool>; 2],
+    pub simul: bool,
+}
 
 pub struct Session {
     pub team: Option<TeamInfo>,
@@ -41,6 +51,8 @@ pub struct Session {
     pub is_replay: bool,
     flag_sounds: Vec<(u32, i32, bool, bool)>,
     speed: f32,
+    /// initial RNG seed of the match (stored in replays so a recorded fight rebuilds identically)
+    pub seed: u32,
     tag_last: [Option<usize>; 2],
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub net: Option<crate::netlink::NetLink>,
@@ -52,38 +64,123 @@ impl Session {
     /// `teams[side]` = fighters of that side (leader first). Players are added interleaved (P1, P2, P3, P4) so that
     /// `roots()[0]`/`roots()[1]` are always the two team leaders. `life` = leader life ratios (sequence carry-over).
     #[allow(clippy::too_many_arguments)]
-    pub fn new(teams: [Vec<Arc<CharDef>>; 2], stage: Stage, pilots: Vec<Pilot>, training: bool, duo: bool, simul: bool, tag: bool, single_round: bool, life: [f32; 2]) -> Self {
+    pub fn new(
+        teams: [Vec<Arc<CharDef>>; 2],
+        stage: Stage,
+        pilots: Vec<Pilot>,
+        training: bool,
+        duo: bool,
+        simul: bool,
+        tag: bool,
+        single_round: bool,
+        life: [f32; 2],
+    ) -> Self {
         let fx = FX.with(|f| f.clone());
         let mut m = Match::new(common_def(), Some(fx), stage.info.clone());
-        if let crate::stages::StageArt::Mugen(bg) = &stage.art { m.bg = Some(ume_engine::stage_bg::BgState::new(bg.stage.clone())); }
+        if let crate::stages::StageArt::Mugen(bg) = &stage.art {
+            m.bg = Some(ume_engine::stage_bg::BgState::new(bg.stage.clone()));
+        }
         m.training = training;
         m.team_simul = simul;
         m.team_tag = tag;
-        if single_round { m.rounds_to_win = 1; }
+        if single_round {
+            m.rounds_to_win = 1;
+        }
         // big teams get a zoomed-out field (room to fight); the ground keeps its place in the picture
-        let ground_k = if matches!(stage.art, crate::stages::StageArt::Procedural { .. } | crate::stages::StageArt::Illustrated { .. }) { stage.info.zoffset / ume_engine::matchs::BASE_H } else { 0.5 };
-        m.set_zoom_for_teams(if simul { teams[0].len().max(teams[1].len()) } else { 1 }, ground_k);
+        let ground_k = if matches!(
+            stage.art,
+            crate::stages::StageArt::Procedural { .. }
+                | crate::stages::StageArt::Illustrated { .. }
+        ) {
+            stage.info.zoffset / ume_engine::matchs::BASE_H
+        } else {
+            0.5
+        };
+        m.set_zoom_for_teams(
+            if simul {
+                teams[0].len().max(teams[1].len())
+            } else {
+                1
+            },
+            ground_k,
+        );
         // face-off at the start of the first round (fighters trade lines before "FIGHT!")
-        if !training { m.intro_ticks = 170; }
+        if !training {
+            m.intro_ticks = 170;
+        }
         let n = teams[0].len().max(teams[1].len());
         let mut slot = 0;
         for k in 0..n {
             for side in 0..2 {
-                let Some(d) = teams[side].get(k) else { continue };
-                let lv = if let Some(Pilot::Cpu(a)) = pilots.get(slot) { a.level } else { 0 };
+                let Some(d) = teams[side].get(k) else {
+                    continue;
+                };
+                let lv = if let Some(Pilot::Cpu(a)) = pilots.get(slot) {
+                    a.level
+                } else {
+                    0
+                };
                 // same character on the field twice → alternate palette
-                let dup = teams[1 - side].iter().any(|o| o.id == d.id) && side == 1 || teams[side][..k].iter().any(|o| o.id == d.id);
+                let dup = teams[1 - side].iter().any(|o| o.id == d.id) && side == 1
+                    || teams[side][..k].iter().any(|o| o.id == d.id);
                 m.add_player(d.clone(), side, lv, if dup { 2 } else { 1 });
                 slot += 1;
             }
         }
         m.start_round();
-        for f in m.fighters.iter_mut().filter(|f| !f.is_helper && f.def.boss) { f.power = 2000.0; }
-        for side in 0..2 { if life[side] < 0.999 { if let Some(f) = m.fighters.iter_mut().find(|f| !f.is_helper && f.side == side) { f.life = (f.life_max * life[side]).max(1.0); } } }
+        for f in m.fighters.iter_mut().filter(|f| !f.is_helper && f.def.boss) {
+            f.power = 2000.0;
+        }
+        for side in 0..2 {
+            if life[side] < 0.999 {
+                if let Some(f) = m
+                    .fighters
+                    .iter_mut()
+                    .find(|f| !f.is_helper && f.side == side)
+                {
+                    f.life = (f.life_max * life[side]).max(1.0);
+                }
+            }
+        }
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, flag_sounds: vec![], speed: 1.0, tag_last: [None; 2], #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
+        let seed = m.rng;
+        Session {
+            team: None,
+            m,
+            stage,
+            r,
+            hud: Hud::new(),
+            vfx,
+            pilots,
+            duo,
+            paused: false,
+            acc: 0.0,
+            over: None,
+            over_timer: 0.0,
+            inputs: vec![],
+            rec: vec![],
+            is_replay: false,
+            flag_sounds: vec![],
+            speed: 1.0,
+            seed,
+            tag_last: [None; 2],
+            #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+            net: None,
+        }
+    }
+
+    /// Playback speed for replays (1x, 2x, 4x).
+    pub fn set_speed(&mut self, speed: f32) {
+        self.speed = speed.clamp(0.25, 4.0);
+    }
+    pub fn speed(&self) -> f32 {
+        self.speed
+    }
+    /// Advance exactly one simulation tick (frame step while a replay is paused).
+    pub fn step_frame(&mut self, c: &mut Controls, audio: &mut Audio) {
+        self.step_visual(c, audio);
     }
 
     pub fn apply_rules(&mut self, r: crate::settings::Rules) {
@@ -91,60 +188,135 @@ impl Session {
         self.m.classic_pushbox = r.classic_pushbox;
         self.speed = r.game_speed.clamp(0.5, 2.0);
         self.m.round_ticks = r.round_ticks;
-        self.m.timer = if r.round_ticks > 0 { r.round_ticks } else { 99 * 60 };
+        self.m.timer = if r.round_ticks > 0 {
+            r.round_ticks
+        } else {
+            99 * 60
+        };
         let k = r.life_percent as f32 / 100.0;
-        for f in self.m.fighters.iter_mut().filter(|f| !f.is_helper) { f.life_max *= k; f.life *= k; }
+        for f in self.m.fighters.iter_mut().filter(|f| !f.is_helper) {
+            f.life_max *= k;
+            f.life *= k;
+        }
     }
 
     fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {
-        let (f, b, d) = (if facing >= 0.0 { k::R } else { k::L }, if facing >= 0.0 { k::L } else { k::R }, k::D);
+        let (f, b, d) = (
+            if facing >= 0.0 { k::R } else { k::L },
+            if facing >= 0.0 { k::L } else { k::R },
+            k::D,
+        );
         let qcf = [d, d, d | f, d | f, f, f];
         match which {
-            1 => { let mut v = qcf.to_vec(); v.extend([f | k::X, 0]); v }
+            1 => {
+                let mut v = qcf.to_vec();
+                v.extend([f | k::X, 0]);
+                v
+            }
             2 => vec![f, f, d, d, d | f, d | f | k::X, 0],
             3 => vec![d, d, d | b, d | b, b, b | k::A, 0],
-            _ => { let mut v = qcf.to_vec(); v.push(0); v.extend(qcf); v.extend([f | k::X, 0]); v }
+            _ => {
+                let mut v = qcf.to_vec();
+                v.push(0);
+                v.extend(qcf);
+                v.extend([f | k::X, 0]);
+                v
+            }
         }
     }
 
     pub fn step(&mut self, c: &mut Controls, audio: &mut Audio) {
         #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
-        if self.net.is_some() { self.net_step(c, audio); return; }
+        if self.net.is_some() {
+            self.net_step(c, audio);
+            return;
+        }
         let roots = self.m.root_indices();
-        if self.m.team_simul { if let Some(cur) = self.pilots.iter().position(|p| matches!(p, Pilot::Human(0))) { if roots.get(cur).is_some_and(|&fi| !self.m.fighters[fi].alive) { self.switch_control(); } } }
+        if self.m.team_simul {
+            if let Some(cur) = self
+                .pilots
+                .iter()
+                .position(|p| matches!(p, Pilot::Human(0)))
+            {
+                if roots.get(cur).is_some_and(|&fi| !self.m.fighters[fi].alive) {
+                    self.switch_control();
+                }
+            }
+        }
         let mut bits = vec![0u32; roots.len()];
         let tag = self.m.team_tag;
         let mut human_bits = None;
         for slot in 0..self.pilots.len() {
-            let Some(fi) = self.pilot_fighter(slot, &roots) else { continue };
+            let Some(fi) = self.pilot_fighter(slot, &roots) else {
+                continue;
+            };
             if tag && slot < 2 && self.tag_last[slot] != Some(fi) {
                 self.tag_last[slot] = Some(fi);
-                if let Pilot::Cpu(ai) = &mut self.pilots[slot] { ai.reset(); }
+                if let Pilot::Cpu(ai) = &mut self.pilots[slot] {
+                    ai.reset();
+                }
             }
             let p = &mut self.pilots[slot];
-            if !self.m.fighters[fi].alive { if let Pilot::Human(s) = p { c.touch.macro_q[(*s).min(1)].clear(); } continue; }
+            if !self.m.fighters[fi].alive {
+                if let Pilot::Human(s) = p {
+                    c.touch.macro_q[(*s).min(1)].clear();
+                }
+                continue;
+            }
             let mut b = match &mut *p {
                 Pilot::Cpu(ai) => ai.poll(&self.m, fi),
                 Pilot::Dummy => 0,
-                Pilot::Replay(v, i) => { let b = v.get(*i).copied().unwrap_or(0); *i += 1; b }
+                Pilot::Replay(v, i) => {
+                    let b = v.get(*i).copied().unwrap_or(0);
+                    *i += 1;
+                    b
+                }
                 Pilot::Human(s) => {
                     let mut b = c.player_bits(*s, self.duo);
-                    if tag && b & k::T != 0 { b = (b & !k::T) | k::TAG; }
-                    if self.m.fighters[fi].def.source == Source::Mugen && b & (k::D2 | k::W | k::E) != 0 && c.touch.macro_q[(*s).min(1)].is_empty() {
-                        let which = if b & k::D2 != 0 && b & k::W != 0 { 4 } else if b & k::D2 != 0 { 1 } else if b & k::W != 0 { 2 } else { 3 };
-                        c.touch.macro_q[(*s).min(1)].extend(Self::mugen_macro(self.m.fighters[fi].facing, which));
+                    if tag && b & k::T != 0 {
+                        b = (b & !k::T) | k::TAG;
+                    }
+                    if self.m.fighters[fi].def.source == Source::Mugen
+                        && b & (k::D2 | k::W | k::E) != 0
+                        && c.touch.macro_q[(*s).min(1)].is_empty()
+                    {
+                        let which = if b & k::D2 != 0 && b & k::W != 0 {
+                            4
+                        } else if b & k::D2 != 0 {
+                            1
+                        } else if b & k::W != 0 {
+                            2
+                        } else {
+                            3
+                        };
+                        c.touch.macro_q[(*s).min(1)]
+                            .extend(Self::mugen_macro(self.m.fighters[fi].facing, which));
                         b &= !(k::D2 | k::W | k::E);
                     }
                     b
                 }
             };
-            if tag && matches!(p, Pilot::Cpu(_)) && Self::cpu_wants_tag(&self.m, fi) { b |= k::TAG; }
-            let Some(target) = roots.iter().position(|&r| r == fi) else { continue };
+            if tag && matches!(p, Pilot::Cpu(_)) && Self::cpu_wants_tag(&self.m, fi) {
+                b |= k::TAG;
+            }
+            let Some(target) = roots.iter().position(|&r| r == fi) else {
+                continue;
+            };
             bits[target] = b;
-            if matches!(self.pilots[slot], Pilot::Human(0)) { human_bits = Some(b); }
+            if matches!(self.pilots[slot], Pilot::Human(0)) {
+                human_bits = Some(b);
+            }
         }
         if let Some(b) = human_bits {
-            match self.inputs.last_mut() { Some(l) if l.0 == b => l.1 = (l.1 + 1).min(99), _ => { self.inputs.push((b, 1)); if self.inputs.len() > 14 { self.inputs.remove(0); } } }
+            match self.inputs.last_mut() {
+                Some(l) if l.0 == b => l.1 = (l.1 + 1).min(99),
+                _ => {
+                    self.inputs.push((b, 1));
+                    if self.inputs.len() > 14 {
+                        self.inputs.remove(0);
+                    }
+                }
+            }
         }
         self.rec.push(bits.clone());
         self.vfx.pre_tick(&self.m);
@@ -155,7 +327,9 @@ impl Session {
 
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     fn net_step(&mut self, c: &mut Controls, audio: &mut Audio) {
-        let Some(mut link) = self.net.take() else { return };
+        let Some(mut link) = self.net.take() else {
+            return;
+        };
         let bits = c.player_bits(0, false);
         let (vfx, rec) = (&mut self.vfx, &mut self.rec);
         let advanced = link.step(&mut self.m, bits, |m, inputs, newest| {
@@ -168,53 +342,206 @@ impl Session {
                 m.tick(inputs);
             }
         });
-        if link.lost.is_some() && self.over.is_none() { self.over = Some(link.local); }
+        if link.lost.is_some() && self.over.is_none() {
+            self.over = Some(link.local);
+        }
         self.net = Some(link);
-        if advanced { self.drain_events(c, audio); }
+        if advanced {
+            self.drain_events(c, audio);
+        }
     }
 
     fn drain_events(&mut self, c: &mut Controls, audio: &mut Audio) {
-        for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
+        for k in std::mem::take(&mut self.vfx.sfx) {
+            audio.sfx(k);
+        }
         for ev in std::mem::take(&mut self.m.events) {
             self.vfx.event(&ev, &self.m);
-            for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
+            for k in std::mem::take(&mut self.vfx.sfx) {
+                audio.sfx(k);
+            }
             match ev {
-                Event::Sound { def, group, index, own, volume, builtin, channel, owner, pan, looping, freq_mul, low_priority, stop_on_get_hit, stop_on_change_state } => {
-                    self.flag_sounds.retain(|(o, ch, _, _)| !(*o == owner && *ch == channel));
-                    if stop_on_get_hit || stop_on_change_state { self.flag_sounds.push((owner, channel, stop_on_get_hit, stop_on_change_state)); }
+                Event::Sound {
+                    def,
+                    group,
+                    index,
+                    own,
+                    volume,
+                    builtin,
+                    channel,
+                    owner,
+                    pan,
+                    looping,
+                    freq_mul,
+                    low_priority,
+                    stop_on_get_hit,
+                    stop_on_change_state,
+                    loop_start,
+                    loop_end,
+                    loop_count,
+                } => {
+                    self.flag_sounds
+                        .retain(|(o, ch, _, _)| !(*o == owner && *ch == channel));
+                    if stop_on_get_hit || stop_on_change_state {
+                        self.flag_sounds.push((
+                            owner,
+                            channel,
+                            stop_on_get_hit,
+                            stop_on_change_state,
+                        ));
+                    }
                     let mut played = false;
                     if let (true, Some(d)) = (own, def.as_ref()) {
-                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), SoundOpts { volume, pan, owner, channel, looping, rate: freq_mul, low_priority }); played = true; }
+                        if let Some(w) = d.sounds.get(&(group, index)) {
+                            audio.sample(
+                                &d.id,
+                                group,
+                                index,
+                                Some(w),
+                                SoundOpts {
+                                    volume,
+                                    pan,
+                                    owner,
+                                    channel,
+                                    looping,
+                                    rate: freq_mul,
+                                    low_priority,
+                                    loop_start,
+                                    loop_end,
+                                    loop_count,
+                                },
+                            );
+                            played = true;
+                        }
                     }
                     if !played {
-                        let kind = builtin.unwrap_or(match group { 5 => if index >= 2 { "hitheavy" } else { "hit" }, 6 => "guard", 7 => "land", _ => if index >= 2 { "swingh" } else { "swing" } });
-                        if group >= 0 || builtin.is_some() { audio.sfx_at(kind, pan); }
+                        let kind = builtin.unwrap_or(match group {
+                            5 => {
+                                if index >= 2 {
+                                    "hitheavy"
+                                } else {
+                                    "hit"
+                                }
+                            }
+                            6 => "guard",
+                            7 => "land",
+                            _ => {
+                                if index >= 2 {
+                                    "swingh"
+                                } else {
+                                    "swing"
+                                }
+                            }
+                        });
+                        if group >= 0 || builtin.is_some() {
+                            audio.sfx_at(kind, pan);
+                        }
                     }
                 }
-                Event::StateChange { fighter } => Self::stop_flagged(&mut self.flag_sounds, audio, fighter, false),
-                Event::Hit { damage, guarded, heavy, attacker, defender, .. } => {
+                Event::StateChange { fighter } => {
+                    Self::stop_flagged(&mut self.flag_sounds, audio, fighter, false)
+                }
+                Event::Hit {
+                    damage,
+                    guarded,
+                    heavy,
+                    attacker,
+                    defender,
+                    ..
+                } => {
                     let roots = self.m.root_indices();
                     let (attacker_side, defender_side) = (attacker, defender);
                     let tag = self.m.team_tag;
-                    let human = |fi: usize, p: &[Pilot]| roots.iter().position(|&r| r == fi).map(|sl| if tag { self.m.fighters[fi].side.min(1) } else { sl }).and_then(|sl| match p.get(sl) { Some(Pilot::Human(slot)) => Some(*slot), _ => None });
+                    let human = |fi: usize, p: &[Pilot]| {
+                        roots
+                            .iter()
+                            .position(|&r| r == fi)
+                            .map(|sl| {
+                                if tag {
+                                    self.m.fighters[fi].side.min(1)
+                                } else {
+                                    sl
+                                }
+                            })
+                            .and_then(|sl| match p.get(sl) {
+                                Some(Pilot::Human(slot)) => Some(*slot),
+                                _ => None,
+                            })
+                    };
                     let mag = (damage / 120.0).clamp(0.15, 1.0);
-                    if let Some(sl) = human(defender_side, &self.pilots) { if guarded { c.rumble(sl, 0.0, 0.35, 70); } else { c.rumble(sl, mag, (mag + 0.2).min(1.0), if heavy { 220 } else { 120 }); } }
-                    if let Some(sl) = human(attacker_side, &self.pilots) { c.rumble(sl, 0.0, if guarded { 0.15 } else { mag * 0.6 }, 60); }
+                    if let Some(sl) = human(defender_side, &self.pilots) {
+                        if guarded {
+                            c.rumble(sl, 0.0, 0.35, 70);
+                        } else {
+                            c.rumble(sl, mag, (mag + 0.2).min(1.0), if heavy { 220 } else { 120 });
+                        }
+                    }
+                    if let Some(sl) = human(attacker_side, &self.pilots) {
+                        c.rumble(sl, 0.0, if guarded { 0.15 } else { mag * 0.6 }, 60);
+                    }
                     let hit_id = self.m.fighters[defender].id;
                     Self::stop_flagged(&mut self.flag_sounds, audio, hit_id, true);
                 }
-                Event::Super { side, .. } => { for (s, p) in self.pilots.iter().enumerate() { if let Pilot::Human(sl) = p { c.rumble(*sl, if s == side { 0.6 } else { 0.3 }, 0.6, 400); } } }
-                Event::Ko { silent, .. } => { if !silent { audio.sfx("ko"); } for p in &self.pilots { if let Pilot::Human(sl) = p { c.rumble(*sl, 1.0, 1.0, 700); } } }
-                Event::Rumble { fighter, strong, weak, ms } => {
+                Event::Super { side, .. } => {
+                    for (s, p) in self.pilots.iter().enumerate() {
+                        if let Pilot::Human(sl) = p {
+                            c.rumble(*sl, if s == side { 0.6 } else { 0.3 }, 0.6, 400);
+                        }
+                    }
+                }
+                Event::Ko { silent, .. } => {
+                    if !silent {
+                        audio.sfx("ko");
+                    }
+                    for p in &self.pilots {
+                        if let Pilot::Human(sl) = p {
+                            c.rumble(*sl, 1.0, 1.0, 700);
+                        }
+                    }
+                }
+                Event::Rumble {
+                    fighter,
+                    strong,
+                    weak,
+                    ms,
+                } => {
                     let roots = self.m.root_indices();
                     let tag = self.m.team_tag;
-                    let slot_of = |k: usize| if tag { self.m.fighters[roots[k]].side.min(1) } else { k };
-                    if let Some(Pilot::Human(sl)) = roots.iter().position(|&r| self.m.fighters[r].id == fighter).and_then(|k| self.pilots.get(slot_of(k))) { c.rumble(*sl, strong, weak, ms); }
+                    let slot_of = |k: usize| {
+                        if tag {
+                            self.m.fighters[roots[k]].side.min(1)
+                        } else {
+                            k
+                        }
+                    };
+                    if let Some(Pilot::Human(sl)) = roots
+                        .iter()
+                        .position(|&r| self.m.fighters[r].id == fighter)
+                        .and_then(|k| self.pilots.get(slot_of(k)))
+                    {
+                        c.rumble(*sl, strong, weak, ms);
+                    }
                 }
-                Event::MatchOver(w) => { self.over = Some(w); }
+                Event::MatchOver(w) => {
+                    self.over = Some(w);
+                }
                 Event::StopSound { owner, channel } => audio.stop(owner, channel),
-                Event::SoundPan { owner, channel, pan } => audio.pan(owner, channel, pan),
-                Event::SoundVolume { owner, channel, volume } => audio.set_volume(owner, channel, volume),
+                Event::SoundPan {
+                    owner,
+                    channel,
+                    pan,
+                } => audio.pan(owner, channel, pan),
+                Event::SoundLoop {
+                    owner,
+                    channel,
+                    start,
+                    end,
+                } => audio.set_loop(owner, channel, start, end, 0),
+                Event::SoundVolume {
+                    owner,
+                    channel,
+                    volume,
+                } => audio.set_volume(owner, channel, volume),
                 Event::Bgm(action) => audio.queue_bgm(action),
                 Event::Tag { .. } => audio.sfx("select"),
                 Event::Fight => audio.sfx("fight"),
@@ -226,69 +553,134 @@ impl Session {
     }
 
     /// Root fighter a pilot slot controls right now: its own, or in tag mode the side's active member.
-    fn stop_flagged(list: &mut Vec<(u32, i32, bool, bool)>, audio: &mut Audio, owner: u32, on_hit: bool) {
+    fn stop_flagged(
+        list: &mut Vec<(u32, i32, bool, bool)>,
+        audio: &mut Audio,
+        owner: u32,
+        on_hit: bool,
+    ) {
         list.retain(|(o, ch, hit, state)| {
             let stop = *o == owner && if on_hit { *hit } else { *state };
-            if stop { audio.stop(*o, *ch); }
+            if stop {
+                audio.stop(*o, *ch);
+            }
             !stop
         });
     }
     fn pilot_fighter(&self, slot: usize, roots: &[usize]) -> Option<usize> {
         let own = *roots.get(slot)?;
-        if self.m.team_tag && slot < 2 && !matches!(self.pilots[slot], Pilot::Replay(..)) { return self.m.tag_active(self.m.fighters[own].side).or(Some(own)); }
+        if self.m.team_tag && slot < 2 && !matches!(self.pilots[slot], Pilot::Replay(..)) {
+            return self.m.tag_active(self.m.fighters[own].side).or(Some(own));
+        }
         Some(own)
     }
 
     fn cpu_wants_tag(m: &Match, fi: usize) -> bool {
-        if !m.tag_ready(fi) { return false; }
+        if !m.tag_ready(fi) {
+            return false;
+        }
         let ratio = |i: usize| m.fighters[i].life / m.fighters[i].life_max.max(1.0);
-        m.tag_next_alive(fi).is_some_and(|to| ratio(fi) < 0.3 && ratio(to) > ratio(fi) + 0.25)
+        m.tag_next_alive(fi)
+            .is_some_and(|to| ratio(fi) < 0.3 && ratio(to) > ratio(fi) + 0.25)
     }
 
     /// Ids of the root fighters currently driven by a human (the P1 fighter you control, P2 in versus).
     pub fn human_ids(&self) -> Vec<u32> {
         let roots = self.m.root_indices();
-        self.pilots.iter().enumerate().filter(|(_, p)| matches!(p, Pilot::Human(_))).filter_map(|(slot, _)| self.pilot_fighter(slot, &roots).map(|fi| self.m.fighters[fi].id)).collect()
+        self.pilots
+            .iter()
+            .enumerate()
+            .filter(|(_, p)| matches!(p, Pilot::Human(_)))
+            .filter_map(|(slot, _)| {
+                self.pilot_fighter(slot, &roots)
+                    .map(|fi| self.m.fighters[fi].id)
+            })
+            .collect()
     }
     pub fn cpu_ids(&self) -> Vec<u32> {
         let roots = self.m.root_indices();
-        self.pilots.iter().enumerate().filter(|(_, p)| matches!(p, Pilot::Cpu(_))).filter_map(|(slot, _)| self.pilot_fighter(slot, &roots).map(|fi| self.m.fighters[fi].id)).collect()
+        self.pilots
+            .iter()
+            .enumerate()
+            .filter(|(_, p)| matches!(p, Pilot::Cpu(_)))
+            .filter_map(|(slot, _)| {
+                self.pilot_fighter(slot, &roots)
+                    .map(|fi| self.m.fighters[fi].id)
+            })
+            .collect()
     }
     /// Parallel teams: hand your controller to the next living teammate (Tab / automatically when yours falls).
     pub fn switch_control(&mut self) {
         let roots = self.m.root_indices();
-        let Some(cur) = self.pilots.iter().position(|p| matches!(p, Pilot::Human(0))) else { return };
+        let Some(cur) = self
+            .pilots
+            .iter()
+            .position(|p| matches!(p, Pilot::Human(0)))
+        else {
+            return;
+        };
         let side = self.m.fighters[roots[cur]].side;
-        let mates: Vec<usize> = (0..roots.len()).filter(|&sl| self.m.fighters[roots[sl]].side == side).collect();
+        let mates: Vec<usize> = (0..roots.len())
+            .filter(|&sl| self.m.fighters[roots[sl]].side == side)
+            .collect();
         let at = mates.iter().position(|&sl| sl == cur).unwrap_or(0);
         for k in 1..mates.len() {
             let cand = mates[(at + k) % mates.len()];
             if self.m.fighters[roots[cand]].alive && cand < self.pilots.len() {
                 self.pilots.swap(cur, cand);
                 // the AI that used to drive the new fighter now drives the old one: drop its cached per-character data
-                if let Pilot::Cpu(a) = &mut self.pilots[cur] { a.reset(); }
+                if let Pilot::Cpu(a) = &mut self.pilots[cur] {
+                    a.reset();
+                }
                 return;
             }
         }
     }
 
     /// One simulation tick plus its visual effects update (used by the screenshot tour).
-    pub fn step_visual(&mut self, c: &mut Controls, audio: &mut Audio) { self.step(c, audio); self.vfx.update(1.0 / 60.0); }
+    pub fn step_visual(&mut self, c: &mut Controls, audio: &mut Audio) {
+        self.step(c, audio);
+        self.vfx.update(1.0 / 60.0);
+    }
 
     /// Advance in real time (fixed step).
     pub fn update(&mut self, dt: f32, c: &mut Controls, audio: &mut Audio) {
-        if self.paused { return; }
+        if self.paused {
+            return;
+        }
         self.vfx.update(dt);
         // face-off camera push-in
-        self.vfx.intro_target = if self.m.round_state == 1 && self.m.round_no == 1 && self.m.intro_ticks > 0 && self.m.round_time > 10 { 0.2 } else { 0.0 };
+        self.vfx.intro_target = if self.m.round_state == 1
+            && self.m.round_no == 1
+            && self.m.intro_ticks > 0
+            && self.m.round_time > 10
+        {
+            0.2
+        } else {
+            0.0
+        };
         self.acc += dt.min(0.1) * self.vfx.time_scale() * self.speed;
         let step = 1.0 / 60.0;
         let mut n = 0;
-        while self.acc >= step - 1e-4 && n < 5 { self.step(c, audio); self.acc -= step; n += 1; }
-        if n == 5 { self.acc = 0.0; }
+        while self.acc >= step - 1e-4 && n < 5 {
+            self.step(c, audio);
+            self.acc -= step;
+            n += 1;
+        }
+        if n == 5 {
+            self.acc = 0.0;
+        }
         // pull the music down under supers and the KO slow-motion so the effects punch through
-        audio.duck = if self.m.global_asserts & ume_engine::flags::gsf::NOMUSIC != 0 { 0.0 } else if self.m.pause.as_ref().is_some_and(|p| p.is_super) || self.vfx.slow_t > 0.0 { 0.28 } else { 1.0 };
-        if self.over.is_some() { self.over_timer += dt; }
+        audio.duck = if self.m.global_asserts & ume_engine::flags::gsf::NOMUSIC != 0 {
+            0.0
+        } else if self.m.pause.as_ref().is_some_and(|p| p.is_super) || self.vfx.slow_t > 0.0 {
+            0.28
+        } else {
+            1.0
+        };
+        if self.over.is_some() {
+            self.over_timer += dt;
+        }
     }
     pub fn draw(&mut self, g: &mut Gfx, ui: &Ui) {
         self.r.human = self.human_ids();
@@ -297,10 +689,15 @@ impl Session {
         g.post.end(&p, ui.t);
         let human = self.human_ids();
         self.hud.replay = self.is_replay;
-        self.hud.inputs = if self.m.training { self.inputs.clone() } else { vec![] };
+        self.hud.inputs = if self.m.training {
+            self.inputs.clone()
+        } else {
+            vec![]
+        };
         self.vfx.draw_cinema_bars(ui);
         let cpu = self.cpu_ids();
-        self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human, &cpu);
+        self.hud
+            .draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human, &cpu);
         self.vfx.draw_banners(ui);
     }
 }

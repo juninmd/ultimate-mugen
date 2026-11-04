@@ -39,6 +39,10 @@ Uma flag fora da tabela é ignorada. O carregador imprime uma linha `AssertSpeci
 | `AutoGuard` | Defende como se "trás" estivesse pressionado |
 | `NoKO` | O jogador não leva KO ao chegar a 0 de vida |
 | `NoHitDamage`, `NoGuardDamage` | Golpes / golpes defendidos não tiram vida do jogador |
+| `NoRedLifeDamage` | Golpes não aumentam a vida vermelha do jogador |
+| `NoDizzyPointsDamage` | Golpes não reduzem os pontos de tontura do jogador |
+| `NoGuardPointsDamage` | Golpes defendidos não reduzem os pontos de defesa do jogador |
+| `NoScore` | Golpes não alteram a pontuação do jogador |
 | `NoGuardKO` | Um golpe defendido não mata o jogador |
 | `NoKOFall` | O golpe que dá KO não força a queda |
 | `NoKOVelocity` | O golpe que dá KO não soma a velocidade extra de KO |
@@ -56,4 +60,4 @@ Uma flag fora da tabela é ignorada. O carregador imprime uma linha `AssertSpeci
 | `DrawUnder` | O jogador é desenhado atrás dos outros lutadores |
 | `NoLifeBarDisplay`, `NoPowerBarDisplay`, `NoFaceDisplay`, `NoNameDisplay`, `NoWinIconDisplay`, `NoComboDisplay` | A parte correspondente do HUD some |
 
-Registradas e legíveis por `IsAsserted`, mas a engine ainda não tem a mecânica correspondente: `NoAIButtonJam`, `NoAICheat`, `NoBrake`, `NoDizzyPointsDamage`, `NoGuardPointsDamage`, `NoRedLifeDamage`, `NoScore`, `NoFaceP2`, `NoFallCount`, `NoFallDefenceUp`, `NoFastRecoverFromLieDown`, `NoGetUpFromLieDown`, `NoIntroReset`, `NoLifeBarAction`, `NoGuardBarDisplay`, `NoStunBarDisplay`, `NoTurnTarget`, `ProjTypeCollision`, `SizePushOnly`.
+Registradas e legíveis por `IsAsserted`, mas a engine ainda não tem a mecânica correspondente: `NoAIButtonJam`, `NoAICheat`, `NoBrake`, `NoFaceP2`, `NoFallCount`, `NoFallDefenceUp`, `NoFastRecoverFromLieDown`, `NoGetUpFromLieDown`, `NoIntroReset`, `NoLifeBarAction`, `NoGuardBarDisplay`, `NoStunBarDisplay`, `NoTurnTarget`, `ProjTypeCollision`, `SizePushOnly`.

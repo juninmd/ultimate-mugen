@@ -278,8 +278,8 @@ fn awakening_costs_a_bar_boosts_stats_and_ends_with_the_round() {
     assert!(f.attack_mul > atk * 1.25 && f.defence_mul > def * 1.2, "stronger and tougher");
     assert!(f.life > 400.0, "small life refill");
     assert!(m.events.iter().any(|e| matches!(e, ume_engine::matchs::Event::Transform { .. })));
-    // plays the power-up state (193), then returns to idle with control; can't awaken twice
-    assert_eq!(f.state_no, 19902);
+    // plays the power-up state (engine awakening state), then returns to idle with control; can't awaken twice
+    assert_eq!(f.state_no, ume_engine::matchs::ENGINE_STATE_AWAKENING);
     for _ in 0..100 { m.tick(&[0, 0]); }
     assert!(m.fighters[0].ctrl && m.fighters[0].state_no == 0, "back to idle with control");
     m.fighters[0].power = 3000.0;
@@ -303,7 +303,7 @@ fn first_round_waits_for_the_face_off_and_a_button_skips_it() {
     m.start_round();
     for _ in 0..140 { m.tick(&[0, 0]); }
     assert!(m.round_state < 2, "still trading lines");
-    assert!(matches!(m.fighters[0].state_no, 192 | 194) || matches!(m.fighters[1].state_no, 192 | 194), "fighters pose for the face-off");
+    assert!([m.fighters[0].state_no, m.fighters[1].state_no].iter().any(|&n| n == ume_engine::matchs::ENGINE_STATE_FACE_OFF || n == ume_engine::matchs::ENGINE_STATE_FACE_OFF_TAUNT), "fighters pose for the face-off");
     for _ in 0..140 { m.tick(&[0, 0]); }
     assert_eq!(m.round_state, 2, "fight begins after the face-off");
     assert!(m.fighters[0].ctrl && m.fighters[1].ctrl);
@@ -483,4 +483,79 @@ fn sequence_teams_use_the_given_leader_and_solo_fights_keep_the_name() {
     m.team_lead = ["kaito".into(), String::new()];
     assert_eq!(m.winner_text(0), "TEAM KAITO WINS");
     assert!(!m.winner_text(1).starts_with("TEAM "));
+}
+
+#[test]
+fn idle_player_is_not_dragged_by_an_advancing_opponent() {
+    for p1 in ["kaito", "kaname"] {
+        let mut m = Match::new(common_def(), None, flat_stage());
+        m.add_player(Arc::new(compile_native(&load(p1), 1, false)), 0, 0, 1);
+        m.add_player(Arc::new(compile_native(&load("shion"), 1, false)), 1, 0, 1);
+        m.start_round();
+        while m.round_state != 2 { m.tick(&[0, 0]); }
+        let start = m.fighters[0].pos.x;
+        let mut min_x = start;
+        for _ in 0..600 {
+            let toward = if m.fighters[1].facing > 0.0 { R } else { L };
+            m.tick(&[0, toward]);
+            min_x = min_x.min(m.fighters[0].pos.x);
+            assert!(m.fighters[0].pos.x <= start + 0.01, "{p1}: idle player moved toward the enemy ({} -> {})", start, m.fighters[0].pos.x);
+        }
+        eprintln!("{p1}: start {start} min {min_x} end {} enemy {}", m.fighters[0].pos.x, m.fighters[1].pos.x);
+    }
+}
+
+#[test]
+fn idle_player_vs_cpu_never_walks_by_itself() {
+    use ume_engine::ai::Ai;
+    use ume_engine::input::InputSource;
+    for id in IDS {
+        for seed in 0..3u32 {
+            let mut m = Match::new(common_def(), None, flat_stage());
+            m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 0, 0, 1);
+            m.add_player(Arc::new(compile_native(&load(id), 1, false)), 1, 0, 1);
+            m.start_round();
+            let mut ai = Ai::new(8, 5 + seed);
+            for t in 0..1500 {
+                let b = [0, ai.poll(&m, 1)];
+                let (x0, hit0) = (m.fighters[0].pos.x, m.fighters[0].move_type);
+                let (e0, s0) = (m.fighters[1].pos.x, m.fighters[0].state_no);
+                m.tick(&b);
+                let f = &m.fighters[0];
+                let toward = (m.fighters[1].pos.x - x0).signum() * (f.pos.x - x0);
+                if toward > 0.01 && hit0 == 'I' && f.move_type == 'I' && f.state_type == 'S' && m.round_state == 2 && f.hit_pause == 0 {
+                    panic!("{id} seed {seed} tick {t}: P1 idle moved toward enemy by {toward}, state {s0}->{}, enemy {e0}->{}", f.state_no, m.fighters[1].pos.x);
+                }
+                if m.round_state >= 4 { break; }
+            }
+        }
+    }
+}
+
+#[test]
+fn screen_scroll_never_drags_an_idle_or_attacking_player_toward_a_launched_enemy() {
+    use ume_engine::ai::Ai;
+    use ume_engine::input::InputSource;
+    for p1 in ["marlow", "garan", "shion"] {
+        for en in ["kaito", "kaname"] {
+            for btn in [X, A, 0] {
+                let mut m = Match::new(common_def(), None, flat_stage());
+                m.add_player(Arc::new(compile_native(&load(p1), 1, false)), 0, 0, 1);
+                m.add_player(Arc::new(compile_native(&load(en), 1, false)), 1, 0, 1);
+                m.start_round();
+                let mut ai = Ai::new(8, 10);
+                for t in 0..1200 {
+                    let e = ai.poll(&m, 1);
+                    let press = if t % 17 < 2 { btn } else { 0 };
+                    let (x0, ex0) = (m.fighters[0].pos.x, m.fighters[1].pos.x);
+                    let (state, vx, facing) = (m.fighters[0].state_no, m.fighters[0].vel.x, m.fighters[0].facing);
+                    m.tick(&[press, e]);
+                    if m.round_state != 2 || state >= 5000 { continue; }
+                    let toward = (m.fighters[0].pos.x - x0) * (ex0 - x0).signum();
+                    let own = (vx * facing * (ex0 - x0).signum()).max(0.0);
+                    assert!(toward <= own + 0.5 || m.fighters[0].hit_pause > 0, "{p1} vs {en} btn {btn} tick {t}: dragged {toward} (own {own})");
+                }
+            }
+        }
+    }
 }

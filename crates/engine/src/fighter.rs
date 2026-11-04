@@ -31,7 +31,7 @@ pub struct HitDefData {
     pub ground_corner_push: f32, pub air_corner_push: f32, pub guard_corner_push: f32, pub air_guard_corner_push: f32,
     pub target_palfx: Option<PalFx>,
     pub dizzy_points: f32, pub guard_points: f32, pub red_life: [f32; 2], pub score: [f32; 2], pub down_recover: bool,
-    pub miss_on_override: bool, pub unhittable_time: i32, pub spark_scale: f32,
+    pub miss_on_override: bool, pub unhittable_time: i32, pub spark_scale: f32, pub xaccel: f32, pub attack_depth: f32, pub p2clsncheck: bool, pub p2clsnrequire: i32,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -43,7 +43,7 @@ pub struct HitOverride { pub attr: String, pub state_no: i32, pub time: i32, pub
 #[derive(Clone, Debug)]
 pub struct GetHitVars {
     pub kind: i32, pub animtype: i32, pub airtype: i32, pub groundtype: i32, pub damage: f32, pub hitcount: i32, pub guardcount: i32,
-    pub hittime: i32, pub slidetime: i32, pub ctrltime: i32, pub xvel: f32, pub yvel: f32, pub yaccel: f32, pub chainid: i32,
+    pub hittime: i32, pub slidetime: i32, pub ctrltime: i32, pub xvel: f32, pub yvel: f32, pub yaccel: f32, pub xaccel: f32, pub chainid: i32,
     pub guarded: bool, pub fall: bool, pub fall_damage: f32, pub fall_xvel: f32, pub fall_yvel: f32, pub fall_recover: bool,
     pub fall_recover_time: i32, pub fall_kill: bool, pub kill: bool, pub attacker_id: u32, pub attacker_no: usize,
     pub hit_id: i32, pub fall_env_shake: Shake, pub down_bounce: bool,
@@ -68,7 +68,7 @@ impl GetHitVars {
 impl Default for GetHitVars {
     fn default() -> Self {
         GetHitVars { kind: 0, animtype: 0, airtype: 0, groundtype: 0, damage: 0.0, hitcount: 0, guardcount: 0, hittime: 0, slidetime: 0, ctrltime: 0,
-            xvel: 0.0, yvel: 0.0, yaccel: 0.44, chainid: -1, guarded: false, fall: false, fall_damage: 0.0, fall_xvel: 0.0, fall_yvel: -4.5,
+            xvel: 0.0, yvel: 0.0, yaccel: 0.44, xaccel: 0.0, chainid: -1, guarded: false, fall: false, fall_damage: 0.0, fall_xvel: 0.0, fall_yvel: -4.5,
             fall_recover: true, fall_recover_time: 4, fall_kill: true, kill: true, attacker_id: 0, attacker_no: 0,
             hit_id: -1, fall_env_shake: Shake::default(), down_bounce: false,
             priority: 0, facing: 0, power: 0.0, attr: 0, guardflag: 0, hit_damage: 0.0, guard_damage: 0.0, hit_power: 0.0, guard_power: 0.0,
@@ -100,6 +100,7 @@ pub fn anim_fallback(no: i32) -> &'static [i32] {
         44 => &[41, 40, 0], 45 => &[42, 41, 40, 0], 46 => &[43, 41, 40, 0], 47 => &[40, 0], 100 => &[20, 0], 105 => &[43, 41, 0], 106 => &[47, 0],
         120 => &[130, 0], 121 => &[131, 11, 0], 122 => &[132, 41, 0], 130 => &[120, 0], 131 => &[121, 11], 132 => &[122, 41],
         140 => &[130, 0], 141 => &[131, 11], 142 => &[132, 41], 150 => &[130, 5000, 0], 151 => &[150, 130, 0], 152 => &[131, 5010, 11], 153 => &[152, 131, 11], 154 => &[132, 5030, 41], 155 => &[154, 132, 41],
+        5300 => &[5000, 0], 5400 => &[150, 5000, 0],
         170 | 175 | 181 | 190 | 191 | 195 | 196 => &[0], 197..=200 => &[5150, 5110], 180 => &[181, 0],
         5000 => &[5001, 5002, 0], 5001 => &[5000, 0], 5002 => &[5001, 5000, 0], 5005 => &[5000, 0], 5006 => &[5005, 5001, 5000], 5007 => &[5006, 5005, 5002, 5000],
         5010 => &[5000, 0], 5011 => &[5010, 5001, 5000], 5012 => &[5011, 5010, 5002, 5000], 5020 => &[5010, 5000, 11], 5021 => &[5020, 5011, 5001], 5022 => &[5021, 5012, 5002],

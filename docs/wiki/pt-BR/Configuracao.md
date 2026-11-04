@@ -54,6 +54,16 @@ A janela pode ser arrastada para qualquer tamanho. O jogo desenha em um espaço 
 | `UME_NOFX=1` | Desliga a camada animada dos cenários (teste de desempenho) |
 | `UME_TOUR=mugen` + `UME_CHARS=a,b` + `UME_STAGE=<id>` | Com `--shots`, fotografa lutadores importados |
 
+## Idioma e localização
+
+A interface traz dois idiomas numa tabela de strings por chave (`src/i18n.rs`): **inglês** (padrão) e **português (Brasil)**.
+Configurações › Idioma troca em tempo real e grava `lang=en|pt` em `ultimate-mugen.cfg`.
+
+- A busca é idioma atual → inglês → nome da chave, então um catálogo incompleto nunca mostra rótulo vazio.
+- Uma chave ausente é impressa uma única vez no log (`i18n: missing key '<key>'`).
+- Os catálogos são compilados no binário, então a troca não faz I/O e funciona no web/mobile.
+- Um teste mantém os dois catálogos em sincronia e um teste de grep falha se as telas migradas (menu, seleção, resultados, pausa, replays, sobrevivência, controles) voltarem a ter português fixo.
+
 ## Controles
 
 | Ação | Teclado P1 | Teclado P2 | Gamepad | Toque |

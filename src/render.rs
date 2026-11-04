@@ -11,6 +11,18 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use ume_engine::palette::{BlendMode, PalParams};
 
+fn draw_transformed_layer_quad(texture: &Texture2D, pivot: [f32; 2], axis: [f32; 2], size: [f32; 2], angle_deg: f32, x_shear: f32, color: Color) {
+    let (sin, cos) = (-angle_deg.to_radians()).sin_cos();
+    let corners = [[0.0, 0.0], [size[0], 0.0], [size[0], size[1]], [0.0, size[1]]];
+    let uvs = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]];
+    let vertices = (0..4).map(|i| {
+        let (rx, ry) = (corners[i][0] - axis[0], corners[i][1] - axis[1]);
+        let sheared = rx - x_shear * ry;
+        Vertex::new(pivot[0] + sheared * cos - ry * sin, pivot[1] + sheared * sin + ry * cos, 0.0, uvs[i][0], uvs[i][1], color)
+    }).collect();
+    draw_mesh(&Mesh { vertices, indices: vec![0, 1, 2, 0, 2, 3], texture: Some(texture.clone()) });
+}
+
 pub struct Gfx { tex: HashMap<u64, Texture2D>, indexed: HashMap<u64, IndexedTexture>, palettes: HashMap<usize, (Arc<Vec<u8>>, Palette)>, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
 
 impl Gfx {
@@ -412,10 +424,13 @@ impl MatchRenderer {
                     let (Some(img), Some(meta)) = (bg.images.get(&key), bg.stage.sprites.get(&key)) else { continue };
                     let t = g.texture(img, true);
                     let off = match state { Some(st) => st.offset(k), None => { let gt = m.game_time as f32; [l.velocity[0] * gt, l.velocity[1] * gt] } };
+                    let layer_scale = l.scale_at([cx, cy]);
+                    let (lx, ly) = (scl * layer_scale[0], scl_y * layer_scale[1]);
                     let sxp = (l.start[0] + off[0] - cx * l.delta[0]) * scl + m.view_w / 2.0 + shx;
                     let syp = (l.start[1] + off[1] - cy * l.delta[1]) * scl_y + (m.view_h - 240.0) / 2.0 + shy;
-                    let (w, h) = (meta.w as f32 * scl, meta.h as f32 * scl_y);
-                    let (x0, y0) = (sxp - meta.axis_x as f32 * scl, syp - meta.axis_y as f32 * scl_y);
+                    let (w, h) = (meta.w as f32 * lx, meta.h as f32 * ly);
+                    let (axis_dx, axis_dy) = (meta.axis_x as f32 * lx, meta.axis_y as f32 * ly);
+                    let (x0, y0) = (sxp - axis_dx, syp - axis_dy);
                     let (stx, sty) = (w + l.tile_spacing[0] * scl, h + l.tile_spacing[1] * scl_y);
                     let xs: Vec<f32> = match l.tile[0] { 1 => { let st = x0 - (x0 / stx).ceil() * stx; let mut v = vec![]; let mut x = st; while x < m.view_w { v.push(x); x += stx; } v } n if n > 1 => (0..n).map(|i| x0 + i as f32 * stx).collect(), _ => vec![x0] };
                     let ys: Vec<f32> = match l.tile[1] { 1 => { let st = y0 - (y0 / sty).ceil() * sty; let mut v = vec![]; let mut y = st; while y < m.view_h { v.push(y); y += sty; } v } n if n > 1 => (0..n).map(|i| y0 + i as f32 * sty).collect(), _ => vec![y0] };
@@ -423,14 +438,24 @@ impl MatchRenderer {
                     let sub = l.trans == "sub";
                     let alpha = if l.trans == "addalpha" { (l.alpha[0] / 256.0).clamp(0.0, 1.0) } else { 1.0 };
                     if add { set_blend(GfxBlend::Add); } else if sub { set_blend(GfxBlend::Sub); }
-                    if let Some(win) = l.window {
-                        let wx = (win[0] - cx * l.delta[0]) * scl + m.view_w / 2.0 + shx;
-                        let wy = (win[1] - cy * l.delta[1]) * scl + (m.view_h - 240.0) / 2.0 + shy;
-                        let (ww, wh) = ((win[2] - win[0] + 1.0) * scl, (win[3] - win[1] + 1.0) * scl);
+                    let clip = l.clip_window();
+                    if let Some(win) = clip {
+                        let scroll = l.window_scroll();
+                        let wx = (win[0] - cx * scroll[0]) * scl + m.view_w / 2.0 + shx;
+                        let wy = (win[1] - cy * scroll[1]) * scl_y + (m.view_h - 240.0) / 2.0 + shy;
+                        let (ww, wh) = ((win[2] - win[0] + 1.0) * scl, (win[3] - win[1] + 1.0) * scl_y);
                         set_scissor(Some(((g.ox + wx * s) as i32, (g.oy + wy * s) as i32, (ww * s).max(0.0) as i32, (wh * s).max(0.0) as i32)));
                     }
-                    for &x in &xs { for &y in &ys { draw_texture_ex(&t, g.ox + x * s, g.oy + y * s, Color::new(1.0, 1.0, 1.0, alpha), DrawTextureParams { dest_size: Some(vec2(w * s + 0.5, h * s + 0.5)), ..Default::default() }); } }
-                    if l.window.is_some() { set_scissor(None); }
+                    let tint = Color::new(1.0, 1.0, 1.0, alpha);
+                    let transformed = l.angle != 0.0 || l.x_shear != 0.0;
+                    for &x in &xs { for &y in &ys {
+                        if transformed {
+                            draw_transformed_layer_quad(&t, [g.ox + (x + axis_dx) * s, g.oy + (y + axis_dy) * s], [axis_dx * s, axis_dy * s], [w * s, h * s], l.angle, l.x_shear, tint);
+                        } else {
+                            draw_texture_ex(&t, g.ox + x * s, g.oy + y * s, tint, DrawTextureParams { dest_size: Some(vec2(w * s + 0.5, h * s + 0.5)), ..Default::default() });
+                        }
+                    } }
+                    if clip.is_some() { set_scissor(None); }
                     if add || sub { set_blend(GfxBlend::Alpha); }
                 }
             }

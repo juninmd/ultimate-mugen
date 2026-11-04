@@ -1,5 +1,6 @@
 //! Input hub: keyboard maps, gamepads (with rumble), touch controls; menu navigation.
-use crate::gamepad::{PadInfo, Pads};
+use crate::gamepad::{PadInfo, PadKind, Pads};
+use crate::ui::{hex, Face, Mark};
 use crate::keybinds::KeyMap;
 use crate::gfx::*;
 use ume_engine::input::k;
@@ -75,7 +76,45 @@ impl TouchPad {
     }
 }
 
-pub struct Controls { pub keys: KeyMap, pub pads: Pads, pub pad_info: Vec<PadInfo>, prev_menu: u32, pub menu_pressed: u32, pub touch: TouchPad }
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum Glyphs { Keyboard, Touch, Pad(PadKind) }
+
+pub fn face(g: Glyphs, keys: &KeyMap, bit: u32) -> Face {
+    let blue = hex("#3a8cff");
+    let red = hex("#ff4d6d");
+    let dark = hex("#3b3552");
+    let punch = bit & (k::X | k::Y | k::Z) != 0;
+    match g {
+        Glyphs::Touch => {
+            let t = match bit { k::X => "SOCO", k::Y => "SOCO+", k::Z => "SOCO 3", k::A => "CHUTE", k::B => "CHUTE+", k::C => "CHUTE 3", k::D2 => "ESPECIAL", k::W => "SUPER", k::T => "DESPERTAR", _ => "II" };
+            Face::chip(t, if punch { blue } else if bit & (k::A | k::B | k::C) != 0 { red } else { hex("#ffb703") })
+        }
+        Glyphs::Keyboard => {
+            let i = crate::keybinds::ACTIONS.iter().position(|a| a.1 == bit);
+            Face::key(i.map(|i| crate::keybinds::label(keys.slots[0][i])).unwrap_or("Esc"))
+        }
+        Glyphs::Pad(PadKind::PlayStation) => match bit {
+            k::X => Face::mark(Mark::Square, hex("#ff7ac8")),
+            k::Y => Face::mark(Mark::Triangle, hex("#3ddc97")),
+            k::A => Face::mark(Mark::Cross, hex("#7aa7ff")),
+            k::B => Face::mark(Mark::Circle, hex("#ff5a6e")),
+            k::Z => Face::chip("R1", dark), k::C => Face::chip("R2", dark),
+            k::D2 => Face::chip("L1", dark), k::W => Face::chip("L2", dark), k::T => Face::chip("R3", dark),
+            _ => Face::chip("OPTIONS", dark),
+        },
+        Glyphs::Pad(_) => match bit {
+            k::X => Face::round("X", hex("#2f7bff")),
+            k::Y => Face::round("Y", hex("#f5c400")),
+            k::A => Face::round("A", hex("#3cb043")),
+            k::B => Face::round("B", hex("#e53935")),
+            k::Z => Face::chip("RB", dark), k::C => Face::chip("RT", dark),
+            k::D2 => Face::chip("LB", dark), k::W => Face::chip("LT", dark), k::T => Face::chip("RS", dark),
+            _ => Face::chip("MENU", dark),
+        },
+    }
+}
+
+pub struct Controls { pub keys: KeyMap, pub pads: Pads, pub pad_info: Vec<PadInfo>, prev_menu: u32, pub menu_pressed: u32, pub touch: TouchPad, pub glyphs: Glyphs }
 
 /// Keyboard bits for a slot from the (rebindable) map; a lone player also gets the fixed arrows + ZXCVBN layout as aliases.
 fn kb_bits(keys: &KeyMap, slot: usize, solo: bool) -> u32 {
@@ -92,10 +131,18 @@ fn kb_bits(keys: &KeyMap, slot: usize, solo: bool) -> u32 {
 pub mod nav { pub const UP: u32 = 1; pub const DOWN: u32 = 2; pub const LEFT: u32 = 4; pub const RIGHT: u32 = 8; pub const OK: u32 = 16; pub const BACK: u32 = 32; pub const START: u32 = 64; pub const AUX: u32 = 128; }
 
 impl Controls {
-    pub fn new(touch: bool) -> Self { Controls { keys: KeyMap::load(), pads: Pads::new(), pad_info: vec![], prev_menu: 0, menu_pressed: 0, touch: TouchPad::new(touch) } }
+    pub fn new(touch: bool) -> Self { Controls { keys: KeyMap::load(), pads: Pads::new(), pad_info: vec![], prev_menu: 0, menu_pressed: 0, touch: TouchPad::new(touch), glyphs: if touch { Glyphs::Touch } else { Glyphs::Keyboard } } }
+    pub fn face(&self, bit: u32) -> Face { face(self.glyphs, &self.keys, bit) }
     pub fn update(&mut self) {
+        let had_pads = !self.pad_info.is_empty();
         self.pad_info = self.pads.update();
         self.touch.update();
+        let fallback = if self.touch.enabled { Glyphs::Touch } else { Glyphs::Keyboard };
+        if let Some(p) = self.pad_info.iter().find(|p| p.bits != 0) { self.glyphs = Glyphs::Pad(p.kind); }
+        else if !had_pads && !self.pad_info.is_empty() { self.glyphs = Glyphs::Pad(self.pad_info[0].kind); }
+        else if self.keys.bits(0, is_key_down) != 0 || is_key_down(KeyCode::Enter) || is_key_down(KeyCode::Escape) { self.glyphs = Glyphs::Keyboard; }
+        else if self.touch.enabled && (self.touch.bits != 0 || is_mouse_button_pressed(MouseButton::Left)) { self.glyphs = Glyphs::Touch; }
+        else if self.pad_info.is_empty() && matches!(self.glyphs, Glyphs::Pad(_)) { self.glyphs = fallback; }
         let mut m = 0;
         let key = |ks: &[KeyCode]| ks.iter().any(|kc| is_key_down(*kc));
         if key(&[KeyCode::Up, KeyCode::W]) { m |= nav::UP; }

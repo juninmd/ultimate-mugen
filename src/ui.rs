@@ -9,6 +9,22 @@ pub struct Ui { pub display: Font, pub body: Font, pub s: f32, pub ox: f32, pub 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Align { Left, Center, Right }
 
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum Mark { Square, Triangle, Cross, Circle }
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum FaceShape { Chip, Round, Key }
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Face { pub text: &'static str, pub color: Color, pub shape: FaceShape, pub mark: Option<Mark> }
+
+impl Face {
+    pub fn chip(text: &'static str, color: Color) -> Self { Face { text, color, shape: FaceShape::Chip, mark: None } }
+    pub fn round(text: &'static str, color: Color) -> Self { Face { text, color, shape: FaceShape::Round, mark: None } }
+    pub fn key(text: &'static str) -> Self { Face { text, color: Color::new(0.92, 0.92, 0.96, 1.0), shape: FaceShape::Key, mark: None } }
+    pub fn mark(mark: Mark, color: Color) -> Self { Face { text: "", color, shape: FaceShape::Round, mark: Some(mark) } }
+}
+
 pub fn hex(h: &str) -> Color {
     let v = u32::from_str_radix(h.trim_start_matches('#'), 16).unwrap_or(0);
     Color::from_rgba((v >> 16) as u8, (v >> 8) as u8, v as u8, 255)
@@ -80,7 +96,51 @@ impl Ui {
         draw_line(self.x(cx - dx * h), self.y(cy - dy * h), self.x(base.0), self.y(base.1), size * 0.22 * self.s, c);
         draw_triangle(tip, l, r, c);
     }
-    pub fn input_icons(&self, input: &str, x: f32, y: f32, size: f32) -> f32 {
+    pub fn face(&self, f: Face, x: f32, y: f32, size: f32) -> f32 {
+        let fs = size * 0.62;
+        match f.shape {
+            FaceShape::Round => {
+                let r = size / 2.0;
+                let (cx, cy) = (x + r, y - r);
+                draw_circle(self.x(cx), self.y(cy), r * self.s, Color::new(0.08, 0.07, 0.12, 0.95));
+                draw_circle_lines(self.x(cx), self.y(cy), r * self.s, 2.0 * self.s, f.color);
+                let m = r * 0.48;
+                let th = 2.6 * self.s;
+                match f.mark {
+                    Some(Mark::Square) => {
+                        let (a, b) = (self.x(cx - m), self.y(cy - m));
+                        let (c, d) = (self.x(cx + m), self.y(cy + m));
+                        draw_line(a, b, c, b, th, f.color); draw_line(c, b, c, d, th, f.color); draw_line(c, d, a, d, th, f.color); draw_line(a, d, a, b, th, f.color);
+                    }
+                    Some(Mark::Triangle) => {
+                        let p = [(cx, cy - m * 1.1), (cx + m * 1.05, cy + m * 0.75), (cx - m * 1.05, cy + m * 0.75)];
+                        for i in 0..3 { let (a, b) = (p[i], p[(i + 1) % 3]); draw_line(self.x(a.0), self.y(a.1), self.x(b.0), self.y(b.1), th, f.color); }
+                    }
+                    Some(Mark::Cross) => {
+                        draw_line(self.x(cx - m), self.y(cy - m), self.x(cx + m), self.y(cy + m), th, f.color);
+                        draw_line(self.x(cx + m), self.y(cy - m), self.x(cx - m), self.y(cy + m), th, f.color);
+                    }
+                    Some(Mark::Circle) => draw_circle_lines(self.x(cx), self.y(cy), m * self.s, th, f.color),
+                    None => { self.text(f.text, cx, y - size * 0.28, fs, f.color, Align::Center, true); }
+                }
+                size
+            }
+            FaceShape::Chip | FaceShape::Key => {
+                let w = (measure_text(f.text, Some(&self.display), (fs * self.s) as u16, 1.0).width / self.s + size * 0.6).max(size);
+                if f.shape == FaceShape::Key {
+                    self.rect(x, y - size, w, size, Color::new(0.85, 0.85, 0.9, 0.95));
+                    self.rect(x + 2.0, y - size + 2.0, w - 4.0, size - 6.0, Color::new(0.97, 0.97, 1.0, 1.0));
+                    self.text(f.text, x + w / 2.0, y - size * 0.3, fs, hex("#1b1726"), Align::Center, false);
+                } else {
+                    self.rect(x, y - size, w, size, f.color);
+                    self.text(f.text, x + w / 2.0, y - size * 0.28, fs, WHITE, Align::Center, true);
+                }
+                w
+            }
+        }
+    }
+    pub fn input_icons(&self, input: &str, x: f32, y: f32, size: f32, face: impl Fn(u32) -> Face) -> f32 {
+        use ume_engine::input::k;
         let mut cx = x;
         for tok in input.replace(['~', ' ', '/', '$', '>'], "").split(',').filter(|t| !t.is_empty()) {
             let mut btns = vec![];
@@ -92,15 +152,12 @@ impl Ui {
                     cx += size + 4.0;
                     continue;
                 }
-                let (label, col) = match p { "x" => ("SOCO", hex("#3a8cff")), "y" => ("SOCO+", hex("#3a8cff")), "z" => ("SOCO 3", hex("#3a8cff")), "a" => ("CHUTE", hex("#ff4d6d")), "b" => ("CHUTE+", hex("#ff4d6d")), "c" => ("CHUTE 3", hex("#ff4d6d")), "s" => ("START", hex("#888899")), _ => continue };
-                btns.push((label, col));
+                let bit = match p { "x" => k::X, "y" => k::Y, "z" => k::Z, "a" => k::A, "b" => k::B, "c" => k::C, "s" => k::S, _ => continue };
+                btns.push(face(bit));
             }
-            for (k, (label, col)) in btns.iter().enumerate() {
-                if k > 0 || cx > x { cx += self.text("+", cx + 2.0, y - size * 0.2, size * 0.8, hex("#a49cc0"), Align::Left, true) + 6.0; }
-                let w = self.text(label, -10000.0, 0.0, size * 0.62, WHITE, Align::Left, true) + size * 0.6;
-                self.rect(cx, y - size, w, size, *col);
-                self.text(label, cx + w / 2.0, y - size * 0.28, size * 0.62, WHITE, Align::Center, true);
-                cx += w + 4.0;
+            for (n, f) in btns.into_iter().enumerate() {
+                if n > 0 || cx > x { cx += self.text("+", cx + 2.0, y - size * 0.2, size * 0.8, hex("#a49cc0"), Align::Left, true) + 6.0; }
+                cx += self.face(f, cx, y, size) + 4.0;
             }
         }
         cx - x

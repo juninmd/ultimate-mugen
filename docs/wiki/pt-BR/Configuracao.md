@@ -49,3 +49,7 @@ Fica ao lado do executável e é gravado pelo menu **Vídeo**. Pode ser editado 
 | Tela cheia / FPS | `F11` / `F3` | — | — | — |
 
 Os nomes `x y z a b c` são os mesmos usados nos comandos (`input`) dos personagens.
+
+## Botões na tela
+
+A lista de golpes da pausa e a tela de Controles mostram a tecla ou o botão real do último dispositivo usado: teclado, Xbox (A/B/X/Y, LB/LT/RB/RT) ou PlayStation (✕ ○ □ △, L1/L2/R1/R2). Em telas de toque aparecem os nomes dos botões virtuais. Controles Xbox são detectados pelo nome ou pelo vendor ID `045E`, PlayStation pelo `054C`. A vibração funciona nos dois: Xbox via force feedback do gilrs (e Gamepad API na web), DualShock 4 / DualSense via relatórios HID diretos.

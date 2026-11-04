@@ -50,10 +50,33 @@ mod tests {
         // awakening together with a direction and an attack
         assert_eq!(pad_bits(0.0, -0.9, |b| b == Btn::R3 || b == Btn::East), k::D | k::B | k::T);
     }
+    #[test]
+    fn pad_kind_is_detected_from_name_or_vendor() {
+        assert_eq!(PadKind::detect("Xbox Wireless Controller", None), PadKind::Xbox);
+        assert_eq!(PadKind::detect("Xbox 360 Controller (XInput STANDARD GAMEPAD)", None), PadKind::Xbox);
+        assert_eq!(PadKind::detect("Controller", Some(0x045E)), PadKind::Xbox);
+        assert_eq!(PadKind::detect("Wireless Controller", None), PadKind::PlayStation);
+        assert_eq!(PadKind::detect("DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)", None), PadKind::PlayStation);
+        assert_eq!(PadKind::detect("8BitDo Pro 2", Some(0x2DC8)), PadKind::Generic);
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub enum PadKind { #[default] Generic, Xbox, PlayStation }
+
+impl PadKind {
+    pub fn detect(name: &str, vendor: Option<u16>) -> Self {
+        let n = name.to_ascii_lowercase();
+        match vendor { Some(0x054C) => return PadKind::PlayStation, Some(0x045E) => return PadKind::Xbox, _ => {} }
+        if ["xbox", "xinput", "microsoft", "x-box", "045e"].iter().any(|s| n.contains(s)) { return PadKind::Xbox; }
+        if ["sony", "dualshock", "dualsense", "wireless controller", "ps4", "ps5", "054c"].iter().any(|s| n.contains(s)) { return PadKind::PlayStation; }
+        PadKind::Generic
+    }
+    pub fn label(self) -> &'static str { match self { PadKind::Xbox => "Xbox", PadKind::PlayStation => "PlayStation", PadKind::Generic => "Controle" } }
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct PadInfo { pub name: String, pub bits: u32, pub sony: bool, pub connected: bool, pub menu_bits: u32 }
+pub struct PadInfo { pub name: String, pub bits: u32, pub kind: PadKind, pub connected: bool, pub menu_bits: u32 }
 
 #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
 mod native {
@@ -72,6 +95,7 @@ mod native {
         hid: Option<hidapi::HidApi>,
         sony: Vec<SonyDev>,
         effects: Vec<(gilrs::ff::Effect, Instant)>,
+        kinds: Vec<PadKind>,
         last_scan: Instant,
     }
 
@@ -119,7 +143,7 @@ mod native {
         pub fn new() -> Self {
             let gilrs = Gilrs::new().ok();
             let hid = hidapi::HidApi::new().ok();
-            let mut p = Pads { gilrs, order: vec![], hid, sony: vec![], effects: vec![], last_scan: Instant::now() - Duration::from_secs(10) };
+            let mut p = Pads { gilrs, order: vec![], hid, sony: vec![], effects: vec![], kinds: vec![], last_scan: Instant::now() - Duration::from_secs(10) };
             p.scan_sony();
             p
         }
@@ -147,7 +171,7 @@ mod native {
                 match ev.event { EventType::Connected => { if !self.order.contains(&ev.id) { self.order.push(ev.id); } } EventType::Disconnected => self.order.retain(|x| *x != ev.id), _ => {} }
             }
             for (id, _) in g.gamepads() { if !self.order.contains(&id) { self.order.push(id); } }
-            self.order.iter().map(|&id| {
+            let infos: Vec<PadInfo> = self.order.iter().map(|&id| {
                 let gp = g.gamepad(id);
                 let (ax, ay) = (gp.value(Axis::LeftStickX), gp.value(Axis::LeftStickY));
                 let b = super::pad_bits(ax, ay, |btn| gp.is_pressed(match btn {
@@ -157,14 +181,21 @@ mod native {
                     Btn::Start => Button::Start, Btn::R3 => Button::RightThumb, Btn::Select => Button::Select,
                 }));
                 let name = gp.name().to_string();
-                let sony = name.to_ascii_lowercase().contains("sony") || name.contains("DualShock") || name.contains("DualSense") || name.contains("Wireless Controller") || name.contains("PS4") || name.contains("PS5");
-                PadInfo { name, bits: b, sony, connected: gp.is_connected(), menu_bits: b }
-            }).collect()
+                let kind = PadKind::detect(&name, gp.vendor_id());
+                PadInfo { name, bits: b, kind, connected: gp.is_connected(), menu_bits: b }
+            }).collect();
+            self.kinds = infos.iter().map(|p| p.kind).collect();
+            infos
+        }
+        fn sony_slot(&self, pad: usize) -> Option<usize> {
+            if self.kinds.get(pad) != Some(&PadKind::PlayStation) { return None; }
+            let i = self.kinds[..pad].iter().filter(|k| **k == PadKind::PlayStation).count();
+            (i < self.sony.len()).then_some(i)
         }
         /// strong/weak in 0..1; duration in ms. Pad index follows the connection order.
         pub fn rumble(&mut self, pad: usize, strong: f32, weak: f32, ms: u32) {
             let until = Instant::now() + Duration::from_millis(ms as u64);
-            if let Some(s) = self.sony.get_mut(pad) {
+            if let Some(s) = self.sony_slot(pad).and_then(|i| self.sony.get_mut(i)) {
                 s.send((strong.clamp(0.0, 1.0) * 255.0) as u8, (weak.clamp(0.0, 1.0) * 255.0) as u8);
                 s.until = Some(until);
                 return;
@@ -179,7 +210,7 @@ mod native {
             if let Ok(e) = b.gamepads(&[id]).finish(g) { let _ = e.play(); self.effects.push((e, until)); }
         }
         pub fn set_light(&mut self, pad: usize, rgb: [u8; 3]) {
-            if let Some(s) = self.sony.get_mut(pad) { s.color = rgb; s.send(0, 0); }
+            if let Some(s) = self.sony_slot(pad).and_then(|i| self.sony.get_mut(i)) { s.color = rgb; s.send(0, 0); }
         }
         pub fn sony_count(&self) -> usize { self.sony.len() }
     }
@@ -192,7 +223,7 @@ mod web {
     extern "C" {
         fn ume_gp_count() -> i32;
         fn ume_gp_state(i: i32) -> u32;
-        fn ume_gp_sony(i: i32) -> i32;
+        fn ume_gp_name(i: i32) -> String;
         fn ume_gp_rumble(i: i32, strong: f32, weak: f32, ms: i32);
     }
     pub struct Pads;
@@ -200,7 +231,7 @@ mod web {
         pub fn new() -> Self { Pads }
         pub fn update(&mut self) -> Vec<PadInfo> {
             let n = ume_gp_count();
-            (0..n).map(|i| { let b = ume_gp_state(i); PadInfo { name: "Gamepad".into(), bits: b, sony: ume_gp_sony(i) != 0, connected: true, menu_bits: b } }).collect()
+            (0..n).map(|i| { let b = ume_gp_state(i); let name = ume_gp_name(i); PadInfo { kind: PadKind::detect(&name, None), name, bits: b, connected: true, menu_bits: b } }).collect()
         }
         pub fn rumble(&mut self, pad: usize, strong: f32, weak: f32, ms: u32) { ume_gp_rumble(pad as i32, strong, weak, ms as i32) }
         pub fn set_light(&mut self, _pad: usize, _rgb: [u8; 3]) {}

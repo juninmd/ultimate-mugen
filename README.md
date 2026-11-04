@@ -2,7 +2,7 @@
 
 **English** · [Português (BR)](README.pt-BR.md)
 
-A 2D fighting game engine **built from scratch in Rust**, inspired by M.U.G.E.N: modern, deterministic and cross-platform (Windows, Linux, macOS, **browser/WASM**, **Android/iOS**), **compatible with classic M.U.G.E.N characters and stages** and with the new native **UMF (Ultimate Mugen Fighter)** format, which is declarative and much simpler. It has native support for **DualShock 4 / DualSense with haptic feedback and colored lightbars**.
+A 2D fighting game engine **built from scratch in Rust**, inspired by M.U.G.E.N: modern, deterministic and cross-platform (Windows, Linux, macOS, **browser/WASM**, **Android/iOS**), **compatible with classic M.U.G.E.N characters and stages** and with the new native **UMF (Ultimate Mugen Fighter)** format, which is declarative and much simpler. It has native support for **Xbox controllers and DualShock 4 / DualSense with rumble** (plus colored lightbars on PlayStation pads). Move lists and the controls screen show the real key or button of the device in use.
 
 ![Fight](screenshots/06-fight-dojo.jpg)
 

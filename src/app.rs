@@ -109,7 +109,7 @@ const MENU: [(&str, &str); 11] = [
     ("Equipe · Sequência", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida"),
     ("Equipe · Paralelo", "5 contra 5 ao mesmo tempo (2 a 5) · TAB troca de lutador"),
     ("Personagens MUGEN", "Como adicionar personagens e cenários"),
-    ("Controles", "Teclado, DualShock/DualSense, toque e vibração"),
+    ("Controles", "Teclado, Xbox, PlayStation, toque e vibração"),
     ("Vídeo", "Tela cheia, resolução até 4K e qualidade da arte"),
     ("Sair", "Fechar o jogo"),
 ];
@@ -275,7 +275,7 @@ impl App {
         let pads = &self.c.pad_info;
         self.ui.text("Controles conectados", sx, 450.0, 20.0, hex("#a49cc0"), Align::Left, false);
         if pads.is_empty() { self.ui.text("nenhum (teclado)", sx, 476.0, 18.0, WHITE, Align::Left, false); }
-        for (i, p) in pads.iter().enumerate().take(4) { self.ui.text(&format!("P{} · {}{}", i + 1, p.name.chars().take(26).collect::<String>(), if p.sony { " (Sony)" } else { "" }), sx, 476.0 + i as f32 * 24.0, 18.0, WHITE, Align::Left, false); }
+        for (i, p) in pads.iter().enumerate().take(4) { self.ui.text(&format!("P{} · {}{}", i + 1, p.name.chars().take(26).collect::<String>(), match p.kind { crate::gamepad::PadKind::Generic => String::new(), k => format!(" ({})", k.label()) }), sx, 476.0 + i as f32 * 24.0, 18.0, WHITE, Align::Left, false); }
         self.screen = Screen::Menu { cur: cur_v };
         if self.c.pressed(nav::BACK) { self.screen = Screen::Title; }
         if let Some(i) = chosen {
@@ -880,7 +880,8 @@ impl App {
             let yy = y + 78.0 + (i - self.move_page * PER_PAGE) as f32 * 46.0;
             self.ui.rect(x + 390.0, yy, 630.0, 40.0, Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.06 } else { 0.03 }));
             self.ui.text(&mv.name.chars().take(26).collect::<String>(), x + 402.0, yy + 27.0, 19.0, WHITE, Align::Left, false);
-            self.ui.input_icons(&mv.input, x + 690.0, yy + 34.0, 28.0);
+            let c = &self.c;
+            self.ui.input_icons(&mv.input, x + 690.0, yy + 34.0, 28.0, |b| c.face(b));
         }
         if pages > 1 {
             self.ui.rect(x + 880.0, y + 20.0, 60.0, 44.0, Color::new(1.0, 1.0, 1.0, 0.12));
@@ -997,30 +998,42 @@ impl App {
         if self.key_edit.is_some() { self.key_editor(); return; }
         self.ui.background();
         self.ui.text("CONTROLES", 60.0, 70.0, 34.0, hex("#ffcc33"), Align::Left, true);
+        use crate::controls::{face, Glyphs};
+        use crate::gamepad::PadKind;
+        use ume_engine::input::k;
         let kl = |i: usize| crate::keybinds::label(self.c.keys.slots[0][i]);
         let touch = self.c.touch.enabled;
-        let rows: [(&str, String, &str, &str); 6] = [
-            ("Mover", format!("{} {} {} {} / setas", kl(0), kl(1), kl(2), kl(3)), "Analógico", "Analógico (esquerda)"),
-            ("Soco", format!("{} · forte {}", kl(4), kl(5)), "Quadrado · forte Triângulo", "SOCO · SOCO+"),
-            ("Chute", format!("{} · forte {}", kl(7), kl(8)), "X · forte Bola", "CHUTE · CHUTE+"),
-            ("Especial", kl(10).to_string(), "L1", "ESPECIAL"),
-            ("Super", format!("{} + {}", kl(10), kl(11)), "L1 + L2", "SUPER"),
-            ("Pausa", "Esc".into(), "OPTIONS", "II (topo da tela)"),
+        let mut cols = vec![Glyphs::Keyboard, Glyphs::Pad(PadKind::Xbox), Glyphs::Pad(PadKind::PlayStation)];
+        if touch { cols.insert(0, Glyphs::Touch); } else { cols.push(Glyphs::Touch); }
+        let head = |g: Glyphs| match g { Glyphs::Keyboard => "Teclado", Glyphs::Touch => "Toque", Glyphs::Pad(p) => p.label() };
+        let rows: [(&str, &[u32], &str); 7] = [
+            ("Mover", &[], ""), ("Soco", &[k::X, k::Y], " "), ("Chute", &[k::A, k::B], " "), ("Especial", &[k::D2], ""),
+            ("Super", &[k::D2, k::W], "+"), ("Despertar", &[k::T], ""), ("Pausa", &[k::S], ""),
         ];
-        let heads: [&str; 3] = if touch { ["Toque", "Controle", "Teclado"] } else { ["Teclado", "Controle", "Toque"] };
-        let xs = [60.0, 300.0, 660.0, 960.0];
-        let (top, rh) = (130.0, 64.0);
-        for (j, h) in heads.iter().enumerate() { self.ui.text(h, xs[j + 1], top, 24.0, hex("#22e8ff"), Align::Left, true); }
-        for (i, (act, kb, pad, tc)) in rows.iter().enumerate() {
-            let y = top + 22.0 + i as f32 * rh;
+        let move_text = |g: Glyphs| match g { Glyphs::Keyboard => format!("{} {} {} {} / setas", kl(0), kl(1), kl(2), kl(3)), Glyphs::Touch => "Analógico esquerdo".into(), Glyphs::Pad(_) => "Analógico ou direcional".into() };
+        let xs = [60.0, 280.0, 520.0, 760.0, 1000.0];
+        let (top, rh) = (120.0, 60.0);
+        for (j, g) in cols.iter().enumerate() {
+            let on = matches!((self.c.glyphs, g), (a, b) if a == *b);
+            self.ui.text(head(*g), xs[j + 1], top, 24.0, if on { hex("#ffcc33") } else { hex("#22e8ff") }, Align::Left, true);
+        }
+        for (i, (act, bits, sep)) in rows.iter().enumerate() {
+            let y = top + 18.0 + i as f32 * rh;
             self.ui.rect(50.0, y, 1180.0, rh - 8.0, Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.07 } else { 0.03 }));
-            self.ui.text(act, xs[0], y + 38.0, 26.0, hex("#ffcc33"), Align::Left, true);
-            let cells: [&str; 3] = if touch { [tc, pad, kb.as_str()] } else { [kb.as_str(), pad, tc] };
-            for (j, c) in cells.iter().enumerate() { self.ui.text(c, xs[j + 1], y + 38.0, 24.0, WHITE, Align::Left, false); }
+            self.ui.text(act, xs[0], y + 36.0, 26.0, hex("#ffcc33"), Align::Left, true);
+            for (j, g) in cols.iter().enumerate() {
+                if bits.is_empty() { self.ui.text(&move_text(*g), xs[j + 1], y + 34.0, 20.0, WHITE, Align::Left, false); continue; }
+                let mut cx = xs[j + 1];
+                let bits: &[u32] = if *g == Glyphs::Touch && bits.contains(&k::W) { &[k::W] } else { bits };
+                for (n, b) in bits.iter().enumerate() {
+                    if n > 0 { cx += if sep.trim().is_empty() { 8.0 } else { self.ui.text(sep, cx + 4.0, y + 36.0, 24.0, hex("#a49cc0"), Align::Left, true) + 10.0 }; }
+                    cx += self.ui.face(face(*g, &self.c.keys, *b), cx, y + 44.0, 36.0);
+                }
+            }
         }
         let pads = self.c.pad_info.clone();
         let status = if pads.is_empty() { "Nenhum controle conectado".to_string() } else { format!("Conectado: {}", pads.iter().map(|p| p.name.as_str()).collect::<Vec<_>>().join(", ")) };
-        self.ui.text(&status, 60.0, 560.0, 20.0, hex("#a49cc0"), Align::Left, false);
+        self.ui.text(&status, 60.0, 585.0, 20.0, hex("#a49cc0"), Align::Left, false);
         for (i, p) in pads.iter().enumerate() { if p.bits & ume_engine::input::k::A != 0 && self.c.pressed(nav::OK) { self.c.rumble(i, 0.8, 0.8, 300); } }
         self.ui.rect(60.0, 610.0, 200.0, 60.0, hex("#ff4d6d"));
         self.ui.text("Voltar", 160.0, 649.0, 26.0, WHITE, Align::Center, true);

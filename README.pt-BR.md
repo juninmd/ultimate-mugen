@@ -2,7 +2,7 @@
 
 [English](README.md) · **Português (BR)**
 
-Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, determinístico, multiplataforma (Windows, Linux, macOS, **navegador/WASM**, **Android/iOS**), **compatível com personagens e cenários clássicos do M.U.G.E.N** e com suporte ao novo formato nativo **UMF (Ultimate Mugen Fighter)**, que é declarativo e muito mais simples. Conta com suporte nativo a **DualShock 4 / DualSense com feedback háptico/vibração e lightbars coloridas**.
+Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, determinístico, multiplataforma (Windows, Linux, macOS, **navegador/WASM**, **Android/iOS**), **compatível com personagens e cenários clássicos do M.U.G.E.N** e com suporte ao novo formato nativo **UMF (Ultimate Mugen Fighter)**, que é declarativo e muito mais simples. Conta com suporte nativo a **controles Xbox e DualShock 4 / DualSense com vibração** (e lightbar colorida nos controles PlayStation). A lista de golpes e a tela de comandos mostram a tecla ou o botão real do dispositivo em uso.
 
 ![Luta](screenshots/06-fight-dojo.jpg)
 

@@ -93,12 +93,16 @@ pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
 }
 
 pub fn decode_sff(buf: &[u8]) -> Result<DecodedSff, String> {
+    decode_sff_only(buf, |_, _| true)
+}
+
+pub fn decode_sff_only(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> Result<DecodedSff, String> {
     if buf.len() < SIGNATURE.len() || &buf[..12] != SIGNATURE {
         return Err("SFF: invalid signature (expected ElecbyteSpr)".into());
     }
     match buf.get(15).copied().unwrap_or(0) {
         1 => Ok(decode_sff_v1(buf)),
-        2 => Ok(decode_sff_v2(buf)),
+        2 => Ok(decode_sff_v2(buf, wanted)),
         v => Err(format!("SFF: unsupported version {v}")),
     }
 }
@@ -227,7 +231,7 @@ fn decode_sff_v1(buf: &[u8]) -> DecodedSff {
 ///     dataLength u32, paletteIndex u16, flags u16 (bit0: 0=ldata, 1=tdata)
 ///   palette node (16 bytes): group u16, index u16, numColors u16,
 ///     linkIndex u16, dataOffset u32 (in ldata), dataLength u32 (0 => linked)
-fn decode_sff_v2(buf: &[u8]) -> DecodedSff {
+fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
     let r = Reader(buf);
     let verlo2 = r.u8(13);
     let spr_ofs = r.u32(36) as usize;
@@ -297,6 +301,11 @@ fn decode_sff_v2(buf: &[u8]) -> DecodedSff {
         }
         sprites.push(spr);
     }
+    let mut needed: Vec<bool> = sprites.iter().map(|s| wanted(s.group, s.index)).collect();
+    for i in (0..sprites.len()).rev() {
+        if let (true, Some(l)) = (needed[i], links[i]) { needed[l] = true; }
+    }
+    jobs.retain(|(i, ..)| needed[*i]);
     let decoded = crate::par::map(&jobs, |&(i, fmt, depth, data)| {
         let mut spr = empty_sprite(0, 0, 0, 0);
         spr.width = sprites[i].width;

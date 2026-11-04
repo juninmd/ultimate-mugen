@@ -11,6 +11,7 @@ How the engine keeps loading fast and frames smooth, and how to measure it.
 | SFF v2 decode | Headers are read in order; LZ5, RLE5, RLE8 and PNG payloads are decoded in parallel; linked sprites share the source pixels (`Arc`) | All cores (max 8) |
 | Character sprites | Palette to RGBA conversion runs in parallel, once per unique pixel buffer and palette; linked sprites share one `ImageData`, so they also share one GPU upload | All cores (max 8) |
 | Stage sprites | Same parallel RGBA conversion; the RGBA buffer is moved into the stage, never copied | All cores (max 8) |
+| Select-screen portraits | `load_mugen_portrait` decodes only sprites 9000,0, 9000,1 and the first idle frame (plus their link sources) via `decode_sff_only` | 1 |
 | Native (UMF) rig | Every unique frame is rasterized in parallel | All cores (max 8) |
 | Whole character | Loaded on a `char-load` thread while the VS screen is shown | 1 background thread |
 

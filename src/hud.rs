@@ -406,8 +406,9 @@ const TILE_W: f32 = 10.5;
 const TILE_GAP: f32 = 2.5;
 
 fn side_tag(id: u32, side: usize, human: &[u32], cpu: &[u32]) -> Option<(&'static str, bool)> {
-    if human.contains(&id) { return Some((if side == 0 { "P1" } else { "P2" }, true)); }
+    if let Some(k) = human.iter().position(|&h| h == id) { return Some((if k == 0 { "P1" } else { "P2" }, true)); }
     if cpu.contains(&id) { return Some(("CPU", false)); }
+    let _ = side;
     None
 }
 

@@ -146,11 +146,13 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 let ch = m.watch_sound(owner_id, n(m, "channel", -1.0) as i32, stop_on_get_hit, stop_on_change_state);
                 let (pv, abs) = if sc.has("abspan", 0) { (n(m, "abspan", 0.0), true) } else { (n(m, "pan", 0.0), false) };
                 let pan = crate::sctrl::sound_pan(m, i, pv as f32, abs);
-                let looping = n(m, "loop", 0.0) != 0.0;
+                let count = if sc.has("loopcount", 0) { n(m, "loopcount", 0.0) as i32 } else if n(m, "loop", 0.0) != 0.0 { -1 } else { 0 };
+                let loop_spec = crate::sound_loop::LoopSpec { start: n(m, "loopstart", 0.0) as i32, end: n(m, "loopend", 0.0) as i32, count };
+                let looping = loop_spec.is_active();
                 let freq_mul = n(m, "freqmul", 1.0) as f32;
                 let low_priority = n(m, "lowpriority", 0.0) != 0.0;
                 let f = &m.fighters[i];
-                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul, low_priority };
+                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul, low_priority, loop_spec };
                 m.events.push(ev);
             }
         }

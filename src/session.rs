@@ -175,9 +175,9 @@ impl Session {
             self.vfx.event(&ev, &self.m);
             for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
             match ev {
-                Event::Sound { def, group, index, own, volume, builtin, channel, owner, pan, looping, freq_mul, low_priority } => {
+                Event::Sound { def, group, index, own, volume, builtin, channel, owner, pan, looping, freq_mul, low_priority, loop_spec } => {
                     if let (true, Some(d)) = (own, def.as_ref()) {
-                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), SoundOpts { volume, pan, owner, channel, looping, rate: freq_mul, low_priority }); continue; }
+                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), SoundOpts { volume, pan, owner, channel, looping, rate: freq_mul, low_priority, loop_spec }); continue; }
                     }
                     let kind = builtin.unwrap_or(match group { 5 => if index >= 2 { "hitheavy" } else { "hit" }, 6 => "guard", 7 => "land", _ => if index >= 2 { "swingh" } else { "swing" } });
                     if group >= 0 || builtin.is_some() { audio.sfx_at(kind, pan); }
@@ -205,6 +205,7 @@ impl Session {
                 Event::SoundVolume { owner, channel, volume } => audio.set_volume(owner, channel, volume),
                 Event::Bgm(action) => audio.queue_bgm(action),
                 Event::Tag { .. } => audio.sfx("select"),
+                Event::SoundLoop { owner, channel, change } => audio.set_loop(owner, channel, change),
                 Event::Fight => audio.sfx("fight"),
                 Event::RoundStart(_) => audio.sfx("round"),
                 Event::RoundEnd(w) if w >= 0 => audio.sfx("win"),

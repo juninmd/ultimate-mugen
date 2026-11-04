@@ -3,6 +3,7 @@ use crate::sound_mix::{decode, pan_bucket, Pcm};
 use crate::gfx::audio::{load_sound_from_bytes, play_sound, set_sound_volume, stop_sound, PlaySoundParams, Sound};
 use std::collections::HashMap;
 use ume_engine::matchs::BgmAction;
+use ume_engine::sound_loop::{LoopChange, LoopPlan, LoopSpec};
 use std::f32::consts::PI;
 
 const SR: u32 = 32000;
@@ -168,11 +169,12 @@ pub struct SoundOpts {
     pub owner: u32,
     pub channel: i32,
     pub low_priority: bool,
+    pub loop_spec: LoopSpec,
 }
 
 impl Default for SoundOpts {
     fn default() -> Self {
-        SoundOpts { volume: 1.0, pan: 0.0, rate: 1.0, looping: false, owner: 0, channel: -1, low_priority: false }
+        SoundOpts { volume: 1.0, pan: 0.0, rate: 1.0, looping: false, owner: 0, channel: -1, low_priority: false, loop_spec: LoopSpec::default() }
     }
 }
 
@@ -191,12 +193,26 @@ enum Source {
     Raw(Vec<u8>),
 }
 
+struct VoicePlan {
+    spec: LoopSpec,
+    from: usize,
+    body: Option<(Sound, f64)>,
+}
+
 struct Voice {
     sound: Sound,
     end: f64,
     start: f64,
     key: Option<SampleKey>,
     opts: SoundOpts,
+    plan: Option<VoicePlan>,
+}
+
+struct LoopJob {
+    key: SampleKey,
+    opts: SoundOpts,
+    from: usize,
+    slot: Option<i32>,
 }
 
 struct Music {
@@ -218,6 +234,8 @@ pub struct Audio {
     pending_sfx: Vec<(&'static str, u32, i8)>,
     channels: HashMap<(u32, i32), Voice>,
     repan: Vec<((u32, i32), f32)>,
+    loop_jobs: Vec<LoopJob>,
+    reloop: Vec<((u32, i32), LoopChange)>,
     loop_seq: i32,
     music: HashMap<u32, Sound>,
     music_wav: HashMap<u32, Vec<u8>>,
@@ -240,7 +258,7 @@ impl Audio {
     pub async fn new(enabled: bool) -> Self {
         let mut a = Audio {
             enabled, builtin: HashMap::new(), builtin_pcm: HashMap::new(), builtin_pan: HashMap::new(), rr: std::cell::Cell::new(0), duck: 1.0, duck_now: 1.0,
-            sources: HashMap::new(), voices: HashMap::new(), pending: vec![], pending_sfx: vec![], channels: HashMap::new(), repan: vec![], loop_seq: -1, music: HashMap::new(), music_wav: HashMap::new(), music_job: None, preload_job: None, playing: None, music_files: HashMap::new(), pending_bgm: vec![], bgm_gain: 1.0, bgm_looping: true, volume: 0.8, music_volume: 1.0,
+            sources: HashMap::new(), voices: HashMap::new(), pending: vec![], pending_sfx: vec![], channels: HashMap::new(), repan: vec![], loop_jobs: vec![], reloop: vec![], loop_seq: -1, music: HashMap::new(), music_wav: HashMap::new(), music_job: None, preload_job: None, playing: None, music_files: HashMap::new(), pending_bgm: vec![], bgm_gain: 1.0, bgm_looping: true, volume: 0.8, music_volume: 1.0,
         };
         if enabled {
             for (k, n) in [("hit", 3u32), ("hitheavy", 3), ("counter", 1), ("guard", 3), ("swing", 3), ("swingh", 2), ("land", 2), ("dash", 1), ("jump", 1), ("super", 1), ("transform", 1), ("defeat", 1), ("ko", 1), ("round", 1), ("fight", 1), ("win", 1),
@@ -283,6 +301,10 @@ impl Audio {
             self.sources.insert(key.clone(), Some(src));
         }
         let raw = matches!(self.sources.get(&key), Some(Some(Source::Raw(_))));
+        if !raw && opts.loop_spec.has_points() {
+            self.loop_jobs.push(LoopJob { key, opts, from: 0, slot: None });
+            return;
+        }
         let vkey = (key, if raw { 0 } else { pan_bucket(opts.pan) }, if raw { 100 } else { rate_key(opts.rate) });
         match self.voices.get(&vkey) {
             Some(Some((s, secs))) => { let (s, secs) = (s.clone(), *secs); self.start(&s, secs, opts, Some(vkey.0.clone())); }
@@ -318,7 +340,7 @@ impl Audio {
         let slot = if o.channel >= 0 { Some(o.channel) } else if o.looping { self.loop_seq -= 1; Some(self.loop_seq) } else { None };
         if let Some(ch) = slot {
             let end = if o.looping { f64::INFINITY } else { now + secs };
-            let voice = Voice { sound: s.clone(), end, start: now, key, opts: o };
+            let voice = Voice { sound: s.clone(), end, start: now, key, opts: o, plan: None };
             if let Some(old) = self.channels.insert((o.owner, ch), voice) { stop_sound(&old.sound); }
         }
         play_sound(s, PlaySoundParams { looped: o.looping, volume: self.volume * o.volume.clamp(0.0, 1.5) });
@@ -351,6 +373,67 @@ impl Audio {
             }
         }
     }
+    pub fn set_loop(&mut self, owner: u32, channel: i32, change: LoopChange) {
+        let now = crate::gfx::get_time();
+        for (&k, v) in self.channels.iter() {
+            if k.0 == owner && (channel < 0 || k.1 == channel) && v.end > now && v.key.is_some() { self.reloop.push((k, change)); }
+        }
+    }
+    fn voice_position(&self, v: &Voice) -> Option<(usize, usize, LoopSpec)> {
+        let Some(Some(Source::Pcm(p))) = v.key.as_ref().and_then(|key| self.sources.get(key)) else { return None };
+        let total = p.frames.len();
+        let (spec, from) = match &v.plan {
+            Some(plan) => (plan.spec, plan.from),
+            None => (if v.opts.looping { LoopSpec { start: 0, end: 0, count: -1 } } else { LoopSpec::default() }, 0),
+        };
+        let elapsed = ((crate::gfx::get_time() - v.start).max(0.0) * p.rate as f64 * v.opts.rate as f64) as usize;
+        let at = LoopPlan::new(total, from, &spec).source_frame(elapsed)?;
+        Some((at, total, spec))
+    }
+    async fn apply_reloop(&mut self) {
+        for (k, change) in std::mem::take(&mut self.reloop) {
+            let Some(v) = self.channels.get(&k) else { continue };
+            let Some((at, _, spec)) = self.voice_position(v) else { continue };
+            let Some(key) = v.key.clone() else { continue };
+            let mut opts = v.opts;
+            opts.loop_spec = spec.apply(change);
+            opts.looping = opts.loop_spec.is_active();
+            self.begin_looped(LoopJob { key, opts, from: at, slot: Some(k.1) }).await;
+        }
+    }
+    async fn begin_looped(&mut self, job: LoopJob) {
+        let Some(Some(Source::Pcm(p))) = self.sources.get(&job.key) else { return };
+        let plan = LoopPlan::new(p.frames.len(), job.from, &job.opts.loop_spec);
+        let (head, body) = plan.unroll(&p.frames);
+        let render = |frames: Vec<[f32; 2]>| Pcm { rate: p.rate, frames }.render(1.0, job.opts.pan, job.opts.rate);
+        let head_pcm = render(head);
+        let body_pcm = body.map(render);
+        let head_secs = head_pcm.seconds();
+        let Ok(head_sound) = load_sound_from_bytes(&head_pcm.to_wav()).await else { return };
+        let body_sound = match body_pcm { Some(b) => load_sound_from_bytes(&b.to_wav()).await.ok().map(|s| (s, crate::gfx::get_time() + head_secs)), None => None };
+        let now = crate::gfx::get_time();
+        let o = job.opts;
+        if o.channel >= 0 && o.low_priority && job.slot.is_none() && self.channels.get(&(o.owner, o.channel)).is_some_and(|v| v.end > now) { return; }
+        let slot = job.slot.or(if o.channel >= 0 { Some(o.channel) } else { self.loop_seq -= 1; Some(self.loop_seq) });
+        let end = if body_sound.is_some() { f64::INFINITY } else { now + head_secs };
+        let voice = Voice { sound: head_sound.clone(), end, start: now, key: Some(job.key), opts: o, plan: Some(VoicePlan { spec: o.loop_spec, from: job.from, body: body_sound }) };
+        if let Some(slot) = slot {
+            if let Some(old) = self.channels.insert((o.owner, slot), voice) { stop_sound(&old.sound); if let Some((b, _)) = old.plan.and_then(|p| p.body) { stop_sound(&b); } }
+        }
+        play_sound(&head_sound, PlaySoundParams { looped: false, volume: self.volume * o.volume.clamp(0.0, 1.5) });
+    }
+    fn switch_loop_bodies(&mut self) {
+        let now = crate::gfx::get_time();
+        let volume = self.volume;
+        for v in self.channels.values_mut() {
+            let Some(plan) = v.plan.as_mut() else { continue };
+            if !plan.body.as_ref().is_some_and(|(_, at)| now >= *at) { continue }
+            let Some((body, _)) = plan.body.take() else { continue };
+            stop_sound(&v.sound);
+            play_sound(&body, PlaySoundParams { looped: true, volume: volume * v.opts.volume.clamp(0.0, 1.5) });
+            v.sound = body;
+        }
+    }
     async fn apply_repan(&mut self) {
         let now = crate::gfx::get_time();
         for (k, pan) in std::mem::take(&mut self.repan) {
@@ -369,6 +452,9 @@ impl Audio {
     pub async fn process(&mut self) {
         self.apply_repan().await;
         self.run_pending_bgm().await;
+        self.apply_reloop().await;
+        self.switch_loop_bodies();
+        for job in std::mem::take(&mut self.loop_jobs) { self.begin_looped(job).await; }
         if let Some(m) = self.playing.as_mut() {
             self.duck_now += (self.duck - self.duck_now) * 0.12;
             let v = self.music_volume * 0.35 * self.duck_now * self.bgm_gain;
@@ -444,14 +530,14 @@ impl Audio {
         let pcm = decode(bytes);
         let looped = pcm.as_ref().filter(|_| self.bgm_looping && (lp.start > 0 || lp.end > lp.start));
         let Some(p) = looped else {
-            let Ok(s) = load_sound_from_bytes(bytes).await else { return false };
+            let Ok(s) = load_sound_from_bytes(bytes).await else { eprintln!("music: cannot decode this file (tracker, MIDI and unknown formats are unsupported), using the built-in stage music"); return false };
             play_sound(&s, PlaySoundParams { looped: self.bgm_looping, volume: v });
             self.playing = Some(Music { intro: None, body: s, switch_at: None });
             return true;
         };
         let end = if lp.end > lp.start { lp.end.min(p.frames.len()) } else { p.frames.len() };
         let intro_pcm = p.slice(0, end);
-        let (Ok(intro), Ok(body)) = (load_sound_from_bytes(&intro_pcm.to_wav()).await, load_sound_from_bytes(&p.slice(lp.start, end).to_wav()).await) else { return false };
+        let (Ok(intro), Ok(body)) = (load_sound_from_bytes(&intro_pcm.to_wav()).await, load_sound_from_bytes(&p.slice(lp.start, end).to_wav()).await) else { eprintln!("music: cannot load the loop section, using the built-in stage music"); return false };
         play_sound(&intro, PlaySoundParams { looped: false, volume: v });
         let at = crate::gfx::get_time() + intro_pcm.seconds();
         self.playing = Some(Music { intro: Some(intro), body, switch_at: Some(at) });

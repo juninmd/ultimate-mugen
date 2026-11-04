@@ -88,7 +88,7 @@ pub enum BgmAction {
 /// Events for the presentation layer (audio, rumble, UI).
 #[derive(Clone)]
 pub enum Event {
-    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str>, pan: f32, looping: bool, freq_mul: f32, low_priority: bool },
+    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str>, pan: f32, looping: bool, freq_mul: f32, low_priority: bool, loop_spec: crate::sound_loop::LoopSpec },
     Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool, attacker: usize, defender: usize },
     /// `fighter` = id of the root fighter that fired it (teams can have many per side)
     Super { side: usize, fighter: u32 },
@@ -98,6 +98,7 @@ pub enum Event {
     StopSound { owner: u32, channel: i32 },
     SoundPan { owner: u32, channel: i32, pan: f32 },
     SoundVolume { owner: u32, channel: i32, volume: f32 },
+    SoundLoop { owner: u32, channel: i32, change: crate::sound_loop::LoopChange },
     Rumble { fighter: u32, strong: f32, weak: f32, ms: u32 },
     Bgm(BgmAction),
     /// a tag-team swap: `fighter` (root id) just stepped in for `side`
@@ -1297,7 +1298,7 @@ impl Match {
     fn sound(&mut self, i: usize, g: i32, n: i32, own: bool, builtin: Option<&'static str>) {
         let pan = crate::sctrl::sound_pan(self, i, 0.0, false);
         let f = &self.fighters[i];
-        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0, low_priority: false });
+        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0, low_priority: false, loop_spec: Default::default() });
     }
     pub fn watch_sound(&mut self, owner: u32, channel: i32, stop_on_get_hit: bool, stop_on_change_state: bool) -> i32 {
         if !stop_on_get_hit && !stop_on_change_state { return channel; }

@@ -307,7 +307,7 @@ pub fn trigger_problem(name: &str, raw: Option<&str>) -> Option<String> {
     let out = probe(|m| { Ctx { m, i: 0 }.trigger(name, &[Node::Num(0.0, false)], None, raw); });
     let sub_prefix = format!("{name}(");
     let problem = if !out.completed { None } else {
-        out.notes.iter().filter(|(c, _)| *c == Category::Trigger).map(|(_, n)| n).find(|n| n.as_str() == name || n.starts_with(&sub_prefix)).cloned()
+        out.notes.iter().filter(|(c, _)| *c == Category::Trigger).map(|(_, n)| n).find(|n| n.as_str() == name || (raw.is_some() && n.starts_with(&sub_prefix))).cloned()
     };
     TRIGGER_CACHE.with(|c| c.borrow_mut().insert(key, problem.clone()));
     problem

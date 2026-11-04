@@ -9,6 +9,7 @@ mod gamepad;
 mod keybinds;
 mod hud;
 mod market;
+mod menu_art;
 mod registry;
 mod render;
 mod poly;

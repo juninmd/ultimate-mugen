@@ -13,6 +13,11 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `DizzySet` | `value` | Dizzy flag |
 | `GuardPointsSet` / `GuardPointsAdd` | `value` | Guard points, `0..data.guardpoints` |
 | `GuardBreakSet` | `value` | Guard break flag |
+| `Text` | `text`, `params`, `pos`, `velocity`, `scale`, `color`, `align`, `removetime`, `id` | Draws text on the fight screen; `%d`, `%f` and `\n` in `text` take values from `params` |
+| `RemoveText` | `id` (omit for all) | Removes the player's texts |
+| `TagOut` / `TagIn` | `self`, `stateno`, `ctrl`, `partnerstateno`, `partnerctrl` | Moves the player to or from standby (hidden, cannot be hit or pushed); `partnerstateno` swaps with the first teammate |
+| `ModifyProjectile` | `id`, `velocity`, `accel`, `velmul`, `removetime`, `projhits`, `projpriority`, `projscale` | Changes the player's live projectiles |
+| `ModifySnd` | `channel`, `pan`, `abspan`, `volumescale` | Changes sounds already playing on a channel |
 
 | Trigger | Returns |
 |---|---|
@@ -20,6 +25,10 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `RedLife` | Red life |
 | `Dizzy`, `DizzyPoints`, `DizzyPointsMax` | Dizzy flag and points |
 | `GuardBreak`, `GuardPoints`, `GuardPointsMax` | Guard break flag and points |
+| `StandBy` | 1 while tagged out |
+| `NumText` | Texts the player has on screen |
+| `ClsnOverlap(clsn1, id, clsn2)` | 1 when the player's box type overlaps the box type of the player with that `id` |
+| `NumPartner` | Teammates on the same side |
 
 `data.dizzypoints` and `data.guardpoints` in the `[Data]` section default to `data.life`.
 

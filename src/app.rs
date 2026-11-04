@@ -41,7 +41,7 @@ pub enum Screen {
 
 /// Fight assets prepared step by step behind the VS screen.
 #[derive(Default)]
-pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, sess: Option<Session> }
+pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, sess: Option<Session>, jobs: Vec<crate::registry::LoadJob> }
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
 #[derive(Clone)]
@@ -612,19 +612,35 @@ impl App {
     }
 
     /// One unit of fight preparation (runs behind the VS screen, one per frame, so the bar animates and the UI never freezes).
-    async fn load_step(&mut self, step: u8) -> Result<(), String> {
+    fn pal_for(plan: &[(usize, usize, usize)], st: usize) -> i32 {
+        let (side, k, r) = plan[st];
+        let dup = (side == 1 && plan.iter().any(|p| p.0 == 0 && p.2 == r)) || plan.iter().any(|p| p.0 == side && p.1 < k && p.2 == r);
+        if dup { 2 } else { 1 }
+    }
+
+    async fn load_step(&mut self, step: u8, wait: bool) -> Result<bool, String> {
         let plan = self.load_plan();
         let s = self.sel.2;
         let n = plan.len();
         let st = step as usize;
         if st < n {
-            if st == 0 { let keep: Vec<usize> = plan.iter().map(|p| p.2).collect(); self.reg.trim_cache(&keep); self.pending = Pending::default(); }
-            let (side, k, r) = plan[st];
-            // same fighter on both sides / twice in a team → alternate palette
-            let dup = (side == 1 && plan.iter().any(|p| p.0 == 0 && p.2 == r)) || plan.iter().any(|p| p.0 == side && p.1 < k && p.2 == r);
-            let d = self.reg.chars[r].load(if dup { 2 } else { 1 })?;
+            if st == 0 && self.pending.jobs.is_empty() {
+                let keep: Vec<usize> = plan.iter().map(|p| p.2).collect();
+                self.reg.trim_cache(&keep);
+                self.pending = Pending::default();
+                let mut seen: Vec<(usize, i32)> = vec![];
+                for k in 0..n {
+                    let key = (plan[k].2, Self::pal_for(&plan, k));
+                    self.pending.jobs.push(if seen.contains(&key) { None } else { seen.push(key); self.reg.chars[key.0].spawn_load(key.1) });
+                }
+            }
+            if !wait && self.pending.jobs.get(st).is_some_and(|j| j.as_ref().is_some_and(|h| !h.is_finished())) { return Ok(false); }
+            let (side, _, r) = plan[st];
+            let job = self.pending.jobs.get_mut(st).and_then(|j| j.take());
+            let d = self.reg.chars[r].finish_load(Self::pal_for(&plan, st), job)?;
             self.pending.defs[side].push(d);
         } else if st == n {
+            self.pending.jobs.clear();
             self.pending.stage = Some(self.reg.build_stage(s));
         } else if st == n + 1 {
             let stage = self.pending.stage.take().ok_or("stage")?;
@@ -657,7 +673,7 @@ impl App {
             let music = self.pending.sess.as_ref().map(|s| s.stage.music).unwrap_or(0);
             self.audio.prepare_music(music).await;
         }
-        Ok(())
+        Ok(true)
     }
 
     fn abort_load(&mut self, e: String) { self.msg = e; self.pending = Pending::default(); self.screen = Screen::Menu { cur: 0 }; }
@@ -670,9 +686,11 @@ impl App {
         let mut step_now = step_v;
         let total = self.load_total();
         if t > dt * 1.5 && step_v < total {
-            if let Err(e) = self.load_step(step_v).await { self.abort_load(e); return; }
-            step_now = step_v + 1;
-            if let Screen::Vs { step, .. } = &mut self.screen { *step = step_now; }
+            match self.load_step(step_v, false).await {
+                Err(e) => { self.abort_load(e); return; }
+                Ok(true) => { step_now = step_v + 1; if let Screen::Vs { step, .. } = &mut self.screen { *step = step_now; } }
+                Ok(false) => {}
+            }
         }
         let ready = step_now >= total;
         let (a, b) = (self.sel.0, self.sel.1);
@@ -704,7 +722,7 @@ impl App {
 
     /// Synchronous variant (screenshot tour, rematch): runs every loading step back to back.
     pub async fn start_fight(&mut self) {
-        for st in 0..self.load_total() { if let Err(e) = self.load_step(st).await { self.abort_load(e); return; } }
+        for st in 0..self.load_total() { if let Err(e) = self.load_step(st, true).await { self.abort_load(e); return; } }
         self.finish_fight().await;
     }
 

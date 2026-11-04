@@ -179,6 +179,7 @@ impl Session {
                 Event::MatchOver(w) => { self.over = Some(w); }
                 Event::StopSound { owner, channel } => audio.stop(owner, channel),
                 Event::SoundPan { owner, channel, pan } => audio.pan(owner, channel, pan),
+                Event::SoundVolume { owner, channel, volume } => audio.set_volume(owner, channel, volume),
                 Event::Fight => audio.sfx("fight"),
                 Event::RoundStart(_) => audio.sfx("round"),
                 Event::RoundEnd(w) if w >= 0 => audio.sfx("win"),

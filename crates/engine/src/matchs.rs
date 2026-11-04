@@ -64,6 +64,7 @@ pub enum Event {
     Transform { fighter: u32 },
     StopSound { owner: u32, channel: i32 },
     SoundPan { owner: u32, channel: i32, pan: f32 },
+    SoundVolume { owner: u32, channel: i32, volume: f32 },
     Rumble { fighter: u32, strong: f32, weak: f32, ms: u32 },
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
 }
@@ -118,6 +119,7 @@ pub struct Match {
     pub all_palfx: Option<PalFx>, pub bg_palfx: Option<PalFx>,
     pub slow_mo: i32,
     pub events: Vec<Event>,
+    pub texts: Vec<crate::ikemen::TextItem>,
     pub announce: Option<Announce>,
     pub rng: u32,
     pub next_id: u32,
@@ -131,7 +133,7 @@ impl Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
-            events: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
+            events: vec![], texts: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
     }
     pub fn random(&mut self) -> f32 {
@@ -274,7 +276,7 @@ impl Match {
 
     fn run_states(&mut self, i: usize) {
         let in_pause = self.fighters[i].hit_pause > 0 || self.fighters[i].hit_shake > 0;
-        self.fighters[i].asserts = 0;
+        self.fighters[i].asserts = if self.fighters[i].ikemen.standby { crate::fighter::asf::INVISIBLE } else { 0 };
         let own = self.fighters[i].def.clone();
         let custom = !Arc::ptr_eq(&self.fighters[i].st_def, &own);
         let helper = self.fighters[i].is_helper;
@@ -603,7 +605,7 @@ impl Match {
             if frozen_by_pause(&self.fighters[i]) { continue; }
             let f = &mut self.fighters[i];
             let frozen = f.hit_pause > 0 || f.hit_shake > 0;
-            f.width_override = None; f.player_push = true; f.trans = None; f.draw_offset = V2::default();
+            f.width_override = None; f.player_push = !f.ikemen.standby; f.trans = None; f.draw_offset = V2::default();
             if f.palfx.as_ref().is_some_and(|p| p.expired()) { f.palfx = None; }
             if !frozen { f.advance_anim(); }
             self.run_states(i);
@@ -612,6 +614,7 @@ impl Match {
         if let Some((_, _, sup)) = paused_by {
             for f in self.fighters.iter_mut() { let t = if sup { &mut f.super_move_time } else { &mut f.pause_move_time }; if *t > 0 { *t -= 1; } }
         }
+        crate::ikemen::tick(self);
         for &id in &ids {
             let Some(i) = self.idx(id) else { continue };
             if frozen_by_pause(&self.fighters[i]) { continue; }
@@ -806,7 +809,7 @@ impl Match {
     pub fn can_be_hit(&self, d: usize, hd: &HitDefData, side: usize) -> bool {
         let f = &self.fighters[d];
         let team_ok = match hd.affect_team { 'B' => true, 'F' => f.side == side, _ => f.side != side };
-        if f.destroyed || !team_ok || !f.alive { return false; }
+        if f.destroyed || !team_ok || !f.alive || f.ikemen.standby { return false; }
         if f.move_type == 'H' {
             if hd.chain_id.is_some_and(|c| f.ghv.hit_id != c) { return false; }
             if f.ghv.hit_id >= 0 && hd.no_chain_id.contains(&Some(f.ghv.hit_id)) { return false; }

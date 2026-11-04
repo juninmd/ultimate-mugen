@@ -188,6 +188,7 @@ mod native {
 #[cfg(target_arch = "wasm32")]
 mod web {
     use super::*;
+    #[wasm_bindgen::prelude::wasm_bindgen]
     extern "C" {
         fn ume_gp_count() -> i32;
         fn ume_gp_state(i: i32) -> u32;
@@ -198,10 +199,10 @@ mod web {
     impl Pads {
         pub fn new() -> Self { Pads }
         pub fn update(&mut self) -> Vec<PadInfo> {
-            let n = unsafe { ume_gp_count() };
-            (0..n).map(|i| { let b = unsafe { ume_gp_state(i) }; PadInfo { name: "Gamepad".into(), bits: b, sony: unsafe { ume_gp_sony(i) } != 0, connected: true, menu_bits: b } }).collect()
+            let n = ume_gp_count();
+            (0..n).map(|i| { let b = ume_gp_state(i); PadInfo { name: "Gamepad".into(), bits: b, sony: ume_gp_sony(i) != 0, connected: true, menu_bits: b } }).collect()
         }
-        pub fn rumble(&mut self, pad: usize, strong: f32, weak: f32, ms: u32) { unsafe { ume_gp_rumble(pad as i32, strong, weak, ms as i32) } }
+        pub fn rumble(&mut self, pad: usize, strong: f32, weak: f32, ms: u32) { ume_gp_rumble(pad as i32, strong, weak, ms as i32) }
         pub fn set_light(&mut self, _pad: usize, _rgb: [u8; 3]) {}
         pub fn sony_count(&self) -> usize { 0 }
     }

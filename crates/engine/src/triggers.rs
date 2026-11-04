@@ -205,7 +205,7 @@ impl<'a> Host for Ctx<'a> {
             "numprojid" => { let id = a0() as i32; m.projectiles.iter().filter(|p| p.owner == f.id && !p.remove && p.id == id).count() as f64 }
             "numtarget" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; f.targets.iter().filter(|t| id < 0 || t.1 == id).count() as f64 }
             "numenemy" => m.roots().filter(|r| r.side != f.side).count() as f64,
-            "numpartner" => 0.0,
+            "numpartner" => m.roots().filter(|r| r.side == f.side && r.id != f.id).count() as f64,
             "win" => b(m.winner_side == f.side as i32),
             "lose" => b(m.winner_side >= 0 && m.winner_side != f.side as i32),
             "winko" => b(m.winner_side == f.side as i32 && m.won_by_ko),

@@ -39,6 +39,7 @@ pub struct Session {
     /// inputs of every root slot for every simulated tick (the data a replay is rebuilt from)
     pub rec: Vec<Vec<u32>>,
     pub is_replay: bool,
+    flag_sounds: Vec<(u32, i32, bool, bool)>,
     tag_last: [Option<usize>; 2],
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub net: Option<crate::netlink::NetLink>,
@@ -81,7 +82,7 @@ impl Session {
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, tag_last: [None; 2], #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
+        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, flag_sounds: vec![], tag_last: [None; 2], #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
     }
 
     pub fn apply_rules(&mut self, r: crate::settings::Rules) {
@@ -175,13 +176,19 @@ impl Session {
             self.vfx.event(&ev, &self.m);
             for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
             match ev {
-                Event::Sound { def, group, index, own, volume, builtin, channel, owner, pan, looping, freq_mul, low_priority } => {
+                Event::Sound { def, group, index, own, volume, builtin, channel, owner, pan, looping, freq_mul, low_priority, stop_on_get_hit, stop_on_change_state } => {
+                    self.flag_sounds.retain(|(o, ch, _, _)| !(*o == owner && *ch == channel));
+                    if stop_on_get_hit || stop_on_change_state { self.flag_sounds.push((owner, channel, stop_on_get_hit, stop_on_change_state)); }
+                    let mut played = false;
                     if let (true, Some(d)) = (own, def.as_ref()) {
-                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), SoundOpts { volume, pan, owner, channel, looping, rate: freq_mul, low_priority }); continue; }
+                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), SoundOpts { volume, pan, owner, channel, looping, rate: freq_mul, low_priority }); played = true; }
                     }
-                    let kind = builtin.unwrap_or(match group { 5 => if index >= 2 { "hitheavy" } else { "hit" }, 6 => "guard", 7 => "land", _ => if index >= 2 { "swingh" } else { "swing" } });
-                    if group >= 0 || builtin.is_some() { audio.sfx_at(kind, pan); }
+                    if !played {
+                        let kind = builtin.unwrap_or(match group { 5 => if index >= 2 { "hitheavy" } else { "hit" }, 6 => "guard", 7 => "land", _ => if index >= 2 { "swingh" } else { "swing" } });
+                        if group >= 0 || builtin.is_some() { audio.sfx_at(kind, pan); }
+                    }
                 }
+                Event::StateChange { fighter } => Self::stop_flagged(&mut self.flag_sounds, audio, fighter, false),
                 Event::Hit { damage, guarded, heavy, attacker, defender, .. } => {
                     let roots = self.m.root_indices();
                     let (attacker_side, defender_side) = (attacker, defender);
@@ -190,6 +197,8 @@ impl Session {
                     let mag = (damage / 120.0).clamp(0.15, 1.0);
                     if let Some(sl) = human(defender_side, &self.pilots) { if guarded { c.rumble(sl, 0.0, 0.35, 70); } else { c.rumble(sl, mag, (mag + 0.2).min(1.0), if heavy { 220 } else { 120 }); } }
                     if let Some(sl) = human(attacker_side, &self.pilots) { c.rumble(sl, 0.0, if guarded { 0.15 } else { mag * 0.6 }, 60); }
+                    let hit_id = self.m.fighters[defender].id;
+                    Self::stop_flagged(&mut self.flag_sounds, audio, hit_id, true);
                 }
                 Event::Super { side, .. } => { for (s, p) in self.pilots.iter().enumerate() { if let Pilot::Human(sl) = p { c.rumble(*sl, if s == side { 0.6 } else { 0.3 }, 0.6, 400); } } }
                 Event::Ko { silent, .. } => { if !silent { audio.sfx("ko"); } for p in &self.pilots { if let Pilot::Human(sl) = p { c.rumble(*sl, 1.0, 1.0, 700); } } }
@@ -214,6 +223,13 @@ impl Session {
     }
 
     /// Root fighter a pilot slot controls right now: its own, or in tag mode the side's active member.
+    fn stop_flagged(list: &mut Vec<(u32, i32, bool, bool)>, audio: &mut Audio, owner: u32, on_hit: bool) {
+        list.retain(|(o, ch, hit, state)| {
+            let stop = *o == owner && if on_hit { *hit } else { *state };
+            if stop { audio.stop(*o, *ch); }
+            !stop
+        });
+    }
     fn pilot_fighter(&self, slot: usize, roots: &[usize]) -> Option<usize> {
         let own = *roots.get(slot)?;
         if self.m.team_tag && slot < 2 && !matches!(self.pilots[slot], Pilot::Replay(..)) { return self.m.tag_active(self.m.fighters[own].side).or(Some(own)); }

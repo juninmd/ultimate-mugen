@@ -53,7 +53,7 @@ impl InputSource for Ai {
         let boss = f.def.boss;
         let skill = if boss { 1.15 } else { self.level as f32 / 8.0 };
         let r = self.r();
-        let threat = e.move_type == 'A' || m.projectiles.iter().any(|p| p.teamside == e.side);
+        let threat = e.move_type == 'A' || m.projectiles.iter().any(|p| p.side == e.side);
         if threat && dist < 140.0 && r < (0.25 + skill * 0.6).min(if boss { 0.55 } else { 1.0 }) && f.move_type != 'H' {
             self.hold = back | if e.state_type == 'C' || self.r() < 0.3 { k::D } else { 0 };
             self.hold_ticks = 8 + (self.r() * 10.0) as i32;

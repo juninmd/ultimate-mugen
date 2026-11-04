@@ -118,7 +118,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         }
         "fallenvshake" => {
             let s = m.fighters[i].ghv.fall_env_shake;
-            if s.time > 0 { m.shake(s.time, s.freq, s.ampl, s.phase); m.fighters[i].ghv.fall_env_shake.time = 0; }
+            if s.time > 0 { m.shake_with_dir(s.time, s.freq, s.ampl, s.phase, s.dir); m.fighters[i].ghv.fall_env_shake.time = 0; }
         }
         "hitvelset" => {
             let (x, y) = (n(m, "x", 1.0) != 0.0, n(m, "y", 1.0) != 0.0);
@@ -146,8 +146,10 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 let looping = n(m, "loop", 0.0) != 0.0;
                 let freq_mul = n(m, "freqmul", 1.0) as f32;
                 let low_priority = n(m, "lowpriority", 0.0) != 0.0;
+                let stop_on_get_hit = n(m, "stopongethit", 0.0) != 0.0;
+                let stop_on_change_state = n(m, "stoponchangestate", 0.0) != 0.0;
                 let f = &m.fighters[i];
-                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul, low_priority };
+                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul, low_priority, stop_on_get_hit, stop_on_change_state };
                 m.events.push(ev);
             }
         }

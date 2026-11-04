@@ -31,6 +31,11 @@ const server = http.createServer((q, r) => {
   await key('Enter', 1500);                 // stage → VS / loading
   await p.waitForTimeout(10000);            // loading + VS + intro
   if (stageRequests.length !== 1) problems.push(`Expected one selected stage download, got ${stageRequests.length}`);
+  // releaseAll (blur, pagehide, contextmenu) synthesises a pointerup: it must be a real PointerEvent, or the
+  // wasm glue throws on event.pointerType and the input stays stuck.
+  await p.locator('#glcanvas').click({ button: 'right' });
+  await p.evaluate(() => window.dispatchEvent(new Event('blur')));
+  await p.waitForTimeout(400);
   const shot = await p.screenshot();
   await b.close(); server.close();
   // black-screen check: the fight must have visible content (mean luminance well above 0 and some colour variance)

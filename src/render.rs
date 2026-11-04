@@ -126,7 +126,10 @@ impl MatchRenderer {
         let gain = g.fx_gain;
         clear_background(BLACK);
         let (mut shx, mut shy) = (0.0, 0.0);
-        if m.shake_time > 0 { shy = m.shake_offset(); shx = (rand::gen_range(-0.5, 0.5)) * m.shake_ampl.abs() * 0.3; }
+        if m.shake_time > 0 {
+            if m.shake_vertical() { shy = m.shake_offset(); }
+            if m.shake_horizontal() { shx = (rand::gen_range(-0.5, 0.5)) * m.shake_ampl.abs() * 0.3; }
+        }
         let (tx, ty) = vfx.shake(gain);
         shx += tx; shy += ty;
         // cinematic camera: punch-in on hits, KO / super zoom about the action

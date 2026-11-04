@@ -111,6 +111,11 @@ impl App {
         let done = shown >= cur.text.chars().count();
         if done { let a = 0.5 + 0.5 * (self.ui.t * 5.0).sin().abs(); { let c = vec2(self.ui.x(1160.0), self.ui.y(box_y + 108.0)); poly::solid(&[c + vec2(-7.0, -8.0) * s, c + vec2(8.0, 0.0) * s, c + vec2(-7.0, 8.0) * s], Color::new(1.0, 1.0, 1.0, a)); } }
         self.ui.text("ENTER avançar · ESC pular", 1240.0, 702.0, 14.0, Color::new(1.0, 1.0, 1.0, 0.45), Align::Right, false);
+        if kind == 0 {
+            if let Some(txt) = self.sp.as_ref().and_then(|sp| sp.intro_text((t * 60.0) as i64)) {
+                self.ui.text(&txt, VW / 2.0, 96.0, 26.0, hex("#ffcc33"), Align::Center, true);
+            }
+        }
 
         let adv = self.c.pressed(nav::OK) || is_mouse_button_pressed(MouseButton::Left) || is_key_pressed(KeyCode::Space);
         if self.c.pressed(nav::BACK | nav::START) { self.cutscene_done(kind); return; }

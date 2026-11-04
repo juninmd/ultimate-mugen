@@ -591,15 +591,17 @@ impl Vfx {
     }
 
     /// Big banner texts (COUNTER!, PERFECT!, SUPER ARTS…), slammed in with overshoot.
-    pub fn draw_banners(&self, ui: &Ui) {
-        // cinematic letterbox while a super / awakening plays
+    pub fn draw_cinema_bars(&self, ui: &Ui) {
         if self.sz > 0.02 { let h = 46.0 * self.sz * self.sz * (3.0 - 2.0 * self.sz); ui.rect(0.0, 0.0, 1280.0, h, Color::new(0.0, 0.0, 0.0, 0.92)); ui.rect(0.0, 720.0 - h, 1280.0, h, Color::new(0.0, 0.0, 0.0, 0.92)); }
+    }
+
+    pub fn draw_banners(&self, ui: &Ui) {
         for (i, b) in self.banners.iter().enumerate() {
             let t = b.t;
             let sc = if t < 0.12 { lerp(1.4, 1.0, t / 0.12) } else if t < 0.2 { lerp(1.0, 1.08, (t - 0.12) / 0.08) } else { lerp(1.08, 1.0, ((t - 0.2) / 0.3).min(1.0)) };
             let a = if t > 1.2 { ((1.6 - t) / 0.4).max(0.0) } else { (t / 0.06).min(1.0) };
             let slide = if t < 0.12 { (1.0 - t / 0.12) * 120.0 } else { 0.0 };
-            let y = 300.0 + i as f32 * 70.0;
+            let y = 300.0 + i as f32 * 96.0;
             let (x0, y0, x1, y1) = (0.0, y - 56.0, 1280.0, y + 28.0);
             ui.quad([vec2(x0, y0 + 12.0), vec2(x1, y0), vec2(x1, y1 - 12.0), vec2(x0, y1)], Color::new(b.col[0] * 0.25, b.col[1] * 0.2, b.col[2] * 0.25, 0.55 * a));
             ui.rect(0.0, y - 56.0 + 8.0, 1280.0, 2.0, Color::new(b.col[0], b.col[1], b.col[2], 0.8 * a));

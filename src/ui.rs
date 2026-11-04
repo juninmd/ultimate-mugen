@@ -165,6 +165,7 @@ impl Ui {
     /// Text with outline + drop shadow (fighting-game style).
     pub fn text_bold(&self, s: &str, x: f32, y: f32, size: f32, c: Color, outline: Color, align: Align) {
         let o = (size * 0.06).max(1.5);
+        let outline = Color { a: outline.a.clamp(0.0, 1.0).powi(3), ..outline };
         for (dx, dy) in [(-o, 0.0), (o, 0.0), (0.0, -o), (0.0, o), (-o, -o), (o, o), (-o, o), (o, -o), (o * 0.6, o * 2.0)] { self.text(s, x + dx, y + dy, size, outline, align, true); }
         self.text(s, x, y, size, c, align, true);
     }
@@ -283,7 +284,7 @@ pub const LOADING_TIPS: [&str; 8] = [
     "Dica: arraste um .zip de personagens M.U.G.E.N para a janela para importar.",
     "Dica: no Treino, F2 exibe as hitboxes.",
     "Dica: ESPECIAL e SUPER executam golpes com um único toque.",
-    "Dica: Vídeo → Qualidade da arte aumenta a nitidez em telas 4K.",
+    "Dica: em Vídeo, a Qualidade da arte aumenta a nitidez em telas 4K.",
     "Dica: PageUp/PageDown e a roda do mouse rolam a lista de lutadores.",
     "Dica: DualShock/DualSense vibram em golpes, defesa e K.O.",
     "Dica: Tab filtra a seleção entre todos, originais e M.U.G.E.N.",

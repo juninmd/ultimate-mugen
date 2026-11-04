@@ -203,8 +203,10 @@ impl<G: Game> Shell<G> {
             match post {
                 Some(p) => {
                     let scene = live.post.scene_view(&gpu.device, [live.config.width, live.config.height]).clone();
-                    gpu.renderer.draw(&gpu.device, &gpu.queue, &mut enc, Target { view: &scene, size, clear }, &live.canvas.batch);
+                    let batch = &live.canvas.batch;
+                    gpu.renderer.draw_calls(&gpu.device, &gpu.queue, &mut enc, Target { view: &scene, size, clear }, batch, 0..batch.split());
                     live.post.apply(&gpu.queue, &mut enc, v, &p);
+                    gpu.renderer.draw_calls(&gpu.device, &gpu.queue, &mut enc, Target { view: v, size, clear: None }, batch, batch.split()..batch.calls.len());
                 }
                 None => gpu.renderer.draw(&gpu.device, &gpu.queue, &mut enc, Target { view: v, size, clear }, &live.canvas.batch),
             }

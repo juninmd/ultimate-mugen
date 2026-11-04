@@ -17,7 +17,7 @@ impl App {
                 if keybinds::id(kc).is_some() {
                     self.c.keys.assign(ed.slot, ed.cur, kc);
                     self.c.keys.save();
-                    ed.msg = format!("{} → {}", ACTIONS[ed.cur].0, keybinds::label(kc));
+                    ed.msg = format!("{}: {}", ACTIONS[ed.cur].0, keybinds::label(kc));
                     ed.waiting = false;
                 } else { ed.msg = "Essa tecla não pode ser usada. Tente outra (Esc cancela).".into(); }
             }

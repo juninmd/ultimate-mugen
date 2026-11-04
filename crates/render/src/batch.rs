@@ -47,12 +47,16 @@ impl Quad {
 pub struct DrawCall { pub blend: Blend, pub first_index: u32, pub index_count: u32, pub scissor: Option<[u32; 4]> }
 
 #[derive(Default)]
-pub struct Batch { pub vertices: Vec<Vertex>, pub indices: Vec<u32>, pub calls: Vec<DrawCall>, pub scissor: Option<[u32; 4]> }
+pub struct Batch { pub vertices: Vec<Vertex>, pub indices: Vec<u32>, pub calls: Vec<DrawCall>, pub scissor: Option<[u32; 4]>, pub overlay_from: Option<usize> }
 
 impl Batch {
     pub fn new() -> Self { Batch::default() }
 
-    pub fn clear(&mut self) { self.vertices.clear(); self.indices.clear(); self.calls.clear(); self.scissor = None; }
+    pub fn clear(&mut self) { self.vertices.clear(); self.indices.clear(); self.calls.clear(); self.scissor = None; self.overlay_from = None; }
+
+    pub fn begin_overlay(&mut self) { self.overlay_from = Some(self.calls.len()); }
+
+    pub fn split(&self) -> usize { self.overlay_from.unwrap_or(self.calls.len()).min(self.calls.len()) }
 
     pub fn push(&mut self, q: &Quad) {
         let [x, y, w, h] = q.dst;
@@ -79,8 +83,9 @@ impl Batch {
 
     fn extend_call(&mut self, blend: Blend, count: u32) {
         let first = self.indices.len() as u32 - count;
+        let at_overlay = self.overlay_from == Some(self.calls.len());
         match self.calls.last_mut() {
-            Some(c) if c.blend == blend && c.scissor == self.scissor => c.index_count += count,
+            Some(c) if c.blend == blend && c.scissor == self.scissor && !at_overlay => c.index_count += count,
             _ => self.calls.push(DrawCall { blend, first_index: first, index_count: count, scissor: self.scissor }),
         }
     }
@@ -107,6 +112,21 @@ mod tests {
             DrawCall { blend: Blend::Add, first_index: 12, index_count: 6, scissor: None },
             DrawCall { blend: Blend::Alpha, first_index: 18, index_count: 6, scissor: None },
         ]);
+    }
+
+    #[test]
+    fn overlay_starts_a_new_call() {
+        let mut b = Batch::new();
+        let q = Quad::new([0.0, 0.0, 8.0, 8.0], Rect { x: 0, y: 0, w: 8, h: 8 }, [64, 64], 0);
+        b.push(&q);
+        b.begin_overlay();
+        b.push(&q);
+        b.push(&q);
+        assert_eq!(b.calls.len(), 2);
+        assert_eq!(b.split(), 1);
+        assert_eq!(b.calls[1].index_count, 12);
+        b.clear();
+        assert_eq!(b.split(), 0);
     }
 
     #[test]

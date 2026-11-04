@@ -132,6 +132,10 @@ impl Renderer {
     }
 
     pub fn draw(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, encoder: &mut wgpu::CommandEncoder, target: Target, batch: &Batch) {
+        self.draw_calls(device, queue, encoder, target, batch, 0..batch.calls.len());
+    }
+
+    pub fn draw_calls(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, encoder: &mut wgpu::CommandEncoder, target: Target, batch: &Batch, calls: std::ops::Range<usize>) {
         let Target { view: target, size: screen, clear } = target;
         if batch.vertices.len() as u64 > self.vcap {
             self.vcap = (batch.vertices.len() as u64).next_power_of_two();
@@ -152,12 +156,13 @@ impl Renderer {
             color_attachments: &[Some(wgpu::RenderPassColorAttachment { view: target, depth_slice: None, resolve_target: None, ops: wgpu::Operations { load, store: wgpu::StoreOp::Store } })],
             ..Default::default()
         });
-        if batch.calls.is_empty() { return; }
+        let calls = &batch.calls[calls.start.min(batch.calls.len())..calls.end.min(batch.calls.len())];
+        if calls.is_empty() { return; }
         pass.set_bind_group(0, &self.bind_group, &[]);
         pass.set_vertex_buffer(0, self.vbuf.slice(..));
         pass.set_index_buffer(self.ibuf.slice(..), wgpu::IndexFormat::Uint32);
         let (tw, th) = (screen[0].max(1.0) as u32, screen[1].max(1.0) as u32);
-        for c in &batch.calls {
+        for c in calls {
             let [x, y, w, h] = c.scissor.map(|[x, y, w, h]| { let (x, y) = (x.min(tw), y.min(th)); [x, y, w.min(tw - x), h.min(th - y)] }).unwrap_or([0, 0, tw, th]);
             if w == 0 || h == 0 { continue; }
             pass.set_scissor_rect(x, y, w, h);

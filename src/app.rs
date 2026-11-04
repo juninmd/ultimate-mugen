@@ -243,7 +243,7 @@ impl App {
         if self.c.pressed(nav::RIGHT) { self.ai_level = (self.ai_level + 1).min(8); }
         let mut chosen = if self.c.pressed(nav::OK | nav::START) { Some(cur_v) } else { None };
         self.ui.background();
-        self.ui.logo(250.0, 330.0, 120.0);
+        self.ui.logo(240.0, 330.0, 108.0);
         for (i, (t, d)) in MENU.iter().enumerate() {
             let k_in = ((self.screen_t - 0.12 - i as f32 * 0.05) / 0.3).clamp(0.0, 1.0);
             let k_in = 1.0 - (1.0 - k_in).powi(3);
@@ -442,7 +442,7 @@ impl App {
                 }
             } else {
                 let init: String = ename.chars().next().map(|c| c.to_uppercase().collect()).unwrap_or_default();
-                self.ui.text(if broken { "✕" } else { &init }, cx + cw / 2.0, cy + ch * 0.58, cw * 0.55, Color::new(1.0, 1.0, 1.0, if broken { 0.5 } else { 0.28 }), Align::Center, true);
+                self.ui.text(if broken { "X" } else { &init }, cx + cw / 2.0, cy + ch * 0.58, cw * 0.55, Color::new(1.0, 1.0, 1.0, if broken { 0.5 } else { 0.28 }), Align::Center, true);
             }
             self.ui.rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.65));
             let nm: String = if emugen { ename.chars().take(13).collect() } else { ename.split_whitespace().next().unwrap_or("").chars().take(12).collect() };
@@ -786,7 +786,7 @@ impl App {
             (1, "Resolução da janela", RESOLUTIONS[self.settings.res.min(RESOLUTIONS.len() - 1)].2.into(), "Até 5K · o jogo escala a imagem para qualquer tamanho"),
             (2, "Qualidade da arte", q.1.into(), "Rasteriza lutadores e cenários em maior densidade de pixels (4K = Ultra)"),
             (3, "Pós-processamento", FX_LEVELS[self.settings.fx.min(2)].into(), "Bloom, aberração cromática, vinheta, correção de cor e blur radial"),
-            (4, "Efeitos de impacto", IMPACT[self.settings.impact.min(IMPACT.len() - 1)].1.into(), "Tremor, zoom, flashes e linhas de velocidade — flashes grandes ficam limitados a 3/s; Mínimo desliga tudo (fotossensibilidade)"),
+            (4, "Efeitos de impacto", IMPACT[self.settings.impact.min(IMPACT.len() - 1)].1.into(), "Tremor, zoom e flashes (máx. 3/s) · Mínimo desliga tudo"),
             (5, "Contador de FPS", on(self.settings.fps).into(), "Alterna também com F3"),
             (6, "Voltar", String::new(), ""),
         ];
@@ -800,7 +800,7 @@ impl App {
             self.ui.rect(x, y, w, h, if f { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) });
             self.ui.text(t, x + 24.0, y + 30.0, 26.0, WHITE, Align::Left, true);
             self.ui.text(d, x + 24.0, y + 52.0, 16.0, if f { WHITE } else { hex("#a49cc0") }, Align::Left, false);
-            self.ui.text(&format!("◀ {v} ▶"), x + w - 24.0, y + 40.0, 24.0, hex("#ffcc33"), Align::Right, true);
+            if !v.is_empty() { self.ui.text(&format!("‹ {v} ›"), x + w - 24.0, y + 40.0, 24.0, hex("#ffcc33"), Align::Right, true); }
             y += 72.0;
         }
         let (pw, ph) = ((screen_width() * dpi_scale()) as i32, Settings::physical_h() as i32);

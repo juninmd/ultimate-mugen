@@ -237,6 +237,7 @@ impl Session {
         let human = self.human_ids();
         self.hud.replay = self.is_replay;
         self.hud.inputs = if self.m.training { self.inputs.clone() } else { vec![] };
+        self.vfx.draw_cinema_bars(ui);
         self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human);
         self.vfx.draw_banners(ui);
     }

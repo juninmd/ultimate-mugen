@@ -19,6 +19,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
 | [Performance](Performance.md) | Developers | Parallel loading, frame pacing, benchmarks |
 | [Research: fighting games](Research-Fighting-Games.md) | Developers | Survey of other fighters and prioritized improvement list |
+| [Stress and resilience](Stress-and-Resilience.md) | Developers | Fuzzing, spawner caps, hot path numbers |
 | [Troubleshooting](Troubleshooting.md) | Everyone | Common errors and diagnostic tools |
 
 ## Accepted formats

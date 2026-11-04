@@ -187,6 +187,10 @@ impl Match {
         list.sort_by(|&a, &b| (!self.fighters[a].alive).cmp(&!self.fighters[b].alive).then((self.fighters[a].pos.x - me.pos.x).abs().partial_cmp(&(self.fighters[b].pos.x - me.pos.x).abs()).unwrap()));
         list.get(n).copied()
     }
+    pub fn partner(&self, i: usize, n: usize) -> Option<usize> {
+        let side = self.fighters[i].side;
+        (0..self.fighters.len()).filter(|&j| j != i && self.fighters[j].side == side && !self.fighters[j].is_helper && !self.fighters[j].destroyed).nth(n)
+    }
     pub fn ground_y(&self) -> f32 { self.stage.zoffset }
 
     // ---------------------------------------------------------------- evaluation helpers

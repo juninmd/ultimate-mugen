@@ -147,6 +147,10 @@ impl<'a> Host for Ctx<'a> {
                 self.m.roots().find(|r| r.player_no == slot).is_some_and(|r| r.def.name.eq_ignore_ascii_case(v0))
             }
             "p2command" => self.enemy_index().is_some_and(|e| self.m.has_command(e, v0)),
+            "stagevar" => match (crate::stagevar::value(self.m, v0), values.get(1)) {
+                (Some(crate::stagevar::StageValue::Text(t)), Some(want)) => t.eq_ignore_ascii_case(want),
+                _ => false,
+            },
             "authorname" => f.def.author.eq_ignore_ascii_case(v0),
             "displayname" => f.def.display_name.eq_ignore_ascii_case(v0),
             "selfcommand" => self.m.has_command(self.i, v0),
@@ -317,6 +321,7 @@ impl<'a> Host for Ctx<'a> {
             "frontedge" | "rightedge" => (m.camera.x + m.view_w / 2.0) as f64,
             "topedge" => (m.camera.y - m.ground_y()) as f64,
             "bottomedge" => (m.camera.y + m.view_h - m.ground_y()) as f64,
+            "stagevar" => match crate::stagevar::value(m, raw.unwrap_or("")) { Some(crate::stagevar::StageValue::Num(v)) => v, _ => 0.0 },
             "gameheight" => m.view_h as f64, "gamewidth" => m.view_w as f64,
             "abs" => a0().abs(), "floor" => a0().floor(), "ceil" => a0().ceil(), "sin" => a0().sin(), "cos" => a0().cos(), "tan" => a0().tan(),
             "asin" => a0().asin(), "acos" => a0().acos(), "atan" => a0().atan(), "exp" => a0().exp(), "ln" => a0().ln(), "sqrt" => a0().sqrt(),

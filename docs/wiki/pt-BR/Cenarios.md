@@ -70,6 +70,22 @@ delta = .8, .8
 
 Planejado: `[BGCtrlDef]`/`[BGCtrl]`, `window`, `[Music]`, sombras e reflexos configuráveis, `type = parallax`.
 
+## Ler o cenário a partir de scripts
+
+`StageVar(<nome>)` devolve o valor do cenário nas unidades do `localcoord` do próprio cenário. O prefixo da seção é opcional: `StageVar(camera.boundleft)` e `StageVar(boundleft)` são a mesma consulta.
+
+| Nome | Valor |
+| --- | --- |
+| `info.name`, `info.displayname`, `info.author`, `info.mugenversion` | texto, comparado com `StageVar(info.author) = "nome"` (sem diferenciar maiúsculas) |
+| `camera.startx`, `camera.starty`, `camera.boundleft`, `camera.boundright`, `camera.boundhigh`, `camera.boundlow` | números |
+| `camera.verticalfollow`, `camera.tension`, `camera.zoomin`, `camera.zoomout` | números |
+| `playerinfo.p1startx`, `playerinfo.p2startx`, `playerinfo.leftbound`, `playerinfo.rightbound` | números |
+| `playerinfo.autoturn` | 1, a menos que o cenário defina `autoturn = 0` |
+| `stageinfo.zoffset`, `stageinfo.localcoord.x`, `stageinfo.localcoord.y`, `stageinfo.roundtime` | números (`localcoord` sozinho é a largura; `roundtime` é -1 quando o cenário não define) |
+| `shadow.intensity`, `shadow.yscale`, `reflection.intensity` | números |
+
+Consultas de texto valem 0 quando usadas como número. Nomes desconhecidos valem 0 e imprimem um aviso ao compilar a expressão. Nos cenários nativos e no cenário plano os valores vêm dos padrões do motor.
+
 ## Cenário nativo
 
 Cenários nativos ficam em `src/stages.rs` e os efeitos animados em `src/stagefx.rs`.

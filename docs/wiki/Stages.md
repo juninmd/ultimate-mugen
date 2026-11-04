@@ -70,6 +70,22 @@ delta = .8, .8
 
 Planned: `[BGCtrlDef]`/`[BGCtrl]`, `window`, `[Music]`, configurable shadows and reflections, `type = parallax`.
 
+## Reading the stage from scripts
+
+`StageVar(<name>)` returns the stage value in the stage's own `localcoord` units. The section prefix is optional: `StageVar(camera.boundleft)` and `StageVar(boundleft)` are the same query.
+
+| Name | Value |
+| --- | --- |
+| `info.name`, `info.displayname`, `info.author`, `info.mugenversion` | text, compared with `StageVar(info.author) = "name"` (case-insensitive) |
+| `camera.startx`, `camera.starty`, `camera.boundleft`, `camera.boundright`, `camera.boundhigh`, `camera.boundlow` | numbers |
+| `camera.verticalfollow`, `camera.tension`, `camera.zoomin`, `camera.zoomout` | numbers |
+| `playerinfo.p1startx`, `playerinfo.p2startx`, `playerinfo.leftbound`, `playerinfo.rightbound` | numbers |
+| `playerinfo.autoturn` | 1 unless the stage sets `autoturn = 0` |
+| `stageinfo.zoffset`, `stageinfo.localcoord.x`, `stageinfo.localcoord.y`, `stageinfo.roundtime` | numbers (`localcoord` alone means the width; `roundtime` is -1 when the stage does not set it) |
+| `shadow.intensity`, `shadow.yscale`, `reflection.intensity` | numbers |
+
+Text queries evaluate to 0 when used as a number. Unknown names evaluate to 0 and print one warning when the expression is compiled. On the built-in flat and native stages the values come from the engine defaults.
+
 ## Native stage
 
 Native stages live in `src/stages.rs` and their animated effects in `src/stagefx.rs`.

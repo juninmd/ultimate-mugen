@@ -218,6 +218,16 @@ impl Parser {
                 }
                 let raw = raw.to_ascii_lowercase();
                 if name == "gethitvar" { crate::triggers::note_hit_var(&raw); }
+                if name == "stagevar" {
+                    crate::stagevar::warn_unknown_once(&raw);
+                    if self.is_op("=", 0) || self.is_op("!=", 0) {
+                        if let Tok::Str(text) = self.peek(1).clone() {
+                            let neg = self.is_op("!=", 0);
+                            self.p += 2;
+                            return Ok(Node::CmpStr { name, neg, values: vec![raw, text] });
+                        }
+                    }
+                }
                 return Ok(Node::Trig { name, args: vec![], comp: None, raw: Some(raw) });
             }
             let mut args = vec![];
@@ -261,10 +271,11 @@ pub fn is_float(n: &Node) -> bool {
         Node::Num(_, f) => *f,
         Node::Bin(op, a, b) => match *op { "+" | "-" | "*" | "/" | "**" => is_float(a) || is_float(b), ":=" => is_float(b), _ => false },
         Node::Un(op, a) => *op == "-" && is_float(a),
-        Node::Trig { name, args, .. } => match name.as_str() {
+        Node::Trig { name, args, raw, .. } => match name.as_str() {
             "vel" | "pos" | "screenpos" | "camerapos" | "p2dist" | "p1dist" | "p2bodydist" | "rootdist" | "parentdist" | "frontedgedist" | "backedgedist"
             | "frontedgebodydist" | "backedgebodydist" | "fvar" | "sysfvar" | "const" | "gethitvar" | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" | "exp" | "ln"
             | "log" | "sqrt" | "e" | "pi" | "const240p" | "const480p" | "const720p" | "camerazoom" | "backedge" | "frontedge" | "leftedge" | "rightedge" | "topedge" | "bottomedge" => true,
+            "stagevar" => raw.as_deref().is_some_and(crate::stagevar::is_float),
             "abs" | "min" | "max" | "clamp" => args.iter().any(is_float),
             "ifelse" | "cond" => args.iter().skip(1).any(is_float),
             _ => false,

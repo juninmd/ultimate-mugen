@@ -22,6 +22,7 @@ pub mod fx;
 pub mod ikemen;
 pub mod palette;
 pub mod stage_bg;
+pub mod stagevar;
 pub mod native;
 pub mod raster;
 

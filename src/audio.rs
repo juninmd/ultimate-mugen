@@ -300,6 +300,15 @@ impl Audio {
     pub fn stop_all(&mut self) {
         for (_, v) in self.channels.drain() { stop_sound(&v.sound); }
     }
+    pub fn set_volume(&mut self, owner: u32, channel: i32, volume: f32) {
+        let now = crate::gfx::get_time();
+        for (&k, v) in self.channels.iter_mut() {
+            if k.0 == owner && (channel < 0 || k.1 == channel) && v.end > now {
+                v.opts.volume = volume;
+                set_sound_volume(&v.sound, self.volume * volume.clamp(0.0, 1.5));
+            }
+        }
+    }
     pub fn pan(&mut self, owner: u32, channel: i32, pan: f32) {
         let now = crate::gfx::get_time();
         for (&k, v) in self.channels.iter_mut() {

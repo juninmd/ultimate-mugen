@@ -53,6 +53,13 @@ pub fn checksum(m: &Match) -> u128 {
     h.v2(m.camera);
     h.f32(m.zoom);
     h.i32(m.pause.as_ref().map_or(-1, |p| p.time));
+    for t in &m.texts {
+        h.u32(t.owner);
+        h.i32(t.id);
+        h.i32(t.time);
+        h.v2(t.pos);
+        h.bytes(t.text.as_bytes());
+    }
     for f in &m.fighters {
         h.u32(f.id);
         h.u32(f.destroyed as u32);
@@ -67,6 +74,7 @@ pub fn checksum(m: &Match) -> u128 {
         }
         h.bytes(&[f.state_type as u8, f.move_type as u8, f.physics as u8, f.ctrl as u8, f.alive as u8, f.hitdef_active as u8]);
         h.f32(f.life);
+        h.u32(f.ikemen.standby as u32);
         h.f32(f.power);
         for v in f.vars {
             h.i32(v);

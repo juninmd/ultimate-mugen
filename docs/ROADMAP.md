@@ -33,7 +33,7 @@ The engine runs a strictly deterministic simulation loop at a fixed 60 ticks per
 
 Classic characters such as Kung Fu Man run faithfully, but advanced Elecbyte features and Ikemen GO extensions remain to be integrated:
 
-- [ ] **Additional and rare state controllers**: full `Zoom`, advanced `PalFX` with sinusoidal interpolation and color inversion, `RemapPal` and dynamic palette swaps.
+- [ ] **Additional and rare state controllers**: advanced `PalFX` with sinusoidal interpolation and color inversion, `RemapPal` and dynamic palette swaps.
 - [ ] **Team modes**: Simul (2v2 on the same screen), Tag (dynamic swaps with assists) and Turns (KOF style).
 - [ ] **Audio and media**: MP3/OGG stage music, intro video and per-character ending screens (`intro.storyboard` / `ending.storyboard`).
 

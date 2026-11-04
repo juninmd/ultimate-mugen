@@ -16,6 +16,7 @@ pub mod sctrl;
 pub mod hitdef;
 pub mod matchs;
 pub mod tag;
+pub mod camera;
 pub mod common;
 pub mod ai;
 pub mod fx;

@@ -1,6 +1,7 @@
 pub mod bgm;
 pub mod console;
 pub mod debug;
+mod camera;
 mod player;
 mod pause;
 mod stage;
@@ -27,6 +28,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         "victoryquote" => { let v = m.num(i, sc, "value", -1.0, 0) as i32; m.fighters[i].victory_quote = v; }
         "forcefeedback" => force_feedback(m, i, sc),
         "envshake" => env_shake(m, i, sc),
+        "zoom" => camera::zoom(m, i, sc),
         "pause" => pause::pause(m, i, sc),
         "superpause" => pause::super_pause(m, i, sc),
         "stopsnd" => sound::stop(m, i, sc),

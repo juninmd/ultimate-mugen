@@ -89,7 +89,7 @@ Extras de comando (Ikemen GO 1.0):
 
 `AfterImage` `AfterImageTime` `AllPalFX` `AngleAdd` `AngleDraw` `AngleMul` `AngleSet` `AssertSpecial` `AttackDist` `AttackMulSet` `BGPalFX` `BindToParent` `BindToRoot` `BindToTarget` `ChangeAnim` `ChangeAnim2` `ChangeState` `CtrlSet` `DefenceMulSet` `DestroySelf` `EnvColor` `EnvShake` `Explod` `ExplodBindTime` `GameMakeAnim` `Gravity` `Helper` `HitAdd` `HitBy` `HitDef` `HitFallDamage` `HitFallSet` `HitFallVel` `HitVelSet` `LifeAdd` `LifeSet` `MakeDust` `ModifyExplod` `MoveHitReset` `NotHitBy` `PalFX` `ParentVarAdd` `ParentVarSet` `Pause` `PlayerPush` `PlaySnd` `PosAdd` `PosFreeze` `PosSet` `PowerAdd` `PowerSet` `Projectile` `RemoveExplod` `ScreenBound` `SelfState` `SprPriority` `StateTypeSet` `SuperPause` `TargetBind` `TargetDrop` `TargetFacing` `TargetLifeAdd` `TargetPowerAdd` `TargetState` `TargetVelAdd` `TargetVelSet` `Trans` `Turn` `VarAdd` `VarRandom` `VarRangeSet` `VarSet` `VelAdd` `VelMul` `VelSet` `Width`
 
-Também suportados: `ReversalDef` `HitOverride` `FallEnvShake` `RemapPal` `StopSnd` `SndPan` `VictoryQuote` `ForceFeedback` `Offset` `Null` `DisplayToClipboard` `AppendToClipboard` `ClearClipboard`. As adições do Ikemen (`RunState`, `Height`, `GetHitVarSet`, `ModifyHitDef`, `ModifyReversalDef`, `OverrideClsn`, `ResizeClsn`, `TransformClsn`) estão em [Extensões do Ikemen](Ikemen-Extensions).
+Também suportados: `Zoom` `ReversalDef` `HitOverride` `FallEnvShake` `RemapPal` `StopSnd` `SndPan` `VictoryQuote` `ForceFeedback` `Offset` `Null` `DisplayToClipboard` `AppendToClipboard` `ClearClipboard`.
 
 Notas sobre Explod: `ignorehitpause` vale 1 por padrão (use 0 para congelar junto com o hit pause do dono). `postype = left/right/front/back` e `space = screen` mantêm o explod fixo na tela enquanto a câmera se move. `ModifyExplod` aceita `vel`, `accel`, `pos`, `scale`, `bindtime`, `removetime`, `sprpriority`, `ontop`, `under`, `removeongethit`, `ignorehitpause`, `facing`, `vfacing`, `supermovetime`, `pausemovetime` e `trans`; `facing` é relativo ao dono. `ExplodBindTime` só altera o tempo de vínculo.
 
@@ -140,6 +140,23 @@ Triggers de combate e estado (escalados pelo localcoord quando retornam posiçõ
 ## Distâncias entre localcoords diferentes
 
 Todo trigger de posição e distância converte o resultado do espaço do mundo para o localcoord do personagem que o avalia (`P2Dist`, `P2BodyDist`, `RootDist`, `ParentDist`, `ScreenPos`, `LeftEdge`/`RightEdge`/`FrontEdge`/`BackEdge` e a família `...EdgeDist`). Numa luta 1280x720 contra 320x240, o mesmo vão aparece 4 vezes maior para o personagem HD. `P2BodyDist` subtrai as larguras frontais dos dois depois de convertê-las para o mundo, então vale 0 quando as caixas se tocam, seja qual for o localcoord de cada personagem. `P2Dist` e `P2BodyDist` dependem apenas das duas posições: a câmera nunca interfere, inclusive nos estados customizados de um arremesso.
+## Zoom da câmera
+
+`Zoom` muda a escala da câmera (1 = normal, acima de 1 = mais perto). A câmera é determinística: avança um passo por tick, sem relógio.
+
+| Parâmetro | Padrão | Significado |
+| --- | --- | --- |
+| `scale` | 1 | Escala pedida |
+| `time` | 1 | Ticks em que o pedido continua ativo; dispare a cada tick para mantê-lo |
+| `delta` | 0 | Somado à escala pedida a cada tick do pedido (uma rampa) |
+| `pos` | 0, 0 | Deslocamento do foco da câmera no localcoord do jogador |
+| `lag` | 0 | 0 vai à escala pedida em um tick; valores próximos de 1 suavizam (`1 - lag` da distância restante por tick) |
+| `zoomindelay` | 0 | Ticks de espera antes de um zoom-in (`scale > 1`) começar |
+| `bound` | 1 | 1 mantém a escala dentro dos limites do cenário (`zoomin` como maior escala, `1 / zoomout` como menor, ampliada pelo zoom-out de equipes) e o deslocamento dentro dos limites do cenário; 0 só limita a escala a 0.25..4 e ignora os limites do cenário |
+
+Quando o pedido termina, a câmera volta à escala normal usando `zoominspeed` / `zoomoutspeed` do cenário.
+
+`CameraZoom` devolve a escala atual da câmera. `ZoomVar(<nome>)` expõe o estado do zoom: `scale` (atual), `target` (escala pedida), `active`, `time` (ticks restantes), `posx`, `posy`, `lag`, `delta`, `delay`, `bound`, `min` e `max` (limites de escala permitidos pelo cenário agora). Todos os nomes valem 0 (ou a escala atual em `target`) quando nenhum `Zoom` está ativo.
 
 ## Redirecionamentos
 

@@ -102,7 +102,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     let ground_corner_push = if has("ground.cornerpush.veloff", 0) { num("ground.cornerpush.veloff", 0.0, 0) * l } else if attr_state.contains('A') && !attr_state.contains('S') && !attr_state.contains('C') { 0.0 } else { 1.3 * guard_vel };
     let shake = |prefix: &str, time_default: f64| -> Shake {
         let freq = num(&format!("{prefix}.freq"), 60.0, 0).clamp(0.0, 180.0);
-        Shake { time: num(&format!("{prefix}.time"), time_default, 0) as i32, freq, ampl: num(&format!("{prefix}.ampl"), -4.0, 0) * l, phase: num(&format!("{prefix}.phase"), if freq >= 90.0 { 90.0 } else { 0.0 }, 0) }
+        Shake { time: num(&format!("{prefix}.time"), time_default, 0) as i32, freq, ampl: num(&format!("{prefix}.ampl"), -4.0, 0) * l, phase: num(&format!("{prefix}.phase"), if freq >= 90.0 { 90.0 } else { 0.0 }, 0), dir: (num(&format!("{prefix}.dir"), 0.0, 0) as u8).min(2) }
     };
     let opt = |k: &str, idx: usize| if has(k, idx) { Some(num(k, 0.0, idx) * l) } else { None };
     let target_palfx = if has("palfx.time", 0) || has("palfx.add", 0) || has("palfx.mul", 0) {

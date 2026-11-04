@@ -287,3 +287,61 @@ pub fn find_stage_defs(vfs: &Vfs) -> Vec<String> {
         .map(|(k, _)| k.clone())
         .collect()
 }
+
+const FNV_OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
+const FNV_PRIME: u64 = 0x0000_0100_0000_01b3;
+
+fn fnv(mut h: u64, bytes: &[u8]) -> u64 {
+    for &b in bytes {
+        h ^= b as u64;
+        h = h.wrapping_mul(FNV_PRIME);
+    }
+    h
+}
+
+/// Stable 64-bit hash (hex) of arbitrary bytes, for deduplicating persisted or repeated imports.
+pub fn content_hash(bytes: &[u8]) -> String {
+    format!("{:016x}", fnv(FNV_OFFSET, bytes))
+}
+
+fn canonical_def_text(def_bytes: &[u8]) -> String {
+    text(def_bytes)
+        .lines()
+        .map(|l| l.split(';').next().unwrap_or("").trim().to_lowercase())
+        .filter(|l| !l.is_empty())
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn def_key(vfs: &Vfs, def: &str, section: &str, sprite_key: &str) -> String {
+    let def = norm_path(def);
+    let Some(def_bytes) = vfs.get(&def) else {
+        return format!("path:{def}");
+    };
+    let secs = crate::ini::parse_ini(&text(def_bytes));
+    let sprite = crate::ini::find_section(&secs, section)
+        .and_then(|s| s.get(sprite_key))
+        .map(|v| unquote(v))
+        .unwrap_or_default();
+    let base = def.rfind('/').map(|i| &def[..i]).unwrap_or("");
+    let mut h = fnv(FNV_OFFSET, canonical_def_text(def_bytes).as_bytes());
+    match resolve(vfs, base, &sprite) {
+        Some(b) => {
+            h = fnv(h, &(b.len() as u64).to_le_bytes());
+            h = fnv(h, b);
+        }
+        None => h = fnv(h, norm_path(&sprite).as_bytes()),
+    }
+    format!("{h:016x}")
+}
+
+/// Identity of a character independent of where it was found: hash of its normalized `.def` and sprite file.
+/// The same fighter imported twice, from another path, or with different letter case yields the same key.
+pub fn char_key(vfs: &Vfs, def: &str) -> String {
+    def_key(vfs, def, "files", "sprite")
+}
+
+/// Identity of a stage, same idea as [`char_key`] (uses `[BGdef] spr`).
+pub fn stage_key(vfs: &Vfs, def: &str) -> String {
+    def_key(vfs, def, "bgdef", "spr")
+}

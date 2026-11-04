@@ -132,6 +132,7 @@ impl App {
         Self::boot(&mut ui, 0.75, "Procurando pasta mugen/…").await;
         #[cfg(not(target_arch = "wasm32"))]
         reg.scan_folders();
+        reg.dedupe();
         reg.sort_mugen();
         Self::boot(&mut ui, 0.9, "Áudio…").await;
         let audio = Audio::new(audio_on).await;
@@ -203,10 +204,10 @@ impl App {
         if self.trans > 0.0 { self.ui.wipe(self.trans); self.trans = (self.trans - dt * 2.6).max(0.0); }
         self.audio.process().await;
         crate::set_import_button(!matches!(self.screen, Screen::Fight | Screen::Vs { .. } | Screen::Results { .. } | Screen::Cutscene { .. }));
-        for (i, zip) in crate::take_imports().into_iter().enumerate() {
-            let mut vfs = ume_formats::vfs::Vfs::new();
-            match ume_formats::vfs::add_zip(&mut vfs, &zip, "") {
-                Ok(_) => { let (c, s, e) = self.reg.add_vfs_lazy(vfs, &format!("web{}-{i}", get_time() as u64)); self.reg.sort_mugen(); self.sel = (self.sel.0.min(self.reg.chars.len() - 1), self.sel.1.min(self.reg.chars.len() - 1), self.sel.2.min(self.reg.stages.len() - 1)); self.msg = format!("Importado: {} personagem(ns), {} cenário(s){}", c.len(), s.len(), if e.is_empty() { String::new() } else { format!(" · {} erro(s)", e.len()) }); }
+        for zip in crate::take_imports() {
+            match self.reg.import_zip(&zip) {
+                Ok(r) if r.duplicate_pack || (r.chars + r.stages == 0 && r.errors == 0) => self.msg = "Pacote já importado".into(),
+                Ok(r) => { self.reg.sort_mugen(); self.sel = (self.sel.0.min(self.reg.chars.len() - 1), self.sel.1.min(self.reg.chars.len() - 1), self.sel.2.min(self.reg.stages.len() - 1)); self.msg = format!("Importado: {} personagem(ns), {} cenário(s){}", r.chars, r.stages, if r.errors == 0 { String::new() } else { format!(" · {} erro(s)", r.errors) }); }
                 Err(e) => self.msg = format!("Zip inválido: {e}"),
             }
         }

@@ -43,12 +43,31 @@
   window.umeStartImports = function (wasm) {
     const DB = 'ultimate-mugen', ST = 'packs';
     function db() { return new Promise((res, rej) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(ST); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
-    async function store(name, buf) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).put(buf, name); } catch (e) {} }
-    async function all() { try { const d = await db(); return await new Promise((res) => { const out = []; const rq = d.transaction(ST).objectStore(ST).openCursor(); rq.onsuccess = () => { const c = rq.result; if (c) { out.push(c.value); c.continue(); } else res(out); }; rq.onerror = () => res(out); }); } catch (e) { return []; } }
-    async function send(file) { const buf = new Uint8Array(await file.arrayBuffer()); wasm.ume_import(buf); store(file.name + ':' + file.size, buf); }
+    async function digest(buf) {
+      try { const h = await crypto.subtle.digest('SHA-256', buf); return Array.from(new Uint8Array(h), (x) => x.toString(16).padStart(2, '0')).join(''); }
+      catch (e) { let h = 2166136261; for (let i = 0; i < buf.length; i++) { h ^= buf[i]; h = Math.imul(h, 16777619) >>> 0; } return 'f' + buf.length + '-' + h.toString(16); }
+    }
+    const seen = new Set();
+    async function store(key, buf) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).put(buf, key); } catch (e) {} }
+    async function all() { try { const d = await db(); return await new Promise((res) => { const out = []; const rq = d.transaction(ST).objectStore(ST).openCursor(); rq.onsuccess = () => { const c = rq.result; if (c) { out.push({ key: c.key, value: c.value }); c.continue(); } else res(out); }; rq.onerror = () => res(out); }); } catch (e) { return []; } }
+    async function remove(key) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).delete(key); } catch (e) {} }
+    async function accept(buf) {
+      const id = await digest(buf);
+      if (seen.has(id)) return false;
+      seen.add(id);
+      wasm.ume_import(buf);
+      return id;
+    }
+    async function send(file) { const buf = new Uint8Array(await file.arrayBuffer()); const id = await accept(buf); if (id) store(id, buf); }
     window.umeImport = (files) => { for (const f of files) send(f); };
-    window.umeClearImports = async () => { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).clear(); };
-    all().then((bufs) => bufs.forEach((b) => wasm.ume_import(new Uint8Array(b))));
+    window.umeClearImports = async () => { seen.clear(); const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).clear(); };
+    all().then(async (rows) => {
+      for (const { key, value } of rows) {
+        const buf = new Uint8Array(value);
+        const id = await accept(buf);
+        if (key !== id) { await remove(key); if (id) await store(id, buf); }
+      }
+    });
     const input = document.getElementById('ume-file');
     if (input) input.addEventListener('change', () => window.umeImport(input.files));
     window.addEventListener('dragover', (e) => e.preventDefault());

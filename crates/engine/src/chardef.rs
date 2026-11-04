@@ -94,6 +94,19 @@ pub struct CharDef {
     pub indexed: HashMap<(i32, i32), IndexedSprite>,
     pub remap_cache: Mutex<HashMap<((i32, i32), PalKey), Arc<ImageData>>>,
     pub image_cache: Mutex<HashMap<(i32, i32), Arc<ImageData>>>,
+    /// Set for large sprite files: the archive is kept and pixels are decoded per sprite on demand.
+    pub sff: Option<Arc<LazySff>>,
+    pub lazy_indexed: Mutex<HashMap<(i32, i32), IndexedSprite>>,
+}
+
+/// Raw sprite file plus the palette choice a full decode would have made, for sprites decoded later.
+#[derive(Debug)]
+pub struct LazySff {
+    pub buf: Arc<Vec<u8>>,
+    pub version: u8,
+    pub target: i32,
+    pub over: Option<Arc<Vec<u8>>>,
+    pub fallback: Option<Arc<Vec<u8>>>,
 }
 impl CharDef {
     pub fn empty(id: &str) -> Self {
@@ -130,7 +143,66 @@ impl CharDef {
             indexed: HashMap::new(),
             remap_cache: Mutex::new(HashMap::new()),
             image_cache: Mutex::new(HashMap::new()),
+            sff: None,
+            lazy_indexed: Mutex::new(HashMap::new()),
         }
+    }
+
+    /// True when sprite pixels are decoded on demand from a retained sprite file.
+    pub fn is_lazy(&self) -> bool { self.sff.is_some() }
+
+    /// Indexed pixels for a sprite, decoding it (and caching) when the character was loaded lazily.
+    pub fn sprite_indexed(&self, key: (i32, i32)) -> Option<IndexedSprite> {
+        if let Some(ix) = self.indexed.get(&key) {
+            return Some(ix.clone());
+        }
+        if let Some(ix) = self.lazy_indexed.lock().ok().and_then(|c| c.get(&key).cloned()) {
+            return Some(ix);
+        }
+        let lazy = self.sff.as_ref()?;
+        let decoded = ume_formats::sff::decode_sff_sprites(&lazy.buf, &[key]).ok()?;
+        let sprite = decoded.sprites.iter().find(|s| (s.group, s.index) == key)?;
+        let pixels = sprite.indexed.clone()?;
+        let pal = if lazy.version == 1 {
+            if sprite.palette_index == lazy.target || sprite.palette.is_none() { (1, 1) } else { (-1, sprite.palette_index) }
+        } else {
+            decoded.palettes.get(sprite.palette_index.max(0) as usize).map(|p| (p.group, p.index)).unwrap_or((1, 1))
+        };
+        let palette = if sprite.palette.is_none() && sprite.rgba.is_none() {
+            lazy.fallback.clone()
+        } else if lazy.over.is_some() && sprite.palette_index == lazy.target && sprite.group != 9000 {
+            lazy.over.clone()
+        } else {
+            sprite.palette.clone()
+        };
+        let ix = IndexedSprite::new(sprite.width, sprite.height, pixels, pal, palette);
+        self.lazy_indexed.lock().ok()?.insert(key, ix.clone());
+        Some(ix)
+    }
+
+    /// RGBA pixels for a sprite, decoding it on demand when needed.
+    pub fn sprite_rgba(&self, key: (i32, i32)) -> Option<Arc<ImageData>> {
+        if let Some(img) = self.sprites.get(&key).and_then(|s| s.image.clone()) {
+            return Some(img);
+        }
+        if let Some(img) = self.image_cache.lock().ok().and_then(|c| c.get(&key).cloned()) {
+            return Some(img);
+        }
+        let ix = self.sprite_indexed(key)?;
+        let pal: &[u8] = match ix.palette.as_deref() { Some(p) => p, None => self.palettes.get(&ix.pal).map(|p| p.as_slice())? };
+        if pal.len() < 1024 {
+            return None;
+        }
+        let mut rgba = vec![0u8; ix.pixels.len() * 4];
+        for (o, &c) in rgba.chunks_exact_mut(4).zip(ix.pixels.iter()) {
+            if c == 0 { continue; }
+            let p = c as usize * 4;
+            o[..3].copy_from_slice(&pal[p..p + 3]);
+            o[3] = 255;
+        }
+        let img = ImageData::new(ix.w, ix.h, rgba);
+        self.image_cache.lock().ok()?.insert(key, img.clone());
+        Some(img)
     }
     pub fn diagnostics(&self) -> &crate::diagnostics::Diagnostics {
         self.diagnostics_cache.get_or_init(|| crate::diagnostics::audit_char(self, &self.source_spans))
@@ -138,7 +210,7 @@ impl CharDef {
     pub fn c(&self, k: &str, d: f64) -> f64 { *self.constants.get(k).unwrap_or(&d) }
 
     pub fn remap_palette(&self, sprite: (i32, i32), remap: &[(PalKey, PalKey)]) -> Option<&Arc<Vec<u8>>> {
-        let ix = self.indexed.get(&sprite)?;
+        let ix = self.sprite_indexed(sprite)?;
         let dst = remap.iter().rev().find(|(src, _)| *src == ix.pal)?.1;
         if dst == ix.pal { return None; }
         self.palettes.get(&dst)
@@ -168,7 +240,7 @@ impl CharDef {
     pub fn rgba_sprite(&self, sprite: (i32, i32)) -> Option<Arc<ImageData>> {
         let spr = self.sprites.get(&sprite)?;
         if let Some(img) = &spr.image { return Some(img.clone()); }
-        let ix = self.indexed.get(&sprite)?;
+        let ix = self.sprite_indexed(sprite)?;
         let mut cache = self.image_cache.lock().ok()?;
         if let Some(img) = cache.get(&sprite) { return Some(img.clone()); }
         let pal: &[u8] = match ix.palette.as_deref() { Some(p) => p, None => self.palettes.get(&ix.pal).map(|p| p.as_slice())? };

@@ -7,8 +7,13 @@ use std::sync::Arc;
 use ume_formats::act::decode_act;
 use ume_formats::air::parse_air;
 use ume_formats::ini::{find_section, nums, parse_ini, unquote};
-use ume_formats::sff::{decode_sff, decode_sff_only, sprite_to_rgba};
+use ume_formats::sff::{decode_sff, decode_sff_selected, sprite_to_rgba};
 use ume_formats::snd::decode_snd;
+
+/// Sprite files at or above this size are indexed instead of fully decoded at load; pixels are decoded per sprite
+/// on first use (a 54 MB HD pack decodes ~5 s up front, and a fight only needs a handful of sprites to start).
+pub const LAZY_SFF_BYTES: usize = 8 << 20;
+
 use ume_formats::vfs::{norm_path, resolve, text, Vfs};
 
 /// `localcoord` -> (largura, altura). Aceita o formato canonico `320,240`,
@@ -22,6 +27,12 @@ fn local_size(lc: Option<&str>) -> (f32, f32) {
 }
 
 pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool) -> Result<CharDef, String> {
+    load_mugen_char_with(vfs, def_path, pal_no, with_images, LAZY_SFF_BYTES)
+}
+
+/// Same as [`load_mugen_char`], with the sprite-file size at which decoding becomes per-sprite
+/// (`usize::MAX` forces a full decode, `0` forces the lazy path).
+pub fn load_mugen_char_with(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool, lazy_sff_bytes: usize) -> Result<CharDef, String> {
     let def_path = norm_path(def_path);
     let base = def_path.rsplit_once('/').map(|(b, _)| b.to_string()).unwrap_or_default();
     let dt = text(vfs.get(&def_path).ok_or("def not found")?);
@@ -72,8 +83,19 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     let mut sprites = HashMap::new();
     let mut palettes = HashMap::new();
     let mut indexed = HashMap::new();
-    if let Some(buf) = resolve(vfs, &base, &fget("sprite").unwrap_or_default()) {
-        let sff = crate::perf::time("sff:decode", || decode_sff(buf))?;
+    let mut lazy_sff_built: Option<(Option<Arc<Vec<u8>>>, u8, i32, Option<Vec<u8>>, Option<Vec<u8>>)> = None;
+    let sprite_name = fget("sprite").unwrap_or_default();
+    let lazy_sff = (!sprite_name.is_empty())
+        .then(|| ume_formats::vfs::resolve_path(vfs, &base, &sprite_name))
+        .flatten()
+        .and_then(|path| vfs.get_shared(&path))
+        .filter(|buf| with_images && buf.len() >= lazy_sff_bytes);
+    if lazy_sff.is_some() || resolve(vfs, &base, &sprite_name).is_some() {
+        let sff = match &lazy_sff {
+            Some(buf) => crate::perf::time("sff:index", || ume_formats::sff::decode_sff_metadata(buf))?,
+            None => crate::perf::time("sff:decode", || decode_sff(resolve(vfs, &base, &sprite_name).unwrap()))?,
+        };
+        let lazy = lazy_sff.is_some();
         let mut counts: HashMap<i32, usize> = HashMap::new();
         for s in &sff.sprites { if s.group != 9000 { *counts.entry(s.palette_index).or_default() += 1; } }
         let target = counts.iter().max_by_key(|(_, n)| **n).map(|(k, _)| *k).unwrap_or(-1);
@@ -118,7 +140,7 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
             let shared = pixels_id(s).map(|px| (px, pal_of(s).or(s.palette.as_deref().map(|v| v.as_slice())).map_or(0, |p| p.as_ptr() as usize), s.width, s.height));
             owner_of.push(match shared { Some(k) => *owners.entry(k).or_insert(i), None => i });
         }
-        let renders: Vec<usize> = (0..unique.len()).filter(|&i| with_images && owner_of[i] == i && unique[i].width > 0 && unique[i].height > 0 && (unique[i].indexed.is_none() || unique[i].group == 9000)).collect();
+        let renders: Vec<usize> = (0..unique.len()).filter(|&i| with_images && !lazy && owner_of[i] == i && unique[i].width > 0 && unique[i].height > 0 && (unique[i].indexed.is_none() || unique[i].group == 9000)).collect();
         let images = crate::perf::time("sff:rgba", || ume_formats::par::map(&renders, |&i| ImageData::new(unique[i].width, unique[i].height, sprite_to_rgba(unique[i], pal_of(unique[i])))));
         let image_of: HashMap<usize, Arc<ImageData>> = renders.into_iter().zip(images).collect();
         for (i, s) in unique.iter().enumerate() {
@@ -127,6 +149,7 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
             let image = if with_images && s.width > 0 && s.height > 0 { image_of.get(&owner_of[i]).cloned() } else { None };
             sprites.insert(key, Sprite { image, width: s.width as f32, height: s.height as f32, axis_x: s.axis_x as f32, axis_y: s.axis_y as f32, scale: 1.0 });
         }
+        lazy_sff_built = Some((lazy_sff, sff.version, target, over, fallback));
     }
     let sounds = crate::perf::time("snd:decode", || resolve(vfs, &base, &fget("sound").unwrap_or_default()).map(decode_snd).unwrap_or_default());
     // move list for the pause screen: every author-defined command with its input (internal hold/recovery helpers left out)
@@ -147,6 +170,9 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     d.constants = constants; d.portrait = sprites.get(&(9000, 0)).cloned(); d.sprites = sprites; d.anims = anims;
     d.commands = commands; d.states = states; d.sounds = sounds; d.ai_commands = ai_commands; d.movelist = movelist; d.series = "M.U.G.E.N".into();
     d.palettes = palettes; d.indexed = indexed;
+    if let Some((Some(buf), version, target, over, fallback)) = lazy_sff_built {
+        d.sff = Some(Arc::new(crate::chardef::LazySff { buf, version, target, over: over.map(Arc::new), fallback: fallback.map(Arc::new) }));
+    }
     d.source_spans = spans;
     report_diagnostics(&d, &def_path);
     let _ = Arc::new(0);
@@ -168,7 +194,7 @@ pub fn load_mugen_portrait(vfs: &Vfs, def_path: &str) -> Option<Sprite> {
     let files = find_section(&secs, "files")?;
     let fget = |k: &str| files.get(k).map(|s| s.to_string());
     let idle_key = resolve(vfs, &base, &fget("anim").unwrap_or_default()).and_then(|b| parse_air(&text(b)).get(&0).and_then(|a| a.frames.first()).map(|f| (f.group, f.index)));
-    let sff = decode_sff_only(resolve(vfs, &base, &fget("sprite")?)?, |g, i| g == 9000 && (i == 0 || i == 1) || Some((g, i)) == idle_key).ok()?;
+    let sff = decode_sff_selected(resolve(vfs, &base, &fget("sprite")?)?, |g, i| g == 9000 && (i == 0 || i == 1) || Some((g, i)) == idle_key).ok()?;
     let find = |g: i32, i: i32| sff.sprites.iter().find(|s| s.group == g && s.index == i && s.width > 0 && s.height > 0);
     let idle = || idle_key.and_then(|(g, i)| find(g, i));
     let act = fget("pal1").and_then(|p| resolve(vfs, &base, &p)).filter(|a| a.len() >= 768).map(decode_act);

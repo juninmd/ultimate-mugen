@@ -194,7 +194,7 @@ impl Registry {
     }
     /// Idempotent .zip import: the same archive bytes are processed once per session, and fighters/stages already in the roster (same content key) are skipped.
     pub fn import_zip(&mut self, bytes: &[u8]) -> Result<ImportReport, String> {
-        let (pack, vfs) = read_zip(bytes)?;
+        let (pack, vfs) = read_zip(bytes.to_vec())?;
         Ok(self.finish_import(pack, vfs))
     }
     pub fn finish_import(&mut self, pack: String, vfs: Vfs) -> ImportReport {
@@ -353,24 +353,14 @@ impl Registry {
 }
 
 /// Heavy half of an import (hash + decompression), safe to run on a worker thread.
-pub fn read_zip(bytes: &[u8]) -> Result<(String, Vfs), String> {
-    let pack = ume_formats::vfs::content_hash(bytes);
+pub fn read_zip(bytes: Vec<u8>) -> Result<(String, Vfs), String> {
+    let pack = ume_formats::vfs::content_hash(&bytes);
     let mut vfs = Vfs::new();
     let clock = ume_shell::Clock::now();
-    ume_formats::vfs::add_zip(&mut vfs, bytes, "")?;
+    ume_formats::vfs::add_zip_arc(&mut vfs, std::sync::Arc::new(bytes), "", ume_formats::vfs::LAZY_ENTRY_BYTES)?;
     if ume_formats::perf::enabled() {
-        let mut by_ext: HashMap<String, (usize, usize)> = HashMap::new();
-        for (k, v) in &vfs {
-            let ext = k.rsplit_once('.').map(|(_, e)| e.to_string()).unwrap_or_else(|| "(none)".into());
-            let e = by_ext.entry(ext).or_default();
-            e.0 += 1;
-            e.1 += v.len();
-        }
-        let mut rows: Vec<_> = by_ext.into_iter().collect();
-        rows.sort_by_key(|(_, (_, b))| std::cmp::Reverse(*b));
-        let total: usize = rows.iter().map(|(_, (_, b))| *b).sum();
-        let listing: Vec<String> = rows.iter().take(12).map(|(e, (n, b))| format!("{e}:{n}/{:.1}MB", *b as f64 / 1048576.0)).collect();
-        ume_formats::perf::emit(&format!("[perf] zip {:.1}MB -> vfs {:.1}MB in {:.0} ms ({})", bytes.len() as f64 / 1048576.0, total as f64 / 1048576.0, clock.elapsed().as_secs_f64() * 1000.0, listing.join(" ")));
+        let (eager, lazy) = vfs.memory();
+        ume_formats::perf::emit(&format!("[perf] zip {} files: {:.1} MB unpacked now, {:.1} MB still packed (inflated on first use), index in {:.0} ms", vfs.len(), eager as f64 / 1048576.0, lazy as f64 / 1048576.0, clock.elapsed().as_secs_f64() * 1000.0));
     }
     Ok((pack, vfs))
 }
@@ -431,11 +421,11 @@ mod tests {
     #[test]
     fn read_zip_matches_import_zip() {
         let zip = include_bytes!("../assets/mugen/elecbyte.zip");
-        let (pack, vfs) = read_zip(zip).unwrap();
+        let (pack, vfs) = read_zip(zip.to_vec()).unwrap();
         let mut reg = Registry::new();
         let r = reg.finish_import(pack.clone(), vfs);
         assert!(r.chars > 0 && !r.duplicate_pack);
-        let (_, vfs2) = read_zip(zip).unwrap();
+        let (_, vfs2) = read_zip(zip.to_vec()).unwrap();
         assert!(reg.finish_import(pack, vfs2).duplicate_pack);
     }
 

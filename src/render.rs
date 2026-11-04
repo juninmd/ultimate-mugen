@@ -41,7 +41,7 @@ impl Gfx {
     }
     pub fn sprite_tex(&mut self, def: &CharDef, key: (i32, i32), remap: &[((i32, i32), (i32, i32))]) -> Option<SpriteTex> {
         let spr = def.sprites.get(&key)?;
-        if let Some(ix) = def.indexed.get(&key) {
+        if let Some(ix) = def.sprite_indexed(key) {
             let pal = (!remap.is_empty()).then(|| def.remap_palette(key, remap)).flatten().or(ix.palette.as_ref());
             if let Some(pal) = pal.filter(|_| ix.w > 0 && ix.h > 0) {
                 let palette = self.palette(pal);
@@ -49,10 +49,17 @@ impl Gfx {
                 return Some(SpriteTex::Indexed(tex, palette));
             }
         }
-        let img = spr.image.as_ref()?;
-        Some(SpriteTex::Rgba(self.texture(img, spr.scale >= 0.99)))
+        let img = match spr.image.clone() {
+            Some(img) => img,
+            None => def.sprite_rgba(key)?,
+        };
+        Some(SpriteTex::Rgba(self.texture(&img, spr.scale >= 0.99)))
     }
     pub fn prefetch(&mut self, def: &CharDef, max_occupancy: f32) -> bool {
+        if def.is_lazy() {
+            let keys: Vec<(i32, i32)> = def.anims.get(&0).map(|a| a.frames.iter().map(|f| (f.group, f.index)).collect()).unwrap_or_default();
+            return keys.into_iter().all(|k| def.sprite_indexed(k).is_some());
+        }
         let keys: Vec<(i32, i32)> = def.sprites.keys().copied().collect();
         keys.into_iter().all(|k| self.sprite_tex(def, k, &[]).is_none_or(|t| t.prefetch(max_occupancy)))
     }

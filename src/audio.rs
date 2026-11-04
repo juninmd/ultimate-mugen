@@ -309,6 +309,15 @@ impl Audio {
     /// Decodes the match's samples off the render thread (inline on wasm). Returns true once everything is in `sources`.
     pub fn preload_match(&mut self, chars: &[CharSounds]) -> bool {
         if !self.enabled { return true; }
+        // Browsers have no worker threads here: decoding every sample of an HD pack blocks the page for ~1 s.
+        // Samples are decoded on first play instead (a few ms each), so the VS screen stays responsive.
+        #[cfg(target_arch = "wasm32")]
+        {
+            self.sources.retain(|k, _| chars.iter().any(|(id, _)| *id == k.0));
+            self.voices.retain(|k, _| chars.iter().any(|(id, _)| *id == k.0 .0));
+            return true;
+        }
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(h) = self.preload_job.take() {
             if !h.is_finished() { self.preload_job = Some(h); return false; }
             for (key, r) in h.join().unwrap_or_default() { self.sources.insert(key, Some(r.map(Source::Pcm).unwrap_or_else(Source::Raw))); }
@@ -323,10 +332,7 @@ impl Audio {
             .collect();
         if todo.is_empty() { return true; }
         let work = move || { let decoded = ume_formats::par::map(&todo, |(_, b)| decode(b)); todo.into_iter().zip(decoded).map(|((k, b), pcm)| (k, pcm.ok_or(b))).collect::<Vec<_>>() };
-        #[cfg(not(target_arch = "wasm32"))]
-        if let Ok(h) = std::thread::Builder::new().name("sfx-decode".into()).spawn(work) { self.preload_job = Some(h); return false; } else { return true; }
-        #[cfg(target_arch = "wasm32")]
-        { for (key, r) in work() { self.sources.insert(key, Some(r.map(Source::Pcm).unwrap_or_else(Source::Raw))); } true }
+        if let Ok(h) = std::thread::Builder::new().name("sfx-decode".into()).spawn(work) { self.preload_job = Some(h); false } else { true }
     }
     fn start(&mut self, s: &Sound, secs: f64, o: SoundOpts, key: Option<SampleKey>) {
         let now = crate::gfx::get_time();

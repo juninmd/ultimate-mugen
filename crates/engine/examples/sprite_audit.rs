@@ -19,7 +19,7 @@ fn main() {
                         None => { missing.insert((*no, fr.group, fr.index)); }
                         Some(s) if s.width == 0.0 || s.height == 0.0 => { empty.insert((*no, fr.group, fr.index)); }
                         Some(s) => {
-                            let blank_sprite = match d.indexed.get(&key) {
+                            let blank_sprite = match d.sprite_indexed(key) {
                                 Some(ix) => ix.pixels.iter().all(|&p| p == 0),
                                 None => s.image.as_ref().is_none_or(|i| i.rgba.chunks(4).all(|p| p[3] == 0)),
                             };

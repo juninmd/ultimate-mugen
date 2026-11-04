@@ -1,12 +1,179 @@
 //! In-memory virtual file system (port of the file-resolution parts of
 //! `src/mugen/loader.ts`) plus a tiny zip reader (stored + deflate, zip64).
+//!
+//! Large archive entries (sprites, sounds) can stay compressed inside the archive and be inflated on first
+//! access, so importing a pack costs a directory scan instead of hundreds of megabytes of decompression.
 
 use crate::ini::unquote;
 use crate::Reader;
 use std::collections::BTreeMap;
+use std::fmt;
+use std::sync::{Arc, OnceLock};
 
-/// Keys: normalized (lowercase, `/`-separated, relative) paths.
-pub type Vfs = BTreeMap<String, Vec<u8>>;
+/// Entries at or above this size stay compressed in the archive until something reads them.
+pub const LAZY_ENTRY_BYTES: usize = 1 << 20;
+
+struct LazyFile {
+    archive: Arc<Vec<u8>>,
+    start: usize,
+    csize: usize,
+    size: usize,
+    method: u16,
+    crc: u32,
+    data: OnceLock<Arc<Vec<u8>>>,
+}
+
+impl LazyFile {
+    fn inflate(&self) -> Arc<Vec<u8>> {
+        let bytes = match self.archive.get(self.start..self.start.saturating_add(self.csize)) {
+            Some(data) if self.method == 0 => data.to_vec(),
+            Some(data) if self.method == 8 => inflate_raw(data, self.size).unwrap_or_default(),
+            _ => Vec::new(),
+        };
+        Arc::new(bytes)
+    }
+}
+
+impl fmt::Debug for LazyFile {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("LazyFile").field("size", &self.size).field("method", &self.method).field("crc", &self.crc).finish()
+    }
+}
+
+/// Normalized (lowercase, `/`-separated, relative) path to file contents.
+#[derive(Default, Clone)]
+pub struct Vfs {
+    files: BTreeMap<String, Arc<Vec<u8>>>,
+    lazy: BTreeMap<String, Arc<LazyFile>>,
+}
+
+impl fmt::Debug for Vfs {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Vfs").field("files", &self.files.len()).field("lazy", &self.lazy.len()).finish()
+    }
+}
+
+impl Vfs {
+    pub fn new() -> Self { Vfs::default() }
+
+    pub fn get(&self, key: &str) -> Option<&Vec<u8>> {
+        if let Some(v) = self.files.get(key) {
+            return Some(v.as_ref());
+        }
+        let entry = self.lazy.get(key)?;
+        Some(entry.data.get_or_init(|| entry.inflate()).as_ref())
+    }
+
+    /// Owned handle to the contents, so a long-lived owner can keep the bytes without copying them.
+    pub fn get_shared(&self, key: &str) -> Option<Arc<Vec<u8>>> {
+        if let Some(v) = self.files.get(key) {
+            return Some(v.clone());
+        }
+        let entry = self.lazy.get(key)?;
+        Some(entry.data.get_or_init(|| entry.inflate()).clone())
+    }
+
+    pub fn insert(&mut self, key: String, data: Vec<u8>) -> Option<Arc<Vec<u8>>> {
+        self.lazy.remove(&key);
+        self.files.insert(key, Arc::new(data))
+    }
+
+    fn insert_lazy(&mut self, key: String, file: LazyFile) {
+        self.files.remove(&key);
+        self.lazy.insert(key, Arc::new(file));
+    }
+
+    pub fn contains_key(&self, key: &str) -> bool { self.files.contains_key(key) || self.lazy.contains_key(key) }
+
+    pub fn len(&self) -> usize { self.files.len() + self.lazy.len() }
+
+    pub fn is_empty(&self) -> bool { self.len() == 0 }
+
+    pub fn keys(&self) -> impl Iterator<Item = &String> { self.files.keys().chain(self.lazy.keys()) }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&String, &Vec<u8>)> {
+        self.keys().filter_map(move |k| self.get(k).map(|v| (k, v)))
+    }
+
+    pub fn append(&mut self, other: &mut Vfs) {
+        for (k, v) in std::mem::take(&mut other.files) {
+            self.lazy.remove(&k);
+            self.files.insert(k, v);
+        }
+        for (k, v) in std::mem::take(&mut other.lazy) {
+            self.files.remove(&k);
+            self.lazy.insert(k, v);
+        }
+    }
+
+    /// Folds the identity of one file into `h` without inflating it when it is stored compressed.
+    pub fn fold_file(&self, key: &str, h: u64) -> Option<u64> {
+        if let Some(v) = self.files.get(key) {
+            let with_len = fnv(h, &(v.len() as u64).to_le_bytes());
+            return Some(fnv(with_len, v.as_slice()));
+        }
+        let e = self.lazy.get(key)?;
+        let with_len = fnv(h, &(e.size as u64).to_le_bytes());
+        Some(fnv(with_len, &e.crc.to_le_bytes()))
+    }
+
+    /// Size in bytes of the file contents (decompressed size for entries still in the archive).
+    pub fn size(&self, key: &str) -> Option<usize> {
+        self.files.get(key).map(|v| v.len()).or_else(|| self.lazy.get(key).map(|e| e.size))
+    }
+
+    /// Bytes already decompressed (eager entries plus archive entries that were read), and bytes still in the archive.
+    pub fn memory(&self) -> (usize, usize) {
+        let mut eager: usize = self.files.values().map(|v| v.len()).sum();
+        let mut lazy = 0;
+        for entry in self.lazy.values() {
+            match entry.data.get() {
+                Some(bytes) => eager += bytes.len(),
+                None => lazy += entry.size,
+            }
+        }
+        (eager, lazy)
+    }
+
+    pub fn lazy_count(&self) -> usize { self.lazy.len() }
+
+    pub fn values(&self) -> impl Iterator<Item = &Vec<u8>> { self.keys().filter_map(move |k| self.get(k)) }
+}
+
+impl std::ops::Index<&str> for Vfs {
+    type Output = Vec<u8>;
+    fn index(&self, key: &str) -> &Vec<u8> { self.get(key).unwrap_or_else(|| panic!("vfs: missing {key}")) }
+}
+
+impl<const N: usize> From<[(String, Vec<u8>); N]> for Vfs {
+    fn from(items: [(String, Vec<u8>); N]) -> Self {
+        let mut vfs = Vfs::new();
+        for (key, bytes) in items {
+            vfs.insert(key, bytes);
+        }
+        vfs
+    }
+}
+
+impl IntoIterator for Vfs {
+    type Item = (String, Vec<u8>);
+    type IntoIter = std::vec::IntoIter<(String, Vec<u8>)>;
+    fn into_iter(self) -> Self::IntoIter {
+        let mut out: Vec<(String, Vec<u8>)> = self.files.into_iter().map(|(k, v)| (k, v.as_ref().clone())).collect();
+        for (k, e) in self.lazy {
+            let bytes = e.data.get_or_init(|| e.inflate()).as_ref().clone();
+            out.push((k, bytes));
+        }
+        out.sort();
+        out.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a Vfs {
+    type Item = (&'a String, &'a Vec<u8>);
+    type IntoIter = std::boxed::Box<dyn Iterator<Item = (&'a String, &'a Vec<u8>)> + 'a>;
+    fn into_iter(self) -> Self::IntoIter { Box::new(self.iter()) }
+}
 
 /// `\` -> `/`, strip a leading `./`, collapse repeated `/`, lowercase.
 pub fn norm_path(p: &str) -> String {
@@ -70,10 +237,11 @@ const CDIR_SIG: u32 = 0x0201_4b50;
 const LOCAL_SIG: u32 = 0x0403_4b50;
 const MAX_ENTRY_BYTES: usize = 256 << 20;
 
-/// Read every file of a zip archive into `vfs` under `prefix` (may be empty).
-/// Directory entries are skipped. Supports stored and deflated entries (and
-/// zip64). Returns the number of files added.
-pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, String> {
+/// Read every file of a zip archive into `vfs` under `prefix` (may be empty), keeping entries at or above
+/// `lazy_threshold` bytes compressed in `archive` until something reads them. Directory entries are skipped.
+/// Supports stored and deflated entries (and zip64). Returns the number of files added.
+pub fn add_zip_arc(vfs: &mut Vfs, archive: Arc<Vec<u8>>, prefix: &str, lazy_threshold: usize) -> Result<usize, String> {
+    let bytes: &[u8] = &archive;
     let r = Reader(bytes);
     if bytes.len() < 22 {
         return Err("zip: file too small".into());
@@ -115,6 +283,7 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         let name_len = r.u16(p + 28) as usize;
         let extra_len = r.u16(p + 30) as usize;
         let comment_len = r.u16(p + 32) as usize;
+        let p_crc = p + 16;
         let mut local = r.u32(p + 42) as u64;
         let name_start = p + 46;
         let name_bytes = bytes.get(name_start..name_start + name_len).ok_or("zip: truncated central directory")?;
@@ -161,15 +330,35 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         let data = bytes
             .get(data_start..data_start.saturating_add(csize))
             .ok_or_else(|| format!("zip: {name}: truncated data"))?;
-        let content = match method {
-            0 => data.to_vec(),
-            8 => inflate_raw(data, usize::try_from(usize_).unwrap_or(0)).map_err(|e| format!("zip: {name}: {e}"))?,
-            m => return Err(format!("zip: {name}: unsupported compression method {m}")),
-        };
-        vfs.insert(join(prefix, &name), content);
+        if method != 0 && method != 8 {
+            return Err(format!("zip: {name}: unsupported compression method {method}"));
+        }
+        let size = usize::try_from(usize_).unwrap_or(0);
+        if size > MAX_ENTRY_BYTES {
+            return Err(format!("zip: {name}: entry too large"));
+        }
+        if data_start.saturating_add(csize) > bytes.len() {
+            return Err(format!("zip: {name}: truncated data"));
+        }
+        let key = join(prefix, &name);
+        if size >= lazy_threshold && size > 0 {
+            vfs.insert_lazy(key, LazyFile { archive: archive.clone(), start: data_start, csize, size, method, crc: r.u32(p_crc), data: OnceLock::new() });
+        } else {
+            let content = match method {
+                0 => data.to_vec(),
+                8 => inflate_raw(data, size).map_err(|e| format!("zip: {name}: {e}"))?,
+                _ => unreachable!(),
+            };
+            vfs.insert(key, content);
+        }
         added += 1;
     }
     Ok(added)
+}
+
+/// Eager variant: every entry is decompressed up front (folders, tests, small archives).
+pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, String> {
+    add_zip_arc(vfs, Arc::new(bytes.to_vec()), prefix, usize::MAX)
 }
 
 fn inflate_raw(data: &[u8], size_hint: usize) -> Result<Vec<u8>, String> {
@@ -204,15 +393,17 @@ pub fn add_dir(vfs: &mut Vfs, dir: &std::path::Path, prefix: &str) -> std::io::R
             if meta.is_dir() {
                 walk(vfs, &path, &child, n)?;
             } else if meta.is_file() {
-                let Ok(data) = std::fs::read(&path) else { continue };
                 if fname.to_ascii_lowercase().ends_with(".zip") {
-                    let mut tmp = Vfs::new();
-                    if let Ok(k) = add_zip(&mut tmp, &data, rel) {
-                        vfs.append(&mut tmp);
-                        *n += k;
-                        continue;
+                    if let Ok(data) = std::fs::read(&path) {
+                        let mut tmp = Vfs::new();
+                        if let Ok(k) = add_zip_arc(&mut tmp, Arc::new(data), rel, usize::MAX) {
+                            vfs.append(&mut tmp);
+                            *n += k;
+                            continue;
+                        }
                     }
                 }
+                let Ok(data) = std::fs::read(&path) else { continue };
                 vfs.insert(norm_path(&child), data);
                 *n += 1;
             }
@@ -252,11 +443,39 @@ pub fn resolve<'a>(vfs: &'a Vfs, base_dir: &str, name: &str) -> Option<&'a [u8]>
     let suffix = format!("/{base}");
     if !base_dir.is_empty() {
         let folder = format!("{base_dir}/");
-        if let Some((_, v)) = vfs.range(folder.clone()..).take_while(|(k, _)| k.starts_with(&folder)).find(|(k, _)| k.ends_with(&suffix)) {
-            return Some(v);
+        let local = vfs.keys().find(|k| k.starts_with(&folder) && k.ends_with(&suffix)).cloned();
+        if let Some(k) = local { return vfs.get(&k).map(|v| v.as_slice()); }
+    }
+    let anywhere = vfs.keys().find(|k| k.ends_with(&suffix) || k.as_str() == base).cloned();
+    anywhere.and_then(|k| vfs.get(&k)).map(|v| v.as_slice())
+}
+
+/// Same lookup order as [`resolve`], returning the key so callers can inspect metadata without inflating.
+pub fn resolve_path(vfs: &Vfs, base_dir: &str, name: &str) -> Option<String> {
+    if name.is_empty() {
+        return None;
+    }
+    let n = norm_path(&unquote(name));
+    if n.is_empty() {
+        return None;
+    }
+    let base_dir = norm_path(base_dir.trim_end_matches(['/', '\\']));
+    let tries = [if base_dir.is_empty() { n.clone() } else { format!("{base_dir}/{n}") }, n.clone(), format!("data/{n}")];
+    for t in &tries {
+        let key = norm_path(t);
+        if vfs.contains_key(&key) {
+            return Some(key);
         }
     }
-    vfs.iter().find(|(k, _)| k.ends_with(&suffix) || k.as_str() == base).map(|(_, v)| v.as_slice())
+    let base = n.rsplit('/').next().unwrap_or(&n);
+    let suffix = format!("/{base}");
+    if !base_dir.is_empty() {
+        let folder = format!("{base_dir}/");
+        if let Some(k) = vfs.keys().find(|k| k.starts_with(&folder) && k.ends_with(&suffix)) {
+            return Some(k.clone());
+        }
+    }
+    vfs.keys().find(|k| k.ends_with(&suffix) || k.as_str() == base).cloned()
 }
 
 /// `\b<word>\s*=` in lowercase text.
@@ -282,28 +501,26 @@ fn has_key(t: &str, word: &str) -> bool {
 
 /// Character .def files (has `[Files]` with `cns =` and `sprite =`).
 pub fn find_char_defs(vfs: &Vfs) -> Vec<String> {
-    vfs.iter()
-        .filter(|(k, v)| {
-            k.ends_with(".def") && {
-                let t = text(v).to_lowercase();
-                t.contains("[files]") && has_key(&t, "cns") && has_key(&t, "sprite")
-            }
-        })
-        .map(|(k, _)| k.clone())
-        .collect()
+    let mut out: Vec<String> = vfs
+        .keys()
+        .filter(|k| k.ends_with(".def"))
+        .filter(|k| vfs.get(k).is_some_and(|v| { let t = text(v).to_lowercase(); t.contains("[files]") && has_key(&t, "cns") && has_key(&t, "sprite") }))
+        .cloned()
+        .collect();
+    out.sort();
+    out
 }
 
 /// Stage .def files (has `[BGdef` and `[StageInfo]` or `[Camera]`).
 pub fn find_stage_defs(vfs: &Vfs) -> Vec<String> {
-    vfs.iter()
-        .filter(|(k, v)| {
-            k.ends_with(".def") && {
-                let t = text(v).to_lowercase();
-                t.contains("[bgdef") && (t.contains("[stageinfo]") || t.contains("[camera]"))
-            }
-        })
-        .map(|(k, _)| k.clone())
-        .collect()
+    let mut out: Vec<String> = vfs
+        .keys()
+        .filter(|k| k.ends_with(".def"))
+        .filter(|k| vfs.get(k).is_some_and(|v| { let t = text(v).to_lowercase(); t.contains("[bgdef") && (t.contains("[stageinfo]") || t.contains("[camera]")) }))
+        .cloned()
+        .collect();
+    out.sort();
+    out
 }
 
 const FNV_OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
@@ -343,11 +560,8 @@ fn def_key(vfs: &Vfs, def: &str, section: &str, sprite_key: &str) -> String {
         .unwrap_or_default();
     let base = def.rfind('/').map(|i| &def[..i]).unwrap_or("");
     let mut h = fnv(FNV_OFFSET, canonical_def_text(def_bytes).as_bytes());
-    match resolve(vfs, base, &sprite) {
-        Some(b) => {
-            h = fnv(h, &(b.len() as u64).to_le_bytes());
-            h = fnv(h, b);
-        }
+    match resolve_path(vfs, base, &sprite).and_then(|path| vfs.fold_file(&path, h)) {
+        Some(folded) => h = folded,
         None => h = fnv(h, norm_path(&sprite).as_bytes()),
     }
     format!("{h:016x}")

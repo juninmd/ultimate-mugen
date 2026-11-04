@@ -592,7 +592,7 @@ pub fn load_screenpack(vfs: &Vfs, system_path: &str) -> Result<Screenpack, Strin
         candidates.into_iter().map(|c| norm_path(&c)).find(|c| vfs.contains_key(c))
     });
     let (fight, fight_dir) = match &fight_path {
-        Some(p) => (parse_fight(&text(&vfs[p])), dir_of(p).to_string()),
+        Some(p) => (parse_fight(&text(vfs.get(p).map(|v| v.as_slice()).unwrap_or(&[]))), dir_of(p).to_string()),
         None => {
             warnings.push(format!("fight.def {:?}: not found", system.fight));
             (FightDef::default(), dir.clone())

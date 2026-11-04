@@ -316,9 +316,9 @@ impl App {
         ume_shell::watchdog::label("import");
         for zip in crate::take_imports() {
             #[cfg(not(target_arch = "wasm32"))]
-            { if let Ok(h) = std::thread::Builder::new().name("zip-import".into()).spawn(move || crate::registry::read_zip(&zip)) { self.import_jobs.push(h); self.msg = "Importando pacote…".into(); } }
+            { if let Ok(h) = std::thread::Builder::new().name("zip-import".into()).spawn(move || crate::registry::read_zip(zip)) { self.import_jobs.push(h); self.msg = "Importando pacote…".into(); } }
             #[cfg(target_arch = "wasm32")]
-            { let r = crate::registry::read_zip(&zip); self.finish_import(r); }
+            { let r = crate::registry::read_zip(zip); self.finish_import(r); }
         }
         #[cfg(target_arch = "wasm32")]
         self.resolve_deep_link(dt);
@@ -1124,9 +1124,9 @@ impl App {
             if let Some(sess) = &self.pending.sess {
                 let mut chars: Vec<crate::audio::CharSounds> = vec![];
                 for f in &sess.m.fighters { if !chars.iter().any(|(id, _)| *id == f.def.id) { chars.push((&f.def.id, &f.def.sounds)); } }
-                sfx_ready = self.audio.preload_match(&chars);
+                sfx_ready = ume_formats::perf::time("audio:preload", || self.audio.preload_match(&chars));
             }
-            let music_ready = self.audio.music_ready(music);
+            let music_ready = ume_formats::perf::time("audio:music_ready", || self.audio.music_ready(music));
             if !sfx_ready || !music_ready { if wait { std::thread::sleep(std::time::Duration::from_millis(2)); return Box::pin(self.load_step(step, wait)).await; } return Ok(false); }
             self.audio.prepare_music(music).await;
         }
@@ -1191,7 +1191,7 @@ impl App {
         self.screen = Screen::Fight;
         self.audio.reset_bgm();
         if let Some(b) = bgm.as_ref() { self.audio.register_music_file("stage", b.0.clone(), b.1); }
-        let custom = match bgm { Some(b) => self.audio.play_music_file(&b.0, b.1).await, None => false };
+        let custom = match bgm { Some(b) => ume_formats::perf::time("audio:stage_bgm", || self.audio.play_music_file(&b.0, b.1)).await, None => false };
         if !custom { self.audio.play_music(music).await; }
     }
 

@@ -37,6 +37,20 @@ impl Pcm {
         (frame < n).then(|| self.slice(frame, n))
     }
 
+    /// Restart a looping clip between `start` and `end` frames, keeping the intro up to `end` on the first pass.
+    pub fn resume_segment(&self, frame: usize, looping: bool, start: usize, end: usize) -> Option<Pcm> {
+        let n = self.frames.len();
+        if n == 0 { return None; }
+        let start = start.min(n);
+        let end = end.min(n).max(start);
+        if !looping || end <= start { return self.resume_at(frame, looping); }
+        let span = end - start;
+        let at = start + frame % span;
+        let mut frames = self.frames[at..end].to_vec();
+        frames.extend_from_slice(&self.frames[start..at]);
+        Some(Pcm { rate: self.rate, frames })
+    }
+
     pub fn render(&self, gain: f32, pan: f32, rate: f32) -> Pcm {
         let (l, r) = pan_gains(pan);
         let step = rate.clamp(0.05, 8.0) as f64;
@@ -157,6 +171,20 @@ mod tests {
         assert_eq!(p.render(1.0, 0.0, 0.5).frames.len(), 2000);
         assert_eq!(p.slice(900, 5000).frames.len(), 100);
         assert!(p.slice(2000, 3000).frames.is_empty());
+    }
+
+    #[test]
+    fn resume_segment_loops_between_the_loop_points() {
+        let p = tone(100);
+        let looped = p.resume_segment(10, true, 40, 80).unwrap();
+        assert_eq!(looped.frames.len(), 40, "the loop wraps inside the 40..80 window");
+        assert_eq!(looped.frames[0], p.frames[50]);
+        assert_eq!(looped.frames[29], p.frames[79]);
+        assert_eq!(looped.frames[30], p.frames[40]);
+        assert_eq!(looped.frames[39], p.frames[49]);
+        let once = p.resume_segment(10, false, 40, 80).unwrap();
+        assert_eq!(once.frames.len(), 90, "without looping it plays out from the elapsed frame");
+        assert_eq!(once.frames[0], p.frames[10]);
     }
 
     #[test]

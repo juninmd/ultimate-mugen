@@ -168,12 +168,28 @@ pub struct SoundOpts {
     pub owner: u32,
     pub channel: i32,
     pub low_priority: bool,
+    pub loop_start: u32,
+    pub loop_end: u32,
+    pub loop_count: i32,
 }
 
 impl Default for SoundOpts {
     fn default() -> Self {
-        SoundOpts { volume: 1.0, pan: 0.0, rate: 1.0, looping: false, owner: 0, channel: -1, low_priority: false }
+        SoundOpts { volume: 1.0, pan: 0.0, rate: 1.0, looping: false, owner: 0, channel: -1, low_priority: false, loop_start: 0, loop_end: 0, loop_count: 0 }
     }
+}
+
+fn loop_frames(opts: &SoundOpts, rate: u32, len: usize) -> (usize, usize) {
+    if opts.loop_start == 0 && opts.loop_end == 0 { return (0, len); }
+    let to_frames = |ms: u32| ((ms as u64 * rate.max(1) as u64) / 1000) as usize;
+    let start = to_frames(opts.loop_start).min(len);
+    let end = if opts.loop_end > opts.loop_start { to_frames(opts.loop_end).min(len) } else { len };
+    (start.min(end), end)
+}
+
+fn loop_expired(opts: &SoundOpts, elapsed: usize, start: usize, end: usize) -> bool {
+    if !opts.looping || opts.loop_count <= 0 || end <= start { return false; }
+    elapsed >= end + (opts.loop_count as usize - 1) * (end - start)
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -353,18 +369,35 @@ impl Audio {
     }
     async fn apply_repan(&mut self) {
         let now = crate::gfx::get_time();
+        let mut stop = vec![];
         for (k, pan) in std::mem::take(&mut self.repan) {
             let Some(v) = self.channels.get(&k) else { continue };
             let Some(Some(Source::Pcm(p))) = v.key.as_ref().and_then(|key| self.sources.get(key)) else { continue };
+            let (start_frame, end_frame) = loop_frames(&v.opts, p.rate, p.frames.len());
             let rendered = p.render(1.0, pan, v.opts.rate);
             let elapsed = ((now - v.start) * rendered.rate as f64).max(0.0) as usize;
-            let Some(clip) = rendered.resume_at(elapsed, v.opts.looping) else { continue };
+            if loop_expired(&v.opts, elapsed, start_frame, end_frame) { stop.push(k); continue; }
+            let Some(clip) = rendered.resume_segment(elapsed, v.opts.looping, start_frame, end_frame) else { stop.push(k); continue };
             let Ok(s) = load_sound_from_bytes(&clip.to_wav()).await else { continue };
             let Some(v) = self.channels.get_mut(&k) else { continue };
             stop_sound(&v.sound);
             play_sound(&s, PlaySoundParams { looped: v.opts.looping, volume: self.volume * v.opts.volume.clamp(0.0, 1.5) });
             v.sound = s;
         }
+        for k in stop { if let Some(v) = self.channels.remove(&k) { stop_sound(&v.sound); } }
+    }
+    /// Retune the loop window (in milliseconds) and loop count of every live channel of `owner`.
+    pub fn set_loop(&mut self, owner: u32, channel: i32, start: u32, end: u32, count: i32) {
+        let mut keys = vec![];
+        for (&k, v) in self.channels.iter_mut() {
+            if k.0 == owner && (channel < 0 || k.1 == channel) {
+                v.opts.loop_start = start;
+                v.opts.loop_end = end;
+                v.opts.loop_count = count;
+                keys.push((k, v.opts.pan));
+            }
+        }
+        self.repan.extend(keys);
     }
     pub async fn process(&mut self) {
         self.apply_repan().await;
@@ -442,6 +475,7 @@ impl Audio {
         self.stop_music();
         let v = self.music_volume * 0.35 * self.bgm_gain;
         let pcm = decode(bytes);
+        if pcm.is_none() { eprintln!("audio: unsupported or corrupt music file; falling back to the built-in track"); }
         let looped = pcm.as_ref().filter(|_| self.bgm_looping && (lp.start > 0 || lp.end > lp.start));
         let Some(p) = looped else {
             let Ok(s) = load_sound_from_bytes(bytes).await else { return false };
@@ -502,6 +536,19 @@ impl Audio {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn loop_window_and_count_are_derived_from_milliseconds() {
+        let mut o = SoundOpts { looping: true, loop_start: 100, loop_end: 500, loop_count: 3, ..Default::default() };
+        let (s, e) = loop_frames(&o, 1000, 10_000);
+        assert_eq!((s, e), (100, 500));
+        assert!(!loop_expired(&o, 999, s, e), "still inside the loop");
+        assert!(loop_expired(&o, 500 + 3 * 400 - 1, s, e), "three passes ran out");
+        o.loop_count = 0;
+        assert!(!loop_expired(&o, 1_000_000, s, e), "zero means endless");
+        o.loop_start = 0;
+        o.loop_end = 0;
+        assert_eq!(loop_frames(&o, 1000, 10_000), (0, 10_000), "without points the whole clip loops");
+    }
     fn energy(v: &[f32]) -> f32 { v.iter().map(|x| x * x).sum::<f32>() / v.len().max(1) as f32 }
     #[test]
     fn every_effect_is_audible_finite_and_clipped() {

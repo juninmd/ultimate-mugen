@@ -69,6 +69,8 @@ impl SourceSpans {
     pub fn is_empty(&self) -> bool { self.spans.is_empty() }
 }
 
+pub const REJECTED_CONTROLLERS: &[&str] = &["loadfile", "savefile", "savestate", "loadstate", "shaderset"];
+
 #[derive(Clone, Debug, Default)]
 pub struct Diagnostics {
     pub findings: Vec<Finding>,
@@ -104,7 +106,8 @@ impl Diagnostics {
                 let places: BTreeSet<String> = hits.iter().map(|h| format!("{} state {}", h.file, h.state)).collect();
                 let shown: Vec<&str> = places.iter().take(3).map(|s| s.as_str()).collect();
                 let more = places.len().saturating_sub(shown.len());
-                out.push_str(&format!("  {}: {} ({} uses; {}{})\n", category.label(), name, hits.len(), shown.join("; "), if more > 0 { format!("; +{more} more") } else { String::new() }));
+                let marker = if category == Category::Controller && REJECTED_CONTROLLERS.contains(&name) { " (rejected by design)" } else { "" };
+                out.push_str(&format!("  {}: {}{} ({} uses; {}{})\n", category.label(), name, marker, hits.len(), shown.join("; "), if more > 0 { format!("; +{more} more") } else { String::new() }));
             }
         }
         out

@@ -156,7 +156,7 @@ pub struct StageEntry { pub key: String, pub id: String, pub name: String, pub t
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct ImportReport { pub chars: usize, pub stages: usize, pub errors: usize, pub duplicate_pack: bool }
 
-pub struct Registry { pub chars: Vec<CharEntry>, pub stages: Vec<StageEntry>, builtin_stages: Vec<stages::StageEntry>, imported_packs: std::collections::HashSet<String> }
+pub struct Registry { pub chars: Vec<CharEntry>, pub stages: Vec<StageEntry>, builtin_stages: Vec<stages::StageEntry>, imported_packs: std::collections::HashSet<String>, pub import_errors: Vec<String> }
 
 fn hex3(h: &str) -> [u8; 3] { let v = u32::from_str_radix(h.trim_start_matches('#'), 16).unwrap_or(0x5a648c); [(v >> 16) as u8, (v >> 8) as u8, v as u8] }
 
@@ -174,7 +174,7 @@ impl Registry {
         }
         let builtin_stages = stages::builtin();
         let stages = builtin_stages.iter().enumerate().map(|(i, s)| StageEntry { key: format!("native:{}", s.id), id: format!("native:{}", s.id), name: s.name.clone(), thumb: s.thumb, mugen: false, src: StageSrc::Builtin(i), preview: RefCell::new(None) }).collect();
-        Registry { chars, stages, builtin_stages, imported_packs: Default::default() }
+        Registry { chars, stages, builtin_stages, imported_packs: Default::default(), import_errors: Default::default() }
     }
     /// Bundled, redistributable MUGEN content (Elecbyte Kung Fu Man + stages, CC BY-NC).
     pub fn add_bundled_mugen(&mut self) {
@@ -186,6 +186,7 @@ impl Registry {
     pub fn add_native_json(&mut self, json: &str) -> Result<String, String> {
         let nc: NativeChar = serde_json::from_str(json).map_err(|e| e.to_string())?;
         let id = format!("umf:{}", nc.id);
+        if let Some(old) = self.chars.iter().find(|c| c.id == id) { eprintln!("replacing character '{}' with the imported UMF definition", old.name); }
         self.chars.retain(|c| c.id != id);
         let name = nc.name.clone();
         self.chars.push(CharEntry { key: id.clone(), id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Arc::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()), jobs: Default::default() });
@@ -300,7 +301,10 @@ impl Registry {
     pub fn build_stage(&self, i: usize) -> Stage {
         match &self.stages[i].src {
             StageSrc::Builtin(b) => (self.builtin_stages[*b].build)(),
-            StageSrc::Mugen { vfs, def } => match load_stage(vfs, def) { Ok(s) => { if self.stages[i].preview.borrow().is_none() { *self.stages[i].preview.borrow_mut() = Some(stages::mugen_preview(&s)); } let mut st = stages::from_mugen(s); st.bgm = stage_bgm(vfs, def).map(Arc::new); st } Err(_) => (self.builtin_stages[0].build)() },
+            StageSrc::Mugen { vfs, def } => match load_stage(vfs, def) {
+                Ok(s) => { if self.stages[i].preview.borrow().is_none() { *self.stages[i].preview.borrow_mut() = Some(stages::mugen_preview(&s)); } let mut st = stages::from_mugen(s); st.bgm = stage_bgm(vfs, def).map(Arc::new); st }
+                Err(e) => { eprintln!("stage '{}' failed to load ({e}); using the built-in fallback", self.stages[i].name); (self.builtin_stages[0].build)() }
+            },
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -334,7 +338,14 @@ impl Registry {
         for d in dirs {
             if !d.is_dir() { continue; }
             let mut vfs = Vfs::new();
-            if ume_formats::vfs::add_dir(&mut vfs, &d, "").is_ok() { let (c, s, _) = self.add_vfs_lazy(vfs, &d.to_string_lossy()); n += c.len() + s.len(); }
+            match ume_formats::vfs::add_dir(&mut vfs, &d, "") {
+                Ok(_) => {
+                    let (c, s, errs) = self.add_vfs_lazy(vfs, &d.to_string_lossy());
+                    n += c.len() + s.len();
+                    self.import_errors.extend(errs.into_iter().map(|e| format!("{}: {e}", d.display())));
+                }
+                Err(e) => self.import_errors.push(format!("{}: {e}", d.display())),
+            }
             break;
         }
         n

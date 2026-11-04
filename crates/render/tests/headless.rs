@@ -153,11 +153,12 @@ fn palfx_in_shader() {
         ume_render::PalFx { invert: true, ..Default::default() },
         ume_render::PalFx { color: 0.0, ..Default::default() },
         ume_render::PalFx { add: [0.2, 0.2, 0.2], mul: [0.5, 0.5, 2.0], ..Default::default() },
+        ume_render::PalFx { hue: 120.0, ..Default::default() },
     ];
     for (k, fx) in fxs.iter().enumerate() {
-        let (mul, add) = fx.vertex([1.0; 4]);
+        let (mul, add, hue) = fx.vertex([1.0; 4]);
         let x = k as f32 * 16.0;
-        let v = |pos: [f32; 2]| ume_render::Vertex { pos, uv, pal: RGBA_SPRITE, mul, add };
+        let v = |pos: [f32; 2]| ume_render::Vertex { pos, uv, pal: RGBA_SPRITE, mul, add, hue };
         b.push_tris(&[v([x, 0.0]), v([x + 16.0, 0.0]), v([x + 16.0, 16.0]), v([x, 16.0])], &[0, 1, 2, 0, 2, 3], Blend::Alpha);
     }
     let img = render(&device, &queue, &mut r, &b, wgpu::Color::BLACK);
@@ -165,6 +166,7 @@ fn palfx_in_shader() {
     assert!(near(px(&img, 8, 8), [55, 155, 255]), "{:?}", px(&img, 8, 8));
     assert!(near(px(&img, 24, 8), [100, 100, 100]), "{:?}", px(&img, 24, 8));
     assert!(near(px(&img, 40, 8), [126, 76, 102]), "{:?}", px(&img, 40, 8));
+    assert!(near(px(&img, 56, 8), [0, 200, 100]), "hue 120 rotates the channels: {:?}", px(&img, 56, 8));
 }
 
 #[test]

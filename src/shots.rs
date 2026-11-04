@@ -262,6 +262,7 @@ pub async fn run(app: &mut App, dir: &str) {
         return;
     }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") { hud_tour(app, dir).await; return; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("market") { market_tour(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("pixel") { crate::pixel_tour::run(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stages") { app.screen = Screen::Fight; crate::stage_tour::run(app, dir).await; return; }
     app.screen = Screen::Title;
@@ -389,4 +390,40 @@ pub async fn run(app: &mut App, dir: &str) {
     request_new_screen_size(1280.0, 720.0);
     frames(app, 10).await;
     story(app, dir).await;
+}
+
+async fn market_tour(app: &mut App, dir: &str) {
+    use std::sync::Arc;
+    use ume_market::catalog::{detect, Tree, TreeEntry};
+    use ume_market::persist::{catalog_key, MemPersist, Persist, STATE_KEY};
+    use ume_market::{Installed, MarketState, RepoRef};
+    let files: Vec<(String, u64)> = [
+        ("chars/kfm/kfm.def", 1), ("chars/kfm/kfm.sff", 900_000), ("chars/kfm/kfm.air", 4000), ("chars/kfm/kfm.cns", 9000), ("chars/kfm/kfm.cmd", 3000),
+        ("chars/goku/goku.def", 1), ("chars/goku/goku.sff", 21_000_000), ("chars/goku/goku.air", 4000), ("chars/goku/goku.cns", 9000),
+        ("stages/dojo.def", 400), ("stages/dojo.sff", 3_400_000), ("stages/city.def", 400), ("stages/city.sff", 5_100_000),
+        ("music/theme.ogg", 4_200_000), ("music/battle.mp3", 6_800_000), ("packs/retro.zip", 18_000_000), ("packs/huge.zip", 90_000_000),
+    ].iter().map(|(p, s)| (p.to_string(), *s)).collect();
+    let tree = Tree { entries: files.into_iter().map(|(path, size)| TreeEntry { path, size }).collect(), truncated: false };
+    let repo = RepoRef::parse("https://github.com/exemplo/mugen-pack").unwrap();
+    let catalog = detect(&tree, "", &repo.name);
+    let persist = Arc::new(MemPersist::new());
+    let mut state = MarketState::default();
+    state.add_repo(repo.clone());
+    state.add_repo(RepoRef::parse("juninmd/ultimate-mugen").unwrap());
+    state.repo_mut(&repo.key()).unwrap().item_count = catalog.items.len();
+    state.repo_mut(&repo.key()).unwrap().listed_at = ume_market::now_secs();
+    for it in catalog.items.iter().filter(|i| i.name == "kfm" || i.name == "dojo") {
+        state.upsert_installed(Installed { repo_key: repo.key(), item_id: it.id.clone(), kind: it.kind, name: it.name.clone(), bytes: it.bytes, files: it.files.len(), active: it.name == "kfm", installed_at: 1 });
+    }
+    persist.write(&catalog_key(&repo.key()), &serde_json::to_vec(&catalog).unwrap()).unwrap();
+    persist.write(STATE_KEY, &state.to_json()).unwrap();
+    app.market = crate::market::Market::with_persist(persist);
+    app.market.finish_hydration();
+    app.market.poll();
+    app.screen = Screen::Market;
+    screen(app, dir, "market-browse", 12).await;
+    for (i, it) in catalog.items.iter().enumerate() { if i % 2 == 0 { app.market_ui_mark(&repo.key(), &it.id); } }
+    screen(app, dir, "market-marked", 3).await;
+    app.market_ui_view_installed();
+    screen(app, dir, "market-installed", 3).await;
 }

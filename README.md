@@ -125,7 +125,7 @@ Linux needs a few system packages first:
 sudo apt-get install -y pkg-config libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev
 ```
 
-**Bring your M.U.G.E.N content:** put characters in `mugen/chars/` (folder or `.zip`) and stages in `mugen/stages/`, or point `UME_MUGEN_DIR` to an existing install.
+**Bring your M.U.G.E.N content:** put characters in `mugen/chars/` (folder or `.zip`) and stages in `mugen/stages/`, or point `UME_MUGEN_DIR` to an existing install. You can also install characters, stages and music from any public GitHub repository in **Mercado GitHub** (main menu); see the [marketplace guide](docs/wiki/Marketplace.md).
 
 <details>
 <summary><b>More build targets and flags</b></summary>

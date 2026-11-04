@@ -223,6 +223,13 @@ impl Registry {
             for (_, i) in cand.into_iter().take(total - cap) { self.chars[i].unload(); }
         }
     }
+    pub fn remove_tag(&mut self, tag: &str) -> (usize, usize) {
+        let (chars_prefix, stages_prefix) = (format!("mugen:{tag}:"), format!("mugenstage:{tag}:"));
+        let (c0, s0) = (self.chars.len(), self.stages.len());
+        self.chars.retain(|c| !c.id.starts_with(&chars_prefix));
+        self.stages.retain(|s| !s.id.starts_with(&stages_prefix));
+        (c0 - self.chars.len(), s0 - self.stages.len())
+    }
     /// Free every cached definition (e.g. when the art quality changes → sprites must be re-rasterized).
     pub fn unload_all(&self) { for c in &self.chars { c.unload(); } }
     /// Imported fighters sorted by name (stable, natives keep their curated order).

@@ -8,6 +8,7 @@ const IDS: [&str; 10] = ["kaito", "shion", "akio", "suzume", "bruno", "sylene", 
 const EPS: f64 = 0.01;
 
 fn load(id: &str) -> NativeChar {
+    std::env::set_var("UME_FORCE_RIG", "1");
     let p = format!("{}/../../assets/chars/{id}.json", env!("CARGO_MANIFEST_DIR"));
     serde_json::from_str(&std::fs::read_to_string(p).unwrap()).unwrap()
 }

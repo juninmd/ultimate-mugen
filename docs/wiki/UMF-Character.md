@@ -173,6 +173,22 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `$` | Inclusive direction (`$D` accepts DB, D, DF) | `$D, x` |
 | `>` | No other input between steps | `F, >F` |
 
+## Pixel-art sprites (optional)
+
+If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files instead of the rig. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size for every file of one fighter. A pose without a PNG falls back to `01_idle.png`; a fighter without the folder keeps its rig.
+
+| File | Poses that use it |
+|---|---|
+| `01_idle` | `idle0`, walk, run, crouch, guard, jump and every pose with no art of its own |
+| `02_attack1` … `06_victory` | jab / punch, kick, special, projectile and victory / taunt poses |
+| `07_idle1`, `08_idle2` | the other breathing frames of `idle` (`idle3` reuses `07_idle1`) |
+| `09_hit1`, `10_hit2`, `11_hit3` | `hitH1`, `hitH2`, `hitH3` (damage) |
+| `12_fall1`, `13_fall2` | `hitAir1`/`fall1`/`trip` and `hitAir2`/`fall2`/`bounce` (knocked into the air) |
+| `14_lie` | `lie`, `dead`, `lose` and every `df*` pose (knocked out, with a low and wide hurt box) |
+| `15_power0`, `16_power1`, `17_power2` | `powerup0`, `powerup1`, `powerup2` (transformation, key `T`) |
+
+`meta.json` holds `{"refHeight": N}`: the height in pixels of the standing body in `01_idle.png`. Every pose of the fighter is scaled so that body is 100 units tall, so a lying or crouching sprite keeps the same pixel size. Without it each PNG is scaled to 100 units by its own height.
+
 ## Validate
 
 ```bash

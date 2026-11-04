@@ -223,7 +223,7 @@ impl Session {
         self.acc += dt.min(0.1) * self.vfx.time_scale();
         let step = 1.0 / 60.0;
         let mut n = 0;
-        while self.acc >= step && n < 5 { self.step(c, audio); self.acc -= step; n += 1; }
+        while self.acc >= step - 1e-4 && n < 5 { self.step(c, audio); self.acc -= step; n += 1; }
         if n == 5 { self.acc = 0.0; }
         // pull the music down under supers and the KO slow-motion so the effects punch through
         audio.duck = if self.m.pause.as_ref().is_some_and(|p| p.is_super) || self.vfx.slow_t > 0.0 { 0.28 } else { 1.0 };

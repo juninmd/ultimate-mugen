@@ -24,6 +24,13 @@ impl Gfx {
             t
         }).clone()
     }
+    pub fn prefetch(&mut self, def: &CharDef, max_occupancy: f32) -> bool {
+        for spr in def.sprites.values() {
+            let Some(img) = spr.image.as_ref() else { continue };
+            if !self.texture(img, spr.scale >= 0.99).prefetch(max_occupancy) { return false; }
+        }
+        true
+    }
     pub fn trim(&mut self, keep: usize) { if self.tex.len() > keep { self.tex.clear(); } }
     /// Ask for a texture-cache flush at the start of the next frame (never mid-frame: pending draw batches still reference the textures).
     pub fn trim_next_frame(&mut self) { self.flush_cache = true; }

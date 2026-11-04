@@ -183,6 +183,10 @@ impl Texture2D {
         Some(r)
     }
 
+    pub fn prefetch(&self, max_occupancy: f32) -> bool {
+        with(|f| self.is_resident() || (f.gpu.rgba_atlas.occupancy() < max_occupancy && self.rect(f).is_some()))
+    }
+
     pub fn width(&self) -> f32 { self.0.w as f32 }
     pub fn height(&self) -> f32 { self.0.h as f32 }
     pub fn size(&self) -> Vec2 { vec2(self.width(), self.height()) }

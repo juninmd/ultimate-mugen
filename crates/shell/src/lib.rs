@@ -89,7 +89,24 @@ pub trait Game {
 
 struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas, post: PostFx }
 
-struct Shell<G: Game> { cfg: Config, game: G, live: Option<Live>, pending: Option<Pending>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String> }
+struct Shell<G: Game> { cfg: Config, game: G, live: Option<Live>, pending: Option<Pending>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String>, pacer: Pacer }
+
+#[derive(Default)]
+pub struct Pacer { debt: f32 }
+
+impl Pacer {
+    const REFRESH_HZ: [f32; 9] = [30.0, 50.0, 60.0, 75.0, 90.0, 120.0, 144.0, 165.0, 240.0];
+
+    pub fn pace(&mut self, raw: f32) -> f32 {
+        let raw = raw.clamp(0.0, 0.25);
+        let Some(period) = Self::REFRESH_HZ.iter().map(|hz| 1.0 / hz).find(|p| (raw - p).abs() < p * 0.04) else { self.debt = 0.0; return raw };
+        self.debt += raw - period;
+        if self.debt.abs() < period { return period; }
+        let paid = period + self.debt;
+        self.debt = 0.0;
+        paid
+    }
+}
 
 pub const ATLAS_SIZE: u32 = 4096;
 
@@ -167,7 +184,7 @@ impl<G: Game> Shell<G> {
             _ => { live.surface.configure(&live.gpu.device, &live.config); return; }
         };
         let now = Instant::now();
-        let dt = (now - self.last).as_secs_f32();
+        let dt = self.pacer.pace((now - self.last).as_secs_f32());
         self.last = now;
         live.canvas.clear();
         let size = [live.config.width as f32, live.config.height as f32];
@@ -287,7 +304,7 @@ pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
     let event_loop = event_loop()?;
     event_loop.set_control_flow(ControlFlow::Poll);
     let now = Instant::now();
-    let mut shell = Shell { cfg, game, live: None, pending: None, input: Input::default(), start: now, last: now, frames: 0, error: None };
+    let mut shell = Shell { cfg, game, live: None, pending: None, input: Input::default(), start: now, last: now, frames: 0, error: None, pacer: Pacer::default() };
     #[cfg(target_arch = "wasm32")]
     {
         use winit::platform::web::EventLoopExtWebSys;
@@ -300,5 +317,31 @@ pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
     {
         event_loop.run_app(&mut shell).map_err(|e| e.to_string())?;
         match shell.error { Some(e) => Err(e), None => Ok(shell.frames) }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Pacer;
+
+    #[test]
+    fn jittery_vsync_frames_become_exact_periods() {
+        let mut p = Pacer::default();
+        for raw in [0.0163, 0.0171, 0.0165, 0.0168, 0.0166] { assert_eq!(p.pace(raw), 1.0 / 60.0); }
+    }
+
+    #[test]
+    fn long_run_keeps_real_time() {
+        let mut p = Pacer::default();
+        let raw = 1.0 / 59.5;
+        let total: f32 = (0..6000).map(|_| p.pace(raw)).sum();
+        assert!((total - raw * 6000.0).abs() < 1.0 / 60.0 + 1e-3);
+    }
+
+    #[test]
+    fn hitches_pass_through() {
+        let mut p = Pacer::default();
+        assert_eq!(p.pace(0.05), 0.05);
+        assert_eq!(p.pace(1.0), 0.25);
     }
 }

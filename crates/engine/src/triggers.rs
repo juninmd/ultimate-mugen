@@ -309,8 +309,8 @@ impl<'a> Host for Ctx<'a> {
             "playeridexist" => b(m.idx(a0() as u32).is_some()),
             "numhelper" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; m.fighters.iter().filter(|h| h.is_helper && h.root == f.root && !h.destroyed && (id < 0 || h.helper_id == id)).count() as f64 }
             "numexplod" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; m.explods.iter().filter(|e| e.owner == f.id && (id < 0 || e.id == id)).count() as f64 }
-            "numproj" => m.projectiles.iter().filter(|p| p.owner == f.id && !p.remove).count() as f64,
-            "numprojid" => { let id = a0() as i32; m.projectiles.iter().filter(|p| p.owner == f.id && !p.remove && p.id == id).count() as f64 }
+            "numproj" => m.projectiles.iter().filter(|p| p.root == f.root && !p.remove).count() as f64,
+            "numprojid" => { let id = a0() as i32; m.projectiles.iter().filter(|p| p.root == f.root && !p.remove && p.id == id).count() as f64 }
             "numtarget" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; f.targets.iter().filter(|t| id < 0 || t.1 == id).count() as f64 }
             "numenemy" => m.roots().filter(|r| r.side != f.side).count() as f64,
             "numpartner" => m.roots().filter(|r| r.side == f.side && r.id != f.id).count() as f64,
@@ -321,6 +321,22 @@ impl<'a> Host for Ctx<'a> {
             "winperfect" => b(m.winner_side == f.side as i32 && m.roots().filter(|r| r.side == f.side).all(|r| r.life >= r.life_max)),
             "loseko" => b(m.winner_side >= 0 && m.winner_side != f.side as i32 && m.won_by_ko),
             "losetime" => b(m.winner_side >= 0 && m.winner_side != f.side as i32 && !m.won_by_ko),
+            "attack" | "attackmul" => f.attack_mul as f64,
+            "defence" | "defencemul" => f.defence_mul as f64,
+            "receiveddamage" => f.received_damage as f64,
+            "receivedhits" => f.received_hits as f64,
+            "combocount" => f.combo_count as f64,
+            "score" => f.score,
+            "scoretotal" => f.score_total,
+            "round" => m.round_no as f64,
+            "roundtime" => m.round_time as f64,
+            "timeremaining" => ((m.timer.max(0) + 59) / 60) as f64,
+            "timeelapsed" => (m.round_time / 60) as f64,
+            "timetotal" => (m.round_ticks / 60) as f64,
+            "fighttime" => (m.round_time / 60) as f64,
+            "roundswon" => m.wins[f.side.min(1)] as f64,
+            "firstattack" => b(m.first_attack == Some(f.side)),
+            "decisiveround" => b(m.wins[0].max(m.wins[1]) == m.rounds_to_win - 1),
             "projcanceltime" => self.proj_time('x', a0() as i32) as f64,
             "mugenversion" => f.def.mugen_version as f64,
             "drawgame" => b(m.winner_side == -2),

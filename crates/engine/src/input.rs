@@ -26,6 +26,8 @@ impl InputHistory {
         self.face[i] = if facing < 0 { -1 } else { 1 };
     }
     pub fn at(&self, t: i64) -> u32 { if t < 0 || t > self.tick || self.tick - t >= (HIST as i64) - 1 { 0 } else { self.buf[(t as usize) & (HIST - 1)] } }
+    /// Drop the last `n` recorded ticks (negative input shifting); the current tick never goes below -1.
+    pub fn rewind(&mut self, n: i32) { self.tick = (self.tick - n.abs() as i64).max(-1); }
     pub fn face_at(&self, t: i64) -> i32 { if t < 0 { 1 } else { self.face[(t as usize) & (HIST - 1)] as i32 } }
 }
 

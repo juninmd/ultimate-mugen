@@ -120,6 +120,12 @@ pub fn background(secs: &[Section], anims: &HashMap<i32, Animation>, name: &str)
                 sin_x: [0.0; 3],
                 sin_y: [0.0; 3],
                 alpha: [256.0, 0.0],
+                scale_start: [1.0, 1.0],
+                scale_delta: [0.0, 0.0],
+                angle: 0.0,
+                x_shear: 0.0,
+                mask_window: None,
+                window_delta: None,
             }
         })
         .collect();

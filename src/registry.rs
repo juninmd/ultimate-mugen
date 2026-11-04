@@ -112,7 +112,7 @@ fn portrait_of(d: &CharDef) -> Option<Sprite> {
 }
 
 pub enum StageSrc { Builtin(usize), Mugen { vfs: Arc<Vfs>, def: String } }
-pub struct StageEntry { pub id: String, pub name: String, pub thumb: [[u8; 3]; 3], pub mugen: bool, pub src: StageSrc }
+pub struct StageEntry { pub id: String, pub name: String, pub thumb: [[u8; 3]; 3], pub mugen: bool, pub src: StageSrc, preview: RefCell<Option<Option<Arc<ume_engine::chardef::ImageData>>>> }
 
 pub struct Registry { pub chars: Vec<CharEntry>, pub stages: Vec<StageEntry>, builtin_stages: Vec<stages::StageEntry> }
 
@@ -131,7 +131,7 @@ impl Registry {
             }
         }
         let builtin_stages = stages::builtin();
-        let stages = builtin_stages.iter().enumerate().map(|(i, s)| StageEntry { id: format!("native:{}", s.id), name: s.name.clone(), thumb: s.thumb, mugen: false, src: StageSrc::Builtin(i) }).collect();
+        let stages = builtin_stages.iter().enumerate().map(|(i, s)| StageEntry { id: format!("native:{}", s.id), name: s.name.clone(), thumb: s.thumb, mugen: false, src: StageSrc::Builtin(i), preview: RefCell::new(None) }).collect();
         Registry { chars, stages, builtin_stages }
     }
     /// Bundled, redistributable MUGEN content (Elecbyte Kung Fu Man + stages, CC BY-NC).
@@ -177,11 +177,11 @@ impl Registry {
                 let info = find_section(&secs, "info");
                 let name = info.and_then(|s| s.get("displayname").or(s.get("name"))).map(unquote).filter(|s| !s.is_empty()).unwrap_or(def.clone());
                 ss.push(name.clone());
-                self.stages.push(StageEntry { id, name, thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]], mugen: true, src: StageSrc::Mugen { vfs: vfs.clone(), def } });
+                self.stages.push(StageEntry { id, name, thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]], mugen: true, src: StageSrc::Mugen { vfs: vfs.clone(), def }, preview: RefCell::new(None) });
                 continue;
             }
             match load_stage(&vfs, &def) {
-                Ok(st) => { ss.push(st.name.clone()); self.stages.push(StageEntry { id, name: st.name, thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]], mugen: true, src: StageSrc::Mugen { vfs: vfs.clone(), def } }); }
+                Ok(st) => { let prev = stages::mugen_preview(&st); ss.push(st.name.clone()); self.stages.push(StageEntry { id, name: st.name, thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]], mugen: true, src: StageSrc::Mugen { vfs: vfs.clone(), def }, preview: RefCell::new(Some(prev)) }); }
                 Err(x) => errs.push(format!("{def}: {x}")),
             }
         }
@@ -209,13 +209,18 @@ impl Registry {
     pub fn stage_preview(&self, i: usize) -> Option<Arc<ume_engine::chardef::ImageData>> {
         match &self.stages.get(i)?.src {
             StageSrc::Builtin(b) => stages::illustration(&self.builtin_stages[*b].id),
-            StageSrc::Mugen { .. } => None,
+            StageSrc::Mugen { vfs, def } => {
+                if let Some(p) = self.stages[i].preview.borrow().as_ref() { return p.clone(); }
+                let p = load_stage(vfs, def).ok().and_then(|st| stages::mugen_preview(&st));
+                *self.stages[i].preview.borrow_mut() = Some(p.clone());
+                p
+            }
         }
     }
     pub fn build_stage(&self, i: usize) -> Stage {
         match &self.stages[i].src {
             StageSrc::Builtin(b) => (self.builtin_stages[*b].build)(),
-            StageSrc::Mugen { vfs, def } => match load_stage(vfs, def) { Ok(s) => { let mut st = stages::from_mugen(s); st.bgm = stage_bgm(vfs, def).map(Arc::new); st } Err(_) => (self.builtin_stages[0].build)() },
+            StageSrc::Mugen { vfs, def } => match load_stage(vfs, def) { Ok(s) => { if self.stages[i].preview.borrow().is_none() { *self.stages[i].preview.borrow_mut() = Some(stages::mugen_preview(&s)); } let mut st = stages::from_mugen(s); st.bgm = stage_bgm(vfs, def).map(Arc::new); st } Err(_) => (self.builtin_stages[0].build)() },
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -288,5 +293,42 @@ mod tests {
         assert_eq!(e.name, "Folder Test");
         assert!(e.load(1).is_ok());
         std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn mugen_stages_produce_cached_previews() {
+        let mut reg = Registry::new();
+        reg.add_bundled_mugen();
+        reg.scan_folders();
+        let mugen_indices: Vec<usize> = reg.stages.iter().enumerate().filter(|(_, s)| s.mugen).map(|(i, _)| i).collect();
+        assert!(!mugen_indices.is_empty());
+        for i in mugen_indices {
+            let p1 = reg.stage_preview(i).unwrap_or_else(|| panic!("missing preview for {}", reg.stages[i].id));
+            let p2 = reg.stage_preview(i).unwrap();
+            assert_eq!(p1.id, p2.id);
+            assert_eq!((p1.w, p1.h), (320, 180));
+            assert!(p1.rgba.chunks_exact(4).any(|px| px[..3] != [20, 20, 30]));
+        }
+    }
+
+    #[test]
+    fn mugen_preview_handles_extreme_tiling_and_position_link_visibility() {
+        let mut vfs = Vfs::new();
+        ume_formats::vfs::add_zip(&mut vfs, include_bytes!("../assets/mugen/elecbyte.zip"), "").unwrap();
+        let mut st = load_stage(&vfs, "stages/stage0.def").unwrap();
+        if st.layers.len() > 1 {
+            st.layers[0].id = 77;
+            st.layers[1].position_link = true;
+            st.ctrl_defs.push(ume_formats::stage::BgCtrlDef {
+                loop_time: -1,
+                ids: vec![77],
+                ctrls: vec![ume_formats::stage::BgCtrl { kind: ume_formats::stage::BgCtrlKind::Visible(false), start: 0, end: 0, loop_time: -1, ids: vec![77] }],
+            });
+        }
+        let last = st.layers.last_mut().unwrap();
+        last.tile = [i32::MAX, i32::MAX];
+        last.start = [-1e20, 0.0];
+        let prev = stages::mugen_preview(&st);
+        if st.layers.len() <= 2 { assert!(prev.is_none()); } else { assert!(prev.is_some()); }
     }
 }

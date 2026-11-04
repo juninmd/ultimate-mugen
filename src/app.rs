@@ -41,7 +41,7 @@ pub enum Screen {
 
 /// Fight assets prepared step by step behind the VS screen.
 #[derive(Default)]
-pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, sess: Option<Session>, jobs: Vec<crate::registry::LoadJob> }
+pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, stage_job: Option<crate::registry::StageJob>, sess: Option<Session>, jobs: Vec<crate::registry::LoadJob> }
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
 #[derive(Clone)]
@@ -430,7 +430,7 @@ impl App {
             if got.is_none() && !emugen && !loaded_one && !broken { got = self.reg.chars[i].load_preview(1).ok(); loaded_one = got.is_some(); }
             // MUGEN tiles use a thumbnail cached apart from the (size-capped) definition cache, decoded one per frame once the cursor rests
             if emugen && !loaded_one && !broken && self.sel_dwell > 0.15 && !self.reg.chars[i].has_portrait_attempt() { self.reg.chars[i].ensure_portrait(); loaded_one = true; }
-            let thumb = if emugen { self.reg.chars[i].portrait() } else { None };
+            let thumb = if emugen { self.reg.chars[i].portrait() } else { got.as_ref().and_then(|d| d.sprites.get(&(9000, 1)).cloned()) };
             if thumb.is_some() || got.is_some() {
                 let por = thumb.and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)));
                 if let Some((im, pw, ph)) = por {
@@ -645,6 +645,12 @@ impl App {
             self.pending.defs[side].push(d);
         } else if st == n {
             self.pending.jobs.clear();
+            let job = self.pending.stage_job.get_or_insert_with(|| self.reg.prepare_stage(s));
+            match job.as_mut().poll(&mut std::task::Context::from_waker(std::task::Waker::noop())) {
+                std::task::Poll::Pending => return Ok(false),
+                std::task::Poll::Ready(result) => result?,
+            }
+            self.pending.stage_job = None;
             self.pending.stage = Some(self.reg.build_stage(s));
         } else if st == n + 1 {
             let stage = self.pending.stage.take().ok_or("stage")?;
@@ -666,6 +672,7 @@ impl App {
                 names: [0, 1].map(|sd| t.members[sd].iter().map(|&r| (self.reg.chars[r].name.split_whitespace().next().unwrap_or("").to_uppercase(), self.reg.chars[r].color)).collect()),
                 idx: t.idx, ko: t.ko.clone(), simul: t.simul,
             });
+            self.c.clear_macros();
             let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, seq, life);
             if let Some(t) = &info { sess.m.team_lead = [0, 1].map(|sd| t.names[sd].first().map(|n| n.0.clone()).unwrap_or_default()); }
             sess.team = info;

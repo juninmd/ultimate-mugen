@@ -8,6 +8,11 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 |---|---|---|
 | `MapSet` | `map`, `value`, `type` (1 = add) | Sets a named value on the player |
 | `MapAdd` | `map`, `value` | Adds to a named value |
+| `MapReset` | `map` (omit for all keys) | Removes one key, or every key, from the player's map |
+| `TeamMapSet` / `TeamMapAdd` / `TeamMapReset` | same as `MapSet` / `MapAdd` / `MapReset` | Same operations on the map shared by every player and helper on the same side |
+| `RootMapSet` / `RootMapAdd` / `RootMapReset` | same as `MapSet` / `MapAdd` / `MapReset` | Same operations on the root player's map |
+| `ParentMapSet` / `ParentMapAdd` / `ParentMapReset` | same as `MapSet` / `MapAdd` / `MapReset` | Same operations on the parent's map; does nothing without a parent |
+| `RootVarSet` / `RootVarAdd` | `var(n)`, `fvar(n)`, `sysvar(n)`, `sysfvar(n)` or `v` / `fv` + `value` | Writes variables on the root player, like `ParentVarSet` does on the parent |
 | `RedLifeSet` / `RedLifeAdd` | `value`, `absolute` | Recoverable (red) life, kept between `life` and `lifemax` |
 | `DizzyPointsSet` / `DizzyPointsAdd` | `value` | Stun points, `0..data.dizzypoints` |
 | `DizzySet` | `value` | Dizzy flag |
@@ -29,7 +34,8 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 
 | Trigger | Returns |
 |---|---|
-| `Map(name)` | Named value, 0 when unset |
+| `Map(name)` | Named value, 0 when unset (use `Root, Map(name)` or `Parent, Map(name)` to read another scope) |
+| `TeamMap(name)` | Value in the team map of the player's side, 0 when unset |
 | `RedLife` | Red life |
 | `Dizzy`, `DizzyPoints`, `DizzyPointsMax` | Dizzy flag and points |
 | `GuardBreak`, `GuardPoints`, `GuardPointsMax` | Guard break flag and points |
@@ -37,6 +43,10 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `NumText` | Texts the player has on screen |
 | `ClsnOverlap(clsn1, id, clsn2)` | 1 when the player's box type overlaps the box type of the player with that `id` |
 | `NumPartner` | Teammates on the same side |
+
+Map keys are case-insensitive. Each map holds at most 256 keys of at most 64 characters; writes that would exceed either limit are ignored.
+
+Chaves de map não diferenciam maiúsculas. Cada map guarda no máximo 256 chaves de até 64 caracteres; escritas acima desses limites são ignoradas.
 
 `data.dizzypoints` and `data.guardpoints` in the `[Data]` section default to `data.life`.
 

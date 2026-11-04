@@ -101,7 +101,7 @@ impl Session {
         let mut bits = vec![0u32; roots.len()];
         for (slot, p) in self.pilots.iter_mut().enumerate() {
             let Some(&fi) = roots.get(slot) else { continue };
-            if !self.m.fighters[fi].alive { continue; }
+            if !self.m.fighters[fi].alive { if let Pilot::Human(s) = p { c.touch.macro_q[(*s).min(1)].clear(); } continue; }
             bits[slot] = match p {
                 Pilot::Cpu(ai) => ai.poll(&self.m, fi),
                 Pilot::Dummy => 0,
@@ -109,9 +109,9 @@ impl Session {
                 Pilot::Human(s) => {
                     let mut b = c.player_bits(*s, self.duo);
                     // simple-mode buttons for MUGEN characters become motion macros
-                    if self.m.fighters[fi].def.source == Source::Mugen && b & (k::D2 | k::W | k::E) != 0 && c.touch.macro_q.is_empty() {
+                    if self.m.fighters[fi].def.source == Source::Mugen && b & (k::D2 | k::W | k::E) != 0 && c.touch.macro_q[(*s).min(1)].is_empty() {
                         let which = if b & k::D2 != 0 && b & k::W != 0 { 4 } else if b & k::D2 != 0 { 1 } else if b & k::W != 0 { 2 } else { 3 };
-                        c.touch.macro_q.extend(Self::mugen_macro(self.m.fighters[fi].facing, which));
+                        c.touch.macro_q[(*s).min(1)].extend(Self::mugen_macro(self.m.fighters[fi].facing, which));
                         b &= !(k::D2 | k::W | k::E);
                     }
                     b

@@ -138,6 +138,7 @@ pub struct Match {
     pub events: Vec<Event>,
     pub texts: Vec<crate::ikemen::TextItem>,
     pub console: crate::sctrl::console::ConsoleLog,
+    pub team_maps: [crate::ikemen::MapStore; 2],
     pub announce: Option<Announce>,
     pub rng: u32,
     pub next_id: u32,
@@ -151,7 +152,7 @@ impl Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
-            events: vec![], texts: vec![], console: Default::default(), announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
+            events: vec![], texts: vec![], console: Default::default(), team_maps: Default::default(), announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
     }
     pub fn random(&mut self) -> f32 {
@@ -816,7 +817,7 @@ impl Match {
         let mut target = ((minx + maxx) / 2.0).clamp(self.stage.bound_left, self.stage.bound_right);
         if maxx - minx < self.view_w - 2.0 * t {
             if minx < target - half + t { target = minx + half - t; }
-            if maxx > target + half - t { target = maxx - half + t; }
+            if maxx > target + half - t { target = maxx - half - t; }
         }
         target = target.clamp(self.stage.bound_left, self.stage.bound_right);
         self.camera.x += (target - self.camera.x) * 0.5;
@@ -882,14 +883,14 @@ impl Match {
         let mut found = vec![];
         for r in 0..self.fighters.len() {
             let fr = &self.fighters[r];
-            let Some((attr, _)) = fr.reversal.as_ref() else { continue };
+            let Some((attr, _)) = fr.reversal.as_ref() else { continue; }
             if fr.destroyed { continue; }
             let c1r = fr.boxes(1);
             if c1r.is_empty() { continue; }
             for a in 0..self.fighters.len() {
                 let fa = &self.fighters[a];
                 if a == r || fa.side == fr.side || fa.destroyed || !fa.hitdef_active || fa.move_type != 'A' { continue; }
-                let Some(hd) = fa.hitdef.as_ref() else { continue };
+                let Some(hd) = fa.hitdef.as_ref() else { continue; }
                 if !Self::attr_match(hd, attr) { continue; }
                 if let Some(at) = Self::overlap(&c1r, &fa.boxes(1)) { found.push((r, a, at)); break; }
             }
@@ -918,7 +919,7 @@ impl Match {
         for a in 0..self.fighters.len() {
             let fa = &self.fighters[a];
             if fa.destroyed || !fa.hitdef_active || (fa.move_type != 'A' && !fa.is_helper) { continue; }
-            let Some(hd) = fa.hitdef.as_ref() else { continue };
+            let Some(hd) = fa.hitdef.as_ref() else { continue; }
             let c1 = fa.boxes(1);
             if c1.is_empty() { continue; }
             for d in 0..self.fighters.len() {
@@ -964,6 +965,7 @@ impl Match {
         let a_facing = proj.map(|p| p.1).unwrap_or(self.fighters[a].facing);
         let (aid, aside, apos, aroot) = { let f = &self.fighters[a]; (f.id, f.side, f.pos, f.root) };
         let did = self.fighters[d].id;
+        let ano = self.fighters[a].player_no;
         if !from_proj {
             let fa = &mut self.fighters[a];
             fa.move_contact = 1;
@@ -986,6 +988,7 @@ impl Match {
             {
                 let fd = &mut self.fighters[d];
                 fd.ghv = GetHitVars { attacker_id: aid, hit_id: hd.id, chainid: hd.chain_id.unwrap_or(-1), hittime: hd.ground_hit_time, ..GetHitVars::default() };
+                fd.ghv.record_hitdef(hd, false, (aid, aside, ano), a_facing, proj.map(|p| p.0));
                 fd.hit_shake = hd.pause_p2; fd.move_type = 'H';
                 if force_air { fd.state_type = 'A'; fd.ghv.fall = true; }
             }
@@ -1008,6 +1011,7 @@ impl Match {
                 g.xvel = (if fd.state_type == 'A' { hd.air_guard_vel[0] } else { hd.guard_vel }) * dir;
                 g.yvel = if fd.state_type == 'A' { hd.air_guard_vel[1] } else { 0.0 };
                 g.yaccel = hd.yaccel; g.damage = dmg; g.guardcount = gc + 1;
+                g.record_hitdef(hd, true, (aid, aside, ano), a_facing, proj.map(|p| p.0));
                 fd.hit_shake = hd.guard_pause_p2; fd.hit_over_time = hd.guard_hit_time; fd.slide_time = hd.guard_slide_time;
                 fd.ctrl = false; fd.move_type = 'H';
             }
@@ -1048,6 +1052,7 @@ impl Match {
                 g.fall_xvel = hd.fall_xvel.map(|x| x * dir).unwrap_or(g.xvel); g.fall_yvel = hd.fall_yvel;
                 g.fall_recover = hd.fall_recover; g.fall_recover_time = hd.fall_recover_time; g.fall_damage = hd.fall_damage; g.fall_kill = hd.fall_kill; g.kill = hd.kill;
                 g.chainid = hd.chain_id.unwrap_or(-1);
+                g.record_hitdef(hd, false, (aid, aside, ano), a_facing, proj.map(|p| p.0));
                 if fd.life <= 0.0 {
                     g.fall = true;
                     if g.yvel == 0.0 { g.yvel = -5.0 * fd.lscl; g.xvel = g.xvel.min(-2.5 * fd.lscl); }

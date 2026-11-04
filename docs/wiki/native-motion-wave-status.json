@@ -1,0 +1,7 @@
+{
+  "status": "partial",
+  "portraits": {"fighters": 16, "dedicated": 16},
+  "motionFramesAdded": 156,
+  "coverage": ["idle", "walk", "run", "crouch", "jump", "guard", "damage", "recovery", "attacks"],
+  "incomplete": ["fighter-specific frame coverage varies", "transformation and complete locomotion/combat sequences remain outstanding", "runtime frame selection does not prove natural gameplay transitions", "visual review of every portrait and full animation loop remains outstanding"]
+}

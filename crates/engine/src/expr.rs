@@ -61,7 +61,7 @@ pub enum Node {
 }
 
 const REDIRS: [&str; 10] = ["parent", "root", "helper", "target", "partner", "enemy", "enemynear", "playerid", "p2", "stateowner"];
-const STRCMP: [&str; 15] = ["command", "statetype", "movetype", "p2statetype", "p2movetype", "name", "p1name", "p2name", "p3name", "p4name", "authorname", "hitdefattr", "physics", "stagevar", "p2command"];
+const STRCMP: [&str; 19] = ["command", "statetype", "movetype", "p2statetype", "p2movetype", "name", "p1name", "p2name", "p3name", "p4name", "p5name", "p6name", "p7name", "p8name", "authorname", "hitdefattr", "physics", "stagevar", "p2command"];
 const COMPONENT: [&str; 13] = ["vel", "pos", "p2dist", "p2bodydist", "p1dist", "rootdist", "parentdist", "screenpos", "camerapos", "hitvel", "camerazoom", "scale", "offset"];
 const RAWARG: [&str; 7] = ["const", "gethitvar", "stagevar", "const240p", "const480p", "const720p", "constcoord"];
 const LEVELS: [&[&str]; 11] = [&["||"], &["^^"], &["&&"], &["|"], &["^"], &["&"], &["=", "!=", ":="], &["<", "<=", ">", ">="], &["+", "-"], &["*", "/", "%"], &["**"]];
@@ -190,7 +190,9 @@ impl Parser {
                     }
                     match x { Tok::Id(s) | Tok::Num(s, _) | Tok::Str(s) => raw.push_str(&s), Tok::Op(o) => raw.push_str(o), Tok::Eof => {} }
                 }
-                return Ok(Node::Trig { name, args: vec![], comp: None, raw: Some(raw.to_ascii_lowercase()) });
+                let raw = raw.to_ascii_lowercase();
+                if name == "gethitvar" { crate::triggers::note_hit_var(&raw); }
+                return Ok(Node::Trig { name, args: vec![], comp: None, raw: Some(raw) });
             }
             let mut args = vec![];
             if !self.is_op(")", 0) {

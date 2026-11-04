@@ -24,6 +24,11 @@ impl<'a> Ctx<'a> {
     fn f(&self) -> &Fighter { &self.m.fighters[self.i] }
     fn enemy_index(&self) -> Option<usize> { self.m.enemy(self.i, 0) }
     fn enemy(&self) -> Option<&Fighter> { self.enemy_index().map(|e| &self.m.fighters[e]) }
+    fn to_local(&self, world: f32) -> f64 { world as f64 / self.f().lscl as f64 }
+    fn local_delta(&self, other: &Fighter, comp: Option<char>) -> f64 {
+        let f = self.f();
+        self.to_local(if comp == Some('y') { other.pos.y - f.pos.y } else { (other.pos.x - f.pos.x) * f.facing })
+    }
     fn screen_edge(&self, right: bool) -> f32 {
         let m = self.m;
         if right { m.camera.x + m.view_w / 2.0 } else { m.camera.x - m.view_w / 2.0 }
@@ -181,18 +186,18 @@ impl<'a> Host for Ctx<'a> {
             "sysfvar" => f.sysfvars.get(a0() as usize).copied().unwrap_or(0.0),
             "vel" => (match comp { Some('y') => f.vel.y, Some('z') => 0.0, _ => f.vel.x }) as f64 / l,
             "pos" => (match comp { Some('y') => f.pos.y, Some('z') => 0.0, _ => f.pos.x - m.camera.x }) as f64 / l,
-            "screenpos" => (match comp { Some('y') => f.pos.y - m.camera.y + m.ground_y(), _ => f.pos.x - m.camera.x + m.view_w / 2.0 }) as f64,
+            "screenpos" => self.to_local(match comp { Some('y') => f.pos.y - m.camera.y + m.ground_y(), _ => f.pos.x - m.camera.x + m.view_w / 2.0 }),
             "camerapos" => (if comp == Some('y') { m.camera.y } else { m.camera.x }) as f64,
             "camerazoom" => 1.0,
-            "p2dist" | "p1dist" => self.enemy().map(|e| (if comp == Some('y') { e.pos.y - f.pos.y } else { (e.pos.x - f.pos.x) * f.facing }) as f64 / l).unwrap_or(0.0),
+            "p2dist" | "p1dist" => self.enemy().map(|e| self.local_delta(e, comp)).unwrap_or(0.0),
             "p2bodydist" => self.enemy().map(|e| {
-                if comp == Some('y') { return (e.pos.y - f.pos.y) as f64 / l; }
+                if comp == Some('y') { return self.local_delta(e, comp); }
                 let dx = (e.pos.x - f.pos.x) * f.facing;
                 let theirs = if (e.pos.x - f.pos.x) * e.facing < 0.0 { e.front_width() } else { e.back_width() };
-                (dx - f.front_width() - theirs) as f64 / l
+                self.to_local(dx - f.front_width() - theirs)
             }).unwrap_or(0.0),
-            "rootdist" => m.idx(f.root).map(|r| { let rf = &m.fighters[r]; (if comp == Some('y') { rf.pos.y - f.pos.y } else { (rf.pos.x - f.pos.x) * f.facing }) as f64 / l }).unwrap_or(0.0),
-            "parentdist" => f.parent.and_then(|p| m.idx(p)).map(|r| { let rf = &m.fighters[r]; (if comp == Some('y') { rf.pos.y - f.pos.y } else { (rf.pos.x - f.pos.x) * f.facing }) as f64 / l }).unwrap_or(0.0),
+            "rootdist" => m.idx(f.root).map(|r| self.local_delta(&m.fighters[r], comp)).unwrap_or(0.0),
+            "parentdist" => f.parent.and_then(|p| m.idx(p)).map(|r| self.local_delta(&m.fighters[r], comp)).unwrap_or(0.0),
             "frontedgedist" => edist(true) / l,
             "backedgedist" => edist(false) / l,
             "frontedgebodydist" => (edist(true) - f.front_width() as f64) / l,

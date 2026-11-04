@@ -3,6 +3,9 @@ use crate::expr::Node;
 use crate::matchs::Match;
 use crate::triggers::Ctx;
 
+mod ext;
+pub use ext::{format_text, tick, TextItem};
+
 #[derive(Clone, Debug, Default)]
 pub struct IkemenState {
     pub map: Vec<(String, f32)>,
@@ -13,6 +16,7 @@ pub struct IkemenState {
     pub guard_max: f32,
     pub dizzy: bool,
     pub guard_break: bool,
+    pub standby: bool,
 }
 
 impl IkemenState {
@@ -20,7 +24,7 @@ impl IkemenState {
         let life = def.c("data.life", 1000.0) as f32;
         let dizzy_max = def.c("data.dizzypoints", life as f64) as f32;
         let guard_max = def.c("data.guardpoints", life as f64) as f32;
-        IkemenState { map: vec![], red_life: life, dizzy_points: dizzy_max, dizzy_max, guard_points: guard_max, guard_max, dizzy: false, guard_break: false }
+        IkemenState { map: vec![], red_life: life, dizzy_points: dizzy_max, dizzy_max, guard_points: guard_max, guard_max, dizzy: false, guard_break: false, standby: false }
     }
 
     pub fn get(&self, key: &str) -> f32 {
@@ -72,7 +76,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         }
         "dizzyset" => { let v = n(m, "value", 1.0) != 0.0; m.fighters[i].ikemen.dizzy = v; }
         "guardbreakset" => { let v = n(m, "value", 1.0) != 0.0; m.fighters[i].ikemen.guard_break = v; }
-        _ => return false,
+        _ => return ext::run(m, i, sc),
     }
     true
 }
@@ -100,7 +104,7 @@ pub fn trigger(c: &Ctx, name: &str, args: &[Node]) -> Option<f64> {
         "guardbreak" => b(s.guard_break),
         "guardpoints" => s.guard_points as f64,
         "guardpointsmax" => s.guard_max as f64,
-        _ => return None,
+        _ => return ext::trigger(c, name, args),
     })
 }
 

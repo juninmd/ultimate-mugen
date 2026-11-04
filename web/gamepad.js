@@ -1,4 +1,5 @@
-// miniquad plugin: Gamepad API (buttons/sticks) + DualShock/DualSense/Xbox vibration via vibrationActuator.
+// Globals imported by the wasm module: Gamepad API (buttons/sticks), DualShock/DualSense/Xbox vibration,
+// touch detection and the MUGEN .zip import button (packs persisted in IndexedDB).
 (function () {
   const K = { U: 1, D: 2, L: 4, R: 8, a: 16, b: 32, c: 64, x: 128, y: 256, z: 512, s: 1024, d: 2048, w: 4096 };
   function pads() { return navigator.getGamepads ? Array.from(navigator.getGamepads()).filter((p) => p && p.connected) : []; }
@@ -18,39 +19,25 @@
     else if (a && a.pulse) a.pulse(Math.max(strong, weak), ms);
     else if (navigator.vibrate && ('ontouchstart' in window)) navigator.vibrate(ms);
   }
-  miniquad_add_plugin({
-    register_plugin: function (imp) {
-      imp.env.ume_gp_count = () => pads().length;
-      imp.env.ume_gp_state = (i) => state(i);
-      imp.env.ume_gp_sony = (i) => { const p = pads()[i]; return p && /054c|sony|dualshock|dualsense|wireless controller/i.test(p.id) ? 1 : 0; };
-      imp.env.ume_gp_rumble = (i, s, w, ms) => rumble(i, s, w, ms);
-      imp.env.ume_vibrate = (ms) => { if (navigator.vibrate) navigator.vibrate(ms); };
-    },
-    name: 'ume_gamepad', version: 1,
-  });
-})();
+  window.ume_gp_count = () => pads().length;
+  window.ume_gp_state = (i) => state(i);
+  window.ume_gp_sony = (i) => { const p = pads()[i]; return p && /054c|sony|dualshock|dualsense|wireless controller/i.test(p.id) ? 1 : 0; };
+  window.ume_gp_rumble = (i, s, w, ms) => rumble(i, s, w, ms);
+  window.ume_set_import_visible = (v) => { const b = document.getElementById('imp'); if (b) b.style.display = v ? '' : 'none'; };
+  window.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0;
 
-// Touch detection + MUGEN .zip import from the page (drag & drop or button), persisted in IndexedDB.
-miniquad_add_plugin({
-  register_plugin: function (imp) { imp.env.ume_set_import_visible = (v) => { const b = document.getElementById('imp'); if (b) b.style.display = v ? '' : 'none'; }; imp.env.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0; },
-  on_init: function () {
+  window.umeStartImports = function (wasm) {
     const DB = 'ultimate-mugen', ST = 'packs';
     function db() { return new Promise((res, rej) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(ST); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
     async function store(name, buf) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).put(buf, name); } catch (e) {} }
     async function all() { try { const d = await db(); return await new Promise((res) => { const out = []; const rq = d.transaction(ST).objectStore(ST).openCursor(); rq.onsuccess = () => { const c = rq.result; if (c) { out.push(c.value); c.continue(); } else res(out); }; rq.onerror = () => res(out); }); } catch (e) { return []; } }
-    function sendBytes(buf) {
-      const ptr = wasm_exports.ume_alloc(buf.length);
-      new Uint8Array(wasm_memory.buffer, ptr, buf.length).set(buf);
-      wasm_exports.ume_import(ptr, buf.length);
-    }
-    async function send(file) { const buf = new Uint8Array(await file.arrayBuffer()); sendBytes(buf); store(file.name + ':' + file.size, buf); }
+    async function send(file) { const buf = new Uint8Array(await file.arrayBuffer()); wasm.ume_import(buf); store(file.name + ':' + file.size, buf); }
     window.umeImport = (files) => { for (const f of files) send(f); };
     window.umeClearImports = async () => { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).clear(); };
-    all().then((bufs) => bufs.forEach((b) => sendBytes(new Uint8Array(b))));
+    all().then((bufs) => bufs.forEach((b) => wasm.ume_import(new Uint8Array(b))));
     const input = document.getElementById('ume-file');
     if (input) input.addEventListener('change', () => window.umeImport(input.files));
     window.addEventListener('dragover', (e) => e.preventDefault());
     window.addEventListener('drop', (e) => { e.preventDefault(); window.umeImport(e.dataTransfer.files); });
-  },
-  name: 'ume_import', version: 1,
-});
+  };
+})();

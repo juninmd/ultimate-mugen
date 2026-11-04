@@ -7,7 +7,9 @@ pub mod text;
 
 use std::collections::HashSet;
 use std::sync::Arc;
-use std::time::Instant;
+use std::cell::RefCell;
+use std::rc::Rc;
+use web_time::Instant;
 use ume_render::{Atlas, Canvas, PostFx, Renderer, Target};
 pub use ume_render::PostParams;
 use winit::application::ApplicationHandler;
@@ -82,19 +84,38 @@ pub trait Game {
 
 struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas, post: PostFx }
 
-struct Shell<G: Game> { cfg: Config, game: G, live: Option<Live>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String> }
+struct Shell<G: Game> { cfg: Config, game: G, live: Option<Live>, pending: Option<Pending>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String> }
 
 pub const ATLAS_SIZE: u32 = 4096;
 
-fn init_live(event_loop: &ActiveEventLoop, cfg: &Config) -> Result<Live, String> {
-    let mut attrs = Window::default_attributes().with_title(cfg.title.clone()).with_inner_size(PhysicalSize::new(cfg.width, cfg.height));
+fn create_window(event_loop: &ActiveEventLoop, cfg: &Config) -> Result<Arc<Window>, String> {
+    let mut attrs = Window::default_attributes().with_title(cfg.title.clone());
+    #[cfg(not(target_arch = "wasm32"))]
+    { attrs = attrs.with_inner_size(PhysicalSize::new(cfg.width, cfg.height)); }
+    #[cfg(target_arch = "wasm32")]
+    {
+        use wasm_bindgen::JsCast;
+        use winit::platform::web::WindowAttributesExtWebSys;
+        let canvas = web_sys::window().and_then(|w| w.document()).and_then(|d| d.get_element_by_id("glcanvas")).and_then(|e| e.dyn_into::<web_sys::HtmlCanvasElement>().ok());
+        attrs = attrs.with_append(canvas.is_none()).with_canvas(canvas).with_prevent_default(true).with_focusable(true);
+    }
     if cfg.fullscreen { attrs = attrs.with_fullscreen(Some(Fullscreen::Borderless(None))); }
-    let window = Arc::new(event_loop.create_window(attrs).map_err(|e| e.to_string())?);
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_with_display_handle_from_env(Box::new(event_loop.owned_display_handle())));
+    event_loop.create_window(attrs).map(Arc::new).map_err(|e| e.to_string())
+}
+
+fn instance(event_loop: &ActiveEventLoop) -> wgpu::Instance {
+    #[cfg(not(target_arch = "wasm32"))]
+    let desc = wgpu::InstanceDescriptor::new_with_display_handle_from_env(Box::new(event_loop.owned_display_handle()));
+    #[cfg(target_arch = "wasm32")]
+    let desc = { let _ = event_loop; let mut d = wgpu::InstanceDescriptor::new_without_display_handle_from_env(); d.backends = wgpu::Backends::GL; d };
+    wgpu::Instance::new(desc)
+}
+
+async fn init_live(instance: wgpu::Instance, window: Arc<Window>) -> Result<Live, String> {
     let surface = instance.create_surface(window.clone()).map_err(|e| e.to_string())?;
-    let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions { compatible_surface: Some(&surface), ..Default::default() })).map_err(|e| e.to_string())?;
+    let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions { compatible_surface: Some(&surface), ..Default::default() }).await.map_err(|e| e.to_string())?;
     let limits = wgpu::Limits::downlevel_webgl2_defaults().using_resolution(adapter.limits());
-    let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor { required_limits: limits, ..Default::default() })).map_err(|e| e.to_string())?;
+    let (device, queue) = adapter.request_device(&wgpu::DeviceDescriptor { required_limits: limits, ..Default::default() }).await.map_err(|e| e.to_string())?;
     let size = window.inner_size();
     let mut config = surface.get_default_config(&adapter, size.width.max(1), size.height.max(1)).ok_or("surface unsupported by adapter")?;
     let caps = surface.get_capabilities(&adapter);
@@ -110,9 +131,32 @@ fn init_live(event_loop: &ActiveEventLoop, cfg: &Config) -> Result<Live, String>
     Ok(Live { window, surface, config, gpu, canvas, post })
 }
 
+type Pending = Rc<RefCell<Option<Result<Live, String>>>>;
+
 impl<G: Game> Shell<G> {
+    fn adopt(&mut self, event_loop: &ActiveEventLoop) {
+        let Some(ready) = self.pending.as_ref().and_then(|p| p.borrow_mut().take()) else { return };
+        self.pending = None;
+        match ready {
+            Ok(mut live) => { self.game.init(&mut live.gpu); live.window.request_redraw(); self.live = Some(live); }
+            Err(e) => {
+                #[cfg(target_arch = "wasm32")]
+                web_sys::console::error_1(&e.clone().into());
+                self.error = Some(e);
+                event_loop.exit();
+            }
+        }
+    }
+
     fn redraw(&mut self, event_loop: &ActiveEventLoop) {
+        if self.live.is_none() { self.adopt(event_loop); }
         let Some(live) = self.live.as_mut() else { return };
+        let actual = live.window.inner_size();
+        if actual.width > 0 && actual.height > 0 && (actual.width != live.config.width || actual.height != live.config.height) {
+            live.config.width = actual.width;
+            live.config.height = actual.height;
+            live.surface.configure(&live.gpu.device, &live.config);
+        }
         let frame = match live.surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(t) | wgpu::CurrentSurfaceTexture::Suboptimal(t) => t,
             _ => { live.surface.configure(&live.gpu.device, &live.config); return; }
@@ -159,11 +203,20 @@ impl<G: Game> Shell<G> {
 
 impl<G: Game> ApplicationHandler for Shell<G> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        if self.live.is_some() { return; }
-        match init_live(event_loop, &self.cfg) {
-            Ok(mut live) => { self.game.init(&mut live.gpu); live.window.request_redraw(); self.live = Some(live); }
-            Err(e) => { self.error = Some(e); event_loop.exit(); }
-        }
+        if self.live.is_some() || self.pending.is_some() { return; }
+        let window = match create_window(event_loop, &self.cfg) { Ok(w) => w, Err(e) => { self.error = Some(e); event_loop.exit(); return; } };
+        let pending: Pending = Rc::new(RefCell::new(None));
+        let (slot, instance, w) = (pending.clone(), instance(event_loop), window.clone());
+        let task = async move {
+            let r = init_live(instance, w.clone()).await;
+            *slot.borrow_mut() = Some(r);
+            w.request_redraw();
+        };
+        self.pending = Some(pending);
+        #[cfg(not(target_arch = "wasm32"))]
+        { pollster::block_on(task); self.adopt(event_loop); }
+        #[cfg(target_arch = "wasm32")]
+        wasm_bindgen_futures::spawn_local(task);
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _: WindowId, event: WindowEvent) {
@@ -204,11 +257,22 @@ impl<G: Game> ApplicationHandler for Shell<G> {
     }
 }
 
-pub fn run<G: Game>(cfg: Config, game: G) -> Result<u64, String> {
+pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
     let event_loop = EventLoop::new().map_err(|e| e.to_string())?;
     event_loop.set_control_flow(ControlFlow::Poll);
     let now = Instant::now();
-    let mut shell = Shell { cfg, game, live: None, input: Input::default(), start: now, last: now, frames: 0, error: None };
-    event_loop.run_app(&mut shell).map_err(|e| e.to_string())?;
-    match shell.error { Some(e) => Err(e), None => Ok(shell.frames) }
+    let mut shell = Shell { cfg, game, live: None, pending: None, input: Input::default(), start: now, last: now, frames: 0, error: None };
+    #[cfg(target_arch = "wasm32")]
+    {
+        use winit::platform::web::EventLoopExtWebSys;
+        std::panic::set_hook(Box::new(|info| web_sys::console::error_1(&info.to_string().into())));
+        let _ = &mut shell;
+        event_loop.spawn_app(shell);
+        Ok(0)
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        event_loop.run_app(&mut shell).map_err(|e| e.to_string())?;
+        match shell.error { Some(e) => Err(e), None => Ok(shell.frames) }
+    }
 }

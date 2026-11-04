@@ -176,12 +176,16 @@ impl App {
         reg.scan_folders();
         reg.dedupe();
         reg.sort_mugen();
+        let import_msg = if reg.import_errors.is_empty() { String::new() } else {
+            let first: Vec<&str> = reg.import_errors.iter().take(3).map(|s| s.as_str()).collect();
+            format!("{} erro(s) ao ler mugen/: {}", reg.import_errors.len(), first.join(" | "))
+        };
         Self::boot(&mut ui, 0.9, "Áudio…").await;
         let audio = Audio::new(audio_on).await;
         Self::boot(&mut ui, 1.0, "Pronto!").await;
         App {
             reg, market: crate::market::Market::open(), market_ui: market::MarketUi::default(), ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
-            ai_level: settings.difficulty, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
+            ai_level: settings.difficulty, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: import_msg, preview_t: 0.0,
             settings, key_edit: None, move_page: 0, pending: Pending::default(), import_jobs: vec![], window_watch: WindowWatch::default(), window_pinned: false, team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }

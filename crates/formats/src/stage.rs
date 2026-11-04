@@ -99,6 +99,12 @@ pub struct MugenStage {
     pub start_y: f32,
     pub zoom_out: f32,
     pub zoom_in: f32,
+    pub info_name: String,
+    pub display_name: String,
+    pub author: String,
+    pub mugen_version: String,
+    pub round_time: f32,
+    pub auto_turn: bool,
 }
 
 fn bgctrl_kind(s: &Section) -> Option<BgCtrlKind> {
@@ -252,6 +258,12 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         start_y: g("camera", "starty", 0.0),
         zoom_out: g("camera", "zoomout", 1.0),
         zoom_in: g("camera", "zoomin", 1.0),
+        info_name: unquote(get("info", "name").unwrap_or("")),
+        display_name: unquote(get("info", "displayname").unwrap_or("")),
+        author: unquote(get("info", "author").unwrap_or("")),
+        mugen_version: unquote(get("info", "mugenversion").unwrap_or("")),
+        round_time: g("stageinfo", "roundtime", -1.0),
+        auto_turn: g("playerinfo", "autoturn", 1.0) != 0.0,
         anims,
     })
 }

@@ -16,6 +16,7 @@ mod cutscene;
 mod keyedit;
 mod market;
 mod settings_screen;
+mod versus;
 pub(crate) use keyedit::KeyEdit;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -746,28 +747,9 @@ impl App {
             }
         }
         let ready = step_now >= total;
-        let (a, b) = (self.sel.0, self.sel.1);
-        let k = (t / 0.4).min(1.0);
-        clear_background(BLACK);
-        let ca = rgb(self.reg.chars[a].color); let cb = rgb(self.reg.chars[b].color);
-        self.ui.gradient_v(-(1.0 - k) * 640.0, 0.0, 640.0, VH, ca, BLACK);
-        self.ui.gradient_v(640.0 + (1.0 - k) * 640.0, 0.0, 640.0, VH, cb, BLACK);
-        crate::vfx::speed_lines((screen_width() / 2.0, screen_height() * 0.46), 0.10 + 0.08 * (self.ui.t * 3.0).sin().abs(), [1.0, 0.8, 0.5], (self.ui.t * 12.0) as u32, 40);
-        let pt = self.preview_t;
-        // previews: whatever is already loaded (full or idle-only), so this screen itself never stalls
-        if let Some(d) = self.reg.chars[a].peek(1) { self.draw_char(&d, 0, pt, 320.0 - (1.0 - k) * 640.0, 560.0, 420.0, false); }
-        if let Some(d) = self.reg.chars[b].peek(if a == b { 2 } else { 1 }).or_else(|| self.reg.chars[b].load_preview(if a == b { 2 } else { 1 }).ok().filter(|_| !self.reg.chars[b].mugen)) { self.draw_char(&d, 0, pt, 960.0 + (1.0 - k) * 640.0, 560.0, 420.0, true); }
-        self.ui.text_bold(&self.reg.chars[a].name.to_uppercase(), 320.0, 630.0, 40.0, WHITE, BLACK, Align::Center);
-        self.ui.text_bold(&self.reg.chars[b].name.to_uppercase(), 960.0, 630.0, 40.0, WHITE, BLACK, Align::Center);
-        self.ui.text(&self.reg.chars[a].series, 320.0, 662.0, 20.0, hex("#dddddd"), Align::Center, false);
-        self.ui.text(&self.reg.chars[b].series, 960.0, 662.0, 20.0, hex("#dddddd"), Align::Center, false);
-        let vs_s = 170.0 * (if t < 0.6 { 3.0 - 2.0 * (t / 0.6) } else { 1.0 });
-        glow(self.ui.x(640.0), self.ui.y(330.0), 220.0 * self.ui.s, Color::new(1.0, 0.5, 0.1, 0.7));
-        self.ui.text_bold("VS", 640.0, 330.0 + vs_s * 0.35, vs_s, hex("#ffcc33"), hex("#5a0a10"), Align::Center);
-        let sub = if let Some(t) = &self.team { let (ia, ib) = (t.idx[0] + 1, t.idx[1] + 1); if t.simul { format!("EQUIPE PARALELO · {} + {} vs {} + {}", self.reg.chars[t.members[0][0]].name, self.reg.chars[t.members[0][1.min(t.members[0].len() - 1)]].name, self.reg.chars[t.members[1][0]].name, self.reg.chars[t.members[1][1.min(t.members[1].len() - 1)]].name) } else { format!("EQUIPE SEQUÊNCIA · {}º vs {}º lutador", ia, ib) } } else if let Some((l, i)) = &self.arcade { format!("ARCADE · LUTA {}/{}", i + 1, l.len()) } else { self.reg.stages[self.sel.2].name.clone() };
-        self.ui.text(&sub, 640.0, 700.0, 20.0, hex("#a49cc0"), Align::Center, true);
+        self.draw_versus(t);
         if !ready {
-            self.ui.progress_bar(440.0, 28.0, 400.0, step_now as f32 / total as f32, &self.load_label(step_now));
+            self.ui.progress_bar(440.0, 84.0, 400.0, step_now as f32 / total as f32, &self.load_label(step_now));
         } else if t > 1.8 || self.c.pressed(nav::OK | nav::START) || is_mouse_button_pressed(MouseButton::Left) {
             self.finish_fight().await;
         }

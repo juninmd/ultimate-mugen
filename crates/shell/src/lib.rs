@@ -196,10 +196,6 @@ impl<G: Game> Shell<G> {
         self.game.frame(&mut f);
         let (quit, c, post, resize, fullscreen, shot, vsync, cap) = (f.quit, f.clear, f.post, f.resize, f.fullscreen, f.screenshot.take(), f.vsync, f.frame_cap);
         if let Some(c) = cap { self.frame_cap = c; }
-        if let Some(on) = vsync {
-            let mode = if on { wgpu::PresentMode::AutoVsync } else { wgpu::PresentMode::AutoNoVsync };
-            if live.config.present_mode != mode { live.config.present_mode = mode; live.surface.configure(&live.gpu.device, &live.config); }
-        }
         if let Some([w, h]) = resize { let _ = live.window.request_inner_size(PhysicalSize::new(w, h)); }
         if let Some(fs) = fullscreen { live.window.set_fullscreen(fs.then_some(Fullscreen::Borderless(None))); }
         let view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
@@ -227,6 +223,10 @@ impl<G: Game> Shell<G> {
         }
         live.window.pre_present_notify();
         live.gpu.queue.present(frame);
+        if let Some(on) = vsync {
+            let mode = if on { wgpu::PresentMode::AutoVsync } else { wgpu::PresentMode::AutoNoVsync };
+            if live.config.present_mode != mode { live.config.present_mode = mode; live.surface.configure(&live.gpu.device, &live.config); }
+        }
         self.input.end_frame();
         self.frames += 1;
         #[cfg(not(target_arch = "wasm32"))]

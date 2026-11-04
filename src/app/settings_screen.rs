@@ -50,7 +50,7 @@ impl App {
             3 => vec![
                 row(Act::Difficulty, tr("Dificuldade da CPU", "CPU difficulty"), format!("{} / 8", s.difficulty), tr("Vale para Arcade, Versus CPU e Equipes", "Applies to Arcade, Versus CPU and Teams")),
                 row(Act::RoundTime, tr("Tempo do round", "Round time"), match ROUND_SECONDS[s.round_time.min(ROUND_SECONDS.len() - 1)] { 0 => tr("Infinito", "Infinite").to_string(), n => format!("{n} s") }, tr("Vale a partir da próxima luta", "Takes effect from the next fight")),
-                row(Act::Rounds, tr("Rounds para vencer", "Rounds to win"), ROUNDS_TO_WIN[s.rounds.min(ROUNDS_TO_WIN.len() - 1)].to_string(), tr("Melhor de 1, 3 ou 5", "Best of 1, 3 or 5")),
+                row(Act::Rounds, tr("Rounds para vencer", "Rounds to win"), format!("{} {}", tr("Melhor de", "Best of"), ROUNDS_TO_WIN[s.rounds.min(ROUNDS_TO_WIN.len() - 1)] * 2 - 1), tr("Vitórias necessárias: 1, 2 ou 3 rounds", "Wins needed: 1, 2 or 3 rounds")),
                 row(Act::Life, tr("Vida dos lutadores", "Fighter life"), format!("{}%", LIFE_PERCENT[s.life.min(LIFE_PERCENT.len() - 1)]), tr("Multiplica a barra de vida de todos", "Scales everyone's life bar")),
             ],
             4 => vec![row(Act::Language, tr("Idioma", "Language"), LANGS.iter().find(|(l, _)| *l == s.lang).map(|(_, n)| *n).unwrap_or(""), tr("Menus de configurações e tela de versus. O restante é traduzido gradualmente", "Settings and versus screens. The rest is being translated gradually"))],
@@ -176,7 +176,7 @@ impl App {
         let back = self.clicked_rect(56.0, 668.0, 150.0, 40.0);
         self.ui.rect(56.0, 668.0, 150.0, 40.0, Color::new(1.0, 1.0, 1.0, 0.1));
         self.ui.text(tr("Voltar", "Back"), 131.0, 696.0, 20.0, WHITE, Align::Center, true);
-        let note = if from_fight { tr("Em luta: regras de jogabilidade valem na próxima luta", "In a fight: gameplay rules apply from the next fight") } else { tr("↑↓ navegar · ←→ alterar · Enter confirmar · Esc voltar", "↑↓ navigate · ←→ change · Enter confirm · Esc back") };
+        let note = if from_fight { tr("Em luta: regras de jogabilidade valem na próxima luta", "In a fight: gameplay rules apply from the next fight") } else { tr("Cima/Baixo: navegar · Esq/Dir: alterar · Enter: confirmar · Esc: voltar", "Up/Down: navigate · Left/Right: change · Enter: confirm · Esc: back") };
         self.ui.text(note, VW - 56.0, 696.0, 16.0, hex("#a49cc0"), Align::Right, false);
 
         let mut changed = false;

@@ -41,6 +41,6 @@ Map keys are case-insensitive. Each map holds at most 256 keys of at most 64 cha
 
 Chaves de map não diferenciam maiúsculas. Cada map guarda no máximo 256 chaves de até 64 caracteres; escritas acima desses limites são ignoradas.
 
-`data.dizzypoints` and `data.guardpoints` in the `[Data]` section default to `data.life`.
+`data.dizzypoints` and `data.guardpoints` in the `[Data]` section default to `data.life`. How hits spend these values is described in [Red life, dizzy and guard points](Life-Systems.md).
 
-`data.dizzypoints` e `data.guardpoints` na seção `[Data]` usam `data.life` como padrão.
+`data.dizzypoints` e `data.guardpoints` na seção `[Data]` usam `data.life` como padrão. Como os golpes gastam esses valores está em [Vida vermelha, tontura e defesa](pt-BR/Sistemas-de-Vida.md).

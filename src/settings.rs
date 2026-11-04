@@ -45,7 +45,7 @@ impl Default for Settings {
             single_round: false, classic_pushbox: true, team_life_share: true, game_speed: 2,
             survival_recovery: 2, survival_best: 0,
             pal1: 1, pal2: 1,
-            lang: crate::i18n::Lang::Pt,
+            lang: crate::i18n::Lang::En,
         }
     }
 }
@@ -209,7 +209,7 @@ mod tests {
         let s = Settings::from_text("fullscreen=1\nres=3\nquality=2\nfps=1\nfx=1\nimpact_lv=0\n");
         assert!(s.fullscreen && s.fps);
         assert_eq!((s.res, s.quality, s.fx, s.impact), (3, 2, 1, 0));
-        assert_eq!((s.vsync, s.master, s.rounds, s.lang), (true, 8, 1, crate::i18n::Lang::Pt));
+        assert_eq!((s.vsync, s.master, s.rounds, s.lang), (true, 8, 1, crate::i18n::Lang::En));
     }
 
     #[test]

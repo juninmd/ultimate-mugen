@@ -95,16 +95,16 @@ impl App {
         let Screen::SurvivalOver { score, rounds } = self.screen else { return };
         self.ui.background();
         self.ui.motes(50, 1.4);
-        self.ui.text_bold("FIM DE JOGO", VW / 2.0, 210.0, 62.0, hex("#ff4d6d"), BLACK, Align::Center);
+        self.ui.text_bold(crate::i18n::t("survival.over"), VW / 2.0, 210.0, 62.0, hex("#ff4d6d"), BLACK, Align::Center);
         let best = self.settings.survival_best.max(0) as i64;
         let record = score >= best && score > 0;
-        self.ui.text(&format!("{score} PONTOS"), VW / 2.0, 300.0, 40.0, hex("#ffcc33"), Align::Center, true);
-        self.ui.text(&format!("{rounds} {} vencida(s)", if rounds == 2 { "luta" } else { "lutas" }), VW / 2.0, 346.0, 22.0, WHITE, Align::Center, false);
-        self.ui.text(&if record { format!("NOVO RECORDE! (anterior: {})", self.settings.survival_best.saturating_sub(score as u64)) } else { format!("RECORDE: {best}") }, VW / 2.0, 386.0, 20.0, if record { hex("#6dff9e") } else { hex("#a49cc0") }, Align::Center, true);
+        self.ui.text(&crate::i18n::tf("survival.points", &[("{score}", &score.to_string())]), VW / 2.0, 300.0, 40.0, hex("#ffcc33"), Align::Center, true);
+        self.ui.text(&crate::i18n::tf("survival.wins", &[("{count}", &rounds.to_string())]), VW / 2.0, 346.0, 22.0, WHITE, Align::Center, false);
+        self.ui.text(&if record { crate::i18n::t("survival.new_record").to_string() } else { crate::i18n::tf("survival.record", &[("{best}", &best.to_string())]) }, VW / 2.0, 386.0, 20.0, if record { hex("#6dff9e") } else { hex("#a49cc0") }, Align::Center, true);
         let can_replay = self.last_fight.is_some();
-        let mut items: Vec<&str> = vec!["Tentar de novo"];
-        if can_replay { items.push("Ver replay"); }
-        items.extend(["Personagens", "Menu"]);
+        let mut items: Vec<&str> = vec![crate::i18n::t("survival.retry")];
+        if can_replay { items.push(crate::i18n::t("survival.watch")); }
+        items.extend([crate::i18n::t("results.characters"), crate::i18n::t("results.menu")]);
         let mut cur = 0usize;
         let mut ok = self.c.pressed(nav::OK | nav::START);
         for (i, it) in items.iter().enumerate() {
@@ -118,15 +118,15 @@ impl App {
         if ok {
             self.audio.stop_music();
             match items[cur] {
-                "Tentar de novo" => {
+                x if x == crate::i18n::t("survival.retry") => {
                     self.replaying = None;
                     self.survival = Some(Survival::default());
                     self.sel.1 = self.survival_opponent(self.sel.0, None);
                     if let Some(t) = self.team.as_mut() { t.members[1] = vec![self.sel.1]; }
                     self.screen = Screen::Vs { t: 0.0, step: 0 };
                 }
-                "Ver replay" => { self.screen = Screen::Results { winner: 1, cur: 0 }; }
-                "Personagens" => { self.replaying = None; self.session = None; self.survival = None; self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }; }
+                x if x == crate::i18n::t("survival.watch") => { self.screen = Screen::Results { winner: 1, cur: 0 }; }
+                x if x == crate::i18n::t("results.characters") => { self.replaying = None; self.session = None; self.survival = None; self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }; }
                 _ => { self.replaying = None; self.session = None; self.survival = None; self.screen = Screen::Menu { cur: 0 }; }
             }
             return;
@@ -140,8 +140,8 @@ impl App {
         let Some(s) = self.survival else { return };
         let best = self.settings.survival_best;
         self.ui.rect(VW / 2.0 - 210.0, 6.0, 420.0, 44.0, Color::new(0.02, 0.01, 0.06, 0.6));
-        self.ui.text(&format!("SOBREVIVÊNCIA · RODADA {} · {} PTS", s.round, s.score), VW / 2.0, 28.0, 17.0, hex("#ffcc33"), Align::Center, true);
-        self.ui.text(&format!("RECORDE {best}"), VW / 2.0, 43.0, 12.0, hex("#a49cc0"), Align::Center, false);
+        self.ui.text(&crate::i18n::tf("survival.hud", &[("{round}", &s.round.to_string()), ("{score}", &s.score.to_string())]), VW / 2.0, 28.0, 17.0, hex("#ffcc33"), Align::Center, true);
+        self.ui.text(&crate::i18n::tf("survival.record", &[("{best}", &best.to_string())]), VW / 2.0, 43.0, 12.0, hex("#a49cc0"), Align::Center, false);
     }
 
     /// Life ratios the recorded fight started with (Survival carries life between fights).

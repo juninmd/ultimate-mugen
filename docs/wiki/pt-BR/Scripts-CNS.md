@@ -99,6 +99,27 @@ Funções extras: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 
 `GetHitVar(<nome>)` lê os dados do último golpe sofrido (após `HitDef`, defesa ou `HitOverride`). Além dos nomes do MUGEN 1.1 (`type`, `animtype`, `airtype`, `groundtype`, `damage`, `hitcount`, `guardcount`, `hitshaketime`, `hittime`, `slidetime`, `ctrltime`, `xvel`, `yvel`, `yaccel`, `chainid`, `guarded`, `fall`, `fall.*`, `kill`, `id`, `playerno`), estes nomes do Ikemen retornam valores reais: `recovertime` (ticks restantes até `fall.recovertime` permitir a recuperação, 0 fora de queda), `down.recover` (o `down.recover` do HitDef, padrão 1), `priority`, `facing` (direção do atacante, 1 ou -1), `power` (poder recebido pelo alvo), `isbound` (ao vivo, 1 enquanto o alvo está preso), `attr` (máscara de bits: S=1 C=2 A=4 L=8, NA=64 NT=128 NP=256 SA=512 ST=1024 SP=2048 HA=4096 HT=8192 HP=16384), `guardflag` (máscara de bits: H=1 L=2 A=4), `hitdamage`, `guarddamage`, `hitpower`, `guardpower`, `dizzypoints` (`dizzypoints` do HitDef, padrão o dano do golpe), `guardpoints` (`guardpoints` do HitDef, padrão o dano na defesa), `redlife` (`redlife` do HitDef, valor de golpe ou defesa), `score` (`score` do HitDef, valor de golpe ou defesa), `teamside` (lado do atacante, 1 ou 2), `projid` (-1 se não foi projétil), `playerid` (ID do atacante, igual a `id`), `p1stateno` e `p2stateno` (-1 quando o HitDef não define). Qualquer outro nome registra um aviso no stderr ao carregar a expressão e vale 0.
 
+Triggers de combate e estado (escalados pelo localcoord quando retornam posições ou velocidades):
+
+| Trigger | Resultado |
+|---|---|
+| `HitDefVar(<nome>)` | Lê o último `HitDef` do personagem: `p1stateno`, `p2stateno`, `priority`, `sparkx`, `sparky`, `sparkno`, `guard.sparkno`, `pausetime.p1`, `pausetime.p2`, `guard.pausetime.p1/.p2`, `ground.velocity.x/.y`, `air.velocity.x/.y`, `down.velocity.x/.y`, `guard.velocity`, `attr` e `guardflag` (máscaras de bits como no `GetHitVar`), `id`, `chainid`, `damage`, `guard.damage`, `hittime`, `numhits`, `fall`, `yaccel`. `pausetime` e `*.velocity` sem sufixo valem o primeiro componente. Nomes desconhecidos retornam 0 |
+| `MoveHitVar(<nome>)` | Lê o último golpe que este personagem acertou: `id` e `playerno` do alvo, `sparkx`, `sparky` (ponto de contato relativo ao atacante), `cornerpush` (recuo aplicado ao atacante no canto), `overridden` (o golpe foi absorvido por um `HitOverride`), `frame` (1 no tick seguinte ao golpe) |
+| `MoveCountered` | Como `MoveHit`, mas só quando o alvo estava em ataque (`movetype = A`) ao ser atingido. Zerado junto com `MoveHit` |
+| `HitByAttr = SCA, NA, SA` | 1 quando o último golpe sofrido combina com a lista de atributos (mesma sintaxe do `HitDefAttr`) |
+| `HitOverridden` | 1 no tick seguinte a um `HitOverride` absorver um golpe |
+| `PrevStateType = S`, `PrevMoveType = A` | Tipo de estado e de movimento do estado anterior ao atual |
+| `PrevAnim` | Número da animação antes da última troca de animação |
+| `SelfStateNoExist(n)` | 1 quando os arquivos do próprio personagem definem o estado `n` |
+| `InRunState` | 1 nos estados de corrida padrão (100, 105) |
+| `InCustomState` | 1 enquanto executa um estado de outro personagem (`p2getp1state`) |
+| `InCustomAnim` | 1 enquanto toca uma animação de outro personagem (`ChangeAnim2`) |
+| `IsAsserted(<flag>)` | 1 quando a flag foi declarada neste tick com `AssertSpecial`. Compartilha a tabela de flags do `AssertSpecial` (flags do personagem e `TimerFreeze`, `Intro`, `RoundNotOver`) |
+| `JugglePoints` | Pontos de juggle restantes: o `data.airjuggle` do atacante (o próprio quando não está apanhando) menos os pontos já gastos |
+| `HitVel X` / `HitVel Y` | Velocidade definida pelo último golpe sofrido |
+| `ParentExist` | 1 enquanto o pai deste helper ainda existe |
+| `AirJumpCount` | Saltos aéreos feitos desde o pouso |
+
 ## Redirecionamentos
 
 `parent`, `root`, `helper(id)`, `target(id)`, `partner(n)` (o n-ésimo outro jogador não-helper do mesmo lado, padrão 0; um helper redireciona pelo seu root; NaN quando não existe), `enemy(n)`, `enemynear(n)`, `playerid(id)`, `p2`. Exemplo: `trigger1 = enemynear, life < 200`.

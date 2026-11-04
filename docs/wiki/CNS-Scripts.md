@@ -99,6 +99,27 @@ Extra functions: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 
 `GetHitVar(<name>)` reads the data of the last hit taken (after `HitDef`, guard or `HitOverride`). Beyond the MUGEN 1.1 names (`type`, `animtype`, `airtype`, `groundtype`, `damage`, `hitcount`, `guardcount`, `hitshaketime`, `hittime`, `slidetime`, `ctrltime`, `xvel`, `yvel`, `yaccel`, `chainid`, `guarded`, `fall`, `fall.*`, `kill`, `id`, `playerno`) these Ikemen names return real values: `recovertime` (ticks left until `fall.recovertime` allows recovery, 0 when not falling), `down.recover` (the HitDef `down.recover`, default 1), `priority`, `facing` (attacker facing, 1 or -1), `power` (power the target received), `isbound` (live, 1 while the target is bound), `attr` (bit mask: S=1 C=2 A=4 L=8, NA=64 NT=128 NP=256 SA=512 ST=1024 SP=2048 HA=4096 HT=8192 HP=16384), `guardflag` (bit mask: H=1 L=2 A=4), `hitdamage`, `guarddamage`, `hitpower`, `guardpower`, `dizzypoints` (HitDef `dizzypoints`, default the hit damage), `guardpoints` (HitDef `guardpoints`, default the guard damage), `redlife` (HitDef `redlife`, hit or guard value), `score` (HitDef `score`, hit or guard value), `teamside` (attacker side, 1 or 2), `projid` (-1 unless a projectile hit), `playerid` (attacker ID, same as `id`), `p1stateno` and `p2stateno` (-1 when the HitDef sets none). Any other name logs one warning on stderr when the expression is loaded and evaluates to 0.
 
+Combat and state triggers (localcoord-scaled where they return positions or velocities):
+
+| Trigger | Result |
+|---|---|
+| `HitDefVar(<name>)` | Reads the character's last `HitDef`: `p1stateno`, `p2stateno`, `priority`, `sparkx`, `sparky`, `sparkno`, `guard.sparkno`, `pausetime.p1`, `pausetime.p2`, `guard.pausetime.p1/.p2`, `ground.velocity.x/.y`, `air.velocity.x/.y`, `down.velocity.x/.y`, `guard.velocity`, `attr` and `guardflag` (bit masks as in `GetHitVar`), `id`, `chainid`, `damage`, `guard.damage`, `hittime`, `numhits`, `fall`, `yaccel`. Bare `pausetime` and `*.velocity` mean the first component. Unknown names return 0 |
+| `MoveHitVar(<name>)` | Reads the last hit this character landed: `id` and `playerno` of the target, `sparkx`, `sparky` (contact point relative to the attacker), `cornerpush` (push-back applied to the attacker in a corner), `overridden` (the hit was absorbed by a `HitOverride`), `frame` (1 for the tick after the hit) |
+| `MoveCountered` | Like `MoveHit`, but only when the target was in an attack (`movetype = A`) when it was hit. Cleared with `MoveHit` |
+| `HitByAttr = SCA, NA, SA` | 1 when the last hit taken matches the attribute list (same syntax as `HitDefAttr`) |
+| `HitOverridden` | 1 for the tick after a `HitOverride` absorbed a hit |
+| `PrevStateType = S`, `PrevMoveType = A` | State type and move type of the state before the current one |
+| `PrevAnim` | Animation number before the last animation change |
+| `SelfStateNoExist(n)` | 1 when the character's own files define state `n` |
+| `InRunState` | 1 in the standard run states (100, 105) |
+| `InCustomState` | 1 while running a state owned by another character (`p2getp1state`) |
+| `InCustomAnim` | 1 while playing an animation owned by another character (`ChangeAnim2`) |
+| `IsAsserted(<flag>)` | 1 when the flag was asserted this tick with `AssertSpecial`. Shares the flag table with `AssertSpecial` (character flags and `TimerFreeze`, `Intro`, `RoundNotOver`) |
+| `JugglePoints` | Juggle points left: the attacker's `data.airjuggle` (own when not being hit) minus the points already spent |
+| `HitVel X` / `HitVel Y` | Velocity set by the last hit taken |
+| `ParentExist` | 1 while the parent of this helper still exists |
+| `AirJumpCount` | Air jumps performed since landing |
+
 ## Redirections
 
 `parent`, `root`, `helper(id)`, `target(id)`, `partner(n)` (the n-th other non-helper player on the same side, default 0; a helper redirects through its root; NaN when there is none), `enemy(n)`, `enemynear(n)`, `playerid(id)`, `p2`. Example: `trigger1 = enemynear, life < 200`.

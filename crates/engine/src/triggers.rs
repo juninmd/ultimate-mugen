@@ -57,6 +57,34 @@ impl<'a> Ctx<'a> {
             _ => 0.0,
         }
     }
+    fn hitdef_var(&self, k: &str) -> f64 {
+        let f = self.f(); let l = f.lscl as f64;
+        let Some(hd) = f.hitdef.as_ref() else { return 0.0 };
+        let (stem, second) = match k.rsplit_once('.') { Some((s, "y")) | Some((s, "p2")) => (s, true), Some((s, "x")) | Some((s, "p1")) => (s, false), _ => (k, false) };
+        let pick = |pair: [f64; 2]| pair[second as usize];
+        match stem {
+            "p1stateno" => hd.p1stateno as f64, "p2stateno" => hd.p2stateno as f64, "priority" => hd.priority as f64,
+            "sparkx" => hd.spark_x as f64 / l, "sparky" => hd.spark_y as f64 / l, "sparkno" => hd.spark_no as f64, "guard.sparkno" => hd.guard_spark_no as f64,
+            "pausetime" => pick([hd.pause_p1 as f64, hd.pause_p2 as f64]), "guard.pausetime" => pick([hd.guard_pause_p1 as f64, hd.guard_pause_p2 as f64]),
+            "ground.velocity" => pick([hd.ground_vel[0] as f64 / l, hd.ground_vel[1] as f64 / l]), "air.velocity" => pick([hd.air_vel[0] as f64 / l, hd.air_vel[1] as f64 / l]),
+            "down.velocity" => pick([hd.down_vel[0] as f64 / l, hd.down_vel[1] as f64 / l]), "guard.velocity" => hd.guard_vel as f64 / l,
+            "airguard.velocity" => pick([hd.air_guard_vel[0] as f64 / l, hd.air_guard_vel[1] as f64 / l]),
+            "attr" => crate::hitdef::attr_bits(&hd.attr_state, &hd.attr_kind) as f64, "guardflag" => crate::hitdef::guardflag_bits(&hd.guardflag) as f64,
+            "id" => hd.id as f64, "chainid" => hd.chain_id.unwrap_or(-1) as f64, "damage" => hd.damage as f64, "guard.damage" => hd.guard_damage as f64,
+            "hittime" | "ground.hittime" => hd.ground_hit_time as f64, "air.hittime" => hd.air_hit_time as f64, "guard.hittime" => hd.guard_hit_time as f64,
+            "numhits" => hd.num_hits as f64, "fall" => hd.fall as i32 as f64, "yaccel" => hd.yaccel as f64 / l,
+            _ => 0.0,
+        }
+    }
+    fn move_hit_var(&self, k: &str) -> f64 {
+        let v = &self.f().move_hit_var; let now = self.m.game_time;
+        match k {
+            "id" => v.target_id as f64, "playerno" => v.target_no as f64, "sparkx" => v.spark_x as f64, "sparky" => v.spark_y as f64,
+            "cornerpush" => v.corner_push as f64, "overridden" => b(v.overridden),
+            "frame" => b(v.hit_time > 0 && now - v.hit_time <= 1),
+            _ => 0.0,
+        }
+    }
     fn proj_time(&self, kind: char, id: i32) -> i64 {
         let f = self.f();
         let mut best = -1i64;
@@ -124,6 +152,14 @@ impl<'a> Host for Ctx<'a> {
                 let ok_state = hd.attr_state.chars().any(|c| st.contains(c));
                 ok_state && (values.len() == 1 || values[1..].iter().any(|v| attr_kind_match(&v.to_ascii_uppercase(), &hd.attr_kind)))
             }
+            "hitbyattr" => {
+                let attr = f.ghv.attr;
+                if attr == 0 { return neg; }
+                let ok_state = crate::hitdef::state_mask(&v0.to_ascii_uppercase()) & attr != 0;
+                ok_state && (values.len() == 1 || values[1..].iter().any(|v| crate::hitdef::attr_kind_mask(&v.to_ascii_uppercase()) & attr != 0))
+            }
+            "prevstatetype" => f.prev_state_type == c0,
+            "prevmovetype" => f.prev_move_type == c0,
             _ => false,
         };
         r != neg
@@ -208,6 +244,27 @@ impl<'a> Host for Ctx<'a> {
             "hitpausetime" => f.hit_pause as f64,
             "inguarddist" => b(m.in_guard_dist(self.i)),
             "gethitvar" => self.ghv(raw.unwrap_or("")),
+            "hitdefvar" => self.hitdef_var(raw.unwrap_or("")),
+            "movehitvar" => self.move_hit_var(raw.unwrap_or("")),
+            "movecountered" => f.move_countered as f64,
+            "hitoverridden" => b(f.hit_overridden_at > 0 && m.game_time - f.hit_overridden_at <= 1),
+            "prevanim" => f.prev_anim as f64,
+            "selfstatenoexist" => b(f.def.states.contains_key(&(a0() as i32))),
+            "inrunstate" => b(matches!(f.state_no, 100 | 105)),
+            "incustomstate" => b(!std::sync::Arc::ptr_eq(&f.st_def, &f.def)),
+            "incustomanim" => b(!std::sync::Arc::ptr_eq(&f.anim_def, &f.def)),
+            "isasserted" => match crate::fighter::asf::resolve(raw.unwrap_or("")) {
+                Some(crate::fighter::AssertFlag::Char(bit)) => b(f.asserts & bit != 0),
+                Some(crate::fighter::AssertFlag::Global(bit)) => b(m.global_asserts & bit != 0),
+                None => 0.0,
+            },
+            "jugglepoints" => {
+                let budget = f.last_hit_by.and_then(|id| m.idx(id)).filter(|_| f.move_type == 'H').map(|k| m.fighters[k].def.c("data.airjuggle", 15.0)).unwrap_or_else(|| f.def.c("data.airjuggle", 15.0));
+                (budget - f.juggle_used as f64).max(0.0)
+            }
+            "hitvel" => (if comp == Some('y') { f.ghv.yvel } else { f.ghv.xvel }) as f64 / l,
+            "parentexist" => b(f.parent.and_then(|p| m.idx(p)).is_some_and(|k| !m.fighters[k].destroyed)),
+            "airjumpcount" => f.air_jumps as f64,
             "const" => self.const_val(raw.unwrap_or("")),
             "const240p" => a0() * f.def.local_w as f64 / 320.0,
             "const480p" => a0() * f.def.local_w as f64 / 640.0,

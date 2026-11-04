@@ -145,3 +145,180 @@ fn partner_skips_helpers_and_missing_teammates() {
     let h = m.fighters.iter().position(|f| f.is_helper).unwrap();
     assert_eq!(ev(&m, h, "partner, life"), 150.0, "a helper redirects through its root");
 }
+
+const STRIKER: &str = "
+[Statedef 200]
+type = S
+movetype = A
+physics = S
+anim = 200
+ctrl = 0
+
+[State 200, hit]
+type = HitDef
+trigger1 = Time = 0
+attr = S, SP
+damage = 30
+priority = 5
+pausetime = 4, 6
+sparkxy = 7, -9
+ground.velocity = -4, -2
+ground.hittime = 12
+p2stateno = 5100
+
+[Statedef 5100]
+type = S
+movetype = H
+physics = S
+anim = 5000
+ctrl = 0
+
+[Statedef 5200]
+type = C
+movetype = I
+physics = C
+anim = 0
+ctrl = 1
+";
+
+fn land_strike(defender: &str) -> ume_engine::matchs::Match {
+    let mut m = duel(mugen_char("striker", STRIKER), mugen_char("dummy", defender));
+    face_off(&mut m, 40.0);
+    enter(&mut m, 0, 200);
+    while m.fighters[0].move_hit_var.hit_time == 0 && m.game_time < 2000 { m.tick(&[0, 0]); }
+    m
+}
+
+#[test]
+fn hit_description_triggers_report_the_landed_hit() {
+    let m = land_strike("");
+    assert_eq!(m.fighters[1].state_no, 5100);
+    let table: [(usize, &str, f64); 17] = [
+        (0, "HitDefVar(p2stateno)", 5100.0), (0, "HitDefVar(p1stateno)", -1.0), (0, "HitDefVar(priority)", 5.0),
+        (0, "HitDefVar(sparkx)", 7.0), (0, "HitDefVar(sparky)", -9.0), (0, "HitDefVar(pausetime.p1)", 4.0),
+        (0, "HitDefVar(pausetime.p2)", 6.0), (0, "HitDefVar(ground.velocity.x)", -4.0), (0, "HitDefVar(ground.velocity.y)", -2.0),
+        (0, "HitDefVar(attr)", 1.0 + 2048.0), (0, "HitDefVar(id)", 0.0),
+        (0, "MoveHitVar(id)", m.fighters[1].id as f64), (0, "MoveHitVar(playerno)", m.fighters[1].player_no as f64),
+        (0, "MoveHitVar(overridden)", 0.0), (0, "MoveHitVar(frame)", 1.0),
+        (1, "HitVel X", m.fighters[1].ghv.xvel as f64), (1, "HitVel Y", -2.0),
+    ];
+    for (who, src, want) in table {
+        assert_eq!(ev(&m, who, src), want, "{src}");
+    }
+}
+
+#[test]
+fn hit_by_attr_matches_the_attribute_of_the_last_hit() {
+    let m = land_strike("");
+    assert_eq!(ev(&m, 1, "HitByAttr = SCA, SP"), 1.0);
+    assert_eq!(ev(&m, 1, "HitByAttr = S, AP"), 1.0);
+    assert_eq!(ev(&m, 1, "HitByAttr = SCA, NA, HT"), 0.0);
+    assert_eq!(ev(&m, 1, "HitByAttr = C, SP"), 0.0);
+    assert_eq!(ev(&m, 1, "HitByAttr != SCA, NA"), 1.0);
+    assert_eq!(ev(&m, 0, "HitByAttr = SCA, AA, AT, AP"), 0.0, "an attacker that was never hit matches nothing");
+}
+
+#[test]
+fn move_frame_and_counter_flags_expire() {
+    let mut m = land_strike("");
+    assert_eq!(ev(&m, 0, "MoveHitVar(frame)"), 1.0);
+    ticks(&mut m, 2);
+    assert_eq!(ev(&m, 0, "MoveHitVar(frame)"), 0.0);
+    assert_eq!(ev(&m, 0, "MoveCountered"), 0.0);
+
+    let mut m = duel(mugen_char("striker", STRIKER), mugen_char("dummy", ""));
+    face_off(&mut m, 40.0);
+    m.fighters[1].move_type = 'A';
+    enter(&mut m, 0, 200);
+    while m.fighters[0].move_hit_var.hit_time == 0 && m.game_time < 2000 { m.tick(&[0, 0]); }
+    assert!(ev(&m, 0, "MoveCountered") >= 1.0);
+}
+
+#[test]
+fn hit_override_sets_hitoverridden_and_overridden_flags() {
+    let mut m = duel(mugen_char("striker", STRIKER), mugen_char("dummy", ""));
+    face_off(&mut m, 40.0);
+    m.fighters[1].hit_overrides[0] = Some(ume_engine::fighter::HitOverride { attr: "SCA, AA, AT, AP".into(), state_no: 5000, time: 30, force_air: false });
+    enter(&mut m, 0, 200);
+    while m.fighters[0].move_hit_var.hit_time == 0 && m.game_time < 2000 { m.tick(&[0, 0]); }
+    assert_eq!(ev(&m, 1, "HitOverridden"), 1.0);
+    assert_eq!(ev(&m, 0, "MoveHitVar(overridden)"), 1.0);
+    assert_eq!(m.fighters[1].life, m.fighters[1].life_max);
+    ticks(&mut m, 3);
+    assert_eq!(ev(&m, 1, "HitOverridden"), 0.0);
+}
+
+#[test]
+fn previous_state_triggers_remember_the_last_state() {
+    let mut m = duel(mugen_char("a", STRIKER), mugen_char("b", ""));
+    enter(&mut m, 0, 200);
+    assert_eq!(ev(&m, 0, "PrevStateType = S"), 1.0);
+    assert_eq!(ev(&m, 0, "PrevMoveType = I"), 1.0);
+    enter(&mut m, 0, 5200);
+    assert_eq!(ev(&m, 0, "PrevStateType = S"), 1.0);
+    assert_eq!(ev(&m, 0, "PrevMoveType = A"), 1.0);
+    assert_eq!(ev(&m, 0, "PrevMoveType != I"), 1.0);
+    enter(&mut m, 0, 0);
+    assert_eq!(ev(&m, 0, "PrevStateType = C"), 1.0);
+    assert_eq!(ev(&m, 0, "PrevStateNo"), 5200.0);
+}
+
+#[test]
+fn prev_anim_tracks_the_animation_before_the_last_change() {
+    let mut m = duel(mugen_char("a", STRIKER), mugen_char("b", ""));
+    enter(&mut m, 0, 200);
+    assert_eq!(ev(&m, 0, "Anim"), 200.0);
+    assert_eq!(ev(&m, 0, "PrevAnim"), 0.0);
+    enter(&mut m, 0, 5100);
+    assert_eq!(ev(&m, 0, "PrevAnim"), 200.0);
+}
+
+#[test]
+fn state_ownership_and_existence_triggers() {
+    let mut m = land_strike("");
+    assert_eq!(ev(&m, 0, "SelfStateNoExist(200)"), 1.0);
+    assert_eq!(ev(&m, 0, "SelfStateNoExist(777)"), 0.0);
+    assert_eq!(ev(&m, 1, "SelfStateNoExist(5100)"), 0.0, "the dummy does not own state 5100");
+    assert_eq!(ev(&m, 1, "InCustomState"), 1.0, "the target runs a state given by the attacker");
+    assert_eq!(ev(&m, 0, "InCustomState"), 0.0);
+    assert_eq!(ev(&m, 0, "InCustomAnim"), 0.0);
+    m.fighters[0].state_no = 100;
+    assert_eq!(ev(&m, 0, "InRunState"), 1.0);
+    m.fighters[0].state_no = 0;
+    assert_eq!(ev(&m, 0, "InRunState"), 0.0);
+}
+
+#[test]
+fn is_asserted_shares_the_assert_special_table() {
+    let mut m = duel(mugen_char("a", ""), mugen_char("b", ""));
+    assert_eq!(ev(&m, 0, "IsAsserted(NoWalk)"), 0.0);
+    m.fighters[0].asserts |= ume_engine::fighter::asf::NOWALK;
+    assert_eq!(ev(&m, 0, "IsAsserted(NoWalk)"), 1.0);
+    assert_eq!(ev(&m, 0, "IsAsserted(\"nowalk\")"), 1.0);
+    assert_eq!(ev(&m, 0, "IsAsserted(NoJump)"), 0.0);
+    assert_eq!(ev(&m, 1, "IsAsserted(NoWalk)"), 0.0);
+    assert_eq!(ev(&m, 0, "IsAsserted(Intro)"), 0.0);
+    m.global_asserts |= 2;
+    assert_eq!(ev(&m, 0, "IsAsserted(Intro)"), 1.0);
+    assert_eq!(ev(&m, 0, "IsAsserted(NotAFlag)"), 0.0);
+}
+
+#[test]
+fn juggle_points_parent_and_air_jump_triggers() {
+    let mut m = duel(mugen_char("a", ""), mugen_char("b", ""));
+    assert_eq!(ev(&m, 0, "JugglePoints"), 15.0);
+    m.fighters[0].juggle_used = 6;
+    assert_eq!(ev(&m, 0, "JugglePoints"), 9.0);
+    m.fighters[0].juggle_used = 40;
+    assert_eq!(ev(&m, 0, "JugglePoints"), 0.0);
+
+    assert_eq!(ev(&m, 1, "ParentExist"), 0.0);
+    m.fighters[1].parent = Some(m.fighters[0].id);
+    assert_eq!(ev(&m, 1, "ParentExist"), 1.0);
+    m.fighters[0].destroyed = true;
+    assert_eq!(ev(&m, 1, "ParentExist"), 0.0);
+
+    assert_eq!(ev(&m, 1, "AirJumpCount"), 0.0);
+    m.fighters[1].air_jumps = 2;
+    assert_eq!(ev(&m, 1, "AirJumpCount"), 2.0);
+}

@@ -219,7 +219,7 @@ impl Match {
         let common = self.common.clone();
         {
             let f = &mut self.fighters[i];
-            f.prev_state_no = f.state_no;
+            f.prev_state_no = f.state_no; f.prev_state_type = f.state_type; f.prev_move_type = f.move_type;
             f.state_no = no;
             if Arc::ptr_eq(&owner, &f.def) { f.state_giver = None; }
             f.st_def = owner.clone();
@@ -247,7 +247,7 @@ impl Match {
         if let Some(c) = ctrl { f.ctrl = c != 0.0; }
         if let Some(s) = sp { f.spr_priority = s as i32; }
         if hdp == 0.0 { f.hitdef_active = false; f.reversal = None; }
-        if mhp == 0.0 { f.move_contact = 0; f.move_hit = 0; f.move_guarded = 0; f.move_reversed = 0; }
+        if mhp == 0.0 { f.move_contact = 0; f.move_hit = 0; f.move_guarded = 0; f.move_reversed = 0; f.move_countered = 0; }
         if hcp == 0.0 { f.hit_count = 0; f.uniq_hit_count = 0; f.uniq_hit_keys.clear(); }
     }
     pub fn face_enemy(&mut self, i: usize) {
@@ -657,6 +657,7 @@ impl Match {
             if f.move_contact > 0 { f.move_contact += 1; }
             if f.move_hit > 0 { f.move_hit += 1; }
             if f.move_guarded > 0 { f.move_guarded += 1; }
+            if f.move_countered > 0 { f.move_countered += 1; }
             for n in f.not_hit_by.iter_mut() { n.1 -= 1; }
             f.not_hit_by.retain(|n| n.1 > 0);
             for n in f.hit_by.iter_mut() { n.1 -= 1; }
@@ -949,6 +950,8 @@ impl Match {
         let (aid, aside, apos, aroot) = { let f = &self.fighters[a]; (f.id, f.side, f.pos, f.root) };
         let did = self.fighters[d].id;
         let ano = self.fighters[a].player_no;
+        let d_attacking = self.fighters[d].move_type == 'A';
+        let mut corner_pushed = 0.0f32;
         if !from_proj {
             let fa = &mut self.fighters[a];
             fa.move_contact = 1;
@@ -976,6 +979,8 @@ impl Match {
                 if force_air { fd.state_type = 'A'; fd.ghv.fall = true; }
             }
             if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('h', pid, gt)); } else { let fa = &mut self.fighters[a]; fa.move_hit = 1; fa.hit_pause = hd.pause_p1; }
+            self.fighters[d].hit_overridden_at = gt;
+            if !from_proj { self.record_move_hit(a, d, at, true, 0.0); }
             let dd = self.fighters[d].def.clone();
             self.change_state(d, state_no, dd);
             self.events.push(Event::Hit { attacker_side: aside, defender_side: self.fighters[d].side, damage: 0.0, guarded: false, heavy: false, attacker: self.idx(aroot).unwrap_or(a), defender: d });
@@ -1005,7 +1010,7 @@ impl Match {
             self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
             self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false);
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
-            if cornered && self.fighters[a].def.source == Source::Mugen { self.fighters[a].vel.x = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; }
+            if cornered && self.fighters[a].def.source == Source::Mugen { corner_pushed = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; self.fighters[a].vel.x = corner_pushed; }
         } else {
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
@@ -1045,7 +1050,7 @@ impl Match {
                 fd.ctrl = false; fd.move_type = 'H'; fd.spr_priority = hd.p2sprpriority;
             }
             if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('h', pid, gt)); }
-            else { let fa = &mut self.fighters[a]; fa.move_hit = 1; fa.hit_count += hd.num_hits; if !fa.uniq_hit_keys.contains(&(did, hd.id)) { fa.uniq_hit_keys.push((did, hd.id)); fa.uniq_hit_count += 1; } fa.hit_pause = hd.pause_p1; fa.spr_priority = hd.p1sprpriority; }
+            else { let fa = &mut self.fighters[a]; fa.move_hit = 1; fa.move_countered = d_attacking as i32; fa.hit_count += hd.num_hits; if !fa.uniq_hit_keys.contains(&(did, hd.id)) { fa.uniq_hit_keys.push((did, hd.id)); fa.uniq_hit_count += 1; } fa.hit_pause = hd.pause_p1; fa.spr_priority = hd.p1sprpriority; }
             let st = if self.fighters[d].pos.y < -1.0 && self.fighters[d].state_type != 'L' { 'A' } else { self.fighters[d].state_type };
             if hd.p2stateno >= 0 {
                 let owner = if hd.p2getp1state { self.fighters[a].def.clone() } else { self.fighters[d].def.clone() };
@@ -1069,7 +1074,7 @@ impl Match {
             if let Some(s) = hd.hit_sound { self.sound(a, s.0, s.1, s.2, Some(if heavy { "hitheavy" } else { "hit" })); }
             if hd.env_shake.time > 0 { self.shake(hd.env_shake.time, hd.env_shake.freq, hd.env_shake.ampl, hd.env_shake.phase); }
             if let Some(p) = hd.target_palfx.clone() { self.fighters[d].palfx = Some(p); }
-            if cornered && self.fighters[a].def.source == Source::Mugen { self.fighters[a].vel.x = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; }
+            if cornered && self.fighters[a].def.source == Source::Mugen { corner_pushed = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; self.fighters[a].vel.x = corner_pushed; }
             self.place_target(a, d, hd);
             let droot = self.fighters[d].root;
             self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
@@ -1081,8 +1086,17 @@ impl Match {
             self.fighters[a].pos.x += away * push;
             self.corner_pushes += 1;
         }
+        if !from_proj { self.record_move_hit(a, d, at, false, corner_pushed); }
         let dmg = self.fighters[d].ghv.damage;
         self.events.push(Event::Hit { attacker_side: aside, defender_side: self.fighters[d].side, damage: dmg, guarded, heavy: hd.animtype >= 2, attacker: self.idx(aroot).unwrap_or(a), defender: d });
+    }
+
+    fn record_move_hit(&mut self, a: usize, d: usize, at: (f32, f32), overridden: bool, corner_push: f32) {
+        let (did, dno) = (self.fighters[d].id as i32, self.fighters[d].player_no as i32);
+        let hit_time = self.game_time;
+        let fa = &mut self.fighters[a];
+        let l = fa.lscl;
+        fa.move_hit_var = crate::fighter::MoveHitVars { target_id: did, target_no: dno, spark_x: (at.0 - fa.pos.x) * fa.facing / l, spark_y: (at.1 - fa.pos.y) / l, corner_push: corner_push / l, hit_time, overridden };
     }
 
     fn place_target(&mut self, a: usize, d: usize, hd: &HitDefData) {

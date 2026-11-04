@@ -88,6 +88,12 @@ pub struct TrailPoint { pub x: f32, pub y: f32, pub group: i32, pub index: i32, 
 #[derive(Clone, Debug)]
 pub struct AfterImage { pub time: i32, pub length: usize, pub trail: Vec<TrailPoint>, pub params: AfterImageParams, pub ticks: i32 }
 
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct MoveHitVars { pub target_id: i32, pub target_no: i32, pub spark_x: f32, pub spark_y: f32, pub corner_push: f32, pub hit_time: i64, pub overridden: bool }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum AssertFlag { Char(u32), Global(u32) }
+
 /// AssertSpecial flags
 pub mod asf {
     pub const NOAUTOTURN: u32 = 1; pub const NOWALK: u32 = 2; pub const NOJUMP: u32 = 4; pub const INVISIBLE: u32 = 8; pub const NOSHADOW: u32 = 16;
@@ -96,6 +102,13 @@ pub mod asf {
     pub fn from_name(s: &str) -> u32 {
         match s { "noautoturn" => NOAUTOTURN, "nowalk" => NOWALK, "nojump" => NOJUMP, "invisible" => INVISIBLE, "noshadow" => NOSHADOW, "unguardable" => UNGUARDABLE,
             "nostandguard" => NOSTANDGUARD, "nocrouchguard" => NOCROUCHGUARD, "noairguard" => NOAIRGUARD, "nokosnd" => NOKOSND, "nojugglecheck" => NOJUGGLE, _ => 0 }
+    }
+    pub fn resolve(s: &str) -> Option<super::AssertFlag> {
+        let s = s.trim().trim_matches('"').to_ascii_lowercase();
+        match from_name(&s) {
+            0 => match s.as_str() { "timerfreeze" => Some(super::AssertFlag::Global(1)), "intro" => Some(super::AssertFlag::Global(2)), "roundnotover" => Some(super::AssertFlag::Global(4)), _ => None },
+            bit => Some(super::AssertFlag::Char(bit)),
+        }
     }
 }
 
@@ -141,6 +154,7 @@ pub struct Fighter {
     pub anim_no: i32, pub anim_real: i32, pub elem: usize, pub elem_time: i32, pub anim_elapsed: i32, pub anim_changed: bool,
     pub hitdef: Option<HitDefData>, pub hitdef_active: bool, pub hitdef_targets: Vec<u32>,
     pub move_contact: i32, pub move_hit: i32, pub move_guarded: i32, pub move_reversed: i32, pub hit_count: i32, pub uniq_hit_count: i32, pub uniq_hit_keys: Vec<(u32, i32)>,
+    pub move_countered: i32, pub move_hit_var: MoveHitVars, pub hit_overridden_at: i64, pub prev_state_type: char, pub prev_move_type: char, pub prev_anim: i32,
     pub ghv: GetHitVars, /** juggle points already spent on this fighter in the current air combo */ pub juggle_used: i32, /** consecutive ticks without control during the fight (stuck-state watchdog) */ pub no_ctrl_ticks: i32, pub hit_pause: i32, pub hit_shake: i32, pub hit_over_time: i32, pub slide_time: i32, pub fall_time: i32,
     pub asserts: u32,
     pub width_override: Option<(f32, f32)>, pub player_push: bool, pub screen_bound: bool, pub pos_freeze: bool, pub spr_priority: i32,
@@ -181,6 +195,7 @@ impl Fighter {
             vars: [0; 60], fvars: [0.0; 40], sysvars: [0; 5], sysfvars: [0.0; 5],
             anim_no: -1, anim_real: -1, elem: 0, elem_time: 0, anim_elapsed: 0, anim_changed: false,
             hitdef: None, hitdef_active: false, hitdef_targets: vec![], move_contact: 0, move_hit: 0, move_guarded: 0, move_reversed: 0, hit_count: 0, uniq_hit_count: 0, uniq_hit_keys: vec![],
+            move_countered: 0, move_hit_var: MoveHitVars::default(), hit_overridden_at: 0, prev_state_type: 'S', prev_move_type: 'I', prev_anim: -1,
             ghv: GetHitVars::default(), juggle_used: 0, no_ctrl_ticks: 0, hit_pause: 0, hit_shake: 0, hit_over_time: 0, slide_time: 0, fall_time: 0, asserts: 0,
             width_override: None, player_push: true, screen_bound: true, pos_freeze: false, spr_priority: 0, targets: vec![],
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
@@ -229,6 +244,7 @@ impl Fighter {
     }
     /// Change animation; `from` is the CharDef providing the animation (own, or state owner for ChangeAnim2).
     pub fn change_anim(&mut self, no: i32, from: &Arc<CharDef>, elem: i32) {
+        if no != self.anim_no { self.prev_anim = self.anim_no; }
         let mut real = if from.anims.contains_key(&no) { Some(no) } else { None };
         if real.is_none() { real = anim_fallback(no).iter().copied().find(|a| from.anims.contains_key(a)); }
         let real = match real {

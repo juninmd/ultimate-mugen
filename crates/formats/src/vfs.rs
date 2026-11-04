@@ -11,12 +11,21 @@ pub type Vfs = BTreeMap<String, Vec<u8>>;
 /// `\` -> `/`, strip a leading `./`, collapse repeated `/`, lowercase.
 pub fn norm_path(p: &str) -> String {
     if p.is_ascii() {
-        let p = p.strip_prefix("./").or_else(|| p.strip_prefix(".\\")).unwrap_or(p);
+        let p = p
+            .strip_prefix("./")
+            .or_else(|| p.strip_prefix(".\\"))
+            .unwrap_or(p);
         let mut out = String::with_capacity(p.len());
         let mut last_slash = false;
         for b in p.bytes() {
-            let b = if b == b'\\' { b'/' } else { b.to_ascii_lowercase() };
-            if b == b'/' && last_slash { continue; }
+            let b = if b == b'\\' {
+                b'/'
+            } else {
+                b.to_ascii_lowercase()
+            };
+            if b == b'/' && last_slash {
+                continue;
+            }
             last_slash = b == b'/';
             out.push(b as char);
         }
@@ -95,7 +104,10 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
     let eocd = eocd.ok_or("zip: end of central directory not found")?;
     let mut entries = r.u16(eocd + 10) as u64;
     let mut cd_ofs = r.u32(eocd + 16) as u64;
-    if (entries == 0xffff || cd_ofs == 0xffff_ffff) && eocd >= 20 && r.u32(eocd - 20) == EOCD64_LOC_SIG {
+    if (entries == 0xffff || cd_ofs == 0xffff_ffff)
+        && eocd >= 20
+        && r.u32(eocd - 20) == EOCD64_LOC_SIG
+    {
         let z64 = r.u64(eocd - 20 + 8) as usize;
         if r.u32(z64) == EOCD64_SIG {
             entries = r.u64(z64 + 32);
@@ -117,12 +129,19 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         let comment_len = r.u16(p + 32) as usize;
         let mut local = r.u32(p + 42) as u64;
         let name_start = p + 46;
-        let name_bytes = bytes.get(name_start..name_start + name_len).ok_or("zip: truncated central directory")?;
+        let name_bytes = bytes
+            .get(name_start..name_start + name_len)
+            .ok_or("zip: truncated central directory")?;
         // zip64 extended information
-        let extra = bytes.get(name_start + name_len..name_start + name_len + extra_len).unwrap_or(&[]);
+        let extra = bytes
+            .get(name_start + name_len..name_start + name_len + extra_len)
+            .unwrap_or(&[]);
         let mut e = 0;
         while e + 4 <= extra.len() {
-            let (id, sz) = (u16::from_le_bytes([extra[e], extra[e + 1]]), u16::from_le_bytes([extra[e + 2], extra[e + 3]]) as usize);
+            let (id, sz) = (
+                u16::from_le_bytes([extra[e], extra[e + 1]]),
+                u16::from_le_bytes([extra[e + 2], extra[e + 3]]) as usize,
+            );
             if id == 1 {
                 let er = Reader(&extra[e + 4..(e + 4 + sz).min(extra.len())]);
                 let mut q = 0;
@@ -142,7 +161,11 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         }
         p = name_start + name_len + extra_len + comment_len;
 
-        let name = if flags & 0x800 != 0 { String::from_utf8_lossy(name_bytes).into_owned() } else { text(name_bytes) };
+        let name = if flags & 0x800 != 0 {
+            String::from_utf8_lossy(name_bytes).into_owned()
+        } else {
+            text(name_bytes)
+        };
         if name.ends_with('/') || name.ends_with('\\') {
             continue;
         }
@@ -163,7 +186,8 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
             .ok_or_else(|| format!("zip: {name}: truncated data"))?;
         let content = match method {
             0 => data.to_vec(),
-            8 => inflate_raw(data, usize::try_from(usize_).unwrap_or(0)).map_err(|e| format!("zip: {name}: {e}"))?,
+            8 => inflate_raw(data, usize::try_from(usize_).unwrap_or(0))
+                .map_err(|e| format!("zip: {name}: {e}"))?,
             m => return Err(format!("zip: {name}: unsupported compression method {m}")),
         };
         vfs.insert(join(prefix, &name), content);
@@ -176,16 +200,25 @@ fn inflate_raw(data: &[u8], size_hint: usize) -> Result<Vec<u8>, String> {
     use miniz_oxide::inflate::core::{decompress, inflate_flags, DecompressorOxide};
     use miniz_oxide::inflate::TINFLStatus;
     // fast path: exact-size output buffer from the declared size
-    if size_hint > 0 && size_hint <= MAX_ENTRY_BYTES && size_hint <= data.len().saturating_mul(64).max(1 << 20) {
+    if size_hint > 0
+        && size_hint <= MAX_ENTRY_BYTES
+        && size_hint <= data.len().saturating_mul(64).max(1 << 20)
+    {
         let mut out = vec![0u8; size_hint];
         let mut st = DecompressorOxide::new();
-        let (status, _, written) =
-            decompress(&mut st, data, &mut out, 0, inflate_flags::TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF);
+        let (status, _, written) = decompress(
+            &mut st,
+            data,
+            &mut out,
+            0,
+            inflate_flags::TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF,
+        );
         if status == TINFLStatus::Done && written == size_hint {
             return Ok(out);
         }
     }
-    miniz_oxide::inflate::decompress_to_vec_with_limit(data, MAX_ENTRY_BYTES).map_err(|e| format!("inflate: {:?}", e.status))
+    miniz_oxide::inflate::decompress_to_vec_with_limit(data, MAX_ENTRY_BYTES)
+        .map_err(|e| format!("inflate: {:?}", e.status))
 }
 
 /// Recursively add every file under `dir` (keys relative to `dir`, under
@@ -199,12 +232,20 @@ pub fn add_dir(vfs: &mut Vfs, dir: &std::path::Path, prefix: &str) -> std::io::R
         for e in entries {
             let fname = e.file_name().to_string_lossy().into_owned();
             let path = e.path();
-            let child = if rel.is_empty() { fname.clone() } else { format!("{rel}/{fname}") };
-            let Ok(meta) = std::fs::metadata(&path) else { continue };
+            let child = if rel.is_empty() {
+                fname.clone()
+            } else {
+                format!("{rel}/{fname}")
+            };
+            let Ok(meta) = std::fs::metadata(&path) else {
+                continue;
+            };
             if meta.is_dir() {
                 walk(vfs, &path, &child, n)?;
             } else if meta.is_file() {
-                let Ok(data) = std::fs::read(&path) else { continue };
+                let Ok(data) = std::fs::read(&path) else {
+                    continue;
+                };
                 if fname.to_ascii_lowercase().ends_with(".zip") {
                     let mut tmp = Vfs::new();
                     if let Ok(k) = add_zip(&mut tmp, &data, rel) {
@@ -241,7 +282,15 @@ pub fn resolve<'a>(vfs: &'a Vfs, base_dir: &str, name: &str) -> Option<&'a [u8]>
         return None;
     }
     let base_dir = norm_path(base_dir.trim_end_matches(['/', '\\']));
-    let tries = [if base_dir.is_empty() { n.clone() } else { format!("{base_dir}/{n}") }, n.clone(), format!("data/{n}")];
+    let tries = [
+        if base_dir.is_empty() {
+            n.clone()
+        } else {
+            format!("{base_dir}/{n}")
+        },
+        n.clone(),
+        format!("data/{n}"),
+    ];
     for t in &tries {
         if let Some(v) = vfs.get(&norm_path(t)) {
             return Some(v);
@@ -252,11 +301,17 @@ pub fn resolve<'a>(vfs: &'a Vfs, base_dir: &str, name: &str) -> Option<&'a [u8]>
     let suffix = format!("/{base}");
     if !base_dir.is_empty() {
         let folder = format!("{base_dir}/");
-        if let Some((_, v)) = vfs.range(folder.clone()..).take_while(|(k, _)| k.starts_with(&folder)).find(|(k, _)| k.ends_with(&suffix)) {
+        if let Some((_, v)) = vfs
+            .range(folder.clone()..)
+            .take_while(|(k, _)| k.starts_with(&folder))
+            .find(|(k, _)| k.ends_with(&suffix))
+        {
             return Some(v);
         }
     }
-    vfs.iter().find(|(k, _)| k.ends_with(&suffix) || k.as_str() == base).map(|(_, v)| v.as_slice())
+    vfs.iter()
+        .find(|(k, _)| k.ends_with(&suffix) || k.as_str() == base)
+        .map(|(_, v)| v.as_slice())
 }
 
 /// `\b<word>\s*=` in lowercase text.
@@ -339,7 +394,7 @@ fn def_key(vfs: &Vfs, def: &str, section: &str, sprite_key: &str) -> String {
     let secs = crate::ini::parse_ini(&text(def_bytes));
     let sprite = crate::ini::find_section(&secs, section)
         .and_then(|s| s.get(sprite_key))
-        .map(|v| unquote(v))
+        .map(unquote)
         .unwrap_or_default();
     let base = def.rfind('/').map(|i| &def[..i]).unwrap_or("");
     let mut h = fnv(FNV_OFFSET, canonical_def_text(def_bytes).as_bytes());

@@ -9,9 +9,16 @@ pub enum Op {
     Trig0(u32),
     Trig1(u32),
     CmpStr(u32),
-    Special { host: u32, has_b: bool },
+    Special {
+        host: u32,
+        has_b: bool,
+    },
     Assign(u32),
-    Redirect { kind: u32, has_arg: bool, len: u32 },
+    Redirect {
+        kind: u32,
+        has_arg: bool,
+        len: u32,
+    },
     Abs,
     Floor,
     Ceil,
@@ -56,11 +63,19 @@ pub enum Op {
     OrJump(u32),
     JumpIfZero(u32),
     Jump(u32),
-    Interval { neg: bool, lo_inc: bool, hi_inc: bool },
+    Interval {
+        neg: bool,
+        lo_inc: bool,
+        hi_inc: bool,
+    },
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct Code { ops: Vec<Op>, host: Vec<Node>, depth: usize }
+pub struct Code {
+    ops: Vec<Op>,
+    host: Vec<Node>,
+    depth: usize,
+}
 
 impl Code {
     pub fn compile(n: &Node) -> Code {
@@ -72,12 +87,19 @@ impl Code {
     }
 
     pub fn constant(&self) -> Option<f64> {
-        match self.ops.as_slice() { [Op::Const(v)] => Some(*v), _ => None }
+        match self.ops.as_slice() {
+            [Op::Const(v)] => Some(*v),
+            _ => None,
+        }
     }
 
-    pub fn len(&self) -> usize { self.ops.len() }
+    pub fn len(&self) -> usize {
+        self.ops.len()
+    }
 
-    pub fn is_empty(&self) -> bool { self.ops.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.ops.is_empty()
+    }
 
     fn push(&mut self, op: Op, d: &mut usize, delta: isize) {
         self.ops.push(op);
@@ -103,13 +125,25 @@ impl Code {
             Node::Num(v, _) => self.push(Op::Const(*v), d, 1),
             Node::Un(op, a) => {
                 self.emit(a, d);
-                let o = match *op { "!" => Op::Not, "~" => Op::BitNot, _ => Op::Neg };
+                let o = match *op {
+                    "!" => Op::Not,
+                    "~" => Op::BitNot,
+                    _ => Op::Neg,
+                };
                 self.push(o, d, 0);
             }
             Node::Bin(op, a, b) if *op == "&&" || *op == "||" => {
                 self.emit(a, d);
                 let at = self.ops.len();
-                self.push(if *op == "&&" { Op::AndJump(0) } else { Op::OrJump(0) }, d, -1);
+                self.push(
+                    if *op == "&&" {
+                        Op::AndJump(0)
+                    } else {
+                        Op::OrJump(0)
+                    },
+                    d,
+                    -1,
+                );
                 self.emit(b, d);
                 self.push(Op::Truthy, d, 0);
                 self.patch(at);
@@ -119,10 +153,28 @@ impl Code {
                 let o = match *op {
                     "+" => Op::Add,
                     "-" => Op::Sub,
-                    "*" => if fl { Op::MulF } else { Op::MulI },
-                    "/" => if fl { Op::DivF } else { Op::DivI },
+                    "*" => {
+                        if fl {
+                            Op::MulF
+                        } else {
+                            Op::MulI
+                        }
+                    }
+                    "/" => {
+                        if fl {
+                            Op::DivF
+                        } else {
+                            Op::DivI
+                        }
+                    }
                     "%" => Op::Mod,
-                    "**" => if fl { Op::PowF } else { Op::PowI },
+                    "**" => {
+                        if fl {
+                            Op::PowF
+                        } else {
+                            Op::PowI
+                        }
+                    }
                     "=" => Op::Eq,
                     "!=" => Op::Ne,
                     "<" => Op::Lt,
@@ -134,20 +186,41 @@ impl Code {
                     "|" => Op::BitOr,
                     "^" => Op::BitXor,
                     ":=" => Op::Second,
-                    _ => { self.push(Op::Const(0.0), d, 1); return; }
+                    _ => {
+                        self.push(Op::Const(0.0), d, 1);
+                        return;
+                    }
                 };
                 self.emit(a, d);
                 self.emit(b, d);
                 self.push(o, d, -1);
             }
-            Node::Interval { a, neg, lo, hi, lo_inc, hi_inc } => {
+            Node::Interval {
+                a,
+                neg,
+                lo,
+                hi,
+                lo_inc,
+                hi_inc,
+            } => {
                 self.emit(a, d);
                 self.emit(lo, d);
                 self.emit(hi, d);
-                self.push(Op::Interval { neg: *neg, lo_inc: *lo_inc, hi_inc: *hi_inc }, d, -2);
+                self.push(
+                    Op::Interval {
+                        neg: *neg,
+                        lo_inc: *lo_inc,
+                        hi_inc: *hi_inc,
+                    },
+                    d,
+                    -2,
+                );
             }
             Node::Trig { name, args, .. } if name == "ifelse" || name == "cond" => {
-                if args.len() < 3 { self.push(Op::Const(0.0), d, 1); return; }
+                if args.len() < 3 {
+                    self.push(Op::Const(0.0), d, 1);
+                    return;
+                }
                 self.emit(&args[0], d);
                 let jz = self.ops.len();
                 self.push(Op::JumpIfZero(0), d, -1);
@@ -158,36 +231,74 @@ impl Code {
                 self.emit(&args[2], d);
                 self.patch(jmp);
             }
-            Node::Trig { name, args, comp, raw: None } if args.len() == 1 && !matches!(name.as_str(), "isasserted" | "map" | "teammap") => {
+            Node::Trig {
+                name,
+                args,
+                comp,
+                raw: None,
+            } if args.len() == 1 && !matches!(name.as_str(), "isasserted" | "map" | "teammap") => {
                 self.emit(&args[0], d);
                 let o = match name.as_str() {
-                    "abs" => Some(Op::Abs), "floor" => Some(Op::Floor), "ceil" => Some(Op::Ceil),
-                    "sin" => Some(Op::Sin), "cos" => Some(Op::Cos), "tan" => Some(Op::Tan),
-                    "asin" => Some(Op::Asin), "acos" => Some(Op::Acos), "atan" => Some(Op::Atan),
-                    "exp" => Some(Op::Exp), "ln" => Some(Op::Ln), "sqrt" => Some(Op::Sqrt), "sign" => Some(Op::Sign),
+                    "abs" => Some(Op::Abs),
+                    "floor" => Some(Op::Floor),
+                    "ceil" => Some(Op::Ceil),
+                    "sin" => Some(Op::Sin),
+                    "cos" => Some(Op::Cos),
+                    "tan" => Some(Op::Tan),
+                    "asin" => Some(Op::Asin),
+                    "acos" => Some(Op::Acos),
+                    "atan" => Some(Op::Atan),
+                    "exp" => Some(Op::Exp),
+                    "ln" => Some(Op::Ln),
+                    "sqrt" => Some(Op::Sqrt),
+                    "sign" => Some(Op::Sign),
                     _ => None,
                 };
                 if let Some(op) = o {
                     self.push(op, d, 0);
                 } else {
                     let k = self.host.len() as u32;
-                    self.host.push(Node::Trig { name: name.clone(), args: vec![], comp: *comp, raw: None });
+                    self.host.push(Node::Trig {
+                        name: name.clone(),
+                        args: vec![],
+                        comp: *comp,
+                        raw: None,
+                    });
                     self.push(Op::Trig1(k), d, 0);
                 }
             }
-            Node::Trig { name, args, raw: None, .. } if (name == "min" || name == "max") && args.len() == 2 => {
+            Node::Trig {
+                name,
+                args,
+                raw: None,
+                ..
+            } if (name == "min" || name == "max") && args.len() == 2 => {
                 self.emit(&args[0], d);
                 self.emit(&args[1], d);
                 self.push(if name == "min" { Op::Min } else { Op::Max }, d, -1);
             }
-            Node::Trig { name, args, raw: None, .. } if name == "clamp" && args.len() == 3 => {
+            Node::Trig {
+                name,
+                args,
+                raw: None,
+                ..
+            } if name == "clamp" && args.len() == 3 => {
                 self.emit(&args[0], d);
                 self.emit(&args[1], d);
                 self.emit(&args[2], d);
                 self.push(Op::Clamp, d, -2);
             }
-            Node::Trig { name, args, raw: None, .. } if (name == "e" || name == "pi" || name == "__str") && args.is_empty() => {
-                let v = match name.as_str() { "e" => std::f64::consts::E, "pi" => std::f64::consts::PI, _ => 0.0 };
+            Node::Trig {
+                name,
+                args,
+                raw: None,
+                ..
+            } if (name == "e" || name == "pi" || name == "__str") && args.is_empty() => {
+                let v = match name.as_str() {
+                    "e" => std::f64::consts::E,
+                    "pi" => std::f64::consts::PI,
+                    _ => 0.0,
+                };
                 self.push(Op::Const(v), d, 1);
             }
             Node::Trig { args, .. } if args.is_empty() => {
@@ -200,29 +311,67 @@ impl Code {
                 self.host.push(n.clone());
                 self.push(Op::CmpStr(k), d, 1);
             }
-            Node::Special { name, op, a, op2, b } => {
+            Node::Special {
+                name,
+                op,
+                a,
+                op2,
+                b,
+            } => {
                 self.emit(a, d);
                 let has_b = b.is_some();
-                if let Some(bb) = b { self.emit(bb, d); }
+                if let Some(bb) = b {
+                    self.emit(bb, d);
+                }
                 let k = self.host.len() as u32;
-                self.host.push(Node::Special { name: name.clone(), op, a: Box::new(Node::Num(0.0, false)), op2: *op2, b: None });
-                self.push(Op::Special { host: k, has_b }, d, if has_b { -1 } else { 0 });
+                self.host.push(Node::Special {
+                    name: name.clone(),
+                    op,
+                    a: Box::new(Node::Num(0.0, false)),
+                    op2: *op2,
+                    b: None,
+                });
+                self.push(
+                    Op::Special { host: k, has_b },
+                    d,
+                    if has_b { -1 } else { 0 },
+                );
             }
             Node::Assign { name, idx, v } => {
                 self.emit(idx, d);
                 self.emit(v, d);
                 let k = self.host.len() as u32;
-                self.host.push(Node::Trig { name: name.clone(), args: vec![], comp: None, raw: None });
+                self.host.push(Node::Trig {
+                    name: name.clone(),
+                    args: vec![],
+                    comp: None,
+                    raw: None,
+                });
                 self.push(Op::Assign(k), d, -1);
             }
             Node::Redir { kind, arg, e } => {
                 let has_arg = arg.is_some();
-                if let Some(a) = arg { self.emit(a, d); }
+                if let Some(a) = arg {
+                    self.emit(a, d);
+                }
                 let k = self.host.len() as u32;
-                self.host.push(Node::Trig { name: kind.clone(), args: vec![], comp: None, raw: None });
+                self.host.push(Node::Trig {
+                    name: kind.clone(),
+                    args: vec![],
+                    comp: None,
+                    raw: None,
+                });
                 let sub = Code::compile(e);
                 let len = sub.ops.len() as u32;
-                self.push(Op::Redirect { kind: k, has_arg, len }, d, if has_arg { 0 } else { 1 });
+                self.push(
+                    Op::Redirect {
+                        kind: k,
+                        has_arg,
+                        len,
+                    },
+                    d,
+                    if has_arg { 0 } else { 1 },
+                );
                 self.depth = self.depth.max(*d + sub.depth);
                 let base_op = self.ops.len() as u32;
                 let base_host = self.host.len() as u32;
@@ -233,9 +382,16 @@ impl Code {
                         Op::Trig0(h) => Op::Trig0(h + base_host),
                         Op::Trig1(h) => Op::Trig1(h + base_host),
                         Op::CmpStr(h) => Op::CmpStr(h + base_host),
-                        Op::Special { host, has_b } => Op::Special { host: host + base_host, has_b },
+                        Op::Special { host, has_b } => Op::Special {
+                            host: host + base_host,
+                            has_b,
+                        },
                         Op::Assign(h) => Op::Assign(h + base_host),
-                        Op::Redirect { kind, has_arg, len } => Op::Redirect { kind: kind + base_host, has_arg, len },
+                        Op::Redirect { kind, has_arg, len } => Op::Redirect {
+                            kind: kind + base_host,
+                            has_arg,
+                            len,
+                        },
                         Op::AndJump(t) => Op::AndJump(t + base_op),
                         Op::OrJump(t) => Op::OrJump(t + base_op),
                         Op::JumpIfZero(t) => Op::JumpIfZero(t + base_op),
@@ -249,7 +405,9 @@ impl Code {
     }
 
     pub fn run<H: Host>(&self, h: &H) -> f64 {
-        if self.depth > STACK { return 0.0; }
+        if self.depth > STACK {
+            return 0.0;
+        }
         self.run_slice(h, 0, self.ops.len())
     }
 
@@ -262,10 +420,19 @@ impl Code {
         let it = |x: f64| x.trunc() as i64;
         while pc < end {
             match ops[pc] {
-                Op::Const(v) => { s[sp] = v; sp += 1; }
-                Op::Host(i) => { s[sp] = eval(&self.host[i as usize], h); sp += 1; }
+                Op::Const(v) => {
+                    s[sp] = v;
+                    sp += 1;
+                }
+                Op::Host(i) => {
+                    s[sp] = eval(&self.host[i as usize], h);
+                    sp += 1;
+                }
                 Op::Trig0(i) => {
-                    if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                    if let Node::Trig {
+                        name, comp, raw, ..
+                    } = &self.host[i as usize]
+                    {
                         s[sp] = h.trigger(name, &[], *comp, raw.as_deref());
                     } else {
                         s[sp] = 0.0;
@@ -275,7 +442,9 @@ impl Code {
                 Op::Trig1(i) => {
                     let a0 = [Node::Num(s[sp - 1], false)];
                     s[sp - 1] = match &self.host[i as usize] {
-                        Node::Trig { name, comp, raw, .. } => h.trigger(name, &a0, *comp, raw.as_deref()),
+                        Node::Trig {
+                            name, comp, raw, ..
+                        } => h.trigger(name, &a0, *comp, raw.as_deref()),
                         _ => 0.0,
                     };
                 }
@@ -287,10 +456,17 @@ impl Code {
                     sp += 1;
                 }
                 Op::Special { host, has_b } => {
-                    let bv = if has_b { sp -= 1; Some(s[sp]) } else { None };
+                    let bv = if has_b {
+                        sp -= 1;
+                        Some(s[sp])
+                    } else {
+                        None
+                    };
                     let av = s[sp - 1];
                     s[sp - 1] = match &self.host[host as usize] {
-                        Node::Special { name, op, op2, .. } => ib(h.special(name, op, av, *op2, bv)),
+                        Node::Special { name, op, op2, .. } => {
+                            ib(h.special(name, op, av, *op2, bv))
+                        }
                         _ => 0.0,
                     };
                 }
@@ -303,11 +479,22 @@ impl Code {
                     };
                 }
                 Op::Redirect { kind, has_arg, len } => {
-                    let arg = if has_arg { sp -= 1; Some(s[sp]) } else { None };
-                    let name = match &self.host[kind as usize] { Node::Trig { name, .. } => name.as_str(), _ => "" };
+                    let arg = if has_arg {
+                        sp -= 1;
+                        Some(s[sp])
+                    } else {
+                        None
+                    };
+                    let name = match &self.host[kind as usize] {
+                        Node::Trig { name, .. } => name.as_str(),
+                        _ => "",
+                    };
                     let sub_start = pc + 1;
                     let sub_end = sub_start + len as usize;
-                    s[sp] = match h.redirect(name, arg) { Some(t) => self.run_slice(&t, sub_start, sub_end), None => f64::NAN };
+                    s[sp] = match h.redirect(name, arg) {
+                        Some(t) => self.run_slice(&t, sub_start, sub_end),
+                        None => f64::NAN,
+                    };
                     sp += 1;
                     pc = sub_end;
                     continue;
@@ -325,38 +512,114 @@ impl Code {
                 Op::Ln => s[sp - 1] = s[sp - 1].ln(),
                 Op::Sqrt => s[sp - 1] = s[sp - 1].sqrt(),
                 Op::Sign => s[sp - 1] = s[sp - 1].signum(),
-                Op::Min => { sp -= 1; let (x, y) = (s[sp - 1], s[sp]); s[sp - 1] = if x.is_nan() || y.is_nan() { f64::NAN } else { x.min(y) }; }
-                Op::Max => { sp -= 1; let (x, y) = (s[sp - 1], s[sp]); s[sp - 1] = if x.is_nan() || y.is_nan() { f64::NAN } else { x.max(y) }; }
-                Op::Clamp => { sp -= 2; let (v, lo, hi) = (s[sp - 1], s[sp], s[sp + 1]); s[sp - 1] = if v.is_nan() || lo.is_nan() || hi.is_nan() { f64::NAN } else { v.max(lo).min(hi) }; }
-                Op::Not => if !s[sp - 1].is_nan() { s[sp - 1] = ib(s[sp - 1] == 0.0) },
-                Op::BitNot => if !s[sp - 1].is_nan() { s[sp - 1] = !(s[sp - 1].trunc() as i32) as f64 },
+                Op::Min => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        x.min(y)
+                    };
+                }
+                Op::Max => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        x.max(y)
+                    };
+                }
+                Op::Clamp => {
+                    sp -= 2;
+                    let (v, lo, hi) = (s[sp - 1], s[sp], s[sp + 1]);
+                    s[sp - 1] = if v.is_nan() || lo.is_nan() || hi.is_nan() {
+                        f64::NAN
+                    } else {
+                        v.max(lo).min(hi)
+                    };
+                }
+                Op::Not => {
+                    if !s[sp - 1].is_nan() {
+                        s[sp - 1] = ib(s[sp - 1] == 0.0)
+                    }
+                }
+                Op::BitNot => {
+                    if !s[sp - 1].is_nan() {
+                        s[sp - 1] = !(s[sp - 1].trunc() as i32) as f64
+                    }
+                }
                 Op::Neg => s[sp - 1] = -s[sp - 1],
                 Op::Truthy => s[sp - 1] = ib(truthy(s[sp - 1])),
-                Op::AndJump(t) => { sp -= 1; if !truthy(s[sp]) { s[sp] = 0.0; sp += 1; pc = t as usize; continue; } }
-                Op::OrJump(t) => { sp -= 1; if truthy(s[sp]) { s[sp] = 1.0; sp += 1; pc = t as usize; continue; } }
-                Op::JumpIfZero(t) => { sp -= 1; if s[sp] == 0.0 { pc = t as usize; continue; } }
-                Op::Jump(t) => { pc = t as usize; continue; }
-                Op::Interval { neg, lo_inc, hi_inc } => {
+                Op::AndJump(t) => {
+                    sp -= 1;
+                    if !truthy(s[sp]) {
+                        s[sp] = 0.0;
+                        sp += 1;
+                        pc = t as usize;
+                        continue;
+                    }
+                }
+                Op::OrJump(t) => {
+                    sp -= 1;
+                    if truthy(s[sp]) {
+                        s[sp] = 1.0;
+                        sp += 1;
+                        pc = t as usize;
+                        continue;
+                    }
+                }
+                Op::JumpIfZero(t) => {
+                    sp -= 1;
+                    if s[sp] == 0.0 {
+                        pc = t as usize;
+                        continue;
+                    }
+                }
+                Op::Jump(t) => {
+                    pc = t as usize;
+                    continue;
+                }
+                Op::Interval {
+                    neg,
+                    lo_inc,
+                    hi_inc,
+                } => {
                     sp -= 2;
                     let (v, l, u) = (s[sp - 1], s[sp], s[sp + 1]);
-                    if v.is_nan() || l.is_nan() || u.is_nan() { s[sp - 1] = f64::NAN; pc += 1; continue; }
-                    let inside = (if lo_inc { v >= l } else { v > l }) && (if hi_inc { v <= u } else { v < u });
+                    if v.is_nan() || l.is_nan() || u.is_nan() {
+                        s[sp - 1] = f64::NAN;
+                        pc += 1;
+                        continue;
+                    }
+                    let inside = (if lo_inc { v >= l } else { v > l })
+                        && (if hi_inc { v <= u } else { v < u });
                     s[sp - 1] = ib(inside != neg);
                 }
                 op => {
                     sp -= 1;
                     let (x, y) = (s[sp - 1], s[sp]);
-                    s[sp - 1] = if x.is_nan() || y.is_nan() { f64::NAN } else { binary(op, x, y, it) };
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        binary(op, x, y, it)
+                    };
                 }
             }
             pc += 1;
         }
-        if sp == 0 { 0.0 } else { s[sp - 1] }
+        if sp == 0 {
+            0.0
+        } else {
+            s[sp - 1]
+        }
     }
 }
 
 #[inline]
-pub fn truthy(v: f64) -> bool { v != 0.0 && !v.is_nan() }
+pub fn truthy(v: f64) -> bool {
+    v != 0.0 && !v.is_nan()
+}
 
 #[inline]
 fn binary(op: Op, x: f64, y: f64, it: impl Fn(f64) -> i64) -> f64 {
@@ -366,9 +629,28 @@ fn binary(op: Op, x: f64, y: f64, it: impl Fn(f64) -> i64) -> f64 {
         Op::Sub => x - y,
         Op::MulF => x * y,
         Op::MulI => it(x).wrapping_mul(it(y)) as i32 as f64,
-        Op::DivF => if y == 0.0 { 0.0 } else { x / y },
-        Op::DivI => if y == 0.0 { 0.0 } else { (x / y).trunc() },
-        Op::Mod => { let m = it(y); if m == 0 { 0.0 } else { (it(x) % m) as f64 } }
+        Op::DivF => {
+            if y == 0.0 {
+                0.0
+            } else {
+                x / y
+            }
+        }
+        Op::DivI => {
+            if y == 0.0 {
+                0.0
+            } else {
+                (x / y).trunc()
+            }
+        }
+        Op::Mod => {
+            let m = it(y);
+            if m == 0 {
+                0.0
+            } else {
+                (it(x) % m) as f64
+            }
+        }
         Op::PowF => x.powf(y),
         Op::PowI => x.powf(y).trunc(),
         Op::Eq => ib(x == y),
@@ -387,14 +669,30 @@ fn binary(op: Op, x: f64, y: f64, it: impl Fn(f64) -> i64) -> f64 {
 
 struct NoHost;
 impl Host for NoHost {
-    fn trigger(&self, _: &str, _: &[Node], _: Option<char>, _: Option<&str>) -> f64 { 0.0 }
-    fn redirect(&self, _: &str, _: Option<f64>) -> Option<Self> { None }
-    fn cmpstr(&self, _: &str, _: bool, _: &[String]) -> bool { false }
-    fn special(&self, _: &str, _: &str, _: f64, _: Option<&str>, _: Option<f64>) -> bool { false }
-    fn assign(&self, _: &str, _: i32, v: f64) -> f64 { v }
+    fn trigger(&self, _: &str, _: &[Node], _: Option<char>, _: Option<&str>) -> f64 {
+        0.0
+    }
+    fn redirect(&self, _: &str, _: Option<f64>) -> Option<Self> {
+        None
+    }
+    fn cmpstr(&self, _: &str, _: bool, _: &[String]) -> bool {
+        false
+    }
+    fn special(&self, _: &str, _: &str, _: f64, _: Option<&str>, _: Option<f64>) -> bool {
+        false
+    }
+    fn assign(&self, _: &str, _: i32, v: f64) -> f64 {
+        v
+    }
 }
 
-fn num(n: &Node) -> Option<f64> { if let Node::Num(v, _) = n { Some(*v) } else { None } }
+fn num(n: &Node) -> Option<f64> {
+    if let Node::Num(v, _) = n {
+        Some(*v)
+    } else {
+        None
+    }
+}
 
 pub fn fold(n: &Node) -> Node {
     match n {
@@ -402,32 +700,102 @@ pub fn fold(n: &Node) -> Node {
             let a = fold(a);
             let constant = num(&a).is_some();
             let r = Node::Un(op, Box::new(a));
-            if constant { Node::Num(eval(&r, &NoHost), is_float(&r)) } else { r }
+            if constant {
+                Node::Num(eval(&r, &NoHost), is_float(&r))
+            } else {
+                r
+            }
         }
         Node::Bin(op, a, b) => {
             let (a, b) = (fold(a), fold(b));
             let both = num(&a).is_some() && num(&b).is_some();
             let r = Node::Bin(op, Box::new(a), Box::new(b));
-            if both && *op != ":=" { Node::Num(eval(&r, &NoHost), is_float(&r)) } else { r }
+            if both && *op != ":=" {
+                Node::Num(eval(&r, &NoHost), is_float(&r))
+            } else {
+                r
+            }
         }
-        Node::Interval { a, neg, lo, hi, lo_inc, hi_inc } => {
-            let r = Node::Interval { a: Box::new(fold(a)), neg: *neg, lo: Box::new(fold(lo)), hi: Box::new(fold(hi)), lo_inc: *lo_inc, hi_inc: *hi_inc };
+        Node::Interval {
+            a,
+            neg,
+            lo,
+            hi,
+            lo_inc,
+            hi_inc,
+        } => {
+            let r = Node::Interval {
+                a: Box::new(fold(a)),
+                neg: *neg,
+                lo: Box::new(fold(lo)),
+                hi: Box::new(fold(hi)),
+                lo_inc: *lo_inc,
+                hi_inc: *hi_inc,
+            };
             if let Node::Interval { a, lo, hi, .. } = &r {
-                if num(a).is_some() && num(lo).is_some() && num(hi).is_some() { return Node::Num(eval(&r, &NoHost), false); }
+                if num(a).is_some() && num(lo).is_some() && num(hi).is_some() {
+                    return Node::Num(eval(&r, &NoHost), false);
+                }
             }
             r
         }
-        Node::Trig { name, args, comp, raw } if name == "ifelse" || name == "cond" => {
+        Node::Trig {
+            name,
+            args,
+            comp,
+            raw,
+        } if name == "ifelse" || name == "cond" => {
             let args: Vec<Node> = args.iter().map(fold).collect();
             if args.len() >= 3 {
-                if let Some(c) = num(&args[0]) { return if c != 0.0 { args[1].clone() } else { args[2].clone() }; }
+                if let Some(c) = num(&args[0]) {
+                    return if c != 0.0 {
+                        args[1].clone()
+                    } else {
+                        args[2].clone()
+                    };
+                }
             }
-            Node::Trig { name: name.clone(), args, comp: *comp, raw: raw.clone() }
+            Node::Trig {
+                name: name.clone(),
+                args,
+                comp: *comp,
+                raw: raw.clone(),
+            }
         }
-        Node::Trig { name, args, comp, raw } => Node::Trig { name: name.clone(), args: args.iter().map(fold).collect(), comp: *comp, raw: raw.clone() },
-        Node::Redir { kind, arg, e } => Node::Redir { kind: kind.clone(), arg: arg.as_ref().map(|x| Box::new(fold(x))), e: Box::new(fold(e)) },
-        Node::Special { name, op, a, op2, b } => Node::Special { name: name.clone(), op, a: Box::new(fold(a)), op2: *op2, b: b.as_ref().map(|x| Box::new(fold(x))) },
-        Node::Assign { name, idx, v } => Node::Assign { name: name.clone(), idx: Box::new(fold(idx)), v: Box::new(fold(v)) },
+        Node::Trig {
+            name,
+            args,
+            comp,
+            raw,
+        } => Node::Trig {
+            name: name.clone(),
+            args: args.iter().map(fold).collect(),
+            comp: *comp,
+            raw: raw.clone(),
+        },
+        Node::Redir { kind, arg, e } => Node::Redir {
+            kind: kind.clone(),
+            arg: arg.as_ref().map(|x| Box::new(fold(x))),
+            e: Box::new(fold(e)),
+        },
+        Node::Special {
+            name,
+            op,
+            a,
+            op2,
+            b,
+        } => Node::Special {
+            name: name.clone(),
+            op,
+            a: Box::new(fold(a)),
+            op2: *op2,
+            b: b.as_ref().map(|x| Box::new(fold(x))),
+        },
+        Node::Assign { name, idx, v } => Node::Assign {
+            name: name.clone(),
+            idx: Box::new(fold(idx)),
+            v: Box::new(fold(v)),
+        },
         other => other.clone(),
     }
 }
@@ -441,25 +809,66 @@ mod tests {
     impl Host for H {
         fn trigger(&self, name: &str, args: &[Node], comp: Option<char>, _: Option<&str>) -> f64 {
             let a: f64 = args.iter().map(|n| eval(n, self)).sum();
-            let k = name.bytes().fold(7u32, |h, b| h.wrapping_mul(31).wrapping_add(b as u32)) % 23;
+            let k = name
+                .bytes()
+                .fold(7u32, |h, b| h.wrapping_mul(31).wrapping_add(b as u32))
+                % 23;
             k as f64 - 6.0 + a * 0.5 + if comp == Some('y') { -1.25 } else { 0.0 }
         }
-        fn redirect(&self, _: &str, _: Option<f64>) -> Option<Self> { Some(H) }
-        fn cmpstr(&self, name: &str, neg: bool, v: &[String]) -> bool { ((name.len() + v.len()) % 2 == 0) != neg }
-        fn special(&self, _: &str, op: &str, a: f64, _: Option<&str>, _: Option<f64>) -> bool { (a as i64 % 2 == 0) == (op == "=") }
-        fn assign(&self, _: &str, _: i32, v: f64) -> f64 { v }
+        fn redirect(&self, _: &str, _: Option<f64>) -> Option<Self> {
+            Some(H)
+        }
+        fn cmpstr(&self, name: &str, neg: bool, v: &[String]) -> bool {
+            (name.len() + v.len()).is_multiple_of(2) != neg
+        }
+        fn special(&self, _: &str, op: &str, a: f64, _: Option<&str>, _: Option<f64>) -> bool {
+            (a as i64 % 2 == 0) == (op == "=")
+        }
+        fn assign(&self, _: &str, _: i32, v: f64) -> f64 {
+            v
+        }
     }
 
     fn same(src: &str) {
         let n = parse(src).unwrap();
         let tree = eval(&n, &H);
         let code = Expr::new(n).eval(&H);
-        assert!(tree == code || (tree.is_nan() && code.is_nan()), "{src}: tree {tree} != code {code}");
+        assert!(
+            tree == code || (tree.is_nan() && code.is_nan()),
+            "{src}: tree {tree} != code {code}"
+        );
     }
 
     #[test]
     fn matches_tree_on_samples() {
-        for s in ["1 + 2 * 3", "7/2", "7.0/2", "-7/2", "2**3", "2.0**0.5", "7%3", "time = [5, 7]", "time != (7, 9]", "!time || 0", "time && var(1)", "ifelse(time > 3, 10, 20)", "cond(0, 1, 2.5)", "vel y < 0 && pos x", "~5", "3 ^^ 0", "6 & 3 | 8 ^ 1", "var(3) := 4 + 1", "p2, life > 0", "statetype = S", "animelem = 3, >= 2", "1/0", "5 % 0", "-(2 + 3) * 2.5"] { same(s); }
+        for s in [
+            "1 + 2 * 3",
+            "7/2",
+            "7.0/2",
+            "-7/2",
+            "2**3",
+            "2.0**0.5",
+            "7%3",
+            "time = [5, 7]",
+            "time != (7, 9]",
+            "!time || 0",
+            "time && var(1)",
+            "ifelse(time > 3, 10, 20)",
+            "cond(0, 1, 2.5)",
+            "vel y < 0 && pos x",
+            "~5",
+            "3 ^^ 0",
+            "6 & 3 | 8 ^ 1",
+            "var(3) := 4 + 1",
+            "p2, life > 0",
+            "statetype = S",
+            "animelem = 3, >= 2",
+            "1/0",
+            "5 % 0",
+            "-(2 + 3) * 2.5",
+        ] {
+            same(s);
+        }
     }
 
     #[test]
@@ -468,21 +877,42 @@ mod tests {
         let mut n = 0;
         for line in src.lines() {
             let l = line.split(';').next().unwrap_or("");
-            let Some((k, v)) = l.split_once('=') else { continue };
+            let Some((k, v)) = l.split_once('=') else {
+                continue;
+            };
             let k = k.trim().to_ascii_lowercase();
-            if !(k.starts_with("trigger") || k == "value" || k == "x" || k == "y") { continue; }
-            if parse(v.trim()).is_ok() { same(v.trim()); n += 1; }
+            if !(k.starts_with("trigger") || k == "value" || k == "x" || k == "y") {
+                continue;
+            }
+            if parse(v.trim()).is_ok() {
+                same(v.trim());
+                n += 1;
+            }
         }
         assert!(n > 100, "only {n} expressions");
     }
 
     struct Bottom;
     impl Host for Bottom {
-        fn trigger(&self, name: &str, _: &[Node], _: Option<char>, _: Option<&str>) -> f64 { if name == "time" { f64::NAN } else { 1.0 } }
-        fn redirect(&self, _: &str, _: Option<f64>) -> Option<Self> { None }
-        fn cmpstr(&self, _: &str, _: bool, _: &[String]) -> bool { false }
-        fn special(&self, _: &str, _: &str, _: f64, _: Option<&str>, _: Option<f64>) -> bool { false }
-        fn assign(&self, _: &str, _: i32, v: f64) -> f64 { v }
+        fn trigger(&self, name: &str, _: &[Node], _: Option<char>, _: Option<&str>) -> f64 {
+            if name == "time" {
+                f64::NAN
+            } else {
+                1.0
+            }
+        }
+        fn redirect(&self, _: &str, _: Option<f64>) -> Option<Self> {
+            None
+        }
+        fn cmpstr(&self, _: &str, _: bool, _: &[String]) -> bool {
+            false
+        }
+        fn special(&self, _: &str, _: &str, _: f64, _: Option<&str>, _: Option<f64>) -> bool {
+            false
+        }
+        fn assign(&self, _: &str, _: i32, v: f64) -> f64 {
+            v
+        }
     }
 
     #[test]
@@ -501,9 +931,20 @@ mod tests {
 
     #[test]
     fn folds_constants() {
-        assert_eq!(Code::compile(&parse("2 * (3 + 4) - 1").unwrap()).constant(), Some(13.0));
-        assert_eq!(Code::compile(&parse("ifelse(1, 5, time)").unwrap()).constant(), Some(5.0));
-        assert_eq!(Code::compile(&parse("10 = [5, 15]").unwrap()).constant(), Some(1.0));
-        assert!(Code::compile(&parse("time + 1").unwrap()).constant().is_none());
+        assert_eq!(
+            Code::compile(&parse("2 * (3 + 4) - 1").unwrap()).constant(),
+            Some(13.0)
+        );
+        assert_eq!(
+            Code::compile(&parse("ifelse(1, 5, time)").unwrap()).constant(),
+            Some(5.0)
+        );
+        assert_eq!(
+            Code::compile(&parse("10 = [5, 15]").unwrap()).constant(),
+            Some(1.0)
+        );
+        assert!(Code::compile(&parse("time + 1").unwrap())
+            .constant()
+            .is_none());
     }
 }

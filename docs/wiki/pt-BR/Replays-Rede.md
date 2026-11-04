@@ -43,3 +43,13 @@ A pasta guarda os 64 arquivos mais novos; os antigos são removidos quando um no
 podem ser lidos (por exemplo, gravados por outra build) aparecem com o motivo em vez de falharem em silêncio.
 
 Os detalhes do netplay por rollback continuam em [Netplay-and-Replays](../Netplay-and-Replays.md).
+
+## Espectadores e dados de netplay nos replays
+
+Um terceiro tipo de conexão observa sem enviar entrada:
+
+```nultimate-mugen --spectate --peer <ip-do-host>:7000 [--port 7002] [--chars a,b --stage id]
+```n
+Ele monta uma `SpectatorSession` do GGRS (`PlayerType::Spectator`), renderiza as entradas confirmadas pelo host e nunca envia entrada local; o overlay mostra `ESPECTADOR · ping · quadros atrás`.
+
+Replays gravados online guardam a configuração da sessão (`netplay`: lado, peer, porta, delay, janela de rollback, número de jogadores, flag de espectador) junto das entradas, então um desync pode ser reproduzido com os mesmos ajustes. Quando o GGRS detecta um desync, o jogo grava `replays/desync-<unix>.json` com essa configuração, o quadro, o `Match::checksum()` e os últimos 120 quadros de entrada.

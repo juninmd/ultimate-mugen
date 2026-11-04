@@ -31,6 +31,22 @@ The bottom of the screen shows the connection state and ping. Pause is disabled 
 - `ume_netplay::checksum` hashes positions, states, life, power, variables, explods and projectiles. GGRS compares it between peers to detect desyncs.
 - Inputs are one `u32` per player per frame (the same bits as local play).
 
+## Spectators and netplay data in replays
+
+A third connection type observes without contributing input:
+
+```
+ultimate-mugen --spectate --peer <host-ip>:7000 [--port 7002] [--chars a,b --stage id]
+```
+
+It builds a GGRS `SpectatorSession` (`PlayerType::Spectator`), renders the confirmed inputs from the host and never
+sends local input; the overlay shows `SPECTATOR · ping · frames behind`.
+
+Replays recorded online store the session configuration (`netplay`: side, peer, port, delay, rollback window, player
+count, spectator flag) next to the inputs, so a desync can be reproduced with the same settings. When GGRS reports a
+desync, the game writes `replays/desync-<unix>.json` with that config, the frame, `Match::checksum()` and the last 120
+input frames.
+
 ## Rules for deterministic content
 
 Rollback only works if the same inputs always produce the same fight.

@@ -122,6 +122,8 @@ pub fn get_frame_time() -> f32 { with(|f| f.dt) }
 pub fn get_fps() -> i32 { with(|f| if f.dt > 0.0 { (1.0 / f.dt).round() as i32 } else { 0 }) }
 pub fn request_new_screen_size(w: f32, h: f32) { with(|f| f.resize = Some([w.max(1.0) as u32, h.max(1.0) as u32])) }
 pub fn set_fullscreen(on: bool) { with(|f| f.fullscreen = Some(on)) }
+pub fn set_vsync(on: bool) { with(|f| f.vsync = Some(on)) }
+pub fn set_frame_cap(fps: u32) { with(|f| f.frame_cap = Some(fps)) }
 pub fn set_post(p: Option<PostParams>) { with(|f| { f.post = p; f.canvas.batch.begin_overlay(); }) }
 pub fn glass_panel(x: f32, y: f32, w: f32, h: f32, radius: f32, tint: [f32; 3]) -> bool { with(|f| f.post.as_mut().is_some_and(|p| p.glass.push(x, y, w, h, radius, tint))) }
 pub fn set_blend(b: Blend) { with(|f| f.canvas.blend = b) }

@@ -217,8 +217,8 @@ impl Hud {
             }
             let (cx, cy) = (w / 2.0, 19.0);
             glass(&p, s, cx - 18.0, 5.0, 36.0, 28.0, 8.0, [0.75, 0.8, 1.0]);
-            let t = if m.training { "--".to_string() } else { format!("{:02}", (m.timer + 59) / 60) };
-            let urgent = !m.training && m.timer > 0 && m.timer <= 10 * 60;
+            let t = if m.training || m.round_ticks == 0 { "--".to_string() } else { format!("{:02}", (m.timer + 59) / 60) };
+            let urgent = !m.training && m.round_ticks > 0 && m.timer > 0 && m.timer <= 10 * 60;
             let pulse = if urgent { 1.0 + 0.18 * (1.0 - ((m.timer % 60) as f32 / 60.0)) } else { 1.0 };
             if urgent { let a = 0.12 + 0.1 * (gt * 9.0).sin().abs(); poly::solid(&sp_box(&p, cx - 18.0, 5.0, 36.0, 28.0, 8.0), Color::new(1.0, 0.1, 0.1, a)); }
             outlined(&t, cx, cy + 6.0 * pulse, 17.0 * pulse, if urgent { hex("#ff5a5a") } else { WHITE }, Align::Center);

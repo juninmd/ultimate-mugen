@@ -96,6 +96,8 @@ Shake and sound notes: `EnvShake` (and the `envshake.*` / `fall.envshake.*` HitD
 
 Explod notes: `ignorehitpause` defaults to 1 (set 0 to freeze with the owner's hit pause). `postype = left/right/front/back` and `space = screen` keep the explod fixed on screen while the camera moves. `ModifyExplod` accepts `vel`, `accel`, `pos`, `scale`, `bindtime`, `removetime`, `sprpriority`, `ontop`, `under`, `removeongethit`, `ignorehitpause`, `facing`, `vfacing`, `supermovetime`, `pausemovetime` and `trans`; `facing` is relative to the owner. `ExplodBindTime` only changes the bind time.
 
+Palette effects stack in this order: the stage `BGPalFX`, then `AllPalFX`, then the fighter's own `PalFX`. They apply on the tick they change (no extra frame of latency), and a `Sub` trans skips the palette tint while additive trans keeps it.
+
 HitDef life-system parameters: `redlife` raises the defender red-life band, `dizzypoints` and `guardpoints` drain the dizzy and guard meters (zero sets `Dizzy`/`GuardBreak`), `score` feeds the attacker and defender scores, `sparkscale` scales the hit spark, `missonoverride` marks the hit as a miss when a `HitOverride` absorbs it and `unhittabletime` grants the defender invincibility for N ticks.
 
 Helper notes: a helper freezes during `Pause` and `SuperPause` unless it has `pausemovetime` / `supermovetime` ticks left or was spawned with `pausebool = 1`, which makes it ignore every pause. Helpers with `keyctrl = 1` only receive their root's commands while the round is being fought; once the round is decided they get none. On the victory screen (round state 4) helpers are frozen and hidden.

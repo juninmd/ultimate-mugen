@@ -96,6 +96,8 @@ Notas de tremor e som: `EnvShake` (e os parâmetros `envshake.*` / `fall.envshak
 
 Notas sobre Explod: `ignorehitpause` vale 1 por padrão (use 0 para congelar junto com o hit pause do dono). `postype = left/right/front/back` e `space = screen` mantêm o explod fixo na tela enquanto a câmera se move. `ModifyExplod` aceita `vel`, `accel`, `pos`, `scale`, `bindtime`, `removetime`, `sprpriority`, `ontop`, `under`, `removeongethit`, `ignorehitpause`, `facing`, `vfacing`, `supermovetime`, `pausemovetime` e `trans`; `facing` é relativo ao dono. `ExplodBindTime` só altera o tempo de vínculo.
 
+Efeitos de paleta empilham nesta ordem: `BGPalFX` do cenário, depois `AllPalFX`, depois o `PalFX` do próprio lutador. Eles valem no tick em que mudam (sem quadro de atraso), e um trans `Sub` ignora o tom da paleta enquanto o trans aditivo o mantém.
+
 Parâmetros de vida do HitDef: `redlife` aumenta a faixa de red life do defensor, `dizzypoints` e `guardpoints` drenam os medidores de tontura e guarda (zero ativa `Dizzy`/`GuardBreak`), `score` alimenta o placar do atacante e do defensor, `sparkscale` escala o spark do golpe, `missonoverride` marca o golpe como errado quando um `HitOverride` o absorve e `unhittabletime` dá N ticks de invencibilidade ao defensor.
 
 Notas de helper: um helper congela durante `Pause` e `SuperPause`, a menos que ainda tenha ticks de `pausemovetime` / `supermovetime` ou tenha nascido com `pausebool = 1`, que o faz ignorar qualquer pausa. Helpers com `keyctrl = 1` só recebem os comandos do root enquanto o round é lutado; decidido o round, não recebem nenhum. Na tela de vitória (estado de round 4) os helpers ficam congelados e ocultos.

@@ -287,7 +287,7 @@ impl Match {
     }
 
     /// Run a state's controllers. Returns true if the state changed.
-    fn run_state(&mut self, i: usize, sd_owner: &Arc<CharDef>, no: i32, in_pause: bool) -> bool {
+    pub(crate) fn run_state(&mut self, i: usize, sd_owner: &Arc<CharDef>, no: i32, in_pause: bool) -> bool {
         let common = self.common.clone();
         let sd = match sd_owner.states.get(&no).or_else(|| if no >= 0 { common.states.get(&no) } else { None }) { Some(s) => s, None => return false };
         for sc in &sd.controllers {
@@ -662,7 +662,7 @@ impl Match {
             if frozen_by_pause(&self.fighters[i]) { continue; }
             let f = &mut self.fighters[i];
             let frozen = f.hit_pause > 0 || f.hit_shake > 0;
-            f.width_override = None; f.player_push = !f.ikemen.standby; f.trans = None; f.draw_offset = V2::default();
+            f.width_override = None; f.height_override = None; f.clsn_mods.retain_mut(|c| { if c.time > 0 { c.time -= 1; } c.time != 0 }); f.player_push = !f.ikemen.standby; f.trans = None; f.draw_offset = V2::default();
             if f.palfx.as_ref().is_some_and(|p| p.expired()) { f.palfx = None; }
             if !frozen { f.advance_anim(); }
             self.run_states(i);
@@ -795,8 +795,7 @@ impl Match {
                 let (fa, fb) = (&self.fighters[a], &self.fighters[b]);
                 let pushable = |f: &Fighter| !f.destroyed && (!f.is_helper || f.helper_player) && f.player_push && f.state_type != 'L';
                 if fa.side == fb.side || !pushable(fa) || !pushable(fb) { continue; }
-                let ha = fa.c("size.height", 60.0) * fa.lscl; let hb = fb.c("size.height", 60.0) * fb.lscl;
-                if fa.pos.y - ha > fb.pos.y || fb.pos.y - hb > fa.pos.y { continue; }
+                if fa.pos.y - fa.height_top() > fb.pos.y + fb.height_bottom() || fb.pos.y - fb.height_top() > fa.pos.y + fa.height_bottom() { continue; }
                 let (l, r) = if fa.pos.x <= fb.pos.x { (a, b) } else { (b, a) };
                 let (fl, fr) = (&self.fighters[l], &self.fighters[r]);
                 let lw = if fl.facing > 0.0 { fl.front_width() } else { fl.back_width() };

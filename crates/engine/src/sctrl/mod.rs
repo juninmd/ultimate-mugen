@@ -4,6 +4,9 @@ pub mod debug;
 mod player;
 mod pause;
 mod stage;
+pub mod clsn;
+mod hitmod;
+mod state;
 pub(crate) mod sound;
 
 pub use debug::format_clipboard;
@@ -14,6 +17,12 @@ use crate::matchs::{Event, Match};
 pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
     match sc.kind.as_str() {
         "null" => {}
+        "runstate" => state::run_state(m, i, sc),
+        "height" => state::height(m, i, sc),
+        "gethitvarset" => hitmod::get_hit_var_set(m, i, sc),
+        "modifyhitdef" => hitmod::modify_hitdef(m, i, sc),
+        "modifyreversaldef" => hitmod::modify_reversaldef(m, i, sc),
+        "overrideclsn" | "transformclsn" | "resizeclsn" => clsn::run(m, i, sc),
         "offset" => offset(m, i, sc),
         "victoryquote" => { let v = m.num(i, sc, "value", -1.0, 0) as i32; m.fighters[i].victory_quote = v; }
         "forcefeedback" => force_feedback(m, i, sc),

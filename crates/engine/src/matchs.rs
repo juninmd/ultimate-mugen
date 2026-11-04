@@ -807,7 +807,7 @@ impl Match {
             if maxx > target + half - t { target = maxx - half + t; }
         }
         target = target.clamp(self.stage.bound_left, self.stage.bound_right);
-        self.camera.x += (target - self.camera.x) * 0.5;
+        if maxx - minx <= self.view_w - 40.0 { self.camera.x += (target - self.camera.x) * 0.5; }
         let ty = (highest * self.stage.vertical_follow).min(0.0).clamp(self.stage.bound_high, self.stage.bound_low);
         self.camera.y += (ty - self.camera.y) * 0.3;
     }

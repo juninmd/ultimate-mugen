@@ -1,4 +1,3 @@
-//! Match renderer (macroquad): stages, fighters, effects, debug boxes.
 use crate::postfx::PostFx;
 use crate::stagefx::{Ctx, StageReact};
 use crate::stages::{Particle, Stage, StageArt};

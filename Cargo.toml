@@ -19,17 +19,12 @@ name = "ultimate-mugen"
 path = "src/main.rs"
 
 [dependencies]
+ume-shell = { path = "crates/shell" }
 ume-formats = { path = "crates/formats" }
 ume-engine = { path = "crates/engine" }
 tiny-skia = "0.11"
 serde_json = "1"
 symphonia = { version = "=0.5.5", default-features = false, features = ["ogg", "vorbis", "mp3", "flac", "wav", "pcm", "adpcm"] }
-
-[target.'cfg(target_os = "ios")'.dependencies]
-macroquad = { version = "0.4", default-features = false, features = ["audio"] }
-
-[target.'cfg(not(target_os = "ios"))'.dependencies]
-ume-shell = { path = "crates/shell" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
@@ -49,6 +44,10 @@ opt-level = 3
 [profile.release]
 opt-level = 3
 lto = "thin"
+
+[package.metadata.bundle]
+name = "Ultimate MUGEN"
+identifier = "dev.ultimatemugen.app"
 
 [package.metadata.android]
 package = "dev.ultimatemugen.app"

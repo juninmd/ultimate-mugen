@@ -5,6 +5,21 @@ use crate::matchs::Match;
 
 pub struct Ctx<'a> { pub m: &'a Match, pub i: usize }
 
+const HIT_VARS: &[&str] = &[
+    "type", "animtype", "airtype", "groundtype", "damage", "hitcount", "guardcount", "hitshaketime", "hittime", "slidetime", "ctrltime",
+    "recovertime", "xvel", "yvel", "yaccel", "chainid", "guarded", "fall", "fall.damage", "fall.xvel", "fall.yvel", "fall.recover",
+    "fall.time", "fall.recovertime", "fall.kill", "kill", "id", "playerid", "playerno", "down.recover", "priority", "facing", "power",
+    "isbound", "attr", "guardflag", "hitdamage", "guarddamage", "hitpower", "guardpower", "dizzypoints", "guardpoints", "redlife",
+    "score", "teamside", "projid", "p1stateno", "p2stateno",
+];
+
+pub fn note_hit_var(name: &str) {
+    static REPORTED: std::sync::OnceLock<std::sync::Mutex<std::collections::HashSet<String>>> = std::sync::OnceLock::new();
+    if HIT_VARS.contains(&name) { return; }
+    let first = REPORTED.get_or_init(Default::default).lock().map(|mut set| set.insert(name.to_string())).unwrap_or(false);
+    if first { eprintln!("gethitvar: unknown parameter '{name}' evaluates to 0"); }
+}
+
 impl<'a> Ctx<'a> {
     fn f(&self) -> &Fighter { &self.m.fighters[self.i] }
     fn enemy_index(&self) -> Option<usize> { self.m.enemy(self.i, 0) }
@@ -27,12 +42,18 @@ impl<'a> Ctx<'a> {
         match k {
             "type" => g.kind as f64, "animtype" => g.animtype as f64, "airtype" => g.airtype as f64, "groundtype" => g.groundtype as f64,
             "damage" => g.damage as f64, "hitcount" => g.hitcount as f64, "guardcount" => g.guardcount as f64, "hitshaketime" => f.hit_shake as f64,
-            "hittime" => g.hittime as f64, "slidetime" => g.slidetime as f64, "ctrltime" => g.ctrltime as f64, "recovertime" => 0.0,
+            "hittime" => g.hittime as f64, "slidetime" => g.slidetime as f64, "ctrltime" => g.ctrltime as f64,
             "xvel" => g.xvel as f64 / l, "yvel" => g.yvel as f64 / l, "yaccel" => g.yaccel as f64 / l, "chainid" => g.hit_id as f64,
             "guarded" => g.guarded as i32 as f64, "fall" => g.fall as i32 as f64, "fall.damage" => g.fall_damage as f64,
             "fall.xvel" => g.fall_xvel as f64 / l, "fall.yvel" => g.fall_yvel as f64 / l, "fall.recover" => g.fall_recover as i32 as f64,
             "fall.time" => f.fall_time as f64, "fall.recovertime" => g.fall_recover_time as f64, "fall.kill" => g.fall_kill as i32 as f64,
-            "kill" => g.kill as i32 as f64, "id" => g.attacker_id as f64, "playerno" => g.attacker_no as f64, "down.recover" => 1.0,
+            "kill" => g.kill as i32 as f64, "id" | "playerid" => g.attacker_id as f64, "playerno" => g.attacker_no as f64, "down.recover" => g.down_recover as i32 as f64,
+            "recovertime" => if g.fall && g.fall_recover { (g.fall_recover_time - f.fall_time).max(0) as f64 } else { 0.0 },
+            "priority" => g.priority as f64, "facing" => g.facing as f64, "power" => g.power as f64, "isbound" => b(f.bind.is_some()),
+            "attr" => g.attr as f64, "guardflag" => g.guardflag as f64,
+            "hitdamage" => g.hit_damage as f64, "guarddamage" => g.guard_damage as f64, "hitpower" => g.hit_power as f64, "guardpower" => g.guard_power as f64,
+            "dizzypoints" => g.dizzy_points as f64, "guardpoints" => g.guard_points as f64, "redlife" => g.red_life as f64, "score" => g.score as f64,
+            "teamside" => g.team_side as f64, "projid" => g.proj_id as f64, "p1stateno" => g.p1stateno as f64, "p2stateno" => g.p2stateno as f64,
             _ => 0.0,
         }
     }

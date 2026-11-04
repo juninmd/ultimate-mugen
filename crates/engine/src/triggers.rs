@@ -225,7 +225,7 @@ impl<'a> Host for Ctx<'a> {
             "ishelper" => b(f.is_helper && (args.is_empty() || f.helper_id == a0() as i32)),
             "ishometeam" => b(f.side == 0),
             "teamside" => (f.side + 1) as f64,
-            "teammode" => 0.0,
+            "teammode" => if m.team_tag { 3.0 } else if m.team_simul { 1.0 } else { 0.0 },
             "id" => f.id as f64,
             "playeridexist" => b(m.idx(a0() as u32).is_some()),
             "numhelper" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; m.fighters.iter().filter(|h| h.is_helper && h.root == f.root && !h.destroyed && (id < 0 || h.helper_id == id)).count() as f64 }

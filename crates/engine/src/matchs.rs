@@ -55,7 +55,7 @@ pub struct Projectile {
 /// Events for the presentation layer (audio, rumble, UI).
 #[derive(Clone)]
 pub enum Event {
-    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str>, pan: f32, looping: bool, freq_mul: f32 },
+    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str>, pan: f32, looping: bool, freq_mul: f32, low_priority: bool },
     Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool, attacker: usize, defender: usize },
     /// `fighter` = id of the root fighter that fired it (teams can have many per side)
     Super { side: usize, fighter: u32 },
@@ -379,8 +379,6 @@ impl Match {
                 }
                 _ => {}
             }
-            // hit/fall states with physics N (common1's 5030/5035/5050) must never sink below the floor
-            if f.move_type == 'H' && f.pos.y > 0.0 { f.pos.y = 0.0; }
             if f.slide_time > 0 { f.slide_time -= 1; }
         }
         if land { let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); }
@@ -649,6 +647,7 @@ impl Match {
             }
         }
         self.tick_ids = ids;
+        self.rescue_stuck();
         self.push_and_bound();
         self.rebind();
         self.orphan_custom_states();
@@ -706,6 +705,26 @@ impl Match {
         if self.shake_time > 0 { self.shake_time -= 1; self.shake_elapsed += 1; }
         if let Some((t, _)) = self.flash.as_mut() { *t -= 1; if *t <= 0 { self.flash = None; } }
         if let Some(a) = self.announce.as_mut() { a.time -= 1; if a.time <= 0 { self.announce = None; } }
+    }
+
+    /// Safety net for scripts that never hand control back: a fighter lying down past `data.liedown.time` (the M.U.G.E.N. engine
+    /// stands it up itself, many characters' own common1.cns has no exit from 5110) or without control for 15 s goes back to a
+    /// controllable state instead of freezing the character for the rest of the match.
+    fn rescue_stuck(&mut self) {
+        const NO_CTRL_LIMIT: i32 = 900;
+        for i in 0..self.fighters.len() {
+            let free = { let f = &self.fighters[i]; f.alive && !f.is_helper && f.round_free(self.round_state == 2, self.pause.is_some()) };
+            let f = &mut self.fighters[i];
+            f.no_ctrl_ticks = if free && !f.ctrl { f.no_ctrl_ticks + 1 } else { 0 };
+            let lying = free && f.state_no == 5110 && f.state_time > f.def.c("data.liedown.time", 60.0) as i32 + 30;
+            if !lying && f.no_ctrl_ticks <= NO_CTRL_LIMIT { continue; }
+            f.no_ctrl_ticks = 0;
+            let def = f.def.clone();
+            let getup = lying && (def.states.contains_key(&5120) || self.common.states.contains_key(&5120));
+            if !getup { let f = &mut self.fighters[i]; f.vel = V2::default(); f.ctrl = true; }
+            self.change_state(i, if getup { 5120 } else { 0 }, def);
+            if !getup { self.fighters[i].ctrl = true; }
+        }
     }
 
     fn push_and_bound(&mut self) {
@@ -1055,7 +1074,7 @@ impl Match {
     fn sound(&mut self, i: usize, g: i32, n: i32, own: bool, builtin: Option<&'static str>) {
         let pan = crate::sctrl::sound_pan(self, i, 0.0, false);
         let f = &self.fighters[i];
-        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0 });
+        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0, low_priority: false });
     }
     pub fn do_shake(&mut self, t: i32, ampl: f32) { self.shake(t, 60.0, -ampl.abs(), 0.0); }
     pub fn shake(&mut self, t: i32, freq: f32, ampl: f32, phase: f32) {

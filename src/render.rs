@@ -4,9 +4,7 @@ use crate::stagefx::{Ctx, StageReact};
 use crate::stages::{Particle, Stage, StageArt};
 use crate::ui::Ui;
 use crate::vfx::{FxParams, Vfx};
-use macroquad::models::{draw_mesh, Mesh, Vertex};
-use macroquad::prelude::*;
-use macroquad::miniquad::{BlendFactor, BlendState, BlendValue, Equation, PipelineParams};
+use crate::gfx::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 use ume_engine::chardef::{AnimFrame, Blend, CharDef, ImageData};
@@ -14,47 +12,11 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use ume_engine::palette::{BlendMode, PalParams};
 
-const VS: &str = "#version 100
-attribute vec3 position; attribute vec2 texcoord; attribute vec4 color0;
-varying lowp vec2 uv; varying lowp vec4 color;
-uniform mat4 Model; uniform mat4 Projection;
-void main() { gl_Position = Projection * Model * vec4(position, 1); color = color0 / 255.0; uv = texcoord; }";
-const FS: &str = "#version 100
-varying lowp vec4 color; varying lowp vec2 uv; uniform sampler2D Texture;
-void main() { gl_FragColor = color * texture2D(Texture, uv); }";
-const PAL_FS: &str = "#version 100
-precision mediump float;
-varying lowp vec4 color; varying lowp vec2 uv; uniform sampler2D Texture;
-uniform vec3 PalAdd; uniform vec3 PalMul; uniform float PalColor; uniform float PalInvert;
-void main() {
-    vec4 t = texture2D(Texture, uv);
-    vec3 c = mix(t.rgb, vec3(1.0) - t.rgb, PalInvert);
-    float g = (c.r + c.g + c.b) / 3.0;
-    c = mix(vec3(g), c, PalColor);
-    c = clamp((c + PalAdd) * PalMul, 0.0, 1.0);
-    gl_FragColor = color * vec4(c, t.a);
-}";
-
-pub struct Gfx { tex: HashMap<u64, Texture2D>, pub add: Material, pub pal: Material, pub pal_add: Material, /** M.U.G.E.N. `S` blend: dest minus src */ pub sub: Material, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
+pub struct Gfx { tex: HashMap<u64, Texture2D>, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
 
 impl Gfx {
     pub fn new() -> Self {
-        let add = load_material(ShaderSource::Glsl { vertex: VS, fragment: FS }, MaterialParams {
-            pipeline_params: PipelineParams { color_blend: Some(BlendState::new(Equation::Add, BlendFactor::Value(BlendValue::SourceAlpha), BlendFactor::One)), ..Default::default() },
-            ..Default::default()
-        }).unwrap();
-        let sub = load_material(ShaderSource::Glsl { vertex: VS, fragment: FS }, MaterialParams {
-            pipeline_params: PipelineParams { color_blend: Some(BlendState::new(Equation::ReverseSubtract, BlendFactor::Value(BlendValue::SourceAlpha), BlendFactor::One)), ..Default::default() },
-            ..Default::default()
-        }).unwrap();
-        let pal_material = |blend: BlendState| load_material(ShaderSource::Glsl { vertex: VS, fragment: PAL_FS }, MaterialParams {
-            pipeline_params: PipelineParams { color_blend: Some(blend), ..Default::default() },
-            uniforms: vec![UniformDesc::new("PalAdd", UniformType::Float3), UniformDesc::new("PalMul", UniformType::Float3), UniformDesc::new("PalColor", UniformType::Float1), UniformDesc::new("PalInvert", UniformType::Float1)],
-            ..Default::default()
-        }).unwrap();
-        let pal = pal_material(BlendState::new(Equation::Add, BlendFactor::Value(BlendValue::SourceAlpha), BlendFactor::OneMinusValue(BlendValue::SourceAlpha)));
-        let pal_add = pal_material(BlendState::new(Equation::Add, BlendFactor::Value(BlendValue::SourceAlpha), BlendFactor::One));
-        Gfx { tex: HashMap::new(), add, sub, pal, pal_add, view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), flush_cache: false, fx_gain: 1.0 }
+        Gfx { tex: HashMap::new(), view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), flush_cache: false, fx_gain: 1.0 }
     }
     pub fn texture(&mut self, img: &Arc<ImageData>, nearest: bool) -> Texture2D {
         self.tex.entry(img.id).or_insert_with(|| {
@@ -113,20 +75,19 @@ impl MatchRenderer {
         let mut c = o.tint; c.a *= o.alpha;
         if let Some((sa, _)) = fr.alpha { c.a *= (sa as f32 / 256.0).min(1.0); }
         let pal = o.pal.filter(|p| !p.is_identity() && !sub);
-        if let Some(p) = pal {
-            let mat = if add { &g.pal_add } else { &g.pal };
-            mat.set_uniform("PalAdd", (p.add[0] / 255.0, p.add[1] / 255.0, p.add[2] / 255.0));
-            mat.set_uniform("PalMul", (p.mul[0] / 256.0, p.mul[1] / 256.0, p.mul[2] / 256.0));
-            mat.set_uniform("PalColor", p.color / 256.0);
-            mat.set_uniform("PalInvert", if p.invert { 1.0f32 } else { 0.0 });
-            gl_use_material(mat);
-        } else if add { gl_use_material(&g.add); } else if sub { gl_use_material(&g.sub); }
+        if let Some(p) = pal { c.r *= (p.mul[0] / 256.0).min(1.0); c.g *= (p.mul[1] / 256.0).min(1.0); c.b *= (p.mul[2] / 256.0).min(1.0); }
+        if add { set_blend(GfxBlend::Add); } else if sub { set_blend(GfxBlend::Sub); }
         draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, c, params.clone());
-        if add || sub || pal.is_some() { gl_use_default_material(); }
+        if add || sub { set_blend(GfxBlend::Alpha); }
+        if let Some(p) = pal.filter(|p| p.add.iter().any(|a| *a > 0.0)) {
+            set_blend(GfxBlend::Add);
+            draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, Color::new(p.add[0] / 255.0, p.add[1] / 255.0, p.add[2] / 255.0, c.a), params.clone());
+            set_blend(GfxBlend::Alpha);
+        }
         if o.flash > 0.0 {
-            gl_use_material(&g.add);
+            set_blend(GfxBlend::Add);
             draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, Color::new(1.0, 1.0, 1.0, o.flash), params);
-            gl_use_default_material();
+            set_blend(GfxBlend::Alpha);
         }
     }
 
@@ -407,17 +368,16 @@ impl MatchRenderer {
                     let add = l.trans.starts_with("add") && l.trans != "addalpha";
                     let sub = l.trans == "sub";
                     let alpha = if l.trans == "addalpha" { (l.alpha[0] / 256.0).clamp(0.0, 1.0) } else { 1.0 };
-                    if add { gl_use_material(&g.add); } else if sub { gl_use_material(&g.sub); }
+                    if add { set_blend(GfxBlend::Add); } else if sub { set_blend(GfxBlend::Sub); }
                     if let Some(win) = l.window {
                         let wx = (win[0] - cx * l.delta[0]) * scl + m.view_w / 2.0 + shx;
                         let wy = (win[1] - cy * l.delta[1]) * scl + (m.view_h - 240.0) / 2.0 + shy;
                         let (ww, wh) = ((win[2] - win[0] + 1.0) * scl, (win[3] - win[1] + 1.0) * scl);
-                        let sh = screen_height();
-                        unsafe { get_internal_gl() }.quad_gl.scissor(Some(((g.ox + wx * s) as i32, (sh - (g.oy + (wy + wh) * s)) as i32, (ww * s).max(0.0) as i32, (wh * s).max(0.0) as i32)));
+                        set_scissor(Some(((g.ox + wx * s) as i32, (g.oy + wy * s) as i32, (ww * s).max(0.0) as i32, (wh * s).max(0.0) as i32)));
                     }
                     for &x in &xs { for &y in &ys { draw_texture_ex(&t, g.ox + x * s, g.oy + y * s, Color::new(1.0, 1.0, 1.0, alpha), DrawTextureParams { dest_size: Some(vec2(w * s + 0.5, h * s + 0.5)), ..Default::default() }); } }
-                    if l.window.is_some() { unsafe { get_internal_gl() }.quad_gl.scissor(None); }
-                    if add || sub { gl_use_default_material(); }
+                    if l.window.is_some() { set_scissor(None); }
+                    if add || sub { set_blend(GfxBlend::Alpha); }
                 }
             }
         }

@@ -121,7 +121,7 @@ pub struct Fighter {
     pub anim_no: i32, pub anim_real: i32, pub elem: usize, pub elem_time: i32, pub anim_elapsed: i32, pub anim_changed: bool,
     pub hitdef: Option<HitDefData>, pub hitdef_active: bool, pub hitdef_targets: Vec<u32>,
     pub move_contact: i32, pub move_hit: i32, pub move_guarded: i32, pub move_reversed: i32, pub hit_count: i32,
-    pub ghv: GetHitVars, /** juggle points already spent on this fighter in the current air combo */ pub juggle_used: i32, pub hit_pause: i32, pub hit_shake: i32, pub hit_over_time: i32, pub slide_time: i32, pub fall_time: i32,
+    pub ghv: GetHitVars, /** juggle points already spent on this fighter in the current air combo */ pub juggle_used: i32, /** consecutive ticks without control during the fight (stuck-state watchdog) */ pub no_ctrl_ticks: i32, pub hit_pause: i32, pub hit_shake: i32, pub hit_over_time: i32, pub slide_time: i32, pub fall_time: i32,
     pub asserts: u32,
     pub width_override: Option<(f32, f32)>, pub player_push: bool, pub screen_bound: bool, pub pos_freeze: bool, pub spr_priority: i32,
     pub targets: Vec<(u32, i32)>,
@@ -161,7 +161,7 @@ impl Fighter {
             vars: [0; 60], fvars: [0.0; 40], sysvars: [0; 5], sysfvars: [0.0; 5],
             anim_no: -1, anim_real: -1, elem: 0, elem_time: 0, anim_elapsed: 0, anim_changed: false,
             hitdef: None, hitdef_active: false, hitdef_targets: vec![], move_contact: 0, move_hit: 0, move_guarded: 0, move_reversed: 0, hit_count: 0,
-            ghv: GetHitVars::default(), juggle_used: 0, hit_pause: 0, hit_shake: 0, hit_over_time: 0, slide_time: 0, fall_time: 0, asserts: 0,
+            ghv: GetHitVars::default(), juggle_used: 0, no_ctrl_ticks: 0, hit_pause: 0, hit_shake: 0, hit_over_time: 0, slide_time: 0, fall_time: 0, asserts: 0,
             width_override: None, player_push: true, screen_bound: true, pos_freeze: false, spr_priority: 0, targets: vec![],
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
             persist: HashMap::new(), air_jumps: 0, bind: None, palfx: None, trans: None, remap: vec![], angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
@@ -275,4 +275,6 @@ impl Fighter {
         }).collect()
     }
     pub fn has_assert(&self, f: u32) -> bool { self.asserts & f != 0 }
+    /// True while nothing legitimately freezes this fighter (round running, no super pause, no hit pause/shake, not bound).
+    pub fn round_free(&self, fighting: bool, paused: bool) -> bool { fighting && !paused && self.hit_pause == 0 && self.hit_shake == 0 && self.bind.is_none() }
 }

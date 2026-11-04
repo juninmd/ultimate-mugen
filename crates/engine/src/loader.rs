@@ -93,16 +93,24 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
         }
     }
     let sounds = resolve(vfs, &base, &fget("sound").unwrap_or_default()).map(decode_snd).unwrap_or_default();
+    // move list for the pause screen: every author-defined command with its input (internal hold/recovery helpers left out)
+    let mut movelist: Vec<MoveInfo> = vec![];
+    for c in commands.iter().filter(|c| !c.raw.is_empty()) {
+        let l = c.name.to_ascii_lowercase();
+        // single keys (a, fwd, start...) are not moves: keep sequences, charges and button combos only
+        let single = !c.raw.contains(',') && !c.raw.contains('+');
+        if single || l.starts_with("hold") || l.starts_with("recovery") || movelist.iter().any(|m| m.command == c.name) { continue; }
+        movelist.push(MoveInfo { name: c.name.replace('_', " "), input: c.raw.clone(), command: c.name.clone() });
+    }
     let ai_commands = commands.iter().map(|c| c.name.clone())
         .filter(|n| { let l = n.to_ascii_lowercase(); !(l.starts_with("hold") || l.starts_with("recovery") || ["fwd", "back", "up", "down", "ff", "bb"].contains(&l.as_str())) }).collect();
     let mut d = CharDef::empty(&format!("mugen:{def_path}"));
     d.name = name; d.display_name = display; d.author = author; d.source = Source::Mugen;
-    d.local_w = local_w; d.local_h = lc[1];
+    d.local_w = local_w; d.local_h = lc.get(1).copied().filter(|h| *h > 0.0).unwrap_or(240.0);
     d.mugen_version = crate::chardef::parse_mugen_version(info.and_then(|s| s.get("mugenversion")));
     d.constants = constants; d.portrait = sprites.get(&(9000, 0)).cloned(); d.sprites = sprites; d.anims = anims;
-    d.commands = commands; d.states = states; d.sounds = sounds; d.ai_commands = ai_commands; d.series = "M.U.G.E.N".into();
+    d.commands = commands; d.states = states; d.sounds = sounds; d.ai_commands = ai_commands; d.movelist = movelist; d.series = "M.U.G.E.N".into();
     d.palettes = palettes; d.indexed = indexed;
-    let _ = Vec::<MoveInfo>::new;
     let _ = Arc::new(0);
     Ok(d)
 }

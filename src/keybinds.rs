@@ -4,11 +4,12 @@ use crate::gfx::KeyCode;
 use ume_engine::input::k;
 
 /// Rebindable fighting actions: label and engine input bit.
-pub const ACTIONS: [(&str, u32); 14] = [
+pub const ACTIONS: [(&str, u32); 15] = [
     ("Cima", k::U), ("Baixo", k::D), ("Esquerda", k::L), ("Direita", k::R),
     ("Soco fraco (LP)", k::X), ("Soco forte (HP)", k::Y), ("Soco 3", k::Z),
     ("Chute fraco (LK)", k::A), ("Chute forte (HK)", k::B), ("Chute 3", k::C),
     ("Especial 1", k::D2), ("Especial 2", k::W), ("Especial 3", k::E), ("Despertar", k::T),
+    ("Troca (Tag)", k::TAG),
 ];
 const N: usize = ACTIONS.len();
 
@@ -106,8 +107,8 @@ impl Default for KeyMap {
     fn default() -> Self {
         use KeyCode::*;
         KeyMap { slots: [
-            [Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T],
-            [I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0],
+            [Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T, R],
+            [I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter],
         ] }
     }
 }
@@ -115,8 +116,8 @@ impl Default for KeyMap {
 fn previous_defaults() -> [[KeyCode; N]; 2] {
     use KeyCode::*;
     [
-        [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T],
-        [Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0],
+        [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T, R],
+        [Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter],
     ]
 }
 

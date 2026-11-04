@@ -141,9 +141,10 @@ impl MatchRenderer {
         self.draw_stage(g, m, stage, false, shx, shy);
         if m.pause.as_ref().is_some_and(|p| p.darken) { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(0.0, 0.0, 0.04, 0.62)); }
         if gain > 0.0 { vfx.draw_back(g, m, shx, shy); }
+        let global_noshadow = m.global_asserts & ume_engine::flags::gsf::GLOBALNOSHADOW != 0;
         // soft contact shadows (3 layered ellipses)
         for f in m.fighters.iter().filter(|_| matches!(stage.art, StageArt::Procedural { .. } | StageArt::Illustrated { .. })) {
-            if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE | ume_engine::fighter::asf::NOSHADOW) { continue; }
+            if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::flags::asf::INVISIBLE | ume_engine::flags::asf::NOSHADOW) || global_noshadow { continue; }
             let hgt = (-f.pos.y).max(0.0);
             let r = 22.0 * (1.0 - hgt / 200.0).max(0.4);
             let a = 0.17 * (1.0 - hgt / 150.0).max(0.3);
@@ -155,7 +156,7 @@ impl MatchRenderer {
         if let StageArt::Mugen(bg) = &stage.art {
             let (sh, refl) = (&bg.stage.shadow, bg.stage.reflection);
             for f in &m.fighters {
-                if f.destroyed || f.has_assert(ume_engine::fighter::asf::INVISIBLE | ume_engine::fighter::asf::NOSHADOW) { continue; }
+                if f.destroyed || f.has_assert(ume_engine::flags::asf::INVISIBLE | ume_engine::flags::asf::NOSHADOW) || global_noshadow { continue; }
                 let Some(fr) = f.frame() else { continue };
                 if sh.intensity > 0.0 {
                     let tint = Color::new(sh.color[0] / 255.0, sh.color[1] / 255.0, sh.color[2] / 255.0, 1.0);
@@ -171,7 +172,7 @@ impl MatchRenderer {
         // floor reflections (procedural stages)
         if matches!(stage.art, StageArt::Procedural { .. } | StageArt::Illustrated { .. }) && gain > 0.0 {
             for f in &m.fighters {
-                if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE | ume_engine::fighter::asf::NOSHADOW) { continue; }
+                if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::flags::asf::INVISIBLE | ume_engine::flags::asf::NOSHADOW) || global_noshadow { continue; }
                 self.draw_reflection(g, m, f, shx, shy);
             }
         }
@@ -180,7 +181,7 @@ impl MatchRenderer {
         let mut items: Vec<(i32, usize, It)> = vec![];
         let mut ord = 0;
         for (i, e) in m.explods.iter().enumerate() { if e.under { items.push((-100 + e.spr_priority, ord, It::E(i))); ord += 1; } }
-        for (i, f) in m.fighters.iter().enumerate() { if !f.destroyed { items.push((f.spr_priority, ord, It::F(i))); ord += 1; } }
+        for (i, f) in m.fighters.iter().enumerate() { if !f.destroyed { items.push((f.spr_priority - if f.has_assert(ume_engine::flags::asf::DRAWUNDER) { 1000 } else { 0 }, ord, It::F(i))); ord += 1; } }
         for (i, p) in m.projectiles.iter().enumerate() { items.push((p.spr_priority, ord, It::P(i))); ord += 1; }
         for (i, e) in m.explods.iter().enumerate() { if !e.under { items.push((if e.on_top { 1000 + e.spr_priority } else { e.spr_priority }, ord, It::E(i))); ord += 1; } }
         items.sort_by_key(|x| (x.0, x.1));
@@ -221,7 +222,7 @@ impl MatchRenderer {
         if roots.len() <= 2 { return; }
         let s = g.view_scale;
         for f in roots {
-            if !f.alive || f.destroyed || f.has_assert(ume_engine::fighter::asf::INVISIBLE) { continue; }
+            if !f.alive || f.destroyed || f.has_assert(ume_engine::flags::asf::INVISIBLE) { continue; }
             let hgt = f.def.c("size.height", 60.0) as f32 * f.lscl + 14.0;
             let (cx, cy) = (g.ox + (Self::sx(m, f.pos.x) + shx) * s, g.oy + (Self::sy(m, f.pos.y - hgt) + shy) * s);
             let mine = self.human.contains(&f.id);
@@ -289,7 +290,7 @@ impl MatchRenderer {
     }
 
     fn draw_fighter(&self, g: &mut Gfx, m: &Match, f: &Fighter, fi: usize, shx: f32, shy: f32) {
-        if f.has_assert(ume_engine::fighter::asf::INVISIBLE) { return; }
+        if f.has_assert(ume_engine::flags::asf::INVISIBLE) { return; }
         if let Some(ai) = &f.after_image {
             let shown = ai.params.shown(ai.trail.len(), ai.length);
             for (k, &i) in shown.iter().enumerate().rev() {
@@ -342,6 +343,7 @@ impl MatchRenderer {
     }
 
     fn draw_stage(&mut self, g: &mut Gfx, m: &Match, st: &Stage, front: bool, shx: f32, shy: f32) {
+        if m.global_asserts & if front { ume_engine::flags::gsf::NOFG } else { ume_engine::flags::gsf::NOBG } != 0 { return; }
         let s = g.view_scale;
         match &st.art {
             StageArt::Procedural { back, tint, .. } => {

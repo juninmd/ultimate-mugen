@@ -67,10 +67,10 @@ impl InputSource for Ai {
         if self.cooldown > 0 { self.cooldown -= 1; return self.idle(dist, fwd, back); }
         if !f.ctrl { return 0; }
         if !self.attack.is_empty() && (dist < near || (dist > 110.0 * scale && self.r() < 0.08 + skill * if boss { 0.2 } else { 0.06 })) && self.r() < 0.2 + skill * 0.5 {
-            let pool: Vec<usize> = (0..self.attack.len()).filter(|&i| dist < near || self.attack[i].steps.len() > 1).collect();
-            if !pool.is_empty() {
-                let pick = (self.r() * pool.len() as f32) as usize % pool.len();
-                let c = &self.attack[pool[pick]];
+            let count = self.attack.iter().filter(|c| dist < near || c.steps.len() > 1).count();
+            if count > 0 {
+                let pick = (self.r() * count as f32) as usize % count;
+                let c = self.attack.iter().filter(|c| dist < near || c.steps.len() > 1).nth(pick).unwrap();
                 self.queue = Self::seq(c, f.facing).into();
                 self.cooldown = if boss { (8.0 + self.r() * 12.0) as i32 } else { (20.0 + (1.0 - skill) * 40.0 + self.r() * 20.0) as i32 };
                 return self.queue.pop_front().unwrap_or(0);

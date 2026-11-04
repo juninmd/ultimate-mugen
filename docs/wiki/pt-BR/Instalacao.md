@@ -19,7 +19,7 @@ sudo apt-get install -y pkg-config libudev-dev libasound2-dev libx11-dev libxi-d
 | Desktop | `cargo run --release` |
 | Testes | `cargo test --workspace --release` |
 | Web (PWA) | `rustup target add wasm32-unknown-unknown` e `./scripts/build-web.sh`, depois `python3 -m http.server -d web/dist 8080` |
-| Android | `cargo install cargo-apk --version 0.9.6 --locked` e `cargo apk build --lib --release --target aarch64-linux-android` |
+| Android | `cargo install cargo-apk --version 0.9.6 --locked` e `cargo apk build -p ultimate-mugen --lib --release --target aarch64-linux-android` |
 | iOS | alvo `aarch64-apple-ios`, guia em [macroquad.rs/articles/ios](https://macroquad.rs/articles/ios/) |
 
 ## Estrutura de pastas ao lado do executável

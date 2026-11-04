@@ -164,7 +164,7 @@ Acesse `http://localhost:8080` no navegador. Na versão web, você pode arrastar
   Com o Android SDK e NDK instalados (`ANDROID_HOME` e `ANDROID_NDK_ROOT`):
   ```bash
   cargo install cargo-apk --version 0.9.6 --locked
-  cargo apk build --lib --release --target aarch64-linux-android
+  cargo apk build -p ultimate-mugen --lib --release --target aarch64-linux-android
   ```
 - **iOS**:
   Siga o [guia de empacotamento do Macroquad para iOS](https://macroquad.rs/articles/ios/) usando o target `aarch64-apple-ios`.

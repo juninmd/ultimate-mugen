@@ -132,7 +132,7 @@ Open `http://localhost:8080`. On the web you can drag character `.zip` files in 
 - **Android**:
   ```bash
   cargo install cargo-apk --version 0.9.6 --locked
-  cargo apk build --lib --release --target aarch64-linux-android
+  cargo apk build -p ultimate-mugen --lib --release --target aarch64-linux-android
   ```
 - **iOS**: follow the [Macroquad iOS packaging guide](https://macroquad.rs/articles/ios/) with the `aarch64-apple-ios` target.
 

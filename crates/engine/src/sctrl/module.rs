@@ -36,6 +36,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         m.restart_pending = true;
         return true;
     }
+    crate::diagnostics::note_unsupported(crate::diagnostics::Category::Controller, &sc.kind);
     let reason = match status {
         ModuleStatus::RejectedByDesign => "rejected by design, ignored",
         _ => "not implemented yet, ignored",

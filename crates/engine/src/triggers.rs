@@ -7,7 +7,8 @@ pub struct Ctx<'a> { pub m: &'a Match, pub i: usize }
 
 impl<'a> Ctx<'a> {
     fn f(&self) -> &Fighter { &self.m.fighters[self.i] }
-    fn enemy(&self) -> Option<&Fighter> { self.m.enemy(self.i, 0).map(|e| &self.m.fighters[e]) }
+    fn enemy_index(&self) -> Option<usize> { self.m.enemy(self.i, 0) }
+    fn enemy(&self) -> Option<&Fighter> { self.enemy_index().map(|e| &self.m.fighters[e]) }
     fn edge_dist(&self, front: bool) -> f32 {
         let f = self.f(); let m = self.m;
         let (l, r) = (m.camera.x - m.view_w / 2.0, m.camera.x + m.view_w / 2.0);
@@ -88,6 +89,11 @@ impl<'a> Host for Ctx<'a> {
             "p2movetype" => self.enemy().is_some_and(|e| e.move_type == c0),
             "name" | "p1name" => f.def.name.eq_ignore_ascii_case(v0),
             "p2name" => self.enemy().is_some_and(|e| e.def.name.eq_ignore_ascii_case(v0)),
+            "p3name" | "p4name" | "p5name" | "p6name" | "p7name" | "p8name" => {
+                let slot = (name.as_bytes()[1] - b'0') as usize;
+                self.m.roots().find(|r| r.player_no == slot).is_some_and(|r| r.def.name.eq_ignore_ascii_case(v0))
+            }
+            "p2command" => self.enemy_index().is_some_and(|e| self.m.has_command(e, v0)),
             "authorname" => f.def.author.eq_ignore_ascii_case(v0),
             "hitdefattr" => {
                 let Some(hd) = f.hitdef.as_ref() else { return neg };

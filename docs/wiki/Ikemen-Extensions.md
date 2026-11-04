@@ -18,6 +18,9 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `TagOut` / `TagIn` | `self`, `stateno`, `ctrl`, `partnerstateno`, `partnerctrl` | Moves the player to or from standby (hidden, cannot be hit or pushed); `partnerstateno` swaps with the first teammate |
 | `ModifyProjectile` | `id`, `velocity`, `accel`, `velmul`, `removetime`, `projhits`, `projpriority`, `projscale` | Changes the player's live projectiles |
 | `ModifySnd` | `channel`, `pan`, `abspan`, `volumescale` | Changes sounds already playing on a channel |
+| `AssertCommand` | `name`, `buffertime` (default 1), `redirectid` | Makes command `name` active for `buffertime` ticks, starting with the current one; the effect is read by `Command` triggers and the built-in walk/guard/jump states |
+| `AssertInput` | `flag`, `flag2`..`flag4` (`U D L R F B a b c x y z s d w`), `time` (default 1), `redirectid` | ORs the listed buttons and directions into the player's input for `time` ticks; `F`/`B` follow the current facing; the injected bits go through the normal command matching and appear in the input history |
+| `ShiftInput` | `value`, `redirectid` | Shifts the player's input history by `value` ticks: positive delays inputs (the newest ticks become empty), negative moves them earlier; the tick counter is untouched |
 
 | Trigger | Returns |
 |---|---|
@@ -33,3 +36,5 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 `data.dizzypoints` and `data.guardpoints` in the `[Data]` section default to `data.life`.
 
 `data.dizzypoints` e `data.guardpoints` na seção `[Data]` usam `data.life` como padrão.
+
+PT-BR: `AssertCommand` ativa um comando por `buffertime` ticks; `AssertInput` injeta botões e direções no input por `time` ticks (`F`/`B` seguem o lado); `ShiftInput` desloca o histórico de inputs (positivo atrasa, negativo adianta). Os três aceitam `redirectid` para agir sobre outro jogador. Tudo é estado da simulação, então replays e rollback continuam determinísticos.

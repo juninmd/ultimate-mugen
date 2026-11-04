@@ -1,5 +1,6 @@
 pub mod debug;
 mod pause;
+pub(crate) mod virtual_input;
 pub(crate) mod sound;
 
 pub use debug::format_clipboard;
@@ -10,6 +11,9 @@ use crate::matchs::{Event, Match};
 pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
     match sc.kind.as_str() {
         "null" => {}
+        "assertcommand" => virtual_input::assert_command(m, i, sc),
+        "assertinput" => virtual_input::assert_input(m, i, sc),
+        "shiftinput" => virtual_input::shift_input(m, i, sc),
         "offset" => offset(m, i, sc),
         "victoryquote" => { let v = m.num(i, sc, "value", -1.0, 0) as i32; m.fighters[i].victory_quote = v; }
         "forcefeedback" => force_feedback(m, i, sc),

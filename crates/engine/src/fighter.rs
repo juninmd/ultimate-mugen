@@ -138,6 +138,7 @@ pub struct Fighter {
     pub proj_contacts: Vec<(char, i32, i64)>,
     pub last_hit_by: Option<u32>,
     pub history: InputHistory,
+    pub input_asserts: Vec<(u32, i32)>, pub command_asserts: Vec<(String, i32)>,
     pub cmd: CommandState,
     pub combo_count: i32, pub combo_damage: f32,
     /// 0 = base form, 1 = transformed (awakened) until the round ends
@@ -165,7 +166,7 @@ impl Fighter {
             width_override: None, player_push: true, screen_bound: true, pos_freeze: false, spr_priority: 0, targets: vec![],
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
             persist: HashMap::new(), air_jumps: 0, bind: None, palfx: None, trans: None, remap: vec![], angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
-            after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), cmd: CommandState::default(),
+            after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), input_asserts: vec![], command_asserts: vec![], cmd: CommandState::default(),
             combo_count: 0, combo_damage: 0.0, form: 0, form_time: 0, reversal: None, hit_overrides: Default::default(), ikemen: crate::ikemen::IkemenState::new(&def),
             pause_move_time: 0, super_move_time: 0, preserve: false, own_pal: true, state_giver: None,
             draw_offset: V2::default(), victory_quote: -1, clipboard: vec![], unhittable: 0, super_defence_mul: 1.0, def,

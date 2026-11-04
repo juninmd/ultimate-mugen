@@ -603,9 +603,11 @@ impl Match {
             let bits = inputs.get(k).copied().unwrap_or(0);
             if bits & crate::input::k::T != 0 { awaken.push(fi); }
             k += 1;
+            let bits = bits | f.take_asserted_inputs();
             f.history.push(bits, f.facing as i32);
             let def = f.def.clone();
             f.cmd.update(&f.history, &def.commands);
+            f.apply_command_asserts();
         }
         for fi in awaken { self.try_transform(fi); }
         let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time, p.is_super));

@@ -24,6 +24,27 @@ impl InputHistory {
         self.buf[i] = bits;
         self.face[i] = if facing < 0 { -1 } else { 1 };
     }
+    pub fn or_current(&mut self, bits: u32) {
+        if self.tick >= 0 { self.buf[(self.tick as usize) & (HIST - 1)] |= bits; }
+    }
+    pub fn shift(&mut self, ticks: i32) {
+        if ticks == 0 || self.tick < 0 { return; }
+        let (old_buf, old_face) = (self.buf, self.face);
+        let window = HIST as i64 - 1;
+        for back in 0..window {
+            let t = self.tick - back;
+            if t < 0 { break; }
+            let src = t - ticks as i64;
+            let slot = (t as usize) & (HIST - 1);
+            if src >= 0 && src <= self.tick && self.tick - src < window {
+                let from = (src as usize) & (HIST - 1);
+                self.buf[slot] = old_buf[from];
+                self.face[slot] = old_face[from];
+            } else {
+                self.buf[slot] = 0;
+            }
+        }
+    }
     pub fn at(&self, t: i64) -> u32 { if t < 0 || t > self.tick || self.tick - t >= (HIST as i64) - 1 { 0 } else { self.buf[(t as usize) & (HIST - 1)] } }
     pub fn face_at(&self, t: i64) -> i32 { if t < 0 { 1 } else { self.face[(t as usize) & (HIST - 1)] as i32 } }
 }

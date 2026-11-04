@@ -252,3 +252,57 @@ fn test_hit_filtering_can_be_hit() {
     m.fighters[p2_idx].not_hit_by.push(("S,NA".into(), 10));
     assert!(!m.can_be_hit(p2_idx, &hd, m.fighters[p1_idx].side));
 }
+
+fn eval_trigger(m: &Match, i: usize, src: &str) -> f64 {
+    m.ev(i, &ume_engine::chardef::safe_expr(src))
+}
+
+#[test]
+fn test_uniq_hit_count_diverges_from_hit_count_on_repeated_hitdef() {
+    let cd = make_dummy_chardef("p1");
+    let mut m = Match::new(cd.clone(), None, StageInfo::default());
+    let p1 = m.add_player(cd.clone(), 0, 0, 1);
+    let p2 = m.add_player(cd.clone(), 1, 0, 2);
+    m.round_state = 2;
+
+    let mut hd = HitDefData::default();
+    hd.damage = 10.0;
+    hd.id = 7;
+    hd.p2stateno = 5000;
+    hd.num_hits = 1;
+    hd.p1stateno = -1;
+    for _ in 0..3 {
+        m.apply_hit(p1, p2, &hd, (0.0, 0.0), None);
+    }
+    assert_eq!(eval_trigger(&m, p1, "HitCount"), 3.0);
+    assert_eq!(eval_trigger(&m, p1, "UniqHitCount"), 1.0);
+
+    let mut other = hd.clone();
+    other.id = 8;
+    m.apply_hit(p1, p2, &other, (0.0, 0.0), None);
+    assert_eq!(eval_trigger(&m, p1, "HitCount"), 4.0);
+    assert_eq!(eval_trigger(&m, p1, "UniqHitCount"), 2.0);
+}
+
+#[test]
+fn test_uniq_hit_count_resets_with_hit_count() {
+    let cd = make_dummy_chardef("p1");
+    let mut m = Match::new(cd.clone(), None, StageInfo::default());
+    let p1 = m.add_player(cd.clone(), 0, 0, 1);
+    let p2 = m.add_player(cd.clone(), 1, 0, 2);
+    m.round_state = 2;
+
+    let mut hd = HitDefData::default();
+    hd.p2stateno = 5000;
+    hd.num_hits = 1;
+    hd.p1stateno = -1;
+    m.apply_hit(p1, p2, &hd, (0.0, 0.0), None);
+    m.apply_hit(p1, p2, &hd, (0.0, 0.0), None);
+    assert_eq!(eval_trigger(&m, p1, "UniqHitCount"), 1.0);
+
+    m.change_state(p1, 0, cd.clone());
+    assert_eq!(eval_trigger(&m, p1, "HitCount"), 0.0);
+    assert_eq!(eval_trigger(&m, p1, "UniqHitCount"), 0.0);
+    m.apply_hit(p1, p2, &hd, (0.0, 0.0), None);
+    assert_eq!(eval_trigger(&m, p1, "UniqHitCount"), 1.0);
+}

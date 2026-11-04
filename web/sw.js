@@ -1,5 +1,5 @@
 // Offline cache (network-first for HTML, cache-first for assets)
-const CACHE = 'ume-v1';
+const CACHE = 'ume-v2';
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', (e) => {

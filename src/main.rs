@@ -12,7 +12,7 @@ mod hud;
 mod registry;
 mod render;
 mod poly;
-#[cfg_attr(any(target_arch = "wasm32", target_os = "android", target_os = "ios"), path = "postfx_gl.rs")]
+#[cfg_attr(any(target_os = "android", target_os = "ios"), path = "postfx_gl.rs")]
 mod postfx;
 mod session;
 mod settings;
@@ -28,9 +28,9 @@ mod vfx;
 
 use crate::gfx::*;
 
-#[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 type WindowConf = ume_shell::Config;
-#[cfg(any(target_arch = "wasm32", target_os = "android", target_os = "ios"))]
+#[cfg(any(target_os = "android", target_os = "ios"))]
 type WindowConf = Conf;
 
 fn conf() -> WindowConf {
@@ -54,13 +54,14 @@ fn conf() -> WindowConf {
     }
     if args.iter().any(|a| a == "--4k") { (w, h) = (3840, 2160); }
     let fullscreen = st.fullscreen || args.iter().any(|a| a == "--fullscreen");
-    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
     return ume_shell::Config { title: "Ultimate MUGEN".into(), width: w, height: h, fullscreen, max_frames: std::env::var("UME_FRAMES").ok().and_then(|v| v.parse().ok()) };
-    #[cfg(any(target_arch = "wasm32", target_os = "android", target_os = "ios"))]
+    #[cfg(any(target_os = "android", target_os = "ios"))]
     Conf { window_title: "Ultimate MUGEN".into(), window_width: w as i32, window_height: h as i32, fullscreen, high_dpi: true, sample_count: 4, window_resizable: true, ..Default::default() }
 }
 
 #[cfg(target_arch = "wasm32")]
+#[wasm_bindgen::prelude::wasm_bindgen]
 extern "C" { fn ume_is_touch() -> i32; fn ume_set_import_visible(v: i32); }
 
 /// Show the page's "Importar MUGEN" button only outside fights (web).
@@ -69,7 +70,7 @@ pub fn set_import_button(visible: bool) {
     {
         static mut LAST: i32 = -1;
         let v = visible as i32;
-        unsafe { if LAST != v { LAST = v; ume_set_import_visible(v); } }
+        if unsafe { LAST } != v { unsafe { LAST = v; } ume_set_import_visible(v); }
     }
     let _ = visible;
 }
@@ -79,10 +80,8 @@ pub fn set_import_button(visible: bool) {
 pub mod webimport {
     use std::sync::Mutex;
     pub static QUEUE: Mutex<Vec<Vec<u8>>> = Mutex::new(Vec::new());
-    #[no_mangle]
-    pub extern "C" fn ume_alloc(n: usize) -> *mut u8 { let mut v = Vec::<u8>::with_capacity(n.max(1)); let p = v.as_mut_ptr(); std::mem::forget(v); p }
-    #[no_mangle]
-    pub extern "C" fn ume_import(p: *mut u8, n: usize) { let v = unsafe { Vec::from_raw_parts(p, n, n.max(1)) }; QUEUE.lock().unwrap().push(v); }
+    #[wasm_bindgen::prelude::wasm_bindgen]
+    pub fn ume_import(bytes: Vec<u8>) { QUEUE.lock().unwrap().push(bytes); }
 }
 pub fn take_imports() -> Vec<Vec<u8>> {
     #[cfg(target_arch = "wasm32")]
@@ -91,12 +90,12 @@ pub fn take_imports() -> Vec<Vec<u8>> {
     vec![]
 }
 
-#[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 fn main() {
     if let Err(e) = run_async(conf(), game()) { eprintln!("{e}"); std::process::exit(1); }
 }
 
-#[cfg(any(target_arch = "wasm32", target_os = "android", target_os = "ios"))]
+#[cfg(any(target_os = "android", target_os = "ios"))]
 #[macroquad::main(conf)]
 async fn main() { game().await }
 
@@ -105,7 +104,7 @@ async fn game() {
     let has = |f: &str| args.iter().any(|a| a == f);
     let shots = args.iter().position(|a| a == "--shots").and_then(|i| args.get(i + 1)).cloned();
     #[cfg(target_arch = "wasm32")]
-    let touch_dev = unsafe { ume_is_touch() } != 0;
+    let touch_dev = ume_is_touch() != 0;
     #[cfg(not(target_arch = "wasm32"))]
     let touch_dev = cfg!(any(target_os = "android", target_os = "ios"));
     let mut app = app::App::new(has("--touch") || touch_dev, shots.is_none() && !has("--mute")).await;

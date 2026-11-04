@@ -22,9 +22,12 @@
   <canvas id="glcanvas" tabindex="1"></canvas>
   <label id="imp">⇪ Importar MUGEN (.zip)<input id="ume-file" type="file" accept=".zip" multiple hidden /></label>
   <div id="rot">Gire o aparelho para jogar na horizontal ↻</div>
-  <script src="mq_js_bundle.js"></script>
   <script src="gamepad.js"></script>
-  <script>load("ultimate-mugen.wasm");</script>
+  <script type="module">
+    import init, * as ume from './ultimate-mugen.js';
+    await init();
+    window.umeStartImports(ume);
+  </script>
   <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
 </body>
 </html>

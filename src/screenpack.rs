@@ -1,7 +1,10 @@
 //! Screenpack support: load `system.def` / `select.def` / `fight.def` from a M.U.G.E.N pack and expose the
 //! pieces the native UI can honour (menu labels, roster order, storyboard text and lifebar geometry).
 use std::path::{Path, PathBuf};
-use ume_formats::screenpack::{load_screenpack, Bar, Screenpack, Storyboard};
+#[cfg(not(target_arch = "wasm32"))]
+use ume_formats::screenpack::load_screenpack;
+use ume_formats::screenpack::{Bar, Screenpack, Storyboard};
+#[cfg(not(target_arch = "wasm32"))]
 use ume_formats::vfs::{add_dir, Vfs};
 
 pub struct ScreenpackUi {
@@ -131,6 +134,7 @@ impl ScreenpackUi {
 }
 
 /// Load a screenpack from a folder that contains `system.def` or `data/system.def`.
+#[cfg(not(target_arch = "wasm32"))]
 pub fn load_from(root: &Path) -> Result<ScreenpackUi, String> {
     let mut vfs: Vfs = Vfs::new();
     add_dir(&mut vfs, root, "").map_err(|e| format!("screenpack: {e}"))?;
@@ -141,6 +145,12 @@ pub fn load_from(root: &Path) -> Result<ScreenpackUi, String> {
         .ok_or("screenpack: system.def not found")?;
     let pack = load_screenpack(&vfs, path)?;
     Ok(ScreenpackUi::from_pack(root, pack))
+}
+
+/// The browser build has no filesystem: screenpacks arrive through the archive, so nothing is probed here.
+#[cfg(target_arch = "wasm32")]
+pub fn load_from(_root: &Path) -> Result<ScreenpackUi, String> {
+    Err("screenpack: folder loading is not available in the browser".to_string())
 }
 
 /// Probe the usual places (next to the executable and inside `mugen/`), first readable pack wins.

@@ -9,7 +9,7 @@ use ume_engine::loader::{load_mugen_char, load_mugen_portrait};
 use ume_engine::native::{compile_native, compile_native_preview, NativeChar};
 use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::stage::load_stage;
-use ume_formats::vfs::{find_char_defs, find_stage_defs, text, Vfs};
+use ume_formats::vfs::{char_key, find_char_defs, find_stage_defs, stage_key, text, Vfs};
 
 include!(concat!(env!("OUT_DIR"), "/chars_gen.rs"));
 
@@ -41,7 +41,7 @@ fn build(src: &Src, pal: i32, name: &str) -> Result<CharDef, String> {
 }
 
 pub struct CharEntry {
-    pub id: String, pub name: String, pub series: String, pub author: String, pub color: [u8; 3], pub description: String, pub mugen: bool, /** final boss: hidden from the roster */ pub boss: bool,
+    pub key: String, pub id: String, pub name: String, pub series: String, pub author: String, pub color: [u8; 3], pub description: String, pub mugen: bool, /** final boss: hidden from the roster */ pub boss: bool,
     pub src: Src,
     cache: RefCell<HashMap<i32, Arc<CharDef>>>,
     /// idle/win only (native fighters): ~10x cheaper than a full compile, used by the select grid and VS screen
@@ -114,9 +114,12 @@ fn portrait_of(d: &CharDef) -> Option<Sprite> {
 }
 
 pub enum StageSrc { Builtin(usize), Mugen { vfs: Arc<Vfs>, def: String } }
-pub struct StageEntry { pub id: String, pub name: String, pub thumb: [[u8; 3]; 3], pub mugen: bool, pub src: StageSrc, preview: RefCell<Option<Option<Arc<ume_engine::chardef::ImageData>>>> }
+pub struct StageEntry { pub key: String, pub id: String, pub name: String, pub thumb: [[u8; 3]; 3], pub mugen: bool, pub src: StageSrc, preview: RefCell<Option<Option<Arc<ume_engine::chardef::ImageData>>>> }
 
-pub struct Registry { pub chars: Vec<CharEntry>, pub stages: Vec<StageEntry>, builtin_stages: Vec<stages::StageEntry> }
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
+pub struct ImportReport { pub chars: usize, pub stages: usize, pub errors: usize, pub duplicate_pack: bool }
+
+pub struct Registry { pub chars: Vec<CharEntry>, pub stages: Vec<StageEntry>, builtin_stages: Vec<stages::StageEntry>, imported_packs: std::collections::HashSet<String> }
 
 fn hex3(h: &str) -> [u8; 3] { let v = u32::from_str_radix(h.trim_start_matches('#'), 16).unwrap_or(0x5a648c); [(v >> 16) as u8, (v >> 8) as u8, v as u8] }
 
@@ -126,15 +129,15 @@ impl Registry {
         for (_, json) in BUILTIN.iter() {
             match serde_json::from_str::<NativeChar>(json) {
                 Ok(nc) => chars.push(CharEntry {
-                    id: format!("umf:{}", nc.id), name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color),
+                    key: format!("umf:{}", nc.id), id: format!("umf:{}", nc.id), name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color),
                     description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Arc::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()),
                 }),
                 Err(e) => eprintln!("bad builtin char: {e}"),
             }
         }
         let builtin_stages = stages::builtin();
-        let stages = builtin_stages.iter().enumerate().map(|(i, s)| StageEntry { id: format!("native:{}", s.id), name: s.name.clone(), thumb: s.thumb, mugen: false, src: StageSrc::Builtin(i), preview: RefCell::new(None) }).collect();
-        Registry { chars, stages, builtin_stages }
+        let stages = builtin_stages.iter().enumerate().map(|(i, s)| StageEntry { key: format!("native:{}", s.id), id: format!("native:{}", s.id), name: s.name.clone(), thumb: s.thumb, mugen: false, src: StageSrc::Builtin(i), preview: RefCell::new(None) }).collect();
+        Registry { chars, stages, builtin_stages, imported_packs: Default::default() }
     }
     /// Bundled, redistributable MUGEN content (Elecbyte Kung Fu Man + stages, CC BY-NC).
     pub fn add_bundled_mugen(&mut self) {
@@ -148,8 +151,26 @@ impl Registry {
         let id = format!("umf:{}", nc.id);
         self.chars.retain(|c| c.id != id);
         let name = nc.name.clone();
-        self.chars.push(CharEntry { id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Arc::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) });
+        self.chars.push(CharEntry { key: id.clone(), id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Arc::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) });
         Ok(name)
+    }
+    /// Idempotent .zip import: the same archive bytes are processed once per session, and fighters/stages already in the roster (same content key) are skipped.
+    pub fn import_zip(&mut self, bytes: &[u8]) -> Result<ImportReport, String> {
+        let pack = ume_formats::vfs::content_hash(bytes);
+        if !self.imported_packs.insert(pack.clone()) { return Ok(ImportReport { duplicate_pack: true, ..Default::default() }); }
+        let mut vfs = Vfs::new();
+        if let Err(e) = ume_formats::vfs::add_zip(&mut vfs, bytes, "") { self.imported_packs.remove(&pack); return Err(e); }
+        let (chars, stages, errors) = self.add_vfs_lazy(vfs, &format!("pack-{pack}"));
+        Ok(ImportReport { chars: chars.len(), stages: stages.len(), errors: errors.len(), duplicate_pack: false })
+    }
+    /// Drop repeated entries that share a content key, keeping the first occurrence (cleans rosters built by older versions).
+    pub fn dedupe(&mut self) -> usize {
+        let before = self.chars.len() + self.stages.len();
+        let mut seen = std::collections::HashSet::new();
+        self.chars.retain(|c| seen.insert(c.key.clone()));
+        seen.clear();
+        self.stages.retain(|s| seen.insert(s.key.clone()));
+        before - self.chars.len() - self.stages.len()
     }
     /// Like add_vfs but skips the full validation decode (fast startup for trusted bundled content).
     pub fn add_vfs_lazy(&mut self, vfs: Vfs, tag: &str) -> (Vec<String>, Vec<String>, Vec<String>) { self.add_vfs_inner(vfs, tag, false) }
@@ -166,24 +187,26 @@ impl Registry {
             if ume_formats::ini::nums(info.and_then(|s| s.get("localcoord")), &[320.0])[0] > 320.0 { name.push_str(" HD"); }
             let author = info.and_then(|s| s.get("author")).map(unquote).unwrap_or_default();
             let id = format!("mugen:{tag}:{def}");
-            if self.chars.iter().any(|c| c.id == id) { continue; }
-            let e = CharEntry { id, name: name.clone(), series: "M.U.G.E.N".into(), author, color: [90, 110, 150], description: "Personagem M.U.G.E.N importado".into(), mugen: true, boss: false, src: Src::Mugen { vfs: vfs.clone(), def: def.clone() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) };
+            let key = char_key(&vfs, &def);
+            if self.chars.iter().any(|c| c.id == id || c.key == key) { continue; }
+            let e = CharEntry { key, id, name: name.clone(), series: "M.U.G.E.N".into(), author, color: [90, 110, 150], description: "Personagem M.U.G.E.N importado".into(), mugen: true, boss: false, src: Src::Mugen { vfs: vfs.clone(), def: def.clone() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) };
             if !validate { self.chars.push(e); cs.push(name); continue; }
             match e.load(1) { Ok(_) => { e.unload(); self.chars.push(e); cs.push(name); } Err(x) => errs.push(format!("{def}: {x}")) }
         }
         for def in find_stage_defs(&vfs) {
             let id = format!("mugenstage:{tag}:{def}");
-            if self.stages.iter().any(|s| s.id == id) { continue; }
+            let key = stage_key(&vfs, &def);
+            if self.stages.iter().any(|s| s.id == id || s.key == key) { continue; }
             if !validate {
                 let secs = parse_ini(&text(vfs.get(&def).map(|v| v.as_slice()).unwrap_or(&[])));
                 let info = find_section(&secs, "info");
                 let name = info.and_then(|s| s.get("displayname").or(s.get("name"))).map(unquote).filter(|s| !s.is_empty()).unwrap_or(def.clone());
                 ss.push(name.clone());
-                self.stages.push(StageEntry { id, name, thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]], mugen: true, src: StageSrc::Mugen { vfs: vfs.clone(), def }, preview: RefCell::new(None) });
+                self.stages.push(StageEntry { key, id, name, thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]], mugen: true, src: StageSrc::Mugen { vfs: vfs.clone(), def }, preview: RefCell::new(None) });
                 continue;
             }
             match load_stage(&vfs, &def) {
-                Ok(st) => { let prev = stages::mugen_preview(&st); ss.push(st.name.clone()); self.stages.push(StageEntry { id, name: st.name, thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]], mugen: true, src: StageSrc::Mugen { vfs: vfs.clone(), def }, preview: RefCell::new(Some(prev)) }); }
+                Ok(st) => { let prev = stages::mugen_preview(&st); ss.push(st.name.clone()); self.stages.push(StageEntry { key, id, name: st.name, thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]], mugen: true, src: StageSrc::Mugen { vfs: vfs.clone(), def }, preview: RefCell::new(Some(prev)) }); }
                 Err(x) => errs.push(format!("{def}: {x}")),
             }
         }
@@ -304,6 +327,45 @@ mod tests {
         assert_eq!(e.name, "Folder Test");
         assert!(e.load(1).is_ok());
         std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn importing_the_same_pack_twice_does_not_duplicate() {
+        let zip = include_bytes!("../assets/mugen/elecbyte.zip");
+        let mut reg = Registry::new();
+        let r1 = reg.import_zip(zip).unwrap();
+        assert!(r1.chars > 0 && !r1.duplicate_pack);
+        let (c, s) = (reg.chars.len(), reg.stages.len());
+        let r2 = reg.import_zip(zip).unwrap();
+        assert!(r2.duplicate_pack);
+        assert_eq!((reg.chars.len(), reg.stages.len()), (c, s));
+    }
+
+    #[test]
+    fn same_content_from_another_source_is_skipped_and_dedupe_cleans_old_rosters() {
+        let load = || { let mut v = Vfs::new(); ume_formats::vfs::add_zip(&mut v, include_bytes!("../assets/mugen/elecbyte.zip"), "").unwrap(); v };
+        let mut reg = Registry::new();
+        reg.add_vfs_lazy(load(), "bundled");
+        let (c, s) = (reg.chars.len(), reg.stages.len());
+        reg.add_vfs_lazy(load(), "web123-0");
+        reg.add_vfs_lazy(load(), "/some/other/dir");
+        assert_eq!((reg.chars.len(), reg.stages.len()), (c, s));
+        let dup_key = reg.chars.iter().find(|c| c.mugen).unwrap().key.clone();
+        let e = CharEntry { key: dup_key, id: "mugen:legacy:chars/kfm/kfm.def".into(), name: "Legacy".into(), series: String::new(), author: String::new(), color: [0; 3], description: String::new(), mugen: true, boss: false, src: Src::Mugen { vfs: Arc::new(Vfs::new()), def: String::new() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) };
+        reg.chars.push(e);
+        assert_eq!(reg.dedupe(), 1);
+        assert_eq!(reg.chars.len(), c);
+    }
+
+    #[test]
+    fn scanning_folders_repeatedly_is_idempotent() {
+        let mut reg = Registry::new();
+        reg.add_bundled_mugen();
+        reg.scan_folders();
+        let (c, s) = (reg.chars.len(), reg.stages.len());
+        reg.scan_folders();
+        reg.add_bundled_mugen();
+        assert_eq!((reg.chars.len(), reg.stages.len()), (c, s));
     }
 
     #[test]

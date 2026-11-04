@@ -461,3 +461,25 @@ fn duel_stats(id: &str, boss: bool) -> (u32, f32, f32) {
     }
     (boss_wins, boss_hp / seeds as f32, foe_hp / seeds as f32)
 }
+
+#[test]
+fn team_wins_are_announced_by_the_first_member() {
+    let mut m = team_match(true);
+    let roots = m.root_indices();
+    let lead = m.fighters[roots[0]].def.display_name.split_whitespace().next().unwrap().to_uppercase();
+    assert_eq!(m.team_leader(0).as_deref(), Some(lead.as_str()));
+    m.fighters[roots[1]].life = 0.0;
+    m.fighters[roots[3]].life = 0.0;
+    for _ in 0..400 { m.tick(&[0, 0, 0, 0]); if m.round_state == 4 { break; } }
+    assert_eq!(m.announce.as_ref().map(|a| a.text.clone()), Some(format!("TEAM {lead} WINS")));
+}
+
+#[test]
+fn sequence_teams_use_the_given_leader_and_solo_fights_keep_the_name() {
+    let mut m = duel();
+    assert_eq!(m.team_leader(0), None);
+    assert!(m.winner_text(0).ends_with(" WINS") && !m.winner_text(0).starts_with("TEAM "));
+    m.team_lead = ["kaito".into(), String::new()];
+    assert_eq!(m.winner_text(0), "TEAM KAITO WINS");
+    assert!(!m.winner_text(1).starts_with("TEAM "));
+}

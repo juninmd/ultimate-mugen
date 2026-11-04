@@ -667,6 +667,7 @@ impl App {
                 idx: t.idx, ko: t.ko.clone(), simul: t.simul,
             });
             let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, seq, life);
+            if let Some(t) = &info { sess.m.team_lead = [0, 1].map(|sd| t.names[sd].first().map(|n| n.0.clone()).unwrap_or_default()); }
             sess.team = info;
             sess.is_replay = replay.is_some();
             if seq { if let Some(t) = &self.team { for side in 0..2 { if let Some(f) = sess.m.fighters.iter_mut().find(|f| !f.is_helper && f.side == side) { f.power = t.power[side].min(f.power_max); } } } }
@@ -941,7 +942,7 @@ impl App {
         let e = &self.reg.chars[w];
         self.ui.gradient_v(160.0, 200.0, 960.0, 300.0, alpha(rgb(e.color), 0.9), Color::new(0.08, 0.05, 0.16, 0.95));
         let done = self.mode == Mode::Arcade && self.arcade.as_ref().is_some_and(|(l, i)| *i >= l.len());
-        let title = if done { "ARCADE COMPLETO!".to_string() } else if self.team.is_some() { format!("EQUIPE {} VENCE!", e.name.split_whitespace().next().unwrap_or("").to_uppercase()) } else { format!("{} VENCE!", e.name.to_uppercase()) };
+        let title = if done { "ARCADE COMPLETO!".to_string() } else if self.team.is_some() { { let lead = self.team.as_ref().and_then(|t| t.members[winner.min(1)].first().copied()).unwrap_or(w); format!("TIME {} VENCEU!", self.reg.chars[lead].name.split_whitespace().next().unwrap_or("").to_uppercase()) } } else { format!("{} VENCE!", e.name.to_uppercase()) };
         let pal = if winner == 1 && self.sel.0 == self.sel.1 { 2 } else { 1 };
         if let Ok(d) = e.load(pal) { let t = self.preview_t; self.draw_char(&d, if d.anims.contains_key(&181) { 181 } else { 0 }, t, 330.0, 480.0, 260.0, false); }
         self.ui.text_bold(&title, 480.0, 300.0, 44.0, hex("#ffcc33"), BLACK, Align::Left);

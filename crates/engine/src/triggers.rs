@@ -24,10 +24,13 @@ impl<'a> Ctx<'a> {
     fn f(&self) -> &Fighter { &self.m.fighters[self.i] }
     fn enemy_index(&self) -> Option<usize> { self.m.enemy(self.i, 0) }
     fn enemy(&self) -> Option<&Fighter> { self.enemy_index().map(|e| &self.m.fighters[e]) }
+    fn screen_edge(&self, right: bool) -> f32 {
+        let m = self.m;
+        if right { m.camera.x + m.view_w / 2.0 } else { m.camera.x - m.view_w / 2.0 }
+    }
     fn edge_dist(&self, front: bool) -> f32 {
-        let f = self.f(); let m = self.m;
-        let (l, r) = (m.camera.x - m.view_w / 2.0, m.camera.x + m.view_w / 2.0);
-        if (f.facing > 0.0) == front { r - f.pos.x } else { f.pos.x - l }
+        let f = self.f();
+        if (f.facing > 0.0) == front { self.screen_edge(true) - f.pos.x } else { f.pos.x - self.screen_edge(false) }
     }
     fn const_val(&self, k: &str) -> f64 {
         let c = &self.f().def.constants;
@@ -251,8 +254,10 @@ impl<'a> Host for Ctx<'a> {
             "projcontacttime" => self.proj_time('c', a0() as i32) as f64,
             "projhittime" => self.proj_time('h', a0() as i32) as f64,
             "projguardedtime" => self.proj_time('g', a0() as i32) as f64,
-            "backedge" | "leftedge" => (m.camera.x - m.view_w / 2.0) as f64,
-            "frontedge" | "rightedge" => (m.camera.x + m.view_w / 2.0) as f64,
+            "leftedge" => self.screen_edge(false) as f64 / l,
+            "rightedge" => self.screen_edge(true) as f64 / l,
+            "frontedge" => self.screen_edge(f.facing > 0.0) as f64 / l,
+            "backedge" => self.screen_edge(f.facing <= 0.0) as f64 / l,
             "topedge" => (m.camera.y - m.ground_y()) as f64,
             "bottomedge" => (m.camera.y + m.view_h - m.ground_y()) as f64,
             "gameheight" => m.view_h as f64, "gamewidth" => m.view_w as f64,

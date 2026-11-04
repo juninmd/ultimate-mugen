@@ -127,6 +127,9 @@ Combat and state triggers (localcoord-scaled where they return positions or velo
 | `HitVel X` / `HitVel Y` | Velocity set by the last hit taken |
 | `ParentExist` | 1 while the parent of this helper still exists |
 | `AirJumpCount` | Air jumps performed since landing |
+## Screen edge triggers
+
+`LeftEdge` and `RightEdge` are absolute: they always return the left and right screen edges. `FrontEdge` and `BackEdge` depend on `Facing`: a right-facing player reads `FrontEdge = RightEdge` and `BackEdge = LeftEdge`, a left-facing player reads the opposite. All four are in the player's `localcoord` units and use the same edges as `FrontEdgeDist` and `BackEdgeDist`, so `(FrontEdge - X) * Facing` equals `FrontEdgeDist` (with `X` the player's world position).
 
 ## Redirections
 

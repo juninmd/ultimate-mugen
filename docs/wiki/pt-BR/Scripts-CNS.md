@@ -127,6 +127,9 @@ Triggers de combate e estado (escalados pelo localcoord quando retornam posiçõ
 | `HitVel X` / `HitVel Y` | Velocidade definida pelo último golpe sofrido |
 | `ParentExist` | 1 enquanto o pai deste helper ainda existe |
 | `AirJumpCount` | Saltos aéreos feitos desde o pouso |
+## Triggers de borda da tela
+
+`LeftEdge` e `RightEdge` são absolutos: sempre devolvem a borda esquerda e a direita da tela. `FrontEdge` e `BackEdge` dependem de `Facing`: quem olha para a direita lê `FrontEdge = RightEdge` e `BackEdge = LeftEdge`, e quem olha para a esquerda lê o contrário. Os quatro usam as unidades do `localcoord` do personagem e as mesmas bordas de `FrontEdgeDist` e `BackEdgeDist`, então `(FrontEdge - X) * Facing` é igual a `FrontEdgeDist` (com `X` a posição do personagem no mundo).
 
 ## Redirecionamentos
 

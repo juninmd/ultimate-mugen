@@ -1206,11 +1206,6 @@ impl Match {
                 let fd = &mut self.fighters[d];
                 fd.life = if hd.guard_kill && !training && !fd.has_assert(asf::NOGUARDKO) { (fd.life - dmg).max(0.0) } else { (fd.life - dmg).max(fd.life.min(1.0)) };
                 fd.received_damage += dmg; fd.received_hits += 1;
-                if !fd.has_assert(asf::NOGUARDPOINTSDAMAGE) {
-                    fd.ikemen.guard_points = (fd.ikemen.guard_points - hd.guard_points).max(0.0);
-                    if fd.ikemen.guard_points <= 0.0 { fd.ikemen.guard_break = true; }
-                }
-                fd.ikemen.red_life = (fd.life + hd.red_life[1]).min(fd.life_max).max(fd.life);
                 let gc = fd.ghv.guardcount;
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
@@ -1250,11 +1245,6 @@ impl Match {
                 if (!hd.kill || training) && nl < 1.0 { nl = fd.life.min(1.0); }
                 fd.life = nl.max(0.0);
                 fd.received_damage += dmg; fd.received_hits += 1;
-                fd.ikemen.red_life = (fd.life + hd.red_life[0]).min(fd.life_max).max(fd.life);
-                if !fd.has_assert(asf::NODIZZYPOINTSDAMAGE) {
-                    fd.ikemen.dizzy_points = (fd.ikemen.dizzy_points - hd.dizzy_points).max(0.0);
-                    if fd.ikemen.dizzy_points <= 0.0 { fd.ikemen.dizzy = true; }
-                }
                 if hd.unhittable_time > 0 { fd.unhittable = fd.unhittable.max(hd.unhittable_time); }
                 let air = fd.state_type == 'A' || fd.air_height() < -1.0;
                 let down = fd.state_type == 'L';

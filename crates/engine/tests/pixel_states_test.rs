@@ -44,6 +44,9 @@ fn every_fighter_with_a_sprite_folder_draws_it() {
     for id in ids {
         let def = compiled(&id);
         assert!(def.sprites.values().any(|s| s.image.is_some()), "{id}: sprite images loaded");
+        let portrait = def.sprites.get(&(9000, 1)).and_then(|sprite| sprite.image.as_deref()).expect("dedicated portrait image");
+        assert!(portrait.w.max(portrait.h) <= 256, "{id}: dedicated portrait fits the selection texture budget");
+        assert!(portrait.rgba.chunks_exact(4).any(|pixel| pixel[3] > 0), "{id}: dedicated portrait contains visible pixels");
     }
 }
 

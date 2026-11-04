@@ -231,7 +231,7 @@ impl<'a> Host for Ctx<'a> {
             "sysvar" => f.sysvars.get(a0() as usize).copied().unwrap_or(0) as f64,
             "sysfvar" => f.sysfvars.get(a0() as usize).copied().unwrap_or(0.0),
             "vel" => (match comp { Some('y') => f.vel.y, Some('z') => 0.0, _ => f.vel.x }) as f64 / l,
-            "pos" => (match comp { Some('y') => f.pos.y, Some('z') => 0.0, _ => f.pos.x - m.camera.x }) as f64 / l,
+            "pos" => (match comp { Some('y') => f.air_height(), Some('z') => 0.0, _ => f.pos.x - m.camera.x }) as f64 / l,
             "screenpos" => self.to_local(match comp { Some('y') => f.pos.y - m.camera.y + m.ground_y(), _ => f.pos.x - m.camera.x + m.view_w / 2.0 }),
             "camerapos" => (if comp == Some('y') { m.camera.y } else { m.camera.x }) as f64,
             "camerazoom" => m.camera_scale() as f64,

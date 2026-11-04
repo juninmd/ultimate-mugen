@@ -89,7 +89,7 @@ Command extras (Ikemen GO 1.0):
 
 `AfterImage` `AfterImageTime` `AllPalFX` `AngleAdd` `AngleDraw` `AngleMul` `AngleSet` `AssertSpecial` `AttackDist` `AttackMulSet` `BGPalFX` `BindToParent` `BindToRoot` `BindToTarget` `ChangeAnim` `ChangeAnim2` `ChangeState` `CtrlSet` `DefenceMulSet` `DestroySelf` `EnvColor` `EnvShake` `Explod` `ExplodBindTime` `GameMakeAnim` `Gravity` `Helper` `HitAdd` `HitBy` `HitDef` `HitFallDamage` `HitFallSet` `HitFallVel` `HitVelSet` `LifeAdd` `LifeSet` `MakeDust` `ModifyExplod` `MoveHitReset` `NotHitBy` `PalFX` `ParentVarAdd` `ParentVarSet` `Pause` `PlayerPush` `PlaySnd` `PosAdd` `PosFreeze` `PosSet` `PowerAdd` `PowerSet` `Projectile` `RemoveExplod` `ScreenBound` `SelfState` `SprPriority` `StateTypeSet` `SuperPause` `TargetBind` `TargetDrop` `TargetFacing` `TargetLifeAdd` `TargetPowerAdd` `TargetState` `TargetVelAdd` `TargetVelSet` `Trans` `Turn` `VarAdd` `VarRandom` `VarRangeSet` `VarSet` `VelAdd` `VelMul` `VelSet` `Width`
 
-Also supported: `Zoom` `ReversalDef` `HitOverride` `FallEnvShake` `RemapPal` `StopSnd` `SndPan` `VictoryQuote` `ForceFeedback` `Offset` `Null` `DisplayToClipboard` `AppendToClipboard` `ClearClipboard`.
+Also supported: `Zoom` `Camera` `GroundLevelOffset` `Depth` `DepthBound` `ReversalDef` `HitOverride` `FallEnvShake` `RemapPal` `StopSnd` `SndPan` `VictoryQuote` `ForceFeedback` `Offset` `Null` `DisplayToClipboard` `AppendToClipboard` `ClearClipboard`.
 
 Explod notes: `ignorehitpause` defaults to 1 (set 0 to freeze with the owner's hit pause). `postype = left/right/front/back` and `space = screen` keep the explod fixed on screen while the camera moves. `ModifyExplod` accepts `vel`, `accel`, `pos`, `scale`, `bindtime`, `removetime`, `sprpriority`, `ontop`, `under`, `removeongethit`, `ignorehitpause`, `facing`, `vfacing`, `supermovetime`, `pausemovetime` and `trans`; `facing` is relative to the owner. `ExplodBindTime` only changes the bind time.
 
@@ -155,6 +155,14 @@ Every position and distance trigger converts its world-space result into the loc
 When the request ends the camera eases back to its normal scale using the stage `zoominspeed` / `zoomoutspeed`.
 
 `CameraZoom` returns the live camera scale. `ZoomVar(<name>)` exposes the camera zoom state: `scale` (live), `target` (requested scale), `active`, `time` (ticks left), `posx`, `posy`, `lag`, `delta`, `delay`, `bound`, `min` and `max` (the scale limits currently allowed by the stage). All names return 0 (or the live scale for `target`) when no `Zoom` is active.
+
+## Camera and ground level controllers
+
+The engine is 2D, so there is no Z axis: `Pos Z`, `Vel Z` and the other Z components always read 0.
+
+- `Camera` (`pos`, `zoom`, `bound`, `lag`, `time`): moves the camera focus by `pos` (player localcoord) and optionally sets the camera scale with `zoom`. It uses the same machinery as `Zoom` (see above): `bound = 1` keeps the offset inside the stage bounds and the scale inside the stage zoom limits, `lag` eases the zoom, `time` is the number of ticks the request stays active. Without `zoom` the current scale is kept.
+- `GroundLevelOffset value = n`: raises the floor under this character by `n` pixels (negative digs it), so it stands on the raised floor with normal landing, ground physics and ground/air hit detection. `Pos Y` is measured from the character's own floor (0 while standing on it), `ScreenPos Y` and the spawn height of projectiles, explods and helpers include the offset. The offset resets at round start.
+- `Depth` and `DepthBound` are accepted but ignored (Z is out of scope); the first use prints one warning (`depth is accepted but ignored: the engine has no Z axis`) and the character is not changed.
 
 ## Redirections
 

@@ -20,6 +20,9 @@ fn main() {
         let t = Instant::now();
         if let Some(b) = vfs.get(&sff) { let _ = ume_formats::sff::decode_sff(b); }
         let ms = t.elapsed().as_secs_f64() * 1000.0;
-        println!("{def:40} {best:7.1} ms ({sprites} sprites, sff {ms:.1} ms)");
+        let t = Instant::now();
+        let _ = ume_engine::loader::load_mugen_portrait(&vfs, &def);
+        let portrait = t.elapsed().as_secs_f64() * 1000.0;
+        println!("{def:40} {best:7.1} ms ({sprites} sprites, sff {ms:.1} ms, portrait {portrait:.1} ms)");
     }
 }

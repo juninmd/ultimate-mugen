@@ -7,7 +7,7 @@ use std::sync::Arc;
 use ume_formats::act::decode_act;
 use ume_formats::air::parse_air;
 use ume_formats::ini::{find_section, nums, parse_ini, unquote};
-use ume_formats::sff::{decode_sff, sprite_to_rgba};
+use ume_formats::sff::{decode_sff, decode_sff_only, sprite_to_rgba};
 use ume_formats::snd::decode_snd;
 use ume_formats::vfs::{norm_path, resolve, text, Vfs};
 
@@ -154,13 +154,10 @@ pub fn load_mugen_portrait(vfs: &Vfs, def_path: &str) -> Option<Sprite> {
     let secs = parse_ini(&text(vfs.get(&def_path)?));
     let files = find_section(&secs, "files")?;
     let fget = |k: &str| files.get(k).map(|s| s.to_string());
-    let sff = decode_sff(resolve(vfs, &base, &fget("sprite")?)?).ok()?;
+    let idle_key = resolve(vfs, &base, &fget("anim").unwrap_or_default()).and_then(|b| parse_air(&text(b)).get(&0).and_then(|a| a.frames.first()).map(|f| (f.group, f.index)));
+    let sff = decode_sff_only(resolve(vfs, &base, &fget("sprite")?)?, |g, i| g == 9000 && (i == 0 || i == 1) || Some((g, i)) == idle_key).ok()?;
     let find = |g: i32, i: i32| sff.sprites.iter().find(|s| s.group == g && s.index == i && s.width > 0 && s.height > 0);
-    let idle = || {
-        let air = parse_air(&text(resolve(vfs, &base, &fget("anim")?)?));
-        let fr = air.get(&0)?.frames.first()?.clone();
-        find(fr.group, fr.index)
-    };
+    let idle = || idle_key.and_then(|(g, i)| find(g, i));
     let act = fget("pal1").and_then(|p| resolve(vfs, &base, &p)).filter(|a| a.len() >= 768).map(decode_act);
     let fallback = act.or_else(|| sff.palettes.first().map(|p| p.data.to_vec()));
     // first candidate that actually has visible pixels (some packs ship blank 9000,x placeholders)

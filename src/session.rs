@@ -188,6 +188,7 @@ impl Session {
                 Event::StopSound { owner, channel } => audio.stop(owner, channel),
                 Event::SoundPan { owner, channel, pan } => audio.pan(owner, channel, pan),
                 Event::SoundVolume { owner, channel, volume } => audio.set_volume(owner, channel, volume),
+                Event::Bgm(action) => audio.queue_bgm(action),
                 Event::Fight => audio.sfx("fight"),
                 Event::RoundStart(_) => audio.sfx("round"),
                 Event::RoundEnd(w) if w >= 0 => audio.sfx("win"),

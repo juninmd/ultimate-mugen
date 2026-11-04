@@ -23,6 +23,14 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `TagOut` / `TagIn` | `self`, `stateno`, `ctrl`, `partnerstateno`, `partnerctrl` | Moves the player to or from standby (hidden, cannot be hit or pushed); `partnerstateno` swaps with the first teammate |
 | `ModifyProjectile` | `id`, `velocity`, `accel`, `velmul`, `removetime`, `projhits`, `projpriority`, `projscale` | Changes the player's live projectiles |
 | `ModifySnd` | `channel`, `pan`, `abspan`, `volumescale` | Changes sounds already playing on a channel |
+| `PlayBGM` | `bgm`, `volume`, `loop`, `loopstart`, `loopend`, `freqmul` | Starts a music track (`volume` in percent); an empty `bgm` stops the music. The engine only emits an event; the app resolves the file: `"stage"` is the stage's own track, `"builtin:N"` a built-in track, other names must have been registered by the app |
+| `StopBGM` | | Stops the music |
+| `ModifyBGM` | `volume`, `loop`, `loopstart`, `loopend`, `freqmul` | `volume` applies to the playing track at once; `loop` is used by the next `PlayBGM`; `loopstart`, `loopend` and `freqmul` are emitted as events but changing them while a track plays is not applied yet |
+| `ModifyStageVar` | `camera.boundleft`, `camera.boundright`, `camera.boundhigh`, `camera.boundlow`, `camera.verticalfollow`, `camera.tension`, `camera.startx`, `camera.starty`, `camera.zoomout`, `stageinfo.zoffset`, `playerinfo.p1startx`, `playerinfo.p2startx` | Changes the running stage; the part before the dot is optional. Values are in character units; camera position is clamped to the new bounds at once and `zoffset` is re-applied through the zoom. `startx` / `starty` apply on the next round |
+| `ModifyStageBG` | `id` (omit or -1 for all layers), `visible`, `enabled`, `velocity`, `pos`, `offset`, `sinx`, `siny`, `anim` | Changes background layers of the running stage; `pos` is absolute, `offset` is added |
+| `ModifyBGCtrl` | `id` (target layer id), `time` (start, end, loop), `looptime`, `value`, `x`, `y` | Edits the stage's `BGCtrl` entries that target `id` (all when omitted); the edits last until the round restarts |
+| `ModifyPlayer` | `id` (omit for self), `life`, `lifemax`, `power`, `powermax`, `ctrl`, `ailevel`, `redlife`, `dizzypoints`, `guardpoints` | Whitelisted fields only, always clamped (`ailevel` 0..8, `power` lives on the root) |
+| `PrintToConsole` | `text`, `params` | Appends a line to the match's compatibility log (`Match::console`); `%d`, `%f` and `\n` as in `Text`. At most 20 lines per second per match, 200 lines kept, 240 characters per line |
 
 | Trigger | Returns |
 |---|---|

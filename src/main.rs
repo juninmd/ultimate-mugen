@@ -13,6 +13,7 @@ mod menu_art;
 mod registry;
 mod render;
 mod replays;
+mod screenpack;
 mod poly;
 mod postfx;
 mod session;

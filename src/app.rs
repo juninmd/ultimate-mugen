@@ -122,6 +122,8 @@ pub struct App {
     survival: Option<survival::Survival>,
     /// Arcade/Survival with a second human on the same side (couch co-op)
     pub coop: bool,
+    /// Screenpack loaded from mugen/data or mugen/screenpacks (menu labels, roster order, storyboards, lifebar geometry)
+    sp: Option<crate::screenpack::ScreenpackUi>,
     /// Palette chosen per side (1..=PALETTE_COUNT) and per team member in pick order
     pub pal: [i32; 2],
     pub pal_pick: i32,
@@ -217,6 +219,7 @@ impl App {
             replay_list: vec![], replay_problems: vec![], replay_rename: None, replay_confirm: false, replay_by_name: false,
             survival: None,
             coop: false,
+            sp: crate::screenpack::probe(),
             pal: [settings.pal1 as i32, settings.pal2 as i32], pal_pick: 1, team_pal: vec![],
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
@@ -373,7 +376,7 @@ impl App {
         let n = MENU.len();
         let step = 456.0 / n as f32;
         for (i, (key, _)) in MENU.iter().enumerate() {
-            let label = crate::i18n::t(key);
+            let label = self.menu_text(key);
             let k_in = ((self.screen_t - 0.05 - i as f32 * 0.04) / 0.28).clamp(0.0, 1.0);
             let k_in = 1.0 - (1.0 - k_in).powi(3);
             let (x, y, w, h) = (40.0 - (1.0 - k_in) * 120.0, 196.0 + i as f32 * step, 520.0, step - 4.0);
@@ -385,13 +388,13 @@ impl App {
                 let pulse = 0.8 + 0.2 * (ui.t * 5.0).sin();
                 ui.quad([vec2(x + off + 18.0, y), vec2(x + off + w, y), vec2(x + off + w - 18.0, y + h), vec2(x + off, y + h)], Color::new(accent.r * pulse, accent.g * pulse, accent.b * pulse, 0.92 * k_in));
                 ui.quad([vec2(x + off - 14.0, y), vec2(x + off - 4.0, y), vec2(x + off - 18.0, y + h), vec2(x + off - 28.0, y + h)], Color::new(1.0, 1.0, 1.0, k_in));
-                ui.text(label, x + off + 30.0, y + h * 0.72, 24.0, hex("#12051f"), Align::Left, true);
+                ui.text(&label, x + off + 30.0, y + h * 0.72, 24.0, hex("#12051f"), Align::Left, true);
             } else {
                 ui.quad([vec2(x + 18.0, y), vec2(x + w - 80.0, y), vec2(x + w - 98.0, y + h), vec2(x, y + h)], Color::new(1.0, 1.0, 1.0, 0.07 * k_in));
-                ui.text(label, x + 30.0, y + h * 0.72, 22.0, Color::new(1.0, 1.0, 1.0, 0.82 * k_in), Align::Left, true);
+                ui.text(&label, x + 30.0, y + h * 0.72, 22.0, Color::new(1.0, 1.0, 1.0, 0.82 * k_in), Align::Left, true);
             }
         }
-        let title = crate::i18n::t(MENU[cur_v].0);
+        let title = self.menu_text(MENU[cur_v].0);
         let desc = crate::i18n::t(MENU[cur_v].1);
         let ta = ((self.menu_art_fade()) * 1.0).clamp(0.0, 1.0);
         ui.text_bold(&title.to_uppercase(), VW - 60.0, 590.0, if title.chars().count() > 12 { 44.0 } else { 64.0 }, Color::new(1.0, 1.0, 1.0, ta), Color::new(0.05, 0.02, 0.1, ta), Align::Right);
@@ -507,8 +510,24 @@ impl App {
 
     /// Registry indices visible under the current filter (never empty).
     fn char_view(&self) -> Vec<usize> {
-        let v: Vec<usize> = self.playable().into_iter().filter(|&i| match self.sel_filter { 1 => !self.reg.chars[i].mugen, 2 => self.reg.chars[i].mugen, _ => true }).collect();
-        if v.is_empty() { self.playable() } else { v }
+        let mut v: Vec<usize> = self.playable().into_iter().filter(|&i| match self.sel_filter { 1 => !self.reg.chars[i].mugen, 2 => self.reg.chars[i].mugen, _ => true }).collect();
+        if v.is_empty() { v = self.playable(); }
+        if let Some(sp) = &self.sp {
+            v.sort_by_key(|&i| {
+                let e = &self.reg.chars[i];
+                sp.roster_pos(&e.id).or_else(|| sp.roster_pos(&e.name)).unwrap_or(usize::MAX)
+            });
+        }
+        v
+    }
+
+    /// Menu label honouring a loaded screenpack (`system.def` `menu.itemname.*`), else the i18n catalog.
+    fn menu_text(&self, key: &'static str) -> String {
+        let mugen = match key { "menu.arcade" => "arcade", "menu.survival" => "survival", "menu.team_seq" => "teamarcade", "menu.team_simul" => "teamversus", "menu.team_tag" => "teamcoop", "menu.training" => "training", "menu.watch" => "watch", "menu.quit" => "exit", _ => "" };
+        match self.sp.as_ref().filter(|_| !mugen.is_empty()).and_then(|s| s.menu_label(mugen)) {
+            Some(label) => label.to_string(),
+            None => crate::i18n::t(key).to_string(),
+        }
     }
 
     fn select(&mut self) {
@@ -1047,6 +1066,7 @@ impl App {
             });
             self.c.clear_macros();
             let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus || coop, simul, tag, seq, life);
+            sess.hud.bars = self.sp.as_ref().map(|sp| [sp.bar_span(0, false, sp.localcoord), sp.bar_span(1, false, sp.localcoord)]);
             if let Some(t) = &info { sess.m.team_lead = [0, 1].map(|sd| t.names[sd].first().map(|n| n.0.clone()).unwrap_or_default()); }
             if let Some(t) = &info { sess.m.team_turns = seq; sess.m.team_size = [t.names[0].len(), t.names[1].len()]; sess.m.team_member = t.idx; }
             sess.team = info;

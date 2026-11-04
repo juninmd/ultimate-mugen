@@ -8,10 +8,10 @@ use ume_engine::matchs::{Match, BASE_H, BASE_W};
 use crate::poly;
 use crate::session::TeamInfo;
 
-pub struct Hud { pub replay: bool, pub inputs: Vec<(u32, u16)>, trail: [f32; 2], combo: [(i32, f32, i32); 2], pop: [f32; 2], last_hits: [i32; 2] }
+pub struct Hud { pub replay: bool, pub inputs: Vec<(u32, u16)>, trail: [f32; 2], combo: [(i32, f32, i32); 2], pop: [f32; 2], last_hits: [i32; 2], pub bars: Option<[Option<(f32, f32)>; 2]> }
 
 impl Hud {
-    pub fn new() -> Self { Hud { replay: false, inputs: vec![], trail: [1.0, 1.0], combo: [(0, 0.0, 0); 2], pop: [0.0; 2], last_hits: [0; 2] } }
+    pub fn new() -> Self { Hud { replay: false, inputs: vec![], trail: [1.0, 1.0], combo: [(0, 0.0, 0); 2], pop: [0.0; 2], last_hits: [0; 2], bars: None } }
 
     /// Test/demo hook: pretend a combo just finished (shows in the training "last combo" line).
     pub fn inject_last_combo(&mut self, hits: i32, dmg: f32) { self.combo[0] = (hits, dmg, 0); }
@@ -68,7 +68,8 @@ impl Hud {
                 poly::grad_h(&[p(px0 - 4.0, 0.0), p(px0 + panel_w, 0.0), p(px0 + panel_w, py0 + ph), p(px0 - 4.0, py0 + ph)], if side == 0 { dk } else { cl }, if side == 0 { cl } else { dk });
                 let hl = |y: f32| { let (a, b) = (p(px0 + 6.0, y), p(px0 + panel_w - 6.0, y)); draw_line(a.x, a.y, b.x, b.y, 0.5 * s, Color::new(tint[0], tint[1], tint[2], 0.55)); };
                 hl(py0 + ph - 0.5);
-                let (bx, bw, by, bh) = if side == 0 { (px0 + 27.0, panel_w - 35.0, py0 + 4.0, 5.5) } else { (px0 + 8.0, panel_w - 35.0, py0 + 4.0, 5.5) };
+                let (mut bx, mut bw, by, bh) = if side == 0 { (px0 + 27.0, panel_w - 35.0, py0 + 4.0, 5.5) } else { (px0 + 8.0, panel_w - 35.0, py0 + 4.0, 5.5) };
+                if let Some(Some((x, ww))) = self.bars.as_ref().map(|b| b[side].as_ref().copied()) { bx = x.clamp(0.0, w - 20.0); bw = ww.clamp(20.0, (w - bx - 4.0).max(20.0)); }
                 let ratio = (f.life / f.life_max).max(0.0);
                 if !(f.move_type == 'H' && f.hit_shake > 0) { self.trail[side] = if self.trail[side] > ratio { (self.trail[side] - 0.006).max(ratio) } else { ratio }; }
                 let low = ratio < 0.25;

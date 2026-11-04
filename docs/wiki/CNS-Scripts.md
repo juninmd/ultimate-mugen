@@ -158,3 +158,26 @@ cargo run --release -p ume-engine --example mugen_check -- --strict mugen/chars/
 ```
 
 CI runs it with `--strict` over `crates/engine/tests/data/chars`, so a feature used by the fixture characters that the engine does not implement fails the build. In code, `ume_engine::diagnostics::audit_cns(file, text)` returns the findings for a snippet and `CharDef::diagnostics()` for a loaded character.
+
+## Introspection triggers
+
+Triggers that read back what a character created or what it is drawing. The last argument is a variable name written bare, like Ikemen GO; an axis is a second word (`pos x`). A lookup that finds nothing (no such explod, projectile or box) is undefined (NaN): any comparison with it stays undefined and counts as false, so test for existence with `NumExplod`, `NumProj` or `HelperIndexExist` first when the difference matters. Positions and velocities are in the character's own coordinates, positions follow the `Pos` convention (`x` relative to the camera, `y` relative to the floor).
+
+| Trigger | Variables |
+|---|---|
+| `ExplodVar(id, index, var)` | `id` `time` `removetime` `bindtime` `bindid` `anim` `animelem` `animelemtime` `animtime` `animplayerno` `spriteplayerno` `facing` `ignorehitpause` `layerno` `pausemovetime` `supermovetime` `sprpriority` `pos x/y/z` `vel x/y/z` `accel x/y/z` `scale x/y`. Reads the `index`-th explod of the caller with that `id` (`id` below 0 matches any) |
+| `ProjVar(id, index, var)` | `projid` `time` `projremovetime` `projhits` `projmisstime` `projpriority` `projsprpriority` `projedgebound` `projstagebound` `lowbound` `highbound` `projhitanim` `projremanim` `projcancelanim` `projremove` `anim` `animelem` `facing` `teamside` `pausemovetime` `supermovetime` `pos x/y/z` `vel x/y/z` `accel x/y/z` `velmul x/y` `remvelocity x/y/z` `scale x/y`. Reads the `index`-th live projectile of the caller with that `id` |
+| `PalFXVar(var)` | `time` (ticks left) `add.r/g/b` `mul.r/g/b` `color` `invertall`; prefix `bg.` or `all.` for the background and global effects. No effect active reads as the identity (`add` 0, `mul` 256, `color` 256) |
+| `ClsnVar(type, index, edge)` | `type` is `clsn1`, `clsn2`, `size` or `dummy`; `edge` is `back`, `front`, `top` or `bottom`, relative to the character and its facing. `size` is the body size box from `size.ground.back/front` and `size.height`; `dummy` has no boxes |
+| `ClsnOverlap(type, playerid, type)` | now accepts `size` (both sides) and `dummy` (first side, never overlaps) besides `clsn1` and `clsn2` |
+| `ProjClsnOverlap(index, playerid, type)` | the attack box of the caller's `index`-th projectile against a box of that player |
+| `HelperVar(var)` | for a helper: `id` `helpertype` `keyctrl` `ownpal` `preserve`; undefined for a non-helper |
+| `SpriteVar(var)` | the current sprite: `group` `image` `width` `height` `xoffset` `yoffset` |
+| `AnimElemVar(var)` | the current animation element: `group` `image` `time` `hflip` `vflip` `xoffset` `yoffset` `xscale` `yscale` `angle` `alphasource` `alphadest` `numclsn1` `numclsn2` |
+| `InputTime(key)` | ticks the key has been held: `U` `D` `L` `R`, relative `F` `B`, `N` (nothing pressed) and the buttons `a` `b` `c` `x` `y` `z` `s` (case matters: `B` is back, `b` is the button) |
+| `AnimLength` `AnimPlayerNo` `SpritePlayerNo` | total ticks of the animation (-1 when it never ends); player number that owns the animation and the sprites |
+| `Index` `RunOrder` `HelperIndexExist(n)` | position of the character among the root and its helpers (root is 0); 1-based update order in the match; whether the root has an `n`-th (0-based) helper |
+| `IkemenVersion(major)` `IkemenVersion(minor)` | version of the Ikemen GO behaviour followed: 1 and 0 |
+| `DisplayName = "x"` `SelfCommand = "x"` | string comparisons against the display name and the character's own command buffer |
+
+Not implemented yet, and reported by the load diagnostics: `BGMVar`, `SoundVar` (the engine core holds no audio state), `AnimLoopCount`, `AnimPrefix`, `HelperName`, the `angle`, `friction`, `xshear`, `drawpal.*` and `shader` variables of `ExplodVar`, and the `attr`, `guardflag`, `hitflag`, `shadow` variables of `ProjVar`. An unknown variable name is reported once per character load as `explodvar(name)` and evaluates to 0.

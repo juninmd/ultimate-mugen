@@ -4,6 +4,7 @@ use crate::matchs::Match;
 use crate::triggers::Ctx;
 
 mod ext;
+pub mod introspect;
 mod maps;
 pub use ext::{format_text, tick, TextItem};
 pub use maps::{MapStore, MAP_MAX_KEYS, MAP_MAX_KEY_LEN};

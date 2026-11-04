@@ -116,6 +116,8 @@ impl<'a> Host for Ctx<'a> {
             }
             "p2command" => self.enemy_index().is_some_and(|e| self.m.has_command(e, v0)),
             "authorname" => f.def.author.eq_ignore_ascii_case(v0),
+            "displayname" => f.def.display_name.eq_ignore_ascii_case(v0),
+            "selfcommand" => self.m.has_command(self.i, v0),
             "hitdefattr" => {
                 let Some(hd) = f.hitdef.as_ref() else { return neg };
                 if f.move_type != 'A' { return neg; }
@@ -262,7 +264,7 @@ impl<'a> Host for Ctx<'a> {
             "min" => a0().min(self.a(args, 1)), "max" => a0().max(self.a(args, 1)),
             "clamp" => a0().max(self.a(args, 1)).min(self.a(args, 2)),
             "sign" => a0().signum(), "e" => std::f64::consts::E, "pi" => std::f64::consts::PI,
-            _ => crate::ikemen::trigger(self, name, args).unwrap_or_else(|| { crate::diagnostics::note_unsupported(crate::diagnostics::Category::Trigger, name); 0.0 }),
+            _ => crate::ikemen::introspect::trigger(self, name, args, raw).or_else(|| crate::ikemen::trigger(self, name, args)).unwrap_or_else(|| { crate::diagnostics::note_unsupported(crate::diagnostics::Category::Trigger, name); 0.0 }),
         }
     }
 }

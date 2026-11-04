@@ -3,6 +3,7 @@ use crate::expr::{eval, Node};
 use crate::fighter::V2;
 use crate::matchs::{Event, Match};
 use crate::triggers::Ctx;
+use super::introspect::BoxKind;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TextItem {
@@ -122,21 +123,18 @@ pub fn tick(m: &mut Match) {
     m.texts.retain(|t| t.time != 0);
 }
 
-fn clsn_kind(n: Option<&Node>) -> u8 {
-    match n { Some(Node::Trig { name, .. }) if name == "clsn1" => 1, _ => 2 }
-}
-
 pub fn trigger(c: &Ctx, name: &str, args: &[Node]) -> Option<f64> {
     let f = &c.m.fighters[c.i];
     Some(match name {
         "standby" => f.ikemen.standby as i32 as f64,
         "numtext" => c.m.texts.iter().filter(|t| t.owner == f.root).count() as f64,
         "clsnoverlap" => {
+            let word = |at: usize| super::introspect::box_word(args.get(at));
+            let kinds = (word(0).and_then(BoxKind::from_word), word(2).and_then(BoxKind::from_word).filter(|k| *k != BoxKind::Dummy));
+            let (Some(own_kind), Some(other_kind)) = kinds else { return Some(0.0) };
             let id = args.get(1).map(|n| eval(n, c)).unwrap_or(-1.0) as u32;
             let Some(o) = c.m.idx(id) else { return Some(0.0) };
-            let (a, b) = (f.boxes(clsn_kind(args.first())), c.m.fighters[o].boxes(clsn_kind(args.get(2))));
-            let hit = a.iter().any(|x| b.iter().any(|y| x[0].min(x[2]) <= y[0].max(y[2]) && y[0].min(y[2]) <= x[0].max(x[2]) && x[1].min(x[3]) <= y[1].max(y[3]) && y[1].min(y[3]) <= x[1].max(x[3])));
-            hit as i32 as f64
+            super::introspect::overlap(&super::introspect::boxes(f, own_kind), &super::introspect::boxes(&c.m.fighters[o], other_kind)) as i32 as f64
         }
         _ => return None,
     })

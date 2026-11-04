@@ -21,7 +21,7 @@
   }
   window.ume_gp_count = () => pads().length;
   window.ume_gp_state = (i) => state(i);
-  window.ume_gp_sony = (i) => { const p = pads()[i]; return p && /054c|sony|dualshock|dualsense|wireless controller/i.test(p.id) ? 1 : 0; };
+  window.ume_gp_name = (i) => { const p = pads()[i]; return p ? p.id : ''; };
   window.ume_gp_rumble = (i, s, w, ms) => rumble(i, s, w, ms);
   window.ume_set_import_visible = (v) => { const b = document.getElementById('imp'); if (b) b.style.display = v ? '' : 'none'; };
   window.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0;

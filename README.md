@@ -2,7 +2,7 @@
 
 **English** · [Português (BR)](README.pt-BR.md)
 
-A 2D fighting game engine **built from scratch in Rust**, inspired by M.U.G.E.N: modern, deterministic and cross-platform (Windows, Linux, macOS, **browser/WASM**, **Android/iOS**), **compatible with classic M.U.G.E.N characters and stages** and with the new native **UMF (Ultimate Mugen Fighter)** format, which is declarative and much simpler. It has native support for **DualShock 4 / DualSense with haptic feedback and colored lightbars**.
+A 2D fighting game engine **built from scratch in Rust**, inspired by M.U.G.E.N: modern, deterministic and cross-platform (Windows, Linux, macOS, **browser/WASM**, **Android/iOS**), **compatible with classic M.U.G.E.N characters and stages** and with the new native **UMF (Ultimate Mugen Fighter)** format, which is declarative and much simpler. It has native support for **Xbox controllers and DualShock 4 / DualSense with rumble** (plus colored lightbars on PlayStation pads). Move lists and the controls screen show the real key or button of the device in use.
 
 ![Fight](screenshots/06-fight-dojo.jpg)
 
@@ -150,7 +150,7 @@ Keyboard, multiple gamepads and touch work at the same time.
 | **Light Kick (LK)** | `J` (or `Z`) | Numpad `1` | Cross (`✕`) / `A` (Xbox) | **LK** button |
 | **Heavy Kick (HK)** | `K` (or `X`) | Numpad `2` | Circle (`○`) / `B` (Xbox) | **HK** button |
 | **Extra Kick (C)** | `L` (or `C`) | Numpad `3` | `R2` / `RT` | — |
-| **Quick specials** | `1`, `2`, `3` | Numpad `7`, `8`, `9` | `L1`, `L2` | **SP1**, **SP2**, **SP3** |
+| **Quick specials** | `1`, `2`, `3` | Numpad `7`, `8`, `9` | `L1`, `L2` | **ESPECIAL**, **SUPER** |
 | **Super** | `1` + `2` | Numpad `7` + `8` | `L1` + `L2` | **SUPER** button |
 | **Awakening (transformation)** | `T` | Numpad `0` | Right stick click / `SELECT` | — |
 | **Pause / Hitboxes** | `Esc` / `F2` | `Esc` / `F2` | `OPTIONS` / `START` | `❚❚` button (top corner) |

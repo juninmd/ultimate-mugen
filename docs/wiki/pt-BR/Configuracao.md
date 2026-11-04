@@ -42,10 +42,14 @@ Fica ao lado do executável e é gravado pelo menu **Vídeo**. Pode ser editado 
 | Mover | `WASD` ou setas | setas | D-pad / analógico | analógico virtual |
 | Socos `x` `y` `z` | `U` `I` `O` | Num `4` `5` `6` | □ △ R1 | LP HP |
 | Chutes `a` `b` `c` | `J` `K` `L` | Num `1` `2` `3` | ✕ ○ R2 | LK HK |
-| Especiais rápidos | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | SP1 SP2 SP3 |
+| Especiais rápidos | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | ESPECIAL, SUPER |
 | Super | `1`+`2` | Num `7`+`8` | L1+L2 | SUPER |
 | Despertar | `T` | Num `0` | R3 / SELECT | — |
 | Pausa / hitboxes | `Esc` / `F2` | `Esc` / `F2` | START | ❚❚ |
 | Tela cheia / FPS | `F11` / `F3` | — | — | — |
 
 Os nomes `x y z a b c` são os mesmos usados nos comandos (`input`) dos personagens.
+
+## Botões na tela
+
+A lista de golpes da pausa e a tela de Controles mostram a tecla ou o botão real do último dispositivo usado: teclado, Xbox (A/B/X/Y, LB/LT/RB/RT) ou PlayStation (✕ ○ □ △, L1/L2/R1/R2). Em telas de toque aparecem os nomes dos botões virtuais. Controles Xbox são detectados pelo nome ou pelo vendor ID `045E`, PlayStation pelo `054C`. A vibração funciona nos dois: Xbox via force feedback do gilrs (e Gamepad API na web), DualShock 4 / DualSense via relatórios HID diretos.

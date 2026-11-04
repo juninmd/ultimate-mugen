@@ -2,7 +2,7 @@
 
 [English](README.md) · **Português (BR)**
 
-Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, determinístico, multiplataforma (Windows, Linux, macOS, **navegador/WASM**, **Android/iOS**), **compatível com personagens e cenários clássicos do M.U.G.E.N** e com suporte ao novo formato nativo **UMF (Ultimate Mugen Fighter)**, que é declarativo e muito mais simples. Conta com suporte nativo a **DualShock 4 / DualSense com feedback háptico/vibração e lightbars coloridas**.
+Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, determinístico, multiplataforma (Windows, Linux, macOS, **navegador/WASM**, **Android/iOS**), **compatível com personagens e cenários clássicos do M.U.G.E.N** e com suporte ao novo formato nativo **UMF (Ultimate Mugen Fighter)**, que é declarativo e muito mais simples. Conta com suporte nativo a **controles Xbox e DualShock 4 / DualSense com vibração** (e lightbar colorida nos controles PlayStation). A lista de golpes e a tela de comandos mostram a tecla ou o botão real do dispositivo em uso.
 
 ![Luta](screenshots/06-fight-dojo.jpg)
 
@@ -185,7 +185,7 @@ O motor aceita simultaneamente teclado, múltiplos gamepads e toque na tela.
 | **Chute Leve (LK)** | `J` (ou `Z`) | Teclado Numérico `1` | Xis (`✕`) / `A` (Xbox) | Botão **LK** |
 | **Chute Médio/Forte (HK)** | `K` (ou `X`) | Teclado Numérico `2` | Círculo (`○`) / `B` (Xbox) | Botão **HK** |
 | **Chute Extra (C)** | `L` (ou `C`) | Teclado Numérico `3` | `R2` / `RT` | — |
-| **Especiais Rápidos** | `1`, `2`, `3` | Teclado Numérico `7`, `8`, `9` | `L1`, `L2` | Botões **SP1**, **SP2**, **SP3** |
+| **Especiais Rápidos** | `1`, `2`, `3` | Teclado Numérico `7`, `8`, `9` | `L1`, `L2` | Botões **ESPECIAL**, **SUPER** |
 | **Super Movimento** | `1` + `2` | Teclado Numérico `7` + `8` | `L1` + `L2` | Botão **SUPER** |
 | **Despertar (transformação)** | `T` | Teclado Numérico `0` | Clique do analógico direito / `SELECT` | — |
 | **Pausa / Hitboxes** | `Esc` / `F2` | `Esc` / `F2` | Botão `OPTIONS` / `START` | Botão `❚❚` (canto superior) |

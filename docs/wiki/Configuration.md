@@ -42,10 +42,14 @@ Lives next to the executable and is written by the **Video** menu. It can be edi
 | Move | `WASD` or arrows | arrows | D-pad / stick | virtual stick |
 | Punches `x` `y` `z` | `U` `I` `O` | Num `4` `5` `6` | □ △ R1 | LP HP |
 | Kicks `a` `b` `c` | `J` `K` `L` | Num `1` `2` `3` | ✕ ○ R2 | LK HK |
-| Quick specials | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | SP1 SP2 SP3 |
+| Quick specials | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | ESPECIAL, SUPER |
 | Super | `1`+`2` | Num `7`+`8` | L1+L2 | SUPER |
 | Awakening | `T` | Num `0` | R3 / SELECT | — |
 | Pause / hitboxes | `Esc` / `F2` | `Esc` / `F2` | START | ❚❚ |
 | Fullscreen / FPS | `F11` / `F3` | — | — | — |
 
 The names `x y z a b c` are the same ones used in character commands (`input`).
+
+## Button prompts
+
+The pause move list and the Controls screen show the real key or button of the device you used last: keyboard keys, Xbox (A/B/X/Y, LB/LT/RB/RT) or PlayStation (✕ ○ □ △, L1/L2/R1/R2). On touch screens they show the virtual button names. Xbox pads are detected by name or by vendor ID `045E`, PlayStation pads by `054C`. Rumble works on both: Xbox through gilrs force feedback (and the Gamepad API on the web), DualShock 4 / DualSense through direct HID reports.

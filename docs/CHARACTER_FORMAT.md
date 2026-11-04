@@ -32,7 +32,7 @@ const char: NativeChar = {
 | Campo | Gera |
 |---|---|
 | `input` | `[Command]` com a sintaxe do MUGEN (`~`, `/`, `$`, `>`, `+`) |
-| `simple` | botão de 1 toque (SP1/SP2/SP3/SUPER) no celular e teclas 1/2/3 |
+| `simple` | botão de 1 toque (ESPECIAL/SUPER) no celular e teclas 1/2/3 |
 | `kind` | prioridade de comando e regras de cancelamento: normal→especial→super em *hit/guard* |
 | `when` | estado de origem (em pé, agachado, no ar) e física |
 | `hits[].at` | `HitDef` ativado no quadro N; dano, hitstop, hitstun, knockback e faíscas derivados do `level` |

@@ -109,7 +109,7 @@ const MENU: [(&str, &str); 11] = [
     ("Equipe · Sequência", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida"),
     ("Equipe · Paralelo", "5 contra 5 ao mesmo tempo (2 a 5) · TAB troca de lutador"),
     ("Personagens MUGEN", "Como adicionar personagens e cenários"),
-    ("Controles", "Teclado, DualShock/DualSense, toque e vibração"),
+    ("Controles", "Teclado, Xbox, PlayStation, toque e vibração"),
     ("Vídeo", "Tela cheia, resolução até 4K e qualidade da arte"),
     ("Sair", "Fechar o jogo"),
 ];
@@ -275,7 +275,7 @@ impl App {
         let pads = &self.c.pad_info;
         self.ui.text("Controles conectados", sx, 450.0, 20.0, hex("#a49cc0"), Align::Left, false);
         if pads.is_empty() { self.ui.text("nenhum (teclado)", sx, 476.0, 18.0, WHITE, Align::Left, false); }
-        for (i, p) in pads.iter().enumerate().take(4) { self.ui.text(&format!("P{} · {}{}", i + 1, p.name.chars().take(26).collect::<String>(), if p.sony { " (Sony)" } else { "" }), sx, 476.0 + i as f32 * 24.0, 18.0, WHITE, Align::Left, false); }
+        for (i, p) in pads.iter().enumerate().take(4) { self.ui.text(&format!("P{} · {}{}", i + 1, p.name.chars().take(26).collect::<String>(), match p.kind { crate::gamepad::PadKind::Generic => String::new(), k => format!(" ({})", k.label()) }), sx, 476.0 + i as f32 * 24.0, 18.0, WHITE, Align::Left, false); }
         self.screen = Screen::Menu { cur: cur_v };
         if self.c.pressed(nav::BACK) { self.screen = Screen::Title; }
         if let Some(i) = chosen {
@@ -869,7 +869,7 @@ impl App {
         }
         let f = &s.m.fighters[0];
         self.ui.text(&format!("GOLPES — {}", f.def.display_name.to_uppercase()), x + 400.0, y + 52.0, 22.0, hex("#22e8ff"), Align::Left, true);
-        const PER_PAGE: usize = 14;
+        const PER_PAGE: usize = 9;
         let total = f.def.movelist.len();
         let pages = total.div_ceil(PER_PAGE).max(1);
         if self.c.pressed(nav::RIGHT) { self.move_page = (self.move_page + 1) % pages; }
@@ -877,11 +877,21 @@ impl App {
         self.move_page = self.move_page.min(pages - 1);
         if total == 0 { self.ui.text("Este personagem não define comandos no .cmd", x + 400.0, y + 90.0, 18.0, WHITE, Align::Left, false); }
         for (i, mv) in f.def.movelist.iter().enumerate().skip(self.move_page * PER_PAGE).take(PER_PAGE) {
-            let yy = y + 90.0 + (i - self.move_page * PER_PAGE) as f32 * 29.0;
-            self.ui.text(&mv.name.chars().take(34).collect::<String>(), x + 400.0, yy, 18.0, WHITE, Align::Left, false);
-            self.ui.text(&pretty_input(&mv.input), x + 1010.0, yy, 16.0, hex("#ffcc33"), Align::Right, true);
+            let yy = y + 78.0 + (i - self.move_page * PER_PAGE) as f32 * 46.0;
+            self.ui.rect(x + 390.0, yy, 630.0, 40.0, Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.06 } else { 0.03 }));
+            self.ui.text(&mv.name.chars().take(26).collect::<String>(), x + 402.0, yy + 27.0, 19.0, WHITE, Align::Left, false);
+            let c = &self.c;
+            self.ui.input_icons(&mv.input, x + 690.0, yy + 34.0, 28.0, |b| c.face(b));
         }
-        if pages > 1 { self.ui.text(&format!("< > página {}/{} · {} comandos", self.move_page + 1, pages, total), x + 400.0, y + 505.0, 16.0, hex("#a49cc0"), Align::Left, false); }
+        if pages > 1 {
+            self.ui.rect(x + 880.0, y + 20.0, 60.0, 44.0, Color::new(1.0, 1.0, 1.0, 0.12));
+            self.ui.rect(x + 950.0, y + 20.0, 60.0, 44.0, Color::new(1.0, 1.0, 1.0, 0.12));
+            self.ui.arrow(x + 910.0, y + 42.0, 26.0, (-1.0, 0.0), WHITE);
+            self.ui.arrow(x + 980.0, y + 42.0, 26.0, (1.0, 0.0), WHITE);
+            if self.clicked_rect(x + 880.0, y + 20.0, 60.0, 44.0) { self.move_page = (self.move_page + pages - 1) % pages; }
+            if self.clicked_rect(x + 950.0, y + 20.0, 60.0, 44.0) { self.move_page = (self.move_page + 1) % pages; }
+            self.ui.text(&format!("página {}/{}", self.move_page + 1, pages), x + 400.0, y + 505.0, 16.0, hex("#a49cc0"), Align::Left, false);
+        }
         if accept_back && self.c.pressed(nav::BACK) { self.session.as_mut().unwrap().paused = false; return; }
         if ok {
             match self.pause_cur {
@@ -987,34 +997,53 @@ impl App {
     fn controls_screen(&mut self) {
         if self.key_edit.is_some() { self.key_editor(); return; }
         self.ui.background();
-        self.ui.text("CONTROLES", 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
-        let col = |app: &App, x: f32, title: &str, lines: &[&str]| {
-            app.ui.text(title, x, 120.0, 24.0, hex("#22e8ff"), Align::Left, true);
-            for (i, l) in lines.iter().enumerate() { app.ui.text(l, x, 156.0 + i as f32 * 28.0, 19.0, WHITE, Align::Left, false); }
-        };
-        let kl = |slot: usize, idx: &[usize]| idx.iter().map(|&i| crate::keybinds::label(self.c.keys.slots[slot][i])).collect::<Vec<_>>();
-        let (mv, p1a, p1b, sp, p2m, p2a) = (kl(0, &[0, 1, 2, 3]).join(" "), kl(0, &[4, 5, 6]).join(" · "), kl(0, &[7, 8, 9]).join(" · "), kl(0, &[10, 11, 12]).join(" · "), kl(1, &[0, 1, 2, 3]).join(" "), format!("{} · {}", kl(1, &[4, 5, 6]).join("/"), kl(1, &[7, 8, 9]).join("/")));
-        let lines = [format!("Mover: {mv} (ou setas)"), format!("Socos: {p1a}"), format!("Chutes: {p1b}"), format!("Especiais: {sp}"), format!("Super simples: {} + {}", kl(0, &[10])[0], kl(0, &[11])[0]), "Pausa: Esc · Hitboxes: F2".into(), String::new(), "2 Jogadores (P2):".into(), format!("{p2m} + {p2a}")];
-        let refs: Vec<&str> = lines.iter().map(|l| l.as_str()).collect();
-        col(self, 40.0, "Teclado", &refs);
-        self.ui.rect(40.0, 398.0, 320.0, 34.0, hex("#ff4d6d"));
-        self.ui.text("Personalizar teclado (Tab)", 200.0, 421.0, 19.0, WHITE, Align::Center, true);
-        if is_key_pressed(KeyCode::Tab) || self.clicked_rect(40.0, 398.0, 320.0, 34.0) { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); }
-        col(self, 450.0, "DualShock 4 / DualSense", &["Quadrado: soco fraco · Triângulo: soco forte · R1: soco 3", "X: chute fraco · Bola: chute forte · R2: chute 3", "L1 / L2: especiais simples", "OPTIONS: pausa", "Vibração: golpes recebidos, defesa,", "super e K.O. (USB e Bluetooth)", "Lightbar: P1 azul · P2 vermelho", "Xbox e genéricos também funcionam"]);
-        col(self, 880.0, "Celular / Tablet", &["Analógico virtual à esquerda", "LP / HP / LK / HK à direita", "SP1–SP3 e SUPER com um toque", "(funcionam também com MUGEN)", "Vibração do aparelho no navegador"]);
-        self.ui.text("Controles detectados:", 40.0, 470.0, 22.0, hex("#ffcc33"), Align::Left, true);
-        let pads = self.c.pad_info.clone();
-        if pads.is_empty() { self.ui.text("Nenhum controle conectado — conecte um DualShock/DualSense via USB ou Bluetooth.", 40.0, 504.0, 20.0, WHITE, Align::Left, false); }
-        for (i, p) in pads.iter().enumerate().take(4) {
-            let y = 504.0 + i as f32 * 34.0;
-            self.ui.text(&format!("P{}: {} {}", i + 1, p.name, if p.sony { "(Sony)" } else { "" }), 40.0, y, 20.0, WHITE, Align::Left, false);
-            if self.clicked_rect(700.0, y - 22.0, 220.0, 30.0) { self.c.rumble(i, 1.0, 1.0, 500); }
-            self.ui.rect(700.0, y - 22.0, 220.0, 30.0, hex("#ff4d6d"));
-            self.ui.text("Testar vibração", 810.0, y, 18.0, WHITE, Align::Center, true);
+        self.ui.text("CONTROLES", 60.0, 70.0, 34.0, hex("#ffcc33"), Align::Left, true);
+        use crate::controls::{face, Glyphs};
+        use crate::gamepad::PadKind;
+        use ume_engine::input::k;
+        let kl = |i: usize| crate::keybinds::label(self.c.keys.slots[0][i]);
+        let touch = self.c.touch.enabled;
+        let mut cols = vec![Glyphs::Keyboard, Glyphs::Pad(PadKind::Xbox), Glyphs::Pad(PadKind::PlayStation)];
+        if touch { cols.insert(0, Glyphs::Touch); } else { cols.push(Glyphs::Touch); }
+        let head = |g: Glyphs| match g { Glyphs::Keyboard => "Teclado", Glyphs::Touch => "Toque", Glyphs::Pad(p) => p.label() };
+        let rows: [(&str, &[u32], &str); 7] = [
+            ("Mover", &[], ""), ("Soco", &[k::X, k::Y], " "), ("Chute", &[k::A, k::B], " "), ("Especial", &[k::D2], ""),
+            ("Super", &[k::D2, k::W], "+"), ("Despertar", &[k::T], ""), ("Pausa", &[k::S], ""),
+        ];
+        let move_text = |g: Glyphs| match g { Glyphs::Keyboard => format!("{} {} {} {} / setas", kl(0), kl(1), kl(2), kl(3)), Glyphs::Touch => "Analógico esquerdo".into(), Glyphs::Pad(_) => "Analógico ou direcional".into() };
+        let xs = [60.0, 280.0, 520.0, 760.0, 1000.0];
+        let (top, rh) = (120.0, 60.0);
+        for (j, g) in cols.iter().enumerate() {
+            let on = matches!((self.c.glyphs, g), (a, b) if a == *b);
+            self.ui.text(head(*g), xs[j + 1], top, 24.0, if on { hex("#ffcc33") } else { hex("#22e8ff") }, Align::Left, true);
         }
-        self.ui.text("Pressione X/A no controle para testar a vibração · Esc para voltar", 40.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
+        for (i, (act, bits, sep)) in rows.iter().enumerate() {
+            let y = top + 18.0 + i as f32 * rh;
+            self.ui.rect(50.0, y, 1180.0, rh - 8.0, Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.07 } else { 0.03 }));
+            self.ui.text(act, xs[0], y + 36.0, 26.0, hex("#ffcc33"), Align::Left, true);
+            for (j, g) in cols.iter().enumerate() {
+                if bits.is_empty() { self.ui.text(&move_text(*g), xs[j + 1], y + 34.0, 20.0, WHITE, Align::Left, false); continue; }
+                let mut cx = xs[j + 1];
+                let bits: &[u32] = if *g == Glyphs::Touch && bits.contains(&k::W) { &[k::W] } else { bits };
+                for (n, b) in bits.iter().enumerate() {
+                    if n > 0 { cx += if sep.trim().is_empty() { 8.0 } else { self.ui.text(sep, cx + 4.0, y + 36.0, 24.0, hex("#a49cc0"), Align::Left, true) + 10.0 }; }
+                    cx += self.ui.face(face(*g, &self.c.keys, *b), cx, y + 44.0, 36.0);
+                }
+            }
+        }
+        let pads = self.c.pad_info.clone();
+        let status = if pads.is_empty() { "Nenhum controle conectado".to_string() } else { format!("Conectado: {}", pads.iter().map(|p| p.name.as_str()).collect::<Vec<_>>().join(", ")) };
+        self.ui.text(&status, 60.0, 585.0, 20.0, hex("#a49cc0"), Align::Left, false);
         for (i, p) in pads.iter().enumerate() { if p.bits & ume_engine::input::k::A != 0 && self.c.pressed(nav::OK) { self.c.rumble(i, 0.8, 0.8, 300); } }
-        if self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 8 }; }
+        self.ui.rect(60.0, 610.0, 200.0, 60.0, hex("#ff4d6d"));
+        self.ui.text("Voltar", 160.0, 649.0, 26.0, WHITE, Align::Center, true);
+        let back = self.clicked_rect(60.0, 610.0, 200.0, 60.0);
+        if !touch {
+            self.ui.rect(300.0, 610.0, 360.0, 60.0, Color::new(1.0, 1.0, 1.0, 0.1));
+            self.ui.text("Personalizar teclado (Tab)", 480.0, 649.0, 22.0, WHITE, Align::Center, true);
+            if is_key_pressed(KeyCode::Tab) || self.clicked_rect(300.0, 610.0, 360.0, 60.0) { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); }
+        }
+        if back || self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 8 }; }
     }
 
     fn mugen_screen(&mut self) {
@@ -1056,20 +1085,6 @@ fn pause_step(was_paused: bool, toggle: bool) -> (bool, bool) {
 }
 
 /// Numpad notation (2 = down, 6 = forward, 236 = quarter-circle forward).
-pub fn pretty_input(s: &str) -> String {
-    let mut dirs = String::new();
-    let mut btn = String::new();
-    for t in s.replace(['~', ' ', '/', '$'], "").split(',') {
-        let d = match t { "D" => "2", "U" => "8", "F" => "6", "B" => "4", "DF" => "3", "DB" => "1", "UF" => "9", "UB" => "7", _ => "" };
-        if !d.is_empty() { dirs.push_str(d); continue; }
-        let mut parts = vec![];
-        for p in t.split('+') {
-            match p { "D" | "U" | "F" | "B" | "DF" | "DB" | "UF" | "UB" => {}, "x" => parts.push("LP"), "y" => parts.push("HP"), "z" => parts.push("P3"), "a" => parts.push("LK"), "b" => parts.push("HK"), "c" => parts.push("K3"), o => parts.push(if o.chars().last().is_some_and(|c| "DUFB".contains(c)) { "" } else { o }) }
-        }
-        btn = parts.join("+");
-    }
-    if dirs.is_empty() { btn } else { format!("{dirs} {btn}") }
-}
 
 #[cfg(test)]
 mod tests {

@@ -21,7 +21,7 @@ async fn snap(app: &mut App, dir: &str, name: &str, draw: impl Fn(&mut App)) {
 pub(crate) fn find(app: &App, id: &str) -> usize { app.reg.chars.iter().position(|c| c.id.ends_with(id)).unwrap_or(0) }
 pub(crate) fn stage(app: &App, id: &str) -> usize { app.reg.stages.iter().position(|s| s.id.contains(id)).unwrap_or(0) }
 
-async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &str, ticks: usize, want: &str) {
+pub(crate) async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &str, st: &str, ticks: usize, want: &str) {
     app.mode = Mode::Watch;
     app.sel = (find(app, p1), find(app, p2), stage(app, st));
     app.start_fight().await;
@@ -219,6 +219,7 @@ pub async fn run(app: &mut App, dir: &str) {
         return;
     }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") { hud_tour(app, dir).await; return; }
+    if std::env::var("UME_TOUR").as_deref() == Ok("pixel") { crate::pixel_tour::run(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stages") { app.screen = Screen::Fight; crate::stage_tour::run(app, dir).await; return; }
     app.screen = Screen::Title;
     screen(app, dir, "01-title", 30).await;

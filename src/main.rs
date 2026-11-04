@@ -15,6 +15,7 @@ mod postfx;
 mod session;
 mod settings;
 mod mugen_tour;
+mod pixel_tour;
 mod shots;
 mod stage_tour;
 mod stagefx;

@@ -24,3 +24,4 @@
 - Hover scan (fighters stuck off the floor): `cargo run --release -p ume-engine --example hover_check -- <char_dir>` (`TRACE=1` for transitions)
 - Missing/blank sprite audit: `cargo run --release -p ume-engine --example sprite_audit -- <char_dir>`
 - MUGEN visual probe: `UME_TOUR=mugen UME_CHARS=<id-suffix>,<id-suffix> ultimate-mugen --shots <dir> --res 1280x720 --mute`
+- Pixel-art state probe (idle, transformation, hit, knockout, defeat of a native fighter that has `assets/chars/sprites/<id>/`): `UME_TOUR=pixel UME_CHARS=<fighter>,<opponent> ultimate-mugen --shots <dir> --res 1280x720 --mute`

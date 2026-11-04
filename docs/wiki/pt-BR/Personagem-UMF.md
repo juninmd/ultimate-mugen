@@ -173,6 +173,22 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `$` | Direção inclusiva (`$D` aceita DB, D, DF) | `$D, x` |
 | `>` | Sem nenhuma outra entrada entre os passos | `F, >F` |
 
+## Sprites pixel art (opcional)
+
+Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG em vez do rig. Use PNGs transparentes voltados para a direita, com os pés na borda inferior e o mesmo tamanho de tela em todos os arquivos de um lutador. Uma pose sem PNG usa `01_idle.png`; um lutador sem a pasta continua com o rig.
+
+| Arquivo | Poses que o usam |
+|---|---|
+| `01_idle` | `idle0`, andar, correr, agachar, defender, pular e toda pose sem arte própria |
+| `02_attack1` … `06_victory` | poses de soco, chute, especial, projétil e vitória / provocação |
+| `07_idle1`, `08_idle2` | os outros quadros de respiração do `idle` (`idle3` reaproveita `07_idle1`) |
+| `09_hit1`, `10_hit2`, `11_hit3` | `hitH1`, `hitH2`, `hitH3` (dano) |
+| `12_fall1`, `13_fall2` | `hitAir1`/`fall1`/`trip` e `hitAir2`/`fall2`/`bounce` (lançado ao ar) |
+| `14_lie` | `lie`, `dead`, `lose` e toda pose `df*` (nocauteado, com hurtbox baixa e larga) |
+| `15_power0`, `16_power1`, `17_power2` | `powerup0`, `powerup1`, `powerup2` (transformação, tecla `T`) |
+
+`meta.json` guarda `{"refHeight": N}`: a altura em pixels do corpo em pé em `01_idle.png`. Toda pose do lutador é escalada para esse corpo medir 100 unidades, então um sprite deitado ou agachado mantém o mesmo tamanho de pixel. Sem ele, cada PNG é escalado a 100 unidades pela própria altura.
+
 ## Validar
 
 ```bash

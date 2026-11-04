@@ -1,7 +1,7 @@
 //! UMF → CharDef compiler: generates commands, [Statedef -1], move states, HitDefs and projectiles as CNS.
 use super::rig::{render_effect, render_pose, RigRender};
 use super::types::*;
-use crate::chardef::{default_constants, AnimFrame, Animation, Blend, CharDef, ImageData, MoveInfo, Source, Sprite};
+use crate::chardef::{default_constants, AnimFrame, Animation, Blend, CharDef, MoveInfo, Source, Sprite};
 use crate::cns::parse_states;
 use crate::commands::parse_command;
 use serde_json::Value;
@@ -56,45 +56,10 @@ pub fn compile_native_preview(nc: &NativeChar, pal_no: i32) -> CharDef { compile
 
 fn frame_key(fr: &NativeFrame) -> String { serde_json::to_string(&(&fr.pose, &fr.effect, &fr.hit, &fr.sprite)).unwrap_or_default() }
 
-fn try_load_pixel_sprite(nc: &NativeChar, fr: &NativeFrame) -> Option<RigRender> {
-    let spr_name = if let Some(s) = &fr.sprite {
-        s.as_str()
-    } else if let Some(Value::String(p)) = &fr.pose {
-        p.as_str()
-    } else {
-        "idle"
-    };
-    let candidates = [
-        format!("assets/chars/sprites/{}/{}.png", nc.id, spr_name),
-        format!("assets/chars/sprites/{}/idle.png", nc.id),
-    ];
-    for p in candidates {
-        if let Ok(bytes) = std::fs::read(&p) {
-            if let Ok(dec) = ume_formats::png::decode_png(&bytes) {
-                if let Some(rgba) = dec.rgba {
-                    let img = ImageData::new(dec.width, dec.height, rgba);
-                    let scale = 100.0 / (dec.height as f32).max(1.0);
-                    return Some(RigRender {
-                        image: Some(img),
-                        width: dec.width as f32,
-                        height: dec.height as f32,
-                        axis_x: dec.width as f32 / 2.0,
-                        axis_y: dec.height as f32,
-                        scale,
-                        hurt: vec![[-18.0, -96.0, 18.0, 0.0]],
-                        hit: vec![],
-                    });
-                }
-            }
-        }
-    }
-    None
-}
-
 fn render_frame(nc: &NativeChar, fr: &NativeFrame, with_images: bool, palette: Option<&Value>) -> RigRender {
-    let use_pixel = nc.art.kind == "sprites" || nc.art.kind == "pixel" || std::env::var("UME_PIXEL_ART").is_ok();
-    if use_pixel {
-        if let Some(r) = try_load_pixel_sprite(nc, fr) {
+    let force_rig = std::env::var("UME_FORCE_RIG").is_ok();
+    if !force_rig && with_images {
+        if let Some(r) = super::pixel::try_load(nc, fr) {
             return r;
         }
     }

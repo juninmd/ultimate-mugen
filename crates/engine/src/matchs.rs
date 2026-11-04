@@ -13,9 +13,26 @@ pub struct StageInfo {
     pub bound_left: f32, pub bound_right: f32, pub bound_high: f32, pub bound_low: f32,
     pub p1x: f32, pub p2x: f32, pub zoffset: f32, pub vertical_follow: f32, pub tension: f32,
     pub start_x: f32, pub start_y: f32, pub zoom_out: f32,
+    pub zoom_in: f32,
+    pub camera: CameraParams,
+    pub auto_turn: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct CameraParams {
+    pub vertical_follow_delta: f32,
+    pub y_scroll_speed: f32,
+    pub zoom_in_speed: f32,
+    pub zoom_out_speed: f32,
+    pub lowest_cap: bool,
+    pub dynamic_bound_high: bool,
+    pub bound_high_delta: f32,
+}
+impl Default for CameraParams {
+    fn default() -> Self { CameraParams { vertical_follow_delta: 0.0, y_scroll_speed: 0.3, zoom_in_speed: 0.04, zoom_out_speed: 0.04, lowest_cap: false, dynamic_bound_high: false, bound_high_delta: 0.0 } }
 }
 impl Default for StageInfo {
-    fn default() -> Self { StageInfo { name: "Flat".into(), bound_left: -200.0, bound_right: 200.0, bound_high: -60.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 210.0, vertical_follow: 0.2, tension: 60.0, start_x: 0.0, start_y: 0.0, zoom_out: 1.0 } }
+    fn default() -> Self { StageInfo { name: "Flat".into(), bound_left: -200.0, bound_right: 200.0, bound_high: -60.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 210.0, vertical_follow: 0.2, tension: 60.0, start_x: 0.0, start_y: 0.0, zoom_out: 1.0, zoom_in: 1.0, camera: CameraParams::default(), auto_turn: true } }
 }
 
 #[derive(Clone)]
@@ -126,6 +143,7 @@ pub struct Match {
     pub fx: Option<Arc<CharDef>>,
     pub stage: StageInfo,
     pub camera: V2,
+    pub camera_target_y: f32,
     pub view_w: f32, pub view_h: f32,
     /// Zoom-out for big teams: the play field is `zoom` × the base 426×240 view (so 5v5 has room to fight). Driven by `update_camera`
     /// between `zoom_min` (formation size) and `zoom_max`, depending on how far apart the fighters are.
@@ -172,7 +190,7 @@ pub struct Match {
 impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
-            fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
+            fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, team_tag: false, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
@@ -404,8 +422,9 @@ impl Match {
         let st = self.fighters[i].state_type;
         if let Some(e) = self.enemy(i, 0) {
             let ex = self.fighters[e].pos.x;
+            let auto_turn = self.stage.auto_turn;
             let f = &mut self.fighters[i];
-            if !f.has_assert(asf::NOAUTOTURN) && matches!(s, 0 | 11 | 20 | 52) && st != 'A' {
+            if auto_turn && !f.has_assert(asf::NOAUTOTURN) && matches!(s, 0 | 11 | 20 | 52) && st != 'A' {
                 let should = if ex >= f.pos.x { 1.0 } else { -1.0 };
                 if should != f.facing && (ex - f.pos.x).abs() > 1.0 {
                     f.facing = should;
@@ -539,6 +558,7 @@ impl Match {
         self.explods.clear(); self.projectiles.clear(); self.pause = None;
         self.fighters.retain(|f| !f.is_helper || f.preserve);
         self.camera = V2 { x: self.stage.start_x, y: self.stage.start_y };
+        self.camera_target_y = self.camera.y;
         if let Some(bg) = self.bg.as_mut() { bg.reset(); }
         let mut slot = [0usize; 2];
         let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()];
@@ -910,7 +930,7 @@ impl Match {
         }
     }
 
-    fn update_camera(&mut self) {
+    pub fn update_camera(&mut self) {
         let (mut minx, mut maxx, mut highest, mut any) = (f32::MAX, f32::MIN, f32::MAX, false);
         for f in self.roots().filter(|f| !f.destroyed && !f.ikemen.standby) { minx = minx.min(f.pos.x); maxx = maxx.max(f.pos.x); highest = highest.min(f.pos.y); any = true; }
         if !any { return; }
@@ -919,7 +939,8 @@ impl Match {
             for f in self.roots().filter(|f| f.alive && !f.destroyed) { lo = lo.min(f.pos.x); hi = hi.max(f.pos.x); live = true; }
             let need = if !live { self.zoom_min } else { (hi - lo + 150.0) / BASE_W };
             let target = need.clamp(self.zoom_min, self.zoom_max);
-            self.zoom += (target - self.zoom) * 0.04;
+            let speed = if target > self.zoom { self.stage.camera.zoom_out_speed } else { self.stage.camera.zoom_in_speed };
+            self.zoom += (target - self.zoom) * speed.clamp(0.0, 1.0);
             self.apply_zoom();
         }
         let half = self.view_w / 2.0; let t = self.stage.tension;
@@ -930,8 +951,12 @@ impl Match {
         }
         target = target.clamp(self.stage.bound_left, self.stage.bound_right);
         self.camera.x += (target - self.camera.x) * 0.5;
-        let ty = (highest * self.stage.vertical_follow).min(0.0).clamp(self.stage.bound_high, self.stage.bound_low);
-        self.camera.y += (ty - self.camera.y) * 0.3;
+        let cam = &self.stage.camera;
+        let top = if cam.dynamic_bound_high { self.stage.bound_high - cam.bound_high_delta * (self.zoom - 1.0).max(0.0) } else { self.stage.bound_high };
+        let lowest = if cam.lowest_cap { self.stage.start_y.min(0.0) } else { 0.0 };
+        let ty = (highest * self.stage.vertical_follow).min(lowest).clamp(top, self.stage.bound_low.max(top));
+        if (ty - self.camera_target_y).abs() >= cam.vertical_follow_delta { self.camera_target_y = ty; }
+        self.camera.y += (self.camera_target_y - self.camera.y) * cam.y_scroll_speed.clamp(0.0, 1.0);
     }
 
     // ---------------------------------------------------------------- hits

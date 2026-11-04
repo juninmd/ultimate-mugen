@@ -4,17 +4,19 @@ use std::sync::Mutex;
 
 pub enum StageValue { Num(f64), Text(String) }
 
-const KEYS: [&str; 26] = [
+const KEYS: &[&str] = &[
     "info.name", "info.displayname", "info.author", "info.mugenversion",
     "camera.startx", "camera.starty", "camera.boundleft", "camera.boundright", "camera.boundhigh", "camera.boundlow",
     "camera.verticalfollow", "camera.tension", "camera.zoomin", "camera.zoomout",
     "playerinfo.p1startx", "playerinfo.p2startx", "playerinfo.autoturn",
     "stageinfo.zoffset", "stageinfo.localcoord.x", "stageinfo.localcoord.y", "stageinfo.roundtime",
+    "camera.verticalfollowdelta", "camera.yscrollspeed", "camera.zoominspeed", "camera.zoomoutspeed", "camera.lowestcap",
+    "camera.dynamicboundhigh", "camera.boundhighdelta",
     "shadow.intensity", "shadow.yscale", "reflection.intensity", "playerinfo.leftbound", "playerinfo.rightbound",
 ];
 
 const TEXT_KEYS: [&str; 4] = ["info.name", "info.displayname", "info.author", "info.mugenversion"];
-const INT_KEYS: [&str; 4] = ["stageinfo.localcoord.x", "stageinfo.localcoord.y", "stageinfo.roundtime", "playerinfo.autoturn"];
+const INT_KEYS: [&str; 6] = ["stageinfo.localcoord.x", "stageinfo.localcoord.y", "stageinfo.roundtime", "playerinfo.autoturn", "camera.lowestcap", "camera.dynamicboundhigh"];
 
 pub fn canonical(raw: &str) -> Option<&'static str> {
     let raw = raw.trim().trim_matches('"').to_ascii_lowercase();
@@ -58,13 +60,20 @@ pub fn value(m: &Match, raw: &str) -> Option<StageValue> {
         "camera.boundlow" => n(st.map_or(info.bound_low, |s| s.bound_low)),
         "camera.verticalfollow" => n(st.map_or(info.vertical_follow, |s| s.vertical_follow)),
         "camera.tension" => n(st.map_or(info.tension, |s| s.tension)),
-        "camera.zoomin" => n(st.map_or(1.0, |s| s.zoom_in)),
+        "camera.zoomin" => n(st.map_or(info.zoom_in, |s| s.zoom_in)),
         "camera.zoomout" => n(st.map_or(info.zoom_out, |s| s.zoom_out)),
+        "camera.verticalfollowdelta" => n(st.map_or(info.camera.vertical_follow_delta, |s| s.vertical_follow_delta)),
+        "camera.yscrollspeed" => n(st.map_or(info.camera.y_scroll_speed, |s| s.y_scroll_speed)),
+        "camera.zoominspeed" => n(st.map_or(info.camera.zoom_in_speed, |s| s.zoom_in_speed)),
+        "camera.zoomoutspeed" => n(st.map_or(info.camera.zoom_out_speed, |s| s.zoom_out_speed)),
+        "camera.lowestcap" => n(st.map_or(info.camera.lowest_cap as i32 as f32, |s| s.lowest_cap as i32 as f32)),
+        "camera.dynamicboundhigh" => n(st.map_or(info.camera.dynamic_bound_high as i32 as f32, |s| s.dynamic_bound_high as i32 as f32)),
+        "camera.boundhighdelta" => n(st.map_or(info.camera.bound_high_delta, |s| s.bound_high_delta)),
         "playerinfo.p1startx" => n(st.map_or(info.p1x, |s| s.p1x)),
         "playerinfo.p2startx" => n(st.map_or(info.p2x, |s| s.p2x)),
         "playerinfo.leftbound" => n(st.map_or(info.bound_left, |s| s.bound_left)),
         "playerinfo.rightbound" => n(st.map_or(info.bound_right, |s| s.bound_right)),
-        "playerinfo.autoturn" => n(st.map_or(1.0, |s| s.auto_turn as i32 as f32)),
+        "playerinfo.autoturn" => n(st.map_or(info.auto_turn as i32 as f32, |s| s.auto_turn as i32 as f32)),
         "stageinfo.zoffset" => n(st.map_or(info.zoffset, |s| s.zoffset)),
         "stageinfo.localcoord.x" => n(st.map_or(320.0, |s| s.local_w)),
         "stageinfo.localcoord.y" => n(st.map_or(240.0, |s| s.local_h)),

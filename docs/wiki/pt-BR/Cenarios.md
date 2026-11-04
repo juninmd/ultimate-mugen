@@ -86,6 +86,22 @@ Planejado: `[BGCtrlDef]`/`[BGCtrl]`, `window`, `[Music]`, sombras e reflexos con
 
 Consultas de texto valem 0 quando usadas como número. Nomes desconhecidos valem 0 e imprimem um aviso ao compilar a expressão. Nos cenários nativos e no cenário plano os valores vêm dos padrões do motor.
 
+## Parâmetros de câmera
+
+O grupo `[Camera]` aceita estas chaves extras. Todas são opcionais e o padrão reproduz a câmera anterior, então um cenário que as omite se comporta exatamente como antes.
+
+| Chave | Padrão | Efeito |
+| --- | --- | --- |
+| `verticalfollow` | 0.2 | Fração da altura do lutador mais alto que a câmera acompanha para cima |
+| `verticalfollowdelta` | 0 | Zona morta em pixels do cenário: o alvo vertical só muda quando se moveu pelo menos isso, evitando tremor em pequenos pulos |
+| `yscrollspeed` | 0.3 | Parcela da distância vertical restante percorrida por tick (limitada a 0..1) |
+| `zoominspeed`, `zoomoutspeed` | 0.04 | Parcela da diferença de zoom restante percorrida por tick ao aproximar ou afastar a câmera (limitada a 0..1; 0 mantém o zoom, 1 chega em um tick) |
+| `lowestcap` | 0 | Com 1 a câmera nunca desce abaixo de `starty` |
+| `dynamicboundhigh` | 0 | Com 1 o `boundhigh` sobe `boundhighdelta` por unidade de zoom-out acima de 1x, mantendo o céu alcançável com a câmera afastada |
+| `boundhighdelta` | 0 | Usado por `dynamicboundhigh` |
+
+`autoturn` em `[PlayerInfo]` (padrão 1) define se os lutadores se viram sozinhos quando o oponente passa por cima deles nos estados parado, andando e agachado. `autoturn = 0` mantém a direção até um controlador mudá-la (`AssertSpecial flag = noautoturn` continua desligando por personagem). `StageVar(camera.<chave>)` e `StageVar(playerinfo.autoturn)` leem todos esses valores.
+
 ## Cenário nativo
 
 Cenários nativos ficam em `src/stages.rs` e os efeitos animados em `src/stagefx.rs`.

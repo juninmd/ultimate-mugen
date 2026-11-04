@@ -105,6 +105,13 @@ pub struct MugenStage {
     pub mugen_version: String,
     pub round_time: f32,
     pub auto_turn: bool,
+    pub vertical_follow_delta: f32,
+    pub y_scroll_speed: f32,
+    pub zoom_in_speed: f32,
+    pub zoom_out_speed: f32,
+    pub lowest_cap: bool,
+    pub dynamic_bound_high: bool,
+    pub bound_high_delta: f32,
 }
 
 fn bgctrl_kind(s: &Section) -> Option<BgCtrlKind> {
@@ -264,6 +271,13 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         mugen_version: unquote(get("info", "mugenversion").unwrap_or("")),
         round_time: g("stageinfo", "roundtime", -1.0),
         auto_turn: g("playerinfo", "autoturn", 1.0) != 0.0,
+        vertical_follow_delta: g("camera", "verticalfollowdelta", 0.0).max(0.0),
+        y_scroll_speed: g("camera", "yscrollspeed", 0.3).clamp(0.0, 1.0),
+        zoom_in_speed: g("camera", "zoominspeed", 0.04).clamp(0.0, 1.0),
+        zoom_out_speed: g("camera", "zoomoutspeed", 0.04).clamp(0.0, 1.0),
+        lowest_cap: g("camera", "lowestcap", 0.0) != 0.0,
+        dynamic_bound_high: g("camera", "dynamicboundhigh", 0.0) != 0.0,
+        bound_high_delta: g("camera", "boundhighdelta", 0.0).max(0.0),
         anims,
     })
 }

@@ -86,6 +86,22 @@ Planned: `[BGCtrlDef]`/`[BGCtrl]`, `window`, `[Music]`, configurable shadows and
 
 Text queries evaluate to 0 when used as a number. Unknown names evaluate to 0 and print one warning when the expression is compiled. On the built-in flat and native stages the values come from the engine defaults.
 
+## Camera parameters
+
+The `[Camera]` group accepts these extra keys. Every key is optional and its default reproduces the previous camera, so a stage that omits them behaves exactly as before.
+
+| Key | Default | Effect |
+| --- | --- | --- |
+| `verticalfollow` | 0.2 | Fraction of the highest fighter's height the camera follows upward |
+| `verticalfollowdelta` | 0 | Dead zone in stage pixels: the vertical target only changes when it moved at least this much, which stops small jumps from shaking the camera |
+| `yscrollspeed` | 0.3 | Share of the remaining vertical distance covered per tick (clamped to 0..1) |
+| `zoominspeed`, `zoomoutspeed` | 0.04 | Share of the remaining zoom difference covered per tick when the camera zooms in or out (clamped to 0..1; 0 holds the zoom, 1 snaps in one tick) |
+| `lowestcap` | 0 | When 1 the camera never sinks below `starty` |
+| `dynamicboundhigh` | 0 | When 1 `boundhigh` is raised by `boundhighdelta` for every unit of zoom-out above 1x, so the sky stays reachable while zoomed out |
+| `boundhighdelta` | 0 | Used by `dynamicboundhigh` |
+
+`autoturn` in `[PlayerInfo]` (default 1) controls whether fighters turn around by themselves when the opponent crosses over them in the stand, walk and crouch states. `autoturn = 0` keeps their facing until a controller changes it (`AssertSpecial flag = noautoturn` still disables it per character). `StageVar(camera.<key>)` and `StageVar(playerinfo.autoturn)` read all of these.
+
 ## Native stage
 
 Native stages live in `src/stages.rs` and their animated effects in `src/stagefx.rs`.

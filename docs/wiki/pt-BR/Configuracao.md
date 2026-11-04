@@ -31,6 +31,8 @@ Fica ao lado do executável e é gravado pelo menu **Vídeo**. Pode ser editado 
 | Variável | Efeito |
 |---|---|
 | `UME_MUGEN_DIR` | Pasta de conteúdo M.U.G.E.N alternativa |
+| `UME_MARKET_HOME` | Pasta dos downloads e do estado do [mercado](Mercado.md) |
+| `UME_GITHUB_TOKEN` / `GITHUB_TOKEN` | Token opcional do GitHub para o mercado (aumenta o limite da API) |
 | `UME_NO_UPDATE_CHECK=1` | Não procura atualizações |
 | `UME_NOFX=1` | Desliga a camada animada dos cenários (teste de desempenho) |
 | `UME_TOUR=mugen` + `UME_CHARS=a,b` + `UME_STAGE=<id>` | Com `--shots`, fotografa lutadores importados |

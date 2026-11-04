@@ -13,6 +13,7 @@
 - Built-in UMF: `assets/chars/` (embedded at compile time via `build.rs` and `index.json`).
 - MUGEN Chars: `mugen/chars/<char_name>/` (auto-scanned by `scan_folders()` at startup, git-ignored).
 - Bundled MUGEN packs: `assets/mugen/elecbyte.zip`.
+- GitHub marketplace: logic in `crates/market` (listing, safety limits, bundles, downloads), app glue in `src/market.rs`, screen in `src/app/market.rs`, web storage in `web/market.js`. Docs: `docs/wiki/Marketplace.md`.
 
 ## Testing & Validation
 - **Regra de ouro**: Baixar e descompactar todos os personagens primeiro; executar suites de teste (`cargo test`, `mugen_check`) **apenas uma vez ao final** da instalação completa.

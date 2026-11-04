@@ -8,6 +8,7 @@ mod gfx;
 mod gamepad;
 mod keybinds;
 mod hud;
+mod market;
 mod registry;
 mod render;
 mod poly;

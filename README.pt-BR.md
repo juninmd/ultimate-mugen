@@ -125,7 +125,7 @@ No Linux, instale alguns pacotes antes:
 sudo apt-get install -y pkg-config libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev
 ```
 
-**Traga seu conteúdo M.U.G.E.N:** coloque personagens em `mugen/chars/` (pasta ou `.zip`) e cenários em `mugen/stages/`, ou aponte `UME_MUGEN_DIR` para uma instalação existente.
+**Traga seu conteúdo M.U.G.E.N:** coloque personagens em `mugen/chars/` (pasta ou `.zip`) e cenários em `mugen/stages/`, ou aponte `UME_MUGEN_DIR` para uma instalação existente. Também dá para instalar personagens, cenários e músicas de qualquer repositório público do GitHub em **Mercado GitHub** (menu principal); veja o [guia do mercado](docs/wiki/pt-BR/Mercado.md).
 
 <details>
 <summary><b>Outros alvos de build e flags</b></summary>

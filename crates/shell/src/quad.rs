@@ -126,6 +126,7 @@ pub fn set_post(p: Option<PostParams>) { with(|f| { f.post = p; f.canvas.batch.b
 pub fn set_blend(b: Blend) { with(|f| f.canvas.blend = b) }
 pub fn quit() { with(|f| f.quit = true) }
 pub fn set_scissor(r: Option<(i32, i32, i32, i32)>) { with(|f| f.canvas.batch.scissor = r.map(|(x, y, w, h)| [x.max(0) as u32, y.max(0) as u32, w.max(0) as u32, h.max(0) as u32])) }
+pub fn typed_text() -> String { with(|f| f.input.typed.clone()) }
 pub fn mouse_wheel() -> (f32, f32) { with(|f| (f.input.wheel[0], f.input.wheel[1])) }
 pub fn mouse_delta_position() -> Vec2 { with(|f| Vec2::from(f.input.mouse_delta)) }
 

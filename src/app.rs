@@ -14,6 +14,7 @@ use ume_engine::chardef::CharDef;
 
 mod cutscene;
 mod keyedit;
+mod market;
 pub(crate) use keyedit::KeyEdit;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -34,6 +35,7 @@ pub enum Screen {
     Results { winner: usize, cur: usize },
     Controls,
     Mugen,
+    Market,
     Video { cur: usize },
     /// story scene: 0 arcade opening · 1 before the boss · 2 ending
     Cutscene { kind: u8, page: usize, t: f32 },
@@ -57,6 +59,8 @@ const VIEW_ROWS: usize = 4;
 
 pub struct App {
     pub reg: Registry,
+    pub market: crate::market::Market,
+    pub(crate) market_ui: market::MarketUi,
     pub ui: Ui,
     pub g: Gfx,
     pub c: Controls,
@@ -100,7 +104,7 @@ pub struct App {
     last_disc: Option<std::mem::Discriminant<Screen>>,
 }
 
-const MENU: [(&str, &str); 11] = [
+const MENU: [(&str, &str); 12] = [
     ("Arcade", "Enfrente uma sequência de oponentes"),
     ("Versus CPU", "Você contra o computador"),
     ("2 Jogadores", "Teclado compartilhado ou dois controles"),
@@ -109,6 +113,7 @@ const MENU: [(&str, &str); 11] = [
     ("Equipe · Sequência", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida"),
     ("Equipe · Paralelo", "5 contra 5 ao mesmo tempo (2 a 5) · TAB troca de lutador"),
     ("Personagens MUGEN", "Como adicionar personagens e cenários"),
+    ("Mercado GitHub", "Baixe personagens, cenários e músicas de repositórios"),
     ("Controles", "Teclado, Xbox, PlayStation, toque e vibração"),
     ("Vídeo", "Tela cheia, resolução até 4K e qualidade da arte"),
     ("Sair", "Fechar o jogo"),
@@ -138,7 +143,7 @@ impl App {
         let audio = Audio::new(audio_on).await;
         Self::boot(&mut ui, 1.0, "Pronto!").await;
         App {
-            reg, ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
+            reg, market: crate::market::Market::open(), market_ui: market::MarketUi::default(), ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
             settings, key_edit: None, move_page: 0, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
@@ -185,6 +190,7 @@ impl App {
             Screen::Results { .. } => self.results().await,
             Screen::Controls => self.controls_screen(),
             Screen::Mugen => self.mugen_screen(),
+            Screen::Market => self.market_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
         }
         if is_key_pressed(KeyCode::F11) { self.toggle_fullscreen(); }
@@ -203,6 +209,10 @@ impl App {
         self.screen_t += dt;
         if self.trans > 0.0 { self.ui.wipe(self.trans); self.trans = (self.trans - dt * 2.6).max(0.0); }
         self.audio.process().await;
+        self.market.poll();
+        if self.market.has_registry_work() && matches!(self.screen, Screen::Title | Screen::Menu { .. } | Screen::Market | Screen::Video { .. } | Screen::Controls | Screen::Mugen) && self.market.apply_to(&mut self.reg) {
+            self.after_registry_change();
+        }
         crate::set_import_button(!matches!(self.screen, Screen::Fight | Screen::Vs { .. } | Screen::Results { .. } | Screen::Cutscene { .. }));
         for zip in crate::take_imports() {
             match self.reg.import_zip(&zip) {
@@ -216,6 +226,18 @@ impl App {
             self.ui.text(&self.msg, VW / 2.0, VH - 12.0, 18.0, hex("#6dff9e"), Align::Center, false);
             if is_key_pressed(KeyCode::Escape) || is_mouse_button_pressed(MouseButton::Left) { self.msg.clear(); }
         }
+    }
+
+    fn after_registry_change(&mut self) {
+        let (nc, ns) = (self.reg.chars.len().max(1), self.reg.stages.len().max(1));
+        self.sel = (self.sel.0.min(nc - 1), self.sel.1.min(nc - 1), self.sel.2.min(ns - 1));
+        self.arcade = None;
+        self.team_pick.clear();
+        self.last_fight = None;
+        self.replaying = None;
+        self.sel_last = [usize::MAX; 2];
+        self.sel_row = 0;
+        self.stage_row = 0;
     }
 
     fn go(&mut self, s: Screen) { self.audio.sfx("confirm"); self.screen = s; }
@@ -284,8 +306,9 @@ impl App {
             match i {
                 0..=6 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); if self.mode == Mode::TeamSimul { self.team_n = 5; } else if self.mode == Mode::TeamSeq { self.team_n = 3; } self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
                 7 => self.go(Screen::Mugen),
-                8 => self.go(Screen::Controls),
-                9 => self.go(Screen::Video { cur: 0 }),
+                8 => self.go(Screen::Market),
+                9 => self.go(Screen::Controls),
+                10 => self.go(Screen::Video { cur: 0 }),
                 _ => self.quit = true,
             }
         }
@@ -747,7 +770,7 @@ impl App {
     async fn finish_fight(&mut self) {
         let Some(sess) = self.pending.sess.take() else { self.screen = Screen::Menu { cur: 0 }; return };
         let music = sess.stage.music;
-        let bgm = sess.stage.bgm.clone();
+        let bgm = sess.stage.bgm.clone().or_else(|| self.market.pick_track());
         // DualShock/DualSense lightbars: P1 blue, P2 red
         self.c.pads.set_light(0, [30, 90, 255]);
         self.c.pads.set_light(1, [255, 40, 60]);
@@ -782,7 +805,7 @@ impl App {
             3 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.fx = ((self.settings.fx as i32 + d).rem_euclid(FX_LEVELS.len() as i32)) as usize; changed = true; }
             4 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.impact = ((self.settings.impact as i32 + d).rem_euclid(IMPACT.len() as i32)) as usize; changed = true; }
             5 if ok || dir != 0 => { self.settings.fps = !self.settings.fps; changed = true; }
-            6 if ok => { self.screen = Screen::Menu { cur: 9 }; return; }
+            6 if ok => { self.screen = Screen::Menu { cur: 10 }; return; }
             _ => {}
         }
         if changed { self.audio.sfx("select"); self.settings.apply_window(); self.settings.save(); self.apply_quality(); }
@@ -805,7 +828,7 @@ impl App {
             let f = id == cur;
             let (x, w, h) = (160.0, 960.0, 62.0);
             if self.hover_rect(x, y, w, h) && mouse_delta_position().length() > 0.0 { cur = id; }
-            if self.clicked_rect(x, y, w, h) { cur = id; self.screen = Screen::Video { cur }; if id == 6 { self.screen = Screen::Menu { cur: 9 }; return; } }
+            if self.clicked_rect(x, y, w, h) { cur = id; self.screen = Screen::Video { cur }; if id == 6 { self.screen = Screen::Menu { cur: 10 }; return; } }
             self.ui.rect(x, y, w, h, if f { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) });
             self.ui.text(t, x + 24.0, y + 30.0, 26.0, WHITE, Align::Left, true);
             self.ui.text(d, x + 24.0, y + 52.0, 16.0, if f { WHITE } else { hex("#a49cc0") }, Align::Left, false);
@@ -814,7 +837,7 @@ impl App {
         }
         let (pw, ph) = ((screen_width() * dpi_scale()) as i32, Settings::physical_h() as i32);
         self.ui.text(&format!("Tela atual: {pw}×{ph} · arte rasterizada a {:.1}× · {} lutadores · {} cenários", ume_engine::native::rig::art_res(), self.reg.chars.len(), self.reg.stages.len()), 160.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
-        if self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 9 }; return; }
+        if self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 10 }; return; }
         self.screen = Screen::Video { cur };
     }
 
@@ -1067,7 +1090,7 @@ impl App {
             self.ui.text("Personalizar teclado (Tab)", 480.0, 649.0, 22.0, WHITE, Align::Center, true);
             if is_key_pressed(KeyCode::Tab) || self.clicked_rect(300.0, 610.0, 360.0, 60.0) { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); }
         }
-        if back || self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 8 }; }
+        if back || self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 9 }; }
     }
 
     fn mugen_screen(&mut self) {

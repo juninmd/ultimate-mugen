@@ -31,6 +31,8 @@ Lives next to the executable and is written by the **Video** menu. It can be edi
 | Variable | Effect |
 |---|---|
 | `UME_MUGEN_DIR` | Alternative M.U.G.E.N content folder |
+| `UME_MARKET_HOME` | Folder for [marketplace](Marketplace.md) downloads and state |
+| `UME_GITHUB_TOKEN` / `GITHUB_TOKEN` | Optional GitHub token for the marketplace (raises the API rate limit) |
 | `UME_NO_UPDATE_CHECK=1` | Skip update checks |
 | `UME_NOFX=1` | Disable the animated stage layer (performance testing) |
 | `UME_TOUR=mugen` + `UME_CHARS=a,b` + `UME_STAGE=<id>` | With `--shots`, photograph imported fighters |

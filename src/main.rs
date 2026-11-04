@@ -1,30 +1,31 @@
 mod app;
 mod audio;
-#[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
-mod netlink;
-mod sound_mix;
 mod controls;
-mod gfx;
 mod gamepad;
-mod keybinds;
+mod gfx;
 mod hud;
+mod i18n;
+mod keybinds;
 mod market;
 mod menu_art;
+mod mugen_tour;
+#[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+mod netlink;
+mod pixel_tour;
+mod poly;
+mod postfx;
 mod registry;
 mod render;
 mod replays;
-mod poly;
-mod postfx;
+mod screenpack;
 mod session;
 mod settings;
-mod storage;
-mod i18n;
-mod mugen_tour;
-mod pixel_tour;
 mod shots;
+mod sound_mix;
 mod stage_tour;
 mod stagefx;
 mod stages;
+mod storage;
 mod texgen;
 mod ui;
 mod update;
@@ -38,29 +39,61 @@ fn conf() -> WindowConf {
     // window size: saved setting, overridable with `--res 3840x2160`, `--4k`, `--fullscreen`
     let args: Vec<String> = std::env::args().collect();
     // headless probes (no window): used by the release pipeline to verify the stamped version and the published manifest
-    if args.iter().any(|a| a == "--version") { println!("ultimate-mugen {}", update::VERSION); std::process::exit(0); }
+    if args.iter().any(|a| a == "--version") {
+        println!("ultimate-mugen {}", update::VERSION);
+        std::process::exit(0);
+    }
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     if args.iter().any(|a| a == "--check-update") {
         match update::fetch_latest(update::VERSION) {
-            Ok(Some(u)) => println!("update available: {} -> {} ({})", update::VERSION, u.version, update::RELEASES_URL),
+            Ok(Some(u)) => println!(
+                "update available: {} -> {} ({})",
+                update::VERSION,
+                u.version,
+                update::RELEASES_URL
+            ),
             Ok(None) => println!("up to date: {}", update::VERSION),
-            Err(e) => { eprintln!("update check failed: {e}"); std::process::exit(1); }
+            Err(e) => {
+                eprintln!("update check failed: {e}");
+                std::process::exit(1);
+            }
         }
         std::process::exit(0);
     }
     let st = settings::Settings::load();
     let (mut w, mut h) = st.window_size();
-    if let Some(r) = args.iter().position(|a| a == "--res").and_then(|i| args.get(i + 1)) {
-        if let Some((a, b)) = r.split_once(['x', 'X']) { if let (Ok(a), Ok(b)) = (a.parse(), b.parse()) { (w, h) = (a, b); } }
+    if let Some(r) = args
+        .iter()
+        .position(|a| a == "--res")
+        .and_then(|i| args.get(i + 1))
+    {
+        if let Some((a, b)) = r.split_once(['x', 'X']) {
+            if let (Ok(a), Ok(b)) = (a.parse(), b.parse()) {
+                (w, h) = (a, b);
+            }
+        }
     }
-    if args.iter().any(|a| a == "--4k") { (w, h) = (3840, 2160); }
+    if args.iter().any(|a| a == "--4k") {
+        (w, h) = (3840, 2160);
+    }
     let fullscreen = st.fullscreen || args.iter().any(|a| a == "--fullscreen");
-    ume_shell::Config { title: "Ultimate MUGEN".into(), width: w, height: h, fullscreen, max_frames: std::env::var("UME_FRAMES").ok().and_then(|v| v.parse().ok()) }
+    ume_shell::Config {
+        title: "Ultimate MUGEN".into(),
+        width: w,
+        height: h,
+        fullscreen,
+        max_frames: std::env::var("UME_FRAMES")
+            .ok()
+            .and_then(|v| v.parse().ok()),
+    }
 }
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen::prelude::wasm_bindgen]
-extern "C" { fn ume_is_touch() -> i32; fn ume_set_import_visible(v: i32); }
+extern "C" {
+    fn ume_is_touch() -> i32;
+    fn ume_set_import_visible(v: i32);
+}
 
 /// Show the page's "Importar MUGEN" button only outside fights (web).
 pub fn set_import_button(visible: bool) {
@@ -68,7 +101,12 @@ pub fn set_import_button(visible: bool) {
     {
         static mut LAST: i32 = -1;
         let v = visible as i32;
-        if unsafe { LAST } != v { unsafe { LAST = v; } ume_set_import_visible(v); }
+        if unsafe { LAST } != v {
+            unsafe {
+                LAST = v;
+            }
+            ume_set_import_visible(v);
+        }
     }
     let _ = visible;
 }
@@ -79,12 +117,16 @@ pub mod webimport {
     use std::sync::Mutex;
     pub static QUEUE: Mutex<Vec<Vec<u8>>> = Mutex::new(Vec::new());
     #[wasm_bindgen::prelude::wasm_bindgen]
-    pub fn ume_import(bytes: Vec<u8>) { QUEUE.lock().unwrap().push(bytes); }
+    pub fn ume_import(bytes: Vec<u8>) {
+        QUEUE.lock().unwrap().push(bytes);
+    }
 }
 pub fn take_imports() -> Vec<Vec<u8>> {
     #[cfg(target_arch = "wasm32")]
-    { return std::mem::take(&mut *webimport::QUEUE.lock().unwrap()); }
-    #[allow(unreachable_code)]
+    {
+        return std::mem::take(&mut *webimport::QUEUE.lock().unwrap());
+    }
+
     vec![]
 }
 
@@ -149,7 +191,10 @@ fn percent_decode(s: &str) -> String {
 
 #[allow(dead_code)]
 fn main() {
-    if let Err(e) = run_async(conf(), game()) { eprintln!("{e}"); std::process::exit(1); }
+    if let Err(e) = run_async(conf(), game()) {
+        eprintln!("{e}");
+        std::process::exit(1);
+    }
 }
 
 async fn game() {
@@ -173,7 +218,9 @@ async fn game() {
     }
     loop {
         app.frame().await;
-        if app.quit { break; }
+        if app.quit {
+            break;
+        }
         next_frame().await;
     }
 }

@@ -237,7 +237,7 @@ pub fn is_float(n: &Node) -> bool {
         Node::Un(op, a) => *op == "-" && is_float(a),
         Node::Trig { name, args, .. } => match name.as_str() {
             "vel" | "pos" | "screenpos" | "camerapos" | "p2dist" | "p1dist" | "p2bodydist" | "rootdist" | "parentdist" | "frontedgedist" | "backedgedist"
-            | "frontedgebodydist" | "backedgebodydist" | "fvar" | "sysfvar" | "const" | "gethitvar" | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" | "exp" | "ln"
+            | "frontedgebodydist" | "backedgebodydist" | "fvar" | "flocal" | "sysfvar" | "const" | "gethitvar" | "sin" | "cos" | "tan" | "asin" | "acos" | "atan" | "exp" | "ln"
             | "log" | "sqrt" | "e" | "pi" | "const240p" | "const480p" | "const720p" | "camerazoom" | "backedge" | "frontedge" | "leftedge" | "rightedge" | "topedge" | "bottomedge" => true,
             "abs" | "min" | "max" | "clamp" => args.iter().any(is_float),
             "ifelse" | "cond" => args.iter().skip(1).any(is_float),

@@ -53,7 +53,7 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     for k in ["st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9"] {
         let Some(fname) = fget(k) else { continue };
         if norm_path(&unquote(&fname)) == norm_path(&unquote(&cns_name)) { continue; }
-        if let Some(b) = resolve(vfs, &base, &fname) { crate::zss::parse_state_file(&fname, &text(b), &mut states, true); }
+        if let Some(b) = resolve(vfs, &base, &fname) { crate::zss::parse_state_file(&fname, &text(b), &mut states, true)?; }
     }
     let cmd_text = resolve(vfs, &base, &fget("cmd").unwrap_or_default()).map(text).unwrap_or_default();
     let (mut commands, cmd_states) = parse_cmd(&cmd_text);
@@ -61,7 +61,7 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
         if id < 0 && states.contains_key(&id) { states.get_mut(&id).map(|s: &mut crate::chardef::StateDef| s.controllers.extend(sd.controllers)); } else { states.insert(id, sd); }
     }
     if let Some(stc) = fget("stcommon") {
-        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{}", unquote(&stc)))) { crate::zss::parse_state_file(&stc, &text(b), &mut states, false); }
+        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{}", unquote(&stc)))) { crate::zss::parse_state_file(&stc, &text(b), &mut states, false)?; }
     }
     for (n, c) in [("holdfwd", "/$F"), ("holdback", "/$B"), ("holdup", "/$U"), ("holddown", "/$D")] {
         if !commands.iter().any(|x| x.name == n) { commands.push(parse_command(n, c, 1, 1)); }

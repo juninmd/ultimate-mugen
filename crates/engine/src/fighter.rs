@@ -116,6 +116,8 @@ pub fn anim_fallback(no: i32) -> &'static [i32] {
     }
 }
 
+pub const LOCAL_SLOTS: usize = 48;
+
 #[derive(Clone)]
 pub struct Fighter {
     pub id: u32,
@@ -137,7 +139,7 @@ pub struct Fighter {
     pub state_no: i32, pub prev_state_no: i32, pub state_time: i32,
     pub state_type: char, pub move_type: char, pub physics: char, pub ctrl: bool,
     pub life: f32, pub life_max: f32, pub power: f32, pub power_max: f32, pub alive: bool,
-    pub vars: [i32; 60], pub fvars: [f64; 40], pub sysvars: [i32; 5], pub sysfvars: [f64; 5],
+    pub vars: [i32; 60], pub fvars: [f64; 40], pub locals: [f64; LOCAL_SLOTS], pub sysvars: [i32; 5], pub sysfvars: [f64; 5],
     pub anim_no: i32, pub anim_real: i32, pub elem: usize, pub elem_time: i32, pub anim_elapsed: i32, pub anim_changed: bool,
     pub hitdef: Option<HitDefData>, pub hitdef_active: bool, pub hitdef_targets: Vec<u32>,
     pub move_contact: i32, pub move_hit: i32, pub move_guarded: i32, pub move_reversed: i32, pub hit_count: i32, pub uniq_hit_count: i32, pub uniq_hit_keys: Vec<(u32, i32)>,
@@ -178,7 +180,7 @@ impl Fighter {
             pos: V2::default(), vel: V2::default(), facing: 1.0, lscl,
             state_no: 0, prev_state_no: 0, state_time: 0, state_type: 'S', move_type: 'I', physics: 'S', ctrl: true,
             life, life_max: life, power: 0.0, power_max: def.c("data.power", 3000.0) as f32, alive: true,
-            vars: [0; 60], fvars: [0.0; 40], sysvars: [0; 5], sysfvars: [0.0; 5],
+            vars: [0; 60], fvars: [0.0; 40], locals: [0.0; LOCAL_SLOTS], sysvars: [0; 5], sysfvars: [0.0; 5],
             anim_no: -1, anim_real: -1, elem: 0, elem_time: 0, anim_elapsed: 0, anim_changed: false,
             hitdef: None, hitdef_active: false, hitdef_targets: vec![], move_contact: 0, move_hit: 0, move_guarded: 0, move_reversed: 0, hit_count: 0, uniq_hit_count: 0, uniq_hit_keys: vec![],
             ghv: GetHitVars::default(), juggle_used: 0, no_ctrl_ticks: 0, hit_pause: 0, hit_shake: 0, hit_over_time: 0, slide_time: 0, fall_time: 0, asserts: 0,

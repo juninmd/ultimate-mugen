@@ -23,7 +23,6 @@ case 1, 2:
 default:
 	CtrlSet{ value: 0 }
 }
-let x = 3;
 if AnimTime = 0 {
 	ChangeState{ value: 0; ctrl: 1 }
 }
@@ -37,7 +36,7 @@ fn parses_states_and_controllers() {
     let mut st = HashMap::new();
     let r = parse_zss(SRC, &mut st, true);
     assert_eq!(r.states, 2);
-    assert_eq!(r.unsupported, vec!["let".to_string()]);
+    assert!(r.errors.is_empty(), "{:?}", r.errors);
     let s = &st[&200];
     assert_eq!(s.param("anim").unwrap().raw, "200");
     assert_eq!(s.param("velset").unwrap().exprs.len(), 2);

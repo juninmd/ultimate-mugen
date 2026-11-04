@@ -271,11 +271,40 @@ impl Match {
     fn run_state(&mut self, i: usize, sd_owner: &Arc<CharDef>, no: i32, in_pause: bool) -> bool {
         let common = self.common.clone();
         let sd = match sd_owner.states.get(&no).or_else(|| if no >= 0 { common.states.get(&no) } else { None }) { Some(s) => s, None => return false };
-        for sc in &sd.controllers {
+        let total = sd.controllers.len();
+        let mut at = 0usize;
+        let mut back_jumps = 0u32;
+        while at < total {
+            let sc = &sd.controllers[at];
+            let here = at;
+            at += 1;
             if i >= self.fighters.len() || self.fighters[i].destroyed { return true; }
             if in_pause && !sc.ignore_hitpause { continue; }
             if !self.triggered(i, sc) { self.apply_assigns(); continue; }
             self.apply_assigns();
+            if sc.kind.starts_with("__") {
+                match sc.kind.as_str() {
+                    "__jump" => {
+                        let to = self.num(i, sc, "to", 0.0, 0) as i64;
+                        let mut target = here as i64 + to;
+                        if to <= 0 {
+                            back_jumps += 1;
+                            if back_jumps > crate::zss::LOOP_ITERATION_CAP {
+                                target = here as i64 + self.num(i, sc, "exit", 1.0, 0) as i64;
+                            }
+                        }
+                        at = target.clamp(0, total as i64) as usize;
+                    }
+                    "__set" => {
+                        let slot = self.num(i, sc, "slot", 0.0, 0) as usize;
+                        let mut v = self.num(i, sc, "value", 0.0, 0);
+                        if self.num(i, sc, "float", 0.0, 0) == 0.0 { v = v.trunc(); }
+                        if let Some(cell) = self.fighters[i].locals.get_mut(slot) { *cell = v; }
+                    }
+                    _ => {}
+                }
+                continue;
+            }
             if sc.persistent != 1 {
                 let f = &mut self.fighters[i];
                 if let Some(&last) = f.persist.get(&sc.uid) {

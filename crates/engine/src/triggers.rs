@@ -174,6 +174,7 @@ impl<'a> Host for Ctx<'a> {
             "facing" => f.facing as f64,
             "var" => f.vars.get(a0() as usize).copied().unwrap_or(0) as f64,
             "fvar" => f.fvars.get(a0() as usize).copied().unwrap_or(0.0),
+            "local" | "flocal" => f.locals.get(a0() as usize).copied().unwrap_or(0.0),
             "sysvar" => f.sysvars.get(a0() as usize).copied().unwrap_or(0) as f64,
             "sysfvar" => f.sysfvars.get(a0() as usize).copied().unwrap_or(0.0),
             "vel" => (match comp { Some('y') => f.vel.y, Some('z') => 0.0, _ => f.vel.x }) as f64 / l,

@@ -179,3 +179,26 @@ cargo run --release -p ume-engine --example mugen_check -- --strict mugen/chars/
 ```
 
 O CI roda com `--strict` sobre `crates/engine/tests/data/chars`; um recurso usado pelos personagens de teste que a engine não implementa quebra o build. No código, `ume_engine::diagnostics::audit_cns(arquivo, texto)` devolve os achados de um trecho e `CharDef::diagnostics()` os de um personagem carregado.
+
+## Triggers de introspecção
+
+Triggers que leem de volta o que o personagem criou ou o que ele está desenhando. O último argumento é o nome da variável escrito sem aspas, como no Ikemen GO; um eixo é uma segunda palavra (`pos x`). Uma consulta que não encontra nada (explod, projétil ou caixa inexistente) é indefinida (NaN): qualquer comparação com ela continua indefinida e conta como falsa, então teste a existência com `NumExplod`, `NumProj` ou `HelperIndexExist` quando a diferença importar. Posições e velocidades usam as coordenadas do próprio personagem; as posições seguem a convenção de `Pos` (`x` relativo à câmera, `y` relativo ao chão).
+
+| Trigger | Variáveis |
+|---|---|
+| `ExplodVar(id, índice, var)` | `id` `time` `removetime` `bindtime` `bindid` `anim` `animelem` `animelemtime` `animtime` `animplayerno` `spriteplayerno` `facing` `ignorehitpause` `layerno` `pausemovetime` `supermovetime` `sprpriority` `pos x/y/z` `vel x/y/z` `accel x/y/z` `scale x/y`. Lê o `índice`-ésimo explod do chamador com esse `id` (`id` abaixo de 0 vale qualquer um) |
+| `ProjVar(id, índice, var)` | `projid` `time` `projremovetime` `projhits` `projmisstime` `projpriority` `projsprpriority` `projedgebound` `projstagebound` `lowbound` `highbound` `projhitanim` `projremanim` `projcancelanim` `projremove` `anim` `animelem` `facing` `teamside` `pausemovetime` `supermovetime` `pos x/y/z` `vel x/y/z` `accel x/y/z` `velmul x/y` `remvelocity x/y/z` `scale x/y`. Lê o `índice`-ésimo projétil vivo do chamador com esse `id` |
+| `PalFXVar(var)` | `time` (ticks restantes) `add.r/g/b` `mul.r/g/b` `color` `invertall`; prefixo `bg.` ou `all.` para os efeitos de fundo e global. Sem efeito ativo vale a identidade (`add` 0, `mul` 256, `color` 256) |
+| `ClsnVar(tipo, índice, borda)` | `tipo` é `clsn1`, `clsn2`, `size` ou `dummy`; `borda` é `back`, `front`, `top` ou `bottom`, relativa ao personagem e à sua direção. `size` é a caixa de corpo de `size.ground.back/front` e `size.height`; `dummy` não tem caixas |
+| `ClsnOverlap(tipo, playerid, tipo)` | agora aceita `size` (nos dois lados) e `dummy` (no primeiro, nunca sobrepõe) além de `clsn1` e `clsn2` |
+| `ProjClsnOverlap(índice, playerid, tipo)` | a caixa de ataque do `índice`-ésimo projétil do chamador contra uma caixa daquele jogador |
+| `HelperVar(var)` | num helper: `id` `helpertype` `keyctrl` `ownpal` `preserve`; indefinido fora de um helper |
+| `SpriteVar(var)` | o sprite atual: `group` `image` `width` `height` `xoffset` `yoffset` |
+| `AnimElemVar(var)` | o elemento atual da animação: `group` `image` `time` `hflip` `vflip` `xoffset` `yoffset` `xscale` `yscale` `angle` `alphasource` `alphadest` `numclsn1` `numclsn2` |
+| `InputTime(tecla)` | ticks em que a tecla está pressionada: `U` `D` `L` `R`, relativas `F` `B`, `N` (nada pressionado) e os botões `a` `b` `c` `x` `y` `z` `s` (maiúscula importa: `B` é trás, `b` é o botão) |
+| `AnimLength` `AnimPlayerNo` `SpritePlayerNo` | total de ticks da animação (-1 se nunca termina); número do jogador dono da animação e dos sprites |
+| `Index` `RunOrder` `HelperIndexExist(n)` | posição do personagem entre o root e seus helpers (o root é 0); ordem de atualização na partida, começando em 1; se o root tem o `n`-ésimo helper (base 0) |
+| `IkemenVersion(major)` `IkemenVersion(minor)` | versão do comportamento do Ikemen GO seguida: 1 e 0 |
+| `DisplayName = "x"` `SelfCommand = "x"` | comparações de texto com o nome de exibição e com o buffer de comandos do próprio personagem |
+
+Ainda não implementados, e apontados pelo diagnóstico de carregamento: `BGMVar`, `SoundVar` (o núcleo da engine não guarda estado de áudio), `AnimLoopCount`, `AnimPrefix`, `HelperName`, as variáveis `angle`, `friction`, `xshear`, `drawpal.*` e `shader` de `ExplodVar`, e `attr`, `guardflag`, `hitflag`, `shadow` de `ProjVar`. Um nome de variável desconhecido é apontado uma vez por carregamento como `explodvar(nome)` e vale 0.

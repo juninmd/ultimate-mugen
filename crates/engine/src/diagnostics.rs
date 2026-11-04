@@ -164,9 +164,15 @@ fn audit_node(n: &Node, push: &mut impl FnMut(Category, String)) {
         Node::Num(..) => {}
         Node::Bin(_, a, b) => { audit_node(a, push); audit_node(b, push); }
         Node::Un(_, a) => audit_node(a, push),
-        Node::Trig { name, args, .. } => {
-            if !matches!(name.as_str(), "__str" | "ifelse" | "cond") && !trigger_supported(name) { push(Category::Trigger, name.clone()); }
-            for a in args { audit_node(a, push); }
+        Node::Trig { name, args, raw, .. } => {
+            if !matches!(name.as_str(), "__str" | "ifelse" | "cond") {
+                if let Some(problem) = trigger_problem(name, raw.as_deref()) { push(Category::Trigger, problem); }
+            }
+            let takes_box_types = matches!(name.as_str(), "clsnoverlap" | "projclsnoverlap" | "clsnvar");
+            for a in args {
+                let is_box_type = matches!(a, Node::Trig { name, args, raw: None, comp: None } if args.is_empty() && matches!(name.as_str(), "clsn1" | "clsn2" | "size" | "dummy"));
+                if !(takes_box_types && is_box_type) { audit_node(a, push); }
+            }
         }
         Node::Redir { kind, arg, e } => {
             if !redirection_supported(kind) { push(Category::Redirection, kind.clone()); }
@@ -195,6 +201,7 @@ thread_local! {
     static READS: RefCell<HashSet<String>> = RefCell::new(HashSet::new());
     static COMMON: RefCell<Option<Arc<CharDef>>> = const { RefCell::new(None) };
     static CACHE: RefCell<HashMap<String, bool>> = RefCell::new(HashMap::new());
+    static TRIGGER_CACHE: RefCell<HashMap<String, Option<String>>> = RefCell::new(HashMap::new());
     static CONSUMED_CACHE: RefCell<HashMap<String, Arc<HashSet<String>>>> = RefCell::new(HashMap::new());
 }
 
@@ -290,12 +297,20 @@ pub fn assert_flag_supported(flag: &str) -> bool {
     })
 }
 
-pub fn trigger_supported(name: &str) -> bool {
-    if !sane_name(name) { return false; }
-    cached(format!("trigger {name}"), || {
-        let out = probe(|m| { Ctx { m, i: 0 }.trigger(name, &[Node::Num(0.0, false)], None, None); });
-        !out.completed || !out.notes.iter().any(|(c, n)| *c == Category::Trigger && n == name)
-    })
+pub fn trigger_supported(name: &str) -> bool { trigger_problem(name, None).is_none() }
+
+pub fn trigger_problem(name: &str, raw: Option<&str>) -> Option<String> {
+    if !sane_name(name) { return Some(name.to_string()); }
+    if raw.is_some_and(|r| !sane_name(r)) { return None; }
+    let key = format!("trigger {name} {}", raw.unwrap_or(""));
+    if let Some(v) = TRIGGER_CACHE.with(|c| c.borrow().get(&key).cloned()) { return v; }
+    let out = probe(|m| { Ctx { m, i: 0 }.trigger(name, &[Node::Num(0.0, false)], None, raw); });
+    let sub_prefix = format!("{name}(");
+    let problem = if !out.completed { None } else {
+        out.notes.iter().filter(|(c, _)| *c == Category::Trigger).map(|(_, n)| n).find(|n| n.as_str() == name || (raw.is_some() && n.starts_with(&sub_prefix))).cloned()
+    };
+    TRIGGER_CACHE.with(|c| c.borrow_mut().insert(key, problem.clone()));
+    problem
 }
 
 pub fn redirection_supported(kind: &str) -> bool {

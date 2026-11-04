@@ -323,6 +323,9 @@ impl Match {
         let src = if f.is_helper { if f.key_ctrl { self.idx(f.root) } else { None } } else { Some(i) };
         let Some(s) = src else { return false };
         if self.round_state != 2 && self.round_state != 3 && !self.training { return false; }
+        if !Arc::ptr_eq(&f.st_def, &f.def) {
+            return f.st_def.commands.iter().find(|c| c.name == name).is_some_and(|c| crate::commands::match_command(&self.fighters[s].history, c));
+        }
         self.fighters[s].cmd.active.contains(name)
     }
 
@@ -601,6 +604,11 @@ impl Match {
         self.round_logic();
         self.global_asserts = 0;
         for p in [&mut self.all_palfx, &mut self.bg_palfx] { if p.as_ref().is_some_and(|fx| fx.expired()) { *p = None; } }
+        let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time, p.is_super));
+        let frozen_by_pause = |f: &Fighter| match paused_by {
+            None => false,
+            Some((by, mt, sup)) => !(f.id == by && mt > 0) && (if sup { f.super_move_time } else { f.pause_move_time }) <= 0,
+        };
         let mut k = 0;
         let mut awaken: Vec<usize> = vec![];
         for (fi, f) in self.fighters.iter_mut().enumerate() {
@@ -610,14 +618,10 @@ impl Match {
             k += 1;
             f.history.push(bits, f.facing as i32);
             let def = f.def.clone();
-            f.cmd.update(&f.history, &def.commands);
+            let paused = f.hit_pause > 0 || f.hit_shake > 0 || frozen_by_pause(f);
+            f.cmd.update(&f.history, &def.commands, paused);
         }
         for fi in awaken { self.try_transform(fi); }
-        let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time, p.is_super));
-        let frozen_by_pause = |f: &Fighter| match paused_by {
-            None => false,
-            Some((by, mt, sup)) => !(f.id == by && mt > 0) && (if sup { f.super_move_time } else { f.pause_move_time }) <= 0,
-        };
         let mut ids = std::mem::take(&mut self.tick_ids);
         ids.clear();
         ids.extend(self.fighters.iter().map(|f| f.id));

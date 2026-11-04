@@ -77,6 +77,14 @@ triggerall = command = "hadou"
 trigger1 = statetype = S && ctrl
 ```
 
+Command extras (Ikemen GO 1.0):
+
+| Feature | Behavior |
+|---|---|
+| `N` step | Neutral direction: no direction key held (`command = N, x`, `~D, N, x`, `N+x`). A neutral step is a held state, like `/`, so it matches while no direction is pressed |
+| `pausebuffer` | `[Command]` (or `command.pausebuffer` in `[Defaults]`) keeps a command that fired during hit pause, hit shake or a pause/super pause active for that many extra ticks, so it can be read when the pause ends. Also accepted as `buffer.pausetime`. Default 0 |
+| Custom states | When a player runs a state owned by another character (`TargetState`, `p2getp1state`), `Command` is evaluated with the commands of the state owner against the input of the player in the state |
+
 ## Supported state controllers
 
 `AfterImage` `AfterImageTime` `AllPalFX` `AngleAdd` `AngleDraw` `AngleMul` `AngleSet` `AssertSpecial` `AttackDist` `AttackMulSet` `BGPalFX` `BindToParent` `BindToRoot` `BindToTarget` `ChangeAnim` `ChangeAnim2` `ChangeState` `CtrlSet` `DefenceMulSet` `DestroySelf` `EnvColor` `EnvShake` `Explod` `ExplodBindTime` `GameMakeAnim` `Gravity` `Helper` `HitAdd` `HitBy` `HitDef` `HitFallDamage` `HitFallSet` `HitFallVel` `HitVelSet` `LifeAdd` `LifeSet` `MakeDust` `ModifyExplod` `MoveHitReset` `NotHitBy` `PalFX` `ParentVarAdd` `ParentVarSet` `Pause` `PlayerPush` `PlaySnd` `PosAdd` `PosFreeze` `PosSet` `PowerAdd` `PowerSet` `Projectile` `RemoveExplod` `ScreenBound` `SelfState` `SprPriority` `StateTypeSet` `SuperPause` `TargetBind` `TargetDrop` `TargetFacing` `TargetLifeAdd` `TargetPowerAdd` `TargetState` `TargetVelAdd` `TargetVelSet` `Trans` `Turn` `VarAdd` `VarRandom` `VarRangeSet` `VarSet` `VelAdd` `VelMul` `VelSet` `Width`

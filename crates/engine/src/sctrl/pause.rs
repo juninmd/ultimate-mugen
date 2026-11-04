@@ -37,8 +37,8 @@ pub fn super_pause(m: &mut Match, i: usize, sc: &Controller) {
     let pan = crate::sctrl::sound_pan(m, i, 0.0, false);
     let f = &m.fighters[i];
     let ev = match parse_sound_ref(snd.as_deref()) {
-        Some((g, idx, own)) if g >= 0 => Event::Sound { def: Some(f.def.clone()), group: g, index: idx, own, volume: 1.0, channel: -1, owner: f.id, builtin: None, pan, looping: false, freq_mul: 1.0, low_priority: false, stop_on_get_hit: false, stop_on_change_state: false },
-        _ => Event::Sound { def: None, group: -1, index: 0, own: false, volume: 1.0, channel: -1, owner: f.id, builtin: Some("super"), pan, looping: false, freq_mul: 1.0, low_priority: false, stop_on_get_hit: false, stop_on_change_state: false },
+        Some((g, idx, own)) if g >= 0 => Event::Sound { def: Some(f.def.clone()), group: g, index: idx, own, volume: 1.0, channel: -1, owner: f.id, builtin: None, pan, looping: false, freq_mul: 1.0, low_priority: false, stop_on_get_hit: false, stop_on_change_state: false, loop_start: 0, loop_end: 0, loop_count: 0 },
+        _ => Event::Sound { def: None, group: -1, index: 0, own: false, volume: 1.0, channel: -1, owner: f.id, builtin: Some("super"), pan, looping: false, freq_mul: 1.0, low_priority: false, stop_on_get_hit: false, stop_on_change_state: false, loop_start: 0, loop_end: 0, loop_count: 0 },
     };
     let (side, fighter) = (f.side, f.root);
     m.events.push(ev);

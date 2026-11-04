@@ -849,43 +849,43 @@ trigger1 = 1
 value = 0
 
 ;---------------------------------------------------------------- engine additions: face-off, taunt, transformation, defeat
-[Statedef 192]
+[Statedef 19900]
 type = S
 ctrl = 0
 anim = 190
 velset = 0,0
 
-[State 192, go]
+[State 19900, go]
 type = ChangeState
 trigger1 = RoundState >= 2
 value = 0
 ctrl = 1
 
-[Statedef 194]
+[Statedef 19901]
 type = S
 ctrl = 0
 anim = 195
 velset = 0,0
 
-[State 194, go]
+[State 19901, go]
 type = ChangeState
 trigger1 = RoundState >= 2
 value = 0
 ctrl = 1
 
-[Statedef 193]
+[Statedef 19902]
 type = S
 ctrl = 0
 anim = 196
 velset = 0,0
 
-[State 193, inv]
+[State 19902, inv]
 type = NotHitBy
 trigger1 = Time = 0
 value = SCA
 time = 100
 
-[State 193, go]
+[State 19902, go]
 type = ChangeState
 trigger1 = Time >= 78
 value = 0

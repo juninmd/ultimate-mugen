@@ -32,7 +32,12 @@ default:
 | `if` / `else if` / `else`, `switch` / `case` / `default` | Supported |
 | `persistent(n)`, `ignorehitpause` | Supported |
 | Any state controller `Name{ key: value; … }` | Supported |
-| `let`, `for`, `while`, `call`, `[Function]` | Ignored, reported on load |
+| `let` locals (compiled to `var(59)` downwards, 20 slots) | Supported |
+| `for` / `while` (unrolled up to 32 iterations per tick, then bounded) | Supported |
+| `break` / `continue` | Supported |
+| `call name(args)` and `[Function name(params)]` (inlined, arity checked) | Supported |
+
+A ZSS file that fails to compile (wrong arity, unknown function, malformed loop, too many locals) is reported as a compile error and not loaded; it never silently drops logic. Loops are bounded to 32 iterations per tick; a `while` that never changes its condition stops at the cap instead of hanging the match.
 
 Conditions are checked per controller, as in CNS. A controller that changes a value used by its own `if` affects the controllers that follow it.
 

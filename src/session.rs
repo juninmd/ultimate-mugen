@@ -179,12 +179,12 @@ impl Session {
             self.vfx.event(&ev, &self.m);
             for k in std::mem::take(&mut self.vfx.sfx) { audio.sfx(k); }
             match ev {
-                Event::Sound { def, group, index, own, volume, builtin, channel, owner, pan, looping, freq_mul, low_priority, stop_on_get_hit, stop_on_change_state } => {
+                Event::Sound { def, group, index, own, volume, builtin, channel, owner, pan, looping, freq_mul, low_priority, stop_on_get_hit, stop_on_change_state, loop_start, loop_end, loop_count } => {
                     self.flag_sounds.retain(|(o, ch, _, _)| !(*o == owner && *ch == channel));
                     if stop_on_get_hit || stop_on_change_state { self.flag_sounds.push((owner, channel, stop_on_get_hit, stop_on_change_state)); }
                     let mut played = false;
                     if let (true, Some(d)) = (own, def.as_ref()) {
-                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), SoundOpts { volume, pan, owner, channel, looping, rate: freq_mul, low_priority }); played = true; }
+                        if let Some(w) = d.sounds.get(&(group, index)) { audio.sample(&d.id, group, index, Some(w), SoundOpts { volume, pan, owner, channel, looping, rate: freq_mul, low_priority, loop_start, loop_end, loop_count }); played = true; }
                     }
                     if !played {
                         let kind = builtin.unwrap_or(match group { 5 => if index >= 2 { "hitheavy" } else { "hit" }, 6 => "guard", 7 => "land", _ => if index >= 2 { "swingh" } else { "swing" } });
@@ -214,6 +214,7 @@ impl Session {
                 Event::MatchOver(w) => { self.over = Some(w); }
                 Event::StopSound { owner, channel } => audio.stop(owner, channel),
                 Event::SoundPan { owner, channel, pan } => audio.pan(owner, channel, pan),
+                Event::SoundLoop { owner, channel, start, end } => audio.set_loop(owner, channel, start, end, 0),
                 Event::SoundVolume { owner, channel, volume } => audio.set_volume(owner, channel, volume),
                 Event::Bgm(action) => audio.queue_bgm(action),
                 Event::Tag { .. } => audio.sfx("select"),

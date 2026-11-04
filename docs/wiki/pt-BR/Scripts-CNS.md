@@ -98,13 +98,17 @@ Notas sobre Explod: `ignorehitpause` vale 1 por padrão (use 0 para congelar jun
 
 Efeitos de paleta empilham nesta ordem: `BGPalFX` do cenário, depois `AllPalFX`, depois o `PalFX` do próprio lutador. Eles valem no tick em que mudam (sem quadro de atraso), e um trans `Sub` ignora o tom da paleta enquanto o trans aditivo o mantém. `hue` (graus) gira as cores em torno do eixo cinza e `sinhue` oscila essa rotação usando o período do `sinadd`; os dois funcionam nos três controllers de paleta.
 
+Canais de som: `PlaySnd` aceita `loop`, `loopstart`/`loopend` (milissegundos), `loopcount` (0 = infinito), `stopongethit`, `stoponchangestate`, `pan`/`abspan`, `volumescale` e `freqmul`; `ModifySnd` reajusta `channel`, `pan`, `volumescale` e `loopstart`/`loopend` de um canal vivo. Formato de música não suportado gera aviso e cai para a trilha embutida (trackers são rejeitados por decisão, veja [decisões de compatibilidade](Decisoes-de-Compatibilidade.md)).
+
 Parâmetros de vida do HitDef: `redlife` é subtraído do red life do defensor (a faixa entre `Life` e `RedLife` é a parte do dano que ele não cobre), `dizzypoints` e `guardpoints` drenam os medidores de tontura e guarda (zero ativa `Dizzy`/`GuardBreak` e entra no estado de tontura 5300 ou no de quebra de defesa 5400, veja [Sistemas de vida](Sistemas-de-Vida.md)), `score` alimenta o placar do atacante e do defensor, `sparkscale` escala o spark do golpe, `missonoverride` mostra o texto `MISS` quando um `HitOverride` absorve o golpe, `unhittabletime` dá N ticks de invencibilidade ao defensor (a contagem pausa durante o hit pause) e `xaccel` desloca o defensor na horizontal enquanto estiver no estado de dano. `attack.depth` é lido e ignorado (a engine é 2D). `p2clsncheck = 0` deixa o golpe conectar sem caixas do defensor e `p2clsnrequire = n` exige a caixa Clsn2 `n` do defensor (índice -1 = qualquer).
 
 Notas de helper: um helper congela durante `Pause` e `SuperPause`, a menos que ainda tenha ticks de `pausemovetime` / `supermovetime` ou tenha nascido com `pausebool = 1`, que o faz ignorar qualquer pausa. Helpers com `keyctrl = 1` só recebem os comandos do root enquanto o round é lutado; decidido o round, não recebem nenhum. Na tela de vitória (estado de round 4) os helpers ficam congelados e ocultos.
 
 ## Controllers Ikemen, de cenário e de jogador
 
-`PlayBGM` `StopBGM` `ModifyBGM` `ModifyStageVar` `ModifyStageBG` `ModifyBGCtrl` `ModifyPlayer` `PrintToConsole` `RunState` `Height` `GetHitVarSet` `ModifyHitDef` `ModifyReversalDef` `OverrideClsn` `ResizeClsn` `TransformClsn` `TargetAdd` `TargetScoreAdd` `TargetRedLifeAdd` `TargetDizzyPointsAdd` `TargetGuardPointsAdd` `ScoreAdd` `RoundTimeSet` `RoundTimeAdd` `AssertCommand` `AssertInput` `ShiftInput` `RemapSprite` `TransformSprite`
+`PlayBGM` `StopBGM` `ModifyBGM` `ModifyStageVar` `ModifyStageBG` `ModifyBGCtrl` `ModifyPlayer` `PrintToConsole` `RunState` `Height` `GetHitVarSet` `ModifyHitDef` `ModifyReversalDef` `OverrideClsn` `ResizeClsn` `TransformClsn` `TargetAdd` `TargetScoreAdd` `TargetRedLifeAdd` `TargetDizzyPointsAdd` `TargetGuardPointsAdd` `ScoreAdd` `RoundTimeSet` `RoundTimeAdd` `AssertCommand` `AssertInput` `ShiftInput` `RemapSprite` `TransformSprite` `MatchRestart`
+
+Faltam (planejado ou rejeitado por decisão, interpretados e ignorados com um aviso): `Storyboard` `RemoveStoryboard` `Dialogue` `SaveState` `LoadState` `LifebarAction` `ChangeMovelist` `LoadFile` `SaveFile` `ShaderSet`
 
 Parâmetros e comportamento em [Ikemen extensions](../Ikemen-Extensions.md).
 

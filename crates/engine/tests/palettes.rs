@@ -102,7 +102,7 @@ fn allpalfx_and_bgpalfx_are_separate() {
 
 #[test]
 fn palparams_apply_matches_mugen_formula() {
-    let p = PalParams { add: [10.0, 0.0, 0.0], mul: [128.0, 256.0, 256.0], color: 256.0, invert: false };
+    let p = PalParams { add: [10.0, 0.0, 0.0], mul: [128.0, 256.0, 256.0], color: 256.0, invert: false, hue: 0.0 };
     assert_eq!(p.apply([100, 50, 255]), [55, 50, 255]);
     let inv = PalParams { invert: true, ..Default::default() };
     assert_eq!(inv.apply([0, 100, 255]), [255, 155, 0]);

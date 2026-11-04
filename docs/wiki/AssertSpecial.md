@@ -39,6 +39,10 @@ A flag that is not in the table is ignored. The loader prints one `AssertSpecial
 | `AutoGuard` | Guards as if back were held |
 | `NoKO` | This player is not KO'd at 0 life |
 | `NoHitDamage`, `NoGuardDamage` | Hits / guarded hits do no life damage to the player |
+| `NoRedLifeDamage` | Hits do not raise the player's red life |
+| `NoDizzyPointsDamage` | Hits do not lower the player's dizzy points |
+| `NoGuardPointsDamage` | Guarded hits do not lower the player's guard points |
+| `NoScore` | Hits do not change the player's score |
 | `NoGuardKO` | A guarded hit cannot kill the player |
 | `NoKOFall` | A KO'ing hit does not force the fall |
 | `NoKOVelocity` | A KO'ing hit does not add the extra KO launch velocity |
@@ -56,4 +60,4 @@ A flag that is not in the table is ignored. The loader prints one `AssertSpecial
 | `DrawUnder` | The player is drawn behind other fighters |
 | `NoLifeBarDisplay`, `NoPowerBarDisplay`, `NoFaceDisplay`, `NoNameDisplay`, `NoWinIconDisplay`, `NoComboDisplay` | The matching HUD part is hidden |
 
-Recorded and readable through `IsAsserted`, but the engine has no matching mechanic yet: `NoAIButtonJam`, `NoAICheat`, `NoBrake`, `NoDizzyPointsDamage`, `NoGuardPointsDamage`, `NoRedLifeDamage`, `NoScore`, `NoFaceP2`, `NoFallCount`, `NoFallDefenceUp`, `NoFastRecoverFromLieDown`, `NoGetUpFromLieDown`, `NoIntroReset`, `NoLifeBarAction`, `NoGuardBarDisplay`, `NoStunBarDisplay`, `NoTurnTarget`, `ProjTypeCollision`, `SizePushOnly`.
+Recorded and readable through `IsAsserted`, but the engine has no matching mechanic yet: `NoAIButtonJam`, `NoAICheat`, `NoBrake`, `NoFaceP2`, `NoFallCount`, `NoFallDefenceUp`, `NoFastRecoverFromLieDown`, `NoGetUpFromLieDown`, `NoIntroReset`, `NoLifeBarAction`, `NoGuardBarDisplay`, `NoStunBarDisplay`, `NoTurnTarget`, `ProjTypeCollision`, `SizePushOnly`.

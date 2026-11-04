@@ -2,6 +2,7 @@ pub mod bgm;
 pub mod console;
 pub mod debug;
 mod camera;
+pub mod module;
 mod player;
 mod pause;
 pub(crate) mod virtual_input;
@@ -51,7 +52,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         "modifybgctrl" => stage::modify_bg_ctrl(m, i, sc),
         "modifyplayer" => player::modify_player(m, i, sc),
         "printtoconsole" => console::print_to_console(m, i, sc),
-        _ => return false,
+        _ => return module::run(m, i, sc),
     }
     true
 }
@@ -82,5 +83,6 @@ fn env_shake(m: &mut Match, i: usize, sc: &Controller) {
     let freq = m.num(i, sc, "freq", 60.0, 0).clamp(0.0, 180.0) as f32;
     let ampl = m.num(i, sc, "ampl", -4.0, 0) as f32 * m.fighters[i].lscl;
     let phase = m.num(i, sc, "phase", if freq >= 90.0 { 90.0 } else { 0.0 }, 0) as f32;
-    m.shake(time, freq, ampl, phase);
+    let dir = (m.num(i, sc, "dir", 0.0, 0) as i64).clamp(0, 2) as u8;
+    m.shake_with_dir(time, freq, ampl, phase, dir);
 }

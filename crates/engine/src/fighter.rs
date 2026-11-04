@@ -31,10 +31,11 @@ pub struct HitDefData {
     pub ground_corner_push: f32, pub air_corner_push: f32, pub guard_corner_push: f32, pub air_guard_corner_push: f32,
     pub target_palfx: Option<PalFx>,
     pub dizzy_points: f32, pub guard_points: f32, pub red_life: [f32; 2], pub score: [f32; 2], pub down_recover: bool,
+    pub miss_on_override: bool, pub unhittable_time: i32, pub spark_scale: f32, pub xaccel: f32, pub attack_depth: f32, pub p2clsncheck: bool, pub p2clsnrequire: i32,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Shake { pub time: i32, pub freq: f32, pub ampl: f32, pub phase: f32 }
+pub struct Shake { pub time: i32, pub freq: f32, pub ampl: f32, pub phase: f32, pub dir: u8 }
 
 #[derive(Clone, Debug)]
 pub struct HitOverride { pub attr: String, pub state_no: i32, pub time: i32, pub force_air: bool }
@@ -42,7 +43,7 @@ pub struct HitOverride { pub attr: String, pub state_no: i32, pub time: i32, pub
 #[derive(Clone, Debug)]
 pub struct GetHitVars {
     pub kind: i32, pub animtype: i32, pub airtype: i32, pub groundtype: i32, pub damage: f32, pub hitcount: i32, pub guardcount: i32,
-    pub hittime: i32, pub slidetime: i32, pub ctrltime: i32, pub xvel: f32, pub yvel: f32, pub yaccel: f32, pub chainid: i32,
+    pub hittime: i32, pub slidetime: i32, pub ctrltime: i32, pub xvel: f32, pub yvel: f32, pub yaccel: f32, pub xaccel: f32, pub chainid: i32,
     pub guarded: bool, pub fall: bool, pub fall_damage: f32, pub fall_xvel: f32, pub fall_yvel: f32, pub fall_recover: bool,
     pub fall_recover_time: i32, pub fall_kill: bool, pub kill: bool, pub attacker_id: u32, pub attacker_no: usize,
     pub hit_id: i32, pub fall_env_shake: Shake, pub down_bounce: bool,
@@ -67,7 +68,7 @@ impl GetHitVars {
 impl Default for GetHitVars {
     fn default() -> Self {
         GetHitVars { kind: 0, animtype: 0, airtype: 0, groundtype: 0, damage: 0.0, hitcount: 0, guardcount: 0, hittime: 0, slidetime: 0, ctrltime: 0,
-            xvel: 0.0, yvel: 0.0, yaccel: 0.44, chainid: -1, guarded: false, fall: false, fall_damage: 0.0, fall_xvel: 0.0, fall_yvel: -4.5,
+            xvel: 0.0, yvel: 0.0, yaccel: 0.44, xaccel: 0.0, chainid: -1, guarded: false, fall: false, fall_damage: 0.0, fall_xvel: 0.0, fall_yvel: -4.5,
             fall_recover: true, fall_recover_time: 4, fall_kill: true, kill: true, attacker_id: 0, attacker_no: 0,
             hit_id: -1, fall_env_shake: Shake::default(), down_bounce: false,
             priority: 0, facing: 0, power: 0.0, attr: 0, guardflag: 0, hit_damage: 0.0, guard_damage: 0.0, hit_power: 0.0, guard_power: 0.0,
@@ -99,6 +100,7 @@ pub fn anim_fallback(no: i32) -> &'static [i32] {
         44 => &[41, 40, 0], 45 => &[42, 41, 40, 0], 46 => &[43, 41, 40, 0], 47 => &[40, 0], 100 => &[20, 0], 105 => &[43, 41, 0], 106 => &[47, 0],
         120 => &[130, 0], 121 => &[131, 11, 0], 122 => &[132, 41, 0], 130 => &[120, 0], 131 => &[121, 11], 132 => &[122, 41],
         140 => &[130, 0], 141 => &[131, 11], 142 => &[132, 41], 150 => &[130, 5000, 0], 151 => &[150, 130, 0], 152 => &[131, 5010, 11], 153 => &[152, 131, 11], 154 => &[132, 5030, 41], 155 => &[154, 132, 41],
+        5300 => &[5000, 0], 5400 => &[150, 5000, 0],
         170 | 175 | 181 | 190 | 191 | 195 | 196 => &[0], 197..=200 => &[5150, 5110], 180 => &[181, 0],
         5000 => &[5001, 5002, 0], 5001 => &[5000, 0], 5002 => &[5001, 5000, 0], 5005 => &[5000, 0], 5006 => &[5005, 5001, 5000], 5007 => &[5006, 5005, 5002, 5000],
         5010 => &[5000, 0], 5011 => &[5010, 5001, 5000], 5012 => &[5011, 5010, 5002, 5000], 5020 => &[5010, 5000, 11], 5021 => &[5020, 5011, 5001], 5022 => &[5021, 5012, 5002],
@@ -120,6 +122,10 @@ pub struct Fighter {
     pub is_helper: bool,
     pub helper_id: i32,
     pub helper_player: bool,
+    pub helper_projectile: bool,
+    pub own_projectile: bool,
+    pub own_clsn_scale: bool,
+    pub size_overrides: Vec<(String, f32)>,
     pub key_ctrl: bool,
     pub parent: Option<u32>,
     pub root: u32,
@@ -155,7 +161,9 @@ pub asserts: u64,
     pub history: InputHistory,
     pub input_asserts: Vec<(u32, i32)>, pub command_asserts: Vec<(String, i32)>,
     pub cmd: CommandState,
-    pub combo_count: i32, pub combo_damage: f32,
+    pub combo_count: i32, pub combo_damage: f32, pub combo_target: Option<u32>, pub combo_timer: i32,
+    pub received_damage: f32, pub received_hits: i32, pub score: f64, pub score_total: f64,
+    pub sprite_remap: Vec<((i32, i32), (i32, i32), i32)>, pub sprite_transform: Option<(f32, f32, f32, i32)>,
     /// 0 = base form, 1 = transformed (awakened) until the round ends
     pub form: u8, pub form_time: i32,
     pub draw_offset: V2, pub victory_quote: i32, pub clipboard: Vec<String>, pub unhittable: i32, pub super_defence_mul: f32,
@@ -169,7 +177,7 @@ impl Fighter {
         let lscl = 320.0 / if def.local_w > 0.0 { def.local_w } else { 320.0 };
         let life = def.c("data.life", 1000.0) as f32;
         Fighter {
-            id, st_def: def.clone(), anim_def: def.clone(), side, player_no, is_helper: false, helper_id: 0, helper_player: false, key_ctrl: false,
+            id, st_def: def.clone(), anim_def: def.clone(), side, player_no, is_helper: false, helper_id: 0, helper_player: false, helper_projectile: false, own_projectile: false, own_clsn_scale: false, size_overrides: vec![], key_ctrl: false,
             parent: None, root: id, destroyed: false, pal_no: 1, ai_level: 0,
             pos: V2::default(), vel: V2::default(), facing: 1.0, lscl,
             state_no: 0, prev_state_no: 0, state_time: 0, state_type: 'S', move_type: 'I', physics: 'S', ctrl: true,
@@ -183,12 +191,15 @@ impl Fighter {
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
             persist: HashMap::new(), air_jumps: 0, ground_level: 0.0, bind: None, palfx: None, trans: None, remap: vec![], angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
             after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), input_asserts: vec![], command_asserts: vec![], cmd: CommandState::default(),
-            combo_count: 0, combo_damage: 0.0, form: 0, form_time: 0, reversal: None, hit_overrides: Default::default(), ikemen: crate::ikemen::IkemenState::new(&def),
+            combo_count: 0, combo_damage: 0.0, combo_target: None, combo_timer: 0, received_damage: 0.0, received_hits: 0, score: 0.0, score_total: 0.0, sprite_remap: vec![], sprite_transform: None, form: 0, form_time: 0, reversal: None, hit_overrides: Default::default(), ikemen: crate::ikemen::IkemenState::new(&def),
             pause_move_time: 0, super_move_time: 0, pause_bool: false, preserve: false, own_pal: true, state_giver: None,
             draw_offset: V2::default(), victory_quote: -1, clipboard: vec![], unhittable: 0, super_defence_mul: 1.0, def,
         }
     }
-    pub fn c(&self, k: &str, d: f64) -> f32 { self.def.c(k, d) as f32 }
+    pub fn c(&self, k: &str, d: f64) -> f32 {
+        match self.size_overrides.iter().find(|(n, _)| n == k) { Some((_, v)) => *v, None => self.def.c(k, d) as f32 }
+    }
+    pub fn projectile_tally_id(&self) -> u32 { if self.own_projectile { self.id } else { self.root } }
 
     pub fn anim(&self) -> Option<&Animation> { self.anim_def.anims.get(&self.anim_real) }
     pub fn frame(&self) -> Option<&AnimFrame> { self.anim().and_then(|a| a.frames.get(self.elem)) }
@@ -288,8 +299,8 @@ impl Fighter {
         let modified;
         let list: &[Box4] = if self.clsn_mods.iter().any(|c| c.kind == kind) { modified = crate::sctrl::clsn::apply(&self.clsn_mods, kind, list); &modified } else { list };
         let s = self.lscl * self.draw_scale[0];
-        let sx = self.def.c("size.xscale", 1.0) as f32;
-        let sy = self.def.c("size.yscale", 1.0) as f32;
+        let sx = self.c("size.xscale", 1.0);
+        let sy = self.c("size.yscale", 1.0);
         let mut out: Vec<Box4> = list.iter().map(|b| {
             let (mut x1, mut x2) = (b[0] * sx * s, b[2] * sx * s);
             if fr.flip_h { let t = -x2; x2 = -x1; x1 = t; }

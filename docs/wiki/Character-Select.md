@@ -19,6 +19,7 @@ Common traits of well-known fighting-game select screens (Street Fighter, Tekken
 - Smoothly following cursor with pulsing fill, corner brackets and a P1/P2/CPU tag; non-hovered tiles are dimmed.
 - Team slots (up to 5) with portrait, name and a numbered badge on the picked tiles.
 - Stage chip in the header, cycled with `[` and `]` or by clicking the arrows; the stage grid still confirms it after the fighters.
+- Palette row under each side panel: 12 numbered swatches with the current one highlighted. `,` / `.` cycle, `P` picks a random palette, clicking a swatch jumps to it; each side keeps its own palette and team members are stored independently. The last palette of each player is persisted in `ultimate-mugen.cfg` (`pal1`, `pal2`) and in replays.
 - Keyboard, gamepad and touch/mouse use the same navigation as before.
 
 ## Uniform character size

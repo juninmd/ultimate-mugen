@@ -118,7 +118,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         }
         "fallenvshake" => {
             let s = m.fighters[i].ghv.fall_env_shake;
-            if s.time > 0 { m.shake(s.time, s.freq, s.ampl, s.phase); m.fighters[i].ghv.fall_env_shake.time = 0; }
+            if s.time > 0 { m.shake_with_dir(s.time, s.freq, s.ampl, s.phase, s.dir); m.fighters[i].ghv.fall_env_shake.time = 0; }
         }
         "hitvelset" => {
             let (x, y) = (n(m, "x", 1.0) != 0.0, n(m, "y", 1.0) != 0.0);
@@ -146,8 +146,13 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 let looping = n(m, "loop", 0.0) != 0.0;
                 let freq_mul = n(m, "freqmul", 1.0) as f32;
                 let low_priority = n(m, "lowpriority", 0.0) != 0.0;
+                let stop_on_get_hit = n(m, "stopongethit", 0.0) != 0.0;
+                let stop_on_change_state = n(m, "stoponchangestate", 0.0) != 0.0;
+                let loop_start = n(m, "loopstart", 0.0).max(0.0) as u32;
+                let loop_end = n(m, "loopend", 0.0).max(0.0) as u32;
+                let loop_count = n(m, "loopcount", 0.0) as i32;
                 let f = &m.fighters[i];
-                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul, low_priority };
+                let ev = Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: idx, own, volume: vol, channel: ch, owner: f.id, builtin: None, pan, looping, freq_mul, low_priority, stop_on_get_hit, stop_on_change_state, loop_start, loop_end, loop_count };
                 m.events.push(ev);
             }
         }
@@ -166,7 +171,21 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             else { let last = n(m, "last", 59.0) as usize; let v = n(m, "value", 0.0) as i32; for k in first..=last.min(59) { m.fighters[i].vars[k] = v; } }
         }
         "poweradd" => { let v = n(m, "value", 0.0) as f32; m.add_power(i, v); }
-        "powerset" => { let v = n(m, "value", 0.0) as f32; if let Some(r) = m.idx(m.fighters[i].root) { let f = &mut m.fighters[r]; f.power = v.clamp(0.0, f.power_max); } }
+        "remapsprite" => {
+            let from = (n2(m, "from", 0.0, 0) as i32, n2(m, "from", 0.0, 1) as i32);
+            let to = (n2(m, "to", 0.0, 0) as i32, n2(m, "to", 0.0, 1) as i32);
+            let time = n(m, "time", -1.0) as i32;
+            let f = &mut m.fighters[i];
+            f.sprite_remap.retain(|(from_, _, _)| *from_ != from);
+            f.sprite_remap.push((from, to, time));
+        }
+        "transformsprite" => {
+            let scale = n(m, "scale", 1.0) as f32;
+            let angle = n(m, "angle", 0.0) as f32;
+            let shear = n(m, "xshear", 0.0) as f32;
+            let time = n(m, "time", 1.0) as i32;
+            m.fighters[i].sprite_transform = Some((scale, angle, shear, time));
+        }        "powerset" => { let v = n(m, "value", 0.0) as f32; if let Some(r) = m.idx(m.fighters[i].root) { let f = &mut m.fighters[r]; f.power = v.clamp(0.0, f.power_max); } }
         "lifeadd" => { let (v, k, a) = (n(m, "value", 0.0) as f32, n(m, "kill", 1.0) != 0.0, n(m, "absolute", 0.0) != 0.0); life_add(m, i, v, k, a); }
         "lifeset" => { let v = n(m, "value", 0.0) as f32; let f = &mut m.fighters[i]; f.life = v.clamp(0.0, f.life_max); }
         "targetlifeadd" => {
@@ -175,6 +194,23 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             for t in target_indices(m, i, sc) { life_add(m, t, v * mul, k, a); }
         }
         "targetpoweradd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc) { m.add_power(t, v); } }
+        "targetadd" => {
+            let want = n(m, "id", -1.0) as i32;
+            let pick = if want >= 0 { m.idx(want as u32) } else { m.enemy(i, 0) };
+            if let Some(t) = pick {
+                let (rid, rroot) = (m.fighters[t].id, m.fighters[t].root);
+                let f = &mut m.fighters[i];
+                if !f.targets.iter().any(|(id, _)| *id == rid) { f.targets.push((rid, if want >= 0 { want } else { -1 })); }
+                let _ = rroot;
+            }
+        }
+        "targetscoreadd" => { let v = n(m, "value", 0.0); for t in target_indices(m, i, sc) { let root = m.fighters[t].root; if let Some(r) = m.idx(root) { let f = &mut m.fighters[r]; f.score = (f.score + v).max(0.0); f.score_total = (f.score_total + v).max(0.0); } } }
+        "targetredlifeadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc) { let f = &mut m.fighters[t]; f.ikemen.red_life = (f.ikemen.red_life + v).clamp(f.life, f.life_max); } }
+        "targetdizzypointsadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc) { let f = &mut m.fighters[t]; f.ikemen.dizzy_points = (f.ikemen.dizzy_points + v).clamp(0.0, f.ikemen.dizzy_max); } }
+        "targetguardpointsadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc) { let f = &mut m.fighters[t]; f.ikemen.guard_points = (f.ikemen.guard_points + v).clamp(0.0, f.ikemen.guard_max); } }
+        "scoreadd" => { let v = n(m, "value", 0.0); if let Some(r) = m.idx(m.fighters[i].root) { let f = &mut m.fighters[r]; f.score = (f.score + v).max(0.0); f.score_total = (f.score_total + v).max(0.0); } }
+        "roundtimeset" => { let v = n(m, "value", 99.0).clamp(0.0, 100000.0); m.timer = (v * 60.0).round() as i32; m.round_ticks = m.timer; }
+        "roundtimeadd" => { let v = n(m, "value", 0.0); m.timer = ((m.timer as f64) + v * 60.0).clamp(0.0, 100000.0 * 60.0).round() as i32; }
         "targetvelset" | "targetveladd" => {
             let x = if sc.has("x", 0) { Some(n(m, "x", 0.0) as f32 * l) } else { None };
             let y = if sc.has("y", 0) { Some(n(m, "y", 0.0) as f32 * l) } else { None };

@@ -11,13 +11,16 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Adding M.U.G.E.N content](MUGEN-Content.md) | Players | Install `.def`/`.zip` characters and stages, and validate them |
 | [GitHub marketplace](Marketplace.md) | Players | Install characters, stages and music from any GitHub repository |
 | [Game modes](Game-Modes.md) | Players | Arcade, teams (Sequence, Parallel, Tag) and their rules |
+| [Compatibility decisions](Compatibility-Decisions.md) | Creators | Features the engine rejects by design and why |
 | [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
 | [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |
 | [AssertSpecial flags](AssertSpecial.md) | Creators | All 77 Ikemen flags and what each one does |
+| [Red life, dizzy and guard points](Life-Systems.md) | Creators | RedLife, DizzyPoints, GuardPoints, states 5300/5400 and HitDef defaults |
 | [Creating stages](Stages.md) | Creators | M.U.G.E.N `.def` stages and native stages |
 | [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
 | [Performance](Performance.md) | Developers | Parallel loading, frame pacing, benchmarks |
+| [Replays](Netplay-and-Replays.md#saved-replays-in-the-game-replays) | Players | Saved fights, replay browser, playback speed |
 | [Research: fighting games](Research-Fighting-Games.md) | Developers | Survey of other fighters and prioritized improvement list |
 | [Stress and resilience](Stress-and-Resilience.md) | Developers | Fuzzing, spawner caps, hot path numbers |
 | [Troubleshooting](Troubleshooting.md) | Everyone | Common errors and diagnostic tools |

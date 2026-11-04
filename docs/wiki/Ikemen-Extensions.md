@@ -76,6 +76,26 @@ Map keys are case-insensitive. Each map holds at most 256 keys of at most 64 cha
 
 Chaves de map não diferenciam maiúsculas. Cada map guarda no máximo 256 chaves de até 64 caracteres; escritas acima desses limites são ignoradas.
 
-`data.dizzypoints` and `data.guardpoints` in the `[Data]` section default to `data.life`.
+`data.dizzypoints` and `data.guardpoints` in the `[Data]` section default to `data.life`. How hits spend these values is described in [Red life, dizzy and guard points](Life-Systems.md).
 
 `data.dizzypoints` e `data.guardpoints` na seção `[Data]` usam `data.life` como padrão.
+
+`Helper` accepts `helpertype = projectile`: the helper's `HitDef` contacts count as projectile hits (`ProjHit`, `ProjContact`, `ProjGuarded` and their `*Time` forms fire on the helper and on its root, keyed by the helper `id`), the attacker is not put in hit pause and the helper has no hurtbox. `ownprojectile = 1` keeps the projectiles the helper fires on the helper: `NumProj` and `NumProjID` of the helper count them and the root does not. `size.*` parameters (for example `size.xscale`, `size.yscale`, `size.height`, `size.ground.back`) override the character constants for that helper only, including `Const(size.*)` and the size of its hurtboxes. A helper spawned by another helper inherits the parent's `size.*` overrides unless it is spawned with `ownclsnscale = 1`, which starts from the character's own constants.
+
+`Helper` aceita `helpertype = projectile`: os contatos do `HitDef` do helper contam como acertos de projétil (`ProjHit`, `ProjContact`, `ProjGuarded` e as formas `*Time` valem no helper e no root, indexados pelo `id` do helper), o atacante não entra em hit pause e o helper não tem hurtbox. `ownprojectile = 1` mantém no helper os projéteis que ele dispara: `NumProj` e `NumProjID` do helper os contam e o root não. Os parâmetros `size.*` (por exemplo `size.xscale`, `size.yscale`, `size.height`, `size.ground.back`) substituem as constantes do personagem só para aquele helper, inclusive `Const(size.*)` e o tamanho das hurtboxes. Um helper criado por outro helper herda os `size.*` do pai, a menos que seja criado com `ownclsnscale = 1`, que parte das constantes do próprio personagem.
+
+## Module controllers / Controllers de módulo
+
+Ikemen GO modules and motifs use these controllers. They are always parsed (a character that contains them still loads and runs); the table says what each one does here. A controller that is not supported does nothing and writes one warning line to the match's compatibility log (`Match::console`) the first time it runs. The list lives in `ume_engine::sctrl::module::MODULE_CONTROLLERS` so tools can query it with `module_status(name)` / `rejected_by_design()`.
+
+Controllers de módulo do Ikemen GO são sempre interpretados (o personagem carrega e roda); os não suportados não fazem nada e registram um aviso único no log de compatibilidade.
+
+| Controller | Status | Notes |
+|---|---|---|
+| `MatchRestart` | supported | Resets wins and the round counter and restarts at the start of the next tick |
+| `LoadFile`, `SaveFile` | rejected by design | Characters never get file access; content runs in a sandbox |
+| `ShaderSet` | rejected by design | The renderer has a fixed pipeline; user shader code is not loaded |
+| `Storyboard`, `RemoveStoryboard`, `Dialogue` | planned | `[SceneDef]` files are parsed but there is no storyboard runtime yet |
+| `SaveState`, `LoadState` | planned | Needs the rollback snapshot of the match (see the roadmap) |
+| `LifebarAction` | planned | The HUD has no scripting hooks yet |
+| `ChangeMovelist` | planned | The movelist is fixed at load time |

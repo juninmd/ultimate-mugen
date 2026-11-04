@@ -52,8 +52,9 @@ pub fn input_flags(raw: &str, facing: f32) -> u32 {
 }
 
 pub fn assert_command(m: &mut Match, i: usize, sc: &Controller) {
-    let Some(name) = sc.raw("name").map(unquote).filter(|n| !n.is_empty()) else { return };
-    let time = (m.num(i, sc, "buffertime", 1.0, 0) as i32).max(1);
+    let name = sc.raw("name").or_else(|| sc.raw("value")).map(unquote).filter(|n| !n.is_empty());
+    let Some(name) = name else { return };
+    let time = (m.num(i, sc, if sc.has("buffertime", 0) { "buffertime" } else { "time" }, 1.0, 0) as i32).max(1);
     let Some(t) = input_owner(m, i, sc) else { return };
     let f = &mut m.fighters[t];
     f.cmd.active.insert(Arc::from(name.as_str()));
@@ -67,7 +68,8 @@ pub fn assert_input(m: &mut Match, i: usize, sc: &Controller) {
     let time = (m.num(i, sc, "time", 1.0, 0) as i32).max(1);
     let Some(t) = input_owner(m, i, sc) else { return };
     let facing = m.fighters[t].facing;
-    let bits = ["flag", "flag2", "flag3", "flag4"].iter().filter_map(|key| sc.raw(key)).fold(0, |acc, raw| acc | input_flags(raw, facing));
+    let numeric = if sc.has("value", 0) { m.num(i, sc, "value", 0.0, 0) as u32 } else { 0 };
+    let bits = numeric | ["flag", "flag2", "flag3", "flag4"].iter().filter_map(|key| sc.raw(key)).fold(0, |acc, raw| acc | input_flags(raw, facing));
     if bits == 0 {
         return;
     }

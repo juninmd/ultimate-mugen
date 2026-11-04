@@ -124,7 +124,7 @@ fn proj_var(name: &str) -> Option<ProjGet> {
         "anim" => |p, _| p.cur.anim as f64,
         "animelem" => |p, _| (p.cur.elem + 1) as f64,
         "facing" => |p, _| p.facing as f64,
-        "teamside" => |p, _| (p.side + 1) as f64,
+        "teamside" => |p, _| (p.teamside + 1) as f64,
         "pausemovetime" => |p, _| p.pause_move as f64,
         "supermovetime" => |p, _| p.super_move as f64,
         "pos.x" => |p, c| camera_relative(c, p.pos, p.lscl).0,

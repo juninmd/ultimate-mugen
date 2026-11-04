@@ -50,7 +50,7 @@ Motor de luta 2D **feito do zero em Rust**, inspirado no M.U.G.E.N: moderno, det
 
 | Requisito | Escolha Técnica |
 |---|---|
-| **Base de código unificada** (desktop, web e mobile) | **wgpu + winit** (Vulkan, Metal, DX12, GLES, WebGL2; Windows, Linux, macOS, WASM, Android). O iOS ainda usa macroquad. |
+| **Base de código unificada** (desktop, web e mobile) | **wgpu + winit** (Vulkan, Metal, DX12, GLES, WebGL2; Windows, Linux, macOS, WASM, Android, iOS). |
 | **Desempenho e determinismo** (base para rollback netcode e replays) | Rust com simulação em passo fixo (60 ticks/s), PRNG determinístico e ausência de Garbage Collector. |
 | **Controles & Vibração avançada** | **gilrs** para entrada multiplataforma + relatórios HID diretos para DualShock 4/DualSense (USB e Bluetooth, com checksum CRC32) + HTML5 Gamepad API com `vibrationActuator` na web. |
 | **Arte procedural nítida** | **tiny-skia** (rasterização vetorial com antialiasing e gradientes) para esqueletos procedurais em qualquer escala. |
@@ -167,7 +167,7 @@ Acesse `http://localhost:8080` no navegador. Na versão web, você pode arrastar
   cargo apk build -p ultimate-mugen --lib --release --target aarch64-linux-android
   ```
 - **iOS**:
-  Siga o [guia de empacotamento do Macroquad para iOS](https://macroquad.rs/articles/ios/) usando o target `aarch64-apple-ios`.
+  No macOS com Xcode: `cargo install cargo-bundle` e `cargo bundle --release --target aarch64-apple-ios` (assine o `.app` com seu time no Xcode ou via `codesign`).
 
 ---
 
@@ -220,7 +220,7 @@ ultimate-mugen/
 │   ├── engine/       # VM de luta determinística, física, colisões, IA e compilador UMF
 │   ├── render/       # Renderer wgpu: atlas, sprites em lote com paletas em WGSL, pós-processamento
 │   └── shell/        # Janela winit, entrada, texto, áudio e a API imediata usada pelo app
-├── src/              # Camada da aplicação (telas, renderização, áudio, HID/gamepads e HUD); wgpu no desktop, macroquad na web/mobile até esses alvos migrarem
+├── src/              # Camada da aplicação (telas, renderização, áudio, HID/gamepads e HUD); wgpu + winit em todas as plataformas
 ├── assets/           # Fontes OFL, definições UMF (.json) e pacotes de assets
 ├── docs/             # Documentação técnica detalhada, roadmap e pesquisa
 └── web/              # Shell HTML, PWA, service worker e glue code JS

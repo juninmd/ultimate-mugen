@@ -56,6 +56,14 @@ pub(crate) async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &s
             if want == "impact" { s.vfx.force_impact(); }
         }
         "hit" => { for _ in 0..1200 { s.step_visual(c, audio); if !s.m.explods.is_empty() && s.m.fighters.iter().any(|f| f.move_type == 'H' && f.hit_shake > 2 && !f.ghv.guarded) { break; } } }
+        "counter" | "guard" | "heavy" => {
+            for _ in 0..600 { if s.m.round_state == 2 && s.m.fighters[0].ctrl { break; } s.step_visual(c, audio); }
+            if want == "counter" { s.m.fighters[1].move_type = 'A'; }
+            s.vfx.pre_tick(&s.m);
+            let ev = ume_engine::matchs::Event::Hit { attacker_side: 0, defender_side: 1, damage: if want == "heavy" { 120.0 } else { 60.0 }, guarded: want == "guard", heavy: want == "heavy", attacker: 0, defender: 1 };
+            s.vfx.event(&ev, &s.m);
+            for _ in 0..3 { s.vfx.update(1.0 / 60.0); }
+        }
         "proj" => { for _ in 0..1500 { s.step_visual(c, audio); if s.m.projectiles.iter().any(|p| !p.dying && p.time > 8) { break; } } }
         "ko" => {
             if let Some(f) = s.m.fighters.get_mut(1) { f.life = 1.0; }
@@ -124,6 +132,12 @@ async fn team_win(app: &mut App, dir: &str, name: &str, simul: bool, n: usize) {
     }
     snap(app, dir, name, |a| a.draw_session_only()).await;
     app.team = None;
+}
+
+async fn fx_tour(app: &mut App, dir: &str) {
+    for (name, want) in [("fx1-hit", "hit"), ("fx2-heavy", "heavy"), ("fx3-counter", "counter"), ("fx4-guard", "guard"), ("fx5-super", "super")] {
+        fight(app, dir, name, "kaito", "shion", "dojo", 330, want).await;
+    }
 }
 
 async fn hud_tour(app: &mut App, dir: &str) {
@@ -261,6 +275,7 @@ pub async fn run(app: &mut App, dir: &str) {
         screen(app, dir, "stage-select", 8).await;
         return;
     }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("fx") { fx_tour(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") { hud_tour(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("pixel") { crate::pixel_tour::run(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stages") { app.screen = Screen::Fight; crate::stage_tour::run(app, dir).await; return; }

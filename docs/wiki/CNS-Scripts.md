@@ -91,6 +91,8 @@ Command extras (Ikemen GO 1.0):
 
 Also supported: `ReversalDef` `HitOverride` `FallEnvShake` `RemapPal` `StopSnd` `SndPan` `VictoryQuote` `ForceFeedback` `Offset` `Null` `DisplayToClipboard` `AppendToClipboard` `ClearClipboard`.
 
+Shake and sound notes: `EnvShake` accepts `dir` in degrees, clamped to a full turn: `0` (default when omitted, which also keeps the small horizontal jitter) is vertical, `90` horizontal and anything in between shakes on both axes. `PlaySnd` accepts `stopongethit` and `stoponchangestate`: the channel is stopped when the player that started it is hit (or guards) or changes state; a flagged sound without `channel` gets its own channel automatically, and `StopSnd` clears the marks.
+
 Explod notes: `ignorehitpause` defaults to 1 (set 0 to freeze with the owner's hit pause). `postype = left/right/front/back` and `space = screen` keep the explod fixed on screen while the camera moves. `ModifyExplod` accepts `vel`, `accel`, `pos`, `scale`, `bindtime`, `removetime`, `sprpriority`, `ontop`, `under`, `removeongethit`, `ignorehitpause`, `facing`, `vfacing`, `supermovetime`, `pausemovetime` and `trans`; `facing` is relative to the owner. `ExplodBindTime` only changes the bind time.
 
 ## Supported triggers

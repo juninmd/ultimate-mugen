@@ -52,5 +52,10 @@ fn env_shake(m: &mut Match, i: usize, sc: &Controller) {
     let freq = m.num(i, sc, "freq", 60.0, 0).clamp(0.0, 180.0) as f32;
     let ampl = m.num(i, sc, "ampl", -4.0, 0) as f32 * m.fighters[i].lscl;
     let phase = m.num(i, sc, "phase", if freq >= 90.0 { 90.0 } else { 0.0 }, 0) as f32;
-    m.shake(time, freq, ampl, phase);
+    if sc.has("dir", 0) {
+        let dir = (m.num(i, sc, "dir", 0.0, 0) as f32).clamp(-360.0, 360.0);
+        m.shake_directed(time, freq, ampl, phase, dir);
+    } else {
+        m.shake(time, freq, ampl, phase);
+    }
 }

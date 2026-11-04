@@ -86,6 +86,9 @@ pub fn corner_push(xvel: f32) -> f32 { (xvel.abs() * 0.5).clamp(1.2, 4.5) }
 pub const BASE_W: f32 = 426.67;
 pub const BASE_H: f32 = 240.0;
 
+#[derive(Clone, Debug)]
+pub struct SoundWatch { pub owner: u32, pub channel: i32, pub stop_on_get_hit: bool, pub stop_on_change_state: bool }
+
 #[derive(Default, Clone)]
 pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_super: bool, pub darken: bool, pub unhittable: bool, pub p2_def_mul: f32, pub end_cmd_buf_time: i32, pub pause_bg: bool }
 #[derive(Clone)]
@@ -119,7 +122,8 @@ pub struct Match {
     pub timer: i32, pub round_ticks: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
-    pub shake_time: i32, pub shake_ampl: f32, pub shake_freq: f32, pub shake_phase: f32, pub shake_elapsed: i32,
+    pub shake_time: i32, pub shake_ampl: f32, pub shake_freq: f32, pub shake_phase: f32, pub shake_elapsed: i32, pub shake_dir: Option<f32>,
+    pub sound_watches: Vec<SoundWatch>, pub next_auto_channel: i32,
     pub flash: Option<(i32, [f32; 3])>,
     pub bg: Option<crate::stage_bg::BgState>,
     pub all_palfx: Option<PalFx>, pub bg_palfx: Option<PalFx>,
@@ -139,7 +143,7 @@ impl Match {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
-            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
+            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: None, sound_watches: vec![], next_auto_channel: 1000, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
     }
@@ -217,6 +221,8 @@ impl Match {
     // ---------------------------------------------------------------- state machine
     pub fn change_state(&mut self, i: usize, no: i32, owner: Arc<CharDef>) {
         let common = self.common.clone();
+        let fighter_id = self.fighters[i].id;
+        self.release_sounds(fighter_id, false);
         {
             let f = &mut self.fighters[i];
             f.prev_state_no = f.state_no;
@@ -460,7 +466,7 @@ impl Match {
     }
     pub fn start_round(&mut self) {
         self.round_state = 0; self.round_time = 0; self.timer = if self.round_ticks > 0 { self.round_ticks } else { 99 * 60 }; self.winner_side = -1; self.slow_mo = 0; self.won_by_ko = false;
-        self.explods.clear(); self.projectiles.clear(); self.pause = None;
+        self.explods.clear(); self.projectiles.clear(); self.pause = None; self.sound_watches.clear();
         self.fighters.retain(|f| !f.is_helper || f.preserve);
         self.camera = V2 { x: self.stage.start_x, y: self.stage.start_y };
         if let Some(bg) = self.bg.as_mut() { bg.reset(); }
@@ -952,6 +958,7 @@ impl Match {
         let a_facing = proj.map(|p| p.1).unwrap_or(self.fighters[a].facing);
         let (aid, aside, apos, aroot) = { let f = &self.fighters[a]; (f.id, f.side, f.pos, f.root) };
         let did = self.fighters[d].id;
+        self.release_sounds(did, true);
         let ano = self.fighters[a].player_no;
         if !from_proj {
             let fa = &mut self.fighters[a];
@@ -1110,9 +1117,42 @@ impl Match {
         let f = &self.fighters[i];
         self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0, low_priority: false });
     }
+    pub fn watch_sound(&mut self, owner: u32, channel: i32, stop_on_get_hit: bool, stop_on_change_state: bool) -> i32 {
+        if !stop_on_get_hit && !stop_on_change_state { return channel; }
+        let channel = if channel >= 0 { channel } else { self.next_auto_channel += 1; self.next_auto_channel };
+        self.sound_watches.retain(|w| !(w.owner == owner && w.channel == channel));
+        if self.sound_watches.len() >= 256 { self.sound_watches.remove(0); }
+        self.sound_watches.push(SoundWatch { owner, channel, stop_on_get_hit, stop_on_change_state });
+        channel
+    }
+    pub fn forget_sound(&mut self, owner: u32, channel: i32) {
+        self.sound_watches.retain(|w| !(w.owner == owner && (channel < 0 || w.channel == channel)));
+    }
+    fn release_sounds(&mut self, owner: u32, on_hit: bool) {
+        if self.sound_watches.is_empty() { return; }
+        let mut stopped = vec![];
+        self.sound_watches.retain(|w| {
+            let hit = w.owner == owner && if on_hit { w.stop_on_get_hit } else { w.stop_on_change_state };
+            if hit { stopped.push(w.channel); }
+            !hit
+        });
+        for channel in stopped { self.events.push(Event::StopSound { owner, channel }); }
+    }
     pub fn do_shake(&mut self, t: i32, ampl: f32) { self.shake(t, 60.0, -ampl.abs(), 0.0); }
+    pub fn shake_directed(&mut self, t: i32, freq: f32, ampl: f32, phase: f32, dir: f32) {
+        self.shake(t, freq, ampl, phase);
+        if t > 0 { self.shake_dir = Some(dir.rem_euclid(360.0)); }
+    }
+    pub fn shake_vector(&self) -> V2 {
+        let off = self.shake_offset();
+        match self.shake_dir {
+            Some(d) if self.shake_time > 0 => { let r = d.to_radians(); V2 { x: off * r.sin(), y: off * r.cos() } }
+            _ => V2 { x: 0.0, y: off },
+        }
+    }
     pub fn shake(&mut self, t: i32, freq: f32, ampl: f32, phase: f32) {
         if t <= 0 { return; }
+        self.shake_dir = None;
         self.shake_time = t; self.shake_elapsed = 0; self.shake_freq = freq; self.shake_phase = phase;
         self.shake_ampl = if ampl != 0.0 { ampl } else { -4.0 };
     }

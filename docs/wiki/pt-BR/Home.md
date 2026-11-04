@@ -17,6 +17,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Criar cenários](Cenarios.md) | Criadores | Cenário M.U.G.E.N `.def` e cenário nativo |
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
 | [Desempenho](Desempenho.md) | Desenvolvedores | Carga paralela, ritmo de quadros, benchmarks |
+| [Pesquisa de jogos de luta](Pesquisa-Jogos-Luta.md) | Desenvolvedores | Pesquisa de outros lutadores e lista priorizada de melhorias |
 | [Solução de problemas](Problemas.md) | Todos | Erros comuns e ferramentas de diagnóstico |
 
 ## Formatos aceitos

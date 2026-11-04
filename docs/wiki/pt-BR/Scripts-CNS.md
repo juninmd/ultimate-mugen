@@ -131,6 +131,10 @@ Triggers de combate e estado (escalados pelo localcoord quando retornam posiçõ
 
 `LeftEdge` e `RightEdge` são absolutos: sempre devolvem a borda esquerda e a direita da tela. `FrontEdge` e `BackEdge` dependem de `Facing`: quem olha para a direita lê `FrontEdge = RightEdge` e `BackEdge = LeftEdge`, e quem olha para a esquerda lê o contrário. Os quatro usam as unidades do `localcoord` do personagem e as mesmas bordas de `FrontEdgeDist` e `BackEdgeDist`, então `(FrontEdge - X) * Facing` é igual a `FrontEdgeDist` (com `X` a posição do personagem no mundo).
 
+## Distâncias entre localcoords diferentes
+
+Todo trigger de posição e distância converte o resultado do espaço do mundo para o localcoord do personagem que o avalia (`P2Dist`, `P2BodyDist`, `RootDist`, `ParentDist`, `ScreenPos`, `LeftEdge`/`RightEdge`/`FrontEdge`/`BackEdge` e a família `...EdgeDist`). Numa luta 1280x720 contra 320x240, o mesmo vão aparece 4 vezes maior para o personagem HD. `P2BodyDist` subtrai as larguras frontais dos dois depois de convertê-las para o mundo, então vale 0 quando as caixas se tocam, seja qual for o localcoord de cada personagem. `P2Dist` e `P2BodyDist` dependem apenas das duas posições: a câmera nunca interfere, inclusive nos estados customizados de um arremesso.
+
 ## Redirecionamentos
 
 `parent`, `root`, `helper(id)`, `target(id)`, `partner(n)` (o n-ésimo outro jogador não-helper do mesmo lado, padrão 0; um helper redireciona pelo seu root; NaN quando não existe), `enemy(n)`, `enemynear(n)`, `playerid(id)`, `p2`. Exemplo: `trigger1 = enemynear, life < 200`.

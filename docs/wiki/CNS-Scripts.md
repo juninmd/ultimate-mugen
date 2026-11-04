@@ -131,6 +131,10 @@ Combat and state triggers (localcoord-scaled where they return positions or velo
 
 `LeftEdge` and `RightEdge` are absolute: they always return the left and right screen edges. `FrontEdge` and `BackEdge` depend on `Facing`: a right-facing player reads `FrontEdge = RightEdge` and `BackEdge = LeftEdge`, a left-facing player reads the opposite. All four are in the player's `localcoord` units and use the same edges as `FrontEdgeDist` and `BackEdgeDist`, so `(FrontEdge - X) * Facing` equals `FrontEdgeDist` (with `X` the player's world position).
 
+## Distances between different localcoords
+
+Every position and distance trigger converts its world-space result into the localcoord of the player that evaluates it (`P2Dist`, `P2BodyDist`, `RootDist`, `ParentDist`, `ScreenPos`, `LeftEdge`/`RightEdge`/`FrontEdge`/`BackEdge` and the `...EdgeDist` family). In a 1280x720 versus 320x240 match the same gap reads 4 times larger for the HD player. `P2BodyDist` subtracts both players' front widths after each width is converted to world units, so it is 0 when the boxes touch no matter which localcoord each character was drawn for. `P2Dist` and `P2BodyDist` only depend on the two player positions: the camera never influences them, including inside a throw's custom states.
+
 ## Redirections
 
 `parent`, `root`, `helper(id)`, `target(id)`, `partner(n)` (the n-th other non-helper player on the same side, default 0; a helper redirects through its root; NaN when there is none), `enemy(n)`, `enemynear(n)`, `playerid(id)`, `p2`. Example: `trigger1 = enemynear, life < 200`.

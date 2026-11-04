@@ -11,7 +11,7 @@ pub struct MapStore {
 
 impl MapStore {
     pub fn get(&self, key: &str) -> f32 {
-        self.entries.iter().find(|(k, _)| k == key).map(|(_, v)| *v).unwrap_or(0.0)
+        self.entries.iter().find(|(k, _)| k.eq_ignore_ascii_case(key)).map(|(_, v)| *v).unwrap_or(0.0)
     }
 
     pub fn set(&mut self, key: &str, v: f32, add: bool) {

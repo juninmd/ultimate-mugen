@@ -99,6 +99,20 @@ pub struct MugenStage {
     pub start_y: f32,
     pub zoom_out: f32,
     pub zoom_in: f32,
+    pub info_name: String,
+    pub display_name: String,
+    pub author: String,
+    pub mugen_version: String,
+    pub round_time: f32,
+    pub auto_turn: bool,
+    pub vertical_follow_delta: f32,
+    pub y_scroll_speed: f32,
+    pub zoom_in_speed: f32,
+    pub zoom_out_speed: f32,
+    pub lowest_cap: bool,
+    pub dynamic_bound_high: bool,
+    pub bound_high_delta: f32,
+    pub constants: HashMap<String, f32>,
 }
 
 fn bgctrl_kind(s: &Section) -> Option<BgCtrlKind> {
@@ -146,11 +160,34 @@ fn pair(v: Vec<f32>, def: [f32; 2]) -> [f32; 2] {
     [v.first().copied().unwrap_or(def[0]), v.get(1).copied().unwrap_or(def[1])]
 }
 
+/// glTF/3D stages are rejected by design: detect the model request so the loader can warn once and keep the 2D layers.
+pub fn stage_requests_3d(text: &str) -> bool {
+    parse_ini(text).iter().any(|s| {
+        matches!(s.lname.as_str(), "model" | "model3d" | "stage3d" | "gltf" | "scene")
+            || s.entries.iter().any(|(k, v)| {
+                let v = v.to_ascii_lowercase();
+                (k == "model" || k == "gltf" || k == "scene" || k.contains("3dmodel")) && (v.ends_with(".glb") || v.ends_with(".gltf") || !v.is_empty())
+            })
+    })
+}
+
+fn warn_3d_once(path: &str) {
+    use std::sync::{Mutex, OnceLock};
+    static SEEN: OnceLock<Mutex<std::collections::HashSet<String>>> = OnceLock::new();
+    let seen = SEEN.get_or_init(|| Mutex::new(std::collections::HashSet::new()));
+    if let Ok(mut seen) = seen.lock() {
+        if seen.insert(path.to_string()) {
+            eprintln!("stage {path}: glTF/3D models are not supported; rendering the 2D background layers instead");
+        }
+    }
+}
+
 pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
     let def_path = norm_path(def_path);
     let base_dir = def_path.rfind('/').map(|i| &def_path[..i]).unwrap_or("");
     let t = text(vfs.get(&def_path).ok_or_else(|| format!("stage: {def_path} not found"))?);
     let secs = parse_ini(&t);
+    if stage_requests_3d(&t) { warn_3d_once(&def_path); }
     let get = |s: &str, k: &str| find_section(&secs, s).and_then(|s| s.get(k));
     let g = |s: &str, k: &str, d: f32| nums(get(s, k), &[d])[0];
 
@@ -252,6 +289,20 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         start_y: g("camera", "starty", 0.0),
         zoom_out: g("camera", "zoomout", 1.0),
         zoom_in: g("camera", "zoomin", 1.0),
+        info_name: unquote(get("info", "name").unwrap_or("")),
+        display_name: unquote(get("info", "displayname").unwrap_or("")),
+        author: unquote(get("info", "author").unwrap_or("")),
+        mugen_version: unquote(get("info", "mugenversion").unwrap_or("")),
+        round_time: g("stageinfo", "roundtime", -1.0),
+        auto_turn: g("playerinfo", "autoturn", 1.0) != 0.0,
+        vertical_follow_delta: g("camera", "verticalfollowdelta", 0.0).max(0.0),
+        y_scroll_speed: g("camera", "yscrollspeed", 0.3).clamp(0.0, 1.0),
+        zoom_in_speed: g("camera", "zoominspeed", 0.04).clamp(0.0, 1.0),
+        zoom_out_speed: g("camera", "zoomoutspeed", 0.04).clamp(0.0, 1.0),
+        lowest_cap: g("camera", "lowestcap", 0.0) != 0.0,
+        dynamic_bound_high: g("camera", "dynamicboundhigh", 0.0) != 0.0,
+        bound_high_delta: g("camera", "boundhighdelta", 0.0).max(0.0),
+        constants: find_section(&secs, "constants").map(|s| s.entries.iter().filter_map(|(k, v)| nums(Some(v.as_str()), &[f32::NAN]).first().copied().filter(|n| !n.is_nan()).map(|n| (k.clone(), n))).collect()).unwrap_or_default(),
         anims,
     })
 }

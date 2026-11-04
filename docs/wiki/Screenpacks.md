@@ -4,6 +4,8 @@
 
 A screenpack is the set of files that draws everything around a fight: title menu, character select, lifebars, fonts, intro and logo storyboards.
 
+**Status:** `crates/formats/src/screenpack.rs` parses and validates these files, but the engine does not draw them yet. The title, select and fight screens are the native ones, and no screenpack is loaded at runtime until the screenpack work in the [parity tracker](https://github.com/juninmd/ultimate-mugen/issues/135) is done. The checker below only tells whether a pack parses.
+
 ## Layout
 
 ```
@@ -53,4 +55,4 @@ prefix.displaytime = 60
 cargo run -p ume-formats --example screenpack_check -- <game root> data/system.def
 ```
 
-It prints what was loaded and one `warning:` line per missing or broken file. A screenpack with no `error:` line opens in the engine.
+It prints what was loaded and one `warning:` line per missing or broken file. A screenpack with no `error:` line parses cleanly; displaying it in the engine is not implemented yet.

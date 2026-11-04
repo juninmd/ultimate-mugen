@@ -17,6 +17,16 @@ pub fn attr_bits(state: &str, kinds: &[String]) -> i32 {
     }
     bits
 }
+pub fn attr_kind_mask(want: &str) -> i32 {
+    let w = want.as_bytes();
+    if w.len() != 2 { return 0; }
+    let columns: &[i32] = match w[0] { b'N' => &[0], b'S' => &[3], b'H' => &[6], b'A' => &[0, 3, 6], _ => return 0 };
+    let row = match w[1] { b'A' => 0, b'T' => 1, b'P' => 2, _ => return 0 };
+    columns.iter().fold(0, |mask, c| mask | (1 << (6 + c + row)))
+}
+pub fn state_mask(state: &str) -> i32 {
+    state.chars().fold(0, |bits, c| bits | match c { 'S' => 1, 'C' => 2, 'A' => 4, 'L' => 8, _ => 0 })
+}
 pub fn guardflag_bits(flags: &str) -> i32 {
     flags.chars().fold(0, |bits, c| bits | match c { 'H' => 1, 'L' => 2, 'A' => 4, 'M' => 3, _ => 0 })
 }
@@ -92,7 +102,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     let ground_corner_push = if has("ground.cornerpush.veloff", 0) { num("ground.cornerpush.veloff", 0.0, 0) * l } else if attr_state.contains('A') && !attr_state.contains('S') && !attr_state.contains('C') { 0.0 } else { 1.3 * guard_vel };
     let shake = |prefix: &str, time_default: f64| -> Shake {
         let freq = num(&format!("{prefix}.freq"), 60.0, 0).clamp(0.0, 180.0);
-        Shake { time: num(&format!("{prefix}.time"), time_default, 0) as i32, freq, ampl: num(&format!("{prefix}.ampl"), -4.0, 0) * l, phase: num(&format!("{prefix}.phase"), if freq >= 90.0 { 90.0 } else { 0.0 }, 0) }
+        Shake { time: num(&format!("{prefix}.time"), time_default, 0) as i32, freq, ampl: num(&format!("{prefix}.ampl"), -4.0, 0) * l, phase: num(&format!("{prefix}.phase"), if freq >= 90.0 { 90.0 } else { 0.0 }, 0), dir: (num(&format!("{prefix}.dir"), 0.0, 0) as u8).min(2) }
     };
     let opt = |k: &str, idx: usize| if has(k, idx) { Some(num(k, 0.0, idx) * l) } else { None };
     let target_palfx = if has("palfx.time", 0) || has("palfx.add", 0) || has("palfx.mul", 0) {
@@ -164,6 +174,6 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         red_life: [num("redlife", damage as f64, 0), num("redlife", num("damage", 0.0, 1) as f64, 1)],
         score: [num("score", 0.0, 0), num("score", 0.0, 1)],
         down_recover: num("down.recover", 1.0, 0) != 0.0,
-        airjuggle: if f.has_assert(crate::fighter::asf::NOJUGGLE) { i32::MAX / 2 } else { f.def.c("data.airjuggle", 15.0) as i32 },
+        airjuggle: if f.has_assert(crate::fighter::asf::NOJUGGLECHECK) { i32::MAX / 2 } else { f.def.c("data.airjuggle", 15.0) as i32 },
     }
 }

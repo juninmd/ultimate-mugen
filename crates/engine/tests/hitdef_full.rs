@@ -96,7 +96,7 @@ type = FallEnvShake
 trigger1 = Time = 0
 ";
     let mut m = duel(mugen_char("a", ""), mugen_char("b", cns));
-    m.fighters[1].ghv.fall_env_shake = ume_engine::fighter::Shake { time: 15, freq: 60.0, ampl: -4.0, phase: 0.0 };
+    m.fighters[1].ghv.fall_env_shake = ume_engine::fighter::Shake { time: 15, freq: 60.0, ampl: -4.0, phase: 0.0, dir: 0 };
     enter(&mut m, 1, 600);
     m.tick(&[0, 0]);
     assert!(m.shake_time > 0);

@@ -70,6 +70,9 @@ pub fn decode_png(buf: &[u8]) -> Result<DecodedPng, String> {
     if width == 0 || height == 0 {
         return Err("PNG: missing IHDR".into());
     }
+    if !crate::pixels_within_limit(width, height) {
+        return Err(format!("PNG: {width}x{height} exceeds the pixel limit"));
+    }
     if interlace != 0 {
         return Err("PNG: interlaced images are not supported".into());
     }
@@ -86,6 +89,9 @@ pub fn decode_png(buf: &[u8]) -> Result<DecodedPng, String> {
         return Err(format!("PNG: unsupported bit depth {bit_depth} for color type {color_type}"));
     }
 
+    if (width as u64) * (height as u64) > crate::sff::MAX_SPRITE_PIXELS as u64 {
+        return Err("PNG: image too large".into());
+    }
     let (w, h) = (width as usize, height as usize);
     let bits_pp = channels * bit_depth as usize;
     let bpp = (bits_pp >> 3).max(1); // filter byte distance

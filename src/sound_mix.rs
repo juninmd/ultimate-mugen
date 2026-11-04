@@ -95,6 +95,7 @@ pub fn decode(bytes: &[u8]) -> Option<Pcm> {
     let id = track.id;
     let mut dec = symphonia::default::get_codecs().make(&track.codec_params, &DecoderOptions::default()).ok()?;
     let mut out = Pcm { rate: track.codec_params.sample_rate.unwrap_or(22050), frames: vec![] };
+    let mut samples: Option<SampleBuffer<f32>> = None;
     while let Ok(packet) = format.next_packet() {
         if packet.track_id() != id {
             continue;
@@ -104,7 +105,10 @@ pub fn decode(bytes: &[u8]) -> Option<Pcm> {
                 let spec = *buf.spec();
                 out.rate = spec.rate;
                 let ch = spec.channels.count().max(1);
-                let mut sb = SampleBuffer::<f32>::new(buf.capacity() as u64, spec);
+                if samples.as_ref().is_none_or(|sb| sb.capacity() < buf.capacity() * ch) {
+                    samples = Some(SampleBuffer::new(buf.capacity() as u64, spec));
+                }
+                let sb = samples.as_mut().unwrap();
                 sb.copy_interleaved_ref(buf);
                 for f in sb.samples().chunks(ch) {
                     let l = f[0];
@@ -171,5 +175,37 @@ mod tests {
     #[test]
     fn garbage_is_rejected() {
         assert!(decode(b"not audio").is_none());
+    }
+
+    #[test]
+    fn multiple_packets_preserve_stereo_samples_and_partial_tail() {
+        let p = Pcm { rate: 44100, frames: (0..100_003).map(|i| [(i as f32 * 0.05).sin() * 0.5, (i as f32 * 0.03).cos() * 0.4]).collect() };
+        let back = decode(&p.to_wav()).unwrap();
+        assert_eq!(back.rate, p.rate);
+        assert_eq!(back.frames.len(), p.frames.len());
+        for (actual, expected) in back.frames.iter().zip(&p.frames) {
+            for c in 0..2 { assert!((actual[c] - expected[c]).abs() < 1e-4); }
+        }
+    }
+
+    #[test]
+    fn multiple_mono_packets_duplicate_channels_without_stale_tail() {
+        let p = tone(100_003);
+        let stereo = p.to_wav();
+        let mut mono = stereo[..44].to_vec();
+        let size = p.frames.len() as u32 * 2;
+        mono[4..8].copy_from_slice(&(36 + size).to_le_bytes());
+        mono[22..24].copy_from_slice(&1u16.to_le_bytes());
+        mono[28..32].copy_from_slice(&(p.rate * 2).to_le_bytes());
+        mono[32..34].copy_from_slice(&2u16.to_le_bytes());
+        mono[40..44].copy_from_slice(&size.to_le_bytes());
+        for frame in stereo[44..].chunks_exact(4) { mono.extend_from_slice(&frame[..2]); }
+        let back = decode(&mono).unwrap();
+        assert_eq!(back.rate, p.rate);
+        assert_eq!(back.frames.len(), p.frames.len());
+        for (actual, expected) in back.frames.iter().zip(&p.frames) {
+            assert_eq!(actual[0], actual[1]);
+            assert!((actual[0] - expected[0]).abs() < 1e-4);
+        }
     }
 }

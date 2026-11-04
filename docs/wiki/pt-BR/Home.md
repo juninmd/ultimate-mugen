@@ -10,12 +10,16 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Configuração e controles](Configuracao.md) | Jogadores | Arquivo `.cfg`, flags de linha de comando, variáveis de ambiente, controles |
 | [Adicionar conteúdo M.U.G.E.N](Conteudo-MUGEN.md) | Jogadores | Instalar personagens e cenários `.def`/`.zip` e validar |
 | [Mercado GitHub](Mercado.md) | Jogadores | Instalar personagens, cenários e músicas de qualquer repositório do GitHub |
+| [Modos de jogo](Modos-de-Jogo.md) | Jogadores | Arcade, equipes (Sequência, Paralelo, Tag) e suas regras |
+| [Decisões de compatibilidade](Decisoes-de-Compatibilidade.md) | Criadores | Recursos rejeitados por decisão e o motivo |
 | [Criar personagem UMF](Personagem-UMF.md) | Criadores | Lutador completo em um único JSON |
 | [Arte do esqueleto (rig)](Rig.md) | Criadores | Estilo, poses, articulações e paletas |
 | [Scripts CNS](Scripts-CNS.md) | Criadores | Estados, controllers, triggers e comandos suportados |
+| [Flags do AssertSpecial](Flags-AssertSpecial.md) | Criadores | As 77 flags do Ikemen e o efeito de cada uma |
 | [Criar cenários](Cenarios.md) | Criadores | Cenário M.U.G.E.N `.def` e cenário nativo |
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
 | [Desempenho](Desempenho.md) | Desenvolvedores | Carga paralela, ritmo de quadros, benchmarks |
+| [Pesquisa de jogos de luta](Pesquisa-Jogos-Luta.md) | Desenvolvedores | Pesquisa de outros lutadores e lista priorizada de melhorias |
 | [Solução de problemas](Problemas.md) | Todos | Erros comuns e ferramentas de diagnóstico |
 
 ## Formatos aceitos
@@ -30,6 +34,10 @@ Lutadores UMF e M.U.G.E.N rodam na mesma máquina de estados e podem se enfrenta
 ## Roadmap
 
 O plano de compatibilidade e as decisões de arquitetura estão em [`docs/ROADMAP.pt-BR.md`](../../ROADMAP.pt-BR.md). Itens marcados como **planejado** nesta wiki ainda não existem na versão atual.
+
+## Status de compatibilidade
+
+O progresso rumo à paridade com o Ikemen GO v1.0.0 é acompanhado na [issue #135](https://github.com/juninmd/ultimate-mugen/issues/135), com uma issue para cada controlador, trigger ou recurso faltante. As listas de controladores, triggers e redirecionamentos suportados em [Scripts CNS](Scripts-CNS.md) são conferidas com a engine por `cargo test -p ume-engine --test wiki_sync`: um nome listado que a engine não trata, um nome implementado que não está listado ou uma diferença entre as páginas em inglês e português quebra o teste. Cada carregamento de personagem também aponta os controladores, triggers e parâmetros usados que a engine ignora (veja "Diagnóstico no carregamento" na mesma página).
 
 ## Agradecimentos
 

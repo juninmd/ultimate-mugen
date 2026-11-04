@@ -37,31 +37,32 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     let mut constants = default_constants();
     let mut provided = HashSet::new();
     let mut states = HashMap::new();
+    let mut spans = crate::diagnostics::SourceSpans::default();
     // `stcommon` (normalmente common1.cns) traz os estados comuns E, em varios chars de
     // fullgames, o mapeamento comando -> ChangeState do [Statedef -1]. Sem ele o lutador
     // carrega e anda, mas nunca ataca. So vale o arquivo dentro da pasta do char: o
     // fallback global (`data/common1.cns`) aplicaria o common de um jogo a outro.
     let common_name = unquote(&fget("stcommon").unwrap_or_default());
     if !common_name.is_empty() && !common_name.contains("..") && !common_name.contains('/') && !common_name.contains('\\') {
-        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{common_name}"))) { parse_states(&text(b), &mut states, false); }
+        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{common_name}"))) { spans.track(&common_name, || parse_states(&text(b), &mut states, false)); }
     }
     let cns_name = fget("cns").unwrap_or_default();
     let cns_text = resolve(vfs, &base, &cns_name).map(text).unwrap_or_default();
     parse_constants(&cns_text, &mut constants, &mut provided);
     scale_default_constants(&mut constants, &provided, local_w as f64 / 320.0);
-    parse_states(&cns_text, &mut states, true);
+    spans.track(&cns_name, || parse_states(&cns_text, &mut states, true));
     for k in ["st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9"] {
         let Some(fname) = fget(k) else { continue };
         if norm_path(&unquote(&fname)) == norm_path(&unquote(&cns_name)) { continue; }
-        if let Some(b) = resolve(vfs, &base, &fname) { crate::zss::parse_state_file(&fname, &text(b), &mut states, true); }
+        if let Some(b) = resolve(vfs, &base, &fname) { spans.track(&fname, || crate::zss::parse_state_file(&fname, &text(b), &mut states, true)); }
     }
     let cmd_text = resolve(vfs, &base, &fget("cmd").unwrap_or_default()).map(text).unwrap_or_default();
-    let (mut commands, cmd_states) = parse_cmd(&cmd_text);
+    let (mut commands, cmd_states) = spans.track(&fget("cmd").unwrap_or_default(), || parse_cmd(&cmd_text));
     for (id, sd) in cmd_states {
         if id < 0 && states.contains_key(&id) { states.get_mut(&id).map(|s: &mut crate::chardef::StateDef| s.controllers.extend(sd.controllers)); } else { states.insert(id, sd); }
     }
     if let Some(stc) = fget("stcommon") {
-        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{}", unquote(&stc)))) { crate::zss::parse_state_file(&stc, &text(b), &mut states, false); }
+        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{}", unquote(&stc)))) { spans.track(&stc, || crate::zss::parse_state_file(&stc, &text(b), &mut states, false)); }
     }
     for (n, c) in [("holdfwd", "/$F"), ("holdback", "/$B"), ("holdup", "/$U"), ("holddown", "/$D")] {
         if !commands.iter().any(|x| x.name == n) { commands.push(parse_command(n, c, 1, 1)); }
@@ -146,8 +147,15 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     d.constants = constants; d.portrait = sprites.get(&(9000, 0)).cloned(); d.sprites = sprites; d.anims = anims;
     d.commands = commands; d.states = states; d.sounds = sounds; d.ai_commands = ai_commands; d.movelist = movelist; d.series = "M.U.G.E.N".into();
     d.palettes = palettes; d.indexed = indexed;
+    d.source_spans = spans;
+    report_diagnostics(&d, &def_path);
     let _ = Arc::new(0);
     Ok(d)
+}
+
+fn report_diagnostics(d: &CharDef, def_path: &str) {
+    if cfg!(target_arch = "wasm32") || std::env::var_os("UME_QUIET_DIAGNOSTICS").is_some() { return; }
+    eprint!("{}", d.diagnostics().report(def_path, std::env::var_os("TRACE").is_some()));
 }
 
 /// Select-screen thumbnail: the 9000,1 / 9000,0 portrait, else the first idle frame (anim 0).

@@ -40,6 +40,11 @@ fn build(src: &Src, pal: i32, name: &str) -> Result<CharDef, String> {
     }
 }
 
+#[derive(Default)]
+struct Inflight { load: HashMap<i32, std::thread::JoinHandle<Result<CharDef, String>>>, portrait: Option<std::thread::JoinHandle<Option<Sprite>>> }
+
+const MAX_STREAMS: usize = 2;
+
 pub struct CharEntry {
     pub key: String, pub id: String, pub name: String, pub series: String, pub author: String, pub color: [u8; 3], pub description: String, pub mugen: bool, /** final boss: hidden from the roster */ pub boss: bool,
     pub src: Src,
@@ -52,6 +57,7 @@ pub struct CharEntry {
     pub broken: Cell<bool>,
     /// failed loads are remembered (no retry storm every frame)
     errs: RefCell<HashMap<i32, String>>,
+    jobs: RefCell<Inflight>,
 }
 impl CharEntry {
     pub fn load(&self, pal: i32) -> Result<Arc<CharDef>, String> {
@@ -81,6 +87,37 @@ impl CharEntry {
         self.touch();
         Ok(d)
     }
+    /// Background variant of [`Self::load_preview`] for MUGEN characters: spawns a thread, collects the result on later frames, never blocks. Sequential (still one per frame) on wasm and for UMF.
+    pub fn stream_preview(&self, pal: i32) {
+        if !self.mugen || cfg!(target_arch = "wasm32") { let _ = self.load_preview(pal); return; }
+        if self.peek(pal).is_some() || self.errs.borrow().contains_key(&pal) { return; }
+        if self.jobs.borrow().load.get(&pal).is_some() { self.reap(); return; }
+        if self.jobs.borrow().load.len() >= MAX_STREAMS { return; }
+        let (src, name) = (self.src.clone(), self.name.clone());
+        if let Ok(h) = std::thread::Builder::new().name("char-preview".into()).spawn(move || build(&src, pal, &name)) { self.jobs.borrow_mut().load.insert(pal, h); }
+    }
+    pub fn stream_portrait(&self) {
+        if self.portrait.borrow().is_some() { return; }
+        let Src::Mugen { vfs, def } = &self.src else { return self.ensure_portrait() };
+        if cfg!(target_arch = "wasm32") { return self.ensure_portrait(); }
+        if self.jobs.borrow().portrait.is_some() { self.reap(); return; }
+        let (vfs, def) = (vfs.clone(), def.clone());
+        if let Ok(h) = std::thread::Builder::new().name("char-portrait".into()).spawn(move || load_mugen_portrait(&vfs, &def)) { self.jobs.borrow_mut().portrait = Some(h); }
+    }
+    /// Collects finished background jobs (previews and portraits) into the caches.
+    pub fn reap(&self) {
+        let (done_load, done_portrait) = {
+            let mut j = self.jobs.borrow_mut();
+            let pals: Vec<i32> = j.load.iter().filter(|(_, h)| h.is_finished()).map(|(p, _)| *p).collect();
+            let loads: Vec<(i32, std::thread::JoinHandle<Result<CharDef, String>>)> = pals.into_iter().filter_map(|p| j.load.remove(&p).map(|h| (p, h))).collect();
+            let portrait = if j.portrait.as_ref().is_some_and(|h| h.is_finished()) { j.portrait.take() } else { None };
+            (loads, portrait)
+        };
+        for (pal, h) in done_load { let _ = self.store(pal, h.join().unwrap_or_else(|_| Err("loader thread panicked".into()))); }
+        if let Some(h) = done_portrait { *self.portrait.borrow_mut() = Some(h.join().ok().flatten()); }
+    }
+    pub fn errs_has(&self, pal: i32) -> bool { self.errs.borrow().contains_key(&pal) }
+    pub fn streaming(&self) -> bool { let j = self.jobs.borrow(); !j.load.is_empty() || j.portrait.is_some() }
     /// Cheap definition for menus: full if already loaded, else preview (natives) or a full load (MUGEN).
     pub fn load_preview(&self, pal: i32) -> Result<Arc<CharDef>, String> {
         if let Some(d) = self.peek(pal) { self.touch(); return Ok(d); }
@@ -119,7 +156,7 @@ pub struct StageEntry { pub key: String, pub id: String, pub name: String, pub t
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct ImportReport { pub chars: usize, pub stages: usize, pub errors: usize, pub duplicate_pack: bool }
 
-pub struct Registry { pub chars: Vec<CharEntry>, pub stages: Vec<StageEntry>, builtin_stages: Vec<stages::StageEntry>, imported_packs: std::collections::HashSet<String> }
+pub struct Registry { pub chars: Vec<CharEntry>, pub stages: Vec<StageEntry>, builtin_stages: Vec<stages::StageEntry>, imported_packs: std::collections::HashSet<String>, pub import_errors: Vec<String> }
 
 fn hex3(h: &str) -> [u8; 3] { let v = u32::from_str_radix(h.trim_start_matches('#'), 16).unwrap_or(0x5a648c); [(v >> 16) as u8, (v >> 8) as u8, v as u8] }
 
@@ -130,14 +167,14 @@ impl Registry {
             match serde_json::from_str::<NativeChar>(json) {
                 Ok(nc) => chars.push(CharEntry {
                     key: format!("umf:{}", nc.id), id: format!("umf:{}", nc.id), name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color),
-                    description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Arc::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()),
+                    description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Arc::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()), jobs: Default::default(),
                 }),
                 Err(e) => eprintln!("bad builtin char: {e}"),
             }
         }
         let builtin_stages = stages::builtin();
         let stages = builtin_stages.iter().enumerate().map(|(i, s)| StageEntry { key: format!("native:{}", s.id), id: format!("native:{}", s.id), name: s.name.clone(), thumb: s.thumb, mugen: false, src: StageSrc::Builtin(i), preview: RefCell::new(None) }).collect();
-        Registry { chars, stages, builtin_stages, imported_packs: Default::default() }
+        Registry { chars, stages, builtin_stages, imported_packs: Default::default(), import_errors: Default::default() }
     }
     /// Bundled, redistributable MUGEN content (Elecbyte Kung Fu Man + stages, CC BY-NC).
     pub fn add_bundled_mugen(&mut self) {
@@ -149,19 +186,21 @@ impl Registry {
     pub fn add_native_json(&mut self, json: &str) -> Result<String, String> {
         let nc: NativeChar = serde_json::from_str(json).map_err(|e| e.to_string())?;
         let id = format!("umf:{}", nc.id);
+        if let Some(old) = self.chars.iter().find(|c| c.id == id) { eprintln!("replacing character '{}' with the imported UMF definition", old.name); }
         self.chars.retain(|c| c.id != id);
         let name = nc.name.clone();
-        self.chars.push(CharEntry { key: id.clone(), id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Arc::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) });
+        self.chars.push(CharEntry { key: id.clone(), id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Arc::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()), jobs: Default::default() });
         Ok(name)
     }
     /// Idempotent .zip import: the same archive bytes are processed once per session, and fighters/stages already in the roster (same content key) are skipped.
     pub fn import_zip(&mut self, bytes: &[u8]) -> Result<ImportReport, String> {
-        let pack = ume_formats::vfs::content_hash(bytes);
-        if !self.imported_packs.insert(pack.clone()) { return Ok(ImportReport { duplicate_pack: true, ..Default::default() }); }
-        let mut vfs = Vfs::new();
-        if let Err(e) = ume_formats::vfs::add_zip(&mut vfs, bytes, "") { self.imported_packs.remove(&pack); return Err(e); }
+        let (pack, vfs) = read_zip(bytes)?;
+        Ok(self.finish_import(pack, vfs))
+    }
+    pub fn finish_import(&mut self, pack: String, vfs: Vfs) -> ImportReport {
+        if !self.imported_packs.insert(pack.clone()) { return ImportReport { duplicate_pack: true, ..Default::default() }; }
         let (chars, stages, errors) = self.add_vfs_lazy(vfs, &format!("pack-{pack}"));
-        Ok(ImportReport { chars: chars.len(), stages: stages.len(), errors: errors.len(), duplicate_pack: false })
+        ImportReport { chars: chars.len(), stages: stages.len(), errors: errors.len(), duplicate_pack: false }
     }
     /// Drop repeated entries that share a content key, keeping the first occurrence (cleans rosters built by older versions).
     pub fn dedupe(&mut self) -> usize {
@@ -189,7 +228,7 @@ impl Registry {
             let id = format!("mugen:{tag}:{def}");
             let key = char_key(&vfs, &def);
             if self.chars.iter().any(|c| c.id == id || c.key == key) { continue; }
-            let e = CharEntry { key, id, name: name.clone(), series: "M.U.G.E.N".into(), author, color: [90, 110, 150], description: "Personagem M.U.G.E.N importado".into(), mugen: true, boss: false, src: Src::Mugen { vfs: vfs.clone(), def: def.clone() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) };
+            let e = CharEntry { key, id, name: name.clone(), series: "M.U.G.E.N".into(), author, color: [90, 110, 150], description: "Personagem M.U.G.E.N importado".into(), mugen: true, boss: false, src: Src::Mugen { vfs: vfs.clone(), def: def.clone() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()), jobs: Default::default() };
             if !validate { self.chars.push(e); cs.push(name); continue; }
             match e.load(1) { Ok(_) => { e.unload(); self.chars.push(e); cs.push(name); } Err(x) => errs.push(format!("{def}: {x}")) }
         }
@@ -213,6 +252,7 @@ impl Registry {
         (cs, ss, errs)
     }
     /// Keep memory bounded with hundreds of fighters: drop the least-recently-used definitions beyond the caps (never `keep`).
+    pub fn reap_streams(&self) { for c in &self.chars { if c.streaming() { c.reap(); } } }
     pub fn trim_cache(&self, keep: &[usize]) {
         const CAP_MUGEN: usize = 6; const CAP_NATIVE: usize = 40;
         for (mugen, cap) in [(true, CAP_MUGEN), (false, CAP_NATIVE)] {
@@ -261,7 +301,10 @@ impl Registry {
     pub fn build_stage(&self, i: usize) -> Stage {
         match &self.stages[i].src {
             StageSrc::Builtin(b) => (self.builtin_stages[*b].build)(),
-            StageSrc::Mugen { vfs, def } => match load_stage(vfs, def) { Ok(s) => { if self.stages[i].preview.borrow().is_none() { *self.stages[i].preview.borrow_mut() = Some(stages::mugen_preview(&s)); } let mut st = stages::from_mugen(s); st.bgm = stage_bgm(vfs, def).map(Arc::new); st } Err(_) => (self.builtin_stages[0].build)() },
+            StageSrc::Mugen { vfs, def } => match load_stage(vfs, def) {
+                Ok(s) => { if self.stages[i].preview.borrow().is_none() { *self.stages[i].preview.borrow_mut() = Some(stages::mugen_preview(&s)); } let mut st = stages::from_mugen(s); st.bgm = stage_bgm(vfs, def).map(Arc::new); st }
+                Err(e) => { eprintln!("stage '{}' failed to load ({e}); using the built-in fallback", self.stages[i].name); (self.builtin_stages[0].build)() }
+            },
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -295,11 +338,26 @@ impl Registry {
         for d in dirs {
             if !d.is_dir() { continue; }
             let mut vfs = Vfs::new();
-            if ume_formats::vfs::add_dir(&mut vfs, &d, "").is_ok() { let (c, s, _) = self.add_vfs_lazy(vfs, &d.to_string_lossy()); n += c.len() + s.len(); }
+            match ume_formats::vfs::add_dir(&mut vfs, &d, "") {
+                Ok(_) => {
+                    let (c, s, errs) = self.add_vfs_lazy(vfs, &d.to_string_lossy());
+                    n += c.len() + s.len();
+                    self.import_errors.extend(errs.into_iter().map(|e| format!("{}: {e}", d.display())));
+                }
+                Err(e) => self.import_errors.push(format!("{}: {e}", d.display())),
+            }
             break;
         }
         n
     }
+}
+
+/// Heavy half of an import (hash + decompression), safe to run on a worker thread.
+pub fn read_zip(bytes: &[u8]) -> Result<(String, Vfs), String> {
+    let pack = ume_formats::vfs::content_hash(bytes);
+    let mut vfs = Vfs::new();
+    ume_formats::vfs::add_zip(&mut vfs, bytes, "")?;
+    Ok((pack, vfs))
 }
 
 pub fn stage_bgm(vfs: &Vfs, def: &str) -> Option<(Vec<u8>, MusicLoop)> {
@@ -337,6 +395,36 @@ mod tests {
     }
 
     #[test]
+    fn mugen_previews_stream_without_blocking_the_caller() {
+        let zip = include_bytes!("../assets/mugen/elecbyte.zip");
+        let mut reg = Registry::new();
+        reg.import_zip(zip).unwrap();
+        let e = reg.chars.iter().find(|c| c.mugen && !c.broken.get()).unwrap();
+        let t = std::time::Instant::now();
+        e.stream_preview(1);
+        e.stream_portrait();
+        let call_ms = t.elapsed().as_secs_f64() * 1000.0;
+        assert!(call_ms < 25.0, "stream calls took {call_ms} ms");
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+        while (e.peek(1).is_none() || !e.has_portrait_attempt()) && std::time::Instant::now() < deadline {
+            e.reap();
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        assert!(e.peek(1).is_some() && e.has_portrait_attempt() && !e.streaming());
+    }
+
+    #[test]
+    fn read_zip_matches_import_zip() {
+        let zip = include_bytes!("../assets/mugen/elecbyte.zip");
+        let (pack, vfs) = read_zip(zip).unwrap();
+        let mut reg = Registry::new();
+        let r = reg.finish_import(pack.clone(), vfs);
+        assert!(r.chars > 0 && !r.duplicate_pack);
+        let (_, vfs2) = read_zip(zip).unwrap();
+        assert!(reg.finish_import(pack, vfs2).duplicate_pack);
+    }
+
+    #[test]
     fn importing_the_same_pack_twice_does_not_duplicate() {
         let zip = include_bytes!("../assets/mugen/elecbyte.zip");
         let mut reg = Registry::new();
@@ -358,7 +446,7 @@ mod tests {
         reg.add_vfs_lazy(load(), "/some/other/dir");
         assert_eq!((reg.chars.len(), reg.stages.len()), (c, s));
         let dup_key = reg.chars.iter().find(|c| c.mugen).unwrap().key.clone();
-        let e = CharEntry { key: dup_key, id: "mugen:legacy:chars/kfm/kfm.def".into(), name: "Legacy".into(), series: String::new(), author: String::new(), color: [0; 3], description: String::new(), mugen: true, boss: false, src: Src::Mugen { vfs: Arc::new(Vfs::new()), def: String::new() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) };
+        let e = CharEntry { key: dup_key, id: "mugen:legacy:chars/kfm/kfm.def".into(), name: "Legacy".into(), series: String::new(), author: String::new(), color: [0; 3], description: String::new(), mugen: true, boss: false, src: Src::Mugen { vfs: Arc::new(Vfs::new()), def: String::new() }, cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()), jobs: Default::default() };
         reg.chars.push(e);
         assert_eq!(reg.dedupe(), 1);
         assert_eq!(reg.chars.len(), c);

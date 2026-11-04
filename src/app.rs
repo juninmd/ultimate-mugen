@@ -25,7 +25,9 @@ pub(crate) use keyedit::KeyEdit;
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode { Arcade, Survival, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul, TeamTag }
 impl Mode {
-    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Survival => "SOBREVIVÊNCIA", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO", Mode::TeamTag => "EQUIPE · TAG" } }
+    fn label(self) -> &'static str {
+        crate::i18n::t(match self { Mode::Arcade => "mode.arcade", Mode::Survival => "mode.survival", Mode::Cpu => "mode.cpu", Mode::Versus => "mode.versus", Mode::Training => "mode.training", Mode::Watch => "mode.watch", Mode::TeamSeq => "mode.team_seq", Mode::TeamSimul => "mode.team_simul", Mode::TeamTag => "mode.team_tag" })
+    }
     /// Team size (1 for the regular modes).
     pub fn is_team(self) -> bool { matches!(self, Mode::TeamSeq | Mode::TeamSimul | Mode::TeamTag) }
     /// Stable key used by replay files.
@@ -164,21 +166,21 @@ pub struct App {
 }
 
 const MENU: [(&str, &str); 15] = [
-    ("Arcade", "Enfrente uma sequência de oponentes"),
-    ("Sobrevivência", "Oponentes sem fim, vida recuperada a cada vitória e pontuação"),
-    ("Versus CPU", "Você contra o computador"),
-    ("2 Jogadores", "Teclado compartilhado ou dois controles"),
-    ("Treino", "Boneco de treino, barra infinita, hitboxes"),
-    ("CPU vs CPU", "Assista a IA lutar"),
-    ("Equipe · Sequência", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida"),
-    ("Equipe · Paralelo", "5 contra 5 ao mesmo tempo (2 a 5) · TAB troca de lutador"),
-    ("Equipe · Tag", "Um em campo, o parceiro espera e entra na troca (2 a 3 por lado)"),
-    ("Personagens MUGEN", "Como adicionar personagens e cenários"),
-    ("Mercado GitHub", "Baixe personagens, cenários e músicas de repositórios"),
-    ("Controles", "Teclado, Xbox, PlayStation, toque e vibração"),
-    ("Configurações", "Vídeo, áudio, controles, jogabilidade e idioma"),
-    ("Replays", "Assista, renomeie e apague lutas gravadas"),
-    ("Sair", "Fechar o jogo"),
+    ("menu.arcade", "desc.arcade"),
+    ("menu.survival", "desc.survival"),
+    ("menu.cpu", "desc.cpu"),
+    ("menu.versus", "desc.versus"),
+    ("menu.training", "desc.training"),
+    ("menu.watch", "desc.watch"),
+    ("menu.team_seq", "desc.team_seq"),
+    ("menu.team_simul", "desc.team_simul"),
+    ("menu.team_tag", "desc.team_tag"),
+    ("menu.mugen", "desc.mugen"),
+    ("menu.market", "desc.market"),
+    ("menu.controls", "desc.controls"),
+    ("menu.settings", "desc.settings"),
+    ("menu.replays", "desc.replays"),
+    ("menu.quit", "desc.quit"),
 ];
 
 impl App {
@@ -370,7 +372,8 @@ impl App {
         ui.logo(250.0, 118.0, 74.0);
         let n = MENU.len();
         let step = 456.0 / n as f32;
-        for (i, (t, _)) in MENU.iter().enumerate() {
+        for (i, (key, _)) in MENU.iter().enumerate() {
+            let label = crate::i18n::t(key);
             let k_in = ((self.screen_t - 0.05 - i as f32 * 0.04) / 0.28).clamp(0.0, 1.0);
             let k_in = 1.0 - (1.0 - k_in).powi(3);
             let (x, y, w, h) = (40.0 - (1.0 - k_in) * 120.0, 196.0 + i as f32 * step, 520.0, step - 4.0);
@@ -382,13 +385,14 @@ impl App {
                 let pulse = 0.8 + 0.2 * (ui.t * 5.0).sin();
                 ui.quad([vec2(x + off + 18.0, y), vec2(x + off + w, y), vec2(x + off + w - 18.0, y + h), vec2(x + off, y + h)], Color::new(accent.r * pulse, accent.g * pulse, accent.b * pulse, 0.92 * k_in));
                 ui.quad([vec2(x + off - 14.0, y), vec2(x + off - 4.0, y), vec2(x + off - 18.0, y + h), vec2(x + off - 28.0, y + h)], Color::new(1.0, 1.0, 1.0, k_in));
-                ui.text(t, x + off + 30.0, y + h * 0.72, 24.0, hex("#12051f"), Align::Left, true);
+                ui.text(label, x + off + 30.0, y + h * 0.72, 24.0, hex("#12051f"), Align::Left, true);
             } else {
                 ui.quad([vec2(x + 18.0, y), vec2(x + w - 80.0, y), vec2(x + w - 98.0, y + h), vec2(x, y + h)], Color::new(1.0, 1.0, 1.0, 0.07 * k_in));
-                ui.text(t, x + 30.0, y + h * 0.72, 22.0, Color::new(1.0, 1.0, 1.0, 0.82 * k_in), Align::Left, true);
+                ui.text(label, x + 30.0, y + h * 0.72, 22.0, Color::new(1.0, 1.0, 1.0, 0.82 * k_in), Align::Left, true);
             }
         }
-        let (title, desc) = MENU[cur_v];
+        let title = crate::i18n::t(MENU[cur_v].0);
+        let desc = crate::i18n::t(MENU[cur_v].1);
         let ta = ((self.menu_art_fade()) * 1.0).clamp(0.0, 1.0);
         ui.text_bold(&title.to_uppercase(), VW - 60.0, 590.0, if title.chars().count() > 12 { 44.0 } else { 64.0 }, Color::new(1.0, 1.0, 1.0, ta), Color::new(0.05, 0.02, 0.1, ta), Align::Right);
         ui.rect(VW - 460.0, 608.0, 400.0, 4.0, Color::new(accent.r, accent.g, accent.b, ta));
@@ -595,7 +599,7 @@ impl App {
         self.sel_buf.clear();
         if team_mode { let _ = write!(self.sel_buf, "{} {}v{}", self.mode.label(), self.team_n, self.team_n); } else { self.sel_buf.push_str(self.mode.label()); }
         self.ui.text(&self.sel_buf, 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
-        let hint = if team_mode { "Monte sua equipe · Q/E: tamanho" } else if picking == 0 { "JOGADOR 1: escolha seu lutador" } else if two { "JOGADOR 2: escolha" } else if coop_mode { "JOGADOR 2 (PARCEIRO): escolha" } else { "Escolha o oponente" };
+        let hint = if team_mode { crate::i18n::t("select.team_hint") } else if picking == 0 { crate::i18n::t("select.p1") } else if two { crate::i18n::t("select.p2") } else if coop_mode { crate::i18n::t("select.partner") } else { crate::i18n::t("select.opponent") };
         self.ui.text(hint, VW - 40.0, 56.0, 20.0, hex("#d8d0f0"), Align::Right, false);
         if ns > 0 {
             let (sx, sy, sw, sh) = (500.0, 10.0, 280.0, 62.0);
@@ -611,12 +615,14 @@ impl App {
             let ar = |this: &Self, x: f32, dir: f32| draw_triangle(vec2(this.ui.x(x + dir * 7.0), this.ui.y(sy + sh * 0.5)), vec2(this.ui.x(x - dir * 5.0), this.ui.y(sy + sh * 0.5 - 9.0)), vec2(this.ui.x(x - dir * 5.0), this.ui.y(sy + sh * 0.5 + 9.0)), hex("#ffcc33"));
             ar(self, sx + 18.0, -1.0);
             ar(self, sx + sw - 18.0, 1.0);
-            self.ui.text("CENÁRIO", sx + 126.0, sy + 22.0, 12.0, hex("#a49cc0"), Align::Left, true);
+            self.ui.text(crate::i18n::t("select.stage"), sx + 126.0, sy + 22.0, 12.0, hex("#a49cc0"), Align::Left, true);
             let stage_name = &self.reg.stages[self.sel.2].name;
             self.ui.text(clip(stage_name, 15), sx + 126.0, sy + 46.0, 15.0, WHITE, Align::Left, true);
         }
 
         let focus = cur[picking];
+        #[cfg(target_arch = "wasm32")]
+        self.prefetch_sprite_pack(focus);
         if self.sel_last[picking] != focus { self.sel_last[picking] = focus; self.sel_dwell = 0.0; } else { self.sel_dwell += dt; }
         let mut want: Vec<(usize, i32)> = vec![(focus, if picking == 0 { pal_side0 } else { pal_side1 })];
         for side in 0..2 { if let Some(i) = picked[side] { want.push((i, if side == 0 { pal_side0 } else { pal_side1 })); } }
@@ -725,7 +731,7 @@ impl App {
                 let (px, py) = (if side == 0 { 24.0 } else { VW - 304.0 }, 100.0);
                 let y = py + 470.0;
                 self.ui.rect(px + 12.0, y, 256.0, 46.0, Color::new(0.0, 0.0, 0.0, 0.42));
-                self.ui.text(&format!("PALETA {pal}/{} · , . ciclo · P aleatória", crate::settings::PALETTE_COUNT), px + 20.0, y + 16.0, 12.0, hex("#d8d0f0"), Align::Left, true);
+                self.ui.text(&format!("{} {pal}/{} · {}", crate::i18n::t("select.palette"), crate::settings::PALETTE_COUNT, crate::i18n::t("select.palette_hint")), px + 20.0, y + 16.0, 12.0, hex("#d8d0f0"), Align::Left, true);
                 for n in 1..=crate::settings::PALETTE_COUNT as i32 {
                     let bx = px + 14.0 + (n - 1) as f32 * 20.0;
                     let by = y + 22.0;
@@ -770,12 +776,12 @@ impl App {
             let on = self.coop;
             if self.clicked_rect(bx, by, bw, bh) { self.coop = !self.coop; self.audio.sfx("select"); }
             self.ui.rect(bx, by, bw, bh, if on { alpha(hex("#3fa9ff"), 0.65) } else { Color::new(1.0, 1.0, 1.0, 0.08) });
-            self.ui.text(if on { "CO-OP 2P: LIGADO [V]" } else { "CO-OP 2P: DESLIGADO [V]" }, bx + bw / 2.0, by + 27.0, 15.0, WHITE, Align::Center, true);
+            self.ui.text(if on { crate::i18n::t("select.coop_on") } else { crate::i18n::t("select.coop_off") }, bx + bw / 2.0, by + 27.0, 15.0, WHITE, Align::Center, true);
         }
         self.ui.rect(0.0, 652.0, VW, 1.5, alpha(accents[picking.min(1)], 0.7));
         let desc = &self.reg.chars[cur[picking]].description;
         self.ui.text(desc, VW / 2.0, 680.0, 18.0, hex("#d8d0f0"), Align::Center, false);
-        let flabel = ["TODOS", "ORIGINAIS", "M.U.G.E.N"][self.sel_filter as usize % 3];
+        let flabel = [crate::i18n::t("select.filter_all"), crate::i18n::t("select.filter_originals"), crate::i18n::t("select.filter_mugen")][self.sel_filter as usize % 3];
         self.sel_buf.clear();
         let _ = write!(self.sel_buf, "[Tab] {flabel} · {}/{m} · [R] aleatório · [ ] cenário · PgUp/PgDn", pos + 1);
         self.ui.text(&self.sel_buf, VW / 2.0, 706.0, 14.0, hex("#a49cc0"), Align::Center, false);
@@ -1197,31 +1203,31 @@ impl App {
     }
 
     async fn pause_menu(&mut self, accept_back: bool) {
-        let items = ["Continuar", "Hitboxes", "Reiniciar luta", "Trocar personagens", "Configurações", "Menu principal"];
+        let items = [crate::i18n::t("pause.continue"), crate::i18n::t("pause.hitboxes"), crate::i18n::t("pause.restart"), crate::i18n::t("pause.change"), crate::i18n::t("pause.settings"), crate::i18n::t("pause.menu")];
         if self.c.pressed(nav::DOWN) { self.pause_cur = (self.pause_cur + 1) % items.len(); }
         if self.c.pressed(nav::UP) { self.pause_cur = (self.pause_cur + items.len() - 1) % items.len(); }
         let mut ok = self.c.pressed(nav::OK);
         draw_rectangle(0.0, 0.0, screen_width(), screen_height(), Color::new(0.02, 0.01, 0.06, 0.72));
         let (x, y) = (120.0, 110.0);
         self.ui.rect(x, y, 1040.0, 520.0, Color::new(0.08, 0.05, 0.16, 0.92));
-        self.ui.text("PAUSA", x + 30.0, y + 52.0, 34.0, hex("#ffcc33"), Align::Left, true);
+        self.ui.text(crate::i18n::t("pause.title"), x + 30.0, y + 52.0, 34.0, hex("#ffcc33"), Align::Left, true);
         let s = self.session.as_ref().unwrap();
         for (i, it) in items.iter().enumerate() {
             let (bx, by) = (x + 30.0, y + 80.0 + i as f32 * 56.0);
             if self.clicked_rect(bx, by, 330.0, 48.0) { self.pause_cur = i; ok = true; }
             self.ui.rect(bx, by, 330.0, 48.0, if i == self.pause_cur { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) });
-            let label = if i == 1 { format!("Hitboxes: {}", if s.r.debug { "ON" } else { "OFF" }) } else { it.to_string() };
+            let label = if i == 1 { format!("{}: {}", crate::i18n::t("pause.hitboxes"), if s.r.debug { "ON" } else { "OFF" }) } else { it.to_string() };
             self.ui.text(&label, bx + 16.0, by + 32.0, 22.0, WHITE, Align::Left, false);
         }
         let f = &s.m.fighters[0];
-        self.ui.text(&format!("GOLPES — {}", f.def.display_name.to_uppercase()), x + 400.0, y + 52.0, 22.0, hex("#22e8ff"), Align::Left, true);
+        self.ui.text(&format!("{} — {}", crate::i18n::t("pause.moves"), f.def.display_name.to_uppercase()), x + 400.0, y + 52.0, 22.0, hex("#22e8ff"), Align::Left, true);
         const PER_PAGE: usize = 9;
         let total = f.def.movelist.len();
         let pages = total.div_ceil(PER_PAGE).max(1);
         if self.c.pressed(nav::RIGHT) { self.move_page = (self.move_page + 1) % pages; }
         if self.c.pressed(nav::LEFT) { self.move_page = (self.move_page + pages - 1) % pages; }
         self.move_page = self.move_page.min(pages - 1);
-        if total == 0 { self.ui.text("Este personagem não define comandos no .cmd", x + 400.0, y + 90.0, 18.0, WHITE, Align::Left, false); }
+        if total == 0 { self.ui.text(crate::i18n::t("pause.no_moves"), x + 400.0, y + 90.0, 18.0, WHITE, Align::Left, false); }
         for (i, mv) in f.def.movelist.iter().enumerate().skip(self.move_page * PER_PAGE).take(PER_PAGE) {
             let yy = y + 78.0 + (i - self.move_page * PER_PAGE) as f32 * 46.0;
             self.ui.rect(x + 390.0, yy, 630.0, 40.0, Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.06 } else { 0.03 }));
@@ -1236,7 +1242,7 @@ impl App {
             self.ui.arrow(x + 980.0, y + 42.0, 26.0, (1.0, 0.0), WHITE);
             if self.clicked_rect(x + 880.0, y + 20.0, 60.0, 44.0) { self.move_page = (self.move_page + pages - 1) % pages; }
             if self.clicked_rect(x + 950.0, y + 20.0, 60.0, 44.0) { self.move_page = (self.move_page + 1) % pages; }
-            self.ui.text(&format!("página {}/{}", self.move_page + 1, pages), x + 400.0, y + 505.0, 16.0, hex("#a49cc0"), Align::Left, false);
+            self.ui.text(&format!("{} {}/{}", crate::i18n::t("pause.page"), self.move_page + 1, pages), x + 400.0, y + 505.0, 16.0, hex("#a49cc0"), Align::Left, false);
         }
         if accept_back && self.c.pressed(nav::BACK) { self.session.as_mut().unwrap().paused = false; return; }
         if ok {
@@ -1280,12 +1286,12 @@ impl App {
         let e = &self.reg.chars[w];
         self.ui.gradient_v(160.0, 200.0, 960.0, 300.0, alpha(rgb(e.color), 0.9), Color::new(0.08, 0.05, 0.16, 0.95));
         let done = self.mode == Mode::Arcade && self.arcade.as_ref().is_some_and(|(l, i)| *i >= l.len());
-        let title = if done { "ARCADE COMPLETO!".to_string() } else if self.team.is_some() { { let lead = self.team.as_ref().and_then(|t| t.members[winner.min(1)].first().copied()).unwrap_or(w); format!("TIME {} VENCEU!", self.reg.chars[lead].name.split_whitespace().next().unwrap_or("").to_uppercase()) } } else { format!("{} VENCE!", e.name.to_uppercase()) };
+        let title = if done { crate::i18n::t("results.arcade_complete").to_string() } else if self.team.is_some() { { let lead = self.team.as_ref().and_then(|t| t.members[winner.min(1)].first().copied()).unwrap_or(w); crate::i18n::tf("results.team_wins", &[("{name}", &self.reg.chars[lead].name.split_whitespace().next().unwrap_or("").to_uppercase())]) } } else { crate::i18n::tf("results.wins", &[("{name}", &e.name.to_uppercase())]) };
         let pal = if winner == 1 && self.sel.0 == self.sel.1 { 2 } else { 1 };
         if let Some(d) = e.peek(pal) { let t = self.preview_t; self.draw_char(&d, if d.anims.contains_key(&181) { 181 } else { 0 }, t, 330.0, 480.0, 260.0, false); }
         self.ui.text_bold(&title, 480.0, 300.0, 44.0, hex("#ffcc33"), BLACK, Align::Left);
         let can_replay = self.last_fight.is_some();
-        let items: Vec<&str> = if can_replay { vec!["Revanche", "Replay", "Personagens", "Menu"] } else { vec!["Revanche", "Personagens", "Menu"] };
+        let items: Vec<&str> = if can_replay { vec![crate::i18n::t("results.rematch"), crate::i18n::t("results.replay"), crate::i18n::t("results.characters"), crate::i18n::t("results.menu")] } else { vec![crate::i18n::t("results.rematch"), crate::i18n::t("results.characters"), crate::i18n::t("results.menu")] };
         let nitems = items.len();
         if self.c.pressed(nav::RIGHT) { cur = (cur + 1) % nitems; }
         if self.c.pressed(nav::LEFT) { cur = (cur + nitems - 1) % nitems; }
@@ -1355,7 +1361,7 @@ impl App {
     fn controls_screen(&mut self) {
         if self.key_edit.is_some() { self.key_editor(); return; }
         self.ui.background();
-        self.ui.text("CONTROLES", 60.0, 70.0, 34.0, hex("#ffcc33"), Align::Left, true);
+        self.ui.text(crate::i18n::t("controls.title"), 60.0, 70.0, 34.0, hex("#ffcc33"), Align::Left, true);
         use crate::controls::{face, Glyphs};
         use crate::gamepad::PadKind;
         use ume_engine::input::k;
@@ -1363,10 +1369,10 @@ impl App {
         let touch = self.c.touch.enabled;
         let mut cols = vec![Glyphs::Keyboard, Glyphs::Pad(PadKind::Xbox), Glyphs::Pad(PadKind::PlayStation)];
         if touch { cols.insert(0, Glyphs::Touch); } else { cols.push(Glyphs::Touch); }
-        let head = |g: Glyphs| match g { Glyphs::Keyboard => "Teclado", Glyphs::Touch => "Toque", Glyphs::Pad(p) => p.label() };
+        let head = |g: Glyphs| match g { Glyphs::Keyboard => crate::i18n::t("controls.keyboard"), Glyphs::Touch => crate::i18n::t("controls.touch"), Glyphs::Pad(p) => p.label() };
         let rows: [(&str, &[u32], &str); 7] = [
-            ("Mover", &[], ""), ("Soco", &[k::X, k::Y], " "), ("Chute", &[k::A, k::B], " "), ("Especial", &[k::D2], ""),
-            ("Super", &[k::D2, k::W], "+"), ("Despertar", &[k::T], ""), ("Pausa", &[k::S], ""),
+            (crate::i18n::t("controls.move"), &[], ""), (crate::i18n::t("controls.punch"), &[k::X, k::Y], " "), (crate::i18n::t("controls.kick"), &[k::A, k::B], " "), (crate::i18n::t("controls.special"), &[k::D2], ""),
+            (crate::i18n::t("controls.super"), &[k::D2, k::W], "+"), (crate::i18n::t("controls.awaken"), &[k::T], ""), (crate::i18n::t("controls.pause"), &[k::S], ""),
         ];
         let move_text = |g: Glyphs| match g { Glyphs::Keyboard => format!("{} {} {} {} / setas", kl(0), kl(1), kl(2), kl(3)), Glyphs::Touch => "Analógico esquerdo".into(), Glyphs::Pad(_) => "Analógico ou direcional".into() };
         let xs = [60.0, 280.0, 520.0, 760.0, 1000.0];
@@ -1390,15 +1396,15 @@ impl App {
             }
         }
         let pads = self.c.pad_info.clone();
-        let status = if pads.is_empty() { "Nenhum controle conectado".to_string() } else { format!("Conectado: {}", pads.iter().map(|p| p.name.as_str()).collect::<Vec<_>>().join(", ")) };
+        let status = if pads.is_empty() { crate::i18n::t("controls.none").to_string() } else { format!("Conectado: {}", pads.iter().map(|p| p.name.as_str()).collect::<Vec<_>>().join(", ")) };
         self.ui.text(&status, 60.0, 585.0, 20.0, hex("#a49cc0"), Align::Left, false);
         for (i, p) in pads.iter().enumerate() { if p.bits & ume_engine::input::k::A != 0 && self.c.pressed(nav::OK) { self.c.rumble(i, 0.8, 0.8, 300); } }
         self.ui.rect(60.0, 610.0, 200.0, 60.0, hex("#ff4d6d"));
-        self.ui.text("Voltar", 160.0, 649.0, 26.0, WHITE, Align::Center, true);
+        self.ui.text(crate::i18n::t("controls.back"), 160.0, 649.0, 26.0, WHITE, Align::Center, true);
         let back = self.clicked_rect(60.0, 610.0, 200.0, 60.0);
         if !touch {
             self.ui.rect(300.0, 610.0, 360.0, 60.0, Color::new(1.0, 1.0, 1.0, 0.1));
-            self.ui.text("Personalizar teclado (Tab)", 480.0, 649.0, 22.0, WHITE, Align::Center, true);
+            self.ui.text(crate::i18n::t("controls.customize"), 480.0, 649.0, 22.0, WHITE, Align::Center, true);
             if is_key_pressed(KeyCode::Tab) || self.clicked_rect(300.0, 610.0, 360.0, 60.0) { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); }
         }
         if back || self.c.pressed(nav::BACK) { self.screen = match self.settings_back.take() { Some((tab, from_fight)) => Screen::Settings { tab, cur: 1, from_fight }, None => Screen::Menu { cur: 11 } }; }

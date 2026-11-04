@@ -106,19 +106,19 @@ impl App {
         let total = self.replaying.as_ref().map(|r| r.rec.len()).unwrap_or(0);
         let (speed, paused, tick) = self.session.as_ref().map(|s| (s.speed(), s.paused, s.rec.len().min(total))).unwrap_or((1.0, false, 0));
         self.ui.rect(VW / 2.0 - 320.0, VH - 52.0, 640.0, 36.0, Color::new(0.02, 0.01, 0.06, 0.62));
-        let text = format!("REPLAY {speed:.0}x · {tick}/{total} quadros · ESPAÇO {} · 1/2/4 velocidade · . avança · ESC sai", if paused { "continua" } else { "pausa" });
+        let text = crate::i18n::tf("replays.bar", &[("{speed}", &format!("{speed:.0}")), ("{tick}", &tick.to_string()), ("{total}", &total.to_string()), ("{action}", crate::i18n::t(if paused { "replays.resume" } else { "replays.pause" }))]);
         self.ui.text(&text, VW / 2.0, VH - 28.0, 15.0, hex("#d8d0f0"), Align::Center, false);
-        if paused { self.ui.text("PAUSADO", VW / 2.0, VH - 62.0, 22.0, hex("#ffcc33"), Align::Center, true); }
+        if paused { self.ui.text(crate::i18n::t("replays.paused"), VW / 2.0, VH - 62.0, 22.0, hex("#ffcc33"), Align::Center, true); }
     }
 
     pub(crate) fn replays_screen(&mut self) {
         let Screen::Replays { mut cur } = self.screen else { return };
         self.ui.background();
         self.ui.motes(30, 0.8);
-        self.ui.text("REPLAYS", 40.0, 56.0, 34.0, hex("#ffcc33"), Align::Left, true);
+        self.ui.text(crate::i18n::t("replays.title"), 40.0, 56.0, 34.0, hex("#ffcc33"), Align::Left, true);
         if self.replay_list.is_empty() {
-            self.ui.text("Nenhuma luta gravada ainda.", VW / 2.0, 300.0, 26.0, hex("#a49cc0"), Align::Center, false);
-            self.ui.text("Termine uma luta para ela aparecer aqui.", VW / 2.0, 340.0, 20.0, hex("#a49cc0"), Align::Center, false);
+            self.ui.text(crate::i18n::t("replays.empty"), VW / 2.0, 300.0, 26.0, hex("#a49cc0"), Align::Center, false);
+            self.ui.text(crate::i18n::t("replays.empty_hint"), VW / 2.0, 340.0, 20.0, hex("#a49cc0"), Align::Center, false);
         }
         let count = self.replay_list.len();
         cur = cur.min(count.saturating_sub(1));
@@ -129,23 +129,23 @@ impl App {
             self.ui.rect(0.0, 0.0, VW, VH, Color::new(0.0, 0.0, 0.0, 0.7));
             self.ui.rect(x, y, w, h, hex("#1a1030"));
             self.ui.rect_lines(x, y, w, h, 2.0, hex("#ff4d6d"));
-            self.ui.text("RENOMEAR REPLAY", x + 30.0, y + 46.0, 26.0, hex("#ffcc33"), Align::Left, true);
+            self.ui.text(crate::i18n::t("replays.rename_title"), x + 30.0, y + 46.0, 26.0, hex("#ffcc33"), Align::Left, true);
             self.ui.rect(x + 30.0, y + 84.0, w - 60.0, 48.0, Color::new(1.0, 1.0, 1.0, 0.1));
             let caret = if (self.ui.t * 2.0) as i32 % 2 == 0 { "|" } else { "" };
             let shown: String = buf.chars().take(64).collect();
             self.ui.text(&format!("{shown}{caret}"), x + 44.0, y + 118.0, 24.0, WHITE, Align::Left, false);
-            self.ui.text("Enter confirma · Esc cancela", x + 30.0, y + 176.0, 17.0, hex("#a49cc0"), Align::Left, false);
+            self.ui.text(crate::i18n::t("replays.confirm"), x + 30.0, y + 176.0, 17.0, hex("#a49cc0"), Align::Left, false);
             let ok = is_key_pressed(KeyCode::Enter) || is_key_pressed(KeyCode::KpEnter) || self.clicked_rect(x + w - 330.0, y + h - 64.0, 150.0, 44.0);
             let cancel = is_key_pressed(KeyCode::Escape) || self.clicked_rect(x + w - 170.0, y + h - 64.0, 140.0, 44.0);
             self.ui.rect(x + w - 330.0, y + h - 64.0, 150.0, 44.0, alpha(hex("#2ecc71"), 0.5));
-            self.ui.text("OK", x + w - 255.0, y + h - 36.0, 20.0, WHITE, Align::Center, true);
+            self.ui.text(crate::i18n::t("common.ok"), x + w - 255.0, y + h - 36.0, 20.0, WHITE, Align::Center, true);
             self.ui.rect(x + w - 170.0, y + h - 64.0, 140.0, 44.0, alpha(hex("#ff4d6d"), 0.5));
-            self.ui.text("Cancelar", x + w - 100.0, y + h - 36.0, 20.0, WHITE, Align::Center, true);
+            self.ui.text(crate::i18n::t("common.cancel"), x + w - 100.0, y + h - 36.0, 20.0, WHITE, Align::Center, true);
             let finish = if ok { Some(true) } else if cancel { Some(false) } else { None };
             match finish {
                 Some(commit) => {
                     let label = self.replay_rename.take().unwrap_or_default();
-                    if commit { if let Some(e) = self.replay_list.get(cur) { match replays::rename(&e.path, &label) { Ok(_) => { self.refresh_replays(); self.msg = "Replay renomeado".into(); } Err(m) => self.msg = m } } }
+                    if commit { if let Some(e) = self.replay_list.get(cur) { match replays::rename(&e.path, &label) { Ok(_) => { self.refresh_replays(); self.msg = crate::i18n::t("replays.renamed").into(); } Err(m) => self.msg = m } } }
                     self.screen = Screen::Replays { cur };
                 }
                 None => self.screen = Screen::Replays { cur },
@@ -166,7 +166,7 @@ impl App {
         }
         if count > 12 { self.ui.text(&format!("{} replays · use ↑/↓", count), VW / 2.0, 660.0, 16.0, hex("#a49cc0"), Align::Center, false); }
         if let Some(first) = self.replay_problems.first() { self.ui.text(&format!("{} replay(s) ilegível(is): {first}", self.replay_problems.len()), 60.0, 686.0, 15.0, hex("#ff9e6d"), Align::Left, false); }
-        let buttons = [("Jogar", "Enter"), ("Renomear", "R"), ("Apagar", "Del"), ("Ordenar por nome", "S"), ("Voltar", "Esc")];
+        let buttons = [(crate::i18n::t("replays.play"), "Enter"), (crate::i18n::t("replays.rename"), "R"), (crate::i18n::t("replays.delete"), "Del"), (crate::i18n::t("replays.sort"), "S"), (crate::i18n::t("replays.back"), "Esc")];
         let mut action = None;
         for (i, (label, key)) in buttons.iter().enumerate() {
             let x = 60.0 + i as f32 * 236.0;
@@ -176,7 +176,7 @@ impl App {
             self.ui.text(key, x + 110.0, 706.0, 11.0, Color::new(1.0, 1.0, 1.0, 0.6), Align::Center, false);
             if self.clicked_rect(x, 668.0, 220.0, 44.0) { action = Some(i); }
         }
-        if self.replay_confirm { self.ui.text("Pressione DELETE de novo para apagar", VW / 2.0, 650.0, 17.0, hex("#ff4d6d"), Align::Center, true); }
+        if self.replay_confirm { self.ui.text(crate::i18n::t("replays.confirm_delete"), VW / 2.0, 650.0, 17.0, hex("#ff4d6d"), Align::Center, true); }
         if self.c.pressed(nav::DOWN) && count > 0 { cur = (cur + 1) % count; self.replay_confirm = false; }
         if self.c.pressed(nav::UP) && count > 0 { cur = (cur + count - 1) % count; self.replay_confirm = false; }
         if is_key_pressed(KeyCode::R) && count > 0 { action = Some(1); }
@@ -189,7 +189,7 @@ impl App {
             Some(2) if count > 0 => {
                 if self.replay_confirm {
                     let path = self.replay_list[cur].path.clone();
-                    match replays::delete(&path) { Ok(_) => { self.refresh_replays(); self.msg = "Replay apagado".into(); } Err(e) => self.msg = e }
+                    match replays::delete(&path) { Ok(_) => { self.refresh_replays(); self.msg = crate::i18n::t("replays.deleted").into(); } Err(e) => self.msg = e }
                     self.replay_confirm = false;
                     self.screen = Screen::Replays { cur: 0 };
                     return;

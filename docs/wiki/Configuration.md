@@ -54,6 +54,16 @@ The window can be dragged to any size. The game draws into a fixed 16:9 logical 
 | `UME_NOFX=1` | Disable the animated stage layer (performance testing) |
 | `UME_TOUR=mugen` + `UME_CHARS=a,b` + `UME_STAGE=<id>` | With `--shots`, photograph imported fighters |
 
+## Language and localization
+
+The UI ships two locales in a keyed string table (`src/i18n.rs`): **English** (default) and **Portuguese (Brazil)**.
+Settings › Language switches at runtime and stores `lang=en|pt` in `ultimate-mugen.cfg`.
+
+- Lookup order is current locale → English → the key name, so an incomplete catalog never shows a blank label.
+- A missing key is printed once to the log (`i18n: missing key '<key>'`).
+- The catalogs are compiled in, so switching has no I/O cost and works on web/mobile.
+- A unit test keeps the two catalogs in sync, and a grep test fails if the migrated screens (menu, select, results, pause, replays, survival, controls) go back to hardcoded Portuguese.
+
 ## Controls
 
 | Action | Keyboard P1 | Keyboard P2 | Gamepad | Touch |

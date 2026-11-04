@@ -39,6 +39,7 @@ fn with<R>(f: impl FnOnce(&mut Frame<'static>) -> R) -> R {
 struct AsyncGame { main: Option<Pin<Box<dyn Future<Output = ()>>>> }
 
 impl Game for AsyncGame {
+    fn init(&mut self, _: &mut crate::Gpu) { reset_textures(); }
     fn frame(&mut self, f: &mut Frame) {
         if ATLAS_FULL.with(|a| a.get()) { reset_atlas(f); }
         KEY_QUEUE.with(|q| { let mut q = q.borrow_mut(); q.clear(); q.extend(f.input.pressed_order.iter().filter_map(|k| KeyCode::from_winit(*k))); });

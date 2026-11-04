@@ -9,6 +9,11 @@ edition = "2021"
 description = "Ultimate MUGEN — motor de luta 2D moderno em Rust, compatível com personagens M.U.G.E.N"
 license = "MIT"
 
+[lib]
+name = "ultimate_mugen"
+path = "src/android.rs"
+crate-type = ["cdylib"]
+
 [[bin]]
 name = "ultimate-mugen"
 path = "src/main.rs"
@@ -20,10 +25,10 @@ tiny-skia = "0.11"
 serde_json = "1"
 symphonia = { version = "=0.5.5", default-features = false, features = ["ogg", "vorbis", "mp3", "flac", "wav", "pcm", "adpcm"] }
 
-[target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
+[target.'cfg(target_os = "ios")'.dependencies]
 macroquad = { version = "0.4", default-features = false, features = ["audio"] }
 
-[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+[target.'cfg(not(target_os = "ios"))'.dependencies]
 ume-shell = { path = "crates/shell" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
@@ -45,14 +50,17 @@ opt-level = 3
 opt-level = 3
 lto = "thin"
 
-# Android: `cargo quad-apk build --release` (docker image notfl3/cargo-apk)
 [package.metadata.android]
-package_name = "dev.ultimatemugen.app"
-label = "Ultimate MUGEN"
-fullscreen = true
-min_sdk_version = 26
-target_sdk_version = 33
-build_targets = ["armv7-linux-androideabi", "aarch64-linux-android"]
+package = "dev.ultimatemugen.app"
+build_targets = ["aarch64-linux-android", "armv7-linux-androideabi"]
 
-[package.metadata.android.activity_attributes]
-"android:screenOrientation" = "userLandscape"
+[package.metadata.android.sdk]
+min_sdk_version = 26
+target_sdk_version = 34
+
+[package.metadata.android.application]
+label = "Ultimate MUGEN"
+theme = "@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
+
+[package.metadata.android.application.activity]
+orientation = "userLandscape"

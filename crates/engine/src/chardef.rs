@@ -124,6 +124,7 @@ pub type PalKey = (i32, i32);
 
 #[derive(Clone, Debug)]
 pub struct IndexedSprite { pub w: u32, pub h: u32, pub pixels: Arc<Vec<u8>>, pub pal: PalKey }
+
 pub fn parse_mugen_version(raw: Option<&str>) -> f32 {
     let Some(v) = raw.map(str::trim).filter(|v| !v.is_empty()) else { return 1.0 };
     let mut parts = v.split('.');

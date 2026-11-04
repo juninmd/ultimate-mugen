@@ -159,12 +159,13 @@ value = 2
 ";
     let mut m = duel(mugen_char("a", asserted), mugen_char("b", ""));
     enter(&mut m, 0, 500);
-    m.tick(&[0, 0]);
+    m.tick(&[16, 0]);
     assert!(m.has_command(0, "hadou"), "AssertCommand makes the command visible");
+    assert_eq!(m.fighters[0].history.at(m.fighters[0].history.tick), 0, "ShiftInput delays the input it was scheduled with");
     let t1 = m.fighters[0].history.tick;
     m.tick(&[0, 0]);
-    assert_eq!(m.fighters[0].history.tick - t1, 3, "ShiftInput pushes two extra history ticks before the current one");
-    assert!(m.fighters[0].history.at(m.fighters[0].history.tick) & 32 != 0, "AssertInput injects the button bits");
+    assert_eq!(m.fighters[0].history.tick, t1 + 1, "ShiftInput leaves the tick counter alone");
+    assert!(m.fighters[0].history.at(t1 + 1) & 32 != 0, "AssertInput injects the button bits");
     for _ in 0..6 { m.tick(&[0, 0]); }
     assert!(!m.has_command(0, "hadou"), "the assertion expires after its time");
 }

@@ -39,10 +39,15 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `OverrideClsn` | `clsn` (1 attack, 2 hurt, default 2), `index` (-1 replaces the whole list), `value = x1, y1, x2, y2`, `time` (default 1, -1 = until replaced) | Replaces a collision box in animation units |
 | `ResizeClsn` | `clsn`, `index` (-1 = all boxes), `value = dx1, dy1, dx2, dy2`, `time` | Moves each edge of the box by the given deltas |
 | `TransformClsn` | `clsn`, `scale = sx[, sy]`, `offset = x, y`, `time` | Scales then shifts every box of that type |
+| `AssertCommand` | `name`, `buffertime` (default 1), `redirectid` | Makes command `name` active for `buffertime` ticks, starting with the current one; read by `Command` and the built-in walk, guard and jump states |
+| `AssertInput` | `flag`, `flag2`..`flag4` (`U D L R F B a b c x y z s d w`), `time` (default 1), `redirectid` | ORs the listed buttons and directions into the player's input for `time` ticks; `F`/`B` follow the facing; the press is matched by commands on the tick it is injected, and a held button is not a new press |
+| `ShiftInput` | `value`, `redirectid` | Shifts the input history by `value` ticks: positive delays inputs (the newest ticks become empty), negative moves them earlier; the tick counter is untouched |
 
 Collision modifiers apply in the order they were added, are replaced when the same kind of change is issued again for the same box type (and `index`), count down once per tick, and are reflected by the F2 box view. `time = -1` keeps a modifier until another one replaces it.
 
 PT-BR: `RunState` executa os controllers de outro state sem trocar de state; `Height` ajusta a altura do corpo no tick; `GetHitVarSet` grava campos do `GetHitVar` (`hittype` no lugar de `type`); `ModifyHitDef` e `ModifyReversalDef` alteram só os campos listados; `OverrideClsn`, `ResizeClsn` e `TransformClsn` (`clsn` = 1 ataque, 2 corpo) mudam as caixas de colisão e aparecem no F2.
+
+PT-BR: `AssertCommand` ativa um comando por `buffertime` ticks; `AssertInput` injeta botões e direções no input por `time` ticks (`F`/`B` seguem o lado); `ShiftInput` desloca o histórico de inputs (positivo atrasa, negativo adianta). Os três aceitam `redirectid`. Tudo é estado da simulação, então replays e rollback continuam determinísticos.
 
 | Trigger | Returns |
 |---|---|

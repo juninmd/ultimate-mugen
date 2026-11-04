@@ -449,7 +449,6 @@ impl Match {
         let f = &self.fighters[i];
         let src = if f.is_helper { if f.key_ctrl { self.idx(f.root) } else { None } } else { Some(i) };
         let Some(s) = src else { return false };
-        if f.asserted_commands.iter().any(|(n, t)| *t > 0 && n.eq_ignore_ascii_case(name)) { return true; }
         let accepting = if f.is_helper { self.round_state == 2 } else { self.round_state == 2 || self.round_state == 3 };
         if !accepting && !self.training && !self.fighters[s].has_assert(asf::POSTROUNDINPUT) { return false; }
         if !Arc::ptr_eq(&f.st_def, &f.def) {
@@ -780,14 +779,11 @@ impl Match {
             }
             if bits & crate::input::k::T != 0 { awaken.push(fi); }
             k += 1;
-            if f.assert_input.1 > 0 { bits |= f.assert_input.0; f.assert_input.1 -= 1; }
-            if f.input_shift > 0 { let (b, fa) = (bits, f.facing as i32); for _ in 0..f.input_shift { f.history.push(b, fa); } }
-            else if f.input_shift < 0 { f.history.rewind(f.input_shift); }
-            f.input_shift = 0;
+            let bits = bits | f.take_asserted_inputs();
             f.history.push(bits, f.facing as i32);
             let paused = f.hit_pause > 0 || f.hit_shake > 0 || frozen_by_pause(f);
             f.cmd.update(&f.history, &f.def.commands, paused);
-            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 });
+            f.apply_command_asserts();
         }
         for fi in awaken { self.try_transform(fi); }
         if tagged { self.tag_step(&tag_requests); }

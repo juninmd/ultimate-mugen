@@ -16,6 +16,8 @@ mod poly;
 mod postfx;
 mod session;
 mod settings;
+mod storage;
+mod i18n;
 mod mugen_tour;
 mod pixel_tour;
 mod shots;

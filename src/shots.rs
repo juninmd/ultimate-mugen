@@ -269,6 +269,7 @@ pub async fn run(app: &mut App, dir: &str) {
     let _ = std::fs::create_dir_all(dir);
     if std::env::var("UME_TOUR").as_deref() == Ok("native-coverage") { native_coverage(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("mugen") { crate::mugen_tour::run(app, dir).await; return; }
+    if std::env::var("UME_TOUR").as_deref() == Ok("ui") { ui_tour(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("story") { story(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stage-select") {
         app.screen = Screen::Stages { cur: 1 };
@@ -392,7 +393,7 @@ pub async fn run(app: &mut App, dir: &str) {
     }
     app.session = None;
     cap(app, Screen::Menu { cur: 3 }); frames(app, 30).await; app.trans = 0.62; screen(app, dir, "22-transition", 0).await;
-    cap(app, Screen::Video { cur: 3 }); screen(app, dir, "17-video", 40).await;
+    cap(app, Screen::Settings { tab: 0, cur: 3, from_fight: false }); screen(app, dir, "17-video", 40).await;
     app.ui.begin(); app.ui.loading_screen(0.62, "Carregando lutador 2…"); get_screen_data().export_png(&format!("{dir}/18-loading.png")); println!("shot 18-loading"); next_frame().await;
     app.screen = Screen::Controls; screen(app, dir, "14-controls", 5).await;
     // phone landscape with touch controls
@@ -450,4 +451,39 @@ async fn market_tour(app: &mut App, dir: &str) {
     screen(app, dir, "market-marked", 3).await;
     app.market_ui_view_installed();
     screen(app, dir, "market-installed", 3).await;
+}
+
+async fn ui_tour(app: &mut App, dir: &str) {
+    for tab in 0..6 {
+        app.screen = Screen::Settings { tab, cur: if tab == 1 { 2 } else { 1 }, from_fight: false };
+        screen(app, dir, &format!("settings-{tab}"), 6).await;
+    }
+    app.settings.lang = crate::i18n::Lang::En;
+    app.screen = Screen::Settings { tab: 3, cur: 2, from_fight: false };
+    screen(app, dir, "settings-3-en", 6).await;
+    app.settings.lang = crate::i18n::Lang::Pt;
+    app.sel = (find(app, "kaito"), find(app, "garan"), stage(app, "dojo"));
+    app.mode = Mode::Cpu;
+    app.screen = Screen::Vs { t: 0.0, step: 0 };
+    frames(app, 40).await;
+    app.screen = Screen::Vs { t: 0.55, step: 0 };
+    screen(app, dir, "vs-1v1-mid", 0).await;
+    app.screen = Screen::Vs { t: 1.4, step: 0 };
+    screen(app, dir, "vs-1v1", 0).await;
+    let roster: Vec<usize> = (0..app.reg.chars.len()).filter(|&i| !app.reg.chars[i].boss && !app.reg.chars[i].broken.get()).take(10).collect();
+    if roster.len() >= 10 {
+        app.mode = Mode::TeamSimul;
+        app.team_n = 5;
+        app.sel = (roster[0], roster[5], stage(app, "neon"));
+        app.team = Some(Team::new(roster[..5].to_vec(), roster[5..10].to_vec(), true));
+        app.screen = Screen::Vs { t: 0.0, step: 0 };
+        frames(app, 40).await;
+        println!("5v5 after load: vs={}", matches!(app.screen, Screen::Vs { .. }));
+        app.screen = Screen::Vs { t: -9.0, step: 200 };
+        frames(app, 3).await;
+        app.trans = 0.0;
+        app.screen = Screen::Vs { t: 1.5, step: 200 };
+        screen(app, dir, "vs-5v5", 0).await;
+        println!("5v5 screen vs={} msg={}", matches!(app.screen, Screen::Vs { .. }), app.msg);
+    }
 }

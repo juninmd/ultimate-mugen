@@ -153,17 +153,8 @@ impl KeyMap {
         for p in 0..2 { let s = m.slots[p]; if (0..N).any(|a| (a + 1..N).any(|b| s[a] == s[b])) { m.reset_slot(p); } }
         m
     }
-    #[cfg(not(target_arch = "wasm32"))]
-    fn path() -> std::path::PathBuf { std::env::current_exe().ok().and_then(|p| p.parent().map(|d| d.join("ultimate-mugen.keys"))).unwrap_or_else(|| "ultimate-mugen.keys".into()) }
-    pub fn load() -> Self {
-        #[cfg(not(target_arch = "wasm32"))]
-        if let Ok(t) = std::fs::read_to_string(Self::path()) { return Self::from_text(&t); }
-        KeyMap::default()
-    }
-    pub fn save(&self) {
-        #[cfg(not(target_arch = "wasm32"))]
-        let _ = std::fs::write(Self::path(), self.to_text());
-    }
+    pub fn load() -> Self { crate::storage::read("ultimate-mugen.keys").map(|t| Self::from_text(&t)).unwrap_or_default() }
+    pub fn save(&self) { crate::storage::write("ultimate-mugen.keys", &self.to_text()); }
 }
 
 #[cfg(test)]

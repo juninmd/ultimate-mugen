@@ -123,7 +123,6 @@ fn kb_bits(keys: &KeyMap, slot: usize, solo: bool) -> u32 {
     if slot == 0 && solo {
         let mut map = |kc: KeyCode, bit: u32| { if is_key_down(kc) { b |= bit; } };
         map(KeyCode::Up, k::U); map(KeyCode::Down, k::D); map(KeyCode::Left, k::L); map(KeyCode::Right, k::R);
-        map(KeyCode::Z, k::A); map(KeyCode::X, k::B); map(KeyCode::C, k::C); map(KeyCode::V, k::X); map(KeyCode::B, k::Y); map(KeyCode::N, k::Z);
     }
     b
 }

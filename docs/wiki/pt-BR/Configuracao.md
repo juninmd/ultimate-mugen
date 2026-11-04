@@ -2,7 +2,7 @@
 
 ## Arquivo `ultimate-mugen.cfg`
 
-Fica ao lado do executável e é gravado pelo menu **Vídeo**. Pode ser editado à mão.
+Fica ao lado do executável e é gravado pelo menu **Configurações** (menu principal ou menu de pausa: Vídeo, Áudio, Controles, Jogabilidade, Idioma, Sobre). Pode ser editado à mão. Na web o mesmo texto fica no `localStorage`, no Android no armazenamento privado do app.
 
 | Chave | Valores | Efeito |
 |---|---|---|
@@ -12,6 +12,16 @@ Fica ao lado do executável e é gravado pelo menu **Vídeo**. Pode ser editado 
 | `fps` | `0` / `1` | Mostra FPS |
 | `fx` | `0` a `2` | Pós-processamento (bloom, vinheta etc.) |
 | `impact_lv` | `0` mínimo (fotossensibilidade), `1` reduzido, `2` normal, `3` intenso | Força dos efeitos de impacto |
+| `version` | `2` | Versão do formato (arquivos antigos sem ela continuam válidos) |
+| `vsync` | `0` / `1` | V-Sync (nativo) |
+| `fps_cap` | `0` sem limite, `1` 30, `2` 60, `3` 120, `4` 144 | Limitador de quadros (nativo) |
+| `master` `music` `sfx` | `0` a `10` | Níveis de volume |
+| `mute` | `0` / `1` | Silencia tudo |
+| `difficulty` | `1` a `8` | Nível da CPU |
+| `round_time` | `0` 99 s, `1` 60 s, `2` 30 s, `3` infinito | Tempo do round |
+| `rounds` | `0` primeiro a 1, `1` primeiro a 2, `2` primeiro a 3 | Rounds para vencer |
+| `life` | `0` 50%, `1` 75%, `2` 100%, `3` 150%, `4` 200% | Multiplicador da barra de vida |
+| `lang` | `pt` / `en` | Idioma das telas de configurações e versus |
 
 ## Linha de comando
 

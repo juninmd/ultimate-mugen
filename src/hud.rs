@@ -220,8 +220,8 @@ impl Hud {
             }
             let (cx, cy) = (w / 2.0, 13.0);
             for k in 0..9 { let tx = cx - 8.0 + k as f32 * 2.0; let (a, b) = (p(tx, 21.5), p(tx, 23.0)); draw_line(a.x, a.y, b.x, b.y, 0.4 * s, Color::new(1.0, 1.0, 1.0, 0.4)); }
-            let t = if m.training { "--".to_string() } else { format!("{:02}", (m.timer + 59) / 60) };
-            let urgent = !m.training && m.timer > 0 && m.timer <= 10 * 60;
+            let t = if m.training || m.round_ticks == 0 { "--".to_string() } else { format!("{:02}", (m.timer + 59) / 60) };
+            let urgent = !m.training && m.round_ticks > 0 && m.timer > 0 && m.timer <= 10 * 60;
             let pulse = if urgent { 1.0 + 0.18 * (1.0 - ((m.timer % 60) as f32 / 60.0)) } else { 1.0 };
             if urgent { let a = 0.12 + 0.1 * (gt * 9.0).sin().abs(); poly::solid(&sp_box(&p, cx - 15.0, 5.0, 30.0, 17.0, 6.0), Color::new(1.0, 0.1, 0.1, a)); }
             outlined(&t, cx, cy + 5.2 * pulse, 14.0 * pulse, if urgent { hex("#ff5a5a") } else { WHITE }, Align::Center);

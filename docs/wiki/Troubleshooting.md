@@ -8,7 +8,7 @@
 | HD character too big or small | `localcoord` missing in the `.def` | Add `localcoord = 1280, 720` to `[Info]` |
 | Move has no effect | Controller not implemented yet | See the list in [CNS scripts](CNS-Scripts.md) |
 | UMF does not load | Invalid JSON or a missing required field | `cargo run --release` prints the `serde_json` error with line and column |
-| Game is slow | High art resolution | Video menu → Quality, or `quality=1` in the `.cfg` |
+| Game is slow | High art resolution | Settings → Video → Quality, or `quality=1` in the `.cfg` |
 | Too many flashes | Light sensitivity | `impact_lv=0` in the `.cfg` |
 | `mugen/` folder not found | Executable run from another directory | Set `UME_MUGEN_DIR` |
 

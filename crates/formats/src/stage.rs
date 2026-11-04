@@ -31,6 +31,29 @@ pub struct BgLayer {
     pub sin_x: [f32; 3],
     pub sin_y: [f32; 3],
     pub alpha: [f32; 2],
+    pub scale_start: [f32; 2],
+    pub scale_delta: [f32; 2],
+    pub angle: f32,
+    pub x_shear: f32,
+    pub mask_window: Option<[f32; 4]>,
+    pub window_delta: Option<[f32; 2]>,
+}
+
+impl BgLayer {
+    pub fn scale_at(&self, camera: [f32; 2]) -> [f32; 2] {
+        [0, 1].map(|a| (self.scale_start[a] + self.scale_delta[a] * camera[a] * self.delta[a]).clamp(0.0, 64.0))
+    }
+
+    pub fn window_scroll(&self) -> [f32; 2] {
+        self.window_delta.unwrap_or(self.delta)
+    }
+
+    pub fn clip_window(&self) -> Option<[f32; 4]> {
+        match (self.window, self.mask_window) {
+            (Some(a), Some(b)) => Some([a[0].max(b[0]), a[1].max(b[1]), a[2].min(b[2]), a[3].min(b[3])]),
+            (a, b) => a.or(b),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -160,11 +183,34 @@ fn pair(v: Vec<f32>, def: [f32; 2]) -> [f32; 2] {
     [v.first().copied().unwrap_or(def[0]), v.get(1).copied().unwrap_or(def[1])]
 }
 
+/// glTF/3D stages are rejected by design: detect the model request so the loader can warn once and keep the 2D layers.
+pub fn stage_requests_3d(text: &str) -> bool {
+    parse_ini(text).iter().any(|s| {
+        matches!(s.lname.as_str(), "model" | "model3d" | "stage3d" | "gltf" | "scene")
+            || s.entries.iter().any(|(k, v)| {
+                let v = v.to_ascii_lowercase();
+                (k == "model" || k == "gltf" || k == "scene" || k.contains("3dmodel")) && (v.ends_with(".glb") || v.ends_with(".gltf") || !v.is_empty())
+            })
+    })
+}
+
+fn warn_3d_once(path: &str) {
+    use std::sync::{Mutex, OnceLock};
+    static SEEN: OnceLock<Mutex<std::collections::HashSet<String>>> = OnceLock::new();
+    let seen = SEEN.get_or_init(|| Mutex::new(std::collections::HashSet::new()));
+    if let Ok(mut seen) = seen.lock() {
+        if seen.insert(path.to_string()) {
+            eprintln!("stage {path}: glTF/3D models are not supported; rendering the 2D background layers instead");
+        }
+    }
+}
+
 pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
     let def_path = norm_path(def_path);
     let base_dir = def_path.rfind('/').map(|i| &def_path[..i]).unwrap_or("");
     let t = text(vfs.get(&def_path).ok_or_else(|| format!("stage: {def_path} not found"))?);
     let secs = parse_ini(&t);
+    if stage_requests_3d(&t) { warn_3d_once(&def_path); }
     let get = |s: &str, k: &str| find_section(&secs, s).and_then(|s| s.get(k));
     let g = |s: &str, k: &str, d: f32| nums(get(s, k), &[d])[0];
 
@@ -209,7 +255,10 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         let delta = [delta_v[0], delta_v.get(1).copied().unwrap_or(delta_v[0])];
         let tile = pair(n("tile", &[0.0, 0.0]), [0.0, 0.0]);
         let anim = if kind == "anim" { anims.get(&(n("actionno", &[0.0])[0] as i32)).cloned() } else { None };
-        let win = if s.get("window").is_some() { Some(n("window", &[0.0, 0.0, 0.0, 0.0])) } else if s.get("maskwindow").is_some() { Some(n("maskwindow", &[0.0, 0.0, 0.0, 0.0])) } else { None };
+        let rect = |k: &str| s.get(k).map(|_| n(k, &[0.0, 0.0, 0.0, 0.0])).filter(|w| w.len() >= 4).map(|w| [w[0], w[1], w[2], w[3]]);
+        let spacing_key = if s.get("tilespacing").is_some() { "tilespacing" } else { "spacing" };
+        let scale_start = pair(n("scalestart", &[1.0, 1.0]), [1.0, 1.0]);
+        let scale_delta = pair(n("scaledelta", &[0.0, 0.0]), [0.0, 0.0]);
         let three = |k: &str| { let v = n(k, &[0.0, 0.0, 0.0]); [v[0], v.get(1).copied().unwrap_or(0.0), v.get(2).copied().unwrap_or(0.0)] };
         let alpha = n("alpha", &[256.0, 0.0]);
         layers.push(BgLayer {
@@ -217,7 +266,7 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
             start: pair(n("start", &[0.0, 0.0]), [0.0, 0.0]),
             delta,
             tile: [tile[0] as i32, tile[1] as i32],
-            tile_spacing: pair(n("tilespacing", &[0.0, 0.0]), [0.0, 0.0]),
+            tile_spacing: pair(n(spacing_key, &[0.0, 0.0]), [0.0, 0.0]),
             velocity: pair(n("velocity", &[0.0, 0.0]), [0.0, 0.0]),
             layer: n("layerno", &[0.0])[0] as i32,
             trans: s.get("trans").unwrap_or("none").to_lowercase(),
@@ -225,7 +274,13 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
             anim,
             id: n("id", &[0.0])[0] as i32,
             position_link: n("positionlink", &[0.0])[0] != 0.0,
-            window: win.filter(|w| w.len() >= 4).map(|w| [w[0], w[1], w[2], w[3]]),
+            window: rect("window"),
+            mask_window: rect("maskwindow"),
+            window_delta: s.get("windowdelta").map(|_| pair(n("windowdelta", &[0.0, 0.0]), [0.0, 0.0])),
+            scale_start,
+            scale_delta,
+            angle: n("angle", &[0.0])[0],
+            x_shear: n("xshear", &[0.0])[0],
             sin_x: three("sin.x"),
             sin_y: three("sin.y"),
             alpha: [alpha[0], alpha.get(1).copied().unwrap_or(0.0)],

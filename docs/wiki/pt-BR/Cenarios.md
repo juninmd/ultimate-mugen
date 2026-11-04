@@ -66,9 +66,22 @@ delta = .8, .8
 | `[PlayerInfo]` | `p1startx`, `p2startx` |
 | `[StageInfo]` | `zoffset`, `localcoord` |
 | `[BGdef]` | `spr` |
-| `[BG ...]` | `type` (`normal`, `anim`), `spriteno`, `actionno`, `layerno` (0 atrás, 1 na frente), `start`, `delta`, `tile`, `tilespacing`, `velocity`, `trans`, `mask` |
+| `[BG ...]` | `type` (`normal`, `anim`), `spriteno`, `actionno`, `layerno` (0 atrás, 1 na frente), `start`, `delta`, `tile`, `tilespacing`, `velocity`, `trans`, `mask`, `scalestart`, `scaledelta`, `angle`, `xshear`, `window`, `maskwindow`, `windowdelta`, `spacing` |
 
-Planejado: `[BGCtrlDef]`/`[BGCtrl]`, `window`, `[Music]`, sombras e reflexos configuráveis, `type = parallax`.
+Parâmetros de transformação da camada (Ikemen / M.U.G.E.N 1.1), aplicados tanto pelo renderizador quanto pela pré-visualização na seleção de cenário:
+
+| Chave | Significado |
+|---|---|
+| `scalestart = x, y` | Escala base do sprite, ancorada no eixo dele (padrão `1, 1`). |
+| `scaledelta = x, y` | Variação de escala por unidade de movimento da câmera, multiplicada por `delta`: `escala = scalestart + scaledelta * câmera * delta`; a camada cresce ou encolhe conforme a câmera se move (padrão `0, 0`). |
+| `angle` | Rotação em graus em torno do eixo do sprite, anti-horária para valores positivos. |
+| `xshear` | Cisalhamento horizontal: cada linha é deslocada por `xshear` vezes a distância dela ao eixo. |
+| `window = x1, y1, x2, y2` | Retângulo de recorte em unidades do cenário. |
+| `maskwindow = x1, y1, x2, y2` | Segundo retângulo de recorte; com os dois presentes a camada é recortada pela interseção. |
+| `windowdelta = x, y` | Quão rápido a janela de recorte acompanha a câmera (padrão: o `delta` da camada). |
+| `spacing = x, y` | Espaço entre os ladrilhos; usado quando `tilespacing` não existe (`tilespacing` vence se ambos existirem). |
+
+Planejado: `[Music]`, sombras e reflexos configuráveis, `type = parallax`.
 
 ## Ler o cenário a partir de scripts
 

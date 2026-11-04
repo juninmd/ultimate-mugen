@@ -528,6 +528,7 @@ impl Audio {
         self.stop_music();
         let v = self.music_volume * 0.35 * self.bgm_gain;
         let pcm = decode(bytes);
+        if pcm.is_none() { eprintln!("audio: unsupported or corrupt music file; falling back to the built-in track"); }
         let looped = pcm.as_ref().filter(|_| self.bgm_looping && (lp.start > 0 || lp.end > lp.start));
         let Some(p) = looped else {
             let Ok(s) = load_sound_from_bytes(bytes).await else { eprintln!("music: cannot decode this file (tracker, MIDI and unknown formats are unsupported), using the built-in stage music"); return false };

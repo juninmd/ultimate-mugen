@@ -36,7 +36,7 @@ pub enum Phase { Started, Moved, Ended, Cancelled }
 pub struct Touch { pub id: u64, pub phase: Phase, pub position: [f32; 2] }
 
 #[derive(Default)]
-pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode>, pub pressed_order: Vec<KeyCode>, pub mouse: [f32; 2], pub mouse_delta: [f32; 2], pub wheel: [f32; 2], pub mouse_down: bool, pub mouse_pressed: bool, pub touches: Vec<Touch>, primary_touch: Option<u64>, pub typed: String }
+pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode>, pub pressed_order: Vec<KeyCode>, pub mouse: [f32; 2], pub mouse_delta: [f32; 2], pub wheel: [f32; 2], pub mouse_down: bool, pub mouse_pressed: bool, pub touches: Vec<Touch>, primary_touch: Option<u64>, pub typed: String, pub pointer_scale: [f32; 2] }
 
 impl Input {
     pub fn is_down(&self, k: KeyCode) -> bool { self.down.contains(&k) }
@@ -78,6 +78,9 @@ pub struct Frame<'a> {
     pub clear: [f64; 4],
     pub post: Option<PostParams>,
     pub scale: f32,
+    pub window: [f32; 2],
+    pub stretch: Option<f32>,
+    pub linear: bool,
     pub resize: Option<[u32; 2]>,
     pub fullscreen: Option<bool>,
     pub vsync: Option<bool>,
@@ -93,7 +96,13 @@ pub trait Game {
 
 struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas, post: PostFx }
 
-struct Shell<G: Game> { cfg: Config, game: G, live: Option<Live>, pending: Option<Pending>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String>, pacer: Pacer, frame_cap: u32, watchdog: watchdog::Watchdog }
+pub const STRETCH_ASPECT: f32 = 16.0 / 9.0;
+
+pub fn logical_size(surface: [f32; 2], stretch: Option<f32>) -> [f32; 2] {
+    match stretch { Some(aspect) => [surface[1] * aspect, surface[1]], None => surface }
+}
+
+struct Shell<G: Game> { stretch: Option<f32>, linear: bool, cfg: Config, game: G, live: Option<Live>, pending: Option<Pending>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String>, pacer: Pacer, frame_cap: u32, watchdog: watchdog::Watchdog }
 
 #[derive(Default)]
 pub struct Pacer { debt: f32 }
@@ -192,11 +201,17 @@ impl<G: Game> Shell<G> {
         let dt = self.pacer.pace((now - self.last).as_secs_f32());
         self.last = now;
         live.canvas.clear();
-        let size = [live.config.width as f32, live.config.height as f32];
-        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, scale: live.window.scale_factor() as f32, resize: None, fullscreen: None, vsync: None, frame_cap: None, screenshot: None, quit: false };
+        let surface = [live.config.width as f32, live.config.height as f32];
+        let size = logical_size(surface, self.stretch);
+        self.input.pointer_scale = [size[0] / surface[0], size[1] / surface[1]];
+        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, scale: live.window.scale_factor() as f32, window: surface, stretch: self.stretch, linear: self.linear, resize: None, fullscreen: None, vsync: None, frame_cap: None, screenshot: None, quit: false };
         self.game.frame(&mut f);
         let (quit, c, post, resize, fullscreen, shot, vsync, cap) = (f.quit, f.clear, f.post, f.resize, f.fullscreen, f.screenshot.take(), f.vsync, f.frame_cap);
         if let Some(c) = cap { self.frame_cap = c; }
+        (self.stretch, self.linear) = (f.stretch, f.linear);
+        let size = logical_size(surface, self.stretch);
+        live.gpu.renderer.set_linear(self.linear);
+        live.gpu.renderer.set_scissor_scale([surface[0] / size[0], surface[1] / size[1]]);
         if let Some([w, h]) = resize { let _ = live.window.request_inner_size(PhysicalSize::new(w, h)); }
         if let Some(fs) = fullscreen { live.window.set_fullscreen(fs.then_some(Fullscreen::Borderless(None))); }
         let view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
@@ -332,7 +347,7 @@ pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
     // on the web `Poll` makes winit spin a postTask/AbortController loop next to requestAnimationFrame (GC churn, starved frames); redraws are already self-requested
     event_loop.set_control_flow(if cfg!(target_arch = "wasm32") { ControlFlow::Wait } else { ControlFlow::Poll });
     let now = Instant::now();
-    let mut shell = Shell { cfg, game, live: None, pending: None, input: Input::default(), start: now, last: now, frames: 0, error: None, pacer: Pacer::default(), frame_cap: 0, watchdog: watchdog::Watchdog::from_env() };
+    let mut shell = Shell { stretch: None, linear: false, cfg, game, live: None, pending: None, input: Input { pointer_scale: [1.0, 1.0], ..Input::default() }, start: now, last: now, frames: 0, error: None, pacer: Pacer::default(), frame_cap: 0, watchdog: watchdog::Watchdog::from_env() };
     #[cfg(target_arch = "wasm32")]
     {
         use winit::platform::web::EventLoopExtWebSys;
@@ -351,6 +366,14 @@ pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
 #[cfg(test)]
 mod tests {
     use super::Pacer;
+
+    #[test]
+    fn stretch_forces_sixteen_nine_logical_space_on_any_window() {
+        assert_eq!(super::logical_size([1000.0, 500.0], None), [1000.0, 500.0]);
+        let [w, h] = super::logical_size([1000.0, 900.0], Some(super::STRETCH_ASPECT));
+        assert_eq!(h, 900.0);
+        assert!((w / h - 16.0 / 9.0).abs() < 1e-5);
+    }
 
     #[test]
     fn jittery_vsync_frames_become_exact_periods() {

@@ -4,7 +4,7 @@ use crate::controls::{nav, Controls};
 use crate::registry::Registry;
 use crate::render::{Gfx, MatchRenderer, DrawOpts};
 use crate::session::{Pilot, Session};
-use crate::settings::{Rules, Settings, FX_LEVELS, IMPACT, QUALITY, RESOLUTIONS};
+use crate::settings::{Rules, Settings, WindowWatch, FX_LEVELS, IMPACT, QUALITY, RESOLUTIONS};
 use crate::stages::Stage;
 use crate::ui::*;
 use crate::gfx::*;
@@ -128,6 +128,8 @@ pub struct App {
     sel_flash: (usize, f32),
     stage_row: usize,
     quality_check: f32,
+    window_watch: WindowWatch,
+    window_pinned: bool,
     updater: crate::update::Checker,
     pub trans: f32,
     screen_t: f32,
@@ -180,7 +182,7 @@ impl App {
         App {
             reg, market: crate::market::Market::open(), market_ui: market::MarketUi::default(), ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: settings.difficulty, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, key_edit: None, move_page: 0, pending: Pending::default(), import_jobs: vec![], team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
+            settings, key_edit: None, move_page: 0, pending: Pending::default(), import_jobs: vec![], window_watch: WindowWatch::default(), window_pinned: false, team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -193,6 +195,11 @@ impl App {
             self.reg.unload_all();
             self.g.trim_next_frame();
         }
+    }
+    fn remember_window_size(&mut self, dt: f32) {
+        if self.window_pinned || cfg!(any(target_arch = "wasm32", target_os = "android", target_os = "ios")) { return; }
+        let (w, h) = window_size();
+        if let Some(size) = self.window_watch.observe((w as u32, h as u32), dt, self.settings.fullscreen, self.settings.window) { self.settings.window = size; self.settings.save(); }
     }
     fn toggle_fullscreen(&mut self) { self.settings.fullscreen = !self.settings.fullscreen; self.settings.apply_window(); self.settings.save(); }
 
@@ -216,6 +223,8 @@ impl App {
             self.applied = Some(self.settings);
         }
         self.g.post.level = self.settings.fx as u8;
+        set_keep_aspect(self.settings.keep_aspect);
+        set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;
         self.c.update();
         self.preview_t += get_frame_time();
@@ -235,6 +244,7 @@ impl App {
             Screen::Cutscene { .. } => self.cutscene(),
         }
         if is_key_pressed(KeyCode::F11) { self.toggle_fullscreen(); }
+        self.remember_window_size(dt);
         if is_key_pressed(KeyCode::F3) { self.settings.fps = !self.settings.fps; self.settings.save(); }
         // auto art quality follows the display (checked outside fights so live sprites are never swapped)
         self.quality_check += dt;

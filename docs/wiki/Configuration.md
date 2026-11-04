@@ -22,6 +22,13 @@ Lives next to the executable and is written by the **Settings** menu (main menu 
 | `rounds` | `0` first to 1, `1` first to 2, `2` first to 3 | Rounds needed to win |
 | `life` | `0` 50%, `1` 75%, `2` 100%, `3` 150%, `4` 200% | Life bar multiplier |
 | `lang` | `pt` / `en` | Language of the settings and versus screens |
+| `keep_aspect` | `1` (default) / `0` | `1` letterboxes the 16:9 picture inside any window shape; `0` stretches it to fill the window |
+| `filter` | `nearest` (default) / `linear` | Sprite sampling when scaled: crisp pixels or bilinear smoothing |
+| `window` | `WIDTHxHEIGHT`, `0x0` when unset | Windowed size, saved automatically about one second after you stop resizing; overrides `res` until you pick a size in the Video menu |
+
+## Resizable window
+
+The window can be dragged to any size. The game draws into a fixed 16:9 logical space that is scaled to the window, so the fight area, HUD and menus stay consistent at every size and the window size is independent from the game resolution. With **Keep aspect** on, the unused strip is black; with it off, the picture is stretched and mouse and touch input are mapped back to the stretched space. The `--res WxH` flag still sets the starting window size and takes priority over the saved `window` value.
 
 ## Command line
 

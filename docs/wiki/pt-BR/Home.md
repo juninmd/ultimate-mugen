@@ -34,6 +34,10 @@ Lutadores UMF e M.U.G.E.N rodam na mesma máquina de estados e podem se enfrenta
 
 O plano de compatibilidade e as decisões de arquitetura estão em [`docs/ROADMAP.pt-BR.md`](../../ROADMAP.pt-BR.md). Itens marcados como **planejado** nesta wiki ainda não existem na versão atual.
 
+## Status de compatibilidade
+
+O progresso rumo à paridade com o Ikemen GO v1.0.0 é acompanhado na [issue #135](https://github.com/juninmd/ultimate-mugen/issues/135), com uma issue para cada controlador, trigger ou recurso faltante. As listas de controladores, triggers e redirecionamentos suportados em [Scripts CNS](Scripts-CNS.md) são conferidas com a engine por `cargo test -p ume-engine --test wiki_sync`: um nome listado que a engine não trata, um nome implementado que não está listado ou uma diferença entre as páginas em inglês e português quebra o teste. Cada carregamento de personagem também aponta os controladores, triggers e parâmetros usados que a engine ignora (veja "Diagnóstico no carregamento" na mesma página).
+
 ## Agradecimentos
 
 Obrigado à equipe do [Ikemen GO](https://github.com/ikemen-engine/Ikemen-GO) e à Elecbyte, criadora do M.U.G.E.N, pela inspiração.

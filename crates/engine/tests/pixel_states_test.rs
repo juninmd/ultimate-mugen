@@ -29,7 +29,7 @@ fn frame_art(def: &CharDef, anim: i32, frame: usize) -> &ImageData {
 #[test]
 fn every_fighter_with_a_sprite_folder_draws_it() {
     let ids = fighters_where("01_idle.png");
-    assert!(ids.len() >= 11, "the eleven shipped fighters have sprite folders, found {ids:?}");
+    assert!(ids.len() >= 16, "all sixteen native fighters have sprite folders, found {ids:?}");
     for id in ids {
         let def = compiled(&id);
         assert!(def.sprites.values().any(|s| s.image.is_some()), "{id}: sprite images loaded");
@@ -39,7 +39,7 @@ fn every_fighter_with_a_sprite_folder_draws_it() {
 #[test]
 fn state_animations_use_their_own_art() {
     let ids = fighters_where("17_power2.png");
-    assert!(ids.len() >= 10, "ten fighters ship the full pixel-art pack, found {ids:?}");
+    assert!(ids.len() >= 15, "fifteen fighters ship the full pixel-art pack (kaito keeps its older one), found {ids:?}");
     for id in ids {
         let def = compiled(&id);
         let idle = frame_art(&def, 0, 0);

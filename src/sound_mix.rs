@@ -23,6 +23,20 @@ impl Pcm {
         Pcm { rate: self.rate, frames: self.frames.get(start.min(end)..end).unwrap_or(&[]).to_vec() }
     }
 
+    pub fn resume_at(&self, frame: usize, looping: bool) -> Option<Pcm> {
+        let n = self.frames.len();
+        if n == 0 {
+            return None;
+        }
+        if looping {
+            let at = frame % n;
+            let mut frames = self.frames[at..].to_vec();
+            frames.extend_from_slice(&self.frames[..at]);
+            return Some(Pcm { rate: self.rate, frames });
+        }
+        (frame < n).then(|| self.slice(frame, n))
+    }
+
     pub fn render(&self, gain: f32, pan: f32, rate: f32) -> Pcm {
         let (l, r) = pan_gains(pan);
         let step = rate.clamp(0.05, 8.0) as f64;
@@ -139,6 +153,19 @@ mod tests {
         assert_eq!(p.render(1.0, 0.0, 0.5).frames.len(), 2000);
         assert_eq!(p.slice(900, 5000).frames.len(), 100);
         assert!(p.slice(2000, 3000).frames.is_empty());
+    }
+
+    #[test]
+    fn resume_keeps_phase() {
+        let p = tone(100);
+        let once = p.resume_at(30, false).unwrap();
+        assert_eq!(once.frames.len(), 70);
+        assert_eq!(once.frames[0], p.frames[30]);
+        assert!(p.resume_at(100, false).is_none());
+        let looped = p.resume_at(230, true).unwrap();
+        assert_eq!(looped.frames.len(), 100);
+        assert_eq!(looped.frames[0], p.frames[30]);
+        assert_eq!(looped.frames[70], p.frames[0]);
     }
 
     #[test]

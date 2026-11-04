@@ -149,5 +149,10 @@ pub fn default_constants() -> HashMap<String, f64> {
     s("velocity.airjump.back.x", -2.55); s("velocity.airjump.fwd.x", 2.5);
     s("movement.airjump.num", 1.0); s("movement.airjump.height", 35.0); s("movement.yaccel", 0.44);
     s("movement.stand.friction", 0.85); s("movement.crouch.friction", 0.82);
+    // M.U.G.E.N. 1.1 common1 constants: without them a bouncing / recovering fighter gets 0 gravity and flies off (frozen in 5101 etc.)
+    s("movement.down.bounce.yaccel", 0.4); s("movement.down.bounce.groundlevel", 12.0); s("movement.down.bounce.offset.x", 0.0); s("movement.down.bounce.offset.y", 20.0);
+    s("movement.down.friction.threshold", 0.05); s("movement.air.gethit.groundlevel", 25.0); s("movement.air.gethit.groundrecover.ground.threshold", -20.0);
+    s("movement.air.gethit.groundrecover.groundlevel", 10.0); s("movement.air.gethit.airrecover.threshold", -1.0); s("movement.air.gethit.airrecover.yaccel", 0.35);
+    s("movement.air.gethit.trip.groundlevel", 15.0);
     m
 }

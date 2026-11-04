@@ -5,14 +5,14 @@ use ume_render::{Canvas, Color, Quad, Rect};
 #[derive(Clone, Copy)]
 struct Glyph { rect: Option<Rect>, left: f32, top: f32, advance: f32 }
 
-pub struct Font { font: fontdue::Font, glyphs: HashMap<(char, u16), Glyph> }
+pub struct Font { font: fontdue::Font, glyphs: HashMap<(char, u16), Glyph>, full: bool }
 
 fn quantize(px: f32) -> u16 { px.round().clamp(1.0, 512.0) as u16 }
 
 impl Font {
     pub fn from_bytes(bytes: &[u8]) -> Result<Font, String> {
         let font = fontdue::Font::from_bytes(bytes, fontdue::FontSettings::default()).map_err(|e| e.to_string())?;
-        Ok(Font { font, glyphs: HashMap::new() })
+        Ok(Font { font, glyphs: HashMap::new(), full: false })
     }
 
     pub fn ascent(&self, px: f32) -> f32 {
@@ -31,6 +31,7 @@ impl Font {
         if let Some(g) = self.glyphs.get(&(c, px)) { return *g; }
         let (m, coverage) = self.font.rasterize(c, px as f32);
         let rect = (m.width > 0 && m.height > 0).then(|| gpu.rgba_atlas.alloc(m.width as u32, m.height as u32)).flatten();
+        if rect.is_none() && m.width > 0 && m.height > 0 { self.full = true; return Glyph { rect: None, left: 0.0, top: 0.0, advance: m.advance_width }; }
         if let Some(r) = rect {
             let rgba: Vec<u8> = coverage.iter().flat_map(|&a| [255, 255, 255, a]).collect();
             gpu.renderer.upload_rgba(&gpu.queue, r, &rgba);
@@ -58,6 +59,10 @@ impl Font {
     }
 
     pub fn cached_glyphs(&self) -> usize { self.glyphs.len() }
+
+    pub fn clear_cache(&mut self) { self.glyphs.clear(); self.full = false; }
+
+    pub fn atlas_full(&self) -> bool { self.full }
 }
 
 #[cfg(test)]

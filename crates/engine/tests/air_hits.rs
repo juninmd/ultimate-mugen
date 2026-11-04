@@ -13,7 +13,7 @@ fn state(id: i32, ty: &str, mv: &str, phys: &str) -> StateDef {
 fn dummy() -> Arc<CharDef> {
     let mut cd = CharDef::empty("dummy");
     cd.local_w = 320.0; cd.local_h = 240.0;
-    for s in [state(0, "S", "I", "S"), state(5000, "S", "H", "S"), state(5020, "A", "H", "N")] { cd.states.insert(s.id, s); }
+    for s in [state(0, "S", "I", "S"), state(5000, "S", "H", "S"), state(5020, "A", "H", "N"), state(5110, "L", "H", "N"), state(5120, "L", "I", "N"), state(5050, "A", "H", "N")] { cd.states.insert(s.id, s); }
     Arc::new(cd)
 }
 
@@ -67,4 +67,25 @@ fn juggle_budget_stops_air_combos() {
     hd.juggle = 0;
     m.fighters[b].juggle_used = 15;
     assert!(m.can_be_hit(b, &hd, 0), "zero-point moves are never blocked");
+}
+
+#[test]
+fn fighter_lying_down_without_an_exit_state_gets_up() {
+    // many characters ship a common1.cns whose 5110 has no ChangeState out; the engine must stand the fighter up
+    let (mut m, _a, b) = duel();
+    let d = m.fighters[b].def.clone();
+    m.change_state(b, 5110, d);
+    for _ in 0..200 { m.tick(&[0, 0]); }
+    assert_ne!(m.fighters[b].state_no, 5110);
+    assert_eq!(m.fighters[b].move_type, 'I', "back in a neutral state");
+}
+
+#[test]
+fn watchdog_returns_control_after_fifteen_seconds_without_it() {
+    let (mut m, _a, b) = duel();
+    let d = m.fighters[b].def.clone();
+    m.change_state(b, 5050, d); // falling state that never lands in this dummy
+    m.fighters[b].ctrl = false;
+    for _ in 0..1000 { m.tick(&[0, 0]); }
+    assert!(m.fighters[b].ctrl, "control must come back");
 }

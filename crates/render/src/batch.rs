@@ -28,15 +28,15 @@ impl Quad {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct DrawCall { pub blend: Blend, pub first_index: u32, pub index_count: u32 }
+pub struct DrawCall { pub blend: Blend, pub first_index: u32, pub index_count: u32, pub scissor: Option<[u32; 4]> }
 
 #[derive(Default)]
-pub struct Batch { pub vertices: Vec<Vertex>, pub indices: Vec<u32>, pub calls: Vec<DrawCall> }
+pub struct Batch { pub vertices: Vec<Vertex>, pub indices: Vec<u32>, pub calls: Vec<DrawCall>, pub scissor: Option<[u32; 4]> }
 
 impl Batch {
     pub fn new() -> Self { Batch::default() }
 
-    pub fn clear(&mut self) { self.vertices.clear(); self.indices.clear(); self.calls.clear(); }
+    pub fn clear(&mut self) { self.vertices.clear(); self.indices.clear(); self.calls.clear(); self.scissor = None; }
 
     pub fn push(&mut self, q: &Quad) {
         let [x, y, w, h] = q.dst;
@@ -64,8 +64,8 @@ impl Batch {
     fn extend_call(&mut self, blend: Blend, count: u32) {
         let first = self.indices.len() as u32 - count;
         match self.calls.last_mut() {
-            Some(c) if c.blend == blend => c.index_count += count,
-            _ => self.calls.push(DrawCall { blend, first_index: first, index_count: count }),
+            Some(c) if c.blend == blend && c.scissor == self.scissor => c.index_count += count,
+            _ => self.calls.push(DrawCall { blend, first_index: first, index_count: count, scissor: self.scissor }),
         }
     }
 }
@@ -87,9 +87,9 @@ mod tests {
         b.push(&q);
         assert_eq!(b.vertices.len(), 16);
         assert_eq!(b.calls, vec![
-            DrawCall { blend: Blend::Alpha, first_index: 0, index_count: 12 },
-            DrawCall { blend: Blend::Add, first_index: 12, index_count: 6 },
-            DrawCall { blend: Blend::Alpha, first_index: 18, index_count: 6 },
+            DrawCall { blend: Blend::Alpha, first_index: 0, index_count: 12, scissor: None },
+            DrawCall { blend: Blend::Add, first_index: 12, index_count: 6, scissor: None },
+            DrawCall { blend: Blend::Alpha, first_index: 18, index_count: 6, scissor: None },
         ]);
     }
 

@@ -4,7 +4,7 @@
 use crate::app::{App, Mode};
 use crate::shots::{find, stage};
 use crate::stagefx::{Impulse, ImpulseKind};
-use macroquad::prelude::*;
+use crate::gfx::*;
 
 async fn draw_frames(app: &mut App, n: usize, shot: Option<String>) {
     let mut tot = 0.0;

@@ -4,7 +4,7 @@
 use crate::poly;
 use crate::render::Gfx;
 use crate::ui::Ui;
-use macroquad::prelude::*;
+use crate::gfx::*;
 use ume_engine::matchs::{Event, Match};
 
 #[derive(Clone, Copy, PartialEq)]
@@ -470,7 +470,7 @@ impl Vfx {
         let hash = |i: f32, k: f32| ((i * 12.9898 + k * 78.233).sin() * 43758.5453).fract().abs();
         match self.weather {
             Weather::Rain => {
-                gl_use_default_material();
+                set_blend(GfxBlend::Alpha);
                 for i in 0..170 {
                     let f = i as f32;
                     let (hx, hy, hs) = (hash(f, 1.0), hash(f, 2.0), hash(f, 3.0));
@@ -490,7 +490,7 @@ impl Vfx {
             }
             Weather::Fireflies | Weather::Wisps => {
                 let col = if self.weather == Weather::Fireflies { (0.85, 1.0, 0.4) } else { (0.45, 0.95, 0.9) };
-                gl_use_default_material();
+                set_blend(GfxBlend::Alpha);
                 for i in 0..26 {
                     let f = i as f32;
                     let (hx, hy, hs) = (hash(f, 8.0), hash(f, 9.0), hash(f, 10.0));
@@ -535,7 +535,7 @@ impl Vfx {
             }
         }
         // additive
-        gl_use_material(&g.add);
+        set_blend(GfxBlend::Add);
         for p in self.parts.iter().filter(|p| matches!(p.k, Kind::Spark | Kind::Glow | Kind::Ember)) {
             let a = (p.life / p.max).clamp(0.0, 1.0);
             let c = tp(p.x, p.y);
@@ -571,7 +571,7 @@ impl Vfx {
             let c = tp(r.x, r.y);
             poly::ring(c, lerp(r.r0, r.r1, e) * s, (r.w * (1.0 - t) + 0.4) * s, Color::new(r.col[0], r.col[1], r.col[2], (1.0 - t) * 0.9));
         }
-        gl_use_default_material();
+        set_blend(GfxBlend::Alpha);
         // damage numbers / labels
         for f in &self.floats {
             let t = f.t / 0.9;
@@ -614,7 +614,7 @@ pub fn speed_lines(focus: (f32, f32), a: f32, col: [f32; 3], seed: u32, n: usize
     let (w, h) = (screen_width(), screen_height());
     let reach = (w * w + h * h).sqrt();
     let seed = seed as f32;
-    gl_use_default_material();
+    set_blend(GfxBlend::Alpha);
     for i in 0..n {
         let h1 = ((i as f32 * 12.9898 + seed * 7.13).sin() * 43758.5453).fract().abs();
         let h2 = ((i as f32 * 78.233 + seed * 3.7).sin() * 12543.1).fract().abs();

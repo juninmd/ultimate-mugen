@@ -1,13 +1,18 @@
 pub mod sprites;
+pub mod audio;
+pub mod quad;
+mod screenshot;
+use screenshot::Save;
 pub mod text;
 
 use std::collections::HashSet;
 use std::sync::Arc;
 use std::time::Instant;
-use ume_render::{Atlas, Canvas, Renderer, Target};
+use ume_render::{Atlas, Canvas, PostFx, Renderer, Target};
+pub use ume_render::PostParams;
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
-use winit::event::{ElementState, WindowEvent};
+use winit::event::{ElementState, MouseButton, MouseScrollDelta, TouchPhase, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
 use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{Fullscreen, Window, WindowId};
@@ -21,12 +26,35 @@ impl Default for Config {
     fn default() -> Self { Config { title: "Ultimate MUGEN".into(), width: 1280, height: 720, fullscreen: false, max_frames: None } }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Phase { Started, Moved, Ended, Cancelled }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Touch { pub id: u64, pub phase: Phase, pub position: [f32; 2] }
+
 #[derive(Default)]
-pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode> }
+pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode>, pub pressed_order: Vec<KeyCode>, pub mouse: [f32; 2], pub mouse_delta: [f32; 2], pub wheel: [f32; 2], pub mouse_down: bool, pub mouse_pressed: bool, pub touches: Vec<Touch> }
 
 impl Input {
     pub fn is_down(&self, k: KeyCode) -> bool { self.down.contains(&k) }
     pub fn is_pressed(&self, k: KeyCode) -> bool { self.pressed.contains(&k) }
+
+    fn end_frame(&mut self) {
+        self.pressed.clear();
+        self.pressed_order.clear();
+        self.mouse_pressed = false;
+        self.mouse_delta = [0.0; 2];
+        self.wheel = [0.0; 2];
+        self.touches.retain(|t| !matches!(t.phase, Phase::Ended | Phase::Cancelled));
+        for t in &mut self.touches { if t.phase == Phase::Started { t.phase = Phase::Moved; } }
+    }
+
+    fn touch(&mut self, id: u64, phase: Phase, position: [f32; 2]) {
+        match self.touches.iter_mut().find(|t| t.id == id) {
+            Some(t) => { t.position = position; if t.phase != Phase::Started || phase != Phase::Moved { t.phase = phase; } }
+            None => self.touches.push(Touch { id, phase, position }),
+        }
+    }
 }
 
 pub struct Gpu { pub device: wgpu::Device, pub queue: wgpu::Queue, pub renderer: Renderer, pub rgba_atlas: Atlas, pub index_atlas: Atlas }
@@ -39,6 +67,11 @@ pub struct Frame<'a> {
     pub dt: f32,
     pub time: f64,
     pub clear: [f64; 4],
+    pub post: Option<PostParams>,
+    pub scale: f32,
+    pub resize: Option<[u32; 2]>,
+    pub fullscreen: Option<bool>,
+    pub screenshot: Option<String>,
     pub quit: bool,
 }
 
@@ -47,7 +80,7 @@ pub trait Game {
     fn frame(&mut self, f: &mut Frame);
 }
 
-struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas }
+struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas, post: PostFx }
 
 struct Shell<G: Game> { cfg: Config, game: G, live: Option<Live>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String> }
 
@@ -64,14 +97,17 @@ fn init_live(event_loop: &ActiveEventLoop, cfg: &Config) -> Result<Live, String>
     let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor { required_limits: limits, ..Default::default() })).map_err(|e| e.to_string())?;
     let size = window.inner_size();
     let mut config = surface.get_default_config(&adapter, size.width.max(1), size.height.max(1)).ok_or("surface unsupported by adapter")?;
-    if let Some(f) = surface.get_capabilities(&adapter).formats.into_iter().find(|f| !f.is_srgb()) { config.format = f; }
+    let caps = surface.get_capabilities(&adapter);
+    if let Some(f) = caps.formats.iter().copied().find(|f| !f.is_srgb()) { config.format = f; }
+    if caps.usages.contains(wgpu::TextureUsages::COPY_SRC) { config.usage |= wgpu::TextureUsages::COPY_SRC; }
     surface.configure(&device, &config);
     let side = ATLAS_SIZE.min(device.limits().max_texture_dimension_2d);
     let renderer = Renderer::new(&device, config.format, [side, side]);
     let mut rgba_atlas = Atlas::new(side, side);
     let canvas = Canvas::new(&renderer, &queue, &mut rgba_atlas).ok_or("atlas too small")?;
+    let post = PostFx::new(&device, config.format);
     let gpu = Gpu { device, queue, renderer, rgba_atlas, index_atlas: Atlas::new(side, side) };
-    Ok(Live { window, surface, config, gpu, canvas })
+    Ok(Live { window, surface, config, gpu, canvas, post })
 }
 
 impl<G: Game> Shell<G> {
@@ -86,17 +122,35 @@ impl<G: Game> Shell<G> {
         self.last = now;
         live.canvas.clear();
         let size = [live.config.width as f32, live.config.height as f32];
-        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], quit: false };
+        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, scale: live.window.scale_factor() as f32, resize: None, fullscreen: None, screenshot: None, quit: false };
         self.game.frame(&mut f);
-        let (quit, c) = (f.quit, f.clear);
+        let (quit, c, post, resize, fullscreen, shot) = (f.quit, f.clear, f.post, f.resize, f.fullscreen, f.screenshot.take());
+        if let Some([w, h]) = resize { let _ = live.window.request_inner_size(PhysicalSize::new(w, h)); }
+        if let Some(fs) = fullscreen { live.window.set_fullscreen(fs.then_some(Fullscreen::Borderless(None))); }
         let view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let gpu = &mut live.gpu;
         let mut enc = gpu.device.create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
-        gpu.renderer.draw(&gpu.device, &gpu.queue, &mut enc, Target { view: &view, size, clear: Some(wgpu::Color { r: c[0], g: c[1], b: c[2], a: c[3] }) }, &live.canvas.batch);
+        let clear = Some(wgpu::Color { r: c[0], g: c[1], b: c[2], a: c[3] });
+        let offscreen = shot.as_ref().filter(|_| !frame.texture.usage().contains(wgpu::TextureUsages::COPY_SRC)).map(|_| screenshot::target(&gpu.device, &frame.texture));
+        let offscreen_view = offscreen.as_ref().map(|t| t.create_view(&wgpu::TextureViewDescriptor::default()));
+        for v in std::iter::once(&view).chain(offscreen_view.as_ref()) {
+            match post {
+                Some(p) => {
+                    let scene = live.post.scene_view(&gpu.device, [live.config.width, live.config.height]).clone();
+                    gpu.renderer.draw(&gpu.device, &gpu.queue, &mut enc, Target { view: &scene, size, clear }, &live.canvas.batch);
+                    live.post.apply(&gpu.queue, &mut enc, v, &p);
+                }
+                None => gpu.renderer.draw(&gpu.device, &gpu.queue, &mut enc, Target { view: v, size, clear }, &live.canvas.batch),
+            }
+        }
+        let readback = shot.map(|path| (path, screenshot::copy(&gpu.device, &mut enc, offscreen.as_ref().unwrap_or(&frame.texture))));
         gpu.queue.submit([enc.finish()]);
+        if let Some((path, rb)) = readback {
+            if let Err(e) = rb.save(&gpu.device, &path) { eprintln!("screenshot {path}: {e}"); }
+        }
         live.window.pre_present_notify();
         live.gpu.queue.present(frame);
-        self.input.pressed.clear();
+        self.input.end_frame();
         self.frames += 1;
         if quit || self.cfg.max_frames.is_some_and(|m| self.frames >= m) { event_loop.exit(); return; }
         live.window.request_redraw();
@@ -122,10 +176,28 @@ impl<G: Game> ApplicationHandler for Shell<G> {
             },
             WindowEvent::KeyboardInput { event, .. } => if let PhysicalKey::Code(k) = event.physical_key {
                 match event.state {
-                    ElementState::Pressed => { if !event.repeat { self.input.pressed.insert(k); } self.input.down.insert(k); }
+                    ElementState::Pressed => { if !event.repeat { self.input.pressed.insert(k); self.input.pressed_order.push(k); } self.input.down.insert(k); }
                     ElementState::Released => { self.input.down.remove(&k); }
                 }
             },
+            WindowEvent::CursorMoved { position, .. } => {
+                let p = [position.x as f32, position.y as f32];
+                self.input.mouse_delta = [self.input.mouse_delta[0] + p[0] - self.input.mouse[0], self.input.mouse_delta[1] + p[1] - self.input.mouse[1]];
+                self.input.mouse = p;
+            }
+            WindowEvent::MouseWheel { delta, .. } => {
+                let [x, y] = match delta { MouseScrollDelta::LineDelta(x, y) => [x, y], MouseScrollDelta::PixelDelta(p) => [p.x as f32 / 40.0, p.y as f32 / 40.0] };
+                self.input.wheel = [self.input.wheel[0] + x, self.input.wheel[1] + y];
+            }
+            WindowEvent::MouseInput { state, button: MouseButton::Left, .. } => {
+                let down = state == ElementState::Pressed;
+                if down && !self.input.mouse_down { self.input.mouse_pressed = true; }
+                self.input.mouse_down = down;
+            }
+            WindowEvent::Touch(t) => {
+                let phase = match t.phase { TouchPhase::Started => Phase::Started, TouchPhase::Moved => Phase::Moved, TouchPhase::Ended => Phase::Ended, TouchPhase::Cancelled => Phase::Cancelled };
+                self.input.touch(t.id, phase, [t.location.x as f32, t.location.y as f32]);
+            }
             WindowEvent::RedrawRequested => self.redraw(event_loop),
             _ => {}
         }

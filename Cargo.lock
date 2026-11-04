@@ -2568,6 +2568,7 @@ dependencies = [
  "ume-engine",
  "ume-formats",
  "ume-netplay",
+ "ume-shell",
  "ureq",
 ]
 
@@ -2612,7 +2613,10 @@ name = "ume-shell"
 version = "0.2.0"
 dependencies = [
  "fontdue",
+ "glam",
+ "png",
  "pollster",
+ "quad-snd",
  "ume-engine",
  "ume-formats",
  "ume-render",

@@ -172,8 +172,10 @@ A Cargo workspace with strict separation between pure parsing, the deterministic
 ultimate-mugen/
 ├── crates/
 │   ├── formats/      # Pure M.U.G.E.N format parsers and decoders (no display dependencies)
-│   └── engine/       # Deterministic fight VM, physics, collisions, AI and UMF compiler
-├── src/              # Application layer (macroquad, rendering, audio, HID/gamepads, HUD)
+│   ├── engine/       # Deterministic fight VM, physics, collisions, AI and UMF compiler
+│   ├── render/       # wgpu renderer: atlas, batched sprites with palettes in WGSL, post-processing
+│   └── shell/        # winit window, input, text, audio and the immediate-mode API used by the app
+├── src/              # Application layer (screens, rendering, audio, HID/gamepads, HUD); wgpu on desktop, macroquad on web/mobile until those targets move
 ├── assets/           # OFL fonts, UMF definitions (.json) and asset packs
 ├── docs/             # Detailed technical documentation, roadmap and research
 └── web/              # HTML shell, PWA, service worker and JS glue code

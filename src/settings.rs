@@ -1,5 +1,5 @@
 //! Video / quality settings: fullscreen, window size presets (up to 4K), art quality, FPS counter. Persisted next to the executable (native).
-use macroquad::prelude::*;
+use crate::gfx::*;
 
 pub const RESOLUTIONS: [(u32, u32, &str); 5] = [(1280, 720, "1280×720 (HD)"), (1920, 1080, "1920×1080 (Full HD)"), (2560, 1440, "2560×1440 (QHD)"), (3840, 2160, "3840×2160 (4K UHD)"), (5120, 2880, "5120×2880 (5K)")];
 /// Art quality: 0 = auto (by display height), then fixed pixels-per-unit for procedural art.
@@ -45,10 +45,10 @@ impl Settings {
         let _ = std::fs::write(Self::path(), format!("fullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\n", self.fullscreen as i32, self.res, self.quality, self.fps as i32, self.fx, self.impact));
     }
     /// Physical (pixel) height of the drawable area.
-    pub fn physical_h() -> f32 { screen_height() * macroquad::miniquad::window::dpi_scale() }
+    pub fn physical_h() -> f32 { screen_height() * dpi_scale() }
     pub fn apply_window(&self) {
         set_fullscreen(self.fullscreen);
         #[cfg(not(target_arch = "wasm32"))]
-        if !self.fullscreen { let (w, h, _) = RESOLUTIONS[self.res.min(RESOLUTIONS.len() - 1)]; { let d = macroquad::miniquad::window::dpi_scale().max(0.5); request_new_screen_size(w as f32 / d, h as f32 / d) }; }
+        if !self.fullscreen { let (w, h, _) = RESOLUTIONS[self.res.min(RESOLUTIONS.len() - 1)]; { let d = dpi_scale().max(0.5); request_new_screen_size(w as f32 / d, h as f32 / d) }; }
     }
 }

@@ -1,7 +1,7 @@
 //! In-fight HUD drawn in game-view units (426.67 x 240) using the renderer's transform.
 use crate::render::Gfx;
 use crate::ui::{alpha, hex, Align, Ui};
-use macroquad::prelude::*;
+use crate::gfx::*;
 use ume_engine::fighter::Fighter;
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 use crate::poly;

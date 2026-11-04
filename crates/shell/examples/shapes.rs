@@ -10,6 +10,7 @@ impl Game for Demo {
         if f.input.is_down(Key::ArrowRight) { self.x += 200.0 * f.dt; }
         if f.input.is_down(Key::ArrowLeft) { self.x -= 200.0 * f.dt; }
         f.clear = [0.08, 0.09, 0.14, 1.0];
+        if std::env::var_os("UME_POST").is_some() { f.post = Some(ume_shell::PostParams { bloom: 0.9, vignette: 0.5, chroma: 0.6, grain: 0.035, contrast: 1.07, time: (f.time * 60.0).floor() as f32 % 97.0, ..Default::default() }); }
         let [w, h] = f.size;
         f.canvas.rect(0.0, h * 0.75, w, h * 0.25, Color::rgba(40, 60, 90, 255));
         f.canvas.circle([w * 0.5 + self.x, h * 0.5], h * 0.1, Color::rgba(230, 90, 40, 255));

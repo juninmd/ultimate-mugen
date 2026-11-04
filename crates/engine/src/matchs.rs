@@ -328,6 +328,8 @@ impl Match {
             f.prev_state_no = f.state_no; f.prev_state_type = f.state_type; f.prev_move_type = f.move_type;
             if f.state_no != no { self.events.push(Event::StateChange { fighter: f.id }); }
             f.state_no = no;
+            f.ikemen.dizzy = f.ikemen.dizzy && no == 5300;
+            f.ikemen.guard_break = f.ikemen.guard_break && no == 5400;
             if Arc::ptr_eq(&owner, &f.def) { f.state_giver = None; }
             f.st_def = owner.clone();
             f.state_time = 0;
@@ -353,7 +355,7 @@ impl Match {
         if let Some(v) = vy { f.vel.y = v as f32 * f.lscl; }
         if let Some(c) = ctrl { f.ctrl = c != 0.0; }
         if let Some(s) = sp { f.spr_priority = s as i32; }
-        if hdp == 0.0 { f.hitdef_active = false; f.reversal = None; }
+        if hdp == 0.0 { f.hitdef_active = false; f.reversal = None; f.hitdef_targets.clear(); }
         if mhp == 0.0 { f.move_contact = 0; f.move_hit = 0; f.move_guarded = 0; f.move_reversed = 0; f.move_countered = 0; }
         if hcp == 0.0 { f.hit_count = 0; f.uniq_hit_count = 0; f.uniq_hit_keys.clear(); }
     }
@@ -523,6 +525,7 @@ impl Match {
                 _ => {}
             }
             if f.slide_time > 0 { f.slide_time -= 1; }
+            if f.move_type == 'H' && f.ghv.xaccel != 0.0 { f.vel.x += f.ghv.xaccel; }
         }
         if land { let d = self.fighters[i].def.clone(); self.change_state(i, 52, d); }
     }
@@ -839,7 +842,7 @@ impl Match {
         self.skip_asserted_announcements();
         if let Some(p) = self.pause.as_mut() { p.time -= 1; if p.time <= 0 { self.pause = None; } }
         for f in self.fighters.iter_mut() {
-            if f.unhittable > 0 { f.unhittable -= 1; }
+            if f.hit_pause == 0 && f.hit_shake == 0 && f.unhittable > 0 { f.unhittable -= 1; }
             if f.combo_timer > 0 {
                 f.combo_timer -= 1;
                 if f.combo_timer == 0 { f.combo_count = 0; f.combo_damage = 0.0; f.combo_target = None; }
@@ -999,7 +1002,7 @@ impl Match {
             if maxx > target + half - t { target = maxx - half + t; }
         }
         target = if bound { (target + offset.x).clamp(self.stage.bound_left, self.stage.bound_right) } else { target.clamp(self.stage.bound_left, self.stage.bound_right) + offset.x };
-        self.camera.x += (target - self.camera.x) * 0.5;
+        if maxx - minx <= self.view_w - 40.0 { self.camera.x += (target - self.camera.x) * 0.5; }
         let cam = &self.stage.camera;
         let top = self.effective_bound_high();
         let lowest = if cam.lowest_cap { self.stage.start_y.min(0.0) } else { 0.0 };
@@ -1119,9 +1122,12 @@ impl Match {
                 let fd = &self.fighters[d];
                 if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) { continue; }
                 if hd.hit_once && !fa.hitdef_targets.is_empty() { continue; }
-                if fd.frame().is_none_or(|f| f.clsn2.is_empty()) { continue; }
+                if hd.p2clsncheck && fd.frame().is_none_or(|f| f.clsn2.is_empty()) { continue; }
                 if !self.can_be_hit(d, hd, fa.side) { continue; }
-                if let Some(at) = Self::overlap(&c1, &fd.boxes(2)) { pending.push((a, d, hd.clone(), at)); }
+                let d_boxes = fd.boxes(2);
+                let targets = if hd.p2clsnrequire >= 0 { d_boxes.get(hd.p2clsnrequire as usize).copied().into_iter().collect::<Vec<_>>() } else { d_boxes };
+                if targets.is_empty() { continue; }
+                if let Some(at) = Self::overlap(&c1, &targets) { pending.push((a, d, hd.clone(), at)); }
             }
         }
         let mut struck: Vec<usize> = vec![];
@@ -1192,6 +1198,8 @@ impl Match {
         let gt = self.game_time;
         let cornered = !from_proj && self.at_corner(d);
         let d_air = self.fighters[d].state_type == 'A' || self.fighters[d].air_height() < -1.0;
+        let mut dizzy_now = false;
+        let mut guard_broke = false;
         if let Some((state_no, force_air)) = overridden {
             {
                 let fd = &mut self.fighters[d];
@@ -1205,6 +1213,11 @@ impl Match {
             if !from_proj { self.record_move_hit(a, d, at, true, 0.0); }
             let dd = self.fighters[d].def.clone();
             self.change_state(d, state_no, dd);
+            if hd.miss_on_override {
+                let f = &self.fighters[a];
+                let pos = V2 { x: f.pos.x, y: f.pos.y - 92.0 * f.lscl };
+                self.texts.push(crate::ikemen::TextItem { owner: f.id, id: -1, text: "MISS".into(), pos, vel: V2 { x: 0.0, y: -1.0 }, scale: [1.0, 1.0], color: [255, 220, 80], align: 0, time: 30 });
+            }
             self.events.push(Event::Hit { attacker_side: aside, defender_side: self.fighters[d].side, damage: 0.0, guarded: false, heavy: false, attacker: self.idx(aroot).unwrap_or(a), defender: d });
             return;
         }
@@ -1218,7 +1231,7 @@ impl Match {
                 fd.received_damage += dmg; fd.received_hits += 1;
                 if !fd.has_assert(asf::NOGUARDPOINTSDAMAGE) {
                     fd.ikemen.guard_points = (fd.ikemen.guard_points - hd.guard_points).max(0.0);
-                    if fd.ikemen.guard_points <= 0.0 { fd.ikemen.guard_break = true; }
+                    if fd.ikemen.guard_points <= 0.0 { fd.ikemen.guard_break = true; guard_broke = true; }
                 }
                 fd.ikemen.red_life = (fd.life + hd.red_life[1]).min(fd.life_max).max(fd.life);
                 let gc = fd.ghv.guardcount;
@@ -1240,6 +1253,12 @@ impl Match {
             self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false, hd.spark_scale);
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
             if cornered && self.fighters[a].def.source == Source::Mugen && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; self.fighters[a].vel.x = corner_pushed; }
+            if guard_broke {
+                self.fighters[d].ikemen.guard_break = true;
+                let dd = self.fighters[d].def.clone();
+                if dd.states.contains_key(&5400) { self.change_state(d, 5400, dd); self.fighters[d].ikemen.guard_points = self.fighters[d].ikemen.guard_max; }
+                else if self.common.states.contains_key(&5400) { self.change_state(d, 5400, self.common.clone()); self.fighters[d].ikemen.guard_points = self.fighters[d].ikemen.guard_max; }
+            }
         } else {
             let training = self.training;
             let was_hit = self.fighters[d].move_type == 'H';
@@ -1260,7 +1279,7 @@ impl Match {
                 fd.ikemen.red_life = (fd.life + hd.red_life[0]).min(fd.life_max).max(fd.life);
                 if !fd.has_assert(asf::NODIZZYPOINTSDAMAGE) {
                     fd.ikemen.dizzy_points = (fd.ikemen.dizzy_points - hd.dizzy_points).max(0.0);
-                    if fd.ikemen.dizzy_points <= 0.0 { fd.ikemen.dizzy = true; }
+                    if fd.ikemen.dizzy_points <= 0.0 { fd.ikemen.dizzy = true; dizzy_now = true; }
                 }
                 if hd.unhittable_time > 0 { fd.unhittable = fd.unhittable.max(hd.unhittable_time); }
                 let air = fd.state_type == 'A' || fd.air_height() < -1.0;
@@ -1275,7 +1294,7 @@ impl Match {
                 g.slidetime = hd.ground_slide_time; g.ctrltime = hd.ground_hit_time;
                 let v = if down { hd.down_vel } else if air { hd.air_vel } else { hd.ground_vel };
                 g.hit_id = hd.id; g.fall_env_shake = hd.fall_env_shake; g.down_bounce = hd.down_bounce;
-                g.xvel = v[0] * dir; g.yvel = v[1]; g.yaccel = hd.yaccel;
+                g.xvel = v[0] * dir; g.yvel = v[1]; g.yaccel = hd.yaccel; g.xaccel = hd.xaccel * dir;
                 g.fall_xvel = hd.fall_xvel.map(|x| x * dir).unwrap_or(g.xvel); g.fall_yvel = hd.fall_yvel;
                 g.fall_recover = hd.fall_recover; g.fall_recover_time = hd.fall_recover_time; g.fall_damage = hd.fall_damage; g.fall_kill = hd.fall_kill; g.kill = hd.kill;
                 g.chainid = hd.chain_id.unwrap_or(-1);
@@ -1302,9 +1321,11 @@ impl Match {
                 let no = if st == 'A' || st == 'L' { 5020 } else if st == 'C' && !hd.forcestand { 5010 } else { 5000 };
                 self.change_state(d, no, dd);
             }
-            if self.fighters[d].ikemen.dizzy {
+            if dizzy_now {
+                self.fighters[d].ikemen.dizzy = true;
                 let dd = self.fighters[d].def.clone();
-                if dd.states.contains_key(&5300) { self.change_state(d, 5300, dd.clone()); } else if self.common.states.contains_key(&5300) { self.change_state(d, 5300, self.common.clone()); }
+                if dd.states.contains_key(&5300) { self.change_state(d, 5300, dd); self.fighters[d].ikemen.dizzy_points = self.fighters[d].ikemen.dizzy_max; }
+                else if self.common.states.contains_key(&5300) { self.change_state(d, 5300, self.common.clone()); self.fighters[d].ikemen.dizzy_points = self.fighters[d].ikemen.dizzy_max; }
             }
             if hd.p1stateno >= 0 && !from_proj { let ad = self.fighters[a].def.clone(); self.change_state(a, hd.p1stateno, ad); }
             self.add_power(a, hd.get_power); self.add_power(d, hd.give_power);

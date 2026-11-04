@@ -36,7 +36,7 @@ impl Canvas {
 
     pub fn white_uv(&self) -> [f32; 2] { self.white }
 
-    fn v(&self, x: f32, y: f32, c: Color) -> Vertex { Vertex { pos: [x, y], uv: self.white, pal: RGBA_SPRITE, mul: c.0, add: [0.0; 4] } }
+    fn v(&self, x: f32, y: f32, c: Color) -> Vertex { Vertex { pos: [x, y], uv: self.white, pal: RGBA_SPRITE, mul: c.0, add: [0.0; 4], hue: 0.0 } }
 
     pub fn triangle(&mut self, a: [f32; 2], b: [f32; 2], c: [f32; 2], color: Color) {
         let vs = [self.v(a[0], a[1], color), self.v(b[0], b[1], color), self.v(c[0], c[1], color)];

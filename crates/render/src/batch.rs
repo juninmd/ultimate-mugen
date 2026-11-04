@@ -3,21 +3,21 @@ use bytemuck::{Pod, Zeroable};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Pod, Zeroable)]
-pub struct Vertex { pub pos: [f32; 2], pub uv: [f32; 2], pub pal: u32, pub mul: [f32; 4], pub add: [f32; 4] }
+pub struct Vertex { pub pos: [f32; 2], pub uv: [f32; 2], pub pal: u32, pub mul: [f32; 4], pub add: [f32; 4], pub hue: f32 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct PalFx { pub add: [f32; 3], pub mul: [f32; 3], pub color: f32, pub invert: bool }
+pub struct PalFx { pub add: [f32; 3], pub mul: [f32; 3], pub color: f32, pub invert: bool, pub hue: f32 }
 
 impl Default for PalFx {
-    fn default() -> Self { PalFx { add: [0.0; 3], mul: [1.0; 3], color: 1.0, invert: false } }
+    fn default() -> Self { PalFx { add: [0.0; 3], mul: [1.0; 3], color: 1.0, invert: false, hue: 0.0 } }
 }
 
 impl PalFx {
-    pub fn vertex(&self, tint: [f32; 4]) -> ([f32; 4], [f32; 4]) {
+    pub fn vertex(&self, tint: [f32; 4]) -> ([f32; 4], [f32; 4], f32) {
         let mul = [0, 1, 2].map(|k| tint[k] * self.mul[k]);
         let add = [0, 1, 2].map(|k| self.add[k] * mul[k]);
         let w = (1.0 - self.color.clamp(0.0, 1.0)) + if self.invert { 2.0 } else { 0.0 };
-        ([mul[0], mul[1], mul[2], tint[3]], [add[0], add[1], add[2], w])
+        ([mul[0], mul[1], mul[2], tint[3]], [add[0], add[1], add[2], w], self.hue)
     }
 }
 
@@ -68,7 +68,7 @@ impl Batch {
         let add = [q.add[0], q.add[1], q.add[2], 0.0];
         let base = self.vertices.len() as u32;
         for (px, py, u, v) in [(x, y, u0, v0), (x + w, y, u1, v0), (x + w, y + h, u1, v1), (x, y + h, u0, v1)] {
-            self.vertices.push(Vertex { pos: [px, py], uv: [u, v], pal: q.palette, mul: q.mul, add });
+            self.vertices.push(Vertex { pos: [px, py], uv: [u, v], pal: q.palette, mul: q.mul, add, hue: 0.0 });
         }
         self.indices.extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
         self.extend_call(q.blend, 6);

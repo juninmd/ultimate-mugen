@@ -30,6 +30,7 @@ pub struct HitDefData {
     pub down_vel: [f32; 2], pub down_hit_time: i32, pub down_bounce: bool, pub fall_env_shake: Shake, pub env_shake: Shake,
     pub ground_corner_push: f32, pub air_corner_push: f32, pub guard_corner_push: f32, pub air_guard_corner_push: f32,
     pub target_palfx: Option<PalFx>,
+    pub dizzy_points: f32, pub guard_points: f32, pub red_life: [f32; 2], pub score: [f32; 2], pub down_recover: bool,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -45,13 +46,32 @@ pub struct GetHitVars {
     pub guarded: bool, pub fall: bool, pub fall_damage: f32, pub fall_xvel: f32, pub fall_yvel: f32, pub fall_recover: bool,
     pub fall_recover_time: i32, pub fall_kill: bool, pub kill: bool, pub attacker_id: u32, pub attacker_no: usize,
     pub hit_id: i32, pub fall_env_shake: Shake, pub down_bounce: bool,
+    pub priority: i32, pub facing: i32, pub power: f32, pub attr: i32, pub guardflag: i32,
+    pub hit_damage: f32, pub guard_damage: f32, pub hit_power: f32, pub guard_power: f32,
+    pub dizzy_points: f32, pub guard_points: f32, pub red_life: f32, pub score: f32,
+    pub team_side: i32, pub proj_id: i32, pub p1stateno: i32, pub p2stateno: i32, pub down_recover: bool,
+}
+impl GetHitVars {
+    pub fn record_hitdef(&mut self, hd: &HitDefData, guarded: bool, attacker: (u32, usize, usize), attacker_facing: f32, proj_id: Option<i32>) {
+        let side = guarded as usize;
+        self.attacker_id = attacker.0; self.team_side = attacker.1 as i32 + 1; self.attacker_no = attacker.2;
+        self.priority = hd.priority; self.facing = if attacker_facing < 0.0 { -1 } else { 1 };
+        self.power = if guarded { hd.guard_give_power } else { hd.give_power };
+        self.attr = crate::hitdef::attr_bits(&hd.attr_state, &hd.attr_kind); self.guardflag = crate::hitdef::guardflag_bits(&hd.guardflag);
+        self.hit_damage = hd.damage; self.guard_damage = hd.guard_damage; self.hit_power = hd.get_power; self.guard_power = hd.guard_get_power;
+        self.dizzy_points = hd.dizzy_points; self.guard_points = hd.guard_points; self.red_life = hd.red_life[side]; self.score = hd.score[side];
+        self.proj_id = proj_id.unwrap_or(-1);
+        self.p1stateno = hd.p1stateno; self.p2stateno = hd.p2stateno; self.down_recover = hd.down_recover;
+    }
 }
 impl Default for GetHitVars {
     fn default() -> Self {
         GetHitVars { kind: 0, animtype: 0, airtype: 0, groundtype: 0, damage: 0.0, hitcount: 0, guardcount: 0, hittime: 0, slidetime: 0, ctrltime: 0,
             xvel: 0.0, yvel: 0.0, yaccel: 0.44, chainid: -1, guarded: false, fall: false, fall_damage: 0.0, fall_xvel: 0.0, fall_yvel: -4.5,
             fall_recover: true, fall_recover_time: 4, fall_kill: true, kill: true, attacker_id: 0, attacker_no: 0,
-            hit_id: -1, fall_env_shake: Shake::default(), down_bounce: false }
+            hit_id: -1, fall_env_shake: Shake::default(), down_bounce: false,
+            priority: 0, facing: 0, power: 0.0, attr: 0, guardflag: 0, hit_damage: 0.0, guard_damage: 0.0, hit_power: 0.0, guard_power: 0.0,
+            dizzy_points: 0.0, guard_points: 0.0, red_life: 0.0, score: 0.0, team_side: 0, proj_id: -1, p1stateno: -1, p2stateno: -1, down_recover: true }
     }
 }
 
@@ -68,16 +88,9 @@ pub struct TrailPoint { pub x: f32, pub y: f32, pub group: i32, pub index: i32, 
 #[derive(Clone, Debug)]
 pub struct AfterImage { pub time: i32, pub length: usize, pub trail: Vec<TrailPoint>, pub params: AfterImageParams, pub ticks: i32 }
 
-/// AssertSpecial flags
-pub mod asf {
-    pub const NOAUTOTURN: u32 = 1; pub const NOWALK: u32 = 2; pub const NOJUMP: u32 = 4; pub const INVISIBLE: u32 = 8; pub const NOSHADOW: u32 = 16;
-    pub const UNGUARDABLE: u32 = 32; pub const NOSTANDGUARD: u32 = 64; pub const NOCROUCHGUARD: u32 = 128; pub const NOAIRGUARD: u32 = 256;
-    pub const NOKOSND: u32 = 512; pub const NOJUGGLE: u32 = 1024;
-    pub fn from_name(s: &str) -> u32 {
-        match s { "noautoturn" => NOAUTOTURN, "nowalk" => NOWALK, "nojump" => NOJUMP, "invisible" => INVISIBLE, "noshadow" => NOSHADOW, "unguardable" => UNGUARDABLE,
-            "nostandguard" => NOSTANDGUARD, "nocrouchguard" => NOCROUCHGUARD, "noairguard" => NOAIRGUARD, "nokosnd" => NOKOSND, "nojugglecheck" => NOJUGGLE, _ => 0 }
-    }
-}
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct MoveHitVars { pub target_id: i32, pub target_no: i32, pub spark_x: f32, pub spark_y: f32, pub corner_push: f32, pub hit_time: i64, pub overridden: bool }
+pub use crate::flags::asf;
 
 /// fallback chains for missing animations
 pub fn anim_fallback(no: i32) -> &'static [i32] {
@@ -120,15 +133,17 @@ pub struct Fighter {
     pub vars: [i32; 60], pub fvars: [f64; 40], pub sysvars: [i32; 5], pub sysfvars: [f64; 5],
     pub anim_no: i32, pub anim_real: i32, pub elem: usize, pub elem_time: i32, pub anim_elapsed: i32, pub anim_changed: bool,
     pub hitdef: Option<HitDefData>, pub hitdef_active: bool, pub hitdef_targets: Vec<u32>,
-    pub move_contact: i32, pub move_hit: i32, pub move_guarded: i32, pub move_reversed: i32, pub hit_count: i32,
+    pub move_contact: i32, pub move_hit: i32, pub move_guarded: i32, pub move_reversed: i32, pub hit_count: i32, pub uniq_hit_count: i32, pub uniq_hit_keys: Vec<(u32, i32)>,
+    pub move_countered: i32, pub move_hit_var: MoveHitVars, pub hit_overridden_at: i64, pub prev_state_type: char, pub prev_move_type: char, pub prev_anim: i32,
     pub ghv: GetHitVars, /** juggle points already spent on this fighter in the current air combo */ pub juggle_used: i32, /** consecutive ticks without control during the fight (stuck-state watchdog) */ pub no_ctrl_ticks: i32, pub hit_pause: i32, pub hit_shake: i32, pub hit_over_time: i32, pub slide_time: i32, pub fall_time: i32,
-    pub asserts: u32,
-    pub width_override: Option<(f32, f32)>, pub player_push: bool, pub screen_bound: bool, pub pos_freeze: bool, pub spr_priority: i32,
+pub asserts: u64,
+    pub width_override: Option<(f32, f32)>, pub height_override: Option<(f32, f32)>, pub clsn_mods: Vec<crate::sctrl::clsn::ClsnMod>, pub run_state_depth: u8, pub player_push: bool, pub screen_bound: bool, pub pos_freeze: bool, pub spr_priority: i32,
     pub targets: Vec<(u32, i32)>,
     pub not_hit_by: Vec<(String, i32)>, pub hit_by: Vec<(String, i32)>,
     pub attack_mul: f32, pub defence_mul: f32,
     pub persist: HashMap<u32, i32>,
     pub air_jumps: i32,
+    pub ground_level: f32,
     pub bind: Option<Bind>,
     pub palfx: Option<PalFx>,
     pub trans: Option<Trans>,
@@ -145,7 +160,7 @@ pub struct Fighter {
     pub draw_offset: V2, pub victory_quote: i32, pub clipboard: Vec<String>, pub unhittable: i32, pub super_defence_mul: f32,
     pub reversal: Option<(String, HitDefData)>, pub hit_overrides: [Option<HitOverride>; 8],
     pub ikemen: crate::ikemen::IkemenState,
-    pub pause_move_time: i32, pub super_move_time: i32, pub preserve: bool, pub own_pal: bool, pub state_giver: Option<u32>,
+    pub pause_move_time: i32, pub super_move_time: i32, pub pause_bool: bool, pub preserve: bool, pub own_pal: bool, pub state_giver: Option<u32>,
 }
 
 impl Fighter {
@@ -160,14 +175,15 @@ impl Fighter {
             life, life_max: life, power: 0.0, power_max: def.c("data.power", 3000.0) as f32, alive: true,
             vars: [0; 60], fvars: [0.0; 40], sysvars: [0; 5], sysfvars: [0.0; 5],
             anim_no: -1, anim_real: -1, elem: 0, elem_time: 0, anim_elapsed: 0, anim_changed: false,
-            hitdef: None, hitdef_active: false, hitdef_targets: vec![], move_contact: 0, move_hit: 0, move_guarded: 0, move_reversed: 0, hit_count: 0,
+            hitdef: None, hitdef_active: false, hitdef_targets: vec![], move_contact: 0, move_hit: 0, move_guarded: 0, move_reversed: 0, hit_count: 0, uniq_hit_count: 0, uniq_hit_keys: vec![],
+            move_countered: 0, move_hit_var: MoveHitVars::default(), hit_overridden_at: 0, prev_state_type: 'S', prev_move_type: 'I', prev_anim: -1,
             ghv: GetHitVars::default(), juggle_used: 0, no_ctrl_ticks: 0, hit_pause: 0, hit_shake: 0, hit_over_time: 0, slide_time: 0, fall_time: 0, asserts: 0,
-            width_override: None, player_push: true, screen_bound: true, pos_freeze: false, spr_priority: 0, targets: vec![],
+            width_override: None, height_override: None, clsn_mods: vec![], run_state_depth: 0, player_push: true, screen_bound: true, pos_freeze: false, spr_priority: 0, targets: vec![],
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
-            persist: HashMap::new(), air_jumps: 0, bind: None, palfx: None, trans: None, remap: vec![], angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
+            persist: HashMap::new(), air_jumps: 0, ground_level: 0.0, bind: None, palfx: None, trans: None, remap: vec![], angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
             after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), cmd: CommandState::default(),
             combo_count: 0, combo_damage: 0.0, form: 0, form_time: 0, reversal: None, hit_overrides: Default::default(), ikemen: crate::ikemen::IkemenState::new(&def),
-            pause_move_time: 0, super_move_time: 0, preserve: false, own_pal: true, state_giver: None,
+            pause_move_time: 0, super_move_time: 0, pause_bool: false, preserve: false, own_pal: true, state_giver: None,
             draw_offset: V2::default(), victory_quote: -1, clipboard: vec![], unhittable: 0, super_defence_mul: 1.0, def,
         }
     }
@@ -209,6 +225,7 @@ impl Fighter {
     }
     /// Change animation; `from` is the CharDef providing the animation (own, or state owner for ChangeAnim2).
     pub fn change_anim(&mut self, no: i32, from: &Arc<CharDef>, elem: i32) {
+        if no != self.anim_no { self.prev_anim = self.anim_no; }
         let mut real = if from.anims.contains_key(&no) { Some(no) } else { None };
         if real.is_none() { real = anim_fallback(no).iter().copied().find(|a| from.anims.contains_key(a)); }
         let real = match real {
@@ -250,6 +267,7 @@ impl Fighter {
         }
     }
 
+    pub fn air_height(&self) -> f32 { self.pos.y - self.ground_level }
     pub fn front_width(&self) -> f32 {
         if let Some((f, _)) = self.width_override { return f; }
         (if self.state_type == 'A' { self.c("size.air.front", 12.0) } else { self.c("size.ground.front", 16.0) }) * self.lscl
@@ -258,23 +276,34 @@ impl Fighter {
         if let Some((_, b)) = self.width_override { return b; }
         (if self.state_type == 'A' { self.c("size.air.back", 12.0) } else { self.c("size.ground.back", 15.0) }) * self.lscl
     }
+    pub fn height_top(&self) -> f32 { self.height_override.map(|h| h.0).unwrap_or_else(|| self.c("size.height", 60.0) * self.lscl) }
+    pub fn height_bottom(&self) -> f32 { self.height_override.map(|h| h.1).unwrap_or(0.0) }
     pub fn add_power_local(&mut self, v: f32) { self.power = (self.power + v).clamp(0.0, self.power_max); }
 
     /// Collision boxes in world space (kind 1 = attack, 2 = hurt).
     pub fn boxes(&self, kind: u8) -> Vec<Box4> {
         let Some(fr) = self.frame() else { return vec![] };
         let list = if kind == 1 { &fr.clsn1 } else { &fr.clsn2 };
+        let modified;
+        let list: &[Box4] = if self.clsn_mods.iter().any(|c| c.kind == kind) { modified = crate::sctrl::clsn::apply(&self.clsn_mods, kind, list); &modified } else { list };
         let s = self.lscl * self.draw_scale[0];
         let sx = self.def.c("size.xscale", 1.0) as f32;
         let sy = self.def.c("size.yscale", 1.0) as f32;
-        list.iter().map(|b| {
+        let mut out: Vec<Box4> = list.iter().map(|b| {
             let (mut x1, mut x2) = (b[0] * sx * s, b[2] * sx * s);
             if fr.flip_h { let t = -x2; x2 = -x1; x1 = t; }
             if self.facing < 0.0 { let t = -x2; x2 = -x1; x1 = t; }
             [self.pos.x + x1, self.pos.y + b[1] * sy * s, self.pos.x + x2, self.pos.y + b[3] * sy * s]
-        }).collect()
+        }).collect();
+        if out.is_empty() && kind == 2 {
+            if let Some((top, bottom)) = self.height_override {
+                let (a, b) = (self.pos.x - self.back_width() * self.facing, self.pos.x + self.front_width() * self.facing);
+                out.push([a.min(b), self.pos.y - top, a.max(b), self.pos.y + bottom]);
+            }
+        }
+        out
     }
-    pub fn has_assert(&self, f: u32) -> bool { self.asserts & f != 0 }
+    pub fn has_assert(&self, f: u64) -> bool { self.asserts & f != 0 }
     /// True while nothing legitimately freezes this fighter (round running, no super pause, no hit pause/shake, not bound).
     pub fn round_free(&self, fighting: bool, paused: bool) -> bool { fighting && !paused && self.hit_pause == 0 && self.hit_shake == 0 && self.bind.is_none() }
 }

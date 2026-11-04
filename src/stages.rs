@@ -103,7 +103,7 @@ fn ridge(pm: &mut Pixmap, t: Transform, w: f32, base: f32, amp: f32, top: &str, 
     fill(pm, t, b.finish(), &lin(base - amp, base + 50.0, &[(0.0, top), (1.0, bot)]));
 }
 fn parts(seed: u32, n: usize, f: impl Fn(&mut Rng) -> Particle) -> Vec<Particle> { let mut r = Rng(seed); (0..n).map(|_| f(&mut r)).collect() }
-fn info(name: &str) -> StageInfo { StageInfo { start_x: 0.0, start_y: 0.0, zoom_out: 1.0, name: name.into(), bound_left: -230.0, bound_right: 230.0, bound_high: -80.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 205.0, vertical_follow: 0.25, tension: 60.0 } }
+fn info(name: &str) -> StageInfo { StageInfo { start_x: 0.0, start_y: 0.0, zoom_out: 1.0, name: name.into(), bound_left: -230.0, bound_right: 230.0, bound_high: -80.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 205.0, vertical_follow: 0.25, tension: 60.0, ..StageInfo::default() } }
 
 /// Deterministic skyline: (x, width, height) of each tower, shared by the baked art and the animated blink lights.
 pub fn skyline(seed: u32, total: f32, wmin: f32, wmax: f32, hmin: f32, hmax: f32, gap: f32) -> Vec<(f32, f32, f32)> {
@@ -740,26 +740,69 @@ fn volcano() -> Stage {
     Stage { info: info("Cratera Vulcânica"), art: StageArt::Procedural { back, particles, tint: Some([1.0, 0.24, 0.0, 0.05]) }, music: 5, kind: StageKind::Volcano, bgm: None }
 }
 
+const ILLUSTRATION_IDS: [&str; 7] = ["dojo", "neon", "bamboo", "plains", "spirit", "volcano", "brazil"];
+
+fn decode_illustration(bytes: &[u8]) -> Result<Arc<ImageData>, String> {
+    let png = ume_formats::png::decode_png(bytes).map_err(|e| e.to_string())?;
+    let rgba = png.rgba.ok_or("expected truecolor stage PNG")?;
+    Ok(ImageData::new(png.width, png.height, rgba))
+}
+
+pub fn illustration_preview(id: &str) -> Option<Arc<ImageData>> {
+    use std::sync::OnceLock;
+    static IMAGES: [OnceLock<Arc<ImageData>>; 7] = [const { OnceLock::new() }; 7];
+    let index = ILLUSTRATION_IDS.iter().position(|name| *name == id)?;
+    let bytes: [&[u8]; 7] = [
+        include_bytes!("../assets/stages/thumbs/dojo.png"),
+        include_bytes!("../assets/stages/thumbs/neon.png"),
+        include_bytes!("../assets/stages/thumbs/bamboo.png"),
+        include_bytes!("../assets/stages/thumbs/plains.png"),
+        include_bytes!("../assets/stages/thumbs/spirit.png"),
+        include_bytes!("../assets/stages/thumbs/volcano.png"),
+        include_bytes!("../assets/stages/thumbs/brazil.png"),
+    ];
+    Some(IMAGES[index].get_or_init(|| decode_illustration(bytes[index]).expect("embedded stage thumbnail")).clone())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
 pub fn illustration(id: &str) -> Option<Arc<ImageData>> {
     use std::sync::OnceLock;
-    static IMAGES: OnceLock<Vec<Arc<ImageData>>> = OnceLock::new();
-    let ids = ["dojo", "neon", "bamboo", "plains", "spirit", "volcano", "brazil"];
-    let index = ids.iter().position(|name| *name == id)?;
-    Some(IMAGES.get_or_init(|| {
-        let bytes: [&[u8]; 7] = [
-            include_bytes!("../assets/stages/dojo.png"),
-            include_bytes!("../assets/stages/neon.png"),
-            include_bytes!("../assets/stages/bamboo.png"),
-            include_bytes!("../assets/stages/plains.png"),
-            include_bytes!("../assets/stages/spirit.png"),
-            include_bytes!("../assets/stages/volcano.png"),
-            include_bytes!("../assets/stages/brazil.png"),
-        ];
-        bytes.iter().map(|data| {
-            let png = ume_formats::png::decode_png(data).expect("embedded stage PNG");
-            ImageData::new(png.width, png.height, png.rgba.expect("truecolor stage PNG"))
-        }).collect()
-    })[index].clone())
+    static IMAGES: [OnceLock<Arc<ImageData>>; 7] = [const { OnceLock::new() }; 7];
+    let index = ILLUSTRATION_IDS.iter().position(|name| *name == id)?;
+    let bytes: [&[u8]; 7] = [
+        include_bytes!("../assets/stages/dojo.png"),
+        include_bytes!("../assets/stages/neon.png"),
+        include_bytes!("../assets/stages/bamboo.png"),
+        include_bytes!("../assets/stages/plains.png"),
+        include_bytes!("../assets/stages/spirit.png"),
+        include_bytes!("../assets/stages/volcano.png"),
+        include_bytes!("../assets/stages/brazil.png"),
+    ];
+    Some(IMAGES[index].get_or_init(|| decode_illustration(bytes[index]).expect("embedded stage PNG")).clone())
+}
+
+#[cfg(target_arch = "wasm32")]
+thread_local! {
+    static WEB_ILLUSTRATION: std::cell::RefCell<Option<(String, Arc<ImageData>)>> = const { std::cell::RefCell::new(None) };
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn illustration(id: &str) -> Option<Arc<ImageData>> {
+    WEB_ILLUSTRATION.with(|cache| cache.borrow().as_ref().filter(|(key, _)| key == id).map(|(_, image)| image.clone()))
+}
+
+#[cfg(target_arch = "wasm32")]
+pub async fn prepare_illustration(id: &str) -> Result<(), String> {
+    use wasm_bindgen::prelude::*;
+    #[wasm_bindgen]
+    extern "C" { fn ume_fetch_asset(path: &str) -> js_sys::Promise; }
+    if illustration(id).is_some() { return Ok(()); }
+    if !ILLUSTRATION_IDS.contains(&id) { return Err(format!("Unknown stage: {id}")); }
+    let data = js_sys::futures::JsFuture::from(ume_fetch_asset(&format!("assets/stages/{id}.png"))).await
+        .map_err(|e| format!("Stage download failed: {e:?}"))?;
+    let image = decode_illustration(&js_sys::Uint8Array::new(&data).to_vec())?;
+    WEB_ILLUSTRATION.with(|cache| *cache.borrow_mut() = Some((id.to_string(), image)));
+    Ok(())
 }
 
 fn illustrated(id: &str, name: &str, music: u32, kind: StageKind) -> Stage {
@@ -787,7 +830,12 @@ pub fn from_mugen(mut st: MugenStage) -> Stage {
     let info = StageInfo {
         name: st.name.clone(), bound_left: st.bound_left * scl, bound_right: st.bound_right * scl, bound_high: st.bound_high * scl_y, bound_low: st.bound_low * scl_y,
         p1x: st.p1x * scl, p2x: st.p2x * scl, zoffset: st.zoffset * scl_y, vertical_follow: st.vertical_follow, tension: st.tension * scl,
-        start_x: st.start_x * scl, start_y: st.start_y * scl_y, zoom_out: st.zoom_out,
+        start_x: st.start_x * scl, start_y: st.start_y * scl_y, zoom_out: st.zoom_out, zoom_in: st.zoom_in,
+        camera: ume_engine::matchs::CameraParams {
+            vertical_follow_delta: st.vertical_follow_delta * scl_y, y_scroll_speed: st.y_scroll_speed, zoom_in_speed: st.zoom_in_speed, zoom_out_speed: st.zoom_out_speed,
+            lowest_cap: st.lowest_cap, dynamic_bound_high: st.dynamic_bound_high, bound_high_delta: st.bound_high_delta * scl_y,
+        },
+        auto_turn: st.auto_turn,
     };
     let images = st.sprites.iter_mut().filter(|(_, im)| im.w > 0 && im.h > 0).map(|(k, im)| (*k, ImageData::new(im.w, im.h, std::mem::take(&mut im.rgba)))).collect();
     Stage { info, art: StageArt::Mugen(Box::new(MugenBg { stage: Arc::new(st), images, scl, scl_y })), music: 0, kind: StageKind::Custom, bgm: None }
@@ -996,5 +1044,26 @@ mod tests {
         let clipped = red_pixels(&preview_of("window = -10, 100, 10, 140\nmaskwindow = 0, 100, 100, 140"));
         assert_eq!(extent(&clipped).0, 10);
         assert!(clipped.iter().all(|p| p.0 >= 160));
+    }
+}
+
+#[cfg(test)]
+mod illustration_tests {
+    use super::*;
+
+    #[test]
+    fn thumbnails_are_small_and_cached_per_stage() {
+        for id in ILLUSTRATION_IDS {
+            let image = illustration_preview(id).unwrap();
+            assert_eq!((image.w, image.h), (240, 135));
+            assert!(Arc::ptr_eq(&image, &illustration_preview(id).unwrap()));
+        }
+        assert!(!Arc::ptr_eq(&illustration_preview("dojo").unwrap(), &illustration_preview("neon").unwrap()));
+        assert!(illustration_preview("unknown").is_none());
+    }
+
+    #[test]
+    fn invalid_stage_image_is_an_error() {
+        assert!(decode_illustration(b"invalid image").is_err());
     }
 }

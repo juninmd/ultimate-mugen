@@ -92,6 +92,8 @@ pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
     out
 }
 
+pub const MAX_SPRITE_PIXELS: usize = 1 << 24;
+
 pub fn decode_sff(buf: &[u8]) -> Result<DecodedSff, String> {
     decode_sff_only(buf, |_, _| true)
 }
@@ -166,8 +168,7 @@ fn decode_sff_v1(buf: &[u8]) -> DecodedSff {
         } else {
             let block_end = if next > data_start { next } else { data_start.saturating_add(length) }.min(buf.len());
             let pcx = &buf[data_start..block_end];
-            if pcx.len() >= PCX_HEADER_SIZE {
-                let h = read_pcx_header(pcx).expect("length checked");
+            if let Some(h) = read_pcx_header(pcx).ok().filter(|h| (h.width as usize).saturating_mul(h.height as usize) <= MAX_SPRITE_PIXELS) {
                 spr.width = h.width;
                 spr.height = h.height;
                 let data_end;
@@ -289,6 +290,10 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
         let mut spr = empty_sprite(r.u16(o) as i32, r.u16(o + 2) as i32, r.i16(o + 8) as i32, r.i16(o + 10) as i32);
         spr.width = r.u16(o + 4) as u32;
         spr.height = r.u16(o + 6) as u32;
+        if !crate::pixels_within_limit(spr.width, spr.height) {
+            spr.width = 0;
+            spr.height = 0;
+        }
         spr.palette_index = pal_idx as i32;
         if d_len == 0 {
             links.push(Some(link).filter(|&l| l < i));
@@ -343,6 +348,10 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
 }
 
 fn decode_v2_image(spr: &mut DecodedSprite, fmt: u8, depth: u8, data: &[u8], has_sff_palette: bool) {
+    if (spr.width as usize) * (spr.height as usize) > MAX_SPRITE_PIXELS {
+        spr.width = 0;
+        spr.height = 0;
+    }
     let n = spr.width as usize * spr.height as usize;
     // compressed formats are prefixed by a u32 uncompressed length
     let body = &data[data.len().min(4)..];

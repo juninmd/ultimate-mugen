@@ -23,6 +23,7 @@ impl PostFx {
             center: p.center,
             tint: p.tint,
             invert: p.invert,
+            glass: Default::default(),
         }));
     }
 }

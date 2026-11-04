@@ -11,8 +11,6 @@ use ume_engine::matchs::{Event, Match};
 enum Kind { Spark, Glow, Dust, Debris, Ember, Slash }
 struct P { k: Kind, x: f32, y: f32, vx: f32, vy: f32, g: f32, life: f32, max: f32, size: f32, col: [f32; 3], rot: f32, vrot: f32 }
 struct Ring { x: f32, y: f32, r0: f32, r1: f32, t: f32, dur: f32, w: f32, col: [f32; 3] }
-/// SF6-style colour paint splash: irregular blob + droplets, spawned *behind the attacker* so the source of the hit reads clearly.
-struct Splat { x: f32, y: f32, dir: f32, t: f32, dur: f32, col: [f32; 3], radii: [f32; 14], drops: [(f32, f32, f32); 7], size: f32 }
 /// Dynamic stage lighting from impacts (Tekken 8: hit effects "light up the stage like fireworks").
 struct Light { x: f32, y: f32, r: f32, t: f32, dur: f32, col: [f32; 3] }
 #[derive(Clone, Copy, PartialEq, Default)]
@@ -34,7 +32,7 @@ struct Snap { grounded: bool, vy: f32, vx: f32, move_type: char }
 pub struct FxParams { pub invert: f32, pub chroma: f32, pub vignette: f32, pub bloom: f32, pub saturation: f32, pub flash: f32, pub radial: f32, pub center: [f32; 2], pub tint: [f32; 3] }
 
 pub struct Vfx {
-    splats: Vec<Splat>, lights: Vec<Light>, pub weather: Weather, clock: f32, invert_t: f32, dist_zoom: f32, dist_target: f32,
+    lights: Vec<Light>, pub weather: Weather, clock: f32, invert_t: f32, dist_zoom: f32, dist_target: f32,
     parts: Vec<P>, rings: Vec<Ring>, floats: Vec<Float>, pub banners: Vec<Banner>,
     pub trauma: f32, punch: f32, ko_t: f32, ko_focus: (f32, f32), pub slow_t: f32,
     chroma: f32, flash: f32, radial: f32, vig: f32, lines: f32, lines_col: [f32; 3], sat_pulse: f32,
@@ -53,11 +51,17 @@ pub struct Vfx {
     snap: Vec<Snap>, pre_mt: Vec<char>, rng: u32, tick: u32,
 }
 
+const MAX_FLOATS: usize = 6;
+const FLOAT_LIFE: f32 = 0.7;
+const MAX_PARTS: usize = 400;
+const MAX_RINGS: usize = 10;
+const MAX_LIGHTS: usize = 5;
+
 fn lerp(a: f32, b: f32, t: f32) -> f32 { a + (b - a) * t }
 
 impl Vfx {
     pub fn new() -> Self {
-        Vfx { splats: vec![], lights: vec![], weather: Weather::None, clock: 0.0, invert_t: 0.0, dist_zoom: 0.0, dist_target: 0.0, parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
+        Vfx { lights: vec![], weather: Weather::None, clock: 0.0, invert_t: 0.0, dist_zoom: 0.0, dist_target: 0.0, parts: vec![], rings: vec![], floats: vec![], banners: vec![], trauma: 0.0, punch: 0.0, ko_t: 0.0, ko_focus: (0.0, 0.0), slow_t: 0.0, chroma: 0.0, flash: 0.0, radial: 0.0, vig: 0.0, lines: 0.0,
             lines_col: [1.0, 1.0, 1.0], sat_pulse: 0.0, super_t: 0.0, super_owner: 0, intro_target: 0.0, intro_zoom: 0.0, sz: 0.0, super_active: false, squash: vec![], sfx: vec![], combo: [0; 2], meter: [0; 2], first_hit: false, flash_clock: 1.0, snap: vec![], pre_mt: vec![], rng: 0x9e37_79b9, tick: 0 }
     }
     fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
@@ -99,13 +103,6 @@ impl Vfx {
             self.parts.push(P { k: Kind::Debris, x, y, vx, vy, g: 0.22, life, max: life, size: sz, col, rot: 0.0, vrot: vr });
         }
     }
-    fn splat(&mut self, x: f32, y: f32, dir: f32, size: f32, col: [f32; 3]) {
-        let mut radii = [0.0; 14];
-        for (i, r) in radii.iter_mut().enumerate() { *r = if i % 2 == 0 { self.rr(0.75, 1.15) } else { self.rr(0.35, 0.65) }; }
-        let mut drops = [(0.0, 0.0, 0.0); 7];
-        for d in drops.iter_mut() { *d = (self.rr(-1.2, 1.2), self.rr(1.1, 1.9), self.rr(0.04, 0.12)); }
-        self.splats.push(Splat { x, y, dir, t: 0.0, dur: 0.6, col, radii, drops, size });
-    }
     /// Colour of a fighter's awakened aura: its own colour pushed towards bright.
     pub fn form_color(f: &ume_engine::fighter::Fighter) -> [f32; 3] {
         // the character's colour at full saturation, a touch towards white
@@ -114,7 +111,7 @@ impl Vfx {
         [lerp(c[0] / mx, 1.0, 0.18), lerp(c[1] / mx, 1.0, 0.18), lerp(c[2] / mx, 1.0, 0.18)]
     }
     fn ember(&mut self, x: f32, y: f32, vx: f32, vy: f32, g: f32, life: f32, size: f32, col: [f32; 3]) { self.parts.push(P { k: Kind::Ember, x, y, vx, vy, g, life, max: life, size, col, rot: 0.0, vrot: 0.0 }); }
-    fn light(&mut self, x: f32, y: f32, r: f32, dur: f32, col: [f32; 3]) { self.lights.push(Light { x, y, r, t: 0.0, dur, col }); }
+    fn light(&mut self, x: f32, y: f32, r: f32, dur: f32, col: [f32; 3]) { if self.lights.len() >= MAX_LIGHTS { self.lights.remove(0); } self.lights.push(Light { x, y, r, t: 0.0, dur, col }); }
     /// Anime "impact frame" (colour inversion for a few ms) — used on super activation and KO.
     pub fn force_impact(&mut self) { self.invert_t = 0.075; self.flash_clock = 0.0; }
     /// Large flashes are spaced >= 0.34 s apart (<= 3 per second); small ones pass through.
@@ -122,7 +119,6 @@ impl Vfx {
         if v >= 0.3 { if self.flash_clock < 0.34 { return; } self.flash_clock = 0.0; }
         self.flash = self.flash.max(v);
     }
-    fn invert_add(&mut self) { if self.flash_clock >= 0.34 { self.invert_t = 0.075; self.flash_clock = 0.0; } }
     #[cfg(test)] pub fn flash_level(&self) -> f32 { self.flash }
     fn slashes(&mut self, x: f32, y: f32, dir: f32, n: usize, len: f32, col: [f32; 3]) {
         for i in 0..n {
@@ -131,9 +127,16 @@ impl Vfx {
             self.parts.push(P { k: Kind::Slash, x, y, vx: 0.0, vy: 0.0, g: 0.0, life: 0.13, max: 0.13, size: l, col, rot: a, vrot: 0.0 });
         }
     }
-    fn ring(&mut self, x: f32, y: f32, r1: f32, dur: f32, w: f32, col: [f32; 3]) { self.rings.push(Ring { x, y, r0: 2.0, r1, t: 0.0, dur, w, col }); }
+    fn ring(&mut self, x: f32, y: f32, r1: f32, dur: f32, w: f32, col: [f32; 3]) { if self.rings.len() >= MAX_RINGS { self.rings.remove(0); } self.rings.push(Ring { x, y, r0: 2.0, r1, t: 0.0, dur, w, col }); }
     fn glow(&mut self, x: f32, y: f32, size: f32, life: f32, col: [f32; 3]) { self.parts.push(P { k: Kind::Glow, x, y, vx: 0.0, vy: 0.0, g: 0.0, life, max: life, size, col, rot: 0.0, vrot: 0.0 }); }
-    fn float(&mut self, x: f32, y: f32, text: String, size: f32, col: [f32; 3]) { self.floats.push(Float { x, y, t: 0.0, text, size, col }); }
+    fn float(&mut self, x: f32, y: f32, text: String, size: f32, col: [f32; 3]) {
+        if self.floats.len() >= MAX_FLOATS { self.floats.remove(0); }
+        self.floats.push(Float { x, y, t: 0.0, text, size, col });
+    }
+    fn tag(&mut self, x: f32, y: f32, text: &str, col: [f32; 3]) {
+        if self.floats.iter().any(|f| f.text == text && f.t < 0.35) { return; }
+        self.float(x, y, text.to_string(), 6.0, col);
+    }
     pub fn banner(&mut self, text: &str, sub: &str, col: [f32; 3]) {
         // never stack the same banner twice (e.g. both fighters landing a counter in the same exchange)
         if self.banners.iter().any(|b| b.text == text && b.t < 0.8) { return; }
@@ -153,82 +156,65 @@ impl Vfx {
     /// Feed one simulation event.
     pub fn event(&mut self, ev: &Event, m: &Match) {
         match ev {
-            Event::Hit { attacker_side, defender_side, damage, guarded, heavy, attacker, defender } => {
+            Event::Hit { damage, guarded, heavy, attacker, defender, .. } => {
                 let Some(df) = m.fighters.get(*defender) else { return };
                 let (dx, dy, dface) = Self::chest_of(df);
                 let dir = if m.fighters.get(*attacker).is_some_and(|a| a.pos.x <= dx) { 1.0 } else { -1.0 };
                 let (x, y) = (dx + dface * 7.0, dy);
                 let mag = (damage / 90.0).clamp(0.2, 1.4);
                 if *guarded {
-                    self.spark_burst(x, y, dir, 7, 3.2, [0.45, 0.75, 1.0], 0.9);
-                    self.ring(x, y, 16.0, 0.22, 1.4, [0.5, 0.8, 1.0]);
-                    self.glow(x, y, 12.0, 0.12, [0.5, 0.8, 1.0]);
-                    self.trauma = (self.trauma + 0.08).min(1.0);
-                    self.float(x, y - 14.0, "GUARD".into(), 6.5, [0.55, 0.8, 1.0]);
+                    self.spark_burst(x, y, dir, 5, 3.0, [0.45, 0.75, 1.0], 0.9);
+                    self.ring(x, y, 14.0, 0.2, 1.2, [0.5, 0.8, 1.0]);
+                    self.trauma = (self.trauma + 0.05).min(1.0);
+                    self.tag(x, y - 14.0, "GUARD", [0.55, 0.8, 1.0]);
                     return;
                 }
-                // 5-8 micro-responses at once: burst, glow, ring, dust, shake, punch, chroma, number
-                let n = 9 + (mag * 14.0) as usize;
-                self.spark_burst(x, y, dir, n, 3.0 + mag * 4.5, [1.0, 0.62, 0.15], 1.0);
-                self.spark_burst(x, y, dir, 4, 5.5, [1.0, 1.0, 0.9], 0.4);
-                self.glow(x, y, 16.0 + mag * 14.0, 0.14, [1.0, 0.75, 0.35]);
-                self.slashes(x, y, dir, 3 + (mag * 3.0) as usize, 22.0 + mag * 16.0, [1.0, 0.95, 0.8]);
-                self.light(x, y - 6.0, 70.0 + mag * 70.0, 0.2, [1.0, 0.7, 0.35]);
-                self.ring(x, y, 20.0 + mag * 26.0, 0.28, 1.8, [1.0, 0.85, 0.5]);
-                self.trauma = (self.trauma + 0.16 + mag * 0.22).min(1.0);
-                self.punch = self.punch.max(0.012 + mag * 0.018);
-                self.chroma = self.chroma.max(0.35 + mag * 0.4);
-                if *heavy || mag > 0.75 {
-                    self.ring(x, y, 52.0, 0.4, 2.6, [1.0, 1.0, 1.0]);
-                    self.debris(x, y + 10.0, 8, [0.8, 0.72, 0.6]);
-                    self.lines = 1.0; self.lines_col = [1.0, 0.95, 0.8];
-                    // SF6-style colour paint, built behind the attacker so the source of the hit is readable
-                    let (ax, scol) = (m.fighters.get(*attacker).map(|a| a.pos.x).unwrap_or(x - dir * 30.0), if *attacker_side == 0 { [0.13, 0.78, 1.0] } else { [1.0, 0.25, 0.55] });
-                    self.splat(ax - dir * 6.0, y + 6.0, dir, 34.0 + mag * 22.0, scol);
-                    self.flash_add(0.18);
-                    self.punch = self.punch.max(0.04);
-                }
-                // SF6-style pop-up notice for the first clean hit of the round
-                if !self.first_hit && m.round_state == 2 && !m.training { self.first_hit = true; self.banner("FIRST ATTACK", "", [0.4, 0.9, 1.0]); }
                 let counter = self.pre_mt.get(*defender).copied() == Some('A');
-                let _ = defender_side;
-                let col = if counter { [1.0, 0.35, 0.3] } else { [1.0, 0.92, 0.55] };
-                self.float(x + dir * 12.0, y - 10.0, format!("{}", *damage as i32), 8.0 + mag * 6.0, col);
-                if counter { self.sfx.push("counter"); self.banner("COUNTER!", "", [1.0, 0.3, 0.25]); self.glow(x, y, 26.0, 0.2, [1.0, 0.3, 0.2]); self.chroma = self.chroma.max(0.9); }
+                let n = 5 + (mag * 8.0) as usize;
+                self.spark_burst(x, y, dir, n, 3.0 + mag * 3.5, [1.0, 0.62, 0.15], 1.0);
+                self.spark_burst(x, y, dir, 2, 5.0, [1.0, 1.0, 0.9], 0.4);
+                self.glow(x, y, 12.0 + mag * 10.0, 0.12, [1.0, 0.75, 0.35]);
+                self.slashes(x, y, dir, 2 + (mag * 2.0) as usize, 16.0 + mag * 10.0, [1.0, 0.95, 0.8]);
+                self.ring(x, y, 16.0 + mag * 18.0, 0.24, 1.4, [1.0, 0.85, 0.5]);
+                self.trauma = (self.trauma + 0.07 + mag * 0.12).min(0.6);
+                self.punch = self.punch.max(0.008 + mag * 0.012);
+                if *heavy || mag > 0.75 {
+                    self.debris(x, y + 10.0, 4, [0.8, 0.72, 0.6]);
+                    self.flash_add(0.1);
+                    self.punch = self.punch.max(0.022);
+                }
+                if !self.first_hit && m.round_state == 2 && !m.training { self.first_hit = true; self.tag(x, y - 26.0, "FIRST ATTACK", [0.4, 0.9, 1.0]); }
+                let col = if counter { [1.0, 0.45, 0.35] } else { [1.0, 0.92, 0.55] };
+                self.float(x + dir * 12.0, y - 6.0, format!("{}", *damage as i32), 6.0 + mag * 2.5, col);
+                if counter { self.sfx.push("counter"); self.tag(x, y - 14.0, "COUNTER", [1.0, 0.45, 0.35]); self.ring(x, y, 18.0, 0.2, 1.2, [1.0, 0.45, 0.35]); }
             }
-            Event::Super { side, fighter } => {
+            Event::Super { fighter, .. } => {
                 self.super_t = 1.0; self.super_owner = *fighter;
                 if let Some((x, y, _)) = m.fighters.iter().find(|f| f.id == *fighter).map(Self::chest_of) {
-                    self.ring(x, y, 90.0, 0.7, 3.5, [1.0, 0.9, 0.4]);
-                    self.ring(x, y, 60.0, 0.5, 2.0, [1.0, 1.0, 1.0]);
-                    self.glow(x, y, 50.0, 0.4, [1.0, 0.8, 0.3]);
-                    // grander: staggered shock-rings, a radial storm of sparks, a ground quake and a column of light
-                    for (i, r) in [140.0f32, 200.0, 280.0].iter().enumerate() { self.ring(x, y, *r, 0.7 + i as f32 * 0.2, 3.2 - i as f32 * 0.7, [1.0, 0.8 - i as f32 * 0.15, 0.35]); }
-                    self.spark_burst(x, y, 1.0, 64, 11.0, [1.0, 0.85, 0.4], std::f32::consts::PI);
-                    self.spark_burst(x, y, 1.0, 22, 14.0, [1.0, 1.0, 1.0], std::f32::consts::PI);
-                    self.debris(x, y + 18.0, 20, [0.75, 0.68, 0.6]);
-                    self.light(x, y, 300.0, 0.9, [1.0, 0.8, 0.35]);
+                    self.ring(x, y, 70.0, 0.5, 2.4, [1.0, 0.9, 0.4]);
+                    self.ring(x, y, 120.0, 0.6, 1.6, [1.0, 0.8, 0.35]);
+                    self.glow(x, y, 36.0, 0.3, [1.0, 0.8, 0.3]);
+                    self.spark_burst(x, y, 1.0, 22, 8.0, [1.0, 0.85, 0.4], std::f32::consts::PI);
+                    self.debris(x, y + 18.0, 6, [0.75, 0.68, 0.6]);
+                    self.light(x, y, 160.0, 0.5, [1.0, 0.8, 0.35]);
                     self.sfx.push("super");
+                    let nm = m.fighters.iter().find(|f| f.id == *fighter).map(|f| f.def.display_name.to_uppercase()).unwrap_or_default();
+                    self.tag(x, y - 46.0, &format!("SUPER · {nm}"), [1.0, 0.82, 0.3]);
                 }
-                self.flash_add(0.55); self.chroma = self.chroma.max(1.0); self.radial = 1.0; self.trauma = (self.trauma + 0.4).min(1.0);
-                self.lines = 1.4; self.lines_col = [1.0, 0.85, 0.4];
-                self.invert_add();
-                if let Some((x, y, f)) = m.fighters.iter().find(|f| f.id == *fighter).map(Self::chest_of) { self.splat(x - f * 10.0, y + 8.0, f, 80.0, if *side == 0 { [0.13, 0.78, 1.0] } else { [1.0, 0.25, 0.55] }); self.light(x, y, 190.0, 0.45, [1.0, 0.85, 0.45]); }
-                let nm = m.fighters.iter().find(|f| f.id == *fighter).map(|f| f.def.display_name.to_uppercase()).unwrap_or_default();
-                self.banner("SUPER ARTS", &nm, [1.0, 0.82, 0.3]);
+                self.flash_add(0.25); self.chroma = self.chroma.max(0.5); self.radial = 0.45; self.trauma = (self.trauma + 0.15).min(0.6);
+                self.lines = 0.7; self.lines_col = [1.0, 0.85, 0.4];
             }
-            Event::Ko { loser_side } => {
-                self.slow_t = 1.7; self.ko_t = 1.0;
+            Event::Ko { loser_side, slow, .. } => {
+                self.slow_t = if *slow { 1.7 } else { 0.0 }; self.ko_t = 1.0;
                 if let Some((x, y, _)) = Self::chest(m, *loser_side) {
                     self.ko_focus = (x, y);
-                    self.ring(x, y, 130.0, 0.9, 4.0, [1.0, 0.25, 0.3]);
-                    self.ring(x, y, 80.0, 0.6, 2.5, [1.0, 1.0, 1.0]);
-                    self.glow(x, y, 60.0, 0.5, [1.0, 0.3, 0.3]);
-                    self.light(x, y, 220.0, 0.6, [1.0, 0.3, 0.3]);
-                    self.spark_burst(x, y, 1.0, 26, 8.0, [1.0, 0.4, 0.3], std::f32::consts::PI);
-                    self.debris(x, y + 12.0, 14, [0.7, 0.6, 0.55]);
+                    self.ring(x, y, 110.0, 0.8, 3.0, [1.0, 0.25, 0.3]);
+                    self.glow(x, y, 44.0, 0.4, [1.0, 0.3, 0.3]);
+                    self.light(x, y, 160.0, 0.5, [1.0, 0.3, 0.3]);
+                    self.spark_burst(x, y, 1.0, 14, 7.0, [1.0, 0.4, 0.3], std::f32::consts::PI);
+                    self.debris(x, y + 12.0, 6, [0.7, 0.6, 0.55]);
                 }
-                self.invert_add(); self.flash_add(0.9); self.chroma = 1.0; self.radial = 1.0; self.trauma = 1.0; self.vig = 1.0; self.lines = 1.6; self.lines_col = [1.0, 0.35, 0.3];
+                self.flash_add(0.5); self.chroma = 0.6; self.radial = 0.6; self.trauma = 0.6; self.vig = 0.8; self.lines = 0.8; self.lines_col = [1.0, 0.35, 0.3];
                 let w = 1 - loser_side;
                 if m.roots().find(|f| f.side == w).is_some_and(|f| f.life >= f.life_max - 0.5) { self.sfx.push("perfect"); self.banner("PERFECT!", "vitória sem sofrer dano", [1.0, 0.85, 0.2]); }
             }
@@ -238,25 +224,23 @@ impl Vfx {
                 if let Some(f) = m.fighters.iter().find(|f| f.id == *fighter) {
                     col = Self::form_color(f);
                     let (x, y, _) = Self::chest_of(f);
-                    for (i, r) in [70.0f32, 120.0, 180.0, 250.0].iter().enumerate() { self.ring(x, y, *r, 0.55 + i as f32 * 0.15, 3.8 - i as f32 * 0.7, col); }
-                    self.ring(f.pos.x, f.pos.y - 2.0, 150.0, 1.0, 3.0, [1.0, 1.0, 1.0]);
-                    self.glow(x, y, 100.0, 0.9, col); self.light(x, y, 280.0, 1.3, col);
-                    for _ in 0..70 {
-                        let (px, life) = (f.pos.x + self.rr(-20.0, 20.0), self.rr(0.7, 1.5));
-                        let (vy, sz, c) = (-self.rr(1.2, 4.5), self.rr(1.0, 2.4), if self.r() > 0.4 { col } else { [1.0, 1.0, 1.0] });
+                    for (i, r) in [70.0f32, 140.0].iter().enumerate() { self.ring(x, y, *r, 0.55 + i as f32 * 0.2, 2.8 - i as f32 * 0.8, col); }
+                    self.glow(x, y, 70.0, 0.7, col); self.light(x, y, 200.0, 1.0, col);
+                    for _ in 0..28 {
+                        let (px, life) = (f.pos.x + self.rr(-20.0, 20.0), self.rr(0.7, 1.4));
+                        let (vy, sz, c) = (-self.rr(1.2, 4.0), self.rr(1.0, 2.0), if self.r() > 0.4 { col } else { [1.0, 1.0, 1.0] });
                         let vx = self.rr(-0.3, 0.3); self.ember(px, f.pos.y, vx, vy, -0.01, life, sz, c);
                     }
-                    self.spark_burst(x, y, 1.0, 56, 10.0, col, std::f32::consts::PI);
-                    self.slashes(x, y, 1.0, 10, 70.0, col);
-                    self.debris(f.pos.x, f.pos.y, 26, [0.7, 0.65, 0.6]);
-                    self.dust(f.pos.x, f.pos.y, 28, 3.2, 1.0, [0.85, 0.8, 0.75]);
+                    self.spark_burst(x, y, 1.0, 20, 8.0, col, std::f32::consts::PI);
+                    self.debris(f.pos.x, f.pos.y, 8, [0.7, 0.65, 0.6]);
+                    self.dust(f.pos.x, f.pos.y, 12, 3.0, 1.0, [0.85, 0.8, 0.75]);
                     let nm = f.def.form_name.to_uppercase();
-                    self.banner(if nm.is_empty() { "DESPERTAR" } else { &nm }, &f.def.display_name, col);
+                    self.tag(x, y - 46.0, if nm.is_empty() { "DESPERTAR" } else { &nm }, col);
                 }
-                self.flash_add(0.8); self.invert_add(); self.chroma = 1.0; self.radial = 1.0; self.trauma = 1.0; self.vig = 0.6;
-                self.lines = 1.5; self.lines_col = col; self.sfx.push("transform");
+                self.flash_add(0.4); self.chroma = 0.6; self.radial = 0.5; self.trauma = 0.5; self.vig = 0.3;
+                self.lines = 0.7; self.lines_col = col; self.sfx.push("transform");
             }
-            Event::Fight => { if m.roots().any(|f| f.def.boss) { self.banner("CHEFE FINAL", "MIKAZUKI OBORO", [1.0, 0.15, 0.3]); self.sfx.push("ko"); } self.ring(m.camera.x, m.stage.zoffset - 60.0, 160.0, 0.6, 3.0, [1.0, 0.8, 0.3]); self.flash_add(0.35); self.chroma = self.chroma.max(0.7); self.trauma = (self.trauma + 0.25).min(1.0); self.radial = 0.6; }
+            Event::Fight => { if m.roots().any(|f| f.def.boss) { self.banner("CHEFE FINAL", "MIKAZUKI OBORO", [1.0, 0.15, 0.3]); self.sfx.push("ko"); } self.ring(m.camera.x, m.stage.zoffset - 60.0, 120.0, 0.5, 2.0, [1.0, 0.8, 0.3]); self.flash_add(0.2); self.chroma = self.chroma.max(0.4); self.trauma = (self.trauma + 0.1).min(1.0); self.radial = 0.3; }
             Event::RoundStart(_) => { self.slow_t = 0.0; self.ko_t = 0.0; self.first_hit = false; }
             _ => {}
         }
@@ -315,9 +299,9 @@ impl Vfx {
         // super aura: rising energy motes while the super pause runs
         if let Some(p) = &m.pause { if p.is_super {
             if let Some((x, y, _)) = m.fighters.iter().find(|f| f.id == self.super_owner).map(Self::chest_of) {
-                self.trauma = self.trauma.max(0.42);
-                if self.tick % 5 == 0 { self.slashes(x, y, 1.0, 2, 60.0, [1.0, 0.9, 0.5]); }
-                for _ in 0..6 {
+                self.trauma = self.trauma.max(0.12);
+                if self.tick % 10 == 0 { self.slashes(x, y, 1.0, 1, 40.0, [1.0, 0.9, 0.5]); }
+                for _ in 0..2 {
                     let ang = self.rr(0.0, std::f32::consts::TAU); let rr = self.rr(14.0, 34.0);
                     let c = if self.r() > 0.5 { [1.0, 0.85, 0.35] } else { [0.5, 0.85, 1.0] };
                     let life = self.rr(0.4, 0.8);
@@ -325,9 +309,9 @@ impl Vfx {
                     let size = self.rr(0.8, 1.8);
                     self.parts.push(P { k: Kind::Ember, x: px, y: py, vx: 0.0, vy, g: -0.01, life, max: life, size, col: c, rot: 0.0, vrot: 0.0 });
                 }
-                if self.tick % 14 == 0 { self.ring(x, y, 46.0, 0.45, 1.6, [1.0, 0.9, 0.5]); }
+                if self.tick % 28 == 0 { self.ring(x, y, 40.0, 0.4, 1.2, [1.0, 0.9, 0.5]); }
             }
-            self.lines = self.lines.max(0.7);
+            self.lines = self.lines.max(0.3);
         } }
     }
 
@@ -349,14 +333,12 @@ impl Vfx {
         self.flash_clock += dt;
         self.dist_zoom += (self.dist_target - self.dist_zoom) * (3.0 * dt).min(1.0);
         self.intro_zoom += (self.intro_target - self.intro_zoom) * (2.5 * dt).min(1.0);
-        for sp in &mut self.splats { sp.t += dt; }
-        self.splats.retain(|s| s.t < s.dur);
         for l in &mut self.lights { l.t += dt; }
         self.lights.retain(|l| l.t < l.dur);
         for r in &mut self.rings { r.t += dt; }
         self.rings.retain(|r| r.t < r.dur);
-        for f in &mut self.floats { f.t += dt; f.y -= 0.35 * k * (1.0 - (f.t / 0.9).min(1.0)); }
-        self.floats.retain(|f| f.t < 0.9);
+        for f in &mut self.floats { f.t += dt; f.y -= 0.35 * k * (1.0 - (f.t / FLOAT_LIFE).min(1.0)); }
+        self.floats.retain(|f| f.t < FLOAT_LIFE);
         for b in &mut self.banners { b.t += dt; }
         self.banners.retain(|b| b.t < 1.6);
         self.trauma = (self.trauma - dt * 1.6).max(0.0);
@@ -370,7 +352,7 @@ impl Vfx {
         if self.slow_t > 0.0 { self.slow_t = (self.slow_t - dt).max(0.0); }
         if self.slow_t <= 0.0 { self.ko_t = (self.ko_t - dt * 1.5).max(0.0); }
         self.sat_pulse = if self.ko_t > 0.0 { self.ko_t } else { 0.0 };
-        self.parts.truncate(900);
+        self.parts.truncate(MAX_PARTS);
     }
 
     /// Camera: zoom factor and focus in game-view coordinates.
@@ -441,22 +423,6 @@ impl Vfx {
                     let c = if layer == 0 { col } else { [1.0, 0.95, 0.85] };
                     poly::fill(&[a, tip, b], |q| { let k = ((boty - q.y) / (boty - topy).abs().max(1.0)).clamp(0.0, 1.0); Color::new(c[0], c[1], c[2], (0.95 - layer as f32 * 0.2) * amb * (1.0 - k).powf(1.1)) });
                 }
-            }
-        }
-        for sp in &self.splats {
-            let t = sp.t / sp.dur;
-            let e = 1.0 - (1.0 - (t * 3.0).min(1.0)).powi(3);
-            let a = if t < 0.55 { 1.0 } else { 1.0 - (t - 0.55) / 0.45 };
-            let c = tp(sp.x + sp.dir * sp.size * 0.35 * e, sp.y);
-            let n = sp.radii.len();
-            let pt = |i: usize, k: f32| { let ang = i as f32 / n as f32 * std::f32::consts::TAU + if sp.dir < 0.0 { std::f32::consts::PI } else { 0.0 }; let stretch = 1.0 + 0.7 * ang.cos().max(0.0); vec2(c.x + ang.cos() * sp.radii[i % n] * sp.size * e * k * stretch * s, c.y + ang.sin() * sp.radii[i % n] * sp.size * e * k * 0.8 * s) };
-            for (k, col) in [(1.12, Color::new(0.06, 0.02, 0.12, 0.85 * a)), (1.0, Color::new(sp.col[0], sp.col[1], sp.col[2], 0.8 * a)), (0.55, Color::new(lerp(sp.col[0], 1.0, 0.55), lerp(sp.col[1], 1.0, 0.55), lerp(sp.col[2], 1.0, 0.55), 0.6 * a))] {
-                for i in 0..n { draw_triangle(c, pt(i, k), pt((i + 1) % n, k), col); }
-            }
-            for (ang, dist, rs) in sp.drops.iter() {
-                let a2 = ang + if sp.dir < 0.0 { std::f32::consts::PI } else { 0.0 };
-                let p = vec2(c.x + a2.cos() * dist * sp.size * e * s * 1.2, c.y + a2.sin() * dist * sp.size * e * s * 0.9);
-                poly::circle(p, rs * sp.size * s * 0.5 * e.min(1.0), Color::new(sp.col[0], sp.col[1], sp.col[2], 0.85 * a));
             }
         }
     }
@@ -574,7 +540,7 @@ impl Vfx {
         set_blend(GfxBlend::Alpha);
         // damage numbers / labels
         for f in &self.floats {
-            let t = f.t / 0.9;
+            let t = f.t / FLOAT_LIFE;
             let pop = if t < 0.15 { 0.6 + t / 0.15 * 0.7 } else { 1.3 - (t - 0.15).min(0.3) };
             let a = if t > 0.7 { (1.0 - t) / 0.3 } else { 1.0 };
             let c = tp(f.x, f.y);
@@ -592,21 +558,20 @@ impl Vfx {
 
     /// Big banner texts (COUNTER!, PERFECT!, SUPER ARTS…), slammed in with overshoot.
     pub fn draw_cinema_bars(&self, ui: &Ui) {
-        if self.sz > 0.02 { let h = 46.0 * self.sz * self.sz * (3.0 - 2.0 * self.sz); ui.rect(0.0, 0.0, 1280.0, h, Color::new(0.0, 0.0, 0.0, 0.92)); ui.rect(0.0, 720.0 - h, 1280.0, h, Color::new(0.0, 0.0, 0.0, 0.92)); }
+        if self.sz > 0.02 { let h = 26.0 * self.sz * self.sz * (3.0 - 2.0 * self.sz); ui.rect(0.0, 0.0, 1280.0, h, Color::new(0.0, 0.0, 0.0, 0.92)); ui.rect(0.0, 720.0 - h, 1280.0, h, Color::new(0.0, 0.0, 0.0, 0.92)); }
     }
 
     pub fn draw_banners(&self, ui: &Ui) {
         for (i, b) in self.banners.iter().enumerate() {
             let t = b.t;
-            let sc = if t < 0.12 { lerp(1.4, 1.0, t / 0.12) } else if t < 0.2 { lerp(1.0, 1.08, (t - 0.12) / 0.08) } else { lerp(1.08, 1.0, ((t - 0.2) / 0.3).min(1.0)) };
-            let a = if t > 1.2 { ((1.6 - t) / 0.4).max(0.0) } else { (t / 0.06).min(1.0) };
-            let slide = if t < 0.12 { (1.0 - t / 0.12) * 120.0 } else { 0.0 };
-            let y = 300.0 + i as f32 * 96.0;
-            let (x0, y0, x1, y1) = (0.0, y - 56.0, 1280.0, y + 28.0);
-            ui.quad([vec2(x0, y0 + 12.0), vec2(x1, y0), vec2(x1, y1 - 12.0), vec2(x0, y1)], Color::new(b.col[0] * 0.25, b.col[1] * 0.2, b.col[2] * 0.25, 0.55 * a));
-            ui.rect(0.0, y - 56.0 + 8.0, 1280.0, 2.0, Color::new(b.col[0], b.col[1], b.col[2], 0.8 * a));
-            ui.text_bold(&b.text, 640.0 - slide, y, 64.0 * sc, Color::new(b.col[0], b.col[1], b.col[2], a), Color::new(0.1, 0.02, 0.1, a), crate::ui::Align::Center);
-            if !b.sub.is_empty() { ui.text(&b.sub, 640.0, y + 22.0, 18.0, Color::new(1.0, 1.0, 1.0, a * 0.8), crate::ui::Align::Center, false); }
+            let sc = if t < 0.12 { lerp(1.25, 1.0, t / 0.12) } else { 1.0 };
+            let a = if t > 1.2 { ((1.6 - t) / 0.4).max(0.0) } else { (t / 0.08).min(1.0) };
+            let y = 124.0 + i as f32 * 44.0;
+            let hw = 190.0 * (0.6 + 0.4 * (t / 0.15).min(1.0));
+            ui.rect(640.0 - hw, y - 24.0, hw * 2.0, 34.0, Color::new(b.col[0] * 0.2, b.col[1] * 0.2, b.col[2] * 0.25, 0.35 * a));
+            ui.rect(640.0 - hw, y + 10.0, hw * 2.0, 1.5, Color::new(b.col[0], b.col[1], b.col[2], 0.7 * a));
+            ui.text_bold(&b.text, 640.0, y, 26.0 * sc, Color::new(b.col[0], b.col[1], b.col[2], a), Color::new(0.1, 0.02, 0.1, a), crate::ui::Align::Center);
+            if !b.sub.is_empty() { ui.text(&b.sub, 640.0, y + 8.0, 11.0, Color::new(1.0, 1.0, 1.0, a * 0.8), crate::ui::Align::Center, false); }
         }
     }
 }

@@ -1,4 +1,4 @@
-use ume_engine::chardef::{CharDef, ImageData};
+use ume_engine::chardef::{CharDef, ImageData, Sprite};
 use ume_engine::native::{compile_native, NativeChar};
 
 const SPRITES: &str = "../../assets/chars/sprites";
@@ -26,6 +26,17 @@ fn frame_art(def: &CharDef, anim: i32, frame: usize) -> &ImageData {
     def.sprites[&(f.group, f.index)].image.as_deref().expect("sprite image")
 }
 
+fn frame_sprite(def: &CharDef, anim: i32, frame: usize) -> &Sprite {
+    let f = &def.anims[&anim].frames[frame];
+    &def.sprites[&(f.group, f.index)]
+}
+
+fn opaque_floor_offset(sprite: &Sprite) -> f32 {
+    let image = sprite.image.as_deref().expect("sprite image");
+    let bottom = image.rgba.chunks_exact(4).enumerate().filter(|(_, pixel)| pixel[3] > 0).map(|(index, _)| index as u32 / image.w + 1).max().expect("opaque pixels");
+    (bottom as f32 * sprite.height / image.h as f32 - sprite.axis_y) * sprite.scale
+}
+
 #[test]
 fn every_fighter_with_a_sprite_folder_draws_it() {
     let ids = fighters_where("01_idle.png");
@@ -33,6 +44,9 @@ fn every_fighter_with_a_sprite_folder_draws_it() {
     for id in ids {
         let def = compiled(&id);
         assert!(def.sprites.values().any(|s| s.image.is_some()), "{id}: sprite images loaded");
+        let portrait = def.sprites.get(&(9000, 1)).and_then(|sprite| sprite.image.as_deref()).expect("dedicated portrait image");
+        assert!(portrait.w.max(portrait.h) <= 256, "{id}: dedicated portrait fits the selection texture budget");
+        assert!(portrait.rgba.chunks_exact(4).any(|pixel| pixel[3] > 0), "{id}: dedicated portrait contains visible pixels");
     }
 }
 
@@ -52,10 +66,11 @@ fn state_animations_use_their_own_art() {
         }
         assert_ne!(frame_art(&def, 196, 0).rgba, frame_art(&def, 196, 2).rgba, "{id}: transformation must progress");
         assert_eq!(frame_art(&def, 5150, 0).rgba, frame_art(&def, 5110, 0).rgba, "{id}: dead and lie down share the knocked-out art");
-        let canvas = (idle.w, idle.h);
         for (anim, frame) in [(5000, 0), (5050, 0), (5110, 0), (196, 2)] {
             let art = frame_art(&def, anim, frame);
-            assert_eq!((art.w, art.h), canvas, "{id}: anim {anim} shares the fighter's canvas");
+            assert!(art.w > 0 && art.h > 0, "{id}: anim {anim} has nonzero image dimensions");
+            let floor_offset = opaque_floor_offset(frame_sprite(&def, anim, frame));
+            assert!(floor_offset.is_finite() && floor_offset.abs() <= 1.5, "{id}: anim {anim} opaque pixels align with its own floor anchor, offset {floor_offset}");
         }
     }
 }

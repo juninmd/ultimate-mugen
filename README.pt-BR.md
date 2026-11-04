@@ -125,7 +125,7 @@ No Linux, instale alguns pacotes antes:
 sudo apt-get install -y pkg-config libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev
 ```
 
-**Traga seu conteúdo M.U.G.E.N:** coloque personagens em `mugen/chars/` (pasta ou `.zip`) e cenários em `mugen/stages/`, ou aponte `UME_MUGEN_DIR` para uma instalação existente.
+**Traga seu conteúdo M.U.G.E.N:** coloque personagens em `mugen/chars/` (pasta ou `.zip`) e cenários em `mugen/stages/`, ou aponte `UME_MUGEN_DIR` para uma instalação existente. Também dá para instalar personagens, cenários e músicas de qualquer repositório público do GitHub em **Mercado GitHub** (menu principal); veja o [guia do mercado](docs/wiki/pt-BR/Mercado.md).
 
 <details>
 <summary><b>Outros alvos de build e flags</b></summary>
@@ -168,13 +168,13 @@ Teclado, vários controles e toque funcionam ao mesmo tempo. As listas de golpes
 
 | Ação | Teclado (P1) | Teclado (P2) | DualShock 4 / DualSense / XInput | Toque |
 |---|---|---|---|---|
-| **Mover / Pular / Agachar** | `W` `A` `S` `D` ou setas | Setas | D-Pad ou analógico esquerdo | Analógico virtual |
-| **Soco fraco** | `U` (ou `V`) | Numpad `4` | `□` / `X` | **LP** |
-| **Soco forte** | `I` (ou `B`) | Numpad `5` | `△` / `Y` | **HP** |
-| **Soco extra (Z)** | `O` (ou `N`) | Numpad `6` | `R1` / `RB` | — |
-| **Chute fraco** | `J` (ou `Z`) | Numpad `1` | `✕` / `A` | **LK** |
-| **Chute forte** | `K` (ou `X`) | Numpad `2` | `○` / `B` | **HK** |
-| **Chute extra (C)** | `L` (ou `C`) | Numpad `3` | `R2` / `RT` | — |
+| **Mover / Pular / Agachar** | Setas | `I` `K` `J` `L` | D-Pad ou analógico esquerdo | Analógico virtual |
+| **Soco fraco** | `Q` | Numpad `4` | `□` / `X` | **LP** |
+| **Soco forte** | `W` | Numpad `5` | `△` / `Y` | **HP** |
+| **Soco extra (Z)** | `E` | Numpad `6` | `R1` / `RB` | — |
+| **Chute fraco** | `A` | Numpad `1` | `✕` / `A` | **LK** |
+| **Chute forte** | `S` | Numpad `2` | `○` / `B` | **HK** |
+| **Chute extra (C)** | `D` | Numpad `3` | `R2` / `RT` | — |
 | **Especiais rápidos** | `1`, `2`, `3` | Numpad `7`, `8`, `9` | `L1`, `L2` | **ESPECIAL**, **SUPER** |
 | **Super** | `1` + `2` | Numpad `7` + `8` | `L1` + `L2` | **SUPER** |
 | **Transformação** | `T` | Numpad `0` | Analógico direito / `SELECT` | — |

@@ -4,11 +4,14 @@ use crate::matchs::Match;
 use crate::triggers::Ctx;
 
 mod ext;
+pub mod introspect;
+mod maps;
 pub use ext::{format_text, tick, TextItem};
+pub use maps::{MapStore, MAP_MAX_KEYS, MAP_MAX_KEY_LEN};
 
 #[derive(Clone, Debug, Default)]
 pub struct IkemenState {
-    pub map: Vec<(String, f32)>,
+    pub map: MapStore,
     pub red_life: f32,
     pub dizzy_points: f32,
     pub dizzy_max: f32,
@@ -24,37 +27,15 @@ impl IkemenState {
         let life = def.c("data.life", 1000.0) as f32;
         let dizzy_max = def.c("data.dizzypoints", life as f64) as f32;
         let guard_max = def.c("data.guardpoints", life as f64) as f32;
-        IkemenState { map: vec![], red_life: life, dizzy_points: dizzy_max, dizzy_max, guard_points: guard_max, guard_max, dizzy: false, guard_break: false, standby: false }
+        IkemenState { map: MapStore::default(), red_life: life, dizzy_points: dizzy_max, dizzy_max, guard_points: guard_max, guard_max, dizzy: false, guard_break: false, standby: false }
     }
-
-    pub fn get(&self, key: &str) -> f32 {
-        self.map.iter().find(|(k, _)| k == key).map(|(_, v)| *v).unwrap_or(0.0)
-    }
-
-    pub fn set(&mut self, key: &str, v: f32, add: bool) {
-        match self.map.iter_mut().find(|(k, _)| k == key) {
-            Some((_, x)) => *x = if add { *x + v } else { v },
-            None => self.map.push((key.to_string(), v)),
-        }
-    }
-}
-
-fn map_key(sc: &Controller) -> Option<String> {
-    let raw = sc.raw("map")?;
-    let k = raw.trim().trim_matches('"').trim().to_ascii_lowercase();
-    (!k.is_empty()).then_some(k)
 }
 
 pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
     let n = |m: &Match, k: &str, d: f64| m.num(i, sc, k, d, 0) as f32;
     let kind = sc.kind.as_str();
+    if maps::run(m, i, sc) { return true; }
     match kind {
-        "mapset" | "mapadd" => {
-            let Some(key) = map_key(sc) else { return true };
-            let v = n(m, "value", 0.0);
-            let add = kind == "mapadd" || n(m, "type", 0.0) as i32 == 1;
-            m.fighters[i].ikemen.set(&key, v, add);
-        }
         "redlifeset" | "redlifeadd" => {
             let v = n(m, "value", 0.0);
             let f = &mut m.fighters[i];
@@ -83,10 +64,10 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
 
 fn n_absolute(sc: &Controller) -> bool { sc.raw("absolute").is_some_and(|v| v.trim() != "0") }
 
-fn name_arg(args: &[Node]) -> Option<String> {
+fn name_arg(args: &[Node]) -> Option<&str> {
     match args.first()? {
-        Node::Trig { name, args, raw: None, .. } if args.is_empty() => Some(name.clone()),
-        Node::Trig { name, raw: Some(s), .. } if name == "__str" => Some(s.to_ascii_lowercase()),
+        Node::Trig { name, args, raw: None, .. } if args.is_empty() => Some(name.as_str()),
+        Node::Trig { name, raw: Some(s), .. } if name == "__str" => Some(s.as_str()),
         _ => None,
     }
 }
@@ -96,7 +77,8 @@ pub fn trigger(c: &Ctx, name: &str, args: &[Node]) -> Option<f64> {
     let s = &f.ikemen;
     let b = |x: bool| x as i32 as f64;
     Some(match name {
-        "map" => name_arg(args).map(|k| s.get(&k) as f64).unwrap_or(0.0),
+        "map" => name_arg(args).map(|k| s.map.get(k) as f64).unwrap_or(0.0),
+        "teammap" => name_arg(args).map(|k| maps::team_value(c.m, c.i, k) as f64).unwrap_or(0.0),
         "redlife" => s.red_life as f64,
         "dizzy" => b(s.dizzy),
         "dizzypoints" => s.dizzy_points as f64,

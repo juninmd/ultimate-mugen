@@ -2,6 +2,20 @@
 // touch detection and the MUGEN .zip import button (packs persisted in IndexedDB).
 (function () {
   const K = { U: 1, D: 2, L: 4, R: 8, a: 16, b: 32, c: 64, x: 128, y: 256, z: 512, s: 1024, d: 2048, w: 4096 };
+  const held = new Map();
+  function releaseAll() {
+    const c = document.getElementById('glcanvas');
+    if (!c) return;
+    for (const [code, e] of held) c.dispatchEvent(new KeyboardEvent('keyup', { code, key: e.key, keyCode: e.keyCode, bubbles: true }));
+    held.clear();
+    for (const t of ['mouseup', 'pointerup']) { try { c.dispatchEvent(new MouseEvent(t, { button: 0, bubbles: true })); } catch (e) {} }
+  }
+  window.addEventListener('keydown', (e) => { if (e.code) held.set(e.code, { key: e.key, keyCode: e.keyCode }); }, true);
+  window.addEventListener('keyup', (e) => { held.delete(e.code); }, true);
+  window.addEventListener('blur', releaseAll);
+  window.addEventListener('pagehide', releaseAll);
+  window.addEventListener('contextmenu', releaseAll);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
   function pads() { return navigator.getGamepads ? Array.from(navigator.getGamepads()).filter((p) => p && p.connected) : []; }
   function state(i) {
     const p = pads()[i]; if (!p) return 0;
@@ -24,17 +38,38 @@
   window.ume_gp_name = (i) => { const p = pads()[i]; return p ? p.id : ''; };
   window.ume_gp_rumble = (i, s, w, ms) => rumble(i, s, w, ms);
   window.ume_set_import_visible = (v) => { const b = document.getElementById('imp'); if (b) b.style.display = v ? '' : 'none'; };
+  window.ume_storage_get = (k) => { try { return localStorage.getItem('ume.' + k) || ''; } catch (e) { return ''; } };
+  window.ume_storage_set = (k, v) => { try { localStorage.setItem('ume.' + k, v); } catch (e) {} };
   window.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0;
 
   window.umeStartImports = function (wasm) {
     const DB = 'ultimate-mugen', ST = 'packs';
     function db() { return new Promise((res, rej) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(ST); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
-    async function store(name, buf) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).put(buf, name); } catch (e) {} }
-    async function all() { try { const d = await db(); return await new Promise((res) => { const out = []; const rq = d.transaction(ST).objectStore(ST).openCursor(); rq.onsuccess = () => { const c = rq.result; if (c) { out.push(c.value); c.continue(); } else res(out); }; rq.onerror = () => res(out); }); } catch (e) { return []; } }
-    async function send(file) { const buf = new Uint8Array(await file.arrayBuffer()); wasm.ume_import(buf); store(file.name + ':' + file.size, buf); }
+    async function digest(buf) {
+      try { const h = await crypto.subtle.digest('SHA-256', buf); return Array.from(new Uint8Array(h), (x) => x.toString(16).padStart(2, '0')).join(''); }
+      catch (e) { let h = 2166136261; for (let i = 0; i < buf.length; i++) { h ^= buf[i]; h = Math.imul(h, 16777619) >>> 0; } return 'f' + buf.length + '-' + h.toString(16); }
+    }
+    const seen = new Set();
+    async function store(key, buf) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).put(buf, key); } catch (e) {} }
+    async function all() { try { const d = await db(); return await new Promise((res) => { const out = []; const rq = d.transaction(ST).objectStore(ST).openCursor(); rq.onsuccess = () => { const c = rq.result; if (c) { out.push({ key: c.key, value: c.value }); c.continue(); } else res(out); }; rq.onerror = () => res(out); }); } catch (e) { return []; } }
+    async function remove(key) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).delete(key); } catch (e) {} }
+    async function accept(buf) {
+      const id = await digest(buf);
+      if (seen.has(id)) return false;
+      seen.add(id);
+      wasm.ume_import(buf);
+      return id;
+    }
+    async function send(file) { const buf = new Uint8Array(await file.arrayBuffer()); const id = await accept(buf); if (id) store(id, buf); }
     window.umeImport = (files) => { for (const f of files) send(f); };
-    window.umeClearImports = async () => { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).clear(); };
-    all().then((bufs) => bufs.forEach((b) => wasm.ume_import(new Uint8Array(b))));
+    window.umeClearImports = async () => { seen.clear(); const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).clear(); };
+    all().then(async (rows) => {
+      for (const { key, value } of rows) {
+        const buf = new Uint8Array(value);
+        const id = await accept(buf);
+        if (key !== id) { await remove(key); if (id) await store(id, buf); }
+      }
+    });
     const input = document.getElementById('ume-file');
     if (input) input.addEventListener('change', () => window.umeImport(input.files));
     window.addEventListener('dragover', (e) => e.preventDefault());

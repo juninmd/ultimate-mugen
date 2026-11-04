@@ -1002,7 +1002,7 @@ impl Match {
             if maxx > target + half - t { target = maxx - half + t; }
         }
         target = if bound { (target + offset.x).clamp(self.stage.bound_left, self.stage.bound_right) } else { target.clamp(self.stage.bound_left, self.stage.bound_right) + offset.x };
-        self.camera.x += (target - self.camera.x) * 0.5;
+        if maxx - minx <= self.view_w - 40.0 { self.camera.x += (target - self.camera.x) * 0.5; }
         let cam = &self.stage.camera;
         let top = self.effective_bound_high();
         let lowest = if cam.lowest_cap { self.stage.start_y.min(0.0) } else { 0.0 };

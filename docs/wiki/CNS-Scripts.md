@@ -109,6 +109,19 @@ Extra functions: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 - Ranges: `stateno = [200, 299]`, `(200, 299]`.
 - Operators: `+ - * / % ** ! && || ^^ & | ^ ~ = != < <= > >=` and `:=` in `var(n) := value`.
 
+## Pause and freeze rules
+
+| Entity | Hit pause (attacker) / hit shake (defender) | `Pause` | `SuperPause` |
+|---|---|---|---|
+| Fighter or helper | Animation, `Time`, physics and timers stop; only controllers with `ignorehitpause = 1` run | Frozen, except the pauser during `movetime` and helpers with `pausemovetime` ticks left | Frozen, except the pauser during `movetime` and helpers with `supermovetime` ticks left |
+| Explod | Keeps going with `ignorehitpause = 1` (default); with `0` it stops while its owner is in hit pause or hit shake, position binding included | Frozen unless `pausemovetime` ticks are left | Frozen unless `supermovetime` ticks are left |
+| Projectile | Not affected by the owner's hit pause | Frozen unless `pausemovetime` ticks are left | Frozen unless `supermovetime` ticks are left |
+
+- A `pausemovetime`/`supermovetime` budget is spent one tick per frozen frame and only by its own kind of pause.
+- `AnimTime`, `AnimElemTime`, `AnimElemNo` and `Time` hold their value for the whole hit pause or shake and resume on the first free tick.
+- `HitPauseTime` is the attacker's remaining hit pause; `GetHitVar(hitshaketime)` and `HitShakeOver` describe the defender's shake. Every other `GetHitVar` field is a snapshot taken when the hit lands and does not change during the shake; the recovery clock (`HitOver`) also waits for the shake to end.
+- Regression tests: `crates/engine/tests/freeze_rules.rs`.
+
 ## Debugging
 
 - `F2` in training shows hitboxes.

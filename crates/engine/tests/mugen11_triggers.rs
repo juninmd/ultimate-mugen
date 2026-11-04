@@ -1,4 +1,5 @@
 mod support;
+use std::sync::Arc;
 use support::*;
 use ume_engine::chardef::parse_mugen_version;
 use ume_engine::expr::{parse, truthy};
@@ -144,4 +145,29 @@ fn partner_skips_helpers_and_missing_teammates() {
     assert_eq!(ev(&m, 0, "partner, life"), 150.0, "the helper does not shadow the real teammate");
     let h = m.fighters.iter().position(|f| f.is_helper).unwrap();
     assert_eq!(ev(&m, h, "partner, life"), 150.0, "a helper redirects through its root");
+}
+
+#[test]
+fn command_in_custom_state_uses_state_owner_commands_on_the_victim_inputs() {
+    let mut owner = Arc::try_unwrap(mugen_char("a", "[Statedef 7000]\ntype = S\n")).ok().unwrap();
+    owner.commands = vec![ume_engine::commands::parse_command("hadou", "N, x", 15, 1)];
+    let owner = Arc::new(owner);
+    let mut m = duel(owner.clone(), mugen_char("b", ""));
+    m.change_state(1, 7000, owner.clone());
+    m.tick(&[0, 0]);
+    m.tick(&[0, ume_engine::input::k::X]);
+    assert_eq!(ev(&m, 1, "command = \"hadou\""), 1.0);
+    assert_eq!(ev(&m, 0, "command = \"hadou\""), 0.0);
+    for _ in 0..20 { m.tick(&[0, ume_engine::input::k::R]); }
+    m.tick(&[0, ume_engine::input::k::R | ume_engine::input::k::X]);
+    assert_eq!(ev(&m, 1, "command = \"hadou\""), 0.0);
+}
+
+#[test]
+fn command_outside_custom_state_ignores_foreign_commands() {
+    let mut owner = Arc::try_unwrap(mugen_char("a", "")).ok().unwrap();
+    owner.commands = vec![ume_engine::commands::parse_command("hadou", "x", 15, 1)];
+    let mut m = duel(Arc::new(owner), mugen_char("b", ""));
+    m.tick(&[0, ume_engine::input::k::X]);
+    assert_eq!(ev(&m, 1, "command = \"hadou\""), 0.0);
 }

@@ -391,13 +391,13 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
     // backing plate + coloured field
     poly::grad_v(&poly::chamfer(x0 - 2.2 * s, y0 - 2.2 * s, d + 4.4 * s, d + 4.4 * s, cut + 1.6 * s), hex("#4a5078"), hex("#0a0c1a"));
     poly::grad_v(&poly::chamfer(x0, y0, d, d, cut), poly::shade(col, 1.15), poly::shade(col, 0.55));
-    let por = f.def.sprites.get(&(9000, 1)).or(f.def.sprites.get(&(9000, 0))).filter(|sp| f.def.source == ume_engine::chardef::Source::Mugen && sp.image.is_some()).map(|sp| (sp.clone(), true))
+    let por = f.def.sprites.get(&(9000, 1)).or(f.def.sprites.get(&(9000, 0))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), true))
         .or_else(|| f.def.anims.get(&0).and_then(|a| a.frames.first()).and_then(|fr| f.def.sprites.get(&(fr.group, fr.index))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), false)));
     if let Some((sp, full)) = por {
         let img = sp.image.clone().unwrap();
         let tex = g.texture(&img, sp.scale >= 0.99);
         let (iw, ih) = (img.w as f32, img.h as f32);
-        let src = if full { let sd = iw.min(ih); Rect::new((iw - sd) / 2.0, 0.0, sd, sd) } else { let sd = (ih * 0.40).min(iw); let cx = sp.axis_x.clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
+        let src = if full { let sd = iw.min(ih); Rect::new((iw - sd) / 2.0, 0.0, sd, sd) } else { let sd = (ih * 0.40).min(iw); let cx = (sp.axis_x * iw / sp.width.max(1.0)).clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
         let flip = side == 1 && !full;
         let mut vertices = vec![Vertex::new(x0 + half, y0 + half, 0.0, (src.x + src.w * 0.5) / iw, (src.y + src.h * 0.5) / ih, WHITE)];
         for p in poly::chamfer(x0, y0, d, d, cut) {

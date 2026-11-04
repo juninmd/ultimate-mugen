@@ -4,6 +4,7 @@ pub mod bytecode;
 pub mod commands;
 pub mod input;
 pub mod chardef;
+pub mod diagnostics;
 pub mod cns;
 pub mod zss;
 pub mod loader;

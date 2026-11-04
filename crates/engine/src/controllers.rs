@@ -6,7 +6,7 @@ use crate::hitdef::{build, parse_sound_ref};
 use crate::matchs::{Event, Match};
 use std::sync::Arc;
 
-fn set_vars(m: &mut Match, i: usize, sc: &Controller, add: bool, target: usize) {
+pub(crate) fn set_vars(m: &mut Match, i: usize, sc: &Controller, add: bool, target: usize) {
     if sc.has("v", 0) || sc.has("fv", 0) {
         let isf = sc.has("fv", 0);
         let idx = m.num(i, sc, if isf { "fv" } else { "v" }, 0.0, 0) as usize;

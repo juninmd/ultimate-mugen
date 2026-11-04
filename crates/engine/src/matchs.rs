@@ -11,9 +11,10 @@ pub struct StageInfo {
     pub name: String,
     pub bound_left: f32, pub bound_right: f32, pub bound_high: f32, pub bound_low: f32,
     pub p1x: f32, pub p2x: f32, pub zoffset: f32, pub vertical_follow: f32, pub tension: f32,
+    pub start_x: f32, pub start_y: f32, pub zoom_out: f32,
 }
 impl Default for StageInfo {
-    fn default() -> Self { StageInfo { name: "Flat".into(), bound_left: -200.0, bound_right: 200.0, bound_high: -60.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 210.0, vertical_follow: 0.2, tension: 60.0 } }
+    fn default() -> Self { StageInfo { name: "Flat".into(), bound_left: -200.0, bound_right: 200.0, bound_high: -60.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 210.0, vertical_follow: 0.2, tension: 60.0, start_x: 0.0, start_y: 0.0, zoom_out: 1.0 } }
 }
 
 #[derive(Clone)]
@@ -114,6 +115,7 @@ pub struct Match {
     pub pause: Option<PauseState>,
     pub shake_time: i32, pub shake_ampl: f32, pub shake_freq: f32, pub shake_phase: f32, pub shake_elapsed: i32,
     pub flash: Option<(i32, [f32; 3])>,
+    pub bg: Option<crate::stage_bg::BgState>,
     pub all_palfx: Option<PalFx>, pub bg_palfx: Option<PalFx>,
     pub slow_mo: i32,
     pub events: Vec<Event>,
@@ -130,7 +132,7 @@ impl Match {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
-            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, slow_mo: 0,
+            match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
     }
@@ -424,7 +426,8 @@ impl Match {
     /// Zoom limits from the team sizes (call before `start_round`): 1v1 = no zoom-out, 5v5 = up to 1.8× the field.
     pub fn set_zoom_for_teams(&mut self, per_side: usize, ground_k: f32) {
         let n = per_side.max(1) as f32 - 1.0;
-        self.zoom_min = 1.0 + 0.1 * n; self.zoom_max = 1.0 + 0.2 * n; self.zoom = self.zoom_min; self.zoffset0 = self.stage.zoffset; self.ground_k = ground_k;
+        let stage_out = if self.stage.zoom_out > 0.0 { 1.0 / self.stage.zoom_out } else { 1.0 };
+        self.zoom_min = 1.0 + 0.1 * n; self.zoom_max = (1.0 + 0.2 * n).max(stage_out); self.zoom = self.zoom_min; self.zoffset0 = self.stage.zoffset; self.ground_k = ground_k;
         self.apply_zoom();
     }
     fn apply_zoom(&mut self) {
@@ -435,7 +438,8 @@ impl Match {
         self.round_state = 0; self.round_time = 0; self.timer = 99 * 60; self.winner_side = -1; self.slow_mo = 0; self.won_by_ko = false;
         self.explods.clear(); self.projectiles.clear(); self.pause = None;
         self.fighters.retain(|f| !f.is_helper || f.preserve);
-        self.camera = V2::default();
+        self.camera = V2 { x: self.stage.start_x, y: self.stage.start_y };
+        if let Some(bg) = self.bg.as_mut() { bg.reset(); }
         let mut slot = [0usize; 2];
         let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()];
         for i in 0..self.fighters.len() {
@@ -658,6 +662,7 @@ impl Match {
         self.update_projectiles(paused);
         self.update_explods(paused);
         self.update_camera();
+        if !paused { if let Some(bg) = self.bg.as_mut() { bg.step(); } }
         self.visual_timers();
         if let Some(p) = self.pause.as_mut() { p.time -= 1; if p.time <= 0 { self.pause = None; } }
         for f in self.fighters.iter_mut() { if f.unhittable > 0 { f.unhittable -= 1; } }

@@ -112,7 +112,7 @@ impl MatchRenderer {
         if m.pause.as_ref().is_some_and(|p| p.darken) { draw_rectangle(g.ox, g.oy, m.view_w * s, m.view_h * s, Color::new(0.0, 0.0, 0.04, 0.62)); }
         if gain > 0.0 { vfx.draw_back(g, m, shx, shy); }
         // soft contact shadows (3 layered ellipses)
-        for f in &m.fighters {
+        for f in m.fighters.iter().filter(|_| matches!(stage.art, StageArt::Procedural { .. })) {
             if f.destroyed || (f.is_helper && !f.helper_player) || f.has_assert(ume_engine::fighter::asf::INVISIBLE | ume_engine::fighter::asf::NOSHADOW) { continue; }
             let hgt = (-f.pos.y).max(0.0);
             let r = 22.0 * (1.0 - hgt / 200.0).max(0.4);
@@ -120,6 +120,22 @@ impl MatchRenderer {
             for (k, m2) in [(1.0, 1.0), (0.72, 1.0), (0.45, 1.0)].iter().enumerate() {
                 let _ = m2;
                 draw_ellipse(g.ox + (Self::sx(m, f.pos.x) + shx) * s, g.oy + (Self::sy(m, 0.0) + shy) * s, r * (1.0 + 0.25 * (2 - k) as f32) * s, r * 0.22 * (1.0 + 0.25 * (2 - k) as f32) * s, 0.0, Color::new(0.0, 0.0, 0.0, a));
+            }
+        }
+        if let StageArt::Mugen(bg) = &stage.art {
+            let (sh, refl) = (&bg.stage.shadow, bg.stage.reflection);
+            for f in &m.fighters {
+                if f.destroyed || f.has_assert(ume_engine::fighter::asf::INVISIBLE | ume_engine::fighter::asf::NOSHADOW) { continue; }
+                let Some(fr) = f.frame() else { continue };
+                if sh.intensity > 0.0 {
+                    let tint = Color::new(sh.color[0] / 255.0, sh.color[1] / 255.0, sh.color[2] / 255.0, 1.0);
+                    let o = DrawOpts { alpha: sh.intensity / 256.0, tint, vflip: true, ..Default::default() };
+                    Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y * sh.yscale, f.facing, f.lscl, [f.draw_scale[0], f.draw_scale[1] * sh.yscale.abs()], &o, shx, shy);
+                }
+                if refl > 0.0 {
+                    let o = DrawOpts { alpha: refl / 256.0, add: true, vflip: true, ..Default::default() };
+                    Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
+                }
             }
         }
         // floor reflections (procedural stages)
@@ -333,29 +349,34 @@ impl MatchRenderer {
             StageArt::Mugen(bg) => {
                 let scl = bg.scl;
                 let (cx, cy) = (m.camera.x / scl, m.camera.y / scl);
-                for l in &bg.stage.layers {
+                let state = m.bg.as_ref();
+                for (k, l) in bg.stage.layers.iter().enumerate() {
                     if (l.layer == 1) != front { continue; }
-                    let key = if let Some(a) = &l.anim {
-                        let tot = a.total_time.max(1) as i64;
-                        let tm = (m.game_time % tot) as i32;
-                        let mut acc = 0; let mut idx = 0;
-                        for (i, f) in a.frames.iter().enumerate() { idx = i; if f.time < 0 || tm < acc + f.time { break; } acc += f.time; }
-                        a.frames.get(idx).map(|f| (f.group, f.index)).unwrap_or(l.sprite)
-                    } else { l.sprite };
+                    if state.is_some_and(|st| !st.visible(k)) { continue; }
+                    let key = match state { Some(st) => st.sprite(k), None => l.sprite };
                     let (Some(img), Some(meta)) = (bg.images.get(&key), bg.stage.sprites.get(&key)) else { continue };
                     let t = g.texture(img, true);
-                    let gt = m.game_time as f32;
-                    let sxp = (l.start[0] + l.velocity[0] * gt - cx * l.delta[0]) * scl + m.view_w / 2.0 + shx;
-                    let syp = (l.start[1] + l.velocity[1] * gt - cy * l.delta[1]) * scl + (m.view_h - 240.0) / 2.0 + shy;
+                    let off = match state { Some(st) => st.offset(k), None => { let gt = m.game_time as f32; [l.velocity[0] * gt, l.velocity[1] * gt] } };
+                    let sxp = (l.start[0] + off[0] - cx * l.delta[0]) * scl + m.view_w / 2.0 + shx;
+                    let syp = (l.start[1] + off[1] - cy * l.delta[1]) * scl + (m.view_h - 240.0) / 2.0 + shy;
                     let (w, h) = (meta.w as f32 * scl, meta.h as f32 * scl);
                     let (x0, y0) = (sxp - meta.axis_x as f32 * scl, syp - meta.axis_y as f32 * scl);
                     let (stx, sty) = (w + l.tile_spacing[0] * scl, h + l.tile_spacing[1] * scl);
                     let xs: Vec<f32> = match l.tile[0] { 1 => { let st = x0 - (x0 / stx).ceil() * stx; let mut v = vec![]; let mut x = st; while x < m.view_w { v.push(x); x += stx; } v } n if n > 1 => (0..n).map(|i| x0 + i as f32 * stx).collect(), _ => vec![x0] };
                     let ys: Vec<f32> = match l.tile[1] { 1 => { let st = y0 - (y0 / sty).ceil() * sty; let mut v = vec![]; let mut y = st; while y < m.view_h { v.push(y); y += sty; } v } n if n > 1 => (0..n).map(|i| y0 + i as f32 * sty).collect(), _ => vec![y0] };
-                    let add = l.trans.starts_with("add");
-                    if add { set_blend(GfxBlend::Add); }
-                    for &x in &xs { for &y in &ys { draw_texture_ex(&t, g.ox + x * s, g.oy + y * s, WHITE, DrawTextureParams { dest_size: Some(vec2(w * s + 0.5, h * s + 0.5)), ..Default::default() }); } }
-                    if add { set_blend(GfxBlend::Alpha); }
+                    let add = l.trans.starts_with("add") && l.trans != "addalpha";
+                    let sub = l.trans == "sub";
+                    let alpha = if l.trans == "addalpha" { (l.alpha[0] / 256.0).clamp(0.0, 1.0) } else { 1.0 };
+                    if add { set_blend(GfxBlend::Add); } else if sub { set_blend(GfxBlend::Sub); }
+                    if let Some(win) = l.window {
+                        let wx = (win[0] - cx * l.delta[0]) * scl + m.view_w / 2.0 + shx;
+                        let wy = (win[1] - cy * l.delta[1]) * scl + (m.view_h - 240.0) / 2.0 + shy;
+                        let (ww, wh) = ((win[2] - win[0] + 1.0) * scl, (win[3] - win[1] + 1.0) * scl);
+                        set_scissor(Some(((g.ox + wx * s) as i32, (g.oy + wy * s) as i32, (ww * s).max(0.0) as i32, (wh * s).max(0.0) as i32)));
+                    }
+                    for &x in &xs { for &y in &ys { draw_texture_ex(&t, g.ox + x * s, g.oy + y * s, Color::new(1.0, 1.0, 1.0, alpha), DrawTextureParams { dest_size: Some(vec2(w * s + 0.5, h * s + 0.5)), ..Default::default() }); } }
+                    if l.window.is_some() { set_scissor(None); }
+                    if add || sub { set_blend(GfxBlend::Alpha); }
                 }
             }
         }

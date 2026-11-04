@@ -52,6 +52,7 @@ impl Session {
     pub fn new(teams: [Vec<Arc<CharDef>>; 2], stage: Stage, pilots: Vec<Pilot>, training: bool, duo: bool, simul: bool, single_round: bool, life: [f32; 2]) -> Self {
         let fx = FX.with(|f| f.clone());
         let mut m = Match::new(common_def(), Some(fx), stage.info.clone());
+        if let crate::stages::StageArt::Mugen(bg) = &stage.art { m.bg = Some(ume_engine::stage_bg::BgState::new(bg.stage.clone())); }
         m.training = training;
         m.team_simul = simul;
         if single_round { m.rounds_to_win = 1; }

@@ -114,6 +114,12 @@ pub fn background(secs: &[Section], anims: &HashMap<i32, Animation>, name: &str)
                 mask: n("mask", &[0.0])[0] != 0.0,
                 anim: (kind == "anim").then(|| anims.get(&(n("actionno", &[0.0])[0] as i32)).cloned()).flatten(),
                 kind,
+                id: n("id", &[0.0])[0] as i32,
+                position_link: false,
+                window: None,
+                sin_x: [0.0; 3],
+                sin_y: [0.0; 3],
+                alpha: [256.0, 0.0],
             }
         })
         .collect();

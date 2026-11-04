@@ -15,6 +15,11 @@
 - Bundled MUGEN packs: `assets/mugen/elecbyte.zip`.
 - GitHub marketplace: logic in `crates/market` (listing, safety limits, bundles, downloads), app glue in `src/market.rs`, screen in `src/app/market.rs`, web storage in `web/market.js`. Docs: `docs/wiki/Marketplace.md`.
 
+## External Resource Sources
+- https://qxmugen.com/ (chars, stages, tools; downloads need login).
+- https://mugenarchive.com/ (chars, stages; Cloudflare challenge, download manually).
+- Agents never bypass login/challenges: user downloads into `mugen/incoming/`.
+
 ## Testing & Validation
 - **Regra de ouro**: Baixar e descompactar todos os personagens primeiro; executar suites de teste (`cargo test`, `mugen_check`) **apenas uma vez ao final** da instalação completa.
 - Engine compatibility: `cargo test --workspace --release`

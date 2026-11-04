@@ -1,5 +1,9 @@
+pub mod bgm;
+pub mod console;
 pub mod debug;
+mod player;
 mod pause;
+mod stage;
 pub(crate) mod sound;
 
 pub use debug::format_clipboard;
@@ -21,6 +25,14 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         "displaytoclipboard" => debug::display(m, i, sc, false),
         "appendtoclipboard" => debug::display(m, i, sc, true),
         "clearclipboard" => m.fighters[i].clipboard.clear(),
+        "playbgm" => bgm::play_bgm(m, i, sc),
+        "stopbgm" => bgm::stop_bgm(m),
+        "modifybgm" => bgm::modify_bgm(m, i, sc),
+        "modifystagevar" => stage::modify_stage_var(m, i, sc),
+        "modifystagebg" => stage::modify_stage_bg(m, i, sc),
+        "modifybgctrl" => stage::modify_bg_ctrl(m, i, sc),
+        "modifyplayer" => player::modify_player(m, i, sc),
+        "printtoconsole" => console::print_to_console(m, i, sc),
         _ => return false,
     }
     true

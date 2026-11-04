@@ -57,6 +57,16 @@ pub struct Projectile {
     pub remove_on_hit: bool, pub stage_bound: f32, pub super_move: i32, pub pause_move: i32,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum BgmAction {
+    Play { file: String, looping: bool, volume: f32, loop_start: usize, loop_end: usize, freq_mul: f32 },
+    Stop,
+    Volume(f32),
+    Loop(bool),
+    LoopPoints { start: usize, end: usize },
+    Rate(f32),
+}
+
 /// Events for the presentation layer (audio, rumble, UI).
 #[derive(Clone)]
 pub enum Event {
@@ -71,6 +81,7 @@ pub enum Event {
     SoundPan { owner: u32, channel: i32, pan: f32 },
     SoundVolume { owner: u32, channel: i32, volume: f32 },
     Rumble { fighter: u32, strong: f32, weak: f32, ms: u32 },
+    Bgm(BgmAction),
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
 }
 
@@ -127,6 +138,7 @@ pub struct Match {
     pub events: Vec<Event>,
     pub texts: Vec<crate::ikemen::TextItem>,
     pub team_maps: [crate::ikemen::MapStore; 2],
+    pub console: crate::sctrl::console::ConsoleLog,
     pub announce: Option<Announce>,
     pub rng: u32,
     pub next_id: u32,
@@ -140,7 +152,7 @@ impl Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
-            events: vec![], texts: vec![], team_maps: Default::default(), announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
+            events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
     }
     pub fn random(&mut self) -> f32 {
@@ -453,6 +465,11 @@ impl Match {
         let stage_out = if self.stage.zoom_out > 0.0 { 1.0 / self.stage.zoom_out } else { 1.0 };
         self.zoom_min = 1.0 + 0.1 * n; self.zoom_max = (1.0 + 0.2 * n).max(stage_out); self.zoom = self.zoom_min; self.zoffset0 = self.stage.zoffset; self.ground_k = ground_k;
         self.apply_zoom();
+    }
+    pub(crate) fn refresh_stage_camera(&mut self) {
+        self.apply_zoom();
+        self.camera.x = self.camera.x.clamp(self.stage.bound_left, self.stage.bound_right);
+        self.camera.y = self.camera.y.clamp(self.stage.bound_high, self.stage.bound_low);
     }
     fn apply_zoom(&mut self) {
         self.view_w = BASE_W * self.zoom; self.view_h = BASE_H * self.zoom;

@@ -110,7 +110,7 @@ pub struct App {
     last_disc: Option<std::mem::Discriminant<Screen>>,
 }
 
-const MENU: [(&str, &str); 12] = [
+const MENU: [(&str, &str); 13] = [
     ("Arcade", "Enfrente uma sequência de oponentes"),
     ("Versus CPU", "Você contra o computador"),
     ("2 Jogadores", "Teclado compartilhado ou dois controles"),

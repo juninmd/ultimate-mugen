@@ -93,7 +93,7 @@ impl Hud {
                 for i in 1..10 { let t = i as f32 / 10.0; let (a, b) = (p(bx + bw * t, by + 1.0), p(bx + bw * t, by + bh - 1.0)); draw_line(a.x, a.y, b.x, b.y, 0.45 * s, Color::new(0.0, 0.0, 0.0, 0.25)); }
                 let acx = if side == 0 { px0 + 12.0 } else { px0 + panel_w - 12.0 };
                 let ac = p(acx, py0 + 11.5);
-                portrait(g, f, ac, 10.0 * s, side, s, if low { hex("#ff4d4d") } else if human.contains(&f.id) { hex("#ffcc33") } else { Color::new(1.0, 1.0, 1.0, 0.85) });
+                if show_face { portrait(g, f, ac, 10.0 * s, side, s, if low { hex("#ff4d4d") } else if human.contains(&f.id) { hex("#ffcc33") } else { Color::new(1.0, 1.0, 1.0, 0.85) }); }
                 if let Some((tag, tc)) = side_tag(f.id, side, human, cpu) {
                     let (tw, th) = (13.0, 5.0);
                     let tc_pos = p(acx - tw / 2.0, py0 + ph - 3.0);
@@ -245,12 +245,14 @@ impl Hud {
                 outlined(&format!("TIME {lead}"), x, 41.0, 5.2, if side == 0 { hex("#22e8ff") } else { hex("#ff4d6d") }, al);
             }
             let (cx, cy) = (w / 2.0, 13.0);
+            if show_timer {
             for k in 0..9 { let tx = cx - 8.0 + k as f32 * 2.0; let (a, b) = (p(tx, 21.5), p(tx, 23.0)); draw_line(a.x, a.y, b.x, b.y, 0.4 * s, Color::new(1.0, 1.0, 1.0, 0.4)); }
             let t = if m.training || m.round_ticks == 0 { "--".to_string() } else { format!("{:02}", (m.timer + 59) / 60) };
             let urgent = !m.training && m.round_ticks > 0 && m.timer > 0 && m.timer <= 10 * 60;
             let pulse = if urgent { 1.0 + 0.18 * (1.0 - ((m.timer % 60) as f32 / 60.0)) } else { 1.0 };
             if urgent { let a = 0.12 + 0.1 * (gt * 9.0).sin().abs(); poly::solid(&sp_box(&p, cx - 15.0, 5.0, 30.0, 17.0, 6.0), Color::new(1.0, 0.1, 0.1, a)); }
             outlined(&t, cx, cy + 5.2 * pulse, 14.0 * pulse, if urgent { hex("#ff5a5a") } else { WHITE }, Align::Center);
+            }
             let team_rows = !partners.is_empty() || team.is_some();
             let cy0 = if team_rows { -5.0 } else { -15.0 };
             // combos

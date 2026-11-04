@@ -141,10 +141,6 @@ fn flag_name_arg(arg: &Node) -> Option<String> {
     }
 }
 
-fn clsn_kind(n: Option<&Node>) -> u8 {
-    match n { Some(Node::Trig { name, .. }) if name == "clsn1" => 1, _ => 2 }
-}
-
 pub fn trigger(c: &Ctx, name: &str, args: &[Node]) -> Option<f64> {
     let f = &c.m.fighters[c.i];
     Some(match name {

@@ -1,10 +1,14 @@
 pub mod bgm;
 pub mod console;
 pub mod debug;
+mod camera;
 pub mod module;
 mod player;
 mod pause;
 mod stage;
+pub mod clsn;
+mod hitmod;
+mod state;
 pub(crate) mod sound;
 
 pub use debug::format_clipboard;
@@ -15,10 +19,20 @@ use crate::matchs::{Event, Match};
 pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
     match sc.kind.as_str() {
         "null" => {}
+        "runstate" => state::run_state(m, i, sc),
+        "height" => state::height(m, i, sc),
+        "gethitvarset" => hitmod::get_hit_var_set(m, i, sc),
+        "modifyhitdef" => hitmod::modify_hitdef(m, i, sc),
+        "modifyreversaldef" => hitmod::modify_reversaldef(m, i, sc),
+        "overrideclsn" | "transformclsn" | "resizeclsn" => clsn::run(m, i, sc),
         "offset" => offset(m, i, sc),
         "victoryquote" => { let v = m.num(i, sc, "value", -1.0, 0) as i32; m.fighters[i].victory_quote = v; }
         "forcefeedback" => force_feedback(m, i, sc),
         "envshake" => env_shake(m, i, sc),
+        "zoom" => camera::zoom(m, i, sc),
+        "camera" => camera::camera(m, i, sc),
+        "groundleveloffset" => camera::ground_level_offset(m, i, sc),
+        "depth" | "depthbound" => camera::unsupported_depth(m, sc),
         "pause" => pause::pause(m, i, sc),
         "superpause" => pause::super_pause(m, i, sc),
         "stopsnd" => sound::stop(m, i, sc),

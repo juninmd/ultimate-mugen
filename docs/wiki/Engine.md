@@ -25,6 +25,7 @@ Tick flow: inputs → `Match::tick` → for each fighter, `[Statedef -3/-2/-1]` 
 2. `n(m, "param", default)` reads a numeric parameter; `n2(m, "param", default, index)` reads the Nth value; `sc.has("param", 0)` tests presence; `sc.raw("param")` returns the text.
 3. Add the field in `fighter.rs` if you need new state.
 4. Write a test in `crates/engine/tests/combat_logic.rs` calling `ume_engine::controllers::run`.
+5. List the name in `CNS-Scripts.md` and `pt-BR/Scripts-CNS.md`. `cargo test -p ume-engine --test wiki_sync` fails for an implemented controller that is not listed and for a listed one that is not implemented. Return `true` from the module's `run` (or fall through to the last branch) so the load diagnostics do not report it as unsupported.
 
 ## Add a trigger
 
@@ -34,7 +35,7 @@ In `crates/engine/src/triggers.rs`, add a branch to the name `match`:
 "winko" => b(m.match_over && m.winner_side == f.side as i32 && m.won_by_ko),
 ```
 
-`f` is the evaluated fighter and `m` the match. `won_by_ko` would be a new field on `Match`. `b(bool)` converts to 0/1. Triggers returning floats must appear in `is_float` in `expr.rs`.
+`f` is the evaluated fighter and `m` the match. `won_by_ko` would be a new field on `Match`. `b(bool)` converts to 0/1. Triggers returning floats must appear in `is_float` in `expr.rs`. List the new name in `CNS-Scripts.md` and `pt-BR/Scripts-CNS.md`; `wiki_sync` checks both directions.
 
 ## Add a file format
 

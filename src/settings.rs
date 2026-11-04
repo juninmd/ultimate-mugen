@@ -18,6 +18,7 @@ const FILE: &str = "ultimate-mugen.cfg";
 pub struct Settings {
     pub fullscreen: bool, pub res: usize, pub quality: usize, pub fps: bool, pub fx: usize, pub impact: usize,
     pub vsync: bool, pub fps_cap: usize,
+    pub keep_aspect: bool, pub linear: bool, pub window: (u32, u32),
     pub master: u8, pub music: u8, pub sfx: u8, pub mute: bool,
     pub difficulty: i32, pub round_time: usize, pub rounds: usize, pub life: usize,
     pub lang: crate::i18n::Lang,
@@ -28,6 +29,7 @@ impl Default for Settings {
         Settings {
             fullscreen: false, res: 1, quality: 0, fps: false, fx: 2, impact: 2,
             vsync: true, fps_cap: 0,
+            keep_aspect: true, linear: false, window: (0, 0),
             master: 8, music: 10, sfx: 10, mute: false,
             difficulty: 4, round_time: 0, rounds: 1, life: 2,
             lang: crate::i18n::Lang::Pt,
@@ -70,6 +72,9 @@ impl Settings {
                 "fps" => s.fps = v == "1",
                 "fx" => s.fx = pick(v, 2, 2),
                 "impact_lv" => s.impact = pick(v, 2, IMPACT.len() - 1),
+                "keep_aspect" => s.keep_aspect = v != "0",
+                "filter" => s.linear = v == "linear",
+                "window" => s.window = parse_window(v),
                 "vsync" => s.vsync = v != "0",
                 "fps_cap" => s.fps_cap = pick(v, 0, FPS_CAPS.len() - 1),
                 "master" => s.master = pick(v, 8, VOLUME_STEPS),
@@ -89,8 +94,8 @@ impl Settings {
 
     pub fn to_text(&self) -> String {
         format!(
-            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nlang={}\n",
-            FORMAT_VERSION, self.fullscreen as i32, self.res, self.quality, self.fps as i32, self.fx, self.impact, self.vsync as i32, self.fps_cap, self.master, self.music, self.sfx, self.mute as i32,
+            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nlang={}\n",
+            FORMAT_VERSION, self.fullscreen as i32, self.res, self.quality, self.fps as i32, self.fx, self.impact, self.keep_aspect as i32, if self.linear { "linear" } else { "nearest" }, self.window.0, self.window.1, self.vsync as i32, self.fps_cap, self.master, self.music, self.sfx, self.mute as i32,
             self.difficulty, self.round_time, self.rounds, self.life, if self.lang == crate::i18n::Lang::En { "en" } else { "pt" },
         )
     }
@@ -104,16 +109,75 @@ impl Settings {
     }
     /// Physical (pixel) height of the drawable area.
     pub fn physical_h() -> f32 { screen_height() * dpi_scale() }
+    pub fn window_size(&self) -> (u32, u32) {
+        if self.window.0 >= MIN_WINDOW.0 && self.window.1 >= MIN_WINDOW.1 { return self.window; }
+        let (w, h, _) = RESOLUTIONS[self.res.min(RESOLUTIONS.len() - 1)];
+        (w, h)
+    }
     pub fn apply_window(&self) {
         set_fullscreen(self.fullscreen);
         #[cfg(not(target_arch = "wasm32"))]
-        if !self.fullscreen { let (w, h, _) = RESOLUTIONS[self.res.min(RESOLUTIONS.len() - 1)]; { let d = dpi_scale().max(0.5); request_new_screen_size(w as f32 / d, h as f32 / d) }; }
+        if !self.fullscreen { let (w, h) = self.window_size(); { let d = dpi_scale().max(0.5); request_new_screen_size(w as f32 / d, h as f32 / d) }; }
+    }
+}
+
+pub const MIN_WINDOW: (u32, u32) = (320, 180);
+
+fn parse_window(v: &str) -> (u32, u32) {
+    v.split_once('x').and_then(|(w, h)| Some((w.trim().parse().ok()?, h.trim().parse().ok()?))).unwrap_or((0, 0))
+}
+
+#[derive(Default)]
+pub struct WindowWatch { seen: (u32, u32), stable: f32 }
+
+impl WindowWatch {
+    const SETTLE_SECONDS: f32 = 0.8;
+
+    pub fn observe(&mut self, size: (u32, u32), dt: f32, fullscreen: bool, saved: (u32, u32)) -> Option<(u32, u32)> {
+        if fullscreen || size.0 < MIN_WINDOW.0 || size.1 < MIN_WINDOW.1 { self.seen = (0, 0); return None; }
+        if size != self.seen { self.seen = size; self.stable = 0.0; return None; }
+        self.stable += dt;
+        (self.stable >= Self::SETTLE_SECONDS && size != saved).then_some(size)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn window_size_prefers_saved_window_over_preset() {
+        let mut s = Settings::default();
+        assert_eq!(s.window_size(), (1920, 1080));
+        s.window = (1000, 700);
+        assert_eq!(s.window_size(), (1000, 700));
+        s.window = (10, 10);
+        assert_eq!(s.window_size(), (1920, 1080));
+    }
+
+    #[test]
+    fn window_string_round_trips_and_rejects_garbage() {
+        assert_eq!(parse_window("1366x768"), (1366, 768));
+        assert_eq!(parse_window("junk"), (0, 0));
+        assert_eq!(parse_window("12x"), (0, 0));
+    }
+
+    #[test]
+    fn watch_reports_only_after_the_resize_settles() {
+        let mut w = WindowWatch::default();
+        assert_eq!(w.observe((900, 600), 0.1, false, (0, 0)), None);
+        assert_eq!(w.observe((900, 600), 0.5, false, (0, 0)), None);
+        assert_eq!(w.observe((900, 600), 0.5, false, (0, 0)), Some((900, 600)));
+        assert_eq!(w.observe((900, 600), 0.5, false, (900, 600)), None);
+        assert_eq!(w.observe((910, 600), 2.0, false, (900, 600)), None);
+    }
+
+    #[test]
+    fn watch_ignores_fullscreen_and_minimised_windows() {
+        let mut w = WindowWatch::default();
+        for _ in 0..10 { assert_eq!(w.observe((1920, 1080), 0.5, true, (0, 0)), None); }
+        for _ in 0..10 { assert_eq!(w.observe((0, 0), 0.5, false, (0, 0)), None); }
+    }
 
     #[test]
     fn version_one_files_load_with_new_defaults() {

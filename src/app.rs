@@ -4,7 +4,7 @@ use crate::controls::{nav, Controls};
 use crate::registry::Registry;
 use crate::render::{Gfx, MatchRenderer, DrawOpts};
 use crate::session::{Pilot, Session};
-use crate::settings::{Rules, Settings, FX_LEVELS, IMPACT, QUALITY, RESOLUTIONS};
+use crate::settings::{Rules, Settings, WindowWatch, FX_LEVELS, IMPACT, QUALITY, RESOLUTIONS};
 use crate::stages::Stage;
 use crate::ui::*;
 use crate::gfx::*;
@@ -21,11 +21,11 @@ mod versus;
 pub(crate) use keyedit::KeyEdit;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul }
+pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul, TeamTag }
 impl Mode {
-    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO" } }
+    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO", Mode::TeamTag => "EQUIPE · TAG" } }
     /// Team size (1 for the regular modes).
-    pub fn is_team(self) -> bool { matches!(self, Mode::TeamSeq | Mode::TeamSimul) }
+    pub fn is_team(self) -> bool { matches!(self, Mode::TeamSeq | Mode::TeamSimul | Mode::TeamTag) }
 }
 
 pub enum Screen {
@@ -54,9 +54,11 @@ pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, 
 
 /// Team battle state: sequence (KOF-style turns, winner keeps its remaining life) or parallel (2v2 simultaneous).
 #[derive(Clone)]
-pub struct Team { pub members: [Vec<usize>; 2], pub idx: [usize; 2], pub life: [f32; 2], /** KOF XV: the team shares one super meter */ pub power: [f32; 2], pub ko: [Vec<bool>; 2], pub simul: bool }
+pub struct Team { pub members: [Vec<usize>; 2], pub idx: [usize; 2], pub life: [f32; 2], /** KOF XV: the team shares one super meter */ pub power: [f32; 2], pub ko: [Vec<bool>; 2], pub simul: bool, pub tag: bool }
 impl Team {
-    pub fn new(a: Vec<usize>, b: Vec<usize>, simul: bool) -> Self { let (la, lb) = (a.len(), b.len()); Team { members: [a, b], idx: [0, 0], life: [1.0, 1.0], power: [0.0, 0.0], ko: [vec![false; la], vec![false; lb]], simul } }
+    pub fn new(a: Vec<usize>, b: Vec<usize>, simul: bool) -> Self { let (la, lb) = (a.len(), b.len()); Team { members: [a, b], idx: [0, 0], life: [1.0, 1.0], power: [0.0, 0.0], ko: [vec![false; la], vec![false; lb]], simul, tag: false } }
+    pub fn tagged(a: Vec<usize>, b: Vec<usize>) -> Self { Team { tag: true, ..Team::new(a, b, false) } }
+    pub fn whole_squad(&self) -> bool { self.simul || self.tag }
 }
 const VIEW_ROWS: usize = 4;
 const NUMS: [&str; 5] = ["1", "2", "3", "4", "5"];
@@ -103,6 +105,7 @@ pub struct App {
     /** page of the pause-screen move list (14 moves per page) */
     move_page: usize,
     pending: Pending,
+    import_jobs: Vec<std::thread::JoinHandle<Result<(String, ume_formats::vfs::Vfs), String>>>,
     pub team: Option<Team>,
     /// last finished fight (replayable) and the replay being played now
     last_fight: Option<Replay>,
@@ -125,6 +128,8 @@ pub struct App {
     sel_flash: (usize, f32),
     stage_row: usize,
     quality_check: f32,
+    window_watch: WindowWatch,
+    window_pinned: bool,
     updater: crate::update::Checker,
     pub trans: f32,
     screen_t: f32,
@@ -135,7 +140,7 @@ pub struct App {
     fight_rules: Rules,
 }
 
-const MENU: [(&str, &str); 12] = [
+const MENU: [(&str, &str); 13] = [
     ("Arcade", "Enfrente uma sequência de oponentes"),
     ("Versus CPU", "Você contra o computador"),
     ("2 Jogadores", "Teclado compartilhado ou dois controles"),
@@ -143,6 +148,7 @@ const MENU: [(&str, &str); 12] = [
     ("CPU vs CPU", "Assista a IA lutar"),
     ("Equipe · Sequência", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida"),
     ("Equipe · Paralelo", "5 contra 5 ao mesmo tempo (2 a 5) · TAB troca de lutador"),
+    ("Equipe · Tag", "Um em campo, o parceiro espera e entra na troca (2 a 3 por lado)"),
     ("Personagens MUGEN", "Como adicionar personagens e cenários"),
     ("Mercado GitHub", "Baixe personagens, cenários e músicas de repositórios"),
     ("Controles", "Teclado, Xbox, PlayStation, toque e vibração"),
@@ -176,7 +182,7 @@ impl App {
         App {
             reg, market: crate::market::Market::open(), market_ui: market::MarketUi::default(), ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: settings.difficulty, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, key_edit: None, move_page: 0, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
+            settings, key_edit: None, move_page: 0, pending: Pending::default(), import_jobs: vec![], window_watch: WindowWatch::default(), window_pinned: false, team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -189,6 +195,11 @@ impl App {
             self.reg.unload_all();
             self.g.trim_next_frame();
         }
+    }
+    fn remember_window_size(&mut self, dt: f32) {
+        if self.window_pinned || cfg!(any(target_arch = "wasm32", target_os = "android", target_os = "ios")) { return; }
+        let (w, h) = window_size();
+        if let Some(size) = self.window_watch.observe((w as u32, h as u32), dt, self.settings.fullscreen, self.settings.window) { self.settings.window = size; self.settings.save(); }
     }
     fn toggle_fullscreen(&mut self) { self.settings.fullscreen = !self.settings.fullscreen; self.settings.apply_window(); self.settings.save(); }
 
@@ -212,6 +223,8 @@ impl App {
             self.applied = Some(self.settings);
         }
         self.g.post.level = self.settings.fx as u8;
+        set_keep_aspect(self.settings.keep_aspect);
+        set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;
         self.c.update();
         self.preview_t += get_frame_time();
@@ -231,6 +244,7 @@ impl App {
             Screen::Cutscene { .. } => self.cutscene(),
         }
         if is_key_pressed(KeyCode::F11) { self.toggle_fullscreen(); }
+        self.remember_window_size(dt);
         if is_key_pressed(KeyCode::F3) { self.settings.fps = !self.settings.fps; self.settings.save(); }
         // auto art quality follows the display (checked outside fights so live sprites are never swapped)
         self.quality_check += dt;
@@ -252,12 +266,17 @@ impl App {
             self.after_registry_change();
         }
         crate::set_import_button(!matches!(self.screen, Screen::Fight | Screen::Vs { .. } | Screen::Results { .. } | Screen::Cutscene { .. }));
+        ume_shell::watchdog::label("import");
         for zip in crate::take_imports() {
-            match self.reg.import_zip(&zip) {
-                Ok(r) if r.duplicate_pack || (r.chars + r.stages == 0 && r.errors == 0) => self.msg = "Pacote já importado".into(),
-                Ok(r) => { self.reg.sort_mugen(); self.sel = (self.sel.0.min(self.reg.chars.len() - 1), self.sel.1.min(self.reg.chars.len() - 1), self.sel.2.min(self.reg.stages.len() - 1)); self.msg = format!("Importado: {} personagem(ns), {} cenário(s){}", r.chars, r.stages, if r.errors == 0 { String::new() } else { format!(" · {} erro(s)", r.errors) }); }
-                Err(e) => self.msg = format!("Zip inválido: {e}"),
-            }
+            #[cfg(not(target_arch = "wasm32"))]
+            { if let Ok(h) = std::thread::Builder::new().name("zip-import".into()).spawn(move || crate::registry::read_zip(&zip)) { self.import_jobs.push(h); self.msg = "Importando pacote…".into(); } }
+            #[cfg(target_arch = "wasm32")]
+            { let r = crate::registry::read_zip(&zip); self.finish_import(r); }
+        }
+        if self.import_jobs.iter().any(|h| h.is_finished()) {
+            let (done, rest): (Vec<_>, Vec<_>) = std::mem::take(&mut self.import_jobs).into_iter().partition(|h| h.is_finished());
+            self.import_jobs = rest;
+            for h in done { let r = h.join().unwrap_or_else(|_| Err("import thread panicked".into())); self.finish_import(r); }
         }
         if !self.msg.is_empty() {
             self.ui.rect(0.0, VH - 36.0, VW, 36.0, Color::new(0.0, 0.0, 0.0, 0.7));
@@ -353,13 +372,13 @@ impl App {
         self.screen = Screen::Menu { cur: cur_v };
         if self.c.pressed(nav::BACK) { self.screen = Screen::Title; }
         if let Some(i) = chosen {
-            let mode = [Mode::Arcade, Mode::Cpu, Mode::Versus, Mode::Training, Mode::Watch, Mode::TeamSeq, Mode::TeamSimul];
+            let mode = [Mode::Arcade, Mode::Cpu, Mode::Versus, Mode::Training, Mode::Watch, Mode::TeamSeq, Mode::TeamSimul, Mode::TeamTag];
             match i {
-                0..=6 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); if self.mode == Mode::TeamSimul { self.team_n = 5; } else if self.mode == Mode::TeamSeq { self.team_n = 3; } self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
-                7 => self.go(Screen::Mugen),
-                8 => self.go(Screen::Market),
-                9 => { self.settings_back = None; self.go(Screen::Controls) }
-                10 => self.go(Screen::Settings { tab: 0, cur: 0, from_fight: false }),
+                0..=7 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); if self.mode == Mode::TeamSimul { self.team_n = 5; } else if self.mode == Mode::TeamSeq { self.team_n = 3; } else if self.mode == Mode::TeamTag { self.team_n = 2; } self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
+                8 => self.go(Screen::Mugen),
+                9 => self.go(Screen::Market),
+                10 => { self.settings_back = None; self.go(Screen::Controls) }
+                11 => self.go(Screen::Settings { tab: 0, cur: 0, from_fight: false }),
                 _ => self.quit = true,
             }
         }
@@ -478,7 +497,7 @@ impl App {
 
         self.ui.background();
         if self.mode.is_team() {
-            if is_key_pressed(KeyCode::E) { self.team_n = (self.team_n + 1).min(5); self.audio.sfx("select"); }
+            if is_key_pressed(KeyCode::E) { self.team_n = (self.team_n + 1).min(if self.mode == Mode::TeamTag { 3 } else { 5 }); self.audio.sfx("select"); }
             if is_key_pressed(KeyCode::Q) { self.team_n = (self.team_n - 1).max(2).max(self.team_pick.len() + 1); self.audio.sfx("select"); }
         }
         if self.names_up.len() != self.reg.chars.len() { self.names_up = self.reg.chars.iter().map(|c| c.name.to_uppercase()).collect(); }
@@ -527,15 +546,18 @@ impl App {
         let focus = cur[picking];
         if self.sel_last[picking] != focus { self.sel_last[picking] = focus; self.sel_dwell = 0.0; } else { self.sel_dwell += dt; }
         let pal_of = |side: usize, i: usize, picked: [Option<usize>; 2]| if side == 1 && picked[0] == Some(i) { 2 } else { 1 };
-        let mut want = [(focus, pal_of(picking, focus, picked)), (usize::MAX, 0), (usize::MAX, 0)];
-        for side in 0..2 { if let Some(i) = picked[side] { want[side + 1] = (i, pal_of(side, i, picked)); } }
+        let mut want: Vec<(usize, i32)> = vec![(focus, pal_of(picking, focus, picked))];
+        for side in 0..2 { if let Some(i) = picked[side] { want.push((i, pal_of(side, i, picked))); } }
+        ume_shell::watchdog::label("select:preview");
+        self.reg.reap_streams();
         let mut loaded_one = false;
         for (i, pal) in want {
             if i == usize::MAX { continue; }
             let e = &self.reg.chars[i];
             if e.peek(pal).is_some() || e.broken.get() { continue; }
             if self.sel_dwell < if e.mugen { 0.18 } else { 0.03 } { continue; }
-            if e.load_preview(pal).is_err() { self.msg = format!("Falha ao carregar {}", self.reg.chars[i].name); }
+            e.stream_preview(pal);
+            if e.errs_has(pal) { self.msg = format!("Falha ao carregar {}", e.name); }
             loaded_one = true;
         }
 
@@ -562,7 +584,8 @@ impl App {
             self.ui.rect(cx, cy + ch * 0.62, cw, ch * 0.38, alpha(col, 0.18));
             let mut got = self.reg.chars[i].peek(1);
             if got.is_none() && !emugen && !loaded_one && !broken { got = self.reg.chars[i].load_preview(1).ok(); loaded_one = got.is_some(); }
-            if emugen && !loaded_one && !broken && self.sel_dwell > 0.15 && !self.reg.chars[i].has_portrait_attempt() { self.reg.chars[i].ensure_portrait(); loaded_one = true; }
+            // MUGEN tiles use a thumbnail cached apart from the (size-capped) definition cache, decoded one per frame once the cursor rests
+            if emugen && !loaded_one && !broken && self.sel_dwell > 0.15 && !self.reg.chars[i].has_portrait_attempt() { self.reg.chars[i].stream_portrait(); loaded_one = true; }
             let thumb = if emugen { self.reg.chars[i].portrait() } else { got.as_ref().and_then(|d| d.sprites.get(&(9000, 1)).cloned()) };
             if thumb.is_some() || got.is_some() {
                 let por = thumb.and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)));
@@ -680,7 +703,7 @@ impl App {
                 pool.sort_by_key(|&i| self.reg.chars[i].mugen as u8);
                 let mut foes: Vec<usize> = pool.into_iter().take(n).collect();
                 while foes.len() < n { foes.push(self.team_pick[foes.len() % self.team_pick.len()]); }
-                let t = Team::new(self.team_pick.clone(), foes, self.mode == Mode::TeamSimul);
+                let t = if self.mode == Mode::TeamTag { Team::tagged(self.team_pick.clone(), foes) } else { Team::new(self.team_pick.clone(), foes, self.mode == Mode::TeamSimul) };
                 self.sel = (t.members[0][0], t.members[1][0], self.sel.2);
                 self.team = Some(t);
                 self.screen = Screen::Stages { cur: 1 };
@@ -836,7 +859,7 @@ impl App {
     fn load_plan(&self) -> Vec<(usize, usize, usize)> {
         let mut v = vec![];
         match &self.team {
-            Some(t) if t.simul => { for k in 0..t.members[0].len().max(t.members[1].len()) { for side in 0..2 { if let Some(&r) = t.members[side].get(k) { v.push((side, k, r)); } } } }
+            Some(t) if t.whole_squad() => { for k in 0..t.members[0].len().max(t.members[1].len()) { for side in 0..2 { if let Some(&r) = t.members[side].get(k) { v.push((side, k, r)); } } } }
             _ => { v.push((0, 0, self.sel.0)); v.push((1, 0, self.sel.1)); }
         }
         v
@@ -863,6 +886,7 @@ impl App {
         let n = plan.len();
         let st = step as usize;
         if st < n {
+            ume_shell::watchdog::label("load:character");
             if st == 0 && self.pending.jobs.is_empty() {
                 let keep: Vec<usize> = plan.iter().map(|p| p.2).collect();
                 self.reg.trim_cache(&keep);
@@ -879,6 +903,7 @@ impl App {
             let d = self.reg.chars[r].finish_load(Self::pal_for(&plan, st), job)?;
             self.pending.defs[side].push(d);
         } else if st == n {
+            ume_shell::watchdog::label("load:stage");
             self.pending.jobs.clear();
             let job = self.pending.stage_job.get_or_insert_with(|| self.reg.prepare_stage(s));
             match job.as_mut().poll(&mut std::task::Context::from_waker(std::task::Waker::noop())) {
@@ -888,6 +913,7 @@ impl App {
             self.pending.stage_job = None;
             self.pending.stage = Some(self.reg.build_stage(s));
         } else if st == n + 1 {
+            ume_shell::watchdog::label("load:session");
             let stage = self.pending.stage.take().ok_or("stage")?;
             let teams = std::mem::take(&mut self.pending.defs);
             let lvl = match &self.arcade { Some((_, i)) if self.mode == Mode::Arcade => (2 + *i as i32 + self.ai_level / 3).min(8), _ => self.ai_level };
@@ -901,15 +927,16 @@ impl App {
             let replay = self.replaying.clone();
             for k in 0..teams[0].len().max(teams[1].len()) { for side in 0..2 { if teams[side].get(k).is_some() { pilots.push(if k == 0 { leader(side) } else { Pilot::Cpu(Ai::new((lvl - 1).max(1), 31 + (side * 7 + k) as u32)) }); } } }
             if let Some(r) = &replay { for (slot, p) in pilots.iter_mut().enumerate() { *p = Pilot::Replay(r.rec.iter().map(|b| b.get(slot).copied().unwrap_or(0)).collect(), 0); } }
-            let (simul, seq) = (self.team.as_ref().is_some_and(|t| t.simul), self.team.as_ref().is_some_and(|t| !t.simul));
-            let life = self.team.as_ref().filter(|t| !t.simul).map(|t| t.life).unwrap_or([1.0, 1.0]);
+            let (simul, tag, seq) = (self.team.as_ref().is_some_and(|t| t.simul), self.team.as_ref().is_some_and(|t| t.tag), self.team.as_ref().is_some_and(|t| !t.whole_squad()));
+            let life = self.team.as_ref().filter(|t| !t.whole_squad()).map(|t| t.life).unwrap_or([1.0, 1.0]);
             let info = self.team.as_ref().map(|t| crate::session::TeamInfo {
                 names: [0, 1].map(|sd| t.members[sd].iter().map(|&r| (self.reg.chars[r].name.split_whitespace().next().unwrap_or("").to_uppercase(), self.reg.chars[r].color)).collect()),
-                idx: t.idx, ko: t.ko.clone(), simul: t.simul,
+                idx: t.idx, ko: t.ko.clone(), simul: t.whole_squad(),
             });
             self.c.clear_macros();
-            let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, seq, life);
+            let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, tag, seq, life);
             if let Some(t) = &info { sess.m.team_lead = [0, 1].map(|sd| t.names[sd].first().map(|n| n.0.clone()).unwrap_or_default()); }
+            if let Some(t) = &info { sess.m.team_turns = seq; sess.m.team_size = [t.names[0].len(), t.names[1].len()]; sess.m.team_member = t.idx; }
             sess.team = info;
             sess.is_replay = replay.is_some();
             self.fight_rules = replay.as_ref().map(|r| r.rules).unwrap_or_else(|| self.settings.rules());
@@ -919,15 +946,27 @@ impl App {
             if seq && self.team.as_ref().is_some_and(|t| t.idx != [0, 0]) { sess.vfx.banner("PRÓXIMO LUTADOR", &format!("{} vs {}", self.reg.chars[self.sel.0].name, self.reg.chars[self.sel.1].name), [0.4, 0.9, 1.0]); }
             self.pending.sess = Some(sess);
         } else {
+            ume_shell::watchdog::label("load:audio");
             let music = self.pending.sess.as_ref().map(|s| s.stage.music).unwrap_or(0);
+            let mut sfx_ready = true;
             if let Some(sess) = &self.pending.sess {
                 let mut chars: Vec<crate::audio::CharSounds> = vec![];
                 for f in &sess.m.fighters { if !chars.iter().any(|(id, _)| *id == f.def.id) { chars.push((&f.def.id, &f.def.sounds)); } }
-                self.audio.preload_match(&chars);
+                sfx_ready = self.audio.preload_match(&chars);
             }
+            let music_ready = self.audio.music_ready(music);
+            if !sfx_ready || !music_ready { if wait { std::thread::sleep(std::time::Duration::from_millis(2)); return Box::pin(self.load_step(step, wait)).await; } return Ok(false); }
             self.audio.prepare_music(music).await;
         }
         Ok(true)
+    }
+
+    fn finish_import(&mut self, read: Result<(String, ume_formats::vfs::Vfs), String>) {
+        match read.map(|(pack, vfs)| self.reg.finish_import(pack, vfs)) {
+            Ok(r) if r.duplicate_pack || (r.chars + r.stages == 0 && r.errors == 0) => self.msg = "Pacote já importado".into(),
+            Ok(r) => { self.reg.sort_mugen(); self.sel = (self.sel.0.min(self.reg.chars.len() - 1), self.sel.1.min(self.reg.chars.len() - 1), self.sel.2.min(self.reg.stages.len() - 1)); self.msg = format!("Importado: {} personagem(ns), {} cenário(s){}", r.chars, r.stages, if r.errors == 0 { String::new() } else { format!(" · {} erro(s)", r.errors) }); }
+            Err(e) => self.msg = format!("Zip inválido: {e}"),
+        }
     }
 
     fn abort_load(&mut self, e: String) { self.msg = e; self.pending = Pending::default(); self.screen = Screen::Menu { cur: 0 }; }
@@ -968,6 +1007,7 @@ impl App {
         // DualShock/DualSense lightbars: P1 blue, P2 red
         self.c.pads.set_light(0, [30, 90, 255]);
         self.c.pads.set_light(1, [255, 40, 60]);
+        ume_shell::watchdog::label("fight:prefetch");
         self.g.trim(4000);
         let mut warmed: Vec<&str> = vec![];
         for f in &sess.m.fighters {
@@ -1009,7 +1049,7 @@ impl App {
         if s.paused { self.pause_menu(accept_back).await; return; }
         if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
-                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.simul) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules }); } }
+                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules }); } }
                 self.screen = Screen::Results { winner: w, cur: 0 };
             } } }
     }
@@ -1018,7 +1058,7 @@ impl App {
     /// Returns true when another bout was queued (false → the team match is over / not a sequence).
     fn team_next(&mut self, w: usize) -> bool {
         let Some(t) = self.team.as_mut() else { return false };
-        if t.simul { return false; }
+        if t.whole_squad() { return false; }
         let Some(s) = self.session.as_ref() else { return false };
         let ratio = s.m.roots().find(|f| f.side == w).map(|f| (f.life / f.life_max).clamp(0.0, 1.0)).unwrap_or(1.0);
         // shared team meter carries over to the next fighter
@@ -1036,7 +1076,7 @@ impl App {
         true
     }
     fn reset_team(&mut self) {
-        if let Some(t) = self.team.as_mut() { *t = Team::new(t.members[0].clone(), t.members[1].clone(), t.simul); self.sel = (t.members[0][0], t.members[1][0], self.sel.2); }
+        if let Some(t) = self.team.as_mut() { *t = Team { tag: t.tag, ..Team::new(t.members[0].clone(), t.members[1].clone(), t.simul) }; self.sel = (t.members[0][0], t.members[1][0], self.sel.2); }
     }
 
     async fn pause_menu(&mut self, accept_back: bool) {
@@ -1118,7 +1158,7 @@ impl App {
         let done = self.mode == Mode::Arcade && self.arcade.as_ref().is_some_and(|(l, i)| *i >= l.len());
         let title = if done { "ARCADE COMPLETO!".to_string() } else if self.team.is_some() { { let lead = self.team.as_ref().and_then(|t| t.members[winner.min(1)].first().copied()).unwrap_or(w); format!("TIME {} VENCEU!", self.reg.chars[lead].name.split_whitespace().next().unwrap_or("").to_uppercase()) } } else { format!("{} VENCE!", e.name.to_uppercase()) };
         let pal = if winner == 1 && self.sel.0 == self.sel.1 { 2 } else { 1 };
-        if let Ok(d) = e.load(pal) { let t = self.preview_t; self.draw_char(&d, if d.anims.contains_key(&181) { 181 } else { 0 }, t, 330.0, 480.0, 260.0, false); }
+        if let Some(d) = e.peek(pal) { let t = self.preview_t; self.draw_char(&d, if d.anims.contains_key(&181) { 181 } else { 0 }, t, 330.0, 480.0, 260.0, false); }
         self.ui.text_bold(&title, 480.0, 300.0, 44.0, hex("#ffcc33"), BLACK, Align::Left);
         let can_replay = self.last_fight.is_some();
         let items: Vec<&str> = if can_replay { vec!["Revanche", "Replay", "Personagens", "Menu"] } else { vec!["Revanche", "Personagens", "Menu"] };
@@ -1259,7 +1299,7 @@ impl App {
         let found: Vec<String> = self.reg.chars.iter().filter(|c| c.mugen).map(|c| format!("{} ({})", c.name, c.author)).collect();
         self.ui.text(&format!("Encontrados: {} personagens MUGEN, {} cenários MUGEN", found.len(), self.reg.stages.iter().filter(|s| s.mugen).count()), 40.0, 520.0, 22.0, hex("#ffcc33"), Align::Left, true);
         for (i, f) in found.iter().enumerate().take(4) { self.ui.text(f, 60.0, 556.0 + i as f32 * 26.0, 19.0, WHITE, Align::Left, false); }
-        if self.c.pressed(nav::BACK | nav::OK) { self.screen = Screen::Menu { cur: 7 }; }
+        if self.c.pressed(nav::BACK | nav::OK) { self.screen = Screen::Menu { cur: 8 }; }
     }
 
     // used by the screenshot tour

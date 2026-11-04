@@ -27,6 +27,12 @@ pub mod snd;
 pub mod stage;
 pub mod vfs;
 
+pub const MAX_IMAGE_PIXELS: u64 = 1 << 26;
+
+pub fn pixels_within_limit(width: u32, height: u32) -> bool {
+    u64::from(width) * u64::from(height) <= MAX_IMAGE_PIXELS
+}
+
 /// Little-endian bounds-checked reader: out-of-range reads return 0.
 #[derive(Clone, Copy)]
 pub(crate) struct Reader<'a>(pub &'a [u8]);

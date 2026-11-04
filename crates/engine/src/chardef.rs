@@ -61,7 +61,7 @@ pub fn safe_expr(src: &str) -> Expr { Expr::new(parse(src).unwrap_or(Node::Num(0
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Source { Mugen, Native }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct MoveInfo { pub name: String, pub input: String, pub command: String }
 
 #[derive(Debug)]
@@ -85,23 +85,49 @@ pub struct CharDef {
     pub color: [u8; 3],
     pub series: String,
     pub description: String,
-    /// story lines (round-start face-off, victory) and the transformed form's name; `boss` = arcade final boss
     pub intro: String, pub taunt: String, pub win_quote: String, pub form_name: String, pub boss: bool,
-    pub palettes: HashMap<PalKey, Arc<Vec<u8>>>, pub indexed: HashMap<(i32, i32), IndexedSprite>,
-    pub remap_cache: Mutex<HashMap<((i32, i32), PalKey), Arc<ImageData>>>,
     pub mugen_version: f32,
+    pub unknown_asserts: Vec<String>,
     pub source_spans: crate::diagnostics::SourceSpans,
     pub diagnostics_cache: std::sync::OnceLock<crate::diagnostics::Diagnostics>,
+    pub palettes: HashMap<PalKey, Arc<Vec<u8>>>,
+    pub indexed: HashMap<(i32, i32), IndexedSprite>,
+    pub remap_cache: Mutex<HashMap<((i32, i32), PalKey), Arc<ImageData>>>,
 }
 impl CharDef {
     pub fn empty(id: &str) -> Self {
         CharDef {
-            id: id.into(), name: id.into(), display_name: id.into(), author: String::new(), source: Source::Native, local_w: 320.0, local_h: 240.0,
-            constants: default_constants(), sprites: HashMap::new(), anims: HashMap::new(), commands: vec![], states: HashMap::new(), sounds: HashMap::new(),
-            portrait: None, movelist: vec![], ai_commands: vec![], color: [90, 100, 140], series: String::new(), description: String::new(),
-            intro: String::new(), taunt: String::new(), win_quote: String::new(), form_name: String::new(), boss: false, mugen_version: 1.0,
-            palettes: HashMap::new(), indexed: HashMap::new(), remap_cache: Mutex::new(HashMap::new()),
-            source_spans: Default::default(), diagnostics_cache: Default::default(),
+            id: id.into(),
+            name: id.into(),
+            display_name: id.into(),
+            author: String::new(),
+            source: Source::Native,
+            local_w: 320.0,
+            local_h: 240.0,
+            constants: default_constants(),
+            sprites: HashMap::new(),
+            anims: HashMap::new(),
+            commands: vec![],
+            states: HashMap::new(),
+            sounds: HashMap::new(),
+            portrait: None,
+            movelist: vec![],
+            ai_commands: vec![],
+            color: [90, 100, 140],
+            series: String::new(),
+            description: String::new(),
+            intro: String::new(),
+            taunt: String::new(),
+            win_quote: String::new(),
+            form_name: String::new(),
+            boss: false,
+            mugen_version: 1.0,
+            unknown_asserts: vec![],
+            source_spans: Default::default(),
+            diagnostics_cache: Default::default(),
+            palettes: HashMap::new(),
+            indexed: HashMap::new(),
+            remap_cache: Mutex::new(HashMap::new()),
         }
     }
     pub fn diagnostics(&self) -> &crate::diagnostics::Diagnostics {

@@ -85,7 +85,8 @@ pub fn checksum(m: &Match) -> u128 {
         for v in f.sysvars {
             h.i32(v);
         }
-        h.u32(f.asserts);
+        h.u32(f.asserts as u32);
+        h.u32((f.asserts >> 32) as u32);
         h.i64(f.history.tick);
     }
     for e in &m.explods {

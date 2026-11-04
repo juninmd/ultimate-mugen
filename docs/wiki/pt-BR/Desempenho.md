@@ -25,6 +25,9 @@ O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria th
 | Passo fixo | `Session::update` | Simulação a 60 Hz com tolerância mínima e no máximo 5 ticks por quadro (sem espiral de atraso) |
 | Pré-carga de texturas | `Gfx::prefetch`, `Texture2D::prefetch` | Os sprites dos lutadores sobem para o atlas no início da luta (até 50% do atlas), então o primeiro especial não faz upload no meio da partida |
 | Pré-aquecimento de sons | `Audio::preload_match` | Todos os sons dos lutadores são decodificados em paralelo na tela de VS; sons de personagens que saíram da partida são liberados |
+| VM de bytecode | `ume_engine::bytecode` | Expressões CNS/ZSS compilam para uma VM em pilha fixa (`[f64; 32]`) com redirecionamentos inline (`parent`, `root`, `helper`, `enemynear`), intrínsecos matemáticos, triggers de 0/1 argumento, `CmpStr`, `Special` (`animelem`, `timemod`) e atribuições `:=` |
+| Caminhos críticos sem alocação | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | Chaves de comando em `Arc<str>`, verificação ASCII de `HitDefAttr` sem alocação, seleção de golpes da IA em duas passagens e `RefCell::get_mut` evitam alocações no heap a cada tick |
+| Limites de resiliência | `ume_formats`, `ume_engine::matchs` | Decodificadores de imagem rejeitam cabeçalhos acima de `MAX_IMAGE_PIXELS` (`1 << 26`) antes de alocar; partidas limitam helpers (60), explods (512), projéteis (256) e textos (128) |
 
 ## Memória de GPU
 
@@ -39,7 +42,10 @@ O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria th
 |---|---|
 | `cargo run --release -p ume-engine --example mugen_load_bench [zip] [execuções]` | Tempo de carga de personagem M.U.G.E.N (padrão: `elecbyte.zip` embutido) |
 | `cargo run --release -p ume-engine --example load_bench` | Tempo de compilação nativa (UMF) |
+| `cargo run --release -p ume-engine --example tick_bench -- [zip_ou_dir] [segundos] [por_lado]` | Taxa de simulação (`ticks/s`) e percentis de latência (`p50`, `p99`, `max`, % do orçamento de 16,6 ms) |
 | `cargo test -p ume-engine --release --test tick_alloc` | Zero alocações por tick de simulação |
+| `cargo test -p ume-formats --release --test fuzz_resilience` | Fuzzing por mutação em decodificadores SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR e INI |
+| `cargo test -p ume-engine --release --test stress_resilience` | Expressões CNS hostis, floods recursivos de helper/explod/projétil e estresse 4v4 simul |
 
 Referência (4 núcleos, release): `kfm720` caiu de 85 ms para 27 ms, `kfm` de 12 ms para 7 ms.
 
@@ -63,3 +69,32 @@ A versão nativa mantém as imagens completas embutidas, decodificando cada cen�
 `scripts/build-web.sh` copia os PNGs externos e `assets.js` para `web/dist/`. Publique o diretório inteiro, incluindo `assets/stages/`. Jogar offline exige que o cenário escolhido tenha sido baixado anteriormente. Ao substituir a arte de um cenário, regenere sua miniatura em `assets/stages/thumbs/` como PNG RGB de 240×135 com `python scripts/generate-stage-thumbnails.py` (exige Pillow).
 
 Execute `node scripts/web-smoke.js web/dist` após compilar a versão web (exige Playwright e Chromium). O teste rejeita downloads de cenários completos antes da confirmação e exige exatamente um na primeira luta. Isso verifica o escopo da transferência, não um percentil de latência nem um ganho de FPS.
+
+## Orçamento da thread principal no carregamento
+
+Regra: a thread de render nunca espera disco, decodificação, parsing ou síntese. No nativo esse trabalho roda em threads de trabalho e a UI consulta a conclusão; no wasm (thread única) continua fatiado em um passo por quadro.
+
+| Trabalho | Onde roda agora |
+|---|---|
+| Preview e retrato MUGEN na seleção | `CharEntry::stream_preview` / `stream_portrait` (máx. 2 workers, coletados por `Registry::reap_streams`). Chamada ~0,1 ms contra 28 ms (KFM) e 84 ms (KFM HD) síncronos |
+| Importação de `.zip` (hash + descompressão) | `registry::read_zip` em worker; só `finish_import` (~4 ms) roda na thread principal |
+| Decodificação dos sons da luta | `Audio::preload_match` em worker; a barra do VS espera |
+| Síntese da música do cenário (17-31 ms) | `Audio::music_ready` em worker |
+| Tela de vitória | usa a definição em cache (`peek`), nunca carrega |
+
+Watchdog de quadros: `UME_WATCHDOG=1` registra todo quadro acima de `UME_HITCH_MS` (padrão 50) com o rótulo ativo (`ume_shell::watchdog::label("load:stage")`) e, ao sair, um resumo com o pior quadro.
+## Busca no sistema de arquivos virtual
+
+`cargo run --locked --release -p ume-formats --example vfs_bench` mede normalização de caminhos e busca por nome com 50.000 arquivos não relacionados. Exibe cinco amostras por cenário. O benchmark sintético exclui acesso a disco, decodificação e renderização.
+
+A busca alternativa na pasta usa o intervalo do mapa ordenado da VFS correspondente ao diretório do personagem, evitando percorrer outros personagens. Os limites de diretório importam: `chars/kfm-extra` não pode substituir um arquivo de `chars/kfm`. A busca global por nome continua como última alternativa de compatibilidade. A normalização ASCII cria uma única string de saída; caminhos não ASCII mantêm as regras Unicode de minúsculas, inclusive sigma grego contextual.
+
+Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,8 para 48,0 ns por operação, e a da busca na pasta de 278,2 para 1,0 µs. São resultados de microbenchmark, não medidas de FPS ou de carregamento completo do jogo. Arquivos ausentes que exigem busca global ainda podem percorrer todo o mapa.
+
+## Alocações de áudio e interface
+
+`cargo run --locked --release --example audio_bench` decodifica cinco vezes um WAV estéreo gerado de 30 segundos a 44,1 kHz, contando alocações e realocações durante cada decodificação. O decodificador reutiliza o buffer de conversão de amostras intercaladas enquanto houver capacidade; ele cresce quando um pacote posterior precisa de mais amostras. A quantidade de amostras escritas continua vindo do pacote atual, inclusive em pacotes finais parciais e entrada mono.
+
+No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
+
+`Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.

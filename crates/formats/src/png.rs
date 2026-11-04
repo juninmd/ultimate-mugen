@@ -86,6 +86,9 @@ pub fn decode_png(buf: &[u8]) -> Result<DecodedPng, String> {
         return Err(format!("PNG: unsupported bit depth {bit_depth} for color type {color_type}"));
     }
 
+    if (width as u64) * (height as u64) > crate::sff::MAX_SPRITE_PIXELS as u64 {
+        return Err("PNG: image too large".into());
+    }
     let (w, h) = (width as usize, height as usize);
     let bits_pp = channels * bit_depth as usize;
     let bpp = (bits_pp >> 3).max(1); // filter byte distance

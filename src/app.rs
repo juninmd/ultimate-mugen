@@ -671,6 +671,11 @@ impl App {
             self.pending.sess = Some(sess);
         } else {
             let music = self.pending.sess.as_ref().map(|s| s.stage.music).unwrap_or(0);
+            if let Some(sess) = &self.pending.sess {
+                let mut chars: Vec<crate::audio::CharSounds> = vec![];
+                for f in &sess.m.fighters { if !chars.iter().any(|(id, _)| *id == f.def.id) { chars.push((&f.def.id, &f.def.sounds)); } }
+                self.audio.preload_match(&chars);
+            }
             self.audio.prepare_music(music).await;
         }
         Ok(true)
@@ -733,8 +738,14 @@ impl App {
         // DualShock/DualSense lightbars: P1 blue, P2 red
         self.c.pads.set_light(0, [30, 90, 255]);
         self.c.pads.set_light(1, [255, 40, 60]);
-        self.session = Some(sess);
         self.g.trim(4000);
+        let mut warmed: Vec<&str> = vec![];
+        for f in &sess.m.fighters {
+            if warmed.contains(&f.def.id.as_str()) { continue; }
+            warmed.push(&f.def.id);
+            if !self.g.prefetch(&f.def, 0.5) { break; }
+        }
+        self.session = Some(sess);
         self.screen = Screen::Fight;
         let custom = match bgm { Some(b) => self.audio.play_music_file(&b.0, b.1).await, None => false };
         if !custom { self.audio.play_music(music).await; }

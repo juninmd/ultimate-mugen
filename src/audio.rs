@@ -183,6 +183,7 @@ pub struct MusicLoop {
 
 type SampleKey = (String, i32, i32);
 type VoiceKey = (SampleKey, i8, u16);
+pub type CharSounds<'a> = (&'a str, &'a HashMap<(i32, i32), Vec<u8>>);
 
 enum Source {
     Pcm(Pcm),
@@ -277,6 +278,19 @@ impl Audio {
             Some(Some((s, secs))) => { let (s, secs) = (s.clone(), *secs); self.start(&s, secs, opts, Some(vkey.0.clone())); }
             Some(None) => {}
             None => { self.voices.insert(vkey.clone(), None); self.pending.push((vkey, opts)); }
+        }
+    }
+    pub fn preload_match(&mut self, chars: &[CharSounds]) {
+        if !self.enabled { return; }
+        self.sources.retain(|k, _| chars.iter().any(|(id, _)| *id == k.0));
+        self.voices.retain(|k, _| chars.iter().any(|(id, _)| *id == k.0 .0));
+        let todo: Vec<(SampleKey, &Vec<u8>)> = chars.iter()
+            .flat_map(|(id, sounds)| sounds.iter().map(move |(k, b)| ((id.to_string(), k.0, k.1), b)))
+            .filter(|(k, _)| !self.sources.contains_key(k))
+            .collect();
+        let decoded = ume_formats::par::map(&todo, |(_, b)| decode(b));
+        for ((key, b), pcm) in todo.into_iter().zip(decoded) {
+            self.sources.insert(key, Some(pcm.map(Source::Pcm).unwrap_or_else(|| Source::Raw(b.clone()))));
         }
     }
     fn start(&mut self, s: &Sound, secs: f64, o: SoundOpts, key: Option<SampleKey>) {

@@ -76,7 +76,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
                 scale: [n(m, "scale", 1.0, 0), n(m, "scale", 1.0, 1)],
                 color: c, align: n(m, "align", 1.0, 0) as i32, time: n(m, "removetime", 1.0, 0) as i32,
             };
-            m.texts.push(item);
+            if m.texts.len() < 128 { m.texts.push(item); }
         }
         "removetext" => {
             let (id, owner) = (n(m, "id", -1.0, 0) as i32, m.fighters[i].root);

@@ -26,7 +26,17 @@ pub fn pretty_name(n: &str) -> String {
     if words.is_empty() { n.to_string() } else { words.join(" ") }
 }
 
-pub enum Src { Native(Box<NativeChar>), Mugen { vfs: Arc<Vfs>, def: String } }
+#[derive(Clone)]
+pub enum Src { Native(Arc<NativeChar>), Mugen { vfs: Arc<Vfs>, def: String } }
+
+pub type LoadJob = Option<std::thread::JoinHandle<Result<CharDef, String>>>;
+
+fn build(src: &Src, pal: i32, name: &str) -> Result<CharDef, String> {
+    match src {
+        Src::Native(nc) => Ok(compile_native(nc, pal, true)),
+        Src::Mugen { vfs, def } => load_mugen_char(vfs, def, pal, true).map(|mut d| { d.display_name = name.to_string(); d }),
+    }
+}
 
 pub struct CharEntry {
     pub id: String, pub name: String, pub series: String, pub author: String, pub color: [u8; 3], pub description: String, pub mugen: bool, /** final boss: hidden from the roster */ pub boss: bool,
@@ -45,13 +55,24 @@ impl CharEntry {
     pub fn load(&self, pal: i32) -> Result<Arc<CharDef>, String> {
         if let Some(d) = self.cache.borrow().get(&pal) { return Ok(d.clone()); }
         if let Some(e) = self.errs.borrow().get(&pal) { return Err(e.clone()); }
-        let d = Arc::new(match &self.src {
-            Src::Native(nc) => compile_native(nc, pal, true),
-            Src::Mugen { vfs, def } => match load_mugen_char(vfs, def, pal, true) {
-                Ok(mut d) => { d.display_name = self.name.clone(); d }
-                Err(e) => { self.broken.set(true); self.errs.borrow_mut().insert(pal, e.clone()); return Err(e); }
-            },
-        });
+        self.store(pal, build(&self.src, pal, &self.name))
+    }
+    pub fn spawn_load(&self, pal: i32) -> LoadJob {
+        if cfg!(target_arch = "wasm32") || self.cache.borrow().contains_key(&pal) || self.errs.borrow().contains_key(&pal) { return None; }
+        let (src, name) = (self.src.clone(), self.name.clone());
+        std::thread::Builder::new().name("char-load".into()).spawn(move || build(&src, pal, &name)).ok()
+    }
+    pub fn finish_load(&self, pal: i32, job: LoadJob) -> Result<Arc<CharDef>, String> {
+        match job {
+            Some(h) => self.store(pal, h.join().unwrap_or_else(|_| Err("loader thread panicked".into()))),
+            None => self.load(pal),
+        }
+    }
+    fn store(&self, pal: i32, r: Result<CharDef, String>) -> Result<Arc<CharDef>, String> {
+        let d = match r {
+            Ok(d) => Arc::new(d),
+            Err(e) => { if self.mugen { self.broken.set(true); } self.errs.borrow_mut().insert(pal, e.clone()); return Err(e); }
+        };
         if self.mugen && self.portrait.borrow().is_none() { *self.portrait.borrow_mut() = Some(portrait_of(&d)); }
         self.cache.borrow_mut().insert(pal, d.clone());
         self.preview.borrow_mut().remove(&pal);
@@ -104,7 +125,7 @@ impl Registry {
             match serde_json::from_str::<NativeChar>(json) {
                 Ok(nc) => chars.push(CharEntry {
                     id: format!("umf:{}", nc.id), name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color),
-                    description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()),
+                    description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Arc::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()),
                 }),
                 Err(e) => eprintln!("bad builtin char: {e}"),
             }
@@ -125,7 +146,7 @@ impl Registry {
         let id = format!("umf:{}", nc.id);
         self.chars.retain(|c| c.id != id);
         let name = nc.name.clone();
-        self.chars.push(CharEntry { id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Box::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) });
+        self.chars.push(CharEntry { id, name: nc.name.clone(), series: nc.series.clone(), author: nc.author.clone(), color: hex3(&nc.color), description: nc.description.clone().unwrap_or_default(), mugen: false, boss: nc.boss, src: Src::Native(Arc::new(nc)), cache: RefCell::new(HashMap::new()), preview: RefCell::new(HashMap::new()), last_use: Cell::new(0), portrait: RefCell::new(None), broken: Cell::new(false), errs: RefCell::new(HashMap::new()) });
         Ok(name)
     }
     /// Like add_vfs but skips the full validation decode (fast startup for trusted bundled content).

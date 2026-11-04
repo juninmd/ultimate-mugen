@@ -61,6 +61,17 @@ pub struct Session {
 thread_local! { static FX: Arc<CharDef> = build_fx(true); }
 
 impl Session {
+    /// Netplay settings a replay stores; the browser and mobile builds never open a socket.
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    pub fn netplay_config(&self) -> Option<crate::replays::NetplayConfig> {
+        self.net.as_ref().map(|n| n.config.clone())
+    }
+
+    #[cfg(any(target_arch = "wasm32", target_os = "android", target_os = "ios"))]
+    pub fn netplay_config(&self) -> Option<crate::replays::NetplayConfig> {
+        None
+    }
+
     /// `teams[side]` = fighters of that side (leader first). Players are added interleaved (P1, P2, P3, P4) so that
     /// `roots()[0]`/`roots()[1]` are always the two team leaders. `life` = leader life ratios (sequence carry-over).
     #[allow(clippy::too_many_arguments)]

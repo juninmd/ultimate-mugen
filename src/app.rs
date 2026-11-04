@@ -72,15 +72,19 @@ impl Team {
 const VIEW_ROWS: usize = 4;
 const NUMS: [&str; 5] = ["1", "2", "3", "4", "5"];
 
-fn opaque_box(s: &ume_engine::chardef::Sprite) -> (f32, f32, f32, f32) {
-    let Some(im) = s.image.as_ref() else { return (0.0, 0.0, s.width, s.height) };
-    let (iw, ih) = (im.w as usize, im.h as usize);
+fn opaque_box(d: &CharDef, key: (i32, i32), s: &ume_engine::chardef::Sprite) -> (f32, f32, f32, f32) {
+    let dims = s.image.as_ref().map(|im| (im.w as usize, im.h as usize)).or_else(|| d.indexed.get(&key).map(|ix| (ix.w as usize, ix.h as usize)));
+    let Some((iw, ih)) = dims else { return (0.0, 0.0, s.width, s.height) };
     if iw == 0 || ih == 0 { return (0.0, 0.0, s.width, s.height); }
+    let visible = |x: usize, y: usize| match (&s.image, d.indexed.get(&key)) {
+        (Some(im), _) => im.rgba[(y * iw + x) * 4 + 3] > 16,
+        (None, Some(ix)) => ix.pixels.get(y * iw + x).is_some_and(|&p| p != 0),
+        _ => false,
+    };
     let (mut x0, mut y0, mut x1, mut y1) = (iw, ih, 0, 0);
     for y in 0..ih {
-        let row = &im.rgba[y * iw * 4..(y + 1) * iw * 4];
         for x in 0..iw {
-            if row[x * 4 + 3] > 16 { x0 = x0.min(x); x1 = x1.max(x + 1); y0 = y0.min(y); y1 = y1.max(y + 1); }
+            if visible(x, y) { x0 = x0.min(x); x1 = x1.max(x + 1); y0 = y0.min(y); y1 = y1.max(y + 1); }
         }
     }
     if x0 >= x1 || y0 >= y1 { return (0.0, 0.0, s.width, s.height); }
@@ -127,6 +131,9 @@ pub struct App {
     /// last finished fight (replayable) and the replay being played now
     last_fight: Option<Replay>,
     pub replaying: Option<Replay>,
+    /// web deep link waiting for the imported packs to land in the registry
+    #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
+    deep: Option<(Option<String>, Option<String>, Option<usize>, Mode, bool, Option<String>, f32)>,
     /// fighters per team in the team modes (2..=5)
     pub team_n: usize,
     pub team_pick: Vec<usize>,
@@ -211,6 +218,7 @@ impl App {
         App {
             reg, market: crate::market::Market::open(), market_ui: market::MarketUi::default(), ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: settings.difficulty, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: import_msg, preview_t: 0.0,
+            deep: None,
             settings, key_edit: None, move_page: 0, pending: Pending::default(), import_jobs: vec![], window_watch: WindowWatch::default(), window_pinned: false, team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
             replay_list: vec![], replay_problems: vec![], replay_rename: None, replay_confirm: false, replay_by_name: false,
             survival: None,
@@ -284,7 +292,11 @@ impl App {
         // auto art quality follows the display (checked outside fights so live sprites are never swapped)
         self.quality_check += dt;
         if self.quality_check > 0.7 && matches!(self.screen, Screen::Menu { .. } | Screen::Title | Screen::Settings { from_fight: false, .. } | Screen::Select { .. } | Screen::Stages { .. }) { self.quality_check = 0.0; self.apply_quality(); }
-        if self.settings.fps { self.ui.text(&format!("{} FPS · {}×{} · arte {:.1}×", get_fps(), (screen_width() * dpi_scale()) as i32, Settings::physical_h() as i32, ume_engine::native::rig::art_res()), 10.0, 20.0, 16.0, hex("#6dff9e"), Align::Left, false); }
+        if self.settings.fps {
+            self.ui.text(&format!("{} FPS · {}×{} · arte {:.1}×", get_fps(), (screen_width() * dpi_scale()) as i32, Settings::physical_h() as i32, ume_engine::native::rig::art_res()), 10.0, 20.0, 16.0, hex("#6dff9e"), Align::Left, false);
+            let st = stats();
+            self.ui.text(&format!("{} v · {} dc · {} up/{} KB · atlas {:.0}%/{:.0}%", st.vertices, st.draw_calls, st.uploads, st.upload_kb, st.rgba_fill * 100.0, st.index_fill * 100.0), 10.0, 42.0, 14.0, hex("#6dff9e"), Align::Left, false);
+        }
         // screen transition: diagonal wipe whenever the screen changes (not into/out of the fight itself)
         let disc = std::mem::discriminant(&self.screen);
         if self.last_disc != Some(disc) {
@@ -308,6 +320,8 @@ impl App {
             #[cfg(target_arch = "wasm32")]
             { let r = crate::registry::read_zip(&zip); self.finish_import(r); }
         }
+        #[cfg(target_arch = "wasm32")]
+        self.resolve_deep_link(dt);
         if self.import_jobs.iter().any(|h| h.is_finished()) {
             let (done, rest): (Vec<_>, Vec<_>) = std::mem::take(&mut self.import_jobs).into_iter().partition(|h| h.is_finished());
             self.import_jobs = rest;
@@ -333,6 +347,57 @@ impl App {
         self.stage_row = 0;
     }
     fn menu_art_fade(&self) -> f32 { self.menu_art.fade_in() }
+
+    /// Web deep link: `?p1=<lutador>&p2=<lutador>&cenario=<n>&modo=cpu|versus|treino|watch&luta=1`
+    /// opens the stage pick or the fight itself (shareable links, QA and performance runs). Names are resolved once
+    /// the imported packs reach the registry, so the link keeps working while the pack is still loading.
+    #[cfg(target_arch = "wasm32")]
+    pub fn apply_deep_link(&mut self) {
+        let q = crate::query_params();
+        let get = |k: &str| q.iter().find(|(a, _)| a == k).map(|(_, b)| b.clone());
+        let (p1, p2) = (get("p1"), get("p2"));
+        let screen = get("tela");
+        if p1.is_none() && p2.is_none() && screen.is_none() { return; }
+        let mode = match get("modo").as_deref() {
+            Some("versus") => Mode::Versus,
+            Some("treino") => Mode::Training,
+            Some("watch") => Mode::Watch,
+            _ => Mode::Cpu,
+        };
+        let stage = get("cenario").and_then(|v| v.parse::<usize>().ok());
+        self.deep = Some((p1, p2, stage, mode, get("luta").is_some_and(|v| v != "0"), screen, 0.0));
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn resolve_deep_link(&mut self, dt: f32) {
+        let Some(deep) = self.deep.as_mut() else { return };
+        deep.6 += dt;
+        let (p1, p2, stage, mode, fight, screen, waited) = (deep.0.clone(), deep.1.clone(), deep.2, deep.3, deep.4, deep.5.clone(), deep.6);
+        let find = |needle: &str| {
+            let n = needle.to_lowercase();
+            self.reg.chars.iter().position(|c| {
+                c.id.to_lowercase().contains(&n) || c.key.to_lowercase().contains(&n) || c.name.to_lowercase().contains(&n)
+            })
+        };
+        let first = p1.as_deref().and_then(find).or_else(|| p2.as_deref().and_then(find));
+        let screen_only = p1.is_none() && p2.is_none();
+        if first.is_none() && !screen_only && waited < 20.0 { return; }
+        let p1 = p1.as_deref().and_then(find).or(first);
+        let p2 = p2.as_deref().and_then(find).or(first);
+        if let Some(i) = p1 { self.sel.0 = i; }
+        if let Some(i) = p2 { self.sel.1 = i; }
+        if let Some(s) = stage.filter(|&s| s < self.reg.stages.len()) { self.sel.2 = s; }
+        self.mode = mode;
+        self.team = None;
+        self.arcade = None;
+        self.screen = match screen.as_deref() {
+            Some("select") => { self.sel_filter = 2; Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] } }
+            Some("stages") => Screen::Stages { cur: self.sel.2 },
+            _ if fight => Screen::Vs { t: 0.0, step: 0 },
+            _ => Screen::Stages { cur: self.sel.2 },
+        };
+        self.deep = None;
+    }
 
     fn go(&mut self, s: Screen) { self.audio.sfx("confirm"); self.screen = s; }
 
@@ -434,9 +499,9 @@ impl App {
         let (mut acc, mut idx) = (0, 0);
         for (i, f) in a.frames.iter().enumerate() { idx = i; if f.time < 0 || tm < acc + f.time { break; } acc += f.time; }
         let fr = &a.frames[idx];
-        let Some(spr) = d.sprites.get(&(fr.group, fr.index)) else { return };
-        let Some(img) = spr.image.clone() else { return };
-        let tex = self.g.texture(&img, spr.scale >= 0.99);
+        let key = (fr.group, fr.index);
+        let Some(spr) = d.sprites.get(&key) else { return };
+        let Some(tex) = self.g.sprite_tex(d, key, &[]) else { return };
         let l = 320.0 / d.local_w;
         let k = kv * self.ui.s;
         let ks = k * spr.scale * l;
@@ -445,7 +510,7 @@ impl App {
         let px = self.ui.x(x) + fr.x * l * k * if mirror { -1.0 } else { 1.0 };
         let py = self.ui.y(y) + fr.y * l * k;
         let left = if flip { px - (spr.width - spr.axis_x) * ks } else { px - spr.axis_x * ks };
-        draw_texture_ex(&tex, left, py - spr.axis_y * ks, self.char_tint, DrawTextureParams { dest_size: Some(vec2(w, h)), flip_x: flip, ..Default::default() });
+        tex.draw(left, py - spr.axis_y * ks, self.char_tint, DrawTextureParams { dest_size: Some(vec2(w, h)), flip_x: flip, ..Default::default() });
     }
 
     fn char_extent(&mut self, d: &Arc<CharDef>) -> [f32; 4] {
@@ -456,7 +521,7 @@ impl App {
             for fr in &a.frames {
                 let Some(s) = d.sprites.get(&(fr.group, fr.index)) else { continue };
                 let sc = s.scale * l;
-                let (ox, oy, ow, oh) = opaque_box(s);
+                let (ox, oy, ow, oh) = opaque_box(d, (fr.group, fr.index), s);
                 let (top, left) = (fr.y * l + (oy - s.axis_y) * sc, if fr.flip_h { fr.x * l + (s.width - ow - ox - s.axis_x) * sc } else { fr.x * l + (ox - s.axis_x) * sc });
                 e = [e[0].min(top), e[1].max(top + oh * sc), e[2].min(left), e[3].max(left + ow * sc)];
             }

@@ -433,9 +433,10 @@ fn sp_box(p: &impl Fn(f32, f32) -> Vec2, x: f32, y: f32, w: f32, h: f32, r: f32)
 fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, frame: Color) {
     let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
     let por = f.def.sprites.get(&(9000, 1)).or(f.def.sprites.get(&(9000, 0))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), true))
-        .or_else(|| f.def.anims.get(&0).and_then(|a| a.frames.first()).and_then(|fr| f.def.sprites.get(&(fr.group, fr.index))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), false)));
+        .or_else(|| f.def.anims.get(&0).and_then(|a| a.frames.first()).map(|fr| (fr.group, fr.index)).and_then(|k| f.def.sprites.get(&k).map(|sp| (sp.clone(), false))));
     if let Some((sp, full)) = por {
-        let img = sp.image.clone().unwrap();
+        let img = sp.image.clone().or_else(|| f.def.rgba_sprite((9000, 1)).or_else(|| f.def.anims.get(&0).and_then(|a| a.frames.first()).and_then(|fr| f.def.rgba_sprite((fr.group, fr.index)))));
+        let Some(img) = img else { return };
         let tex = g.texture(&img, sp.scale >= 0.99);
         let (iw, ih) = (img.w as f32, img.h as f32);
         let src = if full { Rect::new(0.0, 0.0, iw, ih) } else { let sd = (ih * 0.40).min(iw); let cx = (sp.axis_x * iw / sp.width.max(1.0)).clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };

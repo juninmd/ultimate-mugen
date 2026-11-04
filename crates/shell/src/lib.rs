@@ -11,6 +11,7 @@ use std::sync::Arc;
 use std::cell::RefCell;
 use std::rc::Rc;
 use web_time::Instant;
+pub use web_time::Instant as Clock;
 use ume_render::{Atlas, Canvas, PostFx, Renderer, Target};
 pub use ume_render::PostParams;
 use winit::application::ApplicationHandler;
@@ -206,9 +207,11 @@ impl<G: Game> Shell<G> {
         self.input.pointer_scale = [size[0] / surface[0], size[1] / surface[1]];
         let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, scale: live.window.scale_factor() as f32, window: surface, stretch: self.stretch, linear: self.linear, resize: None, fullscreen: None, vsync: None, frame_cap: None, screenshot: None, quit: false };
         self.game.frame(&mut f);
+        let (verts, calls) = (f.canvas.batch.vertices.len(), f.canvas.batch.calls.len());
         let (quit, c, post, resize, fullscreen, shot, vsync, cap) = (f.quit, f.clear, f.post, f.resize, f.fullscreen, f.screenshot.take(), f.vsync, f.frame_cap);
         if let Some(c) = cap { self.frame_cap = c; }
         (self.stretch, self.linear) = (f.stretch, f.linear);
+        quad::publish_stats(verts, calls, live.gpu.rgba_atlas.occupancy(), live.gpu.index_atlas.occupancy());
         let size = logical_size(surface, self.stretch);
         live.gpu.renderer.set_linear(self.linear);
         live.gpu.renderer.set_scissor_scale([surface[0] / size[0], surface[1] / size[1]]);

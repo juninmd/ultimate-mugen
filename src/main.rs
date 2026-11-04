@@ -88,6 +88,65 @@ pub fn take_imports() -> Vec<Vec<u8>> {
     vec![]
 }
 
+/// Query string of the page (`?p1=...)`, percent-decoded, for the web deep link.
+#[cfg(target_arch = "wasm32")]
+pub fn query_params() -> Vec<(String, String)> {
+    let Ok(location) = js_sys::Reflect::get(&js_sys::global(), &"location".into()) else { return vec![] };
+    let Ok(search) = js_sys::Reflect::get(&location, &"search".into()) else { return vec![] };
+    let raw = search.as_string().unwrap_or_default();
+    raw.trim_start_matches('?').split('&').filter(|p| !p.is_empty()).map(|pair| {
+        let (k, v) = pair.split_once('=').unwrap_or((pair, ""));
+        (percent_decode(k), percent_decode(v))
+    }).collect()
+}
+
+/// Console log from Rust, used by the browser diagnostics (`?perf=1`).
+#[cfg(target_arch = "wasm32")]
+pub fn web_log(msg: &str) {
+    let Ok(console) = js_sys::Reflect::get(&js_sys::global(), &"console".into()) else { return };
+    let Ok(log) = js_sys::Reflect::get(&console, &"log".into()) else { return };
+    if let Some(f) = wasm_bindgen::JsCast::dyn_ref::<js_sys::Function>(&log) { let _ = f.call1(&console, &js_sys::JsString::from(msg)); }
+}
+
+fn perf_clock() -> f64 {
+    #[cfg(target_arch = "wasm32")]
+    { js_sys::Date::now() }
+    #[cfg(not(target_arch = "wasm32"))]
+    { std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs_f64() * 1000.0).unwrap_or(0.0) }
+}
+
+pub fn init_perf() {
+    ume_formats::perf::set_clock(perf_clock);
+    #[cfg(target_arch = "wasm32")]
+    ume_formats::perf::set_sink(web_log);
+    ume_formats::perf::enable(perf_enabled());
+}
+
+#[allow(dead_code)]
+pub fn perf_enabled() -> bool {
+    #[cfg(target_arch = "wasm32")]
+    if query_params().iter().any(|(k, v)| k == "perf" && v != "0") { return true; }
+    false
+}
+
+#[cfg(target_arch = "wasm32")]
+fn percent_decode(s: &str) -> String {
+    let b = s.as_bytes();
+    let mut out = Vec::with_capacity(b.len());
+    let mut i = 0;
+    while i < b.len() {
+        match b[i] {
+            b'%' if i + 2 < b.len() => match u8::from_str_radix(&s[i + 1..i + 3], 16) {
+                Ok(v) => { out.push(v); i += 3; }
+                Err(_) => { out.push(b'%'); i += 1; }
+            },
+            b'+' => { out.push(b' '); i += 1; }
+            c => { out.push(c); i += 1; }
+        }
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
 #[allow(dead_code)]
 fn main() {
     if let Err(e) = run_async(conf(), game()) { eprintln!("{e}"); std::process::exit(1); }
@@ -96,12 +155,15 @@ fn main() {
 async fn game() {
     let args: Vec<String> = std::env::args().collect();
     let has = |f: &str| args.iter().any(|a| a == f);
+    init_perf();
     let shots = args.iter().position(|a| a == "--shots").and_then(|i| args.get(i + 1)).cloned();
     #[cfg(target_arch = "wasm32")]
     let touch_dev = ume_is_touch() != 0;
     #[cfg(not(target_arch = "wasm32"))]
     let touch_dev = cfg!(any(target_os = "android", target_os = "ios"));
     let mut app = app::App::new(has("--touch") || touch_dev, shots.is_none() && !has("--mute")).await;
+    #[cfg(target_arch = "wasm32")]
+    app.apply_deep_link();
     if let Some(dir) = shots { shots::run(&mut app, &dir).await; return; }
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     match netlink::NetArgs::parse(&args) {

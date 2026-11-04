@@ -631,7 +631,7 @@ impl Match {
             if !frozen { f.advance_anim(); }
             self.run_states(i);
         }
-        if let Some(p) = self.pause.as_mut() { if p.move_time > 0 { p.move_time -= 1; } }
+        if paused_by.is_some() { if let Some(p) = self.pause.as_mut() { if p.move_time > 0 { p.move_time -= 1; } } }
         if let Some((_, _, sup)) = paused_by {
             for f in self.fighters.iter_mut() { let t = if sup { &mut f.super_move_time } else { &mut f.pause_move_time }; if *t > 0 { *t -= 1; } }
         }
@@ -679,7 +679,7 @@ impl Match {
         for f in self.fighters.iter_mut() {
             for o in f.hit_overrides.iter_mut() { if let Some(h) = o { if h.time > 0 { h.time -= 1; if h.time == 0 { *o = None; } } } }
         }
-        let paused = self.pause.is_some();
+        let paused = paused_by.is_some();
         self.update_projectiles(paused);
         self.update_explods(paused);
         self.update_camera();
@@ -1245,7 +1245,7 @@ impl Match {
                 if !allowed { return true; }
                 if ps == Some(true) { e.super_move -= 1; } else { e.pause_move -= 1; }
             }
-            let owner_hit_pause = fighters.iter().find(|f| f.id == e.owner).is_some_and(|f| f.hit_pause > 0);
+            let owner_hit_pause = fighters.iter().find(|f| f.id == e.owner).is_some_and(|f| f.hit_pause > 0 || f.hit_shake > 0);
             if owner_hit_pause && !e.ignore_hit_pause { return true; }
             let bound = if e.screen { None } else { e.bind_to.and_then(|b| fighters.iter().find(|f| f.id == b)).map(|f| (f.pos, f.facing)) };
             e.time += 1;

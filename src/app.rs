@@ -101,6 +101,7 @@ pub struct App {
     updater: crate::update::Checker,
     pub trans: f32,
     screen_t: f32,
+    menu_art: crate::menu_art::MenuArt,
     last_disc: Option<std::mem::Discriminant<Screen>>,
 }
 
@@ -145,7 +146,7 @@ impl App {
         App {
             reg, market: crate::market::Market::open(), market_ui: market::MarketUi::default(), ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, key_edit: None, move_page: 0, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
+            settings, key_edit: None, move_page: 0, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None,
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -207,6 +208,7 @@ impl App {
             self.screen_t = 0.0;
         }
         self.screen_t += dt;
+        self.menu_art.tick(dt);
         if self.trans > 0.0 { self.ui.wipe(self.trans); self.trans = (self.trans - dt * 2.6).max(0.0); }
         self.audio.process().await;
         self.market.poll();
@@ -239,19 +241,21 @@ impl App {
         self.sel_row = 0;
         self.stage_row = 0;
     }
+    fn menu_art_fade(&self) -> f32 { self.menu_art.fade_in() }
 
     fn go(&mut self, s: Screen) { self.audio.sfx("confirm"); self.screen = s; }
 
     // ------------------------------------------------------------ title / menu
     fn title(&mut self) {
-        self.ui.background();
+        self.menu_art.select(0);
+        self.menu_art.draw(&self.ui);
         self.ui.logo(VW / 2.0, 330.0, 200.0);
         self.ui.text("ENGINE DE LUTA · RUST · DESKTOP · WEB · MOBILE", VW / 2.0, 420.0, 20.0, hex("#a49cc0"), Align::Center, true);
         if (self.ui.t * 2.0) as i32 % 2 == 0 { self.ui.text_bold("PRESSIONE START / ENTER", VW / 2.0, 540.0, 30.0, WHITE, hex("#12051f"), Align::Center); }
         self.ui.text("Compatível com personagens M.U.G.E.N  ·  DualShock 4 / DualSense com vibração", VW / 2.0, 690.0, 18.0, hex("#a49cc0"), Align::Center, false);
         let line = match self.updater.poll() {
-            Some(u) => format!("v{} · nova versão v{} disponível: {}", crate::update::VERSION, u.version, crate::update::RELEASES_URL),
-            None => format!("v{}", crate::update::VERSION),
+            Some(u) => format!("{} · nova versão v{} disponível: {}", crate::update::build_label(), u.version, crate::update::RELEASES_URL),
+            None => crate::update::build_label(),
         };
         self.ui.text(&line, VW - 14.0, VH - 12.0, 14.0, hex("#a49cc0"), Align::Right, false);
         if self.c.pressed(nav::OK | nav::START) || is_mouse_button_pressed(MouseButton::Left) || !touches().is_empty() && touches()[0].phase == TouchPhase::Started { self.go(Screen::Menu { cur: 0 }); }
@@ -265,40 +269,50 @@ impl App {
         if self.c.pressed(nav::LEFT) { self.ai_level = (self.ai_level - 1).max(1); }
         if self.c.pressed(nav::RIGHT) { self.ai_level = (self.ai_level + 1).min(8); }
         let mut chosen = if self.c.pressed(nav::OK | nav::START) { Some(cur_v) } else { None };
-        self.ui.background();
-        self.ui.logo(240.0, 330.0, 108.0);
-        for (i, (t, d)) in MENU.iter().enumerate() {
-            let k_in = ((self.screen_t - 0.12 - i as f32 * 0.05) / 0.3).clamp(0.0, 1.0);
+        self.menu_art.select(cur_v);
+        self.menu_art.draw(&self.ui);
+        let ui = &self.ui;
+        let accent = crate::menu_art::accent_of(cur_v);
+        crate::menu_art::glass(ui, -400.0, 0.0, 400.0 + 600.0, VH, 1.0);
+        ui.rect(-400.0, 0.0, 400.0 + 600.0, VH, Color::new(0.0, 0.0, 0.0, 0.18));
+        ui.rect(600.0, 0.0, 3.0, VH, Color::new(accent.r, accent.g, accent.b, 0.8));
+        ui.logo(250.0, 118.0, 74.0);
+        let n = MENU.len();
+        let step = 456.0 / n as f32;
+        for (i, (t, _)) in MENU.iter().enumerate() {
+            let k_in = ((self.screen_t - 0.05 - i as f32 * 0.04) / 0.28).clamp(0.0, 1.0);
             let k_in = 1.0 - (1.0 - k_in).powi(3);
-            let step_y = 590.0 / MENU.len() as f32;
-            let (x, y, w, h) = (460.0 - (1.0 - k_in) * 90.0, 104.0 + i as f32 * step_y, 440.0, step_y - 6.0);
+            let (x, y, w, h) = (40.0 - (1.0 - k_in) * 120.0, 196.0 + i as f32 * step, 520.0, step - 4.0);
             if self.hover_rect(x, y, w, h) && (mouse_delta_position().length() > 0.0) { cur_v = i; }
-            if self.clicked_rect(x, y, w, h) { chosen = Some(i); }
+            if self.clicked_rect(x, y, w, h) { cur_v = i; chosen = Some(i); }
             let f = i == cur_v;
-            let off = if f { 14.0 } else { 0.0 };
-            let pulse = if f { 0.85 + 0.15 * (self.ui.t * 6.0).sin() } else { 1.0 };
-            let mut col = if f { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) };
-            col.r *= pulse; col.g *= pulse; col.b *= pulse; col.a *= k_in;
-            if f { self.ui.quad([vec2(x + off + 8.0, y - 3.0), vec2(x + off + w + 6.0, y - 3.0), vec2(x + off + w - 8.0, y + h + 3.0), vec2(x + off - 6.0, y + h + 3.0)], Color::new(1.0, 0.3, 0.43, 0.22 * k_in)); }
-            self.ui.quad([vec2(x + off + 14.0, y), vec2(x + off + w, y), vec2(x + off + w - 14.0, y + h), vec2(x + off, y + h)], col);
-            if f { self.ui.quad([vec2(x + off + w - 60.0, y), vec2(x + off + w, y), vec2(x + off + w - 14.0, y + h), vec2(x + off + w - 74.0, y + h)], hex("#8a2be2")); }
-            self.ui.text(t, x + off + 26.0, y + h * 0.54, 22.0, WHITE, Align::Left, true);
-            self.ui.text(d, x + off + 26.0, y + h * 0.88, 14.0, if f { WHITE } else { hex("#a49cc0") }, Align::Left, false);
+            let off = if f { 22.0 } else { 0.0 };
+            if f {
+                let pulse = 0.8 + 0.2 * (ui.t * 5.0).sin();
+                ui.quad([vec2(x + off + 18.0, y), vec2(x + off + w, y), vec2(x + off + w - 18.0, y + h), vec2(x + off, y + h)], Color::new(accent.r * pulse, accent.g * pulse, accent.b * pulse, 0.92 * k_in));
+                ui.quad([vec2(x + off - 14.0, y), vec2(x + off - 4.0, y), vec2(x + off - 18.0, y + h), vec2(x + off - 28.0, y + h)], Color::new(1.0, 1.0, 1.0, k_in));
+                ui.text(t, x + off + 30.0, y + h * 0.72, 24.0, hex("#12051f"), Align::Left, true);
+            } else {
+                ui.quad([vec2(x + 18.0, y), vec2(x + w - 80.0, y), vec2(x + w - 98.0, y + h), vec2(x, y + h)], Color::new(1.0, 1.0, 1.0, 0.07 * k_in));
+                ui.text(t, x + 30.0, y + h * 0.72, 22.0, Color::new(1.0, 1.0, 1.0, 0.82 * k_in), Align::Left, true);
+            }
         }
+        let (title, desc) = MENU[cur_v];
+        let ta = ((self.menu_art_fade()) * 1.0).clamp(0.0, 1.0);
+        ui.text_bold(&title.to_uppercase(), VW - 60.0, 590.0, if title.chars().count() > 12 { 44.0 } else { 64.0 }, Color::new(1.0, 1.0, 1.0, ta), Color::new(0.05, 0.02, 0.1, ta), Align::Right);
+        ui.rect(VW - 460.0, 608.0, 400.0, 4.0, Color::new(accent.r, accent.g, accent.b, ta));
+        ui.text(desc, VW - 60.0, 646.0, 22.0, Color::new(1.0, 1.0, 1.0, 0.9 * ta), Align::Right, false);
         let (nm, nn) = (self.reg.chars.iter().filter(|c| c.mugen).count(), self.playable().len());
-        let sx = 960.0;
-        self.ui.text(&format!("{nn}"), sx, 200.0, 40.0, hex("#ffcc33"), Align::Left, true);
-        self.ui.text("lutadores", sx + 70.0, 196.0, 22.0, hex("#a49cc0"), Align::Left, false);
-        self.ui.text(&format!("{}", self.reg.stages.len()), sx, 250.0, 40.0, hex("#ffcc33"), Align::Left, true);
-        self.ui.text("cenários", sx + 70.0, 246.0, 22.0, hex("#a49cc0"), Align::Left, false);
-        self.ui.text(&format!("{nm}"), sx, 300.0, 40.0, hex("#ffcc33"), Align::Left, true);
-        self.ui.text("MUGEN importados", sx + 70.0, 296.0, 22.0, hex("#a49cc0"), Align::Left, false);
-        self.ui.text("Dificuldade CPU (esq./dir.)", sx, 370.0, 20.0, hex("#a49cc0"), Align::Left, false);
-        for i in 0..8 { self.ui.rect(sx + i as f32 * 26.0, 384.0, 20.0, 14.0, if i < self.ai_level { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.12) }); }
+        let stats = format!("{nn} lutadores · {} cenários · {nm} MUGEN", self.reg.stages.len());
+        ui.text(&stats, VW - 40.0, 44.0, 20.0, Color::new(1.0, 1.0, 1.0, 0.85), Align::Right, false);
+        if cur_v <= 6 {
+            ui.text("Dificuldade CPU (esq./dir.)", VW - 40.0, 86.0, 16.0, hex("#d8d0f0"), Align::Right, false);
+            for i in 0..8 { ui.rect(VW - 40.0 - 8.0 * 26.0 + i as f32 * 26.0, 96.0, 20.0, 12.0, if i < self.ai_level { accent } else { Color::new(1.0, 1.0, 1.0, 0.18) }); }
+        }
+        ui.text(&crate::update::build_label(), 40.0, VH - 20.0, 16.0, hex("#a49cc0"), Align::Left, false);
         let pads = &self.c.pad_info;
-        self.ui.text("Controles conectados", sx, 450.0, 20.0, hex("#a49cc0"), Align::Left, false);
-        if pads.is_empty() { self.ui.text("nenhum (teclado)", sx, 476.0, 18.0, WHITE, Align::Left, false); }
-        for (i, p) in pads.iter().enumerate().take(4) { self.ui.text(&format!("P{} · {}{}", i + 1, p.name.chars().take(26).collect::<String>(), match p.kind { crate::gamepad::PadKind::Generic => String::new(), k => format!(" ({})", k.label()) }), sx, 476.0 + i as f32 * 24.0, 18.0, WHITE, Align::Left, false); }
+        let pad_line = if pads.is_empty() { "teclado".to_string() } else { format!("{} controle(s)", pads.len()) };
+        ui.text(&pad_line, 560.0, VH - 20.0, 16.0, hex("#a49cc0"), Align::Right, false);
         self.screen = Screen::Menu { cur: cur_v };
         if self.c.pressed(nav::BACK) { self.screen = Screen::Title; }
         if let Some(i) = chosen {

@@ -230,8 +230,8 @@ impl<'a> Host for Ctx<'a> {
             "playeridexist" => b(m.idx(a0() as u32).is_some()),
             "numhelper" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; m.fighters.iter().filter(|h| h.is_helper && h.root == f.root && !h.destroyed && (id < 0 || h.helper_id == id)).count() as f64 }
             "numexplod" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; m.explods.iter().filter(|e| e.owner == f.id && (id < 0 || e.id == id)).count() as f64 }
-            "numproj" => m.projectiles.iter().filter(|p| p.owner == f.id && !p.remove).count() as f64,
-            "numprojid" => { let id = a0() as i32; m.projectiles.iter().filter(|p| p.owner == f.id && !p.remove && p.id == id).count() as f64 }
+            "numproj" => m.projectiles.iter().filter(|p| p.root == f.root && !p.remove).count() as f64,
+            "numprojid" => { let id = a0() as i32; m.projectiles.iter().filter(|p| p.root == f.root && !p.remove && p.id == id).count() as f64 }
             "numtarget" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; f.targets.iter().filter(|t| id < 0 || t.1 == id).count() as f64 }
             "numenemy" => m.roots().filter(|r| r.side != f.side).count() as f64,
             "numpartner" => m.roots().filter(|r| r.side == f.side && r.id != f.id).count() as f64,

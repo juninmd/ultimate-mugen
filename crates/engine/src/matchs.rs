@@ -50,7 +50,7 @@ impl Explod {
 
 #[derive(Clone)]
 pub struct Projectile {
-    pub owner: u32, pub side: usize, pub id: i32, pub cur: AnimCursor, pub hit_anim: i32, pub rem_anim: i32, pub cancel_anim: i32,
+    pub owner: u32, pub root: u32, pub teamside: usize, pub id: i32, pub cur: AnimCursor, pub hit_anim: i32, pub rem_anim: i32, pub cancel_anim: i32,
     pub pos: V2, pub vel: V2, pub accel: V2, pub vel_mul: V2, pub rem_vel: V2, pub facing: f32, pub hits: i32, pub miss_time: i32, pub miss_cd: i32,
     pub priority: i32, pub spr_priority: i32, pub edge_bound: f32, pub height_bound: [f32; 2], pub remove_time: i32, pub time: i32,
     pub hitdef: HitDefData, pub dying: bool, pub guard_dist: f32, pub scale: [f32; 2], pub remove: bool, pub lscl: f32,
@@ -373,7 +373,7 @@ impl Match {
             if e.side == me.side || e.destroyed { continue; }
             if e.move_type == 'A' && e.hitdef_active { if let Some(h) = &e.hitdef { if (e.pos.x - me.pos.x).abs() <= h.guard_dist * e.lscl { return true; } } }
         }
-        self.projectiles.iter().any(|p| p.side != me.side && !p.dying && (p.pos.x - me.pos.x).abs() <= p.guard_dist)
+        self.projectiles.iter().any(|p| p.teamside != me.side && !p.dying && (p.pos.x - me.pos.x).abs() <= p.guard_dist)
     }
 
     fn physics_step(&mut self, i: usize) {
@@ -1328,7 +1328,7 @@ impl Match {
         let has = |k: &str| sc.has(k, 0);
         let hit_anim = if has("projhitanim") { num(self, "projhitanim", -1.0, 0) as i32 } else { -1 };
         let p = Projectile {
-            owner: f.id, side: f.side, id: num(self, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
+            owner: f.id, root: f.root, teamside: f.side, id: num(self, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
             hit_anim, rem_anim: if has("projremanim") { num(self, "projremanim", -1.0, 0) as i32 } else { hit_anim },
             cancel_anim: if has("projcancelanim") { num(self, "projcancelanim", -1.0, 0) as i32 } else { -1 },
             pos: V2 { x, y }, vel: V2 { x: num(self, "velocity", 0.0, 0) * f.lscl, y: num(self, "velocity", 0.0, 1) * f.lscl },
@@ -1387,7 +1387,7 @@ impl Match {
         for a in 0..n { for b in 0..n {
             if a == b || frozen[a] || frozen[b] { continue; }
             let (pa, pb) = (&self.projectiles[a], &self.projectiles[b]);
-            if pa.dying || pb.dying || pa.remove || pb.remove || pa.side == pb.side { continue; }
+            if pa.dying || pb.dying || pa.remove || pb.remove || pa.teamside == pb.teamside { continue; }
             let ba: Vec<Box4> = Self::proj_boxes(pa, 1).into_iter().chain(Self::proj_boxes(pa, 2)).collect();
             let bb: Vec<Box4> = Self::proj_boxes(pb, 1).into_iter().chain(Self::proj_boxes(pb, 2)).collect();
             if Self::overlap(&ba, &bb).is_some() {
@@ -1406,9 +1406,9 @@ impl Match {
             for d in 0..self.fighters.len() {
                 let p = &self.projectiles[pi];
                 if p.dying || p.remove || p.miss_cd > 0 { break; }
-                let Some(oi) = self.idx(p.owner) else { break };
-                if self.fighters[d].root == self.fighters[oi].root { continue; }
-                if !self.can_be_hit(d, &p.hitdef, p.side) { continue; }
+                let Some(oi) = self.idx(p.owner).or_else(|| self.idx(p.root)) else { break };
+                if self.fighters[d].root == p.root { continue; }
+                if !self.can_be_hit(d, &p.hitdef, p.teamside) { continue; }
                 let c1 = Self::proj_boxes(p, 1);
                 if c1.is_empty() { break; }
                 let Some(at) = Self::overlap(&c1, &self.fighters[d].boxes(2)) else { continue };

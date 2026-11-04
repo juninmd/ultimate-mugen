@@ -247,7 +247,7 @@ impl Match {
         if let Some(s) = sp { f.spr_priority = s as i32; }
         if hdp == 0.0 { f.hitdef_active = false; f.reversal = None; }
         if mhp == 0.0 { f.move_contact = 0; f.move_hit = 0; f.move_guarded = 0; f.move_reversed = 0; }
-        if hcp == 0.0 { f.hit_count = 0; }
+        if hcp == 0.0 { f.hit_count = 0; f.uniq_hit_count = 0; f.uniq_hit_keys.clear(); }
     }
     pub fn face_enemy(&mut self, i: usize) {
         if let Some(e) = self.enemy(i, 0) {
@@ -1040,7 +1040,7 @@ impl Match {
                 fd.ctrl = false; fd.move_type = 'H'; fd.spr_priority = hd.p2sprpriority;
             }
             if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('h', pid, gt)); }
-            else { let fa = &mut self.fighters[a]; fa.move_hit = 1; fa.hit_count += hd.num_hits; fa.hit_pause = hd.pause_p1; fa.spr_priority = hd.p1sprpriority; }
+            else { let fa = &mut self.fighters[a]; fa.move_hit = 1; fa.hit_count += hd.num_hits; if !fa.uniq_hit_keys.contains(&(did, hd.id)) { fa.uniq_hit_keys.push((did, hd.id)); fa.uniq_hit_count += 1; } fa.hit_pause = hd.pause_p1; fa.spr_priority = hd.p1sprpriority; }
             let st = if self.fighters[d].pos.y < -1.0 && self.fighters[d].state_type != 'L' { 'A' } else { self.fighters[d].state_type };
             if hd.p2stateno >= 0 {
                 let owner = if hd.p2getp1state { self.fighters[a].def.clone() } else { self.fighters[d].def.clone() };

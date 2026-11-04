@@ -93,6 +93,8 @@ Missing (planned): `WinKO` `WinTime` `WinPerfect` `LoseKO` `LoseTime` `ProjCance
 
 Extra functions: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 
+`HitCount` sums the `numhits` of every hit the attacker lands. `UniqHitCount` counts each distinct `(target, HitDef id)` pair once, so three hits of one HitDef give `HitCount = 3` and `UniqHitCount = 1`. Both reset together on state changes unless `HitCountPersist = 1`.
+
 ## Redirections
 
 `parent`, `root`, `helper(id)`, `target(id)`, `partner(n)` (the n-th other non-helper player on the same side, default 0; a helper redirects through its root; NaN when there is none), `enemy(n)`, `enemynear(n)`, `playerid(id)`, `p2`. Example: `trigger1 = enemynear, life < 200`.

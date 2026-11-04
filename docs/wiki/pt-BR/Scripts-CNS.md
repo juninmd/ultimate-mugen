@@ -93,6 +93,8 @@ Faltam (planejado): `WinKO` `WinTime` `WinPerfect` `LoseKO` `LoseTime` `ProjCanc
 
 Funções extras: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 
+`HitCount` soma os `numhits` de cada golpe que o atacante acerta. `UniqHitCount` conta cada par distinto `(alvo, id do HitDef)` uma única vez, então três golpes de um mesmo HitDef dão `HitCount = 3` e `UniqHitCount = 1`. Ambos são zerados juntos nas trocas de estado, a menos que `HitCountPersist = 1`.
+
 ## Redirecionamentos
 
 `parent`, `root`, `helper(id)`, `target(id)`, `partner(n)` (o n-ésimo outro jogador não-helper do mesmo lado, padrão 0; um helper redireciona pelo seu root; NaN quando não existe), `enemy(n)`, `enemynear(n)`, `playerid(id)`, `p2`. Exemplo: `trigger1 = enemynear, life < 200`.

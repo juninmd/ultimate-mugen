@@ -364,7 +364,6 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
     let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
     let (x0, y0, d) = (pc.x - half, pc.y - half, half * 2.0);
     let cut = d * 0.24;
-    let dark = Color::new(0.03, 0.04, 0.09, 1.0);
     // backing plate + coloured field
     poly::grad_v(&poly::chamfer(x0 - 2.2 * s, y0 - 2.2 * s, d + 4.4 * s, d + 4.4 * s, cut + 1.6 * s), hex("#4a5078"), hex("#0a0c1a"));
     poly::grad_v(&poly::chamfer(x0, y0, d, d, cut), poly::shade(col, 1.15), poly::shade(col, 0.55));
@@ -375,13 +374,16 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
         let tex = g.texture(&img, sp.scale >= 0.99);
         let (iw, ih) = (img.w as f32, img.h as f32);
         let src = if full { let sd = iw.min(ih); Rect::new((iw - sd) / 2.0, 0.0, sd, sd) } else { let sd = (ih * 0.40).min(iw); let cx = sp.axis_x.clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
-        draw_texture_ex(&tex, x0, y0, WHITE, DrawTextureParams { dest_size: Some(vec2(d, d)), source: Some(src), flip_x: side == 1 && !full, ..Default::default() });
-    }
-    // mask the four image corners so the picture follows the chamfer
-    let pad = 2.2 * s;
-    for (corner, dx, dy) in [(vec2(x0, y0), 1.0, 1.0), (vec2(x0 + d, y0), -1.0, 1.0), (vec2(x0 + d, y0 + d), -1.0, -1.0), (vec2(x0, y0 + d), 1.0, -1.0)] {
-        let (a, b, c2) = (corner + vec2(-dx * pad, -dy * pad), corner + vec2(dx * (cut + 0.4 * s), -dy * pad), corner + vec2(-dx * pad, dy * (cut + 0.4 * s)));
-        poly::solid(&[a, b, vec2(corner.x + dx * cut, corner.y), vec2(corner.x, corner.y + dy * cut), c2], dark);
+        let flip = side == 1 && !full;
+        let mut vertices = vec![Vertex::new(x0 + half, y0 + half, 0.0, (src.x + src.w * 0.5) / iw, (src.y + src.h * 0.5) / ih, WHITE)];
+        for p in poly::chamfer(x0, y0, d, d, cut) {
+            let tx = (p.x - x0) / d;
+            let tx = if flip { 1.0 - tx } else { tx };
+            vertices.push(Vertex::new(p.x, p.y, 0.0, (src.x + src.w * tx) / iw, (src.y + src.h * (p.y - y0) / d) / ih, WHITE));
+        }
+        let n = vertices.len() as u16 - 1;
+        let indices = (0..n).flat_map(|i| [0, 1 + i, 1 + (i + 1) % n]).collect();
+        draw_mesh(&Mesh { vertices, indices, texture: Some(tex) });
     }
     // inner shine along the top edge, then the frame
     poly::outline(&poly::chamfer(x0, y0, d, d, cut), 1.4 * s, frame);

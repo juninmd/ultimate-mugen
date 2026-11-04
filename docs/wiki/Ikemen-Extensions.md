@@ -57,6 +57,15 @@ PT-BR: `RunState` executa os controllers de outro state sem trocar de state; `He
 | `NumPartner` | Teammates on the same side |
 | `IsAsserted(flag)` | 1 while the [AssertSpecial](AssertSpecial.md) flag is on (character or global flag) |
 | `TeamMode` | 0 single, 1 simul (Parallel), 2 turns (Sequence), 3 tag (reserved, no tag mode yet). Also accepts `TeamMode = Simul`, `TeamMode = turns`, `TeamMode = 1` (names are case-insensitive) |
+| `TeamSize` | Members of the player's team (the whole roster in Sequence mode, the fielded players otherwise) |
+| `TeamLeader` | `PlayerNo` of the player's team leader |
+| `NumPlayer` | Players in the match (both rosters; 6 for a 3v3 Sequence, 10 for a 5v5 Parallel) |
+| `PlayerNo` | 1-based slot of the player: P1, P2, P3... interleaved by side (a helper reports its root's slot); in Sequence mode `member * 2 + side + 1` |
+| `MemberNo` | 1-based position of the player in its team (a helper reports its root's position) |
+| `PlayerIndexExist(n)` | 1 when the 0-based index `n` exists in the match player list (helpers included) |
+| `LastPlayerID` | ID of the most recently created player or helper |
+| `IntroState` | 1 before the intro starts, 2 while the intro plays, 0 afterwards |
+| `OutroState` | 1 while the round is decided (KO / time over), 2 during the win poses, 0 otherwise |
 
 Map keys are case-insensitive. Each map holds at most 256 keys of at most 64 characters; writes that would exceed either limit are ignored.
 

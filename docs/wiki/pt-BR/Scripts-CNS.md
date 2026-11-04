@@ -103,6 +103,8 @@ Faltam (planejado): `WinKO` `WinTime` `WinPerfect` `LoseKO` `LoseTime` `ProjCanc
 
 `TeamMode` retorna 0 (single), 1 (simul, modo Paralelo), 2 (turns, modo Sequência) ou 3 (tag, reservado). Aceita também `TeamMode = Simul`, `TeamMode = turns` e `TeamMode = 1`; no `Text`, `%s` com `TeamMode` puro imprime o nome do modo.
 
+Triggers de equipe e slot: `TeamSize` (membros da equipe; o elenco inteiro no modo Sequência), `TeamLeader` (`PlayerNo` do líder), `NumPlayer` (jogadores da partida, ambos os elencos), `PlayerNo` (slot 1-based, intercalado por lado; helper usa o slot do root), `MemberNo` (posição 1-based na equipe), `PlayerIndexExist(n)` (índice 0-based na lista de jogadores, helpers incluídos), `LastPlayerID` (ID do último jogador ou helper criado), `IntroState` (1 antes da introdução, 2 durante, 0 depois) e `OutroState` (1 com o round decidido, 2 nas poses de vitória, 0 caso contrário).
+
 Funções extras: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 
 `HitCount` soma os `numhits` de cada golpe que o atacante acerta. `UniqHitCount` conta cada par distinto `(alvo, id do HitDef)` uma única vez, então três golpes de um mesmo HitDef dão `HitCount = 3` e `UniqHitCount = 1`. Ambos são zerados juntos nas trocas de estado, a menos que `HitCountPersist = 1`.

@@ -1,5 +1,6 @@
 pub mod debug;
 mod pause;
+mod targets;
 pub(crate) mod sound;
 
 pub use debug::format_clipboard;
@@ -10,6 +11,14 @@ use crate::matchs::{Event, Match};
 pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
     match sc.kind.as_str() {
         "null" => {}
+        "targetadd" => targets::target_add(m, i, sc),
+        "targetscoreadd" => targets::target_score_add(m, i, sc),
+        "targetredlifeadd" => targets::target_red_life_add(m, i, sc),
+        "targetdizzypointsadd" => targets::target_dizzy_points_add(m, i, sc),
+        "targetguardpointsadd" => targets::target_guard_points_add(m, i, sc),
+        "scoreadd" => targets::score_add(m, i, sc),
+        "roundtimeset" => targets::round_time(m, i, sc, false),
+        "roundtimeadd" => targets::round_time(m, i, sc, true),
         "offset" => offset(m, i, sc),
         "victoryquote" => { let v = m.num(i, sc, "value", -1.0, 0) as i32; m.fighters[i].victory_quote = v; }
         "forcefeedback" => force_feedback(m, i, sc),

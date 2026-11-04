@@ -40,7 +40,7 @@ fn life_add(m: &mut Match, t: usize, v: f32, kill: bool, absolute: bool) {
     f.life = nl.clamp(0.0, f.life_max);
 }
 
-fn target_indices(m: &Match, i: usize, sc: &Controller) -> Vec<usize> {
+pub(crate) fn target_indices(m: &Match, i: usize, sc: &Controller) -> Vec<usize> {
     let id = if sc.has("id", 0) { m.num(i, sc, "id", -1.0, 0) as i32 } else { -1 };
     m.fighters[i].targets.iter().filter(|t| id < 0 || t.1 == id).filter_map(|t| m.idx(t.0)).collect()
 }

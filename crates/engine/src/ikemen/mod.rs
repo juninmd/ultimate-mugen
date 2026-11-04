@@ -17,6 +17,7 @@ pub struct IkemenState {
     pub dizzy: bool,
     pub guard_break: bool,
     pub standby: bool,
+    pub score: f32,
 }
 
 impl IkemenState {
@@ -24,7 +25,7 @@ impl IkemenState {
         let life = def.c("data.life", 1000.0) as f32;
         let dizzy_max = def.c("data.dizzypoints", life as f64) as f32;
         let guard_max = def.c("data.guardpoints", life as f64) as f32;
-        IkemenState { map: vec![], red_life: life, dizzy_points: dizzy_max, dizzy_max, guard_points: guard_max, guard_max, dizzy: false, guard_break: false, standby: false }
+        IkemenState { map: vec![], red_life: life, dizzy_points: dizzy_max, dizzy_max, guard_points: guard_max, guard_max, dizzy: false, guard_break: false, standby: false, score: 0.0 }
     }
 
     pub fn get(&self, key: &str) -> f32 {
@@ -98,6 +99,7 @@ pub fn trigger(c: &Ctx, name: &str, args: &[Node]) -> Option<f64> {
     Some(match name {
         "map" => name_arg(args).map(|k| s.get(&k) as f64).unwrap_or(0.0),
         "redlife" => s.red_life as f64,
+        "score" => c.m.idx(f.root).map_or(s.score, |r| c.m.fighters[r].ikemen.score) as f64,
         "dizzy" => b(s.dizzy),
         "dizzypoints" => s.dizzy_points as f64,
         "dizzypointsmax" => s.dizzy_max as f64,

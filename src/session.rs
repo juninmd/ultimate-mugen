@@ -40,6 +40,7 @@ pub struct Session {
     pub rec: Vec<Vec<u32>>,
     pub is_replay: bool,
     flag_sounds: Vec<(u32, i32, bool, bool)>,
+    speed: f32,
     tag_last: [Option<usize>; 2],
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub net: Option<crate::netlink::NetLink>,
@@ -82,11 +83,13 @@ impl Session {
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, flag_sounds: vec![], tag_last: [None; 2], #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
+        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, flag_sounds: vec![], speed: 1.0, tag_last: [None; 2], #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
     }
 
     pub fn apply_rules(&mut self, r: crate::settings::Rules) {
-        if self.m.rounds_to_win != 1 { self.m.rounds_to_win = r.rounds_to_win; }
+        self.m.rounds_to_win = if r.single_round { 1 } else { r.rounds_to_win };
+        self.m.classic_pushbox = r.classic_pushbox;
+        self.speed = r.game_speed.clamp(0.5, 2.0);
         self.m.round_ticks = r.round_ticks;
         self.m.timer = if r.round_ticks > 0 { r.round_ticks } else { 99 * 60 };
         let k = r.life_percent as f32 / 100.0;
@@ -278,7 +281,7 @@ impl Session {
         self.vfx.update(dt);
         // face-off camera push-in
         self.vfx.intro_target = if self.m.round_state == 1 && self.m.round_no == 1 && self.m.intro_ticks > 0 && self.m.round_time > 10 { 0.2 } else { 0.0 };
-        self.acc += dt.min(0.1) * self.vfx.time_scale();
+        self.acc += dt.min(0.1) * self.vfx.time_scale() * self.speed;
         let step = 1.0 / 60.0;
         let mut n = 0;
         while self.acc >= step - 1e-4 && n < 5 { self.step(c, audio); self.acc -= step; n += 1; }

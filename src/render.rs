@@ -120,7 +120,7 @@ impl MatchRenderer {
         let mut c = o.tint; c.a *= o.alpha;
         if let Some((sa, _)) = fr.alpha { c.a *= (sa as f32 / 256.0).min(1.0); }
         let pal = o.pal.filter(|p| !p.is_identity() && !sub);
-        params.pal_fx = pal.map(|p| PalFx { add: p.add.map(|v| v / 255.0), mul: p.mul.map(|v| v / 256.0), color: p.color / 256.0, invert: p.invert });
+        params.pal_fx = pal.map(|p| PalFx { add: p.add.map(|v| v / 255.0), mul: p.mul.map(|v| v / 256.0), color: p.color / 256.0, invert: p.invert, hue: p.hue });
         if add { set_blend(GfxBlend::Add); } else if sub { set_blend(GfxBlend::Sub); }
         tex.draw(g.ox + left * s, g.oy + top * s, c, params.clone());
         if add || sub { set_blend(GfxBlend::Alpha); }

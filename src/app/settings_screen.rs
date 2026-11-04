@@ -1,9 +1,9 @@
 use super::*;
 use crate::i18n::{tr, Lang, LANGS};
-use crate::settings::{FPS_CAPS, LIFE_PERCENT, ROUNDS_TO_WIN, ROUND_SECONDS, VOLUME_STEPS};
+use crate::settings::{FPS_CAPS, GAME_SPEEDS, LIFE_PERCENT, ROUNDS_TO_WIN, ROUND_SECONDS, VOLUME_STEPS};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-enum Act { Fullscreen, Res, Quality, Fx, Impact, FpsCounter, Vsync, FpsCap, Master, Music, Sfx, Mute, Keys, Guide, Difficulty, RoundTime, Rounds, Life, Language, Reset, Info }
+enum Act { Fullscreen, Res, Quality, Fx, Impact, FpsCounter, Vsync, FpsCap, Master, Music, Sfx, Mute, Keys, Guide, Difficulty, RoundTime, Rounds, Life, SingleRound, ClassicPushbox, TeamLifeShare, GameSpeed, Language, Reset, Info }
 
 struct Row { act: Act, label: String, value: String, hint: String, level: Option<u8> }
 
@@ -52,6 +52,10 @@ impl App {
                 row(Act::RoundTime, tr("Tempo do round", "Round time"), match ROUND_SECONDS[s.round_time.min(ROUND_SECONDS.len() - 1)] { 0 => tr("Infinito", "Infinite").to_string(), n => format!("{n} s") }, tr("Vale a partir da próxima luta", "Takes effect from the next fight")),
                 row(Act::Rounds, tr("Rounds para vencer", "Rounds to win"), format!("{} {}", tr("Melhor de", "Best of"), ROUNDS_TO_WIN[s.rounds.min(ROUNDS_TO_WIN.len() - 1)] * 2 - 1), tr("Vitórias necessárias: 1, 2 ou 3 rounds", "Wins needed: 1, 2 or 3 rounds")),
                 row(Act::Life, tr("Vida dos lutadores", "Fighter life"), format!("{}%", LIFE_PERCENT[s.life.min(LIFE_PERCENT.len() - 1)]), tr("Multiplica a barra de vida de todos", "Scales everyone's life bar")),
+                row(Act::SingleRound, tr("Round único", "Single round"), on_off(s.single_round), tr("A luta termina no primeiro round vencido", "The fight ends on the first round won")),
+                row(Act::ClassicPushbox, tr("Pushbox clássico", "Classic pushbox"), on_off(s.classic_pushbox), tr("O atacante não é empurrado pelo defensor (regra M.U.G.E.N)", "The attacker is not pushed back by the defender (M.U.G.E.N rule)")),
+                row(Act::TeamLifeShare, tr("Vida compartilhada em equipe", "Shared team life"), on_off(s.team_life_share), tr("O vencedor mantém a vida para o próximo membro", "The winner keeps life for the next member")),
+                row(Act::GameSpeed, tr("Velocidade do jogo", "Game speed"), format!("{:.0}%", GAME_SPEEDS[s.game_speed.min(GAME_SPEEDS.len() - 1)] * 100.0), tr("Ritmo da simulação, sem alterar o conteúdo", "Simulation pace, without changing content")),
             ],
             4 => vec![row(Act::Language, tr("Idioma", "Language"), LANGS.iter().find(|(l, _)| *l == s.lang).map(|(_, n)| *n).unwrap_or(""), tr("Menus de configurações e tela de versus. O restante é traduzido gradualmente", "Settings and versus screens. The rest is being translated gradually"))],
             _ => vec![row(Act::Reset, tr("Restaurar padrões", "Restore defaults"), tr("Enter", "Enter"), tr("Volta todas as configurações ao original", "Resets every setting to its original value"))],
@@ -80,6 +84,10 @@ impl App {
             Act::RoundTime if go => s.round_time = cycle(s.round_time, step, ROUND_SECONDS.len()),
             Act::Rounds if go => s.rounds = cycle(s.rounds, step, ROUNDS_TO_WIN.len()),
             Act::Life if go => s.life = cycle(s.life, step, LIFE_PERCENT.len()),
+            Act::SingleRound if go => s.single_round = !s.single_round,
+            Act::ClassicPushbox if go => s.classic_pushbox = !s.classic_pushbox,
+            Act::TeamLifeShare if go => s.team_life_share = !s.team_life_share,
+            Act::GameSpeed if go => s.game_speed = cycle(s.game_speed, step, GAME_SPEEDS.len()),
             Act::Language if go => s.lang = if s.lang == Lang::En { Lang::Pt } else { Lang::En },
             Act::Reset if ok => { *s = Settings::default(); self.ai_level = s.difficulty; self.msg = tr("Configurações restauradas", "Settings restored").into(); }
             Act::Keys if ok => { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); self.screen = Screen::Controls; changed = false; }

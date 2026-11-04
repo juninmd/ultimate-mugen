@@ -56,6 +56,7 @@ const EOCD64_LOC_SIG: u32 = 0x0706_4b50;
 const EOCD64_SIG: u32 = 0x0606_4b50;
 const CDIR_SIG: u32 = 0x0201_4b50;
 const LOCAL_SIG: u32 = 0x0403_4b50;
+const MAX_ENTRY_BYTES: usize = 256 << 20;
 
 /// Read every file of a zip archive into `vfs` under `prefix` (may be empty).
 /// Directory entries are skipped. Supports stored and deflated entries (and
@@ -160,7 +161,7 @@ fn inflate_raw(data: &[u8], size_hint: usize) -> Result<Vec<u8>, String> {
     use miniz_oxide::inflate::core::{decompress, inflate_flags, DecompressorOxide};
     use miniz_oxide::inflate::TINFLStatus;
     // fast path: exact-size output buffer from the declared size
-    if size_hint > 0 && size_hint <= 1 << 30 {
+    if size_hint > 0 && size_hint <= MAX_ENTRY_BYTES {
         let mut out = vec![0u8; size_hint];
         let mut st = DecompressorOxide::new();
         let (status, _, written) =
@@ -169,7 +170,7 @@ fn inflate_raw(data: &[u8], size_hint: usize) -> Result<Vec<u8>, String> {
             return Ok(out);
         }
     }
-    miniz_oxide::inflate::decompress_to_vec(data).map_err(|e| format!("inflate: {:?}", e.status))
+    miniz_oxide::inflate::decompress_to_vec_with_limit(data, MAX_ENTRY_BYTES).map_err(|e| format!("inflate: {:?}", e.status))
 }
 
 /// Recursively add every file under `dir` (keys relative to `dir`, under
@@ -184,11 +185,11 @@ pub fn add_dir(vfs: &mut Vfs, dir: &std::path::Path, prefix: &str) -> std::io::R
             let fname = e.file_name().to_string_lossy().into_owned();
             let path = e.path();
             let child = if rel.is_empty() { fname.clone() } else { format!("{rel}/{fname}") };
-            let meta = std::fs::metadata(&path)?;
+            let Ok(meta) = std::fs::metadata(&path) else { continue };
             if meta.is_dir() {
                 walk(vfs, &path, &child, n)?;
             } else if meta.is_file() {
-                let data = std::fs::read(&path)?;
+                let Ok(data) = std::fs::read(&path) else { continue };
                 if fname.to_ascii_lowercase().ends_with(".zip") {
                     let mut tmp = Vfs::new();
                     if let Ok(k) = add_zip(&mut tmp, &data, rel) {

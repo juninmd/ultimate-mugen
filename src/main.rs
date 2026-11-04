@@ -10,6 +10,7 @@ mod keybinds;
 mod hud;
 mod market;
 mod registry;
+mod replays;
 mod render;
 mod poly;
 mod postfx;

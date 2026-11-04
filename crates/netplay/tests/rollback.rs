@@ -6,7 +6,7 @@ use ume_engine::input::k::*;
 use ume_engine::loader::load_mugen_char;
 use ume_engine::matchs::Match;
 use ume_formats::vfs::{add_zip, Vfs};
-use ume_netplay::{checksum, run_sync_test, MemorySocket, Netplay, Replay, Rollback};
+use ume_netplay::{checksum, run_sync_test, Header, MemorySocket, Netplay, Replay, Rollback};
 
 fn kfm() -> Arc<CharDef> {
     let mut v = Vfs::new();
@@ -86,6 +86,66 @@ fn replay_round_trip_reproduces_match() {
     assert_eq!(checksum(&r), checksum(&m));
     assert!(Replay::from_bytes(&bytes[..bytes.len() - 3]).is_err());
     assert!(Replay::from_bytes(b"nope").is_err());
+}
+
+fn sample_header(sum: Option<u128>) -> Header {
+    Header {
+        build: "1.2.3".into(),
+        mode: "versus".into(),
+        stage: "dojo".into(),
+        teams: [vec!["kfm".into()], vec!["kfm".into()]],
+        palettes: vec![1, 2],
+        simul: false,
+        seed: 0x2545_f491,
+        created: 1_700_000_000,
+        checksum: sum,
+    }
+}
+
+#[test]
+fn replay_file_of_1200_ticks_reloads_to_the_same_checksum() {
+    let d = kfm();
+    let mut m = new_match(&d);
+    let mut rec = Replay::with_header(2, &sample_header(None));
+    for f in script(11, 1200) {
+        rec.push(&f);
+        m.tick(&f);
+    }
+    let final_sum = checksum(&m);
+    rec.set_header(&sample_header(Some(final_sum)));
+    let bytes = rec.to_bytes();
+    let back = Replay::from_bytes(&bytes).unwrap();
+    assert_eq!(back.len(), 1200);
+    assert_eq!(back.header().unwrap(), sample_header(Some(final_sum)));
+    let mut r = new_match(&d);
+    for n in 0..back.len() {
+        r.tick(back.frame(n).unwrap());
+    }
+    assert_eq!(checksum(&r), final_sum);
+    assert_eq!(Some(checksum(&r)), back.header().unwrap().checksum);
+}
+
+#[test]
+fn replay_from_another_build_is_rejected_with_a_clear_message() {
+    let rec = Replay::with_header(2, &sample_header(None));
+    assert!(rec.check_build("1.2.3").is_ok());
+    let msg = rec.check_build("2.0.0").unwrap_err();
+    assert!(msg.contains("1.2.3") && msg.contains("2.0.0"), "{msg}");
+    assert!(Replay::new(2).check_build("1.2.3").is_err());
+    assert!(Replay::new(2).header().is_err());
+}
+
+#[test]
+fn replay_header_survives_empty_teams_and_rejects_oversized_files() {
+    let mut h = sample_header(None);
+    h.teams = [vec![], vec!["a".into(), "b c".into()]];
+    h.palettes = vec![];
+    let rec = Replay::with_header(2, &h);
+    assert_eq!(Replay::from_bytes(&rec.to_bytes()).unwrap().header().unwrap(), h);
+    let mut huge = Replay::new(2).to_bytes();
+    let at = huge.len() - 4;
+    huge[at..].copy_from_slice(&u32::MAX.to_le_bytes());
+    assert!(Replay::from_bytes(&huge).is_err());
 }
 
 fn p2p_fight(d: &Arc<CharDef>, seed: u64, latency: u64, frames: i32) -> (u128, u128, u64, i32) {

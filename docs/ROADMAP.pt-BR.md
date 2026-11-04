@@ -22,10 +22,10 @@ A arquitetura do motor foi concebida com um loop de simulação estritamente det
 
 ## 2. Sistema de Replays e Tournaments
 
-- [ ] **Gravador de Replays Determinísticos**:
+- [x] **Gravador de Replays Determinísticos**:
   - Gravação de semente inicial (`seed`), IDs de lutadores/paletas, cenário escolhido e fluxo sequencial de entradas compactadas por bitfield.
   - Como a simulação é determinística, um arquivo de replay de vários minutos ocupará apenas alguns kilobytes.
-- [ ] **Player de Replay**:
+- [x] **Player de Replay** (assumir o controle ainda pendente):
   - Reprodução em velocidade normal, acelerada (2x, 4x), pausa e avanço quadro a quadro.
   - Capacidade de assumir o controle do personagem em qualquer ponto do replay ("Takeover / Replay Take").
 

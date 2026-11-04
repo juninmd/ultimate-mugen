@@ -39,6 +39,10 @@ pub struct Session {
     /// inputs of every root slot for every simulated tick (the data a replay is rebuilt from)
     pub rec: Vec<Vec<u32>>,
     pub is_replay: bool,
+    pub seed: u32,
+    pub speed: u32,
+    pub hold: bool,
+    pub step_once: bool,
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub net: Option<crate::netlink::NetLink>,
 }
@@ -76,10 +80,11 @@ impl Session {
         m.start_round();
         for f in m.fighters.iter_mut().filter(|f| !f.is_helper && f.def.boss) { f.power = 2000.0; }
         for side in 0..2 { if life[side] < 0.999 { if let Some(f) = m.fighters.iter_mut().find(|f| !f.is_helper && f.side == side) { f.life = (f.life_max * life[side]).max(1.0); } } }
+        let m_seed = m.rng;
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
+        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, seed: m_seed, speed: 1, hold: false, step_once: false, #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
     }
 
     fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {
@@ -221,17 +226,33 @@ impl Session {
     /// Advance in real time (fixed step).
     pub fn update(&mut self, dt: f32, c: &mut Controls, audio: &mut Audio) {
         if self.paused { return; }
+        if self.is_replay && self.hold {
+            if std::mem::take(&mut self.step_once) && self.over.is_none() { self.step(c, audio); self.vfx.update(1.0 / 60.0); }
+            return;
+        }
         self.vfx.update(dt);
         // face-off camera push-in
         self.vfx.intro_target = if self.m.round_state == 1 && self.m.round_no == 1 && self.m.intro_ticks > 0 && self.m.round_time > 10 { 0.2 } else { 0.0 };
-        self.acc += dt.min(0.1) * self.vfx.time_scale();
+        let speed = if self.is_replay { self.speed.max(1) } else { 1 };
+        self.acc += dt.min(0.1) * self.vfx.time_scale() * speed as f32;
         let step = 1.0 / 60.0;
-        let mut n = 0;
-        while self.acc >= step - 1e-4 && n < 5 { self.step(c, audio); self.acc -= step; n += 1; }
-        if n == 5 { self.acc = 0.0; }
+        let (mut n, limit) = (0, 5 * speed);
+        while self.acc >= step - 1e-4 && n < limit { self.step(c, audio); self.acc -= step; n += 1; }
+        if n == limit { self.acc = 0.0; }
         // pull the music down under supers and the KO slow-motion so the effects punch through
         audio.duck = if self.m.pause.as_ref().is_some_and(|p| p.is_super) || self.vfx.slow_t > 0.0 { 0.28 } else { 1.0 };
         if self.over.is_some() { self.over_timer += dt; }
+    }
+    pub fn is_networked(&self) -> bool {
+        #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+        return self.net.is_some();
+        #[cfg(any(target_arch = "wasm32", target_os = "android", target_os = "ios"))]
+        false
+    }
+    pub fn cycle_speed(&mut self, faster: bool) {
+        const SPEEDS: [u32; 3] = [1, 2, 4];
+        let at = SPEEDS.iter().position(|&v| v == self.speed).unwrap_or(0);
+        self.speed = SPEEDS[if faster { (at + 1).min(2) } else { at.saturating_sub(1) }];
     }
     pub fn draw(&mut self, g: &mut Gfx, ui: &Ui) {
         self.r.human = self.human_ids();

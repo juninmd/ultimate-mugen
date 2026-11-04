@@ -169,12 +169,12 @@ Teclado, vários controles e toque funcionam ao mesmo tempo. As listas de golpes
 | Ação | Teclado (P1) | Teclado (P2) | DualShock 4 / DualSense / XInput | Toque |
 |---|---|---|---|---|
 | **Mover / Pular / Agachar** | Setas | `I` `K` `J` `L` | D-Pad ou analógico esquerdo | Analógico virtual |
-| **Soco fraco** | `Q` (ou `V`) | Numpad `4` | `□` / `X` | **LP** |
-| **Soco forte** | `W` (ou `B`) | Numpad `5` | `△` / `Y` | **HP** |
-| **Soco extra (Z)** | `E` (ou `N`) | Numpad `6` | `R1` / `RB` | — |
-| **Chute fraco** | `A` (ou `Z`) | Numpad `1` | `✕` / `A` | **LK** |
-| **Chute forte** | `S` (ou `X`) | Numpad `2` | `○` / `B` | **HK** |
-| **Chute extra (C)** | `D` (ou `C`) | Numpad `3` | `R2` / `RT` | — |
+| **Soco fraco** | `Q` | Numpad `4` | `□` / `X` | **LP** |
+| **Soco forte** | `W` | Numpad `5` | `△` / `Y` | **HP** |
+| **Soco extra (Z)** | `E` | Numpad `6` | `R1` / `RB` | — |
+| **Chute fraco** | `A` | Numpad `1` | `✕` / `A` | **LK** |
+| **Chute forte** | `S` | Numpad `2` | `○` / `B` | **HK** |
+| **Chute extra (C)** | `D` | Numpad `3` | `R2` / `RT` | — |
 | **Especiais rápidos** | `1`, `2`, `3` | Numpad `7`, `8`, `9` | `L1`, `L2` | **ESPECIAL**, **SUPER** |
 | **Super** | `1` + `2` | Numpad `7` + `8` | `L1` + `L2` | **SUPER** |
 | **Transformação** | `T` | Numpad `0` | Analógico direito / `SELECT` | — |

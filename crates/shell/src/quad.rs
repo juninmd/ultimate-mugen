@@ -115,6 +115,9 @@ impl Rect {
 
 pub fn screen_width() -> f32 { with(|f| f.size[0]) }
 pub fn screen_height() -> f32 { with(|f| f.size[1]) }
+pub fn window_size() -> (f32, f32) { with(|f| (f.window[0], f.window[1])) }
+pub fn set_keep_aspect(keep: bool) { with(|f| f.stretch = if keep { None } else { Some(crate::STRETCH_ASPECT) }) }
+pub fn set_linear_filter(linear: bool) { with(|f| f.linear = linear) }
 pub fn dpi_scale() -> f32 { 1.0 }
 pub fn window_scale() -> f32 { with(|f| f.scale) }
 pub fn get_time() -> f64 { with(|f| f.time) }
@@ -131,7 +134,7 @@ pub fn quit() { with(|f| f.quit = true) }
 pub fn set_scissor(r: Option<(i32, i32, i32, i32)>) { with(|f| f.canvas.batch.scissor = r.map(|(x, y, w, h)| [x.max(0) as u32, y.max(0) as u32, w.max(0) as u32, h.max(0) as u32])) }
 pub fn typed_text() -> String { with(|f| f.input.typed.clone()) }
 pub fn mouse_wheel() -> (f32, f32) { with(|f| (f.input.wheel[0], f.input.wheel[1])) }
-pub fn mouse_delta_position() -> Vec2 { with(|f| Vec2::from(f.input.mouse_delta)) }
+pub fn mouse_delta_position() -> Vec2 { with(|f| Vec2::from(f.input.mouse_delta) * Vec2::from(f.input.pointer_scale)) }
 
 pub struct ScreenData;
 
@@ -430,14 +433,14 @@ pub enum MouseButton { Left }
 
 pub fn is_mouse_button_down(_: MouseButton) -> bool { with(|f| f.input.mouse_down) }
 pub fn is_mouse_button_pressed(_: MouseButton) -> bool { with(|f| f.input.mouse_pressed) }
-pub fn mouse_position() -> (f32, f32) { with(|f| (f.input.mouse[0], f.input.mouse[1])) }
+pub fn mouse_position() -> (f32, f32) { with(|f| (f.input.mouse[0] * f.input.pointer_scale[0], f.input.mouse[1] * f.input.pointer_scale[1])) }
 
 pub type TouchPhase = Phase;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Touch { pub id: u64, pub phase: TouchPhase, pub position: Vec2 }
 
-pub fn touches() -> Vec<Touch> { with(|f| f.input.touches.iter().map(|t| Touch { id: t.id, phase: t.phase, position: Vec2::from(t.position) }).collect()) }
+pub fn touches() -> Vec<Touch> { with(|f| f.input.touches.iter().map(|t| Touch { id: t.id, phase: t.phase, position: Vec2::from(t.position) * Vec2::from(f.input.pointer_scale) }).collect()) }
 
 pub mod rand {
     use super::RNG;

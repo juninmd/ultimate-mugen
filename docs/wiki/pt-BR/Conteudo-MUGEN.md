@@ -35,7 +35,7 @@ cargo run --release -p ume-engine --example hover_check -- mugen/chars/kfm
 
 | Ferramenta | Mostra |
 |---|---|
-| `mugen_check` | Carrega e simula uma luta sem janela; lista erros de parse e estados inválidos |
+| `mugen_check` | Carrega e simula uma luta sem janela; lista erros de parse, estados inválidos e controladores, triggers e parâmetros não suportados (`--strict` falha neles) |
 | `sprite_audit` | Sprites ausentes ou em branco referenciados pelo `.air` |
 | `hover_check` | Lutador preso fora do chão (`TRACE=1` mostra as transições) |
 

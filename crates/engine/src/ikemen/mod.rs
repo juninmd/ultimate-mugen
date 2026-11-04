@@ -5,6 +5,7 @@ use crate::triggers::Ctx;
 
 mod ext;
 pub mod life;
+pub mod introspect;
 mod maps;
 pub use ext::{format_text, tick, TextItem};
 pub use maps::{MapStore, MAP_MAX_KEYS, MAP_MAX_KEY_LEN};
@@ -65,10 +66,10 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
 
 fn n_absolute(sc: &Controller) -> bool { sc.raw("absolute").is_some_and(|v| v.trim() != "0") }
 
-fn name_arg(args: &[Node]) -> Option<String> {
+fn name_arg(args: &[Node]) -> Option<&str> {
     match args.first()? {
-        Node::Trig { name, args, raw: None, .. } if args.is_empty() => Some(name.clone()),
-        Node::Trig { name, raw: Some(s), .. } if name == "__str" => Some(s.to_ascii_lowercase()),
+        Node::Trig { name, args, raw: None, .. } if args.is_empty() => Some(name.as_str()),
+        Node::Trig { name, raw: Some(s), .. } if name == "__str" => Some(s.as_str()),
         _ => None,
     }
 }
@@ -78,8 +79,8 @@ pub fn trigger(c: &Ctx, name: &str, args: &[Node]) -> Option<f64> {
     let s = &f.ikemen;
     let b = |x: bool| x as i32 as f64;
     Some(match name {
-        "map" => name_arg(args).map(|k| s.map.get(&k) as f64).unwrap_or(0.0),
-        "teammap" => name_arg(args).map(|k| maps::team_value(c.m, c.i, &k) as f64).unwrap_or(0.0),
+        "map" => name_arg(args).map(|k| s.map.get(k) as f64).unwrap_or(0.0),
+        "teammap" => name_arg(args).map(|k| maps::team_value(c.m, c.i, k) as f64).unwrap_or(0.0),
         "redlife" => s.red_life as f64,
         "dizzy" => b(s.dizzy),
         "dizzypoints" => s.dizzy_points as f64,

@@ -51,3 +51,22 @@ fn accepts_small_deflated_entry() {
     let mut v = Vfs::new();
     assert_eq!(add_zip(&mut v, &zip, "").unwrap(), 1);
 }
+
+#[test]
+fn accepts_deflate_with_exaggerated_size_hint() {
+    let deflated = miniz_oxide::deflate::compress_to_vec(b"hello", 1);
+    let zip = stored_zip_with_deflate(256 << 20, &deflated);
+    let mut v = Vfs::new();
+    assert_eq!(add_zip(&mut v, &zip, "").unwrap(), 1);
+    assert_eq!(v.values().next().unwrap(), b"hello");
+}
+
+#[test]
+fn rejects_oversized_stored_entry_before_reading_data() {
+    let mut zip = stored_zip_with_deflate(1, b"x");
+    let central = zip.windows(4).position(|s| s == 0x0201_4b50u32.to_le_bytes()).unwrap();
+    zip[central + 10..central + 12].copy_from_slice(&0u16.to_le_bytes());
+    zip[central + 20..central + 24].copy_from_slice(&(257u32 << 20).to_le_bytes());
+    let mut v = Vfs::new();
+    assert!(add_zip(&mut v, &zip, "").unwrap_err().contains("entry too large"));
+}

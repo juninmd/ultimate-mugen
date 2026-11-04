@@ -26,6 +26,7 @@ impl Hud {
         // Main bar per side: the fighter you control (side 0) / the front-line fighter still standing (side 1); everyone else gets a portrait tile.
         let main_of = |sd: usize| -> Option<&Fighter> {
             let all: Vec<&Fighter> = m.roots().filter(|f| f.side == sd).collect();
+            if m.team_tag { if let Some(active) = all.iter().copied().find(|f| !f.ikemen.standby) { return Some(active); } }
             all.iter().copied().find(|f| human.contains(&f.id) && f.alive).or_else(|| all.iter().copied().find(|f| f.alive)).or_else(|| all.first().copied())
         };
         let roots: Vec<&Fighter> = (0..2).filter_map(main_of).collect();
@@ -61,10 +62,13 @@ impl Hud {
                 let show_name = !f.has_assert(asf::NONAMEDISPLAY);
                 let show_wins = !f.has_assert(asf::NOWINICONDISPLAY);
                 let px0 = if side == 0 { 4.0 } else { w / 2.0 + 22.0 };
-                let (py0, ph) = (4.0, 38.0);
+                let (py0, ph) = (4.0, 23.0);
                 let tint = side_tint(side);
-                glass(&p, s, px0, py0, panel_w, ph, 6.0, tint);
-                let (bx, bw, by, bh) = if side == 0 { (px0 + 42.0, panel_w - 50.0, py0 + 7.0, 11.0) } else { (px0 + 8.0, panel_w - 50.0, py0 + 7.0, 11.0) };
+                let (dk, cl) = (Color::new(0.02, 0.04, 0.12, 0.7), Color::new(0.02, 0.04, 0.12, 0.0));
+                poly::grad_h(&[p(px0 - 4.0, 0.0), p(px0 + panel_w, 0.0), p(px0 + panel_w, py0 + ph), p(px0 - 4.0, py0 + ph)], if side == 0 { dk } else { cl }, if side == 0 { cl } else { dk });
+                let hl = |y: f32| { let (a, b) = (p(px0 + 6.0, y), p(px0 + panel_w - 6.0, y)); draw_line(a.x, a.y, b.x, b.y, 0.5 * s, Color::new(tint[0], tint[1], tint[2], 0.55)); };
+                hl(py0 + ph - 0.5);
+                let (bx, bw, by, bh) = if side == 0 { (px0 + 27.0, panel_w - 35.0, py0 + 4.0, 5.5) } else { (px0 + 8.0, panel_w - 35.0, py0 + 4.0, 5.5) };
                 let ratio = (f.life / f.life_max).max(0.0);
                 if !(f.move_type == 'H' && f.hit_shake > 0) { self.trail[side] = if self.trail[side] > ratio { (self.trail[side] - 0.006).max(ratio) } else { ratio }; }
                 let low = ratio < 0.25;
@@ -87,16 +91,14 @@ impl Hud {
                     draw_line(e0.x, e0.y, e1.x, e1.y, 0.8 * s, Color::new(1.0, 1.0, 0.92, 0.45));
                 }
                 for i in 1..10 { let t = i as f32 / 10.0; let (a, b) = (p(bx + bw * t, by + 1.0), p(bx + bw * t, by + bh - 1.0)); draw_line(a.x, a.y, b.x, b.y, 0.45 * s, Color::new(0.0, 0.0, 0.0, 0.25)); }
-                }
-                let acx = if side == 0 { px0 + 21.0 } else { px0 + panel_w - 21.0 };
-                let ac = p(acx, py0 + 19.5);
-                if show_face {
-                portrait(g, f, ac, 16.0 * s, side, s, if low { hex("#ff4d4d") } else if human.contains(&f.id) { hex("#ffcc33") } else { Color::new(1.0, 1.0, 1.0, 0.85) });
+                let acx = if side == 0 { px0 + 12.0 } else { px0 + panel_w - 12.0 };
+                let ac = p(acx, py0 + 11.5);
+                if show_face { portrait(g, f, ac, 10.0 * s, side, s, if low { hex("#ff4d4d") } else if human.contains(&f.id) { hex("#ffcc33") } else { Color::new(1.0, 1.0, 1.0, 0.85) }); }
                 if let Some((tag, tc)) = side_tag(f.id, side, human, cpu) {
-                    let (tw, th) = (17.0, 7.0);
-                    let tc_pos = p(acx - tw / 2.0, py0 + ph - 3.2);
+                    let (tw, th) = (13.0, 5.0);
+                    let tc_pos = p(acx - tw / 2.0, py0 + ph - 3.0);
                     poly::grad_v(&[tc_pos, tc_pos + vec2(tw * s, 0.0), tc_pos + vec2(tw * s, th * s), tc_pos + vec2(0.0, th * s)], Color::new(0.04, 0.05, 0.1, 0.9), Color::new(0.1, 0.12, 0.2, 0.9));
-                    text(tag, acx, py0 + ph + 2.4, 5.4, if tc { hex("#ffcc33") } else { hex("#c9cde6") }, Align::Center, true);
+                    text(tag, acx, py0 + ph + 1.4, 4.2, if tc { hex("#ffcc33") } else { hex("#c9cde6") }, Align::Center, true);
                 }
                 }
                 if show_name {
@@ -104,33 +106,33 @@ impl Hud {
                 let al = if side == 0 { Align::Left } else { Align::Right };
                 let cc = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
                 let name = f.def.display_name.to_uppercase();
-                let nsz = 8.0;
-                text(&name, nx + 0.5, by + bh + 11.5, nsz, Color::new(0.0, 0.0, 0.05, 0.7), al, true);
-                text(&name, nx, by + bh + 11.0, nsz, WHITE, al, true);
+                let nsz = 6.4;
+                text(&name, nx + 0.5, by + bh + 6.6, nsz, Color::new(0.0, 0.0, 0.05, 0.7), al, true);
+                text(&name, nx, by + bh + 6.1, nsz, WHITE, al, true);
                 let name_w = measure_text(&name, Some(&ui.display), ((nsz * s).max(9.0)) as u16, 1.0).width / s;
-                let uly = p(0.0, by + bh + 13.4).y;
+                let uly = p(0.0, by + bh + 8.0).y;
                 let (ux0, ux1) = if side == 0 { (p(nx, 0.0).x, p(nx + name_w, 0.0).x) } else { (p(nx - name_w, 0.0).x, p(nx, 0.0).x) };
-                poly::grad_h(&[vec2(ux0, uly), vec2(ux1, uly), vec2(ux1, uly + 1.0 * s), vec2(ux0, uly + 1.0 * s)], if side == 0 { poly::with_a(cc, 0.95) } else { poly::with_a(cc, 0.0) }, if side == 0 { poly::with_a(cc, 0.0) } else { poly::with_a(cc, 0.95) });
+                poly::grad_h(&[vec2(ux0, uly), vec2(ux1, uly), vec2(ux1, uly + 0.8 * s), vec2(ux0, uly + 0.8 * s)], if side == 0 { poly::with_a(cc, 0.95) } else { poly::with_a(cc, 0.0) }, if side == 0 { poly::with_a(cc, 0.0) } else { poly::with_a(cc, 0.95) });
                 if f.form > 0 && f.alive {
                     let fc = crate::vfx::Vfx::form_color(f);
                     let fcol = Color::new(fc[0], fc[1], fc[2], 1.0);
                     let pulse = 0.75 + 0.25 * (gt * 6.0).sin();
                     let label = if f.def.form_name.is_empty() { "DESPERTO".to_string() } else { f.def.form_name.to_uppercase() };
-                    let tw = measure_text(&label, Some(&ui.display), ((5.4 * s).max(9.0)) as u16, 1.0).width / s + 12.0;
+                    let tw = measure_text(&label, Some(&ui.display), ((4.4 * s).max(9.0)) as u16, 1.0).width / s + 9.0;
                     let tx = if side == 0 { nx + name_w + 6.0 } else { nx - name_w - 6.0 - tw };
-                    let ty = by + bh + 4.6;
-                    poly::grad_h(&sp(poly::chamfer(tx, ty, tw, 7.0, 3.0)), poly::with_a(poly::shade(fcol, 0.5), 0.9 * pulse), poly::with_a(fcol, 0.9 * pulse));
-                    poly::solid(&poly::regular(p(tx + 4.5, ty + 3.5), 1.7 * s, 4, std::f32::consts::FRAC_PI_2), Color::new(1.0, 1.0, 1.0, pulse));
-                    text(&label, tx + 8.0, ty + 5.6, 5.0, WHITE, Align::Left, true);
+                    let ty = by + bh + 2.2;
+                    poly::grad_h(&sp(poly::chamfer(tx, ty, tw, 5.2, 2.2)), poly::with_a(poly::shade(fcol, 0.5), 0.9 * pulse), poly::with_a(fcol, 0.9 * pulse));
+                    poly::solid(&poly::regular(p(tx + 3.4, ty + 2.6), 1.3 * s, 4, std::f32::consts::FRAC_PI_2), Color::new(1.0, 1.0, 1.0, pulse));
+                    text(&label, tx + 6.2, ty + 4.2, 4.0, WHITE, Align::Left, true);
                 }
                 }
                 if show_wins {
                 for i in 0..m.rounds_to_win {
                     let won = m.wins[side] > i;
                     let cx = if side == 0 { bx + bw - 4.0 - i as f32 * 9.0 } else { bx + 4.0 + i as f32 * 9.0 };
-                    let c = p(cx, by + bh + 7.2);
-                    let dia = poly::regular(c, 3.4 * s, 4, std::f32::consts::FRAC_PI_2);
-                    if won { poly::circle(c, 5.0 * s, Color::new(1.0, 0.8, 0.2, 0.25)); poly::grad_v(&dia, hex("#fff3a0"), hex("#e8a010")); } else { poly::solid(&dia, Color::new(0.02, 0.02, 0.06, 0.55)); }
+                    let c = p(cx, by + bh + 4.6);
+                    let dia = poly::regular(c, 2.6 * s, 4, std::f32::consts::FRAC_PI_2);
+                    if won { poly::circle(c, 4.0 * s, Color::new(1.0, 0.8, 0.2, 0.25)); poly::grad_v(&dia, hex("#fff3a0"), hex("#e8a010")); } else { poly::solid(&dia, Color::new(0.02, 0.02, 0.06, 0.55)); }
                     poly::outline(&dia, 0.6 * s, if won { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.5) });
                 }
                 }
@@ -169,23 +171,23 @@ impl Hud {
                 if lvl >= 3 { let a = 0.08 + 0.07 * (gt * 9.0).sin().abs(); poly::solid(&sp(poly::chamfer(pxm - 2.0, py - 2.0, pw + 4.0, ph2 + 4.0, 3.0)), Color::new(1.0, 0.3, 0.85, a)); }
                 }
             }
-            let strip_y = 46.0;
+            let strip_y = 30.5;
             let mut col_idx = [0usize; 2];
             let strip_n = |side: usize| -> usize { if let Some(t) = team.filter(|t| !t.simul) { t.names[side].len() } else { partners.iter().filter(|f| f.side.min(1) == side).count() } };
             for side in 0..2 {
                 let n = strip_n(side);
                 if n == 0 { continue; }
                 let step = TILE_W + TILE_GAP;
-                let sw = n as f32 * step + 6.0;
+                let sw = n as f32 * step + 5.0;
                 let sx = if side == 0 { 4.0 } else { w - 4.0 - sw };
-                glass(&p, s, sx, strip_y, sw, 28.0, 6.0, side_tint(side));
+                glass(&p, s, sx, strip_y, sw, 16.0, 5.0, side_tint(side));
             }
             for f in &partners {
                 let side = f.side.min(1);
                 let j = col_idx[side]; col_idx[side] += 1;
                 let step = TILE_W + TILE_GAP;
-                let tx = if side == 0 { 4.0 + 3.0 + j as f32 * step } else { w - 4.0 - 3.0 - TILE_W - j as f32 * step };
-                let c = p(tx + TILE_W / 2.0, strip_y + 3.0 + TILE_W / 2.0 + 0.5);
+                let tx = if side == 0 { 4.0 + 2.5 + j as f32 * step } else { w - 4.0 - 2.5 - TILE_W - j as f32 * step };
+                let c = p(tx + TILE_W / 2.0, strip_y + 2.0 + TILE_W / 2.0);
                 let ratio = (f.life / f.life_max).clamp(0.0, 1.0);
                 let mine = human.contains(&f.id);
                 portrait(g, f, c, TILE_W / 2.0 * s, side, s, if mine { hex("#ffcc33") } else if f.alive { Color::new(1.0, 1.0, 1.0, 0.7) } else { Color::new(1.0, 1.0, 1.0, 0.22) });
@@ -195,11 +197,19 @@ impl Hud {
                     draw_line(c.x - r, c.y - r, c.x + r, c.y + r, 1.8 * s, Color::new(1.0, 0.3, 0.3, 0.95));
                     draw_line(c.x - r, c.y + r, c.x + r, c.y - r, 1.8 * s, Color::new(1.0, 0.3, 0.3, 0.95));
                 }
-                let by = strip_y + 3.0 + TILE_W + 2.4;
+                let by = strip_y + 2.0 + TILE_W + 1.0;
                 let bar = p(tx, by);
-                poly::solid(&[bar, bar + vec2(TILE_W * s, 0.0), bar + vec2(TILE_W * s, 2.4 * s), bar + vec2(0.0, 2.4 * s)], Color::new(0.02, 0.03, 0.08, 0.7));
+                poly::solid(&[bar, bar + vec2(TILE_W * s, 0.0), bar + vec2(TILE_W * s, 1.5 * s), bar + vec2(0.0, 1.5 * s)], Color::new(0.02, 0.03, 0.08, 0.7));
                 let fc = if !f.alive { hex("#555566") } else if ratio < 0.25 { hex("#ff7a2a") } else { hex("#33d6a0") };
-                poly::solid(&[bar, bar + vec2(TILE_W * ratio * s, 0.0), bar + vec2(TILE_W * ratio * s, 2.4 * s), bar + vec2(0.0, 2.4 * s)], fc);
+                poly::solid(&[bar, bar + vec2(TILE_W * ratio * s, 0.0), bar + vec2(TILE_W * ratio * s, 1.5 * s), bar + vec2(0.0, 1.5 * s)], fc);
+                if m.team_tag && f.alive {
+                    let cd = m.tag_cooldown[side] as f32 / m.tag_cooldown_max.max(1) as f32;
+                    let ready = cd <= 0.0;
+                    let tbar = p(tx, by + 2.4);
+                    poly::solid(&[tbar, tbar + vec2(TILE_W * s, 0.0), tbar + vec2(TILE_W * s, 1.2 * s), tbar + vec2(0.0, 1.2 * s)], Color::new(0.02, 0.03, 0.08, 0.7));
+                    let fw = TILE_W * (1.0 - cd.clamp(0.0, 1.0)) * s;
+                    poly::solid(&[tbar, tbar + vec2(fw, 0.0), tbar + vec2(fw, 1.2 * s), tbar + vec2(0.0, 1.2 * s)], if ready { hex("#ffcc33") } else { hex("#4aa3ff") });
+                }
             }
             if let Some(t) = team.filter(|t| !t.simul) {
                 for side in 0..2 {
@@ -208,43 +218,43 @@ impl Hud {
                         let ko = t.ko[side].get(k).copied().unwrap_or(false);
                         let cur = t.idx[side] == k;
                         let step = TILE_W + TILE_GAP;
-                        let x = if side == 0 { 4.0 + 3.0 + k as f32 * step } else { w - 4.0 - 3.0 - TILE_W - k as f32 * step };
+                        let x = if side == 0 { 4.0 + 2.5 + k as f32 * step } else { w - 4.0 - 2.5 - TILE_W - k as f32 * step };
                         let _ = n;
-                        let c = p(x + TILE_W / 2.0, strip_y + 14.0);
+                        let c = p(x + TILE_W / 2.0, strip_y + 8.0);
                         let col = if ko { Color::from_rgba(70, 70, 80, 255) } else { Color::from_rgba(col[0], col[1], col[2], 255) };
-                        let r = (if cur { 8.4 } else { 7.2 }) * s;
+                        let r = (if cur { 5.2 } else { 4.4 }) * s;
                         poly::circle(c, r, poly::with_a(col, 0.85));
-                        poly::ring(c, r, (if cur { 1.5 } else { 0.8 }) * s, if cur { hex("#ffcc33") } else { Color::new(1.0, 1.0, 1.0, 0.6) });
-                        if ko { let rr = 3.4 * s; draw_line(c.x - rr, c.y - rr, c.x + rr, c.y + rr, 1.6 * s, Color::new(1.0, 0.3, 0.3, 0.95)); draw_line(c.x - rr, c.y + rr, c.x + rr, c.y - rr, 1.6 * s, Color::new(1.0, 0.3, 0.3, 0.95)); } else { text(name.chars().next().map(|_| &name[..name.chars().next().unwrap().len_utf8()]).unwrap_or("?"), x + TILE_W / 2.0, strip_y + 14.0 + 2.6, if cur { 8.0 } else { 6.5 }, WHITE, Align::Center, true); }
+                        poly::ring(c, r, (if cur { 1.1 } else { 0.6 }) * s, if cur { hex("#ffcc33") } else { Color::new(1.0, 1.0, 1.0, 0.6) });
+                        if ko { let rr = 2.0 * s; draw_line(c.x - rr, c.y - rr, c.x + rr, c.y + rr, 1.6 * s, Color::new(1.0, 0.3, 0.3, 0.95)); draw_line(c.x - rr, c.y + rr, c.x + rr, c.y - rr, 1.6 * s, Color::new(1.0, 0.3, 0.3, 0.95)); } else { text(name.chars().next().map(|_| &name[..name.chars().next().unwrap().len_utf8()]).unwrap_or("?"), x + TILE_W / 2.0, strip_y + 8.0 + 1.7, if cur { 5.2 } else { 4.4 }, WHITE, Align::Center, true); }
                     }
                 }
             }
             if m.team_simul {
                 let alive = |sd: usize| m.roots().filter(|f| f.side == sd && f.alive).count();
                 let tot = |sd: usize| m.roots().filter(|f| f.side == sd).count();
-                outlined(&format!("{}/{}", alive(0), tot(0)), w / 2.0 - 22.0, 46.0, 8.0, hex("#22e8ff"), Align::Center);
-                outlined(&format!("{}/{}", alive(1), tot(1)), w / 2.0 + 22.0, 46.0, 8.0, hex("#ff4d6d"), Align::Center);
+                outlined(&format!("{}/{}", alive(0), tot(0)), w / 2.0 - 22.0, 34.0, 6.4, hex("#22e8ff"), Align::Center);
+                outlined(&format!("{}/{}", alive(1), tot(1)), w / 2.0 + 22.0, 34.0, 6.4, hex("#ff4d6d"), Align::Center);
                 if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 { text("TAB · TROCAR DE LUTADOR", 10.0, BASE_H - 24.0, 5.2, Color::new(1.0, 1.0, 1.0, 0.6), Align::Left, true); }
             }
             for side in 0..2 {
                 let Some(lead) = team_label(m, team, side) else { continue };
                 let n = strip_n(side);
                 if n == 0 { continue; }
-                let off = 4.0 + n as f32 * (TILE_W + TILE_GAP) + 10.0;
+                let off = 4.0 + n as f32 * (TILE_W + TILE_GAP) + 8.0;
                 let (x, al) = if side == 0 { (off, Align::Left) } else { (w - off, Align::Right) };
-                outlined(&format!("TIME {lead}"), x, 63.0, 6.4, if side == 0 { hex("#22e8ff") } else { hex("#ff4d6d") }, al);
+                outlined(&format!("TIME {lead}"), x, 41.0, 5.2, if side == 0 { hex("#22e8ff") } else { hex("#ff4d6d") }, al);
             }
+            let (cx, cy) = (w / 2.0, 13.0);
             if show_timer {
-            let (cx, cy) = (w / 2.0, 19.0);
-            glass(&p, s, cx - 18.0, 5.0, 36.0, 28.0, 8.0, [0.75, 0.8, 1.0]);
+            for k in 0..9 { let tx = cx - 8.0 + k as f32 * 2.0; let (a, b) = (p(tx, 21.5), p(tx, 23.0)); draw_line(a.x, a.y, b.x, b.y, 0.4 * s, Color::new(1.0, 1.0, 1.0, 0.4)); }
             let t = if m.training || m.round_ticks == 0 { "--".to_string() } else { format!("{:02}", (m.timer + 59) / 60) };
             let urgent = !m.training && m.round_ticks > 0 && m.timer > 0 && m.timer <= 10 * 60;
             let pulse = if urgent { 1.0 + 0.18 * (1.0 - ((m.timer % 60) as f32 / 60.0)) } else { 1.0 };
-            if urgent { let a = 0.12 + 0.1 * (gt * 9.0).sin().abs(); poly::solid(&sp_box(&p, cx - 18.0, 5.0, 36.0, 28.0, 8.0), Color::new(1.0, 0.1, 0.1, a)); }
-            outlined(&t, cx, cy + 6.0 * pulse, 17.0 * pulse, if urgent { hex("#ff5a5a") } else { WHITE }, Align::Center);
+            if urgent { let a = 0.12 + 0.1 * (gt * 9.0).sin().abs(); poly::solid(&sp_box(&p, cx - 15.0, 5.0, 30.0, 17.0, 6.0), Color::new(1.0, 0.1, 0.1, a)); }
+            outlined(&t, cx, cy + 5.2 * pulse, 14.0 * pulse, if urgent { hex("#ff5a5a") } else { WHITE }, Align::Center);
             }
             let team_rows = !partners.is_empty() || team.is_some();
-            let cy0 = if team_rows { 22.0 } else { 0.0 };
+            let cy0 = if team_rows { -5.0 } else { -15.0 };
             // combos
             for (side, att) in roots.iter().enumerate().take(if hide_combo { 0 } else { 2 }) {
                 let def = roots[1 - side];
@@ -318,7 +328,7 @@ impl Hud {
                     let wdt = measure_text(&l1, Some(&ui.body), (fs * s) as u16, 1.0).width.max(measure_text(&l2, Some(&ui.body), (fs * s) as u16, 1.0).width) / s + 14.0;
                     let hgt = if l2.is_empty() { 17.0 } else { 27.0 };
                     let bx = if side == 0 { (BASE_W * 0.27 - wdt / 2.0).max(6.0) } else { (BASE_W * 0.73 - wdt / 2.0).min(BASE_W - wdt - 6.0) };
-                    let by = 60.0 + side as f32 * 14.0;
+                    let by = 58.0 + side as f32 * 14.0;
                     let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
                     let sp = |v: Vec<Vec2>| -> Vec<Vec2> { v.into_iter().map(|q| p(q.x, q.y)).collect() };
                     poly::solid(&sp(poly::chamfer(bx + 1.5, by + 1.8, wdt, hgt, 3.5)), Color::new(0.0, 0.0, 0.0, 0.35 * a));
@@ -348,21 +358,21 @@ impl Hud {
         }
         if self.replay {
             let a = 0.6 + 0.4 * (gt * 3.0).sin().abs();
-            draw_circle(p(w / 2.0 - 22.0, 49.0).x, p(0.0, 49.0).y, 2.4 * s, Color::new(1.0, 0.2, 0.25, a));
-            text("REPLAY", w / 2.0 + 2.0, 51.5, 7.0, Color::new(1.0, 1.0, 1.0, 0.9), Align::Center, true);
+            draw_circle(p(w / 2.0 - 22.0, 29.0).x, p(0.0, 29.0).y, 2.0 * s, Color::new(1.0, 0.2, 0.25, a));
+            text("REPLAY", w / 2.0 + 2.0, 31.0, 6.0, Color::new(1.0, 1.0, 1.0, 0.9), Align::Center, true);
         }
         if m.training {
-            text("TREINO", w / 2.0, 46.0, 7.0, Color::new(1.0, 1.0, 1.0, 0.8), Align::Center, true);
+            text("TREINO", w / 2.0, 30.0, 6.0, Color::new(1.0, 1.0, 1.0, 0.8), Align::Center, true);
             // attack data: last combo (hits + damage) stays on screen
             let (hits, dmg) = (self.combo[0].0, self.combo[0].1);
-            if hits >= 2 { text(&format!("ÚLTIMO COMBO  {hits} HITS · {} DMG", dmg as i32), w / 2.0, 56.0, 6.0, hex("#ffcc33"), Align::Center, true); }
+            if hits >= 2 { text(&format!("ÚLTIMO COMBO  {hits} HITS · {} DMG", dmg as i32), w / 2.0, 38.0, 5.6, hex("#ffcc33"), Align::Center, true); }
             // input history (newest at the bottom): direction arrow, buttons, frames held
             let n = self.inputs.len();
-            draw_rectangle(p(6.0, 74.0).x, p(0.0, 74.0).y, 62.0 * s, (n as f32 * 8.2 + 8.0) * s, Color::new(0.02, 0.02, 0.06, 0.55));
-            text("INPUTS", 10.0, 80.0, 5.0, Color::new(1.0, 1.0, 1.0, 0.6), Align::Left, true);
+            draw_rectangle(p(6.0, 50.0).x, p(0.0, 50.0).y, 62.0 * s, (n as f32 * 8.2 + 8.0) * s, Color::new(0.02, 0.02, 0.06, 0.55));
+            text("INPUTS", 10.0, 56.0, 5.0, Color::new(1.0, 1.0, 1.0, 0.6), Align::Left, true);
             use ume_engine::input::k;
             for (i, (bits, fr)) in self.inputs.iter().enumerate() {
-                let y = 86.0 + i as f32 * 8.2;
+                let y = 62.0 + i as f32 * 8.2;
                 let a = 0.45 + 0.55 * (i as f32 + 1.0) / n.max(1) as f32;
                 let (dx, dy) = ((bits & k::R != 0) as i32 - (bits & k::L != 0) as i32, (bits & k::D != 0) as i32 - (bits & k::U != 0) as i32);
                 let c = p(14.0, y - 2.0);
@@ -392,8 +402,8 @@ fn face_off_line(f: &Fighter, answer: bool) -> String {
     (if answer { B } else { A })[h % 5].to_string()
 }
 
-const TILE_W: f32 = 19.0;
-const TILE_GAP: f32 = 3.0;
+const TILE_W: f32 = 10.5;
+const TILE_GAP: f32 = 2.5;
 
 fn side_tag(id: u32, side: usize, human: &[u32], cpu: &[u32]) -> Option<(&'static str, bool)> {
     if human.contains(&id) { return Some((if side == 0 { "P1" } else { "P2" }, true)); }
@@ -421,30 +431,23 @@ fn sp_box(p: &impl Fn(f32, f32) -> Vec2, x: f32, y: f32, w: f32, h: f32, r: f32)
 /// Round avatar on a soft character-coloured glow: head crop of the idle sprite (M.U.G.E.N.: the 9000,x portrait) with a transparent background.
 fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, frame: Color) {
     let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
-    let (x0, y0, d) = (pc.x - half, pc.y - half, half * 2.0);
-    poly::circle(pc, half + 2.2 * s, Color::new(col.r, col.g, col.b, 0.16));
-    poly::grad_v(&poly::regular(pc, half, 40, 0.0), Color::new(col.r, col.g, col.b, 0.34), Color::new(col.r * 0.4, col.g * 0.4, col.b * 0.4, 0.2));
     let por = f.def.sprites.get(&(9000, 1)).or(f.def.sprites.get(&(9000, 0))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), true))
         .or_else(|| f.def.anims.get(&0).and_then(|a| a.frames.first()).and_then(|fr| f.def.sprites.get(&(fr.group, fr.index))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), false)));
     if let Some((sp, full)) = por {
         let img = sp.image.clone().unwrap();
         let tex = g.texture(&img, sp.scale >= 0.99);
         let (iw, ih) = (img.w as f32, img.h as f32);
-        let src = if full { let sd = iw.min(ih); Rect::new((iw - sd) / 2.0, 0.0, sd, sd) } else { let sd = (ih * 0.40).min(iw); let cx = (sp.axis_x * iw / sp.width.max(1.0)).clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
+        let src = if full { Rect::new(0.0, 0.0, iw, ih) } else { let sd = (ih * 0.40).min(iw); let cx = (sp.axis_x * iw / sp.width.max(1.0)).clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
+        let hh = half * 2.0;
+        let ww = hh * src.w / src.h;
+        let (x0, y0) = (pc.x - ww / 2.0, pc.y - half);
         let flip = side == 1 && !full;
-        let mut vertices = Vec::with_capacity(41);
-        vertices.push(Vertex::new(pc.x, pc.y, 0.0, (src.x + src.w * 0.5) / iw, (src.y + src.h * 0.5) / ih, WHITE));
-        for p in poly::regular(pc, half, 40, 0.0) {
-            let tx = (p.x - x0) / d;
-            let tx = if flip { 1.0 - tx } else { tx };
-            vertices.push(Vertex::new(p.x, p.y, 0.0, (src.x + src.w * tx) / iw, (src.y + src.h * (p.y - y0) / d) / ih, WHITE));
-        }
-        let n = vertices.len() as u16 - 1;
-        let indices = (0..n).flat_map(|i| [0, 1 + i, 1 + (i + 1) % n]).collect();
-        draw_mesh(&Mesh { vertices, indices, texture: Some(tex) });
+        let (u0, u1) = if flip { ((src.x + src.w) / iw, src.x / iw) } else { (src.x / iw, (src.x + src.w) / iw) };
+        let (v0, v1) = (src.y / ih, (src.y + src.h) / ih);
+        let vertices = vec![Vertex::new(x0, y0, 0.0, u0, v0, WHITE), Vertex::new(x0 + ww, y0, 0.0, u1, v0, WHITE), Vertex::new(x0 + ww, y0 + hh, 0.0, u1, v1, WHITE), Vertex::new(x0, y0 + hh, 0.0, u0, v1, WHITE)];
+        draw_mesh(&Mesh { vertices, indices: vec![0, 1, 2, 0, 2, 3], texture: Some(tex) });
     }
-    poly::ring(pc, half, 1.5 * s, frame);
-    poly::ring(pc, half - 1.3 * s, 0.6 * s, Color::new(1.0, 1.0, 1.0, 0.28));
+    let _ = (s, frame, col);
 }
 
 fn poly_pt(p: impl Fn(f32, f32) -> Vec2, x: f32, y: f32) -> Vec2 { p(x, y) }

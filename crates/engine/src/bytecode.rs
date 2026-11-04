@@ -6,6 +6,28 @@ const STACK: usize = 32;
 pub enum Op {
     Const(f64),
     Host(u32),
+    Trig0(u32),
+    Trig1(u32),
+    CmpStr(u32),
+    Special { host: u32, has_b: bool },
+    Assign(u32),
+    Redirect { kind: u32, has_arg: bool, len: u32 },
+    Abs,
+    Floor,
+    Ceil,
+    Sin,
+    Cos,
+    Tan,
+    Asin,
+    Acos,
+    Atan,
+    Exp,
+    Ln,
+    Sqrt,
+    Sign,
+    Min,
+    Max,
+    Clamp,
     Not,
     BitNot,
     Neg,
@@ -136,22 +158,176 @@ impl Code {
                 self.emit(&args[2], d);
                 self.patch(jmp);
             }
+            Node::Trig { name, args, comp, raw: None } if args.len() == 1 && !matches!(name.as_str(), "isasserted" | "map" | "teammap") => {
+                self.emit(&args[0], d);
+                let o = match name.as_str() {
+                    "abs" => Some(Op::Abs), "floor" => Some(Op::Floor), "ceil" => Some(Op::Ceil),
+                    "sin" => Some(Op::Sin), "cos" => Some(Op::Cos), "tan" => Some(Op::Tan),
+                    "asin" => Some(Op::Asin), "acos" => Some(Op::Acos), "atan" => Some(Op::Atan),
+                    "exp" => Some(Op::Exp), "ln" => Some(Op::Ln), "sqrt" => Some(Op::Sqrt), "sign" => Some(Op::Sign),
+                    _ => None,
+                };
+                if let Some(op) = o {
+                    self.push(op, d, 0);
+                } else {
+                    let k = self.host.len() as u32;
+                    self.host.push(Node::Trig { name: name.clone(), args: vec![], comp: *comp, raw: None });
+                    self.push(Op::Trig1(k), d, 0);
+                }
+            }
+            Node::Trig { name, args, raw: None, .. } if (name == "min" || name == "max") && args.len() == 2 => {
+                self.emit(&args[0], d);
+                self.emit(&args[1], d);
+                self.push(if name == "min" { Op::Min } else { Op::Max }, d, -1);
+            }
+            Node::Trig { name, args, raw: None, .. } if name == "clamp" && args.len() == 3 => {
+                self.emit(&args[0], d);
+                self.emit(&args[1], d);
+                self.emit(&args[2], d);
+                self.push(Op::Clamp, d, -2);
+            }
+            Node::Trig { name, args, raw: None, .. } if (name == "e" || name == "pi" || name == "__str") && args.is_empty() => {
+                let v = match name.as_str() { "e" => std::f64::consts::E, "pi" => std::f64::consts::PI, _ => 0.0 };
+                self.push(Op::Const(v), d, 1);
+            }
+            Node::Trig { args, .. } if args.is_empty() => {
+                let k = self.host.len() as u32;
+                self.host.push(n.clone());
+                self.push(Op::Trig0(k), d, 1);
+            }
+            Node::CmpStr { .. } => {
+                let k = self.host.len() as u32;
+                self.host.push(n.clone());
+                self.push(Op::CmpStr(k), d, 1);
+            }
+            Node::Special { name, op, a, op2, b } => {
+                self.emit(a, d);
+                let has_b = b.is_some();
+                if let Some(bb) = b { self.emit(bb, d); }
+                let k = self.host.len() as u32;
+                self.host.push(Node::Special { name: name.clone(), op, a: Box::new(Node::Num(0.0, false)), op2: *op2, b: None });
+                self.push(Op::Special { host: k, has_b }, d, if has_b { -1 } else { 0 });
+            }
+            Node::Assign { name, idx, v } => {
+                self.emit(idx, d);
+                self.emit(v, d);
+                let k = self.host.len() as u32;
+                self.host.push(Node::Trig { name: name.clone(), args: vec![], comp: None, raw: None });
+                self.push(Op::Assign(k), d, -1);
+            }
+            Node::Redir { kind, arg, e } => {
+                let has_arg = arg.is_some();
+                if let Some(a) = arg { self.emit(a, d); }
+                let k = self.host.len() as u32;
+                self.host.push(Node::Trig { name: kind.clone(), args: vec![], comp: None, raw: None });
+                let sub = Code::compile(e);
+                let len = sub.ops.len() as u32;
+                self.push(Op::Redirect { kind: k, has_arg, len }, d, if has_arg { 0 } else { 1 });
+                self.depth = self.depth.max(*d + sub.depth);
+                let base_op = self.ops.len() as u32;
+                let base_host = self.host.len() as u32;
+                self.host.extend(sub.host);
+                for op in sub.ops {
+                    self.ops.push(match op {
+                        Op::Host(h) => Op::Host(h + base_host),
+                        Op::Trig0(h) => Op::Trig0(h + base_host),
+                        Op::Trig1(h) => Op::Trig1(h + base_host),
+                        Op::CmpStr(h) => Op::CmpStr(h + base_host),
+                        Op::Special { host, has_b } => Op::Special { host: host + base_host, has_b },
+                        Op::Assign(h) => Op::Assign(h + base_host),
+                        Op::Redirect { kind, has_arg, len } => Op::Redirect { kind: kind + base_host, has_arg, len },
+                        Op::AndJump(t) => Op::AndJump(t + base_op),
+                        Op::OrJump(t) => Op::OrJump(t + base_op),
+                        Op::JumpIfZero(t) => Op::JumpIfZero(t + base_op),
+                        Op::Jump(t) => Op::Jump(t + base_op),
+                        other => other,
+                    });
+                }
+            }
             _ => self.host_call(n, d),
         }
     }
 
     pub fn run<H: Host>(&self, h: &H) -> f64 {
         if self.depth > STACK { return 0.0; }
+        self.run_slice(h, 0, self.ops.len())
+    }
+
+    fn run_slice<H: Host>(&self, h: &H, start: usize, end: usize) -> f64 {
         let mut s = [0.0f64; STACK];
         let mut sp = 0usize;
-        let mut pc = 0usize;
+        let mut pc = start;
         let ops = self.ops.as_slice();
         let ib = |c: bool| c as i32 as f64;
         let it = |x: f64| x.trunc() as i64;
-        while pc < ops.len() {
+        while pc < end {
             match ops[pc] {
                 Op::Const(v) => { s[sp] = v; sp += 1; }
                 Op::Host(i) => { s[sp] = eval(&self.host[i as usize], h); sp += 1; }
+                Op::Trig0(i) => {
+                    if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                        s[sp] = h.trigger(name, &[], *comp, raw.as_deref());
+                    } else {
+                        s[sp] = 0.0;
+                    }
+                    sp += 1;
+                }
+                Op::Trig1(i) => {
+                    let a0 = [Node::Num(s[sp - 1], false)];
+                    s[sp - 1] = match &self.host[i as usize] {
+                        Node::Trig { name, comp, raw, .. } => h.trigger(name, &a0, *comp, raw.as_deref()),
+                        _ => 0.0,
+                    };
+                }
+                Op::CmpStr(i) => {
+                    s[sp] = match &self.host[i as usize] {
+                        Node::CmpStr { name, neg, values } => ib(h.cmpstr(name, *neg, values)),
+                        _ => 0.0,
+                    };
+                    sp += 1;
+                }
+                Op::Special { host, has_b } => {
+                    let bv = if has_b { sp -= 1; Some(s[sp]) } else { None };
+                    let av = s[sp - 1];
+                    s[sp - 1] = match &self.host[host as usize] {
+                        Node::Special { name, op, op2, .. } => ib(h.special(name, op, av, *op2, bv)),
+                        _ => 0.0,
+                    };
+                }
+                Op::Assign(i) => {
+                    sp -= 1;
+                    let (idx, val) = (s[sp - 1] as i32, s[sp]);
+                    s[sp - 1] = match &self.host[i as usize] {
+                        Node::Trig { name, .. } => h.assign(name, idx, val),
+                        _ => val,
+                    };
+                }
+                Op::Redirect { kind, has_arg, len } => {
+                    let arg = if has_arg { sp -= 1; Some(s[sp]) } else { None };
+                    let name = match &self.host[kind as usize] { Node::Trig { name, .. } => name.as_str(), _ => "" };
+                    let sub_start = pc + 1;
+                    let sub_end = sub_start + len as usize;
+                    s[sp] = match h.redirect(name, arg) { Some(t) => self.run_slice(&t, sub_start, sub_end), None => f64::NAN };
+                    sp += 1;
+                    pc = sub_end;
+                    continue;
+                }
+                Op::Abs => s[sp - 1] = s[sp - 1].abs(),
+                Op::Floor => s[sp - 1] = s[sp - 1].floor(),
+                Op::Ceil => s[sp - 1] = s[sp - 1].ceil(),
+                Op::Sin => s[sp - 1] = s[sp - 1].sin(),
+                Op::Cos => s[sp - 1] = s[sp - 1].cos(),
+                Op::Tan => s[sp - 1] = s[sp - 1].tan(),
+                Op::Asin => s[sp - 1] = s[sp - 1].asin(),
+                Op::Acos => s[sp - 1] = s[sp - 1].acos(),
+                Op::Atan => s[sp - 1] = s[sp - 1].atan(),
+                Op::Exp => s[sp - 1] = s[sp - 1].exp(),
+                Op::Ln => s[sp - 1] = s[sp - 1].ln(),
+                Op::Sqrt => s[sp - 1] = s[sp - 1].sqrt(),
+                Op::Sign => s[sp - 1] = s[sp - 1].signum(),
+                Op::Min => { sp -= 1; let (x, y) = (s[sp - 1], s[sp]); s[sp - 1] = if x.is_nan() || y.is_nan() { f64::NAN } else { x.min(y) }; }
+                Op::Max => { sp -= 1; let (x, y) = (s[sp - 1], s[sp]); s[sp - 1] = if x.is_nan() || y.is_nan() { f64::NAN } else { x.max(y) }; }
+                Op::Clamp => { sp -= 2; let (v, lo, hi) = (s[sp - 1], s[sp], s[sp + 1]); s[sp - 1] = if v.is_nan() || lo.is_nan() || hi.is_nan() { f64::NAN } else { v.max(lo).min(hi) }; }
                 Op::Not => if !s[sp - 1].is_nan() { s[sp - 1] = ib(s[sp - 1] == 0.0) },
                 Op::BitNot => if !s[sp - 1].is_nan() { s[sp - 1] = !(s[sp - 1].trunc() as i32) as f64 },
                 Op::Neg => s[sp - 1] = -s[sp - 1],

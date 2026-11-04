@@ -25,6 +25,7 @@ Tick flow: inputs → `Match::tick` → for each fighter, `[Statedef -3/-2/-1]` 
 2. `n(m, "param", default)` reads a numeric parameter; `n2(m, "param", default, index)` reads the Nth value; `sc.has("param", 0)` tests presence; `sc.raw("param")` returns the text.
 3. Add the field in `fighter.rs` if you need new state.
 4. Write a test in `crates/engine/tests/combat_logic.rs` calling `ume_engine::controllers::run`.
+5. List the name in `CNS-Scripts.md` and `pt-BR/Scripts-CNS.md`. `cargo test -p ume-engine --test wiki_sync` fails for an implemented controller that is not listed and for a listed one that is not implemented. Return `true` from the module's `run` (or fall through to the last branch) so the load diagnostics do not report it as unsupported.
 
 ## Add a trigger
 
@@ -34,7 +35,7 @@ In `crates/engine/src/triggers.rs`, add a branch to the name `match`:
 "winko" => b(m.match_over && m.winner_side == f.side as i32 && m.won_by_ko),
 ```
 
-`f` is the evaluated fighter and `m` the match. `won_by_ko` would be a new field on `Match`. `b(bool)` converts to 0/1. Triggers returning floats must appear in `is_float` in `expr.rs`.
+`f` is the evaluated fighter and `m` the match. `won_by_ko` would be a new field on `Match`. `b(bool)` converts to 0/1. Triggers returning floats must appear in `is_float` in `expr.rs`. List the new name in `CNS-Scripts.md` and `pt-BR/Scripts-CNS.md`; `wiki_sync` checks both directions.
 
 ## Add a file format
 
@@ -70,3 +71,8 @@ Put the decoder in `crates/formats/src/<format>.rs`, export it in `lib.rs` and t
 | Network | `ggrs` (rollback) + `matchbox` (WebRTC) |
 
 The migration is described in [`docs/ROADMAP.md`](../ROADMAP.md).
+
+## HUD glass and impact effects
+
+- The in-fight HUD panels are "glass": `ume_shell::quad::glass_panel` registers up to 16 rounded rectangles per frame, and the post-processing composite pass replaces those pixels with a blurred copy of the scene (quarter resolution, separable blur, no per-frame allocations), plus tint, drop shadow and a rim highlight. With post-processing off (`fx` level 0) the HUD falls back to translucent polygons.
+- Impact feedback is deliberately small: guard and counter share the same small label and ring, super arts only get a light ring burst and a compact label, and the number of simultaneous floats, rings, lights and particles is capped in `src/vfx.rs`.

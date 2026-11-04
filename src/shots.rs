@@ -56,6 +56,14 @@ pub(crate) async fn fight(app: &mut App, dir: &str, name: &str, p1: &str, p2: &s
             if want == "impact" { s.vfx.force_impact(); }
         }
         "hit" => { for _ in 0..1200 { s.step_visual(c, audio); if !s.m.explods.is_empty() && s.m.fighters.iter().any(|f| f.move_type == 'H' && f.hit_shake > 2 && !f.ghv.guarded) { break; } } }
+        "counter" | "guard" | "heavy" => {
+            for _ in 0..600 { if s.m.round_state == 2 && s.m.fighters[0].ctrl { break; } s.step_visual(c, audio); }
+            if want == "counter" { s.m.fighters[1].move_type = 'A'; }
+            s.vfx.pre_tick(&s.m);
+            let ev = ume_engine::matchs::Event::Hit { attacker_side: 0, defender_side: 1, damage: if want == "heavy" { 120.0 } else { 60.0 }, guarded: want == "guard", heavy: want == "heavy", attacker: 0, defender: 1 };
+            s.vfx.event(&ev, &s.m);
+            for _ in 0..3 { s.vfx.update(1.0 / 60.0); }
+        }
         "proj" => { for _ in 0..1500 { s.step_visual(c, audio); if s.m.projectiles.iter().any(|p| !p.dying && p.time > 8) { break; } } }
         "ko" => {
             if let Some(f) = s.m.fighters.get_mut(1) { f.life = 1.0; }
@@ -124,6 +132,12 @@ async fn team_win(app: &mut App, dir: &str, name: &str, simul: bool, n: usize) {
     }
     snap(app, dir, name, |a| a.draw_session_only()).await;
     app.team = None;
+}
+
+async fn fx_tour(app: &mut App, dir: &str) {
+    for (name, want) in [("fx1-hit", "hit"), ("fx2-heavy", "heavy"), ("fx3-counter", "counter"), ("fx4-guard", "guard"), ("fx5-super", "super")] {
+        fight(app, dir, name, "kaito", "shion", "dojo", 330, want).await;
+    }
 }
 
 async fn hud_tour(app: &mut App, dir: &str) {
@@ -255,13 +269,38 @@ pub async fn run(app: &mut App, dir: &str) {
     let _ = std::fs::create_dir_all(dir);
     if std::env::var("UME_TOUR").as_deref() == Ok("native-coverage") { native_coverage(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("mugen") { crate::mugen_tour::run(app, dir).await; return; }
+    if std::env::var("UME_TOUR").as_deref() == Ok("ui") { ui_tour(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("story") { story(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stage-select") {
         app.screen = Screen::Stages { cur: 1 };
         screen(app, dir, "stage-select", 8).await;
         return;
     }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("select") {
+        app.mode = Mode::Cpu;
+        let ids = ["kaname", "valdric", "akio", "kaito"];
+        let cur = [find(app, ids[0]), find(app, ids[1])];
+        app.screen = Screen::Select { cur, picking: 0, picked: [None, None] };
+        screen(app, dir, "select-1p", 60).await;
+        app.screen = Screen::Select { cur: [find(app, ids[2]), find(app, ids[1])], picking: 1, picked: [Some(find(app, ids[2])), None] };
+        screen(app, dir, "select-2p", 60).await;
+        app.mode = Mode::TeamSimul; app.team_n = 5; app.team_pick = vec![find(app, "kaito"), find(app, "lian"), find(app, ids[0])];
+        app.screen = Screen::Select { cur: [find(app, ids[3]), 0], picking: 0, picked: [None, None] };
+        screen(app, dir, "select-team5", 60).await;
+        return;
+    }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("fx") { fx_tour(app, dir).await; return; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("menu") {
+        app.screen = Screen::Title;
+        screen(app, dir, "menu-title", 30).await;
+        for (n, cur) in [(0, 0usize), (1, 1), (2, 3), (3, 7), (4, 9)] {
+            app.screen = Screen::Menu { cur };
+            screen(app, dir, &format!("menu-{n}"), 40).await;
+        }
+        return;
+    }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") { hud_tour(app, dir).await; return; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("market") { market_tour(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("pixel") { crate::pixel_tour::run(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stages") { app.screen = Screen::Fight; crate::stage_tour::run(app, dir).await; return; }
     app.screen = Screen::Title;
@@ -367,7 +406,7 @@ pub async fn run(app: &mut App, dir: &str) {
     }
     app.session = None;
     cap(app, Screen::Menu { cur: 3 }); frames(app, 30).await; app.trans = 0.62; screen(app, dir, "22-transition", 0).await;
-    cap(app, Screen::Video { cur: 3 }); screen(app, dir, "17-video", 40).await;
+    cap(app, Screen::Settings { tab: 0, cur: 3, from_fight: false }); screen(app, dir, "17-video", 40).await;
     app.ui.begin(); app.ui.loading_screen(0.62, "Carregando lutador 2…"); get_screen_data().export_png(&format!("{dir}/18-loading.png")); println!("shot 18-loading"); next_frame().await;
     app.screen = Screen::Controls; screen(app, dir, "14-controls", 5).await;
     // phone landscape with touch controls
@@ -389,4 +428,75 @@ pub async fn run(app: &mut App, dir: &str) {
     request_new_screen_size(1280.0, 720.0);
     frames(app, 10).await;
     story(app, dir).await;
+}
+
+async fn market_tour(app: &mut App, dir: &str) {
+    use std::sync::Arc;
+    use ume_market::catalog::{detect, Tree, TreeEntry};
+    use ume_market::persist::{catalog_key, MemPersist, Persist, STATE_KEY};
+    use ume_market::{Installed, MarketState, RepoRef};
+    let files: Vec<(String, u64)> = [
+        ("chars/kfm/kfm.def", 1), ("chars/kfm/kfm.sff", 900_000), ("chars/kfm/kfm.air", 4000), ("chars/kfm/kfm.cns", 9000), ("chars/kfm/kfm.cmd", 3000),
+        ("chars/goku/goku.def", 1), ("chars/goku/goku.sff", 21_000_000), ("chars/goku/goku.air", 4000), ("chars/goku/goku.cns", 9000),
+        ("stages/dojo.def", 400), ("stages/dojo.sff", 3_400_000), ("stages/city.def", 400), ("stages/city.sff", 5_100_000),
+        ("music/theme.ogg", 4_200_000), ("music/battle.mp3", 6_800_000), ("packs/retro.zip", 18_000_000), ("packs/huge.zip", 90_000_000),
+    ].iter().map(|(p, s)| (p.to_string(), *s)).collect();
+    let tree = Tree { entries: files.into_iter().map(|(path, size)| TreeEntry { path, size }).collect(), truncated: false };
+    let repo = RepoRef::parse("https://github.com/exemplo/mugen-pack").unwrap();
+    let catalog = detect(&tree, "", &repo.name);
+    let persist = Arc::new(MemPersist::new());
+    let mut state = MarketState::default();
+    state.add_repo(repo.clone());
+    state.add_repo(RepoRef::parse("juninmd/ultimate-mugen").unwrap());
+    state.repo_mut(&repo.key()).unwrap().item_count = catalog.items.len();
+    state.repo_mut(&repo.key()).unwrap().listed_at = ume_market::now_secs();
+    for it in catalog.items.iter().filter(|i| i.name == "kfm" || i.name == "dojo") {
+        state.upsert_installed(Installed { repo_key: repo.key(), item_id: it.id.clone(), kind: it.kind, name: it.name.clone(), bytes: it.bytes, files: it.files.len(), active: it.name == "kfm", installed_at: 1 });
+    }
+    persist.write(&catalog_key(&repo.key()), &serde_json::to_vec(&catalog).unwrap()).unwrap();
+    persist.write(STATE_KEY, &state.to_json()).unwrap();
+    app.market = crate::market::Market::with_persist(persist);
+    app.market.finish_hydration();
+    app.market.poll();
+    app.screen = Screen::Market;
+    screen(app, dir, "market-browse", 12).await;
+    for (i, it) in catalog.items.iter().enumerate() { if i % 2 == 0 { app.market_ui_mark(&repo.key(), &it.id); } }
+    screen(app, dir, "market-marked", 3).await;
+    app.market_ui_view_installed();
+    screen(app, dir, "market-installed", 3).await;
+}
+
+async fn ui_tour(app: &mut App, dir: &str) {
+    for tab in 0..6 {
+        app.screen = Screen::Settings { tab, cur: if tab == 1 { 2 } else { 1 }, from_fight: false };
+        screen(app, dir, &format!("settings-{tab}"), 6).await;
+    }
+    app.settings.lang = crate::i18n::Lang::En;
+    app.screen = Screen::Settings { tab: 3, cur: 2, from_fight: false };
+    screen(app, dir, "settings-3-en", 6).await;
+    app.settings.lang = crate::i18n::Lang::Pt;
+    app.sel = (find(app, "kaito"), find(app, "garan"), stage(app, "dojo"));
+    app.mode = Mode::Cpu;
+    app.screen = Screen::Vs { t: 0.0, step: 0 };
+    frames(app, 40).await;
+    app.screen = Screen::Vs { t: 0.55, step: 0 };
+    screen(app, dir, "vs-1v1-mid", 0).await;
+    app.screen = Screen::Vs { t: 1.4, step: 0 };
+    screen(app, dir, "vs-1v1", 0).await;
+    let roster: Vec<usize> = (0..app.reg.chars.len()).filter(|&i| !app.reg.chars[i].boss && !app.reg.chars[i].broken.get()).take(10).collect();
+    if roster.len() >= 10 {
+        app.mode = Mode::TeamSimul;
+        app.team_n = 5;
+        app.sel = (roster[0], roster[5], stage(app, "neon"));
+        app.team = Some(Team::new(roster[..5].to_vec(), roster[5..10].to_vec(), true));
+        app.screen = Screen::Vs { t: 0.0, step: 0 };
+        frames(app, 40).await;
+        println!("5v5 after load: vs={}", matches!(app.screen, Screen::Vs { .. }));
+        app.screen = Screen::Vs { t: -9.0, step: 200 };
+        frames(app, 3).await;
+        app.trans = 0.0;
+        app.screen = Screen::Vs { t: 1.5, step: 200 };
+        screen(app, dir, "vs-5v5", 0).await;
+        println!("5v5 screen vs={} msg={}", matches!(app.screen, Screen::Vs { .. }), app.msg);
+    }
 }

@@ -10,6 +10,18 @@ pub type Vfs = BTreeMap<String, Vec<u8>>;
 
 /// `\` -> `/`, strip a leading `./`, collapse repeated `/`, lowercase.
 pub fn norm_path(p: &str) -> String {
+    if p.is_ascii() {
+        let p = p.strip_prefix("./").or_else(|| p.strip_prefix(".\\")).unwrap_or(p);
+        let mut out = String::with_capacity(p.len());
+        let mut last_slash = false;
+        for b in p.bytes() {
+            let b = if b == b'\\' { b'/' } else { b.to_ascii_lowercase() };
+            if b == b'/' && last_slash { continue; }
+            last_slash = b == b'/';
+            out.push(b as char);
+        }
+        return out;
+    }
     let s = p.replace('\\', "/");
     let s = s.strip_prefix("./").unwrap_or(&s);
     let mut out = String::with_capacity(s.len());
@@ -143,6 +155,9 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         }
         let data_start = local + 30 + r.u16(local + 26) as usize + r.u16(local + 28) as usize;
         let csize = usize::try_from(csize).map_err(|_| "zip: entry too large")?;
+        if method == 0 && csize > MAX_ENTRY_BYTES {
+            return Err(format!("zip: {name}: entry too large"));
+        }
         let data = bytes
             .get(data_start..data_start.saturating_add(csize))
             .ok_or_else(|| format!("zip: {name}: truncated data"))?;
@@ -161,7 +176,7 @@ fn inflate_raw(data: &[u8], size_hint: usize) -> Result<Vec<u8>, String> {
     use miniz_oxide::inflate::core::{decompress, inflate_flags, DecompressorOxide};
     use miniz_oxide::inflate::TINFLStatus;
     // fast path: exact-size output buffer from the declared size
-    if size_hint > 0 && size_hint <= MAX_ENTRY_BYTES {
+    if size_hint > 0 && size_hint <= MAX_ENTRY_BYTES && size_hint <= data.len().saturating_mul(64).max(1 << 20) {
         let mut out = vec![0u8; size_hint];
         let mut st = DecompressorOxide::new();
         let (status, _, written) =
@@ -235,8 +250,11 @@ pub fn resolve<'a>(vfs: &'a Vfs, base_dir: &str, name: &str) -> Option<&'a [u8]>
     // fallback: basename anywhere in the folder, then anywhere
     let base = n.rsplit('/').next().unwrap_or(&n);
     let suffix = format!("/{base}");
-    if let Some((_, v)) = vfs.iter().find(|(k, _)| k.starts_with(&base_dir) && k.ends_with(&suffix)) {
-        return Some(v);
+    if !base_dir.is_empty() {
+        let folder = format!("{base_dir}/");
+        if let Some((_, v)) = vfs.range(folder.clone()..).take_while(|(k, _)| k.starts_with(&folder)).find(|(k, _)| k.ends_with(&suffix)) {
+            return Some(v);
+        }
     }
     vfs.iter().find(|(k, _)| k.ends_with(&suffix) || k.as_str() == base).map(|(_, v)| v.as_slice())
 }

@@ -1,5 +1,5 @@
 //! Load MUGEN characters from folders and run headless CPU-vs-CPU matches to validate compatibility.
-//! Usage: cargo run --release -p ume-engine --example mugen_check -- <char_dir>...
+//! Usage: cargo run --release -p ume-engine --example mugen_check -- [--strict] <char_dir>...
 use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::common::{common_def, flat_stage};
@@ -9,13 +9,21 @@ use ume_engine::matchs::{Event, Match};
 use ume_formats::vfs::{add_dir, find_char_defs, Vfs};
 
 fn main() {
-    for dir in std::env::args().skip(1) {
+    let strict = std::env::args().any(|a| a == "--strict");
+    let mut unsupported_chars = 0;
+    for dir in std::env::args().skip(1).filter(|a| a != "--strict") {
         let mut vfs = Vfs::new();
         if let Err(e) = add_dir(&mut vfs, std::path::Path::new(&dir), "c") { println!("{dir}: io error {e}"); continue; }
         for def in find_char_defs(&vfs) {
             let t = std::time::Instant::now();
             let d = match load_mugen_char(&vfs, &def, 1, true) { Ok(d) => Arc::new(d), Err(e) => { println!("FAIL load {def}: {e}"); continue; } };
             let load_ms = t.elapsed().as_millis();
+            let diagnostics = d.diagnostics();
+            if diagnostics.is_clean() { println!("DIAG {def}: clean"); } else {
+                unsupported_chars += 1;
+                println!("DIAG {def}: {}", diagnostics.summary());
+                if std::env::var_os("TRACE").is_some() || strict { print!("{}", diagnostics.detail()); }
+            }
             let res = std::panic::catch_unwind(|| {
                 let mut m = Match::new(common_def(), None, flat_stage());
                 m.add_player(d.clone(), 0, 6, 1); m.add_player(d.clone(), 1, 6, 2);
@@ -38,5 +46,9 @@ fn main() {
                 Err(_) => println!("PANIC {def}"),
             }
         }
+    }
+    if strict && unsupported_chars > 0 {
+        eprintln!("{unsupported_chars} character(s) use unsupported controllers, triggers or parameters");
+        std::process::exit(1);
     }
 }

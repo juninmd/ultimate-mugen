@@ -5,6 +5,8 @@
 1. Put the folder in `mugen/chars/<name>/` with the `.def` inside, or drop the `.zip` straight into `mugen/`.
 2. Open the game: the character shows up in the select screen. `Tab` filters between all, originals and M.U.G.E.N.
 
+To download content from a GitHub repository instead, see the [GitHub marketplace](Marketplace.md).
+
 On the web, use the **Import MUGEN (.zip)** button or drag the `.zip` onto the window. Imports are idempotent: the same archive, or the same fighter or stage found again under another path, name or letter case, is registered only once (identity is a hash of the normalized `.def` plus its sprite file). Packs saved in the browser from older versions are deduplicated automatically on the next load.
 
 Hundreds of characters are registered without decoding everything; only the item under the cursor is loaded, and an LRU cache bounds memory.
@@ -35,7 +37,7 @@ cargo run --release -p ume-engine --example hover_check -- mugen/chars/kfm
 
 | Tool | Shows |
 |---|---|
-| `mugen_check` | Loads and simulates a fight without a window; lists parse errors and invalid states |
+| `mugen_check` | Loads and simulates a fight without a window; lists parse errors, invalid states and unsupported controllers, triggers and parameters (`--strict` fails on them) |
 | `sprite_audit` | Missing or blank sprites referenced by the `.air` |
 | `hover_check` | Fighter stuck off the floor (`TRACE=1` shows transitions) |
 

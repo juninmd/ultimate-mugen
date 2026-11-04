@@ -103,7 +103,7 @@ fn ridge(pm: &mut Pixmap, t: Transform, w: f32, base: f32, amp: f32, top: &str, 
     fill(pm, t, b.finish(), &lin(base - amp, base + 50.0, &[(0.0, top), (1.0, bot)]));
 }
 fn parts(seed: u32, n: usize, f: impl Fn(&mut Rng) -> Particle) -> Vec<Particle> { let mut r = Rng(seed); (0..n).map(|_| f(&mut r)).collect() }
-fn info(name: &str) -> StageInfo { StageInfo { start_x: 0.0, start_y: 0.0, zoom_out: 1.0, name: name.into(), bound_left: -230.0, bound_right: 230.0, bound_high: -80.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 205.0, vertical_follow: 0.25, tension: 60.0 } }
+fn info(name: &str) -> StageInfo { StageInfo { start_x: 0.0, start_y: 0.0, zoom_out: 1.0, name: name.into(), bound_left: -230.0, bound_right: 230.0, bound_high: -80.0, bound_low: 0.0, p1x: -70.0, p2x: 70.0, zoffset: 205.0, vertical_follow: 0.25, tension: 60.0, ..StageInfo::default() } }
 
 /// Deterministic skyline: (x, width, height) of each tower, shared by the baked art and the animated blink lights.
 pub fn skyline(seed: u32, total: f32, wmin: f32, wmax: f32, hmin: f32, hmax: f32, gap: f32) -> Vec<(f32, f32, f32)> {
@@ -830,7 +830,12 @@ pub fn from_mugen(mut st: MugenStage) -> Stage {
     let info = StageInfo {
         name: st.name.clone(), bound_left: st.bound_left * scl, bound_right: st.bound_right * scl, bound_high: st.bound_high * scl_y, bound_low: st.bound_low * scl_y,
         p1x: st.p1x * scl, p2x: st.p2x * scl, zoffset: st.zoffset * scl_y, vertical_follow: st.vertical_follow, tension: st.tension * scl,
-        start_x: st.start_x * scl, start_y: st.start_y * scl_y, zoom_out: st.zoom_out,
+        start_x: st.start_x * scl, start_y: st.start_y * scl_y, zoom_out: st.zoom_out, zoom_in: st.zoom_in,
+        camera: ume_engine::matchs::CameraParams {
+            vertical_follow_delta: st.vertical_follow_delta * scl_y, y_scroll_speed: st.y_scroll_speed, zoom_in_speed: st.zoom_in_speed, zoom_out_speed: st.zoom_out_speed,
+            lowest_cap: st.lowest_cap, dynamic_bound_high: st.dynamic_bound_high, bound_high_delta: st.bound_high_delta * scl_y,
+        },
+        auto_turn: st.auto_turn,
     };
     let images = st.sprites.iter_mut().filter(|(_, im)| im.w > 0 && im.h > 0).map(|(k, im)| (*k, ImageData::new(im.w, im.h, std::mem::take(&mut im.rgba)))).collect();
     Stage { info, art: StageArt::Mugen(Box::new(MugenBg { stage: Arc::new(st), images, scl, scl_y })), music: 0, kind: StageKind::Custom, bgm: None }

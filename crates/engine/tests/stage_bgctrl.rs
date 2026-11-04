@@ -1,4 +1,6 @@
+mod support;
 use std::sync::Arc;
+use support::{duel, mugen_char};
 use ume_engine::stage_bg::BgState;
 use ume_formats::stage::{load_stage, BgCtrlKind};
 use ume_formats::vfs::Vfs;
@@ -158,4 +160,94 @@ fn match_uses_stage_camera_start_and_steps_the_background() {
     assert_eq!(m.camera.x, 30.0);
     m.tick(&[]);
     assert_eq!(m.bg.as_ref().unwrap().offset(0)[0], 1.0);
+}
+
+const CUSTOM_DEF: &str = r#"
+[Info]
+name = "Rooftop"
+displayname = "Night Rooftop"
+author = "Tester"
+
+[Camera]
+startx = 12
+starty = -8
+boundleft = -180
+boundright = 220
+boundhigh = -90
+boundlow = 15
+verticalfollow = 0.6
+tension = 40
+zoomin = 1.2
+zoomout = 0.7
+
+[PlayerInfo]
+p1startx = -60
+p2startx = 60
+autoturn = 0
+
+[StageInfo]
+zoffset = 190
+localcoord = 640, 480
+roundtime = 60
+
+[BGdef]
+"#;
+
+fn stage_match(def: &str) -> ume_engine::matchs::Match {
+    let mut v = Vfs::new();
+    v.insert("stages/s.def".into(), def.as_bytes().to_vec());
+    let st = Arc::new(load_stage(&v, "stages/s.def").unwrap());
+    let mut m = duel(mugen_char("a", ""), mugen_char("b", ""));
+    m.bg = Some(BgState::new(st));
+    m
+}
+
+fn ev(m: &ume_engine::matchs::Match, src: &str) -> f64 {
+    m.ev(0, &ume_engine::expr::Expr::new(ume_engine::expr::parse(src).unwrap()))
+}
+
+#[test]
+fn stagevar_reads_the_flat_stage() {
+    let m = duel(mugen_char("a", ""), mugen_char("b", ""));
+    assert_eq!(ev(&m, "StageVar(camera.boundleft)"), -200.0);
+    assert_eq!(ev(&m, "StageVar(camera.boundright)"), 200.0);
+    assert_eq!(ev(&m, "StageVar(boundhigh)"), -60.0);
+    assert_eq!(ev(&m, "StageVar(stageinfo.zoffset)"), 210.0);
+    assert_eq!(ev(&m, "StageVar(camera.tension)"), 60.0);
+    assert_eq!(ev(&m, "StageVar(localcoord)"), 320.0);
+    assert_eq!(ev(&m, "StageVar(stageinfo.localcoord.y)"), 240.0);
+    assert_eq!(ev(&m, "StageVar(roundtime)"), -1.0);
+    assert_eq!(ev(&m, "StageVar(autoturn)"), 1.0);
+    assert_eq!(ev(&m, "StageVar(info.name) = \"flat\""), 1.0);
+}
+
+#[test]
+fn stagevar_reads_a_stage_with_custom_bounds() {
+    let m = stage_match(CUSTOM_DEF);
+    assert_eq!(ev(&m, "StageVar(camera.boundleft)"), -180.0);
+    assert_eq!(ev(&m, "StageVar(camera.boundright)"), 220.0);
+    assert_eq!(ev(&m, "StageVar(camera.boundhigh)"), -90.0);
+    assert_eq!(ev(&m, "StageVar(camera.boundlow)"), 15.0);
+    assert!((ev(&m, "StageVar(camera.verticalfollow)") - 0.6).abs() < 1e-6);
+    assert_eq!(ev(&m, "StageVar(camera.tension)"), 40.0);
+    assert_eq!(ev(&m, "StageVar(camera.startx)"), 12.0);
+    assert_eq!(ev(&m, "StageVar(camera.starty)"), -8.0);
+    assert_eq!(ev(&m, "StageVar(stageinfo.zoffset)"), 190.0);
+    assert_eq!(ev(&m, "StageVar(localcoord)"), 640.0);
+    assert_eq!(ev(&m, "StageVar(stageinfo.localcoord.y)"), 480.0);
+    assert_eq!(ev(&m, "StageVar(stageinfo.roundtime)"), 60.0);
+    assert_eq!(ev(&m, "StageVar(playerinfo.autoturn)"), 0.0);
+    assert_eq!(ev(&m, "StageVar(playerinfo.p2startx)"), 60.0);
+}
+
+#[test]
+fn stagevar_strings_compare_and_unknown_names_are_zero() {
+    let m = stage_match(CUSTOM_DEF);
+    assert_eq!(ev(&m, "StageVar(info.author) = \"tester\""), 1.0);
+    assert_eq!(ev(&m, "StageVar(info.author) != \"someone else\""), 1.0);
+    assert_eq!(ev(&m, "StageVar(info.displayname) = \"Night Rooftop\""), 1.0);
+    assert_eq!(ev(&m, "StageVar(info.name) = \"Rooftop\""), 1.0);
+    assert_eq!(ev(&m, "StageVar(info.author)"), 0.0);
+    assert_eq!(ev(&m, "StageVar(camera.nonsense)"), 0.0);
+    assert!(!ume_engine::stagevar::canonical("camera.nonsense").is_some());
 }

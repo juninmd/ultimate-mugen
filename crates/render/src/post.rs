@@ -1,5 +1,19 @@
 pub const POST_SHADER: &str = include_str!("post.wgsl");
 
+pub const MAX_GLASS: usize = 16;
+
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
+pub struct Glass { pub n: usize, pub rects: [[f32; 8]; MAX_GLASS] }
+
+impl Glass {
+    pub fn push(&mut self, x: f32, y: f32, w: f32, h: f32, radius: f32, tint: [f32; 3]) -> bool {
+        if self.n >= MAX_GLASS || w <= 0.0 || h <= 0.0 { return false; }
+        self.rects[self.n] = [x, y, x + w, y + h, radius.min(w / 2.0).min(h / 2.0), tint[0], tint[1], tint[2]];
+        self.n += 1;
+        true
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct PostParams {
     pub chroma: f32,
@@ -14,24 +28,27 @@ pub struct PostParams {
     pub center: [f32; 2],
     pub tint: [f32; 3],
     pub invert: f32,
+    pub glass: Glass,
 }
 
 impl Default for PostParams {
     fn default() -> Self {
-        PostParams { chroma: 0.0, vignette: 0.0, bloom: 0.0, grain: 0.0, saturation: 1.0, contrast: 1.0, flash: 0.0, time: 0.0, radial: 0.0, center: [0.5, 0.5], tint: [1.0; 3], invert: 0.0 }
+        PostParams { chroma: 0.0, vignette: 0.0, bloom: 0.0, grain: 0.0, saturation: 1.0, contrast: 1.0, flash: 0.0, time: 0.0, radial: 0.0, center: [0.5, 0.5], tint: [1.0; 3], invert: 0.0, glass: Glass::default() }
     }
 }
 
-const SLOT: u64 = 256;
+const SLOT: u64 = 1024;
+const UNIFORM_BYTES: u64 = 80 + MAX_GLASS as u64 * 32;
 const PASSES: usize = 6;
 
-struct Targets { size: [u32; 2], scene: wgpu::Texture, scene_view: wgpu::TextureView, groups: [wgpu::BindGroup; PASSES], half: [wgpu::TextureView; 2], half_size: [u32; 2] }
+struct Targets { size: [u32; 2], scene: wgpu::Texture, scene_view: wgpu::TextureView, groups: [wgpu::BindGroup; PASSES], glass_groups: [wgpu::BindGroup; 4], half: [wgpu::TextureView; 2], glass: [wgpu::TextureView; 2], half_size: [u32; 2] }
 
 pub struct PostFx {
     format: wgpu::TextureFormat,
     layout: wgpu::BindGroupLayout,
     bright: wgpu::RenderPipeline,
     blur: wgpu::RenderPipeline,
+    copy: wgpu::RenderPipeline,
     composite: wgpu::RenderPipeline,
     uniforms: wgpu::Buffer,
     sampler: wgpu::Sampler,
@@ -65,6 +82,7 @@ impl PostFx {
                 wgpu::BindGroupLayoutEntry { binding: 0, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: None }, count: None },
                 tex(1),
                 tex(2),
+                tex(4),
                 wgpu::BindGroupLayoutEntry { binding: 3, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering), count: None },
             ],
         });
@@ -83,7 +101,7 @@ impl PostFx {
         });
         let uniforms = device.create_buffer(&wgpu::BufferDescriptor { label: Some("ume-post-uniforms"), size: SLOT * PASSES as u64, usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST, mapped_at_creation: false });
         let sampler = device.create_sampler(&wgpu::SamplerDescriptor { label: Some("ume-post-linear"), mag_filter: wgpu::FilterMode::Linear, min_filter: wgpu::FilterMode::Linear, ..Default::default() });
-        PostFx { format, layout, bright: pipeline("fs_bright"), blur: pipeline("fs_blur"), composite: pipeline("fs_composite"), uniforms, sampler, targets: None }
+        PostFx { format, layout, bright: pipeline("fs_bright"), blur: pipeline("fs_blur"), copy: pipeline("fs_copy"), composite: pipeline("fs_composite"), uniforms, sampler, targets: None }
     }
 
     pub fn scene_texture(&self) -> Option<&wgpu::Texture> { self.targets.as_ref().map(|t| &t.scene) }
@@ -100,19 +118,23 @@ impl PostFx {
         let view = |t: &wgpu::Texture| t.create_view(&wgpu::TextureViewDescriptor::default());
         let scene_view = view(&scene);
         let half = [view(&color_target(device, "ume-post-a", half_size, self.format)), view(&color_target(device, "ume-post-b", half_size, self.format))];
-        let group = |slot: usize, src: &wgpu::TextureView, bloom: &wgpu::TextureView| device.create_bind_group(&wgpu::BindGroupDescriptor {
+        let glass = [view(&color_target(device, "ume-glass-a", half_size, self.format)), view(&color_target(device, "ume-glass-b", half_size, self.format))];
+        let group = |slot: usize, src: &wgpu::TextureView, bloom: &wgpu::TextureView, frost: &wgpu::TextureView| device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("ume-post-bind"),
             layout: &self.layout,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding { buffer: &self.uniforms, offset: slot as u64 * SLOT, size: wgpu::BufferSize::new(80) }) },
+                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding { buffer: &self.uniforms, offset: slot as u64 * SLOT, size: wgpu::BufferSize::new(UNIFORM_BYTES) }) },
                 wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(src) },
                 wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(bloom) },
                 wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::Sampler(&self.sampler) },
+                wgpu::BindGroupEntry { binding: 4, resource: wgpu::BindingResource::TextureView(frost) },
             ],
         });
         let [a, b] = &half;
-        let groups = [group(0, &scene_view, &scene_view), group(1, a, a), group(2, b, b), group(3, a, a), group(4, b, b), group(5, &scene_view, a)];
-        Targets { size, scene, scene_view, groups, half, half_size }
+        let [ga, gb] = &glass;
+        let groups = [group(0, &scene_view, &scene_view, &scene_view), group(1, a, a, &scene_view), group(2, b, b, &scene_view), group(3, a, a, &scene_view), group(4, b, b, &scene_view), group(5, &scene_view, a, ga)];
+        let glass_groups = [group(1, ga, ga, &scene_view), group(2, gb, gb, &scene_view), group(3, ga, ga, &scene_view), group(4, gb, gb, &scene_view)];
+        Targets { size, scene, scene_view, groups, glass_groups, half, glass, half_size }
     }
 
     pub fn apply(&self, queue: &wgpu::Queue, encoder: &mut wgpu::CommandEncoder, target: &wgpu::TextureView, p: &PostParams) {
@@ -121,7 +143,12 @@ impl PostFx {
         let [hw, hh] = [t.half_size[0] as f32, t.half_size[1] as f32];
         let mut data = [0f32; (SLOT as usize / 4) * PASSES];
         let mut slot = |i: usize, v: [f32; 20]| data[i * SLOT as usize / 4..][..20].copy_from_slice(&v);
+        let glass_on = p.glass.n > 0;
         let dir = |x: f32, y: f32| { let mut v = [0f32; 20]; v[0] = x; v[1] = y; v };
+        let mut copy = [0f32; 20];
+        copy[2] = 1.5 / t.size[0] as f32;
+        copy[3] = 1.5 / t.size[1] as f32;
+        slot(0, copy);
         slot(1, dir(1.6 / hw, 0.0));
         slot(2, dir(0.0, 1.6 / hh));
         slot(3, dir(3.4 / hw, 0.0));
@@ -131,9 +158,13 @@ impl PostFx {
             p.chroma, p.vignette, if bloom_on { p.bloom } else { 0.0 }, p.grain,
             p.saturation, p.contrast, p.flash, p.time,
             p.radial, p.center[0], p.center[1], aspect,
-            p.tint[0], p.tint[1], p.tint[2], 0.0,
-            p.invert, 0.0, 0.0, 0.0,
+            p.tint[0], p.tint[1], p.tint[2], p.glass.n as f32,
+            p.invert, t.size[0] as f32, t.size[1] as f32, (t.size[1] as f32 / 720.0).max(1.0),
         ]);
+        for (i, r) in p.glass.rects[..p.glass.n].iter().enumerate() {
+            let o = 5 * SLOT as usize / 4 + 20 + i * 8;
+            data[o..o + 8].copy_from_slice(r);
+        }
         queue.write_buffer(&self.uniforms, 0, bytemuck::cast_slice(&data));
         let mut pass = |pipeline: &wgpu::RenderPipeline, group: &wgpu::BindGroup, dst: &wgpu::TextureView| {
             let mut rp = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -152,6 +183,14 @@ impl PostFx {
             pass(&self.blur, &t.groups[2], a);
             pass(&self.blur, &t.groups[3], b);
             pass(&self.blur, &t.groups[4], a);
+        }
+        if glass_on {
+            let [ga, gb] = &t.glass;
+            pass(&self.copy, &t.groups[0], ga);
+            pass(&self.blur, &t.glass_groups[0], gb);
+            pass(&self.blur, &t.glass_groups[1], ga);
+            pass(&self.blur, &t.glass_groups[2], gb);
+            pass(&self.blur, &t.glass_groups[3], ga);
         }
         pass(&self.composite, &t.groups[5], target);
     }

@@ -30,6 +30,7 @@
   <div id="rot">Gire o aparelho para jogar na horizontal ↻</div>
   <script src="gamepad.js"></script>
   <script src="assets.js"></script>
+  <script src="market.js"></script>
   <script type="module">
     import init, * as ume from './ultimate-mugen.js?v=__BUILD__';
     const boot = document.getElementById('boot'), bar = document.querySelector('#bar i'), msg = document.getElementById('bootmsg');
@@ -48,6 +49,7 @@
     } catch (e) { msg.textContent = 'Falha ao carregar: ' + (e && e.message || e); throw e; }
     bar.style.width = '100%';
     window.umeStartImports(ume);
+    window.umeStartMarket(ume);
     setTimeout(hide, 600);
     const cv = document.getElementById('glcanvas');
     cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); msg.textContent = 'Contexto gráfico perdido, recarregando…'; boot.classList.remove('done'); document.body.appendChild(boot); setTimeout(() => location.reload(), 800); });

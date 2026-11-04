@@ -120,6 +120,10 @@ pub struct Fighter {
     pub is_helper: bool,
     pub helper_id: i32,
     pub helper_player: bool,
+    pub helper_projectile: bool,
+    pub own_projectile: bool,
+    pub own_clsn_scale: bool,
+    pub size_overrides: Vec<(String, f32)>,
     pub key_ctrl: bool,
     pub parent: Option<u32>,
     pub root: u32,
@@ -168,7 +172,7 @@ impl Fighter {
         let lscl = 320.0 / if def.local_w > 0.0 { def.local_w } else { 320.0 };
         let life = def.c("data.life", 1000.0) as f32;
         Fighter {
-            id, st_def: def.clone(), anim_def: def.clone(), side, player_no, is_helper: false, helper_id: 0, helper_player: false, key_ctrl: false,
+            id, st_def: def.clone(), anim_def: def.clone(), side, player_no, is_helper: false, helper_id: 0, helper_player: false, helper_projectile: false, own_projectile: false, own_clsn_scale: false, size_overrides: vec![], key_ctrl: false,
             parent: None, root: id, destroyed: false, pal_no: 1, ai_level: 0,
             pos: V2::default(), vel: V2::default(), facing: 1.0, lscl,
             state_no: 0, prev_state_no: 0, state_time: 0, state_type: 'S', move_type: 'I', physics: 'S', ctrl: true,
@@ -187,7 +191,10 @@ impl Fighter {
             draw_offset: V2::default(), victory_quote: -1, clipboard: vec![], unhittable: 0, super_defence_mul: 1.0, def,
         }
     }
-    pub fn c(&self, k: &str, d: f64) -> f32 { self.def.c(k, d) as f32 }
+    pub fn c(&self, k: &str, d: f64) -> f32 {
+        match self.size_overrides.iter().find(|(n, _)| n == k) { Some((_, v)) => *v, None => self.def.c(k, d) as f32 }
+    }
+    pub fn projectile_tally_id(&self) -> u32 { if self.own_projectile { self.id } else { self.root } }
 
     pub fn anim(&self) -> Option<&Animation> { self.anim_def.anims.get(&self.anim_real) }
     pub fn frame(&self) -> Option<&AnimFrame> { self.anim().and_then(|a| a.frames.get(self.elem)) }
@@ -287,8 +294,8 @@ impl Fighter {
         let modified;
         let list: &[Box4] = if self.clsn_mods.iter().any(|c| c.kind == kind) { modified = crate::sctrl::clsn::apply(&self.clsn_mods, kind, list); &modified } else { list };
         let s = self.lscl * self.draw_scale[0];
-        let sx = self.def.c("size.xscale", 1.0) as f32;
-        let sy = self.def.c("size.yscale", 1.0) as f32;
+        let sx = self.c("size.xscale", 1.0);
+        let sy = self.c("size.yscale", 1.0);
         let mut out: Vec<Box4> = list.iter().map(|b| {
             let (mut x1, mut x2) = (b[0] * sx * s, b[2] * sx * s);
             if fr.flip_h { let t = -x2; x2 = -x1; x1 = t; }

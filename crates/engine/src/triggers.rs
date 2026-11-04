@@ -38,6 +38,7 @@ impl<'a> Ctx<'a> {
         if (f.facing > 0.0) == front { self.screen_edge(true) - f.pos.x } else { f.pos.x - self.screen_edge(false) }
     }
     fn const_val(&self, k: &str) -> f64 {
+        if let Some((_, v)) = self.f().size_overrides.iter().find(|(n, _)| n == k) { return *v as f64; }
         let c = &self.f().def.constants;
         if let Some(v) = c.get(k) { return *v; }
         if k.starts_with("velocity.") && !k.ends_with(".x") && !k.ends_with(".y") { return *c.get(&format!("{k}.x")).unwrap_or(&0.0); }
@@ -309,8 +310,8 @@ impl<'a> Host for Ctx<'a> {
             "playeridexist" => b(m.idx(a0() as u32).is_some()),
             "numhelper" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; m.fighters.iter().filter(|h| h.is_helper && h.root == f.root && !h.destroyed && (id < 0 || h.helper_id == id)).count() as f64 }
             "numexplod" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; m.explods.iter().filter(|e| e.owner == f.id && (id < 0 || e.id == id)).count() as f64 }
-            "numproj" => m.projectiles.iter().filter(|p| p.root == f.root && !p.remove).count() as f64,
-            "numprojid" => { let id = a0() as i32; m.projectiles.iter().filter(|p| p.root == f.root && !p.remove && p.id == id).count() as f64 }
+            "numproj" => m.projectiles.iter().filter(|p| p.tally == f.projectile_tally_id() && !p.remove).count() as f64,
+            "numprojid" => { let id = a0() as i32; m.projectiles.iter().filter(|p| p.tally == f.projectile_tally_id() && !p.remove && p.id == id).count() as f64 }
             "numtarget" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; f.targets.iter().filter(|t| id < 0 || t.1 == id).count() as f64 }
             "numenemy" => m.roots().filter(|r| r.side != f.side).count() as f64,
             "numpartner" => m.roots().filter(|r| r.side == f.side && r.id != f.id).count() as f64,

@@ -68,7 +68,7 @@ impl Explod {
 
 #[derive(Clone)]
 pub struct Projectile {
-    pub owner: u32, pub root: u32, pub teamside: usize, pub id: i32, pub cur: AnimCursor, pub hit_anim: i32, pub rem_anim: i32, pub cancel_anim: i32,
+    pub owner: u32, pub root: u32, pub tally: u32, pub teamside: usize, pub id: i32, pub cur: AnimCursor, pub hit_anim: i32, pub rem_anim: i32, pub cancel_anim: i32,
     pub pos: V2, pub vel: V2, pub accel: V2, pub vel_mul: V2, pub rem_vel: V2, pub facing: f32, pub hits: i32, pub miss_time: i32, pub miss_cd: i32,
     pub priority: i32, pub spr_priority: i32, pub edge_bound: f32, pub height_bound: [f32; 2], pub remove_time: i32, pub time: i32,
     pub hitdef: HitDefData, pub dying: bool, pub guard_dist: f32, pub scale: [f32; 2], pub remove: bool, pub lscl: f32,
@@ -995,7 +995,7 @@ impl Match {
     pub fn can_be_hit(&self, d: usize, hd: &HitDefData, side: usize) -> bool {
         let f = &self.fighters[d];
         let team_ok = match hd.affect_team { 'B' => true, 'F' => f.side == side, _ => f.side != side };
-        if f.destroyed || !team_ok || !f.alive || f.ikemen.standby { return false; }
+        if f.destroyed || !team_ok || !f.alive || f.ikemen.standby || f.helper_projectile { return false; }
         if f.move_type == 'H' {
             if hd.chain_id.is_some_and(|c| f.ghv.hit_id != c) { return false; }
             if f.ghv.hit_id >= 0 && hd.no_chain_id.contains(&Some(f.ghv.hit_id)) { return false; }
@@ -1090,10 +1090,22 @@ impl Match {
             let did = self.fighters[d].id;
             self.fighters[a].hitdef_targets.push(did);
             if hd.hit_once { self.fighters[a].targets.retain(|t| t.0 == did); }
-            self.apply_hit(a, d, &hd, at, None);
+            let projectile_helper = self.fighters[a].helper_projectile;
+            let contacts_before = self.fighters[a].proj_contacts.len();
+            let as_projectile = projectile_helper.then(|| (self.fighters[a].helper_id, self.fighters[a].facing));
+            self.apply_hit(a, d, &hd, at, as_projectile);
+            if projectile_helper { self.share_projectile_helper_contacts(a, contacts_before); }
             struck.push(a);
         }
         for a in struck { if self.fighters.get(a).is_some_and(|f| f.def.source == Source::Mugen) { self.fighters[a].hitdef_active = false; } }
+    }
+
+    fn share_projectile_helper_contacts(&mut self, a: usize, from: usize) {
+        let gt = self.game_time;
+        let (id, root) = (self.fighters[a].helper_id, self.fighters[a].root);
+        self.fighters[a].proj_contacts.push(('c', id, gt));
+        let fresh: Vec<_> = self.fighters[a].proj_contacts[from..].to_vec();
+        if let Some(r) = self.idx(root) { if r != a { self.fighters[r].proj_contacts.extend(fresh); } }
     }
 
     /// Is fighter `i` standing against the edge of the playable area (screen / stage bound)?
@@ -1474,7 +1486,19 @@ impl Match {
         h.super_move_time = num(self, "supermovetime", 0.0, 0) as i32;
         h.preserve = num(self, "preserve", 0.0, 0) != 0.0;
         h.own_pal = num(self, "ownpal", 0.0, 0) != 0.0;
-        h.helper_player = sc.raw("helpertype").is_some_and(|t| t.trim().eq_ignore_ascii_case("player"));
+        let helper_type = sc.raw("helpertype").map(|t| t.trim().to_ascii_lowercase()).unwrap_or_default();
+        h.helper_player = helper_type == "player";
+        h.helper_projectile = helper_type == "projectile";
+        h.own_projectile = num(self, "ownprojectile", 0.0, 0) != 0.0;
+        h.own_clsn_scale = num(self, "ownclsnscale", 0.0, 0) != 0.0;
+        if !h.own_clsn_scale { h.size_overrides = f.size_overrides.clone(); }
+        for (name, param) in &sc.params {
+            if !name.starts_with("size.") { continue; }
+            let Some(e) = param.exprs.first() else { continue };
+            let v = self.ev(i, e) as f32;
+            if v.is_nan() { continue; }
+            match h.size_overrides.iter_mut().find(|(n, _)| n == name) { Some(slot) => slot.1 = v, None => h.size_overrides.push((name.clone(), v)) }
+        }
         h.pal_no = f.pal_no; h.ai_level = root.ai_level; h.life = root.life_max; h.life_max = root.life_max;
         let postype = sc.raw("postype").unwrap_or("p1").to_ascii_lowercase();
         let (px, py) = (num(self, "pos", 0.0, 0) * f.lscl, num(self, "pos", 0.0, 1) * f.lscl);
@@ -1520,7 +1544,7 @@ impl Match {
         let has = |k: &str| sc.has(k, 0);
         let hit_anim = if has("projhitanim") { num(self, "projhitanim", -1.0, 0) as i32 } else { -1 };
         let p = Projectile {
-            owner: f.id, root: f.root, teamside: f.side, id: num(self, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
+            owner: f.id, root: f.root, tally: f.projectile_tally_id(), teamside: f.side, id: num(self, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
             hit_anim, rem_anim: if has("projremanim") { num(self, "projremanim", -1.0, 0) as i32 } else { hit_anim },
             cancel_anim: if has("projcancelanim") { num(self, "projcancelanim", -1.0, 0) as i32 } else { -1 },
             pos: V2 { x, y }, vel: V2 { x: num(self, "velocity", 0.0, 0) * f.lscl, y: num(self, "velocity", 0.0, 1) * f.lscl },

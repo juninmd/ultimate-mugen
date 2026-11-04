@@ -51,3 +51,19 @@ Chaves de map não diferenciam maiúsculas. Cada map guarda no máximo 256 chave
 `data.dizzypoints` and `data.guardpoints` in the `[Data]` section default to `data.life`.
 
 `data.dizzypoints` e `data.guardpoints` na seção `[Data]` usam `data.life` como padrão.
+
+## Module controllers / Controllers de módulo
+
+Ikemen GO modules and motifs use these controllers. They are always parsed (a character that contains them still loads and runs); the table says what each one does here. A controller that is not supported does nothing and writes one warning line to the match's compatibility log (`Match::console`) the first time it runs. The list lives in `ume_engine::sctrl::module::MODULE_CONTROLLERS` so tools can query it with `module_status(name)` / `rejected_by_design()`.
+
+Controllers de módulo do Ikemen GO são sempre interpretados (o personagem carrega e roda); os não suportados não fazem nada e registram um aviso único no log de compatibilidade.
+
+| Controller | Status | Notes |
+|---|---|---|
+| `MatchRestart` | supported | Resets wins and the round counter and restarts at the start of the next tick |
+| `LoadFile`, `SaveFile` | rejected by design | Characters never get file access; content runs in a sandbox |
+| `ShaderSet` | rejected by design | The renderer has a fixed pipeline; user shader code is not loaded |
+| `Storyboard`, `RemoveStoryboard`, `Dialogue` | planned | `[SceneDef]` files are parsed but there is no storyboard runtime yet |
+| `SaveState`, `LoadState` | planned | Needs the rollback snapshot of the match (see the roadmap) |
+| `LifebarAction` | planned | The HUD has no scripting hooks yet |
+| `ChangeMovelist` | planned | The movelist is fixed at load time |

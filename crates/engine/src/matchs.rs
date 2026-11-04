@@ -139,6 +139,7 @@ pub struct Match {
     pub texts: Vec<crate::ikemen::TextItem>,
     pub team_maps: [crate::ikemen::MapStore; 2],
     pub console: crate::sctrl::console::ConsoleLog,
+    pub restart_pending: bool,
     pub announce: Option<Announce>,
     pub rng: u32,
     pub next_id: u32,
@@ -152,7 +153,7 @@ impl Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             team_simul: false, team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
-            events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
+            events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
     }
     pub fn random(&mut self) -> f32 {
@@ -612,6 +613,11 @@ impl Match {
         if self.slow_mo > 0 {
             self.slow_mo -= 1;
             if self.slow_mo % 3 != 0 { self.visual_timers(); return; }
+        }
+        if std::mem::take(&mut self.restart_pending) {
+            self.wins = [0, 0];
+            self.round_no = 1;
+            self.start_round();
         }
         self.game_time += 1;
         self.round_time += 1;

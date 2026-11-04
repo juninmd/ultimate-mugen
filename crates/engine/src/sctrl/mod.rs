@@ -1,6 +1,7 @@
 pub mod bgm;
 pub mod console;
 pub mod debug;
+pub mod module;
 mod player;
 mod pause;
 mod stage;
@@ -33,7 +34,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         "modifybgctrl" => stage::modify_bg_ctrl(m, i, sc),
         "modifyplayer" => player::modify_player(m, i, sc),
         "printtoconsole" => console::print_to_console(m, i, sc),
-        _ => return false,
+        _ => return module::run(m, i, sc),
     }
     true
 }

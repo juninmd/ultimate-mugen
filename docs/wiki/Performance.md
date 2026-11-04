@@ -98,3 +98,31 @@ On the cloud development machine, median normalization time decreased from 60.8 
 In the cloud development environment, warm-run allocations decreased from 2,331 to 1,183 per decode. Elapsed times were noisy (roughly 9–11 ms in warm runs) and do not demonstrate a speedup. This reduces temporary allocation churn rather than the final decoded PCM size. The benchmark excludes playback and audio-device latency. Run `cargo test --locked --release --example audio_bench` for sample-preservation, mono/stereo, tail and existing PCM tests.
 
 `Ui::quad` transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.
+
+## M.U.G.E.N. sprites, thumbnails and the web loading budget
+
+A 371 MB pack of eight HD characters (429 MB of SFF and 176 MB of SND once decompressed) used to freeze the
+select screen for 6 to 24 seconds. `CharEntry::ensure_portrait` calls `decode_sff_only` with a filter that asks
+for sprites 9000,0, 9000,1 and the idle frame, but the SFF v1 decoder ignored that filter and decoded every PCX
+subfile in the file. It now honours it, so a 673-sprite character decodes its thumbnail in about 1.8 ms
+(`cargo run --release -p ume-engine --example mugen_load_bench -- <zip>`), and switching the roster filter no
+longer registers a single long task in Chrome's `PerformanceObserver`.
+
+Paletted sprites also stopped being baked into RGBA at load time: they live in the 8-bit index atlas and are
+coloured by a palette row in the shader. `CharDef::rgba_sprite` materialises an RGBA copy only for the paths that
+must own pixels (floor reflections, thumbnails), so a HD character no longer allocates a 4x buffer per sprite.
+
+Remaining cost on the web: `registry::read_zip` still decompresses the whole archive into the VFS (3 to 4 s and
+about 610 MB for that pack) and the first fight still decodes the complete SFF (roughly 5 s for a 54 MB
+character). Those two are the next targets: a lazy VFS and per-sprite decoding.
+
+| Probe | What it shows |
+|---|---|
+| F3 | second overlay line: vertices, draw calls, atlas uploads (count and KB) and RGBA/index atlas fill |
+| `?perf=1` | console log with the archive size, the VFS size per extension and the import time, plus per-character phases (`sff:decode`, `snd:decode`, `cns:parse`, `air:parse`, `sff:rgba`) |
+| `?p1=<fighter>&p2=<fighter>&luta=1` | deep link straight into a fight |
+| `?tela=select` | opens the roster (used for QA of the select screen) |
+| `?cenario=<n>&modo=cpu\|versus\|treino\|watch` | stage index and mode for the link |
+
+Deep links resolve after the imported packs reach the registry, so a shared link keeps working while the pack is
+still importing.

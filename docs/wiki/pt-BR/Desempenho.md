@@ -98,3 +98,32 @@ Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,
 No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
 
 `Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.
+
+## Sprites M.U.G.E.N., miniaturas e o orçamento de carregamento na web
+
+Um pacote de 371 MB com oito personagens HD (429 MB de SFF e 176 MB de SND depois de descompactado) travava a
+tela de seleção por 6 a 24 segundos. `CharEntry::ensure_portrait` chama `decode_sff_only` pedindo os sprites 9000,0,
+9000,1 e o quadro parado, mas o decodificador SFF v1 ignorava esse filtro e decodificava todos os subarquivos PCX
+do arquivo. Agora ele respeita o filtro: um personagem de 673 sprites decodifica a miniatura em cerca de 1,8 ms
+(`cargo run --release -p ume-engine -- example mugen_load_bench -- <zip>`), e alternar o filtro da seleção não
+registra mais nenhuma tarefa longa no `PerformanceObserver` do Chrome.
+
+Sprites com paleta também deixaram de ser convertidos para RGBA no carregamento: eles ficam no atlas de índices de
+8 bits e são coloridos por uma linha de paleta no shader. `CharDef::rgba_sprite` materializa uma cópia RGBA apenas
+para os caminhos que precisam dos pixels (reflexo no chão, miniaturas), então um personagem HD não aloca mais um
+buffer 4x por sprite.
+
+Custo que ainda existe na web: `registry::read_zip` descompacta o arquivo inteiro para a VFS (3 a 4 s e cerca de
+610 MB nesse pacote) e a primeira luta ainda decodifica o SFF completo (aproximadamente 5 s para um personagem de
+54 MB). Esses dois são os próximos alvos: uma VFS preguiçosa e decodificação por sprite.
+
+| Sonda | O que mostra |
+|---|---|
+| F3 | segunda linha do overlay: vértices, chamadas de desenho, uploads do atlas (quantidade e KB) e ocupação dos atlas RGBA/índice |
+| `?perf=1` | log no console com tamanho do arquivo, tamanho da VFS por extensão e tempo de importação, além das fases por personagem (`sff:decode`, `snd:decode`, `cns:parse`, `air:parse`, `sff:rgba`) |
+| `?p1=<lutador>&p2=<lutador>&luta=1` | link direto para uma luta |
+| `?tela=select` | abre a seleção (usado para QA da tela de seleção) |
+| `?cenario=<n>&modo=cpu\|versus\|treino\|watch` | índice do cenário e modo do link |
+
+Os links diretos são resolvidos depois que os pacotes importados chegam ao registro, então um link compartilhado
+continua funcionando enquanto o pacote ainda está sendo importado.

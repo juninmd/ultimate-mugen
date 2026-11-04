@@ -43,6 +43,20 @@ impl Input {
     pub fn is_down(&self, k: KeyCode) -> bool { self.down.contains(&k) }
     pub fn is_pressed(&self, k: KeyCode) -> bool { self.pressed.contains(&k) }
 
+    /// Drop every held key, mouse button and finger. The key-up of a held key goes to whichever window has
+    /// focus, so a window that loses focus mid-input never receives it: without this the game keeps reading
+    /// the last direction (the fighter walks into the corner) or attack button (no command ever fires again,
+    /// because a press edge is required) as held forever.
+    pub fn release_all(&mut self) {
+        self.down.clear();
+        self.pressed.clear();
+        self.pressed_order.clear();
+        self.mouse_down = false;
+        self.mouse_pressed = false;
+        self.touches.clear();
+        self.primary_touch = None;
+    }
+
     fn end_frame(&mut self) {
         self.pressed.clear();
         self.pressed_order.clear();
@@ -52,6 +66,20 @@ impl Input {
         self.wheel = [0.0; 2];
         self.touches.retain(|t| !matches!(t.phase, Phase::Ended | Phase::Cancelled));
         for t in &mut self.touches { if t.phase == Phase::Started { t.phase = Phase::Moved; } }
+    }
+
+    /// One keyboard transition. `text` is the printable character of a press (empty for the ones that only
+    /// exist as a physical key, like the arrows).
+    fn key(&mut self, state: ElementState, code: Option<KeyCode>, repeat: bool, text: &str) {
+        let Some(code) = code else { return };
+        match state {
+            ElementState::Pressed => {
+                self.typed.extend(text.chars().filter(|c| !c.is_control()));
+                if !repeat { self.pressed.insert(code); self.pressed_order.push(code); }
+                self.down.insert(code);
+            }
+            ElementState::Released => { self.down.remove(&code); }
+        }
     }
 
     fn touch(&mut self, id: u64, phase: Phase, position: [f32; 2]) {
@@ -279,12 +307,16 @@ impl<G: Game> ApplicationHandler for Shell<G> {
     }
 
     fn suspended(&mut self, _: &ActiveEventLoop) {
+        self.input.release_all();
         if cfg!(target_os = "android") { self.live = None; self.pending = None; }
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _: WindowId, event: WindowEvent) {
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
+            // focus and visibility changes swallow the matching key-up: forget what was held so the fighter
+            // never keeps walking (or holding an attack, which stops every command from firing) after alt-tab
+            WindowEvent::Focused(false) | WindowEvent::Occluded(true) => self.input.release_all(),
             WindowEvent::Resized(s) => if let Some(live) = self.live.as_mut() {
                 let (w, h) = (s.width.max(1), s.height.max(1));
                 if (w, h) != (live.config.width, live.config.height) {
@@ -294,15 +326,9 @@ impl<G: Game> ApplicationHandler for Shell<G> {
                 }
             },
             WindowEvent::KeyboardInput { event, .. } => {
-                if event.state == ElementState::Pressed {
-                    if let Some(t) = &event.text { self.input.typed.extend(t.chars().filter(|c| !c.is_control())); }
-                }
-                if let PhysicalKey::Code(k) = event.physical_key {
-                    match event.state {
-                        ElementState::Pressed => { if !event.repeat { self.input.pressed.insert(k); self.input.pressed_order.push(k); } self.input.down.insert(k); }
-                        ElementState::Released => { self.input.down.remove(&k); }
-                    }
-                }
+                let text = event.text.as_deref().unwrap_or("");
+                let code = match event.physical_key { PhysicalKey::Code(k) => Some(k), _ => None };
+                self.input.key(event.state, code, event.repeat, text);
             }
             WindowEvent::CursorMoved { position, .. } => {
                 let p = [position.x as f32, position.y as f32];
@@ -368,7 +394,50 @@ pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
 
 #[cfg(test)]
 mod tests {
-    use super::Pacer;
+    use super::{ElementState, Input, Pacer, KeyCode};
+
+    /// Holding a key and alt-tabbing: the window that loses focus never sees the key-up, so the shell has to
+    /// forget it. Otherwise the fighter keeps walking (or keeps an attack button pressed, which makes every
+    /// command stop firing because commands need a fresh press edge).
+    #[test]
+    fn a_lost_key_up_is_cleared_when_the_window_loses_focus() {
+        let mut i = Input::default();
+        i.key(ElementState::Pressed, Some(KeyCode::ArrowRight), false, "");
+        i.key(ElementState::Pressed, Some(KeyCode::KeyX), false, "x");
+        assert!(i.is_down(KeyCode::ArrowRight) && i.is_down(KeyCode::KeyX));
+        i.release_all();
+        assert!(!i.is_down(KeyCode::ArrowRight) && !i.is_down(KeyCode::KeyX), "nothing stays held");
+        assert!(!i.is_pressed(KeyCode::KeyX) && i.pressed_order.is_empty(), "no stale press survives the focus change");
+    }
+
+    #[test]
+    fn focus_loss_clears_the_mouse_and_every_finger() {
+        let mut i = Input::default();
+        i.mouse_down = true; i.mouse_pressed = true;
+        i.touch(3, super::Phase::Started, [40.0, 50.0]);
+        i.touch(4, super::Phase::Started, [60.0, 70.0]);
+        i.release_all();
+        assert!(!i.mouse_down && !i.mouse_pressed);
+        assert!(i.touches.is_empty(), "no finger stays pressed on the touch pad");
+    }
+
+    #[test]
+    fn releasing_a_key_normally_is_unchanged() {
+        let mut i = Input::default();
+        i.key(ElementState::Pressed, Some(KeyCode::KeyQ), false, "q");
+        i.key(ElementState::Released, Some(KeyCode::KeyQ), false, "");
+        assert!(!i.is_down(KeyCode::KeyQ) && i.is_pressed(KeyCode::KeyQ), "the press is still readable this frame");
+        assert_eq!(i.typed, "q");
+    }
+
+    #[test]
+    fn a_repeated_key_does_not_queue_extra_presses() {
+        let mut i = Input::default();
+        i.key(ElementState::Pressed, Some(KeyCode::ArrowUp), false, "");
+        i.key(ElementState::Pressed, Some(KeyCode::ArrowUp), true, "");
+        assert_eq!(i.pressed_order, vec![KeyCode::ArrowUp]);
+        assert!(i.is_down(KeyCode::ArrowUp));
+    }
 
     #[test]
     fn stretch_forces_sixteen_nine_logical_space_on_any_window() {

@@ -10,6 +10,7 @@
 | UMF não carrega | JSON inválido ou campo obrigatório faltando | `cargo run --release` mostra o erro do `serde_json` com linha e coluna |
 | Jogo lento | Resolução de arte alta | Menu Vídeo → Qualidade, ou `quality=1` no `.cfg` |
 | Muitos flashes | Sensibilidade à luz | `impact_lv=0` no `.cfg` |
+| Lutador continua andando sozinho e os comandos param de sair | Tecla presa depois de trocar de janela (o sistema entrega o "soltar" para a outra janela) | O shell solta todo o input ao perder o foco; aperte e solte a tecla de novo se ainda acontecer |
 | Não acha a pasta `mugen/` | Executável rodando de outro diretório | Defina `UME_MUGEN_DIR` |
 
 Para relatar um bug, abra uma issue com o personagem ou cenário, a saída do `mugen_check` e os passos para reproduzir.

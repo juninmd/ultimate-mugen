@@ -10,6 +10,7 @@
 | UMF does not load | Invalid JSON or a missing required field | `cargo run --release` prints the `serde_json` error with line and column |
 | Game is slow | High art resolution | Settings → Video → Quality, or `quality=1` in the `.cfg` |
 | Too many flashes | Light sensitivity | `impact_lv=0` in the `.cfg` |
+| Fighter keeps walking on its own and commands stop coming out | Key stuck after switching windows (the OS delivers the key-up to the other window) | The shell releases every input on focus loss; press and release the key again if it still happens |
 | `mugen/` folder not found | Executable run from another directory | Set `UME_MUGEN_DIR` |
 
 To report a bug, open an issue with the character or stage, the `mugen_check` output and the steps to reproduce.

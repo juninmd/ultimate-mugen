@@ -348,6 +348,23 @@ mod tests {
             &parse_command("n", "N+x", 1, 1)
         ));
     }
+    #[test]
+    fn a_button_that_never_gets_released_stops_matching_until_the_history_clears() {
+        let mut h = feed(&[0, D, D, D | R, D | R, R, R | X], 1);
+        let qcf = parse_command("q", "~D, DF, F, x", 15, 1);
+        let mut st = CommandState::default();
+        st.update(&h, std::slice::from_ref(&qcf), false);
+        assert!(st.active.contains("q"));
+        // the key-up was lost (window lost focus while x was held): no press edge ever happens again
+        for _ in 0..30 { h.push(R | X, 1); st.update(&h, std::slice::from_ref(&qcf), false); }
+        assert!(!st.active.contains("q"), "a permanently held button cannot fire the same command twice");
+        // releasing everything and rolling the motion again works, which is what the shell restore must allow
+        for _ in 0..3 { h.push(0, 1); }
+        for b in [D, D, D | R, D | R, R, R | X] { h.push(b, 1); }
+        st.update(&h, std::slice::from_ref(&qcf), false);
+        assert!(st.active.contains("q"));
+    }
+
     fn pausing_state(c: &CommandDef, h: &InputHistory, ticks: usize) -> Vec<bool> {
         let mut st = CommandState::default();
         let mut h = h.clone();

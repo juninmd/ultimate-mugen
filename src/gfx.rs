@@ -1,11 +1,11 @@
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
+#[cfg(not(target_os = "ios"))]
 mod imp {
     pub use ume_shell::audio;
     pub use ume_shell::quad::*;
     pub use ume_shell::quad::Blend as GfxBlend;
 }
 
-#[cfg(any(target_os = "android", target_os = "ios"))]
+#[cfg(target_os = "ios")]
 mod imp {
     pub use macroquad::audio;
     pub use macroquad::models::{draw_mesh, Mesh, Vertex};

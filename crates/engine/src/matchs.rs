@@ -198,6 +198,14 @@ impl Match {
     pub fn idx(&self, id: u32) -> Option<usize> { self.fighters.iter().position(|f| f.id == id && !f.destroyed) }
     pub fn enemy(&self, i: usize, n: usize) -> Option<usize> {
         let me = &self.fighters[i];
+        if n == 0 {
+            return self.fighters.iter().enumerate()
+                .filter(|(_, f)| !f.is_helper && f.side != me.side && !f.destroyed)
+                .take(16)
+                .min_by(|(_, a), (_, b)| (!a.alive).cmp(&!b.alive).then_with(||
+                    (a.pos.x - me.pos.x).abs().total_cmp(&(b.pos.x - me.pos.x).abs())))
+                .map(|(j, _)| j);
+        }
         let mut buf = [0usize; 16];
         let mut len = 0;
         for (j, f) in self.fighters.iter().enumerate() {

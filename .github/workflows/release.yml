@@ -21,7 +21,7 @@ jobs:
       version: ${{ steps.plan.outputs.version }}
       tag: ${{ steps.plan.outputs.tag }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - run: node --test scripts/*.test.mjs
       - id: plan
@@ -45,7 +45,7 @@ jobs:
     env: { UME_RELEASE_VERSION: "${{ needs.plan.outputs.version }}" }
     defaults: { run: { shell: bash } }
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config
@@ -77,7 +77,7 @@ jobs:
       VERSION: ${{ needs.plan.outputs.version }}
       TAG: ${{ needs.plan.outputs.tag }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: { path: dist, pattern: "dist-*", merge-multiple: true }
       - uses: actions/download-artifact@v4

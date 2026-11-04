@@ -442,6 +442,7 @@ async fn market_tour(app: &mut App, dir: &str) {
     screen(app, dir, "market-marked", 3).await;
     app.market_ui_view_installed();
     screen(app, dir, "market-installed", 3).await;
+}
 
 async fn ui_tour(app: &mut App, dir: &str) {
     for tab in 0..6 {

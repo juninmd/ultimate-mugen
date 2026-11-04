@@ -166,3 +166,17 @@ fn palfx_in_shader() {
     assert!(near(px(&img, 24, 8), [100, 100, 100]), "{:?}", px(&img, 24, 8));
     assert!(near(px(&img, 40, 8), [126, 76, 102]), "{:?}", px(&img, 40, 8));
 }
+
+#[test]
+fn glass_panel_blurs_and_leaves_the_rest_alone() {
+    let Some((device, queue)) = gpu() else { eprintln!("no GPU adapter, skipping"); return; };
+    let plain = post_render(&device, &queue, &ume_render::PostParams::default());
+    let mut p = ume_render::PostParams::default();
+    assert!(p.glass.push(20.0, 16.0, 24.0, 32.0, 4.0, [0.5, 0.6, 0.9]));
+    let glass = post_render(&device, &queue, &p);
+    assert_eq!(px(&glass, 2, 2), px(&plain, 2, 2), "far outside the panel nothing changes");
+    assert!(px(&glass, 38, 32)[0] > px(&plain, 38, 32)[0] + 20, "red bleeds across the sharp edge inside the panel: {:?}", px(&glass, 38, 32));
+    assert!(px(&glass, 26, 32)[0] < px(&plain, 26, 32)[0], "and the sharp red is softened: {:?}", px(&glass, 26, 32));
+    assert!(px(&glass, 18, 32)[0] < px(&plain, 18, 32)[0], "the panel casts a soft shadow just outside its edge");
+    assert!(!{ let mut g = ume_render::Glass::default(); (0..ume_render::MAX_GLASS + 1).all(|_| g.push(0.0, 0.0, 4.0, 4.0, 1.0, [0.0; 3])) }, "capacity is bounded");
+}

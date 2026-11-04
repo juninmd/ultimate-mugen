@@ -9,6 +9,7 @@ mod gamepad;
 mod keybinds;
 mod hud;
 mod registry;
+mod replays;
 mod render;
 mod poly;
 mod postfx;

@@ -14,7 +14,9 @@ use ume_engine::chardef::CharDef;
 
 mod cutscene;
 mod keyedit;
+mod replay_browser;
 pub(crate) use keyedit::KeyEdit;
+use replay_browser::Browser;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul }
@@ -34,6 +36,7 @@ pub enum Screen {
     Results { winner: usize, cur: usize },
     Controls,
     Mugen,
+    Replays,
     Video { cur: usize },
     /// story scene: 0 arcade opening · 1 before the boss · 2 ending
     Cutscene { kind: u8, page: usize, t: f32 },
@@ -45,7 +48,7 @@ pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, stage_j
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
 #[derive(Clone)]
-pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>> }
+pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>>, pals: Vec<i32>, seed: u32, checksum: Option<u128> }
 
 /// Team battle state: sequence (KOF-style turns, winner keeps its remaining life) or parallel (2v2 simultaneous).
 #[derive(Clone)]
@@ -81,6 +84,9 @@ pub struct App {
     /// last finished fight (replayable) and the replay being played now
     last_fight: Option<Replay>,
     pub replaying: Option<Replay>,
+    replay_ui: Browser,
+    replay_from_browser: bool,
+    replay_verdict: Option<bool>,
     /// fighters per team in the team modes (2..=5)
     pub team_n: usize,
     pub team_pick: Vec<usize>,
@@ -100,7 +106,7 @@ pub struct App {
     last_disc: Option<std::mem::Discriminant<Screen>>,
 }
 
-const MENU: [(&str, &str); 11] = [
+const MENU: [(&str, &str); 12] = [
     ("Arcade", "Enfrente uma sequência de oponentes"),
     ("Versus CPU", "Você contra o computador"),
     ("2 Jogadores", "Teclado compartilhado ou dois controles"),
@@ -111,6 +117,7 @@ const MENU: [(&str, &str); 11] = [
     ("Personagens MUGEN", "Como adicionar personagens e cenários"),
     ("Controles", "Teclado, Xbox, PlayStation, toque e vibração"),
     ("Vídeo", "Tela cheia, resolução até 4K e qualidade da arte"),
+    ("Replays", "Rever, renomear e apagar lutas gravadas"),
     ("Sair", "Fechar o jogo"),
 ];
 
@@ -140,7 +147,7 @@ impl App {
         App {
             reg, ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: 4, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: String::new(), preview_t: 0.0,
-            settings, key_edit: None, move_page: 0, pending: Pending::default(), team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
+            settings, key_edit: None, move_page: 0, pending: Pending::default(), team: None, last_fight: None, replaying: None, replay_ui: Browser::default(), replay_from_browser: false, replay_verdict: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, last_disc: None,
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -185,6 +192,7 @@ impl App {
             Screen::Results { .. } => self.results().await,
             Screen::Controls => self.controls_screen(),
             Screen::Mugen => self.mugen_screen(),
+            Screen::Replays => self.replays_screen().await,
             Screen::Cutscene { .. } => self.cutscene(),
         }
         if is_key_pressed(KeyCode::F11) { self.toggle_fullscreen(); }
@@ -286,6 +294,7 @@ impl App {
                 7 => self.go(Screen::Mugen),
                 8 => self.go(Screen::Controls),
                 9 => self.go(Screen::Video { cur: 0 }),
+                10 => self.open_replays(),
                 _ => self.quit = true,
             }
         }
@@ -623,6 +632,10 @@ impl App {
         if dup { 2 } else { 1 }
     }
 
+    fn palette_of(&self, plan: &[(usize, usize, usize)], st: usize) -> i32 {
+        self.replaying.as_ref().and_then(|r| r.pals.get(st).copied()).unwrap_or_else(|| Self::pal_for(plan, st))
+    }
+
     async fn load_step(&mut self, step: u8, wait: bool) -> Result<bool, String> {
         let plan = self.load_plan();
         let s = self.sel.2;
@@ -635,14 +648,14 @@ impl App {
                 self.pending = Pending::default();
                 let mut seen: Vec<(usize, i32)> = vec![];
                 for k in 0..n {
-                    let key = (plan[k].2, Self::pal_for(&plan, k));
+                    let key = (plan[k].2, self.palette_of(&plan, k));
                     self.pending.jobs.push(if seen.contains(&key) { None } else { seen.push(key); self.reg.chars[key.0].spawn_load(key.1) });
                 }
             }
             if !wait && self.pending.jobs.get(st).is_some_and(|j| j.as_ref().is_some_and(|h| !h.is_finished())) { return Ok(false); }
             let (side, _, r) = plan[st];
             let job = self.pending.jobs.get_mut(st).and_then(|j| j.take());
-            let d = self.reg.chars[r].finish_load(Self::pal_for(&plan, st), job)?;
+            let d = self.reg.chars[r].finish_load(self.palette_of(&plan, st), job)?;
             self.pending.defs[side].push(d);
         } else if st == n {
             self.pending.jobs.clear();
@@ -678,6 +691,7 @@ impl App {
             if let Some(t) = &info { sess.m.team_lead = [0, 1].map(|sd| t.names[sd].first().map(|n| n.0.clone()).unwrap_or_default()); }
             sess.team = info;
             sess.is_replay = replay.is_some();
+            if let Some(r) = &replay { sess.m.rng = r.seed; }
             if seq { if let Some(t) = &self.team { for side in 0..2 { if let Some(f) = sess.m.fighters.iter_mut().find(|f| !f.is_helper && f.side == side) { f.power = t.power[side].min(f.power_max); } } } }
             sess.r.debug = self.debug_boxes;
             if seq && self.team.as_ref().is_some_and(|t| t.idx != [0, 0]) { sess.vfx.banner("PRÓXIMO LUTADOR", &format!("{} vs {}", self.reg.chars[self.sel.0].name, self.reg.chars[self.sel.1].name), [0.4, 0.9, 1.0]); }
@@ -692,6 +706,13 @@ impl App {
             self.audio.prepare_music(music).await;
         }
         Ok(true)
+    }
+
+    fn leave_fight(&mut self) {
+        let back_to_browser = self.replaying.is_some() && self.replay_from_browser;
+        self.replaying = None;
+        self.replay_from_browser = false;
+        if back_to_browser { self.open_replays(); } else { self.screen = Screen::Menu { cur: 0 }; }
     }
 
     fn abort_load(&mut self, e: String) { self.msg = e; self.pending = Pending::default(); self.screen = Screen::Menu { cur: 0 }; }
@@ -836,6 +857,8 @@ impl App {
         if is_key_pressed(KeyCode::Tab) && !s.paused { s.switch_control(); }
         s.update(dt, &mut self.c, &mut self.audio);
         s.draw(&mut self.g, &self.ui);
+        self.check_replay_verdict();
+        self.draw_replay_controls();
         self.c.touch.draw();
         if self.c.touch.enabled { self.ui.rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.0, 0.0, 0.0, 0.35)); self.ui.text("II", VW / 2.0, pb.1 + 30.0, 20.0, WHITE, Align::Center, true); }
         #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
@@ -844,7 +867,7 @@ impl App {
         if s.paused { self.pause_menu(accept_back).await; return; }
         if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
-                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.simul) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone() }); } }
+                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.simul) { if let Some(r) = self.snapshot_fight() { if !self.session.as_ref().is_some_and(|s| s.is_networked()) { self.persist_replay(&r); } self.last_fight = Some(r); } }
                 self.screen = Screen::Results { winner: w, cur: 0 };
             } } }
     }
@@ -923,7 +946,7 @@ impl App {
                 1 => { let s = self.session.as_mut().unwrap(); s.r.debug = !s.r.debug; self.debug_boxes = s.r.debug; }
                 2 => { self.reset_team(); self.start_fight().await; }
                 3 => { self.audio.stop_music(); self.session = None; self.team = None; self.team_pick.clear(); self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }; }
-                _ => { self.audio.stop_music(); self.session = None; self.team = None; self.screen = Screen::Menu { cur: 0 }; }
+                _ => { self.audio.stop_music(); self.session = None; self.team = None; self.leave_fight(); }
             }
         }
     }
@@ -972,16 +995,16 @@ impl App {
             // with a replay available the menu is Revanche / Replay / Personagens / Menu; without it Revanche / Personagens / Menu
             let choice = if can_replay { cur } else if cur >= 1 { cur + 1 } else { 0 };
             match choice {
-                0 => { self.replaying = None; if let Some((_, i)) = self.arcade.as_mut() { *i = (*i).min(5); } self.reset_team(); self.start_fight().await; }
+                0 => { self.replaying = None; self.replay_from_browser = false; if let Some((_, i)) = self.arcade.as_mut() { *i = (*i).min(5); } self.reset_team(); self.start_fight().await; }
                 1 => { self.start_replay().await; }
-                2 => { self.replaying = None; self.session = None; self.team = None; self.team_pick.clear(); self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }; }
-                _ => { self.replaying = None; self.session = None; self.team = None; self.screen = Screen::Menu { cur: 0 }; }
+                2 => { self.replaying = None; self.replay_from_browser = false; self.session = None; self.team = None; self.team_pick.clear(); self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }; }
+                _ => { self.session = None; self.team = None; self.leave_fight(); }
             }
         }
     }
 
     /// Snapshot the running session as the replayable "last fight" (used by the screenshot tour's determinism check).
-    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone() }); } }
+    pub fn capture_replay(&mut self) { self.last_fight = self.snapshot_fight(); }
 
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub async fn start_netplay(&mut self, a: &crate::netlink::NetArgs) {
@@ -1015,6 +1038,7 @@ impl App {
         let Some(r) = self.last_fight.clone() else { return };
         self.mode = r.mode; self.team = r.team.clone(); self.sel = r.sel;
         self.replaying = Some(r);
+        self.replay_verdict = None;
         self.start_fight().await;
     }
 

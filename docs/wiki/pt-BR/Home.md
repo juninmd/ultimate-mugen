@@ -15,6 +15,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Criar cenários](Cenarios.md) | Criadores | Cenário M.U.G.E.N `.def` e cenário nativo |
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
 | [Desempenho](Desempenho.md) | Desenvolvedores | Carga paralela, ritmo de quadros, benchmarks |
+| [Netplay e replays](Netplay-e-Replays.md) | Jogadores | Replays em disco, navegador de replays, velocidade e avanço de quadro |
 | [Solução de problemas](Problemas.md) | Todos | Erros comuns e ferramentas de diagnóstico |
 
 ## Formatos aceitos

@@ -24,8 +24,8 @@ The engine runs a strictly deterministic simulation loop at a fixed 60 ticks per
 
 ## 2. Replays and Tournaments
 
-- [ ] **Deterministic replay recorder**: initial `seed`, fighter and palette IDs, chosen stage and a bitfield-packed input stream. A multi-minute replay takes only a few kilobytes.
-- [ ] **Replay player**: normal and fast playback (2x, 4x), pause, frame stepping and takeover of a character at any point.
+- [x] **Deterministic replay recorder**: initial `seed`, fighter and palette IDs, chosen stage and a bitfield-packed input stream. A multi-minute replay takes only a few kilobytes.
+- [x] **Replay player**: normal and fast playback (2x, 4x), pause and frame stepping. Taking over a character at any point is still pending.
 
 ---
 

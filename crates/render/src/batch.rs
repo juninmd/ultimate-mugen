@@ -5,6 +5,22 @@ use bytemuck::{Pod, Zeroable};
 #[derive(Clone, Copy, Debug, Default, PartialEq, Pod, Zeroable)]
 pub struct Vertex { pub pos: [f32; 2], pub uv: [f32; 2], pub pal: u32, pub mul: [f32; 4], pub add: [f32; 4] }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PalFx { pub add: [f32; 3], pub mul: [f32; 3], pub color: f32, pub invert: bool }
+
+impl Default for PalFx {
+    fn default() -> Self { PalFx { add: [0.0; 3], mul: [1.0; 3], color: 1.0, invert: false } }
+}
+
+impl PalFx {
+    pub fn vertex(&self, tint: [f32; 4]) -> ([f32; 4], [f32; 4]) {
+        let mul = [0, 1, 2].map(|k| tint[k] * self.mul[k]);
+        let add = [0, 1, 2].map(|k| self.add[k] * mul[k]);
+        let w = (1.0 - self.color.clamp(0.0, 1.0)) + if self.invert { 2.0 } else { 0.0 };
+        ([mul[0], mul[1], mul[2], tint[3]], [add[0], add[1], add[2], w])
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum Blend { #[default] Alpha, Add, Sub }
 

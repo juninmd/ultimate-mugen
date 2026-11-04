@@ -6,7 +6,7 @@ pub mod post;
 
 pub use atlas::{Atlas, Rect};
 pub use canvas::{Canvas, Color};
-pub use batch::{Batch, Blend, DrawCall, Quad, Vertex};
+pub use batch::{Batch, Blend, DrawCall, PalFx, Quad, Vertex};
 pub use gpu::{Renderer, Target};
 pub use post::{PostFx, PostParams, POST_SHADER};
 

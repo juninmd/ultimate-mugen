@@ -140,3 +140,29 @@ fn post_effects_composite() {
     let glow = post_render(&device, &queue, &ume_render::PostParams { bloom: 1.0, ..Default::default() });
     assert!(px(&glow, 36, 32)[0] > px(&plain, 36, 32)[0], "bloom should spill past the edge");
 }
+
+#[test]
+fn palfx_in_shader() {
+    let Some((device, queue)) = gpu() else { eprintln!("no GPU adapter, skipping"); return; };
+    let mut r = Renderer::new(&device, wgpu::TextureFormat::Rgba8Unorm, [16, 16]);
+    let rgba = Rect { x: 4, y: 4, w: 1, h: 1 };
+    r.upload_rgba(&queue, rgba, &[200, 100, 0, 255]);
+    let uv = [4.5 / 16.0, 4.5 / 16.0];
+    let mut b = Batch::new();
+    let fxs = [
+        ume_render::PalFx { invert: true, ..Default::default() },
+        ume_render::PalFx { color: 0.0, ..Default::default() },
+        ume_render::PalFx { add: [0.2, 0.2, 0.2], mul: [0.5, 0.5, 2.0], ..Default::default() },
+    ];
+    for (k, fx) in fxs.iter().enumerate() {
+        let (mul, add) = fx.vertex([1.0; 4]);
+        let x = k as f32 * 16.0;
+        let v = |pos: [f32; 2]| ume_render::Vertex { pos, uv, pal: RGBA_SPRITE, mul, add };
+        b.push_tris(&[v([x, 0.0]), v([x + 16.0, 0.0]), v([x + 16.0, 16.0]), v([x, 16.0])], &[0, 1, 2, 0, 2, 3], Blend::Alpha);
+    }
+    let img = render(&device, &queue, &mut r, &b, wgpu::Color::BLACK);
+    let near = |a: [u8; 4], e: [u8; 3]| (0..3).all(|i| (a[i] as i32 - e[i] as i32).abs() <= 2);
+    assert!(near(px(&img, 8, 8), [55, 155, 255]), "{:?}", px(&img, 8, 8));
+    assert!(near(px(&img, 24, 8), [100, 100, 100]), "{:?}", px(&img, 24, 8));
+    assert!(near(px(&img, 40, 8), [126, 76, 102]), "{:?}", px(&img, 40, 8));
+}

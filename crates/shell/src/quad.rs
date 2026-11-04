@@ -8,7 +8,7 @@ use ume_render::RGBA_SPRITE;
 
 pub use crate::PostParams;
 pub use glam::{vec2, vec3, vec4, Vec2, Vec3, Vec4};
-pub use ume_render::Blend;
+pub use ume_render::{Blend, PalFx};
 
 thread_local! {
     static FRAME: Cell<*mut ()> = const { Cell::new(std::ptr::null_mut()) };
@@ -191,7 +191,7 @@ impl Texture2D {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct DrawTextureParams { pub dest_size: Option<Vec2>, pub source: Option<Rect>, pub rotation: f32, pub flip_x: bool, pub flip_y: bool, pub pivot: Option<Vec2> }
+pub struct DrawTextureParams { pub dest_size: Option<Vec2>, pub source: Option<Rect>, pub rotation: f32, pub flip_x: bool, pub flip_y: bool, pub pivot: Option<Vec2>, pub pal_fx: Option<ume_render::PalFx> }
 
 pub fn draw_texture(t: &Texture2D, x: f32, y: f32, c: Color) { draw_texture_ex(t, x, y, c, DrawTextureParams::default()) }
 
@@ -211,7 +211,8 @@ pub fn draw_texture_ex(t: &Texture2D, x: f32, y: f32, c: Color, p: DrawTexturePa
             let (dx, dy) = (cx - pivot.x, cy - pivot.y);
             [pivot.x + dx * co - dy * s, pivot.y + dx * s + dy * co]
         };
-        let v = |pos: [f32; 2], uv: [f32; 2]| ume_render::Vertex { pos, uv, pal: RGBA_SPRITE, mul: c.to_array(), add: [0.0; 4] };
+        let (mul, add) = match p.pal_fx { Some(fx) => fx.vertex(c.to_array()), None => (c.to_array(), [0.0; 4]) };
+        let v = |pos: [f32; 2], uv: [f32; 2]| ume_render::Vertex { pos, uv, pal: RGBA_SPRITE, mul, add };
         let verts = [
             v(corner(x, y), [u0, v0]),
             v(corner(x + size.x, y), [u1, v0]),

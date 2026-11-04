@@ -46,7 +46,14 @@ fn fs_main(v: VOut) -> @location(0) vec4<f32> {
         }
         c = textureLoad(palette, vec2<i32>(idx, i32(v.pal)), 0);
     }
-    let rgb = clamp(c.rgb * v.mul.rgb + v.add.rgb, vec3<f32>(0.0), vec3<f32>(1.0));
+    let inv = v.add.w >= 1.5;
+    let desat = v.add.w - select(0.0, 2.0, inv);
+    var src = c.rgb;
+    if inv {
+        src = vec3<f32>(1.0) - src;
+    }
+    src = mix(src, vec3<f32>((src.r + src.g + src.b) / 3.0), desat);
+    let rgb = clamp(src * v.mul.rgb + v.add.rgb, vec3<f32>(0.0), vec3<f32>(1.0));
     let a = c.a * v.mul.a;
     return vec4<f32>(rgb * a, a);
 }

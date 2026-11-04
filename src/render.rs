@@ -68,21 +68,17 @@ impl MatchRenderer {
         let (w, h) = (spr.width * kx, spr.height * ky);
         let left = if flip { px - (spr.width - spr.axis_x) * kx } else { px - spr.axis_x * kx };
         let top = if vflip { py - (spr.height - spr.axis_y) * ky } else { py - spr.axis_y * ky };
-        let params = DrawTextureParams { dest_size: Some(vec2(w * s, h * s)), flip_x: flip, flip_y: vflip, rotation: -o.angle.to_radians() * facing, pivot: Some(vec2(g.ox + px * s, g.oy + py * s)), ..Default::default() };
+        let mut params = DrawTextureParams { dest_size: Some(vec2(w * s, h * s)), flip_x: flip, flip_y: vflip, rotation: -o.angle.to_radians() * facing, pivot: Some(vec2(g.ox + px * s, g.oy + py * s)), ..Default::default() };
         let sub = o.sub || (matches!(fr.blend, Blend::Sub) && !o.add);
         let add = !sub && (o.add || matches!(fr.blend, Blend::Add | Blend::Add1));
         let mut c = o.tint; c.a *= o.alpha;
         if let Some((sa, _)) = fr.alpha { c.a *= (sa as f32 / 256.0).min(1.0); }
         let pal = o.pal.filter(|p| !p.is_identity() && !sub);
-        if let Some(p) = pal { c.r *= (p.mul[0] / 256.0).min(1.0); c.g *= (p.mul[1] / 256.0).min(1.0); c.b *= (p.mul[2] / 256.0).min(1.0); }
+        params.pal_fx = pal.map(|p| PalFx { add: p.add.map(|v| v / 255.0), mul: p.mul.map(|v| v / 256.0), color: p.color / 256.0, invert: p.invert });
         if add { set_blend(GfxBlend::Add); } else if sub { set_blend(GfxBlend::Sub); }
         draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, c, params.clone());
         if add || sub { set_blend(GfxBlend::Alpha); }
-        if let Some(p) = pal.filter(|p| p.add.iter().any(|a| *a > 0.0)) {
-            set_blend(GfxBlend::Add);
-            draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, Color::new(p.add[0] / 255.0, p.add[1] / 255.0, p.add[2] / 255.0, c.a), params.clone());
-            set_blend(GfxBlend::Alpha);
-        }
+        params.pal_fx = None;
         if o.flash > 0.0 {
             set_blend(GfxBlend::Add);
             draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, Color::new(1.0, 1.0, 1.0, o.flash), params);

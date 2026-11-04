@@ -843,13 +843,14 @@ pub fn mugen_preview(st: &MugenStage) -> Option<Arc<ImageData>> {
             }
             if l.position_link { off[0] += root_off[0]; off[1] += root_off[1]; vis &= root_vis; } else { root_off = off; root_vis = vis; }
             if (l.layer == 1) != front || !vis { continue; }
-            let (wx0, wy0, wx1, wy1) = match l.window {
+            let scroll = l.window_scroll();
+            let (wx0, wy0, wx1, wy1) = match l.clip_window() {
                 Some(win) if win[2] <= win[0] || win[3] <= win[1] => continue,
                 Some(win) => (
-                    ((win[0] - cx * l.delta[0]) * scl).floor().max(0.0) as isize,
-                    ((win[1] - cy * l.delta[1]) * scl_y).floor().max(0.0) as isize,
-                    (((win[2] + 1.0) - cx * l.delta[0]) * scl).ceil().min(vw) as isize,
-                    (((win[3] + 1.0) - cy * l.delta[1]) * scl_y).ceil().min(vh) as isize,
+                    ((win[0] - cx * scroll[0]) * scl + vw * 0.5).floor().max(0.0) as isize,
+                    ((win[1] - cy * scroll[1]) * scl_y).floor().max(0.0) as isize,
+                    (((win[2] + 1.0) - cx * scroll[0]) * scl + vw * 0.5).ceil().min(vw) as isize,
+                    (((win[3] + 1.0) - cy * scroll[1]) * scl_y).ceil().min(vh) as isize,
                 ),
                 None => (0, 0, W as isize, H as isize),
             };
@@ -858,11 +859,14 @@ pub fn mugen_preview(st: &MugenStage) -> Option<Arc<ImageData>> {
             let Some(meta) = st.sprites.get(&key) else { continue };
             let (mw, mh) = (meta.w as usize, meta.h as usize);
             if mw == 0 || mh == 0 || mw.checked_mul(mh).and_then(|n| n.checked_mul(4)).is_none_or(|n| meta.rgba.len() < n) { continue; }
+            let layer_scale = l.scale_at([cx, cy]);
+            let (lx, ly) = (scl * layer_scale[0], scl_y * layer_scale[1]);
             let sxp = (l.start[0] + off[0] - cx * l.delta[0]) * scl + vw * 0.5;
             let syp = (l.start[1] + off[1] - cy * l.delta[1]) * scl_y;
-            let (w, h) = (meta.w as f32 * scl, meta.h as f32 * scl_y);
+            let (w, h) = (meta.w as f32 * lx, meta.h as f32 * ly);
             if w < 0.5 || h < 0.5 { continue; }
-            let (x0, y0) = (sxp - meta.axis_x as f32 * scl, syp - meta.axis_y as f32 * scl_y);
+            let (axis_dx, axis_dy) = (meta.axis_x as f32 * lx, meta.axis_y as f32 * ly);
+            let (x0, y0) = (sxp - axis_dx, syp - axis_dy);
             let (stx, sty) = ((w + l.tile_spacing[0] * scl).max(1.0), (h + l.tile_spacing[1] * scl_y).max(1.0));
             if ![scl, scl_y, sxp, syp, w, h, x0, y0, stx, sty].iter().all(|v| v.is_finite()) { continue; }
             let xs = tiles(l.tile[0], x0, w, stx, vw);
@@ -873,20 +877,42 @@ pub fn mugen_preview(st: &MugenStage) -> Option<Arc<ImageData>> {
             let addalpha = l.trans == "addalpha";
             let sa = (l.alpha[0] / 256.0).clamp(0.0, 1.0);
             let da = (l.alpha[1] / 256.0).clamp(0.0, 1.0);
+            let transformed = l.angle != 0.0 || l.x_shear != 0.0;
+            let (sin_a, cos_a) = (-l.angle).to_radians().sin_cos();
             for &tx in &xs {
-                let dx0 = (tx.floor() as isize).max(wx0).max(0);
-                let dx1 = ((tx + w).ceil() as isize).min(wx1).min(W as isize);
-                if dx0 >= dx1 { continue; }
                 for &ty in &ys {
-                    let dy0 = (ty.floor() as isize).max(wy0).max(0);
-                    let dy1 = ((ty + h).ceil() as isize).min(wy1).min(H as isize);
-                    if dy0 >= dy1 { continue; }
+                    let (bx0, bx1, by0, by1) = if transformed {
+                        let (pivot_x, pivot_y) = (tx + axis_dx, ty + axis_dy);
+                        let mut bounds = (f32::MAX, f32::MIN, f32::MAX, f32::MIN);
+                        for (cxp, cyp) in [(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)] {
+                            let (rx, ry) = (cxp - axis_dx, cyp - axis_dy);
+                            let sheared = rx - l.x_shear * ry;
+                            let (qx, qy) = (pivot_x + sheared * cos_a - ry * sin_a, pivot_y + sheared * sin_a + ry * cos_a);
+                            bounds = (bounds.0.min(qx), bounds.1.max(qx), bounds.2.min(qy), bounds.3.max(qy));
+                        }
+                        if !bounds.0.is_finite() || !bounds.1.is_finite() || !bounds.2.is_finite() || !bounds.3.is_finite() { continue; }
+                        (bounds.0, bounds.1, bounds.2, bounds.3)
+                    } else {
+                        (tx, tx + w, ty, ty + h)
+                    };
+                    let dx0 = (bx0.floor() as isize).max(wx0).max(0);
+                    let dx1 = (bx1.ceil() as isize).min(wx1).min(W as isize);
+                    let dy0 = (by0.floor() as isize).max(wy0).max(0);
+                    let dy1 = (by1.ceil() as isize).min(wy1).min(H as isize);
+                    if dx0 >= dx1 || dy0 >= dy1 { continue; }
                     for py in dy0..dy1 {
-                        let sy = (((py as f32 + 0.5 - ty) / h) * mh as f32) as usize;
-                        let sy = sy.min(mh - 1);
                         for px in dx0..dx1 {
-                            let sx = (((px as f32 + 0.5 - tx) / w) * mw as f32) as usize;
-                            let sx = sx.min(mw - 1);
+                            let (u, v) = if transformed {
+                                let (dx, dy) = (px as f32 + 0.5 - (tx + axis_dx), py as f32 + 0.5 - (ty + axis_dy));
+                                let ry = -dx * sin_a + dy * cos_a;
+                                let rx = dx * cos_a + dy * sin_a + l.x_shear * ry;
+                                ((rx + axis_dx) / w, (ry + axis_dy) / h)
+                            } else {
+                                ((px as f32 + 0.5 - tx) / w, (py as f32 + 0.5 - ty) / h)
+                            };
+                            if transformed && (!(0.0..1.0).contains(&u) || !(0.0..1.0).contains(&v)) { continue; }
+                            let sy = ((v.max(0.0) * mh as f32) as usize).min(mh - 1);
+                            let sx = ((u.max(0.0) * mw as f32) as usize).min(mw - 1);
                             let s = &meta.rgba[(sy * mw + sx) * 4..][..4];
                             if s[3] == 0 { continue; }
                             let d = &mut rgba[(py as usize * W + px as usize) * 4..][..4];
@@ -913,4 +939,62 @@ pub fn mugen_preview(st: &MugenStage) -> Option<Arc<ImageData>> {
         }
     }
     drawn.then(|| ImageData::new(W as u32, H as u32, rgba))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ume_formats::stage::{load_stage, StageImage};
+    use ume_formats::vfs::Vfs;
+
+    fn preview_of(layer_extra: &str) -> Vec<u8> {
+        let def = format!("[BGdef]\n\n[BG square]\ntype = normal\nspriteno = 0, 0\nstart = 0, 120\n{layer_extra}\n");
+        let mut vfs = Vfs::new();
+        vfs.insert("stages/t.def".into(), def.into_bytes());
+        let mut st = load_stage(&vfs, "stages/t.def").unwrap();
+        let rgba = [255u8, 0, 0, 255].repeat(20 * 20);
+        st.sprites.insert((0, 0), StageImage { w: 20, h: 20, axis_x: 10, axis_y: 10, rgba });
+        mugen_preview(&st).unwrap().rgba.clone()
+    }
+
+    fn red_pixels(rgba: &[u8]) -> Vec<(usize, usize)> {
+        rgba.chunks_exact(4).enumerate().filter(|(_, p)| p[0] == 255 && p[1] == 0).map(|(i, _)| (i % 320, i / 320)).collect()
+    }
+
+    fn extent(points: &[(usize, usize)]) -> (usize, usize) {
+        let xs = points.iter().map(|p| p.0);
+        let ys = points.iter().map(|p| p.1);
+        (xs.clone().max().unwrap() - xs.min().unwrap() + 1, ys.clone().max().unwrap() - ys.min().unwrap() + 1)
+    }
+
+    #[test]
+    fn preview_applies_layer_scale() {
+        let base = red_pixels(&preview_of(""));
+        let scaled = red_pixels(&preview_of("scalestart = 2, 2"));
+        assert_eq!(extent(&base).0, 20);
+        assert_eq!(extent(&scaled).0, 40);
+        assert!(extent(&scaled).1.abs_diff(extent(&base).1 * 2) <= 2);
+        assert!(scaled.len() > base.len() * 3);
+    }
+
+    #[test]
+    fn preview_applies_angle_and_shear() {
+        let base = red_pixels(&preview_of(""));
+        let quarter_turn = red_pixels(&preview_of("angle = 90"));
+        let rotated = red_pixels(&preview_of("angle = 45"));
+        let sheared = red_pixels(&preview_of("xshear = 1"));
+        assert!(extent(&quarter_turn).0.abs_diff(extent(&base).1) <= 2);
+        assert!(extent(&quarter_turn).1.abs_diff(extent(&base).0) <= 2);
+        assert!(extent(&rotated).0 > extent(&base).0 + 2);
+        assert!((rotated.len() as f32 - base.len() as f32).abs() < base.len() as f32 * 0.1);
+        assert!(extent(&sheared).0 > extent(&base).0 + 4);
+        assert!(extent(&sheared).1.abs_diff(extent(&base).1) <= 1);
+    }
+
+    #[test]
+    fn preview_clips_to_window_intersection() {
+        let clipped = red_pixels(&preview_of("window = -10, 100, 10, 140\nmaskwindow = 0, 100, 100, 140"));
+        assert_eq!(extent(&clipped).0, 10);
+        assert!(clipped.iter().all(|p| p.0 >= 160));
+    }
 }

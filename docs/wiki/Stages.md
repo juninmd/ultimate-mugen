@@ -66,9 +66,22 @@ delta = .8, .8
 | `[PlayerInfo]` | `p1startx`, `p2startx` |
 | `[StageInfo]` | `zoffset`, `localcoord` |
 | `[BGdef]` | `spr` |
-| `[BG ...]` | `type` (`normal`, `anim`), `spriteno`, `actionno`, `layerno` (0 behind, 1 in front), `start`, `delta`, `tile`, `tilespacing`, `velocity`, `trans`, `mask` |
+| `[BG ...]` | `type` (`normal`, `anim`), `spriteno`, `actionno`, `layerno` (0 behind, 1 in front), `start`, `delta`, `tile`, `tilespacing`, `velocity`, `trans`, `mask`, `scalestart`, `scaledelta`, `angle`, `xshear`, `window`, `maskwindow`, `windowdelta`, `spacing` |
 
-Planned: `[BGCtrlDef]`/`[BGCtrl]`, `window`, `[Music]`, configurable shadows and reflections, `type = parallax`.
+Layer transform parameters (Ikemen / M.U.G.E.N 1.1), applied by both the live renderer and the stage-select preview:
+
+| Key | Meaning |
+|---|---|
+| `scalestart = x, y` | Base scale of the sprite, anchored at its axis (default `1, 1`). |
+| `scaledelta = x, y` | Scale change per stage unit of camera movement, multiplied by `delta`: `scale = scalestart + scaledelta * camera * delta`, so the layer grows or shrinks as the camera moves (default `0, 0`). |
+| `angle` | Rotation in degrees around the sprite axis, counter-clockwise for positive values. |
+| `xshear` | Horizontal shear: each row is shifted by `xshear` times its distance from the axis. |
+| `window = x1, y1, x2, y2` | Clipping rectangle in stage units. |
+| `maskwindow = x1, y1, x2, y2` | Second clipping rectangle; when both are present the layer is clipped to their intersection. |
+| `windowdelta = x, y` | How fast the clipping window scrolls with the camera (defaults to the layer `delta`). |
+| `spacing = x, y` | Gap between tiles; used when `tilespacing` is absent (`tilespacing` wins when both are set). |
+
+Planned: `[Music]`, configurable shadows and reflections, `type = parallax`.
 
 ## Native stage
 

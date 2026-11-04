@@ -259,6 +259,64 @@ trans = add
     assert_eq!(anim.total_time, 10);
 }
 
+#[test]
+fn stage_layer_hd_parameters() {
+    let stage_def = br#"
+[BGdef]
+spr = none.sff
+
+[BG Hd]
+type = normal
+spriteno = 0, 0
+delta = 0.5, 0.25
+scalestart = 2, 3
+scaledelta = 0.01, 0.02
+angle = 15
+xshear = 0.5
+window = 10, 20, 110, 120
+maskwindow = 0, 40, 100, 200
+windowdelta = 0.3, 0.6
+spacing = 4, 6
+
+[BG Plain]
+type = normal
+spriteno = 1, 0
+delta = 1, 1
+tilespacing = 7, 8
+spacing = 1, 1
+maskwindow = 5, 6, 7, 8
+"#;
+    let mut vfs = Vfs::new();
+    vfs.insert("stages/hd.def".into(), stage_def.to_vec());
+    let st = load_stage(&vfs, "stages/hd.def").unwrap();
+    let hd = &st.layers[0];
+    assert_eq!(hd.scale_start, [2.0, 3.0]);
+    assert_eq!(hd.scale_delta, [0.01, 0.02]);
+    assert_eq!(hd.angle, 15.0);
+    assert_eq!(hd.x_shear, 0.5);
+    assert_eq!(hd.window, Some([10.0, 20.0, 110.0, 120.0]));
+    assert_eq!(hd.mask_window, Some([0.0, 40.0, 100.0, 200.0]));
+    assert_eq!(hd.clip_window(), Some([10.0, 40.0, 100.0, 120.0]));
+    assert_eq!(hd.window_scroll(), [0.3, 0.6]);
+    assert_eq!(hd.tile_spacing, [4.0, 6.0]);
+
+    let camera = [100.0, 50.0];
+    let scale = hd.scale_at(camera);
+    assert!((scale[0] - (2.0 + 0.01 * 100.0 * 0.5)).abs() < 1e-5);
+    assert!((scale[1] - (3.0 + 0.02 * 50.0 * 0.25)).abs() < 1e-5);
+    assert!(hd.scale_at([200.0, 50.0])[0] > scale[0]);
+
+    let plain = &st.layers[1];
+    assert_eq!(plain.scale_start, [1.0, 1.0]);
+    assert_eq!(plain.scale_at([300.0, 300.0]), [1.0, 1.0]);
+    assert_eq!(plain.angle, 0.0);
+    assert_eq!(plain.x_shear, 0.0);
+    assert_eq!(plain.window, None);
+    assert_eq!(plain.clip_window(), Some([5.0, 6.0, 7.0, 8.0]));
+    assert_eq!(plain.window_scroll(), [1.0, 1.0]);
+    assert_eq!(plain.tile_spacing, [7.0, 8.0]);
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn add_dir_expands_zips() {

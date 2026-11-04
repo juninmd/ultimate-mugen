@@ -31,6 +31,29 @@ pub struct BgLayer {
     pub sin_x: [f32; 3],
     pub sin_y: [f32; 3],
     pub alpha: [f32; 2],
+    pub scale_start: [f32; 2],
+    pub scale_delta: [f32; 2],
+    pub angle: f32,
+    pub x_shear: f32,
+    pub mask_window: Option<[f32; 4]>,
+    pub window_delta: Option<[f32; 2]>,
+}
+
+impl BgLayer {
+    pub fn scale_at(&self, camera: [f32; 2]) -> [f32; 2] {
+        [0, 1].map(|a| (self.scale_start[a] + self.scale_delta[a] * camera[a] * self.delta[a]).clamp(0.0, 64.0))
+    }
+
+    pub fn window_scroll(&self) -> [f32; 2] {
+        self.window_delta.unwrap_or(self.delta)
+    }
+
+    pub fn clip_window(&self) -> Option<[f32; 4]> {
+        match (self.window, self.mask_window) {
+            (Some(a), Some(b)) => Some([a[0].max(b[0]), a[1].max(b[1]), a[2].min(b[2]), a[3].min(b[3])]),
+            (a, b) => a.or(b),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -195,7 +218,10 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         let delta = [delta_v[0], delta_v.get(1).copied().unwrap_or(delta_v[0])];
         let tile = pair(n("tile", &[0.0, 0.0]), [0.0, 0.0]);
         let anim = if kind == "anim" { anims.get(&(n("actionno", &[0.0])[0] as i32)).cloned() } else { None };
-        let win = if s.get("window").is_some() { Some(n("window", &[0.0, 0.0, 0.0, 0.0])) } else if s.get("maskwindow").is_some() { Some(n("maskwindow", &[0.0, 0.0, 0.0, 0.0])) } else { None };
+        let rect = |k: &str| s.get(k).map(|_| n(k, &[0.0, 0.0, 0.0, 0.0])).filter(|w| w.len() >= 4).map(|w| [w[0], w[1], w[2], w[3]]);
+        let spacing_key = if s.get("tilespacing").is_some() { "tilespacing" } else { "spacing" };
+        let scale_start = pair(n("scalestart", &[1.0, 1.0]), [1.0, 1.0]);
+        let scale_delta = pair(n("scaledelta", &[0.0, 0.0]), [0.0, 0.0]);
         let three = |k: &str| { let v = n(k, &[0.0, 0.0, 0.0]); [v[0], v.get(1).copied().unwrap_or(0.0), v.get(2).copied().unwrap_or(0.0)] };
         let alpha = n("alpha", &[256.0, 0.0]);
         layers.push(BgLayer {
@@ -203,7 +229,7 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
             start: pair(n("start", &[0.0, 0.0]), [0.0, 0.0]),
             delta,
             tile: [tile[0] as i32, tile[1] as i32],
-            tile_spacing: pair(n("tilespacing", &[0.0, 0.0]), [0.0, 0.0]),
+            tile_spacing: pair(n(spacing_key, &[0.0, 0.0]), [0.0, 0.0]),
             velocity: pair(n("velocity", &[0.0, 0.0]), [0.0, 0.0]),
             layer: n("layerno", &[0.0])[0] as i32,
             trans: s.get("trans").unwrap_or("none").to_lowercase(),
@@ -211,7 +237,13 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
             anim,
             id: n("id", &[0.0])[0] as i32,
             position_link: n("positionlink", &[0.0])[0] != 0.0,
-            window: win.filter(|w| w.len() >= 4).map(|w| [w[0], w[1], w[2], w[3]]),
+            window: rect("window"),
+            mask_window: rect("maskwindow"),
+            window_delta: s.get("windowdelta").map(|_| pair(n("windowdelta", &[0.0, 0.0]), [0.0, 0.0])),
+            scale_start,
+            scale_delta,
+            angle: n("angle", &[0.0])[0],
+            x_shear: n("xshear", &[0.0])[0],
             sin_x: three("sin.x"),
             sin_y: three("sin.y"),
             alpha: [alpha[0], alpha.get(1).copied().unwrap_or(0.0)],

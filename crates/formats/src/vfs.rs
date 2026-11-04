@@ -143,6 +143,9 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         }
         let data_start = local + 30 + r.u16(local + 26) as usize + r.u16(local + 28) as usize;
         let csize = usize::try_from(csize).map_err(|_| "zip: entry too large")?;
+        if method == 0 && csize > MAX_ENTRY_BYTES {
+            return Err(format!("zip: {name}: entry too large"));
+        }
         let data = bytes
             .get(data_start..data_start.saturating_add(csize))
             .ok_or_else(|| format!("zip: {name}: truncated data"))?;
@@ -161,7 +164,7 @@ fn inflate_raw(data: &[u8], size_hint: usize) -> Result<Vec<u8>, String> {
     use miniz_oxide::inflate::core::{decompress, inflate_flags, DecompressorOxide};
     use miniz_oxide::inflate::TINFLStatus;
     // fast path: exact-size output buffer from the declared size
-    if size_hint > 0 && size_hint <= MAX_ENTRY_BYTES {
+    if size_hint > 0 && size_hint <= MAX_ENTRY_BYTES && size_hint <= data.len().saturating_mul(64).max(1 << 20) {
         let mut out = vec![0u8; size_hint];
         let mut st = DecompressorOxide::new();
         let (status, _, written) =

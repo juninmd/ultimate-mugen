@@ -34,7 +34,7 @@ fn px(img: &[u8], x: u32, y: u32) -> [u8; 4] { let i = ((y * 64 + x) * 4) as usi
 #[test]
 fn draws_palettes_rgba_and_blending() {
     let Some((device, queue)) = gpu() else { eprintln!("no GPU adapter, skipping"); return; };
-    let mut r = Renderer::new(&device, wgpu::TextureFormat::Rgba8Unorm, [256, 256]);
+    let mut r = Renderer::new(&device, &queue, wgpu::TextureFormat::Rgba8Unorm, [256, 256]);
     let mut pal = [[0u8; 4]; 256];
     pal[1] = [255, 0, 0, 255];
     pal[2] = [0, 0, 255, 255];
@@ -77,7 +77,7 @@ fn draws_palettes_rgba_and_blending() {
 #[test]
 fn canvas_shapes_render() {
     let Some((device, queue)) = gpu() else { eprintln!("no GPU adapter, skipping"); return; };
-    let mut r = Renderer::new(&device, wgpu::TextureFormat::Rgba8Unorm, [64, 64]);
+    let mut r = Renderer::new(&device, &queue, wgpu::TextureFormat::Rgba8Unorm, [64, 64]);
     let mut atlas = ume_render::Atlas::new(64, 64);
     let mut c = ume_render::Canvas::new(&r, &queue, &mut atlas).unwrap();
     c.rect(2.0, 2.0, 10.0, 10.0, ume_render::Color::rgba(255, 0, 0, 255));
@@ -97,7 +97,7 @@ fn canvas_shapes_render() {
 fn post_render(device: &wgpu::Device, queue: &wgpu::Queue, p: &ume_render::PostParams) -> Vec<u8> {
     let (w, h) = (64u32, 64u32);
     let fmt = wgpu::TextureFormat::Rgba8Unorm;
-    let mut r = Renderer::new(device, fmt, [64, 64]);
+    let mut r = Renderer::new(device, queue, fmt, [64, 64]);
     let mut atlas = ume_render::Atlas::new(64, 64);
     let mut canvas = ume_render::Canvas::new(&r, queue, &mut atlas).unwrap();
     canvas.rect(0.0, 0.0, 32.0, 64.0, ume_render::Color::rgba(255, 0, 0, 255));
@@ -144,7 +144,7 @@ fn post_effects_composite() {
 #[test]
 fn palfx_in_shader() {
     let Some((device, queue)) = gpu() else { eprintln!("no GPU adapter, skipping"); return; };
-    let mut r = Renderer::new(&device, wgpu::TextureFormat::Rgba8Unorm, [16, 16]);
+    let mut r = Renderer::new(&device, &queue, wgpu::TextureFormat::Rgba8Unorm, [16, 16]);
     let rgba = Rect { x: 4, y: 4, w: 1, h: 1 };
     r.upload_rgba(&queue, rgba, &[200, 100, 0, 255]);
     let uv = [4.5 / 16.0, 4.5 / 16.0];

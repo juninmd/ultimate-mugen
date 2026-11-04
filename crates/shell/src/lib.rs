@@ -145,7 +145,7 @@ async fn init_live(instance: wgpu::Instance, window: Arc<Window>) -> Result<Live
     if caps.usages.contains(wgpu::TextureUsages::COPY_SRC) { config.usage |= wgpu::TextureUsages::COPY_SRC; }
     surface.configure(&device, &config);
     let side = ATLAS_SIZE.min(device.limits().max_texture_dimension_2d);
-    let renderer = Renderer::new(&device, config.format, [side, side]);
+    let renderer = Renderer::new(&device, &queue, config.format, [side, side]);
     let mut rgba_atlas = Atlas::new(side, side);
     let canvas = Canvas::new(&renderer, &queue, &mut rgba_atlas).ok_or("atlas too small")?;
     let post = PostFx::new(&device, config.format);
@@ -181,7 +181,8 @@ impl<G: Game> Shell<G> {
         }
         let frame = match live.surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(t) | wgpu::CurrentSurfaceTexture::Suboptimal(t) => t,
-            _ => { live.surface.configure(&live.gpu.device, &live.config); return; }
+            wgpu::CurrentSurfaceTexture::Timeout | wgpu::CurrentSurfaceTexture::Occluded => { live.window.request_redraw(); return; }
+            _ => { live.surface.configure(&live.gpu.device, &live.config); live.window.request_redraw(); return; }
         };
         let now = Instant::now();
         let dt = self.pacer.pace((now - self.last).as_secs_f32());
@@ -251,9 +252,12 @@ impl<G: Game> ApplicationHandler for Shell<G> {
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::Resized(s) => if let Some(live) = self.live.as_mut() {
-                live.config.width = s.width.max(1);
-                live.config.height = s.height.max(1);
-                live.surface.configure(&live.gpu.device, &live.config);
+                let (w, h) = (s.width.max(1), s.height.max(1));
+                if (w, h) != (live.config.width, live.config.height) {
+                    live.config.width = w;
+                    live.config.height = h;
+                    live.surface.configure(&live.gpu.device, &live.config);
+                }
             },
             WindowEvent::KeyboardInput { event, .. } => if let PhysicalKey::Code(k) = event.physical_key {
                 match event.state {
@@ -304,7 +308,8 @@ fn event_loop() -> Result<EventLoop<()>, String> {
 
 pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
     let event_loop = event_loop()?;
-    event_loop.set_control_flow(ControlFlow::Poll);
+    // on the web `Poll` makes winit spin a postTask/AbortController loop next to requestAnimationFrame (GC churn, starved frames); redraws are already self-requested
+    event_loop.set_control_flow(if cfg!(target_arch = "wasm32") { ControlFlow::Wait } else { ControlFlow::Poll });
     let now = Instant::now();
     let mut shell = Shell { cfg, game, live: None, pending: None, input: Input::default(), start: now, last: now, frames: 0, error: None, pacer: Pacer::default() };
     #[cfg(target_arch = "wasm32")]

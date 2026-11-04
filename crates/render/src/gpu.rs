@@ -51,12 +51,26 @@ fn write_region(queue: &wgpu::Queue, tex: &wgpu::Texture, r: Rect, bpp: u32, dat
     );
 }
 
+fn zero_fill(queue: &wgpu::Queue, tex: &wgpu::Texture, w: u32, h: u32, bpp: u32) {
+    const BAND: u32 = 256;
+    let zeros = vec![0u8; (w * BAND.min(h) * bpp) as usize];
+    let mut y = 0;
+    while y < h {
+        let rows = BAND.min(h - y);
+        write_region(queue, tex, Rect { x: 0, y, w, h: rows }, bpp, &zeros[..(w * rows * bpp) as usize]);
+        y += rows;
+    }
+}
+
 impl Renderer {
-    pub fn new(device: &wgpu::Device, format: wgpu::TextureFormat, atlas_size: [u32; 2]) -> Self {
+    pub fn new(device: &wgpu::Device, queue: &wgpu::Queue, format: wgpu::TextureFormat, atlas_size: [u32; 2]) -> Self {
         let [aw, ah] = atlas_size;
         let index_tex = texture(device, "ume-index-atlas", aw, ah, wgpu::TextureFormat::R8Unorm);
         let rgba_tex = texture(device, "ume-rgba-atlas", aw, ah, wgpu::TextureFormat::Rgba8Unorm);
         let palette_tex = texture(device, "ume-palettes", 256, PALETTE_ROWS, wgpu::TextureFormat::Rgba8Unorm);
+        zero_fill(queue, &index_tex, aw, ah, 1);
+        zero_fill(queue, &rgba_tex, aw, ah, 4);
+        zero_fill(queue, &palette_tex, 256, PALETTE_ROWS, 4);
         let globals = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: Some("ume-globals"), contents: &[0u8; 16], usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST });
         let sampler = device.create_sampler(&wgpu::SamplerDescriptor { label: Some("ume-nearest"), ..Default::default() });
         let tex_entry = |binding| wgpu::BindGroupLayoutEntry {

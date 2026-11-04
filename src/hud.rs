@@ -25,6 +25,7 @@ impl Hud {
         // Main bar per side: the fighter you control (side 0) / the front-line fighter still standing (side 1); everyone else gets a portrait tile.
         let main_of = |sd: usize| -> Option<&Fighter> {
             let all: Vec<&Fighter> = m.roots().filter(|f| f.side == sd).collect();
+            if m.team_tag { if let Some(active) = all.iter().copied().find(|f| !f.ikemen.standby) { return Some(active); } }
             all.iter().copied().find(|f| human.contains(&f.id) && f.alive).or_else(|| all.iter().copied().find(|f| f.alive)).or_else(|| all.first().copied())
         };
         let roots: Vec<&Fighter> = (0..2).filter_map(main_of).collect();
@@ -181,6 +182,14 @@ impl Hud {
                 poly::solid(&[bar, bar + vec2(TILE_W * s, 0.0), bar + vec2(TILE_W * s, 2.4 * s), bar + vec2(0.0, 2.4 * s)], Color::new(0.02, 0.03, 0.08, 0.7));
                 let fc = if !f.alive { hex("#555566") } else if ratio < 0.25 { hex("#ff7a2a") } else { hex("#33d6a0") };
                 poly::solid(&[bar, bar + vec2(TILE_W * ratio * s, 0.0), bar + vec2(TILE_W * ratio * s, 2.4 * s), bar + vec2(0.0, 2.4 * s)], fc);
+                if m.team_tag && f.alive {
+                    let cd = m.tag_cooldown[side] as f32 / m.tag_cooldown_max.max(1) as f32;
+                    let ready = cd <= 0.0;
+                    let tbar = p(tx, by + 3.0);
+                    poly::solid(&[tbar, tbar + vec2(TILE_W * s, 0.0), tbar + vec2(TILE_W * s, 1.6 * s), tbar + vec2(0.0, 1.6 * s)], Color::new(0.02, 0.03, 0.08, 0.7));
+                    let fw = TILE_W * (1.0 - cd.clamp(0.0, 1.0)) * s;
+                    poly::solid(&[tbar, tbar + vec2(fw, 0.0), tbar + vec2(fw, 1.6 * s), tbar + vec2(0.0, 1.6 * s)], if ready { hex("#ffcc33") } else { hex("#4aa3ff") });
+                }
             }
             if let Some(t) = team.filter(|t| !t.simul) {
                 for side in 0..2 {

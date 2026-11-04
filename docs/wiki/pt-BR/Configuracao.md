@@ -57,6 +57,7 @@ Fica ao lado do executável e é gravado pelo menu **Configurações** (menu pri
 | Especiais rápidos | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | ESPECIAL, SUPER |
 | Super | `1`+`2` | Num `7`+`8` | L1+L2 | SUPER |
 | Despertar | `T` | Num `0` | R3 / SELECT | — |
+| Troca (modo Tag) | `R` | Num Enter | R3 / SELECT | botão de despertar |
 | Pausa / hitboxes | `Esc` / `F2` | `Esc` / `F2` | START | ❚❚ |
 | Tela cheia / FPS | `F11` / `F3` | — | — | — |
 

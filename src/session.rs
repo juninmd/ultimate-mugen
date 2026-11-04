@@ -39,6 +39,7 @@ pub struct Session {
     /// inputs of every root slot for every simulated tick (the data a replay is rebuilt from)
     pub rec: Vec<Vec<u32>>,
     pub is_replay: bool,
+    tag_last: [Option<usize>; 2],
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub net: Option<crate::netlink::NetLink>,
 }
@@ -49,12 +50,13 @@ impl Session {
     /// `teams[side]` = fighters of that side (leader first). Players are added interleaved (P1, P2, P3, P4) so that
     /// `roots()[0]`/`roots()[1]` are always the two team leaders. `life` = leader life ratios (sequence carry-over).
     #[allow(clippy::too_many_arguments)]
-    pub fn new(teams: [Vec<Arc<CharDef>>; 2], stage: Stage, pilots: Vec<Pilot>, training: bool, duo: bool, simul: bool, single_round: bool, life: [f32; 2]) -> Self {
+    pub fn new(teams: [Vec<Arc<CharDef>>; 2], stage: Stage, pilots: Vec<Pilot>, training: bool, duo: bool, simul: bool, tag: bool, single_round: bool, life: [f32; 2]) -> Self {
         let fx = FX.with(|f| f.clone());
         let mut m = Match::new(common_def(), Some(fx), stage.info.clone());
         if let crate::stages::StageArt::Mugen(bg) = &stage.art { m.bg = Some(ume_engine::stage_bg::BgState::new(bg.stage.clone())); }
         m.training = training;
         m.team_simul = simul;
+        m.team_tag = tag;
         if single_round { m.rounds_to_win = 1; }
         // big teams get a zoomed-out field (room to fight); the ground keeps its place in the picture
         let ground_k = if matches!(stage.art, crate::stages::StageArt::Procedural { .. } | crate::stages::StageArt::Illustrated { .. }) { stage.info.zoffset / ume_engine::matchs::BASE_H } else { 0.5 };
@@ -79,7 +81,7 @@ impl Session {
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
+        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, tag_last: [None; 2], #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
     }
 
     pub fn apply_rules(&mut self, r: crate::settings::Rules) {
@@ -107,16 +109,23 @@ impl Session {
         let roots = self.m.root_indices();
         if self.m.team_simul { if let Some(cur) = self.pilots.iter().position(|p| matches!(p, Pilot::Human(0))) { if roots.get(cur).is_some_and(|&fi| !self.m.fighters[fi].alive) { self.switch_control(); } } }
         let mut bits = vec![0u32; roots.len()];
-        for (slot, p) in self.pilots.iter_mut().enumerate() {
-            let Some(&fi) = roots.get(slot) else { continue };
+        let tag = self.m.team_tag;
+        let mut human_bits = None;
+        for slot in 0..self.pilots.len() {
+            let Some(fi) = self.pilot_fighter(slot, &roots) else { continue };
+            if tag && slot < 2 && self.tag_last[slot] != Some(fi) {
+                self.tag_last[slot] = Some(fi);
+                if let Pilot::Cpu(ai) = &mut self.pilots[slot] { ai.reset(); }
+            }
+            let p = &mut self.pilots[slot];
             if !self.m.fighters[fi].alive { if let Pilot::Human(s) = p { c.touch.macro_q[(*s).min(1)].clear(); } continue; }
-            bits[slot] = match p {
+            let mut b = match &mut *p {
                 Pilot::Cpu(ai) => ai.poll(&self.m, fi),
                 Pilot::Dummy => 0,
                 Pilot::Replay(v, i) => { let b = v.get(*i).copied().unwrap_or(0); *i += 1; b }
                 Pilot::Human(s) => {
                     let mut b = c.player_bits(*s, self.duo);
-                    // simple-mode buttons for MUGEN characters become motion macros
+                    if tag && b & k::T != 0 { b = (b & !k::T) | k::TAG; }
                     if self.m.fighters[fi].def.source == Source::Mugen && b & (k::D2 | k::W | k::E) != 0 && c.touch.macro_q[(*s).min(1)].is_empty() {
                         let which = if b & k::D2 != 0 && b & k::W != 0 { 4 } else if b & k::D2 != 0 { 1 } else if b & k::W != 0 { 2 } else { 3 };
                         c.touch.macro_q[(*s).min(1)].extend(Self::mugen_macro(self.m.fighters[fi].facing, which));
@@ -125,9 +134,12 @@ impl Session {
                     b
                 }
             };
+            if tag && matches!(p, Pilot::Cpu(_)) && Self::cpu_wants_tag(&self.m, fi) { b |= k::TAG; }
+            let Some(target) = roots.iter().position(|&r| r == fi) else { continue };
+            bits[target] = b;
+            if matches!(self.pilots[slot], Pilot::Human(0)) { human_bits = Some(b); }
         }
-        if let Some(slot) = self.pilots.iter().position(|p| matches!(p, Pilot::Human(0))) {
-            let b = bits.get(slot).copied().unwrap_or(0);
+        if let Some(b) = human_bits {
             match self.inputs.last_mut() { Some(l) if l.0 == b => l.1 = (l.1 + 1).min(99), _ => { self.inputs.push((b, 1)); if self.inputs.len() > 14 { self.inputs.remove(0); } } }
         }
         self.rec.push(bits.clone());
@@ -173,7 +185,8 @@ impl Session {
                 Event::Hit { damage, guarded, heavy, attacker, defender, .. } => {
                     let roots = self.m.root_indices();
                     let (attacker_side, defender_side) = (attacker, defender);
-                    let human = |fi: usize, p: &[Pilot]| roots.iter().position(|&r| r == fi).and_then(|sl| match p.get(sl) { Some(Pilot::Human(slot)) => Some(*slot), _ => None });
+                    let tag = self.m.team_tag;
+                    let human = |fi: usize, p: &[Pilot]| roots.iter().position(|&r| r == fi).map(|sl| if tag { self.m.fighters[fi].side.min(1) } else { sl }).and_then(|sl| match p.get(sl) { Some(Pilot::Human(slot)) => Some(*slot), _ => None });
                     let mag = (damage / 120.0).clamp(0.15, 1.0);
                     if let Some(sl) = human(defender_side, &self.pilots) { if guarded { c.rumble(sl, 0.0, 0.35, 70); } else { c.rumble(sl, mag, (mag + 0.2).min(1.0), if heavy { 220 } else { 120 }); } }
                     if let Some(sl) = human(attacker_side, &self.pilots) { c.rumble(sl, 0.0, if guarded { 0.15 } else { mag * 0.6 }, 60); }
@@ -182,13 +195,16 @@ impl Session {
                 Event::Ko { .. } => { audio.sfx("ko"); for p in &self.pilots { if let Pilot::Human(sl) = p { c.rumble(*sl, 1.0, 1.0, 700); } } }
                 Event::Rumble { fighter, strong, weak, ms } => {
                     let roots = self.m.root_indices();
-                    if let Some(Pilot::Human(sl)) = roots.iter().position(|&r| self.m.fighters[r].id == fighter).and_then(|k| self.pilots.get(k)) { c.rumble(*sl, strong, weak, ms); }
+                    let tag = self.m.team_tag;
+                    let slot_of = |k: usize| if tag { self.m.fighters[roots[k]].side.min(1) } else { k };
+                    if let Some(Pilot::Human(sl)) = roots.iter().position(|&r| self.m.fighters[r].id == fighter).and_then(|k| self.pilots.get(slot_of(k))) { c.rumble(*sl, strong, weak, ms); }
                 }
                 Event::MatchOver(w) => { self.over = Some(w); }
                 Event::StopSound { owner, channel } => audio.stop(owner, channel),
                 Event::SoundPan { owner, channel, pan } => audio.pan(owner, channel, pan),
                 Event::SoundVolume { owner, channel, volume } => audio.set_volume(owner, channel, volume),
                 Event::Bgm(action) => audio.queue_bgm(action),
+                Event::Tag { .. } => audio.sfx("select"),
                 Event::Fight => audio.sfx("fight"),
                 Event::RoundStart(_) => audio.sfx("round"),
                 Event::RoundEnd(w) if w >= 0 => audio.sfx("win"),
@@ -197,14 +213,27 @@ impl Session {
         }
     }
 
+    /// Root fighter a pilot slot controls right now: its own, or in tag mode the side's active member.
+    fn pilot_fighter(&self, slot: usize, roots: &[usize]) -> Option<usize> {
+        let own = *roots.get(slot)?;
+        if self.m.team_tag && slot < 2 && !matches!(self.pilots[slot], Pilot::Replay(..)) { return self.m.tag_active(self.m.fighters[own].side).or(Some(own)); }
+        Some(own)
+    }
+
+    fn cpu_wants_tag(m: &Match, fi: usize) -> bool {
+        if !m.tag_ready(fi) { return false; }
+        let ratio = |i: usize| m.fighters[i].life / m.fighters[i].life_max.max(1.0);
+        m.tag_next_alive(fi).is_some_and(|to| ratio(fi) < 0.3 && ratio(to) > ratio(fi) + 0.25)
+    }
+
     /// Ids of the root fighters currently driven by a human (the P1 fighter you control, P2 in versus).
     pub fn human_ids(&self) -> Vec<u32> {
         let roots = self.m.root_indices();
-        self.pilots.iter().enumerate().filter(|(_, p)| matches!(p, Pilot::Human(_))).filter_map(|(slot, _)| roots.get(slot).map(|&fi| self.m.fighters[fi].id)).collect()
+        self.pilots.iter().enumerate().filter(|(_, p)| matches!(p, Pilot::Human(_))).filter_map(|(slot, _)| self.pilot_fighter(slot, &roots).map(|fi| self.m.fighters[fi].id)).collect()
     }
     pub fn cpu_ids(&self) -> Vec<u32> {
         let roots = self.m.root_indices();
-        self.pilots.iter().enumerate().filter(|(_, p)| matches!(p, Pilot::Cpu(_))).filter_map(|(slot, _)| roots.get(slot).map(|&fi| self.m.fighters[fi].id)).collect()
+        self.pilots.iter().enumerate().filter(|(_, p)| matches!(p, Pilot::Cpu(_))).filter_map(|(slot, _)| self.pilot_fighter(slot, &roots).map(|fi| self.m.fighters[fi].id)).collect()
     }
     /// Parallel teams: hand your controller to the next living teammate (Tab / automatically when yours falls).
     pub fn switch_control(&mut self) {

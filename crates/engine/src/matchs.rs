@@ -408,7 +408,8 @@ impl Match {
         let f = &self.fighters[i];
         let src = if f.is_helper { if f.key_ctrl { self.idx(f.root) } else { None } } else { Some(i) };
         let Some(s) = src else { return false };
-        if self.round_state != 2 && self.round_state != 3 && !self.training && !self.fighters[s].has_assert(asf::POSTROUNDINPUT) { return false; }
+        let accepting = if f.is_helper { self.round_state == 2 } else { self.round_state == 2 || self.round_state == 3 };
+        if !accepting && !self.training && !self.fighters[s].has_assert(asf::POSTROUNDINPUT) { return false; }
         if !Arc::ptr_eq(&f.st_def, &f.def) {
             return f.st_def.commands.iter().find(|c| c.name == name).is_some_and(|c| crate::commands::match_command(&self.fighters[s].history, c));
         }
@@ -704,9 +705,11 @@ impl Match {
         self.global_asserts = 0;
         for p in [&mut self.all_palfx, &mut self.bg_palfx] { if p.as_ref().is_some_and(|fx| fx.expired()) { *p = None; } }
         let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time, p.is_super));
-        let frozen_by_pause = |f: &Fighter| match paused_by {
+        let victory_screen = self.round_state >= 4;
+        if victory_screen { for f in self.fighters.iter_mut().filter(|f| f.is_helper) { f.asserts |= crate::fighter::asf::INVISIBLE; } }
+        let frozen_by_pause = |f: &Fighter| (victory_screen && f.is_helper) || match paused_by {
             None => false,
-            Some((by, mt, sup)) => !(f.id == by && mt > 0) && (if sup { f.super_move_time } else { f.pause_move_time }) <= 0,
+            Some((by, mt, sup)) => !(f.id == by && mt > 0) && !f.pause_bool && (if sup { f.super_move_time } else { f.pause_move_time }) <= 0,
         };
         let mut k = 0;
         let mut awaken: Vec<usize> = vec![];
@@ -1455,6 +1458,7 @@ impl Match {
         h.parent = Some(f.id); h.root = root.id;
         h.key_ctrl = num(self, "keyctrl", 0.0, 0) != 0.0;
         h.pause_move_time = num(self, "pausemovetime", 0.0, 0) as i32;
+        h.pause_bool = num(self, "pausebool", 0.0, 0) != 0.0;
         h.super_move_time = num(self, "supermovetime", 0.0, 0) as i32;
         h.preserve = num(self, "preserve", 0.0, 0) != 0.0;
         h.own_pal = num(self, "ownpal", 0.0, 0) != 0.0;

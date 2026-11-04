@@ -57,7 +57,7 @@ impl Session {
         m.team_simul = simul;
         if single_round { m.rounds_to_win = 1; }
         // big teams get a zoomed-out field (room to fight); the ground keeps its place in the picture
-        let ground_k = if matches!(stage.art, crate::stages::StageArt::Procedural { .. }) { stage.info.zoffset / ume_engine::matchs::BASE_H } else { 0.5 };
+        let ground_k = if matches!(stage.art, crate::stages::StageArt::Procedural { .. } | crate::stages::StageArt::Illustrated { .. }) { stage.info.zoffset / ume_engine::matchs::BASE_H } else { 0.5 };
         m.set_zoom_for_teams(if simul { teams[0].len().max(teams[1].len()) } else { 1 }, ground_k);
         // face-off at the start of the first round (fighters trade lines before "FIGHT!")
         if !training { m.intro_ticks = 170; }

@@ -206,6 +206,12 @@ impl Registry {
         self.chars[n..].sort_by_key(|c| c.name.to_lowercase());
         self.stages.sort_by_key(|s| (s.mugen, if s.mugen { s.name.to_lowercase() } else { String::new() }));
     }
+    pub fn stage_preview(&self, i: usize) -> Option<Arc<ume_engine::chardef::ImageData>> {
+        match &self.stages.get(i)?.src {
+            StageSrc::Builtin(b) => stages::illustration(&self.builtin_stages[*b].id),
+            StageSrc::Mugen { .. } => None,
+        }
+    }
     pub fn build_stage(&self, i: usize) -> Stage {
         match &self.stages[i].src {
             StageSrc::Builtin(b) => (self.builtin_stages[*b].build)(),

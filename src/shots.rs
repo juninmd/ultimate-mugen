@@ -167,6 +167,11 @@ pub async fn run(app: &mut App, dir: &str) {
     let _ = std::fs::create_dir_all(dir);
     if std::env::var("UME_TOUR").as_deref() == Ok("mugen") { crate::mugen_tour::run(app, dir).await; return; }
     if std::env::var("UME_TOUR").as_deref() == Ok("story") { story(app, dir).await; return; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stage-select") {
+        app.screen = Screen::Stages { cur: 1 };
+        screen(app, dir, "stage-select", 8).await;
+        return;
+    }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stages") { app.screen = Screen::Fight; crate::stage_tour::run(app, dir).await; return; }
     app.screen = Screen::Title;
     screen(app, dir, "01-title", 30).await;

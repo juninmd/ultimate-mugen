@@ -403,30 +403,23 @@ fn sp_box(p: &impl Fn(f32, f32) -> Vec2, x: f32, y: f32, w: f32, h: f32, r: f32)
 /// Round avatar on a soft character-coloured glow: head crop of the idle sprite (M.U.G.E.N.: the 9000,x portrait) with a transparent background.
 fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, frame: Color) {
     let col = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
-    let (x0, y0, d) = (pc.x - half, pc.y - half, half * 2.0);
-    poly::circle(pc, half + 2.2 * s, Color::new(col.r, col.g, col.b, 0.16));
-    poly::grad_v(&poly::regular(pc, half, 40, 0.0), Color::new(col.r, col.g, col.b, 0.34), Color::new(col.r * 0.4, col.g * 0.4, col.b * 0.4, 0.2));
     let por = f.def.sprites.get(&(9000, 1)).or(f.def.sprites.get(&(9000, 0))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), true))
         .or_else(|| f.def.anims.get(&0).and_then(|a| a.frames.first()).and_then(|fr| f.def.sprites.get(&(fr.group, fr.index))).filter(|sp| sp.image.is_some()).map(|sp| (sp.clone(), false)));
     if let Some((sp, full)) = por {
         let img = sp.image.clone().unwrap();
         let tex = g.texture(&img, sp.scale >= 0.99);
         let (iw, ih) = (img.w as f32, img.h as f32);
-        let src = if full { let sd = iw.min(ih); Rect::new((iw - sd) / 2.0, 0.0, sd, sd) } else { let sd = (ih * 0.40).min(iw); let cx = (sp.axis_x * iw / sp.width.max(1.0)).clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
+        let src = if full { Rect::new(0.0, 0.0, iw, ih) } else { let sd = (ih * 0.40).min(iw); let cx = (sp.axis_x * iw / sp.width.max(1.0)).clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0)); Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd) };
+        let hh = half * 2.0;
+        let ww = hh * src.w / src.h;
+        let (x0, y0) = (pc.x - ww / 2.0, pc.y - half);
         let flip = side == 1 && !full;
-        let mut vertices = Vec::with_capacity(41);
-        vertices.push(Vertex::new(pc.x, pc.y, 0.0, (src.x + src.w * 0.5) / iw, (src.y + src.h * 0.5) / ih, WHITE));
-        for p in poly::regular(pc, half, 40, 0.0) {
-            let tx = (p.x - x0) / d;
-            let tx = if flip { 1.0 - tx } else { tx };
-            vertices.push(Vertex::new(p.x, p.y, 0.0, (src.x + src.w * tx) / iw, (src.y + src.h * (p.y - y0) / d) / ih, WHITE));
-        }
-        let n = vertices.len() as u16 - 1;
-        let indices = (0..n).flat_map(|i| [0, 1 + i, 1 + (i + 1) % n]).collect();
-        draw_mesh(&Mesh { vertices, indices, texture: Some(tex) });
+        let (u0, u1) = if flip { ((src.x + src.w) / iw, src.x / iw) } else { (src.x / iw, (src.x + src.w) / iw) };
+        let (v0, v1) = (src.y / ih, (src.y + src.h) / ih);
+        let vertices = vec![Vertex::new(x0, y0, 0.0, u0, v0, WHITE), Vertex::new(x0 + ww, y0, 0.0, u1, v0, WHITE), Vertex::new(x0 + ww, y0 + hh, 0.0, u1, v1, WHITE), Vertex::new(x0, y0 + hh, 0.0, u0, v1, WHITE)];
+        draw_mesh(&Mesh { vertices, indices: vec![0, 1, 2, 0, 2, 3], texture: Some(tex) });
     }
-    poly::ring(pc, half, 1.5 * s, frame);
-    poly::ring(pc, half - 1.3 * s, 0.6 * s, Color::new(1.0, 1.0, 1.0, 0.28));
+    let _ = (s, frame, col);
 }
 
 fn poly_pt(p: impl Fn(f32, f32) -> Vec2, x: f32, y: f32) -> Vec2 { p(x, y) }

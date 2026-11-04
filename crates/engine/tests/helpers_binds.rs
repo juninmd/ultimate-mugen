@@ -82,7 +82,7 @@ fn ownpal_zero_shares_the_parent_palfx() {
     let mut m = duel(mugen_char("a", CNS), mugen_char("b", ""));
     enter(&mut m, 0, 800);
     m.tick(&[0, 0]);
-    m.fighters[0].palfx = Some(ume_engine::fighter::PalFx { time: 10, add: [50.0, 0.0, 0.0], mul: [256.0; 3] });
+    m.fighters[0].palfx = Some(ume_engine::fighter::PalFx::new(10, [50.0, 0.0, 0.0], [256.0; 3]));
     let h = helper(&m);
     assert_eq!(m.palfx_of(h).map(|p| p.add[0]), Some(50.0));
     m.fighters[h].own_pal = true;

@@ -9,6 +9,7 @@ use std::sync::Arc;
 use ume_engine::chardef::{AnimFrame, Blend, CharDef, ImageData};
 use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
+use ume_engine::palette::{BlendMode, PalParams};
 
 pub struct Gfx { tex: HashMap<u64, Texture2D>, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
 
@@ -35,8 +36,8 @@ impl Gfx {
     }
 }
 
-pub struct DrawOpts { pub alpha: f32, pub add: bool, pub sub: bool, pub flash: f32, pub tint: Color, pub angle: f32, pub vflip: bool }
-impl Default for DrawOpts { fn default() -> Self { DrawOpts { alpha: 1.0, add: false, sub: false, flash: 0.0, tint: WHITE, angle: 0.0, vflip: false } } }
+pub struct DrawOpts { pub alpha: f32, pub add: bool, pub sub: bool, pub flash: f32, pub tint: Color, pub angle: f32, pub vflip: bool, pub pal: Option<PalParams>, pub remap: Vec<((i32, i32), (i32, i32))> }
+impl Default for DrawOpts { fn default() -> Self { DrawOpts { alpha: 1.0, add: false, sub: false, flash: 0.0, tint: WHITE, angle: 0.0, vflip: false, pal: None, remap: vec![] } } }
 
 pub struct MatchRenderer { pub debug: bool, pub particles: Vec<Particle>, /** ids of human-controlled fighters (get the ▼ marker) */ pub human: Vec<u32>, pub squash: Vec<[f32; 2]>, /** animated + reactive stage layer (see `stagefx`: `fx.react(&[Impulse])`) */ pub fx: StageReact }
 
@@ -52,6 +53,8 @@ impl MatchRenderer {
     pub fn draw_sprite(g: &mut Gfx, m: &Match, def: &CharDef, fr: &AnimFrame, x: f32, y: f32, facing: f32, lscl: f32, extra: [f32; 2], o: &DrawOpts, shx: f32, shy: f32) {
         let Some(spr) = def.sprites.get(&(fr.group, fr.index)) else { return };
         let Some(img) = spr.image.as_ref() else { return };
+        let remapped = if o.remap.is_empty() { None } else { def.remapped((fr.group, fr.index), &o.remap) };
+        let img = remapped.as_ref().unwrap_or(img);
         let s = g.view_scale;
         let tex = g.texture(img, spr.scale >= 0.99);
         let xs = def.c("size.xscale", 1.0) as f32; let ys = def.c("size.yscale", 1.0) as f32;
@@ -70,9 +73,16 @@ impl MatchRenderer {
         let add = !sub && (o.add || matches!(fr.blend, Blend::Add | Blend::Add1));
         let mut c = o.tint; c.a *= o.alpha;
         if let Some((sa, _)) = fr.alpha { c.a *= (sa as f32 / 256.0).min(1.0); }
+        let pal = o.pal.filter(|p| !p.is_identity() && !sub);
+        if let Some(p) = pal { c.r *= (p.mul[0] / 256.0).min(1.0); c.g *= (p.mul[1] / 256.0).min(1.0); c.b *= (p.mul[2] / 256.0).min(1.0); }
         if add { set_blend(GfxBlend::Add); } else if sub { set_blend(GfxBlend::Sub); }
         draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, c, params.clone());
         if add || sub { set_blend(GfxBlend::Alpha); }
+        if let Some(p) = pal.filter(|p| p.add.iter().any(|a| *a > 0.0)) {
+            set_blend(GfxBlend::Add);
+            draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, Color::new(p.add[0] / 255.0, p.add[1] / 255.0, p.add[2] / 255.0, c.a), params.clone());
+            set_blend(GfxBlend::Alpha);
+        }
         if o.flash > 0.0 {
             set_blend(GfxBlend::Add);
             draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, Color::new(1.0, 1.0, 1.0, o.flash), params);
@@ -132,7 +142,11 @@ impl MatchRenderer {
             match it {
                 It::F(i) => self.draw_fighter(g, m, &m.fighters[i], i, shx, shy),
                 It::P(i) => { let p = &m.projectiles[i]; if let Some(fr) = p.cur.frame() { Self::draw_sprite(g, m, &p.cur.def, fr, p.pos.x, p.pos.y, p.facing, p.lscl, p.scale, &DrawOpts::default(), shx, shy); } }
-                It::E(i) => { let e = &m.explods[i]; if let Some(fr) = e.cur.frame() { Self::draw_sprite(g, m, &e.cur.def, fr, e.pos.x, e.pos.y, e.facing, e.lscl, e.scale, &DrawOpts { add: e.add, vflip: e.vfacing < 0.0, ..Default::default() }, shx, shy); } }
+                It::E(i) => {
+                    let e = &m.explods[i];
+                    let remap = m.idx(e.owner).map(|o| m.fighters[o].remap.clone()).unwrap_or_default();
+                    if let Some(fr) = e.cur.frame() { Self::draw_sprite(g, m, &e.cur.def, fr, e.pos.x, e.pos.y, e.facing, e.lscl, e.scale, &DrawOpts { add: e.add, vflip: e.vfacing < 0.0, remap, ..Default::default() }, shx, shy); }
+                }
             }
         }
         self.draw_stage(g, m, stage, true, shx, shy);
@@ -231,11 +245,13 @@ impl MatchRenderer {
     fn draw_fighter(&self, g: &mut Gfx, m: &Match, f: &Fighter, fi: usize, shx: f32, shy: f32) {
         if f.has_assert(ume_engine::fighter::asf::INVISIBLE) { return; }
         if let Some(ai) = &f.after_image {
-            let n = ai.trail.len();
-            for (i, t) in ai.trail.iter().enumerate().rev().step_by(2) {
-                if i == 0 { continue; }
+            let shown = ai.params.shown(ai.trail.len(), ai.length);
+            for (k, &i) in shown.iter().enumerate().rev() {
+                let t = &ai.trail[i];
                 let fr = AnimFrame { group: t.group, index: t.index, x: t.fx, y: t.fy, time: 1, flip_h: t.flip_h, flip_v: false, blend: Blend::None, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0, clsn1: vec![], clsn2: vec![] };
-                Self::draw_sprite(g, m, &f.anim_def, &fr, t.x, t.y, t.facing, f.lscl, f.draw_scale, &DrawOpts { alpha: 0.4 * (1.0 - i as f32 / n as f32), add: true, tint: Color::new(0.4, 0.6, 1.0, 1.0), ..Default::default() }, shx, shy);
+                let tr = ai.params.trans;
+                let o = DrawOpts { alpha: tr.src / 256.0, add: matches!(tr.mode, BlendMode::Add | BlendMode::Add1), sub: tr.mode == BlendMode::Sub, pal: Some(ai.params.image_params(k)), remap: f.remap.clone(), ..Default::default() };
+                Self::draw_sprite(g, m, &f.anim_def, &fr, t.x, t.y, t.facing, f.lscl, f.draw_scale, &o, shx, shy);
             }
         }
         let Some(fr) = f.frame() else { return };
@@ -244,10 +260,16 @@ impl MatchRenderer {
         if hit { x += if f.hit_shake % 2 == 1 { 1.5 } else { -1.5 }; }
         let mut o = DrawOpts { angle: if f.angle_draw { f.angle } else { 0.0 }, tint: self.fx.ambient(f.pos.x, m.camera.x), ..Default::default() };
         if hit && f.hit_shake % 4 < 2 && !f.ghv.guarded && g.fx_gain > 0.2 { o.flash = 0.55; }
-        if let Some(p) = m.palfx_of(fi) {
-            if p.add.iter().sum::<f32>() > 200.0 { o.flash = 0.6; } else if p.add[0] > p.add[2] + 40.0 { o.tint = Color::new(1.0, 0.7, 0.6, 1.0); } else if p.add[2] > p.add[0] + 40.0 { o.tint = Color::new(0.6, 0.8, 1.0, 1.0); }
+        o.pal = Some(m.fighter_pal(fi));
+        o.remap = f.remap.clone();
+        if let Some(t) = &f.trans {
+            match t.mode {
+                BlendMode::Add | BlendMode::Add1 => { o.add = true; o.alpha = t.src / 256.0; }
+                BlendMode::Sub => { o.sub = true; o.alpha = t.src / 256.0; }
+                BlendMode::AddAlpha => { o.alpha = t.src / 256.0; }
+                BlendMode::None => {}
+            }
         }
-        if let Some((mode, a, _)) = &f.trans { if mode.starts_with("add") { o.add = true; o.alpha = a / 256.0; } else if mode.starts_with("sub") { o.sub = true; o.alpha = a / 256.0; } }
         // awakened form: warm tint + pulsing halo in the form colour
         if (f.form > 0 || f.def.boss) && f.alive && g.fx_gain > 0.0 {
             let c = crate::vfx::Vfx::form_color(f);

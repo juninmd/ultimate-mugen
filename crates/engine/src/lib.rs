@@ -17,6 +17,7 @@ pub mod common;
 pub mod ai;
 pub mod fx;
 pub mod ikemen;
+pub mod palette;
 pub mod native;
 pub mod raster;
 

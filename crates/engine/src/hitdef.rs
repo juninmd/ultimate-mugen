@@ -85,7 +85,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     };
     let opt = |k: &str, idx: usize| if has(k, idx) { Some(num(k, 0.0, idx) * l) } else { None };
     let target_palfx = if has("palfx.time", 0) || has("palfx.add", 0) || has("palfx.mul", 0) {
-        Some(PalFx { time: num("palfx.time", 0.0, 0) as i32, add: [num("palfx.add", 0.0, 0), num("palfx.add", 0.0, 1), num("palfx.add", 0.0, 2)], mul: [num("palfx.mul", 256.0, 0), num("palfx.mul", 256.0, 1), num("palfx.mul", 256.0, 2)] })
+        Some(PalFx::new(num("palfx.time", 0.0, 0) as i32, [num("palfx.add", 0.0, 0), num("palfx.add", 0.0, 1), num("palfx.add", 0.0, 2)], [num("palfx.mul", 256.0, 0), num("palfx.mul", 256.0, 1), num("palfx.mul", 256.0, 2)]))
     } else { None };
     let gst = num("ground.slidetime", 0.0, 0) as i32;
     HitDefData {

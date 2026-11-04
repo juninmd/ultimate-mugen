@@ -58,6 +58,7 @@ Put the decoder in `crates/formats/src/<format>.rs`, export it in `lib.rs` and t
 - Code, commits, issues and documentation are written in English. Portuguese translations live in `*.pt-BR.md` files and `docs/wiki/pt-BR/`.
 - The simulation (`crates/engine`) uses no clock, threads or randomness outside `Match::random`, to keep replays and rollback working.
 - No allocation inside `Match::tick` in new code.
+- Files stay under 250 lines with one responsibility each, split by axis of change: see [File layout](File-Layout.md) and `node scripts/file-size.mjs`.
 - Conventional Commits (`feat:`, `fix:`), validated by `scripts/commit-lint.mjs`.
 
 ## Architecture decisions

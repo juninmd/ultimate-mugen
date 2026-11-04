@@ -89,7 +89,7 @@ Extras de comando (Ikemen GO 1.0):
 
 `AfterImage` `AfterImageTime` `AllPalFX` `AngleAdd` `AngleDraw` `AngleMul` `AngleSet` `AssertSpecial` `AttackDist` `AttackMulSet` `BGPalFX` `BindToParent` `BindToRoot` `BindToTarget` `ChangeAnim` `ChangeAnim2` `ChangeState` `CtrlSet` `DefenceMulSet` `DestroySelf` `EnvColor` `EnvShake` `Explod` `ExplodBindTime` `GameMakeAnim` `Gravity` `Helper` `HitAdd` `HitBy` `HitDef` `HitFallDamage` `HitFallSet` `HitFallVel` `HitVelSet` `LifeAdd` `LifeSet` `MakeDust` `ModifyExplod` `MoveHitReset` `NotHitBy` `PalFX` `ParentVarAdd` `ParentVarSet` `Pause` `PlayerPush` `PlaySnd` `PosAdd` `PosFreeze` `PosSet` `PowerAdd` `PowerSet` `Projectile` `RemoveExplod` `ScreenBound` `SelfState` `SprPriority` `StateTypeSet` `SuperPause` `TargetBind` `TargetDrop` `TargetFacing` `TargetLifeAdd` `TargetPowerAdd` `TargetState` `TargetVelAdd` `TargetVelSet` `Trans` `Turn` `VarAdd` `VarRandom` `VarRangeSet` `VarSet` `VelAdd` `VelMul` `VelSet` `Width`
 
-Também suportados: `ReversalDef` `HitOverride` `FallEnvShake` `RemapPal` `StopSnd` `SndPan` `VictoryQuote` `ForceFeedback` `Offset` `Null` `DisplayToClipboard` `AppendToClipboard` `ClearClipboard`.
+Também suportados: `Zoom` `ReversalDef` `HitOverride` `FallEnvShake` `RemapPal` `StopSnd` `SndPan` `VictoryQuote` `ForceFeedback` `Offset` `Null` `DisplayToClipboard` `AppendToClipboard` `ClearClipboard`.
 
 Notas sobre Explod: `ignorehitpause` vale 1 por padrão (use 0 para congelar junto com o hit pause do dono). `postype = left/right/front/back` e `space = screen` mantêm o explod fixo na tela enquanto a câmera se move. `ModifyExplod` aceita `vel`, `accel`, `pos`, `scale`, `bindtime`, `removetime`, `sprpriority`, `ontop`, `under`, `removeongethit`, `ignorehitpause`, `facing`, `vfacing`, `supermovetime`, `pausemovetime` e `trans`; `facing` é relativo ao dono. `ExplodBindTime` só altera o tempo de vínculo.
 
@@ -106,6 +106,24 @@ Funções extras: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 `HitCount` soma os `numhits` de cada golpe que o atacante acerta. `UniqHitCount` conta cada par distinto `(alvo, id do HitDef)` uma única vez, então três golpes de um mesmo HitDef dão `HitCount = 3` e `UniqHitCount = 1`. Ambos são zerados juntos nas trocas de estado, a menos que `HitCountPersist = 1`.
 
 `GetHitVar(<nome>)` lê os dados do último golpe sofrido (após `HitDef`, defesa ou `HitOverride`). Além dos nomes do MUGEN 1.1 (`type`, `animtype`, `airtype`, `groundtype`, `damage`, `hitcount`, `guardcount`, `hitshaketime`, `hittime`, `slidetime`, `ctrltime`, `xvel`, `yvel`, `yaccel`, `chainid`, `guarded`, `fall`, `fall.*`, `kill`, `id`, `playerno`), estes nomes do Ikemen retornam valores reais: `recovertime` (ticks restantes até `fall.recovertime` permitir a recuperação, 0 fora de queda), `down.recover` (o `down.recover` do HitDef, padrão 1), `priority`, `facing` (direção do atacante, 1 ou -1), `power` (poder recebido pelo alvo), `isbound` (ao vivo, 1 enquanto o alvo está preso), `attr` (máscara de bits: S=1 C=2 A=4 L=8, NA=64 NT=128 NP=256 SA=512 ST=1024 SP=2048 HA=4096 HT=8192 HP=16384), `guardflag` (máscara de bits: H=1 L=2 A=4), `hitdamage`, `guarddamage`, `hitpower`, `guardpower`, `dizzypoints` (`dizzypoints` do HitDef, padrão o dano do golpe), `guardpoints` (`guardpoints` do HitDef, padrão o dano na defesa), `redlife` (`redlife` do HitDef, valor de golpe ou defesa), `score` (`score` do HitDef, valor de golpe ou defesa), `teamside` (lado do atacante, 1 ou 2), `projid` (-1 se não foi projétil), `playerid` (ID do atacante, igual a `id`), `p1stateno` e `p2stateno` (-1 quando o HitDef não define). Qualquer outro nome registra um aviso no stderr ao carregar a expressão e vale 0.
+
+## Zoom da câmera
+
+`Zoom` muda a escala da câmera (1 = normal, acima de 1 = mais perto). A câmera é determinística: avança um passo por tick, sem relógio.
+
+| Parâmetro | Padrão | Significado |
+| --- | --- | --- |
+| `scale` | 1 | Escala pedida |
+| `time` | 1 | Ticks em que o pedido continua ativo; dispare a cada tick para mantê-lo |
+| `delta` | 0 | Somado à escala pedida a cada tick do pedido (uma rampa) |
+| `pos` | 0, 0 | Deslocamento do foco da câmera no localcoord do jogador |
+| `lag` | 0 | 0 vai à escala pedida em um tick; valores próximos de 1 suavizam (`1 - lag` da distância restante por tick) |
+| `zoomindelay` | 0 | Ticks de espera antes de um zoom-in (`scale > 1`) começar |
+| `bound` | 1 | 1 mantém a escala dentro dos limites do cenário (`zoomin` como maior escala, `1 / zoomout` como menor, ampliada pelo zoom-out de equipes) e o deslocamento dentro dos limites do cenário; 0 só limita a escala a 0.25..4 e ignora os limites do cenário |
+
+Quando o pedido termina, a câmera volta à escala normal usando `zoominspeed` / `zoomoutspeed` do cenário.
+
+`CameraZoom` devolve a escala atual da câmera. `ZoomVar(<nome>)` expõe o estado do zoom: `scale` (atual), `target` (escala pedida), `active`, `time` (ticks restantes), `posx`, `posy`, `lag`, `delta`, `delay`, `bound`, `min` e `max` (limites de escala permitidos pelo cenário agora). Todos os nomes valem 0 (ou a escala atual em `target`) quando nenhum `Zoom` está ativo.
 
 ## Redirecionamentos
 

@@ -221,7 +221,7 @@ impl<'a> Host for Ctx<'a> {
             "matchno" => 1.0,
             "gametime" => m.game_time as f64,
             "tickspersecond" => 60.0,
-            "ailevel" => m.idx(f.root).map(|r| m.fighters[r].ai_level).unwrap_or(0) as f64,
+            "ailevel" => m.idx(f.root).filter(|&r| !m.fighters[r].has_assert(crate::flags::asf::NOAILEVEL)).map(|r| m.fighters[r].ai_level).unwrap_or(0) as f64,
             "ishelper" => b(f.is_helper && (args.is_empty() || f.helper_id == a0() as i32)),
             "ishometeam" => b(f.side == 0),
             "teamside" => (f.side + 1) as f64,

@@ -204,8 +204,8 @@ impl Vfx {
                 self.flash_add(0.25); self.chroma = self.chroma.max(0.5); self.radial = 0.45; self.trauma = (self.trauma + 0.15).min(0.6);
                 self.lines = 0.7; self.lines_col = [1.0, 0.85, 0.4];
             }
-            Event::Ko { loser_side } => {
-                self.slow_t = 1.7; self.ko_t = 1.0;
+            Event::Ko { loser_side, slow, .. } => {
+                self.slow_t = if *slow { 1.7 } else { 0.0 }; self.ko_t = 1.0;
                 if let Some((x, y, _)) = Self::chest(m, *loser_side) {
                     self.ko_focus = (x, y);
                     self.ring(x, y, 110.0, 0.8, 3.0, [1.0, 0.25, 0.3]);

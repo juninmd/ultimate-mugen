@@ -2,6 +2,7 @@
 use crate::chardef::{Animation, Box4, CharDef, Controller, Source};
 use crate::expr::{truthy, Expr};
 use crate::fighter::*;
+use crate::flags::gsf;
 use crate::triggers::Ctx;
 use std::cell::RefCell;
 use std::sync::Arc;
@@ -64,7 +65,7 @@ pub enum Event {
     Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool, attacker: usize, defender: usize },
     /// `fighter` = id of the root fighter that fired it (teams can have many per side)
     Super { side: usize, fighter: u32 },
-    Ko { loser_side: usize },
+    Ko { loser_side: usize, silent: bool, slow: bool },
     /// a fighter awakened into its transformed form (id of the root fighter)
     Transform { fighter: u32 },
     StopSound { owner: u32, channel: i32 },
@@ -88,8 +89,10 @@ pub const BASE_H: f32 = 240.0;
 
 #[derive(Default, Clone)]
 pub struct PauseState { pub by: u32, pub time: i32, pub move_time: i32, pub is_super: bool, pub darken: bool, pub unhittable: bool, pub p2_def_mul: f32, pub end_cmd_buf_time: i32, pub pause_bg: bool }
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum AnnounceKind { #[default] Other, Round, Fight, Ko, Win }
 #[derive(Clone)]
-pub struct Announce { pub text: String, pub time: i32, pub total: i32 }
+pub struct Announce { pub text: String, pub time: i32, pub total: i32, pub kind: AnnounceKind }
 
 #[derive(Clone)]
 pub struct Match {
@@ -297,7 +300,11 @@ impl Match {
 
     fn run_states(&mut self, i: usize) {
         let in_pause = self.fighters[i].hit_pause > 0 || self.fighters[i].hit_shake > 0;
-        self.fighters[i].asserts = if self.fighters[i].ikemen.standby { crate::fighter::asf::INVISIBLE } else { 0 };
+        {
+            let f = &mut self.fighters[i];
+            f.asserts = if in_pause { f.asserts & !asf::ANIMATEHITPAUSE } else { 0 };
+            if f.ikemen.standby { f.asserts |= asf::INVISIBLE; }
+        }
         let own = self.fighters[i].def.clone();
         let custom = !Arc::ptr_eq(&self.fighters[i].st_def, &own);
         let helper = self.fighters[i].is_helper;
@@ -322,7 +329,7 @@ impl Match {
         let f = &self.fighters[i];
         let src = if f.is_helper { if f.key_ctrl { self.idx(f.root) } else { None } } else { Some(i) };
         let Some(s) = src else { return false };
-        if self.round_state != 2 && self.round_state != 3 && !self.training { return false; }
+        if self.round_state != 2 && self.round_state != 3 && !self.training && !self.fighters[s].has_assert(asf::POSTROUNDINPUT) { return false; }
         if !Arc::ptr_eq(&f.st_def, &f.def) {
             return f.st_def.commands.iter().find(|c| c.name == name).is_some_and(|c| crate::commands::match_command(&self.fighters[s].history, c));
         }
@@ -347,20 +354,23 @@ impl Match {
                 }
             }
         }
+        if self.fighters[i].has_assert(asf::NOHARDCODEDKEYS) { return; }
         let own = self.fighters[i].def.clone();
         if st == 'S' || st == 'C' {
-            if cmd(self, "holdback") && self.in_guard_dist(i) && !(120..=155).contains(&s) { self.change_state(i, 120, own); return; }
+            let guard_blocked = self.fighters[i].has_assert(if st == 'S' { asf::NOSTANDGUARD } else { asf::NOCROUCHGUARD });
+            let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD);
+            if guard_input && !guard_blocked && self.in_guard_dist(i) && !(120..=155).contains(&s) { self.change_state(i, 120, own); return; }
             if st == 'S' {
                 if cmd(self, "holdup") && !self.fighters[i].has_assert(asf::NOJUMP) { self.change_state(i, 40, own); return; }
-                if cmd(self, "holddown") && s != 10 && s != 11 { self.change_state(i, 10, own); return; }
+                if cmd(self, "holddown") && s != 10 && s != 11 && !self.fighters[i].has_assert(asf::NOCROUCH) { self.change_state(i, 10, own); return; }
                 if (cmd(self, "holdfwd") || cmd(self, "holdback")) && s != 20 && !self.fighters[i].has_assert(asf::NOWALK) && (s == 0 || s == 52) { self.change_state(i, 20, own); }
-            } else if !cmd(self, "holddown") && s == 11 { self.change_state(i, 12, own); }
+            } else if !cmd(self, "holddown") && s == 11 && !self.fighters[i].has_assert(asf::NOSTAND) { self.change_state(i, 12, own); }
         } else if st == 'A' {
             let f = &self.fighters[i];
             let maxj = f.c("movement.airjump.num", 1.0) as i32;
             let h = &f.history;
             let pressed_up = h.at(h.tick) & 1 != 0 && h.at(h.tick - 1) & 1 == 0;
-            if s == 50 && f.air_jumps < maxj && pressed_up && f.pos.y < -f.c("movement.airjump.height", 35.0) * f.lscl {
+            if s == 50 && f.air_jumps < maxj && !f.has_assert(asf::NOAIRJUMP) && pressed_up && f.pos.y < -f.c("movement.airjump.height", 35.0) * f.lscl {
                 self.fighters[i].air_jumps += 1;
                 self.change_state(i, 45, own);
             }
@@ -490,7 +500,7 @@ impl Match {
         }
         // round-count-aware announcer (Guilty Gear: "Final" for the deciding duel)
         let decider = self.rounds_to_win > 1 && self.wins[0] == self.rounds_to_win - 1 && self.wins[1] == self.rounds_to_win - 1;
-        self.announce = Some(Announce { text: if decider { "FINAL ROUND".into() } else { format!("ROUND {}", self.round_no) }, time: 70, total: 70 });
+        self.announce = Some(Announce { text: if decider { "FINAL ROUND".into() } else { format!("ROUND {}", self.round_no) }, time: 70, total: 70, kind: AnnounceKind::Round });
         self.events.push(Event::RoundStart(self.round_no));
     }
 
@@ -511,14 +521,14 @@ impl Match {
                 }
             }
             // MUGEN: "FIGHT!" waits while any player asserts the Intro flag (capped for safety)
-            1 if self.round_time > 60 + if self.round_no == 1 { self.intro_ticks } else { 0 } && (self.global_asserts & 2 == 0 || self.round_time > 600) => {
+            1 if self.round_time > 60 + if self.round_no == 1 { self.intro_ticks } else { 0 } && (self.global_asserts & gsf::INTRO == 0 || self.round_time > 600) => {
                 self.round_state = 2; self.round_time = 0;
-                self.announce = Some(Announce { text: "FIGHT!".into(), time: 50, total: 50 });
+                self.announce = Some(Announce { text: "FIGHT!".into(), time: 50, total: 50, kind: AnnounceKind::Fight });
                 self.events.push(Event::Fight);
                 for f in self.fighters.iter_mut() { if !f.is_helper && (f.state_no == 0 || f.state_no == 5900 || f.state_no == 192 || f.state_no == 194) { f.ctrl = true; } }
             }
             2 => {
-                if !self.training && self.round_ticks > 0 && self.pause.is_none() && self.global_asserts & 1 == 0 { self.timer = (self.timer - 1).max(0); }
+                if !self.training && self.round_ticks > 0 && self.pause.is_none() && self.global_asserts & (gsf::TIMERFREEZE | gsf::ROUNDFREEZE) == 0 { self.timer = (self.timer - 1).max(0); }
                 let (root_buf, root_len) = self.root_index_buf();
                 let roots = &root_buf[..root_len];
                 if self.training {
@@ -526,7 +536,8 @@ impl Match {
                     for &i in roots { self.fighters[i].power = self.fighters[i].power_max; }
                     return;
                 }
-                let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| self.fighters[i].life <= 0.0).collect();
+                let ko_disabled = self.global_asserts & gsf::GLOBALNOKO != 0;
+                let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| self.fighters[i].life <= 0.0 && !ko_disabled && !self.fighters[i].has_assert(asf::NOKO)).collect();
                 let team_life = |m: &Match, s: usize| -> (f32, f32) { roots.iter().filter(|&&i| m.fighters[i].side == s).fold((0.0, 0.0), |a, &i| (a.0 + m.fighters[i].life.max(0.0), a.1 + m.fighters[i].life_max)) };
                 if self.team_simul {
                     // a fallen teammate stays down; the round ends only when a whole team is KO'd
@@ -542,20 +553,21 @@ impl Match {
                         for &i in &dead { self.fighters[i].alive = false; }
                         let sides_dead = [dead.iter().any(|&i| self.fighters[i].side == 0), dead.iter().any(|&i| self.fighters[i].side == 1)];
                         self.winner_side = if sides_dead[0] && sides_dead[1] { -2 } else if sides_dead[0] { 1 } else { 0 };
-                        self.slow_mo = 75;
-                        self.announce = Some(Announce { text: "K.O.".into(), time: 110, total: 110 });
-                        self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side });
+                        let slow = self.global_asserts & gsf::NOKOSLOW == 0;
+                        self.slow_mo = if slow { 75 } else { 0 };
+                        self.announce = Some(Announce { text: "K.O.".into(), time: 110, total: 110, kind: AnnounceKind::Ko });
+                        self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side, silent: self.global_asserts & gsf::NOKOSND != 0, slow });
                     } else {
                         let (l0, l1) = (team_life(self, 0), team_life(self, 1));
                         let (r0, r1) = (l0.0 / l0.1.max(1.0), l1.0 / l1.1.max(1.0));
                         self.winner_side = if (r0 - r1).abs() < 1e-6 { -2 } else if r0 > r1 { 0 } else { 1 };
-                        self.announce = Some(Announce { text: "TIME OVER".into(), time: 110, total: 110 });
+                        self.announce = Some(Announce { text: "TIME OVER".into(), time: 110, total: 110, kind: AnnounceKind::Other });
                     }
                 }
             }
             3 => {
                 let settled = self.roots().all(|f| if f.alive { f.move_type != 'H' && (f.ctrl || f.state_no == 0) } else { f.state_no == 5150 || f.state_no == 5110 });
-                if ((settled && self.round_time > 90) || self.round_time > 300) && (self.global_asserts & 4 == 0 || self.round_time > 900) {
+                if ((settled && self.round_time > 90) || self.round_time > 300) && (self.global_asserts & gsf::ROUNDNOTOVER == 0 || self.round_time > 900) {
                     self.round_state = 4; self.round_time = 0;
                     let decides = self.winner_side >= 0 && self.wins[self.winner_side as usize] + 1 >= self.rounds_to_win;
                     for (k, i) in self.root_indices().into_iter().enumerate() {
@@ -573,7 +585,7 @@ impl Match {
                     }
                     if self.winner_side >= 0 { self.wins[self.winner_side as usize] += 1; }
                     let text = if self.winner_side >= 0 { self.winner_text(self.winner_side as usize) } else { "DRAW".into() };
-                    self.announce = Some(Announce { text, time: 150, total: 150 });
+                    self.announce = Some(Announce { text, time: 150, total: 150, kind: AnnounceKind::Win });
                     self.events.push(Event::RoundEnd(self.winner_side));
                 }
             }
@@ -597,9 +609,9 @@ impl Match {
             if self.slow_mo % 3 != 0 { self.visual_timers(); return; }
         }
         self.game_time += 1;
-        self.round_time += 1;
+        if self.global_asserts & gsf::ROUNDFREEZE == 0 { self.round_time += 1; }
         // any attack button skips the first-round face-off (inputs are recorded, so replays skip identically)
-        if self.round_state == 1 && self.round_no == 1 && self.intro_ticks > 0 && self.round_time > 8 && self.round_time < 60 + self.intro_ticks
+        if self.round_state == 1 && self.round_no == 1 && self.intro_ticks > 0 && self.global_asserts & gsf::ROUNDNOTSKIP == 0 && self.round_time > 8 && self.round_time < 60 + self.intro_ticks
             && inputs.iter().any(|b| b & (crate::input::k::A | crate::input::k::B | crate::input::k::C | crate::input::k::X | crate::input::k::Y | crate::input::k::Z) != 0) { self.round_time = 60 + self.intro_ticks; }
         self.round_logic();
         self.global_asserts = 0;
@@ -613,7 +625,7 @@ impl Match {
         let mut awaken: Vec<usize> = vec![];
         for (fi, f) in self.fighters.iter_mut().enumerate() {
             if f.is_helper { continue; }
-            let bits = inputs.get(k).copied().unwrap_or(0);
+            let bits = if f.has_assert(asf::NOINPUT) { 0 } else { inputs.get(k).copied().unwrap_or(0) };
             if bits & crate::input::k::T != 0 { awaken.push(fi); }
             k += 1;
             f.history.push(bits, f.facing as i32);
@@ -624,7 +636,7 @@ impl Match {
         for fi in awaken { self.try_transform(fi); }
         let mut ids = std::mem::take(&mut self.tick_ids);
         ids.clear();
-        ids.extend(self.fighters.iter().map(|f| f.id));
+        self.collect_run_order(&mut ids);
         for &id in &ids {
             let Some(i) = self.idx(id) else { continue };
             if frozen_by_pause(&self.fighters[i]) { continue; }
@@ -632,7 +644,7 @@ impl Match {
             let frozen = f.hit_pause > 0 || f.hit_shake > 0;
             f.width_override = None; f.player_push = !f.ikemen.standby; f.trans = None; f.draw_offset = V2::default();
             if f.palfx.as_ref().is_some_and(|p| p.expired()) { f.palfx = None; }
-            if !frozen { f.advance_anim(); }
+            if (!frozen || f.has_assert(asf::ANIMATEHITPAUSE)) && !f.has_assert(asf::ANIMFREEZE) { f.advance_anim(); }
             self.run_states(i);
         }
         if paused_by.is_some() { if let Some(p) = self.pause.as_mut() { if p.move_time > 0 { p.move_time -= 1; } } }
@@ -686,9 +698,10 @@ impl Match {
         let paused = paused_by.is_some();
         self.update_projectiles(paused);
         self.update_explods(paused);
-        self.update_camera();
+        if self.global_asserts & gsf::CAMERAFREEZE == 0 { self.update_camera(); }
         if !paused { if let Some(bg) = self.bg.as_mut() { bg.step(); } }
         self.visual_timers();
+        self.skip_asserted_announcements();
         if let Some(p) = self.pause.as_mut() { p.time -= 1; if p.time <= 0 { self.pause = None; } }
         for f in self.fighters.iter_mut() { if f.unhittable > 0 { f.unhittable -= 1; } }
         // drop stale targets
@@ -698,6 +711,35 @@ impl Match {
             targets.retain(|(t, _)| self.fighters.iter().any(|f| f.id == *t && (f.move_type == 'H' || st < 2 || mc > 0)));
             self.fighters[k].targets = targets;
         }
+    }
+
+    fn collect_run_order(&self, ids: &mut Vec<u32>) {
+        ids.extend(self.fighters.iter().map(|f| f.id));
+        if self.fighters.iter().all(|f| f.asserts & (asf::RUNFIRST | asf::RUNLAST) == 0) { return; }
+        let rank = |id: &u32| match self.fighters.iter().find(|f| f.id == *id) {
+            Some(f) if f.has_assert(asf::RUNFIRST) && !f.has_assert(asf::RUNLAST) => 0,
+            Some(f) if f.has_assert(asf::RUNLAST) && !f.has_assert(asf::RUNFIRST) => 2,
+            _ => 1,
+        };
+        ids.sort_by_key(rank);
+    }
+
+    pub fn run_order_ids(&self) -> Vec<u32> {
+        let mut ids = vec![];
+        self.collect_run_order(&mut ids);
+        ids
+    }
+
+    fn skip_asserted_announcements(&mut self) {
+        let Some(kind) = self.announce.as_ref().map(|a| a.kind) else { return };
+        let skipped = match kind {
+            AnnounceKind::Round => gsf::SKIPROUNDDISPLAY,
+            AnnounceKind::Fight => gsf::SKIPFIGHTDISPLAY,
+            AnnounceKind::Ko => gsf::SKIPKODISPLAY,
+            AnnounceKind::Win => gsf::SKIPWINDISPLAY,
+            AnnounceKind::Other => 0,
+        };
+        if self.global_asserts & skipped != 0 { self.announce = None; }
     }
 
     /// Transformation ("awakening"): costs one super bar, once per round, lasts until the round ends — stronger hits, tougher, regenerating
@@ -772,6 +814,12 @@ impl Match {
                 if overlap > 0.0 {
                     let (mut lp, mut rp) = (overlap / 2.0, overlap / 2.0);
                     if fl.state_type == 'A' && fr.state_type != 'A' { lp = overlap; rp = 0.0; } else if fr.state_type == 'A' && fl.state_type != 'A' { rp = overlap; lp = 0.0; }
+                    match (fl.has_assert(asf::IMMOVABLE), fr.has_assert(asf::IMMOVABLE)) {
+                        (true, false) => { lp = 0.0; rp = overlap; }
+                        (false, true) => { lp = overlap; rp = 0.0; }
+                        (true, true) => { lp = 0.0; rp = 0.0; }
+                        (false, false) => {}
+                    }
                     self.fighters[l].pos.x -= lp; self.fighters[r].pos.x += rp;
                 }
             }
@@ -845,12 +893,13 @@ impl Match {
         if hf.contains('+') && f.move_type != 'H' { return false; }
         if hf.contains('-') && f.move_type == 'H' { return false; }
         let falling = f.move_type == 'H' && f.ghv.fall && st == 'A';
+        let hf_falling = hf.contains('F') && !f.has_assert(asf::NOFALLHITFLAG);
         // air juggle budget: a falling, airborne target can only absorb `airjuggle` points of moves in a row
         if falling && f.juggle_used + hd.juggle > hd.airjuggle { return false; }
         if st == 'S' && !(hf.contains('H') || hf.contains('M')) { return false; }
         if st == 'C' && !(hf.contains('L') || hf.contains('M')) { return false; }
-        if st == 'A' && !hf.contains('A') && !(falling && hf.contains('F')) { return false; }
-        if falling && !hf.contains('F') { return false; }
+        if st == 'A' && !hf.contains('A') && !(falling && hf_falling) { return false; }
+        if falling && !hf_falling { return false; }
         if st == 'L' && !hf.contains('D') { return false; }
         if f.not_hit_by.iter().any(|(a, _)| Self::attr_match(hd, a)) { return false; }
         if f.hit_by.iter().any(|(a, _)| !Self::attr_match(hd, a)) { return false; }
@@ -858,12 +907,14 @@ impl Match {
     }
     fn is_guarding(&self, d: usize, hd: &HitDefData) -> bool {
         let f = &self.fighters[d];
-        if f.has_assert(asf::UNGUARDABLE) || hd.guardflag.is_empty() { return false; }
+        if hd.guardflag.is_empty() { return false; }
         let gf = &hd.guardflag; let st = f.state_type;
+        let blocked = match st { 'S' => asf::NOSTANDGUARD, 'C' => asf::NOCROUCHGUARD, 'A' => asf::NOAIRGUARD, _ => 0 };
+        if f.has_assert(blocked) { return false; }
         let ok = (st == 'S' && (gf.contains('H') || gf.contains('M'))) || (st == 'C' && (gf.contains('L') || gf.contains('M'))) || (st == 'A' && gf.contains('A'));
         if !ok { return false; }
         if (120..=155).contains(&f.state_no) { return true; }
-        f.ctrl && f.move_type != 'H' && st != 'A' && !f.is_helper && self.has_command(d, "holdback")
+        f.ctrl && f.move_type != 'H' && st != 'A' && !f.is_helper && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD))
     }
 
     fn detect_reversals(&mut self) {
@@ -946,7 +997,7 @@ impl Match {
     }
 
     pub fn apply_hit(&mut self, a: usize, d: usize, hd: &HitDefData, at: (f32, f32), proj: Option<(i32, f32)>) {
-        let guarded = self.is_guarding(d, hd);
+        let guarded = !self.fighters[a].has_assert(asf::UNGUARDABLE) && self.is_guarding(d, hd);
         let overridden = if guarded { None } else { self.hit_override(d, hd) };
         let from_proj = proj.is_some();
         let a_facing = proj.map(|p| p.1).unwrap_or(self.fighters[a].facing);
@@ -987,11 +1038,11 @@ impl Match {
         }
         if guarded {
             let training = self.training;
-            let dmg = (hd.guard_damage * attack_mul).round();
+            let dmg = if self.fighters[d].has_assert(asf::NOGUARDDAMAGE) { 0.0 } else { (hd.guard_damage * attack_mul).round() };
             let pause_p1 = hd.guard_pause_p1;
             {
                 let fd = &mut self.fighters[d];
-                fd.life = if hd.guard_kill && !training { (fd.life - dmg).max(0.0) } else { (fd.life - dmg).max(fd.life.min(1.0)) };
+                fd.life = if hd.guard_kill && !training && !fd.has_assert(asf::NOGUARDKO) { (fd.life - dmg).max(0.0) } else { (fd.life - dmg).max(fd.life.min(1.0)) };
                 let gc = fd.ghv.guardcount;
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
@@ -1010,7 +1061,7 @@ impl Match {
             self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
             self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false);
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
-            if cornered && self.fighters[a].def.source == Source::Mugen { self.fighters[a].vel.x = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; }
+            if cornered && self.fighters[a].def.source == Source::Mugen && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { self.fighters[a].vel.x = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; }
         } else {
             let training = self.training;
             let was_hit = self.fighters[d].move_type == 'H';
@@ -1018,7 +1069,9 @@ impl Match {
             let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale(prev_hc) } else { 1.0 };
             let mut dmg = (hd.damage * attack_mul * scale / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
+            if self.fighters[d].has_assert(asf::NOHITDAMAGE) { dmg = 0.0; }
             let prev_fall = self.fighters[d].ghv.fall;
+            let ko_global_off = self.global_asserts & gsf::GLOBALNOKO != 0;
             if was_hit && prev_fall && (self.fighters[d].state_type == 'A' || self.fighters[d].pos.y < -1.0) { self.fighters[d].juggle_used += hd.juggle; }
             {
                 let fd = &mut self.fighters[d];
@@ -1042,9 +1095,10 @@ impl Match {
                 g.fall_recover = hd.fall_recover; g.fall_recover_time = hd.fall_recover_time; g.fall_damage = hd.fall_damage; g.fall_kill = hd.fall_kill; g.kill = hd.kill;
                 g.chainid = hd.chain_id.unwrap_or(-1);
                 g.record_hitdef(hd, false, (aid, aside, ano), a_facing, proj.map(|p| p.0));
-                if fd.life <= 0.0 {
-                    g.fall = true;
-                    if g.yvel == 0.0 { g.yvel = -5.0 * fd.lscl; g.xvel = g.xvel.min(-2.5 * fd.lscl); }
+                let ko_disabled = ko_global_off || fd.asserts & asf::NOKO != 0;
+                if fd.life <= 0.0 && !ko_disabled {
+                    if fd.asserts & asf::NOKOFALL == 0 { g.fall = true; }
+                    if g.yvel == 0.0 && fd.asserts & asf::NOKOVELOCITY == 0 { g.yvel = -5.0 * fd.lscl; g.xvel = g.xvel.min(-2.5 * fd.lscl); }
                     fd.alive = false;
                 }
                 fd.hit_shake = hd.pause_p2; fd.hit_over_time = fd.ghv.hittime; fd.slide_time = fd.ghv.slidetime; fd.fall_time = 0;
@@ -1075,13 +1129,13 @@ impl Match {
             if let Some(s) = hd.hit_sound { self.sound(a, s.0, s.1, s.2, Some(if heavy { "hitheavy" } else { "hit" })); }
             if hd.env_shake.time > 0 { self.shake(hd.env_shake.time, hd.env_shake.freq, hd.env_shake.ampl, hd.env_shake.phase); }
             if let Some(p) = hd.target_palfx.clone() { self.fighters[d].palfx = Some(p); }
-            if cornered && self.fighters[a].def.source == Source::Mugen { self.fighters[a].vel.x = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; }
+            if cornered && self.fighters[a].def.source == Source::Mugen && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { self.fighters[a].vel.x = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; }
             self.place_target(a, d, hd);
             let droot = self.fighters[d].root;
             self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
         }
         // cornered defenders push the attacker back instead of absorbing all the knock-back (SF/Tekken/GG behaviour)
-        if !from_proj && self.fighters[a].def.source == Source::Native && self.fighters[a].state_type != 'A' && self.at_corner(d) {
+        if !from_proj && self.fighters[a].def.source == Source::Native && self.fighters[a].state_type != 'A' && !self.fighters[a].has_assert(asf::NOCORNERPUSH) && self.at_corner(d) {
             let push = corner_push(self.fighters[d].ghv.xvel);
             let away = if apos.x <= self.fighters[d].pos.x { -1.0 } else { 1.0 };
             self.fighters[a].pos.x += away * push;
@@ -1158,7 +1212,7 @@ impl Match {
     }
     pub fn spawn_dust(&mut self, i: usize, x: f32, y: f32) {
         let Some(fx) = self.fx.clone() else { return };
-        if !fx.anims.contains_key(&120) { return; }
+        if !fx.anims.contains_key(&120) || self.fighters[i].has_assert(asf::NOMAKEDUST) { return; }
         let mut e = self.make_explod(&self.fighters[i], fx, 120, x, y, 1.0);
         e.on_top = false; e.spr_priority = -3;
         self.explods.push(e);

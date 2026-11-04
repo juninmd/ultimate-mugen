@@ -146,6 +146,8 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     d.constants = constants; d.portrait = sprites.get(&(9000, 0)).cloned(); d.sprites = sprites; d.anims = anims;
     d.commands = commands; d.states = states; d.sounds = sounds; d.ai_commands = ai_commands; d.movelist = movelist; d.series = "M.U.G.E.N".into();
     d.palettes = palettes; d.indexed = indexed;
+    d.unknown_asserts = crate::flags::unknown_in_states(&d.states);
+    crate::flags::warn_unknown(&d.name, &d.unknown_asserts);
     let _ = Arc::new(0);
     Ok(d)
 }

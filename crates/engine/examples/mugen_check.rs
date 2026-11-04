@@ -16,6 +16,7 @@ fn main() {
             let t = std::time::Instant::now();
             let d = match load_mugen_char(&vfs, &def, 1, true) { Ok(d) => Arc::new(d), Err(e) => { println!("FAIL load {def}: {e}"); continue; } };
             let load_ms = t.elapsed().as_millis();
+            if !d.unknown_asserts.is_empty() { println!("UNKNOWN-FLAGS {def}: AssertSpecial flags ignored: {}", d.unknown_asserts.join(", ")); }
             let res = std::panic::catch_unwind(|| {
                 let mut m = Match::new(common_def(), None, flat_stage());
                 m.add_player(d.clone(), 0, 6, 1); m.add_player(d.clone(), 1, 6, 2);

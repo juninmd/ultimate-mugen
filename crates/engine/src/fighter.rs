@@ -88,16 +88,7 @@ pub struct TrailPoint { pub x: f32, pub y: f32, pub group: i32, pub index: i32, 
 #[derive(Clone, Debug)]
 pub struct AfterImage { pub time: i32, pub length: usize, pub trail: Vec<TrailPoint>, pub params: AfterImageParams, pub ticks: i32 }
 
-/// AssertSpecial flags
-pub mod asf {
-    pub const NOAUTOTURN: u32 = 1; pub const NOWALK: u32 = 2; pub const NOJUMP: u32 = 4; pub const INVISIBLE: u32 = 8; pub const NOSHADOW: u32 = 16;
-    pub const UNGUARDABLE: u32 = 32; pub const NOSTANDGUARD: u32 = 64; pub const NOCROUCHGUARD: u32 = 128; pub const NOAIRGUARD: u32 = 256;
-    pub const NOKOSND: u32 = 512; pub const NOJUGGLE: u32 = 1024;
-    pub fn from_name(s: &str) -> u32 {
-        match s { "noautoturn" => NOAUTOTURN, "nowalk" => NOWALK, "nojump" => NOJUMP, "invisible" => INVISIBLE, "noshadow" => NOSHADOW, "unguardable" => UNGUARDABLE,
-            "nostandguard" => NOSTANDGUARD, "nocrouchguard" => NOCROUCHGUARD, "noairguard" => NOAIRGUARD, "nokosnd" => NOKOSND, "nojugglecheck" => NOJUGGLE, _ => 0 }
-    }
-}
+pub use crate::flags::asf;
 
 /// fallback chains for missing animations
 pub fn anim_fallback(no: i32) -> &'static [i32] {
@@ -142,7 +133,7 @@ pub struct Fighter {
     pub hitdef: Option<HitDefData>, pub hitdef_active: bool, pub hitdef_targets: Vec<u32>,
     pub move_contact: i32, pub move_hit: i32, pub move_guarded: i32, pub move_reversed: i32, pub hit_count: i32, pub uniq_hit_count: i32, pub uniq_hit_keys: Vec<(u32, i32)>,
     pub ghv: GetHitVars, /** juggle points already spent on this fighter in the current air combo */ pub juggle_used: i32, /** consecutive ticks without control during the fight (stuck-state watchdog) */ pub no_ctrl_ticks: i32, pub hit_pause: i32, pub hit_shake: i32, pub hit_over_time: i32, pub slide_time: i32, pub fall_time: i32,
-    pub asserts: u32,
+    pub asserts: u64,
     pub width_override: Option<(f32, f32)>, pub player_push: bool, pub screen_bound: bool, pub pos_freeze: bool, pub spr_priority: i32,
     pub targets: Vec<(u32, i32)>,
     pub not_hit_by: Vec<(String, i32)>, pub hit_by: Vec<(String, i32)>,
@@ -294,7 +285,7 @@ impl Fighter {
             [self.pos.x + x1, self.pos.y + b[1] * sy * s, self.pos.x + x2, self.pos.y + b[3] * sy * s]
         }).collect()
     }
-    pub fn has_assert(&self, f: u32) -> bool { self.asserts & f != 0 }
+    pub fn has_assert(&self, f: u64) -> bool { self.asserts & f != 0 }
     /// True while nothing legitimately freezes this fighter (round running, no super pause, no hit pause/shake, not bound).
     pub fn round_free(&self, fighting: bool, paused: bool) -> bool { fighting && !paused && self.hit_pause == 0 && self.hit_shake == 0 && self.bind.is_none() }
 }

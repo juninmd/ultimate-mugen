@@ -8,6 +8,7 @@ pub mod cns;
 pub mod zss;
 pub mod loader;
 pub mod fighter;
+pub mod flags;
 pub mod triggers;
 pub mod controllers;
 pub mod sctrl;

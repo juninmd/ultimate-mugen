@@ -35,6 +35,7 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `NumText` | Texts the player has on screen |
 | `ClsnOverlap(clsn1, id, clsn2)` | 1 when the player's box type overlaps the box type of the player with that `id` |
 | `NumPartner` | Teammates on the same side |
+| `IsAsserted(flag)` | 1 while the [AssertSpecial](AssertSpecial.md) flag is on (character or global flag) |
 
 Map keys are case-insensitive. Each map holds at most 256 keys of at most 64 characters; writes that would exceed either limit are ignored.
 

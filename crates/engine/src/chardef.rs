@@ -87,6 +87,7 @@ pub struct CharDef {
     pub palettes: HashMap<PalKey, Arc<Vec<u8>>>, pub indexed: HashMap<(i32, i32), IndexedSprite>,
     pub remap_cache: Mutex<HashMap<((i32, i32), PalKey), Arc<ImageData>>>,
     pub mugen_version: f32,
+    pub unknown_asserts: Vec<String>,
 }
 impl CharDef {
     pub fn empty(id: &str) -> Self {
@@ -94,7 +95,7 @@ impl CharDef {
             id: id.into(), name: id.into(), display_name: id.into(), author: String::new(), source: Source::Native, local_w: 320.0, local_h: 240.0,
             constants: default_constants(), sprites: HashMap::new(), anims: HashMap::new(), commands: vec![], states: HashMap::new(), sounds: HashMap::new(),
             portrait: None, movelist: vec![], ai_commands: vec![], color: [90, 100, 140], series: String::new(), description: String::new(),
-            intro: String::new(), taunt: String::new(), win_quote: String::new(), form_name: String::new(), boss: false, mugen_version: 1.0,
+            intro: String::new(), taunt: String::new(), win_quote: String::new(), form_name: String::new(), boss: false, mugen_version: 1.0, unknown_asserts: vec![],
             palettes: HashMap::new(), indexed: HashMap::new(), remap_cache: Mutex::new(HashMap::new()),
         }
     }

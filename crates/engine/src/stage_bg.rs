@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use ume_formats::air::Animation;
-use ume_formats::stage::{BgCtrlKind, MugenStage};
+use ume_formats::stage::{BgCtrlDef, BgCtrlKind, MugenStage};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct BgLayerState {
@@ -9,7 +9,7 @@ pub struct BgLayerState {
 }
 
 #[derive(Clone)]
-pub struct BgState { pub stage: Arc<MugenStage>, pub layers: Vec<BgLayerState>, pub def_time: Vec<i32> }
+pub struct BgState { pub stage: Arc<MugenStage>, pub layers: Vec<BgLayerState>, pub def_time: Vec<i32>, pub ctrl_defs: Vec<BgCtrlDef> }
 
 fn sin_wave(s: [f32; 3], t: i32) -> f32 {
     if s[1] <= 0.0 { return 0.0; }
@@ -24,14 +24,16 @@ impl BgState {
             BgLayerState { visible: true, enabled: true, pos: [0.0; 2], vel: l.velocity, anim: None, anim_time: 0, sin_x: l.sin_x, sin_y: l.sin_y, sin_time: 0, link }
         }).collect();
         let def_time = vec![0; stage.ctrl_defs.len()];
-        BgState { stage, layers, def_time }
+        let ctrl_defs = stage.ctrl_defs.clone();
+        BgState { stage, layers, def_time, ctrl_defs }
     }
 
     pub fn reset(&mut self) { *self = BgState::new(self.stage.clone()); }
 
     pub fn step(&mut self) {
         let stage = self.stage.clone();
-        for (d, def) in stage.ctrl_defs.iter().enumerate() {
+        let ctrl_defs = std::mem::take(&mut self.ctrl_defs);
+        for (d, def) in ctrl_defs.iter().enumerate() {
             let t = self.def_time[d];
             for c in &def.ctrls {
                 let tt = if c.loop_time > 0 { t % c.loop_time } else { t };
@@ -56,6 +58,7 @@ impl BgState {
             let next = t + 1;
             self.def_time[d] = if def.loop_time > 0 && next >= def.loop_time { 0 } else { next };
         }
+        self.ctrl_defs = ctrl_defs;
         for s in self.layers.iter_mut().filter(|s| s.enabled) {
             s.pos[0] += s.vel[0]; s.pos[1] += s.vel[1];
             s.anim_time += 1; s.sin_time += 1;

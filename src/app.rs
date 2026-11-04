@@ -752,6 +752,8 @@ impl App {
         }
         self.session = Some(sess);
         self.screen = Screen::Fight;
+        self.audio.reset_bgm();
+        if let Some(b) = bgm.as_ref() { self.audio.register_music_file("stage", b.0.clone(), b.1); }
         let custom = match bgm { Some(b) => self.audio.play_music_file(&b.0, b.1).await, None => false };
         if !custom { self.audio.play_music(music).await; }
     }

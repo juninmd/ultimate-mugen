@@ -167,6 +167,25 @@ O motor é 2D, então não há eixo Z: `Pos Z`, `Vel Z` e os outros componentes 
 - `GroundLevelOffset value = n`: eleva em `n` pixels o chão sob este personagem (negativo cava), que passa a ficar sobre o chão elevado com pouso, física de chão e detecção de golpe no chão/ar normais. `Pos Y` é medido a partir do chão do próprio personagem (0 enquanto está sobre ele); `ScreenPos Y` e a altura de criação de projéteis, explods e helpers incluem o deslocamento. O deslocamento zera no início do round.
 - `Depth` e `DepthBound` são aceitos mas ignorados (Z está fora do escopo); o primeiro uso imprime um aviso (`depth is accepted but ignored: the engine has no Z axis`) e o personagem não é alterado.
 
+## Triggers de tela, câmera e cenário
+
+Todas as distâncias e tamanhos usam o localcoord do jogador que avalia. Triggers "relativos ao zoom" mudam quando a câmera dá zoom (o zoom-out de 5v5, `Zoom`, `Camera`).
+
+| Trigger | Relativo ao zoom | Significado |
+| --- | --- | --- |
+| `ScreenWidth`, `ScreenHeight` | sim | Tamanho da área visível (`GameWidth` / `GameHeight` continuam devolvendo o tamanho bruto da vista em pixels do jogo) |
+| `TopBoundDist` | sim | Distância da posição do jogador até o ponto mais alto que o cenário deixa a câmera mostrar (`boundhigh`, elevado por `dynamicboundhigh`) |
+| `TopBoundBodyDist` | sim | O mesmo, menos o `size.height` do jogador (cabeça até o teto) |
+| `BotBoundDist`, `BotBoundBodyDist` | sim | Distância dos pés até o ponto mais baixo que a câmera mostra (`boundlow` mais a altura da vista); iguais porque a origem fica nos pés |
+| `StageFrontEdgeDist`, `StageBackEdgeDist` | sim | Distância até os limites laterais do cenário (`boundleft` / `boundright` ampliados por meia vista) à frente / atrás do jogador, conforme `Facing` |
+| `NumStageBG` / `NumStageBG(id)` | não | Número de camadas de fundo do cenário, opcionalmente só as com o `id` dado |
+| `StageBGVar(id, nome)` | não | Valor atual da primeira camada com esse `id`: `pos.x`, `pos.y` (início mais rolagem e senoide), `start.x/y`, `delta.x/y`, `velocity.x/y`, `tile.x/y`, `layerno`, `id`, `visible`, `enabled`, `sprite.group`, `sprite.index`; id ou nome desconhecido dá 0 |
+| `StageConst(nome)` | não | Número do grupo `[Constants]` do cenário (0 se faltar ou nos cenários nativos) |
+| `Const1080p(n)` | não | `n` convertido de um desenho com 1920 pixels de largura para o localcoord do jogador |
+| `LocalCoord X` / `LocalCoord Y` | não | Largura / altura do localcoord do jogador |
+| `Angle`, `Scale X/Y`, `Alpha X/Y`, `SprPriority`, `LayerNo` | não | O estado de desenho atual do jogador (`Alpha` é origem / destino, 256 / 0 quando opaco). `XAngle`, `YAngle` e `XShear` valem 0: o renderizador 2D não tem inclinação nem cisalhamento |
+| `ZoomVar(nome)`, `CameraZoom` | sim | Veja "Zoom da câmera" |
+
 ## Redirecionamentos
 
 `parent` `root` `helper` `target` `partner` `enemy` `enemynear` `playerid` `p2` `stateowner`

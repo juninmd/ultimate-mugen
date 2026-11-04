@@ -1,4 +1,3 @@
-//! Trigger evaluation: implements the expression Host for a fighter in a match.
 use crate::expr::{eval, Host, Node};
 use crate::fighter::Fighter;
 use crate::matchs::Match;

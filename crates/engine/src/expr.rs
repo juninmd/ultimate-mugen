@@ -62,8 +62,8 @@ pub enum Node {
 
 const REDIRS: [&str; 10] = ["parent", "root", "helper", "target", "partner", "enemy", "enemynear", "playerid", "p2", "stateowner"];
 const STRCMP: &[&str] = &["command", "statetype", "movetype", "p2statetype", "p2movetype", "name", "p1name", "p2name", "p3name", "p4name", "p5name", "p6name", "p7name", "p8name", "authorname", "hitdefattr", "physics", "stagevar", "p2command", "hitbyattr", "prevstatetype", "prevmovetype", "displayname", "helpername", "selfcommand", "teammode"];
-const COMPONENT: [&str; 13] = ["vel", "pos", "p2dist", "p2bodydist", "p1dist", "rootdist", "parentdist", "screenpos", "camerapos", "hitvel", "camerazoom", "scale", "offset"];
-const RAWARG: [&str; 11] = ["const", "gethitvar", "hitdefvar", "movehitvar", "isasserted", "stagevar", "zoomvar", "const240p", "const480p", "const720p", "constcoord"];
+const COMPONENT: [&str; 15] = ["vel", "pos", "p2dist", "p2bodydist", "p1dist", "rootdist", "parentdist", "screenpos", "camerapos", "hitvel", "camerazoom", "scale", "offset", "localcoord", "alpha"];
+const RAWARG: [&str; 13] = ["const", "gethitvar", "hitdefvar", "movehitvar", "isasserted", "stagevar", "zoomvar", "stagebgvar", "stageconst", "const240p", "const480p", "const720p", "constcoord"];
 const VARSPEC: &[&str] = &["explodvar", "projvar", "palfxvar", "clsnvar", "helpervar", "bgmvar", "spritevar", "animelemvar", "inputtime", "ikemenversion"];
 const LEVELS: [&[&str]; 11] = [&["||"], &["^^"], &["&&"], &["|"], &["^"], &["&"], &["=", "!=", ":="], &["<", "<=", ">", ">="], &["+", "-"], &["*", "/", "%"], &["**"]];
 
@@ -277,6 +277,8 @@ pub fn is_float(n: &Node) -> bool {
             | "log" | "sqrt" | "e" | "pi" | "const240p" | "const480p" | "const720p" | "camerazoom" | "backedge" | "frontedge" | "leftedge" | "rightedge" | "topedge" | "bottomedge" => true,
             "stagevar" => raw.as_deref().is_some_and(crate::stagevar::is_float),
             "zoomvar" => raw.as_deref().is_some_and(crate::camera::zoom_var_is_float),
+            "screenwidth" | "screenheight" | "topbounddist" | "topboundbodydist" | "botbounddist" | "botboundbodydist" | "stagefrontedgedist" | "stagebackedgedist"
+            | "stageconst" | "const1080p" | "angle" | "xangle" | "yangle" | "xshear" | "scale" => true,
             "abs" | "min" | "max" | "clamp" => args.iter().any(is_float),
             "ifelse" | "cond" => args.iter().skip(1).any(is_float),
             _ => false,

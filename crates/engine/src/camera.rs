@@ -16,6 +16,11 @@ const FREE_SCALE_MIN: f32 = 0.25;
 const FREE_SCALE_MAX: f32 = 4.0;
 
 impl Match {
+    pub fn effective_bound_high(&self) -> f32 {
+        let cam = &self.stage.camera;
+        if cam.dynamic_bound_high { self.stage.bound_high - cam.bound_high_delta * (self.zoom - 1.0).max(0.0) } else { self.stage.bound_high }
+    }
+
     pub fn camera_scale(&self) -> f32 { 1.0 / self.zoom.max(f32::EPSILON) }
 
     pub fn zoom_limits(&self) -> (f32, f32) {

@@ -960,7 +960,7 @@ impl Match {
         target = if bound { (target + offset.x).clamp(self.stage.bound_left, self.stage.bound_right) } else { target.clamp(self.stage.bound_left, self.stage.bound_right) + offset.x };
         self.camera.x += (target - self.camera.x) * 0.5;
         let cam = &self.stage.camera;
-        let top = if cam.dynamic_bound_high { self.stage.bound_high - cam.bound_high_delta * (self.zoom - 1.0).max(0.0) } else { self.stage.bound_high };
+        let top = self.effective_bound_high();
         let lowest = if cam.lowest_cap { self.stage.start_y.min(0.0) } else { 0.0 };
         let follow = (highest * self.stage.vertical_follow).min(lowest);
         let ty = if bound { (follow + offset.y).clamp(top, self.stage.bound_low.max(top)) } else { follow.clamp(top, self.stage.bound_low.max(top)) + offset.y };

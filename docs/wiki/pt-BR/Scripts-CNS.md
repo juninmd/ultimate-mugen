@@ -98,7 +98,9 @@ Notas de helper: um helper congela durante `Pause` e `SuperPause`, a menos que a
 
 ## Controllers Ikemen, de cenário e de jogador
 
-`PlayBGM` `StopBGM` `ModifyBGM` `ModifyStageVar` `ModifyStageBG` `ModifyBGCtrl` `ModifyPlayer` `PrintToConsole` `RunState` `Height` `GetHitVarSet` `ModifyHitDef` `ModifyReversalDef` `OverrideClsn` `ResizeClsn` `TransformClsn`
+`PlayBGM` `StopBGM` `ModifyBGM` `ModifyStageVar` `ModifyStageBG` `ModifyBGCtrl` `ModifyPlayer` `PrintToConsole` `RunState` `Height` `GetHitVarSet` `ModifyHitDef` `ModifyReversalDef` `OverrideClsn` `ResizeClsn` `TransformClsn` `MatchRestart`
+
+Faltam (planejado ou rejeitado por decisão, interpretados e ignorados com um aviso): `Storyboard` `RemoveStoryboard` `Dialogue` `SaveState` `LoadState` `LifebarAction` `ChangeMovelist` `LoadFile` `SaveFile` `ShaderSet`
 
 Parâmetros e comportamento em [Ikemen extensions](../Ikemen-Extensions.md).
 

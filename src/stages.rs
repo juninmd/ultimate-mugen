@@ -16,7 +16,7 @@ pub struct Layer { pub image: Arc<ImageData>, pub w: f32, pub h: f32, pub y: f32
 #[derive(Clone)]
 pub struct Particle { pub x: f32, pub y: f32, pub vx: f32, pub vy: f32, pub s: f32, pub a: f32, pub c: [u8; 3] }
 
-pub struct MugenBg { pub stage: Arc<MugenStage>, pub images: std::collections::HashMap<(i32, i32), Arc<ImageData>>, pub scl: f32 }
+pub struct MugenBg { pub stage: Arc<MugenStage>, pub images: std::collections::HashMap<(i32, i32), Arc<ImageData>>, pub scl: f32, pub scl_y: f32 }
 
 /// Which built-in look a stage has (drives the animated / reactive layer in `stagefx`); `Custom` = MUGEN stages (untouched).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
@@ -754,11 +754,13 @@ pub fn builtin() -> Vec<StageEntry> {
 
 pub fn from_mugen(st: MugenStage) -> Stage {
     let scl = 320.0 / if st.local_w > 0.0 { st.local_w } else { 320.0 };
+    // eixo Y: cenarios 1280x720 (16:9) precisam de 240/720 para ocupar a altura toda
+    let scl_y = 240.0 / if st.local_h > 0.0 { st.local_h } else { 240.0 };
     let info = StageInfo {
-        name: st.name.clone(), bound_left: st.bound_left * scl, bound_right: st.bound_right * scl, bound_high: st.bound_high * scl, bound_low: st.bound_low * scl,
-        p1x: st.p1x * scl, p2x: st.p2x * scl, zoffset: st.zoffset * scl, vertical_follow: st.vertical_follow, tension: st.tension * scl,
-        start_x: st.start_x * scl, start_y: st.start_y * scl, zoom_out: st.zoom_out,
+        name: st.name.clone(), bound_left: st.bound_left * scl, bound_right: st.bound_right * scl, bound_high: st.bound_high * scl_y, bound_low: st.bound_low * scl_y,
+        p1x: st.p1x * scl, p2x: st.p2x * scl, zoffset: st.zoffset * scl_y, vertical_follow: st.vertical_follow, tension: st.tension * scl,
+        start_x: st.start_x * scl, start_y: st.start_y * scl_y, zoom_out: st.zoom_out,
     };
     let images = st.sprites.iter().filter(|(_, im)| im.w > 0 && im.h > 0).map(|(k, im)| (*k, ImageData::new(im.w, im.h, im.rgba.clone()))).collect();
-    Stage { info, art: StageArt::Mugen(Box::new(MugenBg { stage: Arc::new(st), images, scl })), music: 0, kind: StageKind::Custom, bgm: None }
+    Stage { info, art: StageArt::Mugen(Box::new(MugenBg { stage: Arc::new(st), images, scl, scl_y })), music: 0, kind: StageKind::Custom, bgm: None }
 }

@@ -75,6 +75,10 @@ pub struct MugenStage {
     pub name: String,
     /// `[StageInfo] localcoord` width (default 320).
     pub local_w: f32,
+    /// `[StageInfo] localcoord` height (default 240). Cenarios 16:9 (1280x720)
+    /// usam 720 aqui: o eixo vertical escala por `240/local_h` para o cenario
+    /// preencher a tela em vez de sobrar faixa preta embaixo.
+    pub local_h: f32,
     pub bound_left: f32,
     pub bound_right: f32,
     pub bound_high: f32,
@@ -160,6 +164,7 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
     };
     let lc = nums(get("stageinfo", "localcoord"), &[320.0, 240.0]);
     let local_w = if lc[0] == 0.0 { 320.0 } else { lc[0] };
+    let local_h = lc.get(1).copied().filter(|h| *h > 0.0).unwrap_or(240.0);
     let zoffset = g("stageinfo", "zoffset", 200.0);
 
     let mut sprites = HashMap::new();
@@ -220,6 +225,7 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
     Ok(MugenStage {
         name,
         local_w,
+        local_h,
         bound_left: g("camera", "boundleft", -150.0),
         bound_right: g("camera", "boundright", 150.0),
         bound_high: g("camera", "boundhigh", -25.0),

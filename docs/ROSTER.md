@@ -26,15 +26,9 @@
 |---|---|---|---|
 | Kung Fu Man, Kung Fu Man HD | Elecbyte | Creative Commons não comercial | `assets/mugen/elecbyte.zip` |
 | Cenários Mountainside Temple, Training Room, Training Room HD | Elecbyte | Creative Commons não comercial | `assets/mugen/elecbyte.zip` |
-| Restaze, Kokirin, Dog, Rinp GGX, Thunder Horse GGX, Nich Chara, True Z (personagens originais) | Balito | "license free" declarado pelo autor | `assets/mugen/community.zip` |
-| Cenários Ink Dojo, Night Festival, Training Room EX | projeto rugen | MIT / Apache-2.0 | `assets/mugen/community.zip` |
-| Suave Dude | Masukenpu-kun (personagem/sons: Elecbyte) | "free to use them as you wish" + CC não comercial | `assets/mugen/community.zip` |
-| Cenários Training Stage, Training Stage Z | Gacel, Phantom.of.the.Server (screenpack Ikemen GO) | CC BY 3.0 | `assets/mugen/community.zip` |
 
 ### Compilações MUGEN famosas (pesquisadas)
-Hyper Dragon Ball Z (Team Z2), Anime Supreme Battle (mugen_master335), packs "MUGEN Ultimate/Anime", packs estilo JUS, Mortal Kombat Project, Super Marvel vs Capcom: Eternity of Heroes, KOF Zillion/Wing/Ultimate MUGEN e Scott Pilgrim Versus (Ikemen) usam personagens e cenários de franquias (Toei/Shueisha, Midway/WB, Marvel/Capcom, SNK, Ubisoft) — **não podem ser redistribuídos** e não estão incluídos; podem ser importados pelo próprio jogador. Das compilações abertas (Ikemen GO, Ikemen Plus Ultra, fiiight) foi aproveitado o conteúdo com licença explícita listado acima.
-
-Detalhes e textos das licenças: `assets/mugen/LICENSE-ELECBYTE.txt` e `assets/mugen/LICENSE-COMMUNITY.txt`.
+Hyper Dragon Ball Z (Team Z2), Anime Supreme Battle (mugen_master335), packs "MUGEN Ultimate/Anime", packs estilo JUS, Mortal Kombat Project, Super Marvel vs Capcom: Eternity of Heroes, KOF Zillion/Wing/Ultimate MUGEN e Scott Pilgrim Versus (Ikemen) usam personagens e cenários de franquias (Toei/Shueisha, Midway/WB, Marvel/Capcom, SNK, Ubisoft) — **não podem ser redistribuídos** e não estão incluídos; podem ser importados pelo próprio jogador. Detalhes e textos das licenças: `assets/mugen/LICENSE-ELECBYTE.txt`.
 
 ## Personagens Dragon Ball Z suportados e validados (`mugen/chars/`)
 Os personagens da comunidade (como os catalogados no warehouse AK1 / Anderson Kenya - Categoria 38) são carregados automaticamente da pasta `mugen/chars/`:
@@ -68,6 +62,9 @@ Os personagens da comunidade (como os catalogados no warehouse AK1 / Anderson Ke
 | **Kid Goku** | Bills Dios | `chars/kid_goku/kid_goku.def` | 659 sprites / 184 anims | Validado (CPU 60s fight OK) |
 | **Goku SSJ GT** | Yamcha Z | `chars/goku_ssj/gokussj-gt.def` | 116 sprites / 84 anims | Validado (CPU 60s fight OK) |
 | **Mr Satan** | CHOUJIN | `chars/mrsatan/mrsatan.def` | 515 sprites / 202 anims | Validado (CPU 60s fight OK) |
+| **Gogeta SSJ4** | Pocket_Danyell | `chars/Gogeta-Ssj4/Gogeta Ssj4.def` | 507 sprites / 226 anims | Validado (Shonen Jump suite OK) |
+| **Goku SSJ4** | _Vision | `chars/Goku-Ssj4/Goku Ssj4.def` | 198 sprites / 168 anims | Validado (Shonen Jump suite OK) |
+| **Vegeta SSJ4** | EmuBoarding | `chars/Vegeta-ssj4/Vegeta ssj4.def` | 246 sprites / 156 anims | Validado (Shonen Jump suite OK) |
 
 ## Personagens Naruto suportados e validados (`mugen/chars/`)
 | Personagem | Autor / Origem | Arquivo .def | Sprites / Animações | Status no Motor |
@@ -75,12 +72,22 @@ Os personagens da comunidade (como os catalogados no warehouse AK1 / Anderson Ke
 | **Naruto (Nanadaime Hokage)** | Bills Dios | `chars/naruto_hokage/naruto nanadaime.def` | 856 sprites / 479 anims | Validado (CPU 60s fight OK) |
 | **Naruto (The Last)** | Bills Dios | `chars/naruto_the_last/naruto the last.def` | 863 sprites / 434 anims | Validado (CPU 60s fight OK) |
 | **Sasuke Uchiha** | hyuga | `chars/sasuke/usasuke.def` | 445 sprites / 155 anims | Validado (CPU 60s fight OK) |
-| **Hatake Kakashi** | MugenGuru | `chars/kakashi/kakashi.def` | 219 sprites / 101 anims | Validado (CPU 60s fight OK) |
+| **Naruto Sennin (Sage)** | MUGEN Community | `chars/Naruto Sage/Naruto Sage.def` | 752 sprites / 211 anims | Validado (Shonen Jump suite OK) |
+| **Sasuke (Hawk)** | MUGEN Community | `chars/BEST Sasuke/Sasuke.def` | 1318 sprites / 357 anims | Validado (Shonen Jump suite OK) |
+| **Might Guy (Gai)** | MUGEN Community | `chars/Gai/Gai.def` | 669 sprites / 303 anims | Validado (Shonen Jump suite OK) |
+| **Pain (S-Pain)** | MUGEN Community | `chars/S-PainNZC/Pain.def` | 579 sprites / 211 anims | Validado (Shonen Jump suite OK) |
+| **Madara Uchiha (Akatsuki)** | MUGEN Community | `chars/AkatsukiMadara299/Madara.def` | 143 sprites / 104 anims | Validado (Shonen Jump suite OK) |
+| **Kakashi Hatake (Kid)** | MUGEN Community | `chars/Kakashi Kid/Kakashi Kid.def` | 212 sprites / 97 anims | Validado (Shonen Jump suite OK) |
 | **Uchiha Itachi** | Kaitsu-Gohan | `chars/itachi/uchiha itachi.def` | 228 sprites / 108 anims | Validado (CPU 60s fight OK) |
-| **Gaara do Deserto** | Pheitan | `chars/gaara/sabaku no gaara.def` | 94 sprites / 59 anims | Validado (CPU 60s fight OK) |
 | **Rock Lee** | hyuga | `chars/rock_lee/rlee.def` | 488 sprites / 136 anims | Validado (CPU 60s fight OK) |
 | **Minato Namikaze (Yondaime)** | Marvin | `chars/minato/yondaime.def` | 250 sprites / 115 anims | Validado (CPU 60s fight OK) |
 | **Haruno Sakura** | Kaitsu-Gohan | `chars/sakura/haruno sakura.def` | 235 sprites / 113 anims | Validado (CPU 60s fight OK) |
+
+## Personagens JoJo's Bizarre Adventure suportados e validados (`mugen/chars/`)
+| Personagem | Autor / Origem | Arquivo .def | Sprites / Animações | Status no Motor |
+|---|---|---|---|---|
+| **Jotaro Kujo** | Warusaki3 | `chars/Jotaro/Jotaro.def` | 1582 sprites / 459 anims | Validado (Shonen Jump suite OK) |
+| **Dio Brando** | Warusaki3 | `chars/Dio/Dio.def` | 999 sprites / 468 anims | Validado (Shonen Jump suite OK) |
 
 ## Personagens Bleach suportados e validados (`mugen/chars/`)
 | Personagem | Autor / Origem | Arquivo .def | Sprites / Animações | Status no Motor |
@@ -119,6 +126,44 @@ Os personagens da comunidade (como os catalogados no warehouse AK1 / Anderson Ke
 | **Monumento dos Hokages (Mt. Hokage)** | Naruto | `stages/mthokage.def` | Rostos dos Hokages ao fundo |
 | **Arena do Torneio Chunin (Tournament)** | Naruto | `stages/tourn.def` | Paredes da arena e arquibancada |
 | **Floresta da Morte (Forest)** | Naruto | `stages/forest.def` | Vegetação densa e sombras |
+
+## Elenco dublado em PT-BR (`mugen/chars/`)
+
+28 personagens da comunidade com dublagem brasileira (Mugen Br, MFmugen PT BR e Golden
+Mugen Brasil): Dragon Ball (Raditz, Goku UI/MUI, Vegeta SSGSS, Cell EX), Jujutsu Kaisen
+(Itadori, Gojo, Nanami, Maki, Yuta, Panda, Inumaki), One Piece (Luffy e Gear 2), Bleach
+(Ichigo), Demon Slayer (Tanjiro), My Hero Academia (All Might), One Punch Man (Saitama),
+Shield Hero (Naofumi), Attack on Titan (Mikasa, Hange, Annie) e Marvel/DC (Gambit,
+Noturno, Jubileu, Mistica, Mulher Maravilha, Ravena).
+
+Tabela completa com `.def`, autor, quantidade de sons, origem e validação: `docs/PTBR_CHARS.md`.
+Instalação/atualização: `scripts/fetch-ptbr-chars.ps1`; relatório: `scripts/verify-ptbr-chars.ps1`.
+
+## Lutadores dos fullgames M.U.G.E.N mais famosos (`mugen/chars/`)
+
+30 personagens extraídos de três fullgames clássicos: **Mortal Kombat Project 4.9.3**
+(Scorpion, Sub-Zero, Liu Kang, Raiden, Sonya, Jax, Johnny Cage, Mileena, Shang Tsung,
+Shao Kahn), **Super Marvel vs. Capcom: Eternity of Heroes** (Ryu, Ken, Hulk,
+Homem-Aranha, Capitão América, Homem de Ferro, Wolverine, Magneto, Morrigan,
+Deadpool) e **The King of Fighters Zillion SE 2022** (Kyo, Iori, Terry, Mai, Kula,
+Rugal, Ryo, Robert, Leona, Athena).
+
+Detalhes, origem e correções de motor: `docs/FAMOUS_CHARS.md`.
+Instalação: `scripts/fetch-famous-chars.ps1`.
+
+## Pacote Dragon Ball FighterZ (JUS)
+
+40 personagens e 13 cenários do pacote local *Dragon Ball FighterZ Mugen Jus Edition*
+(estilo JUS): Goku (SSJ, SSB, UI, GT, Blizzard), Vegeta (Scouter, SSGSS, SSJ), Gohan,
+Gotenks, Trunks, Piccolo, Tien, Krillin, Yamcha, Videl, Android 16/17/18/21, Cell, Buu,
+Bardock, Broly (Z e DBS), Cooler, Freeza, Ginyu, Beerus, Hit, Jiren, Kefla, Black,
+Zamasu, Gogeta Blue, Vegetto Blue, Janemba, Nappa.
+
+Cenários `[DBFZ]*` incluem Cell Games, World Tournament, West City, Namek, Cavern,
+Glacier, Island, Galactic Arena, Janemba, Land of the Kai's, Asteroid Battlefield,
+Rocky Field e Planet Namek Destroyed.
+
+Detalhes e tabela completa: `docs/DBFZ_PACK.md`. Instalação: `scripts/install-dbfz-pack.ps1`.
 
 ## Personagens MUGEN populares para importar
 Personagens de anime e jogos feitos pela comunidade MUGEN usam sprites e marcas de terceiros, por isso **não são incluídos**. O Ultimate MUGEN lê esses pacotes diretamente: baixe-os das fontes da comunidade (MUGEN Archive, Mugen Free For All, MugenGuild) e use **Menu → Importar MUGEN**. O autor exibido vem do campo `[Info] author=` do próprio personagem.

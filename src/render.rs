@@ -344,7 +344,8 @@ impl MatchRenderer {
             }
             StageArt::Mugen(bg) => {
                 let scl = bg.scl;
-                let (cx, cy) = (m.camera.x / scl, m.camera.y / scl);
+                let scl_y = bg.scl_y;
+                let (cx, cy) = (m.camera.x / scl, m.camera.y / scl_y);
                 let state = m.bg.as_ref();
                 for (k, l) in bg.stage.layers.iter().enumerate() {
                     if (l.layer == 1) != front { continue; }
@@ -354,10 +355,10 @@ impl MatchRenderer {
                     let t = g.texture(img, true);
                     let off = match state { Some(st) => st.offset(k), None => { let gt = m.game_time as f32; [l.velocity[0] * gt, l.velocity[1] * gt] } };
                     let sxp = (l.start[0] + off[0] - cx * l.delta[0]) * scl + m.view_w / 2.0 + shx;
-                    let syp = (l.start[1] + off[1] - cy * l.delta[1]) * scl + (m.view_h - 240.0) / 2.0 + shy;
-                    let (w, h) = (meta.w as f32 * scl, meta.h as f32 * scl);
-                    let (x0, y0) = (sxp - meta.axis_x as f32 * scl, syp - meta.axis_y as f32 * scl);
-                    let (stx, sty) = (w + l.tile_spacing[0] * scl, h + l.tile_spacing[1] * scl);
+                    let syp = (l.start[1] + off[1] - cy * l.delta[1]) * scl_y + (m.view_h - 240.0) / 2.0 + shy;
+                    let (w, h) = (meta.w as f32 * scl, meta.h as f32 * scl_y);
+                    let (x0, y0) = (sxp - meta.axis_x as f32 * scl, syp - meta.axis_y as f32 * scl_y);
+                    let (stx, sty) = (w + l.tile_spacing[0] * scl, h + l.tile_spacing[1] * scl_y);
                     let xs: Vec<f32> = match l.tile[0] { 1 => { let st = x0 - (x0 / stx).ceil() * stx; let mut v = vec![]; let mut x = st; while x < m.view_w { v.push(x); x += stx; } v } n if n > 1 => (0..n).map(|i| x0 + i as f32 * stx).collect(), _ => vec![x0] };
                     let ys: Vec<f32> = match l.tile[1] { 1 => { let st = y0 - (y0 / sty).ceil() * sty; let mut v = vec![]; let mut y = st; while y < m.view_h { v.push(y); y += sty; } v } n if n > 1 => (0..n).map(|i| y0 + i as f32 * sty).collect(), _ => vec![y0] };
                     let add = l.trans.starts_with("add") && l.trans != "addalpha";

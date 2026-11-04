@@ -11,6 +11,16 @@ use ume_formats::sff::{decode_sff, sprite_to_rgba};
 use ume_formats::snd::decode_snd;
 use ume_formats::vfs::{norm_path, resolve, text, Vfs};
 
+/// `localcoord` -> (largura, altura). Aceita o formato canonico `320,240`,
+/// o valor unico usado por varios chars de fullgames (`400` vira `400x240`)
+/// e o campo ausente/invalido (320x240).
+fn local_size(lc: Option<&str>) -> (f32, f32) {
+    let v = nums(lc, &[320.0, 240.0]);
+    let w = v.first().copied().filter(|w| *w > 0.0).unwrap_or(320.0);
+    let h = v.get(1).copied().filter(|h| *h > 0.0).unwrap_or(240.0);
+    (w, h)
+}
+
 pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool) -> Result<CharDef, String> {
     let def_path = norm_path(def_path);
     let base = def_path.rsplit_once('/').map(|(b, _)| b.to_string()).unwrap_or_default();
@@ -22,12 +32,19 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
     let name = info.and_then(|s| s.get("name")).map(unquote).filter(|s| !s.is_empty()).unwrap_or(def_path.clone());
     let display = info.and_then(|s| s.get("displayname")).map(unquote).filter(|s| !s.is_empty()).unwrap_or(name.clone());
     let author = info.and_then(|s| s.get("author")).map(unquote).unwrap_or_default();
-    let lc = nums(info.and_then(|s| s.get("localcoord")), &[320.0, 240.0]);
-    let local_w = if lc[0] > 0.0 { lc[0] } else { 320.0 };
+    let (local_w, local_h) = local_size(info.and_then(|s| s.get("localcoord")));
 
     let mut constants = default_constants();
     let mut provided = HashSet::new();
     let mut states = HashMap::new();
+    // `stcommon` (normalmente common1.cns) traz os estados comuns E, em varios chars de
+    // fullgames, o mapeamento comando -> ChangeState do [Statedef -1]. Sem ele o lutador
+    // carrega e anda, mas nunca ataca. So vale o arquivo dentro da pasta do char: o
+    // fallback global (`data/common1.cns`) aplicaria o common de um jogo a outro.
+    let common_name = unquote(&fget("stcommon").unwrap_or_default());
+    if !common_name.is_empty() && !common_name.contains("..") && !common_name.contains('/') && !common_name.contains('\\') {
+        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{common_name}"))) { parse_states(&text(b), &mut states, false); }
+    }
     let cns_name = fget("cns").unwrap_or_default();
     let cns_text = resolve(vfs, &base, &cns_name).map(text).unwrap_or_default();
     parse_constants(&cns_text, &mut constants, &mut provided);
@@ -106,7 +123,7 @@ pub fn load_mugen_char(vfs: &Vfs, def_path: &str, pal_no: i32, with_images: bool
         .filter(|n| { let l = n.to_ascii_lowercase(); !(l.starts_with("hold") || l.starts_with("recovery") || ["fwd", "back", "up", "down", "ff", "bb"].contains(&l.as_str())) }).collect();
     let mut d = CharDef::empty(&format!("mugen:{def_path}"));
     d.name = name; d.display_name = display; d.author = author; d.source = Source::Mugen;
-    d.local_w = local_w; d.local_h = lc.get(1).copied().filter(|h| *h > 0.0).unwrap_or(240.0);
+    d.local_w = local_w; d.local_h = local_h;
     d.mugen_version = crate::chardef::parse_mugen_version(info.and_then(|s| s.get("mugenversion")));
     d.constants = constants; d.portrait = sprites.get(&(9000, 0)).cloned(); d.sprites = sprites; d.anims = anims;
     d.commands = commands; d.states = states; d.sounds = sounds; d.ai_commands = ai_commands; d.movelist = movelist; d.series = "M.U.G.E.N".into();
@@ -141,4 +158,27 @@ pub fn load_mugen_portrait(vfs: &Vfs, def_path: &str) -> Option<Sprite> {
         Some(Sprite { image: Some(ImageData::new(spr.width, spr.height, rgba)), width: spr.width as f32, height: spr.height as f32, axis_x: spr.axis_x as f32, axis_y: spr.axis_y as f32, scale: 1.0 })
     });
     picked
+}
+
+#[cfg(test)]
+mod tests {
+    use super::local_size;
+
+    #[test]
+    fn localcoord_accepts_two_values() {
+        assert_eq!(local_size(Some("400, 300")), (400.0, 300.0));
+    }
+
+    #[test]
+    fn localcoord_single_value_does_not_panic() {
+        // chars de fullgames (KOF Zillion) usam `localcoord = 400`
+        assert_eq!(local_size(Some("400")), (400.0, 240.0));
+    }
+
+    #[test]
+    fn localcoord_missing_or_invalid_falls_back() {
+        assert_eq!(local_size(None), (320.0, 240.0));
+        assert_eq!(local_size(Some("")), (320.0, 240.0));
+        assert_eq!(local_size(Some("0")), (320.0, 240.0));
+    }
 }

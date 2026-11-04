@@ -97,7 +97,7 @@ impl<'a> Host for Ctx<'a> {
             "partner" => m.partner(if f.is_helper { m.idx(f.root)? } else { self.i }, arg.map(|a| a.max(0.0) as usize).unwrap_or(0))?,
             "playerid" => m.idx(arg? as u32)?,
             "stateowner" => self.i,
-            _ => return None,
+            _ => { crate::diagnostics::note_unsupported(crate::diagnostics::Category::Redirection, kind); return None }
         };
         Some(Ctx { m, i })
     }
@@ -127,7 +127,7 @@ impl<'a> Host for Ctx<'a> {
                 let ok_state = hd.attr_state.chars().any(|c| v0.chars().any(|v| v.eq_ignore_ascii_case(&c)));
                 ok_state && (values.len() == 1 || values[1..].iter().any(|v| attr_kind_match(v, &hd.attr_kind)))
             }
-            _ => false,
+            _ => { crate::diagnostics::note_unsupported(crate::diagnostics::Category::StringTrigger, name); false }
         };
         r != neg
     }
@@ -265,7 +265,7 @@ impl<'a> Host for Ctx<'a> {
             "min" => a0().min(self.a(args, 1)), "max" => a0().max(self.a(args, 1)),
             "clamp" => a0().max(self.a(args, 1)).min(self.a(args, 2)),
             "sign" => a0().signum(), "e" => std::f64::consts::E, "pi" => std::f64::consts::PI,
-            _ => crate::ikemen::trigger(self, name, args).unwrap_or(0.0),
+            _ => crate::ikemen::trigger(self, name, args).unwrap_or_else(|| { crate::diagnostics::note_unsupported(crate::diagnostics::Category::Trigger, name); 0.0 }),
         }
     }
 }

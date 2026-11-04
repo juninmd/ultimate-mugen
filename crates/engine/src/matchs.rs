@@ -88,7 +88,9 @@ pub enum BgmAction {
 /// Events for the presentation layer (audio, rumble, UI).
 #[derive(Clone)]
 pub enum Event {
-    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str>, pan: f32, looping: bool, freq_mul: f32, low_priority: bool, stop_on_get_hit: bool, stop_on_change_state: bool },
+    Sound { def: Option<Arc<CharDef>>, group: i32, index: i32, own: bool, volume: f32, channel: i32, owner: u32, builtin: Option<&'static str>, pan: f32, looping: bool, freq_mul: f32, low_priority: bool, stop_on_get_hit: bool, stop_on_change_state: bool, loop_start: u32, loop_end: u32, loop_count: i32 },
+    /// retunes the loop points of a live sound channel (`ModifySnd`)
+    SoundLoop { owner: u32, channel: i32, start: u32, end: u32 },
     /// the fighter `fighter` entered a new state (used to stop flagged sound channels)
     StateChange { fighter: u32 },
     Hit { attacker_side: usize, defender_side: usize, damage: f32, guarded: bool, heavy: bool, attacker: usize, defender: usize },
@@ -1390,7 +1392,7 @@ impl Match {
     fn sound(&mut self, i: usize, g: i32, n: i32, own: bool, builtin: Option<&'static str>) {
         let pan = crate::sctrl::sound_pan(self, i, 0.0, false);
         let f = &self.fighters[i];
-        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0, low_priority: false, stop_on_get_hit: false, stop_on_change_state: false });
+        self.events.push(Event::Sound { def: if own { Some(f.def.clone()) } else { None }, group: g, index: n, own, volume: 1.0, channel: -1, owner: f.id, builtin, pan, looping: false, freq_mul: 1.0, low_priority: false, stop_on_get_hit: false, stop_on_change_state: false, loop_start: 0, loop_end: 0, loop_count: 0 });
     }
     pub fn do_shake(&mut self, t: i32, ampl: f32) { self.shake(t, 60.0, -ampl.abs(), 0.0); }
     pub fn shake(&mut self, t: i32, freq: f32, ampl: f32, phase: f32) {

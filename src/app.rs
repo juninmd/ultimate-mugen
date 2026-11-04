@@ -1546,8 +1546,6 @@ impl App {
         }
 
         let focus = cur[picking];
-        #[cfg(target_arch = "wasm32")]
-        self.prefetch_sprite_pack(focus);
         if self.sel_last[picking] != focus {
             self.sel_last[picking] = focus;
             self.sel_dwell = 0.0;
@@ -3150,11 +3148,7 @@ impl App {
                             life: self.survival_life(),
                             pal: self.pal,
                             team_pal: self.team_pal.clone(),
-                            net: self
-                                .session
-                                .as_ref()
-                                .and_then(|s| s.net.as_ref())
-                                .map(|n| n.config.clone()),
+                            net: s.netplay_config(),
                         });
                     }
                     self.archive_last_fight();
@@ -3658,11 +3652,7 @@ impl App {
                 life: self.survival_life(),
                 pal: self.pal,
                 team_pal: self.team_pal.clone(),
-                net: self
-                    .session
-                    .as_ref()
-                    .and_then(|s| s.net.as_ref())
-                    .map(|n| n.config.clone()),
+                net: s.netplay_config(),
             });
         }
     }

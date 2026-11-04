@@ -1,0 +1,10 @@
+[Info]
+name = "Supported"
+displayname = "Supported"
+author = "fixture"
+mugenversion = 1.1
+
+[Files]
+cmd = supported.cmd
+cns = supported.cns
+sprite = supported.sff

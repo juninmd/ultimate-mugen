@@ -69,10 +69,11 @@ fn preview_is_light_and_art_res_scales() {
     assert!(pv.anims.len() <= 2 && pv.sprites.len() * 3 < full.sprites.len(), "preview rasterizes far fewer frames");
     // higher art resolution → denser sprites, same on-screen size (scale = 1/res)
     let base = art_res();
-    let (s1, w1) = { let s = full.sprites.values().find(|s| s.image.is_some()).unwrap(); (s.scale, s.width) };
+    let key = *pv.sprites.iter().filter(|(k, sp)| sp.image.is_some() && full.sprites.get(*k).is_some_and(|f| f.image.is_some())).map(|(k, _)| k).min().expect("a sprite present in both");
+    let (s1, w1) = { let s = &full.sprites[&key]; (s.scale, s.width) };
     set_art_res(6.0);
     let hi = compile_native_preview(&nc, 1);
-    let s2 = hi.sprites.values().find(|s| s.image.is_some()).unwrap();
+    let s2 = &hi.sprites[&key];
     set_art_res(base);
     assert!(s2.scale < s1 && s2.width > w1 * 0.9, "6x art is denser than the default");
 }

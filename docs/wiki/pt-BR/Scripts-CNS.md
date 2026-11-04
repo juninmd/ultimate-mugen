@@ -134,3 +134,27 @@ Funções extras: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 
 - `F2` no treino mostra hitboxes.
 - `cargo run --release -p ume-engine --example mugen_check -- <pasta>` lista estados e expressões com erro.
+
+## Diagnóstico no carregamento
+
+Cada carregamento de personagem confere os controladores, triggers e parâmetros lidos com o que a engine realmente implementa. Não há lista fixa: cada nome desconhecido é executado uma vez numa partida descartável e marcado quando o despacho não o trata, então o relatório acompanha a engine conforme controladores e triggers são adicionados.
+
+O relatório indica, por arquivo e estado (`.cns`, `.cmd`, `.st`, `.zss`):
+
+| Achado | Significado |
+|---|---|
+| controlador não suportado | o `type` não tem implementação |
+| trigger desconhecido | o nome do trigger não é avaliado pela engine |
+| redirecionamento / trigger de texto não suportado | um tipo de redirecionamento (`partner`, ...) ou comparação de texto (`p3name = ...`) que a engine não resolve |
+| parâmetro desconhecido | nenhum caminho do controlador lê esse parâmetro |
+| flag de AssertSpecial desconhecida | a flag não é reconhecida |
+
+Cada carga imprime um resumo no stderr (`n controladores não suportados, m triggers desconhecidos, ...`), sem repetição por nome; `TRACE=1` acrescenta os nomes com os arquivos e estados que os usam. Defina `UME_QUIET_DIAGNOSTICS=1` para silenciar.
+
+O `mugen_check` imprime o resumo de cada personagem e, com `--strict`, imprime os detalhes e termina com código diferente de zero se algum personagem tiver achados:
+
+```bash
+cargo run --release -p ume-engine --example mugen_check -- --strict mugen/chars/kfm
+```
+
+O CI roda com `--strict` sobre `crates/engine/tests/data/chars`; um recurso usado pelos personagens de teste que a engine não implementa quebra o build. No código, `ume_engine::diagnostics::audit_cns(arquivo, texto)` devolve os achados de um trecho e `CharDef::diagnostics()` os de um personagem carregado.

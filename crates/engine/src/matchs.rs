@@ -948,6 +948,7 @@ impl Match {
         let a_facing = proj.map(|p| p.1).unwrap_or(self.fighters[a].facing);
         let (aid, aside, apos, aroot) = { let f = &self.fighters[a]; (f.id, f.side, f.pos, f.root) };
         let did = self.fighters[d].id;
+        let ano = self.fighters[a].player_no;
         if !from_proj {
             let fa = &mut self.fighters[a];
             fa.move_contact = 1;
@@ -970,6 +971,7 @@ impl Match {
             {
                 let fd = &mut self.fighters[d];
                 fd.ghv = GetHitVars { attacker_id: aid, hit_id: hd.id, chainid: hd.chain_id.unwrap_or(-1), hittime: hd.ground_hit_time, ..GetHitVars::default() };
+                fd.ghv.record_hitdef(hd, false, (aid, aside, ano), a_facing, proj.map(|p| p.0));
                 fd.hit_shake = hd.pause_p2; fd.move_type = 'H';
                 if force_air { fd.state_type = 'A'; fd.ghv.fall = true; }
             }
@@ -992,6 +994,7 @@ impl Match {
                 g.xvel = (if fd.state_type == 'A' { hd.air_guard_vel[0] } else { hd.guard_vel }) * dir;
                 g.yvel = if fd.state_type == 'A' { hd.air_guard_vel[1] } else { 0.0 };
                 g.yaccel = hd.yaccel; g.damage = dmg; g.guardcount = gc + 1;
+                g.record_hitdef(hd, true, (aid, aside, ano), a_facing, proj.map(|p| p.0));
                 fd.hit_shake = hd.guard_pause_p2; fd.hit_over_time = hd.guard_hit_time; fd.slide_time = hd.guard_slide_time;
                 fd.ctrl = false; fd.move_type = 'H';
             }
@@ -1032,6 +1035,7 @@ impl Match {
                 g.fall_xvel = hd.fall_xvel.map(|x| x * dir).unwrap_or(g.xvel); g.fall_yvel = hd.fall_yvel;
                 g.fall_recover = hd.fall_recover; g.fall_recover_time = hd.fall_recover_time; g.fall_damage = hd.fall_damage; g.fall_kill = hd.fall_kill; g.kill = hd.kill;
                 g.chainid = hd.chain_id.unwrap_or(-1);
+                g.record_hitdef(hd, false, (aid, aside, ano), a_facing, proj.map(|p| p.0));
                 if fd.life <= 0.0 {
                     g.fall = true;
                     if g.yvel == 0.0 { g.yvel = -5.0 * fd.lscl; g.xvel = g.xvel.min(-2.5 * fd.lscl); }

@@ -190,7 +190,9 @@ impl Parser {
                     }
                     match x { Tok::Id(s) | Tok::Num(s, _) | Tok::Str(s) => raw.push_str(&s), Tok::Op(o) => raw.push_str(o), Tok::Eof => {} }
                 }
-                return Ok(Node::Trig { name, args: vec![], comp: None, raw: Some(raw.to_ascii_lowercase()) });
+                let raw = raw.to_ascii_lowercase();
+                if name == "gethitvar" { crate::triggers::note_hit_var(&raw); }
+                return Ok(Node::Trig { name, args: vec![], comp: None, raw: Some(raw) });
             }
             let mut args = vec![];
             if !self.is_op(")", 0) {

@@ -31,7 +31,7 @@ pub struct HitDefData {
     pub ground_corner_push: f32, pub air_corner_push: f32, pub guard_corner_push: f32, pub air_guard_corner_push: f32,
     pub target_palfx: Option<PalFx>,
     pub dizzy_points: f32, pub guard_points: f32, pub red_life: [f32; 2], pub score: [f32; 2], pub down_recover: bool,
-    pub miss_on_override: bool, pub unhittable_time: i32, pub spark_scale: f32, pub xaccel: f32, pub attack_depth: f32, pub p2clsncheck: bool, pub p2clsnrequire: i32,
+    pub miss_on_override: bool, pub unhittable_time: i32, pub spark_scale: f32, pub guard_spark_scale: f32, pub xaccel: f32, pub attack_depth: f32, pub p2clsncheck: bool, pub p2clsnrequire: i32,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]

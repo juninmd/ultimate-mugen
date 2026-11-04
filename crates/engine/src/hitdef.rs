@@ -177,6 +177,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         miss_on_override: num("missonoverride", 0.0, 0) != 0.0,
         unhittable_time: num("unhittabletime", -1.0, 0) as i32,
         spark_scale: num("sparkscale", 1.0, 0).max(0.01) as f32,
+        guard_spark_scale: num("guard.sparkscale", num("sparkscale", 1.0, 0) as f64, 0).max(0.01) as f32,
         xaccel: num("xaccel", 0.0, 0) * l,
         attack_depth: num("attack.depth", 0.0, 0) as f32,
         p2clsncheck: num("p2clsncheck", 1.0, 0) != 0.0,

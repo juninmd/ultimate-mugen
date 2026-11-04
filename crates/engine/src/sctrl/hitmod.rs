@@ -137,6 +137,8 @@ pub fn merge_hitdef(dst: &mut HitDefData, src: &HitDefData, sc: &Controller) {
             "guard.cornerpush.veloff" => dst.guard_corner_push = src.guard_corner_push,
             "airguard.cornerpush.veloff" => dst.air_guard_corner_push = src.air_guard_corner_push,
             "palfx.time" | "palfx.add" | "palfx.mul" => dst.target_palfx = src.target_palfx.clone(),
+            "sparkscale" => { dst.spark_scale = src.spark_scale; if !sc.has("guard.sparkscale", 0) { dst.guard_spark_scale = src.guard_spark_scale; } }
+            "guard.sparkscale" => dst.guard_spark_scale = src.guard_spark_scale,
             _ => {}
         }
     }

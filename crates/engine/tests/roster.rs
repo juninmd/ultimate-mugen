@@ -278,8 +278,8 @@ fn awakening_costs_a_bar_boosts_stats_and_ends_with_the_round() {
     assert!(f.attack_mul > atk * 1.25 && f.defence_mul > def * 1.2, "stronger and tougher");
     assert!(f.life > 400.0, "small life refill");
     assert!(m.events.iter().any(|e| matches!(e, ume_engine::matchs::Event::Transform { .. })));
-    // plays the power-up state (193), then returns to idle with control; can't awaken twice
-    assert_eq!(f.state_no, 193);
+    // plays the power-up state (engine awakening state), then returns to idle with control; can't awaken twice
+    assert_eq!(f.state_no, ume_engine::matchs::ENGINE_STATE_AWAKENING);
     for _ in 0..100 { m.tick(&[0, 0]); }
     assert!(m.fighters[0].ctrl && m.fighters[0].state_no == 0, "back to idle with control");
     m.fighters[0].power = 3000.0;
@@ -303,7 +303,7 @@ fn first_round_waits_for_the_face_off_and_a_button_skips_it() {
     m.start_round();
     for _ in 0..140 { m.tick(&[0, 0]); }
     assert!(m.round_state < 2, "still trading lines");
-    assert!(matches!(m.fighters[0].state_no, 192 | 194) || matches!(m.fighters[1].state_no, 192 | 194), "fighters pose for the face-off");
+    assert!([m.fighters[0].state_no, m.fighters[1].state_no].iter().any(|&n| n == ume_engine::matchs::ENGINE_STATE_FACE_OFF || n == ume_engine::matchs::ENGINE_STATE_FACE_OFF_TAUNT), "fighters pose for the face-off");
     for _ in 0..140 { m.tick(&[0, 0]); }
     assert_eq!(m.round_state, 2, "fight begins after the face-off");
     assert!(m.fighters[0].ctrl && m.fighters[1].ctrl);

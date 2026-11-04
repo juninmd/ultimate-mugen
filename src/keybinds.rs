@@ -106,10 +106,18 @@ impl Default for KeyMap {
     fn default() -> Self {
         use KeyCode::*;
         KeyMap { slots: [
-            [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T],
-            [Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0],
+            [Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T],
+            [I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0],
         ] }
     }
+}
+
+fn previous_defaults() -> [[KeyCode; N]; 2] {
+    use KeyCode::*;
+    [
+        [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T],
+        [Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0],
+    ]
 }
 
 impl KeyMap {
@@ -140,6 +148,8 @@ impl KeyMap {
             let (Some(p), Ok(i), Some(kc)) = (p.strip_prefix('p').and_then(|p| p.parse::<usize>().ok()), i.parse::<usize>(), from_id(v.trim())) else { continue };
             if (1..=2).contains(&p) && i < N { m.slots[p - 1][i] = kc; }
         }
+        let old = previous_defaults();
+        for p in 0..2 { if m.slots[p] == old[p] { m.reset_slot(p); } }
         for p in 0..2 { let s = m.slots[p]; if (0..N).any(|a| (a + 1..N).any(|b| s[a] == s[b])) { m.reset_slot(p); } }
         m
     }
@@ -163,18 +173,24 @@ mod tests {
     #[test]
     fn defaults_match_the_documented_layout() {
         let m = KeyMap::default();
-        assert_eq!(m.bits(0, |k| k == KeyCode::U), k::X);
-        assert_eq!(m.bits(0, |k| k == KeyCode::W || k == KeyCode::D), k::U | k::R);
+        assert_eq!(m.bits(0, |k| k == KeyCode::Q), k::X);
+        assert_eq!(m.bits(0, |k| k == KeyCode::W), k::Y);
+        assert_eq!(m.bits(0, |k| k == KeyCode::E), k::Z);
+        assert_eq!(m.bits(0, |k| k == KeyCode::A), k::A);
+        assert_eq!(m.bits(0, |k| k == KeyCode::S), k::B);
+        assert_eq!(m.bits(0, |k| k == KeyCode::D), k::C);
+        assert_eq!(m.bits(0, |k| k == KeyCode::Up || k == KeyCode::Right), k::U | k::R);
+        assert_eq!(m.bits(1, |k| k == KeyCode::I || k == KeyCode::L), k::U | k::R);
         assert_eq!(m.bits(1, |k| k == KeyCode::Kp4), k::X);
-        assert_eq!(m.bits(1, |k| k == KeyCode::U), 0, "P2 never reads P1 keys");
+        assert_eq!(m.bits(1, |k| k == KeyCode::Q), 0, "P2 never reads P1 keys");
     }
 
     #[test]
     fn assigning_a_used_key_swaps_instead_of_duplicating() {
         let mut m = KeyMap::default();
-        m.assign(0, 4, KeyCode::I); // LP <- I (was HP)
-        assert_eq!(m.slots[0][4], KeyCode::I);
-        assert_eq!(m.slots[0][5], KeyCode::U, "HP takes LP's old key");
+        m.assign(0, 4, KeyCode::W);
+        assert_eq!(m.slots[0][4], KeyCode::W);
+        assert_eq!(m.slots[0][5], KeyCode::Q, "HP takes LP's old key");
     }
 
     #[test]
@@ -182,6 +198,13 @@ mod tests {
         let mut m = KeyMap::default();
         m.assign(1, 0, KeyCode::Space);
         assert_eq!(KeyMap::from_text(&m.to_text()), m);
+    }
+
+    #[test]
+    fn saved_file_with_the_previous_defaults_upgrades_to_the_new_ones() {
+        let mut old = KeyMap::default();
+        old.slots = previous_defaults();
+        assert_eq!(KeyMap::from_text(&old.to_text()), KeyMap::default());
     }
 
     #[test]

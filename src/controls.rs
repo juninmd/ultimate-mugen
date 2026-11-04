@@ -149,8 +149,8 @@ impl Controls {
         if key(&[KeyCode::Down, KeyCode::S]) { m |= nav::DOWN; }
         if key(&[KeyCode::Left, KeyCode::A]) { m |= nav::LEFT; }
         if key(&[KeyCode::Right, KeyCode::D]) { m |= nav::RIGHT; }
-        if key(&[KeyCode::Enter, KeyCode::Space, KeyCode::J, KeyCode::U, KeyCode::Kp1]) { m |= nav::OK; }
-        if key(&[KeyCode::Escape, KeyCode::Backspace, KeyCode::K]) { m |= nav::BACK; }
+        if key(&[KeyCode::Enter, KeyCode::Space, KeyCode::Q, KeyCode::Kp1]) { m |= nav::OK; }
+        if key(&[KeyCode::Escape, KeyCode::Backspace, KeyCode::W]) { m |= nav::BACK; }
         if key(&[KeyCode::F2]) { m |= nav::AUX; }
         for p in &self.pad_info {
             let b = p.bits;

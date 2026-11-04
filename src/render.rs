@@ -729,18 +729,11 @@ impl MatchRenderer {
             return;
         }
         let def = &f.anim_def;
-        let Some(spr) = def.sprites.get(&(fr.group, fr.index)) else {
-            return;
-        };
-        let Some(img) = spr.image.as_ref() else {
-            return;
-        };
+        let Some(spr) = def.sprites.get(&(fr.group, fr.index)) else { return };
+        let Some(img) = def.rgba_sprite((fr.group, fr.index)) else { return };
         let s = g.view_scale;
-        let tex = g.texture(img, spr.scale >= 0.99);
-        let (xs, ys) = (
-            def.c("size.xscale", 1.0) as f32,
-            def.c("size.yscale", 1.0) as f32,
-        );
+        let tex = g.texture(&img, spr.scale >= 0.99);
+        let (xs, ys) = (def.c("size.xscale", 1.0) as f32, def.c("size.yscale", 1.0) as f32);
         let k = spr.scale * f.lscl;
         let (kx, ky) = (
             k * xs * f.draw_scale[0] * fr.xscale,

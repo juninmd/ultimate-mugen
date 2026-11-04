@@ -145,6 +145,7 @@ pub struct CharDef {
     pub palettes: HashMap<PalKey, Arc<Vec<u8>>>,
     pub indexed: HashMap<(i32, i32), IndexedSprite>,
     pub remap_cache: Mutex<HashMap<((i32, i32), PalKey), Arc<ImageData>>>,
+    pub image_cache: Mutex<HashMap<(i32, i32), Arc<ImageData>>>,
 }
 impl CharDef {
     pub fn empty(id: &str) -> Self {
@@ -180,6 +181,7 @@ impl CharDef {
             palettes: HashMap::new(),
             indexed: HashMap::new(),
             remap_cache: Mutex::new(HashMap::new()),
+            image_cache: Mutex::new(HashMap::new()),
         }
     }
     pub fn diagnostics(&self) -> &crate::diagnostics::Diagnostics {
@@ -229,6 +231,28 @@ impl CharDef {
         }
         let img = ImageData::new(ix.w, ix.h, rgba);
         cache.insert((sprite, dst), img.clone());
+        Some(img)
+    }
+
+    /// RGBA copy of a sprite, materialised on first use. Indexed sprites are drawn straight from the index
+    /// atlas, so this is only needed by paths that must own the pixels (reflections, thumbnails).
+    pub fn rgba_sprite(&self, sprite: (i32, i32)) -> Option<Arc<ImageData>> {
+        let spr = self.sprites.get(&sprite)?;
+        if let Some(img) = &spr.image { return Some(img.clone()); }
+        let ix = self.indexed.get(&sprite)?;
+        let mut cache = self.image_cache.lock().ok()?;
+        if let Some(img) = cache.get(&sprite) { return Some(img.clone()); }
+        let pal: &[u8] = match ix.palette.as_deref() { Some(p) => p, None => self.palettes.get(&ix.pal).map(|p| p.as_slice())? };
+        if pal.len() < 1024 { return None; }
+        let mut rgba = vec![0u8; ix.pixels.len() * 4];
+        for (o, &c) in rgba.chunks_exact_mut(4).zip(ix.pixels.iter()) {
+            if c == 0 { continue; }
+            let p = c as usize * 4;
+            o[..3].copy_from_slice(&pal[p..p + 3]);
+            o[3] = 255;
+        }
+        let img = ImageData::new(ix.w, ix.h, rgba);
+        cache.insert(sprite, img.clone());
         Some(img)
     }
 }

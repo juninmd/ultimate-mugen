@@ -74,13 +74,11 @@ pub fn load_mugen_char(
         }
     }
     let cns_name = fget("cns").unwrap_or_default();
-    let cns_text = resolve(vfs, &base, &cns_name).map(text).unwrap_or_default();
+    let cns_text = crate::perf::time("cns:read", || resolve(vfs, &base, &cns_name).map(text).unwrap_or_default());
     parse_constants(&cns_text, &mut constants, &mut provided);
     scale_default_constants(&mut constants, &provided, local_w as f64 / 320.0);
-    spans.track(&cns_name, || parse_states(&cns_text, &mut states, true));
-    for k in [
-        "st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9",
-    ] {
+    crate::perf::time("cns:parse", || spans.track(&cns_name, || parse_states(&cns_text, &mut states, true)));
+    for k in ["st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9"] {
         let Some(fname) = fget(k) else { continue };
         if norm_path(&unquote(&fname)) == norm_path(&unquote(&cns_name)) {
             continue;
@@ -122,15 +120,13 @@ pub fn load_mugen_char(
             commands.push(parse_command(n, c, 1, 1));
         }
     }
-    let anims = resolve(vfs, &base, &fget("anim").unwrap_or_default())
-        .map(|b| parse_air(&text(b)))
-        .unwrap_or_default();
+    let anims = crate::perf::time("air:parse", || resolve(vfs, &base, &fget("anim").unwrap_or_default()).map(|b| parse_air(&text(b))).unwrap_or_default());
 
     let mut sprites = HashMap::new();
     let mut palettes = HashMap::new();
     let mut indexed = HashMap::new();
     if let Some(buf) = resolve(vfs, &base, &fget("sprite").unwrap_or_default()) {
-        let sff = decode_sff(buf)?;
+        let sff = crate::perf::time("sff:decode", || decode_sff(buf))?;
         let mut counts: HashMap<i32, usize> = HashMap::new();
         for s in &sff.sprites {
             if s.group != 9000 {
@@ -278,18 +274,8 @@ pub fn load_mugen_char(
                 None => i,
             });
         }
-        let renders: Vec<usize> = (0..unique.len())
-            .filter(|&i| {
-                with_images && owner_of[i] == i && unique[i].width > 0 && unique[i].height > 0
-            })
-            .collect();
-        let images = ume_formats::par::map(&renders, |&i| {
-            ImageData::new(
-                unique[i].width,
-                unique[i].height,
-                sprite_to_rgba(unique[i], pal_of(unique[i])),
-            )
-        });
+        let renders: Vec<usize> = (0..unique.len()).filter(|&i| with_images && owner_of[i] == i && unique[i].width > 0 && unique[i].height > 0 && (unique[i].indexed.is_none() || unique[i].group == 9000)).collect();
+        let images = crate::perf::time("sff:rgba", || ume_formats::par::map(&renders, |&i| ImageData::new(unique[i].width, unique[i].height, sprite_to_rgba(unique[i], pal_of(unique[i])))));
         let image_of: HashMap<usize, Arc<ImageData>> = renders.into_iter().zip(images).collect();
         for (i, s) in unique.iter().enumerate() {
             let key = (s.group, s.index);
@@ -323,9 +309,7 @@ pub fn load_mugen_char(
             );
         }
     }
-    let sounds = resolve(vfs, &base, &fget("sound").unwrap_or_default())
-        .map(decode_snd)
-        .unwrap_or_default();
+    let sounds = crate::perf::time("snd:decode", || resolve(vfs, &base, &fget("sound").unwrap_or_default()).map(decode_snd).unwrap_or_default());
     // move list for the pause screen: every author-defined command with its input (internal hold/recovery helpers left out)
     let mut movelist: Vec<MoveInfo> = vec![];
     for c in commands.iter().filter(|c| !c.raw.is_empty()) {

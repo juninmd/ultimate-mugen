@@ -54,8 +54,11 @@ impl Hud {
                 let px0 = if side == 0 { 4.0 } else { w / 2.0 + 22.0 };
                 let (py0, ph) = (4.0, 23.0);
                 let tint = side_tint(side);
-                glass(&p, s, px0, py0, panel_w, ph, 6.0, tint);
-                let (bx, bw, by, bh) = if side == 0 { (px0 + 27.0, panel_w - 35.0, py0 + 4.0, 7.0) } else { (px0 + 8.0, panel_w - 35.0, py0 + 4.0, 7.0) };
+                let (dk, cl) = (Color::new(0.02, 0.04, 0.12, 0.7), Color::new(0.02, 0.04, 0.12, 0.0));
+                poly::grad_h(&[p(px0 - 4.0, 0.0), p(px0 + panel_w, 0.0), p(px0 + panel_w, py0 + ph), p(px0 - 4.0, py0 + ph)], if side == 0 { dk } else { cl }, if side == 0 { cl } else { dk });
+                let hl = |y: f32| { let (a, b) = (p(px0 + 6.0, y), p(px0 + panel_w - 6.0, y)); draw_line(a.x, a.y, b.x, b.y, 0.5 * s, Color::new(tint[0], tint[1], tint[2], 0.55)); };
+                hl(py0 + ph - 0.5);
+                let (bx, bw, by, bh) = if side == 0 { (px0 + 27.0, panel_w - 35.0, py0 + 4.0, 5.5) } else { (px0 + 8.0, panel_w - 35.0, py0 + 4.0, 5.5) };
                 let ratio = (f.life / f.life_max).max(0.0);
                 if !(f.move_type == 'H' && f.hit_shake > 0) { self.trail[side] = if self.trail[side] > ratio { (self.trail[side] - 0.006).max(ratio) } else { ratio }; }
                 let low = ratio < 0.25;
@@ -216,12 +219,12 @@ impl Hud {
                 outlined(&format!("TIME {lead}"), x, 41.0, 5.2, if side == 0 { hex("#22e8ff") } else { hex("#ff4d6d") }, al);
             }
             let (cx, cy) = (w / 2.0, 13.0);
-            glass(&p, s, cx - 15.0, 5.0, 30.0, 17.0, 6.0, [0.75, 0.8, 1.0]);
+            for k in 0..9 { let tx = cx - 8.0 + k as f32 * 2.0; let (a, b) = (p(tx, 21.5), p(tx, 23.0)); draw_line(a.x, a.y, b.x, b.y, 0.4 * s, Color::new(1.0, 1.0, 1.0, 0.4)); }
             let t = if m.training { "--".to_string() } else { format!("{:02}", (m.timer + 59) / 60) };
             let urgent = !m.training && m.timer > 0 && m.timer <= 10 * 60;
             let pulse = if urgent { 1.0 + 0.18 * (1.0 - ((m.timer % 60) as f32 / 60.0)) } else { 1.0 };
             if urgent { let a = 0.12 + 0.1 * (gt * 9.0).sin().abs(); poly::solid(&sp_box(&p, cx - 15.0, 5.0, 30.0, 17.0, 6.0), Color::new(1.0, 0.1, 0.1, a)); }
-            outlined(&t, cx, cy + 4.2 * pulse, 11.0 * pulse, if urgent { hex("#ff5a5a") } else { WHITE }, Align::Center);
+            outlined(&t, cx, cy + 5.2 * pulse, 14.0 * pulse, if urgent { hex("#ff5a5a") } else { WHITE }, Align::Center);
             let team_rows = !partners.is_empty() || team.is_some();
             let cy0 = if team_rows { -5.0 } else { -15.0 };
             // combos

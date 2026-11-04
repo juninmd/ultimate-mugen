@@ -31,6 +31,10 @@ UMF and M.U.G.E.N fighters run on the same state machine and can fight each othe
 
 Compatibility plans and architecture decisions are in [`docs/ROADMAP.md`](../ROADMAP.md). Items marked **planned** in this wiki do not exist in the current version yet.
 
+## Compatibility status
+
+The progress toward Ikemen GO v1.0.0 parity is tracked in [issue #135](https://github.com/juninmd/ultimate-mugen/issues/135), with one issue per missing controller, trigger or feature. The lists of supported controllers, triggers and redirections in [CNS scripts](CNS-Scripts.md) are checked against the engine by `cargo test -p ume-engine --test wiki_sync`: a listed name the engine does not handle, an implemented name that is not listed, or a mismatch between the English and Portuguese pages fails the test. Every character load also reports the controllers, triggers and parameters it uses that the engine ignores (see "Load diagnostics" in the same page).
+
 ## Acknowledgments
 
 Thanks to the [Ikemen GO](https://github.com/ikemen-engine/Ikemen-GO) team and to Elecbyte, creator of M.U.G.E.N, for the inspiration.

@@ -26,6 +26,7 @@ Fluxo de um tick: entradas → `Match::tick` → para cada lutador, `[Statedef -
 2. `n(m, "param", padrão)` lê um parâmetro numérico; `n2(m, "param", padrão, índice)` lê o N-ésimo valor; `sc.has("param", 0)` testa presença; `sc.raw("param")` devolve o texto.
 3. Crie o campo em `fighter.rs` se precisar de estado novo.
 4. Escreva um teste em `crates/engine/tests/combat_logic.rs` chamando `ume_engine::controllers::run`.
+5. Liste o nome em `CNS-Scripts.md` e `pt-BR/Scripts-CNS.md`. `cargo test -p ume-engine --test wiki_sync` falha para um controller implementado que não está listado e para um listado que não está implementado. Devolva `true` no `run` do módulo (ou caia no último ramo) para o diagnóstico de carregamento não apontá-lo como não suportado.
 
 ## Adicionar um trigger
 
@@ -35,7 +36,7 @@ Em `crates/engine/src/triggers.rs`, adicione um ramo no `match` de nomes:
 "winko" => b(m.match_over && m.winner_side == f.side as i32 && m.won_by_ko),
 ```
 
-`f` é o lutador avaliado e `m` a luta. `won_by_ko` seria um campo novo em `Match`. `b(bool)` converte para 0/1. Triggers que retornam float precisam aparecer em `is_float` de `expr.rs`.
+`f` é o lutador avaliado e `m` a luta. `won_by_ko` seria um campo novo em `Match`. `b(bool)` converte para 0/1. Triggers que retornam float precisam aparecer em `is_float` de `expr.rs`. Liste o novo nome em `CNS-Scripts.md` e `pt-BR/Scripts-CNS.md`; o `wiki_sync` confere nos dois sentidos.
 
 ## Adicionar um formato de arquivo
 

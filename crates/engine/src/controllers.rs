@@ -211,21 +211,40 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             m.spawn_fx(i, v, x, y, under);
         }
         "removeexplod" => { let id = if sc.has("id", 0) { n(m, "id", -1.0) as i32 } else { -1 }; let me = m.fighters[i].id; m.explods.retain(|e| !(e.owner == me && (id < 0 || e.id == id))); }
-        "explodbindtime" | "modifyexplod" => {
+        "explodbindtime" => {
             let id = if sc.has("id", 0) { n(m, "id", -1.0) as i32 } else { -1 };
             let me = m.fighters[i].id;
-            let bt = if sc.has("time", 0) { Some(n(m, "time", 0.0) as i32) } else if sc.has("value", 0) { Some(n(m, "value", 0.0) as i32) } else { None };
-            let vel = if sc.has("vel", 0) { Some((n2(m, "vel", 0.0, 0) as f32 * l, n2(m, "vel", 0.0, 1) as f32 * l)) } else { None };
-            let acc = if sc.has("accel", 0) { Some((n2(m, "accel", 0.0, 0) as f32 * l, n2(m, "accel", 0.0, 1) as f32 * l)) } else { None };
-            let rt = if sc.has("removetime", 0) { Some(n(m, "removetime", -2.0) as i32) } else { None };
-            let sc2 = if sc.has("scale", 0) { Some([n2(m, "scale", 1.0, 0) as f32, n2(m, "scale", 1.0, 1) as f32]) } else { None };
-            let is_bind = sc.kind == "explodbindtime";
+            let bt = if sc.has("time", 0) { n(m, "time", 0.0) as i32 } else { n(m, "value", 0.0) as i32 };
+            for e in m.explods.iter_mut().filter(|e| e.owner == me && (id < 0 || e.id == id)) { e.bind_time = bt; }
+        }
+        "modifyexplod" => {
+            let id = if sc.has("id", 0) { n(m, "id", -1.0) as i32 } else { -1 };
+            let me = m.fighters[i].id;
+            let opt = |m: &Match, k: &str| if sc.has(k, 0) { Some(n2(m, k, 0.0, 0) as f32) } else { None };
+            let pair = |m: &Match, k: &str, d: f64, scale: f32| if sc.has(k, 0) { Some((n2(m, k, d, 0) as f32 * scale, n2(m, k, d, 1) as f32 * scale)) } else { None };
+            let (vel, acc, pos, scale) = (pair(m, "vel", 0.0, l), pair(m, "accel", 0.0, l), pair(m, "pos", 0.0, l), pair(m, "scale", 1.0, 1.0));
+            let (bt, rt, pri) = (opt(m, "bindtime"), opt(m, "removetime"), opt(m, "sprpriority"));
+            let (ontop, under, rogh, ihp) = (opt(m, "ontop"), opt(m, "under"), opt(m, "removeongethit"), opt(m, "ignorehitpause"));
+            let (fac, vfac, smt, pmt) = (opt(m, "facing"), opt(m, "vfacing"), opt(m, "supermovetime"), opt(m, "pausemovetime"));
+            let trans = sc.raw("trans").map(|t| t.trim().to_ascii_lowercase());
+            let owner_facing = m.fighters[i].facing;
             for e in m.explods.iter_mut().filter(|e| e.owner == me && (id < 0 || e.id == id)) {
-                if is_bind { if let Some(t) = bt { e.bind_time = t; } continue; }
                 if let Some(v) = vel { e.vel.x = v.0; e.vel.y = v.1; }
                 if let Some(v) = acc { e.accel.x = v.0; e.accel.y = v.1; }
-                if let Some(t) = rt { e.remove_time = t; }
-                if let Some(s) = sc2 { e.scale = s; }
+                if let Some(p) = pos { e.bind_off.x = p.0; e.bind_off.y = p.1; }
+                if let Some(v) = scale { e.scale = [v.0, v.1]; }
+                if let Some(t) = rt { e.remove_time = t as i32; }
+                if let Some(t) = bt { e.bind_time = t as i32; }
+                if let Some(p) = pri { e.spr_priority = p as i32; }
+                if let Some(v) = ontop { e.on_top = v != 0.0; }
+                if let Some(v) = under { e.under = v != 0.0; }
+                if let Some(v) = rogh { e.remove_on_get_hit = v != 0.0; }
+                if let Some(v) = ihp { e.ignore_hit_pause = v != 0.0; }
+                if let Some(v) = fac { e.facing = owner_facing * if v < 0.0 { -1.0 } else { 1.0 }; }
+                if let Some(v) = vfac { e.vfacing = if v < 0.0 { -1.0 } else { 1.0 }; }
+                if let Some(v) = smt { e.super_move = v as i32; }
+                if let Some(v) = pmt { e.pause_move = v as i32; }
+                if let Some(t) = &trans { e.add = t.starts_with("add") && t != "addalpha"; }
             }
         }
         "helper" => m.spawn_helper(i, sc),

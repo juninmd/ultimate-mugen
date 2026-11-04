@@ -161,7 +161,7 @@ impl MatchRenderer {
                 It::E(i) => {
                     let e = &m.explods[i];
                     let remap = m.idx(e.owner).map(|o| m.fighters[o].remap.clone()).unwrap_or_default();
-                    if let Some(fr) = e.cur.frame() { Self::draw_sprite(g, m, &e.cur.def, fr, e.pos.x, e.pos.y, e.facing, e.lscl, e.scale, &DrawOpts { add: e.add, vflip: e.vfacing < 0.0, remap, ..Default::default() }, shx, shy); }
+                    if let Some(fr) = e.cur.frame() { let p = e.world_pos(m.camera); Self::draw_sprite(g, m, &e.cur.def, fr, p.x, p.y, e.facing, e.lscl, e.scale, &DrawOpts { add: e.add, vflip: e.vfacing < 0.0, remap, ..Default::default() }, shx, shy); }
                 }
             }
         }

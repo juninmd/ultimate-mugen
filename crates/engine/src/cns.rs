@@ -18,7 +18,7 @@ pub fn build_controller(s: &Section) -> Option<Controller> {
             continue;
         }
         if k == "persistent" { c.persistent = v.trim().parse().unwrap_or(1); continue; }
-        if k == "ignorehitpause" { c.ignore_hitpause = v.trim().parse::<i32>().unwrap_or(0) != 0; continue; }
+        if k == "ignorehitpause" { c.ignore_hitpause = v.trim().parse::<i32>().unwrap_or(0) != 0; }
         c.params.push((k.clone(), Param::new(v)));
     }
     if let Some(i) = c.triggers.iter().position(|t| t.is_empty()) { c.triggers.truncate(i); }

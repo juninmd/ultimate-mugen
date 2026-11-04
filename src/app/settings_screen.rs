@@ -1,9 +1,9 @@
 use super::*;
 use crate::i18n::{tr, Lang, LANGS};
-use crate::settings::{FPS_CAPS, GAME_SPEEDS, LIFE_PERCENT, ROUNDS_TO_WIN, ROUND_SECONDS, VOLUME_STEPS};
+use crate::settings::{FPS_CAPS, GAME_SPEEDS, LIFE_PERCENT, ROUNDS_TO_WIN, ROUND_SECONDS, SURVIVAL_RECOVERY, VOLUME_STEPS};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-enum Act { Fullscreen, Res, Quality, Fx, Impact, FpsCounter, Vsync, FpsCap, Master, Music, Sfx, Mute, Keys, Guide, Difficulty, RoundTime, Rounds, Life, SingleRound, ClassicPushbox, TeamLifeShare, GameSpeed, Language, Reset, Info }
+enum Act { Fullscreen, Res, Quality, Fx, Impact, FpsCounter, Vsync, FpsCap, Master, Music, Sfx, Mute, Keys, Guide, Difficulty, RoundTime, Rounds, Life, SingleRound, ClassicPushbox, TeamLifeShare, GameSpeed, SurvivalRecovery, Language, Reset, Info }
 
 struct Row { act: Act, label: String, value: String, hint: String, level: Option<u8> }
 
@@ -56,6 +56,7 @@ impl App {
                 row(Act::ClassicPushbox, tr("Pushbox clássico", "Classic pushbox"), on_off(s.classic_pushbox), tr("O atacante não é empurrado pelo defensor (regra M.U.G.E.N)", "The attacker is not pushed back by the defender (M.U.G.E.N rule)")),
                 row(Act::TeamLifeShare, tr("Vida compartilhada em equipe", "Shared team life"), on_off(s.team_life_share), tr("O vencedor mantém a vida para o próximo membro", "The winner keeps life for the next member")),
                 row(Act::GameSpeed, tr("Velocidade do jogo", "Game speed"), format!("{:.0}%", GAME_SPEEDS[s.game_speed.min(GAME_SPEEDS.len() - 1)] * 100.0), tr("Ritmo da simulação, sem alterar o conteúdo", "Simulation pace, without changing content")),
+                row(Act::SurvivalRecovery, tr("Vida recuperada (Sobrevivência)", "Life recovered (Survival)"), format!("{}%", SURVIVAL_RECOVERY[s.survival_recovery.min(SURVIVAL_RECOVERY.len() - 1)]), tr("Quanto da barra volta depois de cada vitória", "How much of the bar comes back after each win")),
             ],
             4 => vec![row(Act::Language, tr("Idioma", "Language"), LANGS.iter().find(|(l, _)| *l == s.lang).map(|(_, n)| *n).unwrap_or(""), tr("Menus de configurações e tela de versus. O restante é traduzido gradualmente", "Settings and versus screens. The rest is being translated gradually"))],
             _ => vec![row(Act::Reset, tr("Restaurar padrões", "Restore defaults"), tr("Enter", "Enter"), tr("Volta todas as configurações ao original", "Resets every setting to its original value"))],
@@ -88,6 +89,7 @@ impl App {
             Act::ClassicPushbox if go => s.classic_pushbox = !s.classic_pushbox,
             Act::TeamLifeShare if go => s.team_life_share = !s.team_life_share,
             Act::GameSpeed if go => s.game_speed = cycle(s.game_speed, step, GAME_SPEEDS.len()),
+            Act::SurvivalRecovery if go => s.survival_recovery = cycle(s.survival_recovery, step, SURVIVAL_RECOVERY.len()),
             Act::Language if go => s.lang = if s.lang == Lang::En { Lang::Pt } else { Lang::En },
             Act::Reset if ok => { *s = Settings::default(); self.ai_level = s.difficulty; self.msg = tr("Configurações restauradas", "Settings restored").into(); }
             Act::Keys if ok => { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); self.screen = Screen::Controls; changed = false; }
@@ -192,7 +194,7 @@ impl App {
         if changed { self.audio.sfx("select"); self.settings.apply_window(); self.settings.save(); if !from_fight { self.apply_quality(); } }
 
         if matches!(self.screen, Screen::Controls) { self.settings_back = Some((tab, from_fight)); return; }
-        if back || self.c.pressed(nav::BACK) { self.screen = if from_fight { Screen::Fight } else { Screen::Menu { cur: 11 } }; return; }
+        if back || self.c.pressed(nav::BACK) { self.screen = if from_fight { Screen::Fight } else { Screen::Menu { cur: 12 } }; return; }
         self.screen = Screen::Settings { tab, cur: new_cur, from_fight };
     }
 }

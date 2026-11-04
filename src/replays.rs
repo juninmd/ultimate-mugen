@@ -17,6 +17,8 @@ pub struct StoredReplay {
     pub stage: String,
     pub palettes: [i32; 2],
     pub seed: u32,
+    /// life ratios the fight started with (Survival carries life between fights)
+    pub life: [f32; 2],
     pub teams: Option<[Vec<String>; 2]>,
     pub simul: bool,
     pub tag: bool,
@@ -77,6 +79,7 @@ impl StoredReplay {
             "stage": self.stage,
             "palettes": self.palettes,
             "seed": self.seed,
+            "life": self.life,
             "teams": teams,
             "simul": self.simul,
             "tag": self.tag,
@@ -116,6 +119,7 @@ impl StoredReplay {
         if runs.is_empty() { return Err("Replay inválido: nenhuma entrada gravada".into()); }
         let chars = pair_strings(o.get("chars"))?;
         let palettes = pair_ints(o.get("palettes")).unwrap_or([1, 1]);
+        let life = pair_floats(o.get("life")).unwrap_or([1.0, 1.0]);
         let teams = match o.get("teams") {
             None | Some(Value::Null) => None,
             Some(Value::Array(sides)) => {
@@ -146,6 +150,7 @@ impl StoredReplay {
             stage: o.get("stage").and_then(Value::as_str).unwrap_or_default().to_string(),
             palettes,
             seed: o.get("seed").and_then(Value::as_u64).unwrap_or(0) as u32,
+            life,
             teams,
             simul: o.get("simul").and_then(Value::as_bool).unwrap_or(false),
             tag: o.get("tag").and_then(Value::as_bool).unwrap_or(false),
@@ -167,6 +172,14 @@ fn pair_ints(v: Option<&Value>) -> Option<[i32; 2]> {
     let arr = v.and_then(Value::as_array)?;
     match arr.as_slice() {
         [a, b] => Some([a.as_i64()? as i32, b.as_i64()? as i32]),
+        _ => None,
+    }
+}
+
+fn pair_floats(v: Option<&Value>) -> Option<[f32; 2]> {
+    let arr = v.and_then(Value::as_array)?;
+    match arr.as_slice() {
+        [a, b] => Some([a.as_f64()? as f32, b.as_f64()? as f32]),
         _ => None,
     }
 }
@@ -269,7 +282,7 @@ mod tests {
         for i in 0..1200u32 { rec.push(vec![if i % 7 == 0 { 4 } else { 0 }, if i % 11 == 0 { 8 } else { 0 }]); }
         StoredReplay {
             label: "Kung Fu Man vs Kung Fu Man".into(), saved_at: 1_700_000_000, mode: "Cpu".into(),
-            chars: ["umf:kfm".into(), "umf:kfm".into()], stage: "dojo".into(), palettes: [1, 2], seed: 0x2545_f491,
+            chars: ["umf:kfm".into(), "umf:kfm".into()], stage: "dojo".into(), palettes: [1, 2], seed: 0x2545_f491, life: [0.55, 1.0],
             teams: None, simul: false, tag: false,
             rules: StoredRules { rounds_to_win: 2, round_ticks: 5940, life_percent: 100, single_round: false, classic_pushbox: true, team_life_share: true, game_speed: 1.0 },
             runs: StoredReplay::from_stream(&rec),

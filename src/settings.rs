@@ -11,6 +11,8 @@ pub const GAME_SPEEDS: [f32; 5] = [0.75, 0.9, 1.0, 1.15, 1.3];
 pub const ROUND_SECONDS: [u32; 4] = [99, 60, 30, 0];
 pub const ROUNDS_TO_WIN: [i32; 3] = [1, 2, 3];
 pub const LIFE_PERCENT: [u32; 5] = [50, 75, 100, 150, 200];
+/// Life recovered between Survival fights, in percent of the bar.
+pub const SURVIVAL_RECOVERY: [u32; 5] = [0, 20, 35, 50, 100];
 pub const VOLUME_STEPS: u8 = 10;
 pub const FORMAT_VERSION: u32 = 2;
 const FILE: &str = "ultimate-mugen.cfg";
@@ -23,6 +25,8 @@ pub struct Settings {
     pub master: u8, pub music: u8, pub sfx: u8, pub mute: bool,
     pub difficulty: i32, pub round_time: usize, pub rounds: usize, pub life: usize,
     pub single_round: bool, pub classic_pushbox: bool, pub team_life_share: bool, pub game_speed: usize,
+    /// Survival: life recovered between fights (index into `SURVIVAL_RECOVERY`) and the local best score
+    pub survival_recovery: usize, pub survival_best: u64,
     pub lang: crate::i18n::Lang,
 }
 
@@ -35,6 +39,7 @@ impl Default for Settings {
             master: 8, music: 10, sfx: 10, mute: false,
             difficulty: 4, round_time: 0, rounds: 1, life: 2,
             single_round: false, classic_pushbox: true, team_life_share: true, game_speed: 2,
+            survival_recovery: 2, survival_best: 0,
             lang: crate::i18n::Lang::Pt,
         }
     }
@@ -96,6 +101,8 @@ impl Settings {
                 "classic_pushbox" => s.classic_pushbox = v != "0",
                 "team_lifeshare" => s.team_life_share = v != "0",
                 "gamespeed" => s.game_speed = pick(v, 2, GAME_SPEEDS.len() - 1),
+                "survival_recovery" => s.survival_recovery = pick(v, 2, SURVIVAL_RECOVERY.len() - 1),
+                "survival_best" => s.survival_best = v.parse().unwrap_or(0),
                 "lang" => s.lang = if v == "en" { crate::i18n::Lang::En } else { crate::i18n::Lang::Pt },
                 _ => {}
             }
@@ -105,9 +112,9 @@ impl Settings {
 
     pub fn to_text(&self) -> String {
         format!(
-            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nsingle_round={}\nclassic_pushbox={}\nteam_lifeshare={}\ngamespeed={}\nlang={}\n",
+            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nsingle_round={}\nclassic_pushbox={}\nteam_lifeshare={}\ngamespeed={}\nsurvival_recovery={}\nsurvival_best={}\nlang={}\n",
             FORMAT_VERSION, self.fullscreen as i32, self.res, self.quality, self.fps as i32, self.fx, self.impact, self.keep_aspect as i32, if self.linear { "linear" } else { "nearest" }, self.window.0, self.window.1, self.vsync as i32, self.fps_cap, self.master, self.music, self.sfx, self.mute as i32,
-            self.difficulty, self.round_time, self.rounds, self.life, self.single_round as i32, self.classic_pushbox as i32, self.team_life_share as i32, self.game_speed, if self.lang == crate::i18n::Lang::En { "en" } else { "pt" },
+            self.difficulty, self.round_time, self.rounds, self.life, self.single_round as i32, self.classic_pushbox as i32, self.team_life_share as i32, self.game_speed, self.survival_recovery, self.survival_best, if self.lang == crate::i18n::Lang::En { "en" } else { "pt" },
         )
     }
 

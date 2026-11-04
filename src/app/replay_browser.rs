@@ -37,7 +37,7 @@ impl App {
         let teams = r.team.as_ref().map(|t| [0, 1].map(|sd| t.members[sd].iter().filter_map(|&i| self.reg.chars.get(i).map(|c| c.id.clone())).collect::<Vec<_>>()));
         Some(StoredReplay {
             label, saved_at: replays::now(), mode: r.mode.key().to_string(), chars, stage,
-            palettes: [1, if r.sel.0 == r.sel.1 { 2 } else { 1 }], seed: r.seed, teams,
+            palettes: [1, if r.sel.0 == r.sel.1 { 2 } else { 1 }], seed: r.seed, life: r.life, teams,
             simul: r.team.as_ref().is_some_and(|t| t.simul), tag: r.team.as_ref().is_some_and(|t| t.tag),
             rules: stored_rules(r.rules), runs: StoredReplay::from_stream(&r.rec),
         })
@@ -58,7 +58,7 @@ impl App {
                 Some(if s.tag { Team::tagged(members[0].clone(), members[1].clone()) } else { Team::new(members[0].clone(), members[1].clone(), s.simul) })
             }
         };
-        Ok(Replay { sel: (first, second, stage), mode: crate::app::Mode::from_key(&s.mode), team, rec: s.stream(), rules: rules_of(s.rules), seed: s.seed })
+        Ok(Replay { sel: (first, second, stage), mode: crate::app::Mode::from_key(&s.mode), team, rec: s.stream(), rules: rules_of(s.rules), seed: s.seed, life: s.life })
     }
 
     /// Write the just-finished fight to `replays/` (desktop). Older files are pruned so the folder stays small.
@@ -202,7 +202,7 @@ impl App {
             }
             _ => {}
         }
-        if self.c.pressed(nav::BACK) || is_key_pressed(KeyCode::Escape) { self.screen = Screen::Menu { cur: 12 }; return; }
+        if self.c.pressed(nav::BACK) || is_key_pressed(KeyCode::Escape) { self.screen = Screen::Menu { cur: 13 }; return; }
         self.screen = Screen::Replays { cur };
     }
 }

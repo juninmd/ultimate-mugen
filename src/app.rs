@@ -18,18 +18,19 @@ mod keyedit;
 mod market;
 mod replay_browser;
 mod settings_screen;
+mod survival;
 mod versus;
 pub(crate) use keyedit::KeyEdit;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul, TeamTag }
+pub enum Mode { Arcade, Survival, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul, TeamTag }
 impl Mode {
-    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO", Mode::TeamTag => "EQUIPE · TAG" } }
+    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Survival => "SOBREVIVÊNCIA", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO", Mode::TeamTag => "EQUIPE · TAG" } }
     /// Team size (1 for the regular modes).
     pub fn is_team(self) -> bool { matches!(self, Mode::TeamSeq | Mode::TeamSimul | Mode::TeamTag) }
     /// Stable key used by replay files.
-    pub fn key(self) -> &'static str { match self { Mode::Arcade => "Arcade", Mode::Cpu => "Cpu", Mode::Versus => "Versus", Mode::Training => "Training", Mode::Watch => "Watch", Mode::TeamSeq => "TeamSeq", Mode::TeamSimul => "TeamSimul", Mode::TeamTag => "TeamTag" } }
-    pub fn from_key(key: &str) -> Mode { match key { "Arcade" => Mode::Arcade, "Versus" => Mode::Versus, "Training" => Mode::Training, "Watch" => Mode::Watch, "TeamSeq" => Mode::TeamSeq, "TeamSimul" => Mode::TeamSimul, "TeamTag" => Mode::TeamTag, _ => Mode::Cpu } }
+    pub fn key(self) -> &'static str { match self { Mode::Arcade => "Arcade", Mode::Survival => "Survival", Mode::Cpu => "Cpu", Mode::Versus => "Versus", Mode::Training => "Training", Mode::Watch => "Watch", Mode::TeamSeq => "TeamSeq", Mode::TeamSimul => "TeamSimul", Mode::TeamTag => "TeamTag" } }
+    pub fn from_key(key: &str) -> Mode { match key { "Arcade" => Mode::Arcade, "Survival" => Mode::Survival, "Versus" => Mode::Versus, "Training" => Mode::Training, "Watch" => Mode::Watch, "TeamSeq" => Mode::TeamSeq, "TeamSimul" => Mode::TeamSimul, "TeamTag" => Mode::TeamTag, _ => Mode::Cpu } }
 }
 
 pub enum Screen {
@@ -40,6 +41,8 @@ pub enum Screen {
     Vs { t: f32, step: u8 },
     Fight,
     Results { winner: usize, cur: usize },
+    /// Survival game over: final score and fights won
+    SurvivalOver { score: i64, rounds: usize },
     Controls,
     Mugen,
     Market,
@@ -56,7 +59,7 @@ pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, stage_j
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
 #[derive(Clone)]
-pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>>, rules: Rules, seed: u32 }
+pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>>, rules: Rules, seed: u32, life: [f32; 2] }
 
 /// Team battle state: sequence (KOF-style turns, winner keeps its remaining life) or parallel (2v2 simultaneous).
 #[derive(Clone)]
@@ -113,6 +116,8 @@ pub struct App {
     pending: Pending,
     import_jobs: Vec<std::thread::JoinHandle<Result<(String, ume_formats::vfs::Vfs), String>>>,
     pub team: Option<Team>,
+    /// Survival run in progress (round, score, carried life)
+    survival: Option<survival::Survival>,
     /// last finished fight (replayable) and the replay being played now
     last_fight: Option<Replay>,
     pub replaying: Option<Replay>,
@@ -152,8 +157,9 @@ pub struct App {
     replay_by_name: bool,
 }
 
-const MENU: [(&str, &str); 14] = [
+const MENU: [(&str, &str); 15] = [
     ("Arcade", "Enfrente uma sequência de oponentes"),
+    ("Sobrevivência", "Oponentes sem fim, vida recuperada a cada vitória e pontuação"),
     ("Versus CPU", "Você contra o computador"),
     ("2 Jogadores", "Teclado compartilhado ou dois controles"),
     ("Treino", "Boneco de treino, barra infinita, hitboxes"),
@@ -201,6 +207,7 @@ impl App {
             ai_level: settings.difficulty, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: import_msg, preview_t: 0.0,
             settings, key_edit: None, move_page: 0, pending: Pending::default(), import_jobs: vec![], window_watch: WindowWatch::default(), window_pinned: false, team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
             replay_list: vec![], replay_problems: vec![], replay_rename: None, replay_confirm: false, replay_by_name: false,
+            survival: None,
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -259,6 +266,7 @@ impl App {
             Screen::Controls => self.controls_screen(),
             Screen::Mugen => self.mugen_screen(),
             Screen::Market => self.market_screen(),
+            Screen::SurvivalOver { .. } => self.survival_over_screen(),
             Screen::Replays { .. } => self.replays_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
         }
@@ -380,7 +388,7 @@ impl App {
         let (nm, nn) = (self.reg.chars.iter().filter(|c| c.mugen).count(), self.playable().len());
         let stats = format!("{nn} lutadores · {} cenários · {nm} MUGEN", self.reg.stages.len());
         ui.text(&stats, VW - 40.0, 44.0, 20.0, Color::new(1.0, 1.0, 1.0, 0.85), Align::Right, false);
-        if cur_v <= 6 {
+        if cur_v <= 8 {
             ui.text("Dificuldade CPU (esq./dir.)", VW - 40.0, 86.0, 16.0, hex("#d8d0f0"), Align::Right, false);
             for i in 0..8 { ui.rect(VW - 40.0 - 8.0 * 26.0 + i as f32 * 26.0, 96.0, 20.0, 12.0, if i < self.ai_level { accent } else { Color::new(1.0, 1.0, 1.0, 0.18) }); }
         }
@@ -391,14 +399,14 @@ impl App {
         self.screen = Screen::Menu { cur: cur_v };
         if self.c.pressed(nav::BACK) { self.screen = Screen::Title; }
         if let Some(i) = chosen {
-            let mode = [Mode::Arcade, Mode::Cpu, Mode::Versus, Mode::Training, Mode::Watch, Mode::TeamSeq, Mode::TeamSimul, Mode::TeamTag];
+            let mode = [Mode::Arcade, Mode::Survival, Mode::Cpu, Mode::Versus, Mode::Training, Mode::Watch, Mode::TeamSeq, Mode::TeamSimul, Mode::TeamTag];
             match i {
-                0..=7 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); if self.mode == Mode::TeamSimul { self.team_n = 5; } else if self.mode == Mode::TeamSeq { self.team_n = 3; } else if self.mode == Mode::TeamTag { self.team_n = 2; } self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
-                8 => self.go(Screen::Mugen),
-                9 => self.go(Screen::Market),
-                10 => { self.settings_back = None; self.go(Screen::Controls) }
-                11 => self.go(Screen::Settings { tab: 0, cur: 0, from_fight: false }),
-                12 => { self.refresh_replays(); self.go(Screen::Replays { cur: 0 }) }
+                0..=8 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); if self.mode == Mode::TeamSimul { self.team_n = 5; } else if self.mode == Mode::TeamSeq { self.team_n = 3; } else if self.mode == Mode::TeamTag { self.team_n = 2; } self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
+                9 => self.go(Screen::Mugen),
+                10 => self.go(Screen::Market),
+                11 => { self.settings_back = None; self.go(Screen::Controls) }
+                12 => self.go(Screen::Settings { tab: 0, cur: 0, from_fight: false }),
+                13 => { self.refresh_replays(); self.go(Screen::Replays { cur: 0 }) }
                 _ => self.quit = true,
             }
         }
@@ -749,6 +757,7 @@ impl App {
                 self.screen = if has_boss { Screen::Cutscene { kind: 0, page: 0, t: 0.0 } } else { Screen::Stages { cur: 1 } };
                 return;
             }
+            if picking == 0 && self.mode == Mode::Survival { self.survival_begin(cur[0]); return; }
             if picking == 0 { picking = 1; } else { self.sel = (picked[0].unwrap(), picked[1].unwrap(), self.sel.2); self.screen = Screen::Stages { cur: self.sel.2 + 1 }; return; }
         }
         if back {
@@ -936,7 +945,7 @@ impl App {
             ume_shell::watchdog::label("load:session");
             let stage = self.pending.stage.take().ok_or("stage")?;
             let teams = std::mem::take(&mut self.pending.defs);
-            let lvl = match &self.arcade { Some((_, i)) if self.mode == Mode::Arcade => (2 + *i as i32 + self.ai_level / 3).min(8), _ => self.ai_level };
+            let lvl = if self.mode == Mode::Survival { self.survival.map(|s| s.ai_level(self.ai_level)).unwrap_or(self.ai_level) } else { match &self.arcade { Some((_, i)) if self.mode == Mode::Arcade => (2 + *i as i32 + self.ai_level / 3).min(8), _ => self.ai_level } };
             let leader = |side: usize| -> Pilot { match (self.mode, side) {
                 (Mode::Watch, 0) => Pilot::Cpu(Ai::new(lvl, 11)), (Mode::Watch, _) => Pilot::Cpu(Ai::new(lvl, 77)),
                 (Mode::Versus, 0) => Pilot::Human(0), (Mode::Versus, _) => Pilot::Human(1),
@@ -948,7 +957,7 @@ impl App {
             for k in 0..teams[0].len().max(teams[1].len()) { for side in 0..2 { if teams[side].get(k).is_some() { pilots.push(if k == 0 { leader(side) } else { Pilot::Cpu(Ai::new((lvl - 1).max(1), 31 + (side * 7 + k) as u32)) }); } } }
             if let Some(r) = &replay { for (slot, p) in pilots.iter_mut().enumerate() { *p = Pilot::Replay(r.rec.iter().map(|b| b.get(slot).copied().unwrap_or(0)).collect(), 0); } }
             let (simul, tag, seq) = (self.team.as_ref().is_some_and(|t| t.simul), self.team.as_ref().is_some_and(|t| t.tag), self.team.as_ref().is_some_and(|t| !t.whole_squad()));
-            let life = self.team.as_ref().filter(|t| !t.whole_squad()).map(|t| t.life).unwrap_or([1.0, 1.0]);
+            let life = if let Some(r) = &replay { r.life } else if self.mode == Mode::Survival { self.survival_life() } else { self.team.as_ref().filter(|t| !t.whole_squad()).map(|t| t.life).unwrap_or([1.0, 1.0]) };
             let info = self.team.as_ref().map(|t| crate::session::TeamInfo {
                 names: [0, 1].map(|sd| t.members[sd].iter().map(|&r| (self.reg.chars[r].name.split_whitespace().next().unwrap_or("").to_uppercase(), self.reg.chars[r].color)).collect()),
                 idx: t.idx, ko: t.ko.clone(), simul: t.whole_squad(),
@@ -1071,6 +1080,7 @@ impl App {
         s.update(dt, &mut self.c, &mut self.audio);
         s.draw(&mut self.g, &self.ui);
         if replaying { self.replay_bar(); }
+        if self.survival_is_playing() { self.survival_hud(); }
         self.c.touch.draw();
         if self.c.touch.enabled { self.ui.rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.0, 0.0, 0.0, 0.35)); self.ui.text("II", VW / 2.0, pb.1 + 30.0, 20.0, WHITE, Align::Center, true); }
         #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
@@ -1079,7 +1089,7 @@ impl App {
         if s.paused { if !replaying { self.pause_menu(accept_back).await; } return; }
         if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
-                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed }); } self.archive_last_fight(); }
+                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed, life: self.survival_life() }); } self.archive_last_fight(); }
                 self.screen = Screen::Results { winner: w, cur: 0 };
             } } }
     }
@@ -1167,6 +1177,12 @@ impl App {
     async fn results(&mut self) {
         let Screen::Results { winner, mut cur } = self.screen else { return };
         if let Some(s) = self.session.as_mut() { s.draw(&mut self.g, &self.ui); }
+        // survival: win advances to the next opponent, loss ends the run
+        if self.mode == Mode::Survival && self.replaying.is_none() {
+            if winner == 0 { self.survival_win(); return; }
+            self.survival_loss();
+            return;
+        }
         // arcade progression
         if self.mode == Mode::Arcade && winner == 0 {
             let boss = self.boss_idx();
@@ -1217,7 +1233,7 @@ impl App {
     }
 
     /// Snapshot the running session as the replayable "last fight" (used by the screenshot tour's determinism check).
-    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed }); } }
+    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed, life: self.survival_life() }); } }
 
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub async fn start_netplay(&mut self, a: &crate::netlink::NetArgs) {
@@ -1306,7 +1322,7 @@ impl App {
             self.ui.text("Personalizar teclado (Tab)", 480.0, 649.0, 22.0, WHITE, Align::Center, true);
             if is_key_pressed(KeyCode::Tab) || self.clicked_rect(300.0, 610.0, 360.0, 60.0) { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); }
         }
-        if back || self.c.pressed(nav::BACK) { self.screen = match self.settings_back.take() { Some((tab, from_fight)) => Screen::Settings { tab, cur: 1, from_fight }, None => Screen::Menu { cur: 10 } }; }
+        if back || self.c.pressed(nav::BACK) { self.screen = match self.settings_back.take() { Some((tab, from_fight)) => Screen::Settings { tab, cur: 1, from_fight }, None => Screen::Menu { cur: 11 } }; }
     }
 
     fn mugen_screen(&mut self) {

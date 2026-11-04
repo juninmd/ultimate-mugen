@@ -101,6 +101,8 @@ Missing (planned): `WinKO` `WinTime` `WinPerfect` `LoseKO` `LoseTime` `ProjCance
 
 `P3Name` to `P8Name` compare against the player in that slot (slot order of the match, not side); an unused slot never matches. `P2Command` reads the command buffer of the nearest opponent, like `Command` does for the owner.
 
+`TeamMode` returns 0 (single), 1 (simul, Parallel mode), 2 (turns, Sequence mode) or 3 (tag, reserved). `TeamMode = Simul`, `TeamMode = turns` and `TeamMode = 1` are all accepted; see Ikemen-Extensions for the `%s` form in `Text`.
+
 Extra functions: `Min`, `Max`, `Clamp`, `Sign`, `Sqrt`, `RandomRange`.
 
 `HitCount` sums the `numhits` of every hit the attacker lands. `UniqHitCount` counts each distinct `(target, HitDef id)` pair once, so three hits of one HitDef give `HitCount = 3` and `UniqHitCount = 1`. Both reset together on state changes unless `HitCountPersist = 1`.

@@ -107,6 +107,16 @@ pub enum AnnounceKind { #[default] Other, Round, Fight, Ko, Win }
 #[derive(Clone)]
 pub struct Announce { pub text: String, pub time: i32, pub total: i32, pub kind: AnnounceKind }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum TeamMode { #[default] Single, Simul, Turns, Tag }
+impl TeamMode {
+    pub fn number(self) -> i32 { self as i32 }
+    pub fn name(self) -> &'static str { match self { TeamMode::Single => "single", TeamMode::Simul => "simul", TeamMode::Turns => "turns", TeamMode::Tag => "tag" } }
+    pub fn parse(s: &str) -> Option<Self> {
+        match s.to_ascii_lowercase().as_str() { "single" | "0" => Some(TeamMode::Single), "simul" | "1" => Some(TeamMode::Simul), "turns" | "2" => Some(TeamMode::Turns), "tag" | "3" => Some(TeamMode::Tag), _ => None }
+    }
+}
+
 #[derive(Clone)]
 pub struct Match {
     pub fighters: Vec<Fighter>,
@@ -131,6 +141,9 @@ pub struct Match {
     pub tag_cooldown_max: i32,
     pub tag_cancel_window: i32,
     pub tag_ko_timer: [i32; 2],
+    pub team_turns: bool,
+    pub team_size: [usize; 2],
+    pub team_member: [usize; 2],
     pub team_lead: [String; 2],
     /// how many times an attacker was pushed back because the defender was cornered (diagnostics / tests)
     pub corner_pushes: u32,
@@ -160,7 +173,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, team_tag: false, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, team_tag: false, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
@@ -178,6 +191,27 @@ impl Match {
         self.fighters.len() - 1
     }
     pub fn roots(&self) -> impl Iterator<Item = &Fighter> { self.fighters.iter().filter(|f| !f.is_helper) }
+    pub fn team_mode(&self) -> TeamMode { if self.team_tag { TeamMode::Tag } else if self.team_simul { TeamMode::Simul } else if self.team_turns { TeamMode::Turns } else { TeamMode::Single } }
+    fn root_of(&self, i: usize) -> usize { if self.fighters[i].is_helper { self.idx(self.fighters[i].root).unwrap_or(i) } else { i } }
+    pub fn team_size_of(&self, side: usize) -> usize {
+        if self.team_size[side.min(1)] > 0 { self.team_size[side.min(1)] } else { self.roots().filter(|r| r.side == side).count() }
+    }
+    pub fn num_players(&self) -> usize { self.team_size_of(0) + self.team_size_of(1) }
+    pub fn member_no(&self, i: usize) -> usize {
+        let r = self.root_of(i);
+        let side = self.fighters[r].side;
+        if self.team_turns { return self.team_member[side.min(1)] + 1; }
+        self.roots().filter(|o| o.side == side).position(|o| o.id == self.fighters[r].id).map_or(1, |p| p + 1)
+    }
+    pub fn slot_no(&self, i: usize) -> usize {
+        let r = self.root_of(i);
+        if self.team_turns { return self.team_member[self.fighters[r].side.min(1)] * 2 + self.fighters[r].side.min(1) + 1; }
+        self.fighters[r].player_no
+    }
+    pub fn team_leader_no(&self, side: usize) -> usize {
+        if self.team_turns { return side.min(1) + 1; }
+        self.fighters.iter().position(|f| !f.is_helper && !f.destroyed && f.side == side).map_or(0, |k| self.slot_no(k))
+    }
     pub fn team_leader(&self, side: usize) -> Option<String> {
         if let Some(n) = self.team_lead.get(side).filter(|n| !n.is_empty()) { return Some(n.to_uppercase()); }
         let mut members = self.roots().filter(|f| f.side == side);

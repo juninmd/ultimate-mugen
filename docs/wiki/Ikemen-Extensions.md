@@ -18,7 +18,7 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `DizzySet` | `value` | Dizzy flag |
 | `GuardPointsSet` / `GuardPointsAdd` | `value` | Guard points, `0..data.guardpoints` |
 | `GuardBreakSet` | `value` | Guard break flag |
-| `Text` | `text`, `params`, `pos`, `velocity`, `scale`, `color`, `align`, `removetime`, `id` | Draws text on the fight screen; `%d`, `%f` and `\n` in `text` take values from `params` |
+| `Text` | `text`, `params`, `pos`, `velocity`, `scale`, `color`, `align`, `removetime`, `id` | Draws text on the fight screen; `%d`, `%f`, `%s` and `\n` in `text` take values from `params` (`%s` prints the mode name for a bare `TeamMode`, otherwise the integer) |
 | `RemoveText` | `id` (omit for all) | Removes the player's texts |
 | `TagOut` / `TagIn` | `self`, `stateno`, `ctrl`, `partnerstateno`, `partnerctrl` | Moves the player to or from standby (hidden, cannot be hit or pushed); `partnerstateno` swaps with the first teammate. In [Tag mode](Game-Modes.md#tag-team) they perform a real swap (cooldown ignored): `TagOut` brings the next living teammate in, `TagIn` on a standby fighter brings it in |
 | `ModifyProjectile` | `id`, `velocity`, `accel`, `velmul`, `removetime`, `projhits`, `projpriority`, `projscale` | Changes the player's live projectiles |
@@ -56,6 +56,7 @@ PT-BR: `RunState` executa os controllers de outro state sem trocar de state; `He
 | `ClsnOverlap(clsn1, id, clsn2)` | 1 when the player's box type overlaps the box type of the player with that `id` |
 | `NumPartner` | Teammates on the same side |
 | `IsAsserted(flag)` | 1 while the [AssertSpecial](AssertSpecial.md) flag is on (character or global flag) |
+| `TeamMode` | 0 single, 1 simul (Parallel), 2 turns (Sequence), 3 tag (reserved, no tag mode yet). Also accepts `TeamMode = Simul`, `TeamMode = turns`, `TeamMode = 1` (names are case-insensitive) |
 
 Map keys are case-insensitive. Each map holds at most 256 keys of at most 64 characters; writes that would exceed either limit are ignored.
 

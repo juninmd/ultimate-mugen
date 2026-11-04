@@ -61,7 +61,7 @@ pub enum Node {
 }
 
 const REDIRS: [&str; 10] = ["parent", "root", "helper", "target", "partner", "enemy", "enemynear", "playerid", "p2", "stateowner"];
-const STRCMP: &[&str] = &["command", "statetype", "movetype", "p2statetype", "p2movetype", "name", "p1name", "p2name", "p3name", "p4name", "p5name", "p6name", "p7name", "p8name", "authorname", "hitdefattr", "physics", "stagevar", "p2command", "hitbyattr", "prevstatetype", "prevmovetype", "displayname", "helpername", "selfcommand"];
+const STRCMP: &[&str] = &["command", "statetype", "movetype", "p2statetype", "p2movetype", "name", "p1name", "p2name", "p3name", "p4name", "p5name", "p6name", "p7name", "p8name", "authorname", "hitdefattr", "physics", "stagevar", "p2command", "hitbyattr", "prevstatetype", "prevmovetype", "displayname", "helpername", "selfcommand", "teammode"];
 const COMPONENT: [&str; 13] = ["vel", "pos", "p2dist", "p2bodydist", "p1dist", "rootdist", "parentdist", "screenpos", "camerapos", "hitvel", "camerazoom", "scale", "offset"];
 const RAWARG: [&str; 10] = ["const", "gethitvar", "hitdefvar", "movehitvar", "isasserted", "stagevar", "const240p", "const480p", "const720p", "constcoord"];
 const VARSPEC: &[&str] = &["explodvar", "projvar", "palfxvar", "clsnvar", "helpervar", "bgmvar", "spritevar", "animelemvar", "inputtime", "ikemenversion"];

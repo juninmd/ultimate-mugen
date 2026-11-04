@@ -133,6 +133,25 @@ The engine is 2D, so there is no Z axis: `Pos Z`, `Vel Z` and the other Z compon
 - `GroundLevelOffset value = n`: raises the floor under this character by `n` pixels (negative digs it), so it stands on the raised floor with normal landing, ground physics and ground/air hit detection. `Pos Y` is measured from the character's own floor (0 while standing on it), `ScreenPos Y` and the spawn height of projectiles, explods and helpers include the offset. The offset resets at round start.
 - `Depth` and `DepthBound` are accepted but ignored (Z is out of scope); the first use prints one warning (`depth is accepted but ignored: the engine has no Z axis`) and the character is not changed.
 
+## Screen, camera and stage triggers
+
+All distances and sizes are in the evaluating player's localcoord. "Zoom-relative" triggers change when the camera zooms (the 5v5 zoom-out, `Zoom`, `Camera`).
+
+| Trigger | Zoom-relative | Meaning |
+| --- | --- | --- |
+| `ScreenWidth`, `ScreenHeight` | yes | Size of the visible area (`GameWidth` / `GameHeight` keep returning the raw view size in game pixels) |
+| `TopBoundDist` | yes | Distance from the player's position up to the highest point the stage lets the camera show (`boundhigh`, raised by `dynamicboundhigh`) |
+| `TopBoundBodyDist` | yes | Same, minus the player's `size.height` (head to ceiling) |
+| `BotBoundDist`, `BotBoundBodyDist` | yes | Distance from the player's feet down to the lowest point the camera can show (`boundlow` plus the view height); identical because the origin is at the feet |
+| `StageFrontEdgeDist`, `StageBackEdgeDist` | yes | Distance to the stage's side limits (`boundleft` / `boundright` extended by half the view) in front of / behind the player, depending on `Facing` |
+| `NumStageBG` / `NumStageBG(id)` | no | Number of stage background layers, optionally only those with the given `id` |
+| `StageBGVar(id, name)` | no | Live value of the first layer with that `id`: `pos.x`, `pos.y` (start plus scroll and sine offset), `start.x/y`, `delta.x/y`, `velocity.x/y`, `tile.x/y`, `layerno`, `id`, `visible`, `enabled`, `sprite.group`, `sprite.index`; unknown id or name gives 0 |
+| `StageConst(name)` | no | Number from the stage's `[Constants]` group (0 when missing or on built-in stages) |
+| `Const1080p(n)` | no | `n` scaled from a 1920 pixel wide design to the player's localcoord |
+| `LocalCoord X` / `LocalCoord Y` | no | The player's localcoord width / height |
+| `Angle`, `Scale X/Y`, `Alpha X/Y`, `SprPriority`, `LayerNo` | no | The player's current draw state (`Alpha` is source / destination, 256 / 0 when opaque). `XAngle`, `YAngle` and `XShear` read 0: the 2D renderer has no tilt or shear |
+| `ZoomVar(name)`, `CameraZoom` | yes | See "Camera zoom" |
+
 ## Redirections
 
 `parent`, `root`, `helper(id)`, `target(id)`, `partner(n)` (the n-th other non-helper player on the same side, default 0; a helper redirects through its root; NaN when there is none), `enemy(n)`, `enemynear(n)`, `playerid(id)`, `p2`. Example: `trigger1 = enemynear, life < 200`.

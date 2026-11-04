@@ -112,6 +112,7 @@ pub struct MugenStage {
     pub lowest_cap: bool,
     pub dynamic_bound_high: bool,
     pub bound_high_delta: f32,
+    pub constants: HashMap<String, f32>,
 }
 
 fn bgctrl_kind(s: &Section) -> Option<BgCtrlKind> {
@@ -278,6 +279,7 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         lowest_cap: g("camera", "lowestcap", 0.0) != 0.0,
         dynamic_bound_high: g("camera", "dynamicboundhigh", 0.0) != 0.0,
         bound_high_delta: g("camera", "boundhighdelta", 0.0).max(0.0),
+        constants: find_section(&secs, "constants").map(|s| s.entries.iter().filter_map(|(k, v)| nums(Some(v.as_str()), &[f32::NAN]).first().copied().filter(|n| !n.is_nan()).map(|n| (k.clone(), n))).collect()).unwrap_or_default(),
         anims,
     })
 }

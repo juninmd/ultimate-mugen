@@ -16,6 +16,18 @@ fn palette_layers_stack_bg_then_all_then_own() {
 }
 
 #[test]
+fn hue_rotates_the_channels_and_combines() {
+    use ume_engine::palette::{PalFx, PalParams};
+    let p = PalParams { hue: 120.0, ..Default::default() };
+    assert_eq!(p.apply([200, 100, 0]), [0, 200, 100], "120° cycles the RGB channels");
+    let fx = PalFx { hue: 30.0, sin_hue: 10.0, sin_period: 4, elapsed: 1, ..Default::default() };
+    let q = fx.params();
+    assert!((q.hue - 40.0).abs() < 1e-3, "sinhue follows the sinadd period: {}", q.hue);
+    let combined = PalParams::default().combine(PalParams { hue: 120.0, ..Default::default() });
+    assert!((combined.hue - 120.0).abs() < 1e-6, "layers add their hue shift");
+}
+
+#[test]
 fn palette_changes_apply_on_the_same_tick() {
     let mut m = duel(mugen_char("a", ""), mugen_char("b", ""));
     assert!(m.fighter_pal(0).is_identity());

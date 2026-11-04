@@ -108,7 +108,7 @@ impl Renderer {
         let bind_groups = [bind_group(&nearest), bind_group(&linear)];
         let module = device.create_shader_module(wgpu::ShaderModuleDescriptor { label: Some("ume-sprite"), source: wgpu::ShaderSource::Wgsl(SHADER.into()) });
         let pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor { label: Some("ume-sprite-pl"), bind_group_layouts: &[Some(&layout)], immediate_size: 0 });
-        let attrs = wgpu::vertex_attr_array![0 => Float32x2, 1 => Float32x2, 2 => Uint32, 3 => Float32x4, 4 => Float32x4];
+        let attrs = wgpu::vertex_attr_array![0 => Float32x2, 1 => Float32x2, 2 => Uint32, 3 => Float32x4, 4 => Float32x4, 5 => Float32];
         let pipeline = |b: Blend| device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("ume-sprite-pipeline"),
             layout: Some(&pl),

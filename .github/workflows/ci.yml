@@ -25,6 +25,8 @@ jobs:
         with: { save-if: "${{ github.ref == 'refs/heads/master' }}" }
       - run: cargo test --workspace --release
         env: { CARGO_PROFILE_RELEASE_LTO: "off", CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16 }
+      - run: cargo run --release -p ume-engine --example mugen_check -- --strict crates/engine/tests/data/chars
+        env: { CARGO_PROFILE_RELEASE_LTO: "off", CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16 }
   wasm:
     runs-on: ubuntu-latest
     steps:

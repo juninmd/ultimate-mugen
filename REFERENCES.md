@@ -14,7 +14,9 @@
 - [BillsLasa/2D-Naruto-The-Last-Fighter---M.U.G.E.N.](https://github.com/BillsLasa/2D-Naruto-The-Last-Fighter---M.U.G.E.N.): Repositório de Naruto (The Last) em formato M.U.G.E.N por Bills Dios.
 - [Internet Archive - Naruto Battle Arena (2003)](https://archive.org/details/Naruto-Battle-Arena-w2003-06-14b): Preservação histórica dos lutadores clássicos de Naruto (Sasuke, Kakashi, Itachi, Gaara, Rock Lee, Minato, Sakura) e cenários da Vila da Folha.
 - [Internet Archive - Bleach MUGEN](https://archive.org/details/bleach-mugen): Coleção preservada de personagens clássicos de Bleach (Ichigo, Bankai Ichigo, Rukia, Renji, Aizen, Byakuya, Hitsugaya, Grimmjow, Ulquiorra).
-- [Internet Archive - Dragonball GT MUGEN Ssj4gogeta](https://archive.org/details/ssj4gogeta): Preservação de personagens de Dragon Ball GT (Goku SSJ GT, Vegeta GT, Piccolo) e cenários clássicos (Sala do Tempo, Deserto, Montanhas).
+- [Internet Archive - Dragonball GT MUGEN Ssj4gogeta](https://archive.org/details/ssj4gogeta): Preservação de personagens de Dragon Ball GT (Goku SSJ GT, Vegeta GT, Piccolo, Gogeta SSJ4, Goku SSJ4, Vegeta SSJ4) e cenários clássicos.
+- [Internet Archive - Warusaki3 MUGEN Characters](https://archive.org/details/warusaki3-mugen-characters): Conversões CPS3 de alta fidelidade de JoJo's Bizarre Adventure (Jotaro Kujo, Dio Brando).
+- [Internet Archive - Naruto Shippuden Ultimate Ninja Storm Generation MUGEN](https://archive.org/details/Naruto-Ultimate-Ninja-Storm-Generation-MUGEN): Lutadores de alta fidelidade do projeto Storm (Naruto Sennin, Sasuke Hawk, Might Guy, Pain, Akatsuki Madara, Kakashi Kid).
 
 ## Ultimate MUGEN Engine
 - [Ultimate MUGEN Engine](https://github.com/juninmd/ultimate-mugen): 2D fighting game engine in Rust with full MUGEN and UMF compatibility.

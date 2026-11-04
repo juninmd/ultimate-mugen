@@ -60,9 +60,13 @@ impl InputSource for Ai {
             return self.hold;
         }
         let near = if boss { 105.0 } else { 70.0 };
+        // chars com localcoord != 320 (KOF/alguns fullgames) desenham e se movem em escala maior:
+        // as distancias fixas do AI precisam acompanhar, senao ele nunca chega "perto" para atacar.
+        let scale = (f.def.local_w / 320.0).clamp(0.5, 2.0);
+        let near = near * scale;
         if self.cooldown > 0 { self.cooldown -= 1; return self.idle(dist, fwd, back); }
         if !f.ctrl { return 0; }
-        if !self.attack.is_empty() && (dist < near || (dist > 110.0 && self.r() < 0.08 + skill * if boss { 0.2 } else { 0.06 })) && self.r() < 0.2 + skill * 0.5 {
+        if !self.attack.is_empty() && (dist < near || (dist > 110.0 * scale && self.r() < 0.08 + skill * if boss { 0.2 } else { 0.06 })) && self.r() < 0.2 + skill * 0.5 {
             let pool: Vec<usize> = (0..self.attack.len()).filter(|&i| dist < near || self.attack[i].steps.len() > 1).collect();
             if !pool.is_empty() {
                 let pick = (self.r() * pool.len() as f32) as usize % pool.len();

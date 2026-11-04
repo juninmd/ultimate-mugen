@@ -2,6 +2,20 @@
 // touch detection and the MUGEN .zip import button (packs persisted in IndexedDB).
 (function () {
   const K = { U: 1, D: 2, L: 4, R: 8, a: 16, b: 32, c: 64, x: 128, y: 256, z: 512, s: 1024, d: 2048, w: 4096 };
+  const held = new Map();
+  function releaseAll() {
+    const c = document.getElementById('glcanvas');
+    if (!c) return;
+    for (const [code, e] of held) c.dispatchEvent(new KeyboardEvent('keyup', { code, key: e.key, keyCode: e.keyCode, bubbles: true }));
+    held.clear();
+    for (const t of ['mouseup', 'pointerup']) { try { c.dispatchEvent(new MouseEvent(t, { button: 0, bubbles: true })); } catch (e) {} }
+  }
+  window.addEventListener('keydown', (e) => { if (e.code) held.set(e.code, { key: e.key, keyCode: e.keyCode }); }, true);
+  window.addEventListener('keyup', (e) => { held.delete(e.code); }, true);
+  window.addEventListener('blur', releaseAll);
+  window.addEventListener('pagehide', releaseAll);
+  window.addEventListener('contextmenu', releaseAll);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
   function pads() { return navigator.getGamepads ? Array.from(navigator.getGamepads()).filter((p) => p && p.connected) : []; }
   function state(i) {
     const p = pads()[i]; if (!p) return 0;

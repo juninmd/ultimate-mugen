@@ -5,12 +5,12 @@ use crate::keybinds::KeyMap;
 use crate::gfx::*;
 use ume_engine::input::k;
 
-pub struct TouchPad { pub enabled: bool, pub bits: u32, pub macro_q: std::collections::VecDeque<u32>, stick_center: Option<Vec2>, pub stick_pos: Vec2, pub pressed: [bool; 7], hold: [u8; 7] }
+pub struct TouchPad { pub enabled: bool, pub bits: u32, pub macro_q: [std::collections::VecDeque<u32>; 2], touch_seen: bool, stick_center: Option<Vec2>, pub stick_pos: Vec2, pub pressed: [bool; 7], hold: [u8; 7] }
 
 pub const TOUCH_BUTTONS: [(&str, u32); 7] = [("SOCO", k::X), ("SOCO+", k::Y), ("ESPECIAL", k::D2), ("CHUTE", k::A), ("CHUTE+", k::B), ("SUPER", k::D2 | k::W), ("DESPERTAR", k::T)];
 
 impl TouchPad {
-    pub fn new(enabled: bool) -> Self { TouchPad { enabled, bits: 0, macro_q: Default::default(), stick_center: None, stick_pos: Vec2::ZERO, pressed: [false; 7], hold: [0; 7] } }
+    pub fn new(enabled: bool) -> Self { TouchPad { enabled, bits: 0, macro_q: Default::default(), touch_seen: false, stick_center: None, stick_pos: Vec2::ZERO, pressed: [false; 7], hold: [0; 7] } }
     pub fn layout() -> (Vec<Vec2>, f32, Vec2, f32) {
         let (w, h) = (screen_width(), screen_height());
         let r = (h * 0.09).clamp(24.0, 52.0);
@@ -23,12 +23,13 @@ impl TouchPad {
     }
     fn radius(i: usize, r: f32) -> f32 { if i == 6 { r * 0.7 } else { r } }
     pub fn update(&mut self) {
-        if !self.enabled { self.bits = 0; return; }
+        if !self.enabled { self.bits = 0; self.stick_center = None; self.stick_pos = Vec2::ZERO; self.pressed = [false; 7]; self.hold = [0; 7]; return; }
         let (btns, r, stick, sr) = Self::layout();
         let dpi = dpi_scale().max(0.01);
         let all: Vec<(Vec2, bool)> = touches().iter().map(|t| (t.position / dpi, matches!(t.phase, TouchPhase::Ended | TouchPhase::Cancelled))).collect();
+        if !all.is_empty() { self.touch_seen = true; }
         let mut points: Vec<(Vec2, bool)> = all;
-        if points.is_empty() && is_mouse_button_down(MouseButton::Left) { points.push((mouse_position().into(), false)); }
+        if points.is_empty() && !self.touch_seen && is_mouse_button_down(MouseButton::Left) { points.push((mouse_position().into(), false)); }
         let mut bits = 0;
         self.pressed = [false; 7];
         let mut stick_touch = None;
@@ -160,15 +161,14 @@ impl Controls {
         self.menu_pressed = m & !self.prev_menu;
         self.prev_menu = m;
     }
+    pub fn clear_macros(&mut self) { for q in self.touch.macro_q.iter_mut() { q.clear(); } }
     pub fn pressed(&self, a: u32) -> bool { self.menu_pressed & a != 0 }
     /// Fighting input bits for a human player slot (0/1). `duo` = two humans share the keyboard.
     pub fn player_bits(&mut self, slot: usize, duo: bool) -> u32 {
         let mut b = kb_bits(&self.keys, slot, !duo);
         if let Some(p) = self.pad_info.get(slot) { b |= p.bits; }
-        if slot == 0 {
-            b |= self.touch.bits;
-            if let Some(m) = self.touch.macro_q.pop_front() { b |= m; }
-        }
+        if slot == 0 { b |= self.touch.bits; }
+        if let Some(m) = self.touch.macro_q[slot.min(1)].pop_front() { b |= m; }
         b
     }
     pub fn rumble(&mut self, slot: usize, strong: f32, weak: f32, ms: u32) {

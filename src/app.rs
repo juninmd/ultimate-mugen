@@ -17,11 +17,11 @@ mod keyedit;
 pub(crate) use keyedit::KeyEdit;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul }
+pub enum Mode { Arcade, Cpu, Versus, Training, Watch, TeamSeq, TeamSimul, TeamTag }
 impl Mode {
-    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO" } }
+    fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO", Mode::TeamTag => "EQUIPE · TAG" } }
     /// Team size (1 for the regular modes).
-    pub fn is_team(self) -> bool { matches!(self, Mode::TeamSeq | Mode::TeamSimul) }
+    pub fn is_team(self) -> bool { matches!(self, Mode::TeamSeq | Mode::TeamSimul | Mode::TeamTag) }
 }
 
 pub enum Screen {
@@ -49,9 +49,11 @@ pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, 
 
 /// Team battle state: sequence (KOF-style turns, winner keeps its remaining life) or parallel (2v2 simultaneous).
 #[derive(Clone)]
-pub struct Team { pub members: [Vec<usize>; 2], pub idx: [usize; 2], pub life: [f32; 2], /** KOF XV: the team shares one super meter */ pub power: [f32; 2], pub ko: [Vec<bool>; 2], pub simul: bool }
+pub struct Team { pub members: [Vec<usize>; 2], pub idx: [usize; 2], pub life: [f32; 2], /** KOF XV: the team shares one super meter */ pub power: [f32; 2], pub ko: [Vec<bool>; 2], pub simul: bool, pub tag: bool }
 impl Team {
-    pub fn new(a: Vec<usize>, b: Vec<usize>, simul: bool) -> Self { let (la, lb) = (a.len(), b.len()); Team { members: [a, b], idx: [0, 0], life: [1.0, 1.0], power: [0.0, 0.0], ko: [vec![false; la], vec![false; lb]], simul } }
+    pub fn new(a: Vec<usize>, b: Vec<usize>, simul: bool) -> Self { let (la, lb) = (a.len(), b.len()); Team { members: [a, b], idx: [0, 0], life: [1.0, 1.0], power: [0.0, 0.0], ko: [vec![false; la], vec![false; lb]], simul, tag: false } }
+    pub fn tagged(a: Vec<usize>, b: Vec<usize>) -> Self { Team { tag: true, ..Team::new(a, b, false) } }
+    pub fn whole_squad(&self) -> bool { self.simul || self.tag }
 }
 const VIEW_ROWS: usize = 4;
 
@@ -100,7 +102,7 @@ pub struct App {
     last_disc: Option<std::mem::Discriminant<Screen>>,
 }
 
-const MENU: [(&str, &str); 11] = [
+const MENU: [(&str, &str); 12] = [
     ("Arcade", "Enfrente uma sequência de oponentes"),
     ("Versus CPU", "Você contra o computador"),
     ("2 Jogadores", "Teclado compartilhado ou dois controles"),
@@ -108,6 +110,7 @@ const MENU: [(&str, &str); 11] = [
     ("CPU vs CPU", "Assista a IA lutar"),
     ("Equipe · Sequência", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida"),
     ("Equipe · Paralelo", "5 contra 5 ao mesmo tempo (2 a 5) · TAB troca de lutador"),
+    ("Equipe · Tag", "Um em campo, o parceiro espera e entra na troca (2 a 3 por lado)"),
     ("Personagens MUGEN", "Como adicionar personagens e cenários"),
     ("Controles", "Teclado, Xbox, PlayStation, toque e vibração"),
     ("Vídeo", "Tela cheia, resolução até 4K e qualidade da arte"),
@@ -279,12 +282,12 @@ impl App {
         self.screen = Screen::Menu { cur: cur_v };
         if self.c.pressed(nav::BACK) { self.screen = Screen::Title; }
         if let Some(i) = chosen {
-            let mode = [Mode::Arcade, Mode::Cpu, Mode::Versus, Mode::Training, Mode::Watch, Mode::TeamSeq, Mode::TeamSimul];
+            let mode = [Mode::Arcade, Mode::Cpu, Mode::Versus, Mode::Training, Mode::Watch, Mode::TeamSeq, Mode::TeamSimul, Mode::TeamTag];
             match i {
-                0..=6 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); if self.mode == Mode::TeamSimul { self.team_n = 5; } else if self.mode == Mode::TeamSeq { self.team_n = 3; } self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
-                7 => self.go(Screen::Mugen),
-                8 => self.go(Screen::Controls),
-                9 => self.go(Screen::Video { cur: 0 }),
+                0..=7 => { self.mode = mode[i]; self.team = None; self.team_pick.clear(); if self.mode == Mode::TeamSimul { self.team_n = 5; } else if self.mode == Mode::TeamSeq { self.team_n = 3; } else if self.mode == Mode::TeamTag { self.team_n = 2; } self.go(Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] }); }
+                8 => self.go(Screen::Mugen),
+                9 => self.go(Screen::Controls),
+                10 => self.go(Screen::Video { cur: 0 }),
                 _ => self.quit = true,
             }
         }
@@ -373,7 +376,7 @@ impl App {
 
         self.ui.background();
         if self.mode.is_team() {
-            if is_key_pressed(KeyCode::E) { self.team_n = (self.team_n + 1).min(5); self.audio.sfx("select"); }
+            if is_key_pressed(KeyCode::E) { self.team_n = (self.team_n + 1).min(if self.mode == Mode::TeamTag { 3 } else { 5 }); self.audio.sfx("select"); }
             if is_key_pressed(KeyCode::Q) { self.team_n = (self.team_n - 1).max(2).max(self.team_pick.len() + 1); self.audio.sfx("select"); }
         }
         let title = if self.mode.is_team() { format!("{} {}v{}", self.mode.label(), self.team_n, self.team_n) } else { self.mode.label().to_string() };
@@ -503,7 +506,7 @@ impl App {
                 pool.sort_by_key(|&i| self.reg.chars[i].mugen as u8);
                 let mut foes: Vec<usize> = pool.into_iter().take(n).collect();
                 while foes.len() < n { foes.push(self.team_pick[foes.len() % self.team_pick.len()]); }
-                let t = Team::new(self.team_pick.clone(), foes, self.mode == Mode::TeamSimul);
+                let t = if self.mode == Mode::TeamTag { Team::tagged(self.team_pick.clone(), foes) } else { Team::new(self.team_pick.clone(), foes, self.mode == Mode::TeamSimul) };
                 self.sel = (t.members[0][0], t.members[1][0], self.sel.2);
                 self.team = Some(t);
                 self.screen = Screen::Stages { cur: 1 };
@@ -601,7 +604,7 @@ impl App {
     fn load_plan(&self) -> Vec<(usize, usize, usize)> {
         let mut v = vec![];
         match &self.team {
-            Some(t) if t.simul => { for k in 0..t.members[0].len().max(t.members[1].len()) { for side in 0..2 { if let Some(&r) = t.members[side].get(k) { v.push((side, k, r)); } } } }
+            Some(t) if t.whole_squad() => { for k in 0..t.members[0].len().max(t.members[1].len()) { for side in 0..2 { if let Some(&r) = t.members[side].get(k) { v.push((side, k, r)); } } } }
             _ => { v.push((0, 0, self.sel.0)); v.push((1, 0, self.sel.1)); }
         }
         v
@@ -660,13 +663,13 @@ impl App {
             let replay = self.replaying.clone();
             for k in 0..teams[0].len().max(teams[1].len()) { for side in 0..2 { if teams[side].get(k).is_some() { pilots.push(if k == 0 { leader(side) } else { Pilot::Cpu(Ai::new((lvl - 1).max(1), 31 + (side * 7 + k) as u32)) }); } } }
             if let Some(r) = &replay { for (slot, p) in pilots.iter_mut().enumerate() { *p = Pilot::Replay(r.rec.iter().map(|b| b.get(slot).copied().unwrap_or(0)).collect(), 0); } }
-            let (simul, seq) = (self.team.as_ref().is_some_and(|t| t.simul), self.team.as_ref().is_some_and(|t| !t.simul));
-            let life = self.team.as_ref().filter(|t| !t.simul).map(|t| t.life).unwrap_or([1.0, 1.0]);
+            let (simul, tag, seq) = (self.team.as_ref().is_some_and(|t| t.simul), self.team.as_ref().is_some_and(|t| t.tag), self.team.as_ref().is_some_and(|t| !t.whole_squad()));
+            let life = self.team.as_ref().filter(|t| !t.whole_squad()).map(|t| t.life).unwrap_or([1.0, 1.0]);
             let info = self.team.as_ref().map(|t| crate::session::TeamInfo {
                 names: [0, 1].map(|sd| t.members[sd].iter().map(|&r| (self.reg.chars[r].name.split_whitespace().next().unwrap_or("").to_uppercase(), self.reg.chars[r].color)).collect()),
-                idx: t.idx, ko: t.ko.clone(), simul: t.simul,
+                idx: t.idx, ko: t.ko.clone(), simul: t.whole_squad(),
             });
-            let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, seq, life);
+            let mut sess = Session::new(teams, stage, pilots, self.mode == Mode::Training, self.mode == Mode::Versus, simul, tag, seq, life);
             if let Some(t) = &info { sess.m.team_lead = [0, 1].map(|sd| t.names[sd].first().map(|n| n.0.clone()).unwrap_or_default()); }
             sess.team = info;
             sess.is_replay = replay.is_some();
@@ -721,7 +724,7 @@ impl App {
         let vs_s = 170.0 * (if t < 0.6 { 3.0 - 2.0 * (t / 0.6) } else { 1.0 });
         glow(self.ui.x(640.0), self.ui.y(330.0), 220.0 * self.ui.s, Color::new(1.0, 0.5, 0.1, 0.7));
         self.ui.text_bold("VS", 640.0, 330.0 + vs_s * 0.35, vs_s, hex("#ffcc33"), hex("#5a0a10"), Align::Center);
-        let sub = if let Some(t) = &self.team { let (ia, ib) = (t.idx[0] + 1, t.idx[1] + 1); if t.simul { format!("EQUIPE PARALELO · {} + {} vs {} + {}", self.reg.chars[t.members[0][0]].name, self.reg.chars[t.members[0][1.min(t.members[0].len() - 1)]].name, self.reg.chars[t.members[1][0]].name, self.reg.chars[t.members[1][1.min(t.members[1].len() - 1)]].name) } else { format!("EQUIPE SEQUÊNCIA · {}º vs {}º lutador", ia, ib) } } else if let Some((l, i)) = &self.arcade { format!("ARCADE · LUTA {}/{}", i + 1, l.len()) } else { self.reg.stages[self.sel.2].name.clone() };
+        let sub = if let Some(t) = &self.team { let (ia, ib) = (t.idx[0] + 1, t.idx[1] + 1); if t.tag { format!("EQUIPE TAG · {} vs {}", t.members[0].iter().map(|&r| self.reg.chars[r].name.split_whitespace().next().unwrap_or("")).collect::<Vec<_>>().join(" + "), t.members[1].iter().map(|&r| self.reg.chars[r].name.split_whitespace().next().unwrap_or("")).collect::<Vec<_>>().join(" + ")) } else if t.simul { format!("EQUIPE PARALELO · {} + {} vs {} + {}", self.reg.chars[t.members[0][0]].name, self.reg.chars[t.members[0][1.min(t.members[0].len() - 1)]].name, self.reg.chars[t.members[1][0]].name, self.reg.chars[t.members[1][1.min(t.members[1].len() - 1)]].name) } else { format!("EQUIPE SEQUÊNCIA · {}º vs {}º lutador", ia, ib) } } else if let Some((l, i)) = &self.arcade { format!("ARCADE · LUTA {}/{}", i + 1, l.len()) } else { self.reg.stages[self.sel.2].name.clone() };
         self.ui.text(&sub, 640.0, 700.0, 20.0, hex("#a49cc0"), Align::Center, true);
         if !ready {
             self.ui.progress_bar(440.0, 28.0, 400.0, step_now as f32 / total as f32, &self.load_label(step_now));
@@ -774,7 +777,7 @@ impl App {
             3 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.fx = ((self.settings.fx as i32 + d).rem_euclid(FX_LEVELS.len() as i32)) as usize; changed = true; }
             4 if ok || dir != 0 => { let d = if dir == 0 { 1 } else { dir }; self.settings.impact = ((self.settings.impact as i32 + d).rem_euclid(IMPACT.len() as i32)) as usize; changed = true; }
             5 if ok || dir != 0 => { self.settings.fps = !self.settings.fps; changed = true; }
-            6 if ok => { self.screen = Screen::Menu { cur: 9 }; return; }
+            6 if ok => { self.screen = Screen::Menu { cur: 10 }; return; }
             _ => {}
         }
         if changed { self.audio.sfx("select"); self.settings.apply_window(); self.settings.save(); self.apply_quality(); }
@@ -797,7 +800,7 @@ impl App {
             let f = id == cur;
             let (x, w, h) = (160.0, 960.0, 62.0);
             if self.hover_rect(x, y, w, h) && mouse_delta_position().length() > 0.0 { cur = id; }
-            if self.clicked_rect(x, y, w, h) { cur = id; self.screen = Screen::Video { cur }; if id == 6 { self.screen = Screen::Menu { cur: 9 }; return; } }
+            if self.clicked_rect(x, y, w, h) { cur = id; self.screen = Screen::Video { cur }; if id == 6 { self.screen = Screen::Menu { cur: 10 }; return; } }
             self.ui.rect(x, y, w, h, if f { hex("#ff4d6d") } else { Color::new(1.0, 1.0, 1.0, 0.06) });
             self.ui.text(t, x + 24.0, y + 30.0, 26.0, WHITE, Align::Left, true);
             self.ui.text(d, x + 24.0, y + 52.0, 16.0, if f { WHITE } else { hex("#a49cc0") }, Align::Left, false);
@@ -806,7 +809,7 @@ impl App {
         }
         let (pw, ph) = ((screen_width() * dpi_scale()) as i32, Settings::physical_h() as i32);
         self.ui.text(&format!("Tela atual: {pw}×{ph} · arte rasterizada a {:.1}× · {} lutadores · {} cenários", ume_engine::native::rig::art_res(), self.reg.chars.len(), self.reg.stages.len()), 160.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
-        if self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 9 }; return; }
+        if self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 10 }; return; }
         self.screen = Screen::Video { cur };
     }
 
@@ -836,7 +839,7 @@ impl App {
         if s.paused { self.pause_menu(accept_back).await; return; }
         if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
-                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.simul) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone() }); } }
+                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone() }); } }
                 self.screen = Screen::Results { winner: w, cur: 0 };
             } } }
     }
@@ -845,7 +848,7 @@ impl App {
     /// Returns true when another bout was queued (false → the team match is over / not a sequence).
     fn team_next(&mut self, w: usize) -> bool {
         let Some(t) = self.team.as_mut() else { return false };
-        if t.simul { return false; }
+        if t.whole_squad() { return false; }
         let Some(s) = self.session.as_ref() else { return false };
         let ratio = s.m.roots().find(|f| f.side == w).map(|f| (f.life / f.life_max).clamp(0.0, 1.0)).unwrap_or(1.0);
         // shared team meter carries over to the next fighter
@@ -863,7 +866,7 @@ impl App {
         true
     }
     fn reset_team(&mut self) {
-        if let Some(t) = self.team.as_mut() { *t = Team::new(t.members[0].clone(), t.members[1].clone(), t.simul); self.sel = (t.members[0][0], t.members[1][0], self.sel.2); }
+        if let Some(t) = self.team.as_mut() { *t = Team { tag: t.tag, ..Team::new(t.members[0].clone(), t.members[1].clone(), t.simul) }; self.sel = (t.members[0][0], t.members[1][0], self.sel.2); }
     }
 
     async fn pause_menu(&mut self, accept_back: bool) {
@@ -1059,7 +1062,7 @@ impl App {
             self.ui.text("Personalizar teclado (Tab)", 480.0, 649.0, 22.0, WHITE, Align::Center, true);
             if is_key_pressed(KeyCode::Tab) || self.clicked_rect(300.0, 610.0, 360.0, 60.0) { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); }
         }
-        if back || self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 8 }; }
+        if back || self.c.pressed(nav::BACK) { self.screen = Screen::Menu { cur: 9 }; }
     }
 
     fn mugen_screen(&mut self) {
@@ -1082,7 +1085,7 @@ impl App {
         let found: Vec<String> = self.reg.chars.iter().filter(|c| c.mugen).map(|c| format!("{} ({})", c.name, c.author)).collect();
         self.ui.text(&format!("Encontrados: {} personagens MUGEN, {} cenários MUGEN", found.len(), self.reg.stages.iter().filter(|s| s.mugen).count()), 40.0, 520.0, 22.0, hex("#ffcc33"), Align::Left, true);
         for (i, f) in found.iter().enumerate().take(4) { self.ui.text(f, 60.0, 556.0 + i as f32 * 26.0, 19.0, WHITE, Align::Left, false); }
-        if self.c.pressed(nav::BACK | nav::OK) { self.screen = Screen::Menu { cur: 7 }; }
+        if self.c.pressed(nav::BACK | nav::OK) { self.screen = Screen::Menu { cur: 8 }; }
     }
 
     // used by the screenshot tour

@@ -47,15 +47,17 @@ fn teammate(m: &Match, i: usize) -> Option<usize> {
 
 fn tag(m: &mut Match, i: usize, sc: &Controller, standby: bool) {
     let n = |m: &Match, k: &str, d: f64| m.num(i, sc, k, d, 0);
+    let tagged = m.team_tag;
+    if tagged && n(m, "self", 1.0) != 0.0 { m.tag_by_controller(i, standby); }
     if n(m, "self", 1.0) != 0.0 {
-        m.fighters[i].ikemen.standby = standby;
+        if !tagged { m.fighters[i].ikemen.standby = standby; }
         if sc.has("ctrl", 0) { m.fighters[i].ctrl = n(m, "ctrl", 0.0) != 0.0; }
         if sc.has("stateno", 0) { let (s, d) = (n(m, "stateno", 0.0) as i32, m.fighters[i].def.clone()); m.change_state(i, s, d); }
     }
     if sc.has("partnerstateno", 0) {
         if let Some(p) = teammate(m, i) {
             let s = n(m, "partnerstateno", 0.0) as i32;
-            m.fighters[p].ikemen.standby = !standby;
+            if !tagged { m.fighters[p].ikemen.standby = !standby; }
             if sc.has("partnerctrl", 0) { m.fighters[p].ctrl = n(m, "partnerctrl", 0.0) != 0.0; }
             let d = m.fighters[p].def.clone();
             m.change_state(p, s, d);

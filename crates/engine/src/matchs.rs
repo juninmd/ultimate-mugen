@@ -71,6 +71,8 @@ pub enum Event {
     SoundPan { owner: u32, channel: i32, pan: f32 },
     SoundVolume { owner: u32, channel: i32, volume: f32 },
     Rumble { fighter: u32, strong: f32, weak: f32, ms: u32 },
+    /// a tag-team swap: `fighter` (root id) just stepped in for `side`
+    Tag { side: usize, fighter: u32 },
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
 }
 
@@ -110,6 +112,11 @@ pub struct Match {
     pub round_state: i32, pub round_no: i32, pub round_time: i32,
     /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
     pub team_simul: bool,
+    pub team_tag: bool,
+    pub tag_cooldown: [i32; 2],
+    pub tag_cooldown_max: i32,
+    pub tag_cancel_window: i32,
+    pub tag_ko_timer: [i32; 2],
     pub team_lead: [String; 2],
     /// how many times an attacker was pushed back because the defender was cornered (diagnostics / tests)
     pub corner_pushes: u32,
@@ -137,7 +144,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, team_tag: false, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, timer: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
         }
@@ -178,7 +185,7 @@ impl Match {
         let mut buf = [0usize; 16];
         let mut len = 0;
         for (j, f) in self.fighters.iter().enumerate() {
-            if f.is_helper || f.side == me.side || f.destroyed { continue; }
+            if f.is_helper || f.side == me.side || f.destroyed || f.ikemen.standby { continue; }
             if len == buf.len() { break; }
             buf[len] = j;
             len += 1;
@@ -484,6 +491,7 @@ impl Match {
             self.change_state(i, 5900, d);
             self.fighters[i].ctrl = false;
         }
+        if self.team_tag { self.reset_tag_round(); }
         // round-count-aware announcer (Guilty Gear: "Final" for the deciding duel)
         let decider = self.rounds_to_win > 1 && self.wins[0] == self.rounds_to_win - 1 && self.wins[1] == self.rounds_to_win - 1;
         self.announce = Some(Announce { text: if decider { "FINAL ROUND".into() } else { format!("ROUND {}", self.round_no) }, time: 70, total: 70 });
@@ -524,7 +532,7 @@ impl Match {
                 }
                 let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| self.fighters[i].life <= 0.0).collect();
                 let team_life = |m: &Match, s: usize| -> (f32, f32) { roots.iter().filter(|&&i| m.fighters[i].side == s).fold((0.0, 0.0), |a, &i| (a.0 + m.fighters[i].life.max(0.0), a.1 + m.fighters[i].life_max)) };
-                if self.team_simul {
+                if self.team_simul || self.team_tag {
                     // a fallen teammate stays down; the round ends only when a whole team is KO'd
                     for &i in &dead { self.fighters[i].alive = false; }
                     let out = |m: &Match, s: usize| roots.iter().filter(|&&i| m.fighters[i].side == s).all(|&i| m.fighters[i].life <= 0.0);
@@ -550,7 +558,7 @@ impl Match {
                 }
             }
             3 => {
-                let settled = self.roots().all(|f| if f.alive { f.move_type != 'H' && (f.ctrl || f.state_no == 0) } else { f.state_no == 5150 || f.state_no == 5110 });
+                let settled = self.roots().all(|f| f.ikemen.standby || if f.alive { f.move_type != 'H' && (f.ctrl || f.state_no == 0) } else { f.state_no == 5150 || f.state_no == 5110 });
                 if ((settled && self.round_time > 90) || self.round_time > 300) && (self.global_asserts & 4 == 0 || self.round_time > 900) {
                     self.round_state = 4; self.round_time = 0;
                     let decides = self.winner_side >= 0 && self.wins[self.winner_side as usize] + 1 >= self.rounds_to_win;
@@ -602,9 +610,16 @@ impl Match {
         for p in [&mut self.all_palfx, &mut self.bg_palfx] { if p.as_ref().is_some_and(|fx| fx.expired()) { *p = None; } }
         let mut k = 0;
         let mut awaken: Vec<usize> = vec![];
+        let mut tag_requests: Vec<usize> = vec![];
+        let tagged = self.team_tag;
         for (fi, f) in self.fighters.iter_mut().enumerate() {
             if f.is_helper { continue; }
-            let bits = inputs.get(k).copied().unwrap_or(0);
+            let mut bits = inputs.get(k).copied().unwrap_or(0);
+            if tagged {
+                if bits & crate::input::k::TAG != 0 { tag_requests.push(fi); }
+                bits &= !crate::input::k::TAG;
+                if f.ikemen.standby { bits = 0; }
+            }
             if bits & crate::input::k::T != 0 { awaken.push(fi); }
             k += 1;
             f.history.push(bits, f.facing as i32);
@@ -612,6 +627,7 @@ impl Match {
             f.cmd.update(&f.history, &def.commands);
         }
         for fi in awaken { self.try_transform(fi); }
+        if tagged { self.tag_step(&tag_requests); }
         let paused_by = self.pause.as_ref().map(|p| (p.by, p.move_time, p.is_super));
         let frozen_by_pause = |f: &Fighter| match paused_by {
             None => false,
@@ -785,7 +801,7 @@ impl Match {
 
     fn update_camera(&mut self) {
         let (mut minx, mut maxx, mut highest, mut any) = (f32::MAX, f32::MIN, f32::MAX, false);
-        for f in self.roots().filter(|f| !f.destroyed) { minx = minx.min(f.pos.x); maxx = maxx.max(f.pos.x); highest = highest.min(f.pos.y); any = true; }
+        for f in self.roots().filter(|f| !f.destroyed && !f.ikemen.standby) { minx = minx.min(f.pos.x); maxx = maxx.max(f.pos.x); highest = highest.min(f.pos.y); any = true; }
         if !any { return; }
         if self.zoom_max > 1.0 {
             let (mut lo, mut hi, mut live) = (f32::MAX, f32::MIN, false);
@@ -900,7 +916,7 @@ impl Match {
         let mut pending = vec![];
         for a in 0..self.fighters.len() {
             let fa = &self.fighters[a];
-            if fa.destroyed || !fa.hitdef_active || (fa.move_type != 'A' && !fa.is_helper) { continue; }
+            if fa.destroyed || fa.ikemen.standby || !fa.hitdef_active || (fa.move_type != 'A' && !fa.is_helper) { continue; }
             let Some(hd) = fa.hitdef.as_ref() else { continue };
             let c1 = fa.boxes(1);
             if c1.is_empty() { continue; }

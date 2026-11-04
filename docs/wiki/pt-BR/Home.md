@@ -9,6 +9,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Instalação e execução](Instalacao.md) | Jogadores | Baixar, compilar, rodar no PC, navegador e celular |
 | [Configuração e controles](Configuracao.md) | Jogadores | Arquivo `.cfg`, flags de linha de comando, variáveis de ambiente, controles |
 | [Adicionar conteúdo M.U.G.E.N](Conteudo-MUGEN.md) | Jogadores | Instalar personagens e cenários `.def`/`.zip` e validar |
+| [Modos de jogo](Modos-de-Jogo.md) | Jogadores | Arcade, equipes (Sequência, Paralelo, Tag) e suas regras |
 | [Criar personagem UMF](Personagem-UMF.md) | Criadores | Lutador completo em um único JSON |
 | [Arte do esqueleto (rig)](Rig.md) | Criadores | Estilo, poses, articulações e paletas |
 | [Scripts CNS](Scripts-CNS.md) | Criadores | Estados, controllers, triggers e comandos suportados |

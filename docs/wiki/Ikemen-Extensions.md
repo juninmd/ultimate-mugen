@@ -15,7 +15,7 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `GuardBreakSet` | `value` | Guard break flag |
 | `Text` | `text`, `params`, `pos`, `velocity`, `scale`, `color`, `align`, `removetime`, `id` | Draws text on the fight screen; `%d`, `%f` and `\n` in `text` take values from `params` |
 | `RemoveText` | `id` (omit for all) | Removes the player's texts |
-| `TagOut` / `TagIn` | `self`, `stateno`, `ctrl`, `partnerstateno`, `partnerctrl` | Moves the player to or from standby (hidden, cannot be hit or pushed); `partnerstateno` swaps with the first teammate |
+| `TagOut` / `TagIn` | `self`, `stateno`, `ctrl`, `partnerstateno`, `partnerctrl` | Moves the player to or from standby (hidden, cannot be hit or pushed); `partnerstateno` swaps with the first teammate. In [Tag mode](Game-Modes.md#tag-team) they perform a real swap (cooldown ignored): `TagOut` brings the next living teammate in, `TagIn` on a standby fighter brings it in |
 | `ModifyProjectile` | `id`, `velocity`, `accel`, `velmul`, `removetime`, `projhits`, `projpriority`, `projscale` | Changes the player's live projectiles |
 | `ModifySnd` | `channel`, `pan`, `abspan`, `volumescale` | Changes sounds already playing on a channel |
 

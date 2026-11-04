@@ -9,6 +9,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Installation](Installation.md) | Players | Download, build, run on desktop, browser and phone |
 | [Configuration and controls](Configuration.md) | Players | `.cfg` file, command-line flags, environment variables, controls |
 | [Adding M.U.G.E.N content](MUGEN-Content.md) | Players | Install `.def`/`.zip` characters and stages, and validate them |
+| [Game modes](Game-Modes.md) | Players | Arcade, teams (Sequence, Parallel, Tag) and their rules |
 | [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
 | [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |

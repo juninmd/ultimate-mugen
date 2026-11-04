@@ -63,3 +63,11 @@ The native build keeps full images embedded, decoding each stage separately on f
 `scripts/build-web.sh` copies the external PNGs and `assets.js` into `web/dist/`. Deploy the entire directory, including `assets/stages/`. Offline play requires the selected stage to have been downloaded previously. When replacing stage art, regenerate its thumbnail under `assets/stages/thumbs/` as a 240×135 RGB PNG with `python scripts/generate-stage-thumbnails.py` (Pillow required).
 
 Run `node scripts/web-smoke.js web/dist` after the web build (requires Playwright and Chromium). It rejects full stage downloads before confirmation and requires exactly one during the first match. This checks transfer scope, not a latency percentile or FPS improvement.
+
+## Virtual filesystem lookup
+
+`cargo run --locked --release -p ume-formats --example vfs_bench` measures path normalization and basename resolution with 50,000 unrelated files. It prints five samples per scenario. This synthetic benchmark excludes disk I/O, decoding and rendering.
+
+The folder fallback uses the ordered VFS map's range for the character directory, avoiding scans over unrelated characters. Directory boundaries matter: `chars/kfm-extra` must not override a file under `chars/kfm`. Global basename lookup remains the last compatibility fallback. ASCII path normalization creates one output string; non-ASCII paths retain Unicode lowercase behavior, including contextual Greek sigma.
+
+On the cloud development machine, median normalization time decreased from 60.8 to 48.0 ns per operation, and median folder fallback time from 278.2 to 1.0 µs. These are microbenchmark results, not FPS or whole-game loading measurements. Missing files that require the global fallback can still scan the entire map.

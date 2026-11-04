@@ -63,3 +63,11 @@ A versão nativa mantém as imagens completas embutidas, decodificando cada cen�
 `scripts/build-web.sh` copia os PNGs externos e `assets.js` para `web/dist/`. Publique o diretório inteiro, incluindo `assets/stages/`. Jogar offline exige que o cenário escolhido tenha sido baixado anteriormente. Ao substituir a arte de um cenário, regenere sua miniatura em `assets/stages/thumbs/` como PNG RGB de 240×135 com `python scripts/generate-stage-thumbnails.py` (exige Pillow).
 
 Execute `node scripts/web-smoke.js web/dist` após compilar a versão web (exige Playwright e Chromium). O teste rejeita downloads de cenários completos antes da confirmação e exige exatamente um na primeira luta. Isso verifica o escopo da transferência, não um percentil de latência nem um ganho de FPS.
+
+## Busca no sistema de arquivos virtual
+
+`cargo run --locked --release -p ume-formats --example vfs_bench` mede normalização de caminhos e busca por nome com 50.000 arquivos não relacionados. Exibe cinco amostras por cenário. O benchmark sintético exclui acesso a disco, decodificação e renderização.
+
+A busca alternativa na pasta usa o intervalo do mapa ordenado da VFS correspondente ao diretório do personagem, evitando percorrer outros personagens. Os limites de diretório importam: `chars/kfm-extra` não pode substituir um arquivo de `chars/kfm`. A busca global por nome continua como última alternativa de compatibilidade. A normalização ASCII cria uma única string de saída; caminhos não ASCII mantêm as regras Unicode de minúsculas, inclusive sigma grego contextual.
+
+Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,8 para 48,0 ns por operação, e a da busca na pasta de 278,2 para 1,0 µs. São resultados de microbenchmark, não medidas de FPS ou de carregamento completo do jogo. Arquivos ausentes que exigem busca global ainda podem percorrer todo o mapa.

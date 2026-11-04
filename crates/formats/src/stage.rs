@@ -173,14 +173,11 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         let buf = resolve(vfs, base_dir, spr).or_else(|| resolve(vfs, "stages", spr));
         if let Some(buf) = buf {
             let sff = decode_sff(buf).map_err(|e| format!("stage {def_path}: {e}"))?;
-            for s in &sff.sprites {
-                sprites.entry((s.group, s.index)).or_insert_with(|| StageImage {
-                    w: s.width,
-                    h: s.height,
-                    axis_x: s.axis_x,
-                    axis_y: s.axis_y,
-                    rgba: sprite_to_rgba(s, None),
-                });
+            let mut seen = std::collections::HashSet::new();
+            let unique: Vec<_> = sff.sprites.iter().filter(|s| seen.insert((s.group, s.index))).collect();
+            let rgba = crate::par::map(&unique, |s| sprite_to_rgba(s, None));
+            for (s, rgba) in unique.into_iter().zip(rgba) {
+                sprites.insert((s.group, s.index), StageImage { w: s.width, h: s.height, axis_x: s.axis_x, axis_y: s.axis_y, rgba });
             }
         }
     }

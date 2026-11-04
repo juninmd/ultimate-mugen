@@ -14,6 +14,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Scripts CNS](Scripts-CNS.md) | Criadores | Estados, controllers, triggers e comandos suportados |
 | [Criar cenários](Cenarios.md) | Criadores | Cenário M.U.G.E.N `.def` e cenário nativo |
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
+| [Desempenho](Desempenho.md) | Desenvolvedores | Carga paralela, ritmo de quadros, benchmarks |
 | [Solução de problemas](Problemas.md) | Todos | Erros comuns e ferramentas de diagnóstico |
 
 ## Formatos aceitos

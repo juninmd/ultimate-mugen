@@ -14,6 +14,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |
 | [Creating stages](Stages.md) | Creators | M.U.G.E.N `.def` stages and native stages |
 | [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
+| [Performance](Performance.md) | Developers | Parallel loading, frame pacing, benchmarks |
 | [Troubleshooting](Troubleshooting.md) | Everyone | Common errors and diagnostic tools |
 
 ## Accepted formats

@@ -18,6 +18,7 @@ pub mod act;
 pub mod air;
 pub mod fnt;
 pub mod ini;
+pub mod par;
 pub mod pcx;
 pub mod png;
 pub mod sff;

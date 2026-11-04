@@ -70,3 +70,8 @@ Put the decoder in `crates/formats/src/<format>.rs`, export it in `lib.rs` and t
 | Network | `ggrs` (rollback) + `matchbox` (WebRTC) |
 
 The migration is described in [`docs/ROADMAP.md`](../ROADMAP.md).
+
+## HUD glass and impact effects
+
+- The in-fight HUD panels are "glass": `ume_shell::quad::glass_panel` registers up to 16 rounded rectangles per frame, and the post-processing composite pass replaces those pixels with a blurred copy of the scene (quarter resolution, separable blur, no per-frame allocations), plus tint, drop shadow and a rim highlight. With post-processing off (`fx` level 0) the HUD falls back to translucent polygons.
+- Impact feedback is deliberately small: guard and counter share the same small label and ring, super arts only get a light ring burst and a compact label, and the number of simultaneous floats, rings, lights and particles is capped in `src/vfx.rs`.

@@ -70,3 +70,8 @@ Coloque o decoder em `crates/formats/src/<formato>.rs`, exporte em `lib.rs` e te
 | Rede | `ggrs` (rollback) + `matchbox` (WebRTC) |
 
 A migração está descrita em [`docs/ROADMAP.pt-BR.md`](../../ROADMAP.pt-BR.md).
+
+## HUD glass e efeitos de impacto
+
+- Os painéis do HUD em luta são "glass": `ume_shell::quad::glass_panel` registra até 16 retângulos arredondados por quadro, e o passe de composição do pós-processamento troca esses pixels por uma cópia desfocada da cena (um quarto da resolução, blur separável, sem alocações por quadro), com tinta, sombra e brilho na borda. Com o pós-processamento desligado (nível `fx` 0) o HUD usa polígonos translúcidos.
+- O feedback de impacto é discreto: guard e counter usam o mesmo rótulo pequeno com anel, o super arts só tem uma rajada leve de anéis e um rótulo compacto, e a quantidade simultânea de textos, anéis, luzes e partículas tem limite em `src/vfx.rs`.

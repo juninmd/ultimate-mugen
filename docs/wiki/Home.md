@@ -19,6 +19,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Creating stages](Stages.md) | Creators | M.U.G.E.N `.def` stages and native stages |
 | [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
 | [Performance](Performance.md) | Developers | Parallel loading, frame pacing, benchmarks |
+| [Replays](Netplay-and-Replays.md#saved-replays-in-the-game-replays) | Players | Saved fights, replay browser, playback speed |
 | [Research: fighting games](Research-Fighting-Games.md) | Developers | Survey of other fighters and prioritized improvement list |
 | [Stress and resilience](Stress-and-Resilience.md) | Developers | Fuzzing, spawner caps, hot path numbers |
 | [Troubleshooting](Troubleshooting.md) | Everyone | Common errors and diagnostic tools |

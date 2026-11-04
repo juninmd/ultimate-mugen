@@ -266,6 +266,17 @@ impl Match {
         for (i, f) in self.fighters.iter().enumerate() { if !f.is_helper && n < buf.len() { buf[n] = i; n += 1; } }
         (buf, n)
     }
+    /// Deterministic hash of the whole simulation state, used by replay round-trip tests and desync reports.
+    pub fn checksum(&self) -> u64 {
+        fn mix(h: &mut u64, v: u64) { *h ^= v; *h = h.wrapping_mul(0x100_0000_01b3); }
+        let mut h: u64 = 0xcbf2_9ce4_8422_2325;
+        for v in [self.game_time as u64, self.timer as u64, self.round_no as u64, self.round_state as u64, self.winner_side as u64, self.wins[0] as u64, self.wins[1] as u64, self.next_id as u64] { mix(&mut h, v); }
+        for f in &self.fighters {
+            for v in [f.id as u64, f.life.to_bits() as u64, f.life_max.to_bits() as u64, f.pos.x.to_bits() as u64, f.pos.y.to_bits() as u64, f.vel.x.to_bits() as u64, f.vel.y.to_bits() as u64, f.power.to_bits() as u64, f.state_no as u64, f.state_time as u64, f.facing.to_bits() as u64, f.ctrl as u64, f.move_type as u64, f.state_type as u64, f.combo_count as u64, f.combo_damage.to_bits() as u64] { mix(&mut h, v); }
+        }
+        h
+    }
+
     pub fn root_indices(&self) -> Vec<usize> { (0..self.fighters.len()).filter(|&i| !self.fighters[i].is_helper).collect() }
     pub fn idx(&self, id: u32) -> Option<usize> { self.fighters.iter().position(|f| f.id == id && !f.destroyed) }
     pub fn enemy(&self, i: usize, n: usize) -> Option<usize> {

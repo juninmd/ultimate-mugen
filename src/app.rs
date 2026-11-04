@@ -16,6 +16,7 @@ use ume_engine::chardef::CharDef;
 mod cutscene;
 mod keyedit;
 mod market;
+mod replay_browser;
 mod settings_screen;
 mod versus;
 pub(crate) use keyedit::KeyEdit;
@@ -26,6 +27,9 @@ impl Mode {
     fn label(self) -> &'static str { match self { Mode::Arcade => "ARCADE", Mode::Cpu => "VERSUS CPU", Mode::Versus => "2 JOGADORES", Mode::Training => "TREINO", Mode::Watch => "CPU vs CPU", Mode::TeamSeq => "EQUIPE · SEQUÊNCIA", Mode::TeamSimul => "EQUIPE · PARALELO", Mode::TeamTag => "EQUIPE · TAG" } }
     /// Team size (1 for the regular modes).
     pub fn is_team(self) -> bool { matches!(self, Mode::TeamSeq | Mode::TeamSimul | Mode::TeamTag) }
+    /// Stable key used by replay files.
+    pub fn key(self) -> &'static str { match self { Mode::Arcade => "Arcade", Mode::Cpu => "Cpu", Mode::Versus => "Versus", Mode::Training => "Training", Mode::Watch => "Watch", Mode::TeamSeq => "TeamSeq", Mode::TeamSimul => "TeamSimul", Mode::TeamTag => "TeamTag" } }
+    pub fn from_key(key: &str) -> Mode { match key { "Arcade" => Mode::Arcade, "Versus" => Mode::Versus, "Training" => Mode::Training, "Watch" => Mode::Watch, "TeamSeq" => Mode::TeamSeq, "TeamSimul" => Mode::TeamSimul, "TeamTag" => Mode::TeamTag, _ => Mode::Cpu } }
 }
 
 pub enum Screen {
@@ -39,6 +43,8 @@ pub enum Screen {
     Controls,
     Mugen,
     Market,
+    /// on-disk replay browser
+    Replays { cur: usize },
     Settings { tab: usize, cur: usize, from_fight: bool },
     /// story scene: 0 arcade opening · 1 before the boss · 2 ending
     Cutscene { kind: u8, page: usize, t: f32 },
@@ -50,7 +56,7 @@ pub struct Pending { defs: [Vec<Arc<CharDef>>; 2], stage: Option<Stage>, stage_j
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
 #[derive(Clone)]
-pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>>, rules: Rules }
+pub struct Replay { sel: (usize, usize, usize), mode: Mode, team: Option<Team>, rec: Vec<Vec<u32>>, rules: Rules, seed: u32 }
 
 /// Team battle state: sequence (KOF-style turns, winner keeps its remaining life) or parallel (2v2 simultaneous).
 #[derive(Clone)]
@@ -138,9 +144,15 @@ pub struct App {
     applied: Option<Settings>,
     settings_back: Option<(usize, bool)>,
     fight_rules: Rules,
+    /// replay browser state
+    replay_list: Vec<crate::replays::Entry>,
+    replay_problems: Vec<String>,
+    replay_rename: Option<String>,
+    replay_confirm: bool,
+    replay_by_name: bool,
 }
 
-const MENU: [(&str, &str); 13] = [
+const MENU: [(&str, &str); 14] = [
     ("Arcade", "Enfrente uma sequência de oponentes"),
     ("Versus CPU", "Você contra o computador"),
     ("2 Jogadores", "Teclado compartilhado ou dois controles"),
@@ -153,6 +165,7 @@ const MENU: [(&str, &str); 13] = [
     ("Mercado GitHub", "Baixe personagens, cenários e músicas de repositórios"),
     ("Controles", "Teclado, Xbox, PlayStation, toque e vibração"),
     ("Configurações", "Vídeo, áudio, controles, jogabilidade e idioma"),
+    ("Replays", "Assista, renomeie e apague lutas gravadas"),
     ("Sair", "Fechar o jogo"),
 ];
 
@@ -187,6 +200,7 @@ impl App {
             reg, market: crate::market::Market::open(), market_ui: market::MarketUi::default(), ui, g: Gfx::new(), c: Controls::new(touch), audio, screen: Screen::Title, mode: Mode::Cpu,
             ai_level: settings.difficulty, sel: (0, 1, 0), session: None, arcade: None, pause_cur: 0, debug_boxes: false, quit: false, msg: import_msg, preview_t: 0.0,
             settings, key_edit: None, move_page: 0, pending: Pending::default(), import_jobs: vec![], window_watch: WindowWatch::default(), window_pinned: false, team: None, last_fight: None, replaying: None, team_n: 3, team_pick: vec![], sel_filter: 0, ending_shown: false, char_tint: WHITE, sel_row: 0, sel_last: [usize::MAX; 2], sel_dwell: 0.0, sel_buf: String::new(), names_up: vec![], fit: Default::default(), sel_cur: [(-1.0, 0.0); 2], sel_flash: (0, 0.0), stage_row: 0, quality_check: 0.0, trans: 0.0, screen_t: 0.0, menu_art: crate::menu_art::MenuArt::new(), last_disc: None, applied: None, settings_back: None, fight_rules: Rules::default(),
+            replay_list: vec![], replay_problems: vec![], replay_rename: None, replay_confirm: false, replay_by_name: false,
             updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
@@ -245,6 +259,7 @@ impl App {
             Screen::Controls => self.controls_screen(),
             Screen::Mugen => self.mugen_screen(),
             Screen::Market => self.market_screen(),
+            Screen::Replays { .. } => self.replays_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
         }
         if is_key_pressed(KeyCode::F11) { self.toggle_fullscreen(); }
@@ -383,6 +398,7 @@ impl App {
                 9 => self.go(Screen::Market),
                 10 => { self.settings_back = None; self.go(Screen::Controls) }
                 11 => self.go(Screen::Settings { tab: 0, cur: 0, from_fight: false }),
+                12 => { self.refresh_replays(); self.go(Screen::Replays { cur: 0 }) }
                 _ => self.quit = true,
             }
         }
@@ -943,6 +959,7 @@ impl App {
             if let Some(t) = &info { sess.m.team_turns = seq; sess.m.team_size = [t.names[0].len(), t.names[1].len()]; sess.m.team_member = t.idx; }
             sess.team = info;
             sess.is_replay = replay.is_some();
+            if let Some(r) = &replay { sess.m.rng = r.seed; sess.seed = r.seed; }
             self.fight_rules = replay.as_ref().map(|r| r.rules).unwrap_or_else(|| self.settings.rules());
             sess.apply_rules(self.fight_rules);
             if seq { if let Some(t) = &self.team { for side in 0..2 { if let Some(f) = sess.m.fighters.iter_mut().find(|f| !f.is_helper && f.side == side) { f.power = t.power[side].min(f.power_max); } } } }
@@ -1028,12 +1045,20 @@ impl App {
     }
 
     async fn fight(&mut self, dt: f32) {
+        let replaying = self.replaying.is_some();
         let Some(s) = self.session.as_mut() else { self.screen = Screen::Menu { cur: 0 }; return };
+        if replaying && is_key_pressed(KeyCode::Escape) { self.leave_replay(); return; }
         if self.c.pressed(nav::AUX) { s.r.debug = !s.r.debug; self.debug_boxes = s.r.debug; }
-        let pause_btn = self.c.pressed(nav::START) || is_key_pressed(KeyCode::Escape) || is_key_pressed(KeyCode::P);
+        let pause_btn = if replaying { is_key_pressed(KeyCode::Space) || self.c.pressed(nav::START) } else { self.c.pressed(nav::START) || is_key_pressed(KeyCode::Escape) || is_key_pressed(KeyCode::P) };
         let (paused, accept_back) = pause_step(s.paused, pause_btn);
         if pause_btn { self.pause_cur = 0; self.move_page = 0; self.audio.sfx("select"); }
         s.paused = paused;
+        if replaying {
+            if is_key_pressed(KeyCode::Key1) { s.set_speed(1.0); }
+            if is_key_pressed(KeyCode::Key2) { s.set_speed(2.0); }
+            if is_key_pressed(KeyCode::Key4) { s.set_speed(4.0); }
+            if s.paused && (is_key_pressed(KeyCode::Period) || is_key_pressed(KeyCode::Right)) { s.step_frame(&mut self.c, &mut self.audio); }
+        }
         #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
         if s.net.is_some() { s.paused = false; }
         // pause button (touch) top-center
@@ -1042,18 +1067,19 @@ impl App {
             let p = self.ui.to_virtual(mouse_position().into());
             if p.x > pb.0 && p.x < pb.0 + pb.2 && p.y > pb.1 && p.y < pb.1 + pb.3 { s.paused = true; }
         }
-        if is_key_pressed(KeyCode::Tab) && !s.paused { s.switch_control(); }
+        if is_key_pressed(KeyCode::Tab) && !s.paused && !replaying { s.switch_control(); }
         s.update(dt, &mut self.c, &mut self.audio);
         s.draw(&mut self.g, &self.ui);
+        if replaying { self.replay_bar(); }
         self.c.touch.draw();
         if self.c.touch.enabled { self.ui.rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.0, 0.0, 0.0, 0.35)); self.ui.text("II", VW / 2.0, pb.1 + 30.0, 20.0, WHITE, Align::Center, true); }
         #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
         if let Some(n) = self.session.as_ref().and_then(|s| s.net.as_ref()) { self.net_overlay(n); }
         let s = self.session.as_mut().unwrap();
-        if s.paused { self.pause_menu(accept_back).await; return; }
+        if s.paused { if !replaying { self.pause_menu(accept_back).await; } return; }
         if let Some(w) = s.over { if s.over_timer > 1.0 { if !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
-                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules }); } }
+                if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad()) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed }); } self.archive_last_fight(); }
                 self.screen = Screen::Results { winner: w, cur: 0 };
             } } }
     }
@@ -1191,7 +1217,7 @@ impl App {
     }
 
     /// Snapshot the running session as the replayable "last fight" (used by the screenshot tour's determinism check).
-    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules }); } }
+    pub fn capture_replay(&mut self) { if let Some(s) = self.session.as_ref() { self.last_fight = Some(Replay { sel: self.sel, mode: self.mode, team: self.team.clone(), rec: s.rec.clone(), rules: self.fight_rules, seed: s.seed }); } }
 
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub async fn start_netplay(&mut self, a: &crate::netlink::NetArgs) {
@@ -1280,7 +1306,7 @@ impl App {
             self.ui.text("Personalizar teclado (Tab)", 480.0, 649.0, 22.0, WHITE, Align::Center, true);
             if is_key_pressed(KeyCode::Tab) || self.clicked_rect(300.0, 610.0, 360.0, 60.0) { self.key_edit = Some(keyedit::KeyEdit { slot: 0, cur: 0, waiting: false, msg: String::new() }); }
         }
-        if back || self.c.pressed(nav::BACK) { self.screen = match self.settings_back.take() { Some((tab, from_fight)) => Screen::Settings { tab, cur: 1, from_fight }, None => Screen::Menu { cur: 9 } }; }
+        if back || self.c.pressed(nav::BACK) { self.screen = match self.settings_back.take() { Some((tab, from_fight)) => Screen::Settings { tab, cur: 1, from_fight }, None => Screen::Menu { cur: 10 } }; }
     }
 
     fn mugen_screen(&mut self) {

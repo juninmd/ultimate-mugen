@@ -12,6 +12,7 @@ mod market;
 mod menu_art;
 mod registry;
 mod render;
+mod replays;
 mod poly;
 mod postfx;
 mod session;

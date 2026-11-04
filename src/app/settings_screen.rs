@@ -192,7 +192,7 @@ impl App {
         if changed { self.audio.sfx("select"); self.settings.apply_window(); self.settings.save(); if !from_fight { self.apply_quality(); } }
 
         if matches!(self.screen, Screen::Controls) { self.settings_back = Some((tab, from_fight)); return; }
-        if back || self.c.pressed(nav::BACK) { self.screen = if from_fight { Screen::Fight } else { Screen::Menu { cur: 10 } }; return; }
+        if back || self.c.pressed(nav::BACK) { self.screen = if from_fight { Screen::Fight } else { Screen::Menu { cur: 11 } }; return; }
         self.screen = Screen::Settings { tab, cur: new_cur, from_fight };
     }
 }

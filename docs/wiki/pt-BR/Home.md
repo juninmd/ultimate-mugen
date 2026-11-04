@@ -11,6 +11,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Adicionar conteúdo M.U.G.E.N](Conteudo-MUGEN.md) | Jogadores | Instalar personagens e cenários `.def`/`.zip` e validar |
 | [Mercado GitHub](Mercado.md) | Jogadores | Instalar personagens, cenários e músicas de qualquer repositório do GitHub |
 | [Modos de jogo](Modos-de-Jogo.md) | Jogadores | Arcade, equipes (Sequência, Paralelo, Tag) e suas regras |
+| [Replays](Replays-Rede.md) | Jogadores | Lutas gravadas, navegador de replays, velocidade de reprodução |
 | [Decisões de compatibilidade](Decisoes-de-Compatibilidade.md) | Criadores | Recursos rejeitados por decisão e o motivo |
 | [Criar personagem UMF](Personagem-UMF.md) | Criadores | Lutador completo em um único JSON |
 | [Arte do esqueleto (rig)](Rig.md) | Criadores | Estilo, poses, articulações e paletas |

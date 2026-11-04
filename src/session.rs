@@ -41,6 +41,8 @@ pub struct Session {
     pub is_replay: bool,
     flag_sounds: Vec<(u32, i32, bool, bool)>,
     speed: f32,
+    /// initial RNG seed of the match (stored in replays so a recorded fight rebuilds identically)
+    pub seed: u32,
     tag_last: [Option<usize>; 2],
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub net: Option<crate::netlink::NetLink>,
@@ -83,8 +85,15 @@ impl Session {
         let r = MatchRenderer::new(&stage);
         let mut vfx = Vfx::new();
         vfx.weather = crate::vfx::Weather::for_stage(&stage.info.name);
-        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, flag_sounds: vec![], speed: 1.0, tag_last: [None; 2], #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
+        let seed = m.rng;
+        Session { team: None, m, stage, r, hud: Hud::new(), vfx, pilots, duo, paused: false, acc: 0.0, over: None, over_timer: 0.0, inputs: vec![], rec: vec![], is_replay: false, flag_sounds: vec![], speed: 1.0, seed, tag_last: [None; 2], #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))] net: None }
     }
+
+    /// Playback speed for replays (1x, 2x, 4x).
+    pub fn set_speed(&mut self, speed: f32) { self.speed = speed.clamp(0.25, 4.0); }
+    pub fn speed(&self) -> f32 { self.speed }
+    /// Advance exactly one simulation tick (frame step while a replay is paused).
+    pub fn step_frame(&mut self, c: &mut Controls, audio: &mut Audio) { self.step_visual(c, audio); }
 
     pub fn apply_rules(&mut self, r: crate::settings::Rules) {
         self.m.rounds_to_win = if r.single_round { 1 } else { r.rounds_to_win };

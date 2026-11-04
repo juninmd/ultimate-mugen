@@ -35,7 +35,7 @@ pub enum Phase { Started, Moved, Ended, Cancelled }
 pub struct Touch { pub id: u64, pub phase: Phase, pub position: [f32; 2] }
 
 #[derive(Default)]
-pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode>, pub pressed_order: Vec<KeyCode>, pub mouse: [f32; 2], pub mouse_delta: [f32; 2], pub wheel: [f32; 2], pub mouse_down: bool, pub mouse_pressed: bool, pub touches: Vec<Touch> }
+pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode>, pub pressed_order: Vec<KeyCode>, pub mouse: [f32; 2], pub mouse_delta: [f32; 2], pub wheel: [f32; 2], pub mouse_down: bool, pub mouse_pressed: bool, pub touches: Vec<Touch>, primary_touch: Option<u64> }
 
 impl Input {
     pub fn is_down(&self, k: KeyCode) -> bool { self.down.contains(&k) }
@@ -52,6 +52,11 @@ impl Input {
     }
 
     fn touch(&mut self, id: u64, phase: Phase, position: [f32; 2]) {
+        if phase == Phase::Started && self.primary_touch.is_none() { self.primary_touch = Some(id); self.mouse_pressed = true; self.mouse_down = true; }
+        if self.primary_touch == Some(id) {
+            self.mouse = position;
+            if matches!(phase, Phase::Ended | Phase::Cancelled) { self.primary_touch = None; self.mouse_down = false; }
+        }
         match self.touches.iter_mut().find(|t| t.id == id) {
             Some(t) => { t.position = position; if t.phase != Phase::Started || phase != Phase::Moved { t.phase = phase; } }
             None => self.touches.push(Touch { id, phase, position }),

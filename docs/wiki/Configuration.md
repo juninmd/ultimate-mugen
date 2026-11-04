@@ -42,7 +42,7 @@ Lives next to the executable and is written by the **Video** menu. It can be edi
 | Move | `WASD` or arrows | arrows | D-pad / stick | virtual stick |
 | Punches `x` `y` `z` | `U` `I` `O` | Num `4` `5` `6` | □ △ R1 | LP HP |
 | Kicks `a` `b` `c` | `J` `K` `L` | Num `1` `2` `3` | ✕ ○ R2 | LK HK |
-| Quick specials | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | SP1 SP2 SP3 |
+| Quick specials | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | ESPECIAL, SUPER |
 | Super | `1`+`2` | Num `7`+`8` | L1+L2 | SUPER |
 | Awakening | `T` | Num `0` | R3 / SELECT | — |
 | Pause / hitboxes | `Esc` / `F2` | `Esc` / `F2` | START | ❚❚ |

@@ -150,7 +150,7 @@ Keyboard, multiple gamepads and touch work at the same time.
 | **Light Kick (LK)** | `J` (or `Z`) | Numpad `1` | Cross (`✕`) / `A` (Xbox) | **LK** button |
 | **Heavy Kick (HK)** | `K` (or `X`) | Numpad `2` | Circle (`○`) / `B` (Xbox) | **HK** button |
 | **Extra Kick (C)** | `L` (or `C`) | Numpad `3` | `R2` / `RT` | — |
-| **Quick specials** | `1`, `2`, `3` | Numpad `7`, `8`, `9` | `L1`, `L2` | **SP1**, **SP2**, **SP3** |
+| **Quick specials** | `1`, `2`, `3` | Numpad `7`, `8`, `9` | `L1`, `L2` | **ESPECIAL**, **SUPER** |
 | **Super** | `1` + `2` | Numpad `7` + `8` | `L1` + `L2` | **SUPER** button |
 | **Awakening (transformation)** | `T` | Numpad `0` | Right stick click / `SELECT` | — |
 | **Pause / Hitboxes** | `Esc` / `F2` | `Esc` / `F2` | `OPTIONS` / `START` | `❚❚` button (top corner) |

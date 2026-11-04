@@ -185,7 +185,7 @@ O motor aceita simultaneamente teclado, múltiplos gamepads e toque na tela.
 | **Chute Leve (LK)** | `J` (ou `Z`) | Teclado Numérico `1` | Xis (`✕`) / `A` (Xbox) | Botão **LK** |
 | **Chute Médio/Forte (HK)** | `K` (ou `X`) | Teclado Numérico `2` | Círculo (`○`) / `B` (Xbox) | Botão **HK** |
 | **Chute Extra (C)** | `L` (ou `C`) | Teclado Numérico `3` | `R2` / `RT` | — |
-| **Especiais Rápidos** | `1`, `2`, `3` | Teclado Numérico `7`, `8`, `9` | `L1`, `L2` | Botões **SP1**, **SP2**, **SP3** |
+| **Especiais Rápidos** | `1`, `2`, `3` | Teclado Numérico `7`, `8`, `9` | `L1`, `L2` | Botões **ESPECIAL**, **SUPER** |
 | **Super Movimento** | `1` + `2` | Teclado Numérico `7` + `8` | `L1` + `L2` | Botão **SUPER** |
 | **Despertar (transformação)** | `T` | Teclado Numérico `0` | Clique do analógico direito / `SELECT` | — |
 | **Pausa / Hitboxes** | `Esc` / `F2` | `Esc` / `F2` | Botão `OPTIONS` / `START` | Botão `❚❚` (canto superior) |

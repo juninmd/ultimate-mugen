@@ -28,9 +28,9 @@ impl Ui {
     pub fn new() -> Self {
         let mut display = load_ttf_font_from_bytes(include_bytes!("../assets/fonts/RussoOne.ttf")).unwrap();
         let mut body = load_ttf_font_from_bytes(include_bytes!("../assets/fonts/Rajdhani.ttf")).unwrap();
-        // macroquad creates the glyph atlas with Nearest sampling; text drawn at a non-1:1 scale (4K, animated sizes) looked stair-stepped
         display.set_filter(FilterMode::Linear);
         body.set_filter(FilterMode::Linear);
+        set_default_font(display.clone());
         Ui { display, body, s: 1.0, ox: 0.0, oy: 0.0, t: 0.0 }
     }
     pub fn begin(&mut self) {
@@ -67,6 +67,43 @@ impl Ui {
         let px = match align { Align::Left => self.x(x), Align::Center => self.x(x) - dim.width / 2.0, Align::Right => self.x(x) - dim.width };
         draw_text_ex(s, px, self.y(y), TextParams { font: Some(font), font_size: fq, font_scale: sc, color: c, ..Default::default() });
         dim.width / self.s
+    }
+    pub fn arrow(&self, cx: f32, cy: f32, size: f32, dir: (f32, f32), c: Color) {
+        let len = (dir.0 * dir.0 + dir.1 * dir.1).sqrt().max(0.001);
+        let (dx, dy) = (dir.0 / len, dir.1 / len);
+        let (px, py) = (-dy, dx);
+        let h = size * 0.45;
+        let tip = vec2(self.x(cx + dx * h), self.y(cy + dy * h));
+        let base = (cx - dx * h * 0.1, cy - dy * h * 0.1);
+        let l = vec2(self.x(base.0 + px * h * 0.75), self.y(base.1 + py * h * 0.75));
+        let r = vec2(self.x(base.0 - px * h * 0.75), self.y(base.1 - py * h * 0.75));
+        draw_line(self.x(cx - dx * h), self.y(cy - dy * h), self.x(base.0), self.y(base.1), size * 0.22 * self.s, c);
+        draw_triangle(tip, l, r, c);
+    }
+    pub fn input_icons(&self, input: &str, x: f32, y: f32, size: f32) -> f32 {
+        let mut cx = x;
+        for tok in input.replace(['~', ' ', '/', '$', '>'], "").split(',').filter(|t| !t.is_empty()) {
+            let mut btns = vec![];
+            for p in tok.split('+') {
+                let d = match p { "F" => Some((1.0, 0.0)), "B" => Some((-1.0, 0.0)), "U" => Some((0.0, -1.0)), "D" => Some((0.0, 1.0)), "DF" => Some((1.0, 1.0)), "DB" => Some((-1.0, 1.0)), "UF" => Some((1.0, -1.0)), "UB" => Some((-1.0, -1.0)), _ => None };
+                if let Some(d) = d {
+                    self.rect(cx, y - size, size, size, Color::new(1.0, 1.0, 1.0, 0.1));
+                    self.arrow(cx + size / 2.0, y - size / 2.0, size, d, WHITE);
+                    cx += size + 4.0;
+                    continue;
+                }
+                let (label, col) = match p { "x" => ("SOCO", hex("#3a8cff")), "y" => ("SOCO+", hex("#3a8cff")), "z" => ("SOCO 3", hex("#3a8cff")), "a" => ("CHUTE", hex("#ff4d6d")), "b" => ("CHUTE+", hex("#ff4d6d")), "c" => ("CHUTE 3", hex("#ff4d6d")), "s" => ("START", hex("#888899")), _ => continue };
+                btns.push((label, col));
+            }
+            for (k, (label, col)) in btns.iter().enumerate() {
+                if k > 0 || cx > x { cx += self.text("+", cx + 2.0, y - size * 0.2, size * 0.8, hex("#a49cc0"), Align::Left, true) + 6.0; }
+                let w = self.text(label, -10000.0, 0.0, size * 0.62, WHITE, Align::Left, true) + size * 0.6;
+                self.rect(cx, y - size, w, size, *col);
+                self.text(label, cx + w / 2.0, y - size * 0.28, size * 0.62, WHITE, Align::Center, true);
+                cx += w + 4.0;
+            }
+        }
+        cx - x
     }
     /// Text with outline + drop shadow (fighting-game style).
     pub fn text_bold(&self, s: &str, x: f32, y: f32, size: f32, c: Color, outline: Color, align: Align) {
@@ -188,7 +225,7 @@ pub const LOADING_TIPS: [&str; 8] = [
     "Dica: F11 alterna tela cheia · F3 mostra o FPS.",
     "Dica: arraste um .zip de personagens M.U.G.E.N para a janela para importar.",
     "Dica: no Treino, F2 exibe as hitboxes.",
-    "Dica: SP1/SP2/SP3 executam especiais com um único botão.",
+    "Dica: ESPECIAL e SUPER executam golpes com um único toque.",
     "Dica: Vídeo → Qualidade da arte aumenta a nitidez em telas 4K.",
     "Dica: PageUp/PageDown e a roda do mouse rolam a lista de lutadores.",
     "Dica: DualShock/DualSense vibram em golpes, defesa e K.O.",

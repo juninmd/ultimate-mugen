@@ -4,22 +4,23 @@ use crate::keybinds::KeyMap;
 use crate::gfx::*;
 use ume_engine::input::k;
 
-pub struct TouchPad { pub enabled: bool, pub bits: u32, pub macro_q: std::collections::VecDeque<u32>, stick_center: Option<Vec2>, pub stick_pos: Vec2, pub pressed: [bool; 9], hold: [u8; 9] }
+pub struct TouchPad { pub enabled: bool, pub bits: u32, pub macro_q: std::collections::VecDeque<u32>, stick_center: Option<Vec2>, pub stick_pos: Vec2, pub pressed: [bool; 7], hold: [u8; 7] }
 
-pub const TOUCH_BUTTONS: [(&str, u32); 9] = [("LP", k::X), ("HP", k::Y), ("SP1", k::D2), ("LK", k::A), ("HK", k::B), ("SP2", k::W), ("SP3", k::E), ("SUPER", k::D2 | k::W), ("AWAKE", k::T)];
+pub const TOUCH_BUTTONS: [(&str, u32); 7] = [("SOCO", k::X), ("SOCO+", k::Y), ("ESPECIAL", k::D2), ("CHUTE", k::A), ("CHUTE+", k::B), ("SUPER", k::D2 | k::W), ("DESPERTAR", k::T)];
 
 impl TouchPad {
-    pub fn new(enabled: bool) -> Self { TouchPad { enabled, bits: 0, macro_q: Default::default(), stick_center: None, stick_pos: Vec2::ZERO, pressed: [false; 9], hold: [0; 9] } }
-    /// Button centers in screen space (right side), radius.
+    pub fn new(enabled: bool) -> Self { TouchPad { enabled, bits: 0, macro_q: Default::default(), stick_center: None, stick_pos: Vec2::ZERO, pressed: [false; 7], hold: [0; 7] } }
     pub fn layout() -> (Vec<Vec2>, f32, Vec2, f32) {
         let (w, h) = (screen_width(), screen_height());
-        let r = (h * 0.075).min(46.0).max(22.0);
-        let gap = r * 2.35;
-        let bx = w - r * 1.4 - gap * 2.0; let by = h - r * 1.4 - gap;
-        let v = (0..9).map(|i| vec2(bx + (i % 3) as f32 * gap, by + ((i / 3) as f32 - 1.0) * gap)).collect();
-        let stick = vec2(r * 3.2, h - r * 3.2);
-        (v, r, stick, r * 2.3)
+        let r = (h * 0.09).clamp(24.0, 52.0);
+        let gap = r * 2.25;
+        let (bx, by) = (w - r * 1.3 - gap * 2.0, h - r * 1.3);
+        let mut v: Vec<Vec2> = (0..6).map(|i| vec2(bx + (i % 3) as f32 * gap, by - (1 - i / 3) as f32 * gap)).collect();
+        v.push(vec2(bx + gap, by - gap * 2.0));
+        let stick = vec2(r * 3.0, h - r * 3.0);
+        (v, r, stick, r * 2.2)
     }
+    fn radius(i: usize, r: f32) -> f32 { if i == 6 { r * 0.7 } else { r } }
     pub fn update(&mut self) {
         if !self.enabled { self.bits = 0; return; }
         let (btns, r, stick, sr) = Self::layout();
@@ -28,19 +29,18 @@ impl TouchPad {
         let mut points: Vec<(Vec2, bool)> = all;
         if points.is_empty() && is_mouse_button_down(MouseButton::Left) { points.push((mouse_position().into(), false)); }
         let mut bits = 0;
-        self.pressed = [false; 9];
+        self.pressed = [false; 7];
         let mut stick_touch = None;
         for h in self.hold.iter_mut() { *h = h.saturating_sub(1); }
         for (p, ended) in &points {
             if p.x < screen_width() * 0.45 && p.y > screen_height() * 0.3 { if !ended { stick_touch = Some(*p); } continue; }
             for (i, c) in btns.iter().enumerate() {
-                if c.distance(*p) < r * 1.15 {
-                    // latch: a tap that starts and ends within one frame still registers for a few frames
+                if c.distance(*p) < Self::radius(i, r) * 1.1 {
                     if *ended { self.hold[i] = self.hold[i].max(3); } else { self.hold[i] = self.hold[i].max(1); }
                 }
             }
         }
-        for i in 0..9 { if self.hold[i] > 0 { bits |= TOUCH_BUTTONS[i].1; self.pressed[i] = true; } }
+        for i in 0..7 { if self.hold[i] > 0 { bits |= TOUCH_BUTTONS[i].1; self.pressed[i] = true; } }
         if let Some(p) = stick_touch {
             let c = *self.stick_center.get_or_insert(stick);
             let d = p - c;
@@ -58,17 +58,19 @@ impl TouchPad {
         if !self.enabled { return; }
         let (btns, r, stick, sr) = Self::layout();
         let c = self.stick_center.unwrap_or(stick);
-        draw_circle(c.x, c.y, sr, Color::new(1.0, 1.0, 1.0, 0.06));
-        draw_circle_lines(c.x, c.y, sr, 2.0, Color::new(1.0, 1.0, 1.0, 0.25));
-        draw_circle(c.x + self.stick_pos.x, c.y + self.stick_pos.y, sr * 0.42, Color::new(1.0, 1.0, 1.0, 0.3));
+        draw_circle(c.x, c.y, sr, Color::new(1.0, 1.0, 1.0, 0.08));
+        draw_circle_lines(c.x, c.y, sr, 2.0, Color::new(1.0, 1.0, 1.0, 0.35));
+        draw_circle(c.x + self.stick_pos.x, c.y + self.stick_pos.y, sr * 0.42, Color::new(1.0, 1.0, 1.0, 0.35));
         for (i, p) in btns.iter().enumerate() {
             let (label, _) = TOUCH_BUTTONS[i];
-            let base = match label { "LP" | "HP" => Color::new(0.25, 0.66, 1.0, 0.3), "LK" | "HK" => Color::new(1.0, 0.3, 0.43, 0.3), "SUPER" => Color::new(0.6, 0.2, 0.9, 0.45), "AWAKE" => Color::new(1.0, 0.45, 0.1, 0.45), _ => Color::new(1.0, 0.8, 0.2, 0.25) };
-            draw_circle(p.x, p.y, r, if self.pressed[i] { Color::new(1.0, 1.0, 1.0, 0.5) } else { base });
-            draw_circle_lines(p.x, p.y, r, 2.0, Color::new(1.0, 1.0, 1.0, 0.4));
-            let fs = (r * 0.55) as u16;
+            let rr = Self::radius(i, r);
+            let base = match i { 0 | 1 => Color::new(0.2, 0.55, 1.0, 0.45), 3 | 4 => Color::new(1.0, 0.27, 0.4, 0.45), 2 => Color::new(1.0, 0.75, 0.15, 0.45), 5 => Color::new(0.6, 0.2, 0.95, 0.55), _ => Color::new(1.0, 0.45, 0.1, 0.5) };
+            draw_circle(p.x, p.y, rr, if self.pressed[i] { Color::new(1.0, 1.0, 1.0, 0.6) } else { base });
+            draw_circle_lines(p.x, p.y, rr, 2.0, Color::new(1.0, 1.0, 1.0, 0.55));
+            let mut fs = (rr * 0.5) as u16;
+            while fs > 8 && measure_text(label, None, fs, 1.0).width > rr * 1.8 { fs -= 1; }
             let d = measure_text(label, None, fs, 1.0);
-            draw_text(label, p.x - d.width / 2.0, p.y + d.height / 3.0, fs as f32, WHITE);
+            draw_text(label, p.x - d.width / 2.0, p.y + d.offset_y / 2.0, fs as f32, WHITE);
         }
     }
 }

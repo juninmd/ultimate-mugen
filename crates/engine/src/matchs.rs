@@ -337,7 +337,7 @@ impl Match {
     }
 
     fn builtin_transitions(&mut self, i: usize) {
-        if !self.fighters[i].ctrl || (self.round_state != 2 && !self.training) { return; }
+        if !self.fighters[i].ctrl || self.fighters[i].ikemen.dizzy || self.fighters[i].ikemen.guard_break || (self.round_state != 2 && !self.training) { return; }
         let cmd = |m: &Match, n: &str| m.fighters[i].cmd.active.contains(n);
         let s = self.fighters[i].state_no;
         let st = self.fighters[i].state_type;
@@ -494,6 +494,7 @@ impl Match {
                 f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false;
                 f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5];
             }
+            crate::ikemen::life::reset_for_round(self, i);
             let d = self.fighters[i].def.clone();
             self.change_state(i, 5900, d);
             self.fighters[i].ctrl = false;
@@ -692,6 +693,7 @@ impl Match {
         self.rebind();
         self.orphan_custom_states();
         self.detect_hits();
+        crate::ikemen::life::maintain(self);
         for f in self.fighters.iter_mut() {
             for o in f.hit_overrides.iter_mut() { if let Some(h) = o { if h.time > 0 { h.time -= 1; if h.time == 0 { *o = None; } } } }
         }
@@ -1058,6 +1060,9 @@ impl Match {
             let st = if self.fighters[d].pos.y < -1.0 { 'A' } else { self.fighters[d].state_type };
             let dd = self.fighters[d].def.clone();
             self.change_state(d, if st == 'A' { 154 } else if st == 'C' { 152 } else { 150 }, dd);
+            let point_mul = attack_mul / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01);
+            crate::ikemen::life::apply_hit_points(self, d, hd, true, point_mul);
+            crate::ikemen::life::enter_stun_states(self, d, true);
             self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
             self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false);
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
@@ -1117,6 +1122,9 @@ impl Match {
                 let no = if st == 'A' || st == 'L' { 5020 } else if st == 'C' && !hd.forcestand { 5010 } else { 5000 };
                 self.change_state(d, no, dd);
             }
+            let point_mul = attack_mul * scale / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01);
+            crate::ikemen::life::apply_hit_points(self, d, hd, false, point_mul);
+            if hd.p2stateno < 0 { crate::ikemen::life::enter_stun_states(self, d, false); }
             if hd.p1stateno >= 0 && !from_proj { let ad = self.fighters[a].def.clone(); self.change_state(a, hd.p1stateno, ad); }
             self.add_power(a, hd.get_power); self.add_power(d, hd.give_power);
             if let Some(r) = self.idx(aroot) {

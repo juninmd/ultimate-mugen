@@ -166,7 +166,7 @@ impl<'a> Host for Ctx<'a> {
             "animexist" | "selfanimexist" => b(f.def.anims.contains_key(&(a0() as i32))),
             "stateno" => f.state_no as f64,
             "prevstateno" => f.prev_state_no as f64,
-            "ctrl" => b(f.ctrl),
+            "ctrl" => b(f.ctrl && !f.ikemen.dizzy && !f.ikemen.guard_break),
             "alive" => b(f.alive),
             "life" => f.life as f64, "lifemax" => f.life_max as f64,
             "power" => m.idx(f.root).map(|r| m.fighters[r].power).unwrap_or(f.power) as f64,

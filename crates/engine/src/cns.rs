@@ -55,10 +55,10 @@ pub fn parse_states(text: &str, into: &mut HashMap<i32, StateDef>, override_exis
 pub fn parse_constants(text: &str, into: &mut HashMap<String, f64>, provided: &mut HashSet<String>) {
     for s in parse_ini(text) {
         let sec = s.lname.as_str();
-        if !["data", "size", "velocity", "movement"].contains(&sec) { continue; }
+        if !["data", "size", "velocity", "movement", "constants"].contains(&sec) { continue; }
         for (k, v) in &s.entries {
             let parts: Vec<f64> = v.split(',').map(|x| x.trim().parse::<f64>().unwrap_or(f64::NAN)).collect();
-            let key = format!("{sec}.{k}");
+            let key = if sec == "constants" { k.to_string() } else { format!("{sec}.{k}") };
             provided.insert(key.clone());
             if parts.len() == 1 {
                 let val = if parts[0].is_finite() { parts[0] } else { 0.0 };

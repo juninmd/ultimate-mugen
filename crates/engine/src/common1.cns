@@ -918,3 +918,49 @@ movetype = H
 physics = N
 anim = 200
 velset = 0,0
+
+[Statedef 5300]
+type = S
+movetype = H
+physics = S
+anim = 5300
+ctrl = 0
+
+[State 5300, recover]
+type = DizzySet
+trigger1 = Time >= 150
+value = 0
+
+[State 5300, points]
+type = DizzyPointsSet
+trigger1 = Time >= 150
+value = DizzyPointsMax
+
+[State 5300, stand]
+type = ChangeState
+trigger1 = Time >= 150
+value = 0
+ctrl = 1
+
+[Statedef 5310]
+type = S
+movetype = H
+physics = S
+anim = 5310
+ctrl = 0
+
+[State 5310, recover]
+type = GuardBreakSet
+trigger1 = Time >= 60
+value = 0
+
+[State 5310, points]
+type = GuardPointsSet
+trigger1 = Time >= 60
+value = GuardPointsMax
+
+[State 5310, stand]
+type = ChangeState
+trigger1 = Time >= 60
+value = 0
+ctrl = 1

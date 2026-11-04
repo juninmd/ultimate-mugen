@@ -124,6 +124,14 @@ pub fn tick(m: &mut Match) {
     m.texts.retain(|t| t.time != 0);
 }
 
+fn flag_name_arg(arg: &Node) -> Option<String> {
+    match arg {
+        Node::Trig { name, args, raw: None, .. } if args.is_empty() && name != "__str" => Some(name.clone()),
+        Node::Trig { name, raw: Some(text), .. } if name == "__str" => Some(text.to_ascii_lowercase()),
+        _ => None,
+    }
+}
+
 fn clsn_kind(n: Option<&Node>) -> u8 {
     match n { Some(Node::Trig { name, .. }) if name == "clsn1" => 1, _ => 2 }
 }
@@ -132,6 +140,11 @@ pub fn trigger(c: &Ctx, name: &str, args: &[Node]) -> Option<f64> {
     let f = &c.m.fighters[c.i];
     Some(match name {
         "standby" => f.ikemen.standby as i32 as f64,
+        "isasserted" => match args.first().and_then(flag_name_arg).and_then(|name| crate::flags::lookup(&name)) {
+            Some(crate::flags::FlagTarget::Character(bit)) => f.has_assert(bit) as i32 as f64,
+            Some(crate::flags::FlagTarget::Global(bit)) => (c.m.global_asserts & bit != 0) as i32 as f64,
+            None => 0.0,
+        },
         "numtext" => c.m.texts.iter().filter(|t| t.owner == f.root).count() as f64,
         "clsnoverlap" => {
             let id = args.get(1).map(|n| eval(n, c)).unwrap_or(-1.0) as u32;

@@ -90,27 +90,7 @@ pub struct AfterImage { pub time: i32, pub length: usize, pub trail: Vec<TrailPo
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct MoveHitVars { pub target_id: i32, pub target_no: i32, pub spark_x: f32, pub spark_y: f32, pub corner_push: f32, pub hit_time: i64, pub overridden: bool }
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum AssertFlag { Char(u32), Global(u32) }
-
-/// AssertSpecial flags
-pub mod asf {
-    pub const NOAUTOTURN: u32 = 1; pub const NOWALK: u32 = 2; pub const NOJUMP: u32 = 4; pub const INVISIBLE: u32 = 8; pub const NOSHADOW: u32 = 16;
-    pub const UNGUARDABLE: u32 = 32; pub const NOSTANDGUARD: u32 = 64; pub const NOCROUCHGUARD: u32 = 128; pub const NOAIRGUARD: u32 = 256;
-    pub const NOKOSND: u32 = 512; pub const NOJUGGLE: u32 = 1024;
-    pub fn from_name(s: &str) -> u32 {
-        match s { "noautoturn" => NOAUTOTURN, "nowalk" => NOWALK, "nojump" => NOJUMP, "invisible" => INVISIBLE, "noshadow" => NOSHADOW, "unguardable" => UNGUARDABLE,
-            "nostandguard" => NOSTANDGUARD, "nocrouchguard" => NOCROUCHGUARD, "noairguard" => NOAIRGUARD, "nokosnd" => NOKOSND, "nojugglecheck" => NOJUGGLE, _ => 0 }
-    }
-    pub fn resolve(s: &str) -> Option<super::AssertFlag> {
-        let s = s.trim().trim_matches('"').to_ascii_lowercase();
-        match from_name(&s) {
-            0 => match s.as_str() { "timerfreeze" => Some(super::AssertFlag::Global(1)), "intro" => Some(super::AssertFlag::Global(2)), "roundnotover" => Some(super::AssertFlag::Global(4)), _ => None },
-            bit => Some(super::AssertFlag::Char(bit)),
-        }
-    }
-}
+pub use crate::flags::asf;
 
 /// fallback chains for missing animations
 pub fn anim_fallback(no: i32) -> &'static [i32] {
@@ -156,7 +136,7 @@ pub struct Fighter {
     pub move_contact: i32, pub move_hit: i32, pub move_guarded: i32, pub move_reversed: i32, pub hit_count: i32, pub uniq_hit_count: i32, pub uniq_hit_keys: Vec<(u32, i32)>,
     pub move_countered: i32, pub move_hit_var: MoveHitVars, pub hit_overridden_at: i64, pub prev_state_type: char, pub prev_move_type: char, pub prev_anim: i32,
     pub ghv: GetHitVars, /** juggle points already spent on this fighter in the current air combo */ pub juggle_used: i32, /** consecutive ticks without control during the fight (stuck-state watchdog) */ pub no_ctrl_ticks: i32, pub hit_pause: i32, pub hit_shake: i32, pub hit_over_time: i32, pub slide_time: i32, pub fall_time: i32,
-    pub asserts: u32,
+pub asserts: u64,
     pub width_override: Option<(f32, f32)>, pub height_override: Option<(f32, f32)>, pub clsn_mods: Vec<crate::sctrl::clsn::ClsnMod>, pub run_state_depth: u8, pub player_push: bool, pub screen_bound: bool, pub pos_freeze: bool, pub spr_priority: i32,
     pub targets: Vec<(u32, i32)>,
     pub not_hit_by: Vec<(String, i32)>, pub hit_by: Vec<(String, i32)>,
@@ -321,7 +301,7 @@ impl Fighter {
         }
         out
     }
-    pub fn has_assert(&self, f: u32) -> bool { self.asserts & f != 0 }
+    pub fn has_assert(&self, f: u64) -> bool { self.asserts & f != 0 }
     /// True while nothing legitimately freezes this fighter (round running, no super pause, no hit pause/shake, not bound).
     pub fn round_free(&self, fighting: bool, paused: bool) -> bool { fighting && !paused && self.hit_pause == 0 && self.hit_shake == 0 && self.bind.is_none() }
 }

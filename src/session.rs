@@ -192,7 +192,7 @@ impl Session {
                     if let Some(sl) = human(attacker_side, &self.pilots) { c.rumble(sl, 0.0, if guarded { 0.15 } else { mag * 0.6 }, 60); }
                 }
                 Event::Super { side, .. } => { for (s, p) in self.pilots.iter().enumerate() { if let Pilot::Human(sl) = p { c.rumble(*sl, if s == side { 0.6 } else { 0.3 }, 0.6, 400); } } }
-                Event::Ko { .. } => { audio.sfx("ko"); for p in &self.pilots { if let Pilot::Human(sl) = p { c.rumble(*sl, 1.0, 1.0, 700); } } }
+                Event::Ko { silent, .. } => { if !silent { audio.sfx("ko"); } for p in &self.pilots { if let Pilot::Human(sl) = p { c.rumble(*sl, 1.0, 1.0, 700); } } }
                 Event::Rumble { fighter, strong, weak, ms } => {
                     let roots = self.m.root_indices();
                     let tag = self.m.team_tag;
@@ -268,7 +268,7 @@ impl Session {
         while self.acc >= step - 1e-4 && n < 5 { self.step(c, audio); self.acc -= step; n += 1; }
         if n == 5 { self.acc = 0.0; }
         // pull the music down under supers and the KO slow-motion so the effects punch through
-        audio.duck = if self.m.pause.as_ref().is_some_and(|p| p.is_super) || self.vfx.slow_t > 0.0 { 0.28 } else { 1.0 };
+        audio.duck = if self.m.global_asserts & ume_engine::flags::gsf::NOMUSIC != 0 { 0.0 } else if self.m.pause.as_ref().is_some_and(|p| p.is_super) || self.vfx.slow_t > 0.0 { 0.28 } else { 1.0 };
         if self.over.is_some() { self.over_timer += dt; }
     }
     pub fn draw(&mut self, g: &mut Gfx, ui: &Ui) {

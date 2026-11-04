@@ -1,4 +1,3 @@
-//! State controller implementations (~90 MUGEN sctrls).
 use crate::chardef::Controller;
 use crate::fighter::{asf, AfterImage, Bind, BindKind, HitOverride, PalFx};
 use crate::palette::{AfterImageParams, Trans};
@@ -248,7 +247,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             }
         }
         "helper" => m.spawn_helper(i, sc),
-        "destroyself" => m.destroy_helper(i),
+        "destroyself" => { if !m.fighters[i].has_assert(asf::NODESTROYSELF) { m.destroy_helper(i); } }
         "projectile" => m.spawn_projectile(i, sc),
         "width" => {
             let k = if sc.has("player", 0) { "player" } else if sc.has("edge", 0) { "edge" } else { "value" };
@@ -257,13 +256,15 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         }
         "sprpriority" => { let v = n(m, "value", 0.0) as i32; m.fighters[i].spr_priority = v; }
         "assertspecial" => {
-            for k in ["flag", "flag2", "flag3", "flag4", "flag5"] {
-                if let Some(v) = sc.raw(k) {
-                    let fl = v.trim().to_ascii_lowercase();
-                    match asf::resolve(&fl) {
-                        Some(crate::fighter::AssertFlag::Char(bit)) => m.fighters[i].asserts |= bit,
-                        Some(crate::fighter::AssertFlag::Global(bit)) => m.global_asserts |= bit,
-                        None => {}
+            if n(m, "enabled", 1.0) != 0.0 {
+                for key in crate::flags::ASSERT_PARAMS {
+                    let Some(raw) = sc.raw(key) else { continue };
+                    for name in crate::flags::names_in(raw) {
+                        match crate::flags::lookup(&name) {
+                            Some(crate::flags::FlagTarget::Character(bit)) => m.fighters[i].asserts |= bit,
+                            Some(crate::flags::FlagTarget::Global(bit)) => m.global_asserts |= bit,
+                            None => {}
+                        }
                     }
                 }
             }

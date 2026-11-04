@@ -3,6 +3,7 @@ use crate::render::Gfx;
 use crate::ui::{hex, Align, Ui};
 use crate::gfx::*;
 use ume_engine::fighter::Fighter;
+use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 use crate::poly;
 use crate::session::TeamInfo;
@@ -48,10 +49,18 @@ impl Hud {
             let c = Color::from_rgba(it.color[0], it.color[1], it.color[2], 255);
             for (k, line) in it.text.lines().enumerate() { text(line, it.pos.x, it.pos.y + k as f32 * 9.0 * it.scale[1], 8.0 * it.scale[1], c, al, false); }
         }
-        if roots.len() >= 2 {
+        let hide_bars = m.global_asserts & gsf::NOBARDISPLAY != 0;
+        let show_timer = !hide_bars && m.global_asserts & gsf::NOTIMEDISPLAY == 0;
+        let hide_combo = roots.iter().any(|f| f.has_assert(asf::NOCOMBODISPLAY));
+        if roots.len() >= 2 && !hide_bars {
             let panel_w = w / 2.0 - 26.0;
             for side in 0..2 {
                 let f = roots[side];
+                let show_life = !f.has_assert(asf::NOLIFEBARDISPLAY);
+                let show_power = !f.has_assert(asf::NOPOWERBARDISPLAY);
+                let show_face = !f.has_assert(asf::NOFACEDISPLAY);
+                let show_name = !f.has_assert(asf::NONAMEDISPLAY);
+                let show_wins = !f.has_assert(asf::NOWINICONDISPLAY);
                 let px0 = if side == 0 { 4.0 } else { w / 2.0 + 22.0 };
                 let (py0, ph) = (4.0, 23.0);
                 let tint = side_tint(side);
@@ -66,6 +75,7 @@ impl Hud {
                 let cut = bh * 0.42;
                 let sp = |pts: Vec<Vec2>| -> Vec<Vec2> { pts.into_iter().map(|q| p(q.x, q.y)).collect() };
                 let capsule = |x: f32, y: f32, ww: f32, hh: f32| sp(poly::chamfer(x, y, ww, hh, hh * 0.42));
+                if show_life {
                 if low && ratio > 0.0 { let pul = 0.10 + 0.12 * (gt * 11.0).sin().abs(); poly::solid(&capsule(bx - 2.0, by - 2.0, bw + 4.0, bh + 4.0), Color::new(1.0, 0.1, 0.1, pul)); }
                 poly::solid(&capsule(bx - 0.8, by - 0.8, bw + 1.6, bh + 1.6), Color::new(1.0, 1.0, 1.0, 0.22));
                 poly::grad_v(&capsule(bx, by, bw, bh), Color::new(0.02, 0.03, 0.08, 0.62), Color::new(0.05, 0.07, 0.14, 0.42));
@@ -90,6 +100,8 @@ impl Hud {
                     poly::grad_v(&[tc_pos, tc_pos + vec2(tw * s, 0.0), tc_pos + vec2(tw * s, th * s), tc_pos + vec2(0.0, th * s)], Color::new(0.04, 0.05, 0.1, 0.9), Color::new(0.1, 0.12, 0.2, 0.9));
                     text(tag, acx, py0 + ph + 1.4, 4.2, if tc { hex("#ffcc33") } else { hex("#c9cde6") }, Align::Center, true);
                 }
+                }
+                if show_name {
                 let nx = if side == 0 { bx } else { bx + bw };
                 let al = if side == 0 { Align::Left } else { Align::Right };
                 let cc = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
@@ -113,6 +125,8 @@ impl Hud {
                     poly::solid(&poly::regular(p(tx + 3.4, ty + 2.6), 1.3 * s, 4, std::f32::consts::FRAC_PI_2), Color::new(1.0, 1.0, 1.0, pulse));
                     text(&label, tx + 6.2, ty + 4.2, 4.0, WHITE, Align::Left, true);
                 }
+                }
+                if show_wins {
                 for i in 0..m.rounds_to_win {
                     let won = m.wins[side] > i;
                     let cx = if side == 0 { bx + bw - 4.0 - i as f32 * 9.0 } else { bx + 4.0 + i as f32 * 9.0 };
@@ -121,6 +135,8 @@ impl Hud {
                     if won { poly::circle(c, 4.0 * s, Color::new(1.0, 0.8, 0.2, 0.25)); poly::grad_v(&dia, hex("#fff3a0"), hex("#e8a010")); } else { poly::solid(&dia, Color::new(0.02, 0.02, 0.06, 0.55)); }
                     poly::outline(&dia, 0.6 * s, if won { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.5) });
                 }
+                }
+                if show_power {
                 let (cw, gap, ph2, py) = (26.0, 3.0, 5.0, BASE_H - 15.0);
                 let pw = cw * 3.0 + gap * 2.0;
                 let pxm = if side == 0 { 14.0 } else { w - 14.0 - pw };
@@ -153,6 +169,7 @@ impl Hud {
                 poly::outline(&hexa, 0.8 * s, WHITE);
                 text(&lab, bcx, py + ph2 / 2.0 + if lvl >= 3 { 1.6 } else { 2.4 }, if lvl >= 3 { 4.6 } else { 7.0 }, WHITE, Align::Center, true);
                 if lvl >= 3 { let a = 0.08 + 0.07 * (gt * 9.0).sin().abs(); poly::solid(&sp(poly::chamfer(pxm - 2.0, py - 2.0, pw + 4.0, ph2 + 4.0, 3.0)), Color::new(1.0, 0.3, 0.85, a)); }
+                }
             }
             let strip_y = 30.5;
             let mut col_idx = [0usize; 2];
@@ -237,7 +254,7 @@ impl Hud {
             let team_rows = !partners.is_empty() || team.is_some();
             let cy0 = if team_rows { -5.0 } else { -15.0 };
             // combos
-            for (side, att) in roots.iter().enumerate().take(2) {
+            for (side, att) in roots.iter().enumerate().take(if hide_combo { 0 } else { 2 }) {
                 let def = roots[1 - side];
                 let c = &mut self.combo[side];
                 if def.move_type == 'H' && def.ghv.hitcount >= 2 && def.last_hit_by.is_some_and(|id| m.fighters.iter().any(|f| f.id == id && f.root == att.id)) { *c = (def.ghv.hitcount, att.combo_damage, 70); }

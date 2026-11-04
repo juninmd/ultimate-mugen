@@ -219,6 +219,9 @@ pub struct Audio {
     repan: Vec<((u32, i32), f32)>,
     loop_seq: i32,
     music: HashMap<u32, Sound>,
+    music_wav: HashMap<u32, Vec<u8>>,
+    music_job: Option<(u32, std::thread::JoinHandle<Vec<u8>>)>,
+    preload_job: Option<std::thread::JoinHandle<Vec<(SampleKey, Result<Pcm, Vec<u8>>)>>>,
     playing: Option<Music>,
     pub volume: f32,
     pub music_volume: f32,
@@ -232,7 +235,7 @@ impl Audio {
     pub async fn new(enabled: bool) -> Self {
         let mut a = Audio {
             enabled, builtin: HashMap::new(), builtin_pcm: HashMap::new(), builtin_pan: HashMap::new(), rr: std::cell::Cell::new(0), duck: 1.0, duck_now: 1.0,
-            sources: HashMap::new(), voices: HashMap::new(), pending: vec![], pending_sfx: vec![], channels: HashMap::new(), repan: vec![], loop_seq: -1, music: HashMap::new(), playing: None, volume: 0.8, music_volume: 1.0,
+            sources: HashMap::new(), voices: HashMap::new(), pending: vec![], pending_sfx: vec![], channels: HashMap::new(), repan: vec![], loop_seq: -1, music: HashMap::new(), music_wav: HashMap::new(), music_job: None, preload_job: None, playing: None, volume: 0.8, music_volume: 1.0,
         };
         if enabled {
             for (k, n) in [("hit", 3u32), ("hitheavy", 3), ("counter", 1), ("guard", 3), ("swing", 3), ("swingh", 2), ("land", 2), ("dash", 1), ("jump", 1), ("super", 1), ("transform", 1), ("defeat", 1), ("ko", 1), ("round", 1), ("fight", 1), ("win", 1),
@@ -282,18 +285,27 @@ impl Audio {
             None => { self.voices.insert(vkey.clone(), None); self.pending.push((vkey, opts)); }
         }
     }
-    pub fn preload_match(&mut self, chars: &[CharSounds]) {
-        if !self.enabled { return; }
+    /// Decodes the match's samples off the render thread (inline on wasm). Returns true once everything is in `sources`.
+    pub fn preload_match(&mut self, chars: &[CharSounds]) -> bool {
+        if !self.enabled { return true; }
+        if let Some(h) = self.preload_job.take() {
+            if !h.is_finished() { self.preload_job = Some(h); return false; }
+            for (key, r) in h.join().unwrap_or_default() { self.sources.insert(key, Some(r.map(Source::Pcm).unwrap_or_else(Source::Raw))); }
+            return true;
+        }
         self.sources.retain(|k, _| chars.iter().any(|(id, _)| *id == k.0));
         self.voices.retain(|k, _| chars.iter().any(|(id, _)| *id == k.0 .0));
-        let todo: Vec<(SampleKey, &Vec<u8>)> = chars.iter()
+        let todo: Vec<(SampleKey, Vec<u8>)> = chars.iter()
             .flat_map(|(id, sounds)| sounds.iter().map(move |(k, b)| ((id.to_string(), k.0, k.1), b)))
             .filter(|(k, _)| !self.sources.contains_key(k))
+            .map(|(k, b)| (k, b.clone()))
             .collect();
-        let decoded = ume_formats::par::map(&todo, |(_, b)| decode(b));
-        for ((key, b), pcm) in todo.into_iter().zip(decoded) {
-            self.sources.insert(key, Some(pcm.map(Source::Pcm).unwrap_or_else(|| Source::Raw(b.clone()))));
-        }
+        if todo.is_empty() { return true; }
+        let work = move || { let decoded = ume_formats::par::map(&todo, |(_, b)| decode(b)); todo.into_iter().zip(decoded).map(|((k, b), pcm)| (k, pcm.ok_or(b))).collect::<Vec<_>>() };
+        #[cfg(not(target_arch = "wasm32"))]
+        if let Ok(h) = std::thread::Builder::new().name("sfx-decode".into()).spawn(work) { self.preload_job = Some(h); return false; } else { return true; }
+        #[cfg(target_arch = "wasm32")]
+        { for (key, r) in work() { self.sources.insert(key, Some(r.map(Source::Pcm).unwrap_or_else(Source::Raw))); } true }
     }
     fn start(&mut self, s: &Sound, secs: f64, o: SoundOpts, key: Option<SampleKey>) {
         let now = crate::gfx::get_time();
@@ -383,9 +395,31 @@ impl Audio {
             }
         }
     }
+    /// Synthesizes the track off the render thread (inline on wasm). Returns true once `prepare_music` is cheap.
+    pub fn music_ready(&mut self, id: u32) -> bool {
+        if !self.enabled || self.music.contains_key(&id) || self.music_wav.contains_key(&id) { return true; }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            match self.music_job.take() {
+                Some((job_id, h)) if job_id == id => {
+                    if !h.is_finished() { self.music_job = Some((id, h)); return false; }
+                    if let Ok(bytes) = h.join() { self.music_wav.insert(id, bytes); }
+                    return true;
+                }
+                _ => {}
+            }
+            match std::thread::Builder::new().name("music-synth".into()).spawn(move || wav(&music(id))) {
+                Ok(h) => { self.music_job = Some((id, h)); false }
+                Err(_) => true,
+            }
+        }
+        #[cfg(target_arch = "wasm32")]
+        true
+    }
     pub async fn prepare_music(&mut self, id: u32) {
         if !self.enabled || self.music.contains_key(&id) { return; }
-        if let Ok(s) = load_sound_from_bytes(&wav(&music(id))).await { self.music.insert(id, s); }
+        let bytes = self.music_wav.remove(&id).unwrap_or_else(|| wav(&music(id)));
+        if let Ok(s) = load_sound_from_bytes(&bytes).await { self.music.insert(id, s); }
     }
     pub async fn play_music(&mut self, id: u32) {
         if !self.enabled { return; }

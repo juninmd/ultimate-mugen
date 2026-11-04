@@ -63,3 +63,17 @@ The native build keeps full images embedded, decoding each stage separately on f
 `scripts/build-web.sh` copies the external PNGs and `assets.js` into `web/dist/`. Deploy the entire directory, including `assets/stages/`. Offline play requires the selected stage to have been downloaded previously. When replacing stage art, regenerate its thumbnail under `assets/stages/thumbs/` as a 240×135 RGB PNG with `python scripts/generate-stage-thumbnails.py` (Pillow required).
 
 Run `node scripts/web-smoke.js web/dist` after the web build (requires Playwright and Chromium). It rejects full stage downloads before confirmation and requires exactly one during the first match. This checks transfer scope, not a latency percentile or FPS improvement.
+
+## Main-thread loading budget
+
+Rule: the render thread never waits on disk, decoding, parsing or synthesis. On native, that work runs on worker threads and the UI polls for completion; on wasm (single thread) it stays sliced into one step per frame.
+
+| Work | Where it runs now |
+|---|---|
+| Select-screen MUGEN preview and portrait | `CharEntry::stream_preview` / `stream_portrait` (max 2 workers, collected by `Registry::reap_streams`). Call cost ~0.1 ms versus 28 ms (KFM) and 84 ms (KFM HD) synchronously |
+| `.zip` import (hash + decompression) | `registry::read_zip` on a worker; only `finish_import` (~4 ms) runs on the main thread |
+| Fight sample decoding | `Audio::preload_match` on a worker, the VS loading bar waits for it |
+| Stage music synthesis (17-31 ms per track) | `Audio::music_ready` on a worker |
+| Winner screen | uses the cached definition (`peek`), never loads |
+
+Frame-time watchdog: set `UME_WATCHDOG=1` to log every frame longer than `UME_HITCH_MS` (default 50) with the active label (`ume_shell::watchdog::label("load:stage")`), and a summary with the worst frame on exit. Labels in use: `select:preview`, `load:character`, `load:stage`, `load:session`, `load:audio`, `fight:prefetch`, `import`.

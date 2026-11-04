@@ -42,6 +42,11 @@ impl Hud {
             for (dx, dy) in [(-o, 0.0), (o, 0.0), (0.0, -o), (0.0, o), (o, o * 1.5)] { text(t, x + dx, y + dy, size, Color::new(0.07, 0.02, 0.12, c.a), al, true); }
             text(t, x, y, size, c, al, true);
         };
+        for it in &m.texts {
+            let al = match it.align { 0 => Align::Center, a if a < 0 => Align::Right, _ => Align::Left };
+            let c = Color::from_rgba(it.color[0], it.color[1], it.color[2], 255);
+            for (k, line) in it.text.lines().enumerate() { text(line, it.pos.x, it.pos.y + k as f32 * 9.0 * it.scale[1], 8.0 * it.scale[1], c, al, false); }
+        }
         if roots.len() >= 2 {
             for side in 0..2 {
                 let f = roots[side];

@@ -4,7 +4,6 @@ use crate::matchs::{Event, Match};
 pub fn stop(m: &mut Match, i: usize, sc: &Controller) {
     let channel = m.num(i, sc, "channel", -1.0, 0) as i32;
     let owner = m.fighters[i].id;
-    m.forget_sound(owner, channel);
     m.events.push(Event::StopSound { owner, channel });
 }
 

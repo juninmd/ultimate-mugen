@@ -11,11 +11,11 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use ume_engine::palette::{BlendMode, PalParams};
 
-pub struct Gfx { tex: HashMap<u64, Texture2D>, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
+pub struct Gfx { tex: HashMap<u64, Texture2D>, indexed: HashMap<u64, IndexedTexture>, palettes: HashMap<usize, (Arc<Vec<u8>>, Palette)>, pub view_scale: f32, pub ox: f32, pub oy: f32, pub post: PostFx, flush_cache: bool, /** impact-effects intensity (0.4 reduced · 1 normal · 1.3 intense) */ pub fx_gain: f32 }
 
 impl Gfx {
     pub fn new() -> Self {
-        Gfx { tex: HashMap::new(), view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), flush_cache: false, fx_gain: 1.0 }
+        Gfx { tex: HashMap::new(), indexed: HashMap::new(), palettes: HashMap::new(), view_scale: 3.0, ox: 0.0, oy: 0.0, post: PostFx::new(), flush_cache: false, fx_gain: 1.0 }
     }
     pub fn texture(&mut self, img: &Arc<ImageData>, nearest: bool) -> Texture2D {
         self.tex.entry(img.id).or_insert_with(|| {
@@ -24,22 +24,52 @@ impl Gfx {
             t
         }).clone()
     }
-    pub fn prefetch(&mut self, def: &CharDef, max_occupancy: f32) -> bool {
-        for spr in def.sprites.values() {
-            let Some(img) = spr.image.as_ref() else { continue };
-            if !self.texture(img, spr.scale >= 0.99).prefetch(max_occupancy) { return false; }
-        }
-        true
+    pub fn palette(&mut self, pal: &Arc<Vec<u8>>) -> Palette {
+        self.palettes.entry(Arc::as_ptr(pal) as usize).or_insert_with(|| (pal.clone(), Palette::from_rgba(pal))).1.clone()
     }
-    pub fn trim(&mut self, keep: usize) { if self.tex.len() > keep { self.tex.clear(); } }
+    pub fn sprite_tex(&mut self, def: &CharDef, key: (i32, i32), remap: &[((i32, i32), (i32, i32))]) -> Option<SpriteTex> {
+        let spr = def.sprites.get(&key)?;
+        if let Some(ix) = def.indexed.get(&key) {
+            let pal = (!remap.is_empty()).then(|| def.remap_palette(key, remap)).flatten().or(ix.palette.as_ref());
+            if let Some(pal) = pal.filter(|_| ix.w > 0 && ix.h > 0) {
+                let palette = self.palette(pal);
+                let tex = self.indexed.entry(ix.id).or_insert_with(|| IndexedTexture::new(ix.w, ix.h, ix.pixels.clone())).clone();
+                return Some(SpriteTex::Indexed(tex, palette));
+            }
+        }
+        let img = spr.image.as_ref()?;
+        Some(SpriteTex::Rgba(self.texture(img, spr.scale >= 0.99)))
+    }
+    pub fn prefetch(&mut self, def: &CharDef, max_occupancy: f32) -> bool {
+        let keys: Vec<(i32, i32)> = def.sprites.keys().copied().collect();
+        keys.into_iter().all(|k| self.sprite_tex(def, k, &[]).is_none_or(|t| t.prefetch(max_occupancy)))
+    }
+    pub fn trim(&mut self, keep: usize) { if self.tex.len() + self.indexed.len() > keep { self.tex.clear(); self.indexed.clear(); self.palettes.clear(); } }
     /// Ask for a texture-cache flush at the start of the next frame (never mid-frame: pending draw batches still reference the textures).
     pub fn trim_next_frame(&mut self) { self.flush_cache = true; }
-    pub fn begin_frame(&mut self) { if self.flush_cache { self.flush_cache = false; self.tex.clear(); } }
+    pub fn begin_frame(&mut self) { if self.flush_cache { self.flush_cache = false; self.tex.clear(); self.indexed.clear(); self.palettes.clear(); } }
     pub fn fit(&mut self, vw: f32, vh: f32) {
         let (w, h) = (screen_width(), screen_height());
         self.view_scale = (w / vw).min(h / vh);
         self.ox = (w - vw * self.view_scale) / 2.0;
         self.oy = (h - vh * self.view_scale) / 2.0;
+    }
+}
+
+pub enum SpriteTex { Rgba(Texture2D), Indexed(IndexedTexture, Palette) }
+
+impl SpriteTex {
+    pub fn draw(&self, x: f32, y: f32, c: Color, p: DrawTextureParams) {
+        match self {
+            SpriteTex::Rgba(t) => draw_texture_ex(t, x, y, c, p),
+            SpriteTex::Indexed(t, pal) => draw_indexed_ex(t, pal, x, y, c, p),
+        }
+    }
+    pub fn prefetch(&self, max_occupancy: f32) -> bool {
+        match self {
+            SpriteTex::Rgba(t) => t.prefetch(max_occupancy),
+            SpriteTex::Indexed(t, _) => t.prefetch(max_occupancy),
+        }
     }
 }
 
@@ -59,11 +89,8 @@ impl MatchRenderer {
     #[allow(clippy::too_many_arguments)]
     pub fn draw_sprite(g: &mut Gfx, m: &Match, def: &CharDef, fr: &AnimFrame, x: f32, y: f32, facing: f32, lscl: f32, extra: [f32; 2], o: &DrawOpts, shx: f32, shy: f32) {
         let Some(spr) = def.sprites.get(&(fr.group, fr.index)) else { return };
-        let Some(img) = spr.image.as_ref() else { return };
-        let remapped = if o.remap.is_empty() { None } else { def.remapped((fr.group, fr.index), &o.remap) };
-        let img = remapped.as_ref().unwrap_or(img);
         let s = g.view_scale;
-        let tex = g.texture(img, spr.scale >= 0.99);
+        let Some(tex) = g.sprite_tex(def, (fr.group, fr.index), &o.remap) else { return };
         let xs = def.c("size.xscale", 1.0) as f32; let ys = def.c("size.yscale", 1.0) as f32;
         let k = spr.scale * lscl;
         let (kx, ky) = (k * xs * extra[0] * fr.xscale, k * ys * extra[1] * fr.yscale);
@@ -83,12 +110,12 @@ impl MatchRenderer {
         let pal = o.pal.filter(|p| !p.is_identity() && !sub);
         params.pal_fx = pal.map(|p| PalFx { add: p.add.map(|v| v / 255.0), mul: p.mul.map(|v| v / 256.0), color: p.color / 256.0, invert: p.invert });
         if add { set_blend(GfxBlend::Add); } else if sub { set_blend(GfxBlend::Sub); }
-        draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, c, params.clone());
+        tex.draw(g.ox + left * s, g.oy + top * s, c, params.clone());
         if add || sub { set_blend(GfxBlend::Alpha); }
         params.pal_fx = None;
         if o.flash > 0.0 {
             set_blend(GfxBlend::Add);
-            draw_texture_ex(&tex, g.ox + left * s, g.oy + top * s, Color::new(1.0, 1.0, 1.0, o.flash), params);
+            tex.draw(g.ox + left * s, g.oy + top * s, Color::new(1.0, 1.0, 1.0, o.flash), params);
             set_blend(GfxBlend::Alpha);
         }
     }

@@ -26,6 +26,13 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | Texture prefetch | `Gfx::prefetch`, `Texture2D::prefetch` | Fighter sprites are uploaded to the atlas when the fight starts (up to 50% atlas), so the first special move does not upload mid-match |
 | Sound prewarm | `Audio::preload_match` | Every fighter sound is decoded in parallel during the VS screen; sounds of characters no longer in the match are freed |
 
+## GPU memory
+
+| Technique | Where | Effect |
+|---|---|---|
+| Palette in the shader | `Gfx::sprite_tex`, `IndexedTexture`, `Palette` | M.U.G.E.N sprites with indexed pixels go to the 8-bit index atlas and are colored by a palette row in the shader: 4x less upload and atlas space than RGBA. `RemapPal` swaps the palette row instead of baking a new RGBA image |
+| Separate atlas resets | `ume_shell::quad` | The RGBA atlas (UI, text, true-color sprites) and the index atlas (+ palette rows) each reset on their own when full, so filling one never forces the other to re-upload |
+
 ## Measuring
 
 | Command | Measures |

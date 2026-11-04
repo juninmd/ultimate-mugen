@@ -115,7 +115,7 @@ fn palparams_apply_matches_mugen_formula() {
 
 fn remap_char() -> Arc<ume_engine::chardef::CharDef> {
     let mut d = Arc::try_unwrap(mugen_char("pal", CNS)).ok().unwrap();
-    d.indexed.insert((0, 0), IndexedSprite { w: 2, h: 1, pixels: Arc::new(vec![0, 1]), pal: (1, 1) });
+    d.indexed.insert((0, 0), IndexedSprite::new(2, 1, Arc::new(vec![0, 1]), (1, 1), None));
     let pal = |r: u8| { let mut p = vec![0u8; 1024]; p[4] = r; p[7] = 255; Arc::new(p) };
     d.palettes.insert((1, 1), pal(10));
     d.palettes.insert((1, 2), pal(200));
@@ -128,6 +128,8 @@ fn remappal_recolors_through_the_palette_table() {
     assert!(d.remapped((0, 0), &[]).is_none());
     let img = d.remapped((0, 0), &[((1, 1), (1, 2))]).expect("remapped image");
     assert_eq!(&img.rgba[..], &[0, 0, 0, 0, 200, 0, 0, 255]);
+    assert_eq!(d.remap_palette((0, 0), &[((1, 1), (1, 2))]).map(|p| p[4]), Some(200));
+    assert!(d.remap_palette((0, 0), &[((1, 1), (1, 1))]).is_none());
     let again = d.remapped((0, 0), &[((1, 1), (1, 2))]).unwrap();
     assert_eq!(img.id, again.id, "cached");
 

@@ -160,11 +160,34 @@ fn pair(v: Vec<f32>, def: [f32; 2]) -> [f32; 2] {
     [v.first().copied().unwrap_or(def[0]), v.get(1).copied().unwrap_or(def[1])]
 }
 
+/// glTF/3D stages are rejected by design: detect the model request so the loader can warn once and keep the 2D layers.
+pub fn stage_requests_3d(text: &str) -> bool {
+    parse_ini(text).iter().any(|s| {
+        matches!(s.lname.as_str(), "model" | "model3d" | "stage3d" | "gltf" | "scene")
+            || s.entries.iter().any(|(k, v)| {
+                let v = v.to_ascii_lowercase();
+                (k == "model" || k == "gltf" || k == "scene" || k.contains("3dmodel")) && (v.ends_with(".glb") || v.ends_with(".gltf") || !v.is_empty())
+            })
+    })
+}
+
+fn warn_3d_once(path: &str) {
+    use std::sync::{Mutex, OnceLock};
+    static SEEN: OnceLock<Mutex<std::collections::HashSet<String>>> = OnceLock::new();
+    let seen = SEEN.get_or_init(|| Mutex::new(std::collections::HashSet::new()));
+    if let Ok(mut seen) = seen.lock() {
+        if seen.insert(path.to_string()) {
+            eprintln!("stage {path}: glTF/3D models are not supported; rendering the 2D background layers instead");
+        }
+    }
+}
+
 pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
     let def_path = norm_path(def_path);
     let base_dir = def_path.rfind('/').map(|i| &def_path[..i]).unwrap_or("");
     let t = text(vfs.get(&def_path).ok_or_else(|| format!("stage: {def_path} not found"))?);
     let secs = parse_ini(&t);
+    if stage_requests_3d(&t) { warn_3d_once(&def_path); }
     let get = |s: &str, k: &str| find_section(&secs, s).and_then(|s| s.get(k));
     let g = |s: &str, k: &str, d: f32| nums(get(s, k), &[d])[0];
 

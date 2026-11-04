@@ -36,7 +36,7 @@ impl App {
             let (active, down) = (team.idx[side] == i || team.simul && i < 2, team.ko[side].get(i).copied().unwrap_or(false));
             let col = rgb(self.reg.chars[reg_i].color);
             self.glass(x, y, card, card, if active { WHITE } else { col }, k * if down { 0.5 } else { 1.0 });
-            if let Some(d) = self.reg.chars[reg_i].peek(1) { self.draw_char(&d, 0, self.preview_t, x + card / 2.0, y + card - 6.0, 62.0, side == 1); }
+            if let Some(d) = self.reg.chars[reg_i].peek(1) { self.draw_char_fit(&d, 0, self.preview_t, x + card / 2.0, y + card - 6.0, card - 8.0, card - 12.0, side == 1); }
             let short: String = self.reg.chars[reg_i].name.split_whitespace().next().unwrap_or("").chars().take(7).collect();
             self.ui.text(&short.to_uppercase(), x + card / 2.0, y + 14.0, 12.0, if active { hex("#ffcc33") } else { WHITE }, Align::Center, true);
             if active { self.ui.rect_lines(x - 2.0, y - 2.0, card + 4.0, card + 4.0, 2.0, hex("#ffcc33")); }
@@ -72,8 +72,8 @@ impl App {
 
         let pt = self.preview_t;
         let bob = (self.ui.t * 1.6).sin() * 3.0;
-        if let Some(d) = self.reg.chars[a].peek(1) { self.draw_char(&d, 0, pt, 330.0 + lo * 1.25, 596.0 + bob, 540.0, false); }
-        if let Some(d) = self.reg.chars[b].peek(if a == b { 2 } else { 1 }).or_else(|| self.reg.chars[b].load_preview(if a == b { 2 } else { 1 }).ok().filter(|_| !self.reg.chars[b].mugen)) { self.draw_char(&d, 0, pt, 950.0 + ro * 1.25, 596.0 + bob, 540.0, true); }
+        if let Some(d) = self.reg.chars[a].peek(1) { self.draw_char_fit(&d, 0, pt, 330.0 + lo * 1.25, 596.0 + bob, 520.0, 520.0, false); }
+        if let Some(d) = self.reg.chars[b].peek(if a == b { 2 } else { 1 }).or_else(|| self.reg.chars[b].load_preview(if a == b { 2 } else { 1 }).ok().filter(|_| !self.reg.chars[b].mugen)) { self.draw_char_fit(&d, 0, pt, 950.0 + ro * 1.25, 596.0 + bob, 520.0, 520.0, true); }
 
         let line = 0.5 + 0.5 * (self.ui.t * 5.0).sin();
         let seam = [vec2(split + lean / 2.0 - 5.0, 0.0), vec2(split + lean / 2.0 + 5.0, 0.0), vec2(split - lean / 2.0 + 5.0, VH), vec2(split - lean / 2.0 - 5.0, VH)];

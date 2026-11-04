@@ -1,0 +1,41 @@
+[Data]
+life = 1000
+
+[Statedef 0]
+type = S
+physics = S
+ctrl = 1
+
+[State 0, stand]
+type = VelSet
+trigger1 = Time = 0
+x = 0
+
+[Statedef 200]
+type = S
+physics = S
+movetype = A
+anim = 200
+
+[State 200, hit]
+type = HitDef
+trigger1 = Time = 0
+attr = S, NA
+damage = 10
+hitflag = MAF
+guardflag = MA
+pausetime = 8, 8
+sparkno = 0
+sparkxy = 0, -50
+hitsound = 5, 0
+guardsound = 6, 0
+ground.type = High
+ground.slidetime = 12
+ground.hittime = 12
+ground.velocity = -4
+
+[State 200, end]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1

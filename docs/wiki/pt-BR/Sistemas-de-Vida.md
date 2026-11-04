@@ -25,13 +25,13 @@ Todo lutador carrega três sistemas de vida do Ikemen GO ao lado de `Life`. Eles
 `GuardPoints` começam em `GuardPointsMax` (`data.guardpoints`, `data.life` quando ausente).
 
 - Um golpe defendido subtrai o valor `guardpoints` do HitDef, multiplicado pelo multiplicador de defesa do alvo.
-- Em 0 o alvo entra no estado comum 5310 (quebra de defesa) com `GuardBreak` ligado e sem controle.
+- Em 0 o alvo entra no estado comum 5400 (quebra de defesa) com `GuardBreak` ligado e sem controle.
 - Quando o estado termina e o alvo sai do estado de golpe, `GuardBreak` desliga e os pontos enchem de novo.
 - `NoGuardPointsDamage` impede que golpes defendidos reduzam os pontos.
 
 ## Estados comuns
 
-O `common1.cns` traz os estados 5300 (tontura, animação 5300 depois 5000) e 5310 (quebra de defesa, animação 5310, depois 150, depois 5000). O personagem pode sobrescrever qualquer um no próprio CNS. Sem nenhum dos dois estados, o sistema correspondente só acompanha os números.
+O `common1.cns` traz os estados 5300 (tontura, animação 5300 depois 5000) e 5400 (quebra de defesa, animação 5400, depois 150, depois 5000). O personagem pode sobrescrever qualquer um no próprio CNS. Sem nenhum dos dois estados, o sistema correspondente só acompanha os números.
 
 ## Padrões do HitDef
 

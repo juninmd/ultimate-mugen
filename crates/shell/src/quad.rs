@@ -249,8 +249,8 @@ fn push_textured(f: &mut Frame, r: ume_render::Rect, pal: u32, tex_size: [f32; 2
         let (dx, dy) = (cx - pivot.x, cy - pivot.y);
         [pivot.x + dx * co - dy * s, pivot.y + dx * s + dy * co]
     };
-    let (mul, add) = match p.pal_fx { Some(fx) => fx.vertex(c.to_array()), None => (c.to_array(), [0.0; 4]) };
-    let v = |pos: [f32; 2], uv: [f32; 2]| ume_render::Vertex { pos, uv, pal, mul, add };
+    let (mul, add, hue) = match p.pal_fx { Some(fx) => fx.vertex(c.to_array()), None => (c.to_array(), [0.0; 4], 0.0) };
+    let v = |pos: [f32; 2], uv: [f32; 2]| ume_render::Vertex { pos, uv, pal, mul, add, hue };
     let verts = [
         v(corner(x, y), [u0, v0]),
         v(corner(x + size.x, y), [u1, v0]),
@@ -334,7 +334,7 @@ pub fn draw_mesh(m: &Mesh) {
         let white = f.canvas.white_uv();
         let verts: Vec<ume_render::Vertex> = m.vertices.iter().map(|v| {
             let uv = match rect { Some(r) => [(r.x as f32 + v.uv.x * r.w as f32) / aw, (r.y as f32 + v.uv.y * r.h as f32) / ah], None => white };
-            ume_render::Vertex { pos: [v.position.x, v.position.y], uv, pal: RGBA_SPRITE, mul: v.color.map(|c| c as f32 / 255.0), add: [0.0; 4] }
+            ume_render::Vertex { pos: [v.position.x, v.position.y], uv, pal: RGBA_SPRITE, mul: v.color.map(|c| c as f32 / 255.0), add: [0.0; 4], hue: 0.0 }
         }).collect();
         let idx: Vec<u32> = m.indices.iter().map(|&i| i as u32).collect();
         let blend = f.canvas.blend;

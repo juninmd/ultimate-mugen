@@ -4,18 +4,18 @@ use crate::matchs::Match;
 #[derive(Clone, Debug, PartialEq)]
 pub struct PalFx {
     pub time: i32, pub add: [f32; 3], pub mul: [f32; 3], pub sin_add: [f32; 3], pub sin_period: i32,
-    pub invert_all: bool, pub color: f32, pub elapsed: i32,
+    pub invert_all: bool, pub color: f32, pub elapsed: i32, pub hue: f32, pub sin_hue: f32,
 }
 
 impl Default for PalFx {
-    fn default() -> Self { PalFx { time: 0, add: [0.0; 3], mul: [256.0; 3], sin_add: [0.0; 3], sin_period: 0, invert_all: false, color: 256.0, elapsed: 0 } }
+    fn default() -> Self { PalFx { time: 0, add: [0.0; 3], mul: [256.0; 3], sin_add: [0.0; 3], sin_period: 0, invert_all: false, color: 256.0, elapsed: 0, hue: 0.0, sin_hue: 0.0 } }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct PalParams { pub add: [f32; 3], pub mul: [f32; 3], pub color: f32, pub invert: bool }
+pub struct PalParams { pub add: [f32; 3], pub mul: [f32; 3], pub color: f32, pub invert: bool, pub hue: f32 }
 
 impl Default for PalParams {
-    fn default() -> Self { PalParams { add: [0.0; 3], mul: [256.0; 3], color: 256.0, invert: false } }
+    fn default() -> Self { PalParams { add: [0.0; 3], mul: [256.0; 3], color: 256.0, invert: false, hue: 0.0 } }
 }
 
 impl PalFx {
@@ -26,7 +26,7 @@ impl PalFx {
     pub fn params(&self) -> PalParams {
         let wave = if self.sin_period > 0 { (std::f32::consts::TAU * self.elapsed as f32 / self.sin_period as f32).sin() } else { 0.0 };
         let add = [0, 1, 2].map(|k| self.add[k] + self.sin_add[k] * wave);
-        PalParams { add, mul: self.mul, color: self.color, invert: self.invert_all }
+        PalParams { add, mul: self.mul, color: self.color, invert: self.invert_all, hue: self.hue + self.sin_hue * wave }
     }
 
     pub fn from_controller(m: &Match, i: usize, sc: &Controller, prefix: &str) -> PalFx {
@@ -41,6 +41,8 @@ impl PalFx {
             invert_all: n("invertall", 0.0, 0) != 0.0,
             color: n("color", 256.0, 0).clamp(0.0, 256.0),
             elapsed: 0,
+            hue: n("hue", 0.0, 0),
+            sin_hue: n("sinhue", 0.0, 0),
         }
     }
 }
@@ -52,6 +54,7 @@ impl PalParams {
             mul: [0, 1, 2].map(|k| self.mul[k] * o.mul[k] / 256.0),
             color: self.color * o.color / 256.0,
             invert: self.invert != o.invert,
+            hue: self.hue + o.hue,
         }
     }
 
@@ -64,6 +67,13 @@ impl PalParams {
             let gray = (c[0] + c[1] + c[2]) / 3.0;
             let t = self.color / 256.0;
             c = c.map(|v| gray + (v - gray) * t);
+        }
+        if self.hue.rem_euclid(360.0).abs() > 0.0001 {
+            let (sin_a, cos_a) = self.hue.to_radians().sin_cos();
+            let k = 0.577_350_26;
+            let dot = (c[0] + c[1] + c[2]) * k;
+            let cross = [(c[2] - c[1]) * k, (c[0] - c[2]) * k, (c[1] - c[0]) * k];
+            c = [0, 1, 2].map(|i| (c[i] * cos_a + cross[i] * sin_a + k * dot * (1.0 - cos_a)).clamp(0.0, 255.0));
         }
         [0, 1, 2].map(|k| ((c[k] + self.add[k]) * self.mul[k] / 256.0).clamp(0.0, 255.0) as u8)
     }
@@ -111,7 +121,7 @@ impl AfterImageParams {
         for _ in 0..image {
             for k in 0..3 { add[k] += self.pal_add[k] * 256.0 / mul[k].max(1.0); mul[k] *= self.pal_mul[k]; }
         }
-        PalParams { add, mul, color: self.pal_color, invert: self.pal_invert }
+        PalParams { add, mul, color: self.pal_color, invert: self.pal_invert, hue: 0.0 }
     }
 
     pub fn shown(&self, trail_len: usize, length: usize) -> Vec<usize> {

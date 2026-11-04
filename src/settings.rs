@@ -7,6 +7,7 @@ pub const IMPACT: [(f32, &str); 4] = [(0.0, "Mínimo (fotossensibilidade)"), (0.
 pub const QUALITY: [(f32, &str); 4] = [(0.0, "Automática"), (3.0, "Padrão (3×)"), (4.5, "Alta (4,5×)"), (6.0, "Ultra 4K (6×)")];
 
 pub const FPS_CAPS: [u32; 5] = [0, 30, 60, 120, 144];
+pub const GAME_SPEEDS: [f32; 5] = [0.75, 0.9, 1.0, 1.15, 1.3];
 pub const ROUND_SECONDS: [u32; 4] = [99, 60, 30, 0];
 pub const ROUNDS_TO_WIN: [i32; 3] = [1, 2, 3];
 pub const LIFE_PERCENT: [u32; 5] = [50, 75, 100, 150, 200];
@@ -21,6 +22,7 @@ pub struct Settings {
     pub keep_aspect: bool, pub linear: bool, pub window: (u32, u32),
     pub master: u8, pub music: u8, pub sfx: u8, pub mute: bool,
     pub difficulty: i32, pub round_time: usize, pub rounds: usize, pub life: usize,
+    pub single_round: bool, pub classic_pushbox: bool, pub team_life_share: bool, pub game_speed: usize,
     pub lang: crate::i18n::Lang,
 }
 
@@ -32,15 +34,16 @@ impl Default for Settings {
             keep_aspect: true, linear: false, window: (0, 0),
             master: 8, music: 10, sfx: 10, mute: false,
             difficulty: 4, round_time: 0, rounds: 1, life: 2,
+            single_round: false, classic_pushbox: true, team_life_share: true, game_speed: 2,
             lang: crate::i18n::Lang::Pt,
         }
     }
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub struct Rules { pub rounds_to_win: i32, pub round_ticks: i32, pub life_percent: u32 }
+pub struct Rules { pub rounds_to_win: i32, pub round_ticks: i32, pub life_percent: u32, pub single_round: bool, pub classic_pushbox: bool, pub team_life_share: bool, pub game_speed: f32 }
 
-impl Default for Rules { fn default() -> Self { Rules { rounds_to_win: 2, round_ticks: 99 * 60, life_percent: 100 } } }
+impl Default for Rules { fn default() -> Self { Rules { rounds_to_win: 2, round_ticks: 99 * 60, life_percent: 100, single_round: false, classic_pushbox: true, team_life_share: true, game_speed: 1.0 } } }
 
 pub fn auto_quality(h: f32) -> f32 { if h <= 900.0 { 3.0 } else if h <= 1300.0 { 4.0 } else if h <= 1700.0 { 4.5 } else { 6.0 } }
 
@@ -53,6 +56,10 @@ impl Settings {
             rounds_to_win: ROUNDS_TO_WIN[self.rounds.min(ROUNDS_TO_WIN.len() - 1)],
             round_ticks: ROUND_SECONDS[self.round_time.min(ROUND_SECONDS.len() - 1)] as i32 * 60,
             life_percent: LIFE_PERCENT[self.life.min(LIFE_PERCENT.len() - 1)],
+            single_round: self.single_round,
+            classic_pushbox: self.classic_pushbox,
+            team_life_share: self.team_life_share,
+            game_speed: GAME_SPEEDS[self.game_speed.min(GAME_SPEEDS.len() - 1)],
         }
     }
     pub fn fps_cap_value(&self) -> u32 { FPS_CAPS[self.fps_cap.min(FPS_CAPS.len() - 1)] }
@@ -85,6 +92,10 @@ impl Settings {
                 "round_time" => s.round_time = pick(v, 0, ROUND_SECONDS.len() - 1),
                 "rounds" => s.rounds = pick(v, 1, ROUNDS_TO_WIN.len() - 1),
                 "life" => s.life = pick(v, 2, LIFE_PERCENT.len() - 1),
+                "single_round" => s.single_round = v != "0",
+                "classic_pushbox" => s.classic_pushbox = v != "0",
+                "team_lifeshare" => s.team_life_share = v != "0",
+                "gamespeed" => s.game_speed = pick(v, 2, GAME_SPEEDS.len() - 1),
                 "lang" => s.lang = if v == "en" { crate::i18n::Lang::En } else { crate::i18n::Lang::Pt },
                 _ => {}
             }
@@ -94,9 +105,9 @@ impl Settings {
 
     pub fn to_text(&self) -> String {
         format!(
-            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nlang={}\n",
+            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nsingle_round={}\nclassic_pushbox={}\nteam_lifeshare={}\ngamespeed={}\nlang={}\n",
             FORMAT_VERSION, self.fullscreen as i32, self.res, self.quality, self.fps as i32, self.fx, self.impact, self.keep_aspect as i32, if self.linear { "linear" } else { "nearest" }, self.window.0, self.window.1, self.vsync as i32, self.fps_cap, self.master, self.music, self.sfx, self.mute as i32,
-            self.difficulty, self.round_time, self.rounds, self.life, if self.lang == crate::i18n::Lang::En { "en" } else { "pt" },
+            self.difficulty, self.round_time, self.rounds, self.life, self.single_round as i32, self.classic_pushbox as i32, self.team_life_share as i32, self.game_speed, if self.lang == crate::i18n::Lang::En { "en" } else { "pt" },
         )
     }
 
@@ -204,6 +215,15 @@ mod tests {
         let r = Settings { round_time: 3, rounds: 2, life: 3, ..Settings::default() }.rules();
         assert_eq!((r.rounds_to_win, r.round_ticks, r.life_percent), (3, 0, 150));
         assert_eq!(Settings::default().rules(), Rules::default());
+    }
+
+    #[test]
+    fn gameplay_options_reach_the_rules() {
+        let r = Settings { single_round: true, classic_pushbox: false, team_life_share: false, game_speed: 4, ..Settings::default() }.rules();
+        assert!(r.single_round && !r.classic_pushbox && !r.team_life_share);
+        assert!((r.game_speed - GAME_SPEEDS[4]).abs() < 1e-6);
+        let s = Settings { single_round: true, classic_pushbox: false, team_life_share: false, game_speed: 4, ..Settings::default() };
+        assert_eq!(Settings::from_text(&s.to_text()), s);
     }
 
     #[test]

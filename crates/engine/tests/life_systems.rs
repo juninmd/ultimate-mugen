@@ -122,7 +122,7 @@ fn five_guarded_hits_break_the_guard() {
     let defender = &m.fighters[1];
     assert_eq!(defender.ikemen.guard_points, 0.0);
     assert!(defender.ikemen.guard_break);
-    assert_eq!(defender.state_no, 5310);
+    assert_eq!(defender.state_no, 5400);
     assert_eq!(m.ev(1, &ume_engine::chardef::safe_expr("GuardBreak")), 1.0);
 }
 

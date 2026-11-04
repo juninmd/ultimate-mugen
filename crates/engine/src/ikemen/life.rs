@@ -3,7 +3,7 @@ use crate::matchs::Match;
 use std::sync::Arc;
 
 pub const DIZZY_STATE: i32 = 5300;
-pub const GUARD_BREAK_STATE: i32 = 5310;
+pub const GUARD_BREAK_STATE: i32 = 5400;
 
 fn state_exists(m: &Match, i: usize, state_no: i32) -> bool {
     let f = &m.fighters[i];

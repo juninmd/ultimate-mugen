@@ -942,24 +942,24 @@ trigger1 = Time >= 150
 value = 0
 ctrl = 1
 
-[Statedef 5310]
+[Statedef 5400]
 type = S
 movetype = H
 physics = S
-anim = 5310
+anim = 5400
 ctrl = 0
 
-[State 5310, recover]
+[State 5400, recover]
 type = GuardBreakSet
 trigger1 = Time >= 60
 value = 0
 
-[State 5310, points]
+[State 5400, points]
 type = GuardPointsSet
 trigger1 = Time >= 60
 value = GuardPointsMax
 
-[State 5310, stand]
+[State 5400, stand]
 type = ChangeState
 trigger1 = Time >= 60
 value = 0

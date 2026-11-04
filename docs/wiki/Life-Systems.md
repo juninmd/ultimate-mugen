@@ -25,13 +25,13 @@ Every fighter carries three Ikemen GO life systems next to `Life`. They are alwa
 `GuardPoints` start at `GuardPointsMax` (`data.guardpoints`, `data.life` when absent).
 
 - A guarded hit subtracts the HitDef `guardpoints` value, multiplied by the defender's defence multiplier.
-- At 0 the defender enters common state 5310 (guard break) with `GuardBreak` set and control removed.
+- At 0 the defender enters common state 5400 (guard break) with `GuardBreak` set and control removed.
 - When the state ends and the defender is out of hit state, `GuardBreak` clears and the points refill.
 - `NoGuardPointsDamage` stops guarded hits from lowering the points.
 
 ## Common states
 
-`common1.cns` ships states 5300 (dizzy, animation 5300 then 5000) and 5310 (guard break, animation 5310 then 150 then 5000). A character may override either state in its own CNS. When neither state exists the matching system only tracks the numbers.
+`common1.cns` ships states 5300 (dizzy, animation 5300 then 5000) and 5400 (guard break, animation 5400 then 150 then 5000). A character may override either state in its own CNS. When neither state exists the matching system only tracks the numbers.
 
 ## HitDef defaults
 

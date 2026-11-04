@@ -1677,8 +1677,8 @@ impl Match {
             for d in 0..self.fighters.len() {
                 let p = &self.projectiles[pi];
                 if p.dying || p.remove || p.miss_cd > 0 { break; }
-                let Some(oi) = self.idx(p.owner) else { break };
-                if self.fighters[d].root == self.fighters[oi].root { continue; }
+                let Some(oi) = self.idx(p.owner).or_else(|| self.idx(p.root)) else { break };
+                if self.fighters[d].root == p.root { continue; }
                 if !self.can_be_hit(d, &p.hitdef, p.side) { continue; }
                 let c1 = Self::proj_boxes(p, 1);
                 if c1.is_empty() { break; }

@@ -10,7 +10,7 @@ description = "Ultimate MUGEN — motor de luta 2D moderno em Rust, compatível 
 license = "MIT"
 
 [lib]
-name = "ultimate_mugen_android"
+name = "ultimate_mugen"
 path = "src/android.rs"
 crate-type = ["cdylib"]
 

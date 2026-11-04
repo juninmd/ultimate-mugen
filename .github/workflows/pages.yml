@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions: { contents: write }
 concurrency: { group: pages, cancel-in-progress: true }
+env: { CARGO_INCREMENTAL: 0, CARGO_NET_RETRY: 10 }
 jobs:
   deploy:
     runs-on: ubuntu-latest

@@ -39,6 +39,7 @@ ggrs = "=0.13.0"
 hidapi = { version = "2", default-features = false, features = ["linux-static-hidraw"] }
 
 [profile.dev]
+debug = "line-tables-only"
 opt-level = 1
 [profile.dev.package."*"]
 opt-level = 3

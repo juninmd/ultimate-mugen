@@ -46,3 +46,44 @@ fn points_and_flags() {
     crate::controllers::run(&mut m, i, &sctrl("redlifeadd", &[("value", "-900"), ("absolute", "1")]));
     assert_eq!(ev(&m, i, "redlife"), 600.0);
 }
+
+#[test]
+fn text_lifecycle_and_format() {
+    let (mut m, i) = setup();
+    crate::controllers::run(&mut m, i, &sctrl("text", &[("text", "\"Hits: %d\""), ("params", "3+4"), ("pos", "10,20"), ("removetime", "2"), ("id", "5")]));
+    assert_eq!(m.texts.len(), 1);
+    assert_eq!(m.texts[0].text, "Hits: 7");
+    assert_eq!(ev(&m, i, "numtext"), 1.0);
+    crate::ikemen::tick(&mut m);
+    assert_eq!(m.texts.len(), 1);
+    crate::ikemen::tick(&mut m);
+    assert!(m.texts.is_empty());
+    crate::controllers::run(&mut m, i, &sctrl("text", &[("text", "\"a\""), ("removetime", "-1"), ("id", "1")]));
+    crate::controllers::run(&mut m, i, &sctrl("text", &[("text", "\"b\""), ("removetime", "-1"), ("id", "2")]));
+    crate::controllers::run(&mut m, i, &sctrl("removetext", &[("id", "1")]));
+    assert_eq!(m.texts.len(), 1);
+    assert_eq!(m.texts[0].text, "b");
+    crate::controllers::run(&mut m, i, &sctrl("removetext", &[]));
+    assert!(m.texts.is_empty());
+}
+
+#[test]
+fn tag_out_hides_and_protects() {
+    let (mut m, i) = setup();
+    let mut hd = crate::fighter::HitDefData::default();
+    hd.hitflag = "MAFD".into();
+    hd.affect_team = 'E';
+    m.round_state = 2;
+    assert!(m.can_be_hit(i, &hd, 1));
+    crate::controllers::run(&mut m, i, &sctrl("tagout", &[]));
+    assert_eq!(ev(&m, i, "standby"), 1.0);
+    assert!(!m.can_be_hit(i, &hd, 1));
+    crate::controllers::run(&mut m, i, &sctrl("tagin", &[]));
+    assert_eq!(ev(&m, i, "standby"), 0.0);
+}
+
+#[test]
+fn format_text_specifiers() {
+    assert_eq!(crate::ikemen::format_text("%d%% %f", &[50.0, 1.5]), "50% 1.500000");
+    assert_eq!(crate::ikemen::format_text("x\\ny", &[]), "x\ny");
+}

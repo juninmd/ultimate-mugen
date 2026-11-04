@@ -519,7 +519,7 @@ impl Match {
                 let (root_buf, root_len) = self.root_index_buf();
                 let roots = &root_buf[..root_len];
                 if self.training {
-                    for &i in roots { if self.fighters[i].life <= 0.0 { self.fighters[i].life = 1.0; } if self.fighters[i].move_type != 'H' && self.fighters[i].state_time > 90 && self.fighters[i].life < self.fighters[i].life_max { self.fighters[i].life = self.fighters[i].life_max; } }
+                    for &i in roots { if !self.fighters[i].alive || self.fighters[i].state_no == 5150 { self.fighters[i].alive = true; self.fighters[i].life = self.fighters[i].life_max; self.fighters[i].move_type = 'I'; self.fighters[i].ctrl = true; let d = self.fighters[i].def.clone(); self.change_state(i, 0, d); } if self.fighters[i].life <= 0.0 { self.fighters[i].life = 1.0; } if self.fighters[i].move_type != 'H' && self.fighters[i].state_time > 90 && self.fighters[i].life < self.fighters[i].life_max { self.fighters[i].life = self.fighters[i].life_max; } }
                     for &i in roots { self.fighters[i].power = self.fighters[i].power_max; }
                     return;
                 }
@@ -982,11 +982,12 @@ impl Match {
             return;
         }
         if guarded {
+            let training = self.training;
             let dmg = (hd.guard_damage * attack_mul).round();
             let pause_p1 = hd.guard_pause_p1;
             {
                 let fd = &mut self.fighters[d];
-                fd.life = if hd.guard_kill { (fd.life - dmg).max(0.0) } else { (fd.life - dmg).max(fd.life.min(1.0)) };
+                fd.life = if hd.guard_kill && !training { (fd.life - dmg).max(0.0) } else { (fd.life - dmg).max(fd.life.min(1.0)) };
                 let gc = fd.ghv.guardcount;
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
@@ -1007,6 +1008,7 @@ impl Match {
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
             if cornered && self.fighters[a].def.source == Source::Mugen { self.fighters[a].vel.x = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; }
         } else {
+            let training = self.training;
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
             let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale(prev_hc) } else { 1.0 };
@@ -1017,7 +1019,7 @@ impl Match {
             {
                 let fd = &mut self.fighters[d];
                 let mut nl = fd.life - dmg;
-                if !hd.kill && nl < 1.0 { nl = fd.life.min(1.0); }
+                if (!hd.kill || training) && nl < 1.0 { nl = fd.life.min(1.0); }
                 fd.life = nl.max(0.0);
                 let air = fd.state_type == 'A' || fd.pos.y < -1.0;
                 let down = fd.state_type == 'L';

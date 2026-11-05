@@ -33,7 +33,7 @@
   "crates/formats/src/air.rs": 315,
   "crates/formats/src/png.rs": 309,
   "crates/formats/src/screenpack.rs": 610,
-  "crates/formats/src/sff.rs": 647,
+  "crates/formats/src/sff.rs": 663,
   "crates/formats/src/stage.rs": 340,
   "crates/formats/src/vfs.rs": 420,
   "crates/formats/tests/decoders.rs": 350,

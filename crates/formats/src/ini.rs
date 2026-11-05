@@ -71,7 +71,7 @@ pub fn parse_ini_no_lines(text: &str) -> Vec<Section> {
 }
 
 pub fn parse_ini_opt(text: &str, keep_lines: bool) -> Vec<Section> {
-    let mut out: Vec<Section> = Vec::new();
+    let mut out: Vec<Section> = Vec::with_capacity(text.len() / 256 + 4);
     for raw in split_lines(text) {
         let line = strip_comment(raw).trim();
         if line.is_empty() {
@@ -86,7 +86,7 @@ pub fn parse_ini_opt(text: &str, keep_lines: bool) -> Vec<Section> {
             out.push(Section {
                 name: name.to_string(),
                 lname: name.to_ascii_lowercase(),
-                entries: Vec::new(),
+                entries: Vec::with_capacity(8),
                 lines: Vec::new(),
             });
             continue;

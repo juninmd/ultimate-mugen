@@ -8,7 +8,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use ume_formats::act::decode_act;
 use ume_formats::air::parse_air;
-use ume_formats::ini::{find_section, parse_float, parse_ini, unquote_str};
+use ume_formats::ini::{find_section, parse_float, parse_ini_no_lines, unquote_str};
 use ume_formats::sff::{decode_sff, decode_sff_only, sprite_to_rgba};
 use ume_formats::snd::decode_snd;
 use ume_formats::vfs::{norm_path, resolve, text, Vfs};
@@ -42,7 +42,7 @@ pub fn load_mugen_char(
         .map(|(b, _)| b.to_string())
         .unwrap_or_default();
     let dt = text(vfs.get(&def_path).ok_or("def not found")?);
-    let secs = parse_ini(&dt);
+    let secs = parse_ini_no_lines(&dt);
     let info = find_section(&secs, "info");
     let files = find_section(&secs, "files");
     let fget = |k: &str| files.and_then(|s| s.get(k));
@@ -450,7 +450,7 @@ pub fn load_mugen_portrait(vfs: &Vfs, def_path: &str) -> Option<Sprite> {
         .rsplit_once('/')
         .map(|(b, _)| b.to_string())
         .unwrap_or_default();
-    let secs = parse_ini(&text(vfs.get(&def_path)?));
+    let secs = parse_ini_no_lines(&text(vfs.get(&def_path)?));
     let files = find_section(&secs, "files")?;
     let fget = |k: &str| files.get(k);
     let idle_key = fget("anim")

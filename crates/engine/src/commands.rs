@@ -41,7 +41,7 @@ fn dir_bits(s: &str) -> Option<u32> {
 
 pub fn parse_command(name: &str, s: &str, time: i32, buffer_time: i32) -> CommandDef {
     let mut steps = vec![];
-    for part in s.split(',') {
+    for part in s.trim().trim_matches('"').split(',') {
         let mut p = part.trim();
         if p.is_empty() {
             continue;

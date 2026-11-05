@@ -108,7 +108,7 @@ pub fn parse_cmd(text: &str) -> (Vec<CommandDef>, HashMap<i32, StateDef>) {
         if name.is_empty() { continue; }
         let t = s.get("time").and_then(|v| v.trim().parse().ok()).unwrap_or(dt);
         let b = s.get("buffer.time").and_then(|v| v.trim().parse().ok()).unwrap_or(db);
-        let mut def = parse_command(&name, c, t, b);
+        let mut def = parse_command(&name, &unquote(c), t, b);
         def.pause_buffer = pause_buffer_of(s).unwrap_or(dp).max(0);
         cmds.push(def);
     }

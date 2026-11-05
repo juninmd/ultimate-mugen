@@ -67,30 +67,38 @@ pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
         return rgba.to_vec();
     }
     let n = s.width as usize * s.height as usize;
+    if n == 0 {
+        return Vec::new();
+    }
     let mut out = vec![0u8; n * 4];
     let pal: Option<&[u8]> = palette.or(s.palette.as_deref().map(|v| v.as_slice()));
     let (Some(idx), Some(pal)) = (&s.indexed, pal) else {
         return out;
     };
+    let mut table = [0u32; 256];
     if pal.len() >= 1024 {
-        for (o, &c) in out.as_chunks_mut::<4>().0.iter_mut().zip(idx.iter()) {
-            if c != 0 {
-                let p = c as usize * 4;
-                o[0] = pal[p];
-                o[1] = pal[p + 1];
-                o[2] = pal[p + 2];
-                o[3] = 255;
-            }
+        for c in 1..256usize {
+            let p = c * 4;
+            table[c] = u32::from_ne_bytes([pal[p], pal[p + 1], pal[p + 2], 255]);
+        }
+    } else {
+        for c in 1..256usize {
+            let p = c * 4;
+            let r = pal.get(p).copied().unwrap_or(0);
+            let g = pal.get(p + 1).copied().unwrap_or(0);
+            let b = pal.get(p + 2).copied().unwrap_or(0);
+            table[c] = u32::from_ne_bytes([r, g, b, 255]);
+        }
+    }
+    let (prefix, out_u32, suffix) = unsafe { out.align_to_mut::<u32>() };
+    if prefix.is_empty() && suffix.is_empty() && out_u32.len() == n {
+        let limit = idx.len().min(n);
+        for i in 0..limit {
+            out_u32[i] = table[idx[i] as usize];
         }
     } else {
         for (o, &c) in out.as_chunks_mut::<4>().0.iter_mut().zip(idx.iter()) {
-            if c != 0 {
-                let p = c as usize * 4;
-                for (k, v) in o[..3].iter_mut().enumerate() {
-                    *v = pal.get(p + k).copied().unwrap_or(0);
-                }
-                o[3] = 255;
-            }
+            o.copy_from_slice(&table[c as usize].to_ne_bytes());
         }
     }
     out
@@ -135,6 +143,12 @@ fn empty_sprite(group: i32, index: i32, axis_x: i32, axis_y: i32) -> DecodedSpri
 // SFF v1
 // ---------------------------------------------------------------------------
 
+struct V1Job<'a> {
+    idx: usize,
+    pcx: &'a [u8],
+    h: crate::pcx::PcxHeader,
+}
+
 /// SFF v1 layout:
 ///   header: [0]sig(12) [12]ver(4) [16]numGroups u32 [20]numImages u32
 ///           [24]firstSubfileOffset u32 [28]subheaderSize u32 [32]paletteType u8
@@ -143,17 +157,17 @@ fn empty_sprite(group: i32, index: i32, axis_x: i32, axis_y: i32) -> DecodedSpri
 ///            followed by PCX data (length bytes; 0 => linked sprite).
 fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
     let r = Reader(buf);
-    // each subfile needs a distinct 32-byte header: bounds runaway counts / cycles
     let count = (r.u32(20) as usize).min(buf.len() / 32 + 1);
     let mut ofs = r.u32(24) as usize;
-    let mut sprites: Vec<DecodedSprite> = Vec::with_capacity(count);
     let mut palettes: Vec<Palette> = Vec::new();
     let mut pal_keys: HashMap<Arc<Vec<u8>>, usize> = HashMap::new();
-    // palette / palette index of the immediately preceding subfile (the one `samePalette` refers to)
     let mut prev: Option<(Option<Arc<Vec<u8>>>, i32)> = None;
     let mut prev_adjacent = false;
 
-    for _ in 0..count {
+    let mut entries: Vec<(DecodedSprite, usize)> = Vec::with_capacity(count);
+    let mut jobs: Vec<V1Job> = Vec::new();
+
+    for i in 0..count {
         if ofs == 0 || ofs.saturating_add(32) > buf.len() {
             break;
         }
@@ -169,19 +183,9 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
         let same_pal = r.u8(ofs + 18) != 0;
         let data_start = ofs + 32;
         let keep = wanted(spr.group, spr.index);
+        let mut decoded = false;
 
-        if length == 0 {
-            if keep {
-                if let Some(src) = sprites.get(link) {
-                    spr.width = src.width;
-                    spr.height = src.height;
-                    spr.indexed = src.indexed.clone();
-                    spr.rgba = src.rgba.clone();
-                    spr.palette = src.palette.clone();
-                    spr.palette_index = src.palette_index;
-                }
-            }
-        } else if keep {
+        if length > 0 && keep {
             let block_end = if next > data_start { next } else { data_start.saturating_add(length) }.min(buf.len());
             let pcx = &buf[data_start..block_end];
             if let Some(h) = read_pcx_header(pcx).ok().filter(|h| {
@@ -190,26 +194,6 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
                 spr.width = h.width;
                 spr.height = h.height;
 
-                let data_end = if h.encoding == 1 {
-                    let (px, end) = decode_pcx_rle(
-                        pcx,
-                        h.width,
-                        h.height,
-                        h.bytes_per_line,
-                        PCX_HEADER_SIZE,
-                        pcx.len(),
-                    );
-                    spr.indexed = Some(Arc::new(px));
-                    end
-                } else {
-                    spr.indexed = Some(Arc::new(raw_rows(
-                        pcx,
-                        h.width as usize,
-                        h.height as usize,
-                        h.bytes_per_line as usize,
-                    )));
-                    PCX_HEADER_SIZE + h.height as usize * h.bytes_per_line as usize
-                };
                 let mut pal: Option<Arc<Vec<u8>>> = None;
                 let inherited = if same_pal && prev_adjacent { prev.clone() } else { None };
                 match inherited {
@@ -218,7 +202,8 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
                         spr.palette_index = pidx;
                     }
                     None => {
-                        if let Some(po) = find_pcx_palette(pcx, data_end) {
+                        let po = find_pcx_palette(pcx, PCX_HEADER_SIZE);
+                        if let Some(po) = po {
                             pal = Some(Arc::new(read_rgb_palette(pcx, po)));
                         } else if prev_adjacent {
                             if let Some((ppal, pidx)) = &prev {
@@ -246,15 +231,59 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
                     }
                 }
                 spr.palette = pal;
+                decoded = true;
+                jobs.push(V1Job { idx: i, pcx, h });
             }
         }
-        if spr.indexed.is_some() {
+        if decoded {
             prev = Some((spr.palette.clone(), spr.palette_index));
         }
-        prev_adjacent = spr.indexed.is_some();
-        sprites.push(spr);
+        prev_adjacent = decoded;
+        entries.push((spr, link));
         ofs = next;
     }
+
+    let decoded = crate::par::map(&jobs, |j| {
+        let px = if j.h.encoding == 1 {
+            let (px, _) = decode_pcx_rle(
+                j.pcx,
+                j.h.width,
+                j.h.height,
+                j.h.bytes_per_line,
+                PCX_HEADER_SIZE,
+                j.pcx.len(),
+            );
+            px
+        } else {
+            raw_rows(
+                j.pcx,
+                j.h.width as usize,
+                j.h.height as usize,
+                j.h.bytes_per_line as usize,
+            )
+        };
+        Arc::new(px)
+    });
+
+    for (j, px) in jobs.into_iter().zip(decoded) {
+        entries[j.idx].0.indexed = Some(px);
+    }
+
+    let mut sprites: Vec<DecodedSprite> = Vec::with_capacity(entries.len());
+    for (mut spr, link) in entries {
+        if spr.indexed.is_none() && wanted(spr.group, spr.index) {
+            if let Some(src) = sprites.get(link) {
+                spr.width = src.width;
+                spr.height = src.height;
+                spr.indexed = src.indexed.clone();
+                spr.rgba = src.rgba.clone();
+                spr.palette = src.palette.clone();
+                spr.palette_index = src.palette_index;
+            }
+        }
+        sprites.push(spr);
+    }
+
     DecodedSff {
         version: 1,
         sprites,

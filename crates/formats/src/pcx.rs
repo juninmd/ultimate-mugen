@@ -106,12 +106,24 @@ pub fn decode_pcx_rle(
 /// Read a 768-byte RGB palette at `offset` into RGBA (index 0 transparent).
 pub fn read_rgb_palette(buf: &[u8], offset: usize) -> Vec<u8> {
     let mut pal = vec![0u8; 1024];
-    for c in 0..256 {
-        let o = offset + c * 3;
-        for k in 0..3 {
-            pal[c * 4 + k] = buf.get(o + k).copied().unwrap_or(0);
+    if offset.saturating_add(768) <= buf.len() {
+        let src = &buf[offset..offset + 768];
+        for c in 0..256 {
+            let o = c * 3;
+            let d = c * 4;
+            pal[d] = src[o];
+            pal[d + 1] = src[o + 1];
+            pal[d + 2] = src[o + 2];
+            pal[d + 3] = if c == 0 { 0 } else { 255 };
         }
-        pal[c * 4 + 3] = if c == 0 { 0 } else { 255 };
+    } else {
+        for c in 0..256 {
+            let o = offset + c * 3;
+            for k in 0..3 {
+                pal[c * 4 + k] = buf.get(o + k).copied().unwrap_or(0);
+            }
+            pal[c * 4 + 3] = if c == 0 { 0 } else { 255 };
+        }
     }
     pal
 }

@@ -4,6 +4,7 @@
 use crate::ini::unquote;
 use crate::Reader;
 use std::collections::BTreeMap;
+use std::sync::Arc;
 
 /// Keys: normalized (lowercase, `/`-separated, relative) paths.
 pub type Vfs = BTreeMap<String, Vec<u8>>;
@@ -49,7 +50,7 @@ pub fn norm_path(p: &str) -> String {
     out.to_lowercase()
 }
 
-fn join(prefix: &str, name: &str) -> String {
+pub fn join(prefix: &str, name: &str) -> String {
     let prefix = prefix.trim_end_matches(['/', '\\']);
     if prefix.is_empty() {
         norm_path(name)
@@ -62,7 +63,6 @@ fn join(prefix: &str, name: &str) -> String {
 pub fn text(b: &[u8]) -> String {
     let b = b.strip_prefix(&[0xef, 0xbb, 0xbf]).unwrap_or(b);
     if b.is_ascii() {
-        // ASCII is valid UTF-8
         return String::from_utf8(b.to_vec()).unwrap_or_default();
     }
     b.iter().map(|&c| c as char).collect()
@@ -79,10 +79,33 @@ const CDIR_SIG: u32 = 0x0201_4b50;
 const LOCAL_SIG: u32 = 0x0403_4b50;
 const MAX_ENTRY_BYTES: usize = 256 << 20;
 
+#[derive(Clone, Default)]
+pub struct ZipProgress {
+    pub done: Arc<std::sync::atomic::AtomicUsize>,
+    pub total: Arc<std::sync::atomic::AtomicUsize>,
+    pub current_name: Arc<std::sync::Mutex<String>>,
+}
+
+struct RawZipEntry<'a> {
+    name: String,
+    method: u16,
+    data: &'a [u8],
+    usize_: usize,
+}
+
 /// Read every file of a zip archive into `vfs` under `prefix` (may be empty).
 /// Directory entries are skipped. Supports stored and deflated entries (and
 /// zip64). Returns the number of files added.
 pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, String> {
+    add_zip_with_progress(vfs, bytes, prefix, None)
+}
+
+pub fn add_zip_with_progress(
+    vfs: &mut Vfs,
+    bytes: &[u8],
+    prefix: &str,
+    progress: Option<&ZipProgress>,
+) -> Result<usize, String> {
     let r = Reader(bytes);
     if bytes.len() < 22 {
         return Err("zip: file too small".into());
@@ -115,7 +138,9 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         }
     }
     let mut p = usize::try_from(cd_ofs).map_err(|_| "zip: bad central directory offset")?;
-    let mut added = 0;
+    let cap = (entries as usize).min(bytes.len() / 46 + 1);
+    let mut raw_entries: Vec<RawZipEntry> = Vec::with_capacity(cap);
+
     for _ in 0..entries {
         if r.u32(p) != CDIR_SIG {
             return Err("zip: corrupt central directory".into());
@@ -184,12 +209,39 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         let data = bytes
             .get(data_start..data_start.saturating_add(csize))
             .ok_or_else(|| format!("zip: {name}: truncated data"))?;
-        let content = match method {
-            0 => data.to_vec(),
-            8 => inflate_raw(data, usize::try_from(usize_).unwrap_or(0))
-                .map_err(|e| format!("zip: {name}: {e}"))?,
-            m => return Err(format!("zip: {name}: unsupported compression method {m}")),
+        raw_entries.push(RawZipEntry {
+            name,
+            method,
+            data,
+            usize_: usize::try_from(usize_).unwrap_or(0),
+        });
+    }
+
+    if let Some(prog) = progress {
+        prog.total.store(raw_entries.len(), std::sync::atomic::Ordering::Relaxed);
+    }
+
+    let decompressed: Vec<Result<(String, Vec<u8>), String>> = crate::par::map(&raw_entries, |entry| {
+        if let Some(prog) = progress {
+            if let Ok(mut cur) = prog.current_name.try_lock() {
+                *cur = entry.name.clone();
+            }
+        }
+        let content = match entry.method {
+            0 => entry.data.to_vec(),
+            8 => inflate_raw(entry.data, entry.usize_)
+                .map_err(|e| format!("zip: {}: {e}", entry.name))?,
+            m => return Err(format!("zip: {}: unsupported compression method {m}", entry.name)),
         };
+        if let Some(prog) = progress {
+            prog.done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        }
+        Ok((entry.name.clone(), content))
+    });
+
+    let mut added = 0;
+    for r in decompressed {
+        let (name, content) = r?;
         vfs.insert(join(prefix, &name), content);
         added += 1;
     }

@@ -755,11 +755,19 @@ impl Registry {
 }
 
 /// Heavy half of an import (hash + decompression), safe to run on a worker thread.
+#[allow(dead_code)]
 pub fn read_zip(bytes: &[u8]) -> Result<(String, Vfs), String> {
+    read_zip_with_progress(bytes, None)
+}
+
+pub fn read_zip_with_progress(
+    bytes: &[u8],
+    progress: Option<&ume_formats::vfs::ZipProgress>,
+) -> Result<(String, Vfs), String> {
     let pack = ume_formats::vfs::content_hash(bytes);
     let mut vfs = Vfs::new();
     let clock = ume_shell::Clock::now();
-    ume_formats::vfs::add_zip(&mut vfs, bytes, "")?;
+    ume_formats::vfs::add_zip_with_progress(&mut vfs, bytes, "", progress)?;
     if ume_formats::perf::enabled() {
         let mut by_ext: HashMap<String, (usize, usize)> = HashMap::new();
         for (k, v) in &vfs {

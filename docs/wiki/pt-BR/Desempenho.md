@@ -161,3 +161,6 @@ un_slice, reduzindo overhead de desreferenciação de struct a cada resolução 
   - Utiliza casamento de padrões disjunto (BgState { layers, def_time, ctrl_defs, stage } = self) em step(), eliminando incrementos atômicos de self.stage.clone() em Arc e alocações de std::mem::take a cada tick.
   - Adiciona retorno rápido para amplitude zero s[0] == 0.0 em sin_wave(), evitando cálculos transcendentais de .sin() para camadas estáticas de fundo.
   - Ignora a soma de quadros de início de repetição de animação quando .loop_start == 0.
+- **Onda 25 - Codificação Rápida de WAV e Reamostragem de Áudio em Taxa Identidade**:
+  - Substitui loops de extensão de fatia por amostra por redimensionamento em bloco de passagem única e escrita indexada direta em wav() e 	o_wav().
+  - Implementa caminho rápido vetorizável por SIMD para reprodução em taxa unitária ((rate - 1.0).abs() < 1e-4) em Pcm::render, içando produtos de ganho constantes para fora do loop de mixagem.

@@ -161,3 +161,6 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
   - Uses disjoint pattern matching (BgState { layers, def_time, ctrl_defs, stage } = self) in step(), eliminating self.stage.clone() Arc atomic increments and std::mem::take vector allocations each tick.
   - Adds early-return zero-amplitude check s[0] == 0.0 in sin_wave(), bypassing transcendental .sin() calculations for static background layers.
   - Skips animation loop start summation when .loop_start == 0.
+- **Wave 25 - Fast WAV Encoding & Identity Rate Audio Resampling**:
+  - Replaces per-sample slice extension loops with single-pass bulk resize and direct indexed byte stores in wav() and 	o_wav().
+  - Implements SIMD-vectorizable identity playback fastpath ((rate - 1.0).abs() < 1e-4) in Pcm::render, hoisting constant gain products outside the mixing loop.

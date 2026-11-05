@@ -11,7 +11,8 @@ const SR: u32 = 32000;
 
 fn wav(samples: &[f32]) -> Vec<u8> {
     let n = samples.len() as u32;
-    let mut v = Vec::with_capacity(44 + n as usize * 2);
+    let total_bytes = 44 + n as usize * 2;
+    let mut v = Vec::with_capacity(total_bytes);
     v.extend_from_slice(b"RIFF");
     v.extend_from_slice(&(36 + n * 2).to_le_bytes());
     v.extend_from_slice(b"WAVEfmt ");
@@ -24,8 +25,13 @@ fn wav(samples: &[f32]) -> Vec<u8> {
     v.extend_from_slice(&16u16.to_le_bytes());
     v.extend_from_slice(b"data");
     v.extend_from_slice(&(n * 2).to_le_bytes());
-    for s in samples {
-        v.extend_from_slice(&((s.clamp(-1.0, 1.0) * 32000.0) as i16).to_le_bytes());
+    v.resize(total_bytes, 0);
+    let dst = &mut v[44..];
+    for (i, s) in samples.iter().enumerate() {
+        let val = (s.clamp(-1.0, 1.0) * 32000.0) as i16;
+        let b = val.to_le_bytes();
+        dst[i * 2] = b[0];
+        dst[i * 2 + 1] = b[1];
     }
     v
 }

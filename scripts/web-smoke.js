@@ -1,14 +1,12 @@
 // Web smoke test: drives the real flow in headless Chromium (title → menu → select → stage → VS → fight) and fails on any
 // page error / Rust panic or a black screen.   Usage:  node scripts/web-smoke.js [web/dist]
 // (needs `playwright`; build first with ./scripts/build-web.sh). Regression guard for "black screen after choosing fighters".
-const http = require('http'), fs = require('fs'), path = require('path'), os = require('os');
+const fs = require('fs'), path = require('path'), os = require('os');
+const { staticServer } = require('./web-smoke-server');
 const { chromium } = require('playwright');
 const dir = path.resolve(process.argv[2] || path.join(__dirname, '..', 'web', 'dist'));
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.wasm': 'application/wasm', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.zip': 'application/zip' };
-const server = http.createServer((q, r) => {
-  const f = path.join(dir, decodeURIComponent(q.url.split('?')[0]).replace(/\/$/, '/index.html'));
-  fs.readFile(f.startsWith(dir) ? f : '', (e, d) => { if (e) { r.writeHead(404).end(); } else { r.writeHead(200, { 'content-type': types[path.extname(f)] || 'application/octet-stream' }).end(d); } });
-});
+const server = staticServer(dir, types);
 (async () => {
   await new Promise(ok => server.listen(0, '127.0.0.1', ok));
   const url = `http://127.0.0.1:${server.address().port}/index.html`;

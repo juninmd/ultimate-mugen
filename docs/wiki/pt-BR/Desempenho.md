@@ -376,3 +376,8 @@ etain_mut.
   - `snd::decode_snd_checked`: Substituicao da alocacao antecipada de `HashSet<usize>` por arquivo SND por inicializacao preguicosa (`Option<HashSet<usize>>`) ativada somente quando offsets apontam para tras (`next <= ofs`), eliminando alocacao em heap e hashing em todos os arquivos SND sequenciais padrao.
   - `fnt::decode_fnt_v1`: Substituicao da alocacao de `split_whitespace().collect::<Vec<&str>>()` por linha de glifo por um iterador continuo lendo ate 3 tokens diretamente, eliminando centenas de alocacoes de vetor por fonte.
   - `fnt::decode_fnt_v2`: Migracao da analise do descritor de fonte para `parse_ini_no_lines`, evitando a coleta desnecessaria de `lines: Vec<String>`.
+
+- **Onda 64 - Analise de Carga de Comandos Sem Alocacao e Troca de Animacao com Guarda de Ponteiro**:
+  - `commands::parse_command`: Substituicao da coleta de `String` na heap em prefixos de comando de carga/liberacao (`~30`) por indexacao de fatias de bytes sem alocacao e correspondencia de bytes ASCII para prefixos (`/`, `$`, `>`, `~`).
+  - `fighter::change_anim`: Adicionada guarda `Arc::ptr_eq` evitando incremento de contagem de referencia quando `from` ja e a definicao ativa `anim_def`.
+  - `fighter::change_anim_own`: Migracao para emprestimo direto por referencia imutavel de `self.def` sem clonar o contador atomico `Arc<CharDef>`.

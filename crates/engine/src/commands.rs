@@ -60,23 +60,23 @@ pub fn parse_command(name: &str, s: &str, time: i32, buffer_time: i32) -> Comman
             } else if let Some(r) = p.strip_prefix('~') {
                 sym.release = true;
                 let r = r.trim_start();
-                let n: String = r.chars().take_while(|c| c.is_ascii_digit()).collect();
-                if !n.is_empty() {
-                    sym.charge = n.parse().unwrap_or(0);
+                let digit_len = r.bytes().take_while(|b| b.is_ascii_digit()).count();
+                if digit_len > 0 {
+                    sym.charge = r[..digit_len].parse().unwrap_or(0);
                 }
-                p = r[n.len()..].trim();
+                p = r[digit_len..].trim();
             } else {
                 break;
             }
         }
         for tok in p.split('+') {
             let mut t = tok.trim();
-            while let Some(c) = t.chars().next() {
+            while let Some(&c) = t.as_bytes().first() {
                 match c {
-                    '/' => sym.hold = true,
-                    '$' => sym.four = true,
-                    '>' => sym.strict = true,
-                    '~' => sym.release = true,
+                    b'/' => sym.hold = true,
+                    b'$' => sym.four = true,
+                    b'>' => sym.strict = true,
+                    b'~' => sym.release = true,
                     _ => break,
                 }
                 t = &t[1..];

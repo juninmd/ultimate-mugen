@@ -367,3 +367,7 @@ etain_mut.
   - `air::parse_air`: Replaced `to_ascii_uppercase()` String allocations for flags and blend modes with zero-alloc byte-level inspection (`fl.as_bytes()`, `bl.as_bytes()`).
   - `air::parse_as_d`: Replaced string searching with case-insensitive byte scanning for `AS...D...` alpha parameters.
   - `air::parse_air`: Pre-allocated animation frames vector with `Vec::with_capacity(8)` and the animation HashMap with `text.len() / 512 + 16`.
+
+- **Wave 61 - Dedicated Zero-Arg Trigger Dispatch & Byte-Level String Comparison**:
+  - `triggers::trigger0`: Fast-pathed the top 20 zero-argument triggers (`time`, `animtime`, `stateno`, `prevstateno`, `anim`, `ctrl`, `alive`, `life`, `facing`, `roundstate`, `movecontact`, `movehit`, `vel`, `pos`) directly without argument-closure setup or the 90-arm general match.
+  - `triggers::cmpstr`: Switched string character decoding to single-byte inspection (`v0.as_bytes().first()`) for `statetype`, `movetype`, and `physics`, and reused parsed string slice in `command` checks.

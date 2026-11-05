@@ -26,9 +26,9 @@ pub fn decode_snd_checked(buf: &[u8]) -> Result<HashMap<(i32, i32), Vec<u8>>, St
     let count = r.u32(16) as usize;
     let mut ofs = r.u32(20) as usize;
     let mut out = HashMap::with_capacity(count.min(8192));
-    let mut seen = HashSet::with_capacity(count.min(8192));
+    let mut seen: Option<HashSet<usize>> = None;
     for _ in 0..count {
-        if ofs < 24 || ofs.saturating_add(16) > buf.len() || !seen.insert(ofs) {
+        if ofs < 24 || ofs.saturating_add(16) > buf.len() {
             break;
         }
         let next = r.u32(ofs) as usize;
@@ -38,6 +38,10 @@ pub fn decode_snd_checked(buf: &[u8]) -> Result<HashMap<(i32, i32), Vec<u8>>, St
         let end = buf.len().min(start.saturating_add(length));
         if end > start {
             if let Entry::Vacant(e) = out.entry(key) { e.insert(buf[start..end].to_vec()); }
+        }
+        if next <= ofs {
+            let set = seen.get_or_insert_with(HashSet::new);
+            if !set.insert(next) { break; }
         }
         ofs = next;
     }

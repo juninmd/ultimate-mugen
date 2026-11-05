@@ -108,3 +108,10 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
   - Replaces nested branching in `input::rel_dirs` with branchless bitwise shift `ud | (4 << (is_back ^ 1))`.
   - Replaces string matching in `button_bit` with byte-level slice matching, supporting case-insensitivity without allocation.
   - Implements branchless facing assignment in `InputHistory::push`.
+
+## Collision box early exit, zero-alloc target slicing & indexed AI dispatch
+
+- Collision box query fast-path: In `fighter::boxes()`, frames with empty collision box definitions and no active collision modifiers immediately return `vec![]` without performing two size-override map queries or scaling math. Pre-multiplied scale vectors and single-XOR horizontal flips (`flip = fr.flip_h ^ (self.facing < 0.0)`) eliminate branch penalty on every box vertex.
+- Zero-alloc `p2clsnrequire` target slice: In `matchs::step_hits`, single required defender box indices borrow a 1-element slice `&d_boxes[req..req + 1]` directly rather than allocating a heap vector.
+- Indexed AI command dispatch: In `ai::Ai`, command definitions are indexed as `Vec<usize>` integers into `fighter.def.commands` instead of cloning full `CommandDef` trees with strings and vectors. Close and ranged attacks are partitioned during `init`, turning tick command selection into `O(1)` array indexing.
+- Vectorized straight-alpha pixmap conversion: `raster::pixmap_to_image` avoids integer divisions on opaque (`alpha == 255`) and transparent (`alpha == 0`) pixels with `as_chunks_mut::<4>()`.

@@ -1146,9 +1146,14 @@ impl Match {
                 if hd.p2clsncheck && fd.frame().is_none_or(|f| f.clsn2.is_empty()) { continue; }
                 if !self.can_be_hit(d, hd, fa.side) { continue; }
                 let d_boxes = fd.boxes(2);
-                let targets = if hd.p2clsnrequire >= 0 { d_boxes.get(hd.p2clsnrequire as usize).copied().into_iter().collect::<Vec<_>>() } else { d_boxes };
+                let targets: &[Box4] = if hd.p2clsnrequire >= 0 {
+                    let req = hd.p2clsnrequire as usize;
+                    if req < d_boxes.len() { &d_boxes[req..req + 1] } else { &[] }
+                } else {
+                    &d_boxes
+                };
                 if targets.is_empty() { continue; }
-                if let Some(at) = Self::overlap(&c1, &targets) { pending.push((a, d, hd.clone(), at)); }
+                if let Some(at) = Self::overlap(&c1, targets) { pending.push((a, d, hd.clone(), at)); }
             }
         }
         let mut struck: Vec<usize> = vec![];

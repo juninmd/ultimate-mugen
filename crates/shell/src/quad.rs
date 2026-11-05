@@ -201,7 +201,12 @@ fn draw_ellipse_poly(x: f32, y: f32, rx: f32, ry: f32, rot: f32, n: u32, c: Colo
         let (px, py) = (t.cos() * rx, t.sin() * ry);
         pts.push([x + px * co - py * s, y + px * s + py * co]);
     }
-    let idx: Vec<u32> = (0..n).flat_map(|i| [0, 1 + i, 1 + (i + 1) % n]).collect();
+    let mut idx = Vec::with_capacity(n as usize * 3);
+    for i in 0..n {
+        idx.push(0);
+        idx.push(1 + i);
+        idx.push(1 + (i + 1) % n);
+    }
     with(|f| f.canvas.mesh(&pts, &[c.render()], &idx));
 }
 
@@ -268,22 +273,27 @@ fn push_textured(f: &mut Frame, r: ume_render::Rect, pal: u32, tex_size: [f32; 2
     let (mut u1, mut v1) = ((r.x as f32 + src.x + src.w) / aw, (r.y as f32 + src.y + src.h) / ah);
     if p.flip_x { std::mem::swap(&mut u0, &mut u1); }
     if p.flip_y { std::mem::swap(&mut v0, &mut v1); }
-    let pivot = p.pivot.unwrap_or(vec2(x + size.x * 0.5, y + size.y * 0.5));
-    let (s, co) = p.rotation.sin_cos();
-    let corner = |cx: f32, cy: f32| {
-        let (dx, dy) = (cx - pivot.x, cy - pivot.y);
-        [pivot.x + dx * co - dy * s, pivot.y + dx * s + dy * co]
+    let (c0, c1, c2, c3) = if p.rotation != 0.0 {
+        let pivot = p.pivot.unwrap_or(vec2(x + size.x * 0.5, y + size.y * 0.5));
+        let (s, co) = p.rotation.sin_cos();
+        let corner = |cx: f32, cy: f32| {
+            let (dx, dy) = (cx - pivot.x, cy - pivot.y);
+            [pivot.x + dx * co - dy * s, pivot.y + dx * s + dy * co]
+        };
+        (corner(x, y), corner(x + size.x, y), corner(x + size.x, y + size.y), corner(x, y + size.y))
+    } else {
+        ([x, y], [x + size.x, y], [x + size.x, y + size.y], [x, y + size.y])
     };
     let (mul, add, hue) = match p.pal_fx { Some(fx) => fx.vertex(c.to_array()), None => (c.to_array(), [0.0; 4], 0.0) };
     let v = |pos: [f32; 2], uv: [f32; 2]| ume_render::Vertex { pos, uv, pal, mul, add, hue };
     let verts = [
-        v(corner(x, y), [u0, v0]),
-        v(corner(x + size.x, y), [u1, v0]),
-        v(corner(x + size.x, y + size.y), [u1, v1]),
-        v(corner(x, y + size.y), [u0, v1]),
+        v(c0, [u0, v0]),
+        v(c1, [u1, v0]),
+        v(c2, [u1, v1]),
+        v(c3, [u0, v1]),
     ];
     let blend = f.canvas.blend;
-    f.canvas.batch.push_tris(&verts, &[0, 1, 2, 0, 2, 3], blend);
+    f.canvas.batch.push_quad_verts(&verts, blend);
 }
 
 struct IndexedInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Arc<Vec<u8>>, w: u32, h: u32 }

@@ -74,6 +74,14 @@ impl Batch {
         self.extend_call(q.blend, 6);
     }
 
+    #[inline]
+    pub fn push_quad_verts(&mut self, verts: &[Vertex; 4], blend: Blend) {
+        let base = self.vertices.len() as u32;
+        self.vertices.extend_from_slice(verts);
+        self.indices.extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
+        self.extend_call(blend, 6);
+    }
+
     pub fn push_tris(&mut self, verts: &[Vertex], indices: &[u32], blend: Blend) {
         let base = self.vertices.len() as u32;
         self.vertices.extend_from_slice(verts);

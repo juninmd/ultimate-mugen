@@ -1,6 +1,6 @@
 const MAGIC: &[u8; 4] = b"UMRP";
 const VERSION: u32 = 1;
-const MAX_REPLAY_BYTES: usize = 64 * 1024 * 1024;
+const MAX_REPLAY_BYTES: usize = 129 * 1024 * 1024;
 const MAX_REPLAY_FRAMES_BYTES: usize = 64 * 1024 * 1024;
 const MAX_REPLAY_METADATA: u32 = 16_384;
 
@@ -41,8 +41,29 @@ impl Replay {
         self.meta.iter().find(|(k, _)| k == key).map(|(_, v)| v.as_str())
     }
 
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut out = Vec::with_capacity(16 + self.frames.len() * 4);
+    pub fn to_bytes(&self) -> Result<Vec<u8>, String> {
+        if self.players == 0 || self.players > 64 || self.frames.len() % self.players != 0 {
+            return Err("replay: invalid player or frame count".into());
+        }
+        if self.meta.len() > MAX_REPLAY_METADATA as usize {
+            return Err("replay: too many metadata entries".into());
+        }
+        let frame_bytes = self.frames.len().checked_mul(4).ok_or("replay: frame size overflow")?;
+        if frame_bytes > MAX_REPLAY_FRAMES_BYTES || self.len() > u32::MAX as usize {
+            return Err("replay: decoded frames exceed size limit".into());
+        }
+        let metadata_bytes = self.meta.iter().try_fold(20usize, |size, (key, value)| {
+            size.checked_add(8)?.checked_add(key.len())?.checked_add(value.len())
+        }).ok_or("replay: metadata size overflow")?;
+        let run_bytes = self.frames.chunks(self.players).enumerate().filter(|(index, frame)| {
+            *index == 0 || self.frames[(index - 1) * self.players..index * self.players] != **frame
+        }).try_fold(0usize, |size, _| size.checked_add(4 + self.players * 4))
+            .ok_or("replay: encoded frame size overflow")?;
+        let encoded_size = metadata_bytes.checked_add(run_bytes).ok_or("replay: encoded size overflow")?;
+        if encoded_size > MAX_REPLAY_BYTES {
+            return Err("replay: encoded data exceeds size limit".into());
+        }
+        let mut out = Vec::with_capacity(encoded_size);
         out.extend_from_slice(MAGIC);
         out.extend_from_slice(&VERSION.to_le_bytes());
         out.extend_from_slice(&(self.players as u32).to_le_bytes());
@@ -73,7 +94,7 @@ impl Replay {
             run += 1;
         }
         flush(&mut out, &mut run, &prev);
-        out
+        Ok(out)
     }
 
     pub fn from_bytes(b: &[u8]) -> Result<Self, String> {

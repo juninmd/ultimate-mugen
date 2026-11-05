@@ -143,3 +143,7 @@ Match evaluation in `crates/engine/src/matchs.rs`, `crates/engine/src/triggers.r
 ## Zero-Allocation AIR Animation Parser
 
 `parse_air` in `crates/formats/src/air.rs` operates directly on line string slices without allocating lowercase `String` instances (`line.to_ascii_lowercase()`) for every line in the animation file. Action and header recognition (`parse_begin_action`, `parse_clsn_header`, `parse_clsn_box`) evaluate byte slices with ASCII case-folding (`eq_ignore_ascii_case`), and collision box coordinates parse into a fixed stack array `[f32; 4]` rather than allocating a temporary heap `Vec<f32>` per bounding box.
+
+## Pre-allocated PCM Audio Channel Copying
+
+In `src/sound_mix.rs:decode`, audio frame decoding calculates packet frame capacity upfront and calls `out.frames.reserve(count)`, eliminating repeated geometric vector reallocations during packet sample consumption. A dedicated mono branch (`ch == 1`) streams frames without slice chunking, and stereo decoding utilizes `chunks_exact(ch)` to eliminate bounds checks. Warm-run decode allocations dropped to 1,175 per 30-second audio stream.

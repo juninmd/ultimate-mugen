@@ -164,9 +164,16 @@ pub fn decode(bytes: &[u8]) -> Option<Pcm> {
                 }
                 let sb = samples.as_mut().unwrap();
                 sb.copy_interleaved_ref(buf);
-                for f in sb.samples().chunks(ch) {
-                    let l = f[0];
-                    out.frames.push([l, f.get(1).copied().unwrap_or(l)]);
+                let count = sb.samples().len() / ch;
+                out.frames.reserve(count);
+                if ch == 1 {
+                    for &s in sb.samples() {
+                        out.frames.push([s, s]);
+                    }
+                } else {
+                    for f in sb.samples().chunks_exact(ch) {
+                        out.frames.push([f[0], f[1]]);
+                    }
                 }
             }
             Err(Error::DecodeError(_)) => continue,

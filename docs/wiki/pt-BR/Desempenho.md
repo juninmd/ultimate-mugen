@@ -143,3 +143,7 @@ O trait `Host` em `crates/engine/src/expr.rs` e a máquina virtual em `crates/en
 ## Analisador de Animações AIR com Alocação Zero
 
 `parse_air` em `crates/formats/src/air.rs` opera diretamente sobre fatias de string de cada linha sem alocar instâncias `String` em minúsculas (`line.to_ascii_lowercase()`) para cada linha do arquivo de animação. O reconhecimento de seções e cabeçalhos (`parse_begin_action`, `parse_clsn_header`, `parse_clsn_box`) avalia fatias de bytes com insensibilidade a maiúsculas ASCII (`eq_ignore_ascii_case`), e as coordenadas de caixas de colisão são processadas em um array de pilha fixo `[f32; 4]` em vez de alocar um `Vec<f32>` na heap por caixa delimitadora.
+
+## Cópia Pré-alocada de Canais de Áudio PCM
+
+Em `src/sound_mix.rs:decode`, a decodificação de quadros de áudio calcula a capacidade do pacote antecipadamente e invoca `out.frames.reserve(count)`, eliminando realocações geométricas repetidas do vetor durante a leitura de amostras. Um fluxo dedicado para áudio mono (`ch == 1`) transfere quadros sem divisão de fatias, e a decodificação estéreo utiliza `chunks_exact(ch)` para eliminar verificações de limites. As alocações em execução aquecida caíram para 1.175 por fluxo de áudio de 30 segundos.

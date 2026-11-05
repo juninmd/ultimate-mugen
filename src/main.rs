@@ -216,7 +216,7 @@ async fn game() {
     let touch_dev = ume_is_touch() != 0;
     #[cfg(not(target_arch = "wasm32"))]
     let touch_dev = cfg!(any(target_os = "android", target_os = "ios"));
-    let mut app = app::App::new(has("--touch") || touch_dev, shots.is_none() && !has("--mute")).await;
+    let mut app = app::App::new(has("--touch") || touch_dev, (shots.is_none() || has("--shots-audio")) && !has("--mute")).await;
     #[cfg(target_arch = "wasm32")]
     app.apply_deep_link();
     #[cfg(target_arch = "wasm32")]

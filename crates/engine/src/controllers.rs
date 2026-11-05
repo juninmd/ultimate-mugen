@@ -15,11 +15,11 @@ pub(crate) fn set_vars(m: &mut Match, i: usize, sc: &Controller, add: bool, targ
         else if idx < 60 { t.vars[idx] = if add { t.vars[idx] + v as i32 } else { v as i32 }; }
         return;
     }
-    for (k, param) in &sc.params {
+    for (k, _) in &sc.params {
         let (sys, fl, rest) = if let Some(r) = k.strip_prefix("sysfvar(") { (true, true, r) } else if let Some(r) = k.strip_prefix("sysvar(") { (true, false, r) }
             else if let Some(r) = k.strip_prefix("fvar(") { (false, true, r) } else if let Some(r) = k.strip_prefix("var(") { (false, false, r) } else { continue };
         let Ok(idx) = rest.trim_end_matches(')').trim().parse::<usize>() else { continue };
-        let v = param.exprs.first().map(|e| m.ev(i, e)).unwrap_or(0.0);
+        let v = m.num(i, sc, k, 0.0, 0);
         let t = &mut m.fighters[target];
         match (sys, fl) {
             (false, false) if idx < 60 => t.vars[idx] = if add { t.vars[idx] + v as i32 } else { v as i32 },

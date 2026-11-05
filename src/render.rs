@@ -11,6 +11,8 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use ume_engine::palette::{BlendMode, PalParams};
 
+mod warm;
+
 fn draw_transformed_layer_quad(
     texture: &Texture2D,
     pivot: [f32; 2],
@@ -121,13 +123,6 @@ impl Gfx {
         }
         let img = spr.image.as_ref()?;
         Some(SpriteTex::Rgba(self.texture(img, spr.scale >= 0.99)))
-    }
-    pub fn prefetch(&mut self, def: &CharDef, max_occupancy: f32) -> bool {
-        let keys: Vec<(i32, i32)> = def.sprites.keys().copied().collect();
-        keys.into_iter().all(|k| {
-            self.sprite_tex(def, k, &[])
-                .is_none_or(|t| t.prefetch(max_occupancy))
-        })
     }
     pub fn trim(&mut self, keep: usize) {
         if self.tex.len() + self.indexed.len() > keep {

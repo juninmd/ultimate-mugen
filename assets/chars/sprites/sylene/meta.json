@@ -1,1 +1,85 @@
-{"refHeight": 350}
+{
+  "frames": {
+    "01_idle": {
+      "axisX": 101.5,
+      "axisY": 277.0,
+      "refHeight": 277.0
+    },
+    "02_attack1": {
+      "axisX": 111.0,
+      "axisY": 264.0,
+      "refHeight": 264.0
+    },
+    "03_attack2": {
+      "axisX": 115.0,
+      "axisY": 268.0,
+      "refHeight": 268.0
+    },
+    "04_special": {
+      "axisX": 114.5,
+      "axisY": 392.0,
+      "refHeight": 392.0
+    },
+    "05_projectile": {
+      "axisX": 114.5,
+      "axisY": 216.0,
+      "refHeight": 216.0
+    },
+    "06_victory": {
+      "axisX": 99.5,
+      "axisY": 300.0,
+      "refHeight": 300.0
+    },
+    "run0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "run1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "run2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "run3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk4": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    }
+  },
+  "refHeight": 350
+}

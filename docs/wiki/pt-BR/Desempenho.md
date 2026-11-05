@@ -357,3 +357,9 @@ etain_mut.
 - **Onda 59 - Escala em Cache no Preenchimento de Caixas e Poda AABB Multicaixas**:
   - `fighter::fill_boxes`: Ignoradas consultas dinamicas por string `size.*` quando nao ha overrides de tamanho, lendo `def.scale_x` e `def.scale_y` diretamente.
   - `matchs::overlap`: Adicionada saida antecipada por bounding box composto (AABB) em colisoes de grupos multicaixas (`a.len() > 1 || b.len() > 1`), eliminando testes $O(N 	imes M)$ em pares disjuntos.
+
+- **Onda 60 - Tokenizacao de Quadros AIR Sem Alocacao e Buffers Pre-Dimensionados**:
+  - `air::parse_air`: Substituicao da alocacao em heap de `Vec<&str>` por quadro por um array fixo em pilha `[""; 12]`, eliminando alocacoes dinamicas de vetores em todos os quadros de animacao.
+  - `air::parse_air`: Substituicao de alocacoes `String` via `to_ascii_uppercase()` para flags e modos de blend por inspecao em nivel de byte (`fl.as_bytes()`, `bl.as_bytes()`).
+  - `air::parse_as_d`: Substituicao de busca por strings por varredura de bytes sem distincao de maiusculas/minusculas para parametros alfa `AS...D...`.
+  - `air::parse_air`: Pre-alocacao do vetor de quadros com `Vec::with_capacity(8)` e do HashMap de animacoes com `text.len() / 512 + 16`.

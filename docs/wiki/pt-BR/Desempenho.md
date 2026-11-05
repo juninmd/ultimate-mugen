@@ -111,3 +111,7 @@ No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíra
 ## Decodificação Vetorizada de Codecs SFFv2
 
 `decode_rle5` e `decode_lz5` em `crates/formats/src/sff.rs` utilizam preenchimento contíguo de fatias (`out[j..e].fill(val)`) em vez de laços escalares de atribuição elemento a elemento. O LLVM traduz o preenchimento de fatias em instruções memset vetorizadas, acelerando corridas longas em folhas de sprites em alta definição (720p/1080p). Para `kfm720.def`, o tempo de carregamento caiu de 60,1 ms para 6,7 ms (8,97x mais rápido).
+
+## Pipeline Paralelo de Recursos de Personagem
+
+`load_char_def` em `crates/engine/src/loader.rs` sobrepõe as fases de recursos do personagem entre núcleos de CPU utilizando `std::thread::scope`. Decodificação de sprites (`sff:decode`), análise de animação (`air:parse`) e decodificação de áudio (`snd:decode`) rodam simultaneamente em threads trabalhadoras enquanto constantes CNS, arquivos de estado e gatilhos CMD são analisados na thread chamadora. `par::workers` em `crates/formats/src/par.rs` escala até 32 threads de processamento paralelo em hardwares multithread. O tempo total de carregamento passa a ser limitado pela fase individual mais lenta em vez do acúmulo serial.

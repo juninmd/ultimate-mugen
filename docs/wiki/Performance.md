@@ -111,3 +111,7 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
 ## SFFv2 Vectorized Slice Codec Decoding
 
 `decode_rle5` and `decode_lz5` in `crates/formats/src/sff.rs` utilize contiguous slice fills (`out[j..e].fill(val)`) instead of scalar element-by-element assignment loops. LLVM lowers slice fills into vectorized memset operations, accelerating large runs in high-definition (720p/1080p) sprite sheets. For `kfm720.def`, load time decreased from 60.1 ms to 6.7 ms (8.97x faster).
+
+## Parallel Character Asset Pipeline
+
+`load_char_def` in `crates/engine/src/loader.rs` overlaps character asset phases across CPU cores using `std::thread::scope`. Sprite decoding (`sff:decode`), animation parsing (`air:parse`), and sound decoding (`snd:decode`) execute concurrently on worker threads while CNS constants, state files, and CMD input triggers parse on the caller thread. `par::workers` in `crates/formats/src/par.rs` scales up to 32 parallel worker threads on high-core hardware. Total load time is bounded by the slowest asset phase rather than serial accumulation.

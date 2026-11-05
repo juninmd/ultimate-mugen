@@ -453,6 +453,7 @@ impl Code {
                 } else {
                     0.0
                 };
+                if v.is_nan() { return f64::NAN; }
                 return match op2 {
                     Op::Eq => (v == c) as i32 as f64,
                     Op::Ne => (v != c) as i32 as f64,
@@ -468,6 +469,7 @@ impl Code {
                 } else {
                     0.0
                 };
+                if v.is_nan() { return f64::NAN; }
                 return match op2 {
                     Op::Eq => (c == v) as i32 as f64,
                     Op::Ne => (c != v) as i32 as f64,

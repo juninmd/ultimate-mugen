@@ -6,7 +6,7 @@ use crate::matchs::Match;
 const HIT_VAR_KEYS: &[&str] = &[
     "hittype", "animtype", "airtype", "groundtype", "damage", "hitcount", "guardcount", "hitshaketime", "hittime", "slidetime", "ctrltime",
     "xvel", "yvel", "yaccel", "chainid", "guarded", "fall", "fall.damage", "fall.xvel", "fall.yvel", "fall.recover", "fall.time",
-    "fall.recovertime", "fall.kill", "kill", "id", "playerno",
+    "fall.recovertime", "fall.kill", "kill", "id", "playerno", "xaccel", "down.recover", "dizzypoints", "guardpoints", "redlife", "score",
 ];
 
 pub fn get_hit_var_set(m: &mut Match, i: usize, sc: &Controller) {
@@ -44,13 +44,19 @@ pub fn get_hit_var_set(m: &mut Match, i: usize, sc: &Controller) {
             "kill" => g.kill = flag,
             "id" => g.attacker_id = v.max(0.0) as u32,
             "playerno" => g.attacker_no = v.max(0.0) as usize,
+            "xaccel" => g.xaccel = v as f32 * l,
+            "down.recover" => g.down_recover = flag,
+            "dizzypoints" => g.dizzy_points = v as f32,
+            "guardpoints" => g.guard_points = v as f32,
+            "redlife" => g.red_life = v as f32,
+            "score" => g.score = v as f32,
             _ => {}
         }
     }
 }
 
 fn shake_key(prefix: &str, key: &str) -> bool {
-    key.strip_prefix(prefix).is_some_and(|rest| matches!(rest, ".time" | ".freq" | ".ampl" | ".phase"))
+    key.strip_prefix(prefix).is_some_and(|rest| matches!(rest, ".time" | ".freq" | ".ampl" | ".phase" | ".dir"))
 }
 
 fn copy_shake(dst: &mut Shake, src: &Shake, key: &str, prefix: &str) {
@@ -61,7 +67,9 @@ fn copy_shake(dst: &mut Shake, src: &Shake, key: &str, prefix: &str) {
         ".time" => dst.time = src.time,
         ".freq" => dst.freq = src.freq,
         ".ampl" => dst.ampl = src.ampl,
-        _ => dst.phase = src.phase,
+        ".phase" => dst.phase = src.phase,
+        ".dir" => dst.dir = src.dir,
+        _ => {}
     }
 }
 
@@ -137,6 +145,18 @@ pub fn merge_hitdef(dst: &mut HitDefData, src: &HitDefData, sc: &Controller) {
             "guard.cornerpush.veloff" => dst.guard_corner_push = src.guard_corner_push,
             "airguard.cornerpush.veloff" => dst.air_guard_corner_push = src.air_guard_corner_push,
             "palfx.time" | "palfx.add" | "palfx.mul" => dst.target_palfx = src.target_palfx.clone(),
+            "dizzypoints" => dst.dizzy_points = src.dizzy_points,
+            "guardpoints" => dst.guard_points = src.guard_points,
+            "redlife" => dst.red_life = src.red_life,
+            "score" => dst.score = src.score,
+            "down.recover" => dst.down_recover = src.down_recover,
+            "missonoverride" => dst.miss_on_override = src.miss_on_override,
+            "unhittabletime" => dst.unhittable_time = src.unhittable_time,
+            "sparkscale" => dst.spark_scale = src.spark_scale,
+            "xaccel" => dst.xaccel = src.xaccel,
+            "attack.depth" => dst.attack_depth = src.attack_depth,
+            "p2clsncheck" => dst.p2clsncheck = src.p2clsncheck,
+            "p2clsnrequire" => dst.p2clsnrequire = src.p2clsnrequire,
             _ => {}
         }
     }

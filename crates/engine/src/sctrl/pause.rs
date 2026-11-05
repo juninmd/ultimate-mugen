@@ -4,6 +4,7 @@ use crate::matchs::{Event, Match, PauseState};
 
 pub fn pause(m: &mut Match, i: usize, sc: &Controller) {
     let time = m.num(i, sc, "time", 0.0, 0) as i32;
+    if time <= 0 { return; }
     let move_time = m.num(i, sc, "movetime", 0.0, 0) as i32;
     let end_cmd_buf_time = m.num(i, sc, "endcmdbuftime", 0.0, 0) as i32;
     let pause_bg = m.num(i, sc, "pausebg", 1.0, 0) != 0.0;
@@ -15,6 +16,7 @@ pub fn super_pause(m: &mut Match, i: usize, sc: &Controller) {
     let n = |m: &Match, k: &str, d: f64, idx: usize| m.num(i, sc, k, d, idx);
     let l = m.fighters[i].lscl;
     let time = n(m, "time", 30.0, 0) as i32;
+    if time <= 0 { return; }
     let move_time = n(m, "movetime", 0.0, 0) as i32;
     let darken = n(m, "darken", 1.0, 0) != 0.0;
     let unhittable = n(m, "unhittable", 1.0, 0) != 0.0;

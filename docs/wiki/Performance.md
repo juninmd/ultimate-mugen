@@ -130,3 +130,7 @@ etain_mut.
   - `matchs::AssignKind`: Replaced dynamic `String` allocations in trigger variable assignments with a 1-byte enum `AssignKind`, cutting assignment tuple memory by 50% and eliminating per-assignment heap operations.
   - `hitdef::state_mask` / `attr_kind_mask` / `guardflag_bits`: In-place case-insensitive ASCII byte folding without string allocations.
   - `triggers::const_val`: Zero-alloc stack-buffered key lookup for `velocity.*.x` constants.
+
+- **Wave 45 - Explod Cache Array & Projectile Triangular Collision Sweeps**:
+  - `Match::update_explods`: Pre-indexed fighter position and pause states into a compact 8-element stack array, avoiding linear `Fighter` scans per explod.
+  - `Match::update_projectiles`: Stack-buffered frozen flags for up to 64 projectiles avoiding heap allocations, and triangular pair-wise collision iteration `(a + 1)..n` halving projectile collision checks.

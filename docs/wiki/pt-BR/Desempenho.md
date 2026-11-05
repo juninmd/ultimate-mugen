@@ -24,3 +24,7 @@ etain_mut.
   - `matchs::AssignKind`: Substituição de alocações dinâmicas de `String` em atribuições de variáveis por um enum de 1 byte `AssignKind`, reduzindo pela metade a memória da tupla e eliminando operações na heap.
   - `hitdef::state_mask` / `attr_kind_mask` / `guardflag_bits`: Processamento de bytes ASCII insensível a maiúsculas in-place sem alocação de strings.
   - `triggers::const_val`: Busca em buffer de pilha com zero alocações para constantes `velocity.*.x`.
+
+- **Onda 45 - Cache de Explods em Array e Varredura Triangular de Colisão de Projéteis**:
+  - `Match::update_explods`: Pré-indexação de posições e estados de pausa dos lutadores em array compacto de 8 posições na pilha, eliminando varreduras lineares por explod.
+  - `Match::update_projectiles`: Flags de congelamento em buffer de pilha para até 64 projéteis sem alocações na heap, e iteração triangular de pares `(a + 1)..n` reduzindo pela metade verificações de colisão entre projéteis.

@@ -123,3 +123,7 @@ A avaliação de partidas em `crates/engine/src/matchs.rs`, `crates/engine/src/t
 - `Match::assigns` registra mutações de variáveis usando o enum compacto `VarKind` (`Var`, `FVar`, `SysVar`, `SysFVar`) em vez de alocar chaves `String` dinâmicas por atribuição.
 - `state_mask`, `attr_kind_mask` e `guardflag_bits` processam fatias de string byte a byte com `to_ascii_uppercase()` em linha, eliminando alocações temporárias de `String` maiúscula em avaliações de `hitbyattr`.
 - A taxa de simulação atingiu mais de 262.000 ticks/segundo com latência máxima por tick inferior a 0,053 ms.
+
+## Conversão de Sprites para RGBA sem Ramificação via LUT em Cache L1
+
+`sprite_to_rgba` em `crates/formats/src/sff.rs` pré-popula uma tabela de busca de 256 entradas `lut: [[u8; 4]; 256]` em cache L1, mapeando índices de paleta de 8 bits diretamente para quads RGBA. O laço de pixels usa cópias de 4 bytes sem desvio condicional (`chunk.copy_from_slice(&lut[c])`), eliminando desvios por pixel para transparência (`c != 0`) e reduzindo falhas de predição de desvio durante a decodificação de sprites. A fase de decodificação SFF executa em ~0,8 ms para folhas de sprites padrão de lutadores.

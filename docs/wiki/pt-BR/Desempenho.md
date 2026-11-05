@@ -98,3 +98,7 @@ Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,
 No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
 
 `Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.
+
+## Analisador de Animações AIR com Alocação Zero
+
+`parse_air` em `crates/formats/src/air.rs` opera diretamente sobre fatias de string de cada linha sem alocar instâncias `String` em minúsculas (`line.to_ascii_lowercase()`) para cada linha do arquivo de animação. O reconhecimento de seções e cabeçalhos (`parse_begin_action`, `parse_clsn_header`, `parse_clsn_box`) avalia fatias de bytes com insensibilidade a maiúsculas ASCII (`eq_ignore_ascii_case`), e as coordenadas de caixas de colisão são processadas em um array de pilha fixo `[f32; 4]` em vez de alocar um `Vec<f32>` na heap por caixa delimitadora.

@@ -98,3 +98,7 @@ On the cloud development machine, median normalization time decreased from 60.8 
 In the cloud development environment, warm-run allocations decreased from 2,331 to 1,183 per decode. Elapsed times were noisy (roughly 9–11 ms in warm runs) and do not demonstrate a speedup. This reduces temporary allocation churn rather than the final decoded PCM size. The benchmark excludes playback and audio-device latency. Run `cargo test --locked --release --example audio_bench` for sample-preservation, mono/stereo, tail and existing PCM tests.
 
 `Ui::quad` transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.
+
+## Zero-Allocation AIR Animation Parser
+
+`parse_air` in `crates/formats/src/air.rs` operates directly on line string slices without allocating lowercase `String` instances (`line.to_ascii_lowercase()`) for every line in the animation file. Action and header recognition (`parse_begin_action`, `parse_clsn_header`, `parse_clsn_box`) evaluate byte slices with ASCII case-folding (`eq_ignore_ascii_case`), and collision box coordinates parse into a fixed stack array `[f32; 4]` rather than allocating a temporary heap `Vec<f32>` per bounding box.

@@ -83,46 +83,45 @@ fn skip_digits(b: &[u8], mut i: usize) -> usize {
 }
 
 /// `/begin\s+action\s+(-?\d+)/i` anywhere in the line.
-fn parse_begin_action(lower: &str) -> Option<i32> {
-    let b = lower.as_bytes();
+fn parse_begin_action(line: &str) -> Option<i32> {
+    let b = line.as_bytes();
     let mut from = 0;
-    while let Some(p) = lower[from..].find("begin") {
-        let start = from + p;
-        let mut i = start + 5;
-        let j = skip_ws(b, i);
-        if j > i && b[j..].starts_with(b"action") {
-            i = j + 6;
-            let k = skip_ws(b, i);
-            if k > i {
-                let mut d = k;
-                if b.get(d) == Some(&b'-') {
-                    d += 1;
-                }
-                let e = skip_digits(b, d);
-                if e > d {
-                    return parse_i32(&lower[k..e]);
+    while from + 5 <= b.len() {
+        if b[from..from + 5].eq_ignore_ascii_case(b"begin") {
+            let i = from + 5;
+            let j = skip_ws(b, i);
+            if j > i && j + 6 <= b.len() && b[j..j + 6].eq_ignore_ascii_case(b"action") {
+                let k = skip_ws(b, j + 6);
+                if k > j + 6 {
+                    let mut d = k;
+                    if b.get(d) == Some(&b'-') {
+                        d += 1;
+                    }
+                    let e = skip_digits(b, d);
+                    if e > d {
+                        return parse_i32(&line[k..e]);
+                    }
                 }
             }
         }
-        from = start + 1;
+        from += 1;
     }
     None
 }
 
-/// `/^clsn([12])(default)?\s*:\s*(\d+)/i` -> (kind, is_default)
-fn parse_clsn_header(lower: &str) -> Option<(u8, bool)> {
-    let b = lower.as_bytes();
-    if !b.starts_with(b"clsn") {
+fn parse_clsn_header(line: &str) -> Option<(u8, bool)> {
+    let b = line.as_bytes();
+    if b.len() < 5 || !b[..4].eq_ignore_ascii_case(b"clsn") {
         return None;
     }
-    let kind = match b.get(4) {
-        Some(b'1') => 1,
-        Some(b'2') => 2,
+    let kind = match b[4] {
+        b'1' => 1,
+        b'2' => 2,
         _ => return None,
     };
     let mut i = 5;
     let mut is_default = false;
-    if b[i..].starts_with(b"default") {
+    if b.len() >= i + 7 && b[i..i + 7].eq_ignore_ascii_case(b"default") {
         is_default = true;
         i += 7;
     }
@@ -137,15 +136,14 @@ fn parse_clsn_header(lower: &str) -> Option<(u8, bool)> {
     Some((kind, is_default))
 }
 
-/// `/^clsn([12])\s*\[\s*\d+\s*\]\s*=\s*(.+)$/i` -> (kind, value start offset)
-fn parse_clsn_box(lower: &str) -> Option<(u8, usize)> {
-    let b = lower.as_bytes();
-    if !b.starts_with(b"clsn") {
+fn parse_clsn_box(line: &str) -> Option<(u8, usize)> {
+    let b = line.as_bytes();
+    if b.len() < 5 || !b[..4].eq_ignore_ascii_case(b"clsn") {
         return None;
     }
-    let kind = match b.get(4) {
-        Some(b'1') => 1,
-        Some(b'2') => 2,
+    let kind = match b[4] {
+        b'1' => 1,
+        b'2' => 2,
         _ => return None,
     };
     let mut i = skip_ws(b, 5);
@@ -172,7 +170,6 @@ fn parse_clsn_box(lower: &str) -> Option<(u8, usize)> {
     Some((kind, i))
 }
 
-/// `/AS(\d+)D(\d+)/` anywhere in an uppercase string.
 fn parse_as_d(bl: &str) -> Option<(i32, i32)> {
     let b = bl.as_bytes();
     let mut from = 0;
@@ -204,7 +201,6 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
     let mut def2: Vec<Box4> = Vec::new();
     let mut next1: Option<Vec<Box4>> = None;
     let mut next2: Option<Vec<Box4>> = None;
-    // (kind, is_default) of the last ClsnN[Default] header
     let mut pending: Option<(u8, bool)> = None;
 
     for raw in split_lines(text) {
@@ -212,10 +208,53 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
         if line.is_empty() {
             continue;
         }
-        let ll = line.to_ascii_lowercase();
-        if ll.starts_with('[') {
+        if starts_with_number(line) {
+            if let Some(anim) = cur.as_mut() {
+                let p: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+                let at = |i: usize| p.get(i).copied().unwrap_or("");
+                let fl = at(5).to_ascii_uppercase();
+                let bl = at(6).to_ascii_uppercase();
+                let mut blend = Blend::None;
+                let mut alpha = None;
+                if bl.starts_with("A1") {
+                    blend = Blend::Add1;
+                } else if bl.starts_with("AS") {
+                    blend = Blend::Add;
+                    alpha = parse_as_d(&bl);
+                } else if bl.starts_with('A') {
+                    blend = Blend::Add;
+                } else if bl.starts_with('S') {
+                    blend = Blend::Sub;
+                }
+                let fnum = |s: &str, d: f32| match parse_float(s) {
+                    Some(v) if v != 0.0 && !v.is_nan() => v as f32,
+                    _ => d,
+                };
+                let opt = |i: usize, d: f32| if at(i).is_empty() { d } else { fnum(at(i), d) };
+                let frame = AnimFrame {
+                    group: parse_i32(at(0)).unwrap_or(0),
+                    index: parse_i32(at(1)).unwrap_or(0),
+                    x: fnum(at(2), 0.0),
+                    y: fnum(at(3), 0.0),
+                    time: parse_i32(at(4)).unwrap_or(1),
+                    flip_h: fl.contains('H'),
+                    flip_v: fl.contains('V'),
+                    blend,
+                    alpha,
+                    xscale: opt(7, 1.0),
+                    yscale: opt(8, 1.0),
+                    angle: opt(9, 0.0),
+                    clsn1: next1.take().unwrap_or_else(|| def1.clone()),
+                    clsn2: next2.take().unwrap_or_else(|| def2.clone()),
+                };
+                anim.frames.push(frame);
+                pending = None;
+            }
+            continue;
+        }
+        if line.starts_with('[') {
             finish(&mut cur, &mut anims);
-            if let Some(id) = parse_begin_action(&ll) {
+            if let Some(id) = parse_begin_action(line) {
                 cur = Some(Animation { id, frames: Vec::new(), loop_start: 0, total_time: 0 });
             }
             def1.clear();
@@ -226,7 +265,7 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
             continue;
         }
         let Some(anim) = cur.as_mut() else { continue };
-        if let Some((kind, is_default)) = parse_clsn_header(&ll) {
+        if let Some((kind, is_default)) = parse_clsn_header(line) {
             pending = Some((kind, is_default));
             match (kind, is_default) {
                 (1, true) => def1 = Vec::new(),
@@ -236,9 +275,15 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
             }
             continue;
         }
-        if let Some((kind, vs)) = parse_clsn_box(&ll) {
-            let vals: Vec<f32> =
-                line[vs..].split(',').map(|s| parse_float(s).unwrap_or(0.0) as f32).collect();
+        if let Some((kind, vs)) = parse_clsn_box(line) {
+            let mut vals = [0.0f32; 4];
+            let mut vi = 0;
+            for s in line[vs..].split(',') {
+                if vi < 4 {
+                    vals[vi] = parse_float(s).unwrap_or(0.0) as f32;
+                    vi += 1;
+                }
+            }
             let bx = norm_box(&vals);
             match pending {
                 Some((k, true)) if k == kind => {
@@ -247,61 +292,18 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
                 Some((k, false)) if k == kind => {
                     if kind == 1 { next1.get_or_insert_with(Vec::new).push(bx) } else { next2.get_or_insert_with(Vec::new).push(bx) }
                 }
-                // tolerate a missing header
                 _ => {
                     if kind == 1 { next1.get_or_insert_with(Vec::new).push(bx) } else { next2.get_or_insert_with(Vec::new).push(bx) }
                 }
             }
             continue;
         }
-        if ll.starts_with("loopstart") {
+        if line.len() >= 9 && line[..9].eq_ignore_ascii_case("loopstart") {
             anim.loop_start = anim.frames.len();
             continue;
         }
-        if ll.starts_with("interpolate") {
+        if line.len() >= 11 && line[..11].eq_ignore_ascii_case("interpolate") {
             continue;
-        }
-        if starts_with_number(line) {
-            let p: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
-            let at = |i: usize| p.get(i).copied().unwrap_or("");
-            let fl = at(5).to_ascii_uppercase();
-            let bl = at(6).to_ascii_uppercase();
-            let mut blend = Blend::None;
-            let mut alpha = None;
-            if bl.starts_with("A1") {
-                blend = Blend::Add1;
-            } else if bl.starts_with("AS") {
-                blend = Blend::Add;
-                alpha = parse_as_d(&bl);
-            } else if bl.starts_with('A') {
-                blend = Blend::Add;
-            } else if bl.starts_with('S') {
-                blend = Blend::Sub;
-            }
-            // JS `parseFloat(x) || d`
-            let fnum = |s: &str, d: f32| match parse_float(s) {
-                Some(v) if v != 0.0 && !v.is_nan() => v as f32,
-                _ => d,
-            };
-            let opt = |i: usize, d: f32| if at(i).is_empty() { d } else { fnum(at(i), d) };
-            let frame = AnimFrame {
-                group: parse_i32(at(0)).unwrap_or(0),
-                index: parse_i32(at(1)).unwrap_or(0),
-                x: fnum(at(2), 0.0),
-                y: fnum(at(3), 0.0),
-                time: parse_i32(at(4)).unwrap_or(1),
-                flip_h: fl.contains('H'),
-                flip_v: fl.contains('V'),
-                blend,
-                alpha,
-                xscale: opt(7, 1.0),
-                yscale: opt(8, 1.0),
-                angle: opt(9, 0.0),
-                clsn1: next1.take().unwrap_or_else(|| def1.clone()),
-                clsn2: next2.take().unwrap_or_else(|| def2.clone()),
-            };
-            anim.frames.push(frame);
-            pending = None;
         }
     }
     finish(&mut cur, &mut anims);

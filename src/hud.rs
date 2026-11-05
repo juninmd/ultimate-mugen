@@ -54,23 +54,34 @@ impl Hud {
         // team leaders (first fighter of each side); partners get compact bars
         // Main bar per side: the fighter you control (side 0) / the front-line fighter still standing (side 1); everyone else gets a portrait tile.
         let main_of = |sd: usize| -> Option<&Fighter> {
-            let all: Vec<&Fighter> = m.roots().filter(|f| f.side == sd).collect();
-            if m.team_tag {
-                if let Some(active) = all.iter().copied().find(|f| !f.ikemen.standby) {
-                    return Some(active);
+            let mut first = None;
+            let mut alive_fallback = None;
+            for f in m.roots().filter(|f| f.side == sd) {
+                if m.team_tag && !f.ikemen.standby {
+                    return Some(f);
+                }
+                if human.contains(&f.id) && f.alive {
+                    return Some(f);
+                }
+                if f.alive && alive_fallback.is_none() {
+                    alive_fallback = Some(f);
+                }
+                if first.is_none() {
+                    first = Some(f);
                 }
             }
-            all.iter()
-                .copied()
-                .find(|f| human.contains(&f.id) && f.alive)
-                .or_else(|| all.iter().copied().find(|f| f.alive))
-                .or_else(|| all.first().copied())
+            alive_fallback.or(first)
         };
-        let roots: Vec<&Fighter> = (0..2).filter_map(main_of).collect();
-        let partners: Vec<&Fighter> = m
-            .roots()
-            .filter(|f| !roots.iter().any(|r| r.id == f.id))
-            .collect();
+        let Some(r0) = main_of(0) else { return; };
+        let Some(r1) = main_of(1) else { return; };
+        let roots = [r0, r1];
+        let partners: Vec<&Fighter> = if m.fighters.len() > 2 {
+            m.roots()
+                .filter(|f| f.id != r0.id && f.id != r1.id)
+                .collect()
+        } else {
+            Vec::new()
+        };
         let w = BASE_W;
         let text = |t: &str, x: f32, y: f32, size: f32, c: Color, al: Align, disp: bool| {
             let font = if disp { &ui.display } else { &ui.body };
@@ -1346,23 +1357,18 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
         let ww = hh * src.w / src.h;
         let (x0, y0) = (pc.x - ww / 2.0, pc.y - half);
         let flip = side == 1 && !full;
-        let (u0, u1) = if flip {
-            ((src.x + src.w) / iw, src.x / iw)
-        } else {
-            (src.x / iw, (src.x + src.w) / iw)
-        };
-        let (v0, v1) = (src.y / ih, (src.y + src.h) / ih);
-        let vertices = vec![
-            Vertex::new(x0, y0, 0.0, u0, v0, WHITE),
-            Vertex::new(x0 + ww, y0, 0.0, u1, v0, WHITE),
-            Vertex::new(x0 + ww, y0 + hh, 0.0, u1, v1, WHITE),
-            Vertex::new(x0, y0 + hh, 0.0, u0, v1, WHITE),
-        ];
-        draw_mesh(&Mesh {
-            vertices,
-            indices: vec![0, 1, 2, 0, 2, 3],
-            texture: Some(tex),
-        });
+        draw_texture_ex(
+            &tex,
+            x0,
+            y0,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(ww, hh)),
+                source: Some(src),
+                flip_x: flip,
+                ..Default::default()
+            },
+        );
     }
     let _ = (s, frame, col);
 }

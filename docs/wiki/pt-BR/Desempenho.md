@@ -13,6 +13,8 @@ Como a engine mantém o carregamento rápido e os quadros estáveis, e como medi
 | Importação e Descompressão Zip | Diretório central escaneado, entradas descompactadas em paralelo com barra visual de progresso `ZipProgress` e indicador de threads de hardware | Todos os núcleos (máx. 32) |
 | Sprites do personagem | A conversão paleta para RGBA roda em paralelo, uma vez por buffer de pixels e paleta únicos; sprites ligados compartilham um `ImageData` e, portanto, um único upload na GPU | Todos os núcleos (máx. 8) |
 | Sprites do cenário | Mesma conversão RGBA em paralelo; o buffer RGBA é movido para o cenário, nunca copiado | Todos os núcleos (máx. 8) |
+| Cache e reuso de cenários | `src::registry` | Instâncias de `MugenStage` são cacheadas entre a prévia de seleção e o início da luta em `StageEntry`, reduzindo o carregamento do cenário de ~30 ms para 0,0 ms | Lazy init (1) |
+| Parsing de cenário em passada única | `ume_formats::stage` | O `.def` do cenário é processado uma única vez com `parse_ini_no_lines` e compartilhado com a detecção de modelos 3D, eliminando passadas duplicadas e alocações de linhas | 1 |
 | Cache de estados comuns | `ume_engine::common` | `common_def()` cacheado via `OnceLock<Arc<CharDef>>`, eliminando ~4 ms de parsing duplicado de `common1.cns` por partida | 1 (lazy init) |
 | Parsing CNS e CMD em passada única | `ume_engine::loader`, `cns` | Seções processadas uma única vez com `parse_ini_no_lines` e compartilhadas entre constantes e estados; evita passadas redundantes de INI | 1 |
 | Cache de bytecode de expressões e parâmetros | `ume_engine::chardef` | `safe_expr` e `Param::new` cacheiam AST e bytecode compilados para triggers e parâmetros idênticos via armazenamento thread-local | Por thread |

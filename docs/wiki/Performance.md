@@ -13,6 +13,8 @@ How the engine keeps loading fast and frames smooth, and how to measure it.
 | Zip Import & Decompression | Central directory scanned, entries decompressed in parallel with live `ZipProgress` visual loading bar and hardware thread tracking | All cores (max 32) |
 | Character sprites | Palette to RGBA conversion runs in parallel, once per unique pixel buffer and palette; linked sprites share one `ImageData`, so they also share one GPU upload | All cores (max 8) |
 | Stage sprites | Same parallel RGBA conversion; the RGBA buffer is moved into the stage, never copied | All cores (max 8) |
+| Stage caching & reuse | `src::registry` | `MugenStage` instances are cached across selection previews and match initialization in `StageEntry`, reducing match start stage loading from ~30 ms to 0.0 ms | Lazy init (1) |
+| Single-pass stage parsing | `ume_formats::stage` | Stage `.def` parsed once with `parse_ini_no_lines` and shared with 3D model detection, eliminating duplicate INI parsing and string line allocations | 1 |
 | Common state cache | `ume_engine::common` | `common_def()` cached via `OnceLock<Arc<CharDef>>`, eliminating ~4 ms duplicate parse of `common1.cns` per match | 1 (lazy init) |
 | CNS & CMD single-pass parsing | `ume_engine::loader`, `cns` | Sections parsed once using `parse_ini_no_lines` and shared between constants and states; avoids redundant INI passes | 1 |
 | Expression & param bytecode cache | `ume_engine::chardef` | `safe_expr` and `Param::new` cache parsed AST and bytecode across identical triggers and parameters via thread-local storage | Per thread |

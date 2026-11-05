@@ -307,6 +307,7 @@ pub struct StageEntry {
     pub mugen: bool,
     pub src: StageSrc,
     preview: RefCell<Option<Option<Arc<ume_engine::chardef::ImageData>>>>,
+    stage: RefCell<Option<Arc<ume_formats::stage::MugenStage>>>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
@@ -370,6 +371,7 @@ impl Registry {
                 mugen: false,
                 src: StageSrc::Builtin(i),
                 preview: RefCell::new(None),
+                stage: RefCell::new(None),
             })
             .collect();
         Registry {
@@ -551,17 +553,19 @@ impl Registry {
                         def,
                     },
                     preview: RefCell::new(None),
+                    stage: RefCell::new(None),
                 });
                 continue;
             }
             match load_stage(&vfs, &def) {
                 Ok(st) => {
                     let prev = stages::mugen_preview(&st);
-                    ss.push(st.name.clone());
+                    let arc_st = Arc::new(st);
+                    ss.push(arc_st.name.clone());
                     self.stages.push(StageEntry {
                         key,
                         id,
-                        name: st.name,
+                        name: arc_st.name.clone(),
                         thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]],
                         mugen: true,
                         src: StageSrc::Mugen {
@@ -569,6 +573,7 @@ impl Registry {
                             def,
                         },
                         preview: RefCell::new(Some(prev)),
+                        stage: RefCell::new(Some(arc_st)),
                     });
                 }
                 Err(x) => errs.push(format!("{def}: {x}")),
@@ -637,16 +642,38 @@ impl Registry {
             )
         });
     }
+    pub fn get_or_load_stage(&self, i: usize) -> Option<Arc<ume_formats::stage::MugenStage>> {
+        if let Some(st) = self.stages[i].stage.borrow().as_ref() {
+            return Some(st.clone());
+        }
+        if let StageSrc::Mugen { vfs, def } = &self.stages[i].src {
+            match load_stage(vfs, def) {
+                Ok(s) => {
+                    let arc = Arc::new(s);
+                    *self.stages[i].stage.borrow_mut() = Some(arc.clone());
+                    Some(arc)
+                }
+                Err(e) => {
+                    eprintln!(
+                        "stage '{}' failed to load ({e}); using the built-in fallback",
+                        self.stages[i].name
+                    );
+                    None
+                }
+            }
+        } else {
+            None
+        }
+    }
     pub fn stage_preview(&self, i: usize) -> Option<Arc<ume_engine::chardef::ImageData>> {
         match &self.stages.get(i)?.src {
             StageSrc::Builtin(b) => stages::illustration_preview(&self.builtin_stages[*b].id),
-            StageSrc::Mugen { vfs, def } => {
+            StageSrc::Mugen { .. } => {
                 if let Some(p) = self.stages[i].preview.borrow().as_ref() {
                     return p.clone();
                 }
-                let p = load_stage(vfs, def)
-                    .ok()
-                    .and_then(|st| stages::mugen_preview(&st));
+                let st = self.get_or_load_stage(i);
+                let p = st.as_ref().and_then(|s| stages::mugen_preview(s));
                 *self.stages[i].preview.borrow_mut() = Some(p.clone());
                 p
             }
@@ -664,22 +691,16 @@ impl Registry {
     pub fn build_stage(&self, i: usize) -> Stage {
         match &self.stages[i].src {
             StageSrc::Builtin(b) => (self.builtin_stages[*b].build)(),
-            StageSrc::Mugen { vfs, def } => match load_stage(vfs, def) {
-                Ok(s) => {
+            StageSrc::Mugen { vfs, def } => match self.get_or_load_stage(i) {
+                Some(s) => {
                     if self.stages[i].preview.borrow().is_none() {
                         *self.stages[i].preview.borrow_mut() = Some(stages::mugen_preview(&s));
                     }
-                    let mut st = stages::from_mugen(s);
+                    let mut st = stages::from_mugen((*s).clone());
                     st.bgm = stage_bgm(vfs, def).map(Arc::new);
                     st
                 }
-                Err(e) => {
-                    eprintln!(
-                        "stage '{}' failed to load ({e}); using the built-in fallback",
-                        self.stages[i].name
-                    );
-                    (self.builtin_stages[0].build)()
-                }
+                None => (self.builtin_stages[0].build)(),
             },
         }
     }

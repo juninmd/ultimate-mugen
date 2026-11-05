@@ -46,3 +46,8 @@ etain_mut.
   - Uso de array fixo em pilha `roots = [r0, r1]` substituindo vetores dinâmicos na heap.
   - Eliminação de alocações de parceiros em partidas 1v1 convencionais.
   - Substituição de vetores de malha/vértices/índices no desenho de retratos por chamadas diretas de `draw_texture_ex`.
+
+- **Onda 49 - Curto-Circuito em Bytecode de Duas Operações e Contexto Único em Gatilhos**:
+  - `bytecode::Code::run`: Execução em caminho rápido para expressões de 2 operações (`!trigger`, `-const`, `!const`, `!host`), ignorando inicialização de pilha e loop do interpretador.
+  - `Match::triggered`: Reutilização de instância única de `Ctx` entre `trigger_all` e grupos de gatilhos, eliminando recriações de contexto por controlador.
+  - `Match::num`: Avaliação direta de expressão sem mapeamento intermediário de closure.

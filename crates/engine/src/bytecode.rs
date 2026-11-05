@@ -408,6 +408,39 @@ impl Code {
         if self.depth > STACK {
             return 0.0;
         }
+        if self.ops.len() == 1 {
+            return match self.ops[0] {
+                Op::Const(v) => v,
+                Op::Trig0(i) => {
+                    if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                        h.trigger(name, &[], *comp, raw.as_deref())
+                    } else {
+                        0.0
+                    }
+                }
+                Op::Host(i) => eval(&self.host[i as usize], h),
+                _ => self.run_slice(h, 0, 1),
+            };
+        }
+        if self.ops.len() == 2 {
+            match (self.ops[0], self.ops[1]) {
+                (Op::Trig0(i), Op::Not) => {
+                    let v = if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                        h.trigger(name, &[], *comp, raw.as_deref())
+                    } else {
+                        0.0
+                    };
+                    return if v == 0.0 { 1.0 } else { 0.0 };
+                }
+                (Op::Const(v), Op::Neg) => return -v,
+                (Op::Const(v), Op::Not) => return if v == 0.0 { 1.0 } else { 0.0 },
+                (Op::Host(i), Op::Not) => {
+                    let v = eval(&self.host[i as usize], h);
+                    return if v == 0.0 { 1.0 } else { 0.0 };
+                }
+                _ => {}
+            }
+        }
         self.run_slice(h, 0, self.ops.len())
     }
 

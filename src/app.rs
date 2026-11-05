@@ -548,10 +548,22 @@ impl App {
             self.apply_quality();
         }
         if self.settings.fps {
+            let fps = get_fps();
+            let col = if fps >= 58 {
+                hex("#6dff9e")
+            } else if fps >= 30 {
+                hex("#ffdd55")
+            } else {
+                hex("#ff5555")
+            };
+            let threads = std::thread::available_parallelism().map_or(1, |n| n.get());
+            let ft_ms = dt * 1000.0;
             self.ui.text(
                 &format!(
-                    "{} FPS · {}×{} · arte {:.1}×",
-                    get_fps(),
+                    "{} FPS ({:.1} ms) · {}T · {}×{} · arte {:.1}×",
+                    fps,
+                    ft_ms,
+                    threads,
                     (screen_width() * dpi_scale()) as i32,
                     Settings::physical_h() as i32,
                     ume_engine::native::rig::art_res()
@@ -559,12 +571,12 @@ impl App {
                 10.0,
                 20.0,
                 16.0,
-                hex("#6dff9e"),
+                col,
                 Align::Left,
                 false,
             );
             let st = stats();
-            self.ui.text(&format!("{} v · {} dc · {} up/{} KB · atlas {:.0}%/{:.0}%", st.vertices, st.draw_calls, st.uploads, st.upload_kb, st.rgba_fill * 100.0, st.index_fill * 100.0), 10.0, 42.0, 14.0, hex("#6dff9e"), Align::Left, false);
+            self.ui.text(&format!("{} v · {} dc · {} up/{} KB · atlas {:.0}%/{:.0}%", st.vertices, st.draw_calls, st.uploads, st.upload_kb, st.rgba_fill * 100.0, st.index_fill * 100.0), 10.0, 42.0, 14.0, col, Align::Left, false);
         }
         // screen transition: diagonal wipe whenever the screen changes (not into/out of the fight itself)
         let disc = std::mem::discriminant(&self.screen);

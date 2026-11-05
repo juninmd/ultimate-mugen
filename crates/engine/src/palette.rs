@@ -24,14 +24,38 @@ impl PalFx {
     pub fn expired(&self) -> bool { self.time > 0 && self.elapsed >= self.time }
 
     pub fn params(&self) -> PalParams {
-        let wave = if self.sin_period > 0 { (std::f32::consts::TAU * self.elapsed as f32 / self.sin_period as f32).sin() } else { 0.0 };
-        let add = [0, 1, 2].map(|k| self.add[k] + self.sin_add[k] * wave);
-        PalParams { add, mul: self.mul, color: self.color, invert: self.invert_all, hue: self.hue + self.sin_hue * wave }
+        if self.sin_period > 0 {
+            let wave = (std::f32::consts::TAU * self.elapsed as f32 / self.sin_period as f32).sin();
+            let add = [
+                self.add[0] + self.sin_add[0] * wave,
+                self.add[1] + self.sin_add[1] * wave,
+                self.add[2] + self.sin_add[2] * wave,
+            ];
+            PalParams { add, mul: self.mul, color: self.color, invert: self.invert_all, hue: self.hue + self.sin_hue * wave }
+        } else {
+            PalParams { add: self.add, mul: self.mul, color: self.color, invert: self.invert_all, hue: self.hue }
+        }
     }
 
     pub fn from_controller(m: &Match, i: usize, sc: &Controller, prefix: &str) -> PalFx {
-        let k = |name: &str| if prefix.is_empty() { name.to_string() } else { format!("{prefix}.{name}") };
-        let n = |name: &str, d: f64, idx: usize| m.num(i, sc, &k(name), d, idx) as f32;
+        let n = |name: &str, d: f64, idx: usize| -> f32 {
+            if prefix.is_empty() {
+                m.num(i, sc, name, d, idx) as f32
+            } else {
+                let mut buf = [0u8; 64];
+                let key = if prefix.len() + 1 + name.len() <= buf.len() {
+                    let p_bytes = prefix.as_bytes();
+                    let n_bytes = name.as_bytes();
+                    buf[..p_bytes.len()].copy_from_slice(p_bytes);
+                    buf[p_bytes.len()] = b'.';
+                    buf[p_bytes.len() + 1..p_bytes.len() + 1 + n_bytes.len()].copy_from_slice(n_bytes);
+                    std::str::from_utf8(&buf[..p_bytes.len() + 1 + n_bytes.len()]).unwrap_or(name)
+                } else {
+                    return m.num(i, sc, &format!("{prefix}.{name}"), d, idx) as f32;
+                };
+                m.num(i, sc, key, d, idx) as f32
+            }
+        };
         PalFx {
             time: n("time", 0.0, 0) as i32,
             add: [n("add", 0.0, 0), n("add", 0.0, 1), n("add", 0.0, 2)],
@@ -49,10 +73,12 @@ impl PalFx {
 
 impl PalParams {
     pub fn combine(self, o: PalParams) -> PalParams {
+        if self.is_identity() { return o; }
+        if o.is_identity() { return self; }
         PalParams {
-            add: [0, 1, 2].map(|k| self.add[k] + o.add[k]),
-            mul: [0, 1, 2].map(|k| self.mul[k] * o.mul[k] / 256.0),
-            color: self.color * o.color / 256.0,
+            add: [self.add[0] + o.add[0], self.add[1] + o.add[1], self.add[2] + o.add[2]],
+            mul: [self.mul[0] * o.mul[0] * (1.0 / 256.0), self.mul[1] * o.mul[1] * (1.0 / 256.0), self.mul[2] * o.mul[2] * (1.0 / 256.0)],
+            color: self.color * o.color * (1.0 / 256.0),
             invert: self.invert != o.invert,
             hue: self.hue + o.hue,
         }
@@ -61,21 +87,43 @@ impl PalParams {
     pub fn is_identity(&self) -> bool { *self == PalParams::default() }
 
     pub fn apply(&self, rgb: [u8; 3]) -> [u8; 3] {
-        let mut c = rgb.map(|v| v as f32);
-        if self.invert { c = c.map(|v| 255.0 - v); }
+        if self.is_identity() {
+            return rgb;
+        }
+        if !self.invert && self.color >= 256.0 && self.hue.rem_euclid(360.0).abs() <= 0.0001 {
+            return [
+                ((rgb[0] as f32 + self.add[0]) * (self.mul[0] * (1.0 / 256.0))).clamp(0.0, 255.0) as u8,
+                ((rgb[1] as f32 + self.add[1]) * (self.mul[1] * (1.0 / 256.0))).clamp(0.0, 255.0) as u8,
+                ((rgb[2] as f32 + self.add[2]) * (self.mul[2] * (1.0 / 256.0))).clamp(0.0, 255.0) as u8,
+            ];
+        }
+        let mut c = [rgb[0] as f32, rgb[1] as f32, rgb[2] as f32];
+        if self.invert { c = [255.0 - c[0], 255.0 - c[1], 255.0 - c[2]]; }
         if self.color < 256.0 {
-            let gray = (c[0] + c[1] + c[2]) / 3.0;
-            let t = self.color / 256.0;
-            c = c.map(|v| gray + (v - gray) * t);
+            let gray = (c[0] + c[1] + c[2]) * (1.0 / 3.0);
+            let t = self.color * (1.0 / 256.0);
+            c = [
+                gray + (c[0] - gray) * t,
+                gray + (c[1] - gray) * t,
+                gray + (c[2] - gray) * t,
+            ];
         }
         if self.hue.rem_euclid(360.0).abs() > 0.0001 {
             let (sin_a, cos_a) = self.hue.to_radians().sin_cos();
             let k = 0.577_350_26;
             let dot = (c[0] + c[1] + c[2]) * k;
             let cross = [(c[2] - c[1]) * k, (c[0] - c[2]) * k, (c[1] - c[0]) * k];
-            c = [0, 1, 2].map(|i| (c[i] * cos_a + cross[i] * sin_a + k * dot * (1.0 - cos_a)).clamp(0.0, 255.0));
+            c = [
+                (c[0] * cos_a + cross[0] * sin_a + k * dot * (1.0 - cos_a)).clamp(0.0, 255.0),
+                (c[1] * cos_a + cross[1] * sin_a + k * dot * (1.0 - cos_a)).clamp(0.0, 255.0),
+                (c[2] * cos_a + cross[2] * sin_a + k * dot * (1.0 - cos_a)).clamp(0.0, 255.0),
+            ];
         }
-        [0, 1, 2].map(|k| ((c[k] + self.add[k]) * self.mul[k] / 256.0).clamp(0.0, 255.0) as u8)
+        [
+            ((c[0] + self.add[0]) * (self.mul[0] * (1.0 / 256.0))).clamp(0.0, 255.0) as u8,
+            ((c[1] + self.add[1]) * (self.mul[1] * (1.0 / 256.0))).clamp(0.0, 255.0) as u8,
+            ((c[2] + self.add[2]) * (self.mul[2] * (1.0 / 256.0))).clamp(0.0, 255.0) as u8,
+        ]
     }
 }
 

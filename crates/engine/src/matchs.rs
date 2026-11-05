@@ -767,18 +767,20 @@ impl Match {
             Some((by, mt, sup)) => !(f.id == by && mt > 0) && !f.pause_bool && (if sup { f.super_move_time } else { f.pause_move_time }) <= 0,
         };
         let mut k = 0;
-        let mut awaken: Vec<usize> = vec![];
-        let mut tag_requests: Vec<usize> = vec![];
+        let mut awaken = [0usize; 8];
+        let mut awaken_len = 0;
+        let mut tag_requests = [0usize; 8];
+        let mut tag_len = 0;
         let tagged = self.team_tag;
         for (fi, f) in self.fighters.iter_mut().enumerate() {
             if f.is_helper { continue; }
             let mut bits = if f.has_assert(asf::NOINPUT) { 0 } else { inputs.get(k).copied().unwrap_or(0) };
             if tagged {
-                if bits & crate::input::k::TAG != 0 { tag_requests.push(fi); }
+                if bits & crate::input::k::TAG != 0 && tag_len < tag_requests.len() { tag_requests[tag_len] = fi; tag_len += 1; }
                 bits &= !crate::input::k::TAG;
                 if f.ikemen.standby { bits = 0; }
             }
-            if bits & crate::input::k::T != 0 { awaken.push(fi); }
+            if bits & crate::input::k::T != 0 && awaken_len < awaken.len() { awaken[awaken_len] = fi; awaken_len += 1; }
             k += 1;
             if f.assert_input.1 > 0 { bits |= f.assert_input.0; f.assert_input.1 -= 1; }
             if f.input_shift > 0 { let (b, fa) = (bits, f.facing as i32); for _ in 0..f.input_shift { f.history.push(b, fa); } }
@@ -789,8 +791,8 @@ impl Match {
             f.cmd.update(&f.history, &f.def.commands, paused);
             f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 });
         }
-        for fi in awaken { self.try_transform(fi); }
-        if tagged { self.tag_step(&tag_requests); }
+        for &fi in &awaken[..awaken_len] { self.try_transform(fi); }
+        if tagged { self.tag_step(&tag_requests[..tag_len]); }
         let mut ids = std::mem::take(&mut self.tick_ids);
         ids.clear();
         self.collect_run_order(&mut ids);
@@ -831,10 +833,8 @@ impl Match {
             if f.move_hit > 0 { f.move_hit += 1; }
             if f.move_guarded > 0 { f.move_guarded += 1; }
             if f.move_countered > 0 { f.move_countered += 1; }
-            for n in f.not_hit_by.iter_mut() { n.1 -= 1; }
-            f.not_hit_by.retain(|n| n.1 > 0);
-            for n in f.hit_by.iter_mut() { n.1 -= 1; }
-            f.hit_by.retain(|n| n.1 > 0);
+            if !f.not_hit_by.is_empty() { f.not_hit_by.retain_mut(|n| { n.1 -= 1; n.1 > 0 }); }
+            if !f.hit_by.is_empty() { f.hit_by.retain_mut(|n| { n.1 -= 1; n.1 > 0 }); }
             if let Some(p) = f.palfx.as_mut() { p.elapsed += 1; }
             let tp = f.frame().map(|fr| TrailPoint { x: f.pos.x, y: f.pos.y, group: fr.group, index: fr.index, fx: fr.x, fy: fr.y, flip_h: fr.flip_h, facing: f.facing });
             if let Some(ai) = f.after_image.as_mut() {

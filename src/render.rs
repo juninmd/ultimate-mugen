@@ -882,7 +882,8 @@ impl MatchRenderer {
         if hit && f.hit_shake % 4 < 2 && !f.ghv.guarded && g.fx_gain > 0.2 {
             o.flash = 0.55;
         }
-        o.pal = Some(m.fighter_pal(fi));
+        let pal = m.fighter_pal(fi);
+        if !pal.is_identity() { o.pal = Some(pal); }
         o.remap = &f.remap;
         if let Some(t) = &f.trans {
             match t.mode {

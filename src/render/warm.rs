@@ -20,7 +20,10 @@ impl Gfx {
         const ATLAS_CAP: f32 = 0.5;
         let mut used = 0;
         for (i, key) in keys.iter().enumerate().skip(at) {
-            let Some(spr) = self.sprite_tex(def, *key, &[]) else {
+            let Some(spr_def) = def.sprites.get(key) else {
+                continue;
+            };
+            let Some(spr) = self.sprite_tex_for(def, *key, spr_def, &[]) else {
                 continue;
             };
             if spr.resident() {

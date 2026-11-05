@@ -412,6 +412,7 @@ pub fn load_mugen_char(
     d.local_h = local_h;
     d.mugen_version = crate::chardef::parse_mugen_version(info.and_then(|s| s.get("mugenversion")));
     d.constants = constants;
+    d.refresh_sizes();
     d.portrait = sprites.get(&(9000, 0)).cloned();
     d.sprites = sprites;
     d.anims = anims;

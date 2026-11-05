@@ -59,7 +59,7 @@ fn frame_key(fr: &NativeFrame) -> String { serde_json::to_string(&(&fr.pose, &fr
 fn render_frame(nc: &NativeChar, fr: &NativeFrame, with_images: bool, palette: Option<&Value>) -> RigRender {
     let force_rig = std::env::var("UME_FORCE_RIG").is_ok();
     if !force_rig && with_images {
-        if let Some(r) = super::pixel::try_load(nc, fr) {
+        if let Some(r) = super::pixel::try_load(nc, fr, palette) {
             return r;
         }
     }
@@ -252,7 +252,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     let mut states = HashMap::new();
     parse_states(&(minus1 + &cns), &mut states, true);
     if with_images && std::env::var("UME_FORCE_RIG").is_err() {
-        if let Some(avatar) = super::pixel::portrait(nc) {
+        if let Some(avatar) = super::portrait::portrait(nc, palette) {
             sprites.insert((9000, 1), avatar);
         }
     }

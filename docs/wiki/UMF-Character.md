@@ -190,6 +190,10 @@ If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files inst
 
 `meta.json` holds `{"refHeight": N}`: the height in pixels of the standing body in `01_idle.png`. Every pose of the fighter is scaled so that body is 100 units tall, so a lying or crouching sprite keeps the same pixel size. Without it each PNG is scaled to 100 units by its own height.
 
+Palette entries also apply to these PNGs: each pixel is matched to the shading line of a colour declared in `art.style.colors`, and the matching palette colour replaces it at the same shade. A palette key with no matching `art.style.colors` entry, or a colour nothing in the art resembles, is left untouched.
+
+The web build does not read this folder from disk. `scripts/build-web.sh` runs `scripts/pack_sprites.py`, which writes one `assets/chars/sprites/<id>.pack` per fighter (images capped at 768 px, 256 colours, `meta.json` anchors rescaled) into `web/dist`; the browser fetches a pack when the fighter is focused on the select screen or loaded for the fight, and the engine reads it through the same virtual folder. A failed download keeps the rig.
+
 ## Validate
 
 ```bash

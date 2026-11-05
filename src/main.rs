@@ -29,6 +29,8 @@ mod storage;
 mod texgen;
 mod ui;
 mod update;
+#[cfg(target_arch = "wasm32")]
+mod web_sprites;
 mod vfx;
 
 use crate::gfx::*;
@@ -211,6 +213,8 @@ async fn game() {
     let mut app = app::App::new(has("--touch") || touch_dev, shots.is_none() && !has("--mute")).await;
     #[cfg(target_arch = "wasm32")]
     app.apply_deep_link();
+    #[cfg(target_arch = "wasm32")]
+    crate::web_sprites::prefetch_roster(app.reg.chars.iter().filter(|entry| !entry.mugen).map(|entry| entry.id.trim_start_matches("umf:").to_string()).collect());
     if let Some(dir) = shots { shots::run(&mut app, &dir).await; return; }
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     match netlink::NetArgs::parse(&args) {

@@ -1,6 +1,8 @@
+use super::pack::read_sprite;
+use super::recolor::Recolor;
 use super::rig::{art_res, RigRender};
 use super::types::{NativeChar, NativeFrame};
-use crate::chardef::{ImageData, Sprite};
+use crate::chardef::ImageData;
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 
@@ -11,11 +13,11 @@ const CROUCH_HURT: [f32; 4] = [-16.0, -60.0, 16.0, 0.0];
 const LYING_HURT: [f32; 4] = [-46.0, -26.0, 46.0, 0.0];
 const STRIKE_BOX: [f32; 4] = [2.0, -84.0, 38.0, -32.0];
 const STAND_UNITS: f32 = 100.0;
-const MAX_PORTRAIT_EDGE: u32 = 256;
 
-pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame) -> Option<RigRender> {
+pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value>) -> Option<RigRender> {
     if fr.effect.is_some() { return None; }
-    let mut render = load_pose(&sprite_roots(&nc.id), &native_frame_sprite_key(fr), fr.hit.is_some())?;
+    let recolor = palette.and_then(|p| Recolor::new(nc.art.style.get("colors"), p));
+    let mut render = load_pose(&sprite_roots(&nc.id), &native_frame_sprite_key(fr), fr.hit.is_some(), recolor.as_ref())?;
     let height = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(STAND_UNITS as f64) as f32;
     let height_ratio = height / STAND_UNITS;
     render.scale *= height_ratio;
@@ -24,34 +26,6 @@ pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame) -> Option<RigRender> {
         bounds[3] *= height_ratio;
     }
     Some(render)
-}
-
-pub(super) fn portrait(nc: &NativeChar) -> Option<Sprite> {
-    sprite_roots(&nc.id).iter().find_map(|root| {
-        let bytes = std::fs::read(root.join("portrait.png")).ok()?;
-        let png = ume_formats::png::decode_png(&bytes).ok()?;
-        let (width, height, rgba) = portrait_thumbnail(png.width, png.height, png.rgba?);
-        Some(Sprite { image: Some(ImageData::new(width, height, rgba)), width: width as f32, height: height as f32, axis_x: 0.0, axis_y: 0.0, scale: 1.0 })
-    })
-}
-
-fn portrait_thumbnail(width: u32, height: u32, rgba: Vec<u8>) -> (u32, u32, Vec<u8>) {
-    if width.max(height) <= MAX_PORTRAIT_EDGE { return (width, height, rgba); }
-    let (target_width, target_height) = if width >= height {
-        (MAX_PORTRAIT_EDGE, ((height as u64 * MAX_PORTRAIT_EDGE as u64 + width as u64 / 2) / width as u64).max(1) as u32)
-    } else {
-        (((width as u64 * MAX_PORTRAIT_EDGE as u64 + height as u64 / 2) / height as u64).max(1) as u32, MAX_PORTRAIT_EDGE)
-    };
-    let mut resized = Vec::with_capacity((target_width * target_height * 4) as usize);
-    for y in 0..target_height {
-        let source_y = ((2 * y as u64 + 1) * height as u64 / (2 * target_height as u64)).min(height as u64 - 1) as u32;
-        for x in 0..target_width {
-            let source_x = ((2 * x as u64 + 1) * width as u64 / (2 * target_width as u64)).min(width as u64 - 1) as u32;
-            let source = ((source_y as u64 * width as u64 + source_x as u64) * 4) as usize;
-            resized.extend_from_slice(&rgba[source..source + 4]);
-        }
-    }
-    (target_width, target_height, resized)
 }
 
 pub fn native_frame_sprite_key(fr: &NativeFrame) -> String {
@@ -67,7 +41,7 @@ pub fn native_frame_sprite_key(fr: &NativeFrame) -> String {
     }
 }
 
-fn sprite_roots(id: &str) -> Vec<PathBuf> {
+pub(super) fn sprite_roots(id: &str) -> Vec<PathBuf> {
     let mut roots = vec![
         PathBuf::from(SPRITE_ROOT).join(id),
         Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").join(SPRITE_ROOT).join(id),
@@ -78,17 +52,17 @@ fn sprite_roots(id: &str) -> Vec<PathBuf> {
     roots
 }
 
-fn load_pose(roots: &[PathBuf], pose: &str, striking: bool) -> Option<RigRender> {
-    load_pose_with_source(roots, pose, striking).map(|(render, _)| render)
+fn load_pose(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<RigRender> {
+    load_pose_with_source(roots, pose, striking, recolor).map(|(render, _)| render)
 }
 
-fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool) -> Option<(RigRender, PathBuf)> {
+fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<(RigRender, PathBuf)> {
     let lower = pose.to_ascii_lowercase();
     let stem = pose_stem(&lower);
     [pose, stem, BASE_STEM, "idle"]
         .iter()
         .flat_map(|name| roots.iter().map(move |root| (root, name)))
-        .find_map(|(root, name)| read_render(root, name, &lower, stem, striking).map(|render| (render, root.join(format!("{name}.png")))))
+        .find_map(|(root, name)| read_render(root, name, &lower, stem, striking, recolor).map(|render| (render, root.join(format!("{name}.png")))))
 }
 
 pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
@@ -101,7 +75,7 @@ pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
             if frame.effect.is_some() {
                 return serde_json::json!({"frame": index, "pose": pose, "resolution": "procedural-effect"});
             }
-            match load_pose_with_source(&roots, &pose, frame.hit.is_some()) {
+            match load_pose_with_source(&roots, &pose, frame.hit.is_some(), None) {
                 Some((render, source)) => {
                     let stem = source.file_stem().and_then(|name| name.to_str()).unwrap_or_default();
                     let lower = pose.to_ascii_lowercase();
@@ -119,12 +93,13 @@ pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
     serde_json::json!({"id": character.id, "declaredHeight": character.stats.height, "avatar": roots.iter().any(|root| root.join("portrait.png").is_file()), "animations": animations})
 }
 
-fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool) -> Option<RigRender> {
-    let bytes = std::fs::read(root.join(format!("{name}.png"))).ok()?;
+fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool, recolor: Option<&Recolor>) -> Option<RigRender> {
+    let bytes = read_sprite(root, &format!("{name}.png"))?;
     let dec = ume_formats::png::decode_png(&bytes).ok()?;
-    let rgba = dec.rgba?;
+    let mut rgba = match &dec.rgba { Some(rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&dec) };
+    if let Some(recolor) = recolor { recolor.apply(&mut rgba); }
     let res = art_res().max(0.1);
-    let meta: Value = std::fs::read(root.join("meta.json")).ok().and_then(|bytes| serde_json::from_slice(&bytes).ok()).unwrap_or(Value::Null);
+    let meta: Value = read_sprite(root, "meta.json").and_then(|bytes| serde_json::from_slice(&bytes).ok()).unwrap_or(Value::Null);
     let frame = meta.get("frames").and_then(|frames| frames.get(name)).unwrap_or(&Value::Null);
     let positive = |value: Option<&Value>| value.and_then(Value::as_f64).filter(|number| number.is_finite() && *number > 0.0 && *number <= f32::MAX as f64).map(|number| number as f32);
     let units = positive(frame.get("refHeight")).or_else(|| positive(meta.get("refHeight"))).unwrap_or(dec.height as f32).max(1.0);
@@ -213,7 +188,7 @@ mod tests {
         let dir = fixture("frame-geometry");
         write_png(&dir, "walk0", 400, 600);
         std::fs::write(dir.join("meta.json"), r#"{"refHeight":200,"frames":{"walk0":{"refHeight":400,"axisX":180,"axisY":560}}}"#).unwrap();
-        let render = load_pose(std::slice::from_ref(&dir), "walk0", false).unwrap();
+        let render = load_pose(std::slice::from_ref(&dir), "walk0", false, None).unwrap();
         assert!((render.axis_y * render.scale - 140.0).abs() < 0.001);
         assert!((render.axis_x * render.scale - 45.0).abs() < 0.001);
         assert!((400.0 * art_res() * render.scale - 100.0).abs() < 0.001);
@@ -225,20 +200,20 @@ mod tests {
         let mut fighter: NativeChar = serde_json::from_str(include_str!("../../../../assets/chars/bruno.json")).unwrap();
         let frame: NativeFrame = serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
         fighter.stats.height = Some(100.0);
-        let baseline = try_load(&fighter, &frame).unwrap();
+        let baseline = try_load(&fighter, &frame, None).unwrap();
         fighter.stats.height = Some(116.0);
-        let taller = try_load(&fighter, &frame).unwrap();
+        let taller = try_load(&fighter, &frame, None).unwrap();
         assert!((taller.scale / baseline.scale - 1.16).abs() < 0.001);
         assert!((taller.hurt[0][1] / baseline.hurt[0][1] - 1.16).abs() < 0.001);
         fighter.stats.height = Some(f64::NAN);
-        assert_eq!(try_load(&fighter, &frame).unwrap().scale, baseline.scale);
+        assert_eq!(try_load(&fighter, &frame, None).unwrap().scale, baseline.scale);
     }
 
     #[test]
     fn effect_frames_do_not_fall_back_to_fighter_idle() {
         let fighter: NativeChar = serde_json::from_str(include_str!("../../../../assets/chars/bruno.json")).unwrap();
         let frame: NativeFrame = serde_json::from_value(serde_json::json!({"effect": {"kind": "orb"}, "ticks": 1})).unwrap();
-        assert!(try_load(&fighter, &frame).is_none());
+        assert!(try_load(&fighter, &frame, None).is_none());
     }
 
     #[test]
@@ -273,7 +248,7 @@ mod tests {
         write_png(&dir, "09_hit1", 30, 20);
         write_png(&dir, "jab0", 50, 20);
         let roots = [dir.clone()];
-        let art_width = |pose: &str| load_pose(&roots, pose, false).unwrap().image.unwrap().w;
+        let art_width = |pose: &str| load_pose(&roots, pose, false, None).unwrap().image.unwrap().w;
         assert_eq!(art_width("jab0"), 50);
         assert_eq!(art_width("hitH1"), 30);
         assert_eq!(art_width("hitH3"), 10, "no hit3 art: falls back to the base pose");
@@ -287,8 +262,8 @@ mod tests {
         write_png(&dir, "14_lie", 200, 200);
         std::fs::write(dir.join("meta.json"), r#"{"refHeight": 160}"#).unwrap();
         let roots = [dir.clone()];
-        let stand = load_pose(&roots, "idle0", false).unwrap();
-        let lying = load_pose(&roots, "lie", false).unwrap();
+        let stand = load_pose(&roots, "idle0", false, None).unwrap();
+        let lying = load_pose(&roots, "lie", false, None).unwrap();
         assert_eq!(stand.scale, lying.scale);
         assert!((stand.scale * 160.0 - STAND_UNITS / art_res()).abs() < 1e-3, "standing body is {STAND_UNITS} units tall");
         std::fs::remove_dir_all(dir).unwrap();
@@ -300,16 +275,22 @@ mod tests {
         write_png(&dir, "01_idle", 10, 10);
         write_png(&dir, "14_lie", 10, 10);
         let roots = [dir.clone()];
-        assert_eq!(load_pose(&roots, "lie", false).unwrap().hurt, vec![LYING_HURT]);
-        assert_eq!(load_pose(&roots, "idle0", false).unwrap().hurt, vec![STAND_HURT]);
-        assert_eq!(load_pose(&roots, "crouch1", false).unwrap().hurt, vec![CROUCH_HURT]);
+        assert_eq!(load_pose(&roots, "lie", false, None).unwrap().hurt, vec![LYING_HURT]);
+        assert_eq!(load_pose(&roots, "idle0", false, None).unwrap().hurt, vec![STAND_HURT]);
+        assert_eq!(load_pose(&roots, "crouch1", false, None).unwrap().hurt, vec![CROUCH_HURT]);
         std::fs::remove_dir_all(dir).unwrap();
     }
 
     #[test]
     fn missing_art_returns_none_so_the_rig_takes_over() {
         let dir = fixture("none");
-        assert!(load_pose(std::slice::from_ref(&dir), "idle0", false).is_none());
+        assert!(load_pose(std::slice::from_ref(&dir), "idle0", false, None).is_none());
         std::fs::remove_dir_all(dir).unwrap();
     }
+
+
+
+
+
+
 }

@@ -190,6 +190,10 @@ Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG
 
 `meta.json` guarda `{"refHeight": N}`: a altura em pixels do corpo em pé em `01_idle.png`. Toda pose do lutador é escalada para esse corpo medir 100 unidades, então um sprite deitado ou agachado mantém o mesmo tamanho de pixel. Sem ele, cada PNG é escalado a 100 unidades pela própria altura.
 
+As entradas de `palettes` também valem para esses PNGs: cada pixel é casado com a linha de sombreamento de uma cor declarada em `art.style.colors` e a cor da paleta substitui no mesmo tom. Uma chave de paleta sem entrada correspondente em `art.style.colors`, ou uma cor que nada na arte lembra, fica intocada.
+
+O build web não lê essa pasta do disco. `scripts/build-web.sh` roda `scripts/pack_sprites.py`, que grava um `assets/chars/sprites/<id>.pack` por lutador (imagens limitadas a 768 px, 256 cores, âncoras do `meta.json` reescaladas) em `web/dist`; o navegador baixa o pack quando o lutador ganha foco na seleção ou é carregado para a luta, e o engine lê pelo mesmo diretório virtual. Se o download falhar, o rig continua.
+
 ## Validar
 
 ```bash

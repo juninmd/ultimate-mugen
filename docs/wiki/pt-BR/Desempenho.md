@@ -327,3 +327,10 @@ etain_mut.
   - `controllers::set_vars`: Avaliação direta de `param.exprs.first()` sem iterações duplicadas de busca por string `sc.param(...)`.
   - `controllers::run`: Substituição de checagens duplas de parâmetros em `changestate`/`selfstate` por consultas unificadas `opt(...)` para `ctrl` e `anim`.
   - Vazão de simulação elevada para 226.415 ticks/s com p50 em 0.003 ms, e decodificação de retratos reduzida para 0.6 ms.
+
+- **Onda 55 - Decodificacao RGBA Alinhada em u32, Tabelas SFF Pre-Alocadas e Paletas PCX Sem Desvios**:
+  - sff::sprite_to_rgba: Alocacao direta em Vec<u32> garantindo alinhamento de 4 bytes por hardware, eliminando loops de alinhamento de fatias e checagens de desvio, e convertendo para Vec<u8> via Vec::from_raw_parts com custo zero.
+  - pcx::read_rgb_palette: Conversao de blocos RGB de 768 bytes em [u32; 256] com u32::from_ne_bytes sem desvios condicionais e atribuicao direta de canal alfa constante.
+  - sff::decode_v1: Remocao do campo nao utilizado idx em V1Job e pre-alocacao do vetor jobs com count.min(8192).
+  - sff::decode_v2: Pre-alocacao das tabelas de palettes com pal_count.min(buf.len() / 16 + 1) e jobs com spr_count.min(buf.len() / 28 + 1).
+  - sff::decode_v2_image: Otimizacao de quadros RAW profundidade 32 com copia direta de fatias e profundidade 24 com chunks de 3 bytes em vez de consultas byte a byte.

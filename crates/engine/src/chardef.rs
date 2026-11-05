@@ -7,6 +7,9 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 pub use ume_formats::air::{AnimFrame, Animation, Blend, Box4};
 
+mod constants;
+pub use constants::default_constants;
+
 static IMG_ID: AtomicU64 = AtomicU64::new(1);
 
 /// RGBA image owned by the engine (uploaded to a GPU texture by the renderer, cached by `id`).
@@ -376,76 +379,3 @@ pub fn parse_mugen_version(raw: Option<&str>) -> f32 {
     }
 }
 
-pub fn default_constants() -> HashMap<String, f64> {
-    let mut m = HashMap::new();
-    let mut s = |k: &str, v: f64| {
-        m.insert(k.to_string(), v);
-    };
-    s("data.life", 1000.0);
-    s("data.power", 3000.0);
-    s("data.attack", 100.0);
-    s("data.defence", 100.0);
-    s("data.fall.defence_up", 50.0);
-    s("data.liedown.time", 60.0);
-    s("data.airjuggle", 15.0);
-    s("data.sparkno", 2.0);
-    s("data.guard.sparkno", 40.0);
-    s("size.xscale", 1.0);
-    s("size.yscale", 1.0);
-    s("size.ground.back", 15.0);
-    s("size.ground.front", 16.0);
-    s("size.air.back", 12.0);
-    s("size.air.front", 12.0);
-    s("size.height", 60.0);
-    s("size.attack.dist", 160.0);
-    s("size.proj.attack.dist", 90.0);
-    s("size.head.pos.x", -5.0);
-    s("size.head.pos.y", -90.0);
-    s("size.mid.pos.x", -5.0);
-    s("size.mid.pos.y", -60.0);
-    s("size.shadowoffset", 0.0);
-    s("size.draw.offset.x", 0.0);
-    s("size.draw.offset.y", 0.0);
-    s("velocity.walk.fwd.x", 2.4);
-    s("velocity.walk.back.x", -2.2);
-    s("velocity.run.fwd.x", 4.6);
-    s("velocity.run.fwd.y", 0.0);
-    s("velocity.run.back.x", -4.5);
-    s("velocity.run.back.y", -3.8);
-    s("velocity.jump.y", -8.4);
-    s("velocity.jump.neu.x", 0.0);
-    s("velocity.jump.back.x", -2.55);
-    s("velocity.jump.fwd.x", 2.5);
-    s("velocity.runjump.back.x", -2.55);
-    s("velocity.runjump.back.y", -8.1);
-    s("velocity.runjump.fwd.x", 4.0);
-    s("velocity.runjump.fwd.y", -8.1);
-    s("velocity.airjump.y", -8.1);
-    s("velocity.airjump.neu.x", 0.0);
-    s("velocity.airjump.back.x", -2.55);
-    s("velocity.airjump.fwd.x", 2.5);
-    s("movement.airjump.num", 1.0);
-    s("movement.airjump.height", 35.0);
-    s("movement.yaccel", 0.44);
-    s("movement.stand.friction", 0.85);
-    s("movement.crouch.friction", 0.82);
-    s("default.lifetoredlifemul", 0.75);
-    s("super.lifetoredlifemul", 0.75);
-    s("default.lifetodizzypointsmul", 1.8);
-    s("super.lifetodizzypointsmul", 0.0);
-    s("default.lifetoguardpointsmul", 1.5);
-    s("super.lifetoguardpointsmul", -0.33);
-    // M.U.G.E.N. 1.1 common1 constants: without them a bouncing / recovering fighter gets 0 gravity and flies off (frozen in 5101 etc.)
-    s("movement.down.bounce.yaccel", 0.4);
-    s("movement.down.bounce.groundlevel", 12.0);
-    s("movement.down.bounce.offset.x", 0.0);
-    s("movement.down.bounce.offset.y", 20.0);
-    s("movement.down.friction.threshold", 0.05);
-    s("movement.air.gethit.groundlevel", 25.0);
-    s("movement.air.gethit.groundrecover.ground.threshold", -20.0);
-    s("movement.air.gethit.groundrecover.groundlevel", 10.0);
-    s("movement.air.gethit.airrecover.threshold", -1.0);
-    s("movement.air.gethit.airrecover.yaccel", 0.35);
-    s("movement.air.gethit.trip.groundlevel", 15.0);
-    m
-}

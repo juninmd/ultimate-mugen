@@ -11,8 +11,10 @@ use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::stage::load_stage;
 use ume_formats::vfs::{char_key, find_char_defs, find_stage_defs, stage_key, text, Vfs};
 
+mod bgm;
 #[path = "registry_sprite_cache.rs"]
 mod sprite_cache;
+pub use bgm::stage_bgm;
 
 include!(concat!(env!("OUT_DIR"), "/chars_gen.rs"));
 
@@ -804,30 +806,6 @@ pub fn read_zip_with_progress(
         ume_formats::perf::emit(&format!("[perf] zip {:.1}MB -> vfs {:.1}MB in {:.0} ms ({})", bytes.len() as f64 / 1048576.0, total as f64 / 1048576.0, clock.elapsed().as_secs_f64() * 1000.0, listing.join(" ")));
     }
     Ok((pack, vfs))
-}
-
-pub fn stage_bgm(vfs: &Vfs, def: &str) -> Option<(Vec<u8>, MusicLoop)> {
-    let secs = parse_ini(&text(vfs.get(&ume_formats::vfs::norm_path(def))?));
-    let m = find_section(&secs, "music")?;
-    let name = unquote(m.get("bgmusic")?);
-    if name.is_empty() {
-        return None;
-    }
-    let base = def.rfind('/').map(|i| &def[..i]).unwrap_or("");
-    let bytes = ume_formats::vfs::resolve(vfs, base, &name)
-        .or_else(|| ume_formats::vfs::resolve(vfs, "", &name))?;
-    let n = |k: &str| {
-        m.get(k)
-            .and_then(|v| v.trim().parse::<usize>().ok())
-            .unwrap_or(0)
-    };
-    Some((
-        bytes.to_vec(),
-        MusicLoop {
-            start: n("bgmloopstart"),
-            end: n("bgmloopend"),
-        },
-    ))
 }
 
 #[cfg(all(test, not(target_arch = "wasm32")))]

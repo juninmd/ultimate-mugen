@@ -800,7 +800,7 @@ value = 5150
 
 [State 5110, up]
 type = ChangeState
-trigger1 = Time >= const(data.liedown.time) * 0 + 40
+trigger1 = Time >= const(data.liedown.time)
 trigger1 = RoundState = 2
 value = 5120
 

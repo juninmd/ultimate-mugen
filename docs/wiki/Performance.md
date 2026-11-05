@@ -100,6 +100,10 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
 
 `Ui::quad` transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.
 
+- **Wave 29 - Chunked Raster Pixmap Conversion & In-Order SFF RLE8 Decoding**:
+  - Replaces per-pixel `extend_from_slice` calls in `raster::pixmap_to_image` with direct 4-byte chunk slice writes (`chunks_exact_mut(4)`).
+  - Streamlines `decode_rle8` read sequence without extra index decrementing.
+
 - **Wave 30 - Branchless Input Relative Directions & Byte Jump Table**:
   - Replaces nested branching in `input::rel_dirs` with branchless bitwise shift `ud | (4 << (is_back ^ 1))`.
   - Replaces string matching in `button_bit` with byte-level slice matching, supporting case-insensitivity without allocation.

@@ -98,3 +98,7 @@ On the cloud development machine, median normalization time decreased from 60.8 
 In the cloud development environment, warm-run allocations decreased from 2,331 to 1,183 per decode. Elapsed times were noisy (roughly 9–11 ms in warm runs) and do not demonstrate a speedup. This reduces temporary allocation churn rather than the final decoded PCM size. The benchmark excludes playback and audio-device latency. Run `cargo test --locked --release --example audio_bench` for sample-preservation, mono/stereo, tail and existing PCM tests.
 
 `Ui::quad` transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.
+
+## Branchless Sprite RGBA Swizzling via L1 Cache LUT
+
+`sprite_to_rgba` in `crates/formats/src/sff.rs` pre-populates an in-cache 256-entry lookup table `lut: [[u8; 4]; 256]`, mapping 8-bit palette indices to pre-swizzled RGBA quads. Pixel loop evaluation uses branchless 4-byte slice copies (`chunk.copy_from_slice(&lut[c])`), eliminating per-pixel branching on transparent pixels (`c != 0`) and reducing branch mispredictions during sprite decoding. SFF decoding phase completes in ~0.8 ms for standard fighter spritesheets.

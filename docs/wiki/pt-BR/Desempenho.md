@@ -98,3 +98,7 @@ Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,
 No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
 
 `Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.
+
+## Conversão de Sprites para RGBA sem Ramificação via LUT em Cache L1
+
+`sprite_to_rgba` em `crates/formats/src/sff.rs` pré-popula uma tabela de busca de 256 entradas `lut: [[u8; 4]; 256]` em cache L1, mapeando índices de paleta de 8 bits diretamente para quads RGBA. O laço de pixels usa cópias de 4 bytes sem desvio condicional (`chunk.copy_from_slice(&lut[c])`), eliminando desvios por pixel para transparência (`c != 0`) e reduzindo falhas de predição de desvio durante a decodificação de sprites. A fase de decodificação SFF executa em ~0,8 ms para folhas de sprites padrão de lutadores.

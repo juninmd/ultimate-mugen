@@ -72,26 +72,16 @@ pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
     let (Some(idx), Some(pal)) = (&s.indexed, pal) else {
         return out;
     };
-    if pal.len() >= 1024 {
-        for (o, &c) in out.as_chunks_mut::<4>().0.iter_mut().zip(idx.iter()) {
-            if c != 0 {
-                let p = c as usize * 4;
-                o[0] = pal[p];
-                o[1] = pal[p + 1];
-                o[2] = pal[p + 2];
-                o[3] = 255;
-            }
+    let mut lut = [[0u8; 4]; 256];
+    let is_rgba_pal = pal.len() >= 1024;
+    for i in 1..256 {
+        let p = if is_rgba_pal { i * 4 } else { i * 3 };
+        if p + 2 < pal.len() {
+            lut[i] = [pal[p], pal[p + 1], pal[p + 2], 255];
         }
-    } else {
-        for (o, &c) in out.as_chunks_mut::<4>().0.iter_mut().zip(idx.iter()) {
-            if c != 0 {
-                let p = c as usize * 4;
-                for (k, v) in o[..3].iter_mut().enumerate() {
-                    *v = pal.get(p + k).copied().unwrap_or(0);
-                }
-                o[3] = 255;
-            }
-        }
+    }
+    for (chunk, &c) in out.chunks_exact_mut(4).zip(idx.iter()) {
+        chunk.copy_from_slice(&lut[c as usize]);
     }
     out
 }

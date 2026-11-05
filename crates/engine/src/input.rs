@@ -55,6 +55,5 @@ pub fn rel_dirs(bits: u32, facing: i32) -> u32 {
     let is_back = is_l ^ is_neg;
     ud | (4 << (is_back ^ 1))
 }
-}
 
 pub trait InputSource { fn poll(&mut self, m: &crate::matchs::Match, me: usize) -> u32; }

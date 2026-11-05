@@ -4,7 +4,7 @@ use crate::gamepad::PadKind;
 use ume_engine::input::k;
 
 impl App {
-    fn controls_screen(&mut self) {
+    pub(super) fn controls_screen(&mut self) {
         if self.key_edit.is_some() {
             self.key_editor();
             return;

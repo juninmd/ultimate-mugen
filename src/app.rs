@@ -3800,9 +3800,6 @@ impl App {
     }
 
     fn mugen_screen(&mut self) {
-    }
-
-    fn mugen_screen(&mut self) {
         self.ui.background();
         self.ui.text(
             "PERSONAGENS E CENÁRIOS M.U.G.E.N",

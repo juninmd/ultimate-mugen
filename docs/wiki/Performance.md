@@ -338,3 +338,10 @@ etain_mut.
   - sff::decode_v1: Removed unused idx from V1Job and pre-allocated jobs buffer with count.min(8192).
   - sff::decode_v2: Pre-allocated palettes buffer with pal_count.min(buf.len() / 16 + 1) and jobs buffer with spr_count.min(buf.len() / 28 + 1).
   - sff::decode_v2_image: Optimized RAW depth-32 frames with single slice copies and depth-24 frames with 3-byte chunks instead of byte-by-byte offset probing.
+
+- **Wave 56 - Copy-Derived Binds, Lazy Fallbacks & Direct In-Place State Animations**:
+  - `fighter::Bind`: Derived `Copy` and `PartialEq`, turning bind checks and updates in `rebind` and `update_bind` into direct stack bit-copies with zero heap cloning.
+  - `fighter::Fighter::change_anim_own`: Added internal animation change helper from own definition, removing external `def.clone()` overhead in `changestate`, `changeanim`, and auto-turn transitions.
+  - `matchs::run_state`: Converted `common` lookup into a lazy fallback (`let fallback;`), bypassing `self.common.clone()` on all negative states (-3, -2, -1) and every character-defined state.
+  - `matchs::change_state`: Replaced eager `self.common.clone()` with reference pointer equality `&self.common` and lazy state definition fallback.
+  - `matchs::tick`: Replaced per-frame `f.st_def.clone()` in physics override loop with scalar `Option<char>` extraction.

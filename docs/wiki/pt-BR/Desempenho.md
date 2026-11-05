@@ -334,3 +334,10 @@ etain_mut.
   - sff::decode_v1: Remocao do campo nao utilizado idx em V1Job e pre-alocacao do vetor jobs com count.min(8192).
   - sff::decode_v2: Pre-alocacao das tabelas de palettes com pal_count.min(buf.len() / 16 + 1) e jobs com spr_count.min(buf.len() / 28 + 1).
   - sff::decode_v2_image: Otimizacao de quadros RAW profundidade 32 com copia direta de fatias e profundidade 24 com chunks de 3 bytes em vez de consultas byte a byte.
+
+- **Onda 56 - Binds com Semantica Copy, Fallbacks Preguicosos e Animacoes Diretas**:
+  - `fighter::Bind`: Implementacao de `Copy` e `PartialEq`, convertendo verificacoes e atualizacoes em `rebind` e `update_bind` em copias binarias de pilha sem clones na heap.
+  - `fighter::Fighter::change_anim_own`: Adicao de metodo auxiliar para troca de animacao propria, removendo clones externos de `def.clone()` em `changestate`, `changeanim` e transicoes de auto-turn.
+  - `matchs::run_state`: Conversao da consulta a `common` em fallback preguicoso (`let fallback;`), ignorando clones de `self.common` em todos os estados negativos (-3, -2, -1) e estados definidos pelo personagem.
+  - `matchs::change_state`: Substituicao do clone ansioso de `self.common` por igualdade de ponteiro `&self.common` e fallback sob demanda.
+  - `matchs::tick`: Eliminacao do clone por quadro de `f.st_def` no loop de override de fisica atraves de extracao escalar de `Option<char>`.

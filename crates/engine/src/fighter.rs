@@ -77,7 +77,7 @@ impl Default for GetHitVars {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BindKind { Target, Parent, Root }
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Bind { pub to: u32, pub time: i32, pub x: f32, pub y: f32, pub kind: BindKind }
 
 pub use crate::palette::PalFx;
@@ -264,6 +264,10 @@ impl Fighter {
             self.elem = ((elem - 1) as usize).min(n - 1);
         }
         self.anim_changed = true;
+    }
+    pub fn change_anim_own(&mut self, no: i32, elem: i32) {
+        let d = self.def.clone();
+        self.change_anim(no, &d, elem);
     }
     pub fn advance_anim(&mut self) {
         if self.anim_changed { self.anim_changed = false; return; }

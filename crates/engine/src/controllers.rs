@@ -68,7 +68,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             let owner = if sc.kind == "selfstate" { m.fighters[i].def.clone() } else { m.fighters[i].st_def.clone() };
             let anim = opt(m, "anim").map(|a| a as i32);
             m.change_state(i, v, owner);
-            if let Some(a) = anim { let d = m.fighters[i].def.clone(); m.fighters[i].change_anim(a, &d, 1); }
+            if let Some(a) = anim { m.fighters[i].change_anim_own(a, 1); }
         }
         "targetstate" => {
             let v = n(m, "value", 0.0) as i32;
@@ -79,8 +79,12 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "changeanim" | "changeanim2" => {
             let v = n(m, "value", 0.0) as i32;
             let e = if sc.has("elem", 0) { n(m, "elem", 1.0) as i32 } else { 1 };
-            let from = if sc.kind == "changeanim2" { m.fighters[i].st_def.clone() } else { m.fighters[i].def.clone() };
-            m.fighters[i].change_anim(v, &from, e);
+            if sc.kind == "changeanim2" {
+                let from = m.fighters[i].st_def.clone();
+                m.fighters[i].change_anim(v, &from, e);
+            } else {
+                m.fighters[i].change_anim_own(v, e);
+            }
         }
         "velset" | "veladd" | "velmul" => {
             let x = opt(m, "x").map(|v| v as f32);

@@ -2691,6 +2691,10 @@ impl App {
     }
 
     async fn load_step(&mut self, step: u8, wait: bool) -> Result<bool, String> {
+        self.load_step_inner(step, wait).await
+    }
+
+    async fn load_step_inner(&mut self, step: u8, wait: bool) -> Result<bool, String> {
         let plan = self.load_plan();
         let s = self.sel.2;
         let n = plan.len();

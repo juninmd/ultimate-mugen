@@ -19,3 +19,8 @@ etain_mut.
   - `loader::load_mugen_char`: Conversão de `fget` para retornar `Option<&str>` ao invés de `Option<String>`, eliminando cerca de 20 alocações na heap por carregamento de lutador.
   - `loader::local_size`: Análise em pilha via `split_once(',')` substituindo a alocação dinâmica de `nums`.
   - `cns::parse_cmd`: `unquote_str` in-place para nome e comandos.
+
+- **Onda 44 - Despacho de Estado AssignKind Zero-Alloc e Máscaras de Bits Case-Insensitive**:
+  - `matchs::AssignKind`: Substituição de alocações dinâmicas de `String` em atribuições de variáveis por um enum de 1 byte `AssignKind`, reduzindo pela metade a memória da tupla e eliminando operações na heap.
+  - `hitdef::state_mask` / `attr_kind_mask` / `guardflag_bits`: Processamento de bytes ASCII insensível a maiúsculas in-place sem alocação de strings.
+  - `triggers::const_val`: Busca em buffer de pilha com zero alocações para constantes `velocity.*.x`.

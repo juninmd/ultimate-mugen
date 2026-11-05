@@ -125,3 +125,8 @@ etain_mut.
   - `loader::load_mugen_char`: Converted `fget` from returning `Option<String>` to `Option<&str>`, eliminating ~20 heap allocations per character load.
   - `loader::local_size`: Stack-based parsing via `split_once(',')` replacing dynamic `nums` allocation.
   - `cns::parse_cmd`: In-place `unquote_str` for command name and inputs.
+
+- **Wave 44 - Zero-Alloc AssignKind State Dispatch & Case-Insensitive Bitmasks**:
+  - `matchs::AssignKind`: Replaced dynamic `String` allocations in trigger variable assignments with a 1-byte enum `AssignKind`, cutting assignment tuple memory by 50% and eliminating per-assignment heap operations.
+  - `hitdef::state_mask` / `attr_kind_mask` / `guardflag_bits`: In-place case-insensitive ASCII byte folding without string allocations.
+  - `triggers::const_val`: Zero-alloc stack-buffered key lookup for `velocity.*.x` constants.

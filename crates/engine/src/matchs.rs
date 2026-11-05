@@ -325,7 +325,13 @@ impl Match {
     // ---------------------------------------------------------------- evaluation helpers
     pub fn ev(&self, i: usize, e: &Expr) -> f64 { e.eval(&Ctx { m: self, i }) }
     pub fn num(&self, i: usize, sc: &Controller, k: &str, d: f64, idx: usize) -> f64 {
-        match sc.param(k).and_then(|p| p.exprs.get(idx)).map(|e| self.ev(i, e)) { Some(v) if !v.is_nan() => v, _ => d }
+        match sc.param(k).and_then(|p| p.exprs.get(idx)) {
+            Some(e) => {
+                let v = e.eval(&Ctx { m: self, i });
+                if !v.is_nan() { v } else { d }
+            }
+            None => d,
+        }
     }
     fn apply_assigns(&mut self) {
         if self.assigns.get_mut().is_empty() { return; }
@@ -400,9 +406,10 @@ impl Match {
     }
 
     fn triggered(&self, i: usize, sc: &Controller) -> bool {
-        for e in &sc.trigger_all { if !truthy(self.ev(i, e)) { return false; } }
+        let ctx = Ctx { m: self, i };
+        for e in &sc.trigger_all { if !truthy(e.eval(&ctx)) { return false; } }
         if sc.triggers.is_empty() { return false; }
-        sc.triggers.iter().any(|g| g.iter().all(|e| truthy(self.ev(i, e))))
+        sc.triggers.iter().any(|g| g.iter().all(|e| truthy(e.eval(&ctx))))
     }
 
     /// Run a state's controllers. Returns true if the state changed.

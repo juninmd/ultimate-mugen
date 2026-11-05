@@ -152,3 +152,8 @@ etain_mut.
   - Used fixed stack array `roots = [r0, r1]` instead of dynamically allocated vectors.
   - Bypassed partner vector allocations on standard 1v1 matches.
   - Replaced temporary mesh/vertex/index heap vectors in portrait drawing with direct `draw_texture_ex` quad draws.
+
+- **Wave 49 - Dual-Op Bytecode Short-Circuits & Single-Context Trigger Loops**:
+  - `bytecode::Code::run`: Fast-path short-circuit execution for 2-op expressions (`!trigger`, `-const`, `!const`, `!host`), bypassing stack array zeroing and interpreter loop.
+  - `Match::triggered`: Reused single `Ctx` across `trigger_all` and trigger groups, eliminating redundant host context creations per controller evaluation.
+  - `Match::num`: Direct expression evaluation avoiding intermediate Option closure mapping.

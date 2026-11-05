@@ -32,6 +32,8 @@ mod update;
 #[cfg(target_arch = "wasm32")]
 mod web_sprites;
 mod vfx;
+#[cfg(test)]
+mod vfx_camera_tests;
 
 use crate::gfx::*;
 

@@ -116,8 +116,6 @@ pub struct Vfx {
     pub weather: Weather,
     clock: f32,
     invert_t: f32,
-    dist_zoom: f32,
-    dist_target: f32,
     parts: Vec<P>,
     rings: Vec<Ring>,
     floats: Vec<Float>,
@@ -174,8 +172,6 @@ impl Vfx {
             weather: Weather::None,
             clock: 0.0,
             invert_t: 0.0,
-            dist_zoom: 0.0,
-            dist_target: 0.0,
             parts: vec![],
             rings: vec![],
             floats: vec![],
@@ -720,16 +716,6 @@ impl Vfx {
     /// Per simulation tick: landing / run dust, super aura.
     pub fn tick(&mut self, m: &Match) {
         self.tick = self.tick.wrapping_add(1);
-        {
-            let xs: Vec<f32> = m.roots().filter(|f| f.alive).map(|f| f.pos.x).collect();
-            if xs.len() >= 2 {
-                let (lo, hi) = (
-                    xs.iter().cloned().fold(f32::MAX, f32::min),
-                    xs.iter().cloned().fold(f32::MIN, f32::max),
-                );
-                self.dist_target = ((260.0 - (hi - lo)) / 260.0).clamp(0.0, 1.0) * 0.07;
-            }
-        }
         self.snap.resize(m.fighters.len(), Snap::default());
         self.squash.resize(m.fighters.len(), 0.0);
         for (side, (fi, f)) in m
@@ -949,7 +935,6 @@ impl Vfx {
         self.sz += (target - self.sz) * (rate * dt).min(1.0);
         self.invert_t = (self.invert_t - dt).max(0.0);
         self.flash_clock += dt;
-        self.dist_zoom += (self.dist_target - self.dist_zoom) * (3.0 * dt).min(1.0);
         self.intro_zoom += (self.intro_target - self.intro_zoom) * (2.5 * dt).min(1.0);
         for l in &mut self.lights {
             l.t += dt;
@@ -1012,7 +997,7 @@ impl Vfx {
             0.0
         };
         let sup = self.sz * self.sz * (3.0 - 2.0 * self.sz) * 0.2;
-        let z = 1.0 + (self.punch + ko + sup + self.dist_zoom + self.intro_zoom) * gain;
+        let z = 1.0 + (self.punch + ko + sup + self.intro_zoom) * gain;
         let mid = if self.sz > 0.01 {
             match m
                 .fighters

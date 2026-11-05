@@ -301,3 +301,10 @@ etain_mut.
   - Pré-alocação de capacidade para `HashSet`, `sprites`, `indexed` e `counts` com base no número de sprites decodificados do SFF.
   - Comparação de bytes ASCII insensível a maiúsculas (`eq_ignore_ascii_case`) nos filtros de `ai_commands` e `movelist`, eliminando strings temporárias na heap para nomes de comandos.
   - `loader::load_mugen_portrait`: Extração in-place de fatias de string em consultas de seção evitando clones de strings pertencidas.
+
+- **Onda 51 - Cache de Dimensões Comuns, Consulta Única de Sprites e Despacho Direto de Textura**:
+  - `CharDef`: Dimensões centrais e fatores de escala (`scale_x`, `scale_y`, `size_ground_back`, `size_ground_front`, `size_air_back`, `size_air_front`, `size_height`, `size_attack_dist`) em cache direto na estrutura via `refresh_sizes`.
+  - `Fighter::c`: Casamento de padrões em caminho rápido para chaves `size.*`, evitando hashing de strings dinâmicas e consultas a `HashMap` a cada tick de física, colisão e avaliação de gatilhos.
+  - `Gfx::sprite_tex_for`: Eliminação da consulta duplicada de `def.sprites.get` por quadro renderizado em todos os lutadores, sombras, ajudantes e explods.
+  - `Gfx::draw_sprite`: Uso direto de `def.scale_x` e `def.scale_y`, removendo consultas repetidas à tabela `def.c(...)` a cada quadro.
+  - Redução no tempo de carregamento de `kfm.def` para 4.6 ms e taxa de simulação acelerada para 216k ticks/s.

@@ -6,7 +6,7 @@ use crate::ui::Ui;
 use crate::vfx::{FxParams, Vfx};
 use std::collections::HashMap;
 use std::sync::Arc;
-use ume_engine::chardef::{AnimFrame, Blend, CharDef, ImageData};
+use ume_engine::chardef::{AnimFrame, Blend, CharDef, ImageData, Sprite};
 use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use ume_engine::palette::{BlendMode, PalParams};
@@ -106,11 +106,22 @@ impl Gfx {
         remap: &[((i32, i32), (i32, i32))],
     ) -> Option<SpriteTex> {
         let spr = def.sprites.get(&key)?;
+        self.sprite_tex_for(def, key, spr, remap)
+    }
+
+    pub fn sprite_tex_for(
+        &mut self,
+        def: &CharDef,
+        key: (i32, i32),
+        spr: &Sprite,
+        remap: &[((i32, i32), (i32, i32))],
+    ) -> Option<SpriteTex> {
         if let Some(ix) = def.indexed.get(&key) {
-            let pal = (!remap.is_empty())
-                .then(|| def.remap_palette(key, remap))
-                .flatten()
-                .or(ix.palette.as_ref());
+            let pal = if remap.is_empty() {
+                ix.palette.as_ref()
+            } else {
+                def.remap_palette(key, remap).or(ix.palette.as_ref())
+            };
             if let Some(pal) = pal.filter(|_| ix.w > 0 && ix.h > 0) {
                 let palette = self.palette(pal);
                 let tex = self
@@ -248,11 +259,11 @@ impl MatchRenderer {
             return;
         };
         let s = g.view_scale;
-        let Some(tex) = g.sprite_tex(def, (fr.group, fr.index), &o.remap) else {
+        let Some(tex) = g.sprite_tex_for(def, (fr.group, fr.index), spr, &o.remap) else {
             return;
         };
-        let xs = def.c("size.xscale", 1.0) as f32;
-        let ys = def.c("size.yscale", 1.0) as f32;
+        let xs = def.scale_x;
+        let ys = def.scale_y;
         let k = spr.scale * lscl;
         let (kx, ky) = (k * xs * extra[0] * fr.xscale, k * ys * extra[1] * fr.yscale);
         let mut flip = facing < 0.0;

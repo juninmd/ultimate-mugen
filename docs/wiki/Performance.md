@@ -305,3 +305,10 @@ etain_mut.
   - Pre-allocated capacity for `HashSet`, `sprites`, `indexed`, and `counts` based on decoded SFF sprite lengths.
   - Case-insensitive ASCII byte comparison (`eq_ignore_ascii_case`) for `ai_commands` and `movelist` filters, eliminating temporary heap strings for command names.
   - `loader::load_mugen_portrait`: In-place string slice extraction from section lookups avoiding owned string clones.
+
+- **Wave 51 - Cached Common Sizes, Single-Pass Sprite Lookups & Direct Texture Dispatch**:
+  - `CharDef`: Cached core dimensions and scale factors (`scale_x`, `scale_y`, `size_ground_back`, `size_ground_front`, `size_air_back`, `size_air_front`, `size_height`, `size_attack_dist`) directly on the struct via `refresh_sizes`.
+  - `Fighter::c`: Fast-path pattern match on `size.*` keys avoiding dynamic string hashing and `HashMap` lookups on every physics, collision, and trigger query.
+  - `Gfx::sprite_tex_for`: Eliminated duplicate `def.sprites.get` lookup per rendered frame across all fighters, shadows, helpers, and explods.
+  - `Gfx::draw_sprite`: Uses `def.scale_x` and `def.scale_y` directly, removing repeated per-frame `def.c(...)` table probes.
+  - Reduced `kfm.def` load time to 4.6 ms and accelerated simulation tick rate to 216k ticks/s.

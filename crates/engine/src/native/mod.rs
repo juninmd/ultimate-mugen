@@ -10,4 +10,4 @@ pub use compile::{compile_native, compile_native_preview, compile_native_with, S
 pub use types::*;
 
 pub use pixel::{audit_native_sprite_frames, native_frame_sprite_key};
-pub use pack::{contains as has_sprite_pack, insert as insert_sprite_pack};
+pub use pack::{contains as has_sprite_pack, insert as insert_sprite_pack, revision as sprite_pack_revision};

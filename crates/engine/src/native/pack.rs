@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
@@ -10,6 +10,7 @@ const MAX_PACKS: usize = 24;
 pub struct SpritePack {
     pub character: String,
     files: HashMap<String, Arc<Vec<u8>>>,
+    revision: u64,
 }
 
 impl SpritePack {
@@ -39,7 +40,7 @@ impl SpritePack {
             at = data_end;
             if files.insert(name.clone(), Arc::new(data.to_vec())).is_some() { return Err(format!("sprite pack: duplicate entry {name}")); }
         }
-        Ok(SpritePack { character, files })
+        Ok(SpritePack { character, files, revision: 0 })
     }
 }
 
@@ -52,11 +53,18 @@ pub(super) fn read_sprite(root: &Path, name: &str) -> Option<Arc<Vec<u8>>> {
 
 thread_local! {
     static PACKS: RefCell<Vec<(String, Arc<SpritePack>)>> = RefCell::new(Vec::new());
+    static REVISION: Cell<u64> = const { Cell::new(0) };
 }
 
 pub fn insert(character: &str, bytes: &[u8]) -> Result<(), String> {
-    let pack = Arc::new(SpritePack::parse(bytes)?);
+    let mut pack = SpritePack::parse(bytes)?;
     if pack.character != character { return Err(format!("sprite pack: {} sent for {character}", pack.character)); }
+    pack.revision = REVISION.with(|revision| {
+        let next = revision.get().wrapping_add(1).max(1);
+        revision.set(next);
+        next
+    });
+    let pack = Arc::new(pack);
     PACKS.with(|packs| {
         let mut packs = packs.borrow_mut();
         packs.retain(|(name, _)| name != character);
@@ -68,6 +76,10 @@ pub fn insert(character: &str, bytes: &[u8]) -> Result<(), String> {
 
 pub fn contains(character: &str) -> bool {
     PACKS.with(|packs| packs.borrow().iter().any(|(name, _)| name == character))
+}
+
+pub fn revision(character: &str) -> u64 {
+    PACKS.with(|packs| packs.borrow().iter().find(|(name, _)| name == character).map_or(0, |(_, pack)| pack.revision))
 }
 
 pub fn read(character: &str, name: &str) -> Option<Arc<Vec<u8>>> {

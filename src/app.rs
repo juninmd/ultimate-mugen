@@ -2671,15 +2671,13 @@ impl App {
     }
 
     async fn load_step(&mut self, step: u8, wait: bool) -> Result<bool, String> {
-        self.load_step_inner(step, wait).await
-    }
-
-    async fn load_step_inner(&mut self, step: u8, wait: bool) -> Result<bool, String> {
         let plan = self.load_plan();
         let s = self.sel.2;
         let n = plan.len();
         let st = step as usize;
         if st < n {
+            #[cfg(target_arch = "wasm32")]
+            if !crate::web_sprites::ready(&self.reg.chars[plan[st].2])? { return Ok(false); }
             ume_shell::watchdog::label("load:character");
             if st == 0 && self.pending.jobs.is_empty() {
                 let keep: Vec<usize> = plan.iter().map(|p| p.2).collect();

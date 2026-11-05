@@ -202,3 +202,5 @@ cargo run --release -p ume-engine --example rig_sheet
 ```
 
 `rig_sheet` generates a sheet with every pose so you can review the art without opening the game.
+
+Browser sprite packs load asynchronously. A newly downloaded or replaced pack invalidates the affected native fighter’s cached previews and all palettes; other fighters keep their caches. Match loading waits for the chosen built-in fighters’ packs and reports download failures rather than starting with a cached procedural fallback. Imported native definitions without a bundled pack remain supported.

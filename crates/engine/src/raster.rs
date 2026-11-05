@@ -4,10 +4,14 @@ use std::sync::Arc;
 pub use tiny_skia::{Color, FillRule, GradientStop, LinearGradient, Paint, PathBuilder, Pixmap, Point, RadialGradient, Shader, SpreadMode, Stroke, Transform, LineCap, LineJoin};
 
 pub fn pixmap_to_image(p: &Pixmap) -> Arc<ImageData> {
-    let mut data = Vec::with_capacity(p.data().len());
-    for px in p.pixels() {
+    let len = p.data().len();
+    let mut data = vec![0u8; len];
+    for (px, dst) in p.pixels().iter().zip(data.chunks_exact_mut(4)) {
         let c = px.demultiply();
-        data.extend_from_slice(&[c.red(), c.green(), c.blue(), c.alpha()]);
+        dst[0] = c.red();
+        dst[1] = c.green();
+        dst[2] = c.blue();
+        dst[3] = c.alpha();
     }
     ImageData::new(p.width(), p.height(), data)
 }

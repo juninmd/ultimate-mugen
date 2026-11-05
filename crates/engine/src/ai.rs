@@ -16,19 +16,23 @@ impl Ai {
         if facing >= 0.0 { if back { b |= k::L } if fwd { b |= k::R } } else { if back { b |= k::R } if fwd { b |= k::L } }
         b
     }
-    fn seq(c: &CommandDef, facing: f32) -> Vec<u32> {
-        let mut out = vec![];
+    fn append_seq(queue: &mut std::collections::VecDeque<u32>, c: &CommandDef, facing: f32) {
+        queue.clear();
         for s in &c.steps {
             let d = Self::abs(s.dir, facing);
             if s.release {
-                out.push(d | s.btns); out.push(d | s.btns);
-                for _ in 0..s.charge { out.push(d | s.btns); }
+                queue.push_back(d | s.btns); queue.push_back(d | s.btns);
+                for _ in 0..s.charge { queue.push_back(d | s.btns); }
                 continue;
             }
-            if s.btns != 0 { let pd = out.last().map(|x| x & 15).unwrap_or(0); out.push(if d != 0 { d } else { pd } | s.btns); out.push(0); }
-            else { out.push(d); out.push(d); }
+            if s.btns != 0 {
+                let pd = queue.back().copied().map(|x| x & 15).unwrap_or(0);
+                queue.push_back(if d != 0 { d } else { pd } | s.btns);
+                queue.push_back(0);
+            } else {
+                queue.push_back(d); queue.push_back(d);
+            }
         }
-        out
     }
 }
 
@@ -71,12 +75,12 @@ impl InputSource for Ai {
             if count > 0 {
                 let pick = (self.r() * count as f32) as usize % count;
                 let c = self.attack.iter().filter(|c| dist < near || c.steps.len() > 1).nth(pick).unwrap();
-                self.queue = Self::seq(c, f.facing).into();
+                Self::append_seq(&mut self.queue, c, f.facing);
                 self.cooldown = if boss { (8.0 + self.r() * 12.0) as i32 } else { (20.0 + (1.0 - skill) * 40.0 + self.r() * 20.0) as i32 };
                 return self.queue.pop_front().unwrap_or(0);
             }
         }
-        if dist > 60.0 && self.r() < 0.02 + skill * 0.02 { self.queue = vec![k::U | fwd, k::U | fwd, fwd].into(); self.cooldown = 30; return self.queue.pop_front().unwrap(); }
+        if dist > 60.0 && self.r() < 0.02 + skill * 0.02 { self.queue.clear(); self.queue.push_back(k::U | fwd); self.queue.push_back(k::U | fwd); self.queue.push_back(fwd); self.cooldown = 30; return self.queue.pop_front().unwrap(); }
         self.idle(dist, fwd, back)
     }
 }

@@ -2,9 +2,17 @@ use std::cell::Cell;
 
 thread_local! { static LABEL: Cell<&'static str> = const { Cell::new("frame") }; }
 
-pub fn label(name: &'static str) { LABEL.with(|l| l.set(name)); }
+/// Names the phase that is about to run.
+///
+/// The label sticks to the first phase named in a frame: a frame is attributed to the work it
+/// started with (loading, prefetching), not to the last bookkeeping block that happened to call
+/// this. Without that rule a trailing `label("import")` at the end of the app frame made every
+/// hitch inside a loading step show up as an import.
+pub fn label(name: &'static str) {
+    LABEL.with(|l| if l.get() == "frame" { l.set(name) });
+}
 pub fn current() -> &'static str { LABEL.with(|l| l.get()) }
-fn reset() { label("frame"); }
+fn reset() { LABEL.with(|l| l.set("frame")); }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Hitch { pub frame: u64, pub ms: f32, pub label: &'static str }
@@ -53,6 +61,13 @@ mod tests {
         assert_eq!(current(), "frame");
         assert_eq!((w.hitches, w.total), (1, 2));
         assert_eq!(w.worst.ms, 120.0);
+    }
+
+    #[test]
+    fn keeps_the_label_of_the_first_phase_in_a_frame() {
+        label("load:sprites");
+        label("import");
+        assert_eq!(current(), "load:sprites");
     }
 
     #[test]

@@ -7,6 +7,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | Page | Audience | Covers |
 |---|---|---|
 | [Installation](Installation.md) | Players | Download, build, run on desktop, browser and phone |
+| [Automatic updates](Auto-Update.md) | Players | Self-update from GitHub releases, opt-outs and CLI flags |
 | [Configuration and controls](Configuration.md) | Players | `.cfg` file, command-line flags, environment variables, controls |
 | [Adding M.U.G.E.N content](MUGEN-Content.md) | Players | Install `.def`/`.zip` characters and stages, and validate them |
 | [GitHub marketplace](Marketplace.md) | Players | Install characters, stages and music from any GitHub repository |
@@ -21,6 +22,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
 | [File layout](File-Layout.md) | Developers | The 250-line rule, one responsibility per file, splitting a file, parallel PRs |
 | [Performance](Performance.md) | Developers | Parallel loading, frame pacing, benchmarks |
+| [Reverse engineering the browser port](Ikemen-Web-Reverse-Engineering.md) | Developers | How a 78-fighter M.U.G.E.N build runs in a browser, and what we took from it |
 | [Replays](Netplay-and-Replays.md#saved-replays-in-the-game-replays) | Players | Saved fights, replay browser, playback speed |
 | [Research: fighting games](Research-Fighting-Games.md) | Developers | Survey of other fighters and prioritized improvement list |
 | [Stress and resilience](Stress-and-Resilience.md) | Developers | Fuzzing, spawner caps, hot path numbers |

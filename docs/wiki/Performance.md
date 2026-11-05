@@ -249,3 +249,9 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 
 - Single-op expression short-circuit: In `bytecode::Code::run`, expressions with exactly one opcode (`Op::Const(v)`, `Op::Trig0(i)`, `Op::Host(i)`) return immediately without stack array zeroing, program counter advancement, or loop dispatch.
 - Zero-cost constant and parameter lookups: Constant numbers and 0-argument triggers (`Time`, `StateTime`, `AnimTime`, `StateNo`, etc.) execute in 1 CPU cycle, avoiding VM frame setup.
+
+## Single-lookup animation advance & target cleanup early continue
+
+- Single-lookup animation frame unpack in `advance_anim`: Unpacks `(total, loop_start, len, ft)` in a single tuple query on `self.anim()`, eliminating repeated HashMap lookups per animated fighter and explod each tick.
+- Empty size-override short-circuit: `fighter::c` immediately queries character constants when `self.size_overrides.is_empty()`, bypassing linear slice scans.
+- Stale target cleanup early continue: `matchs::step` skips target vector moves and retain passes whenever `self.fighters[k].targets.is_empty()`.

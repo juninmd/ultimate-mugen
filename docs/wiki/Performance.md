@@ -331,3 +331,10 @@ etain_mut.
   - `controllers::set_vars`: Directly evaluated `param.exprs.first()` without duplicate `sc.param(...)` string search iterations.
   - `controllers::run`: Replaced double parameter checks in `changestate`/`selfstate` with unified `opt(...)` queries for `ctrl` and `anim`.
   - Pushed simulation throughput to 226,415 ticks/s with p50 at 0.003 ms, and dropped portrait decode to 0.6 ms.
+
+- **Wave 55 - Aligned u32 RGBA Decoding, Pre-Allocated SFF Tables & Branchless PCX Palettes**:
+  - sff::sprite_to_rgba: Allocated direct Vec<u32> ensuring guaranteed 4-byte hardware alignment, eliminating slice-alignment fallback loops and branch checks, and converting to Vec<u8> via zero-cost Vec::from_raw_parts.
+  - pcx::read_rgb_palette: Converted 768-byte RGB chunks to [u32; 256] with branchless u32::from_ne_bytes and constant alpha assignments, dropping byte-by-byte shifting.
+  - sff::decode_v1: Removed unused idx from V1Job and pre-allocated jobs buffer with count.min(8192).
+  - sff::decode_v2: Pre-allocated palettes buffer with pal_count.min(buf.len() / 16 + 1) and jobs buffer with spr_count.min(buf.len() / 28 + 1).
+  - sff::decode_v2_image: Optimized RAW depth-32 frames with single slice copies and depth-24 frames with 3-byte chunks instead of byte-by-byte offset probing.

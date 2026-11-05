@@ -309,8 +309,16 @@ impl Match {
 
     // ---------------------------------------------------------------- evaluation helpers
     pub fn ev(&self, i: usize, e: &Expr) -> f64 { e.eval(&Ctx { m: self, i }) }
+    #[inline]
+    pub fn num_opt(&self, i: usize, sc: &Controller, k: &str, idx: usize) -> Option<f64> {
+        let p = sc.param(k)?;
+        let e = p.exprs.get(idx)?;
+        let v = self.ev(i, e);
+        if v.is_nan() { None } else { Some(v) }
+    }
+    #[inline]
     pub fn num(&self, i: usize, sc: &Controller, k: &str, d: f64, idx: usize) -> f64 {
-        match sc.param(k).and_then(|p| p.exprs.get(idx)).map(|e| self.ev(i, e)) { Some(v) if !v.is_nan() => v, _ => d }
+        self.num_opt(i, sc, k, idx).unwrap_or(d)
     }
     fn apply_assigns(&mut self) {
         if self.assigns.get_mut().is_empty() { return; }
@@ -401,10 +409,14 @@ impl Match {
             self.apply_assigns();
             if sc.persistent != 1 {
                 let f = &mut self.fighters[i];
-                if let Some(&last) = f.persist.get(&sc.uid) {
+                if let Some(&(_, last)) = f.persist.iter().find(|(k, _)| *k == sc.uid) {
                     if sc.persistent == 0 || f.state_time - last < sc.persistent { continue; }
                 }
-                f.persist.insert(sc.uid, f.state_time);
+                if let Some(entry) = f.persist.iter_mut().find(|(k, _)| *k == sc.uid) {
+                    entry.1 = f.state_time;
+                } else {
+                    f.persist.push((sc.uid, f.state_time));
+                }
             }
             let (sno, sdef, st) = { let f = &self.fighters[i]; (f.state_no, f.st_def.clone(), f.state_time) };
             let id = self.fighters[i].id;

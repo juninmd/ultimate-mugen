@@ -185,10 +185,18 @@ pub struct CharDef {
     pub indexed: HashMap<(i32, i32), IndexedSprite>,
     pub remap_cache: Mutex<HashMap<((i32, i32), PalKey), Arc<ImageData>>>,
     pub image_cache: Mutex<HashMap<(i32, i32), Arc<ImageData>>>,
+    pub scale_x: f32,
+    pub scale_y: f32,
+    pub size_ground_back: f32,
+    pub size_ground_front: f32,
+    pub size_air_back: f32,
+    pub size_air_front: f32,
+    pub size_height: f32,
+    pub size_attack_dist: f32,
 }
 impl CharDef {
     pub fn empty(id: &str) -> Self {
-        CharDef {
+        let mut d = CharDef {
             id: id.into(),
             name: id.into(),
             display_name: id.into(),
@@ -221,12 +229,33 @@ impl CharDef {
             indexed: HashMap::new(),
             remap_cache: Mutex::new(HashMap::new()),
             image_cache: Mutex::new(HashMap::new()),
-        }
+            scale_x: 1.0,
+            scale_y: 1.0,
+            size_ground_back: 15.0,
+            size_ground_front: 16.0,
+            size_air_back: 12.0,
+            size_air_front: 12.0,
+            size_height: 60.0,
+            size_attack_dist: 160.0,
+        };
+        d.refresh_sizes();
+        d
     }
     pub fn diagnostics(&self) -> &crate::diagnostics::Diagnostics {
         self.diagnostics_cache
             .get_or_init(|| crate::diagnostics::audit_char(self, &self.source_spans))
     }
+    pub fn refresh_sizes(&mut self) {
+        self.scale_x = self.c("size.xscale", 1.0) as f32;
+        self.scale_y = self.c("size.yscale", 1.0) as f32;
+        self.size_ground_back = self.c("size.ground.back", 15.0) as f32;
+        self.size_ground_front = self.c("size.ground.front", 16.0) as f32;
+        self.size_air_back = self.c("size.air.back", 12.0) as f32;
+        self.size_air_front = self.c("size.air.front", 12.0) as f32;
+        self.size_height = self.c("size.height", 60.0) as f32;
+        self.size_attack_dist = self.c("size.attack.dist", 160.0) as f32;
+    }
+
     pub fn c(&self, k: &str, d: f64) -> f64 {
         *self.constants.get(k).unwrap_or(&d)
     }

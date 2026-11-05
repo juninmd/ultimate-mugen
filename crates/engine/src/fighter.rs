@@ -180,10 +180,26 @@ impl Fighter {
         }
     }
     pub fn c(&self, k: &str, d: f64) -> f32 {
+        let fallback = |def: &CharDef| -> f32 {
+            match k {
+                "size.xscale" => def.scale_x,
+                "size.yscale" => def.scale_y,
+                "size.ground.back" => def.size_ground_back,
+                "size.ground.front" => def.size_ground_front,
+                "size.air.back" => def.size_air_back,
+                "size.air.front" => def.size_air_front,
+                "size.height" => def.size_height,
+                "size.attack.dist" => def.size_attack_dist,
+                _ => def.c(k, d) as f32,
+            }
+        };
         if self.size_overrides.is_empty() {
-            return self.def.c(k, d) as f32;
+            return fallback(&self.def);
         }
-        match self.size_overrides.iter().find(|(n, _)| n == k) { Some((_, v)) => *v, None => self.def.c(k, d) as f32 }
+        match self.size_overrides.iter().find(|(n, _)| n == k) {
+            Some((_, v)) => *v,
+            None => fallback(&self.def),
+        }
     }
     pub fn projectile_tally_id(&self) -> u32 { if self.own_projectile { self.id } else { self.root } }
 

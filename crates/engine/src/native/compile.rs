@@ -261,7 +261,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     let cv = u32::from_str_radix(hex, 16).unwrap_or(0x5a648c);
     let mut d = CharDef::empty(&format!("umf:{}", nc.id));
     d.name = nc.name.clone(); d.display_name = nc.name.clone(); d.author = nc.author.clone(); d.source = Source::Native;
-    d.constants = k; d.sprites = sprites; d.anims = anims; d.commands = commands; d.states = states; d.portrait = portrait;
+    d.constants = k; d.refresh_sizes(); d.sprites = sprites; d.anims = anims; d.commands = commands; d.states = states; d.portrait = portrait;
     d.ai_commands = movelist.iter().map(|m: &MoveInfo| m.command.clone()).collect(); d.movelist = movelist;
     d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.description = nc.description.clone().unwrap_or_default();
     d.intro = nc.intro.clone().unwrap_or_default(); d.taunt = nc.taunt.clone().unwrap_or_default(); d.win_quote = nc.win_quote.clone().unwrap_or_default();

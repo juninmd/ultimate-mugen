@@ -1,5 +1,8 @@
 const MAGIC: &[u8; 4] = b"UMRP";
 const VERSION: u32 = 1;
+const MAX_REPLAY_BYTES: usize = 64 * 1024 * 1024;
+const MAX_REPLAY_FRAMES_BYTES: usize = 64 * 1024 * 1024;
+const MAX_REPLAY_METADATA: u32 = 16_384;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Replay {
@@ -26,7 +29,12 @@ impl Replay {
     }
 
     pub fn frame(&self, n: usize) -> Option<&[u32]> {
-        self.frames.get(n * self.players..(n + 1) * self.players)
+        if self.players == 0 {
+            return None;
+        }
+        let start = n.checked_mul(self.players)?;
+        let end = start.checked_add(self.players)?;
+        self.frames.get(start..end)
     }
 
     pub fn meta(&self, key: &str) -> Option<&str> {
@@ -69,6 +77,9 @@ impl Replay {
     }
 
     pub fn from_bytes(b: &[u8]) -> Result<Self, String> {
+        if b.len() > MAX_REPLAY_BYTES {
+            return Err("replay: file exceeds size limit".into());
+        }
         let mut c = Cursor { b, at: 0 };
         if c.take(4)? != MAGIC {
             return Err("replay: bad magic".into());
@@ -82,6 +93,9 @@ impl Replay {
             return Err("replay: bad player count".into());
         }
         let n_meta = c.u32()?;
+        if n_meta > MAX_REPLAY_METADATA {
+            return Err("replay: too many metadata entries".into());
+        }
         let mut meta = Vec::new();
         for _ in 0..n_meta {
             let k = c.string()?;
@@ -89,18 +103,27 @@ impl Replay {
             meta.push((k, v));
         }
         let total = c.u32()? as usize;
-        let mut frames = Vec::with_capacity(total.min(1 << 22) * players);
-        while frames.len() < total * players {
+        let frame_values = total.checked_mul(players).ok_or("replay: frame count overflow")?;
+        let frame_bytes = frame_values.checked_mul(4).ok_or("replay: frame size overflow")?;
+        if frame_bytes > MAX_REPLAY_FRAMES_BYTES {
+            return Err("replay: decoded frames exceed size limit".into());
+        }
+        let mut frames = Vec::with_capacity(frame_values);
+        let mut decoded_frames = 0usize;
+        while decoded_frames < total {
             let run = c.u32()? as usize;
-            if run == 0 {
-                return Err("replay: empty run".into());
+            if run == 0 || run > total - decoded_frames {
+                return Err("replay: invalid frame run".into());
             }
             let f = (0..players).map(|_| c.u32()).collect::<Result<Vec<_>, _>>()?;
-            for _ in 0..run.min(total) {
+            for _ in 0..run {
                 frames.extend_from_slice(&f);
             }
+            decoded_frames += run;
         }
-        frames.truncate(total * players);
+        if c.at != b.len() {
+            return Err("replay: trailing bytes".into());
+        }
         Ok(Replay { players, meta, frames })
     }
 }

@@ -16,6 +16,8 @@ Cada luta terminada é arquivada automaticamente em `replays/`, ao lado do execu
 | `rules` | rounds, tempo do round, % de vida, round único, pushbox, vida compartilhada, velocidade |
 | `inputs` | trilha de entradas com run-length: `slots`, depois `count` + uma entrada por slot por trecho |
 
+O leitor recusa arquivos incompletos ou com trechos maiores que a contagem declarada, bytes extras no fim, arquivos acima de 64 MiB, trilhas decodificadas acima de 64 MiB e mais de 16.384 entradas de metadados. Esses limites impedem que replays malformados provoquem alocações sem limite.
+
 O replay alimenta as entradas gravadas por `Pilot::Replay`; a simulação é determinística, então a luta é
 reconstruída exatamente. Um teste de ida e volta grava 1200 ticks, recarrega o arquivo e compara o checksum final
 (`cargo test -p ume-engine --test replay_roundtrip`).

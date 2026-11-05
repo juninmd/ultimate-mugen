@@ -79,6 +79,8 @@ UME_NETPLAY_FIGHTS=200 cargo test --release -p ume-netplay --test rollback p2p
 
 Equal consecutive frames are stored once, so held buttons cost almost nothing.
 
+The reader rejects incomplete or overlong frame runs, trailing bytes, files larger than 64 MiB, decoded input streams larger than 64 MiB and more than 16,384 metadata entries. These limits keep malformed replay files from allocating unbounded memory.
+
 ```rust
 let mut rec = Replay::new(2);
 rec.meta.push(("p1".into(), "kfm".into()));

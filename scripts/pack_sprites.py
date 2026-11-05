@@ -12,6 +12,7 @@ floor and body scale match the desktop build.
 
 import io
 import json
+import math
 import os
 import sys
 
@@ -54,6 +55,8 @@ def rescale_meta(meta_bytes, scales):
         for key in ANCHOR_KEYS:
             if key in frame:
                 frame[key] = frame[key] * scale
+        if isinstance(frame.get("awakeningHair"), list) and len(frame["awakeningHair"]) == 4:
+            frame["awakeningHair"] = [math.floor(value * scale) if index < 2 else math.ceil(value * scale) for index, value in enumerate(frame["awakeningHair"])]
     meta["frames"] = frames
     return json.dumps(meta, ensure_ascii=False).encode("utf-8")
 

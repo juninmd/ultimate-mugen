@@ -32,6 +32,7 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
   "stats": {},
   "art": { "type": "rig", "style": {}, "poses": {} },
   "palettes": [],
+  "awakeningPalette": { "hair": "#f6c83e" },
   "anims": {},
   "moves": []
 }
@@ -46,6 +47,7 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | `stats` | no | Attributes, table below |
 | `art` | yes | Art, see [Rig](Rig.md) |
 | `palettes` | no | Alternate colors; each item overrides keys of `art.style.colors` |
+| `awakeningPalette` | no | Color overrides applied on top of the selected palette while awakened; effect sprites are unchanged |
 | `anims` | yes | Animations by name |
 | `moves` | yes | Moves |
 
@@ -132,6 +134,7 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `invuln` | `[start, end]` | Invincible frames |
 | `teleport` | frame | Reappears behind the opponent |
 | `fx` | `aura` | Extra visual effect |
+| `voice` | `1000, 0` | Character sound group and index played at move start, when that sample is bundled |
 | `airPhysics` | `true` | Keeps air physics |
 
 ### `hits[]`
@@ -189,6 +192,8 @@ If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files inst
 | `15_power0`, `16_power1`, `17_power2` | `powerup0`, `powerup1`, `powerup2` (transformation, key `T`) |
 
 `meta.json` holds `{"refHeight": N}`: the height in pixels of the standing body in `01_idle.png`. Every pose of the fighter is scaled so that body is 100 units tall, so a lying or crouching sprite keeps the same pixel size. Without it each PNG is scaled to 100 units by its own height.
+
+When `awakeningPalette` overrides `hair`, each sprite's `frames.<stem>.awakeningHair` supplies `[left, top, right, bottom]` in source pixels. Hair recoloring is confined to that rectangle; sprites without one retain their original hair. Web packing rescales these coordinates with the sprite.
 
 Palette entries also apply to these PNGs: each pixel is matched to the shading line of a colour declared in `art.style.colors`, and the matching palette colour replaces it at the same shade. A palette key with no matching `art.style.colors` entry, or a colour nothing in the art resembles, is left untouched.
 

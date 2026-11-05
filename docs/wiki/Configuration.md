@@ -40,6 +40,7 @@ The window can be dragged to any size. The game draws into a fixed 16:9 logical 
 | `--touch` | Force touch controls |
 | `--mute` | No audio |
 | `--shots <folder>` | Automatic tour saving screenshots |
+| `--shots-audio` | Enable sound during a screenshot tour; `--mute` still takes precedence |
 | `--version` | Print the version |
 | `--check-update` | Print whether a newer release exists and exit |
 | `--update` | Download, verify and install the newest release, then exit |

@@ -6,7 +6,7 @@ use crate::cns::parse_states;
 use crate::commands::parse_command;
 use serde_json::Value;
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::Arc; #[path = "compile_extras.rs"] mod extras;
 
 pub const STANDARD_ANIMS: &[(&str, i32)] = &[
     ("idle", 0), ("turn", 5), ("crouchTurn", 6), ("crouchStart", 10), ("crouch", 11), ("crouchEnd", 12), ("walk", 20), ("walkBack", 21),
@@ -130,7 +130,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         if !wanted(anim_no[name]) { continue; }
         for fr in &a.frames { let k = frame_key(fr); if seen.insert(k.clone()) { jobs.push((k, fr)); } }
     }
-    let mut rendered = render_all(nc, jobs, with_images, palette);
+    let mut rendered = render_all(nc, jobs, with_images, palette); let awakening_palette = extras::awakening_palette(nc, palette);
     let mut cache: HashMap<String, ((i32, i32), Vec<[f32; 4]>, Vec<[f32; 4]>)> = HashMap::new();
     let mut idx = 0;
     for (name, a) in nc.anims.iter() {
@@ -143,14 +143,14 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
                 let r = rendered.remove(&key).expect("frame rendered");
                 let k = (1, idx);
                 idx += 1;
-                sprites.insert(k, Sprite { image: r.image, width: r.width, height: r.height, axis_x: r.axis_x, axis_y: r.axis_y, scale: r.scale });
+                sprites.insert(k, Sprite { image: r.image, width: r.width, height: r.height, axis_x: r.axis_x, axis_y: r.axis_y, scale: r.scale }); extras::insert_awakened(&mut sprites, nc, fr, k.1, with_images, awakening_palette.as_ref());
                 (k, r.hurt, r.hit)
             });
             let hurt = match &fr.hurt { Some(Value::String(s)) if s == "none" => vec![], Some(v @ Value::Array(_)) => serde_json::from_value(v.clone()).unwrap_or(entry.1.clone()), _ => entry.1.clone() };
             let hit = fr.hit.as_ref().and_then(|h| h.bx).map(|b| vec![b]).unwrap_or(entry.2.clone());
             frames.push(AnimFrame {
                 group: entry.0 .0, index: entry.0 .1, x: fr.offset.map(|o| o[0]).unwrap_or(0.0), y: fr.offset.map(|o| o[1]).unwrap_or(0.0), time: if fr.ticks > 0 && nc.speed.is_some_and(|k| k > 1.0) { ((fr.ticks as f32 / nc.speed.unwrap_or(1.0)).round() as i32).max(1) } else { fr.ticks },
-                flip_h: false, flip_v: false, blend: if fr.effect.is_some() { Blend::Add } else { Blend::None }, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0,
+                flip_h: false, flip_v: false, blend: if fr.effect.as_ref().is_some_and(|effect| effect.get("type").and_then(Value::as_str) != Some("dragon")) { Blend::Add } else { Blend::None }, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0,
                 clsn2: if fr.effect.is_some() { hit.clone() } else { hurt }, clsn1: hit,
             });
         }
@@ -215,7 +215,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let jumps = m.moves.iter().any(|v| v.vel[1].is_some_and(|y| y != 0.0));
         let ph = match when { "air" => 'A', "crouch" => 'C', _ => if jumps { 'N' } else { 'S' } };
         let pa = if cost > 0.0 { -cost } else if m.kind == "special" { 30.0 } else { 15.0 };
-        cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" });
+        cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" }); cns += &extras::voice_state(m, sid);
         if m.kind == "super" {
             cns += &format!("[State {sid}, super]\ntype = SuperPause\ntrigger1 = Time = 0\ntime = 55\nanim = 30\npos = 0, -60\nsound = -1\n\n[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\nframegap = 2\npalbright = 0, 0, 0\npalcontrast = 100, 150, 256\npaladd = 0, 0, 0\npalmul = .85, .85, .85\ntime = 60\nlength = 10\n\n");
         } else if m.fx.as_deref() == Some("aura") {
@@ -265,7 +265,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     d.ai_commands = movelist.iter().map(|m: &MoveInfo| m.command.clone()).collect(); d.movelist = movelist;
     d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.description = nc.description.clone().unwrap_or_default();
     d.intro = nc.intro.clone().unwrap_or_default(); d.taunt = nc.taunt.clone().unwrap_or_default(); d.win_quote = nc.win_quote.clone().unwrap_or_default();
-    d.form_name = nc.form.clone().unwrap_or_default(); d.boss = nc.boss;
+    d.form_name = nc.form.clone().unwrap_or_default(); d.boss = nc.boss; extras::insert_voices(&mut d, nc);
     let _ = Arc::new(());
     d
 }

@@ -101,6 +101,7 @@ pub(crate) async fn fight(
                 }
             }
         }
+        "dragon" | "rush" => crate::pixel_tour::probe(s, c, audio, want, name),
         "super" | "super2" | "impact" => {
             for f in s.m.fighters.iter_mut() {
                 f.power = 3000.0;
@@ -210,6 +211,7 @@ pub(crate) async fn fight(
         _ => {}
     }
     snap(app, dir, name, |a| a.draw_session_only()).await;
+    crate::pixel_tour::finish_probe(app, want, name);
 }
 
 /// Team battle shot: `simul` = 2v2 on the field together, otherwise sequence (3v3, second bout with carried life).
@@ -647,20 +649,14 @@ async fn native_coverage(app: &mut App, dir: &str) {
                 fighter.vel.x = 0.0;
                 fighter.vel.y = 0.0;
                 fighter.change_anim(0, &fighter.def.clone(), 1);
+                if index == 0 && std::env::var("UME_AWAKENED").as_deref() == Ok("1") { fighter.form = 1; }
             }
         }
         snap(app, dir, &format!("height-{id}"), |app| {
             app.draw_session_only()
         })
         .await;
-        for (label, animation) in [
-            ("idle", 0),
-            ("walk", 20),
-            ("walk-back", 21),
-            ("run", 100),
-            ("damage", 5000),
-            ("transform", 196),
-        ] {
+        for (label, animation) in crate::pixel_tour::coverage(app, &id) {
             let definition = app.session.as_ref().unwrap().m.fighters[0].def.clone();
             let anim = definition.anims.get(&animation).unwrap_or_else(|| {
                 panic!("{id}: required {label} animation {animation} is missing")

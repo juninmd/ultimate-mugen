@@ -74,6 +74,7 @@ Um quadro com `effect` desenha um efeito no lugar do corpo. Use em projéteis e 
 | `type` | Formato |
 |---|---|
 | `orb` (padrão), `burst` | Bola de energia / explosão |
+| `dragon` | Dragão de energia voltado para frente, com corpo em movimento |
 | `beam` (`length`) | Raio horizontal |
 | `pillar` (`length`) | Coluna vertical |
 | `shockwave` | Onda no chão |

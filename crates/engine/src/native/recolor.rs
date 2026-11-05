@@ -1,6 +1,6 @@
 use serde_json::Value;
 
-pub(super) struct Recolor { pairs: Vec<[[f32; 3]; 2]>, keep: Vec<[f32; 3]> }
+pub(super) struct Recolor { pairs: Vec<([[f32; 3]; 2], bool)>, keep: Vec<[f32; 3]>, restrict_hair: bool }
 
 impl Recolor {
     pub(super) fn new(colors: Option<&Value>, palette: &Value) -> Option<Self> {
@@ -17,27 +17,33 @@ impl Recolor {
             match overrides.get(key).and_then(Value::as_str).and_then(rgb) {
                 Some(target) if target != source => {
                     overridden.push(source);
-                    pairs.push([source, target]);
+                    pairs.push(([source, target], key == "hair"));
                 }
                 _ => keep.push(source),
             }
         }
         keep.retain(|color| !overridden.contains(color));
         keep.truncate(256);
-        (!pairs.is_empty()).then_some(Recolor { pairs, keep })
+        let restrict_hair = palette.get("_awakening").and_then(Value::as_bool).unwrap_or(false);
+        (!pairs.is_empty()).then_some(Recolor { pairs, keep, restrict_hair })
     }
 
     pub(super) fn apply(&self, rgba: &mut [u8]) {
-        let mut cache: std::collections::HashMap<[u8; 3], [u8; 3]> = std::collections::HashMap::new();
-        for pixel in rgba.chunks_exact_mut(4) {
+        self.apply_in_region(rgba, 0, None);
+    }
+
+    pub(super) fn apply_in_region(&self, rgba: &mut [u8], width: u32, region: Option<[u32; 4]>) {
+        let mut cache: std::collections::HashMap<([u8; 3], bool), [u8; 3]> = std::collections::HashMap::new();
+        for (index, pixel) in rgba.chunks_exact_mut(4).enumerate() {
             if pixel[3] == 0 { continue; }
             let key = [pixel[0], pixel[1], pixel[2]];
-            let mapped = *cache.entry(key).or_insert_with(|| self.swap(key));
+            let allow_hair = !self.restrict_hair || region.is_some_and(|[x1, y1, x2, y2]| width > 0 && (index as u32 % width) >= x1 && (index as u32 % width) < x2 && (index as u32 / width) >= y1 && (index as u32 / width) < y2);
+            let mapped = *cache.entry((key, allow_hair)).or_insert_with(|| self.swap(key, allow_hair));
             pixel[..3].copy_from_slice(&mapped);
         }
     }
 
-    fn swap(&self, [r, g, b]: [u8; 3]) -> [u8; 3] {
+    fn swap(&self, [r, g, b]: [u8; 3], allow_hair: bool) -> [u8; 3] {
         let pixel = [r as f32, g as f32, b as f32];
         let fit = |source: &[f32; 3]| -> Option<(f32, f32)> {
             let energy = source.iter().map(|c| c * c).sum::<f32>().max(1.0);
@@ -46,10 +52,11 @@ impl Recolor {
             let residual = pixel.iter().zip(source).map(|(p, s)| (p - s * shade).powi(2)).sum::<f32>().sqrt();
             (residual <= 60.0 * shade.clamp(0.45, 1.0)).then_some((residual, shade))
         };
-        let mut swap: Option<(f32, [f32; 3], f32)> = None;
-        for [source, target] in &self.pairs {
+        let mut swap: Option<(f32, [f32; 3], f32, bool)> = None;
+        for ([source, target], is_hair) in &self.pairs {
+            if *is_hair && !allow_hair { continue; }
             if let Some((residual, shade)) = fit(source) {
-                if swap.is_none_or(|(score, _, _)| residual < score) { swap = Some((residual, *target, shade)); }
+                if swap.is_none_or(|(score, _, _, _)| residual < score) { swap = Some((residual, *target, shade, *is_hair)); }
             }
         }
         let mut untouched = f32::INFINITY;
@@ -59,11 +66,14 @@ impl Recolor {
             }
         }
         match swap {
-            Some((residual, target, shade)) if residual <= untouched => [
+            Some((residual, target, shade, is_hair)) if residual <= untouched => {
+                let shade = if self.restrict_hair && is_hair { (0.35 + shade * 0.8).min(1.0) } else { shade };
+                [
                 (target[0] * shade).round().clamp(0.0, 255.0) as u8,
                 (target[1] * shade).round().clamp(0.0, 255.0) as u8,
                 (target[2] * shade).round().clamp(0.0, 255.0) as u8,
-            ],
+                ]
+            },
             _ => [r, g, b],
         }
     }
@@ -85,6 +95,20 @@ mod tests {
     use super::*;
     use crate::native::pixel::try_load;
     use crate::native::types::{NativeChar, NativeFrame};
+
+    #[test]
+    fn awakening_hair_is_confined_to_the_authored_region() {
+        let colors = serde_json::json!({"hair":"#3a2418", "skin":"#e2a97e"});
+        let palette = serde_json::json!({"hair":"#f6c83e", "_awakening":true});
+        let recolor = Recolor::new(Some(&colors), &palette).unwrap();
+        let mut pixels = vec![58, 36, 24, 255, 58, 36, 24, 255];
+        recolor.apply_in_region(&mut pixels, 2, Some([0, 0, 1, 1]));
+        assert_eq!(&pixels[..4], &[246, 200, 62, 255]);
+        assert_eq!(&pixels[4..], &[58, 36, 24, 255]);
+        let mut missing = vec![58, 36, 24, 255];
+        recolor.apply_in_region(&mut missing, 1, None);
+        assert_eq!(missing, [58, 36, 24, 255]);
+    }
 
     #[test]
     fn palette_swap_rebuilds_a_base_colour_along_its_own_shading() {

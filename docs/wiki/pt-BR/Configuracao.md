@@ -40,6 +40,7 @@ A janela pode ser arrastada para qualquer tamanho. O jogo desenha em um espaço 
 | `--touch` | Força os controles de toque |
 | `--mute` | Sem áudio |
 | `--shots <pasta>` | Tour automático salvando capturas |
+| `--shots-audio` | Ativa som durante o tour de capturas; `--mute` continua tendo prioridade |
 | `--version` | Mostra a versão |
 | `--check-update` | Mostra se existe release mais nova e sai |
 | `--update` | Baixa, verifica e instala a release mais nova, depois sai |

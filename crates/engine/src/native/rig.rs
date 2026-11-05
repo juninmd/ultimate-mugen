@@ -15,6 +15,7 @@
 //! the coverage (downsampled for wide blurs), a 3-pass box blur (sigma = blur / 2), then tinting
 //! and compositing. Cel shading resolves the three canvas clip/fill passes per pixel from one
 //! coverage mask and its shifted copies.
+#[path = "rig/dragon.rs"] mod dragon;
 use super::types::{ActiveSpec, Box4};
 use crate::chardef::ImageData;
 use serde_json::Value;
@@ -4270,8 +4271,6 @@ pub fn render_pose(
 
 // ------------------------------------------------------------------ effects
 /// effect: { type, size?, length?, color?, color2?, phase?, angle? }
-/// types: orb, slash, beam, fire, darkfire, ice, lightning, kunai, shuriken, water, wave, pillar, shockwave, burst, petal
-/// The axis is the effect centre (beam: its origin on the left; pillar/shockwave: ground centre).
 pub fn render_effect(effect: &Value, with_images: bool, palette: Option<&Value>) -> RigRender {
     let e = effect;
     let c = Colors::new(None, palette);
@@ -4753,6 +4752,7 @@ fn draw_effect(ctx: &mut Ctx, ty: &str, s: f64, ph: f64, col: Rgb, col2: Rgb, e:
                 ctx.stroke_w(&sol([0x1a, 0x12, 0x10], 1.0), 0.5);
             }
         }
+        "dragon" => dragon::draw(ctx, s, ph, col, col2),
         "burst" => {
             let t = ph.clamp(0.0, 1.0);
             let rr = s * (0.6 + t * 1.1);

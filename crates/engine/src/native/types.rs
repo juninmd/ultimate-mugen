@@ -104,6 +104,7 @@ pub struct NativeChar {
     pub anims: indexmap_like::OrderedMap<NativeAnim>,
     pub moves: Vec<NativeMove>,
     #[serde(default)] pub palettes: Vec<Value>,
+    #[serde(default, rename = "awakeningPalette")] pub awakening_palette: Option<Value>,
     #[serde(default, rename = "winQuote")] pub win_quote: Option<String>,
     /// round-start lines: `intro` is said first, `taunt` is the reply / provocation
     #[serde(default)] pub intro: Option<String>, #[serde(default)] pub taunt: Option<String>,

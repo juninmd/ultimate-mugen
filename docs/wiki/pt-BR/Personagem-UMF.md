@@ -32,6 +32,7 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
   "stats": {},
   "art": { "type": "rig", "style": {}, "poses": {} },
   "palettes": [],
+  "awakeningPalette": { "hair": "#f6c83e" },
   "anims": {},
   "moves": []
 }
@@ -46,6 +47,7 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `stats` | não | Atributos, tabela abaixo |
 | `art` | sim | Arte, ver [Rig](Rig.md) |
 | `palettes` | não | Cores alternativas; cada item sobrescreve chaves de `art.style.colors` |
+| `awakeningPalette` | não | Cores aplicadas sobre a paleta selecionada durante o despertar; sprites de efeitos não mudam |
 | `anims` | sim | Animações por nome |
 | `moves` | sim | Golpes |
 
@@ -132,6 +134,7 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `invuln` | `[início, fim]` | Quadros invencíveis |
 | `teleport` | quadro | Reaparece atrás do oponente |
 | `fx` | `aura` | Efeito visual extra |
+| `voice` | `1000, 0` | Grupo e índice do som do personagem tocado no início do golpe, quando o áudio estiver incluído |
 | `airPhysics` | `true` | Mantém física aérea |
 
 ### `hits[]`
@@ -189,6 +192,8 @@ Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG
 | `15_power0`, `16_power1`, `17_power2` | `powerup0`, `powerup1`, `powerup2` (transformação, tecla `T`) |
 
 `meta.json` guarda `{"refHeight": N}`: a altura em pixels do corpo em pé em `01_idle.png`. Toda pose do lutador é escalada para esse corpo medir 100 unidades, então um sprite deitado ou agachado mantém o mesmo tamanho de pixel. Sem ele, cada PNG é escalado a 100 unidades pela própria altura.
+
+Quando `awakeningPalette` altera `hair`, cada sprite define `frames.<nome>.awakeningHair` como `[esquerda, topo, direita, baixo]` em pixels da imagem original. A troca de cabelo fica limitada a esse retângulo; sprites sem retângulo mantêm o cabelo original. O empacotamento web redimensiona essas coordenadas junto com a imagem.
 
 As entradas de `palettes` também valem para esses PNGs: cada pixel é casado com a linha de sombreamento de uma cor declarada em `art.style.colors` e a cor da paleta substitui no mesmo tom. Uma chave de paleta sem entrada correspondente em `art.style.colors`, ou uma cor que nada na arte lembra, fica intocada.
 

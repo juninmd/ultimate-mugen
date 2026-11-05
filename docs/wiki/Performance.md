@@ -39,6 +39,7 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, two-pass iterator AI move selection, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
 | Palette identity bypass | `ume_engine::palette` | `is_identity()` guard skips float trig, multiplications, and clamping on untouched palettes, plus short-circuiting in `PalParams::combine` and batch `apply_slice` |
 | Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, scratch collision buffers (`fill_boxes`, `fill_proj_boxes`), stack array frozen projectiles, prefiltered `remove_on_get_hit` explods, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
+| Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, stack-array target indices, linear flat vector persistence, `num_opt` single-pass parameter evaluation, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
 | Resilience bounds | `ume_formats`, `ume_engine::matchs` | Image decoders reject headers above `MAX_IMAGE_PIXELS` (`1 << 26`) before allocating; matches cap helpers (60), explods (512), projectiles (256), and texts (128) |
 
 ## GPU memory

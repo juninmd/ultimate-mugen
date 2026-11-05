@@ -341,45 +341,78 @@ fn with_joined<R>(a: &str, b: &str, f: impl FnOnce(&str) -> R) -> R {
 /// Resolve a file name referenced from a .def in `base_dir`. Tries
 /// `base_dir/name`, `name`, `data/name`, then the basename anywhere under
 /// `base_dir`, then the basename anywhere.
+pub fn with_norm_path<R>(p: &str, f: impl FnOnce(&str) -> R) -> R {
+    let unquoted = crate::ini::unquote_str(p);
+    let p = unquoted
+        .strip_prefix("./")
+        .or_else(|| unquoted.strip_prefix(".\\"))
+        .unwrap_or(unquoted);
+    if p.is_ascii() && p.len() <= 512 {
+        let mut buf = [0u8; 512];
+        let mut len = 0;
+        let mut last_slash = false;
+        for b in p.bytes() {
+            let b = if b == b'\\' {
+                b'/'
+            } else {
+                b.to_ascii_lowercase()
+            };
+            if b == b'/' && last_slash {
+                continue;
+            }
+            last_slash = b == b'/';
+            buf[len] = b;
+            len += 1;
+        }
+        if let Ok(s) = std::str::from_utf8(&buf[..len]) {
+            return f(s);
+        }
+    }
+    f(&norm_path(p))
+}
+
 pub fn resolve<'a>(vfs: &'a Vfs, base_dir: &str, name: &str) -> Option<&'a [u8]> {
     if name.is_empty() {
         return None;
     }
-    let n = norm_path(crate::ini::unquote_str(name));
-    if n.is_empty() {
-        return None;
-    }
-    let base_dir = norm_path(base_dir.trim_end_matches(['/', '\\']));
-    if !base_dir.is_empty() {
-        if let Some(v) = with_joined(&base_dir, &n, |cand| vfs.get(cand)) {
-            return Some(v);
+    with_norm_path(name, |n| {
+        if n.is_empty() {
+            return None;
         }
-    }
-    if let Some(v) = vfs.get(&n) {
-        return Some(v);
-    }
-    if let Some(v) = with_joined("data", &n, |cand| vfs.get(cand)) {
-        return Some(v);
-    }
-    let base = n.rsplit('/').next().unwrap_or(&n);
-    let is_match = |k: &str| {
-        k.ends_with(base)
-            && (k.len() == base.len()
-                || k.as_bytes().get(k.len() - base.len() - 1) == Some(&b'/'))
-    };
-    if !base_dir.is_empty() {
-        let folder = format!("{base_dir}/");
-        if let Some((_, v)) = vfs
-            .range::<String, _>(&folder..)
-            .take_while(|(k, _)| k.starts_with(&folder))
-            .find(|(k, _)| is_match(k.as_str()))
-        {
-            return Some(v);
-        }
-    }
-    vfs.iter()
-        .find(|(k, _)| is_match(k.as_str()))
-        .map(|(_, v)| v.as_slice())
+        let trimmed_base = base_dir.trim_end_matches(['/', '\\']);
+        with_norm_path(trimmed_base, |base_dir| {
+            if !base_dir.is_empty() {
+                if let Some(v) = with_joined(base_dir, n, |cand| vfs.get(cand)) {
+                    return Some(v.as_slice());
+                }
+            }
+            if let Some(v) = vfs.get(n) {
+                return Some(v.as_slice());
+            }
+            if let Some(v) = with_joined("data", n, |cand| vfs.get(cand)) {
+                return Some(v.as_slice());
+            }
+            let base = n.rsplit('/').next().unwrap_or(n);
+            let is_match = |k: &str| {
+                k.ends_with(base)
+                    && (k.len() == base.len()
+                        || k.as_bytes().get(k.len() - base.len() - 1) == Some(&b'/'))
+            };
+            if !base_dir.is_empty() {
+                let folder = format!("{base_dir}/");
+                if let Some((_, v)) = vfs
+                    .range::<String, _>(&folder..)
+                    .take_while(|(k, _)| k.starts_with(&folder))
+                    .find(|(k, _)| is_match(k.as_str()))
+                {
+                    return Some(v.as_slice());
+                }
+            }
+            vfs.iter()
+                .find(|(k, _)| is_match(k.as_str()))
+                .map(|(_, v)| v.as_slice())
+        })
+    })
 }
 
 /// `\b<word>\s*=` in lowercase text.

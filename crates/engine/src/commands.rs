@@ -1,7 +1,7 @@
 //! MUGEN command (CMD) parsing and backward matching against the input history.
 use crate::input::{button_bit, rel_dirs, InputHistory};
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct CmdSymbol {
     pub release: bool,
     pub hold: bool,
@@ -40,7 +40,7 @@ fn dir_bits(s: &str) -> Option<u32> {
 }
 
 pub fn parse_command(name: &str, s: &str, time: i32, buffer_time: i32) -> CommandDef {
-    let mut steps = vec![];
+    let mut steps = Vec::with_capacity(4);
     for part in s.trim().trim_matches('"').split(',') {
         let mut p = part.trim();
         if p.is_empty() {
@@ -105,6 +105,9 @@ pub fn parse_command(name: &str, s: &str, time: i32, buffer_time: i32) -> Comman
 #[inline]
 fn held(h: &InputHistory, t: i64, s: &CmdSymbol) -> bool {
     let bits = h.at(t);
+    if bits & s.btns != s.btns {
+        return false;
+    }
     if s.neutral && bits & 15 != 0 {
         return false;
     }
@@ -119,7 +122,7 @@ fn held(h: &InputHistory, t: i64, s: &CmdSymbol) -> bool {
             return false;
         }
     }
-    bits & s.btns == s.btns
+    true
 }
 fn is_state_step(s: &CmdSymbol) -> bool {
     s.hold || (s.neutral && s.btns == 0 && s.dir == 0)
@@ -145,10 +148,11 @@ fn fires(h: &InputHistory, t: i64, s: &CmdSymbol) -> bool {
         if !held(h, t, s) {
             return false;
         }
-        let (now, prev, p2, p3) = (h.at(t), h.at(t - 1), h.at(t - 2), h.at(t - 3));
+        let (now, prev) = (h.at(t), h.at(t - 1));
         if s.btns & now & !prev == 0 {
             return false;
         }
+        let (p2, p3) = (h.at(t - 2), h.at(t - 3));
         let pressed_recently = (now & !prev) | (prev & !p2) | (p2 & !p3);
         if s.btns & !pressed_recently != 0 {
             return false;

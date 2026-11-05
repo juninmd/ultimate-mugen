@@ -147,6 +147,35 @@ fn auto_turn_off_keeps_the_facing_when_the_enemy_crosses_over() {
 }
 
 #[test]
+fn a_cornered_fighter_holds_still_while_the_opponent_closes_in() {
+    let mut m = field();
+    let half = m.view_w / 2.0;
+    m.camera.x = 0.0;
+    m.fighters[0].pos.x = -half + m.stage.tension + 10.0;
+    m.fighters[1].pos.x = half - m.stage.tension - 10.0;
+    let screen_x = m.fighters[0].pos.x - m.camera.x;
+    for _ in 0..140 {
+        m.fighters[1].pos.x -= 1.0;
+        m.update_camera();
+        assert!((m.fighters[0].pos.x - m.camera.x - screen_x).abs() < 1e-3, "the cornered fighter drifted to {}", m.fighters[0].pos.x - m.camera.x);
+    }
+}
+
+#[test]
+fn the_camera_pans_until_a_fighter_leaves_the_tension_band() {
+    let mut m = field();
+    let half = m.view_w / 2.0;
+    m.camera.x = 0.0;
+    m.fighters[0].pos.x = -half + 20.0;
+    m.fighters[1].pos.x = 70.0;
+    for _ in 0..60 {
+        m.update_camera();
+    }
+    let screen_x = m.fighters[0].pos.x - m.camera.x + half;
+    assert!((screen_x - m.stage.tension).abs() < 1e-2, "expected tension {0} px from the edge, got {screen_x}", m.stage.tension);
+}
+
+#[test]
 fn stagevar_reports_the_camera_parameters() {
     let st = Arc::new(load("[Camera]\nverticalfollowdelta = 4\nzoominspeed = 0.1\nlowestcap = 1\n\n[BGdef]\n"));
     let mut m = duel(mugen_char("a", ""), mugen_char("b", ""));

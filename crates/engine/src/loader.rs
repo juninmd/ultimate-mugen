@@ -15,7 +15,6 @@ use ume_formats::ini::{find_section, nums, parse_ini, unquote};
 use ume_formats::sff::{decode_sff, decode_sff_only, sprite_to_rgba};
 use ume_formats::snd::decode_snd;
 use ume_formats::vfs::{norm_path, resolve, text, Vfs};
-
 /// `localcoord` -> (largura, altura). Aceita o formato canonico `320,240`,
 /// o valor unico usado por varios chars de fullgames (`400` vira `400x240`)
 /// e o campo ausente/invalido (320x240).
@@ -123,9 +122,7 @@ pub fn load_mugen_char(
         if !commands.iter().any(|x| x.name == n) {
             commands.push(parse_command(n, c, 1, 1));
         }
-    }
-    let anims = crate::perf::time("air:parse", || resolve(vfs, &base, &fget("anim").unwrap_or_default()).map(|b| parse_air(&text(b))).unwrap_or_default());
-
+}
     let mut sprites = HashMap::new();
     let mut palettes = HashMap::new();
     let mut indexed = HashMap::new();
@@ -354,7 +351,7 @@ pub fn load_mugen_char(
     d.constants = constants;
     d.portrait = sprites.get(&(9000, 0)).cloned();
     d.sprites = sprites;
-    d.anims = anims;
+    d.anims = crate::perf::time("air:parse", || resolve(vfs, &base, &fget("anim").unwrap_or_default()).map(|b| parse_air(&text(b))).unwrap_or_default());
     d.commands = commands;
     d.states = states;
     d.sounds = sounds;

@@ -4,29 +4,29 @@
 
 Instale personagens, cenários e músicas direto de qualquer repositório público do GitHub. Abra **Mercado GitHub** no menu principal.
 
-## Começando
+## Como usar
 
-1. Pressione `U` (ou clique em **+ Adicionar**) e cole um link: `https://github.com/dono/repo`, `dono/repo` ou o link de uma pasta, como `https://github.com/dono/repo/tree/main/mugen`.
-2. O jogo lê a árvore do repositório e lista o que encontrar.
-3. Marque os itens (`Espaço`, clique ou **Todos**) e pressione **Instalar** (`I`). Os downloads rodam em paralelo, com barra de progresso.
-4. Itens instalados já ficam ativos. Use **Ativar** (`E`) e **Desativar** (`O`) em qualquer seleção, inclusive em massa, ou **Remover** (`X`) para apagar do aparelho.
+1. Aperte `U` (ou clique em **+ Adicionar**) e informe o link: `https://github.com/dono/repo`, `dono/repo` ou link de subpasta como `https://github.com/dono/repo/tree/main/mugen`.
+2. O jogo lê a árvore do repositório e mostra tudo o que encontrou.
+3. Marque os itens desejados (`Espaço`, clique ou **Todos**) e aperte **Instalar** (`I`). Os downloads rodam em paralelo com barra de progresso.
+4. O conteúdo instalado fica ativo na hora. Use **Ativar** (`E`) e **Desativar** (`O`) em qualquer seleção, inclusive em lote, ou **Remover** (`X`) para apagar do aparelho.
 
-Tudo fica salvo localmente: a lista de repositórios, os itens instalados e o estado ativo/inativo continuam na próxima vez.
+Tudo fica salvo localmente: a lista de repositórios, os itens instalados e o estado de ativação continuam lá na próxima abertura.
 
 ## O que é detectado
 
-| Tipo | Regra | Arquivos instalados |
+| Tipo | Regra | O que é instalado |
 |---|---|---|
-| Personagem | pasta com `.def` e, na árvore, `.sff`, `.air` e `.cns`/`.cmd` | a pasta inteira, mais arquivos declarados em `[Files]` que estejam em outro lugar do repositório |
-| Cenário | `.def` com `.sff` de mesmo nome, ou qualquer `.def` dentro de uma pasta `stages/` | os arquivos do cenário, o sprite `spr` e a música `bgmusic` |
-| Música | `.ogg`, `.mp3`, `.flac`, `.wav` (wav abaixo de 32 KB é ignorado como efeito sonoro) | o arquivo de áudio |
-| Pacote | `.zip` | o arquivo, aberto em memória como uma importação manual |
+| Personagem | pasta com `.def` e `.sff`, `.air` e `.cns`/`.cmd` na árvore | a pasta inteira, mais arquivos declarados no `[Files]` que estejam em outras partes do repositório |
+| Cenário | `.def` com `.sff` de mesmo nome, ou qualquer `.def` dentro de pasta `stages/` | os arquivos do cenário, o sprite `spr` e a música `bgmusic` |
+| Música | `.ogg`, `.mp3`, `.flac`, `.wav` (wav menor que 32 KB é ignorado como efeito sonoro) | o arquivo de áudio |
+| Pacote | `.zip` | o arquivo compactado, descompactado em memória como na importação manual |
 
-Arquivos de screenpack (`system.def`, `select.def`, `fight.def`, ...) nunca viram cenário ou personagem. Pastas ocultas (`.git`, `.github`) são ignoradas.
+Arquivos de screenpack (`system.def`, `select.def`, `fight.def`, ...) nunca viram cenários nem personagens. Arquivos dentro de pastas ocultas (`.git`, `.github`) são ignorados.
 
-As músicas ativas tocam em rodízio como trilha da luta quando o cenário não tem música própria. Cenário M.U.G.E.N com `bgmusic` mantém a própria trilha.
+Músicas ativas tocam como trilha da luta em revezamento sempre que o cenário não tiver música própria. Cenários M.U.G.E.N com `bgmusic` continuam tocando a própria faixa.
 
-## Onde ficam os dados
+## Onde os dados ficam salvos
 
 | Plataforma | Estado e downloads |
 |---|---|
@@ -34,20 +34,20 @@ As músicas ativas tocam em rodízio como trilha da luta quando o cenário não 
 | macOS | `~/Library/Application Support/ultimate-mugen/market` |
 | Windows | `%APPDATA%\ultimate-mugen\market` |
 | Android | armazenamento interno do app, pasta `market/` |
-| Web | IndexedDB, banco `ultimate-mugen-market` |
+| Web | banco IndexedDB `ultimate-mugen-market` |
 
-Defina `UME_MARKET_HOME` para mudar a pasta no desktop. Cada item instalado é um único arquivo; a lista de repositórios, os itens instalados, o ETag de cada listagem e o token opcional ficam em `state.json`.
+Defina `UME_MARKET_HOME` para trocar a pasta no computador. Cada item instalado é gravado em um pacote único; a lista de repositórios, itens instalados, o ETag de cada listagem e o token opcional ficam em `state.json`.
 
-## Limite de requisições, token e cache
+## Limites da API, token e cache
 
-A listagem usa a API do GitHub (60 requisições por hora sem token) e os arquivos vêm de `raw.githubusercontent.com`, que não tem o mesmo limite. A listagem envia o ETag salvo: se nada mudou, a resposta é `304` e vale o cache local. O repositório é atualizado ao abrir se o cache tiver mais de 10 minutos, ou sob demanda com `R`.
+A listagem usa a API do GitHub (60 requisições por hora sem token) e os downloads usam `raw.githubusercontent.com`, que não tem essa trava. As listagens guardam o ETag recebido: se o repositório não mudou, o GitHub devolve `304` e a listagem vem do cache local. Um repositório é atualizado ao abrir se o cache tiver mais de 10 minutos, ou manualmente com `R`.
 
-Para aumentar o limite da API pressione `T` e cole um token de acesso pessoal (sem permissões para repositórios públicos), ou defina `UME_GITHUB_TOKEN` / `GITHUB_TOKEN` no desktop. O token só é enviado para `api.github.com`.
+Para aumentar o limite, aperte `T` e cole um personal access token (não precisa de permissões para repositórios públicos), ou defina `UME_GITHUB_TOKEN` / `GITHUB_TOKEN` no computador. O token só é enviado para `api.github.com`.
 
 ## Limites de segurança
 
 - Só links `https` para `github.com`, `api.github.com`, `raw.githubusercontent.com`, `media.githubusercontent.com` e `codeload.github.com` são acessados. Redirecionamentos para outros hosts são bloqueados.
-- Caminhos vindos do repositório são validados: sem `..`, caminhos absolutos, barras invertidas, letras de unidade ou caracteres de controle. Entradas inseguras somem da listagem.
+- Caminhos vindos do repositório são validados: sem `..`, caminhos absolutos, barras invertidas, letras de unidade, caracteres de controle, espaços no início ou nomes de dispositivo reservados do Windows (`CON`, `PRN`, `AUX`, `NUL`, `COM1-9`, `LPT1-9`). Entradas inseguras somem da listagem.
 - Limites: 64 MB por arquivo, 256 MB e 4000 arquivos por item, 48 MB para a listagem. Itens acima disso aparecem como "grande demais" e não podem ser instalados.
 - O conteúdo nunca é executado como código. Os personagens passam pelos mesmos leitores da importação manual.
 - Respeite a licença de cada autor. Baixar de um repositório não dá direito de redistribuir.
@@ -56,11 +56,5 @@ Para aumentar o limite da API pressione `T` e cole um token de acesso pessoal (s
 
 | Plataforma | Adicionar repositório |
 |---|---|
-| Desktop | digitar no jogo (colar não existe na janela do jogo; digite `dono/repo`) |
-| Web e navegador do celular | o prompt do próprio navegador, com colar |
-| App Android | escolha uma sugestão; o app ainda não tem teclado no jogo |
-
-## Veja também
-
-- [Adicionar conteúdo M.U.G.E.N](Conteudo-MUGEN.md) para a pasta `mugen/` manual.
-- [Configuração](Configuracao.md) para variáveis de ambiente.
+| Desktop | digitar no próprio jogo (colar não funciona na janela do jogo; digite `dono/repo`) |
+| Web e celular | prompt nativo do navegador, com colar |

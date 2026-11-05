@@ -6,7 +6,13 @@ pub const MAX_TREE_ENTRIES: usize = 200_000;
 pub const MAX_PATH_BYTES: usize = 240;
 pub const MAX_SEGMENT_BYTES: usize = 120;
 
-const ALLOWED_HOSTS: [&str; 5] = ["api.github.com", "raw.githubusercontent.com", "media.githubusercontent.com", "github.com", "codeload.github.com"];
+const ALLOWED_HOSTS: [&str; 5] = [
+    "api.github.com",
+    "raw.githubusercontent.com",
+    "media.githubusercontent.com",
+    "github.com",
+    "codeload.github.com",
+];
 
 pub fn host_of(url: &str) -> Option<&str> {
     let rest = url.strip_prefix("https://")?;
@@ -21,6 +27,18 @@ pub fn url_allowed(url: &str) -> bool {
     host_of(url).is_some_and(|h| ALLOWED_HOSTS.iter().any(|a| a.eq_ignore_ascii_case(h)))
 }
 
+fn is_reserved_device_name(seg: &str) -> bool {
+    let stem = match seg.find('.') {
+        Some(i) => &seg[..i],
+        None => seg,
+    };
+    const NAMES: [&str; 22] = [
+        "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
+        "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+    ];
+    NAMES.iter().any(|&r| stem.eq_ignore_ascii_case(r))
+}
+
 pub fn safe_rel_path(p: &str) -> Option<String> {
     if p.is_empty() || p.len() > MAX_PATH_BYTES || p.starts_with('/') || p.ends_with('/') {
         return None;
@@ -29,7 +47,15 @@ pub fn safe_rel_path(p: &str) -> Option<String> {
         return None;
     }
     for seg in p.split('/') {
-        if seg.is_empty() || seg == "." || seg == ".." || seg.len() > MAX_SEGMENT_BYTES || seg.ends_with('.') || seg.ends_with(' ') {
+        if seg.is_empty()
+            || seg == "."
+            || seg == ".."
+            || seg.len() > MAX_SEGMENT_BYTES
+            || seg.starts_with(' ')
+            || seg.ends_with('.')
+            || seg.ends_with(' ')
+            || is_reserved_device_name(seg)
+        {
             return None;
         }
     }
@@ -38,7 +64,11 @@ pub fn safe_rel_path(p: &str) -> Option<String> {
 
 pub fn safe_subdir(p: &str) -> Option<String> {
     let t = p.trim_matches('/');
-    if t.is_empty() { Some(String::new()) } else { safe_rel_path(t) }
+    if t.is_empty() {
+        Some(String::new())
+    } else {
+        safe_rel_path(t)
+    }
 }
 
 pub fn valid_owner(s: &str) -> bool {
@@ -95,8 +125,13 @@ mod tests {
 
     #[test]
     fn rejects_traversal_and_absolute_paths() {
-        for bad in ["", "/etc/passwd", "../x", "a/../b", "a/./b", "a//b", "a\\b", "C:/x", "a/b/", "x\0y", "a/b.", "con:", "a/b?c"] {
-            assert!(safe_rel_path(bad).is_none(), "{bad:?}");
+        let bad = [
+            "", "/etc/passwd", "../x", "a/../b", "a/./b", "a//b", "a\\b", "C:/x", "a/b/",
+            "x\0y", "a/b.", "con:", "a/b?c", "con", "aux.def", "nul.sff", "prn", "com1.cns",
+            "lpt1.txt", "a/ b/c",
+        ];
+        for b in bad {
+            assert!(safe_rel_path(b).is_none(), "{b:?}");
         }
         assert_eq!(safe_rel_path("chars/KFM/kfm.def").as_deref(), Some("chars/KFM/kfm.def"));
         assert_eq!(safe_rel_path("sprites/ç é.sff").as_deref(), Some("sprites/ç é.sff"));

@@ -69,7 +69,7 @@ impl InstallJob {
         }
         self.got.extend(downloaded);
         if self.got.len() + next.len() > MAX_ITEM_FILES {
-            next.clear();
+            return Err(MarketError::TooLarge);
         }
         for f in &next {
             self.have.insert(f.path.clone());
@@ -87,10 +87,16 @@ impl InstallJob {
     }
 }
 
-pub fn order_files(wanted: &[FileRef], mut results: Vec<Option<Vec<u8>>>) -> Result<Files, MarketError> {
+pub fn order_files(
+    wanted: &[FileRef],
+    mut results: Vec<Option<Vec<u8>>>,
+) -> Result<Files, MarketError> {
     let mut out = Vec::with_capacity(wanted.len());
     for (f, r) in wanted.iter().zip(results.drain(..)) {
-        out.push((f.path.clone(), r.ok_or_else(|| MarketError::Network(format!("missing {}", f.path)))?));
+        out.push((
+            f.path.clone(),
+            r.ok_or_else(|| MarketError::Network(format!("missing {}", f.path)))?,
+        ));
     }
     Ok(out)
 }
@@ -101,20 +107,52 @@ mod tests {
     use crate::catalog::{detect, Tree};
 
     fn catalog(files: &[(&str, u64)]) -> Catalog {
-        detect(&Tree { entries: files.iter().map(|(p, s)| TreeEntry { path: p.to_string(), size: *s }).collect(), truncated: false }, "", "repo")
+        detect(
+            &Tree {
+                entries: files
+                    .iter()
+                    .map(|(p, s)| TreeEntry {
+                        path: p.to_string(),
+                        size: *s,
+                    })
+                    .collect(),
+                truncated: false,
+            },
+            "",
+            "repo",
+        )
     }
 
     #[test]
     fn stage_install_pulls_referenced_sprites_and_music_in_a_second_round() {
-        let c = catalog(&[("stages/arena.def", 50), ("stages/arena.sff", 10), ("shared/bg.sff", 10), ("sound/theme.mp3", 100_000)]);
+        let c = catalog(&[
+            ("stages/arena.def", 50),
+            ("stages/arena.sff", 10),
+            ("shared/bg.sff", 10),
+            ("sound/theme.mp3", 100_000),
+        ]);
         let item = c.find("stage:stages/arena.def").unwrap().clone();
         let mut job = InstallJob::new(&item, &c).unwrap();
         assert_eq!(job.pending().len(), 2);
         let def = b"[BGdef]\nspr = shared/bg.sff\n[Music]\nbgmusic = sound/theme.mp3\n".to_vec();
-        job.accept(vec![("stages/arena.def".into(), def), ("stages/arena.sff".into(), vec![1])]).unwrap();
+        job.accept(vec![
+            ("stages/arena.def".into(), def),
+            ("stages/arena.sff".into(), vec![1]),
+        ])
+        .unwrap();
         assert!(!job.is_done());
-        assert_eq!(job.pending().iter().map(|f| f.path.as_str()).collect::<Vec<_>>(), vec!["shared/bg.sff", "sound/theme.mp3"]);
-        job.accept(vec![("shared/bg.sff".into(), vec![2]), ("sound/theme.mp3".into(), vec![3])]).unwrap();
+        assert_eq!(
+            job.pending()
+                .iter()
+                .map(|f| f.path.as_str())
+                .collect::<Vec<_>>(),
+            vec!["shared/bg.sff", "sound/theme.mp3"]
+        );
+        job.accept(vec![
+            ("shared/bg.sff".into(), vec![2]),
+            ("sound/theme.mp3".into(), vec![3]),
+        ])
+        .unwrap();
         assert!(job.is_done());
         assert_eq!(job.finish().len(), 4);
     }
@@ -130,7 +168,10 @@ mod tests {
     #[test]
     fn oversized_items_cannot_start() {
         let c = catalog(&[("big.zip", MAX_FILE_BYTES + 1)]);
-        assert_eq!(InstallJob::new(c.find("pack:big.zip").unwrap(), &c).err(), Some(MarketError::TooLarge));
+        assert_eq!(
+            InstallJob::new(c.find("pack:big.zip").unwrap(), &c).err(),
+            Some(MarketError::TooLarge)
+        );
     }
 
     #[test]
@@ -138,13 +179,28 @@ mod tests {
         let c = catalog(&[("m/a.ogg", 100_000)]);
         let mut job = InstallJob::new(c.find("music:m/a.ogg").unwrap(), &c).unwrap();
         let huge = vec![0u8; (MAX_FILE_BYTES + 1) as usize];
-        assert_eq!(job.accept(vec![("m/a.ogg".into(), huge)]), Err(MarketError::TooLarge));
+        assert_eq!(
+            job.accept(vec![("m/a.ogg".into(), huge)]),
+            Err(MarketError::TooLarge)
+        );
     }
 
     #[test]
     fn order_files_reports_missing_results() {
-        let wanted = vec![FileRef { path: "a".into(), size: 1 }, FileRef { path: "b".into(), size: 1 }];
-        assert_eq!(order_files(&wanted, vec![Some(vec![1]), Some(vec![2])]).unwrap(), vec![("a".to_string(), vec![1]), ("b".to_string(), vec![2])]);
+        let wanted = vec![
+            FileRef {
+                path: "a".into(),
+                size: 1,
+            },
+            FileRef {
+                path: "b".into(),
+                size: 1,
+            },
+        ];
+        assert_eq!(
+            order_files(&wanted, vec![Some(vec![1]), Some(vec![2])]).unwrap(),
+            vec![("a".to_string(), vec![1]), ("b".to_string(), vec![2])]
+        );
         assert!(order_files(&wanted, vec![Some(vec![1]), None]).is_err());
     }
 }

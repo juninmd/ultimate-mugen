@@ -47,7 +47,7 @@ To raise the API limit press `T` and paste a personal access token (no scopes ne
 ## Safety limits
 
 - Only `https` links to `github.com`, `api.github.com`, `raw.githubusercontent.com`, `media.githubusercontent.com` and `codeload.github.com` are fetched. Redirects to other hosts are blocked.
-- Paths coming from a repository are validated: no `..`, absolute paths, backslashes, drive letters or control characters. Unsafe entries are dropped from the listing.
+- Paths coming from a repository are validated: no `..`, absolute paths, backslashes, drive letters, control characters, leading spaces or Windows reserved device names (`CON`, `PRN`, `AUX`, `NUL`, `COM1-9`, `LPT1-9`). Unsafe entries are dropped from the listing.
 - Limits: 64 MB per file, 256 MB and 4000 files per item, 48 MB for the listing. Items above the limits are shown as "grande demais" and cannot be installed.
 - Content never runs as code. Characters are loaded by the same sandboxed parsers as manual imports.
 - Respect each author's license. Installing from a repository is a download, not a redistribution right.
@@ -58,9 +58,3 @@ To raise the API limit press `T` and paste a personal access token (no scopes ne
 |---|---|
 | Desktop | type in the game (paste is not available in the game window; type `owner/repo`) |
 | Web and phone browser | the browser's own prompt, with paste |
-| Android app | choose a suggestion; the app has no in-game keyboard yet |
-
-## Related
-
-- [Adding M.U.G.E.N content](MUGEN-Content.md) for the manual `mugen/` folder.
-- [Configuration](Configuration.md) for environment variables.

@@ -172,8 +172,8 @@ impl<'a> Host for Ctx<'a> {
             "hitbyattr" => {
                 let attr = f.ghv.attr;
                 if attr == 0 { return neg; }
-                let ok_state = crate::hitdef::state_mask(&v0.to_ascii_uppercase()) & attr != 0;
-                ok_state && (values.len() == 1 || values[1..].iter().any(|v| crate::hitdef::attr_kind_mask(&v.to_ascii_uppercase()) & attr != 0))
+                let ok_state = crate::hitdef::state_mask(v0) & attr != 0;
+                ok_state && (values.len() == 1 || values[1..].iter().any(|v| crate::hitdef::attr_kind_mask(v) & attr != 0))
             }
             "prevstatetype" => f.prev_state_type == c0,
             "prevmovetype" => f.prev_move_type == c0,
@@ -202,7 +202,14 @@ impl<'a> Host for Ctx<'a> {
         match bb { None => (happened == want) != neg, Some(v) => (happened == want && cmp(t as f64, op2.unwrap_or("="), v)) != neg }
     }
     fn assign(&self, name: &str, idx: i32, v: f64) -> f64 {
-        self.m.assigns.borrow_mut().push((self.i, name.to_string(), idx, v));
+        let kind = match name {
+            "var" => crate::matchs::VarKind::Var,
+            "fvar" => crate::matchs::VarKind::FVar,
+            "sysvar" => crate::matchs::VarKind::SysVar,
+            "sysfvar" => crate::matchs::VarKind::SysFVar,
+            _ => return if name == "var" || name == "sysvar" { (v as i32) as f64 } else { v },
+        };
+        self.m.assigns.borrow_mut().push((self.i, kind, idx, v));
         if name == "var" || name == "sysvar" { (v as i32) as f64 } else { v }
     }
     fn trigger(&self, name: &str, args: &[Node], comp: Option<char>, raw: Option<&str>) -> f64 {

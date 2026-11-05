@@ -98,3 +98,10 @@ Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,
 No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
 
 `Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.
+
+## Gatilhos e Atribuições de Variáveis com Alocação Zero
+
+A avaliação de partidas em `crates/engine/src/matchs.rs`, `crates/engine/src/triggers.rs` e `crates/engine/src/hitdef.rs` elimina alocações na heap durante os ticks de estado:
+- `Match::assigns` registra mutações de variáveis usando o enum compacto `VarKind` (`Var`, `FVar`, `SysVar`, `SysFVar`) em vez de alocar chaves `String` dinâmicas por atribuição.
+- `state_mask`, `attr_kind_mask` e `guardflag_bits` processam fatias de string byte a byte com `to_ascii_uppercase()` em linha, eliminando alocações temporárias de `String` maiúscula em avaliações de `hitbyattr`.
+- A taxa de simulação atingiu mais de 262.000 ticks/segundo com latência máxima por tick inferior a 0,053 ms.

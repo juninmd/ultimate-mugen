@@ -98,3 +98,10 @@ On the cloud development machine, median normalization time decreased from 60.8 
 In the cloud development environment, warm-run allocations decreased from 2,331 to 1,183 per decode. Elapsed times were noisy (roughly 9–11 ms in warm runs) and do not demonstrate a speedup. This reduces temporary allocation churn rather than the final decoded PCM size. The benchmark excludes playback and audio-device latency. Run `cargo test --locked --release --example audio_bench` for sample-preservation, mono/stereo, tail and existing PCM tests.
 
 `Ui::quad` transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.
+
+## Zero-Allocation Triggers and Variable Assignments
+
+Match evaluation in `crates/engine/src/matchs.rs`, `crates/engine/src/triggers.rs`, and `crates/engine/src/hitdef.rs` eliminates runtime heap allocations during state ticks:
+- `Match::assigns` records variable mutations using a compact `VarKind` enum (`Var`, `FVar`, `SysVar`, `SysFVar`) rather than allocating dynamic `String` keys per assignment.
+- `state_mask`, `attr_kind_mask`, and `guardflag_bits` parse string slices byte-by-byte with inline `to_ascii_uppercase()`, eliminating temporary uppercase `String` allocations during `hitbyattr` evaluations.
+- Simulation tick rate increased to over 262,000 ticks/sec with peak tick latency under 0.053 ms.

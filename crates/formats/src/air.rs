@@ -298,11 +298,12 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
             }
             continue;
         }
-        if line.len() >= 9 && line[..9].eq_ignore_ascii_case("loopstart") {
+        let lb = line.as_bytes();
+        if lb.len() >= 9 && lb[..9].eq_ignore_ascii_case(b"loopstart") {
             anim.loop_start = anim.frames.len();
             continue;
         }
-        if line.len() >= 11 && line[..11].eq_ignore_ascii_case("interpolate") {
+        if lb.len() >= 11 && lb[..11].eq_ignore_ascii_case(b"interpolate") {
             continue;
         }
     }

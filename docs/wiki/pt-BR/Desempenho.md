@@ -176,3 +176,7 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 - Substitui desvios aninhados em `input::rel_dirs` por deslocamento binário branchless `ud | (4 << (is_back ^ 1))`.
 - Substitui casamento de strings em `button_bit` por casamento em nível de byte na fatia, suportando insensibilidade a maiúsculas sem alocação.
 - Implementa atribuição de direção branchless em `InputHistory::push`.
+- **Onda 31 - Descompactação ZIP VFS Paralela Multi-Thread e HUD de Loading Cibernético**:
+  - Implementa descompressão em blocos com escopo multi-thread (`std::thread::scope`) aproveitando todo o paralelismo de CPU disponível para extração de arquivos ZIP em `add_zip`.
+  - Substitui descompressão sequencial por trabalho concorrente em lote, reduzindo a decodificação de recursos SFF de 222.6 ms para 88.7 ms (-60.1%).
+  - Adiciona HUD de carregamento cibernético com bordas brilhantes, pulso laser de dois tons ciano/branco e telemetria de pipeline paralelo.

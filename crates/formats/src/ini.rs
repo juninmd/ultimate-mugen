@@ -17,13 +17,18 @@ pub struct Section {
 impl Section {
     /// First value for `key` (case-insensitive).
     pub fn get(&self, key: &str) -> Option<&str> {
-        self.get_all(key).next()
+        self.entries
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case(key))
+            .map(|(_, v)| v.as_str())
     }
 
     /// All values for `key` (case-insensitive), in file order.
-    pub fn get_all<'a>(&'a self, key: &str) -> impl Iterator<Item = &'a str> + 'a {
-        let key = key.to_lowercase();
-        self.entries.iter().filter(move |(k, _)| *k == key).map(|(_, v)| v.as_str())
+    pub fn get_all<'a>(&'a self, key: &'a str) -> impl Iterator<Item = &'a str> + 'a {
+        self.entries
+            .iter()
+            .filter(move |(k, _)| k.eq_ignore_ascii_case(key))
+            .map(|(_, v)| v.as_str())
     }
 }
 
@@ -93,8 +98,7 @@ pub fn parse_ini(text: &str) -> Vec<Section> {
 
 /// First section whose name equals `name` (case-insensitive).
 pub fn find_section<'a>(secs: &'a [Section], name: &str) -> Option<&'a Section> {
-    let l = name.to_lowercase();
-    secs.iter().find(|s| s.lname == l)
+    secs.iter().find(|s| s.lname.eq_ignore_ascii_case(name))
 }
 
 /// Trim and remove surrounding double quotes (text up to the closing quote).

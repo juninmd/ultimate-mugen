@@ -199,3 +199,10 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 - Eliminação de escrita de zeros em `decode_rle8`: Como `vec![0u8; size]` já aloca memória inicializada em zero, repetições de pixels transparentes (`val == 0`) e literais zero (`d == 0`) pulam escritas na memória e apenas avançam o índice `j`. Isso elimina esperas nos buffers de escrita e sujeira nas linhas de cache (geralmente 50-80% de transparência).
 - Preenchimento em bloco no RLE5: Em `decode_rle5`, loops byte a byte foram substituídos por `.fill(c)` em fatias (ou avanço direto quando `c == 0`), transformando iterações individuais em memsets vetorizados.
 - Cópia direta de fatias para paletas SFF v2: Em `decode_sff_v2`, paletas com limites válidos utilizam cópia em lote ou direta via `copy_from_slice`, eliminando checagens de limites e adições saturadas por cor.
+
+## Saída antecipada de caixas de colisão, fatiamento de alvos sem alocação e despacho de IA indexado
+
+- Fast-path em caixas de colisão: Em `fighter::boxes()`, quadros sem caixas e sem modificadores ativos retornam imediatamente `vec![]` sem consultar tabelas de escala ou calcular fatores. Fatores de escala pré-multiplicados e inversão horizontal com XOR único (`flip = fr.flip_h ^ (self.facing < 0.0)`) removem penalidades de ramificação em cada vértice.
+- Fatiamento de alvo sem alocação em `p2clsnrequire`: Em `matchs::step_hits`, alvos específicos emprestam a fatia `&d_boxes[req..req + 1]` diretamente em vez de alocar um `Vec` no heap.
+- Despacho de comandos de IA indexado: Em `ai::Ai`, comandos são indexados como `Vec<usize>` em `fighter.def.commands` em vez de clonar árvores `CommandDef`. Ataques próximos e à distância são separados na inicialização, tornando a seleção em `O(1)` sem varreduras lineares.
+- Conversão vetorizada de pixmap para straight alpha: `raster::pixmap_to_image` evita divisões inteiras em pixels opacos (`alpha == 255`) e transparentes (`alpha == 0`) utilizando `as_chunks_mut::<4>()`.

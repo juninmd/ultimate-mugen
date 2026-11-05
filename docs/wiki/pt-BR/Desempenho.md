@@ -38,6 +38,7 @@ O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria th
 | Caminho rápido de batch de quads | `ume_render::Batch`, `ume_shell::quad` | `push_quad_verts` dedicado insere índices contíguos de quad sem mapeamento por iterador; coordenadas de quad sem rotação evitam trigonometria (`sin_cos`) |
 | Caminhos críticos sem alocação | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | Chaves de comando em `Arc<str>`, verificação ASCII de `HitDefAttr` sem alocação, seleção de golpes da IA em duas passagens e `RefCell::get_mut` evitam alocações no heap a cada tick |
 | Atalho de paleta identidade | `ume_engine::palette` | A verificação `is_identity()` pula trigonometria flutuante, multiplicações e clamp em paletas intocadas, além de atalho em `PalParams::combine` e lote em `apply_slice` |
+| Caminhos críticos sem alocação | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | Chaves de comando em `Arc<str>`, verificação ASCII de `HitDefAttr` sem alocação, buffers de rascunho de colisão (`fill_boxes`, `fill_proj_boxes`), array de pilha para projéteis congelados, explods `remove_on_get_hit` pré-filtrados e `RefCell::get_mut` evitam alocações no heap a cada tick |
 | Limites de resiliência | `ume_formats`, `ume_engine::matchs` | Decodificadores de imagem rejeitam cabeçalhos acima de `MAX_IMAGE_PIXELS` (`1 << 26`) antes de alocar; partidas limitam helpers (60), explods (512), projéteis (256) e textos (128) |
 
 ## Memória de GPU

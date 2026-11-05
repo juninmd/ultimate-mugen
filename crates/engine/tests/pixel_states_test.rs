@@ -15,10 +15,14 @@ fn fighters_where(file: &str) -> Vec<String> {
 }
 
 fn compiled(id: &str) -> CharDef {
+    compiled_pal(id, 1)
+}
+
+fn compiled_pal(id: &str, pal: i32) -> CharDef {
     std::env::remove_var("UME_FORCE_RIG");
     let json = std::fs::read_to_string(format!("../../assets/chars/{id}.json")).expect("read json");
     let nc: NativeChar = serde_json::from_str(&json).expect("parse json");
-    compile_native(&nc, 1, true)
+    compile_native(&nc, pal, true)
 }
 
 fn frame_art(def: &CharDef, anim: i32, frame: usize) -> &ImageData {
@@ -130,5 +134,39 @@ fn state_animations_use_their_own_art() {
             let floor_offset = opaque_floor_offset(frame_sprite(&def, anim, frame));
             assert!(floor_offset.is_finite() && floor_offset.abs() <= 1.5, "{id}: anim {anim} opaque pixels align with its own floor anchor, offset {floor_offset}");
         }
+    }
+}
+
+#[test]
+fn alternate_palettes_recolour_the_sprite_art() {
+    for id in fighters_where("01_idle.png") {
+        let base = compiled(&id);
+        let swapped = compiled_pal(&id, 2);
+        let before = frame_art(&base, 0, 0);
+        let after = frame_art(&swapped, 0, 0);
+        assert_eq!(
+            (before.w, before.h),
+            (after.w, after.h),
+            "{id}: the palette swap keeps the sprite size"
+        );
+        assert!(
+            before
+                .rgba
+                .chunks_exact(4)
+                .zip(after.rgba.chunks_exact(4))
+                .all(|(a, b)| a[3] == b[3]),
+            "{id}: the palette swap keeps the silhouette"
+        );
+        let changed = before
+            .rgba
+            .chunks_exact(4)
+            .zip(after.rgba.chunks_exact(4))
+            .filter(|(a, b)| a[..3] != b[..3])
+            .count();
+        let opaque = before.rgba.chunks_exact(4).filter(|pixel| pixel[3] > 0).count();
+        assert!(
+            changed * 4 > opaque,
+            "{id}: palette 2 must repaint a meaningful part of the fighter ({changed} of {opaque})"
+        );
     }
 }

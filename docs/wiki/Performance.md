@@ -108,3 +108,10 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
   - Replaces nested branching in `input::rel_dirs` with branchless bitwise shift `ud | (4 << (is_back ^ 1))`.
   - Replaces string matching in `button_bit` with byte-level slice matching, supporting case-insensitivity without allocation.
   - Implements branchless facing assignment in `InputHistory::push`.
+
+## Pre-allocated SND decoding & zero-alloc command movelist filtering
+
+- Pre-allocated SND sound hash tables: `snd::decode_snd_checked` bounds capacity using `count.min(buf.len() / 16 + 1)` and preallocates both `out` and `seen` hash tables with that capacity, eliminating repeated hash table reallocations and rehashes across character audio decoding.
+- Static palette key resolution in loader: `loader::load_character` resolves character DEF palette overrides (`pal1`..`pal12`) using static string slice table `PAL_KEYS` rather than formatting 12 heap strings per character.
+- Pre-allocated sprite deduplication: Pre-sizes `seen` and `unique` sprite vectors to `sff.sprites.len()`.
+- Filter-first zero-alloc movelist and AI command extraction: `loader::load_character` filters commands in-place with `eq_ignore_ascii_case` before allocating or cloning strings, removing dozens of heap allocations per loaded character.

@@ -194,11 +194,15 @@ pub fn load_mugen_char(
                     p.data.clone(),
                 );
             }
-            for k in 1..=12 {
+            const PAL_KEYS: [&str; 12] = [
+                "pal1", "pal2", "pal3", "pal4", "pal5", "pal6", "pal7", "pal8", "pal9", "pal10", "pal11", "pal12",
+            ];
+            for (idx, &pal_key) in PAL_KEYS.iter().enumerate() {
+                let k = (idx + 1) as i32;
                 if palettes.contains_key(&(1, k)) {
                     continue;
                 }
-                if let Some(a) = fget(&format!("pal{k}"))
+                if let Some(a) = fget(pal_key)
                     .and_then(|p| resolve(vfs, &base, &p))
                     .filter(|a| a.len() >= 768)
                 {
@@ -223,12 +227,13 @@ pub fn load_mugen_char(
                 );
             }
         }
-        let mut seen = std::collections::HashSet::new();
-        let unique: Vec<&ume_formats::sff::DecodedSprite> = sff
-            .sprites
-            .iter()
-            .filter(|s| seen.insert((s.group, s.index)))
-            .collect();
+        let mut seen = std::collections::HashSet::with_capacity(sff.sprites.len());
+        let mut unique: Vec<&ume_formats::sff::DecodedSprite> = Vec::with_capacity(sff.sprites.len());
+        for s in &sff.sprites {
+            if seen.insert((s.group, s.index)) {
+                unique.push(s);
+            }
+        }
         let pal_of = |s: &ume_formats::sff::DecodedSprite| -> Option<&[u8]> {
             let paletteless = s.palette.is_none() && s.rgba.is_none();
             if paletteless {
@@ -256,7 +261,7 @@ pub fn load_mugen_char(
                 .map(|p| Arc::as_ptr(p) as usize)
                 .or_else(|| s.rgba.as_ref().map(|p| Arc::as_ptr(p) as usize))
         };
-        let mut owners: HashMap<(usize, usize, u32, u32), usize> = HashMap::new();
+        let mut owners: HashMap<(usize, usize, u32, u32), usize> = HashMap::with_capacity(unique.len());
         let mut owner_of = Vec::with_capacity(unique.len());
         for (i, s) in unique.iter().enumerate() {
             let shared = pixels_id(s).map(|px| {
@@ -313,14 +318,14 @@ pub fn load_mugen_char(
     // move list for the pause screen: every author-defined command with its input (internal hold/recovery helpers left out)
     let mut movelist: Vec<MoveInfo> = vec![];
     for c in commands.iter().filter(|c| !c.raw.is_empty()) {
-        let l = c.name.to_ascii_lowercase();
-        // single keys (a, fwd, start...) are not moves: keep sequences, charges and button combos only
-        let single = !c.raw.contains(',') && !c.raw.contains('+');
-        if single
-            || l.starts_with("hold")
-            || l.starts_with("recovery")
-            || movelist.iter().any(|m| m.command == c.name)
+        let name = c.name.as_str();
+        if (name.len() >= 4 && name[..4].eq_ignore_ascii_case("hold"))
+            || (name.len() >= 8 && name[..8].eq_ignore_ascii_case("recovery"))
         {
+            continue;
+        }
+        let single = !c.raw.contains(',') && !c.raw.contains('+');
+        if single || movelist.iter().any(|m| m.command == c.name) {
             continue;
         }
         movelist.push(MoveInfo {
@@ -331,13 +336,13 @@ pub fn load_mugen_char(
     }
     let ai_commands = commands
         .iter()
-        .map(|c| c.name.clone())
-        .filter(|n| {
-            let l = n.to_ascii_lowercase();
-            !(l.starts_with("hold")
-                || l.starts_with("recovery")
-                || ["fwd", "back", "up", "down", "ff", "bb"].contains(&l.as_str()))
+        .filter(|c| {
+            let n = c.name.as_str();
+            !(n.len() >= 4 && n[..4].eq_ignore_ascii_case("hold")
+                || (n.len() >= 8 && n[..8].eq_ignore_ascii_case("recovery"))
+                || ["fwd", "back", "up", "down", "ff", "bb"].iter().any(|k| k.eq_ignore_ascii_case(n)))
         })
+        .map(|c| c.name.clone())
         .collect();
     let mut d = CharDef::empty(&format!("mugen:{def_path}"));
     d.name = name;

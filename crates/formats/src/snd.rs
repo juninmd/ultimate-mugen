@@ -25,8 +25,9 @@ pub fn decode_snd_checked(buf: &[u8]) -> Result<HashMap<(i32, i32), Vec<u8>>, St
     let r = Reader(buf);
     let count = r.u32(16) as usize;
     let mut ofs = r.u32(20) as usize;
-    let mut out = HashMap::new();
-    let mut seen = HashSet::new();
+    let cap = count.min(buf.len() / 16 + 1);
+    let mut out = HashMap::with_capacity(cap);
+    let mut seen = HashSet::with_capacity(cap);
     for _ in 0..count {
         if ofs < 24 || ofs.saturating_add(16) > buf.len() || !seen.insert(ofs) {
             break;

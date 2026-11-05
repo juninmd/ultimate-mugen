@@ -21,6 +21,7 @@ Common traits of well-known fighting-game select screens (Street Fighter, Tekken
 - Stage chip in the header, cycled with `[` and `]` or by clicking the arrows; the stage grid still confirms it after the fighters.
 - Palette row under each side panel: 12 numbered swatches with the current one highlighted. `,` / `.` cycle, `P` picks a random palette, clicking a swatch jumps to it; each side keeps its own palette and team members are stored independently. The last palette of each player is persisted in `ultimate-mugen.cfg` (`pal1`, `pal2`) and in replays.
 - Keyboard, gamepad and touch/mouse use the same navigation as before.
+- Grid navigation moves by column: `Up` and `Down` keep the current column and land on the closest tile of the target row, so a shorter last row never blocks or skips the cursor. `PgUp`/`PgDn` move a whole page, `Home`/`End` jump to the ends, the wheel scrolls by row and `R` picks a random tile.
 
 ## Uniform character size
 

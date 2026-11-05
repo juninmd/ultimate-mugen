@@ -371,3 +371,7 @@ etain_mut.
 - **Wave 61 - Dedicated Zero-Arg Trigger Dispatch & Byte-Level String Comparison**:
   - `triggers::trigger0`: Fast-pathed the top 20 zero-argument triggers (`time`, `animtime`, `stateno`, `prevstateno`, `anim`, `ctrl`, `alive`, `life`, `facing`, `roundstate`, `movecontact`, `movehit`, `vel`, `pos`) directly without argument-closure setup or the 90-arm general match.
   - `triggers::cmpstr`: Switched string character decoding to single-byte inspection (`v0.as_bytes().first()`) for `statetype`, `movetype`, and `physics`, and reused parsed string slice in `command` checks.
+
+- **Wave 62 - Bytecode VM Fast Paths for 1-Arg Triggers & Arithmetic Comparisons**:
+  - `bytecode::Code::run`: Added dedicated fast paths for 2-op unary 1-arg triggers (`[Op::Const, Op::Trig1]`), 3-op inverted 1-arg triggers (`[Op::Const, Op::Trig1, Op::Not]`), and 4-op 1-arg trigger comparisons (`[Op::Const, Op::Trig1, Op::Const, Op]`), bypassing the stack machine loop and vector indexing for `var(X) = Y`, `fvar(X) > Y`, and `animelemtime(X) >= Y`.
+  - `bytecode::Code::run`: Expanded 3-op comparisons to cover arithmetic (`Add`, `Sub`) and trigger-to-trigger relational checks (`[Op::Trig0, Op::Trig0, Op]`), eliminating stack interpreter overhead for expressions like `anim = stateno` or `time > animtime`.

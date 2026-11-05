@@ -367,3 +367,7 @@ etain_mut.
 - **Onda 61 - Despacho Dedicado de Gatilhos Sem Argumentos e Comparacao de Strings em Bytes**:
   - `triggers::trigger0`: Desvio rapido para os 20 principais gatilhos sem argumentos (`time`, `animtime`, `stateno`, `prevstateno`, `anim`, `ctrl`, `alive`, `life`, `facing`, `roundstate`, `movecontact`, `movehit`, `vel`, `pos`) diretamente sem criacao de closures de argumentos ou passagem pelo match geral de 90 bracos.
   - `triggers::cmpstr`: Migracao da decodificacao de caracteres para inspecao de byte unico (`v0.as_bytes().first()`) para `statetype`, `movetype` e `physics`, e reutilizacao de fatias de string em checagens de `command`.
+
+- **Onda 62 - Atalhos Rapidos na VM de Bytecode para Gatilhos de 1 Argumento e Comparacoes Aritmeticas**:
+  - `bytecode::Code::run`: Adicionados atalhos dedicados para instrucoes unarias de 2 ops de 1 argumento (`[Op::Const, Op::Trig1]`), gatilhos invertidos de 3 ops (`[Op::Const, Op::Trig1, Op::Not]`) e comparacoes de 4 ops (`[Op::Const, Op::Trig1, Op::Const, Op]`), ignorando o loop da pilha e indexacoes para expressoes como `var(X) = Y`, `fvar(X) > Y` e `animelemtime(X) >= Y`.
+  - `bytecode::Code::run`: Expandidas comparacoes de 3 ops para suportar aritmetica (`Add`, `Sub`) e relacoes entre dois gatilhos (`[Op::Trig0, Op::Trig0, Op]`), eliminando o interpretador de pilha para expressoes como `anim = stateno` ou `time > animtime`.

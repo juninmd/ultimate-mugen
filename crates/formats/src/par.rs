@@ -1,31 +1,30 @@
 pub fn workers(jobs: usize) -> usize {
     if cfg!(target_arch = "wasm32") { return 1; }
-    std::thread::available_parallelism().map(|n| n.get()).unwrap_or(1).min(jobs).clamp(1, 8)
+    std::thread::available_parallelism().map(|n| n.get()).unwrap_or(1).min(jobs).clamp(1, 32)
 }
 
 pub fn map<T: Sync, R: Send>(items: &[T], f: impl Fn(&T) -> R + Sync) -> Vec<R> {
-    let n = workers(items.len() / 4);
+    if items.is_empty() { return Vec::new(); }
+    let n = workers(items.len() / 2);
     if n <= 1 { return items.iter().map(f).collect(); }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        let next = AtomicUsize::new(0);
-        let chunk = (items.len() / (n * 8)).max(1);
-        let mut parts: Vec<Vec<(usize, R)>> = std::thread::scope(|sc| {
-            let handles: Vec<_> = (0..n).map(|_| sc.spawn(|| {
-                let mut out = Vec::new();
-                loop {
-                    let start = next.fetch_add(chunk, Ordering::Relaxed);
-                    if start >= items.len() { break out; }
-                    let end = (start + chunk).min(items.len());
-                    out.extend((start..end).map(|i| (i, f(&items[i]))));
-                }
-            })).collect();
+        let parts: Vec<Vec<R>> = std::thread::scope(|sc| {
+            let handles: Vec<_> = (0..n).map(|t| {
+                let start = t * items.len() / n;
+                let end = (t + 1) * items.len() / n;
+                let f_ref = &f;
+                sc.spawn(move || {
+                    (start..end).map(|i| f_ref(&items[i])).collect::<Vec<R>>()
+                })
+            }).collect();
             handles.into_iter().map(|h| h.join().unwrap_or_else(|e| std::panic::resume_unwind(e))).collect()
         });
-        let mut slots: Vec<Option<R>> = (0..items.len()).map(|_| None).collect();
-        for (i, r) in parts.iter_mut().flat_map(std::mem::take) { slots[i] = Some(r); }
-        slots.into_iter().map(|r| r.expect("every index is produced exactly once")).collect()
+        let mut out = Vec::with_capacity(items.len());
+        for part in parts {
+            out.extend(part);
+        }
+        out
     }
     #[cfg(target_arch = "wasm32")]
     unreachable!()

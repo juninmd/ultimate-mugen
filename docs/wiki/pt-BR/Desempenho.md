@@ -8,7 +8,9 @@ Como a engine mantém o carregamento rápido e os quadros estáveis, e como medi
 
 | Etapa | O que acontece | Threads |
 |---|---|---|
-| Decodificação SFF v2 | Os cabeçalhos são lidos em ordem; os dados LZ5, RLE5, RLE8 e PNG são decodificados em paralelo; sprites ligados compartilham os pixels de origem (`Arc`) | Todos os núcleos (máx. 8) |
+| Decodificação SFF v1 | Cabeçalhos de subarquivos escaneados; payloads PCX decodificados em paralelo entre núcleos; sprites ligados compartilham pixels de origem (`Arc`) | Todos os núcleos (máx. 32) |
+| Decodificação SFF v2 | Os cabeçalhos são lidos em ordem; os dados LZ5, RLE5, RLE8 e PNG são decodificados em paralelo; sprites ligados compartilham os pixels de origem (`Arc`) | Todos os núcleos (máx. 32) |
+| Importação e Descompressão Zip | Diretório central escaneado, entradas descompactadas em paralelo com barra visual de progresso `ZipProgress` e indicador de threads de hardware | Todos os núcleos (máx. 32) |
 | Sprites do personagem | A conversão paleta para RGBA roda em paralelo, uma vez por buffer de pixels e paleta únicos; sprites ligados compartilham um `ImageData` e, portanto, um único upload na GPU | Todos os núcleos (máx. 8) |
 | Sprites do cenário | Mesma conversão RGBA em paralelo; o buffer RGBA é movido para o cenário, nunca copiado | Todos os núcleos (máx. 8) |
 | Retratos da tela de seleção | `load_mugen_portrait` decodifica só os sprites 9000,0, 9000,1 e o primeiro quadro parado (mais as origens dos links) via `decode_sff_only` | 1 |

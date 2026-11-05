@@ -247,6 +247,7 @@ pub struct App {
     move_page: usize,
     pending: Pending,
     import_jobs: Vec<std::thread::JoinHandle<Result<(String, ume_formats::vfs::Vfs), String>>>,
+    import_progress: Option<ume_formats::vfs::ZipProgress>,
     pub team: Option<Team>,
     /// Survival run in progress (round, score, carried life)
     survival: Option<survival::Survival>,
@@ -389,6 +390,7 @@ impl App {
             move_page: 0,
             pending: Pending::default(),
             import_jobs: vec![],
+            import_progress: None,
             window_watch: WindowWatch::default(),
             window_pinned: false,
             team: None,
@@ -603,12 +605,14 @@ impl App {
         for zip in crate::take_imports() {
             #[cfg(not(target_arch = "wasm32"))]
             {
+                let prog = ume_formats::vfs::ZipProgress::default();
+                self.import_progress = Some(prog.clone());
                 if let Ok(h) = std::thread::Builder::new()
                     .name("zip-import".into())
-                    .spawn(move || crate::registry::read_zip(&zip))
+                    .spawn(move || crate::registry::read_zip_with_progress(&zip, Some(&prog)))
                 {
                     self.import_jobs.push(h);
-                    self.msg = "Importando pacote…".into();
+                    self.msg = "Importando recursos MUGEN…".into();
                 }
             }
             #[cfg(target_arch = "wasm32")]
@@ -630,8 +634,32 @@ impl App {
                     .unwrap_or_else(|_| Err("import thread panicked".into()));
                 self.finish_import(r);
             }
+            if self.import_jobs.is_empty() {
+                self.import_progress = None;
+            }
         }
-        if !self.msg.is_empty() {
+        if !self.import_jobs.is_empty() {
+            let (done, total, cur_file) = if let Some(p) = &self.import_progress {
+                let d = p.done.load(std::sync::atomic::Ordering::Relaxed);
+                let t = p.total.load(std::sync::atomic::Ordering::Relaxed);
+                let cur = p.current_name.lock().map(|s| s.clone()).unwrap_or_default();
+                (d, t, cur)
+            } else {
+                (0, 0, String::new())
+            };
+            let ratio = if total > 0 { (done as f32 / total as f32).clamp(0.0, 1.0) } else { 0.15 + 0.15 * (self.ui.t * 3.0).sin().abs() };
+            let banner_h = 68.0;
+            self.ui.rect(0.0, VH - banner_h, VW, banner_h, Color::new(0.04, 0.03, 0.08, 0.94));
+            self.ui.rect(0.0, VH - banner_h, VW, 2.0, hex("#00f0ff"));
+            let label = if !cur_file.is_empty() {
+                format!("IMPORTANDO RECURSOS MUGEN: {} ({}/{})", cur_file, done, total)
+            } else {
+                format!("IMPORTANDO RECURSOS MUGEN ({}/{})", done, total)
+            };
+            self.ui.progress_bar(80.0, VH - banner_h + 12.0, VW - 160.0, ratio, &label);
+            let hw = format!("⚡ PIPELINE: {} THREADS PARALELAS · SIMD", ume_formats::par::workers(total.max(1)));
+            self.ui.text(&hw, VW - 80.0, VH - banner_h + 8.0, 13.0, hex("#00f0ff"), Align::Right, true);
+        } else if !self.msg.is_empty() {
             self.ui
                 .rect(0.0, VH - 36.0, VW, 36.0, Color::new(0.0, 0.0, 0.0, 0.7));
             self.ui.text(

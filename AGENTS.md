@@ -9,6 +9,14 @@
 - English is the default language for code, commits, issues and docs. Portuguese lives in `*.pt-BR.md` files and `docs/wiki/pt-BR/`; keep both in sync.
 - Update `docs/wiki/` whenever a format, controller, trigger, flag or folder layout changes.
 
+## File Size and Layout
+- Hard ceiling: **250 lines per source file**, checked by `node scripts/file-size.mjs` (Rust, JS, TS, CSS, HTML, WGSL). Content and docs (UMF JSON, `.cns`, `.air`, `.def`, atlas, `.md`) are out.
+- One file, one responsibility: the file name states what it does, the folder names the feature, and `mod.rs` is a facade with declarations and re-exports only. Rules and examples: `docs/wiki/File-Layout.md`.
+- Split by axis of change, not by size: a feature becomes `feature.rs` (shared types and entry points) plus `feature/<concern>.rs` (body, collision, palette, screen...), so two PRs working on the same feature touch different files.
+- Existing files over the ceiling are grandfathered in `scripts/file-size-baseline.json`. They may not grow; split them and run `--update` in the same PR. Never raise a number in the baseline.
+- Parallel PRs: put new logic in a new file and wire it with a single line in the shared file (`mod.rs`, `controllers.rs`, `triggers.rs`, `index.json`). No reformatting or renames of shared files inside a feature PR.
+- No `utils.rs`, `helpers.rs`, `misc.rs`, `common.rs` or `manager.rs`: name the concept instead.
+
 ## Character Directories
 - Built-in UMF: `assets/chars/` (embedded at compile time via `build.rs` and `index.json`).
 - MUGEN Chars: `mugen/chars/<char_name>/` (auto-scanned by `scan_folders()` at startup, git-ignored).
@@ -22,6 +30,7 @@
 
 ## Testing & Validation
 - **Regra de ouro**: Baixar e descompactar todos os personagens primeiro; executar suites de teste (`cargo test`, `mugen_check`) **apenas uma vez ao final** da instalação completa.
+- File size gate: `node scripts/file-size.mjs` (add `--update` only when a split removed a baseline entry).
 - Engine compatibility: `cargo test --workspace --release`
 - DBZ integration test: `cargo test -p ume-engine --test dbz -- --nocapture`
 - Shonen Jump integration test: `cargo test -p ume-engine --test shonen_jump -- --nocapture`

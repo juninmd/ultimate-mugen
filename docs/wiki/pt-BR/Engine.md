@@ -58,6 +58,7 @@ Coloque o decoder em `crates/formats/src/<formato>.rs`, exporte em `lib.rs` e te
 - Sem comentários no código: nomes de funções, tipos e variáveis devem explicar a intenção. Explicações ficam nesta wiki.
 - A simulação (`crates/engine`) não usa relógio, threads nem aleatoriedade fora de `Match::random`, para manter replays e rollback.
 - Nada de alocação dentro de `Match::tick` em código novo.
+- Arquivos ficam abaixo de 250 linhas, um assunto cada, divididos pelo eixo de mudança: veja [Layout de arquivos](Layout-de-Arquivos.md) e `node scripts/file-size.mjs`.
 - Mensagens de commit no padrão Conventional Commits (`feat:`, `fix:`), validadas por `scripts/commit-lint.mjs`.
 
 ## Decisões de arquitetura

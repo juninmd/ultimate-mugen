@@ -14,6 +14,7 @@ How the engine keeps loading fast and frames smooth, and how to measure it.
 | Select-screen portraits | `load_mugen_portrait` decodes only sprites 9000,0, 9000,1 and the first idle frame (plus their link sources) via `decode_sff_only` | 1 |
 | Native (UMF) rig | Every unique frame is rasterized in parallel | All cores (max 8) |
 | Whole character | Loaded on a `char-load` thread while the VS screen is shown | 1 background thread |
+| Resource import | Background worker thread with cybernetic loading progress bar and active worker count badge | 1 background thread per job |
 
 The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the calling thread, since the browser build has no threads.
 

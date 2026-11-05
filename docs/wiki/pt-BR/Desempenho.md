@@ -14,6 +14,7 @@ Como a engine mantém o carregamento rápido e os quadros estáveis, e como medi
 | Retratos da tela de seleção | `load_mugen_portrait` decodifica só os sprites 9000,0, 9000,1 e o primeiro quadro parado (mais as origens dos links) via `decode_sff_only` | 1 |
 | Rig nativo (UMF) | Cada quadro único é rasterizado em paralelo | Todos os núcleos (máx. 8) |
 | Personagem inteiro | Carregado numa thread `char-load` enquanto a tela de VS aparece | 1 thread em segundo plano |
+| Importação de recursos | Thread auxiliar em segundo plano com barra de carregamento cibernética e contador de tarefas ativas | 1 thread de segundo plano por job |
 
 O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria thread, pois o build do navegador não tem threads.
 

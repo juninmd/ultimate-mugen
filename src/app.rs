@@ -631,7 +631,34 @@ impl App {
                 self.finish_import(r);
             }
         }
-        if !self.msg.is_empty() {
+        if !self.import_jobs.is_empty() {
+            let active = self.import_jobs.len();
+            let bar_w = (VW * 0.45).max(320.0);
+            let bar_h = 8.0;
+            let bar_x = (VW - bar_w) / 2.0;
+            let bar_y = VH - 20.0;
+            self.ui.rect(0.0, VH - 44.0, VW, 44.0, Color::new(0.02, 0.04, 0.08, 0.88));
+            self.ui.rect(bar_x, bar_y, bar_w, bar_h, Color::new(0.12, 0.16, 0.24, 0.9));
+            let t = (get_time() * 1.5).fract() as f32;
+            let sweep_w = bar_w * 0.35;
+            let sweep_x = bar_x + (bar_w - sweep_w) * t;
+            self.ui.rect(sweep_x, bar_y + 1.0, sweep_w, bar_h - 2.0, hex("#38bdf8"));
+            self.ui.rect(0.0, VH - 3.0, VW, 3.0, hex("#0284c7"));
+            let label = if active == 1 {
+                "IMPORTANDO RECURSOS M.U.G.E.N...".to_string()
+            } else {
+                format!("IMPORTANDO RECURSOS M.U.G.E.N ({} TAREFAS ATIVAS)...", active)
+            };
+            self.ui.text(
+                &label,
+                VW / 2.0,
+                VH - 26.0,
+                14.0,
+                hex("#e0f2fe"),
+                Align::Center,
+                true,
+            );
+        } else if !self.msg.is_empty() {
             self.ui
                 .rect(0.0, VH - 36.0, VW, 36.0, Color::new(0.0, 0.0, 0.0, 0.7));
             self.ui.text(

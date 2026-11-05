@@ -138,7 +138,36 @@ fn attr_kind_match(want: &str, have: &[String]) -> bool {
 
 impl<'a> Host for Ctx<'a> {
     fn trigger0(&self, name: &str, comp: Option<char>, raw: Option<&str>) -> f64 {
-        self.trigger(name, &[], comp, raw)
+        let f = self.f();
+        match name {
+            "time" | "statetime" => f.state_time as f64,
+            "animtime" => f.anim_time_trig() as f64,
+            "stateno" => f.state_no as f64,
+            "prevstateno" => f.prev_state_no as f64,
+            "anim" => f.anim_no as f64,
+            "ctrl" => b(f.ctrl && !f.ikemen.dizzy && !f.ikemen.guard_break),
+            "alive" => b(f.alive),
+            "life" => f.life as f64,
+            "lifemax" => f.life_max as f64,
+            "facing" => f.facing as f64,
+            "roundstate" => self.m.round_state as f64,
+            "movecontact" => f.move_contact as f64,
+            "movehit" => f.move_hit as f64,
+            "moveguarded" => f.move_guarded as f64,
+            "movereversed" => f.move_reversed as f64,
+            "hitshakeover" => b(f.hit_shake <= 0),
+            "hitover" => b(f.hit_over_time <= 0),
+            "hitpausetime" => f.hit_pause as f64,
+            "vel" => {
+                let l = f.lscl as f64;
+                (match comp { Some('y') => f.vel.y, Some('z') => 0.0, _ => f.vel.x }) as f64 / l
+            }
+            "pos" => {
+                let l = f.lscl as f64;
+                (match comp { Some('y') => f.air_height(), Some('z') => 0.0, _ => f.pos.x - self.m.camera.x }) as f64 / l
+            }
+            _ => self.trigger(name, &[], comp, raw),
+        }
     }
     fn trigger1(&self, name: &str, a0: f64, comp: Option<char>, raw: Option<&str>) -> f64 {
         let f = self.f();
@@ -175,11 +204,11 @@ impl<'a> Host for Ctx<'a> {
     }
     fn cmpstr(&self, name: &str, neg: bool, values: &[String]) -> bool {
         let v0 = values.first().map(|s| s.as_str()).unwrap_or("");
-        let c0 = v0.chars().next().unwrap_or(' ').to_ascii_uppercase();
+        let c0 = v0.as_bytes().first().copied().unwrap_or(b' ').to_ascii_uppercase() as char;
         let f = self.f();
         let r = match name {
             "teammode" => crate::matchs::TeamMode::parse(v0).is_some_and(|t| t == self.m.team_mode()),
-            "command" => self.m.has_command(self.i, values.first().map(|s| s.as_str()).unwrap_or("")),
+            "command" => self.m.has_command(self.i, v0),
             "statetype" => f.state_type == c0,
             "movetype" => f.move_type == c0,
             "physics" => f.physics == c0,

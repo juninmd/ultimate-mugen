@@ -442,18 +442,31 @@ impl Code {
                     let v = eval(&self.host[i as usize], h);
                     return if v.is_nan() { f64::NAN } else if v == 0.0 { 1.0 } else { 0.0 };
                 }
+                (Op::Const(arg), Op::Trig1(i)) => {
+                    return match &self.host[i as usize] {
+                        Node::Trig { name, comp, raw, .. } => h.trigger1(name, arg, *comp, raw.as_deref()),
+                        _ => 0.0,
+                    };
+                }
                 _ => {}
             }
         }
         if self.ops.len() == 3 {
             let (op0, op1, op2) = (self.ops[0], self.ops[1], self.ops[2]);
+            if let (Op::Const(arg), Op::Trig1(i), Op::Not) = (op0, op1, op2) {
+                let v = match &self.host[i as usize] {
+                    Node::Trig { name, comp, raw, .. } => h.trigger1(name, arg, *comp, raw.as_deref()),
+                    _ => 0.0,
+                };
+                return if v.is_nan() { f64::NAN } else if v == 0.0 { 1.0 } else { 0.0 };
+            }
             if let (Op::Trig0(i), Op::Const(c)) = (op0, op1) {
                 let v = if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
                     h.trigger0(name, *comp, raw.as_deref())
                 } else {
                     0.0
                 };
-                if v.is_nan() { return f64::NAN; }
+                if v.is_nan() || c.is_nan() { return f64::NAN; }
                 return match op2 {
                     Op::Eq => (v == c) as i32 as f64,
                     Op::Ne => (v != c) as i32 as f64,
@@ -461,6 +474,8 @@ impl Code {
                     Op::Ge => (v >= c) as i32 as f64,
                     Op::Lt => (v < c) as i32 as f64,
                     Op::Le => (v <= c) as i32 as f64,
+                    Op::Add => v + c,
+                    Op::Sub => v - c,
                     _ => self.run_slice(h, 0, 3),
                 };
             } else if let (Op::Const(c), Op::Trig0(i)) = (op0, op1) {
@@ -469,7 +484,7 @@ impl Code {
                 } else {
                     0.0
                 };
-                if v.is_nan() { return f64::NAN; }
+                if v.is_nan() || c.is_nan() { return f64::NAN; }
                 return match op2 {
                     Op::Eq => (c == v) as i32 as f64,
                     Op::Ne => (c != v) as i32 as f64,
@@ -477,10 +492,74 @@ impl Code {
                     Op::Ge => (c >= v) as i32 as f64,
                     Op::Lt => (c < v) as i32 as f64,
                     Op::Le => (c <= v) as i32 as f64,
+                    Op::Add => c + v,
+                    Op::Sub => c - v,
+                    _ => self.run_slice(h, 0, 3),
+                };
+            } else if let (Op::Trig0(i), Op::Trig0(j)) = (op0, op1) {
+                let v0 = if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                    h.trigger0(name, *comp, raw.as_deref())
+                } else {
+                    0.0
+                };
+                let v1 = if let Node::Trig { name, comp, raw, .. } = &self.host[j as usize] {
+                    h.trigger0(name, *comp, raw.as_deref())
+                } else {
+                    0.0
+                };
+                if v0.is_nan() || v1.is_nan() { return f64::NAN; }
+                return match op2 {
+                    Op::Eq => (v0 == v1) as i32 as f64,
+                    Op::Ne => (v0 != v1) as i32 as f64,
+                    Op::Gt => (v0 > v1) as i32 as f64,
+                    Op::Ge => (v0 >= v1) as i32 as f64,
+                    Op::Lt => (v0 < v1) as i32 as f64,
+                    Op::Le => (v0 <= v1) as i32 as f64,
+                    Op::Add => v0 + v1,
+                    Op::Sub => v0 - v1,
                     _ => self.run_slice(h, 0, 3),
                 };
             }
         }
+        if self.ops.len() == 4 {
+            let (op0, op1, op2, op3) = (self.ops[0], self.ops[1], self.ops[2], self.ops[3]);
+            if let (Op::Const(arg), Op::Trig1(i), Op::Const(c)) = (op0, op1, op2) {
+                let v = match &self.host[i as usize] {
+                    Node::Trig { name, comp, raw, .. } => h.trigger1(name, arg, *comp, raw.as_deref()),
+                    _ => 0.0,
+                };
+                if v.is_nan() || c.is_nan() { return f64::NAN; }
+                return match op3 {
+                    Op::Eq => (v == c) as i32 as f64,
+                    Op::Ne => (v != c) as i32 as f64,
+                    Op::Gt => (v > c) as i32 as f64,
+                    Op::Ge => (v >= c) as i32 as f64,
+                    Op::Lt => (v < c) as i32 as f64,
+                    Op::Le => (v <= c) as i32 as f64,
+                    Op::Add => v + c,
+                    Op::Sub => v - c,
+                    _ => self.run_slice(h, 0, 4),
+                };
+            } else if let (Op::Const(c), Op::Const(arg), Op::Trig1(i)) = (op0, op1, op2) {
+                let v = match &self.host[i as usize] {
+                    Node::Trig { name, comp, raw, .. } => h.trigger1(name, arg, *comp, raw.as_deref()),
+                    _ => 0.0,
+                };
+                if v.is_nan() || c.is_nan() { return f64::NAN; }
+                return match op3 {
+                    Op::Eq => (c == v) as i32 as f64,
+                    Op::Ne => (c != v) as i32 as f64,
+                    Op::Gt => (c > v) as i32 as f64,
+                    Op::Ge => (c >= v) as i32 as f64,
+                    Op::Lt => (c < v) as i32 as f64,
+                    Op::Le => (c <= v) as i32 as f64,
+                    Op::Add => c + v,
+                    Op::Sub => c - v,
+                    _ => self.run_slice(h, 0, 4),
+                };
+            }
+        }
+
         self.run_slice(h, 0, self.ops.len())
     }
 

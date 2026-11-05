@@ -367,3 +367,16 @@ etain_mut.
   - `air::parse_air`: Replaced `to_ascii_uppercase()` String allocations for flags and blend modes with zero-alloc byte-level inspection (`fl.as_bytes()`, `bl.as_bytes()`).
   - `air::parse_as_d`: Replaced string searching with case-insensitive byte scanning for `AS...D...` alpha parameters.
   - `air::parse_air`: Pre-allocated animation frames vector with `Vec::with_capacity(8)` and the animation HashMap with `text.len() / 512 + 16`.
+
+- **Wave 61 - Dedicated Zero-Arg Trigger Dispatch & Byte-Level String Comparison**:
+  - `triggers::trigger0`: Fast-pathed the top 20 zero-argument triggers (`time`, `animtime`, `stateno`, `prevstateno`, `anim`, `ctrl`, `alive`, `life`, `facing`, `roundstate`, `movecontact`, `movehit`, `vel`, `pos`) directly without argument-closure setup or the 90-arm general match.
+  - `triggers::cmpstr`: Switched string character decoding to single-byte inspection (`v0.as_bytes().first()`) for `statetype`, `movetype`, and `physics`, and reused parsed string slice in `command` checks.
+
+- **Wave 62 - Bytecode VM Fast Paths for 1-Arg Triggers & Arithmetic Comparisons**:
+  - `bytecode::Code::run`: Added dedicated fast paths for 2-op unary 1-arg triggers (`[Op::Const, Op::Trig1]`), 3-op inverted 1-arg triggers (`[Op::Const, Op::Trig1, Op::Not]`), and 4-op 1-arg trigger comparisons (`[Op::Const, Op::Trig1, Op::Const, Op]`), bypassing the stack machine loop and vector indexing for `var(X) = Y`, `fvar(X) > Y`, and `animelemtime(X) >= Y`.
+  - `bytecode::Code::run`: Expanded 3-op comparisons to cover arithmetic (`Add`, `Sub`) and trigger-to-trigger relational checks (`[Op::Trig0, Op::Trig0, Op]`), eliminating stack interpreter overhead for expressions like `anim = stateno` or `time > animtime`.
+
+- **Wave 63 - Lazy SND Cycle Detection & Zero-Alloc FNT Glyph Tokenization**:
+  - `snd::decode_snd_checked`: Replaced eager `HashSet<usize>` allocation per SND file with lazy initialization (`Option<HashSet<usize>>`) triggered only when subfile offsets point backwards (`next <= ofs`), eliminating heap allocation and hashing overhead across all standard sequential SND files.
+  - `fnt::decode_fnt_v1`: Replaced per-glyph line `split_whitespace().collect::<Vec<&str>>()` heap allocations with a streaming iterator reading up to 3 tokens directly, eliminating hundreds of vector allocations per font file.
+  - `fnt::decode_fnt_v2`: Switched font descriptor parsing to `parse_ini_no_lines`, avoiding unused `lines: Vec<String>` collection.

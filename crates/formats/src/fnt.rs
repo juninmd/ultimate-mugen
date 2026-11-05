@@ -1,4 +1,4 @@
-use crate::ini::{find_section, nums, parse_ini, unquote};
+use crate::ini::{find_section, nums, parse_ini, parse_ini_no_lines, unquote};
 use crate::pcx::decode_pcx;
 use crate::vfs::text;
 use crate::Reader;
@@ -119,18 +119,21 @@ fn decode_fnt_v1(buf: &[u8]) -> Result<Font, String> {
     if let Some(map) = find_section(&secs, "map") {
         let mut slot = 0u32;
         for line in &map.lines {
-            let toks: Vec<&str> = line.split_whitespace().collect();
-            let Some(c) = toks.first().and_then(|t| parse_char(t)) else { continue };
+            let mut it = line.split_whitespace();
+            let Some(tok0) = it.next() else { continue };
+            let Some(c) = parse_char(tok0) else { continue };
+            let tok1 = it.next();
+            let tok2 = it.next();
             let glyph = match kind {
                 FontKind::Fixed => {
-                    if let Some(i) = toks.get(1).and_then(|t| t.parse::<u32>().ok()) {
+                    if let Some(i) = tok1.and_then(|t| t.parse::<u32>().ok()) {
                         slot = i;
                     }
                     Glyph { x: slot.saturating_mul(size[0].max(0) as u32), w: size[0].max(0) as u32 }
                 }
                 _ => {
-                    let x = toks.get(1).and_then(|t| t.parse::<u32>().ok()).unwrap_or(0);
-                    let w = toks.get(2).and_then(|t| t.parse::<u32>().ok()).unwrap_or(size[0].max(0) as u32);
+                    let x = tok1.and_then(|t| t.parse::<u32>().ok()).unwrap_or(0);
+                    let w = tok2.and_then(|t| t.parse::<u32>().ok()).unwrap_or(size[0].max(0) as u32);
                     Glyph { x, w }
                 }
             };
@@ -151,7 +154,7 @@ fn decode_fnt_v1(buf: &[u8]) -> Result<Font, String> {
 }
 
 fn decode_fnt_v2(src: &str) -> Result<Font, String> {
-    let secs = parse_ini(src);
+    let secs = parse_ini_no_lines(src);
     let def = find_section(&secs, "def").ok_or("FNT: missing [Def] section")?;
     let kind = match def.get("type").map(|t| unquote(t).to_ascii_lowercase()) {
         Some(t) if t == "truetype" => FontKind::TrueType,

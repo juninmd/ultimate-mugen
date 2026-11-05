@@ -363,3 +363,16 @@ etain_mut.
   - `air::parse_air`: Substituicao de alocacoes `String` via `to_ascii_uppercase()` para flags e modos de blend por inspecao em nivel de byte (`fl.as_bytes()`, `bl.as_bytes()`).
   - `air::parse_as_d`: Substituicao de busca por strings por varredura de bytes sem distincao de maiusculas/minusculas para parametros alfa `AS...D...`.
   - `air::parse_air`: Pre-alocacao do vetor de quadros com `Vec::with_capacity(8)` e do HashMap de animacoes com `text.len() / 512 + 16`.
+
+- **Onda 61 - Despacho Dedicado de Gatilhos Sem Argumentos e Comparacao de Strings em Bytes**:
+  - `triggers::trigger0`: Desvio rapido para os 20 principais gatilhos sem argumentos (`time`, `animtime`, `stateno`, `prevstateno`, `anim`, `ctrl`, `alive`, `life`, `facing`, `roundstate`, `movecontact`, `movehit`, `vel`, `pos`) diretamente sem criacao de closures de argumentos ou passagem pelo match geral de 90 bracos.
+  - `triggers::cmpstr`: Migracao da decodificacao de caracteres para inspecao de byte unico (`v0.as_bytes().first()`) para `statetype`, `movetype` e `physics`, e reutilizacao de fatias de string em checagens de `command`.
+
+- **Onda 62 - Atalhos Rapidos na VM de Bytecode para Gatilhos de 1 Argumento e Comparacoes Aritmeticas**:
+  - `bytecode::Code::run`: Adicionados atalhos dedicados para instrucoes unarias de 2 ops de 1 argumento (`[Op::Const, Op::Trig1]`), gatilhos invertidos de 3 ops (`[Op::Const, Op::Trig1, Op::Not]`) e comparacoes de 4 ops (`[Op::Const, Op::Trig1, Op::Const, Op]`), ignorando o loop da pilha e indexacoes para expressoes como `var(X) = Y`, `fvar(X) > Y` e `animelemtime(X) >= Y`.
+  - `bytecode::Code::run`: Expandidas comparacoes de 3 ops para suportar aritmetica (`Add`, `Sub`) e relacoes entre dois gatilhos (`[Op::Trig0, Op::Trig0, Op]`), eliminando o interpretador de pilha para expressoes como `anim = stateno` ou `time > animtime`.
+
+- **Onda 63 - Deteccao Lazy de Ciclos em SND e Tokenizacao Sem Alocacao de Glifos FNT**:
+  - `snd::decode_snd_checked`: Substituicao da alocacao antecipada de `HashSet<usize>` por arquivo SND por inicializacao preguicosa (`Option<HashSet<usize>>`) ativada somente quando offsets apontam para tras (`next <= ofs`), eliminando alocacao em heap e hashing em todos os arquivos SND sequenciais padrao.
+  - `fnt::decode_fnt_v1`: Substituicao da alocacao de `split_whitespace().collect::<Vec<&str>>()` por linha de glifo por um iterador continuo lendo ate 3 tokens diretamente, eliminando centenas de alocacoes de vetor por fonte.
+  - `fnt::decode_fnt_v2`: Migracao da analise do descritor de fonte para `parse_ini_no_lines`, evitando a coleta desnecessaria de `lines: Vec<String>`.

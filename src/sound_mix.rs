@@ -72,6 +72,18 @@ impl Pcm {
 
     pub fn render(&self, gain: f32, pan: f32, rate: f32) -> Pcm {
         let (l, r) = pan_gains(pan);
+        let gl = gain * l;
+        let gr = gain * r;
+        if (rate - 1.0).abs() < 1e-4 {
+            let mut frames = Vec::with_capacity(self.frames.len());
+            for s in &self.frames {
+                frames.push([s[0] * gl, s[1] * gr]);
+            }
+            return Pcm {
+                rate: self.rate,
+                frames,
+            };
+        }
         let step = rate.clamp(0.05, 8.0) as f64;
         let n = (self.frames.len() as f64 / step).floor() as usize;
         let mut frames = Vec::with_capacity(n);
@@ -82,7 +94,7 @@ impl Pcm {
             let s0 = self.frames[a];
             let s1 = self.frames.get(a + 1).copied().unwrap_or(s0);
             let mix = |c: usize| s0[c] + (s1[c] - s0[c]) * t;
-            frames.push([mix(0) * gain * l, mix(1) * gain * r]);
+            frames.push([mix(0) * gl, mix(1) * gr]);
         }
         Pcm {
             rate: self.rate,
@@ -92,7 +104,8 @@ impl Pcm {
 
     pub fn to_wav(&self) -> Vec<u8> {
         let n = self.frames.len() as u32;
-        let mut v = Vec::with_capacity(44 + n as usize * 4);
+        let total_bytes = 44 + n as usize * 4;
+        let mut v = Vec::with_capacity(total_bytes);
         v.extend_from_slice(b"RIFF");
         v.extend_from_slice(&(36 + n * 4).to_le_bytes());
         v.extend_from_slice(b"WAVEfmt ");
@@ -105,10 +118,18 @@ impl Pcm {
         v.extend_from_slice(&16u16.to_le_bytes());
         v.extend_from_slice(b"data");
         v.extend_from_slice(&(n * 4).to_le_bytes());
-        for f in &self.frames {
-            for s in f {
-                v.extend_from_slice(&((s.clamp(-1.0, 1.0) * 32767.0) as i16).to_le_bytes());
-            }
+        v.resize(total_bytes, 0);
+        let dst = &mut v[44..];
+        for (i, f) in self.frames.iter().enumerate() {
+            let s0 = (f[0].clamp(-1.0, 1.0) * 32767.0) as i16;
+            let s1 = (f[1].clamp(-1.0, 1.0) * 32767.0) as i16;
+            let b0 = s0.to_le_bytes();
+            let b1 = s1.to_le_bytes();
+            let off = i * 4;
+            dst[off] = b0[0];
+            dst[off + 1] = b0[1];
+            dst[off + 2] = b1[0];
+            dst[off + 3] = b1[1];
         }
         v
     }

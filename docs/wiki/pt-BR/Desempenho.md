@@ -98,3 +98,7 @@ Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,
 No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
 
 `Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.
+
+- **Onda 25 - Codificação Rápida de WAV e Reamostragem de Áudio em Taxa Identidade**:
+  - Substitui loops de extensão de fatia por amostra por redimensionamento em bloco de passagem única e escrita indexada direta em wav() e 	o_wav().
+  - Implementa caminho rápido vetorizável por SIMD para reprodução em taxa unitária ((rate - 1.0).abs() < 1e-4) em Pcm::render, içando produtos de ganho constantes para fora do loop de mixagem.

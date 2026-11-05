@@ -41,7 +41,9 @@ A janela pode ser arrastada para qualquer tamanho. O jogo desenha em um espaço 
 | `--mute` | Sem áudio |
 | `--shots <pasta>` | Tour automático salvando capturas |
 | `--version` | Mostra a versão |
-| `--check-update` / `--no-update-check` | Controla a busca de atualização |
+| `--check-update` | Mostra se existe release mais nova e sai |
+| `--update` | Baixa, verifica e instala a release mais nova, depois sai |
+| `--no-auto-update` / `--no-update-check` | Mantém só o aviso / não procura atualização |
 
 ## Variáveis de ambiente
 
@@ -51,6 +53,7 @@ A janela pode ser arrastada para qualquer tamanho. O jogo desenha em um espaço 
 | `UME_MARKET_HOME` | Pasta dos downloads e do estado do [mercado](Mercado.md) |
 | `UME_GITHUB_TOKEN` / `GITHUB_TOKEN` | Token opcional do GitHub para o mercado (aumenta o limite da API) |
 | `UME_NO_UPDATE_CHECK=1` | Não procura atualizações |
+| `UME_NO_AUTO_UPDATE=1` | Mantém o aviso, mas nunca baixa nem instala |
 | `UME_NOFX=1` | Desliga a camada animada dos cenários (teste de desempenho) |
 | `UME_TOUR=mugen` + `UME_CHARS=a,b` + `UME_STAGE=<id>` | Com `--shots`, fotografa lutadores importados |
 

@@ -95,6 +95,53 @@ impl Batch {
 mod tests {
     use super::*;
 
+    fn quad(blend: Blend, x: f32) -> Quad {
+        let mut q = Quad::new([x, 0.0, 8.0, 8.0], Rect { x: 0, y: 0, w: 8, h: 8 }, [64, 64], 0);
+        q.blend = blend;
+        q
+    }
+
+    #[test]
+    fn a_fight_screen_stays_within_the_draw_call_budget() {
+        let mut b = Batch::new();
+        for i in 0..12 {
+            b.push(&quad(Blend::Alpha, i as f32));
+        }
+        b.push(&quad(Blend::Sub, 0.0));
+        for i in 0..3 {
+            b.push(&quad(Blend::Alpha, i as f32));
+        }
+        for i in 0..160 {
+            b.push(&quad(Blend::Alpha, i as f32));
+        }
+        for i in 0..3 {
+            b.push(&quad(Blend::Add, i as f32));
+            b.push(&quad(Blend::Alpha, i as f32));
+        }
+        b.begin_overlay();
+        b.scissor = Some([0, 0, 320, 240]);
+        for i in 0..40 {
+            b.push(&quad(Blend::Alpha, i as f32));
+        }
+        b.scissor = Some([320, 240, 320, 240]);
+        for i in 0..40 {
+            b.push(&quad(Blend::Alpha, i as f32));
+        }
+        assert!(b.calls.len() <= 12, "fight frame used {} calls", b.calls.len());
+        assert!(b.calls.len() <= crate::DRAW_CALL_BUDGET);
+        assert_eq!(b.vertices.len(), (12 + 1 + 3 + 160 + 6 + 80) * 4);
+    }
+
+    #[test]
+    fn a_flat_run_of_quads_is_one_call() {
+        let mut b = Batch::new();
+        for i in 0..300 {
+            b.push(&quad(Blend::Alpha, i as f32));
+        }
+        assert_eq!(b.calls.len(), 1);
+        assert_eq!(b.calls[0].index_count, 300 * 6);
+    }
+
     #[test]
     fn merges_calls_with_same_blend() {
         let mut b = Batch::new();

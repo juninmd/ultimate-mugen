@@ -65,6 +65,9 @@ jobs:
           mkdir -p "stage/$name" dist
           cp "target/release/${{ matrix.exe }}" README.md "stage/$name/"
           if [ "${{ matrix.pack }}" = zip ]; then (cd stage && 7z a -tzip "../dist/$name.zip" "$name" >/dev/null); else tar -czf "dist/$name.tar.gz" -C stage "$name"; fi
+          raw="dist/ultimate-mugen-v${UME_RELEASE_VERSION}-${{ matrix.platform }}"
+          if [ "${{ matrix.pack }}" = zip ]; then raw="$raw.exe"; fi
+          cp "target/release/${{ matrix.exe }}" "$raw"
           ls -l dist
       - uses: actions/upload-artifact@v4
         with: { name: "dist-${{ matrix.platform }}", path: dist/*, if-no-files-found: error }

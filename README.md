@@ -228,11 +228,11 @@ cargo check --target wasm32-unknown-unknown
 Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `perf:` …), since they drive automatic releases. Code, commits and docs are in English; Portuguese lives in `*.pt-BR.md` and `docs/wiki/pt-BR/`.
 
 <details>
-<summary><b>Releases and update check</b></summary>
+<summary><b>Releases and automatic updates</b></summary>
 
-The git tag is the source of truth for the version. On every push to `master`, the `Release` workflow plans the bump from commits (`feat` → minor, `fix`/`perf` → patch), builds Linux, Windows and macOS, uploads packages with `latest.json` and `SHA256SUMS.txt`, verifies the draft and publishes it.
+The git tag is the source of truth for the version. On every push to `master`, the `Release` workflow plans the bump from commits (`feat` → minor, `fix`/`perf` → patch), builds Linux, Windows and macOS, uploads the packages, a raw executable per platform plus `latest.json` and `SHA256SUMS.txt`, verifies the draft and publishes it.
 
-The desktop game checks `latest.json` in the background (HTTPS only, silent when offline) and only shows a notice on the title screen. Nothing is downloaded or run automatically. Disable it with `--no-update-check` or `UME_NO_UPDATE_CHECK=1`.
+The installed desktop build checks `latest.json` at boot (HTTPS only), downloads the raw executable for its platform, verifies the manifest `sha256` and the downloaded binary's `--version`, replaces itself and restarts on the title/menu screen. Progress and failures show on the title screen; offline, a failed check or an unwritable install directory leave the running build untouched. Opt out of installing with `--no-auto-update` / `UME_NO_AUTO_UPDATE=1`, or of the check itself with `--no-update-check` / `UME_NO_UPDATE_CHECK=1`. `--check-update` only prints the available version and `--update` downloads and installs from a terminal.
 
 </details>
 

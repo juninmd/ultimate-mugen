@@ -168,3 +168,7 @@ un_slice, reduzindo overhead de desreferenciação de struct a cada resolução 
   - Elimina formatação intermediária de strings e clones em hitdef::build utilizando Option<&str> emprestado para parâmetros, casamento direto de bytes em ttr_bits, state_mask e guardflag_bits.
   - Substitui formatação dinâmica de strings por consultas estáticas de campo para parâmetros de shake de tela/câmera.
   - Ramo padrão com zero alocações para estado e tipos de ataque.
+- **Onda 27 - Caixas de Colisão In-Place e Início Rápido de Elemento de Animação**:
+  - Implementa Fighter::fill_boxes utilizando buffers scratch fornecidos pelo chamador, eliminando alocações contínuas de Vec<Box4> nos loops de detecção de reversals, golpes e projéteis.
+  - Substitui coleta de vetor na heap para verificação de caixa única p2clsnrequire por fatia em array na pilha com zero cópias.
+  - Adiciona saída antecipada if n <= 1 { return 0; } em lem_start para ignorar instanciação de iteradores nas consultas mais frequentes de tempo de quadros de animação.

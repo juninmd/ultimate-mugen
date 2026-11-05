@@ -168,3 +168,7 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
   - Eliminates intermediate string formatting and clones in hitdef::build by using borrowed Option<&str> for parameters, direct byte matching in ttr_bits, state_mask, and guardflag_bits.
   - Replaces dynamic string formatting with static field lookups for screen/camera shake parameters.
   - Zero-alloc default branch for attack state and kinds.
+- **Wave 27 - In-Place Collision Boxes & Fast Animation Elem Start**:
+  - Implements Fighter::fill_boxes using caller-provided scratch buffers, eliminating continuous Vec<Box4> allocations during reversal, hit, and projectile detection loops.
+  - Replaces heap vector collection for p2clsnrequire single box checks with a zero-copy stack array slice.
+  - Adds if n <= 1 { return 0; } early-exit in lem_start to bypass iterator instantiation for the most common animation frame timing queries.

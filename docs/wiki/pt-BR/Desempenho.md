@@ -233,3 +233,10 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 
 - Resolução de parâmetros de shake sem alocação: `hitdef::build` usa consultas diretas de strings estáticas (`parse_shake`) em vez de formatar 10 chaves dinâmicas no heap (`{prefix}.freq`, `{prefix}.time`, `{prefix}.ampl`, etc.) a cada instanciação de `HitDef`.
 - Análise de `animtype` e `groundtype` no local: `hitdef::animtype` e `hitdef::groundtype` comparam tokens padrão de animação/chão do MUGEN usando `eq_ignore_ascii_case` diretamente em fatias `&str` sem alocar strings em minúsculas.
+
+## Consultas de seções INI sem alocação e análise de constantes CNS em pilha
+
+- `Section::get` e `Section::get_all` sem alocação: `ini::Section::get` e `ini::Section::get_all` comparam chaves diretamente com `eq_ignore_ascii_case` sem alocar instâncias de `String` em minúsculas a cada consulta.
+- `find_section` sem alocação: `ini::find_section` utiliza `eq_ignore_ascii_case` diretamente no nome da seção sem alocar strings em minúsculas.
+- Análise de constantes CNS em pilha: `cns::parse_constants` desempacota vetores numéricos separados por vírgula em um array `[f64; 4]` na pilha, eliminando alocações de `Vec<f64>` em cada linha de constantes.
+- Vetor de comandos pré-alocado: `cns::parse_cmd` pré-aloca a capacidade de `cmds` para `secs.len()`.

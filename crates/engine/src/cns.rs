@@ -67,15 +67,22 @@ pub fn parse_constants_from_sections(secs: &[Section], into: &mut HashMap<String
         let sec = s.lname.as_str();
         if !["data", "size", "velocity", "movement", "constants"].contains(&sec) { continue; }
         for (k, v) in &s.entries {
-            let parts: Vec<f64> = v.split(',').map(|x| x.trim().parse::<f64>().unwrap_or(f64::NAN)).collect();
+            let mut parts = [f64::NAN; 4];
+            let mut count = 0;
+            for x in v.split(',') {
+                if count < 4 {
+                    parts[count] = x.trim().parse::<f64>().unwrap_or(f64::NAN);
+                    count += 1;
+                }
+            }
             let key = if sec == "constants" { k.to_string() } else { format!("{sec}.{k}") };
             provided.insert(key.clone());
-            if parts.len() == 1 {
-                let val = if parts[0].is_finite() { parts[0] } else { 0.0 };
+            if count <= 1 {
+                let val = if count == 1 && parts[0].is_finite() { parts[0] } else { 0.0 };
                 into.insert(key.clone(), val);
                 if sec == "velocity" { into.insert(format!("{key}.x"), val); provided.insert(format!("{key}.x")); }
             } else {
-                for (i, p) in parts.iter().enumerate() {
+                for (i, p) in parts[..count].iter().enumerate() {
                     let c = ["x", "y", "z"].get(i).copied().unwrap_or("w");
                     let kk = format!("{key}.{c}");
                     into.insert(kk.clone(), if p.is_finite() { *p } else { 0.0 });
@@ -109,7 +116,7 @@ pub fn parse_cmd(text: &str) -> (Vec<CommandDef>, HashMap<i32, StateDef>) {
         db = d.get("command.buffer.time").and_then(|v| v.trim().parse().ok()).unwrap_or(1);
         dp = pause_buffer_of(d).unwrap_or(0);
     }
-    let mut cmds = vec![];
+    let mut cmds = Vec::with_capacity(secs.len());
     for s in &secs {
         if s.lname != "command" { continue; }
         let (Some(n), Some(c)) = (s.get("name"), s.get("command")) else { continue };

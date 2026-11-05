@@ -237,3 +237,10 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 
 - Zero-alloc shake parameter resolution: `hitdef::build` uses direct static parameter string lookups (`parse_shake`) instead of formatting 10 dynamic heap `String` keys (`{prefix}.freq`, `{prefix}.time`, `{prefix}.ampl`, etc.) per `HitDef` instantiation.
 - In-place `animtype` and `groundtype` parsing: `hitdef::animtype` and `hitdef::groundtype` match standard MUGEN animation/ground tokens using `eq_ignore_ascii_case` directly on borrowed `&str` without lowercase string allocations.
+
+## Zero-alloc INI section queries and stack-buffered CNS constant parsing
+
+- Zero-alloc `Section::get` and `Section::get_all`: `ini::Section::get` and `ini::Section::get_all` compare keys directly using `eq_ignore_ascii_case` without allocating lowercase `String` instances on every query.
+- Zero-alloc `find_section`: `ini::find_section` uses `eq_ignore_ascii_case` directly on section names without allocating a lowercase string.
+- Stack-buffered CNS constant parsing: `cns::parse_constants` unpacks comma-separated numeric vectors into a stack-allocated `[f64; 4]` array, eliminating `Vec<f64>` allocations on every constant line.
+- Pre-allocated command definition vector: `cns::parse_cmd` pre-allocates `cmds` capacity to `secs.len()`.

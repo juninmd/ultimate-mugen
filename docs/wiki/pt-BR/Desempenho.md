@@ -206,3 +206,10 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 - Fatiamento de alvo sem alocação em `p2clsnrequire`: Em `matchs::step_hits`, alvos específicos emprestam a fatia `&d_boxes[req..req + 1]` diretamente em vez de alocar um `Vec` no heap.
 - Despacho de comandos de IA indexado: Em `ai::Ai`, comandos são indexados como `Vec<usize>` em `fighter.def.commands` em vez de clonar árvores `CommandDef`. Ataques próximos e à distância são separados na inicialização, tornando a seleção em `O(1)` sem varreduras lineares.
 - Conversão vetorizada de pixmap para straight alpha: `raster::pixmap_to_image` evita divisões inteiras em pixels opacos (`alpha == 255`) e transparentes (`alpha == 0`) utilizando `as_chunks_mut::<4>()`.
+
+## Decodificação SND pré-alocada e filtragem de comandos sem alocação
+
+- Tabelas hash pré-alocadas para sons SND: `snd::decode_snd_checked` limita a capacidade em `count.min(buf.len() / 16 + 1)` e pré-aloca as tabelas `out` e `seen`, eliminando redimensionamentos repetidos e rehashes durante a decodificação de áudio de personagens.
+- Resolução estática de chaves de paleta no carregador: `loader::load_character` resolve substituições de paletas (`pal1`..`pal12`) usando uma tabela estática de fatias `PAL_KEYS` em vez de formatar 12 strings no heap por personagem.
+- Deduplicação de sprites pré-alocada: Pré-dimensiona os vetores `seen` e `unique` para o tamanho de `sff.sprites.len()`.
+- Extração de lista de golpes e comandos de IA com zero alocações: `loader::load_character` filtra comandos no local usando `eq_ignore_ascii_case` antes de clonar ou alocar strings, removendo dezenas de alocações no heap por personagem carregado.

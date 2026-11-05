@@ -218,3 +218,10 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 - Zero-alloc `p2clsnrequire` target slice: In `matchs::step_hits`, single required defender box indices borrow a 1-element slice `&d_boxes[req..req + 1]` directly rather than allocating a heap vector.
 - Indexed AI command dispatch: In `ai::Ai`, command definitions are indexed as `Vec<usize>` integers into `fighter.def.commands` instead of cloning full `CommandDef` trees with strings and vectors. Close and ranged attacks are partitioned during `init`, turning tick command selection into `O(1)` array indexing.
 - Vectorized straight-alpha pixmap conversion: `raster::pixmap_to_image` avoids integer divisions on opaque (`alpha == 255`) and transparent (`alpha == 0`) pixels with `as_chunks_mut::<4>()`.
+
+## Pre-allocated SND decoding & zero-alloc command movelist filtering
+
+- Pre-allocated SND sound hash tables: `snd::decode_snd_checked` bounds capacity using `count.min(buf.len() / 16 + 1)` and preallocates both `out` and `seen` hash tables with that capacity, eliminating repeated hash table reallocations and rehashes across character audio decoding.
+- Static palette key resolution in loader: `loader::load_character` resolves character DEF palette overrides (`pal1`..`pal12`) using static string slice table `PAL_KEYS` rather than formatting 12 heap strings per character.
+- Pre-allocated sprite deduplication: Pre-sizes `seen` and `unique` sprite vectors to `sff.sprites.len()`.
+- Filter-first zero-alloc movelist and AI command extraction: `loader::load_character` filters commands in-place with `eq_ignore_ascii_case` before allocating or cloning strings, removing dozens of heap allocations per loaded character.

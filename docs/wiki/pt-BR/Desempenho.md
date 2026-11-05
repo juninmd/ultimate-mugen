@@ -26,7 +26,7 @@ O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria th
 | Pré-carga de texturas | `Gfx::prefetch_step`, `App::warm_step` | Os sprites dos lutadores sobem para o atlas em pedaços de 512 KiB por quadro, ao longo dos passos de carregamento (tela de VS) ou entre quadros cedidos (`start_fight`), então nenhum quadro paga um lutador inteiro; uma revanche com o mesmo elenco não copia nada |
 | Pré-aquecimento de sons | `Audio::preload_match` | Todos os sons dos lutadores são decodificados em paralelo na tela de VS; sons de personagens que saíram da partida são liberados |
 | VM de bytecode | `ume_engine::bytecode` | Expressões CNS/ZSS compilam para uma VM em pilha fixa (`[f64; 32]`) com redirecionamentos inline (`parent`, `root`, `helper`, `enemynear`), intrínsecos matemáticos, triggers de 0/1 argumento, `CmpStr`, `Special` (`animelem`, `timemod`) e atribuições `:=` |
-| Caminhos críticos sem alocação | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | Chaves de comando em `Arc<str>`, verificação ASCII de `HitDefAttr` sem alocação, seleção de golpes da IA em duas passagens e `RefCell::get_mut` evitam alocações no heap a cada tick |
+| Caminhos críticos sem alocação | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | Chaves de comando em `Arc<str>`, verificação ASCII de `HitDefAttr` sem alocação, tradução de direção `abs` sem desvios, seleção de golpes em combate próximo O(1), `append_seq` in-place e `RefCell::get_mut` evitam alocações no heap a cada tick |
 | Limites de resiliência | `ume_formats`, `ume_engine::matchs` | Decodificadores de imagem rejeitam cabeçalhos acima de `MAX_IMAGE_PIXELS` (`1 << 26`) antes de alocar; partidas limitam helpers (60), explods (512), projéteis (256) e textos (128) |
 
 ## Memória de GPU

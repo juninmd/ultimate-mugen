@@ -26,7 +26,7 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | Texture prefetch | `Gfx::prefetch_step`, `App::warm_step` | Fighter sprites are uploaded to the atlas one 512 KiB chunk per frame across the loading steps (VS screen) or between yielded frames (`start_fight`), so no single frame pays for a whole fighter; a rematch with the same roster copies nothing |
 | Sound prewarm | `Audio::preload_match` | Every fighter sound is decoded in parallel during the VS screen; sounds of characters no longer in the match are freed |
 | Bytecode VM | `ume_engine::bytecode` | CNS/ZSS expressions compile into a flat stack VM (`[f64; 32]`) with inline redirects (`parent`, `root`, `helper`, `enemynear`), math/comparison intrinsics, zero/one-arg triggers, `CmpStr`, `Special` (`animelem`, `timemod`), and `:=` assignments |
-| Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, two-pass iterator AI move selection, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
+| Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, branchless `abs` direction translation, O(1) close-range AI selection, in-place `append_seq`, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
 | Resilience bounds | `ume_formats`, `ume_engine::matchs` | Image decoders reject headers above `MAX_IMAGE_PIXELS` (`1 << 26`) before allocating; matches cap helpers (60), explods (512), projectiles (256), and texts (128) |
 
 ## GPU memory

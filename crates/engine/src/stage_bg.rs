@@ -12,7 +12,7 @@ pub struct BgLayerState {
 pub struct BgState { pub stage: Arc<MugenStage>, pub layers: Vec<BgLayerState>, pub def_time: Vec<i32>, pub ctrl_defs: Vec<BgCtrlDef> }
 
 fn sin_wave(s: [f32; 3], t: i32) -> f32 {
-    if s[1] <= 0.0 { return 0.0; }
+    if s[0] == 0.0 || s[1] <= 0.0 { return 0.0; }
     s[0] * (std::f32::consts::TAU * (t as f32 + s[2]) / s[1]).sin()
 }
 
@@ -31,16 +31,15 @@ impl BgState {
     pub fn reset(&mut self) { *self = BgState::new(self.stage.clone()); }
 
     pub fn step(&mut self) {
-        let stage = self.stage.clone();
-        let ctrl_defs = std::mem::take(&mut self.ctrl_defs);
+        let BgState { layers, def_time, ctrl_defs, stage } = self;
         for (d, def) in ctrl_defs.iter().enumerate() {
-            let t = self.def_time[d];
+            let t = def_time[d];
             for c in &def.ctrls {
                 let tt = if c.loop_time > 0 { t % c.loop_time } else { t };
                 if tt < c.start || tt > c.end { continue; }
                 for (k, l) in stage.layers.iter().enumerate() {
                     if !c.ids.is_empty() && !c.ids.contains(&l.id) { continue; }
-                    let s = &mut self.layers[k];
+                    let s = &mut layers[k];
                     match &c.kind {
                         BgCtrlKind::Null => {}
                         BgCtrlKind::Visible(v) => s.visible = *v,
@@ -56,10 +55,9 @@ impl BgState {
                 }
             }
             let next = t + 1;
-            self.def_time[d] = if def.loop_time > 0 && next >= def.loop_time { 0 } else { next };
+            def_time[d] = if def.loop_time > 0 && next >= def.loop_time { 0 } else { next };
         }
-        self.ctrl_defs = ctrl_defs;
-        for s in self.layers.iter_mut().filter(|s| s.enabled) {
+        for s in layers.iter_mut().filter(|s| s.enabled) {
             s.pos[0] += s.vel[0]; s.pos[1] += s.vel[1];
             s.anim_time += 1; s.sin_time += 1;
         }
@@ -81,7 +79,7 @@ impl BgState {
         let l = &self.stage.layers[k];
         let Some(a) = self.animation(k) else { return l.sprite };
         let tot = a.total_time.max(1);
-        let ls: i32 = a.frames.iter().take(a.loop_start).map(|f| f.time.max(0)).sum();
+        let ls: i32 = if a.loop_start == 0 { 0 } else { a.frames.iter().take(a.loop_start).map(|f| f.time.max(0)).sum() };
         let mut tm = self.layers[k].anim_time;
         if tm >= tot && a.total_time > 0 { tm = ls + (tm - ls) % (tot - ls).max(1); }
         let mut acc = 0;

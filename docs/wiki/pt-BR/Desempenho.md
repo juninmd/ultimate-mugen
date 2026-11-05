@@ -98,3 +98,8 @@ Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,
 No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
 
 `Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.
+
+- **Onda 24 - Passo de Fundo de Cenário Sem Cópias e Retorno Rápido de Ondas**:
+  - Utiliza casamento de padrões disjunto (BgState { layers, def_time, ctrl_defs, stage } = self) em step(), eliminando incrementos atômicos de self.stage.clone() em Arc e alocações de std::mem::take a cada tick.
+  - Adiciona retorno rápido para amplitude zero s[0] == 0.0 em sin_wave(), evitando cálculos transcendentais de .sin() para camadas estáticas de fundo.
+  - Ignora a soma de quadros de início de repetição de animação quando .loop_start == 0.

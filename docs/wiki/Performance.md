@@ -98,3 +98,8 @@ On the cloud development machine, median normalization time decreased from 60.8 
 In the cloud development environment, warm-run allocations decreased from 2,331 to 1,183 per decode. Elapsed times were noisy (roughly 9–11 ms in warm runs) and do not demonstrate a speedup. This reduces temporary allocation churn rather than the final decoded PCM size. The benchmark excludes playback and audio-device latency. Run `cargo test --locked --release --example audio_bench` for sample-preservation, mono/stereo, tail and existing PCM tests.
 
 `Ui::quad` transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.
+
+- **Wave 24 - Stage Background Zero-Copy Step & Wave Early-Return**:
+  - Uses disjoint pattern matching (BgState { layers, def_time, ctrl_defs, stage } = self) in step(), eliminating self.stage.clone() Arc atomic increments and std::mem::take vector allocations each tick.
+  - Adds early-return zero-amplitude check s[0] == 0.0 in sin_wave(), bypassing transcendental .sin() calculations for static background layers.
+  - Skips animation loop start summation when .loop_start == 0.

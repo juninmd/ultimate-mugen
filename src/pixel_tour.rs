@@ -38,6 +38,10 @@ pub async fn run(app: &mut App, dir: &str) {
         )
         .await;
     }
+    if hero == "kaito" {
+        fight(app, dir, "kaito-dragon", hero, rival, &stage, 100, "dragon").await;
+        fight(app, dir, "kaito-rush", hero, rival, &stage, 100, "rush").await;
+    }
     for (name, ticks, want) in VICTIM_SHOTS {
         fight(
             app,

@@ -101,6 +101,33 @@ pub(crate) async fn fight(
                 }
             }
         }
+        "dragon" | "rush" => {
+            for pilot in &mut s.pilots { *pilot = crate::session::Pilot::Dummy; }
+            for _ in 0..600 {
+                if s.m.round_state == 2 && s.m.fighters[0].ctrl { break; }
+                s.step_visual(c, audio);
+            }
+            for _ in 0..90 { s.step_visual(c, audio); }
+            let distance = if want == "rush" { 32.0 } else { 100.0 };
+            s.m.fighters[0].pos.x = -distance;
+            s.m.fighters[1].pos.x = distance;
+            s.m.fighters[1].pos.y = 0.0;
+            s.m.fighters[1].vel = Default::default();
+            let d = s.m.fighters[0].def.clone();
+            let move_name = if want == "rush" { "storm rush" } else { "storm dragon fist" };
+            let state = d.states.get(&-1).and_then(|state| state.controllers.iter().find(|c| c.label.to_ascii_lowercase().contains(move_name))).and_then(|c| c.raw("value")).and_then(|v| v.parse::<i32>().ok());
+            use ume_engine::input::k;
+            let direction = if want == "rush" { k::L } else { k::R };
+            let button = if want == "rush" { k::X } else { k::Y };
+            s.pilots[0] = crate::session::Pilot::Replay(vec![k::D, k::D | direction, direction, direction | button], 0);
+            let mut entered = false;
+            for _ in 0..90 {
+                s.step_visual(c, audio);
+                entered |= Some(s.m.fighters[0].state_no) == state;
+                if want == "dragon" && s.m.projectiles.iter().any(|p| !p.dying && p.time > 2) || want == "rush" && s.m.fighters[1].received_hits > 0 { break; }
+            }
+            println!("{name}: state = {state:?}, entered by input = {entered}, projectiles = {}", s.m.projectiles.len());
+        }
         "super" | "super2" | "impact" => {
             for f in s.m.fighters.iter_mut() {
                 f.power = 3000.0;
@@ -210,6 +237,13 @@ pub(crate) async fn fight(
         _ => {}
     }
     snap(app, dir, name, |a| a.draw_session_only()).await;
+    if want == "dragon" || want == "rush" {
+        let App { session, c, audio, .. } = app;
+        let s = session.as_mut().unwrap();
+        let before = s.m.fighters[1].life;
+        for _ in 0..90 { s.step_visual(c, audio); }
+        println!("{name}: subsequent damage = {}, total hits = {}", before - s.m.fighters[1].life, s.m.fighters[1].received_hits);
+    }
 }
 
 /// Team battle shot: `simul` = 2v2 on the field together, otherwise sequence (3v3, second bout with carried life).
@@ -647,20 +681,32 @@ async fn native_coverage(app: &mut App, dir: &str) {
                 fighter.vel.x = 0.0;
                 fighter.vel.y = 0.0;
                 fighter.change_anim(0, &fighter.def.clone(), 1);
+                if index == 0 && std::env::var("UME_AWAKENED").as_deref() == Ok("1") { fighter.form = 1; }
             }
         }
         snap(app, dir, &format!("height-{id}"), |app| {
             app.draw_session_only()
         })
         .await;
-        for (label, animation) in [
+        let mut coverage = vec![
             ("idle", 0),
             ("walk", 20),
             ("walk-back", 21),
             ("run", 100),
+            ("crouch", 11),
+            ("jump-up", 41),
+            ("jump-down", 44),
             ("damage", 5000),
             ("transform", 196),
-        ] {
+        ];
+        if id == "kaito" {
+            let d = app.session.as_ref().unwrap().m.fighters[0].def.clone();
+            for (label, name) in [("dragon", "storm dragon fist"), ("rush", "storm rush"), ("uppercut", "rising tempest")] {
+                let animation = d.states.get(&-1).and_then(|state| state.controllers.iter().find(|c| c.label.to_ascii_lowercase().contains(name))).and_then(|c| c.raw("value")).and_then(|v| v.parse::<i32>().ok()).and_then(|state| d.states.get(&state)).and_then(|state| state.param("anim")).and_then(|v| v.raw.parse::<i32>().ok());
+                if let Some(animation) = animation { coverage.push((label, animation)); }
+            }
+        }
+        for (label, animation) in coverage {
             let definition = app.session.as_ref().unwrap().m.fighters[0].def.clone();
             let anim = definition.anims.get(&animation).unwrap_or_else(|| {
                 panic!("{id}: required {label} animation {animation} is missing")

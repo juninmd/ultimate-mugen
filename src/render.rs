@@ -871,6 +871,9 @@ impl MatchRenderer {
             frame.group = to.0;
             frame.index = to.1;
         }
+        if f.form > 0 && frame.group == 1 && f.anim_def.sprites.contains_key(&(2, frame.index)) {
+            frame.group = 2;
+        }
         let mut extra = f.draw_scale;
         let mut angle_extra = 0.0;
         if let Some((scale, angle, _, t)) = f.sprite_transform {

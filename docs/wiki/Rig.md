@@ -74,6 +74,7 @@ A frame with `effect` draws an effect in place of the body. Use it for projectil
 | `type` | Shape |
 |---|---|
 | `orb` (default), `burst` | Energy ball / explosion |
+| `dragon` | Forward-facing energy dragon with a trailing body |
 | `beam` (`length`) | Horizontal ray |
 | `pillar` (`length`) | Vertical column |
 | `shockwave` | Ground wave |

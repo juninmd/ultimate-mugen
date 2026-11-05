@@ -131,6 +131,12 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         for fr in &a.frames { let k = frame_key(fr); if seen.insert(k.clone()) { jobs.push((k, fr)); } }
     }
     let mut rendered = render_all(nc, jobs, with_images, palette);
+    let awakening_palette = nc.awakening_palette.as_ref().and_then(|awake| {
+        let mut colors = palette.and_then(|p| p.get("colors").unwrap_or(p).as_object()).cloned().unwrap_or_default();
+        colors.extend(awake.get("colors").unwrap_or(awake).as_object()?.clone());
+        colors.insert("_awakening".into(), Value::Bool(true));
+        Some(Value::Object(colors))
+    });
     let mut cache: HashMap<String, ((i32, i32), Vec<[f32; 4]>, Vec<[f32; 4]>)> = HashMap::new();
     let mut idx = 0;
     for (name, a) in nc.anims.iter() {
@@ -144,13 +150,19 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
                 let k = (1, idx);
                 idx += 1;
                 sprites.insert(k, Sprite { image: r.image, width: r.width, height: r.height, axis_x: r.axis_x, axis_y: r.axis_y, scale: r.scale });
+                if with_images && fr.effect.is_none() {
+                    if let Some(palette) = awakening_palette.as_ref() {
+                        let awake = render_frame(nc, fr, true, Some(palette));
+                        sprites.insert((2, k.1), Sprite { image: awake.image, width: awake.width, height: awake.height, axis_x: awake.axis_x, axis_y: awake.axis_y, scale: awake.scale });
+                    }
+                }
                 (k, r.hurt, r.hit)
             });
             let hurt = match &fr.hurt { Some(Value::String(s)) if s == "none" => vec![], Some(v @ Value::Array(_)) => serde_json::from_value(v.clone()).unwrap_or(entry.1.clone()), _ => entry.1.clone() };
             let hit = fr.hit.as_ref().and_then(|h| h.bx).map(|b| vec![b]).unwrap_or(entry.2.clone());
             frames.push(AnimFrame {
                 group: entry.0 .0, index: entry.0 .1, x: fr.offset.map(|o| o[0]).unwrap_or(0.0), y: fr.offset.map(|o| o[1]).unwrap_or(0.0), time: if fr.ticks > 0 && nc.speed.is_some_and(|k| k > 1.0) { ((fr.ticks as f32 / nc.speed.unwrap_or(1.0)).round() as i32).max(1) } else { fr.ticks },
-                flip_h: false, flip_v: false, blend: if fr.effect.is_some() { Blend::Add } else { Blend::None }, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0,
+                flip_h: false, flip_v: false, blend: if fr.effect.as_ref().is_some_and(|effect| effect.get("type").and_then(Value::as_str) != Some("dragon")) { Blend::Add } else { Blend::None }, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0,
                 clsn2: if fr.effect.is_some() { hit.clone() } else { hurt }, clsn1: hit,
             });
         }
@@ -216,6 +228,12 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let ph = match when { "air" => 'A', "crouch" => 'C', _ => if jumps { 'N' } else { 'S' } };
         let pa = if cost > 0.0 { -cost } else if m.kind == "special" { 30.0 } else { 15.0 };
         cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" });
+        if let Some((group, index)) = m.voice.as_deref().and_then(|voice| {
+            let (group, index) = voice.split_once(',')?;
+            Some((group.trim().parse::<u16>().ok()?, index.trim().parse::<u16>().ok()?))
+        }) {
+            cns += &format!("[State {sid}, voice]\ntype = PlaySnd\ntrigger1 = Time = 0\nvalue = {group}, {index}\nchannel = 4\nstopongethit = 1\n\n");
+        }
         if m.kind == "super" {
             cns += &format!("[State {sid}, super]\ntype = SuperPause\ntrigger1 = Time = 0\ntime = 55\nanim = 30\npos = 0, -60\nsound = -1\n\n[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\nframegap = 2\npalbright = 0, 0, 0\npalcontrast = 100, 150, 256\npaladd = 0, 0, 0\npalmul = .85, .85, .85\ntime = 60\nlength = 10\n\n");
         } else if m.fx.as_deref() == Some("aura") {
@@ -266,6 +284,12 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.description = nc.description.clone().unwrap_or_default();
     d.intro = nc.intro.clone().unwrap_or_default(); d.taunt = nc.taunt.clone().unwrap_or_default(); d.win_quote = nc.win_quote.clone().unwrap_or_default();
     d.form_name = nc.form.clone().unwrap_or_default(); d.boss = nc.boss;
+    if nc.id == "kaito" {
+        d.sounds.insert((1000, 0), include_bytes!("../../../../assets/chars/voices/kaito/dragon.wav").to_vec());
+        d.sounds.insert((1000, 1), include_bytes!("../../../../assets/chars/voices/kaito/rush.wav").to_vec());
+        d.sounds.insert((1000, 2), include_bytes!("../../../../assets/chars/voices/kaito/gale.wav").to_vec());
+        d.sounds.insert((1000, 3), include_bytes!("../../../../assets/chars/voices/kaito/awake.wav").to_vec());
+    }
     let _ = Arc::new(());
     d
 }

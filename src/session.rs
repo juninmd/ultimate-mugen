@@ -537,6 +537,11 @@ impl Session {
                     self.over = Some(w);
                 }
                 Event::StopSound { owner, channel } => audio.stop(owner, channel),
+                Event::Transform { fighter } => {
+                    if let Some(f) = self.m.fighters.iter().find(|f| f.id == fighter && f.def.id == "umf:kaito") {
+                        audio.sample(&f.def.id, 1000, 3, f.def.sounds.get(&(1000, 3)), SoundOpts { owner: fighter, channel: 4, ..Default::default() });
+                    }
+                }
                 Event::SoundPan {
                     owner,
                     channel,

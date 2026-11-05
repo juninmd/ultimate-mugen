@@ -213,3 +213,11 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 - Resolução estática de chaves de paleta no carregador: `loader::load_character` resolve substituições de paletas (`pal1`..`pal12`) usando uma tabela estática de fatias `PAL_KEYS` em vez de formatar 12 strings no heap por personagem.
 - Deduplicação de sprites pré-alocada: Pré-dimensiona os vetores `seen` e `unique` para o tamanho de `sff.sprites.len()`.
 - Extração de lista de golpes e comandos de IA com zero alocações: `loader::load_character` filtra comandos no local usando `eq_ignore_ascii_case` antes de clonar ou alocar strings, removendo dezenas de alocações no heap por personagem carregado.
+- **Onda 27 - Caixas de Colisão In-Place e Início Rápido de Elemento de Animação**:
+  - Implementa Fighter::fill_boxes utilizando buffers scratch fornecidos pelo chamador, eliminando alocações contínuas de Vec<Box4> nos loops de detecção de reversals, golpes e projéteis.
+  - Substitui coleta de vetor na heap para verificação de caixa única p2clsnrequire por fatia em array na pilha com zero cópias.
+  - Adiciona saída antecipada if n <= 1 { return 0; } em `elem_start` para ignorar instanciação de iteradores nas consultas mais frequentes de tempo de quadros de animação.
+- **Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes**:
+  - Substitui desvios aninhados em `input::rel_dirs` por deslocamento binário branchless `ud | (4 << (is_back ^ 1))`.
+  - Substitui casamento de strings em `button_bit` por casamento em nível de byte na fatia, suportando insensibilidade a maiúsculas sem alocação.
+  - Implementa atribuição de direção branchless em `InputHistory::push`.

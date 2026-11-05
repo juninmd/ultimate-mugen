@@ -448,13 +448,13 @@ impl Code {
                     } else {
                         0.0
                     };
-                    return if v == 0.0 { 1.0 } else { 0.0 };
+                    return if v.is_nan() { f64::NAN } else if v == 0.0 { 1.0 } else { 0.0 };
                 }
                 (Op::Const(v), Op::Neg) => return -v,
                 (Op::Const(v), Op::Not) => return if v == 0.0 { 1.0 } else { 0.0 },
                 (Op::Host(i), Op::Not) => {
                     let v = eval(&self.host[i as usize], h);
-                    return if v == 0.0 { 1.0 } else { 0.0 };
+                    return if v.is_nan() { f64::NAN } else if v == 0.0 { 1.0 } else { 0.0 };
                 }
                 _ => {}
             }

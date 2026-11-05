@@ -297,3 +297,11 @@ etain_mut.
   - `bytecode::Code::run`: Fast-path short-circuit execution for 2-op expressions (`!trigger`, `-const`, `!const`, `!host`), bypassing stack array zeroing and interpreter loop.
   - `Match::triggered`: Reused single `Ctx` across `trigger_all` and trigger groups, eliminating redundant host context creations per controller evaluation.
   - `Match::num`: Direct expression evaluation avoiding intermediate Option closure mapping.
+
+- **Wave 50 - SND Pre-Allocation, Deduped State Parsing & Zero-Alloc Command Filters**:
+  - `snd::decode_snd_checked`: Pre-allocated sound dictionary and offset visited sets using the header sound count, with in-place `Entry::Vacant` insertions avoiding redundant sound re-allocation.
+  - `loader::load_mugen_char`: Eliminated redundant second parse pass of `stcommon` during character loading.
+  - Pre-allocated static palette keys `PAL_KEYS` to avoid 12 dynamic string formatting allocations per character load.
+  - Pre-allocated capacity for `HashSet`, `sprites`, `indexed`, and `counts` based on decoded SFF sprite lengths.
+  - Case-insensitive ASCII byte comparison (`eq_ignore_ascii_case`) for `ai_commands` and `movelist` filters, eliminating temporary heap strings for command names.
+  - `loader::load_mugen_portrait`: In-place string slice extraction from section lookups avoiding owned string clones.

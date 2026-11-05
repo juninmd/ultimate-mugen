@@ -70,9 +70,9 @@ pub fn load_mugen_char(
     let mut states = HashMap::new();
     let mut spans = crate::diagnostics::SourceSpans::default();
 
-    let sprite_buf = resolve(vfs, &base, fget("sprite").unwrap_or_default());
-    let anim_buf = resolve(vfs, &base, fget("anim").unwrap_or_default());
-    let snd_buf = resolve(vfs, &base, fget("sound").unwrap_or_default());
+    let sprite_buf = fget("sprite").and_then(|p| resolve(vfs, &base, p));
+    let anim_buf = fget("anim").and_then(|p| resolve(vfs, &base, p));
+    let snd_buf = fget("sound").and_then(|p| resolve(vfs, &base, p));
 
     // `stcommon` (normalmente common1.cns) traz os estados comuns E, em varios chars de
     // fullgames, o mapeamento comando -> ChangeState do [Statedef -1]. Sem ele o lutador
@@ -91,7 +91,7 @@ pub fn load_mugen_char(
         }
     }
     let cns_name = fget("cns").unwrap_or_default();
-    let cns_text = crate::perf::time("cns:read", || resolve(vfs, &base, cns_name).map(text).unwrap_or_default());
+    let cns_text = crate::perf::time("cns:read", || fget("cns").and_then(|c| resolve(vfs, &base, c)).map(text).unwrap_or_default());
     parse_constants(&cns_text, &mut constants, &mut provided);
     scale_default_constants(&mut constants, &provided, local_w as f64 / 320.0);
     crate::perf::time("cns:parse", || spans.track(cns_name, || parse_states(&cns_text, &mut states, true)));
@@ -107,7 +107,8 @@ pub fn load_mugen_char(
         }
     }
     let cmd_name = fget("cmd").unwrap_or_default();
-    let cmd_text = resolve(vfs, &base, cmd_name)
+    let cmd_text = fget("cmd")
+        .and_then(|c| resolve(vfs, &base, c))
         .map(text)
         .unwrap_or_default();
     let (mut commands, cmd_states) =
@@ -173,7 +174,9 @@ pub fn load_mugen_char(
         Some(res) => Some(res?),
         None => None,
     } {
-        let mut counts: HashMap<i32, usize> = HashMap::new();
+        sprites.reserve(sff.sprites.len());
+        indexed.reserve(sff.sprites.len());
+        let mut counts: HashMap<i32, usize> = HashMap::with_capacity(sff.palettes.len().max(8));
         for s in &sff.sprites {
             if s.group != 9000 {
                 *counts.entry(s.palette_index).or_default() += 1;
@@ -248,12 +251,17 @@ pub fn load_mugen_char(
                     p.data.clone(),
                 );
             }
-            for k in 1..=12 {
+            const PAL_KEYS: [&str; 12] = [
+                "pal1", "pal2", "pal3", "pal4", "pal5", "pal6",
+                "pal7", "pal8", "pal9", "pal10", "pal11", "pal12",
+            ];
+            for (i, &key) in PAL_KEYS.iter().enumerate() {
+                let k = (i + 1) as i32;
                 if palettes.contains_key(&(1, k)) {
                     continue;
                 }
-                if let Some(a) = fget(&format!("pal{k}"))
-                    .and_then(|p| resolve(vfs, &base, &p))
+                if let Some(a) = fget(key)
+                    .and_then(|p| resolve(vfs, &base, p))
                     .filter(|a| a.len() >= 768)
                 {
                     palettes.insert((1, k), Arc::new(decode_act(a)));
@@ -277,7 +285,7 @@ pub fn load_mugen_char(
                 );
             }
         }
-        let mut seen = std::collections::HashSet::new();
+        let mut seen = std::collections::HashSet::with_capacity(sff.sprites.len());
         let unique: Vec<&ume_formats::sff::DecodedSprite> = sff
             .sprites
             .iter()
@@ -364,16 +372,16 @@ pub fn load_mugen_char(
         }
     }
     // move list for the pause screen: every author-defined command with its input (internal hold/recovery helpers left out)
-    let mut movelist: Vec<MoveInfo> = vec![];
+    let mut movelist: Vec<MoveInfo> = Vec::with_capacity(commands.len().min(64));
     for c in commands.iter().filter(|c| !c.raw.is_empty()) {
-        let l = c.name.to_ascii_lowercase();
-        // single keys (a, fwd, start...) are not moves: keep sequences, charges and button combos only
         let single = !c.raw.contains(',') && !c.raw.contains('+');
-        if single
-            || l.starts_with("hold")
-            || l.starts_with("recovery")
-            || movelist.iter().any(|m| m.command == c.name)
-        {
+        if single {
+            continue;
+        }
+        let b = c.name.as_bytes();
+        let is_hold = b.len() >= 4 && b[..4].eq_ignore_ascii_case(b"hold");
+        let is_rec = b.len() >= 8 && b[..8].eq_ignore_ascii_case(b"recovery");
+        if is_hold || is_rec || movelist.iter().any(|m| m.command == c.name) {
             continue;
         }
         movelist.push(MoveInfo {
@@ -384,13 +392,16 @@ pub fn load_mugen_char(
     }
     let ai_commands = commands
         .iter()
-        .map(|c| c.name.clone())
-        .filter(|n| {
-            let l = n.to_ascii_lowercase();
-            !(l.starts_with("hold")
-                || l.starts_with("recovery")
-                || ["fwd", "back", "up", "down", "ff", "bb"].contains(&l.as_str()))
+        .filter(|c| {
+            let b = c.name.as_bytes();
+            let is_hold = b.len() >= 4 && b[..4].eq_ignore_ascii_case(b"hold");
+            let is_rec = b.len() >= 8 && b[..8].eq_ignore_ascii_case(b"recovery");
+            let is_dir = ["fwd", "back", "up", "down", "ff", "bb"]
+                .iter()
+                .any(|d| d.eq_ignore_ascii_case(&c.name));
+            !is_hold && !is_rec && !is_dir
         })
+        .map(|c| c.name.clone())
         .collect();
     let mut d = CharDef::empty(&format!("mugen:{def_path}"));
     d.name = name;
@@ -440,14 +451,16 @@ pub fn load_mugen_portrait(vfs: &Vfs, def_path: &str) -> Option<Sprite> {
         .unwrap_or_default();
     let secs = parse_ini(&text(vfs.get(&def_path)?));
     let files = find_section(&secs, "files")?;
-    let fget = |k: &str| files.get(k).map(|s| s.to_string());
-    let idle_key = resolve(vfs, &base, &fget("anim").unwrap_or_default()).and_then(|b| {
-        parse_air(&text(b))
-            .get(&0)
-            .and_then(|a| a.frames.first())
-            .map(|f| (f.group, f.index))
-    });
-    let sff = decode_sff_only(resolve(vfs, &base, &fget("sprite")?)?, |g, i| {
+    let fget = |k: &str| files.get(k);
+    let idle_key = fget("anim")
+        .and_then(|a| resolve(vfs, &base, a))
+        .and_then(|b| {
+            parse_air(&text(b))
+                .get(&0)
+                .and_then(|a| a.frames.first())
+                .map(|f| (f.group, f.index))
+        });
+    let sff = decode_sff_only(resolve(vfs, &base, fget("sprite")?)?, |g, i| {
         g == 9000 && (i == 0 || i == 1) || Some((g, i)) == idle_key
     })
     .ok()?;

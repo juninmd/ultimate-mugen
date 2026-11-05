@@ -49,14 +49,15 @@ impl Font {
     }
 
     pub fn text_width(&self, s: &str) -> i32 {
-        let mut w = 0;
-        let mut n = 0;
+        let mut w = 0i32;
+        let mut n = 0usize;
         for c in s.chars() {
             let g = self.glyph(c).or_else(|| self.glyph(' '));
-            w += g.map(|g| g.w as i32).unwrap_or(self.size[0]);
-            n += 1;
+            w = w.saturating_add(g.map(|g| g.w.min(i32::MAX as u32) as i32).unwrap_or(self.size[0]));
+            n = n.saturating_add(1);
         }
-        w + self.spacing[0] * (n - 1).max(0)
+        let spacing_count = n.saturating_sub(1).min(i32::MAX as usize) as i32;
+        w.saturating_add(self.spacing[0].saturating_mul(spacing_count))
     }
 
     pub fn palette_bank(&self, bank: i32) -> Option<Vec<u8>> {

@@ -36,7 +36,7 @@ Músicas ativas tocam como trilha da luta em revezamento sempre que o cenário n
 | Android | armazenamento interno do app, pasta `market/` |
 | Web | banco IndexedDB `ultimate-mugen-market` |
 
-Defina `UME_MARKET_HOME` para trocar a pasta no computador. Cada item instalado é gravado em um pacote único; a lista de repositórios, itens instalados, o ETag de cada listagem e o token opcional ficam em `state.json`.
+Defina `UME_MARKET_HOME` para trocar a pasta no computador. Cada item instalado é gravado em um pacote único; a lista de repositórios, itens instalados, o ETag de cada listagem e o token opcional ficam em `state.json`. Os nomes dos pacotes passam por percent-encoding só com minúsculas, então itens e pastas que diferem apenas por maiúsculas/minúsculas nunca dividem o mesmo arquivo no Windows ou no macOS.
 
 ## Limites da API, token e cache
 

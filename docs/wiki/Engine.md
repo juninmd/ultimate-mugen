@@ -73,6 +73,16 @@ Put the decoder in `crates/formats/src/<format>.rs`, export it in `lib.rs` and t
 
 The migration is described in [`docs/ROADMAP.md`](../ROADMAP.md).
 
+## State ownership and control
+
+A fighter runs a state from the definition that gave it: its own `.cns`, the shared `common1.cns`, or another character's definition (`TargetState`, `p2stateno`, a throw). Three rules keep control flowing:
+
+- A state number the character defines always runs from the character's own definition, so returning from an engine state (face-off, awakening) or from a `common1` state hands control back instead of leaving the fighter owned by the shared file.
+- States from `common1.cns` are the player's own: the character's `-1` states and the engine's walk/jump/crouch transitions keep running during a get-hit, lie-down or any other shared state — M.U.G.E.N. characters cancel hits from `-1` that way.
+- Only a custom state given by the opponent pauses them, because the giver's script owns the fighter until it hands control back.
+
+A fighter whose state owner is not itself and not `common1` is "in a custom state"; the helpers that answer this are the guard for every input-driven transition, so losing it makes the character stand still while still reading as alive (`ctrl`, state 0).
+
 ## HUD glass and impact effects
 
 - The in-fight HUD panels are "glass": `ume_shell::quad::glass_panel` registers up to 16 rounded rectangles per frame, and the post-processing composite pass replaces those pixels with a blurred copy of the scene (quarter resolution, separable blur, no per-frame allocations), plus tint, drop shadow and a rim highlight. With post-processing off (`fx` level 0) the HUD falls back to translucent polygons.

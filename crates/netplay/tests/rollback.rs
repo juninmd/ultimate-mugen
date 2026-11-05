@@ -74,7 +74,7 @@ fn replay_round_trip_reproduces_match() {
         rec.push(&f);
         m.tick(&f);
     }
-    let bytes = rec.to_bytes();
+    let bytes = rec.to_bytes().expect("encode replay");
     assert!(bytes.len() < 600 * 8);
     let back = Replay::from_bytes(&bytes).unwrap();
     assert_eq!(back, rec);

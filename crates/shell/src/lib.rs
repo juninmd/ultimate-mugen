@@ -1,6 +1,7 @@
 pub mod sprites;
 pub mod audio;
 pub mod quad;
+pub mod platform;
 mod screenshot;
 use screenshot::Save;
 pub mod text;
@@ -244,7 +245,7 @@ impl<G: Game> Shell<G> {
         live.gpu.renderer.set_linear(self.linear);
         live.gpu.renderer.set_scissor_scale([surface[0] / size[0], surface[1] / size[1]]);
         if let Some([w, h]) = resize { let _ = live.window.request_inner_size(PhysicalSize::new(w, h)); }
-        if let Some(fs) = fullscreen { live.window.set_fullscreen(fs.then_some(Fullscreen::Borderless(None))); }
+        if let Some(fs) = fullscreen { platform::set_window_fullscreen(&live.window, fs); }
         let view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let gpu = &mut live.gpu;
         let mut enc = gpu.device.create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
@@ -306,10 +307,7 @@ impl<G: Game> ApplicationHandler for Shell<G> {
         wasm_bindgen_futures::spawn_local(task);
     }
 
-    fn suspended(&mut self, _: &ActiveEventLoop) {
-        self.input.release_all();
-        if cfg!(target_os = "android") { self.live = None; self.pending = None; }
-    }
+    fn suspended(&mut self, _: &ActiveEventLoop) { self.input.release_all(); if cfg!(target_os = "android") { self.live = None; self.pending = None; } }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _: WindowId, event: WindowEvent) {
         match event {

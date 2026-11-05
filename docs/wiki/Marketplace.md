@@ -36,7 +36,7 @@ Active music tracks play as the fight BGM in rotation whenever the stage has no 
 | Android | app internal storage, `market/` |
 | Web | IndexedDB database `ultimate-mugen-market` |
 
-Set `UME_MARKET_HOME` to move the folder on desktop. Each installed item is a single bundle file; the list of repositories, the installed items, the ETag of each listing and the optional token are in `state.json`.
+Set `UME_MARKET_HOME` to move the folder on desktop. Each installed item is a single bundle file; the list of repositories, the installed items, the ETag of each listing and the optional token are in `state.json`. Bundle file names are percent-encoded with lowercase letters only, so items and folders whose names differ just in letter case never share a file on Windows or macOS.
 
 ## Rate limits, token and caching
 

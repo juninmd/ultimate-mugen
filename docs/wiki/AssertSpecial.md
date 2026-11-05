@@ -37,7 +37,7 @@ A flag that is not in the table is ignored. The loader prints one `AssertSpecial
 | `NoAutoTurn`, `NoWalk`, `NoJump`, `NoAirJump`, `NoCrouch`, `NoStand` | Disable the built-in turn, walk, jump, double jump, crouch and stand-up transitions |
 | `NoHardcodedKeys` | Disables every built-in key transition (walk, jump, crouch, guard) |
 | `AutoGuard` | Guards as if back were held |
-| `NoKO` | This player is not KO'd at 0 life |
+| `NoKO` | This player is not KO'd at 0 life; in team modes, they also keep their team from being eliminated while they remain in play |
 | `NoHitDamage`, `NoGuardDamage` | Hits / guarded hits do no life damage to the player |
 | `NoRedLifeDamage` | Hits do not raise the player's red life |
 | `NoDizzyPointsDamage` | Hits do not lower the player's dizzy points |

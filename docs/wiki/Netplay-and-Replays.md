@@ -45,7 +45,8 @@ sends local input; the overlay shows `SPECTATOR · ping · frames behind`.
 Replays recorded online store the session configuration (`netplay`: side, peer, port, delay, rollback window, player
 count, spectator flag) next to the inputs, so a desync can be reproduced with the same settings. When GGRS reports a
 desync, the game writes `replays/desync-<unix>.json` with that config, the frame, `Match::checksum()` and the last 120
-input frames.
+input frames. A desync report is a diagnostic, not a replay: the Replays menu never lists it (neither as a fight nor as
+an unreadable file), so it does not look like a corrupted replay after a desync.
 
 ## Rules for deterministic content
 
@@ -68,11 +69,13 @@ A raw stream of recorded inputs:
 
 Equal consecutive frames are stored once, so held buttons cost almost nothing.
 
+The reader rejects incomplete or overlong frame runs, trailing bytes, files larger than 129 MiB, decoded input streams larger than 64 MiB and more than 16,384 metadata entries. The writer returns an error when player counts, frame data or metadata exceed these limits. The encoded size allows a worst-case run per frame while decoded frames remain capped at 64 MiB.
+
 ```rust
 let mut rec = Replay::new(2);
 rec.meta.push(("p1".into(), "kfm".into()));
 rec.push(&[p1_bits, p2_bits]);
-std::fs::write("fight.umr", rec.to_bytes())?;
+std::fs::write("fight.umr", rec.to_bytes().expect("valid replay size"))?;
 ```
 
 ## Saved replays in the game (`replays/`)

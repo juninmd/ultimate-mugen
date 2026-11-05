@@ -1299,21 +1299,19 @@ impl App {
             pos = (pos + m - 1) % m;
         }
         if self.c.pressed(nav::DOWN) {
-            pos = if pos + cols < m {
-                pos + cols
+            let (row, col) = (pos / cols, pos % cols);
+            pos = if row + 1 < total_rows {
+                ((row + 1) * cols + col).min(m - 1)
             } else {
-                pos % cols
+                col
             };
         }
         if self.c.pressed(nav::UP) {
-            pos = if pos >= cols {
+            let (row, col) = (pos / cols, pos % cols);
+            pos = if row > 0 {
                 pos - cols
             } else {
-                let mut q = (total_rows - 1) * cols + pos;
-                if q >= m {
-                    q -= cols;
-                }
-                q
+                ((total_rows - 1) * cols + col).min(m - 1)
             };
         }
         if is_key_pressed(KeyCode::PageDown) {

@@ -34,6 +34,7 @@ Cada luta terminada é arquivada automaticamente em `replays/`, ao lado do execu
 | `inputs` | trilha de entradas com run-length: `slots`, depois `count` + uma entrada por slot por trecho |
 
 A decodificação de replays limita arquivos a 16 MiB, 500.000 trechos e 2.000.000 quadros no total para evitar alocações de memória ilimitadas por fluxos malformados. Relatórios de dessincronização (`desync-*.json`) em `replays/` são preservados sem serem listados como replays com erro.
+O leitor recusa arquivos incompletos ou com trechos maiores que a contagem declarada, bytes extras no fim, arquivos acima de 129 MiB, trilhas decodificadas acima de 64 MiB e mais de 16.384 entradas de metadados. O gravador retorna erro quando jogadores, quadros ou metadados excedem esses limites. O tamanho codificado permite um trecho para cada quadro no pior caso, mantendo a trilha decodificada limitada a 64 MiB.
 
 O replay alimenta as entradas gravadas por `Pilot::Replay`; a simulação é determinística, então a luta é
 reconstruída exatamente. Um teste de ida e volta grava 1200 ticks, recarrega o arquivo e compara o checksum final
@@ -58,5 +59,18 @@ Teclas durante a reprodução:
 | `.` ou → pausado | avançar um quadro |
 | Esc | sair do replay e voltar ao navegador |
 
-A pasta guarda os 64 arquivos mais novos; os mais antigos são apagados quando um novo replay é salvo. Arquivos que
-não puderem ser lidos (por exemplo, gravados por outra versão) aparecem com o motivo em vez de falharem em silêncio.
+A pasta guarda os 64 arquivos mais novos; os antigos são removidos quando um novo replay é gravado. Arquivos que não
+podem ser lidos (por exemplo, gravados por outra build) aparecem com o motivo em vez de falharem em silêncio.
+
+Os detalhes do netplay por rollback continuam em [Netplay-and-Replays](../Netplay-and-Replays.md).
+
+## Espectadores e dados de netplay nos replays
+
+Um terceiro tipo de conexão observa sem enviar entrada:
+
+```
+ultimate-mugen --spectate --peer <ip-do-host>:7000 [--port 7002] [--chars a,b --stage id]
+```
+Ele monta uma `SpectatorSession` do GGRS (`PlayerType::Spectator`), renderiza as entradas confirmadas pelo host e nunca envia entrada local; o overlay mostra `ESPECTADOR · ping · quadros atrás`.
+
+Replays gravados online guardam a configuração da sessão (`netplay`: lado, peer, porta, delay, janela de rollback, número de jogadores, flag de espectador) junto das entradas, então um desync pode ser reproduzido com os mesmos ajustes. Quando o GGRS detecta um desync, o jogo grava `replays/desync-<unix>.json` com essa configuração, o quadro, o `Match::checksum()` e os últimos 120 quadros de entrada. O relatório de desync é um diagnóstico, não um replay: o menu Replays nunca o lista (nem como luta, nem como arquivo ilegível), então ele não parece um replay corrompido depois de um desync.

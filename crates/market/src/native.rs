@@ -185,7 +185,7 @@ pub struct FsPersist {
 fn escape_segment(seg: &str) -> String {
     let mut out = String::with_capacity(seg.len());
     for (i, b) in seg.bytes().enumerate() {
-        if b.is_ascii_alphanumeric() || b == b'-' || b == b'_' || (b == b'.' && i > 0 && !out.ends_with('.')) {
+        if b.is_ascii_digit() || b.is_ascii_lowercase() || matches!(b, b'-' | b'_') || (b == b'.' && i > 0 && !out.ends_with('.')) {
             out.push(b as char);
         } else {
             out.push_str(&format!("%{b:02X}"));

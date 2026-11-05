@@ -302,6 +302,13 @@ impl Expr {
 /// Evaluation host: implemented by the match/fighter context.
 pub trait Host {
     fn trigger(&self, name: &str, args: &[Node], comp: Option<char>, raw: Option<&str>) -> f64;
+    fn trigger0(&self, name: &str, comp: Option<char>, raw: Option<&str>) -> f64 {
+        self.trigger(name, &[], comp, raw)
+    }
+    fn trigger1(&self, name: &str, arg0: f64, comp: Option<char>, raw: Option<&str>) -> f64 {
+        let a = [Node::Num(arg0, false)];
+        self.trigger(name, &a, comp, raw)
+    }
     fn redirect(&self, kind: &str, arg: Option<f64>) -> Option<Self> where Self: Sized;
     fn cmpstr(&self, name: &str, neg: bool, values: &[String]) -> bool;
     fn special(&self, name: &str, op: &str, a: f64, op2: Option<&str>, b: Option<f64>) -> bool;

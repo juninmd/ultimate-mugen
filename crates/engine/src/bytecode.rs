@@ -433,18 +433,17 @@ impl Code {
                         name, comp, raw, ..
                     } = &self.host[i as usize]
                     {
-                        s[sp] = h.trigger(name, &[], *comp, raw.as_deref());
+                        s[sp] = h.trigger0(name, *comp, raw.as_deref());
                     } else {
                         s[sp] = 0.0;
                     }
                     sp += 1;
                 }
                 Op::Trig1(i) => {
-                    let a0 = [Node::Num(s[sp - 1], false)];
                     s[sp - 1] = match &self.host[i as usize] {
                         Node::Trig {
                             name, comp, raw, ..
-                        } => h.trigger(name, &a0, *comp, raw.as_deref()),
+                        } => h.trigger1(name, s[sp - 1], *comp, raw.as_deref()),
                         _ => 0.0,
                     };
                 }

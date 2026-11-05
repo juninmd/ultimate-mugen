@@ -98,3 +98,7 @@ Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,
 No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
 
 `Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.
+
+## Despacho Direto de Gatilhos em Bytecode
+
+O trait `Host` em `crates/engine/src/expr.rs` e a máquina virtual em `crates/engine/src/bytecode.rs` introduzem ganchos de despacho direto `trigger0` e `trigger1`. Para avaliação de gatilhos unários (`Op::Trig1`), operandos na pilha avaliam diretamente na lógica do gatilho sem encapsulamento em arrays AST temporários `[Node::Num]` ou redirecionamento via `eval()`. Gatilhos críticos (`var`, `fvar`, `sysvar`, `animelemno`, `animelemtime`, `animexist`, `selfstatenoexist`) executam como índices e consultas inline em arrays, reduzindo a latência máxima de tick de simulação para 0,042 ms.

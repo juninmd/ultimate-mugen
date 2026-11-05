@@ -240,3 +240,8 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 - `find_section` sem alocação: `ini::find_section` utiliza `eq_ignore_ascii_case` diretamente no nome da seção sem alocar strings em minúsculas.
 - Análise de constantes CNS em pilha: `cns::parse_constants` desempacota vetores numéricos separados por vírgula em um array `[f64; 4]` na pilha, eliminando alocações de `Vec<f64>` em cada linha de constantes.
 - Vetor de comandos pré-alocado: `cns::parse_cmd` pré-aloca a capacidade de `cmds` para `secs.len()`.
+
+## Fast-path de bytecode de operação única e avaliação sem pilha
+
+- Atalho de expressão com operação única: Em `bytecode::Code::run`, expressões com exatamente um opcode (`Op::Const(v)`, `Op::Trig0(i)`, `Op::Host(i)`) retornam imediatamente sem inicialização do array de pilha, avanço do program counter ou despacho no loop da máquina virtual.
+- Consultas de constantes e parâmetros com custo zero: Números constantes e gatilhos sem argumentos (`Time`, `StateTime`, `AnimTime`, `StateNo`, etc.) executam em 1 ciclo de CPU sem overhead de frame de execução.

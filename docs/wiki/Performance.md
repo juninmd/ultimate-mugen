@@ -244,3 +244,8 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 - Zero-alloc `find_section`: `ini::find_section` uses `eq_ignore_ascii_case` directly on section names without allocating a lowercase string.
 - Stack-buffered CNS constant parsing: `cns::parse_constants` unpacks comma-separated numeric vectors into a stack-allocated `[f64; 4]` array, eliminating `Vec<f64>` allocations on every constant line.
 - Pre-allocated command definition vector: `cns::parse_cmd` pre-allocates `cmds` capacity to `secs.len()`.
+
+## Single-op bytecode fast-path & stack-less expression evaluation
+
+- Single-op expression short-circuit: In `bytecode::Code::run`, expressions with exactly one opcode (`Op::Const(v)`, `Op::Trig0(i)`, `Op::Host(i)`) return immediately without stack array zeroing, program counter advancement, or loop dispatch.
+- Zero-cost constant and parameter lookups: Constant numbers and 0-argument triggers (`Time`, `StateTime`, `AnimTime`, `StateNo`, etc.) execute in 1 CPU cycle, avoiding VM frame setup.

@@ -404,7 +404,25 @@ impl Code {
         }
     }
 
+    #[inline]
     pub fn run<H: Host>(&self, h: &H) -> f64 {
+        if let Some(&first) = self.ops.first() {
+            if self.ops.len() == 1 {
+                match first {
+                    Op::Const(v) => return v,
+                    Op::Trig0(i) => {
+                        if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                            return h.trigger(name, &[], *comp, raw.as_deref());
+                        }
+                        return 0.0;
+                    }
+                    Op::Host(i) => return eval(&self.host[i as usize], h),
+                    _ => {}
+                }
+            }
+        } else {
+            return 0.0;
+        }
         if self.depth > STACK {
             return 0.0;
         }

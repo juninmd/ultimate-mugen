@@ -3,7 +3,7 @@
 //! units: callers scale by `320 / local_w`.
 
 use crate::air::{parse_air, Animation};
-use crate::ini::{find_section, nums, parse_ini, unquote, Section};
+use crate::ini::{find_section, nums, parse_ini_no_lines, unquote, Section};
 use crate::sff::{decode_sff, sprite_to_rgba};
 use crate::vfs::{norm_path, resolve, text, Vfs};
 use std::collections::HashMap;
@@ -184,14 +184,18 @@ fn pair(v: Vec<f32>, def: [f32; 2]) -> [f32; 2] {
 }
 
 /// glTF/3D stages are rejected by design: detect the model request so the loader can warn once and keep the 2D layers.
-pub fn stage_requests_3d(text: &str) -> bool {
-    parse_ini(text).iter().any(|s| {
+pub fn stage_requests_3d_secs(secs: &[Section]) -> bool {
+    secs.iter().any(|s| {
         matches!(s.lname.as_str(), "model" | "model3d" | "stage3d" | "gltf" | "scene")
             || s.entries.iter().any(|(k, v)| {
                 let v = v.to_ascii_lowercase();
                 (k == "model" || k == "gltf" || k == "scene" || k.contains("3dmodel")) && (v.ends_with(".glb") || v.ends_with(".gltf") || !v.is_empty())
             })
     })
+}
+
+pub fn stage_requests_3d(text: &str) -> bool {
+    stage_requests_3d_secs(&parse_ini_no_lines(text))
 }
 
 fn warn_3d_once(path: &str) {
@@ -209,8 +213,8 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
     let def_path = norm_path(def_path);
     let base_dir = def_path.rfind('/').map(|i| &def_path[..i]).unwrap_or("");
     let t = text(vfs.get(&def_path).ok_or_else(|| format!("stage: {def_path} not found"))?);
-    let secs = parse_ini(&t);
-    if stage_requests_3d(&t) { warn_3d_once(&def_path); }
+    let secs = parse_ini_no_lines(&t);
+    if stage_requests_3d_secs(&secs) { warn_3d_once(&def_path); }
     let get = |s: &str, k: &str| find_section(&secs, s).and_then(|s| s.get(k));
     let g = |s: &str, k: &str, d: f32| nums(get(s, k), &[d])[0];
 

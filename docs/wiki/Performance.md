@@ -225,3 +225,10 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 - Static palette key resolution in loader: `loader::load_character` resolves character DEF palette overrides (`pal1`..`pal12`) using static string slice table `PAL_KEYS` rather than formatting 12 heap strings per character.
 - Pre-allocated sprite deduplication: Pre-sizes `seen` and `unique` sprite vectors to `sff.sprites.len()`.
 - Filter-first zero-alloc movelist and AI command extraction: `loader::load_character` filters commands in-place with `eq_ignore_ascii_case` before allocating or cloning strings, removing dozens of heap allocations per loaded character.
+
+## In-place zero-alloc AIR animation and collision parser
+
+- Elimination of line-level `to_ascii_lowercase()` heap allocations: `air::parse_air` processes text lines directly with case-insensitive ASCII byte matching (`eq_ignore_ascii_case`), removing 5,000 to 20,000 heap string allocations per character `.air` file.
+- Stack-allocated collision box parser: `parse_box4` parses four coordinates directly into a fixed `[f32; 4]` array on the stack, eliminating `Vec<f32>` allocations per collision box.
+- Stack-buffered frame parameter tokenization: AnimFrame lines unpack up to 11 comma-separated parameters into a fixed `[&str; 11]` array without allocating `Vec<&str>`.
+- In-place flip and blend flag parsing: `fl` and `bl` flags are evaluated in-place without uppercase string allocation.

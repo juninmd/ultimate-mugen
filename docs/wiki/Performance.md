@@ -361,3 +361,9 @@ etain_mut.
 - **Wave 59 - Cached Scale in Box Filling & Multi-Box AABB Collision Pruning**:
   - `fighter::fill_boxes`: Bypassed dynamic `size.*` string queries when no size overrides exist, reading `def.scale_x` and `def.scale_y` directly.
   - `matchs::overlap`: Added composite axis-aligned bounding box early exit when checking multi-box collision groups (`a.len() > 1 || b.len() > 1`), eliminating $O(N 	imes M)$ pairwise tests on disjoint collision clusters.
+
+- **Wave 60 - Zero-Alloc AIR Frame Tokenization & Pre-Sized Animation Buffers**:
+  - `air::parse_air`: Replaced per-frame `Vec<&str>` heap allocation with a fixed 12-element stack array `[""; 12]`, eliminating dynamic vector allocations across all animation frames.
+  - `air::parse_air`: Replaced `to_ascii_uppercase()` String allocations for flags and blend modes with zero-alloc byte-level inspection (`fl.as_bytes()`, `bl.as_bytes()`).
+  - `air::parse_as_d`: Replaced string searching with case-insensitive byte scanning for `AS...D...` alpha parameters.
+  - `air::parse_air`: Pre-allocated animation frames vector with `Vec::with_capacity(8)` and the animation HashMap with `text.len() / 512 + 16`.

@@ -3881,7 +3881,7 @@ impl App {
             self.c.touch.draw();
         }
     }
-    pub fn preview_opts() -> DrawOpts {
+    pub fn preview_opts<'a>() -> DrawOpts<'a> {
         DrawOpts::default()
     }
     pub fn renderer_new(st: &crate::stages::Stage) -> MatchRenderer {

@@ -171,7 +171,7 @@ impl SpriteTex {
     }
 }
 
-pub struct DrawOpts {
+pub struct DrawOpts<'a> {
     pub alpha: f32,
     pub add: bool,
     pub sub: bool,
@@ -180,9 +180,9 @@ pub struct DrawOpts {
     pub angle: f32,
     pub vflip: bool,
     pub pal: Option<PalParams>,
-    pub remap: Vec<((i32, i32), (i32, i32))>,
+    pub remap: &'a [((i32, i32), (i32, i32))],
 }
-impl Default for DrawOpts {
+impl<'a> Default for DrawOpts<'a> {
     fn default() -> Self {
         DrawOpts {
             alpha: 1.0,
@@ -193,7 +193,7 @@ impl Default for DrawOpts {
             angle: 0.0,
             vflip: false,
             pal: None,
-            remap: vec![],
+            remap: &[],
         }
     }
 }
@@ -240,7 +240,7 @@ impl MatchRenderer {
         facing: f32,
         lscl: f32,
         extra: [f32; 2],
-        o: &DrawOpts,
+        o: &DrawOpts<'_>,
         shx: f32,
         shy: f32,
     ) {
@@ -301,13 +301,13 @@ impl MatchRenderer {
         } else if sub {
             set_blend(GfxBlend::Sub);
         }
-        tex.draw(g.ox + left * s, g.oy + top * s, c, params.clone());
-        if add || sub {
-            set_blend(GfxBlend::Alpha);
-        }
-        params.pal_fx = None;
         if o.flash > 0.0 {
+            tex.draw(g.ox + left * s, g.oy + top * s, c, params.clone());
+            if add || sub {
+                set_blend(GfxBlend::Alpha);
+            }
             set_blend(GfxBlend::Add);
+            params.pal_fx = None;
             tex.draw(
                 g.ox + left * s,
                 g.oy + top * s,
@@ -315,6 +315,11 @@ impl MatchRenderer {
                 params,
             );
             set_blend(GfxBlend::Alpha);
+        } else {
+            tex.draw(g.ox + left * s, g.oy + top * s, c, params);
+            if add || sub {
+                set_blend(GfxBlend::Alpha);
+            }
         }
     }
 
@@ -566,8 +571,8 @@ impl MatchRenderer {
                     let e = &m.explods[i];
                     let remap = m
                         .idx(e.owner)
-                        .map(|o| m.fighters[o].remap.clone())
-                        .unwrap_or_default();
+                        .map(|o| m.fighters[o].remap.as_slice())
+                        .unwrap_or(&[]);
                     if let Some(fr) = e.cur.frame() {
                         let p = e.world_pos(m.camera);
                         Self::draw_sprite(
@@ -826,7 +831,7 @@ impl MatchRenderer {
                     add: matches!(tr.mode, BlendMode::Add | BlendMode::Add1),
                     sub: tr.mode == BlendMode::Sub,
                     pal: Some(ai.params.image_params(k)),
-                    remap: f.remap.clone(),
+                    remap: &f.remap,
                     ..Default::default()
                 };
                 Self::draw_sprite(
@@ -878,7 +883,7 @@ impl MatchRenderer {
             o.flash = 0.55;
         }
         o.pal = Some(m.fighter_pal(fi));
-        o.remap = f.remap.clone();
+        o.remap = &f.remap;
         if let Some(t) = &f.trans {
             match t.mode {
                 BlendMode::Add | BlendMode::Add1 => {

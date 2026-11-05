@@ -231,7 +231,7 @@ pub fn detect(tree: &Tree, subdir: &str, fallback_name: &str) -> Catalog {
     }
 
     for it in &mut items {
-        it.files.sort_by(|a, b| a.path.cmp(&b.path));
+        it.files.sort_by(|a, b| a.path.cmp(&b.path)); it.installable &= !tree.truncated || matches!(it.kind, Kind::Music | Kind::Pack);
     }
     items.sort_by(|a, b| (a.kind, a.name.to_lowercase(), &a.id).cmp(&(b.kind, b.name.to_lowercase(), &b.id)));
     items.dedup_by(|a, b| a.id == b.id);

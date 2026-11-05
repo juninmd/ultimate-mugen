@@ -55,14 +55,14 @@ pub fn attr_kind_mask(want: &str) -> i32 {
     if w.len() != 2 {
         return 0;
     }
-    let columns: &[i32] = match w[0] {
+    let columns: &[i32] = match w[0].to_ascii_uppercase() {
         b'N' => &[0],
         b'S' => &[3],
         b'H' => &[6],
         b'A' => &[0, 3, 6],
         _ => return 0,
     };
-    let row = match w[1] {
+    let row = match w[1].to_ascii_uppercase() {
         b'A' => 0,
         b'T' => 1,
         b'P' => 2,
@@ -73,23 +73,23 @@ pub fn attr_kind_mask(want: &str) -> i32 {
         .fold(0, |mask, c| mask | (1 << (6 + c + row)))
 }
 pub fn state_mask(state: &str) -> i32 {
-    state.chars().fold(0, |bits, c| {
-        bits | match c {
-            'S' => 1,
-            'C' => 2,
-            'A' => 4,
-            'L' => 8,
+    state.bytes().fold(0, |bits, c| {
+        bits | match c.to_ascii_uppercase() {
+            b'S' => 1,
+            b'C' => 2,
+            b'A' => 4,
+            b'L' => 8,
             _ => 0,
         }
     })
 }
 pub fn guardflag_bits(flags: &str) -> i32 {
-    flags.chars().fold(0, |bits, c| {
-        bits | match c {
-            'H' => 1,
-            'L' => 2,
-            'A' => 4,
-            'M' => 3,
+    flags.bytes().fold(0, |bits, c| {
+        bits | match c.to_ascii_uppercase() {
+            b'H' => 1,
+            b'L' => 2,
+            b'A' => 4,
+            b'M' => 3,
             _ => 0,
         }
     })

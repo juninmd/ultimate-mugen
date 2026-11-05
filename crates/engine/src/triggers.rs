@@ -41,7 +41,16 @@ impl<'a> Ctx<'a> {
         if let Some((_, v)) = self.f().size_overrides.iter().find(|(n, _)| n == k) { return *v as f64; }
         let c = &self.f().def.constants;
         if let Some(v) = c.get(k) { return *v; }
-        if k.starts_with("velocity.") && !k.ends_with(".x") && !k.ends_with(".y") { return *c.get(&format!("{k}.x")).unwrap_or(&0.0); }
+        if k.starts_with("velocity.") && !k.ends_with(".x") && !k.ends_with(".y") {
+            let mut buf = [0u8; 64];
+            if k.len() + 2 <= buf.len() {
+                buf[..k.len()].copy_from_slice(k.as_bytes());
+                buf[k.len()..k.len() + 2].copy_from_slice(b".x");
+                if let Ok(key) = std::str::from_utf8(&buf[..k.len() + 2]) {
+                    return *c.get(key).unwrap_or(&0.0);
+                }
+            }
+        }
         if k == "data.defense" { return *c.get("data.defence").unwrap_or(&100.0); }
         if k.ends_with(".x") { if let Some(v) = c.get(&k[..k.len() - 2]) { return *v; } }
         0.0
@@ -165,15 +174,15 @@ impl<'a> Host for Ctx<'a> {
             "hitdefattr" => {
                 let Some(hd) = f.hitdef.as_ref() else { return neg };
                 if f.move_type != 'A' { return neg; }
-                if v0.is_empty() || !v0.chars().all(|c| "SCAsca".contains(c)) { return neg; }
-                let ok_state = hd.attr_state.chars().any(|c| v0.chars().any(|v| v.eq_ignore_ascii_case(&c)));
+                if v0.is_empty() || !v0.bytes().all(|c| matches!(c, b'S' | b'C' | b'A' | b's' | b'c' | b'a')) { return neg; }
+                let ok_state = hd.attr_state.bytes().any(|c| v0.bytes().any(|v| v.eq_ignore_ascii_case(&c)));
                 ok_state && (values.len() == 1 || values[1..].iter().any(|v| attr_kind_match(v, &hd.attr_kind)))
             }
             "hitbyattr" => {
                 let attr = f.ghv.attr;
                 if attr == 0 { return neg; }
-                let ok_state = crate::hitdef::state_mask(&v0.to_ascii_uppercase()) & attr != 0;
-                ok_state && (values.len() == 1 || values[1..].iter().any(|v| crate::hitdef::attr_kind_mask(&v.to_ascii_uppercase()) & attr != 0))
+                let ok_state = crate::hitdef::state_mask(v0) & attr != 0;
+                ok_state && (values.len() == 1 || values[1..].iter().any(|v| crate::hitdef::attr_kind_mask(v) & attr != 0))
             }
             "prevstatetype" => f.prev_state_type == c0,
             "prevmovetype" => f.prev_move_type == c0,
@@ -202,7 +211,9 @@ impl<'a> Host for Ctx<'a> {
         match bb { None => (happened == want) != neg, Some(v) => (happened == want && cmp(t as f64, op2.unwrap_or("="), v)) != neg }
     }
     fn assign(&self, name: &str, idx: i32, v: f64) -> f64 {
-        self.m.assigns.borrow_mut().push((self.i, name.to_string(), idx, v));
+        if let Some(kind) = crate::matchs::AssignKind::parse(name) {
+            self.m.assigns.borrow_mut().push((self.i, kind, idx, v));
+        }
         if name == "var" || name == "sysvar" { (v as i32) as f64 } else { v }
     }
     fn trigger(&self, name: &str, args: &[Node], comp: Option<char>, raw: Option<&str>) -> f64 {

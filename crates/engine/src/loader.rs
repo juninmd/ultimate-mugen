@@ -2,7 +2,10 @@
 use crate::chardef::{
     default_constants, CharDef, ImageData, IndexedSprite, MoveInfo, Source, Sprite,
 };
-use crate::cns::{parse_cmd, parse_constants, parse_states, scale_default_constants};
+use crate::cns::{
+    parse_cmd, parse_constants_from_sections, parse_states, parse_states_from_sections,
+    scale_default_constants,
+};
 use crate::commands::parse_command;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -75,9 +78,10 @@ pub fn load_mugen_char(
     }
     let cns_name = fget("cns").unwrap_or_default();
     let cns_text = crate::perf::time("cns:read", || resolve(vfs, &base, &cns_name).map(text).unwrap_or_default());
-    parse_constants(&cns_text, &mut constants, &mut provided);
+    let cns_secs = crate::perf::time("cns:ini", || ume_formats::ini::parse_ini_no_lines(&cns_text));
+    parse_constants_from_sections(&cns_secs, &mut constants, &mut provided);
     scale_default_constants(&mut constants, &provided, local_w as f64 / 320.0);
-    crate::perf::time("cns:parse", || spans.track(&cns_name, || parse_states(&cns_text, &mut states, true)));
+    crate::perf::time("cns:parse", || spans.track(&cns_name, || parse_states_from_sections(&cns_secs, &mut states, true)));
     for k in ["st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9"] {
         let Some(fname) = fget(k) else { continue };
         if norm_path(&unquote(&fname)) == norm_path(&unquote(&cns_name)) {

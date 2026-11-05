@@ -13,6 +13,10 @@ How the engine keeps loading fast and frames smooth, and how to measure it.
 | Zip Import & Decompression | Central directory scanned, entries decompressed in parallel with live `ZipProgress` visual loading bar and hardware thread tracking | All cores (max 32) |
 | Character sprites | Palette to RGBA conversion runs in parallel, once per unique pixel buffer and palette; linked sprites share one `ImageData`, so they also share one GPU upload | All cores (max 8) |
 | Stage sprites | Same parallel RGBA conversion; the RGBA buffer is moved into the stage, never copied | All cores (max 8) |
+| Common state cache | `ume_engine::common` | `common_def()` cached via `OnceLock<Arc<CharDef>>`, eliminating ~4 ms duplicate parse of `common1.cns` per match | 1 (lazy init) |
+| CNS & CMD single-pass parsing | `ume_engine::loader`, `cns` | Sections parsed once using `parse_ini_no_lines` and shared between constants and states; avoids redundant INI passes | 1 |
+| Expression & param bytecode cache | `ume_engine::chardef` | `safe_expr` and `Param::new` cache parsed AST and bytecode across identical triggers and parameters via thread-local storage | Per thread |
+| Zero-alloc INI lookups | `ume_formats::ini` | `Section::get` and `find_section` use `eq_ignore_ascii_case` avoiding heap allocations; `strip_comment` short-circuits without comments | Calling thread |
 | Select-screen portraits | `load_mugen_portrait` decodes only sprites 9000,0, 9000,1 and the first idle frame (plus their link sources) via `decode_sff_only` | 1 |
 | Native (UMF) rig | Every unique frame is rasterized in parallel | All cores (max 8) |
 | Whole character | Loaded on a `char-load` thread while the VS screen is shown | 1 background thread |
@@ -49,7 +53,7 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | `cargo test -p ume-formats --release --test fuzz_resilience` | Mutation fuzzing across SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR and INI decoders |
 | `cargo test -p ume-engine --release --test stress_resilience` | Hostile CNS expressions, recursive helper/explod/projectile floods, and 4v4 simul stress |
 
-Reference (4 cores, release): `kfm720` went from 85 ms to 27 ms, `kfm` from 12 ms to 7 ms.
+Reference (release): `kfm` went from 48.3 ms to 10.3 ms (4.69x faster), `kfm720` from 60.1 ms to 29.9 ms (2.01x faster). Simulation tick throughput reaches 110,000 - 130,000 ticks/s at p50 0.007 ms.
 
 ## Web (wasm)
 

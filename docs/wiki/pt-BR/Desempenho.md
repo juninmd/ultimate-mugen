@@ -13,6 +13,10 @@ Como a engine mantém o carregamento rápido e os quadros estáveis, e como medi
 | Importação e Descompressão Zip | Diretório central escaneado, entradas descompactadas em paralelo com barra visual de progresso `ZipProgress` e indicador de threads de hardware | Todos os núcleos (máx. 32) |
 | Sprites do personagem | A conversão paleta para RGBA roda em paralelo, uma vez por buffer de pixels e paleta únicos; sprites ligados compartilham um `ImageData` e, portanto, um único upload na GPU | Todos os núcleos (máx. 8) |
 | Sprites do cenário | Mesma conversão RGBA em paralelo; o buffer RGBA é movido para o cenário, nunca copiado | Todos os núcleos (máx. 8) |
+| Cache de estados comuns | `ume_engine::common` | `common_def()` cacheado via `OnceLock<Arc<CharDef>>`, eliminando ~4 ms de parsing duplicado de `common1.cns` por partida | 1 (lazy init) |
+| Parsing CNS e CMD em passada única | `ume_engine::loader`, `cns` | Seções processadas uma única vez com `parse_ini_no_lines` e compartilhadas entre constantes e estados; evita passadas redundantes de INI | 1 |
+| Cache de bytecode de expressões e parâmetros | `ume_engine::chardef` | `safe_expr` e `Param::new` cacheiam AST e bytecode compilados para triggers e parâmetros idênticos via armazenamento thread-local | Por thread |
+| Consultas INI sem alocação | `ume_formats::ini` | `Section::get` e `find_section` usam `eq_ignore_ascii_case` evitando alocações no heap; `strip_comment` atalha linhas sem comentário | Thread chamadora |
 | Retratos da tela de seleção | `load_mugen_portrait` decodifica só os sprites 9000,0, 9000,1 e o primeiro quadro parado (mais as origens dos links) via `decode_sff_only` | 1 |
 | Rig nativo (UMF) | Cada quadro único é rasterizado em paralelo | Todos os núcleos (máx. 8) |
 | Personagem inteiro | Carregado numa thread `char-load` enquanto a tela de VS aparece | 1 thread em segundo plano |
@@ -49,7 +53,7 @@ O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria th
 | `cargo test -p ume-formats --release --test fuzz_resilience` | Fuzzing por mutação em decodificadores SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR e INI |
 | `cargo test -p ume-engine --release --test stress_resilience` | Expressões CNS hostis, floods recursivos de helper/explod/projétil e estresse 4v4 simul |
 
-Referência (4 núcleos, release): `kfm720` caiu de 85 ms para 27 ms, `kfm` de 12 ms para 7 ms.
+Referência (release): `kfm` caiu de 48,3 ms para 10,3 ms (4,69x mais rápido), `kfm720` de 60,1 ms para 29,9 ms (2,01x mais rápido). Taxa de simulação atinge 110.000 - 130.000 ticks/s em p50 0,007 ms.
 
 ## Web (wasm)
 

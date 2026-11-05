@@ -15,20 +15,26 @@ pub struct Section {
 }
 
 impl Section {
-    /// First value for `key` (case-insensitive).
     pub fn get(&self, key: &str) -> Option<&str> {
-        self.get_all(key).next()
+        self.entries
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case(key))
+            .map(|(_, v)| v.as_str())
     }
 
-    /// All values for `key` (case-insensitive), in file order.
-    pub fn get_all<'a>(&'a self, key: &str) -> impl Iterator<Item = &'a str> + 'a {
-        let key = key.to_lowercase();
-        self.entries.iter().filter(move |(k, _)| *k == key).map(|(_, v)| v.as_str())
+    pub fn get_all<'a>(&'a self, key: &'a str) -> impl Iterator<Item = &'a str> + 'a {
+        self.entries
+            .iter()
+            .filter(move |(k, _)| k.eq_ignore_ascii_case(key))
+            .map(|(_, v)| v.as_str())
     }
 }
 
 /// Remove a `;` comment (ignoring `;` inside double quotes).
 pub fn strip_comment(line: &str) -> &str {
+    if !line.contains(';') {
+        return line;
+    }
     let mut in_q = false;
     for (i, c) in line.bytes().enumerate() {
         if c == b'"' {
@@ -57,6 +63,14 @@ pub(crate) fn starts_with_number(line: &str) -> bool {
 }
 
 pub fn parse_ini(text: &str) -> Vec<Section> {
+    parse_ini_opt(text, true)
+}
+
+pub fn parse_ini_no_lines(text: &str) -> Vec<Section> {
+    parse_ini_opt(text, false)
+}
+
+pub fn parse_ini_opt(text: &str, keep_lines: bool) -> Vec<Section> {
     let mut out: Vec<Section> = Vec::new();
     for raw in split_lines(text) {
         let line = strip_comment(raw).trim();
@@ -71,7 +85,7 @@ pub fn parse_ini(text: &str) -> Vec<Section> {
             .trim();
             out.push(Section {
                 name: name.to_string(),
-                lname: name.to_lowercase(),
+                lname: name.to_ascii_lowercase(),
                 entries: Vec::new(),
                 lines: Vec::new(),
             });
@@ -83,18 +97,19 @@ pub fn parse_ini(text: &str) -> Vec<Section> {
         let cur = out.last_mut().unwrap();
         if let Some(eq) = line.find('=') {
             if eq > 0 && !starts_with_number(line) {
-                cur.entries.push((line[..eq].trim().to_lowercase(), line[eq + 1..].trim().to_string()));
+                cur.entries.push((line[..eq].trim().to_ascii_lowercase(), line[eq + 1..].trim().to_string()));
             }
         }
-        cur.lines.push(line.to_string());
+        if keep_lines {
+            cur.lines.push(line.to_string());
+        }
     }
     out
 }
 
 /// First section whose name equals `name` (case-insensitive).
 pub fn find_section<'a>(secs: &'a [Section], name: &str) -> Option<&'a Section> {
-    let l = name.to_lowercase();
-    secs.iter().find(|s| s.lname == l)
+    secs.iter().find(|s| s.lname.eq_ignore_ascii_case(name))
 }
 
 /// Trim and remove surrounding double quotes (text up to the closing quote).

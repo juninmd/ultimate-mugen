@@ -2,7 +2,7 @@
 use crate::chardef::{next_uid, safe_expr, Controller, Param, StateDef};
 use crate::commands::{parse_command, CommandDef};
 use std::collections::{HashMap, HashSet};
-use ume_formats::ini::{parse_ini, unquote, Section};
+use ume_formats::ini::{parse_ini_no_lines, unquote, Section};
 
 pub fn build_controller(s: &Section) -> Option<Controller> {
     let kind = s.get("type")?.trim().to_ascii_lowercase();
@@ -26,9 +26,14 @@ pub fn build_controller(s: &Section) -> Option<Controller> {
 }
 
 pub fn parse_states(text: &str, into: &mut HashMap<i32, StateDef>, override_existing: bool) {
+    let secs = parse_ini_no_lines(text);
+    parse_states_from_sections(&secs, into, override_existing);
+}
+
+pub fn parse_states_from_sections(secs: &[Section], into: &mut HashMap<i32, StateDef>, override_existing: bool) {
     let mut cur: Option<i32> = None;
     let mut skip = false;
-    for s in parse_ini(text) {
+    for s in secs {
         let ln = s.lname.trim();
         if let Some(rest) = ln.strip_prefix("statedef") {
             let id: i32 = rest.trim().split(|c: char| !(c == '-' || c.is_ascii_digit())).next().and_then(|x| x.parse().ok()).unwrap_or(i32::MIN);
@@ -45,7 +50,7 @@ pub fn parse_states(text: &str, into: &mut HashMap<i32, StateDef>, override_exis
         }
         if ln.starts_with("state ") || ln.starts_with("state\t") || (ln.starts_with("state") && ln[5..].trim_start().starts_with(|c: char| c == '-' || c.is_ascii_digit())) {
             if skip { continue; }
-            if let (Some(id), Some(c)) = (cur, build_controller(&s)) { into.get_mut(&id).unwrap().controllers.push(c); }
+            if let (Some(id), Some(c)) = (cur, build_controller(s)) { into.get_mut(&id).unwrap().controllers.push(c); }
             continue;
         }
         cur = None; skip = false;
@@ -53,7 +58,12 @@ pub fn parse_states(text: &str, into: &mut HashMap<i32, StateDef>, override_exis
 }
 
 pub fn parse_constants(text: &str, into: &mut HashMap<String, f64>, provided: &mut HashSet<String>) {
-    for s in parse_ini(text) {
+    let secs = parse_ini_no_lines(text);
+    parse_constants_from_sections(&secs, into, provided);
+}
+
+pub fn parse_constants_from_sections(secs: &[Section], into: &mut HashMap<String, f64>, provided: &mut HashSet<String>) {
+    for s in secs {
         let sec = s.lname.as_str();
         if !["data", "size", "velocity", "movement", "constants"].contains(&sec) { continue; }
         for (k, v) in &s.entries {
@@ -79,7 +89,6 @@ pub fn parse_constants(text: &str, into: &mut HashMap<String, f64>, provided: &m
     }
 }
 
-/// Scale 320x240-based defaults for hi-res characters that didn't provide them.
 pub fn scale_default_constants(into: &mut HashMap<String, f64>, provided: &HashSet<String>, factor: f64) {
     if factor == 1.0 { return; }
     for (k, v) in into.iter_mut() {
@@ -93,7 +102,7 @@ fn pause_buffer_of(s: &Section) -> Option<i32> {
 }
 
 pub fn parse_cmd(text: &str) -> (Vec<CommandDef>, HashMap<i32, StateDef>) {
-    let secs = parse_ini(text);
+    let secs = parse_ini_no_lines(text);
     let (mut dt, mut db, mut dp) = (15, 1, 0);
     if let Some(d) = secs.iter().find(|s| s.lname == "defaults") {
         dt = d.get("command.time").and_then(|v| v.trim().parse().ok()).unwrap_or(15);
@@ -113,6 +122,6 @@ pub fn parse_cmd(text: &str) -> (Vec<CommandDef>, HashMap<i32, StateDef>) {
         cmds.push(def);
     }
     let mut states = HashMap::new();
-    parse_states(text, &mut states, true);
+    parse_states_from_sections(&secs, &mut states, true);
     (cmds, states)
 }

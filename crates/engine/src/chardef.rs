@@ -1,6 +1,7 @@
 //! Character definition shared by MUGEN-loaded and UMF-compiled characters.
 use crate::commands::CommandDef;
 use crate::expr::{parse, parse_list, Expr, Node};
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
@@ -42,13 +43,37 @@ pub struct Param {
     pub raw: String,
     pub exprs: Vec<Expr>,
 }
-impl Param {
-    pub fn new(raw: &str) -> Self {
-        let exprs = parse_list(raw)
+thread_local! {
+    static EXPR_CACHE: RefCell<HashMap<String, Expr>> = RefCell::new(HashMap::with_capacity(1024));
+    static EXPR_LIST_CACHE: RefCell<HashMap<String, Vec<Expr>>> = RefCell::new(HashMap::with_capacity(1024));
+}
+
+pub fn parse_expr_list(raw: &str) -> Vec<Expr> {
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        return Vec::new();
+    }
+    EXPR_LIST_CACHE.with(|c| {
+        let mut map = c.borrow_mut();
+        if let Some(list) = map.get(trimmed) {
+            return list.clone();
+        }
+        let list: Vec<Expr> = parse_list(trimmed)
             .map(|v| v.into_iter().map(Expr::new).collect())
             .unwrap_or_default();
+        if map.len() < 8192 {
+            map.insert(trimmed.to_string(), list.clone());
+        }
+        list
+    })
+}
+
+impl Param {
+    pub fn new(raw: &str) -> Self {
+        let trimmed = raw.trim();
+        let exprs = parse_expr_list(trimmed);
         Param {
-            raw: raw.trim().to_string(),
+            raw: trimmed.to_string(),
             exprs,
         }
     }
@@ -96,7 +121,21 @@ pub fn next_uid() -> u32 {
 }
 
 pub fn safe_expr(src: &str) -> Expr {
-    Expr::new(parse(src).unwrap_or(Node::Num(0.0, false)))
+    let trimmed = src.trim();
+    if trimmed.is_empty() {
+        return Expr::num(0.0);
+    }
+    EXPR_CACHE.with(|c| {
+        let mut map = c.borrow_mut();
+        if let Some(e) = map.get(trimmed) {
+            return e.clone();
+        }
+        let expr = Expr::new(parse(trimmed).unwrap_or(Node::Num(0.0, false)));
+        if map.len() < 8192 {
+            map.insert(trimmed.to_string(), expr.clone());
+        }
+        expr
+    })
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

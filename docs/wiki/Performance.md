@@ -164,3 +164,7 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 - **Wave 25 - Fast WAV Encoding & Identity Rate Audio Resampling**:
   - Replaces per-sample slice extension loops with single-pass bulk resize and direct indexed byte stores in wav() and 	o_wav().
   - Implements SIMD-vectorizable identity playback fastpath ((rate - 1.0).abs() < 1e-4) in Pcm::render, hoisting constant gain products outside the mixing loop.
+- **Wave 26 - HitDef Zero-Alloc Parser & Static Shake Construction**:
+  - Eliminates intermediate string formatting and clones in hitdef::build by using borrowed Option<&str> for parameters, direct byte matching in ttr_bits, state_mask, and guardflag_bits.
+  - Replaces dynamic string formatting with static field lookups for screen/camera shake parameters.
+  - Zero-alloc default branch for attack state and kinds.

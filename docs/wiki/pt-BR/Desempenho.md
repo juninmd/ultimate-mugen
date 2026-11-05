@@ -164,3 +164,7 @@ un_slice, reduzindo overhead de desreferenciação de struct a cada resolução 
 - **Onda 25 - Codificação Rápida de WAV e Reamostragem de Áudio em Taxa Identidade**:
   - Substitui loops de extensão de fatia por amostra por redimensionamento em bloco de passagem única e escrita indexada direta em wav() e 	o_wav().
   - Implementa caminho rápido vetorizável por SIMD para reprodução em taxa unitária ((rate - 1.0).abs() < 1e-4) em Pcm::render, içando produtos de ganho constantes para fora do loop de mixagem.
+- **Onda 26 - Parser de HitDef Sem Alocações e Construção Estática de Shake**:
+  - Elimina formatação intermediária de strings e clones em hitdef::build utilizando Option<&str> emprestado para parâmetros, casamento direto de bytes em ttr_bits, state_mask e guardflag_bits.
+  - Substitui formatação dinâmica de strings por consultas estáticas de campo para parâmetros de shake de tela/câmera.
+  - Ramo padrão com zero alocações para estado e tipos de ataque.

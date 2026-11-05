@@ -120,7 +120,7 @@ No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíra
 
 ## Pipeline Paralelo de Recursos de Personagem
 
-`load_char_def` em `crates/engine/src/loader.rs` sobrepõe as fases de recursos do personagem entre núcleos de CPU utilizando `std::thread::scope`. Decodificação de sprites (`sff:decode`), análise de animação (`air:parse`) e decodificação de áudio (`snd:decode`) rodam simultaneamente em threads trabalhadoras enquanto constantes CNS, arquivos de estado e gatilhos CMD são analisados na thread chamadora. `par::workers` em `crates/formats/src/par.rs` escala até 32 threads de processamento paralelo em hardwares multithread. O tempo total de carregamento passa a ser limitado pela fase individual mais lenta em vez do acúmulo serial.
+`load_mugen_char` em `crates/engine/src/loader.rs` sobrepõe as fases de recursos do personagem entre núcleos de CPU utilizando `std::thread::scope`. Decodificação de sprites (`sff:decode`), análise de animação (`air:parse`) e decodificação de áudio (`snd:decode`) rodam simultaneamente em threads trabalhadoras enquanto constantes CNS, arquivos de estado e gatilhos CMD são analisados na thread chamadora. `par::workers` em `crates/formats/src/par.rs` escala até 32 threads de processamento paralelo em hardwares multithread. O tempo total de carregamento passa a ser limitado pela fase individual mais lenta em vez do acúmulo serial.
 
 ## Gatilhos e Atribuições de Variáveis com Alocação Zero
 
@@ -154,9 +154,9 @@ O trait `Host` em `crates/engine/src/expr.rs` e a máquina virtual em `crates/en
 Em `src/sound_mix.rs:decode`, a decodificação de quadros de áudio calcula a capacidade do pacote antecipadamente e invoca `out.frames.reserve(count)`, eliminando realocações geométricas repetidas do vetor durante a leitura de amostras. Um fluxo dedicado para áudio mono (`ch == 1`) transfere quadros sem divisão de fatias, e a decodificação estéreo utiliza `chunks_exact(ch)` para eliminar verificações de limites. As alocações em execução aquecida caíram para 1.175 por fluxo de áudio de 30 segundos.
 - **Onda 23 - Tabela de Jump Direta Inline do Bytecode e Dispatch com Host Fatiado**:
   - Aplica inline das operações aritméticas e relacionais mais frequentes (Add, Sub, MulF, MulI, DivF, DivI, Eq, Ne, Lt, Le, Gt, Ge, BitAnd, BitOr, BitXor, Xor) diretamente no loop de casamento externo de 
-un_slice, eliminando chamadas intermediárias de função e closures.
+run_slice, eliminando chamadas intermediárias de função e closures.
   - Fatia self.host antecipadamente em 
-un_slice, reduzindo overhead de desreferenciação de struct a cada resolução de gatilho e expressão.
+run_slice, reduzindo overhead de desreferenciação de struct a cada resolução de gatilho e expressão.
 - **Onda 24 - Passo de Fundo de Cenário Sem Cópias e Retorno Rápido de Ondas**:
   - Utiliza casamento de padrões disjunto (BgState { layers, def_time, ctrl_defs, stage } = self) em step(), eliminando incrementos atômicos de self.stage.clone() em Arc e alocações de std::mem::take a cada tick.
   - Adiciona retorno rápido para amplitude zero s[0] == 0.0 em sin_wave(), evitando cálculos transcendentais de .sin() para camadas estáticas de fundo.
@@ -171,7 +171,7 @@ un_slice, reduzindo overhead de desreferenciação de struct a cada resolução 
 - **Onda 27 - Caixas de Colisão In-Place e Início Rápido de Elemento de Animação**:
   - Implementa Fighter::fill_boxes utilizando buffers scratch fornecidos pelo chamador, eliminando alocações contínuas de Vec<Box4> nos loops de detecção de reversals, golpes e projéteis.
   - Substitui coleta de vetor na heap para verificação de caixa única p2clsnrequire por fatia em array na pilha com zero cópias.
-  - Adiciona saída antecipada if n <= 1 { return 0; } em lem_start para ignorar instanciação de iteradores nas consultas mais frequentes de tempo de quadros de animação.
+  - Adiciona saída antecipada if n <= 1 { return 0; } em `elem_start` para ignorar instanciação de iteradores nas consultas mais frequentes de tempo de quadros de animação.
 Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes:
 - Substitui desvios aninhados em `input::rel_dirs` por deslocamento binário branchless `ud | (4 << (is_back ^ 1))`.
 - Substitui casamento de strings em `button_bit` por casamento em nível de byte na fatia, suportando insensibilidade a maiúsculas sem alocação.
@@ -183,13 +183,13 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 
 ## Decodificação SIMD de paletas ACT e fast-path de limites de câmera
 
-- Decodificação vetorizada ACT: decode_act e ncode_act utilizam s_chunks::<3>() e s_chunks_mut::<4>() para decodificar tripletos RGB para RGBA em lotes sem checagens redundantes de limites.
+- Decodificação vetorizada ACT: decode_act e `encode_act` utilizam s_chunks::<3>() e s_chunks_mut::<4>() para decodificar tripletos RGB para RGBA em lotes sem checagens redundantes de limites.
 - Limites de câmera em passada única: Match::update_camera calcula os limites de todos os lutadores raiz (minx, maxx, highest) e dos lutadores vivos (lo, hi) em uma única iteração de self.roots(), eliminando filtragens redundantes.
 - Checagens de sobreposição otimizadas: Match::overlap armazena as coordenadas de  em registradores escalares antes do laço interno de colisão contra  e substitui divisões por 2.0 por multiplicações * 0.5.
 
 ## Pipeline de avaliação de controladores e gatilhos com zero alocações
 
-- Indexação de alvos sem alocação no heap: `controllers::target_indices` retorna buffer em pilha `([usize; 8], usize)` em vez de `Vec<usize>`, eliminando alocações em controladores de alvo (`targetstate`, `targetlifeadd`, `targetpoweradd`, `targetfacing`, `targetbind`, etc.).
+- Indexação de alvos sem alocação no heap: `controllers::target_indices` retorna buffer em pilha `Vec<usize>` em vez de `Vec<usize>`, eliminando alocações em controladores de alvo (`targetstate`, `targetlifeadd`, `targetpoweradd`, `targetfacing`, `targetbind`, etc.).
 - Resolução de flags AssertSpecial sem alocação: `flags::names_in` e `flags::lookup` operam diretamente em fatias `&str` com comparação ASCII insensível a maiúsculas/minúsculas (`eq_ignore_ascii_case`), removendo alocações de strings a cada quadro.
 - Constantes de velocidade em buffer na pilha: `triggers::Ctx::const_val` formata a chave em um buffer de 64 bytes para buscar sufixos `.x` sem alocação no heap via `format!("{k}.x")`.
 - Atribuições de variáveis tipadas: `Match::assigns` armazena o enum `AssignKind` em vez de alocar uma `String` na atribuição de variáveis de gatilhos.
@@ -203,16 +203,16 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 ## Saída antecipada de caixas de colisão, fatiamento de alvos sem alocação e despacho de IA indexado
 
 - Fast-path em caixas de colisão: Em `fighter::boxes()`, quadros sem caixas e sem modificadores ativos retornam imediatamente `vec![]` sem consultar tabelas de escala ou calcular fatores. Fatores de escala pré-multiplicados e inversão horizontal com XOR único (`flip = fr.flip_h ^ (self.facing < 0.0)`) removem penalidades de ramificação em cada vértice.
-- Fatiamento de alvo sem alocação em `p2clsnrequire`: Em `matchs::step_hits`, alvos específicos emprestam a fatia `&d_boxes[req..req + 1]` diretamente em vez de alocar um `Vec` no heap.
+- Fatiamento de alvo sem alocação em `p2clsnrequire`: Em `Match::tick`, alvos específicos emprestam a fatia `&d_boxes[req..req + 1]` diretamente em vez de alocar um `Vec` no heap.
 - Despacho de comandos de IA indexado: Em `ai::Ai`, comandos são indexados como `Vec<usize>` em `fighter.def.commands` em vez de clonar árvores `CommandDef`. Ataques próximos e à distância são separados na inicialização, tornando a seleção em `O(1)` sem varreduras lineares.
 - Conversão vetorizada de pixmap para straight alpha: `raster::pixmap_to_image` evita divisões inteiras em pixels opacos (`alpha == 255`) e transparentes (`alpha == 0`) utilizando `as_chunks_mut::<4>()`.
 
 ## Decodificação SND pré-alocada e filtragem de comandos sem alocação
 
-- Tabelas hash pré-alocadas para sons SND: `snd::decode_snd_checked` limita a capacidade em `count.min(buf.len() / 16 + 1)` e pré-aloca as tabelas `out` e `seen`, eliminando redimensionamentos repetidos e rehashes durante a decodificação de áudio de personagens.
-- Resolução estática de chaves de paleta no carregador: `loader::load_character` resolve substituições de paletas (`pal1`..`pal12`) usando uma tabela estática de fatias `PAL_KEYS` em vez de formatar 12 strings no heap por personagem.
+- Tabelas hash pré-alocadas para sons SND: `snd::decode_snd_checked` limita a capacidade em `count.min(8192)` e pré-aloca as tabelas `out` e `seen`, eliminando redimensionamentos repetidos e rehashes durante a decodificação de áudio de personagens.
+- Resolução estática de chaves de paleta no carregador: `loader::load_mugen_char` resolve substituições de paletas (`pal1`..`pal12`) usando uma tabela estática de fatias `PAL_KEYS` em vez de formatar 12 strings no heap por personagem.
 - Deduplicação de sprites pré-alocada: Pré-dimensiona os vetores `seen` e `unique` para o tamanho de `sff.sprites.len()`.
-- Extração de lista de golpes e comandos de IA com zero alocações: `loader::load_character` filtra comandos no local usando `eq_ignore_ascii_case` antes de clonar ou alocar strings, removendo dezenas de alocações no heap por personagem carregado.
+- Extração de lista de golpes e comandos de IA com zero alocações: `loader::load_mugen_char` filtra comandos no local usando `eq_ignore_ascii_case` antes de clonar ou alocar strings, removendo dezenas de alocações no heap por personagem carregado.
 - **Onda 27 - Caixas de Colisão In-Place e Início Rápido de Elemento de Animação**:
   - Implementa Fighter::fill_boxes utilizando buffers scratch fornecidos pelo chamador, eliminando alocações contínuas de Vec<Box4> nos loops de detecção de reversals, golpes e projéteis.
   - Substitui coleta de vetor na heap para verificação de caixa única p2clsnrequire por fatia em array na pilha com zero cópias.
@@ -225,7 +225,7 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 ## Analisador de animação e colisão AIR no local sem alocações no heap
 
 - Eliminação de alocações `to_ascii_lowercase()` por linha: `air::parse_air` processa linhas de texto diretamente com comparação ASCII de bytes insensível a maiúsculas (`eq_ignore_ascii_case`), removendo de 5.000 a 20.000 alocações de string por arquivo `.air`.
-- Analisador de caixas de colisão em pilha: `parse_box4` analisa quatro coordenadas diretamente em um array fixo `[f32; 4]` na pilha, eliminando alocações de `Vec<f32>` por caixa de colisão.
+- Analisador de caixas de colisão em pilha: `parse_clsn_box` analisa quatro coordenadas diretamente em um array fixo `[f32; 4]` na pilha, eliminando alocações de `Vec<f32>` por caixa de colisão.
 - Tokenização de parâmetros de quadros em buffer de pilha: Linhas AnimFrame desempacotam até 11 parâmetros separados por vírgula em um array fixo `[&str; 11]` sem alocar `Vec<&str>`.
 - Análise de flags de flip e blend no local: Flags `fl` e `bl` são avaliadas diretamente sem alocação de strings em maiúsculas.
 
@@ -250,9 +250,23 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 
 - Desempacotamento de quadro de animação em consulta única em `advance_anim`: Desempacota `(total, loop_start, len, ft)` em uma única consulta a `self.anim()`, eliminando buscas repetidas em HashMap por lutador e explod animado a cada tick.
 - Atalho para substituições de tamanho vazias: `fighter::c` consulta diretamente constantes do personagem quando `self.size_overrides.is_empty()`, pulando varreduras lineares na fatia.
-- Limpeza de alvos obsoletos com atalho: `matchs::step` pula movimentações de vetores e chamadas de retenção sempre que `self.fighters[k].targets.is_empty()`.
+- Limpeza de alvos obsoletos com atalho: `Match::tick` pula movimentações de vetores e chamadas de retenção sempre que `self.fighters[k].targets.is_empty()`.
 - **Onda 42 - Caminho Rápido de Efeitos de Paleta, Buffers de Quadro em Pilha e Consultas Zero-Alloc**:
   - PalParams::apply: Caminho rápido para transformações idênticas e sem rotação de matiz/inversão, ignorando trigonometria e desenrolando canais de cores.
   - PalFx::from_controller: Eliminação de alocações na heap para buscas de parâmetros de controladores usando chaves em buffer de pilha.
   - Match::tick: Remoção de alocações dinâmicas de Vec<usize> por tick para waken e 	ag_requests através de arrays em pilha, unificando loops com 
 etain_mut.
+- **Onda 43 - Carregador de Personagens Zero-Alloc e Unquote In-Place**:
+  - `ini::unquote_str`: Empréstimo in-place de fatias sem alocar novas instâncias de `String` para strings limpas ou entre aspas.
+  - `loader::load_mugen_char`: Conversão de `fget` para retornar `Option<&str>` ao invés de `Option<String>`, eliminando cerca de 20 alocações na heap por carregamento de lutador.
+  - `loader::local_size`: Análise em pilha via `split_once(',')` substituindo a alocação dinâmica de `nums`.
+  - `cns::parse_cmd`: `unquote_str` in-place para nome e comandos.
+
+- **Onda 44 - Despacho de Estado AssignKind Zero-Alloc e Máscaras de Bits Case-Insensitive**:
+  - `matchs::AssignKind`: Substituição de alocações dinâmicas de `String` em atribuições de variáveis por um enum de 1 byte `AssignKind`, reduzindo pela metade a memória da tupla e eliminando operações na heap.
+  - `hitdef::state_mask` / `attr_kind_mask` / `guardflag_bits`: Processamento de bytes ASCII insensível a maiúsculas in-place sem alocação de strings.
+  - `triggers::const_val`: Busca em buffer de pilha com zero alocações para constantes `velocity.*.x`.
+
+- **Onda 45 - Cache de Explods em Array e Varredura Triangular de Colisão de Projéteis**:
+  - `Match::update_explods`: Pré-indexação de posições e estados de pausa dos lutadores em array compacto de 8 posições na pilha, eliminando varreduras lineares por explod.
+  - `Match::update_projectiles`: Flags de congelamento em buffer de pilha para até 64 projéteis sem alocações na heap, e iteração triangular de pares `(a + 1)..n` reduzindo pela metade verificações de colisão entre projéteis.

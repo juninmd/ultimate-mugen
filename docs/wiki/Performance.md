@@ -128,7 +128,7 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
 
 ## Parallel Character Asset Pipeline
 
-`load_char_def` in `crates/engine/src/loader.rs` overlaps character asset phases across CPU cores using `std::thread::scope`. Sprite decoding (`sff:decode`), animation parsing (`air:parse`), and sound decoding (`snd:decode`) execute concurrently on worker threads while CNS constants, state files, and CMD input triggers parse on the caller thread. `par::workers` in `crates/formats/src/par.rs` scales up to 32 parallel worker threads on high-core hardware. Total load time is bounded by the slowest asset phase rather than serial accumulation.
+`load_mugen_char` in `crates/engine/src/loader.rs` overlaps character asset phases across CPU cores using `std::thread::scope`. Sprite decoding (`sff:decode`), animation parsing (`air:parse`), and sound decoding (`snd:decode`) execute concurrently on worker threads while CNS constants, state files, and CMD input triggers parse on the caller thread. `par::workers` in `crates/formats/src/par.rs` scales up to 32 parallel worker threads on high-core hardware. Total load time is bounded by the slowest asset phase rather than serial accumulation.
 
 ## Zero-Allocation Triggers and Variable Assignments
 
@@ -162,9 +162,9 @@ Match evaluation in `crates/engine/src/matchs.rs`, `crates/engine/src/triggers.r
 In `src/sound_mix.rs:decode`, audio frame decoding calculates packet frame capacity upfront and calls `out.frames.reserve(count)`, eliminating repeated geometric vector reallocations during packet sample consumption. A dedicated mono branch (`ch == 1`) streams frames without slice chunking, and stereo decoding utilizes `chunks_exact(ch)` to eliminate bounds checks. Warm-run decode allocations dropped to 1,175 per 30-second audio stream.
 - **Wave 23 - Bytecode Inline Direct Jump Table & Host Slice Dispatch**:
   - Inlines frequent arithmetic and relational operations (Add, Sub, MulF, MulI, DivF, DivI, Eq, Ne, Lt, Le, Gt, Ge, BitAnd, BitOr, BitXor, Xor) directly into 
-un_slice's outer match table, eliminating intermediate function calls and closure lookups.
+run_slice's outer match table, eliminating intermediate function calls and closure lookups.
   - Slices self.host upfront in 
-un_slice, reducing struct dereference overhead on each trigger and expression resolution.
+run_slice, reducing struct dereference overhead on each trigger and expression resolution.
 - **Wave 24 - Stage Background Zero-Copy Step & Wave Early-Return**:
   - Uses disjoint pattern matching (BgState { layers, def_time, ctrl_defs, stage } = self) in step(), eliminating self.stage.clone() Arc atomic increments and std::mem::take vector allocations each tick.
   - Adds early-return zero-amplitude check s[0] == 0.0 in sin_wave(), bypassing transcendental .sin() calculations for static background layers.
@@ -179,7 +179,7 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 - **Wave 27 - In-Place Collision Boxes & Fast Animation Elem Start**:
   - Implements Fighter::fill_boxes using caller-provided scratch buffers, eliminating continuous Vec<Box4> allocations during reversal, hit, and projectile detection loops.
   - Replaces heap vector collection for p2clsnrequire single box checks with a zero-copy stack array slice.
-  - Adds if n <= 1 { return 0; } early-exit in lem_start to bypass iterator instantiation for the most common animation frame timing queries.
+  - Adds if n <= 1 { return 0; } early-exit in `elem_start` to bypass iterator instantiation for the most common animation frame timing queries.
 - **Wave 29 - Chunked Raster Pixmap Conversion & In-Order SFF RLE8 Decoding**:
   - Replaces per-pixel `extend_from_slice` calls in `raster::pixmap_to_image` with direct 4-byte chunk slice writes (`chunks_exact_mut(4)`).
   - Streamlines `decode_rle8` read sequence without extra index decrementing.
@@ -195,13 +195,13 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 
 ## SIMD ACT palette decoding & camera bounds fast-path
 
-- Vectorized ACT decoding: decode_act and ncode_act use s_chunks::<3>() and s_chunks_mut::<4>() to decode RGB triplets to RGBA in batches without bounds checks.
+- Vectorized ACT decoding: decode_act and `encode_act` use s_chunks::<3>() and s_chunks_mut::<4>() to decode RGB triplets to RGBA in batches without bounds checks.
 - Single-pass camera bounds: Match::update_camera computes all-root bounds (minx, maxx, highest) and live-root bounds (lo, hi) in a single iteration over self.roots(), eliminating redundant iterator scans.
 - Hoisted overlap bounding-box checks: Match::overlap hoists  coordinates into scalar registers before testing collision against  and replaces division by 2.0 with * 0.5 multiplication.
 
 ## Zero-allocation controller and trigger evaluation pipeline
 
-- Zero-alloc target indexing: `controllers::target_indices` returns a stack-allocated `([usize; 8], usize)` buffer instead of heap `Vec<usize>`, eliminating allocation across all target controllers (`targetstate`, `targetlifeadd`, `targetpoweradd`, `targetfacing`, `targetbind`, etc.).
+- Zero-alloc target indexing: `controllers::target_indices` returns a stack-allocated `Vec<usize>` buffer instead of heap `Vec<usize>`, eliminating allocation across all target controllers (`targetstate`, `targetlifeadd`, `targetpoweradd`, `targetfacing`, `targetbind`, etc.).
 - Zero-alloc AssertSpecial flag lookup: `flags::names_in` and `flags::lookup` work directly with borrowed `&str` and ASCII case-insensitive matching (`eq_ignore_ascii_case`), removing per-frame string allocations on shadow and status flags.
 - Stack-buffered velocity constant lookup: `triggers::Ctx::const_val` copies the key into a 64-byte stack array to query `.x` variants without heap `format!("{k}.x")`.
 - Typed variable assignments: `Match::assigns` records `AssignKind` enum instead of allocating a `String` on each trigger variable assignment.
@@ -215,21 +215,21 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 ## Collision box early exit, zero-alloc target slicing & indexed AI dispatch
 
 - Collision box query fast-path: In `fighter::boxes()`, frames with empty collision box definitions and no active collision modifiers immediately return `vec![]` without performing two size-override map queries or scaling math. Pre-multiplied scale vectors and single-XOR horizontal flips (`flip = fr.flip_h ^ (self.facing < 0.0)`) eliminate branch penalty on every box vertex.
-- Zero-alloc `p2clsnrequire` target slice: In `matchs::step_hits`, single required defender box indices borrow a 1-element slice `&d_boxes[req..req + 1]` directly rather than allocating a heap vector.
+- Zero-alloc `p2clsnrequire` target slice: In `Match::tick`, single required defender box indices borrow a 1-element slice `&d_boxes[req..req + 1]` directly rather than allocating a heap vector.
 - Indexed AI command dispatch: In `ai::Ai`, command definitions are indexed as `Vec<usize>` integers into `fighter.def.commands` instead of cloning full `CommandDef` trees with strings and vectors. Close and ranged attacks are partitioned during `init`, turning tick command selection into `O(1)` array indexing.
 - Vectorized straight-alpha pixmap conversion: `raster::pixmap_to_image` avoids integer divisions on opaque (`alpha == 255`) and transparent (`alpha == 0`) pixels with `as_chunks_mut::<4>()`.
 
 ## Pre-allocated SND decoding & zero-alloc command movelist filtering
 
-- Pre-allocated SND sound hash tables: `snd::decode_snd_checked` bounds capacity using `count.min(buf.len() / 16 + 1)` and preallocates both `out` and `seen` hash tables with that capacity, eliminating repeated hash table reallocations and rehashes across character audio decoding.
-- Static palette key resolution in loader: `loader::load_character` resolves character DEF palette overrides (`pal1`..`pal12`) using static string slice table `PAL_KEYS` rather than formatting 12 heap strings per character.
+- Pre-allocated SND sound hash tables: `snd::decode_snd_checked` bounds capacity using `count.min(8192)` and preallocates both `out` and `seen` hash tables with that capacity, eliminating repeated hash table reallocations and rehashes across character audio decoding.
+- Static palette key resolution in loader: `loader::load_mugen_char` resolves character DEF palette overrides (`pal1`..`pal12`) using static string slice table `PAL_KEYS` rather than formatting 12 heap strings per character.
 - Pre-allocated sprite deduplication: Pre-sizes `seen` and `unique` sprite vectors to `sff.sprites.len()`.
-- Filter-first zero-alloc movelist and AI command extraction: `loader::load_character` filters commands in-place with `eq_ignore_ascii_case` before allocating or cloning strings, removing dozens of heap allocations per loaded character.
+- Filter-first zero-alloc movelist and AI command extraction: `loader::load_mugen_char` filters commands in-place with `eq_ignore_ascii_case` before allocating or cloning strings, removing dozens of heap allocations per loaded character.
 
 ## In-place zero-alloc AIR animation and collision parser
 
 - Elimination of line-level `to_ascii_lowercase()` heap allocations: `air::parse_air` processes text lines directly with case-insensitive ASCII byte matching (`eq_ignore_ascii_case`), removing 5,000 to 20,000 heap string allocations per character `.air` file.
-- Stack-allocated collision box parser: `parse_box4` parses four coordinates directly into a fixed `[f32; 4]` array on the stack, eliminating `Vec<f32>` allocations per collision box.
+- Stack-allocated collision box parser: `parse_clsn_box` parses four coordinates directly into a fixed `[f32; 4]` array on the stack, eliminating `Vec<f32>` allocations per collision box.
 - Stack-buffered frame parameter tokenization: AnimFrame lines unpack up to 11 comma-separated parameters into a fixed `[&str; 11]` array without allocating `Vec<&str>`.
 - In-place flip and blend flag parsing: `fl` and `bl` flags are evaluated in-place without uppercase string allocation.
 
@@ -254,9 +254,23 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 
 - Single-lookup animation frame unpack in `advance_anim`: Unpacks `(total, loop_start, len, ft)` in a single tuple query on `self.anim()`, eliminating repeated HashMap lookups per animated fighter and explod each tick.
 - Empty size-override short-circuit: `fighter::c` immediately queries character constants when `self.size_overrides.is_empty()`, bypassing linear slice scans.
-- Stale target cleanup early continue: `matchs::step` skips target vector moves and retain passes whenever `self.fighters[k].targets.is_empty()`.
+- Stale target cleanup early continue: `Match::tick` skips target vector moves and retain passes whenever `self.fighters[k].targets.is_empty()`.
 - **Wave 42 - Fast-Path Palette Effects, Stack Frame Buffers & Zero-Alloc Sctrl Queries**:
   - PalParams::apply: Fast-path bypass for identity and non-hue/non-inverted color transformations, skipping trigonometry and unrolling color channels.
   - PalFx::from_controller: Zero heap allocations for controller parameter lookups using stack-buffered keys.
   - Match::tick: Eliminated per-tick Vec<usize> allocations for waken and 	ag_requests by using stack-allocated fixed arrays, and fused filter/decrement loops with 
 etain_mut.
+- **Wave 43 - Zero-Alloc Character Loader Path & In-Place Unquote**:
+  - `ini::unquote_str`: In-place slice borrowing without allocating new `String` instances for unquoted and clean strings.
+  - `loader::load_mugen_char`: Converted `fget` from returning `Option<String>` to `Option<&str>`, eliminating ~20 heap allocations per character load.
+  - `loader::local_size`: Stack-based parsing via `split_once(',')` replacing dynamic `nums` allocation.
+  - `cns::parse_cmd`: In-place `unquote_str` for command name and inputs.
+
+- **Wave 44 - Zero-Alloc AssignKind State Dispatch & Case-Insensitive Bitmasks**:
+  - `matchs::AssignKind`: Replaced dynamic `String` allocations in trigger variable assignments with a 1-byte enum `AssignKind`, cutting assignment tuple memory by 50% and eliminating per-assignment heap operations.
+  - `hitdef::state_mask` / `attr_kind_mask` / `guardflag_bits`: In-place case-insensitive ASCII byte folding without string allocations.
+  - `triggers::const_val`: Zero-alloc stack-buffered key lookup for `velocity.*.x` constants.
+
+- **Wave 45 - Explod Cache Array & Projectile Triangular Collision Sweeps**:
+  - `Match::update_explods`: Pre-indexed fighter position and pause states into a compact 8-element stack array, avoiding linear `Fighter` scans per explod.
+  - `Match::update_projectiles`: Stack-buffered frozen flags for up to 64 projectiles avoiding heap allocations, and triangular pair-wise collision iteration `(a + 1)..n` halving projectile collision checks.

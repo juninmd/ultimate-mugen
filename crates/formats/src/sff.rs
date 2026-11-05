@@ -147,6 +147,7 @@ struct V1Job<'a> {
     idx: usize,
     pcx: &'a [u8],
     h: crate::pcx::PcxHeader,
+    same_pal: bool,
 }
 
 /// SFF v1 layout:
@@ -164,7 +165,7 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
     let mut prev: Option<(Option<Arc<Vec<u8>>>, i32)> = None;
     let mut prev_adjacent = false;
 
-    let mut entries: Vec<(DecodedSprite, usize)> = Vec::with_capacity(count);
+    let mut entries: Vec<(DecodedSprite, usize, bool)> = Vec::with_capacity(count);
     let mut jobs: Vec<V1Job> = Vec::new();
 
     for i in 0..count {
@@ -183,7 +184,7 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
         let same_pal = r.u8(ofs + 18) != 0;
         let data_start = ofs + 32;
         let keep = wanted(spr.group, spr.index);
-        let mut decoded = false;
+        let mut has_data = false;
 
         if length > 0 && keep {
             let block_end = if next > data_start { next } else { data_start.saturating_add(length) }.min(buf.len());
@@ -193,17 +194,62 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
             }) {
                 spr.width = h.width;
                 spr.height = h.height;
+                has_data = true;
+                jobs.push(V1Job { idx: i, pcx, h, same_pal });
+            }
+        }
+        entries.push((spr, link, has_data));
+        ofs = next;
+    }
 
+    let decoded: Vec<(Arc<Vec<u8>>, usize)> = crate::par::map(&jobs, |j| {
+        if j.h.encoding == 1 {
+            let (px, end) = decode_pcx_rle(
+                j.pcx,
+                j.h.width,
+                j.h.height,
+                j.h.bytes_per_line,
+                PCX_HEADER_SIZE,
+                j.pcx.len(),
+            );
+            (Arc::new(px), end)
+        } else {
+            let px = raw_rows(
+                j.pcx,
+                j.h.width as usize,
+                j.h.height as usize,
+                j.h.bytes_per_line as usize,
+            );
+            let end = PCX_HEADER_SIZE + j.h.height as usize * j.h.bytes_per_line as usize;
+            (Arc::new(px), end)
+        }
+    });
+
+    let mut sprites: Vec<DecodedSprite> = Vec::with_capacity(entries.len());
+    let mut job_iter = jobs.into_iter().zip(decoded);
+    let mut next_job = job_iter.next();
+    for (mut spr, link, has_data) in entries {
+        let job = if has_data {
+            let (j, (px, end)) = next_job.take().expect("sff v1 job order");
+            next_job = job_iter.next();
+            Some((j, px, end))
+        } else {
+            None
+        };
+        if let Some((j, px, end)) = job {
+            let keep = wanted(spr.group, spr.index);
+            if keep {
+                spr.indexed = Some(px);
+                let pcx = j.pcx;
                 let mut pal: Option<Arc<Vec<u8>>> = None;
-                let inherited = if same_pal && prev_adjacent { prev.clone() } else { None };
+                let inherited = if j.same_pal && prev_adjacent { prev.clone() } else { None };
                 match inherited {
                     Some((ppal, pidx)) => {
                         pal = ppal.clone();
                         spr.palette_index = pidx;
                     }
                     None => {
-                        let po = find_pcx_palette(pcx, PCX_HEADER_SIZE);
-                        if let Some(po) = po {
+                        if let Some(po) = find_pcx_palette(pcx, end) {
                             pal = Some(Arc::new(read_rgb_palette(pcx, po)));
                         } else if prev_adjacent {
                             if let Some((ppal, pidx)) = &prev {
@@ -231,47 +277,8 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
                     }
                 }
                 spr.palette = pal;
-                decoded = true;
-                jobs.push(V1Job { idx: i, pcx, h });
             }
-        }
-        if decoded {
-            prev = Some((spr.palette.clone(), spr.palette_index));
-        }
-        prev_adjacent = decoded;
-        entries.push((spr, link));
-        ofs = next;
-    }
-
-    let decoded = crate::par::map(&jobs, |j| {
-        let px = if j.h.encoding == 1 {
-            let (px, _) = decode_pcx_rle(
-                j.pcx,
-                j.h.width,
-                j.h.height,
-                j.h.bytes_per_line,
-                PCX_HEADER_SIZE,
-                j.pcx.len(),
-            );
-            px
-        } else {
-            raw_rows(
-                j.pcx,
-                j.h.width as usize,
-                j.h.height as usize,
-                j.h.bytes_per_line as usize,
-            )
-        };
-        Arc::new(px)
-    });
-
-    for (j, px) in jobs.into_iter().zip(decoded) {
-        entries[j.idx].0.indexed = Some(px);
-    }
-
-    let mut sprites: Vec<DecodedSprite> = Vec::with_capacity(entries.len());
-    for (mut spr, link) in entries {
-        if spr.indexed.is_none() && wanted(spr.group, spr.index) {
+        } else if wanted(spr.group, spr.index) {
             if let Some(src) = sprites.get(link) {
                 spr.width = src.width;
                 spr.height = src.height;
@@ -281,6 +288,10 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
                 spr.palette_index = src.palette_index;
             }
         }
+        if spr.indexed.is_some() {
+            prev = Some((spr.palette.clone(), spr.palette_index));
+        }
+        prev_adjacent = spr.indexed.is_some();
         sprites.push(spr);
     }
 

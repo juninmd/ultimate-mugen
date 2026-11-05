@@ -92,6 +92,7 @@ pub struct AfterImage { pub time: i32, pub length: usize, pub trail: Vec<TrailPo
 pub struct MoveHitVars { pub target_id: i32, pub target_no: i32, pub spark_x: f32, pub spark_y: f32, pub corner_push: f32, pub hit_time: i64, pub overridden: bool }
 pub use crate::flags::asf;
 pub use crate::anim_fallback;
+pub use crate::anim_fallback::anim_fallback;
 
 #[derive(Clone)]
 pub struct Fighter {
@@ -193,8 +194,9 @@ impl Fighter {
         match self.anim() { None => 0, Some(a) if a.total_time < 0 => -1, Some(a) => self.anim_elapsed - a.total_time }
     }
     pub fn elem_start(&self, n: usize) -> i32 {
+        if n <= 1 { return 0; }
         let Some(a) = self.anim() else { return 0 };
-        a.frames.iter().take(n.saturating_sub(1)).map(|f| f.time.max(0)).sum()
+        a.frames.iter().take(n - 1).map(|f| f.time.max(0)).sum()
     }
     pub fn anim_elem_started(&self, n: i32) -> bool {
         self.elem as i32 + 1 == n && self.elem_time == 0 && (n > 1 || self.anim_elapsed == 0 || self.anim().is_some_and(|a| a.loop_start == 0))

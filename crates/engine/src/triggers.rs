@@ -56,7 +56,6 @@ impl<'a> Ctx<'a> {
                     return *c.get(key).unwrap_or(&0.0);
                 }
             }
-            return *c.get(&format!("{k}.x")).unwrap_or(&0.0);
         }
         if k == "data.defense" { return *c.get("data.defence").unwrap_or(&100.0); }
         if k.ends_with(".x") { if let Some(v) = c.get(&k[..k.len() - 2]) { return *v; } }
@@ -202,8 +201,8 @@ impl<'a> Host for Ctx<'a> {
             "hitdefattr" => {
                 let Some(hd) = f.hitdef.as_ref() else { return neg };
                 if f.move_type != 'A' { return neg; }
-                if v0.is_empty() || !v0.chars().all(|c| "SCAsca".contains(c)) { return neg; }
-                let ok_state = hd.attr_state.chars().any(|c| v0.chars().any(|v| v.eq_ignore_ascii_case(&c)));
+                if v0.is_empty() || !v0.bytes().all(|c| matches!(c, b'S' | b'C' | b'A' | b's' | b'c' | b'a')) { return neg; }
+                let ok_state = hd.attr_state.bytes().any(|c| v0.bytes().any(|v| v.eq_ignore_ascii_case(&c)));
                 ok_state && (values.len() == 1 || values[1..].iter().any(|v| attr_kind_match(v, &hd.attr_kind)))
             }
             "hitbyattr" => {
@@ -239,14 +238,9 @@ impl<'a> Host for Ctx<'a> {
         match bb { None => (happened == want) != neg, Some(v) => (happened == want && cmp(t as f64, op2.unwrap_or("="), v)) != neg }
     }
     fn assign(&self, name: &str, idx: i32, v: f64) -> f64 {
-        let kind = match name {
-            "var" => crate::matchs::VarKind::Var,
-            "fvar" => crate::matchs::VarKind::FVar,
-            "sysvar" => crate::matchs::VarKind::SysVar,
-            "sysfvar" => crate::matchs::VarKind::SysFVar,
-            _ => return if name == "var" || name == "sysvar" { (v as i32) as f64 } else { v },
-        };
-        self.m.assigns.borrow_mut().push((self.i, kind, idx, v));
+        if let Some(kind) = crate::matchs::AssignKind::parse(name) {
+            self.m.assigns.borrow_mut().push((self.i, kind, idx, v));
+        }
         if name == "var" || name == "sysvar" { (v as i32) as f64 } else { v }
     }
     fn trigger(&self, name: &str, args: &[Node], comp: Option<char>, raw: Option<&str>) -> f64 {

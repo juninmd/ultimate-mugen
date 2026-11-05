@@ -148,11 +148,18 @@ pub const MAX_EXPLODS: usize = 256;
 pub const MAX_PROJECTILES: usize = 256;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum VarKind {
-    Var,
-    FVar,
-    SysVar,
-    SysFVar,
+pub enum AssignKind { Var, FVar, SysVar, SysFVar }
+
+impl AssignKind {
+    pub fn parse(s: &str) -> Option<Self> {
+        match s {
+            "var" => Some(AssignKind::Var),
+            "fvar" => Some(AssignKind::FVar),
+            "sysvar" => Some(AssignKind::SysVar),
+            "sysfvar" => Some(AssignKind::SysFVar),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -212,7 +219,7 @@ pub struct Match {
     pub announce: Option<Announce>,
     pub rng: u32,
     pub next_id: u32,
-    pub assigns: RefCell<Vec<(usize, VarKind, i32, f64)>>,
+    pub assigns: RefCell<Vec<(usize, AssignKind, i32, f64)>>,
     pub tick_ids: Vec<u32>,
     pub scratch_c1: Vec<Box4>,
     pub scratch_c2: Vec<Box4>,
@@ -338,10 +345,10 @@ impl Match {
             let Some(f) = self.fighters.get_mut(i) else { continue };
             let u = idx as usize;
             match kind {
-                VarKind::Var if u < 60 => f.vars[u] = v as i32,
-                VarKind::FVar if u < 40 => f.fvars[u] = v,
-                VarKind::SysVar if u < 5 => f.sysvars[u] = v as i32,
-                VarKind::SysFVar if u < 5 => f.sysfvars[u] = v,
+                AssignKind::Var if u < 60 => f.vars[u] = v as i32,
+                AssignKind::FVar if u < 40 => f.fvars[u] = v,
+                AssignKind::SysVar if u < 5 => f.sysvars[u] = v as i32,
+                AssignKind::SysFVar if u < 5 => f.sysfvars[u] = v,
                 _ => {}
             }
         }
@@ -1594,6 +1601,14 @@ impl Match {
     fn update_explods(&mut self, paused: bool) {
         if self.explods.is_empty() { return; }
         let ps = self.pause.as_ref().map(|p| p.is_super);
+        let mut f_info = [(0u32, false, V2::default(), 0.0f32); 8];
+        let f_len = self.fighters.len().min(8);
+        for i in 0..f_len {
+            let f = &self.fighters[i];
+            f_info[i] = (f.id, f.hit_pause > 0 || f.hit_shake > 0, f.pos, f.facing);
+        }
+        let info = &f_info[..f_len];
+        let all_in_info = self.fighters.len() <= 8;
         let fighters = &self.fighters;
         self.explods.retain_mut(|e| {
             if paused {
@@ -1601,9 +1616,19 @@ impl Match {
                 if !allowed { return true; }
                 if ps == Some(true) { e.super_move -= 1; } else { e.pause_move -= 1; }
             }
-            let owner_hit_pause = fighters.iter().find(|f| f.id == e.owner).is_some_and(|f| f.hit_pause > 0 || f.hit_shake > 0);
+            let owner_hit_pause = if all_in_info {
+                info.iter().find(|i| i.0 == e.owner).map(|i| i.1).unwrap_or(false)
+            } else {
+                fighters.iter().find(|f| f.id == e.owner).is_some_and(|f| f.hit_pause > 0 || f.hit_shake > 0)
+            };
             if owner_hit_pause && !e.ignore_hit_pause { return true; }
-            let bound = if e.screen { None } else { e.bind_to.and_then(|b| fighters.iter().find(|f| f.id == b)).map(|f| (f.pos, f.facing)) };
+            let bound = if e.screen {
+                None
+            } else if all_in_info {
+                e.bind_to.and_then(|b| info.iter().find(|i| i.0 == b)).map(|i| (i.2, i.3))
+            } else {
+                e.bind_to.and_then(|b| fighters.iter().find(|f| f.id == b)).map(|f| (f.pos, f.facing))
+            };
             e.time += 1;
             e.cur.advance();
             match bound {
@@ -1729,11 +1754,17 @@ impl Match {
         let super_pause = self.pause.as_ref().is_some_and(|p| p.is_super);
         let (left, right) = (self.camera.x - self.view_w / 2.0, self.camera.x + self.view_w / 2.0);
         let (stage_l, stage_r) = (self.stage.bound_left - self.view_w / 2.0, self.stage.bound_right + self.view_w / 2.0);
-        let mut frozen = vec![false; self.projectiles.len()];
+        let mut frozen_buf = [false; 64];
+        let n = self.projectiles.len();
+        let use_stack = n <= frozen_buf.len();
+        let mut frozen_heap = if !use_stack { vec![false; n] } else { vec![] };
         for (k, p) in self.projectiles.iter_mut().enumerate() {
             if paused {
                 let budget = if super_pause { &mut p.super_move } else { &mut p.pause_move };
-                if *budget <= 0 { frozen[k] = true; continue; }
+                if *budget <= 0 {
+                    if use_stack { frozen_buf[k] = true; } else { frozen_heap[k] = true; }
+                    continue;
+                }
                 *budget -= 1;
             }
             p.cur.advance(); p.time += 1;
@@ -1750,9 +1781,9 @@ impl Match {
             if p.pos.y < p.height_bound[0] || p.pos.y > p.height_bound[1] { p.remove = true; }
             if p.remove_time >= 0 && p.time >= p.remove_time { let a = p.rem_anim; Self::kill_proj(p, a); }
         }
-        let n = self.projectiles.len();
-        for a in 0..n { for b in 0..n {
-            if a == b || frozen[a] || frozen[b] { continue; }
+        let is_frozen = |idx: usize| if use_stack { frozen_buf[idx] } else { frozen_heap[idx] };
+        for a in 0..n { for b in (a + 1)..n {
+            if is_frozen(a) || is_frozen(b) { continue; }
             let (pa, pb) = (&self.projectiles[a], &self.projectiles[b]);
             if pa.dying || pb.dying || pa.remove || pb.remove || pa.side == pb.side { continue; }
             let ba: Vec<Box4> = Self::proj_boxes(pa, 1).into_iter().chain(Self::proj_boxes(pa, 2)).collect();
@@ -1769,7 +1800,7 @@ impl Match {
             }
         } }
         for pi in 0..self.projectiles.len() {
-            if frozen[pi] { continue; }
+            if is_frozen(pi) { continue; }
             for d in 0..self.fighters.len() {
                 let p = &self.projectiles[pi];
                 if p.dying || p.remove || p.miss_cd > 0 { break; }

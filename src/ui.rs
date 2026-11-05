@@ -618,12 +618,12 @@ impl Ui {
                 c,
             );
         }
-        self.text(label, x, y + 36.0, 18.0, hex("#d8d0f0"), Align::Left, false);
+        self.text(label, x, y + 28.0, 15.0, hex("#d8d0f0"), Align::Left, false);
         self.text(
             &format!("{}%", (p * 100.0) as i32),
             x + w,
-            y + 36.0,
-            18.0,
+            y + 28.0,
+            15.0,
             hex("#ffcc33"),
             Align::Right,
             true,

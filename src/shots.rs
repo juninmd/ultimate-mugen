@@ -10,6 +10,7 @@ async fn frames(app: &mut App, n: usize) {
 }
 async fn screen(app: &mut App, dir: &str, name: &str, warm: usize) {
     frames(app, warm).await;
+    app.trans = 0.0;
     app.frame().await;
     get_screen_data().export_png(&format!("{dir}/{name}.png"));
     println!("shot {name}");

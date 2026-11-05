@@ -152,3 +152,8 @@ Match evaluation in `crates/engine/src/matchs.rs`, `crates/engine/src/triggers.r
 ## Pre-allocated PCM Audio Channel Copying
 
 In `src/sound_mix.rs:decode`, audio frame decoding calculates packet frame capacity upfront and calls `out.frames.reserve(count)`, eliminating repeated geometric vector reallocations during packet sample consumption. A dedicated mono branch (`ch == 1`) streams frames without slice chunking, and stereo decoding utilizes `chunks_exact(ch)` to eliminate bounds checks. Warm-run decode allocations dropped to 1,175 per 30-second audio stream.
+- **Wave 23 - Bytecode Inline Direct Jump Table & Host Slice Dispatch**:
+  - Inlines frequent arithmetic and relational operations (Add, Sub, MulF, MulI, DivF, DivI, Eq, Ne, Lt, Le, Gt, Ge, BitAnd, BitOr, BitXor, Xor) directly into 
+un_slice's outer match table, eliminating intermediate function calls and closure lookups.
+  - Slices self.host upfront in 
+un_slice, reducing struct dereference overhead on each trigger and expression resolution.

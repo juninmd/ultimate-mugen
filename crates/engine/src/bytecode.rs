@@ -416,6 +416,7 @@ impl Code {
         let mut sp = 0usize;
         let mut pc = start;
         let ops = self.ops.as_slice();
+        let host = self.host.as_slice();
         let ib = |c: bool| c as i32 as f64;
         let it = |x: f64| x.trunc() as i64;
         while pc < end {
@@ -425,13 +426,13 @@ impl Code {
                     sp += 1;
                 }
                 Op::Host(i) => {
-                    s[sp] = eval(&self.host[i as usize], h);
+                    s[sp] = eval(&host[i as usize], h);
                     sp += 1;
                 }
                 Op::Trig0(i) => {
                     if let Node::Trig {
                         name, comp, raw, ..
-                    } = &self.host[i as usize]
+                    } = &host[i as usize]
                     {
                         s[sp] = h.trigger0(name, *comp, raw.as_deref());
                     } else {
@@ -448,13 +449,13 @@ impl Code {
                     };
                 }
                 Op::CmpStr(i) => {
-                    s[sp] = match &self.host[i as usize] {
+                    s[sp] = match &host[i as usize] {
                         Node::CmpStr { name, neg, values } => ib(h.cmpstr(name, *neg, values)),
                         _ => 0.0,
                     };
                     sp += 1;
                 }
-                Op::Special { host, has_b } => {
+                Op::Special { host: host_idx, has_b } => {
                     let bv = if has_b {
                         sp -= 1;
                         Some(s[sp])
@@ -462,7 +463,7 @@ impl Code {
                         None
                     };
                     let av = s[sp - 1];
-                    s[sp - 1] = match &self.host[host as usize] {
+                    s[sp - 1] = match &host[host_idx as usize] {
                         Node::Special { name, op, op2, .. } => {
                             ib(h.special(name, op, av, *op2, bv))
                         }
@@ -472,7 +473,7 @@ impl Code {
                 Op::Assign(i) => {
                     sp -= 1;
                     let (idx, val) = (s[sp - 1] as i32, s[sp]);
-                    s[sp - 1] = match &self.host[i as usize] {
+                    s[sp - 1] = match &host[i as usize] {
                         Node::Trig { name, .. } => h.assign(name, idx, val),
                         _ => val,
                     };
@@ -484,7 +485,7 @@ impl Code {
                     } else {
                         None
                     };
-                    let name = match &self.host[kind as usize] {
+                    let name = match &host[kind as usize] {
                         Node::Trig { name, .. } => name.as_str(),
                         _ => "",
                     };
@@ -594,6 +595,135 @@ impl Code {
                     let inside = (if lo_inc { v >= l } else { v > l })
                         && (if hi_inc { v <= u } else { v < u });
                     s[sp - 1] = ib(inside != neg);
+                }
+                Op::Add => {
+                    sp -= 1;
+                    s[sp - 1] += s[sp];
+                }
+                Op::Sub => {
+                    sp -= 1;
+                    s[sp - 1] -= s[sp];
+                }
+                Op::MulF => {
+                    sp -= 1;
+                    s[sp - 1] *= s[sp];
+                }
+                Op::MulI => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        it(x).wrapping_mul(it(y)) as i32 as f64
+                    };
+                }
+                Op::DivF => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if y == 0.0 {
+                        0.0
+                    } else {
+                        x / y
+                    };
+                }
+                Op::DivI => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if y == 0.0 {
+                        0.0
+                    } else {
+                        (x / y).trunc()
+                    };
+                }
+                Op::Eq => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        ib(x == y)
+                    };
+                }
+                Op::Ne => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        ib(x != y)
+                    };
+                }
+                Op::Lt => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        ib(x < y)
+                    };
+                }
+                Op::Le => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        ib(x <= y)
+                    };
+                }
+                Op::Gt => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        ib(x > y)
+                    };
+                }
+                Op::Ge => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        ib(x >= y)
+                    };
+                }
+                Op::BitAnd => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        (it(x) & it(y)) as f64
+                    };
+                }
+                Op::BitOr => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        (it(x) | it(y)) as f64
+                    };
+                }
+                Op::BitXor => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        (it(x) ^ it(y)) as f64
+                    };
+                }
+                Op::Xor => {
+                    sp -= 1;
+                    let (x, y) = (s[sp - 1], s[sp]);
+                    s[sp - 1] = if x.is_nan() || y.is_nan() {
+                        f64::NAN
+                    } else {
+                        ib((x != 0.0) != (y != 0.0))
+                    };
                 }
                 op => {
                     sp -= 1;

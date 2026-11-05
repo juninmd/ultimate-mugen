@@ -152,3 +152,8 @@ O trait `Host` em `crates/engine/src/expr.rs` e a máquina virtual em `crates/en
 ## Cópia Pré-alocada de Canais de Áudio PCM
 
 Em `src/sound_mix.rs:decode`, a decodificação de quadros de áudio calcula a capacidade do pacote antecipadamente e invoca `out.frames.reserve(count)`, eliminando realocações geométricas repetidas do vetor durante a leitura de amostras. Um fluxo dedicado para áudio mono (`ch == 1`) transfere quadros sem divisão de fatias, e a decodificação estéreo utiliza `chunks_exact(ch)` para eliminar verificações de limites. As alocações em execução aquecida caíram para 1.175 por fluxo de áudio de 30 segundos.
+- **Onda 23 - Tabela de Jump Direta Inline do Bytecode e Dispatch com Host Fatiado**:
+  - Aplica inline das operações aritméticas e relacionais mais frequentes (Add, Sub, MulF, MulI, DivF, DivI, Eq, Ne, Lt, Le, Gt, Ge, BitAnd, BitOr, BitXor, Xor) diretamente no loop de casamento externo de 
+un_slice, eliminando chamadas intermediárias de função e closures.
+  - Fatia self.host antecipadamente em 
+un_slice, reduzindo overhead de desreferenciação de struct a cada resolução de gatilho e expressão.

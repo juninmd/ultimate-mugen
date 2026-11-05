@@ -157,3 +157,7 @@ In `src/sound_mix.rs:decode`, audio frame decoding calculates packet frame capac
 un_slice's outer match table, eliminating intermediate function calls and closure lookups.
   - Slices self.host upfront in 
 un_slice, reducing struct dereference overhead on each trigger and expression resolution.
+- **Wave 24 - Stage Background Zero-Copy Step & Wave Early-Return**:
+  - Uses disjoint pattern matching (BgState { layers, def_time, ctrl_defs, stage } = self) in step(), eliminating self.stage.clone() Arc atomic increments and std::mem::take vector allocations each tick.
+  - Adds early-return zero-amplitude check s[0] == 0.0 in sin_wave(), bypassing transcendental .sin() calculations for static background layers.
+  - Skips animation loop start summation when .loop_start == 0.

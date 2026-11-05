@@ -157,3 +157,7 @@ Em `src/sound_mix.rs:decode`, a decodificação de quadros de áudio calcula a c
 un_slice, eliminando chamadas intermediárias de função e closures.
   - Fatia self.host antecipadamente em 
 un_slice, reduzindo overhead de desreferenciação de struct a cada resolução de gatilho e expressão.
+- **Onda 24 - Passo de Fundo de Cenário Sem Cópias e Retorno Rápido de Ondas**:
+  - Utiliza casamento de padrões disjunto (BgState { layers, def_time, ctrl_defs, stage } = self) em step(), eliminando incrementos atômicos de self.stage.clone() em Arc e alocações de std::mem::take a cada tick.
+  - Adiciona retorno rápido para amplitude zero s[0] == 0.0 em sin_wave(), evitando cálculos transcendentais de .sin() para camadas estáticas de fundo.
+  - Ignora a soma de quadros de início de repetição de animação quando .loop_start == 0.

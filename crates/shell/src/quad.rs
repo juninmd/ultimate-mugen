@@ -5,7 +5,7 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll, Waker};
 use std::sync::Arc;
-use ume_render::{PALETTE_ROWS, RGBA_SPRITE};
+use ume_render::RGBA_SPRITE;
 
 pub use crate::PostParams;
 pub use glam::{vec2, vec3, vec4, Vec2, Vec3, Vec4};
@@ -17,7 +17,6 @@ thread_local! {
     static RNG: Cell<u64> = const { Cell::new(0x9e37_79b9_7f4a_7c15) };
     static GENERATION: Cell<u32> = const { Cell::new(0) };
     static ATLAS_FULL: Cell<bool> = const { Cell::new(false) };
-    static PALETTES_USED: Cell<u32> = const { Cell::new(0) };
     static INDEX_GENERATION: Cell<u32> = const { Cell::new(0) };
     static INDEX_FULL: Cell<bool> = const { Cell::new(false) };
     static KEY_QUEUE: RefCell<Vec<KeyCode>> = const { RefCell::new(Vec::new()) };
@@ -53,7 +52,7 @@ fn index_generation() -> u32 { INDEX_GENERATION.with(|g| g.get()) }
 
 fn reset_index_atlas(f: &mut Frame) {
     f.gpu.index_atlas.clear();
-    PALETTES_USED.with(|p| p.set(0));
+    f.gpu.palette_rows.clear();
     INDEX_GENERATION.with(|g| g.set(g.get().wrapping_add(1)));
     INDEX_FULL.with(|a| a.set(false));
 }
@@ -310,39 +309,17 @@ impl IndexedTexture {
 
     pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == index_generation()) }
 
+    /// Bytes this sheet occupies in the index atlas (one byte per pixel).
+    pub fn pixels_len(&self) -> u64 { self.0.w as u64 * self.0.h as u64 }
+
     pub fn prefetch(&self, max_occupancy: f32) -> bool {
         with(|f| self.is_resident() || (f.gpu.index_atlas.occupancy() < max_occupancy && self.rect(f).is_some()))
     }
 }
 
-struct PaletteInner { slot: Cell<Option<(u32, u32)>>, colors: Box<[[u8; 4]; 256]> }
+mod palette;
 
-#[derive(Clone)]
-pub struct Palette(Rc<PaletteInner>);
-
-impl Palette {
-    pub fn from_rgba(pal: &[u8]) -> Palette {
-        let mut colors = Box::new([[0u8; 4]; 256]);
-        for (i, c) in colors.iter_mut().enumerate().skip(1) {
-            let at = |k: usize| pal.get(i * 4 + k).copied().unwrap_or(0);
-            *c = [at(0), at(1), at(2), 255];
-        }
-        Palette(Rc::new(PaletteInner { slot: Cell::new(None), colors }))
-    }
-
-    fn row(&self, f: &mut Frame) -> Option<u32> {
-        let gen = index_generation();
-        if let Some((g, row)) = self.0.slot.get() { if g == gen { return Some(row); } }
-        let row = PALETTES_USED.with(|p| p.get());
-        if row >= PALETTE_ROWS { INDEX_FULL.with(|a| a.set(true)); return None; }
-        PALETTES_USED.with(|p| p.set(row + 1));
-        f.gpu.renderer.set_palette(&f.gpu.queue, row, &self.0.colors);
-        self.0.slot.set(Some((gen, row)));
-        Some(row)
-    }
-
-    pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == index_generation()) }
-}
+pub use palette::Palette;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vertex { pub position: Vec3, pub uv: Vec2, pub color: [u8; 4], pub normal: Vec4 }

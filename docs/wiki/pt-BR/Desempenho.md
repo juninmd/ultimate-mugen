@@ -341,3 +341,25 @@ etain_mut.
   - `matchs::run_state`: Conversao da consulta a `common` em fallback preguicoso (`let fallback;`), ignorando clones de `self.common` em todos os estados negativos (-3, -2, -1) e estados definidos pelo personagem.
   - `matchs::change_state`: Substituicao do clone ansioso de `self.common` por igualdade de ponteiro `&self.common` e fallback sob demanda.
   - `matchs::tick`: Eliminacao do clone por quadro de `f.st_def` no loop de override de fisica atraves de extracao escalar de `Option<char>`.
+
+- **Onda 57 - Parsing INI Sem Alocacao de Linhas, Controladores e Estados Pre-Dimensionados**:
+  - `ini::parse_ini_no_lines`: Substituicao do parsing de INI que copiava linhas em `parse_states`, `parse_constants`, `parse_cmd` e na resolucao de DEF do `loader.rs` por `parse_ini_no_lines`, evitando dezenas de milhares de alocacoes de `String` descartadas por personagem.
+  - `ini::parse_ini_opt`: Pre-alocacao do vetor de secoes com `text.len() / 256 + 4` e das entradas de cada secao com capacidade 8.
+  - `cns::build_controller`: Pre-alocacao de `params` do controlador com a capacidade exata de `s.entries.len()`.
+  - `cns::parse_states`: Pre-alocacao de `StateDef` com capacidade de 16 controladores e parametros dimensionados pelas entradas da secao, eliminando realocacoes dinamicas na compilacao de estados.
+
+- **Onda 58 - Normalizacao de Caminhos em Pilha, Atalhos Rapidos de Comandos e Simbolos Copy**:
+  - `vfs::with_norm_path`: Buffer de 512 bytes em pilha para normalizacao e remocao de aspas de caminhos, eliminando alocacoes na heap em todas as consultas de recursos de `vfs::resolve`.
+  - `commands::CmdSymbol`: Implementacao de `Copy` e `PartialEq` para manipulacao binaria de simbolos de 20 bytes.
+  - `commands::held`: Verificacao antecipada de mascara de botoes antes de consultas de direcao relativa e orientacao, descartando botoes inativos na primeira instrucao.
+  - `commands::fires`: Avaliacao de `now & !prev` antes de ler ticks anteriores do historico (`p2`, `p3`), evitando sondagens de historico em frames sem disparo.
+
+- **Onda 59 - Escala em Cache no Preenchimento de Caixas e Poda AABB Multicaixas**:
+  - `fighter::fill_boxes`: Ignoradas consultas dinamicas por string `size.*` quando nao ha overrides de tamanho, lendo `def.scale_x` e `def.scale_y` diretamente.
+  - `matchs::overlap`: Adicionada saida antecipada por bounding box composto (AABB) em colisoes de grupos multicaixas (`a.len() > 1 || b.len() > 1`), eliminando testes $O(N 	imes M)$ em pares disjuntos.
+
+- **Onda 60 - Tokenizacao de Quadros AIR Sem Alocacao e Buffers Pre-Dimensionados**:
+  - `air::parse_air`: Substituicao da alocacao em heap de `Vec<&str>` por quadro por um array fixo em pilha `[""; 12]`, eliminando alocacoes dinamicas de vetores em todos os quadros de animacao.
+  - `air::parse_air`: Substituicao de alocacoes `String` via `to_ascii_uppercase()` para flags e modos de blend por inspecao em nivel de byte (`fl.as_bytes()`, `bl.as_bytes()`).
+  - `air::parse_as_d`: Substituicao de busca por strings por varredura de bytes sem distincao de maiusculas/minusculas para parametros alfa `AS...D...`.
+  - `air::parse_air`: Pre-alocacao do vetor de quadros com `Vec::with_capacity(8)` e do HashMap de animacoes com `text.len() / 512 + 16`.

@@ -173,16 +173,18 @@ fn parse_clsn_box(line: &str) -> Option<(u8, usize)> {
 fn parse_as_d(bl: &str) -> Option<(i32, i32)> {
     let b = bl.as_bytes();
     let mut from = 0;
-    while let Some(p) = bl[from..].find("AS") {
-        let s = from + p + 2;
-        let e = skip_digits(b, s);
-        if e > s && b.get(e) == Some(&b'D') {
-            let e2 = skip_digits(b, e + 1);
-            if e2 > e + 1 {
-                return Some((parse_i32(&bl[s..e])?, parse_i32(&bl[e + 1..e2])?));
+    while from + 2 <= b.len() {
+        if (b[from] == b'A' || b[from] == b'a') && (b[from + 1] == b'S' || b[from + 1] == b's') {
+            let s = from + 2;
+            let e = skip_digits(b, s);
+            if e > s && b.get(e).map(|c| c.to_ascii_uppercase()) == Some(b'D') {
+                let e2 = skip_digits(b, e + 1);
+                if e2 > e + 1 {
+                    return Some((parse_i32(&bl[s..e])?, parse_i32(&bl[e + 1..e2])?));
+                }
             }
         }
-        from = from + p + 1;
+        from += 1;
     }
     None
 }
@@ -195,7 +197,7 @@ fn finish(cur: &mut Option<Animation>, anims: &mut HashMap<i32, Animation>) {
 }
 
 pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
-    let mut anims: HashMap<i32, Animation> = HashMap::new();
+    let mut anims: HashMap<i32, Animation> = HashMap::with_capacity(text.len() / 512 + 16);
     let mut cur: Option<Animation> = None;
     let mut def1: Vec<Box4> = Vec::new();
     let mut def2: Vec<Box4> = Vec::new();
@@ -210,20 +212,28 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
         }
         if starts_with_number(line) {
             if let Some(anim) = cur.as_mut() {
-                let p: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
-                let at = |i: usize| p.get(i).copied().unwrap_or("");
-                let fl = at(5).to_ascii_uppercase();
-                let bl = at(6).to_ascii_uppercase();
+                let mut p = [""; 12];
+                let mut count = 0;
+                for s in line.split(',') {
+                    if count < 12 {
+                        p[count] = s.trim();
+                        count += 1;
+                    }
+                }
+                let at = |i: usize| if i < count { p[i] } else { "" };
+                let fl = at(5);
+                let bl = at(6);
+                let bl_b = bl.as_bytes();
                 let mut blend = Blend::None;
                 let mut alpha = None;
-                if bl.starts_with("A1") {
+                if bl.len() >= 2 && (bl_b[0] == b'A' || bl_b[0] == b'a') && bl_b[1] == b'1' {
                     blend = Blend::Add1;
-                } else if bl.starts_with("AS") {
+                } else if bl.len() >= 2 && (bl_b[0] == b'A' || bl_b[0] == b'a') && (bl_b[1] == b'S' || bl_b[1] == b's') {
                     blend = Blend::Add;
-                    alpha = parse_as_d(&bl);
-                } else if bl.starts_with('A') {
+                    alpha = parse_as_d(bl);
+                } else if !bl.is_empty() && (bl_b[0] == b'A' || bl_b[0] == b'a') {
                     blend = Blend::Add;
-                } else if bl.starts_with('S') {
+                } else if !bl.is_empty() && (bl_b[0] == b'S' || bl_b[0] == b's') {
                     blend = Blend::Sub;
                 }
                 let fnum = |s: &str, d: f32| match parse_float(s) {
@@ -231,14 +241,15 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
                     _ => d,
                 };
                 let opt = |i: usize, d: f32| if at(i).is_empty() { d } else { fnum(at(i), d) };
+                let fl_b = fl.as_bytes();
                 let frame = AnimFrame {
                     group: parse_i32(at(0)).unwrap_or(0),
                     index: parse_i32(at(1)).unwrap_or(0),
                     x: fnum(at(2), 0.0),
                     y: fnum(at(3), 0.0),
                     time: parse_i32(at(4)).unwrap_or(1),
-                    flip_h: fl.contains('H'),
-                    flip_v: fl.contains('V'),
+                    flip_h: fl_b.iter().any(|&c| c == b'H' || c == b'h'),
+                    flip_v: fl_b.iter().any(|&c| c == b'V' || c == b'v'),
                     blend,
                     alpha,
                     xscale: opt(7, 1.0),
@@ -255,7 +266,7 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
         if line.starts_with('[') {
             finish(&mut cur, &mut anims);
             if let Some(id) = parse_begin_action(line) {
-                cur = Some(Animation { id, frames: Vec::new(), loop_start: 0, total_time: 0 });
+                cur = Some(Animation { id, frames: Vec::with_capacity(8), loop_start: 0, total_time: 0 });
             }
             def1.clear();
             def2.clear();
@@ -268,10 +279,10 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
         if let Some((kind, is_default)) = parse_clsn_header(line) {
             pending = Some((kind, is_default));
             match (kind, is_default) {
-                (1, true) => def1 = Vec::new(),
-                (2, true) => def2 = Vec::new(),
-                (1, false) => next1 = Some(Vec::new()),
-                _ => next2 = Some(Vec::new()),
+                (1, true) => def1 = Vec::with_capacity(4),
+                (2, true) => def2 = Vec::with_capacity(4),
+                (1, false) => next1 = Some(Vec::with_capacity(4)),
+                _ => next2 = Some(Vec::with_capacity(4)),
             }
             continue;
         }

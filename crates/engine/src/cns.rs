@@ -2,12 +2,12 @@
 use crate::chardef::{next_uid, safe_expr, Controller, Param, StateDef};
 use crate::commands::{parse_command, CommandDef};
 use std::collections::{HashMap, HashSet};
-use ume_formats::ini::{parse_ini, unquote_str, Section};
+use ume_formats::ini::{parse_ini_no_lines, unquote_str, Section};
 
 pub fn build_controller(s: &Section) -> Option<Controller> {
     let kind = s.get("type")?.trim().to_ascii_lowercase();
     if kind.is_empty() { return None; }
-    let mut c = Controller { kind, label: s.name.clone(), trigger_all: vec![], triggers: vec![], params: vec![], persistent: 1, ignore_hitpause: false, uid: next_uid() };
+    let mut c = Controller { kind, label: s.name.clone(), trigger_all: vec![], triggers: vec![], params: Vec::with_capacity(s.entries.len()), persistent: 1, ignore_hitpause: false, uid: next_uid() };
     for (k, v) in &s.entries {
         if k == "type" { continue; }
         if k == "triggerall" { c.trigger_all.push(safe_expr(v)); continue; }
@@ -28,7 +28,7 @@ pub fn build_controller(s: &Section) -> Option<Controller> {
 pub fn parse_states(text: &str, into: &mut HashMap<i32, StateDef>, override_existing: bool) {
     let mut cur: Option<i32> = None;
     let mut skip = false;
-    for s in parse_ini(text) {
+    for s in parse_ini_no_lines(text) {
         let ln = s.lname.trim();
         if let Some(rest) = ln.strip_prefix("statedef") {
             let id: i32 = rest.trim().split(|c: char| !(c == '-' || c.is_ascii_digit())).next().and_then(|x| x.parse().ok()).unwrap_or(i32::MIN);
@@ -36,7 +36,7 @@ pub fn parse_states(text: &str, into: &mut HashMap<i32, StateDef>, override_exis
             if into.contains_key(&id) && !override_existing && id >= 0 { skip = true; cur = None; continue; }
             skip = false;
             if !(id < 0 && into.contains_key(&id)) {
-                into.insert(id, StateDef { id, params: vec![], controllers: vec![] });
+                into.insert(id, StateDef { id, params: Vec::with_capacity(s.entries.len()), controllers: Vec::with_capacity(16) });
             }
             let sd = into.get_mut(&id).unwrap();
             for (k, v) in &s.entries { sd.params.push((k.clone(), Param::new(v))); }
@@ -53,7 +53,7 @@ pub fn parse_states(text: &str, into: &mut HashMap<i32, StateDef>, override_exis
 }
 
 pub fn parse_constants(text: &str, into: &mut HashMap<String, f64>, provided: &mut HashSet<String>) {
-    for s in parse_ini(text) {
+    for s in parse_ini_no_lines(text) {
         let sec = s.lname.as_str();
         if !["data", "size", "velocity", "movement", "constants"].contains(&sec) { continue; }
         for (k, v) in &s.entries {
@@ -100,7 +100,7 @@ fn pause_buffer_of(s: &Section) -> Option<i32> {
 }
 
 pub fn parse_cmd(text: &str) -> (Vec<CommandDef>, HashMap<i32, StateDef>) {
-    let secs = parse_ini(text);
+    let secs = parse_ini_no_lines(text);
     let (mut dt, mut db, mut dp) = (15, 1, 0);
     if let Some(d) = secs.iter().find(|s| s.lname == "defaults") {
         dt = d.get("command.time").and_then(|v| v.trim().parse().ok()).unwrap_or(15);

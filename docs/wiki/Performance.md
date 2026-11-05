@@ -345,3 +345,25 @@ etain_mut.
   - `matchs::run_state`: Converted `common` lookup into a lazy fallback (`let fallback;`), bypassing `self.common.clone()` on all negative states (-3, -2, -1) and every character-defined state.
   - `matchs::change_state`: Replaced eager `self.common.clone()` with reference pointer equality `&self.common` and lazy state definition fallback.
   - `matchs::tick`: Replaced per-frame `f.st_def.clone()` in physics override loop with scalar `Option<char>` extraction.
+
+- **Wave 57 - Non-Allocating INI Parsing, Pre-Allocated Controllers & State Sizing**:
+  - `ini::parse_ini_no_lines`: Replaced line-allocating INI parsing in `parse_states`, `parse_constants`, `parse_cmd`, and `loader.rs` character DEF resolution with `parse_ini_no_lines`, avoiding tens of thousands of unused `String` line allocations per character.
+  - `ini::parse_ini_opt`: Pre-allocated section output vector with `text.len() / 256 + 4` and section entries with capacity 8.
+  - `cns::build_controller`: Pre-allocated controller `params` with capacity matching `s.entries.len()`.
+  - `cns::parse_states`: Pre-allocated `StateDef` with `controllers` capacity 16 and `params` capacity matching section entries, eliminating dynamic reallocation during state compilation.
+
+- **Wave 58 - Stack-Buffered Path Normalization, Fast Command Short-Circuits & Copy Symbols**:
+  - `vfs::with_norm_path`: Stack-allocated 512-byte buffer for path normalization and unquoting, eliminating heap allocation across all resource lookups in `vfs::resolve`.
+  - `commands::CmdSymbol`: Derived `Copy` and `PartialEq` for 20-byte bitwise symbol handling.
+  - `commands::held`: Early button bitmask check before invoking relative direction and facing lookups, short-circuiting inactive buttons on the first instruction.
+  - `commands::fires`: Evaluated `now & !prev` before reading older history ticks (`p2`, `p3`), skipping multi-tick history probes on non-firing frames.
+
+- **Wave 59 - Cached Scale in Box Filling & Multi-Box AABB Collision Pruning**:
+  - `fighter::fill_boxes`: Bypassed dynamic `size.*` string queries when no size overrides exist, reading `def.scale_x` and `def.scale_y` directly.
+  - `matchs::overlap`: Added composite axis-aligned bounding box early exit when checking multi-box collision groups (`a.len() > 1 || b.len() > 1`), eliminating $O(N 	imes M)$ pairwise tests on disjoint collision clusters.
+
+- **Wave 60 - Zero-Alloc AIR Frame Tokenization & Pre-Sized Animation Buffers**:
+  - `air::parse_air`: Replaced per-frame `Vec<&str>` heap allocation with a fixed 12-element stack array `[""; 12]`, eliminating dynamic vector allocations across all animation frames.
+  - `air::parse_air`: Replaced `to_ascii_uppercase()` String allocations for flags and blend modes with zero-alloc byte-level inspection (`fl.as_bytes()`, `bl.as_bytes()`).
+  - `air::parse_as_d`: Replaced string searching with case-insensitive byte scanning for `AS...D...` alpha parameters.
+  - `air::parse_air`: Pre-allocated animation frames vector with `Vec::with_capacity(8)` and the animation HashMap with `text.len() / 512 + 16`.

@@ -1110,6 +1110,28 @@ impl Match {
 
     // ---------------------------------------------------------------- hits
     pub fn overlap(a: &[Box4], b: &[Box4]) -> Option<(f32, f32)> {
+        if a.is_empty() || b.is_empty() {
+            return None;
+        }
+        if a.len() > 1 || b.len() > 1 {
+            let (mut ax0, mut ay0, mut ax2, mut ay2) = (a[0][0], a[0][1], a[0][2], a[0][3]);
+            for x in &a[1..] {
+                ax0 = ax0.min(x[0]);
+                ay0 = ay0.min(x[1]);
+                ax2 = ax2.max(x[2]);
+                ay2 = ay2.max(x[3]);
+            }
+            let (mut bx0, mut by0, mut bx2, mut by2) = (b[0][0], b[0][1], b[0][2], b[0][3]);
+            for y in &b[1..] {
+                bx0 = bx0.min(y[0]);
+                by0 = by0.min(y[1]);
+                bx2 = bx2.max(y[2]);
+                by2 = by2.max(y[3]);
+            }
+            if ax0 > bx2 || ax2 < bx0 || ay0 > by2 || ay2 < by0 {
+                return None;
+            }
+        }
         for x in a {
             let (x0, y0, x2, y2) = (x[0], x[1], x[2], x[3]);
             for y in b {

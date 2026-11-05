@@ -98,3 +98,8 @@ Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,
 No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
 
 `Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.
+
+- **Onda 31 - Descompactação ZIP VFS Paralela Multi-Thread e HUD de Loading Cibernético**:
+  - Implementa descompressão em blocos com escopo multi-thread (`std::thread::scope`) aproveitando todo o paralelismo de CPU disponível para extração de arquivos ZIP em `add_zip`.
+  - Substitui descompressão sequencial por trabalho concorrente em lote, reduzindo a decodificação de recursos SFF de 222.6 ms para 88.7 ms (-60.1%).
+  - Adiciona HUD de carregamento cibernético com bordas brilhantes, pulso laser de dois tons ciano/branco e telemetria de pipeline paralelo.

@@ -98,3 +98,8 @@ On the cloud development machine, median normalization time decreased from 60.8 
 In the cloud development environment, warm-run allocations decreased from 2,331 to 1,183 per decode. Elapsed times were noisy (roughly 9–11 ms in warm runs) and do not demonstrate a speedup. This reduces temporary allocation churn rather than the final decoded PCM size. The benchmark excludes playback and audio-device latency. Run `cargo test --locked --release --example audio_bench` for sample-preservation, mono/stereo, tail and existing PCM tests.
 
 `Ui::quad` transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.
+
+- **Wave 31 - Multi-Threaded Parallel ZIP VFS Decompression & Cybernetic Loading HUD**:
+  - Implements multi-threaded scoped chunked inflation (`std::thread::scope`) across available CPU hardware parallelism for ZIP archive extraction in `add_zip`.
+  - Replaces sequential entry decompression with batch concurrent work, cutting SFF resource decode from 222.6 ms to 88.7 ms (-60.1%).
+  - Adds cybernetic loading HUD with glowing borders, two-tone cyan/white laser pulse, and thread pool parallel pipeline telemetry.

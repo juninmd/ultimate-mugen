@@ -82,6 +82,13 @@ const MAX_ENTRY_BYTES: usize = 256 << 20;
 /// Read every file of a zip archive into `vfs` under `prefix` (may be empty).
 /// Directory entries are skipped. Supports stored and deflated entries (and
 /// zip64). Returns the number of files added.
+struct RawEntry<'a> {
+    name: String,
+    method: u16,
+    data: &'a [u8],
+    usize_: usize,
+}
+
 pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, String> {
     let r = Reader(bytes);
     if bytes.len() < 22 {
@@ -116,6 +123,7 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
     }
     let mut p = usize::try_from(cd_ofs).map_err(|_| "zip: bad central directory offset")?;
     let mut added = 0;
+    let mut raw_entries = Vec::with_capacity(entries.min(1024) as usize);
     for _ in 0..entries {
         if r.u32(p) != CDIR_SIG {
             return Err("zip: corrupt central directory".into());
@@ -184,13 +192,73 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         let data = bytes
             .get(data_start..data_start.saturating_add(csize))
             .ok_or_else(|| format!("zip: {name}: truncated data"))?;
-        let content = match method {
-            0 => data.to_vec(),
-            8 => inflate_raw(data, usize::try_from(usize_).unwrap_or(0))
-                .map_err(|e| format!("zip: {name}: {e}"))?,
-            m => return Err(format!("zip: {name}: unsupported compression method {m}")),
-        };
-        vfs.insert(join(prefix, &name), content);
+        raw_entries.push(RawEntry {
+            name: join(prefix, &name),
+            method,
+            data,
+            usize_: usize::try_from(usize_).unwrap_or(0),
+        });
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    let extracted: Result<Vec<(String, Vec<u8>)>, String> = if raw_entries.len() > 1 {
+        let threads = std::thread::available_parallelism()
+            .map(|n| n.get())
+            .unwrap_or(4)
+            .min(raw_entries.len());
+        let chunk_size = (raw_entries.len() + threads - 1) / threads;
+        std::thread::scope(|s| {
+            let mut handles = Vec::with_capacity(threads);
+            for chunk in raw_entries.chunks(chunk_size) {
+                handles.push(s.spawn(move || {
+                    let mut batch = Vec::with_capacity(chunk.len());
+                    for e in chunk {
+                        let content = match e.method {
+                            0 => e.data.to_vec(),
+                            8 => inflate_raw(e.data, e.usize_)
+                                .map_err(|err| format!("zip: {}: {err}", e.name))?,
+                            m => return Err(format!("zip: {}: unsupported compression method {m}", e.name)),
+                        };
+                        batch.push((e.name.clone(), content));
+                    }
+                    Ok(batch)
+                }));
+            }
+            let mut all = Vec::with_capacity(raw_entries.len());
+            for h in handles {
+                all.extend(h.join().unwrap()?);
+            }
+            Ok(all)
+        })
+    } else {
+        raw_entries
+            .into_iter()
+            .map(|e| {
+                let content = match e.method {
+                    0 => e.data.to_vec(),
+                    8 => inflate_raw(e.data, e.usize_).map_err(|err| format!("zip: {}: {err}", e.name))?,
+                    m => return Err(format!("zip: {}: unsupported compression method {m}", e.name)),
+                };
+                Ok((e.name, content))
+            })
+            .collect()
+    };
+
+    #[cfg(target_arch = "wasm32")]
+    let extracted: Result<Vec<(String, Vec<u8>)>, String> = raw_entries
+        .into_iter()
+        .map(|e| {
+            let content = match e.method {
+                0 => e.data.to_vec(),
+                8 => inflate_raw(e.data, e.usize_).map_err(|err| format!("zip: {}: {err}", e.name))?,
+                m => return Err(format!("zip: {}: unsupported compression method {m}", e.name)),
+            };
+            Ok((e.name, content))
+        })
+        .collect();
+
+    for (name, content) in extracted? {
+        vfs.insert(name, content);
         added += 1;
     }
     Ok(added)

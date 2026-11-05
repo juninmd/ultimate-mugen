@@ -631,7 +631,36 @@ impl App {
                 self.finish_import(r);
             }
         }
-        if !self.msg.is_empty() {
+        if !self.import_jobs.is_empty() {
+            let active = self.import_jobs.len();
+            let bar_w = (VW * 0.50).max(360.0);
+            let bar_h = 10.0;
+            let bar_x = (VW - bar_w) / 2.0;
+            let bar_y = VH - 24.0;
+            self.ui.rect(0.0, VH - 52.0, VW, 52.0, Color::new(0.01, 0.03, 0.07, 0.92));
+            self.ui.rect(bar_x - 1.0, bar_y - 1.0, bar_w + 2.0, bar_h + 2.0, Color::new(0.06, 0.20, 0.35, 0.8));
+            self.ui.rect(bar_x, bar_y, bar_w, bar_h, Color::new(0.05, 0.08, 0.14, 0.95));
+            let t = (get_time() * 1.6).fract() as f32;
+            let sweep_w = bar_w * 0.38;
+            let sweep_x = bar_x + (bar_w - sweep_w) * t;
+            self.ui.rect(sweep_x, bar_y + 1.0, sweep_w, bar_h - 2.0, hex("#00f5ff"));
+            self.ui.rect(sweep_x + sweep_w * 0.4, bar_y + 1.0, sweep_w * 0.2, bar_h - 2.0, Color::new(1.0, 1.0, 1.0, 0.85));
+            self.ui.rect(0.0, VH - 3.0, VW, 3.0, hex("#0284c7"));
+            let label = if active == 1 {
+                "IMPORTANDO RECURSOS M.U.G.E.N [THREAD POOL: PIPELINE PARALELO ATIVO]...".to_string()
+            } else {
+                format!("IMPORTANDO RECURSOS M.U.G.E.N ({} TAREFAS ATIVAS) [PARALELO ATIVO]...", active)
+            };
+            self.ui.text(
+                &label,
+                VW / 2.0,
+                VH - 34.0,
+                14.0,
+                hex("#e0f2fe"),
+                Align::Center,
+                true,
+            );
+        } else if !self.msg.is_empty() {
             self.ui
                 .rect(0.0, VH - 36.0, VW, 36.0, Color::new(0.0, 0.0, 0.0, 0.7));
             self.ui.text(

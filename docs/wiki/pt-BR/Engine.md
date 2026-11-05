@@ -73,6 +73,16 @@ Coloque o decoder em `crates/formats/src/<formato>.rs`, exporte em `lib.rs` e te
 
 A migração está descrita em [`docs/ROADMAP.pt-BR.md`](../../ROADMAP.pt-BR.md).
 
+## Dono do estado e controle
+
+Um lutador roda o estado a partir da definição que o forneceu: o `.cns` dele, o `common1.cns` compartilhado, ou a definição de outro personagem (`TargetState`, `p2stateno`, um arremesso). Três regras mantêm o controle fluindo:
+
+- Um número de estado que o personagem define sempre roda a partir da definição dele, então voltar de um estado de engine (face-off, despertar) ou de um estado do `common1` devolve o controle em vez de deixar o lutador preso à definição compartilhada.
+- Estados do `common1.cns` são do próprio jogador: os estados `-1` do personagem e as transições de andar/pular/agachar da engine continuam rodando durante um get-hit, deitado ou qualquer estado compartilhado — personagens M.U.G.E.N. cancelam golpes pelo `-1` assim.
+- Só um estado customizado dado pelo oponente pausa esses estados, porque o script de quem deu é dono do lutador até devolver o controle.
+
+Um lutador cujo dono do estado não é ele mesmo nem o `common1` está "em estado customizado"; é esse o teste que protege toda transição vinda do input, e perdê-lo faz o personagem ficar parado mesmo parecendo vivo (`ctrl`, estado 0).
+
 ## HUD glass e efeitos de impacto
 
 - Os painéis do HUD em luta são "glass": `ume_shell::quad::glass_panel` registra até 16 retângulos arredondados por quadro, e o passe de composição do pós-processamento troca esses pixels por uma cópia desfocada da cena (um quarto da resolução, blur separável, sem alocações por quadro), com tinta, sombra e brilho na borda. Com o pós-processamento desligado (nível `fx` 0) o HUD usa polígonos translúcidos.

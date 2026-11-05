@@ -25,26 +25,26 @@ fn groundtype(s: &str) -> Option<i32> {
 }
 pub fn attr_bits(state: &str, kinds: &[String]) -> i32 {
     let mut bits = 0;
-    for c in state.chars() {
-        bits |= match c {
-            'S' => 1,
-            'C' => 2,
-            'A' => 4,
-            'L' => 8,
+    for &b in state.as_bytes() {
+        bits |= match b {
+            b'S' => 1,
+            b'C' => 2,
+            b'A' => 4,
+            b'L' => 8,
             _ => 0,
         };
     }
     for k in kinds {
-        bits |= match k.as_str() {
-            "NA" => 64,
-            "NT" => 128,
-            "NP" => 256,
-            "SA" => 512,
-            "ST" => 1024,
-            "SP" => 2048,
-            "HA" => 4096,
-            "HT" => 8192,
-            "HP" => 16384,
+        bits |= match k.as_bytes() {
+            b"NA" => 64,
+            b"NT" => 128,
+            b"NP" => 256,
+            b"SA" => 512,
+            b"ST" => 1024,
+            b"SP" => 2048,
+            b"HA" => 4096,
+            b"HT" => 8192,
+            b"HP" => 16384,
             _ => 0,
         };
     }
@@ -73,23 +73,23 @@ pub fn attr_kind_mask(want: &str) -> i32 {
         .fold(0, |mask, c| mask | (1 << (6 + c + row)))
 }
 pub fn state_mask(state: &str) -> i32 {
-    state.chars().fold(0, |bits, c| {
-        bits | match c {
-            'S' => 1,
-            'C' => 2,
-            'A' => 4,
-            'L' => 8,
+    state.as_bytes().iter().fold(0, |bits, &b| {
+        bits | match b {
+            b'S' => 1,
+            b'C' => 2,
+            b'A' => 4,
+            b'L' => 8,
             _ => 0,
         }
     })
 }
 pub fn guardflag_bits(flags: &str) -> i32 {
-    flags.chars().fold(0, |bits, c| {
-        bits | match c {
-            'H' => 1,
-            'L' => 2,
-            'A' => 4,
-            'M' => 3,
+    flags.as_bytes().iter().fold(0, |bits, &b| {
+        bits | match b {
+            b'H' => 1,
+            b'L' => 2,
+            b'A' => 4,
+            b'M' => 3,
             _ => 0,
         }
     })
@@ -114,22 +114,29 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     let l = f.lscl;
     let num = |k: &str, d: f64, idx: usize| m.num(i, sc, k, d, idx) as f32;
     let has = |k: &str, idx: usize| sc.has(k, idx);
-    let raw = |k: &str| sc.raw(k).map(|s| s.trim().to_string());
-    let attr = raw("attr")
-        .unwrap_or("S,NA".into())
-        .to_ascii_uppercase()
-        .replace(char::is_whitespace, "");
-    let mut parts = attr.split(',');
-    let attr_state = parts.next().unwrap_or("S").to_string();
-    let attr_kind: Vec<String> = parts.map(|s| s.to_string()).collect();
+    let raw = |k: &str| sc.raw(k).map(|s| s.trim());
+    let (attr_state, attr_kind) = if let Some(raw_attr) = raw("attr") {
+        let mut clean = String::with_capacity(raw_attr.len());
+        for b in raw_attr.bytes() {
+            if !b.is_ascii_whitespace() {
+                clean.push(b.to_ascii_uppercase() as char);
+            }
+        }
+        let mut parts = clean.split(',');
+        let state = parts.next().unwrap_or("S").to_string();
+        let kinds: Vec<String> = parts.map(|s| s.to_string()).collect();
+        (state, kinds)
+    } else {
+        ("S".to_string(), vec!["NA".to_string()])
+    };
     let damage = num("damage", 0.0, 0);
     let (pause_p1, pause_p2) = (
         num("pausetime", 0.0, 0) as i32,
         num("pausetime", 0.0, 1) as i32,
     );
-    let at = raw("animtype").and_then(|s| animtype(&s)).unwrap_or(0);
-    let gt = raw("ground.type").and_then(|s| groundtype(&s)).unwrap_or(1);
-    let spark = |r: Option<String>, d: i32| -> (i32, bool) {
+    let at = raw("animtype").and_then(animtype).unwrap_or(0);
+    let gt = raw("ground.type").and_then(groundtype).unwrap_or(1);
+    let spark = |r: Option<&str>, d: i32| -> (i32, bool) {
         match r {
             None => (d, false),
             Some(s) => {
@@ -163,18 +170,32 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     } else {
         1.3 * guard_vel
     };
-    let shake = |prefix: &str, time_default: f64| -> Shake {
-        let freq = num(&format!("{prefix}.freq"), 60.0, 0).clamp(0.0, 180.0);
+    let shake_fall = {
+        let freq = num("fall.envshake.freq", 60.0, 0).clamp(0.0, 180.0);
         Shake {
-            time: num(&format!("{prefix}.time"), time_default, 0) as i32,
+            time: num("fall.envshake.time", 0.0, 0) as i32,
             freq,
-            ampl: num(&format!("{prefix}.ampl"), -4.0, 0) * l,
+            ampl: num("fall.envshake.ampl", -4.0, 0) * l,
             phase: num(
-                &format!("{prefix}.phase"),
+                "fall.envshake.phase",
                 if freq >= 90.0 { 90.0 } else { 0.0 },
                 0,
             ),
-            dir: (num(&format!("{prefix}.dir"), 0.0, 0) as u8).min(2),
+            dir: (num("fall.envshake.dir", 0.0, 0) as u8).min(2),
+        }
+    };
+    let shake_env = {
+        let freq = num("envshake.freq", 60.0, 0).clamp(0.0, 180.0);
+        Shake {
+            time: num("envshake.time", 0.0, 0) as i32,
+            freq,
+            ampl: num("envshake.ampl", -4.0, 0) * l,
+            phase: num(
+                "envshake.phase",
+                if freq >= 90.0 { 90.0 } else { 0.0 },
+                0,
+            ),
+            dir: (num("envshake.dir", 0.0, 0) as u8).min(2),
         }
     };
     let opt = |k: &str, idx: usize| {
@@ -212,12 +233,12 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     HitDefData {
         attr_state: attr_state.clone(),
         attr_kind: attr_kind.clone(),
-        hitflag: raw("hitflag").unwrap_or("MAF".into()).to_ascii_uppercase(),
-        guardflag: raw("guardflag").unwrap_or_default().to_ascii_uppercase(),
+        hitflag: raw("hitflag").map_or_else(|| "MAF".to_string(), |s| s.to_ascii_uppercase()),
+        guardflag: raw("guardflag").map_or_else(String::new, |s| s.to_ascii_uppercase()),
         animtype: at,
-        air_animtype: raw("air.animtype").and_then(|s| animtype(&s)).unwrap_or(at),
+        air_animtype: raw("air.animtype").and_then(animtype).unwrap_or(at),
         fall_animtype: raw("fall.animtype")
-            .and_then(|s| animtype(&s))
+            .and_then(animtype)
             .unwrap_or(if at >= 3 { at } else { 4 }),
         priority: (num("priority", 4.0, 0) as i32).clamp(1, 7),
         damage,
@@ -240,10 +261,10 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         guard_spark_own,
         spark_x: num("sparkxy", 0.0, 0) * l,
         spark_y: num("sparkxy", 0.0, 1) * l,
-        hit_sound: parse_sound_ref(raw("hitsound").as_deref()).or(Some((5, 0, false))),
-        guard_sound: parse_sound_ref(raw("guardsound").as_deref()).or(Some((6, 0, false))),
+        hit_sound: parse_sound_ref(raw("hitsound")).or(Some((5, 0, false))),
+        guard_sound: parse_sound_ref(raw("guardsound")).or(Some((6, 0, false))),
         ground_type: gt,
-        air_type: raw("air.type").and_then(|s| groundtype(&s)).unwrap_or(gt),
+        air_type: raw("air.type").and_then(groundtype).unwrap_or(gt),
         ground_slide_time: gst,
         guard_slide_time: if has("guard.slidetime", 0) {
             num("guard.slidetime", 0.0, 0) as i32
@@ -388,8 +409,8 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
             ght
         },
         down_bounce: num("down.bounce", 0.0, 0) != 0.0,
-        fall_env_shake: shake("fall.envshake", 0.0),
-        env_shake: shake("envshake", 0.0),
+        fall_env_shake: shake_fall,
+        env_shake: shake_env,
         ground_corner_push,
         air_corner_push: if has("air.cornerpush.veloff", 0) {
             num("air.cornerpush.veloff", 0.0, 0) * l

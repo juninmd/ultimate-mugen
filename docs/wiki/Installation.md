@@ -2,7 +2,7 @@
 
 ## Download a ready build
 
-Download the file for your platform from [Releases](https://github.com/juninmd/ultimate-mugen/releases), extract it and run `ultimate-mugen` (Windows: `ultimate-mugen.exe` or `run.bat`). The engine checks for updates by itself; turn that off with `--no-update-check` or `UME_NO_UPDATE_CHECK=1`.
+Download the file for your platform from [Releases](https://github.com/juninmd/ultimate-mugen/releases), extract it and run `ultimate-mugen` (Windows: `ultimate-mugen.exe` or `run.bat`). The desktop build updates itself from the newest release over HTTPS; see [Automatic updates](Auto-Update.md). Turn the download off with `--no-auto-update` / `UME_NO_AUTO_UPDATE=1` or the whole check with `--no-update-check` / `UME_NO_UPDATE_CHECK=1`.
 
 ## Build from source
 

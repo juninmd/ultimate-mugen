@@ -7,6 +7,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | Page | Audience | Covers |
 |---|---|---|
 | [Installation](Installation.md) | Players | Download, build, run on desktop, browser and phone |
+| [Automatic updates](Auto-Update.md) | Players | Self-update from GitHub releases, opt-outs and CLI flags |
 | [Configuration and controls](Configuration.md) | Players | `.cfg` file, command-line flags, environment variables, controls |
 | [Adding M.U.G.E.N content](MUGEN-Content.md) | Players | Install `.def`/`.zip` characters and stages, and validate them |
 | [GitHub marketplace](Marketplace.md) | Players | Install characters, stages and music from any GitHub repository |

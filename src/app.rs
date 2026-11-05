@@ -20,6 +20,7 @@ mod market;
 mod replay_browser;
 mod settings_screen;
 mod survival;
+mod update_banner;
 mod versus;
 pub(crate) use keyedit::KeyEdit;
 
@@ -286,7 +287,7 @@ pub struct App {
     quality_check: f32,
     window_watch: WindowWatch,
     window_pinned: bool,
-    updater: crate::update::Checker,
+    updater: crate::update::Updater,
     pub trans: f32,
     screen_t: f32,
     menu_art: crate::menu_art::MenuArt,
@@ -433,7 +434,7 @@ impl App {
             pal: [settings.pal1 as i32, settings.pal2 as i32],
             pal_pick: 1,
             team_pal: vec![],
-            updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
+            updater: crate::update::Updater::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
 
@@ -508,6 +509,7 @@ impl App {
         self.c.update();
         self.preview_t += get_frame_time();
         let dt = get_frame_time();
+        self.updater.poll();
         match &mut self.screen {
             Screen::Title => self.title(),
             Screen::Menu { .. } => self.menu(),
@@ -652,6 +654,7 @@ impl App {
                 self.msg.clear();
             }
         }
+        self.apply_update_if_ready();
     }
 
     fn after_registry_change(&mut self) {
@@ -761,24 +764,7 @@ impl App {
             Align::Center,
             false,
         );
-        let line = match self.updater.poll() {
-            Some(u) => format!(
-                "{} · nova versão v{} disponível: {}",
-                crate::update::build_label(),
-                u.version,
-                crate::update::RELEASES_URL
-            ),
-            None => crate::update::build_label(),
-        };
-        self.ui.text(
-            &line,
-            VW - 14.0,
-            VH - 12.0,
-            14.0,
-            hex("#a49cc0"),
-            Align::Right,
-            false,
-        );
+        self.draw_update_status();
         if self.c.pressed(nav::OK | nav::START)
             || is_mouse_button_pressed(MouseButton::Left)
             || !touches().is_empty() && touches()[0].phase == TouchPhase::Started

@@ -62,6 +62,10 @@ fn conf() -> WindowConf {
         }
         std::process::exit(0);
     }
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    if args.iter().any(|a| a == "--update") {
+        std::process::exit(update::update_now());
+    }
     let st = settings::Settings::load();
     let (mut w, mut h) = st.window_size();
     if let Some(r) = args

@@ -93,7 +93,12 @@ pub async fn prepare(character: String) -> Result<bool, String> {
     let promise = ume_fetch_asset(&format!("assets/chars/sprites/{character}.pack"));
     let data = match js_sys::futures::JsFuture::from(promise).await {
         Ok(data) => data,
-        Err(error) => return give_up(&character, format!("sprite pack {character}: {error:?}")),
+        Err(_) => {
+            return give_up(
+                &character,
+                format!("Unable to load sprites for {character}. Reload the page to retry."),
+            )
+        }
     };
     let bytes = js_sys::Uint8Array::new(&data).to_vec();
     match ume_engine::native::insert_sprite_pack(&character, &bytes) {
@@ -103,6 +108,9 @@ pub async fn prepare(character: String) -> Result<bool, String> {
             });
             Ok(true)
         }
-        Err(error) => give_up(&character, error),
+        Err(_) => give_up(
+            &character,
+            format!("Invalid sprites for {character}. Reload the page to retry."),
+        ),
     }
 }

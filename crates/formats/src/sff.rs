@@ -169,7 +169,6 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
         let same_pal = r.u8(ofs + 18) != 0;
         let data_start = ofs + 32;
         let keep = wanted(spr.group, spr.index);
-        let mut decoded = false;
 
         if length == 0 {
             if keep {
@@ -247,13 +246,12 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
                     }
                 }
                 spr.palette = pal;
-                decoded = true;
             }
         }
-        if decoded {
+        if spr.indexed.is_some() {
             prev = Some((spr.palette.clone(), spr.palette_index));
         }
-        prev_adjacent = decoded;
+        prev_adjacent = spr.indexed.is_some();
         sprites.push(spr);
         ofs = next;
     }

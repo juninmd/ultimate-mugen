@@ -378,7 +378,7 @@ impl Match {
         self.change_state(i, no, common);
     }
     pub fn change_state(&mut self, i: usize, no: i32, owner: Arc<CharDef>) {
-        let common = self.common.clone(); let owner = if no >= 0 && Arc::ptr_eq(&owner, &common) && self.fighters[i].def.states.contains_key(&no) { self.fighters[i].def.clone() } else { owner };
+        let owner = if no >= 0 && Arc::ptr_eq(&owner, &self.common) && self.fighters[i].def.states.contains_key(&no) { self.fighters[i].def.clone() } else { owner };
         {
             let f = &mut self.fighters[i];
             f.prev_state_no = f.state_no; f.prev_state_type = f.state_type; f.prev_move_type = f.move_type;
@@ -391,7 +391,15 @@ impl Match {
             f.state_time = 0;
             f.persist.clear();
         }
-        let Some(sd) = owner.states.get(&no).or_else(|| common.states.get(&no)) else { return };
+        let fallback;
+        let sd = if let Some(s) = owner.states.get(&no) {
+            s
+        } else if let Some(_) = self.common.states.get(&no) {
+            fallback = self.common.clone();
+            fallback.states.get(&no).unwrap()
+        } else {
+            return;
+        };
         let kind = |k: &str| sd.param(k).map(|p| p.raw.trim().chars().next().map(|c| c.to_ascii_uppercase()));
         let ev = |m: &Match, k: &str, idx: usize| sd.param(k).and_then(|p| p.exprs.get(idx)).map(|e| m.ev(i, e));
         {
@@ -400,7 +408,7 @@ impl Match {
             match kind("movetype") { Some(Some(c)) if c != 'U' => f.move_type = c, None => f.move_type = 'I', _ => {} }
             match kind("physics") { Some(Some(c)) if c != 'U' => f.physics = c, None => f.physics = 'N', _ => {} }
         }
-        if let Some(a) = ev(self, "anim", 0) { let d = self.fighters[i].def.clone(); self.fighters[i].change_anim(a as i32, &d, 1); }
+        if let Some(a) = ev(self, "anim", 0) { self.fighters[i].change_anim_own(a as i32, 1); }
         let vx = ev(self, "velset", 0); let vy = ev(self, "velset", 1);
         let ctrl = ev(self, "ctrl", 0); let pa = ev(self, "poweradd", 0); let sp = ev(self, "sprpriority", 0); let fp = ev(self, "facep2", 0);
         let hdp = ev(self, "hitdefpersist", 0).unwrap_or(0.0); let mhp = ev(self, "movehitpersist", 0).unwrap_or(0.0); let hcp = ev(self, "hitcountpersist", 0).unwrap_or(0.0);
@@ -435,8 +443,18 @@ impl Match {
 
     /// Run a state's controllers. Returns true if the state changed.
     pub(crate) fn run_state(&mut self, i: usize, sd_owner: &Arc<CharDef>, no: i32, in_pause: bool) -> bool {
-        let common = self.common.clone();
-        let sd = match sd_owner.states.get(&no).or_else(|| if no >= 0 { common.states.get(&no) } else { None }) { Some(s) => s, None => return false };
+        let fallback;
+        let sd = if let Some(s) = sd_owner.states.get(&no) {
+            s
+        } else if no >= 0 {
+            fallback = self.common.clone();
+            match fallback.states.get(&no) {
+                Some(s) => s,
+                None => return false,
+            }
+        } else {
+            return false;
+        };
         for sc in &sd.controllers {
             if i >= self.fighters.len() || self.fighters[i].destroyed { return true; }
             if in_pause && !sc.ignore_hitpause { continue; }
@@ -487,8 +505,10 @@ impl Match {
         }
         for _ in 0..16 {
             let Some(i) = self.idx(id) else { return };
-            let (owner, no) = { let f = &self.fighters[i]; (f.st_def.clone(), f.state_no) };
-            if !self.run_state(i, &owner, no, in_pause) { break; }
+            let (same, no) = { let f = &self.fighters[i]; (Arc::ptr_eq(&f.st_def, &own), f.state_no) };
+            let owner;
+            let st_ref = if same { &own } else { owner = self.fighters[i].st_def.clone(); &owner };
+            if !self.run_state(i, st_ref, no, in_pause) { break; }
         }
     }
 
@@ -518,23 +538,21 @@ impl Match {
                 let should = if ex >= f.pos.x { 1.0 } else { -1.0 };
                 if should != f.facing && (ex - f.pos.x).abs() > 1.0 {
                     f.facing = should;
-                    let d = f.def.clone();
-                    if s == 0 && d.anims.contains_key(&5) { f.change_anim(5, &d, 1); }
-                    if s == 11 && d.anims.contains_key(&6) { f.change_anim(6, &d, 1); }
+                    if s == 0 && f.def.anims.contains_key(&5) { f.change_anim_own(5, 1); }
+                    if s == 11 && f.def.anims.contains_key(&6) { f.change_anim_own(6, 1); }
                 }
             }
         }
         if self.fighters[i].has_assert(asf::NOHARDCODEDKEYS) { return; }
-        let own = self.fighters[i].def.clone();
         if st == 'S' || st == 'C' {
             let guard_blocked = self.fighters[i].has_assert(if st == 'S' { asf::NOSTANDGUARD } else { asf::NOCROUCHGUARD });
             let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD);
-            if guard_input && !guard_blocked && self.in_guard_dist(i) && !(120..=155).contains(&s) { self.change_state(i, 120, own); return; }
+            if guard_input && !guard_blocked && self.in_guard_dist(i) && !(120..=155).contains(&s) { let own = self.fighters[i].def.clone(); self.change_state(i, 120, own); return; }
             if st == 'S' {
-                if cmd(self, "holdup") && !self.fighters[i].has_assert(asf::NOJUMP) { self.change_state(i, 40, own); return; }
-                if cmd(self, "holddown") && s != 10 && s != 11 && !self.fighters[i].has_assert(asf::NOCROUCH) { self.change_state(i, 10, own); return; }
-                if (cmd(self, "holdfwd") || cmd(self, "holdback")) && s != 20 && !self.fighters[i].has_assert(asf::NOWALK) && (s == 0 || s == 52) { self.change_state(i, 20, own); }
-            } else if !cmd(self, "holddown") && s == 11 && !self.fighters[i].has_assert(asf::NOSTAND) { self.change_state(i, 12, own); }
+                if cmd(self, "holdup") && !self.fighters[i].has_assert(asf::NOJUMP) { let own = self.fighters[i].def.clone(); self.change_state(i, 40, own); return; }
+                if cmd(self, "holddown") && s != 10 && s != 11 && !self.fighters[i].has_assert(asf::NOCROUCH) { let own = self.fighters[i].def.clone(); self.change_state(i, 10, own); return; }
+                if (cmd(self, "holdfwd") || cmd(self, "holdback")) && s != 20 && !self.fighters[i].has_assert(asf::NOWALK) && (s == 0 || s == 52) { let own = self.fighters[i].def.clone(); self.change_state(i, 20, own); }
+            } else if !cmd(self, "holddown") && s == 11 && !self.fighters[i].has_assert(asf::NOSTAND) { let own = self.fighters[i].def.clone(); self.change_state(i, 12, own); }
         } else if st == 'A' {
             let f = &self.fighters[i];
             let maxj = f.c("movement.airjump.num", 1.0) as i32;
@@ -542,7 +560,7 @@ impl Match {
             let pressed_up = h.at(h.tick) & 1 != 0 && h.at(h.tick - 1) & 1 == 0;
             if s == 50 && f.air_jumps < maxj && !f.has_assert(asf::NOAIRJUMP) && pressed_up && f.pos.y < -f.c("movement.airjump.height", 35.0) * f.lscl {
                 self.fighters[i].air_jumps += 1;
-                self.change_state(i, 45, own);
+                let own = self.fighters[i].def.clone(); self.change_state(i, 45, own);
             }
         }
     }
@@ -592,7 +610,7 @@ impl Match {
     }
     fn rebind(&mut self) {
         for i in 0..self.fighters.len() {
-            let Some(b) = self.fighters[i].bind.clone() else { continue };
+            let Some(b) = self.fighters[i].bind else { continue };
             let Some(t) = self.idx(b.to) else { continue };
             let (tx, ty, tf) = (self.fighters[t].pos.x, self.fighters[t].pos.y, self.fighters[t].facing);
             let f = &mut self.fighters[i];
@@ -617,7 +635,7 @@ impl Match {
         f.palfx.as_ref().or_else(|| f.parent.and_then(|p| self.idx(p)).and_then(|p| self.palfx_of(p)))
     }
     pub fn update_bind(&mut self, i: usize) {
-        let Some(b) = self.fighters[i].bind.clone() else { return };
+        let Some(b) = self.fighters[i].bind else { return };
         let Some(t) = self.idx(b.to) else { self.fighters[i].bind = None; return };
         if b.time == 0 { self.fighters[i].bind = None; return; }
         let (tx, ty, tf) = (self.fighters[t].pos.x, self.fighters[t].pos.y, self.fighters[t].facing);

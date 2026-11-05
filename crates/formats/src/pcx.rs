@@ -105,27 +105,26 @@ pub fn decode_pcx_rle(
 
 /// Read a 768-byte RGB palette at `offset` into RGBA (index 0 transparent).
 pub fn read_rgb_palette(buf: &[u8], offset: usize) -> Vec<u8> {
-    let mut pal = vec![0u8; 1024];
+    let mut pal = vec![0u32; 256];
     if offset.saturating_add(768) <= buf.len() {
         let src = &buf[offset..offset + 768];
-        for c in 0..256 {
+        for c in 1..256 {
             let o = c * 3;
-            let d = c * 4;
-            pal[d] = src[o];
-            pal[d + 1] = src[o + 1];
-            pal[d + 2] = src[o + 2];
-            pal[d + 3] = if c == 0 { 0 } else { 255 };
+            pal[c] = u32::from_ne_bytes([src[o], src[o + 1], src[o + 2], 255]);
         }
+        pal[0] = u32::from_ne_bytes([src[0], src[1], src[2], 0]);
     } else {
         for c in 0..256 {
             let o = offset + c * 3;
-            for k in 0..3 {
-                pal[c * 4 + k] = buf.get(o + k).copied().unwrap_or(0);
-            }
-            pal[c * 4 + 3] = if c == 0 { 0 } else { 255 };
+            let r = buf.get(o).copied().unwrap_or(0);
+            let g = buf.get(o + 1).copied().unwrap_or(0);
+            let b = buf.get(o + 2).copied().unwrap_or(0);
+            let a = if c == 0 { 0 } else { 255 };
+            pal[c] = u32::from_ne_bytes([r, g, b, a]);
         }
     }
-    pal
+    let mut pal = std::mem::ManuallyDrop::new(pal);
+    unsafe { Vec::from_raw_parts(pal.as_mut_ptr() as *mut u8, 1024, 1024) }
 }
 
 /// Locate the 256-color palette of a PCX buffer. Preferred: the 0x0C marker

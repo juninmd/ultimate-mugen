@@ -325,3 +325,23 @@ etain_mut.
   - `Match::detect_reversals`: Fast-path early exit when no fighters have an active reversal state, plus fixed-size stack arrays for detected reversals.
   - `Match::detect_hits`: Stack-allocated fixed buffer `pending` storing only fighter indices and coordinates, avoiding eager `HitDefData` heap clones on idle/no-hit frames.
   - `struck` list switched to stack arrays, eliminating vector allocations across physics and hit detection loops.
+
+- **Wave 54 - Stack-Buffered Target Indices & Direct Param Expression Evaluations**:
+  - `controllers::target_indices`: Replaced heap-allocated `Vec<usize>` with fixed stack array `[Option<usize>; 8]`, eliminating allocation churn in `TargetState`, `TargetLifeAdd`, `TargetPowerAdd`, `TargetFacing`, and `TargetBind`.
+  - `controllers::set_vars`: Directly evaluated `param.exprs.first()` without duplicate `sc.param(...)` string search iterations.
+  - `controllers::run`: Replaced double parameter checks in `changestate`/`selfstate` with unified `opt(...)` queries for `ctrl` and `anim`.
+  - Pushed simulation throughput to 226,415 ticks/s with p50 at 0.003 ms, and dropped portrait decode to 0.6 ms.
+
+- **Wave 55 - Aligned u32 RGBA Decoding, Pre-Allocated SFF Tables & Branchless PCX Palettes**:
+  - sff::sprite_to_rgba: Allocated direct Vec<u32> ensuring guaranteed 4-byte hardware alignment, eliminating slice-alignment fallback loops and branch checks, and converting to Vec<u8> via zero-cost Vec::from_raw_parts.
+  - pcx::read_rgb_palette: Converted 768-byte RGB chunks to [u32; 256] with branchless u32::from_ne_bytes and constant alpha assignments, dropping byte-by-byte shifting.
+  - sff::decode_v1: Removed unused idx from V1Job and pre-allocated jobs buffer with count.min(8192).
+  - sff::decode_v2: Pre-allocated palettes buffer with pal_count.min(buf.len() / 16 + 1) and jobs buffer with spr_count.min(buf.len() / 28 + 1).
+  - sff::decode_v2_image: Optimized RAW depth-32 frames with single slice copies and depth-24 frames with 3-byte chunks instead of byte-by-byte offset probing.
+
+- **Wave 56 - Copy-Derived Binds, Lazy Fallbacks & Direct In-Place State Animations**:
+  - `fighter::Bind`: Derived `Copy` and `PartialEq`, turning bind checks and updates in `rebind` and `update_bind` into direct stack bit-copies with zero heap cloning.
+  - `fighter::Fighter::change_anim_own`: Added internal animation change helper from own definition, removing external `def.clone()` overhead in `changestate`, `changeanim`, and auto-turn transitions.
+  - `matchs::run_state`: Converted `common` lookup into a lazy fallback (`let fallback;`), bypassing `self.common.clone()` on all negative states (-3, -2, -1) and every character-defined state.
+  - `matchs::change_state`: Replaced eager `self.common.clone()` with reference pointer equality `&self.common` and lazy state definition fallback.
+  - `matchs::tick`: Replaced per-frame `f.st_def.clone()` in physics override loop with scalar `Option<char>` extraction.

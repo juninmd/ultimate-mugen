@@ -70,10 +70,9 @@ pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
     if n == 0 {
         return Vec::new();
     }
-    let mut out = vec![0u8; n * 4];
     let pal: Option<&[u8]> = palette.or(s.palette.as_deref().map(|v| v.as_slice()));
     let (Some(idx), Some(pal)) = (&s.indexed, pal) else {
-        return out;
+        return vec![0u8; n * 4];
     };
     let mut table = [0u32; 256];
     if pal.len() >= 1024 {
@@ -90,18 +89,16 @@ pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
             table[c] = u32::from_ne_bytes([r, g, b, 255]);
         }
     }
-    let (prefix, out_u32, suffix) = unsafe { out.align_to_mut::<u32>() };
-    if prefix.is_empty() && suffix.is_empty() && out_u32.len() == n {
-        let limit = idx.len().min(n);
-        for i in 0..limit {
-            out_u32[i] = table[idx[i] as usize];
-        }
-    } else {
-        for (o, &c) in out.as_chunks_mut::<4>().0.iter_mut().zip(idx.iter()) {
-            o.copy_from_slice(&table[c as usize].to_ne_bytes());
-        }
+    let mut out_u32 = vec![0u32; n];
+    let limit = idx.len().min(n);
+    for i in 0..limit {
+        out_u32[i] = table[idx[i] as usize];
     }
-    out
+    let mut out_u32 = std::mem::ManuallyDrop::new(out_u32);
+    let ptr = out_u32.as_mut_ptr() as *mut u8;
+    let len = out_u32.len() * 4;
+    let cap = out_u32.capacity() * 4;
+    unsafe { Vec::from_raw_parts(ptr, len, cap) }
 }
 
 pub const MAX_SPRITE_PIXELS: usize = 1 << 24;
@@ -144,7 +141,6 @@ fn empty_sprite(group: i32, index: i32, axis_x: i32, axis_y: i32) -> DecodedSpri
 // ---------------------------------------------------------------------------
 
 struct V1Job<'a> {
-    idx: usize,
     pcx: &'a [u8],
     h: crate::pcx::PcxHeader,
     same_pal: bool,
@@ -166,9 +162,9 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
     let mut prev_adjacent = false;
 
     let mut entries: Vec<(DecodedSprite, usize, bool)> = Vec::with_capacity(count);
-    let mut jobs: Vec<V1Job> = Vec::new();
+    let mut jobs: Vec<V1Job> = Vec::with_capacity(count.min(8192));
 
-    for i in 0..count {
+    for _ in 0..count {
         if ofs == 0 || ofs.saturating_add(32) > buf.len() {
             break;
         }
@@ -195,7 +191,7 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
                 spr.width = h.width;
                 spr.height = h.height;
                 has_data = true;
-                jobs.push(V1Job { idx: i, pcx, h, same_pal });
+                jobs.push(V1Job { pcx, h, same_pal });
             }
         }
         entries.push((spr, link, has_data));
@@ -327,7 +323,7 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
     let tdata = r.u32(60) as usize;
 
     // --- palettes
-    let mut palettes: Vec<Palette> = Vec::new();
+    let mut palettes: Vec<Palette> = Vec::with_capacity(pal_count.min(buf.len() / 16 + 1));
     for i in 0..pal_count {
         let o = pal_ofs.saturating_add(i.saturating_mul(16));
         if o.saturating_add(16) > buf.len() {
@@ -373,7 +369,7 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
     // --- sprites
     let mut sprites: Vec<DecodedSprite> = Vec::with_capacity(spr_count.min(buf.len() / 28 + 1));
     let mut links: Vec<Option<usize>> = Vec::with_capacity(sprites.capacity());
-    let mut jobs: Vec<(usize, u8, u8, &[u8])> = Vec::new();
+    let mut jobs: Vec<(usize, u8, u8, &[u8])> = Vec::with_capacity(spr_count.min(buf.len() / 28 + 1));
     for i in 0..spr_count {
         let o = spr_ofs.saturating_add(i.saturating_mul(28));
         if o.saturating_add(28) > buf.len() {
@@ -480,17 +476,20 @@ fn decode_v2_image(
     let body = &data[data.len().min(4)..];
     match fmt {
         format::RAW => {
-            if depth == 24 || depth == 32 {
-                let bpp = (depth / 8) as usize;
+            if depth == 32 {
                 let mut out = vec![0u8; n * 4];
-                for (p, o) in out.as_chunks_mut::<4>().0.iter_mut().enumerate() {
-                    let g = |k: usize| data.get(p * bpp + k).copied().unwrap_or(0);
-                    o[0] = g(0);
-                    o[1] = g(1);
-                    o[2] = g(2);
-                    o[3] = if bpp == 4 { g(3) } else { 255 };
-                }
+                let k = (n * 4).min(data.len());
+                out[..k].copy_from_slice(&data[..k]);
                 spr.rgba = Some(Arc::new(out));
+            } else if depth == 24 {
+                let mut out = vec![0u32; n];
+                let count = n.min(data.len() / 3);
+                for (p, chunk) in data[..count * 3].chunks_exact(3).enumerate() {
+                    out[p] = u32::from_ne_bytes([chunk[0], chunk[1], chunk[2], 255]);
+                }
+                let mut out = std::mem::ManuallyDrop::new(out);
+                let bytes = unsafe { Vec::from_raw_parts(out.as_mut_ptr() as *mut u8, n * 4, n * 4) };
+                spr.rgba = Some(Arc::new(bytes));
             } else {
                 let mut out = vec![0u8; n];
                 let k = n.min(data.len());

@@ -321,3 +321,23 @@ etain_mut.
   - `Match::detect_reversals`: Saída rápida antecipada quando nenhum lutador possui estado ativo de reversão, além de buffers de pilha de tamanho fixo para reversões detectadas.
   - `Match::detect_hits`: Buffer fixo em pilha `pending` armazenando apenas índices e coordenadas de lutadores, eliminando clones prematuros na heap de `HitDefData` em frames sem impacto.
   - Lista de `struck` migrada para buffers de pilha, eliminando alocações dinâmicas nos loops de física e detecção de acertos.
+
+- **Onda 54 - Índices de Alvo em Buffer de Pilha e Avaliação Direta de Expressões**:
+  - `controllers::target_indices`: Substituição de `Vec<usize>` alocado na heap por array fixo em pilha `[Option<usize>; 8]`, eliminando alocações repetidas em `TargetState`, `TargetLifeAdd`, `TargetPowerAdd`, `TargetFacing` e `TargetBind`.
+  - `controllers::set_vars`: Avaliação direta de `param.exprs.first()` sem iterações duplicadas de busca por string `sc.param(...)`.
+  - `controllers::run`: Substituição de checagens duplas de parâmetros em `changestate`/`selfstate` por consultas unificadas `opt(...)` para `ctrl` e `anim`.
+  - Vazão de simulação elevada para 226.415 ticks/s com p50 em 0.003 ms, e decodificação de retratos reduzida para 0.6 ms.
+
+- **Onda 55 - Decodificacao RGBA Alinhada em u32, Tabelas SFF Pre-Alocadas e Paletas PCX Sem Desvios**:
+  - sff::sprite_to_rgba: Alocacao direta em Vec<u32> garantindo alinhamento de 4 bytes por hardware, eliminando loops de alinhamento de fatias e checagens de desvio, e convertendo para Vec<u8> via Vec::from_raw_parts com custo zero.
+  - pcx::read_rgb_palette: Conversao de blocos RGB de 768 bytes em [u32; 256] com u32::from_ne_bytes sem desvios condicionais e atribuicao direta de canal alfa constante.
+  - sff::decode_v1: Remocao do campo nao utilizado idx em V1Job e pre-alocacao do vetor jobs com count.min(8192).
+  - sff::decode_v2: Pre-alocacao das tabelas de palettes com pal_count.min(buf.len() / 16 + 1) e jobs com spr_count.min(buf.len() / 28 + 1).
+  - sff::decode_v2_image: Otimizacao de quadros RAW profundidade 32 com copia direta de fatias e profundidade 24 com chunks de 3 bytes em vez de consultas byte a byte.
+
+- **Onda 56 - Binds com Semantica Copy, Fallbacks Preguicosos e Animacoes Diretas**:
+  - `fighter::Bind`: Implementacao de `Copy` e `PartialEq`, convertendo verificacoes e atualizacoes em `rebind` e `update_bind` em copias binarias de pilha sem clones na heap.
+  - `fighter::Fighter::change_anim_own`: Adicao de metodo auxiliar para troca de animacao propria, removendo clones externos de `def.clone()` em `changestate`, `changeanim` e transicoes de auto-turn.
+  - `matchs::run_state`: Conversao da consulta a `common` em fallback preguicoso (`let fallback;`), ignorando clones de `self.common` em todos os estados negativos (-3, -2, -1) e estados definidos pelo personagem.
+  - `matchs::change_state`: Substituicao do clone ansioso de `self.common` por igualdade de ponteiro `&self.common` e fallback sob demanda.
+  - `matchs::tick`: Eliminacao do clone por quadro de `f.st_def` no loop de override de fisica atraves de extracao escalar de `Option<char>`.

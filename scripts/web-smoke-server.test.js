@@ -15,6 +15,7 @@ async function withServer(run) {
   fs.mkdirSync(root);
   fs.mkdirSync(sibling);
   fs.mkdirSync(path.join(root, 'assets'));
+  fs.symlinkSync(sibling, path.join(root, 'assets', 'linked'), process.platform === 'win32' ? 'junction' : 'dir');
   fs.writeFileSync(path.join(root, 'index.html'), 'game');
   fs.writeFileSync(path.join(root, 'assets', 'index.html'), 'assets');
   fs.writeFileSync(path.join(sibling, 'secret.txt'), 'secret');
@@ -48,6 +49,14 @@ test('serves web build files from the local smoke server', async () => {
 test('does not disclose sibling files whose directory shares the build prefix', async () => {
   await withServer(async port => {
     const response = await request(port, '/../dist-private/secret.txt');
+    assert.equal(response.status, 404);
+    assert.notEqual(response.body, 'secret');
+  });
+});
+
+test('does not follow a link from the build directory to a sibling directory', async () => {
+  await withServer(async port => {
+    const response = await request(port, '/assets/linked/secret.txt');
     assert.equal(response.status, 404);
     assert.notEqual(response.body, 'secret');
   });

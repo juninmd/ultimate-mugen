@@ -221,10 +221,10 @@ pub fn decode_png(buf: &[u8]) -> Result<DecodedPng, String> {
                     gg = img[s + bs];
                     bb = img[s + 2 * bs];
                     aa = 255;
-                    // tRNS holds 16-bit BE samples: low byte at 8-bit depth, high byte at 16-bit
-                    if let Some(t) = tr {
+                    if let Some(t) = tr.filter(|t| t.len() >= 6) {
                         let hi = if bs == 2 { 0 } else { 1 };
-                        if t.len() >= 6 && rr == t[hi] && gg == t[2 + hi] && bb == t[4 + hi] {
+                        let same_low = bs == 1 || (img[s + 1] == t[1] && img[s + 3] == t[3] && img[s + 5] == t[5]);
+                        if rr == t[hi] && gg == t[2 + hi] && bb == t[4 + hi] && same_low {
                             aa = 0;
                         }
                     }

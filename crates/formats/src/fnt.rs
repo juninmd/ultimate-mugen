@@ -126,7 +126,7 @@ fn decode_fnt_v1(buf: &[u8]) -> Result<Font, String> {
                     if let Some(i) = toks.get(1).and_then(|t| t.parse::<u32>().ok()) {
                         slot = i;
                     }
-                    Glyph { x: slot * size[0].max(0) as u32, w: size[0].max(0) as u32 }
+                    Glyph { x: slot.saturating_mul(size[0].max(0) as u32), w: size[0].max(0) as u32 }
                 }
                 _ => {
                     let x = toks.get(1).and_then(|t| t.parse::<u32>().ok()).unwrap_or(0);

@@ -1,6 +1,3 @@
-//! In-memory virtual file system (port of the file-resolution parts of
-//! `src/mugen/loader.ts`) plus a tiny zip reader (stored + deflate, zip64).
-
 use crate::ini::unquote;
 use crate::Reader;
 use std::collections::BTreeMap;
@@ -16,7 +13,7 @@ pub fn norm_path(p: &str) -> String {
             .strip_prefix("./")
             .or_else(|| p.strip_prefix(".\\"))
             .unwrap_or(p);
-        let mut out = String::with_capacity(p.len());
+        let mut out = Vec::with_capacity(p.len());
         let mut last_slash = false;
         for b in p.bytes() {
             let b = if b == b'\\' {
@@ -28,9 +25,9 @@ pub fn norm_path(p: &str) -> String {
                 continue;
             }
             last_slash = b == b'/';
-            out.push(b as char);
+            out.push(b);
         }
-        return out;
+        return unsafe { String::from_utf8_unchecked(out) };
     }
     let s = p.replace('\\', "/");
     let s = s.strip_prefix("./").unwrap_or(&s);
@@ -63,12 +60,15 @@ pub fn join(prefix: &str, name: &str) -> String {
 pub fn text(b: &[u8]) -> String {
     let b = b.strip_prefix(&[0xef, 0xbb, 0xbf]).unwrap_or(b);
     if b.is_ascii() {
-        return String::from_utf8(b.to_vec()).unwrap_or_default();
+        return unsafe { std::str::from_utf8_unchecked(b) }.to_string();
     }
-    b.iter().map(|&c| c as char).collect()
+    let mut s = String::with_capacity(b.len() + (b.len() >> 2));
+    for &c in b {
+        s.push(c as char);
+    }
+    s
 }
 
-// ---------------------------------------------------------------------------
 // zip
 // ---------------------------------------------------------------------------
 
@@ -334,27 +334,25 @@ pub fn resolve<'a>(vfs: &'a Vfs, base_dir: &str, name: &str) -> Option<&'a [u8]>
         return None;
     }
     let base_dir = norm_path(base_dir.trim_end_matches(['/', '\\']));
-    let tries = [
-        if base_dir.is_empty() {
-            n.clone()
-        } else {
-            format!("{base_dir}/{n}")
-        },
-        n.clone(),
-        format!("data/{n}"),
-    ];
-    for t in &tries {
-        if let Some(v) = vfs.get(&norm_path(t)) {
+    if !base_dir.is_empty() {
+        let candidate = format!("{base_dir}/{n}");
+        if let Some(v) = vfs.get(&candidate) {
             return Some(v);
         }
     }
-    // fallback: basename anywhere in the folder, then anywhere
+    if let Some(v) = vfs.get(&n) {
+        return Some(v);
+    }
+    let candidate = format!("data/{n}");
+    if let Some(v) = vfs.get(&candidate) {
+        return Some(v);
+    }
     let base = n.rsplit('/').next().unwrap_or(&n);
     let suffix = format!("/{base}");
     if !base_dir.is_empty() {
         let folder = format!("{base_dir}/");
         if let Some((_, v)) = vfs
-            .range(folder.clone()..)
+            .range::<String, _>(&folder..)
             .take_while(|(k, _)| k.starts_with(&folder))
             .find(|(k, _)| k.ends_with(&suffix))
         {

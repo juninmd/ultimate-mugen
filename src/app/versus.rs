@@ -42,7 +42,7 @@ impl App {
             return;
         };
         let members = team.members[side].clone();
-        let (card, gap) = (74.0, 8.0);
+        let (card, gap) = (64.0, 6.0);
         let n = members.len();
         for (i, &reg_i) in members.iter().enumerate() {
             let k = ease_out((t - 0.55 - i as f32 * 0.07) / 0.3);
@@ -74,9 +74,9 @@ impl App {
                     0,
                     self.preview_t,
                     x + card / 2.0,
-                    y + card - 6.0,
+                    y + card - 4.0,
                     card - 8.0,
-                    card - 12.0,
+                    card - 10.0,
                     side == 1,
                 );
             }
@@ -91,8 +91,8 @@ impl App {
             self.ui.text(
                 &short.to_uppercase(),
                 x + card / 2.0,
-                y + 14.0,
-                12.0,
+                y + 12.0,
+                11.0,
                 if active { hex("#ffcc33") } else { WHITE },
                 Align::Center,
                 true,
@@ -301,8 +301,8 @@ impl App {
             );
         }
         if self.team.is_some() {
-            self.versus_team_strip(0, 40.0, 504.0, t);
-            self.versus_team_strip(1, VW - 40.0, 504.0, t);
+            self.versus_team_strip(0, 40.0, 88.0, t);
+            self.versus_team_strip(1, VW - 40.0, 88.0, t);
         }
 
         let cx = 640.0;

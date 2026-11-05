@@ -13,7 +13,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use web_time::Instant;
 pub use web_time::Instant as Clock;
-use ume_render::{Atlas, Canvas, PostFx, Renderer, Target};
+use ume_render::{Atlas, Canvas, PaletteRows, PostFx, Renderer, Target};
 pub use ume_render::PostParams;
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
@@ -96,7 +96,7 @@ impl Input {
     }
 }
 
-pub struct Gpu { pub device: wgpu::Device, pub queue: wgpu::Queue, pub renderer: Renderer, pub rgba_atlas: Atlas, pub index_atlas: Atlas }
+pub struct Gpu { pub device: wgpu::Device, pub queue: wgpu::Queue, pub renderer: Renderer, pub rgba_atlas: Atlas, pub index_atlas: Atlas, pub palette_rows: PaletteRows }
 
 pub struct Frame<'a> {
     pub gpu: &'a mut Gpu,
@@ -192,7 +192,7 @@ async fn init_live(instance: wgpu::Instance, window: Arc<Window>) -> Result<Live
     let mut rgba_atlas = Atlas::new(side, side);
     let canvas = Canvas::new(&renderer, &queue, &mut rgba_atlas).ok_or("atlas too small")?;
     let post = PostFx::new(&device, config.format);
-    let gpu = Gpu { device, queue, renderer, rgba_atlas, index_atlas: Atlas::new(side, side) };
+    let gpu = Gpu { device, queue, renderer, rgba_atlas, index_atlas: Atlas::new(side, side), palette_rows: PaletteRows::new() };
     Ok(Live { window, surface, config, gpu, canvas, post })
 }
 

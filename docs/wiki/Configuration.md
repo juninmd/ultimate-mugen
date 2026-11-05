@@ -41,7 +41,9 @@ The window can be dragged to any size. The game draws into a fixed 16:9 logical 
 | `--mute` | No audio |
 | `--shots <folder>` | Automatic tour saving screenshots |
 | `--version` | Print the version |
-| `--check-update` / `--no-update-check` | Control the update check |
+| `--check-update` | Print whether a newer release exists and exit |
+| `--update` | Download, verify and install the newest release, then exit |
+| `--no-auto-update` / `--no-update-check` | Keep the notice only / skip the update check |
 
 ## Environment variables
 
@@ -51,6 +53,7 @@ The window can be dragged to any size. The game draws into a fixed 16:9 logical 
 | `UME_MARKET_HOME` | Folder for [marketplace](Marketplace.md) downloads and state |
 | `UME_GITHUB_TOKEN` / `GITHUB_TOKEN` | Optional GitHub token for the marketplace (raises the API rate limit) |
 | `UME_NO_UPDATE_CHECK=1` | Skip update checks |
+| `UME_NO_AUTO_UPDATE=1` | Keep the update notice but never download or install |
 | `UME_NOFX=1` | Disable the animated stage layer (performance testing) |
 | `UME_TOUR=mugen` + `UME_CHARS=a,b` + `UME_STAGE=<id>` | With `--shots`, photograph imported fighters |
 

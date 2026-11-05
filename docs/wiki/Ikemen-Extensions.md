@@ -39,10 +39,15 @@ Controllers e triggers do Ikemen GO que personagens podem usar em CNS ou ZSS.
 | `OverrideClsn` | `clsn` (1 attack, 2 hurt, default 2), `index` (-1 replaces the whole list), `value = x1, y1, x2, y2`, `time` (default 1, -1 = until replaced) | Replaces a collision box in animation units |
 | `ResizeClsn` | `clsn`, `index` (-1 = all boxes), `value = dx1, dy1, dx2, dy2`, `time` | Moves each edge of the box by the given deltas |
 | `TransformClsn` | `clsn`, `scale = sx[, sy]`, `offset = x, y`, `time` | Scales then shifts every box of that type |
+| `AssertCommand` | `value` (or `name`), `time` (default 1) | Makes that command active for `time` ticks; `Command` and the built-in walk, guard and jump states see it even outside the input window |
+| `AssertInput` | `value` (input bits), `time` (default 1) | ORs the bits into the player's input for `time` ticks, so `Command` matches the injected press |
+| `ShiftInput` | `value` | Positive pushes `value` extra history ticks (the input arrives later), negative drops that many ticks |
 
 Collision modifiers apply in the order they were added, are replaced when the same kind of change is issued again for the same box type (and `index`), count down once per tick, and are reflected by the F2 box view. `time = -1` keeps a modifier until another one replaces it.
 
 PT-BR: `RunState` executa os controllers de outro state sem trocar de state; `Height` ajusta a altura do corpo no tick; `GetHitVarSet` grava campos do `GetHitVar` (`hittype` no lugar de `type`); `ModifyHitDef` e `ModifyReversalDef` alteram só os campos listados; `OverrideClsn`, `ResizeClsn` e `TransformClsn` (`clsn` = 1 ataque, 2 corpo) mudam as caixas de colisão e aparecem no F2.
+
+PT-BR: `AssertCommand` mantém um comando ativo por `time` ticks; `AssertInput` injeta bits no input do jogador pelos próximos `time` ticks; `ShiftInput` empurra (positivo) ou descarta (negativo) ticks do histórico de inputs.
 
 | Trigger | Returns |
 |---|---|

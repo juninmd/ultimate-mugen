@@ -67,9 +67,12 @@ impl Batch {
         if q.flip_v { std::mem::swap(&mut v0, &mut v1); }
         let add = [q.add[0], q.add[1], q.add[2], 0.0];
         let base = self.vertices.len() as u32;
-        for (px, py, u, v) in [(x, y, u0, v0), (x + w, y, u1, v0), (x + w, y + h, u1, v1), (x, y + h, u0, v1)] {
-            self.vertices.push(Vertex { pos: [px, py], uv: [u, v], pal: q.palette, mul: q.mul, add, hue: 0.0 });
-        }
+        self.vertices.extend_from_slice(&[
+            Vertex { pos: [x, y], uv: [u0, v0], pal: q.palette, mul: q.mul, add, hue: 0.0 },
+            Vertex { pos: [x + w, y], uv: [u1, v0], pal: q.palette, mul: q.mul, add, hue: 0.0 },
+            Vertex { pos: [x + w, y + h], uv: [u1, v1], pal: q.palette, mul: q.mul, add, hue: 0.0 },
+            Vertex { pos: [x, y + h], uv: [u0, v1], pal: q.palette, mul: q.mul, add, hue: 0.0 },
+        ]);
         self.indices.extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
         self.extend_call(q.blend, 6);
     }

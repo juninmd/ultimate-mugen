@@ -131,3 +131,7 @@ A avaliação de partidas em `crates/engine/src/matchs.rs`, `crates/engine/src/t
 ## Fila de Comandos de Entrada da IA com Alocação Zero
 
 `crates/engine/src/ai.rs` reutiliza a memória do buffer circular em `Ai.queue: VecDeque<u32>` por meio de `append_seq(&mut queue, ...)` em vez de criar e descartar vetores temporários na heap `Vec<u32>` a cada decisão de movimento da IA. A latência máxima por tick caiu para 0,046 ms sob carga.
+
+## Lotes de Vértices Contíguos e Rasterização sem Multiplicação Prévia
+
+`Batch::push` em `crates/render/src/batch.rs` substitui chamadas repetidas a `self.vertices.push()` por uma única cópia de fatia contígua (`self.vertices.extend_from_slice(&[...])`), agrupando os quatro vértices do quadrilátero em uma única operação de memória. Em `crates/engine/src/raster.rs`, `pixmap_to_image` pré-dimensiona os buffers de pixel (`vec![0u8; pixels.len() * 4]`) e desmultiplica os canais straight-alpha usando `chunks_exact_mut(4)`, viabilizando auto-vetorização sobre superfícies e efeitos procedurais de cenários.

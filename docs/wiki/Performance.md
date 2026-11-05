@@ -131,3 +131,7 @@ Match evaluation in `crates/engine/src/matchs.rs`, `crates/engine/src/triggers.r
 ## Zero-Allocation AI Input Command Queue
 
 `crates/engine/src/ai.rs` reuses the backing ring-buffer memory of `Ai.queue: VecDeque<u32>` via `append_seq(&mut queue, ...)` rather than constructing and discarding intermediate heap vectors `Vec<u32>` on each AI move decision. Peak tick latency dropped to 0.046 ms under load.
+
+## Contiguous Vertex Slice Batching & Demultiplying Rasterization
+
+`Batch::push` in `crates/render/src/batch.rs` replaces repeated `self.vertices.push()` calls with single contiguous slice copying (`self.vertices.extend_from_slice(&[...])`), batching all four quad vertices in a single memory operation. In `crates/engine/src/raster.rs`, `pixmap_to_image` pre-sizes pixel buffers (`vec![0u8; pixels.len() * 4]`) and demultiplies straight-alpha channels via `chunks_exact_mut(4)` to enable auto-vectorization across procedurally rendered stage surfaces and effects.

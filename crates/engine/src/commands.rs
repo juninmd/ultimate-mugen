@@ -102,6 +102,7 @@ pub fn parse_command(name: &str, s: &str, time: i32, buffer_time: i32) -> Comman
     }
 }
 
+#[inline]
 fn held(h: &InputHistory, t: i64, s: &CmdSymbol) -> bool {
     let bits = h.at(t);
     if s.neutral && bits & 15 != 0 {
@@ -118,10 +119,7 @@ fn held(h: &InputHistory, t: i64, s: &CmdSymbol) -> bool {
             return false;
         }
     }
-    if s.btns != 0 && bits & s.btns != s.btns {
-        return false;
-    }
-    true
+    bits & s.btns == s.btns
 }
 fn is_state_step(s: &CmdSymbol) -> bool {
     s.hold || (s.neutral && s.btns == 0 && s.dir == 0)
@@ -151,16 +149,9 @@ fn fires(h: &InputHistory, t: i64, s: &CmdSymbol) -> bool {
         if s.btns & now & !prev == 0 {
             return false;
         }
-        let mut b = 1u32;
-        while b <= s.btns {
-            if s.btns & b != 0
-                && (now & !prev) & b == 0
-                && (prev & !p2) & b == 0
-                && (p2 & !p3) & b == 0
-            {
-                return false;
-            }
-            b <<= 1;
+        let pressed_recently = (now & !prev) | (prev & !p2) | (p2 & !p3);
+        if s.btns & !pressed_recently != 0 {
+            return false;
         }
         return true;
     }
@@ -175,7 +166,8 @@ pub fn match_command(h: &InputHistory, c: &CommandDef) -> bool {
     let tt = h.tick;
     let last = &c.steps[n - 1];
     let mut t_end = tt;
-    while t_end > tt - c.buffer_time as i64 && t_end >= 0 {
+    let limit_buf = tt - c.buffer_time as i64;
+    while t_end > limit_buf && t_end >= 0 {
         if fires(h, t_end, last) {
             if n == 1 {
                 return true;
@@ -183,12 +175,13 @@ pub fn match_command(h: &InputHistory, c: &CommandDef) -> bool {
             let limit = t_end - c.time as i64;
             let mut t = t_end;
             let mut ok = true;
+            let lower_bound = limit.max(0);
             for i in (0..n - 1).rev() {
                 let s = &c.steps[i];
                 let strict_next = c.steps[i + 1].strict;
                 let mut found = -1i64;
                 let mut x = t - if is_state_step(s) || s.release { 0 } else { 1 };
-                while x >= limit.max(0) {
+                while x >= lower_bound {
                     if fires(h, x, s) {
                         found = x;
                         break;
@@ -221,10 +214,12 @@ pub struct CommandState {
 impl CommandState {
     pub fn update(&mut self, h: &InputHistory, cmds: &[CommandDef], paused: bool) {
         self.active.clear();
-        for v in self.pause_hold.values_mut() {
-            *v -= 1;
+        if !self.pause_hold.is_empty() {
+            for v in self.pause_hold.values_mut() {
+                *v -= 1;
+            }
+            self.pause_hold.retain(|_, v| *v > 0);
         }
-        self.pause_hold.retain(|_, v| *v > 0);
         for c in cmds {
             if self.active.contains(c.name.as_str()) {
                 continue;

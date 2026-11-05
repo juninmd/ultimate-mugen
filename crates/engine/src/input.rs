@@ -32,12 +32,16 @@ impl InputHistory {
 }
 
 /// Relative direction bits: U=1 D=2 B=4 F=8
+#[inline]
 pub fn rel_dirs(bits: u32, facing: i32) -> u32 {
-    let mut r = bits & 3;
-    let (l, rr) = (bits & k::L != 0, bits & k::R != 0);
-    if l && rr { return r; }
-    if facing >= 0 { if l { r |= 4 } if rr { r |= 8 } } else { if rr { r |= 4 } if l { r |= 8 } }
-    r
+    let lr = bits & 12;
+    if lr == 12 {
+        bits & 3
+    } else if facing >= 0 {
+        bits & 15
+    } else {
+        (bits & 3) | ((lr & 4) << 1) | ((lr & 8) >> 1)
+    }
 }
 
 /// Source of input bits for a player (keyboard/gamepad/touch/AI/replay).

@@ -108,3 +108,9 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
   - Replaces nested branching in `input::rel_dirs` with branchless bitwise shift `ud | (4 << (is_back ^ 1))`.
   - Replaces string matching in `button_bit` with byte-level slice matching, supporting case-insensitivity without allocation.
   - Implements branchless facing assignment in `InputHistory::push`.
+
+## SFF v2 chunked RLE decompression and redundant zero-store elimination
+
+- Redundant zero-store skipping in `decode_rle8`: Since `vec![0u8; size]` allocates already zero-initialized memory, runs of transparent pixels (`val == 0`) and literal zeroes (`d == 0`) skip memory writes and simply advance the write index `j`. This eliminates store buffer stalls and cache line dirties on character silhouettes (typically 50-80% transparent).
+- Chunked RLE5 run fills: In `decode_rle5`, inner byte-by-byte loops are replaced with bulk slice `.fill(c)` (or index advances when `c == 0`), converting single-byte iterations into vectorized memsets.
+- Direct slice copying for SFF v2 palettes: In `decode_sff_v2`, palettes with valid slice bounds copy 4-byte chunks in bulk or directly via `copy_from_slice`, eliminating per-color bounds and saturating additions.

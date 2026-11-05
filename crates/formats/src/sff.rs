@@ -301,16 +301,30 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
             let mut data = vec![0u8; 1024];
             let start = ldata.saturating_add(d_ofs);
             let n = (d_len / 4).min(256);
-            for c in 0..n {
-                let s = start.saturating_add(c * 4);
-                if s.saturating_add(3) >= buf.len() {
-                    break;
+            if start.saturating_add(n * 4) <= buf.len() {
+                if verlo2 == 0 {
+                    let src_chunks = buf[start..start + n * 4].as_chunks::<4>().0;
+                    let dst_chunks = data[..n * 4].as_chunks_mut::<4>().0;
+                    for (src, dst) in src_chunks.iter().zip(dst_chunks.iter_mut()) {
+                        dst[0] = src[0];
+                        dst[1] = src[1];
+                        dst[2] = src[2];
+                        dst[3] = 255;
+                    }
+                } else {
+                    data[..n * 4].copy_from_slice(&buf[start..start + n * 4]);
                 }
-                data[c * 4..c * 4 + 3].copy_from_slice(&buf[s..s + 3]);
-                // v2.00: 4th byte unused; v2.01 stores alpha (Ikemen behavior)
-                data[c * 4 + 3] = if verlo2 == 0 { 255 } else { buf[s + 3] };
+            } else {
+                for c in 0..n {
+                    let s = start.saturating_add(c * 4);
+                    if s.saturating_add(3) >= buf.len() {
+                        break;
+                    }
+                    data[c * 4..c * 4 + 3].copy_from_slice(&buf[s..s + 3]);
+                    data[c * 4 + 3] = if verlo2 == 0 { 255 } else { buf[s + 3] };
+                }
             }
-            data[3] = 0; // color 0 is always transparent
+            data[3] = 0;
             Arc::new(data)
         };
         palettes.push(Palette { group, index, data });
@@ -493,10 +507,14 @@ pub fn decode_rle8(src: &[u8], size: usize) -> Vec<u8> {
                 0
             };
             let e = (j + n).min(size);
-            out[j..e].fill(val);
+            if val != 0 {
+                out[j..e].fill(val);
+            }
             j = e;
         } else {
-            out[j] = d;
+            if d != 0 {
+                out[j] = d;
+            }
             j += 1;
         }
     }
@@ -528,24 +546,23 @@ pub fn decode_rle5(src: &[u8], size: usize) -> Vec<u8> {
             i += 1;
         }
         loop {
-            if j < size {
-                out[j] = c;
-                j += 1;
+            let count = (rl + 1) as usize;
+            let end = (j + count).min(size);
+            if c != 0 {
+                out[j..end].fill(c);
             }
-            rl -= 1;
-            if rl < 0 {
-                dl -= 1;
-                if dl < 0 {
-                    break;
-                }
-                if i >= len {
-                    return out;
-                }
-                let b = src[i];
-                i += 1;
-                c = b & 0x1f;
-                rl = (b >> 5) as i32;
+            j = end;
+            dl -= 1;
+            if dl < 0 {
+                break;
             }
+            if i >= len {
+                return out;
+            }
+            let b = src[i];
+            i += 1;
+            c = b & 0x1f;
+            rl = (b >> 5) as i32;
         }
     }
     out

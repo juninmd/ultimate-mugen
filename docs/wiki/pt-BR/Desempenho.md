@@ -353,3 +353,7 @@ etain_mut.
   - `commands::CmdSymbol`: Implementacao de `Copy` e `PartialEq` para manipulacao binaria de simbolos de 20 bytes.
   - `commands::held`: Verificacao antecipada de mascara de botoes antes de consultas de direcao relativa e orientacao, descartando botoes inativos na primeira instrucao.
   - `commands::fires`: Avaliacao de `now & !prev` antes de ler ticks anteriores do historico (`p2`, `p3`), evitando sondagens de historico em frames sem disparo.
+
+- **Onda 59 - Escala em Cache no Preenchimento de Caixas e Poda AABB Multicaixas**:
+  - `fighter::fill_boxes`: Ignoradas consultas dinamicas por string `size.*` quando nao ha overrides de tamanho, lendo `def.scale_x` e `def.scale_y` diretamente.
+  - `matchs::overlap`: Adicionada saida antecipada por bounding box composto (AABB) em colisoes de grupos multicaixas (`a.len() > 1 || b.len() > 1`), eliminando testes $O(N 	imes M)$ em pares disjuntos.

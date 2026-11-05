@@ -45,7 +45,8 @@ sends local input; the overlay shows `SPECTATOR · ping · frames behind`.
 Replays recorded online store the session configuration (`netplay`: side, peer, port, delay, rollback window, player
 count, spectator flag) next to the inputs, so a desync can be reproduced with the same settings. When GGRS reports a
 desync, the game writes `replays/desync-<unix>.json` with that config, the frame, `Match::checksum()` and the last 120
-input frames.
+input frames. A desync report is a diagnostic, not a replay: the Replays menu never lists it (neither as a fight nor as
+an unreadable file), so it does not look like a corrupted replay after a desync.
 
 ## Rules for deterministic content
 

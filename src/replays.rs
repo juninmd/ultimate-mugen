@@ -407,10 +407,8 @@ pub fn problems(dir: &Path) -> Vec<(PathBuf, String)> {
     read.filter_map(Result::ok)
         .map(|e| e.path())
         .filter(|p| p.extension().is_some_and(|x| x == "json"))
-        .filter_map(|path| match load(&path) {
-            Ok(_) => None,
-            Err(e) => Some((path, e)),
-        })
+        .filter(|p| !p.file_name().is_some_and(|n| n.to_string_lossy().starts_with("desync-")))
+        .filter_map(|path| match load(&path) { Ok(_) => None, Err(e) => Some((path, e)) })
         .collect()
 }
 

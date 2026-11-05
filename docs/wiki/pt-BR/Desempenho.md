@@ -315,3 +315,9 @@ etain_mut.
   - `Fighter::anim_elem_time`: Retorno instantâneo para `animelemtime(1)` sem iteração de quadros.
   - `bytecode::Code::run`: Curto-circuito em caminho rápido para expressões de comparação de 3 operações (`[Trig0, Const, Cmp]` e `[Const, Trig0, Cmp]`), avaliando gatilhos diretamente via `Host::trigger0` e ignorando alocações na pilha da máquina virtual.
   - Redução do tempo de carregamento de `kfm720.def` para 8.7 ms e de `kfm.def` para 4.4 ms.
+
+- **Onda 53 - Dicas de Índice de Lutadores, Acertos em Buffer de Pilha e Atalhos de Reversão**:
+  - `Match::idx_hint`: Resolução de índice direta em $O(1)$ baseada em dicas de posição da ordem de execução, substituindo varreduras lineares entre lutadores no pipeline de cada tick.
+  - `Match::detect_reversals`: Saída rápida antecipada quando nenhum lutador possui estado ativo de reversão, além de buffers de pilha de tamanho fixo para reversões detectadas.
+  - `Match::detect_hits`: Buffer fixo em pilha `pending` armazenando apenas índices e coordenadas de lutadores, eliminando clones prematuros na heap de `HitDefData` em frames sem impacto.
+  - Lista de `struck` migrada para buffers de pilha, eliminando alocações dinâmicas nos loops de física e detecção de acertos.

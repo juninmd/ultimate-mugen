@@ -319,3 +319,9 @@ etain_mut.
   - `Fighter::anim_elem_time`: Instant return for `animelemtime(1)` without frame iteration.
   - `bytecode::Code::run`: Fast-path short-circuits for 3-op comparison expressions (`[Trig0, Const, Cmp]` and `[Const, Trig0, Cmp]`), evaluating triggers directly via `Host::trigger0` and bypassing virtual machine stack allocation.
   - Dropped `kfm720.def` loading time to 8.7 ms and `kfm.def` to 4.4 ms.
+
+- **Wave 53 - Fighter Index Hints, Stack-Allocated Hits & Early Reversal Bypasses**:
+  - `Match::idx_hint`: Direct $O(1)$ index resolution based on run-order position hints, replacing linear scans across active fighters in the per-tick execution pipeline.
+  - `Match::detect_reversals`: Fast-path early exit when no fighters have an active reversal state, plus fixed-size stack arrays for detected reversals.
+  - `Match::detect_hits`: Stack-allocated fixed buffer `pending` storing only fighter indices and coordinates, avoiding eager `HitDefData` heap clones on idle/no-hit frames.
+  - `struck` list switched to stack arrays, eliminating vector allocations across physics and hit detection loops.

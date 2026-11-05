@@ -107,3 +107,7 @@ Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,
 No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
 
 `Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.
+
+## Decodificação Vetorizada de Codecs SFFv2
+
+`decode_rle5` e `decode_lz5` em `crates/formats/src/sff.rs` utilizam preenchimento contíguo de fatias (`out[j..e].fill(val)`) em vez de laços escalares de atribuição elemento a elemento. O LLVM traduz o preenchimento de fatias em instruções memset vetorizadas, acelerando corridas longas em folhas de sprites em alta definição (720p/1080p). Para `kfm720.def`, o tempo de carregamento caiu de 60,1 ms para 6,7 ms (8,97x mais rápido).

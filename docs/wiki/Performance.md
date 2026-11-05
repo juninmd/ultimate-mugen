@@ -108,3 +108,8 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
   - Replaces nested branching in `input::rel_dirs` with branchless bitwise shift `ud | (4 << (is_back ^ 1))`.
   - Replaces string matching in `button_bit` with byte-level slice matching, supporting case-insensitivity without allocation.
   - Implements branchless facing assignment in `InputHistory::push`.
+
+## HitDef zero-alloc shake parameters and in-place type matching
+
+- Zero-alloc shake parameter resolution: `hitdef::build` uses direct static parameter string lookups (`parse_shake`) instead of formatting 10 dynamic heap `String` keys (`{prefix}.freq`, `{prefix}.time`, `{prefix}.ampl`, etc.) per `HitDef` instantiation.
+- In-place `animtype` and `groundtype` parsing: `hitdef::animtype` and `hitdef::groundtype` match standard MUGEN animation/ground tokens using `eq_ignore_ascii_case` directly on borrowed `&str` without lowercase string allocations.

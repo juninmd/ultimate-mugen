@@ -8,6 +8,9 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
+mod palette;
+use palette::{poly_pt, side_tint};
+
 pub struct Hud {
     pub replay: bool,
     pub inputs: Vec<(u32, u16)>,
@@ -1289,14 +1292,6 @@ fn team_label(m: &Match, team: Option<&TeamInfo>, side: usize) -> Option<String>
     m.team_leader(side)
 }
 
-fn side_tint(side: usize) -> [f32; 3] {
-    if side == 0 {
-        [0.3, 0.72, 1.0]
-    } else {
-        [1.0, 0.38, 0.52]
-    }
-}
-
 fn glass(
     p: &impl Fn(f32, f32) -> Vec2,
     s: f32,
@@ -1373,6 +1368,3 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
     let _ = (s, frame, col);
 }
 
-fn poly_pt(p: impl Fn(f32, f32) -> Vec2, x: f32, y: f32) -> Vec2 {
-    p(x, y)
-}

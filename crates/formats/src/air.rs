@@ -3,6 +3,9 @@
 use crate::ini::{parse_float, parse_i32, split_lines, starts_with_number, strip_comment};
 use std::collections::HashMap;
 
+mod scan;
+use scan::{skip_digits, skip_ws};
+
 /// Collision box `x1, y1, x2, y2`, normalized so that `x1 <= x2`, `y1 <= y2`.
 pub type Box4 = [f32; 4];
 
@@ -61,25 +64,6 @@ fn norm_box(a: &[f32]) -> Box4 {
     let g = |i: usize| a.get(i).copied().unwrap_or(0.0);
     let (x1, y1, x2, y2) = (g(0), g(1), g(2), g(3));
     [x1.min(x2), y1.min(y2), x1.max(x2), y1.max(y2)]
-}
-
-#[inline]
-fn is_ws(c: u8) -> bool {
-    matches!(c, b' ' | b'\t' | b'\n' | b'\r' | 0x0b | 0x0c)
-}
-
-fn skip_ws(b: &[u8], mut i: usize) -> usize {
-    while i < b.len() && is_ws(b[i]) {
-        i += 1;
-    }
-    i
-}
-
-fn skip_digits(b: &[u8], mut i: usize) -> usize {
-    while i < b.len() && b[i].is_ascii_digit() {
-        i += 1;
-    }
-    i
 }
 
 /// `/begin\s+action\s+(-?\d+)/i` anywhere in the line.

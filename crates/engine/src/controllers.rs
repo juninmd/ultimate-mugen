@@ -15,11 +15,11 @@ pub(crate) fn set_vars(m: &mut Match, i: usize, sc: &Controller, add: bool, targ
         else if idx < 60 { t.vars[idx] = if add { t.vars[idx] + v as i32 } else { v as i32 }; }
         return;
     }
-    for (k, _) in &sc.params {
+    for (k, param) in &sc.params {
         let (sys, fl, rest) = if let Some(r) = k.strip_prefix("sysfvar(") { (true, true, r) } else if let Some(r) = k.strip_prefix("sysvar(") { (true, false, r) }
             else if let Some(r) = k.strip_prefix("fvar(") { (false, true, r) } else if let Some(r) = k.strip_prefix("var(") { (false, false, r) } else { continue };
         let Ok(idx) = rest.trim_end_matches(')').trim().parse::<usize>() else { continue };
-        let v = m.num(i, sc, k, 0.0, 0);
+        let v = param.exprs.first().map(|e| m.ev(i, e)).unwrap_or(0.0);
         let t = &mut m.fighters[target];
         match (sys, fl) {
             (false, false) if idx < 60 => t.vars[idx] = if add { t.vars[idx] + v as i32 } else { v as i32 },
@@ -39,13 +39,17 @@ fn life_add(m: &mut Match, t: usize, v: f32, kill: bool, absolute: bool) {
     f.life = nl.clamp(0.0, f.life_max);
 }
 
-fn target_indices(m: &Match, i: usize, sc: &Controller) -> Vec<usize> {
+fn target_indices(m: &Match, i: usize, sc: &Controller) -> [Option<usize>; 8] {
     let id = m.num_opt(i, sc, "id", 0).map(|v| v as i32).unwrap_or(-1);
-    let mut out = Vec::with_capacity(m.fighters[i].targets.len());
+    let mut out = [None; 8];
+    let mut count = 0;
     for t in &m.fighters[i].targets {
-        if (id < 0 || t.1 == id) {
+        if id < 0 || t.1 == id {
             if let Some(idx) = m.idx(t.0) {
-                out.push(idx);
+                if count < out.len() {
+                    out[count] = Some(idx);
+                    count += 1;
+                }
             }
         }
     }
@@ -60,9 +64,9 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
     match sc.kind.as_str() {
         "changestate" | "selfstate" => {
             let v = n(m, "value", 0.0) as i32;
-            if sc.has("ctrl", 0) { m.fighters[i].ctrl = n(m, "ctrl", 0.0) != 0.0; }
+            if let Some(c) = opt(m, "ctrl") { m.fighters[i].ctrl = c != 0.0; }
             let owner = if sc.kind == "selfstate" { m.fighters[i].def.clone() } else { m.fighters[i].st_def.clone() };
-            let anim = if sc.has("anim", 0) { Some(n(m, "anim", 0.0) as i32) } else { None };
+            let anim = opt(m, "anim").map(|a| a as i32);
             m.change_state(i, v, owner);
             if let Some(a) = anim { let d = m.fighters[i].def.clone(); m.fighters[i].change_anim(a, &d, 1); }
         }
@@ -70,7 +74,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             let v = n(m, "value", 0.0) as i32;
             let d = m.fighters[i].def.clone();
             let giver = m.fighters[i].id;
-            for t in target_indices(m, i, sc) { m.change_state(t, v, d.clone()); m.fighters[t].state_giver = Some(giver); }
+            for t in target_indices(m, i, sc).into_iter().flatten() { m.change_state(t, v, d.clone()); m.fighters[t].state_giver = Some(giver); }
         }
         "changeanim" | "changeanim2" => {
             let v = n(m, "value", 0.0) as i32;
@@ -211,9 +215,9 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "targetlifeadd" => {
             let (v, k, a) = (n(m, "value", 0.0) as f32, n(m, "kill", 1.0) != 0.0, n(m, "absolute", 0.0) != 0.0);
             let mul = if a { 1.0 } else { m.fighters[i].attack_mul };
-            for t in target_indices(m, i, sc) { life_add(m, t, v * mul, k, a); }
+            for t in target_indices(m, i, sc).into_iter().flatten() { life_add(m, t, v * mul, k, a); }
         }
-        "targetpoweradd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc) { m.add_power(t, v); } }
+        "targetpoweradd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc).into_iter().flatten() { m.add_power(t, v); } }
         "targetadd" => {
             let want = n(m, "id", -1.0) as i32;
             let pick = if want >= 0 { m.idx(want as u32) } else { m.enemy(i, 0) };
@@ -224,10 +228,10 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 let _ = rroot;
             }
         }
-        "targetscoreadd" => { let v = n(m, "value", 0.0); for t in target_indices(m, i, sc) { let root = m.fighters[t].root; if let Some(r) = m.idx(root) { let f = &mut m.fighters[r]; f.score = (f.score + v).max(0.0); f.score_total = (f.score_total + v).max(0.0); } } }
-        "targetredlifeadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc) { let f = &mut m.fighters[t]; f.ikemen.red_life = (f.ikemen.red_life + v).clamp(f.life, f.life_max); } }
-        "targetdizzypointsadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc) { let f = &mut m.fighters[t]; f.ikemen.dizzy_points = (f.ikemen.dizzy_points + v).clamp(0.0, f.ikemen.dizzy_max); } }
-        "targetguardpointsadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc) { let f = &mut m.fighters[t]; f.ikemen.guard_points = (f.ikemen.guard_points + v).clamp(0.0, f.ikemen.guard_max); } }
+        "targetscoreadd" => { let v = n(m, "value", 0.0); for t in target_indices(m, i, sc).into_iter().flatten() { let root = m.fighters[t].root; if let Some(r) = m.idx(root) { let f = &mut m.fighters[r]; f.score = (f.score + v).max(0.0); f.score_total = (f.score_total + v).max(0.0); } } }
+        "targetredlifeadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc).into_iter().flatten() { let f = &mut m.fighters[t]; f.ikemen.red_life = (f.ikemen.red_life + v).clamp(f.life, f.life_max); } }
+        "targetdizzypointsadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc).into_iter().flatten() { let f = &mut m.fighters[t]; f.ikemen.dizzy_points = (f.ikemen.dizzy_points + v).clamp(0.0, f.ikemen.dizzy_max); } }
+        "targetguardpointsadd" => { let v = n(m, "value", 0.0) as f32; for t in target_indices(m, i, sc).into_iter().flatten() { let f = &mut m.fighters[t]; f.ikemen.guard_points = (f.ikemen.guard_points + v).clamp(0.0, f.ikemen.guard_max); } }
         "scoreadd" => { let v = n(m, "value", 0.0); if let Some(r) = m.idx(m.fighters[i].root) { let f = &mut m.fighters[r]; f.score = (f.score + v).max(0.0); f.score_total = (f.score_total + v).max(0.0); } }
         "roundtimeset" => { let v = n(m, "value", 99.0).clamp(0.0, 100000.0); m.timer = (v * 60.0).round() as i32; m.round_ticks = m.timer; }
         "roundtimeadd" => { let v = n(m, "value", 0.0); m.timer = ((m.timer as f64) + v * 60.0).clamp(0.0, 100000.0 * 60.0).round() as i32; }
@@ -235,17 +239,17 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             let x = if sc.has("x", 0) { Some(n(m, "x", 0.0) as f32 * l) } else { None };
             let y = if sc.has("y", 0) { Some(n(m, "y", 0.0) as f32 * l) } else { None };
             let add = sc.kind == "targetveladd";
-            for t in target_indices(m, i, sc) {
+            for t in target_indices(m, i, sc).into_iter().flatten() {
                 let f = &mut m.fighters[t];
                 if let Some(x) = x { if add { f.vel.x += x } else { f.vel.x = x } }
                 if let Some(y) = y { if add { f.vel.y += y } else { f.vel.y = y } }
             }
         }
-        "targetfacing" => { let v = n(m, "value", 1.0); let fa = m.fighters[i].facing; for t in target_indices(m, i, sc) { m.fighters[t].facing = if v > 0.0 { fa } else { -fa }; } }
+        "targetfacing" => { let v = n(m, "value", 1.0); let fa = m.fighters[i].facing; for t in target_indices(m, i, sc).into_iter().flatten() { m.fighters[t].facing = if v > 0.0 { fa } else { -fa }; } }
         "targetbind" => {
             let (time, x, y) = (n(m, "time", 1.0) as i32, n2(m, "pos", 0.0, 0) as f32 * l, n2(m, "pos", 0.0, 1) as f32 * l);
             let me = m.fighters[i].id;
-            for t in target_indices(m, i, sc) { m.fighters[t].bind = Some(Bind { to: me, time, x, y, kind: BindKind::Target }); m.update_bind(t); }
+            for t in target_indices(m, i, sc).into_iter().flatten() { m.fighters[t].bind = Some(Bind { to: me, time, x, y, kind: BindKind::Target }); m.update_bind(t); }
         }
         "bindtotarget" | "bindtoparent" | "bindtoroot" => {
             let (time, x, y) = (n(m, "time", 1.0) as i32, n2(m, "pos", 0.0, 0) as f32 * l, n2(m, "pos", 0.0, 1) as f32 * l);

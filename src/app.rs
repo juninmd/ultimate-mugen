@@ -15,6 +15,7 @@ use ume_engine::chardef::CharDef;
 
 mod cutscene;
 mod keyedit;
+mod loading;
 mod market;
 mod replay_browser;
 mod settings_screen;
@@ -136,6 +137,7 @@ pub struct Pending {
     stage_job: Option<crate::registry::StageJob>,
     sess: Option<Session>,
     jobs: Vec<crate::registry::LoadJob>,
+    warm: loading::Warm,
 }
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
@@ -300,6 +302,8 @@ pub struct App {
     replay_by_name: bool,
     /// a desync report was already written for the current online match
     desync_reported: bool,
+    /// Roster signature of the last sprite warm-up, so a rematch keeps the atlases it already filled.
+    warm_key: String,
 }
 
 const MENU: [(&str, &str); 15] = [
@@ -422,6 +426,7 @@ impl App {
             replay_confirm: false,
             replay_by_name: false,
             desync_reported: false,
+            warm_key: String::new(),
             survival: None,
             coop: false,
             sp: crate::screenpack::probe(),
@@ -2622,21 +2627,6 @@ impl App {
         }
         v
     }
-    fn load_total(&self) -> u8 {
-        (self.load_plan().len() + 3) as u8
-    }
-    fn load_label(&self, step: u8) -> String {
-        let plan = self.load_plan();
-        match plan.get(step as usize) {
-            Some((_, _, r)) => format!("Carregando {}…", self.reg.chars[*r].name),
-            None => [
-                "Montando o cenário…",
-                "Preparando a luta…",
-                "Sintetizando a música…",
-            ][(step as usize - plan.len()).min(2)]
-            .to_string(),
-        }
-    }
 
     /// One unit of fight preparation (runs behind the VS screen, one per frame, so the bar animates and the UI never freezes).
     /// Palette for a planned fighter: explicit team/player choice, with the classic duplicate-fighter fallback.
@@ -2883,7 +2873,7 @@ impl App {
                 );
             }
             self.pending.sess = Some(sess);
-        } else {
+        } else if st == n + 2 {
             ume_shell::watchdog::label("load:audio");
             let music = self
                 .pending
@@ -2910,6 +2900,12 @@ impl App {
                 return Ok(false);
             }
             self.audio.prepare_music(music).await;
+        } else if !self.warm_step() {
+            if wait {
+                std::thread::sleep(std::time::Duration::from_millis(2));
+                return Box::pin(self.load_step(step, wait)).await;
+            }
+            return Ok(false);
         }
         Ok(true)
     }
@@ -2974,11 +2970,12 @@ impl App {
         let ready = step_now >= total;
         self.draw_versus(t);
         if !ready {
+            let within = if step_now + 1 == total { self.warm_progress() } else { 0.0 };
             self.ui.progress_bar(
                 440.0,
                 75.0,
                 400.0,
-                step_now as f32 / total as f32,
+                (step_now as f32 + within) / total as f32,
                 &self.load_label(step_now),
             );
         } else if t > 1.8
@@ -2990,8 +2987,18 @@ impl App {
     }
 
     /// Synchronous variant (screenshot tour, rematch): runs every loading step back to back.
+    /// The sprite warm-up is the one step that is paid over several frames here: it copies 1 MiB per
+    /// frame, yielding between chunks, so a rematch or a netplay start does not freeze the window for
+    /// the hundreds of milliseconds a full fighter upload takes.
     pub async fn start_fight(&mut self) {
-        for st in 0..self.load_total() {
+        let total = self.load_total();
+        for st in 0..total {
+            if st + 1 == total {
+                while !self.warm_step() {
+                    next_frame().await;
+                }
+                continue;
+            }
             if let Err(e) = self.load_step(st, true).await {
                 self.abort_load(e);
                 return;
@@ -3010,18 +3017,6 @@ impl App {
         // DualShock/DualSense lightbars: P1 blue, P2 red
         self.c.pads.set_light(0, [30, 90, 255]);
         self.c.pads.set_light(1, [255, 40, 60]);
-        ume_shell::watchdog::label("fight:prefetch");
-        self.g.trim(4000);
-        let mut warmed: Vec<&str> = vec![];
-        for f in &sess.m.fighters {
-            if warmed.contains(&f.def.id.as_str()) {
-                continue;
-            }
-            warmed.push(&f.def.id);
-            if !self.g.prefetch(&f.def, 0.5) {
-                break;
-            }
-        }
         self.session = Some(sess);
         self.screen = Screen::Fight;
         self.audio.reset_bgm();

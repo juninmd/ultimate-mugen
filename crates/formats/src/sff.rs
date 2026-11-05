@@ -2,7 +2,9 @@
 //! 2.00 / 2.01 (raw, RLE8, RLE5, LZ5, PNG8/24/32). Port of `src/mugen/sff.ts`
 //! and `src/mugen/sprite.ts`; decompression follows Ikemen GO (image.go).
 
-use crate::pcx::{decode_pcx_rle, find_pcx_palette, raw_rows, read_pcx_header, read_rgb_palette, PCX_HEADER_SIZE};
+use crate::pcx::{
+    decode_pcx_rle, find_pcx_palette, raw_rows, read_pcx_header, read_rgb_palette, PCX_HEADER_SIZE,
+};
 pub use crate::png::{decode_png, png_indexed_to_rgba, DecodedPng};
 use crate::Reader;
 use std::collections::HashMap;
@@ -67,9 +69,11 @@ pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
     let n = s.width as usize * s.height as usize;
     let mut out = vec![0u8; n * 4];
     let pal: Option<&[u8]> = palette.or(s.palette.as_deref().map(|v| v.as_slice()));
-    let (Some(idx), Some(pal)) = (&s.indexed, pal) else { return out };
+    let (Some(idx), Some(pal)) = (&s.indexed, pal) else {
+        return out;
+    };
     if pal.len() >= 1024 {
-        for (o, &c) in out.chunks_exact_mut(4).zip(idx.iter()) {
+        for (o, &c) in out.as_chunks_mut::<4>().0.iter_mut().zip(idx.iter()) {
             if c != 0 {
                 let p = c as usize * 4;
                 o[0] = pal[p];
@@ -79,7 +83,7 @@ pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
             }
         }
     } else {
-        for (o, &c) in out.chunks_exact_mut(4).zip(idx.iter()) {
+        for (o, &c) in out.as_chunks_mut::<4>().0.iter_mut().zip(idx.iter()) {
             if c != 0 {
                 let p = c as usize * 4;
                 for (k, v) in o[..3].iter_mut().enumerate() {
@@ -98,12 +102,15 @@ pub fn decode_sff(buf: &[u8]) -> Result<DecodedSff, String> {
     decode_sff_only(buf, |_, _| true)
 }
 
-pub fn decode_sff_only(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> Result<DecodedSff, String> {
+pub fn decode_sff_only(
+    buf: &[u8],
+    wanted: impl Fn(i32, i32) -> bool,
+) -> Result<DecodedSff, String> {
     if buf.len() < SIGNATURE.len() || &buf[..12] != SIGNATURE {
         return Err("SFF: invalid signature (expected ElecbyteSpr)".into());
     }
     match buf.get(15).copied().unwrap_or(0) {
-        1 => Ok(decode_sff_v1(buf)),
+        1 => Ok(decode_sff_v1(buf, wanted)),
         2 => Ok(decode_sff_v2(buf, wanted)),
         v => Err(format!("SFF: unsupported version {v}")),
     }
@@ -134,7 +141,7 @@ fn empty_sprite(group: i32, index: i32, axis_x: i32, axis_y: i32) -> DecodedSpri
 ///   subfile: [0]next u32 [4]length u32 [8]axisX i16 [10]axisY i16 [12]group u16
 ///            [14]index u16 [16]linkIndex u16 [18]samePalette u8 [19]comment(13)
 ///            followed by PCX data (length bytes; 0 => linked sprite).
-fn decode_sff_v1(buf: &[u8]) -> DecodedSff {
+fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
     let r = Reader(buf);
     // each subfile needs a distinct 32-byte header: bounds runaway counts / cycles
     let count = (r.u32(20) as usize).min(buf.len() / 32 + 1);
@@ -142,8 +149,9 @@ fn decode_sff_v1(buf: &[u8]) -> DecodedSff {
     let mut sprites: Vec<DecodedSprite> = Vec::with_capacity(count);
     let mut palettes: Vec<Palette> = Vec::new();
     let mut pal_keys: HashMap<Arc<Vec<u8>>, usize> = HashMap::new();
-    // palette / palette index of the previous non-linked sprite
+    // palette / palette index of the immediately preceding subfile (the one `samePalette` refers to)
     let mut prev: Option<(Option<Arc<Vec<u8>>>, i32)> = None;
+    let mut prev_adjacent = false;
 
     for _ in 0..count {
         if ofs == 0 || ofs.saturating_add(32) > buf.len() {
@@ -151,47 +159,73 @@ fn decode_sff_v1(buf: &[u8]) -> DecodedSff {
         }
         let next = r.u32(ofs) as usize;
         let length = r.u32(ofs + 4) as usize;
-        let mut spr = empty_sprite(r.u16(ofs + 12) as i32, r.u16(ofs + 14) as i32, r.i16(ofs + 8) as i32, r.i16(ofs + 10) as i32);
+        let mut spr = empty_sprite(
+            r.u16(ofs + 12) as i32,
+            r.u16(ofs + 14) as i32,
+            r.i16(ofs + 8) as i32,
+            r.i16(ofs + 10) as i32,
+        );
         let link = r.u16(ofs + 16) as usize;
         let same_pal = r.u8(ofs + 18) != 0;
         let data_start = ofs + 32;
+        let keep = wanted(spr.group, spr.index);
+        let mut decoded = false;
 
         if length == 0 {
-            if let Some(src) = sprites.get(link) {
-                spr.width = src.width;
-                spr.height = src.height;
-                spr.indexed = src.indexed.clone();
-                spr.rgba = src.rgba.clone();
-                spr.palette = src.palette.clone();
-                spr.palette_index = src.palette_index;
+            if keep {
+                if let Some(src) = sprites.get(link) {
+                    spr.width = src.width;
+                    spr.height = src.height;
+                    spr.indexed = src.indexed.clone();
+                    spr.rgba = src.rgba.clone();
+                    spr.palette = src.palette.clone();
+                    spr.palette_index = src.palette_index;
+                }
             }
-        } else {
+        } else if keep {
             let block_end = if next > data_start { next } else { data_start.saturating_add(length) }.min(buf.len());
             let pcx = &buf[data_start..block_end];
-            if let Some(h) = read_pcx_header(pcx).ok().filter(|h| (h.width as usize).saturating_mul(h.height as usize) <= MAX_SPRITE_PIXELS) {
+            if let Some(h) = read_pcx_header(pcx).ok().filter(|h| {
+                (h.width as usize).saturating_mul(h.height as usize) <= MAX_SPRITE_PIXELS
+            }) {
                 spr.width = h.width;
                 spr.height = h.height;
-                let data_end;
-                if h.encoding == 1 {
-                    let (px, end) = decode_pcx_rle(pcx, h.width, h.height, h.bytes_per_line, PCX_HEADER_SIZE, pcx.len());
+
+                let data_end = if h.encoding == 1 {
+                    let (px, end) = decode_pcx_rle(
+                        pcx,
+                        h.width,
+                        h.height,
+                        h.bytes_per_line,
+                        PCX_HEADER_SIZE,
+                        pcx.len(),
+                    );
                     spr.indexed = Some(Arc::new(px));
-                    data_end = end;
+                    end
                 } else {
-                    spr.indexed = Some(Arc::new(raw_rows(pcx, h.width as usize, h.height as usize, h.bytes_per_line as usize)));
-                    data_end = PCX_HEADER_SIZE + h.height as usize * h.bytes_per_line as usize;
-                }
+                    spr.indexed = Some(Arc::new(raw_rows(
+                        pcx,
+                        h.width as usize,
+                        h.height as usize,
+                        h.bytes_per_line as usize,
+                    )));
+                    PCX_HEADER_SIZE + h.height as usize * h.bytes_per_line as usize
+                };
                 let mut pal: Option<Arc<Vec<u8>>> = None;
-                match (&prev, same_pal) {
-                    (Some((ppal, pidx)), true) => {
+                let inherited = if same_pal && prev_adjacent { prev.clone() } else { None };
+                match inherited {
+                    Some((ppal, pidx)) => {
                         pal = ppal.clone();
-                        spr.palette_index = *pidx;
+                        spr.palette_index = pidx;
                     }
-                    _ => {
+                    None => {
                         if let Some(po) = find_pcx_palette(pcx, data_end) {
                             pal = Some(Arc::new(read_rgb_palette(pcx, po)));
-                        } else if let Some((ppal, pidx)) = &prev {
-                            pal = ppal.clone();
-                            spr.palette_index = *pidx;
+                        } else if prev_adjacent {
+                            if let Some((ppal, pidx)) = &prev {
+                                pal = ppal.clone();
+                                spr.palette_index = *pidx;
+                            }
                         }
                         if let Some(p) = &pal {
                             if spr.palette_index < 0 {
@@ -200,7 +234,11 @@ fn decode_sff_v1(buf: &[u8]) -> DecodedSff {
                                     spr.palette_index = found as i32;
                                 } else {
                                     let idx = palettes.len();
-                                    palettes.push(Palette { group: spr.group, index: spr.index, data: p.clone() });
+                                    palettes.push(Palette {
+                                        group: spr.group,
+                                        index: spr.index,
+                                        data: p.clone(),
+                                    });
                                     pal_keys.insert(p.clone(), idx);
                                     spr.palette_index = idx as i32;
                                 }
@@ -209,13 +247,21 @@ fn decode_sff_v1(buf: &[u8]) -> DecodedSff {
                     }
                 }
                 spr.palette = pal;
+                decoded = true;
             }
+        }
+        if decoded {
             prev = Some((spr.palette.clone(), spr.palette_index));
         }
+        prev_adjacent = decoded;
         sprites.push(spr);
         ofs = next;
     }
-    DecodedSff { version: 1, sprites, palettes }
+    DecodedSff {
+        version: 1,
+        sprites,
+        palettes,
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -287,7 +333,12 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
         let (d_ofs, d_len) = (r.u32(o + 16) as usize, r.u32(o + 20) as usize);
         let pal_idx = r.u16(o + 24) as usize;
         let flags = r.u16(o + 26);
-        let mut spr = empty_sprite(r.u16(o) as i32, r.u16(o + 2) as i32, r.i16(o + 8) as i32, r.i16(o + 10) as i32);
+        let mut spr = empty_sprite(
+            r.u16(o) as i32,
+            r.u16(o + 2) as i32,
+            r.i16(o + 8) as i32,
+            r.i16(o + 10) as i32,
+        );
         spr.width = r.u16(o + 4) as u32;
         spr.height = r.u16(o + 6) as u32;
         if !crate::pixels_within_limit(spr.width, spr.height) {
@@ -308,7 +359,9 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
     }
     let mut needed: Vec<bool> = sprites.iter().map(|s| wanted(s.group, s.index)).collect();
     for i in (0..sprites.len()).rev() {
-        if let (true, Some(l)) = (needed[i], links[i]) { needed[l] = true; }
+        if let (true, Some(l)) = (needed[i], links[i]) {
+            needed[l] = true;
+        }
     }
     jobs.retain(|(i, ..)| needed[*i]);
     let decoded = crate::par::map(&jobs, |&(i, fmt, depth, data)| {
@@ -330,7 +383,12 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
     }
     for i in 0..sprites.len() {
         if let Some(l) = links[i] {
-            let (w, h, idx, rgba) = (sprites[l].width, sprites[l].height, sprites[l].indexed.clone(), sprites[l].rgba.clone());
+            let (w, h, idx, rgba) = (
+                sprites[l].width,
+                sprites[l].height,
+                sprites[l].indexed.clone(),
+                sprites[l].rgba.clone(),
+            );
             let spr = &mut sprites[i];
             spr.width = w;
             spr.height = h;
@@ -340,14 +398,27 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
         let spr = &mut sprites[i];
         if spr.rgba.is_some() {
             spr.palette_index = -1;
-        } else if let Some(p) = usize::try_from(spr.palette_index).ok().and_then(|i| palettes.get(i)) {
+        } else if let Some(p) = usize::try_from(spr.palette_index)
+            .ok()
+            .and_then(|i| palettes.get(i))
+        {
             spr.palette = Some(p.data.clone());
         }
     }
-    DecodedSff { version: 2, sprites, palettes }
+    DecodedSff {
+        version: 2,
+        sprites,
+        palettes,
+    }
 }
 
-fn decode_v2_image(spr: &mut DecodedSprite, fmt: u8, depth: u8, data: &[u8], has_sff_palette: bool) {
+fn decode_v2_image(
+    spr: &mut DecodedSprite,
+    fmt: u8,
+    depth: u8,
+    data: &[u8],
+    has_sff_palette: bool,
+) {
     if (spr.width as usize) * (spr.height as usize) > MAX_SPRITE_PIXELS {
         spr.width = 0;
         spr.height = 0;
@@ -360,7 +431,7 @@ fn decode_v2_image(spr: &mut DecodedSprite, fmt: u8, depth: u8, data: &[u8], has
             if depth == 24 || depth == 32 {
                 let bpp = (depth / 8) as usize;
                 let mut out = vec![0u8; n * 4];
-                for (p, o) in out.chunks_exact_mut(4).enumerate() {
+                for (p, o) in out.as_chunks_mut::<4>().0.iter_mut().enumerate() {
                     let g = |k: usize| data.get(p * bpp + k).copied().unwrap_or(0);
                     o[0] = g(0);
                     o[1] = g(1);

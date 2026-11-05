@@ -6,7 +6,7 @@ use ume_formats::fnt::decode_fnt;
 use ume_formats::ini::parse_ini;
 use ume_formats::pcx::decode_pcx;
 use ume_formats::png::decode_png;
-use ume_formats::sff::{decode_sff, decode_rle5, decode_rle8, decode_lz5};
+use ume_formats::sff::{decode_lz5, decode_rle5, decode_rle8, decode_sff};
 use ume_formats::snd::{decode_snd, decode_snd_checked};
 use ume_formats::vfs::{add_zip, Vfs};
 
@@ -65,12 +65,24 @@ fn mutate(src: &[u8], rng: &mut XorShift) -> Vec<u8> {
 fn survives(name: &str, input: &[u8], run: impl Fn(&[u8])) {
     let start = Instant::now();
     let result = catch_unwind(AssertUnwindSafe(|| run(input)));
-    assert!(result.is_ok(), "{name} panicked on {} byte input", input.len());
-    assert!(start.elapsed() < MAX_DECODE_TIME, "{name} took {:?} on {} byte input", start.elapsed(), input.len());
+    assert!(
+        result.is_ok(),
+        "{name} panicked on {} byte input",
+        input.len()
+    );
+    assert!(
+        start.elapsed() < MAX_DECODE_TIME,
+        "{name} took {:?} on {} byte input",
+        start.elapsed(),
+        input.len()
+    );
 }
 
 fn mutations_per_file() -> usize {
-    std::env::var("FUZZ_ITERATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(400)
+    std::env::var("FUZZ_ITERATIONS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(400)
 }
 
 fn fuzz_corpus(name: &str, corpus: &[Vec<u8>], run: impl Fn(&[u8])) {
@@ -85,17 +97,25 @@ fn fuzz_corpus(name: &str, corpus: &[Vec<u8>], run: impl Fn(&[u8])) {
 
 fn corpus_from_zip(ext: &str) -> Vec<Vec<u8>> {
     let zip = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets/mugen/elecbyte.zip");
-    let Ok(bytes) = std::fs::read(zip) else { return Vec::new() };
+    let Ok(bytes) = std::fs::read(zip) else {
+        return Vec::new();
+    };
     let mut vfs = Vfs::new();
     add_zip(&mut vfs, &bytes, "").unwrap();
-    let mut files: Vec<_> = vfs.iter().filter(|(k, _)| k.ends_with(ext)).map(|(k, v)| (k.clone(), v.clone())).collect();
-    files.sort_by(|a, b| a.1.len().cmp(&b.1.len()));
+    let mut files: Vec<_> = vfs
+        .iter()
+        .filter(|(k, _)| k.ends_with(ext))
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect();
+    files.sort_by_key(|a| a.1.len());
     files.into_iter().take(3).map(|(_, v)| v).collect()
 }
 
 fn random_corpus() -> Vec<Vec<u8>> {
     let mut rng = XorShift(42);
-    (0..8).map(|n| (0..16 << n).map(|_| rng.next() as u8).collect()).collect()
+    (0..8)
+        .map(|n| (0..16 << n).map(|_| rng.next() as u8).collect())
+        .collect()
 }
 
 #[test]
@@ -142,7 +162,11 @@ fn rle_decoders_survive_hostile_sizes() {
 
 #[test]
 fn text_parsers_survive_mutations() {
-    let corpus: Vec<Vec<u8>> = corpus_from_zip(".air").into_iter().chain(corpus_from_zip(".def")).chain(random_corpus()).collect();
+    let corpus: Vec<Vec<u8>> = corpus_from_zip(".air")
+        .into_iter()
+        .chain(corpus_from_zip(".def"))
+        .chain(random_corpus())
+        .collect();
     fuzz_corpus("parse_ini/air", &corpus, |b| {
         let text = String::from_utf8_lossy(b);
         let _ = parse_ini(&text);

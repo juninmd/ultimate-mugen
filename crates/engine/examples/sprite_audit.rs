@@ -14,10 +14,17 @@ fn main() {
             for (no, a) in &d.anims {
                 for fr in &a.frames {
                     frames += 1;
-                    match d.sprites.get(&(fr.group, fr.index)) {
+                    let key = (fr.group, fr.index);
+                    match d.sprites.get(&key) {
                         None => { missing.insert((*no, fr.group, fr.index)); }
-                        Some(s) if s.image.is_none() => { empty.insert((*no, fr.group, fr.index)); }
-                        Some(s) => { if s.image.as_ref().is_some_and(|i| i.rgba.chunks(4).all(|p| p[3] == 0)) { blank += 1; if blank <= 3 { println!("   blank sprite {},{} {}x{} (anim {no})", fr.group, fr.index, s.width, s.height); } } }
+                        Some(s) if s.width == 0.0 || s.height == 0.0 => { empty.insert((*no, fr.group, fr.index)); }
+                        Some(s) => {
+                            let blank_sprite = match d.indexed.get(&key) {
+                                Some(ix) => ix.pixels.iter().all(|&p| p == 0),
+                                None => s.image.as_ref().is_none_or(|i| i.rgba.chunks(4).all(|p| p[3] == 0)),
+                            };
+                            if blank_sprite { blank += 1; if blank <= 3 { println!("   blank sprite {},{} {}x{} (anim {no})", fr.group, fr.index, s.width, s.height); } }
+                        }
                     }
                 }
             }

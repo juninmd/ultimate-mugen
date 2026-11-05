@@ -5,6 +5,7 @@ mod camera;
 pub mod module;
 mod player;
 mod pause;
+pub(crate) mod virtual_input;
 mod stage;
 pub mod clsn;
 mod hitmod;
@@ -19,6 +20,9 @@ use crate::matchs::{Event, Match};
 pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
     match sc.kind.as_str() {
         "null" => {}
+        "assertcommand" => virtual_input::assert_command(m, i, sc),
+        "assertinput" => virtual_input::assert_input(m, i, sc),
+        "shiftinput" => virtual_input::shift_input(m, i, sc),
         "runstate" => state::run_state(m, i, sc),
         "height" => state::height(m, i, sc),
         "gethitvarset" => hitmod::get_hit_var_set(m, i, sc),

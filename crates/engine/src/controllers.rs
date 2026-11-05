@@ -171,17 +171,6 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             else { let last = n(m, "last", 59.0) as usize; let v = n(m, "value", 0.0) as i32; for k in first..=last.min(59) { m.fighters[i].vars[k] = v; } }
         }
         "poweradd" => { let v = n(m, "value", 0.0) as f32; m.add_power(i, v); }
-        "assertcommand" => {
-            let name = sc.raw("value").or_else(|| sc.raw("name")).map(|s| s.trim().trim_matches('"').to_ascii_lowercase()).unwrap_or_default();
-            let time = (n(m, "time", 1.0) as i32).max(1);
-            if !name.is_empty() { m.fighters[i].asserted_commands.push((name, time)); }
-        }
-        "assertinput" => {
-            let bits = n(m, "value", 0.0) as u32;
-            let time = (n(m, "time", 1.0) as i32).max(1);
-            m.fighters[i].assert_input = (bits, time);
-        }
-        "shiftinput" => { m.fighters[i].input_shift = n(m, "value", 0.0) as i32; }
         "remapsprite" => {
             let from = (n2(m, "from", 0.0, 0) as i32, n2(m, "from", 0.0, 1) as i32);
             let to = (n2(m, "to", 0.0, 0) as i32, n2(m, "to", 0.0, 1) as i32);

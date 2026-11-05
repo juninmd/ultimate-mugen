@@ -3,6 +3,9 @@
 (function () {
   const K = { U: 1, D: 2, L: 4, R: 8, a: 16, b: 32, c: 64, x: 128, y: 256, z: 512, s: 1024, d: 2048, w: 4096 };
   const held = new Map();
+  // False while the page is blurred: pads keep reporting their last state (some browsers stop polling them
+  // altogether), so a button held at that moment would stay pressed for the rest of the session.
+  let pageActive = true;
   const cursor = { x: 0, y: 0 };
   const keepCursor = (e) => { cursor.x = e.clientX; cursor.y = e.clientY; };
   window.addEventListener('pointermove', keepCursor, true);
@@ -26,13 +29,14 @@
   }
   window.addEventListener('keydown', (e) => { if (e.code) held.set(e.code, { key: e.key, keyCode: e.keyCode }); }, true);
   window.addEventListener('keyup', (e) => { held.delete(e.code); }, true);
-  window.addEventListener('blur', releaseAll);
+  window.addEventListener('blur', () => { pageActive = false; releaseAll(); });
+  window.addEventListener('focus', () => { pageActive = true; });
   window.addEventListener('pagehide', releaseAll);
   window.addEventListener('contextmenu', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
   function pads() { return navigator.getGamepads ? Array.from(navigator.getGamepads()).filter((p) => p && p.connected) : []; }
   function state(i) {
-    const p = pads()[i]; if (!p) return 0;
+    const p = pads()[i]; if (!p || !pageActive || document.hidden) return 0;
     const pr = (n) => !!(p.buttons[n] && p.buttons[n].pressed);
     const ax = p.axes[0] || 0, ay = p.axes[1] || 0; let b = 0;
     if (ay < -0.5 || pr(12)) b |= K.U; if (ay > 0.5 || pr(13)) b |= K.D; if (ax < -0.5 || pr(14)) b |= K.L; if (ax > 0.5 || pr(15)) b |= K.R;

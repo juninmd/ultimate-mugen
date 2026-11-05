@@ -21,6 +21,7 @@ pub mod ini;
 pub mod par;
 pub mod pcx;
 pub mod png;
+pub mod perf;
 pub mod sff;
 pub mod screenpack;
 pub mod snd;

@@ -5,43 +5,78 @@ use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Mutex;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Lang { Pt, En }
+pub enum Lang {
+    Pt,
+    En,
+}
 
 pub const LANGS: [(Lang, &str); 2] = [(Lang::En, "English"), (Lang::Pt, "Português (Brasil)")];
 
 static CURRENT: AtomicU8 = AtomicU8::new(1);
 static MISSING: Mutex<BTreeSet<&'static str>> = Mutex::new(BTreeSet::new());
 
-pub fn set(l: Lang) { CURRENT.store(if l == Lang::En { 1 } else { 0 }, Ordering::Relaxed); }
-pub fn get() -> Lang { if CURRENT.load(Ordering::Relaxed) == 1 { Lang::En } else { Lang::Pt } }
-pub fn default_lang() -> Lang { Lang::En }
+pub fn set(l: Lang) {
+    CURRENT.store(if l == Lang::En { 1 } else { 0 }, Ordering::Relaxed);
+}
+pub fn get() -> Lang {
+    if CURRENT.load(Ordering::Relaxed) == 1 {
+        Lang::En
+    } else {
+        Lang::Pt
+    }
+}
+pub fn default_lang() -> Lang {
+    Lang::En
+}
 
 /// Legacy helper: pick one of two literals. Prefer `t(key)` in new code.
-pub fn tr<'a>(pt: &'a str, en: &'a str) -> &'a str { if get() == Lang::En { en } else { pt } }
+pub fn tr<'a>(pt: &'a str, en: &'a str) -> &'a str {
+    if get() == Lang::En {
+        en
+    } else {
+        pt
+    }
+}
 
 /// Translate a catalog key. Unknown keys fall back to English, then to the key itself.
 pub fn t(key: &'static str) -> &'static str {
     let table = if get() == Lang::En { EN } else { PT };
-    if let Some((_, v)) = table.iter().find(|(k, _)| *k == key) { return v; }
-    if let Some((_, v)) = EN.iter().find(|(k, _)| *k == key) { return v; }
+    if let Some((_, v)) = table.iter().find(|(k, _)| *k == key) {
+        return v;
+    }
+    if let Some((_, v)) = EN.iter().find(|(k, _)| *k == key) {
+        return v;
+    }
     let mut missing = MISSING.lock().unwrap_or_else(|e| e.into_inner());
-    if missing.insert(key) { eprintln!("i18n: missing key '{key}'"); }
+    if missing.insert(key) {
+        eprintln!("i18n: missing key '{key}'");
+    }
     key
 }
 
 /// Translate a key that contains `{name}` placeholders and fill them in.
 pub fn tf(key: &'static str, pairs: &[(&str, &str)]) -> String {
     let mut out = t(key).to_string();
-    for (k, v) in pairs { out = out.replace(k, v); }
+    for (k, v) in pairs {
+        out = out.replace(k, v);
+    }
     out
 }
 
 /// Keys without an English entry (used by tests and the release checklist).
 pub fn keys_without_english() -> Vec<&'static str> {
-    PT.iter().map(|(k, _)| *k).filter(|k| !EN.iter().any(|(e, _)| e == k)).collect()
+    PT.iter()
+        .map(|(k, _)| *k)
+        .filter(|k| !EN.iter().any(|(e, _)| e == k))
+        .collect()
 }
 
-pub fn missing_logged() -> Vec<&'static str> { MISSING.lock().map(|m| m.iter().copied().collect()).unwrap_or_default() }
+pub fn missing_logged() -> Vec<&'static str> {
+    MISSING
+        .lock()
+        .map(|m| m.iter().copied().collect())
+        .unwrap_or_default()
+}
 
 macro_rules! catalog {
     ($($key:literal => $en:literal, $pt:literal;)*) => {
@@ -190,8 +225,17 @@ mod tests {
 
     #[test]
     fn catalogs_are_complete_in_both_languages() {
-        assert!(keys_without_english().is_empty(), "every Portuguese key needs an English entry: {:?}", keys_without_english());
-        for (k, _) in EN { assert!(PT.iter().any(|(p, _)| p == k), "missing pt-BR entry for {k}"); }
+        assert!(
+            keys_without_english().is_empty(),
+            "every Portuguese key needs an English entry: {:?}",
+            keys_without_english()
+        );
+        for (k, _) in EN {
+            assert!(
+                PT.iter().any(|(p, _)| p == k),
+                "missing pt-BR entry for {k}"
+            );
+        }
     }
 
     #[test]
@@ -222,17 +266,39 @@ mod tests {
     #[test]
     fn migrated_screens_have_no_hardcoded_portuguese() {
         let root = env!("CARGO_MANIFEST_DIR");
-        let files = ["src/app.rs", "src/app/replay_browser.rs", "src/app/survival.rs"];
+        let files = [
+            "src/app.rs",
+            "src/app/replay_browser.rs",
+            "src/app/survival.rs",
+        ];
         let phrases = [
-            "Revanche", "RENOMEAR REPLAY", "FIM DE JOGO", "Nenhuma luta gravada", "Pressione DELETE",
-            "Tentar de novo", "Monte sua equipe", "Escolha o oponente", "CO-OP 2P: LIGADO",
-            "Personalizar teclado", "Menu principal", "Reiniciar luta", "Trocar personagens",
-            "JOGADOR 1: escolha", "SOBREVIVÊNCIA · RODADA", "{score} PONTOS",
+            "Revanche",
+            "RENOMEAR REPLAY",
+            "FIM DE JOGO",
+            "Nenhuma luta gravada",
+            "Pressione DELETE",
+            "Tentar de novo",
+            "Monte sua equipe",
+            "Escolha o oponente",
+            "CO-OP 2P: LIGADO",
+            "Personalizar teclado",
+            "Menu principal",
+            "Reiniciar luta",
+            "Trocar personagens",
+            "JOGADOR 1: escolha",
+            "SOBREVIVÊNCIA · RODADA",
+            "{score} PONTOS",
         ];
         for file in files {
-            let text = std::fs::read_to_string(format!("{root}/{file}")).unwrap_or_else(|e| panic!("cannot read {file}: {e}"));
+            let text = std::fs::read_to_string(format!("{root}/{file}"))
+                .unwrap_or_else(|e| panic!("cannot read {file}: {e}"));
             for line in text.lines().filter(|l| !l.trim_start().starts_with("//")) {
-                for phrase in phrases { assert!(!line.contains(phrase), "{file} still has hardcoded UI text {phrase:?}: {line}"); }
+                for phrase in phrases {
+                    assert!(
+                        !line.contains(phrase),
+                        "{file} still has hardcoded UI text {phrase:?}: {line}"
+                    );
+                }
             }
         }
     }

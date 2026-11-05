@@ -21,6 +21,30 @@ thread_local! {
     static INDEX_GENERATION: Cell<u32> = const { Cell::new(0) };
     static INDEX_FULL: Cell<bool> = const { Cell::new(false) };
     static KEY_QUEUE: RefCell<Vec<KeyCode>> = const { RefCell::new(Vec::new()) };
+    static UPLOAD_BYTES: Cell<u64> = const { Cell::new(0) };
+    static UPLOAD_COUNT: Cell<u32> = const { Cell::new(0) };
+    static STATS: Cell<FrameStats> = const { Cell::new(FrameStats::EMPTY) };
+}
+
+/// Per-frame counters for the F3 overlay: what the last frame cost on the CPU/GPU upload path.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct FrameStats { pub vertices: u32, pub draw_calls: u32, pub uploads: u32, pub upload_kb: u32, pub rgba_fill: f32, pub index_fill: f32 }
+
+impl FrameStats { pub const EMPTY: FrameStats = FrameStats { vertices: 0, draw_calls: 0, uploads: 0, upload_kb: 0, rgba_fill: 0.0, index_fill: 0.0 }; }
+
+pub fn stats() -> FrameStats { STATS.with(|s| s.get()) }
+
+fn note_upload(bytes: u64) {
+    UPLOAD_BYTES.with(|b| b.set(b.get() + bytes));
+    UPLOAD_COUNT.with(|c| c.set(c.get() + 1));
+}
+
+/// Called by the shell once the frame is drawn, so the next frame can report it.
+pub fn publish_stats(vertices: usize, draw_calls: usize, rgba_fill: f32, index_fill: f32) {
+    let (uploads, kb) = (UPLOAD_COUNT.with(|c| c.get()), (UPLOAD_BYTES.with(|b| b.get()) / 1024) as u32);
+    STATS.with(|s| s.set(FrameStats { vertices: vertices.min(u32::MAX as usize) as u32, draw_calls: draw_calls.min(u32::MAX as usize) as u32, uploads, upload_kb: kb, rgba_fill, index_fill }));
+    UPLOAD_BYTES.with(|b| b.set(0));
+    UPLOAD_COUNT.with(|c| c.set(0));
 }
 
 fn generation() -> u32 { GENERATION.with(|g| g.get()) }
@@ -200,6 +224,7 @@ impl Texture2D {
         if let Some((g, r)) = self.0.slot.get() { if g == gen { return Some(r); } }
         let Some(r) = f.gpu.rgba_atlas.alloc(self.0.w, self.0.h) else { ATLAS_FULL.with(|a| a.set(true)); return None };
         f.gpu.renderer.upload_rgba(&f.gpu.queue, r, &self.0.pixels);
+        note_upload((self.0.w as u64) * (self.0.h as u64) * 4);
         self.0.slot.set(Some((gen, r)));
         Some(r)
     }
@@ -278,6 +303,7 @@ impl IndexedTexture {
         if let Some((g, r)) = self.0.slot.get() { if g == gen { return Some(r); } }
         let Some(r) = f.gpu.index_atlas.alloc(self.0.w, self.0.h) else { INDEX_FULL.with(|a| a.set(true)); return None };
         f.gpu.renderer.upload_indexed(&f.gpu.queue, r, &self.0.pixels);
+        note_upload((self.0.w as u64) * (self.0.h as u64));
         self.0.slot.set(Some((gen, r)));
         Some(r)
     }

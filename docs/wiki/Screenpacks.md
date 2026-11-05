@@ -4,7 +4,15 @@
 
 A screenpack is the set of files that draws everything around a fight: title menu, character select, lifebars, fonts, intro and logo storyboards.
 
-**Status:** `crates/formats/src/screenpack.rs` parses and validates these files, but the engine does not draw them yet. The title, select and fight screens are the native ones, and no screenpack is loaded at runtime until the screenpack work in the [parity tracker](https://github.com/juninmd/ultimate-mugen/issues/135) is done. The checker below only tells whether a pack parses.
+**Status:** the runtime now loads a screenpack when one is present (`mugen/data/system.def`, `mugen/screenpacks/<pack>/system.def` or `UME_SCREENPACK`). The native UI stays as the fallback for anything a pack does not provide:
+
+- `system.def` `menu.itemname.*` labels replace the main-menu titles (Arcade, Survival, teams, Training, Watch, Exit).
+- `select.def` `[Characters]` order drives the select grid order.
+- `intro.storyboard` text scenes are played over the arcade opening cutscene, timed by each scene's `end.time`.
+- `fight.def` lifebar `pos`/`range.x` place and size the life bars (converted from the pack `localcoord` to the 426×240 HUD space); the rest of the HUD stays native.
+- Parsed sprites/fonts/sounds are kept in `ume_formats::screenpack::Screenpack` for the remaining screens, but system/fight sprite drawing (backgrounds, bar sprites, fonts) is still native.
+
+The checker below tells whether a pack parses; the game never refuses to start because of a broken pack (it falls back to the native UI and logs the warnings).
 
 ## Layout
 

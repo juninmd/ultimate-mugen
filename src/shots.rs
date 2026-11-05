@@ -1313,7 +1313,6 @@ async fn market_tour(app: &mut App, dir: &str) {
     app.market_ui_view_installed();
     screen(app, dir, "market-installed", 3).await;
 }
-
 async fn ui_tour(app: &mut App, dir: &str) {
     for tab in 0..6 {
         app.screen = Screen::Settings {

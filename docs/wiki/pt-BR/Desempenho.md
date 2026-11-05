@@ -34,3 +34,9 @@ etain_mut.
   - Dimensões X e Y pré-escaladas (`sx * s` e `sy * s`), reduzindo as multiplicações de ponto flutuante por caixa de 8 para 4.
   - Combinação de `flip_h != (facing < 0.0)` em uma única condição booleana XOR branchless.
   - `Fighter::c`: Busca de fatia guardada por `!self.size_overrides.is_empty()`.
+
+- **Onda 47 - Junção de Candidatos VFS em Buffer de Pilha e Casamento de Sufixo Zero-Alloc**:
+  - `vfs::resolve`: `with_joined` em buffer de pilha de 512 bytes para caminhos candidatos `base_dir/name` e `data/name`, eliminando alocações na heap no caminho direto de busca.
+  - Substituição de strings dinâmicas `format!("/{base}")` por predicado de bytes in-place `is_match`.
+  - Uso direto de `ini::unquote_str` sem alocar strings intermediárias.
+  - Fallback de pasta sub-microssegundo em 50k arquivos (0.9 us/op) e redução no tempo de carga de lutadores (`kfm.def` caiu para 6.7 ms).

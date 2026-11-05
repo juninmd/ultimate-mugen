@@ -140,3 +140,9 @@ etain_mut.
   - Pre-scaled X and Y dimensions (`sx * s` and `sy * s`), cutting per-box floating-point multiplications from 8 to 4.
   - Combined `flip_h != (facing < 0.0)` into a single branchless boolean XOR condition.
   - `Fighter::c`: Guarded slice search with `!self.size_overrides.is_empty()`.
+
+- **Wave 47 - Stack-Buffered VFS Candidate Joining & Zero-Alloc Suffix Matching**:
+  - `vfs::resolve`: Inlined `with_joined` using a 512-byte stack buffer for `base_dir/name` and `data/name` path candidates, completely eliminating candidate heap allocations on the direct hit path.
+  - Replaced `format!("/{base}")` heap strings with in-place byte boundary predicate `is_match`.
+  - Used `ini::unquote_str` directly instead of allocating owned `unquote` strings.
+  - Sub-microsecond VFS folder fallback on 50k files (0.9 us/op) and reduced character load time (`kfm.def` down to 6.7 ms).

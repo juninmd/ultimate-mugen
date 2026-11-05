@@ -357,3 +357,7 @@ etain_mut.
   - `commands::CmdSymbol`: Derived `Copy` and `PartialEq` for 20-byte bitwise symbol handling.
   - `commands::held`: Early button bitmask check before invoking relative direction and facing lookups, short-circuiting inactive buttons on the first instruction.
   - `commands::fires`: Evaluated `now & !prev` before reading older history ticks (`p2`, `p3`), skipping multi-tick history probes on non-firing frames.
+
+- **Wave 59 - Cached Scale in Box Filling & Multi-Box AABB Collision Pruning**:
+  - `fighter::fill_boxes`: Bypassed dynamic `size.*` string queries when no size overrides exist, reading `def.scale_x` and `def.scale_y` directly.
+  - `matchs::overlap`: Added composite axis-aligned bounding box early exit when checking multi-box collision groups (`a.len() > 1 || b.len() > 1`), eliminating $O(N 	imes M)$ pairwise tests on disjoint collision clusters.

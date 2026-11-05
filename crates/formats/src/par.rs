@@ -1,6 +1,6 @@
 pub fn workers(jobs: usize) -> usize {
     if cfg!(target_arch = "wasm32") { return 1; }
-    std::thread::available_parallelism().map(|n| n.get()).unwrap_or(1).min(jobs).clamp(1, 8)
+    std::thread::available_parallelism().map(|n| n.get()).unwrap_or(1).min(jobs).clamp(1, 32)
 }
 
 pub fn map<T: Sync, R: Send>(items: &[T], f: impl Fn(&T) -> R + Sync) -> Vec<R> {

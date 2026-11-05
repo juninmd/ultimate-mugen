@@ -58,75 +58,169 @@ pub fn load_mugen_char(
     let mut constants = default_constants();
     let mut provided = HashSet::new();
     let mut states = HashMap::new();
+    let mut commands = Vec::new();
     let mut spans = crate::diagnostics::SourceSpans::default();
-    // `stcommon` (normalmente common1.cns) traz os estados comuns E, em varios chars de
-    // fullgames, o mapeamento comando -> ChangeState do [Statedef -1]. Sem ele o lutador
-    // carrega e anda, mas nunca ataca. So vale o arquivo dentro da pasta do char: o
-    // fallback global (`data/common1.cns`) aplicaria o common de um jogo a outro.
-    let common_name = unquote(&fget("stcommon").unwrap_or_default());
-    if !common_name.is_empty()
-        && !common_name.contains("..")
-        && !common_name.contains('/')
-        && !common_name.contains('\\')
-    {
-        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{common_name}"))) {
-            spans.track(&common_name, || parse_states(&text(b), &mut states, false));
+
+    let sprite_buf = resolve(vfs, &base, &fget("sprite").unwrap_or_default());
+    let anim_buf = resolve(vfs, &base, &fget("anim").unwrap_or_default());
+    let snd_buf = resolve(vfs, &base, &fget("sound").unwrap_or_default());
+
+    let (sff_opt, anims, sounds) = {
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            std::thread::scope(|sc| {
+                let h_sff = sc.spawn(|| {
+                    sprite_buf.map(|buf| crate::perf::time("sff:decode", || decode_sff(buf)))
+                });
+                let h_anim = sc.spawn(|| {
+                    crate::perf::time("air:parse", || anim_buf.map(|b| parse_air(&text(b))).unwrap_or_default())
+                });
+                let h_snd = sc.spawn(|| {
+                    crate::perf::time("snd:decode", || snd_buf.map(decode_snd).unwrap_or_default())
+                });
+
+                let common_name = unquote(&fget("stcommon").unwrap_or_default());
+                if !common_name.is_empty()
+                    && !common_name.contains("..")
+                    && !common_name.contains('/')
+                    && !common_name.contains('\\')
+                {
+                    if let Some(b) = vfs.get(&norm_path(&format!("{base}/{common_name}"))) {
+                        spans.track(&common_name, || parse_states(&text(b), &mut states, false));
+                    }
+                }
+                let cns_name = fget("cns").unwrap_or_default();
+                let cns_text = crate::perf::time("cns:read", || resolve(vfs, &base, &cns_name).map(text).unwrap_or_default());
+                parse_constants(&cns_text, &mut constants, &mut provided);
+                scale_default_constants(&mut constants, &provided, local_w as f64 / 320.0);
+                crate::perf::time("cns:parse", || spans.track(&cns_name, || parse_states(&cns_text, &mut states, true)));
+                for k in ["st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9"] {
+                    let Some(fname) = fget(k) else { continue };
+                    if norm_path(&unquote(&fname)) == norm_path(&unquote(&cns_name)) {
+                        continue;
+                    }
+                    if let Some(b) = resolve(vfs, &base, &fname) {
+                        spans.track(&fname, || {
+                            crate::zss::parse_state_file(&fname, &text(b), &mut states, true)
+                        });
+                    }
+                }
+                let cmd_text = resolve(vfs, &base, &fget("cmd").unwrap_or_default())
+                    .map(text)
+                    .unwrap_or_default();
+                let (mut cmd_list, cmd_states) =
+                    spans.track(&fget("cmd").unwrap_or_default(), || parse_cmd(&cmd_text));
+                for (id, sd) in cmd_states {
+                    if id < 0 && states.contains_key(&id) {
+                        if let Some(s) = states.get_mut(&id) {
+                            s.controllers.extend(sd.controllers)
+                        }
+                    } else {
+                        states.insert(id, sd);
+                    }
+                }
+                if let Some(stc) = fget("stcommon") {
+                    if let Some(b) = vfs.get(&norm_path(&format!("{base}/{}", unquote(&stc)))) {
+                        spans.track(&stc, || {
+                            crate::zss::parse_state_file(&stc, &text(b), &mut states, false)
+                        });
+                    }
+                }
+                for (n, c) in [
+                    ("holdfwd", "/$F"),
+                    ("holdback", "/$B"),
+                    ("holdup", "/$U"),
+                    ("holddown", "/$D"),
+                ] {
+                    if !cmd_list.iter().any(|x| x.name == n) {
+                        cmd_list.push(parse_command(n, c, 1, 1));
+                    }
+                }
+                commands = cmd_list;
+
+                let anims = h_anim.join().unwrap();
+                let sounds = h_snd.join().unwrap();
+                let sff = h_sff.join().unwrap();
+                (sff, anims, sounds)
+            })
         }
-    }
-    let cns_name = fget("cns").unwrap_or_default();
-    let cns_text = crate::perf::time("cns:read", || resolve(vfs, &base, &cns_name).map(text).unwrap_or_default());
-    parse_constants(&cns_text, &mut constants, &mut provided);
-    scale_default_constants(&mut constants, &provided, local_w as f64 / 320.0);
-    crate::perf::time("cns:parse", || spans.track(&cns_name, || parse_states(&cns_text, &mut states, true)));
-    for k in ["st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9"] {
-        let Some(fname) = fget(k) else { continue };
-        if norm_path(&unquote(&fname)) == norm_path(&unquote(&cns_name)) {
-            continue;
-        }
-        if let Some(b) = resolve(vfs, &base, &fname) {
-            spans.track(&fname, || {
-                crate::zss::parse_state_file(&fname, &text(b), &mut states, true)
-            });
-        }
-    }
-    let cmd_text = resolve(vfs, &base, &fget("cmd").unwrap_or_default())
-        .map(text)
-        .unwrap_or_default();
-    let (mut commands, cmd_states) =
-        spans.track(&fget("cmd").unwrap_or_default(), || parse_cmd(&cmd_text));
-    for (id, sd) in cmd_states {
-        if id < 0 && states.contains_key(&id) {
-            if let Some(s) = states.get_mut(&id) {
-                s.controllers.extend(sd.controllers)
+        #[cfg(target_arch = "wasm32")]
+        {
+            let common_name = unquote(&fget("stcommon").unwrap_or_default());
+            if !common_name.is_empty()
+                && !common_name.contains("..")
+                && !common_name.contains('/')
+                && !common_name.contains('\\')
+            {
+                if let Some(b) = vfs.get(&norm_path(&format!("{base}/{common_name}"))) {
+                    spans.track(&common_name, || parse_states(&text(b), &mut states, false));
+                }
             }
-        } else {
-            states.insert(id, sd);
+            let cns_name = fget("cns").unwrap_or_default();
+            let cns_text = crate::perf::time("cns:read", || resolve(vfs, &base, &cns_name).map(text).unwrap_or_default());
+            parse_constants(&cns_text, &mut constants, &mut provided);
+            scale_default_constants(&mut constants, &provided, local_w as f64 / 320.0);
+            crate::perf::time("cns:parse", || spans.track(&cns_name, || parse_states(&cns_text, &mut states, true)));
+            for k in ["st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9"] {
+                let Some(fname) = fget(k) else { continue };
+                if norm_path(&unquote(&fname)) == norm_path(&unquote(&cns_name)) {
+                    continue;
+                }
+                if let Some(b) = resolve(vfs, &base, &fname) {
+                    spans.track(&fname, || {
+                        crate::zss::parse_state_file(&fname, &text(b), &mut states, true)
+                    });
+                }
+            }
+            let cmd_text = resolve(vfs, &base, &fget("cmd").unwrap_or_default())
+                .map(text)
+                .unwrap_or_default();
+            let (mut cmd_list, cmd_states) =
+                spans.track(&fget("cmd").unwrap_or_default(), || parse_cmd(&cmd_text));
+            for (id, sd) in cmd_states {
+                if id < 0 && states.contains_key(&id) {
+                    if let Some(s) = states.get_mut(&id) {
+                        s.controllers.extend(sd.controllers)
+                    }
+                } else {
+                    states.insert(id, sd);
+                }
+            }
+            if let Some(stc) = fget("stcommon") {
+                if let Some(b) = vfs.get(&norm_path(&format!("{base}/{}", unquote(&stc)))) {
+                    spans.track(&stc, || {
+                        crate::zss::parse_state_file(&stc, &text(b), &mut states, false)
+                    });
+                }
+            }
+            for (n, c) in [
+                ("holdfwd", "/$F"),
+                ("holdback", "/$B"),
+                ("holdup", "/$U"),
+                ("holddown", "/$D"),
+            ] {
+                if !cmd_list.iter().any(|x| x.name == n) {
+                    cmd_list.push(parse_command(n, c, 1, 1));
+                }
+            }
+            commands = cmd_list;
+
+            let anims = crate::perf::time("air:parse", || anim_buf.map(|b| parse_air(&text(b))).unwrap_or_default());
+            let sounds = crate::perf::time("snd:decode", || snd_buf.map(decode_snd).unwrap_or_default());
+            let sff = sprite_buf.map(|buf| crate::perf::time("sff:decode", || decode_sff(buf)));
+            (sff, anims, sounds)
         }
-    }
-    if let Some(stc) = fget("stcommon") {
-        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{}", unquote(&stc)))) {
-            spans.track(&stc, || {
-                crate::zss::parse_state_file(&stc, &text(b), &mut states, false)
-            });
-        }
-    }
-    for (n, c) in [
-        ("holdfwd", "/$F"),
-        ("holdback", "/$B"),
-        ("holdup", "/$U"),
-        ("holddown", "/$D"),
-    ] {
-        if !commands.iter().any(|x| x.name == n) {
-            commands.push(parse_command(n, c, 1, 1));
-        }
-    }
-    let anims = crate::perf::time("air:parse", || resolve(vfs, &base, &fget("anim").unwrap_or_default()).map(|b| parse_air(&text(b))).unwrap_or_default());
+    };
+
+    let sff = match sff_opt {
+        Some(res) => Some(res?),
+        None => None,
+    };
 
     let mut sprites = HashMap::new();
     let mut palettes = HashMap::new();
     let mut indexed = HashMap::new();
-    if let Some(buf) = resolve(vfs, &base, &fget("sprite").unwrap_or_default()) {
-        let sff = crate::perf::time("sff:decode", || decode_sff(buf))?;
+    if let Some(sff) = sff {
         let mut counts: HashMap<i32, usize> = HashMap::new();
         for s in &sff.sprites {
             if s.group != 9000 {
@@ -309,7 +403,6 @@ pub fn load_mugen_char(
             );
         }
     }
-    let sounds = crate::perf::time("snd:decode", || resolve(vfs, &base, &fget("sound").unwrap_or_default()).map(decode_snd).unwrap_or_default());
     // move list for the pause screen: every author-defined command with its input (internal hold/recovery helpers left out)
     let mut movelist: Vec<MoveInfo> = vec![];
     for c in commands.iter().filter(|c| !c.raw.is_empty()) {

@@ -122,6 +122,27 @@ fn attr_kind_match(want: &str, have: &[String]) -> bool {
 }
 
 impl<'a> Host for Ctx<'a> {
+    fn trigger0(&self, name: &str, comp: Option<char>, raw: Option<&str>) -> f64 {
+        self.trigger(name, &[], comp, raw)
+    }
+    fn trigger1(&self, name: &str, a0: f64, comp: Option<char>, raw: Option<&str>) -> f64 {
+        let f = self.f();
+        match name {
+            "var" => if a0 >= 0.0 && a0.is_finite() { f.vars.get(a0 as usize).copied().unwrap_or(0) as f64 } else { 0.0 },
+            "fvar" => if a0 >= 0.0 && a0.is_finite() { f.fvars.get(a0 as usize).copied().unwrap_or(0.0) } else { 0.0 },
+            "sysvar" => if a0 >= 0.0 && a0.is_finite() { f.sysvars.get(a0 as usize).copied().unwrap_or(0) as f64 } else { 0.0 },
+            "sysfvar" => if a0 >= 0.0 && a0.is_finite() { f.sysfvars.get(a0 as usize).copied().unwrap_or(0.0) } else { 0.0 },
+            "animelemno" => f.anim_elem_no_at(a0 as i32) as f64,
+            "animelemtime" => f.anim_elem_time(a0 as i32).unwrap_or(-1) as f64,
+            "animexist" | "selfanimexist" => b(f.def.anims.contains_key(&(a0 as i32))),
+            "selfstatenoexist" => b(f.def.states.contains_key(&(a0 as i32))),
+            "ishelper" => b(f.is_helper && f.helper_id == a0 as i32),
+            _ => {
+                let a = [Node::Num(a0, false)];
+                self.trigger(name, &a, comp, raw)
+            }
+        }
+    }
     fn redirect(&self, kind: &str, arg: Option<f64>) -> Option<Self> {
         let m = self.m; let f = self.f();
         let i = match kind {

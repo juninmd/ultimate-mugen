@@ -135,3 +135,7 @@ A avaliação de partidas em `crates/engine/src/matchs.rs`, `crates/engine/src/t
 ## Lotes de Vértices Contíguos e Rasterização sem Multiplicação Prévia
 
 `Batch::push` em `crates/render/src/batch.rs` substitui chamadas repetidas a `self.vertices.push()` por uma única cópia de fatia contígua (`self.vertices.extend_from_slice(&[...])`), agrupando os quatro vértices do quadrilátero em uma única operação de memória. Em `crates/engine/src/raster.rs`, `pixmap_to_image` pré-dimensiona os buffers de pixel (`vec![0u8; pixels.len() * 4]`) e desmultiplica os canais straight-alpha usando `chunks_exact_mut(4)`, viabilizando auto-vetorização sobre superfícies e efeitos procedurais de cenários.
+
+## Despacho Direto de Gatilhos em Bytecode
+
+O trait `Host` em `crates/engine/src/expr.rs` e a máquina virtual em `crates/engine/src/bytecode.rs` introduzem ganchos de despacho direto `trigger0` e `trigger1`. Para avaliação de gatilhos unários (`Op::Trig1`), operandos na pilha avaliam diretamente na lógica do gatilho sem encapsulamento em arrays AST temporários `[Node::Num]` ou redirecionamento via `eval()`. Gatilhos críticos (`var`, `fvar`, `sysvar`, `animelemno`, `animelemtime`, `animexist`, `selfstatenoexist`) executam como índices e consultas inline em arrays, reduzindo a latência máxima de tick de simulação para 0,042 ms.

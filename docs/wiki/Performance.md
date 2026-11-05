@@ -135,3 +135,7 @@ Match evaluation in `crates/engine/src/matchs.rs`, `crates/engine/src/triggers.r
 ## Contiguous Vertex Slice Batching & Demultiplying Rasterization
 
 `Batch::push` in `crates/render/src/batch.rs` replaces repeated `self.vertices.push()` calls with single contiguous slice copying (`self.vertices.extend_from_slice(&[...])`), batching all four quad vertices in a single memory operation. In `crates/engine/src/raster.rs`, `pixmap_to_image` pre-sizes pixel buffers (`vec![0u8; pixels.len() * 4]`) and demultiplies straight-alpha channels via `chunks_exact_mut(4)` to enable auto-vectorization across procedurally rendered stage surfaces and effects.
+
+## Bytecode Direct Trigger Dispatch
+
+`Host` in `crates/engine/src/expr.rs` and the virtual machine in `crates/engine/src/bytecode.rs` introduce `trigger0` and `trigger1` direct dispatch hooks. For unary trigger evaluation (`Op::Trig1`), stack operands evaluate directly into trigger logic without wrapping into temporary `[Node::Num]` AST arrays or indirection through `eval()`. Hot path triggers (`var`, `fvar`, `sysvar`, `animelemno`, `animelemtime`, `animexist`, `selfstatenoexist`) execute as inline array indices and lookups, reducing worst-case simulation tick latency to 0.042 ms.

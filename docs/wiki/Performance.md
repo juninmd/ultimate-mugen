@@ -345,3 +345,9 @@ etain_mut.
   - `matchs::run_state`: Converted `common` lookup into a lazy fallback (`let fallback;`), bypassing `self.common.clone()` on all negative states (-3, -2, -1) and every character-defined state.
   - `matchs::change_state`: Replaced eager `self.common.clone()` with reference pointer equality `&self.common` and lazy state definition fallback.
   - `matchs::tick`: Replaced per-frame `f.st_def.clone()` in physics override loop with scalar `Option<char>` extraction.
+
+- **Wave 57 - Non-Allocating INI Parsing, Pre-Allocated Controllers & State Sizing**:
+  - `ini::parse_ini_no_lines`: Replaced line-allocating INI parsing in `parse_states`, `parse_constants`, `parse_cmd`, and `loader.rs` character DEF resolution with `parse_ini_no_lines`, avoiding tens of thousands of unused `String` line allocations per character.
+  - `ini::parse_ini_opt`: Pre-allocated section output vector with `text.len() / 256 + 4` and section entries with capacity 8.
+  - `cns::build_controller`: Pre-allocated controller `params` with capacity matching `s.entries.len()`.
+  - `cns::parse_states`: Pre-allocated `StateDef` with `controllers` capacity 16 and `params` capacity matching section entries, eliminating dynamic reallocation during state compilation.

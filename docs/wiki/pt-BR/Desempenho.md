@@ -341,3 +341,9 @@ etain_mut.
   - `matchs::run_state`: Conversao da consulta a `common` em fallback preguicoso (`let fallback;`), ignorando clones de `self.common` em todos os estados negativos (-3, -2, -1) e estados definidos pelo personagem.
   - `matchs::change_state`: Substituicao do clone ansioso de `self.common` por igualdade de ponteiro `&self.common` e fallback sob demanda.
   - `matchs::tick`: Eliminacao do clone por quadro de `f.st_def` no loop de override de fisica atraves de extracao escalar de `Option<char>`.
+
+- **Onda 57 - Parsing INI Sem Alocacao de Linhas, Controladores e Estados Pre-Dimensionados**:
+  - `ini::parse_ini_no_lines`: Substituicao do parsing de INI que copiava linhas em `parse_states`, `parse_constants`, `parse_cmd` e na resolucao de DEF do `loader.rs` por `parse_ini_no_lines`, evitando dezenas de milhares de alocacoes de `String` descartadas por personagem.
+  - `ini::parse_ini_opt`: Pre-alocacao do vetor de secoes com `text.len() / 256 + 4` e das entradas de cada secao com capacidade 8.
+  - `cns::build_controller`: Pre-alocacao de `params` do controlador com a capacidade exata de `s.entries.len()`.
+  - `cns::parse_states`: Pre-alocacao de `StateDef` com capacidade de 16 controladores e parametros dimensionados pelas entradas da secao, eliminando realocacoes dinamicas na compilacao de estados.

@@ -298,6 +298,15 @@ impl Match {
 
     pub fn root_indices(&self) -> Vec<usize> { (0..self.fighters.len()).filter(|&i| !self.fighters[i].is_helper).collect() }
     pub fn idx(&self, id: u32) -> Option<usize> { self.fighters.iter().position(|f| f.id == id && !f.destroyed) }
+    #[inline]
+    pub fn idx_hint(&self, id: u32, hint: usize) -> Option<usize> {
+        if let Some(f) = self.fighters.get(hint) {
+            if f.id == id && !f.destroyed {
+                return Some(hint);
+            }
+        }
+        self.idx(id)
+    }
     pub fn enemy(&self, i: usize, n: usize) -> Option<usize> {
         let me = &self.fighters[i];
         if n == 0 {
@@ -834,8 +843,8 @@ impl Match {
         let mut ids = std::mem::take(&mut self.tick_ids);
         ids.clear();
         self.collect_run_order(&mut ids);
-        for &id in &ids {
-            let Some(i) = self.idx(id) else { continue };
+        for (order_i, &id) in ids.iter().enumerate() {
+            let Some(i) = self.idx_hint(id, order_i) else { continue };
             if frozen_by_pause(&self.fighters[i]) { continue; }
             let f = &mut self.fighters[i];
             let frozen = f.hit_pause > 0 || f.hit_shake > 0;
@@ -849,8 +858,8 @@ impl Match {
             for f in self.fighters.iter_mut() { let t = if sup { &mut f.super_move_time } else { &mut f.pause_move_time }; if *t > 0 { *t -= 1; } }
         }
         crate::ikemen::tick(self);
-        for &id in &ids {
-            let Some(i) = self.idx(id) else { continue };
+        for (order_i, &id) in ids.iter().enumerate() {
+            let Some(i) = self.idx_hint(id, order_i) else { continue };
             if frozen_by_pause(&self.fighters[i]) { continue; }
             {
                 let f = &mut self.fighters[i];
@@ -1147,7 +1156,9 @@ impl Match {
     }
 
     fn detect_reversals(&mut self) {
-        let mut found = vec![];
+        if !self.fighters.iter().any(|f| f.reversal.is_some()) { return; }
+        let mut found = [(0usize, 0usize, (0.0f32, 0.0f32)); 4];
+        let mut found_len = 0;
         for r in 0..self.fighters.len() {
             let fr = &self.fighters[r];
             let Some((attr, _)) = fr.reversal.as_ref() else { continue };
@@ -1160,10 +1171,16 @@ impl Match {
                 let Some(hd) = fa.hitdef.as_ref() else { continue };
                 if !Self::attr_match(hd, attr) { continue; }
                 fa.fill_boxes(1, &mut self.scratch_c2);
-                if let Some(at) = Self::overlap(&self.scratch_c1, &self.scratch_c2) { found.push((r, a, at)); break; }
+                if let Some(at) = Self::overlap(&self.scratch_c1, &self.scratch_c2) {
+                    if found_len < found.len() {
+                        found[found_len] = (r, a, at);
+                        found_len += 1;
+                    }
+                    break;
+                }
             }
         }
-        for (r, a, at) in found {
+        for &(r, a, at) in &found[..found_len] {
             let Some((_, rd)) = self.fighters[r].reversal.take() else { continue };
             let aid = self.fighters[a].id;
             {
@@ -1183,7 +1200,8 @@ impl Match {
 
     fn detect_hits(&mut self) {
         self.detect_reversals();
-        let mut pending = vec![];
+        let mut pending = [(0usize, 0usize, (0.0f32, 0.0f32)); 8];
+        let mut pending_len = 0;
         for a in 0..self.fighters.len() {
             let fa = &self.fighters[a];
             if fa.destroyed || fa.ikemen.standby || !fa.hitdef_active || (fa.move_type != 'A' && !fa.is_helper) { continue; }
@@ -1206,12 +1224,19 @@ impl Match {
                     &self.scratch_c2
                 };
                 if targets.is_empty() { continue; }
-                if let Some(at) = Self::overlap(&self.scratch_c1, targets) { pending.push((a, d, hd.clone(), at)); }
+                if let Some(at) = Self::overlap(&self.scratch_c1, targets) {
+                    if pending_len < pending.len() {
+                        pending[pending_len] = (a, d, at);
+                        pending_len += 1;
+                    }
+                }
             }
         }
-        let mut struck: Vec<usize> = vec![];
-        for (a, d, hd, at) in pending {
-            if hd.hit_once && struck.contains(&a) { continue; }
+        let mut struck = [0usize; 8];
+        let mut struck_len = 0;
+        for &(a, d, at) in &pending[..pending_len] {
+            let Some(hd) = self.fighters[a].hitdef.clone() else { continue };
+            if hd.hit_once && struck[..struck_len].contains(&a) { continue; }
             if !self.fighters[a].hitdef_active { continue; }
             let did = self.fighters[d].id;
             self.fighters[a].hitdef_targets.push(did);
@@ -1221,9 +1246,12 @@ impl Match {
             let as_projectile = projectile_helper.then(|| (self.fighters[a].helper_id, self.fighters[a].facing));
             self.apply_hit(a, d, &hd, at, as_projectile);
             if projectile_helper { self.share_projectile_helper_contacts(a, contacts_before); }
-            struck.push(a);
+            if struck_len < struck.len() {
+                struck[struck_len] = a;
+                struck_len += 1;
+            }
         }
-        for a in struck { if self.fighters.get(a).is_some_and(|f| f.def.source == Source::Mugen) { self.fighters[a].hitdef_active = false; } }
+        for &a in &struck[..struck_len] { if self.fighters.get(a).is_some_and(|f| f.def.source == Source::Mugen) { self.fighters[a].hitdef_active = false; } }
     }
 
     fn share_projectile_helper_contacts(&mut self, a: usize, from: usize) {

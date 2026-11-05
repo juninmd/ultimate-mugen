@@ -412,7 +412,7 @@ impl Code {
                     Op::Const(v) => return v,
                     Op::Trig0(i) => {
                         if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
-                            return h.trigger(name, &[], *comp, raw.as_deref());
+                            return h.trigger0(name, *comp, raw.as_deref());
                         }
                         return 0.0;
                     }
@@ -426,25 +426,11 @@ impl Code {
         if self.depth > STACK {
             return 0.0;
         }
-        if self.ops.len() == 1 {
-            return match self.ops[0] {
-                Op::Const(v) => v,
-                Op::Trig0(i) => {
-                    if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
-                        h.trigger(name, &[], *comp, raw.as_deref())
-                    } else {
-                        0.0
-                    }
-                }
-                Op::Host(i) => eval(&self.host[i as usize], h),
-                _ => self.run_slice(h, 0, 1),
-            };
-        }
         if self.ops.len() == 2 {
             match (self.ops[0], self.ops[1]) {
                 (Op::Trig0(i), Op::Not) => {
                     let v = if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
-                        h.trigger(name, &[], *comp, raw.as_deref())
+                        h.trigger0(name, *comp, raw.as_deref())
                     } else {
                         0.0
                     };
@@ -457,6 +443,40 @@ impl Code {
                     return if v.is_nan() { f64::NAN } else if v == 0.0 { 1.0 } else { 0.0 };
                 }
                 _ => {}
+            }
+        }
+        if self.ops.len() == 3 {
+            let (op0, op1, op2) = (self.ops[0], self.ops[1], self.ops[2]);
+            if let (Op::Trig0(i), Op::Const(c)) = (op0, op1) {
+                let v = if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                    h.trigger0(name, *comp, raw.as_deref())
+                } else {
+                    0.0
+                };
+                return match op2 {
+                    Op::Eq => (v == c) as i32 as f64,
+                    Op::Ne => (v != c) as i32 as f64,
+                    Op::Gt => (v > c) as i32 as f64,
+                    Op::Ge => (v >= c) as i32 as f64,
+                    Op::Lt => (v < c) as i32 as f64,
+                    Op::Le => (v <= c) as i32 as f64,
+                    _ => self.run_slice(h, 0, 3),
+                };
+            } else if let (Op::Const(c), Op::Trig0(i)) = (op0, op1) {
+                let v = if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                    h.trigger0(name, *comp, raw.as_deref())
+                } else {
+                    0.0
+                };
+                return match op2 {
+                    Op::Eq => (c == v) as i32 as f64,
+                    Op::Ne => (c != v) as i32 as f64,
+                    Op::Gt => (c > v) as i32 as f64,
+                    Op::Ge => (c >= v) as i32 as f64,
+                    Op::Lt => (c < v) as i32 as f64,
+                    Op::Le => (c <= v) as i32 as f64,
+                    _ => self.run_slice(h, 0, 3),
+                };
             }
         }
         self.run_slice(h, 0, self.ops.len())

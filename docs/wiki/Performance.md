@@ -312,3 +312,16 @@ etain_mut.
   - `Gfx::sprite_tex_for`: Eliminated duplicate `def.sprites.get` lookup per rendered frame across all fighters, shadows, helpers, and explods.
   - `Gfx::draw_sprite`: Uses `def.scale_x` and `def.scale_y` directly, removing repeated per-frame `def.c(...)` table probes.
   - Reduced `kfm.def` load time to 4.6 ms and accelerated simulation tick rate to 216k ticks/s.
+
+- **Wave 52 - Cached Animation Timing & 3-Op Bytecode Fast-Paths**:
+  - `Fighter`: Cached `anim_total_time` and `anim_loop_start` upon animation switches, turning `anim_time_trig` (`animtime`) into a direct scalar subtraction without map lookups.
+  - `Fighter::advance_anim`: Reused single animation lookup across the frame advance loop and eliminated repeated `self.anim()` lookups.
+  - `Fighter::anim_elem_time`: Instant return for `animelemtime(1)` without frame iteration.
+  - `bytecode::Code::run`: Fast-path short-circuits for 3-op comparison expressions (`[Trig0, Const, Cmp]` and `[Const, Trig0, Cmp]`), evaluating triggers directly via `Host::trigger0` and bypassing virtual machine stack allocation.
+  - Dropped `kfm720.def` loading time to 8.7 ms and `kfm.def` to 4.4 ms.
+
+- **Wave 53 - Fighter Index Hints, Stack-Allocated Hits & Early Reversal Bypasses**:
+  - `Match::idx_hint`: Direct $O(1)$ index resolution based on run-order position hints, replacing linear scans across active fighters in the per-tick execution pipeline.
+  - `Match::detect_reversals`: Fast-path early exit when no fighters have an active reversal state, plus fixed-size stack arrays for detected reversals.
+  - `Match::detect_hits`: Stack-allocated fixed buffer `pending` storing only fighter indices and coordinates, avoiding eager `HitDefData` heap clones on idle/no-hit frames.
+  - `struck` list switched to stack arrays, eliminating vector allocations across physics and hit detection loops.

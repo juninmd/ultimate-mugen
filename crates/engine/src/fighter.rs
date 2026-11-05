@@ -208,8 +208,9 @@ impl Fighter {
         match self.anim() { None => 0, Some(a) if a.total_time < 0 => -1, Some(a) => self.anim_elapsed - a.total_time }
     }
     pub fn elem_start(&self, n: usize) -> i32 {
+        if n <= 1 { return 0; }
         let Some(a) = self.anim() else { return 0 };
-        a.frames.iter().take(n.saturating_sub(1)).map(|f| f.time.max(0)).sum()
+        a.frames.iter().take(n - 1).map(|f| f.time.max(0)).sum()
     }
     pub fn anim_elem_started(&self, n: i32) -> bool {
         self.elem as i32 + 1 == n && self.elem_time == 0 && (n > 1 || self.anim_elapsed == 0 || self.anim().is_some_and(|a| a.loop_start == 0))
@@ -292,27 +293,33 @@ impl Fighter {
     pub fn height_bottom(&self) -> f32 { self.height_override.map(|h| h.1).unwrap_or(0.0) }
     pub fn add_power_local(&mut self, v: f32) { self.power = (self.power + v).clamp(0.0, self.power_max); }
 
-    /// Collision boxes in world space (kind 1 = attack, 2 = hurt).
-    pub fn boxes(&self, kind: u8) -> Vec<Box4> {
-        let Some(fr) = self.frame() else { return vec![] };
+    pub fn fill_boxes(&self, kind: u8, out: &mut Vec<Box4>) {
+        out.clear();
+        let Some(fr) = self.frame() else { return };
         let list = if kind == 1 { &fr.clsn1 } else { &fr.clsn2 };
         let modified;
         let list: &[Box4] = if self.clsn_mods.iter().any(|c| c.kind == kind) { modified = crate::sctrl::clsn::apply(&self.clsn_mods, kind, list); &modified } else { list };
         let s = self.lscl * self.draw_scale[0];
         let sx = self.c("size.xscale", 1.0);
         let sy = self.c("size.yscale", 1.0);
-        let mut out: Vec<Box4> = list.iter().map(|b| {
+        for b in list {
             let (mut x1, mut x2) = (b[0] * sx * s, b[2] * sx * s);
             if fr.flip_h { let t = -x2; x2 = -x1; x1 = t; }
             if self.facing < 0.0 { let t = -x2; x2 = -x1; x1 = t; }
-            [self.pos.x + x1, self.pos.y + b[1] * sy * s, self.pos.x + x2, self.pos.y + b[3] * sy * s]
-        }).collect();
+            out.push([self.pos.x + x1, self.pos.y + b[1] * sy * s, self.pos.x + x2, self.pos.y + b[3] * sy * s]);
+        }
         if out.is_empty() && kind == 2 {
             if let Some((top, bottom)) = self.height_override {
                 let (a, b) = (self.pos.x - self.back_width() * self.facing, self.pos.x + self.front_width() * self.facing);
                 out.push([a.min(b), self.pos.y - top, a.max(b), self.pos.y + bottom]);
             }
         }
+    }
+
+    /// Collision boxes in world space (kind 1 = attack, 2 = hurt).
+    pub fn boxes(&self, kind: u8) -> Vec<Box4> {
+        let mut out = Vec::new();
+        self.fill_boxes(kind, &mut out);
         out
     }
     pub fn has_assert(&self, f: u64) -> bool { self.asserts & f != 0 }

@@ -1097,18 +1097,21 @@ impl Match {
 
     fn detect_reversals(&mut self) {
         let mut found = vec![];
+        let mut c1r = Vec::with_capacity(8);
+        let mut fa_boxes = Vec::with_capacity(8);
         for r in 0..self.fighters.len() {
             let fr = &self.fighters[r];
             let Some((attr, _)) = fr.reversal.as_ref() else { continue };
             if fr.destroyed { continue; }
-            let c1r = fr.boxes(1);
+            fr.fill_boxes(1, &mut c1r);
             if c1r.is_empty() { continue; }
             for a in 0..self.fighters.len() {
                 let fa = &self.fighters[a];
                 if a == r || fa.side == fr.side || fa.destroyed || !fa.hitdef_active || fa.move_type != 'A' { continue; }
                 let Some(hd) = fa.hitdef.as_ref() else { continue };
                 if !Self::attr_match(hd, attr) { continue; }
-                if let Some(at) = Self::overlap(&c1r, &fa.boxes(1)) { found.push((r, a, at)); break; }
+                fa.fill_boxes(1, &mut fa_boxes);
+                if let Some(at) = Self::overlap(&c1r, &fa_boxes) { found.push((r, a, at)); break; }
             }
         }
         for (r, a, at) in found {
@@ -1132,23 +1135,35 @@ impl Match {
     fn detect_hits(&mut self) {
         self.detect_reversals();
         let mut pending = vec![];
+        let mut c1 = Vec::with_capacity(8);
+        let mut d_boxes = Vec::with_capacity(8);
         for a in 0..self.fighters.len() {
             let fa = &self.fighters[a];
             if fa.destroyed || fa.ikemen.standby || !fa.hitdef_active || (fa.move_type != 'A' && !fa.is_helper) { continue; }
             let Some(hd) = fa.hitdef.as_ref() else { continue };
             let Some(fr) = fa.frame() else { continue };
             if fr.clsn1.is_empty() { continue; }
-            let c1 = fa.boxes(1);
+            fa.fill_boxes(1, &mut c1);
             for d in 0..self.fighters.len() {
                 let fd = &self.fighters[d];
                 if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) { continue; }
                 if hd.hit_once && !fa.hitdef_targets.is_empty() { continue; }
                 if hd.p2clsncheck && fd.frame().is_none_or(|f| f.clsn2.is_empty()) { continue; }
                 if !self.can_be_hit(d, hd, fa.side) { continue; }
-                let d_boxes = fd.boxes(2);
-                let targets = if hd.p2clsnrequire >= 0 { d_boxes.get(hd.p2clsnrequire as usize).copied().into_iter().collect::<Vec<_>>() } else { d_boxes };
+                fd.fill_boxes(2, &mut d_boxes);
+                let single;
+                let targets: &[Box4] = if hd.p2clsnrequire >= 0 {
+                    if let Some(&b) = d_boxes.get(hd.p2clsnrequire as usize) {
+                        single = [b];
+                        &single
+                    } else {
+                        &[]
+                    }
+                } else {
+                    &d_boxes
+                };
                 if targets.is_empty() { continue; }
-                if let Some(at) = Self::overlap(&c1, &targets) { pending.push((a, d, hd.clone(), at)); }
+                if let Some(at) = Self::overlap(&c1, targets) { pending.push((a, d, hd.clone(), at)); }
             }
         }
         let mut struck: Vec<usize> = vec![];
@@ -1724,6 +1739,7 @@ impl Match {
                 }
             }
         } }
+        let mut d_clsn2 = Vec::with_capacity(8);
         for pi in 0..self.projectiles.len() {
             if frozen[pi] { continue; }
             for d in 0..self.fighters.len() {
@@ -1734,7 +1750,8 @@ impl Match {
                 if !self.can_be_hit(d, &p.hitdef, p.side) { continue; }
                 let c1 = Self::proj_boxes(p, 1);
                 if c1.is_empty() { break; }
-                let Some(at) = Self::overlap(&c1, &self.fighters[d].boxes(2)) else { continue };
+                self.fighters[d].fill_boxes(2, &mut d_clsn2);
+                let Some(at) = Self::overlap(&c1, &d_clsn2) else { continue };
                 let (hd, pid, pf) = (p.hitdef.clone(), p.id, p.facing);
                 self.apply_hit(oi, d, &hd, at, Some((pid, pf)));
                 let gt = self.game_time;

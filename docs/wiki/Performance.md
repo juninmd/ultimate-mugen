@@ -98,3 +98,8 @@ On the cloud development machine, median normalization time decreased from 60.8 
 In the cloud development environment, warm-run allocations decreased from 2,331 to 1,183 per decode. Elapsed times were noisy (roughly 9–11 ms in warm runs) and do not demonstrate a speedup. This reduces temporary allocation churn rather than the final decoded PCM size. The benchmark excludes playback and audio-device latency. Run `cargo test --locked --release --example audio_bench` for sample-preservation, mono/stereo, tail and existing PCM tests.
 
 `Ui::quad` transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.
+
+- **Wave 27 - In-Place Collision Boxes & Fast Animation Elem Start**:
+  - Implements Fighter::fill_boxes using caller-provided scratch buffers, eliminating continuous Vec<Box4> allocations during reversal, hit, and projectile detection loops.
+  - Replaces heap vector collection for p2clsnrequire single box checks with a zero-copy stack array slice.
+  - Adds if n <= 1 { return 0; } early-exit in lem_start to bypass iterator instantiation for the most common animation frame timing queries.

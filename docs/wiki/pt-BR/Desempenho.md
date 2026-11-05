@@ -127,3 +127,7 @@ A avaliação de partidas em `crates/engine/src/matchs.rs`, `crates/engine/src/t
 ## Conversão de Sprites para RGBA sem Ramificação via LUT em Cache L1
 
 `sprite_to_rgba` em `crates/formats/src/sff.rs` pré-popula uma tabela de busca de 256 entradas `lut: [[u8; 4]; 256]` em cache L1, mapeando índices de paleta de 8 bits diretamente para quads RGBA. O laço de pixels usa cópias de 4 bytes sem desvio condicional (`chunk.copy_from_slice(&lut[c])`), eliminando desvios por pixel para transparência (`c != 0`) e reduzindo falhas de predição de desvio durante a decodificação de sprites. A fase de decodificação SFF executa em ~0,8 ms para folhas de sprites padrão de lutadores.
+
+## Fila de Comandos de Entrada da IA com Alocação Zero
+
+`crates/engine/src/ai.rs` reutiliza a memória do buffer circular em `Ai.queue: VecDeque<u32>` por meio de `append_seq(&mut queue, ...)` em vez de criar e descartar vetores temporários na heap `Vec<u32>` a cada decisão de movimento da IA. A latência máxima por tick caiu para 0,046 ms sob carga.

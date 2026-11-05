@@ -3,6 +3,7 @@ use crate::audio::{Audio, SoundOpts};
 use crate::controls::Controls;
 use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
+#[path = "session/kaito.rs"] mod kaito;
 use crate::stages::Stage;
 use crate::ui::Ui;
 use crate::vfx::Vfx;
@@ -13,7 +14,6 @@ use ume_engine::common::common_def;
 use ume_engine::fx::build_fx;
 use ume_engine::input::{k, InputSource};
 use ume_engine::matchs::{Event, Match};
-
 /// `Replay(inputs, cursor)`: feeds back recorded inputs (the simulation is deterministic, so this reproduces the fight exactly).
 pub enum Pilot {
     Human(usize),
@@ -21,7 +21,6 @@ pub enum Pilot {
     Dummy,
     Replay(Vec<u32>, usize),
 }
-
 /// Team roster shown by the HUD (sequence / parallel team modes).
 #[derive(Clone, Default)]
 pub struct TeamInfo {
@@ -537,11 +536,7 @@ impl Session {
                     self.over = Some(w);
                 }
                 Event::StopSound { owner, channel } => audio.stop(owner, channel),
-                Event::Transform { fighter } => {
-                    if let Some(f) = self.m.fighters.iter().find(|f| f.id == fighter && f.def.id == "umf:kaito") {
-                        audio.sample(&f.def.id, 1000, 3, f.def.sounds.get(&(1000, 3)), SoundOpts { owner: fighter, channel: 4, ..Default::default() });
-                    }
-                }
+                Event::Transform { fighter } => kaito::play_awakening(&self.m, audio, fighter),
                 Event::SoundPan {
                     owner,
                     channel,

@@ -1097,18 +1097,21 @@ impl Match {
 
     fn detect_reversals(&mut self) {
         let mut found = vec![];
+        let mut c1r = Vec::new();
+        let mut fa_boxes = Vec::new();
         for r in 0..self.fighters.len() {
             let fr = &self.fighters[r];
             let Some((attr, _)) = fr.reversal.as_ref() else { continue };
             if fr.destroyed { continue; }
-            let c1r = fr.boxes(1);
+            fr.fill_boxes(1, &mut c1r);
             if c1r.is_empty() { continue; }
             for a in 0..self.fighters.len() {
                 let fa = &self.fighters[a];
                 if a == r || fa.side == fr.side || fa.destroyed || !fa.hitdef_active || fa.move_type != 'A' { continue; }
                 let Some(hd) = fa.hitdef.as_ref() else { continue };
                 if !Self::attr_match(hd, attr) { continue; }
-                if let Some(at) = Self::overlap(&c1r, &fa.boxes(1)) { found.push((r, a, at)); break; }
+                fa.fill_boxes(1, &mut fa_boxes);
+                if let Some(at) = Self::overlap(&c1r, &fa_boxes) { found.push((r, a, at)); break; }
             }
         }
         for (r, a, at) in found {
@@ -1132,23 +1135,31 @@ impl Match {
     fn detect_hits(&mut self) {
         self.detect_reversals();
         let mut pending = vec![];
+        let mut c1 = Vec::new();
+        let mut d_boxes = Vec::new();
         for a in 0..self.fighters.len() {
             let fa = &self.fighters[a];
             if fa.destroyed || fa.ikemen.standby || !fa.hitdef_active || (fa.move_type != 'A' && !fa.is_helper) { continue; }
             let Some(hd) = fa.hitdef.as_ref() else { continue };
             let Some(fr) = fa.frame() else { continue };
             if fr.clsn1.is_empty() { continue; }
-            let c1 = fa.boxes(1);
+            fa.fill_boxes(1, &mut c1);
+            if c1.is_empty() { continue; }
             for d in 0..self.fighters.len() {
                 let fd = &self.fighters[d];
                 if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) { continue; }
                 if hd.hit_once && !fa.hitdef_targets.is_empty() { continue; }
                 if hd.p2clsncheck && fd.frame().is_none_or(|f| f.clsn2.is_empty()) { continue; }
                 if !self.can_be_hit(d, hd, fa.side) { continue; }
-                let d_boxes = fd.boxes(2);
-                let targets = if hd.p2clsnrequire >= 0 { d_boxes.get(hd.p2clsnrequire as usize).copied().into_iter().collect::<Vec<_>>() } else { d_boxes };
+                fd.fill_boxes(2, &mut d_boxes);
+                let targets: &[Box4] = if hd.p2clsnrequire >= 0 {
+                    let req = hd.p2clsnrequire as usize;
+                    if req < d_boxes.len() { &d_boxes[req..=req] } else { &[] }
+                } else {
+                    &d_boxes
+                };
                 if targets.is_empty() { continue; }
-                if let Some(at) = Self::overlap(&c1, &targets) { pending.push((a, d, hd.clone(), at)); }
+                if let Some(at) = Self::overlap(&c1, targets) { pending.push((a, d, hd.clone(), at)); }
             }
         }
         let mut struck: Vec<usize> = vec![];
@@ -1358,7 +1369,10 @@ impl Match {
             if cornered && self.fighters[a].def.source == Source::Mugen && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; self.fighters[a].vel.x = corner_pushed; }
             self.place_target(a, d, hd);
             let droot = self.fighters[d].root;
-            self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
+            if self.explods.iter().any(|e| e.remove_on_get_hit) {
+                let roots: Vec<u32> = self.fighters.iter().filter(|f| f.root == droot).map(|f| f.id).collect();
+                self.explods.retain(|e| !(e.remove_on_get_hit && roots.contains(&e.owner)));
+            }
         }
         // cornered defenders push the attacker back instead of absorbing all the knock-back (SF/Tekken/GG behaviour)
         if !from_proj && self.fighters[a].def.source == Source::Native && self.fighters[a].state_type != 'A' && !self.fighters[a].has_assert(asf::NOCORNERPUSH) && self.at_corner(d) {
@@ -1668,14 +1682,21 @@ impl Match {
             self.projectiles.push(p);
         }
     }
-    pub fn proj_boxes(p: &Projectile, kind: u8) -> Vec<Box4> {
-        let Some(fr) = p.cur.frame() else { return vec![] };
+    pub fn fill_proj_boxes(p: &Projectile, kind: u8, out: &mut Vec<Box4>) {
+        out.clear();
+        let Some(fr) = p.cur.frame() else { return; };
         let list = if kind == 1 { &fr.clsn1 } else { &fr.clsn2 };
-        list.iter().map(|b| {
+        out.reserve(list.len());
+        for b in list {
             let (mut x1, mut x2) = (b[0] * p.lscl * p.scale[0], b[2] * p.lscl * p.scale[0]);
             if p.facing < 0.0 { let t = -x2; x2 = -x1; x1 = t; }
-            [p.pos.x + x1, p.pos.y + b[1] * p.lscl * p.scale[1], p.pos.x + x2, p.pos.y + b[3] * p.lscl * p.scale[1]]
-        }).collect()
+            out.push([p.pos.x + x1, p.pos.y + b[1] * p.lscl * p.scale[1], p.pos.x + x2, p.pos.y + b[3] * p.lscl * p.scale[1]]);
+        }
+    }
+    pub fn proj_boxes(p: &Projectile, kind: u8) -> Vec<Box4> {
+        let mut out = Vec::new();
+        Self::fill_proj_boxes(p, kind, &mut out);
+        out
     }
     fn kill_proj(p: &mut Projectile, anim: i32) {
         if anim >= 0 && p.cur.def.anims.contains_key(&anim) { p.cur = AnimCursor::new(p.cur.def.clone(), anim); p.dying = true; } else { p.remove = true; }
@@ -1685,7 +1706,7 @@ impl Match {
         let super_pause = self.pause.as_ref().is_some_and(|p| p.is_super);
         let (left, right) = (self.camera.x - self.view_w / 2.0, self.camera.x + self.view_w / 2.0);
         let (stage_l, stage_r) = (self.stage.bound_left - self.view_w / 2.0, self.stage.bound_right + self.view_w / 2.0);
-        let mut frozen = vec![false; self.projectiles.len()];
+        let mut frozen = [false; MAX_PROJECTILES];
         for (k, p) in self.projectiles.iter_mut().enumerate() {
             if paused {
                 let budget = if super_pause { &mut p.super_move } else { &mut p.pause_move };
@@ -1707,12 +1728,19 @@ impl Match {
             if p.remove_time >= 0 && p.time >= p.remove_time { let a = p.rem_anim; Self::kill_proj(p, a); }
         }
         let n = self.projectiles.len();
+        let mut ba = Vec::new();
+        let mut bb = Vec::new();
+        let mut tmp_b = Vec::new();
         for a in 0..n { for b in 0..n {
             if a == b || frozen[a] || frozen[b] { continue; }
             let (pa, pb) = (&self.projectiles[a], &self.projectiles[b]);
             if pa.dying || pb.dying || pa.remove || pb.remove || pa.side == pb.side { continue; }
-            let ba: Vec<Box4> = Self::proj_boxes(pa, 1).into_iter().chain(Self::proj_boxes(pa, 2)).collect();
-            let bb: Vec<Box4> = Self::proj_boxes(pb, 1).into_iter().chain(Self::proj_boxes(pb, 2)).collect();
+            Self::fill_proj_boxes(pa, 1, &mut ba);
+            Self::fill_proj_boxes(pa, 2, &mut tmp_b);
+            ba.extend_from_slice(&tmp_b);
+            Self::fill_proj_boxes(pb, 1, &mut bb);
+            Self::fill_proj_boxes(pb, 2, &mut tmp_b);
+            bb.extend_from_slice(&tmp_b);
             if Self::overlap(&ba, &bb).is_some() {
                 let (pra, prb) = (pa.priority, pb.priority);
                 let gt = self.game_time;
@@ -1724,17 +1752,22 @@ impl Match {
                 }
             }
         } }
+        let mut c1 = Vec::new();
+        let mut d_boxes = Vec::new();
         for pi in 0..self.projectiles.len() {
             if frozen[pi] { continue; }
+            let p = &self.projectiles[pi];
+            if p.dying || p.remove || p.miss_cd > 0 { continue; }
+            let Some(oi) = self.idx(p.owner).or_else(|| self.idx(p.root)) else { continue };
+            Self::fill_proj_boxes(p, 1, &mut c1);
+            if c1.is_empty() { continue; }
             for d in 0..self.fighters.len() {
                 let p = &self.projectiles[pi];
                 if p.dying || p.remove || p.miss_cd > 0 { break; }
-                let Some(oi) = self.idx(p.owner).or_else(|| self.idx(p.root)) else { break };
                 if self.fighters[d].root == p.root { continue; }
                 if !self.can_be_hit(d, &p.hitdef, p.side) { continue; }
-                let c1 = Self::proj_boxes(p, 1);
-                if c1.is_empty() { break; }
-                let Some(at) = Self::overlap(&c1, &self.fighters[d].boxes(2)) else { continue };
+                self.fighters[d].fill_boxes(2, &mut d_boxes);
+                let Some(at) = Self::overlap(&c1, &d_boxes) else { continue };
                 let (hd, pid, pf) = (p.hitdef.clone(), p.id, p.facing);
                 self.apply_hit(oi, d, &hd, at, Some((pid, pf)));
                 let gt = self.game_time;

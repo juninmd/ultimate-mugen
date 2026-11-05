@@ -37,6 +37,11 @@ impl Rollback {
 
     pub fn handle<A: Clone + PartialEq + Eq + Hash + Debug + 'static>(&mut self, requests: Vec<GgrsRequest<Netplay<A>>>) -> Vec<Event> {
         let mut saves = std::mem::take(&mut self.saves);
+        for r in &requests {
+            if let GgrsRequest::LoadGameState { frame, .. } = r {
+                saves.retain(|(f, _)| *f <= *frame);
+            }
+        }
         let stats = drive(&mut self.game, requests, |m, inputs, _| m.tick(inputs), |frame, sum| {
             saves.retain(|(f, _)| *f < frame);
             saves.push_back((frame, sum));
@@ -73,7 +78,8 @@ where
                 cell.save(frame, Some(game.clone()), Some(sum));
                 saved(frame, sum);
             }
-            GgrsRequest::LoadGameState { cell, .. } => {
+            GgrsRequest::LoadGameState { cell, frame } => {
+                let _ = frame;
                 if let Some(m) = cell.load() {
                     *game = m;
                     stats.rollbacks += 1;
@@ -82,7 +88,7 @@ where
             GgrsRequest::AdvanceFrame { inputs } => {
                 stats.advanced += 1;
                 let newest = stats.advanced as usize == advances;
-                if !newest {
+                if stats.rollbacks > 0 && !newest {
                     stats.resimulated += 1;
                 }
                 let keys: Vec<u32> = inputs.iter().map(|(i, _)| *i).collect();

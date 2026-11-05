@@ -108,3 +108,10 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
   - Replaces nested branching in `input::rel_dirs` with branchless bitwise shift `ud | (4 << (is_back ^ 1))`.
   - Replaces string matching in `button_bit` with byte-level slice matching, supporting case-insensitivity without allocation.
   - Implements branchless facing assignment in `InputHistory::push`.
+
+## Zero-allocation controller and trigger evaluation pipeline
+
+- Zero-alloc target indexing: `controllers::target_indices` returns a stack-allocated `([usize; 8], usize)` buffer instead of heap `Vec<usize>`, eliminating allocation across all target controllers (`targetstate`, `targetlifeadd`, `targetpoweradd`, `targetfacing`, `targetbind`, etc.).
+- Zero-alloc AssertSpecial flag lookup: `flags::names_in` and `flags::lookup` work directly with borrowed `&str` and ASCII case-insensitive matching (`eq_ignore_ascii_case`), removing per-frame string allocations on shadow and status flags.
+- Stack-buffered velocity constant lookup: `triggers::Ctx::const_val` copies the key into a 64-byte stack array to query `.x` variants without heap `format!("{k}.x")`.
+- Typed variable assignments: `Match::assigns` records `AssignKind` enum instead of allocating a `String` on each trigger variable assignment.

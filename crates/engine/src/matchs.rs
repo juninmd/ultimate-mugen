@@ -147,7 +147,16 @@ impl TeamMode {
 pub const MAX_EXPLODS: usize = 256;
 pub const MAX_PROJECTILES: usize = 256;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AssignKind {
+    Var,
+    FVar,
+    SysVar,
+    SysFVar,
+}
+
 #[derive(Clone)]
+
 pub struct Match {
     pub fighters: Vec<Fighter>,
     pub explods: Vec<Explod>,
@@ -203,7 +212,7 @@ pub struct Match {
     pub announce: Option<Announce>,
     pub rng: u32,
     pub next_id: u32,
-    pub assigns: RefCell<Vec<(usize, String, i32, f64)>>,
+    pub assigns: RefCell<Vec<(usize, AssignKind, i32, f64)>>,
     pub tick_ids: Vec<u32>,
 }
 
@@ -314,14 +323,14 @@ impl Match {
     }
     fn apply_assigns(&mut self) {
         if self.assigns.get_mut().is_empty() { return; }
-        for (i, name, idx, v) in self.assigns.get_mut().drain(..) {
+        for (i, kind, idx, v) in self.assigns.get_mut().drain(..) {
             let Some(f) = self.fighters.get_mut(i) else { continue };
             let u = idx as usize;
-            match name.as_str() {
-                "var" if u < 60 => f.vars[u] = v as i32,
-                "fvar" if u < 40 => f.fvars[u] = v,
-                "sysvar" if u < 5 => f.sysvars[u] = v as i32,
-                "sysfvar" if u < 5 => f.sysfvars[u] = v,
+            match kind {
+                AssignKind::Var if u < 60 => f.vars[u] = v as i32,
+                AssignKind::FVar if u < 40 => f.fvars[u] = v,
+                AssignKind::SysVar if u < 5 => f.sysvars[u] = v as i32,
+                AssignKind::SysFVar if u < 5 => f.sysfvars[u] = v,
                 _ => {}
             }
         }

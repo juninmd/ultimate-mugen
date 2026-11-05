@@ -2,7 +2,7 @@
   "crates/engine/examples/import_sprite_atlas.rs": 437,
   "crates/engine/examples/rig_sheet.rs": 305,
   "crates/engine/src/bytecode.rs": 950,
-  "crates/engine/src/chardef.rs": 383,
+  "crates/engine/src/chardef.rs": 422,
   "crates/engine/src/commands.rs": 404,
   "crates/engine/src/controllers.rs": 377,
   "crates/engine/src/diagnostics.rs": 333,

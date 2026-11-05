@@ -10,6 +10,7 @@ pub mod zss;
 pub mod loader;
 pub use ume_formats::perf;
 pub mod fighter;
+pub mod anim_fallback;
 pub mod flags;
 pub mod triggers;
 pub mod controllers;

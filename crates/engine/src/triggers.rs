@@ -26,8 +26,8 @@ impl<'a> Ctx<'a> {
     fn enemy(&self) -> Option<&Fighter> { self.enemy_index().map(|e| &self.m.fighters[e]) }
     fn to_local(&self, world: f32) -> f64 { world as f64 / self.f().lscl as f64 }
     fn local_delta(&self, other: &Fighter, comp: Option<char>) -> f64 {
-        let f = self.f();
-        self.to_local(if comp == Some('y') { other.pos.y - f.pos.y } else { (other.pos.x - f.pos.x) * f.facing })
+        if comp == Some('z') { return 0.0; }
+        let f = self.f(); self.to_local(if comp == Some('y') { other.pos.y - f.pos.y } else { (other.pos.x - f.pos.x) * f.facing })
     }
     fn screen_edge(&self, right: bool) -> f32 {
         let m = self.m;
@@ -131,7 +131,7 @@ impl<'a> Host for Ctx<'a> {
             "target" => { let id = arg.map(|a| a as i32).unwrap_or(-1); let t = f.targets.iter().find(|t| id < 0 || t.1 == id)?; m.idx(t.0)? }
             "enemy" | "enemynear" | "p2" => m.enemy(self.i, arg.unwrap_or(0.0) as usize)?,
             "partner" => m.partner(if f.is_helper { m.idx(f.root)? } else { self.i }, arg.map(|a| a.max(0.0) as usize).unwrap_or(0))?,
-            "playerid" => m.idx(arg? as u32)?,
+            "playerid" => { let id = arg?; if id <= 0.0 || !id.is_finite() { return None; } m.idx(id as u32)? },
             "stateowner" => self.i,
             _ => { crate::diagnostics::note_unsupported(crate::diagnostics::Category::Redirection, kind); return None }
         };
@@ -149,9 +149,8 @@ impl<'a> Host for Ctx<'a> {
             "physics" => f.physics == c0,
             "p2statetype" => self.enemy().is_some_and(|e| e.state_type == c0),
             "p2movetype" => self.enemy().is_some_and(|e| e.move_type == c0),
-            "name" | "p1name" => f.def.name.eq_ignore_ascii_case(v0),
-            "p2name" => self.enemy().is_some_and(|e| e.def.name.eq_ignore_ascii_case(v0)),
-            "p3name" | "p4name" | "p5name" | "p6name" | "p7name" | "p8name" => {
+            "name" => f.def.name.eq_ignore_ascii_case(v0),
+            "p1name" | "p2name" | "p3name" | "p4name" | "p5name" | "p6name" | "p7name" | "p8name" => {
                 let slot = (name.as_bytes()[1] - b'0') as usize;
                 self.m.roots().find(|r| r.player_no == slot).is_some_and(|r| r.def.name.eq_ignore_ascii_case(v0))
             }
@@ -188,19 +187,19 @@ impl<'a> Host for Ctx<'a> {
         if name == "animelem" {
             return match bb {
                 None => f.anim_elem_started(a as i32) != neg,
-                Some(t) => match f.anim_elem_time(a as i32) { Some(dt) => cmp(dt as f64, op2.unwrap_or("="), t), None => false },
+                Some(t) => match f.anim_elem_time(a as i32) { Some(dt) => cmp(dt as f64, op2.unwrap_or("="), t) != neg, None => false },
             };
         }
         if name == "timemod" {
             let m = a as i32;
-            return m != 0 && ((f.state_time % m) as f64 == bb.unwrap_or(0.0)) != neg;
+            return m != 0 && cmp((f.state_time % m) as f64, op2.unwrap_or("="), bb.unwrap_or(0.0)) != neg;
         }
         let (kind, rest) = if let Some(r) = name.strip_prefix("projhit") { ('h', r) } else if let Some(r) = name.strip_prefix("projcontact") { ('c', r) } else if let Some(r) = name.strip_prefix("projguarded") { ('g', r) } else { return false };
         let id = rest.parse::<i32>().unwrap_or(0);
         let t = self.proj_time(kind, id);
         let happened = t >= 0;
         let want = a != 0.0;
-        match bb { None => (happened == want) != neg, Some(v) => happened == want && cmp(t as f64, op2.unwrap_or("="), v) }
+        match bb { None => (happened == want) != neg, Some(v) => (happened == want && cmp(t as f64, op2.unwrap_or("="), v)) != neg }
     }
     fn assign(&self, name: &str, idx: i32, v: f64) -> f64 {
         self.m.assigns.borrow_mut().push((self.i, name.to_string(), idx, v));
@@ -226,10 +225,10 @@ impl<'a> Host for Ctx<'a> {
             "power" => m.idx(f.root).map(|r| m.fighters[r].power).unwrap_or(f.power) as f64,
             "powermax" => f.power_max as f64,
             "facing" => f.facing as f64,
-            "var" => f.vars.get(a0() as usize).copied().unwrap_or(0) as f64,
-            "fvar" => f.fvars.get(a0() as usize).copied().unwrap_or(0.0),
-            "sysvar" => f.sysvars.get(a0() as usize).copied().unwrap_or(0) as f64,
-            "sysfvar" => f.sysfvars.get(a0() as usize).copied().unwrap_or(0.0),
+            "var" => if a0() >= 0.0 && a0().is_finite() { f.vars.get(a0() as usize).copied().unwrap_or(0) as f64 } else { 0.0 },
+            "fvar" => if a0() >= 0.0 && a0().is_finite() { f.fvars.get(a0() as usize).copied().unwrap_or(0.0) } else { 0.0 },
+            "sysvar" => if a0() >= 0.0 && a0().is_finite() { f.sysvars.get(a0() as usize).copied().unwrap_or(0) as f64 } else { 0.0 },
+            "sysfvar" => if a0() >= 0.0 && a0().is_finite() { f.sysfvars.get(a0() as usize).copied().unwrap_or(0.0) } else { 0.0 },
             "vel" => (match comp { Some('y') => f.vel.y, Some('z') => 0.0, _ => f.vel.x }) as f64 / l,
             "pos" => (match comp { Some('y') => f.air_height(), Some('z') => 0.0, _ => f.pos.x - m.camera.x }) as f64 / l,
             "screenpos" => self.to_local(match comp { Some('y') => f.pos.y - m.camera.y + m.ground_y(), _ => f.pos.x - m.camera.x + m.view_w / 2.0 }),
@@ -238,6 +237,7 @@ impl<'a> Host for Ctx<'a> {
             "zoomvar" => m.zoom_var(raw.unwrap_or("")),
             "p2dist" | "p1dist" => self.enemy().map(|e| self.local_delta(e, comp)).unwrap_or(0.0),
             "p2bodydist" => self.enemy().map(|e| {
+                if comp == Some('z') { return 0.0; }
                 if comp == Some('y') { return self.local_delta(e, comp); }
                 let dx = (e.pos.x - f.pos.x) * f.facing;
                 let theirs = if (e.pos.x - f.pos.x) * e.facing < 0.0 { e.front_width() } else { e.back_width() };
@@ -251,7 +251,7 @@ impl<'a> Host for Ctx<'a> {
             "backedgebodydist" => (edist(false) - f.back_width() as f64) / l,
             "p2life" => self.enemy().map(|e| e.life as f64).unwrap_or(0.0),
             "p2stateno" => self.enemy().map(|e| e.state_no as f64).unwrap_or(0.0),
-            "p2ctrl" => b(self.enemy().is_some_and(|e| e.ctrl)),
+            "p2ctrl" => b(self.enemy().is_some_and(|e| e.ctrl && !e.ikemen.dizzy && !e.ikemen.guard_break)),
             "p2power" => self.enemy().map(|e| e.power as f64).unwrap_or(0.0),
             "hitshakeover" => b(f.hit_shake <= 0),
             "hitover" => b(f.hit_over_time <= 0),
@@ -282,7 +282,7 @@ impl<'a> Host for Ctx<'a> {
             "const" => self.const_val(raw.unwrap_or("")),
             "const240p" => a0() * f.def.local_w as f64 / 320.0,
             "const480p" => a0() * f.def.local_w as f64 / 640.0,
-            "const720p" => a0() * f.def.local_w as f64 / 1280.0,
+            "const720p" => a0() * f.def.local_w as f64 / 1280.0, "const1080p" => a0() * f.def.local_w as f64 / 1920.0,
             "random" => { let x = (m.game_time as u64).wrapping_mul(2654435761).wrapping_add(f.id as u64 * 40503 + f.state_time as u64 * 977 + m.rng as u64); ((x >> 7) % 1000) as f64 }
             "randomrange" => { let (lo, hi) = (a0(), self.a(args, 1)); let x = (m.game_time as u64).wrapping_mul(2654435761).wrapping_add(m.rng as u64); lo + ((x >> 7) % ((hi - lo + 1.0).max(1.0) as u64)) as f64 }
             "roundstate" => m.round_state as f64,
@@ -307,7 +307,7 @@ impl<'a> Host for Ctx<'a> {
             "introstate" => match m.round_state { 0 => 1.0, 1 => 2.0, _ => 0.0 },
             "outrostate" => match m.round_state { 3 => 1.0, 4 => 2.0, _ => 0.0 },
             "id" => f.id as f64,
-            "playeridexist" => b(m.idx(a0() as u32).is_some()),
+            "playeridexist" => { let n = a0(); b(n > 0.0 && n.is_finite() && m.idx(n as u32).is_some()) },
             "numhelper" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; m.fighters.iter().filter(|h| h.is_helper && h.root == f.root && !h.destroyed && (id < 0 || h.helper_id == id)).count() as f64 }
             "numexplod" => { let id = if args.is_empty() { -1 } else { a0() as i32 }; m.explods.iter().filter(|e| e.owner == f.id && (id < 0 || e.id == id)).count() as f64 }
             "numproj" => m.projectiles.iter().filter(|p| p.tally == f.projectile_tally_id() && !p.remove).count() as f64,

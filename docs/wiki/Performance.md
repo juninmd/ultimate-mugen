@@ -192,3 +192,9 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
   - Implements multi-threaded scoped chunked inflation (`std::thread::scope`) across available CPU hardware parallelism for ZIP archive extraction in `add_zip`.
   - Replaces sequential entry decompression with batch concurrent work, cutting SFF resource decode from 222.6 ms to 88.7 ms (-60.1%).
   - Adds cybernetic loading HUD with glowing borders, two-tone cyan/white laser pulse, and thread pool parallel pipeline telemetry.
+
+## SIMD ACT palette decoding & camera bounds fast-path
+
+- Vectorized ACT decoding: decode_act and ncode_act use s_chunks::<3>() and s_chunks_mut::<4>() to decode RGB triplets to RGBA in batches without bounds checks.
+- Single-pass camera bounds: Match::update_camera computes all-root bounds (minx, maxx, highest) and live-root bounds (lo, hi) in a single iteration over self.roots(), eliminating redundant iterator scans.
+- Hoisted overlap bounding-box checks: Match::overlap hoists  coordinates into scalar registers before testing collision against  and replaces division by 2.0 with * 0.5 multiplication.

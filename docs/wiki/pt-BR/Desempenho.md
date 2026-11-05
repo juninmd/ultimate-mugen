@@ -180,3 +180,9 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
   - Implementa descompressão em blocos com escopo multi-thread (`std::thread::scope`) aproveitando todo o paralelismo de CPU disponível para extração de arquivos ZIP em `add_zip`.
   - Substitui descompressão sequencial por trabalho concorrente em lote, reduzindo a decodificação de recursos SFF de 222.6 ms para 88.7 ms (-60.1%).
   - Adiciona HUD de carregamento cibernético com bordas brilhantes, pulso laser de dois tons ciano/branco e telemetria de pipeline paralelo.
+
+## Decodificação SIMD de paletas ACT e fast-path de limites de câmera
+
+- Decodificação vetorizada ACT: decode_act e ncode_act utilizam s_chunks::<3>() e s_chunks_mut::<4>() para decodificar tripletos RGB para RGBA em lotes sem checagens redundantes de limites.
+- Limites de câmera em passada única: Match::update_camera calcula os limites de todos os lutadores raiz (minx, maxx, highest) e dos lutadores vivos (lo, hi) em uma única iteração de self.roots(), eliminando filtragens redundantes.
+- Checagens de sobreposição otimizadas: Match::overlap armazena as coordenadas de  em registradores escalares antes do laço interno de colisão contra  e substitui divisões por 2.0 por multiplicações * 0.5.

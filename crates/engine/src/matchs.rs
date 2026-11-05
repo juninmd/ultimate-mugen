@@ -1030,11 +1030,23 @@ impl Match {
 
     pub fn update_camera(&mut self) {
         let (mut minx, mut maxx, mut highest, mut any) = (f32::MAX, f32::MIN, f32::MAX, false);
-        for f in self.roots().filter(|f| !f.destroyed && !f.ikemen.standby) { minx = minx.min(f.pos.x); maxx = maxx.max(f.pos.x); highest = highest.min(f.pos.y); any = true; }
+        let (mut lo, mut hi, mut live) = (f32::MAX, f32::MIN, false);
+        for f in self.roots() {
+            if f.destroyed { continue; }
+            if !f.ikemen.standby {
+                minx = minx.min(f.pos.x);
+                maxx = maxx.max(f.pos.x);
+                highest = highest.min(f.pos.y);
+                any = true;
+            }
+            if f.alive {
+                lo = lo.min(f.pos.x);
+                hi = hi.max(f.pos.x);
+                live = true;
+            }
+        }
         if !any { return; }
         let natural = if self.zoom_max > 1.0 {
-            let (mut lo, mut hi, mut live) = (f32::MAX, f32::MIN, false);
-            for f in self.roots().filter(|f| f.alive && !f.destroyed) { lo = lo.min(f.pos.x); hi = hi.max(f.pos.x); live = true; }
             let need = if !live { self.zoom_min } else { (hi - lo + 150.0) / BASE_W };
             need.clamp(self.zoom_min, self.zoom_max)
         } else { self.zoom_min };
@@ -1058,11 +1070,14 @@ impl Match {
 
     // ---------------------------------------------------------------- hits
     pub fn overlap(a: &[Box4], b: &[Box4]) -> Option<(f32, f32)> {
-        for x in a { for y in b {
-            if x[0] <= y[2] && x[2] >= y[0] && x[1] <= y[3] && x[3] >= y[1] {
-                return Some(((x[0].max(y[0]) + x[2].min(y[2])) / 2.0, (x[1].max(y[1]) + x[3].min(y[3])) / 2.0));
+        for x in a {
+            let (x0, y0, x2, y2) = (x[0], x[1], x[2], x[3]);
+            for y in b {
+                if x0 <= y[2] && x2 >= y[0] && y0 <= y[3] && y2 >= y[1] {
+                    return Some(((x0.max(y[0]) + x2.min(y[2])) * 0.5, (y0.max(y[1]) + y2.min(y[3])) * 0.5));
+                }
             }
-        } }
+        }
         None
     }
     fn attr_match(hd: &HitDefData, spec: &str) -> bool {

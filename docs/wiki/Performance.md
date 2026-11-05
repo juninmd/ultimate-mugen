@@ -198,3 +198,10 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 - Vectorized ACT decoding: decode_act and ncode_act use s_chunks::<3>() and s_chunks_mut::<4>() to decode RGB triplets to RGBA in batches without bounds checks.
 - Single-pass camera bounds: Match::update_camera computes all-root bounds (minx, maxx, highest) and live-root bounds (lo, hi) in a single iteration over self.roots(), eliminating redundant iterator scans.
 - Hoisted overlap bounding-box checks: Match::overlap hoists  coordinates into scalar registers before testing collision against  and replaces division by 2.0 with * 0.5 multiplication.
+
+## Zero-allocation controller and trigger evaluation pipeline
+
+- Zero-alloc target indexing: `controllers::target_indices` returns a stack-allocated `([usize; 8], usize)` buffer instead of heap `Vec<usize>`, eliminating allocation across all target controllers (`targetstate`, `targetlifeadd`, `targetpoweradd`, `targetfacing`, `targetbind`, etc.).
+- Zero-alloc AssertSpecial flag lookup: `flags::names_in` and `flags::lookup` work directly with borrowed `&str` and ASCII case-insensitive matching (`eq_ignore_ascii_case`), removing per-frame string allocations on shadow and status flags.
+- Stack-buffered velocity constant lookup: `triggers::Ctx::const_val` copies the key into a 64-byte stack array to query `.x` variants without heap `format!("{k}.x")`.
+- Typed variable assignments: `Match::assigns` records `AssignKind` enum instead of allocating a `String` on each trigger variable assignment.

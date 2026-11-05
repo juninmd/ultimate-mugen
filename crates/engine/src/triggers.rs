@@ -4,18 +4,24 @@ use crate::matchs::Match;
 
 pub struct Ctx<'a> { pub m: &'a Match, pub i: usize }
 
-const HIT_VARS: &[&str] = &[
-    "type", "animtype", "airtype", "groundtype", "damage", "hitcount", "guardcount", "hitshaketime", "hittime", "slidetime", "ctrltime",
-    "recovertime", "xvel", "yvel", "yaccel", "xaccel", "chainid", "guarded", "fall", "fall.damage", "fall.xvel", "fall.yvel", "fall.recover",
-    "fall.time", "fall.recovertime", "fall.kill", "fall.envshake.time", "fall.envshake.freq", "fall.envshake.ampl", "fall.envshake.phase",
-    "kill", "id", "playerid", "playerno", "down.recover", "priority", "facing", "power",
-    "isbound", "attr", "guardflag", "hitdamage", "guarddamage", "hitpower", "guardpower", "dizzypoints", "guardpoints", "redlife",
-    "score", "teamside", "projid", "p1stateno", "p2stateno",
-];
+pub fn is_hit_var(name: &str) -> bool {
+    matches!(
+        name,
+        "type" | "animtype" | "airtype" | "groundtype" | "damage" | "hitcount" | "guardcount"
+        | "hitshaketime" | "hittime" | "slidetime" | "ctrltime" | "recovertime" | "xvel" | "yvel"
+        | "yaccel" | "xaccel" | "chainid" | "guarded" | "fall" | "fall.damage" | "fall.xvel"
+        | "fall.yvel" | "fall.recover" | "fall.time" | "fall.recovertime" | "fall.kill"
+        | "fall.envshake.time" | "fall.envshake.freq" | "fall.envshake.ampl"
+        | "fall.envshake.phase" | "kill" | "id" | "playerid" | "playerno" | "down.recover"
+        | "priority" | "facing" | "power" | "isbound" | "attr" | "guardflag" | "hitdamage"
+        | "guarddamage" | "hitpower" | "guardpower" | "dizzypoints" | "guardpoints" | "redlife"
+        | "score" | "teamside" | "projid" | "p1stateno" | "p2stateno"
+    )
+}
 
 pub fn note_hit_var(name: &str) {
     static REPORTED: std::sync::OnceLock<std::sync::Mutex<std::collections::HashSet<String>>> = std::sync::OnceLock::new();
-    if HIT_VARS.contains(&name) { return; }
+    if is_hit_var(name) { return; }
     let first = REPORTED.get_or_init(Default::default).lock().map(|mut set| set.insert(name.to_string())).unwrap_or(false);
     if first { eprintln!("gethitvar: unknown parameter '{name}' evaluates to 0"); }
 }
@@ -41,7 +47,17 @@ impl<'a> Ctx<'a> {
         if let Some((_, v)) = self.f().size_overrides.iter().find(|(n, _)| n == k) { return *v as f64; }
         let c = &self.f().def.constants;
         if let Some(v) = c.get(k) { return *v; }
-        if k.starts_with("velocity.") && !k.ends_with(".x") && !k.ends_with(".y") { return *c.get(&format!("{k}.x")).unwrap_or(&0.0); }
+        if k.starts_with("velocity.") && !k.ends_with(".x") && !k.ends_with(".y") {
+            let mut buf = [0u8; 64];
+            if k.len() + 2 <= buf.len() {
+                buf[..k.len()].copy_from_slice(k.as_bytes());
+                buf[k.len()..k.len() + 2].copy_from_slice(b".x");
+                if let Ok(key) = std::str::from_utf8(&buf[..k.len() + 2]) {
+                    return *c.get(key).unwrap_or(&0.0);
+                }
+            }
+            return *c.get(&format!("{k}.x")).unwrap_or(&0.0);
+        }
         if k == "data.defense" { return *c.get("data.defence").unwrap_or(&100.0); }
         if k.ends_with(".x") { if let Some(v) = c.get(&k[..k.len() - 2]) { return *v; } }
         0.0

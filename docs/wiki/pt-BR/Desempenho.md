@@ -186,3 +186,10 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 - Decodificação vetorizada ACT: decode_act e ncode_act utilizam s_chunks::<3>() e s_chunks_mut::<4>() para decodificar tripletos RGB para RGBA em lotes sem checagens redundantes de limites.
 - Limites de câmera em passada única: Match::update_camera calcula os limites de todos os lutadores raiz (minx, maxx, highest) e dos lutadores vivos (lo, hi) em uma única iteração de self.roots(), eliminando filtragens redundantes.
 - Checagens de sobreposição otimizadas: Match::overlap armazena as coordenadas de  em registradores escalares antes do laço interno de colisão contra  e substitui divisões por 2.0 por multiplicações * 0.5.
+
+## Pipeline de avaliação de controladores e gatilhos com zero alocações
+
+- Indexação de alvos sem alocação no heap: `controllers::target_indices` retorna buffer em pilha `([usize; 8], usize)` em vez de `Vec<usize>`, eliminando alocações em controladores de alvo (`targetstate`, `targetlifeadd`, `targetpoweradd`, `targetfacing`, `targetbind`, etc.).
+- Resolução de flags AssertSpecial sem alocação: `flags::names_in` e `flags::lookup` operam diretamente em fatias `&str` com comparação ASCII insensível a maiúsculas/minúsculas (`eq_ignore_ascii_case`), removendo alocações de strings a cada quadro.
+- Constantes de velocidade em buffer na pilha: `triggers::Ctx::const_val` formata a chave em um buffer de 64 bytes para buscar sufixos `.x` sem alocação no heap via `format!("{k}.x")`.
+- Atribuições de variáveis tipadas: `Match::assigns` armazena o enum `AssignKind` em vez de alocar uma `String` na atribuição de variáveis de gatilhos.

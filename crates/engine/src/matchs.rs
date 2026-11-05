@@ -156,6 +156,7 @@ pub enum VarKind {
 }
 
 #[derive(Clone)]
+
 pub struct Match {
     pub fighters: Vec<Fighter>,
     pub explods: Vec<Explod>,

@@ -11,13 +11,13 @@ pub fn normalize(raw: &str) -> String {
     raw.trim().trim_matches('"').trim().to_ascii_lowercase()
 }
 
-pub fn names_in(raw: &str) -> impl Iterator<Item = String> + '_ {
-    raw.split(',').map(normalize).filter(|name| !name.is_empty())
+pub fn names_in(raw: &str) -> impl Iterator<Item = &str> + '_ {
+    raw.split(',').map(|s| s.trim().trim_matches('"').trim()).filter(|s| !s.is_empty())
 }
 
 pub fn lookup(raw: &str) -> Option<FlagTarget> {
-    let name = normalize(raw);
-    asf::from_name(&name).map(FlagTarget::Character).or_else(|| gsf::from_name(&name).map(FlagTarget::Global))
+    let name = raw.trim().trim_matches('"').trim();
+    asf::from_name(name).map(FlagTarget::Character).or_else(|| gsf::from_name(name).map(FlagTarget::Global))
 }
 
 pub const ASSERT_PARAMS: [&str; 5] = ["flag", "flag2", "flag3", "flag4", "flag5"];
@@ -30,6 +30,7 @@ pub fn unknown_in_states(states: &HashMap<i32, StateDef>) -> Vec<String> {
         .flat_map(|controller| ASSERT_PARAMS.iter().filter_map(|key| controller.raw(key)))
         .flat_map(names_in)
         .filter(|name| lookup(name).is_none())
+        .map(|name| name.to_ascii_lowercase())
         .collect();
     unknown.sort();
     unknown.dedup();
@@ -166,7 +167,7 @@ pub mod asf {
     ];
 
     pub fn from_name(name: &str) -> Option<u64> {
-        NAMES.iter().find(|(known, _)| *known == name).map(|(_, bit)| *bit)
+        NAMES.iter().find(|(known, _)| known.eq_ignore_ascii_case(name)).map(|(_, bit)| *bit)
     }
 }
 
@@ -214,6 +215,6 @@ pub mod gsf {
     ];
 
     pub fn from_name(name: &str) -> Option<u32> {
-        NAMES.iter().find(|(known, _)| *known == name).map(|(_, bit)| *bit)
+        NAMES.iter().find(|(known, _)| known.eq_ignore_ascii_case(name)).map(|(_, bit)| *bit)
     }
 }

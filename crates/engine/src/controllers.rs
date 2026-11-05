@@ -285,7 +285,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             let (bt, rt, pri) = (opt(m, "bindtime"), opt(m, "removetime"), opt(m, "sprpriority"));
             let (ontop, under, rogh, ihp) = (opt(m, "ontop"), opt(m, "under"), opt(m, "removeongethit"), opt(m, "ignorehitpause"));
             let (fac, vfac, smt, pmt) = (opt(m, "facing"), opt(m, "vfacing"), opt(m, "supermovetime"), opt(m, "pausemovetime"));
-            let trans = sc.raw("trans").map(|t| t.trim().to_ascii_lowercase());
+            let trans = sc.raw("trans");
             let owner_facing = m.fighters[i].facing;
             for e in m.explods.iter_mut().filter(|e| e.owner == me && (id < 0 || e.id == id)) {
                 if let Some(v) = vel { e.vel.x = v.0; e.vel.y = v.1; }
@@ -303,7 +303,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 if let Some(v) = vfac { e.vfacing = if v < 0.0 { -1.0 } else { 1.0 }; }
                 if let Some(v) = smt { e.super_move = v as i32; }
                 if let Some(v) = pmt { e.pause_move = v as i32; }
-                if let Some(t) = &trans { e.add = t.starts_with("add") && t != "addalpha"; }
+                if let Some(t) = trans { let t = t.trim(); e.add = (t.starts_with("add") || t.starts_with("ADD") || t.starts_with("Add")) && !t.eq_ignore_ascii_case("addalpha"); }
             }
         }
         "helper" => m.spawn_helper(i, sc),
@@ -376,7 +376,9 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "nothitby" | "hitby" => {
             let attr = sc.raw("value").or(sc.raw("value2")).unwrap_or("").to_ascii_uppercase();
             let t = n(m, "time", 1.0) as i32;
-            if sc.kind == "nothitby" { m.fighters[i].not_hit_by = vec![(attr, t)]; } else { m.fighters[i].hit_by = vec![(attr, t)]; }
+            let dst = if sc.kind == "nothitby" { &mut m.fighters[i].not_hit_by } else { &mut m.fighters[i].hit_by };
+            dst.clear();
+            dst.push((attr, t));
         }
         "movehitreset" => { let f = &mut m.fighters[i]; f.move_contact = 0; f.move_hit = 0; f.move_guarded = 0; f.move_reversed = 0; }
         "hitadd" => { let v = n(m, "value", 0.0) as i32; m.fighters[i].hit_count += v; }

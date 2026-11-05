@@ -1,6 +1,3 @@
-//! In-memory virtual file system (port of the file-resolution parts of
-//! `src/mugen/loader.ts`) plus a tiny zip reader (stored + deflate, zip64).
-
 use crate::ini::unquote;
 use crate::Reader;
 use std::collections::BTreeMap;

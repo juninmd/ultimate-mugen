@@ -36,7 +36,7 @@ As músicas ativas tocam em rodízio como trilha da luta quando o cenário não 
 | Android | armazenamento interno do app, pasta `market/` |
 | Web | IndexedDB, banco `ultimate-mugen-market` |
 
-Defina `UME_MARKET_HOME` para mudar a pasta no desktop. Cada item instalado é um único arquivo; a lista de repositórios, os itens instalados, o ETag de cada listagem e o token opcional ficam em `state.json`.
+Defina `UME_MARKET_HOME` para mudar a pasta no desktop. Cada item instalado é um único arquivo; a lista de repositórios, os itens instalados, o ETag de cada listagem e o token opcional ficam em `state.json`. Os nomes dos arquivos de pacote passam por percent-encoding só com minúsculas, então itens e pastas que diferem apenas por maiúsculas/minúsculas nunca dividem o mesmo arquivo no Windows ou no macOS.
 
 ## Limite de requisições, token e cache
 

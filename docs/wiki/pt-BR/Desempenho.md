@@ -98,3 +98,7 @@ Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,
 No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute `cargo test --locked --release --example audio_bench` para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.
 
 `Ui::quad` transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.
+
+## Lotes de Vértices Contíguos e Rasterização sem Multiplicação Prévia
+
+`Batch::push` em `crates/render/src/batch.rs` substitui chamadas repetidas a `self.vertices.push()` por uma única cópia de fatia contígua (`self.vertices.extend_from_slice(&[...])`), agrupando os quatro vértices do quadrilátero em uma única operação de memória. Em `crates/engine/src/raster.rs`, `pixmap_to_image` pré-dimensiona os buffers de pixel (`vec![0u8; pixels.len() * 4]`) e desmultiplica os canais straight-alpha usando `chunks_exact_mut(4)`, viabilizando auto-vetorização sobre superfícies e efeitos procedurais de cenários.

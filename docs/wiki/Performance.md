@@ -380,3 +380,8 @@ etain_mut.
   - `snd::decode_snd_checked`: Replaced eager `HashSet<usize>` allocation per SND file with lazy initialization (`Option<HashSet<usize>>`) triggered only when subfile offsets point backwards (`next <= ofs`), eliminating heap allocation and hashing overhead across all standard sequential SND files.
   - `fnt::decode_fnt_v1`: Replaced per-glyph line `split_whitespace().collect::<Vec<&str>>()` heap allocations with a streaming iterator reading up to 3 tokens directly, eliminating hundreds of vector allocations per font file.
   - `fnt::decode_fnt_v2`: Switched font descriptor parsing to `parse_ini_no_lines`, avoiding unused `lines: Vec<String>` collection.
+
+- **Wave 64 - Zero-Alloc Command Charge Parsing & Pointer-Guarded Animation Switching**:
+  - `commands::parse_command`: Replaced `String` heap collection in release/charge command prefix parsing (`~30`) with zero-alloc byte slice indexing and ASCII byte matching for prefix symbols (`/`, `$`, `>`, `~`).
+  - `fighter::change_anim`: Added `Arc::ptr_eq` guard avoiding reference count bumps when `from` is already the active `anim_def`.
+  - `fighter::change_anim_own`: Switched to direct immutable reference borrowing of `self.def` without cloning the `Arc<CharDef>` atomic counter.

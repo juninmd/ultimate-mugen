@@ -40,3 +40,9 @@ etain_mut.
   - Substituição de strings dinâmicas `format!("/{base}")` por predicado de bytes in-place `is_match`.
   - Uso direto de `ini::unquote_str` sem alocar strings intermediárias.
   - Fallback de pasta sub-microssegundo em 50k arquivos (0.9 us/op) e redução no tempo de carga de lutadores (`kfm.def` caiu para 6.7 ms).
+
+- **Onda 48 - Pipeline de HUD Zero-Alloc e Quads de Textura Diretos**:
+  - `Hud::draw`: Otimização de `main_of` em varredura única de iterador sem alocar `Vec<&Fighter>` por lado a cada quadro.
+  - Uso de array fixo em pilha `roots = [r0, r1]` substituindo vetores dinâmicos na heap.
+  - Eliminação de alocações de parceiros em partidas 1v1 convencionais.
+  - Substituição de vetores de malha/vértices/índices no desenho de retratos por chamadas diretas de `draw_texture_ex`.

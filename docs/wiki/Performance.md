@@ -146,3 +146,9 @@ etain_mut.
   - Replaced `format!("/{base}")` heap strings with in-place byte boundary predicate `is_match`.
   - Used `ini::unquote_str` directly instead of allocating owned `unquote` strings.
   - Sub-microsecond VFS folder fallback on 50k files (0.9 us/op) and reduced character load time (`kfm.def` down to 6.7 ms).
+
+- **Wave 48 - Zero-Alloc HUD Frame Pipeline & Direct Texture Quads**:
+  - `Hud::draw`: Streamlined `main_of` into single-pass iterator scans avoiding dynamic `Vec<&Fighter>` allocations per side.
+  - Used fixed stack array `roots = [r0, r1]` instead of dynamically allocated vectors.
+  - Bypassed partner vector allocations on standard 1v1 matches.
+  - Replaced temporary mesh/vertex/index heap vectors in portrait drawing with direct `draw_texture_ex` quad draws.

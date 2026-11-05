@@ -325,3 +325,9 @@ etain_mut.
   - `Match::detect_reversals`: Fast-path early exit when no fighters have an active reversal state, plus fixed-size stack arrays for detected reversals.
   - `Match::detect_hits`: Stack-allocated fixed buffer `pending` storing only fighter indices and coordinates, avoiding eager `HitDefData` heap clones on idle/no-hit frames.
   - `struck` list switched to stack arrays, eliminating vector allocations across physics and hit detection loops.
+
+- **Wave 54 - Stack-Buffered Target Indices & Direct Param Expression Evaluations**:
+  - `controllers::target_indices`: Replaced heap-allocated `Vec<usize>` with fixed stack array `[Option<usize>; 8]`, eliminating allocation churn in `TargetState`, `TargetLifeAdd`, `TargetPowerAdd`, `TargetFacing`, and `TargetBind`.
+  - `controllers::set_vars`: Directly evaluated `param.exprs.first()` without duplicate `sc.param(...)` string search iterations.
+  - `controllers::run`: Replaced double parameter checks in `changestate`/`selfstate` with unified `opt(...)` queries for `ctrl` and `anim`.
+  - Pushed simulation throughput to 226,415 ticks/s with p50 at 0.003 ms, and dropped portrait decode to 0.6 ms.

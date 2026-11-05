@@ -321,3 +321,9 @@ etain_mut.
   - `Match::detect_reversals`: Saída rápida antecipada quando nenhum lutador possui estado ativo de reversão, além de buffers de pilha de tamanho fixo para reversões detectadas.
   - `Match::detect_hits`: Buffer fixo em pilha `pending` armazenando apenas índices e coordenadas de lutadores, eliminando clones prematuros na heap de `HitDefData` em frames sem impacto.
   - Lista de `struck` migrada para buffers de pilha, eliminando alocações dinâmicas nos loops de física e detecção de acertos.
+
+- **Onda 54 - Índices de Alvo em Buffer de Pilha e Avaliação Direta de Expressões**:
+  - `controllers::target_indices`: Substituição de `Vec<usize>` alocado na heap por array fixo em pilha `[Option<usize>; 8]`, eliminando alocações repetidas em `TargetState`, `TargetLifeAdd`, `TargetPowerAdd`, `TargetFacing` e `TargetBind`.
+  - `controllers::set_vars`: Avaliação direta de `param.exprs.first()` sem iterações duplicadas de busca por string `sc.param(...)`.
+  - `controllers::run`: Substituição de checagens duplas de parâmetros em `changestate`/`selfstate` por consultas unificadas `opt(...)` para `ctrl` e `anim`.
+  - Vazão de simulação elevada para 226.415 ticks/s com p50 em 0.003 ms, e decodificação de retratos reduzida para 0.6 ms.

@@ -363,3 +363,7 @@ etain_mut.
   - `air::parse_air`: Substituicao de alocacoes `String` via `to_ascii_uppercase()` para flags e modos de blend por inspecao em nivel de byte (`fl.as_bytes()`, `bl.as_bytes()`).
   - `air::parse_as_d`: Substituicao de busca por strings por varredura de bytes sem distincao de maiusculas/minusculas para parametros alfa `AS...D...`.
   - `air::parse_air`: Pre-alocacao do vetor de quadros com `Vec::with_capacity(8)` e do HashMap de animacoes com `text.len() / 512 + 16`.
+
+- **Onda 61 - Despacho Dedicado de Gatilhos Sem Argumentos e Comparacao de Strings em Bytes**:
+  - `triggers::trigger0`: Desvio rapido para os 20 principais gatilhos sem argumentos (`time`, `animtime`, `stateno`, `prevstateno`, `anim`, `ctrl`, `alive`, `life`, `facing`, `roundstate`, `movecontact`, `movehit`, `vel`, `pos`) diretamente sem criacao de closures de argumentos ou passagem pelo match geral de 90 bracos.
+  - `triggers::cmpstr`: Migracao da decodificacao de caracteres para inspecao de byte unico (`v0.as_bytes().first()`) para `statetype`, `movetype` e `physics`, e reutilizacao de fatias de string em checagens de `command`.

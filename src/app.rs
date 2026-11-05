@@ -1746,10 +1746,11 @@ impl App {
             }
             for side in 0..2 {
                 if picked[side] == Some(i) {
-                    self.ui.rect(cx, cy, 24.0, 14.0, accents[side]);
+                    let tx = if side == 0 { cx } else { cx + cw - 24.0 };
+                    self.ui.rect(tx, cy, 24.0, 14.0, accents[side]);
                     self.ui.text(
                         if side == 0 { "P1" } else { "P2" },
-                        cx + 12.0,
+                        tx + 12.0,
                         cy + 12.0,
                         11.0,
                         BLACK,
@@ -1846,7 +1847,9 @@ impl App {
                 );
             }
             if picked[side].is_none() {
-                self.ui.rect(rx - pad, ry - pad - 15.0, 26.0, 15.0, a);
+                let tag_w = if side == 0 { 26.0 } else if two { 26.0 } else { 32.0 };
+                let tag_x = if side == 0 { rx - pad } else { rx + cw + pad - tag_w };
+                self.ui.rect(tag_x, ry - pad - 15.0, tag_w, 15.0, a);
                 self.ui.text(
                     if side == 0 {
                         "P1"
@@ -1855,7 +1858,7 @@ impl App {
                     } else {
                         "CPU"
                     },
-                    rx - pad + 13.0,
+                    tag_x + tag_w / 2.0,
                     ry - pad - 3.0,
                     12.0,
                     BLACK,
@@ -1897,7 +1900,7 @@ impl App {
             );
             if idx.is_some() {
                 let (px, py) = (if side == 0 { 24.0 } else { VW - 304.0 }, 100.0);
-                let y = py + 470.0;
+                let y = py + 38.0;
                 self.ui
                     .rect(px + 12.0, y, 256.0, 46.0, Color::new(0.0, 0.0, 0.0, 0.42));
                 self.ui.text(
@@ -2973,7 +2976,7 @@ impl App {
         if !ready {
             self.ui.progress_bar(
                 440.0,
-                84.0,
+                75.0,
                 400.0,
                 step_now as f32 / total as f32,
                 &self.load_label(step_now),

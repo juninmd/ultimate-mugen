@@ -15,11 +15,14 @@ use ume_engine::chardef::CharDef;
 
 mod cutscene;
 mod keyedit;
+mod loading;
 mod market;
 mod replay_browser;
 mod settings_screen;
 mod survival;
+mod update_banner;
 mod versus;
+mod controls_screen;
 pub(crate) use keyedit::KeyEdit;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -136,6 +139,7 @@ pub struct Pending {
     stage_job: Option<crate::registry::StageJob>,
     sess: Option<Session>,
     jobs: Vec<crate::registry::LoadJob>,
+    warm: loading::Warm,
 }
 
 /// Everything needed to re-simulate a finished fight: same fighters, stage and mode, plus the recorded inputs per slot.
@@ -285,7 +289,7 @@ pub struct App {
     quality_check: f32,
     window_watch: WindowWatch,
     window_pinned: bool,
-    updater: crate::update::Checker,
+    updater: crate::update::Updater,
     pub trans: f32,
     screen_t: f32,
     menu_art: crate::menu_art::MenuArt,
@@ -301,6 +305,8 @@ pub struct App {
     replay_by_name: bool,
     /// a desync report was already written for the current online match
     desync_reported: bool,
+    /// Roster signature of the last sprite warm-up, so a rematch keeps the atlases it already filled.
+    warm_key: String,
 }
 
 const MENU: [(&str, &str); 15] = [
@@ -424,13 +430,14 @@ impl App {
             replay_confirm: false,
             replay_by_name: false,
             desync_reported: false,
+            warm_key: String::new(),
             survival: None,
             coop: false,
             sp: crate::screenpack::probe(),
             pal: [settings.pal1 as i32, settings.pal2 as i32],
             pal_pick: 1,
             team_pal: vec![],
-            updater: crate::update::Checker::start(&std::env::args().collect::<Vec<_>>()),
+            updater: crate::update::Updater::start(&std::env::args().collect::<Vec<_>>()),
         }
     }
 
@@ -505,6 +512,7 @@ impl App {
         self.c.update();
         self.preview_t += get_frame_time();
         let dt = get_frame_time();
+        self.updater.poll();
         match &mut self.screen {
             Screen::Title => self.title(),
             Screen::Menu { .. } => self.menu(),
@@ -687,6 +695,7 @@ impl App {
                 self.msg.clear();
             }
         }
+        self.apply_update_if_ready();
     }
 
     fn after_registry_change(&mut self) {
@@ -796,24 +805,7 @@ impl App {
             Align::Center,
             false,
         );
-        let line = match self.updater.poll() {
-            Some(u) => format!(
-                "{} · nova versão v{} disponível: {}",
-                crate::update::build_label(),
-                u.version,
-                crate::update::RELEASES_URL
-            ),
-            None => crate::update::build_label(),
-        };
-        self.ui.text(
-            &line,
-            VW - 14.0,
-            VH - 12.0,
-            14.0,
-            hex("#a49cc0"),
-            Align::Right,
-            false,
-        );
+        self.draw_update_status();
         if self.c.pressed(nav::OK | nav::START)
             || is_mouse_button_pressed(MouseButton::Left)
             || !touches().is_empty() && touches()[0].phase == TouchPhase::Started
@@ -2662,21 +2654,6 @@ impl App {
         }
         v
     }
-    fn load_total(&self) -> u8 {
-        (self.load_plan().len() + 3) as u8
-    }
-    fn load_label(&self, step: u8) -> String {
-        let plan = self.load_plan();
-        match plan.get(step as usize) {
-            Some((_, _, r)) => format!("Carregando {}…", self.reg.chars[*r].name),
-            None => [
-                "Montando o cenário…",
-                "Preparando a luta…",
-                "Sintetizando a música…",
-            ][(step as usize - plan.len()).min(2)]
-            .to_string(),
-        }
-    }
 
     /// One unit of fight preparation (runs behind the VS screen, one per frame, so the bar animates and the UI never freezes).
     /// Palette for a planned fighter: explicit team/player choice, with the classic duplicate-fighter fallback.
@@ -2923,7 +2900,7 @@ impl App {
                 );
             }
             self.pending.sess = Some(sess);
-        } else {
+        } else if st == n + 2 {
             ume_shell::watchdog::label("load:audio");
             let music = self
                 .pending
@@ -2950,6 +2927,12 @@ impl App {
                 return Ok(false);
             }
             self.audio.prepare_music(music).await;
+        } else if !self.warm_step() {
+            if wait {
+                std::thread::sleep(std::time::Duration::from_millis(2));
+                return Box::pin(self.load_step(step, wait)).await;
+            }
+            return Ok(false);
         }
         Ok(true)
     }
@@ -3014,11 +2997,12 @@ impl App {
         let ready = step_now >= total;
         self.draw_versus(t);
         if !ready {
+            let within = if step_now + 1 == total { self.warm_progress() } else { 0.0 };
             self.ui.progress_bar(
                 440.0,
                 75.0,
                 400.0,
-                step_now as f32 / total as f32,
+                (step_now as f32 + within) / total as f32,
                 &self.load_label(step_now),
             );
         } else if t > 1.8
@@ -3030,8 +3014,18 @@ impl App {
     }
 
     /// Synchronous variant (screenshot tour, rematch): runs every loading step back to back.
+    /// The sprite warm-up is the one step that is paid over several frames here: it copies 1 MiB per
+    /// frame, yielding between chunks, so a rematch or a netplay start does not freeze the window for
+    /// the hundreds of milliseconds a full fighter upload takes.
     pub async fn start_fight(&mut self) {
-        for st in 0..self.load_total() {
+        let total = self.load_total();
+        for st in 0..total {
+            if st + 1 == total {
+                while !self.warm_step() {
+                    next_frame().await;
+                }
+                continue;
+            }
             if let Err(e) = self.load_step(st, true).await {
                 self.abort_load(e);
                 return;
@@ -3050,18 +3044,6 @@ impl App {
         // DualShock/DualSense lightbars: P1 blue, P2 red
         self.c.pads.set_light(0, [30, 90, 255]);
         self.c.pads.set_light(1, [255, 40, 60]);
-        ume_shell::watchdog::label("fight:prefetch");
-        self.g.trim(4000);
-        let mut warmed: Vec<&str> = vec![];
-        for f in &sess.m.fighters {
-            if warmed.contains(&f.def.id.as_str()) {
-                continue;
-            }
-            warmed.push(&f.def.id);
-            if !self.g.prefetch(&f.def, 0.5) {
-                break;
-            }
-        }
         self.session = Some(sess);
         self.screen = Screen::Fight;
         self.audio.reset_bgm();
@@ -3830,196 +3812,6 @@ impl App {
         self.start_fight().await;
     }
 
-    fn controls_screen(&mut self) {
-        if self.key_edit.is_some() {
-            self.key_editor();
-            return;
-        }
-        self.ui.background();
-        self.ui.text(
-            crate::i18n::t("controls.title"),
-            60.0,
-            70.0,
-            34.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
-        use crate::controls::{face, Glyphs};
-        use crate::gamepad::PadKind;
-        use ume_engine::input::k;
-        let kl = |i: usize| crate::keybinds::label(self.c.keys.slots[0][i]);
-        let touch = self.c.touch.enabled;
-        let mut cols = vec![
-            Glyphs::Keyboard,
-            Glyphs::Pad(PadKind::Xbox),
-            Glyphs::Pad(PadKind::PlayStation),
-        ];
-        if touch {
-            cols.insert(0, Glyphs::Touch);
-        } else {
-            cols.push(Glyphs::Touch);
-        }
-        let head = |g: Glyphs| match g {
-            Glyphs::Keyboard => crate::i18n::t("controls.keyboard"),
-            Glyphs::Touch => crate::i18n::t("controls.touch"),
-            Glyphs::Pad(p) => p.label(),
-        };
-        let rows: [(&str, &[u32], &str); 7] = [
-            (crate::i18n::t("controls.move"), &[], ""),
-            (crate::i18n::t("controls.punch"), &[k::X, k::Y], " "),
-            (crate::i18n::t("controls.kick"), &[k::A, k::B], " "),
-            (crate::i18n::t("controls.special"), &[k::D2], ""),
-            (crate::i18n::t("controls.super"), &[k::D2, k::W], "+"),
-            (crate::i18n::t("controls.awaken"), &[k::T], ""),
-            (crate::i18n::t("controls.pause"), &[k::S], ""),
-        ];
-        let move_text = |g: Glyphs| match g {
-            Glyphs::Keyboard => format!("{} {} {} {} / setas", kl(0), kl(1), kl(2), kl(3)),
-            Glyphs::Touch => "Analógico esquerdo".into(),
-            Glyphs::Pad(_) => "Analógico ou direcional".into(),
-        };
-        let xs = [60.0, 280.0, 520.0, 760.0, 1000.0];
-        let (top, rh) = (120.0, 60.0);
-        for (j, g) in cols.iter().enumerate() {
-            let on = matches!((self.c.glyphs, g), (a, b) if a == *b);
-            self.ui.text(
-                head(*g),
-                xs[j + 1],
-                top,
-                24.0,
-                if on { hex("#ffcc33") } else { hex("#22e8ff") },
-                Align::Left,
-                true,
-            );
-        }
-        for (i, (act, bits, sep)) in rows.iter().enumerate() {
-            let y = top + 18.0 + i as f32 * rh;
-            self.ui.rect(
-                50.0,
-                y,
-                1180.0,
-                rh - 8.0,
-                Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.07 } else { 0.03 }),
-            );
-            self.ui.text(
-                act,
-                xs[0],
-                y + 36.0,
-                26.0,
-                hex("#ffcc33"),
-                Align::Left,
-                true,
-            );
-            for (j, g) in cols.iter().enumerate() {
-                if bits.is_empty() {
-                    self.ui.text(
-                        &move_text(*g),
-                        xs[j + 1],
-                        y + 34.0,
-                        20.0,
-                        WHITE,
-                        Align::Left,
-                        false,
-                    );
-                    continue;
-                }
-                let mut cx = xs[j + 1];
-                let bits: &[u32] = if *g == Glyphs::Touch && bits.contains(&k::W) {
-                    &[k::W]
-                } else {
-                    bits
-                };
-                for (n, b) in bits.iter().enumerate() {
-                    if n > 0 {
-                        cx += if sep.trim().is_empty() {
-                            8.0
-                        } else {
-                            self.ui.text(
-                                sep,
-                                cx + 4.0,
-                                y + 36.0,
-                                24.0,
-                                hex("#a49cc0"),
-                                Align::Left,
-                                true,
-                            ) + 10.0
-                        };
-                    }
-                    cx += self.ui.face(face(*g, &self.c.keys, *b), cx, y + 44.0, 36.0);
-                }
-            }
-        }
-        let pads = self.c.pad_info.clone();
-        let status = if pads.is_empty() {
-            crate::i18n::t("controls.none").to_string()
-        } else {
-            format!(
-                "Conectado: {}",
-                pads.iter()
-                    .map(|p| p.name.as_str())
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            )
-        };
-        self.ui.text(
-            &status,
-            60.0,
-            585.0,
-            20.0,
-            hex("#a49cc0"),
-            Align::Left,
-            false,
-        );
-        for (i, p) in pads.iter().enumerate() {
-            if p.bits & ume_engine::input::k::A != 0 && self.c.pressed(nav::OK) {
-                self.c.rumble(i, 0.8, 0.8, 300);
-            }
-        }
-        self.ui.rect(60.0, 610.0, 200.0, 60.0, hex("#ff4d6d"));
-        self.ui.text(
-            crate::i18n::t("controls.back"),
-            160.0,
-            649.0,
-            26.0,
-            WHITE,
-            Align::Center,
-            true,
-        );
-        let back = self.clicked_rect(60.0, 610.0, 200.0, 60.0);
-        if !touch {
-            self.ui
-                .rect(300.0, 610.0, 360.0, 60.0, Color::new(1.0, 1.0, 1.0, 0.1));
-            self.ui.text(
-                crate::i18n::t("controls.customize"),
-                480.0,
-                649.0,
-                22.0,
-                WHITE,
-                Align::Center,
-                true,
-            );
-            if is_key_pressed(KeyCode::Tab) || self.clicked_rect(300.0, 610.0, 360.0, 60.0) {
-                self.key_edit = Some(keyedit::KeyEdit {
-                    slot: 0,
-                    cur: 0,
-                    waiting: false,
-                    msg: String::new(),
-                });
-            }
-        }
-        if back || self.c.pressed(nav::BACK) {
-            self.screen = match self.settings_back.take() {
-                Some((tab, from_fight)) => Screen::Settings {
-                    tab,
-                    cur: 1,
-                    from_fight,
-                },
-                None => Screen::Menu { cur: 11 },
-            };
-        }
-    }
-
     fn mugen_screen(&mut self) {
         self.ui.background();
         self.ui.text(
@@ -4102,7 +3894,7 @@ impl App {
             self.c.touch.draw();
         }
     }
-    pub fn preview_opts() -> DrawOpts {
+    pub fn preview_opts<'a>() -> DrawOpts<'a> {
         DrawOpts::default()
     }
     pub fn renderer_new(st: &crate::stages::Stage) -> MatchRenderer {

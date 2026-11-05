@@ -7,14 +7,12 @@ pub struct Ai { pub level: i32, queue: std::collections::VecDeque<u32>, hold: u3
 
 impl Ai {
     pub fn new(level: i32, seed: u32) -> Self { Ai { level, queue: Default::default(), hold: 0, hold_ticks: 0, cooldown: 0, rng: seed | 1, attack: vec![], init: false } }
-    /// Forget cached per-character data (when a CPU pilot is handed another fighter, e.g. control switching in team battles).
     pub fn reset(&mut self) { self.init = false; self.queue.clear(); self.hold = 0; self.hold_ticks = 0; self.cooldown = 0; self.attack.clear(); }
     fn r(&mut self) -> f32 { let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x; x as f32 / 4294967296.0 }
+    #[inline]
     fn abs(rel: u32, facing: f32) -> u32 {
-        let mut b = rel & 3;
-        let (back, fwd) = (rel & 4 != 0, rel & 8 != 0);
-        if facing >= 0.0 { if back { b |= k::L } if fwd { b |= k::R } } else { if back { b |= k::R } if fwd { b |= k::L } }
-        b
+        let bf = rel & 12;
+        if facing >= 0.0 { rel & 15 } else { (rel & 3) | ((bf & 4) << 1) | ((bf & 8) >> 1) }
     }
     fn append_seq(queue: &mut std::collections::VecDeque<u32>, c: &CommandDef, facing: f32) {
         queue.clear();
@@ -26,7 +24,7 @@ impl Ai {
                 continue;
             }
             if s.btns != 0 {
-                let pd = queue.back().copied().map(|x| x & 15).unwrap_or(0);
+                let pd = queue.back().map(|x| x & 15).unwrap_or(0);
                 queue.push_back(if d != 0 { d } else { pd } | s.btns);
                 queue.push_back(0);
             } else {
@@ -47,13 +45,11 @@ impl InputSource for Ai {
         if m.round_state != 2 { return 0; }
         let Some(ei) = m.enemy(me, 0) else { return 0 };
         let e = &m.fighters[ei];
-        // awakening when hurt and the meter allows it
         if f.form == 0 && f.ctrl && f.power >= 1000.0 && f.life < f.life_max * if f.def.boss { 0.6 } else { 0.45 } && self.level >= 3 && f.def.anims.contains_key(&196) { return k::T; }
         if self.hold_ticks > 0 { self.hold_ticks -= 1; return self.hold; }
         let dist = (e.pos.x - f.pos.x).abs();
         let fwd = if f.facing > 0.0 { k::R } else { k::L };
         let back = if f.facing > 0.0 { k::L } else { k::R };
-        // the final boss is relentless: sharper than level 8, attacks from further away and recovers faster, but still guards only part of the time
         let boss = f.def.boss;
         let skill = if boss { 1.15 } else { self.level as f32 / 8.0 };
         let r = self.r();
@@ -64,23 +60,28 @@ impl InputSource for Ai {
             return self.hold;
         }
         let near = if boss { 105.0 } else { 70.0 };
-        // chars com localcoord != 320 (KOF/alguns fullgames) desenham e se movem em escala maior:
-        // as distancias fixas do AI precisam acompanhar, senao ele nunca chega "perto" para atacar.
         let scale = (f.def.local_w / 320.0).clamp(0.5, 2.0);
         let near = near * scale;
         if self.cooldown > 0 { self.cooldown -= 1; return self.idle(dist, fwd, back); }
         if !f.ctrl { return 0; }
         if !self.attack.is_empty() && (dist < near || (dist > 110.0 * scale && self.r() < 0.08 + skill * if boss { 0.2 } else { 0.06 })) && self.r() < 0.2 + skill * 0.5 {
-            let count = self.attack.iter().filter(|c| dist < near || c.steps.len() > 1).count();
+            let count = if dist < near { self.attack.len() } else { self.attack.iter().filter(|c| c.steps.len() > 1).count() };
             if count > 0 {
                 let pick = (self.r() * count as f32) as usize % count;
-                let c = self.attack.iter().filter(|c| dist < near || c.steps.len() > 1).nth(pick).unwrap();
+                let c = if dist < near { &self.attack[pick] } else { self.attack.iter().filter(|c| c.steps.len() > 1).nth(pick).unwrap() };
                 Self::append_seq(&mut self.queue, c, f.facing);
                 self.cooldown = if boss { (8.0 + self.r() * 12.0) as i32 } else { (20.0 + (1.0 - skill) * 40.0 + self.r() * 20.0) as i32 };
                 return self.queue.pop_front().unwrap_or(0);
             }
         }
-        if dist > 60.0 && self.r() < 0.02 + skill * 0.02 { self.queue.clear(); self.queue.push_back(k::U | fwd); self.queue.push_back(k::U | fwd); self.queue.push_back(fwd); self.cooldown = 30; return self.queue.pop_front().unwrap(); }
+        if dist > 60.0 && self.r() < 0.02 + skill * 0.02 {
+            self.queue.clear();
+            self.queue.push_back(k::U | fwd);
+            self.queue.push_back(k::U | fwd);
+            self.queue.push_back(fwd);
+            self.cooldown = 30;
+            return self.queue.pop_front().unwrap();
+        }
         self.idle(dist, fwd, back)
     }
 }

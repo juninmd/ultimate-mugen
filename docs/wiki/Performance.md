@@ -22,6 +22,7 @@ How the engine keeps loading fast and frames smooth, and how to measure it.
 | Select-screen portraits | `load_mugen_portrait` decodes only sprites 9000,0, 9000,1 and the first idle frame (plus their link sources) via `decode_sff_only` | 1 |
 | Native (UMF) rig | Every unique frame is rasterized in parallel | All cores (max 8) |
 | Whole character | Loaded on a `char-load` thread while the VS screen is shown | 1 background thread |
+| VFS resolution | Short-circuiting single-candidate lookups, zero-alloc ASCII path normalization, and clone-free `BTreeMap::range` queries | Calling thread |
 
 The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the calling thread, since the browser build has no threads.
 
@@ -31,7 +32,7 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 |---|---|---|
 | Frame pacing | `ume_shell::Pacer` | Frame times within 4% of a common refresh rate (30 to 240 Hz) become the exact period; the leftover is paid back once it adds up to a full period, so game time stays real time. With vsync this gives exactly one 60 Hz tick per frame instead of 0/2 jitter |
 | Fixed step | `Session::update` | 60 Hz simulation with a tiny tolerance and at most 5 ticks per frame (no spiral of death) |
-| Texture prefetch | `Gfx::prefetch`, `Texture2D::prefetch` | Fighter sprites are uploaded to the atlas when the fight starts (up to 50% atlas), so the first special move does not upload mid-match |
+| Texture prefetch | `Gfx::prefetch_step`, `App::warm_step` | Fighter sprites are uploaded to the atlas one 512 KiB chunk per frame across the loading steps (VS screen) or between yielded frames (`start_fight`), so no single frame pays for a whole fighter; a rematch with the same roster copies nothing |
 | Sound prewarm | `Audio::preload_match` | Every fighter sound is decoded in parallel during the VS screen; sounds of characters no longer in the match are freed |
 | Bytecode VM | `ume_engine::bytecode` | CNS/ZSS expressions compile into a flat stack VM (`[f64; 32]`) with inline redirects (`parent`, `root`, `helper`, `enemynear`), math/comparison intrinsics, zero/one-arg triggers, `CmpStr`, `Special` (`animelem`, `timemod`), and `:=` assignments |
 | Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, reusable scratch buffers for Clsn1/Clsn2 collision detection (`fill_boxes`), two-pass iterator AI move selection, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
@@ -42,6 +43,9 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, stack-array target indices, linear flat vector persistence, `num_opt` single-pass parameter evaluation, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
 | Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, branchless `rel_dirs`, single-cycle bitwise recent button checks in command matcher, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
 | Resilience bounds | `ume_formats`, `ume_engine::matchs` | Image decoders reject headers above `MAX_IMAGE_PIXELS` (`1 << 26`) before allocating; matches cap helpers (60), explods (512), projectiles (256), and texts (128) |
+| Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, branchless `abs` direction translation, O(1) close-range AI selection, in-place `append_seq`, zero-alloc stage background tile iteration, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
+
+## Resilience bounds | `ume_formats`, `ume_engine::matchs` | Image decoders reject headers above `MAX_IMAGE_PIXELS` (`1 << 26`) before allocating; matches cap helpers (60), explods (512), projectiles (256), and texts (128) |
 
 ## GPU memory
 
@@ -57,11 +61,13 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | `cargo run --release -p ume-engine --example mugen_load_bench [zip] [runs]` | M.U.G.E.N character load time (default: bundled `elecbyte.zip`) |
 | `cargo run --release -p ume-engine --example load_bench` | Native (UMF) compile time |
 | `cargo run --release -p ume-engine --example tick_bench -- [zip_or_dir] [seconds] [per_side]` | Simulation throughput (`ticks/s`) and latency percentiles (`p50`, `p99`, `max`, 16.6 ms frame budget %) |
+| `cargo run --release -p ume-engine --example sprite_mem -- <char_dir>...` | Sprite payload per fighter: sprites, index/RGBA atlas MB, largest sprite (sizes the warm-up budget) |
 | `cargo test -p ume-engine --release --test tick_alloc` | Zero allocations per simulation tick |
 | `cargo test -p ume-formats --release --test fuzz_resilience` | Mutation fuzzing across SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR and INI decoders |
 | `cargo test -p ume-engine --release --test stress_resilience` | Hostile CNS expressions, recursive helper/explod/projectile floods, and 4v4 simul stress |
 
 Reference (release): `kfm` went from 48.3 ms to 3.5 ms (13.8x faster), `kfm720` from 60.1 ms to 7.8 ms (7.7x faster). Simulation tick throughput reaches 235,000+ ticks/s at p50 0.004 ms (0.1% frame budget).
+| `cargo test -p ume-engine --release --test stress_resilience` | Hostile CNS expressions, recursive helper/explod/projectile floods, and 4v4 simul stress. |
 
 ## Web (wasm)
 
@@ -97,6 +103,8 @@ Rule: the render thread never waits on disk, decoding, parsing or synthesis. On 
 | Winner screen | uses the cached definition (`peek`), never loads |
 
 Frame-time watchdog: set `UME_WATCHDOG=1` to log every frame longer than `UME_HITCH_MS` (default 50) with the active label (`ume_shell::watchdog::label("load:stage")`), and a summary with the worst frame on exit. Labels in use: `select:preview`, `load:character`, `load:stage`, `load:session`, `load:audio`, `fight:prefetch`, `import`.
+
+Frame-time watchdog: set `UME_WATCHDOG=1` to log every frame longer than `UME_HITCH_MS` (default 50) with the active label (`ume_shell::watchdog::label("load:stage")`), and a summary with the worst frame on exit. Labels in use: `select:preview`, `load:character`, `load:stage`, `load:session`, `load:audio`, `load:sprites`, `import`. The label sticks to the first phase named in a frame, so the trailing bookkeeping blocks do not relabel a slow loading step.
 
 ## Virtual filesystem lookup
 
@@ -172,3 +180,11 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
   - Implements Fighter::fill_boxes using caller-provided scratch buffers, eliminating continuous Vec<Box4> allocations during reversal, hit, and projectile detection loops.
   - Replaces heap vector collection for p2clsnrequire single box checks with a zero-copy stack array slice.
   - Adds if n <= 1 { return 0; } early-exit in lem_start to bypass iterator instantiation for the most common animation frame timing queries.
+- **Wave 29 - Chunked Raster Pixmap Conversion & In-Order SFF RLE8 Decoding**:
+  - Replaces per-pixel `extend_from_slice` calls in `raster::pixmap_to_image` with direct 4-byte chunk slice writes (`chunks_exact_mut(4)`).
+  - Streamlines `decode_rle8` read sequence without extra index decrementing.
+
+- **Wave 30 - Branchless Input Relative Directions & Byte Jump Table**:
+  - Replaces nested branching in `input::rel_dirs` with branchless bitwise shift `ud | (4 << (is_back ^ 1))`.
+  - Replaces string matching in `button_bit` with byte-level slice matching, supporting case-insensitivity without allocation.
+  - Implements branchless facing assignment in `InputHistory::push`.

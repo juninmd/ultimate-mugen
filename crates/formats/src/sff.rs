@@ -510,18 +510,19 @@ pub fn decode_rle8(src: &[u8], size: usize) -> Vec<u8> {
     let (mut i, mut j) = (0usize, 0usize);
     let len = src.len();
     while j < size && i < len {
-        let mut d = src[i];
+        let d = src[i];
         i += 1;
         if d & 0xc0 == 0x40 {
             let n = (d & 0x3f) as usize;
-            d = if i < len {
+            let val = if i < len {
+                let v = src[i];
                 i += 1;
-                src[i - 1]
+                v
             } else {
                 0
             };
             let e = (j + n).min(size);
-            out[j..e].fill(d);
+            out[j..e].fill(val);
             j = e;
         } else {
             out[j] = d;

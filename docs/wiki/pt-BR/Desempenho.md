@@ -172,3 +172,7 @@ un_slice, reduzindo overhead de desreferenciação de struct a cada resolução 
   - Implementa Fighter::fill_boxes utilizando buffers scratch fornecidos pelo chamador, eliminando alocações contínuas de Vec<Box4> nos loops de detecção de reversals, golpes e projéteis.
   - Substitui coleta de vetor na heap para verificação de caixa única p2clsnrequire por fatia em array na pilha com zero cópias.
   - Adiciona saída antecipada if n <= 1 { return 0; } em lem_start para ignorar instanciação de iteradores nas consultas mais frequentes de tempo de quadros de animação.
+Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes:
+- Substitui desvios aninhados em `input::rel_dirs` por deslocamento binário branchless `ud | (4 << (is_back ^ 1))`.
+- Substitui casamento de strings em `button_bit` por casamento em nível de byte na fatia, suportando insensibilidade a maiúsculas sem alocação.
+- Implementa atribuição de direção branchless em `InputHistory::push`.

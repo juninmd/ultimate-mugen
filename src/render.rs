@@ -11,6 +11,8 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use ume_engine::palette::{BlendMode, PalParams};
 
+mod warm;
+
 fn draw_transformed_layer_quad(
     texture: &Texture2D,
     pivot: [f32; 2],
@@ -122,13 +124,6 @@ impl Gfx {
         let img = spr.image.as_ref()?;
         Some(SpriteTex::Rgba(self.texture(img, spr.scale >= 0.99)))
     }
-    pub fn prefetch(&mut self, def: &CharDef, max_occupancy: f32) -> bool {
-        let keys: Vec<(i32, i32)> = def.sprites.keys().copied().collect();
-        keys.into_iter().all(|k| {
-            self.sprite_tex(def, k, &[])
-                .is_none_or(|t| t.prefetch(max_occupancy))
-        })
-    }
     pub fn trim(&mut self, keep: usize) {
         if self.tex.len() + self.indexed.len() > keep {
             self.tex.clear();
@@ -176,7 +171,7 @@ impl SpriteTex {
     }
 }
 
-pub struct DrawOpts {
+pub struct DrawOpts<'a> {
     pub alpha: f32,
     pub add: bool,
     pub sub: bool,
@@ -185,9 +180,9 @@ pub struct DrawOpts {
     pub angle: f32,
     pub vflip: bool,
     pub pal: Option<PalParams>,
-    pub remap: Vec<((i32, i32), (i32, i32))>,
+    pub remap: &'a [((i32, i32), (i32, i32))],
 }
-impl Default for DrawOpts {
+impl<'a> Default for DrawOpts<'a> {
     fn default() -> Self {
         DrawOpts {
             alpha: 1.0,
@@ -198,7 +193,7 @@ impl Default for DrawOpts {
             angle: 0.0,
             vflip: false,
             pal: None,
-            remap: vec![],
+            remap: &[],
         }
     }
 }
@@ -245,7 +240,7 @@ impl MatchRenderer {
         facing: f32,
         lscl: f32,
         extra: [f32; 2],
-        o: &DrawOpts,
+        o: &DrawOpts<'_>,
         shx: f32,
         shy: f32,
     ) {
@@ -306,13 +301,13 @@ impl MatchRenderer {
         } else if sub {
             set_blend(GfxBlend::Sub);
         }
-        tex.draw(g.ox + left * s, g.oy + top * s, c, params.clone());
-        if add || sub {
-            set_blend(GfxBlend::Alpha);
-        }
-        params.pal_fx = None;
         if o.flash > 0.0 {
+            tex.draw(g.ox + left * s, g.oy + top * s, c, params.clone());
+            if add || sub {
+                set_blend(GfxBlend::Alpha);
+            }
             set_blend(GfxBlend::Add);
+            params.pal_fx = None;
             tex.draw(
                 g.ox + left * s,
                 g.oy + top * s,
@@ -320,6 +315,11 @@ impl MatchRenderer {
                 params,
             );
             set_blend(GfxBlend::Alpha);
+        } else {
+            tex.draw(g.ox + left * s, g.oy + top * s, c, params);
+            if add || sub {
+                set_blend(GfxBlend::Alpha);
+            }
         }
     }
 
@@ -571,8 +571,8 @@ impl MatchRenderer {
                     let e = &m.explods[i];
                     let remap = m
                         .idx(e.owner)
-                        .map(|o| m.fighters[o].remap.clone())
-                        .unwrap_or_default();
+                        .map(|o| m.fighters[o].remap.as_slice())
+                        .unwrap_or(&[]);
                     if let Some(fr) = e.cur.frame() {
                         let p = e.world_pos(m.camera);
                         Self::draw_sprite(
@@ -831,7 +831,7 @@ impl MatchRenderer {
                     add: matches!(tr.mode, BlendMode::Add | BlendMode::Add1),
                     sub: tr.mode == BlendMode::Sub,
                     pal: Some(ai.params.image_params(k)),
-                    remap: f.remap.clone(),
+                    remap: &f.remap,
                     ..Default::default()
                 };
                 Self::draw_sprite(
@@ -883,7 +883,7 @@ impl MatchRenderer {
             o.flash = 0.55;
         }
         o.pal = Some(m.fighter_pal(fi));
-        o.remap = f.remap.clone();
+        o.remap = &f.remap;
         if let Some(t) = &f.trans {
             match t.mode {
                 BlendMode::Add | BlendMode::Add1 => {
@@ -1149,34 +1149,6 @@ impl MatchRenderer {
                     let (axis_dx, axis_dy) = (meta.axis_x as f32 * lx, meta.axis_y as f32 * ly);
                     let (x0, y0) = (sxp - axis_dx, syp - axis_dy);
                     let (stx, sty) = (w + l.tile_spacing[0] * scl, h + l.tile_spacing[1] * scl_y);
-                    let xs: Vec<f32> = match l.tile[0] {
-                        1 => {
-                            let st = x0 - (x0 / stx).ceil() * stx;
-                            let mut v = vec![];
-                            let mut x = st;
-                            while x < m.view_w {
-                                v.push(x);
-                                x += stx;
-                            }
-                            v
-                        }
-                        n if n > 1 => (0..n).map(|i| x0 + i as f32 * stx).collect(),
-                        _ => vec![x0],
-                    };
-                    let ys: Vec<f32> = match l.tile[1] {
-                        1 => {
-                            let st = y0 - (y0 / sty).ceil() * sty;
-                            let mut v = vec![];
-                            let mut y = st;
-                            while y < m.view_h {
-                                v.push(y);
-                                y += sty;
-                            }
-                            v
-                        }
-                        n if n > 1 => (0..n).map(|i| y0 + i as f32 * sty).collect(),
-                        _ => vec![y0],
-                    };
                     let add = l.trans.starts_with("add") && l.trans != "addalpha";
                     let sub = l.trans == "sub";
                     let alpha = if l.trans == "addalpha" {
@@ -1207,8 +1179,29 @@ impl MatchRenderer {
                     }
                     let tint = Color::new(1.0, 1.0, 1.0, alpha);
                     let transformed = l.angle != 0.0 || l.x_shear != 0.0;
-                    for &x in &xs {
-                        for &y in &ys {
+                    let for_each_tile = |tile_mode: i32, p0: f32, step: f32, limit: f32, cb: &mut dyn FnMut(f32)| {
+                        match tile_mode {
+                            1 => {
+                                if step > 0.0 {
+                                    let mut p = p0 - (p0 / step).ceil() * step;
+                                    while p < limit {
+                                        cb(p);
+                                        p += step;
+                                    }
+                                } else {
+                                    cb(p0);
+                                }
+                            }
+                            n if n > 1 => {
+                                for i in 0..n {
+                                    cb(p0 + i as f32 * step);
+                                }
+                            }
+                            _ => cb(p0),
+                        }
+                    };
+                    for_each_tile(l.tile[0], x0, stx, m.view_w, &mut |x| {
+                        for_each_tile(l.tile[1], y0, sty, m.view_h, &mut |y| {
                             if transformed {
                                 draw_transformed_layer_quad(
                                     &t,
@@ -1231,8 +1224,8 @@ impl MatchRenderer {
                                     },
                                 );
                             }
-                        }
-                    }
+                        });
+                    });
                     if clip.is_some() {
                         set_scissor(None);
                     }

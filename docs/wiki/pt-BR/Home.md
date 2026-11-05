@@ -7,6 +7,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | Página | Para quem | O que ensina |
 |---|---|---|
 | [Instalação e execução](Instalacao.md) | Jogadores | Baixar, compilar, rodar no PC, navegador e celular |
+| [Atualização automática](Atualizacao-Automatica.md) | Jogadores | Auto-atualização pelas releases do GitHub, como desligar e flags |
 | [Configuração e controles](Configuracao.md) | Jogadores | Arquivo `.cfg`, flags de linha de comando, variáveis de ambiente, controles |
 | [Adicionar conteúdo M.U.G.E.N](Conteudo-MUGEN.md) | Jogadores | Instalar personagens e cenários `.def`/`.zip` e validar |
 | [Mercado GitHub](Mercado.md) | Jogadores | Instalar personagens, cenários e músicas de qualquer repositório do GitHub |
@@ -22,6 +23,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
 | [Layout de arquivos](pt-BR/Layout-de-Arquivos.md) | Desenvolvedores | A regra de 250 linhas, uma responsabilidade por arquivo, dividir arquivos, PRs paralelos |
 | [Desempenho](Desempenho.md) | Desenvolvedores | Carga paralela, ritmo de quadros, benchmarks |
+| [Engenharia reversa do port para navegador](Engenharia-Reversa-Ikemen-Web.md) | Desenvolvedores | Como uma build de M.U.G.E.N com 78 lutadores roda no navegador, e o que copiamos dela |
 | [Pesquisa de jogos de luta](Pesquisa-Jogos-Luta.md) | Desenvolvedores | Pesquisa de outros lutadores e lista priorizada de melhorias |
 | [Solução de problemas](Problemas.md) | Todos | Erros comuns e ferramentas de diagnóstico |
 

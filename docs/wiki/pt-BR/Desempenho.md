@@ -139,3 +139,7 @@ A avaliação de partidas em `crates/engine/src/matchs.rs`, `crates/engine/src/t
 ## Despacho Direto de Gatilhos em Bytecode
 
 O trait `Host` em `crates/engine/src/expr.rs` e a máquina virtual em `crates/engine/src/bytecode.rs` introduzem ganchos de despacho direto `trigger0` e `trigger1`. Para avaliação de gatilhos unários (`Op::Trig1`), operandos na pilha avaliam diretamente na lógica do gatilho sem encapsulamento em arrays AST temporários `[Node::Num]` ou redirecionamento via `eval()`. Gatilhos críticos (`var`, `fvar`, `sysvar`, `animelemno`, `animelemtime`, `animexist`, `selfstatenoexist`) executam como índices e consultas inline em arrays, reduzindo a latência máxima de tick de simulação para 0,042 ms.
+
+## Analisador de Animações AIR com Alocação Zero
+
+`parse_air` em `crates/formats/src/air.rs` opera diretamente sobre fatias de string de cada linha sem alocar instâncias `String` em minúsculas (`line.to_ascii_lowercase()`) para cada linha do arquivo de animação. O reconhecimento de seções e cabeçalhos (`parse_begin_action`, `parse_clsn_header`, `parse_clsn_box`) avalia fatias de bytes com insensibilidade a maiúsculas ASCII (`eq_ignore_ascii_case`), e as coordenadas de caixas de colisão são processadas em um array de pilha fixo `[f32; 4]` em vez de alocar um `Vec<f32>` na heap por caixa delimitadora.

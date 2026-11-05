@@ -139,3 +139,7 @@ Match evaluation in `crates/engine/src/matchs.rs`, `crates/engine/src/triggers.r
 ## Bytecode Direct Trigger Dispatch
 
 `Host` in `crates/engine/src/expr.rs` and the virtual machine in `crates/engine/src/bytecode.rs` introduce `trigger0` and `trigger1` direct dispatch hooks. For unary trigger evaluation (`Op::Trig1`), stack operands evaluate directly into trigger logic without wrapping into temporary `[Node::Num]` AST arrays or indirection through `eval()`. Hot path triggers (`var`, `fvar`, `sysvar`, `animelemno`, `animelemtime`, `animexist`, `selfstatenoexist`) execute as inline array indices and lookups, reducing worst-case simulation tick latency to 0.042 ms.
+
+## Zero-Allocation AIR Animation Parser
+
+`parse_air` in `crates/formats/src/air.rs` operates directly on line string slices without allocating lowercase `String` instances (`line.to_ascii_lowercase()`) for every line in the animation file. Action and header recognition (`parse_begin_action`, `parse_clsn_header`, `parse_clsn_box`) evaluate byte slices with ASCII case-folding (`eq_ignore_ascii_case`), and collision box coordinates parse into a fixed stack array `[f32; 4]` rather than allocating a temporary heap `Vec<f32>` per bounding box.

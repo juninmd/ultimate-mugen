@@ -4,24 +4,36 @@ use crate::fighter::{HitDefData, PalFx, Shake, V2};
 use crate::matchs::Match;
 
 fn animtype(s: &str) -> Option<i32> {
-    Some(match s.trim().to_ascii_lowercase().as_str() {
-        "light" => 0,
-        "medium" | "med" => 1,
-        "hard" | "heavy" => 2,
-        "back" => 3,
-        "up" => 4,
-        "diagup" => 5,
-        _ => return None,
-    })
+    let s = s.trim();
+    if s.eq_ignore_ascii_case("light") {
+        Some(0)
+    } else if s.eq_ignore_ascii_case("medium") || s.eq_ignore_ascii_case("med") {
+        Some(1)
+    } else if s.eq_ignore_ascii_case("hard") || s.eq_ignore_ascii_case("heavy") {
+        Some(2)
+    } else if s.eq_ignore_ascii_case("back") {
+        Some(3)
+    } else if s.eq_ignore_ascii_case("up") {
+        Some(4)
+    } else if s.eq_ignore_ascii_case("diagup") {
+        Some(5)
+    } else {
+        None
+    }
 }
 fn groundtype(s: &str) -> Option<i32> {
-    Some(match s.trim().to_ascii_lowercase().as_str() {
-        "none" => 0,
-        "high" => 1,
-        "low" => 2,
-        "trip" => 3,
-        _ => return None,
-    })
+    let s = s.trim();
+    if s.eq_ignore_ascii_case("none") {
+        Some(0)
+    } else if s.eq_ignore_ascii_case("high") {
+        Some(1)
+    } else if s.eq_ignore_ascii_case("low") {
+        Some(2)
+    } else if s.eq_ignore_ascii_case("trip") {
+        Some(3)
+    } else {
+        None
+    }
 }
 pub fn attr_bits(state: &str, kinds: &[String]) -> i32 {
     let mut bits = 0;
@@ -163,18 +175,18 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     } else {
         1.3 * guard_vel
     };
-    let shake = |prefix: &str, time_default: f64| -> Shake {
-        let freq = num(&format!("{prefix}.freq"), 60.0, 0).clamp(0.0, 180.0);
+    let parse_shake = |time_k: &str, freq_k: &str, ampl_k: &str, phase_k: &str, dir_k: &str, time_default: f64| -> Shake {
+        let freq = num(freq_k, 60.0, 0).clamp(0.0, 180.0);
         Shake {
-            time: num(&format!("{prefix}.time"), time_default, 0) as i32,
+            time: num(time_k, time_default, 0) as i32,
             freq,
-            ampl: num(&format!("{prefix}.ampl"), -4.0, 0) * l,
+            ampl: num(ampl_k, -4.0, 0) * l,
             phase: num(
-                &format!("{prefix}.phase"),
+                phase_k,
                 if freq >= 90.0 { 90.0 } else { 0.0 },
                 0,
             ),
-            dir: (num(&format!("{prefix}.dir"), 0.0, 0) as u8).min(2),
+            dir: (num(dir_k, 0.0, 0) as u8).min(2),
         }
     };
     let opt = |k: &str, idx: usize| {
@@ -388,8 +400,8 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
             ght
         },
         down_bounce: num("down.bounce", 0.0, 0) != 0.0,
-        fall_env_shake: shake("fall.envshake", 0.0),
-        env_shake: shake("envshake", 0.0),
+        fall_env_shake: parse_shake("fall.envshake.time", "fall.envshake.freq", "fall.envshake.ampl", "fall.envshake.phase", "fall.envshake.dir", 0.0),
+        env_shake: parse_shake("envshake.time", "envshake.freq", "envshake.ampl", "envshake.phase", "envshake.dir", 0.0),
         ground_corner_push,
         air_corner_push: if has("air.cornerpush.veloff", 0) {
             num("air.cornerpush.veloff", 0.0, 0) * l

@@ -232,3 +232,8 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 - Stack-allocated collision box parser: `parse_box4` parses four coordinates directly into a fixed `[f32; 4]` array on the stack, eliminating `Vec<f32>` allocations per collision box.
 - Stack-buffered frame parameter tokenization: AnimFrame lines unpack up to 11 comma-separated parameters into a fixed `[&str; 11]` array without allocating `Vec<&str>`.
 - In-place flip and blend flag parsing: `fl` and `bl` flags are evaluated in-place without uppercase string allocation.
+
+## HitDef zero-alloc shake parameters and in-place type matching
+
+- Zero-alloc shake parameter resolution: `hitdef::build` uses direct static parameter string lookups (`parse_shake`) instead of formatting 10 dynamic heap `String` keys (`{prefix}.freq`, `{prefix}.time`, `{prefix}.ampl`, etc.) per `HitDef` instantiation.
+- In-place `animtype` and `groundtype` parsing: `hitdef::animtype` and `hitdef::groundtype` match standard MUGEN animation/ground tokens using `eq_ignore_ascii_case` directly on borrowed `&str` without lowercase string allocations.

@@ -228,3 +228,8 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 - Analisador de caixas de colisão em pilha: `parse_box4` analisa quatro coordenadas diretamente em um array fixo `[f32; 4]` na pilha, eliminando alocações de `Vec<f32>` por caixa de colisão.
 - Tokenização de parâmetros de quadros em buffer de pilha: Linhas AnimFrame desempacotam até 11 parâmetros separados por vírgula em um array fixo `[&str; 11]` sem alocar `Vec<&str>`.
 - Análise de flags de flip e blend no local: Flags `fl` e `bl` são avaliadas diretamente sem alocação de strings em maiúsculas.
+
+## Parâmetros de shake no HitDef sem alocação e correspondência de tipos no local
+
+- Resolução de parâmetros de shake sem alocação: `hitdef::build` usa consultas diretas de strings estáticas (`parse_shake`) em vez de formatar 10 chaves dinâmicas no heap (`{prefix}.freq`, `{prefix}.time`, `{prefix}.ampl`, etc.) a cada instanciação de `HitDef`.
+- Análise de `animtype` e `groundtype` no local: `hitdef::animtype` e `hitdef::groundtype` comparam tokens padrão de animação/chão do MUGEN usando `eq_ignore_ascii_case` diretamente em fatias `&str` sem alocar strings em minúsculas.

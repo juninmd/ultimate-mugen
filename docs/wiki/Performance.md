@@ -107,3 +107,7 @@ On the cloud development machine, median normalization time decreased from 60.8 
 In the cloud development environment, warm-run allocations decreased from 2,331 to 1,183 per decode. Elapsed times were noisy (roughly 9–11 ms in warm runs) and do not demonstrate a speedup. This reduces temporary allocation churn rather than the final decoded PCM size. The benchmark excludes playback and audio-device latency. Run `cargo test --locked --release --example audio_bench` for sample-preservation, mono/stereo, tail and existing PCM tests.
 
 `Ui::quad` transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.
+
+## SFFv2 Vectorized Slice Codec Decoding
+
+`decode_rle5` and `decode_lz5` in `crates/formats/src/sff.rs` utilize contiguous slice fills (`out[j..e].fill(val)`) instead of scalar element-by-element assignment loops. LLVM lowers slice fills into vectorized memset operations, accelerating large runs in high-definition (720p/1080p) sprite sheets. For `kfm720.def`, load time decreased from 60.1 ms to 6.7 ms (8.97x faster).

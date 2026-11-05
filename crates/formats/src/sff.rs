@@ -539,7 +539,7 @@ pub fn decode_rle5(src: &[u8], size: usize) -> Vec<u8> {
     let (mut i, mut j) = (0usize, 0usize);
     let len = src.len();
     while j < size && i < len {
-        let mut rl = src[i] as i32;
+        let mut rl = src[i] as usize;
         i += 1;
         if i >= len {
             break;
@@ -556,24 +556,21 @@ pub fn decode_rle5(src: &[u8], size: usize) -> Vec<u8> {
             i += 1;
         }
         loop {
-            if j < size {
-                out[j] = c;
-                j += 1;
+            let count = rl + 1;
+            let e = (j + count).min(size);
+            out[j..e].fill(c);
+            j = e;
+            dl -= 1;
+            if dl < 0 {
+                break;
             }
-            rl -= 1;
-            if rl < 0 {
-                dl -= 1;
-                if dl < 0 {
-                    break;
-                }
-                if i >= len {
-                    return out;
-                }
-                let b = src[i];
-                i += 1;
-                c = b & 0x1f;
-                rl = (b >> 5) as i32;
+            if i >= len {
+                return out;
             }
+            let b = src[i];
+            i += 1;
+            c = b & 0x1f;
+            rl = (b >> 5) as usize;
         }
     }
     out
@@ -638,6 +635,10 @@ pub fn decode_lz5(src: &[u8], size: usize) -> Vec<u8> {
                     out[j] = if j >= off { out[j - off] } else { 0 };
                     j += 1;
                 }
+            } else if off == 1 {
+                let val = out[j - 1];
+                out[j..e].fill(val);
+                j = e;
             } else if off >= e - j {
                 out.copy_within(j - off..e - off, j);
                 j = e;

@@ -3,7 +3,7 @@ use crate::matchs::Match;
 
 pub fn display(m: &mut Match, i: usize, sc: &Controller, append: bool) {
     let template = sc.raw("text").map(ume_formats::ini::unquote).unwrap_or_default();
-    let args: Vec<f64> = (0..5).filter(|&k| sc.has("params", k)).map(|k| m.num(i, sc, "params", 0.0, k)).collect();
+    let args: Vec<f64> = sc.param("params").map(|p| (0..p.exprs.len()).map(|k| m.num(i, sc, "params", 0.0, k)).collect()).unwrap_or_default();
     let text = format_clipboard(&template, &args);
     let f = &mut m.fighters[i];
     if !append { f.clipboard.clear(); }

@@ -219,7 +219,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         fall_animtype: raw("fall.animtype")
             .and_then(|s| animtype(&s))
             .unwrap_or(if at >= 3 { at } else { 4 }),
-        priority: num("priority", 4.0, 0) as i32,
+        priority: (num("priority", 4.0, 0) as i32).clamp(1, 7),
         damage,
         guard_damage: num("damage", 0.0, 1),
         pause_p1,
@@ -282,7 +282,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
                 num("airguard.velocity", 0.0, 1) * l,
             ]
         } else {
-            [gvx * 1.5, gvy / 2.0]
+            [guard_vel * 1.5, gvy / 2.0]
         },
         p1sprpriority: num("p1sprpriority", 1.0, 0) as i32,
         p2sprpriority: num("p2sprpriority", 0.0, 0) as i32,

@@ -138,7 +138,7 @@ pub fn split_top(v: &str) -> Vec<String> {
         } else if c == b'(' || c == b'[' {
             depth += 1;
         } else if c == b')' || c == b']' {
-            depth -= 1;
+            depth = (depth - 1).max(0);
         } else if c == b',' && depth == 0 {
             out.push(v[start..i].trim().to_string());
             start = i + 1;

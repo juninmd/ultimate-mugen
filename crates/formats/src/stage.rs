@@ -223,7 +223,7 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         }
     };
     let lc = nums(get("stageinfo", "localcoord"), &[320.0, 240.0]);
-    let local_w = if lc[0] == 0.0 { 320.0 } else { lc[0] };
+    let local_w = lc.first().copied().filter(|w| *w > 0.0).unwrap_or(320.0);
     let local_h = lc.get(1).copied().filter(|h| *h > 0.0).unwrap_or(240.0);
     let zoffset = g("stageinfo", "zoffset", 200.0);
 

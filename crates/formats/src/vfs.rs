@@ -157,7 +157,7 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
                     local = er.u64(q);
                 }
             }
-            e += 4 + sz;
+            e = e.saturating_add(4).saturating_add(sz);
         }
         p = name_start + name_len + extra_len + comment_len;
 
@@ -176,7 +176,7 @@ pub fn add_zip(vfs: &mut Vfs, bytes: &[u8], prefix: &str) -> Result<usize, Strin
         if r.u32(local) != LOCAL_SIG {
             return Err(format!("zip: {name}: bad local header"));
         }
-        let data_start = local + 30 + r.u16(local + 26) as usize + r.u16(local + 28) as usize;
+        let data_start = local.saturating_add(30 + r.u16(local + 26) as usize + r.u16(local + 28) as usize);
         let csize = usize::try_from(csize).map_err(|_| "zip: entry too large")?;
         if method == 0 && csize > MAX_ENTRY_BYTES {
             return Err(format!("zip: {name}: entry too large"));

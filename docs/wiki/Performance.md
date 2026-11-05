@@ -98,3 +98,9 @@ On the cloud development machine, median normalization time decreased from 60.8 
 In the cloud development environment, warm-run allocations decreased from 2,331 to 1,183 per decode. Elapsed times were noisy (roughly 9–11 ms in warm runs) and do not demonstrate a speedup. This reduces temporary allocation churn rather than the final decoded PCM size. The benchmark excludes playback and audio-device latency. Run `cargo test --locked --release --example audio_bench` for sample-preservation, mono/stereo, tail and existing PCM tests.
 
 `Ui::quad` transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.
+
+## SIMD ACT palette decoding & camera bounds fast-path
+
+- Vectorized ACT decoding: decode_act and ncode_act use s_chunks::<3>() and s_chunks_mut::<4>() to decode RGB triplets to RGBA in batches without bounds checks.
+- Single-pass camera bounds: Match::update_camera computes all-root bounds (minx, maxx, highest) and live-root bounds (lo, hi) in a single iteration over self.roots(), eliminating redundant iterator scans.
+- Hoisted overlap bounding-box checks: Match::overlap hoists  coordinates into scalar registers before testing collision against  and replaces division by 2.0 with * 0.5 multiplication.

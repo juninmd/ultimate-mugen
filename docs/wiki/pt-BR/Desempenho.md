@@ -28,3 +28,9 @@ etain_mut.
 - **Onda 45 - Cache de Explods em Array e Varredura Triangular de Colisão de Projéteis**:
   - `Match::update_explods`: Pré-indexação de posições e estados de pausa dos lutadores em array compacto de 8 posições na pilha, eliminando varreduras lineares por explod.
   - `Match::update_projectiles`: Flags de congelamento em buffer de pilha para até 64 projéteis sem alocações na heap, e iteração triangular de pares `(a + 1)..n` reduzindo pela metade verificações de colisão entre projéteis.
+
+- **Onda 46 - Caminho Rápido de Caixas de Colisão e Geometria Pré-Escalada**:
+  - `Fighter::boxes`: Saída antecipada para listas vazias de caixas de colisão antes de calcular constantes ou fatores de escala (reduz drasticamente o trabalho em frames ociosos/movimento).
+  - Dimensões X e Y pré-escaladas (`sx * s` e `sy * s`), reduzindo as multiplicações de ponto flutuante por caixa de 8 para 4.
+  - Combinação de `flip_h != (facing < 0.0)` em uma única condição booleana XOR branchless.
+  - `Fighter::c`: Busca de fatia guardada por `!self.size_overrides.is_empty()`.

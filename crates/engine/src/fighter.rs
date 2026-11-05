@@ -197,6 +197,9 @@ impl Fighter {
         }
     }
     pub fn c(&self, k: &str, d: f64) -> f32 {
+        if self.size_overrides.is_empty() {
+            return self.def.c(k, d) as f32;
+        }
         match self.size_overrides.iter().find(|(n, _)| n == k) { Some((_, v)) => *v, None => self.def.c(k, d) as f32 }
     }
     pub fn projectile_tally_id(&self) -> u32 { if self.own_projectile { self.id } else { self.root } }
@@ -260,9 +263,11 @@ impl Fighter {
     }
     pub fn advance_anim(&mut self) {
         if self.anim_changed { self.anim_changed = false; return; }
-        let (total, loop_start, len) = match self.anim() { Some(a) if !a.frames.is_empty() => (a.total_time, a.loop_start, a.frames.len()), _ => return };
+        let (total, loop_start, len, ft) = match self.anim() {
+            Some(a) if !a.frames.is_empty() => (a.total_time, a.loop_start, a.frames.len(), a.frames[self.elem].time),
+            _ => return,
+        };
         if total >= 0 && self.anim_elapsed >= total { self.anim_elapsed = self.elem_start(loop_start + 1); }
-        let ft = self.anim().unwrap().frames[self.elem].time;
         self.anim_elapsed += 1;
         if ft < 0 { return; }
         self.elem_time += 1;
@@ -271,7 +276,7 @@ impl Fighter {
             self.elem += 1;
             if self.elem >= len { self.elem = loop_start; }
             let mut guard = 0;
-            while self.anim().unwrap().frames[self.elem].time == 0 && guard < len {
+            while self.anim().is_some_and(|a| a.frames[self.elem].time == 0) && guard < len {
                 guard += 1;
                 self.elem += 1;
                 if self.elem >= len { self.elem = loop_start; }

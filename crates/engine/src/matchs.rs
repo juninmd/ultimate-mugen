@@ -875,6 +875,7 @@ impl Match {
         }
         // drop stale targets
         for k in 0..self.fighters.len() {
+            if self.fighters[k].targets.is_empty() { continue; }
             let (st, mc) = (self.fighters[k].state_time, self.fighters[k].move_contact);
             let mut targets = std::mem::take(&mut self.fighters[k].targets);
             targets.retain(|(t, _)| self.fighters.iter().any(|f| f.id == *t && (f.move_type == 'H' || st < 2 || mc > 0)));

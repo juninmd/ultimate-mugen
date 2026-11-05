@@ -108,3 +108,9 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
   - Replaces nested branching in `input::rel_dirs` with branchless bitwise shift `ud | (4 << (is_back ^ 1))`.
   - Replaces string matching in `button_bit` with byte-level slice matching, supporting case-insensitivity without allocation.
   - Implements branchless facing assignment in `InputHistory::push`.
+
+## Single-lookup animation advance & target cleanup early continue
+
+- Single-lookup animation frame unpack in `advance_anim`: Unpacks `(total, loop_start, len, ft)` in a single tuple query on `self.anim()`, eliminating repeated HashMap lookups per animated fighter and explod each tick.
+- Empty size-override short-circuit: `fighter::c` immediately queries character constants when `self.size_overrides.is_empty()`, bypassing linear slice scans.
+- Stale target cleanup early continue: `matchs::step` skips target vector moves and retain passes whenever `self.fighters[k].targets.is_empty()`.

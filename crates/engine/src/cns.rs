@@ -2,7 +2,7 @@
 use crate::chardef::{next_uid, safe_expr, Controller, Param, StateDef};
 use crate::commands::{parse_command, CommandDef};
 use std::collections::{HashMap, HashSet};
-use ume_formats::ini::{parse_ini, unquote, Section};
+use ume_formats::ini::{parse_ini, unquote_str, Section};
 
 pub fn build_controller(s: &Section) -> Option<Controller> {
     let kind = s.get("type")?.trim().to_ascii_lowercase();
@@ -111,11 +111,11 @@ pub fn parse_cmd(text: &str) -> (Vec<CommandDef>, HashMap<i32, StateDef>) {
     for s in &secs {
         if s.lname != "command" { continue; }
         let (Some(n), Some(c)) = (s.get("name"), s.get("command")) else { continue };
-        let name = unquote(n);
+        let name = unquote_str(n);
         if name.is_empty() { continue; }
         let t = s.get("time").and_then(|v| v.trim().parse().ok()).unwrap_or(dt);
         let b = s.get("buffer.time").and_then(|v| v.trim().parse().ok()).unwrap_or(db);
-        let mut def = parse_command(&name, &unquote(c), t, b);
+        let mut def = parse_command(name, unquote_str(c), t, b);
         def.pause_buffer = pause_buffer_of(s).unwrap_or(dp).max(0);
         cmds.push(def);
     }

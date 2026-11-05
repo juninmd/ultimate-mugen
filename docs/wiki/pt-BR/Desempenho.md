@@ -14,3 +14,8 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
   - PalFx::from_controller: Eliminação de alocações na heap para buscas de parâmetros de controladores usando chaves em buffer de pilha.
   - Match::tick: Remoção de alocações dinâmicas de Vec<usize> por tick para waken e 	ag_requests através de arrays em pilha, unificando loops com 
 etain_mut.
+- **Onda 43 - Carregador de Personagens Zero-Alloc e Unquote In-Place**:
+  - `ini::unquote_str`: Empréstimo in-place de fatias sem alocar novas instâncias de `String` para strings limpas ou entre aspas.
+  - `loader::load_mugen_char`: Conversão de `fget` para retornar `Option<&str>` ao invés de `Option<String>`, eliminando cerca de 20 alocações na heap por carregamento de lutador.
+  - `loader::local_size`: Análise em pilha via `split_once(',')` substituindo a alocação dinâmica de `nums`.
+  - `cns::parse_cmd`: `unquote_str` in-place para nome e comandos.

@@ -8,7 +8,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use ume_formats::act::decode_act;
 use ume_formats::air::parse_air;
-use ume_formats::ini::{find_section, nums, parse_ini, unquote};
+use ume_formats::ini::{find_section, parse_float, parse_ini, unquote_str};
 use ume_formats::sff::{decode_sff, decode_sff_only, sprite_to_rgba};
 use ume_formats::snd::decode_snd;
 use ume_formats::vfs::{norm_path, resolve, text, Vfs};
@@ -17,10 +17,17 @@ use ume_formats::vfs::{norm_path, resolve, text, Vfs};
 /// o valor unico usado por varios chars de fullgames (`400` vira `400x240`)
 /// e o campo ausente/invalido (320x240).
 fn local_size(lc: Option<&str>) -> (f32, f32) {
-    let v = nums(lc, &[320.0, 240.0]);
-    let w = v.first().copied().filter(|w| *w > 0.0).unwrap_or(320.0);
-    let h = v.get(1).copied().filter(|h| *h > 0.0).unwrap_or(240.0);
-    (w, h)
+    let Some(lc) = lc else { return (320.0, 240.0); };
+    let lc = lc.trim();
+    if lc.is_empty() { return (320.0, 240.0); };
+    if let Some((w_s, h_s)) = lc.split_once(',') {
+        let w = parse_float(w_s).map(|v| v as f32).filter(|w| *w > 0.0).unwrap_or(320.0);
+        let h = parse_float(h_s).map(|v| v as f32).filter(|h| *h > 0.0).unwrap_or(240.0);
+        (w, h)
+    } else {
+        let w = parse_float(lc).map(|v| v as f32).filter(|w| *w > 0.0).unwrap_or(320.0);
+        (w, 240.0)
+    }
 }
 
 pub fn load_mugen_char(
@@ -38,21 +45,24 @@ pub fn load_mugen_char(
     let secs = parse_ini(&dt);
     let info = find_section(&secs, "info");
     let files = find_section(&secs, "files");
-    let fget = |k: &str| files.and_then(|s| s.get(k)).map(|s| s.to_string());
+    let fget = |k: &str| files.and_then(|s| s.get(k));
     let name = info
         .and_then(|s| s.get("name"))
-        .map(unquote)
+        .map(unquote_str)
         .filter(|s| !s.is_empty())
-        .unwrap_or(def_path.clone());
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| def_path.clone());
     let display = info
         .and_then(|s| s.get("displayname"))
-        .map(unquote)
+        .map(unquote_str)
         .filter(|s| !s.is_empty())
-        .unwrap_or(name.clone());
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| name.clone());
     let author = info
         .and_then(|s| s.get("author"))
-        .map(unquote)
-        .unwrap_or_default();
+        .map(unquote_str)
+        .unwrap_or_default()
+        .to_string();
     let (local_w, local_h) = local_size(info.and_then(|s| s.get("localcoord")));
 
     let mut constants = default_constants();
@@ -63,37 +73,38 @@ pub fn load_mugen_char(
     // fullgames, o mapeamento comando -> ChangeState do [Statedef -1]. Sem ele o lutador
     // carrega e anda, mas nunca ataca. So vale o arquivo dentro da pasta do char: o
     // fallback global (`data/common1.cns`) aplicaria o common de um jogo a outro.
-    let common_name = unquote(&fget("stcommon").unwrap_or_default());
+    let common_name = unquote_str(fget("stcommon").unwrap_or_default());
     if !common_name.is_empty()
         && !common_name.contains("..")
         && !common_name.contains('/')
         && !common_name.contains('\\')
     {
         if let Some(b) = vfs.get(&norm_path(&format!("{base}/{common_name}"))) {
-            spans.track(&common_name, || parse_states(&text(b), &mut states, false));
+            spans.track(common_name, || parse_states(&text(b), &mut states, false));
         }
     }
     let cns_name = fget("cns").unwrap_or_default();
-    let cns_text = crate::perf::time("cns:read", || resolve(vfs, &base, &cns_name).map(text).unwrap_or_default());
+    let cns_text = crate::perf::time("cns:read", || resolve(vfs, &base, cns_name).map(text).unwrap_or_default());
     parse_constants(&cns_text, &mut constants, &mut provided);
     scale_default_constants(&mut constants, &provided, local_w as f64 / 320.0);
-    crate::perf::time("cns:parse", || spans.track(&cns_name, || parse_states(&cns_text, &mut states, true)));
+    crate::perf::time("cns:parse", || spans.track(cns_name, || parse_states(&cns_text, &mut states, true)));
     for k in ["st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9"] {
         let Some(fname) = fget(k) else { continue };
-        if norm_path(&unquote(&fname)) == norm_path(&unquote(&cns_name)) {
+        if norm_path(unquote_str(fname)) == norm_path(unquote_str(cns_name)) {
             continue;
         }
-        if let Some(b) = resolve(vfs, &base, &fname) {
-            spans.track(&fname, || {
-                crate::zss::parse_state_file(&fname, &text(b), &mut states, true)
+        if let Some(b) = resolve(vfs, &base, fname) {
+            spans.track(fname, || {
+                crate::zss::parse_state_file(fname, &text(b), &mut states, true)
             });
         }
     }
-    let cmd_text = resolve(vfs, &base, &fget("cmd").unwrap_or_default())
+    let cmd_name = fget("cmd").unwrap_or_default();
+    let cmd_text = resolve(vfs, &base, cmd_name)
         .map(text)
         .unwrap_or_default();
     let (mut commands, cmd_states) =
-        spans.track(&fget("cmd").unwrap_or_default(), || parse_cmd(&cmd_text));
+        spans.track(cmd_name, || parse_cmd(&cmd_text));
     for (id, sd) in cmd_states {
         if id < 0 && states.contains_key(&id) {
             if let Some(s) = states.get_mut(&id) {
@@ -104,9 +115,9 @@ pub fn load_mugen_char(
         }
     }
     if let Some(stc) = fget("stcommon") {
-        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{}", unquote(&stc)))) {
-            spans.track(&stc, || {
-                crate::zss::parse_state_file(&stc, &text(b), &mut states, false)
+        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{}", unquote_str(stc)))) {
+            spans.track(stc, || {
+                crate::zss::parse_state_file(stc, &text(b), &mut states, false)
             });
         }
     }
@@ -120,12 +131,12 @@ pub fn load_mugen_char(
             commands.push(parse_command(n, c, 1, 1));
         }
     }
-    let anims = crate::perf::time("air:parse", || resolve(vfs, &base, &fget("anim").unwrap_or_default()).map(|b| parse_air(&text(b))).unwrap_or_default());
+    let anims = crate::perf::time("air:parse", || resolve(vfs, &base, fget("anim").unwrap_or_default()).map(|b| parse_air(&text(b))).unwrap_or_default());
 
     let mut sprites = HashMap::new();
     let mut palettes = HashMap::new();
     let mut indexed = HashMap::new();
-    if let Some(buf) = resolve(vfs, &base, &fget("sprite").unwrap_or_default()) {
+    if let Some(buf) = resolve(vfs, &base, fget("sprite").unwrap_or_default()) {
         let sff = crate::perf::time("sff:decode", || decode_sff(buf))?;
         let mut counts: HashMap<i32, usize> = HashMap::new();
         for s in &sff.sprites {
@@ -139,8 +150,16 @@ pub fn load_mugen_char(
             .map(|(k, _)| *k)
             .unwrap_or(-1);
         let mut over: Option<Vec<u8>> = None;
+        let mut pal_kbuf = [0u8; 16];
+        let pal_k = {
+            use std::io::Write;
+            let mut cur = std::io::Cursor::new(&mut pal_kbuf[..]);
+            let _ = write!(cur, "pal{pal_no}");
+            let pos = cur.position() as usize;
+            std::str::from_utf8(&pal_kbuf[..pos]).unwrap_or("")
+        };
         if sff.version == 1 {
-            if let Some(a) = fget(&format!("pal{pal_no}")).and_then(|p| resolve(vfs, &base, &p)) {
+            if let Some(a) = fget(pal_k).and_then(|p| resolve(vfs, &base, p)) {
                 if a.len() >= 768 {
                     over = Some(decode_act(a));
                 }
@@ -153,7 +172,7 @@ pub fn load_mugen_char(
             {
                 over = Some(p.data.to_vec());
             } else if let Some(a) =
-                fget(&format!("pal{pal_no}")).and_then(|p| resolve(vfs, &base, &p))
+                fget(pal_k).and_then(|p| resolve(vfs, &base, p))
             {
                 if a.len() >= 768 {
                     over = Some(decode_act(a));
@@ -165,7 +184,7 @@ pub fn load_mugen_char(
             .clone()
             .or_else(|| {
                 fget("pal1")
-                    .and_then(|p| resolve(vfs, &base, &p))
+                    .and_then(|p| resolve(vfs, &base, p))
                     .filter(|a| a.len() >= 768)
                     .map(decode_act)
             })

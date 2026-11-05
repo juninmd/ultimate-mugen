@@ -205,6 +205,8 @@ pub struct Match {
     pub next_id: u32,
     pub assigns: RefCell<Vec<(usize, String, i32, f64)>>,
     pub tick_ids: Vec<u32>,
+    pub scratch_c1: Vec<Box4>,
+    pub scratch_c2: Vec<Box4>,
 }
 
 impl Match {
@@ -214,6 +216,7 @@ impl Match {
             team_simul: false, team_tag: false, classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
+            scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
         }
     }
     pub fn random(&mut self) -> f32 {
@@ -1101,14 +1104,15 @@ impl Match {
             let fr = &self.fighters[r];
             let Some((attr, _)) = fr.reversal.as_ref() else { continue };
             if fr.destroyed { continue; }
-            let c1r = fr.boxes(1);
-            if c1r.is_empty() { continue; }
+            fr.fill_boxes(1, &mut self.scratch_c1);
+            if self.scratch_c1.is_empty() { continue; }
             for a in 0..self.fighters.len() {
                 let fa = &self.fighters[a];
                 if a == r || fa.side == fr.side || fa.destroyed || !fa.hitdef_active || fa.move_type != 'A' { continue; }
                 let Some(hd) = fa.hitdef.as_ref() else { continue };
                 if !Self::attr_match(hd, attr) { continue; }
-                if let Some(at) = Self::overlap(&c1r, &fa.boxes(1)) { found.push((r, a, at)); break; }
+                fa.fill_boxes(1, &mut self.scratch_c2);
+                if let Some(at) = Self::overlap(&self.scratch_c1, &self.scratch_c2) { found.push((r, a, at)); break; }
             }
         }
         for (r, a, at) in found {
@@ -1138,17 +1142,23 @@ impl Match {
             let Some(hd) = fa.hitdef.as_ref() else { continue };
             let Some(fr) = fa.frame() else { continue };
             if fr.clsn1.is_empty() { continue; }
-            let c1 = fa.boxes(1);
+            fa.fill_boxes(1, &mut self.scratch_c1);
+            if self.scratch_c1.is_empty() { continue; }
             for d in 0..self.fighters.len() {
                 let fd = &self.fighters[d];
                 if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) { continue; }
                 if hd.hit_once && !fa.hitdef_targets.is_empty() { continue; }
                 if hd.p2clsncheck && fd.frame().is_none_or(|f| f.clsn2.is_empty()) { continue; }
                 if !self.can_be_hit(d, hd, fa.side) { continue; }
-                let d_boxes = fd.boxes(2);
-                let targets = if hd.p2clsnrequire >= 0 { d_boxes.get(hd.p2clsnrequire as usize).copied().into_iter().collect::<Vec<_>>() } else { d_boxes };
+                fd.fill_boxes(2, &mut self.scratch_c2);
+                let targets: &[Box4] = if hd.p2clsnrequire >= 0 {
+                    let req = hd.p2clsnrequire as usize;
+                    if req < self.scratch_c2.len() { &self.scratch_c2[req..req + 1] } else { &[] }
+                } else {
+                    &self.scratch_c2
+                };
                 if targets.is_empty() { continue; }
-                if let Some(at) = Self::overlap(&c1, &targets) { pending.push((a, d, hd.clone(), at)); }
+                if let Some(at) = Self::overlap(&self.scratch_c1, targets) { pending.push((a, d, hd.clone(), at)); }
             }
         }
         let mut struck: Vec<usize> = vec![];

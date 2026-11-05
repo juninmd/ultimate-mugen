@@ -106,6 +106,7 @@ The `[Camera]` group accepts these extra keys. Every key is optional and its def
 | Key | Default | Effect |
 | --- | --- | --- |
 | `verticalfollow` | 0.2 | Fraction of the highest fighter's height the camera follows upward |
+| `tension` | 50 | Horizontal dead zone: the camera only pans when a fighter comes closer than this to a screen edge, so a cornered fighter stays put while the opponent walks in |
 | `verticalfollowdelta` | 0 | Dead zone in stage pixels: the vertical target only changes when it moved at least this much, which stops small jumps from shaking the camera |
 | `yscrollspeed` | 0.3 | Share of the remaining vertical distance covered per tick (clamped to 0..1) |
 | `zoominspeed`, `zoomoutspeed` | 0.04 | Share of the remaining zoom difference covered per tick when the camera zooms in or out (clamped to 0..1; 0 holds the zoom, 1 snaps in one tick) |

@@ -106,6 +106,7 @@ O grupo `[Camera]` aceita estas chaves extras. Todas são opcionais e o padrão 
 | Chave | Padrão | Efeito |
 | --- | --- | --- |
 | `verticalfollow` | 0.2 | Fração da altura do lutador mais alto que a câmera acompanha para cima |
+| `tension` | 50 | Zona morta horizontal: a câmera só se move quando um lutador chega a menos que isso de uma borda da tela, então um lutador encurralado fica parado enquanto o oponente se aproxima |
 | `verticalfollowdelta` | 0 | Zona morta em pixels do cenário: o alvo vertical só muda quando se moveu pelo menos isso, evitando tremor em pequenos pulos |
 | `yscrollspeed` | 0.3 | Parcela da distância vertical restante percorrida por tick (limitada a 0..1) |
 | `zoominspeed`, `zoomoutspeed` | 0.04 | Parcela da diferença de zoom restante percorrida por tick ao aproximar ou afastar a câmera (limitada a 0..1; 0 mantém o zoom, 1 chega em um tick) |

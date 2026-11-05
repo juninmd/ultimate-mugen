@@ -1016,14 +1016,11 @@ impl Match {
             need.clamp(self.zoom_min, self.zoom_max)
         } else { self.zoom_min };
         let (offset, bound) = self.step_zoom(natural);
-        let half = self.view_w / 2.0; let t = self.stage.tension;
-        let mut target = ((minx + maxx) / 2.0).clamp(self.stage.bound_left, self.stage.bound_right);
-        if maxx - minx < self.view_w - 2.0 * t {
-            if minx < target - half + t { target = minx + half - t; }
-            if maxx > target + half - t { target = maxx - half + t; }
-        }
-        target = if bound { (target + offset.x).clamp(self.stage.bound_left, self.stage.bound_right) } else { target.clamp(self.stage.bound_left, self.stage.bound_right) + offset.x };
-        if maxx - minx <= self.view_w - 40.0 { self.camera.x += (target - self.camera.x) * 0.5; }
+        let half = self.view_w / 2.0; let t = self.stage.tension.clamp(0.0, half);
+        let (lo, hi) = ((maxx - half + t).max(self.stage.bound_left), (minx + half - t).min(self.stage.bound_right));
+        let held = if lo <= hi { self.camera.x.clamp(lo, hi) } else { self.camera.x };
+        let target = if bound { (held + offset.x).clamp(self.stage.bound_left, self.stage.bound_right) } else { held.clamp(self.stage.bound_left, self.stage.bound_right) + offset.x };
+        self.camera.x += (target - self.camera.x) * 0.5;
         let cam = &self.stage.camera;
         let top = self.effective_bound_high();
         let lowest = if cam.lowest_cap { self.stage.start_y.min(0.0) } else { 0.0 };

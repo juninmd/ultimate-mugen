@@ -6,10 +6,13 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use ume_engine::chardef::{CharDef, Sprite};
 use ume_engine::loader::{load_mugen_char, load_mugen_portrait};
-use ume_engine::native::{compile_native, compile_native_preview, NativeChar};
+use ume_engine::native::{compile_native, NativeChar};
 use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::stage::load_stage;
 use ume_formats::vfs::{char_key, find_char_defs, find_stage_defs, stage_key, text, Vfs};
+
+#[path = "registry_sprite_cache.rs"]
+mod sprite_cache;
 
 include!(concat!(env!("OUT_DIR"), "/chars_gen.rs"));
 
@@ -99,9 +102,11 @@ pub struct CharEntry {
     /// failed loads are remembered (no retry storm every frame)
     errs: RefCell<HashMap<i32, String>>,
     jobs: RefCell<Inflight>,
+    sprite_revision: Cell<u64>,
 }
 impl CharEntry {
     pub fn load(&self, pal: i32) -> Result<Arc<CharDef>, String> {
+        self.refresh_sprite_pack();
         if let Some(d) = self.cache.borrow().get(&pal) {
             return Ok(d.clone());
         }
@@ -237,22 +242,6 @@ impl CharEntry {
         let j = self.jobs.borrow();
         !j.load.is_empty() || j.portrait.is_some()
     }
-    /// Cheap definition for menus: full if already loaded, else preview (natives) or a full load (MUGEN).
-    pub fn load_preview(&self, pal: i32) -> Result<Arc<CharDef>, String> {
-        if let Some(d) = self.peek(pal) {
-            self.touch();
-            return Ok(d);
-        }
-        match &self.src {
-            Src::Native(nc) => {
-                let d = Arc::new(compile_native_preview(nc, pal));
-                self.preview.borrow_mut().insert(pal, d.clone());
-                self.touch();
-                Ok(d)
-            }
-            Src::Mugen { .. } => self.load(pal),
-        }
-    }
     /// Cached select-grid thumbnail (MUGEN only); `None` until [`Self::ensure_portrait`] ran or when the character has no usable sprite.
     pub fn portrait(&self) -> Option<Sprite> {
         self.portrait.borrow().clone().flatten()
@@ -270,13 +259,6 @@ impl CharEntry {
             Src::Native(_) => None,
         };
         *self.portrait.borrow_mut() = Some(p);
-    }
-    /// Already-loaded definition (full or preview), never loads.
-    pub fn peek(&self, pal: i32) -> Option<Arc<CharDef>> {
-        if let Some(d) = self.cache.borrow().get(&pal) {
-            return Some(d.clone());
-        }
-        self.preview.borrow().get(&pal).cloned()
     }
     pub fn is_loaded(&self) -> bool {
         !self.cache.borrow().is_empty() || !self.preview.borrow().is_empty()
@@ -371,6 +353,7 @@ impl Registry {
                     broken: Cell::new(false),
                     errs: RefCell::new(HashMap::new()),
                     jobs: Default::default(),
+                    sprite_revision: Cell::new(0),
                 }),
                 Err(e) => eprintln!("bad builtin char: {e}"),
             }
@@ -435,6 +418,7 @@ impl Registry {
             broken: Cell::new(false),
             errs: RefCell::new(HashMap::new()),
             jobs: Default::default(),
+            sprite_revision: Cell::new(0),
         });
         Ok(name)
     }
@@ -525,6 +509,7 @@ impl Registry {
                 broken: Cell::new(false),
                 errs: RefCell::new(HashMap::new()),
                 jobs: Default::default(),
+                sprite_revision: Cell::new(0),
             };
             if !validate {
                 self.chars.push(e);
@@ -927,6 +912,7 @@ mod tests {
             broken: Cell::new(false),
             errs: RefCell::new(HashMap::new()),
             jobs: Default::default(),
+            sprite_revision: Cell::new(0),
         };
         reg.chars.push(e);
         assert_eq!(reg.dedupe(), 1);
@@ -1005,3 +991,7 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "registry_sprite_cache_tests.rs"]
+mod sprite_cache_tests;

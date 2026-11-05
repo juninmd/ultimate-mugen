@@ -202,3 +202,5 @@ cargo run --release -p ume-engine --example rig_sheet
 ```
 
 `rig_sheet` gera uma folha com todas as poses para revisar a arte sem abrir o jogo.
+
+Os pacotes de sprites do navegador carregam de forma assíncrona. Um pacote novo ou substituído invalida as prévias e todas as paletas em cache do lutador afetado; os demais mantêm seus caches. O carregamento da luta aguarda os pacotes dos lutadores nativos escolhidos e informa falhas de download, em vez de iniciar com uma aparência procedural antiga. Definições nativas importadas sem pacote integrado continuam compatíveis.

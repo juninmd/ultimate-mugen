@@ -308,3 +308,10 @@ etain_mut.
   - `Gfx::sprite_tex_for`: Eliminação da consulta duplicada de `def.sprites.get` por quadro renderizado em todos os lutadores, sombras, ajudantes e explods.
   - `Gfx::draw_sprite`: Uso direto de `def.scale_x` e `def.scale_y`, removendo consultas repetidas à tabela `def.c(...)` a cada quadro.
   - Redução no tempo de carregamento de `kfm.def` para 4.6 ms e taxa de simulação acelerada para 216k ticks/s.
+
+- **Onda 52 - Cache de Temporização de Animação e Atalhos em Bytecode de 3 Operações**:
+  - `Fighter`: Cache de `anim_total_time` e `anim_loop_start` em mudanças de animação, convertendo `anim_time_trig` (`animtime`) em uma subtração escalar direta sem consultas a mapas.
+  - `Fighter::advance_anim`: Reutilização da consulta única de animação durante o avanço de quadros, eliminando chamadas repetidas a `self.anim()`.
+  - `Fighter::anim_elem_time`: Retorno instantâneo para `animelemtime(1)` sem iteração de quadros.
+  - `bytecode::Code::run`: Curto-circuito em caminho rápido para expressões de comparação de 3 operações (`[Trig0, Const, Cmp]` e `[Const, Trig0, Cmp]`), avaliando gatilhos diretamente via `Host::trigger0` e ignorando alocações na pilha da máquina virtual.
+  - Redução do tempo de carregamento de `kfm720.def` para 8.7 ms e de `kfm.def` para 4.4 ms.

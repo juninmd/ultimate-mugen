@@ -120,7 +120,7 @@ pub struct Fighter {
     pub state_type: char, pub move_type: char, pub physics: char, pub ctrl: bool,
     pub life: f32, pub life_max: f32, pub power: f32, pub power_max: f32, pub alive: bool,
     pub vars: [i32; 60], pub fvars: [f64; 40], pub sysvars: [i32; 5], pub sysfvars: [f64; 5],
-    pub anim_no: i32, pub anim_real: i32, pub elem: usize, pub elem_time: i32, pub anim_elapsed: i32, pub anim_changed: bool,
+    pub anim_no: i32, pub anim_real: i32, pub elem: usize, pub elem_time: i32, pub anim_elapsed: i32, pub anim_changed: bool, pub anim_total_time: i32, pub anim_loop_start: usize,
     pub hitdef: Option<HitDefData>, pub hitdef_active: bool, pub hitdef_targets: Vec<u32>,
     pub move_contact: i32, pub move_hit: i32, pub move_guarded: i32, pub move_reversed: i32, pub hit_count: i32, pub uniq_hit_count: i32, pub uniq_hit_keys: Vec<(u32, i32)>,
     pub move_countered: i32, pub move_hit_var: MoveHitVars, pub hit_overridden_at: i64, pub prev_state_type: char, pub prev_move_type: char, pub prev_anim: i32,
@@ -166,7 +166,7 @@ impl Fighter {
             state_no: 0, prev_state_no: 0, state_time: 0, state_type: 'S', move_type: 'I', physics: 'S', ctrl: true,
             life, life_max: life, power: 0.0, power_max: def.c("data.power", 3000.0) as f32, alive: true,
             vars: [0; 60], fvars: [0.0; 40], sysvars: [0; 5], sysfvars: [0.0; 5],
-            anim_no: -1, anim_real: -1, elem: 0, elem_time: 0, anim_elapsed: 0, anim_changed: false,
+            anim_no: -1, anim_real: -1, elem: 0, elem_time: 0, anim_elapsed: 0, anim_changed: false, anim_total_time: 0, anim_loop_start: 0,
             hitdef: None, hitdef_active: false, hitdef_targets: vec![], move_contact: 0, move_hit: 0, move_guarded: 0, move_reversed: 0, hit_count: 0, uniq_hit_count: 0, uniq_hit_keys: vec![],
             move_countered: 0, move_hit_var: MoveHitVars::default(), hit_overridden_at: 0, prev_state_type: 'S', prev_move_type: 'I', prev_anim: -1,
             ghv: GetHitVars::default(), juggle_used: 0, no_ctrl_ticks: 0, hit_pause: 0, hit_shake: 0, hit_over_time: 0, slide_time: 0, fall_time: 0, asserts: 0,
@@ -207,7 +207,7 @@ impl Fighter {
     pub fn frame(&self) -> Option<&AnimFrame> { self.anim().and_then(|a| a.frames.get(self.elem)) }
 
     pub fn anim_time_trig(&self) -> i32 {
-        match self.anim() { None => 0, Some(a) if a.total_time < 0 => -1, Some(a) => self.anim_elapsed - a.total_time }
+        if self.anim_total_time < 0 { -1 } else { self.anim_elapsed - self.anim_total_time }
     }
     pub fn elem_start(&self, n: usize) -> i32 {
         if n <= 1 { return 0; }
@@ -215,12 +215,13 @@ impl Fighter {
         a.frames.iter().take(n - 1).map(|f| f.time.max(0)).sum()
     }
     pub fn anim_elem_started(&self, n: i32) -> bool {
-        self.elem as i32 + 1 == n && self.elem_time == 0 && (n > 1 || self.anim_elapsed == 0 || self.anim().is_some_and(|a| a.loop_start == 0))
+        self.elem as i32 + 1 == n && self.elem_time == 0 && (n > 1 || self.anim_elapsed == 0 || self.anim_loop_start == 0)
     }
     pub fn anim_elem_time(&self, n: i32) -> Option<i32> {
         let a = self.anim()?;
         if n < 1 || n as usize > a.frames.len() { return None; }
-        Some(self.anim_elapsed - self.elem_start(n as usize))
+        let start = if n == 1 { 0 } else { a.frames.iter().take(n as usize - 1).map(|f| f.time.max(0)).sum() };
+        Some(self.anim_elapsed - start)
     }
     pub fn anim_elem_no_at(&self, off: i32) -> i32 {
         let Some(a) = self.anim() else { return 0 };
@@ -253,6 +254,9 @@ impl Fighter {
         self.anim_def = from.clone();
         self.anim_no = no;
         self.anim_real = real;
+        let (tot, ls) = from.anims.get(&real).map(|a| (a.total_time, a.loop_start)).unwrap_or((0, 0));
+        self.anim_total_time = tot;
+        self.anim_loop_start = ls;
         self.elem = 0; self.elem_time = 0; self.anim_elapsed = 0;
         if elem > 1 {
             self.anim_elapsed = self.elem_start(elem as usize);
@@ -263,23 +267,25 @@ impl Fighter {
     }
     pub fn advance_anim(&mut self) {
         if self.anim_changed { self.anim_changed = false; return; }
-        let (total, loop_start, len, ft) = match self.anim() {
-            Some(a) if !a.frames.is_empty() => (a.total_time, a.loop_start, a.frames.len(), a.frames[self.elem].time),
-            _ => return,
-        };
-        if total >= 0 && self.anim_elapsed >= total { self.anim_elapsed = self.elem_start(loop_start + 1); }
+        let Some(a) = self.anim_def.anims.get(&self.anim_real) else { return; };
+        if a.frames.is_empty() { return; }
+        let len = a.frames.len();
+        let ft = a.frames[self.elem].time;
+        if self.anim_total_time >= 0 && self.anim_elapsed >= self.anim_total_time {
+            self.anim_elapsed = if self.anim_loop_start == 0 { 0 } else { a.frames.iter().take(self.anim_loop_start).map(|f| f.time.max(0)).sum() };
+        }
         self.anim_elapsed += 1;
         if ft < 0 { return; }
         self.elem_time += 1;
         if self.elem_time >= ft {
             self.elem_time = 0;
             self.elem += 1;
-            if self.elem >= len { self.elem = loop_start; }
+            if self.elem >= len { self.elem = self.anim_loop_start; }
             let mut guard = 0;
-            while self.anim().is_some_and(|a| a.frames[self.elem].time == 0) && guard < len {
+            while a.frames[self.elem].time == 0 && guard < len {
                 guard += 1;
                 self.elem += 1;
-                if self.elem >= len { self.elem = loop_start; }
+                if self.elem >= len { self.elem = self.anim_loop_start; }
             }
         }
     }

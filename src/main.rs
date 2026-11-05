@@ -76,7 +76,9 @@ fn conf() -> WindowConf {
     if args.iter().any(|a| a == "--4k") {
         (w, h) = (3840, 2160);
     }
-    let fullscreen = st.fullscreen || args.iter().any(|a| a == "--fullscreen");
+    // a browser only grants fullscreen from a user gesture: never auto-request it there, the request would be
+    // rejected and the window would end up believing it is fullscreen
+    let fullscreen = !cfg!(target_arch = "wasm32") && (st.fullscreen || args.iter().any(|a| a == "--fullscreen"));
     ume_shell::Config {
         title: "Ultimate MUGEN".into(),
         width: w,

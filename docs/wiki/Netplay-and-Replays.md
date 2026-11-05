@@ -15,7 +15,7 @@ ultimate-mugen --netplay 2 --peer <friend-ip>:7000 --chars kfm,kfm --stage dojo
 
 | Flag | Meaning |
 |---|---|
-| `--netplay 1\|2` | your side |
+| `--netplay 1|2` | your side |
 | `--peer ip:port` | the other player's address |
 | `--port n` | local UDP port (default 7000 / 7001) |
 | `--chars a,b` | character ids or names for P1 and P2 (same on both sides) |
@@ -50,24 +50,13 @@ an unreadable file), so it does not look like a corrupted replay after a desync.
 
 ## Rules for deterministic content
 
-Rollback only works if the same inputs always produce the same fight.
+- Never read real time (`Instant`, `now`) or random numbers from the operating system (`rand::random`, `rand::thread_rng`) during a tick; use the match's seeded PRNG.
+- Floating-point calculations must run in deterministic mode (all target platforms use IEEE 754 with standard rounding).
+- All collections whose iteration affects the simulation must have deterministic ordering (use `Vec` or sorted keys, never direct iteration over a raw `HashSet`/`HashMap`).
 
-- Use `Random` from the engine, never the system clock.
-- Do not read anything outside the match state from a state controller.
-- Characters, stages and the engine build must be the same on both sides.
+## Binary format (`ume_netplay::Replay`)
 
-## Tests
-
-```
-cargo test --release -p ume-netplay
-UME_NETPLAY_FIGHTS=200 cargo test --release -p ume-netplay --test rollback p2p
-```
-
-- `sync_test_detects_no_desync`: GGRS sync-test, rolls back every frame and checks the checksum.
-- `p2p_fights_at_100ms_stay_in_sync`: two peers over an in-memory network with 100 ms of latency play 50 fights with desync detection on.
-- `replay_round_trip_reproduces_match`: a recorded replay plays back to the same final state.
-
-## Replay files (`.umr`)
+A raw stream of recorded inputs:
 
 | Field | Type |
 |---|---|
@@ -105,6 +94,8 @@ Every finished fight is archived automatically to `replays/` beside the executab
 | `rules` | rounds, round time, life %, single round, pushbox, shared team life, game speed |
 | `inputs` | run-length encoded input stream: `slots`, then `count` + one input per slot per run |
 
+Replay decoding bounds files to 16 MiB, 500,000 runs and 2,000,000 total frames to keep malformed or corrupt streams from allocating unbounded memory. Desync reports (`desync-*.json`) in `replays/` are preserved without being listed as corrupt replays.
+
 Replaying feeds the recorded inputs through `Pilot::Replay`; the simulation is deterministic, so the fight is
 rebuilt exactly. A round-trip test records 1200 ticks, reloads the file and compares the final state checksum
 (`cargo test -p ume-engine --test replay_roundtrip`).
@@ -130,4 +121,3 @@ Playback keys:
 
 The folder keeps the newest 64 files; older ones are pruned when a new replay is saved. Files that cannot be read
 (for example, recorded by another build) are listed with the reason instead of failing silently.
-

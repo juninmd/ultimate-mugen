@@ -142,4 +142,117 @@ O seletor exibe as mesmas imagens, recortadas nos cartões sem alterar sua propo
 
 Use `UME_STAGE_ART=procedural` para comparar os cenários procedurais originais. O seletor continua mostrando as ilustrações em pixel art padrão. Capture o seletor com `UME_SHOTS_ONLY=stage-select ultimate-mugen --shots out/ --res 1280x720 --mute`, ou as sete lutas com `UME_SHOTS_ONLY=stages`.
 
-`brazil` (Praça do Interior — Brasil) acrescenta uma praça ao entardecer com casario colonial, igreja, coreto, ipês e jacarandás floridos. Usa a música do planalto e não possui versão procedural anterior.
+---
+
+## Arenas Nativas, Lore e Associação de Personagens
+
+Cada arena nativa de **Ultimate MUGEN** representa um ponto de convergência geográfico e espiritual crucial na colisão dos mundos. Abaixo encontra-se o guia completo dos sete campos de batalha, sua história e os combatentes vinculados a cada um.
+
+### 1. Telhado do Dojo — Pôr do Sol (`dojo`)
+
+![Telhado do Dojo](../../../assets/stages/dojo.png)
+
+- **Atmosfera:** O cume de um dojo tradicional de madeira e telhas curvas erguido sobre montanhas cobertas de névoa ao entardecer. Galhos de cerejeira em flor emolduram o deck de combate, enquanto lanternas de papel iluminam as nuvens douradas e rosadas.
+- **Lutadores Nativos (Cenário de Origem):**
+  - **Kaito Arashi:** O dojo sagrado onde Kaito completou seu treinamento inicial de karatê antes de partir em peregrinação pela Estrada da Tempestade.
+  - **Akio Hoshi:** Pico vizinho onde o Dojo da Queda Estelar observa os céus noturnos.
+- **Desafiantes e Batalhas da História:**
+  - **Lian Feng:** Viaja das montanhas de Wudang para um duelo de honra entre os chutes de seda chineses e o karatê de vendaval japonês.
+  - **Jin Kazaguruma:** Salta pelos beirais para testar a velocidade de seus chakrams contra a firmeza de Kaito.
+- **Significado Narrativo:** Representa a pureza das artes marciais tradicionais, a disciplina do espírito e a tranquilidade anterior à corrupção cósmica.
+
+---
+
+### 2. Neo-Metrópole 2099 (`neon`)
+
+![Neo-Metrópole 2099](../../../assets/stages/neon.png)
+
+- **Atmosfera:** O heliponto molhado pela chuva ácida no topo de um arranha-céu colossal de uma metrópole futurista. Painéis holográficos em ciano e magenta brilham em meio à névoa de meia-noite, enquanto naves aéreas cruzam os céus elétricos.
+- **Lutadores Nativos (Cenário de Origem):**
+  - **VX-9 Volta:** O campo de testes de onde Volta escapou após quebrar seus protocolos corporativos de extermínio.
+  - **Valdric Morn:** O complexo industrial militar onde o Império da Estrela Rubra mantém suas divisões de tanques e canhões de matéria escura.
+- **Desafiantes e Batalhas da História:**
+  - **Capitão Marlow Reyes:** Atraca seu galeão voador para saquear bancos de dados imperiais e duelar contra patrulhas de elite.
+  - **Akio Hoshi:** Invade a metrópole para provar a Valdric que a coragem de um lutador supera qualquer armadura mecânica.
+- **Significado Narrativo:** O palco da tecnocracia e da opressão corporativa, onde a consciência sintética de Volta luta pela liberdade contra a tirania imperial de Valdric.
+
+---
+
+### 3. Bambuzal ao Luar (`bamboo`)
+
+![Bambuzal ao Luar](../../../assets/stages/bamboo.png)
+
+- **Atmosfera:** Um bosque milenar de bambus verde-jade sob a luz prateada de uma lua cheia imensa. Folhagens verde-azuladas, um riacho tranquilo de montanha, vagalumes e lanternas de pedra desgastadas criam um clima de silêncio mortal.
+- **Lutadores Nativos (Cenário de Origem):**
+  - **Shion Kurogane:** O refúgio solitário onde Shion medita empunhando sua colossal espada lunar.
+  - **Suzume Kagerou:** Os corredores de sombra por onde Suzume rastreia seus alvos sem produzir um único ruído.
+  - **Lian Feng:** Os bosques sagrados na base do templo da Lanterna de Jade.
+  - **Jin Kazaguruma:** A copa alta dos bambus por onde Jin salta com seus chakrams de vento.
+- **Desafiantes e Batalhas da História:**
+  - **Kaname Fuyutsuki:** Duelo solene contra Shion sob a lua para decidir se o dever impessoal supera a dor do luto.
+  - **Mikazuki Oboro:** As sombras ganham vida e corvos ilusórios atacam os sobreviventes das antigas dinastias.
+- **Significado Narrativo:** O terreno da furtividade, da paciência e da contemplação poética, onde o mínimo farfalhar de folhas prenuncia um golpe letal.
+
+---
+
+### 4. Planalto Rochoso (`plains`)
+
+![Planalto Rochoso](../../../assets/stages/plains.png)
+
+- **Atmosfera:** Gargantas monumentais de arenito dourado e platôs esculpidos por milênios de ventos sob um céu azul infinito. Gramíneas estepárias douradas ondulam ao longo de estratos rochosos imponentes.
+- **Lutadores Nativos (Cenário de Origem):**
+  - **Daichi Ginrou:** O território selvagem onde Daichi caça com lobos prateados e aprimora seu ki dourado contra rochedos maciços.
+  - **Akio Hoshi:** Antigas crateras onde meteoritos repousam há eras.
+  - **Capitão Marlow Reyes:** Os cânions abertos onde Marlow pousa sua nau para reparos náuticos e apostas.
+  - **Sylene Vashti:** Terras altas e secas onde Sylene pratica condensar umidade do ar em barreiras de gelo.
+- **Desafiantes e Batalhas da História:**
+  - **Bruno Volk vs. Daichi Ginrou:** O choque colossal entre o boxe peso-pesado e as garras do lobo dourado, fazendo o desfiladeiro ecoar.
+  - **Marlow Reyes vs. Lian Feng:** Disputa acrobática por pergaminhos escondidos em ruínas nas escarpas.
+- **Significado Narrativo:** A força bruta e a vastidão da terra intocada, simbolizando a vitalidade e a alegria pura do combate aberto sem artifícios.
+
+---
+
+### 5. Portão dos Espíritos (`spirit`)
+
+![Portão dos Espíritos](../../../assets/stages/spirit.png)
+
+- **Atmosfera:** Portais torii vermelhos ancestrais vigiando um santuário misterioso sob a luz de tochas espectrais azul-turquesa. Lanternas de pedra cobertas de musgo e árvores milenares envolvem o pátio sob um céu estrelado pacífico.
+- **Lutadores Nativos (Cenário de Origem):**
+  - **Kaname Fuyutsuki:** O limiar sagrado defendido pela lâmina do inverno de Kaname para impedir a violação do mundo espiritual.
+  - **Haruki Sumi:** O arquivo sagrado onde Haruki estuda fórmulas de selamento para conter os Titãs do Crepúsculo.
+- **Desafiantes e Batalhas da História:**
+  - **Mikazuki Oboro:** Surge entre os toriis para desestabilizar as barreiras astrais e alimentar seu eclipse de pesadelos.
+  - **Garan the Ashen Oni:** Tenta invadir o pátio sagrado para devorar os espíritos ancestrais e romper os selos de Haruki.
+  - **Suzume Kagerou:** Embosca os asseclas de Oboro antes que conspurquem os altares de seus antepassados.
+- **Significado Narrativo:** O núcleo metafísico do mundo, onde se decide se a alma humana preservará sua dignidade ou se renderá à corrupção eterna.
+
+---
+
+### 6. Cratera Vulcânica (`volcano`)
+
+![Cratera Vulcânica](../../../assets/stages/volcano.png)
+
+- **Atmosfera:** Uma gigantesca caldeira vulcânica em erupção contínua sobre rochedos de basalto negro e rios de lava alaranjada incandescente. Fumaça escarlate, fuligem e labaredas iluminam um terraço de obsidiana cortado por fendas brilhantes.
+- **Lutadores Nativos (Cenário de Origem):**
+  - **Garan the Ashen Oni:** O abismo subterrâneo infernal de onde o demônio rastejou de volta à superfície.
+  - **Mikazuki Oboro:** O vórtice culminante onde o ritual do Eclipse Escarlate atinge sua potência máxima de convergência.
+  - **Valdric Morn:** As fundições geotérmicas onde o império forja canhões de alta potência.
+- **Desafiantes e Batalhas da História:**
+  - **Sylene Vashti:** A rainha exilada marcha em direção à lava para congelar os veios magmáticos e vingar seu reino ancestral.
+  - **Kaito Arashi:** A batalha decisiva contra as sombras de Oboro para dissipar o cataclismo com o Olho da Tempestade.
+- **Significado Narrativo:** O ápice do caos primordial e da destruição absoluta, onde o destino do universo convergente é selado no calor da forja final.
+
+---
+
+### 7. Praça do Interior — Brasil (`brazil`)
+
+![Praça do Interior](../../../assets/stages/brazil.png)
+
+- **Atmosfera:** Uma acolhedora praça histórica no interior do Brasil (inspirada nas cidades coloniais de Minas Gerais e do interior paulista) na hora dourada do entardecer. Casarões em tons pastéis com telhados coloniais de barro, uma igreja elegante ao fundo, um coreto tradicional, ipês e jacarandás floridos e calçamento em pedra portuguesa.
+- **Lutadores Nativos (Cenário de Origem):**
+  - **Bruno "Bulldozer" Volk:** A praça do coração de Bruno, onde ele treina na academia do bairro e defende seus amigos e vizinhos.
+- **Desafiantes e Batalhas da História:**
+  - **Haruki Sumi:** Chega em busca de sossego e hospitalidade, sendo recebido por Bruno com café coado e pão de queijo quentinho no coreto.
+  - **Daichi Ginrou:** Desce das montanhas atraído pelos boatos de um peso-pesado de socos estrondosos que luta rindo.
+  - **Valdric Morn:** Uma expedição imperial tenta confiscar suprimentos e recursos da cidadezinha, sendo repelida pelo cruzado demolidor de Bruno e pela bravura da comunidade local.
+- **Significado Narrativo:** Representa a vida pacífica, a ternura comunitária e a bondade das pessoas comuns, provando pelo que realmente vale a pena lutar e proteger. Utiliza a música tema do planalto e não possui versão procedural anterior.

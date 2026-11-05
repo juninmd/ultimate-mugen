@@ -142,4 +142,117 @@ The stage selector displays the same artwork, cropped to each tile without chang
 
 Set `UME_STAGE_ART=procedural` to compare the original procedural stages. The selector continues to show the default pixel-art illustrations. Capture the selector with `UME_SHOTS_ONLY=stage-select ultimate-mugen --shots out/ --res 1280x720 --mute`, or all seven fights with `UME_SHOTS_ONLY=stages`.
 
-`brazil` (Praça do Interior — Brasil) adds a golden-hour town square with colonial houses, a church, a bandstand, flowering ipê and jacaranda trees. It uses the plains music and has no legacy procedural counterpart.
+---
+
+## Native Arenas, Lore & Character Affinities
+
+Each native arena in **Ultimate MUGEN** represents a critical focal point in the convergence of dimensions. Below is the full guide to the seven native battlegrounds, their world lore, and the fighters who call them home.
+
+### 1. Sunset Dojo Roof (`dojo`) — *Telhado do Dojo — Pôr do Sol*
+
+![Sunset Dojo Roof](../../assets/stages/dojo.png)
+
+- **Atmosphere:** An ancient mountain pagoda dojo perched above misty valleys at golden hour. Cherry blossom branches frame the weathered timber deck, with warm paper lanterns flickering against amber-rose clouds.
+- **Native Fighters (Home Stage):**
+  - **Kaito Arashi:** The sacred training grounds where Kaito completed his Arashi-ryu mastery before beginning his wandering journey.
+  - **Akio Hoshi:** Neighboring mountain summit where the Starfall Dojo observes the evening sky.
+- **Key Challengers & Story Battles:**
+  - **Lian Feng:** Travels from Mount Wudang for an exhibition duel between Chinese flowing silk kicks and Japanese storm karate.
+  - **Jin Kazaguruma:** Arrives via the rooftops to test his wind chakrams against Kaito's gale fist.
+- **Narrative Context:** Represents traditional martial honor, disciplined breathing, and the tranquil purity of combat before cosmic corruption touches the world.
+
+---
+
+### 2. Neo-Metropolis 2099 (`neon`) — *Neo-Metrópole 2099*
+
+![Neo-Metropolis 2099](../../assets/stages/neon.png)
+
+- **Atmosphere:** The rain-slicked rooftop of a mega-skyscraper in a cyberpunk metropolis. Towering holographic ads in cyan and magenta glow through the midnight mist, while aerial cruisers drift between neon-lit towers.
+- **Native Fighters (Home Stage):**
+  - **VX-9 Volta:** The cybernetic testing ground and rooftop escape route where Volta severed his corporate telemetry.
+  - **Valdric Morn:** The industrial command sector where the Red Star Empire deploys heavy mechanized garrison units.
+- **Key Challengers & Story Battles:**
+  - **Captain Marlow Reyes:** Raids corporate data servers with his sky-galleon, dueling security units on the helicopter deck.
+  - **Akio Hoshi:** Climbs the mega-towers to challenge Valdric's cold military technology with pure stellar plasma.
+- **Narrative Context:** Symbolizes the collision of rampant technocracy with human spirit, where high-voltage capacitors and corporate tyrants clash with rogue awakenings.
+
+---
+
+### 3. Moonlit Bamboo Grove (`bamboo`) — *Bambuzal ao Luar*
+
+![Moonlit Bamboo Grove](../../assets/stages/bamboo.png)
+
+- **Atmosphere:** An ancient, whispering jade bamboo forest illuminated by a radiant full moon. Deep teal shadows, a murmuring mountain brook, glowing fireflies, and weathered stone lanterns create an aura of silent danger.
+- **Native Fighters (Home Stage):**
+  - **Shion Kurogane:** Shion's secluded sanctuary where he meditates under the pale moon, practicing his heavy lunar sword forms.
+  - **Suzume Kagerou:** The shadow corridor through which Suzume stalks her targets, moving silently between bamboo stalks.
+  - **Lian Feng:** Sacred groves surrounding the lower slopes of the Jade Lantern sanctuaries.
+  - **Jin Kazaguruma:** The high canopy highways where Jin leaps between bamboo tips with his gale chakrams.
+- **Key Challengers & Story Battles:**
+  - **Kaname Fuyutsuki:** Dueling Shion under the full moon to determine whether sorrow or divine duty wields the truer blade.
+  - **Mikazuki Oboro:** The shadows twist into nightmare ravens as Oboro sends phantom assassins to eliminate the surviving clan heirs.
+- **Narrative Context:** The battleground of stealth, patience, and poetic stillness, where a single rustle of bamboo leaves heralds a lethal strike.
+
+---
+
+### 4. Rocky Plateau (`plains`) — *Planalto Rochoso*
+
+![Rocky Plateau](../../assets/stages/plains.png)
+
+- **Atmosphere:** Immense sandstone mesas and sun-baked canyon terraces beneath a luminous azure sky. Golden steppe grasses sway along weathered geological strata, offering an expansive, unobstructed natural arena.
+- **Native Fighters (Home Stage):**
+  - **Daichi Ginrou:** The rugged canyon perimeter where Daichi runs with silver wolves and tests his golden ki against solid stone.
+  - **Akio Hoshi:** Ancient meteorite impact sites where Akio meditates on fallen cosmic stones.
+  - **Captain Marlow Reyes:** The open desert canyons where Marlow grounds his sky-galleon for repairs and duels.
+  - **Sylene Vashti:** A windswept highland where Sylene practices freezing the arid air into protective glacial walls.
+- **Key Challengers & Story Battles:**
+  - **Bruno Volk vs. Daichi Ginrou:** A clash of titans where heavy boxing punches collide with lupine claws, shaking the mesa.
+  - **Marlow Reyes vs. Lian Feng:** A high-stakes duel over ancient maps found within the sandstone ruins.
+- **Narrative Context:** Represents raw, untamed natural vitality, geological endurance, and the honest joy of physical combat beneath the open sun.
+
+---
+
+### 5. Gate of Spirits (`spirit`) — *Portão dos Espíritos*
+
+![Gate of Spirits](../../assets/stages/spirit.png)
+
+- **Atmosphere:** Weathered vermilion torii gates standing sentinel over an ancient mist-shrouded shrine courtyard. Turquoise spirit motes drift between mossy stone lanterns and colossal sacred camphor trees beneath a quiet night sky.
+- **Native Fighters (Home Stage):**
+  - **Kaname Fuyutsuki:** The sacred gateway protected by Kaname's Everwinter blade, serving as the border between the mortal and spirit realms.
+  - **Haruki Sumi:** The ancient shrine vaults where Haruki studies forgotten sealing texts and prays to keep the Twilight Titans asleep.
+- **Key Challengers & Story Battles:**
+  - **Mikazuki Oboro:** Manifests his shadow illusions directly at the torii gate, seeking to tear open the veil between the living and the dead.
+  - **Garan the Ashen Oni:** Stalks the shrine perimeter, seeking to shatter Haruki's paper talismans and consume the spirits within.
+  - **Suzume Kagerou:** Infiltrates the sacred grounds to intercept Oboro's disciples before they desecrate ancestral graves.
+- **Narrative Context:** The metaphysical heart of the world, where divine judgments are passed and the spiritual fabric of reality is either defended or corrupted.
+
+---
+
+### 6. Volcanic Crater (`volcano`) — *Cratera Vulcânica*
+
+![Volcanic Crater](../../assets/stages/volcano.png)
+
+- **Atmosphere:** An active basalt caldera glowing with incandescent rivers of orange magma. Crimson volcanic smoke, floating embers, and intense amber rim lighting illuminate a solid obsidian fighting terrace laced with glowing fissures.
+- **Native Fighters (Home Stage):**
+  - **Garan the Ashen Oni:** The hellish subterranean threshold from which Garan crawled into the mortal realm.
+  - **Mikazuki Oboro:** The convergence apex where the ritual of the Scarlet Eclipse focuses planetary cosmic energy.
+  - **Valdric Morn:** The industrial geothermal smelting foundries where the Red Star Empire manufactures heavy warmachines.
+- **Key Challengers & Story Battles:**
+  - **Sylene Vashti:** Sylene ventures into the burning caldera to freeze the molten veins and avenge her frozen homeland.
+  - **Kaito Arashi:** The climactic final confrontation against Oboro and Garan to disperse the crimson clouds with the Eye of the Storm.
+- **Narrative Context:** The domain of primordial chaos, destruction, and ultimate stakes. The final testing ground where the fate of all converging realities is decided.
+
+---
+
+### 7. Hinterland Plaza — Brazil (`brazil`) — *Praça do Interior — Brasil*
+
+![Hinterland Plaza](../../assets/stages/brazil.png)
+
+- **Atmosphere:** A warm, charming small town square in the Brazilian interior (inspired by historic Minas Gerais and São Paulo countryside) at golden hour. Pastel colonial stucco houses with aged wooden shutters, a cream-and-blue church in the background, a traditional bandstand (*coreto*), flowering ipê and jacarandá trees, and classic Portuguese stone paving (*calçada portuguesa*).
+- **Native Fighters (Home Stage):**
+  - **Bruno "Bulldozer" Volk:** The beloved town square where Bruno grew up, works out at the local gym, and protects his neighbors.
+- **Key Challengers & Story Battles:**
+  - **Haruki Sumi:** Arrives seeking quiet shelter and warm hospitality, welcomed by Bruno with fresh coffee and cheese bread (*pão de queijo*).
+  - **Daichi Ginrou:** Enters the town with a wide grin, drawn by rumors of an unbeatable heavyweight champion who fights with bare fists.
+  - **Valdric Morn:** An imperial scouting squad attempts to annex the town for raw resources, only to be met by Bruno and an outraged community.
+- **Narrative Context:** Represents the warmth of community, the resilience of everyday working people, and the peaceful mortal lives that the heroes are fighting to protect. It uses the plains theme music and has no legacy procedural counterpart.

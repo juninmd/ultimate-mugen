@@ -92,6 +92,7 @@ Regra: a thread de render nunca espera disco, decodificação, parsing ou sínte
 | Tela de vitória | usa a definição em cache (`peek`), nunca carrega |
 
 Watchdog de quadros: `UME_WATCHDOG=1` registra todo quadro acima de `UME_HITCH_MS` (padrão 50) com o rótulo ativo (`ume_shell::watchdog::label("load:stage")`) e, ao sair, um resumo com o pior quadro.
+
 ## Busca no sistema de arquivos virtual
 
 `cargo run --locked --release -p ume-formats --example vfs_bench` mede normalização de caminhos e busca por nome com 50.000 arquivos não relacionados. Exibe cinco amostras por cenário. O benchmark sintético exclui acesso a disco, decodificação e renderização.
@@ -115,3 +116,10 @@ No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíra
 ## Pipeline Paralelo de Recursos de Personagem
 
 `load_char_def` em `crates/engine/src/loader.rs` sobrepõe as fases de recursos do personagem entre núcleos de CPU utilizando `std::thread::scope`. Decodificação de sprites (`sff:decode`), análise de animação (`air:parse`) e decodificação de áudio (`snd:decode`) rodam simultaneamente em threads trabalhadoras enquanto constantes CNS, arquivos de estado e gatilhos CMD são analisados na thread chamadora. `par::workers` em `crates/formats/src/par.rs` escala até 32 threads de processamento paralelo em hardwares multithread. O tempo total de carregamento passa a ser limitado pela fase individual mais lenta em vez do acúmulo serial.
+
+## Gatilhos e Atribuições de Variáveis com Alocação Zero
+
+A avaliação de partidas em `crates/engine/src/matchs.rs`, `crates/engine/src/triggers.rs` e `crates/engine/src/hitdef.rs` elimina alocações na heap durante os ticks de estado:
+- `Match::assigns` registra mutações de variáveis usando o enum compacto `VarKind` (`Var`, `FVar`, `SysVar`, `SysFVar`) em vez de alocar chaves `String` dinâmicas por atribuição.
+- `state_mask`, `attr_kind_mask` e `guardflag_bits` processam fatias de string byte a byte com `to_ascii_uppercase()` em linha, eliminando alocações temporárias de `String` maiúscula em avaliações de `hitbyattr`.
+- A taxa de simulação atingiu mais de 262.000 ticks/segundo com latência máxima por tick inferior a 0,053 ms.

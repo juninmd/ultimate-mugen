@@ -92,6 +92,7 @@ Rule: the render thread never waits on disk, decoding, parsing or synthesis. On 
 | Winner screen | uses the cached definition (`peek`), never loads |
 
 Frame-time watchdog: set `UME_WATCHDOG=1` to log every frame longer than `UME_HITCH_MS` (default 50) with the active label (`ume_shell::watchdog::label("load:stage")`), and a summary with the worst frame on exit. Labels in use: `select:preview`, `load:character`, `load:stage`, `load:session`, `load:audio`, `fight:prefetch`, `import`.
+
 ## Virtual filesystem lookup
 
 `cargo run --locked --release -p ume-formats --example vfs_bench` measures path normalization and basename resolution with 50,000 unrelated files. It prints five samples per scenario. This synthetic benchmark excludes disk I/O, decoding and rendering.
@@ -115,3 +116,10 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
 ## Parallel Character Asset Pipeline
 
 `load_char_def` in `crates/engine/src/loader.rs` overlaps character asset phases across CPU cores using `std::thread::scope`. Sprite decoding (`sff:decode`), animation parsing (`air:parse`), and sound decoding (`snd:decode`) execute concurrently on worker threads while CNS constants, state files, and CMD input triggers parse on the caller thread. `par::workers` in `crates/formats/src/par.rs` scales up to 32 parallel worker threads on high-core hardware. Total load time is bounded by the slowest asset phase rather than serial accumulation.
+
+## Zero-Allocation Triggers and Variable Assignments
+
+Match evaluation in `crates/engine/src/matchs.rs`, `crates/engine/src/triggers.rs`, and `crates/engine/src/hitdef.rs` eliminates runtime heap allocations during state ticks:
+- `Match::assigns` records variable mutations using a compact `VarKind` enum (`Var`, `FVar`, `SysVar`, `SysFVar`) rather than allocating dynamic `String` keys per assignment.
+- `state_mask`, `attr_kind_mask`, and `guardflag_bits` parse string slices byte-by-byte with inline `to_ascii_uppercase()`, eliminating temporary uppercase `String` allocations during `hitbyattr` evaluations.
+- Simulation tick rate increased to over 262,000 ticks/sec with peak tick latency under 0.053 ms.

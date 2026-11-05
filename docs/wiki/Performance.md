@@ -120,3 +120,8 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
   - PalFx::from_controller: Zero heap allocations for controller parameter lookups using stack-buffered keys.
   - Match::tick: Eliminated per-tick Vec<usize> allocations for waken and 	ag_requests by using stack-allocated fixed arrays, and fused filter/decrement loops with 
 etain_mut.
+- **Wave 43 - Zero-Alloc Character Loader Path & In-Place Unquote**:
+  - `ini::unquote_str`: In-place slice borrowing without allocating new `String` instances for unquoted and clean strings.
+  - `loader::load_mugen_char`: Converted `fget` from returning `Option<String>` to `Option<&str>`, eliminating ~20 heap allocations per character load.
+  - `loader::local_size`: Stack-based parsing via `split_once(',')` replacing dynamic `nums` allocation.
+  - `cns::parse_cmd`: In-place `unquote_str` for command name and inputs.

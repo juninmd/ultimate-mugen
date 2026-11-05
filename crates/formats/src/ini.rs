@@ -103,14 +103,18 @@ pub fn find_section<'a>(secs: &'a [Section], name: &str) -> Option<&'a Section> 
 
 /// Trim and remove surrounding double quotes (text up to the closing quote).
 pub fn unquote(v: &str) -> String {
+    unquote_str(v).to_string()
+}
+
+pub fn unquote_str(v: &str) -> &str {
     let v = v.trim();
     if let Some(rest) = v.strip_prefix('"') {
         match rest.find('"') {
-            Some(e) => rest[..e].to_string(),
-            None => rest.to_string(),
+            Some(e) => &rest[..e],
+            None => rest,
         }
     } else {
-        v.to_string()
+        v
     }
 }
 

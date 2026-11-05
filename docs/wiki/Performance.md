@@ -27,8 +27,9 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | Texture prefetch | `Gfx::prefetch_step`, `App::warm_step` | Fighter sprites are uploaded to the atlas one 512 KiB chunk per frame across the loading steps (VS screen) or between yielded frames (`start_fight`), so no single frame pays for a whole fighter; a rematch with the same roster copies nothing |
 | Sound prewarm | `Audio::preload_match` | Every fighter sound is decoded in parallel during the VS screen; sounds of characters no longer in the match are freed |
 | Bytecode VM | `ume_engine::bytecode` | CNS/ZSS expressions compile into a flat stack VM (`[f64; 32]`) with inline redirects (`parent`, `root`, `helper`, `enemynear`), math/comparison intrinsics, zero/one-arg triggers, `CmpStr`, `Special` (`animelem`, `timemod`), and `:=` assignments |
-| Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, branchless `abs` direction translation, O(1) close-range AI selection, in-place `append_seq`, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
-| Resilience bounds | `ume_formats`, `ume_engine::matchs` | Image decoders reject headers above `MAX_IMAGE_PIXELS` (`1 << 26`) before allocating; matches cap helpers (60), explods (512), projectiles (256), and texts (128) |
+| Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, branchless `abs` direction translation, O(1) close-range AI selection, in-place `append_seq`, zero-alloc stage background tile iteration, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
+
+## Resilience bounds | `ume_formats`, `ume_engine::matchs` | Image decoders reject headers above `MAX_IMAGE_PIXELS` (`1 << 26`) before allocating; matches cap helpers (60), explods (512), projectiles (256), and texts (128) |
 
 ## GPU memory
 
@@ -47,9 +48,7 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | `cargo run --release -p ume-engine --example sprite_mem -- <char_dir>...` | Sprite payload per fighter: sprites, index/RGBA atlas MB, largest sprite (sizes the warm-up budget) |
 | `cargo test -p ume-engine --release --test tick_alloc` | Zero allocations per simulation tick |
 | `cargo test -p ume-formats --release --test fuzz_resilience` | Mutation fuzzing across SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR and INI decoders |
-| `cargo test -p ume-engine --release --test stress_resilience` | Hostile CNS expressions, recursive helper/explod/projectile floods, and 4v4 simul stress |
-
-Reference (4 cores, release): `kfm720` went from 85 ms to 27 ms, `kfm` from 12 ms to 7 ms.
+| `cargo test -p ume-engine --release --test stress_resilience` | Hostile CNS expressions, recursive helper/explod/projectile floods, and 4v4 simul stress. |
 
 ## Web (wasm)
 

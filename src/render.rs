@@ -1144,34 +1144,6 @@ impl MatchRenderer {
                     let (axis_dx, axis_dy) = (meta.axis_x as f32 * lx, meta.axis_y as f32 * ly);
                     let (x0, y0) = (sxp - axis_dx, syp - axis_dy);
                     let (stx, sty) = (w + l.tile_spacing[0] * scl, h + l.tile_spacing[1] * scl_y);
-                    let xs: Vec<f32> = match l.tile[0] {
-                        1 => {
-                            let st = x0 - (x0 / stx).ceil() * stx;
-                            let mut v = vec![];
-                            let mut x = st;
-                            while x < m.view_w {
-                                v.push(x);
-                                x += stx;
-                            }
-                            v
-                        }
-                        n if n > 1 => (0..n).map(|i| x0 + i as f32 * stx).collect(),
-                        _ => vec![x0],
-                    };
-                    let ys: Vec<f32> = match l.tile[1] {
-                        1 => {
-                            let st = y0 - (y0 / sty).ceil() * sty;
-                            let mut v = vec![];
-                            let mut y = st;
-                            while y < m.view_h {
-                                v.push(y);
-                                y += sty;
-                            }
-                            v
-                        }
-                        n if n > 1 => (0..n).map(|i| y0 + i as f32 * sty).collect(),
-                        _ => vec![y0],
-                    };
                     let add = l.trans.starts_with("add") && l.trans != "addalpha";
                     let sub = l.trans == "sub";
                     let alpha = if l.trans == "addalpha" {
@@ -1202,8 +1174,29 @@ impl MatchRenderer {
                     }
                     let tint = Color::new(1.0, 1.0, 1.0, alpha);
                     let transformed = l.angle != 0.0 || l.x_shear != 0.0;
-                    for &x in &xs {
-                        for &y in &ys {
+                    let for_each_tile = |tile_mode: i32, p0: f32, step: f32, limit: f32, cb: &mut dyn FnMut(f32)| {
+                        match tile_mode {
+                            1 => {
+                                if step > 0.0 {
+                                    let mut p = p0 - (p0 / step).ceil() * step;
+                                    while p < limit {
+                                        cb(p);
+                                        p += step;
+                                    }
+                                } else {
+                                    cb(p0);
+                                }
+                            }
+                            n if n > 1 => {
+                                for i in 0..n {
+                                    cb(p0 + i as f32 * step);
+                                }
+                            }
+                            _ => cb(p0),
+                        }
+                    };
+                    for_each_tile(l.tile[0], x0, stx, m.view_w, &mut |x| {
+                        for_each_tile(l.tile[1], y0, sty, m.view_h, &mut |y| {
                             if transformed {
                                 draw_transformed_layer_quad(
                                     &t,
@@ -1226,8 +1219,8 @@ impl MatchRenderer {
                                     },
                                 );
                             }
-                        }
-                    }
+                        });
+                    });
                     if clip.is_some() {
                         set_scissor(None);
                     }

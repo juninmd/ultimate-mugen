@@ -32,6 +32,8 @@ mod update;
 #[cfg(target_arch = "wasm32")]
 mod web_sprites;
 mod vfx;
+#[cfg(test)]
+mod vfx_camera_tests;
 
 use crate::gfx::*;
 
@@ -61,6 +63,10 @@ fn conf() -> WindowConf {
             }
         }
         std::process::exit(0);
+    }
+    #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+    if args.iter().any(|a| a == "--update") {
+        std::process::exit(update::update_now());
     }
     let st = settings::Settings::load();
     let (mut w, mut h) = st.window_size();

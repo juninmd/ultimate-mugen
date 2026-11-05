@@ -134,3 +134,9 @@ etain_mut.
 - **Wave 45 - Explod Cache Array & Projectile Triangular Collision Sweeps**:
   - `Match::update_explods`: Pre-indexed fighter position and pause states into a compact 8-element stack array, avoiding linear `Fighter` scans per explod.
   - `Match::update_projectiles`: Stack-buffered frozen flags for up to 64 projectiles avoiding heap allocations, and triangular pair-wise collision iteration `(a + 1)..n` halving projectile collision checks.
+
+- **Wave 46 - Collision Box Fast Path & Pre-Scaled Box Geometry**:
+  - `Fighter::boxes`: Early exit for empty collision box lists before computing constants or scale factors (drastically cuts idle/movement frame work).
+  - Pre-scaled X and Y dimensions (`sx * s` and `sy * s`), cutting per-box floating-point multiplications from 8 to 4.
+  - Combined `flip_h != (facing < 0.0)` into a single branchless boolean XOR condition.
+  - `Fighter::c`: Guarded slice search with `!self.size_overrides.is_empty()`.

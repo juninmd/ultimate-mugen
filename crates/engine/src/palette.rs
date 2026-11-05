@@ -25,8 +25,9 @@ impl PalFx {
 
     pub fn params(&self) -> PalParams {
         let wave = if self.sin_period > 0 { (std::f32::consts::TAU * self.elapsed as f32 / self.sin_period as f32).sin() } else { 0.0 };
-        let add = [0, 1, 2].map(|k| self.add[k] + self.sin_add[k] * wave);
-        PalParams { add, mul: self.mul, color: self.color, invert: self.invert_all, hue: self.hue + self.sin_hue * wave }
+        let add = if wave == 0.0 { self.add } else { [0, 1, 2].map(|k| self.add[k] + self.sin_add[k] * wave) };
+        let hue = if wave == 0.0 { self.hue } else { self.hue + self.sin_hue * wave };
+        PalParams { add, mul: self.mul, color: self.color, invert: self.invert_all, hue }
     }
 
     pub fn from_controller(m: &Match, i: usize, sc: &Controller, prefix: &str) -> PalFx {
@@ -48,7 +49,13 @@ impl PalFx {
 }
 
 impl PalParams {
+    #[inline]
+    pub fn is_identity(&self) -> bool { *self == PalParams::default() }
+
+    #[inline]
     pub fn combine(self, o: PalParams) -> PalParams {
+        if self.is_identity() { return o; }
+        if o.is_identity() { return self; }
         PalParams {
             add: [0, 1, 2].map(|k| self.add[k] + o.add[k]),
             mul: [0, 1, 2].map(|k| self.mul[k] * o.mul[k] / 256.0),
@@ -58,9 +65,9 @@ impl PalParams {
         }
     }
 
-    pub fn is_identity(&self) -> bool { *self == PalParams::default() }
-
+    #[inline]
     pub fn apply(&self, rgb: [u8; 3]) -> [u8; 3] {
+        if self.is_identity() { return rgb; }
         let mut c = rgb.map(|v| v as f32);
         if self.invert { c = c.map(|v| 255.0 - v); }
         if self.color < 256.0 {
@@ -76,6 +83,13 @@ impl PalParams {
             c = [0, 1, 2].map(|i| (c[i] * cos_a + cross[i] * sin_a + k * dot * (1.0 - cos_a)).clamp(0.0, 255.0));
         }
         [0, 1, 2].map(|k| ((c[k] + self.add[k]) * self.mul[k] / 256.0).clamp(0.0, 255.0) as u8)
+    }
+
+    pub fn apply_slice(&self, rgb_slice: &mut [[u8; 3]]) {
+        if self.is_identity() { return; }
+        for rgb in rgb_slice.iter_mut() {
+            *rgb = self.apply(*rgb);
+        }
     }
 }
 

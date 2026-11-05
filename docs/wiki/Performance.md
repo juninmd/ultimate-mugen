@@ -205,3 +205,9 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 - Zero-alloc AssertSpecial flag lookup: `flags::names_in` and `flags::lookup` work directly with borrowed `&str` and ASCII case-insensitive matching (`eq_ignore_ascii_case`), removing per-frame string allocations on shadow and status flags.
 - Stack-buffered velocity constant lookup: `triggers::Ctx::const_val` copies the key into a 64-byte stack array to query `.x` variants without heap `format!("{k}.x")`.
 - Typed variable assignments: `Match::assigns` records `AssignKind` enum instead of allocating a `String` on each trigger variable assignment.
+
+## SFF v2 chunked RLE decompression and redundant zero-store elimination
+
+- Redundant zero-store skipping in `decode_rle8`: Since `vec![0u8; size]` allocates already zero-initialized memory, runs of transparent pixels (`val == 0`) and literal zeroes (`d == 0`) skip memory writes and simply advance the write index `j`. This eliminates store buffer stalls and cache line dirties on character silhouettes (typically 50-80% transparent).
+- Chunked RLE5 run fills: In `decode_rle5`, inner byte-by-byte loops are replaced with bulk slice `.fill(c)` (or index advances when `c == 0`), converting single-byte iterations into vectorized memsets.
+- Direct slice copying for SFF v2 palettes: In `decode_sff_v2`, palettes with valid slice bounds copy 4-byte chunks in bulk or directly via `copy_from_slice`, eliminating per-color bounds and saturating additions.

@@ -193,3 +193,9 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 - Resolução de flags AssertSpecial sem alocação: `flags::names_in` e `flags::lookup` operam diretamente em fatias `&str` com comparação ASCII insensível a maiúsculas/minúsculas (`eq_ignore_ascii_case`), removendo alocações de strings a cada quadro.
 - Constantes de velocidade em buffer na pilha: `triggers::Ctx::const_val` formata a chave em um buffer de 64 bytes para buscar sufixos `.x` sem alocação no heap via `format!("{k}.x")`.
 - Atribuições de variáveis tipadas: `Match::assigns` armazena o enum `AssignKind` em vez de alocar uma `String` na atribuição de variáveis de gatilhos.
+
+## Descompressão RLE em bloco e eliminação de escrita redundante de zeros no SFF v2
+
+- Eliminação de escrita de zeros em `decode_rle8`: Como `vec![0u8; size]` já aloca memória inicializada em zero, repetições de pixels transparentes (`val == 0`) e literais zero (`d == 0`) pulam escritas na memória e apenas avançam o índice `j`. Isso elimina esperas nos buffers de escrita e sujeira nas linhas de cache (geralmente 50-80% de transparência).
+- Preenchimento em bloco no RLE5: Em `decode_rle5`, loops byte a byte foram substituídos por `.fill(c)` em fatias (ou avanço direto quando `c == 0`), transformando iterações individuais em memsets vetorizados.
+- Cópia direta de fatias para paletas SFF v2: Em `decode_sff_v2`, paletas com limites válidos utilizam cópia em lote ou direta via `copy_from_slice`, eliminando checagens de limites e adições saturadas por cor.

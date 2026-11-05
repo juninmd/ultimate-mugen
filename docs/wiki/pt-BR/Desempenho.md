@@ -371,3 +371,8 @@ etain_mut.
 - **Onda 62 - Atalhos Rapidos na VM de Bytecode para Gatilhos de 1 Argumento e Comparacoes Aritmeticas**:
   - `bytecode::Code::run`: Adicionados atalhos dedicados para instrucoes unarias de 2 ops de 1 argumento (`[Op::Const, Op::Trig1]`), gatilhos invertidos de 3 ops (`[Op::Const, Op::Trig1, Op::Not]`) e comparacoes de 4 ops (`[Op::Const, Op::Trig1, Op::Const, Op]`), ignorando o loop da pilha e indexacoes para expressoes como `var(X) = Y`, `fvar(X) > Y` e `animelemtime(X) >= Y`.
   - `bytecode::Code::run`: Expandidas comparacoes de 3 ops para suportar aritmetica (`Add`, `Sub`) e relacoes entre dois gatilhos (`[Op::Trig0, Op::Trig0, Op]`), eliminando o interpretador de pilha para expressoes como `anim = stateno` ou `time > animtime`.
+
+- **Onda 63 - Deteccao Lazy de Ciclos em SND e Tokenizacao Sem Alocacao de Glifos FNT**:
+  - `snd::decode_snd_checked`: Substituicao da alocacao antecipada de `HashSet<usize>` por arquivo SND por inicializacao preguicosa (`Option<HashSet<usize>>`) ativada somente quando offsets apontam para tras (`next <= ofs`), eliminando alocacao em heap e hashing em todos os arquivos SND sequenciais padrao.
+  - `fnt::decode_fnt_v1`: Substituicao da alocacao de `split_whitespace().collect::<Vec<&str>>()` por linha de glifo por um iterador continuo lendo ate 3 tokens diretamente, eliminando centenas de alocacoes de vetor por fonte.
+  - `fnt::decode_fnt_v2`: Migracao da analise do descritor de fonte para `parse_ini_no_lines`, evitando a coleta desnecessaria de `lines: Vec<String>`.

@@ -336,7 +336,7 @@ impl Match {
         self.change_state(i, no, common);
     }
     pub fn change_state(&mut self, i: usize, no: i32, owner: Arc<CharDef>) {
-        let common = self.common.clone();
+        let common = self.common.clone(); let owner = if no >= 0 && Arc::ptr_eq(&owner, &common) && self.fighters[i].def.states.contains_key(&no) { self.fighters[i].def.clone() } else { owner };
         {
             let f = &mut self.fighters[i];
             f.prev_state_no = f.state_no; f.prev_state_type = f.state_type; f.prev_move_type = f.move_type;
@@ -426,7 +426,7 @@ impl Match {
             if f.ikemen.standby { f.asserts |= asf::INVISIBLE; }
         }
         let own = self.fighters[i].def.clone();
-        let custom = !Arc::ptr_eq(&self.fighters[i].st_def, &own);
+        let custom = !Arc::ptr_eq(&self.fighters[i].st_def, &own) && !Arc::ptr_eq(&self.fighters[i].st_def, &self.common);
         let helper = self.fighters[i].is_helper;
         let id = self.fighters[i].id;
         if !helper && !custom { self.run_state(i, &own, -3, in_pause); }
@@ -452,7 +452,7 @@ impl Match {
         if f.asserted_commands.iter().any(|(n, t)| *t > 0 && n.eq_ignore_ascii_case(name)) { return true; }
         let accepting = if f.is_helper { self.round_state == 2 } else { self.round_state == 2 || self.round_state == 3 };
         if !accepting && !self.training && !self.fighters[s].has_assert(asf::POSTROUNDINPUT) { return false; }
-        if !Arc::ptr_eq(&f.st_def, &f.def) {
+        if !Arc::ptr_eq(&f.st_def, &f.def) && !Arc::ptr_eq(&f.st_def, &self.common) {
             return f.st_def.commands.iter().find(|c| c.name == name).is_some_and(|c| crate::commands::match_command(&self.fighters[s].history, c));
         }
         self.fighters[s].cmd.active.contains(name)

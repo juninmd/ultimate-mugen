@@ -293,3 +293,11 @@ etain_mut.
   - `bytecode::Code::run`: Execução em caminho rápido para expressões de 2 operações (`!trigger`, `-const`, `!const`, `!host`), ignorando inicialização de pilha e loop do interpretador.
   - `Match::triggered`: Reutilização de instância única de `Ctx` entre `trigger_all` e grupos de gatilhos, eliminando recriações de contexto por controlador.
   - `Match::num`: Avaliação direta de expressão sem mapeamento intermediário de closure.
+
+- **Onda 50 - Pré-Alocação de SND, Deduplicação de Parsing de Estados e Filtros de Comando Zero-Alloc**:
+  - `snd::decode_snd_checked`: Pré-alocação do dicionário de sons e do conjunto de offsets visitados usando a contagem de sons do cabeçalho, com inserções in-place `Entry::Vacant` evitando realocações redundantes.
+  - `loader::load_mugen_char`: Eliminação da segunda passagem redundante de parsing do `stcommon` durante o carregamento de personagens.
+  - Chaves de paletas estáticas pré-alocadas `PAL_KEYS` evitando 12 alocações de formatação de string dinâmica por carga.
+  - Pré-alocação de capacidade para `HashSet`, `sprites`, `indexed` e `counts` com base no número de sprites decodificados do SFF.
+  - Comparação de bytes ASCII insensível a maiúsculas (`eq_ignore_ascii_case`) nos filtros de `ai_commands` e `movelist`, eliminando strings temporárias na heap para nomes de comandos.
+  - `loader::load_mugen_portrait`: Extração in-place de fatias de string em consultas de seção evitando clones de strings pertencidas.

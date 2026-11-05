@@ -6,7 +6,7 @@
 //!          [16] `length` bytes of sound data (normally a RIFF/WAVE file).
 
 use crate::Reader;
-use std::collections::{HashMap, HashSet};
+use std::collections::{hash_map::Entry, HashMap, HashSet};
 
 const SIGNATURE: &[u8; 12] = b"ElecbyteSnd\0";
 
@@ -37,7 +37,7 @@ pub fn decode_snd_checked(buf: &[u8]) -> Result<HashMap<(i32, i32), Vec<u8>>, St
         let start = ofs + 16;
         let end = buf.len().min(start.saturating_add(length));
         if end > start {
-            out.entry(key).or_insert_with(|| buf[start..end].to_vec());
+            if let Entry::Vacant(e) = out.entry(key) { e.insert(buf[start..end].to_vec()); }
         }
         ofs = next;
     }

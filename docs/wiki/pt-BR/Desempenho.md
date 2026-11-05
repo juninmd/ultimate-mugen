@@ -270,3 +270,21 @@ etain_mut.
 - **Onda 45 - Cache de Explods em Array e Varredura Triangular de Colisão de Projéteis**:
   - `Match::update_explods`: Pré-indexação de posições e estados de pausa dos lutadores em array compacto de 8 posições na pilha, eliminando varreduras lineares por explod.
   - `Match::update_projectiles`: Flags de congelamento em buffer de pilha para até 64 projéteis sem alocações na heap, e iteração triangular de pares `(a + 1)..n` reduzindo pela metade verificações de colisão entre projéteis.
+
+- **Onda 46 - Caminho Rápido de Caixas de Colisão e Geometria Pré-Escalada**:
+  - `Fighter::boxes`: Saída antecipada para listas vazias de caixas de colisão antes de calcular constantes ou fatores de escala (reduz drasticamente o trabalho em frames ociosos/movimento).
+  - Dimensões X e Y pré-escaladas (`sx * s` e `sy * s`), reduzindo as multiplicações de ponto flutuante por caixa de 8 para 4.
+  - Combinação de `flip_h != (facing < 0.0)` em uma única condição booleana XOR branchless.
+  - `Fighter::c`: Busca de fatia guardada por `!self.size_overrides.is_empty()`.
+
+- **Onda 47 - Junção de Candidatos VFS em Buffer de Pilha e Casamento de Sufixo Zero-Alloc**:
+  - `vfs::resolve`: `with_joined` em buffer de pilha de 512 bytes para caminhos candidatos `base_dir/name` e `data/name`, eliminando alocações na heap no caminho direto de busca.
+  - Substituição de strings dinâmicas `format!("/{base}")` por predicado de bytes in-place `is_match`.
+  - Uso direto de `ini::unquote_str` sem alocar strings intermediárias.
+  - Fallback de pasta sub-microssegundo em 50k arquivos (0.9 us/op) e redução no tempo de carga de lutadores (`kfm.def` caiu para 6.7 ms).
+
+- **Onda 48 - Pipeline de HUD Zero-Alloc e Quads de Textura Diretos**:
+  - `Hud::draw`: Otimização de `main_of` em varredura única de iterador sem alocar `Vec<&Fighter>` por lado a cada quadro.
+  - Uso de array fixo em pilha `roots = [r0, r1]` substituindo vetores dinâmicos na heap.
+  - Eliminação de alocações de parceiros em partidas 1v1 convencionais.
+  - Substituição de vetores de malha/vértices/índices no desenho de retratos por chamadas diretas de `draw_texture_ex`.

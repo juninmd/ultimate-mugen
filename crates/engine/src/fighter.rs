@@ -286,22 +286,30 @@ impl Fighter {
         let Some(fr) = self.frame() else { return; };
         let list = if kind == 1 { &fr.clsn1 } else { &fr.clsn2 };
         let modified;
-        let list: &[Box4] = if self.clsn_mods.iter().any(|c| c.kind == kind) { modified = crate::sctrl::clsn::apply(&self.clsn_mods, kind, list); &modified } else { list };
-        let s = self.lscl * self.draw_scale[0];
-        let sx = self.c("size.xscale", 1.0);
-        let sy = self.c("size.yscale", 1.0);
-        out.reserve(list.len() + 1);
-        for b in list {
-            let (mut x1, mut x2) = (b[0] * sx * s, b[2] * sx * s);
-            if fr.flip_h { let t = -x2; x2 = -x1; x1 = t; }
-            if self.facing < 0.0 { let t = -x2; x2 = -x1; x1 = t; }
-            out.push([self.pos.x + x1, self.pos.y + b[1] * sy * s, self.pos.x + x2, self.pos.y + b[3] * sy * s]);
-        }
-        if out.is_empty() && kind == 2 {
-            if let Some((top, bottom)) = self.height_override {
-                let (a, b) = (self.pos.x - self.back_width() * self.facing, self.pos.x + self.front_width() * self.facing);
-                out.push([a.min(b), self.pos.y - top, a.max(b), self.pos.y + bottom]);
+        let list: &[Box4] = if self.clsn_mods.iter().any(|c| c.kind == kind) {
+            modified = crate::sctrl::clsn::apply(&self.clsn_mods, kind, list);
+            &modified
+        } else {
+            list
+        };
+        if list.is_empty() {
+            if kind == 2 {
+                if let Some((top, bottom)) = self.height_override {
+                    let (a, b) = (self.pos.x - self.back_width() * self.facing, self.pos.x + self.front_width() * self.facing);
+                    out.push([a.min(b), self.pos.y - top, a.max(b), self.pos.y + bottom]);
+                }
             }
+            return;
+        }
+        let s = self.lscl * self.draw_scale[0];
+        let sx = self.c("size.xscale", 1.0) * s;
+        let sy = self.c("size.yscale", 1.0) * s;
+        let flip = fr.flip_h != (self.facing < 0.0);
+        out.reserve(list.len());
+        for b in list {
+            let (mut x1, mut x2) = (b[0] * sx, b[2] * sx);
+            if flip { let t = -x2; x2 = -x1; x1 = t; }
+            out.push([self.pos.x + x1, self.pos.y + b[1] * sy, self.pos.x + x2, self.pos.y + b[3] * sy]);
         }
     }
 

@@ -274,3 +274,21 @@ etain_mut.
 - **Wave 45 - Explod Cache Array & Projectile Triangular Collision Sweeps**:
   - `Match::update_explods`: Pre-indexed fighter position and pause states into a compact 8-element stack array, avoiding linear `Fighter` scans per explod.
   - `Match::update_projectiles`: Stack-buffered frozen flags for up to 64 projectiles avoiding heap allocations, and triangular pair-wise collision iteration `(a + 1)..n` halving projectile collision checks.
+
+- **Wave 46 - Collision Box Fast Path & Pre-Scaled Box Geometry**:
+  - `Fighter::boxes`: Early exit for empty collision box lists before computing constants or scale factors (drastically cuts idle/movement frame work).
+  - Pre-scaled X and Y dimensions (`sx * s` and `sy * s`), cutting per-box floating-point multiplications from 8 to 4.
+  - Combined `flip_h != (facing < 0.0)` into a single branchless boolean XOR condition.
+  - `Fighter::c`: Guarded slice search with `!self.size_overrides.is_empty()`.
+
+- **Wave 47 - Stack-Buffered VFS Candidate Joining & Zero-Alloc Suffix Matching**:
+  - `vfs::resolve`: Inlined `with_joined` using a 512-byte stack buffer for `base_dir/name` and `data/name` path candidates, completely eliminating candidate heap allocations on the direct hit path.
+  - Replaced `format!("/{base}")` heap strings with in-place byte boundary predicate `is_match`.
+  - Used `ini::unquote_str` directly instead of allocating owned `unquote` strings.
+  - Sub-microsecond VFS folder fallback on 50k files (0.9 us/op) and reduced character load time (`kfm.def` down to 6.7 ms).
+
+- **Wave 48 - Zero-Alloc HUD Frame Pipeline & Direct Texture Quads**:
+  - `Hud::draw`: Streamlined `main_of` into single-pass iterator scans avoiding dynamic `Vec<&Fighter>` allocations per side.
+  - Used fixed stack array `roots = [r0, r1]` instead of dynamically allocated vectors.
+  - Bypassed partner vector allocations on standard 1v1 matches.
+  - Replaced temporary mesh/vertex/index heap vectors in portrait drawing with direct `draw_texture_ex` quad draws.

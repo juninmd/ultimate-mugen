@@ -221,7 +221,7 @@ impl Fighter {
     pub fn change_anim(&mut self, no: i32, from: &Arc<CharDef>, elem: i32) {
         if no != self.anim_no { self.prev_anim = self.anim_no; }
         let mut real = if from.anims.contains_key(&no) { Some(no) } else { None };
-        if real.is_none() { real = anim_fallback(no).iter().copied().find(|a| from.anims.contains_key(a)); }
+        if real.is_none() { real = crate::anim_fallback::anim_fallback(no).iter().copied().find(|a| from.anims.contains_key(a)); }
         let real = match real {
             Some(r) => r,
             None => {

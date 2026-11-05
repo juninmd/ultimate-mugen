@@ -351,3 +351,9 @@ etain_mut.
   - `ini::parse_ini_opt`: Pre-allocated section output vector with `text.len() / 256 + 4` and section entries with capacity 8.
   - `cns::build_controller`: Pre-allocated controller `params` with capacity matching `s.entries.len()`.
   - `cns::parse_states`: Pre-allocated `StateDef` with `controllers` capacity 16 and `params` capacity matching section entries, eliminating dynamic reallocation during state compilation.
+
+- **Wave 58 - Stack-Buffered Path Normalization, Fast Command Short-Circuits & Copy Symbols**:
+  - `vfs::with_norm_path`: Stack-allocated 512-byte buffer for path normalization and unquoting, eliminating heap allocation across all resource lookups in `vfs::resolve`.
+  - `commands::CmdSymbol`: Derived `Copy` and `PartialEq` for 20-byte bitwise symbol handling.
+  - `commands::held`: Early button bitmask check before invoking relative direction and facing lookups, short-circuiting inactive buttons on the first instruction.
+  - `commands::fires`: Evaluated `now & !prev` before reading older history ticks (`p2`, `p3`), skipping multi-tick history probes on non-firing frames.

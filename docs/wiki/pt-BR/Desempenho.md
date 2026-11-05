@@ -347,3 +347,9 @@ etain_mut.
   - `ini::parse_ini_opt`: Pre-alocacao do vetor de secoes com `text.len() / 256 + 4` e das entradas de cada secao com capacidade 8.
   - `cns::build_controller`: Pre-alocacao de `params` do controlador com a capacidade exata de `s.entries.len()`.
   - `cns::parse_states`: Pre-alocacao de `StateDef` com capacidade de 16 controladores e parametros dimensionados pelas entradas da secao, eliminando realocacoes dinamicas na compilacao de estados.
+
+- **Onda 58 - Normalizacao de Caminhos em Pilha, Atalhos Rapidos de Comandos e Simbolos Copy**:
+  - `vfs::with_norm_path`: Buffer de 512 bytes em pilha para normalizacao e remocao de aspas de caminhos, eliminando alocacoes na heap em todas as consultas de recursos de `vfs::resolve`.
+  - `commands::CmdSymbol`: Implementacao de `Copy` e `PartialEq` para manipulacao binaria de simbolos de 20 bytes.
+  - `commands::held`: Verificacao antecipada de mascara de botoes antes de consultas de direcao relativa e orientacao, descartando botoes inativos na primeira instrucao.
+  - `commands::fires`: Avaliacao de `now & !prev` antes de ler ticks anteriores do historico (`p2`, `p3`), evitando sondagens de historico em frames sem disparo.

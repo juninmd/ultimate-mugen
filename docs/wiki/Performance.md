@@ -255,3 +255,8 @@ un_slice, reducing struct dereference overhead on each trigger and expression re
 - Single-lookup animation frame unpack in `advance_anim`: Unpacks `(total, loop_start, len, ft)` in a single tuple query on `self.anim()`, eliminating repeated HashMap lookups per animated fighter and explod each tick.
 - Empty size-override short-circuit: `fighter::c` immediately queries character constants when `self.size_overrides.is_empty()`, bypassing linear slice scans.
 - Stale target cleanup early continue: `matchs::step` skips target vector moves and retain passes whenever `self.fighters[k].targets.is_empty()`.
+- **Wave 42 - Fast-Path Palette Effects, Stack Frame Buffers & Zero-Alloc Sctrl Queries**:
+  - PalParams::apply: Fast-path bypass for identity and non-hue/non-inverted color transformations, skipping trigonometry and unrolling color channels.
+  - PalFx::from_controller: Zero heap allocations for controller parameter lookups using stack-buffered keys.
+  - Match::tick: Eliminated per-tick Vec<usize> allocations for waken and 	ag_requests by using stack-allocated fixed arrays, and fused filter/decrement loops with 
+etain_mut.

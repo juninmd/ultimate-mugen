@@ -251,3 +251,8 @@ Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes
 - Desempacotamento de quadro de animação em consulta única em `advance_anim`: Desempacota `(total, loop_start, len, ft)` em uma única consulta a `self.anim()`, eliminando buscas repetidas em HashMap por lutador e explod animado a cada tick.
 - Atalho para substituições de tamanho vazias: `fighter::c` consulta diretamente constantes do personagem quando `self.size_overrides.is_empty()`, pulando varreduras lineares na fatia.
 - Limpeza de alvos obsoletos com atalho: `matchs::step` pula movimentações de vetores e chamadas de retenção sempre que `self.fighters[k].targets.is_empty()`.
+- **Onda 42 - Caminho Rápido de Efeitos de Paleta, Buffers de Quadro em Pilha e Consultas Zero-Alloc**:
+  - PalParams::apply: Caminho rápido para transformações idênticas e sem rotação de matiz/inversão, ignorando trigonometria e desenrolando canais de cores.
+  - PalFx::from_controller: Eliminação de alocações na heap para buscas de parâmetros de controladores usando chaves em buffer de pilha.
+  - Match::tick: Remoção de alocações dinâmicas de Vec<usize> por tick para waken e 	ag_requests através de arrays em pilha, unificando loops com 
+etain_mut.

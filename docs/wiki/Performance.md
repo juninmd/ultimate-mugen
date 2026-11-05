@@ -108,3 +108,8 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
   - Replaces nested branching in `input::rel_dirs` with branchless bitwise shift `ud | (4 << (is_back ^ 1))`.
   - Replaces string matching in `button_bit` with byte-level slice matching, supporting case-insensitivity without allocation.
   - Implements branchless facing assignment in `InputHistory::push`.
+
+## Single-op bytecode fast-path & stack-less expression evaluation
+
+- Single-op expression short-circuit: In `bytecode::Code::run`, expressions with exactly one opcode (`Op::Const(v)`, `Op::Trig0(i)`, `Op::Host(i)`) return immediately without stack array zeroing, program counter advancement, or loop dispatch.
+- Zero-cost constant and parameter lookups: Constant numbers and 0-argument triggers (`Time`, `StateTime`, `AnimTime`, `StateNo`, etc.) execute in 1 CPU cycle, avoiding VM frame setup.

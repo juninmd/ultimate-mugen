@@ -115,3 +115,8 @@ In the cloud development environment, warm-run allocations decreased from 2,331 
 - Zero-alloc `find_section`: `ini::find_section` uses `eq_ignore_ascii_case` directly on section names without allocating a lowercase string.
 - Stack-buffered CNS constant parsing: `cns::parse_constants` unpacks comma-separated numeric vectors into a stack-allocated `[f64; 4]` array, eliminating `Vec<f64>` allocations on every constant line.
 - Pre-allocated command definition vector: `cns::parse_cmd` pre-allocates `cmds` capacity to `secs.len()`.
+- **Wave 42 - Fast-Path Palette Effects, Stack Frame Buffers & Zero-Alloc Sctrl Queries**:
+  - PalParams::apply: Fast-path bypass for identity and non-hue/non-inverted color transformations, skipping trigonometry and unrolling color channels.
+  - PalFx::from_controller: Zero heap allocations for controller parameter lookups using stack-buffered keys.
+  - Match::tick: Eliminated per-tick Vec<usize> allocations for waken and 	ag_requests by using stack-allocated fixed arrays, and fused filter/decrement loops with 
+etain_mut.

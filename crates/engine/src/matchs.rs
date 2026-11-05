@@ -680,7 +680,7 @@ impl Match {
                 if self.team_simul || self.team_tag {
                     // a fallen teammate stays down; the round ends only when a whole team is KO'd
                     for &i in &dead { self.fighters[i].alive = false; }
-                    let out = |m: &Match, s: usize| roots.iter().filter(|&&i| m.fighters[i].side == s).all(|&i| m.fighters[i].life <= 0.0);
+                    let out = |m: &Match, s: usize| roots.iter().filter(|&&i| m.fighters[i].side == s).all(|&i| m.fighters[i].life <= 0.0 && !m.fighters[i].has_assert(asf::NOKO));
                     let (o0, o1) = (out(self, 0), out(self, 1));
                     dead = roots.iter().copied().filter(|&i| (self.fighters[i].side == 0 && o0) || (self.fighters[i].side == 1 && o1)).collect();
                 }

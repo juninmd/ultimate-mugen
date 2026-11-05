@@ -37,7 +37,7 @@ Uma flag fora da tabela é ignorada. O carregador imprime uma linha `AssertSpeci
 | `NoAutoTurn`, `NoWalk`, `NoJump`, `NoAirJump`, `NoCrouch`, `NoStand` | Desligam as transições embutidas de virar, andar, pular, pulo duplo, agachar e levantar |
 | `NoHardcodedKeys` | Desliga todas as transições embutidas por tecla (andar, pular, agachar, defender) |
 | `AutoGuard` | Defende como se "trás" estivesse pressionado |
-| `NoKO` | O jogador não leva KO ao chegar a 0 de vida |
+| `NoKO` | O jogador não leva KO ao chegar a 0 de vida; nos modos de equipe, ele também impede a eliminação do time enquanto permanecer em jogo |
 | `NoHitDamage`, `NoGuardDamage` | Golpes / golpes defendidos não tiram vida do jogador |
 | `NoRedLifeDamage` | Golpes não aumentam a vida vermelha do jogador |
 | `NoDizzyPointsDamage` | Golpes não reduzem os pontos de tontura do jogador |

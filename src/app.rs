@@ -195,6 +195,7 @@ impl Team {
     }
 }
 const VIEW_ROWS: usize = 4;
+const SELECT_ROWS: usize = 6;
 const NUMS: [&str; 5] = ["1", "2", "3", "4", "5"];
 
 fn opaque_box(d: &CharDef, key: (i32, i32), s: &ume_engine::chardef::Sprite) -> (f32, f32, f32, f32) {
@@ -1413,7 +1414,7 @@ impl App {
         }
         let m = view.len();
         let pos_of = |view: &[usize], i: usize| view.iter().position(|&v| v == i).unwrap_or(0);
-        let cols = m.div_ceil(VIEW_ROWS).clamp(6, 9);
+        let cols = m.div_ceil(SELECT_ROWS).clamp(6, 10);
         let total_rows = m.div_ceil(cols);
         let two = self.mode == Mode::Versus;
         let coop_mode = self.coop && matches!(self.mode, Mode::Arcade | Mode::Survival);
@@ -1444,10 +1445,10 @@ impl App {
             };
         }
         if is_key_pressed(KeyCode::PageDown) {
-            pos = (pos + cols * VIEW_ROWS).min(m - 1);
+            pos = (pos + cols * SELECT_ROWS).min(m - 1);
         }
         if is_key_pressed(KeyCode::PageUp) {
-            pos = pos.saturating_sub(cols * VIEW_ROWS);
+            pos = pos.saturating_sub(cols * SELECT_ROWS);
         }
         if is_key_pressed(KeyCode::Home) {
             pos = 0;
@@ -1499,10 +1500,10 @@ impl App {
         if crow < self.sel_row {
             self.sel_row = crow;
         }
-        if crow >= self.sel_row + VIEW_ROWS {
-            self.sel_row = crow + 1 - VIEW_ROWS;
+        if crow >= self.sel_row + SELECT_ROWS {
+            self.sel_row = crow + 1 - SELECT_ROWS;
         }
-        self.sel_row = self.sel_row.min(total_rows.saturating_sub(VIEW_ROWS));
+        self.sel_row = self.sel_row.min(total_rows.saturating_sub(SELECT_ROWS));
 
         self.ui.background();
         if self.mode.is_team() {
@@ -1731,12 +1732,12 @@ impl App {
         }
 
         let gap = 6.0;
-        let cw = ((640.0 - (cols as f32 - 1.0) * gap) / cols as f32).min(96.0);
+        let cw = ((660.0 - (cols as f32 - 1.0) * gap) / cols as f32).min(96.0);
         let ch = cw * 1.17;
         let gw = cols as f32 * cw + (cols as f32 - 1.0) * gap;
         let gx = (VW - gw) / 2.0;
         let gy = 110.0;
-        let gh = VIEW_ROWS as f32 * (ch + gap) - gap;
+        let gh = SELECT_ROWS as f32 * (ch + gap) - gap;
         crate::menu_art::glass(&self.ui, gx - 12.0, gy - 12.0, gw + 24.0, gh + 24.0, 1.0);
         self.ui.rect_lines(
             gx - 12.0,
@@ -1748,7 +1749,7 @@ impl App {
         );
         let mut click = None;
         let first = self.sel_row * cols;
-        let last = ((self.sel_row + VIEW_ROWS) * cols).min(m);
+        let last = ((self.sel_row + SELECT_ROWS) * cols).min(m);
         for k in first..last {
             let i = view[k];
             let (cx, cy) = (
@@ -1901,14 +1902,14 @@ impl App {
                 );
             }
         }
-        if total_rows > VIEW_ROWS {
+        if total_rows > SELECT_ROWS {
             let bx = gx + gw + 3.0;
             self.ui
                 .rect(bx, gy, 5.0, gh, Color::new(1.0, 1.0, 1.0, 0.1));
-            let th = (gh * VIEW_ROWS as f32 / total_rows as f32).max(18.0);
+            let th = (gh * SELECT_ROWS as f32 / total_rows as f32).max(18.0);
             self.ui.rect(
                 bx,
-                gy + (gh - th) * self.sel_row as f32 / (total_rows - VIEW_ROWS) as f32,
+                gy + (gh - th) * self.sel_row as f32 / (total_rows - SELECT_ROWS) as f32,
                 5.0,
                 th,
                 hex("#ff4d6d"),
@@ -3201,6 +3202,7 @@ impl App {
             self.c.pressed(nav::START)
                 || is_key_pressed(KeyCode::Escape)
                 || is_key_pressed(KeyCode::P)
+                || (!s.paused && is_key_pressed(KeyCode::Enter))
         };
         let (paused, accept_back) = pause_step(s.paused, pause_btn);
         if pause_btn {
@@ -3388,7 +3390,7 @@ impl App {
         if self.c.pressed(nav::UP) {
             self.pause_cur = (self.pause_cur + items.len() - 1) % items.len();
         }
-        let mut ok = self.c.pressed(nav::OK);
+        let mut ok = accept_back && self.c.pressed(nav::OK);
         draw_rectangle(
             0.0,
             0.0,

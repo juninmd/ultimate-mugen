@@ -14,7 +14,9 @@ fn palette_shading_matches_baked_rgba() {
             let d = load_mugen_char(&vfs, def, pal, true).unwrap();
             let mut checked = 0;
             for (k, ix) in &d.indexed {
-                let (Some(img), Some(p)) = (d.rgba_sprite(*k), ix.palette.as_ref()) else { continue };
+                let Some(p) = ix.palette.as_ref().or_else(|| d.palettes.get(&ix.pal)) else { continue };
+                if p.len() < 1024 { continue; }
+                let Some(img) = d.rgba_sprite(*k) else { continue };
                 assert_eq!(shade(&ix.pixels, p), img.rgba, "{def} pal {pal} sprite {k:?}");
                 checked += 1;
             }

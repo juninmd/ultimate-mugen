@@ -1,11 +1,196 @@
 {
   "frames": {
+    "01_idle": {
+      "axisX": 108.5,
+      "axisY": 307.0,
+      "refHeight": 307.0
+    },
+    "02_attack1": {
+      "axisX": 194.5,
+      "axisY": 294.0,
+      "refHeight": 294.0
+    },
+    "03_attack2": {
+      "axisX": 176.0,
+      "axisY": 303.0,
+      "refHeight": 303.0
+    },
+    "04_special": {
+      "axisX": 176.0,
+      "axisY": 352.0,
+      "refHeight": 352.0
+    },
+    "05_projectile": {
+      "axisX": 222.5,
+      "axisY": 283.0,
+      "refHeight": 283.0
+    },
+    "06_victory": {
+      "axisX": 206.0,
+      "axisY": 321.0,
+      "refHeight": 321.0
+    },
+    "airGuard": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "airGuardHit": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "bar1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "bar2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "bar3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "crouch": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
     },
     "crouch0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "crouch1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "crouchGuard": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "crouchGuardHit": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "dfKneel0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "dfKneel1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "dfLie": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "dfProp": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "dfProp2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "dfReach0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "dfReach1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "dfSit0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "dfSit1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "flip0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "flip1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "flip2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "flip3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "getUp1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "getUp2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "getUp3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "guard": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "guardHit": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitCrouch": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitL1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitL2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitL3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hop": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -30,6 +215,36 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "inline_0172e9bbe547734f": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jumpDown": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jumpStart": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jumpTop": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jumpUp": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "land": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "run0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -46,6 +261,26 @@
       "refHeight": 320.0
     },
     "run3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sup0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "tk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "tk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "turn": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -79,36 +314,6 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
-    },
-    "01_idle": {
-      "axisX": 108.5,
-      "axisY": 307.0,
-      "refHeight": 307.0
-    },
-    "02_attack1": {
-      "axisX": 194.5,
-      "axisY": 294.0,
-      "refHeight": 294.0
-    },
-    "03_attack2": {
-      "axisX": 176.0,
-      "axisY": 303.0,
-      "refHeight": 303.0
-    },
-    "04_special": {
-      "axisX": 176.0,
-      "axisY": 352.0,
-      "refHeight": 352.0
-    },
-    "05_projectile": {
-      "axisX": 222.5,
-      "axisY": 283.0,
-      "refHeight": 283.0
-    },
-    "06_victory": {
-      "axisX": 206.0,
-      "axisY": 321.0,
-      "refHeight": 321.0
     }
   },
   "refHeight": 393

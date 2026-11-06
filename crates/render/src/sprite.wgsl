@@ -38,6 +38,8 @@ fn vs_main(v: VIn) -> VOut {
 
 @fragment
 fn fs_main(v: VOut) -> @location(0) vec4<f32> {
+    let mul = vec4<f32>(v.mul.rgb * 2.0, v.mul.a);
+    let add = vec4<f32>(v.add.rgb, v.add.w * 3.0);
     let direct = textureSample(rgba_tex, samp, v.uv);
     var c = direct;
     if v.pal != 0xffffffffu {
@@ -49,8 +51,8 @@ fn fs_main(v: VOut) -> @location(0) vec4<f32> {
         }
         c = textureLoad(palette, vec2<i32>(idx, i32(v.pal)), 0);
     }
-    let inv = v.add.w >= 1.5;
-    let desat = v.add.w - select(0.0, 2.0, inv);
+    let inv = add.w >= 1.5;
+    let desat = add.w - select(0.0, 2.0, inv);
     var src = c.rgb;
     if inv {
         src = vec3<f32>(1.0) - src;
@@ -63,7 +65,7 @@ fn fs_main(v: VOut) -> @location(0) vec4<f32> {
         let sa = sin(ang);
         src = src * ca + cross(k, src) * sa + k * dot(k, src) * (1.0 - ca);
     }
-    let rgb = clamp(src * v.mul.rgb + v.add.rgb, vec3<f32>(0.0), vec3<f32>(1.0));
-    let a = c.a * v.mul.a;
+    let rgb = clamp(src * mul.rgb + add.rgb, vec3<f32>(0.0), vec3<f32>(1.0));
+    let a = c.a * mul.a;
     return vec4<f32>(rgb * a, a);
 }

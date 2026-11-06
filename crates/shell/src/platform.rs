@@ -19,3 +19,17 @@ pub fn set_window_fullscreen(window: &Window, on: bool) {
     }
     window.set_fullscreen(on.then_some(Fullscreen::Borderless(None)));
 }
+
+/// Prefer the discrete GPU on desktop. `WGPU_POWER_PREF` (`low`, `high`, `none`) overrides it, which is how a laptop
+/// user keeps the integrated GPU on battery; browsers ignore the hint.
+pub fn power_preference() -> wgpu::PowerPreference {
+    wgpu::PowerPreference::from_env().unwrap_or(if cfg!(target_arch = "wasm32") { wgpu::PowerPreference::None } else { wgpu::PowerPreference::HighPerformance })
+}
+
+/// Atlas side per platform: 4096 on desktop (80 MB of VRAM across the two atlases) and 2048 on phones (20 MB).
+/// `UME_ATLAS` overrides it and the device limit always wins, so a small mobile GPU never gets an unsupported texture.
+pub fn atlas_side(max_texture_dimension: u32) -> u32 {
+    let preferred = std::env::var("UME_ATLAS").ok().and_then(|v| v.parse::<u32>().ok()).unwrap_or(if cfg!(any(target_os = "android", target_os = "ios")) { 2048 } else { crate::ATLAS_SIZE });
+    let ceiling = max_texture_dimension.max(256);
+    preferred.clamp(256, ceiling).next_power_of_two().min(ceiling)
+}

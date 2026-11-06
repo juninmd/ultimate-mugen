@@ -31,6 +31,7 @@ mod ui;
 mod update;
 #[cfg(target_arch = "wasm32")]
 mod web_sprites;
+#[cfg(not(target_arch = "wasm32"))]
 mod scan_report;
 mod vfx;
 #[cfg(test)]

@@ -13,3 +13,7 @@ The forced-state 1001 probe completed for baseline and candidate at distances 24
 ## Workspace regression suite
 
 `cargo test --workspace --release` completed successfully (exit 0). Detailed output is retained locally in `.tmp/daichi-workspace-tests.log`. This confirms the branch workspace test suite; continuous motion playback, guard and airborne-target balance checks remain separate pending requirements.
+
+## Locomotion simulation
+
+`native_locomotion_probe` passed: run frames 0/1/2/3 visited, forward displacement 291.13544, zero ground error, final state 0, y=0 and vx=0 after input release. This validates simulation traversal and release, not visual motion continuity.

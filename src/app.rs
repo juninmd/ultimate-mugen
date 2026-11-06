@@ -351,15 +351,63 @@ impl App {
         } // phones: no bloom passes
         ume_engine::native::rig::set_art_res(settings.art_res(Settings::physical_h()));
         Self::boot(&mut ui, 0.15, "Lutadores originais…").await;
-        let mut reg = Registry::new();
-        Self::boot(&mut ui, 0.35, "Pacote Elecbyte (Kung Fu Man)…").await;
-        reg.add_bundled_mugen();
-
-        Self::boot(&mut ui, 0.75, "Procurando pasta mugen/…").await;
         #[cfg(not(target_arch = "wasm32"))]
-        reg.scan_folders();
-        reg.dedupe();
-        reg.sort_mugen();
+        let mut reg = {
+            let progress = Arc::new(crate::registry::ScanProgress::default());
+            let worker = {
+                let progress = progress.clone();
+                std::thread::Builder::new().name("registry-scan".into()).spawn(move || {
+                    let mut reg = Registry::new();
+                    reg.add_bundled_mugen();
+                    reg.scan_folders_with(&progress);
+                    reg.dedupe();
+                    reg.sort_mugen();
+                    reg
+                })
+            };
+            match worker {
+                Ok(worker) => {
+                    // pump the boot screen while the folder index and the roster are built off-thread:
+                    // a M.U.G.E.N collection of a few thousand files used to freeze the window here
+                    let started = get_time();
+                    while !worker.is_finished() {
+                        let (files, chars, stages) = progress.counts();
+                        let secs = (get_time() - started) as f32;
+                        let p = 0.2 + 0.55 * (1.0 - (-secs * 0.12).exp());
+                        Self::boot(
+                            &mut ui,
+                            p,
+                            &format!(
+                                "Catalogando MUGEN: {files} arquivos · {chars} lutadores · {stages} cenários · {secs:.1}s"
+                            ),
+                        )
+                        .await;
+                    }
+                    worker.join().unwrap_or_else(|_| {
+                        let mut reg = Registry::new();
+                        reg.add_bundled_mugen();
+                        reg
+                    })
+                }
+                Err(_) => {
+                    let mut reg = Registry::new();
+                    reg.add_bundled_mugen();
+                    reg.scan_folders();
+                    reg.dedupe();
+                    reg.sort_mugen();
+                    reg
+                }
+            }
+        };
+        #[cfg(target_arch = "wasm32")]
+        let mut reg = {
+            Self::boot(&mut ui, 0.35, "Pacote Elecbyte (Kung Fu Man)…").await;
+            let mut reg = Registry::new();
+            reg.add_bundled_mugen();
+            reg.dedupe();
+            reg.sort_mugen();
+            reg
+        };
         let import_msg = if reg.import_errors.is_empty() {
             String::new()
         } else {
@@ -2780,15 +2828,13 @@ impl App {
                 .pending
                 .stage_job
                 .get_or_insert_with(|| self.reg.prepare_stage(s));
-            match job
-                .as_mut()
-                .poll(&mut std::task::Context::from_waker(std::task::Waker::noop()))
-            {
-                std::task::Poll::Pending => return Ok(false),
-                std::task::Poll::Ready(result) => result?,
+            if !job.ready_now() {
+                return Ok(false);
             }
+            let built = job.take()?;
             self.pending.stage_job = None;
-            self.pending.stage = Some(self.reg.build_stage(s));
+            self.reg.adopt_stage_preview(s, built.preview);
+            self.pending.stage = Some(built.stage);
         } else if st == n + 1 {
             ume_shell::watchdog::label("load:session");
             let stage = self.pending.stage.take().ok_or("stage")?;
@@ -3072,9 +3118,19 @@ impl App {
                 }
                 continue;
             }
-            if let Err(e) = self.load_step(st, true).await {
-                self.abort_load(e);
-                return;
+            loop {
+                match self.load_step(st, false).await {
+                    Ok(true) => break,
+                    Ok(false) => {
+                        self.ui.begin();
+                        self.ui.loading_screen((st as f32 + 0.5) / total as f32, &self.load_label(st));
+                        next_frame().await;
+                    }
+                    Err(e) => {
+                        self.abort_load(e);
+                        return;
+                    }
+                }
             }
         }
         self.finish_fight().await;

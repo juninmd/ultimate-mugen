@@ -125,7 +125,7 @@ pub fn load_mugen_char(
         {
             std::thread::scope(|sc| {
                 let h_sff = sc.spawn(move || {
-                    sprite_buf.map(|buf| crate::perf::time("sff:decode", || decode_sff(buf)))
+                    sprite_buf.map(|buf| crate::perf::time("sff:decode", || decode_sff(&buf)))
                 });
                 let h_anim = sc.spawn(move || {
                     crate::perf::time("air:parse", || {
@@ -133,7 +133,7 @@ pub fn load_mugen_char(
                     })
                 });
                 let h_snd = sc.spawn(move || {
-                    crate::perf::time("snd:decode", || snd_buf.map(decode_snd).unwrap_or_default())
+                    crate::perf::time("snd:decode", || snd_buf.map(|b| decode_snd(&b)).unwrap_or_default())
                 });
                 (
                     h_sff.join().unwrap(),
@@ -144,12 +144,12 @@ pub fn load_mugen_char(
         }
         #[cfg(target_arch = "wasm32")]
         {
-            let sff = sprite_buf.map(|buf| crate::perf::time("sff:decode", || decode_sff(buf)));
+            let sff = sprite_buf.map(|buf| crate::perf::time("sff:decode", || decode_sff(&buf)));
             let anims = crate::perf::time("air:parse", || {
                 anim_buf.map(|b| parse_air(&text(b))).unwrap_or_default()
             });
             let sounds = crate::perf::time("snd:decode", || {
-                snd_buf.map(decode_snd).unwrap_or_default()
+                snd_buf.map(|b| decode_snd(&b)).unwrap_or_default()
             });
             (sff, anims, sounds)
         }
@@ -187,7 +187,7 @@ pub fn load_mugen_char(
         if sff.version == 1 {
             if let Some(a) = fget(pal_k).and_then(|p| resolve(vfs, &base, p)) {
                 if a.len() >= 768 {
-                    over = Some(decode_act(a));
+                    over = Some(decode_act(&a));
                 }
             }
         } else if pal_no != 1 {
@@ -201,7 +201,7 @@ pub fn load_mugen_char(
                 fget(pal_k).and_then(|p| resolve(vfs, &base, p))
             {
                 if a.len() >= 768 {
-                    over = Some(decode_act(a));
+                    over = Some(decode_act(&a));
                 }
             }
         }
@@ -212,7 +212,7 @@ pub fn load_mugen_char(
                 fget("pal1")
                     .and_then(|p| resolve(vfs, &base, p))
                     .filter(|a| a.len() >= 768)
-                    .map(decode_act)
+                    .map(|a| decode_act(&a))
             })
             .or_else(|| sff.palettes.first().map(|p| p.data.to_vec()));
         let shared_key = |s: &ume_formats::sff::DecodedSprite| -> (i32, i32) {
@@ -252,7 +252,7 @@ pub fn load_mugen_char(
                     .and_then(|p| resolve(vfs, &base, p))
                     .filter(|a| a.len() >= 768)
                 {
-                    palettes.insert((1, k), Arc::new(decode_act(a)));
+                    palettes.insert((1, k), Arc::new(decode_act(&a)));
                 }
             }
             let selected = over

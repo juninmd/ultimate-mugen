@@ -60,9 +60,124 @@ pub enum Src {
     Mugen { vfs: Arc<Vfs>, def: String },
 }
 
-pub type StageJob = std::pin::Pin<Box<dyn std::future::Future<Output = Result<(), String>>>>;
+/// A stage being loaded off the render thread (MUGEN stages decode a whole SFF).
+pub struct StageJob {
+    index: usize,
+    #[cfg(not(target_arch = "wasm32"))]
+    thread: Option<std::thread::JoinHandle<Result<StageBuild, String>>>,
+    #[cfg(target_arch = "wasm32")]
+    future: Option<std::pin::Pin<Box<dyn std::future::Future<Output = StageBuild>>>>,
+    immediate: Option<StageBuild>,
+}
+
+pub struct StageBuild {
+    pub stage: Stage,
+    pub preview: Option<Arc<ume_engine::chardef::ImageData>>,
+}
+
+impl StageJob {
+    fn ready(index: usize, build: StageBuild) -> Self {
+        StageJob {
+            index,
+            immediate: Some(build),
+            #[cfg(not(target_arch = "wasm32"))]
+            thread: None,
+            #[cfg(target_arch = "wasm32")]
+            future: None,
+        }
+    }
+    pub fn index(&self) -> usize {
+        self.index
+    }
+    /// True once the stage is built; polls the browser job, never blocks.
+    pub fn ready_now(&mut self) -> bool {
+        if self.immediate.is_some() {
+            return true;
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            self.thread.as_ref().is_some_and(|h| h.is_finished())
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            if let Some(fut) = self.future.as_mut() {
+                let mut cx = std::task::Context::from_waker(std::task::Waker::noop());
+                if let std::task::Poll::Ready(build) = fut.as_mut().poll(&mut cx) {
+                    self.immediate = Some(build);
+                    self.future = None;
+                }
+            }
+            self.immediate.is_some()
+        }
+    }
+    /// Collects the result; call only after [`Self::ready_now`] returned true.
+    pub fn take(&mut self) -> Result<StageBuild, String> {
+        if let Some(b) = self.immediate.take() {
+            return Ok(b);
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            join_stage_thread(self.thread.take())
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            Err("stage job is still pending".into())
+        }
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn join_stage_thread(thread: Option<std::thread::JoinHandle<Result<StageBuild, String>>>) -> Result<StageBuild, String> {
+    let h = thread.ok_or("stage job already collected")?;
+    h.join().unwrap_or_else(|_| Err("stage loader thread panicked".into()))
+}
 
 pub type LoadJob = Option<std::thread::JoinHandle<Result<CharDef, String>>>;
+
+/// Counters shared with the boot screen while the roster is catalogued on a worker thread.
+#[derive(Default)]
+pub struct ScanProgress {
+    pub(crate) files: std::sync::atomic::AtomicUsize,
+    pub(crate) chars: std::sync::atomic::AtomicUsize,
+    pub(crate) stages: std::sync::atomic::AtomicUsize,
+}
+
+impl ScanProgress {
+    pub fn counts(&self) -> (usize, usize, usize) {
+        use std::sync::atomic::Ordering::Relaxed;
+        (self.files.load(Relaxed), self.chars.load(Relaxed), self.stages.load(Relaxed))
+    }
+    fn add(&self, key: &std::sync::atomic::AtomicUsize, n: usize) {
+        use std::sync::atomic::Ordering::Relaxed;
+        key.fetch_add(n, Relaxed);
+    }
+}
+
+/// Resident memory of the process, for the headless startup report.
+pub fn rss_mb() -> f64 {
+    #[cfg(windows)]
+    {
+        #[repr(C)]
+        struct Counters {
+            cb: u32,
+            fault: u32,
+            peak_ws: usize,
+            ws: usize,
+            _rest: [usize; 6],
+        }
+        extern "system" {
+            fn GetCurrentProcess() -> isize;
+            fn K32GetProcessMemoryInfo(p: isize, c: *mut Counters, cb: u32) -> i32;
+        }
+        let mut c = Counters { cb: std::mem::size_of::<Counters>() as u32, fault: 0, peak_ws: 0, ws: 0, _rest: [0; 6] };
+        let ok = unsafe { K32GetProcessMemoryInfo(GetCurrentProcess(), &mut c, c.cb) };
+        if ok == 0 { 0.0 } else { c.ws as f64 / (1024.0 * 1024.0) }
+    }
+    #[cfg(not(windows))]
+    {
+        0.0
+    }
+}
 
 fn build(src: &Src, pal: i32, name: &str) -> Result<CharDef, String> {
     match src {
@@ -154,8 +269,12 @@ impl CharEntry {
         if self.mugen && self.portrait.borrow().is_none() {
             *self.portrait.borrow_mut() = Some(portrait_of(&d));
         }
-        self.cache.borrow_mut().insert(pal, d.clone());
-        self.preview.borrow_mut().remove(&pal);
+        if let Some(old) = self.cache.borrow_mut().insert(pal, d.clone()) {
+            drop_off_thread(old);
+        }
+        if let Some(old) = self.preview.borrow_mut().remove(&pal) {
+            drop_off_thread(old);
+        }
         self.touch();
         Ok(d)
     }
@@ -273,8 +392,28 @@ impl CharEntry {
         });
     }
     pub fn unload(&self) {
-        self.cache.borrow_mut().clear();
-        self.preview.borrow_mut().clear();
+        let full: Vec<Arc<CharDef>> = self.cache.borrow_mut().drain().map(|(_, d)| d).collect();
+        let previews: Vec<Arc<CharDef>> = self.preview.borrow_mut().drain().map(|(_, d)| d).collect();
+        if !full.is_empty() {
+            drop_off_thread(full);
+        }
+        if !previews.is_empty() {
+            drop_off_thread(previews);
+        }
+    }
+}
+
+/// A fighter definition owns hundreds of megabytes of sprite data: releasing it
+/// on the render thread shows up as a multi-hundred-millisecond frame, so the
+/// last reference is dropped by a short-lived worker instead.
+fn drop_off_thread<T: Send + 'static>(value: T) {
+    #[cfg(target_arch = "wasm32")]
+    {
+        drop(value);
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        if std::thread::Builder::new().name("char-free".into()).spawn(move || drop(value)).is_err() {}
     }
 }
 
@@ -301,6 +440,15 @@ pub enum StageSrc {
     Builtin(usize),
     Mugen { vfs: Arc<Vfs>, def: String },
 }
+
+type StagePreviewPayload = (Option<Arc<ume_engine::chardef::ImageData>>, Option<Arc<ume_formats::stage::MugenStage>>);
+
+enum Preview {
+    Unknown,
+    Loading(std::thread::JoinHandle<StagePreviewPayload>),
+    Ready(Option<Arc<ume_engine::chardef::ImageData>>),
+}
+
 pub struct StageEntry {
     pub key: String,
     pub id: String,
@@ -308,7 +456,7 @@ pub struct StageEntry {
     pub thumb: [[u8; 3]; 3],
     pub mugen: bool,
     pub src: StageSrc,
-    preview: RefCell<Option<Option<Arc<ume_engine::chardef::ImageData>>>>,
+    preview: RefCell<Preview>,
     stage: RefCell<Option<Arc<ume_formats::stage::MugenStage>>>,
 }
 
@@ -372,7 +520,7 @@ impl Registry {
                 thumb: s.thumb,
                 mugen: false,
                 src: StageSrc::Builtin(i),
-                preview: RefCell::new(None),
+                preview: RefCell::new(Preview::Unknown),
                 stage: RefCell::new(None),
             })
             .collect();
@@ -471,8 +619,16 @@ impl Registry {
     ) -> (Vec<String>, Vec<String>, Vec<String>) {
         let vfs = Arc::new(vfs);
         let (mut cs, mut ss, mut errs) = (vec![], vec![], vec![]);
-        for def in find_char_defs(&vfs) {
-            let secs = parse_ini(&text(vfs.get(&def).map(|v| v.as_slice()).unwrap_or(&[])));
+        // roster identity kept in sets: a linear scan per imported fighter is
+        // quadratic and dominates the startup of large collections
+        let mut char_ids: std::collections::HashSet<String> = self.chars.iter().map(|c| c.id.clone()).collect();
+        let mut char_keys: std::collections::HashSet<String> = self.chars.iter().map(|c| c.key.clone()).collect();
+        let mut stage_ids: std::collections::HashSet<String> = self.stages.iter().map(|s| s.id.clone()).collect();
+        let mut stage_keys: std::collections::HashSet<String> = self.stages.iter().map(|s| s.key.clone()).collect();
+        let char_defs = find_char_defs(&vfs);
+        // header parse and content key hit different files: fan the I/O out
+        let chart: Vec<(String, String, String)> = ume_formats::par::map(&char_defs, |def| {
+            let secs = parse_ini(&vfs.get(def).map(|v| text(&v)).unwrap_or_default());
             let info = find_section(&secs, "info");
             let mut name = info
                 .and_then(|s| s.get("displayname").or(s.get("name")))
@@ -487,14 +643,16 @@ impl Registry {
                 .and_then(|s| s.get("author"))
                 .map(unquote)
                 .unwrap_or_default();
+            (name, author, char_key(&vfs, def))
+        });
+        for (def, (name, author, key)) in char_defs.into_iter().zip(chart) {
             let id = format!("mugen:{tag}:{def}");
-            let key = char_key(&vfs, &def);
-            if self.chars.iter().any(|c| c.id == id || c.key == key) {
+            if char_ids.contains(&id) || char_keys.contains(&key) {
                 continue;
             }
             let e = CharEntry {
-                key,
-                id,
+                key: key.clone(),
+                id: id.clone(),
                 name: name.clone(),
                 series: "M.U.G.E.N".into(),
                 author,
@@ -516,6 +674,8 @@ impl Registry {
                 sprite_revision: Cell::new(0),
             };
             if !validate {
+                char_ids.insert(id);
+                char_keys.insert(key);
                 self.chars.push(e);
                 cs.push(name);
                 continue;
@@ -523,27 +683,34 @@ impl Registry {
             match e.load(1) {
                 Ok(_) => {
                     e.unload();
+                    char_ids.insert(id);
+                    char_keys.insert(key);
                     self.chars.push(e);
                     cs.push(name);
                 }
                 Err(x) => errs.push(format!("{def}: {x}")),
             }
         }
-        for def in find_stage_defs(&vfs) {
+        let stage_defs = find_stage_defs(&vfs);
+        let stages_meta: Vec<(String, String)> = ume_formats::par::map(&stage_defs, |def| {
+            let secs = parse_ini(&vfs.get(def).map(|v| text(&v)).unwrap_or_default());
+            let info = find_section(&secs, "info");
+            let name = info
+                .and_then(|s| s.get("displayname").or(s.get("name")))
+                .map(unquote)
+                .filter(|s| !s.is_empty())
+                .unwrap_or(def.clone());
+            (name, stage_key(&vfs, def))
+        });
+        for (def, (name, key)) in stage_defs.into_iter().zip(stages_meta) {
             let id = format!("mugenstage:{tag}:{def}");
-            let key = stage_key(&vfs, &def);
-            if self.stages.iter().any(|s| s.id == id || s.key == key) {
+            if stage_ids.contains(&id) || stage_keys.contains(&key) {
                 continue;
             }
             if !validate {
-                let secs = parse_ini(&text(vfs.get(&def).map(|v| v.as_slice()).unwrap_or(&[])));
-                let info = find_section(&secs, "info");
-                let name = info
-                    .and_then(|s| s.get("displayname").or(s.get("name")))
-                    .map(unquote)
-                    .filter(|s| !s.is_empty())
-                    .unwrap_or(def.clone());
                 ss.push(name.clone());
+                stage_ids.insert(id.clone());
+                stage_keys.insert(key.clone());
                 self.stages.push(StageEntry {
                     key,
                     id,
@@ -554,7 +721,7 @@ impl Registry {
                         vfs: vfs.clone(),
                         def,
                     },
-                    preview: RefCell::new(None),
+                    preview: RefCell::new(Preview::Unknown),
                     stage: RefCell::new(None),
                 });
                 continue;
@@ -564,6 +731,8 @@ impl Registry {
                     let prev = stages::mugen_preview(&st);
                     let arc_st = Arc::new(st);
                     ss.push(arc_st.name.clone());
+                    stage_ids.insert(id.clone());
+                    stage_keys.insert(key.clone());
                     self.stages.push(StageEntry {
                         key,
                         id,
@@ -574,7 +743,7 @@ impl Registry {
                             vfs: vfs.clone(),
                             def,
                         },
-                        preview: RefCell::new(Some(prev)),
+                        preview: RefCell::new(Preview::Ready(prev)),
                         stage: RefCell::new(Some(arc_st)),
                     });
                 }
@@ -632,8 +801,8 @@ impl Registry {
     /// Imported fighters sorted by name (stable, natives keep their curated order).
     pub fn sort_mugen(&mut self) {
         let n = self.chars.iter().take_while(|c| !c.mugen).count();
-        self.chars[n..].sort_by_key(|c| c.name.to_lowercase());
-        self.stages.sort_by_key(|s| {
+        self.chars[n..].sort_by_cached_key(|c| c.name.to_lowercase());
+        self.stages.sort_by_cached_key(|s| {
             (
                 s.mugen,
                 if s.mugen {
@@ -667,43 +836,149 @@ impl Registry {
             None
         }
     }
+    /// Cached 320x180 thumbnail. A MUGEN stage is decoded on a worker thread the
+    /// first time a tile needs it, so scrolling the stage grid never decodes a
+    /// whole stage SFF (with its art) inside one frame.
     pub fn stage_preview(&self, i: usize) -> Option<Arc<ume_engine::chardef::ImageData>> {
-        match &self.stages.get(i)?.src {
-            StageSrc::Builtin(b) => stages::illustration_preview(&self.builtin_stages[*b].id),
-            StageSrc::Mugen { .. } => {
-                if let Some(p) = self.stages[i].preview.borrow().as_ref() {
+        let entry = self.stages.get(i)?;
+        match &entry.src {
+            StageSrc::Builtin(b) => {
+                if let Preview::Ready(p) = &*entry.preview.borrow() {
                     return p.clone();
                 }
-                let st = self.get_or_load_stage(i);
-                let p = st.as_ref().and_then(|s| stages::mugen_preview(s));
-                *self.stages[i].preview.borrow_mut() = Some(p.clone());
+                let p = stages::illustration_preview(&self.builtin_stages[*b].id);
+                *entry.preview.borrow_mut() = Preview::Ready(p.clone());
                 p
+            }
+            StageSrc::Mugen { vfs, def } => {
+                let mut slot = entry.preview.borrow_mut();
+                match std::mem::replace(&mut *slot, Preview::Unknown) {
+                    Preview::Ready(p) => {
+                        *slot = Preview::Ready(p.clone());
+                        return p;
+                    }
+                    Preview::Loading(h) if h.is_finished() => {
+                        let (p, stage) = h.join().ok()?;
+                        if let Some(st) = stage {
+                            *entry.stage.borrow_mut() = Some(st);
+                        }
+                        *slot = Preview::Ready(p.clone());
+                        return p;
+                    }
+                    Preview::Loading(h) => {
+                        *slot = Preview::Loading(h);
+                        return None;
+                    }
+                    Preview::Unknown => {}
+                }
+                drop(slot);
+                #[cfg(target_arch = "wasm32")]
+                {
+                    let st = self.get_or_load_stage(i);
+                    let p = st.as_ref().and_then(|s| stages::mugen_preview(s));
+                    *entry.preview.borrow_mut() = Preview::Ready(p.clone());
+                    p
+                }
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    let (vfs, def) = (vfs.clone(), def.clone());
+                    let job = std::thread::Builder::new().name("stage-preview".into()).spawn(move || {
+                        match load_stage(&vfs, &def) {
+                            Ok(st) => {
+                                let arc = Arc::new(st);
+                                (stages::mugen_preview(&arc), Some(arc))
+                            }
+                            Err(_) => (None, None),
+                        }
+                    });
+                    if let Ok(job) = job {
+                        *entry.preview.borrow_mut() = Preview::Loading(job);
+                    }
+                    None
+                }
             }
         }
     }
+    /// Builds the stage off the render thread. MUGEN stages decode their sprite
+    /// bank (tens of MB) here, which used to happen inside a single frame.
     pub fn prepare_stage(&self, i: usize) -> StageJob {
-        #[cfg(target_arch = "wasm32")]
-        if let StageSrc::Builtin(b) = &self.stages[i].src {
-            let id = self.builtin_stages[*b].id.clone();
-            return Box::pin(async move { stages::prepare_illustration(&id).await });
+        match &self.stages[i].src {
+            StageSrc::Builtin(b) => {
+                #[cfg(target_arch = "wasm32")]
+                {
+                    let (id, idx) = (self.builtin_stages[*b].id.clone(), *b);
+                    return StageJob {
+                        index: i,
+                        future: Some(Box::pin(async move {
+                            let _ = stages::prepare_illustration(&id).await;
+                            StageBuild { stage: (stages::builtin()[idx].build)(), preview: None }
+                        })),
+                        immediate: None,
+                    };
+                }
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    StageJob::ready(i, StageBuild { stage: (self.builtin_stages[*b].build)(), preview: None })
+                }
+            }
+            StageSrc::Mugen { vfs, def } => {
+                #[cfg(not(target_arch = "wasm32"))]
+                if let Some(cached) = self.stages[i].stage.borrow().as_ref() {
+                    let mut st = stages::from_mugen((**cached).clone());
+                    st.bgm = stage_bgm(vfs, def).map(Arc::new);
+                    return StageJob::ready(i, StageBuild { stage: st, preview: None });
+                }
+                let (vfs, def) = (vfs.clone(), def.clone());
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    let job = std::thread::Builder::new().name("stage-load".into()).spawn(move || {
+                        let mugen = match load_stage(&vfs, &def) {
+                            Ok(s) => s,
+                            Err(e) => return Err(e),
+                        };
+                        let preview = stages::mugen_preview(&mugen);
+                        let mut stage = stages::from_mugen(mugen);
+                        stage.bgm = stage_bgm(&vfs, &def).map(Arc::new);
+                        Ok(StageBuild { stage, preview })
+                    });
+                    return match job {
+                        Ok(thread) => StageJob { index: i, thread: Some(thread), immediate: None },
+                        Err(e) => {
+                            eprintln!("stage thread: {e}");
+                            StageJob::ready(i, StageBuild { stage: (self.builtin_stages[0].build)(), preview: None })
+                        }
+                    };
+                }
+                #[cfg(target_arch = "wasm32")]
+                {
+                    let stage = match load_stage(&vfs, &def) {
+                        Ok(s) => stages::from_mugen(s),
+                        Err(_) => (self.builtin_stages[0].build)(),
+                    };
+                    StageJob::ready(i, StageBuild { stage, preview: None })
+                }
+            }
         }
-        let _ = i;
-        Box::pin(async { Ok(()) })
+    }
+    /// Registered once a [`StageJob`] finishes, so the stage grid reuses it.
+    pub fn adopt_stage_preview(&self, i: usize, preview: Option<Arc<ume_engine::chardef::ImageData>>) {
+        if let Some(e) = self.stages.get(i) {
+            if preview.is_some() {
+                *e.preview.borrow_mut() = Preview::Ready(preview);
+            }
+        }
+    }
+    /// True once the thumbnail job finished (with or without art), so callers can
+    /// tell "still decoding" from "this stage has no preview".
+    pub fn preview_settled(&self, i: usize) -> bool {
+        let Some(e) = self.stages.get(i) else { return false };
+        let settled = matches!(&*e.preview.borrow(), Preview::Ready(_));
+        settled
     }
     pub fn build_stage(&self, i: usize) -> Stage {
         match &self.stages[i].src {
             StageSrc::Builtin(b) => (self.builtin_stages[*b].build)(),
-            StageSrc::Mugen { vfs, def } => match self.get_or_load_stage(i) {
-                Some(s) => {
-                    if self.stages[i].preview.borrow().is_none() {
-                        *self.stages[i].preview.borrow_mut() = Some(stages::mugen_preview(&s));
-                    }
-                    let mut st = stages::from_mugen((*s).clone());
-                    st.bgm = stage_bgm(vfs, def).map(Arc::new);
-                    st
-                }
-                None => (self.builtin_stages[0].build)(),
-            },
+            StageSrc::Mugen { .. } => (self.builtin_stages[0].build)(),
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -735,6 +1010,13 @@ impl Registry {
     }
     #[cfg(not(target_arch = "wasm32"))]
     pub fn scan_folders(&mut self) -> usize {
+        self.scan_folders_with(&ScanProgress::default())
+    }
+
+    /// Same as [`Self::scan_folders`], reporting progress so the boot screen can
+    /// stay animated while a large collection is catalogued.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn scan_folders_with(&mut self, progress: &ScanProgress) -> usize {
         let mut n = 0;
         let exe_dir = std::env::current_exe()
             .ok()
@@ -763,9 +1045,12 @@ impl Registry {
             }
             let mut vfs = Vfs::new();
             match ume_formats::vfs::add_dir(&mut vfs, &d, "") {
-                Ok(_) => {
+                Ok(files) => {
+                    progress.add(&progress.files, files);
                     let (c, s, errs) = self.add_vfs_lazy(vfs, &d.to_string_lossy());
                     n += c.len() + s.len();
+                    progress.add(&progress.chars, c.len());
+                    progress.add(&progress.stages, s.len());
                     self.import_errors
                         .extend(errs.into_iter().map(|e| format!("{}: {e}", d.display())));
                 }
@@ -793,7 +1078,7 @@ pub fn read_zip_with_progress(
     ume_formats::vfs::add_zip_with_progress(&mut vfs, bytes, "", progress)?;
     if ume_formats::perf::enabled() {
         let mut by_ext: HashMap<String, (usize, usize)> = HashMap::new();
-        for (k, v) in &vfs {
+        for (k, v) in vfs.iter() {
             let ext = k.rsplit_once('.').map(|(_, e)| e.to_string()).unwrap_or_else(|| "(none)".into());
             let e = by_ext.entry(ext).or_default();
             e.0 += 1;
@@ -950,20 +1235,28 @@ mod tests {
             .map(|(i, _)| i)
             .collect();
         assert!(!mugen_indices.is_empty());
+        let mut produced = 0;
         for i in mugen_indices {
-            let p1 = reg
-                .stage_preview(i)
-                .unwrap_or_else(|| panic!("missing preview for {}", reg.stages[i].id));
-            let p2 = reg.stage_preview(i).unwrap();
-            assert_eq!(p1.id, p2.id);
-            assert_eq!((p1.w, p1.h), (320, 180));
-            assert!(p1
-                .rgba
-                .as_chunks::<4>()
-                .0
-                .iter()
-                .any(|px| px[..3] != [20, 20, 30]));
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+            let bundled = reg.stages[i].id.contains(":bundled:");
+            loop {
+                if let Some(p) = reg.stage_preview(i) {
+                    assert_eq!((p.w, p.h), (320, 180));
+                    assert!(p.rgba.as_chunks::<4>().0.iter().any(|px| px[..3] != [20, 20, 30]));
+                    assert_eq!(reg.stage_preview(i).unwrap().id, p.id, "preview must be cached");
+                    produced += 1;
+                    break;
+                }
+                // folder content may legitimately have no drawable layer: it must
+                // still finish instead of spinning on the worker
+                if reg.preview_settled(i) && !bundled {
+                    break;
+                }
+                assert!(std::time::Instant::now() < deadline, "missing preview for {}", reg.stages[i].id);
+                std::thread::sleep(std::time::Duration::from_millis(5));
+            }
         }
+        assert!(produced > 0, "no stage produced a thumbnail");
     }
 
     #[test]

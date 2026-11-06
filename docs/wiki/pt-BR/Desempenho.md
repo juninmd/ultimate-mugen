@@ -96,7 +96,29 @@ Regra: a thread de render nunca espera disco, decodificação, parsing ou sínte
 | Síntese da música do cenário (17-31 ms) | `Audio::music_ready` em worker |
 | Tela de vitória | usa a definição em cache (`peek`), nunca carrega |
 
-Watchdog de quadros: `UME_WATCHDOG=1` registra todo quadro acima de `UME_HITCH_MS` (padrão 50) com o rótulo ativo (`ume_shell::watchdog::label("load:stage")`) e, ao sair, um resumo com o pior quadro.
+Watchdog de quadros: `UME_WATCHDOG=1` registra todo quadro acima de `UME_HITCH_MS` (padrão 50) com o bloco que segurou a CPU (`ume_shell::watchdog::label("load:stage")`) e, ao sair, um resumo com o pior quadro. Cada quadro é atribuído ao seu segmento mais lento, não ao último rótulo definido, então a contabilidade final não esconde um passo de carregamento lento. Rótulos em uso: `select:reap`, `select:preview`, `select:grid`, `load:character`, `load:stage`, `load:session`, `load:audio`, `load:sprites`, `fight:prefetch`, `import`.
+
+## Inicialização com coleções M.U.G.E.N grandes
+
+Abrir uma pasta lia todos os arquivos para a memória: uma coleção de 15.000 arquivos (4,5 GB de SFF, 3,4 GB de SND) levava 338 s e 10,2 GB de memória residente antes da tela de título, e o Windows marca uma janela como "não está respondendo" após 5 s sem bombear mensagens.
+
+| Técnica | Onde | Efeito |
+|---|---|---|
+| Índice de pasta preguiçoso | `ume_formats::vfs::add_dir` | Percorre só metadados (caminho + tamanho) e lê o arquivo quando ele é usado. Zips dentro da pasta são indexados pelo registro final e diretório central, nunca descompactados de antemão |
+| Cache de cargas pequenas | `vfs::File` | Leituras de até 4 MiB ficam para reuso (def, CNS, AIR); bancos de sprite e som são lidos uma vez por uso em vez de ficarem presos a sessão inteira |
+| Chave de conteúdo amostrada | `vfs::File::signature` | A identidade de personagem/cenário usa tamanho + amostras do início e do fim em vez do banco de sprites inteiro, então o mesmo lutador copiado para outra pasta continua sendo deduplicado |
+| Descoberta e chave em paralelo | `find_char_defs`, `find_stage_defs`, `Registry::add_vfs_inner` | Cabeçalhos de def e chaves de conteúdo são calculados com `ume_formats::par::map` (até 8 workers) |
+| Roster fora da thread principal | `App::new` | `Registry::new` + `scan_folders` + `dedupe` + `sort_mugen` rodam na thread `registry-scan` enquanto a tela de boot continua desenhando quadros |
+| Deduplicação por conjunto | `Registry::add_vfs_inner` | Ids e chaves do roster ficam em `HashSet`; a varredura linear por lutador era quadrática |
+| Thumbnail de cenário assíncrono | `Registry::stage_preview` | O primeiro tile que precisa de um cenário MUGEN dispara um worker; antes o cenário inteiro (SFF + RGBA) era decodificado no quadro em que a grade rolava até ele |
+| Montagem do cenário fora da thread | `Registry::prepare_stage` | O cenário é carregado, o preview é gerado e o BGM é localizado no worker `stage-load`; a tela de VS consulta o resultado |
+| Liberação fora da thread | `Registry::drop_off_thread` | Descartar uma definição de lutador (centenas de MB de sprites) acontece no worker `char-free`, não dentro de um quadro |
+| Carregamento que bombeia quadros | `App::start_fight` | Revanche e tour desenham a tela de carregamento e bombeiam quadros enquanto os workers terminam, então a janela continua respondendo às mensagens do Windows |
+
+`ultimate-mugen --scan-report` imprime o custo de inicialização sem janela (`bundled | scan | total | roster | RSS`).
+`cargo run --release -p ume-formats --example scan_bench -- <mugen_dir>` mede índice, descoberta e chave separadamente.
+
+Referência (Windows, 32 GB de RAM, cache do sistema aquecido): uma coleção de 15.053 entradas com 723 personagens e 137 cenários passou de **338 s e 10.192 MB** para **0,89 s e 33 MB**. Com o watchdog de quadros ligado, catalogar esse roster não registrou nenhum quadro acima de 100 ms; só a indexação caiu de 337,9 s para 0,83 s, a descoberta de 4,31 s para 0,02 s e a geração de chaves de 716 lutadores de 11,0 s para 0,19 s. Conteúdo MUGEN de pasta (210 `.def`, 4,5 GB de `.sff`) continua carregando e lutando: `mugen_check mugen/chars/Sukuna` reporta 1773 sprites em 232 ms.
 
 ## Busca no sistema de arquivos virtual
 

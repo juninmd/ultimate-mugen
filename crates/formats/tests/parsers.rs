@@ -145,8 +145,8 @@ fn zip_round_trip_and_discovery() {
     let mut vfs = Vfs::new();
     let n = add_zip(&mut vfs, &zip, "").unwrap();
     assert_eq!(n, 4);
-    assert_eq!(vfs["test/t.def"], def.to_vec());
-    assert_eq!(vfs["test/t.sff"], big);
+    assert_eq!(vfs.get("test/t.def").unwrap().to_vec(), def.to_vec());
+    assert_eq!(vfs.get("test/t.sff").unwrap().to_vec(), big);
     assert_eq!(find_char_defs(&vfs), vec!["test/t.def"]);
     assert_eq!(find_stage_defs(&vfs), vec!["test/stage.def"]);
     assert_eq!(resolve(&vfs, "test", "sub\\T.air").map(|b| b.len()), Some("[Begin Action 0]\n0,0,0,0,1\n".len()));
@@ -357,7 +357,7 @@ fn folder_fallback_prefers_character_subtree_over_prefix_siblings() {
         ("chars/kfm/nested/fight.air".into(), vec![2]),
         ("shared/common.cns".into(), vec![3]),
     ]);
-    assert_eq!(resolve(&vfs, "Chars\\KFM", "wrong/fight.air"), Some(&[2][..]));
-    assert_eq!(resolve(&vfs, "chars/kfm", "common.cns"), Some(&[3][..]));
-    assert_eq!(resolve(&vfs, "", "fight.air"), Some(&[1][..]));
+    assert_eq!(resolve(&vfs, "Chars\\KFM", "wrong/fight.air").map(|b| b.to_vec()), Some(vec![2]));
+    assert_eq!(resolve(&vfs, "chars/kfm", "common.cns").map(|b| b.to_vec()), Some(vec![3]));
+    assert_eq!(resolve(&vfs, "", "fight.air").map(|b| b.to_vec()), Some(vec![1]));
 }

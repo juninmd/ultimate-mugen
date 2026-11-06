@@ -3381,7 +3381,7 @@ pub struct StageEntry {
     pub id: String,
     pub name: String,
     pub thumb: [[u8; 3]; 3],
-    pub build: Box<dyn Fn() -> Stage>,
+    pub build: Box<dyn Fn() -> Stage + Send + Sync>,
 }
 
 pub fn builtin() -> Vec<StageEntry> {

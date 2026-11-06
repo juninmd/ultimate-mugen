@@ -179,7 +179,7 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 
 ## Pixel-art sprites (optional)
 
-If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files instead of the rig. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size for every file of one fighter. A pose without a PNG falls back to `01_idle.png`; a fighter without the folder keeps its rig.
+If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files instead of the rig. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size for every file of one fighter. A pose without a PNG falls back to `01_idle.png`; a fighter without the folder keeps its rig. After extending the rig, run `cargo run --release -p ume-engine --example generate_missing_sprites` to render a dedicated PNG for every pose the loader would otherwise take from the idle canvas.
 
 | File | Poses that use it |
 |---|---|

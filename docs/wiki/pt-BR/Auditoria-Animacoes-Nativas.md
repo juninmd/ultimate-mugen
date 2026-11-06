@@ -1,20 +1,45 @@
 # Cobertura de animações nativas
 
-Esta entrega é parcial. Ela atualiza artes e o carregador, mas não completa o conjunto de animações do elenco nativo.
+Esta entrega completa a arte dedicada de poses do elenco nativo: todo quadro de animação que o motor
+consegue nomear resolve para o próprio arquivo PNG. Os canvases numerados compartilhados (`09_hit1`,
+`13_fall2`, ...) continuam atendendo os aliases legados, e quadros de efeito puramente procedurais
+(`boltHit`, feixes) ficam renderizados pelo motor por design; ambos são resoluções aprovadas, não lacunas.
 
 ## Incluído nesta etapa
 
-- Imagem dedicada `portrait.png` para os dezesseis lutadores. O seletor usa essas imagens nos cartões e o HUD as prioriza nos retratos.
-- 156 novos quadros de movimento instalados para Kaito e parte do elenco: idle, caminhada, corrida, agachamento, salto, defesa, dano, recuperação e ataques. A cobertura varia por lutador; essa contagem não significa que cada sequência esteja completa.
-- O carregador nativo respeita a altura declarada positiva de cada lutador. Os campos opcionais `refHeight`, `axisX` e `axisY` por quadro alinham escala e apoio dos pés das novas artes.
-- Efeitos procedurais deixaram de reutilizar a arte idle do lutador. A auditoria nativa aponta reutilizações e quadros ausentes.
+- As imagens dedicadas `portrait.png` dos dezesseis lutadores seguem nos cartões do seletor e no HUD.
+- Toda pose textual referenciada por uma animação tem PNG dedicado em `assets/chars/sprites/<id>/`,
+  incluindo defesa, agachamento, salto, flip, turn, land, vitória, intro, taunt, o conjunto de derrotas
+  `df*` e as poses de dano baixo que antes reutilizavam idle. Poses inline têm o quadro `inline_<hash>`
+  renderizado uma única vez.
+- A ferramenta de regeneração é `cargo run --release -p ume-engine --example generate_missing_sprites`.
+  Ela mescla as poses de `crates/engine/src/native/defaults.json` com a tabela de cada personagem,
+  renderiza as poses que faltam pelo rig e escreve quadros 400x400 com eixo (200, 392) e metadado
+  `refHeight` 320, seguindo a convenção existente. Varre `assets/chars`, as pastas de varredura `umf/`
+  e `mugen/umf` e `UME_UMF_DIR`: criar um personagem UMF novo e rodar o comando já entrega o conjunto
+  de sprites. Só são aceitos ids e nomes de quadro como identificadores simples, e a passagem impõe
+  limites de tamanho de origem e de quantidade de quadros por personagem, porque o JSON UMF
+  varrido é conteúdo importado pelo usuário.
+- Verificação: `cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> --require-complete`
+  deve passar para todos os lutadores, e `python scripts/audit_native_sprites.py --out <report.json>` deve
+  ficar limpo em geometria e bordas alfa. O `python scripts/native_sprite_coverage.py` reproduz as regras de
+  resolução em Python sem compilar o motor.
 
-## Lacunas conhecidas
+## Ciclo de QA com sprite-gen
 
-Muitas animações ainda usam poses compartilhadas ou idle, e a quantidade de quadros varia entre os personagens. Caminhada para frente e para trás, corrida, dano, transformação, salto, defesa, recuperação, ataques e vitória ainda não têm sequências completas para todos. Algumas poses inline não possuem PNG correspondente e continuam usando o fallback de compatibilidade. A presença do retrato não comprova sua qualidade visual em todos os cartões e estados do HUD.
+A skill [sprite-gen](https://github.com/aldegad/sprite-gen) segue como ferramenta oficial de QA de qualidade
+artística nos loops nativos, sem exigir credenciais de geração de imagem:
 
-A sonda `native-coverage` captura uma comparação de altura com câmera fixa e quadros individuais de idle, caminhada, recuo, corrida, dano e transformação. Ela seleciona os quadros diretamente; não comprova gatilhos naturais de jogo nem fluidez. Se faltar uma animação exigida, a sonda falha informando personagem e ID.
+- `python scripts/native_motion_descriptor.py --character assets/chars/<id>.json --sprites assets/chars/sprites/<id> --animation walk --out walk.json`
+- `sprite-gen inspect-motion --source walk.json --out walk-report.json` mede âncoras, quadros duplicados,
+  deriva da caixa e contato com as bordas; contato de pé exige `--contacts` e `--foot-box` explícitos.
+- `scripts/preview_native_motion.py` e `scripts/preview_native_scene.py` renderizam GIFs e MP4s de revisão
+  com os estágios do sprite-gen. Veja [Importação de Sprite Atlas](Importacao-Sprite-Atlas.md) pelo caminho
+  de importação component-row quando se quiser arte gerada por IA.
 
-Use o exemplo `native_sprite_audit` para comparar arquivos resolvidos e imagens distintas por pixels. Use `scripts/audit_native_sprites.py` para inventariar dimensões e transparência dos PNGs. Nenhum inventário substitui a inspeção visual ou testar as animações jogando.
+## Limites conhecidos
 
-A geometria por quadro é opcional. `refHeight` é a altura em pixels da origem que representa a escala nominal em pé; os eixos são âncoras nos pixels da origem. O carregador aplica a resolução de arte depois desses valores.
+Inventários e relatórios de auditoria não comprovam que as animações ocorrem naturalmente em partida:
+gatilhos de estado, fluidez de transição e ajuste das hitboxes precisam ser validados no Treino. Recores são
+aplicados no carregamento pelo sistema de paletas, então a conferência visual deve cobrir cada paleta de um
+lutador, não apenas a primeira.

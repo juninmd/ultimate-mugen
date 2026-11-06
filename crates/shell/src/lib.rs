@@ -186,6 +186,7 @@ async fn init_live(instance: wgpu::Instance, window: Arc<Window>) -> Result<Live
     let caps = surface.get_capabilities(&adapter);
     if let Some(f) = caps.formats.iter().copied().find(|f| !f.is_srgb()) { config.format = f; }
     if caps.usages.contains(wgpu::TextureUsages::COPY_SRC) { config.usage |= wgpu::TextureUsages::COPY_SRC; }
+    config.desired_maximum_frame_latency = platform::frame_latency();
     surface.configure(&device, &config);
     let side = ATLAS_SIZE.min(device.limits().max_texture_dimension_2d);
     let renderer = Renderer::new(&device, &queue, config.format, [side, side]);

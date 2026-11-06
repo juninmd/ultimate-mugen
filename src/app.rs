@@ -195,7 +195,7 @@ impl Team {
     }
 }
 const VIEW_ROWS: usize = 4;
-const SELECT_ROWS: usize = 6;
+const SELECT_ROWS: usize = 7;
 const NUMS: [&str; 5] = ["1", "2", "3", "4", "5"];
 
 fn opaque_box(d: &CharDef, key: (i32, i32), s: &ume_engine::chardef::Sprite) -> (f32, f32, f32, f32) {
@@ -1524,18 +1524,6 @@ impl App {
                 .map(|c| c.name.to_uppercase())
                 .collect();
         }
-        let ns = self.reg.stages.len();
-        if ns > 0 {
-            if is_key_pressed(KeyCode::RightBracket) || self.clicked_rect(742.0, 10.0, 38.0, 62.0) {
-                self.sel.2 = (self.sel.2 + 1) % ns;
-                self.audio.sfx("select");
-            }
-            if is_key_pressed(KeyCode::LeftBracket) || self.clicked_rect(500.0, 10.0, 38.0, 62.0) {
-                self.sel.2 = (self.sel.2 + ns - 1) % ns;
-                self.audio.sfx("select");
-            }
-            self.sel.2 = self.sel.2.min(ns - 1);
-        }
         let accents = [hex("#3fa9ff"), hex("#ff4d6d")];
         let active = [picking == 0 || picked[0].is_some(), picking == 1];
         let s_ui = self.ui.s;
@@ -1638,63 +1626,6 @@ impl App {
             Align::Right,
             false,
         );
-        if ns > 0 {
-            let (sx, sy, sw, sh) = (500.0, 10.0, 280.0, 62.0);
-            crate::menu_art::glass(&self.ui, sx, sy, sw, sh, 1.0);
-            self.ui
-                .rect_lines(sx, sy, sw, sh, 1.0, Color::new(1.0, 1.0, 1.0, 0.18));
-            if let Some(image) = self.reg.stage_preview(self.sel.2) {
-                let texture = self.g.texture(&image, true);
-                let (iw, ih) = (image.w as f32, image.h as f32);
-                let ch_src = (iw * 50.0 / 72.0).min(ih);
-                let cw_src = ch_src * 72.0 / 50.0;
-                draw_texture_ex(
-                    &texture,
-                    self.ui.x(sx + 44.0),
-                    self.ui.y(sy + 6.0),
-                    WHITE,
-                    DrawTextureParams {
-                        dest_size: Some(vec2(72.0 * s_ui, 50.0 * s_ui)),
-                        source: Some(Rect::new(
-                            (iw - cw_src) * 0.5,
-                            (ih - ch_src) * 0.5,
-                            cw_src,
-                            ch_src,
-                        )),
-                        ..Default::default()
-                    },
-                );
-            }
-            let ar = |this: &Self, x: f32, dir: f32| {
-                draw_triangle(
-                    vec2(this.ui.x(x + dir * 7.0), this.ui.y(sy + sh * 0.5)),
-                    vec2(this.ui.x(x - dir * 5.0), this.ui.y(sy + sh * 0.5 - 9.0)),
-                    vec2(this.ui.x(x - dir * 5.0), this.ui.y(sy + sh * 0.5 + 9.0)),
-                    hex("#ffcc33"),
-                )
-            };
-            ar(self, sx + 18.0, -1.0);
-            ar(self, sx + sw - 18.0, 1.0);
-            self.ui.text(
-                crate::i18n::t("select.stage"),
-                sx + 126.0,
-                sy + 22.0,
-                12.0,
-                hex("#a49cc0"),
-                Align::Left,
-                true,
-            );
-            let stage_name = &self.reg.stages[self.sel.2].name;
-            self.ui.text(
-                clip(stage_name, 15),
-                sx + 126.0,
-                sy + 46.0,
-                15.0,
-                WHITE,
-                Align::Left,
-                true,
-            );
-        }
 
         let focus = cur[picking];
         if self.sel_last[picking] != focus {
@@ -1732,11 +1663,11 @@ impl App {
         }
 
         let gap = 6.0;
-        let cw = ((660.0 - (cols as f32 - 1.0) * gap) / cols as f32).min(96.0);
+        let cw = ((640.0 - (cols as f32 - 1.0) * gap) / cols as f32).min(96.0);
         let ch = cw * 1.17;
         let gw = cols as f32 * cw + (cols as f32 - 1.0) * gap;
         let gx = (VW - gw) / 2.0;
-        let gy = 110.0;
+        let gy = 98.0;
         let gh = SELECT_ROWS as f32 * (ch + gap) - gap;
         crate::menu_art::glass(&self.ui, gx - 12.0, gy - 12.0, gw + 24.0, gh + 24.0, 1.0);
         self.ui.rect_lines(
@@ -2188,7 +2119,7 @@ impl App {
         self.sel_buf.clear();
         let _ = write!(
             self.sel_buf,
-            "[Tab] {flabel} · {}/{m} · [R] aleatório · [ ] cenário · PgUp/PgDn",
+            "[Tab] {flabel} · {}/{m} · [R] aleatório · PgUp/PgDn",
             pos + 1
         );
         self.ui.text(

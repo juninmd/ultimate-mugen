@@ -244,6 +244,9 @@ pub struct App {
     pub debug_boxes: bool,
     pub quit: bool,
     pub msg: String,
+    /// seconds left before the last `msg` disappears on its own (0 = no toast)
+    msg_ttl: f32,
+    msg_seen: String,
     preview_t: f32,
     pub settings: Settings,
     pub(crate) key_edit: Option<keyedit::KeyEdit>,
@@ -389,6 +392,8 @@ impl App {
             debug_boxes: false,
             quit: false,
             msg: import_msg,
+            msg_ttl: 0.0,
+            msg_seen: String::new(),
             preview_t: 0.0,
             deep: None,
             settings,
@@ -554,6 +559,16 @@ impl App {
         {
             self.quality_check = 0.0;
             self.apply_quality();
+        }
+        if self.msg != self.msg_seen {
+            self.msg_seen.clone_from(&self.msg);
+            self.msg_ttl = if self.msg.is_empty() { 0.0 } else { 6.0 };
+        } else if !self.msg.is_empty() {
+            self.msg_ttl -= dt;
+            if self.msg_ttl <= 0.0 {
+                self.msg.clear();
+                self.msg_seen.clear();
+            }
         }
         if self.settings.fps {
             let fps = get_fps();

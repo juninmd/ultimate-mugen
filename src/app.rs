@@ -22,6 +22,8 @@ mod settings_screen;
 mod survival;
 mod update_banner;
 mod versus;
+#[cfg(target_arch = "wasm32")]
+mod web_import;
 mod controls_screen;
 pub(crate) use keyedit::KeyEdit;
 
@@ -255,6 +257,8 @@ pub struct App {
     pending: Pending,
     import_jobs: Vec<std::thread::JoinHandle<Result<(String, ume_formats::vfs::Vfs), String>>>,
     import_progress: Option<ume_formats::vfs::ZipProgress>,
+    #[cfg(target_arch = "wasm32")]
+    wasm_import: Option<web_import::WasmImport>,
     pub team: Option<Team>,
     /// Survival run in progress (round, score, carried life)
     survival: Option<survival::Survival>,
@@ -402,6 +406,8 @@ impl App {
             pending: Pending::default(),
             import_jobs: vec![],
             import_progress: None,
+            #[cfg(target_arch = "wasm32")]
+            wasm_import: None,
             window_watch: WindowWatch::default(),
             window_pinned: false,
             team: None,
@@ -517,6 +523,15 @@ impl App {
         self.c.update();
         self.preview_t += get_frame_time();
         let dt = get_frame_time();
+        #[cfg(target_arch = "wasm32")]
+        if self.wasm_import.is_some() {
+            self.wasm_import_step();
+            if self.wasm_import.is_some() {
+                self.draw_import_overlay();
+                self.apply_update_if_ready();
+                return;
+            }
+        }
         self.updater.poll();
         match &mut self.screen {
             Screen::Title => self.title(),
@@ -637,27 +652,39 @@ impl App {
             Screen::Fight | Screen::Vs { .. } | Screen::Results { .. } | Screen::Cutscene { .. }
         ));
         ume_shell::watchdog::label("import");
+        #[cfg(not(target_arch = "wasm32"))]
         for zip in crate::take_imports() {
-            #[cfg(not(target_arch = "wasm32"))]
+            let prog = ume_formats::vfs::ZipProgress::default();
+            self.import_progress = Some(prog.clone());
+            if let Ok(h) = std::thread::Builder::new()
+                .name("zip-import".into())
+                .spawn(move || crate::registry::read_zip_with_progress(&zip, Some(&prog)))
             {
-                let prog = ume_formats::vfs::ZipProgress::default();
-                self.import_progress = Some(prog.clone());
-                if let Ok(h) = std::thread::Builder::new()
-                    .name("zip-import".into())
-                    .spawn(move || crate::registry::read_zip_with_progress(&zip, Some(&prog)))
-                {
-                    self.import_jobs.push(h);
-                    self.msg = "Importando recursos MUGEN…".into();
-                }
-            }
-            #[cfg(target_arch = "wasm32")]
-            {
-                let r = crate::registry::read_zip(&zip);
-                self.finish_import(r);
+                self.import_jobs.push(h);
+                self.msg = "Importando recursos MUGEN…".into();
             }
         }
         #[cfg(target_arch = "wasm32")]
-        self.resolve_deep_link(dt);
+        {
+            if self.wasm_import.is_none()
+                && (crate::webimport::busy() || crate::webimport::queued_imports() > 0)
+                && !matches!(
+                    self.screen,
+                    Screen::Fight
+                        | Screen::Vs { .. }
+                        | Screen::Results { .. }
+                        | Screen::Cutscene { .. }
+                )
+            {
+                self.wasm_import = Some(web_import::WasmImport {
+                    pending: None,
+                    show_overlay: false,
+                });
+                self.msg = "Importando recursos MUGEN…".into();
+                crate::set_import_button(false);
+            }
+            self.resolve_deep_link(dt);
+        }
         if self.import_jobs.iter().any(|h| h.is_finished()) {
             let (done, rest): (Vec<_>, Vec<_>) = std::mem::take(&mut self.import_jobs)
                 .into_iter()

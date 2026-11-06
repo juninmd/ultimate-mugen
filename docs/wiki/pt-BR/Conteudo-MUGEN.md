@@ -7,6 +7,8 @@
 
 Na versão web, use o botão **Importar MUGEN (.zip)** ou arraste o `.zip` para a janela. A importação é idempotente: o mesmo arquivo, ou o mesmo lutador ou cenário encontrado de novo em outro caminho, nome ou caixa de letras, é registrado uma única vez (a identidade é um hash do `.def` normalizado mais o arquivo de sprites). Pacotes salvos no navegador por versões antigas são deduplicados automaticamente no próximo carregamento.
 
+Uma importação web mostra uma tela de carregamento em tela cheia desde o momento em que os arquivos são escolhidos até o último pacote ser registrado. Os arquivos são lidos, descompactados e registrados **um por frame**, com no máximo dois pacotes brutos aguardando na memória do wasm; um lote de pacotes grandes não roda mais em um único frame congelado. A mesma tela aparece na inicialização enquanto os pacotes salvos no IndexedDB são restaurados, um de cada vez.
+
 Centenas de personagens são registradas sem decodificar tudo; só o que está sob o cursor é carregado, e um cache LRU limita a memória.
 
 ## Cenários

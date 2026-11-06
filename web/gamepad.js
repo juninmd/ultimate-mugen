@@ -69,25 +69,37 @@
     }
     const seen = new Set();
     async function store(key, buf) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).put(buf, key); } catch (e) {} }
-    async function all() { try { const d = await db(); return await new Promise((res) => { const out = []; const rq = d.transaction(ST).objectStore(ST).openCursor(); rq.onsuccess = () => { const c = rq.result; if (c) { out.push({ key: c.key, value: c.value }); c.continue(); } else res(out); }; rq.onerror = () => res(out); }); } catch (e) { return []; } }
+    async function keys() { try { const d = await db(); return await new Promise((res) => { const rq = d.transaction(ST).objectStore(ST).getAllKeys(); rq.onsuccess = () => res(rq.result || []); rq.onerror = () => res([]); }); } catch (e) { return []; } }
+    async function get(key) { try { const d = await db(); return await new Promise((res) => { const rq = d.transaction(ST).objectStore(ST).get(key); rq.onsuccess = () => res(rq.result); rq.onerror = () => res(null); }); } catch (e) { return null; } }
     async function remove(key) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).delete(key); } catch (e) {} }
+    async function importSlot() { while (wasm.ume_import_pending() >= 2) await new Promise((r) => setTimeout(r, 40)); }
     async function accept(buf) {
       const id = await digest(buf);
       if (seen.has(id)) return false;
       seen.add(id);
       wasm.ume_import(buf);
+      await importSlot();
       return id;
     }
     async function send(file) { const buf = new Uint8Array(await file.arrayBuffer()); const id = await accept(buf); if (id) store(id, buf); }
-    window.umeImport = (files) => { for (const f of files) send(f); };
+    window.umeImport = (files) => {
+      wasm.ume_import_begin();
+      (async () => { try { for (const f of files) await send(f); } finally { wasm.ume_import_end(); } })();
+    };
     window.umeClearImports = async () => { seen.clear(); const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).clear(); };
-    all().then(async (rows) => {
-      for (const { key, value } of rows) {
-        const buf = new Uint8Array(value);
-        const id = await accept(buf);
-        if (key !== id) { await remove(key); if (id) await store(id, buf); }
-      }
-    });
+    (async () => {
+      const ks = await keys();
+      wasm.ume_import_begin();
+      try {
+        for (const key of ks) {
+          const value = await get(key);
+          if (!value) continue;
+          const buf = new Uint8Array(value);
+          const id = await accept(buf);
+          if (key !== id) { await remove(key); if (id) await store(id, buf); }
+        }
+      } finally { wasm.ume_import_end(); }
+    })();
     const input = document.getElementById('ume-file');
     if (input) input.addEventListener('change', () => window.umeImport(input.files));
     window.addEventListener('dragover', (e) => e.preventDefault());

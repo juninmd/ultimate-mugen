@@ -123,18 +123,14 @@ pub fn set_import_button(visible: bool) {
 
 /// Browser imports: JS writes a .zip into wasm memory and queues it for the registry.
 #[cfg(target_arch = "wasm32")]
-pub mod webimport {
-    use std::sync::Mutex;
-    pub static QUEUE: Mutex<Vec<Vec<u8>>> = Mutex::new(Vec::new());
-    #[wasm_bindgen::prelude::wasm_bindgen]
-    pub fn ume_import(bytes: Vec<u8>) {
-        QUEUE.lock().unwrap().push(bytes);
-    }
-}
+pub mod webimport;
 pub fn take_imports() -> Vec<Vec<u8>> {
     #[cfg(target_arch = "wasm32")]
     {
-        return std::mem::take(&mut *webimport::QUEUE.lock().unwrap());
+        return webimport::QUEUE
+            .lock()
+            .map(|mut q| q.drain(..).collect())
+            .unwrap_or_default();
     }
 
     vec![]

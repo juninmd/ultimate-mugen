@@ -9,3 +9,7 @@ All four running frames were inspected in the rebuilt runtime probe at `.tmp/dai
 ## Controlled Daybreak comparison
 
 The forced-state 1001 probe completed for baseline and candidate at distances 24, 36, 48 and 60. Baseline: two impacts and 128 damage at 24/36; one impact and 81 damage at 48/60. Candidate: two impacts and 128 damage at all four distances. Damage values include character attack/defense scaling. The result supports connection improvement in this mirror-match setup, not universal balance or command-input correctness. The candidate retains the original damage values and active-frame timings.
+
+## Workspace regression suite
+
+`cargo test --workspace --release` completed successfully (exit 0). Detailed output is retained locally in `.tmp/daichi-workspace-tests.log`. This confirms the branch workspace test suite; continuous motion playback, guard and airborne-target balance checks remain separate pending requirements.

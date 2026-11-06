@@ -81,7 +81,7 @@ pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
     if pal.len() >= 1024 {
         for c in 1..256usize {
             let p = c * 4;
-            table[c] = u32::from_ne_bytes([pal[p], pal[p + 1], pal[p + 2], 255]);
+            table[c] = u32::from_ne_bytes([pal[p], pal[p + 1], pal[p + 2], pal[p + 3]]);
         }
     } else {
         for c in 1..256usize {

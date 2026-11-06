@@ -15,9 +15,10 @@ pub struct Palette(Rc<PaletteInner>);
 impl Palette {
     pub fn from_rgba(pal: &[u8]) -> Palette {
         let mut colors = Box::new([[0u8; 4]; 256]);
+        let rgba = pal.len() >= 1024;
         for (i, c) in colors.iter_mut().enumerate().skip(1) {
             let at = |k: usize| pal.get(i * 4 + k).copied().unwrap_or(0);
-            *c = [at(0), at(1), at(2), 255];
+            *c = [at(0), at(1), at(2), if rgba { at(3) } else { 255 }];
         }
         Palette(Rc::new(PaletteInner { slot: Cell::new(None), colors }))
     }

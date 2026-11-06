@@ -25,7 +25,7 @@ pub fn load_mugen_portrait(vfs: &Vfs, def_path: &str) -> Option<Sprite> {
                 .and_then(|a| a.frames.first())
                 .map(|f| (f.group, f.index))
         });
-    let sff = decode_sff_only(resolve(vfs, &base, fget("sprite")?)?, |g, i| {
+    let sff = decode_sff_only(&resolve(vfs, &base, fget("sprite")?)?, |g, i| {
         g == 9000 && (i == 0 || i == 1) || Some((g, i)) == idle_key
     })
     .ok()?;
@@ -38,7 +38,7 @@ pub fn load_mugen_portrait(vfs: &Vfs, def_path: &str) -> Option<Sprite> {
     let act = fget("pal1")
         .and_then(|p| resolve(vfs, &base, &p))
         .filter(|a| a.len() >= 768)
-        .map(decode_act);
+        .map(|a| decode_act(&a));
     let fallback = act.or_else(|| sff.palettes.first().map(|p| p.data.to_vec()));
     // first candidate that actually has visible pixels (some packs ship blank 9000,x placeholders)
     let picked = [find(9000, 1), find(9000, 0), idle()]

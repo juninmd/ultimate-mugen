@@ -209,7 +209,7 @@ fn fuzz_zip_and_stage() {
         let mut vf = Vfs::new();
         for (k, bytes) in v.iter() {
             if k.starts_with("stages/") && k.ends_with(".sff") {
-                vf.insert(k.clone(), bytes.clone());
+                vf.insert(k.clone(), bytes.to_vec());
             }
         }
         vf.insert("stages/fuzz.def".into(), b.to_vec());

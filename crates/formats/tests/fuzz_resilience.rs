@@ -108,7 +108,7 @@ fn corpus_from_zip(ext: &str) -> Vec<Vec<u8>> {
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
     files.sort_by_key(|a| a.1.len());
-    files.into_iter().take(3).map(|(_, v)| v).collect()
+    files.into_iter().take(3).map(|(_, v)| v.to_vec()).collect()
 }
 
 fn random_corpus() -> Vec<Vec<u8>> {

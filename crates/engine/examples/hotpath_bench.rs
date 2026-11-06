@@ -32,11 +32,11 @@ fn main() {
             std::hint::black_box(ume_formats::sff::decode_sff(&sff).unwrap());
         });
     }
-    let air = v.iter().find(|(k, _)| k.ends_with(".air")).map(|(_, b)| text(b)).unwrap();
+    let air = v.iter().find(|(k, _)| k.ends_with(".air")).map(|(_, b)| text(&b)).unwrap();
     bench("air parse", 50, || {
         std::hint::black_box(ume_formats::air::parse_air(&air));
     });
-    let cns = v.iter().filter(|(k, _)| k.ends_with(".cns")).max_by_key(|(_, b)| b.len()).map(|(_, b)| text(b)).unwrap();
+    let cns = v.iter().filter(|(k, _)| k.ends_with(".cns")).max_by_key(|(_, b)| b.len()).map(|(_, b)| text(&b)).unwrap();
     bench("cns parse+compile", 50, || {
         let mut m = std::collections::HashMap::new();
         ume_engine::cns::parse_states(&cns, &mut m, true);

@@ -4,7 +4,7 @@ use crate::ini::{find_section, nums, parse_ini, split_top, unquote, Section};
 use crate::sff::{decode_sff, DecodedSff};
 use crate::snd::decode_snd_checked;
 use crate::stage::BgLayer;
-use crate::vfs::{norm_path, resolve, text, Vfs};
+use crate::vfs::{norm_path, resolve, text, Vfs, VfsFile};
 use std::collections::{BTreeMap, HashMap};
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -515,14 +515,14 @@ fn dir_of(p: &str) -> &str {
     p.rfind('/').map(|i| &p[..i]).unwrap_or("")
 }
 
-fn find<'a>(vfs: &'a Vfs, base: &str, name: &str) -> Option<&'a [u8]> {
+fn find<'a>(vfs: &'a Vfs, base: &str, name: &str) -> Option<VfsFile<'a>> {
     resolve(vfs, base, name).or_else(|| resolve(vfs, "data", name)).or_else(|| resolve(vfs, "font", name)).or_else(|| resolve(vfs, "", name))
 }
 
 fn load_fonts(vfs: &Vfs, base: &str, names: &BTreeMap<i32, String>, warnings: &mut Vec<String>) -> BTreeMap<i32, Font> {
     let mut out = BTreeMap::new();
     for (&n, name) in names {
-        match find(vfs, base, name).map(decode_fnt) {
+        match find(vfs, base, name).map(|b| decode_fnt(&b)) {
             Some(Ok(f)) => {
                 out.insert(n, f);
             }
@@ -535,7 +535,7 @@ fn load_fonts(vfs: &Vfs, base: &str, names: &BTreeMap<i32, String>, warnings: &m
 
 fn load_sff(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut Vec<String>) -> Option<DecodedSff> {
     let name = name?;
-    match find(vfs, base, name).map(decode_sff) {
+    match find(vfs, base, name).map(|b| decode_sff(&b)) {
         Some(Ok(s)) => Some(s),
         Some(Err(e)) => {
             warnings.push(format!("{name}: {e}"));
@@ -550,7 +550,7 @@ fn load_sff(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut Vec<Str
 
 fn load_snd(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut Vec<String>) -> HashMap<(i32, i32), Vec<u8>> {
     let Some(name) = name else { return HashMap::new() };
-    match find(vfs, base, name).map(decode_snd_checked) {
+    match find(vfs, base, name).map(|b| decode_snd_checked(&b)) {
         Some(Ok(s)) => s,
         Some(Err(e)) => {
             warnings.push(format!("{name}: {e}"));
@@ -566,7 +566,7 @@ fn load_snd(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut Vec<Str
 fn load_storyboard(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut Vec<String>) -> Option<Storyboard> {
     let name = name?;
     match find(vfs, base, name) {
-        Some(b) => Some(parse_storyboard(&text(b))),
+        Some(b) => Some(parse_storyboard(&text(&b))),
         None => {
             warnings.push(format!("{name}: not found"));
             None
@@ -578,10 +578,10 @@ pub fn load_screenpack(vfs: &Vfs, system_path: &str) -> Result<Screenpack, Strin
     let path = norm_path(system_path);
     let src = vfs.get(&path).ok_or_else(|| format!("screenpack: {path} not found"))?;
     let dir = dir_of(&path).to_string();
-    let system = parse_system(&text(src));
+    let system = parse_system(&text(&src));
     let mut warnings = Vec::new();
     let select = match system.select.as_ref().and_then(|n| find(vfs, &dir, n)) {
-        Some(b) => parse_select(&text(b)),
+        Some(b) => parse_select(&text(&b)),
         None => {
             warnings.push(format!("select.def {:?}: not found", system.select));
             SelectDef::default()
@@ -592,7 +592,7 @@ pub fn load_screenpack(vfs: &Vfs, system_path: &str) -> Result<Screenpack, Strin
         candidates.into_iter().map(|c| norm_path(&c)).find(|c| vfs.contains_key(c))
     });
     let (fight, fight_dir) = match &fight_path {
-        Some(p) => (parse_fight(&text(&vfs[p])), dir_of(p).to_string()),
+        Some(p) => (parse_fight(&vfs.get(p).map(|b| text(&b)).unwrap_or_default()), dir_of(p).to_string()),
         None => {
             warnings.push(format!("fight.def {:?}: not found", system.fight));
             (FightDef::default(), dir.clone())

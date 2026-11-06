@@ -102,9 +102,29 @@ Rule: the render thread never waits on disk, decoding, parsing or synthesis. On 
 | Stage music synthesis (17-31 ms per track) | `Audio::music_ready` on a worker |
 | Winner screen | uses the cached definition (`peek`), never loads |
 
-Frame-time watchdog: set `UME_WATCHDOG=1` to log every frame longer than `UME_HITCH_MS` (default 50) with the active label (`ume_shell::watchdog::label("load:stage")`), and a summary with the worst frame on exit. Labels in use: `select:preview`, `load:character`, `load:stage`, `load:session`, `load:audio`, `fight:prefetch`, `import`.
+Frame-time watchdog: set `UME_WATCHDOG=1` to log every frame longer than `UME_HITCH_MS` (default 50) with the block that held the CPU (`ume_shell::watchdog::label("load:stage")`), and a summary with the worst frame on exit. Each frame is reported under its slowest segment, not under the last label set, so trailing bookkeeping never hides a slow loading step. Labels in use: `select:reap`, `select:preview`, `select:grid`, `load:character`, `load:stage`, `load:session`, `load:audio`, `load:sprites`, `fight:prefetch`, `import`.
 
-Frame-time watchdog: set `UME_WATCHDOG=1` to log every frame longer than `UME_HITCH_MS` (default 50) with the active label (`ume_shell::watchdog::label("load:stage")`), and a summary with the worst frame on exit. Labels in use: `select:preview`, `load:character`, `load:stage`, `load:session`, `load:audio`, `load:sprites`, `import`. The label sticks to the first phase named in a frame, so the trailing bookkeeping blocks do not relabel a slow loading step.
+## Startup with large M.U.G.E.N collections
+
+Opening a folder used to read every file into memory: a 15,000-file collection (4.5 GB of SFF, 3.4 GB of SND) took 338 s and 10.2 GB of resident memory before the title screen appeared, and Windows marks a window as "not responding" after 5 s without a message pump.
+
+| Technique | Where | Effect |
+|---|---|---|
+| Lazy folder index | `ume_formats::vfs::add_dir` | Walks metadata only (path + length) and reads a file when it is used. Zips inside the folder are indexed from their end record and central directory, never inflated up front |
+| Small-payload cache | `vfs::File` | Reads up to 4 MiB are kept for reuse (defs, CNS, AIR); sprite and sound banks are read once per use instead of being pinned for the whole session |
+| Sampled content key | `vfs::File::signature` | Character/stage identity hashes length plus head/tail samples instead of the whole sprite bank, so the same fighter copied to another folder still dedupes |
+| Parallel discovery and keying | `find_char_defs`, `find_stage_defs`, `Registry::add_vfs_inner` | Def headers and content keys are computed with `ume_formats::par::map` (up to 8 workers) |
+| Off-thread roster | `App::new` | `Registry::new` + `scan_folders` + `dedupe` + `sort_mugen` run on the `registry-scan` thread while the boot screen keeps drawing frames |
+| Set-based dedupe | `Registry::add_vfs_inner` | Roster ids and keys live in `HashSet`s; the previous per-fighter linear scan was quadratic |
+| Async stage thumbnail | `Registry::stage_preview` | The first tile that needs a MUGEN stage starts a worker; previously the whole stage (SFF + RGBA) was decoded inside the frame that scrolled to it |
+| Off-thread stage build | `Registry::prepare_stage` | The stage is loaded, previewed and its BGM located on `stage-load`; the VS screen polls the result |
+| Off-thread release | `Registry::drop_off_thread` | Dropping a fighter definition (hundreds of MB of sprites) happens on `char-free`, not inside a frame |
+| Frame-pumping loads | `App::start_fight` | Rematch and tour loads draw a loading screen and pump frames while workers finish, so the window keeps answering Windows messages |
+
+`ultimate-mugen --scan-report` prints the headless startup cost (`bundled | scan | total | roster | RSS`) without opening a window.
+`cargo run --release -p ume-formats --example scan_bench -- <mugen_dir>` measures index, discovery and key costs separately.
+
+Reference (Windows, 32 GB RAM, warm OS cache): a 15,053-entry collection with 723 characters and 137 stages went from **338 s and 10,192 MB** to **0.89 s and 33 MB**. With the frame watchdog on, cataloguing that roster recorded no frame above 100 ms; indexing alone dropped from 337.9 s to 0.83 s, discovery from 4.31 s to 0.02 s and keying 716 fighters from 11.0 s to 0.19 s. M.U.G.E.N folder content (210 `.def`, 4.5 GB of `.sff`) still loads and fights: `mugen_check mugen/chars/Sukuna` reports 1773 sprites in 232 ms.
 
 ## Virtual filesystem lookup
 

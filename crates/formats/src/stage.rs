@@ -214,7 +214,7 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
     if let Some(spr) = bgdef.and_then(|s| s.get("spr")) {
         let buf = resolve(vfs, base_dir, spr).or_else(|| resolve(vfs, "stages", spr));
         if let Some(buf) = buf {
-            let sff = decode_sff(buf).map_err(|e| format!("stage {def_path}: {e}"))?;
+            let sff = decode_sff(&buf).map_err(|e| format!("stage {def_path}: {e}"))?;
             let mut seen = std::collections::HashSet::new();
             let unique: Vec<_> = sff.sprites.iter().filter(|s| seen.insert((s.group, s.index))).collect();
             let rgba = crate::par::map(&unique, |s| sprite_to_rgba(s, None));

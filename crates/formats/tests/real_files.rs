@@ -306,14 +306,14 @@ fn kfm_zip_loads() {
     assert_eq!(n, 12);
     let defs = find_char_defs(&vfs);
     assert_eq!(defs, vec!["kfm/kfm.def"]);
-    let secs = parse_ini(&text(&vfs["kfm/kfm.def"]));
+    let secs = parse_ini(&vfs.get("kfm/kfm.def").map(|b| text(&b)).unwrap_or_default());
     let files = find_section(&secs, "files").unwrap();
     let t = Instant::now();
-    let sff = decode_sff(resolve(&vfs, "kfm", files.get("sprite").unwrap()).unwrap()).unwrap();
+    let sff = decode_sff(&resolve(&vfs, "kfm", files.get("sprite").unwrap()).unwrap()).unwrap();
     let anims = parse_air(&text(
         resolve(&vfs, "kfm", files.get("anim").unwrap()).unwrap(),
     ));
-    let snd = decode_snd(resolve(&vfs, "kfm", files.get("sound").unwrap()).unwrap());
+    let snd = decode_snd(&resolve(&vfs, "kfm", files.get("sound").unwrap()).unwrap());
     eprintln!(
         "kfm from zip: {} sprites, {} anims, {} sounds in {:?}",
         sff.sprites.len(),

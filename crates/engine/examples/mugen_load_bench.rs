@@ -18,7 +18,7 @@ fn main() {
         }
         let sff = def.replace(".def", ".sff");
         let t = Instant::now();
-        if let Some(b) = vfs.get(&sff) { let _ = ume_formats::sff::decode_sff(b); }
+        if let Some(b) = vfs.get(&sff) { let _ = ume_formats::sff::decode_sff(&b); }
         let ms = t.elapsed().as_secs_f64() * 1000.0;
         let t = Instant::now();
         let _ = ume_engine::loader::load_mugen_portrait(&vfs, &def);

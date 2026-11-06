@@ -158,7 +158,7 @@ fn palfx_in_shader() {
     for (k, fx) in fxs.iter().enumerate() {
         let (mul, add, hue) = fx.vertex([1.0; 4]);
         let x = k as f32 * 16.0;
-        let v = |pos: [f32; 2]| ume_render::Vertex { pos, uv, pal: RGBA_SPRITE, mul, add, hue };
+        let v = |pos: [f32; 2]| ume_render::Vertex::new(pos, uv, RGBA_SPRITE, mul, add, hue);
         b.push_tris(&[v([x, 0.0]), v([x + 16.0, 0.0]), v([x + 16.0, 16.0]), v([x, 16.0])], &[0, 1, 2, 0, 2, 3], Blend::Alpha);
     }
     let img = render(&device, &queue, &mut r, &b, wgpu::Color::BLACK);

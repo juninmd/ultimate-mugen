@@ -19,6 +19,7 @@ pub struct Renderer {
     ibuf: wgpu::Buffer,
     vcap: u64,
     icap: u64,
+    iscratch: Vec<u16>,
 }
 
 fn texture(device: &wgpu::Device, label: &str, w: u32, h: u32, format: wgpu::TextureFormat) -> wgpu::Texture {
@@ -53,7 +54,7 @@ fn write_region(queue: &wgpu::Queue, tex: &wgpu::Texture, r: Rect, bpp: u32, dat
     );
 }
 
-fn zero_fill(queue: &wgpu::Queue, tex: &wgpu::Texture, w: u32, h: u32, bpp: u32) {
+fn prefill_web_atlas(queue: &wgpu::Queue, tex: &wgpu::Texture, w: u32, h: u32, bpp: u32) {
     const BAND: u32 = 256;
     let zeros = vec![0u8; (w * BAND.min(h) * bpp) as usize];
     let mut y = 0;
@@ -70,9 +71,11 @@ impl Renderer {
         let index_tex = texture(device, "ume-index-atlas", aw, ah, wgpu::TextureFormat::R8Unorm);
         let rgba_tex = texture(device, "ume-rgba-atlas", aw, ah, wgpu::TextureFormat::Rgba8Unorm);
         let palette_tex = texture(device, "ume-palettes", 256, PALETTE_ROWS, wgpu::TextureFormat::Rgba8Unorm);
-        zero_fill(queue, &index_tex, aw, ah, 1);
-        zero_fill(queue, &rgba_tex, aw, ah, 4);
-        zero_fill(queue, &palette_tex, 256, PALETTE_ROWS, 4);
+        if cfg!(target_arch = "wasm32") {
+            prefill_web_atlas(queue, &index_tex, aw, ah, 1);
+            prefill_web_atlas(queue, &rgba_tex, aw, ah, 4);
+            prefill_web_atlas(queue, &palette_tex, 256, PALETTE_ROWS, 4);
+        }
         let globals = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: Some("ume-globals"), contents: &[0u8; 16], usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST });
         let nearest = device.create_sampler(&wgpu::SamplerDescriptor { label: Some("ume-nearest"), ..Default::default() });
         let linear = device.create_sampler(&wgpu::SamplerDescriptor { label: Some("ume-linear"), mag_filter: wgpu::FilterMode::Linear, min_filter: wgpu::FilterMode::Linear, ..Default::default() });
@@ -108,7 +111,7 @@ impl Renderer {
         let bind_groups = [bind_group(&nearest), bind_group(&linear)];
         let module = device.create_shader_module(wgpu::ShaderModuleDescriptor { label: Some("ume-sprite"), source: wgpu::ShaderSource::Wgsl(SHADER.into()) });
         let pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor { label: Some("ume-sprite-pl"), bind_group_layouts: &[Some(&layout)], immediate_size: 0 });
-        let attrs = wgpu::vertex_attr_array![0 => Float32x2, 1 => Float32x2, 2 => Uint32, 3 => Float32x4, 4 => Float32x4, 5 => Float32];
+        let attrs = wgpu::vertex_attr_array![0 => Float32x2, 1 => Float32x2, 2 => Uint32, 3 => Unorm16x4, 4 => Unorm16x4, 5 => Float32];
         let pipeline = |b: Blend| device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("ume-sprite-pipeline"),
             layout: Some(&pl),
@@ -134,7 +137,7 @@ impl Renderer {
         let (vcap, icap) = (4096u64, 6144u64);
         let vbuf = Self::buffer(device, vcap * std::mem::size_of::<Vertex>() as u64, wgpu::BufferUsages::VERTEX);
         let ibuf = Self::buffer(device, icap * 4, wgpu::BufferUsages::INDEX);
-        Renderer { atlas_size, pipelines, bind_groups, linear: false, scissor_scale: [1.0, 1.0], globals, index_tex, rgba_tex, palette_tex, vbuf, ibuf, vcap, icap }
+        Renderer { atlas_size, pipelines, bind_groups, linear: false, scissor_scale: [1.0, 1.0], globals, index_tex, rgba_tex, palette_tex, vbuf, ibuf, vcap, icap, iscratch: Vec::new() }
     }
 
     fn buffer(device: &wgpu::Device, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
@@ -170,7 +173,16 @@ impl Renderer {
         queue.write_buffer(&self.globals, 0, bytemuck::cast_slice(&[screen[0], screen[1], 0.0, 0.0]));
         if !batch.vertices.is_empty() {
             queue.write_buffer(&self.vbuf, 0, bytemuck::cast_slice(&batch.vertices));
-            queue.write_buffer(&self.ibuf, 0, bytemuck::cast_slice(&batch.indices));
+            if batch.fits_u16() {
+                self.iscratch.clear();
+                self.iscratch.extend(batch.indices.iter().map(|&i| i as u16));
+                if self.iscratch.len() % 2 == 1 {
+                    self.iscratch.push(0);
+                }
+                queue.write_buffer(&self.ibuf, 0, bytemuck::cast_slice(&self.iscratch));
+            } else {
+                queue.write_buffer(&self.ibuf, 0, bytemuck::cast_slice(&batch.indices));
+            }
         }
         let load = clear.map(wgpu::LoadOp::Clear).unwrap_or(wgpu::LoadOp::Load);
         let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -182,7 +194,7 @@ impl Renderer {
         if calls.is_empty() { return; }
         pass.set_bind_group(0, &self.bind_groups[self.linear as usize], &[]);
         pass.set_vertex_buffer(0, self.vbuf.slice(..));
-        pass.set_index_buffer(self.ibuf.slice(..), wgpu::IndexFormat::Uint32);
+        pass.set_index_buffer(self.ibuf.slice(..), if batch.fits_u16() { wgpu::IndexFormat::Uint16 } else { wgpu::IndexFormat::Uint32 });
         let [kx, ky] = self.scissor_scale;
         let (tw, th) = ((screen[0] * kx).round().max(1.0) as u32, (screen[1] * ky).round().max(1.0) as u32);
         let scaled = |v: u32, k: f32| (v as f32 * k).round() as u32;

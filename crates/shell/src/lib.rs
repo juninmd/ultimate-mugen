@@ -178,7 +178,7 @@ fn instance(event_loop: &ActiveEventLoop) -> wgpu::Instance {
 
 async fn init_live(instance: wgpu::Instance, window: Arc<Window>) -> Result<Live, String> {
     let surface = instance.create_surface(window.clone()).map_err(|e| e.to_string())?;
-    let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions { compatible_surface: Some(&surface), ..Default::default() }).await.map_err(|e| e.to_string())?;
+    let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions { power_preference: platform::power_preference(), compatible_surface: Some(&surface), ..Default::default() }).await.map_err(|e| e.to_string())?;
     let limits = wgpu::Limits::downlevel_webgl2_defaults().using_resolution(adapter.limits());
     let (device, queue) = adapter.request_device(&wgpu::DeviceDescriptor { required_limits: limits, ..Default::default() }).await.map_err(|e| e.to_string())?;
     let size = window.inner_size();
@@ -187,7 +187,7 @@ async fn init_live(instance: wgpu::Instance, window: Arc<Window>) -> Result<Live
     if let Some(f) = caps.formats.iter().copied().find(|f| !f.is_srgb()) { config.format = f; }
     if caps.usages.contains(wgpu::TextureUsages::COPY_SRC) { config.usage |= wgpu::TextureUsages::COPY_SRC; }
     surface.configure(&device, &config);
-    let side = ATLAS_SIZE.min(device.limits().max_texture_dimension_2d);
+    let side = platform::atlas_side(device.limits().max_texture_dimension_2d);
     let renderer = Renderer::new(&device, &queue, config.format, [side, side]);
     let mut rgba_atlas = Atlas::new(side, side);
     let canvas = Canvas::new(&renderer, &queue, &mut rgba_atlas).ok_or("atlas too small")?;

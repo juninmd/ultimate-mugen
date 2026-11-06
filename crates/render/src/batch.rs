@@ -3,7 +3,27 @@ use bytemuck::{Pod, Zeroable};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Pod, Zeroable)]
-pub struct Vertex { pub pos: [f32; 2], pub uv: [f32; 2], pub pal: u32, pub mul: [f32; 4], pub add: [f32; 4], pub hue: f32 }
+pub struct Vertex { pub pos: [f32; 2], pub uv: [f32; 2], pub pal: u32, pub mul: [u16; 4], pub add: [u16; 4], pub hue: f32 }
+
+const MUL_RGB_RANGE: f32 = 2.0;
+const ADD_W_RANGE: f32 = 3.0;
+
+fn unorm16(value: f32, range: f32) -> u16 {
+    (value.clamp(0.0, range) / range * 65535.0).round() as u16
+}
+
+impl Vertex {
+    pub fn new(pos: [f32; 2], uv: [f32; 2], pal: u32, mul: [f32; 4], add: [f32; 4], hue: f32) -> Self {
+        Vertex {
+            pos,
+            uv,
+            pal,
+            mul: [unorm16(mul[0], MUL_RGB_RANGE), unorm16(mul[1], MUL_RGB_RANGE), unorm16(mul[2], MUL_RGB_RANGE), unorm16(mul[3], 1.0)],
+            add: [unorm16(add[0], 1.0), unorm16(add[1], 1.0), unorm16(add[2], 1.0), unorm16(add[3], ADD_W_RANGE)],
+            hue,
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct PalFx { pub add: [f32; 3], pub mul: [f32; 3], pub color: f32, pub invert: bool, pub hue: f32 }
@@ -47,12 +67,14 @@ impl Quad {
 pub struct DrawCall { pub blend: Blend, pub first_index: u32, pub index_count: u32, pub scissor: Option<[u32; 4]> }
 
 #[derive(Default)]
-pub struct Batch { pub vertices: Vec<Vertex>, pub indices: Vec<u32>, pub calls: Vec<DrawCall>, pub scissor: Option<[u32; 4]>, pub overlay_from: Option<usize> }
+pub struct Batch { pub vertices: Vec<Vertex>, pub indices: Vec<u32>, pub calls: Vec<DrawCall>, pub scissor: Option<[u32; 4]>, pub overlay_from: Option<usize>, pub max_index: u32 }
 
 impl Batch {
     pub fn new() -> Self { Batch::default() }
 
-    pub fn clear(&mut self) { self.vertices.clear(); self.indices.clear(); self.calls.clear(); self.scissor = None; self.overlay_from = None; }
+    pub fn clear(&mut self) { self.vertices.clear(); self.indices.clear(); self.calls.clear(); self.scissor = None; self.overlay_from = None; self.max_index = 0; }
+
+    pub fn fits_u16(&self) -> bool { self.max_index <= u16::MAX as u32 }
 
     pub fn begin_overlay(&mut self) { self.overlay_from = Some(self.calls.len()); }
 
@@ -68,12 +90,13 @@ impl Batch {
         let add = [q.add[0], q.add[1], q.add[2], 0.0];
         let base = self.vertices.len() as u32;
         self.vertices.extend_from_slice(&[
-            Vertex { pos: [x, y], uv: [u0, v0], pal: q.palette, mul: q.mul, add, hue: 0.0 },
-            Vertex { pos: [x + w, y], uv: [u1, v0], pal: q.palette, mul: q.mul, add, hue: 0.0 },
-            Vertex { pos: [x + w, y + h], uv: [u1, v1], pal: q.palette, mul: q.mul, add, hue: 0.0 },
-            Vertex { pos: [x, y + h], uv: [u0, v1], pal: q.palette, mul: q.mul, add, hue: 0.0 },
+            Vertex::new([x, y], [u0, v0], q.palette, q.mul, add, 0.0),
+            Vertex::new([x + w, y], [u1, v0], q.palette, q.mul, add, 0.0),
+            Vertex::new([x + w, y + h], [u1, v1], q.palette, q.mul, add, 0.0),
+            Vertex::new([x, y + h], [u0, v1], q.palette, q.mul, add, 0.0),
         ]);
         self.indices.extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
+        self.max_index = self.max_index.max(base + 3);
         self.extend_call(q.blend, 6);
     }
 
@@ -82,6 +105,7 @@ impl Batch {
         let base = self.vertices.len() as u32;
         self.vertices.extend_from_slice(verts);
         self.indices.extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
+        self.max_index = self.max_index.max(base + 3);
         self.extend_call(blend, 6);
     }
 
@@ -89,6 +113,8 @@ impl Batch {
         let base = self.vertices.len() as u32;
         self.vertices.extend_from_slice(verts);
         self.indices.extend(indices.iter().map(|i| base + i));
+        let top = indices.iter().copied().max().map_or(self.max_index, |i| base + i);
+        self.max_index = self.max_index.max(top);
         self.extend_call(blend, indices.len() as u32);
     }
 
@@ -185,6 +211,21 @@ mod tests {
         assert_eq!(b.calls[1].index_count, 12);
         b.clear();
         assert_eq!(b.split(), 0);
+    }
+
+    #[test]
+    fn picks_the_narrow_index_format_until_it_does_not_fit() {
+        let mut b = Batch::new();
+        for i in 0..16384 {
+            b.push(&quad(Blend::Alpha, i as f32));
+        }
+        assert_eq!(b.max_index, 65535);
+        assert!(b.fits_u16());
+        b.push(&quad(Blend::Alpha, 0.0));
+        assert_eq!(b.max_index, 65539);
+        assert!(!b.fits_u16());
+        b.clear();
+        assert!(b.fits_u16());
     }
 
     #[test]

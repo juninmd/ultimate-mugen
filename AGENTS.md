@@ -1,8 +1,47 @@
 # Agents Guide - Ultimate MUGEN
 
 ## Overview
-- Engine: 2D fighting game engine written in Rust using `macroquad`, `miniquad`, `tiny-skia`.
+- 2D fighting game engine in Rust with no game framework (no macroquad, miniquad or Bevy): the sprite pipeline is purpose-built for M.U.G.E.N palette-indexed sprites.
+- Rendering: own `wgpu` 30 renderer (`crates/render`) and own `winit` 0.30 shell (`crates/shell`). Palette lives in the fragment shader.
+- Simulation: `crates/engine`, deterministic at 60 Hz, no clock, threads, randomness (outside `Match::random`) or GPU dependency.
 - Formats: Native UMF (`assets/chars/*.json`) and legacy M.U.G.E.N (`.def`, `.sff`, `.air`, `.cmd`, `.cns`, `.snd`).
+- Targets: Windows, Linux, macOS, `wasm32` (WebGL2 fallback) and Android; UI is immediate-mode on top of `ume_shell::quad`.
+
+## Workspace
+| Path | Responsibility | Constraint |
+|---|---|---|
+| `crates/formats` | INI, SFF, AIR, SND, ACT, PCX, PNG, FNT, stages, VFS (folders and zips) | No platform deps, must build for `wasm32` |
+| `crates/engine` | Fighter VM, expressions, triggers, controllers, HitDef, match rules, UMF compiler | Deterministic, allocation-free tick, no window/GPU |
+| `crates/render` | Sprite and post-processing pipelines (wgpu 30) | No winit, no app state |
+| `crates/shell` | Adapter/device, surface, window, input, `quad` draw API, audio out, pacer, watchdog | Hosts `Game`; no game rules |
+| `crates/netplay` | ggrs rollback, state checksum, replay format | Pure logic over `Match` |
+| `crates/market` | GitHub marketplace: listing, bundles, safety limits | No UI |
+| `src/` | Screens, HUD, stages, VFX, audio, settings, registry | Uses `ume_shell::quad`, never `wgpu` directly |
+
+## Rendering and GPU
+- One command encoder and one submit per frame. Sprites are batched into a single vertex/index buffer (grown by `next_power_of_two`) and drawn in one render pass.
+- Two atlases (8-bit index and RGBA) plus a palette texture (`256 x rows`), each with independent reset, so filling one never forces the other to re-upload.
+- Indexed sprites upload 1 byte per pixel; `PalFx` (mul/add/color/invert/hue) and palette swaps happen per vertex/in the shader, so `RemapPal` never bakes a new RGBA image.
+- Vertices are 40 bytes (positions and UVs as `f32`, PalFx multipliers packed as `unorm16`); indices switch to 16-bit while the frame stays under 65536 vertices, so a sprite quad costs 172 bytes instead of 248.
+- Atlas side is 4096 on desktop and 2048 on Android/iOS (80 MB versus 20 MB of VRAM); `UME_ATLAS=<side>` overrides it and the device limit always wins.
+- Draw calls are split by blend state (alpha, add, sub) and scissor; pipeline switches are the main CPU cost of the batch loop.
+- Post-processing (bright, separable blur, copy, composite) runs only when effects are enabled and reuses its targets; HUD glass reuses a quarter-resolution blurred copy.
+- Adapter selection prefers the high-performance GPU and honours `WGPU_POWER_PREF`; vsync and frame cap are runtime toggles (`PresentMode::AutoVsync`/`AutoNoVsync`).
+
+## Concurrency
+- The simulation is single-threaded on purpose: `Match` stays `Clone` with a stable checksum so ggrs rollback and replays keep working. Never parallelize `Match::tick`.
+- Loading and decoding fan out through `ume_formats::par::map` (`std::thread::scope`, work-stealing chunks, `min(cores, 8)` workers); UMF frame raster uses the same rule in `native/compile.rs`.
+- Long jobs run on named threads: `char-load`, `char-preview`, `char-portrait`, `sfx-decode`, `music-synth`, `zip-import`, marketplace fetch.
+- The render batch is built on the main thread; GPU uploads are budgeted by `Gfx::prefetch_step` (4 MiB per frame, up to 50% atlas).
+- Audio: `symphonia` decodes, `quad-snd` plays; decode runs off the main thread.
+
+## Performance rules
+- No allocation inside `Match::tick`; `cargo test -p ume-engine --release --test tick_alloc` must stay green.
+- No clocks, threads or `rand` in `crates/engine` outside `Match::random`.
+- New draw paths must go through the atlas budget and must not upload the same pixels every frame (`Gfx` caches by key and palette).
+- Thread helpers keep the 8-worker cap and the `wasm32` single-thread path.
+- Prefer measuring over guessing: a change that cannot be shown in `tick_bench`, `mugen_load_bench`, the watchdog summary or the F3 overlay is not an optimization.
+- Enable probes with `UME_TRACE=1` (desktop), `?perf=1` (web), `UME_WATCHDOG=1` and `UME_HITCH_MS=<ms>` (frame hitch log).
 
 ## Code Style
 - No comments in code: names must explain intent. Explanations go to the wiki in `docs/wiki/`.
@@ -43,6 +82,9 @@
 - Render dedicated PNGs for every native pose (inline poses, df* defeats, idle-reuse fixes; scans assets/chars + umf dirs): `cargo run --release -p ume-engine --example generate_missing_sprites [--dry-run]`
 - Native PNG inventory (dimensions, alpha edges, geometry metadata): `python scripts/audit_native_sprites.py --out <report.json>`
 - Sprite payload per fighter (sizes the atlas warm-up budget): `cargo run --release -p ume-engine --example sprite_mem -- <char_dir>...`
+- Zero-allocation tick gate: `cargo test -p ume-engine --release --test tick_alloc`
+- M.U.G.E.N character load benchmark: `cargo run --release -p ume-engine --example mugen_load_bench [zip] [runs]`
+- UMF compile benchmark: `cargo run --release -p ume-engine --example load_bench`
 - Simulation tick benchmark: `cargo run --release -p ume-engine --example tick_bench -- [zip_or_char_dir] [seconds] [fighters_per_side]`
 - Format fuzz & engine stress resilience: `cargo test --release -p ume-formats --test fuzz_resilience -p ume-engine --test stress_resilience`
 - MUGEN visual probe: `UME_TOUR=mugen UME_CHARS=<id-suffix>,<id-suffix> ultimate-mugen --shots <dir> --res 1280x720 --mute`

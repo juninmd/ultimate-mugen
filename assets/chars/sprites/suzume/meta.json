@@ -1,34 +1,22 @@
 {
   "frames": {
     "01_idle": {
-      "axisX": 201.5,
-      "axisY": 301.0,
-      "refHeight": 301.0
+      "refHeight": 370
     },
     "02_attack1": {
-      "axisX": 182.0,
-      "axisY": 301.0,
-      "refHeight": 301.0
+      "refHeight": 370
     },
     "03_attack2": {
-      "axisX": 183.0,
-      "axisY": 315.0,
-      "refHeight": 315.0
+      "refHeight": 370
     },
     "04_special": {
-      "axisX": 191.0,
-      "axisY": 298.0,
-      "refHeight": 298.0
+      "refHeight": 370
     },
     "05_projectile": {
-      "axisX": 211.0,
-      "axisY": 289.0,
-      "refHeight": 289.0
+      "refHeight": 370
     },
     "06_victory": {
-      "axisX": 202.5,
-      "axisY": 287.0,
-      "refHeight": 287.0
+      "refHeight": 370
     },
     "run0": {
       "axisX": 200.0,

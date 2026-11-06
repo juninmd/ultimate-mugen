@@ -31,6 +31,7 @@ mod ui;
 mod update;
 #[cfg(target_arch = "wasm32")]
 mod web_sprites;
+mod scan_report;
 mod vfx;
 #[cfg(test)]
 mod vfx_camera_tests;
@@ -48,26 +49,9 @@ fn conf() -> WindowConf {
         std::process::exit(0);
     }
     #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(not(target_arch = "wasm32"))]
     if args.iter().any(|a| a == "--scan-report") {
-        let clock = std::time::Instant::now();
-        let mut reg = crate::registry::Registry::new();
-        let builtin = clock.elapsed();
-        reg.add_bundled_mugen();
-        let bundled = clock.elapsed();
-        reg.scan_folders();
-        let scanned = clock.elapsed();
-        reg.dedupe();
-        reg.sort_mugen();
-        println!(
-            "bundled {:6.2} s | scan {:6.2} s | total {:6.2} s | {} chars, {} stages | rss {:.0} MB",
-            builtin.as_secs_f64(),
-            (scanned - bundled).as_secs_f64(),
-            clock.elapsed().as_secs_f64(),
-            reg.chars.len(),
-            reg.stages.len(),
-            crate::registry::rss_mb()
-        );
-        std::process::exit(0);
+        crate::scan_report::run();
     }
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     if args.iter().any(|a| a == "--check-update") {

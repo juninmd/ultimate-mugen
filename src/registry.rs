@@ -18,41 +18,20 @@ pub use bgm::stage_bgm;
 
 include!(concat!(env!("OUT_DIR"), "/chars_gen.rs"));
 
+mod import;
+mod names;
+mod progress;
+mod register;
+mod stage_job;
+
+pub use import::{read_zip, read_zip_with_progress};
+pub use names::pretty_name;
+pub use progress::{rss_mb, ScanProgress};
+pub use stage_job::{StageBuild, StageJob};
+
+pub type LoadJob = Option<std::thread::JoinHandle<Result<CharDef, String>>>;
+
 /// "true_z_license_free_chara" -> "True Z", "Thunder_horse_GGX" -> "Thunder Horse GGX"
-pub fn pretty_name(n: &str) -> String {
-    let mut s = n.replace(['_', '-'], " ");
-    for junk in [
-        "license free mugen chara for official",
-        "license free chara",
-        "license free",
-        "for official",
-    ] {
-        if let Some(i) = s.to_ascii_lowercase().find(junk) {
-            s.replace_range(i..i + junk.len(), "");
-        }
-    }
-    let words: Vec<String> = s
-        .split_whitespace()
-        .map(|w| {
-            if w.chars()
-                .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit())
-                && w.len() > 1
-            {
-                w.to_string()
-            } else {
-                let mut c = w.chars();
-                c.next()
-                    .map(|f| f.to_uppercase().collect::<String>() + c.as_str())
-                    .unwrap_or_default()
-            }
-        })
-        .collect();
-    if words.is_empty() {
-        n.to_string()
-    } else {
-        words.join(" ")
-    }
-}
 
 #[derive(Clone)]
 pub enum Src {
@@ -60,124 +39,6 @@ pub enum Src {
     Mugen { vfs: Arc<Vfs>, def: String },
 }
 
-/// A stage being loaded off the render thread (MUGEN stages decode a whole SFF).
-pub struct StageJob {
-    index: usize,
-    #[cfg(not(target_arch = "wasm32"))]
-    thread: Option<std::thread::JoinHandle<Result<StageBuild, String>>>,
-    #[cfg(target_arch = "wasm32")]
-    future: Option<std::pin::Pin<Box<dyn std::future::Future<Output = StageBuild>>>>,
-    immediate: Option<StageBuild>,
-}
-
-pub struct StageBuild {
-    pub stage: Stage,
-    pub preview: Option<Arc<ume_engine::chardef::ImageData>>,
-}
-
-impl StageJob {
-    fn ready(index: usize, build: StageBuild) -> Self {
-        StageJob {
-            index,
-            immediate: Some(build),
-            #[cfg(not(target_arch = "wasm32"))]
-            thread: None,
-            #[cfg(target_arch = "wasm32")]
-            future: None,
-        }
-    }
-    pub fn index(&self) -> usize {
-        self.index
-    }
-    /// True once the stage is built; polls the browser job, never blocks.
-    pub fn ready_now(&mut self) -> bool {
-        if self.immediate.is_some() {
-            return true;
-        }
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            self.thread.as_ref().is_some_and(|h| h.is_finished())
-        }
-        #[cfg(target_arch = "wasm32")]
-        {
-            if let Some(fut) = self.future.as_mut() {
-                let mut cx = std::task::Context::from_waker(std::task::Waker::noop());
-                if let std::task::Poll::Ready(build) = fut.as_mut().poll(&mut cx) {
-                    self.immediate = Some(build);
-                    self.future = None;
-                }
-            }
-            self.immediate.is_some()
-        }
-    }
-    /// Collects the result; call only after [`Self::ready_now`] returned true.
-    pub fn take(&mut self) -> Result<StageBuild, String> {
-        if let Some(b) = self.immediate.take() {
-            return Ok(b);
-        }
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            join_stage_thread(self.thread.take())
-        }
-        #[cfg(target_arch = "wasm32")]
-        {
-            Err("stage job is still pending".into())
-        }
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn join_stage_thread(thread: Option<std::thread::JoinHandle<Result<StageBuild, String>>>) -> Result<StageBuild, String> {
-    let h = thread.ok_or("stage job already collected")?;
-    h.join().unwrap_or_else(|_| Err("stage loader thread panicked".into()))
-}
-
-pub type LoadJob = Option<std::thread::JoinHandle<Result<CharDef, String>>>;
-
-/// Counters shared with the boot screen while the roster is catalogued on a worker thread.
-#[derive(Default)]
-pub struct ScanProgress {
-    pub(crate) files: std::sync::atomic::AtomicUsize,
-    pub(crate) chars: std::sync::atomic::AtomicUsize,
-    pub(crate) stages: std::sync::atomic::AtomicUsize,
-}
-
-impl ScanProgress {
-    pub fn counts(&self) -> (usize, usize, usize) {
-        use std::sync::atomic::Ordering::Relaxed;
-        (self.files.load(Relaxed), self.chars.load(Relaxed), self.stages.load(Relaxed))
-    }
-    fn add(&self, key: &std::sync::atomic::AtomicUsize, n: usize) {
-        use std::sync::atomic::Ordering::Relaxed;
-        key.fetch_add(n, Relaxed);
-    }
-}
-
-/// Resident memory of the process, for the headless startup report.
-pub fn rss_mb() -> f64 {
-    #[cfg(windows)]
-    {
-        #[repr(C)]
-        struct Counters {
-            cb: u32,
-            fault: u32,
-            peak_ws: usize,
-            ws: usize,
-            _rest: [usize; 6],
-        }
-        extern "system" {
-            fn GetCurrentProcess() -> isize;
-            fn K32GetProcessMemoryInfo(p: isize, c: *mut Counters, cb: u32) -> i32;
-        }
-        let mut c = Counters { cb: std::mem::size_of::<Counters>() as u32, fault: 0, peak_ws: 0, ws: 0, _rest: [0; 6] };
-        let ok = unsafe { K32GetProcessMemoryInfo(GetCurrentProcess(), &mut c, c.cb) };
-        if ok == 0 { 0.0 } else { c.ws as f64 / (1024.0 * 1024.0) }
-    }
-    #[cfg(not(windows))]
-    {
-        0.0
-    }
-}
 
 fn build(src: &Src, pal: i32, name: &str) -> Result<CharDef, String> {
     match src {
@@ -611,147 +472,6 @@ impl Registry {
     pub fn add_vfs(&mut self, vfs: Vfs, tag: &str) -> (Vec<String>, Vec<String>, Vec<String>) {
         self.add_vfs_inner(vfs, tag, true)
     }
-    fn add_vfs_inner(
-        &mut self,
-        vfs: Vfs,
-        tag: &str,
-        validate: bool,
-    ) -> (Vec<String>, Vec<String>, Vec<String>) {
-        let vfs = Arc::new(vfs);
-        let (mut cs, mut ss, mut errs) = (vec![], vec![], vec![]);
-        // roster identity kept in sets: a linear scan per imported fighter is
-        // quadratic and dominates the startup of large collections
-        let mut char_ids: std::collections::HashSet<String> = self.chars.iter().map(|c| c.id.clone()).collect();
-        let mut char_keys: std::collections::HashSet<String> = self.chars.iter().map(|c| c.key.clone()).collect();
-        let mut stage_ids: std::collections::HashSet<String> = self.stages.iter().map(|s| s.id.clone()).collect();
-        let mut stage_keys: std::collections::HashSet<String> = self.stages.iter().map(|s| s.key.clone()).collect();
-        let char_defs = find_char_defs(&vfs);
-        // header parse and content key hit different files: fan the I/O out
-        let chart: Vec<(String, String, String)> = ume_formats::par::map(&char_defs, |def| {
-            let secs = parse_ini(&vfs.get(def).map(|v| text(&v)).unwrap_or_default());
-            let info = find_section(&secs, "info");
-            let mut name = info
-                .and_then(|s| s.get("displayname").or(s.get("name")))
-                .map(unquote)
-                .filter(|s| !s.is_empty())
-                .unwrap_or(def.clone());
-            name = pretty_name(&name);
-            if ume_formats::ini::nums(info.and_then(|s| s.get("localcoord")), &[320.0])[0] > 320.0 {
-                name.push_str(" HD");
-            }
-            let author = info
-                .and_then(|s| s.get("author"))
-                .map(unquote)
-                .unwrap_or_default();
-            (name, author, char_key(&vfs, def))
-        });
-        for (def, (name, author, key)) in char_defs.into_iter().zip(chart) {
-            let id = format!("mugen:{tag}:{def}");
-            if char_ids.contains(&id) || char_keys.contains(&key) {
-                continue;
-            }
-            let e = CharEntry {
-                key: key.clone(),
-                id: id.clone(),
-                name: name.clone(),
-                series: "M.U.G.E.N".into(),
-                author,
-                color: [90, 110, 150],
-                description: "Personagem M.U.G.E.N importado".into(),
-                mugen: true,
-                boss: false,
-                src: Src::Mugen {
-                    vfs: vfs.clone(),
-                    def: def.clone(),
-                },
-                cache: RefCell::new(HashMap::new()),
-                preview: RefCell::new(HashMap::new()),
-                last_use: Cell::new(0),
-                portrait: RefCell::new(None),
-                broken: Cell::new(false),
-                errs: RefCell::new(HashMap::new()),
-                jobs: Default::default(),
-                sprite_revision: Cell::new(0),
-            };
-            if !validate {
-                char_ids.insert(id);
-                char_keys.insert(key);
-                self.chars.push(e);
-                cs.push(name);
-                continue;
-            }
-            match e.load(1) {
-                Ok(_) => {
-                    e.unload();
-                    char_ids.insert(id);
-                    char_keys.insert(key);
-                    self.chars.push(e);
-                    cs.push(name);
-                }
-                Err(x) => errs.push(format!("{def}: {x}")),
-            }
-        }
-        let stage_defs = find_stage_defs(&vfs);
-        let stages_meta: Vec<(String, String)> = ume_formats::par::map(&stage_defs, |def| {
-            let secs = parse_ini(&vfs.get(def).map(|v| text(&v)).unwrap_or_default());
-            let info = find_section(&secs, "info");
-            let name = info
-                .and_then(|s| s.get("displayname").or(s.get("name")))
-                .map(unquote)
-                .filter(|s| !s.is_empty())
-                .unwrap_or(def.clone());
-            (name, stage_key(&vfs, def))
-        });
-        for (def, (name, key)) in stage_defs.into_iter().zip(stages_meta) {
-            let id = format!("mugenstage:{tag}:{def}");
-            if stage_ids.contains(&id) || stage_keys.contains(&key) {
-                continue;
-            }
-            if !validate {
-                ss.push(name.clone());
-                stage_ids.insert(id.clone());
-                stage_keys.insert(key.clone());
-                self.stages.push(StageEntry {
-                    key,
-                    id,
-                    name,
-                    thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]],
-                    mugen: true,
-                    src: StageSrc::Mugen {
-                        vfs: vfs.clone(),
-                        def,
-                    },
-                    preview: RefCell::new(Preview::Unknown),
-                    stage: RefCell::new(None),
-                });
-                continue;
-            }
-            match load_stage(&vfs, &def) {
-                Ok(st) => {
-                    let prev = stages::mugen_preview(&st);
-                    let arc_st = Arc::new(st);
-                    ss.push(arc_st.name.clone());
-                    stage_ids.insert(id.clone());
-                    stage_keys.insert(key.clone());
-                    self.stages.push(StageEntry {
-                        key,
-                        id,
-                        name: arc_st.name.clone(),
-                        thumb: [[40, 40, 60], [20, 20, 30], [60, 60, 90]],
-                        mugen: true,
-                        src: StageSrc::Mugen {
-                            vfs: vfs.clone(),
-                            def,
-                        },
-                        preview: RefCell::new(Preview::Ready(prev)),
-                        stage: RefCell::new(Some(arc_st)),
-                    });
-                }
-                Err(x) => errs.push(format!("{def}: {x}")),
-            }
-        }
-        (cs, ss, errs)
-    }
     /// Keep memory bounded with hundreds of fighters: drop the least-recently-used definitions beyond the caps (never `keep`).
     pub fn reap_streams(&self) {
         for c in &self.chars {
@@ -1062,36 +782,6 @@ impl Registry {
     }
 }
 
-/// Heavy half of an import (hash + decompression), safe to run on a worker thread.
-#[allow(dead_code)]
-pub fn read_zip(bytes: &[u8]) -> Result<(String, Vfs), String> {
-    read_zip_with_progress(bytes, None)
-}
-
-pub fn read_zip_with_progress(
-    bytes: &[u8],
-    progress: Option<&ume_formats::vfs::ZipProgress>,
-) -> Result<(String, Vfs), String> {
-    let pack = ume_formats::vfs::content_hash(bytes);
-    let mut vfs = Vfs::new();
-    let clock = ume_shell::Clock::now();
-    ume_formats::vfs::add_zip_with_progress(&mut vfs, bytes, "", progress)?;
-    if ume_formats::perf::enabled() {
-        let mut by_ext: HashMap<String, (usize, usize)> = HashMap::new();
-        for (k, v) in vfs.iter() {
-            let ext = k.rsplit_once('.').map(|(_, e)| e.to_string()).unwrap_or_else(|| "(none)".into());
-            let e = by_ext.entry(ext).or_default();
-            e.0 += 1;
-            e.1 += v.len();
-        }
-        let mut rows: Vec<_> = by_ext.into_iter().collect();
-        rows.sort_by_key(|(_, (_, b))| std::cmp::Reverse(*b));
-        let total: usize = rows.iter().map(|(_, (_, b))| *b).sum();
-        let listing: Vec<String> = rows.iter().take(12).map(|(e, (n, b))| format!("{e}:{n}/{:.1}MB", *b as f64 / 1048576.0)).collect();
-        ume_formats::perf::emit(&format!("[perf] zip {:.1}MB -> vfs {:.1}MB in {:.0} ms ({})", bytes.len() as f64 / 1048576.0, total as f64 / 1048576.0, clock.elapsed().as_secs_f64() * 1000.0, listing.join(" ")));
-    }
-    Ok((pack, vfs))
-}
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {

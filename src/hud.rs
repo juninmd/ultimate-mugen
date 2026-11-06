@@ -1336,17 +1336,11 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
     if let Some((sp, img, full)) = f.def.portrait_pick() {
         let tex = g.texture(&img, sp.scale >= 0.99);
         let (iw, ih) = (img.w as f32, img.h as f32);
-        let src = if full {
-            Rect::new(0.0, 0.0, iw, ih)
-        } else {
-            let sd = (ih * 0.40).min(iw);
-            let cx =
-                (sp.axis_x * iw / sp.width.max(1.0)).clamp(sd / 2.0, (iw - sd / 2.0).max(sd / 2.0));
-            Rect::new(cx - sd / 2.0, ih * 0.02, sd, sd)
-        };
+        let src = Rect::new(0.0, 0.0, iw, ih);
         let hh = half * 2.0;
-        let ww = hh * src.w / src.h;
-        let (x0, y0) = (pc.x - ww / 2.0, pc.y - half);
+        let fit = (hh / src.w).min(hh / src.h);
+        let (ww, wh) = (src.w * fit, src.h * fit);
+        let (x0, y0) = (pc.x - ww / 2.0, pc.y - wh / 2.0);
         let flip = side == 1 && !full;
         draw_texture_ex(
             &tex,
@@ -1354,7 +1348,7 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
             y0,
             WHITE,
             DrawTextureParams {
-                dest_size: Some(vec2(ww, hh)),
+                dest_size: Some(vec2(ww, wh)),
                 source: Some(src),
                 flip_x: flip,
                 ..Default::default()

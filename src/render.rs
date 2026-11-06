@@ -703,6 +703,12 @@ impl MatchRenderer {
         if a0 <= 0.01 {
             return;
         }
+        if f.def.source == ume_engine::chardef::Source::Mugen {
+            let tint = self.fx.ambient(f.pos.x, m.camera.x);
+            let o = DrawOpts { alpha: a0, tint, vflip: true, ..Default::default() };
+            Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
+            return;
+        }
         let def = &f.anim_def;
         let Some(spr) = def.sprites.get(&(fr.group, fr.index)) else { return };
         let Some(img) = def.rgba_sprite((fr.group, fr.index)) else { return };

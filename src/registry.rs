@@ -593,7 +593,7 @@ impl Registry {
     }
     pub fn trim_cache(&self, keep: &[usize]) {
         const CAP_MUGEN: usize = 6;
-        const CAP_NATIVE: usize = 40;
+        const CAP_NATIVE: usize = 4;
         for (mugen, cap) in [(true, CAP_MUGEN), (false, CAP_NATIVE)] {
             let total = self
                 .chars

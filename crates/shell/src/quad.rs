@@ -212,15 +212,27 @@ fn draw_ellipse_poly(x: f32, y: f32, rx: f32, ry: f32, rot: f32, n: u32, c: Colo
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FilterMode { Linear, Nearest }
 
-struct TexInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Rc<[u8]>, w: u32, h: u32 }
+struct TexInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Arc<[u8]>, w: u32, h: u32 }
 
 #[derive(Clone)]
 pub struct Texture2D(Rc<TexInner>);
 
 impl Texture2D {
     pub fn from_rgba8(w: u16, h: u16, rgba: &[u8]) -> Texture2D {
+        Self::from_rgba_shared(w, h, Arc::from(rgba))
+    }
+
+    pub fn from_rgba_shared(w: u16, h: u16, rgba: Arc<[u8]>) -> Texture2D {
         let (w, h) = (w as u32, h as u32);
-        Texture2D(Rc::new(TexInner { slot: Cell::new(None), pixels: rgba[..(w * h * 4) as usize].into(), w, h }))
+        let needed = (w * h * 4) as usize;
+        let pixels = if rgba.len() == needed {
+            rgba
+        } else {
+            let mut v = rgba[..rgba.len().min(needed)].to_vec();
+            v.resize(needed, 0);
+            Arc::from(v)
+        };
+        Texture2D(Rc::new(TexInner { slot: Cell::new(None), pixels, w, h }))
     }
 
     fn rect(&self, f: &mut Frame) -> Option<ume_render::Rect> {

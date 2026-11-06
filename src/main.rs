@@ -11,6 +11,7 @@ mod menu_art;
 mod mugen_tour;
 #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
 mod netlink;
+mod perf_tour;
 mod pixel_tour;
 mod poly;
 mod postfx;
@@ -167,13 +168,20 @@ pub fn init_perf() {
     ume_formats::perf::set_clock(perf_clock);
     #[cfg(target_arch = "wasm32")]
     ume_formats::perf::set_sink(web_log);
+    #[cfg(not(target_arch = "wasm32"))]
+    ume_formats::perf::set_sink(perf_log);
     ume_formats::perf::enable(perf_enabled());
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+fn perf_log(msg: &str) { eprintln!("{msg}"); }
 
 #[allow(dead_code)]
 pub fn perf_enabled() -> bool {
     #[cfg(target_arch = "wasm32")]
     if query_params().iter().any(|(k, v)| k == "perf" && v != "0") { return true; }
+    #[cfg(not(target_arch = "wasm32"))]
+    if std::env::var("UME_TRACE").is_ok_and(|v| v != "0") { return true; }
     false
 }
 

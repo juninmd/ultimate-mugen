@@ -60,8 +60,38 @@ O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria th
 | `cargo test -p ume-engine --release --test tick_alloc` | Zero alocações por tick de simulação |
 | `cargo test -p ume-formats --release --test fuzz_resilience` | Fuzzing por mutação em decodificadores SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR e INI |
 | `cargo test -p ume-engine --release --test stress_resilience` | Expressões CNS hostis, floods recursivos de helper/explod/projétil e estresse 4v4 simul |
+| `UME_TOUR=perf --shots <dir>` | Laço de quadro real de uma luta CPU vs CPU: percentis de simulação e desenho, vértices, draw calls, uploads/preenchimento do atlas e RSS, uma vez por segundo |
 
 Referência (release): `kfm` caiu de 48,3 ms para 3,5 ms (13,8x mais rápido), `kfm720` de 60,1 ms para 7,8 ms (7,7x mais rápido). Taxa de simulação atinge 235.000+ ticks/s em p50 0,004 ms (0,1% do orçamento de frame).
+
+## Profile de quadros e memória
+
+`UME_TOUR=perf` executa o `App` real (não um laço sintético) e imprime uma vez por segundo:
+
+```
+perf: 1s step p50 0.03 p99 0.11 max 0.21 · draw p50 0.09 p99 0.26 max 1.11 ·
+frame p50 5.52 p99 5.75 max 5.84 ms · 1661 v 2.0 dc 0 up 143 KB ·
+atlas 75%/0% · rss 379 MB
+```
+
+`UME_PERF_SECONDS=<n>` define a duração, `UME_CHARS=a,b[,c,d…]` escolhe os lutadores (quatro ou mais ids viram time paralelo) e `UME_STAGE=<id>` escolhe o cenário. `UME_PERF_ROTATE=1` inicia uma luta para cada par nativo do roster e imprime o RSS após cada carga, expondo caches que nunca diminuem.
+
+Medido a 1280×720 (Windows, 16 núcleos lógicos, release, vsync):
+
+| Cenário | Passo p50 | Desenho p50 | Quadro p50 | RSS após carregar |
+|---|---|---|---|---|
+| Kaito vs Shion | 0,03 ms | 0,09 ms | 5,52 ms (vsync 180 Hz) | 380 MB |
+| 2v2 paralelo (4 lutadores nativos) | 0,05 ms | 0,13 ms | 5,52 ms | 533 MB |
+
+A simulação e a montagem do lote ficam muito abaixo de um quadro de 16,6 ms; o tempo de parede é a taxa do monitor. O que custa memória é a arte RGBA nativa: cada lutador nativo tem cerca de 90 MB de pixels descomprimidos a 720p. Três correções saíram desta passagem:
+
+| Correção | Onde | Efeito |
+|---|---|---|
+| Compartilhar o buffer RGBA entre `ImageData` e `Texture2D` | `chardef::ImageData`, `Texture2D::from_rgba_shared` | Remove a segunda cópia completa de cada sprite nativo: o RSS de 1v1 caiu de 455 para 380 MB |
+| Descartar o cache de texturas da GPU quando o roster muda | `App::warm_step` (`Gfx::trim(0)`) | Sprites e arte do cenário da luta anterior são liberados; uma revanche mantém os atlas já preenchidos |
+| Limitar definições nativas em cache | `Registry::trim_cache` (`CAP_NATIVE = 4`) | Percorrer o roster somava ~150 MB por luta e chegava a 1,3 GB após sete lutas; com o limite o cache guarda o par atual mais dois recentes e o time atual nunca é descartado |
+
+Percorrer o roster nativo também mostra o atlas ciclando: quatro lutadores deixam o atlas RGBA em 83%, então uma animação que precisa de um quadro novo dispara um reset e reenvia só os sprites em tela (rajadas de algumas centenas de KB, pior quadro de desenho 1,4 ms). A arte M.U.G.E.N indexada não paga esse custo porque vive no atlas de 8 bits.
 
 ## Web (wasm)
 

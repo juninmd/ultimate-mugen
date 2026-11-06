@@ -45,8 +45,6 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | Resilience bounds | `ume_formats`, `ume_engine::matchs` | Image decoders reject headers above `MAX_IMAGE_PIXELS` (`1 << 26`) before allocating; matches cap helpers (60), explods (512), projectiles (256), and texts (128) |
 | Zero-alloc hot paths | `commands`, `matchs`, `triggers`, `ai`, `ikemen` | `Arc<str>` command keys, zero-allocation ASCII `HitDefAttr` matching, branchless `abs` direction translation, O(1) close-range AI selection, in-place `append_seq`, zero-alloc stage background tile iteration, and in-place `RefCell::get_mut` variable assignments avoid heap allocations per tick |
 
-## Resilience bounds | `ume_formats`, `ume_engine::matchs` | Image decoders reject headers above `MAX_IMAGE_PIXELS` (`1 << 26`) before allocating; matches cap helpers (60), explods (512), projectiles (256), and texts (128) |
-
 ## GPU memory
 
 | Technique | Where | Effect |
@@ -65,9 +63,38 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 | `cargo test -p ume-engine --release --test tick_alloc` | Zero allocations per simulation tick |
 | `cargo test -p ume-formats --release --test fuzz_resilience` | Mutation fuzzing across SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR and INI decoders |
 | `cargo test -p ume-engine --release --test stress_resilience` | Hostile CNS expressions, recursive helper/explod/projectile floods, and 4v4 simul stress |
+| `UME_TOUR=perf --shots <dir>` | Full frame loop of a real CPU-vs-CPU match: simulation and draw time percentiles, vertices, draw calls, atlas uploads/fill and RSS, once per second |
 
 Reference (release): `kfm` went from 48.3 ms to 3.5 ms (13.8x faster), `kfm720` from 60.1 ms to 7.8 ms (7.7x faster). Simulation tick throughput reaches 235,000+ ticks/s at p50 0.004 ms (0.1% frame budget).
-| `cargo test -p ume-engine --release --test stress_resilience` | Hostile CNS expressions, recursive helper/explod/projectile floods, and 4v4 simul stress. |
+
+## Frame and memory profiling
+
+`UME_TOUR=perf` drives the real `App` (not a synthetic loop) and reports, once per second:
+
+```
+perf: 1s step p50 0.03 p99 0.11 max 0.21 · draw p50 0.09 p99 0.26 max 1.11 ·
+frame p50 5.52 p99 5.75 max 5.84 ms · 1661 v 2.0 dc 0 up 143 KB ·
+atlas 75%/0% · rss 379 MB
+```
+
+`UME_PERF_SECONDS=<n>` sets the run length, `UME_CHARS=a,b[,c,d…]` picks the fighters (four or more ids split into a parallel team) and `UME_STAGE=<id>` picks the stage. `UME_PERF_ROTATE=1` instead starts a fight for every native pair in the roster and prints RSS after each load, which exposes caches that never shrink.
+
+Measured at 1280×720 (Windows, 16 logical cores, release, vsync):
+
+| Scenario | Step p50 | Draw p50 | Frame p50 | RSS after load |
+|---|---|---|---|---|
+| Kaito vs Shion | 0.03 ms | 0.09 ms | 5.52 ms (180 Hz vsync) | 380 MB |
+| 2v2 parallel (4 native fighters) | 0.05 ms | 0.13 ms | 5.52 ms | 533 MB |
+
+The simulation and the batch build stay far inside a 16.6 ms frame; the wall-clock frame time is the display refresh. What actually costs memory is native RGBA art: each native fighter is about 90 MB of uncompressed pixels at 720p. Three fixes came out of this pass:
+
+| Fix | Where | Effect |
+|---|---|---|
+| Share the RGBA buffer between `ImageData` and `Texture2D` | `chardef::ImageData`, `Texture2D::from_rgba_shared` | Removes the second full copy of every native sprite: 1v1 RSS fell from 455 to 380 MB |
+| Evict the GPU texture cache when the roster changes | `App::warm_step` (`Gfx::trim(0)`) | Sprites and stage art from the previous match are freed; a rematch keeps the atlases it already filled |
+| Cap cached native definitions | `Registry::trim_cache` (`CAP_NATIVE = 4`) | Rotating through the roster used to add ~150 MB per fight and reached 1.3 GB after seven matches; with the cap the cache keeps only the current pair plus two recent ones and the current team is always protected |
+
+Rotating the whole native roster also shows the atlas cycling: four fighters leave the RGBA atlas at 83%, so an animation that needs a new frame triggers a reset and re-uploads only the sprites on screen (bursts of a few hundred KB, worst draw frame 1.4 ms). Indexed M.U.G.E.N art does not pay this cost because it lives in the 8-bit atlas.
 
 ## Web (wasm)
 

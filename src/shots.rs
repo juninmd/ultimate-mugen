@@ -753,6 +753,10 @@ pub async fn run(app: &mut App, dir: &str) {
         crate::pixel_tour::run(app, dir).await;
         return;
     }
+    if std::env::var("UME_TOUR").as_deref() == Ok("perf") {
+        crate::perf_tour::run(app, dir).await;
+        return;
+    }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stages") {
         app.screen = Screen::Fight;
         crate::stage_tour::run(app, dir).await;
@@ -1078,7 +1082,8 @@ pub async fn run(app: &mut App, dir: &str) {
             .reg
             .chars
             .iter()
-            .find(|c| c.mugen)
+            .find(|c| c.mugen && c.id.to_lowercase().contains("kfm"))
+            .or_else(|| app.reg.chars.iter().find(|c| c.mugen))
             .map(|c| c.id.clone())
             .unwrap();
         let ms = app

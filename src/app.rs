@@ -699,9 +699,14 @@ impl App {
             self.screen,
             Screen::Fight | Screen::Vs { .. } | Screen::Results { .. } | Screen::Cutscene { .. }
         ));
-        ume_shell::watchdog::label("import");
         #[cfg(not(target_arch = "wasm32"))]
-        for zip in crate::take_imports() {
+        let incoming = crate::take_imports();
+        #[cfg(not(target_arch = "wasm32"))]
+        if !incoming.is_empty() {
+            ume_shell::watchdog::label("import");
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        for zip in incoming {
             let prog = ume_formats::vfs::ZipProgress::default();
             self.import_progress = Some(prog.clone());
             if let Ok(h) = std::thread::Builder::new()
@@ -724,6 +729,7 @@ impl App {
                         | Screen::Cutscene { .. }
                 )
             {
+                ume_shell::watchdog::label("import");
                 self.wasm_import = Some(web_import::WasmImport {
                     pending: None,
                     show_overlay: false,
@@ -734,6 +740,7 @@ impl App {
             self.resolve_deep_link(dt);
         }
         if self.import_jobs.iter().any(|h| h.is_finished()) {
+            ume_shell::watchdog::label("import");
             let (done, rest): (Vec<_>, Vec<_>) = std::mem::take(&mut self.import_jobs)
                 .into_iter()
                 .partition(|h| h.is_finished());
@@ -2781,7 +2788,20 @@ impl App {
     }
 
     async fn load_step(&mut self, step: u8, wait: bool) -> Result<bool, String> {
-        self.load_step_inner(step, wait).await
+        let clock = ume_shell::Clock::now();
+        let out = self.load_step_inner(step, wait).await;
+        if crate::perf_enabled() {
+            let msg = format!(
+                "[perf] step {step} ({}): {:.1} ms",
+                self.load_label(step),
+                clock.elapsed().as_secs_f64() * 1000.0
+            );
+            #[cfg(target_arch = "wasm32")]
+            crate::web_log(&msg);
+            #[cfg(not(target_arch = "wasm32"))]
+            eprintln!("{msg}");
+        }
+        out
     }
 
     async fn load_step_inner(&mut self, step: u8, wait: bool) -> Result<bool, String> {

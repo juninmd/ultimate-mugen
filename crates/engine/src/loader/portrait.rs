@@ -1,4 +1,4 @@
-use crate::chardef::{ImageData, Sprite};
+use crate::chardef::{portrait_pixels_usable, ImageData, Sprite};
 use ume_formats::act::decode_act;
 use ume_formats::air::parse_air;
 use ume_formats::ini::{find_section, parse_ini_no_lines};
@@ -48,7 +48,7 @@ pub fn load_mugen_portrait(vfs: &Vfs, def_path: &str) -> Option<Sprite> {
             let use_act = spr.group != 9000 && sff.version == 1
                 || spr.palette.is_none() && spr.rgba.is_none();
             let rgba = sprite_to_rgba(spr, if use_act { fallback.as_deref() } else { None });
-            if rgba.as_chunks::<4>().0.iter().all(|p| p[3] == 0) {
+            if !portrait_pixels_usable(&rgba) {
                 return None;
             }
             Some(Sprite {

@@ -188,6 +188,7 @@ pub struct CharDef {
     pub indexed: HashMap<(i32, i32), IndexedSprite>,
     pub remap_cache: Mutex<HashMap<((i32, i32), PalKey), Arc<ImageData>>>,
     pub image_cache: Mutex<HashMap<(i32, i32), Arc<ImageData>>>,
+    portrait_pick: std::sync::OnceLock<Option<(Sprite, Arc<ImageData>, bool)>>,
     pub scale_x: f32,
     pub scale_y: f32,
     pub size_ground_back: f32,
@@ -232,6 +233,7 @@ impl CharDef {
             indexed: HashMap::new(),
             remap_cache: Mutex::new(HashMap::new()),
             image_cache: Mutex::new(HashMap::new()),
+            portrait_pick: std::sync::OnceLock::new(),
             scale_x: 1.0,
             scale_y: 1.0,
             size_ground_back: 15.0,
@@ -326,6 +328,38 @@ impl CharDef {
         cache.insert(sprite, img.clone());
         Some(img)
     }
+
+    /// The sprite used as a select/HUD avatar, cached: the M.U.G.E.N. 9000,1 portrait, then 9000,0,
+    /// then the first idle frame (head crop). Packs often ship a solid dark 9000,1 placeholder, which
+    /// would otherwise leave a black tile in the roster and the team strip.
+    pub fn portrait_pick(&self) -> Option<(Sprite, Arc<ImageData>, bool)> {
+        self.portrait_pick.get_or_init(|| {
+            let idle = self.anims.get(&0).and_then(|a| a.frames.first()).map(|f| (f.group, f.index));
+            for (group, index, full) in [(9000, 1, true), (9000, 0, true)] {
+                let key = (group, index);
+                let Some(sprite) = self.sprites.get(&key) else { continue };
+                let Some(image) = self.rgba_sprite(key) else { continue };
+                if portrait_pixels_usable(&image.rgba) { return Some((sprite.clone(), image, full)); }
+            }
+            let key = idle?;
+            let sprite = self.sprites.get(&key)?;
+            let image = self.rgba_sprite(key)?;
+            portrait_pixels_usable(&image.rgba).then(|| (sprite.clone(), image, false))
+        }).clone()
+    }
+}
+
+/// True when a portrait has enough colour range to be more than a blank placeholder: at least one
+/// reasonably bright pixel, or a visible average above near-black.
+pub fn portrait_pixels_usable(rgba: &[u8]) -> bool {
+    let (mut visible, mut sum, mut max) = (0u64, 0u64, 0u8);
+    for p in rgba.chunks_exact(4).filter(|p| p[3] > 16) {
+        let l = ((p[0] as u16 + p[1] as u16 + p[2] as u16) / 3) as u8;
+        visible += 1;
+        sum += l as u64;
+        max = max.max(l);
+    }
+    visible > 0 && (max >= 16 || sum as f64 / visible as f64 >= 8.0)
 }
 
 pub type PalKey = (i32, i32);
@@ -379,3 +413,34 @@ pub fn parse_mugen_version(raw: Option<&str>) -> f32 {
     }
 }
 
+
+#[cfg(test)]
+mod portrait_tests {
+    use super::portrait_pixels_usable;
+
+    #[test]
+    fn transparent_portraits_are_rejected() {
+        assert!(!portrait_pixels_usable(&[0u8; 256]));
+    }
+
+    #[test]
+    fn solid_dark_placeholders_are_rejected() {
+        let mut rgba = Vec::new();
+        for _ in 0..64 { rgba.extend_from_slice(&[2, 2, 3, 255]); }
+        assert!(!portrait_pixels_usable(&rgba));
+    }
+
+    #[test]
+    fn portraits_with_visible_colour_are_kept() {
+        let mut rgba = vec![0u8; 64 * 4];
+        rgba[40..44].copy_from_slice(&[180, 120, 90, 255]);
+        assert!(portrait_pixels_usable(&rgba));
+    }
+
+    #[test]
+    fn uniformly_dark_but_visible_portraits_are_kept() {
+        let mut rgba = Vec::new();
+        for _ in 0..64 { rgba.extend_from_slice(&[30, 20, 25, 255]); }
+        assert!(portrait_pixels_usable(&rgba));
+    }
+}

@@ -3,6 +3,9 @@
 use crate::gfx::KeyCode;
 use ume_engine::input::k;
 
+mod keys;
+use keys::KEYS;
+
 /// Rebindable fighting actions: label and engine input bit.
 pub const ACTIONS: [(&str, u32); 16] = [
     ("Cima", k::U),
@@ -23,9 +26,6 @@ pub const ACTIONS: [(&str, u32); 16] = [
     ("Carregar ki (Start)", k::S),
 ];
 const N: usize = ACTIONS.len();
-
-mod keys;
-use keys::KEYS;
 
 pub fn id(key: KeyCode) -> Option<&'static str> {
     KEYS.iter().find(|e| e.0 == key).map(|e| e.1)

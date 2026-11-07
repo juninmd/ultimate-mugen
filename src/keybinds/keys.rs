@@ -69,6 +69,7 @@ pub(super) const KEYS: &[(KeyCode, &str, &str)] = &[
     (KeyCode::KpDivide, "KpDivide", "Num /"),
     (KeyCode::KpDecimal, "KpDecimal", "Num ."),
     (KeyCode::KpEnter, "KpEnter", "Num Enter"),
+    (KeyCode::Enter, "Enter", "Enter"),
     (KeyCode::LeftShift, "LeftShift", "Shift Esq."),
     (KeyCode::RightShift, "RightShift", "Shift Dir."),
     (KeyCode::LeftControl, "LeftControl", "Ctrl Esq."),
@@ -82,4 +83,3 @@ pub(super) const KEYS: &[(KeyCode, &str, &str)] = &[
     (KeyCode::PageUp, "PageUp", "Page Up"),
     (KeyCode::PageDown, "PageDown", "Page Down"),
 ];
-

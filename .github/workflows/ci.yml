@@ -38,7 +38,7 @@ jobs:
         with: { save-if: "${{ github.ref == 'refs/heads/master' }}" }
       - run: cargo build --release --target wasm32-unknown-unknown
   web-smoke:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable

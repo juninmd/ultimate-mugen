@@ -3130,7 +3130,7 @@ impl App {
         let pause_btn = if replaying {
             is_key_pressed(KeyCode::Space) || self.c.pressed(nav::START)
         } else {
-            self.c.pressed(nav::START)
+            (self.c.pressed(nav::START) && !is_key_pressed(KeyCode::Enter) && !is_key_pressed(KeyCode::KpEnter))
                 || is_key_pressed(KeyCode::Escape)
                 || is_key_pressed(KeyCode::P)
                 || (!s.paused && is_key_pressed(KeyCode::Enter))

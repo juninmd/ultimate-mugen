@@ -577,6 +577,8 @@ impl Match {
                 for f in self.fighters.iter_mut() {
                     if !f.is_helper && (f.state_no == 0 || f.state_no == 5900 || f.state_no == ENGINE_STATE_FACE_OFF || f.state_no == ENGINE_STATE_FACE_OFF_TAUNT) { f.ctrl = true; }
                 }
+                self.leave_intro_states();
+
             }
             2 => {
                 if !self.training && self.round_ticks > 0 && self.pause.is_none() && self.global_asserts & (gsf::TIMERFREEZE | gsf::ROUNDFREEZE) == 0 { self.timer = (self.timer - 1).max(0); }

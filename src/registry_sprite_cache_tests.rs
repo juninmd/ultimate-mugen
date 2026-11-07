@@ -54,7 +54,7 @@ fn late_sprite_packs_replace_cached_native_definitions() {
     assert!(!Arc::ptr_eq(&preview, &refreshed));
     assert_eq!(
         refreshed.sprites[&(9000, 1)].image.as_ref().unwrap().rgba,
-        [255, 255, 255, 255]
+        [255, 255, 255, 255].into()
     );
 
     let other = "unrelated_sprite_cache_regression";
@@ -70,6 +70,6 @@ fn late_sprite_packs_replace_cached_native_definitions() {
     let replaced = entry.load(1).unwrap();
     assert_eq!(
         replaced.sprites[&(9000, 1)].image.as_ref().unwrap().rgba,
-        [0, 0, 0, 255]
+        [0, 0, 0, 255].into()
     );
 }

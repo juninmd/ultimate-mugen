@@ -195,6 +195,7 @@ impl Team {
     }
 }
 const VIEW_ROWS: usize = 4;
+const SELECT_ROWS: usize = 7;
 const NUMS: [&str; 5] = ["1", "2", "3", "4", "5"];
 
 fn opaque_box(d: &CharDef, key: (i32, i32), s: &ume_engine::chardef::Sprite) -> (f32, f32, f32, f32) {
@@ -1413,7 +1414,7 @@ impl App {
         }
         let m = view.len();
         let pos_of = |view: &[usize], i: usize| view.iter().position(|&v| v == i).unwrap_or(0);
-        let cols = m.div_ceil(VIEW_ROWS).clamp(6, 9);
+        let cols = m.div_ceil(SELECT_ROWS).clamp(6, 10);
         let total_rows = m.div_ceil(cols);
         let two = self.mode == Mode::Versus;
         let coop_mode = self.coop && matches!(self.mode, Mode::Arcade | Mode::Survival);
@@ -1444,10 +1445,10 @@ impl App {
             };
         }
         if is_key_pressed(KeyCode::PageDown) {
-            pos = (pos + cols * VIEW_ROWS).min(m - 1);
+            pos = (pos + cols * SELECT_ROWS).min(m - 1);
         }
         if is_key_pressed(KeyCode::PageUp) {
-            pos = pos.saturating_sub(cols * VIEW_ROWS);
+            pos = pos.saturating_sub(cols * SELECT_ROWS);
         }
         if is_key_pressed(KeyCode::Home) {
             pos = 0;
@@ -1499,10 +1500,10 @@ impl App {
         if crow < self.sel_row {
             self.sel_row = crow;
         }
-        if crow >= self.sel_row + VIEW_ROWS {
-            self.sel_row = crow + 1 - VIEW_ROWS;
+        if crow >= self.sel_row + SELECT_ROWS {
+            self.sel_row = crow + 1 - SELECT_ROWS;
         }
-        self.sel_row = self.sel_row.min(total_rows.saturating_sub(VIEW_ROWS));
+        self.sel_row = self.sel_row.min(total_rows.saturating_sub(SELECT_ROWS));
 
         self.ui.background();
         if self.mode.is_team() {
@@ -1522,18 +1523,6 @@ impl App {
                 .iter()
                 .map(|c| c.name.to_uppercase())
                 .collect();
-        }
-        let ns = self.reg.stages.len();
-        if ns > 0 {
-            if is_key_pressed(KeyCode::RightBracket) || self.clicked_rect(742.0, 10.0, 38.0, 62.0) {
-                self.sel.2 = (self.sel.2 + 1) % ns;
-                self.audio.sfx("select");
-            }
-            if is_key_pressed(KeyCode::LeftBracket) || self.clicked_rect(500.0, 10.0, 38.0, 62.0) {
-                self.sel.2 = (self.sel.2 + ns - 1) % ns;
-                self.audio.sfx("select");
-            }
-            self.sel.2 = self.sel.2.min(ns - 1);
         }
         let accents = [hex("#3fa9ff"), hex("#ff4d6d")];
         let active = [picking == 0 || picked[0].is_some(), picking == 1];
@@ -1637,63 +1626,6 @@ impl App {
             Align::Right,
             false,
         );
-        if ns > 0 {
-            let (sx, sy, sw, sh) = (500.0, 10.0, 280.0, 62.0);
-            crate::menu_art::glass(&self.ui, sx, sy, sw, sh, 1.0);
-            self.ui
-                .rect_lines(sx, sy, sw, sh, 1.0, Color::new(1.0, 1.0, 1.0, 0.18));
-            if let Some(image) = self.reg.stage_preview(self.sel.2) {
-                let texture = self.g.texture(&image, true);
-                let (iw, ih) = (image.w as f32, image.h as f32);
-                let ch_src = (iw * 50.0 / 72.0).min(ih);
-                let cw_src = ch_src * 72.0 / 50.0;
-                draw_texture_ex(
-                    &texture,
-                    self.ui.x(sx + 44.0),
-                    self.ui.y(sy + 6.0),
-                    WHITE,
-                    DrawTextureParams {
-                        dest_size: Some(vec2(72.0 * s_ui, 50.0 * s_ui)),
-                        source: Some(Rect::new(
-                            (iw - cw_src) * 0.5,
-                            (ih - ch_src) * 0.5,
-                            cw_src,
-                            ch_src,
-                        )),
-                        ..Default::default()
-                    },
-                );
-            }
-            let ar = |this: &Self, x: f32, dir: f32| {
-                draw_triangle(
-                    vec2(this.ui.x(x + dir * 7.0), this.ui.y(sy + sh * 0.5)),
-                    vec2(this.ui.x(x - dir * 5.0), this.ui.y(sy + sh * 0.5 - 9.0)),
-                    vec2(this.ui.x(x - dir * 5.0), this.ui.y(sy + sh * 0.5 + 9.0)),
-                    hex("#ffcc33"),
-                )
-            };
-            ar(self, sx + 18.0, -1.0);
-            ar(self, sx + sw - 18.0, 1.0);
-            self.ui.text(
-                crate::i18n::t("select.stage"),
-                sx + 126.0,
-                sy + 22.0,
-                12.0,
-                hex("#a49cc0"),
-                Align::Left,
-                true,
-            );
-            let stage_name = &self.reg.stages[self.sel.2].name;
-            self.ui.text(
-                clip(stage_name, 15),
-                sx + 126.0,
-                sy + 46.0,
-                15.0,
-                WHITE,
-                Align::Left,
-                true,
-            );
-        }
 
         let focus = cur[picking];
         if self.sel_last[picking] != focus {
@@ -1735,8 +1667,8 @@ impl App {
         let ch = cw * 1.17;
         let gw = cols as f32 * cw + (cols as f32 - 1.0) * gap;
         let gx = (VW - gw) / 2.0;
-        let gy = 110.0;
-        let gh = VIEW_ROWS as f32 * (ch + gap) - gap;
+        let gy = 98.0;
+        let gh = SELECT_ROWS as f32 * (ch + gap) - gap;
         crate::menu_art::glass(&self.ui, gx - 12.0, gy - 12.0, gw + 24.0, gh + 24.0, 1.0);
         self.ui.rect_lines(
             gx - 12.0,
@@ -1748,7 +1680,7 @@ impl App {
         );
         let mut click = None;
         let first = self.sel_row * cols;
-        let last = ((self.sel_row + VIEW_ROWS) * cols).min(m);
+        let last = ((self.sel_row + SELECT_ROWS) * cols).min(m);
         for k in first..last {
             let i = view[k];
             let (cx, cy) = (
@@ -1901,14 +1833,14 @@ impl App {
                 );
             }
         }
-        if total_rows > VIEW_ROWS {
+        if total_rows > SELECT_ROWS {
             let bx = gx + gw + 3.0;
             self.ui
                 .rect(bx, gy, 5.0, gh, Color::new(1.0, 1.0, 1.0, 0.1));
-            let th = (gh * VIEW_ROWS as f32 / total_rows as f32).max(18.0);
+            let th = (gh * SELECT_ROWS as f32 / total_rows as f32).max(18.0);
             self.ui.rect(
                 bx,
-                gy + (gh - th) * self.sel_row as f32 / (total_rows - VIEW_ROWS) as f32,
+                gy + (gh - th) * self.sel_row as f32 / (total_rows - SELECT_ROWS) as f32,
                 5.0,
                 th,
                 hex("#ff4d6d"),
@@ -2187,7 +2119,7 @@ impl App {
         self.sel_buf.clear();
         let _ = write!(
             self.sel_buf,
-            "[Tab] {flabel} · {}/{m} · [R] aleatório · [ ] cenário · PgUp/PgDn",
+            "[Tab] {flabel} · {}/{m} · [R] aleatório · PgUp/PgDn",
             pos + 1
         );
         self.ui.text(
@@ -3201,6 +3133,7 @@ impl App {
             self.c.pressed(nav::START)
                 || is_key_pressed(KeyCode::Escape)
                 || is_key_pressed(KeyCode::P)
+                || (!s.paused && is_key_pressed(KeyCode::Enter))
         };
         let (paused, accept_back) = pause_step(s.paused, pause_btn);
         if pause_btn {
@@ -3388,7 +3321,7 @@ impl App {
         if self.c.pressed(nav::UP) {
             self.pause_cur = (self.pause_cur + items.len() - 1) % items.len();
         }
-        let mut ok = self.c.pressed(nav::OK);
+        let mut ok = accept_back && self.c.pressed(nav::OK);
         draw_rectangle(
             0.0,
             0.0,

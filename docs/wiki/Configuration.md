@@ -78,7 +78,8 @@ Settings › Language switches at runtime and stores `lang=en|pt` in `ultimate-m
 | Quick specials | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | ESPECIAL, SUPER |
 | Super | `1`+`2` | Num `7`+`8` | L1+L2 | SUPER |
 | Awakening | `T` | Num `0` | R3 / SELECT | — |
-| Tag swap (Tag mode) | `R` | Num Enter | R3 / SELECT | awaken button |
+| Tag swap (Tag mode) | `F` | Num Enter | R3 / SELECT | awaken button |
+| Charge ki (Start) | `R` | Num Decimal | — | — |
 | Pause / hitboxes | `Esc` / `F2` | `Esc` / `F2` | START | ❚❚ |
 | Fullscreen / FPS | `F11` / `F3` | — | — | — |
 

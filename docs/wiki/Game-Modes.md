@@ -10,6 +10,16 @@ The main menu offers single fights (Arcade, Versus CPU, 2 Players, Training, CPU
 | Team · Parallel | the whole team at once (2 to 5); `Tab` hands your controller to the next teammate | every member of a side is KO'd |
 | Team · Tag | 1 active + the rest on standby (2 or 3 per side) | every member of a side is KO'd |
 
+## Arcade / Story Mode
+
+`Arcade` in the main menu runs the Scarlet Eclipse Tournament story campaign:
+
+- **Prologue (`Cutscene kind: 0`).** Each of the 15 native fighters has a unique opening narrative and personal vow before entering the tournament ladder.
+- **Pre-Boss Confrontation (`Cutscene kind: 1`).** After defeating eight rivals, the player reaches the Scarlet Eclipse Hall and confronts the hidden final boss, **Mikazuki Oboro**, with character-specific dialogue.
+- **Boss Phase 1 & In-Match Awakening.** Oboro fights with flight, shadow teleportation, super speed, and his first awakening (**Mangekyo Desperto**, `form = 1`). If Oboro loses a round during the match, he automatically breaks his seal at the start of the next round (`Match::awaken_defeated_boss`) and transforms into his final form (**Eclipse Absoluto**, `form = 2`).
+- **Boss Transformation Cutscene (`Cutscene kind: 3`) & Final Challenge (Phase 2).** Defeating Oboro the first time on the Arcade ladder triggers the **Awakening: Absolute Eclipse** cutscene (`kind: 3`), launching the final challenge (`Match::awaken_boss_final`) where Oboro starts in **Eclipse Absoluto** (`form = 2`) with boosted max life (`1.15x`), passive dark-eclipse regeneration, accelerated meter gain, level-8 AI, and exclusive Phase 2 moves (*Corte do Eclipse Carmesim*, *Chama do Eclipse Eterno*, and *Julgamento do Eclipse Absoluto*).
+- **Character Ending Cutscenes (`Cutscene kind: 2`) & Main Menu Return.** Defeating Oboro's final form plays a 5-page ending cutscene unique to the player's chosen character (`src/app/cutscene/endings.rs`) and returns directly to the Main Menu (`Screen::Menu`) once completed.
+
 ## Survival
 
 `Sobrevivência` in the main menu is an endless run against the whole roster:

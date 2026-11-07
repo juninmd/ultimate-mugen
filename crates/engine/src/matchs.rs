@@ -522,6 +522,7 @@ impl Match {
         self.zoom_request = None;
         if let Some(bg) = self.bg.as_mut() { bg.reset(); }
         let mut slot = [0usize; 2];
+        let boss_final = self.fighters.iter().any(|f| !f.is_helper && f.def.boss && f.form >= 2);
         let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()];
         for i in 0..self.fighters.len() {
             if self.fighters[i].is_helper { continue; }
@@ -530,7 +531,6 @@ impl Match {
                 let f = &mut self.fighters[i];
                 let k = { let s = f.side.min(1); slot[s] += 1; (slot[s] - 1) as f32 };
                 f.destroyed = false;
-                // teammates line up behind the leader; big teams (up to 5) are packed tighter so everyone starts on screen
                 let gap = if team_n[f.side.min(1)] <= 2 { 52.0 } else { 130.0 / (team_n[f.side.min(1)] - 1) as f32 };
                 f.pos = V2 { x: if f.side == 0 { p1x - gap * k } else { p2x + gap * k }, y: 0.0 };
                 f.vel = V2::default();
@@ -547,8 +547,8 @@ impl Match {
             self.change_state(i, 5900, d);
             self.fighters[i].ctrl = false;
         }
+        if boss_final { self.awaken_boss_final(); }
         if self.team_tag { self.reset_tag_round(); }
-        // round-count-aware announcer (Guilty Gear: "Final" for the deciding duel)
         let decider = self.rounds_to_win > 1 && self.wins[0] == self.rounds_to_win - 1 && self.wins[1] == self.rounds_to_win - 1;
         self.announce = Some(Announce { text: if decider { "FINAL ROUND".into() } else { format!("ROUND {}", self.round_no) }, time: 70, total: 70, kind: AnnounceKind::Round });
         self.events.push(Event::RoundStart(self.round_no));
@@ -579,7 +579,7 @@ impl Match {
                     if !f.is_helper && (f.state_no == 0 || f.state_no == 5900 || f.state_no == ENGINE_STATE_FACE_OFF || f.state_no == ENGINE_STATE_FACE_OFF_TAUNT) { f.ctrl = true; }
                 }
                 self.leave_intro_states();
-
+                self.awaken_defeated_boss();
             }
             2 => {
                 if !self.training && self.round_ticks > 0 && self.pause.is_none() && self.global_asserts & (gsf::TIMERFREEZE | gsf::ROUNDFREEZE) == 0 { self.timer = (self.timer - 1).max(0); }
@@ -743,7 +743,7 @@ impl Match {
             f.state_time += 1;
             if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); }
             // the final boss keeps charging on its own (a super every ~10 s even when not hitting)
-            if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + 0.35).min(f.power_max); }
+            if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + if f.form >= 2 { 0.85 } else { 0.35 }).min(f.power_max); if f.form >= 2 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.12).min(f.life_max); } }
             if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_used = 0; f.super_defence_mul = 1.0; }
             if f.move_contact > 0 { f.move_contact += 1; }
             if f.move_hit > 0 { f.move_hit += 1; }

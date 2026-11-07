@@ -3598,5 +3598,268 @@
   "form": "Mangekyo Desperto",
   "speed": 1.3,
   "country": "Dimensão do Eclipse",
-  "stage": "volcano"
+  "stage": "volcano",
+  "abilities": {
+    "fly": {
+      "speed": 4.8,
+      "cost": 40.0,
+      "input": "a+b",
+      "anim": "jumpTop"
+    },
+    "teleport": {
+      "cost": 150.0,
+      "input": "b+c",
+      "anim": "espelho"
+    },
+    "superSpeed": {
+      "mul": 2.3,
+      "cost": 80.0,
+      "input": "a+c"
+    },
+    "forms": [
+      {
+        "id": "mangekyo",
+        "name": "Mangekyo Desperto",
+        "cost": 1000.0,
+        "attack": 1.32,
+        "defense": 1.25,
+        "palette": {
+          "colors": {
+            "hair": "#f0e8ff",
+            "eye": "#ff2a55",
+            "top2": "#ff1a4a",
+            "trim": "#ff1a4a",
+            "belt": "#ff1a4a",
+            "energy": "#ff2a6a",
+            "aura": "#ff1a4a",
+            "weapon2": "#ff5577"
+          }
+        },
+        "parts": [
+          "hair",
+          "eye",
+          "top2",
+          "trim",
+          "belt",
+          "energy",
+          "aura",
+          "weapon2"
+        ],
+        "replaceMoves": false,
+        "moves": [
+          {
+            "id": "corte_eclipse",
+            "name": "Corte do Eclipse Carmesim",
+            "input": "~D, DB, B, y",
+            "kind": "special",
+            "anim": "espelho",
+            "teleport": 3,
+            "invuln": [
+              1,
+              3
+            ],
+            "fx": "aura",
+            "hits": [
+              {
+                "at": 4,
+                "damage": 96,
+                "level": "heavy",
+                "launch": true,
+                "knockback": [
+                  -5,
+                  -6
+                ]
+              }
+            ],
+            "projectile": {
+              "at": 4,
+              "anim": "blackFlame",
+              "hitAnim": "blackFlameHit",
+              "speed": [
+                3.5,
+                0
+              ],
+              "offset": [
+                48,
+                -30
+              ],
+              "damage": 34,
+              "hits": 5,
+              "level": "heavy",
+              "priority": 5,
+              "removeTime": 90
+            }
+          }
+        ]
+      },
+      {
+        "id": "eclipse_absoluto",
+        "name": "Eclipse Absoluto",
+        "cost": 1000.0,
+        "attack": 1.45,
+        "defense": 1.35,
+        "palette": {
+          "colors": {
+            "hair": "#fff4d0",
+            "eye": "#ffd13b",
+            "top": "#28083c",
+            "top2": "#ffd13b",
+            "trim": "#ffd13b",
+            "pants": "#1a0528",
+            "cloth": "#c8102e",
+            "belt": "#ffd13b",
+            "wrap": "#3c1050",
+            "boot": "#12041e",
+            "weapon": "#ff1a4a",
+            "weapon2": "#ffd13b",
+            "hilt": "#ffd13b",
+            "accent": "#ffd13b",
+            "energy": "#ffd13b",
+            "aura": "#ff2a55",
+            "undershirt": "#380848"
+          }
+        },
+        "replaceMoves": false,
+        "moves": [
+          {
+            "id": "chama_eclipse",
+            "name": "Chama do Eclipse Eterno",
+            "input": "~D, DF, F, b",
+            "kind": "special",
+            "anim": "amaterasu",
+            "invuln": [
+              1,
+              3
+            ],
+            "fx": "aura",
+            "projectile": [
+              {
+                "at": 3,
+                "anim": "blackFlame",
+                "hitAnim": "blackFlameHit",
+                "speed": [
+                  3.8,
+                  0
+                ],
+                "offset": [
+                  48,
+                  -28
+                ],
+                "damage": 36,
+                "hits": 8,
+                "level": "heavy",
+                "priority": 5,
+                "removeTime": 120
+              },
+              {
+                "at": 3,
+                "anim": "moonBeam",
+                "hitAnim": "moonHit",
+                "speed": [
+                  0,
+                  0
+                ],
+                "offset": [
+                  88,
+                  -62
+                ],
+                "damage": 42,
+                "hits": 4,
+                "level": "heavy",
+                "launch": true,
+                "priority": 5,
+                "removeTime": 34
+              }
+            ]
+          },
+          {
+            "id": "julgamento_eclipse",
+            "name": "Julgamento do Eclipse Absoluto",
+            "input": "~D, DF, F, D, DF, F, y",
+            "kind": "super",
+            "anim": "kyoka",
+            "cost": 1000.0,
+            "teleport": 2,
+            "invuln": [
+              1,
+              9
+            ],
+            "fx": "aura",
+            "hits": [
+              {
+                "at": 3,
+                "damage": 45,
+                "level": "heavy"
+              },
+              {
+                "at": 4,
+                "damage": 45,
+                "level": "heavy"
+              },
+              {
+                "at": 5,
+                "damage": 45,
+                "level": "heavy"
+              },
+              {
+                "at": 6,
+                "damage": 48,
+                "level": "heavy"
+              },
+              {
+                "at": 9,
+                "damage": 110,
+                "level": "heavy",
+                "launch": true,
+                "knockback": [
+                  -7,
+                  -8
+                ]
+              }
+            ],
+            "projectile": [
+              {
+                "at": 4,
+                "anim": "spectralWave",
+                "hitAnim": "spectralHit",
+                "speed": [
+                  6.0,
+                  0
+                ],
+                "offset": [
+                  42,
+                  -34
+                ],
+                "damage": 46,
+                "hits": 5,
+                "level": "heavy",
+                "launch": true,
+                "priority": 7,
+                "removeTime": 75
+              },
+              {
+                "at": 9,
+                "anim": "kyokaFlame",
+                "hitAnim": "blackFlameHit",
+                "speed": [
+                  0,
+                  0
+                ],
+                "offset": [
+                  56,
+                  -8
+                ],
+                "damage": 52,
+                "hits": 5,
+                "level": "heavy",
+                "launch": true,
+                "priority": 7,
+                "removeTime": 30
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 }

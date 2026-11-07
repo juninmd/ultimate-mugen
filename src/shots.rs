@@ -3,6 +3,7 @@ use crate::app::{App, Mode, Screen, Team};
 use crate::gfx::*;
 use crate::shots::replay::replay_determinism;
 mod replay;
+mod story_tour;
 mod suzume_tour;
 
 async fn frames(app: &mut App, n: usize) {
@@ -701,6 +702,10 @@ pub async fn run(app: &mut App, dir: &str) {
     }
     if std::env::var("UME_TOUR").as_deref() == Ok("story") {
         story(app, dir).await;
+        return;
+    }
+    if std::env::var("UME_TOUR").as_deref() == Ok("story_plus") {
+        story_tour::run(app, dir).await;
         return;
     }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("stage-select") {

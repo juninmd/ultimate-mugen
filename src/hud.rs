@@ -376,10 +376,11 @@ impl Hud {
                         let fc = crate::vfx::Vfx::form_color(f);
                         let fcol = Color::new(fc[0], fc[1], fc[2], 1.0);
                         let pulse = 0.75 + 0.25 * (gt * 6.0).sin();
-                        let label = if f.def.form_name.is_empty() {
+                        let fnm = f.active_form_name();
+                        let label = if fnm.is_empty() {
                             "DESPERTO".to_string()
                         } else {
-                            f.def.form_name.to_uppercase()
+                            fnm.to_uppercase()
                         };
                         let tw = measure_text(
                             &label,
@@ -1107,7 +1108,10 @@ impl Hud {
         // awakening hint: one super bar is enough
         if m.round_state == 2 && human.len() == 1 {
             if let Some(f) = m.roots().find(|f| human.contains(&f.id)) {
-                if f.form == 0 && f.alive && f.power >= 1000.0 && f.def.anims.contains_key(&196) {
+                if f.alive
+                    && f.next_form_cost().is_some_and(|c| f.power >= c)
+                    && f.def.anims.contains_key(&196)
+                {
                     let a = 0.55 + 0.45 * (gt * 5.0).sin().abs();
                     text(
                         "T · DESPERTAR",

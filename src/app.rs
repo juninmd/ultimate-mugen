@@ -1208,6 +1208,11 @@ impl App {
         kv: f32,
         mirror: bool,
     ) {
+        let (form_g, anim) = if anim <= -1000 {
+            (3, -anim - 1000)
+        } else {
+            (1, anim)
+        };
         let Some(a) = d.anims.get(&anim).or(d.anims.get(&0)) else {
             return;
         };
@@ -1225,7 +1230,14 @@ impl App {
             acc += f.time;
         }
         let fr = &a.frames[idx];
-        let key = (fr.group, fr.index);
+        let key = if form_g > 1
+            && fr.group == 1
+            && d.sprites.contains_key(&(form_g, fr.index))
+        {
+            (form_g, fr.index)
+        } else {
+            (fr.group, fr.index)
+        };
         let Some(spr) = d.sprites.get(&key) else { return };
         let Some(tex) = self.g.sprite_tex(d, key, &[]) else { return };
         let l = 320.0 / d.local_w;
@@ -1264,7 +1276,6 @@ impl App {
         e
     }
 
-    /// Draws a fighter scaled so its idle bounding box fits `fw` x `fh`, feet on `bottom`, centred on `cx`.
     pub fn draw_char_fit(
         &mut self,
         d: &Arc<CharDef>,
@@ -1290,19 +1301,16 @@ impl App {
         );
     }
 
-    /// Everyone you can pick (the arcade final boss stays hidden).
     fn playable(&self) -> Vec<usize> {
         (0..self.reg.chars.len())
             .filter(|&i| !self.reg.chars[i].boss)
             .collect()
     }
-    /// Registry index of the arcade final boss, if present.
     fn boss_idx(&self) -> Option<usize> {
         (0..self.reg.chars.len())
             .find(|&i| self.reg.chars[i].boss && !self.reg.chars[i].broken.get())
     }
 
-    /// Start an Arcade run for `me` (plus an optional second human `mate` on the same side).
     fn arcade_start(&mut self, me: usize, mate: Option<usize>) {
         let n = self.reg.chars.len();
         let mut ladder: Vec<usize> = (0..n)
@@ -1316,17 +1324,18 @@ impl App {
         let seed = (get_time() * 1000.0) as usize;
         let ll = ladder.len().max(1);
         ladder.rotate_left(seed % ll);
-        // originals first (guaranteed to work), MUGEN fighters mixed in later rounds
         ladder.sort_by_key(|&i| self.reg.chars[i].mugen as u8);
         ladder.truncate(8);
         if ladder.is_empty() {
             ladder.push(me);
         }
-        // the ladder ends with the hidden final boss
         let has_boss = self
             .boss_idx()
             .filter(|&b| b != me && Some(b) != mate)
-            .map(|b| ladder.push(b))
+            .map(|b| {
+                ladder.push(b);
+                ladder.push(b);
+            })
             .is_some();
         self.sel = (me, ladder[0], self.sel.2);
         self.team = mate.map(|m| Team::new(vec![me, m], vec![ladder[0]], true));
@@ -2791,10 +2800,16 @@ impl App {
             ume_shell::watchdog::label("load:session");
             let stage = self.pending.stage.take().ok_or("stage")?;
             let teams = std::mem::take(&mut self.pending.defs);
+            let boss_phase2 = self.mode == Mode::Arcade
+                && self.arcade.as_ref().is_some_and(|(l, i)| {
+                    *i > 0 && l.get(*i) == l.get(*i - 1) && l.get(*i).copied() == self.boss_idx()
+                });
             let lvl = if self.mode == Mode::Survival {
                 self.survival
                     .map(|s| s.ai_level(self.ai_level))
                     .unwrap_or(self.ai_level)
+            } else if boss_phase2 {
+                8
             } else {
                 match &self.arcade {
                     Some((_, i)) if self.mode == Mode::Arcade => {
@@ -2918,6 +2933,9 @@ impl App {
                 .map(|r| r.rules)
                 .unwrap_or_else(|| self.settings.rules());
             sess.apply_rules(self.fight_rules);
+            if boss_phase2 {
+                sess.m.awaken_boss_final();
+            }
             if seq {
                 if let Some(t) = &self.team {
                     for side in 0..2 {
@@ -3554,18 +3572,34 @@ impl App {
         // arcade progression
         if self.mode == Mode::Arcade && winner == 0 {
             let boss = self.boss_idx();
+            let st_volcano = self.reg.stages.iter().position(|s| s.id.contains("volcano"));
+            let st_spirit = self.reg.stages.iter().position(|s| s.id.contains("spirit"));
             if let Some((ladder, i)) = self.arcade.as_mut() {
                 *i += 1;
                 if *i < ladder.len() {
+                    let is_boss = Some(ladder[*i]) == boss;
+                    let is_phase2 = is_boss && *i > 0 && Some(ladder[*i - 1]) == boss;
                     self.sel.1 = ladder[*i];
-                    self.sel.2 = (*i * 3 + 1) % self.reg.stages.len();
+                    self.sel.2 = if is_phase2 {
+                        st_spirit.or(st_volcano).unwrap_or(0)
+                    } else if is_boss {
+                        st_volcano.unwrap_or((*i * 3 + 1) % self.reg.stages.len())
+                    } else {
+                        (*i * 3 + 1) % self.reg.stages.len()
+                    };
                     self.audio.stop_music();
                     if self.coop {
                         if let Some(t) = self.team.as_mut() {
                             t.members[1] = vec![ladder[*i]];
                         }
                     }
-                    self.screen = if Some(ladder[*i]) == boss {
+                    self.screen = if is_phase2 {
+                        Screen::Cutscene {
+                            kind: 3,
+                            page: 0,
+                            t: 0.0,
+                        }
+                    } else if is_boss {
                         Screen::Cutscene {
                             kind: 1,
                             page: 0,
@@ -3719,8 +3753,8 @@ impl App {
             match choice {
                 0 => {
                     self.replaying = None;
-                    if let Some((_, i)) = self.arcade.as_mut() {
-                        *i = (*i).min(5);
+                    if let Some((l, i)) = self.arcade.as_mut() {
+                        *i = (*i).min(l.len().saturating_sub(1));
                     }
                     self.reset_team();
                     self.start_fight().await;
@@ -4028,8 +4062,31 @@ mod tests {
 
     #[test]
     fn pause_menu_is_navigable_once_open() {
-        assert_eq!(pause_step(true, false), (true, true)); // paused, no toggle: BACK accepted
-        assert_eq!(pause_step(true, true), (false, true)); // Esc while paused closes the menu
-        assert_eq!(pause_step(false, false), (false, false)); // idle
+        assert_eq!(pause_step(true, false), (true, true));
+        assert_eq!(pause_step(true, true), (false, true));
+        assert_eq!(pause_step(false, false), (false, false));
+    }
+
+    #[test]
+    fn character_story_and_ending_scripts_are_unique_for_each_fighter() {
+        let roster = [
+            "kaito", "shion", "akio", "suzume", "bruno", "sylene", "volta", "lian", "garan",
+            "marlow", "kaname", "jin", "daichi", "valdric", "haruki",
+        ];
+        let mut openings = std::collections::BTreeSet::new();
+        let mut prebosses = std::collections::BTreeSet::new();
+        let mut awakenings = std::collections::BTreeSet::new();
+        let mut endings = std::collections::BTreeSet::new();
+        for id in roster {
+            let op = super::cutscene::script_for(0, id, id, "", "Mikazuki Oboro", "");
+            let pb = super::cutscene::script_for(1, id, id, "", "Mikazuki Oboro", "");
+            let aw = super::cutscene::script_for(3, id, id, "", "Mikazuki Oboro", "");
+            let en = super::cutscene::script_for(2, id, id, "", "Mikazuki Oboro", "");
+            assert!(op.len() >= 4 && pb.len() >= 5 && aw.len() >= 6 && en.len() >= 5);
+            assert!(openings.insert(op.last().unwrap().text.clone()));
+            assert!(prebosses.insert(pb[3].text.clone()));
+            assert!(awakenings.insert(aw[4].text.clone()));
+            assert!(endings.insert(en[1].text.clone()));
+        }
     }
 }

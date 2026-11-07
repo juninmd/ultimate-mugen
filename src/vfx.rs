@@ -333,7 +333,9 @@ impl Vfx {
     }
     /// Colour of a fighter's awakened aura: its own colour pushed towards bright.
     pub fn form_color(f: &ume_engine::fighter::Fighter) -> [f32; 3] {
-        // the character's colour at full saturation, a touch towards white
+        if f.def.boss && f.form >= 2 {
+            return [1.0, 0.78, 0.22];
+        }
         let c = [
             f.def.color[0] as f32 / 255.0,
             f.def.color[1] as f32 / 255.0,
@@ -669,13 +671,16 @@ impl Vfx {
                     self.spark_burst(x, y, 1.0, 20, 8.0, col, std::f32::consts::PI);
                     self.debris(f.pos.x, f.pos.y, 8, [0.7, 0.65, 0.6]);
                     self.dust(f.pos.x, f.pos.y, 12, 3.0, 1.0, [0.85, 0.8, 0.75]);
-                    let nm = f.def.form_name.to_uppercase();
+                    let nm = f.active_form_name().to_uppercase();
                     self.tag(
                         x,
                         y - 46.0,
                         if nm.is_empty() { "DESPERTAR" } else { &nm },
                         col,
                     );
+                    if f.def.boss && f.form >= 2 {
+                        self.banner("ECLIPSE ABSOLUTO", "FORMA FINAL DE MIKAZUKI OBORO", col);
+                    }
                 }
                 self.flash_add(0.4);
                 self.chroma = 0.6;
@@ -687,8 +692,12 @@ impl Vfx {
                 self.sfx.push("transform");
             }
             Event::Fight => {
-                if m.roots().any(|f| f.def.boss) {
-                    self.banner("CHEFE FINAL", "MIKAZUKI OBORO", [1.0, 0.15, 0.3]);
+                if let Some(b) = m.roots().find(|f| f.def.boss) {
+                    if b.form >= 2 {
+                        self.banner("DESAFIO FINAL", "OBORO · ECLIPSE ABSOLUTO", [1.0, 0.78, 0.22]);
+                    } else {
+                        self.banner("CHEFE FINAL", "MIKAZUKI OBORO", [1.0, 0.15, 0.3]);
+                    }
                     self.sfx.push("ko");
                 }
                 self.ring(

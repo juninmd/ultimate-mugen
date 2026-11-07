@@ -10,6 +10,16 @@ O menu principal oferece lutas individuais (Arcade, Versus CPU, 2 Jogadores, Tre
 | Equipe · Paralelo | a equipe inteira ao mesmo tempo (2 a 5); `Tab` passa o controle ao próximo | todos os membros de um lado caem |
 | Equipe · Tag | 1 ativo + os demais em espera (2 ou 3 por lado) | todos os membros de um lado caem |
 
+## Arcade / Modo História
+
+`Arcade` no menu principal executa a campanha narrativa do Torneio do Eclipse Escarlate:
+
+- **Prólogo (`Cutscene kind: 0`).** Cada um dos 15 lutadores nativos possui sua própria introdução narrativa e juramento pessoal antes de iniciar a escada do torneio.
+- **Confronto Pré-Chefe (`Cutscene kind: 1`).** Após derrotar oito rivais, o jogador chega ao Salão do Eclipse e enfrenta o chefe final oculto, **Mikazuki Oboro**, com diálogos exclusivos para cada personagem.
+- **Chefe Fase 1 e Despertar em Luta.** Oboro utiliza voo, teletransporte sombrio, super velocidade e sua primeira forma (**Mangekyo Desperto**, `form = 1`). Quando derrotado ao menos uma vez em um round, Oboro rompe seu selo automaticamente no início do round seguinte (`Match::awaken_defeated_boss`) e assume sua transformação final (**Eclipse Absoluto**, `form = 2`).
+- **Cutscene de Transformação (`Cutscene kind: 3`) e Desafio Final (Fase 2).** Derrotar Oboro pela primeira vez na escada do modo história dispara a cutscene **Despertar: Eclipse Absoluto** (`kind: 3`) e inicia o desafio final (`Match::awaken_boss_final`), no qual Oboro já começa em **Eclipse Absoluto** (`form = 2`) com vida máxima ampliada (`1.15x`), regeneração contínua do eclipse, ganho acelerado de barra, IA nível 8 e golpes exclusivos da forma final (*Corte do Eclipse Carmesim*, *Chama do Eclipse Eterno* e *Julgamento do Eclipse Absoluto*).
+- **Cutscene Final por Personagem (`Cutscene kind: 2`) e Retorno ao Menu Principal.** Ao derrotar a forma final de Oboro, cada personagem exibe sua própria cutscene de encerramento e epílogo (`src/app/cutscene/endings.rs`) e, ao final, o jogo encerra a sessão e retorna diretamente ao Menu Principal (`Screen::Menu`).
+
 ## Sobrevivência
 
 `Sobrevivência` no menu principal é uma sequência sem fim contra o elenco inteiro:

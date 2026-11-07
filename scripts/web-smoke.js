@@ -22,15 +22,17 @@ const server = staticServer(dir, types);
   });
   await p.goto(url);
   await p.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
-  await p.waitForTimeout(10000);
+  await p.waitForTimeout(12000);
   await p.locator('#glcanvas').focus();
-  const key = async (k, wait = 900) => { await p.keyboard.down(k); await p.waitForTimeout(200); await p.keyboard.up(k); await p.waitForTimeout(wait); };
+  const key = async (k, wait = 1000) => { await p.keyboard.down(k); await p.waitForTimeout(200); await p.keyboard.up(k); await p.waitForTimeout(wait); };
   await key('Enter');                       // title → menu
   await key('ArrowDown'); await key('ArrowDown'); await key('Enter', 1500);  // Arcade, Survival → CPU (Versus CPU) → select
   await key('Enter', 1500); await key('Enter', 1500); // P1, P2 → stages
   if (stageRequests.length) problems.push(`Full stage images fetched before confirmation: ${stageRequests.length}`);
+  const stageReq = p.waitForRequest(r => /\/assets\/stages\/[^/]+\.png$/.test(new URL(r.url()).pathname), { timeout: 30000 }).catch(() => null);
   await key('Enter', 1500);                 // stage → VS / loading
-  await p.waitForTimeout(10000);            // loading + VS + intro
+  await stageReq;
+  await p.waitForTimeout(6000);             // intro + fight start
   if (stageRequests.length !== 1) problems.push(`Expected one selected stage download, got ${stageRequests.length}`);
   // releaseAll (blur, pagehide, contextmenu) synthesises a pointerup: it must be a real PointerEvent, or the
   // wasm glue throws on event.pointerType and the input stays stuck.

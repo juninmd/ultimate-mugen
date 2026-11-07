@@ -1,5 +1,5 @@
 use std::cell::Cell;
-use std::time::Instant;
+use web_time::Instant;
 
 thread_local! {
     static LABEL: Cell<&'static str> = const { Cell::new("frame") };

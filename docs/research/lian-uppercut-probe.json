@@ -1,0 +1,19 @@
+{
+  "characterId": "lian",
+  "move": "crane",
+  "scores": {
+    "baseline": [
+      2,
+      2,
+      1,
+      1
+    ],
+    "candidate": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  "improvedInProbe": true
+}

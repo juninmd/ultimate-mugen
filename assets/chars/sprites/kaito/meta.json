@@ -1,67 +1,31 @@
 {
   "frames": {
     "01_idle": {
-      "awakeningHair": [
-        67,
-        0,
-        133,
-        35
-      ],
       "axisX": 99.0,
       "axisY": 358.0,
       "refHeight": 358.0
     },
     "02_attack1": {
-      "awakeningHair": [
-        66,
-        0,
-        132,
-        36
-      ],
       "axisX": 111.5,
       "axisY": 362.0,
       "refHeight": 362.0
     },
     "03_attack2": {
-      "awakeningHair": [
-        40,
-        5,
-        106,
-        59
-      ],
       "axisX": 115.0,
       "axisY": 385.0,
       "refHeight": 385.0
     },
     "04_special": {
-      "awakeningHair": [
-        67,
-        46,
-        133,
-        100
-      ],
       "axisX": 114.5,
-      "axisY": 500.0,
+      "axisY": 483.0,
       "refHeight": 500.0
     },
     "05_projectile": {
-      "awakeningHair": [
-        33,
-        0,
-        99,
-        35
-      ],
       "axisX": 114.5,
       "axisY": 358.0,
       "refHeight": 358.0
     },
     "06_victory": {
-      "awakeningHair": [
-        70,
-        0,
-        136,
-        38
-      ],
       "axisX": 102.0,
       "axisY": 379.0,
       "refHeight": 379.0
@@ -75,22 +39,6 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
-    },
-    "attack1": {
-      "awakeningHair": [
-        66,
-        0,
-        132,
-        36
-      ]
-    },
-    "attack2": {
-      "awakeningHair": [
-        40,
-        5,
-        106,
-        59
-      ]
     },
     "bar1": {
       "axisX": 200.0,
@@ -106,14 +54,6 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
-    },
-    "blast": {
-      "awakeningHair": [
-        33,
-        0,
-        99,
-        35
-      ]
     },
     "bounce": {
       "axisX": 200.0,
@@ -217,14 +157,6 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "fireball": {
-      "awakeningHair": [
-        33,
-        0,
-        99,
-        35
-      ]
-    },
     "flip0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -244,14 +176,6 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
-    },
-    "gale": {
-      "awakeningHair": [
-        33,
-        0,
-        99,
-        35
-      ]
     },
     "getUp1": {
       "axisX": 200.0,
@@ -329,14 +253,6 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "hkick": {
-      "awakeningHair": [
-        40,
-        5,
-        106,
-        59
-      ]
-    },
     "hop": {
       "awakeningHair": [
         156,
@@ -347,14 +263,6 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
-    },
-    "idle": {
-      "awakeningHair": [
-        67,
-        0,
-        133,
-        35
-      ]
     },
     "idle0": {
       "awakeningHair": [
@@ -404,14 +312,6 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
-    },
-    "jab": {
-      "awakeningHair": [
-        66,
-        0,
-        132,
-        36
-      ]
     },
     "jab0": {
       "awakeningHair": [
@@ -473,14 +373,6 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "kick": {
-      "awakeningHair": [
-        40,
-        5,
-        106,
-        59
-      ]
-    },
     "land": {
       "awakeningHair": [
         189,
@@ -516,30 +408,6 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
-    },
-    "projectile": {
-      "awakeningHair": [
-        33,
-        0,
-        99,
-        35
-      ]
-    },
-    "punch": {
-      "awakeningHair": [
-        66,
-        0,
-        132,
-        36
-      ]
-    },
-    "rise": {
-      "awakeningHair": [
-        67,
-        46,
-        133,
-        100
-      ]
     },
     "run0": {
       "awakeningHair": [
@@ -585,34 +453,10 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "special": {
-      "awakeningHair": [
-        67,
-        46,
-        133,
-        100
-      ]
-    },
-    "stand": {
-      "awakeningHair": [
-        67,
-        0,
-        133,
-        35
-      ]
-    },
     "sup0": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
-    },
-    "taunt": {
-      "awakeningHair": [
-        70,
-        0,
-        136,
-        38
-      ]
     },
     "tk0": {
       "axisX": 200.0,
@@ -639,22 +483,6 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
-    },
-    "uppercut": {
-      "awakeningHair": [
-        67,
-        46,
-        133,
-        100
-      ]
-    },
-    "victory": {
-      "awakeningHair": [
-        70,
-        0,
-        136,
-        38
-      ]
     },
     "walk0": {
       "awakeningHair": [
@@ -721,14 +549,6 @@
       "axisX": 613.0,
       "axisY": 1183,
       "refHeight": 1136
-    },
-    "win": {
-      "awakeningHair": [
-        70,
-        0,
-        136,
-        38
-      ]
     },
     "win0": {
       "awakeningHair": [

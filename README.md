@@ -178,7 +178,7 @@ Keyboard, multiple gamepads and touch work at the same time. Move lists show the
 | **Quick specials** | `1`, `2`, `3` | Numpad `7`, `8`, `9` | `L1`, `L2` | **ESPECIAL**, **SUPER** |
 | **Super** | `1` + `2` | Numpad `7` + `8` | `L1` + `L2` | **SUPER** |
 | **Transformation** | `T` | Numpad `0` | Right stick / `SELECT` | — |
-| **Pause / Hitboxes** | `Esc` / `F2` | `Esc` / `F2` | `OPTIONS` / `START` | `❚❚` |
+| **Pause / Hitboxes** | `Esc` / `Enter` / `F2` | `Esc` / `Enter` / `F2` | `OPTIONS` / `START` | `❚❚` |
 | **Fullscreen / FPS** | `F11` / `F3` | — | — | — |
 | **Switch fighter (parallel team)** | `Tab` | — | — | — |
 

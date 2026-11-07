@@ -55,7 +55,7 @@ pub struct Match {
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
     pub shake_time: i32, pub shake_ampl: f32, pub shake_freq: f32, pub shake_phase: f32, pub shake_elapsed: i32, pub shake_dir: u8,
-    pub flash: Option<(i32, [f32; 3])>,
+    pub flash: Option<(i32, [f32; 4])>,
     pub bg: Option<crate::stage_bg::BgState>,
     pub all_palfx: Option<PalFx>, pub bg_palfx: Option<PalFx>,
     pub slow_mo: i32,
@@ -577,6 +577,8 @@ impl Match {
                 for f in self.fighters.iter_mut() {
                     if !f.is_helper && (f.state_no == 0 || f.state_no == 5900 || f.state_no == ENGINE_STATE_FACE_OFF || f.state_no == ENGINE_STATE_FACE_OFF_TAUNT) { f.ctrl = true; }
                 }
+                self.leave_intro_states();
+
             }
             2 => {
                 if !self.training && self.round_ticks > 0 && self.pause.is_none() && self.global_asserts & (gsf::TIMERFREEZE | gsf::ROUNDFREEZE) == 0 { self.timer = (self.timer - 1).max(0); }
@@ -702,7 +704,7 @@ impl Match {
             f.history.push(bits, f.facing as i32);
             let paused = f.hit_pause > 0 || f.hit_shake > 0 || frozen_by_pause(f);
             f.cmd.update(&f.history, &f.def.commands, paused);
-            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 });
+            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0];
         }
         for &fi in &awaken[..awaken_len] { self.try_transform(fi); }
         if tagged { self.tag_step(&tag_requests[..tag_len]); }

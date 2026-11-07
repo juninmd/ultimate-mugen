@@ -1,0 +1,19 @@
+{
+  "characterId": "bruno",
+  "move": "lariat",
+  "scores": {
+    "baseline": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "candidate": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  "improvedInProbe": true
+}

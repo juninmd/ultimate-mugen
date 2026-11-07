@@ -18,26 +18,6 @@
     "06_victory": {
       "refHeight": 350
     },
-    "run0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "run1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "run2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "run3": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
     "walk0": {
       "axisX": 200.0,
       "axisY": 392.0,

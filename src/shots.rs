@@ -3,6 +3,7 @@ use crate::app::{App, Mode, Screen, Team};
 use crate::gfx::*;
 use crate::shots::replay::replay_determinism;
 mod replay;
+mod suzume_tour;
 
 async fn frames(app: &mut App, n: usize) {
     for _ in 0..n {
@@ -104,7 +105,6 @@ pub(crate) async fn fight(
             }
         }
         "dragon" | "rush" => crate::pixel_tour::probe(s, c, audio, want, name),
-        "walk" => crate::pixel_tour::probe_walk(s, c, audio, name),
         "super" | "super2" | "impact" => {
             for f in s.m.fighters.iter_mut() {
                 f.power = 3000.0;
@@ -683,6 +683,10 @@ async fn native_coverage(app: &mut App, dir: &str) {
 
 pub async fn run(app: &mut App, dir: &str) {
     let _ = std::fs::create_dir_all(dir);
+    if std::env::var("UME_TOUR").as_deref() == Ok("suzume") {
+        suzume_tour::suzume_abilities_tour(app, dir).await;
+        return;
+    }
     if std::env::var("UME_TOUR").as_deref() == Ok("native-coverage") {
         native_coverage(app, dir).await;
         return;

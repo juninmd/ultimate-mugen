@@ -20,16 +20,6 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "runStart": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "runStop": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
     "walk0": {
       "axisX": 200.0,
       "axisY": 392.0,

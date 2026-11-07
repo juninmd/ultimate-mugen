@@ -134,7 +134,7 @@ Each `Layer` has `delta` (parallax), `y`, `front` (drawn in front of the fighter
 
 ## Built-in pixel art
 
-The seven native arenas use embedded full-color PNG artwork in `assets/stages/`: `dojo.png`, `neon.png`, `bamboo.png`, `plains.png`, `spirit.png`, `volcano.png` and `brazil.png`. Generation prompts and tool provenance are recorded in `assets/stages/prompts.json`. No external image service or filesystem access is needed at runtime.
+The twenty-one native arenas use embedded full-color PNG artwork in `assets/stages/`: seven core realms (`dojo.png`, `neon.png`, `bamboo.png`, `plains.png`, `spirit.png`, `volcano.png` and `brazil.png`), seven world landmarks (`great_wall.png`, `petra.png`, `christ_redeemer.png`, `texas.png`, `chichen_itza.png`, `colosseum.png`, `taj_mahal.png`), and seven Ancient Wonders of the World (`pyramids_giza.png`, `hanging_gardens.png`, `temple_artemis.png`, `statue_zeus.png`, `mausoleum_halicarnassus.png`, `colossus_rhodes.png`, `lighthouse_alexandria.png`). Generation prompts and tool provenance are recorded in `assets/stages/prompts.json`. No external image service or filesystem access is needed at runtime.
 
 `StageArt::Illustrated` draws the background with nearest-neighbor filtering, aligns the fighting floor at 85% of the image height, and clamps horizontal camera movement to the image edges. Team zoom retains the native ground proportion. Fighter shadows, reflections and combat effects remain active; the old procedural prop animations are exclusive to procedural artwork.
 
@@ -256,3 +256,133 @@ Each native arena in **Ultimate MUGEN** represents a critical focal point in the
   - **Daichi Ginrou:** Enters the town with a wide grin, drawn by rumors of an unbeatable heavyweight champion who fights with bare fists.
   - **Valdric Morn:** An imperial scouting squad attempts to annex the town for raw resources, only to be met by Bruno and an outraged community.
 - **Narrative Context:** Represents the warmth of community, the resilience of everyday working people, and the peaceful mortal lives that the heroes are fighting to protect. It uses the plains theme music and has no legacy procedural counterpart.
+
+---
+
+## The 7 Modern Wonders of the World
+
+### 8. Great Wall of China (`great_wall`) — *Grande Muralha da China*
+
+![Great Wall of China](../../assets/stages/great_wall.png)
+
+- **Atmosphere:** An ancient stone fortification winding across rugged mist-shrouded green mountain ridges at sunrise. Imposing brick watchtowers frame the battlement fighting deck, with golden morning sunlight breaking through soft clouds and fluttering imperial banners.
+- **Lore & Affinities:** Sacred bastion where martial artists of the East test their endurance and footwork. Lian Feng and Jin Kazaguruma hold exhibition clashes along the winding ramparts.
+
+---
+
+### 9. Petra — Al-Khazneh (`petra`) — *Petra — Al-Khazneh*
+
+![Petra](../../assets/stages/petra.png)
+
+- **Atmosphere:** The monumental rose-red rock-cut Hellenistic temple facade of The Treasury carved into towering sandstone canyon walls of the Siq. Warm desert sunlight, glowing bronze braziers, and a level sandstone arena floor.
+- **Lore & Affinities:** Hidden desert sanctuary of forgotten merchant princes and desert nomads. Daichi Ginrou and Marlow Reyes duel for ancient relics stored within the rock-cut vaults.
+
+---
+
+### 10. Christ the Redeemer (`christ_redeemer`) — *Cristo Redentor — Corcovado*
+
+![Christ the Redeemer](../../assets/stages/christ_redeemer.png)
+
+- **Atmosphere:** Perched atop Mount Corcovado in Rio de Janeiro at golden sunset. The colossal Art Deco statue opens its arms over Guanabara Bay and Sugarloaf Mountain far below as twilight colors wash across the sky and city lights flicker to life.
+- **Lore & Affinities:** A beacon of divine grace and sanctuary overlooking the metropolis. Bruno Volk and Haruki Sumi clash under the sacred silhouette at dusk.
+
+---
+
+### 11. Inland Town — Texas, USA (`texas`) — *Cidade do Interior — Texas, EUA*
+
+![Inland Town — Texas](../../assets/stages/texas.png)
+
+- **Atmosphere:** A historic frontier small town in inland West Texas at dusty golden sunset. Weathered wooden clapboard saloon and general store with covered boardwalk porches, an old red brick courthouse with a bell tower cupola, a spinning steel windmill water tower, telegraph poles with drooping wires, the Texas Lone Star flag fluttering in the breeze, saguaro and prickly pear cactus framing the edges, and a broad level packed sand and dirt fighting road.
+- **Lore & Affinities:** The rugged heartland of lone wanderers, brawlers, and frontier lawmen. Bruno Volk and Captain Marlow Reyes duel in high-noon brawls along the dusty thoroughfare.
+
+---
+
+### 12. Chichén Itzá (`chichen_itza`) — *Chichén Itzá — Templo de Kukulcán*
+
+![Chichén Itzá](../../assets/stages/chichen_itza.png)
+
+- **Atmosphere:** The grand Mesoamerican step-pyramid of El Castillo under a deep purple twilight sky scattered with ancient Mayan constellations. Carved feathered serpent heads flank the stone balustrades amid lush tropical jungle foliage.
+- **Lore & Affinities:** Nexus of celestial alignments and feathered serpent deity worship. Mikazuki Oboro and Garan invoke eclipse magic on the ceremonial plaza.
+
+---
+
+### 13. Colosseum of Rome (`colosseum`) — *Coliseu de Roma*
+
+![Colosseum of Rome](../../assets/stages/colosseum.png)
+
+- **Atmosphere:** The monumental Roman amphitheater in late golden-hour afternoon. Multi-tiered travertine arches, weathered Corinthian columns, imperial red vexillum banners, and packed golden fighting sand.
+- **Lore & Affinities:** Legendary epicenter of gladiator combat and martial glory. Bruno Volk, Daichi Ginrou, and Valdric Morn clash in ruthless exhibition duels before the imperial banners.
+
+---
+
+### 14. Taj Mahal (`taj_mahal`) — *Taj Mahal — Palácio de Mármore*
+
+![Taj Mahal](../../assets/stages/taj_mahal.png)
+
+- **Atmosphere:** The radiant ivory-white marble mausoleum reflected in the tranquil Yamuna reflecting pool at pink-gold dawn. Slender cypress trees, lotus pools, and intricate carved marble jali screens frame the polished fighting deck.
+- **Lore & Affinities:** Eternal monument of love and perfection. Akio Hoshi and Lian Feng exchange harmonious ki strikes across the pristine marble terrace.
+
+---
+
+## The 7 Ancient Wonders of the World
+
+### 15. Great Pyramids of Giza (`pyramids_giza`) — *Pirâmides de Gizé*
+
+![Great Pyramids of Giza](../../assets/stages/pyramids_giza.png)
+
+- **Atmosphere:** Colossal limestone pyramids of Khufu and Khafre rising against a burning desert sunset. The limestone profile of the Great Sphinx and distant date palm silhouettes gaze over the level sandstone terrace.
+- **Lore & Affinities:** Primordial tomb complex where Pharaohs attained immortality. Garan and Marlow Reyes search for forbidden astral relics beneath the shifting dunes.
+
+---
+
+### 16. Hanging Gardens of Babylon (`hanging_gardens`) — *Jardins Suspensos da Babilônia*
+
+![Hanging Gardens of Babylon](../../assets/stages/hanging_gardens.png)
+
+- **Atmosphere:** Monumental multi-tiered palace terraces cascading with tropical blossoms, date palms, weeping willows, and aqueduct waterfalls. Lapis lazuli glazed brick walls with gold lion reliefs overlook the Euphrates.
+- **Lore & Affinities:** Mesopotamian wonder built by royal love. Haruki Sumi and Sylene Vashti duel amid fragrant jasmine and cascading mountain waters.
+
+---
+
+### 17. Temple of Artemis at Ephesus (`temple_artemis`) — *Templo de Ártemis em Éfeso*
+
+![Temple of Artemis at Ephesus](../../assets/stages/temple_artemis.png)
+
+- **Atmosphere:** Colossal Greek temple colonnade of fluted Ionic marble columns under a starry Aegean night sky. Glowing bronze sacrificial braziers, olive groves, and coastal hills frame the polished marble courtyard.
+- **Lore & Affinities:** Sacred sanctuary of the huntress goddess. Suzume Kagerou and Shion Kurogane cross blades under the cool lunar light.
+
+---
+
+### 18. Statue of Zeus at Olympia (`statue_zeus`) — *Estátua de Zeus em Olímpia*
+
+![Statue of Zeus at Olympia](../../assets/stages/statue_zeus.png)
+
+- **Atmosphere:** Sanctuary interior housing the colossal chryselephantine seated Zeus on an ornate cedarwood throne. Ivory skin, golden robes, winged Nike, and burning bronze cauldrons casting dramatic shadows across mosaic marble.
+- **Lore & Affinities:** The seat of Olympian authority and thunderous power. Kaito Arashi and Valdric Morn test storm energy against imperial authority.
+
+---
+
+### 19. Mausoleum at Halicarnassus (`mausoleum_halicarnassus`) — *Mausoléu de Halicarnasso*
+
+![Mausoleum at Halicarnassus](../../assets/stages/mausoleum_halicarnassus.png)
+
+- **Atmosphere:** Monumental marble tomb with sculpted Amazonomachy friezes, 36 slender Ionic columns, a stepped pyramid roof, and a crowning marble four-horse chariot overlooking the turquoise Aegean harbor.
+- **Lore & Affinities:** Splendor of Anatolian and Hellenic artistry. Kaname Fuyutsuki and Akio Hoshi duel beneath the guardian marble lions.
+
+---
+
+### 20. Colossus of Rhodes (`colossus_rhodes`) — *Colosso de Rodes*
+
+![Colossus of Rhodes](../../assets/stages/colossus_rhodes.png)
+
+- **Atmosphere:** Titanic bronze statue of Helios crowned with a spiked solar halo standing tall over the stormy twilight harbor entrance. A blazing beacon brazier pierces violet tempest clouds while turquoise waves crash against the pier.
+- **Lore & Affinities:** Guardian of the Mediterranean sea routes. VX-9 Volta and Marlow Reyes clash on the rain-swept harbor pier beneath the beacon flames.
+
+---
+
+### 21. Lighthouse of Alexandria (`lighthouse_alexandria`) — *Farol de Alexandria — Pharos*
+
+![Lighthouse of Alexandria](../../assets/stages/lighthouse_alexandria.png)
+
+- **Atmosphere:** The monumental three-tiered Pharos tower projecting a brilliant golden light beam over churning Mediterranean waves at midnight. White limestone battlements and royal Ptolemaic banners frame the ramparts.
+- **Lore & Affinities:** Guiding light across dangerous seas and cosmic crossroads. Kaito Arashi, Shion Kurogane, and Jin Kazaguruma meet at the midnight ramparts as the beacon sweeps the horizon.

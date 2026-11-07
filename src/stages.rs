@@ -3277,6 +3277,8 @@ fn volcano() -> Stage {
     }
 }
 
+mod wonders;
+
 const ILLUSTRATION_IDS: [&str; 7] = [
     "dojo", "neon", "bamboo", "plains", "spirit", "volcano", "brazil",
 ];
@@ -3288,6 +3290,9 @@ fn decode_illustration(bytes: &[u8]) -> Result<Arc<ImageData>, String> {
 }
 
 pub fn illustration_preview(id: &str) -> Option<Arc<ImageData>> {
+    if let Some(image) = wonders::illustration_preview(id) {
+        return Some(image);
+    }
     use std::sync::OnceLock;
     static IMAGES: [OnceLock<Arc<ImageData>>; 7] = [const { OnceLock::new() }; 7];
     let index = ILLUSTRATION_IDS.iter().position(|name| *name == id)?;
@@ -3309,6 +3314,9 @@ pub fn illustration_preview(id: &str) -> Option<Arc<ImageData>> {
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn illustration(id: &str) -> Option<Arc<ImageData>> {
+    if let Some(image) = wonders::illustration(id) {
+        return Some(image);
+    }
     use std::sync::OnceLock;
     static IMAGES: [OnceLock<Arc<ImageData>>; 7] = [const { OnceLock::new() }; 7];
     let index = ILLUSTRATION_IDS.iter().position(|name| *name == id)?;
@@ -3354,7 +3362,7 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
     if illustration(id).is_some() {
         return Ok(());
     }
-    if !ILLUSTRATION_IDS.contains(&id) {
+    if !ILLUSTRATION_IDS.contains(&id) && !wonders::WONDER_IDS.contains(&id) {
         return Err(format!("Unknown stage: {id}"));
     }
     let data = js_sys::futures::JsFuture::from(ume_fetch_asset(&format!("assets/stages/{id}.png")))
@@ -3385,88 +3393,70 @@ pub struct StageEntry {
 }
 
 pub fn builtin() -> Vec<StageEntry> {
-    vec![
+    let mut stages = vec![
         StageEntry {
             id: "dojo".into(),
             name: "Telhado do Dojo — Pôr do Sol".into(),
             thumb: [[42, 30, 92], [212, 80, 122], [255, 154, 74]],
-            build: Box::new(|| {
-                if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") {
-                    dojo()
-                } else {
-                    illustrated("dojo", "Telhado do Dojo — Pôr do Sol", 0, StageKind::Dojo)
-                }
+            build: Box::new(|| match std::env::var("UME_STAGE_ART").as_deref() {
+                Ok("procedural") => dojo(),
+                _ => illustrated("dojo", "Telhado do Dojo — Pôr do Sol", 0, StageKind::Dojo),
             }),
         },
         StageEntry {
             id: "neon".into(),
             name: "Neo-Metrópole 2099".into(),
             thumb: [[5, 3, 15], [29, 11, 58], [255, 47, 208]],
-            build: Box::new(|| {
-                if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") {
-                    neon()
-                } else {
-                    illustrated("neon", "Neo-Metrópole 2099", 1, StageKind::Neon)
-                }
+            build: Box::new(|| match std::env::var("UME_STAGE_ART").as_deref() {
+                Ok("procedural") => neon(),
+                _ => illustrated("neon", "Neo-Metrópole 2099", 1, StageKind::Neon),
             }),
         },
         StageEntry {
             id: "bamboo".into(),
             name: "Bambuzal ao Luar".into(),
             thumb: [[4, 16, 28], [18, 58, 74], [44, 106, 106]],
-            build: Box::new(|| {
-                if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") {
-                    bamboo()
-                } else {
-                    illustrated("bamboo", "Bambuzal ao Luar", 2, StageKind::Bamboo)
-                }
+            build: Box::new(|| match std::env::var("UME_STAGE_ART").as_deref() {
+                Ok("procedural") => bamboo(),
+                _ => illustrated("bamboo", "Bambuzal ao Luar", 2, StageKind::Bamboo),
             }),
         },
         StageEntry {
             id: "plains".into(),
             name: "Planalto Rochoso".into(),
             thumb: [[44, 111, 214], [140, 198, 242], [216, 176, 128]],
-            build: Box::new(|| {
-                if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") {
-                    plains()
-                } else {
-                    illustrated("plains", "Planalto Rochoso", 3, StageKind::Plains)
-                }
+            build: Box::new(|| match std::env::var("UME_STAGE_ART").as_deref() {
+                Ok("procedural") => plains(),
+                _ => illustrated("plains", "Planalto Rochoso", 3, StageKind::Plains),
             }),
         },
         StageEntry {
             id: "spirit".into(),
             name: "Portão dos Espíritos".into(),
             thumb: [[10, 20, 32], [29, 74, 82], [154, 208, 200]],
-            build: Box::new(|| {
-                if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") {
-                    spirit()
-                } else {
-                    illustrated("spirit", "Portão dos Espíritos", 4, StageKind::Spirit)
-                }
+            build: Box::new(|| match std::env::var("UME_STAGE_ART").as_deref() {
+                Ok("procedural") => spirit(),
+                _ => illustrated("spirit", "Portão dos Espíritos", 4, StageKind::Spirit),
             }),
         },
         StageEntry {
             id: "volcano".into(),
             name: "Cratera Vulcânica".into(),
             thumb: [[18, 4, 4], [74, 14, 8], [200, 56, 26]],
-            build: Box::new(|| {
-                if std::env::var("UME_STAGE_ART").as_deref() == Ok("procedural") {
-                    volcano()
-                } else {
-                    illustrated("volcano", "Cratera Vulcânica", 5, StageKind::Volcano)
-                }
+            build: Box::new(|| match std::env::var("UME_STAGE_ART").as_deref() {
+                Ok("procedural") => volcano(),
+                _ => illustrated("volcano", "Cratera Vulcânica", 5, StageKind::Volcano),
             }),
         },
         StageEntry {
             id: "brazil".into(),
             name: "Praça do Interior — Brasil".into(),
             thumb: [[97, 59, 132], [238, 163, 69], [166, 106, 70]],
-            build: Box::new(|| {
-                illustrated("brazil", "Praça do Interior — Brasil", 3, StageKind::Custom)
-            }),
+            build: Box::new(|| illustrated("brazil", "Praça do Interior — Brasil", 3, StageKind::Custom)),
         },
-    ]
+    ];
+    stages.extend(wonders::builtin());
+    stages
 }
 
 pub fn from_mugen(mut st: MugenStage) -> Stage {
@@ -3850,7 +3840,7 @@ mod illustration_tests {
 
     #[test]
     fn thumbnails_are_small_and_cached_per_stage() {
-        for id in ILLUSTRATION_IDS {
+        for id in ILLUSTRATION_IDS.iter().chain(wonders::WONDER_IDS.iter()) {
             let image = illustration_preview(id).unwrap();
             assert_eq!((image.w, image.h), (240, 135));
             assert!(Arc::ptr_eq(&image, &illustration_preview(id).unwrap()));

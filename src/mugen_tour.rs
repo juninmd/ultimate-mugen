@@ -26,6 +26,14 @@ pub async fn run(app: &mut App, dir: &str) {
         println!("set UME_CHARS=a,b (suffix of the registry id)");
         return;
     }
+    if let Some(missing) = chars
+        .iter()
+        .take(2)
+        .find(|c| !app.reg.chars.iter().any(|r| r.id.ends_with(c.as_str())))
+    {
+        println!("no registry id ends with '{missing}' (ids end in .def, e.g. ichiji/ichiji.def)");
+        return;
+    }
     let (a, b) = (find(app, &chars[0]), find(app, &chars[1]));
     // select grid: let the thumbnails stream in
     let n = app.reg.chars.len();

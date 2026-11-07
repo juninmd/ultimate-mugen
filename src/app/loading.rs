@@ -61,7 +61,7 @@ impl App {
                 jobs.push((f.def.clone(), keys, 0));
             }
             if key != self.warm_key {
-                self.g.trim(4000);
+                self.g.trim(0);
                 self.warm_key = key;
             }
             self.pending.warm.jobs = jobs;

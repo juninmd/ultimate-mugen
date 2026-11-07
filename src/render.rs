@@ -46,7 +46,7 @@ impl Gfx {
         self.tex
             .entry(img.id)
             .or_insert_with(|| {
-                let t = Texture2D::from_rgba8(img.w as u16, img.h as u16, &img.rgba);
+                let t = Texture2D::from_rgba_shared(img.w as u16, img.h as u16, img.rgba.clone());
                 t.set_filter(if nearest {
                     FilterMode::Nearest
                 } else {
@@ -472,6 +472,15 @@ impl MatchRenderer {
                 self.draw_reflection(g, m, f, shx, shy);
             }
         }
+        if let Some((t, c)) = m.flash.filter(|(_, c)| c[3] > 0.0 && gain > 0.2) {
+            draw_rectangle(
+                ox0,
+                oy0,
+                m.view_w * s0,
+                m.view_h * s0,
+                Color::new(c[0] / 255.0, c[1] / 255.0, c[2] / 255.0, (t as f32 / 10.0).min(0.85)),
+            );
+        }
         // ordered draw list
         enum It {
             F(usize),
@@ -591,7 +600,7 @@ impl MatchRenderer {
             vfx.draw_weather(gain);
             vfx.draw_lines(focus_screen, gain);
         }
-        if let Some((t, c)) = m.flash.filter(|_| gain > 0.2) {
+        if let Some((t, c)) = m.flash.filter(|(_, c)| c[3] == 0.0 && gain > 0.2) {
             draw_rectangle(
                 g.ox,
                 g.oy,

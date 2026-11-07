@@ -3788,7 +3788,7 @@ mod tests {
                 rgba,
             },
         );
-        mugen_preview(&st).unwrap().rgba.clone()
+        mugen_preview(&st).unwrap().rgba.to_vec()
     }
 
     fn red_pixels(rgba: &[u8]) -> Vec<(usize, usize)> {

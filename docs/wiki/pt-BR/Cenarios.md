@@ -134,7 +134,7 @@ Cada `Layer` tem `delta` (parallax), `y`, `front` (desenhada na frente dos lutad
 
 ## Pixel art dos cenários nativos
 
-As sete arenas nativas usam imagens PNG coloridas incorporadas de `assets/stages/`: `dojo.png`, `neon.png`, `bamboo.png`, `plains.png`, `spirit.png`, `volcano.png` e `brazil.png`. Os prompts e a ferramenta de geração estão registrados em `assets/stages/prompts.json`. O jogo não precisa de serviço externo de imagens nem de acesso a esses arquivos em execução.
+As vinte e uma arenas nativas usam imagens PNG coloridas incorporadas de `assets/stages/`: os sete reinos principais (`dojo.png`, `neon.png`, `bamboo.png`, `plains.png`, `spirit.png`, `volcano.png` e `brazil.png`), os sete cenários emblemáticos do mundo (`great_wall.png`, `petra.png`, `christ_redeemer.png`, `texas.png`, `chichen_itza.png`, `colosseum.png`, `taj_mahal.png`) e as sete Maravilhas do Mundo Antigo (`pyramids_giza.png`, `hanging_gardens.png`, `temple_artemis.png`, `statue_zeus.png`, `mausoleum_halicarnassus.png`, `colossus_rhodes.png`, `lighthouse_alexandria.png`). Os prompts e a ferramenta de geração estão registrados em `assets/stages/prompts.json`. O jogo não precisa de serviço externo de imagens nem de acesso a esses arquivos em execução.
 
 `StageArt::Illustrated` desenha o fundo com filtro nearest-neighbor, alinha o piso a 85% da altura da imagem e limita o movimento horizontal da câmera às bordas da imagem. O zoom de equipes mantém a proporção nativa do chão. Sombras, reflexos dos lutadores e efeitos de combate continuam ativos; as antigas animações de objetos ficam exclusivas da arte procedural.
 
@@ -256,3 +256,133 @@ Cada arena nativa de **Ultimate MUGEN** representa um ponto de convergência geo
   - **Daichi Ginrou:** Desce das montanhas atraído pelos boatos de um peso-pesado de socos estrondosos que luta rindo.
   - **Valdric Morn:** Uma expedição imperial tenta confiscar suprimentos e recursos da cidadezinha, sendo repelida pelo cruzado demolidor de Bruno e pela bravura da comunidade local.
 - **Significado Narrativo:** Representa a vida pacífica, a ternura comunitária e a bondade das pessoas comuns, provando pelo que realmente vale a pena lutar e proteger. Utiliza a música tema do planalto e não possui versão procedural anterior.
+
+---
+
+## As 7 Maravilhas Modernas do Mundo
+
+### 8. Grande Muralha da China (`great_wall`)
+
+![Grande Muralha da China](../../../assets/stages/great_wall.png)
+
+- **Atmosfera:** Uma imponente fortificação milenar de pedra serpenteando sobre montanhas verdejantes envoltas em névoa ao nascer do sol. Torres de vigia em tijolo emolduram as laterais, estandartes imperiais vermelhos e dourados e um amplo chão contínuo de pedra nas ameias.
+- **Lore e Afinidades:** Bastião ancestral onde os grandes mestres marciais do oriente aprimoram sua resistência. Lian Feng e Jin Kazaguruma realizam duelos de exibição no topo dos baluartes.
+
+---
+
+### 9. Petra — Al-Khazneh (`petra`)
+
+![Petra](../../../assets/stages/petra.png)
+
+- **Atmosfera:** A monumental fachada helenística do Tesouro (Al-Khazneh) esculpida diretamente nos desfiladeiros de arenito avermelhado do cânion Siq. Luz solar quente do deserto, braseiros de bronze acesos e piso nivelado de arenito.
+- **Lore e Afinidades:** Santuário sagrado de antigas caravanas mercantes e nômades do deserto. Daichi Ginrou e Marlow Reyes disputam relíquias guardadas nas câmaras subterrâneas.
+
+---
+
+### 10. Cristo Redentor — Corcovado (`christ_redeemer`)
+
+![Cristo Redentor](../../../assets/stages/christ_redeemer.png)
+
+- **Atmosfera:** No cume do Morro do Corcovado no Rio de Janeiro na hora de ouro do entardecer. A gigantesca estátua Art Déco de braços abertos sobre a Baía de Guanabara e o Pão de Açúcar, com o céu em tons de magenta e dourado e as luzes da cidade cintilando ao longe.
+- **Lore e Afinidades:** Farol espiritual e santuário de proteção sobre a metrópole. Bruno Volk e Haruki Sumi testam suas forças sob a benção silenciosa do monumento.
+
+---
+
+### 11. Cidade do Interior — Texas, EUA (`texas`)
+
+![Cidade do Interior — Texas](../../../assets/stages/texas.png)
+
+- **Atmosfera:** Uma cidade histórica no interior do Texas ao pôr do sol dourado e empoeirado. Fachadas rústicas de madeira com varandas cobertas de tábuas corridas, fórum do condado em tijolos vermelhos com torre sineira, catavento e caixa d'água de ferro silhuetados contra o crepúsculo carmesim e âmbar, postes telegráficos com fios caídos, bandeira do Texas tremulando ao vento da tarde, cactos nas laterais e uma ampla rua de terra batida nivelada para combate.
+- **Lore e Afinidades:** O coração indomável dos justiceiros e forasteiros do oeste americano. Bruno Volk e Captain Marlow Reyes travam duelos de valentões ao cair da tarde na poeira da rua principal.
+
+---
+
+### 12. Chichén Itzá — Templo de Kukulcán (`chichen_itza`)
+
+![Chichén Itzá](../../../assets/stages/chichen_itza.png)
+
+- **Atmosfera:** A imensa pirâmide em degraus de El Castillo sob um céu crepuscular púrpura salpicado de constelações maias. Cabeças talhadas da serpente emplumada na base das escadarias e densa selva tropical circundante.
+- **Lore e Afinidades:** Vórtice de alinhamentos cósmicos e cultos estelares. Mikazuki Oboro e Garan canalizam energias de eclipse na praça cerimonial.
+
+---
+
+### 13. Coliseu de Roma (`colosseum`)
+
+![Coliseu de Roma](../../../assets/stages/colosseum.png)
+
+- **Atmosfera:** O anfiteatro romano sob a luz dourada do final da tarde. Arcos de travertino em múltiplos níveis, colunas coríntias imperiais, estandartes vermelhos de seda e uma ampla arena de areia batida.
+- **Lore e Afinidades:** Berço histórico das batalhas de gladiadores e da coragem guerreira. Bruno Volk, Daichi Ginrou e Valdric Morn se enfrentam diante dos arcos monumentais.
+
+---
+
+### 14. Taj Mahal — Palácio de Mármore (`taj_mahal`)
+
+![Taj Mahal](../../../assets/stages/taj_mahal.png)
+
+- **Atmosfera:** O deslumbrante mausoléu de mármore branco marfim refletido no espelho d'água dos jardins Charbagh à aurora. Ciprestes verde-escuros, flores de lótus e arcos com treliças de mármore entalhado emolduram o pátio de combate.
+- **Lore e Afinidades:** Homenagem suprema ao amor eterno e à harmonia espiritual. Akio Hoshi e Lian Feng trocam golpes de ki sobre a pureza do piso de mármore polido.
+
+---
+
+## As 7 Maravilhas do Mundo Antigo
+
+### 15. Pirâmides de Gizé (`pyramids_giza`)
+
+![Pirâmides de Gizé](../../../assets/stages/pyramids_giza.png)
+
+- **Atmosfera:** As colossais pirâmides de Quéops e Quéfren sob um pôr do sol incandescente no deserto do Saara. O imponente perfil da Grande Esfinge e dunas douradas cercam o amplo terraço de arenito.
+- **Lore e Afinidades:** Tumbas cósmicas construídas para a eternidade dos faraós. Garan e Marlow Reyes vasculham as areias em busca de segredos astrais esquecidos.
+
+---
+
+### 16. Jardins Suspensos da Babilônia (`hanging_gardens`)
+
+![Jardins Suspensos da Babilônia](../../../assets/stages/hanging_gardens.png)
+
+- **Atmosfera:** Terraços palacianos monumentais repletos de vegetação tropical exótica, palmeiras, salgueiros e cascatas de aquedutos fluindo para espelhos d'água. Paredes de tijolos azuis vidrados com relevos de leões dourados avistando o rio Eufrates.
+- **Lore e Afinidades:** Maravilha construída pelo amor de um rei mesopotâmico. Haruki Sumi e Sylene Vashti duelam entre flores perfumadas e fontes cristalinas.
+
+---
+
+### 17. Templo de Ártemis em Éfeso (`temple_artemis`)
+
+![Templo de Ártemis em Éfeso](../../../assets/stages/temple_artemis.png)
+
+- **Atmosfera:** Grande colunata de mármore jônico sob um límpido céu noturno e mar Egeu ao luar. Braseiros sagrados com chamas âmbar, relevos esculpidos e olivedos emolduram o pátio cerimonial.
+- **Lore e Afinidades:** O templo inviolável da deusa da caça e das florestas. Suzume Kagerou e Shion Kurogane cruzam suas lâminas sob o brilho da lua cheia.
+
+---
+
+### 18. Estátua de Zeus em Olímpia (`statue_zeus`)
+
+![Estátua de Zeus em Olímpia](../../../assets/stages/statue_zeus.png)
+
+- **Atmosfera:** O interior sagrado do templo abrigando a colossal estátua de ouro e marfim de Zeus em seu trono entalhado em cedro e pedras preciosas. Tochas fumegantes, tapeçarias vermelhas e piso de mosaico de mármore.
+- **Lore e Afinidades:** A morada do relâmpago e do juízo divino. Kaito Arashi e Valdric Morn medem forças perante o olhar imortal do senhor do Olimpo.
+
+---
+
+### 19. Mausoléu de Halicarnasso (`mausoleum_halicarnassus`)
+
+![Mausoléu de Halicarnasso](../../../assets/stages/mausoleum_halicarnassus.png)
+
+- **Atmosfera:** Tumba monumental de mármore em múltiplos níveis, com frisos da Amazonomaquia, 36 colunas jônicas, teto piramidal coroado por uma quadriga de quatro cavalos de mármore e vista para o porto do mar Egeu.
+- **Lore e Afinidades:** Apogeu da escultura e arquitetura da Antiguidade clássica. Kaname Fuyutsuki e Akio Hoshi duelam entre os leões guardiões de mármore.
+
+---
+
+### 20. Colosso de Rodes (`colossus_rhodes`)
+
+![Colosso de Rodes](../../../assets/stages/colossus_rhodes.png)
+
+- **Atmosfera:** A titânica estátua de bronze do deus Hélio erguendo sua tocha acesa sobre a entrada do porto na tempestade crepuscular. Ondas furiosas arrebentam no quebra-mar de pedra molhada enquanto triremes gregas balançam na baía.
+- **Lore e Afinidades:** Guardião dos mares e farol da liberdade egeia. VX-9 Volta e Marlow Reyes enfrentam o vento e a chuva no cais de pedra sob o archote de chamas ardentes.
+
+---
+
+### 21. Farol de Alexandria — Pharos (`lighthouse_alexandria`)
+
+![Farol de Alexandria](../../../assets/stages/lighthouse_alexandria.png)
+
+- **Atmosfera:** A imensa torre de três estágios de Pharos projetando um feixe de luz dourada varrendo o mar revolto à meia-noite sob um céu repleto de estrelas. Muralhas brancas de calcário e estandartes ptolemaicos ao vento.
+- **Lore e Afinidades:** Guia supremo de marinheiros e estudiosos de Alexandria. Kaito Arashi, Shion Kurogane e Jin Kazaguruma se reúnem nas muralhas enquanto o facho de luz corta as trevas oceânicas.

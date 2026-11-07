@@ -61,6 +61,12 @@ impl<T: Clone> OneOrMany<T> { pub fn to_vec(&self) -> Vec<T> { match self { OneO
 pub struct VelChange { pub at: i32, pub vel: [Option<f32>; 2] }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ArmorSpec { pub hits: u32, #[serde(default)] pub threshold: Option<f32> }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ParrySpec { pub window: [i32; 2], #[serde(default)] pub spark: Option<i32> }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NativeMove {
     pub id: String, pub name: String, pub input: String,
     #[serde(default)] pub simple: Option<String>,
@@ -77,6 +83,11 @@ pub struct NativeMove {
     #[serde(default)] pub teleport: Option<i32>,
     #[serde(default)] pub fx: Option<String>,
     #[serde(default)] pub voice: Option<String>,
+    #[serde(default)] pub armor: Option<ArmorSpec>,
+    #[serde(default)] pub parry: Option<ParrySpec>,
+    #[serde(default)] pub burst: Option<bool>,
+    #[serde(default)] pub flight: Option<bool>,
+    #[serde(default)] pub timestop: Option<i32>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

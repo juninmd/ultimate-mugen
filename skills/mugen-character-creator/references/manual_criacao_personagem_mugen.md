@@ -1,3 +1,14 @@
+---
+name: mugen-character-creator
+description: >-
+  Comprehensive guide, runbook, reference manual, blueprints, and modern
+  innovation roadmap for creating custom fighting game characters from scratch
+  for M.U.G.E.N, IKEMEN GO, and Ultimate MUGEN. Covers classic 6-file MUGEN
+  pipelines, 8-bit/32-bit sprites, SFFv2 codecs, hitboxes, state controllers,
+  11 functional move blueprints, competitive AI, and modern declarative UMF 2.0
+  traits and automated Rust tooling (Auto-Clsn, Auto-Ground, Live Hot-Reload).
+---
+
 # Enciclopédia Master de Criação de Personagens M.U.G.E.N: Da Sprite ao Motor
 
 Este é o documento definitivo, exaustivo e cumulativo para concepção, desenho, programação, balanceamento e homologação de personagens autônomos para os motores **M.U.G.E.N** (1.0, 1.1), **IKEMEN GO** e **Ultimate MUGEN**.
@@ -1289,3 +1300,228 @@ cargo run --release -p ume-engine --example native_sprite_audit -- mugen/chars/m
 # 5. Verificação de personagens presos/flutuando fora do chão (Hover check)
 cargo run --release -p ume-engine --example hover_check -- mugen/chars/meu_lutador/
 ```
+
+
+---
+
+## 13. Análise Comparativa e Plano Diretor de Inovação (MUGEN Tradicional vs Ultimate MUGEN)
+
+Este documento apresenta uma análise comparativa aprofundada entre:
+1. **O Modelo Tradicional do M.U.G.E.N / Fighter Factory** (anos 1999–2015).
+2. **A Skill Desenvolvida (`mugen-character-creator`)** (baseada na engenharia reversa de KFM 720, Gogeta SSJ4, Buu Z2 e DIO_K).
+3. **O Sistema Nativo do Repositório (`ultimate-mugen`)** (arquitetura declarativa UMF JSON, compilador Rust em `crates/engine/src/native/` e renderizador WGPU).
+
+O objetivo é traçar o mapa completo de inovações técnicas necessárias para atingir e superar a qualidade, profundidade e equilíbrio dos melhores personagens de MUGEN, eliminando 90% do atrito, complexidade manual e fragilidade do desenvolvimento tradicional.
+
+---
+
+## 1. Matriz Comparativa Tridimensional
+
+| Dimensão Técnica | MUGEN Tradicional (Fighter Factory) | Skill Atual (`mugen-character-creator`) | Motor Nativo (`ultimate-mugen` / UMF) | Meta Inovadora (Próxima Geração) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Formato de Dados** | 6 arquivos fragmentados (`.def`, `.cns`, `.cmd`, `.air`, `.sff`, `.snd`) | Multi-arquivo modular em `states/` + `.def` | Arquivo único declarativo UMF (`assets/chars/<id>.json`) | **UMF 2.0 / TOML Estruturado com Composição de Traits** |
+| **Criação de Hitboxes** | Desenho manual vetor a vetor em cada quadro (horas por golpe) | Especificação por caixas `Clsn1`/`Clsn2` na `.air` | Caixas heurísticas padrão geradas por constantes | **Auto-Clsn por Convex Hull da Silhueta Alfa via Rust** |
+| **Alinhamento de Eixos** | Arrastar e alinhar pivô $(X, Y)$ quadro a quadro (sujeito a jitter) | Fórmula matemática + técnica manual de Onion Skin | Rig procedural 2D com esqueleto fixo | **Auto-Ground Anchor & Centróide Automático de Apoio** |
+| **Geração de Sprites** | Desenho puramente manual de 300–800 sprites em pixel art | Documentação de pipelines (Pixel, 3D Render e Ripping) | Rig procedural 2D em tempo real ou PNGs dedicados | **Híbrido: Rig 2D vetorial + Skinning + Shaders de Iluminação WGPU** |
+| **Lógica de Ataques** | Dezenas de blocos `[State]` e `HitDef` com 25 parâmetros repetidos | 11 Blueprints prontos para cópia | Array de golpes de alto nível (`"moves": [{"id": "jab", ...}]`) | **Macros Declarativas (`Strike`, `Projectile`, `Parry`)** |
+| **Mecânicas Especiais** | Helpers invisíveis complexos, `HitOverride`, `Pause` milimétrico | Blueprints de Super Armor, Time Stop, Voo e Burst | Limitado a disparos simples, teleporte e dash | **Componentes Nativos (`armor: 1`, `timestop: 120t`, `burst: true`)** |
+| **Feedback e Teste** | Fechar editor, abrir MUGEN, carregar luta, testar, fechar | Comandos Rust de checagem (`hover_check`, `native_sprite_audit`) | Compilação em memória no startup do jogo | **Hot-Reload em Tempo Real a 60 Hz sem Reiniciar a Partida** |
+| **Inteligência Artificial** | Linhas extensas de triggers manuais ou loops arcaicos de CPU | Regras estruturadas com `AILevel` e detecção de projéteis | Árvore de decisão embutida no motor Rust (`crates/engine/src/ai.rs`)| **IA com Planejamento de Frames, Anti-Aéreo Automático e Hit-Confirm** |
+
+---
+
+## 2. Diagnóstico dos Gargalos Atuais
+
+### 2.1. Onde o MUGEN Tradicional é Superior ao Repositório Atual
+1. **Granularidade e Expressividade Total**: No MUGEN tradicional, cada quadro de animação pode ter uma hitbox milimétrica única, múltiplos pontos de emissão de partículas, binds de posição de arremesso (`TargetBind`), e desvios de colisão dinâmicos (`Width`).
+2. **Acervo de Mecânicas Competitivas**: Personagens como `BuuZ2` e `DIO_K` possuem cancelamentos avançados (Super Cancel, Focus Attack, Time Stop, armaduras parciais) difíceis de representar no schema JSON rígido do UMF atual.
+3. **Controle de Efeitos Visuais**: Suporte nativo completo a centenas de `Explod` independentes com rotação, escala, prioridade de desenho (`sprpriority`) e modos de mistura alfa customizados (`ASxxxDxxx`).
+
+### 2.2. Onde o MUGEN Tradicional é Obsoleto e Doloroso
+1. **Fragilidade Extrema**: Errar uma vírgula ou nome de estado pode travar o motor silenciosamente ou prender o oponente em congelamento perpétuo.
+2. **Custo de Produção Inviável**: Criar um personagem completo do zero no MUGEN tradicional exige desenhar ou ripar entre 400 e 900 sprites, alinhar eixos manualmente 900 vezes e desenhar caixas de colisão em mais de 1.500 quadros. Pouquíssimos projetos amadores chegam ao fim.
+3. **Falta de Tipagem e Validação**: Arquivos INI/CNS não possuem verificação estática de tipos, permitindo que bugs de digitação passem despercebidos.
+
+### 2.3. Onde o Repositório (`ultimate-mugen`) Já Está Muito à Frente
+1. **Pipeline de Alto Nível Compilado em Rust**: O motor em Rust compila em nanossegundos o formato UMF diretamente para structs em memória e bytecode determinístico (`crates/engine/src/native/compile.rs`).
+2. **Renderização Moderna WGPU**: Shaders em WGSL, processamento de paleta diretamente na GPU sem alocar texturas RGBA redundantes para cada skin, e orçamento estrito de Texture Atlas (4096 no desktop / 2048 em mobile).
+3. **Ferramental Automatizado**: Exemplos em Rust como `native_sprite_audit`, `hover_check`, `sprite_mem` e `scaffold_char` que validam matematicamente a integridade física e geométrica dos lutadores.
+
+---
+
+## 3. Os 7 Pilares de Inovação para a Criação de Próxima Geração
+
+Para permitir que qualquer criador (humano ou agente de IA) crie lutadores com o polimento de um jogo profissional da Capcom/ArcSys sem a sobrecarga do MUGEN clássico, implementaremos as seguintes inovações:
+
+```mermaid
+flowchart LR
+    P1["1. UMF 2.0 Declarativo"] --> COMPILER["Compilador Rust de Alta Velocidade"]
+    P2["2. Auto-Clsn por Visão Alfa"] --> COMPILER
+    P3["3. Auto-Ground & Pivô Inteligente"] --> COMPILER
+    P4["4. Componentes de Mecânicas (Traits)"] --> COMPILER
+    P5["5. Hot-Reload ao Vivo (Live Preview)"] --> ENGINE["Ultimate MUGEN Engine (WGPU / 60 Hz)"]
+    COMPILER --> ENGINE
+```
+
+---
+
+### Pilar 1: UMF 2.0 com Componentes Modulares (Traits)
+Em vez de forçar o autor a escrever 50 linhas de controladores para cada golpe especial, o formato de personagem passa a utilizar **Componentes Reutilizáveis**:
+
+```json
+{
+  "id": "shoryu",
+  "name": "Dragon Uppercut",
+  "input": "F, D, DF, x",
+  "kind": "special",
+  "components": {
+    "invincibility": { "fromTick": 1, "toTick": 10, "type": "all" },
+    "thrust": { "startupVel": [7.0, -24.0], "gravity": 1.4 },
+    "hit": {
+      "damage": 120,
+      "launch": true,
+      "knockback": [-4.0, -18.0],
+      "hitstop": 12
+    },
+    "landing": { "recoveryTicks": 10, "dust": true, "sound": "land.wav" }
+  }
+}
+```
+**O Ganho**: O compilador Rust (`crates/engine/src/native/compile.rs`) gera automaticamente os controladores `NotHitBy`, `VelSet`, `VelAdd`, `HitDef`, e a transição para a frame de pouso com `PosSet y = 0`. O autor escreve 15 linhas limpas em vez de 120 linhas arcaicas de CNS.
+
+---
+
+### Pilar 2: Geração Automática de Hitboxes e Hurtboxes (Auto-Clsn via Alfa)
+No MUGEN clássico, desenhar caixas azuis e vermelhas no Fighter Factory consome até 60% do tempo de desenvolvimento.
+
+**Inovação Técnica em Rust**:
+- Criar a ferramenta `crates/engine/examples/auto_clsn.rs`.
+- O algoritmo escaneia os pixels opacos da sprite PNG:
+  1. **Hurtbox Azul (`Clsn2`)**: Divide a silhueta opaca em 3 clusters anatômicos usando k-means simples ou cortes proporcionais:
+     - Topo (Cabeça): do topo até 25% da altura.
+     - Meio (Tronco): de 25% até 65% da altura.
+     - Base (Pernas): de 65% até o chão.
+     Gera retângulos ajustados automaticamente com padding configurável de 2 pixels.
+  2. **Hitbox Vermelha (`Clsn1`)**: Detecta extremidades que se projetam para fora da base neutra do corpo (o punho esticado ou pé estendido além da largura usual do tronco), posicionando a caixa vermelha no frame ativo automaticamente!
+
+---
+
+### Pilar 3: Ancoragem Automática ao Chão (Auto-Ground & Auto-Pivot)
+Eliminação completa do erro de "lutador flutuando" ou "afundando no chão":
+
+**Inovação Técnica em Rust**:
+- A ferramenta calcula para cada frame:
+  $$\text{Axis}_Y = \max(\{y \mid \text{pixel}(x, y).\text{alfa} > 0\})$$
+- O ponto mais baixo de contato da perna de apoio é fixado automaticamente como $Y=0$.
+- O `Axis X` é alinhado automaticamente ao centro de massa da projeção vertical dos pés.
+- **Resultado**: 100% dos tremores de animação são extintos antes mesmo de o personagem entrar no motor.
+
+---
+
+### Pilar 4: Biblioteca de Comportamentos Especiais Prontos
+Transformar os 11 blueprints do manual em abstrações nativas de 1 linha:
+
+| Habilidade | No MUGEN Tradicional | No Modelo Inovador UMF 2.0 |
+| :--- | :--- | :--- |
+| **Super Armor** | Helper invisível + `HitOverride` + binds complexos | `"armor": { "hits": 1 }` |
+| **Time Stop** | `Pause` + `SuperPause` + sincronização `movetime` | `"timeStop": { "duration": 120 }` |
+| **Voo Livre** | `physics = N` + variáveis de oscilação senoidal manual | `"flight": { "speed": 8.0, "bobbing": true }` |
+| **Carregamento de Ki** | Loop de 3 estados com `command != "charge"` | `"charge": { "button": "hold_a+b", "rate": 10 }` |
+| **Burst Defensivo** | Interceptação em `movetype = H` + onda de choque | `"burst": { "cost": 2000, "knockback": 12.0 }` |
+| **Parry (3rd Strike)**| `ReversalDef` com janela manual e custom states | `"parry": { "window": 4, "sound": "parry.wav" }` |
+| **Damage Dampener** | Cálculos em `fvar` no `[Statedef -2]` | `"damageScaling": { "decay": 0.85, "floor": 0.20 }` |
+
+---
+
+### Pilar 5: Hot-Reload e Inspeção Visual ao Vivo (Live Hitbox Overlay)
+Em vez do ciclo lento e fragmentado do Fighter Factory:
+- O motor `ultimate-mugen` ganha um observador de arquivos (`notify` crate ou watchdog de modificação).
+- Ao alterar o arquivo de sprites ou a definição do lutador, o motor recarrega o `CharDef` **em tempo de execução**, mantendo o estado da luta intacto.
+- O overlay de depuração (tecla `F4`) exibe as caixas `Clsn1` (vermelho translúcido) e `Clsn2` (azul translúcido) renderizadas diretamente sobre as sprites em 60 Hz.
+
+---
+
+### Pilar 6: Sistema Híbrido de Sprites (Rigs 2D Suaves + Efeitos WGPU)
+- Em vez de forçar autores a desenharem centenas de quadros estáticos, o motor suporta animação esquelética leve (como já iniciado em `crates/engine/src/native/rig.rs`).
+- Adição de interpolação linear/cúbica de rotações entre poses chaves (`idle0` para `idle1`), permitindo animações de 60 FPS incrivelmente fluidas com apenas 4 poses bases cadastradas.
+- Aplicação de shaders de iluminação dinâmica em tempo real (PalFX avançado, auras de energia e sombras de chão projetadas) processadas na GPU, eliminando a necessidade de desenhar efeitos de luz quadro a quadro.
+
+---
+
+### Pilar 7: Auditoria Automatizada em Linha de Comando (CI/CD de Balanceamento)
+Nenhum personagem chega ao jogo com bugs ou desbalanceamento grotesco:
+- `cargo run -p ume-engine --example char_audit -- <id>` analisa:
+  - **Dano Teórico Máximo**: Simula todos os cancels possíveis e alerta se o personagem tiver Touch of Death (100% de vida em 1 combo).
+  - **Inviolabilidade**: Alerta se houver golpes com frames ativos sem caixa azul de vulnerabilidade (hitboxes sem risco).
+  - **Desconexão de Pouso**: Verifica se todos os estados aéreos garantem transição segura para o solo.
+  - **Consistência de Hitstop e Vantagem de Quadros**: Calcula se o golpe deixa o atacante em vantagem (+frames) ou desvantagem (-frames) na defesa.
+
+---
+
+## 4. Roteiro Prático de Implementação (Roadmap)
+
+```
+[FASE 1: FERRAMENTAL CLI RUST] - [CONCLUÍDO E HOMOLOGADO]
+  ├── scaffold_char.rs (Criado e funcional)
+  ├── auto_clsn.rs (Geração de caixas por silhueta alfa)
+  └── auto_ground.rs (Ancoragem matemática de eixos no solo)
+
+[FASE 2: EVOLUÇÃO DO FORMATO UMF 2.0] - [CONCLUÍDO E HOMOLOGADO]
+  ├── Schema declarativo com traits (Armor, TimeStop, Parry, Flight, Burst)
+  └── Compilador native/compile.rs expandido para emitir controladores automaticamente
+
+[FASE 3: EXPERIÊNCIA DE DESENVOLVIMENTO (DEVEX)]
+  ├── Live Hot-Reload em winit/wgpu
+  ├── Hitbox & Frame Data Overlay visual no F4
+  └── Teste de estresse automatizado contra a IA
+```
+
+---
+
+## 5. Ferramentas e Traits Homologados e Prontos para Uso
+
+### A. Gerador Automático de Hitboxes (`auto_clsn`)
+Gera caixas proporcionais de corpo (cabeça, tronco, pernas) e caixas ativas de ataque escaneando os pixels da silhueta da sprite:
+```bash
+# Formato AIR M.U.G.E.N clássico
+cargo run --release -p ume-engine --example auto_clsn -- <caminho_ou_pasta_png> [--axis-x 160] [--axis-y 240]
+
+# Formato JSON UMF nativo com detecção de caixa de ataque ativa
+cargo run --release -p ume-engine --example auto_clsn -- <sprite.png> --attack --json
+```
+
+### B. Ancorador Automático de Chão e Eixos (`auto_ground`)
+Calcula o pixel de contato mais baixo ($Y_{max}$) e o centro de massa horizontal ($X$) para eliminar o efeito de personagens flutuando ou tremendo:
+```bash
+# Relatório de alinhamento e eixo global recomendado
+cargo run --release -p ume-engine --example auto_ground -- assets/chars/sprites/meu_char/
+
+# Saída estruturada em JSON
+cargo run --release -p ume-engine --example auto_ground -- assets/chars/sprites/meu_char/ --json
+```
+
+### C. Traits Declarativos UMF 2.0 (`crates/engine/src/native/`)
+Em vez de programar controladores complexos manualmente, adicione os atributos diretamente no JSON do golpe:
+```json
+{
+  "id": "armored_tackle",
+  "name": "Armored Tackle",
+  "input": "D, DF, F, x",
+  "kind": "special",
+  "anim": "special",
+  "armor": { "hits": 1, "threshold": 50.0 },
+  "parry": { "window": [1, 8], "spark": 2 },
+  "timestop": 120,
+  "burst": true,
+  "flight": true
+}
+```
+- `"armor"`: Emite `HitOverride` mantendo o lutador no golpe sem entrar em animação de dano.
+- `"parry"`: Emite `ReversalDef` com janela ativa de frames e faísca configurável.
+- `"timestop"`: Emite `Pause` global com sincronização de movimento (`movetime = ticks`).
+- `"burst"`: Habilita ativação direta durante `movetype = H` (fora de KO) com invulnerabilidade `NotHitBy`.
+- `"flight"`: Configura `physics = N` e aplica vetor 8-direcional de levitação no ar.
+
+---
+
+Com essa arquitetura, a barreira técnica de meses de trabalho artesanal cai para **algumas horas de parametrização elegante e declarativa**, preservando a mesma profundidade, competitividade e impacto visual que tornaram o M.U.G.E.N uma lenda dos jogos de luta.

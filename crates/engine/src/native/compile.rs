@@ -209,13 +209,13 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
             _ => "\ntrigger2 = movecontact && stateno = [200, 2999]".into(),
         };
         let cost_line = if cost > 0.0 { format!("triggerall = power >= {cost}\n") } else { String::new() };
-        minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = command = \"{cname}\"{simple_cmd}\ntriggerall = {state_cond}{crouch_ok}\n{cost_line}trigger1 = ctrl{cancel}\n\n", m.name);
+        minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = command = \"{cname}\"{simple_cmd}\ntriggerall = {state_cond}{crouch_ok}\n{cost_line}trigger1 = ctrl{cancel}{}\n\n", m.name, if m.burst == Some(true) { "\ntrigger2 = movetype = H && stateno != [5100, 5150]" } else { "" });
         let anim = anim_no.get(&m.anim).copied().unwrap_or(0);
         let st = match when { "air" => 'A', "crouch" => 'C', _ => 'S' };
         let jumps = m.moves.iter().any(|v| v.vel[1].is_some_and(|y| y != 0.0));
-        let ph = match when { "air" => 'A', "crouch" => 'C', _ => if jumps { 'N' } else { 'S' } };
+        let ph = match when { "air" => 'A', "crouch" => 'C', _ => if jumps || m.flight == Some(true) { 'N' } else { 'S' } };
         let pa = if cost > 0.0 { -cost } else if m.kind == "special" { 30.0 } else { 15.0 };
-        cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" }); cns += &extras::voice_state(m, sid);
+        cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" }); cns += &extras::voice_and_traits_state(m, sid);
         if m.kind == "super" {
             cns += &format!("[State {sid}, super]\ntype = SuperPause\ntrigger1 = Time = 0\ntime = 55\nanim = 30\npos = 0, -60\nsound = -1\n\n[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\nframegap = 2\npalbright = 0, 0, 0\npalcontrast = 100, 150, 256\npaladd = 0, 0, 0\npalmul = .85, .85, .85\ntime = 60\nlength = 10\n\n");
         } else if m.fx.as_deref() == Some("aura") {

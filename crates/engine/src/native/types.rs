@@ -34,6 +34,14 @@ pub struct HitSpec {
     #[serde(default)] pub hitstun: Option<i32>,
     #[serde(default)] pub spark: Option<i32>,
     #[serde(default)] pub shake: Option<i32>,
+    #[serde(default)] pub priority: Option<i32>,
+    #[serde(default)] pub hitflag: Option<String>,
+    #[serde(default)] pub pausetime: Option<[i32; 2]>,
+    #[serde(default)] pub cornerpush: Option<f32>,
+    #[serde(default, rename = "hitSound")] pub hit_sound: Option<[i32; 2]>,
+    #[serde(default, rename = "guardSound")] pub guard_sound: Option<[i32; 2]>,
+    #[serde(default, rename = "sparkPos")] pub spark_pos: Option<[f32; 2]>,
+    #[serde(default, rename = "groundBounce")] pub ground_bounce: Option<bool>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -67,6 +75,19 @@ pub struct ArmorSpec { pub hits: u32, #[serde(default)] pub threshold: Option<f3
 pub struct ParrySpec { pub window: [i32; 2], #[serde(default)] pub spark: Option<i32> }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ThrowSpec {
+    pub damage: f32,
+    #[serde(default)] pub bind: Option<[f32; 2]>,
+    #[serde(default, rename = "p2State")] pub p2_state: Option<i32>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct PassiveSpec {
+    #[serde(default, rename = "meterRegen")] pub meter_regen: Option<f32>,
+    #[serde(default, rename = "lifeRegen")] pub life_regen: Option<f32>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NativeMove {
     pub id: String, pub name: String, pub input: String,
     #[serde(default)] pub simple: Option<String>,
@@ -88,6 +109,8 @@ pub struct NativeMove {
     #[serde(default)] pub burst: Option<bool>,
     #[serde(default)] pub flight: Option<bool>,
     #[serde(default)] pub timestop: Option<i32>,
+    #[serde(default)] pub throw: Option<ThrowSpec>,
+    #[serde(default)] pub cancels: Option<Vec<String>>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -111,6 +134,7 @@ pub struct NativeChar {
     #[serde(default)] pub description: Option<String>,
     pub color: String,
     #[serde(default)] pub stats: NativeStats,
+    #[serde(default)] pub passives: Option<PassiveSpec>,
     pub art: NativeArt,
     pub anims: indexmap_like::OrderedMap<NativeAnim>,
     pub moves: Vec<NativeMove>,

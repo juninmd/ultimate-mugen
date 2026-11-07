@@ -6,7 +6,7 @@ use crate::cns::parse_states;
 use crate::commands::parse_command;
 use serde_json::Value;
 use std::collections::HashMap;
-use std::sync::Arc; #[path = "compile_extras.rs"] mod extras;
+#[path = "compile_extras.rs"] mod extras;
 
 pub const STANDARD_ANIMS: &[(&str, i32)] = &[
     ("idle", 0), ("turn", 5), ("crouchTurn", 6), ("crouchStart", 10), ("crouch", 11), ("crouchEnd", 12), ("walk", 20), ("walkBack", 21),
@@ -18,36 +18,6 @@ pub const STANDARD_ANIMS: &[(&str, i32)] = &[
     ("trip", 5070), ("airRecover", 5040),
     ("taunt", 195), ("powerUp", 196), ("defeat1", 197), ("defeat2", 198), ("defeat3", 199), ("defeat4", 200),
 ];
-
-struct Lv { stop: i32, stun: i32, kb: f32, anim: &'static str }
-fn level(l: Option<&str>) -> Lv {
-    match l.unwrap_or("medium") {
-        "light" => Lv { stop: 9, stun: 12, kb: -3.5, anim: "Light" },
-        "heavy" => Lv { stop: 13, stun: 20, kb: -6.0, anim: "Hard" },
-        _ => Lv { stop: 11, stun: 16, kb: -4.5, anim: "Medium" },
-    }
-}
-fn guardflag(g: Option<&str>) -> &'static str { match g.unwrap_or("mid") { "high" => "HA", "low" => "L", "unblockable" => "", _ => "MA" } }
-
-#[allow(clippy::too_many_arguments)]
-fn hitdef_lines(damage: f32, gd: Option<f32>, lvl: Option<&str>, guard: Option<&str>, kb: Option<[f32; 2]>, air_kb: Option<[f32; 2]>, launch: bool, hitstop: Option<i32>, hitstun: Option<i32>, shake: Option<i32>, is_proj: bool, attr: &str) -> String {
-    let lv = level(lvl);
-    let kb = kb.unwrap_or([lv.kb, 0.0]);
-    let air = air_kb.unwrap_or([kb[0] * 0.8, if launch { -6.0 } else { -3.5 }]);
-    let stop = hitstop.unwrap_or(lv.stop);
-    let stun = hitstun.unwrap_or(lv.stun);
-    let gd = gd.unwrap_or((damage / 8.0).round());
-    let spark = match lvl { Some("heavy") => 2, Some("light") => 0, _ => 1 };
-    let mut s = format!(
-        "attr = {attr}\ndamage = {damage}, {gd}\nanimtype = {}\nguardflag = {}\nhitflag = MAF\npausetime = {}, {stop}\nguard.pausetime = {}, {}\nsparkno = {spark}\nguard.sparkno = 40\nsparkxy = 0, 0\nhitsound = 5, {spark}\nguardsound = 6, 0\nground.type = {}\nground.slidetime = {}\nground.hittime = {stun}\nground.velocity = {}, {}\nair.velocity = {}, {}\nair.hittime = {}\nguard.velocity = {}\nfall = {}\nair.fall = {}\nfall.recover = 1\ngetpower = {}, {}\ngivepower = {}, {}\n",
-        lv.anim, guardflag(guard), if is_proj { 0 } else { stop }, if is_proj { 0 } else { stop - 2 }, stop - 2,
-        if guard == Some("low") { "Low" } else { "High" }, (stun as f32 * 0.6).round() as i32,
-        kb[0], if launch { if kb[1] != 0.0 { kb[1] } else { -7.0 } } else { kb[1] }, air[0], air[1], stun + 6, kb[0] * 0.7,
-        launch as i32, (launch || lvl == Some("heavy")) as i32,
-        (damage * 1.2).round(), (damage * 0.5).round(), (damage * 0.6).round(), (damage * 0.3).round());
-    if let Some(t) = shake { s += &format!("envshake.time = {t}\n"); }
-    s
-}
 
 /// Full compile (all animations).
 pub fn compile_native(nc: &NativeChar, pal_no: i32, with_images: bool) -> CharDef { compile_native_with(nc, pal_no, with_images, None) }
@@ -203,10 +173,17 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let cost = m.cost.unwrap_or(if m.kind == "super" { 1000.0 } else { 0.0 });
         let state_cond = match when { "air" => "statetype = A", "crouch" => "statetype = C || (statetype = S && command = \"holddown\")", _ => "statetype = S || statetype = C && command != \"holddown\"" };
         let crouch_ok = match when { "crouch" => "\ntriggerall = command = \"holddown\"", "stand" => "\ntriggerall = command != \"holddown\" || statetype = S", _ => "" };
-        let cancel = match m.kind.as_str() {
-            "normal" => if when == "air" { String::new() } else { format!("\ntrigger2 = movecontact && stateno = [200, 299] && stateno != {sid} && time > 2") },
-            "special" => format!("\ntrigger2 = movecontact && stateno = [200, 699]\ntrigger3 = movecontact && stateno = [1000, 2999] && stateno != {sid} && time > 6"),
-            _ => "\ntrigger2 = movecontact && stateno = [200, 2999]".into(),
+        let cancel = if let Some(cancels) = &m.cancels {
+            let mut cond = String::from("\ntrigger2 = movecontact && (false");
+            for c in cancels { cond += &format!(" || command = \"m_{c}\""); }
+            cond += ")";
+            cond
+        } else {
+            match m.kind.as_str() {
+                "normal" => if when == "air" { String::new() } else { format!("\ntrigger2 = movecontact && stateno = [200, 299] && stateno != {sid} && time > 2") },
+                "special" => format!("\ntrigger2 = movecontact && stateno = [200, 699]\ntrigger3 = movecontact && stateno = [1000, 2999] && stateno != {sid} && time > 6"),
+                _ => "\ntrigger2 = movecontact && stateno = [200, 2999]".into(),
+            }
         };
         let cost_line = if cost > 0.0 { format!("triggerall = power >= {cost}\n") } else { String::new() };
         minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = command = \"{cname}\"{simple_cmd}\ntriggerall = {state_cond}{crouch_ok}\n{cost_line}trigger1 = ctrl{cancel}{}\n\n", m.name, if m.burst == Some(true) { "\ntrigger2 = movetype = H && stateno != [5100, 5150]" } else { "" });
@@ -234,7 +211,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let attr = format!("{st}, {}A", match m.kind.as_str() { "normal" => "N", "special" => "S", _ => "H" });
         for h in &m.hits {
             cns += &format!("[State {sid}, hit]\ntype = HitDef\ntrigger1 = AnimElem = {}\n{}\n", h.at,
-                hitdef_lines(h.damage * sm, h.guard_damage.map(|g| g * sm), h.level.as_deref(), h.guard.as_deref(), h.knockback, h.air_knockback, h.launch.unwrap_or(false), h.hitstop, h.hitstun, h.shake, false, &attr));
+                extras::hitdef_from_spec(h, sm, &attr, false));
         }
         let mut pid = sid;
         for p in m.projectile.as_ref().map(|p| p.to_vec()).unwrap_or_default() {
@@ -244,17 +221,16 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
             cns += &format!("[State {sid}, proj]\ntype = Projectile\ntrigger1 = AnimElem = {}\nprojid = {pid}\nprojanim = {pa}\n{ph2}offset = {}, {}\nvelocity = {}, {}\n{}projhits = {}\nprojmisstime = 6\nprojpriority = {}\nprojremovetime = {}\n{}\n",
                 p.at, p.offset[0], p.offset[1], p.speed[0], p.speed[1], p.accel.map(|a| format!("accel = {}, {}\n", a[0], a[1])).unwrap_or_default(),
                 p.hits.unwrap_or(1), p.priority.unwrap_or(1), p.remove_time.unwrap_or(-1),
-                hitdef_lines(p.damage * sm, None, Some(p.level.as_deref().unwrap_or("medium")), None, p.knockback, None, p.launch.unwrap_or(false), None, None, None, true, &pattr));
+                extras::hitdef_projectile(p.damage * sm, Some(p.level.as_deref().unwrap_or("medium")), p.knockback, p.launch.unwrap_or(false), &pattr));
             pid += 1;
         }
         if when != "air" { cns += &format!("[State {sid}, end]\ntype = ChangeState\ntrigger1 = AnimTime = 0\nvalue = {}\nctrl = 1\n\n", if when == "crouch" { 11 } else { 0 }); }
     }
     let mut states = HashMap::new();
-    parse_states(&(minus1 + &cns), &mut states, true);
+    let minus2 = extras::passives_cns(nc);
+    parse_states(&(minus1 + &minus2 + &cns), &mut states, true);
     if with_images && std::env::var("UME_FORCE_RIG").is_err() {
-        if let Some(avatar) = super::portrait::portrait(nc, palette) {
-            sprites.insert((9000, 1), avatar);
-        }
+        if let Some(avatar) = super::portrait::portrait(nc, palette) { sprites.insert((9000, 1), avatar); }
     }
     let portrait = sprites.get(&(9000, 1)).cloned().or_else(|| anims.get(&0).and_then(|a: &Animation| a.frames.first()).and_then(|f| sprites.get(&(f.group, f.index)).cloned()));
     let hex = nc.color.trim_start_matches('#');
@@ -266,7 +242,6 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.description = nc.description.clone().unwrap_or_default();
     d.intro = nc.intro.clone().unwrap_or_default(); d.taunt = nc.taunt.clone().unwrap_or_default(); d.win_quote = nc.win_quote.clone().unwrap_or_default();
     d.form_name = nc.form.clone().unwrap_or_default(); d.boss = nc.boss; extras::insert_voices(&mut d, nc);
-    let _ = Arc::new(());
     d
 }
 
@@ -277,7 +252,7 @@ mod tests {
     /// heavier hits must freeze longer and the values stay in the researched band.
     #[test]
     fn hitstop_scales_with_attack_strength() {
-        let (l, m, h) = (level(Some("light")), level(Some("medium")), level(Some("heavy")));
+        let (l, m, h) = (extras::level(Some("light")), extras::level(Some("medium")), extras::level(Some("heavy")));
         assert!(l.stop < m.stop && m.stop < h.stop);
         assert_eq!((l.stop, m.stop, h.stop), (9, 11, 13));
         assert!(l.stun < m.stun && m.stun < h.stun, "hit-stun also scales");

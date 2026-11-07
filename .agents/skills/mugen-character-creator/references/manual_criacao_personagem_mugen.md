@@ -1522,6 +1522,82 @@ Em vez de programar controladores complexos manualmente, adicione os atributos d
 - `"burst"`: Habilita ativação direta durante `movetype = H` (fora de KO) com invulnerabilidade `NotHitBy`.
 - `"flight"`: Configura `physics = N` e aplica vetor 8-direcional de levitação no ar.
 
+### D. Arquitetura Suprema Nativa UMF Next (Fechamento dos 8 Gaps do M.U.G.E.N)
+Comparando o lutador nativo flagship **Kaito** (`assets/chars/kaito.json`) com os expoentes do MUGEN (`kfm720`, `BuuZ2`, `DIO_K`), a nova arquitetura suprema do compilador nativo fecha todos os 8 gaps históricos de combate através de parâmetros declarativos:
+
+```json
+{
+  "passives": {
+    "meterRegen": 1.5,
+    "lifeRegen": 0.2
+  },
+  "moves": [
+    {
+      "id": "jab",
+      "name": "Snap Jab",
+      "input": "x",
+      "kind": "normal",
+      "anim": "jab",
+      "cancels": ["strong", "lkick", "sweep"],
+      "hits": [
+        {
+          "at": 2,
+          "damage": 28,
+          "level": "light",
+          "priority": 4,
+          "pausetime": [6, 12],
+          "cornerpush": -2.0,
+          "sparkPos": [35, -60],
+          "hitSound": [5, 0],
+          "guardSound": [6, 0]
+        }
+      ]
+    },
+    {
+      "id": "tomoe_throw",
+      "name": "Tomoe Nage (Arremesso)",
+      "input": "F+y",
+      "kind": "normal",
+      "anim": "jab",
+      "throw": {
+        "damage": 120,
+        "bind": [30, -10],
+        "p2State": 820
+      }
+    },
+    {
+      "id": "otg_stomp",
+      "name": "Earthquake Stomp",
+      "input": "~D, DF, F, b",
+      "kind": "special",
+      "anim": "strong",
+      "hits": [
+        {
+          "at": 3,
+          "damage": 75,
+          "level": "heavy",
+          "priority": 6,
+          "hitflag": "MAFD",
+          "groundBounce": true,
+          "shake": 10
+        }
+      ]
+    }
+  ]
+}
+```
+1. **`priority`**: Prioridade cirúrgica (1 a 7) para trades e counter-hits no mesmo frame.
+2. **`pausetime: [p1, p2]`**: Asimetria de hitstop gerando frame advantage competitivo (+frames para links).
+3. **`hitflag: "MAFD"` e `groundBounce: true`**: Acerto em oponentes caídos (OTG) e quique de chão.
+4. **`hitSound`, `guardSound` e `sparkPos`**: Desacoplamento sonoro e faíscas posicionadas na ponta do membro.
+5. **`cornerpush`**: Controle de recuo para prevenir armadilhas infinitas de canto.
+6. **`throw`**: Agarrões com `TargetBind`, `TargetLifeAdd` e transição para `p2State`.
+7. **`cancels`**: Target combos e gatlings customizados declarados por golpe.
+8. **`passives`**: Rotinas globais contínuas a 60 Hz em `[Statedef -2]` (regeneração passiva de meter e vida).
+
 ---
 
 Com essa arquitetura, a barreira técnica de meses de trabalho artesanal cai para **algumas horas de parametrização elegante e declarativa**, preservando a mesma profundidade, competitividade e impacto visual que tornaram o M.U.G.E.N uma lenda dos jogos de luta.
+
+> **Passo a passo de sprites e regras de animação perfeita:** ver [references/sprites_animacoes_passo_a_passo.md](references/sprites_animacoes_passo_a_passo.md).
+

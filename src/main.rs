@@ -1,5 +1,6 @@
 mod app;
 mod audio;
+mod boss;
 mod controls;
 mod gamepad;
 mod gfx;
@@ -50,7 +51,6 @@ fn conf() -> WindowConf {
         println!("ultimate-mugen {}", update::VERSION);
         std::process::exit(0);
     }
-    #[cfg(not(target_arch = "wasm32"))]
     #[cfg(not(target_arch = "wasm32"))]
     if args.iter().any(|a| a == "--scan-report") {
         crate::scan_report::run();

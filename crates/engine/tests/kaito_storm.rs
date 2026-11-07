@@ -10,6 +10,83 @@ fn fighter(name: &str) -> Arc<ume_engine::chardef::CharDef> {
     Arc::new(compile_native(&character, 1, true))
 }
 
+fn match_with_close_opponent() -> Match {
+    let mut game = Match::new(common_def(), None, flat_stage());
+    game.add_player(fighter("kaito"), 0, 0, 1);
+    game.add_player(fighter("shion"), 1, 0, 2);
+    game.start_round();
+    for _ in 0..600 {
+        if game.round_state == 2 && game.fighters[0].ctrl { break; }
+        game.tick(&[0, 0]);
+    }
+    game.fighters[0].pos.x = -32.0;
+    game.fighters[1].pos.x = 32.0;
+    game.fighters[0].facing = 1.0;
+    game.fighters[1].facing = -1.0;
+    game
+}
+
+#[test]
+fn kaito_walk_visits_six_frames_and_stays_on_the_floor() {
+    let mut game = match_with_close_opponent();
+    game.fighters[1].pos.x = 400.0;
+    let start = game.fighters[0].pos.x;
+    let mut frames = std::collections::BTreeSet::new();
+    let mut max_ground_error = 0.0_f32;
+    for _ in 0..48 {
+        game.tick(&[k::R, 0]);
+        let fighter = &game.fighters[0];
+        if fighter.state_no == 20 {
+            frames.insert(fighter.elem);
+            max_ground_error = max_ground_error.max(fighter.pos.y.abs());
+        }
+    }
+    assert_eq!(frames.len(), 6, "walk animation did not visit its six frames");
+    assert!(game.fighters[0].pos.x > start, "Kaito did not advance while walking");
+    assert!(max_ground_error < 0.01, "walking left the floor");
+}
+
+#[test]
+fn gale_fist_motion_creates_a_projectile_and_hits() {
+    let mut game = match_with_close_opponent();
+    let before = game.fighters[1].life;
+    let inputs = [k::D, k::D | k::R, k::R, k::R | k::X];
+    let mut projectile = false;
+    for tick in 0..100 {
+        game.tick(&[inputs.get(tick).copied().unwrap_or(0), 0]);
+        projectile |= !game.projectiles.is_empty();
+    }
+    assert!(projectile, "Gale Fist did not create its projectile");
+    assert!(game.fighters[1].life < before, "Gale Fist did not connect");
+}
+
+#[test]
+fn rising_tempest_motion_connects_from_close_range() {
+    let mut game = match_with_close_opponent();
+    let inputs = [k::R, k::D, k::D | k::R, k::R | k::Y];
+    for tick in 0..100 { game.tick(&[inputs.get(tick).copied().unwrap_or(0), 0]); }
+    assert!(game.fighters[1].received_hits >= 1, "Rising Tempest failed to connect");
+}
+
+#[test]
+fn thunderstep_motion_connects_from_close_range() {
+    let mut game = match_with_close_opponent();
+    let inputs = [k::D, k::D | k::L, k::L, k::L | k::A];
+    for tick in 0..100 { game.tick(&[inputs.get(tick).copied().unwrap_or(0), 0]); }
+    assert!(game.fighters[1].received_hits >= 1, "Thunderstep failed to connect");
+}
+
+#[test]
+fn typhoon_barrage_spends_meter_and_connects() {
+    let mut game = match_with_close_opponent();
+    game.fighters[0].power = 3000.0;
+    let before = game.fighters[1].life;
+    let inputs = [k::D, k::D | k::R, k::R, k::D, k::D | k::R, k::R, k::R | k::X];
+    for tick in 0..120 { game.tick(&[inputs.get(tick).copied().unwrap_or(0), 0]); }
+    assert!(game.fighters[0].power < 3000.0, "Typhoon Barrage did not spend power");
+    assert!(game.fighters[1].life < before, "Typhoon Barrage did not connect");
+}
+
 #[test]
 fn awakened_idle_preserves_pixels_outside_the_hair_region() {
     let path = format!("{}/../../assets/chars/kaito.json", env!("CARGO_MANIFEST_DIR"));

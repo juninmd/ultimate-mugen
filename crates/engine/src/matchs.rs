@@ -7,6 +7,7 @@ use crate::triggers::Ctx;
 use std::cell::RefCell;
 use std::sync::Arc;
 
+mod forms;
 mod types;
 pub use types::*;
 
@@ -536,7 +537,7 @@ impl Match {
                 f.ground_level = 0.0;
                 f.facing = if f.side == 0 { 1.0 } else { -1.0 };
                 f.life = f.life_max; f.alive = true;
-                if f.form > 0 { f.attack_mul /= 1.3; f.defence_mul /= 1.25; f.form = 0; f.form_time = 0; }
+                f.revert_form();
                 if first { f.power = 0.0; }
                 f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false;
                 f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5];
@@ -825,25 +826,6 @@ impl Match {
             AnnounceKind::Other => 0,
         };
         if self.global_asserts & skipped != 0 { self.announce = None; }
-    }
-
-    /// Transformation ("awakening"): costs one super bar, once per round, lasts until the round ends — stronger hits, tougher, regenerating
-    /// meter and a small life refill, with a cinematic pause. Native characters only (they carry the power-up animation).
-    pub fn try_transform(&mut self, i: usize) -> bool {
-        let f = &self.fighters[i];
-        if f.is_helper || f.form > 0 || !f.alive || !f.ctrl || f.state_type == 'A' || f.power < 1000.0 || self.round_state != 2 || self.pause.is_some() || !f.def.anims.contains_key(&196) { return false; }
-        let id = f.id;
-        {
-            let f = &mut self.fighters[i];
-            f.power -= 1000.0; f.form = 1; f.form_time = 0; f.attack_mul *= 1.3; f.defence_mul *= 1.25;
-            f.life = (f.life + f.life_max * 0.1).min(f.life_max);
-        }
-        self.change_engine_state(i, ENGINE_STATE_AWAKENING);
-        self.fighters[i].ctrl = false;
-        self.pause = Some(PauseState { by: id, time: 80, move_time: 80, is_super: true, darken: true, unhittable: true, p2_def_mul: 1.0, pause_bg: true, ..Default::default() });
-        self.do_shake(40, 5.0);
-        self.events.push(Event::Transform { fighter: id });
-        true
     }
 
     pub fn fighter_pal(&self, i: usize) -> crate::palette::PalParams {

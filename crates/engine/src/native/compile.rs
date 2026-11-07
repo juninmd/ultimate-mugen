@@ -26,7 +26,7 @@ pub fn compile_native_preview(nc: &NativeChar, pal_no: i32) -> CharDef { compile
 
 fn frame_key(fr: &NativeFrame) -> String { serde_json::to_string(&(&fr.pose, &fr.effect, &fr.hit, &fr.sprite)).unwrap_or_default() }
 
-fn render_frame(nc: &NativeChar, fr: &NativeFrame, with_images: bool, palette: Option<&Value>) -> RigRender {
+pub(super) fn render_frame(nc: &NativeChar, fr: &NativeFrame, with_images: bool, palette: Option<&Value>) -> RigRender {
     let force_rig = std::env::var("UME_FORCE_RIG").is_ok();
     if !force_rig && with_images {
         if let Some(r) = super::pixel::try_load(nc, fr, palette) {
@@ -114,6 +114,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
                 let k = (1, idx);
                 idx += 1;
                 sprites.insert(k, Sprite { image: r.image, width: r.width, height: r.height, axis_x: r.axis_x, axis_y: r.axis_y, scale: r.scale }); extras::insert_awakened(&mut sprites, nc, fr, k.1, with_images, awakening_palette.as_ref());
+                super::forms::insert_form_sprites(&mut sprites, nc, fr, k.1, with_images, palette);
                 (k, r.hurt, r.hit)
             });
             let hurt = match &fr.hurt { Some(Value::String(s)) if s == "none" => vec![], Some(v @ Value::Array(_)) => serde_json::from_value(v.clone()).unwrap_or(entry.1.clone()), _ => entry.1.clone() };
@@ -148,21 +149,24 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         parse_command("holdfwd", "/$F", 1, 1), parse_command("holdback", "/$B", 1, 1), parse_command("holdup", "/$U", 1, 1), parse_command("holddown", "/$D", 1, 1),
         parse_command("FF", "F, F", 10, 1), parse_command("BB", "B, B", 10, 1),
     ];
-    let mut minus1 = String::from("[Statedef -1]\n\n[State -1, run]\ntype = ChangeState\nvalue = 100\ntriggerall = command = \"FF\"\ntrigger1 = statetype = S && ctrl\n\n[State -1, hop]\ntype = ChangeState\nvalue = 105\ntriggerall = command = \"BB\"\ntrigger1 = statetype = S && ctrl\n\n");
+    let ab = super::abilities::ability_code(nc.abilities.as_ref(), &anim_no);
+    commands.extend(ab.commands);
+    let mut minus1 = String::from("[Statedef -1]\n\n[State -1, run]\ntype = ChangeState\nvalue = 100\ntriggerall = command = \"FF\"\ntrigger1 = statetype = S && ctrl\n\n[State -1, hop]\ntype = ChangeState\nvalue = 105\ntriggerall = command = \"BB\"\ntrigger1 = statetype = S && ctrl\n\n") + &ab.minus1;
     let mut cns = String::new();
     let rank = |m: &NativeMove| (match m.kind.as_str() { "super" => 300, "special" => 200, _ => 100 }) + m.input.split(',').count() as i32 * 5 + m.input.contains('+') as i32 * 2;
-    let mut order: Vec<&NativeMove> = nc.moves.iter().collect();
-    order.sort_by_key(|m| -rank(m));
+    let mut order = super::forms::collect_form_moves(nc);
+    order.sort_by_key(|(m, _, _)| -rank(m));
     let mut next_state: HashMap<&str, i32> = [("normal", 200), ("crouch", 400), ("air", 600), ("special", 1000), ("super", 3000)].into_iter().collect();
     let mut movelist = vec![];
-    for m in order {
+    for (m, form_cond, forms_mask) in order {
         let when = m.when.as_deref().unwrap_or("stand");
         let cat = if m.kind == "normal" { match when { "crouch" => "crouch", "air" => "air", _ => "normal" } } else if m.kind == "super" { "super" } else { "special" };
         let sid = { let v = next_state.get_mut(cat).unwrap(); *v += 1; *v - 1 };
         let cname = format!("m_{}", m.id);
         let simple_btn = m.input.trim().split('+').all(|t| ["a", "b", "c", "x", "y", "z"].contains(&t.trim()));
         commands.push(parse_command(&cname, &m.input, if m.kind == "super" { 30 } else if m.kind == "special" { 20 } else { 15 }, if simple_btn { 1 } else { 2 }));
-        movelist.push(MoveInfo { name: m.name.clone(), input: m.input.clone(), command: cname.clone() });
+        let cost = m.cost.unwrap_or(if m.kind == "super" { 1000.0 } else { 0.0 });
+        movelist.push(MoveInfo { name: m.name.clone(), input: m.input.clone(), command: cname.clone(), cost, drain: false, forms: forms_mask });
         let mut simple_cmd = String::new();
         if let Some(sp) = &m.simple {
             let sc = format!("simple_{sp}_{}", m.id);
@@ -170,7 +174,6 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
             commands.push(parse_command(&sc, inp, 1, 2));
             simple_cmd = format!(" || command = \"{sc}\"");
         }
-        let cost = m.cost.unwrap_or(if m.kind == "super" { 1000.0 } else { 0.0 });
         let state_cond = match when { "air" => "statetype = A", "crouch" => "statetype = C || (statetype = S && command = \"holddown\")", _ => "statetype = S || statetype = C && command != \"holddown\"" };
         let crouch_ok = match when { "crouch" => "\ntriggerall = command = \"holddown\"", "stand" => "\ntriggerall = command != \"holddown\" || statetype = S", _ => "" };
         let cancel = if let Some(cancels) = &m.cancels {
@@ -185,8 +188,9 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
                 _ => "\ntrigger2 = movecontact && stateno = [200, 2999]".into(),
             }
         };
+        let form_line = form_cond.as_ref().map(|fc| format!("triggerall = {fc}\n")).unwrap_or_default();
         let cost_line = if cost > 0.0 { format!("triggerall = power >= {cost}\n") } else { String::new() };
-        minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = command = \"{cname}\"{simple_cmd}\ntriggerall = {state_cond}{crouch_ok}\n{cost_line}trigger1 = ctrl{cancel}{}\n\n", m.name, if m.burst == Some(true) { "\ntrigger2 = movetype = H && stateno != [5100, 5150]" } else { "" });
+        minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = command = \"{cname}\"{simple_cmd}\ntriggerall = {state_cond}{crouch_ok}\n{form_line}{cost_line}trigger1 = ctrl{cancel}{}\n\n", m.name, if m.burst == Some(true) { "\ntrigger2 = movetype = H && stateno != [5100, 5150]" } else { "" });
         let anim = anim_no.get(&m.anim).copied().unwrap_or(0);
         let st = match when { "air" => 'A', "crouch" => 'C', _ => 'S' };
         let jumps = m.moves.iter().any(|v| v.vel[1].is_some_and(|y| y != 0.0));
@@ -226,8 +230,9 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         }
         if when != "air" { cns += &format!("[State {sid}, end]\ntype = ChangeState\ntrigger1 = AnimTime = 0\nvalue = {}\nctrl = 1\n\n", if when == "crouch" { 11 } else { 0 }); }
     }
+    cns += &ab.states; movelist.extend(ab.movelist);
     let mut states = HashMap::new();
-    let minus2 = extras::passives_cns(nc);
+    let minus2 = extras::passives_cns(nc) + &ab.minus2;
     parse_states(&(minus1 + &minus2 + &cns), &mut states, true);
     if with_images && std::env::var("UME_FORCE_RIG").is_err() {
         if let Some(avatar) = super::portrait::portrait(nc, palette) { sprites.insert((9000, 1), avatar); }
@@ -241,7 +246,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     d.ai_commands = movelist.iter().map(|m: &MoveInfo| m.command.clone()).collect(); d.movelist = movelist;
     d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.description = nc.description.clone().unwrap_or_default();
     d.intro = nc.intro.clone().unwrap_or_default(); d.taunt = nc.taunt.clone().unwrap_or_default(); d.win_quote = nc.win_quote.clone().unwrap_or_default();
-    d.form_name = nc.form.clone().unwrap_or_default(); d.boss = nc.boss; extras::insert_voices(&mut d, nc);
+    d.form_name = nc.form.clone().unwrap_or_default(); d.forms = super::forms::build_forms(nc, pal_no, with_images); d.boss = nc.boss; extras::insert_voices(&mut d, nc);
     d
 }
 

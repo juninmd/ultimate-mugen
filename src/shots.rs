@@ -3,6 +3,7 @@ use crate::app::{App, Mode, Screen, Team};
 use crate::gfx::*;
 use crate::shots::replay::replay_determinism;
 mod replay;
+mod suzume_tour;
 
 async fn frames(app: &mut App, n: usize) {
     for _ in 0..n {
@@ -682,6 +683,10 @@ async fn native_coverage(app: &mut App, dir: &str) {
 
 pub async fn run(app: &mut App, dir: &str) {
     let _ = std::fs::create_dir_all(dir);
+    if std::env::var("UME_TOUR").as_deref() == Ok("suzume") {
+        suzume_tour::suzume_abilities_tour(app, dir).await;
+        return;
+    }
     if std::env::var("UME_TOUR").as_deref() == Ok("native-coverage") {
         native_coverage(app, dir).await;
         return;
@@ -1319,4 +1324,10 @@ async fn ui_tour(app: &mut App, dir: &str) {
             app.msg
         );
     }
+    app.sel = (find(app, "suzume"), find(app, "shion"), stage(app, "dojo"));
+    app.start_fight().await;
+    if let Some(s) = app.session.as_mut() {
+        s.paused = true;
+    }
+    screen(app, dir, "suzume-pause-movelist", 2).await;
 }

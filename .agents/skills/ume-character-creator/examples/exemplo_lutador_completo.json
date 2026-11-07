@@ -1,0 +1,235 @@
+{
+  "format": "umf/1",
+  "id": "zephyr",
+  "name": "Zephyr Skywalker",
+  "series": "Crônicas do Éter",
+  "author": "Ultimate MUGEN",
+  "description": "Mestre da aerocinese e combate dimensional. Capaz de voar livremente, manipular o espaço e despertar transformações celestiais.",
+  "color": "#1ca3ec",
+  "winQuote": "As correntes do céu obedecem apenas àqueles que não temem o abismo.",
+  "intro": "O fluxo celestial está ao meu favor. Mostre sua determinação.",
+  "taunt": "Você luta como se estivesse preso ao chão.",
+  "form": "Despertar Celestial",
+  "stats": {
+    "life": 1000,
+    "power": 3000,
+    "attack": 100,
+    "defense": 100,
+    "walk": [2.6, 2.3],
+    "run": [5.6, 4.8],
+    "jump": [-8.5, -2.6, 0, 2.8],
+    "gravity": 0.48,
+    "airJumps": 1,
+    "height": 100,
+    "width": [16, 15]
+  },
+  "abilities": {
+    "fly": {
+      "speed": 4.2,
+      "cost": 60.0,
+      "input": "a+b",
+      "anim": "jumpUp"
+    },
+    "teleport": {
+      "cost": 300.0,
+      "input": "b+c",
+      "anim": "idle"
+    },
+    "superSpeed": {
+      "mul": 2.2,
+      "cost": 120.0,
+      "input": "a+c"
+    },
+    "forms": [
+      {
+        "id": "forma_vento",
+        "name": "Ascensão dos Ventos (Parcial)",
+        "cost": 1000.0,
+        "attack": 1.35,
+        "defense": 1.2,
+        "palette": {
+          "colors": {
+            "hair": "#7ef9ff",
+            "eye": "#00f0ff"
+          }
+        },
+        "parts": ["hair", "eye"],
+        "replace_moves": false,
+        "moves": [
+          {
+            "id": "corte_celestial",
+            "name": "Corte Celestial",
+            "input": "~D, DF, F, y",
+            "kind": "special",
+            "anim": "strong",
+            "cost": 250.0,
+            "moves": [{"at": 2, "vel": [5.0, -4.0]}],
+            "hits": [{"at": 3, "damage": 85, "level": "heavy", "launch": true}]
+          }
+        ]
+      },
+      {
+        "id": "forma_tempestade",
+        "name": "Titã da Tempestade (Corpo Todo)",
+        "cost": 1500.0,
+        "attack": 1.6,
+        "defense": 1.4,
+        "palette": {
+          "colors": {
+            "hair": "#ffe600",
+            "eye": "#ff3300",
+            "top": "#1a1c24",
+            "top2": "#ffd700",
+            "pants": "#0f1015"
+          }
+        },
+        "replace_moves": true,
+        "moves": [
+          {
+            "id": "raio_cataclismo",
+            "name": "Raio Cataclismo",
+            "input": "~D, DF, F, D, DF, F, x+y",
+            "kind": "super",
+            "anim": "super",
+            "cost": 1000.0,
+            "invuln": [1, 5],
+            "hits": [
+              {"at": 3, "damage": 120, "level": "heavy", "launch": true, "knockback": [-6, -8]}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "avatar_kaito",
+        "name": "Invocação de Kaito (Troca de Personagem)",
+        "cost": 1000.0,
+        "attack": 1.2,
+        "defense": 1.2,
+        "character": "kaito",
+        "replace_moves": false,
+        "moves": []
+      }
+    ]
+  },
+  "art": {
+    "type": "rig",
+    "style": {
+      "build": 1.04,
+      "top": "gi",
+      "sleeves": "none",
+      "pants": "gi",
+      "belt": true,
+      "gloves": "wrap",
+      "boots": "barefoot",
+      "hair": {
+        "type": "spiky",
+        "spikes": 6,
+        "min": 0.45,
+        "max": 0.9,
+        "sweep": 35,
+        "seed": 4,
+        "strands": 5,
+        "locks": 3,
+        "shine": true
+      },
+      "colors": {
+        "skin": "#e8b288",
+        "hair": "#23334d",
+        "eye": "#1ca3ec",
+        "top": "#1ca3ec",
+        "top2": "#eef8ff",
+        "trim": "#0f5e8a",
+        "pants": "#1e2430",
+        "belt": "#10131a",
+        "wrap": "#eef8ff"
+      }
+    },
+    "poses": {
+      "idle0": {"shoulderF": 40, "elbowF": 100, "shoulderB": 20, "elbowB": 118, "thighF": 20, "kneeF": 24, "thighB": -16, "kneeB": 10, "lean": 5, "head": -4},
+      "jab0": {"shoulderF": 60, "elbowF": 78, "shoulderB": 20, "elbowB": 118, "thighF": 20, "kneeF": 24, "thighB": -16, "kneeB": 10, "lean": 8, "head": -4},
+      "jab1": {"shoulderF": 92, "elbowF": 4, "shoulderB": 16, "elbowB": 122, "thighF": 24, "kneeF": 20, "thighB": -16, "kneeB": 10, "lean": 12, "head": -10},
+      "str0": {"shoulderF": 60, "elbowF": 90, "shoulderB": 5, "elbowB": 122, "thighF": 20, "kneeF": 24, "thighB": -16, "kneeB": 10, "lean": 2, "head": -4},
+      "str1": {"shoulderF": 10, "elbowF": 130, "shoulderB": 94, "elbowB": 2, "thighF": 34, "kneeF": 28, "thighB": -24, "kneeB": 4, "lean": 18, "head": -16},
+      "sup0": {"shoulderF": -28, "elbowF": 108, "shoulderB": -38, "elbowB": 108, "thighF": 32, "kneeF": 38, "thighB": -22, "kneeB": 18, "lean": -6, "head": -4},
+      "sup1": {"shoulderF": 90, "elbowF": 2, "shoulderB": 86, "elbowB": 6, "thighF": 40, "kneeF": 30, "thighB": -32, "kneeB": 2, "lean": 16, "head": -14}
+    }
+  },
+  "palettes": [
+    {
+      "top": "#b8433a",
+      "trim": "#6a1e1a",
+      "top2": "#f4f0e6",
+      "pants": "#3a2a2a",
+      "hair": "#1a1a22"
+    }
+  ],
+  "awakeningPalette": {
+    "hair": "#7ef9ff"
+  },
+  "anims": {
+    "idle": {
+      "frames": [{"pose": "idle0", "ticks": 12}]
+    },
+    "jab": {
+      "frames": [
+        {"pose": "jab0", "ticks": 3},
+        {"pose": "jab1", "ticks": 3, "hit": {"part": "handF", "radius": 9}},
+        {"pose": "jab0", "ticks": 4}
+      ]
+    },
+    "strong": {
+      "frames": [
+        {"pose": "str0", "ticks": 4},
+        {"pose": "str1", "ticks": 4, "hit": {"part": "handB", "radius": 10}},
+        {"pose": "str0", "ticks": 6}
+      ]
+    },
+    "super": {
+      "frames": [
+        {"pose": "sup0", "ticks": 12},
+        {"pose": "sup1", "ticks": 8, "hit": {"part": "handF", "radius": 14}},
+        {"pose": "idle0", "ticks": 6}
+      ]
+    }
+  },
+  "moves": [
+    {
+      "id": "jab",
+      "name": "Golpe Leve",
+      "input": "x",
+      "kind": "normal",
+      "anim": "jab",
+      "hits": [{"at": 2, "damage": 30, "level": "light"}]
+    },
+    {
+      "id": "impacto_aereo",
+      "name": "Impacto Aéreo",
+      "input": "~D, DF, F, x",
+      "kind": "special",
+      "anim": "strong",
+      "cost": 0.0,
+      "moves": [{"at": 2, "vel": [4.5, 0.0]}],
+      "hits": [{"at": 2, "damage": 65, "level": "medium", "knockback": [-3, 0]}]
+    },
+    {
+      "id": "esfera_eterea",
+      "name": "Esfera Etérea",
+      "input": "~D, DB, B, y",
+      "kind": "special",
+      "anim": "strong",
+      "cost": 500.0,
+      "hits": [{"at": 2, "damage": 90, "level": "heavy", "launch": true}]
+    },
+    {
+      "id": "furacao_primordial",
+      "name": "Furacão Primordial",
+      "input": "~D, DF, F, D, DF, F, x",
+      "kind": "super",
+      "anim": "super",
+      "cost": 1000.0,
+      "simple": "super",
+      "invuln": [1, 4],
+      "hits": [{"at": 2, "damage": 220, "level": "heavy", "launch": true, "knockback": [-5, -7]}]
+    }
+  ]
+}

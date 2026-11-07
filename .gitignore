@@ -12,3 +12,5 @@ temp_*.zip
 temp_extract/
 .tmp/
 *.tmp
+
+/shots/

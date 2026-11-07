@@ -310,6 +310,7 @@ impl<'a> Host for Ctx<'a> {
             "winperfect" => b(m.winner_side == f.side as i32 && m.roots().filter(|r| r.side == f.side).all(|r| r.life >= r.life_max)),
             "loseko" => b(m.winner_side >= 0 && m.winner_side != f.side as i32 && m.won_by_ko),
             "losetime" => b(m.winner_side >= 0 && m.winner_side != f.side as i32 && !m.won_by_ko),
+            "form" => f.form as f64,
             "attack" | "attackmul" => f.attack_mul as f64,
             "defence" | "defencemul" => f.defence_mul as f64,
             "receiveddamage" => f.received_damage as f64,

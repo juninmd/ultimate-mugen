@@ -347,26 +347,30 @@ impl Registry {
         let mut chars = vec![];
         for (_, json) in BUILTIN.iter() {
             match serde_json::from_str::<NativeChar>(json) {
-                Ok(nc) => chars.push(CharEntry {
-                    key: format!("umf:{}", nc.id),
-                    id: format!("umf:{}", nc.id),
-                    name: nc.name.clone(),
-                    series: nc.series.clone(),
-                    author: nc.author.clone(),
-                    color: hex3(&nc.color),
-                    description: nc.description.clone().unwrap_or_default(),
-                    mugen: false,
-                    boss: nc.boss,
-                    src: Src::Native(Arc::new(nc)),
-                    cache: RefCell::new(HashMap::new()),
-                    preview: RefCell::new(HashMap::new()),
-                    last_use: Cell::new(0),
-                    portrait: RefCell::new(None),
-                    broken: Cell::new(false),
-                    errs: RefCell::new(HashMap::new()),
-                    jobs: Default::default(),
-                    sprite_revision: Cell::new(0),
-                }),
+                Ok(nc) => {
+                    let arc = Arc::new(nc);
+                    ume_engine::native::register_native(arc.clone());
+                    chars.push(CharEntry {
+                        key: format!("umf:{}", arc.id),
+                        id: format!("umf:{}", arc.id),
+                        name: arc.name.clone(),
+                        series: arc.series.clone(),
+                        author: arc.author.clone(),
+                        color: hex3(&arc.color),
+                        description: arc.description.clone().unwrap_or_default(),
+                        mugen: false,
+                        boss: arc.boss,
+                        src: Src::Native(arc),
+                        cache: RefCell::new(HashMap::new()),
+                        preview: RefCell::new(HashMap::new()),
+                        last_use: Cell::new(0),
+                        portrait: RefCell::new(None),
+                        broken: Cell::new(false),
+                        errs: RefCell::new(HashMap::new()),
+                        jobs: Default::default(),
+                        sprite_revision: Cell::new(0),
+                    });
+                }
                 Err(e) => eprintln!("bad builtin char: {e}"),
             }
         }
@@ -413,17 +417,19 @@ impl Registry {
         }
         self.chars.retain(|c| c.id != id);
         let name = nc.name.clone();
+        let arc = Arc::new(nc);
+        ume_engine::native::register_native(arc.clone());
         self.chars.push(CharEntry {
             key: id.clone(),
             id,
-            name: nc.name.clone(),
-            series: nc.series.clone(),
-            author: nc.author.clone(),
-            color: hex3(&nc.color),
-            description: nc.description.clone().unwrap_or_default(),
+            name: arc.name.clone(),
+            series: arc.series.clone(),
+            author: arc.author.clone(),
+            color: hex3(&arc.color),
+            description: arc.description.clone().unwrap_or_default(),
             mugen: false,
-            boss: nc.boss,
-            src: Src::Native(Arc::new(nc)),
+            boss: arc.boss,
+            src: Src::Native(arc),
             cache: RefCell::new(HashMap::new()),
             preview: RefCell::new(HashMap::new()),
             last_use: Cell::new(0),

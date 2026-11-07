@@ -154,6 +154,18 @@ pub struct MoveInfo {
     pub name: String,
     pub input: String,
     pub command: String,
+    pub cost: f32,
+    pub drain: bool,
+    pub forms: u32,
+}
+
+#[derive(Debug)]
+pub struct FormInfo {
+    pub name: String,
+    pub cost: f32,
+    pub attack: f32,
+    pub defense: f32,
+    pub target: Option<std::sync::Arc<CharDef>>,
 }
 
 #[derive(Debug)]
@@ -181,6 +193,7 @@ pub struct CharDef {
     pub taunt: String,
     pub win_quote: String,
     pub form_name: String,
+    pub forms: Vec<FormInfo>,
     pub boss: bool,
     pub mugen_version: f32,
     pub unknown_asserts: Vec<String>,
@@ -226,6 +239,7 @@ impl CharDef {
             taunt: String::new(),
             win_quote: String::new(),
             form_name: String::new(),
+            forms: vec![],
             boss: false,
             mugen_version: 1.0,
             unknown_asserts: vec![],

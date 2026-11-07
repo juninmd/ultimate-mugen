@@ -37,6 +37,19 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with: { save-if: "${{ github.ref == 'refs/heads/master' }}" }
       - run: cargo build --release --target wasm32-unknown-unknown
+  web-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with: { targets: wasm32-unknown-unknown }
+      - uses: Swatinem/rust-cache@v2
+        with: { save-if: "${{ github.ref == 'refs/heads/master' }}" }
+      - run: cargo install wasm-bindgen-cli --locked --version "$(grep -A1 '^name = "wasm-bindgen"$' Cargo.lock | sed -n 's/^version = "\(.*\)"/\1/p')"
+      - run: python3 -m pip install --user --break-system-packages "pillow>=11,<13"
+      - run: ./scripts/build-web.sh
+      - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - run: node scripts/web-smoke.js web/dist
   android:
     runs-on: ubuntu-latest
     steps:

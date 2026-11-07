@@ -20,3 +20,7 @@
 
 ## Ultimate MUGEN Engine
 - [Ultimate MUGEN Engine](https://github.com/juninmd/ultimate-mugen): 2D fighting game engine in Rust with full MUGEN and UMF compatibility.
+
+## World Wonders Stages
+- [New7Wonders of the World](https://world.new7wonders.com/wonders/): Official initiative and documentation of the 7 Modern Wonders of the World (Great Wall of China, Petra, Christ the Redeemer, Machu Picchu, Chichén Itzá, Roman Colosseum, Taj Mahal).
+- [Seven Wonders of the Ancient World - Encyclopedia Britannica](https://www.britannica.com/topic/Seven-Wonders-of-the-Ancient-World): Classical historical reference for the 7 Ancient Wonders (Great Pyramid of Giza, Hanging Gardens of Babylon, Temple of Artemis, Statue of Zeus at Olympia, Mausoleum at Halicarnassus, Colossus of Rhodes, Lighthouse of Alexandria).

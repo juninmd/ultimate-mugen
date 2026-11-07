@@ -94,7 +94,7 @@ fn awakened_native_sprites_recolor_only_the_hair_region() {
     let definition = ume_engine::native::compile_native_with(&character, 1, true, Some(&[0, 20, 196, 1012]));
     let metadata_path = format!("{}/../../assets/chars/sprites/kaito/meta.json", env!("CARGO_MANIFEST_DIR"));
     let metadata: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(metadata_path).unwrap()).unwrap();
-    for (animation, frame_index, pose) in [(0, 0, "idle0"), (20, 1, "walk1"), (196, 0, "powerup0"), (196, 1, "powerup1"), (1012, 0, "rise0"), (1012, 1, "rise1"), (1012, 2, "rise2")] {
+    for (animation, frame_index, pose) in [(0, 0, "idle0"), (20, 1, "walk1"), (196, 0, "powerup0"), (196, 1, "powerup1"), (1012, 0, "rise0"), (1012, 1, "inline_0172e9bbe547734f"), (1012, 2, "rise1"), (1012, 3, "rise2")] {
         let frame = &definition.anims[&animation].frames[frame_index];
         let normal = definition.sprites[&(frame.group, frame.index)].image.as_ref().unwrap();
         let awakened = definition.sprites[&(2, frame.index)].image.as_ref().unwrap();

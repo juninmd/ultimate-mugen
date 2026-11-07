@@ -23,7 +23,7 @@ pub const ACTIONS: [(&str, u32); 16] = [
     ("Especial 3", k::E),
     ("Despertar", k::T),
     ("Troca (Tag)", k::TAG),
-    ("Start (carregar ki)", k::S),
+    ("Carregar ki (Start)", k::S),
 ];
 const N: usize = ACTIONS.len();
 
@@ -48,7 +48,7 @@ impl Default for KeyMap {
         KeyMap {
             slots: [
                 [
-                    Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T, R, Enter,
+                    Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T, F, R,
                 ],
                 [
                     I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal,
@@ -61,7 +61,7 @@ impl Default for KeyMap {
 fn previous_defaults() -> [[KeyCode; N]; 2] {
     use KeyCode::*;
     [
-        [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T, R, Enter],
+        [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T, F, R],
         [
             Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal,
         ],
@@ -106,6 +106,7 @@ impl KeyMap {
     /// Unknown names / out-of-range lines are ignored; a slot that ends up with a duplicate key falls back to its defaults.
     pub fn from_text(t: &str) -> Self {
         let mut m = KeyMap::default();
+        let mut has_start = [false; 2];
         for l in t.lines() {
             let Some((k, v)) = l.split_once('=') else {
                 continue;
@@ -122,6 +123,19 @@ impl KeyMap {
             };
             if (1..=2).contains(&p) && i < N {
                 m.slots[p - 1][i] = kc;
+                if i == N - 1 { has_start[p - 1] = true; }
+            }
+        }
+        for p in 0..2 {
+            if !has_start[p] {
+                if p == 0 && m.slots[p][14] == KeyCode::R {
+                    if let Some(key) = [KeyCode::F].into_iter().chain(KEYS.iter().map(|entry| entry.0)).find(|key| *key != KeyCode::R && !m.slots[p][..14].contains(key)) {
+                        m.slots[p][14] = key;
+                    }
+                }
+                if m.slots[p][..N - 1].contains(&m.slots[p][N - 1]) {
+                    if let Some(key) = KEYS.iter().map(|entry| entry.0).find(|key| !m.slots[p][..N - 1].contains(key)) { m.slots[p][N - 1] = key; }
+                }
             }
         }
         let old = previous_defaults();
@@ -151,6 +165,16 @@ impl KeyMap {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn charge_is_rebindable_and_old_bindings_migrate() {
+        let mut m = KeyMap::from_text("p1.14=R\np2.14=KpEnter\n");
+        assert_eq!(m.bits(0, |k| k == KeyCode::R), k::S);
+        assert_eq!(m.bits(0, |k| k == KeyCode::F), k::TAG);
+        assert_eq!(m.bits(1, |k| k == KeyCode::KpDecimal), k::S);
+        m.assign(0, 15, KeyCode::Space);
+        assert_eq!(KeyMap::from_text(&m.to_text()), m);
+    }
 
     #[test]
     fn defaults_match_the_documented_layout() {
@@ -206,19 +230,4 @@ garbage",
         assert_eq!(m.slots[0], KeyMap::default().slots[0]);
         assert_eq!(m.slots[1], KeyMap::default().slots[1]);
     }
-
-    #[test]
-    fn start_button_is_rebindable_and_defaults_to_enter() {
-        let mut m = KeyMap::default();
-        assert_eq!(m.bits(0, |k| k == KeyCode::Enter), k::S);
-        m.assign(0, ACTIONS.len() - 1, KeyCode::Space);
-        assert_eq!(m.bits(0, |k| k == KeyCode::Space), k::S);
-        assert_eq!(m.bits(0, |k| k == KeyCode::Enter), 0);
-        assert_eq!(KeyMap::from_text(&m.to_text()).slots[0][ACTIONS.len() - 1], KeyCode::Space);
-    }
-
-    #[test]
-    fn saved_file_without_the_start_entry_keeps_the_default_start_key() {
-        let m = KeyMap::from_text("p1.0=Up\np1.14=R\n");
-        assert_eq!(m.slots[0][ACTIONS.len() - 1], KeyCode::Enter);
-    }}
+}

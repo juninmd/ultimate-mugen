@@ -1,0 +1,54 @@
+; Constants and Player Data
+[Data]
+life = 1000
+power = 3000
+attack = 100
+defence = 100
+fall.defence_up = 50
+liedown.time = 60
+airjuggle = 15
+sparkno = 2
+guard.sparkno = 40
+KO.echo = 0
+volume = 0
+IntPersistIndex = 50
+FloatPersistIndex = 30
+
+[Size]
+xscale = 1
+yscale = 1
+ground.back = 50
+ground.front = 50
+air.back = 45
+air.front = 45
+height = 240
+attack.dist = 640
+proj.attack.dist = 360
+proj.doscale = 0
+head.pos = -10, -290
+mid.pos = -15, -170
+shadowoffset = 0
+draw.offset = 0, 0
+
+[Velocity]
+walk.fwd  = 9.5
+walk.back = -8.5
+run.fwd  = 18.0, 0
+run.back = -17.5, -14.0
+jump.neu = 0, -33.0
+jump.back = -10.0, -33.0
+jump.fwd = 10.5, -33.0
+runjump.back = -11.0, -32.0
+runjump.fwd = 16.0, -32.0
+airjump.neu = 0, -30.0
+airjump.back = -9.0, -30.0
+airjump.fwd = 9.5, -30.0
+
+[Movement]
+airjump.num = 1
+airjump.height = 140
+yaccel = 1.76
+stand.friction = 0.85
+crouch.friction = 0.82
+stand.friction.threshold = 8
+crouch.friction.threshold = 8

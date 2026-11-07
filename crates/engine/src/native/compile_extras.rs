@@ -24,6 +24,29 @@ pub(super) fn voice_state(m: &NativeMove, sid: i32) -> String {
     format!("[State {sid}, voice]\ntype = PlaySnd\ntrigger1 = Time = 0\nvalue = {group}, {index}\nchannel = 4\nstopongethit = 1\n\n")
 }
 
+pub(super) fn voice_and_traits_state(m: &NativeMove, sid: i32) -> String {
+    let mut out = voice_state(m, sid);
+    if m.armor.is_some() {
+        out += &format!("[State {sid}, armor]\ntype = HitOverride\ntrigger1 = 1\nattr = SCA,AA,AP,AT\nslot = 0\nstateno = {sid}\ntime = 2\nforceair = 0\n\n");
+    }
+    if let Some(p) = &m.parry {
+        let sp = p.spark.unwrap_or(2);
+        out += &format!("[State {sid}, parry]\ntype = ReversalDef\ntrigger1 = AnimElemNo(0) >= {} && AnimElemNo(0) <= {}\nreversal.attr = SCA,NA,SA,HA,NP,SP,HP\npausetime = 15, 15\nsparkno = {sp}\nhitsound = 5, 0\n\n", p.window[0], p.window[1]);
+    }
+    if let Some(ticks) = m.timestop {
+        if ticks > 0 {
+            out += &format!("[State {sid}, timestop]\ntype = Pause\ntrigger1 = AnimElem = 1\ntime = {ticks}\nmovetime = {ticks}\npausebg = 1\n\n");
+        }
+    }
+    if m.burst == Some(true) {
+        out += &format!("[State {sid}, burst_inv]\ntype = NotHitBy\ntrigger1 = 1\nvalue = SCA\ntime = 1\n\n[State {sid}, burst_push]\ntype = VelSet\ntrigger1 = Time = 0\nx = 0\ny = 0\n\n");
+    }
+    if m.flight == Some(true) {
+        out += &format!("[State {sid}, flight_hover]\ntype = VelSet\ntrigger1 = 1\nx = ifelse(command = \"holdfwd\", 3, ifelse(command = \"holdback\", -3, 0))\ny = ifelse(command = \"holdup\", -3, ifelse(command = \"holddown\", 3, 0))\n\n");
+    }
+    out
+}
+
 pub(super) fn insert_voices(d: &mut CharDef, nc: &NativeChar) {
     if nc.id != "kaito" { return; }
     d.sounds.insert((1000, 0), include_bytes!("../../../../assets/chars/voices/kaito/dragon.wav").to_vec());

@@ -1,0 +1,32 @@
+; Definition file for MeuLutador
+[Info]
+name = "MeuLutador"
+displayname = "Lutador Master"
+versiondate = 01,01,2026
+mugenversion = 1.0
+author = "SeuNome"
+pal.defaults = 1,2,3,4,5,6
+localcoord = 1280,720
+
+[Files]
+sprite   = files/sprites.sff
+anim     = files/animacoes.air
+sound    = files/sons.snd
+cmd      = files/comandos.cmd
+cns      = states/constants.cns
+stcommon = common1.cns
+st       = states/system.cns
+st1      = states/normals.cns
+st2      = states/specials.cns
+st3      = states/supers.cns
+st4      = states/helpers.cns
+st5      = states/state-2-3.cns
+st6      = config.txt
+
+[Palette Keymap]
+x = 1
+y = 2
+z = 3
+a = 4
+b = 5
+c = 6

@@ -38,6 +38,8 @@ fn test_trait_compilation_and_cns_generation() {
         burst: None,
         flight: None,
         timestop: None,
+        throw: None,
+        cancels: None,
     });
 
     // 2. Parry trait
@@ -64,6 +66,8 @@ fn test_trait_compilation_and_cns_generation() {
         burst: None,
         flight: None,
         timestop: None,
+        throw: None,
+        cancels: None,
     });
 
     // 3. TimeStop trait
@@ -90,6 +94,8 @@ fn test_trait_compilation_and_cns_generation() {
         burst: None,
         flight: None,
         timestop: Some(120),
+        throw: None,
+        cancels: None,
     });
 
     // 4. Burst trait
@@ -116,6 +122,8 @@ fn test_trait_compilation_and_cns_generation() {
         burst: Some(true),
         flight: None,
         timestop: None,
+        throw: None,
+        cancels: None,
     });
 
     // 5. Flight trait
@@ -142,6 +150,8 @@ fn test_trait_compilation_and_cns_generation() {
         burst: None,
         flight: Some(true),
         timestop: None,
+        throw: None,
+        cancels: None,
     });
 
     let def = compile_native(&nc, 1, false);
@@ -205,6 +215,8 @@ fn test_trait_runtime_match_simulation() {
         burst: None,
         flight: None,
         timestop: Some(90),
+        throw: None,
+        cancels: None,
     });
 
     let def = std::sync::Arc::new(compile_native(&nc, 1, false));

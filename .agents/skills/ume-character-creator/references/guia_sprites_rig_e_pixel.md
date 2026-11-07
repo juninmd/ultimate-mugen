@@ -79,6 +79,14 @@ Use a ferramenta de geração de imagens para criar ou reparar PNGs quando o per
 - Registre dimensões, caixa alfa, linha do chão, eixo/pivô, altura de referência e orientação da pose de referência antes de gerar. Uma imagem que parece semelhante pode ter escala ou enquadramento diferentes.
 - Faça inventário das animações e sprites já existentes; identifique lacunas ou defeitos concretos. Não substitua sprites bons sem necessidade.
 
+### Exceção: retratos de interface
+Retratos como `portrait.png` podem usar uma pixel art de alta resolução, com clusters menores, shading e detalhes faciais mais finos que os sprites de combate. Preserve essa diferença de acabamento: o retrato continua sendo pixel art, mas não deve ser simplificado, reduzido nem alinhado ao pivô/tela das poses de jogo.
+
+- Use o retrato detalhado aprovado do próprio personagem como referência visual. Se ele foi removido ou substituído por engano, restaure a versão original do controle de versão em vez de tentar recriá-la; ela é a referência mais fiel.
+- Para criar um novo, peça um busto/close-up quadrado, com rosto, cabelo, roupa e expressão bem legíveis, identidade e paleta iguais às sprites. Preserve a densidade de pixels, contorno marcado, sombreamento em clusters e nível de detalhe do retrato de referência.
+- Gere em alta resolução adequada ao slot de UI, com fundo transparente e canal RGBA; enquadre cabeça, faixa/acessórios e ombros sem cortes acidentais. O retrato Kaito aprovado mede 1254 × 1254 px e serve como referência concreta de resolução e acabamento, não como tamanho obrigatório para todo projeto. Não aplique chroma key ou redução de tamanho de sprite sheet quando já houver transparência.
+- Confira o PNG sobre fundos claros e escuros, verifique halo nas bordas e visualize no tamanho real do menu. Mantenha o retrato separado das poses auditadas como animação.
+
 ### Prompt de geração
 - Descreva o personagem e a ação da pose sem ambiguidade. Trave roupa, paleta, proporções, penteado, faixa, silhueta, contorno, direção e tamanho relativo à referência.
 - Peça pixel art com pixels duros e clusters limpos, transparência real, sem antialiasing, blur, glow, gradientes, texto, fundo ou objetos extras. Para efeitos, solicite-os explicitamente apenas quando fizerem parte da pose.
@@ -93,9 +101,16 @@ Use a ferramenta de geração de imagens para criar ou reparar PNGs quando o per
 - Faça uma folha de contato com nomes e dimensões, confira todas as poses em tamanho ampliado e no tamanho de jogo. Depois execute a auditoria nativa de sprites e capture o estado relevante em runtime; uma folha de contato ou teste estrutural não prova a leitura visual no jogo.
 
 ### Evidência e encerramento
+- Antes de encerrar, compare os PNGs do pacote com os arquivos realmente resolvidos pela auditoria nativa. Apague apenas aliases sem referência nem papel de fallback; preserve retratos e stems base como `01_idle` e `04_special` quando o carregador os usa como fallback.
 - Informe os arquivos substituídos/criados e mantenha backup dos originais antes de mudanças em lote.
 - Diferencie auditoria de cobertura, testes de lógica, inspeção de PNG e validação visual em runtime. Só afirme uma verificação quando ela realmente foi executada.
 - Para animações de locomoção, valide a sequência inteira em movimento: identidade, direção, altura, eixo dos pés, continuidade e ausência de saltos entre quadros.
+
+- Audite cada quadro efetivamente resolvido, não apenas os nomes dos movimentos: uma pose de fallback pode servir a várias animações e uma imagem nomeada pode continuar ativa sem estar óbvia no manifesto. Substitua o fallback compartilhado quando estiver cortado e forneça PNGs nomeados para as poses específicas que precisam de silhuetas diferentes.
+- Antes de apagar um PNG, confira a chave que o loader realmente resolve: `frame.sprite` sobrescreve `frame.pose`; uma pose vetorial declarada em `art.poses` pode continuar sendo usada para a geometria enquanto outra imagem nomeada fornece o pixel art. Trate os fallbacks implementados em `native/pixel.rs` como dependências e preserve os retratos da UI.
+- Se uma pose declarativa for um objeto inline, mantenha esse objeto ao trocar a arte. O motor deriva a chave `inline_<hash>` do conteúdo; um PNG com essa chave troca só a imagem. Substituir a pose inline por uma pose nomeada diferente pode mudar hitboxes e índices de sprite e deve ser tratado como alteração de comportamento.
+- Em folhas de células, confira os limites de cada célula e o resultado recortado; remova o fundo conectado às bordas, preserve a resolução por vizinho mais próximo e rejeite membros cortados, pixels soltos e efeitos que cruzem para outra célula. Verifique novamente cada PNG em folha de contato no tamanho nativo.
+- Mantenha poses distintas ao longo de sequências de ataque: quadros de carga, impacto e recuperação não devem repetir o mesmo desenho só para preencher nomes. Se a geração produzir uma pose inadequada, gere outra ou use a pose intacta mais próxima apenas quando a silhueta e a função continuarem legíveis.
 
 ## 4. Gerador Automático de Sprites Faltantes
 Para gerar imagens PNG dedicadas a partir do modelo vetorial:

@@ -88,24 +88,26 @@ fn typhoon_barrage_spends_meter_and_connects() {
 }
 
 #[test]
-fn awakened_idle_preserves_pixels_outside_the_hair_region() {
+fn awakened_native_sprites_recolor_only_the_hair_region() {
     let path = format!("{}/../../assets/chars/kaito.json", env!("CARGO_MANIFEST_DIR"));
     let character: NativeChar = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
-    let definition = ume_engine::native::compile_native_with(&character, 1, true, Some(&[0]));
-    let frame = &definition.anims[&0].frames[0];
-    let normal = definition.sprites[&(frame.group, frame.index)].image.as_ref().unwrap();
-    let awakened = definition.sprites[&(2, frame.index)].image.as_ref().unwrap();
+    let definition = ume_engine::native::compile_native_with(&character, 1, true, Some(&[0, 20, 196, 1012]));
     let metadata_path = format!("{}/../../assets/chars/sprites/kaito/meta.json", env!("CARGO_MANIFEST_DIR"));
     let metadata: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(metadata_path).unwrap()).unwrap();
-    let region: [u32; 4] = serde_json::from_value(metadata["frames"]["idle0"]["awakeningHair"].clone()).unwrap();
-    let (mut changed_inside, mut changed_outside) = (0, 0);
-    for (index, (a, b)) in normal.rgba.chunks_exact(4).zip(awakened.rgba.chunks_exact(4)).enumerate() {
-        if a == b { continue; }
-        let (x, y) = (index as u32 % normal.w, index as u32 / normal.w);
-        if (region[0]..region[2]).contains(&x) && (region[1]..region[3]).contains(&y) { changed_inside += 1; } else { changed_outside += 1; }
+    for (animation, frame_index, pose) in [(0, 0, "idle0"), (20, 1, "walk1"), (196, 0, "powerup0"), (196, 1, "powerup1"), (1012, 0, "rise0"), (1012, 1, "inline_0172e9bbe547734f"), (1012, 2, "rise1"), (1012, 3, "rise2")] {
+        let frame = &definition.anims[&animation].frames[frame_index];
+        let normal = definition.sprites[&(frame.group, frame.index)].image.as_ref().unwrap();
+        let awakened = definition.sprites[&(2, frame.index)].image.as_ref().unwrap();
+        let region: [u32; 4] = serde_json::from_value(metadata["frames"][pose]["awakeningHair"].clone()).unwrap();
+        let (mut changed_inside, mut changed_outside) = (0, 0);
+        for (index, (a, b)) in normal.rgba.chunks_exact(4).zip(awakened.rgba.chunks_exact(4)).enumerate() {
+            if a == b { continue; }
+            let (x, y) = (index as u32 % normal.w, index as u32 / normal.w);
+            if (region[0]..region[2]).contains(&x) && (region[1]..region[3]).contains(&y) { changed_inside += 1; } else { changed_outside += 1; }
+        }
+        assert!(changed_inside > 100, "{pose} hair should change visibly");
+        assert_eq!(changed_outside, 0, "{pose} awakening should not recolor pixels outside the hair region");
     }
-    assert!(changed_inside > 100, "the hair should change visibly");
-    assert_eq!(changed_outside, 0, "awakening should not recolor the rest of the sprite");
 }
 
 #[test]

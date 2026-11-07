@@ -10,7 +10,7 @@ thread_local! {
 fn close_segment() {
     let (Some(since), label) = (SINCE.with(|s| s.get()), LABEL.with(|l| l.get())) else { return };
     let ms = since.elapsed().as_secs_f32() * 1000.0;
-    WORST.with(|w| { if ms > w.get().1 { w.set((label, ms)); } });
+    WORST.with(|w| { if ms > w.get().1 || w.get().0 == "frame" { w.set((label, ms)); } });
     SINCE.with(|s| s.set(Some(Instant::now())));
 }
 

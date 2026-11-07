@@ -55,7 +55,7 @@ pub struct Match {
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
     pub shake_time: i32, pub shake_ampl: f32, pub shake_freq: f32, pub shake_phase: f32, pub shake_elapsed: i32, pub shake_dir: u8,
-    pub flash: Option<(i32, [f32; 3])>,
+    pub flash: Option<(i32, [f32; 4])>,
     pub bg: Option<crate::stage_bg::BgState>,
     pub all_palfx: Option<PalFx>, pub bg_palfx: Option<PalFx>,
     pub slow_mo: i32,

@@ -104,6 +104,7 @@ pub(crate) async fn fight(
             }
         }
         "dragon" | "rush" => crate::pixel_tour::probe(s, c, audio, want, name),
+        "walk" => crate::pixel_tour::probe_walk(s, c, audio, name),
         "super" | "super2" | "impact" => {
             for f in s.m.fighters.iter_mut() {
                 f.power = 3000.0;
@@ -1319,4 +1320,10 @@ async fn ui_tour(app: &mut App, dir: &str) {
             app.msg
         );
     }
+    app.sel = (find(app, "suzume"), find(app, "shion"), stage(app, "dojo"));
+    app.start_fight().await;
+    if let Some(s) = app.session.as_mut() {
+        s.paused = true;
+    }
+    screen(app, dir, "suzume-pause-movelist", 2).await;
 }

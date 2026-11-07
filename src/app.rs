@@ -3438,6 +3438,17 @@ impl App {
                 Align::Left,
                 false,
             );
+            if mv.cost > 0.0 {
+                let cost_label = if mv.drain {
+                    format!("{:.0}/s PWR", mv.cost)
+                } else if mv.cost >= 1000.0 && mv.cost % 1000.0 == 0.0 {
+                    let b = (mv.cost / 1000.0) as i32;
+                    if b == 1 { "1 BAR".to_string() } else { format!("{b} BARS") }
+                } else {
+                    format!("{:.0} PWR", mv.cost)
+                };
+                self.ui.text(&cost_label, x + 1010.0, yy + 27.0, 15.0, hex("#ffd13b"), Align::Right, false);
+            }
             let c = &self.c;
             self.ui
                 .input_icons(&mv.input, x + 690.0, yy + 34.0, 28.0, |b| c.face(b));

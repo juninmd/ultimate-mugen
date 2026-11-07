@@ -135,6 +135,7 @@ pub struct NativeChar {
     pub color: String,
     #[serde(default)] pub stats: NativeStats,
     #[serde(default)] pub passives: Option<PassiveSpec>,
+    #[serde(default)] pub abilities: Option<super::ability_spec::AbilitySpec>,
     pub art: NativeArt,
     pub anims: indexmap_like::OrderedMap<NativeAnim>,
     pub moves: Vec<NativeMove>,

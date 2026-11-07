@@ -858,7 +858,7 @@ impl MatchRenderer {
                 angle_extra = angle;
             }
         }
-        let fr = { if f.form > 0 && frame.group == 1 && f.anim_def.sprites.contains_key(&(2, frame.index)) { frame.group = 2; } &frame };
+        let fr = { if f.form > 0 && frame.group == 1 { let g = 1 + f.form as i32; if f.anim_def.sprites.contains_key(&(g, frame.index)) { frame.group = g; } else if f.anim_def.sprites.contains_key(&(2, frame.index)) { frame.group = 2; } } &frame };
         let mut x = f.pos.x + f.draw_offset.x * f.facing;
         let hit = f.hit_shake > 0 && f.move_type == 'H';
         if hit {

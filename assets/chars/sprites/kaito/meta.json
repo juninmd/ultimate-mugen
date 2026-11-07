@@ -11,14 +11,26 @@
       "refHeight": 362.0
     },
     "03_attack2": {
-      "axisX": 115.0,
-      "axisY": 385.0,
-      "refHeight": 385.0
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
     },
     "04_special": {
-      "axisX": 114.5,
-      "axisY": 483.0,
-      "refHeight": 500.0
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
     },
     "05_projectile": {
       "axisX": 114.5,
@@ -308,11 +320,6 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "inline_0172e9bbe547734f": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
     "jab0": {
       "awakeningHair": [
         66,
@@ -395,16 +402,34 @@
       "refHeight": 320.0
     },
     "powerup0": {
+      "awakeningHair": [
+        202,
+        72,
+        302,
+        150
+      ],
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
     },
     "powerup1": {
+      "awakeningHair": [
+        176,
+        78,
+        279,
+        166
+      ],
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
     },
     "powerup2": {
+      "awakeningHair": [
+        224,
+        72,
+        310,
+        150
+      ],
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -461,12 +486,24 @@
     "tk0": {
       "axisX": 200.0,
       "axisY": 392.0,
-      "refHeight": 320.0
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
     },
     "tk1": {
       "axisX": 200.0,
       "axisY": 392.0,
-      "refHeight": 320.0
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
     },
     "trip": {
       "axisX": 200.0,
@@ -492,8 +529,8 @@
         204
       ],
       "axisX": 595.5,
-      "axisY": 1196,
-      "refHeight": 1109
+      "axisY": 1196.0,
+      "refHeight": 1109.0
     },
     "walk1": {
       "awakeningHair": [
@@ -502,9 +539,9 @@
         784,
         220
       ],
-      "axisX": 600.0,
-      "axisY": 1184,
-      "refHeight": 1105
+      "axisX": 595.5,
+      "axisY": 1196.0,
+      "refHeight": 1109.0
     },
     "walk2": {
       "awakeningHair": [
@@ -513,9 +550,9 @@
         715,
         149
       ],
-      "axisX": 616.5,
-      "axisY": 1171,
-      "refHeight": 1137
+      "axisX": 595.5,
+      "axisY": 1196.0,
+      "refHeight": 1109.0
     },
     "walk3": {
       "awakeningHair": [
@@ -524,9 +561,9 @@
         760,
         163
       ],
-      "axisX": 578.0,
-      "axisY": 1199,
-      "refHeight": 1160
+      "axisX": 595.5,
+      "axisY": 1196.0,
+      "refHeight": 1109.0
     },
     "walk4": {
       "awakeningHair": [
@@ -535,9 +572,9 @@
         781,
         241
       ],
-      "axisX": 590.0,
-      "axisY": 1169,
-      "refHeight": 1031
+      "axisX": 595.5,
+      "axisY": 1196.0,
+      "refHeight": 1109.0
     },
     "walk5": {
       "awakeningHair": [
@@ -546,9 +583,9 @@
         737,
         164
       ],
-      "axisX": 613.0,
-      "axisY": 1183,
-      "refHeight": 1136
+      "axisX": 595.5,
+      "axisY": 1196.0,
+      "refHeight": 1109.0
     },
     "win0": {
       "awakeningHair": [
@@ -564,6 +601,160 @@
         0,
         136,
         38
+      ]
+    },
+    "rise0": {
+      "awakeningHair": [
+        198,
+        74,
+        301,
+        160
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "rise1": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "rise2": {
+      "awakeningHair": [
+        170,
+        76,
+        270,
+        164
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "gale0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
+    },
+    "gale1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
+    },
+    "gale2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
+    },
+    "lk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
+    },
+    "lk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
+    },
+    "hk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
+    },
+    "hk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
+    },
+    "clk": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
+    },
+    "sweep0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
+    },
+    "sweep1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
+    },
+    "akick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
       ]
     }
   }

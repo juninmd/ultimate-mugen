@@ -22,9 +22,9 @@ const server = staticServer(dir, types);
   });
   await p.goto(url);
   await p.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
-  await p.waitForTimeout(8000);
+  await p.waitForTimeout(10000);
   await p.locator('#glcanvas').focus();
-  const key = async (k, wait = 900) => { await p.keyboard.down(k); await p.waitForTimeout(120); await p.keyboard.up(k); await p.waitForTimeout(wait); };
+  const key = async (k, wait = 900) => { await p.keyboard.down(k); await p.waitForTimeout(200); await p.keyboard.up(k); await p.waitForTimeout(wait); };
   await key('Enter');                       // title → menu
   await key('ArrowDown'); await key('ArrowDown'); await key('Enter', 1500);  // Arcade, Survival → CPU (Versus CPU) → select
   await key('Enter', 1500); await key('Enter', 1500); // P1, P2 → stages

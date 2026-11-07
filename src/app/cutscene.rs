@@ -11,10 +11,7 @@ pub struct Page {
     pub text: String,
 }
 pub(self) fn pg(who: u8, text: impl Into<String>) -> Page {
-    Page {
-        who,
-        text: text.into(),
-    }
+    Page { who, text: text.into() }
 }
 
 pub fn script(kind: u8, hero: &str, hero_quote: &str, boss: &str, boss_line: &str) -> Vec<Page> {
@@ -29,9 +26,20 @@ pub fn script_for(
     boss: &str,
     boss_line: &str,
 ) -> Vec<Page> {
+    let clean_boss = boss.strip_prefix("umf:").unwrap_or(boss).to_lowercase();
     match kind {
         0 => story::opening_script(hero_id, hero),
-        1 => story::preboss_script(hero_id, boss, boss_line),
+        1 => {
+            if clean_boss.contains("garan") || clean_boss.contains("valdric") {
+                let boss_key = if clean_boss.contains("garan") { "garan" } else { "valdric" };
+                crate::boss::dialogue::script(1, hero, hero_quote, boss_key, boss, boss_line)
+                    .into_iter()
+                    .map(|p| Page { who: p.who, text: p.text })
+                    .collect()
+            } else {
+                story::preboss_script(hero_id, boss, boss_line)
+            }
+        }
         3 => story::awakening_script(hero_id, hero),
         _ => endings::ending_script(hero_id, hero, hero_quote),
     }
@@ -52,20 +60,10 @@ impl App {
     }
 
     pub(super) fn cutscene(&mut self) {
-        let Screen::Cutscene {
-            kind,
-            mut page,
-            mut t,
-        } = self.screen
-        else {
-            return;
-        };
+        let Screen::Cutscene { kind, mut page, mut t } = self.screen else { return; };
         t += get_frame_time();
         let hero = self.sel.0;
-        let Some(boss) = self.boss_idx() else {
-            self.cutscene_done(kind);
-            return;
-        };
+        let Some(boss) = self.boss_idx() else { self.cutscene_done(kind); return; };
         let (hero_id, hero_name) = (self.reg.chars[hero].id.clone(), self.reg.chars[hero].name.clone());
         let boss_name = self.reg.chars[boss].name.clone();
         let script = script_for(
@@ -118,10 +116,7 @@ impl App {
             let y = 90.0 + f * 31.0 + (self.ui.t * 1.7 + f).sin() * 12.0;
             let flap = (self.ui.t * 9.0 + f * 1.3).sin() * 7.0;
             let c = vec2(self.ui.x(x), self.ui.y(y));
-            poly::solid(
-                &[c + vec2(-12.0, flap) * s, c + vec2(0.0, -2.0) * s, c + vec2(12.0, flap) * s, c + vec2(0.0, 4.0) * s],
-                Color::new(0.02, 0.0, 0.04, 0.9),
-            );
+            poly::solid(&[c + vec2(-12.0, flap) * s, c + vec2(0.0, -2.0) * s, c + vec2(12.0, flap) * s, c + vec2(0.0, 4.0) * s], Color::new(0.02, 0.0, 0.04, 0.9));
         }
         self.ui.motes(if kind == 3 { 65 } else { 40 }, if kind == 3 { 1.3 } else { 0.8 });
         let fl = match kind {
@@ -204,19 +199,16 @@ impl App {
             poly::solid(&[c + vec2(-7.0, -8.0) * s, c + vec2(8.0, 0.0) * s, c + vec2(-7.0, 8.0) * s], Color::new(1.0, 1.0, 1.0, a));
         }
         let hint = if kind == 2 && page + 1 == script.len() {
-            "ENTER voltar ao menu principal · ESC pular"
+            "ENTER voltar à seleção · ESC pular"
         } else {
             "ENTER avançar · ESC pular"
         };
-        self.ui.text(
-            hint,
-            1240.0,
-            702.0,
-            14.0,
-            Color::new(1.0, 1.0, 1.0, 0.45),
-            Align::Right,
-            false,
-        );
+        self.ui.text(hint, 1240.0, 702.0, 14.0, Color::new(1.0, 1.0, 1.0, 0.45), Align::Right, false);
+        if kind == 0 {
+            if let Some(txt) = self.sp.as_ref().and_then(|sp| sp.intro_text((t * 60.0) as i64)) {
+                self.ui.text(&txt, VW / 2.0, 96.0, 26.0, hex("#ffcc33"), Align::Center, true);
+            }
+        }
         let adv = self.c.pressed(nav::OK)
             || is_mouse_button_pressed(MouseButton::Left)
             || is_key_pressed(KeyCode::Space);
@@ -243,11 +235,15 @@ impl App {
             0 => Screen::Stages { cur: 1 },
             1 | 3 => Screen::Vs { t: 0.0, step: 0 },
             _ => {
-                self.replaying = None;
-                self.session = None;
-                self.team = None;
-                self.arcade = None;
-                Screen::Menu { cur: 0 }
+                if self.mode == Mode::Arcade {
+                    self.arcade_return_to_select()
+                } else {
+                    self.replaying = None;
+                    self.session = None;
+                    self.team = None;
+                    self.arcade = None;
+                    Screen::Menu { cur: 0 }
+                }
             }
         };
     }

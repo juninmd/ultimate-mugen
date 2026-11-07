@@ -12,13 +12,16 @@ The main menu offers single fights (Arcade, Versus CPU, 2 Players, Training, CPU
 
 ## Arcade / Story Mode
 
-`Arcade` in the main menu runs the Scarlet Eclipse Tournament story campaign:
+`Arcade` in the main menu runs the Scarlet Eclipse Tournament story campaign with full cutscenes, dynamic villain progression, and secret fighter unlocks:
 
 - **Prologue (`Cutscene kind: 0`).** Each of the 15 native fighters has a unique opening narrative and personal vow before entering the tournament ladder.
-- **Pre-Boss Confrontation (`Cutscene kind: 1`).** After defeating eight rivals, the player reaches the Scarlet Eclipse Hall and confronts the hidden final boss, **Mikazuki Oboro**, with character-specific dialogue.
-- **Boss Phase 1 & In-Match Awakening.** Oboro fights with flight, shadow teleportation, super speed, and his first awakening (**Mangekyo Desperto**, `form = 1`). If Oboro loses a round during the match, he automatically breaks his seal at the start of the next round (`Match::awaken_defeated_boss`) and transforms into his final form (**Eclipse Absoluto**, `form = 2`).
-- **Boss Transformation Cutscene (`Cutscene kind: 3`) & Final Challenge (Phase 2).** Defeating Oboro the first time on the Arcade ladder triggers the **Awakening: Absolute Eclipse** cutscene (`kind: 3`), launching the final challenge (`Match::awaken_boss_final`) where Oboro starts in **Eclipse Absoluto** (`form = 2`) with boosted max life (`1.15x`), passive dark-eclipse regeneration, accelerated meter gain, level-8 AI, and exclusive Phase 2 moves (*Corte do Eclipse Carmesim*, *Chama do Eclipse Eterno*, and *Julgamento do Eclipse Absoluto*).
-- **Character Ending Cutscenes (`Cutscene kind: 2`) & Main Menu Return.** Defeating Oboro's final form plays a 5-page ending cutscene unique to the player's chosen character (`src/app/cutscene/endings.rs`) and returns directly to the Main Menu (`Screen::Menu`) once completed.
+- **Dynamic Boss Rotation.** The 8-opponent ladder culminates in a dedicated final boss battle with tailored pre-boss dialogue cutscene and boss arena:
+  - **Tier 0 (First Run):** The supreme architect **Mikazuki Oboro** (`oboro`) at Gate of Spirits (`spirit`).
+  - **Tier 1 (After Beating Oboro):** **Garan the Ashen Oni** (`garan`) becomes the new main villain at the Volcanic Crater (`volcano`).
+  - **Tier 2 (After Beating Garan):** **Valdric Morn** (`valdric`) ascends as the imperial tyrant final boss at Neo-Metropolis (`neon`).
+  - **Subsequent Clears:** Rotates cyclically among the 3 main villains. If the player selects the active villain, the engine shifts to an alternate boss to prevent mirror fights.
+- **Boss Empowerment & Oboro Phases.** When fighting as the arcade final boss, villains receive true boss status (`boss = true`, 2000 HP, 125% attack multiplier, boss AI level, power gauge auto-generation, aura VFX, and a dedicated `CHEFE FINAL` banner). When facing Oboro, Phase 1 features his awakened Mangekyo (`form = 1`); defeating him triggers the **Awakening: Absolute Eclipse** cutscene (`kind: 3`) and Phase 2 against **Eclipse Absoluto** (`form = 2`) with boosted life, passive regeneration, and exclusive dark moves.
+- **Character Ending Cutscenes (`Cutscene kind: 2`) & Oboro Unlock.** Defeating the final boss plays a 5-page ending cutscene unique to the player's chosen character (`src/app/cutscene/endings.rs`). Upon completion, the game unlocks **Mikazuki Oboro** on the character select screen, advances the villain rotation, and returns directly to the character selection screen with an unlock toast announcement.
 
 ## Survival
 

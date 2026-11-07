@@ -12,13 +12,16 @@ O menu principal oferece lutas individuais (Arcade, Versus CPU, 2 Jogadores, Tre
 
 ## Arcade / Modo História
 
-`Arcade` no menu principal executa a campanha narrativa do Torneio do Eclipse Escarlate:
+`Arcade` no menu principal executa a campanha narrativa do Torneio do Eclipse Escarlate com cutscenes completas, progressão dinâmica de vilões e desbloqueio de lutador secreto:
 
 - **Prólogo (`Cutscene kind: 0`).** Cada um dos 15 lutadores nativos possui sua própria introdução narrativa e juramento pessoal antes de iniciar a escada do torneio.
-- **Confronto Pré-Chefe (`Cutscene kind: 1`).** Após derrotar oito rivais, o jogador chega ao Salão do Eclipse e enfrenta o chefe final oculto, **Mikazuki Oboro**, com diálogos exclusivos para cada personagem.
-- **Chefe Fase 1 e Despertar em Luta.** Oboro utiliza voo, teletransporte sombrio, super velocidade e sua primeira forma (**Mangekyo Desperto**, `form = 1`). Quando derrotado ao menos uma vez em um round, Oboro rompe seu selo automaticamente no início do round seguinte (`Match::awaken_defeated_boss`) e assume sua transformação final (**Eclipse Absoluto**, `form = 2`).
-- **Cutscene de Transformação (`Cutscene kind: 3`) e Desafio Final (Fase 2).** Derrotar Oboro pela primeira vez na escada do modo história dispara a cutscene **Despertar: Eclipse Absoluto** (`kind: 3`) e inicia o desafio final (`Match::awaken_boss_final`), no qual Oboro já começa em **Eclipse Absoluto** (`form = 2`) com vida máxima ampliada (`1.15x`), regeneração contínua do eclipse, ganho acelerado de barra, IA nível 8 e golpes exclusivos da forma final (*Corte do Eclipse Carmesim*, *Chama do Eclipse Eterno* e *Julgamento do Eclipse Absoluto*).
-- **Cutscene Final por Personagem (`Cutscene kind: 2`) e Retorno ao Menu Principal.** Ao derrotar a forma final de Oboro, cada personagem exibe sua própria cutscene de encerramento e epílogo (`src/app/cutscene/endings.rs`) e, ao final, o jogo encerra a sessão e retorna diretamente ao Menu Principal (`Screen::Menu`).
+- **Rotação Dinâmica de Vilões Principais.** O topo da escalada de 8 oponentes culmina em um confronto com cutscene pré-luta personalizada e arena temática do chefe:
+  - **Tier 0 (Primeira Jornada):** O vilão supremo **Mikazuki Oboro** (`oboro`) no Portão dos Espíritos (`spirit`).
+  - **Tier 1 (Após Derrotar Oboro):** **Garan, o Oni das Cinzas** (`garan`) torna-se o novo vilão principal na Cratera Vulcânica (`volcano`).
+  - **Tier 2 (Após Derrotar Garan):** **Valdric Morn** (`valdric`) assume o trono como o tirano imperial final em Neo-Metropolis (`neon`).
+  - **Zeradas Seguintes:** Alterna ciclicamente entre os 3 vilões principais. Se o jogador escolher o próprio chefe da rodada, a engine seleciona outro vilão para evitar luta espelho no chefe final.
+- **Poderes de Chefe e Fases de Oboro.** Ao assumirem o posto de chefe final do modo história, os vilões recebem atributos de chefe (`boss = true`, 2000 HP, 125% de ataque, IA agressiva de chefe, recarga contínua de super barra, aura visual e banner `CHEFE FINAL`). Ao enfrentar Oboro, a Fase 1 traz sua forma Mangekyo Desperto (`form = 1`); derrotá-lo dispara a cutscene **Despertar: Eclipse Absoluto** (`kind: 3`) e a Fase 2 contra o **Eclipse Absoluto** (`form = 2`) com vida ampliada, regeneração contínua e golpes sombrios exclusivos.
+- **Cutscene Final por Personagem (`Cutscene kind: 2`) e Desbloqueio de Oboro.** Ao derrotar o chefe final, cada personagem exibe sua própria cutscene de encerramento em 5 páginas (`src/app/cutscene/endings.rs`). Ao concluir, **Mikazuki Oboro** é desbloqueado na seleção de personagens, a rotação de vilões é avançada e o jogo retorna diretamente à tela de seleção de personagens com anúncio em banner comemorativo e o novo chefe habilitado.
 
 ## Sobrevivência
 

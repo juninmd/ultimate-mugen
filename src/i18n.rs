@@ -19,23 +19,13 @@ pub fn set(l: Lang) {
     CURRENT.store(if l == Lang::En { 1 } else { 0 }, Ordering::Relaxed);
 }
 pub fn get() -> Lang {
-    if CURRENT.load(Ordering::Relaxed) == 1 {
-        Lang::En
-    } else {
-        Lang::Pt
-    }
+    if CURRENT.load(Ordering::Relaxed) == 1 { Lang::En } else { Lang::Pt }
 }
-pub fn default_lang() -> Lang {
-    Lang::En
-}
+pub fn default_lang() -> Lang { Lang::En }
 
 /// Legacy helper: pick one of two literals. Prefer `t(key)` in new code.
 pub fn tr<'a>(pt: &'a str, en: &'a str) -> &'a str {
-    if get() == Lang::En {
-        en
-    } else {
-        pt
-    }
+    if get() == Lang::En { en } else { pt }
 }
 
 /// Translate a catalog key. Unknown keys fall back to English, then to the key itself.
@@ -151,7 +141,9 @@ catalog! {
     "results.arcade_complete" => "ARCADE COMPLETE!", "ARCADE COMPLETO!";
     "results.wins" => "{name} WINS!", "{name} VENCE!";
     "results.team_wins" => "TEAM {name} WINS!", "TIME {name} VENCEU!";
-
+    "boss.unlocked_oboro" => "★ NEW FIGHTER UNLOCKED: OBORO! ★", "★ NOVO PERSONAGEM DESBLOQUEADO: OBORO! ★";
+    "boss.cleared" => "★ ARCADE CLEARED! ★", "★ MODO HISTÓRIA ZERADO! ★";
+    "boss.next_villain" => "★ NEW MAIN VILLAIN: {boss} ★", "★ NOVO VILÃO PRINCIPAL: {boss} ★";
     "pause.title" => "PAUSED", "PAUSA";
     "pause.continue" => "Continue", "Continuar";
     "pause.hitboxes" => "Hitboxes", "Hitboxes";

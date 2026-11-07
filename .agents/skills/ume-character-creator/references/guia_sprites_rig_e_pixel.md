@@ -79,6 +79,14 @@ Use a ferramenta de geração de imagens para criar ou reparar PNGs quando o per
 - Registre dimensões, caixa alfa, linha do chão, eixo/pivô, altura de referência e orientação da pose de referência antes de gerar. Uma imagem que parece semelhante pode ter escala ou enquadramento diferentes.
 - Faça inventário das animações e sprites já existentes; identifique lacunas ou defeitos concretos. Não substitua sprites bons sem necessidade.
 
+### Exceção: retratos de interface
+Retratos como `portrait.png` podem usar uma pixel art de alta resolução, com clusters menores, shading e detalhes faciais mais finos que os sprites de combate. Preserve essa diferença de acabamento: o retrato continua sendo pixel art, mas não deve ser simplificado, reduzido nem alinhado ao pivô/tela das poses de jogo.
+
+- Use o retrato detalhado aprovado do próprio personagem como referência visual. Se ele foi removido ou substituído por engano, restaure a versão original do controle de versão em vez de tentar recriá-la; ela é a referência mais fiel.
+- Para criar um novo, peça um busto/close-up quadrado, com rosto, cabelo, roupa e expressão bem legíveis, identidade e paleta iguais às sprites. Preserve a densidade de pixels, contorno marcado, sombreamento em clusters e nível de detalhe do retrato de referência.
+- Gere em alta resolução adequada ao slot de UI, com fundo transparente e canal RGBA; enquadre cabeça, faixa/acessórios e ombros sem cortes acidentais. O retrato Kaito aprovado mede 1254 × 1254 px e serve como referência concreta de resolução e acabamento, não como tamanho obrigatório para todo projeto. Não aplique chroma key ou redução de tamanho de sprite sheet quando já houver transparência.
+- Confira o PNG sobre fundos claros e escuros, verifique halo nas bordas e visualize no tamanho real do menu. Mantenha o retrato separado das poses auditadas como animação.
+
 ### Prompt de geração
 - Descreva o personagem e a ação da pose sem ambiguidade. Trave roupa, paleta, proporções, penteado, faixa, silhueta, contorno, direção e tamanho relativo à referência.
 - Peça pixel art com pixels duros e clusters limpos, transparência real, sem antialiasing, blur, glow, gradientes, texto, fundo ou objetos extras. Para efeitos, solicite-os explicitamente apenas quando fizerem parte da pose.

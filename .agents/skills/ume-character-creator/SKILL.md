@@ -143,4 +143,4 @@ Consulte os arquivos complementares incluídos nesta skill:
 - [Manual de Especificação UMF 2.0](references/manual_umf_especificacao_completa.md): Referência técnica exaustiva de cada propriedade do manifesto JSON.
 - [Guia de Sprites Vetoriais e Pixel Art](references/guia_sprites_rig_e_pixel.md): Runbook detalhado para rigs vetoriais e integração de spritesheets PNG.
 
-Para gerar ou corrigir sprites pixel art, siga no guia a seção de geração com referência: ela cobre consistência de personagem e quadros, transparência e contorno, escala, alinhamento de pivô, metadados e revisão visual em runtime.
+Para gerar ou corrigir sprites pixel art, siga no guia a seção de geração com referência, que cobre consistência de personagem e quadros, transparência e contorno, escala, alinhamento de pivô, metadados e revisão visual em runtime. A seção de retratos explica a exceção de alta resolução para imagens de interface.

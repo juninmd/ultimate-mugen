@@ -17,13 +17,16 @@ const server = staticServer(dir, types);
   const stageRequests = [];
   p.on('request', r => { if (/\/assets\/stages\/[^/]+\.png$/.test(new URL(r.url()).pathname)) stageRequests.push(r.url()); });
   p.on('pageerror', e => { if (!/register_plugin/.test(e.message)) problems.push(`pageerror: ${e.message}`); });
-  p.on('console', m => { if (/panicked|PanicHookInfo|renderbufferStorageMultisample/.test(m.text())) problems.push(`console: ${m.text().slice(0, 200)}`); });
+  p.on('console', m => {
+    if (/panicked|PanicHookInfo|renderbufferStorageMultisample/.test(m.text())) problems.push(`console: ${m.text().slice(0, 200)}`);
+  });
   await p.goto(url);
-  await p.waitForTimeout(9000);
-  await p.locator('#glcanvas').focus();
+  await p.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
+  await p.waitForTimeout(1500);
+  await p.locator('#glcanvas').click();
   const key = async (k, wait = 900) => { await p.keyboard.down(k); await p.waitForTimeout(120); await p.keyboard.up(k); await p.waitForTimeout(wait); };
   await key('Enter');                       // title → menu
-  await key('ArrowDown'); await key('Enter', 1500);  // Versus CPU → select
+  await key('ArrowDown'); await key('ArrowDown'); await key('Enter', 1500);  // Arcade, Survival → CPU (Versus CPU) → select
   await key('Enter', 1500); await key('Enter', 1500); // P1, P2 → stages
   if (stageRequests.length) problems.push(`Full stage images fetched before confirmation: ${stageRequests.length}`);
   await key('Enter', 1500);                 // stage → VS / loading

@@ -3,8 +3,11 @@
 use crate::gfx::KeyCode;
 use ume_engine::input::k;
 
+mod keys;
+use keys::KEYS;
+
 /// Rebindable fighting actions: label and engine input bit.
-pub const ACTIONS: [(&str, u32); 15] = [
+pub const ACTIONS: [(&str, u32); 16] = [
     ("Cima", k::U),
     ("Baixo", k::D),
     ("Esquerda", k::L),
@@ -20,91 +23,9 @@ pub const ACTIONS: [(&str, u32); 15] = [
     ("Especial 3", k::E),
     ("Despertar", k::T),
     ("Troca (Tag)", k::TAG),
+    ("Start (carregar ki)", k::S),
 ];
 const N: usize = ACTIONS.len();
-
-/// (key, stable id used in the file, label shown in the UI). Only these keys can be bound.
-const KEYS: &[(KeyCode, &str, &str)] = &[
-    (KeyCode::A, "A", "A"),
-    (KeyCode::B, "B", "B"),
-    (KeyCode::C, "C", "C"),
-    (KeyCode::D, "D", "D"),
-    (KeyCode::E, "E", "E"),
-    (KeyCode::F, "F", "F"),
-    (KeyCode::G, "G", "G"),
-    (KeyCode::H, "H", "H"),
-    (KeyCode::I, "I", "I"),
-    (KeyCode::J, "J", "J"),
-    (KeyCode::K, "K", "K"),
-    (KeyCode::L, "L", "L"),
-    (KeyCode::M, "M", "M"),
-    (KeyCode::N, "N", "N"),
-    (KeyCode::O, "O", "O"),
-    (KeyCode::P, "P", "P"),
-    (KeyCode::Q, "Q", "Q"),
-    (KeyCode::R, "R", "R"),
-    (KeyCode::S, "S", "S"),
-    (KeyCode::T, "T", "T"),
-    (KeyCode::U, "U", "U"),
-    (KeyCode::V, "V", "V"),
-    (KeyCode::W, "W", "W"),
-    (KeyCode::X, "X", "X"),
-    (KeyCode::Y, "Y", "Y"),
-    (KeyCode::Z, "Z", "Z"),
-    (KeyCode::Key0, "Key0", "0"),
-    (KeyCode::Key1, "Key1", "1"),
-    (KeyCode::Key2, "Key2", "2"),
-    (KeyCode::Key3, "Key3", "3"),
-    (KeyCode::Key4, "Key4", "4"),
-    (KeyCode::Key5, "Key5", "5"),
-    (KeyCode::Key6, "Key6", "6"),
-    (KeyCode::Key7, "Key7", "7"),
-    (KeyCode::Key8, "Key8", "8"),
-    (KeyCode::Key9, "Key9", "9"),
-    (KeyCode::Kp0, "Kp0", "Num 0"),
-    (KeyCode::Kp1, "Kp1", "Num 1"),
-    (KeyCode::Kp2, "Kp2", "Num 2"),
-    (KeyCode::Kp3, "Kp3", "Num 3"),
-    (KeyCode::Kp4, "Kp4", "Num 4"),
-    (KeyCode::Kp5, "Kp5", "Num 5"),
-    (KeyCode::Kp6, "Kp6", "Num 6"),
-    (KeyCode::Kp7, "Kp7", "Num 7"),
-    (KeyCode::Kp8, "Kp8", "Num 8"),
-    (KeyCode::Kp9, "Kp9", "Num 9"),
-    (KeyCode::Up, "Up", "Seta Cima"),
-    (KeyCode::Down, "Down", "Seta Baixo"),
-    (KeyCode::Left, "Left", "Seta Esq."),
-    (KeyCode::Right, "Right", "Seta Dir."),
-    (KeyCode::Space, "Space", "Espaço"),
-    (KeyCode::Comma, "Comma", ","),
-    (KeyCode::Period, "Period", "."),
-    (KeyCode::Slash, "Slash", "/"),
-    (KeyCode::Semicolon, "Semicolon", ";"),
-    (KeyCode::Apostrophe, "Apostrophe", "'"),
-    (KeyCode::Minus, "Minus", "-"),
-    (KeyCode::Equal, "Equal", "="),
-    (KeyCode::LeftBracket, "LeftBracket", "["),
-    (KeyCode::RightBracket, "RightBracket", "]"),
-    (KeyCode::Backslash, "Backslash", "\\"),
-    (KeyCode::KpAdd, "KpAdd", "Num +"),
-    (KeyCode::KpSubtract, "KpSubtract", "Num -"),
-    (KeyCode::KpMultiply, "KpMultiply", "Num *"),
-    (KeyCode::KpDivide, "KpDivide", "Num /"),
-    (KeyCode::KpDecimal, "KpDecimal", "Num ."),
-    (KeyCode::KpEnter, "KpEnter", "Num Enter"),
-    (KeyCode::LeftShift, "LeftShift", "Shift Esq."),
-    (KeyCode::RightShift, "RightShift", "Shift Dir."),
-    (KeyCode::LeftControl, "LeftControl", "Ctrl Esq."),
-    (KeyCode::RightControl, "RightControl", "Ctrl Dir."),
-    (KeyCode::LeftAlt, "LeftAlt", "Alt Esq."),
-    (KeyCode::RightAlt, "RightAlt", "Alt Dir."),
-    (KeyCode::Insert, "Insert", "Insert"),
-    (KeyCode::Delete, "Delete", "Delete"),
-    (KeyCode::Home, "Home", "Home"),
-    (KeyCode::End, "End", "End"),
-    (KeyCode::PageUp, "PageUp", "Page Up"),
-    (KeyCode::PageDown, "PageDown", "Page Down"),
-];
 
 pub fn id(key: KeyCode) -> Option<&'static str> {
     KEYS.iter().find(|e| e.0 == key).map(|e| e.1)
@@ -127,10 +48,10 @@ impl Default for KeyMap {
         KeyMap {
             slots: [
                 [
-                    Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T, R,
+                    Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T, R, Enter,
                 ],
                 [
-                    I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter,
+                    I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal,
                 ],
             ],
         }
@@ -140,9 +61,9 @@ impl Default for KeyMap {
 fn previous_defaults() -> [[KeyCode; N]; 2] {
     use KeyCode::*;
     [
-        [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T, R],
+        [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T, R, Enter],
         [
-            Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter,
+            Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal,
         ],
     ]
 }
@@ -285,4 +206,19 @@ garbage",
         assert_eq!(m.slots[0], KeyMap::default().slots[0]);
         assert_eq!(m.slots[1], KeyMap::default().slots[1]);
     }
-}
+
+    #[test]
+    fn start_button_is_rebindable_and_defaults_to_enter() {
+        let mut m = KeyMap::default();
+        assert_eq!(m.bits(0, |k| k == KeyCode::Enter), k::S);
+        m.assign(0, ACTIONS.len() - 1, KeyCode::Space);
+        assert_eq!(m.bits(0, |k| k == KeyCode::Space), k::S);
+        assert_eq!(m.bits(0, |k| k == KeyCode::Enter), 0);
+        assert_eq!(KeyMap::from_text(&m.to_text()).slots[0][ACTIONS.len() - 1], KeyCode::Space);
+    }
+
+    #[test]
+    fn saved_file_without_the_start_entry_keeps_the_default_start_key() {
+        let m = KeyMap::from_text("p1.0=Up\np1.14=R\n");
+        assert_eq!(m.slots[0][ACTIONS.len() - 1], KeyCode::Enter);
+    }}

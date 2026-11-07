@@ -332,7 +332,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "bgpalfx" => { let p = PalFx::from_controller(m, i, sc, ""); m.bg_palfx = Some(p); }
         "envcolor" => {
             let t = n(m, "time", 1.0) as i32;
-            let c = [n2(m, "value", 255.0, 0) as f32, n2(m, "value", 255.0, 1) as f32, n2(m, "value", 255.0, 2) as f32];
+            let c = [n2(m, "value", 255.0, 0) as f32, n2(m, "value", 255.0, 1) as f32, n2(m, "value", 255.0, 2) as f32, n(m, "under", 0.0) as f32];
             if t > 0 { m.flash = Some((t, c)); }
         }
         "remappal" => {

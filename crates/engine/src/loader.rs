@@ -215,9 +215,11 @@ pub fn load_mugen_char(
                     .map(|a| decode_act(&a))
             })
             .or_else(|| sff.palettes.first().map(|p| p.data.to_vec()));
+        let overrides_palette = |s: &ume_formats::sff::DecodedSprite|
+            over.is_some() && s.group != 9000 && (s.palette_index == target || sff.version == 1);
         let shared_key = |s: &ume_formats::sff::DecodedSprite| -> (i32, i32) {
             if sff.version == 1 {
-                return if s.palette_index == target || s.palette.is_none() {
+                return if overrides_palette(s) || s.palette_index == target || s.palette.is_none() {
                     (1, 1)
                 } else {
                     (-1, s.palette_index)
@@ -283,7 +285,7 @@ pub fn load_mugen_char(
             let paletteless = s.palette.is_none() && s.rgba.is_none();
             if paletteless {
                 fallback.as_deref()
-            } else if over.is_some() && s.palette_index == target && s.group != 9000 {
+            } else if overrides_palette(s) {
                 over.as_deref()
             } else {
                 None
@@ -294,7 +296,7 @@ pub fn load_mugen_char(
             let paletteless = s.palette.is_none() && s.rgba.is_none();
             if paletteless {
                 fallback_arc.clone()
-            } else if over.is_some() && s.palette_index == target && s.group != 9000 {
+            } else if overrides_palette(s) {
                 over_arc.clone()
             } else {
                 s.palette.clone()

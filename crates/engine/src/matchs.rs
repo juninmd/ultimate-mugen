@@ -702,7 +702,7 @@ impl Match {
             f.history.push(bits, f.facing as i32);
             let paused = f.hit_pause > 0 || f.hit_shake > 0 || frozen_by_pause(f);
             f.cmd.update(&f.history, &f.def.commands, paused);
-            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 });
+            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0];
         }
         for &fi in &awaken[..awaken_len] { self.try_transform(fi); }
         if tagged { self.tag_step(&tag_requests[..tag_len]); }

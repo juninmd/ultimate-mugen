@@ -21,7 +21,7 @@ Fica ao lado do executável e é gravado pelo menu **Configurações** (menu pri
 | `round_time` | `0` 99 s, `1` 60 s, `2` 30 s, `3` infinito | Tempo do round |
 | `rounds` | `0` primeiro a 1, `1` primeiro a 2, `2` primeiro a 3 | Rounds para vencer |
 | `life` | `0` 50%, `1` 75%, `2` 100%, `3` 150%, `4` 200% | Multiplicador da barra de vida |
-| `lang` | `pt` / `en` | Idioma das telas de configurações e versus |
+| `lang` | `en` / `pt` / `es` | Idioma de toda a interface |
 | `keep_aspect` | `1` (padrão) / `0` | `1` coloca barras pretas e mantém a imagem 16:9 em qualquer janela; `0` estica a imagem até preencher a janela |
 | `filter` | `nearest` (padrão) / `linear` | Amostragem dos sprites ao ampliar: pixels nítidos ou suavização bilinear |
 | `window` | `LARGURAxALTURA`, `0x0` sem valor | Tamanho da janela, gravado automaticamente cerca de um segundo depois de parar de redimensionar; vale mais que `res` até você escolher um tamanho no menu Vídeo |
@@ -60,13 +60,17 @@ A janela pode ser arrastada para qualquer tamanho. O jogo desenha em um espaço 
 
 ## Idioma e localização
 
-A interface traz dois idiomas numa tabela de strings por chave (`src/i18n.rs`): **inglês** (padrão) e **português (Brasil)**.
-Configurações › Idioma troca em tempo real e grava `lang=en|pt` em `ultimate-mugen.cfg`.
+A interface traz três idiomas: **inglês** (padrão), **português (Brasil)** e **espanhol**. Configurações › Idioma alterna em tempo real e grava `lang=en|pt|es` em `ultimate-mugen.cfg`.
 
-- A busca é idioma atual → inglês → nome da chave, então um catálogo incompleto nunca mostra rótulo vazio.
+- `src/i18n/catalog.rs` guarda a tabela por chave (inglês e português) e `src/i18n/es_catalog.rs` a coluna em espanhol; `i18n::t(chave)` procura idioma atual → inglês → nome da chave.
+- Textos avulsos usam `i18n::tr3(pt, en, es)`; o antigo `i18n::tr(pt, en)` acha o espanhol em `src/i18n/es_phrases.rs`, indexado pelo texto em inglês. Marcadores usam `i18n::fill("{nome}", &[("nome", valor)])`.
 - Uma chave ausente é impressa uma única vez no log (`i18n: missing key '<key>'`).
-- Os catálogos são compilados no binário, então a troca não faz I/O e funciona no web/mobile.
-- Um teste mantém os dois catálogos em sincronia e um teste de grep falha se as telas migradas (menu, seleção, resultados, pausa, replays, sobrevivência, controles) voltarem a ter português fixo.
+- Ainda só em português: cutscenes e diálogos do modo história, biografias dos lutadores e nomes dos cenários (dados de conteúdo).
+- No primeiro uso (sem configuração salva) o idioma do sistema é escolhido: `navigator.language` na web, `LC_ALL`/`LC_MESSAGES`/`LANG` no desktop; inglês quando não houver suporte.
+
+## Importar conteúdo M.U.G.E.N
+
+Menu principal › **Importar M.U.G.E.N** é o único ponto de entrada. Na web o botão abre o seletor de arquivos do navegador (a página sobrepõe um `<label>` invisível exatamente sobre o botão, para o clique ser um gesto real do usuário) e também dá para soltar `.zip` na janela. No desktop o botão abre o diálogo de arquivos do sistema (PowerShell no Windows, `osascript` no macOS, `zenity` ou `kdialog` no Linux); pastas em `chars/` e `stages/` continuam sendo lidas ao iniciar.
 
 ## Controles
 

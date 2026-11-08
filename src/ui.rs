@@ -633,7 +633,7 @@ impl Ui {
     pub fn loading_screen(&self, p: f32, label: &str) {
         self.background();
         self.logo(VW / 2.0, 300.0, 150.0);
-        let tip = LOADING_TIPS[((self.t / 3.5) as usize) % LOADING_TIPS.len()];
+        let tip = crate::loading_tips::tip((self.t / 3.5) as usize);
         self.text(
             tip,
             VW / 2.0,
@@ -647,13 +647,3 @@ impl Ui {
     }
 }
 
-pub const LOADING_TIPS: [&str; 8] = [
-    "Dica: F11 alterna tela cheia · F3 mostra o FPS.",
-    "Dica: arraste um .zip de personagens M.U.G.E.N para a janela para importar.",
-    "Dica: no Treino, F2 exibe as hitboxes.",
-    "Dica: ESPECIAL e SUPER executam golpes com um único toque.",
-    "Dica: em Vídeo, a Qualidade da arte aumenta a nitidez em telas 4K.",
-    "Dica: PageUp/PageDown e a roda do mouse rolam a lista de lutadores.",
-    "Dica: DualShock/DualSense vibram em golpes, defesa e K.O.",
-    "Dica: Tab filtra a seleção entre todos, originais e M.U.G.E.N.",
-];

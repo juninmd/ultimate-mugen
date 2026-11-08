@@ -48,8 +48,8 @@ impl App {
         ];
         let move_text = |g: Glyphs| match g {
             Glyphs::Keyboard => format!("{} {} {} {}", kl(0), kl(1), kl(2), kl(3)),
-            Glyphs::Touch => "Analógico esquerdo".into(),
-            Glyphs::Pad(_) => "Analógico ou direcional".into(),
+            Glyphs::Touch => crate::i18n::tr3("Analógico esquerdo", "Left stick", "Stick izquierdo").into(),
+            Glyphs::Pad(_) => crate::i18n::tr3("Analógico ou direcional", "Stick or D-pad", "Stick o cruceta").into(),
         };
         let cell_text = |row: usize, g: Glyphs| match (row, g) {
             (0, g) => Some(move_text(g)),

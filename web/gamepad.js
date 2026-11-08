@@ -56,7 +56,13 @@
   window.ume_gp_state = (i) => state(i);
   window.ume_gp_name = (i) => { const p = pads()[i]; return p ? p.id : ''; };
   window.ume_gp_rumble = (i, s, w, ms) => rumble(i, s, w, ms);
-  window.ume_set_import_visible = (v) => { const b = document.getElementById('imp'); if (b) b.style.display = v ? '' : 'none'; };
+  window.ume_set_import_rect = (x, y, w, h) => {
+    const b = document.getElementById('imp'), c = document.getElementById('glcanvas');
+    if (!b || !c) return;
+    if (w <= 0) { b.style.display = 'none'; return; }
+    const r = c.getBoundingClientRect(), k = r.width / c.width;
+    Object.assign(b.style, { display: 'block', left: (r.left + x * k) + 'px', top: (r.top + y * k) + 'px', width: (w * k) + 'px', height: (h * k) + 'px' });
+  };
   window.ume_storage_get = (k) => { try { return localStorage.getItem('ume.' + k) || ''; } catch (e) { return ''; } };
   window.ume_storage_set = (k, v) => { try { localStorage.setItem('ume.' + k, v); } catch (e) {} };
   window.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0;
@@ -102,7 +108,9 @@
       } finally { wasm.ume_import_end(); }
     })();
     const input = document.getElementById('ume-file');
-    if (input) input.addEventListener('change', () => window.umeImport(input.files));
+    if (input) input.addEventListener('change', () => { window.umeImport(input.files); input.value = ''; });
+    const imp = document.getElementById('imp');
+    window.addEventListener('keydown', (e) => { if (e.key === 'Enter' && imp && imp.style.display === 'block' && input) input.click(); });
     window.addEventListener('dragover', (e) => e.preventDefault());
     window.addEventListener('drop', (e) => { e.preventDefault(); window.umeImport(e.dataTransfer.files); });
   };

@@ -1,5 +1,5 @@
 use super::*;
-use crate::i18n::{tr, Lang, LANGS};
+use crate::i18n::{tr, tr3, LANGS};
 use crate::settings::{
     FPS_CAPS, GAME_SPEEDS, LIFE_PERCENT, ROUNDS_TO_WIN, ROUND_SECONDS, SURVIVAL_RECOVERY,
     VOLUME_STEPS,
@@ -106,7 +106,7 @@ impl App {
                 r.push(row(
                     Act::Quality,
                     tr("Qualidade da arte", "Art quality"),
-                    QUALITY[s.quality.min(QUALITY.len() - 1)].1,
+                    crate::settings_labels::art_quality(s.quality),
                     tr(
                         "Densidade de pixels de lutadores e cenários",
                         "Pixel density of fighters and stages",
@@ -115,7 +115,7 @@ impl App {
                 r.push(row(
                     Act::Fx,
                     tr("Pós-processamento", "Post-processing"),
-                    FX_LEVELS[s.fx.min(FX_LEVELS.len() - 1)],
+                    crate::settings_labels::fx_level(s.fx),
                     tr(
                         "Bloom, vinheta, correção de cor e blur radial",
                         "Bloom, vignette, colour grading and radial blur",
@@ -124,7 +124,7 @@ impl App {
                 r.push(row(
                     Act::Impact,
                     tr("Efeitos de impacto", "Impact effects"),
-                    IMPACT[s.impact.min(IMPACT.len() - 1)].1,
+                    crate::settings_labels::impact_level(s.impact),
                     tr(
                         "Tremor, zoom e flashes · Mínimo desliga tudo",
                         "Shake, zoom and flashes · Minimum turns them off",
@@ -336,10 +336,7 @@ impl App {
                     .find(|(l, _)| *l == s.lang)
                     .map(|(_, n)| *n)
                     .unwrap_or(""),
-                tr(
-                    "Menus de configurações e tela de versus. O restante é traduzido gradualmente",
-                    "Settings and versus screens. The rest is being translated gradually",
-                ),
+                tr3("Idioma de toda a interface", "Language of the whole interface", "Idioma de toda la interfaz"),
             )],
             _ => vec![row(
                 Act::Reset,
@@ -392,13 +389,7 @@ impl App {
             Act::SurvivalRecovery if go => {
                 s.survival_recovery = cycle(s.survival_recovery, step, SURVIVAL_RECOVERY.len())
             }
-            Act::Language if go => {
-                s.lang = if s.lang == Lang::En {
-                    Lang::Pt
-                } else {
-                    Lang::En
-                }
-            }
+            Act::Language if go => s.lang = s.lang.next(step),
             Act::Reset if ok => {
                 *s = Settings::default();
                 self.ai_level = s.difficulty;
@@ -634,7 +625,7 @@ impl App {
                     true,
                 );
             }
-            y += h + 8.0;
+            y += (h + 8.0).min(504.0 / rows.len() as f32);
         }
 
         if tab == 5 {

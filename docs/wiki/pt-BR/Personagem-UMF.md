@@ -209,6 +209,10 @@ Valide com `cargo test --release --test native_roster_lab -- --nocapture` (todo 
 
 Todo lutador nativo pode carregar o medidor: segure **R** (a entrada `s` / Start; para pausar a luta use **Esc** ou **P**). O lutador entra no estado `3920`, repete a animação `powerUp` com um brilho azul e ganha 4 de energia por tick (um super de 1000 em cerca de quatro segundos) até soltar o botão (depois de pelo menos 6 ticks) ou encher o medidor. O estado é `movetype = I`, então um golpe o interrompe, e um lutador com formas ainda se transforma com `T` quando o medidor chega ao custo da forma. O comando é `charge_cmd` (`/s`) e aparece como `Charge Energy` na lista de golpes. A IA embutida só carrega no nível 3 ou mais, com menos de 700 de energia, quando o rival está a mais de 190 unidades e não está atacando.
 
+## Habilidades no ar (todo especial e super)
+
+Todo `special` e `super` com `when` ausente ou `"stand"` ganha também uma versão aérea (estado `20000 + estado de chão`, rótulo `State -1, air <nome>`), acionada pelo mesmo comando com o lutador no ar. O lutador flutua no começo do golpe (mantém 40 % do deslize), a gravidade volta a 45 % depois de 12 ticks, o golpe termina no estado de queda do salto (`50`) com controle, e tocar o chão o interrompe com o estado de pouso (`52`). As versões aéreas causam 70 % do dano de chão, os projéteis saem inclinados para baixo (inclinação 0,85) para alcançar um rival no chão, e cada salto permite um especial aéreo (`var(57)`, zerada ao pousar). Agarrões, golpes de voo e golpes com `when: "crouch"` ou `"air"` mantêm suas próprias regras.
+
 ## Sprites pixel art (opcional)
 
 Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG em vez do rig. Use PNGs transparentes voltados para a direita, com os pés na borda inferior e o mesmo tamanho de tela em todos os arquivos de um lutador. Uma pose sem PNG usa `01_idle.png`; um lutador sem a pasta continua com o rig. Depois de estender o rig, execute `cargo run --release -p ume-engine --example generate_missing_sprites` para renderizar um PNG dedicado para cada pose que o carregador buscaria no canvas idle.

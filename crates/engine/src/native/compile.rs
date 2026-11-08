@@ -162,6 +162,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     for (index, (m, form_cond, forms_mask)) in order.into_iter().enumerate() {
         let when = m.when.as_deref().unwrap_or("stand");
         let sid = plan.sid(index);
+        let (cns_start, minus1_start) = (cns.len(), minus1.len());
         let cname = format!("m_{}", m.id);
         let simple_btn = m.input.trim().split('+').all(|t| ["a", "b", "c", "x", "y", "z"].contains(&t.trim()));
         commands.push(parse_command(&cname, &m.input, if m.kind == "super" { 30 } else if m.kind == "special" { 20 } else { 15 }, if simple_btn { 1 } else { 2 }));
@@ -219,6 +220,10 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
             pid += 1;
         }
         if when != "air" { cns += &format!("[State {sid}, end]\ntype = ChangeState\ntrigger1 = AnimTime = 0\nvalue = {}\nctrl = 1\n\n", if when == "crouch" { 11 } else { 0 }); }
+        if super::air_variant::eligible(m, when) {
+            let (entry, body) = (super::air_variant::entry(&minus1[minus1_start..], sid, &format!("{state_cond}{crouch_ok}")), super::air_variant::body(&cns[cns_start..], sid));
+            minus1 += &entry; cns += &body;
+        }
     }
     cns += &throw_defs; cns += &ab.states; movelist.extend(ab.movelist);
     let mut states = HashMap::new();

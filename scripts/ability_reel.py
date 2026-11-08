@@ -14,7 +14,7 @@ import tempfile
 
 from PIL import Image, ImageDraw, ImageFont
 
-NAME = re.compile(r"C-(?P<hero>[a-z0-9]+)-(?P<index>\d+)-(?P<move>.+)-(?P<frame>\d+)\.png$")
+NAME = re.compile(r"C-(?P<hero>[a-z0-9_]+)-(?P<index>\d+)-(?P<move>.+)-(?P<frame>\d+)\.png$")
 HOLD_FRAMES = 4
 CAPTION_HEIGHT = 22
 FILTER = "split[a][b];[a]palettegen=max_colors={colors}:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle"
@@ -33,12 +33,12 @@ def captioned(file, label, width, font):
 
 def build(hero, clips, out_dir, width, colors, fps):
     font = ImageFont.load_default(size=13)
-    target = out_dir / f"{hero}-abilities.gif"
+    target = out_dir / f"{hero.replace('_', '-')}-abilities.gif"
     with tempfile.TemporaryDirectory() as scratch:
         count = 0
         for number, index in enumerate(sorted(clips), 1):
             files = sorted(clips[index]["files"])
-            label = f"{hero}  {number:02d}/{len(clips)}  {clips[index]['move'].replace('-', ' ')}"
+            label = f"{hero.replace('_', ' ')}  {number:02d}/{len(clips)}  {clips[index]['move'].replace('-', ' ')}"
             for position, file in enumerate(files):
                 frame = captioned(file, label, width, font)
                 for _ in range(HOLD_FRAMES if position == len(files) - 1 else 1):

@@ -77,6 +77,7 @@ fn every_native_attack_state_connects_and_stays_finite() {
         for p in &probes {
             println!("  state {:5} anim {:5} damage {:6.1} hits {:3} reach {:4.0} ctrl@{}", p.state, p.anim, p.damage, p.hits, p.reach, p.ticks_to_ctrl);
             if p.damage <= 0.0 { failures.push(format!("{} state {} never connected (anim {})", nc.id, p.state, p.anim)); }
+            else if p.ticks_to_ctrl < 0 { failures.push(format!("{} state {} never gives control back after connecting", nc.id, p.state)); }
             else if p.state < FIRST_SPECIAL_STATE && p.reach < MIN_NORMAL_REACH { failures.push(format!("{} normal {} only reaches {} units", nc.id, p.state, p.reach)); }
         }
     }

@@ -21,7 +21,9 @@ const FIRST_ABILITY: i32 = 200;
 const FIRST_COMMON: i32 = 5000;
 const VICTIM_STATES: std::ops::Range<i32> = 3800..3900;
 
-fn is_ability_state(state: i32) -> bool { (FIRST_ABILITY..FIRST_COMMON).contains(&state) && !VICTIM_STATES.contains(&state) }
+const AIR_VARIANTS: std::ops::Range<i32> = 20000..25000;
+
+fn is_ability_state(state: i32) -> bool { (FIRST_ABILITY..FIRST_COMMON).contains(&state) && !VICTIM_STATES.contains(&state) || AIR_VARIANTS.contains(&state) }
 
 fn characters() -> Vec<NativeChar> {
     let mut out: Vec<NativeChar> = std::fs::read_dir("../../assets/chars").unwrap().filter_map(|entry| {

@@ -18,6 +18,9 @@ const CHARGE_FRAMES: usize = 12;
 const TRANSFORM_FRAMES: usize = 12;
 const CHARGE_STRIDE_FACTOR: usize = 2;
 const WARM_UP_TICKS: usize = 600;
+const AIR_STATE_OFFSET: i32 = 20000;
+const AIR_START_HEIGHT: f32 = -22.0;
+const AIR_FRAMES: usize = 9;
 const SETTLE_TICKS: usize = 8;
 const SUPER_STATE: i32 = 3000;
 const SUPER_FRAMES: usize = 18;
@@ -26,7 +29,7 @@ struct Clip {
     name: String,
     state: Option<i32>,
     gap: f32,
-    airborne: bool,
+    height: f32,
     frames: usize,
     stride_factor: usize,
     hold: u32,
@@ -34,7 +37,7 @@ struct Clip {
 }
 
 fn plain(name: String, state: i32, gap: f32, airborne: bool, frames: usize) -> Clip {
-    Clip { name, state: Some(state), gap, airborne, frames, stride_factor: 1, hold: 0, transform: false }
+    Clip { name, state: Some(state), gap, height: if airborne { -90.0 } else { 0.0 }, frames, stride_factor: 1, hold: 0, transform: false }
 }
 
 fn clips(def: &CharDef) -> Vec<Clip> {
@@ -58,9 +61,27 @@ fn clips(def: &CharDef) -> Vec<Clip> {
             out.push(plain(name.to_string(), state, gap, false, MOVE_FRAMES));
         }
     }
-    out.push(Clip { name: "charge energy".into(), state: None, gap: 140.0, airborne: false, frames: CHARGE_FRAMES, stride_factor: CHARGE_STRIDE_FACTOR, hold: k::S, transform: false });
+    out.push(Clip { name: "charge energy".into(), state: None, gap: 140.0, height: 0.0, frames: CHARGE_FRAMES, stride_factor: CHARGE_STRIDE_FACTOR, hold: k::S, transform: false });
     if !def.forms.is_empty() {
-        out.push(Clip { name: "transformation".into(), state: None, gap: 140.0, airborne: false, frames: TRANSFORM_FRAMES, stride_factor: CHARGE_STRIDE_FACTOR, hold: 0, transform: true });
+        out.push(Clip { name: "transformation".into(), state: None, gap: 140.0, height: 0.0, frames: TRANSFORM_FRAMES, stride_factor: CHARGE_STRIDE_FACTOR, hold: 0, transform: true });
+    }
+    out
+}
+
+fn air_clips(def: &CharDef) -> Vec<Clip> {
+    let Some(minus_one) = def.states.get(&-1) else { return vec![] };
+    let mut out: Vec<Clip> = vec![];
+    for controller in &minus_one.controllers {
+        let Some(name) = controller.label.strip_prefix("State -1, air ") else { continue };
+        let Some(state) = controller.raw("value").and_then(|v| v.trim().parse::<i32>().ok()) else { continue };
+        if state < AIR_STATE_OFFSET || out.iter().any(|clip| clip.state == Some(state)) { continue; }
+        let mut clip = plain(format!("air {name}"), state, 46.0, true, AIR_FRAMES);
+        clip.height = AIR_START_HEIGHT;
+        if state - AIR_STATE_OFFSET >= SUPER_STATE {
+            clip.frames = SUPER_FRAMES;
+            clip.stride_factor = 2;
+        }
+        out.push(clip);
     }
     out
 }
@@ -70,6 +91,7 @@ pub async fn run(app: &mut App, dir: &str) {
     let rival = std::env::var("UME_RIVAL").unwrap_or_else(|_| "kaito".into());
     let arena = std::env::var("UME_STAGE").unwrap_or_else(|_| "dojo".into());
     let stride: usize = std::env::var("UME_CLIP_STRIDE").ok().and_then(|s| s.parse().ok()).unwrap_or(4);
+    let air_only = std::env::var("UME_CLIP_AIR").is_ok();
     for hero in heroes {
         app.mode = Mode::Watch;
         app.sel = (find(app, &hero), find(app, &rival), stage(app, &arena));
@@ -89,13 +111,15 @@ pub async fn run(app: &mut App, dir: &str) {
             }
         }
         let def: Arc<CharDef> = app.session.as_ref().unwrap().m.fighters[0].def.clone();
-        for (index, clip) in clips(&def).into_iter().enumerate() {
+        let reel = if air_only { air_clips(&def) } else { clips(&def) };
+        let label = if air_only { format!("{hero}_air") } else { hero.clone() };
+        for (index, clip) in reel.into_iter().enumerate() {
             let center = app.session.as_ref().unwrap().m.camera.x;
             {
                 let m = &mut app.session.as_mut().unwrap().m;
                 m.fighters[0].pos.x = center - clip.gap / 2.0;
                 m.fighters[1].pos.x = center + clip.gap / 2.0;
-                m.fighters[0].pos.y = if clip.airborne { -90.0 } else { 0.0 };
+                m.fighters[0].pos.y = clip.height;
                 m.fighters[1].pos.y = 0.0;
                 m.fighters[0].vel.x = 0.0;
                 m.fighters[0].vel.y = 0.0;
@@ -132,11 +156,11 @@ pub async fn run(app: &mut App, dir: &str) {
                     peak = peak.max(s.m.fighters[1].life_max - s.m.fighters[1].life);
                 }
                 app.draw_session_only();
-                get_screen_data().export_png(&format!("{dir}/C-{hero}-{index:02}-{name}-{frame:02}.png"));
+                get_screen_data().export_png(&format!("{dir}/C-{label}-{index:02}-{name}-{frame:02}.png"));
                 next_frame().await;
             }
             let power = app.session.as_ref().unwrap().m.fighters[0].power;
-            println!("{hero} | {:02} | {} | damage {peak:.0} | power {power:.0}", index, clip.name);
+            println!("{label} | {:02} | {} | damage {peak:.0} | power {power:.0}", index, clip.name);
         }
     }
 }

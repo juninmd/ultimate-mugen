@@ -52,22 +52,35 @@ impl Default for KeyMap {
         KeyMap {
             slots: [
                 [
-                    Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T, F, R, Z, X, C,
+                    Up, Down, Left, Right, Q, W, E, A, S, D, V, B, N, T, F, R, Z, X, C,
                 ],
                 [
-                    I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal, KpSubtract, KpAdd, KpMultiply,
+                    I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter,
+                    KpDecimal, KpSubtract, KpAdd, KpMultiply,
                 ],
             ],
         }
     }
 }
 
-fn previous_defaults() -> [[KeyCode; N]; 2] {
+fn previous_defaults() -> [[[KeyCode; N]; 2]; 2] {
     use KeyCode::*;
+    let p2 = [
+        Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter,
+        KpDecimal, KpSubtract, KpAdd, KpMultiply,
+    ];
     [
-        [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T, F, R, Z, X, C],
         [
-            Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal, KpSubtract, KpAdd, KpMultiply,
+            [
+                W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T, F, R, Z, X, C,
+            ],
+            p2,
+        ],
+        [
+            [
+                Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T, F, R, Z, X, C,
+            ],
+            p2,
         ],
     ]
 }
@@ -129,30 +142,49 @@ impl KeyMap {
             if (1..=2).contains(&p) && i < N {
                 m.slots[p - 1][i] = kc;
                 present[p - 1][i] = true;
-                if i == START { has_start[p - 1] = true; }
+                if i == START {
+                    has_start[p - 1] = true;
+                }
             }
         }
         for p in 0..2 {
             if !has_start[p] {
                 if p == 0 && m.slots[p][14] == KeyCode::R {
-                    if let Some(key) = [KeyCode::F].into_iter().chain(KEYS.iter().map(|entry| entry.0)).find(|key| *key != KeyCode::R && !m.slots[p][..14].contains(key)) {
+                    if let Some(key) = [KeyCode::F]
+                        .into_iter()
+                        .chain(KEYS.iter().map(|entry| entry.0))
+                        .find(|key| *key != KeyCode::R && !m.slots[p][..14].contains(key))
+                    {
                         m.slots[p][14] = key;
                     }
                 }
                 if m.slots[p][..START].contains(&m.slots[p][START]) {
-                    if let Some(key) = KEYS.iter().map(|entry| entry.0).find(|key| !m.slots[p][..START].contains(key)) { m.slots[p][START] = key; }
+                    if let Some(key) = KEYS
+                        .iter()
+                        .map(|entry| entry.0)
+                        .find(|key| !m.slots[p][..START].contains(key))
+                    {
+                        m.slots[p][START] = key;
+                    }
                 }
             }
             for i in START + 1..N {
                 if !present[p][i] && m.slots[p][..i].contains(&m.slots[p][i]) {
-                    if let Some(key) = KEYS.iter().map(|entry| entry.0).find(|key| !m.slots[p].contains(key)) { m.slots[p][i] = key; }
+                    if let Some(key) = KEYS
+                        .iter()
+                        .map(|entry| entry.0)
+                        .find(|key| !m.slots[p].contains(key))
+                    {
+                        m.slots[p][i] = key;
+                    }
                 }
             }
         }
-        let old = previous_defaults();
-        for p in 0..2 {
-            if m.slots[p] == old[p] {
-                m.reset_slot(p);
+        for old in previous_defaults() {
+            for p in 0..2 {
+                if m.slots[p] == old[p] {
+                    m.reset_slot(p);
+                }
             }
         }
         for p in 0..2 {

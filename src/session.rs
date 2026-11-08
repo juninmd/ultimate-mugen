@@ -3,7 +3,8 @@ use crate::audio::{Audio, SoundOpts};
 use crate::controls::Controls;
 use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
-#[path = "session/kaito.rs"] mod kaito;
+#[path = "session/kaito.rs"]
+mod kaito;
 use crate::stages::Stage;
 use crate::ui::Ui;
 use crate::vfx::Vfx;
@@ -283,6 +284,25 @@ impl Session {
                 }
                 Pilot::Human(s) => {
                     let mut b = c.player_bits(*s, self.duo);
+                    let side = (*s).min(1);
+                    let slots = b & k::SLOT_MASK;
+                    let fresh = slots & !c.slot_prev[side];
+                    c.slot_prev[side] = slots;
+                    b &= !k::SLOT_MASK;
+                    if fresh != 0 && c.touch.macro_q[side].is_empty() {
+                        let fighter = &self.m.fighters[fi];
+                        if let Some(slot) = k::SLOTS.iter().position(|bit| fresh & bit != 0) {
+                            let seq = c
+                                .shortcuts
+                                .command(&fighter.def.display_name, slot)
+                                .and_then(|name| {
+                                    fighter.def.commands.iter().find(|d| d.name == name)
+                                })
+                                .map(|d| ume_engine::commands::input_macro(d, fighter.facing))
+                                .unwrap_or_default();
+                            c.touch.macro_q[side].extend(seq);
+                        }
+                    }
                     if tag && b & k::T != 0 {
                         b = (b & !k::T) | k::TAG;
                     }
@@ -340,7 +360,7 @@ impl Session {
         let Some(mut link) = self.net.take() else {
             return;
         };
-        let bits = c.player_bits(0, false);
+        let bits = c.player_bits(0, false) & !k::SLOT_MASK;
         let (vfx, rec) = (&mut self.vfx, &mut self.rec);
         let advanced = link.step(&mut self.m, bits, |m, inputs, newest| {
             if newest {
@@ -426,13 +446,11 @@ impl Session {
                     }
                     if !played {
                         let kind = builtin.unwrap_or(match group {
-                            5 => {
-                                match index {
-                                    0 => "hitlight",
-                                    1 => "hit",
-                                    _ => "hitheavy",
-                                }
-                            }
+                            5 => match index {
+                                0 => "hitlight",
+                                1 => "hit",
+                                _ => "hitheavy",
+                            },
                             6 => "guard",
                             7 => "land",
                             _ => {

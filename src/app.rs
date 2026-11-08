@@ -12,8 +12,10 @@ use std::fmt::Write;
 use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::chardef::CharDef;
+use ume_engine::input::k;
 
 mod arcade;
+mod controls_screen;
 mod cutscene;
 mod fight_seed;
 mod keyedit;
@@ -29,7 +31,6 @@ mod update_banner;
 mod versus;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
-mod controls_screen;
 pub(crate) use keyedit::KeyEdit;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -213,10 +214,22 @@ const VIEW_ROWS: usize = 4;
 const SELECT_ROWS: usize = 7;
 const NUMS: [&str; 5] = ["1", "2", "3", "4", "5"];
 
-fn opaque_box(d: &CharDef, key: (i32, i32), s: &ume_engine::chardef::Sprite) -> (f32, f32, f32, f32) {
-    let dims = s.image.as_ref().map(|im| (im.w as usize, im.h as usize)).or_else(|| d.indexed.get(&key).map(|ix| (ix.w as usize, ix.h as usize)));
-    let Some((iw, ih)) = dims else { return (0.0, 0.0, s.width, s.height) };
-    if iw == 0 || ih == 0 { return (0.0, 0.0, s.width, s.height); }
+fn opaque_box(
+    d: &CharDef,
+    key: (i32, i32),
+    s: &ume_engine::chardef::Sprite,
+) -> (f32, f32, f32, f32) {
+    let dims = s
+        .image
+        .as_ref()
+        .map(|im| (im.w as usize, im.h as usize))
+        .or_else(|| d.indexed.get(&key).map(|ix| (ix.w as usize, ix.h as usize)));
+    let Some((iw, ih)) = dims else {
+        return (0.0, 0.0, s.width, s.height);
+    };
+    if iw == 0 || ih == 0 {
+        return (0.0, 0.0, s.width, s.height);
+    }
     let visible = |x: usize, y: usize| match (&s.image, d.indexed.get(&key)) {
         (Some(im), _) => im.rgba[(y * iw + x) * 4 + 3] > 16,
         (None, Some(ix)) => ix.pixels.get(y * iw + x).is_some_and(|&p| p != 0),
@@ -225,7 +238,12 @@ fn opaque_box(d: &CharDef, key: (i32, i32), s: &ume_engine::chardef::Sprite) -> 
     let (mut x0, mut y0, mut x1, mut y1) = (iw, ih, 0, 0);
     for y in 0..ih {
         for x in 0..iw {
-            if visible(x, y) { x0 = x0.min(x); x1 = x1.max(x + 1); y0 = y0.min(y); y1 = y1.max(y + 1); }
+            if visible(x, y) {
+                x0 = x0.min(x);
+                x1 = x1.max(x + 1);
+                y0 = y0.min(y);
+                y1 = y1.max(y + 1);
+            }
         }
     }
     if x0 >= x1 || y0 >= y1 {
@@ -271,6 +289,7 @@ pub struct App {
     pub(crate) key_edit: Option<keyedit::KeyEdit>,
     /** page of the pause-screen move list (14 moves per page) */
     move_page: usize,
+    move_cur: usize,
     pending: Pending,
     import_jobs: Vec<std::thread::JoinHandle<Result<(String, ume_formats::vfs::Vfs), String>>>,
     import_progress: Option<ume_formats::vfs::ZipProgress>,
@@ -293,7 +312,15 @@ pub struct App {
     pub replaying: Option<Replay>,
     /// web deep link waiting for the imported packs to land in the registry
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
-    deep: Option<(Option<String>, Option<String>, Option<usize>, Mode, bool, Option<String>, f32)>,
+    deep: Option<(
+        Option<String>,
+        Option<String>,
+        Option<usize>,
+        Mode,
+        bool,
+        Option<String>,
+        f32,
+    )>,
     /// fighters per team in the team modes (2..=5)
     pub team_n: usize,
     pub team_pick: Vec<usize>,
@@ -375,14 +402,16 @@ impl App {
             let progress = Arc::new(crate::registry::ScanProgress::default());
             let worker = {
                 let progress = progress.clone();
-                std::thread::Builder::new().name("registry-scan".into()).spawn(move || {
-                    let mut reg = Registry::new();
-                    reg.add_bundled_mugen();
-                    reg.scan_folders_with(&progress);
-                    reg.dedupe();
-                    reg.sort_mugen();
-                    reg
-                })
+                std::thread::Builder::new()
+                    .name("registry-scan".into())
+                    .spawn(move || {
+                        let mut reg = Registry::new();
+                        reg.add_bundled_mugen();
+                        reg.scan_folders_with(&progress);
+                        reg.dedupe();
+                        reg.sort_mugen();
+                        reg
+                    })
             };
             match worker {
                 Ok(worker) => {
@@ -471,6 +500,7 @@ impl App {
             settings,
             key_edit: None,
             move_page: 0,
+            move_cur: 0,
             pending: Pending::default(),
             import_jobs: vec![],
             import_progress: None,
@@ -684,7 +714,23 @@ impl App {
                 false,
             );
             let st = stats();
-            self.ui.text(&format!("{} v · {} dc · {} up/{} KB · atlas {:.0}%/{:.0}%", st.vertices, st.draw_calls, st.uploads, st.upload_kb, st.rgba_fill * 100.0, st.index_fill * 100.0), 10.0, 42.0, 14.0, col, Align::Left, false);
+            self.ui.text(
+                &format!(
+                    "{} v · {} dc · {} up/{} KB · atlas {:.0}%/{:.0}%",
+                    st.vertices,
+                    st.draw_calls,
+                    st.uploads,
+                    st.upload_kb,
+                    st.rgba_fill * 100.0,
+                    st.index_fill * 100.0
+                ),
+                10.0,
+                42.0,
+                14.0,
+                col,
+                Align::Left,
+                false,
+            );
         }
         // screen transition: diagonal wipe whenever the screen changes (not into/out of the fight itself)
         let disc = std::mem::discriminant(&self.screen);
@@ -786,18 +832,43 @@ impl App {
             } else {
                 (0, 0, String::new())
             };
-            let ratio = if total > 0 { (done as f32 / total as f32).clamp(0.0, 1.0) } else { 0.15 + 0.15 * (self.ui.t * 3.0).sin().abs() };
+            let ratio = if total > 0 {
+                (done as f32 / total as f32).clamp(0.0, 1.0)
+            } else {
+                0.15 + 0.15 * (self.ui.t * 3.0).sin().abs()
+            };
             let banner_h = 68.0;
-            self.ui.rect(0.0, VH - banner_h, VW, banner_h, Color::new(0.04, 0.03, 0.08, 0.94));
+            self.ui.rect(
+                0.0,
+                VH - banner_h,
+                VW,
+                banner_h,
+                Color::new(0.04, 0.03, 0.08, 0.94),
+            );
             self.ui.rect(0.0, VH - banner_h, VW, 2.0, hex("#00f0ff"));
             let label = if !cur_file.is_empty() {
-                format!("IMPORTANDO RECURSOS MUGEN: {} ({}/{})", cur_file, done, total)
+                format!(
+                    "IMPORTANDO RECURSOS MUGEN: {} ({}/{})",
+                    cur_file, done, total
+                )
             } else {
                 format!("IMPORTANDO RECURSOS MUGEN ({}/{})", done, total)
             };
-            self.ui.progress_bar(80.0, VH - banner_h + 12.0, VW - 160.0, ratio, &label);
-            let hw = format!("⚡ PIPELINE: {} THREADS PARALELAS · SIMD", ume_formats::par::workers(total.max(1)));
-            self.ui.text(&hw, VW - 80.0, VH - banner_h + 8.0, 13.0, hex("#00f0ff"), Align::Right, true);
+            self.ui
+                .progress_bar(80.0, VH - banner_h + 12.0, VW - 160.0, ratio, &label);
+            let hw = format!(
+                "⚡ PIPELINE: {} THREADS PARALELAS · SIMD",
+                ume_formats::par::workers(total.max(1))
+            );
+            self.ui.text(
+                &hw,
+                VW - 80.0,
+                VH - banner_h + 8.0,
+                13.0,
+                hex("#00f0ff"),
+                Align::Right,
+                true,
+            );
         } else if !self.msg.is_empty() {
             self.ui
                 .rect(0.0, VH - 36.0, VW, 36.0, Color::new(0.0, 0.0, 0.0, 0.7));
@@ -846,7 +917,9 @@ impl App {
         let get = |k: &str| q.iter().find(|(a, _)| a == k).map(|(_, b)| b.clone());
         let (p1, p2) = (get("p1"), get("p2"));
         let screen = get("tela");
-        if p1.is_none() && p2.is_none() && screen.is_none() { return; }
+        if p1.is_none() && p2.is_none() && screen.is_none() {
+            return;
+        }
         let mode = match get("modo").as_deref() {
             Some("versus") => Mode::Versus,
             Some("treino") => Mode::Training,
@@ -854,33 +927,71 @@ impl App {
             _ => Mode::Cpu,
         };
         let stage = get("cenario").and_then(|v| v.parse::<usize>().ok());
-        self.deep = Some((p1, p2, stage, mode, get("luta").is_some_and(|v| v != "0"), screen, 0.0));
+        self.deep = Some((
+            p1,
+            p2,
+            stage,
+            mode,
+            get("luta").is_some_and(|v| v != "0"),
+            screen,
+            0.0,
+        ));
     }
 
     #[cfg(target_arch = "wasm32")]
     fn resolve_deep_link(&mut self, dt: f32) {
-        let Some(deep) = self.deep.as_mut() else { return };
+        let Some(deep) = self.deep.as_mut() else {
+            return;
+        };
         deep.6 += dt;
-        let (p1, p2, stage, mode, fight, screen, waited) = (deep.0.clone(), deep.1.clone(), deep.2, deep.3, deep.4, deep.5.clone(), deep.6);
+        let (p1, p2, stage, mode, fight, screen, waited) = (
+            deep.0.clone(),
+            deep.1.clone(),
+            deep.2,
+            deep.3,
+            deep.4,
+            deep.5.clone(),
+            deep.6,
+        );
         let find = |needle: &str| {
             let n = needle.to_lowercase();
             self.reg.chars.iter().position(|c| {
-                c.id.to_lowercase().contains(&n) || c.key.to_lowercase().contains(&n) || c.name.to_lowercase().contains(&n)
+                c.id.to_lowercase().contains(&n)
+                    || c.key.to_lowercase().contains(&n)
+                    || c.name.to_lowercase().contains(&n)
             })
         };
-        let first = p1.as_deref().and_then(find).or_else(|| p2.as_deref().and_then(find));
+        let first = p1
+            .as_deref()
+            .and_then(find)
+            .or_else(|| p2.as_deref().and_then(find));
         let screen_only = p1.is_none() && p2.is_none();
-        if first.is_none() && !screen_only && waited < 20.0 { return; }
+        if first.is_none() && !screen_only && waited < 20.0 {
+            return;
+        }
         let p1 = p1.as_deref().and_then(find).or(first);
         let p2 = p2.as_deref().and_then(find).or(first);
-        if let Some(i) = p1 { self.sel.0 = i; }
-        if let Some(i) = p2 { self.sel.1 = i; }
-        if let Some(s) = stage.filter(|&s| s < self.reg.stages.len()) { self.sel.2 = s; }
+        if let Some(i) = p1 {
+            self.sel.0 = i;
+        }
+        if let Some(i) = p2 {
+            self.sel.1 = i;
+        }
+        if let Some(s) = stage.filter(|&s| s < self.reg.stages.len()) {
+            self.sel.2 = s;
+        }
         self.mode = mode;
         self.team = None;
         self.arcade = None;
         self.screen = match screen.as_deref() {
-            Some("select") => { self.sel_filter = 2; Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] } }
+            Some("select") => {
+                self.sel_filter = 2;
+                Screen::Select {
+                    cur: [self.sel.0, self.sel.1],
+                    picking: 0,
+                    picked: [None, None],
+                }
+            }
             Some("stages") => Screen::Stages { cur: self.sel.2 },
             _ if fight => Screen::Vs { t: 0.0, step: 0 },
             _ => Screen::Stages { cur: self.sel.2 },
@@ -888,7 +999,10 @@ impl App {
         self.deep = None;
     }
 
-    fn go(&mut self, s: Screen) { self.audio.sfx("confirm"); self.screen = s; }
+    fn go(&mut self, s: Screen) {
+        self.audio.sfx("confirm");
+        self.screen = s;
+    }
 
     // ------------------------------------------------------------ title / menu
     fn title(&mut self) {
@@ -1252,16 +1366,17 @@ impl App {
             acc += f.time;
         }
         let fr = &a.frames[idx];
-        let key = if form_g > 1
-            && fr.group == 1
-            && d.sprites.contains_key(&(form_g, fr.index))
-        {
+        let key = if form_g > 1 && fr.group == 1 && d.sprites.contains_key(&(form_g, fr.index)) {
             (form_g, fr.index)
         } else {
             (fr.group, fr.index)
         };
-        let Some(spr) = d.sprites.get(&key) else { return };
-        let Some(tex) = self.g.sprite_tex(d, key, &[]) else { return };
+        let Some(spr) = d.sprites.get(&key) else {
+            return;
+        };
+        let Some(tex) = self.g.sprite_tex(d, key, &[]) else {
+            return;
+        };
         let l = 320.0 / d.local_w;
         let k = kv * self.ui.s;
         let ks = k * spr.scale * l;
@@ -1270,8 +1385,21 @@ impl App {
         let h = spr.height * ks;
         let px = self.ui.x(x) + fr.x * l * k * if mirror { -1.0 } else { 1.0 };
         let py = self.ui.y(y) + fr.y * l * k;
-        let left = if flip { px - (spr.width - spr.axis_x) * ks } else { px - spr.axis_x * ks };
-        tex.draw(left, py - spr.axis_y * ks, self.char_tint, DrawTextureParams { dest_size: Some(vec2(w, h)), flip_x: flip, ..Default::default() });
+        let left = if flip {
+            px - (spr.width - spr.axis_x) * ks
+        } else {
+            px - spr.axis_x * ks
+        };
+        tex.draw(
+            left,
+            py - spr.axis_y * ks,
+            self.char_tint,
+            DrawTextureParams {
+                dest_size: Some(vec2(w, h)),
+                flip_x: flip,
+                ..Default::default()
+            },
+        );
     }
 
     fn char_extent(&mut self, d: &Arc<CharDef>) -> [f32; 4] {
@@ -1287,8 +1415,20 @@ impl App {
                 };
                 let sc = s.scale * l;
                 let (ox, oy, ow, oh) = opaque_box(d, (fr.group, fr.index), s);
-                let (top, left) = (fr.y * l + (oy - s.axis_y) * sc, if fr.flip_h { fr.x * l + (s.width - ow - ox - s.axis_x) * sc } else { fr.x * l + (ox - s.axis_x) * sc });
-                e = [e[0].min(top), e[1].max(top + oh * sc), e[2].min(left), e[3].max(left + ow * sc)];
+                let (top, left) = (
+                    fr.y * l + (oy - s.axis_y) * sc,
+                    if fr.flip_h {
+                        fr.x * l + (s.width - ow - ox - s.axis_x) * sc
+                    } else {
+                        fr.x * l + (ox - s.axis_x) * sc
+                    },
+                );
+                e = [
+                    e[0].min(top),
+                    e[1].max(top + oh * sc),
+                    e[2].min(left),
+                    e[3].max(left + ow * sc),
+                ];
             }
         }
         if e[0] >= e[1] || e[2] >= e[3] {
@@ -1882,8 +2022,18 @@ impl App {
                 );
             }
             if picked[side].is_none() {
-                let tag_w = if side == 0 { 26.0 } else if two { 26.0 } else { 32.0 };
-                let tag_x = if side == 0 { rx - pad } else { rx + cw + pad - tag_w };
+                let tag_w = if side == 0 {
+                    26.0
+                } else if two {
+                    26.0
+                } else {
+                    32.0
+                };
+                let tag_x = if side == 0 {
+                    rx - pad
+                } else {
+                    rx + cw + pad - tag_w
+                };
                 self.ui.rect(tag_x, ry - pad - 15.0, tag_w, 15.0, a);
                 self.ui.text(
                     if side == 0 {
@@ -2247,8 +2397,6 @@ impl App {
         };
         self.draw_boss_toast(dt);
     }
-
-
 
     fn portrait_fit(&mut self, i: usize, x: f32, y: f32, w: f32, h: f32) {
         let e = &self.reg.chars[i];
@@ -2723,7 +2871,9 @@ impl App {
         let st = step as usize;
         if st < n {
             #[cfg(target_arch = "wasm32")]
-            if !crate::web_sprites::ready(&self.reg.chars[plan[st].2])? { return Ok(false); }
+            if !crate::web_sprites::ready(&self.reg.chars[plan[st].2])? {
+                return Ok(false);
+            }
             ume_shell::watchdog::label("load:character");
             if st == 0 && self.pending.jobs.is_empty() {
                 let keep: Vec<usize> = plan.iter().map(|p| p.2).collect();
@@ -2762,11 +2912,8 @@ impl App {
                 if let crate::registry::Src::Native(nc) = &self.reg.chars[r].src {
                     let mut boss_nc = (**nc).clone();
                     boss_nc.boss = true;
-                    let mut def = ume_engine::native::compile_native(
-                        &boss_nc,
-                        self.pal_for(&plan, st),
-                        true,
-                    );
+                    let mut def =
+                        ume_engine::native::compile_native(&boss_nc, self.pal_for(&plan, st), true);
                     if def.c("data.life", 0.0) < 1800.0 {
                         def.constants.insert("data.life".into(), 2000.0);
                     }
@@ -2921,7 +3068,9 @@ impl App {
             }
             sess.team = info;
             sess.is_replay = replay.is_some();
-            let seed = replay.as_ref().map_or_else(crate::app::fight_seed::fresh_seed, |r| r.seed);
+            let seed = replay
+                .as_ref()
+                .map_or_else(crate::app::fight_seed::fresh_seed, |r| r.seed);
             sess.m.rng = seed;
             sess.seed = seed;
             self.fight_rules = replay
@@ -3056,7 +3205,11 @@ impl App {
         let ready = step_now >= total;
         self.draw_versus(t);
         if !ready {
-            let within = if step_now + 1 == total { self.warm_progress() } else { 0.0 };
+            let within = if step_now + 1 == total {
+                self.warm_progress()
+            } else {
+                0.0
+            };
             self.ui.progress_bar(
                 440.0,
                 75.0,
@@ -3090,7 +3243,8 @@ impl App {
                     Ok(true) => break,
                     Ok(false) => {
                         self.ui.begin();
-                        self.ui.loading_screen((st as f32 + 0.5) / total as f32, &self.load_label(st));
+                        self.ui
+                            .loading_screen((st as f32 + 0.5) / total as f32, &self.load_label(st));
                         next_frame().await;
                     }
                     Err(e) => {
@@ -3145,7 +3299,10 @@ impl App {
         let pause_btn = if replaying {
             is_key_pressed(KeyCode::Space) || self.c.pressed(nav::START)
         } else {
-            (self.c.pressed(nav::START) && !is_key_down(self.c.keys.slots[0][15]) && !is_key_pressed(KeyCode::Enter) && !is_key_pressed(KeyCode::KpEnter))
+            (self.c.pressed(nav::START)
+                && !is_key_down(self.c.keys.slots[0][15])
+                && !is_key_pressed(KeyCode::Enter)
+                && !is_key_pressed(KeyCode::KpEnter))
                 || is_key_pressed(KeyCode::Escape)
                 || is_key_pressed(KeyCode::P)
                 || (!s.paused && is_key_pressed(KeyCode::Enter))
@@ -3154,6 +3311,7 @@ impl App {
         if pause_btn {
             self.pause_cur = 0;
             self.move_page = 0;
+            self.move_cur = 0;
             self.audio.sfx("select");
         }
         s.paused = paused;
@@ -3217,7 +3375,11 @@ impl App {
             if n.desyncs > 0 && !self.desync_reported {
                 self.desync_reported = true;
                 let (frame, checksum) = n.desync_at.unwrap_or((0, 0));
-                let rec = self.session.as_ref().map(|s| s.rec.clone()).unwrap_or_default();
+                let rec = self
+                    .session
+                    .as_ref()
+                    .map(|s| s.rec.clone())
+                    .unwrap_or_default();
                 match crate::replays::save_desync(
                     &crate::replays::dir(),
                     Some(&n.config),
@@ -3409,13 +3571,32 @@ impl App {
         const PER_PAGE: usize = 9;
         let total = f.def.movelist.len();
         let pages = total.div_ceil(PER_PAGE).max(1);
-        if self.c.pressed(nav::RIGHT) {
-            self.move_page = (self.move_page + 1) % pages;
+        if total > 0 {
+            if self.c.pressed(nav::RIGHT) {
+                self.move_cur = (self.move_cur + 1) % total;
+            }
+            if self.c.pressed(nav::LEFT) {
+                self.move_cur = (self.move_cur + total - 1) % total;
+            }
+            self.move_cur = self.move_cur.min(total - 1);
+            self.move_page = self.move_cur / PER_PAGE;
         }
-        if self.c.pressed(nav::LEFT) {
-            self.move_page = (self.move_page + pages - 1) % pages;
+        let fighter_name = f.def.display_name.clone();
+        let held_slots = self.c.pad_info.first().map_or(0, |p| p.bits & k::SLOT_MASK)
+            | [KeyCode::Key1, KeyCode::Key2, KeyCode::Key3, KeyCode::Key4]
+                .into_iter()
+                .zip(k::SLOTS)
+                .filter(|(kc, _)| is_key_down(*kc))
+                .fold(0, |b, (_, bit)| b | bit);
+        let fresh_slots = held_slots & !self.c.slot_prev[0];
+        self.c.slot_prev[0] = held_slots;
+        if let (Some(mv), Some(slot)) = (
+            f.def.movelist.get(self.move_cur),
+            k::SLOTS.iter().position(|bit| fresh_slots & bit != 0),
+        ) {
+            self.c.shortcuts.assign(&fighter_name, slot, &mv.command);
+            self.c.shortcuts.save();
         }
-        self.move_page = self.move_page.min(pages - 1);
         if total == 0 {
             self.ui.text(
                 crate::i18n::t("pause.no_moves"),
@@ -3436,13 +3617,31 @@ impl App {
             .take(PER_PAGE)
         {
             let yy = y + 78.0 + (i - self.move_page * PER_PAGE) as f32 * 46.0;
+            if self.clicked_rect(x + 390.0, yy, 630.0, 40.0) {
+                self.move_cur = i;
+            }
             self.ui.rect(
                 x + 390.0,
                 yy,
                 630.0,
                 40.0,
-                Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.06 } else { 0.03 }),
+                if i == self.move_cur {
+                    Color::new(1.0, 0.3, 0.43, 0.35)
+                } else {
+                    Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.06 } else { 0.03 })
+                },
             );
+            if let Some(slot) = self.c.shortcuts.slot_of(&fighter_name, &mv.command) {
+                self.ui.text(
+                    &format!("[{}]", slot + 1),
+                    x + 930.0,
+                    yy + 27.0,
+                    19.0,
+                    hex("#22e8ff"),
+                    Align::Right,
+                    true,
+                );
+            }
             self.ui.text(
                 &mv.name.chars().take(26).collect::<String>(),
                 x + 402.0,
@@ -3457,11 +3656,23 @@ impl App {
                     format!("{:.0}/s PWR", mv.cost)
                 } else if mv.cost >= 1000.0 && mv.cost % 1000.0 == 0.0 {
                     let b = (mv.cost / 1000.0) as i32;
-                    if b == 1 { "1 BAR".to_string() } else { format!("{b} BARS") }
+                    if b == 1 {
+                        "1 BAR".to_string()
+                    } else {
+                        format!("{b} BARS")
+                    }
                 } else {
                     format!("{:.0} PWR", mv.cost)
                 };
-                self.ui.text(&cost_label, x + 1010.0, yy + 27.0, 15.0, hex("#ffd13b"), Align::Right, false);
+                self.ui.text(
+                    &cost_label,
+                    x + 1010.0,
+                    yy + 27.0,
+                    15.0,
+                    hex("#ffd13b"),
+                    Align::Right,
+                    false,
+                );
             }
             let c = &self.c;
             self.ui
@@ -3485,10 +3696,10 @@ impl App {
             self.ui.arrow(x + 910.0, y + 42.0, 26.0, (-1.0, 0.0), WHITE);
             self.ui.arrow(x + 980.0, y + 42.0, 26.0, (1.0, 0.0), WHITE);
             if self.clicked_rect(x + 880.0, y + 20.0, 60.0, 44.0) {
-                self.move_page = (self.move_page + pages - 1) % pages;
+                self.move_cur = ((self.move_page + pages - 1) % pages) * PER_PAGE;
             }
             if self.clicked_rect(x + 950.0, y + 20.0, 60.0, 44.0) {
-                self.move_page = (self.move_page + 1) % pages;
+                self.move_cur = ((self.move_page + 1) % pages) * PER_PAGE;
             }
             self.ui.text(
                 &format!(
@@ -3499,6 +3710,17 @@ impl App {
                 ),
                 x + 400.0,
                 y + 505.0,
+                16.0,
+                hex("#a49cc0"),
+                Align::Left,
+                false,
+            );
+        }
+        if total > 0 {
+            self.ui.text(
+                crate::i18n::t("pause.shortcuts_hint"),
+                x + 400.0,
+                y + 505.0 - if pages > 1 { 24.0 } else { 0.0 },
                 16.0,
                 hex("#a49cc0"),
                 Align::Left,
@@ -3932,7 +4154,9 @@ impl App {
     }
 
     fn mugen_screen(&mut self) {
-        let Screen::Mugen { view, page } = self.screen else { return };
+        let Screen::Mugen { view, page } = self.screen else {
+            return;
+        };
         self.screen = match self.mugen_catalog(view, page) {
             Some((view, page)) => Screen::Mugen { view, page },
             None => Screen::Menu { cur: 9 },

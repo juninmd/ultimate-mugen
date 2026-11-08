@@ -23,6 +23,7 @@ mod replays;
 mod screenpack;
 mod session;
 mod settings;
+mod shortcuts;
 mod shots;
 mod sound_mix;
 mod stage_tour;

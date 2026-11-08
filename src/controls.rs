@@ -2,6 +2,7 @@
 use crate::gamepad::{PadInfo, PadKind, Pads};
 use crate::gfx::*;
 use crate::keybinds::KeyMap;
+use crate::shortcuts::Shortcuts;
 use crate::ui::{hex, Face, Mark};
 use ume_engine::input::k;
 
@@ -274,6 +275,8 @@ pub struct Controls {
     pub menu_pressed: u32,
     pub touch: TouchPad,
     pub glyphs: Glyphs,
+    pub shortcuts: Shortcuts,
+    pub slot_prev: [u32; 2],
 }
 
 /// Keyboard bits for a slot from the (rebindable) map; a lone player also gets the fixed arrows + ZXCVBN layout as aliases.
@@ -289,6 +292,16 @@ fn kb_bits(keys: &KeyMap, slot: usize, solo: bool) -> u32 {
         map(KeyCode::Down, k::D);
         map(KeyCode::Left, k::L);
         map(KeyCode::Right, k::R);
+    }
+    if slot == 0 {
+        for (kc, bit) in [KeyCode::Key1, KeyCode::Key2, KeyCode::Key3, KeyCode::Key4]
+            .into_iter()
+            .zip(k::SLOTS)
+        {
+            if is_key_down(kc) {
+                b |= bit;
+            }
+        }
     }
     b
 }
@@ -314,6 +327,8 @@ impl Controls {
             prev_menu: 0,
             menu_pressed: 0,
             touch: TouchPad::new(touch),
+            shortcuts: Shortcuts::load(),
+            slot_prev: [0; 2],
             glyphs: if touch {
                 Glyphs::Touch
             } else {

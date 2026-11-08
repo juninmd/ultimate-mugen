@@ -15,6 +15,7 @@ use ume_engine::chardef::CharDef;
 
 mod arcade;
 mod cutscene;
+mod fight_seed;
 mod keyedit;
 mod loading;
 mod market;
@@ -2901,10 +2902,9 @@ impl App {
             }
             sess.team = info;
             sess.is_replay = replay.is_some();
-            if let Some(r) = &replay {
-                sess.m.rng = r.seed;
-                sess.seed = r.seed;
-            }
+            let seed = replay.as_ref().map_or_else(crate::app::fight_seed::fresh_seed, |r| r.seed);
+            sess.m.rng = seed;
+            sess.seed = seed;
             self.fight_rules = replay
                 .as_ref()
                 .map(|r| r.rules)
@@ -3193,12 +3193,8 @@ impl App {
             self.net_overlay(n);
             if n.desyncs > 0 && !self.desync_reported {
                 self.desync_reported = true;
-                let frame = n.rollbacks.min(u32::MAX as u64) as u32;
-                let (checksum, rec) = self
-                    .session
-                    .as_ref()
-                    .map(|s| (s.m.checksum(), s.rec.clone()))
-                    .unwrap_or((0, vec![]));
+                let (frame, checksum) = n.desync_at.unwrap_or((0, 0));
+                let rec = self.session.as_ref().map(|s| s.rec.clone()).unwrap_or_default();
                 match crate::replays::save_desync(
                     &crate::replays::dir(),
                     Some(&n.config),
@@ -3845,11 +3841,15 @@ impl App {
             round_time: 0,
             rounds: 1,
             life: 2,
+            single_round: false,
+            classic_pushbox: true,
             ..saved
         };
         self.start_fight().await;
         self.settings = saved;
         if let Some(s) = self.session.as_mut() {
+            s.m.rng = ume_engine::matchs::DEFAULT_SEED;
+            s.seed = ume_engine::matchs::DEFAULT_SEED;
             s.net = Some(link);
         }
     }

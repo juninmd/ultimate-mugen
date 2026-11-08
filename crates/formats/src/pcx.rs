@@ -123,8 +123,7 @@ pub fn read_rgb_palette(buf: &[u8], offset: usize) -> Vec<u8> {
             pal[c] = u32::from_ne_bytes([r, g, b, a]);
         }
     }
-    let mut pal = std::mem::ManuallyDrop::new(pal);
-    unsafe { Vec::from_raw_parts(pal.as_mut_ptr() as *mut u8, 1024, 1024) }
+    pal.iter().flat_map(|v| v.to_ne_bytes()).collect()
 }
 
 /// Locate the 256-color palette of a PCX buffer. Preferred: the 0x0C marker

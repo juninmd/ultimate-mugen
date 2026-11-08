@@ -97,11 +97,7 @@ pub fn sprite_to_rgba(s: &DecodedSprite, palette: Option<&[u8]>) -> Vec<u8> {
     for i in 0..limit {
         out_u32[i] = table[idx[i] as usize];
     }
-    let mut out_u32 = std::mem::ManuallyDrop::new(out_u32);
-    let ptr = out_u32.as_mut_ptr() as *mut u8;
-    let len = out_u32.len() * 4;
-    let cap = out_u32.capacity() * 4;
-    unsafe { Vec::from_raw_parts(ptr, len, cap) }
+    out_u32.iter().flat_map(|v| v.to_ne_bytes()).collect()
 }
 
 pub const MAX_SPRITE_PIXELS: usize = 1 << 24;
@@ -490,8 +486,7 @@ fn decode_v2_image(
                 for (p, chunk) in data[..count * 3].chunks_exact(3).enumerate() {
                     out[p] = u32::from_ne_bytes([chunk[0], chunk[1], chunk[2], 255]);
                 }
-                let mut out = std::mem::ManuallyDrop::new(out);
-                let bytes = unsafe { Vec::from_raw_parts(out.as_mut_ptr() as *mut u8, n * 4, n * 4) };
+                let bytes: Vec<u8> = out.iter().flat_map(|v| v.to_ne_bytes()).collect();
                 spr.rgba = Some(Arc::new(bytes));
             } else {
                 let mut out = vec![0u8; n];

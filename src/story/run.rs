@@ -18,6 +18,7 @@ pub enum Next {
 pub const STARTING_CREDITS: u8 = 3;
 const WAVE_RECOVERY: f32 = 0.2;
 const STAGE_RECOVERY: f32 = 0.6;
+const MIN_CARRIED_LIFE: f32 = 0.08;
 const CONTINUE_LIFE: f32 = 0.6;
 const WAVE_BONUS: i64 = 500;
 const BOSS_BONUS_FACTOR: i64 = 4;
@@ -68,7 +69,12 @@ impl StoryRun {
         (1 + self.stage as i32 + boss_push + base / 4).clamp(1, 8)
     }
 
-    pub fn won_fight(&mut self, fight_score: i64) -> Next {
+    pub fn fight_index(&self) -> usize {
+        self.wave.min(self.stage_def().waves.len())
+    }
+
+    pub fn won_fight(&mut self, fight_score: i64, remaining_life: f32) -> Next {
+        self.life = remaining_life.clamp(MIN_CARRIED_LIFE, 1.0);
         let bonus = WAVE_BONUS * (self.stage as i64 + 1);
         let boss_fight = self.is_boss_fight();
         self.score += fight_score.max(0) + if boss_fight { bonus * BOSS_BONUS_FACTOR } else { bonus };
@@ -119,11 +125,11 @@ mod tests {
         let waves = run.stage_def().waves.len();
         for _ in 0..waves {
             assert!(!run.is_boss_fight());
-            assert_eq!(run.won_fight(0), Next::Wave);
+            assert_eq!(run.won_fight(0, 1.0), Next::Wave);
         }
         assert!(run.is_boss_fight());
         assert_eq!(run.foes("kaito"), vec!["bruno"]);
-        assert_eq!(run.won_fight(0), Next::StageCleared);
+        assert_eq!(run.won_fight(0, 1.0), Next::StageCleared);
         assert_eq!((run.stage, run.wave), (1, 0));
     }
 
@@ -139,7 +145,7 @@ mod tests {
         let mut run = StoryRun::default();
         run.stage = STAGES.len() - 1;
         run.wave = run.stage_def().waves.len();
-        assert_eq!(run.won_fight(0), Next::Finished);
+        assert_eq!(run.won_fight(0, 1.0), Next::Finished);
         assert_eq!(run.phase, Phase::Victory);
     }
 
@@ -152,6 +158,24 @@ mod tests {
         run.continue_fight();
         assert_eq!(run.credits, STARTING_CREDITS - 1);
         assert!((run.life - CONTINUE_LIFE).abs() < 1e-6);
+    }
+
+    #[test]
+    fn health_carries_over_and_recovers_a_little() {
+        let mut run = StoryRun::default();
+        run.won_fight(0, 0.3);
+        assert!((run.life - (0.3 + WAVE_RECOVERY)).abs() < 1e-6);
+        run.won_fight(0, 0.0);
+        assert!(run.life >= MIN_CARRIED_LIFE);
+    }
+
+    #[test]
+    fn longer_stages_have_a_strip_segment_per_fight() {
+        for stage in STAGES.iter() {
+            assert!(stage.waves.len() >= 4);
+            let mid = super::super::stages::fight_center(stage, super::super::stages::fights_in(stage) / 2);
+            assert!(mid.abs() <= super::super::stages::SEGMENT_WORLD);
+        }
     }
 
     #[test]
@@ -178,6 +202,20 @@ mod tests {
         for stage in STAGES.iter() {
             assert!(stage.waves.iter().all(|w| !w.is_empty() && w.len() <= 4));
             assert_ne!(stage.boss, stage.alt_boss);
+        }
+    }
+}
+
+#[cfg(test)]
+mod strip_tests {
+    use super::*;
+
+    #[test]
+    fn every_arena_strip_has_one_segment_per_fight() {
+        for stage in STAGES.iter() {
+            let strip = crate::stages::story_strip(stage.arena).expect("strip");
+            assert_eq!(strip.w as usize, 836 * crate::story::fights_in(stage));
+            assert_eq!(strip.h, 470);
         }
     }
 }

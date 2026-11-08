@@ -1077,17 +1077,16 @@ impl MatchRenderer {
                     }
                 }
             }
-            StageArt::Illustrated { image, ambience } => {
+            StageArt::Illustrated { image, ambience, span } => {
                 let ground = m.stage.zoffset - m.camera.y;
                 let top_ground = m.stage.zoffset - m.stage.bound_high.min(0.0);
                 let bottom_ground = m.stage.zoffset - m.stage.bound_low.max(0.0);
                 let h = (top_ground / 0.85)
                     .max((m.view_h - bottom_ground) / 0.15)
                     .max(m.view_h);
-                let w = (h * image.w as f32 / image.h as f32).max(m.view_w);
-                let x = ((m.view_w - w) * 0.5 - m.camera.x * 0.12 * m.zoom).clamp(m.view_w - w, 0.0);
+                let (h, w, x) = crate::stages::illustration_layout(*span, image.w as f32 / image.h as f32, h, m.view_w, m.camera.x, m.zoom);
                 let rect = ImageRect { x: x + shx, y: ground - h * 0.85 + shy, w, h, view_w: m.view_w, view_h: m.view_h, cam_x: m.camera.x };
-                if front { return draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true); }
+                if front { return if *span > 0.0 { } else { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true) }; }
                 let texture = g.texture(image, true);
                 draw_texture_ex(
                     &texture,
@@ -1099,7 +1098,7 @@ impl MatchRenderer {
                         ..Default::default()
                     },
                 );
-                draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false);
+                if *span <= 0.0 { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false); }
             }
             StageArt::Mugen(bg) => {
                 let scl = bg.scl;

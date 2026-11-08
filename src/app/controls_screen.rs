@@ -19,7 +19,7 @@ impl App {
             Align::Left,
             true,
         );
-        let kl = |i: usize| crate::keybinds::label(self.c.keys.slots[0][i]);
+        let kl = |i: usize| crate::keybinds::id(self.c.keys.slots[0][i]).unwrap_or("?");
         let touch = self.c.touch.enabled;
         let mut cols = vec![
             Glyphs::Keyboard,
@@ -46,7 +46,7 @@ impl App {
             (crate::i18n::t("controls.pause"), &[k::S], ""),
         ];
         let move_text = |g: Glyphs| match g {
-            Glyphs::Keyboard => format!("{} {} {} {} / setas", kl(0), kl(1), kl(2), kl(3)),
+            Glyphs::Keyboard => format!("{} {} {} {}", kl(0), kl(1), kl(2), kl(3)),
             Glyphs::Touch => "Analógico esquerdo".into(),
             Glyphs::Pad(_) => "Analógico ou direcional".into(),
         };

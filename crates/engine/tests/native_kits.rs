@@ -15,6 +15,7 @@ fn every_fighter_has_the_full_toolkit() {
         let has = |prefix: &str| nc.moves.iter().any(|m| m.id.starts_with(prefix));
         assert!(has("ex_"), "{id} ex move");
         assert!(has("launcher") && has("overhead") && has("divekick"), "{id} normals");
+        if has("ult_") { assert!(has("slide") && has("escape_burst"), "{id} mixups"); }
         assert!(nc.passives.is_some(), "{id} passive");
         let supers = nc.moves.iter().filter(|m| m.kind == "super").count();
         assert!(supers >= 2, "{id} supers");
@@ -43,12 +44,12 @@ fn toolkit_compiles_and_reaches_the_move_list() {
     for id in KIT {
         let nc = load(id);
         let def = compile_native(&nc, 1, false);
-        for m in nc.moves.iter().filter(|m| m.id.starts_with("ex_") || m.id.starts_with("ult_") || m.id == "launcher") {
+        for m in nc.moves.iter().filter(|m| m.id.starts_with("ex_") || m.id.starts_with("ult_") || m.id == "launcher" || m.id == "escape_burst") {
             assert!(def.movelist.iter().any(|e| e.name == m.name), "{id} movelist {}", m.name);
         }
         assert!(def.ai_commands.len() >= nc.moves.len(), "{id} ai commands");
         if nc.moves.iter().any(|m| m.id.starts_with("ult_")) {
-            assert!(def.forms.len() == 1, "{id} awakening form");
+            assert!(def.forms.len() == 2, "{id} awakening and ascended forms");
         }
     }
 }

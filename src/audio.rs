@@ -874,7 +874,7 @@ impl Audio {
         let bytes = self
             .music_wav
             .remove(&id)
-            .unwrap_or_else(|| wav(&music(id)));
+            .unwrap_or_else(|| ume_formats::perf::time(&format!("music:{id}"), || wav(&music(id))));
         if let Ok(s) = load_sound_from_bytes(&bytes).await {
             self.music.insert(id, s);
         }

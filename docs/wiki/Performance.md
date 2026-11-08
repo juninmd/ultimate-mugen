@@ -432,3 +432,11 @@ etain_mut.
   - `commands::parse_command`: Replaced `String` heap collection in release/charge command prefix parsing (`~30`) with zero-alloc byte slice indexing and ASCII byte matching for prefix symbols (`/`, `$`, `>`, `~`).
   - `fighter::change_anim`: Added `Arc::ptr_eq` guard avoiding reference count bumps when `from` is already the active `anim_def`.
   - `fighter::change_anim_own`: Switched to direct immutable reference borrowing of `self.def` without cloning the `Arc<CharDef>` atomic counter.
+
+- **Web select screen** (`scripts/web-frame-probe.js`, `scripts/web-profile.js`):
+  - Native roster tiles draw `portrait.png` through `CharEntry::tile_portrait` (one small PNG decode, cached per pack revision) instead of compiling an idle+win preview per tile; the full preview is only built for the focused or picked fighter.
+  - Previews wait until the fighter's sprite pack has arrived (`CharEntry::tile_art_ready`), so the rig rasterizer is never used as a stand-in while the pack downloads.
+  - On `wasm32` a fighter whose pack is missing previews only the first frame of each menu animation, and the automatic art resolution is capped at 3.0 (the rig rasterizer is single-threaded there).
+  - `Recolor::apply_in_region` uses a multiplicative hasher and a last-colour memo instead of SipHash per pixel.
+  - The sprite pack cache holds 64 packs, so rosters above 24 fighters no longer evict each other.
+  - Measured with the profiler in headless Chromium (select screen, 53 cursor moves): main-thread busy time dropped from about 98 s to about 2.5 s.

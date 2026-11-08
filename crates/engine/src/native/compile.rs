@@ -22,7 +22,6 @@ pub const STANDARD_ANIMS: &[(&str, i32)] = &[
 /// Full compile (all animations).
 pub fn compile_native(nc: &NativeChar, pal_no: i32, with_images: bool) -> CharDef { compile_native_with(nc, pal_no, with_images, None) }
 /// Fast compile for menus (select grid, VS screen): rasterizes only idle + win animations (~10x cheaper than the full set).
-pub fn compile_native_preview(nc: &NativeChar, pal_no: i32) -> CharDef { compile_native_with(nc, pal_no, true, Some(&[0, 181])) }
 
 fn frame_key(fr: &NativeFrame) -> String { serde_json::to_string(&(&fr.pose, &fr.effect, &fr.hit, &fr.sprite)).unwrap_or_default() }
 

@@ -109,6 +109,7 @@ fn five_guarded_hits_break_the_guard() {
     let mut m = pair(&[("data.guardpoints", 200.0)]);
     enter(&mut m, 1, 120);
     ticks(&mut m, 1);
+    enter(&mut m, 1, 120);
     let mut hd = hit(5.0);
     hd.guard_damage = 1.0;
     hd.guard_points = 40.0;
@@ -139,6 +140,7 @@ fn the_assert_flags_protect_each_system() {
     let mut m = pair(&[("data.guardpoints", 100.0)]);
     enter(&mut m, 1, 120);
     ticks(&mut m, 1);
+    enter(&mut m, 1, 120);
     m.fighters[1].asserts |= asf::NOGUARDPOINTSDAMAGE;
     let mut guard = hit(5.0);
     guard.guard_points = 60.0;

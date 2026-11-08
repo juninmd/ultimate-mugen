@@ -4,7 +4,7 @@ use crate::commands::CommandState;
 use crate::input::InputHistory;
 use std::sync::Arc;
 
-mod data;
+mod anim_time; mod data;
 pub use data::*;
 use crate::palette::Trans;
 pub use crate::flags::asf;
@@ -124,7 +124,7 @@ impl Fighter {
     pub fn frame(&self) -> Option<&AnimFrame> { self.anim().and_then(|a| a.frames.get(self.elem)) }
 
     pub fn anim_time_trig(&self) -> i32 {
-        if self.anim_total_time < 0 { -1 } else { self.anim_elapsed - self.anim_total_time }
+        self.anim_time_value()
     }
     pub fn elem_start(&self, n: usize) -> i32 {
         if n <= 1 { return 0; }

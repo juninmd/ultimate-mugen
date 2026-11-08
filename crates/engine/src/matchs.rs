@@ -13,6 +13,7 @@ mod armor;
 mod bounds;
 mod forms;
 mod types;
+mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -401,11 +402,12 @@ impl Match {
         if st == 'S' || st == 'C' {
             let guard_blocked = self.fighters[i].has_assert(if st == 'S' { asf::NOSTANDGUARD } else { asf::NOCROUCHGUARD });
             let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD) || self.fighters[i].guard_button;
+            if self.builtin_guard_exit(i, s, guard_input) { return; }
             if guard_input && !guard_blocked && self.in_guard_dist(i) && !(120..=155).contains(&s) { let own = self.fighters[i].def.clone(); self.change_state(i, 120, own); return; }
             if st == 'S' {
                 if cmd(self, "holdup") && !self.fighters[i].has_assert(asf::NOJUMP) { let own = self.fighters[i].def.clone(); self.change_state(i, 40, own); return; }
                 if cmd(self, "holddown") && s != 10 && s != 11 && !self.fighters[i].has_assert(asf::NOCROUCH) { let own = self.fighters[i].def.clone(); self.change_state(i, 10, own); return; }
-                if (cmd(self, "holdfwd") || cmd(self, "holdback")) && s != 20 && !self.fighters[i].has_assert(asf::NOWALK) && (s == 0 || s == 52) { let own = self.fighters[i].def.clone(); self.change_state(i, 20, own); }
+                self.builtin_walk(i, s);
             } else if !cmd(self, "holddown") && s == 11 && !self.fighters[i].has_assert(asf::NOSTAND) { let own = self.fighters[i].def.clone(); self.change_state(i, 12, own); }
         } else if st == 'A' {
             let f = &self.fighters[i];
@@ -569,7 +571,7 @@ impl Match {
                     let mut seen = [false; 2];
                     for i in self.root_indices() {
                         let s = self.fighters[i].side.min(1);
-                        if seen[s] || !self.fighters[i].def.anims.contains_key(&190) { continue; }
+                        if seen[s] || !self.fighters[i].def.anims.contains_key(&190) || (190..=199).contains(&self.fighters[i].state_no) { continue; }
                         seen[s] = true;
                         let taunt = s == 1 && self.fighters[i].def.anims.contains_key(&195);
                         self.change_engine_state(i, if taunt { ENGINE_STATE_FACE_OFF_TAUNT } else { ENGINE_STATE_FACE_OFF });

@@ -1,4 +1,6 @@
 #![allow(dead_code)]
+pub mod gogeta;
+pub mod render;
 use std::collections::HashMap;
 use std::sync::Arc;
 use ume_engine::chardef::{AnimFrame, Animation, Box4, CharDef, Source};

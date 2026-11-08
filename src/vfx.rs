@@ -7,6 +7,10 @@ use crate::render::Gfx;
 use crate::ui::Ui;
 use ume_engine::matchs::{Event, Match};
 
+mod crack;
+mod impact;
+pub mod quality;
+
 #[derive(Clone, Copy, PartialEq)]
 enum Kind {
     Spark,
@@ -15,6 +19,7 @@ enum Kind {
     Debris,
     Ember,
     Slash,
+    Crack,
 }
 struct P {
     k: Kind,
@@ -524,68 +529,7 @@ impl Vfx {
                 attacker,
                 defender,
                 ..
-            } => {
-                let Some(df) = m.fighters.get(*defender) else {
-                    return;
-                };
-                let (dx, dy, dface) = Self::chest_of(df);
-                let dir = if m.fighters.get(*attacker).is_some_and(|a| a.pos.x <= dx) {
-                    1.0
-                } else {
-                    -1.0
-                };
-                let (x, y) = (dx + dface * 7.0, dy);
-                let mag = (damage / 90.0).clamp(0.2, 1.4);
-                if *guarded {
-                    self.spark_burst(x, y, dir, 5, 3.0, [0.45, 0.75, 1.0], 0.9);
-                    self.ring(x, y, 14.0, 0.2, 1.2, [0.5, 0.8, 1.0]);
-                    self.trauma = (self.trauma + 0.05).min(1.0);
-                    self.tag(x, y - 14.0, "GUARD", [0.55, 0.8, 1.0]);
-                    return;
-                }
-                let counter = self.pre_mt.get(*defender).copied() == Some('A');
-                let n = 5 + (mag * 8.0) as usize;
-                self.spark_burst(x, y, dir, n, 3.0 + mag * 3.5, [1.0, 0.62, 0.15], 1.0);
-                self.spark_burst(x, y, dir, 2, 5.0, [1.0, 1.0, 0.9], 0.4);
-                self.glow(x, y, 12.0 + mag * 10.0, 0.12, [1.0, 0.75, 0.35]);
-                self.slashes(
-                    x,
-                    y,
-                    dir,
-                    2 + (mag * 2.0) as usize,
-                    16.0 + mag * 10.0,
-                    [1.0, 0.95, 0.8],
-                );
-                self.ring(x, y, 16.0 + mag * 18.0, 0.24, 1.4, [1.0, 0.85, 0.5]);
-                self.trauma = (self.trauma + 0.07 + mag * 0.12).min(0.6);
-                self.punch = self.punch.max(0.008 + mag * 0.012);
-                if *heavy || mag > 0.75 {
-                    self.debris(x, y + 10.0, 4, [0.8, 0.72, 0.6]);
-                    self.flash_add(0.1);
-                    self.punch = self.punch.max(0.022);
-                }
-                if !self.first_hit && m.round_state == 2 && !m.training {
-                    self.first_hit = true;
-                    self.tag(x, y - 26.0, "FIRST ATTACK", [0.4, 0.9, 1.0]);
-                }
-                let col = if counter {
-                    [1.0, 0.45, 0.35]
-                } else {
-                    [1.0, 0.92, 0.55]
-                };
-                self.float(
-                    x + dir * 12.0,
-                    y - 6.0,
-                    format!("{}", *damage as i32),
-                    6.0 + mag * 2.5,
-                    col,
-                );
-                if counter {
-                    self.sfx.push("counter");
-                    self.tag(x, y - 14.0, "COUNTER", [1.0, 0.45, 0.35]);
-                    self.ring(x, y, 18.0, 0.2, 1.2, [1.0, 0.45, 0.35]);
-                }
-            }
+            } => self.on_hit(*damage, *guarded, *heavy, *attacker, *defender, m),
             Event::Super { fighter, .. } => {
                 self.super_t = 1.0;
                 self.super_owner = *fighter;
@@ -1253,6 +1197,7 @@ impl Vfx {
                 g.oy + (y - m.camera.y + m.stage.zoffset + shy) * s,
             )
         };
+        self.draw_cracks(&tp, s);
         // normal blend
         for p in self
             .parts

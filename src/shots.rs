@@ -154,7 +154,7 @@ pub(crate) async fn fight(
                 }
             }
         }
-        "counter" | "guard" | "heavy" => {
+        "counter" | "guard" | "heavy" | "hyper" => {
             for _ in 0..600 {
                 if s.m.round_state == 2 && s.m.fighters[0].ctrl {
                     break;
@@ -168,7 +168,11 @@ pub(crate) async fn fight(
             let ev = ume_engine::matchs::Event::Hit {
                 attacker_side: 0,
                 defender_side: 1,
-                damage: if want == "heavy" { 120.0 } else { 60.0 },
+                damage: match want {
+                    "hyper" => 200.0,
+                    "heavy" => 120.0,
+                    _ => 60.0,
+                },
                 guarded: want == "guard",
                 heavy: want == "heavy",
                 attacker: 0,
@@ -361,6 +365,7 @@ async fn fx_tour(app: &mut App, dir: &str) {
     for (name, want) in [
         ("fx1-hit", "hit"),
         ("fx2-heavy", "heavy"),
+        ("fx6-hyper", "hyper"),
         ("fx3-counter", "counter"),
         ("fx4-guard", "guard"),
         ("fx5-super", "super"),

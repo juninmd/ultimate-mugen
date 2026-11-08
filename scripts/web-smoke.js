@@ -27,10 +27,16 @@ const server = staticServer(dir, types);
   await p.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
   await p.waitForTimeout(12000);
   await p.locator('#glcanvas').focus();
+  const shotDir = process.env.WEB_SMOKE_SHOTS; if (shotDir) fs.mkdirSync(shotDir, { recursive: true });
+  const snap = async name => { if (shotDir) await p.screenshot({ path: path.join(shotDir, `${name}.png`) }).catch(() => {}); };
+  await snap('00-after-boot');
   const key = async (k, wait = 1000) => { await p.keyboard.down(k); await p.waitForTimeout(200); await p.keyboard.up(k); await p.waitForTimeout(wait); };
   await key('Enter');                       // title → menu
+  await snap('01-menu');
   await key('ArrowDown'); await key('ArrowDown'); await key('Enter', 1500);  // Arcade, Survival → CPU (Versus CPU) → select
-  await key('Enter', 1500); await key('Enter', 1500); // P1, P2 → stages
+  await snap('02-select');
+  await key('Enter', 1500); await snap('03-p1'); await key('Enter', 1500); // P1, P2 → stages
+  await snap('04-stages');
   if (stageRequests.length) problems.push(`Full stage images fetched before confirmation: ${stageRequests.length}`);
   // A slow runner can stall the wasm main thread for seconds and swallow a tap, so the confirm key is retried until the
   // stage request shows up instead of trusting one fixed 1.5 s step.
@@ -38,6 +44,7 @@ const server = staticServer(dir, types);
   for (let attempt = 0; attempt < 4 && !stageRequests.length; attempt++) {
     await key('Enter', 500);                // stage → VS / loading
     await p.waitForRequest(r => /\/assets\/stages\/[^/]+\.png$/.test(new URL(r.url()).pathname), { timeout: 8000 }).catch(() => null);
+    await snap(`05-confirm-${attempt + 1}`);
     timeline.push(`confirm attempt ${attempt + 1} at +${Date.now() - startedAt} ms, stage requests ${stageRequests.length}`);
   }
   await p.waitForTimeout(6000);             // intro + fight start

@@ -50,6 +50,13 @@ jobs:
       - run: ./scripts/build-web.sh
       - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
       - run: node scripts/web-smoke.js web/dist
+        env:
+          WEB_SMOKE_SHOTS: web-smoke-shots
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: web-smoke-shots
+          path: web-smoke-shots/*.png
   android:
     runs-on: ubuntu-latest
     steps:

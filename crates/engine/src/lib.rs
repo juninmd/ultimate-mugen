@@ -18,6 +18,7 @@ pub mod controllers;
 pub mod sctrl;
 pub mod hitdef;
 pub mod matchs;
+pub mod lane;
 pub mod tag;
 pub mod camera;
 pub mod scene_triggers;

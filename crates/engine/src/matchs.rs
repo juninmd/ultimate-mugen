@@ -39,6 +39,7 @@ pub struct Match {
     /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
     pub team_simul: bool,
     pub team_tag: bool,
+    pub lanes: crate::lane::LaneRules,
     /// MUGEN-style pushbox: an attacking fighter does not get pushed back by the defender; off = symmetric split.
     pub classic_pushbox: bool,
     pub tag_cooldown: [i32; 2],
@@ -80,7 +81,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, team_tag: false, classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, team_tag: false, lanes: Default::default(), classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
@@ -700,7 +701,7 @@ impl Match {
                 if f.ikemen.standby { bits = 0; }
             }
             if bits & crate::input::k::T != 0 && awaken_len < awaken.len() { awaken[awaken_len] = fi; awaken_len += 1; }
-            k += 1;
+            k += 1; if self.lanes.active { f.lane_step(bits, &self.lanes); } bits &= !crate::input::k::LANE_MASK;
             if f.assert_input.1 > 0 { bits |= f.assert_input.0; f.assert_input.1 -= 1; }
             if f.input_shift > 0 { let (b, fa) = (bits, f.facing as i32); for _ in 0..f.input_shift { f.history.push(b, fa); } }
             else if f.input_shift < 0 { f.history.rewind(f.input_shift); }
@@ -873,7 +874,7 @@ impl Match {
             for b in a + 1..n {
                 let (fa, fb) = (&self.fighters[a], &self.fighters[b]);
                 let pushable = |f: &Fighter| !f.destroyed && (!f.is_helper || f.helper_player) && f.player_push && f.state_type != 'L';
-                if fa.side == fb.side || !pushable(fa) || !pushable(fb) { continue; }
+                if fa.side == fb.side || !pushable(fa) || !pushable(fb) || !self.same_lane(a, b) { continue; }
                 if fa.pos.y - fa.height_top() > fb.pos.y + fb.height_bottom() || fb.pos.y - fb.height_top() > fa.pos.y + fa.height_bottom() { continue; }
                 let (l, r) = if fa.pos.x <= fb.pos.x { (a, b) } else { (b, a) };
                 let (fl, fr) = (&self.fighters[l], &self.fighters[r]);
@@ -1079,7 +1080,7 @@ impl Match {
             if self.scratch_c1.is_empty() { continue; }
             for d in 0..self.fighters.len() {
                 let fd = &self.fighters[d];
-                if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) { continue; }
+                if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) || !self.same_lane(a, d) { continue; }
                 if hd.hit_once && !fa.hitdef_targets.is_empty() { continue; }
                 if hd.p2clsncheck && fd.frame().is_none_or(|f| f.clsn2.is_empty()) { continue; }
                 if !self.can_be_hit(d, hd, fa.side) { continue; }

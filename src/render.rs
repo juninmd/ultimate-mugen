@@ -382,7 +382,7 @@ impl MatchRenderer {
                 let _ = m2;
                 draw_ellipse(
                     g.ox + (Self::sx(m, f.pos.x) + shx) * s,
-                    g.oy + (Self::sy(m, 0.0) + shy) * s,
+                    g.oy + (Self::sy(m, f.lane) + shy) * s,
                     r * (1.0 + 0.25 * (2 - k) as f32) * s,
                     r * 0.22 * (1.0 + 0.25 * (2 - k) as f32) * s,
                     0.0,
@@ -421,7 +421,7 @@ impl MatchRenderer {
                         &f.anim_def,
                         fr,
                         f.pos.x,
-                        -f.pos.y * sh.yscale,
+                        -f.pos.y * sh.yscale + f.lane,
                         f.facing,
                         f.lscl,
                         [f.draw_scale[0], f.draw_scale[1] * sh.yscale.abs()],
@@ -443,7 +443,7 @@ impl MatchRenderer {
                         &f.anim_def,
                         fr,
                         f.pos.x,
-                        -f.pos.y,
+                        -f.pos.y + f.lane,
                         f.facing,
                         f.lscl,
                         f.draw_scale,
@@ -499,7 +499,7 @@ impl MatchRenderer {
         for (i, f) in m.fighters.iter().enumerate() {
             if !f.destroyed {
                 items.push((
-                    f.spr_priority
+                    f.spr_priority + (f.lane / 6.0) as i32
                         - if f.has_assert(ume_engine::flags::asf::DRAWUNDER) {
                             1000
                         } else {
@@ -647,13 +647,13 @@ impl MatchRenderer {
         }
         let s = g.view_scale;
         for f in roots {
-            if !f.alive || f.destroyed || f.has_assert(ume_engine::flags::asf::INVISIBLE) {
+            if !f.alive || f.destroyed || f.has_assert(ume_engine::flags::asf::INVISIBLE) || (m.lanes.active && f.side == 1) {
                 continue;
             }
             let hgt = f.def.c("size.height", 60.0) as f32 * f.lscl + 14.0;
             let (cx, cy) = (
                 g.ox + (Self::sx(m, f.pos.x) + shx) * s,
-                g.oy + (Self::sy(m, f.pos.y - hgt) + shy) * s,
+                g.oy + (Self::sy(m, f.pos.y + f.lane - hgt) + shy) * s,
             );
             let mine = self.human.contains(&f.id);
             let (w, h) = (
@@ -716,7 +716,7 @@ impl MatchRenderer {
         if f.def.source == ume_engine::chardef::Source::Mugen {
             let tint = self.fx.ambient(f.pos.x, m.camera.x);
             let o = DrawOpts { alpha: a0, tint, vflip: true, ..Default::default() };
-            Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
+            Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y + f.lane, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
             return;
         }
         let def = &f.anim_def;
@@ -735,7 +735,7 @@ impl MatchRenderer {
             flip = !flip;
         }
         let px = Self::sx(m, f.pos.x) + fr.x * f.lscl * xs * f.facing + shx;
-        let py = Self::sy(m, -f.pos.y) + fr.y * f.lscl * ys + shy;
+        let py = Self::sy(m, -f.pos.y + f.lane) + fr.y * f.lscl * ys + shy;
         let (w, h) = (spr.width * kx, spr.height * ky);
         let left = if flip {
             px - (spr.width - spr.axis_x) * kx
@@ -911,7 +911,7 @@ impl MatchRenderer {
                     &f.anim_def,
                     fr,
                     x + dx,
-                    f.pos.y + dy,
+                    f.pos.y + f.lane + dy,
                     f.facing,
                     f.lscl,
                     extra,
@@ -954,7 +954,7 @@ impl MatchRenderer {
                     &f.anim_def,
                     fr,
                     x + dx,
-                    f.pos.y + dy,
+                    f.pos.y + f.lane + dy,
                     f.facing,
                     f.lscl,
                     extra,
@@ -979,7 +979,7 @@ impl MatchRenderer {
             &f.anim_def,
             fr,
             x,
-            f.pos.y + f.draw_offset.y,
+            f.pos.y + f.lane + f.draw_offset.y,
             f.facing,
             f.lscl,
             ds,

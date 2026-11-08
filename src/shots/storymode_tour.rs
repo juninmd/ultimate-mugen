@@ -70,9 +70,29 @@ fn foes_alive(app: &App) -> usize {
         .unwrap_or(0)
 }
 
-async fn play_fight(app: &mut App, dir: &str, name: &str, strong: bool) -> bool {
+fn place_hero(app: &mut App, lane: f32) {
+    if let Some(s) = app.session.as_mut() {
+        if let Some(hero) = s.m.fighters.iter_mut().find(|f| !f.is_helper && f.side == 0) {
+            hero.lane = lane;
+        }
+    }
+}
+
+async fn cap_lane_extremes(app: &mut App, dir: &str, name: &str, far: f32, near: f32) {
+    place_hero(app, far);
+    cap_fight(app, dir, &format!("{name}-lane-far")).await;
+    place_hero(app, near);
+    cap_fight(app, dir, &format!("{name}-lane-near")).await;
+    place_hero(app, 0.0);
+}
+
+async fn play_fight(app: &mut App, dir: &str, name: &str, strong: bool, band: Option<(f32, f32)>) -> bool {
     app.start_fight().await;
     automate_player(app, strong);
+    if let Some((far, near)) = band {
+        step(app, 400, false);
+        cap_lane_extremes(app, dir, name, far, near).await;
+    }
     step(app, 400, false);
     step(app, FIGHT_WARMUP_TICKS, false);
     println!("{name}: {} foe(s) alive at capture", foes_alive(app));
@@ -118,7 +138,8 @@ pub async fn run(app: &mut App, dir: &str) {
         for wave in 0..=waves {
             let label = if wave == waves { "boss".to_string() } else { format!("wave{}", wave + 1) };
             let name = format!("story-s{}-{label}", index + 1);
-            let won = play_fight(app, dir, &name, true).await;
+            let band = (wave == 0).then_some((def.lane_far, def.lane_near));
+            let won = play_fight(app, dir, &name, true, band).await;
             if !won {
                 cleared_all = false;
                 println!("{name}: player lost");

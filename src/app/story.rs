@@ -6,6 +6,7 @@ use crate::ui::*;
 
 const BOSS_LIFE_FACTOR: f32 = 1.5;
 const BOSS_ATTACK_FACTOR: f32 = 1.1;
+const FOE_START_LANES: [f32; 4] = [-10.0, 6.0, -3.0, 8.0];
 
 impl App {
     fn story_char(&self, id: &str) -> Option<usize> {
@@ -98,6 +99,12 @@ impl App {
         let Some(run) = self.story.as_ref().filter(|_| self.story_is_playing()) else { return };
         sess.m.rounds_to_win = 1;
         let accent = run.stage_def().accent;
+        let def = run.stage_def();
+        sess.m.lanes = ume_engine::lane::LaneRules { active: true, far: def.lane_far, near: def.lane_near, show_foe_hud: run.is_boss_fight() };
+        sess.team = None;
+        for (slot, fighter) in sess.m.fighters.iter_mut().filter(|f| !f.is_helper && f.side == 1).enumerate() {
+            fighter.lane = FOE_START_LANES[slot % FOE_START_LANES.len()].clamp(def.lane_far, def.lane_near);
+        }
         if !run.is_boss_fight() {
             let label = text::wave_label(run.wave, run.stage_def().waves.len(), false);
             sess.vfx.banner(&text::stage_label(run.stage), &format!("{label} · {}", text::go()), accent);

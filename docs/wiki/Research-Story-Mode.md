@@ -8,4 +8,6 @@ What was found (fan wikis and reviews, not an official guide) and how it maps to
 
 Not verified: the exact enemy roster of each Final Fight stage beyond the first three, Sengoku mid-bosses, and Arcade Stadium specifics beyond the shared features above.
 
+Depth (beat 'em up convention, from community dev guides, not Final Fight's own code): characters walk a floor band, attacks test a depth tolerance first and then the usual box overlap, and a thin tolerance makes hits miss unless fighters are nearly aligned, so the tolerance is kept generous (14 units) and the CPU aligns itself to the target.
+
 Mapping: five stages (not six) of three thug waves plus a boss, carried life with recovery between waves and stages (food), three credits (continues). Weapons, bonus rounds and rewind are not implemented.

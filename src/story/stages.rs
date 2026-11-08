@@ -4,6 +4,8 @@ pub struct StageDef {
     pub boss: &'static str,
     pub alt_boss: &'static str,
     pub accent: [f32; 3],
+    pub lane_far: f32,
+    pub lane_near: f32,
 }
 
 pub const STAGES: [StageDef; 5] = [
@@ -17,6 +19,8 @@ pub const STAGES: [StageDef; 5] = [
         boss: "bruno",
         alt_boss: "daichi",
         accent: [1.0, 0.72, 0.2],
+        lane_far: -26.0,
+        lane_near: 8.0,
     },
     StageDef {
         arena: "neon",
@@ -28,6 +32,8 @@ pub const STAGES: [StageDef; 5] = [
         boss: "marlow",
         alt_boss: "kaname",
         accent: [0.4, 0.9, 1.0],
+        lane_far: -22.0,
+        lane_near: 8.0,
     },
     StageDef {
         arena: "bamboo",
@@ -39,6 +45,8 @@ pub const STAGES: [StageDef; 5] = [
         boss: "lian",
         alt_boss: "shion",
         accent: [0.45, 1.0, 0.6],
+        lane_far: -20.0,
+        lane_near: 8.0,
     },
     StageDef {
         arena: "volcano",
@@ -50,6 +58,8 @@ pub const STAGES: [StageDef; 5] = [
         boss: "garan",
         alt_boss: "haruki",
         accent: [1.0, 0.4, 0.25],
+        lane_far: -20.0,
+        lane_near: 8.0,
     },
     StageDef {
         arena: "dojo",
@@ -61,5 +71,7 @@ pub const STAGES: [StageDef; 5] = [
         boss: "valdric",
         alt_boss: "kaito",
         accent: [0.85, 0.4, 1.0],
+        lane_far: -16.0,
+        lane_near: 8.0,
     },
 ];

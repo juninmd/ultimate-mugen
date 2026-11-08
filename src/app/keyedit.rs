@@ -76,7 +76,7 @@ impl App {
                 true,
             );
             for i in 0..n {
-                let y = 130.0 + i as f32 * 31.0;
+                let y = 130.0 + i as f32 * 28.0;
                 let sel = ed.slot == slot && ed.cur == i;
                 if !ed.waiting && self.clicked_rect(x, y, 560.0, 30.0) {
                     ed.slot = slot;

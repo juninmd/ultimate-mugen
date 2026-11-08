@@ -509,7 +509,7 @@ impl Vfx {
     fn chest_of(f: &ume_engine::fighter::Fighter) -> (f32, f32, f32) {
         (
             f.pos.x,
-            f.pos.y - f.def.c("size.height", 60.0) as f32 * 0.55,
+            f.pos.y + f.lane - f.def.c("size.height", 60.0) as f32 * 0.55,
             f.facing,
         )
     }
@@ -666,11 +666,11 @@ impl Vfx {
                             if self.r() > 0.4 { col } else { [1.0, 1.0, 1.0] },
                         );
                         let vx = self.rr(-0.3, 0.3);
-                        self.ember(px, f.pos.y, vx, vy, -0.01, life, sz, c);
+                        self.ember(px, f.pos.y + f.lane, vx, vy, -0.01, life, sz, c);
                     }
                     self.spark_burst(x, y, 1.0, 20, 8.0, col, std::f32::consts::PI);
-                    self.debris(f.pos.x, f.pos.y, 8, [0.7, 0.65, 0.6]);
-                    self.dust(f.pos.x, f.pos.y, 12, 3.0, 1.0, [0.85, 0.8, 0.75]);
+                    self.debris(f.pos.x, f.pos.y + f.lane, 8, [0.7, 0.65, 0.6]);
+                    self.dust(f.pos.x, f.pos.y + f.lane, 12, 3.0, 1.0, [0.85, 0.8, 0.75]);
                     let nm = f.active_form_name().to_uppercase();
                     self.tag(
                         x,
@@ -745,7 +745,7 @@ impl Vfx {
             let prev = self.snap[fi];
             if !prev.grounded && now.grounded {
                 let n = 6 + (prev.vy.abs() * 1.6) as usize;
-                self.dust(f.pos.x, f.pos.y, n.min(16), 1.6, 0.5, [0.85, 0.82, 0.78]);
+                self.dust(f.pos.x, f.pos.y + f.lane, n.min(16), 1.6, 0.5, [0.85, 0.82, 0.78]);
                 if prev.vy > 3.0 {
                     self.sfx.push("land");
                 }
@@ -753,7 +753,7 @@ impl Vfx {
                     *q = (prev.vy / 7.0).clamp(0.35, 1.0);
                 }
                 if prev.vy > 5.0 {
-                    self.ring(f.pos.x, f.pos.y - 1.0, 26.0, 0.25, 1.2, [0.9, 0.9, 0.9]);
+                    self.ring(f.pos.x, f.pos.y + f.lane - 1.0, 26.0, 0.25, 1.2, [0.9, 0.9, 0.9]);
                     self.trauma = (self.trauma + 0.1).min(1.0);
                 }
             }
@@ -762,7 +762,7 @@ impl Vfx {
                 if let Some(q) = self.squash.get_mut(fi) {
                     *q = -0.8;
                 }
-                self.dust(f.pos.x, f.pos.y, 5, 1.2, 0.3, [0.85, 0.82, 0.78]);
+                self.dust(f.pos.x, f.pos.y + f.lane, 5, 1.2, 0.3, [0.85, 0.82, 0.78]);
             }
             if now.grounded && now.vx.abs() > 3.2 && prev.vx.abs() <= 3.2 && f.state_type == 'S' {
                 self.sfx.push("dash");
@@ -773,10 +773,10 @@ impl Vfx {
                 && f.state_type == 'S'
             {
                 let b = -f.facing;
-                self.dust(f.pos.x + b * 6.0, f.pos.y, 2, 0.6, 0.25, [0.85, 0.82, 0.78]);
+                self.dust(f.pos.x + b * 6.0, f.pos.y + f.lane, 2, 0.6, 0.25, [0.85, 0.82, 0.78]);
             }
             if f.move_type == 'H' && f.state_type == 'L' && prev.grounded && prev.move_type != 'H' {
-                self.dust(f.pos.x, f.pos.y, 9, 2.0, 0.4, [0.85, 0.82, 0.78]);
+                self.dust(f.pos.x, f.pos.y + f.lane, 9, 2.0, 0.4, [0.85, 0.82, 0.78]);
             }
             self.snap[fi] = now;
         }
@@ -828,11 +828,11 @@ impl Vfx {
             if (5190..=5193).contains(&f.state_no) && !f.alive {
                 if f.state_time == 1 {
                     self.sfx.push("defeat");
-                    self.dust(f.pos.x, f.pos.y, 8, 1.4, 0.3, [0.7, 0.68, 0.7]);
+                    self.dust(f.pos.x, f.pos.y + f.lane, 8, 1.4, 0.3, [0.7, 0.68, 0.7]);
                 }
                 if f.state_time == 52 {
-                    self.dust(f.pos.x, f.pos.y, 10, 1.8, 0.4, [0.8, 0.78, 0.76]);
-                    self.ring(f.pos.x, f.pos.y - 1.0, 34.0, 0.4, 1.4, [0.75, 0.75, 0.8]);
+                    self.dust(f.pos.x, f.pos.y + f.lane, 10, 1.8, 0.4, [0.8, 0.78, 0.76]);
+                    self.ring(f.pos.x, f.pos.y + f.lane - 1.0, 34.0, 0.4, 1.4, [0.75, 0.75, 0.8]);
                 }
                 // the match-deciding defeat: slow push-in on the fallen fighter and pale motes drifting up
                 if f.state_no == 5193 {

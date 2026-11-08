@@ -1,6 +1,7 @@
 //! Move showcase for the screenshot tour: `UME_TOUR=moves UME_CHARS=akio,bruno ultimate-mugen --shots <dir> --res 1280x720 --mute`
 //! forces every special, super and throw of each listed fighter against a dummy rival, prints the damage it dealt and saves the
 //! frame a few ticks after the first hit (`<dir>/M-<fighter>-<move>.png`).
+//! `UME_BOXES=1` draws the hit and hurt boxes on the captured frames; `UME_AFTER_HIT=<ticks>` changes the capture delay.
 use crate::app::{App, Mode};
 use crate::gfx::*;
 use crate::shots::{find, stage};
@@ -56,6 +57,7 @@ pub async fn run(app: &mut App, dir: &str) {
             for pilot in &mut s.pilots {
                 *pilot = crate::session::Pilot::Dummy;
             }
+            s.r.debug = std::env::var("UME_BOXES").is_ok();
             for _ in 0..600 {
                 if s.m.round_state == 2 && s.m.fighters[0].ctrl {
                     break;
@@ -93,7 +95,7 @@ pub async fn run(app: &mut App, dir: &str) {
                     peak = f32::max(peak, start - s.m.fighters[1].life);
                 }
                 if after_hit.is_none() && peak > 0.0 {
-                    after_hit = Some(tick + TICKS_AFTER_HIT);
+                    after_hit = Some(tick + std::env::var("UME_AFTER_HIT").ok().and_then(|t| t.parse().ok()).unwrap_or(TICKS_AFTER_HIT));
                 }
                 if after_hit == Some(tick) {
                     app.draw_session_only();

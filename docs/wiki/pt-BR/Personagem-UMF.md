@@ -88,6 +88,17 @@ Cada animação é uma lista de quadros:
 | `offset` | Deslocamento `[x, y]` do desenho |
 | `loop` | Índice do quadro onde o loop recomeça |
 
+#### Como um frame de ataque vira hitbox
+
+Frames desenhados com sprites em pixel usam como caixa de golpe a geometria do rig da `pose` e do `hit` do frame (`part` + `radius`), ou o `box` explícito quando existe, então cada golpe mantém o próprio alcance. O compilador então remodela a caixa para as proporções medidas em 605 personagens M.U.G.E.N (`native/pixel_hit.rs`, `H` = altura em pé, 96 unidades para `height` 100):
+
+- como um `Clsn1` do M.U.G.E.N, a caixa vai do corpo até a ponta: começa no máximo `0.10 H` à frente da origem e alcança pelo menos `0.60 H` (a mediana do M.U.G.E.N é `0.72 H` nos socos e `0.80 H` nos chutes);
+- pelo menos `0.36 H` de altura, nunca acima de `0.95 H` nem abaixo do chão (socos do M.U.G.E.N ficam entre `-0.75 H` e `-0.33 H`, chutes descem até `-0.05 H`);
+- a hurtbox em pé tem `0.46 H` de largura (mediana do M.U.G.E.N `0.46 H`) e a agachada `0.67 H` de altura (mediana `0.67 H`);
+- um `box` explícito é usado como escrito, então mantenha-o dentro dessas proporções; a auditoria falha caso contrário.
+
+`cargo test --release -p ume-engine --test native_hitbox_audit` verifica todos os frames de golpe do elenco (altura, alcance, início, largura, acima da cabeça, abaixo do chão) e `native_normal_reach` imprime e compara alcance e dano dos quatro golpes normais em pé de cada lutador.
+
 ### Nomes padrão
 
 Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os estados comuns funcionam sem código.

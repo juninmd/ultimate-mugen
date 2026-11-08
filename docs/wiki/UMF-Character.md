@@ -88,6 +88,17 @@ Each animation is a list of frames:
 | `offset` | Drawing offset `[x, y]` |
 | `loop` | Frame index where the loop restarts |
 
+#### How an attack frame becomes a hit box
+
+Frames drawn from pixel sprites take their strike box from the rig geometry of the frame's `pose` and `hit` (`part` + `radius`), or from the explicit `box` when given, so every move keeps its own reach. The compiler then reshapes it to the proportions measured on 605 M.U.G.E.N characters (`native/pixel_hit.rs`, `H` = standing height, 96 units for `height` 100):
+
+- like a M.U.G.E.N `Clsn1`, the box spans from the body to the tip: it starts at most `0.10 H` in front of the origin and reaches at least `0.60 H` (the M.U.G.E.N median for punches is `0.72 H`, kicks `0.80 H`);
+- at least `0.36 H` tall and never above `0.95 H` or below the floor (M.U.G.E.N punches sit between `-0.75 H` and `-0.33 H`, kicks down to `-0.05 H`);
+- the standing hurtbox is `0.46 H` wide (M.U.G.E.N median `0.46 H`) and the crouching one `0.67 H` tall (M.U.G.E.N median `0.67 H`);
+- an explicit `box` is used as written, so keep it inside those proportions; the audit fails otherwise.
+
+`cargo test --release -p ume-engine --test native_hitbox_audit` checks every strike frame of the roster (height, reach, start, width, above the head, under the floor), and `native_normal_reach` prints and compares the reach and damage of the four stand normals of every fighter.
+
 ### Standard names
 
 Animations with these names become the reserved M.U.G.E.N actions, so the common states work with no extra code.

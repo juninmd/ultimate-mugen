@@ -8,8 +8,8 @@ use std::path::{Path, PathBuf};
 
 const SPRITE_ROOT: &str = "assets/chars/sprites";
 const BASE_STEM: &str = "01_idle";
-const STAND_HURT: [f32; 4] = [-18.0, -96.0, 18.0, 0.0];
-const CROUCH_HURT: [f32; 4] = [-16.0, -60.0, 16.0, 0.0];
+const STAND_HURT: [f32; 4] = [-22.0, -96.0, 22.0, 0.0];
+const CROUCH_HURT: [f32; 4] = [-24.0, -64.0, 24.0, 0.0];
 const LYING_HURT: [f32; 4] = [-46.0, -26.0, 46.0, 0.0];
 const STRIKE_BOX: [f32; 4] = [2.0, -84.0, 38.0, -32.0];
 const STAND_UNITS: f32 = 100.0;
@@ -21,9 +21,13 @@ pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value
     let height = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(STAND_UNITS as f64) as f32;
     let height_ratio = height / STAND_UNITS;
     render.scale *= height_ratio;
+    if let Some(boxes) = super::pixel_hit::declared_strike_boxes(nc, fr) {
+        render.hit = boxes;
+    }
     for bounds in &mut render.hurt {
-        bounds[1] *= height_ratio;
-        bounds[3] *= height_ratio;
+        for edge in bounds.iter_mut() {
+            *edge *= height_ratio;
+        }
     }
     Some(render)
 }

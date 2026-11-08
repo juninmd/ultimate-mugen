@@ -11,6 +11,7 @@ pub mod lookup;
 pub mod compile;
 pub mod rig;
 mod pixel;
+mod pixel_hit;
 mod pack;
 mod recolor;
 mod portrait;

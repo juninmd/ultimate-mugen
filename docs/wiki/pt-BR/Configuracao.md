@@ -73,19 +73,23 @@ Configurações › Idioma troca em tempo real e grava `lang=en|pt` em `ultimate
 | Ação | Teclado P1 | Teclado P2 | Gamepad | Toque |
 |---|---|---|---|---|
 | Mover | setas | `I` `K` `J` `L` | D-pad / analógico | analógico virtual |
-| Socos `x` `y` `z` | `Q` `W` `E` | Num `4` `5` `6` | □ △ R1 | LP HP |
-| Chutes `a` `b` `c` | `A` `S` `D` | Num `1` `2` `3` | ✕ ○ R2 | LK HK |
-| Especiais rápidos | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | ESPECIAL, SUPER |
-| Super | `1`+`2` | Num `7`+`8` | L1+L2 | SUPER |
-| Despertar | `T` | Num `0` | R3 / SELECT | — |
-| Troca (modo Tag) | `F` | Num Enter | R3 / SELECT | botão de despertar |
-| Carregar ki (Start) | `R` | Num Decimal | — | — |
+| Socos `x` `y` `z` | `Q` `W` `E` | Num `4` `5` `6` | □ △ | LP HP |
+| Chutes `a` `b` `c` | `A` `S` `D` | Num `1` `2` `3` | ✕ ○ | LK HK |
+| Especiais rápidos | `V` `B` `N` | Num `7` `8` `9` | — | ESPECIAL, SUPER |
+| Atalhos de golpe (slots 1-4) | `1` `2` `3` `4` | — | L1, L2, R1, R2 | — |
+| Despertar (transformar) | `T` | Num `0` | L3 + R3 / SELECT | — |
+| Troca (modo Tag) | `F` | Num Enter | L3 + R3 / SELECT | botão de despertar |
+| Carregar ki | `R` | Num Decimal | R3 (sozinho) / START | — |
 | Pausa / hitboxes | `Esc` / `F2` | `Esc` / `F2` | START | ❚❚ |
 | Tela cheia / FPS | `F11` / `F3` | — | — | — |
 
 Os nomes `x y z a b c` são os mesmos usados nos comandos (`input`) dos personagens.
 
 No pulo, `x` `y` `a` `b` lançam um golpe aéreo cada, e baixo + `b` é o chute para baixo (gerado para todo lutador nativo por `native/air_normals.rs`, reaproveitando as animações aéreas do próprio lutador).
+
+## Atalhos de golpe
+
+No menu de pausa, escolha um golpe na lista e aperte `1`-`4` (ou L1, L2, R1, R2 no gamepad) para ligá-lo àquele slot. Apertar o mesmo slot de novo limpa o atalho. Depois disso, o golpe sai com um único toque, com o movimento e os botões certos executados por você. As ligações ficam por lutador em `ultimate-mugen.shortcuts`, ao lado do executável.
 
 ## Botões na tela
 

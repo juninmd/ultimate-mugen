@@ -76,6 +76,9 @@ Use a ferramenta de geração de imagens para criar ou reparar PNGs quando o per
 
 ### Preparação da referência
 - Abra o sprite de melhor qualidade do próprio personagem e use-o como referência visual explícita. Prefira uma pose nítida, corpo inteiro, de frente lateral ou 3/4 coerente com o movimento alvo.
+- Antes de gerar, inspecione as imagens existentes do personagem. Se já houver pixel art válida, use-a diretamente como referência principal da nova sprite; não inicie de um canvas genérico nem redesenhe o personagem só a partir de texto. Use `walk0.png` ou outra pose canônica para identidade e uma pose pixel art existente mais próxima para movimento, escala e desenho da roupa.
+- A hierarquia de referência é: (1) identidade e paleta da sprite canônica do próprio personagem; (2) pose mais próxima já existente do mesmo personagem; (3) uma referência externa de estilo, apenas se necessária para acabamento. Uma referência externa como `kaito/walk0.png` define qualidade pixel art, nunca o design. Não inclua referências de outra forma, transformação ou personagem quando seus traços possam contaminar a imagem; se forem indispensáveis para geometria, declare explicitamente quais propriedades não podem ser copiadas.
+- Trave os traços distintivos que aparecem nas referências existentes: silhueta e cor do cabelo, rosto e marcas, chapéu/faixa/chifres, roupa e seus recortes, arma, acessórios, paleta e proporção entre cabeça, tronco e membros. Descreva ausências importantes também, por exemplo “sem chapéu”, quando uma referência secundária estiver inconsistente. Se as próprias sprites existentes divergirem, compare mais de um quadro e use a forma canônica pertinente à pose/transformação; não resolva a contradição por invenção.
 - Registre dimensões, caixa alfa, linha do chão, eixo/pivô, altura de referência e orientação da pose de referência antes de gerar. Uma imagem que parece semelhante pode ter escala ou enquadramento diferentes.
 - Faça inventário das animações e sprites já existentes; identifique lacunas ou defeitos concretos. Não substitua sprites bons sem necessidade.
 
@@ -91,9 +94,11 @@ Retratos como `portrait.png` podem usar uma pixel art de alta resolução, com c
 
 ### Prompt de geração
 - Descreva o personagem e a ação da pose sem ambiguidade. Trave roupa, paleta, proporções, penteado, faixa, silhueta, contorno, direção e tamanho relativo à referência.
+- Mantenha o personagem no mesmo tamanho relativo das poses vizinhas. Se arma, cabelo ou efeito largo fizer o corpo encolher para caber no canvas, regenere com outra orientação da arma, perspectiva ou composição; não sacrifique a escala do lutador para encaixar um acessório.
 - Peça pixel art com pixels duros e clusters limpos, transparência real, sem antialiasing, blur, glow, gradientes, texto, fundo ou objetos extras. Para efeitos, solicite-os explicitamente apenas quando fizerem parte da pose.
 - Para uma animação, prefira gerar e revisar poses individuais a partir da mesma referência canônica. Se gerar uma tira, exija células iguais e separação clara; confirme a contagem e os limites das células antes de cortar. Modelos podem produzir dimensões, escalas, direção ou personagem inconsistentes entre chamadas, mesmo com prompts parecidos.
 - Não trate a imagem gerada como pronta. Compare cada pose lado a lado com a referência e com as poses vizinhas; rejeite dedos/membros duplicados, acessórios flutuantes, recortes, mudança de roupa, inversão de lado, halo colorido ou bordas semitransparentes indesejadas.
+- Faça a revisão de identidade em tamanho nativo e ampliado. Confirme explicitamente cabelo/rosto, roupa, marcas, acessórios, paleta, forma/transformação e proporção corporal contra a sprite canônica do próprio lutador; semelhança genérica de gênero ou classe (por exemplo, “pirata” ou “espadachim”) não basta. Qualquer traço inventado ou perdido reprova a imagem e exige nova geração com as sprites originais como referência.
 
 ### Normalização e integração
 - Recorte ou componha cada pose em uma tela de dimensões consistentes para aquela família de animação. Mantenha os pés na mesma linha de chão quando aplicável, alinhe o eixo em `meta.json` e mantenha `refHeight` compatível. Não copie eixos de uma imagem de tamanho diferente sem recalcular.

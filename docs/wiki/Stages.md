@@ -138,6 +138,10 @@ The twenty-one native arenas use embedded full-color PNG artwork in `assets/stag
 
 `StageArt::Illustrated` draws the background with nearest-neighbor filtering, aligns the fighting floor at 85% of the image height, and clamps horizontal camera movement to the image edges. Team zoom retains the native ground proportion. Fighter shadows, reflections and combat effects remain active; the old procedural prop animations are exclusive to procedural artwork.
 
+### Living layers
+
+Every illustrated stage also carries an **ambience profile** (`src/stages/ambience.rs`, data in `src/stages/ambience/profiles/`): translucent mist banks that drift sideways, particles (petals, embers, fireflies, dust, leaves, sparks, birds), additive light pools anchored to lanterns, windows, fire and sun, and slanted god rays. They are drawn every frame with vertex-coloured polygons over the flat artwork (`front: true` layers pass in front of the fighters), react to camera parallax, use `Match::game_time` for motion and scale their particle count with the effects setting. A unit test caps every profile at 420 polygons per frame and checks every value range. To animate a new illustrated stage add a `Profile` for its id in `profiles/classic.rs` or `profiles/wonders.rs`; unknown ids fall back to a few drifting dust motes.
+
 The stage selector displays the same artwork, cropped to each tile without changing its aspect ratio. Random selection and imported M.U.G.E.N stages retain their existing gradient tiles. Imported stages keep their own artwork during combat.
 
 Set `UME_STAGE_ART=procedural` to compare the original procedural stages. The selector continues to show the default pixel-art illustrations. Capture the selector with `UME_SHOTS_ONLY=stage-select ultimate-mugen --shots out/ --res 1280x720 --mute`, or all seven fights with `UME_SHOTS_ONLY=stages`.

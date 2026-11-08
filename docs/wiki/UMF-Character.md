@@ -88,6 +88,17 @@ Each animation is a list of frames:
 | `offset` | Drawing offset `[x, y]` |
 | `loop` | Frame index where the loop restarts |
 
+#### How an attack frame becomes a hit box
+
+Frames drawn from pixel sprites take their strike box from the rig geometry of the frame's `pose` and `hit` (`part` + `radius`), or from the explicit `box` when given, so every move keeps its own reach. The compiler then reshapes it to the proportions measured on 605 M.U.G.E.N characters (`native/pixel_hit.rs`, `H` = standing height, 96 units for `height` 100):
+
+- like a M.U.G.E.N `Clsn1`, the box spans from the body to the tip: it starts at most `0.10 H` in front of the origin and reaches at least `0.60 H` (the M.U.G.E.N median for punches is `0.72 H`, kicks `0.80 H`);
+- at least `0.36 H` tall and never above `0.95 H` or below the floor (M.U.G.E.N punches sit between `-0.75 H` and `-0.33 H`, kicks down to `-0.05 H`);
+- the standing hurtbox is `0.46 H` wide (M.U.G.E.N median `0.46 H`) and the crouching one `0.67 H` tall (M.U.G.E.N median `0.67 H`);
+- an explicit `box` is used as written, so keep it inside those proportions; the audit fails otherwise.
+
+`cargo test --release -p ume-engine --test native_hitbox_audit` checks every strike frame of the roster (height, reach, start, width, above the head, under the floor), and `native_normal_reach` prints and compares the reach and damage of the four stand normals of every fighter.
+
 ### Standard names
 
 Animations with these names become the reserved M.U.G.E.N actions, so the common states work with no extra code.
@@ -136,6 +147,23 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `fx` | `aura` | Extra visual effect |
 | `voice` | `1000, 0` | Character sound group and index played at move start, when that sample is bundled |
 | `airPhysics` | `true` | Keeps air physics |
+| `cancels` | list of move ids | This move may be cancelled **into** those moves on contact (hit, guard or projectile contact). Declaring it replaces the automatic gatling out of this move |
+| `throw` | `{ "damage", "bind", "launch", "at" }` | Grab: see [Combat traits](#combat-traits) |
+| `armor` | `{ "hits", "threshold" }` | Absorbs hits while the move is active |
+| `parry` | `{ "window": [from, to], "spark" }` | Returns attacks during the animation-element window |
+| `timestop` | ticks | Freezes everyone else |
+| `burst` | `true` | Combo breaker usable while being hit |
+| `flight` | `true` | 8-way hover while the move lasts |
+
+### Combat traits
+
+- **Automatic gatling.** A move without `cancels` follows the genre rules: a normal cancels into any *stronger* normal (`light` < `medium` < `heavy` by the strongest hit level, ties by declaration order, so strings can never loop), ground normals link into crouching ones, air normals chain with air normals, and every normal cancels into every special and super on contact. Specials cancel into other specials only through explicit `cancels`; supers cancel out of any move.
+- **Explicit routes.** `"cancels": ["strong", "rush"]` on `jab` makes `strong` and `rush` accept `jab` on contact. A projectile special can be cancelled once its projectile touches the opponent. An `air` special may start from a ground launcher that lists it (uppercut, then dive).
+- **`throw`** (`damage`, `bind` `[x, y]` in front of the thrower, `launch` `[vx, vy]`, `at` = grab frame, default 1). The grab HitDef fires on animation element `at` (give that frame a `hit` box), the victim is held on `at + 1`, takes the damage on `at + 2` and is launched, so the animation needs at least `at + 2` frames. Throws ignore guarding and whiff when the target is out of reach.
+- **`armor`** (`hits` absorbed, optional `threshold` = damage above which the armor breaks). From move start until the last hit frame the move takes 35 % chip damage and is not interrupted; once `hits` are spent the next hit staggers normally.
+- **Multi-hit glue.** Moves with three or more `hits` push the target away only a little on every hit except the last (so the whole string connects) and piercing projectiles (4+ hits) do not shove the target out of the beam. Set `knockback` explicitly to opt out.
+
+Validate with `cargo test --release --test native_roster_lab -- --nocapture` (every attack state must connect; prints damage and reach per move), `--test native_combo_routes` (every declared cancel chains end to end) and `python scripts/audit_native_moves.py`.
 
 ### `hits[]`
 

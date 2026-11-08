@@ -13,11 +13,13 @@ const server = staticServer(dir, types);
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const problems = [];
+  const consoleTail = [];
   p.on('crash', () => problems.push('Chromium page crashed'));
   const stageRequests = [];
   p.on('request', r => { if (/\/assets\/stages\/[^/]+\.png$/.test(new URL(r.url()).pathname)) stageRequests.push(r.url()); });
   p.on('pageerror', e => { if (!/register_plugin/.test(e.message)) problems.push(`pageerror: ${e.message}`); });
   p.on('console', m => {
+    consoleTail.push(`${m.type()}: ${m.text().slice(0, 160)}`); if (consoleTail.length > 40) consoleTail.shift();
     if (/panicked|PanicHookInfo|renderbufferStorageMultisample/.test(m.text())) problems.push(`console: ${m.text().slice(0, 200)}`);
   });
   await p.goto(url);
@@ -46,6 +48,6 @@ const server = staticServer(dir, types);
   let lum = null;
   if (PNG) { const img = PNG.sync.read(shot); let s = 0, s2 = 0, n = img.width * img.height; for (let i = 0; i < n; i++) { const l = (img.data[i * 4] + img.data[i * 4 + 1] + img.data[i * 4 + 2]) / 3; s += l; s2 += l * l; } const m = s / n; lum = { mean: m, sd: Math.sqrt(s2 / n - m * m) }; if (m < 8 || lum.sd < 6) problems.push(`black/flat screen: ${JSON.stringify(lum)}`); }
   fs.writeFileSync(path.join(os.tmpdir(), 'web-smoke-fight.png'), shot);
-  if (problems.length) { console.error('WEB SMOKE FAILED\n' + problems.join('\n')); process.exit(1); }
+  if (problems.length) { console.error('WEB SMOKE FAILED\n' + problems.join('\n') + '\nlast console messages:\n' + consoleTail.join('\n')); process.exit(1); }
   console.log('WEB SMOKE OK', lum ? JSON.stringify(lum) : '(no pngjs: luminance check skipped)');
 })().catch(e => { console.error('SCRIPT FAIL', e); process.exit(2); });

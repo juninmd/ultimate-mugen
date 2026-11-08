@@ -61,9 +61,7 @@ pub enum StageArt {
         particles: Vec<Particle>,
         tint: Option<[f32; 4]>,
     },
-    Illustrated {
-        image: Arc<ImageData>,
-    },
+    Illustrated { image: Arc<ImageData>, ambience: &'static ambience::Profile },
     Mugen(Box<MugenBg>),
 }
 pub struct Stage {
@@ -3277,6 +3275,7 @@ fn volcano() -> Stage {
     }
 }
 
+pub mod ambience;
 mod wonders;
 
 const ILLUSTRATION_IDS: [&str; 7] = [
@@ -3376,9 +3375,7 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
 fn illustrated(id: &str, name: &str, music: u32, kind: StageKind) -> Stage {
     Stage {
         info: info(name),
-        art: StageArt::Illustrated {
-            image: illustration(id).expect("builtin stage image"),
-        },
+        art: StageArt::Illustrated { image: illustration(id).expect("builtin stage image"), ambience: ambience::profile_for(id) },
         music,
         kind,
         bgm: None,

@@ -32,7 +32,7 @@ pub struct HitDefData {
 pub struct Shake { pub time: i32, pub freq: f32, pub ampl: f32, pub phase: f32, pub dir: u8 }
 
 #[derive(Clone, Debug)]
-pub struct HitOverride { pub attr: String, pub state_no: i32, pub time: i32, pub force_air: bool }
+pub struct HitOverride { pub attr: String, pub state_no: i32, pub time: i32, pub force_air: bool, pub keep: bool, pub hits: i32, pub threshold: f32, pub chip: f32 }
 
 #[derive(Clone, Debug)]
 pub struct GetHitVars {

@@ -34,6 +34,20 @@ pub async fn run(app: &mut App, dir: &str) {
         ("spirit", "akio", "bruno"),
         ("volcano", "garan", "marlow"),
         ("brazil", "bruno", "lian"),
+        ("great_wall", "kaname", "valdric"),
+        ("petra", "daichi", "marlow"),
+        ("christ_redeemer", "akio", "haruki"),
+        ("texas", "garan", "jin"),
+        ("chichen_itza", "suzume", "shion"),
+        ("colosseum", "bruno", "kaito"),
+        ("taj_mahal", "lian", "sylene"),
+        ("pyramids_giza", "valdric", "volta"),
+        ("hanging_gardens", "haruki", "suzume"),
+        ("temple_artemis", "sylene", "garan"),
+        ("statue_zeus", "kaito", "daichi"),
+        ("mausoleum_halicarnassus", "marlow", "kaname"),
+        ("colossus_rhodes", "jin", "akio"),
+        ("lighthouse_alexandria", "volta", "shion"),
     ] {
         if only.as_deref().is_some_and(|o| o != st) {
             continue;
@@ -81,6 +95,19 @@ pub async fn run(app: &mut App, dir: &str) {
             Some(format!("{dir}/S-{st}-1-calm.png")),
         )
         .await;
+        if let Some(frames) = std::env::var("UME_GIF_FRAMES").ok().and_then(|v| v.parse::<usize>().ok()) {
+            app.session.as_mut().unwrap().pilots.iter_mut().for_each(|p| *p = crate::session::Pilot::Dummy);
+            for k in 0..frames {
+                {
+                    let App { session, c, audio, .. } = app;
+                    let s = session.as_mut().unwrap();
+                    (0..6).for_each(|_| s.step_visual(c, audio));
+                }
+                app.draw_session_only();
+                get_screen_data().export_png(&format!("{dir}/G-{st}-{k:03}.png"));
+                next_frame().await;
+            }
+        }
         let (x0, x1) = {
             let s = app.session.as_ref().unwrap();
             (s.m.fighters[0].pos.x, s.m.fighters[1].pos.x)

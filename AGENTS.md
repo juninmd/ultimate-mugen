@@ -82,6 +82,13 @@
 - Render dedicated PNGs for every native pose (inline poses, df* defeats, idle-reuse fixes; scans assets/chars + umf dirs): `cargo run --release -p ume-engine --example generate_missing_sprites [--dry-run]`
 - Native PNG inventory (dimensions, alpha edges, geometry metadata): `python scripts/audit_native_sprites.py --out <report.json>`
 - Sprite payload per fighter (sizes the atlas warm-up budget): `cargo run --release -p ume-engine --example sprite_mem -- <char_dir>...`
+- Native roster lab (every attack state of every UMF fighter must connect; prints damage and reach, `UME_LAB_ONLY=id,id`, `UME_CHARS_DIR=<dir>`): `cargo test --release -p ume-engine --test native_roster_lab -- --nocapture`
+- Declared cancel routes chain end to end: `cargo test --release -p ume-engine --test native_combo_routes -- --nocapture`; throws and armor: `--test native_throw_and_armor`
+- Static roster audit (inputs, cancels, throws, hit boxes): `python scripts/audit_native_moves.py [dir]`
+- Hit box audit (every strike frame of every UMF fighter: height, reach, start, width against the M.U.G.E.N-measured proportions): `cargo test --release -p ume-engine --test native_hitbox_audit -- --nocapture`; per-fighter normal reach and damage: `--test native_normal_reach`
+- Draw hit and hurt boxes on the move showcase: `UME_BOXES=1 UME_AFTER_HIT=0` with `UME_TOUR=moves`
+- Move showcase screenshots (every special, super and throw against a dummy): `UME_TOUR=moves UME_CHARS=akio,bruno UME_RIVAL=kaito ultimate-mugen --shots <dir> --res 1280x720 --mute`
+- Living stage layers on/off for A/B captures: `UME_AMBIENCE=0` disables them (`UME_SHOTS_ONLY=stages` captures all 21 stages)
 - Zero-allocation tick gate: `cargo test -p ume-engine --release --test tick_alloc`
 - M.U.G.E.N character load benchmark: `cargo run --release -p ume-engine --example mugen_load_bench [zip] [runs]`
 - UMF compile benchmark: `cargo run --release -p ume-engine --example load_bench`

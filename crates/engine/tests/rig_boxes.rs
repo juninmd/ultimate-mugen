@@ -1,4 +1,5 @@
-//! Rust rig port vs the TypeScript reference (`tests/data/rig_boxes.json`, exported from
+//! Rust rig port vs the TypeScript reference (run on the frozen character snapshots in `tests/data/rig_reference_chars`, so roster
+//! balance changes in `assets/chars` never invalidate it) (`tests/data/rig_boxes.json`, exported from
 //! `src/native/rig.ts` through `compileNative` with a null canvas factory): every frame's
 //! collision boxes and every sprite's size/axis must match.
 use serde_json::Value;
@@ -12,7 +13,7 @@ const EPS: f64 = 0.01;
 fn load(id: &str) -> NativeChar {
     std::env::set_var("UME_FORCE_RIG", "1");
     let p = format!(
-        "{}/../../assets/chars/{id}.json",
+        "{}/tests/data/rig_reference_chars/{id}.json",
         env!("CARGO_MANIFEST_DIR")
     );
     serde_json::from_str(&std::fs::read_to_string(p).unwrap()).unwrap()

@@ -79,6 +79,8 @@ pub struct ThrowSpec {
     pub damage: f32,
     #[serde(default)] pub bind: Option<[f32; 2]>,
     #[serde(default, rename = "p2State")] pub p2_state: Option<i32>,
+    #[serde(default)] pub at: Option<i32>,
+    #[serde(default)] pub launch: Option<[f32; 2]>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

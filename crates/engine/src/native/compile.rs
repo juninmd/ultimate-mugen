@@ -117,7 +117,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
                 (k, r.hurt, r.hit)
             });
             let hurt = match &fr.hurt { Some(Value::String(s)) if s == "none" => vec![], Some(v @ Value::Array(_)) => serde_json::from_value(v.clone()).unwrap_or(entry.1.clone()), _ => entry.1.clone() };
-            let hit = fr.hit.as_ref().and_then(|h| h.bx).map(|b| vec![b]).unwrap_or(entry.2.clone());
+            let hit = entry.2.clone();
             frames.push(AnimFrame {
                 group: entry.0 .0, index: entry.0 .1, x: fr.offset.map(|o| o[0]).unwrap_or(0.0), y: fr.offset.map(|o| o[1]).unwrap_or(0.0), time: if fr.ticks > 0 && nc.speed.is_some_and(|k| k > 1.0) { ((fr.ticks as f32 / nc.speed.unwrap_or(1.0)).round() as i32).max(1) } else { fr.ticks },
                 flip_h: false, flip_v: false, blend: if fr.effect.as_ref().is_some_and(|effect| effect.get("type").and_then(Value::as_str) != Some("dragon")) { Blend::Add } else { Blend::None }, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0,

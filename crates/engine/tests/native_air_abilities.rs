@@ -8,7 +8,7 @@ use ume_engine::native::{compile_native, NativeChar};
 
 const AIR_STATE_OFFSET: i32 = 20000;
 const GAPS: [f32; 8] = [24.0, 44.0, 64.0, 90.0, 120.0, 160.0, 220.0, 300.0];
-const HEIGHTS: [f32; 3] = [-20.0, -45.0, -70.0];
+const HEIGHTS: [f32; 4] = [-6.0, -20.0, -45.0, -70.0];
 const WATCH_TICKS: usize = 260;
 
 fn roster() -> Vec<(NativeChar, Arc<CharDef>)> {

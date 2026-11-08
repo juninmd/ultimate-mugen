@@ -20,7 +20,10 @@ mod keyedit;
 mod loading;
 mod pause;
 mod market;
+mod market_text;
+mod menu_fighters;
 mod mugen_catalog;
+mod mugen_gallery;
 mod replay_browser;
 mod settings_screen;
 mod story;
@@ -395,8 +398,9 @@ impl App {
                         Self::boot(
                             &mut ui,
                             p,
-                            &format!(
-                                "Catalogando MUGEN: {files} arquivos · {chars} lutadores · {stages} cenários · {secs:.1}s"
+                            &crate::i18n::fill(
+                                crate::i18n::tr3("Catalogando MUGEN: {f} arquivos · {c} lutadores · {s} cenários · {t}s", "Cataloguing MUGEN: {f} files · {c} fighters · {s} stages · {t}s", "Catalogando MUGEN: {f} archivos · {c} luchadores · {s} escenarios · {t}s"),
+                                &[("f", &files.to_string()), ("c", &chars.to_string()), ("s", &stages.to_string()), ("t", &format!("{secs:.1}"))],
                             ),
                         )
                         .await;
@@ -441,9 +445,9 @@ impl App {
                 first.join(" | ")
             )
         };
-        Self::boot(&mut ui, 0.9, "Áudio…").await;
+        Self::boot(&mut ui, 0.9, crate::i18n::tr3("Áudio…", "Audio…", "Audio…")).await;
         let audio = Audio::new(audio_on).await;
-        Self::boot(&mut ui, 1.0, "Pronto!").await;
+        Self::boot(&mut ui, 1.0, crate::i18n::tr3("Pronto!", "Ready!", "¡Listo!")).await;
         App {
             reg,
             market: crate::market::Market::open(),
@@ -666,7 +670,7 @@ impl App {
             let ft_ms = dt * 1000.0;
             self.ui.text(
                 &format!(
-                    "{} FPS ({:.1} ms) · {}T · {}×{} · arte {:.1}×",
+                    "{} FPS ({:.1} ms) · {}T · {}×{} · art {:.1}×",
                     fps,
                     ft_ms,
                     threads,
@@ -715,10 +719,7 @@ impl App {
         {
             self.after_registry_change();
         }
-        crate::set_import_button(!matches!(
-            self.screen,
-            Screen::Fight | Screen::Vs { .. } | Screen::Results { .. } | Screen::Cutscene { .. }
-        ));
+        crate::import_button::flush();
         #[cfg(not(target_arch = "wasm32"))]
         let incoming = crate::take_imports();
         #[cfg(not(target_arch = "wasm32"))]
@@ -734,7 +735,7 @@ impl App {
                 .spawn(move || crate::registry::read_zip_with_progress(&zip, Some(&prog)))
             {
                 self.import_jobs.push(h);
-                self.msg = "Importando recursos MUGEN…".into();
+                self.msg = crate::i18n::tr3("Importando recursos MUGEN…", "Importing MUGEN resources…", "Importando recursos MUGEN…").into();
             }
         }
         #[cfg(target_arch = "wasm32")]
@@ -751,8 +752,7 @@ impl App {
             {
                 ume_shell::watchdog::label("import");
                 self.wasm_import = Some(web_import::WasmImport::new());
-                self.msg = "Importando recursos MUGEN…".into();
-                crate::set_import_button(false);
+                self.msg = crate::i18n::tr3("Importando recursos MUGEN…", "Importing MUGEN resources…", "Importando recursos MUGEN…").into();
             }
             self.resolve_deep_link(dt);
         }
@@ -786,12 +786,12 @@ impl App {
             self.ui.rect(0.0, VH - banner_h, VW, banner_h, Color::new(0.04, 0.03, 0.08, 0.94));
             self.ui.rect(0.0, VH - banner_h, VW, 2.0, hex("#00f0ff"));
             let label = if !cur_file.is_empty() {
-                format!("IMPORTANDO RECURSOS MUGEN: {} ({}/{})", cur_file, done, total)
+                format!("{}: {} ({}/{})", crate::i18n::tr3("IMPORTANDO RECURSOS MUGEN", "IMPORTING MUGEN RESOURCES", "IMPORTANDO RECURSOS MUGEN"), cur_file, done, total)
             } else {
-                format!("IMPORTANDO RECURSOS MUGEN ({}/{})", done, total)
+                format!("{} ({}/{})", crate::i18n::tr3("IMPORTANDO RECURSOS MUGEN", "IMPORTING MUGEN RESOURCES", "IMPORTANDO RECURSOS MUGEN"), done, total)
             };
             self.ui.progress_bar(80.0, VH - banner_h + 12.0, VW - 160.0, ratio, &label);
-            let hw = format!("⚡ PIPELINE: {} THREADS PARALELAS · SIMD", ume_formats::par::workers(total.max(1)));
+            let hw = format!("⚡ PIPELINE: {} {} · SIMD", ume_formats::par::workers(total.max(1)), crate::i18n::tr3("THREADS PARALELAS", "PARALLEL THREADS", "HILOS PARALELOS"));
             self.ui.text(&hw, VW - 80.0, VH - banner_h + 8.0, 13.0, hex("#00f0ff"), Align::Right, true);
         } else if !self.msg.is_empty() {
             self.ui
@@ -891,7 +891,7 @@ impl App {
         self.menu_art.draw(&self.ui);
         self.ui.logo(VW / 2.0, 330.0, 200.0);
         self.ui.text(
-            "ENGINE DE LUTA · RUST · DESKTOP · WEB · MOBILE",
+            crate::i18n::tr3("ENGINE DE LUTA · RUST · DESKTOP · WEB · MOBILE", "FIGHTING ENGINE · RUST · DESKTOP · WEB · MOBILE", "MOTOR DE LUCHA · RUST · ESCRITORIO · WEB · MÓVIL"),
             VW / 2.0,
             420.0,
             20.0,
@@ -901,7 +901,7 @@ impl App {
         );
         if (self.ui.t * 2.0) as i32 % 2 == 0 {
             self.ui.text_bold(
-                "PRESSIONE START / ENTER",
+                crate::i18n::tr3("PRESSIONE START / ENTER", "PRESS START / ENTER", "PULSA START / ENTER"),
                 VW / 2.0,
                 540.0,
                 30.0,
@@ -911,7 +911,7 @@ impl App {
             );
         }
         self.ui.text(
-            "Compatível com personagens M.U.G.E.N  ·  DualShock 4 / DualSense com vibração",
+            crate::i18n::tr3("Compatível com personagens M.U.G.E.N  ·  DualShock 4 / DualSense com vibração", "Compatible with M.U.G.E.N characters  ·  DualShock 4 / DualSense with rumble", "Compatible con personajes M.U.G.E.N  ·  DualShock 4 / DualSense con vibración"),
             VW / 2.0,
             690.0,
             18.0,
@@ -952,8 +952,7 @@ impl App {
         } else {
             None
         };
-        self.menu_art.select(cur_v);
-        self.menu_art.draw(&self.ui);
+        self.menu_backdrop(cur_v);
         let ui = &self.ui;
         let accent = crate::menu_art::accent_of(cur_v);
         crate::menu_art::glass(ui, -400.0, 0.0, 400.0 + 600.0, VH, 1.0);
@@ -1084,9 +1083,9 @@ impl App {
             self.reg.chars.iter().filter(|c| c.mugen).count(),
             self.playable().len(),
         );
-        let stats = format!(
-            "{nn} lutadores · {} cenários · {nm} MUGEN",
-            self.reg.stages.len()
+        let stats = crate::i18n::fill(
+            crate::i18n::tr3("{nn} lutadores · {st} cenários · {nm} MUGEN", "{nn} fighters · {st} stages · {nm} MUGEN", "{nn} luchadores · {st} escenarios · {nm} MUGEN"),
+            &[("nn", &nn.to_string()), ("st", &self.reg.stages.len().to_string()), ("nm", &nm.to_string())],
         );
         ui.text(
             &stats,
@@ -1099,7 +1098,7 @@ impl App {
         );
         if cur_v <= 8 {
             ui.text(
-                "Dificuldade CPU (esq./dir.)",
+                crate::i18n::tr3("Dificuldade CPU (esq./dir.)", "CPU difficulty (left/right)", "Dificultad CPU (izq./der.)"),
                 VW - 40.0,
                 86.0,
                 16.0,
@@ -1132,9 +1131,9 @@ impl App {
         );
         let pads = &self.c.pad_info;
         let pad_line = if pads.is_empty() {
-            "teclado".to_string()
+            crate::i18n::tr3("teclado", "keyboard", "teclado").to_string()
         } else {
-            format!("{} controle(s)", pads.len())
+            format!("{} {}", pads.len(), crate::i18n::tr3("controle(s)", "controller(s)", "mando(s)"))
         };
         ui.text(
             &pad_line,
@@ -1626,7 +1625,7 @@ impl App {
             }
             e.stream_preview(pal);
             if e.errs_has(pal) {
-                self.msg = format!("Falha ao carregar {}", e.name);
+                self.msg = format!("{} {}", crate::i18n::tr3("Falha ao carregar", "Failed to load", "Error al cargar"), e.name);
             }
             loaded_one = true;
         }
@@ -2091,8 +2090,9 @@ impl App {
         self.sel_buf.clear();
         let _ = write!(
             self.sel_buf,
-            "[Tab] {flabel} · {}/{m} · [R] aleatório · PgUp/PgDn",
-            pos + 1
+            "[Tab] {flabel} · {}/{m} · [R] {} · PgUp/PgDn",
+            pos + 1,
+            crate::i18n::t("select.random").to_lowercase()
         );
         self.ui.text(
             &self.sel_buf,
@@ -2109,7 +2109,7 @@ impl App {
         self.reg.trim_cache(&keep);
         if confirm {
             if self.reg.chars[cur[picking]].broken.get() {
-                self.msg = "Este personagem não pôde ser carregado.".into();
+                self.msg = crate::i18n::tr3("Este personagem não pôde ser carregado.", "This character could not be loaded.", "No se pudo cargar este personaje.").into();
                 self.screen = Screen::Select {
                     cur,
                     picking,
@@ -2122,7 +2122,7 @@ impl App {
             if self.mode.is_team() {
                 let me = cur[0];
                 if self.team_pick.contains(&me) {
-                    self.msg = "Este lutador já está na equipe.".into();
+                    self.msg = crate::i18n::tr3("Este lutador já está na equipe.", "This fighter is already on the team.", "Este luchador ya está en el equipo.").into();
                     self.screen = Screen::Select {
                         cur,
                         picking: 0,
@@ -2320,9 +2320,9 @@ impl App {
             );
             self.ui.text(
                 if self.mode.is_team() {
-                    "ADVERSÁRIOS SORTEADOS"
+                    crate::i18n::tr3("ADVERSÁRIOS SORTEADOS", "RANDOM OPPONENTS", "RIVALES AL AZAR")
                 } else {
-                    "AGUARDANDO"
+                    crate::i18n::tr3("AGUARDANDO", "WAITING", "ESPERANDO")
                 },
                 cx,
                 py + ph - 24.0,
@@ -2388,7 +2388,7 @@ impl App {
                 py + 300.0,
                 180.0,
                 (self.sel_dwell / 0.4).min(0.95),
-                "Carregando…",
+                crate::i18n::t("common.loading"),
             );
         }
         if self.sel_flash.0 == side && self.sel_flash.1 > 0.0 {
@@ -2515,7 +2515,7 @@ impl App {
         let mut ok = self.c.pressed(nav::OK | nav::START);
         self.ui.background();
         self.ui.text(
-            "ESCOLHA O CENÁRIO",
+            crate::i18n::t("select.choose_stage"),
             40.0,
             56.0,
             30.0,
@@ -2524,7 +2524,7 @@ impl App {
             true,
         );
         self.ui.text(
-            &format!("{}/{} · PgUp/PgDn · roda do mouse", cur + 1, n),
+            &format!("{}/{} · PgUp/PgDn · {}", cur + 1, n, crate::i18n::tr3("roda do mouse", "mouse wheel", "rueda del ratón")),
             VW - 40.0,
             56.0,
             18.0,
@@ -2546,7 +2546,7 @@ impl App {
             }
             let (name, th, mugen) = if i == 0 {
                 (
-                    "Aleatório".to_string(),
+                    crate::i18n::t("select.random").to_string(),
                     [[255, 47, 208], [34, 232, 255], [255, 226, 58]],
                     false,
                 )
@@ -2949,7 +2949,7 @@ impl App {
             sess.r.debug = self.debug_boxes;
             if seq && self.team.as_ref().is_some_and(|t| t.idx != [0, 0]) {
                 sess.vfx.banner(
-                    "PRÓXIMO LUTADOR",
+                    crate::i18n::tr3("PRÓXIMO LUTADOR", "NEXT FIGHTER", "SIGUIENTE LUCHADOR"),
                     &format!(
                         "{} vs {}",
                         self.reg.chars[self.sel.0].name, self.reg.chars[self.sel.1].name
@@ -2998,7 +2998,7 @@ impl App {
     fn finish_import(&mut self, read: Result<(String, ume_formats::vfs::Vfs), String>) {
         match read.map(|(pack, vfs)| self.reg.finish_import(pack, vfs)) {
             Ok(r) if r.duplicate_pack || (r.chars + r.stages == 0 && r.errors == 0) => {
-                self.msg = "Pacote já importado".into()
+                self.msg = crate::i18n::tr3("Pacote já importado", "Pack already imported", "Paquete ya importado").into()
             }
             Ok(r) => {
                 self.reg.sort_mugen();
@@ -3007,18 +3007,12 @@ impl App {
                     self.sel.1.min(self.reg.chars.len() - 1),
                     self.sel.2.min(self.reg.stages.len() - 1),
                 );
-                self.msg = format!(
-                    "Importado: {} personagem(ns), {} cenário(s){}",
-                    r.chars,
-                    r.stages,
-                    if r.errors == 0 {
-                        String::new()
-                    } else {
-                        format!(" · {} erro(s)", r.errors)
-                    }
+                self.msg = crate::i18n::fill(
+                    crate::i18n::tr3("Importado: {c} personagem(ns), {s} cenário(s){e}", "Imported: {c} character(s), {s} stage(s){e}", "Importado: {c} personaje(s), {s} escenario(s){e}"),
+                    &[("c", &r.chars.to_string()), ("s", &r.stages.to_string()), ("e", &if r.errors == 0 { String::new() } else { format!(" · {} {}", r.errors, crate::i18n::tr3("erro(s)", "error(s)", "error(es)")) })],
                 );
             }
-            Err(e) => self.msg = format!("Zip inválido: {e}"),
+            Err(e) => self.msg = format!("{}: {e}", crate::i18n::tr3("Zip inválido", "Invalid zip", "Zip no válido")),
         }
     }
 
@@ -3226,7 +3220,7 @@ impl App {
                 ) {
                     Ok(p) => {
                         self.msg = format!(
-                            "Dessincronização: relatório em {}",
+                            "Desync: report at {}",
                             p.file_name()
                                 .map(|f| f.to_string_lossy().into_owned())
                                 .unwrap_or_default()
@@ -3598,7 +3592,7 @@ impl App {
             None => (Some(0), Some(1.min(self.reg.chars.len() - 1))),
         };
         let (Some(c1), Some(c2)) = (c1, c2) else {
-            self.msg = format!("Netplay: personagem não encontrado ({:?})", a.chars);
+            self.msg = format!("Netplay: character not found ({:?})", a.chars);
             return;
         };
         let stage = a.stage.as_ref().map_or(Some(0), |id| {
@@ -3608,7 +3602,7 @@ impl App {
                 .position(|s| s.id.eq_ignore_ascii_case(id) || s.name.eq_ignore_ascii_case(id))
         });
         let Some(stage) = stage else {
-            self.msg = format!("Netplay: cenário não encontrado ({:?})", a.stage);
+            self.msg = format!("Netplay: stage not found ({:?})", a.stage);
             return;
         };
         let link = match crate::netlink::NetLink::connect(a) {
@@ -3650,16 +3644,18 @@ impl App {
     fn net_overlay(&self, n: &crate::netlink::NetLink) {
         use crate::netlink::NetStatus;
         let (text, color) = match n.status() {
-            NetStatus::Connecting => ("CONECTANDO AO ADVERSÁRIO…".to_string(), hex("#ffcc33")),
-            NetStatus::Waiting => ("SINCRONIZANDO…".to_string(), hex("#ffcc33")),
-            NetStatus::Lost(e) => (format!("CONEXÃO PERDIDA: {e}"), hex("#ff4d6d")),
+            NetStatus::Connecting => (crate::i18n::tr3("CONECTANDO AO ADVERSÁRIO…", "CONNECTING TO OPPONENT…", "CONECTANDO CON EL RIVAL…").to_string(), hex("#ffcc33")),
+            NetStatus::Waiting => (crate::i18n::tr3("SINCRONIZANDO…", "SYNCING…", "SINCRONIZANDO…").to_string(), hex("#ffcc33")),
+            NetStatus::Lost(e) => (format!("{}: {e}", crate::i18n::tr3("CONEXÃO PERDIDA", "CONNECTION LOST", "CONEXIÓN PERDIDA")), hex("#ff4d6d")),
             NetStatus::Running => {
                 if n.spectate {
                     (
                         format!(
-                            "ESPECTADOR · {} ms · {} atrás",
+                            "{} · {} ms · {} {}",
+                            crate::i18n::tr3("ESPECTADOR", "SPECTATOR", "ESPECTADOR"),
                             n.ping_ms().unwrap_or(0),
-                            n.frames_behind()
+                            n.frames_behind(),
+                            crate::i18n::tr3("atrás", "behind", "atrás")
                         ),
                         hex("#a49cc0"),
                     )
@@ -3704,7 +3700,7 @@ impl App {
         let Screen::Mugen { view, page } = self.screen else { return };
         self.screen = match self.mugen_catalog(view, page) {
             Some((view, page)) => Screen::Mugen { view, page },
-            None => Screen::Menu { cur: 9 },
+            None => Screen::Menu { cur: 10 },
         };
     }
 

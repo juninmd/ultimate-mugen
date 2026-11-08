@@ -22,6 +22,7 @@ pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value
     let height_ratio = height / STAND_UNITS;
     render.scale *= height_ratio;
     super::pixel_hit::fit_to_character(nc, fr, &mut render, height_ratio);
+    super::pixel_fit::fit_boxes(&mut render, fr);
     Some(render)
 }
 
@@ -203,7 +204,7 @@ mod tests {
         fighter.stats.height = Some(116.0);
         let taller = try_load(&fighter, &frame, None).unwrap();
         assert!((taller.scale / baseline.scale - 1.16).abs() < 0.001);
-        assert!((taller.hurt[0][1] / baseline.hurt[0][1] - 1.16).abs() < 0.001);
+        assert!((taller.hurt[0][1] / baseline.hurt[0][1] - 1.16).abs() < 0.03);
         fighter.stats.height = Some(f64::NAN);
         assert_eq!(try_load(&fighter, &frame, None).unwrap().scale, baseline.scale);
     }

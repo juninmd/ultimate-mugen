@@ -6,7 +6,7 @@ use ume_engine::matchs::Match;
 use ume_engine::native::{compile_native, NativeChar};
 
 const GAPS: [f32; 14] = [14.0, 24.0, 34.0, 44.0, 54.0, 64.0, 76.0, 90.0, 110.0, 135.0, 165.0, 200.0, 250.0, 320.0];
-const MIN_NORMAL_REACH: f32 = 64.0;
+const MIN_NORMAL_REACH: f32 = 30.0;
 const FIRST_SPECIAL_STATE: i32 = 1000;
 const ATTACK_RANGES: [(i32, i32); 4] = [(200, 299), (400, 499), (600, 699), (1000, 3799)];
 

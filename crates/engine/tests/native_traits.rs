@@ -190,6 +190,7 @@ fn test_trait_compilation_and_cns_generation() {
 #[test]
 fn test_trait_runtime_match_simulation() {
     let mut nc = base_char();
+    nc.abilities = None;
     nc.id = "trait_sim".into();
     nc.moves.clear();
     nc.moves.push(NativeMove {

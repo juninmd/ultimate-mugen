@@ -1,8 +1,8 @@
 //! Generic MUGEN-style INI parser (keeps duplicate keys & order; used by
 //! DEF/CNS/CMD/AIR/stage files). Port of `src/mugen/ini.ts`.
 
-pub(crate) use crate::num::parse_i32;
 pub use crate::num::{parse_float, parse_int};
+pub(crate) use crate::num::parse_i32;
 
 #[derive(Clone, Debug, Default)]
 pub struct Section {
@@ -52,9 +52,7 @@ pub fn strip_comment(line: &str) -> &str {
 /// Split text into lines on `\r\n`, `\n` or `\r` (empty lines may appear
 /// in place of `\r\n`; every consumer skips empty lines). Strips a leading BOM.
 pub(crate) fn split_lines(text: &str) -> impl Iterator<Item = &str> {
-    text.strip_prefix('\u{feff}')
-        .unwrap_or(text)
-        .split(['\n', '\r'])
+    text.strip_prefix('\u{feff}').unwrap_or(text).split(['\n', '\r'])
 }
 
 /// True for JS `/^-?\d/`.
@@ -102,10 +100,7 @@ pub fn parse_ini_opt(text: &str, keep_lines: bool) -> Vec<Section> {
         let cur = out.last_mut().unwrap();
         if let Some(eq) = line.find('=') {
             if eq > 0 && !starts_with_number(line) {
-                cur.entries.push((
-                    line[..eq].trim().to_ascii_lowercase(),
-                    line[eq + 1..].trim().to_string(),
-                ));
+                cur.entries.push((line[..eq].trim().to_ascii_lowercase(), line[eq + 1..].trim().to_string()));
             }
         }
         if keep_lines {
@@ -174,3 +169,4 @@ pub fn split_top(v: &str) -> Vec<String> {
     out.push(v[start..].trim().to_string());
     out
 }
+

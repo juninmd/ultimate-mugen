@@ -18,51 +18,25 @@ fn bench(name: &str, iters: usize, mut f: impl FnMut()) {
         .collect();
     samples.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let mean = samples.iter().sum::<f64>() / samples.len() as f64;
-    println!(
-        "{name:<28} mean {mean:>10.1} us   p50 {:>10.1}   p99 {:>10.1}",
-        samples[samples.len() / 2],
-        samples[samples.len() * 99 / 100]
-    );
+    println!("{name:<28} mean {mean:>10.1} us   p50 {:>10.1}   p99 {:>10.1}", samples[samples.len() / 2], samples[samples.len() * 99 / 100]);
 }
 
 fn main() {
     let mut v = Vfs::new();
-    add_zip(
-        &mut v,
-        include_bytes!("../../../assets/mugen/elecbyte.zip"),
-        "",
-    )
-    .unwrap();
+    add_zip(&mut v, include_bytes!("../../../assets/mugen/elecbyte.zip"), "").unwrap();
     let def = find_char_defs(&v).into_iter().next().unwrap();
     let dir = def.rsplit_once('/').map(|x| x.0).unwrap_or("");
-    let sff = resolve(
-        &v,
-        dir,
-        &format!(
-            "{}.sff",
-            def.rsplit('/').next().unwrap().trim_end_matches(".def")
-        ),
-    )
-    .map(|b| b.to_vec());
+    let sff = resolve(&v, dir, &format!("{}.sff", def.rsplit('/').next().unwrap().trim_end_matches(".def"))).map(|b| b.to_vec());
     if let Some(sff) = sff {
         bench("sff decode", 20, || {
             std::hint::black_box(ume_formats::sff::decode_sff(&sff).unwrap());
         });
     }
-    let air = v
-        .iter()
-        .find(|(k, _)| k.ends_with(".air"))
-        .map(|(_, b)| text(&b))
-        .unwrap();
+    let air = v.iter().find(|(k, _)| k.ends_with(".air")).map(|(_, b)| text(&b)).unwrap();
     bench("air parse", 50, || {
         std::hint::black_box(ume_formats::air::parse_air(&air));
     });
-    let cns = v
-        .iter()
-        .filter(|(k, _)| k.ends_with(".cns"))
-        .max_by_key(|(_, b)| b.len())
-        .map(|(_, b)| text(&b))
-        .unwrap();
+    let cns = v.iter().filter(|(k, _)| k.ends_with(".cns")).max_by_key(|(_, b)| b.len()).map(|(_, b)| text(&b)).unwrap();
     bench("cns parse+compile", 50, || {
         let mut m = std::collections::HashMap::new();
         ume_engine::cns::parse_states(&cns, &mut m, true);
@@ -84,11 +58,7 @@ fn main() {
         bench(&format!("match tick ({n} fighters)"), 2000, || {
             frame += 1;
             let mut inp = inputs.clone();
-            inp[0] = if frame % 40 < 20 {
-                0
-            } else {
-                1 << (frame / 40 % 6)
-            };
+            inp[0] = if frame % 40 < 20 { 0 } else { 1 << (frame / 40 % 6) };
             m.tick(&inp);
         });
     }

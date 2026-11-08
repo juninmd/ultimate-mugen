@@ -103,68 +103,37 @@ fn stage() -> Arc<ume_formats::stage::MugenStage> {
 #[test]
 fn stage_def_extras_are_parsed() {
     let st = stage();
-    assert_eq!(
-        (st.start_x, st.start_y, st.bound_high, st.zoom_out),
-        (30.0, -10.0, -40.0, 0.8)
-    );
+    assert_eq!((st.start_x, st.start_y, st.bound_high, st.zoom_out), (30.0, -10.0, -40.0, 0.8));
     assert_eq!(st.shadow.intensity, 96.0);
     assert_eq!(st.shadow.color, [10.0, 20.0, 30.0]);
     assert_eq!(st.shadow.yscale, -0.3);
     assert_eq!(st.reflection, 64.0);
     let music = st.music.as_ref().expect("music section");
-    assert_eq!(
-        (
-            music.file.as_str(),
-            music.volume,
-            music.loop_start,
-            music.loop_end
-        ),
-        ("sound/theme.ogg", 20.0, 44100, 88200)
-    );
+    assert_eq!((music.file.as_str(), music.volume, music.loop_start, music.loop_end), ("sound/theme.ogg", 20.0, 44100, 88200));
     assert_eq!(st.layers[0].window, Some([0.0, 0.0, 99.0, 49.0]));
     assert!(st.layers[1].position_link);
     assert_eq!(st.layers[1].sin_y, [4.0, 20.0, 0.0]);
     assert_eq!(st.ctrl_defs.len(), 2);
     assert_eq!(st.ctrl_defs[0].ctrls.len(), 4);
-    assert_eq!(
-        st.ctrl_defs[0].ctrls[1].kind,
-        BgCtrlKind::PosAdd(Some(50.0), None)
-    );
+    assert_eq!(st.ctrl_defs[0].ctrls[1].kind, BgCtrlKind::PosAdd(Some(50.0), None));
     assert_eq!(st.ctrl_defs[0].ctrls[2].end, 39);
 }
 
 #[test]
 fn bgctrl_drives_the_layers() {
     let mut bg = BgState::new(stage());
-    for _ in 0..10 {
-        bg.step();
-    }
+    for _ in 0..10 { bg.step(); }
     assert_eq!(bg.offset(0)[0], 10.0, "velocity 1 for ten ticks");
     bg.step();
     let x = bg.offset(0)[0];
-    for _ in 0..5 {
-        bg.step();
-    }
+    for _ in 0..5 { bg.step(); }
     assert_eq!(bg.offset(0)[0], x, "VelSet x = 0 stopped it");
-    for _ in 0..10 {
-        bg.step();
-    }
+    for _ in 0..10 { bg.step(); }
     assert!(bg.offset(0)[0] >= x + 50.0, "PosAdd moved it");
-    assert_eq!(
-        bg.offset(1)[0],
-        bg.offset(0)[0],
-        "positionlink follows the parent layer"
-    );
-    for _ in 0..8 {
-        bg.step();
-    }
-    assert!(
-        !bg.visible(0) && !bg.visible(1),
-        "hidden, and the linked layer too"
-    );
-    for _ in 0..12 {
-        bg.step();
-    }
+    assert_eq!(bg.offset(1)[0], bg.offset(0)[0], "positionlink follows the parent layer");
+    for _ in 0..8 { bg.step(); }
+    assert!(!bg.visible(0) && !bg.visible(1), "hidden, and the linked layer too");
+    for _ in 0..12 { bg.step(); }
     assert!(bg.visible(0));
 }
 
@@ -172,13 +141,9 @@ fn bgctrl_drives_the_layers() {
 fn bgctrl_anim_swaps_the_action() {
     let mut bg = BgState::new(stage());
     assert_eq!(bg.sprite(2), (5, 0));
-    for _ in 0..4 {
-        bg.step();
-    }
+    for _ in 0..4 { bg.step(); }
     assert_eq!(bg.sprite(2), (5, 1));
-    for _ in 0..3 {
-        bg.step();
-    }
+    for _ in 0..3 { bg.step(); }
     assert_eq!(bg.sprite(2), (6, 0));
     bg.reset();
     assert_eq!(bg.sprite(2), (5, 0));
@@ -238,10 +203,7 @@ fn stage_match(def: &str) -> ume_engine::matchs::Match {
 }
 
 fn ev(m: &ume_engine::matchs::Match, src: &str) -> f64 {
-    m.ev(
-        0,
-        &ume_engine::expr::Expr::new(ume_engine::expr::parse(src).unwrap()),
-    )
+    m.ev(0, &ume_engine::expr::Expr::new(ume_engine::expr::parse(src).unwrap()))
 }
 
 #[test]
@@ -283,10 +245,7 @@ fn stagevar_strings_compare_and_unknown_names_are_zero() {
     let m = stage_match(CUSTOM_DEF);
     assert_eq!(ev(&m, "StageVar(info.author) = \"tester\""), 1.0);
     assert_eq!(ev(&m, "StageVar(info.author) != \"someone else\""), 1.0);
-    assert_eq!(
-        ev(&m, "StageVar(info.displayname) = \"Night Rooftop\""),
-        1.0
-    );
+    assert_eq!(ev(&m, "StageVar(info.displayname) = \"Night Rooftop\""), 1.0);
     assert_eq!(ev(&m, "StageVar(info.name) = \"Rooftop\""), 1.0);
     assert_eq!(ev(&m, "StageVar(info.author)"), 0.0);
     assert_eq!(ev(&m, "StageVar(camera.nonsense)"), 0.0);

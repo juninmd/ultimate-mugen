@@ -92,8 +92,15 @@ impl App {
             );
             for (j, g) in cols.iter().enumerate() {
                 if let Some(text) = cell_text(i, *g) {
-                    self.ui
-                        .text(&text, xs[j + 1], y + 34.0, 20.0, WHITE, Align::Left, false);
+                    self.ui.text(
+                        &text,
+                        xs[j + 1],
+                        y + 34.0,
+                        20.0,
+                        WHITE,
+                        Align::Left,
+                        false,
+                    );
                     continue;
                 }
                 let mut cx = xs[j + 1];

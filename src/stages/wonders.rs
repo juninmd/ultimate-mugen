@@ -1,6 +1,6 @@
+use ume_engine::chardef::ImageData;
 use super::{decode_illustration, illustrated, StageEntry, StageKind};
 use std::sync::{Arc, OnceLock};
-use ume_engine::chardef::ImageData;
 
 pub const WONDER_IDS: [&str; 14] = [
     "great_wall",

@@ -1,5 +1,6 @@
 use super::*;
 
+
 /// Counters shared with the boot screen while the roster is catalogued on a worker thread.
 #[derive(Default)]
 pub struct ScanProgress {
@@ -11,11 +12,7 @@ pub struct ScanProgress {
 impl ScanProgress {
     pub fn counts(&self) -> (usize, usize, usize) {
         use std::sync::atomic::Ordering::Relaxed;
-        (
-            self.files.load(Relaxed),
-            self.chars.load(Relaxed),
-            self.stages.load(Relaxed),
-        )
+        (self.files.load(Relaxed), self.chars.load(Relaxed), self.stages.load(Relaxed))
     }
     pub(super) fn add(&self, key: &std::sync::atomic::AtomicUsize, n: usize) {
         use std::sync::atomic::Ordering::Relaxed;
@@ -39,19 +36,9 @@ pub fn rss_mb() -> f64 {
             fn GetCurrentProcess() -> isize;
             fn K32GetProcessMemoryInfo(p: isize, c: *mut Counters, cb: u32) -> i32;
         }
-        let mut c = Counters {
-            cb: std::mem::size_of::<Counters>() as u32,
-            fault: 0,
-            peak_ws: 0,
-            ws: 0,
-            _rest: [0; 6],
-        };
+        let mut c = Counters { cb: std::mem::size_of::<Counters>() as u32, fault: 0, peak_ws: 0, ws: 0, _rest: [0; 6] };
         let ok = unsafe { K32GetProcessMemoryInfo(GetCurrentProcess(), &mut c, c.cb) };
-        if ok == 0 {
-            0.0
-        } else {
-            c.ws as f64 / (1024.0 * 1024.0)
-        }
+        if ok == 0 { 0.0 } else { c.ws as f64 / (1024.0 * 1024.0) }
     }
     #[cfg(not(windows))]
     {

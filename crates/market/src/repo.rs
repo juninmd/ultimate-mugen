@@ -11,9 +11,7 @@ pub struct RepoRef {
 
 impl RepoRef {
     pub fn parse(input: &str) -> Result<RepoRef, String> {
-        let raw = input
-            .trim()
-            .trim_matches(|c| c == '"' || c == '\'' || c == '<' || c == '>');
+        let raw = input.trim().trim_matches(|c| c == '"' || c == '\'' || c == '<' || c == '>');
         if raw.is_empty() {
             return Err("empty repository link".into());
         }
@@ -25,21 +23,12 @@ impl RepoRef {
             return Err("only https links are accepted".into());
         } else if raw.contains("://") {
             return Err("only github.com links are accepted".into());
-        } else if raw
-            .split('/')
-            .next()
-            .is_some_and(|h| h.contains('.') && !valid_owner(h))
-        {
+        } else if raw.split('/').next().is_some_and(|h| h.contains('.') && !valid_owner(h)) {
             host_path(raw)?
         } else {
             raw.to_string()
         };
-        let path = path
-            .split(['?', '#'])
-            .next()
-            .unwrap_or("")
-            .trim_matches('/')
-            .to_string();
+        let path = path.split(['?', '#']).next().unwrap_or("").trim_matches('/').to_string();
         let mut parts = path.split('/');
         let owner = parts.next().unwrap_or("");
         let name = parts.next().unwrap_or("");
@@ -65,20 +54,11 @@ impl RepoRef {
             }
             Some(other) => return Err(format!("unsupported link section: {other:?}")),
         }
-        Ok(RepoRef {
-            owner: owner.to_string(),
-            name: name.to_string(),
-            reference,
-            subdir,
-        })
+        Ok(RepoRef { owner: owner.to_string(), name: name.to_string(), reference, subdir })
     }
 
     pub fn key(&self) -> String {
-        let mut k = format!(
-            "{}/{}",
-            self.owner.to_ascii_lowercase(),
-            self.name.to_ascii_lowercase()
-        );
+        let mut k = format!("{}/{}", self.owner.to_ascii_lowercase(), self.name.to_ascii_lowercase());
         if let Some(r) = &self.reference {
             k.push('@');
             k.push_str(r);
@@ -131,22 +111,8 @@ mod tests {
 
     #[test]
     fn accepts_common_link_shapes() {
-        let base = RepoRef {
-            owner: "juninmd".into(),
-            name: "ultimate-mugen".into(),
-            reference: None,
-            subdir: String::new(),
-        };
-        for s in [
-            "juninmd/ultimate-mugen",
-            "https://github.com/juninmd/ultimate-mugen",
-            "https://github.com/juninmd/ultimate-mugen/",
-            "https://github.com/juninmd/ultimate-mugen.git",
-            "github.com/juninmd/ultimate-mugen",
-            "git@github.com:juninmd/ultimate-mugen.git",
-            "  https://www.github.com/juninmd/ultimate-mugen?tab=readme#x ",
-            "<https://github.com/juninmd/ultimate-mugen>",
-        ] {
+        let base = RepoRef { owner: "juninmd".into(), name: "ultimate-mugen".into(), reference: None, subdir: String::new() };
+        for s in ["juninmd/ultimate-mugen", "https://github.com/juninmd/ultimate-mugen", "https://github.com/juninmd/ultimate-mugen/", "https://github.com/juninmd/ultimate-mugen.git", "github.com/juninmd/ultimate-mugen", "git@github.com:juninmd/ultimate-mugen.git", "  https://www.github.com/juninmd/ultimate-mugen?tab=readme#x ", "<https://github.com/juninmd/ultimate-mugen>"] {
             assert_eq!(p(s), base, "{s}");
         }
     }
@@ -154,10 +120,7 @@ mod tests {
     #[test]
     fn tree_links_carry_branch_and_folder() {
         let r = p("https://github.com/a/b/tree/dev/mugen/chars");
-        assert_eq!(
-            (r.reference.as_deref(), r.subdir.as_str()),
-            (Some("dev"), "mugen/chars")
-        );
+        assert_eq!((r.reference.as_deref(), r.subdir.as_str()), (Some("dev"), "mugen/chars"));
         assert_eq!(r.key(), "a/b@dev:mugen/chars");
         assert_eq!(r.display(), "a/b@dev/mugen/chars");
         assert_eq!(p("a/b").git_ref(), "HEAD");
@@ -165,20 +128,7 @@ mod tests {
 
     #[test]
     fn rejects_foreign_hosts_and_hostile_input() {
-        for bad in [
-            "",
-            "https://gitlab.com/a/b",
-            "http://github.com/a/b",
-            "ftp://github.com/a/b",
-            "https://github.com/a",
-            "https://github.com/a/b/tree/../x",
-            "https://github.com/a/b/tree/main/../../x",
-            "a/b/issues",
-            "https://evil.com/github.com/a/b",
-            "-a/b",
-            "a/b c",
-            "javascript:alert(1)",
-        ] {
+        for bad in ["", "https://gitlab.com/a/b", "http://github.com/a/b", "ftp://github.com/a/b", "https://github.com/a", "https://github.com/a/b/tree/../x", "https://github.com/a/b/tree/main/../../x", "a/b/issues", "https://evil.com/github.com/a/b", "-a/b", "a/b c", "javascript:alert(1)"] {
             assert!(RepoRef::parse(bad).is_err(), "{bad}");
         }
     }

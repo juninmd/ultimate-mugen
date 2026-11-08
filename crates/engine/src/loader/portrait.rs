@@ -61,4 +61,4 @@ pub fn load_mugen_portrait(vfs: &Vfs, def_path: &str) -> Option<Sprite> {
             })
         });
     picked
-}
+}

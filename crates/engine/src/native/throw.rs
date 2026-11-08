@@ -2,14 +2,10 @@ use super::types::NativeMove;
 
 const VICTIM_STATE_BASE: i32 = 3800;
 
-pub(super) fn victim_state(sid: i32) -> i32 {
-    VICTIM_STATE_BASE + (sid % 100) + if sid >= 3000 { 50 } else { 0 }
-}
+pub(super) fn victim_state(sid: i32) -> i32 { VICTIM_STATE_BASE + (sid % 100) + if sid >= 3000 { 50 } else { 0 } }
 
 pub(super) fn throw_states(m: &NativeMove, sid: i32) -> (String, String) {
-    let Some(throw) = &m.throw else {
-        return (String::new(), String::new());
-    };
+    let Some(throw) = &m.throw else { return (String::new(), String::new()) };
     let grab = throw.at.unwrap_or(1).max(1);
     let victim = throw.p2_state.unwrap_or_else(|| victim_state(sid));
     let bind = throw.bind.unwrap_or([34.0, 0.0]);

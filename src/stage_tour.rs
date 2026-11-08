@@ -95,21 +95,11 @@ pub async fn run(app: &mut App, dir: &str) {
             Some(format!("{dir}/S-{st}-1-calm.png")),
         )
         .await;
-        if let Some(frames) = std::env::var("UME_GIF_FRAMES")
-            .ok()
-            .and_then(|v| v.parse::<usize>().ok())
-        {
-            app.session
-                .as_mut()
-                .unwrap()
-                .pilots
-                .iter_mut()
-                .for_each(|p| *p = crate::session::Pilot::Dummy);
+        if let Some(frames) = std::env::var("UME_GIF_FRAMES").ok().and_then(|v| v.parse::<usize>().ok()) {
+            app.session.as_mut().unwrap().pilots.iter_mut().for_each(|p| *p = crate::session::Pilot::Dummy);
             for k in 0..frames {
                 {
-                    let App {
-                        session, c, audio, ..
-                    } = app;
+                    let App { session, c, audio, .. } = app;
                     let s = session.as_mut().unwrap();
                     (0..6).for_each(|_| s.step_visual(c, audio));
                 }

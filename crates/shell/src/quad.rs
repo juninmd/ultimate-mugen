@@ -3,8 +3,8 @@ use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
-use std::sync::Arc;
 use std::task::{Context, Poll, Waker};
+use std::sync::Arc;
 use ume_render::RGBA_SPRITE;
 
 pub use crate::PostParams;
@@ -27,29 +27,11 @@ thread_local! {
 
 /// Per-frame counters for the F3 overlay: what the last frame cost on the CPU/GPU upload path.
 #[derive(Clone, Copy, Debug, Default)]
-pub struct FrameStats {
-    pub vertices: u32,
-    pub draw_calls: u32,
-    pub uploads: u32,
-    pub upload_kb: u32,
-    pub rgba_fill: f32,
-    pub index_fill: f32,
-}
+pub struct FrameStats { pub vertices: u32, pub draw_calls: u32, pub uploads: u32, pub upload_kb: u32, pub rgba_fill: f32, pub index_fill: f32 }
 
-impl FrameStats {
-    pub const EMPTY: FrameStats = FrameStats {
-        vertices: 0,
-        draw_calls: 0,
-        uploads: 0,
-        upload_kb: 0,
-        rgba_fill: 0.0,
-        index_fill: 0.0,
-    };
-}
+impl FrameStats { pub const EMPTY: FrameStats = FrameStats { vertices: 0, draw_calls: 0, uploads: 0, upload_kb: 0, rgba_fill: 0.0, index_fill: 0.0 }; }
 
-pub fn stats() -> FrameStats {
-    STATS.with(|s| s.get())
-}
+pub fn stats() -> FrameStats { STATS.with(|s| s.get()) }
 
 fn note_upload(bytes: u64) {
     UPLOAD_BYTES.with(|b| b.set(b.get() + bytes));
@@ -58,31 +40,15 @@ fn note_upload(bytes: u64) {
 
 /// Called by the shell once the frame is drawn, so the next frame can report it.
 pub fn publish_stats(vertices: usize, draw_calls: usize, rgba_fill: f32, index_fill: f32) {
-    let (uploads, kb) = (
-        UPLOAD_COUNT.with(|c| c.get()),
-        (UPLOAD_BYTES.with(|b| b.get()) / 1024) as u32,
-    );
-    STATS.with(|s| {
-        s.set(FrameStats {
-            vertices: vertices.min(u32::MAX as usize) as u32,
-            draw_calls: draw_calls.min(u32::MAX as usize) as u32,
-            uploads,
-            upload_kb: kb,
-            rgba_fill,
-            index_fill,
-        })
-    });
+    let (uploads, kb) = (UPLOAD_COUNT.with(|c| c.get()), (UPLOAD_BYTES.with(|b| b.get()) / 1024) as u32);
+    STATS.with(|s| s.set(FrameStats { vertices: vertices.min(u32::MAX as usize) as u32, draw_calls: draw_calls.min(u32::MAX as usize) as u32, uploads, upload_kb: kb, rgba_fill, index_fill }));
     UPLOAD_BYTES.with(|b| b.set(0));
     UPLOAD_COUNT.with(|c| c.set(0));
 }
 
-fn generation() -> u32 {
-    GENERATION.with(|g| g.get())
-}
+fn generation() -> u32 { GENERATION.with(|g| g.get()) }
 
-fn index_generation() -> u32 {
-    INDEX_GENERATION.with(|g| g.get())
-}
+fn index_generation() -> u32 { INDEX_GENERATION.with(|g| g.get()) }
 
 fn reset_index_atlas(f: &mut Frame) {
     f.gpu.index_atlas.clear();
@@ -93,75 +59,39 @@ fn reset_index_atlas(f: &mut Frame) {
 
 fn reset_atlas(f: &mut Frame) {
     f.gpu.rgba_atlas.clear();
-    if let Some(c) = ume_render::Canvas::new(&f.gpu.renderer, &f.gpu.queue, &mut f.gpu.rgba_atlas) {
-        *f.canvas = c;
-    }
+    if let Some(c) = ume_render::Canvas::new(&f.gpu.renderer, &f.gpu.queue, &mut f.gpu.rgba_atlas) { *f.canvas = c; }
     GENERATION.with(|g| g.set(g.get().wrapping_add(1)));
     ATLAS_FULL.with(|a| a.set(false));
 }
 
-pub fn reset_textures() {
-    ATLAS_FULL.with(|a| a.set(true));
-    INDEX_FULL.with(|a| a.set(true));
-}
+pub fn reset_textures() { ATLAS_FULL.with(|a| a.set(true)); INDEX_FULL.with(|a| a.set(true)); }
 
 fn with<R>(f: impl FnOnce(&mut Frame<'static>) -> R) -> R {
     let p = FRAME.with(|c| c.get());
-    assert!(
-        !p.is_null(),
-        "ume_shell::quad called outside the frame loop"
-    );
+    assert!(!p.is_null(), "ume_shell::quad called outside the frame loop");
     f(unsafe { &mut *(p as *mut Frame<'static>) })
 }
 
-struct AsyncGame {
-    main: Option<Pin<Box<dyn Future<Output = ()>>>>,
-}
+struct AsyncGame { main: Option<Pin<Box<dyn Future<Output = ()>>>> }
 
 impl Game for AsyncGame {
-    fn init(&mut self, _: &mut crate::Gpu) {
-        reset_textures();
-    }
+    fn init(&mut self, _: &mut crate::Gpu) { reset_textures(); }
     fn frame(&mut self, f: &mut Frame) {
-        if ATLAS_FULL.with(|a| a.get()) {
-            reset_atlas(f);
-        }
-        if INDEX_FULL.with(|a| a.get()) {
-            reset_index_atlas(f);
-        }
-        KEY_QUEUE.with(|q| {
-            let mut q = q.borrow_mut();
-            q.clear();
-            q.extend(
-                f.input
-                    .pressed_order
-                    .iter()
-                    .filter_map(|k| KeyCode::from_winit(*k)),
-            );
-        });
+        if ATLAS_FULL.with(|a| a.get()) { reset_atlas(f); }
+        if INDEX_FULL.with(|a| a.get()) { reset_index_atlas(f); }
+        KEY_QUEUE.with(|q| { let mut q = q.borrow_mut(); q.clear(); q.extend(f.input.pressed_order.iter().filter_map(|k| KeyCode::from_winit(*k))); });
         FRAME.with(|c| c.set(f as *mut Frame as *mut ()));
         let done = match self.main.as_mut() {
-            Some(m) => m
-                .as_mut()
-                .poll(&mut Context::from_waker(Waker::noop()))
-                .is_ready(),
+            Some(m) => m.as_mut().poll(&mut Context::from_waker(Waker::noop())).is_ready(),
             None => true,
         };
         FRAME.with(|c| c.set(std::ptr::null_mut()));
-        if done {
-            self.main = None;
-            f.quit = true;
-        }
+        if done { self.main = None; f.quit = true; }
     }
 }
 
 pub fn run_async(cfg: Config, main: impl Future<Output = ()> + 'static) -> Result<u64, String> {
-    crate::run(
-        cfg,
-        AsyncGame {
-            main: Some(Box::pin(main)),
-        },
-    )
+    crate::run(cfg, AsyncGame { main: Some(Box::pin(main)) })
 }
 
 pub struct NextFrame(bool);
@@ -169,58 +99,24 @@ pub struct NextFrame(bool);
 impl Future for NextFrame {
     type Output = ();
     fn poll(mut self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<()> {
-        if self.0 {
-            Poll::Ready(())
-        } else {
-            self.0 = true;
-            Poll::Pending
-        }
+        if self.0 { Poll::Ready(()) } else { self.0 = true; Poll::Pending }
     }
 }
 
-pub fn next_frame() -> NextFrame {
-    NextFrame(false)
-}
+pub fn next_frame() -> NextFrame { NextFrame(false) }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Color {
-    pub r: f32,
-    pub g: f32,
-    pub b: f32,
-    pub a: f32,
-}
+pub struct Color { pub r: f32, pub g: f32, pub b: f32, pub a: f32 }
 
 impl Color {
-    pub const fn new(r: f32, g: f32, b: f32, a: f32) -> Color {
-        Color { r, g, b, a }
-    }
-    pub fn from_rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
-        Color::new(
-            r as f32 / 255.0,
-            g as f32 / 255.0,
-            b as f32 / 255.0,
-            a as f32 / 255.0,
-        )
-    }
-    pub fn to_array(self) -> [f32; 4] {
-        [self.r, self.g, self.b, self.a]
-    }
-    fn render(self) -> ume_render::Color {
-        ume_render::Color(self.to_array())
-    }
+    pub const fn new(r: f32, g: f32, b: f32, a: f32) -> Color { Color { r, g, b, a } }
+    pub fn from_rgba(r: u8, g: u8, b: u8, a: u8) -> Color { Color::new(r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0, a as f32 / 255.0) }
+    pub fn to_array(self) -> [f32; 4] { [self.r, self.g, self.b, self.a] }
+    fn render(self) -> ume_render::Color { ume_render::Color(self.to_array()) }
 }
 
-impl From<[f32; 4]> for Color {
-    fn from(c: [f32; 4]) -> Color {
-        Color::new(c[0], c[1], c[2], c[3])
-    }
-}
-impl From<Color> for [u8; 4] {
-    fn from(c: Color) -> [u8; 4] {
-        c.to_array()
-            .map(|v| (v.clamp(0.0, 1.0) * 255.0).round() as u8)
-    }
-}
+impl From<[f32; 4]> for Color { fn from(c: [f32; 4]) -> Color { Color::new(c[0], c[1], c[2], c[3]) } }
+impl From<Color> for [u8; 4] { fn from(c: Color) -> [u8; 4] { c.to_array().map(|v| (v.clamp(0.0, 1.0) * 255.0).round() as u8) } }
 
 pub const WHITE: Color = Color::new(1.0, 1.0, 1.0, 1.0);
 pub const BLACK: Color = Color::new(0.0, 0.0, 0.0, 1.0);
@@ -233,128 +129,43 @@ pub const BLUE: Color = Color::new(0.0, 0.47, 0.95, 1.0);
 pub const GRAY: Color = Color::new(0.51, 0.51, 0.51, 1.0);
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Rect {
-    pub x: f32,
-    pub y: f32,
-    pub w: f32,
-    pub h: f32,
-}
+pub struct Rect { pub x: f32, pub y: f32, pub w: f32, pub h: f32 }
 
 impl Rect {
-    pub const fn new(x: f32, y: f32, w: f32, h: f32) -> Rect {
-        Rect { x, y, w, h }
-    }
-    pub fn contains(&self, p: Vec2) -> bool {
-        p.x >= self.x && p.x < self.x + self.w && p.y >= self.y && p.y < self.y + self.h
-    }
+    pub const fn new(x: f32, y: f32, w: f32, h: f32) -> Rect { Rect { x, y, w, h } }
+    pub fn contains(&self, p: Vec2) -> bool { p.x >= self.x && p.x < self.x + self.w && p.y >= self.y && p.y < self.y + self.h }
 }
 
-pub fn screen_width() -> f32 {
-    with(|f| f.size[0])
-}
-pub fn screen_height() -> f32 {
-    with(|f| f.size[1])
-}
-pub fn window_size() -> (f32, f32) {
-    with(|f| (f.window[0], f.window[1]))
-}
-pub fn set_keep_aspect(keep: bool) {
-    with(|f| {
-        f.stretch = if keep {
-            None
-        } else {
-            Some(crate::STRETCH_ASPECT)
-        }
-    })
-}
-pub fn set_linear_filter(linear: bool) {
-    with(|f| f.linear = linear)
-}
-pub fn dpi_scale() -> f32 {
-    1.0
-}
-pub fn window_scale() -> f32 {
-    with(|f| f.scale)
-}
-pub fn get_time() -> f64 {
-    with(|f| f.time)
-}
-pub fn get_frame_time() -> f32 {
-    with(|f| f.dt)
-}
-pub fn get_fps() -> i32 {
-    with(|f| {
-        if f.dt > 0.0 {
-            (1.0 / f.dt).round() as i32
-        } else {
-            0
-        }
-    })
-}
-pub fn request_new_screen_size(w: f32, h: f32) {
-    with(|f| f.resize = Some([w.max(1.0) as u32, h.max(1.0) as u32]))
-}
-pub fn set_fullscreen(on: bool) {
-    with(|f| f.fullscreen = Some(on))
-}
-pub fn set_vsync(on: bool) {
-    with(|f| f.vsync = Some(on))
-}
-pub fn set_frame_cap(fps: u32) {
-    with(|f| f.frame_cap = Some(fps))
-}
-pub fn set_post(p: Option<PostParams>) {
-    with(|f| {
-        f.post = p;
-        f.canvas.batch.begin_overlay();
-    })
-}
-pub fn glass_panel(x: f32, y: f32, w: f32, h: f32, radius: f32, tint: [f32; 3]) -> bool {
-    with(|f| {
-        f.post
-            .as_mut()
-            .is_some_and(|p| p.glass.push(x, y, w, h, radius, tint))
-    })
-}
-pub fn set_blend(b: Blend) {
-    with(|f| f.canvas.blend = b)
-}
-pub fn quit() {
-    with(|f| f.quit = true)
-}
-pub fn set_scissor(r: Option<(i32, i32, i32, i32)>) {
-    with(|f| {
-        f.canvas.batch.scissor = r.map(|(x, y, w, h)| {
-            [
-                x.max(0) as u32,
-                y.max(0) as u32,
-                w.max(0) as u32,
-                h.max(0) as u32,
-            ]
-        })
-    })
-}
-pub fn typed_text() -> String {
-    with(|f| f.input.typed.clone())
-}
-pub fn mouse_wheel() -> (f32, f32) {
-    with(|f| (f.input.wheel[0], f.input.wheel[1]))
-}
-pub fn mouse_delta_position() -> Vec2 {
-    with(|f| Vec2::from(f.input.mouse_delta) * Vec2::from(f.input.pointer_scale))
-}
+pub fn screen_width() -> f32 { with(|f| f.size[0]) }
+pub fn screen_height() -> f32 { with(|f| f.size[1]) }
+pub fn window_size() -> (f32, f32) { with(|f| (f.window[0], f.window[1])) }
+pub fn set_keep_aspect(keep: bool) { with(|f| f.stretch = if keep { None } else { Some(crate::STRETCH_ASPECT) }) }
+pub fn set_linear_filter(linear: bool) { with(|f| f.linear = linear) }
+pub fn dpi_scale() -> f32 { 1.0 }
+pub fn window_scale() -> f32 { with(|f| f.scale) }
+pub fn get_time() -> f64 { with(|f| f.time) }
+pub fn get_frame_time() -> f32 { with(|f| f.dt) }
+pub fn get_fps() -> i32 { with(|f| if f.dt > 0.0 { (1.0 / f.dt).round() as i32 } else { 0 }) }
+pub fn request_new_screen_size(w: f32, h: f32) { with(|f| f.resize = Some([w.max(1.0) as u32, h.max(1.0) as u32])) }
+pub fn set_fullscreen(on: bool) { with(|f| f.fullscreen = Some(on)) }
+pub fn set_vsync(on: bool) { with(|f| f.vsync = Some(on)) }
+pub fn set_frame_cap(fps: u32) { with(|f| f.frame_cap = Some(fps)) }
+pub fn set_post(p: Option<PostParams>) { with(|f| { f.post = p; f.canvas.batch.begin_overlay(); }) }
+pub fn glass_panel(x: f32, y: f32, w: f32, h: f32, radius: f32, tint: [f32; 3]) -> bool { with(|f| f.post.as_mut().is_some_and(|p| p.glass.push(x, y, w, h, radius, tint))) }
+pub fn set_blend(b: Blend) { with(|f| f.canvas.blend = b) }
+pub fn quit() { with(|f| f.quit = true) }
+pub fn set_scissor(r: Option<(i32, i32, i32, i32)>) { with(|f| f.canvas.batch.scissor = r.map(|(x, y, w, h)| [x.max(0) as u32, y.max(0) as u32, w.max(0) as u32, h.max(0) as u32])) }
+pub fn typed_text() -> String { with(|f| f.input.typed.clone()) }
+pub fn mouse_wheel() -> (f32, f32) { with(|f| (f.input.wheel[0], f.input.wheel[1])) }
+pub fn mouse_delta_position() -> Vec2 { with(|f| Vec2::from(f.input.mouse_delta) * Vec2::from(f.input.pointer_scale)) }
 
 pub struct ScreenData;
 
 impl ScreenData {
-    pub fn export_png(&self, path: &str) {
-        with(|f| f.screenshot = Some(path.to_string()))
-    }
+    pub fn export_png(&self, path: &str) { with(|f| f.screenshot = Some(path.to_string())) }
 }
 
-pub fn get_screen_data() -> ScreenData {
-    ScreenData
-}
+pub fn get_screen_data() -> ScreenData { ScreenData }
 
 pub fn clear_background(c: Color) {
     with(|f| {
@@ -363,48 +174,22 @@ pub fn clear_background(c: Color) {
     })
 }
 
-pub fn draw_rectangle(x: f32, y: f32, w: f32, h: f32, c: Color) {
-    with(|f| f.canvas.rect(x, y, w, h, c.render()))
-}
+pub fn draw_rectangle(x: f32, y: f32, w: f32, h: f32, c: Color) { with(|f| f.canvas.rect(x, y, w, h, c.render())) }
 
 pub fn draw_rectangle_lines(x: f32, y: f32, w: f32, h: f32, thickness: f32, c: Color) {
-    with(|f| {
-        f.canvas
-            .rect_lines(x, y, w, h, thickness.min(w * 0.5).min(h * 0.5), c.render())
-    })
+    with(|f| f.canvas.rect_lines(x, y, w, h, thickness.min(w * 0.5).min(h * 0.5), c.render()))
 }
 
-pub fn draw_line(x1: f32, y1: f32, x2: f32, y2: f32, thickness: f32, c: Color) {
-    with(|f| f.canvas.line([x1, y1], [x2, y2], thickness, c.render()))
-}
-pub fn draw_circle(x: f32, y: f32, r: f32, c: Color) {
-    with(|f| f.canvas.circle([x, y], r, c.render()))
-}
-pub fn draw_circle_lines(x: f32, y: f32, r: f32, thickness: f32, c: Color) {
-    with(|f| f.canvas.circle_lines([x, y], r, thickness, c.render()))
-}
-pub fn draw_triangle(a: Vec2, b: Vec2, c: Vec2, color: Color) {
-    with(|f| {
-        f.canvas
-            .triangle(a.into(), b.into(), c.into(), color.render())
-    })
-}
+pub fn draw_line(x1: f32, y1: f32, x2: f32, y2: f32, thickness: f32, c: Color) { with(|f| f.canvas.line([x1, y1], [x2, y2], thickness, c.render())) }
+pub fn draw_circle(x: f32, y: f32, r: f32, c: Color) { with(|f| f.canvas.circle([x, y], r, c.render())) }
+pub fn draw_circle_lines(x: f32, y: f32, r: f32, thickness: f32, c: Color) { with(|f| f.canvas.circle_lines([x, y], r, thickness, c.render())) }
+pub fn draw_triangle(a: Vec2, b: Vec2, c: Vec2, color: Color) { with(|f| f.canvas.triangle(a.into(), b.into(), c.into(), color.render())) }
 
 pub fn draw_poly(x: f32, y: f32, sides: u8, radius: f32, rotation: f32, c: Color) {
-    draw_ellipse_poly(
-        x,
-        y,
-        radius,
-        radius,
-        rotation.to_radians(),
-        sides.max(3) as u32,
-        c,
-    )
+    draw_ellipse_poly(x, y, radius, radius, rotation.to_radians(), sides.max(3) as u32, c)
 }
 
-pub fn draw_ellipse(x: f32, y: f32, w: f32, h: f32, rotation: f32, c: Color) {
-    draw_ellipse_poly(x, y, w, h, rotation.to_radians(), 32, c)
-}
+pub fn draw_ellipse(x: f32, y: f32, w: f32, h: f32, rotation: f32, c: Color) { draw_ellipse_poly(x, y, w, h, rotation.to_radians(), 32, c) }
 
 fn draw_ellipse_poly(x: f32, y: f32, rx: f32, ry: f32, rot: f32, n: u32, c: Color) {
     let (s, co) = rot.sin_cos();
@@ -425,17 +210,9 @@ fn draw_ellipse_poly(x: f32, y: f32, rx: f32, ry: f32, rot: f32, n: u32, c: Colo
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum FilterMode {
-    Linear,
-    Nearest,
-}
+pub enum FilterMode { Linear, Nearest }
 
-struct TexInner {
-    slot: Cell<Option<(u32, ume_render::Rect)>>,
-    pixels: Arc<[u8]>,
-    w: u32,
-    h: u32,
-}
+struct TexInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Arc<[u8]>, w: u32, h: u32 }
 
 #[derive(Clone)]
 pub struct Texture2D(Rc<TexInner>);
@@ -455,25 +232,13 @@ impl Texture2D {
             v.resize(needed, 0);
             Arc::from(v)
         };
-        Texture2D(Rc::new(TexInner {
-            slot: Cell::new(None),
-            pixels,
-            w,
-            h,
-        }))
+        Texture2D(Rc::new(TexInner { slot: Cell::new(None), pixels, w, h }))
     }
 
     fn rect(&self, f: &mut Frame) -> Option<ume_render::Rect> {
         let gen = generation();
-        if let Some((g, r)) = self.0.slot.get() {
-            if g == gen {
-                return Some(r);
-            }
-        }
-        let Some(r) = f.gpu.rgba_atlas.alloc(self.0.w, self.0.h) else {
-            ATLAS_FULL.with(|a| a.set(true));
-            return None;
-        };
+        if let Some((g, r)) = self.0.slot.get() { if g == gen { return Some(r); } }
+        let Some(r) = f.gpu.rgba_atlas.alloc(self.0.w, self.0.h) else { ATLAS_FULL.with(|a| a.set(true)); return None };
         f.gpu.renderer.upload_rgba(&f.gpu.queue, r, &self.0.pixels);
         note_upload((self.0.w as u64) * (self.0.h as u64) * 4);
         self.0.slot.set(Some((gen, r)));
@@ -481,41 +246,20 @@ impl Texture2D {
     }
 
     pub fn prefetch(&self, max_occupancy: f32) -> bool {
-        with(|f| {
-            self.is_resident()
-                || (f.gpu.rgba_atlas.occupancy() < max_occupancy && self.rect(f).is_some())
-        })
+        with(|f| self.is_resident() || (f.gpu.rgba_atlas.occupancy() < max_occupancy && self.rect(f).is_some()))
     }
 
-    pub fn width(&self) -> f32 {
-        self.0.w as f32
-    }
-    pub fn height(&self) -> f32 {
-        self.0.h as f32
-    }
-    pub fn size(&self) -> Vec2 {
-        vec2(self.width(), self.height())
-    }
+    pub fn width(&self) -> f32 { self.0.w as f32 }
+    pub fn height(&self) -> f32 { self.0.h as f32 }
+    pub fn size(&self) -> Vec2 { vec2(self.width(), self.height()) }
     pub fn set_filter(&self, _: FilterMode) {}
-    pub fn is_resident(&self) -> bool {
-        self.0.slot.get().is_some_and(|(g, _)| g == generation())
-    }
+    pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == generation()) }
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct DrawTextureParams {
-    pub dest_size: Option<Vec2>,
-    pub source: Option<Rect>,
-    pub rotation: f32,
-    pub flip_x: bool,
-    pub flip_y: bool,
-    pub pivot: Option<Vec2>,
-    pub pal_fx: Option<ume_render::PalFx>,
-}
+pub struct DrawTextureParams { pub dest_size: Option<Vec2>, pub source: Option<Rect>, pub rotation: f32, pub flip_x: bool, pub flip_y: bool, pub pivot: Option<Vec2>, pub pal_fx: Option<ume_render::PalFx> }
 
-pub fn draw_texture(t: &Texture2D, x: f32, y: f32, c: Color) {
-    draw_texture_ex(t, x, y, c, DrawTextureParams::default())
-}
+pub fn draw_texture(t: &Texture2D, x: f32, y: f32, c: Color) { draw_texture_ex(t, x, y, c, DrawTextureParams::default()) }
 
 pub fn draw_texture_ex(t: &Texture2D, x: f32, y: f32, c: Color, p: DrawTextureParams) {
     with(|f| {
@@ -524,49 +268,22 @@ pub fn draw_texture_ex(t: &Texture2D, x: f32, y: f32, c: Color, p: DrawTexturePa
     })
 }
 
-pub fn draw_indexed_ex(
-    t: &IndexedTexture,
-    palette: &Palette,
-    x: f32,
-    y: f32,
-    c: Color,
-    p: DrawTextureParams,
-) {
+pub fn draw_indexed_ex(t: &IndexedTexture, palette: &Palette, x: f32, y: f32, c: Color, p: DrawTextureParams) {
     with(|f| {
-        let (Some(r), Some(row)) = (t.rect(f), palette.row(f)) else {
-            return;
-        };
+        let (Some(r), Some(row)) = (t.rect(f), palette.row(f)) else { return };
         push_textured(f, r, row, [t.0.w as f32, t.0.h as f32], x, y, c, p);
     })
 }
 
 #[allow(clippy::too_many_arguments)]
-fn push_textured(
-    f: &mut Frame,
-    r: ume_render::Rect,
-    pal: u32,
-    tex_size: [f32; 2],
-    x: f32,
-    y: f32,
-    c: Color,
-    p: DrawTextureParams,
-) {
-    let src = p
-        .source
-        .unwrap_or(Rect::new(0.0, 0.0, tex_size[0], tex_size[1]));
+fn push_textured(f: &mut Frame, r: ume_render::Rect, pal: u32, tex_size: [f32; 2], x: f32, y: f32, c: Color, p: DrawTextureParams) {
+    let src = p.source.unwrap_or(Rect::new(0.0, 0.0, tex_size[0], tex_size[1]));
     let size = p.dest_size.unwrap_or(vec2(src.w, src.h));
     let [aw, ah] = f.gpu.renderer.atlas_size.map(|v| v as f32);
     let (mut u0, mut v0) = ((r.x as f32 + src.x) / aw, (r.y as f32 + src.y) / ah);
-    let (mut u1, mut v1) = (
-        (r.x as f32 + src.x + src.w) / aw,
-        (r.y as f32 + src.y + src.h) / ah,
-    );
-    if p.flip_x {
-        std::mem::swap(&mut u0, &mut u1);
-    }
-    if p.flip_y {
-        std::mem::swap(&mut v0, &mut v1);
-    }
+    let (mut u1, mut v1) = ((r.x as f32 + src.x + src.w) / aw, (r.y as f32 + src.y + src.h) / ah);
+    if p.flip_x { std::mem::swap(&mut u0, &mut u1); }
+    if p.flip_y { std::mem::swap(&mut v0, &mut v1); }
     let (c0, c1, c2, c3) = if p.rotation != 0.0 {
         let pivot = p.pivot.unwrap_or(vec2(x + size.x * 0.5, y + size.y * 0.5));
         let (s, co) = p.rotation.sin_cos();
@@ -574,24 +291,11 @@ fn push_textured(
             let (dx, dy) = (cx - pivot.x, cy - pivot.y);
             [pivot.x + dx * co - dy * s, pivot.y + dx * s + dy * co]
         };
-        (
-            corner(x, y),
-            corner(x + size.x, y),
-            corner(x + size.x, y + size.y),
-            corner(x, y + size.y),
-        )
+        (corner(x, y), corner(x + size.x, y), corner(x + size.x, y + size.y), corner(x, y + size.y))
     } else {
-        (
-            [x, y],
-            [x + size.x, y],
-            [x + size.x, y + size.y],
-            [x, y + size.y],
-        )
+        ([x, y], [x + size.x, y], [x + size.x, y + size.y], [x, y + size.y])
     };
-    let (mul, add, hue) = match p.pal_fx {
-        Some(fx) => fx.vertex(c.to_array()),
-        None => (c.to_array(), [0.0; 4], 0.0),
-    };
+    let (mul, add, hue) = match p.pal_fx { Some(fx) => fx.vertex(c.to_array()), None => (c.to_array(), [0.0; 4], 0.0) };
     let v = |pos: [f32; 2], uv: [f32; 2]| ume_render::Vertex::new(pos, uv, pal, mul, add, hue);
     let verts = [
         v(c0, [u0, v0]),
@@ -603,12 +307,7 @@ fn push_textured(
     f.canvas.batch.push_quad_verts(&verts, blend);
 }
 
-struct IndexedInner {
-    slot: Cell<Option<(u32, ume_render::Rect)>>,
-    pixels: Arc<Vec<u8>>,
-    w: u32,
-    h: u32,
-}
+struct IndexedInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Arc<Vec<u8>>, w: u32, h: u32 }
 
 #[derive(Clone)]
 pub struct IndexedTexture(Rc<IndexedInner>);
@@ -616,57 +315,27 @@ pub struct IndexedTexture(Rc<IndexedInner>);
 impl IndexedTexture {
     pub fn new(w: u32, h: u32, pixels: Arc<Vec<u8>>) -> IndexedTexture {
         let n = (w * h) as usize;
-        let pixels = if pixels.len() == n {
-            pixels
-        } else {
-            let mut v = pixels[..pixels.len().min(n)].to_vec();
-            v.resize(n, 0);
-            Arc::new(v)
-        };
-        IndexedTexture(Rc::new(IndexedInner {
-            slot: Cell::new(None),
-            pixels,
-            w,
-            h,
-        }))
+        let pixels = if pixels.len() == n { pixels } else { let mut v = pixels[..pixels.len().min(n)].to_vec(); v.resize(n, 0); Arc::new(v) };
+        IndexedTexture(Rc::new(IndexedInner { slot: Cell::new(None), pixels, w, h }))
     }
 
     fn rect(&self, f: &mut Frame) -> Option<ume_render::Rect> {
         let gen = index_generation();
-        if let Some((g, r)) = self.0.slot.get() {
-            if g == gen {
-                return Some(r);
-            }
-        }
-        let Some(r) = f.gpu.index_atlas.alloc(self.0.w, self.0.h) else {
-            INDEX_FULL.with(|a| a.set(true));
-            return None;
-        };
-        f.gpu
-            .renderer
-            .upload_indexed(&f.gpu.queue, r, &self.0.pixels);
+        if let Some((g, r)) = self.0.slot.get() { if g == gen { return Some(r); } }
+        let Some(r) = f.gpu.index_atlas.alloc(self.0.w, self.0.h) else { INDEX_FULL.with(|a| a.set(true)); return None };
+        f.gpu.renderer.upload_indexed(&f.gpu.queue, r, &self.0.pixels);
         note_upload((self.0.w as u64) * (self.0.h as u64));
         self.0.slot.set(Some((gen, r)));
         Some(r)
     }
 
-    pub fn is_resident(&self) -> bool {
-        self.0
-            .slot
-            .get()
-            .is_some_and(|(g, _)| g == index_generation())
-    }
+    pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == index_generation()) }
 
     /// Bytes this sheet occupies in the index atlas (one byte per pixel).
-    pub fn pixels_len(&self) -> u64 {
-        self.0.w as u64 * self.0.h as u64
-    }
+    pub fn pixels_len(&self) -> u64 { self.0.w as u64 * self.0.h as u64 }
 
     pub fn prefetch(&self, max_occupancy: f32) -> bool {
-        with(|f| {
-            self.is_resident()
-                || (f.gpu.index_atlas.occupancy() < max_occupancy && self.rect(f).is_some())
-        })
+        with(|f| self.is_resident() || (f.gpu.index_atlas.occupancy() < max_occupancy && self.rect(f).is_some()))
     }
 }
 
@@ -675,62 +344,23 @@ mod palette;
 pub use palette::Palette;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Vertex {
-    pub position: Vec3,
-    pub uv: Vec2,
-    pub color: [u8; 4],
-    pub normal: Vec4,
-}
+pub struct Vertex { pub position: Vec3, pub uv: Vec2, pub color: [u8; 4], pub normal: Vec4 }
 
 impl Vertex {
-    pub fn new(x: f32, y: f32, z: f32, u: f32, v: f32, color: Color) -> Vertex {
-        Vertex {
-            position: vec3(x, y, z),
-            uv: vec2(u, v),
-            color: color.into(),
-            normal: Vec4::ZERO,
-        }
-    }
+    pub fn new(x: f32, y: f32, z: f32, u: f32, v: f32, color: Color) -> Vertex { Vertex { position: vec3(x, y, z), uv: vec2(u, v), color: color.into(), normal: Vec4::ZERO } }
 }
 
-pub struct Mesh {
-    pub vertices: Vec<Vertex>,
-    pub indices: Vec<u16>,
-    pub texture: Option<Texture2D>,
-}
+pub struct Mesh { pub vertices: Vec<Vertex>, pub indices: Vec<u16>, pub texture: Option<Texture2D> }
 
 pub fn draw_mesh(m: &Mesh) {
     with(|f| {
         let [aw, ah] = f.gpu.renderer.atlas_size.map(|v| v as f32);
-        let rect = match m.texture.as_ref() {
-            Some(t) => match t.rect(f) {
-                Some(r) => Some(r),
-                None => return,
-            },
-            None => None,
-        };
+        let rect = match m.texture.as_ref() { Some(t) => match t.rect(f) { Some(r) => Some(r), None => return }, None => None };
         let white = f.canvas.white_uv();
-        let verts: Vec<ume_render::Vertex> = m
-            .vertices
-            .iter()
-            .map(|v| {
-                let uv = match rect {
-                    Some(r) => [
-                        (r.x as f32 + v.uv.x * r.w as f32) / aw,
-                        (r.y as f32 + v.uv.y * r.h as f32) / ah,
-                    ],
-                    None => white,
-                };
-                ume_render::Vertex::new(
-                    [v.position.x, v.position.y],
-                    uv,
-                    RGBA_SPRITE,
-                    v.color.map(|c| c as f32 / 255.0),
-                    [0.0; 4],
-                    0.0,
-                )
-            })
-            .collect();
+        let verts: Vec<ume_render::Vertex> = m.vertices.iter().map(|v| {
+            let uv = match rect { Some(r) => [(r.x as f32 + v.uv.x * r.w as f32) / aw, (r.y as f32 + v.uv.y * r.h as f32) / ah], None => white };
+            ume_render::Vertex::new([v.position.x, v.position.y], uv, RGBA_SPRITE, v.color.map(|c| c as f32 / 255.0), [0.0; 4], 0.0)
+        }).collect();
         let idx: Vec<u32> = m.indices.iter().map(|&i| i as u32).collect();
         let blend = f.canvas.blend;
         f.canvas.batch.push_tris(&verts, &idx, blend);
@@ -744,105 +374,47 @@ impl Font {
     pub fn set_filter(&mut self, _: FilterMode) {}
 }
 
-pub fn load_ttf_font_from_bytes(bytes: &[u8]) -> Result<Font, String> {
-    text::Font::from_bytes(bytes).map(|f| Font(Rc::new(RefCell::new((f, generation())))))
-}
+pub fn load_ttf_font_from_bytes(bytes: &[u8]) -> Result<Font, String> { text::Font::from_bytes(bytes).map(|f| Font(Rc::new(RefCell::new((f, generation()))))) }
 
-pub fn set_default_font(f: Font) {
-    DEFAULT_FONT.with(|d| *d.borrow_mut() = Some(f));
-}
+pub fn set_default_font(f: Font) { DEFAULT_FONT.with(|d| *d.borrow_mut() = Some(f)); }
 
-fn font_or_default(f: Option<&Font>) -> Option<Font> {
-    f.cloned()
-        .or_else(|| DEFAULT_FONT.with(|d| d.borrow().clone()))
-}
+fn font_or_default(f: Option<&Font>) -> Option<Font> { f.cloned().or_else(|| DEFAULT_FONT.with(|d| d.borrow().clone())) }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct TextDimensions {
-    pub width: f32,
-    pub height: f32,
-    pub offset_y: f32,
-}
+pub struct TextDimensions { pub width: f32, pub height: f32, pub offset_y: f32 }
 
 #[derive(Clone)]
-pub struct TextParams<'a> {
-    pub font: Option<&'a Font>,
-    pub font_size: u16,
-    pub font_scale: f32,
-    pub font_scale_aspect: f32,
-    pub rotation: f32,
-    pub color: Color,
-}
+pub struct TextParams<'a> { pub font: Option<&'a Font>, pub font_size: u16, pub font_scale: f32, pub font_scale_aspect: f32, pub rotation: f32, pub color: Color }
 
 impl Default for TextParams<'_> {
-    fn default() -> Self {
-        TextParams {
-            font: None,
-            font_size: 20,
-            font_scale: 1.0,
-            font_scale_aspect: 1.0,
-            rotation: 0.0,
-            color: WHITE,
-        }
-    }
+    fn default() -> Self { TextParams { font: None, font_size: 20, font_scale: 1.0, font_scale_aspect: 1.0, rotation: 0.0, color: WHITE } }
 }
 
-pub fn measure_text(
-    text: &str,
-    font: Option<&Font>,
-    font_size: u16,
-    font_scale: f32,
-) -> TextDimensions {
-    let Some(f) = font_or_default(font) else {
-        return TextDimensions::default();
-    };
+pub fn measure_text(text: &str, font: Option<&Font>, font_size: u16, font_scale: f32) -> TextDimensions {
+    let Some(f) = font_or_default(font) else { return TextDimensions::default() };
     let f = &f.0.borrow().0;
     let px = font_size as f32 * font_scale;
     let [width, height] = f.measure(text, px);
-    TextDimensions {
-        width,
-        height,
-        offset_y: f.ascent(px),
-    }
+    TextDimensions { width, height, offset_y: f.ascent(px) }
 }
 
 pub fn draw_text_ex(text: &str, x: f32, y: f32, p: TextParams) -> TextDimensions {
-    let Some(font) = font_or_default(p.font) else {
-        return TextDimensions::default();
-    };
+    let Some(font) = font_or_default(p.font) else { return TextDimensions::default() };
     let px = p.font_size as f32 * p.font_scale;
     let width = with(|f| {
         let mut fb = font.0.borrow_mut();
         let gen = generation();
-        if fb.1 != gen {
-            fb.0.clear_cache();
-            fb.1 = gen;
-        }
+        if fb.1 != gen { fb.0.clear_cache(); fb.1 = gen; }
         let w = fb.0.draw(f.gpu, f.canvas, text, x, y, px, p.color.render());
-        if fb.0.atlas_full() {
-            ATLAS_FULL.with(|a| a.set(true));
-        }
+        if fb.0.atlas_full() { ATLAS_FULL.with(|a| a.set(true)); }
         w
     });
     let fb = &font.0.borrow().0;
-    TextDimensions {
-        width,
-        height: fb.measure("", px)[1],
-        offset_y: fb.ascent(px),
-    }
+    TextDimensions { width, height: fb.measure("", px)[1], offset_y: fb.ascent(px) }
 }
 
 pub fn draw_text(text: &str, x: f32, y: f32, font_size: f32, color: Color) -> TextDimensions {
-    draw_text_ex(
-        text,
-        x,
-        y,
-        TextParams {
-            font_size: font_size.max(1.0) as u16,
-            color,
-            ..Default::default()
-        },
-    )
+    draw_text_ex(text, x, y, TextParams { font_size: font_size.max(1.0) as u16, color, ..Default::default() })
 }
 
 macro_rules! keys {
@@ -877,65 +449,28 @@ keys! {
     KpAdd => NumpadAdd, KpSubtract => NumpadSubtract, KpMultiply => NumpadMultiply, KpDivide => NumpadDivide, KpDecimal => NumpadDecimal, KpEnter => NumpadEnter,
 }
 
-pub fn is_key_down(k: KeyCode) -> bool {
-    with(|f| f.input.is_down(k.winit()))
-}
-pub fn is_key_pressed(k: KeyCode) -> bool {
-    with(|f| f.input.is_pressed(k.winit()))
-}
-pub fn get_last_key_pressed() -> Option<KeyCode> {
-    KEY_QUEUE.with(|q| q.borrow_mut().pop())
-}
+pub fn is_key_down(k: KeyCode) -> bool { with(|f| f.input.is_down(k.winit())) }
+pub fn is_key_pressed(k: KeyCode) -> bool { with(|f| f.input.is_pressed(k.winit())) }
+pub fn get_last_key_pressed() -> Option<KeyCode> { KEY_QUEUE.with(|q| q.borrow_mut().pop()) }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum MouseButton {
-    Left,
-}
+pub enum MouseButton { Left }
 
-pub fn is_mouse_button_down(_: MouseButton) -> bool {
-    with(|f| f.input.mouse_down)
-}
-pub fn is_mouse_button_pressed(_: MouseButton) -> bool {
-    with(|f| f.input.mouse_pressed)
-}
-pub fn mouse_position() -> (f32, f32) {
-    with(|f| {
-        (
-            f.input.mouse[0] * f.input.pointer_scale[0],
-            f.input.mouse[1] * f.input.pointer_scale[1],
-        )
-    })
-}
+pub fn is_mouse_button_down(_: MouseButton) -> bool { with(|f| f.input.mouse_down) }
+pub fn is_mouse_button_pressed(_: MouseButton) -> bool { with(|f| f.input.mouse_pressed) }
+pub fn mouse_position() -> (f32, f32) { with(|f| (f.input.mouse[0] * f.input.pointer_scale[0], f.input.mouse[1] * f.input.pointer_scale[1])) }
 
 pub type TouchPhase = Phase;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Touch {
-    pub id: u64,
-    pub phase: TouchPhase,
-    pub position: Vec2,
-}
+pub struct Touch { pub id: u64, pub phase: TouchPhase, pub position: Vec2 }
 
-pub fn touches() -> Vec<Touch> {
-    with(|f| {
-        f.input
-            .touches
-            .iter()
-            .map(|t| Touch {
-                id: t.id,
-                phase: t.phase,
-                position: Vec2::from(t.position) * Vec2::from(f.input.pointer_scale),
-            })
-            .collect()
-    })
-}
+pub fn touches() -> Vec<Touch> { with(|f| f.input.touches.iter().map(|t| Touch { id: t.id, phase: t.phase, position: Vec2::from(t.position) * Vec2::from(f.input.pointer_scale) }).collect()) }
 
 pub mod rand {
     use super::RNG;
 
-    pub fn srand(seed: u64) {
-        RNG.with(|r| r.set(seed.max(1)));
-    }
+    pub fn srand(seed: u64) { RNG.with(|r| r.set(seed.max(1))); }
 
     pub fn gen_range(lo: f32, hi: f32) -> f32 {
         let x = RNG.with(|r| {
@@ -965,9 +500,7 @@ mod tests {
     #[test]
     fn rand_stays_in_range() {
         rand::srand(7);
-        assert!((0..1000)
-            .map(|_| rand::gen_range(-0.5, 0.5))
-            .all(|v| (-0.5..0.5).contains(&v)));
+        assert!((0..1000).map(|_| rand::gen_range(-0.5, 0.5)).all(|v| (-0.5..0.5).contains(&v)));
     }
 
     #[test]

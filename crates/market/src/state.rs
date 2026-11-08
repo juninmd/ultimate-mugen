@@ -41,21 +41,13 @@ pub struct MarketState {
 
 impl Default for MarketState {
     fn default() -> Self {
-        MarketState {
-            version: VERSION,
-            repos: vec![],
-            installed: vec![],
-            token: None,
-        }
+        MarketState { version: VERSION, repos: vec![], installed: vec![], token: None }
     }
 }
 
 impl MarketState {
     pub fn from_json(bytes: &[u8]) -> MarketState {
-        serde_json::from_slice::<MarketState>(bytes)
-            .ok()
-            .filter(|s| s.version == VERSION)
-            .unwrap_or_default()
+        serde_json::from_slice::<MarketState>(bytes).ok().filter(|s| s.version == VERSION).unwrap_or_default()
     }
 
     pub fn to_json(&self) -> Vec<u8> {
@@ -67,13 +59,7 @@ impl MarketState {
         if self.repos.iter().any(|r| r.key == key) {
             return false;
         }
-        self.repos.push(RepoRecord {
-            key,
-            repo,
-            etag: None,
-            listed_at: 0,
-            item_count: 0,
-        });
+        self.repos.push(RepoRecord { key, repo, etag: None, listed_at: 0, item_count: 0 });
         true
     }
 
@@ -92,42 +78,26 @@ impl MarketState {
     }
 
     pub fn installed_item(&self, repo_key: &str, item_id: &str) -> Option<&Installed> {
-        self.installed
-            .iter()
-            .find(|i| i.repo_key == repo_key && i.item_id == item_id)
+        self.installed.iter().find(|i| i.repo_key == repo_key && i.item_id == item_id)
     }
 
     pub fn upsert_installed(&mut self, entry: Installed) {
-        match self
-            .installed
-            .iter_mut()
-            .find(|i| i.repo_key == entry.repo_key && i.item_id == entry.item_id)
-        {
+        match self.installed.iter_mut().find(|i| i.repo_key == entry.repo_key && i.item_id == entry.item_id) {
             Some(slot) => {
                 let keep_active = slot.active;
-                *slot = Installed {
-                    active: keep_active || entry.active,
-                    ..entry
-                };
+                *slot = Installed { active: keep_active || entry.active, ..entry };
             }
             None => self.installed.push(entry),
         }
     }
 
     pub fn remove_installed(&mut self, repo_key: &str, item_id: &str) -> Option<Installed> {
-        let i = self
-            .installed
-            .iter()
-            .position(|e| e.repo_key == repo_key && e.item_id == item_id)?;
+        let i = self.installed.iter().position(|e| e.repo_key == repo_key && e.item_id == item_id)?;
         Some(self.installed.remove(i))
     }
 
     pub fn set_active(&mut self, repo_key: &str, item_id: &str, active: bool) -> bool {
-        match self
-            .installed
-            .iter_mut()
-            .find(|i| i.repo_key == repo_key && i.item_id == item_id)
-        {
+        match self.installed.iter_mut().find(|i| i.repo_key == repo_key && i.item_id == item_id) {
             Some(i) if i.active != active => {
                 i.active = active;
                 true
@@ -136,15 +106,8 @@ impl MarketState {
         }
     }
 
-    pub fn set_active_many<'a>(
-        &mut self,
-        targets: impl IntoIterator<Item = (&'a str, &'a str)>,
-        active: bool,
-    ) -> usize {
-        targets
-            .into_iter()
-            .filter(|(r, i)| self.set_active(r, i, active))
-            .count()
+    pub fn set_active_many<'a>(&mut self, targets: impl IntoIterator<Item = (&'a str, &'a str)>, active: bool) -> usize {
+        targets.into_iter().filter(|(r, i)| self.set_active(r, i, active)).count()
     }
 
     pub fn active(&self) -> impl Iterator<Item = &Installed> {
@@ -161,16 +124,7 @@ mod tests {
     use super::*;
 
     fn entry(repo: &str, id: &str, active: bool) -> Installed {
-        Installed {
-            repo_key: repo.into(),
-            item_id: id.into(),
-            kind: Kind::Character,
-            name: id.into(),
-            bytes: 10,
-            files: 2,
-            active,
-            installed_at: 1,
-        }
+        Installed { repo_key: repo.into(), item_id: id.into(), kind: Kind::Character, name: id.into(), bytes: 10, files: 2, active, installed_at: 1 }
     }
 
     #[test]
@@ -192,10 +146,7 @@ mod tests {
         s.token = Some("t".into());
         assert_eq!(MarketState::from_json(&s.to_json()), s);
         assert_eq!(MarketState::from_json(b"garbage"), MarketState::default());
-        assert_eq!(
-            MarketState::from_json(br#"{"version":99,"repos":[],"installed":[],"token":null}"#),
-            MarketState::default()
-        );
+        assert_eq!(MarketState::from_json(br#"{"version":99,"repos":[],"installed":[],"token":null}"#), MarketState::default());
     }
 
     #[test]
@@ -204,12 +155,7 @@ mod tests {
         for id in ["char:a", "char:b", "stage:c"] {
             s.upsert_installed(entry("r", id, false));
         }
-        let all: Vec<(&str, &str)> = vec![
-            ("r", "char:a"),
-            ("r", "char:b"),
-            ("r", "stage:c"),
-            ("r", "missing"),
-        ];
+        let all: Vec<(&str, &str)> = vec![("r", "char:a"), ("r", "char:b"), ("r", "stage:c"), ("r", "missing")];
         assert_eq!(s.set_active_many(all.iter().copied(), true), 3);
         assert_eq!(s.set_active_many(all.iter().copied(), true), 0);
         assert_eq!(s.active().count(), 3);
@@ -221,10 +167,7 @@ mod tests {
     fn reinstalling_keeps_activation() {
         let mut s = MarketState::default();
         s.upsert_installed(entry("r", "char:a", true));
-        s.upsert_installed(Installed {
-            bytes: 99,
-            ..entry("r", "char:a", false)
-        });
+        s.upsert_installed(Installed { bytes: 99, ..entry("r", "char:a", false) });
         assert_eq!(s.installed.len(), 1);
         assert!(s.installed[0].active);
         assert_eq!(s.total_bytes(), 99);

@@ -1,8 +1,8 @@
 use std::sync::Arc;
 use std::time::Instant;
 use ume_engine::ai::Ai;
-use ume_engine::common::{common_def, flat_stage};
 use ume_engine::input::InputSource;
+use ume_engine::common::{common_def, flat_stage};
 use ume_engine::loader::load_mugen_char;
 use ume_engine::matchs::Match;
 use ume_formats::vfs::{add_dir, add_zip, find_char_defs, Vfs};
@@ -12,31 +12,14 @@ fn percentile(sorted: &[f64], p: f64) -> f64 {
 }
 
 fn main() {
-    let src = std::env::args().nth(1).unwrap_or_else(|| {
-        format!(
-            "{}/../../assets/mugen/elecbyte.zip",
-            env!("CARGO_MANIFEST_DIR")
-        )
-    });
-    let seconds: usize = std::env::args()
-        .nth(2)
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(30);
-    let per_side: usize = std::env::args()
-        .nth(3)
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(1);
+    let src = std::env::args().nth(1).unwrap_or_else(|| format!("{}/../../assets/mugen/elecbyte.zip", env!("CARGO_MANIFEST_DIR")));
+    let seconds: usize = std::env::args().nth(2).and_then(|s| s.parse().ok()).unwrap_or(30);
+    let per_side: usize = std::env::args().nth(3).and_then(|s| s.parse().ok()).unwrap_or(1);
     let mut vfs = Vfs::new();
     let path = std::path::Path::new(&src);
-    if path.is_dir() {
-        add_dir(&mut vfs, path, "c").unwrap();
-    } else {
-        add_zip(&mut vfs, &std::fs::read(path).unwrap(), "").unwrap();
-    }
+    if path.is_dir() { add_dir(&mut vfs, path, "c").unwrap(); } else { add_zip(&mut vfs, &std::fs::read(path).unwrap(), "").unwrap(); }
     for def in find_char_defs(&vfs) {
-        let Ok(d) = load_mugen_char(&vfs, &def, 1, true) else {
-            continue;
-        };
+        let Ok(d) = load_mugen_char(&vfs, &def, 1, true) else { continue };
         let d = Arc::new(d);
         let mut m = Match::new(common_def(), None, flat_stage());
         let mut ais = Vec::new();
@@ -53,18 +36,12 @@ fn main() {
         for _ in 0..seconds * 60 {
             let t = Instant::now();
             let roots = m.root_indices();
-            let inputs: Vec<u32> = roots
-                .iter()
-                .zip(ais.iter_mut())
-                .map(|(&r, a)| a.poll(&m, r))
-                .collect();
+            let inputs: Vec<u32> = roots.iter().zip(ais.iter_mut()).map(|(&r, a)| a.poll(&m, r)).collect();
             m.tick(&inputs);
             m.events.clear();
             peak_fighters = peak_fighters.max(m.fighters.len());
             lat.push(t.elapsed().as_secs_f64() * 1000.0);
-            if m.match_over {
-                break;
-            }
+            if m.match_over { break; }
         }
         let wall = total.elapsed().as_secs_f64();
         lat.sort_by(|a, b| a.total_cmp(b));

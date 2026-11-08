@@ -58,16 +58,7 @@ pub fn rng(seed: u32) -> impl FnMut() -> u8 {
 pub fn encode_pcx(w: usize, h: usize, px: &[u8], palette: Option<&[u8]>) -> Vec<u8> {
     let bpl = w + (w & 1);
     let mut wr = Writer::new();
-    wr.u8(10)
-        .u8(5)
-        .u8(1)
-        .u8(8)
-        .u16(0)
-        .u16(0)
-        .u16(w as u32 - 1)
-        .u16(h as u32 - 1)
-        .u16(72)
-        .u16(72);
+    wr.u8(10).u8(5).u8(1).u8(8).u16(0).u16(0).u16(w as u32 - 1).u16(h as u32 - 1).u16(72).u16(72);
     wr.pad(65).u8(1).u16(bpl as u32).u16(1).pad(128);
     for y in 0..h {
         let mut line = vec![0u8; bpl];
@@ -169,21 +160,9 @@ pub fn encode_png(o: PngOpts) -> Vec<u8> {
         raw[y * (stride + 1)] = ft as u8;
         for x in 0..stride {
             let cur = data[y * stride + x] as i32;
-            let a = if x >= bpp {
-                data[y * stride + x - bpp] as i32
-            } else {
-                0
-            };
-            let b = if y > 0 {
-                data[(y - 1) * stride + x] as i32
-            } else {
-                0
-            };
-            let c = if x >= bpp && y > 0 {
-                data[(y - 1) * stride + x - bpp] as i32
-            } else {
-                0
-            };
+            let a = if x >= bpp { data[y * stride + x - bpp] as i32 } else { 0 };
+            let b = if y > 0 { data[(y - 1) * stride + x] as i32 } else { 0 };
+            let c = if x >= bpp && y > 0 { data[(y - 1) * stride + x - bpp] as i32 } else { 0 };
             let pred = [0, a, b, (a + b) >> 1, paeth(a, b, c)][ft];
             raw[y * (stride + 1) + 1 + x] = (cur - pred) as u8;
         }
@@ -223,50 +202,20 @@ pub fn encode_zip(files: &[(&str, &[u8], bool)]) -> Vec<u8> {
     let mut out = Writer::new();
     let mut cd = Writer::new();
     for (name, data, deflate) in files {
-        let comp = if *deflate {
-            miniz_oxide::deflate::compress_to_vec(data, 6)
-        } else {
-            data.to_vec()
-        };
+        let comp = if *deflate { miniz_oxide::deflate::compress_to_vec(data, 6) } else { data.to_vec() };
         let crc = crc32(data);
         let ofs = out.len() as u32;
         let method = if *deflate { 8 } else { 0 };
-        out.u32(0x0403_4b50)
-            .u16(20)
-            .u16(0)
-            .u16(method)
-            .u16(0)
-            .u16(0)
-            .u32(crc);
-        out.u32(comp.len() as u32)
-            .u32(data.len() as u32)
-            .u16(name.len() as u32)
-            .u16(0)
-            .str(name)
-            .raw(&comp);
-        cd.u32(0x0201_4b50)
-            .u16(20)
-            .u16(20)
-            .u16(0)
-            .u16(method)
-            .u16(0)
-            .u16(0)
-            .u32(crc);
-        cd.u32(comp.len() as u32)
-            .u32(data.len() as u32)
-            .u16(name.len() as u32)
-            .u16(0)
-            .u16(0);
+        out.u32(0x0403_4b50).u16(20).u16(0).u16(method).u16(0).u16(0).u32(crc);
+        out.u32(comp.len() as u32).u32(data.len() as u32).u16(name.len() as u32).u16(0).str(name).raw(&comp);
+        cd.u32(0x0201_4b50).u16(20).u16(20).u16(0).u16(method).u16(0).u16(0).u32(crc);
+        cd.u32(comp.len() as u32).u32(data.len() as u32).u16(name.len() as u32).u16(0).u16(0);
         cd.u16(0).u16(0).u32(0).u32(ofs).str(name);
     }
     let cd_ofs = out.len() as u32;
     let cd_len = cd.len() as u32;
     out.raw(&cd.bytes);
-    out.u32(0x0605_4b50)
-        .u16(0)
-        .u16(0)
-        .u16(files.len() as u32)
-        .u16(files.len() as u32);
+    out.u32(0x0605_4b50).u16(0).u16(0).u16(files.len() as u32).u16(files.len() as u32);
     out.u32(cd_len).u32(cd_ofs).u16(7).str("comment");
     out.out()
 }

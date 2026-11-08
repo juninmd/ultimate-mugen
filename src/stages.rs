@@ -61,10 +61,7 @@ pub enum StageArt {
         particles: Vec<Particle>,
         tint: Option<[f32; 4]>,
     },
-    Illustrated {
-        image: Arc<ImageData>,
-        ambience: &'static ambience::Profile,
-    },
+    Illustrated { image: Arc<ImageData>, ambience: &'static ambience::Profile },
     Mugen(Box<MugenBg>),
 }
 pub struct Stage {
@@ -3378,10 +3375,7 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
 fn illustrated(id: &str, name: &str, music: u32, kind: StageKind) -> Stage {
     Stage {
         info: info(name),
-        art: StageArt::Illustrated {
-            image: illustration(id).expect("builtin stage image"),
-            ambience: ambience::profile_for(id),
-        },
+        art: StageArt::Illustrated { image: illustration(id).expect("builtin stage image"), ambience: ambience::profile_for(id) },
         music,
         kind,
         bgm: None,
@@ -3455,9 +3449,7 @@ pub fn builtin() -> Vec<StageEntry> {
             id: "brazil".into(),
             name: "Praça do Interior — Brasil".into(),
             thumb: [[97, 59, 132], [238, 163, 69], [166, 106, 70]],
-            build: Box::new(|| {
-                illustrated("brazil", "Praça do Interior — Brasil", 6, StageKind::Custom)
-            }),
+            build: Box::new(|| illustrated("brazil", "Praça do Interior — Brasil", 6, StageKind::Custom)),
         },
     ];
     stages.extend(wonders::builtin());

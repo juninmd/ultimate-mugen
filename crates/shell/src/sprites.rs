@@ -3,9 +3,7 @@ use std::collections::HashMap;
 use ume_render::Rect;
 
 #[derive(Default)]
-pub struct SpriteCache {
-    slots: HashMap<u64, Option<Rect>>,
-}
+pub struct SpriteCache { slots: HashMap<u64, Option<Rect>> }
 
 impl SpriteCache {
     pub fn get(&mut self, gpu: &mut Gpu, id: u64, w: u32, h: u32, rgba: &[u8]) -> Option<Rect> {
@@ -16,13 +14,9 @@ impl SpriteCache {
         })
     }
 
-    pub fn len(&self) -> usize {
-        self.slots.len()
-    }
+    pub fn len(&self) -> usize { self.slots.len() }
 
-    pub fn is_empty(&self) -> bool {
-        self.slots.is_empty()
-    }
+    pub fn is_empty(&self) -> bool { self.slots.is_empty() }
 
     pub fn clear(&mut self, gpu: &mut Gpu) {
         self.slots.clear();

@@ -23,9 +23,7 @@ mod portrait_tests {
     #[test]
     fn solid_dark_placeholders_are_rejected() {
         let mut rgba = Vec::new();
-        for _ in 0..64 {
-            rgba.extend_from_slice(&[2, 2, 3, 255]);
-        }
+        for _ in 0..64 { rgba.extend_from_slice(&[2, 2, 3, 255]); }
         assert!(!portrait_pixels_usable(&rgba));
     }
 
@@ -39,9 +37,7 @@ mod portrait_tests {
     #[test]
     fn uniformly_dark_but_visible_portraits_are_kept() {
         let mut rgba = Vec::new();
-        for _ in 0..64 {
-            rgba.extend_from_slice(&[30, 20, 25, 255]);
-        }
+        for _ in 0..64 { rgba.extend_from_slice(&[30, 20, 25, 255]); }
         assert!(portrait_pixels_usable(&rgba));
     }
 }

@@ -39,7 +39,8 @@ fn mugen_previews_stream_without_blocking_the_caller() {
     let call_ms = t.elapsed().as_secs_f64() * 1000.0;
     assert!(call_ms < 25.0, "stream calls took {call_ms} ms");
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
-    while (e.peek(1).is_none() || !e.has_portrait_attempt()) && std::time::Instant::now() < deadline
+    while (e.peek(1).is_none() || !e.has_portrait_attempt())
+        && std::time::Instant::now() < deadline
     {
         e.reap();
         std::thread::sleep(std::time::Duration::from_millis(5));
@@ -74,12 +75,8 @@ fn importing_the_same_pack_twice_does_not_duplicate() {
 fn same_content_from_another_source_is_skipped_and_dedupe_cleans_old_rosters() {
     let load = || {
         let mut v = Vfs::new();
-        ume_formats::vfs::add_zip(
-            &mut v,
-            include_bytes!("../../assets/mugen/elecbyte.zip"),
-            "",
-        )
-        .unwrap();
+        ume_formats::vfs::add_zip(&mut v, include_bytes!("../../assets/mugen/elecbyte.zip"), "")
+            .unwrap();
         v
     };
     let mut reg = Registry::new();
@@ -148,17 +145,8 @@ fn mugen_stages_produce_cached_previews() {
         loop {
             if let Some(p) = reg.stage_preview(i) {
                 assert_eq!((p.w, p.h), (320, 180));
-                assert!(p
-                    .rgba
-                    .as_chunks::<4>()
-                    .0
-                    .iter()
-                    .any(|px| px[..3] != [20, 20, 30]));
-                assert_eq!(
-                    reg.stage_preview(i).unwrap().id,
-                    p.id,
-                    "preview must be cached"
-                );
+                assert!(p.rgba.as_chunks::<4>().0.iter().any(|px| px[..3] != [20, 20, 30]));
+                assert_eq!(reg.stage_preview(i).unwrap().id, p.id, "preview must be cached");
                 produced += 1;
                 break;
             }
@@ -167,11 +155,7 @@ fn mugen_stages_produce_cached_previews() {
             if reg.preview_settled(i) && !bundled {
                 break;
             }
-            assert!(
-                std::time::Instant::now() < deadline,
-                "missing preview for {}",
-                reg.stages[i].id
-            );
+            assert!(std::time::Instant::now() < deadline, "missing preview for {}", reg.stages[i].id);
             std::thread::sleep(std::time::Duration::from_millis(5));
         }
     }
@@ -181,12 +165,8 @@ fn mugen_stages_produce_cached_previews() {
 #[test]
 fn mugen_preview_handles_extreme_tiling_and_position_link_visibility() {
     let mut vfs = Vfs::new();
-    ume_formats::vfs::add_zip(
-        &mut vfs,
-        include_bytes!("../../assets/mugen/elecbyte.zip"),
-        "",
-    )
-    .unwrap();
+    ume_formats::vfs::add_zip(&mut vfs, include_bytes!("../../assets/mugen/elecbyte.zip"), "")
+        .unwrap();
     let mut st = load_stage(&vfs, "stages/stage0.def").unwrap();
     if st.layers.len() > 1 {
         st.layers[0].id = 77;
@@ -224,26 +204,17 @@ fn broken_characters_are_quarantined_not_catalogued() {
     }
     vfs.insert(
         "c/broken/broken.def".into(),
-        b"[Info]\nname = \"Broken\"\n[Files]\nsprite = gone.sff\nanim = b.air\ncns = b.cns\n"
-            .to_vec(),
+        b"[Info]\nname = \"Broken\"\n[Files]\nsprite = gone.sff\nanim = b.air\ncns = b.cns\n".to_vec(),
     );
     vfs.insert("c/broken/b.air".into(), b"x".to_vec());
     vfs.insert("c/broken/b.cns".into(), b"x".to_vec());
     let mut reg = Registry::new();
     let before = reg.chars.iter().filter(|c| c.mugen).count();
     reg.add_vfs_lazy(vfs, "pack");
-    let names: Vec<&str> = reg
-        .chars
-        .iter()
-        .filter(|c| c.mugen)
-        .map(|c| c.name.as_str())
-        .collect();
+    let names: Vec<&str> = reg.chars.iter().filter(|c| c.mugen).map(|c| c.name.as_str()).collect();
     assert_eq!(reg.chars.iter().filter(|c| c.mugen).count(), before + 1);
     assert!(names.contains(&"Whole"));
     assert_eq!(reg.quarantined.len(), 1);
     assert_eq!(reg.quarantined[0].name, "Broken");
-    assert_eq!(
-        reg.quarantined[0].problems,
-        vec!["sprite 'gone.sff' não existe"]
-    );
+    assert_eq!(reg.quarantined[0].problems, vec!["sprite 'gone.sff' não existe"]);
 }

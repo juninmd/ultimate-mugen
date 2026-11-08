@@ -56,11 +56,7 @@ fn corner_push_back_is_native_only() {
 #[test]
 fn combo_proration_is_native_only() {
     for (native, expect_full) in [(false, true), (true, false)] {
-        let d = if native {
-            native_char("a", JAB)
-        } else {
-            mugen_char("a", JAB)
-        };
+        let d = if native { native_char("a", JAB) } else { mugen_char("a", JAB) };
         let mut m = duel(d, mugen_char("dummy", ""));
         face_off(&mut m, 40.0);
         let mut dealt = vec![];
@@ -73,14 +69,7 @@ fn combo_proration_is_native_only() {
             dealt.push(before - m.fighters[1].life);
             ticks(&mut m, 12);
         }
-        assert!(
-            dealt.iter().all(|&d| d > 0.0),
-            "every jab landed: {dealt:?}"
-        );
-        assert_eq!(
-            dealt.iter().all(|&d| d == 30.0),
-            expect_full,
-            "native={native} damage per hit {dealt:?}"
-        );
+        assert!(dealt.iter().all(|&d| d > 0.0), "every jab landed: {dealt:?}");
+        assert_eq!(dealt.iter().all(|&d| d == 30.0), expect_full, "native={native} damage per hit {dealt:?}");
     }
 }

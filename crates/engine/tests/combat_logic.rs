@@ -17,22 +17,24 @@ fn make_dummy_chardef(name: &str) -> Arc<CharDef> {
         id: 0,
         total_time: 10,
         loop_start: 0,
-        frames: vec![AnimFrame {
-            group: 0,
-            index: 0,
-            x: 0.0,
-            y: 0.0,
-            time: 10,
-            flip_h: false,
-            flip_v: false,
-            blend: ume_formats::air::Blend::None,
-            alpha: None,
-            xscale: 1.0,
-            yscale: 1.0,
-            angle: 0.0,
-            clsn1: vec![[10.0, -50.0, 40.0, -20.0]], // attack box
-            clsn2: vec![[-15.0, -70.0, 15.0, 0.0]],  // hurt box
-        }],
+        frames: vec![
+            AnimFrame {
+                group: 0,
+                index: 0,
+                x: 0.0,
+                y: 0.0,
+                time: 10,
+                flip_h: false,
+                flip_v: false,
+                blend: ume_formats::air::Blend::None,
+                alpha: None,
+                xscale: 1.0,
+                yscale: 1.0,
+                angle: 0.0,
+                clsn1: vec![[10.0, -50.0, 40.0, -20.0]], // attack box
+                clsn2: vec![[-15.0, -70.0, 15.0, 0.0]],  // hurt box
+            }
+        ],
     };
     cd.anims.insert(0, anim0);
 
@@ -134,8 +136,8 @@ fn test_fighter_boxes_facing_and_scaling() {
     let flipped_boxes = f.boxes(1);
     assert_eq!(flipped_boxes.len(), 1);
     let fb = flipped_boxes[0];
-    assert_eq!(fb[0], 60.0); // 100 - 40
-    assert_eq!(fb[2], 90.0); // 100 - 10
+    assert_eq!(fb[0], 60.0);  // 100 - 40
+    assert_eq!(fb[2], 90.0);  // 100 - 10
     assert_eq!(fb[1], 150.0); // y doesn't flip horizontally
     assert_eq!(fb[3], 180.0);
 }

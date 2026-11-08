@@ -479,12 +479,7 @@ impl MatchRenderer {
                 oy0,
                 m.view_w * s0,
                 m.view_h * s0,
-                Color::new(
-                    c[0] / 255.0,
-                    c[1] / 255.0,
-                    c[2] / 255.0,
-                    (t as f32 / 10.0).min(0.85),
-                ),
+                Color::new(c[0] / 255.0, c[1] / 255.0, c[2] / 255.0, (t as f32 / 10.0).min(0.85)),
             );
         }
         // ordered draw list
@@ -720,41 +715,16 @@ impl MatchRenderer {
         }
         if f.def.source == ume_engine::chardef::Source::Mugen {
             let tint = self.fx.ambient(f.pos.x, m.camera.x);
-            let o = DrawOpts {
-                alpha: a0,
-                tint,
-                vflip: true,
-                ..Default::default()
-            };
-            Self::draw_sprite(
-                g,
-                m,
-                &f.anim_def,
-                fr,
-                f.pos.x,
-                -f.pos.y,
-                f.facing,
-                f.lscl,
-                f.draw_scale,
-                &o,
-                shx,
-                shy,
-            );
+            let o = DrawOpts { alpha: a0, tint, vflip: true, ..Default::default() };
+            Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
             return;
         }
         let def = &f.anim_def;
-        let Some(spr) = def.sprites.get(&(fr.group, fr.index)) else {
-            return;
-        };
-        let Some(img) = def.rgba_sprite((fr.group, fr.index)) else {
-            return;
-        };
+        let Some(spr) = def.sprites.get(&(fr.group, fr.index)) else { return };
+        let Some(img) = def.rgba_sprite((fr.group, fr.index)) else { return };
         let s = g.view_scale;
         let tex = g.texture(&img, spr.scale >= 0.99);
-        let (xs, ys) = (
-            def.c("size.xscale", 1.0) as f32,
-            def.c("size.yscale", 1.0) as f32,
-        );
+        let (xs, ys) = (def.c("size.xscale", 1.0) as f32, def.c("size.yscale", 1.0) as f32);
         let k = spr.scale * f.lscl;
         let (kx, ky) = (
             k * xs * f.draw_scale[0] * fr.xscale,
@@ -889,17 +859,7 @@ impl MatchRenderer {
                 angle_extra = angle;
             }
         }
-        let fr = {
-            if f.form > 0 && frame.group == 1 {
-                let g = 1 + f.form as i32;
-                if f.anim_def.sprites.contains_key(&(g, frame.index)) {
-                    frame.group = g;
-                } else if f.anim_def.sprites.contains_key(&(2, frame.index)) {
-                    frame.group = 2;
-                }
-            }
-            &frame
-        };
+        let fr = { if f.form > 0 && frame.group == 1 { let g = 1 + f.form as i32; if f.anim_def.sprites.contains_key(&(g, frame.index)) { frame.group = g; } else if f.anim_def.sprites.contains_key(&(2, frame.index)) { frame.group = 2; } } &frame };
         let mut x = f.pos.x + f.draw_offset.x * f.facing;
         let hit = f.hit_shake > 0 && f.move_type == 'H';
         if hit {
@@ -914,9 +874,7 @@ impl MatchRenderer {
             o.flash = 0.55;
         }
         let pal = m.fighter_pal(fi);
-        if !pal.is_identity() {
-            o.pal = Some(pal);
-        }
+        if !pal.is_identity() { o.pal = Some(pal); }
         o.remap = &f.remap;
         if let Some(t) = &f.trans {
             match t.mode {
@@ -1127,28 +1085,9 @@ impl MatchRenderer {
                     .max((m.view_h - bottom_ground) / 0.15)
                     .max(m.view_h);
                 let w = (h * image.w as f32 / image.h as f32).max(m.view_w);
-                let x =
-                    ((m.view_w - w) * 0.5 - m.camera.x * 0.12 * m.zoom).clamp(m.view_w - w, 0.0);
-                let rect = ImageRect {
-                    x: x + shx,
-                    y: ground - h * 0.85 + shy,
-                    w,
-                    h,
-                    view_w: m.view_w,
-                    view_h: m.view_h,
-                    cam_x: m.camera.x,
-                };
-                if front {
-                    return draw_profile(
-                        ambience,
-                        rect,
-                        s,
-                        (g.ox, g.oy),
-                        m.game_time as i32,
-                        g.fx_gain,
-                        true,
-                    );
-                }
+                let x = ((m.view_w - w) * 0.5 - m.camera.x * 0.12 * m.zoom).clamp(m.view_w - w, 0.0);
+                let rect = ImageRect { x: x + shx, y: ground - h * 0.85 + shy, w, h, view_w: m.view_w, view_h: m.view_h, cam_x: m.camera.x };
+                if front { return draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true); }
                 let texture = g.texture(image, true);
                 draw_texture_ex(
                     &texture,
@@ -1160,15 +1099,7 @@ impl MatchRenderer {
                         ..Default::default()
                     },
                 );
-                draw_profile(
-                    ambience,
-                    rect,
-                    s,
-                    (g.ox, g.oy),
-                    m.game_time as i32,
-                    g.fx_gain,
-                    false,
-                );
+                draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false);
             }
             StageArt::Mugen(bg) => {
                 let scl = bg.scl;
@@ -1238,32 +1169,27 @@ impl MatchRenderer {
                     }
                     let tint = Color::new(1.0, 1.0, 1.0, alpha);
                     let transformed = l.angle != 0.0 || l.x_shear != 0.0;
-                    let for_each_tile =
-                        |tile_mode: i32,
-                         p0: f32,
-                         step: f32,
-                         limit: f32,
-                         cb: &mut dyn FnMut(f32)| {
-                            match tile_mode {
-                                1 => {
-                                    if step > 0.0 {
-                                        let mut p = p0 - (p0 / step).ceil() * step;
-                                        while p < limit {
-                                            cb(p);
-                                            p += step;
-                                        }
-                                    } else {
-                                        cb(p0);
+                    let for_each_tile = |tile_mode: i32, p0: f32, step: f32, limit: f32, cb: &mut dyn FnMut(f32)| {
+                        match tile_mode {
+                            1 => {
+                                if step > 0.0 {
+                                    let mut p = p0 - (p0 / step).ceil() * step;
+                                    while p < limit {
+                                        cb(p);
+                                        p += step;
                                     }
+                                } else {
+                                    cb(p0);
                                 }
-                                n if n > 1 => {
-                                    for i in 0..n {
-                                        cb(p0 + i as f32 * step);
-                                    }
-                                }
-                                _ => cb(p0),
                             }
-                        };
+                            n if n > 1 => {
+                                for i in 0..n {
+                                    cb(p0 + i as f32 * step);
+                                }
+                            }
+                            _ => cb(p0),
+                        }
+                    };
                     for_each_tile(l.tile[0], x0, stx, m.view_w, &mut |x| {
                         for_each_tile(l.tile[1], y0, sty, m.view_h, &mut |y| {
                             if transformed {

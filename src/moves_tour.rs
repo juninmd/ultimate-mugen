@@ -21,82 +21,33 @@ struct Showcase {
 }
 
 fn showcases(def: &CharDef) -> Vec<Showcase> {
-    let Some(minus_one) = def.states.get(&-1) else {
-        return vec![];
-    };
+    let Some(minus_one) = def.states.get(&-1) else { return vec![] };
     let mut out = vec![];
     for controller in &minus_one.controllers {
-        let Some(name) = controller.label.strip_prefix("State -1, ") else {
-            continue;
-        };
-        let Some(state) = controller
-            .raw("value")
-            .and_then(|v| v.trim().parse::<i32>().ok())
-        else {
-            continue;
-        };
-        let Some(body) = def.states.get(&state) else {
-            continue;
-        };
-        let is_throw = body
-            .controllers
-            .iter()
-            .any(|c| c.label.ends_with("throw_grab"));
+        let Some(name) = controller.label.strip_prefix("State -1, ") else { continue };
+        let Some(state) = controller.raw("value").and_then(|v| v.trim().parse::<i32>().ok()) else { continue };
+        let Some(body) = def.states.get(&state) else { continue };
+        let is_throw = body.controllers.iter().any(|c| c.label.ends_with("throw_grab"));
         let is_special = (1000..3800).contains(&state);
         if !is_throw && !is_special || out.iter().any(|s: &Showcase| s.state == state) {
             continue;
         }
-        let gap = if is_throw {
-            34.0
-        } else if state >= 3000 {
-            48.0
-        } else {
-            52.0
-        };
-        let airborne = body
-            .param("type")
-            .is_some_and(|t| t.raw.eq_ignore_ascii_case("A"));
-        let gap = std::env::var("UME_GAP")
-            .ok()
-            .and_then(|g| g.parse().ok())
-            .unwrap_or(gap);
-        out.push(Showcase {
-            name: name.to_string(),
-            state,
-            gap,
-            airborne,
-        });
+        let gap = if is_throw { 34.0 } else if state >= 3000 { 48.0 } else { 52.0 };
+        let airborne = body.param("type").is_some_and(|t| t.raw.eq_ignore_ascii_case("A"));
+        let gap = std::env::var("UME_GAP").ok().and_then(|g| g.parse().ok()).unwrap_or(gap);
+        out.push(Showcase { name: name.to_string(), state, gap, airborne });
     }
     out.sort_by_key(|s| s.state);
     out
 }
 
 fn slug(name: &str) -> String {
-    let plain = |c: char| match c {
-        'á' | 'à' | 'â' | 'ã' => 'a',
-        'é' | 'ê' => 'e',
-        'í' => 'i',
-        'ó' | 'ô' | 'õ' => 'o',
-        'ú' | 'ü' => 'u',
-        'ç' => 'c',
-        other => other,
-    };
-    name.to_lowercase()
-        .chars()
-        .map(plain)
-        .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
-        .collect::<String>()
-        .trim_matches('-')
-        .to_string()
+    let plain = |c: char| match c { 'á' | 'à' | 'â' | 'ã' => 'a', 'é' | 'ê' => 'e', 'í' => 'i', 'ó' | 'ô' | 'õ' => 'o', 'ú' | 'ü' => 'u', 'ç' => 'c', other => other };
+    name.to_lowercase().chars().map(plain).map(|c| if c.is_ascii_alphanumeric() { c } else { '-' }).collect::<String>().trim_matches('-').to_string()
 }
 
 pub async fn run(app: &mut App, dir: &str) {
-    let chars: Vec<String> = std::env::var("UME_CHARS")
-        .unwrap_or_default()
-        .split(',')
-        .map(|s| s.trim().to_lowercase())
-        .filter(|s| !s.is_empty())
-        .collect();
+    let chars: Vec<String> = std::env::var("UME_CHARS").unwrap_or_default().split(',').map(|s| s.trim().to_lowercase()).filter(|s| !s.is_empty()).collect();
     let rival = std::env::var("UME_RIVAL").unwrap_or_else(|_| "kaito".into());
     let arena = std::env::var("UME_STAGE").unwrap_or_else(|_| "dojo".into());
     for hero in chars {
@@ -104,9 +55,7 @@ pub async fn run(app: &mut App, dir: &str) {
         app.sel = (find(app, &hero), find(app, &rival), stage(app, &arena));
         app.start_fight().await;
         {
-            let App {
-                session, c, audio, ..
-            } = app;
+            let App { session, c, audio, .. } = app;
             let s = session.as_mut().unwrap();
             for pilot in &mut s.pilots {
                 *pilot = crate::session::Pilot::Dummy;
@@ -140,9 +89,7 @@ pub async fn run(app: &mut App, dir: &str) {
             let (mut start, mut peak) = (0.0, 0.0);
             for tick in 0..MAX_WAIT_TICKS {
                 {
-                    let App {
-                        session, c, audio, ..
-                    } = app;
+                    let App { session, c, audio, .. } = app;
                     let s = session.as_mut().unwrap();
                     if tick == 0 {
                         start = s.m.fighters[1].life;
@@ -151,12 +98,7 @@ pub async fn run(app: &mut App, dir: &str) {
                     peak = f32::max(peak, start - s.m.fighters[1].life);
                 }
                 if after_hit.is_none() && peak > 0.0 {
-                    after_hit = Some(
-                        tick + std::env::var("UME_AFTER_HIT")
-                            .ok()
-                            .and_then(|t| t.parse().ok())
-                            .unwrap_or(TICKS_AFTER_HIT),
-                    );
+                    after_hit = Some(tick + std::env::var("UME_AFTER_HIT").ok().and_then(|t| t.parse().ok()).unwrap_or(TICKS_AFTER_HIT));
                 }
                 if after_hit == Some(tick) {
                     app.draw_session_only();
@@ -168,13 +110,7 @@ pub async fn run(app: &mut App, dir: &str) {
                     break;
                 }
             }
-            println!(
-                "{hero} | {} | state {} | damage {:.0}{}",
-                show.name,
-                show.state,
-                peak,
-                if after_hit.is_none() { " | NO HIT" } else { "" }
-            );
+            println!("{hero} | {} | state {} | damage {:.0}{}", show.name, show.state, peak, if after_hit.is_none() { " | NO HIT" } else { "" });
         }
     }
 }

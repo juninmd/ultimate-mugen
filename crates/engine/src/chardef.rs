@@ -327,26 +327,15 @@ impl CharDef {
     /// atlas, so this is only needed by paths that must own the pixels (reflections, thumbnails).
     pub fn rgba_sprite(&self, sprite: (i32, i32)) -> Option<Arc<ImageData>> {
         let spr = self.sprites.get(&sprite)?;
-        if let Some(img) = &spr.image {
-            return Some(img.clone());
-        }
+        if let Some(img) = &spr.image { return Some(img.clone()); }
         let ix = self.indexed.get(&sprite)?;
         let mut cache = self.image_cache.lock().ok()?;
-        if let Some(img) = cache.get(&sprite) {
-            return Some(img.clone());
-        }
-        let pal: &[u8] = match ix.palette.as_deref() {
-            Some(p) => p,
-            None => self.palettes.get(&ix.pal).map(|p| p.as_slice())?,
-        };
-        if pal.len() < 1024 {
-            return None;
-        }
+        if let Some(img) = cache.get(&sprite) { return Some(img.clone()); }
+        let pal: &[u8] = match ix.palette.as_deref() { Some(p) => p, None => self.palettes.get(&ix.pal).map(|p| p.as_slice())? };
+        if pal.len() < 1024 { return None; }
         let mut rgba = vec![0u8; ix.pixels.len() * 4];
         for (o, &c) in rgba.chunks_exact_mut(4).zip(ix.pixels.iter()) {
-            if c == 0 {
-                continue;
-            }
+            if c == 0 { continue; }
             let p = c as usize * 4;
             o[..3].copy_from_slice(&pal[p..p + 3]);
             o[3] = 255;
@@ -360,31 +349,19 @@ impl CharDef {
     /// then the first idle frame (head crop). Packs often ship a solid dark 9000,1 placeholder, which
     /// would otherwise leave a black tile in the roster and the team strip.
     pub fn portrait_pick(&self) -> Option<(Sprite, Arc<ImageData>, bool)> {
-        self.portrait_pick
-            .get_or_init(|| {
-                let idle = self
-                    .anims
-                    .get(&0)
-                    .and_then(|a| a.frames.first())
-                    .map(|f| (f.group, f.index));
-                for (group, index, full) in [(9000, 1, true), (9000, 0, true)] {
-                    let key = (group, index);
-                    let Some(sprite) = self.sprites.get(&key) else {
-                        continue;
-                    };
-                    let Some(image) = self.rgba_sprite(key) else {
-                        continue;
-                    };
-                    if portrait_pixels_usable(&image.rgba) {
-                        return Some((sprite.clone(), image, full));
-                    }
-                }
-                let key = idle?;
-                let sprite = self.sprites.get(&key)?;
-                let image = self.rgba_sprite(key)?;
-                portrait_pixels_usable(&image.rgba).then(|| (sprite.clone(), image, false))
-            })
-            .clone()
+        self.portrait_pick.get_or_init(|| {
+            let idle = self.anims.get(&0).and_then(|a| a.frames.first()).map(|f| (f.group, f.index));
+            for (group, index, full) in [(9000, 1, true), (9000, 0, true)] {
+                let key = (group, index);
+                let Some(sprite) = self.sprites.get(&key) else { continue };
+                let Some(image) = self.rgba_sprite(key) else { continue };
+                if portrait_pixels_usable(&image.rgba) { return Some((sprite.clone(), image, full)); }
+            }
+            let key = idle?;
+            let sprite = self.sprites.get(&key)?;
+            let image = self.rgba_sprite(key)?;
+            portrait_pixels_usable(&image.rgba).then(|| (sprite.clone(), image, false))
+        }).clone()
     }
 }
 
@@ -438,3 +415,6 @@ pub fn parse_mugen_version(raw: Option<&str>) -> f32 {
         _ => 0.0,
     }
 }
+
+
+ 

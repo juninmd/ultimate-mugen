@@ -12,15 +12,8 @@ const DEF: &str = "[Info]\nname = \"A\"\n[Files]\ncns = a.cns\nsprite = a.sff\n"
 #[test]
 fn same_character_has_same_key_regardless_of_path_case_and_comments() {
     let a = char_vfs("chars/a", DEF, b"sprites");
-    let b = char_vfs(
-        "backup/copy/a",
-        "[INFO]\nName = \"A\" ; note\n\n[FILES]\nCNS = a.cns\nSPRITE = A.SFF\n",
-        b"sprites",
-    );
-    assert_eq!(
-        char_key(&a, "chars/a/a.def"),
-        char_key(&b, "backup/copy/a/a.def")
-    );
+    let b = char_vfs("backup/copy/a", "[INFO]\nName = \"A\" ; note\n\n[FILES]\nCNS = a.cns\nSPRITE = A.SFF\n", b"sprites");
+    assert_eq!(char_key(&a, "chars/a/a.def"), char_key(&b, "backup/copy/a/a.def"));
 }
 
 #[test]
@@ -37,17 +30,11 @@ fn different_sprites_or_defs_have_different_keys() {
 fn stage_key_uses_bgdef_sprite() {
     let mk = |dir: &str| {
         let mut v = Vfs::new();
-        v.insert(
-            format!("{dir}/s.def"),
-            b"[Info]\nname=S\n[BGdef]\nspr = s.sff\n[StageInfo]\n".to_vec(),
-        );
+        v.insert(format!("{dir}/s.def"), b"[Info]\nname=S\n[BGdef]\nspr = s.sff\n[StageInfo]\n".to_vec());
         v.insert(format!("{dir}/s.sff"), b"art".to_vec());
         v
     };
-    assert_eq!(
-        stage_key(&mk("stages"), "stages/s.def"),
-        stage_key(&mk("x/y"), "x/y/s.def")
-    );
+    assert_eq!(stage_key(&mk("stages"), "stages/s.def"), stage_key(&mk("x/y"), "x/y/s.def"));
 }
 
 #[test]

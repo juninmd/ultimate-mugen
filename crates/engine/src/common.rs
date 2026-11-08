@@ -21,6 +21,4 @@ pub fn common_def() -> Arc<CharDef> {
         .clone()
 }
 
-pub fn flat_stage() -> StageInfo {
-    StageInfo::default()
-}
+pub fn flat_stage() -> StageInfo { StageInfo::default() }

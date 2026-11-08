@@ -13,11 +13,7 @@ fn chars_root() -> PathBuf {
 fn find_case_insensitive_dir(root: &Path, name: &str) -> Option<PathBuf> {
     if let Ok(entries) = std::fs::read_dir(root) {
         for entry in entries.flatten() {
-            if entry
-                .file_name()
-                .to_string_lossy()
-                .eq_ignore_ascii_case(name)
-            {
+            if entry.file_name().to_string_lossy().eq_ignore_ascii_case(name) {
                 return Some(entry.path());
             }
         }
@@ -42,10 +38,7 @@ fn load_char(dir_name: &str, def: &str) -> Option<Arc<ume_engine::chardef::CharD
 fn test_dbz_characters_load_and_fight() {
     let root = chars_root();
     if !root.exists() {
-        println!(
-            "skipping: {} not found (run scripts/fetch-jump-chars.ps1 to populate)",
-            root.display()
-        );
+        println!("skipping: {} not found (run scripts/fetch-jump-chars.ps1 to populate)", root.display());
         return;
     }
 
@@ -69,13 +62,7 @@ fn test_dbz_characters_load_and_fight() {
     let mut loaded = 0;
     for (dir, def, expected_name) in dbz_roster {
         if let Some(c) = load_char(dir, def) {
-            println!(
-                "Loaded DBZ character: {} (anims={}, states={}, sprites={})",
-                c.name,
-                c.anims.len(),
-                c.states.len(),
-                c.sprites.len()
-            );
+            println!("Loaded DBZ character: {} (anims={}, states={}, sprites={})", c.name, c.anims.len(), c.states.len(), c.sprites.len());
             assert!(!c.anims.is_empty(), "No anims for {}", expected_name);
             assert!(!c.states.is_empty(), "No states for {}", expected_name);
             loaded += 1;
@@ -93,10 +80,6 @@ fn test_dbz_characters_load_and_fight() {
     }
 
     if loaded > 0 {
-        assert!(
-            loaded >= 10,
-            "Expected at least 10 DBZ characters loaded, got {}",
-            loaded
-        );
+        assert!(loaded >= 10, "Expected at least 10 DBZ characters loaded, got {}", loaded);
     }
 }

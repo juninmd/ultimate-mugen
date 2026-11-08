@@ -3,19 +3,14 @@ use support::*;
 use ume_engine::expr::{parse, Expr};
 use ume_engine::matchs::Match;
 
-fn ev(m: &Match, src: &str) -> f64 {
-    m.ev(0, &Expr::new(parse(src).unwrap()))
-}
+fn ev(m: &Match, src: &str) -> f64 { m.ev(0, &Expr::new(parse(src).unwrap())) }
 
 fn zoom_state(params: &str) -> String {
     format!("[Statedef 800]\ntype = S\nphysics = S\n\n[State 800, zoom]\ntype = Zoom\ntrigger1 = var(0) = 0\n{params}\n\n[State 800, once]\ntype = VarSet\ntrigger1 = 1\nv = 0\nvalue = 1\n")
 }
 
 fn zoomer(params: &str) -> Match {
-    let mut m = duel(
-        mugen_char("zoomer", &zoom_state(params)),
-        mugen_char("dummy", ""),
-    );
+    let mut m = duel(mugen_char("zoomer", &zoom_state(params)), mugen_char("dummy", ""));
     m.stage.zoom_in = 1.5;
     m.stage.zoom_out = 0.8;
     m.stage.bound_right = 10.0;
@@ -24,11 +19,7 @@ fn zoomer(params: &str) -> Match {
     m
 }
 
-fn step(m: &mut Match, n: usize) {
-    for _ in 0..n {
-        m.tick(&[0, 0]);
-    }
-}
+fn step(m: &mut Match, n: usize) { for _ in 0..n { m.tick(&[0, 0]); } }
 
 #[test]
 fn camera_zoom_defaults_to_one() {
@@ -46,20 +37,14 @@ fn zoom_sctrl_is_read_back_by_camera_zoom() {
     assert_eq!(ev(&m, "ZoomVar(active)"), 1.0);
     assert!((ev(&m, "ZoomVar(target)") - 1.2).abs() < 1e-4);
     assert_eq!(ev(&m, "CameraZoom = ZoomVar(scale)"), 1.0);
-    assert!(
-        m.view_w < ume_engine::matchs::BASE_W,
-        "zooming in shrinks the visible field"
-    );
+    assert!(m.view_w < ume_engine::matchs::BASE_W, "zooming in shrinks the visible field");
 }
 
 #[test]
 fn zoom_in_is_bounded_by_the_stage_unless_bound_is_off() {
     let mut m = zoomer("scale = 3\ntime = 2");
     step(&mut m, 1);
-    assert!(
-        (ev(&m, "CameraZoom") - 1.5).abs() < 1e-4,
-        "stage zoomin = 1.5"
-    );
+    assert!((ev(&m, "CameraZoom") - 1.5).abs() < 1e-4, "stage zoomin = 1.5");
     let mut free = zoomer("scale = 3\ntime = 2\nbound = 0");
     step(&mut free, 1);
     assert!((ev(&free, "CameraZoom") - 3.0).abs() < 1e-4);
@@ -69,10 +54,7 @@ fn zoom_in_is_bounded_by_the_stage_unless_bound_is_off() {
 fn zoom_out_is_bounded_by_the_stage() {
     let mut m = zoomer("scale = 0.5\ntime = 2");
     step(&mut m, 1);
-    assert!(
-        (ev(&m, "CameraZoom") - 0.8).abs() < 1e-4,
-        "stage zoomout = 0.8"
-    );
+    assert!((ev(&m, "CameraZoom") - 0.8).abs() < 1e-4, "stage zoomout = 0.8");
     assert!((ev(&m, "ZoomVar(min)") - 0.8).abs() < 1e-4);
     assert!((ev(&m, "ZoomVar(max)") - 1.5).abs() < 1e-4);
 }

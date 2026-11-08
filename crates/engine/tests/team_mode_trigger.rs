@@ -4,41 +4,26 @@ use ume_engine::common::{common_def, flat_stage};
 use ume_engine::expr::{parse, truthy, Expr};
 use ume_engine::matchs::{Match, TeamMode};
 
-fn ev(m: &Match, i: usize, src: &str) -> f64 {
-    m.ev(i, &Expr::new(parse(src).unwrap()))
-}
+fn ev(m: &Match, i: usize, src: &str) -> f64 { m.ev(i, &Expr::new(parse(src).unwrap())) }
 
 fn match_of(sides: &[usize], simul: bool, turns: bool) -> Match {
     let mut m = Match::new(common_def(), None, flat_stage());
     m.team_simul = simul;
     m.team_turns = turns;
-    for (slot, side) in sides.iter().enumerate() {
-        m.add_player(mugen_char(&format!("fighter{}", slot + 1), ""), *side, 0, 1);
-    }
+    for (slot, side) in sides.iter().enumerate() { m.add_player(mugen_char(&format!("fighter{}", slot + 1), ""), *side, 0, 1); }
     m.start_round();
-    while m.round_state != 2 {
-        m.tick(&vec![0; sides.len()]);
-    }
+    while m.round_state != 2 { m.tick(&vec![0; sides.len()]); }
     m
 }
 
 fn check(m: &Match, number: f64, name: &str) {
     assert_eq!(ev(m, 0, "TeamMode"), number);
     assert_eq!(ev(m, 0, &format!("TeamMode = {name}")), 1.0);
-    assert_eq!(
-        ev(m, 0, &format!("TeamMode = {}", name.to_uppercase())),
-        1.0
-    );
+    assert_eq!(ev(m, 0, &format!("TeamMode = {}", name.to_uppercase())), 1.0);
     assert_eq!(ev(m, 0, &format!("TeamMode = {}", number as i32)), 1.0);
     assert_eq!(ev(m, 0, &format!("TeamMode != {name}")), 0.0);
     for other in ["single", "simul", "turns", "tag"] {
-        if other != name {
-            assert_eq!(
-                ev(m, 0, &format!("TeamMode = {other}")),
-                0.0,
-                "{name} is not {other}"
-            );
-        }
+        if other != name { assert_eq!(ev(m, 0, &format!("TeamMode = {other}")), 0.0, "{name} is not {other}"); }
     }
 }
 
@@ -91,14 +76,8 @@ removetime = -1
     m.add_player(mugen_char("a", cns), 0, 0, 1);
     m.add_player(mugen_char("b", ""), 1, 0, 1);
     m.start_round();
-    while m.round_state != 2 {
-        m.tick(&[0, 0]);
-    }
+    while m.round_state != 2 { m.tick(&[0, 0]); }
     enter(&mut m, 0, 900);
     ticks(&mut m, 2);
-    assert!(
-        m.texts.iter().any(|t| t.text == "mode simul"),
-        "texts: {:?}",
-        m.texts.iter().map(|t| &t.text).collect::<Vec<_>>()
-    );
+    assert!(m.texts.iter().any(|t| t.text == "mode simul"), "texts: {:?}", m.texts.iter().map(|t| &t.text).collect::<Vec<_>>());
 }

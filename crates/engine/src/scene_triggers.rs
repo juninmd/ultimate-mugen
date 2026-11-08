@@ -3,22 +3,14 @@ use crate::palette::BlendMode;
 use crate::triggers::Ctx;
 
 fn parts(raw: Option<&str>) -> (&str, &str) {
-    raw.and_then(|r| r.split_once(','))
-        .map(|(a, b)| (a.trim(), b.trim()))
-        .unwrap_or(("", raw.unwrap_or("").trim()))
+    raw.and_then(|r| r.split_once(',')).map(|(a, b)| (a.trim(), b.trim())).unwrap_or(("", raw.unwrap_or("").trim()))
 }
 
 fn stage_bg_var(c: &Ctx, raw: Option<&str>) -> f64 {
-    let Some(bg) = c.m.bg.as_ref() else {
-        return 0.0;
-    };
+    let Some(bg) = c.m.bg.as_ref() else { return 0.0 };
     let (id, key) = parts(raw);
-    let Ok(id) = id.parse::<i32>() else {
-        return 0.0;
-    };
-    let Some(k) = bg.stage.layers.iter().position(|l| l.id == id) else {
-        return 0.0;
-    };
+    let Ok(id) = id.parse::<i32>() else { return 0.0 };
+    let Some(k) = bg.stage.layers.iter().position(|l| l.id == id) else { return 0.0 };
     let layer = &bg.stage.layers[k];
     let offset = bg.offset(k);
     let (group, index) = bg.sprite(k);
@@ -44,13 +36,7 @@ fn stage_bg_var(c: &Ctx, raw: Option<&str>) -> f64 {
     }) as f64
 }
 
-pub fn trigger(
-    c: &Ctx,
-    name: &str,
-    args: &[Node],
-    comp: Option<char>,
-    raw: Option<&str>,
-) -> Option<f64> {
+pub fn trigger(c: &Ctx, name: &str, args: &[Node], comp: Option<char>, raw: Option<&str>) -> Option<f64> {
     let m = c.m;
     let f = &m.fighters[c.i];
     let l = f.lscl as f64;
@@ -67,62 +53,19 @@ pub fn trigger(
         "topbounddist" => (f.pos.y - top) as f64 / l,
         "topboundbodydist" => (f.pos.y - top - height) as f64 / l,
         "botbounddist" | "botboundbodydist" => (bottom - f.pos.y) as f64 / l,
-        "stagefrontedgedist" => {
-            (if f.facing > 0.0 {
-                stage_right - f.pos.x
-            } else {
-                f.pos.x - stage_left
-            }) as f64
-                / l
-        }
-        "stagebackedgedist" => {
-            (if f.facing > 0.0 {
-                f.pos.x - stage_left
-            } else {
-                stage_right - f.pos.x
-            }) as f64
-                / l
-        }
-        "numstagebg" => m.bg.as_ref().map_or(0, |bg| {
-            bg.stage
-                .layers
-                .iter()
-                .filter(|layer| args.is_empty() || layer.id == arg0() as i32)
-                .count()
-        }) as f64,
+        "stagefrontedgedist" => (if f.facing > 0.0 { stage_right - f.pos.x } else { f.pos.x - stage_left }) as f64 / l,
+        "stagebackedgedist" => (if f.facing > 0.0 { f.pos.x - stage_left } else { stage_right - f.pos.x }) as f64 / l,
+        "numstagebg" => m.bg.as_ref().map_or(0, |bg| bg.stage.layers.iter().filter(|layer| args.is_empty() || layer.id == arg0() as i32).count()) as f64,
         "stagebgvar" => stage_bg_var(c, raw),
-        "stageconst" => {
-            m.bg.as_ref()
-                .and_then(|bg| bg.stage.constants.get(raw.unwrap_or("").trim()))
-                .copied()
-                .unwrap_or(0.0) as f64
-        }
+        "stageconst" => m.bg.as_ref().and_then(|bg| bg.stage.constants.get(raw.unwrap_or("").trim())).copied().unwrap_or(0.0) as f64,
         "const1080p" => arg0() * f.def.local_w as f64 / 1920.0,
-        "localcoord" => {
-            if comp == Some('y') {
-                f.def.local_h as f64
-            } else {
-                f.def.local_w as f64
-            }
-        }
+        "localcoord" => if comp == Some('y') { f.def.local_h as f64 } else { f.def.local_w as f64 },
         "angle" => f.angle as f64,
         "xangle" | "yangle" | "xshear" => 0.0,
         "scale" => f.draw_scale[if comp == Some('y') { 1 } else { 0 }] as f64,
         "alpha" => match &f.trans {
-            Some(t) if t.mode != BlendMode::None => {
-                if comp == Some('y') {
-                    t.dst as f64
-                } else {
-                    t.src as f64
-                }
-            }
-            _ => {
-                if comp == Some('y') {
-                    0.0
-                } else {
-                    256.0
-                }
-            }
+            Some(t) if t.mode != BlendMode::None => if comp == Some('y') { t.dst as f64 } else { t.src as f64 },
+            _ => if comp == Some('y') { 0.0 } else { 256.0 },
         },
         "layerno" => 0.0,
         "sprpriority" => f.spr_priority as f64,

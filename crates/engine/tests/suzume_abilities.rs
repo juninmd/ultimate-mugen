@@ -29,42 +29,22 @@ fn test_suzume_abilities_compilation_and_movelist() {
     assert!(def.states.contains_key(&3901));
     assert!(def.states.contains_key(&3910));
 
-    let fly = def
-        .movelist
-        .iter()
-        .find(|m| m.command == "fly_toggle")
-        .unwrap();
+    let fly = def.movelist.iter().find(|m| m.command == "fly_toggle").unwrap();
     assert_eq!(fly.cost, 50.0);
     assert!(fly.drain);
 
-    let tp = def
-        .movelist
-        .iter()
-        .find(|m| m.command == "teleport_cmd")
-        .unwrap();
+    let tp = def.movelist.iter().find(|m| m.command == "teleport_cmd").unwrap();
     assert_eq!(tp.cost, 250.0);
     assert!(!tp.drain);
 
-    let sp = def
-        .movelist
-        .iter()
-        .find(|m| m.command == "speed_toggle")
-        .unwrap();
+    let sp = def.movelist.iter().find(|m| m.command == "speed_toggle").unwrap();
     assert_eq!(sp.cost, 100.0);
     assert!(sp.drain);
 
-    let shadow = def
-        .movelist
-        .iter()
-        .find(|m| m.command == "m_shadow")
-        .unwrap();
+    let shadow = def.movelist.iter().find(|m| m.command == "m_shadow").unwrap();
     assert_eq!(shadow.cost, 250.0);
 
-    let storm = def
-        .movelist
-        .iter()
-        .find(|m| m.command == "m_storm")
-        .unwrap();
+    let storm = def.movelist.iter().find(|m| m.command == "m_storm").unwrap();
     assert_eq!(storm.cost, 1000.0);
 }
 

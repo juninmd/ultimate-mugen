@@ -12,11 +12,7 @@ pub fn parse_float(s: &str) -> Option<f64> {
         i = 1;
     }
     if s[i..].starts_with("Infinity") {
-        return Some(if b[0] == b'-' {
-            f64::NEG_INFINITY
-        } else {
-            f64::INFINITY
-        });
+        return Some(if b[0] == b'-' { f64::NEG_INFINITY } else { f64::INFINITY });
     }
     let ds = i;
     while i < b.len() && b[i].is_ascii_digit() {
@@ -71,9 +67,7 @@ pub fn parse_int(s: &str) -> Option<i64> {
     let mut v: i64 = 0;
     let mut nd = 0;
     while i < b.len() {
-        let Some(d) = (b[i] as char).to_digit(radix) else {
-            break;
-        };
+        let Some(d) = (b[i] as char).to_digit(radix) else { break };
         v = v.saturating_mul(radix as i64).saturating_add(d as i64);
         nd += 1;
         i += 1;

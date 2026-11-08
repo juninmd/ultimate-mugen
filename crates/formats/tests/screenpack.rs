@@ -1,9 +1,7 @@
 mod common;
 use common::*;
 use ume_formats::fnt::{decode_fnt, FontKind, Glyph};
-use ume_formats::screenpack::{
-    load_screenpack, parse_fight, parse_select, parse_storyboard, parse_system, SelectSlot,
-};
+use ume_formats::screenpack::{load_screenpack, parse_fight, parse_select, parse_storyboard, parse_system, SelectSlot};
 use ume_formats::vfs::Vfs;
 
 fn fnt_v1(map: &str) -> Vec<u8> {
@@ -12,14 +10,7 @@ fn fnt_v1(map: &str) -> Vec<u8> {
     let pcx = encode_pcx(32, 8, &px, Some(&pal));
     let txt = map.as_bytes();
     let mut w = Writer::new();
-    w.str("ElecbyteFnt\0")
-        .u16(0)
-        .u16(1)
-        .u32(64)
-        .u32(pcx.len() as u32)
-        .u32(64 + pcx.len() as u32)
-        .u32(txt.len() as u32)
-        .pad(64);
+    w.str("ElecbyteFnt\0").u16(0).u16(1).u32(64).u32(pcx.len() as u32).u32(64 + pcx.len() as u32).u32(txt.len() as u32).pad(64);
     w.raw(&pcx).raw(txt);
     w.out()
 }
@@ -36,10 +27,7 @@ fn fnt_v1_variable_and_fixed() {
     assert_eq!(f.image.as_ref().map(|i| (i.width, i.height)), Some((32, 8)));
     assert!(f.palette_bank(1).is_some());
 
-    let f = decode_fnt(&fnt_v1(
-        "[Def]\nSize = 4,8\nType = Fixed\n[Map]\na\nb\nz 7\n",
-    ))
-    .unwrap();
+    let f = decode_fnt(&fnt_v1("[Def]\nSize = 4,8\nType = Fixed\n[Map]\na\nb\nz 7\n")).unwrap();
     assert_eq!(f.kind, FontKind::Fixed);
     assert_eq!(f.glyph('b'), Some(Glyph { x: 4, w: 4 }));
     assert_eq!(f.glyph('z'), Some(Glyph { x: 28, w: 4 }));
@@ -61,21 +49,9 @@ fn system_def() {
     let s = parse_system(SYSTEM);
     assert_eq!(s.localcoord, [640.0, 480.0]);
     assert_eq!(s.fonts.get(&1).map(String::as_str), Some("f-4x6.fnt"));
-    assert_eq!(
-        s.menu.iter().map(|m| m.label.as_str()).collect::<Vec<_>>(),
-        vec!["ARCADE", "VS MODE", "EXIT"]
-    );
+    assert_eq!(s.menu.iter().map(|m| m.label.as_str()).collect::<Vec<_>>(), vec!["ARCADE", "VS MODE", "EXIT"]);
     let bgm = &s.music["title"];
-    assert_eq!(
-        (
-            bgm.file.as_str(),
-            bgm.loop_start,
-            bgm.loop_end,
-            bgm.volume,
-            bgm.looping
-        ),
-        ("sound/title.ogg", 4410, 88200, 80, true)
-    );
+    assert_eq!((bgm.file.as_str(), bgm.loop_start, bgm.loop_end, bgm.volume, bgm.looping), ("sound/title.ogg", 4410, 88200, 80, true));
     let bg = s.background("titlebg");
     assert_eq!(bg.clear_color, Some([10, 20, 30]));
     assert_eq!(bg.layers.len(), 2);
@@ -93,11 +69,7 @@ fn select_def() {
     let s = parse_select("[Characters]\nkfm, stages/kfm.def, music=sound/kfm.mp3, order=2\nrandomselect\nempty\n\"Evil Ken/evil.def\"\n[ExtraStages]\nstages/stage0.def\n[Options]\narcade.maxmatches = 6,1,1,0\n");
     assert_eq!(s.slots.len(), 4);
     match &s.slots[0] {
-        SelectSlot::Char {
-            path,
-            stage,
-            params,
-        } => {
+        SelectSlot::Char { path, stage, params } => {
             assert_eq!(path, "kfm");
             assert_eq!(stage.as_deref(), Some("stages/kfm.def"));
             assert_eq!(params.get("order").map(String::as_str), Some("2"));
@@ -106,15 +78,9 @@ fn select_def() {
     }
     assert_eq!(s.slots[1], SelectSlot::Random);
     assert_eq!(s.slots[2], SelectSlot::Empty);
-    assert_eq!(
-        s.chars().collect::<Vec<_>>(),
-        vec!["kfm", "Evil Ken/evil.def"]
-    );
+    assert_eq!(s.chars().collect::<Vec<_>>(), vec!["kfm", "Evil Ken/evil.def"]);
     assert_eq!(s.extra_stages, vec!["stages/stage0.def"]);
-    assert_eq!(
-        s.options.get("arcade.maxmatches").map(String::as_str),
-        Some("6,1,1,0")
-    );
+    assert_eq!(s.options.get("arcade.maxmatches").map(String::as_str), Some("6,1,1,0"));
 }
 
 #[test]
@@ -156,18 +122,9 @@ fn load_from_vfs_reports_missing_files_without_failing() {
     let mut vfs = Vfs::new();
     vfs.insert("data/system.def".into(), SYSTEM.as_bytes().to_vec());
     vfs.insert("data/select.def".into(), b"[Characters]\nkfm\n".to_vec());
-    vfs.insert(
-        "data/fight.def".into(),
-        b"[Files]\nfont1 = f-4x6.fnt\n[Lifebar]\np1.pos = 1,2\n".to_vec(),
-    );
-    vfs.insert(
-        "font/f-4x6.fnt".into(),
-        fnt_v1("[Def]\nSize = 4,6\nType = Fixed\n[Map]\na\n"),
-    );
-    vfs.insert(
-        "data/logo.def".into(),
-        b"[SceneDef]\n[Scene 0]\nend.time = 10\n".to_vec(),
-    );
+    vfs.insert("data/fight.def".into(), b"[Files]\nfont1 = f-4x6.fnt\n[Lifebar]\np1.pos = 1,2\n".to_vec());
+    vfs.insert("font/f-4x6.fnt".into(), fnt_v1("[Def]\nSize = 4,6\nType = Fixed\n[Map]\na\n"));
+    vfs.insert("data/logo.def".into(), b"[SceneDef]\n[Scene 0]\nend.time = 10\n".to_vec());
     let sp = load_screenpack(&vfs, "data/system.def").unwrap();
     assert_eq!(sp.select.chars().collect::<Vec<_>>(), vec!["kfm"]);
     assert_eq!(sp.fight.life_bar(1).pos, [1.0, 2.0]);

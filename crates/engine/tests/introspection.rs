@@ -69,9 +69,7 @@ fn setup() -> Match {
     m
 }
 
-fn ev(m: &Match, src: &str) -> f64 {
-    m.ev(0, &safe_expr(src))
-}
+fn ev(m: &Match, src: &str) -> f64 { m.ev(0, &safe_expr(src)) }
 
 #[test]
 fn explod_var_reads_back_the_explod() {
@@ -85,16 +83,8 @@ fn explod_var_reads_back_the_explod() {
     assert_eq!(ev(&m, "ExplodVar(7, 0, sprpriority)"), 4.0);
     assert_eq!(ev(&m, "ExplodVar(7, 0, anim)"), 1000.0);
     assert!(ev(&m, "ExplodVar(7, 0, time)") >= 0.0);
-    assert_eq!(
-        ev(&m, "ExplodVar(7, 1, removetime)"),
-        10.0,
-        "the index selects among explods with the same id"
-    );
-    assert_eq!(
-        ev(&m, "ExplodVar(-1, 1, id)"),
-        7.0,
-        "a negative id matches any explod"
-    );
+    assert_eq!(ev(&m, "ExplodVar(7, 1, removetime)"), 10.0, "the index selects among explods with the same id");
+    assert_eq!(ev(&m, "ExplodVar(-1, 1, id)"), 7.0, "a negative id matches any explod");
 }
 
 #[test]
@@ -102,21 +92,13 @@ fn explod_var_missing_entity_is_undefined() {
     let m = setup();
     assert!(ev(&m, "ExplodVar(99, 0, id)").is_nan());
     assert!(ev(&m, "ExplodVar(7, 5, id)").is_nan());
-    assert!(
-        ev(&m, "ExplodVar(99, 0, id) = 0").is_nan(),
-        "a comparison with an undefined value stays undefined"
-    );
+    assert!(ev(&m, "ExplodVar(99, 0, id) = 0").is_nan(), "a comparison with an undefined value stays undefined");
 }
 
 #[test]
 fn explod_var_position_follows_pos_convention() {
     let m = setup();
-    let expected = m
-        .explods
-        .iter()
-        .find(|e| e.id == 7)
-        .map(|e| ((e.world_pos(m.camera).x - m.camera.x) / e.lscl) as f64)
-        .unwrap();
+    let expected = m.explods.iter().find(|e| e.id == 7).map(|e| ((e.world_pos(m.camera).x - m.camera.x) / e.lscl) as f64).unwrap();
     assert_eq!(ev(&m, "ExplodVar(7, 0, pos x)"), expected);
 }
 
@@ -143,11 +125,7 @@ fn palfx_var_reads_own_and_global_effects() {
     assert_eq!(ev(&m, "PalFXVar(color)"), 100.0);
     assert!(ev(&m, "PalFXVar(time)") > 0.0);
     assert_eq!(ev(&m, "PalFXVar(all.add.g)"), 2.0);
-    assert_eq!(
-        ev(&m, "PalFXVar(bg.mul.r)"),
-        256.0,
-        "no background effect reads as the identity"
-    );
+    assert_eq!(ev(&m, "PalFXVar(bg.mul.r)"), 256.0, "no background effect reads as the identity");
 }
 
 #[test]
@@ -180,9 +158,7 @@ fn identity_and_animation_triggers() {
 #[test]
 fn input_time_counts_held_ticks() {
     let mut m = setup();
-    for _ in 0..4 {
-        m.fighters[0].history.push(ume_engine::input::k::A, 1);
-    }
+    for _ in 0..4 { m.fighters[0].history.push(ume_engine::input::k::A, 1); }
     assert_eq!(ev(&m, "InputTime(a)"), 4.0);
     assert_eq!(ev(&m, "InputTime(b)"), 0.0);
     m.fighters[0].history.push(0, 1);
@@ -201,10 +177,7 @@ fn display_name_compares_strings() {
 fn unknown_sub_parameters_are_reported_at_load() {
     let text = "[Statedef 1]\ntype = S\n[State 1, a]\ntype = VelSet\ntrigger1 = ExplodVar(1, 0, pos x) > 0 && ExplodVar(1, 0, nonsense) = 0 && ProjVar(1, 0, pos y) < 3 && PalFXVar(wrong) = 0\nx = 1\n";
     let d = audit_cns("sub.cns", text);
-    assert_eq!(
-        d.names(Category::Trigger),
-        vec!["explodvar(nonsense)", "palfxvar(wrong)"]
-    );
+    assert_eq!(d.names(Category::Trigger), vec!["explodvar(nonsense)", "palfxvar(wrong)"]);
 }
 
 #[test]

@@ -29,15 +29,7 @@ pub fn resolve_key(vfs: &Vfs, base_dir: &str, name: &str) -> Option<String> {
         return None;
     }
     let base_dir = norm_path(base_dir.trim_end_matches(['/', '\\']));
-    let tries = [
-        if base_dir.is_empty() {
-            n.clone()
-        } else {
-            format!("{base_dir}/{n}")
-        },
-        n.clone(),
-        format!("data/{n}"),
-    ];
+    let tries = [if base_dir.is_empty() { n.clone() } else { format!("{base_dir}/{n}") }, n.clone(), format!("data/{n}")];
     for t in &tries {
         if vfs.contains_key(t) {
             return Some(t.clone());
@@ -47,17 +39,11 @@ pub fn resolve_key(vfs: &Vfs, base_dir: &str, name: &str) -> Option<String> {
     let suffix = format!("/{base}");
     if !base_dir.is_empty() {
         let folder = format!("{base_dir}/");
-        if let Some(k) = vfs
-            .keys_from(&folder)
-            .take_while(|k| k.starts_with(&folder))
-            .find(|k| k.ends_with(&suffix))
-        {
+        if let Some(k) = vfs.keys_from(&folder).take_while(|k| k.starts_with(&folder)).find(|k| k.ends_with(&suffix)) {
             return Some(k.clone());
         }
     }
-    vfs.keys()
-        .find(|k| k.ends_with(&suffix) || k.as_str() == base)
-        .cloned()
+    vfs.keys().find(|k| k.ends_with(&suffix) || k.as_str() == base).cloned()
 }
 
 /// Same as [`resolve_key`], returning the bytes.
@@ -91,42 +77,28 @@ fn has_key(t: &str, word: &str) -> bool {
 pub fn find_char_defs(vfs: &Vfs) -> Vec<String> {
     let candidates: Vec<&String> = vfs.keys().filter(|k| k.ends_with(".def")).collect();
     let hits = crate::par::map(&candidates, |key| {
-        let Some(bytes) = vfs.get(key) else {
-            return false;
-        };
+        let Some(bytes) = vfs.get(key) else { return false };
         if bytes.len() > 1 << 20 {
             return false;
         }
         let t = text(&bytes).to_ascii_lowercase();
         t.contains("[files]") && has_key(&t, "cns") && has_key(&t, "sprite")
     });
-    candidates
-        .into_iter()
-        .zip(hits)
-        .filter(|(_, hit)| *hit)
-        .map(|(k, _)| k.clone())
-        .collect()
+    candidates.into_iter().zip(hits).filter(|(_, hit)| *hit).map(|(k, _)| k.clone()).collect()
 }
 
 /// Stage .def files (has `[BGdef` and `[StageInfo]` or `[Camera]`).
 pub fn find_stage_defs(vfs: &Vfs) -> Vec<String> {
     let candidates: Vec<&String> = vfs.keys().filter(|k| k.ends_with(".def")).collect();
     let hits = crate::par::map(&candidates, |key| {
-        let Some(bytes) = vfs.get(key) else {
-            return false;
-        };
+        let Some(bytes) = vfs.get(key) else { return false };
         if bytes.len() > 1 << 20 {
             return false;
         }
         let t = text(&bytes).to_ascii_lowercase();
         t.contains("[bgdef") && (t.contains("[stageinfo]") || t.contains("[camera]"))
     });
-    candidates
-        .into_iter()
-        .zip(hits)
-        .filter(|(_, hit)| *hit)
-        .map(|(k, _)| k.clone())
-        .collect()
+    candidates.into_iter().zip(hits).filter(|(_, hit)| *hit).map(|(k, _)| k.clone()).collect()
 }
 
 fn canonical_def_text(def_bytes: &[u8]) -> String {

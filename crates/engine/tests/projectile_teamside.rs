@@ -80,9 +80,7 @@ type = DestroySelf
 trigger1 = Time = 1
 ";
 
-fn ev(m: &Match, i: usize, src: &str) -> f64 {
-    m.ev(i, &Expr::new(parse(src).unwrap()))
-}
+fn ev(m: &Match, i: usize, src: &str) -> f64 { m.ev(i, &Expr::new(parse(src).unwrap())) }
 
 fn setup() -> Match {
     let mut m = duel(mugen_char("a", CNS), mugen_char("b", CNS));
@@ -96,26 +94,15 @@ fn projectile_keeps_its_team_side_and_facing_when_the_owner_changes() {
     enter(&mut m, 0, 1000);
     ticks(&mut m, 1);
     assert_eq!(m.projectiles.len(), 2);
-    assert!(m
-        .projectiles
-        .iter()
-        .all(|p| p.teamside == 0 && p.owner == m.fighters[0].id && p.root == m.fighters[0].id));
+    assert!(m.projectiles.iter().all(|p| p.teamside == 0 && p.owner == m.fighters[0].id && p.root == m.fighters[0].id));
     let facing = m.projectiles[0].facing;
     m.fighters[0].facing = -facing;
     m.fighters[0].side = 1;
     ticks(&mut m, 1);
-    assert!(
-        m.projectiles
-            .iter()
-            .all(|p| p.teamside == 0 && p.facing == facing),
-        "turning or switching sides afterwards changes nothing"
-    );
+    assert!(m.projectiles.iter().all(|p| p.teamside == 0 && p.facing == facing), "turning or switching sides afterwards changes nothing");
     let life = m.fighters[1].life;
     ticks(&mut m, 60);
-    assert!(
-        m.fighters[1].life < life,
-        "the projectile still hits the original opponent"
-    );
+    assert!(m.fighters[1].life < life, "the projectile still hits the original opponent");
 }
 
 #[test]
@@ -135,9 +122,7 @@ fn helper_projectiles_count_for_the_helper_and_its_root_even_after_it_is_gone() 
     let mut m = setup();
     enter(&mut m, 0, 1010);
     ticks(&mut m, 2);
-    let h = (0..m.fighters.len())
-        .find(|&i| m.fighters[i].is_helper)
-        .expect("helper alive");
+    let h = (0..m.fighters.len()).find(|&i| m.fighters[i].is_helper).expect("helper alive");
     assert_eq!(m.projectiles.len(), 1);
     assert_eq!(m.projectiles[0].root, m.fighters[0].id);
     assert_eq!(m.projectiles[0].teamside, 0);
@@ -145,16 +130,10 @@ fn helper_projectiles_count_for_the_helper_and_its_root_even_after_it_is_gone() 
     assert_eq!(ev(&m, 0, "NumProj"), 1.0);
     assert_eq!(ev(&m, 0, "NumProjID(7)"), 1.0);
     ticks(&mut m, 2);
-    assert!(
-        !m.fighters.iter().any(|f| f.is_helper),
-        "the helper destroyed itself"
-    );
+    assert!(!m.fighters.iter().any(|f| f.is_helper), "the helper destroyed itself");
     assert_eq!(m.projectiles.len(), 1, "its projectile outlives it");
     assert_eq!(ev(&m, 0, "NumProj"), 1.0);
     let life = m.fighters[1].life;
     ticks(&mut m, 80);
-    assert!(
-        m.fighters[1].life < life,
-        "and still lands, credited to the root"
-    );
+    assert!(m.fighters[1].life < life, "and still lands, credited to the root");
 }

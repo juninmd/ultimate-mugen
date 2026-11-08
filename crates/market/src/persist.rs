@@ -28,17 +28,11 @@ impl MemPersist {
     }
 
     pub fn from_entries(entries: HashMap<String, Vec<u8>>) -> Self {
-        MemPersist {
-            map: Mutex::new(entries),
-        }
+        MemPersist { map: Mutex::new(entries) }
     }
 
     pub fn keys(&self) -> Vec<String> {
-        let mut k: Vec<String> = self
-            .map
-            .lock()
-            .map(|m| m.keys().cloned().collect())
-            .unwrap_or_default();
+        let mut k: Vec<String> = self.map.lock().map(|m| m.keys().cloned().collect()).unwrap_or_default();
         k.sort();
         k
     }
@@ -50,10 +44,7 @@ impl Persist for MemPersist {
     }
 
     fn write(&self, key: &str, data: &[u8]) -> Result<(), String> {
-        self.map
-            .lock()
-            .map_err(|_| "storage poisoned".to_string())?
-            .insert(key.to_string(), data.to_vec());
+        self.map.lock().map_err(|_| "storage poisoned".to_string())?.insert(key.to_string(), data.to_vec());
         Ok(())
     }
 

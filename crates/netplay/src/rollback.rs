@@ -1,7 +1,5 @@
 use crate::checksum::checksum;
-use ggrs::{
-    Config, GgrsError, GgrsRequest, Message, NonBlockingSocket, PredictRepeatLast, SessionBuilder,
-};
+use ggrs::{Config, GgrsError, GgrsRequest, Message, NonBlockingSocket, PredictRepeatLast, SessionBuilder};
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
@@ -30,43 +28,27 @@ const SAVE_HISTORY: usize = 256;
 
 impl Rollback {
     pub fn new(game: Match) -> Self {
-        Rollback {
-            game,
-            rollbacks: 0,
-            resimulated: 0,
-            saves: VecDeque::new(),
-        }
+        Rollback { game, rollbacks: 0, resimulated: 0, saves: VecDeque::new() }
     }
 
     pub fn checksum_at(&self, frame: i32) -> Option<u128> {
-        self.saves
-            .iter()
-            .find(|(f, _)| *f == frame)
-            .map(|(_, c)| *c)
+        self.saves.iter().find(|(f, _)| *f == frame).map(|(_, c)| *c)
     }
 
-    pub fn handle<A: Clone + PartialEq + Eq + Hash + Debug + 'static>(
-        &mut self,
-        requests: Vec<GgrsRequest<Netplay<A>>>,
-    ) -> Vec<Event> {
+    pub fn handle<A: Clone + PartialEq + Eq + Hash + Debug + 'static>(&mut self, requests: Vec<GgrsRequest<Netplay<A>>>) -> Vec<Event> {
         let mut saves = std::mem::take(&mut self.saves);
         for r in &requests {
             if let GgrsRequest::LoadGameState { frame, .. } = r {
                 saves.retain(|(f, _)| *f <= *frame);
             }
         }
-        let stats = drive(
-            &mut self.game,
-            requests,
-            |m, inputs, _| m.tick(inputs),
-            |frame, sum| {
-                saves.retain(|(f, _)| *f < frame);
-                saves.push_back((frame, sum));
-                if saves.len() > SAVE_HISTORY {
-                    saves.pop_front();
-                }
-            },
-        );
+        let stats = drive(&mut self.game, requests, |m, inputs, _| m.tick(inputs), |frame, sum| {
+            saves.retain(|(f, _)| *f < frame);
+            saves.push_back((frame, sum));
+            if saves.len() > SAVE_HISTORY {
+                saves.pop_front();
+            }
+        });
         self.saves = saves;
         self.rollbacks += stats.rollbacks;
         self.resimulated += stats.resimulated;
@@ -81,21 +63,13 @@ pub struct DriveStats {
     pub advanced: u64,
 }
 
-pub fn drive<A, T, S>(
-    game: &mut Match,
-    requests: Vec<GgrsRequest<Netplay<A>>>,
-    mut tick: T,
-    mut saved: S,
-) -> DriveStats
+pub fn drive<A, T, S>(game: &mut Match, requests: Vec<GgrsRequest<Netplay<A>>>, mut tick: T, mut saved: S) -> DriveStats
 where
     A: Clone + PartialEq + Eq + Hash + Debug + 'static,
     T: FnMut(&mut Match, &[u32], bool),
     S: FnMut(i32, u128),
 {
-    let advances = requests
-        .iter()
-        .filter(|r| matches!(r, GgrsRequest::AdvanceFrame { .. }))
-        .count();
+    let advances = requests.iter().filter(|r| matches!(r, GgrsRequest::AdvanceFrame { .. })).count();
     let mut stats = DriveStats::default();
     for r in requests {
         match r {
@@ -126,15 +100,8 @@ where
     stats
 }
 
-pub fn run_sync_test(
-    game: Match,
-    inputs: &[[u32; 2]],
-    check_distance: usize,
-) -> Result<Rollback, GgrsError> {
-    let mut session = SessionBuilder::<Netplay<usize>>::new()
-        .with_num_players(2)?
-        .with_check_distance(check_distance)
-        .start_synctest_session()?;
+pub fn run_sync_test(game: Match, inputs: &[[u32; 2]], check_distance: usize) -> Result<Rollback, GgrsError> {
+    let mut session = SessionBuilder::<Netplay<usize>>::new().with_num_players(2)?.with_check_distance(check_distance).start_synctest_session()?;
     let mut rb = Rollback::new(game);
     for f in inputs {
         for (p, &k) in f.iter().enumerate() {
@@ -159,14 +126,7 @@ impl MemorySocket {
     pub fn network(peers: usize, latency_steps: u64) -> (Vec<MemorySocket>, Rc<RefCell<u64>>) {
         let clock = Rc::new(RefCell::new(0));
         let wires: Vec<Wire> = (0..peers).map(|_| Rc::default()).collect();
-        let sockets = (0..peers)
-            .map(|id| MemorySocket {
-                id,
-                latency: latency_steps,
-                clock: clock.clone(),
-                wires: wires.clone(),
-            })
-            .collect();
+        let sockets = (0..peers).map(|id| MemorySocket { id, latency: latency_steps, clock: clock.clone(), wires: wires.clone() }).collect();
         (sockets, clock)
     }
 }

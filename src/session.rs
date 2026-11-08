@@ -3,8 +3,7 @@ use crate::audio::{Audio, SoundOpts};
 use crate::controls::Controls;
 use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
-#[path = "session/kaito.rs"]
-mod kaito;
+#[path = "session/kaito.rs"] mod kaito;
 use crate::stages::Stage;
 use crate::ui::Ui;
 use crate::vfx::Vfx;
@@ -427,11 +426,13 @@ impl Session {
                     }
                     if !played {
                         let kind = builtin.unwrap_or(match group {
-                            5 => match index {
-                                0 => "hitlight",
-                                1 => "hit",
-                                _ => "hitheavy",
-                            },
+                            5 => {
+                                match index {
+                                    0 => "hitlight",
+                                    1 => "hit",
+                                    _ => "hitheavy",
+                                }
+                            }
                             6 => "guard",
                             7 => "land",
                             _ => {

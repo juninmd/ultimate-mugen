@@ -16,10 +16,7 @@ async fn grab(app: &mut App, dir: &str, name: &str) {
 }
 
 async fn catalog_tour(app: &mut App, dir: &str) {
-    for (name, view, page) in [
-        ("catalog-gallery", 0u8, 0usize),
-        ("catalog-quarantine", 1, 0),
-    ] {
+    for (name, view, page) in [("catalog-gallery", 0u8, 0usize), ("catalog-quarantine", 1, 0)] {
         app.screen = Screen::Mugen { view, page };
         for _ in 0..600 {
             app.frame().await;

@@ -1,4 +1,4 @@
-use super::{glow_stroke, rgba, sol, BlendMode, Ctx, Rgb, PI, WHITE};
+use super::{rgba, sol, Ctx, Rgb, BlendMode, PI, WHITE, glow_stroke};
 
 pub(super) fn draw(ctx: &mut Ctx, s: f64, ph: f64, col: Rgb, col2: Rgb) {
     let w = WHITE;

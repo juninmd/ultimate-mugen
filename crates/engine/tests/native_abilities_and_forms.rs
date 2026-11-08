@@ -4,8 +4,8 @@ mod support;
 use std::sync::Arc;
 use support::*;
 use ume_engine::native::{
-    compile_native, register_native, AbilitySpec, FlySpec, FormSpec, NativeChar, SuperSpeedSpec,
-    TeleportSpec,
+    compile_native, register_native, AbilitySpec, FlySpec, FormSpec, NativeChar,
+    SuperSpeedSpec, TeleportSpec,
 };
 
 fn base_char(id: &str, name: &str) -> NativeChar {
@@ -49,27 +49,15 @@ fn test_abilities_compilation_and_movelist() {
     assert!(def.states.contains_key(&3901));
     assert!(def.states.contains_key(&3910));
 
-    let fly_mv = def
-        .movelist
-        .iter()
-        .find(|m| m.command == "fly_toggle")
-        .unwrap();
+    let fly_mv = def.movelist.iter().find(|m| m.command == "fly_toggle").unwrap();
     assert_eq!(fly_mv.cost, 60.0);
     assert!(fly_mv.drain);
 
-    let tp_mv = def
-        .movelist
-        .iter()
-        .find(|m| m.command == "teleport_cmd")
-        .unwrap();
+    let tp_mv = def.movelist.iter().find(|m| m.command == "teleport_cmd").unwrap();
     assert_eq!(tp_mv.cost, 300.0);
     assert!(!tp_mv.drain);
 
-    let sp_mv = def
-        .movelist
-        .iter()
-        .find(|m| m.command == "speed_toggle")
-        .unwrap();
+    let sp_mv = def.movelist.iter().find(|m| m.command == "speed_toggle").unwrap();
     assert_eq!(sp_mv.cost, 120.0);
     assert!(sp_mv.drain);
 }
@@ -157,18 +145,20 @@ fn test_transformation_character_swap_and_move_swap() {
         fly: None,
         teleport: None,
         super_speed: None,
-        forms: vec![FormSpec {
-            id: "alt_char".into(),
-            name: "Full Character Swap".into(),
-            cost: Some(1000.0),
-            attack: Some(1.2),
-            defense: Some(1.1),
-            palette: None,
-            parts: None,
-            character: Some("alt_hero".into()),
-            moves: vec![],
-            replace_moves: false,
-        }],
+        forms: vec![
+            FormSpec {
+                id: "alt_char".into(),
+                name: "Full Character Swap".into(),
+                cost: Some(1000.0),
+                attack: Some(1.2),
+                defense: Some(1.1),
+                palette: None,
+                parts: None,
+                character: Some("alt_hero".into()),
+                moves: vec![],
+                replace_moves: false,
+            },
+        ],
     });
 
     let def = Arc::new(compile_native(&nc, 1, false));
@@ -233,8 +223,7 @@ fn test_form_palette_parts_alteration() {
         replace_moves: false,
     };
 
-    let result_full =
-        ume_engine::native::forms::form_palette(&form_full, Some(&base_palette)).unwrap();
+    let result_full = ume_engine::native::forms::form_palette(&form_full, Some(&base_palette)).unwrap();
     let obj_full = result_full.as_object().unwrap();
     assert_eq!(obj_full.get("hair").unwrap(), "#00ff00");
     assert_eq!(obj_full.get("suit").unwrap(), "#0000ff");

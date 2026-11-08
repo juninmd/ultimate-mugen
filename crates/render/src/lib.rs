@@ -6,8 +6,8 @@ pub mod palette;
 pub mod post;
 
 pub use atlas::{Atlas, Rect};
-pub use batch::{Batch, Blend, DrawCall, PalFx, Quad, Vertex};
 pub use canvas::{Canvas, Color};
+pub use batch::{Batch, Blend, DrawCall, PalFx, Quad, Vertex};
 pub use gpu::{Renderer, Target};
 pub use palette::{PaletteColors, PaletteRows};
 pub use post::{Glass, PostFx, PostParams, MAX_GLASS, POST_SHADER};

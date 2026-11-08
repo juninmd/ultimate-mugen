@@ -14,26 +14,11 @@ const LYING_HURT: [f32; 4] = [-46.0, -26.0, 46.0, 0.0];
 const STRIKE_BOX: [f32; 4] = [2.0, -84.0, 38.0, -32.0];
 const STAND_UNITS: f32 = 100.0;
 
-pub(super) fn try_load(
-    nc: &NativeChar,
-    fr: &NativeFrame,
-    palette: Option<&Value>,
-) -> Option<RigRender> {
-    if fr.effect.is_some() {
-        return None;
-    }
+pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value>) -> Option<RigRender> {
+    if fr.effect.is_some() { return None; }
     let recolor = palette.and_then(|p| Recolor::new(nc.art.style.get("colors"), p));
-    let mut render = load_pose(
-        &sprite_roots(&nc.id),
-        &native_frame_sprite_key(fr),
-        fr.hit.is_some(),
-        recolor.as_ref(),
-    )?;
-    let height = nc
-        .stats
-        .height
-        .filter(|height| height.is_finite() && *height > 0.0)
-        .unwrap_or(STAND_UNITS as f64) as f32;
+    let mut render = load_pose(&sprite_roots(&nc.id), &native_frame_sprite_key(fr), fr.hit.is_some(), recolor.as_ref())?;
+    let height = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(STAND_UNITS as f64) as f32;
     let height_ratio = height / STAND_UNITS;
     render.scale *= height_ratio;
     super::pixel_hit::fit_to_character(nc, fr, &mut render, height_ratio);
@@ -46,9 +31,7 @@ pub fn native_frame_sprite_key(fr: &NativeFrame) -> String {
         (None, Some(Value::String(p))) => p.clone(),
         (None, Some(pose)) => {
             let bytes = serde_json::to_vec(pose).unwrap_or_default();
-            let digest = bytes.iter().fold(0xcbf29ce484222325u64, |hash, byte| {
-                (hash ^ *byte as u64).wrapping_mul(0x100000001b3)
-            });
+            let digest = bytes.iter().fold(0xcbf29ce484222325u64, |hash, byte| (hash ^ *byte as u64).wrapping_mul(0x100000001b3));
             format!("inline_{digest:016x}")
         }
         _ => "idle".to_string(),
@@ -58,44 +41,25 @@ pub fn native_frame_sprite_key(fr: &NativeFrame) -> String {
 pub(super) fn sprite_roots(id: &str) -> Vec<PathBuf> {
     let mut roots = vec![
         PathBuf::from(SPRITE_ROOT).join(id),
-        Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../..")
-            .join(SPRITE_ROOT)
-            .join(id),
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").join(SPRITE_ROOT).join(id),
     ];
-    if let Some(dir) = std::env::current_exe()
-        .ok()
-        .and_then(|p| p.parent().map(Path::to_path_buf))
-    {
+    if let Some(dir) = std::env::current_exe().ok().and_then(|p| p.parent().map(Path::to_path_buf)) {
         roots.push(dir.join(SPRITE_ROOT).join(id));
     }
     roots
 }
 
-fn load_pose(
-    roots: &[PathBuf],
-    pose: &str,
-    striking: bool,
-    recolor: Option<&Recolor>,
-) -> Option<RigRender> {
+fn load_pose(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<RigRender> {
     load_pose_with_source(roots, pose, striking, recolor).map(|(render, _)| render)
 }
 
-fn load_pose_with_source(
-    roots: &[PathBuf],
-    pose: &str,
-    striking: bool,
-    recolor: Option<&Recolor>,
-) -> Option<(RigRender, PathBuf)> {
+fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<(RigRender, PathBuf)> {
     let lower = pose.to_ascii_lowercase();
     let stem = pose_stem(&lower);
     [pose, stem, BASE_STEM, "idle"]
         .iter()
         .flat_map(|name| roots.iter().map(move |root| (root, name)))
-        .find_map(|(root, name)| {
-            read_render(root, name, &lower, stem, striking, recolor)
-                .map(|render| (render, root.join(format!("{name}.png"))))
-        })
+        .find_map(|(root, name)| read_render(root, name, &lower, stem, striking, recolor).map(|render| (render, root.join(format!("{name}.png")))))
 }
 
 pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
@@ -126,62 +90,21 @@ pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
     serde_json::json!({"id": character.id, "declaredHeight": character.stats.height, "avatar": roots.iter().any(|root| root.join("portrait.png").is_file()), "animations": animations})
 }
 
-fn read_render(
-    root: &Path,
-    name: &str,
-    lower: &str,
-    stem: &str,
-    striking: bool,
-    recolor: Option<&Recolor>,
-) -> Option<RigRender> {
+fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool, recolor: Option<&Recolor>) -> Option<RigRender> {
     let bytes = read_sprite(root, &format!("{name}.png"))?;
     let dec = ume_formats::png::decode_png(&bytes).ok()?;
-    let mut rgba = match &dec.rgba {
-        Some(rgba) => rgba.clone(),
-        None => ume_formats::png::png_indexed_to_rgba(&dec),
-    };
+    let mut rgba = match &dec.rgba { Some(rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&dec) };
     let res = art_res().max(0.1);
-    let meta: Value = read_sprite(root, "meta.json")
-        .and_then(|bytes| serde_json::from_slice(&bytes).ok())
-        .unwrap_or(Value::Null);
-    let frame = meta
-        .get("frames")
-        .and_then(|frames| frames.get(name))
-        .unwrap_or(&Value::Null);
-    let hair_region = frame
-        .get("awakeningHair")
-        .and_then(|value| serde_json::from_value::<[u32; 4]>(value.clone()).ok());
-    if let Some(recolor) = recolor {
-        recolor.apply_in_region(&mut rgba, dec.width, hair_region);
-    }
-    let positive = |value: Option<&Value>| {
-        value
-            .and_then(Value::as_f64)
-            .filter(|number| number.is_finite() && *number > 0.0 && *number <= f32::MAX as f64)
-            .map(|number| number as f32)
-    };
-    let units = positive(frame.get("refHeight"))
-        .or_else(|| positive(meta.get("refHeight")))
-        .unwrap_or(dec.height as f32)
-        .max(1.0);
-    let axis = |key: &str, default: f32, limit: f32| {
-        frame
-            .get(key)
-            .and_then(Value::as_f64)
-            .filter(|number| number.is_finite() && *number >= 0.0 && *number <= limit as f64)
-            .map_or(default, |number| number as f32)
-    };
+    let meta: Value = read_sprite(root, "meta.json").and_then(|bytes| serde_json::from_slice(&bytes).ok()).unwrap_or(Value::Null);
+    let frame = meta.get("frames").and_then(|frames| frames.get(name)).unwrap_or(&Value::Null);
+    let hair_region = frame.get("awakeningHair").and_then(|value| serde_json::from_value::<[u32; 4]>(value.clone()).ok());
+    if let Some(recolor) = recolor { recolor.apply_in_region(&mut rgba, dec.width, hair_region); }
+    let positive = |value: Option<&Value>| value.and_then(Value::as_f64).filter(|number| number.is_finite() && *number > 0.0 && *number <= f32::MAX as f64).map(|number| number as f32);
+    let units = positive(frame.get("refHeight")).or_else(|| positive(meta.get("refHeight"))).unwrap_or(dec.height as f32).max(1.0);
+    let axis = |key: &str, default: f32, limit: f32| frame.get(key).and_then(Value::as_f64).filter(|number| number.is_finite() && *number >= 0.0 && *number <= limit as f64).map_or(default, |number| number as f32);
     let axis_x = axis("axisX", dec.width as f32 / 2.0, dec.width as f32);
     let axis_y = axis("axisY", dec.height as f32, dec.height as f32);
-    let hurt = super::pixel_hurt::fit_body(
-        hurtbox(lower, stem),
-        stem,
-        &rgba,
-        dec.width,
-        dec.height,
-        [axis_x, axis_y],
-        STAND_UNITS / units,
-    );
+    let hurt = super::pixel_hurt::fit_body(hurtbox(lower, stem), stem, &rgba, dec.width, dec.height, [axis_x, axis_y], STAND_UNITS / units);
     Some(RigRender {
         image: Some(ImageData::new(dec.width, dec.height, rgba)),
         width: dec.width as f32 * res,
@@ -224,10 +147,7 @@ fn pose_stem(p: &str) -> &'static str {
 
 fn basic_stem(p: &str) -> &'static str {
     let has = |keys: &[&str]| keys.iter().any(|k| p.contains(k));
-    if has(&[
-        "idle", "walk", "run", "stand", "turn", "crouch", "land", "hop", "guard", "getup",
-        "recover",
-    ]) {
+    if has(&["idle", "walk", "run", "stand", "turn", "crouch", "land", "hop", "guard", "getup", "recover"]) {
         BASE_STEM
     } else if has(&["jab", "punch"]) || p.starts_with("str") {
         "02_attack1"
@@ -266,11 +186,7 @@ mod tests {
     fn frame_geometry_overrides_preserve_floor_anchor_and_body_scale() {
         let dir = fixture("frame-geometry");
         write_png(&dir, "walk0", 400, 600);
-        std::fs::write(
-            dir.join("meta.json"),
-            r#"{"refHeight":200,"frames":{"walk0":{"refHeight":400,"axisX":180,"axisY":560}}}"#,
-        )
-        .unwrap();
+        std::fs::write(dir.join("meta.json"), r#"{"refHeight":200,"frames":{"walk0":{"refHeight":400,"axisX":180,"axisY":560}}}"#).unwrap();
         let render = load_pose(std::slice::from_ref(&dir), "walk0", false, None).unwrap();
         assert!((render.axis_y * render.scale - 140.0).abs() < 0.001);
         assert!((render.axis_x * render.scale - 45.0).abs() < 0.001);
@@ -280,10 +196,8 @@ mod tests {
 
     #[test]
     fn declared_height_scales_body_and_hurtboxes_together() {
-        let mut fighter: NativeChar =
-            serde_json::from_str(include_str!("../../../../assets/chars/bruno.json")).unwrap();
-        let frame: NativeFrame =
-            serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
+        let mut fighter: NativeChar = serde_json::from_str(include_str!("../../../../assets/chars/bruno.json")).unwrap();
+        let frame: NativeFrame = serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
         fighter.stats.height = Some(100.0);
         let baseline = try_load(&fighter, &frame, None).unwrap();
         fighter.stats.height = Some(116.0);
@@ -291,47 +205,25 @@ mod tests {
         assert!((taller.scale / baseline.scale - 1.16).abs() < 0.001);
         assert!((taller.hurt[0][1] / baseline.hurt[0][1] - 1.16).abs() < 0.001);
         fighter.stats.height = Some(f64::NAN);
-        assert_eq!(
-            try_load(&fighter, &frame, None).unwrap().scale,
-            baseline.scale
-        );
+        assert_eq!(try_load(&fighter, &frame, None).unwrap().scale, baseline.scale);
     }
 
     #[test]
     fn effect_frames_do_not_fall_back_to_fighter_idle() {
-        let fighter: NativeChar =
-            serde_json::from_str(include_str!("../../../../assets/chars/bruno.json")).unwrap();
-        let frame: NativeFrame =
-            serde_json::from_value(serde_json::json!({"effect": {"kind": "orb"}, "ticks": 1}))
-                .unwrap();
+        let fighter: NativeChar = serde_json::from_str(include_str!("../../../../assets/chars/bruno.json")).unwrap();
+        let frame: NativeFrame = serde_json::from_value(serde_json::json!({"effect": {"kind": "orb"}, "ticks": 1})).unwrap();
         assert!(try_load(&fighter, &frame, None).is_none());
     }
 
     #[test]
     fn every_standard_state_pose_has_its_own_stem() {
         let expected = [
-            ("idle0", "01_idle"),
-            ("idle1", "07_idle1"),
-            ("idle2", "08_idle2"),
-            ("idle3", "07_idle1"),
-            ("hith1", "09_hit1"),
-            ("hith2", "10_hit2"),
-            ("hith3", "11_hit3"),
-            ("hitair1", "12_fall1"),
-            ("fall1", "12_fall1"),
-            ("trip", "12_fall1"),
-            ("hitair2", "13_fall2"),
-            ("fall2", "13_fall2"),
-            ("bounce", "13_fall2"),
-            ("lie", "14_lie"),
-            ("dead", "14_lie"),
-            ("lose", "14_lie"),
-            ("dflie", "14_lie"),
-            ("dfprop2", "14_lie"),
-            ("dfreach1", "14_lie"),
-            ("powerup0", "15_power0"),
-            ("powerup1", "16_power1"),
-            ("powerup2", "17_power2"),
+            ("idle0", "01_idle"), ("idle1", "07_idle1"), ("idle2", "08_idle2"), ("idle3", "07_idle1"),
+            ("hith1", "09_hit1"), ("hith2", "10_hit2"), ("hith3", "11_hit3"),
+            ("hitair1", "12_fall1"), ("fall1", "12_fall1"), ("trip", "12_fall1"),
+            ("hitair2", "13_fall2"), ("fall2", "13_fall2"), ("bounce", "13_fall2"),
+            ("lie", "14_lie"), ("dead", "14_lie"), ("lose", "14_lie"), ("dflie", "14_lie"), ("dfprop2", "14_lie"), ("dfreach1", "14_lie"),
+            ("powerup0", "15_power0"), ("powerup1", "16_power1"), ("powerup2", "17_power2"),
         ];
         for (pose, stem) in expected {
             assert_eq!(pose_stem(pose), stem, "{pose}");
@@ -345,11 +237,7 @@ mod tests {
         assert_eq!(pose_stem("rise2"), "04_special");
         assert_eq!(pose_stem("blast1"), "05_projectile");
         assert_eq!(pose_stem("win0"), "06_victory");
-        assert_eq!(
-            pose_stem("white"),
-            "01_idle",
-            "a pose merely containing 'hit' is not a damage pose"
-        );
+        assert_eq!(pose_stem("white"), "01_idle", "a pose merely containing 'hit' is not a damage pose");
     }
 
     #[test]
@@ -359,20 +247,10 @@ mod tests {
         write_png(&dir, "09_hit1", 30, 20);
         write_png(&dir, "jab0", 50, 20);
         let roots = [dir.clone()];
-        let art_width = |pose: &str| {
-            load_pose(&roots, pose, false, None)
-                .unwrap()
-                .image
-                .unwrap()
-                .w
-        };
+        let art_width = |pose: &str| load_pose(&roots, pose, false, None).unwrap().image.unwrap().w;
         assert_eq!(art_width("jab0"), 50);
         assert_eq!(art_width("hitH1"), 30);
-        assert_eq!(
-            art_width("hitH3"),
-            10,
-            "no hit3 art: falls back to the base pose"
-        );
+        assert_eq!(art_width("hitH3"), 10, "no hit3 art: falls back to the base pose");
         std::fs::remove_dir_all(dir).unwrap();
     }
 
@@ -386,10 +264,7 @@ mod tests {
         let stand = load_pose(&roots, "idle0", false, None).unwrap();
         let lying = load_pose(&roots, "lie", false, None).unwrap();
         assert_eq!(stand.scale, lying.scale);
-        assert!(
-            (stand.scale * 160.0 - STAND_UNITS / art_res()).abs() < 1e-3,
-            "standing body is {STAND_UNITS} units tall"
-        );
+        assert!((stand.scale * 160.0 - STAND_UNITS / art_res()).abs() < 1e-3, "standing body is {STAND_UNITS} units tall");
         std::fs::remove_dir_all(dir).unwrap();
     }
 
@@ -399,18 +274,9 @@ mod tests {
         write_png(&dir, "01_idle", 10, 10);
         write_png(&dir, "14_lie", 10, 10);
         let roots = [dir.clone()];
-        assert_ne!(
-            load_pose(&roots, "lie", false, None).unwrap().hurt,
-            vec![STAND_HURT]
-        );
-        assert_eq!(
-            load_pose(&roots, "idle0", false, None).unwrap().hurt,
-            vec![STAND_HURT]
-        );
-        assert_eq!(
-            load_pose(&roots, "crouch1", false, None).unwrap().hurt,
-            vec![CROUCH_HURT]
-        );
+        assert_ne!(load_pose(&roots, "lie", false, None).unwrap().hurt, vec![STAND_HURT]);
+        assert_eq!(load_pose(&roots, "idle0", false, None).unwrap().hurt, vec![STAND_HURT]);
+        assert_eq!(load_pose(&roots, "crouch1", false, None).unwrap().hurt, vec![CROUCH_HURT]);
         std::fs::remove_dir_all(dir).unwrap();
     }
 
@@ -420,4 +286,10 @@ mod tests {
         assert!(load_pose(std::slice::from_ref(&dir), "idle0", false, None).is_none());
         std::fs::remove_dir_all(dir).unwrap();
     }
+
+
+
+
+
+
 }

@@ -13,15 +13,11 @@ pub struct Replay {
 
 impl Replay {
     pub fn new(players: usize) -> Self {
-        Replay {
-            players: players.max(1),
-            ..Default::default()
-        }
+        Replay { players: players.max(1), ..Default::default() }
     }
 
     pub fn push(&mut self, inputs: &[u32]) {
-        self.frames
-            .extend((0..self.players).map(|i| inputs.get(i).copied().unwrap_or(0)));
+        self.frames.extend((0..self.players).map(|i| inputs.get(i).copied().unwrap_or(0)));
     }
 
     pub fn len(&self) -> usize {
@@ -42,10 +38,7 @@ impl Replay {
     }
 
     pub fn meta(&self, key: &str) -> Option<&str> {
-        self.meta
-            .iter()
-            .find(|(k, _)| k == key)
-            .map(|(_, v)| v.as_str())
+        self.meta.iter().find(|(k, _)| k == key).map(|(_, v)| v.as_str())
     }
 
     pub fn to_bytes(&self) -> Result<Vec<u8>, String> {
@@ -55,36 +48,18 @@ impl Replay {
         if self.meta.len() > MAX_REPLAY_METADATA as usize {
             return Err("replay: too many metadata entries".into());
         }
-        let frame_bytes = self
-            .frames
-            .len()
-            .checked_mul(4)
-            .ok_or("replay: frame size overflow")?;
+        let frame_bytes = self.frames.len().checked_mul(4).ok_or("replay: frame size overflow")?;
         if frame_bytes > MAX_REPLAY_FRAMES_BYTES || self.len() > u32::MAX as usize {
             return Err("replay: decoded frames exceed size limit".into());
         }
-        let metadata_bytes = self
-            .meta
-            .iter()
-            .try_fold(20usize, |size, (key, value)| {
-                size.checked_add(8)?
-                    .checked_add(key.len())?
-                    .checked_add(value.len())
-            })
-            .ok_or("replay: metadata size overflow")?;
-        let run_bytes = self
-            .frames
-            .chunks(self.players)
-            .enumerate()
-            .filter(|(index, frame)| {
-                *index == 0
-                    || self.frames[(index - 1) * self.players..index * self.players] != **frame
-            })
-            .try_fold(0usize, |size, _| size.checked_add(4 + self.players * 4))
+        let metadata_bytes = self.meta.iter().try_fold(20usize, |size, (key, value)| {
+            size.checked_add(8)?.checked_add(key.len())?.checked_add(value.len())
+        }).ok_or("replay: metadata size overflow")?;
+        let run_bytes = self.frames.chunks(self.players).enumerate().filter(|(index, frame)| {
+            *index == 0 || self.frames[(index - 1) * self.players..index * self.players] != **frame
+        }).try_fold(0usize, |size, _| size.checked_add(4 + self.players * 4))
             .ok_or("replay: encoded frame size overflow")?;
-        let encoded_size = metadata_bytes
-            .checked_add(run_bytes)
-            .ok_or("replay: encoded size overflow")?;
+        let encoded_size = metadata_bytes.checked_add(run_bytes).ok_or("replay: encoded size overflow")?;
         if encoded_size > MAX_REPLAY_BYTES {
             return Err("replay: encoded data exceeds size limit".into());
         }
@@ -149,12 +124,8 @@ impl Replay {
             meta.push((k, v));
         }
         let total = c.u32()? as usize;
-        let frame_values = total
-            .checked_mul(players)
-            .ok_or("replay: frame count overflow")?;
-        let frame_bytes = frame_values
-            .checked_mul(4)
-            .ok_or("replay: frame size overflow")?;
+        let frame_values = total.checked_mul(players).ok_or("replay: frame count overflow")?;
+        let frame_bytes = frame_values.checked_mul(4).ok_or("replay: frame size overflow")?;
         if frame_bytes > MAX_REPLAY_FRAMES_BYTES {
             return Err("replay: decoded frames exceed size limit".into());
         }
@@ -165,9 +136,7 @@ impl Replay {
             if run == 0 || run > total - decoded_frames {
                 return Err("replay: invalid frame run".into());
             }
-            let f = (0..players)
-                .map(|_| c.u32())
-                .collect::<Result<Vec<_>, _>>()?;
+            let f = (0..players).map(|_| c.u32()).collect::<Result<Vec<_>, _>>()?;
             for _ in 0..run {
                 frames.extend_from_slice(&f);
             }
@@ -176,11 +145,7 @@ impl Replay {
         if c.at != b.len() {
             return Err("replay: trailing bytes".into());
         }
-        Ok(Replay {
-            players,
-            meta,
-            frames,
-        })
+        Ok(Replay { players, meta, frames })
     }
 }
 
@@ -191,10 +156,7 @@ struct Cursor<'a> {
 
 impl<'a> Cursor<'a> {
     fn take(&mut self, n: usize) -> Result<&'a [u8], String> {
-        let s = self
-            .b
-            .get(self.at..self.at.saturating_add(n))
-            .ok_or("replay: truncated")?;
+        let s = self.b.get(self.at..self.at.saturating_add(n)).ok_or("replay: truncated")?;
         self.at += n;
         Ok(s)
     }

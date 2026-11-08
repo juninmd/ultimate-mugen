@@ -109,12 +109,7 @@ fn run(name: &str, corpus: &[Vec<u8>], iters: usize, target: impl Fn(&[u8])) {
         if !ok || el > budget {
             let path = std::env::temp_dir().join(format!("fuzz-{name}-{i}.bin"));
             let _ = std::fs::write(&path, &input);
-            failures.push(format!(
-                "iter {i}: {} ({} ms) -> {}",
-                if ok { "slow" } else { "panic" },
-                el.as_millis(),
-                path.display()
-            ));
+            failures.push(format!("iter {i}: {} ({} ms) -> {}", if ok { "slow" } else { "panic" }, el.as_millis(), path.display()));
             if failures.len() >= 5 {
                 break;
             }
@@ -124,10 +119,7 @@ fn run(name: &str, corpus: &[Vec<u8>], iters: usize, target: impl Fn(&[u8])) {
 }
 
 fn iters() -> usize {
-    std::env::var("UME_FUZZ_ITERS")
-        .ok()
-        .and_then(|v| v.parse().ok())
-        .unwrap_or(300)
+    std::env::var("UME_FUZZ_ITERS").ok().and_then(|v| v.parse().ok()).unwrap_or(300)
 }
 
 #[test]
@@ -195,10 +187,7 @@ fn fuzz_snd_act_fnt_pcx_png() {
     run("pcx", &pcx, iters(), |b| {
         let _ = ume_formats::pcx::decode_pcx(b, true);
     });
-    let png: Vec<Vec<u8>> = vec![vec![
-        0x89, b'P', b'N', b'G', 13, 10, 26, 10, 0, 0, 0, 13, b'I', b'H', b'D', b'R', 0, 0, 0, 4, 0,
-        0, 0, 4, 8, 3, 0, 0, 0,
-    ]];
+    let png: Vec<Vec<u8>> = vec![vec![0x89, b'P', b'N', b'G', 13, 10, 26, 10, 0, 0, 0, 13, b'I', b'H', b'D', b'R', 0, 0, 0, 4, 0, 0, 0, 4, 8, 3, 0, 0, 0]];
     run("png", &png, iters(), |b| {
         let _ = ume_formats::png::decode_png(b);
     });
@@ -211,18 +200,10 @@ fn fuzz_zip_and_stage() {
     let zip = std::fs::read(p).unwrap();
     let mut small = zip.clone();
     small.drain(..zip.len().saturating_sub(40_000).min(zip.len() / 2));
-    run(
-        "zip",
-        &[
-            small,
-            zip.iter().rev().take(70_000).rev().copied().collect(),
-        ],
-        iters(),
-        |b| {
-            let mut vf = Vfs::new();
-            let _ = add_zip(&mut vf, b, "");
-        },
-    );
+    run("zip", &[small, zip.iter().rev().take(70_000).rev().copied().collect()], iters(), |b| {
+        let mut vf = Vfs::new();
+        let _ = add_zip(&mut vf, b, "");
+    });
     let defs: Vec<Vec<u8>> = seeds(&v, ".def", 1 << 20);
     run("stage", &defs, iters(), |b| {
         let mut vf = Vfs::new();

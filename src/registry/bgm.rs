@@ -23,4 +23,4 @@ pub fn stage_bgm(vfs: &Vfs, def: &str) -> Option<(Vec<u8>, MusicLoop)> {
             end: n("bgmloopend"),
         },
     ))
-}
+}

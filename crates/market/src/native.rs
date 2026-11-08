@@ -1,9 +1,6 @@
 use crate::bundle::Files;
 use crate::catalog::{detect, Catalog, FileRef, Item};
-use crate::client::{
-    check_request, file_request, interpret_file, interpret_tree, is_transient, redirect_target,
-    tree_request, MarketError, RateLimit, Request, Response, TreeOutcome,
-};
+use crate::client::{check_request, file_request, interpret_file, interpret_tree, is_transient, redirect_target, tree_request, MarketError, RateLimit, Request, Response, TreeOutcome};
 use crate::ops::{InstallJob, Progress, PARALLEL_DOWNLOADS};
 use crate::persist::Persist;
 use crate::repo::RepoRef;
@@ -40,10 +37,7 @@ impl Default for UreqTransport {
 }
 
 fn header(resp: &ureq::http::Response<ureq::Body>, name: &str) -> Option<String> {
-    resp.headers()
-        .get(name)
-        .and_then(|v| v.to_str().ok())
-        .map(str::to_string)
+    resp.headers().get(name).and_then(|v| v.to_str().ok()).map(str::to_string)
 }
 
 impl UreqTransport {
@@ -58,40 +52,20 @@ impl UreqTransport {
                 call = call.header("Authorization", &format!("Bearer {t}"));
             }
         }
-        let mut resp = call
-            .call()
-            .map_err(|e| MarketError::Network(e.to_string()))?;
+        let mut resp = call.call().map_err(|e| MarketError::Network(e.to_string()))?;
         let status = resp.status().as_u16();
-        let rate = match (
-            header(&resp, "x-ratelimit-remaining").and_then(|v| v.parse().ok()),
-            header(&resp, "x-ratelimit-reset").and_then(|v| v.parse().ok()),
-        ) {
-            (Some(remaining), Some(reset_epoch)) => Some(RateLimit {
-                remaining,
-                reset_epoch,
-            }),
+        let rate = match (header(&resp, "x-ratelimit-remaining").and_then(|v| v.parse().ok()), header(&resp, "x-ratelimit-reset").and_then(|v| v.parse().ok())) {
+            (Some(remaining), Some(reset_epoch)) => Some(RateLimit { remaining, reset_epoch }),
             _ => None,
         };
-        let out = Response {
-            status,
-            etag: header(&resp, "etag"),
-            body: Vec::new(),
-            rate,
-            retry_after_secs: header(&resp, "retry-after").and_then(|v| v.parse().ok()),
-            location: header(&resp, "location"),
-        };
+        let out = Response { status, etag: header(&resp, "etag"), body: Vec::new(), rate, retry_after_secs: header(&resp, "retry-after").and_then(|v| v.parse().ok()), location: header(&resp, "location") };
         if status != 200 {
             return Ok(out);
         }
-        let body = resp
-            .body_mut()
-            .with_config()
-            .limit(req.max_bytes)
-            .read_to_vec()
-            .map_err(|e| match e {
-                ureq::Error::BodyExceedsLimit(_) => MarketError::TooLarge,
-                other => MarketError::Network(other.to_string()),
-            })?;
+        let body = resp.body_mut().with_config().limit(req.max_bytes).read_to_vec().map_err(|e| match e {
+            ureq::Error::BodyExceedsLimit(_) => MarketError::TooLarge,
+            other => MarketError::Network(other.to_string()),
+        })?;
         Ok(Response { body, ..out })
     }
 }
@@ -103,10 +77,7 @@ impl Transport for UreqTransport {
         for _ in 0..=MAX_REDIRECTS {
             let resp = self.once(&url, req)?;
             if matches!(resp.status, 301 | 302 | 303 | 307 | 308) {
-                let loc = resp
-                    .location
-                    .clone()
-                    .ok_or_else(|| MarketError::Invalid("redirect without location".into()))?;
+                let loc = resp.location.clone().ok_or_else(|| MarketError::Invalid("redirect without location".into()))?;
                 url = redirect_target(&url, &loc)?;
                 continue;
             }
@@ -116,11 +87,7 @@ impl Transport for UreqTransport {
     }
 }
 
-fn fetch_retry(
-    t: &dyn Transport,
-    req: &Request,
-    cancel: &AtomicBool,
-) -> Result<Response, MarketError> {
+fn fetch_retry(t: &dyn Transport, req: &Request, cancel: &AtomicBool) -> Result<Response, MarketError> {
     let mut last = MarketError::Cancelled;
     for attempt in 0..ATTEMPTS {
         if cancel.load(Ordering::Relaxed) {
@@ -139,35 +106,18 @@ fn fetch_retry(
 
 pub enum ListOutcome {
     NotModified,
-    Fresh {
-        catalog: Catalog,
-        etag: Option<String>,
-    },
+    Fresh { catalog: Catalog, etag: Option<String> },
 }
 
-pub fn list_repo(
-    t: &dyn Transport,
-    repo: &RepoRef,
-    etag: Option<&str>,
-    token: Option<&str>,
-) -> Result<ListOutcome, MarketError> {
+pub fn list_repo(t: &dyn Transport, repo: &RepoRef, etag: Option<&str>, token: Option<&str>) -> Result<ListOutcome, MarketError> {
     let resp = fetch_retry(t, &tree_request(repo, etag, token), &AtomicBool::new(false))?;
     match interpret_tree(&resp)? {
         TreeOutcome::NotModified => Ok(ListOutcome::NotModified),
-        TreeOutcome::Fresh { tree, etag } => Ok(ListOutcome::Fresh {
-            catalog: detect(&tree, &repo.subdir, &repo.name),
-            etag,
-        }),
+        TreeOutcome::Fresh { tree, etag } => Ok(ListOutcome::Fresh { catalog: detect(&tree, &repo.subdir, &repo.name), etag }),
     }
 }
 
-pub fn download_files(
-    t: &dyn Transport,
-    repo: &RepoRef,
-    wanted: &[FileRef],
-    cancel: &AtomicBool,
-    on_file: &(dyn Fn(u64) + Sync),
-) -> Result<Files, MarketError> {
+pub fn download_files(t: &dyn Transport, repo: &RepoRef, wanted: &[FileRef], cancel: &AtomicBool, on_file: &(dyn Fn(u64) + Sync)) -> Result<Files, MarketError> {
     let next = AtomicUsize::new(0);
     let slots: Mutex<Vec<Option<Vec<u8>>>> = Mutex::new(vec![None; wanted.len()]);
     let failure: Mutex<Option<MarketError>> = Mutex::new(None);
@@ -175,19 +125,12 @@ pub fn download_files(
     std::thread::scope(|scope| {
         for _ in 0..workers {
             scope.spawn(|| loop {
-                if cancel.load(Ordering::Relaxed)
-                    || failure.lock().map(|f| f.is_some()).unwrap_or(true)
-                {
+                if cancel.load(Ordering::Relaxed) || failure.lock().map(|f| f.is_some()).unwrap_or(true) {
                     return;
                 }
                 let i = next.fetch_add(1, Ordering::Relaxed);
                 let Some(f) = wanted.get(i) else { return };
-                let result = fetch_retry(
-                    t,
-                    &file_request(repo, &f.path, f.size.max(1).saturating_mul(2).max(1 << 20)),
-                    cancel,
-                )
-                .and_then(|r| interpret_file(&r, f.size.saturating_mul(2).max(1 << 20)));
+                let result = fetch_retry(t, &file_request(repo, &f.path, f.size.max(1).saturating_mul(2).max(1 << 20)), cancel).and_then(|r| interpret_file(&r, f.size.saturating_mul(2).max(1 << 20)));
                 match result {
                     Ok(data) => {
                         on_file(data.len() as u64);
@@ -211,20 +154,10 @@ pub fn download_files(
     if cancel.load(Ordering::Relaxed) {
         return Err(MarketError::Cancelled);
     }
-    crate::ops::order_files(
-        wanted,
-        slots.into_inner().map_err(|_| MarketError::Cancelled)?,
-    )
+    crate::ops::order_files(wanted, slots.into_inner().map_err(|_| MarketError::Cancelled)?)
 }
 
-pub fn install_item(
-    t: &dyn Transport,
-    repo: &RepoRef,
-    item: &Item,
-    catalog: &Catalog,
-    cancel: &AtomicBool,
-    progress: &(dyn Fn(Progress) + Sync),
-) -> Result<Files, MarketError> {
+pub fn install_item(t: &dyn Transport, repo: &RepoRef, item: &Item, catalog: &Catalog, cancel: &AtomicBool, progress: &(dyn Fn(Progress) + Sync)) -> Result<Files, MarketError> {
     let mut job = InstallJob::new(item, catalog)?;
     let done_files = AtomicUsize::new(0);
     let done_bytes = AtomicU64::new(0);
@@ -238,12 +171,7 @@ pub fn install_item(
         let downloaded = download_files(t, repo, &wanted, cancel, &|n| {
             let f = done_files.fetch_add(1, Ordering::Relaxed) + 1;
             let b = done_bytes.fetch_add(n, Ordering::Relaxed) + n;
-            progress(Progress {
-                done_files: f,
-                total_files: tf,
-                done_bytes: b,
-                total_bytes: tb,
-            });
+            progress(Progress { done_files: f, total_files: tf, done_bytes: b, total_bytes: tb });
         })?;
         job.accept(downloaded)?;
     }
@@ -257,28 +185,18 @@ pub struct FsPersist {
 fn escape_segment(seg: &str) -> String {
     let mut out = String::with_capacity(seg.len());
     for (i, b) in seg.bytes().enumerate() {
-        if b.is_ascii_digit()
-            || b.is_ascii_lowercase()
-            || matches!(b, b'-' | b'_')
-            || (b == b'.' && i > 0 && !out.ends_with('.'))
-        {
+        if b.is_ascii_digit() || b.is_ascii_lowercase() || matches!(b, b'-' | b'_') || (b == b'.' && i > 0 && !out.ends_with('.')) {
             out.push(b as char);
         } else {
             out.push_str(&format!("%{b:02X}"));
         }
     }
     if out.len() > 120 {
-        let hash = seg.bytes().fold(0xcbf29ce484222325u64, |h, b| {
-            (h ^ b as u64).wrapping_mul(0x100000001b3)
-        });
+        let hash = seg.bytes().fold(0xcbf29ce484222325u64, |h, b| (h ^ b as u64).wrapping_mul(0x100000001b3));
         out.truncate(80);
         out.push_str(&format!("~{hash:016x}"));
     }
-    if out.is_empty() {
-        "%00".into()
-    } else {
-        out
-    }
+    if out.is_empty() { "%00".into() } else { out }
 }
 
 impl FsPersist {
@@ -292,10 +210,7 @@ impl FsPersist {
 
     pub fn path_for(&self, key: &str) -> PathBuf {
         match key.split_once('/') {
-            Some((kind, rest)) => self
-                .root
-                .join(escape_segment(kind))
-                .join(escape_segment(rest)),
+            Some((kind, rest)) => self.root.join(escape_segment(kind)).join(escape_segment(rest)),
             None => self.root.join(escape_segment(key)),
         }
     }
@@ -333,14 +248,9 @@ pub fn default_root() -> PathBuf {
     } else if cfg!(target_os = "macos") {
         home.map(|h| h.join("Library").join("Application Support"))
     } else {
-        std::env::var_os("XDG_DATA_HOME")
-            .map(PathBuf::from)
-            .filter(|p| p.is_absolute())
-            .or_else(|| home.map(|h| h.join(".local").join("share")))
+        std::env::var_os("XDG_DATA_HOME").map(PathBuf::from).filter(|p| p.is_absolute()).or_else(|| home.map(|h| h.join(".local").join("share")))
     };
-    base.unwrap_or_else(|| PathBuf::from("."))
-        .join("ultimate-mugen")
-        .join("market")
+    base.unwrap_or_else(|| PathBuf::from(".")).join("ultimate-mugen").join("market")
 }
 
 #[cfg(test)]
@@ -363,67 +273,30 @@ mod tests {
             self.calls.fetch_add(1, Ordering::Relaxed);
             if req.url.contains("/git/trees/") {
                 if req.etag.as_deref() == Some("\"v1\"") {
-                    return Ok(Response {
-                        status: 304,
-                        ..Default::default()
-                    });
+                    return Ok(Response { status: 304, ..Default::default() });
                 }
-                return Ok(Response {
-                    status: 200,
-                    etag: Some("\"v1\"".into()),
-                    body: self.tree.clone().into_bytes(),
-                    ..Default::default()
-                });
+                return Ok(Response { status: 200, etag: Some("\"v1\"".into()), body: self.tree.clone().into_bytes(), ..Default::default() });
             }
             if self.fail_first.load(Ordering::Relaxed) > 0 {
                 self.fail_first.fetch_sub(1, Ordering::Relaxed);
                 return Err(MarketError::Network("boom".into()));
             }
-            let path = req
-                .url
-                .split("/HEAD/")
-                .nth(1)
-                .unwrap_or("")
-                .replace("%20", " ");
+            let path = req.url.split("/HEAD/").nth(1).unwrap_or("").replace("%20", " ");
             match self.files.get(&path) {
-                Some(d) => Ok(Response {
-                    status: 200,
-                    body: d.clone(),
-                    ..Default::default()
-                }),
-                None => Ok(Response {
-                    status: 404,
-                    ..Default::default()
-                }),
+                Some(d) => Ok(Response { status: 200, body: d.clone(), ..Default::default() }),
+                None => Ok(Response { status: 404, ..Default::default() }),
             }
         }
     }
 
     fn fake() -> Fake {
         let mut files = HashMap::new();
-        files.insert(
-            "chars/kfm/kfm.def".to_string(),
-            b"[Files]\ncmd = kfm.cmd\nsprite = kfm.sff\n".to_vec(),
-        );
-        for (p, n) in [
-            ("chars/kfm/kfm.sff", 8),
-            ("chars/kfm/kfm.air", 2),
-            ("chars/kfm/kfm.cmd", 2),
-            ("chars/kfm/kfm.cns", 2),
-            ("music/a b.ogg", 4),
-        ] {
+        files.insert("chars/kfm/kfm.def".to_string(), b"[Files]\ncmd = kfm.cmd\nsprite = kfm.sff\n".to_vec());
+        for (p, n) in [("chars/kfm/kfm.sff", 8), ("chars/kfm/kfm.air", 2), ("chars/kfm/kfm.cmd", 2), ("chars/kfm/kfm.cns", 2), ("music/a b.ogg", 4)] {
             files.insert(p.to_string(), vec![7; n]);
         }
-        let entries: Vec<String> = files
-            .iter()
-            .map(|(p, d)| format!(r#"{{"path":"{p}","type":"blob","size":{}}}"#, d.len()))
-            .collect();
-        Fake {
-            files,
-            tree: format!(r#"{{"tree":[{}],"truncated":false}}"#, entries.join(",")),
-            calls: AtomicUsize::new(0),
-            fail_first: AtomicUsize::new(0),
-        }
+        let entries: Vec<String> = files.iter().map(|(p, d)| format!(r#"{{"path":"{p}","type":"blob","size":{}}}"#, d.len())).collect();
+        Fake { files, tree: format!(r#"{{"tree":[{}],"truncated":false}}"#, entries.join(",")), calls: AtomicUsize::new(0), fail_first: AtomicUsize::new(0) }
     }
 
     #[test]
@@ -435,15 +308,8 @@ mod tests {
             ListOutcome::NotModified => panic!("expected fresh"),
         };
         assert_eq!(etag.as_deref(), Some("\"v1\""));
-        assert!(matches!(
-            list_repo(&t, &repo, etag.as_deref(), None).unwrap(),
-            ListOutcome::NotModified
-        ));
-        let kfm = catalog
-            .items
-            .iter()
-            .find(|i| i.kind == Kind::Character)
-            .unwrap();
+        assert!(matches!(list_repo(&t, &repo, etag.as_deref(), None).unwrap(), ListOutcome::NotModified));
+        let kfm = catalog.items.iter().find(|i| i.kind == Kind::Character).unwrap();
         let seen = AtomicUsize::new(0);
         let files = install_item(&t, &repo, kfm, &catalog, &AtomicBool::new(false), &|p| {
             seen.store(p.done_files, Ordering::Relaxed);
@@ -451,14 +317,7 @@ mod tests {
         .unwrap();
         assert_eq!(files.len(), 5);
         assert_eq!(seen.load(Ordering::Relaxed), 5);
-        assert_eq!(
-            catalog
-                .items
-                .iter()
-                .filter(|i| i.kind == Kind::Music)
-                .count(),
-            1
-        );
+        assert_eq!(catalog.items.iter().filter(|i| i.kind == Kind::Music).count(), 1);
     }
 
     #[test]
@@ -466,38 +325,18 @@ mod tests {
         let t = fake();
         t.fail_first.store(2, Ordering::Relaxed);
         let repo = RepoRef::parse("a/b").unwrap();
-        let want = vec![FileRef {
-            path: "chars/kfm/kfm.sff".into(),
-            size: 8,
-        }];
-        assert_eq!(
-            download_files(&t, &repo, &want, &AtomicBool::new(false), &|_| {})
-                .unwrap()
-                .len(),
-            1
-        );
-        let missing = vec![FileRef {
-            path: "nope.bin".into(),
-            size: 1,
-        }];
-        assert_eq!(
-            download_files(&t, &repo, &missing, &AtomicBool::new(false), &|_| {}).unwrap_err(),
-            MarketError::NotFound
-        );
+        let want = vec![FileRef { path: "chars/kfm/kfm.sff".into(), size: 8 }];
+        assert_eq!(download_files(&t, &repo, &want, &AtomicBool::new(false), &|_| {}).unwrap().len(), 1);
+        let missing = vec![FileRef { path: "nope.bin".into(), size: 1 }];
+        assert_eq!(download_files(&t, &repo, &missing, &AtomicBool::new(false), &|_| {}).unwrap_err(), MarketError::NotFound);
     }
 
     #[test]
     fn cancellation_stops_downloads() {
         let t = fake();
         let repo = RepoRef::parse("a/b").unwrap();
-        let want = vec![FileRef {
-            path: "chars/kfm/kfm.sff".into(),
-            size: 8,
-        }];
-        assert_eq!(
-            download_files(&t, &repo, &want, &AtomicBool::new(true), &|_| {}).unwrap_err(),
-            MarketError::Cancelled
-        );
+        let want = vec![FileRef { path: "chars/kfm/kfm.sff".into(), size: 8 }];
+        assert_eq!(download_files(&t, &repo, &want, &AtomicBool::new(true), &|_| {}).unwrap_err(), MarketError::Cancelled);
     }
 
     #[test]

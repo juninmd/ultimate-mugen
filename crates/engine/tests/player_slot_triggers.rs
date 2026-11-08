@@ -4,19 +4,13 @@ use ume_engine::common::{common_def, flat_stage};
 use ume_engine::expr::{parse, Expr};
 use ume_engine::matchs::Match;
 
-fn ev(m: &Match, i: usize, src: &str) -> f64 {
-    m.ev(i, &Expr::new(parse(src).unwrap()))
-}
+fn ev(m: &Match, i: usize, src: &str) -> f64 { m.ev(i, &Expr::new(parse(src).unwrap())) }
 
 fn roster(sides: &[usize]) -> Match {
     let mut m = Match::new(common_def(), None, flat_stage());
-    for (slot, side) in sides.iter().enumerate() {
-        m.add_player(mugen_char(&format!("fighter{}", slot + 1), ""), *side, 0, 1);
-    }
+    for (slot, side) in sides.iter().enumerate() { m.add_player(mugen_char(&format!("fighter{}", slot + 1), ""), *side, 0, 1); }
     m.start_round();
-    while m.round_state != 2 {
-        m.tick(&vec![0; sides.len()]);
-    }
+    while m.round_state != 2 { m.tick(&vec![0; sides.len()]); }
     m
 }
 

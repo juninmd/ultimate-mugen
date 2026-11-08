@@ -1,20 +1,20 @@
-pub mod audio;
-pub mod platform;
-pub mod quad;
-mod screenshot;
 pub mod sprites;
+pub mod audio;
+pub mod quad;
+pub mod platform;
+mod screenshot;
 use screenshot::Save;
 pub mod text;
 pub mod watchdog;
 
-use std::cell::RefCell;
 use std::collections::HashSet;
-use std::rc::Rc;
 use std::sync::Arc;
-pub use ume_render::PostParams;
-use ume_render::{Atlas, Canvas, PaletteRows, PostFx, Renderer, Target};
+use std::cell::RefCell;
+use std::rc::Rc;
 use web_time::Instant;
 pub use web_time::Instant as Clock;
+use ume_render::{Atlas, Canvas, PaletteRows, PostFx, Renderer, Target};
+pub use ume_render::PostParams;
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
 use winit::event::{ElementState, MouseButton, MouseScrollDelta, TouchPhase, WindowEvent};
@@ -25,64 +25,24 @@ use winit::window::{Fullscreen, Window, WindowId};
 pub use winit::keyboard::KeyCode as Key;
 
 #[derive(Clone, Debug)]
-pub struct Config {
-    pub title: String,
-    pub width: u32,
-    pub height: u32,
-    pub fullscreen: bool,
-    pub max_frames: Option<u64>,
-}
+pub struct Config { pub title: String, pub width: u32, pub height: u32, pub fullscreen: bool, pub max_frames: Option<u64> }
 
 impl Default for Config {
-    fn default() -> Self {
-        Config {
-            title: "Ultimate MUGEN".into(),
-            width: 1280,
-            height: 720,
-            fullscreen: false,
-            max_frames: None,
-        }
-    }
+    fn default() -> Self { Config { title: "Ultimate MUGEN".into(), width: 1280, height: 720, fullscreen: false, max_frames: None } }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Phase {
-    Started,
-    Moved,
-    Ended,
-    Cancelled,
-}
+pub enum Phase { Started, Moved, Ended, Cancelled }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Touch {
-    pub id: u64,
-    pub phase: Phase,
-    pub position: [f32; 2],
-}
+pub struct Touch { pub id: u64, pub phase: Phase, pub position: [f32; 2] }
 
 #[derive(Default)]
-pub struct Input {
-    down: HashSet<KeyCode>,
-    pressed: HashSet<KeyCode>,
-    pub pressed_order: Vec<KeyCode>,
-    pub mouse: [f32; 2],
-    pub mouse_delta: [f32; 2],
-    pub wheel: [f32; 2],
-    pub mouse_down: bool,
-    pub mouse_pressed: bool,
-    pub touches: Vec<Touch>,
-    primary_touch: Option<u64>,
-    pub typed: String,
-    pub pointer_scale: [f32; 2],
-}
+pub struct Input { down: HashSet<KeyCode>, pressed: HashSet<KeyCode>, pub pressed_order: Vec<KeyCode>, pub mouse: [f32; 2], pub mouse_delta: [f32; 2], pub wheel: [f32; 2], pub mouse_down: bool, pub mouse_pressed: bool, pub touches: Vec<Touch>, primary_touch: Option<u64>, pub typed: String, pub pointer_scale: [f32; 2] }
 
 impl Input {
-    pub fn is_down(&self, k: KeyCode) -> bool {
-        self.down.contains(&k)
-    }
-    pub fn is_pressed(&self, k: KeyCode) -> bool {
-        self.pressed.contains(&k)
-    }
+    pub fn is_down(&self, k: KeyCode) -> bool { self.down.contains(&k) }
+    pub fn is_pressed(&self, k: KeyCode) -> bool { self.pressed.contains(&k) }
 
     /// Drop every held key, mouse button and finger. The key-up of a held key goes to whichever window has
     /// focus, so a window that loses focus mid-input never receives it: without this the game keeps reading
@@ -105,13 +65,8 @@ impl Input {
         self.mouse_pressed = false;
         self.mouse_delta = [0.0; 2];
         self.wheel = [0.0; 2];
-        self.touches
-            .retain(|t| !matches!(t.phase, Phase::Ended | Phase::Cancelled));
-        for t in &mut self.touches {
-            if t.phase == Phase::Started {
-                t.phase = Phase::Moved;
-            }
-        }
+        self.touches.retain(|t| !matches!(t.phase, Phase::Ended | Phase::Cancelled));
+        for t in &mut self.touches { if t.phase == Phase::Started { t.phase = Phase::Moved; } }
     }
 
     /// One keyboard transition. `text` is the printable character of a press (empty for the ones that only
@@ -121,55 +76,27 @@ impl Input {
         match state {
             ElementState::Pressed => {
                 self.typed.extend(text.chars().filter(|c| !c.is_control()));
-                if !repeat {
-                    self.pressed.insert(code);
-                    self.pressed_order.push(code);
-                }
+                if !repeat { self.pressed.insert(code); self.pressed_order.push(code); }
                 self.down.insert(code);
             }
-            ElementState::Released => {
-                self.down.remove(&code);
-            }
+            ElementState::Released => { self.down.remove(&code); }
         }
     }
 
     fn touch(&mut self, id: u64, phase: Phase, position: [f32; 2]) {
-        if phase == Phase::Started && self.primary_touch.is_none() {
-            self.primary_touch = Some(id);
-            self.mouse_pressed = true;
-            self.mouse_down = true;
-        }
+        if phase == Phase::Started && self.primary_touch.is_none() { self.primary_touch = Some(id); self.mouse_pressed = true; self.mouse_down = true; }
         if self.primary_touch == Some(id) {
             self.mouse = position;
-            if matches!(phase, Phase::Ended | Phase::Cancelled) {
-                self.primary_touch = None;
-                self.mouse_down = false;
-            }
+            if matches!(phase, Phase::Ended | Phase::Cancelled) { self.primary_touch = None; self.mouse_down = false; }
         }
         match self.touches.iter_mut().find(|t| t.id == id) {
-            Some(t) => {
-                t.position = position;
-                if t.phase != Phase::Started || phase != Phase::Moved {
-                    t.phase = phase;
-                }
-            }
-            None => self.touches.push(Touch {
-                id,
-                phase,
-                position,
-            }),
+            Some(t) => { t.position = position; if t.phase != Phase::Started || phase != Phase::Moved { t.phase = phase; } }
+            None => self.touches.push(Touch { id, phase, position }),
         }
     }
 }
 
-pub struct Gpu {
-    pub device: wgpu::Device,
-    pub queue: wgpu::Queue,
-    pub renderer: Renderer,
-    pub rgba_atlas: Atlas,
-    pub index_atlas: Atlas,
-    pub palette_rows: PaletteRows,
-}
+pub struct Gpu { pub device: wgpu::Device, pub queue: wgpu::Queue, pub renderer: Renderer, pub rgba_atlas: Atlas, pub index_atlas: Atlas, pub palette_rows: PaletteRows }
 
 pub struct Frame<'a> {
     pub gpu: &'a mut Gpu,
@@ -197,63 +124,27 @@ pub trait Game {
     fn frame(&mut self, f: &mut Frame);
 }
 
-struct Live {
-    window: Arc<Window>,
-    surface: wgpu::Surface<'static>,
-    config: wgpu::SurfaceConfiguration,
-    gpu: Gpu,
-    canvas: Canvas,
-    post: PostFx,
-}
+struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas, post: PostFx }
 
 pub const STRETCH_ASPECT: f32 = 16.0 / 9.0;
 
 pub fn logical_size(surface: [f32; 2], stretch: Option<f32>) -> [f32; 2] {
-    match stretch {
-        Some(aspect) => [surface[1] * aspect, surface[1]],
-        None => surface,
-    }
+    match stretch { Some(aspect) => [surface[1] * aspect, surface[1]], None => surface }
 }
 
-struct Shell<G: Game> {
-    stretch: Option<f32>,
-    linear: bool,
-    cfg: Config,
-    game: G,
-    live: Option<Live>,
-    pending: Option<Pending>,
-    input: Input,
-    start: Instant,
-    last: Instant,
-    frames: u64,
-    error: Option<String>,
-    pacer: Pacer,
-    frame_cap: u32,
-    watchdog: watchdog::Watchdog,
-}
+struct Shell<G: Game> { stretch: Option<f32>, linear: bool, cfg: Config, game: G, live: Option<Live>, pending: Option<Pending>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String>, pacer: Pacer, frame_cap: u32, watchdog: watchdog::Watchdog }
 
 #[derive(Default)]
-pub struct Pacer {
-    debt: f32,
-}
+pub struct Pacer { debt: f32 }
 
 impl Pacer {
     const REFRESH_HZ: [f32; 9] = [30.0, 50.0, 60.0, 75.0, 90.0, 120.0, 144.0, 165.0, 240.0];
 
     pub fn pace(&mut self, raw: f32) -> f32 {
         let raw = raw.clamp(0.0, 0.25);
-        let Some(period) = Self::REFRESH_HZ
-            .iter()
-            .map(|hz| 1.0 / hz)
-            .find(|p| (raw - p).abs() < p * 0.04)
-        else {
-            self.debt = 0.0;
-            return raw;
-        };
+        let Some(period) = Self::REFRESH_HZ.iter().map(|hz| 1.0 / hz).find(|p| (raw - p).abs() < p * 0.04) else { self.debt = 0.0; return raw };
         self.debt += raw - period;
-        if self.debt.abs() < period {
-            return period;
-        }
+        if self.debt.abs() < period { return period; }
         let paid = period + self.debt;
         self.debt = 0.0;
         paid
@@ -265,78 +156,36 @@ pub const ATLAS_SIZE: u32 = 4096;
 fn create_window(event_loop: &ActiveEventLoop, cfg: &Config) -> Result<Arc<Window>, String> {
     let mut attrs = Window::default_attributes().with_title(cfg.title.clone());
     #[cfg(not(target_arch = "wasm32"))]
-    {
-        attrs = attrs.with_inner_size(PhysicalSize::new(cfg.width, cfg.height));
-    }
+    { attrs = attrs.with_inner_size(PhysicalSize::new(cfg.width, cfg.height)); }
     #[cfg(target_arch = "wasm32")]
     {
         use wasm_bindgen::JsCast;
         use winit::platform::web::WindowAttributesExtWebSys;
-        let canvas = web_sys::window()
-            .and_then(|w| w.document())
-            .and_then(|d| d.get_element_by_id("glcanvas"))
-            .and_then(|e| e.dyn_into::<web_sys::HtmlCanvasElement>().ok());
-        attrs = attrs
-            .with_append(canvas.is_none())
-            .with_canvas(canvas)
-            .with_prevent_default(true)
-            .with_focusable(true);
+        let canvas = web_sys::window().and_then(|w| w.document()).and_then(|d| d.get_element_by_id("glcanvas")).and_then(|e| e.dyn_into::<web_sys::HtmlCanvasElement>().ok());
+        attrs = attrs.with_append(canvas.is_none()).with_canvas(canvas).with_prevent_default(true).with_focusable(true);
     }
-    if cfg.fullscreen {
-        attrs = attrs.with_fullscreen(Some(Fullscreen::Borderless(None)));
-    }
-    event_loop
-        .create_window(attrs)
-        .map(Arc::new)
-        .map_err(|e| e.to_string())
+    if cfg.fullscreen { attrs = attrs.with_fullscreen(Some(Fullscreen::Borderless(None))); }
+    event_loop.create_window(attrs).map(Arc::new).map_err(|e| e.to_string())
 }
 
 fn instance(event_loop: &ActiveEventLoop) -> wgpu::Instance {
     #[cfg(not(target_arch = "wasm32"))]
-    let desc = wgpu::InstanceDescriptor::new_with_display_handle_from_env(Box::new(
-        event_loop.owned_display_handle(),
-    ));
+    let desc = wgpu::InstanceDescriptor::new_with_display_handle_from_env(Box::new(event_loop.owned_display_handle()));
     #[cfg(target_arch = "wasm32")]
-    let desc = {
-        let _ = event_loop;
-        let mut d = wgpu::InstanceDescriptor::new_without_display_handle_from_env();
-        d.backends = wgpu::Backends::GL;
-        d
-    };
+    let desc = { let _ = event_loop; let mut d = wgpu::InstanceDescriptor::new_without_display_handle_from_env(); d.backends = wgpu::Backends::GL; d };
     wgpu::Instance::new(desc)
 }
 
 async fn init_live(instance: wgpu::Instance, window: Arc<Window>) -> Result<Live, String> {
-    let surface = instance
-        .create_surface(window.clone())
-        .map_err(|e| e.to_string())?;
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: platform::power_preference(),
-            compatible_surface: Some(&surface),
-            ..Default::default()
-        })
-        .await
-        .map_err(|e| e.to_string())?;
+    let surface = instance.create_surface(window.clone()).map_err(|e| e.to_string())?;
+    let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions { power_preference: platform::power_preference(), compatible_surface: Some(&surface), ..Default::default() }).await.map_err(|e| e.to_string())?;
     let limits = wgpu::Limits::downlevel_webgl2_defaults().using_resolution(adapter.limits());
-    let (device, queue) = adapter
-        .request_device(&wgpu::DeviceDescriptor {
-            required_limits: limits,
-            ..Default::default()
-        })
-        .await
-        .map_err(|e| e.to_string())?;
+    let (device, queue) = adapter.request_device(&wgpu::DeviceDescriptor { required_limits: limits, ..Default::default() }).await.map_err(|e| e.to_string())?;
     let size = window.inner_size();
-    let mut config = surface
-        .get_default_config(&adapter, size.width.max(1), size.height.max(1))
-        .ok_or("surface unsupported by adapter")?;
+    let mut config = surface.get_default_config(&adapter, size.width.max(1), size.height.max(1)).ok_or("surface unsupported by adapter")?;
     let caps = surface.get_capabilities(&adapter);
-    if let Some(f) = caps.formats.iter().copied().find(|f| !f.is_srgb()) {
-        config.format = f;
-    }
-    if caps.usages.contains(wgpu::TextureUsages::COPY_SRC) {
-        config.usage |= wgpu::TextureUsages::COPY_SRC;
-    }
+    if let Some(f) = caps.formats.iter().copied().find(|f| !f.is_srgb()) { config.format = f; }
+    if caps.usages.contains(wgpu::TextureUsages::COPY_SRC) { config.usage |= wgpu::TextureUsages::COPY_SRC; }
     config.desired_maximum_frame_latency = platform::frame_latency();
     surface.configure(&device, &config);
     let side = platform::atlas_side(device.limits().max_texture_dimension_2d);
@@ -344,38 +193,18 @@ async fn init_live(instance: wgpu::Instance, window: Arc<Window>) -> Result<Live
     let mut rgba_atlas = Atlas::new(side, side);
     let canvas = Canvas::new(&renderer, &queue, &mut rgba_atlas).ok_or("atlas too small")?;
     let post = PostFx::new(&device, config.format);
-    let gpu = Gpu {
-        device,
-        queue,
-        renderer,
-        rgba_atlas,
-        index_atlas: Atlas::new(side, side),
-        palette_rows: PaletteRows::new(),
-    };
-    Ok(Live {
-        window,
-        surface,
-        config,
-        gpu,
-        canvas,
-        post,
-    })
+    let gpu = Gpu { device, queue, renderer, rgba_atlas, index_atlas: Atlas::new(side, side), palette_rows: PaletteRows::new() };
+    Ok(Live { window, surface, config, gpu, canvas, post })
 }
 
 type Pending = Rc<RefCell<Option<Result<Live, String>>>>;
 
 impl<G: Game> Shell<G> {
     fn adopt(&mut self, event_loop: &ActiveEventLoop) {
-        let Some(ready) = self.pending.as_ref().and_then(|p| p.borrow_mut().take()) else {
-            return;
-        };
+        let Some(ready) = self.pending.as_ref().and_then(|p| p.borrow_mut().take()) else { return };
         self.pending = None;
         match ready {
-            Ok(mut live) => {
-                self.game.init(&mut live.gpu);
-                live.window.request_redraw();
-                self.live = Some(live);
-            }
+            Ok(mut live) => { self.game.init(&mut live.gpu); live.window.request_redraw(); self.live = Some(live); }
             Err(e) => {
                 #[cfg(target_arch = "wasm32")]
                 web_sys::console::error_1(&e.clone().into());
@@ -386,33 +215,18 @@ impl<G: Game> Shell<G> {
     }
 
     fn redraw(&mut self, event_loop: &ActiveEventLoop) {
-        if self.live.is_none() {
-            self.adopt(event_loop);
-        }
-        let Some(live) = self.live.as_mut() else {
-            return;
-        };
+        if self.live.is_none() { self.adopt(event_loop); }
+        let Some(live) = self.live.as_mut() else { return };
         let actual = live.window.inner_size();
-        if actual.width > 0
-            && actual.height > 0
-            && (actual.width != live.config.width || actual.height != live.config.height)
-        {
+        if actual.width > 0 && actual.height > 0 && (actual.width != live.config.width || actual.height != live.config.height) {
             live.config.width = actual.width;
             live.config.height = actual.height;
             live.surface.configure(&live.gpu.device, &live.config);
         }
         let frame = match live.surface.get_current_texture() {
-            wgpu::CurrentSurfaceTexture::Success(t)
-            | wgpu::CurrentSurfaceTexture::Suboptimal(t) => t,
-            wgpu::CurrentSurfaceTexture::Timeout | wgpu::CurrentSurfaceTexture::Occluded => {
-                live.window.request_redraw();
-                return;
-            }
-            _ => {
-                live.surface.configure(&live.gpu.device, &live.config);
-                live.window.request_redraw();
-                return;
-            }
+            wgpu::CurrentSurfaceTexture::Success(t) | wgpu::CurrentSurfaceTexture::Suboptimal(t) => t,
+            wgpu::CurrentSurfaceTexture::Timeout | wgpu::CurrentSurfaceTexture::Occluded => { live.window.request_redraw(); return; }
+            _ => { live.surface.configure(&live.gpu.device, &live.config); live.window.request_redraw(); return; }
         };
         let now = Instant::now();
         let dt = self.pacer.pace((now - self.last).as_secs_f32());
@@ -421,196 +235,65 @@ impl<G: Game> Shell<G> {
         let surface = [live.config.width as f32, live.config.height as f32];
         let size = logical_size(surface, self.stretch);
         self.input.pointer_scale = [size[0] / surface[0], size[1] / surface[1]];
-        let mut f = Frame {
-            gpu: &mut live.gpu,
-            canvas: &mut live.canvas,
-            input: &self.input,
-            size,
-            dt,
-            time: (now - self.start).as_secs_f64(),
-            clear: [0.0, 0.0, 0.0, 1.0],
-            post: None,
-            scale: live.window.scale_factor() as f32,
-            window: surface,
-            stretch: self.stretch,
-            linear: self.linear,
-            resize: None,
-            fullscreen: None,
-            vsync: None,
-            frame_cap: None,
-            screenshot: None,
-            quit: false,
-        };
+        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, scale: live.window.scale_factor() as f32, window: surface, stretch: self.stretch, linear: self.linear, resize: None, fullscreen: None, vsync: None, frame_cap: None, screenshot: None, quit: false };
         self.game.frame(&mut f);
         let (verts, calls) = (f.canvas.batch.vertices.len(), f.canvas.batch.calls.len());
-        let (quit, c, post, resize, fullscreen, shot, vsync, cap) = (
-            f.quit,
-            f.clear,
-            f.post,
-            f.resize,
-            f.fullscreen,
-            f.screenshot.take(),
-            f.vsync,
-            f.frame_cap,
-        );
-        if let Some(c) = cap {
-            self.frame_cap = c;
-        }
+        let (quit, c, post, resize, fullscreen, shot, vsync, cap) = (f.quit, f.clear, f.post, f.resize, f.fullscreen, f.screenshot.take(), f.vsync, f.frame_cap);
+        if let Some(c) = cap { self.frame_cap = c; }
         (self.stretch, self.linear) = (f.stretch, f.linear);
-        quad::publish_stats(
-            verts,
-            calls,
-            live.gpu.rgba_atlas.occupancy(),
-            live.gpu.index_atlas.occupancy(),
-        );
+        quad::publish_stats(verts, calls, live.gpu.rgba_atlas.occupancy(), live.gpu.index_atlas.occupancy());
         let size = logical_size(surface, self.stretch);
         live.gpu.renderer.set_linear(self.linear);
-        live.gpu
-            .renderer
-            .set_scissor_scale([surface[0] / size[0], surface[1] / size[1]]);
-        if let Some([w, h]) = resize {
-            let _ = live.window.request_inner_size(PhysicalSize::new(w, h));
-        }
-        if let Some(fs) = fullscreen {
-            platform::set_window_fullscreen(&live.window, fs);
-        }
-        let view = frame
-            .texture
-            .create_view(&wgpu::TextureViewDescriptor::default());
+        live.gpu.renderer.set_scissor_scale([surface[0] / size[0], surface[1] / size[1]]);
+        if let Some([w, h]) = resize { let _ = live.window.request_inner_size(PhysicalSize::new(w, h)); }
+        if let Some(fs) = fullscreen { platform::set_window_fullscreen(&live.window, fs); }
+        let view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
         let gpu = &mut live.gpu;
-        let mut enc = gpu
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
-        let clear = Some(wgpu::Color {
-            r: c[0],
-            g: c[1],
-            b: c[2],
-            a: c[3],
-        });
-        let offscreen = shot
-            .as_ref()
-            .filter(|_| {
-                !frame
-                    .texture
-                    .usage()
-                    .contains(wgpu::TextureUsages::COPY_SRC)
-            })
-            .map(|_| screenshot::target(&gpu.device, &frame.texture));
-        let offscreen_view = offscreen
-            .as_ref()
-            .map(|t| t.create_view(&wgpu::TextureViewDescriptor::default()));
+        let mut enc = gpu.device.create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
+        let clear = Some(wgpu::Color { r: c[0], g: c[1], b: c[2], a: c[3] });
+        let offscreen = shot.as_ref().filter(|_| !frame.texture.usage().contains(wgpu::TextureUsages::COPY_SRC)).map(|_| screenshot::target(&gpu.device, &frame.texture));
+        let offscreen_view = offscreen.as_ref().map(|t| t.create_view(&wgpu::TextureViewDescriptor::default()));
         for v in std::iter::once(&view).chain(offscreen_view.as_ref()) {
             match post {
                 Some(p) => {
-                    let scene = live
-                        .post
-                        .scene_view(&gpu.device, [live.config.width, live.config.height])
-                        .clone();
+                    let scene = live.post.scene_view(&gpu.device, [live.config.width, live.config.height]).clone();
                     let batch = &live.canvas.batch;
-                    gpu.renderer.draw_calls(
-                        &gpu.device,
-                        &gpu.queue,
-                        &mut enc,
-                        Target {
-                            view: &scene,
-                            size,
-                            clear,
-                        },
-                        batch,
-                        0..batch.split(),
-                    );
+                    gpu.renderer.draw_calls(&gpu.device, &gpu.queue, &mut enc, Target { view: &scene, size, clear }, batch, 0..batch.split());
                     live.post.apply(&gpu.queue, &mut enc, v, &p);
-                    gpu.renderer.draw_calls(
-                        &gpu.device,
-                        &gpu.queue,
-                        &mut enc,
-                        Target {
-                            view: v,
-                            size,
-                            clear: None,
-                        },
-                        batch,
-                        batch.split()..batch.calls.len(),
-                    );
+                    gpu.renderer.draw_calls(&gpu.device, &gpu.queue, &mut enc, Target { view: v, size, clear: None }, batch, batch.split()..batch.calls.len());
                 }
-                None => gpu.renderer.draw(
-                    &gpu.device,
-                    &gpu.queue,
-                    &mut enc,
-                    Target {
-                        view: v,
-                        size,
-                        clear,
-                    },
-                    &live.canvas.batch,
-                ),
+                None => gpu.renderer.draw(&gpu.device, &gpu.queue, &mut enc, Target { view: v, size, clear }, &live.canvas.batch),
             }
         }
-        let readback = shot.map(|path| {
-            (
-                path,
-                screenshot::copy(
-                    &gpu.device,
-                    &mut enc,
-                    offscreen.as_ref().unwrap_or(&frame.texture),
-                ),
-            )
-        });
+        let readback = shot.map(|path| (path, screenshot::copy(&gpu.device, &mut enc, offscreen.as_ref().unwrap_or(&frame.texture))));
         gpu.queue.submit([enc.finish()]);
         if let Some((path, rb)) = readback {
-            if let Err(e) = rb.save(&gpu.device, &path) {
-                eprintln!("screenshot {path}: {e}");
-            }
+            if let Err(e) = rb.save(&gpu.device, &path) { eprintln!("screenshot {path}: {e}"); }
         }
         live.window.pre_present_notify();
         live.gpu.queue.present(frame);
         if let Some(on) = vsync {
-            let mode = if on {
-                wgpu::PresentMode::AutoVsync
-            } else {
-                wgpu::PresentMode::AutoNoVsync
-            };
-            if live.config.present_mode != mode {
-                live.config.present_mode = mode;
-                live.surface.configure(&live.gpu.device, &live.config);
-            }
+            let mode = if on { wgpu::PresentMode::AutoVsync } else { wgpu::PresentMode::AutoNoVsync };
+            if live.config.present_mode != mode { live.config.present_mode = mode; live.surface.configure(&live.gpu.device, &live.config); }
         }
         self.input.end_frame();
         self.frames += 1;
-        self.watchdog
-            .record((Instant::now() - now).as_secs_f32() * 1000.0);
+        self.watchdog.record((Instant::now() - now).as_secs_f32() * 1000.0);
         #[cfg(not(target_arch = "wasm32"))]
         if self.frame_cap > 0 {
             let budget = std::time::Duration::from_secs_f32(1.0 / self.frame_cap as f32);
             let spent = Instant::now() - now;
-            if spent < budget {
-                std::thread::sleep(budget - spent);
-            }
+            if spent < budget { std::thread::sleep(budget - spent); }
         }
-        if quit || self.cfg.max_frames.is_some_and(|m| self.frames >= m) {
-            if self.watchdog.log {
-                eprintln!("[watchdog] {}", self.watchdog.summary());
-            }
-            event_loop.exit();
-            return;
-        }
+        if quit || self.cfg.max_frames.is_some_and(|m| self.frames >= m) { if self.watchdog.log { eprintln!("[watchdog] {}", self.watchdog.summary()); } event_loop.exit(); return; }
         live.window.request_redraw();
     }
 }
 
 impl<G: Game> ApplicationHandler for Shell<G> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        if self.live.is_some() || self.pending.is_some() {
-            return;
-        }
-        let window = match create_window(event_loop, &self.cfg) {
-            Ok(w) => w,
-            Err(e) => {
-                self.error = Some(e);
-                event_loop.exit();
-                return;
-            }
-        };
+        if self.live.is_some() || self.pending.is_some() { return; }
+        let window = match create_window(event_loop, &self.cfg) { Ok(w) => w, Err(e) => { self.error = Some(e); event_loop.exit(); return; } };
         let pending: Pending = Rc::new(RefCell::new(None));
         let (slot, instance, w) = (pending.clone(), instance(event_loop), window.clone());
         let task = async move {
@@ -620,21 +303,12 @@ impl<G: Game> ApplicationHandler for Shell<G> {
         };
         self.pending = Some(pending);
         #[cfg(not(target_arch = "wasm32"))]
-        {
-            pollster::block_on(task);
-            self.adopt(event_loop);
-        }
+        { pollster::block_on(task); self.adopt(event_loop); }
         #[cfg(target_arch = "wasm32")]
         wasm_bindgen_futures::spawn_local(task);
     }
 
-    fn suspended(&mut self, _: &ActiveEventLoop) {
-        self.input.release_all();
-        if cfg!(target_os = "android") {
-            self.live = None;
-            self.pending = None;
-        }
-    }
+    fn suspended(&mut self, _: &ActiveEventLoop) { self.input.release_all(); if cfg!(target_os = "android") { self.live = None; self.pending = None; } }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _: WindowId, event: WindowEvent) {
         match event {
@@ -642,59 +316,36 @@ impl<G: Game> ApplicationHandler for Shell<G> {
             // focus and visibility changes swallow the matching key-up: forget what was held so the fighter
             // never keeps walking (or holding an attack, which stops every command from firing) after alt-tab
             WindowEvent::Focused(false) | WindowEvent::Occluded(true) => self.input.release_all(),
-            WindowEvent::Resized(s) => {
-                if let Some(live) = self.live.as_mut() {
-                    let (w, h) = (s.width.max(1), s.height.max(1));
-                    if (w, h) != (live.config.width, live.config.height) {
-                        live.config.width = w;
-                        live.config.height = h;
-                        live.surface.configure(&live.gpu.device, &live.config);
-                    }
+            WindowEvent::Resized(s) => if let Some(live) = self.live.as_mut() {
+                let (w, h) = (s.width.max(1), s.height.max(1));
+                if (w, h) != (live.config.width, live.config.height) {
+                    live.config.width = w;
+                    live.config.height = h;
+                    live.surface.configure(&live.gpu.device, &live.config);
                 }
-            }
+            },
             WindowEvent::KeyboardInput { event, .. } => {
                 let text = event.text.as_deref().unwrap_or("");
-                let code = match event.physical_key {
-                    PhysicalKey::Code(k) => Some(k),
-                    _ => None,
-                };
+                let code = match event.physical_key { PhysicalKey::Code(k) => Some(k), _ => None };
                 self.input.key(event.state, code, event.repeat, text);
             }
             WindowEvent::CursorMoved { position, .. } => {
                 let p = [position.x as f32, position.y as f32];
-                self.input.mouse_delta = [
-                    self.input.mouse_delta[0] + p[0] - self.input.mouse[0],
-                    self.input.mouse_delta[1] + p[1] - self.input.mouse[1],
-                ];
+                self.input.mouse_delta = [self.input.mouse_delta[0] + p[0] - self.input.mouse[0], self.input.mouse_delta[1] + p[1] - self.input.mouse[1]];
                 self.input.mouse = p;
             }
             WindowEvent::MouseWheel { delta, .. } => {
-                let [x, y] = match delta {
-                    MouseScrollDelta::LineDelta(x, y) => [x, y],
-                    MouseScrollDelta::PixelDelta(p) => [p.x as f32 / 40.0, p.y as f32 / 40.0],
-                };
+                let [x, y] = match delta { MouseScrollDelta::LineDelta(x, y) => [x, y], MouseScrollDelta::PixelDelta(p) => [p.x as f32 / 40.0, p.y as f32 / 40.0] };
                 self.input.wheel = [self.input.wheel[0] + x, self.input.wheel[1] + y];
             }
-            WindowEvent::MouseInput {
-                state,
-                button: MouseButton::Left,
-                ..
-            } => {
+            WindowEvent::MouseInput { state, button: MouseButton::Left, .. } => {
                 let down = state == ElementState::Pressed;
-                if down && !self.input.mouse_down {
-                    self.input.mouse_pressed = true;
-                }
+                if down && !self.input.mouse_down { self.input.mouse_pressed = true; }
                 self.input.mouse_down = down;
             }
             WindowEvent::Touch(t) => {
-                let phase = match t.phase {
-                    TouchPhase::Started => Phase::Started,
-                    TouchPhase::Moved => Phase::Moved,
-                    TouchPhase::Ended => Phase::Ended,
-                    TouchPhase::Cancelled => Phase::Cancelled,
-                };
-                self.input
-                    .touch(t.id, phase, [t.location.x as f32, t.location.y as f32]);
+                let phase = match t.phase { TouchPhase::Started => Phase::Started, TouchPhase::Moved => Phase::Moved, TouchPhase::Ended => Phase::Ended, TouchPhase::Cancelled => Phase::Cancelled };
+                self.input.touch(t.id, phase, [t.location.x as f32, t.location.y as f32]);
             }
             WindowEvent::RedrawRequested => self.redraw(event_loop),
             _ => {}
@@ -713,10 +364,7 @@ fn event_loop() -> Result<EventLoop<()>, String> {
     {
         use winit::platform::android::EventLoopBuilderExtAndroid;
         let app = ANDROID_APP.get().ok_or("ANDROID_APP not set")?.clone();
-        return EventLoop::builder()
-            .with_android_app(app)
-            .build()
-            .map_err(|e| e.to_string());
+        return EventLoop::builder().with_android_app(app).build().map_err(|e| e.to_string());
     }
     #[allow(unreachable_code)]
     EventLoop::new().map_err(|e| e.to_string())
@@ -725,37 +373,13 @@ fn event_loop() -> Result<EventLoop<()>, String> {
 pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
     let event_loop = event_loop()?;
     // on the web `Poll` makes winit spin a postTask/AbortController loop next to requestAnimationFrame (GC churn, starved frames); redraws are already self-requested
-    event_loop.set_control_flow(if cfg!(target_arch = "wasm32") {
-        ControlFlow::Wait
-    } else {
-        ControlFlow::Poll
-    });
+    event_loop.set_control_flow(if cfg!(target_arch = "wasm32") { ControlFlow::Wait } else { ControlFlow::Poll });
     let now = Instant::now();
-    let mut shell = Shell {
-        stretch: None,
-        linear: false,
-        cfg,
-        game,
-        live: None,
-        pending: None,
-        input: Input {
-            pointer_scale: [1.0, 1.0],
-            ..Input::default()
-        },
-        start: now,
-        last: now,
-        frames: 0,
-        error: None,
-        pacer: Pacer::default(),
-        frame_cap: 0,
-        watchdog: watchdog::Watchdog::from_env(),
-    };
+    let mut shell = Shell { stretch: None, linear: false, cfg, game, live: None, pending: None, input: Input { pointer_scale: [1.0, 1.0], ..Input::default() }, start: now, last: now, frames: 0, error: None, pacer: Pacer::default(), frame_cap: 0, watchdog: watchdog::Watchdog::from_env() };
     #[cfg(target_arch = "wasm32")]
     {
         use winit::platform::web::EventLoopExtWebSys;
-        std::panic::set_hook(Box::new(|info| {
-            web_sys::console::error_1(&info.to_string().into())
-        }));
+        std::panic::set_hook(Box::new(|info| web_sys::console::error_1(&info.to_string().into())));
         let _ = &mut shell;
         event_loop.spawn_app(shell);
         Ok(0)
@@ -763,16 +387,13 @@ pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
     #[cfg(not(target_arch = "wasm32"))]
     {
         event_loop.run_app(&mut shell).map_err(|e| e.to_string())?;
-        match shell.error {
-            Some(e) => Err(e),
-            None => Ok(shell.frames),
-        }
+        match shell.error { Some(e) => Err(e), None => Ok(shell.frames) }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{ElementState, Input, KeyCode, Pacer};
+    use super::{ElementState, Input, Pacer, KeyCode};
 
     /// Holding a key and alt-tabbing: the window that loses focus never sees the key-up, so the shell has to
     /// forget it. Otherwise the fighter keeps walking (or keeps an attack button pressed, which makes every
@@ -784,29 +405,19 @@ mod tests {
         i.key(ElementState::Pressed, Some(KeyCode::KeyX), false, "x");
         assert!(i.is_down(KeyCode::ArrowRight) && i.is_down(KeyCode::KeyX));
         i.release_all();
-        assert!(
-            !i.is_down(KeyCode::ArrowRight) && !i.is_down(KeyCode::KeyX),
-            "nothing stays held"
-        );
-        assert!(
-            !i.is_pressed(KeyCode::KeyX) && i.pressed_order.is_empty(),
-            "no stale press survives the focus change"
-        );
+        assert!(!i.is_down(KeyCode::ArrowRight) && !i.is_down(KeyCode::KeyX), "nothing stays held");
+        assert!(!i.is_pressed(KeyCode::KeyX) && i.pressed_order.is_empty(), "no stale press survives the focus change");
     }
 
     #[test]
     fn focus_loss_clears_the_mouse_and_every_finger() {
         let mut i = Input::default();
-        i.mouse_down = true;
-        i.mouse_pressed = true;
+        i.mouse_down = true; i.mouse_pressed = true;
         i.touch(3, super::Phase::Started, [40.0, 50.0]);
         i.touch(4, super::Phase::Started, [60.0, 70.0]);
         i.release_all();
         assert!(!i.mouse_down && !i.mouse_pressed);
-        assert!(
-            i.touches.is_empty(),
-            "no finger stays pressed on the touch pad"
-        );
+        assert!(i.touches.is_empty(), "no finger stays pressed on the touch pad");
     }
 
     #[test]
@@ -814,10 +425,7 @@ mod tests {
         let mut i = Input::default();
         i.key(ElementState::Pressed, Some(KeyCode::KeyQ), false, "q");
         i.key(ElementState::Released, Some(KeyCode::KeyQ), false, "");
-        assert!(
-            !i.is_down(KeyCode::KeyQ) && i.is_pressed(KeyCode::KeyQ),
-            "the press is still readable this frame"
-        );
+        assert!(!i.is_down(KeyCode::KeyQ) && i.is_pressed(KeyCode::KeyQ), "the press is still readable this frame");
         assert_eq!(i.typed, "q");
     }
 
@@ -841,9 +449,7 @@ mod tests {
     #[test]
     fn jittery_vsync_frames_become_exact_periods() {
         let mut p = Pacer::default();
-        for raw in [0.0163, 0.0171, 0.0165, 0.0168, 0.0166] {
-            assert_eq!(p.pace(raw), 1.0 / 60.0);
-        }
+        for raw in [0.0163, 0.0171, 0.0165, 0.0168, 0.0166] { assert_eq!(p.pace(raw), 1.0 / 60.0); }
     }
 
     #[test]

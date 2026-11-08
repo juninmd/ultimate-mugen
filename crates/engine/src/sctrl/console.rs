@@ -17,13 +17,9 @@ pub struct ConsoleLog {
 }
 
 impl ConsoleLog {
-    pub fn lines(&self) -> impl Iterator<Item = &String> {
-        self.lines.iter()
-    }
+    pub fn lines(&self) -> impl Iterator<Item = &String> { self.lines.iter() }
 
-    pub fn dropped(&self) -> u32 {
-        self.dropped
-    }
+    pub fn dropped(&self) -> u32 { self.dropped }
 
     pub fn print(&mut self, now: i64, line: &str) -> bool {
         if now - self.window_start >= WINDOW_TICKS || now < self.window_start {
@@ -35,43 +31,24 @@ impl ConsoleLog {
             return false;
         }
         self.window_count += 1;
-        if self.lines.len() >= CONSOLE_MAX_LINES {
-            self.lines.pop_front();
-        }
-        self.lines
-            .push_back(line.chars().take(CONSOLE_LINE_MAX_CHARS).collect());
+        if self.lines.len() >= CONSOLE_MAX_LINES { self.lines.pop_front(); }
+        self.lines.push_back(line.chars().take(CONSOLE_LINE_MAX_CHARS).collect());
         true
     }
 
     pub fn warn_once(&mut self, key: &str, message: &str) -> bool {
-        if self.warned.iter().any(|k| k == key) {
-            return false;
-        }
+        if self.warned.iter().any(|k| k == key) { return false; }
         self.warned.push(key.to_string());
-        if self.lines.len() >= CONSOLE_MAX_LINES {
-            self.lines.pop_front();
-        }
+        if self.lines.len() >= CONSOLE_MAX_LINES { self.lines.pop_front(); }
         self.lines.push_back(format!("warning: {message}"));
         true
     }
 }
 
 pub fn print_to_console(m: &mut Match, i: usize, sc: &Controller) {
-    let template = sc
-        .raw("text")
-        .map(ume_formats::ini::unquote)
-        .unwrap_or_default();
-    let args: Vec<f64> = sc
-        .param("params")
-        .map(|p| {
-            (0..p.exprs.len())
-                .map(|k| m.num(i, sc, "params", 0.0, k))
-                .collect()
-        })
-        .unwrap_or_default();
+    let template = sc.raw("text").map(ume_formats::ini::unquote).unwrap_or_default();
+    let args: Vec<f64> = sc.param("params").map(|p| (0..p.exprs.len()).map(|k| m.num(i, sc, "params", 0.0, k)).collect()).unwrap_or_default();
     let line = crate::ikemen::format_text(&template, &args);
     let now = m.game_time;
-    for part in line.split('\n') {
-        m.console.print(now, part);
-    }
+    for part in line.split('\n') { m.console.print(now, part); }
 }

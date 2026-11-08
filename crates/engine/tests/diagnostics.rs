@@ -29,18 +29,12 @@ flag2 = invisible
 #[test]
 fn reports_one_unknown_of_each_kind() {
     let d = audit_cns("synthetic.cns", SYNTHETIC);
-    assert_eq!(
-        d.names(Category::Controller),
-        vec!["totallymadeupcontroller"]
-    );
+    assert_eq!(d.names(Category::Controller), vec!["totallymadeupcontroller"]);
     assert_eq!(d.names(Category::Trigger), vec!["madeuptrigger"]);
     assert_eq!(d.names(Category::Parameter), vec!["velset.bogusparam"]);
     assert_eq!(d.names(Category::AssertFlag), vec!["notaflag"]);
     assert!(d.names(Category::Redirection).is_empty());
-    assert!(d
-        .findings
-        .iter()
-        .all(|f| f.file == "synthetic.cns" && f.state == 200));
+    assert!(d.findings.iter().all(|f| f.file == "synthetic.cns" && f.state == 200));
 }
 
 #[test]
@@ -97,43 +91,12 @@ fn fixture_character_has_no_unsupported_features() {
 
 #[test]
 fn probing_standard_names_never_panics() {
-    for kind in [
-        "hitdef",
-        "helper",
-        "explod",
-        "projectile",
-        "targetbind",
-        "playsnd",
-        "superpause",
-        "destroyself",
-        "changestate",
-        "varset",
-        "assertspecial",
-        "palfx",
-        "afterimage",
-        "bindtoparent",
-    ] {
-        assert!(
-            ume_engine::diagnostics::controller_supported(kind),
-            "{kind}"
-        );
+    for kind in ["hitdef", "helper", "explod", "projectile", "targetbind", "playsnd", "superpause", "destroyself", "changestate", "varset", "assertspecial", "palfx", "afterimage", "bindtoparent"] {
+        assert!(ume_engine::diagnostics::controller_supported(kind), "{kind}");
     }
-    for name in [
-        "time",
-        "anim",
-        "movehit",
-        "gethitvar",
-        "numhelper",
-        "p2dist",
-        "random",
-        "ishelper",
-    ] {
+    for name in ["time", "anim", "movehit", "gethitvar", "numhelper", "p2dist", "random", "ishelper"] {
         assert!(ume_engine::diagnostics::trigger_supported(name), "{name}");
     }
-    assert!(!ume_engine::diagnostics::controller_supported(
-        "definitelynotacontroller"
-    ));
-    assert!(!ume_engine::diagnostics::trigger_supported(
-        "definitelynotatrigger"
-    ));
+    assert!(!ume_engine::diagnostics::controller_supported("definitelynotacontroller"));
+    assert!(!ume_engine::diagnostics::trigger_supported("definitelynotatrigger"));
 }

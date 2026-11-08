@@ -23,8 +23,5 @@ physics = S
     assert!(m.fighters[0].angle_draw, "AngleDraw tilts the tick it runs");
     enter(&mut m, 0, 511);
     m.tick(&[0, 0]);
-    assert!(
-        !m.fighters[0].angle_draw,
-        "leaving the state must not leave the fighter tilted"
-    );
+    assert!(!m.fighters[0].angle_draw, "leaving the state must not leave the fighter tilted");
 }

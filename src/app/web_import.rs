@@ -12,11 +12,7 @@ impl App {
     /// it. Parsing the archive itself is still synchronous (wasm has no threads), but no batch of
     /// persisted packs is ever drained inside a single frame.
     pub(super) fn wasm_import_step(&mut self) {
-        if self
-            .wasm_import
-            .as_ref()
-            .is_none_or(|s| s.pending.is_none())
-        {
+        if self.wasm_import.as_ref().is_none_or(|s| s.pending.is_none()) {
             let Some(zip) = crate::webimport::take_import() else {
                 if !crate::webimport::busy() {
                     self.wasm_import = None;
@@ -47,14 +43,11 @@ impl App {
     }
 
     pub(super) fn draw_import_overlay(&mut self) {
-        let Some(state) = self.wasm_import.as_ref() else {
-            return;
-        };
+        let Some(state) = self.wasm_import.as_ref() else { return };
         let left = crate::webimport::queued_imports() + usize::from(state.pending.is_some());
         let busy = crate::webimport::busy();
         clear_background(hex("#05030c"));
-        self.ui
-            .rect(0.0, 0.0, VW, VH, Color::new(0.015, 0.01, 0.04, 0.9));
+        self.ui.rect(0.0, 0.0, VW, VH, Color::new(0.015, 0.01, 0.04, 0.9));
         self.ui.text_bold(
             "IMPORTANDO RECURSOS MUGEN",
             VW / 2.0,
@@ -83,10 +76,8 @@ impl App {
         let (w, x, y) = (460.0, VW / 2.0 - 230.0, VH / 2.0 + 8.0);
         self.ui.rect(x, y, w, 14.0, Color::new(1.0, 1.0, 1.0, 0.12));
         let phase = (self.ui.t * 0.55).fract();
-        self.ui
-            .rect(x + (w - 140.0) * phase, y, 140.0, 14.0, hex("#22e8ff"));
-        self.ui
-            .rect(x, y, w, 2.0, Color::new(0.13, 0.91, 1.0, 0.65));
+        self.ui.rect(x + (w - 140.0) * phase, y, 140.0, 14.0, hex("#22e8ff"));
+        self.ui.rect(x, y, w, 2.0, Color::new(0.13, 0.91, 1.0, 0.65));
         self.ui.text(
             "O jogo volta sozinho quando o pacote terminar.",
             VW / 2.0,
@@ -97,4 +88,6 @@ impl App {
             false,
         );
     }
+
+
 }

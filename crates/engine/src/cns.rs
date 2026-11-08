@@ -6,52 +6,22 @@ use ume_formats::ini::{parse_ini_no_lines, unquote_str, Section};
 
 pub fn build_controller(s: &Section) -> Option<Controller> {
     let kind = s.get("type")?.trim().to_ascii_lowercase();
-    if kind.is_empty() {
-        return None;
-    }
-    let mut c = Controller {
-        kind,
-        label: s.name.clone(),
-        trigger_all: vec![],
-        triggers: vec![],
-        params: Vec::with_capacity(s.entries.len()),
-        persistent: 1,
-        ignore_hitpause: false,
-        uid: next_uid(),
-    };
+    if kind.is_empty() { return None; }
+    let mut c = Controller { kind, label: s.name.clone(), trigger_all: vec![], triggers: vec![], params: Vec::with_capacity(s.entries.len()), persistent: 1, ignore_hitpause: false, uid: next_uid() };
     for (k, v) in &s.entries {
-        if k == "type" {
-            continue;
-        }
-        if k == "triggerall" {
-            c.trigger_all.push(safe_expr(v));
-            continue;
-        }
-        if let Some(n) = k
-            .strip_prefix("trigger")
-            .and_then(|n| n.parse::<usize>().ok())
-        {
-            if n == 0 || n > 64 {
-                continue;
-            }
-            while c.triggers.len() < n {
-                c.triggers.push(vec![]);
-            }
+        if k == "type" { continue; }
+        if k == "triggerall" { c.trigger_all.push(safe_expr(v)); continue; }
+        if let Some(n) = k.strip_prefix("trigger").and_then(|n| n.parse::<usize>().ok()) {
+            if n == 0 || n > 64 { continue; }
+            while c.triggers.len() < n { c.triggers.push(vec![]); }
             c.triggers[n - 1].push(safe_expr(v));
             continue;
         }
-        if k == "persistent" {
-            c.persistent = v.trim().parse().unwrap_or(1);
-            continue;
-        }
-        if k == "ignorehitpause" {
-            c.ignore_hitpause = v.trim().parse::<i32>().unwrap_or(0) != 0;
-        }
+        if k == "persistent" { c.persistent = v.trim().parse().unwrap_or(1); continue; }
+        if k == "ignorehitpause" { c.ignore_hitpause = v.trim().parse::<i32>().unwrap_or(0) != 0; }
         c.params.push((k.clone(), Param::new(v)));
     }
-    if let Some(i) = c.triggers.iter().position(|t| t.is_empty()) {
-        c.triggers.truncate(i);
-    }
+    if let Some(i) = c.triggers.iter().position(|t| t.is_empty()) { c.triggers.truncate(i); }
     Some(c)
 }
 
@@ -61,69 +31,31 @@ pub fn parse_states(text: &str, into: &mut HashMap<i32, StateDef>, override_exis
     for s in parse_ini_no_lines(text) {
         let ln = s.lname.trim();
         if let Some(rest) = ln.strip_prefix("statedef") {
-            let id: i32 = rest
-                .trim()
-                .split(|c: char| !(c == '-' || c.is_ascii_digit()))
-                .next()
-                .and_then(|x| x.parse().ok())
-                .unwrap_or(i32::MIN);
-            if id == i32::MIN {
-                cur = None;
-                continue;
-            }
-            if into.contains_key(&id) && !override_existing && id >= 0 {
-                skip = true;
-                cur = None;
-                continue;
-            }
+            let id: i32 = rest.trim().split(|c: char| !(c == '-' || c.is_ascii_digit())).next().and_then(|x| x.parse().ok()).unwrap_or(i32::MIN);
+            if id == i32::MIN { cur = None; continue; }
+            if into.contains_key(&id) && !override_existing && id >= 0 { skip = true; cur = None; continue; }
             skip = false;
             if !(id < 0 && into.contains_key(&id)) {
-                into.insert(
-                    id,
-                    StateDef {
-                        id,
-                        params: Vec::with_capacity(s.entries.len()),
-                        controllers: Vec::with_capacity(16),
-                    },
-                );
+                into.insert(id, StateDef { id, params: Vec::with_capacity(s.entries.len()), controllers: Vec::with_capacity(16) });
             }
             let sd = into.get_mut(&id).unwrap();
-            for (k, v) in &s.entries {
-                sd.params.push((k.clone(), Param::new(v)));
-            }
+            for (k, v) in &s.entries { sd.params.push((k.clone(), Param::new(v))); }
             cur = Some(id);
             continue;
         }
-        if ln.starts_with("state ")
-            || ln.starts_with("state\t")
-            || (ln.starts_with("state")
-                && ln[5..]
-                    .trim_start()
-                    .starts_with(|c: char| c == '-' || c.is_ascii_digit()))
-        {
-            if skip {
-                continue;
-            }
-            if let (Some(id), Some(c)) = (cur, build_controller(&s)) {
-                into.get_mut(&id).unwrap().controllers.push(c);
-            }
+        if ln.starts_with("state ") || ln.starts_with("state\t") || (ln.starts_with("state") && ln[5..].trim_start().starts_with(|c: char| c == '-' || c.is_ascii_digit())) {
+            if skip { continue; }
+            if let (Some(id), Some(c)) = (cur, build_controller(&s)) { into.get_mut(&id).unwrap().controllers.push(c); }
             continue;
         }
-        cur = None;
-        skip = false;
+        cur = None; skip = false;
     }
 }
 
-pub fn parse_constants(
-    text: &str,
-    into: &mut HashMap<String, f64>,
-    provided: &mut HashSet<String>,
-) {
+pub fn parse_constants(text: &str, into: &mut HashMap<String, f64>, provided: &mut HashSet<String>) {
     for s in parse_ini_no_lines(text) {
         let sec = s.lname.as_str();
-        if !["data", "size", "velocity", "movement", "constants"].contains(&sec) {
-            continue;
-        }
+        if !["data", "size", "velocity", "movement", "constants"].contains(&sec) { continue; }
         for (k, v) in &s.entries {
             let mut parts = [f64::NAN; 4];
             let mut count = 0;
@@ -133,23 +65,12 @@ pub fn parse_constants(
                     count += 1;
                 }
             }
-            let key = if sec == "constants" {
-                k.to_string()
-            } else {
-                format!("{sec}.{k}")
-            };
+            let key = if sec == "constants" { k.to_string() } else { format!("{sec}.{k}") };
             provided.insert(key.clone());
             if count <= 1 {
-                let val = if count == 1 && parts[0].is_finite() {
-                    parts[0]
-                } else {
-                    0.0
-                };
+                let val = if count == 1 && parts[0].is_finite() { parts[0] } else { 0.0 };
                 into.insert(key.clone(), val);
-                if sec == "velocity" {
-                    into.insert(format!("{key}.x"), val);
-                    provided.insert(format!("{key}.x"));
-                }
+                if sec == "velocity" { into.insert(format!("{key}.x"), val); provided.insert(format!("{key}.x")); }
             } else {
                 for (i, p) in parts[..count].iter().enumerate() {
                     let c = ["x", "y", "z"].get(i).copied().unwrap_or("w");
@@ -160,90 +81,40 @@ pub fn parse_constants(
             }
         }
     }
-    for (to, from) in [
-        ("velocity.jump.y", "velocity.jump.neu.y"),
-        ("velocity.runjump.y", "velocity.runjump.fwd.y"),
-        ("velocity.airjump.y", "velocity.airjump.neu.y"),
-    ] {
-        if provided.contains(from) {
-            if let Some(v) = into.get(from).copied() {
-                into.insert(to.into(), v);
-                provided.insert(to.into());
-            }
-        }
+    for (to, from) in [("velocity.jump.y", "velocity.jump.neu.y"), ("velocity.runjump.y", "velocity.runjump.fwd.y"), ("velocity.airjump.y", "velocity.airjump.neu.y")] {
+        if provided.contains(from) { if let Some(v) = into.get(from).copied() { into.insert(to.into(), v); provided.insert(to.into()); } }
     }
 }
 
 /// Scale 320x240-based defaults for hi-res characters that didn't provide them.
-pub fn scale_default_constants(
-    into: &mut HashMap<String, f64>,
-    provided: &HashSet<String>,
-    factor: f64,
-) {
-    if factor == 1.0 {
-        return;
-    }
+pub fn scale_default_constants(into: &mut HashMap<String, f64>, provided: &HashSet<String>, factor: f64) {
+    if factor == 1.0 { return; }
     for (k, v) in into.iter_mut() {
-        if provided.contains(k)
-            || k.contains("xscale")
-            || k.contains("yscale")
-            || k.ends_with("friction")
-            || k.contains("airjump.num")
-            || k.starts_with("data.")
-        {
-            continue;
-        }
-        if k.starts_with("size.") || k.starts_with("velocity.") || k.starts_with("movement.") {
-            *v *= factor;
-        }
+        if provided.contains(k) || k.contains("xscale") || k.contains("yscale") || k.ends_with("friction") || k.contains("airjump.num") || k.starts_with("data.") { continue; }
+        if k.starts_with("size.") || k.starts_with("velocity.") || k.starts_with("movement.") { *v *= factor; }
     }
 }
 
 fn pause_buffer_of(s: &Section) -> Option<i32> {
-    [
-        "pausebuffer",
-        "command.pausebuffer",
-        "buffer.pausetime",
-        "command.buffer.pausetime",
-    ]
-    .iter()
-    .find_map(|k| s.get(k).and_then(|v| v.trim().parse().ok()))
+    ["pausebuffer", "command.pausebuffer", "buffer.pausetime", "command.buffer.pausetime"].iter().find_map(|k| s.get(k).and_then(|v| v.trim().parse().ok()))
 }
 
 pub fn parse_cmd(text: &str) -> (Vec<CommandDef>, HashMap<i32, StateDef>) {
     let secs = parse_ini_no_lines(text);
     let (mut dt, mut db, mut dp) = (15, 1, 0);
     if let Some(d) = secs.iter().find(|s| s.lname == "defaults") {
-        dt = d
-            .get("command.time")
-            .and_then(|v| v.trim().parse().ok())
-            .unwrap_or(15);
-        db = d
-            .get("command.buffer.time")
-            .and_then(|v| v.trim().parse().ok())
-            .unwrap_or(1);
+        dt = d.get("command.time").and_then(|v| v.trim().parse().ok()).unwrap_or(15);
+        db = d.get("command.buffer.time").and_then(|v| v.trim().parse().ok()).unwrap_or(1);
         dp = pause_buffer_of(d).unwrap_or(0);
     }
     let mut cmds = Vec::with_capacity(secs.len());
     for s in &secs {
-        if s.lname != "command" {
-            continue;
-        }
-        let (Some(n), Some(c)) = (s.get("name"), s.get("command")) else {
-            continue;
-        };
+        if s.lname != "command" { continue; }
+        let (Some(n), Some(c)) = (s.get("name"), s.get("command")) else { continue };
         let name = unquote_str(n);
-        if name.is_empty() {
-            continue;
-        }
-        let t = s
-            .get("time")
-            .and_then(|v| v.trim().parse().ok())
-            .unwrap_or(dt);
-        let b = s
-            .get("buffer.time")
-            .and_then(|v| v.trim().parse().ok())
-            .unwrap_or(db);
+        if name.is_empty() { continue; }
+        let t = s.get("time").and_then(|v| v.trim().parse().ok()).unwrap_or(dt);
+        let b = s.get("buffer.time").and_then(|v| v.trim().parse().ok()).unwrap_or(db);
         let mut def = parse_command(name, unquote_str(c), t, b);
         def.pause_buffer = pause_buffer_of(s).unwrap_or(dp).max(0);
         cmds.push(def);

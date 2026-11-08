@@ -5,9 +5,7 @@ use ume_engine::chardef::CharDef;
 use ume_engine::expr::{parse, Expr};
 use ume_engine::matchs::Match;
 
-fn ev(m: &Match, i: usize, src: &str) -> f64 {
-    m.ev(i, &Expr::new(parse(src).unwrap()))
-}
+fn ev(m: &Match, i: usize, src: &str) -> f64 { m.ev(i, &Expr::new(parse(src).unwrap())) }
 
 fn hd_char() -> Arc<CharDef> {
     let mut d = Arc::try_unwrap(mugen_char("hd", "")).ok().unwrap();
@@ -55,29 +53,15 @@ fn p2dist_converts_each_side_to_its_own_localcoord() {
 fn p2dist_ignores_the_camera() {
     let mut m = mixed_duel();
     m.fighters[1].pos.x = 40.0;
-    let before = (
-        ev(&m, 0, "P2Dist X"),
-        ev(&m, 0, "P2BodyDist X"),
-        ev(&m, 1, "P2Dist X"),
-    );
+    let before = (ev(&m, 0, "P2Dist X"), ev(&m, 0, "P2BodyDist X"), ev(&m, 1, "P2Dist X"));
     m.camera.x += 90.0;
     m.camera.y -= 30.0;
-    assert_eq!(
-        (
-            ev(&m, 0, "P2Dist X"),
-            ev(&m, 0, "P2BodyDist X"),
-            ev(&m, 1, "P2Dist X")
-        ),
-        before
-    );
+    assert_eq!((ev(&m, 0, "P2Dist X"), ev(&m, 0, "P2BodyDist X"), ev(&m, 1, "P2Dist X")), before);
 }
 
 #[test]
 fn p2dist_inside_a_throw_state_uses_only_the_two_positions() {
-    let mut m = duel(
-        mugen_char("thrower", "[Statedef 800]\ntype = S\n"),
-        hd_char(),
-    );
+    let mut m = duel(mugen_char("thrower", "[Statedef 800]\ntype = S\n"), hd_char());
     m.fighters[0].pos.x = 0.0;
     m.fighters[1].pos.x = 24.0;
     enter(&mut m, 0, 800);

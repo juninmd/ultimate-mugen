@@ -43,10 +43,7 @@ pub struct Font {
 impl Font {
     pub fn glyph(&self, c: char) -> Option<Glyph> {
         self.glyphs.get(&c).copied().or_else(|| match self.kind {
-            FontKind::Bitmap | FontKind::TrueType => Some(Glyph {
-                x: c as u32,
-                w: self.size[0].max(0) as u32,
-            }),
+            FontKind::Bitmap | FontKind::TrueType => Some(Glyph { x: c as u32, w: self.size[0].max(0) as u32 }),
             _ => None,
         })
     }
@@ -56,10 +53,7 @@ impl Font {
         let mut n = 0usize;
         for c in s.chars() {
             let g = self.glyph(c).or_else(|| self.glyph(' '));
-            w = w.saturating_add(
-                g.map(|g| g.w.min(i32::MAX as u32) as i32)
-                    .unwrap_or(self.size[0]),
-            );
+            w = w.saturating_add(g.map(|g| g.w.min(i32::MAX as u32) as i32).unwrap_or(self.size[0]));
             n = n.saturating_add(1);
         }
         let spacing_count = n.saturating_sub(1).min(i32::MAX as usize) as i32;
@@ -76,8 +70,7 @@ impl Font {
         let mut out = pal.clone();
         let src = 256 - colors;
         for i in 0..colors {
-            out[(src + i) * 4..(src + i) * 4 + 4]
-                .copy_from_slice(&pal[(start + i) * 4..(start + i) * 4 + 4]);
+            out[(src + i) * 4..(src + i) * 4 + 4].copy_from_slice(&pal[(start + i) * 4..(start + i) * 4 + 4]);
         }
         Some(out)
     }
@@ -110,13 +103,9 @@ fn decode_fnt_v1(buf: &[u8]) -> Result<Font, String> {
     let r = Reader(buf);
     let (pcx_off, pcx_len) = (r.u32(16) as usize, r.u32(20) as usize);
     let (txt_off, txt_len) = (r.u32(24) as usize, r.u32(28) as usize);
-    let pcx = buf
-        .get(pcx_off..pcx_off.saturating_add(pcx_len))
-        .ok_or("FNT: PCX block out of range")?;
+    let pcx = buf.get(pcx_off..pcx_off.saturating_add(pcx_len)).ok_or("FNT: PCX block out of range")?;
     let txt_end = txt_off.saturating_add(txt_len).min(buf.len());
-    let txt = buf
-        .get(txt_off..txt_end)
-        .ok_or("FNT: text block out of range")?;
+    let txt = buf.get(txt_off..txt_end).ok_or("FNT: text block out of range")?;
     let img = decode_pcx(pcx, true).map_err(|e| format!("FNT: {e}"))?;
     let secs = parse_ini(&text(txt));
     let def = find_section(&secs, "def");
@@ -140,16 +129,11 @@ fn decode_fnt_v1(buf: &[u8]) -> Result<Font, String> {
                     if let Some(i) = tok1.and_then(|t| t.parse::<u32>().ok()) {
                         slot = i;
                     }
-                    Glyph {
-                        x: slot.saturating_mul(size[0].max(0) as u32),
-                        w: size[0].max(0) as u32,
-                    }
+                    Glyph { x: slot.saturating_mul(size[0].max(0) as u32), w: size[0].max(0) as u32 }
                 }
                 _ => {
                     let x = tok1.and_then(|t| t.parse::<u32>().ok()).unwrap_or(0);
-                    let w = tok2
-                        .and_then(|t| t.parse::<u32>().ok())
-                        .unwrap_or(size[0].max(0) as u32);
+                    let w = tok2.and_then(|t| t.parse::<u32>().ok()).unwrap_or(size[0].max(0) as u32);
                     Glyph { x, w }
                 }
             };
@@ -164,12 +148,7 @@ fn decode_fnt_v1(buf: &[u8]) -> Result<Font, String> {
         offset: pair(get("offset"), [0, 0]),
         colors: nums(get("colors"), &[0.0])[0] as i32,
         glyphs,
-        image: Some(FontImage {
-            width: img.width,
-            height: img.height,
-            pixels: img.pixels,
-            palette: img.palette,
-        }),
+        image: Some(FontImage { width: img.width, height: img.height, pixels: img.pixels, palette: img.palette }),
         file: None,
     })
 }

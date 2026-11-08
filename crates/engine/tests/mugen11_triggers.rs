@@ -4,9 +4,7 @@ use support::*;
 use ume_engine::chardef::parse_mugen_version;
 use ume_engine::expr::{parse, truthy};
 
-fn ev(m: &ume_engine::matchs::Match, i: usize, src: &str) -> f64 {
-    m.ev(i, &ume_engine::expr::Expr::new(parse(src).unwrap()))
-}
+fn ev(m: &ume_engine::matchs::Match, i: usize, src: &str) -> f64 { m.ev(i, &ume_engine::expr::Expr::new(parse(src).unwrap())) }
 
 #[test]
 fn win_and_lose_kinds() {
@@ -54,21 +52,13 @@ fn undefined_redirects_are_bottom() {
 #[test]
 fn hitdefattr_follows_movetype_and_wildcards() {
     let mut m = duel(mugen_char("a", ""), mugen_char("b", ""));
-    m.fighters[0].hitdef = Some(ume_engine::fighter::HitDefData {
-        attr_state: "S".into(),
-        attr_kind: vec!["SP".into()],
-        ..Default::default()
-    });
+    m.fighters[0].hitdef = Some(ume_engine::fighter::HitDefData { attr_state: "S".into(), attr_kind: vec!["SP".into()], ..Default::default() });
     m.fighters[0].move_type = 'A';
     assert_eq!(ev(&m, 0, "HitDefAttr = SC, AP"), 1.0);
     assert_eq!(ev(&m, 0, "HitDefAttr = S, NA, SP"), 1.0);
     assert_eq!(ev(&m, 0, "HitDefAttr = S, NA"), 0.0);
     assert_eq!(ev(&m, 0, "HitDefAttr = A, SP"), 0.0);
-    assert_eq!(
-        ev(&m, 0, "HitDefAttr = Q"),
-        0.0,
-        "invalid attr strings are false, not errors"
-    );
+    assert_eq!(ev(&m, 0, "HitDefAttr = Q"), 0.0, "invalid attr strings are false, not errors");
     m.fighters[0].move_type = 'I';
     assert_eq!(ev(&m, 0, "HitDefAttr = SCA"), 0.0);
 }
@@ -89,11 +79,7 @@ fn projcanceltime_tracks_cancelled_projectiles() {
     m.fighters[0].proj_contacts.push(('x', 3, gt));
     ticks(&mut m, 2);
     assert_eq!(ev(&m, 0, "ProjCancelTime(3)"), 2.0);
-    assert_eq!(
-        ev(&m, 0, "ProjContactTime(3)"),
-        -1.0,
-        "a cancel is not a contact"
-    );
+    assert_eq!(ev(&m, 0, "ProjContactTime(3)"), -1.0, "a cancel is not a contact");
 }
 
 const SPAWN_HELPER: &str = "
@@ -120,9 +106,7 @@ fn team_of_four() -> ume_engine::matchs::Match {
         m.add_player(mugen_char(name, SPAWN_HELPER), side, 0, 1);
     }
     m.start_round();
-    while m.round_state != 2 {
-        m.tick(&[0, 0, 0, 0]);
-    }
+    while m.round_state != 2 { m.tick(&[0, 0, 0, 0]); }
     m
 }
 
@@ -137,20 +121,9 @@ fn partner_resolves_teammate_in_two_versus_two() {
     assert_eq!(ev(&m, 0, "partner, stateno"), 200.0);
     assert_eq!(ev(&m, 0, "partner, var(3)"), 7.0);
     assert_eq!(ev(&m, 0, "partner, anim"), anim);
-    assert_eq!(
-        ev(&m, 2, "partner, stateno"),
-        0.0,
-        "the teammate sees the first player as its partner"
-    );
-    assert_eq!(
-        ev(&m, 1, "partner, life"),
-        m.fighters[3].life as f64,
-        "the other side has its own partner"
-    );
-    assert!(
-        ev(&m, 0, "partner(1), life").is_nan(),
-        "a two-man team has no second partner"
-    );
+    assert_eq!(ev(&m, 2, "partner, stateno"), 0.0, "the teammate sees the first player as its partner");
+    assert_eq!(ev(&m, 1, "partner, life"), m.fighters[3].life as f64, "the other side has its own partner");
+    assert!(ev(&m, 0, "partner(1), life").is_nan(), "a two-man team has no second partner");
 }
 
 #[test]
@@ -159,43 +132,24 @@ fn partner_skips_helpers_and_missing_teammates() {
     assert!(ev(&m, 0, "partner, life").is_nan(), "no teammate in a duel");
     enter(&mut m, 0, 800);
     ticks(&mut m, 3);
-    let h = m
-        .fighters
-        .iter()
-        .position(|f| f.is_helper)
-        .expect("helper spawned");
+    let h = m.fighters.iter().position(|f| f.is_helper).expect("helper spawned");
     assert!(m.fighters[h].side == 0);
-    assert!(
-        ev(&m, 0, "partner, life").is_nan(),
-        "a helper is never a partner"
-    );
+    assert!(ev(&m, 0, "partner, life").is_nan(), "a helper is never a partner");
     assert_eq!(ev(&m, 0, "NumPartner"), 0.0);
 
     let mut m = team_of_four();
     enter(&mut m, 0, 800);
-    for _ in 0..3 {
-        m.tick(&[0, 0, 0, 0]);
-    }
+    for _ in 0..3 { m.tick(&[0, 0, 0, 0]); }
     assert!(m.fighters.iter().any(|f| f.is_helper));
     m.fighters[2].life = 150.0;
-    assert_eq!(
-        ev(&m, 0, "partner, life"),
-        150.0,
-        "the helper does not shadow the real teammate"
-    );
+    assert_eq!(ev(&m, 0, "partner, life"), 150.0, "the helper does not shadow the real teammate");
     let h = m.fighters.iter().position(|f| f.is_helper).unwrap();
-    assert_eq!(
-        ev(&m, h, "partner, life"),
-        150.0,
-        "a helper redirects through its root"
-    );
+    assert_eq!(ev(&m, h, "partner, life"), 150.0, "a helper redirects through its root");
 }
 
 #[test]
 fn command_in_custom_state_uses_state_owner_commands_on_the_victim_inputs() {
-    let mut owner = Arc::try_unwrap(mugen_char("a", "[Statedef 7000]\ntype = S\n"))
-        .ok()
-        .unwrap();
+    let mut owner = Arc::try_unwrap(mugen_char("a", "[Statedef 7000]\ntype = S\n")).ok().unwrap();
     owner.commands = vec![ume_engine::commands::parse_command("hadou", "N, x", 15, 1)];
     let owner = Arc::new(owner);
     let mut m = duel(owner.clone(), mugen_char("b", ""));
@@ -204,9 +158,7 @@ fn command_in_custom_state_uses_state_owner_commands_on_the_victim_inputs() {
     m.tick(&[0, ume_engine::input::k::X]);
     assert_eq!(ev(&m, 1, "command = \"hadou\""), 1.0);
     assert_eq!(ev(&m, 0, "command = \"hadou\""), 0.0);
-    for _ in 0..20 {
-        m.tick(&[0, ume_engine::input::k::R]);
-    }
+    for _ in 0..20 { m.tick(&[0, ume_engine::input::k::R]); }
     m.tick(&[0, ume_engine::input::k::R | ume_engine::input::k::X]);
     assert_eq!(ev(&m, 1, "command = \"hadou\""), 0.0);
 }
@@ -256,15 +208,10 @@ ctrl = 1
 ";
 
 fn land_strike(defender: &str) -> ume_engine::matchs::Match {
-    let mut m = duel(
-        mugen_char("striker", STRIKER),
-        mugen_char("dummy", defender),
-    );
+    let mut m = duel(mugen_char("striker", STRIKER), mugen_char("dummy", defender));
     face_off(&mut m, 40.0);
     enter(&mut m, 0, 200);
-    while m.fighters[0].move_hit_var.hit_time == 0 && m.game_time < 2000 {
-        m.tick(&[0, 0]);
-    }
+    while m.fighters[0].move_hit_var.hit_time == 0 && m.game_time < 2000 { m.tick(&[0, 0]); }
     m
 }
 
@@ -273,23 +220,13 @@ fn hit_description_triggers_report_the_landed_hit() {
     let m = land_strike("");
     assert_eq!(m.fighters[1].state_no, 5100);
     let table: [(usize, &str, f64); 17] = [
-        (0, "HitDefVar(p2stateno)", 5100.0),
-        (0, "HitDefVar(p1stateno)", -1.0),
-        (0, "HitDefVar(priority)", 5.0),
-        (0, "HitDefVar(sparkx)", 7.0),
-        (0, "HitDefVar(sparky)", -9.0),
-        (0, "HitDefVar(pausetime.p1)", 4.0),
-        (0, "HitDefVar(pausetime.p2)", 6.0),
-        (0, "HitDefVar(ground.velocity.x)", -4.0),
-        (0, "HitDefVar(ground.velocity.y)", -2.0),
-        (0, "HitDefVar(attr)", 1.0 + 2048.0),
-        (0, "HitDefVar(id)", 0.0),
-        (0, "MoveHitVar(id)", m.fighters[1].id as f64),
-        (0, "MoveHitVar(playerno)", m.fighters[1].player_no as f64),
-        (0, "MoveHitVar(overridden)", 0.0),
-        (0, "MoveHitVar(frame)", 1.0),
-        (1, "HitVel X", m.fighters[1].ghv.xvel as f64),
-        (1, "HitVel Y", -2.0),
+        (0, "HitDefVar(p2stateno)", 5100.0), (0, "HitDefVar(p1stateno)", -1.0), (0, "HitDefVar(priority)", 5.0),
+        (0, "HitDefVar(sparkx)", 7.0), (0, "HitDefVar(sparky)", -9.0), (0, "HitDefVar(pausetime.p1)", 4.0),
+        (0, "HitDefVar(pausetime.p2)", 6.0), (0, "HitDefVar(ground.velocity.x)", -4.0), (0, "HitDefVar(ground.velocity.y)", -2.0),
+        (0, "HitDefVar(attr)", 1.0 + 2048.0), (0, "HitDefVar(id)", 0.0),
+        (0, "MoveHitVar(id)", m.fighters[1].id as f64), (0, "MoveHitVar(playerno)", m.fighters[1].player_no as f64),
+        (0, "MoveHitVar(overridden)", 0.0), (0, "MoveHitVar(frame)", 1.0),
+        (1, "HitVel X", m.fighters[1].ghv.xvel as f64), (1, "HitVel Y", -2.0),
     ];
     for (who, src, want) in table {
         assert_eq!(ev(&m, who, src), want, "{src}");
@@ -304,11 +241,7 @@ fn hit_by_attr_matches_the_attribute_of_the_last_hit() {
     assert_eq!(ev(&m, 1, "HitByAttr = SCA, NA, HT"), 0.0);
     assert_eq!(ev(&m, 1, "HitByAttr = C, SP"), 0.0);
     assert_eq!(ev(&m, 1, "HitByAttr != SCA, NA"), 1.0);
-    assert_eq!(
-        ev(&m, 0, "HitByAttr = SCA, AA, AT, AP"),
-        0.0,
-        "an attacker that was never hit matches nothing"
-    );
+    assert_eq!(ev(&m, 0, "HitByAttr = SCA, AA, AT, AP"), 0.0, "an attacker that was never hit matches nothing");
 }
 
 #[test]
@@ -323,9 +256,7 @@ fn move_frame_and_counter_flags_expire() {
     face_off(&mut m, 40.0);
     m.fighters[1].move_type = 'A';
     enter(&mut m, 0, 200);
-    while m.fighters[0].move_hit_var.hit_time == 0 && m.game_time < 2000 {
-        m.tick(&[0, 0]);
-    }
+    while m.fighters[0].move_hit_var.hit_time == 0 && m.game_time < 2000 { m.tick(&[0, 0]); }
     assert!(ev(&m, 0, "MoveCountered") >= 1.0);
 }
 
@@ -333,20 +264,9 @@ fn move_frame_and_counter_flags_expire() {
 fn hit_override_sets_hitoverridden_and_overridden_flags() {
     let mut m = duel(mugen_char("striker", STRIKER), mugen_char("dummy", ""));
     face_off(&mut m, 40.0);
-    m.fighters[1].hit_overrides[0] = Some(ume_engine::fighter::HitOverride {
-        attr: "SCA, AA, AT, AP".into(),
-        state_no: 5000,
-        time: 30,
-        force_air: false,
-        keep: false,
-        hits: 1,
-        threshold: 0.0,
-        chip: 0.0,
-    });
+    m.fighters[1].hit_overrides[0] = Some(ume_engine::fighter::HitOverride { attr: "SCA, AA, AT, AP".into(), state_no: 5000, time: 30, force_air: false, keep: false, hits: 1, threshold: 0.0, chip: 0.0 });
     enter(&mut m, 0, 200);
-    while m.fighters[0].move_hit_var.hit_time == 0 && m.game_time < 2000 {
-        m.tick(&[0, 0]);
-    }
+    while m.fighters[0].move_hit_var.hit_time == 0 && m.game_time < 2000 { m.tick(&[0, 0]); }
     assert_eq!(ev(&m, 1, "HitOverridden"), 1.0);
     assert_eq!(ev(&m, 0, "MoveHitVar(overridden)"), 1.0);
     assert_eq!(m.fighters[1].life, m.fighters[1].life_max);
@@ -384,16 +304,8 @@ fn state_ownership_and_existence_triggers() {
     let mut m = land_strike("");
     assert_eq!(ev(&m, 0, "SelfStateNoExist(200)"), 1.0);
     assert_eq!(ev(&m, 0, "SelfStateNoExist(777)"), 0.0);
-    assert_eq!(
-        ev(&m, 1, "SelfStateNoExist(5100)"),
-        0.0,
-        "the dummy does not own state 5100"
-    );
-    assert_eq!(
-        ev(&m, 1, "InCustomState"),
-        1.0,
-        "the target runs a state given by the attacker"
-    );
+    assert_eq!(ev(&m, 1, "SelfStateNoExist(5100)"), 0.0, "the dummy does not own state 5100");
+    assert_eq!(ev(&m, 1, "InCustomState"), 1.0, "the target runs a state given by the attacker");
     assert_eq!(ev(&m, 0, "InCustomState"), 0.0);
     assert_eq!(ev(&m, 0, "InCustomAnim"), 0.0);
     m.fighters[0].state_no = 100;

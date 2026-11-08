@@ -63,11 +63,7 @@ fn test_hit_priority_and_advanced_hitdef_flags() {
 
     let def = compile_native(&nc, 1, false);
     let state = def.states.get(&200).expect("statedef 200 exists");
-    let hd = state
-        .controllers
-        .iter()
-        .find(|sc| sc.kind == "hitdef")
-        .expect("hitdef found");
+    let hd = state.controllers.iter().find(|sc| sc.kind == "hitdef").expect("hitdef found");
 
     assert_eq!(hd.raw("priority"), Some("6, Hit"));
     assert_eq!(hd.raw("hitflag"), Some("MAFD"));
@@ -80,10 +76,7 @@ fn test_hit_priority_and_advanced_hitdef_flags() {
 
     // Verify cancels
     let minus1 = def.states.get(&-1).expect("statedef -1 exists");
-    let has_cancel_chain = minus1
-        .controllers
-        .iter()
-        .any(|sc| sc.raw("value") == Some("200"));
+    let has_cancel_chain = minus1.controllers.iter().any(|sc| sc.raw("value") == Some("200"));
     assert!(has_cancel_chain);
 }
 
@@ -136,22 +129,13 @@ fn test_throw_and_passives_mechanics() {
     let minus2 = def.states.get(&-2).expect("statedef -2 exists");
     let has_power_add = minus2.controllers.iter().any(|sc| sc.kind == "poweradd");
     let has_life_add = minus2.controllers.iter().any(|sc| sc.kind == "lifeadd");
-    assert!(
-        has_power_add,
-        "Statedef -2 contains PowerAdd for meter regen"
-    );
+    assert!(has_power_add, "Statedef -2 contains PowerAdd for meter regen");
     assert!(has_life_add, "Statedef -2 contains LifeAdd for life regen");
 
     // Verify Throw controllers
     let state = def.states.get(&200).expect("throw state exists");
-    let has_bind = state
-        .controllers
-        .iter()
-        .any(|sc| sc.kind == "targetbind" && sc.raw("pos") == Some("35, -15"));
-    let has_target_dmg = state
-        .controllers
-        .iter()
-        .any(|sc| sc.kind == "targetlifeadd" && sc.raw("value") == Some("-130"));
+    let has_bind = state.controllers.iter().any(|sc| sc.kind == "targetbind" && sc.raw("pos") == Some("35, -15"));
+    let has_target_dmg = state.controllers.iter().any(|sc| sc.kind == "targetlifeadd" && sc.raw("value") == Some("-130"));
     assert!(has_bind, "TargetBind positioned properly");
     assert!(has_target_dmg, "TargetLifeAdd applied damage");
 }

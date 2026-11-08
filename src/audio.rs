@@ -1111,10 +1111,7 @@ mod tests {
             for b in a + 1..tracks.len() {
                 let n = tracks[a].len().min(tracks[b].len()).min(20000);
                 assert!(
-                    tracks[a][..n]
-                        .iter()
-                        .zip(&tracks[b][..n])
-                        .any(|(x, y)| (x - y).abs() > 1e-3),
+                    tracks[a][..n].iter().zip(&tracks[b][..n]).any(|(x, y)| (x - y).abs() > 1e-3),
                     "themes {a} and {b} differ"
                 );
             }

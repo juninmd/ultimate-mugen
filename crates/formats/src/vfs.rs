@@ -13,9 +13,7 @@ mod find;
 mod zip;
 
 use archive::{File, Source};
-pub use find::{
-    char_key, content_hash, find_char_defs, find_stage_defs, resolve, resolve_key, stage_key,
-};
+pub use find::{char_key, content_hash, find_char_defs, find_stage_defs, resolve, resolve_key, stage_key};
 pub use zip::{add_zip, add_zip_with_progress, ZipProgress};
 
 /// Recursively index every file under `dir` (keys relative to `dir`, under
@@ -30,14 +28,8 @@ pub fn add_dir(vfs: &mut Vfs, dir: &std::path::Path, prefix: &str) -> std::io::R
         for e in entries {
             let fname = e.file_name().to_string_lossy().into_owned();
             let path = e.path();
-            let child = if rel.is_empty() {
-                fname.clone()
-            } else {
-                format!("{rel}/{fname}")
-            };
-            let Ok(meta) = std::fs::metadata(&path) else {
-                continue;
-            };
+            let child = if rel.is_empty() { fname.clone() } else { format!("{rel}/{fname}") };
+            let Ok(meta) = std::fs::metadata(&path) else { continue };
             if meta.is_dir() {
                 walk(vfs, &path, &child, n)?;
             } else if meta.is_file() {
@@ -142,9 +134,7 @@ impl Default for Vfs {
 
 impl Vfs {
     pub fn new() -> Self {
-        Vfs {
-            files: BTreeMap::new(),
-        }
+        Vfs { files: BTreeMap::new() }
     }
     pub fn len(&self) -> usize {
         self.files.len()
@@ -156,8 +146,7 @@ impl Vfs {
         self.files.contains_key(key)
     }
     pub fn insert(&mut self, key: String, data: Vec<u8>) {
-        self.files
-            .insert(key, File::new(Source::Bytes(Arc::new(data))));
+        self.files.insert(key, File::new(Source::Bytes(Arc::new(data))));
     }
     pub fn insert_shared(&mut self, key: String, data: Arc<Vec<u8>>) {
         self.files.insert(key, File::new(Source::Bytes(data)));
@@ -167,8 +156,7 @@ impl Vfs {
     }
     #[cfg(not(target_arch = "wasm32"))]
     pub fn insert_disk(&mut self, key: String, path: std::path::PathBuf) {
-        self.files
-            .insert(key, File::new(Source::Disk(Arc::new(path))));
+        self.files.insert(key, File::new(Source::Disk(Arc::new(path))));
     }
     pub fn get(&self, key: &str) -> Option<VfsFile<'_>> {
         let file = self.files.get(key)?;
@@ -190,14 +178,10 @@ impl Vfs {
         self.files.range(start.to_string()..).map(|(k, _)| k)
     }
     pub fn values(&self) -> impl Iterator<Item = VfsFile<'_>> {
-        self.files
-            .iter()
-            .filter_map(|(_, f)| f.bytes().map(VfsFile::Shared))
+        self.files.iter().filter_map(|(_, f)| f.bytes().map(VfsFile::Shared))
     }
     pub fn iter(&self) -> impl Iterator<Item = (&String, VfsFile<'_>)> {
-        self.files
-            .iter()
-            .filter_map(|(k, f)| f.bytes().map(|b| (k, VfsFile::Shared(b))))
+        self.files.iter().filter_map(|(k, f)| f.bytes().map(|b| (k, VfsFile::Shared(b))))
     }
     pub fn append(&mut self, other: &mut Vfs) {
         self.files.append(&mut other.files);
@@ -224,29 +208,18 @@ impl IntoIterator for Vfs {
     type Item = (String, Vec<u8>);
     type IntoIter = std::vec::IntoIter<(String, Vec<u8>)>;
     fn into_iter(self) -> Self::IntoIter {
-        self.files
-            .into_iter()
-            .filter_map(|(k, f)| f.bytes().map(|b| (k, b.as_ref().clone())))
-            .collect::<Vec<_>>()
-            .into_iter()
+        self.files.into_iter().filter_map(|(k, f)| f.bytes().map(|b| (k, b.as_ref().clone()))).collect::<Vec<_>>().into_iter()
     }
 }
 
 /// `\` -> `/`, strip a leading `./`, collapse repeated `/`, lowercase.
 pub fn norm_path(p: &str) -> String {
     if p.is_ascii() {
-        let p = p
-            .strip_prefix("./")
-            .or_else(|| p.strip_prefix(".\\"))
-            .unwrap_or(p);
+        let p = p.strip_prefix("./").or_else(|| p.strip_prefix(".\\")).unwrap_or(p);
         let mut out = String::with_capacity(p.len());
         let mut last_slash = false;
         for b in p.bytes() {
-            let b = if b == b'\\' {
-                b'/'
-            } else {
-                b.to_ascii_lowercase()
-            };
+            let b = if b == b'\\' { b'/' } else { b.to_ascii_lowercase() };
             if b == b'/' && last_slash {
                 continue;
             }

@@ -11,33 +11,20 @@ const MAX_GAP: i32 = 150;
 
 fn characters() -> Vec<NativeChar> {
     let dir = std::env::var("UME_CHARS_DIR").unwrap_or_else(|_| "../../assets/chars".into());
-    let mut out: Vec<NativeChar> = std::fs::read_dir(dir)
-        .unwrap()
-        .filter_map(|e| {
-            let path = e.unwrap().path();
-            let stem = path.file_stem()?.to_string_lossy().to_string();
-            (path.extension()? == "json" && stem != "index")
-                .then(|| serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap())
-        })
-        .collect();
+    let mut out: Vec<NativeChar> = std::fs::read_dir(dir).unwrap().filter_map(|e| {
+        let path = e.unwrap().path();
+        let stem = path.file_stem()?.to_string_lossy().to_string();
+        (path.extension()? == "json" && stem != "index").then(|| serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap())
+    }).collect();
     out.sort_by(|a, b| a.id.cmp(&b.id));
     out
 }
 
 fn state_of(nc: &NativeChar, def: &ume_engine::chardef::CharDef, anim: &str) -> i32 {
-    let name = &nc
-        .moves
-        .iter()
-        .find(|m| m.anim == anim)
-        .unwrap_or_else(|| panic!("{}: no {anim} move", nc.id))
-        .name;
+    let name = &nc.moves.iter().find(|m| m.anim == anim).unwrap_or_else(|| panic!("{}: no {anim} move", nc.id)).name;
     let label = format!("State -1, {name}");
     let minus_one = def.states.get(&-1).unwrap();
-    let controller = minus_one
-        .controllers
-        .iter()
-        .find(|c| c.label == label)
-        .unwrap();
+    let controller = minus_one.controllers.iter().find(|c| c.label == label).unwrap();
     controller.raw("value").unwrap().trim().parse().unwrap()
 }
 
@@ -68,28 +55,13 @@ fn every_fighter_has_its_own_normal_reach_table() {
         m.add_player(def.clone(), 0, 0, 1);
         m.add_player(def.clone(), 1, 0, 2);
         m.start_round();
-        while m.round_state != 2 {
-            m.tick(&[0, 0]);
-        }
-        let row: Vec<(i32, i32)> = STAND_NORMAL_ANIMS
-            .iter()
-            .map(|a| reach(&m, state_of(&nc, &def, a)))
-            .collect();
-        println!(
-            "{:8} reach/damage jab {:?} strong {:?} lkick {:?} hkick {:?}",
-            nc.id, row[0], row[1], row[2], row[3]
-        );
-        assert!(
-            row.iter().all(|(r, d)| *r > 0 && *d > 0),
-            "{}: a stand normal never connects",
-            nc.id
-        );
+        while m.round_state != 2 { m.tick(&[0, 0]); }
+        let row: Vec<(i32, i32)> = STAND_NORMAL_ANIMS.iter().map(|a| reach(&m, state_of(&nc, &def, a))).collect();
+        println!("{:8} reach/damage jab {:?} strong {:?} lkick {:?} hkick {:?}", nc.id, row[0], row[1], row[2], row[3]);
+        assert!(row.iter().all(|(r, d)| *r > 0 && *d > 0), "{}: a stand normal never connects", nc.id);
         let key: Vec<i32> = row.iter().flat_map(|(r, d)| [*r, *d]).collect();
         if let Some(other) = tables.insert(key, nc.id.clone()) {
-            panic!(
-                "{} and {} share the same normal reach and damage table",
-                nc.id, other
-            );
+            panic!("{} and {} share the same normal reach and damage table", nc.id, other);
         }
     }
 }

@@ -5,9 +5,7 @@ use ume_engine::native::{compile_native, NativeChar};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let path = args
-        .first()
-        .ok_or("expected character JSON and state number")?;
+    let path = args.first().ok_or("expected character JSON and state number")?;
     let state: i32 = args.get(1).ok_or("expected state number")?.parse()?;
     let character: NativeChar = serde_json::from_str(&std::fs::read_to_string(path)?)?;
     let definition = Arc::new(compile_native(&character, 1, true));
@@ -18,9 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         game.start_round();
         for _ in 0..600 {
             game.tick(&[0, 0]);
-            if game.round_state == 2 && game.fighters[0].ctrl {
-                break;
-            }
+            if game.round_state == 2 && game.fighters[0].ctrl { break; }
         }
         game.fighters[0].pos.x = -distance / 2.0;
         game.fighters[1].pos.x = distance / 2.0;
@@ -37,24 +33,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let victim = &game.fighters[1];
             if victim.life < previous {
                 hits += 1;
-                println!(
-                    "distance={distance} tick={tick} damage={} victim_y={} attacker_y={}",
-                    previous - victim.life,
-                    victim.pos.y,
-                    game.fighters[0].pos.y
-                );
+                println!("distance={distance} tick={tick} damage={} victim_y={} attacker_y={}", previous - victim.life, victim.pos.y, game.fighters[0].pos.y);
             }
             previous = victim.life;
         }
-        println!(
-            "distance={distance} hits={hits} total_damage={}",
-            initial - previous
-        );
+        println!("distance={distance} hits={hits} total_damage={}", initial - previous);
         for (index, fighter) in game.fighters.iter().take(2).enumerate() {
-            println!(
-                "distance={distance} player={index} final_state={} final_y={} final_vy={}",
-                fighter.state_no, fighter.pos.y, fighter.vel.y
-            );
+            println!("distance={distance} player={index} final_state={} final_y={} final_vy={}", fighter.state_no, fighter.pos.y, fighter.vel.y);
         }
     }
     Ok(())

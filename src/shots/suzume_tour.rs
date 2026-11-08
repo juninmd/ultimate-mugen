@@ -6,11 +6,7 @@ pub(crate) async fn suzume_abilities_tour(app: &mut App, dir: &str) {
 
     // 1. Pause Menu / Movelist with Power Badges
     app.mode = Mode::Watch;
-    app.sel = (
-        find(app, "suzume"),
-        find(app, "shion"),
-        stage(app, "bamboo"),
-    );
+    app.sel = (find(app, "suzume"), find(app, "shion"), stage(app, "bamboo"));
     app.start_fight().await;
     if let Some(s) = app.session.as_mut() {
         s.paused = true;

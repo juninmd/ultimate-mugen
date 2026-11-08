@@ -7,10 +7,7 @@ use ume_engine::matchs::Match;
 use ume_engine::native::{compile_native, NativeChar};
 
 fn load_native(id: &str) -> Arc<CharDef> {
-    let p = format!(
-        "{}/../../assets/chars/{id}.json",
-        env!("CARGO_MANIFEST_DIR")
-    );
+    let p = format!("{}/../../assets/chars/{id}.json", env!("CARGO_MANIFEST_DIR"));
     let nc: NativeChar = serde_json::from_str(&std::fs::read_to_string(p).unwrap()).unwrap();
     Arc::new(compile_native(&nc, 1, false))
 }

@@ -4,25 +4,19 @@ use ume_engine::common::{common_def, flat_stage};
 use ume_engine::expr::{parse, Expr};
 use ume_engine::matchs::Match;
 
-fn ev(m: &Match, i: usize, src: &str) -> f64 {
-    m.ev(i, &Expr::new(parse(src).unwrap()))
-}
+fn ev(m: &Match, i: usize, src: &str) -> f64 { m.ev(i, &Expr::new(parse(src).unwrap())) }
 
 fn roster(sides: &[usize], simul: bool) -> Match {
     let mut m = Match::new(common_def(), None, flat_stage());
     m.team_simul = simul;
-    for (slot, side) in sides.iter().enumerate() {
-        m.add_player(mugen_char(&format!("fighter{}", slot + 1), ""), *side, 0, 1);
-    }
+    for (slot, side) in sides.iter().enumerate() { m.add_player(mugen_char(&format!("fighter{}", slot + 1), ""), *side, 0, 1); }
     m.start_round();
     m
 }
 
 fn run_to_fight(m: &mut Match) {
     let n = m.root_indices().len();
-    while m.round_state != 2 {
-        m.tick(&vec![0; n]);
-    }
+    while m.round_state != 2 { m.tick(&vec![0; n]); }
 }
 
 #[test]
@@ -86,10 +80,8 @@ fn helpers_report_their_roots_slot() {
     run_to_fight(&mut m);
     let before = m.next_id;
     let mut h = m.fighters[2].clone();
-    h.id = m.next_id;
-    m.next_id += 1;
-    h.is_helper = true;
-    h.root = m.fighters[2].id;
+    h.id = m.next_id; m.next_id += 1;
+    h.is_helper = true; h.root = m.fighters[2].id;
     m.fighters.push(h);
     assert_eq!(ev(&m, 4, "PlayerNo"), 3.0);
     assert_eq!(ev(&m, 4, "MemberNo"), 2.0);
@@ -103,21 +95,15 @@ fn intro_and_outro_state_follow_the_round_phase() {
     let mut m = roster(&[0, 1], false);
     assert_eq!(ev(&m, 0, "IntroState"), 1.0);
     assert_eq!(ev(&m, 0, "OutroState"), 0.0);
-    while m.round_state < 1 {
-        m.tick(&[0, 0]);
-    }
+    while m.round_state < 1 { m.tick(&[0, 0]); }
     assert_eq!(ev(&m, 0, "IntroState"), 2.0);
     run_to_fight(&mut m);
     assert_eq!(ev(&m, 0, "IntroState"), 0.0);
     assert_eq!(ev(&m, 0, "OutroState"), 0.0);
     m.fighters[1].life = 0.0;
-    while m.round_state != 3 {
-        m.tick(&[0, 0]);
-    }
+    while m.round_state != 3 { m.tick(&[0, 0]); }
     assert_eq!(ev(&m, 0, "OutroState"), 1.0);
-    while m.round_state != 4 {
-        m.tick(&[0, 0]);
-    }
+    while m.round_state != 4 { m.tick(&[0, 0]); }
     assert_eq!(ev(&m, 0, "OutroState"), 2.0);
     assert_eq!(ev(&m, 0, "IntroState"), 0.0);
 }

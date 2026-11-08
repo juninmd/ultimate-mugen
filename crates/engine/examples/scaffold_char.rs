@@ -4,12 +4,8 @@ use std::fs;
 use std::path::Path;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let name = std::env::args()
-        .nth(1)
-        .unwrap_or_else(|| "MeuLutador".to_string());
-    let target = std::env::args()
-        .nth(2)
-        .unwrap_or_else(|| format!("mugen/chars/{}", name));
+    let name = std::env::args().nth(1).unwrap_or_else(|| "MeuLutador".to_string());
+    let target = std::env::args().nth(2).unwrap_or_else(|| format!("mugen/chars/{}", name));
     let base = Path::new(&target);
 
     fs::create_dir_all(base.join("files"))?;
@@ -127,10 +123,7 @@ triggerall = command = "x" && statetype = S && ctrl
 trigger1 = 1
 "#;
     fs::write(base.join("files/comandos.cmd"), cmd)?;
-    fs::write(
-        base.join("config.txt"),
-        "; Character personalization config\n",
-    )?;
+    fs::write(base.join("config.txt"), "; Character personalization config\n")?;
 
     println!("Scaffolded character '{}' successfully at {:?}", name, base);
     Ok(())

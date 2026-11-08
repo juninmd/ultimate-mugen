@@ -186,12 +186,7 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
         let mut has_data = false;
 
         if length > 0 && keep {
-            let block_end = if next > data_start {
-                next
-            } else {
-                data_start.saturating_add(length)
-            }
-            .min(buf.len());
+            let block_end = if next > data_start { next } else { data_start.saturating_add(length) }.min(buf.len());
             let pcx = &buf[data_start..block_end];
             if let Some(h) = read_pcx_header(pcx).ok().filter(|h| {
                 (h.width as usize).saturating_mul(h.height as usize) <= MAX_SPRITE_PIXELS
@@ -246,11 +241,7 @@ fn decode_sff_v1(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
                 spr.indexed = Some(px);
                 let pcx = j.pcx;
                 let mut pal: Option<Arc<Vec<u8>>> = None;
-                let inherited = if j.same_pal && prev_adjacent {
-                    prev.clone()
-                } else {
-                    None
-                };
+                let inherited = if j.same_pal && prev_adjacent { prev.clone() } else { None };
                 match inherited {
                     Some((ppal, pidx)) => {
                         pal = ppal.clone();
@@ -381,8 +372,7 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
     // --- sprites
     let mut sprites: Vec<DecodedSprite> = Vec::with_capacity(spr_count.min(buf.len() / 28 + 1));
     let mut links: Vec<Option<usize>> = Vec::with_capacity(sprites.capacity());
-    let mut jobs: Vec<(usize, u8, u8, &[u8])> =
-        Vec::with_capacity(spr_count.min(buf.len() / 28 + 1));
+    let mut jobs: Vec<(usize, u8, u8, &[u8])> = Vec::with_capacity(spr_count.min(buf.len() / 28 + 1));
     for i in 0..spr_count {
         let o = spr_ofs.saturating_add(i.saturating_mul(28));
         if o.saturating_add(28) > buf.len() {
@@ -501,8 +491,7 @@ fn decode_v2_image(
                     out[p] = u32::from_ne_bytes([chunk[0], chunk[1], chunk[2], 255]);
                 }
                 let mut out = std::mem::ManuallyDrop::new(out);
-                let bytes =
-                    unsafe { Vec::from_raw_parts(out.as_mut_ptr() as *mut u8, n * 4, n * 4) };
+                let bytes = unsafe { Vec::from_raw_parts(out.as_mut_ptr() as *mut u8, n * 4, n * 4) };
                 spr.rgba = Some(Arc::new(bytes));
             } else {
                 let mut out = vec![0u8; n];
@@ -536,3 +525,4 @@ fn decode_v2_image(
         _ => spr.indexed = Some(Arc::new(vec![0u8; n])),
     }
 }
+

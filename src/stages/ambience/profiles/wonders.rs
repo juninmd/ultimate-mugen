@@ -9,10 +9,7 @@ static GREAT_WALL: Profile = Profile {
         motes(Dust, 18, 2.0, 14.0, 1.5, [0.3, 0.95], 0xf0e8d8, 0.4),
     ],
     glows: &[glow(0.622, 0.255, 0.07, 0xffe8a0, 0.35, 0.15, 6.0)],
-    beams: &[
-        beam(0.622, 0.10, -0.16, 0xfff0c0, 0.10, 12.0),
-        beam(0.622, 0.06, 0.14, 0xfff0c0, 0.07, 9.0),
-    ],
+    beams: &[beam(0.622, 0.10, -0.16, 0xfff0c0, 0.10, 12.0), beam(0.622, 0.06, 0.14, 0xfff0c0, 0.07, 9.0)],
 };
 
 static PETRA: Profile = Profile {
@@ -95,10 +92,7 @@ static TAJ: Profile = Profile {
         glow(0.68, 0.48, 0.10, 0xffe8c0, 0.30, 0.1, 9.0),
         glow(0.50, 0.78, 0.14, 0xffe8d8, 0.08, 0.1, 9.0),
     ],
-    beams: &[
-        beam(0.72, 0.10, -0.06, 0xfff4e0, 0.09, 12.0),
-        beam(0.66, 0.06, -0.10, 0xfff4e0, 0.07, 9.0),
-    ],
+    beams: &[beam(0.72, 0.10, -0.06, 0xfff4e0, 0.09, 12.0), beam(0.66, 0.06, -0.10, 0xfff4e0, 0.07, 9.0)],
 };
 
 static GIZA: Profile = Profile {
@@ -123,10 +117,7 @@ static HANGING: Profile = Profile {
         glow(0.59, 0.67, 0.035, 0xa0f0ff, 0.12, 0.4, 2.6),
         glow(0.36, 0.72, 0.03, 0xa0f0ff, 0.10, 0.3, 3.0),
     ],
-    beams: &[
-        beam(0.50, 0.12, 0.05, 0xf0ffd8, 0.08, 10.0),
-        beam(0.85, 0.08, -0.05, 0xf0ffd8, 0.07, 12.0),
-    ],
+    beams: &[beam(0.50, 0.12, 0.05, 0xf0ffd8, 0.08, 10.0), beam(0.85, 0.08, -0.05, 0xf0ffd8, 0.07, 12.0)],
 };
 
 static ARTEMIS: Profile = Profile {
@@ -184,16 +175,7 @@ static RHODES: Profile = Profile {
         mist(0.25, 0.30, 4.0, 0.2, 0x3a7a88, 0.14, 6),
         fog_front(mist(0.75, 0.10, 6.0, 0.6, 0x9ad8e0, 0.08, 4)),
     ],
-    motes: &[motes(
-        Dust,
-        34,
-        -40.0,
-        -8.0,
-        1.0,
-        [0.0, 0.85],
-        0xb8e8ff,
-        0.35,
-    )],
+    motes: &[motes(Dust, 34, -40.0, -8.0, 1.0, [0.0, 0.85], 0xb8e8ff, 0.35)],
     glows: &[
         glow(0.449, 0.064, 0.07, 0xff7040, 0.40, 0.3, 2.0),
         glow(0.80, 0.38, 0.08, 0xc8a8ff, 0.25, 0.9, 4.5),
@@ -203,10 +185,7 @@ static RHODES: Profile = Profile {
 };
 
 static PHAROS: Profile = Profile {
-    mist: &[
-        mist(0.55, 0.12, 4.0, 0.3, 0x9ab8d0, 0.10, 5),
-        mist(0.72, 0.10, 6.0, 0.5, 0x6a8ab0, 0.08, 4),
-    ],
+    mist: &[mist(0.55, 0.12, 4.0, 0.3, 0x9ab8d0, 0.10, 5), mist(0.72, 0.10, 6.0, 0.5, 0x6a8ab0, 0.08, 4)],
     motes: &[motes(Dust, 30, -2.0, 0.0, 1.0, [0.0, 0.5], 0xf0f8ff, 0.35)],
     glows: &[
         glow(0.347, 0.138, 0.07, 0xffe8a0, 0.55, 0.15, 2.4),

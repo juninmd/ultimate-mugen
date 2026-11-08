@@ -1,6 +1,6 @@
 mod support;
-use std::sync::Arc;
 use support::*;
+use std::sync::Arc;
 use ume_engine::matchs::Event;
 use ume_engine::sctrl::format_clipboard;
 
@@ -108,27 +108,15 @@ fn misc_mugen11_controllers_take_effect() {
     assert_eq!(f.state_no, 300);
     assert_eq!((f.draw_offset.x, f.draw_offset.y), (10.0, -5.0));
     assert_eq!(f.victory_quote, 3);
-    assert_eq!(
-        f.clipboard,
-        vec!["life=1000 ratio=0.500000".to_string(), "next".to_string()]
-    );
+    assert_eq!(f.clipboard, vec!["life=1000 ratio=0.500000".to_string(), "next".to_string()]);
     let id = f.id;
-    assert!(m
-        .events
-        .iter()
-        .any(|e| matches!(e, Event::StopSound { owner, channel: 2 } if *owner == id)));
+    assert!(m.events.iter().any(|e| matches!(e, Event::StopSound { owner, channel: 2 } if *owner == id)));
     assert!(m.events.iter().any(|e| matches!(e, Event::SoundPan { owner, channel: 2, pan } if *owner == id && pan.abs() < 1e-3)));
-    assert!(m
-        .events
-        .iter()
-        .any(|e| matches!(e, Event::Rumble { fighter, ms: 500, .. } if *fighter == id)));
+    assert!(m.events.iter().any(|e| matches!(e, Event::Rumble { fighter, ms: 500, .. } if *fighter == id)));
     assert_eq!(m.shake_freq, 90.0);
     assert_eq!(m.shake_phase, 90.0, "phase defaults to 90 when freq >= 90");
     m.tick(&[0, 0]);
-    assert_eq!(
-        m.fighters[0].draw_offset.x, 0.0,
-        "Offset only lasts for the tick it runs"
-    );
+    assert_eq!(m.fighters[0].draw_offset.x, 0.0, "Offset only lasts for the tick it runs");
     enter(&mut m, 0, 330);
     m.tick(&[0, 0]);
     assert!(m.fighters[0].clipboard.is_empty());
@@ -152,30 +140,17 @@ fn superpause_and_pause_are_distinct() {
     m.tick(&[0, 0]);
     let p = m.pause.as_ref().expect("SuperPause started");
     assert!(p.is_super && p.darken && p.unhittable && p.time > 30);
-    assert!(
-        m.fighters[0].unhittable > 0,
-        "the super user cannot be hit while the screen is frozen"
-    );
-    let hd = ume_engine::fighter::HitDefData {
-        hitflag: "MAF".into(),
-        attr_state: "S".into(),
-        ..Default::default()
-    };
+    assert!(m.fighters[0].unhittable > 0, "the super user cannot be hit while the screen is frozen");
+    let hd = ume_engine::fighter::HitDefData { hitflag: "MAF".into(), attr_state: "S".into(), ..Default::default() };
     assert!(!m.can_be_hit(0, &hd, 1));
-    assert_eq!(
-        m.fighters[1].super_defence_mul, 2.0,
-        "p2defmul reaches current targets"
-    );
+    assert_eq!(m.fighters[1].super_defence_mul, 2.0, "p2defmul reaches current targets");
     ticks(&mut m, 60);
     assert!(m.pause.is_none() && m.fighters[0].unhittable == 0);
 }
 
 #[test]
 fn clipboard_formatting() {
-    assert_eq!(
-        format_clipboard("%d%% of %f\\n", &[50.7, 2.0]),
-        "50% of 2.000000\n"
-    );
+    assert_eq!(format_clipboard("%d%% of %f\\n", &[50.7, 2.0]), "50% of 2.000000\n");
     assert_eq!(format_clipboard("no args %d", &[]), "no args ");
 }
 
@@ -276,10 +251,7 @@ fn runstate_runs_another_state_without_changing_state() {
     m.tick(&[0, 0]);
     let f = &m.fighters[0];
     assert_eq!(f.vars[1], 2, "controllers run once per trigger");
-    assert_eq!(
-        f.vars[2], 1,
-        "persistent = 0 is respected inside the run state"
-    );
+    assert_eq!(f.vars[2], 1, "persistent = 0 is respected inside the run state");
 }
 
 #[test]
@@ -304,10 +276,7 @@ value = 570
     let mut m = duel(mugen_char("p1", cns), mugen_char("p2", ""));
     enter(&mut m, 0, 570);
     m.tick(&[0, 0]);
-    assert_eq!(
-        m.fighters[0].vars[0], 9,
-        "one real pass plus eight nested ones"
-    );
+    assert_eq!(m.fighters[0].vars[0], 9, "one real pass plus eight nested ones");
     assert_eq!(m.fighters[0].run_state_depth, 0);
     assert_eq!(m.fighters[0].state_no, 570);
 }
@@ -319,10 +288,7 @@ fn runstate_honours_ignorehitpause() {
     m.fighters[0].hit_pause = 4;
     m.tick(&[0, 0]);
     let f = &m.fighters[0];
-    assert_eq!(
-        f.vars[1], 0,
-        "the RunState controller itself is skipped during hit pause"
-    );
+    assert_eq!(f.vars[1], 0, "the RunState controller itself is skipped during hit pause");
     assert_eq!(f.vars[4], 1, "ignorehitpause controllers inside still run");
     assert_eq!(f.vars[5], 0, "the others stay frozen");
     m.fighters[0].hit_pause = 0;
@@ -344,8 +310,7 @@ trigger1 = Time = 0
 value = 20, 5
 ";
     let mut def = Arc::try_unwrap(mugen_char("p1", cns)).ok().unwrap();
-    def.anims
-        .insert(400, anim(400, vec![frame(-1, vec![], vec![])]));
+    def.anims.insert(400, anim(400, vec![frame(-1, vec![], vec![])]));
     let mut m = duel(Arc::new(def), mugen_char("p2", ""));
     assert_eq!(m.fighters[0].height_top(), 60.0);
     enter(&mut m, 0, 530);
@@ -355,18 +320,10 @@ value = 20, 5
     let f = &m.fighters[0];
     assert_eq!((f.height_top(), f.height_bottom()), (20.0, 5.0));
     let hurt = f.boxes(2);
-    assert_eq!(
-        hurt.len(),
-        1,
-        "an animation frame without a hurtbox gets one from Height"
-    );
+    assert_eq!(hurt.len(), 1, "an animation frame without a hurtbox gets one from Height");
     assert_eq!((hurt[0][1] - f.pos.y, hurt[0][3] - f.pos.y), (-20.0, 5.0));
     m.tick(&[0, 0]);
-    assert_eq!(
-        m.fighters[0].height_top(),
-        60.0,
-        "Height only lasts for the tick it runs"
-    );
+    assert_eq!(m.fighters[0].height_top(), 60.0, "Height only lasts for the tick it runs");
 }
 
 #[test]
@@ -459,10 +416,7 @@ fn modifyhitdef_changes_only_the_listed_fields_of_the_live_hitdef() {
     enter(&mut m, 0, 200);
     m.tick(&[0, 0]);
     let hd = m.fighters[0].hitdef.clone().expect("hitdef");
-    assert_eq!(
-        (hd.damage, hd.ground_hit_time, hd.ground_vel),
-        (55.0, 21, [-7.0, -2.0])
-    );
+    assert_eq!((hd.damage, hd.ground_hit_time, hd.ground_vel), (55.0, 21, [-7.0, -2.0]));
     assert_eq!(hd.priority, 3, "unlisted fields are untouched");
     assert_eq!(hd.guard_pause_p1, 0);
     ticks(&mut m, 4);
@@ -547,18 +501,14 @@ hitflag = MAFD
     enter(&mut m, 1, 200);
     m.tick(&[0, 0]);
     let (_, rd) = m.fighters[0].reversal.clone().expect("reversal");
-    assert_eq!(
-        (rd.p1stateno, rd.p2stateno, rd.pause_p1, rd.pause_p2),
-        (411, 420, 2, 3)
-    );
+    assert_eq!((rd.p1stateno, rd.p2stateno, rd.pause_p1, rd.pause_p2), (411, 420, 2, 3));
     ticks(&mut m, 5);
     assert_eq!(m.fighters[0].state_no, 411);
     assert_eq!(m.fighters[1].state_no, 420);
 }
 
 fn clsn_jab(modifier: &str) -> String {
-    format!(
-        "
+    format!("
 [Statedef 200]
 type = S
 movetype = A
@@ -581,8 +531,7 @@ type = ChangeState
 trigger1 = AnimTime = 0
 value = 0
 ctrl = 1
-"
-    )
+")
 }
 
 fn jab_result(modifier: &str, gap: f32) -> (f32, bool) {
@@ -590,43 +539,20 @@ fn jab_result(modifier: &str, gap: f32) -> (f32, bool) {
     face_off(&mut m, gap);
     enter(&mut m, 0, 200);
     ticks(&mut m, 5);
-    let reach = m.fighters[0]
-        .boxes(1)
-        .first()
-        .map(|b| b[2] - m.fighters[0].pos.x)
-        .unwrap_or(0.0);
+    let reach = m.fighters[0].boxes(1).first().map(|b| b[2] - m.fighters[0].pos.x).unwrap_or(0.0);
     (reach, m.fighters[1].life < 1000.0)
 }
 
 #[test]
 fn clsn_controllers_change_collision() {
-    assert_eq!(
-        jab_result("", 100.0),
-        (60.0, false),
-        "baseline: out of reach"
-    );
-    let (reach, hit) = jab_result(
-        "[State 200, o]\ntype = OverrideClsn\ntrigger1 = 1\nclsn = 1\nvalue = 0, -60, 120, -30",
-        100.0,
-    );
-    assert!(
-        hit && reach == 120.0,
-        "OverrideClsn replaces the attack box"
-    );
-    let (reach, hit) = jab_result(
-        "[State 200, r]\ntype = ResizeClsn\ntrigger1 = 1\nclsn = 1\nvalue = 0, 0, 50, 0",
-        100.0,
-    );
+    assert_eq!(jab_result("", 100.0), (60.0, false), "baseline: out of reach");
+    let (reach, hit) = jab_result("[State 200, o]\ntype = OverrideClsn\ntrigger1 = 1\nclsn = 1\nvalue = 0, -60, 120, -30", 100.0);
+    assert!(hit && reach == 120.0, "OverrideClsn replaces the attack box");
+    let (reach, hit) = jab_result("[State 200, r]\ntype = ResizeClsn\ntrigger1 = 1\nclsn = 1\nvalue = 0, 0, 50, 0", 100.0);
     assert!(hit && reach == 110.0, "ResizeClsn grows the right edge");
-    let (reach, hit) = jab_result(
-        "[State 200, t]\ntype = TransformClsn\ntrigger1 = 1\nclsn = 1\nscale = 2, 1",
-        100.0,
-    );
+    let (reach, hit) = jab_result("[State 200, t]\ntype = TransformClsn\ntrigger1 = 1\nclsn = 1\nscale = 2, 1", 100.0);
     assert!(hit && reach == 120.0, "TransformClsn scales the box");
-    let (reach, hit) = jab_result(
-        "[State 200, t]\ntype = TransformClsn\ntrigger1 = 1\nclsn = 1\noffset = 45, 0",
-        100.0,
-    );
+    let (reach, hit) = jab_result("[State 200, t]\ntype = TransformClsn\ntrigger1 = 1\nclsn = 1\noffset = 45, 0", 100.0);
     assert!(hit && reach == 105.0, "TransformClsn offsets the box");
 }
 
@@ -662,18 +588,10 @@ value = 0, 0, 10, 10
     let mut m = duel(mugen_char("p1", cns), mugen_char("p2", ""));
     enter(&mut m, 0, 560);
     m.tick(&[0, 0]);
-    assert_eq!(
-        m.fighters[0].clsn_mods.len(),
-        2,
-        "the second ResizeClsn replaces the first"
-    );
+    assert_eq!(m.fighters[0].clsn_mods.len(), 2, "the second ResizeClsn replaces the first");
     let base = m.fighters[0].pos;
     let b = m.fighters[0].boxes(2);
-    assert_eq!(
-        b,
-        vec![[base.x, base.y, base.x + 10.0, base.y + 10.0]],
-        "mods apply in the order they were added, so the later override replaces the resized box"
-    );
+    assert_eq!(b, vec![[base.x, base.y, base.x + 10.0, base.y + 10.0]], "mods apply in the order they were added, so the later override replaces the resized box");
     m.tick(&[0, 0]);
     assert_eq!(m.fighters[0].clsn_mods.len(), 2);
     m.tick(&[0, 0]);

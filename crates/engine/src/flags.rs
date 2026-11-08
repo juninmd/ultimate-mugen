@@ -12,16 +12,12 @@ pub fn normalize(raw: &str) -> String {
 }
 
 pub fn names_in(raw: &str) -> impl Iterator<Item = &str> + '_ {
-    raw.split(',')
-        .map(|s| s.trim().trim_matches('"').trim())
-        .filter(|s| !s.is_empty())
+    raw.split(',').map(|s| s.trim().trim_matches('"').trim()).filter(|s| !s.is_empty())
 }
 
 pub fn lookup(raw: &str) -> Option<FlagTarget> {
     let name = raw.trim().trim_matches('"').trim();
-    asf::from_name(name)
-        .map(FlagTarget::Character)
-        .or_else(|| gsf::from_name(name).map(FlagTarget::Global))
+    asf::from_name(name).map(FlagTarget::Character).or_else(|| gsf::from_name(name).map(FlagTarget::Global))
 }
 
 pub const ASSERT_PARAMS: [&str; 5] = ["flag", "flag2", "flag3", "flag4", "flag5"];
@@ -43,10 +39,7 @@ pub fn unknown_in_states(states: &HashMap<i32, StateDef>) -> Vec<String> {
 
 pub fn warn_unknown(character: &str, unknown: &[String]) {
     if !unknown.is_empty() {
-        eprintln!(
-            "{character}: AssertSpecial flags not recognised and ignored: {}",
-            unknown.join(", ")
-        );
+        eprintln!("{character}: AssertSpecial flags not recognised and ignored: {}", unknown.join(", "));
     }
 }
 
@@ -174,10 +167,7 @@ pub mod asf {
     ];
 
     pub fn from_name(name: &str) -> Option<u64> {
-        NAMES
-            .iter()
-            .find(|(known, _)| known.eq_ignore_ascii_case(name))
-            .map(|(_, bit)| *bit)
+        NAMES.iter().find(|(known, _)| known.eq_ignore_ascii_case(name)).map(|(_, bit)| *bit)
     }
 }
 
@@ -225,9 +215,6 @@ pub mod gsf {
     ];
 
     pub fn from_name(name: &str) -> Option<u32> {
-        NAMES
-            .iter()
-            .find(|(known, _)| known.eq_ignore_ascii_case(name))
-            .map(|(_, bit)| *bit)
+        NAMES.iter().find(|(known, _)| known.eq_ignore_ascii_case(name)).map(|(_, bit)| *bit)
     }
 }

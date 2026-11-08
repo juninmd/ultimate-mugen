@@ -142,4 +142,4 @@ fn folds_constants() {
     assert!(Code::compile(&parse("time + 1").unwrap())
         .constant()
         .is_none());
-}
+}

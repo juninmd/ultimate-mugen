@@ -64,14 +64,9 @@ fn accepts_deflate_with_exaggerated_size_hint() {
 #[test]
 fn rejects_oversized_stored_entry_before_reading_data() {
     let mut zip = stored_zip_with_deflate(1, b"x");
-    let central = zip
-        .windows(4)
-        .position(|s| s == 0x0201_4b50u32.to_le_bytes())
-        .unwrap();
+    let central = zip.windows(4).position(|s| s == 0x0201_4b50u32.to_le_bytes()).unwrap();
     zip[central + 10..central + 12].copy_from_slice(&0u16.to_le_bytes());
     zip[central + 20..central + 24].copy_from_slice(&(257u32 << 20).to_le_bytes());
     let mut v = Vfs::new();
-    assert!(add_zip(&mut v, &zip, "")
-        .unwrap_err()
-        .contains("entry too large"));
+    assert!(add_zip(&mut v, &zip, "").unwrap_err().contains("entry too large"));
 }

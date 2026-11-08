@@ -223,8 +223,7 @@ pub fn decode_png(buf: &[u8]) -> Result<DecodedPng, String> {
                     aa = 255;
                     if let Some(t) = tr.filter(|t| t.len() >= 6) {
                         let hi = if bs == 2 { 0 } else { 1 };
-                        let same_low = bs == 1
-                            || (img[s + 1] == t[1] && img[s + 3] == t[3] && img[s + 5] == t[5]);
+                        let same_low = bs == 1 || (img[s + 1] == t[1] && img[s + 3] == t[3] && img[s + 5] == t[5]);
                         if rr == t[hi] && gg == t[2 + hi] && bb == t[4 + hi] && same_low {
                             aa = 0;
                         }

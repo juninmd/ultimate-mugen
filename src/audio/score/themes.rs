@@ -1,0 +1,228 @@
+#[derive(Clone, Copy)]
+pub enum Drums {
+    Rock,
+    Taiko,
+    Samba,
+    Breaks,
+    March,
+}
+
+#[derive(Clone, Copy)]
+pub enum Lead {
+    Square,
+    Saw,
+    Pluck,
+    Flute,
+}
+
+pub struct Theme {
+    pub bpm: f32,
+    pub scale: &'static [i32],
+    pub root: i32,
+    pub prog: [i32; 8],
+    pub drums: Drums,
+    pub lead: Lead,
+    pub pad: bool,
+}
+
+const MINOR_PENT: &[i32] = &[0, 3, 5, 7, 10, 12];
+const PHRYGIAN: &[i32] = &[0, 1, 3, 5, 7, 8, 12];
+const BLUES: &[i32] = &[0, 3, 5, 6, 7, 10, 12];
+const YO: &[i32] = &[0, 2, 5, 7, 9, 12];
+const HARMONIC: &[i32] = &[0, 2, 3, 5, 7, 8, 11, 12];
+const DORIAN: &[i32] = &[0, 2, 3, 5, 7, 9, 10, 12];
+const MIXO: &[i32] = &[0, 2, 4, 5, 7, 9, 10, 12];
+const DOUBLE_HARM: &[i32] = &[0, 1, 4, 5, 7, 8, 11, 12];
+
+pub const THEMES: [Theme; 21] = [
+    Theme {
+        bpm: 128.0,
+        scale: YO,
+        root: 40,
+        prog: [0, 0, 5, 5, 3, 3, 7, 5],
+        drums: Drums::Taiko,
+        lead: Lead::Flute,
+        pad: true,
+    },
+    Theme {
+        bpm: 150.0,
+        scale: MINOR_PENT,
+        root: 43,
+        prog: [0, 0, 3, 3, 5, 5, 7, 3],
+        drums: Drums::Breaks,
+        lead: Lead::Saw,
+        pad: true,
+    },
+    Theme {
+        bpm: 118.0,
+        scale: YO,
+        root: 38,
+        prog: [0, 5, 0, 5, 3, 7, 3, 5],
+        drums: Drums::Taiko,
+        lead: Lead::Pluck,
+        pad: true,
+    },
+    Theme {
+        bpm: 136.0,
+        scale: DORIAN,
+        root: 41,
+        prog: [0, 0, 5, 3, 0, 0, 7, 5],
+        drums: Drums::Rock,
+        lead: Lead::Square,
+        pad: false,
+    },
+    Theme {
+        bpm: 124.0,
+        scale: PHRYGIAN,
+        root: 39,
+        prog: [0, 1, 0, 1, 5, 3, 1, 0],
+        drums: Drums::March,
+        lead: Lead::Flute,
+        pad: true,
+    },
+    Theme {
+        bpm: 146.0,
+        scale: BLUES,
+        root: 42,
+        prog: [0, 0, 0, 0, 5, 5, 0, 7],
+        drums: Drums::Rock,
+        lead: Lead::Saw,
+        pad: false,
+    },
+    Theme {
+        bpm: 132.0,
+        scale: MIXO,
+        root: 45,
+        prog: [0, 0, 5, 5, 7, 7, 5, 3],
+        drums: Drums::Samba,
+        lead: Lead::Pluck,
+        pad: false,
+    },
+    Theme {
+        bpm: 126.0,
+        scale: DOUBLE_HARM,
+        root: 38,
+        prog: [0, 0, 1, 1, 5, 5, 1, 0],
+        drums: Drums::Taiko,
+        lead: Lead::Flute,
+        pad: true,
+    },
+    Theme {
+        bpm: 140.0,
+        scale: PHRYGIAN,
+        root: 40,
+        prog: [0, 0, 3, 5, 0, 0, 1, 3],
+        drums: Drums::March,
+        lead: Lead::Square,
+        pad: true,
+    },
+    Theme {
+        bpm: 138.0,
+        scale: BLUES,
+        root: 41,
+        prog: [0, 3, 0, 5, 0, 3, 7, 5],
+        drums: Drums::Rock,
+        lead: Lead::Pluck,
+        pad: false,
+    },
+    Theme {
+        bpm: 122.0,
+        scale: HARMONIC,
+        root: 43,
+        prog: [0, 0, 5, 5, 3, 3, 7, 7],
+        drums: Drums::March,
+        lead: Lead::Saw,
+        pad: true,
+    },
+    Theme {
+        bpm: 130.0,
+        scale: DORIAN,
+        root: 44,
+        prog: [0, 5, 3, 5, 0, 5, 7, 3],
+        drums: Drums::Samba,
+        lead: Lead::Flute,
+        pad: true,
+    },
+    Theme {
+        bpm: 144.0,
+        scale: MINOR_PENT,
+        root: 40,
+        prog: [0, 0, 7, 7, 5, 5, 3, 7],
+        drums: Drums::Breaks,
+        lead: Lead::Square,
+        pad: false,
+    },
+    Theme {
+        bpm: 116.0,
+        scale: YO,
+        root: 45,
+        prog: [0, 0, 3, 3, 5, 5, 3, 0],
+        drums: Drums::Taiko,
+        lead: Lead::Flute,
+        pad: true,
+    },
+    Theme {
+        bpm: 134.0,
+        scale: HARMONIC,
+        root: 42,
+        prog: [0, 0, 5, 5, 0, 0, 7, 5],
+        drums: Drums::March,
+        lead: Lead::Pluck,
+        pad: true,
+    },
+    Theme {
+        bpm: 142.0,
+        scale: MIXO,
+        root: 38,
+        prog: [0, 0, 5, 7, 0, 0, 5, 3],
+        drums: Drums::Rock,
+        lead: Lead::Saw,
+        pad: true,
+    },
+    Theme {
+        bpm: 120.0,
+        scale: DOUBLE_HARM,
+        root: 41,
+        prog: [0, 1, 0, 1, 3, 3, 1, 5],
+        drums: Drums::March,
+        lead: Lead::Flute,
+        pad: true,
+    },
+    Theme {
+        bpm: 148.0,
+        scale: PHRYGIAN,
+        root: 43,
+        prog: [0, 0, 1, 1, 0, 0, 5, 3],
+        drums: Drums::Breaks,
+        lead: Lead::Saw,
+        pad: false,
+    },
+    Theme {
+        bpm: 127.0,
+        scale: DORIAN,
+        root: 39,
+        prog: [0, 3, 5, 3, 0, 3, 7, 5],
+        drums: Drums::Samba,
+        lead: Lead::Pluck,
+        pad: true,
+    },
+    Theme {
+        bpm: 133.0,
+        scale: MINOR_PENT,
+        root: 44,
+        prog: [0, 0, 5, 5, 7, 7, 3, 5],
+        drums: Drums::Rock,
+        lead: Lead::Square,
+        pad: true,
+    },
+    Theme {
+        bpm: 125.0,
+        scale: BLUES,
+        root: 37,
+        prog: [0, 0, 5, 3, 0, 0, 7, 5],
+        drums: Drums::Taiko,
+        lead: Lead::Saw,
+        pad: true,
+    },
+];
+

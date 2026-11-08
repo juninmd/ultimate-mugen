@@ -68,11 +68,7 @@ fn setup() -> (Match, usize, usize) {
     face_off(&mut m, 200.0);
     enter(&mut m, 0, 220);
     ticks(&mut m, 2);
-    let find = |m: &Match, id: i32| {
-        (0..m.fighters.len())
-            .find(|&i| m.fighters[i].is_helper && m.fighters[i].helper_id == id)
-            .unwrap()
-    };
+    let find = |m: &Match, id: i32| (0..m.fighters.len()).find(|&i| m.fighters[i].is_helper && m.fighters[i].helper_id == id).unwrap();
     let (a, b) = (find(&m, 7), find(&m, 8));
     (m, a, b)
 }
@@ -84,21 +80,10 @@ fn pausebool_helper_ignores_pause_and_superpause() {
         enter(&mut m, 1, state);
         m.tick(&[0, 0]);
         assert!(m.pause.is_some());
-        let (ax, px, rx) = (
-            m.fighters[always].pos.x,
-            m.fighters[plain].pos.x,
-            m.fighters[0].pos.x,
-        );
+        let (ax, px, rx) = (m.fighters[always].pos.x, m.fighters[plain].pos.x, m.fighters[0].pos.x);
         ticks(&mut m, 8);
-        assert_eq!(
-            m.fighters[always].pos.x,
-            ax + 8.0,
-            "state {state}: pausebool helper keeps moving"
-        );
-        assert_eq!(
-            m.fighters[plain].pos.x, px,
-            "state {state}: a regular helper freezes"
-        );
+        assert_eq!(m.fighters[always].pos.x, ax + 8.0, "state {state}: pausebool helper keeps moving");
+        assert_eq!(m.fighters[plain].pos.x, px, "state {state}: a regular helper freezes");
         assert_eq!(m.fighters[0].pos.x, rx, "state {state}: so does its root");
     }
 }
@@ -111,14 +96,8 @@ fn helpers_stop_accepting_commands_when_the_round_ends() {
     assert!(m.has_command(plain, "x"));
     assert!(m.has_command(0, "x"));
     m.round_state = 3;
-    assert!(
-        !m.has_command(plain, "x"),
-        "helpers lose their commands as soon as the round is decided"
-    );
-    assert!(
-        m.has_command(0, "x"),
-        "the root keeps its own until it settles"
-    );
+    assert!(!m.has_command(plain, "x"), "helpers lose their commands as soon as the round is decided");
+    assert!(m.has_command(0, "x"), "the root keeps its own until it settles");
     m.round_state = 4;
     assert!(!m.has_command(plain, "x"));
     assert_eq!(m.fighters[plain].root, root);
@@ -127,18 +106,13 @@ fn helpers_stop_accepting_commands_when_the_round_ends() {
 #[test]
 fn helpers_are_frozen_and_hidden_on_the_victory_screen() {
     let (mut m, always, plain) = setup();
-    let invisible =
-        |m: &Match, i: usize| m.fighters[i].has_assert(ume_engine::fighter::asf::INVISIBLE);
+    let invisible = |m: &Match, i: usize| m.fighters[i].has_assert(ume_engine::fighter::asf::INVISIBLE);
     ticks(&mut m, 1);
     assert!(!invisible(&m, plain) && !invisible(&m, always));
     let (px, ax) = (m.fighters[plain].pos.x, m.fighters[always].pos.x);
     m.round_state = 4;
     m.round_time = 0;
     ticks(&mut m, 5);
-    assert_eq!(
-        (m.fighters[plain].pos.x, m.fighters[always].pos.x),
-        (px, ax),
-        "no helper moves, pausebool included"
-    );
+    assert_eq!((m.fighters[plain].pos.x, m.fighters[always].pos.x), (px, ax), "no helper moves, pausebool included");
     assert!(invisible(&m, plain) && invisible(&m, always));
 }

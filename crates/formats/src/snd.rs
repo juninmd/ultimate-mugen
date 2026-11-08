@@ -37,15 +37,11 @@ pub fn decode_snd_checked(buf: &[u8]) -> Result<HashMap<(i32, i32), Vec<u8>>, St
         let start = ofs + 16;
         let end = buf.len().min(start.saturating_add(length));
         if end > start {
-            if let Entry::Vacant(e) = out.entry(key) {
-                e.insert(buf[start..end].to_vec());
-            }
+            if let Entry::Vacant(e) = out.entry(key) { e.insert(buf[start..end].to_vec()); }
         }
         if next <= ofs {
             let set = seen.get_or_insert_with(HashSet::new);
-            if !set.insert(next) {
-                break;
-            }
+            if !set.insert(next) { break; }
         }
         ofs = next;
     }

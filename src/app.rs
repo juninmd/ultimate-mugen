@@ -583,7 +583,7 @@ impl App {
             );
             self.applied = Some(self.settings);
         }
-        self.g.post.level = self.settings.fx as u8;
+        self.g.post.level = crate::vfx::quality::set(self.settings.fx);
         set_keep_aspect(self.settings.keep_aspect);
         set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;

@@ -21,7 +21,7 @@ pub(super) fn reset_rule() -> String {
 }
 
 pub(super) fn eligible(m: &NativeMove, when: &str) -> bool {
-    matches!(m.kind.as_str(), "special" | "super") && when == "stand" && m.throw.is_none() && m.flight != Some(true)
+    matches!(m.kind.as_str(), "special" | "super") && when == "stand" && m.throw.is_none() && m.flight != Some(true) && m.burst != Some(true)
 }
 
 pub(super) fn entry(chunk: &str, ground_state: i32, ground_conditions: &str) -> String {

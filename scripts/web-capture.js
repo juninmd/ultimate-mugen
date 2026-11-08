@@ -13,6 +13,8 @@ const server = staticServer(dir, types);
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, recordVideo: plan.video ? { dir: out, size: { width: 960, height: 540 } } : undefined });
   const page = await ctx.newPage();
+  page.on('console', m => { if (process.env.CAPTURE_LOG) console.log(m.type(), m.text().slice(0, 200)); });
+  page.on('pageerror', e => console.log('pageerror', e.message.slice(0, 300)));
   await page.goto(url);
   await page.locator('#boot').waitFor({ state: 'detached', timeout: 60000 }).catch(() => {});
   await page.waitForTimeout(12000);

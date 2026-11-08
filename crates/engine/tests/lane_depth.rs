@@ -6,7 +6,7 @@ use ume_engine::input::k;
 use ume_engine::matchs::Match;
 use ume_engine::native::{compile_native, NativeChar};
 
-const JAB_STATE: i32 = 200;
+const JAB_STATE: i32 = 201;
 
 fn arena(lanes: bool) -> Match {
     let path = format!("{}/../../assets/chars/kaito.json", env!("CARGO_MANIFEST_DIR"));
@@ -20,6 +20,12 @@ fn arena(lanes: bool) -> Match {
     m.lanes.near = 40.0;
     m.start_round();
     while m.round_state != 2 {
+        m.tick(&[0, 0]);
+    }
+    for _ in 0..240 {
+        if m.fighters.iter().all(|f| f.ctrl) {
+            break;
+        }
         m.tick(&[0, 0]);
     }
     m
@@ -71,4 +77,31 @@ fn fighters_on_different_lanes_do_not_push_each_other() {
     let (x0, x1) = (m.fighters[0].pos.x, m.fighters[1].pos.x);
     ticks(&mut m, 5);
     assert_eq!((m.fighters[0].pos.x - x0).abs() + (m.fighters[1].pos.x - x1).abs(), 0.0);
+}
+
+fn defender_damage(lanes: bool, defender_input: u32) -> (f32, bool) {
+    let mut m = arena(lanes);
+    face_off(&mut m, 30.0);
+    enter(&mut m, 1, 0);
+    m.fighters[1].ctrl = true;
+    ticks(&mut m, 2);
+    let start = m.fighters[1].life;
+    enter(&mut m, 0, JAB_STATE);
+    let mut guarded = false;
+    for _ in 0..60 {
+        m.tick(&[0, defender_input]);
+        guarded |= (120..=155).contains(&m.fighters[1].state_no);
+    }
+    (start - m.fighters[1].life, guarded)
+}
+
+#[test]
+fn the_guard_button_blocks_without_holding_back_and_only_in_lane_mode() {
+    let (open, open_guarded) = defender_damage(true, 0);
+    let (blocked, blocked_guarded) = defender_damage(true, k::GUARD);
+    assert!(!open_guarded && open > 0.0);
+    assert!(blocked_guarded, "the guard button puts the defender in a guard state");
+    assert!(blocked < open, "guarded damage ({blocked}) is below open damage ({open})");
+    let (outside, outside_guarded) = defender_damage(false, k::GUARD);
+    assert!(!outside_guarded && outside > 0.0, "the button does nothing outside lane mode");
 }

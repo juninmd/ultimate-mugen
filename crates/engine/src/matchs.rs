@@ -398,7 +398,7 @@ impl Match {
         if self.fighters[i].has_assert(asf::NOHARDCODEDKEYS) { return; }
         if st == 'S' || st == 'C' {
             let guard_blocked = self.fighters[i].has_assert(if st == 'S' { asf::NOSTANDGUARD } else { asf::NOCROUCHGUARD });
-            let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD);
+            let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD) || self.fighters[i].guard_button;
             if guard_input && !guard_blocked && self.in_guard_dist(i) && !(120..=155).contains(&s) { let own = self.fighters[i].def.clone(); self.change_state(i, 120, own); return; }
             if st == 'S' {
                 if cmd(self, "holdup") && !self.fighters[i].has_assert(asf::NOJUMP) { let own = self.fighters[i].def.clone(); self.change_state(i, 40, own); return; }
@@ -701,7 +701,7 @@ impl Match {
                 if f.ikemen.standby { bits = 0; }
             }
             if bits & crate::input::k::T != 0 && awaken_len < awaken.len() { awaken[awaken_len] = fi; awaken_len += 1; }
-            k += 1; if self.lanes.active { f.lane_step(bits, &self.lanes); } bits &= !crate::input::k::LANE_MASK;
+            k += 1; if self.lanes.active { f.lane_step(bits, &self.lanes); } f.guard_button = self.lanes.active && bits & crate::input::k::GUARD != 0; bits &= !crate::input::k::BRAWLER_MASK;
             if f.assert_input.1 > 0 { bits |= f.assert_input.0; f.assert_input.1 -= 1; }
             if f.input_shift > 0 { let (b, fa) = (bits, f.facing as i32); for _ in 0..f.input_shift { f.history.push(b, fa); } }
             else if f.input_shift < 0 { f.history.rewind(f.input_shift); }
@@ -1020,7 +1020,7 @@ impl Match {
         let ok = (st == 'S' && (gf.contains('H') || gf.contains('M'))) || (st == 'C' && (gf.contains('L') || gf.contains('M'))) || (st == 'A' && gf.contains('A'));
         if !ok { return false; }
         if (120..=155).contains(&f.state_no) { return true; }
-        f.ctrl && f.move_type != 'H' && st != 'A' && !f.is_helper && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD))
+        f.ctrl && f.move_type != 'H' && st != 'A' && !f.is_helper && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD) || f.guard_button)
     }
 
     fn detect_reversals(&mut self) {

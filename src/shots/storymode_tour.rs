@@ -86,12 +86,32 @@ async fn cap_lane_extremes(app: &mut App, dir: &str, name: &str, far: f32, near:
     place_hero(app, 0.0);
 }
 
+async fn cap_guard(app: &mut App, dir: &str, name: &str) {
+    if let Some(s) = app.session.as_mut() {
+        s.pilots[0] = Pilot::Replay(vec![ume_engine::input::k::GUARD; FIGHT_LIMIT_TICKS], 0);
+    }
+    for _ in 0..FIGHT_LIMIT_TICKS {
+        step(app, 1, false);
+        let guarding = app.session.as_ref().is_some_and(|s| {
+            s.m.fighters.iter().any(|f| !f.is_helper && f.side == 0 && (120..=155).contains(&f.state_no))
+        });
+        if guarding {
+            break;
+        }
+    }
+    cap_fight(app, dir, &format!("{name}-guard")).await;
+}
+
 async fn play_fight(app: &mut App, dir: &str, name: &str, strong: bool, band: Option<(f32, f32)>) -> bool {
     app.start_fight().await;
     automate_player(app, strong);
     if let Some((far, near)) = band {
         step(app, 400, false);
         cap_lane_extremes(app, dir, name, far, near).await;
+        cap_guard(app, dir, name).await;
+        app.session = None;
+        app.start_fight().await;
+        automate_player(app, strong);
     }
     step(app, 400, false);
     step(app, FIGHT_WARMUP_TICKS, false);

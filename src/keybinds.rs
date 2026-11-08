@@ -7,7 +7,7 @@ mod keys;
 use keys::KEYS;
 
 /// Rebindable fighting actions: label and engine input bit.
-pub const ACTIONS: [(&str, u32); 18] = [
+pub const ACTIONS: [(&str, u32); 19] = [
     ("Cima", k::U),
     ("Baixo", k::D),
     ("Esquerda", k::L),
@@ -26,6 +26,7 @@ pub const ACTIONS: [(&str, u32); 18] = [
     ("Carregar ki (Start)", k::S),
     ("Andar p/ o fundo (Story)", k::LANE_UP),
     ("Andar p/ a frente (Story)", k::LANE_DOWN),
+    ("Defender (Story)", k::GUARD),
 ];
 const START: usize = 15;
 const N: usize = ACTIONS.len();
@@ -51,10 +52,10 @@ impl Default for KeyMap {
         KeyMap {
             slots: [
                 [
-                    Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T, F, R, Z, X,
+                    Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T, F, R, Z, X, C,
                 ],
                 [
-                    I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal, KpSubtract, KpAdd,
+                    I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal, KpSubtract, KpAdd, KpMultiply,
                 ],
             ],
         }
@@ -64,9 +65,9 @@ impl Default for KeyMap {
 fn previous_defaults() -> [[KeyCode; N]; 2] {
     use KeyCode::*;
     [
-        [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T, F, R, Z, X],
+        [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T, F, R, Z, X, C],
         [
-            Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal, KpSubtract, KpAdd,
+            Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal, KpSubtract, KpAdd, KpMultiply,
         ],
     ]
 }

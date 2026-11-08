@@ -16,6 +16,7 @@ const server = staticServer(dir, types);
   const consoleTail = [];
   p.on('crash', () => problems.push('Chromium page crashed'));
   const stageRequests = [];
+  const timeline = [];
   p.on('request', r => { if (/\/assets\/stages\/[^/]+\.png$/.test(new URL(r.url()).pathname)) stageRequests.push(r.url()); });
   p.on('pageerror', e => { if (!/register_plugin/.test(e.message)) problems.push(`pageerror: ${e.message}`); });
   p.on('console', m => {
@@ -31,9 +32,14 @@ const server = staticServer(dir, types);
   await key('ArrowDown'); await key('ArrowDown'); await key('Enter', 1500);  // Arcade, Survival → CPU (Versus CPU) → select
   await key('Enter', 1500); await key('Enter', 1500); // P1, P2 → stages
   if (stageRequests.length) problems.push(`Full stage images fetched before confirmation: ${stageRequests.length}`);
-  const stageReq = p.waitForRequest(r => /\/assets\/stages\/[^/]+\.png$/.test(new URL(r.url()).pathname), { timeout: 30000 }).catch(() => null);
-  await key('Enter', 1500);                 // stage → VS / loading
-  await stageReq;
+  // A slow runner can stall the wasm main thread for seconds and swallow a tap, so the confirm key is retried until the
+  // stage request shows up instead of trusting one fixed 1.5 s step.
+  const startedAt = Date.now();
+  for (let attempt = 0; attempt < 4 && !stageRequests.length; attempt++) {
+    await key('Enter', 500);                // stage → VS / loading
+    await p.waitForRequest(r => /\/assets\/stages\/[^/]+\.png$/.test(new URL(r.url()).pathname), { timeout: 8000 }).catch(() => null);
+    timeline.push(`confirm attempt ${attempt + 1} at +${Date.now() - startedAt} ms, stage requests ${stageRequests.length}`);
+  }
   await p.waitForTimeout(6000);             // intro + fight start
   if (stageRequests.length !== 1) problems.push(`Expected one selected stage download, got ${stageRequests.length}`);
   // releaseAll (blur, pagehide, contextmenu) synthesises a pointerup: it must be a real PointerEvent, or the
@@ -48,6 +54,6 @@ const server = staticServer(dir, types);
   let lum = null;
   if (PNG) { const img = PNG.sync.read(shot); let s = 0, s2 = 0, n = img.width * img.height; for (let i = 0; i < n; i++) { const l = (img.data[i * 4] + img.data[i * 4 + 1] + img.data[i * 4 + 2]) / 3; s += l; s2 += l * l; } const m = s / n; lum = { mean: m, sd: Math.sqrt(s2 / n - m * m) }; if (m < 8 || lum.sd < 6) problems.push(`black/flat screen: ${JSON.stringify(lum)}`); }
   fs.writeFileSync(path.join(os.tmpdir(), 'web-smoke-fight.png'), shot);
-  if (problems.length) { console.error('WEB SMOKE FAILED\n' + problems.join('\n') + '\nlast console messages:\n' + consoleTail.join('\n')); process.exit(1); }
+  if (problems.length) { console.error('WEB SMOKE FAILED\n' + problems.join('\n') + '\ntimeline:\n' + timeline.join('\n') + '\nlast console messages:\n' + consoleTail.join('\n')); process.exit(1); }
   console.log('WEB SMOKE OK', lum ? JSON.stringify(lum) : '(no pngjs: luminance check skipped)');
 })().catch(e => { console.error('SCRIPT FAIL', e); process.exit(2); });

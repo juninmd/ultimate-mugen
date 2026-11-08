@@ -59,7 +59,7 @@ fn play(a: &Arc<CharDef>, b: &Arc<CharDef>, seeds: (u32, u32), used: &mut [BTree
             if f.power < 0.0 || f.power > f.power_max + 0.5 { report(problems, "power-range", side, format!("power {} of {}", f.power, f.power_max)); }
             let frozen = m.pause.is_some() || f.hit_pause > 0 || f.hit_shake > 0 || f.bind.is_some();
             let s = &mut streaks[side];
-            s.sunk = if f.pos.y > 1.5 { s.sunk + 1 } else { 0 };
+            s.sunk = if f.pos.y <= 1.5 { 0 } else if frozen { s.sunk } else { s.sunk + 1 };
             if s.sunk > LONGEST_BELOW_FLOOR { report(problems, "below-floor", side, format!("y {:.1} for {} ticks in state {}", f.pos.y, s.sunk, f.state_no)); }
             let outside_view = (f.pos.x - m.camera.x).abs() > m.view_w / 2.0 + OFF_CAMERA_MARGIN;
             s.hidden = if outside_view { s.hidden + 1 } else { 0 };

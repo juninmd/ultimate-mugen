@@ -6,6 +6,7 @@ pub const STANDING_UNITS: f32 = 96.0;
 pub const BODY_START: f32 = 0.10;
 pub const MIN_REACH: f32 = 0.60;
 pub const MIN_HEIGHT: f32 = 0.36;
+const BACK_STRIKE_CENTER: f32 = -0.30;
 pub const HIGHEST_TOP: f32 = -0.95;
 
 pub fn standing_height(nc: &NativeChar) -> f32 {
@@ -46,7 +47,7 @@ fn declared_strike_boxes(nc: &NativeChar, fr: &NativeFrame) -> Option<Vec<Box4>>
 }
 
 pub fn playable_strike_box(mut bounds: Box4, height: f32) -> Box4 {
-    let faces_forward = (bounds[0] + bounds[2]) * 0.5 > 0.0;
+    let faces_forward = (bounds[0] + bounds[2]) * 0.5 > BACK_STRIKE_CENTER * height;
     bounds[1] = bounds[1].max(HIGHEST_TOP * height);
     bounds[3] = bounds[3].min(0.0);
     if bounds[3] - bounds[1] < MIN_HEIGHT * height {

@@ -51,7 +51,7 @@ fn presses(command: &CommandDef) -> Vec<u32> {
             frames.extend(std::iter::repeat_n(bits, hold));
             frames.extend([0, 0]);
         } else {
-            frames.extend(std::iter::repeat_n(bits, HOLD_TICKS));
+            frames.extend(std::iter::repeat_n(bits, if step.hold { HELD_STEP_TICKS } else { HOLD_TICKS }));
             frames.push(0);
         }
     }
@@ -66,7 +66,7 @@ fn abilities_reached(base: &Match, command: &CommandDef, forms: usize) -> BTreeS
             let mut m = base.clone();
             m.fighters[0].form = form as u8;
             face_off(&mut m, gap);
-            m.fighters[0].power = 3000.0;
+            m.fighters[0].power = if command.name == "charge_cmd" { 0.0 } else { 3000.0 };
             let held = match stance {
                 Stance::Standing => 0,
                 Stance::Crouching => { for _ in 0..8 { m.tick(&[CROUCH_HOLD, 0]); } CROUCH_HOLD }

@@ -692,7 +692,7 @@ pub async fn run(app: &mut App, dir: &str) {
         native_coverage(app, dir).await;
         return;
     }
-    if matches!(std::env::var("UME_TOUR").as_deref(), Ok("mugen" | "moves" | "duel")) {
+    if matches!(std::env::var("UME_TOUR").as_deref(), Ok("mugen" | "moves" | "duel" | "clips")) {
         crate::mugen_tour::run(app, dir).await;
         return;
     }

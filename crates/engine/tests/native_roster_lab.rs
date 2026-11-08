@@ -6,6 +6,8 @@ use ume_engine::matchs::Match;
 use ume_engine::native::{compile_native, NativeChar};
 
 const GAPS: [f32; 14] = [14.0, 24.0, 34.0, 44.0, 54.0, 64.0, 76.0, 90.0, 110.0, 135.0, 165.0, 200.0, 250.0, 320.0];
+const MIN_NORMAL_REACH: f32 = 64.0;
+const FIRST_SPECIAL_STATE: i32 = 1000;
 const ATTACK_RANGES: [(i32, i32); 4] = [(200, 299), (400, 499), (600, 699), (1000, 3799)];
 
 struct Probe { state: i32, anim: i32, damage: f32, reach: f32, hits: usize, ticks_to_ctrl: i32 }
@@ -75,6 +77,7 @@ fn every_native_attack_state_connects_and_stays_finite() {
         for p in &probes {
             println!("  state {:5} anim {:5} damage {:6.1} hits {:3} reach {:4.0} ctrl@{}", p.state, p.anim, p.damage, p.hits, p.reach, p.ticks_to_ctrl);
             if p.damage <= 0.0 { failures.push(format!("{} state {} never connected (anim {})", nc.id, p.state, p.anim)); }
+            else if p.state < FIRST_SPECIAL_STATE && p.reach < MIN_NORMAL_REACH { failures.push(format!("{} normal {} only reaches {} units", nc.id, p.state, p.reach)); }
         }
     }
     assert!(failures.is_empty(), "dead moves:\n{}", failures.join("\n"));

@@ -2,6 +2,8 @@ use crate::commands::CommandDef;
 use crate::input::{k, InputSource};
 use crate::matchs::Match;
 
+mod charge;
+
 pub struct Ai {
     pub level: i32,
     queue: std::collections::VecDeque<u32>,
@@ -91,7 +93,7 @@ impl InputSource for Ai {
             self.ranged_attack.clear();
             let mask = 1u32 << (f.form as u32).min(31);
             for (idx, c) in f.def.commands.iter().enumerate() {
-                if matches!(c.name.as_str(), "fly_toggle" | "speed_toggle" | "teleport_cmd") {
+                if matches!(c.name.as_str(), "fly_toggle" | "speed_toggle" | "teleport_cmd" | "charge_cmd") {
                     continue;
                 }
                 let form_ok = f
@@ -134,6 +136,9 @@ impl InputSource for Ai {
             && f.def.anims.contains_key(&196)
         {
             return k::T;
+        }
+        if charge::wants_to_charge(m, me, ei, self.level) {
+            return k::S;
         }
         if self.hold_ticks > 0 {
             self.hold_ticks -= 1;

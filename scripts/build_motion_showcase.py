@@ -38,7 +38,7 @@ for row_idx, char_id in enumerate(chars):
             sprite = sprite.resize((tile_size - 10, tile_size - 10), Image.NEAREST)
             img.paste(sprite, (x + 5, y + 5), sprite)
 
-os.makedirs("proto_sprites", exist_ok=True)
-out_path = "proto_sprites/motion_sprites_showcase.png"
+os.makedirs("docs/assets/pixel-art", exist_ok=True)
+out_path = "docs/assets/pixel-art/motion_sprites_showcase.png"
 img.save(out_path)
 print(f"Saved motion showcase to {out_path}")

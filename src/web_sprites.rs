@@ -43,11 +43,19 @@ pub fn prefetch_roster(ids: Vec<String>) {
     });
 }
 
+pub fn pack_name(entry: &crate::registry::CharEntry) -> String {
+    match &entry.src {
+        crate::registry::Src::Native(native) => native.sprite_dir().to_string(),
+        _ => entry.id.trim_start_matches("umf:").to_string(),
+    }
+}
+
 pub fn ready(entry: &crate::registry::CharEntry) -> Result<bool, String> {
     if entry.mugen {
         return Ok(true);
     }
-    let character = entry.id.trim_start_matches("umf:");
+    let character = pack_name(entry);
+    let character = character.as_str();
     if ume_engine::native::has_sprite_pack(character) {
         return Ok(true);
     }

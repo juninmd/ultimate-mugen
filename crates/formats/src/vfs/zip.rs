@@ -11,11 +11,11 @@ const LOCAL_SIG: u32 = 0x0403_4b50;
 const MAX_ENTRY_BYTES: usize = 256 << 20;
 
 pub(super) struct ZipEntry {
-    name: String,
-    method: u16,
-    csize: u64,
-    usize: u64,
-    local: u64,
+    pub(super) name: String,
+    pub(super) method: u16,
+    pub(super) csize: u64,
+    pub(super) usize: u64,
+    pub(super) local: u64,
 }
 
 /// Import progress shared with the UI while an in-memory archive is unpacked.
@@ -115,7 +115,7 @@ impl<F: FnMut(u64, usize) -> Option<Vec<u8>>> Probe<F> {
 
 /// Parse the end-of-central-directory record and every central directory
 /// entry, using `read(at, len)` for random access into the archive.
-fn zip_entries(read: impl FnMut(u64, usize) -> Option<Vec<u8>>, size: u64) -> Result<Vec<ZipEntry>, String> {
+pub(super) fn zip_entries(read: impl FnMut(u64, usize) -> Option<Vec<u8>>, size: u64) -> Result<Vec<ZipEntry>, String> {
     let mut probe = Probe(read);
     let min = size.saturating_sub(22 + 0xffff);
     let mut eocd = None;

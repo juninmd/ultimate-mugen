@@ -592,7 +592,7 @@ impl App {
         let dt = get_frame_time();
         #[cfg(target_arch = "wasm32")]
         if self.wasm_import.is_some() {
-            self.wasm_import_step();
+            self.wasm_import_step(dt);
             if self.wasm_import.is_some() {
                 self.draw_import_overlay();
                 self.apply_update_if_ready();
@@ -750,10 +750,7 @@ impl App {
                 )
             {
                 ume_shell::watchdog::label("import");
-                self.wasm_import = Some(web_import::WasmImport {
-                    pending: None,
-                    show_overlay: false,
-                });
+                self.wasm_import = Some(web_import::WasmImport::new());
                 self.msg = "Importando recursos MUGEN…".into();
                 crate::set_import_button(false);
             }

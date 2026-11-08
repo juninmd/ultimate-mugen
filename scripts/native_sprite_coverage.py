@@ -85,7 +85,7 @@ def resolution_for(pose, files):
 
 
 def targets_for(char, defaults):
-    folder = CHARS / "sprites" / char["id"]
+    folder = CHARS / "sprites" / char.get("spriteSet", char["id"])
     files = {path.stem for path in folder.glob("*.png") if path.suffix == ".png"}
     poses = dict(defaults.get("poses") or {})
     poses.update((char.get("art") or {}).get("poses") or {})
@@ -126,7 +126,7 @@ def targets_for(char, defaults):
 
 def audit_character(char, defaults):
     cid = char["id"]
-    folder = CHARS / "sprites" / cid
+    folder = CHARS / "sprites" / char.get("spriteSet", cid)
     files = {path.stem for path in folder.glob("*.png") if path.suffix == ".png"}
     poses = dict(defaults.get("poses") or {})
     poses.update((char.get("art") or {}).get("poses") or {})

@@ -13,6 +13,7 @@ use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::chardef::CharDef;
 
+mod arcade;
 mod cutscene;
 mod keyedit;
 mod loading;
@@ -243,6 +244,7 @@ pub struct App {
     pub sel: (usize, usize, usize),
     pub session: Option<Session>,
     pub arcade: Option<(Vec<usize>, usize)>,
+    pub boss_progression: crate::boss::BossProgression,
     pub pause_cur: usize,
     pub debug_boxes: bool,
     pub quit: bool,
@@ -441,6 +443,7 @@ impl App {
             sel: (0, 1, 0),
             session: None,
             arcade: None,
+            boss_progression: crate::boss::BossProgression::load(),
             pause_cur: 0,
             debug_boxes: false,
             quit: false,
@@ -1299,63 +1302,6 @@ impl App {
             k,
             mirror,
         );
-    }
-
-    fn playable(&self) -> Vec<usize> {
-        (0..self.reg.chars.len())
-            .filter(|&i| !self.reg.chars[i].boss)
-            .collect()
-    }
-    fn boss_idx(&self) -> Option<usize> {
-        (0..self.reg.chars.len())
-            .find(|&i| self.reg.chars[i].boss && !self.reg.chars[i].broken.get())
-    }
-
-    fn arcade_start(&mut self, me: usize, mate: Option<usize>) {
-        let n = self.reg.chars.len();
-        let mut ladder: Vec<usize> = (0..n)
-            .filter(|&i| {
-                i != me
-                    && Some(i) != mate
-                    && !self.reg.chars[i].broken.get()
-                    && !self.reg.chars[i].boss
-            })
-            .collect();
-        let seed = (get_time() * 1000.0) as usize;
-        let ll = ladder.len().max(1);
-        ladder.rotate_left(seed % ll);
-        ladder.sort_by_key(|&i| self.reg.chars[i].mugen as u8);
-        ladder.truncate(8);
-        if ladder.is_empty() {
-            ladder.push(me);
-        }
-        let has_boss = self
-            .boss_idx()
-            .filter(|&b| b != me && Some(b) != mate)
-            .map(|b| {
-                ladder.push(b);
-                ladder.push(b);
-            })
-            .is_some();
-        self.sel = (me, ladder[0], self.sel.2);
-        self.team = mate.map(|m| Team::new(vec![me, m], vec![ladder[0]], true));
-        self.team_pal = if mate.is_some() {
-            vec![self.side_pal(0), self.side_pal(1)]
-        } else {
-            vec![]
-        };
-        self.arcade = Some((ladder, 0));
-        self.survival = None;
-        self.ending_shown = false;
-        self.screen = if has_boss {
-            Screen::Cutscene {
-                kind: 0,
-                page: 0,
-                t: 0.0,
-            }
-        } else {
-            Screen::Stages { cur: 1 }
-        };
     }
 
     /// Registry indices visible under the current filter (never empty).
@@ -2277,7 +2223,10 @@ impl App {
             picking,
             picked,
         };
+        self.draw_boss_toast(dt);
     }
+
+
 
     fn portrait_fit(&mut self, i: usize, x: f32, y: f32, w: f32, h: f32) {
         let e = &self.reg.chars[i];
@@ -2780,7 +2729,31 @@ impl App {
             }
             let (side, _, r) = plan[st];
             let job = self.pending.jobs.get_mut(st).and_then(|j| j.take());
-            let d = self.reg.chars[r].finish_load(self.pal_for(&plan, st), job)?;
+            let mut d = self.reg.chars[r].finish_load(self.pal_for(&plan, st), job)?;
+            let is_boss_match = self.mode == Mode::Arcade
+                && side == 1
+                && self
+                    .arcade
+                    .as_ref()
+                    .is_some_and(|(l, i)| *i + 1 == l.len() && l.last() == Some(&r));
+            if is_boss_match {
+                if let crate::registry::Src::Native(nc) = &self.reg.chars[r].src {
+                    let mut boss_nc = (**nc).clone();
+                    boss_nc.boss = true;
+                    let mut def = ume_engine::native::compile_native(
+                        &boss_nc,
+                        self.pal_for(&plan, st),
+                        true,
+                    );
+                    if def.c("data.life", 0.0) < 1800.0 {
+                        def.constants.insert("data.life".into(), 2000.0);
+                    }
+                    if def.c("data.attack", 0.0) < 115.0 {
+                        def.constants.insert("data.attack".into(), 125.0);
+                    }
+                    d = Arc::new(def);
+                }
+            }
             self.pending.defs[side].push(d);
         } else if st == n {
             ume_shell::watchdog::label("load:stage");
@@ -3572,50 +3545,35 @@ impl App {
         // arcade progression
         if self.mode == Mode::Arcade && winner == 0 {
             let boss = self.boss_idx();
-            let st_volcano = self.reg.stages.iter().position(|s| s.id.contains("volcano"));
-            let st_spirit = self.reg.stages.iter().position(|s| s.id.contains("spirit"));
+            let mut next_action = None;
             if let Some((ladder, i)) = self.arcade.as_mut() {
                 *i += 1;
                 if *i < ladder.len() {
                     let is_boss = Some(ladder[*i]) == boss;
                     let is_phase2 = is_boss && *i > 0 && Some(ladder[*i - 1]) == boss;
-                    self.sel.1 = ladder[*i];
-                    self.sel.2 = if is_phase2 {
-                        st_spirit.or(st_volcano).unwrap_or(0)
-                    } else if is_boss {
-                        st_volcano.unwrap_or((*i * 3 + 1) % self.reg.stages.len())
-                    } else {
-                        (*i * 3 + 1) % self.reg.stages.len()
-                    };
-                    self.audio.stop_music();
-                    if self.coop {
-                        if let Some(t) = self.team.as_mut() {
-                            t.members[1] = vec![ladder[*i]];
-                        }
-                    }
-                    self.screen = if is_phase2 {
-                        Screen::Cutscene {
-                            kind: 3,
-                            page: 0,
-                            t: 0.0,
-                        }
-                    } else if is_boss {
-                        Screen::Cutscene {
-                            kind: 1,
-                            page: 0,
-                            t: 0.0,
-                        }
-                    } else {
-                        Screen::Vs { t: 0.0, step: 0 }
-                    };
-                    return;
-                }
-                if *i == ladder.len()
+                    next_action = Some((*i, ladder[*i], is_boss, is_phase2, false));
+                } else if *i == ladder.len()
                     && !self.ending_shown
                     && boss.is_some_and(|b| ladder.last() == Some(&b))
                 {
                     self.ending_shown = true;
-                    self.audio.stop_music();
+                    next_action = Some((*i, 0, false, false, true));
+                }
+            }
+            if let Some((idx, next_char, is_boss, is_phase2, is_ending)) = next_action {
+                self.audio.stop_music();
+                if is_ending {
+                    let hero_id = self.player_char_id();
+                    let boss_entry_id = boss
+                        .map(|b| {
+                            self.reg.chars[b]
+                                .id
+                                .strip_prefix("umf:")
+                                .unwrap_or(&self.reg.chars[b].id)
+                                .to_string()
+                        })
+                        .unwrap_or_default();
+                    self.boss_progression.on_clear(&hero_id, &boss_entry_id);
                     self.screen = Screen::Cutscene {
                         kind: 2,
                         page: 0,
@@ -3623,6 +3581,36 @@ impl App {
                     };
                     return;
                 }
+                self.sel.1 = next_char;
+                let st_spirit = self.reg.stages.iter().position(|s| s.id.contains("spirit"));
+                self.sel.2 = if is_phase2 {
+                    st_spirit.unwrap_or(0)
+                } else if is_boss {
+                    self.boss_stage_idx(next_char)
+                } else {
+                    (idx * 3 + 1) % self.reg.stages.len()
+                };
+                if self.coop {
+                    if let Some(t) = self.team.as_mut() {
+                        t.members[1] = vec![next_char];
+                    }
+                }
+                self.screen = if is_phase2 {
+                    Screen::Cutscene {
+                        kind: 3,
+                        page: 0,
+                        t: 0.0,
+                    }
+                } else if is_boss {
+                    Screen::Cutscene {
+                        kind: 1,
+                        page: 0,
+                        t: 0.0,
+                    }
+                } else {
+                    Screen::Vs { t: 0.0, step: 0 }
+                };
+                return;
             }
         }
         draw_rectangle(
@@ -3742,6 +3730,10 @@ impl App {
         self.screen = Screen::Results { winner, cur };
         if ok {
             self.audio.stop_music();
+            if done {
+                self.screen = self.arcade_return_to_select();
+                return;
+            }
             // with a replay available the menu is Revanche / Replay / Personagens / Menu; without it Revanche / Personagens / Menu
             let choice = if can_replay {
                 cur

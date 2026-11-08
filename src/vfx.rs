@@ -696,7 +696,8 @@ impl Vfx {
                     if b.form >= 2 {
                         self.banner("DESAFIO FINAL", "OBORO · ECLIPSE ABSOLUTO", [1.0, 0.78, 0.22]);
                     } else {
-                        self.banner("CHEFE FINAL", "MIKAZUKI OBORO", [1.0, 0.15, 0.3]);
+                        let name = b.def.display_name.to_uppercase();
+                        self.banner("CHEFE FINAL", &name, [1.0, 0.15, 0.3]);
                     }
                     self.sfx.push("ko");
                 }

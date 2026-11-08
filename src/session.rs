@@ -427,10 +427,10 @@ impl Session {
                     if !played {
                         let kind = builtin.unwrap_or(match group {
                             5 => {
-                                if index >= 2 {
-                                    "hitheavy"
-                                } else {
-                                    "hit"
+                                match index {
+                                    0 => "hitlight",
+                                    1 => "hit",
+                                    _ => "hitheavy",
                                 }
                             }
                             6 => "guard",

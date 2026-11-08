@@ -3276,13 +3276,15 @@ fn volcano() -> Stage {
 }
 
 pub mod ambience;
+mod story_strip;
+pub use story_strip::*;
 mod wonders;
 
 const ILLUSTRATION_IDS: [&str; 7] = [
     "dojo", "neon", "bamboo", "plains", "spirit", "volcano", "brazil",
 ];
 
-fn decode_illustration(bytes: &[u8]) -> Result<Arc<ImageData>, String> {
+pub(crate) fn decode_illustration(bytes: &[u8]) -> Result<Arc<ImageData>, String> {
     let png = ume_formats::png::decode_png(bytes).map_err(|e| e.to_string())?;
     let rgba = png.rgba.ok_or("expected truecolor stage PNG")?;
     Ok(ImageData::new(png.width, png.height, rgba))
@@ -3309,61 +3311,6 @@ pub fn illustration_preview(id: &str) -> Option<Arc<ImageData>> {
             .get_or_init(|| decode_illustration(bytes[index]).expect("embedded stage thumbnail"))
             .clone(),
     )
-}
-
-pub const STORY_ARENAS: [&str; 5] = ["brazil", "neon", "bamboo", "volcano", "dojo"];
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn story_strip(arena: &str) -> Option<Arc<ImageData>> {
-    use std::sync::OnceLock;
-    static STRIPS: [OnceLock<Arc<ImageData>>; 5] = [const { OnceLock::new() }; 5];
-    let index = STORY_ARENAS.iter().position(|name| *name == arena)?;
-    let bytes: [&[u8]; 5] = [
-        include_bytes!("../assets/stages/story/brazil.png"),
-        include_bytes!("../assets/stages/story/neon.png"),
-        include_bytes!("../assets/stages/story/bamboo.png"),
-        include_bytes!("../assets/stages/story/volcano.png"),
-        include_bytes!("../assets/stages/story/dojo.png"),
-    ];
-    Some(STRIPS[index].get_or_init(|| decode_illustration(bytes[index]).expect("embedded story strip")).clone())
-}
-
-#[cfg(target_arch = "wasm32")]
-thread_local! {
-    static WEB_STRIP: std::cell::RefCell<Option<(String, Arc<ImageData>)>> = const { std::cell::RefCell::new(None) };
-    static WANT_STRIP: std::cell::RefCell<Option<String>> = const { std::cell::RefCell::new(None) };
-}
-
-#[cfg(target_arch = "wasm32")]
-pub fn story_strip(arena: &str) -> Option<Arc<ImageData>> {
-    WEB_STRIP.with(|cache| cache.borrow().as_ref().filter(|(key, _)| key == arena).map(|(_, image)| image.clone()))
-}
-
-#[cfg(target_arch = "wasm32")]
-pub fn want_story_strip(arena: &str) {
-    WANT_STRIP.with(|want| *want.borrow_mut() = Some(arena.to_string()));
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn want_story_strip(_arena: &str) {}
-
-#[cfg(target_arch = "wasm32")]
-async fn prepare_story_strip() -> Result<(), String> {
-    use wasm_bindgen::prelude::*;
-    #[wasm_bindgen]
-    extern "C" {
-        fn ume_fetch_asset(path: &str) -> js_sys::Promise;
-    }
-    let Some(arena) = WANT_STRIP.with(|want| want.borrow_mut().take()) else { return Ok(()) };
-    if story_strip(&arena).is_some() || !STORY_ARENAS.contains(&arena.as_str()) {
-        return Ok(());
-    }
-    let data = js_sys::futures::JsFuture::from(ume_fetch_asset(&format!("assets/stages/story/{arena}.png")))
-        .await
-        .map_err(|e| format!("Story strip download failed: {e:?}"))?;
-    let image = decode_illustration(&js_sys::Uint8Array::new(&data).to_vec())?;
-    WEB_STRIP.with(|cache| *cache.borrow_mut() = Some((arena, image)));
-    Ok(())
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -3413,7 +3360,7 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
     extern "C" {
         fn ume_fetch_asset(path: &str) -> js_sys::Promise;
     }
-    prepare_story_strip().await?;
+    story_strip::prepare().await?;
     if illustration(id).is_some() {
         return Ok(());
     }

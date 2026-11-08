@@ -43,5 +43,5 @@ pub struct FormSpec {
     #[serde(default)] pub parts: Option<Vec<String>>,
     #[serde(default)] pub character: Option<String>,
     #[serde(default)] pub moves: Vec<NativeMove>,
-    #[serde(default, rename = "replaceMoves")] pub replace_moves: bool,
+    #[serde(default, rename = "replaceMoves", alias = "replace_moves")] pub replace_moves: bool,
 }

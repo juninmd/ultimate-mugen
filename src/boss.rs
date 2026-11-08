@@ -44,7 +44,9 @@ impl BossProgression {
 
     pub fn is_unlocked(&self, id: &str) -> bool {
         let clean = id.strip_prefix("umf:").unwrap_or(id);
-        if clean == "oboro" {
+        if clean.starts_with("npc_") {
+            false
+        } else if clean == "oboro" {
             self.unlocked_oboro || self.clears > 0
         } else {
             true

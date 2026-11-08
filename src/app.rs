@@ -21,6 +21,8 @@ mod market;
 mod mugen_catalog;
 mod replay_browser;
 mod settings_screen;
+mod story;
+mod story_screen;
 mod survival;
 mod update_banner;
 mod versus;
@@ -32,6 +34,7 @@ pub(crate) use keyedit::KeyEdit;
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode {
     Arcade,
+    Story,
     Survival,
     Cpu,
     Versus,
@@ -45,6 +48,7 @@ impl Mode {
     fn label(self) -> &'static str {
         crate::i18n::t(match self {
             Mode::Arcade => "mode.arcade",
+            Mode::Story => return crate::i18n::tr("HISTÓRIA", "STORY"),
             Mode::Survival => "mode.survival",
             Mode::Cpu => "mode.cpu",
             Mode::Versus => "mode.versus",
@@ -63,6 +67,7 @@ impl Mode {
     pub fn key(self) -> &'static str {
         match self {
             Mode::Arcade => "Arcade",
+            Mode::Story => "Story",
             Mode::Survival => "Survival",
             Mode::Cpu => "Cpu",
             Mode::Versus => "Versus",
@@ -76,6 +81,7 @@ impl Mode {
     pub fn from_key(key: &str) -> Mode {
         match key {
             "Arcade" => Mode::Arcade,
+            "Story" => Mode::Story,
             "Survival" => Mode::Survival,
             "Versus" => Mode::Versus,
             "Training" => Mode::Training,
@@ -109,6 +115,9 @@ pub enum Screen {
     Results {
         winner: usize,
         cur: usize,
+    },
+    Story {
+        t: f32,
     },
     /// Survival game over: final score and fights won
     SurvivalOver {
@@ -269,6 +278,7 @@ pub struct App {
     pub team: Option<Team>,
     /// Survival run in progress (round, score, carried life)
     survival: Option<survival::Survival>,
+    story: Option<crate::story::StoryRun>,
     /// Arcade/Survival with a second human on the same side (couch co-op)
     pub coop: bool,
     /// Screenpack loaded from mugen/data or mugen/screenpacks (menu labels, roster order, storyboards, lifebar geometry)
@@ -323,8 +333,9 @@ pub struct App {
     warm_key: String,
 }
 
-const MENU: [(&str, &str); 15] = [
+const MENU: [(&str, &str); 16] = [
     ("menu.arcade", "desc.arcade"),
+    ("menu.story", "desc.story"),
     ("menu.survival", "desc.survival"),
     ("menu.cpu", "desc.cpu"),
     ("menu.versus", "desc.versus"),
@@ -499,6 +510,7 @@ impl App {
             desync_reported: false,
             warm_key: String::new(),
             survival: None,
+            story: None,
             coop: false,
             sp: crate::screenpack::probe(),
             pal: [settings.pal1 as i32, settings.pal2 as i32],
@@ -601,6 +613,7 @@ impl App {
             Screen::Controls => self.controls_screen(),
             Screen::Mugen { .. } => self.mugen_screen(),
             Screen::Market => self.market_screen(),
+            Screen::Story { .. } => self.story_screen(dt),
             Screen::SurvivalOver { .. } => self.survival_over_screen(),
             Screen::Replays { .. } => self.replays_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
@@ -1143,6 +1156,7 @@ impl App {
         if let Some(i) = chosen {
             let mode = [
                 Mode::Arcade,
+                Mode::Story,
                 Mode::Survival,
                 Mode::Cpu,
                 Mode::Versus,
@@ -1153,7 +1167,7 @@ impl App {
                 Mode::TeamTag,
             ];
             match i {
-                0..=8 => {
+                0..=9 => {
                     self.mode = mode[i];
                     self.team = None;
                     self.team_pick.clear();
@@ -1170,18 +1184,18 @@ impl App {
                         picked: [None, None],
                     });
                 }
-                9 => self.go(Screen::Mugen { view: 0, page: 0 }),
-                10 => self.go(Screen::Market),
-                11 => {
+                10 => self.go(Screen::Mugen { view: 0, page: 0 }),
+                11 => self.go(Screen::Market),
+                12 => {
                     self.settings_back = None;
                     self.go(Screen::Controls)
                 }
-                12 => self.go(Screen::Settings {
+                13 => self.go(Screen::Settings {
                     tab: 0,
                     cur: 0,
                     from_fight: false,
                 }),
-                13 => {
+                14 => {
                     self.refresh_replays();
                     self.go(Screen::Replays { cur: 0 })
                 }
@@ -2166,6 +2180,9 @@ impl App {
             } else if picking == 0 && self.mode == Mode::Arcade {
                 self.arcade_start(cur[0], None);
                 return;
+            } else if picking == 0 && self.mode == Mode::Story {
+                self.story_begin(cur[0]);
+                return;
             } else if picking == 0 && self.mode == Mode::Survival {
                 self.survival_begin(cur[0], None);
                 return;
@@ -2781,7 +2798,9 @@ impl App {
                 && self.arcade.as_ref().is_some_and(|(l, i)| {
                     *i > 0 && l.get(*i) == l.get(*i - 1) && l.get(*i).copied() == self.boss_idx()
                 });
-            let lvl = if self.mode == Mode::Survival {
+            let lvl = if let Some(story_lvl) = self.story_level() {
+                story_lvl
+            } else if self.mode == Mode::Survival {
                 self.survival
                     .map(|s| s.ai_level(self.ai_level))
                     .unwrap_or(self.ai_level)
@@ -2842,8 +2861,8 @@ impl App {
             );
             let life = if let Some(r) = &replay {
                 r.life
-            } else if self.mode == Mode::Survival {
-                self.survival_life()
+            } else if matches!(self.mode, Mode::Survival | Mode::Story) {
+                self.run_life()
             } else {
                 self.team
                     .as_ref()
@@ -2910,6 +2929,7 @@ impl App {
                 .map(|r| r.rules)
                 .unwrap_or_else(|| self.settings.rules());
             sess.apply_rules(self.fight_rules);
+            self.story_tune(&mut sess);
             if boss_phase2 {
                 sess.m.awaken_boss_final();
             }
@@ -3174,6 +3194,9 @@ impl App {
         if self.survival_is_playing() {
             self.survival_hud();
         }
+        if self.story_is_playing() {
+            self.story_hud();
+        }
         self.c.touch.draw();
         if self.c.touch.enabled {
             self.ui
@@ -3239,7 +3262,7 @@ impl App {
                             rec: s.rec.clone(),
                             rules: self.fight_rules,
                             seed: s.seed,
-                            life: self.survival_life(),
+                            life: self.run_life(),
                             pal: self.pal,
                             team_pal: self.team_pal.clone(),
                             net: s.netplay_config(),
@@ -3538,12 +3561,12 @@ impl App {
             s.draw(&mut self.g, &self.ui);
         }
         // survival: win advances to the next opponent, loss ends the run
-        if self.mode == Mode::Survival && self.replaying.is_none() {
+        if matches!(self.mode, Mode::Survival | Mode::Story) && self.replaying.is_none() {
             if winner == 0 {
-                self.survival_win();
+                self.run_win();
                 return;
             }
-            self.survival_loss();
+            self.run_loss();
             return;
         }
         // arcade progression
@@ -3789,7 +3812,7 @@ impl App {
                 rec: s.rec.clone(),
                 rules: self.fight_rules,
                 seed: s.seed,
-                life: self.survival_life(),
+                life: self.run_life(),
                 pal: self.pal,
                 team_pal: self.team_pal.clone(),
                 net: s.netplay_config(),

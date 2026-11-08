@@ -33,7 +33,10 @@ impl App {
                 id == target && !self.reg.chars[i].broken.get()
             })
             .or_else(|| {
-                (0..self.reg.chars.len()).find(|&i| self.reg.chars[i].boss && !self.reg.chars[i].broken.get())
+                (0..self.reg.chars.len()).find(|&i| {
+                    let id = self.reg.chars[i].id.strip_prefix("umf:").unwrap_or(&self.reg.chars[i].id);
+                    self.reg.chars[i].boss && !id.starts_with("npc_") && !self.reg.chars[i].broken.get()
+                })
             })
     }
 

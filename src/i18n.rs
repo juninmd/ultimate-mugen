@@ -23,18 +23,19 @@ pub fn get() -> Lang {
 }
 pub fn default_lang() -> Lang { Lang::En }
 
-/// Legacy helper: pick one of two literals. Prefer `t(key)` in new code.
 pub fn tr<'a>(pt: &'a str, en: &'a str) -> &'a str {
     if get() == Lang::En { en } else { pt }
 }
 
-/// Translate a catalog key. Unknown keys fall back to English, then to the key itself.
 pub fn t(key: &'static str) -> &'static str {
     let table = if get() == Lang::En { EN } else { PT };
     if let Some((_, v)) = table.iter().find(|(k, _)| *k == key) {
         return v;
     }
     if let Some((_, v)) = EN.iter().find(|(k, _)| *k == key) {
+        return v;
+    }
+    if let Some(v) = crate::story::text::lookup(key) {
         return v;
     }
     let mut missing = MISSING.lock().unwrap_or_else(|e| e.into_inner());
@@ -44,7 +45,6 @@ pub fn t(key: &'static str) -> &'static str {
     key
 }
 
-/// Translate a key that contains `{name}` placeholders and fill them in.
 pub fn tf(key: &'static str, pairs: &[(&str, &str)]) -> String {
     let mut out = t(key).to_string();
     for (k, v) in pairs {

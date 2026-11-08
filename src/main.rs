@@ -29,8 +29,8 @@ mod stage_tour;
 mod stagefx;
 mod stages;
 mod storage;
-mod texgen;
-mod ui;
+mod story;
+mod texgen; mod ui;
 mod update;
 #[cfg(target_arch = "wasm32")]
 mod web_sprites;

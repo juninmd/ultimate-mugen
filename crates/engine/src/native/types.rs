@@ -150,6 +150,8 @@ pub struct NativeChar {
     #[serde(default)] pub form: Option<String>,
     /// final boss: hidden from the select screen, closes the arcade ladder
     #[serde(default)] pub boss: bool,
+    #[serde(default)] pub npc: bool,
+    #[serde(default, rename = "spriteSet")] pub sprite_set: Option<String>,
     /// animation speed multiplier (> 1 = every timed frame is shorter: faster moves, startup and recovery)
     #[serde(default)] pub speed: Option<f32>,
 }

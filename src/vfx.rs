@@ -10,7 +10,10 @@ use ume_engine::matchs::{Event, Match};
 mod awaken;
 mod crack;
 mod dash;
+#[cfg(test)]
+mod cost_tests;
 mod impact;
+mod ko;
 pub mod quality;
 
 #[derive(Clone, Copy, PartialEq)]
@@ -538,14 +541,7 @@ impl Vfx {
             } => {
                 self.slow_t = if *slow { 1.7 } else { 0.0 };
                 self.ko_t = 1.0;
-                if let Some((x, y, _)) = Self::chest(m, *loser_side) {
-                    self.ko_focus = (x, y);
-                    self.ring(x, y, 110.0, 0.8, 3.0, [1.0, 0.25, 0.3]);
-                    self.glow(x, y, 44.0, 0.4, [1.0, 0.3, 0.3]);
-                    self.light(x, y, 160.0, 0.5, [1.0, 0.3, 0.3]);
-                    self.spark_burst(x, y, 1.0, 14, 7.0, [1.0, 0.4, 0.3], std::f32::consts::PI);
-                    self.debris(x, y + 12.0, 6, [0.7, 0.6, 0.55]);
-                }
+                self.ko_burst(m, *loser_side);
                 self.flash_add(0.5);
                 self.chroma = 0.6;
                 self.radial = 0.6;
@@ -559,17 +555,17 @@ impl Vfx {
                     .is_some_and(|f| f.life >= f.life_max - 0.5)
                 {
                     self.sfx.push("perfect");
-                    self.banner("PERFECT!", "vitória sem sofrer dano", [1.0, 0.85, 0.2]);
+                    self.banner("PERFECT!", crate::i18n::tr3("vitória sem sofrer dano", "flawless victory", "victoria sin recibir daño"), [1.0, 0.85, 0.2]);
                 }
             }
             Event::Transform { fighter } => self.on_transform(*fighter, m),
             Event::Fight => {
                 if let Some(b) = m.roots().find(|f| f.def.boss) {
                     if b.form >= 2 {
-                        self.banner("DESAFIO FINAL", "OBORO · ECLIPSE ABSOLUTO", [1.0, 0.78, 0.22]);
+                        self.banner(crate::i18n::tr3("DESAFIO FINAL", "FINAL CHALLENGE", "DESAFÍO FINAL"), crate::i18n::tr3("OBORO · ECLIPSE ABSOLUTO", "OBORO · ABSOLUTE ECLIPSE", "OBORO · ECLIPSE ABSOLUTO"), [1.0, 0.78, 0.22]);
                     } else {
                         let name = b.def.display_name.to_uppercase();
-                        self.banner("CHEFE FINAL", &name, [1.0, 0.15, 0.3]);
+                        self.banner(crate::i18n::tr3("CHEFE FINAL", "FINAL BOSS", "JEFE FINAL"), &name, [1.0, 0.15, 0.3]);
                     }
                     self.sfx.extend(["ko", "crowd"]);
                 }

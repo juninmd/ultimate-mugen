@@ -108,15 +108,15 @@ impl App {
                 .position(|c| c.id.eq_ignore_ascii_case(id) || c.name.eq_ignore_ascii_case(id))
         };
         let first = find(&s.chars[0])
-            .ok_or_else(|| format!("Replay: personagem não encontrado ({})", s.chars[0]))?;
+            .ok_or_else(|| format!("{} ({})", crate::i18n::tr3("Replay: personagem não encontrado", "Replay: character not found", "Repetición: personaje no encontrado"), s.chars[0]))?;
         let second = find(&s.chars[1])
-            .ok_or_else(|| format!("Replay: personagem não encontrado ({})", s.chars[1]))?;
+            .ok_or_else(|| format!("{} ({})", crate::i18n::tr3("Replay: personagem não encontrado", "Replay: character not found", "Repetición: personaje no encontrado"), s.chars[1]))?;
         let stage = self
             .reg
             .stages
             .iter()
             .position(|st| st.id.eq_ignore_ascii_case(&s.stage))
-            .ok_or_else(|| format!("Replay: cenário não encontrado ({})", s.stage))?;
+            .ok_or_else(|| format!("{} ({})", crate::i18n::tr3("Replay: cenário não encontrado", "Replay: stage not found", "Repetición: escenario no encontrado"), s.stage))?;
         let team =
             match &s.teams {
                 None => None,
@@ -125,7 +125,7 @@ impl App {
                     for side in 0..2 {
                         for id in &t[side] {
                             members[side].push(find(id).ok_or_else(|| {
-                                format!("Replay: personagem não encontrado ({id})")
+                                format!("{} ({id})", crate::i18n::tr3("Replay: personagem não encontrado", "Replay: character not found", "Repetición: personaje no encontrado"))
                             })?);
                         }
                     }
@@ -484,10 +484,7 @@ impl App {
         }
         if let Some(first) = self.replay_problems.first() {
             self.ui.text(
-                &format!(
-                    "{} replay(s) ilegível(is): {first}",
-                    self.replay_problems.len()
-                ),
+                &format!("{} {}: {first}", self.replay_problems.len(), crate::i18n::tr3("replay(s) ilegível(is)", "unreadable replay(s)", "repetición(es) ilegible(s)")),
                 60.0,
                 686.0,
                 15.0,

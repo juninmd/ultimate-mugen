@@ -87,11 +87,11 @@ impl Vfx {
             self.tag(
                 x,
                 y - 46.0,
-                if nm.is_empty() { "DESPERTAR" } else { &nm },
+                if nm.is_empty() { crate::i18n::tr3("DESPERTAR", "AWAKEN", "DESPERTAR") } else { &nm },
                 col,
             );
             if f.def.boss && f.form >= 2 {
-                self.banner("ECLIPSE ABSOLUTO", "FORMA FINAL DE MIKAZUKI OBORO", col);
+                self.banner(crate::i18n::tr3("ECLIPSE ABSOLUTO", "ABSOLUTE ECLIPSE", "ECLIPSE ABSOLUTO"), crate::i18n::tr3("FORMA FINAL DE MIKAZUKI OBORO", "FINAL FORM OF MIKAZUKI OBORO", "FORMA FINAL DE MIKAZUKI OBORO"), col);
             }
         }
         self.flash_add(0.4);

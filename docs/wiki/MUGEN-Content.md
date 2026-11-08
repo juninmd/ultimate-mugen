@@ -7,7 +7,7 @@
 
 To download content from a GitHub repository instead, see the [GitHub marketplace](Marketplace.md).
 
-On the web, use the **Import MUGEN (.zip)** button or drag the `.zip` onto the window. Imports are idempotent: the same archive, or the same fighter or stage found again under another path, name or letter case, is registered only once (identity is a hash of the normalized `.def` plus its sprite file). Packs saved in the browser from older versions are deduplicated automatically on the next load.
+Use Main menu › **Import M.U.G.E.N** (the only import button; on the web it opens the browser picker, on desktop the system file dialog) or drag the `.zip` onto the web window. Imports are idempotent: the same archive, or the same fighter or stage found again under another path, name or letter case, is registered only once (identity is a hash of the normalized `.def` plus its sprite file). Packs saved in the browser from older versions are deduplicated automatically on the next load.
 
 A web import shows a full-screen loading overlay from the moment the files are selected until the last archive is registered. Archives are read, decompressed and registered **one per frame**, with at most two raw packs waiting in wasm memory; a batch of large packs no longer runs in one frozen frame. The same overlay appears on startup while the packs persisted in IndexedDB are restored, one at a time.
 

@@ -153,8 +153,8 @@ fn storm_rush_connects_three_hits() {
         if game.round_state == 2 && game.fighters[0].ctrl { break; }
         game.tick(&[0, 0]);
     }
-    game.fighters[0].pos.x = -32.0;
-    game.fighters[1].pos.x = 32.0;
+    game.fighters[0].pos.x = -26.0;
+    game.fighters[1].pos.x = 26.0;
     game.fighters[0].facing = 1.0;
     game.fighters[1].facing = -1.0;
     let inputs = [k::D, k::D | k::L, k::L, k::L | k::X];

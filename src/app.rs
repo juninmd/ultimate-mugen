@@ -18,6 +18,7 @@ mod cutscene;
 mod fight_seed;
 mod keyedit;
 mod loading;
+mod pause_moves;
 mod market;
 mod mugen_catalog;
 mod replay_browser;
@@ -271,6 +272,7 @@ pub struct App {
     pub(crate) key_edit: Option<keyedit::KeyEdit>,
     /** page of the pause-screen move list (14 moves per page) */
     move_page: usize,
+    move_cur: usize,
     pending: Pending,
     import_jobs: Vec<std::thread::JoinHandle<Result<(String, ume_formats::vfs::Vfs), String>>>,
     import_progress: Option<ume_formats::vfs::ZipProgress>,
@@ -471,6 +473,7 @@ impl App {
             settings,
             key_edit: None,
             move_page: 0,
+            move_cur: 0,
             pending: Pending::default(),
             import_jobs: vec![],
             import_progress: None,
@@ -3154,6 +3157,7 @@ impl App {
         if pause_btn {
             self.pause_cur = 0;
             self.move_page = 0;
+            self.move_cur = 0;
             self.audio.sfx("select");
         }
         s.paused = paused;
@@ -3392,119 +3396,7 @@ impl App {
                 false,
             );
         }
-        let f = &s.m.fighters[0];
-        self.ui.text(
-            &format!(
-                "{} — {}",
-                crate::i18n::t("pause.moves"),
-                f.def.display_name.to_uppercase()
-            ),
-            x + 400.0,
-            y + 52.0,
-            22.0,
-            hex("#22e8ff"),
-            Align::Left,
-            true,
-        );
-        const PER_PAGE: usize = 9;
-        let total = f.def.movelist.len();
-        let pages = total.div_ceil(PER_PAGE).max(1);
-        if self.c.pressed(nav::RIGHT) {
-            self.move_page = (self.move_page + 1) % pages;
-        }
-        if self.c.pressed(nav::LEFT) {
-            self.move_page = (self.move_page + pages - 1) % pages;
-        }
-        self.move_page = self.move_page.min(pages - 1);
-        if total == 0 {
-            self.ui.text(
-                crate::i18n::t("pause.no_moves"),
-                x + 400.0,
-                y + 90.0,
-                18.0,
-                WHITE,
-                Align::Left,
-                false,
-            );
-        }
-        for (i, mv) in f
-            .def
-            .movelist
-            .iter()
-            .enumerate()
-            .skip(self.move_page * PER_PAGE)
-            .take(PER_PAGE)
-        {
-            let yy = y + 78.0 + (i - self.move_page * PER_PAGE) as f32 * 46.0;
-            self.ui.rect(
-                x + 390.0,
-                yy,
-                630.0,
-                40.0,
-                Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.06 } else { 0.03 }),
-            );
-            self.ui.text(
-                &mv.name.chars().take(26).collect::<String>(),
-                x + 402.0,
-                yy + 27.0,
-                19.0,
-                WHITE,
-                Align::Left,
-                false,
-            );
-            if mv.cost > 0.0 {
-                let cost_label = if mv.drain {
-                    format!("{:.0}/s PWR", mv.cost)
-                } else if mv.cost >= 1000.0 && mv.cost % 1000.0 == 0.0 {
-                    let b = (mv.cost / 1000.0) as i32;
-                    if b == 1 { "1 BAR".to_string() } else { format!("{b} BARS") }
-                } else {
-                    format!("{:.0} PWR", mv.cost)
-                };
-                self.ui.text(&cost_label, x + 1010.0, yy + 27.0, 15.0, hex("#ffd13b"), Align::Right, false);
-            }
-            let c = &self.c;
-            self.ui
-                .input_icons(&mv.input, x + 690.0, yy + 34.0, 28.0, |b| c.face(b));
-        }
-        if pages > 1 {
-            self.ui.rect(
-                x + 880.0,
-                y + 20.0,
-                60.0,
-                44.0,
-                Color::new(1.0, 1.0, 1.0, 0.12),
-            );
-            self.ui.rect(
-                x + 950.0,
-                y + 20.0,
-                60.0,
-                44.0,
-                Color::new(1.0, 1.0, 1.0, 0.12),
-            );
-            self.ui.arrow(x + 910.0, y + 42.0, 26.0, (-1.0, 0.0), WHITE);
-            self.ui.arrow(x + 980.0, y + 42.0, 26.0, (1.0, 0.0), WHITE);
-            if self.clicked_rect(x + 880.0, y + 20.0, 60.0, 44.0) {
-                self.move_page = (self.move_page + pages - 1) % pages;
-            }
-            if self.clicked_rect(x + 950.0, y + 20.0, 60.0, 44.0) {
-                self.move_page = (self.move_page + 1) % pages;
-            }
-            self.ui.text(
-                &format!(
-                    "{} {}/{}",
-                    crate::i18n::t("pause.page"),
-                    self.move_page + 1,
-                    pages
-                ),
-                x + 400.0,
-                y + 505.0,
-                16.0,
-                hex("#a49cc0"),
-                Align::Left,
-                false,
-            );
-        }
+        self.pause_moves(x, y);
         if accept_back && self.c.pressed(nav::BACK) {
             self.session.as_mut().unwrap().paused = false;
             return;

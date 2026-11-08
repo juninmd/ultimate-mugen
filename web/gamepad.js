@@ -1,7 +1,7 @@
 // Globals imported by the wasm module: Gamepad API (buttons/sticks), DualShock/DualSense/Xbox vibration,
 // touch detection and the MUGEN .zip import button (packs persisted in IndexedDB).
 (function () {
-  const K = { U: 1, D: 2, L: 4, R: 8, a: 16, b: 32, c: 64, x: 128, y: 256, z: 512, s: 1024, d: 2048, w: 4096 };
+  const K = { U: 1, D: 2, L: 4, R: 8, a: 16, b: 32, c: 64, x: 128, y: 256, z: 512, s: 1024, d: 2048, w: 4096, t: 16384, s1: 524288, s2: 1048576, s3: 2097152, s4: 4194304 };
   const held = new Map();
   // False while the page is blurred: pads keep reporting their last state (some browsers stop polling them
   // altogether), so a button held at that moment would stay pressed for the rest of the session.
@@ -40,8 +40,9 @@
     const pr = (n) => !!(p.buttons[n] && p.buttons[n].pressed);
     const ax = p.axes[0] || 0, ay = p.axes[1] || 0; let b = 0;
     if (ay < -0.5 || pr(12)) b |= K.U; if (ay > 0.5 || pr(13)) b |= K.D; if (ax < -0.5 || pr(14)) b |= K.L; if (ax > 0.5 || pr(15)) b |= K.R;
-    if (pr(2)) b |= K.x; if (pr(3)) b |= K.y; if (pr(5)) b |= K.z; if (pr(0)) b |= K.a; if (pr(1)) b |= K.b; if (pr(7)) b |= K.c;
-    if (pr(4)) b |= K.d; if (pr(6)) b |= K.w; if (pr(9)) b |= K.s;
+    if (pr(2)) b |= K.x; if (pr(3)) b |= K.y; if (pr(0)) b |= K.a; if (pr(1)) b |= K.b;
+    if (pr(4)) b |= K.s1; if (pr(6)) b |= K.s2; if (pr(5)) b |= K.s3; if (pr(7)) b |= K.s4;
+    if (pr(9)) b |= K.s; if (pr(10) && pr(11)) b |= K.t; else if (pr(11)) b |= K.s;
     return b;
   }
   function rumble(i, strong, weak, ms) {

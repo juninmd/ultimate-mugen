@@ -62,9 +62,11 @@ fn text_round_trip_keeps_custom_bindings() {
 
 #[test]
 fn saved_file_with_the_previous_defaults_upgrades_to_the_new_ones() {
-    let mut old = KeyMap::default();
-    old.slots = previous_defaults();
-    assert_eq!(KeyMap::from_text(&old.to_text()), KeyMap::default());
+    for layout in previous_defaults() {
+        let mut old = KeyMap::default();
+        old.slots = layout;
+        assert_eq!(KeyMap::from_text(&old.to_text()), KeyMap::default());
+    }
 }
 
 #[test]

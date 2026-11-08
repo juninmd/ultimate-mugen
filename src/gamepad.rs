@@ -19,6 +19,7 @@ pub enum Btn {
     L2,
     Start,
     R3,
+    L3,
     Select,
 }
 #[allow(dead_code)]
@@ -36,15 +37,11 @@ pub fn pad_bits(ax: f32, ay: f32, pressed: impl Fn(Btn) -> bool) -> u32 {
     if ax > 0.5 || pressed(Btn::DRight) {
         b |= k::R;
     }
-    // Sony layout: Square=West X(LP), Triangle=North Y(HP), R1=Z; Cross=South A(LK), Circle=East B(HK), R2=C
     if pressed(Btn::West) {
         b |= k::X;
     }
     if pressed(Btn::North) {
         b |= k::Y;
-    }
-    if pressed(Btn::R1) {
-        b |= k::Z;
     }
     if pressed(Btn::South) {
         b |= k::A;
@@ -52,94 +49,32 @@ pub fn pad_bits(ax: f32, ay: f32, pressed: impl Fn(Btn) -> bool) -> u32 {
     if pressed(Btn::East) {
         b |= k::B;
     }
-    if pressed(Btn::R2) {
-        b |= k::C;
-    }
-    if pressed(Btn::L1) {
-        b |= k::D2;
-    }
-    if pressed(Btn::L2) {
-        b |= k::W;
+    for (btn, slot) in [
+        (Btn::L1, k::SLOT1),
+        (Btn::L2, k::SLOT2),
+        (Btn::R1, k::SLOT3),
+        (Btn::R2, k::SLOT4),
+    ] {
+        if pressed(btn) {
+            b |= slot;
+        }
     }
     if pressed(Btn::Start) {
         b |= k::S;
     }
-    // awakening: click the right stick (or SELECT)
-    if pressed(Btn::R3) || pressed(Btn::Select) {
+    match (pressed(Btn::L3), pressed(Btn::R3)) {
+        (true, true) => b |= k::T,
+        (false, true) => b |= k::S,
+        _ => {}
+    }
+    if pressed(Btn::Select) {
         b |= k::T;
     }
     b
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn right_stick_click_and_select_awaken_and_nothing_else_does() {
-        assert_eq!(pad_bits(0.0, 0.0, |b| b == Btn::R3), k::T);
-        assert_eq!(pad_bits(0.0, 0.0, |b| b == Btn::Select), k::T);
-        for b in [
-            Btn::West,
-            Btn::North,
-            Btn::South,
-            Btn::East,
-            Btn::R1,
-            Btn::R2,
-            Btn::L1,
-            Btn::L2,
-            Btn::Start,
-            Btn::DUp,
-        ] {
-            assert_eq!(
-                pad_bits(0.0, 0.0, |x| x == b) & k::T,
-                0,
-                "{b:?} must not awaken"
-            );
-        }
-        assert_eq!(pad_bits(0.0, 0.0, |_| false), 0);
-    }
-    #[test]
-    fn face_buttons_sticks_and_dpad_map_as_documented() {
-        assert_eq!(pad_bits(0.0, 0.0, |b| b == Btn::West), k::X);
-        assert_eq!(pad_bits(0.0, 0.0, |b| b == Btn::South), k::A);
-        assert_eq!(pad_bits(0.0, 0.0, |b| b == Btn::L1), k::D2);
-        assert_eq!(pad_bits(0.9, 0.0, |_| false), k::R);
-        assert_eq!(pad_bits(-0.9, 0.9, |_| false), k::L | k::U);
-        assert_eq!(pad_bits(0.2, -0.2, |_| false), 0, "dead zone");
-        // awakening together with a direction and an attack
-        assert_eq!(
-            pad_bits(0.0, -0.9, |b| b == Btn::R3 || b == Btn::East),
-            k::D | k::B | k::T
-        );
-    }
-    #[test]
-    fn pad_kind_is_detected_from_name_or_vendor() {
-        assert_eq!(
-            PadKind::detect("Xbox Wireless Controller", None),
-            PadKind::Xbox
-        );
-        assert_eq!(
-            PadKind::detect("Xbox 360 Controller (XInput STANDARD GAMEPAD)", None),
-            PadKind::Xbox
-        );
-        assert_eq!(PadKind::detect("Controller", Some(0x045E)), PadKind::Xbox);
-        assert_eq!(
-            PadKind::detect("Wireless Controller", None),
-            PadKind::PlayStation
-        );
-        assert_eq!(
-            PadKind::detect(
-                "DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)",
-                None
-            ),
-            PadKind::PlayStation
-        );
-        assert_eq!(
-            PadKind::detect("8BitDo Pro 2", Some(0x2DC8)),
-            PadKind::Generic
-        );
-    }
-}
+mod tests;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub enum PadKind {
@@ -415,6 +350,7 @@ mod native {
                             Btn::L2 => Button::LeftTrigger2,
                             Btn::Start => Button::Start,
                             Btn::R3 => Button::RightThumb,
+                            Btn::L3 => Button::LeftThumb,
                             Btn::Select => Button::Select,
                         })
                     });

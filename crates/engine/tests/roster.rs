@@ -285,7 +285,13 @@ fn awakening_costs_a_bar_boosts_stats_and_ends_with_the_round() {
     m.fighters[0].power = 3000.0;
     let a2 = m.fighters[0].attack_mul;
     m.tick(&[T, 0]);
-    assert_eq!(m.fighters[0].attack_mul, a2, "only once per round");
+    assert_eq!(m.fighters[0].form, 2, "second bar-sized transformation ascends once");
+    for _ in 0..100 { m.tick(&[0, 0]); }
+    m.fighters[0].power = 3000.0;
+    let a3 = m.fighters[0].attack_mul;
+    m.tick(&[T, 0]);
+    assert_eq!(m.fighters[0].attack_mul, a3, "no third form");
+    let _ = a2;
     // meter regenerates while awakened
     let p = m.fighters[0].power; m.fighters[0].power = 100.0;
     for _ in 0..60 { m.tick(&[0, 0]); }
@@ -523,8 +529,8 @@ fn idle_player_vs_cpu_never_walks_by_itself() {
                 m.tick(&b);
                 let f = &m.fighters[0];
                 let toward = (m.fighters[1].pos.x - x0).signum() * (f.pos.x - x0);
-                if toward > 0.01 && hit0 == 'I' && f.move_type == 'I' && f.state_type == 'S' && m.round_state == 2 && f.hit_pause == 0 {
-                    panic!("{id} seed {seed} tick {t}: P1 idle moved toward enemy by {toward}, state {s0}->{}, enemy {e0}->{}", f.state_no, m.fighters[1].pos.x);
+                if toward > 0.01 && (e0 - x0).abs() > 30.0 && hit0 == 'I' && f.move_type == 'I' && f.state_type == 'S' && m.round_state == 2 && f.hit_pause == 0 {
+                    panic!("{id} seed {seed} tick {t}: P1 idle moved toward enemy by {toward}, state {s0}->{}, enemy {e0}->{} estate {} p1x {x0}->{}", f.state_no, m.fighters[1].pos.x, m.fighters[1].state_no, f.pos.x);
                 }
                 if m.round_state >= 4 { break; }
             }

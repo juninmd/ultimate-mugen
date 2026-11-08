@@ -13,6 +13,10 @@ A web import shows a full-screen loading overlay from the moment the files are s
 
 Hundreds of characters are registered without decoding everything; only the item under the cursor is loaded, and an LRU cache bounds memory.
 
+Before a character reaches the roster, the catalogue checks that every file its `.def` names under `[Files]` exists inside the character's own folder (or the pack root, or `data/`): `sprite`, `anim` and `cns` are required. A character that fails the check is **quarantined**: it is kept out of the select screen, and the reason is listed. Files are never borrowed from another character's folder, so a copied `.def` that points to another fighter's sprites cannot load them by name. The check is structural (file presence), so it stays fast enough for the startup scan; a fighter whose files exist but whose animations reference missing sprites still loads and is shown with its missing frames.
+
+Open **Personagens MUGEN** on the main menu to see the summary: how many characters loaded, how many are in quarantine and the most common reasons, plus a gallery of every loaded character (portrait, name and author; `←/→` change pages) and the quarantine list (`TAB` switches the view; `ESC` returns).
+
 ## Stages
 
 Put `<name>.def` and the `.sff` in `mugen/stages/`, or inside a `.zip` in `mugen/`.

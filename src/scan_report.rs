@@ -12,6 +12,7 @@ pub fn run() -> ! {
     let scanned = clock.elapsed();
     reg.dedupe();
     reg.sort_mugen();
+    println!("quarantined {} characters", reg.quarantined.len());
     println!(
         "bundled {:6.2} s | scan {:6.2} s | total {:6.2} s | {} chars, {} stages | rss {:.0} MB",
         builtin.as_secs_f64(),

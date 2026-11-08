@@ -18,6 +18,7 @@ mod cutscene;
 mod keyedit;
 mod loading;
 mod market;
+mod mugen_catalog;
 mod replay_browser;
 mod settings_screen;
 mod survival;
@@ -115,7 +116,10 @@ pub enum Screen {
         rounds: usize,
     },
     Controls,
-    Mugen,
+    Mugen {
+        view: u8,
+        page: usize,
+    },
     Market,
     /// on-disk replay browser
     Replays {
@@ -595,7 +599,7 @@ impl App {
             Screen::Fight => self.fight(dt).await,
             Screen::Results { .. } => self.results().await,
             Screen::Controls => self.controls_screen(),
-            Screen::Mugen => self.mugen_screen(),
+            Screen::Mugen { .. } => self.mugen_screen(),
             Screen::Market => self.market_screen(),
             Screen::SurvivalOver { .. } => self.survival_over_screen(),
             Screen::Replays { .. } => self.replays_screen(),
@@ -693,7 +697,7 @@ impl App {
                     | Screen::Market
                     | Screen::Settings { .. }
                     | Screen::Controls
-                    | Screen::Mugen
+                    | Screen::Mugen { .. }
             )
             && self.market.apply_to(&mut self.reg)
         {
@@ -1166,7 +1170,7 @@ impl App {
                         picked: [None, None],
                     });
                 }
-                9 => self.go(Screen::Mugen),
+                9 => self.go(Screen::Mugen { view: 0, page: 0 }),
                 10 => self.go(Screen::Market),
                 11 => {
                     self.settings_back = None;
@@ -3905,78 +3909,11 @@ impl App {
     }
 
     fn mugen_screen(&mut self) {
-        self.ui.background();
-        self.ui.text(
-            "PERSONAGENS E CENÁRIOS M.U.G.E.N",
-            40.0,
-            56.0,
-            30.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
-        let lines = [
-            "O motor lê os formatos originais do M.U.G.E.N 1.0/1.1 e do Ikemen GO:",
-            "  .def · .sff (v1 PCX e v2 RLE8/RLE5/LZ5/PNG) · .air (Clsn1/Clsn2) · .cmd · .cns · .snd · .act · stages",
-            "  Triggers, redirecionamentos, ~90 state controllers, HitDef completo, helpers, projéteis, explods, super pause.",
-            "",
-            "Como adicionar (desktop): coloque pastas ou arquivos .zip dentro da pasta  mugen/  ao lado do jogo",
-            "  ex.: mugen/chars/kfm/kfm.def   ·   mugen/stages/meu_cenario.def   ·   mugen/goku.zip",
-            "  (ou defina a variável de ambiente UME_MUGEN_DIR). Eles aparecem automaticamente na seleção.",
-            "Versão web: botão \"Importar\" da página (arraste .zip).",
-            "",
-            "Personagens de anime/jogos (Dragon Ball, Bleach, Naruto…) feitos por fãs pertencem a seus autores",
-            "e detentores dos direitos — não são distribuídos com o jogo. Veja docs/ROSTER.md.",
-        ];
-        for (i, l) in lines.iter().enumerate() {
-            self.ui.text(
-                l,
-                40.0,
-                120.0 + i as f32 * 32.0,
-                20.0,
-                if l.starts_with("  ") {
-                    hex("#c9f7ff")
-                } else {
-                    WHITE
-                },
-                Align::Left,
-                false,
-            );
-        }
-        let found: Vec<String> = self
-            .reg
-            .chars
-            .iter()
-            .filter(|c| c.mugen)
-            .map(|c| format!("{} ({})", c.name, c.author))
-            .collect();
-        self.ui.text(
-            &format!(
-                "Encontrados: {} personagens MUGEN, {} cenários MUGEN",
-                found.len(),
-                self.reg.stages.iter().filter(|s| s.mugen).count()
-            ),
-            40.0,
-            520.0,
-            22.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
-        for (i, f) in found.iter().enumerate().take(4) {
-            self.ui.text(
-                f,
-                60.0,
-                556.0 + i as f32 * 26.0,
-                19.0,
-                WHITE,
-                Align::Left,
-                false,
-            );
-        }
-        if self.c.pressed(nav::BACK | nav::OK) {
-            self.screen = Screen::Menu { cur: 8 };
-        }
+        let Screen::Mugen { view, page } = self.screen else { return };
+        self.screen = match self.mugen_catalog(view, page) {
+            Some((view, page)) => Screen::Mugen { view, page },
+            None => Screen::Menu { cur: 9 },
+        };
     }
 
     // used by the screenshot tour

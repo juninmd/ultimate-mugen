@@ -8,6 +8,22 @@ pub struct StageDef {
     pub lane_near: f32,
 }
 
+pub const SEGMENT_WORLD: f32 = 640.0;
+pub const FIGHT_HALF_RANGE: f32 = 100.0;
+
+pub fn fights_in(def: &StageDef) -> usize {
+    def.waves.len() + 1
+}
+
+pub fn strip_span(def: &StageDef) -> f32 {
+    SEGMENT_WORLD * fights_in(def) as f32
+}
+
+pub fn fight_center(def: &StageDef, fight: usize) -> f32 {
+    let last = fights_in(def) - 1;
+    (fight.min(last) as f32 - last as f32 / 2.0) * SEGMENT_WORLD
+}
+
 pub const STAGES: [StageDef; 5] = [
     StageDef {
         arena: "brazil",
@@ -15,6 +31,7 @@ pub const STAGES: [StageDef; 5] = [
             &["npc_brute", "npc_brute"],
             &["npc_razor", "npc_brute"],
             &["npc_razor", "npc_razor", "npc_brute"],
+            &["npc_razor", "npc_brute", "npc_spitfire"],
         ],
         boss: "bruno",
         alt_boss: "daichi",
@@ -28,6 +45,7 @@ pub const STAGES: [StageDef; 5] = [
             &["npc_razor", "npc_spitfire"],
             &["npc_brute", "npc_spitfire", "npc_razor"],
             &["npc_phantom", "npc_razor"],
+            &["npc_brute", "npc_brute", "npc_spitfire"],
         ],
         boss: "marlow",
         alt_boss: "kaname",
@@ -41,6 +59,7 @@ pub const STAGES: [StageDef; 5] = [
             &["npc_phantom", "npc_phantom"],
             &["npc_spitfire", "npc_brute", "npc_phantom"],
             &["npc_colossus"],
+            &["npc_razor", "npc_phantom", "npc_spitfire"],
         ],
         boss: "lian",
         alt_boss: "shion",
@@ -54,6 +73,7 @@ pub const STAGES: [StageDef; 5] = [
             &["npc_colossus", "npc_spitfire"],
             &["npc_phantom", "npc_razor", "npc_brute"],
             &["npc_colossus", "npc_phantom"],
+            &["npc_brute", "npc_colossus", "npc_razor"],
         ],
         boss: "garan",
         alt_boss: "haruki",
@@ -67,6 +87,7 @@ pub const STAGES: [StageDef; 5] = [
             &["npc_brute", "npc_razor", "npc_spitfire"],
             &["npc_colossus", "npc_phantom", "npc_razor"],
             &["npc_colossus", "npc_brute", "npc_spitfire", "npc_phantom"],
+            &["npc_phantom", "npc_phantom", "npc_razor", "npc_spitfire"],
         ],
         boss: "valdric",
         alt_boss: "kaito",

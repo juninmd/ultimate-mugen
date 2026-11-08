@@ -8,6 +8,28 @@ const BOSS_LIFE_FACTOR: f32 = 1.5;
 const BOSS_ATTACK_FACTOR: f32 = 1.1;
 const FOE_START_LANES: [f32; 4] = [-10.0, 6.0, -3.0, 8.0];
 
+fn story_scroll(sess: &mut Session, def: &crate::story::StageDef, fight: usize) {
+    let Some(strip) = crate::stages::story_strip(def.arena) else { return };
+    let center = crate::story::fight_center(def, fight);
+    let span = crate::story::strip_span(def);
+    if let crate::stages::StageArt::Illustrated { image, span: art_span, .. } = &mut sess.stage.art {
+        *image = strip;
+        *art_span = span;
+    } else {
+        return;
+    }
+    let stage = &mut sess.m.stage;
+    stage.bound_left = center - crate::story::FIGHT_HALF_RANGE;
+    stage.bound_right = center + crate::story::FIGHT_HALF_RANGE;
+    stage.start_x = center;
+    stage.p1x += center;
+    stage.p2x += center;
+    sess.m.camera.x = center;
+    for fighter in sess.m.fighters.iter_mut().filter(|f| !f.is_helper) {
+        fighter.pos.x += center;
+    }
+}
+
 impl App {
     fn story_char(&self, id: &str) -> Option<usize> {
         (0..self.reg.chars.len()).find(|&i| {
@@ -37,6 +59,7 @@ impl App {
         let Some(&first) = foes.first() else { return };
         let me = self.sel.0;
         let arena = run.stage_def().arena;
+        crate::stages::want_story_strip(arena);
         self.sel.1 = first;
         self.sel.2 = self.reg.stages.iter().position(|s| s.id.contains(arena)).unwrap_or(self.sel.2);
         self.team = Some(Team::new(vec![me], foes, true));
@@ -57,15 +80,24 @@ impl App {
             .unwrap_or(0)
     }
 
+    fn story_remaining_life(&self) -> f32 {
+        self.session
+            .as_ref()
+            .and_then(|s| s.m.fighters.iter().find(|f| !f.is_helper && f.side == 0))
+            .map(|f| if f.life_max > 0.0 { f.life / f.life_max } else { 1.0 })
+            .unwrap_or(1.0)
+    }
+
     pub(crate) fn story_win(&mut self) {
         let gained = self.story_fight_score();
+        let remaining = self.story_remaining_life();
         let Some(run) = self.story.as_mut() else { return };
-        let next = run.won_fight(gained);
+        let next = run.won_fight(gained, remaining);
         self.audio.stop_music();
         match next {
             Next::Wave => {
                 self.story_prepare_fight();
-                self.screen = Screen::Vs { t: 0.0, step: 0 };
+                self.screen = Screen::Vs { t: 1.8, step: 0 };
             }
             Next::StageCleared | Next::Finished => {
                 self.session = None;
@@ -102,6 +134,7 @@ impl App {
         let def = run.stage_def();
         sess.m.lanes = ume_engine::lane::LaneRules { active: true, far: def.lane_far, near: def.lane_near, show_foe_hud: run.is_boss_fight() };
         sess.team = None;
+        story_scroll(sess, def, run.fight_index());
         for (slot, fighter) in sess.m.fighters.iter_mut().filter(|f| !f.is_helper && f.side == 1).enumerate() {
             fighter.lane = FOE_START_LANES[slot % FOE_START_LANES.len()].clamp(def.lane_far, def.lane_near);
         }

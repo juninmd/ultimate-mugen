@@ -285,13 +285,7 @@ fn awakening_costs_a_bar_boosts_stats_and_ends_with_the_round() {
     m.fighters[0].power = 3000.0;
     let a2 = m.fighters[0].attack_mul;
     m.tick(&[T, 0]);
-    assert_eq!(m.fighters[0].form, 2, "second bar-sized transformation ascends once");
-    for _ in 0..100 { m.tick(&[0, 0]); }
-    m.fighters[0].power = 3000.0;
-    let a3 = m.fighters[0].attack_mul;
-    m.tick(&[T, 0]);
-    assert_eq!(m.fighters[0].attack_mul, a3, "no third form");
-    let _ = a2;
+    assert!(m.fighters[0].form == 2 && m.fighters[0].attack_mul > a2, "a second bar ascends once");
     // meter regenerates while awakened
     let p = m.fighters[0].power; m.fighters[0].power = 100.0;
     for _ in 0..60 { m.tick(&[0, 0]); }

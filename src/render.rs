@@ -14,6 +14,7 @@ use ume_engine::palette::{BlendMode, PalParams};
 
 mod layers;
 mod warm;
+mod wide_image;
 use layers::draw_transformed_layer_quad;
 
 pub struct Gfx {
@@ -1087,17 +1088,7 @@ impl MatchRenderer {
                 let (h, w, x) = crate::stages::illustration_layout(*span, image.w as f32 / image.h as f32, h, m.view_w, m.camera.x, m.zoom);
                 let rect = ImageRect { x: x + shx, y: ground - h * 0.85 + shy, w, h, view_w: m.view_w, view_h: m.view_h, cam_x: m.camera.x };
                 if front { return if *span > 0.0 { } else { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true) }; }
-                let texture = g.texture(image, true);
-                draw_texture_ex(
-                    &texture,
-                    g.ox + rect.x * s,
-                    g.oy + rect.y * s,
-                    WHITE,
-                    DrawTextureParams {
-                        dest_size: Some(vec2(w * s, h * s)),
-                        ..Default::default()
-                    },
-                );
+                g.draw_wide_image(image, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
                 if *span <= 0.0 { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false); }
             }
             StageArt::Mugen(bg) => {

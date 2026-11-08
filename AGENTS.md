@@ -62,6 +62,11 @@
 - Bundled MUGEN packs: `assets/mugen/elecbyte.zip`.
 - GitHub marketplace: logic in `crates/market` (listing, safety limits, bundles, downloads), app glue in `src/market.rs`, screen in `src/app/market.rs`, web storage in `web/market.js`. Docs: `docs/wiki/Marketplace.md`.
 
+## Repository Map
+- `docs/wiki/` (EN) and `docs/wiki/pt-BR/` (PT): the wiki, indexed by `Home.md`. `docs/assets/` holds README media; `docs/evidence/` and `docs/research/` hold audit output.
+- `.agents/skills/`: agent skills (`mugen-character-creator`, `ume-character-creator`, `ume-stage-creator`). One copy only; do not duplicate them elsewhere.
+- `scripts/`: build, audit and capture tools; `tools/`: asset generators.
+
 ## External Resource Sources
 - https://qxmugen.com/ (chars, stages, tools; downloads need login).
 - https://mugenarchive.com/ (chars, stages; Cloudflare challenge, download manually).
@@ -69,6 +74,7 @@
 
 ## Testing & Validation
 - **Regra de ouro**: Baixar e descompactar todos os personagens primeiro; executar suites de teste (`cargo test`, `mugen_check`) **apenas uma vez ao final** da instalação completa.
+- **Browser smoke test (mandatory for every change):** `rustup target add wasm32-unknown-unknown`, `./scripts/build-web.sh`, then `node scripts/web-smoke.js web/dist` (wasm in headless Chromium via Playwright). `WEB_SMOKE_SHOTS=<dir>` keeps its screenshots. For README captures run `CAPTURE_OUT=<dir> node scripts/web-capture.js <plan.json>` (see `docs/wiki/Media-Capture.md`).
 - File size gate: `node scripts/file-size.mjs` (add `--update` only when a split removed a baseline entry).
 - Engine compatibility: `cargo test --workspace --release`
 - DBZ integration test: `cargo test -p ume-engine --test dbz -- --nocapture`

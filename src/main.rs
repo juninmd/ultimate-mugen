@@ -232,7 +232,7 @@ async fn game() {
     #[cfg(target_arch = "wasm32")]
     app.apply_deep_link();
     #[cfg(target_arch = "wasm32")]
-    crate::web_sprites::prefetch_roster(app.reg.chars.iter().filter(|entry| !entry.mugen).map(|entry| entry.id.trim_start_matches("umf:").to_string()).collect());
+    crate::web_sprites::prefetch_roster(app.reg.chars.iter().filter(|entry| !entry.mugen).map(crate::web_sprites::pack_name).collect());
     if let Some(dir) = shots { shots::run(&mut app, &dir).await; return; }
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     match netlink::NetArgs::parse(&args) {

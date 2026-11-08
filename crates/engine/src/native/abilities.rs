@@ -27,7 +27,7 @@ fn anim_of(anim_no: &HashMap<String, i32>, wanted: Option<&String>, fallbacks: &
 }
 
 pub(super) fn ability_code(spec: Option<&AbilitySpec>, anim_no: &HashMap<String, i32>) -> AbilityCode {
-    let mut code = AbilityCode::default();
+    let mut code = super::charge::charge_code(anim_no);
     let Some(spec) = spec else { return code };
     if let Some(fly) = &spec.fly {
         let input = fly.input.as_deref().unwrap_or("a+b");

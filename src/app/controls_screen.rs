@@ -19,7 +19,7 @@ impl App {
             Align::Left,
             true,
         );
-        let kl = |i: usize| crate::keybinds::label(self.c.keys.slots[0][i]);
+        let kl = |i: usize| crate::keybinds::id(self.c.keys.slots[0][i]).unwrap_or("?");
         let touch = self.c.touch.enabled;
         let mut cols = vec![
             Glyphs::Keyboard,
@@ -36,7 +36,7 @@ impl App {
             Glyphs::Touch => crate::i18n::t("controls.touch"),
             Glyphs::Pad(p) => p.label(),
         };
-        let rows: [(&str, &[u32], &str); 7] = [
+        let rows: [(&str, &[u32], &str); 8] = [
             (crate::i18n::t("controls.move"), &[], ""),
             (crate::i18n::t("controls.punch"), &[k::X, k::Y], " "),
             (crate::i18n::t("controls.kick"), &[k::A, k::B], " "),
@@ -44,14 +44,22 @@ impl App {
             (crate::i18n::t("controls.super"), &[k::D2, k::W], "+"),
             (crate::i18n::t("controls.awaken"), &[k::T], ""),
             (crate::i18n::t("controls.pause"), &[k::S], ""),
+            (crate::i18n::tr("Carregar ki", "Charge ki"), &[k::S], ""),
         ];
         let move_text = |g: Glyphs| match g {
-            Glyphs::Keyboard => format!("{} {} {} {} / setas", kl(0), kl(1), kl(2), kl(3)),
+            Glyphs::Keyboard => format!("{} {} {} {}", kl(0), kl(1), kl(2), kl(3)),
             Glyphs::Touch => "Analógico esquerdo".into(),
             Glyphs::Pad(_) => "Analógico ou direcional".into(),
         };
+        let cell_text = |row: usize, g: Glyphs| match (row, g) {
+            (0, g) => Some(move_text(g)),
+            (6, Glyphs::Keyboard) => Some("Esc / P".to_string()),
+            (7, Glyphs::Keyboard) => None,
+            (7, _) => Some("-".to_string()),
+            _ => None,
+        };
         let xs = [60.0, 280.0, 520.0, 760.0, 1000.0];
-        let (top, rh) = (120.0, 60.0);
+        let (top, rh) = (120.0, 52.0);
         for (j, g) in cols.iter().enumerate() {
             let on = matches!((self.c.glyphs, g), (a, b) if a == *b);
             self.ui.text(
@@ -83,9 +91,9 @@ impl App {
                 true,
             );
             for (j, g) in cols.iter().enumerate() {
-                if bits.is_empty() {
+                if let Some(text) = cell_text(i, *g) {
                     self.ui.text(
-                        &move_text(*g),
+                        &text,
                         xs[j + 1],
                         y + 34.0,
                         20.0,

@@ -19,6 +19,7 @@ pub async fn run(app: &mut App, dir: &str) {
     match std::env::var("UME_TOUR").as_deref() {
         Ok("moves") => return crate::moves_tour::run(app, dir).await,
         Ok("duel") => return crate::moves_tour::duel::run(app, dir).await,
+        Ok("clips") => return crate::moves_tour::clips::run(app, dir).await,
         _ => {}
     }
     let chars: Vec<String> = std::env::var("UME_CHARS")

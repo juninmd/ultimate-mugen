@@ -11,6 +11,8 @@ pub mod lookup;
 pub mod compile;
 pub mod rig;
 mod pixel;
+mod charge;
+pub(crate) use charge::{CHARGE_COMMAND, CHARGE_STATE};
 mod pixel_hit;
 mod pixel_hurt;
 mod pack;

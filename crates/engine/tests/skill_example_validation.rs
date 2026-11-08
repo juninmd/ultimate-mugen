@@ -22,7 +22,7 @@ fn test_skill_example_character_compilation() {
 
     let super_mv = def.movelist.iter().find(|m| m.name == "Furacão Primordial").unwrap();
     assert_eq!(super_mv.cost, 1000.0);
-    assert_eq!(super_mv.forms, u32::MAX);
+    assert_eq!(super_mv.forms, u32::MAX & !(1 << 2), "the base super is hidden only in the form that replaces moves");
 
     let form_mv = def.movelist.iter().find(|m| m.name == "Raio Cataclismo").unwrap();
     assert_eq!(form_mv.cost, 1000.0);

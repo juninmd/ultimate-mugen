@@ -2,6 +2,7 @@
 //! forces every special, super and throw of each listed fighter against a dummy rival, prints the damage it dealt and saves the
 //! frame a few ticks after the first hit (`<dir>/M-<fighter>-<move>.png`).
 //! `UME_BOXES=1` draws the hit and hurt boxes on the captured frames; `UME_AFTER_HIT=<ticks>` changes the capture delay.
+pub mod clips;
 pub mod duel;
 use crate::app::{App, Mode};
 use crate::gfx::*;
@@ -41,7 +42,8 @@ fn showcases(def: &CharDef) -> Vec<Showcase> {
 }
 
 fn slug(name: &str) -> String {
-    name.chars().map(|c| if c.is_ascii_alphanumeric() { c.to_ascii_lowercase() } else { '-' }).collect::<String>().trim_matches('-').to_string()
+    let plain = |c: char| match c { 'á' | 'à' | 'â' | 'ã' => 'a', 'é' | 'ê' => 'e', 'í' => 'i', 'ó' | 'ô' | 'õ' => 'o', 'ú' | 'ü' => 'u', 'ç' => 'c', other => other };
+    name.to_lowercase().chars().map(plain).map(|c| if c.is_ascii_alphanumeric() { c } else { '-' }).collect::<String>().trim_matches('-').to_string()
 }
 
 pub async fn run(app: &mut App, dir: &str) {

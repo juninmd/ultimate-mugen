@@ -73,3 +73,13 @@ fn controls_return_after_time_over() {
         .all(|f| f.ctrl && f.alive));
     assert_eq!(m.timer, 30);
 }
+
+#[test]
+fn no_hits_or_commands_land_during_time_over() {
+    let mut m = timed_duel(30);
+    run_until(&mut m, 3, 1);
+    assert!(!m.won_by_ko);
+    assert!(!m.has_command(0, "holdfwd"));
+    let hd = ume_engine::fighter::HitDefData::default();
+    assert!(!m.can_be_hit(1, &hd, 0));
+}

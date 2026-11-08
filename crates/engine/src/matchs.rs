@@ -373,7 +373,7 @@ impl Match {
         let src = if f.is_helper { if f.key_ctrl { self.idx(f.root) } else { None } } else { Some(i) };
         let Some(s) = src else { return false };
         if f.asserted_commands.iter().any(|(n, t)| *t > 0 && n.eq_ignore_ascii_case(name)) { return true; }
-        let accepting = if f.is_helper { self.round_state == 2 } else { self.round_state == 2 || self.round_state == 3 };
+        let accepting = if f.is_helper { self.round_state == 2 } else { self.round_state == 2 || (self.round_state == 3 && self.won_by_ko) };
         if !accepting && !self.training && !self.fighters[s].has_assert(asf::POSTROUNDINPUT) { return false; }
         if !Arc::ptr_eq(&f.st_def, &f.def) && !Arc::ptr_eq(&f.st_def, &self.common) {
             return f.st_def.commands.iter().find(|c| c.name == name).is_some_and(|c| crate::commands::match_command(&self.fighters[s].history, c));
@@ -998,7 +998,7 @@ impl Match {
             if hd.chain_id.is_some_and(|c| f.ghv.hit_id != c) { return false; }
             if f.ghv.hit_id >= 0 && hd.no_chain_id.contains(&Some(f.ghv.hit_id)) { return false; }
         }
-        if self.round_state != 2 && !(self.round_state == 3 && f.alive) { return false; }
+        if self.round_state != 2 && !(self.round_state == 3 && f.alive && self.won_by_ko) { return false; }
         if f.state_no == 5150 || f.unhittable > 0 { return false; }
         let hf = &hd.hitflag; let st = f.state_type;
         if hf.contains('+') && f.move_type != 'H' { return false; }

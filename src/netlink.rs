@@ -113,6 +113,7 @@ pub struct NetLink {
     skip: u32,
     pub rollbacks: u64,
     pub desyncs: u32,
+    pub desync_at: Option<(u32, u64)>,
     pub lost: Option<String>,
 }
 
@@ -145,6 +146,7 @@ impl NetLink {
                 skip: 0,
                 rollbacks: 0,
                 desyncs: 0,
+                desync_at: None,
                 lost: None,
             });
         }
@@ -167,6 +169,7 @@ impl NetLink {
             skip: 0,
             rollbacks: 0,
             desyncs: 0,
+            desync_at: None,
             lost: None,
         })
     }
@@ -194,17 +197,6 @@ impl NetLink {
         }
     }
 
-    /// Faults shared by both connection types (disconnects and desyncs).
-    fn faults(&mut self, events: impl Iterator<Item = GgrsEvent<Net>>) {
-        for e in events {
-            match e {
-                GgrsEvent::Disconnected { .. } => self.lost = Some("opponent disconnected".into()),
-                GgrsEvent::DesyncDetected { .. } => self.desyncs += 1,
-                _ => {}
-            }
-        }
-    }
-
     pub fn step<F: FnMut(&mut Match, &[u32], bool)>(
         &mut self,
         game: &mut Match,
@@ -225,7 +217,10 @@ impl NetLink {
             match e {
                 GgrsEvent::WaitRecommendation { skip_frames } => self.skip += skip_frames,
                 GgrsEvent::Disconnected { .. } => self.lost = Some("opponent disconnected".into()),
-                GgrsEvent::DesyncDetected { .. } => self.desyncs += 1,
+                GgrsEvent::DesyncDetected { frame, local_checksum, .. } => {
+                    self.desyncs += 1;
+                    self.desync_at.get_or_insert((frame as u32, local_checksum as u64));
+                }
                 _ => {}
             }
         }

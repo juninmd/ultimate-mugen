@@ -277,7 +277,7 @@ impl Fighter {
             (self.c("size.xscale", 1.0), self.c("size.yscale", 1.0))
         };
         let sx = xscale * s;
-        let sy = yscale * s;
+        let sy = yscale * self.lscl * self.draw_scale[1];
         let flip = fr.flip_h != (self.facing < 0.0);
         out.reserve(list.len());
         for b in list {

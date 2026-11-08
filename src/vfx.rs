@@ -587,7 +587,7 @@ impl Vfx {
                     .is_some_and(|f| f.life >= f.life_max - 0.5)
                 {
                     self.sfx.push("perfect");
-                    self.banner("PERFECT!", "vitória sem sofrer dano", [1.0, 0.85, 0.2]);
+                    self.banner("PERFECT!", crate::i18n::tr3("vitória sem sofrer dano", "flawless victory", "victoria sin recibir daño"), [1.0, 0.85, 0.2]);
                 }
             }
             Event::Transform { fighter } => {
@@ -623,7 +623,7 @@ impl Vfx {
                         col,
                     );
                     if f.def.boss && f.form >= 2 {
-                        self.banner("ECLIPSE ABSOLUTO", "FORMA FINAL DE MIKAZUKI OBORO", col);
+                        self.banner(crate::i18n::tr3("ECLIPSE ABSOLUTO", "ABSOLUTE ECLIPSE", "ECLIPSE ABSOLUTO"), crate::i18n::tr3("FORMA FINAL DE MIKAZUKI OBORO", "FINAL FORM OF MIKAZUKI OBORO", "FORMA FINAL DE MIKAZUKI OBORO"), col);
                     }
                 }
                 self.flash_add(0.4);
@@ -638,10 +638,10 @@ impl Vfx {
             Event::Fight => {
                 if let Some(b) = m.roots().find(|f| f.def.boss) {
                     if b.form >= 2 {
-                        self.banner("DESAFIO FINAL", "OBORO · ECLIPSE ABSOLUTO", [1.0, 0.78, 0.22]);
+                        self.banner(crate::i18n::tr3("DESAFIO FINAL", "FINAL CHALLENGE", "DESAFÍO FINAL"), crate::i18n::tr3("OBORO · ECLIPSE ABSOLUTO", "OBORO · ABSOLUTE ECLIPSE", "OBORO · ECLIPSE ABSOLUTO"), [1.0, 0.78, 0.22]);
                     } else {
                         let name = b.def.display_name.to_uppercase();
-                        self.banner("CHEFE FINAL", &name, [1.0, 0.15, 0.3]);
+                        self.banner(crate::i18n::tr3("CHEFE FINAL", "FINAL BOSS", "JEFE FINAL"), &name, [1.0, 0.15, 0.3]);
                     }
                     self.sfx.extend(["ko", "crowd"]);
                 }

@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod energy; mod energy_gem; mod palette; mod story_hud; use palette::{poly_pt, side_tint};
+mod energy; mod energy_gem; mod palette; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -480,8 +480,8 @@ impl Hud {
                     });
                     if nforms > 0 {
                         let lbl = match f.next_form_cost() {
-                            Some(c) => format!("FORMA {}/{} · PRÓX {}", f.form + 1, nforms + 1, c as i32),
-                            None => format!("FORMA {0}/{0} · MAX", nforms + 1),
+                            Some(c) => format!("{} {}/{} · {} {}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), f.form + 1, nforms + 1, crate::i18n::tr3("PRÓX", "NEXT", "SIG"), c as i32),
+                            None => format!("{} {1}/{1} · MAX", crate::i18n::tr3("FORMA", "FORM", "FORMA"), nforms + 1),
                         };
                         let al = if side == 0 { Align::Left } else { Align::Right };
                         let tx = if side == 0 { pxm + 6.2 * (nforms + 1).min(7) as f32 + 2.0 } else { pxm + pw - 6.2 * (nforms + 1).min(7) as f32 - 2.0 };
@@ -713,7 +713,7 @@ impl Hud {
                 );
                 if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 {
                     text(
-                        "TAB · TROCAR DE LUTADOR",
+                        crate::i18n::tr3("TAB · TROCAR DE LUTADOR", "TAB · SWITCH FIGHTER", "TAB · CAMBIAR DE LUCHADOR"),
                         w / 2.0,
                         BASE_H - 20.0,
                         5.2,
@@ -738,7 +738,7 @@ impl Hud {
                     (w - off, Align::Right)
                 };
                 outlined(
-                    &format!("TIME {lead}"),
+                    &format!("{} {lead}", crate::i18n::tr3("TIME", "TEAM", "EQUIPO")),
                     x,
                     41.0,
                     5.2,
@@ -1080,7 +1080,7 @@ impl Hud {
                 {
                     let a = 0.55 + 0.45 * (gt * 5.0).sin().abs();
                     text(
-                        &format!("T · FORMA {}/{}", f.form + 2, f.form_count() + 1),
+                        &format!("T · {} {}/{}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), f.form + 2, f.form_count() + 1),
                         BASE_W / 2.0,
                         BASE_H - 8.0,
                         6.0,
@@ -1123,7 +1123,7 @@ impl Hud {
             let (hits, dmg) = (self.combo[0].0, self.combo[0].1);
             if hits >= 2 {
                 text(
-                    &format!("ÚLTIMO COMBO  {hits} HITS · {} DMG", dmg as i32),
+                    &format!("{}  {hits} HITS · {} DMG", crate::i18n::tr3("ÚLTIMO COMBO", "LAST COMBO", "ÚLTIMO COMBO"), dmg as i32),
                     w / 2.0,
                     38.0,
                     5.6,
@@ -1217,26 +1217,12 @@ fn face_off_line(f: &Fighter, answer: bool) -> String {
     if !own.is_empty() {
         return own.clone();
     }
-    const A: [&str; 5] = [
-        "Vamos ver do que você é capaz!",
-        "Prepare-se!",
-        "Não vou pegar leve!",
-        "Que vença o melhor!",
-        "Mostre sua força!",
-    ];
-    const B: [&str; 5] = [
-        "Só isso?",
-        "Você não me assusta.",
-        "Venha com tudo!",
-        "Hmpf... entediante.",
-        "Vai se arrepender.",
-    ];
     let h = f
         .def
         .display_name
         .bytes()
         .fold(7usize, |a, b| a.wrapping_mul(31).wrapping_add(b as usize));
-    (if answer { B } else { A })[h % 5].to_string()
+    taunts::generic_line(answer, h).to_string()
 }
 
 const TILE_W: f32 = 10.5;

@@ -143,7 +143,7 @@ Details in the [Performance wiki page](docs/wiki/Performance.md).
 
 ## 🏁 Quick start
 
-**Play now:** open the [web build](https://juninmd.github.io/ultimate-mugen/) and drag a character `.zip` into the window.
+**Play now:** open the [web build](https://juninmd.github.io/ultimate-mugen/) and drag a character `.zip` into the window (or use Import M.U.G.E.N in the main menu).
 
 **Desktop:**
 

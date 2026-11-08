@@ -96,6 +96,7 @@ fn helpers_stop_accepting_commands_when_the_round_ends() {
     assert!(m.has_command(plain, "x"));
     assert!(m.has_command(0, "x"));
     m.round_state = 3;
+    m.won_by_ko = true;
     assert!(!m.has_command(plain, "x"), "helpers lose their commands as soon as the round is decided");
     assert!(m.has_command(0, "x"), "the root keeps its own until it settles");
     m.round_state = 4;

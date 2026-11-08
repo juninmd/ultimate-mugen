@@ -206,6 +206,10 @@ Validate with `cargo test --release --test native_roster_lab -- --nocapture` (ev
 | `>` | No other input between steps | `F, >F` |
 | `N` | Neutral direction (no direction held) | `N, x` |
 
+## Power normals (Punch 3 and Kick 3)
+
+Every native fighter that does not declare a move bound to `z` or `c` gets four extra normals at compile time (`native/power_normals.rs`): `power_punch` and `crouch_power_punch` on `z` (default key **E**, shown as *Punch 3*), `power_kick` and `crouch_power_kick` on `c` (default key **D**, shown as *Kick 3*). Each one reuses the animation, timing, guard height and `cancels` of the fighter's heaviest ground normal of that family (`y` then `x` for punches, `b` then `a` for kicks, crouching variants take the crouching normal), named `<base name> Max`. Hits deal 130 % damage, are promoted to `heavy`, gain 4 hit-stun and 2 hit-stop ticks when those are set, and push 25 % harder. Moves that cancel into the base normal also cancel into its power version, and the new moves appear in the pause move list. Declare your own `z` or `c` move to opt out. Air versions are not generated here.
+
 ## Energy charge (every fighter)
 
 Every native fighter can charge its meter: hold **R** (the `s` / Start input; the pause key in a fight is **Esc** or **P**). The fighter enters state `3920`, plays its `powerUp` animation on a loop with a blue glow and gains 4 power per tick (a 1000-power super in about four seconds) until the button is released (after at least 6 ticks) or the meter is full. The state is `movetype = I`, so a hit interrupts it, and a form-capable fighter still transforms with `T` once the meter reaches the form cost. The command is `charge_cmd` (`/s`) and shows as `Charge Energy` in the move list. The built-in AI charges only at level 3 or above, with less than 700 power, when the rival is more than 190 units away and is not attacking.

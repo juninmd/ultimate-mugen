@@ -1,4 +1,4 @@
-use super::rig::render_pose;
+use super::rig::{render_pose, RigRender};
 use super::types::{ActiveSpec, Box4, NativeChar, NativeFrame};
 use serde_json::Value;
 
@@ -13,7 +13,18 @@ pub fn standing_height(nc: &NativeChar) -> f32 {
     STANDING_UNITS * declared / 100.0
 }
 
-pub(super) fn declared_strike_boxes(nc: &NativeChar, fr: &NativeFrame) -> Option<Vec<Box4>> {
+pub(super) fn fit_to_character(nc: &NativeChar, fr: &NativeFrame, render: &mut RigRender, height_ratio: f32) {
+    if let Some(boxes) = declared_strike_boxes(nc, fr) {
+        render.hit = boxes;
+    }
+    for bounds in &mut render.hurt {
+        for edge in bounds.iter_mut() {
+            *edge *= height_ratio;
+        }
+    }
+}
+
+fn declared_strike_boxes(nc: &NativeChar, fr: &NativeFrame) -> Option<Vec<Box4>> {
     let active = fr.hit.as_ref()?;
     if let Some(explicit) = active.bx {
         return Some(vec![explicit]);

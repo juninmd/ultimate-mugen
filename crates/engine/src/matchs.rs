@@ -1146,10 +1146,6 @@ impl Match {
         f.pos.x <= minx + 2.0 || f.pos.x >= maxx - 2.0
     }
 
-    fn hit_override(&self, d: usize, hd: &HitDefData) -> Option<(i32, bool)> {
-        self.fighters[d].hit_overrides.iter().flatten().find(|o| o.time != 0 && !o.keep && Self::attr_match(hd, &o.attr)).map(|o| (o.state_no, o.force_air))
-    }
-
     pub fn apply_hit(&mut self, a: usize, d: usize, hd: &HitDefData, at: (f32, f32), proj: Option<(i32, f32)>) {
         let guarded = !self.fighters[a].has_assert(asf::UNGUARDABLE) && self.is_guarding(d, hd);
         let overridden = if guarded { None } else { self.hit_override(d, hd) };

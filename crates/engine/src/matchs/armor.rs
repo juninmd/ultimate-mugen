@@ -1,6 +1,10 @@
 use super::*;
 
 impl Match {
+    pub(super) fn hit_override(&self, d: usize, hd: &HitDefData) -> Option<(i32, bool)> {
+        self.fighters[d].hit_overrides.iter().flatten().find(|o| o.time != 0 && !o.keep && Self::attr_match(hd, &o.attr)).map(|o| (o.state_no, o.force_air))
+    }
+
     pub(super) fn absorb_armored_hit(&mut self, a: usize, d: usize, hd: &HitDefData, at: (f32, f32), proj: Option<(i32, f32)>) -> bool {
         let Some(slot) = self.fighters[d].hit_overrides.iter().position(|o| {
             o.as_ref().is_some_and(|o| o.keep && o.time != 0 && o.hits > 0 && Self::attr_match(hd, &o.attr) && (o.threshold <= 0.0 || hd.damage <= o.threshold))

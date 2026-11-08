@@ -1,10 +1,11 @@
 use crate::chardef::Controller;
-use crate::fighter::{asf, AfterImage, Bind, BindKind, HitOverride, PalFx};
+use crate::fighter::{asf, AfterImage, Bind, BindKind, PalFx};
 use crate::palette::{AfterImageParams, Trans};
 use crate::hitdef::{build, parse_sound_ref};
 use crate::matchs::{Event, Match};
 use std::sync::Arc;
 
+mod hit_override;
 mod targets;
 use targets::{life_add, target_indices};
 
@@ -105,13 +106,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             let hd = build(m, i, sc);
             m.fighters[i].reversal = Some((attr, hd));
         }
-        "hitoverride" => {
-            let attr = sc.raw("attr").unwrap_or("SCA,AA,AT,AP").to_string();
-            let slot = (n(m, "slot", 0.0) as usize).min(7);
-            let (state_no, time, force_air) = (n(m, "stateno", -1.0) as i32, n(m, "time", 1.0) as i32, n(m, "forceair", 0.0) != 0.0);
-            let (keep, hits, threshold, chip) = (n(m, "keepstate", 0.0) != 0.0, n(m, "armorhits", 1.0) as i32, n(m, "armorthreshold", 0.0) as f32, n(m, "armorchip", 35.0) as f32);
-            m.fighters[i].hit_overrides[slot] = if state_no < 0 && !keep { None } else { Some(HitOverride { attr, state_no, time, force_air, keep, hits, threshold, chip }) };
-        }
+        "hitoverride" => hit_override::apply(m, i, sc),
         "fallenvshake" => {
             let s = m.fighters[i].ghv.fall_env_shake;
             if s.time > 0 { m.shake_with_dir(s.time, s.freq, s.ampl, s.phase, s.dir); m.fighters[i].ghv.fall_env_shake.time = 0; }

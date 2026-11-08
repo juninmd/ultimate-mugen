@@ -21,14 +21,7 @@ pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value
     let height = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(STAND_UNITS as f64) as f32;
     let height_ratio = height / STAND_UNITS;
     render.scale *= height_ratio;
-    if let Some(boxes) = super::pixel_hit::declared_strike_boxes(nc, fr) {
-        render.hit = boxes;
-    }
-    for bounds in &mut render.hurt {
-        for edge in bounds.iter_mut() {
-            *edge *= height_ratio;
-        }
-    }
+    super::pixel_hit::fit_to_character(nc, fr, &mut render, height_ratio);
     Some(render)
 }
 

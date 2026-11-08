@@ -1078,7 +1078,6 @@ impl MatchRenderer {
                 }
             }
             StageArt::Illustrated { image, ambience } => {
-                let (zoom, density) = (m.zoom, g.fx_gain);
                 let ground = m.stage.zoffset - m.camera.y;
                 let top_ground = m.stage.zoffset - m.stage.bound_high.min(0.0);
                 let bottom_ground = m.stage.zoffset - m.stage.bound_low.max(0.0);
@@ -1086,12 +1085,9 @@ impl MatchRenderer {
                     .max((m.view_h - bottom_ground) / 0.15)
                     .max(m.view_h);
                 let w = (h * image.w as f32 / image.h as f32).max(m.view_w);
-                let x = ((m.view_w - w) * 0.5 - m.camera.x * 0.12 * zoom).clamp(m.view_w - w, 0.0);
+                let x = ((m.view_w - w) * 0.5 - m.camera.x * 0.12 * m.zoom).clamp(m.view_w - w, 0.0);
                 let rect = ImageRect { x: x + shx, y: ground - h * 0.85 + shy, w, h, view_w: m.view_w, view_h: m.view_h, cam_x: m.camera.x };
-                if front {
-                    draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, density, true);
-                    return;
-                }
+                if front { return draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true); }
                 let texture = g.texture(image, true);
                 draw_texture_ex(
                     &texture,
@@ -1103,7 +1099,7 @@ impl MatchRenderer {
                         ..Default::default()
                     },
                 );
-                draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, density, false);
+                draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false);
             }
             StageArt::Mugen(bg) => {
                 let scl = bg.scl;

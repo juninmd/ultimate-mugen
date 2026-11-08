@@ -16,6 +16,9 @@ async fn grab(app: &mut App, dir: &str, name: &str) {
 }
 
 pub async fn run(app: &mut App, dir: &str) {
+    if std::env::var("UME_TOUR").as_deref() == Ok("moves") {
+        return crate::moves_tour::run(app, dir).await;
+    }
     let chars: Vec<String> = std::env::var("UME_CHARS")
         .unwrap_or_default()
         .split(',')

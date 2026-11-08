@@ -3730,6 +3730,179 @@
         ],
         "at": 1
       }
+    },
+    {
+      "id": "ex_corvos",
+      "name": "Corvos EX",
+      "input": "~D, DF, F, x+y",
+      "kind": "special",
+      "anim": "corvos",
+      "projectile": [
+        {
+          "at": 3,
+          "anim": "crowFx",
+          "hitAnim": "crowHit",
+          "speed": [
+            8.8,
+            -1.1
+          ],
+          "offset": [
+            50,
+            -56
+          ],
+          "damage": 26.0,
+          "level": "heavy",
+          "hits": 3,
+          "priority": 2
+        },
+        {
+          "at": 3,
+          "anim": "crowFx",
+          "hitAnim": "crowHit",
+          "speed": [
+            9.2,
+            0
+          ],
+          "offset": [
+            52,
+            -54
+          ],
+          "damage": 26.0,
+          "level": "heavy",
+          "hits": 3,
+          "priority": 2
+        },
+        {
+          "at": 3,
+          "anim": "crowFx",
+          "hitAnim": "crowHit",
+          "speed": [
+            8.8,
+            1.1
+          ],
+          "offset": [
+            50,
+            -52
+          ],
+          "damage": 26.0,
+          "level": "heavy",
+          "hits": 3,
+          "priority": 2
+        }
+      ],
+      "cancels": [
+        "amaterasu",
+        "tsukuyomi"
+      ],
+      "cost": 250.0
+    },
+    {
+      "id": "ex_amaterasu",
+      "name": "Mirror Strike EX",
+      "input": "~D, DB, B, y+b",
+      "kind": "special",
+      "anim": "amaterasu",
+      "projectile": [
+        {
+          "at": 3,
+          "anim": "blackFlame",
+          "hitAnim": "blackFlameHit",
+          "speed": [
+            3.2,
+            0
+          ],
+          "offset": [
+            48,
+            -30
+          ],
+          "damage": 19.5,
+          "hits": 8,
+          "level": "heavy",
+          "priority": 4,
+          "removeTime": 120
+        }
+      ],
+      "cancels": [
+        "tsukuyomi"
+      ],
+      "cost": 500.0,
+      "invuln": [
+        1,
+        6
+      ]
+    },
+    {
+      "id": "overhead",
+      "name": "Eclipse Chop",
+      "input": "x+b",
+      "kind": "normal",
+      "anim": "hkick",
+      "hits": [
+        {
+          "at": 3,
+          "damage": 74.1,
+          "level": "medium",
+          "launch": true,
+          "knockback": [
+            -3,
+            -7
+          ],
+          "guard": "high",
+          "hitstun": 20
+        }
+      ]
+    },
+    {
+      "id": "launcher",
+      "name": "Moonrise Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [
+        {
+          "at": 3,
+          "damage": 58.0,
+          "level": "heavy",
+          "launch": true,
+          "knockback": [
+            -1,
+            -6
+          ],
+          "hitstun": 22
+        }
+      ]
+    },
+    {
+      "id": "divekick",
+      "name": "Crow Dive",
+      "input": "y",
+      "kind": "normal",
+      "anim": "akick",
+      "when": "air",
+      "hits": [
+        {
+          "at": 2,
+          "damage": 77.0,
+          "level": "heavy",
+          "guard": "high",
+          "groundBounce": true,
+          "launch": true,
+          "knockback": [
+            -1,
+            4
+          ]
+        }
+      ],
+      "moves": [
+        {
+          "at": 1,
+          "vel": [
+            1.8,
+            2.5
+          ]
+        }
+      ]
     }
   ],
   "palettes": [
@@ -4034,5 +4207,8 @@
         ]
       }
     ]
+  },
+  "passives": {
+    "meterRegen": 0.4
   }
 }

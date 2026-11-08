@@ -8,6 +8,8 @@ fn fighter_with(moves: serde_json::Value, anims: serde_json::Value) -> NativeCha
     let mut value: serde_json::Value = serde_json::from_str(include_str!("../../../assets/chars/kaito.json")).unwrap();
     value["id"] = json!("lab");
     value["moves"] = moves;
+    value["abilities"] = serde_json::Value::Null;
+    value["passives"] = serde_json::Value::Null;
     for (name, anim) in anims.as_object().unwrap() { value["anims"][name] = anim.clone(); }
     serde_json::from_value(value).unwrap()
 }

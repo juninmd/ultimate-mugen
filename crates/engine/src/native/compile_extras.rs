@@ -53,10 +53,10 @@ pub(super) fn passives_cns(nc: &NativeChar) -> String {
     let mut out = String::from("[Statedef -2]\n\n");
     if let Some(pass) = &nc.passives {
         if let Some(mr) = pass.meter_regen {
-            if mr > 0.0 { out += &format!("[State -2, meter_regen]\ntype = PowerAdd\ntrigger1 = 1\nvalue = {mr}\n\n"); }
+            if mr > 0.0 { out += &format!("[State -2, meter_regen]\ntype = PowerAdd\ntrigger1 = alive && roundstate = 2\nvalue = {mr}\n\n"); }
         }
         if let Some(lr) = pass.life_regen {
-            if lr != 0.0 { out += &format!("[State -2, life_regen]\ntype = LifeAdd\ntrigger1 = 1\nvalue = {lr}\n\n"); }
+            if lr != 0.0 { out += &format!("[State -2, life_regen]\ntype = LifeAdd\ntrigger1 = alive && roundstate = 2 && life < lifemax\nvalue = {lr}\n\n"); }
         }
     }
     out

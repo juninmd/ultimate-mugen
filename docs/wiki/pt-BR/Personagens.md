@@ -588,3 +588,21 @@ classDiagram
     Garan --> Haruki : Fome pelos Titãs
     Sylene --> Garan : Gelo vs Fogo das Cinzas
 ```
+
+## Kit compartilhado
+
+Todo lutador jogável recebe o mesmo kit de combos e habilidades além dos golpes do dossiê:
+
+| Adição | Comando | Notas |
+|---|---|---|
+| Projétil EX | movimento do projétil + `x+y` | 250 de barra, tiro mais forte com mais acertos |
+| Anti-aéreo EX | movimento do uppercut + `y+b` | 500 de barra, invulnerabilidade maior |
+| Overhead | `x+b` | golpe médio que exige defesa alta |
+| Launcher agachado | agachado + `y` | inicia combos aéreos |
+| Golpe mergulho | `y` no ar | quica o oponente no chão |
+| Hyper nível 3 | movimento do super + `x+y` | gasta a barra inteira (3000) |
+| Especial despertado | movimento do projétil + `a+b` | só transformado, leque de três tiros |
+| Transformação | L3+R3 / despertar | bônus de ataque e defesa, libera golpes da forma |
+
+Lutadores de ki também têm voo, teletransporte ou super velocidade, e todos têm um passivo (regeneração de barra ou vida). Tudo aparece na lista de golpes do pause e pode ser ligado aos atalhos 1-4 / L1, L2, R1, R2.
+

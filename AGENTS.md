@@ -85,6 +85,7 @@
 - Native roster lab (every attack state of every UMF fighter must connect; prints damage and reach, `UME_LAB_ONLY=id,id`, `UME_CHARS_DIR=<dir>`): `cargo test --release -p ume-engine --test native_roster_lab -- --nocapture`
 - Declared cancel routes chain end to end: `cargo test --release -p ume-engine --test native_combo_routes -- --nocapture`; throws and armor: `--test native_throw_and_armor`
 - Static roster audit (inputs, cancels, throws, hit boxes): `python scripts/audit_native_moves.py [dir]`
+- CPU-vs-CPU balance duel (round-robin of every UMF fighter, win rate, damage, hits, knockout rate; `UME_DUEL_SKIP=oboro` leaves the boss out, `UME_DUEL_LEVEL`, `UME_DUEL_SEED_OFFSET`): `cargo run --release -p ume-engine --example native_duel -- assets/chars`
 - Hit box audit (every strike frame of every UMF fighter: height, reach, start, width against the M.U.G.E.N-measured proportions): `cargo test --release -p ume-engine --test native_hitbox_audit -- --nocapture`; per-fighter normal reach and damage: `--test native_normal_reach`
 - Draw hit and hurt boxes on the move showcase: `UME_BOXES=1 UME_AFTER_HIT=0` with `UME_TOUR=moves`
 - Move showcase screenshots (every special, super and throw against a dummy): `UME_TOUR=moves UME_CHARS=akio,bruno UME_RIVAL=kaito ultimate-mugen --shots <dir> --res 1280x720 --mute`

@@ -15,6 +15,7 @@ mod air_variant;
 mod air_normals;
 mod power_normals;
 mod charge;
+pub mod charge_ramp;
 pub(crate) use charge::{CHARGE_COMMAND, CHARGE_STATE};
 mod pixel_hit;
 mod pixel_hurt;

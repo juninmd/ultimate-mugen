@@ -2,7 +2,7 @@
 // usage: NODE_PATH=$(npm root -g) node scripts/web-profile.js Enter Enter Enter
 const { chromium } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
-const root = require('path').resolve(__dirname, '../web/dist');
+const root = process.env.DIST || require('path').resolve(__dirname, '../web/dist');
 const types = {'.html':'text/html','.js':'text/javascript','.wasm':'application/wasm','.svg':'image/svg+xml','.webmanifest':'application/json'};
 const srv = http.createServer((q,r)=>{ let p = q.url.split('?')[0]; if(p==='/')p='/index.html'; const f=path.join(root,p); fs.readFile(f,(e,d)=>{ if(e){r.writeHead(404);r.end();return;} r.writeHead(200,{'content-type':types[path.extname(f)]||'application/octet-stream'}); r.end(d);});}).listen(8098);
 (async()=>{
@@ -22,10 +22,11 @@ const srv = http.createServer((q,r)=>{ let p = q.url.split('?')[0]; if(p==='/')p
   await cdp.send('Profiler.start');
   const steps = process.argv.slice(2);
   await pg.mouse.click(640,360);
-  for (const k of steps) { await pg.keyboard.down(k); await pg.waitForTimeout(300); await pg.keyboard.up(k); await pg.waitForTimeout(3500); await pg.screenshot({path:`/tmp/p_${k}_${Date.now()%100000}.png`}); }
+  for (const spec of steps) { const [k,rep='1']=spec.split('*'); for(let r=0;r<+rep;r++){ await pg.keyboard.down(k); await pg.waitForTimeout(rep==='1'?300:80); await pg.keyboard.up(k); await pg.waitForTimeout(rep==='1'?3500:120);}  await pg.screenshot({path:`/tmp/p_${k}_${Date.now()%100000}.png`}); }
   const {profile} = await cdp.send('Profiler.stop');
   const self = {}; const dt = profile.timeDeltas; const byId={}; profile.nodes.forEach(n=>byId[n.id]=n);
   profile.samples.forEach((id,i)=>{ const n=byId[id]; const k=n.callFrame.functionName||'(anon)'; self[k]=(self[k]||0)+dt[i]/1000; });
+  const busy = Object.entries(self).filter(([k])=>k!=='(idle)'&&k!=='(program)'&&k!=='(garbage collector)').reduce((a,[,v])=>a+v,0); console.log('BUSY_MS', busy.toFixed(0));
   const top = Object.entries(self).sort((a,b)=>b[1]-a[1]).slice(0,25);
   console.log(top.map(([k,v])=>v.toFixed(0)+'ms '+k).join('\n'));
   const ft = await pg.evaluate(()=>window.__ft);

@@ -21,11 +21,14 @@ mod pixel_hurt;
 mod pack;
 mod recolor;
 mod portrait;
+mod preview;
 mod sprite_set;
-pub use compile::{compile_native, compile_native_preview, compile_native_with, STANDARD_ANIMS};
+pub use compile::{compile_native, compile_native_with, STANDARD_ANIMS};
+pub use preview::compile_native_preview;
 pub use types::*;
 pub use ability_spec::*;
 pub use lookup::register_native;
+pub use portrait::select_portrait;
 
 pub use pixel::{audit_native_sprite_frames, native_frame_sprite_key};
 pub use pack::{contains as has_sprite_pack, insert as insert_sprite_pack, revision as sprite_pack_revision};

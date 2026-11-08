@@ -153,7 +153,7 @@ impl Settings {
     pub fn art_res(&self, physical_h: f32) -> f32 {
         let q = QUALITY[self.quality.min(QUALITY.len() - 1)].0;
         if q <= 0.0 {
-            auto_quality(physical_h)
+            auto_quality(physical_h).min(if cfg!(target_arch = "wasm32") { 3.0 } else { f32::MAX })
         } else {
             q
         }

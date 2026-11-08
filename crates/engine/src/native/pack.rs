@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 const MAGIC: &[u8; 4] = b"UMEP";
 const VERSION: u8 = 2;
-const MAX_PACKS: usize = 24;
+const MAX_PACKS: usize = 64;
 
 pub struct SpritePack {
     pub character: String,

@@ -433,3 +433,11 @@ etain_mut.
   - `commands::parse_command`: Substituicao da coleta de `String` na heap em prefixos de comando de carga/liberacao (`~30`) por indexacao de fatias de bytes sem alocacao e correspondencia de bytes ASCII para prefixos (`/`, `$`, `>`, `~`).
   - `fighter::change_anim`: Adicionada guarda `Arc::ptr_eq` evitando incremento de contagem de referencia quando `from` ja e a definicao ativa `anim_def`.
   - `fighter::change_anim_own`: Migracao para emprestimo direto por referencia imutavel de `self.def` sem clonar o contador atomico `Arc<CharDef>`.
+
+- **Tela de selecao na web** (`scripts/web-frame-probe.js`, `scripts/web-profile.js`):
+  - Os quadros dos personagens nativos desenham `portrait.png` por `CharEntry::tile_portrait` (uma decodificacao pequena, em cache por revisao do pacote) em vez de compilar uma previa de idle e vitoria por quadro; a previa completa so e montada para o personagem em foco ou escolhido.
+  - As previas esperam o pacote de sprites chegar (`CharEntry::tile_art_ready`), entao o rasterizador de rig nunca serve de substituto durante o download.
+  - Em `wasm32`, um personagem sem pacote previsualiza so o primeiro quadro de cada animacao do menu, e a resolucao automatica da arte fica limitada a 3.0.
+  - `Recolor::apply_in_region` usa um hasher multiplicativo e memoria do ultimo tom no lugar de SipHash por pixel.
+  - O cache de pacotes guarda 64 pacotes, entao elencos acima de 24 personagens nao se expulsam mais.
+  - Medido com o profiler no Chromium headless (tela de selecao, 53 movimentos de cursor): tempo ocupado da thread principal caiu de cerca de 98 s para cerca de 2,5 s.

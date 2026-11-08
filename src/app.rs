@@ -1621,7 +1621,7 @@ impl App {
                 continue;
             }
             let e = &self.reg.chars[i];
-            if e.peek(pal).is_some() || e.broken.get() {
+            if e.peek(pal).is_some() || e.broken.get() || !e.tile_art_ready() {
                 continue;
             }
             if self.sel_dwell < if e.mugen { 0.18 } else { 0.03 } {
@@ -1673,7 +1673,8 @@ impl App {
             self.ui
                 .rect(cx, cy + ch * 0.62, cw, ch * 0.38, alpha(col, 0.18));
             let mut got = self.reg.chars[i].peek(1);
-            if got.is_none() && !emugen && !loaded_one && !broken {
+            let tile_thumb = if emugen { None } else { self.reg.chars[i].tile_portrait(1) };
+            if got.is_none() && tile_thumb.is_none() && !emugen && !loaded_one && !broken && self.reg.chars[i].tile_art_ready() {
                 got = self.reg.chars[i].load_preview(1).ok();
                 loaded_one = got.is_some();
             }
@@ -1690,8 +1691,10 @@ impl App {
             let thumb = if emugen {
                 self.reg.chars[i].portrait()
             } else {
-                got.as_ref()
-                    .and_then(|d| d.sprites.get(&(9000, 1)).cloned())
+                tile_thumb.or_else(|| {
+                    got.as_ref()
+                        .and_then(|d| d.sprites.get(&(9000, 1)).cloned())
+                })
             };
             if thumb.is_some() || got.is_some() {
                 let por = thumb.and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)));
@@ -2253,7 +2256,8 @@ impl App {
         let por = if e.mugen {
             e.portrait()
         } else {
-            e.peek(1).and_then(|d| d.sprites.get(&(9000, 1)).cloned())
+            e.tile_portrait(1)
+                .or_else(|| e.peek(1).and_then(|d| d.sprites.get(&(9000, 1)).cloned()))
         };
         let Some((im, pw, ph)) =
             por.and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)))

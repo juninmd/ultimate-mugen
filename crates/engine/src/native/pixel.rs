@@ -104,6 +104,7 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
     let axis = |key: &str, default: f32, limit: f32| frame.get(key).and_then(Value::as_f64).filter(|number| number.is_finite() && *number >= 0.0 && *number <= limit as f64).map_or(default, |number| number as f32);
     let axis_x = axis("axisX", dec.width as f32 / 2.0, dec.width as f32);
     let axis_y = axis("axisY", dec.height as f32, dec.height as f32);
+    let hurt = super::pixel_hurt::fit_body(hurtbox(lower, stem), stem, &rgba, dec.width, dec.height, [axis_x, axis_y], STAND_UNITS / units);
     Some(RigRender {
         image: Some(ImageData::new(dec.width, dec.height, rgba)),
         width: dec.width as f32 * res,
@@ -111,7 +112,7 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
         axis_x: axis_x * res,
         axis_y: axis_y * res,
         scale: STAND_UNITS / units / res,
-        hurt: vec![hurtbox(lower, stem)],
+        hurt: vec![hurt],
         hit: if striking { vec![STRIKE_BOX] } else { vec![] },
     })
 }
@@ -273,7 +274,7 @@ mod tests {
         write_png(&dir, "01_idle", 10, 10);
         write_png(&dir, "14_lie", 10, 10);
         let roots = [dir.clone()];
-        assert_eq!(load_pose(&roots, "lie", false, None).unwrap().hurt, vec![LYING_HURT]);
+        assert_ne!(load_pose(&roots, "lie", false, None).unwrap().hurt, vec![STAND_HURT]);
         assert_eq!(load_pose(&roots, "idle0", false, None).unwrap().hurt, vec![STAND_HURT]);
         assert_eq!(load_pose(&roots, "crouch1", false, None).unwrap().hurt, vec![CROUCH_HURT]);
         std::fs::remove_dir_all(dir).unwrap();

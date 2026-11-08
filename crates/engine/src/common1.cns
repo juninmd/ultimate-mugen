@@ -680,6 +680,12 @@ type = CtrlSet
 trigger1 = Time = 2
 value = 1
 
+[State 5040, land]
+type = ChangeState
+trigger1 = Time > 0 && Pos Y >= 0
+value = 52
+ctrl = 1
+
 [Statedef 5050]
 type = A
 movetype = H

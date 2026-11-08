@@ -12,6 +12,7 @@ pub mod compile;
 pub mod rig;
 mod pixel;
 mod pixel_hit;
+mod pixel_hurt;
 mod pack;
 mod recolor;
 mod portrait;

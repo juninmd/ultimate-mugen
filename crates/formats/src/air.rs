@@ -176,7 +176,7 @@ fn parse_as_d(bl: &str) -> Option<(i32, i32)> {
 fn finish(cur: &mut Option<Animation>, anims: &mut HashMap<i32, Animation>) {
     if let Some(mut a) = cur.take() {
         a.compute_total();
-        anims.insert(a.id, a);
+        anims.entry(a.id).or_insert(a);
     }
 }
 

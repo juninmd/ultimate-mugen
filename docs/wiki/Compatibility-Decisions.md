@@ -35,3 +35,7 @@ glTF stages are **rejected by design**. The stage loader detects a model request
 |---|---|---|---|
 | Airborne hit state with `physics = N` | No gravity: a fighter hit by repeated `yvel = 0` attacks stays in mid-air | The fighter falls, as if its state had ground-or-air gravity | Stops fighters from hovering while a projectile keeps hitting them. Attack states with `physics = N` (hover and flight moves) keep their scripted height. |
 
+| Duplicate `[Begin Action N]` in an AIR file | First definition wins | First definition wins | Later copies used to overwrite the first and dropped its hitboxes. |
+| `AnimTime` on an animation ending in a `-1` frame (M.U.G.E.N. characters) | 0 on that frame, negative before | Same | Taunts and one-shot states ending on a `-1` frame never finished. |
+| Walk (20) and guard (130/131) exits | Engine hands control back when the direction is released | Same, even if the character's `common1.cns` has no exit | Characters were stuck walking or guarding. |
+| Character-owned intro (states 190-199) | Round waits for the `intro` flag | Same; the engine face-off no longer replaces it | The intro was cut short. |

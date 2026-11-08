@@ -1461,13 +1461,13 @@ impl Match {
             }
             "left" => {
                 x = -half + px;
-                y = py;
+                y = py - self.stage.zoffset;
                 bind_to = None;
                 facing = fac;
             }
             "right" => {
                 x = half + px;
-                y = py;
+                y = py - self.stage.zoffset;
                 bind_to = None;
                 facing = fac;
             }

@@ -213,7 +213,7 @@ impl Vfx {
         }
     }
 
-    fn cracks(&mut self, x: f32, y: f32, dir: f32, len: f32) {
+    pub(super) fn cracks(&mut self, x: f32, y: f32, dir: f32, len: f32) {
         for i in 0..3 {
             let side = if i == 1 { -dir } else { dir };
             let rot = side.signum() * self.rr(0.0, 0.25)

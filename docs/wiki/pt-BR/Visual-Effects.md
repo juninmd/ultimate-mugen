@@ -7,3 +7,5 @@ Os efeitos de apresentação ficam em `src/vfx.rs` e `src/vfx/`; a simulação n
 - **Qualidade** (`src/vfx/quality.rs`): segue a opção `fx` (0 baixa, 1 média, 2 alta). As quantidades escalam 0,35 / 0,7 / 1,0; média remove rachaduras e luzes de cenário, baixa também remove detritos e metade do flare.
 - As partículas continuam no pool `MAX_PARTS`.
 - `UME_SHOTS_ONLY=fx` gera imagens de hit, heavy, hyper, counter, guard e super.
+- **Super e despertar** (`src/vfx/awaken.rs`): anéis em camadas (peito e chão), pilar de energia, rajada de faíscas em 360 graus, rachaduras no chão em qualidade alta.
+- **Dash** (`src/vfx/dash.rs`): riscos de velocidade e anel no chão ao iniciar um dash.

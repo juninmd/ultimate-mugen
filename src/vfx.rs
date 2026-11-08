@@ -7,7 +7,9 @@ use crate::render::Gfx;
 use crate::ui::Ui;
 use ume_engine::matchs::{Event, Match};
 
+mod awaken;
 mod crack;
+mod dash;
 mod impact;
 pub mod quality;
 
@@ -530,37 +532,7 @@ impl Vfx {
                 defender,
                 ..
             } => self.on_hit(*damage, *guarded, *heavy, *attacker, *defender, m),
-            Event::Super { fighter, .. } => {
-                self.super_t = 1.0;
-                self.super_owner = *fighter;
-                if let Some((x, y, _)) = m
-                    .fighters
-                    .iter()
-                    .find(|f| f.id == *fighter)
-                    .map(Self::chest_of)
-                {
-                    self.ring(x, y, 70.0, 0.5, 2.4, [1.0, 0.9, 0.4]);
-                    self.ring(x, y, 120.0, 0.6, 1.6, [1.0, 0.8, 0.35]);
-                    self.glow(x, y, 36.0, 0.3, [1.0, 0.8, 0.3]);
-                    self.spark_burst(x, y, 1.0, 22, 8.0, [1.0, 0.85, 0.4], std::f32::consts::PI);
-                    self.debris(x, y + 18.0, 6, [0.75, 0.68, 0.6]);
-                    self.light(x, y, 160.0, 0.5, [1.0, 0.8, 0.35]);
-                    self.sfx.push("super");
-                    let nm = m
-                        .fighters
-                        .iter()
-                        .find(|f| f.id == *fighter)
-                        .map(|f| f.def.display_name.to_uppercase())
-                        .unwrap_or_default();
-                    self.tag(x, y - 46.0, &format!("SUPER · {nm}"), [1.0, 0.82, 0.3]);
-                }
-                self.flash_add(0.25);
-                self.chroma = self.chroma.max(0.5);
-                self.radial = 0.45;
-                self.trauma = (self.trauma + 0.15).min(0.6);
-                self.lines = 0.7;
-                self.lines_col = [1.0, 0.85, 0.4];
-            }
+            Event::Super { fighter, .. } => self.on_super(*fighter, m),
             Event::Ko {
                 loser_side, slow, ..
             } => {
@@ -590,51 +562,7 @@ impl Vfx {
                     self.banner("PERFECT!", crate::i18n::tr3("vitória sem sofrer dano", "flawless victory", "victoria sin recibir daño"), [1.0, 0.85, 0.2]);
                 }
             }
-            Event::Transform { fighter } => {
-                self.super_t = 1.0;
-                self.super_owner = *fighter;
-                let mut col = [1.0, 0.85, 0.4];
-                if let Some(f) = m.fighters.iter().find(|f| f.id == *fighter) {
-                    col = Self::form_color(f);
-                    let (x, y, _) = Self::chest_of(f);
-                    for (i, r) in [70.0f32, 140.0].iter().enumerate() {
-                        self.ring(x, y, *r, 0.55 + i as f32 * 0.2, 2.8 - i as f32 * 0.8, col);
-                    }
-                    self.glow(x, y, 70.0, 0.7, col);
-                    self.light(x, y, 200.0, 1.0, col);
-                    for _ in 0..28 {
-                        let (px, life) = (f.pos.x + self.rr(-20.0, 20.0), self.rr(0.7, 1.4));
-                        let (vy, sz, c) = (
-                            -self.rr(1.2, 4.0),
-                            self.rr(1.0, 2.0),
-                            if self.r() > 0.4 { col } else { [1.0, 1.0, 1.0] },
-                        );
-                        let vx = self.rr(-0.3, 0.3);
-                        self.ember(px, f.pos.y + f.lane, vx, vy, -0.01, life, sz, c);
-                    }
-                    self.spark_burst(x, y, 1.0, 20, 8.0, col, std::f32::consts::PI);
-                    self.debris(f.pos.x, f.pos.y + f.lane, 8, [0.7, 0.65, 0.6]);
-                    self.dust(f.pos.x, f.pos.y + f.lane, 12, 3.0, 1.0, [0.85, 0.8, 0.75]);
-                    let nm = f.active_form_name().to_uppercase();
-                    self.tag(
-                        x,
-                        y - 46.0,
-                        if nm.is_empty() { "DESPERTAR" } else { &nm },
-                        col,
-                    );
-                    if f.def.boss && f.form >= 2 {
-                        self.banner(crate::i18n::tr3("ECLIPSE ABSOLUTO", "ABSOLUTE ECLIPSE", "ECLIPSE ABSOLUTO"), crate::i18n::tr3("FORMA FINAL DE MIKAZUKI OBORO", "FINAL FORM OF MIKAZUKI OBORO", "FORMA FINAL DE MIKAZUKI OBORO"), col);
-                    }
-                }
-                self.flash_add(0.4);
-                self.chroma = 0.6;
-                self.radial = 0.5;
-                self.trauma = 0.5;
-                self.vig = 0.3;
-                self.lines = 0.7;
-                self.lines_col = col;
-                self.sfx.push("transform");
-            }
+            Event::Transform { fighter } => self.on_transform(*fighter, m),
             Event::Fight => {
                 if let Some(b) = m.roots().find(|f| f.def.boss) {
                     if b.form >= 2 {
@@ -710,6 +638,7 @@ impl Vfx {
             }
             if now.grounded && now.vx.abs() > 3.2 && prev.vx.abs() <= 3.2 && f.state_type == 'S' {
                 self.sfx.push("dash");
+                self.dash_burst(f.pos.x, f.pos.y + f.lane, f.facing);
             }
             if now.grounded
                 && now.vx.abs() > 3.2

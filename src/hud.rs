@@ -1001,7 +1001,7 @@ impl Hud {
                     } else {
                         (100.0, 210.0)
                     };
-                    if rt < t0 || rt > t1 {
+                    if rt < t0 || rt > t1 || matches!(f.def.source, ume_engine::chardef::Source::Mugen) {
                         continue;
                     }
                     let txt = face_off_line(f, side == 1);

@@ -10,18 +10,50 @@ use ume_engine::matchs::Match;
 use ume_formats::vfs::{add_dir, Vfs};
 
 pub fn dir() -> Option<PathBuf> {
-    std::env::var("UME_GOGETA_DIR")
+    std::env::var("UME_CHAR_DIR")
+        .or_else(|_| std::env::var("UME_GOGETA_DIR"))
         .ok()
         .map(PathBuf::from)
         .filter(|p| p.exists())
+}
+
+pub fn def_name() -> Option<String> {
+    if let Ok(n) = std::env::var("UME_CHAR_DEF") {
+        return Some(n);
+    }
+    let mut names: Vec<String> = std::fs::read_dir(dir()?)
+        .ok()?
+        .filter_map(|e| e.ok())
+        .map(|e| e.file_name().to_string_lossy().to_string())
+        .filter(|n| n.to_lowercase().ends_with(".def"))
+        .collect();
+    names.sort();
+    names.into_iter().next()
+}
+
+pub fn cmd_path() -> Option<PathBuf> {
+    let d = dir()?;
+    let def = std::fs::read(d.join(def_name()?)).ok()?;
+    let text: String = def.iter().map(|&b| b as char).collect();
+    for l in text.lines() {
+        let l = l.trim();
+        if l.to_lowercase().starts_with("cmd") {
+            if let Some((_, v)) = l.split_once('=') {
+                let v = v.split(';').next()?.trim();
+                return Some(d.join(v));
+            }
+        }
+    }
+    None
 }
 
 pub fn load(pal: i32) -> Option<Arc<CharDef>> {
     let p = dir()?;
     let mut v = Vfs::new();
     add_dir(&mut v, &p, "g").unwrap();
+    let def = def_name()?;
     Some(Arc::new(
-        load_mugen_char(&v, "g/gogeta-ssj4.def", pal, true).unwrap(),
+        load_mugen_char(&v, &format!("g/{def}"), pal, true).unwrap(),
     ))
 }
 
@@ -150,7 +182,9 @@ pub fn run_command(d: &Arc<CharDef>, c: &CommandDef, gap: f32, air: bool, ticks:
     let f = |i: usize| (r.m.fighters[i].state_no, r.m.fighters[i].ctrl);
     o.p1_final = f(0);
     o.p2_final = f(1);
-    o.p1_recovered = r.m.fighters[0].ctrl && r.m.fighters[0].alive;
-    o.p2_recovered = r.m.fighters[1].ctrl && r.m.fighters[1].alive;
+    o.p1_recovered =
+        (r.m.fighters[0].ctrl || r.m.fighters[0].move_type == 'I') && r.m.fighters[0].alive;
+    o.p2_recovered =
+        (r.m.fighters[1].ctrl || r.m.fighters[1].move_type == 'I') && r.m.fighters[1].alive;
     o
 }

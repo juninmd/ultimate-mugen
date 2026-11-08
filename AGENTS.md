@@ -74,7 +74,8 @@
 
 ## Testing & Validation
 - **Regra de ouro**: Baixar e descompactar todos os personagens primeiro; executar suites de teste (`cargo test`, `mugen_check`) **apenas uma vez ao final** da instalação completa.
-- **Browser smoke test (mandatory for every change):** `rustup target add wasm32-unknown-unknown`, `./scripts/build-web.sh`, then `node scripts/web-smoke.js web/dist` (wasm in headless Chromium via Playwright). `WEB_SMOKE_SHOTS=<dir>` keeps its screenshots. For README captures run `CAPTURE_OUT=<dir> node scripts/web-capture.js <plan.json>` (see `docs/wiki/Media-Capture.md`).
+- **Browser smoke test (always)**: every change that can affect gameplay, rendering, loading, input or the web build must be checked in a real browser before the PR is opened, not only with `cargo test`. Build the wasm bundle and drive it in headless Chromium: `rustup target add wasm32-unknown-unknown`, `cargo install wasm-bindgen-cli --locked --version <version in Cargo.lock>`, `./scripts/build-web.sh`, then `NODE_PATH=$(npm root -g) WEB_SMOKE_SHOTS=<dir> node scripts/web-smoke.js web/dist` (title, menu, select, stage and fight must finish with `WEB SMOKE OK`; look at the screenshots, a black or frozen frame is a failure). For a M.U.G.E.N. character, also import its zip through `#ume-file`, pick it on the select screen, fight and attach the screenshots to the PR. CI runs the same script as `web-smoke`.
+- Capture README media with `CAPTURE_OUT=<dir> node scripts/web-capture.js <plan.json>` (see `docs/wiki/Media-Capture.md`).
 - File size gate: `node scripts/file-size.mjs` (add `--update` only when a split removed a baseline entry).
 - Engine compatibility: `cargo test --workspace --release`
 - DBZ integration test: `cargo test -p ume-engine --test dbz -- --nocapture`

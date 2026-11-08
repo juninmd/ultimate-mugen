@@ -714,11 +714,11 @@ impl Hud {
                 if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 {
                     text(
                         "TAB · TROCAR DE LUTADOR",
-                        10.0,
-                        BASE_H - 24.0,
+                        w / 2.0,
+                        BASE_H - 20.0,
                         5.2,
                         Color::new(1.0, 1.0, 1.0, 0.6),
-                        Align::Left,
+                        Align::Center,
                         true,
                     );
                 }

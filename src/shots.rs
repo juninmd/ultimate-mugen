@@ -2,7 +2,7 @@
 use crate::app::{App, Mode, Screen, Team};
 use crate::gfx::*;
 use crate::shots::replay::replay_determinism;
-mod replay; mod story_tour; mod storymode_tour; mod suzume_tour;
+mod pause_tour; mod replay; mod story_tour; mod storymode_tour; mod suzume_tour;
 
 async fn frames(app: &mut App, n: usize) {
     for _ in 0..n {
@@ -752,10 +752,8 @@ pub async fn run(app: &mut App, dir: &str) {
         }
         return;
     }
-    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") {
-        hud_tour(app, dir).await;
-        return;
-    }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("pause") { return pause_tour::run(app, dir).await; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") { return hud_tour(app, dir).await; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("market") {
         market_tour(app, dir).await;
         return;

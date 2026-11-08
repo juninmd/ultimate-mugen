@@ -9,3 +9,4 @@ Presentation-only effects live in `src/vfx.rs` and `src/vfx/`; the simulation ne
 - `UME_SHOTS_ONLY=fx` renders hit, heavy, hyper, counter, guard and super stills.
 - **Super and awakening** (`src/vfx/awaken.rs`): layered rings (chest and ground), energy pillar of embers, 360 degree spark burst, ground cracks on high quality.
 - **Dash** (`src/vfx/dash.rs`): speed streaks and a ground ring when a fighter starts a ground dash.
+- **KO finish** (`src/vfx/ko.rs`): three staggered shockwaves, white core, 360 degree sparks, radial slashes, debris and ground cracks on the loser. Simulation-side cost: `cargo test --release --bin ultimate-mugen cost -- --ignored --nocapture`.

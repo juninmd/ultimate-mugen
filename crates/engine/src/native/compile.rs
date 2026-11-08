@@ -240,7 +240,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     d.ai_commands = movelist.iter().map(|m: &MoveInfo| m.command.clone()).collect(); d.movelist = movelist;
     d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.description = nc.description.clone().unwrap_or_default();
     d.intro = nc.intro.clone().unwrap_or_default(); d.taunt = nc.taunt.clone().unwrap_or_default(); d.win_quote = nc.win_quote.clone().unwrap_or_default();
-    d.form_name = nc.form.clone().unwrap_or_default(); d.forms = super::forms::build_forms(nc, pal_no, with_images); d.boss = nc.boss; extras::insert_voices(&mut d, nc);
+    d.form_name = nc.form.clone().unwrap_or_default(); d.forms = super::forms::build_forms(nc, pal_no, with_images); d.boss = nc.boss; d.passives = nc.passives.as_ref().map(|p| p.rules()).unwrap_or_default(); extras::insert_voices(&mut d, nc);
     d
 }
 

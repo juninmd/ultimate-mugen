@@ -86,6 +86,8 @@ pub fn checksum(m: &Match) -> u128 {
             h.i32(v);
         }
         h.u32(f.form as u32);
+        h.i32(f.passive.stacks);
+        h.i32(f.passive.idle_ticks);
         for v in [f.ghv.kind, f.ghv.hittime, f.ghv.slidetime, f.ghv.ctrltime] {
             h.i32(v);
         }

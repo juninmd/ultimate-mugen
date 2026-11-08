@@ -10,7 +10,7 @@ impl Match {
             o.as_ref().is_some_and(|o| o.keep && o.time != 0 && o.hits > 0 && Self::attr_match(hd, &o.attr) && (o.threshold <= 0.0 || hd.damage <= o.threshold))
         }) else { return false };
         let chip = self.fighters[d].hit_overrides[slot].as_ref().map_or(0.0, |o| o.chip);
-        let attack_mul = self.idx(self.fighters[a].root).map(|r| self.fighters[r].attack_mul).unwrap_or(1.0);
+        let attack_mul = self.idx(self.fighters[a].root).map(|r| self.fighters[r].effective_attack()).unwrap_or(1.0);
         let dmg = (hd.damage * attack_mul * chip / 100.0).round().max(1.0);
         let gt = self.game_time;
         let attacker_id = self.fighters[a].id;

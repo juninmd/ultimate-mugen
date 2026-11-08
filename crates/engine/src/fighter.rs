@@ -65,7 +65,7 @@ pub asserts: u64,
     pub asserted_commands: Vec<(String, i32)>, pub assert_input: (u32, i32), pub input_shift: i32,
     pub sprite_remap: Vec<((i32, i32), (i32, i32), i32)>, pub sprite_transform: Option<(f32, f32, f32, i32)>,
     /// 0 = base form, n = nth transformation (CharDef::forms, legacy awakening = 1) until the round ends
-    pub form: u8, pub form_time: i32, pub base_def: Arc<CharDef>,
+    pub form: u8, pub form_time: i32, pub base_def: Arc<CharDef>, pub passive: crate::passives::PassiveState,
     pub draw_offset: V2, pub victory_quote: i32, pub clipboard: Vec<String>, pub unhittable: i32, pub super_defence_mul: f32,
     pub reversal: Option<(String, HitDefData)>, pub hit_overrides: [Option<HitOverride>; 8],
     pub ikemen: crate::ikemen::IkemenState,
@@ -91,7 +91,7 @@ impl Fighter {
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
             persist: Vec::new(), air_jumps: 0, ground_level: 0.0, bind: None, palfx: None, trans: None, remap: vec![], angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
             after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), cmd: CommandState::default(),
-            combo_count: 0, combo_damage: 0.0, combo_target: None, combo_timer: 0, received_damage: 0.0, received_hits: 0, score: 0.0, score_total: 0.0, asserted_commands: vec![], assert_input: (0, 0), input_shift: 0, sprite_remap: vec![], sprite_transform: None, form: 0, form_time: 0, base_def: def.clone(), reversal: None, hit_overrides: Default::default(), ikemen: crate::ikemen::IkemenState::new(&def),
+            combo_count: 0, combo_damage: 0.0, combo_target: None, combo_timer: 0, received_damage: 0.0, received_hits: 0, score: 0.0, score_total: 0.0, asserted_commands: vec![], assert_input: (0, 0), input_shift: 0, sprite_remap: vec![], sprite_transform: None, form: 0, form_time: 0, base_def: def.clone(), passive: Default::default(), reversal: None, hit_overrides: Default::default(), ikemen: crate::ikemen::IkemenState::new(&def),
             pause_move_time: 0, super_move_time: 0, pause_bool: false, preserve: false, own_pal: true, state_giver: None,
             draw_offset: V2::default(), victory_quote: -1, clipboard: vec![], unhittable: 0, super_defence_mul: 1.0, def,
         }

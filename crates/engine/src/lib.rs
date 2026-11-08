@@ -30,6 +30,7 @@ pub mod palette;
 pub mod stage_bg;
 pub mod stagevar;
 pub mod native;
+pub mod passives;
 pub mod raster;
 
 pub use ume_formats as formats;

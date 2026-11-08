@@ -437,7 +437,7 @@ impl Match {
         let mut land = false;
         {
             let f = &mut self.fighters[i];
-            f.pos.x += f.vel.x * f.facing;
+            f.pos.x += f.vel.x * f.facing * f.passive_speed();
             f.pos.y += f.vel.y;
             let physics = if f.physics == 'N' && f.move_type == 'H' && f.state_type == 'A' { 'A' } else { f.physics };
             match physics {
@@ -546,7 +546,7 @@ impl Match {
                 f.ground_level = 0.0;
                 f.facing = if f.side == 0 { 1.0 } else { -1.0 };
                 f.life = f.life_max; f.alive = true;
-                f.revert_form();
+                f.revert_form(); f.reset_passive_for_round();
                 if first { f.power = 0.0; }
                 f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false;
                 f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5];
@@ -750,7 +750,7 @@ impl Match {
             self.physics_step(i);
             let f = &mut self.fighters[i];
             f.state_time += 1;
-            if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); }
+            if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); } f.tick_passive();
             // the final boss keeps charging on its own (a super every ~10 s even when not hitting)
             if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + if f.form >= 2 { 0.85 } else { 0.35 }).min(f.power_max); if f.form >= 2 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.12).min(f.life_max); } }
             if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_used = 0; f.super_defence_mul = 1.0; }
@@ -1162,7 +1162,7 @@ impl Match {
             fa.move_contact = 1;
             if !fa.targets.iter().any(|t| t.0 == did) { fa.targets.push((did, hd.id)); }
         }
-        let attack_mul = self.idx(aroot).map(|r| self.fighters[r].attack_mul).unwrap_or(1.0);
+        let attack_mul = self.idx(aroot).map(|r| self.fighters[r].effective_attack()).unwrap_or(1.0);
         {
             let fd = &mut self.fighters[d];
             fd.last_hit_by = Some(aid);
@@ -1219,7 +1219,7 @@ impl Match {
             let st = if self.fighters[d].air_height() < -1.0 { 'A' } else { self.fighters[d].state_type };
             let dd = self.fighters[d].def.clone();
             self.change_state(d, if st == 'A' { 154 } else if st == 'C' { 152 } else { 150 }, dd);
-            let point_mul = attack_mul / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01);
+            let point_mul = attack_mul / self.fighters[d].effective_defence().max(0.01);
             crate::ikemen::life::apply_hit_points(self, d, hd, true, point_mul);
             crate::ikemen::life::enter_stun_states(self, d, true);
             self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
@@ -1231,7 +1231,7 @@ impl Match {
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
             let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale_for(prev_hc, hd.attr_kind.iter().any(|k| k.starts_with('H'))) } else { 1.0 };
-            let mut dmg = (hd.damage * attack_mul * scale / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01)).round();
+            let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].effective_defence().max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             if self.fighters[d].has_assert(asf::NOHITDAMAGE) { dmg = 0.0; }
             let prev_fall = self.fighters[d].ghv.fall;
@@ -1283,7 +1283,7 @@ impl Match {
                 let no = if st == 'A' || st == 'L' { 5020 } else if st == 'C' && !hd.forcestand { 5010 } else { 5000 };
                 self.change_state(d, no, dd);
             }
-            let point_mul = attack_mul * scale / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01);
+            let point_mul = attack_mul * scale / self.fighters[d].effective_defence().max(0.01);
             crate::ikemen::life::apply_hit_points(self, d, hd, false, point_mul);
             if hd.p2stateno < 0 { crate::ikemen::life::enter_stun_states(self, d, false); }
             if hd.p1stateno >= 0 && !from_proj { let ad = self.fighters[a].def.clone(); self.change_state(a, hd.p1stateno, ad); }

@@ -30,7 +30,7 @@ mod stagefx;
 mod stages;
 mod storage;
 mod story;
-mod texgen; mod ui;
+mod passive_fx; mod texgen; mod ui;
 mod update;
 #[cfg(target_arch = "wasm32")]
 mod web_sprites;

@@ -19,6 +19,7 @@ mod pixel_hurt;
 mod pack;
 mod recolor;
 mod portrait;
+mod sprite_set;
 pub use compile::{compile_native, compile_native_preview, compile_native_with, STANDARD_ANIMS};
 pub use types::*;
 pub use ability_spec::*;

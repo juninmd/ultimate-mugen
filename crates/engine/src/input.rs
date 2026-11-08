@@ -4,6 +4,8 @@ pub mod k {
     pub const S: u32 = 1024; pub const D2: u32 = 2048; pub const W: u32 = 4096; pub const E: u32 = 8192;
     pub const T: u32 = 16384;
     pub const TAG: u32 = 32768;
+    pub const LANE_UP: u32 = 65536; pub const LANE_DOWN: u32 = 131072; pub const LANE_MASK: u32 = LANE_UP | LANE_DOWN;
+    pub const GUARD: u32 = 262144; pub const BRAWLER_MASK: u32 = LANE_MASK | GUARD;
 }
 
 pub fn button_bit(s: &str) -> Option<u32> {

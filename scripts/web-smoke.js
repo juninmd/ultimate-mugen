@@ -37,7 +37,7 @@ const server = staticServer(dir, types);
   const key = async (k, wait = 1000) => { await p.keyboard.down(k); await frames(2); await p.keyboard.up(k); await frames(5); await p.waitForTimeout(wait); };
   await key('Enter');                       // title → menu
   await snap('01-menu');
-  await key('ArrowDown'); await key('ArrowDown'); await key('Enter', 1500);  // Arcade, Survival → CPU (Versus CPU) → select
+  for (let i = 0; i < 3; i++) await key('ArrowDown'); await key('Enter', 1500);  // Arcade, Story, Survival → CPU (Versus CPU) → select
   await snap('02-select');
   await key('Enter', 1500); await snap('03-p1'); await key('Enter', 1500); // P1, P2 → stages
   await snap('04-stages');

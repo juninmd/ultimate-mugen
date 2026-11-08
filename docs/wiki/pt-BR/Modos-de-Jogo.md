@@ -23,6 +23,23 @@ O menu principal oferece lutas individuais (Arcade, Versus CPU, 2 Jogadores, Tre
 - **Poderes de Chefe e Fases de Oboro.** Ao assumirem o posto de chefe final do modo história, os vilões recebem atributos de chefe (`boss = true`, 2000 HP, 125% de ataque, IA agressiva de chefe, recarga contínua de super barra, aura visual e banner `CHEFE FINAL`). Ao enfrentar Oboro, a Fase 1 traz sua forma Mangekyo Desperto (`form = 1`); derrotá-lo dispara a cutscene **Despertar: Eclipse Absoluto** (`kind: 3`) e a Fase 2 contra o **Eclipse Absoluto** (`form = 2`) com vida ampliada, regeneração contínua e golpes sombrios exclusivos.
 - **Cutscene Final por Personagem (`Cutscene kind: 2`) e Desbloqueio de Oboro.** Ao derrotar o chefe final, cada personagem exibe sua própria cutscene de encerramento em 5 páginas (`src/app/cutscene/endings.rs`). Ao concluir, **Mikazuki Oboro** é desbloqueado na seleção de personagens, a rotação de vilões é avançada e o jogo retorna diretamente à tela de seleção de personagens com anúncio em banner comemorativo e o novo chefe habilitado.
 
+## História (fases de pancadaria)
+
+`História` no menu principal é uma campanha estilo Final Fight / Sengoku: cinco fases, cada uma com algumas **ondas de capangas lutando ao mesmo tempo** (1 contra 2 a 4, usando as regras de equipe simultânea) e fechada por um **chefe de fase**.
+
+- **Estrutura.** Fase = 3 ondas + 1 chefe. Cenários: Becos da Cidade (praça), Metrô (Neo-Metrópole), Bambuzal, Área Industrial (Cratera Vulcânica) e Cobertura do Chefão (Dojo). Chefes: Bruno, Marlow, Lian, Garan, Valdric. Se você escolher um chefe como lutador, entra o substituto (Daichi, Kaname, Shion, Haruki, Kaito).
+- **Chefes.** Têm 150 % de vida e 110 % de ataque; um round decide cada luta.
+- **Vida acumulada.** A barra que você termina uma onda é a que começa a próxima, mais 20 % após a onda e 60 % após a fase (as "comidas" dos arcades originais).
+- **Créditos.** São 3 créditos; ao cair você pode *Continuar* (retoma a mesma luta com 60 % de vida) até acabarem.
+- **Pontuação.** `ScoreTotal` do motor mais bônus por onda (500 x fase, chefe x4).
+- **Dificuldade.** Nível da CPU sobe por fase e +2 nos chefes (máx. 8).
+- **Faixas de profundidade (estilo Final Fight).** O Story tem uma faixa de chão: dois botões extras andam para o fundo ou para a frente do cenário (P1 `Z` / `X`, P2 `Num -` / `Num +`, reconfiguráveis em Controles; os bits do motor são `LANE_UP` / `LANE_DOWN`). Só anda no chão e com controle, e cada fase limita a faixa ao chão real (`lane_far` / `lane_near` em `src/story/stages.rs`). O golpe só acerta, e os corpos só se empurram, quando os dois estão a até 14 unidades de profundidade; a CPU se alinha ao herói sozinha. Sprites, sombras, reflexos e efeitos acompanham a faixa e quem está mais perto desenha na frente. Os outros modos nunca ativam as faixas.
+- **Botão de defesa.** O Story tem um botão exclusivo de defesa (P1 `C`, P2 `Num *`, reconfigurável). Enquanto segurado, quem está no chão e com controle bloqueia como se segurasse para trás, sem recuar (com Baixo, defende agachado). Fora do Story é ignorado.
+- **HUD do Story.** Capangas não têm barra de vida nem ficha de equipe. O herói mantém o painel da esquerda, uma faixa inferior mostra fase, onda, pontos e créditos, e a luta de chefe ganha uma barra larga de **Vilão da Fase** (nome e vida) à direita.
+- **Capangas (`assets/chars/npc_*.json`, gerados por `scripts/gen_story_npcs.py`).** Lutadores com paleta trocada, ocultos na seleção (`"npc": true`), cada um com uma habilidade própria: Brute (golpes fortes com armadura), Razor (35 % mais rápido, chutes avançam), Spitfire (jab lança orbe), Colossus (160 % de vida, armadura em todo golpe básico), Phantom (rápido e invulnerável ao chutar).
+
+Captura de evidências: `UME_TOUR=storymode ultimate-mugen --shots <dir> --res 1280x720 --mute`.
+
 ## Sobrevivência
 
 `Sobrevivência` no menu principal é uma sequência sem fim contra o elenco inteiro:

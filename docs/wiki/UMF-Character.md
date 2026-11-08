@@ -43,6 +43,7 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | `format` | yes | Always `umf/1` |
 | `id`, `name`, `series`, `author`, `color` | yes | Identity; `color` is the select card color |
 | `boss` | no | `true` hides it from select and makes it the final Arcade boss |
+| `npc` | no | `true` hides it from select and every random pool; used by Story mode thugs, no boss empowerment |
 | `speed` | no | Animation speed multiplier (>1 = faster moves) |
 | `stats` | no | Attributes, table below |
 | `art` | yes | Art, see [Rig](Rig.md) |

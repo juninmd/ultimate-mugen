@@ -17,7 +17,7 @@ const STAND_UNITS: f32 = 100.0;
 pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value>) -> Option<RigRender> {
     if fr.effect.is_some() { return None; }
     let recolor = palette.and_then(|p| Recolor::new(nc.art.style.get("colors"), p));
-    let mut render = load_pose(&sprite_roots(&nc.id), &native_frame_sprite_key(fr), fr.hit.is_some(), recolor.as_ref())?;
+    let mut render = load_pose(&sprite_roots(nc.sprite_dir()), &native_frame_sprite_key(fr), fr.hit.is_some(), recolor.as_ref())?;
     let height = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(STAND_UNITS as f64) as f32;
     let height_ratio = height / STAND_UNITS;
     render.scale *= height_ratio;
@@ -65,7 +65,7 @@ fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool, recolor:
 pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
     let character = &super::compile::with_defaults(character);
     use std::hash::{Hash, Hasher};
-    let roots = sprite_roots(&character.id);
+    let roots = sprite_roots(character.sprite_dir());
     let animations: Vec<Value> = character.anims.iter().map(|(animation, data)| {
         let frames: Vec<Value> = data.frames.iter().enumerate().map(|(index, frame)| {
             let pose = native_frame_sprite_key(frame);

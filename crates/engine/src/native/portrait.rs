@@ -9,7 +9,7 @@ const MAX_PORTRAIT_EDGE: u32 = 256;
 
 pub(super) fn portrait(nc: &NativeChar, palette: Option<&Value>) -> Option<Sprite> {
     let recolor = palette.and_then(|palette| Recolor::new(nc.art.style.get("colors"), palette));
-    sprite_roots(&nc.id).iter().find_map(|root| {
+    sprite_roots(nc.sprite_dir()).iter().find_map(|root| {
         let bytes = read_sprite(root, "portrait.png")?;
         let png = ume_formats::png::decode_png(&bytes).ok()?;
         let rgba = match &png.rgba { Some(rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&png) };

@@ -85,6 +85,12 @@ impl Ai {
 
 impl InputSource for Ai {
     fn poll(&mut self, m: &Match, me: usize) -> u32 {
+        self.poll_fight(m, me) | crate::lane::ai_lane_bits(m, me)
+    }
+}
+
+impl Ai {
+    fn poll_fight(&mut self, m: &Match, me: usize) -> u32 {
         let f = &m.fighters[me];
         if !self.init || self.last_form != f.form {
             self.init = true;

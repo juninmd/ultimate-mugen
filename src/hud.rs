@@ -8,8 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod palette;
-use palette::{poly_pt, side_tint};
+mod palette; mod story_hud; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -80,12 +79,13 @@ impl Hud {
         let roots = [r0, r1];
         let partners: Vec<&Fighter> = if m.fighters.len() > 2 {
             m.roots()
-                .filter(|f| f.id != r0.id && f.id != r1.id)
+                .filter(|f| f.id != r0.id && f.id != r1.id && !(m.lanes.active && f.side == 1))
                 .collect()
         } else {
             Vec::new()
         };
         let w = BASE_W;
+        if m.lanes.active && m.lanes.show_foe_hud { story_hud::draw_boss_bar(ui, g, r1); }
         let text = |t: &str, x: f32, y: f32, size: f32, c: Color, al: Align, disp: bool| {
             let font = if disp { &ui.display } else { &ui.body };
             let fs = (size * s).max(9.0) as u16;
@@ -146,7 +146,7 @@ impl Hud {
         let hide_combo = roots.iter().any(|f| f.has_assert(asf::NOCOMBODISPLAY));
         if roots.len() >= 2 && !hide_bars {
             let panel_w = w / 2.0 - 26.0;
-            for side in 0..2 {
+            for side in 0..(if m.lanes.active { 1 } else { 2 }) {
                 let f = roots[side];
                 let show_life = !f.has_assert(asf::NOLIFEBARDISPLAY);
                 let show_power = !f.has_assert(asf::NOPOWERBARDISPLAY);
@@ -726,7 +726,7 @@ impl Hud {
                     }
                 }
             }
-            if m.team_simul {
+            if m.team_simul && !m.lanes.active {
                 let alive = |sd: usize| m.roots().filter(|f| f.side == sd && f.alive).count();
                 let tot = |sd: usize| m.roots().filter(|f| f.side == sd).count();
                 outlined(

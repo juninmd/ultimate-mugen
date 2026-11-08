@@ -12,6 +12,7 @@ pub mod compile;
 pub mod rig;
 mod pixel;
 mod air_variant;
+mod air_normals;
 mod charge;
 pub(crate) use charge::{CHARGE_COMMAND, CHARGE_STATE};
 mod pixel_hit;

@@ -85,6 +85,8 @@ Settings › Language switches at runtime and stores `lang=en|pt` in `ultimate-m
 
 The names `x y z a b c` are the same ones used in character commands (`input`).
 
+While jumping, `x` `y` `a` `b` each throw an air normal, and down + `b` is the diving down kick (generated for every native fighter by `native/air_normals.rs`, reusing the fighter's own air animations).
+
 ## Button prompts
 
 The pause move list and the Controls screen show the real key or button of the device you used last: keyboard keys, Xbox (A/B/X/Y, LB/LT/RB/RT) or PlayStation (✕ ○ □ △, L1/L2/R1/R2). On touch screens they show the virtual button names. Xbox pads are detected by name or by vendor ID `045E`, PlayStation pads by `054C`. Rumble works on both: Xbox through gilrs force feedback (and the Gamepad API on the web), DualShock 4 / DualSense through direct HID reports.

@@ -78,7 +78,7 @@ pub(super) fn with_defaults(nc: &NativeChar) -> NativeChar {
             if out.anims.get(k).is_none() { if let Ok(a) = serde_json::from_value::<NativeAnim>(v.clone()) { out.anims.0.push((k.clone(), a)); } }
         }
     }
-    out
+    super::air_normals::complete(out)
 }
 
 pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only: Option<&[i32]>) -> CharDef {

@@ -9,6 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
+mod award;
 mod armor;
 mod bounds;
 mod forms;
@@ -645,7 +646,7 @@ impl Match {
                         let no = if self.winner_side == s { 180 } else if self.winner_side == -2 { 175 } else { 170 };
                         self.change_state(i, no, d);
                     }
-                    if self.winner_side >= 0 { self.wins[self.winner_side as usize] += 1; }
+                    self.award_round();
                     let text = if self.winner_side >= 0 { self.winner_text(self.winner_side as usize) } else { "DRAW".into() };
                     self.announce = Some(Announce { text, time: 150, total: 150, kind: AnnounceKind::Win });
                     self.events.push(Event::RoundEnd(self.winner_side));

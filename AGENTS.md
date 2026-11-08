@@ -94,6 +94,7 @@
 - Zero-allocation tick gate: `cargo test -p ume-engine --release --test tick_alloc`
 - M.U.G.E.N character load benchmark: `cargo run --release -p ume-engine --example mugen_load_bench [zip] [runs]`
 - UMF compile benchmark: `cargo run --release -p ume-engine --example load_bench`
+- Native roster tick benchmark (every UMF pair, only `Match::tick` timed): `cargo run --release -p ume-engine --example native_tick_bench -- assets/chars`
 - Simulation tick benchmark: `cargo run --release -p ume-engine --example tick_bench -- [zip_or_char_dir] [seconds] [fighters_per_side]`
 - Format fuzz & engine stress resilience: `cargo test --release -p ume-formats --test fuzz_resilience -p ume-engine --test stress_resilience`
 - MUGEN visual probe: `UME_TOUR=mugen UME_CHARS=<id-suffix>,<id-suffix> ultimate-mugen --shots <dir> --res 1280x720 --mute`

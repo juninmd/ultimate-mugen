@@ -89,10 +89,12 @@
 - Hit box audit (every strike frame of every UMF fighter: height, reach, start, width against the M.U.G.E.N-measured proportions): `cargo test --release -p ume-engine --test native_hitbox_audit -- --nocapture`; per-fighter normal reach and damage: `--test native_normal_reach`
 - Draw hit and hurt boxes on the move showcase: `UME_BOXES=1 UME_AFTER_HIT=0` with `UME_TOUR=moves`
 - Move showcase screenshots (every special, super and throw against a dummy): `UME_TOUR=moves UME_CHARS=akio,bruno UME_RIVAL=kaito ultimate-mugen --shots <dir> --res 1280x720 --mute`
+- Live CPU-vs-CPU fight capture in the real game (frames every `UME_DUEL_STRIDE` ticks, `UME_BOXES=1` draws hit/hurt boxes, `UME_DUEL_SKIP`, `UME_DUEL_FRAMES`, `UME_STAGE`): `UME_TOUR=duel UME_CHARS=akio,jin ultimate-mugen --shots <dir> --res 1280x720 --mute`
 - Living stage layers on/off for A/B captures: `UME_AMBIENCE=0` disables them (`UME_SHOTS_ONLY=stages` captures all 21 stages)
 - Zero-allocation tick gate: `cargo test -p ume-engine --release --test tick_alloc`
 - M.U.G.E.N character load benchmark: `cargo run --release -p ume-engine --example mugen_load_bench [zip] [runs]`
 - UMF compile benchmark: `cargo run --release -p ume-engine --example load_bench`
+- Native roster tick benchmark (every UMF pair, only `Match::tick` timed): `cargo run --release -p ume-engine --example native_tick_bench -- assets/chars`
 - Simulation tick benchmark: `cargo run --release -p ume-engine --example tick_bench -- [zip_or_char_dir] [seconds] [fighters_per_side]`
 - Format fuzz & engine stress resilience: `cargo test --release -p ume-formats --test fuzz_resilience -p ume-engine --test stress_resilience`
 - MUGEN visual probe: `UME_TOUR=mugen UME_CHARS=<id-suffix>,<id-suffix> ultimate-mugen --shots <dir> --res 1280x720 --mute`

@@ -16,8 +16,10 @@ async fn grab(app: &mut App, dir: &str, name: &str) {
 }
 
 pub async fn run(app: &mut App, dir: &str) {
-    if std::env::var("UME_TOUR").as_deref() == Ok("moves") {
-        return crate::moves_tour::run(app, dir).await;
+    match std::env::var("UME_TOUR").as_deref() {
+        Ok("moves") => return crate::moves_tour::run(app, dir).await,
+        Ok("duel") => return crate::moves_tour::duel::run(app, dir).await,
+        _ => {}
     }
     let chars: Vec<String> = std::env::var("UME_CHARS")
         .unwrap_or_default()

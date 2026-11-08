@@ -43,6 +43,10 @@
 - Prefer measuring over guessing: a change that cannot be shown in `tick_bench`, `mugen_load_bench`, the watchdog summary or the F3 overlay is not an optimization.
 - Enable probes with `UME_TRACE=1` (desktop), `?perf=1` (web), `UME_WATCHDOG=1` and `UME_HITCH_MS=<ms>` (frame hitch log).
 
+## Verification
+- Every change gets a browser smoke test: `scripts/build-web.sh`, serve `web/dist`, drive it in headless Chromium with Playwright (hold keys at least 100 ms), and look at screenshots.
+- Screenshot tours: `UME_SHOTS_ONLY=pause|hud|menu xvfb-run -a target/release/ultimate-mugen --shots <dir> --res 1280x720 --mute`.
+
 ## Code Style
 - No comments in code: names must explain intent. Explanations go to the wiki in `docs/wiki/`.
 - English is the default language for code, commits, issues and docs. Portuguese lives in `*.pt-BR.md` files and `docs/wiki/pt-BR/`; keep both in sync.

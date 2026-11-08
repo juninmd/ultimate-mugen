@@ -18,7 +18,7 @@ mod cutscene;
 mod fight_seed;
 mod keyedit;
 mod loading;
-mod pause_moves;
+mod pause;
 mod market;
 mod mugen_catalog;
 mod replay_browser;
@@ -260,7 +260,7 @@ pub struct App {
     pub session: Option<Session>,
     pub arcade: Option<(Vec<usize>, usize)>,
     pub boss_progression: crate::boss::BossProgression,
-    pub pause_cur: usize,
+    pause: pause::PauseState,
     pub debug_boxes: bool,
     pub quit: bool,
     pub msg: String,
@@ -270,9 +270,6 @@ pub struct App {
     preview_t: f32,
     pub settings: Settings,
     pub(crate) key_edit: Option<keyedit::KeyEdit>,
-    /** page of the pause-screen move list (14 moves per page) */
-    move_page: usize,
-    move_cur: usize,
     pending: Pending,
     import_jobs: Vec<std::thread::JoinHandle<Result<(String, ume_formats::vfs::Vfs), String>>>,
     import_progress: Option<ume_formats::vfs::ZipProgress>,
@@ -462,7 +459,7 @@ impl App {
             session: None,
             arcade: None,
             boss_progression: crate::boss::BossProgression::load(),
-            pause_cur: 0,
+            pause: pause::PauseState::new(),
             debug_boxes: false,
             quit: false,
             msg: import_msg,
@@ -472,8 +469,6 @@ impl App {
             deep: None,
             settings,
             key_edit: None,
-            move_page: 0,
-            move_cur: 0,
             pending: Pending::default(),
             import_jobs: vec![],
             import_progress: None,
@@ -3155,9 +3150,7 @@ impl App {
         };
         let (paused, accept_back) = pause_step(s.paused, pause_btn);
         if pause_btn {
-            self.pause_cur = 0;
-            self.move_page = 0;
-            self.move_cur = 0;
+            self.pause.reset();
             self.audio.sfx("select");
         }
         s.paused = paused;
@@ -3321,123 +3314,6 @@ impl App {
                 ..Team::new(t.members[0].clone(), t.members[1].clone(), t.simul)
             };
             self.sel = (t.members[0][0], t.members[1][0], self.sel.2);
-        }
-    }
-
-    async fn pause_menu(&mut self, accept_back: bool) {
-        let items = [
-            crate::i18n::t("pause.continue"),
-            crate::i18n::t("pause.hitboxes"),
-            crate::i18n::t("pause.restart"),
-            crate::i18n::t("pause.change"),
-            crate::i18n::t("pause.settings"),
-            crate::i18n::t("pause.menu"),
-        ];
-        if self.c.pressed(nav::DOWN) {
-            self.pause_cur = (self.pause_cur + 1) % items.len();
-        }
-        if self.c.pressed(nav::UP) {
-            self.pause_cur = (self.pause_cur + items.len() - 1) % items.len();
-        }
-        let mut ok = accept_back && self.c.pressed(nav::OK);
-        draw_rectangle(
-            0.0,
-            0.0,
-            screen_width(),
-            screen_height(),
-            Color::new(0.02, 0.01, 0.06, 0.72),
-        );
-        let (x, y) = (120.0, 110.0);
-        self.ui
-            .rect(x, y, 1040.0, 520.0, Color::new(0.08, 0.05, 0.16, 0.92));
-        self.ui.text(
-            crate::i18n::t("pause.title"),
-            x + 30.0,
-            y + 52.0,
-            34.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
-        let s = self.session.as_ref().unwrap();
-        for (i, it) in items.iter().enumerate() {
-            let (bx, by) = (x + 30.0, y + 80.0 + i as f32 * 56.0);
-            if self.clicked_rect(bx, by, 330.0, 48.0) {
-                self.pause_cur = i;
-                ok = true;
-            }
-            self.ui.rect(
-                bx,
-                by,
-                330.0,
-                48.0,
-                if i == self.pause_cur {
-                    hex("#ff4d6d")
-                } else {
-                    Color::new(1.0, 1.0, 1.0, 0.06)
-                },
-            );
-            let label = if i == 1 {
-                format!(
-                    "{}: {}",
-                    crate::i18n::t("pause.hitboxes"),
-                    if s.r.debug { "ON" } else { "OFF" }
-                )
-            } else {
-                it.to_string()
-            };
-            self.ui.text(
-                &label,
-                bx + 16.0,
-                by + 32.0,
-                22.0,
-                WHITE,
-                Align::Left,
-                false,
-            );
-        }
-        self.pause_moves(x, y);
-        if accept_back && self.c.pressed(nav::BACK) {
-            self.session.as_mut().unwrap().paused = false;
-            return;
-        }
-        if ok {
-            match self.pause_cur {
-                0 => self.session.as_mut().unwrap().paused = false,
-                1 => {
-                    let s = self.session.as_mut().unwrap();
-                    s.r.debug = !s.r.debug;
-                    self.debug_boxes = s.r.debug;
-                }
-                2 => {
-                    self.reset_team();
-                    self.start_fight().await;
-                }
-                3 => {
-                    self.audio.stop_music();
-                    self.session = None;
-                    self.team = None;
-                    self.team_pick.clear();
-                    self.screen = Screen::Select {
-                        cur: [self.sel.0, self.sel.1],
-                        picking: 0,
-                        picked: [None, None],
-                    };
-                }
-                4 => {
-                    self.screen = Screen::Settings {
-                        tab: 0,
-                        cur: 0,
-                        from_fight: true,
-                    }
-                }
-                _ => {
-                    self.audio.stop_music();
-                    self.session = None;
-                    self.team = None;
-                    self.screen = Screen::Menu { cur: 0 };
-                }
-            }
         }
     }
 

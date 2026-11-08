@@ -48,7 +48,10 @@ mod tests {
             Quarantined {
                 name: "a".into(),
                 def: "a.def".into(),
-                problems: vec!["anim 'a.air' não existe".into(), "cns 'a.cns' não existe".into()],
+                problems: vec![
+                    "anim 'a.air' não existe".into(),
+                    "cns 'a.cns' não existe".into(),
+                ],
             },
             Quarantined {
                 name: "b".into(),

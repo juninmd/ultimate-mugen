@@ -1,7 +1,7 @@
 use crate::expr::{eval, is_float, Host, Node};
 mod fold;
-use fold::{binary, fold};
 pub use fold::truthy;
+use fold::{binary, fold};
 
 const STACK: usize = 32;
 
@@ -414,7 +414,10 @@ impl Code {
                 match first {
                     Op::Const(v) => return v,
                     Op::Trig0(i) => {
-                        if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                        if let Node::Trig {
+                            name, comp, raw, ..
+                        } = &self.host[i as usize]
+                        {
                             return h.trigger0(name, *comp, raw.as_deref());
                         }
                         return 0.0;
@@ -432,22 +435,39 @@ impl Code {
         if self.ops.len() == 2 {
             match (self.ops[0], self.ops[1]) {
                 (Op::Trig0(i), Op::Not) => {
-                    let v = if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                    let v = if let Node::Trig {
+                        name, comp, raw, ..
+                    } = &self.host[i as usize]
+                    {
                         h.trigger0(name, *comp, raw.as_deref())
                     } else {
                         0.0
                     };
-                    return if v.is_nan() { f64::NAN } else if v == 0.0 { 1.0 } else { 0.0 };
+                    return if v.is_nan() {
+                        f64::NAN
+                    } else if v == 0.0 {
+                        1.0
+                    } else {
+                        0.0
+                    };
                 }
                 (Op::Const(v), Op::Neg) => return -v,
                 (Op::Const(v), Op::Not) => return if v == 0.0 { 1.0 } else { 0.0 },
                 (Op::Host(i), Op::Not) => {
                     let v = eval(&self.host[i as usize], h);
-                    return if v.is_nan() { f64::NAN } else if v == 0.0 { 1.0 } else { 0.0 };
+                    return if v.is_nan() {
+                        f64::NAN
+                    } else if v == 0.0 {
+                        1.0
+                    } else {
+                        0.0
+                    };
                 }
                 (Op::Const(arg), Op::Trig1(i)) => {
                     return match &self.host[i as usize] {
-                        Node::Trig { name, comp, raw, .. } => h.trigger1(name, arg, *comp, raw.as_deref()),
+                        Node::Trig {
+                            name, comp, raw, ..
+                        } => h.trigger1(name, arg, *comp, raw.as_deref()),
                         _ => 0.0,
                     };
                 }
@@ -458,18 +478,31 @@ impl Code {
             let (op0, op1, op2) = (self.ops[0], self.ops[1], self.ops[2]);
             if let (Op::Const(arg), Op::Trig1(i), Op::Not) = (op0, op1, op2) {
                 let v = match &self.host[i as usize] {
-                    Node::Trig { name, comp, raw, .. } => h.trigger1(name, arg, *comp, raw.as_deref()),
+                    Node::Trig {
+                        name, comp, raw, ..
+                    } => h.trigger1(name, arg, *comp, raw.as_deref()),
                     _ => 0.0,
                 };
-                return if v.is_nan() { f64::NAN } else if v == 0.0 { 1.0 } else { 0.0 };
+                return if v.is_nan() {
+                    f64::NAN
+                } else if v == 0.0 {
+                    1.0
+                } else {
+                    0.0
+                };
             }
             if let (Op::Trig0(i), Op::Const(c)) = (op0, op1) {
-                let v = if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                let v = if let Node::Trig {
+                    name, comp, raw, ..
+                } = &self.host[i as usize]
+                {
                     h.trigger0(name, *comp, raw.as_deref())
                 } else {
                     0.0
                 };
-                if v.is_nan() || c.is_nan() { return f64::NAN; }
+                if v.is_nan() || c.is_nan() {
+                    return f64::NAN;
+                }
                 return match op2 {
                     Op::Eq => (v == c) as i32 as f64,
                     Op::Ne => (v != c) as i32 as f64,
@@ -482,12 +515,17 @@ impl Code {
                     _ => self.run_slice(h, 0, 3),
                 };
             } else if let (Op::Const(c), Op::Trig0(i)) = (op0, op1) {
-                let v = if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                let v = if let Node::Trig {
+                    name, comp, raw, ..
+                } = &self.host[i as usize]
+                {
                     h.trigger0(name, *comp, raw.as_deref())
                 } else {
                     0.0
                 };
-                if v.is_nan() || c.is_nan() { return f64::NAN; }
+                if v.is_nan() || c.is_nan() {
+                    return f64::NAN;
+                }
                 return match op2 {
                     Op::Eq => (c == v) as i32 as f64,
                     Op::Ne => (c != v) as i32 as f64,
@@ -500,17 +538,25 @@ impl Code {
                     _ => self.run_slice(h, 0, 3),
                 };
             } else if let (Op::Trig0(i), Op::Trig0(j)) = (op0, op1) {
-                let v0 = if let Node::Trig { name, comp, raw, .. } = &self.host[i as usize] {
+                let v0 = if let Node::Trig {
+                    name, comp, raw, ..
+                } = &self.host[i as usize]
+                {
                     h.trigger0(name, *comp, raw.as_deref())
                 } else {
                     0.0
                 };
-                let v1 = if let Node::Trig { name, comp, raw, .. } = &self.host[j as usize] {
+                let v1 = if let Node::Trig {
+                    name, comp, raw, ..
+                } = &self.host[j as usize]
+                {
                     h.trigger0(name, *comp, raw.as_deref())
                 } else {
                     0.0
                 };
-                if v0.is_nan() || v1.is_nan() { return f64::NAN; }
+                if v0.is_nan() || v1.is_nan() {
+                    return f64::NAN;
+                }
                 return match op2 {
                     Op::Eq => (v0 == v1) as i32 as f64,
                     Op::Ne => (v0 != v1) as i32 as f64,
@@ -528,10 +574,14 @@ impl Code {
             let (op0, op1, op2, op3) = (self.ops[0], self.ops[1], self.ops[2], self.ops[3]);
             if let (Op::Const(arg), Op::Trig1(i), Op::Const(c)) = (op0, op1, op2) {
                 let v = match &self.host[i as usize] {
-                    Node::Trig { name, comp, raw, .. } => h.trigger1(name, arg, *comp, raw.as_deref()),
+                    Node::Trig {
+                        name, comp, raw, ..
+                    } => h.trigger1(name, arg, *comp, raw.as_deref()),
                     _ => 0.0,
                 };
-                if v.is_nan() || c.is_nan() { return f64::NAN; }
+                if v.is_nan() || c.is_nan() {
+                    return f64::NAN;
+                }
                 return match op3 {
                     Op::Eq => (v == c) as i32 as f64,
                     Op::Ne => (v != c) as i32 as f64,
@@ -545,10 +595,14 @@ impl Code {
                 };
             } else if let (Op::Const(c), Op::Const(arg), Op::Trig1(i)) = (op0, op1, op2) {
                 let v = match &self.host[i as usize] {
-                    Node::Trig { name, comp, raw, .. } => h.trigger1(name, arg, *comp, raw.as_deref()),
+                    Node::Trig {
+                        name, comp, raw, ..
+                    } => h.trigger1(name, arg, *comp, raw.as_deref()),
                     _ => 0.0,
                 };
-                if v.is_nan() || c.is_nan() { return f64::NAN; }
+                if v.is_nan() || c.is_nan() {
+                    return f64::NAN;
+                }
                 return match op3 {
                     Op::Eq => (c == v) as i32 as f64,
                     Op::Ne => (c != v) as i32 as f64,
@@ -610,7 +664,10 @@ impl Code {
                     };
                     sp += 1;
                 }
-                Op::Special { host: host_idx, has_b } => {
+                Op::Special {
+                    host: host_idx,
+                    has_b,
+                } => {
                     let bv = if has_b {
                         sp -= 1;
                         Some(s[sp])
@@ -775,20 +832,12 @@ impl Code {
                 Op::DivF => {
                     sp -= 1;
                     let (x, y) = (s[sp - 1], s[sp]);
-                    s[sp - 1] = if y == 0.0 {
-                        0.0
-                    } else {
-                        x / y
-                    };
+                    s[sp - 1] = if y == 0.0 { 0.0 } else { x / y };
                 }
                 Op::DivI => {
                     sp -= 1;
                     let (x, y) = (s[sp - 1], s[sp]);
-                    s[sp - 1] = if y == 0.0 {
-                        0.0
-                    } else {
-                        (x / y).trunc()
-                    };
+                    s[sp - 1] = if y == 0.0 { 0.0 } else { (x / y).trunc() };
                 }
                 Op::Eq => {
                     sp -= 1;

@@ -391,11 +391,20 @@ impl App {
                     tm.members[1].len()
                 )
             } else {
-                format!("{} · {}º vs {}º", tr("EQUIPE SEQUÊNCIA", "TEAM TURNS"), tm.idx[0] + 1, tm.idx[1] + 1)
+                format!(
+                    "{} · {}º vs {}º",
+                    tr("EQUIPE SEQUÊNCIA", "TEAM TURNS"),
+                    tm.idx[0] + 1,
+                    tm.idx[1] + 1
+                )
             }
         } else if let Some((l, i)) = &self.arcade {
             if *i > 0 && l.get(*i) == l.get(*i - 1) {
-                tr("ARCADE · DESAFIO FINAL: ECLIPSE ABSOLUTO", "ARCADE · FINAL CHALLENGE: ABSOLUTE ECLIPSE").to_string()
+                tr(
+                    "ARCADE · DESAFIO FINAL: ECLIPSE ABSOLUTO",
+                    "ARCADE · FINAL CHALLENGE: ABSOLUTE ECLIPSE",
+                )
+                .to_string()
             } else {
                 format!("ARCADE · {} {}/{}", tr("LUTA", "FIGHT"), i + 1, l.len())
             }

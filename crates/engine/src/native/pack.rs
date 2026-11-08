@@ -15,38 +15,97 @@ pub struct SpritePack {
 
 impl SpritePack {
     pub fn parse(bytes: &[u8]) -> Result<Self, String> {
-        if bytes.len() > 16 << 20 { return Err("sprite pack: larger than 16 MiB".into()); }
-        if bytes.len() < 11 || &bytes[0..4] != MAGIC { return Err("sprite pack: bad header".into()); }
-        if bytes[4] != VERSION { return Err(format!("sprite pack: unsupported version {}", bytes[4])); }
+        if bytes.len() > 16 << 20 {
+            return Err("sprite pack: larger than 16 MiB".into());
+        }
+        if bytes.len() < 11 || &bytes[0..4] != MAGIC {
+            return Err("sprite pack: bad header".into());
+        }
+        if bytes[4] != VERSION {
+            return Err(format!("sprite pack: unsupported version {}", bytes[4]));
+        }
         let id_len = u16::from_le_bytes(bytes[5..7].try_into().unwrap()) as usize;
-        let id_end = 7usize.checked_add(id_len).ok_or("sprite pack: truncated id")?;
-        let character = std::str::from_utf8(bytes.get(7..id_end).ok_or("sprite pack: truncated id")?).map_err(|_| "sprite pack: id is not utf-8")?.to_string();
-        if character.is_empty() { return Err("sprite pack: empty id".into()); }
+        let id_end = 7usize
+            .checked_add(id_len)
+            .ok_or("sprite pack: truncated id")?;
+        let character =
+            std::str::from_utf8(bytes.get(7..id_end).ok_or("sprite pack: truncated id")?)
+                .map_err(|_| "sprite pack: id is not utf-8")?
+                .to_string();
+        if character.is_empty() {
+            return Err("sprite pack: empty id".into());
+        }
         let count_at = id_end;
-        let count = u32::from_le_bytes(bytes.get(count_at..count_at + 4).ok_or("sprite pack: truncated count")?.try_into().unwrap()) as usize;
+        let count = u32::from_le_bytes(
+            bytes
+                .get(count_at..count_at + 4)
+                .ok_or("sprite pack: truncated count")?
+                .try_into()
+                .unwrap(),
+        ) as usize;
         let mut at = count_at + 4;
-        if count > (bytes.len() - at) / 6 { return Err(format!("sprite pack: {count} entries do not fit in {} bytes", bytes.len())); }
+        if count > (bytes.len() - at) / 6 {
+            return Err(format!(
+                "sprite pack: {count} entries do not fit in {} bytes",
+                bytes.len()
+            ));
+        }
         let mut files = HashMap::with_capacity(count.min(64));
         for _ in 0..count {
-            let name_len = u16::from_le_bytes(bytes.get(at..at + 2).ok_or("sprite pack: truncated name")?.try_into().unwrap()) as usize;
+            let name_len = u16::from_le_bytes(
+                bytes
+                    .get(at..at + 2)
+                    .ok_or("sprite pack: truncated name")?
+                    .try_into()
+                    .unwrap(),
+            ) as usize;
             at += 2;
-            let name_end = at.checked_add(name_len).ok_or("sprite pack: truncated name")?;
-            let name = std::str::from_utf8(bytes.get(at..name_end).ok_or("sprite pack: truncated name")?).map_err(|_| "sprite pack: name is not utf-8")?.to_string();
+            let name_end = at
+                .checked_add(name_len)
+                .ok_or("sprite pack: truncated name")?;
+            let name = std::str::from_utf8(
+                bytes
+                    .get(at..name_end)
+                    .ok_or("sprite pack: truncated name")?,
+            )
+            .map_err(|_| "sprite pack: name is not utf-8")?
+            .to_string();
             at = name_end;
-            let data_len = u32::from_le_bytes(bytes.get(at..at + 4).ok_or("sprite pack: truncated payload")?.try_into().unwrap()) as usize;
+            let data_len = u32::from_le_bytes(
+                bytes
+                    .get(at..at + 4)
+                    .ok_or("sprite pack: truncated payload")?
+                    .try_into()
+                    .unwrap(),
+            ) as usize;
             at += 4;
-            let data_end = at.checked_add(data_len).ok_or("sprite pack: truncated payload")?;
-            let data = bytes.get(at..data_end).ok_or("sprite pack: truncated payload")?;
+            let data_end = at
+                .checked_add(data_len)
+                .ok_or("sprite pack: truncated payload")?;
+            let data = bytes
+                .get(at..data_end)
+                .ok_or("sprite pack: truncated payload")?;
             at = data_end;
-            if files.insert(name.clone(), Arc::new(data.to_vec())).is_some() { return Err(format!("sprite pack: duplicate entry {name}")); }
+            if files
+                .insert(name.clone(), Arc::new(data.to_vec()))
+                .is_some()
+            {
+                return Err(format!("sprite pack: duplicate entry {name}"));
+            }
         }
-        Ok(SpritePack { character, files, revision: 0 })
+        Ok(SpritePack {
+            character,
+            files,
+            revision: 0,
+        })
     }
 }
 
 pub(super) fn read_sprite(root: &Path, name: &str) -> Option<Arc<Vec<u8>>> {
     if let Some(character) = root.file_name().and_then(|name| name.to_str()) {
-        if let Some(bytes) = read(character, name) { return Some(bytes); }
+        if let Some(bytes) = read(character, name) {
+            return Some(bytes);
+        }
     }
     std::fs::read(root.join(name)).ok().map(Arc::new)
 }
@@ -58,7 +117,12 @@ thread_local! {
 
 pub fn insert(character: &str, bytes: &[u8]) -> Result<(), String> {
     let mut pack = SpritePack::parse(bytes)?;
-    if pack.character != character { return Err(format!("sprite pack: {} sent for {character}", pack.character)); }
+    if pack.character != character {
+        return Err(format!(
+            "sprite pack: {} sent for {character}",
+            pack.character
+        ));
+    }
     pack.revision = REVISION.with(|revision| {
         let next = revision.get().wrapping_add(1).max(1);
         revision.set(next);
@@ -68,7 +132,9 @@ pub fn insert(character: &str, bytes: &[u8]) -> Result<(), String> {
     PACKS.with(|packs| {
         let mut packs = packs.borrow_mut();
         packs.retain(|(name, _)| name != character);
-        if packs.len() >= MAX_PACKS { packs.remove(0); }
+        if packs.len() >= MAX_PACKS {
+            packs.remove(0);
+        }
         packs.push((character.to_string(), pack));
     });
     Ok(())
@@ -79,11 +145,23 @@ pub fn contains(character: &str) -> bool {
 }
 
 pub fn revision(character: &str) -> u64 {
-    PACKS.with(|packs| packs.borrow().iter().find(|(name, _)| name == character).map_or(0, |(_, pack)| pack.revision))
+    PACKS.with(|packs| {
+        packs
+            .borrow()
+            .iter()
+            .find(|(name, _)| name == character)
+            .map_or(0, |(_, pack)| pack.revision)
+    })
 }
 
 pub fn read(character: &str, name: &str) -> Option<Arc<Vec<u8>>> {
-    PACKS.with(|packs| packs.borrow().iter().find(|(id, _)| id == character).and_then(|(_, pack)| pack.files.get(name).cloned()))
+    PACKS.with(|packs| {
+        packs
+            .borrow()
+            .iter()
+            .find(|(id, _)| id == character)
+            .and_then(|(_, pack)| pack.files.get(name).cloned())
+    })
 }
 
 #[cfg(test)]
@@ -143,11 +221,18 @@ mod tests {
         let mut pixmap = tiny_skia::Pixmap::new(8, 16).unwrap();
         pixmap.fill(tiny_skia::Color::from_rgba8(10, 200, 30, 255));
         let png = pixmap.encode_png().unwrap();
-        insert("virtual-fighter", &pack("virtual-fighter", &[("idle0.png", &png)])).unwrap();
-        let mut fighter: super::super::types::NativeChar = serde_json::from_str(include_str!("../../../../assets/chars/kaito.json")).unwrap();
+        insert(
+            "virtual-fighter",
+            &pack("virtual-fighter", &[("idle0.png", &png)]),
+        )
+        .unwrap();
+        let mut fighter: super::super::types::NativeChar =
+            serde_json::from_str(include_str!("../../../../assets/chars/kaito.json")).unwrap();
         fighter.id = "virtual-fighter".into();
-        let frame: super::super::types::NativeFrame = serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
-        let render = crate::native::pixel::try_load(&fighter, &frame, None).expect("sprite read from the pack");
+        let frame: super::super::types::NativeFrame =
+            serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
+        let render = crate::native::pixel::try_load(&fighter, &frame, None)
+            .expect("sprite read from the pack");
         assert_eq!(render.image.unwrap().w, 8);
     }
 }

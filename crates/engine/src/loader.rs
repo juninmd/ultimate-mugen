@@ -79,11 +79,20 @@ pub fn load_mugen_char(
         }
     }
     let cns_name = fget("cns").unwrap_or_default();
-    let cns_text = crate::perf::time("cns:read", || fget("cns").and_then(|c| resolve(vfs, &base, c)).map(text).unwrap_or_default());
+    let cns_text = crate::perf::time("cns:read", || {
+        fget("cns")
+            .and_then(|c| resolve(vfs, &base, c))
+            .map(text)
+            .unwrap_or_default()
+    });
     parse_constants(&cns_text, &mut constants, &mut provided);
     scale_default_constants(&mut constants, &provided, local_w as f64 / 320.0);
-    crate::perf::time("cns:parse", || spans.track(cns_name, || parse_states(&cns_text, &mut states, true)));
-    for k in ["st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9"] {
+    crate::perf::time("cns:parse", || {
+        spans.track(cns_name, || parse_states(&cns_text, &mut states, true))
+    });
+    for k in [
+        "st", "st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7", "st8", "st9",
+    ] {
         let Some(fname) = fget(k) else { continue };
         if norm_path(unquote_str(fname)) == norm_path(unquote_str(cns_name)) {
             continue;
@@ -99,8 +108,7 @@ pub fn load_mugen_char(
         .and_then(|c| resolve(vfs, &base, c))
         .map(text)
         .unwrap_or_default();
-    let (mut commands, cmd_states) =
-        spans.track(cmd_name, || parse_cmd(&cmd_text));
+    let (mut commands, cmd_states) = spans.track(cmd_name, || parse_cmd(&cmd_text));
     for (id, sd) in cmd_states {
         if id < 0 && states.contains_key(&id) {
             if let Some(s) = states.get_mut(&id) {
@@ -133,7 +141,9 @@ pub fn load_mugen_char(
                     })
                 });
                 let h_snd = sc.spawn(move || {
-                    crate::perf::time("snd:decode", || snd_buf.map(|b| decode_snd(&b)).unwrap_or_default())
+                    crate::perf::time("snd:decode", || {
+                        snd_buf.map(|b| decode_snd(&b)).unwrap_or_default()
+                    })
                 });
                 (
                     h_sff.join().unwrap(),
@@ -197,9 +207,7 @@ pub fn load_mugen_char(
                 .find(|p| p.group == 1 && p.index == pal_no)
             {
                 over = Some(p.data.to_vec());
-            } else if let Some(a) =
-                fget(pal_k).and_then(|p| resolve(vfs, &base, p))
-            {
+            } else if let Some(a) = fget(pal_k).and_then(|p| resolve(vfs, &base, p)) {
                 if a.len() >= 768 {
                     over = Some(decode_act(&a));
                 }
@@ -215,8 +223,9 @@ pub fn load_mugen_char(
                     .map(|a| decode_act(&a))
             })
             .or_else(|| sff.palettes.first().map(|p| p.data.to_vec()));
-        let overrides_palette = |s: &ume_formats::sff::DecodedSprite|
-            over.is_some() && s.group != 9000 && (s.palette_index == target || sff.version == 1);
+        let overrides_palette = |s: &ume_formats::sff::DecodedSprite| {
+            over.is_some() && s.group != 9000 && (s.palette_index == target || sff.version == 1)
+        };
         let shared_key = |s: &ume_formats::sff::DecodedSprite| -> (i32, i32) {
             if sff.version == 1 {
                 return if overrides_palette(s) || s.palette_index == target || s.palette.is_none() {
@@ -242,8 +251,8 @@ pub fn load_mugen_char(
                 );
             }
             const PAL_KEYS: [&str; 12] = [
-                "pal1", "pal2", "pal3", "pal4", "pal5", "pal6",
-                "pal7", "pal8", "pal9", "pal10", "pal11", "pal12",
+                "pal1", "pal2", "pal3", "pal4", "pal5", "pal6", "pal7", "pal8", "pal9", "pal10",
+                "pal11", "pal12",
             ];
             for (i, &key) in PAL_KEYS.iter().enumerate() {
                 let k = (i + 1) as i32;
@@ -326,8 +335,24 @@ pub fn load_mugen_char(
                 None => i,
             });
         }
-        let renders: Vec<usize> = (0..unique.len()).filter(|&i| with_images && owner_of[i] == i && unique[i].width > 0 && unique[i].height > 0 && (unique[i].indexed.is_none() || unique[i].group == 9000)).collect();
-        let images = crate::perf::time("sff:rgba", || ume_formats::par::map(&renders, |&i| ImageData::new(unique[i].width, unique[i].height, sprite_to_rgba(unique[i], pal_of(unique[i])))));
+        let renders: Vec<usize> = (0..unique.len())
+            .filter(|&i| {
+                with_images
+                    && owner_of[i] == i
+                    && unique[i].width > 0
+                    && unique[i].height > 0
+                    && (unique[i].indexed.is_none() || unique[i].group == 9000)
+            })
+            .collect();
+        let images = crate::perf::time("sff:rgba", || {
+            ume_formats::par::map(&renders, |&i| {
+                ImageData::new(
+                    unique[i].width,
+                    unique[i].height,
+                    sprite_to_rgba(unique[i], pal_of(unique[i])),
+                )
+            })
+        });
         let image_of: HashMap<usize, Arc<ImageData>> = renders.into_iter().zip(images).collect();
         for (i, s) in unique.iter().enumerate() {
             let key = (s.group, s.index);
@@ -374,7 +399,14 @@ pub fn load_mugen_char(
         if is_hold || is_rec || movelist.iter().any(|m| m.command == c.name) {
             continue;
         }
-        movelist.push(MoveInfo { name: c.name.replace('_', " "), input: c.raw.clone(), command: c.name.clone(), cost: 0.0, drain: false, forms: u32::MAX });
+        movelist.push(MoveInfo {
+            name: c.name.replace('_', " "),
+            input: c.raw.clone(),
+            command: c.name.clone(),
+            cost: 0.0,
+            drain: false,
+            forms: u32::MAX,
+        });
     }
     let ai_commands = commands
         .iter()

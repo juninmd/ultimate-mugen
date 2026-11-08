@@ -28,7 +28,9 @@ impl App {
     /// Returns the next `(view, page)`, or `None` when the player leaves the screen.
     pub(crate) fn mugen_catalog(&mut self, view: u8, page: usize) -> Option<(u8, usize)> {
         self.ui.background();
-        let loaded: Vec<usize> = (0..self.reg.chars.len()).filter(|&i| self.reg.chars[i].mugen).collect();
+        let loaded: Vec<usize> = (0..self.reg.chars.len())
+            .filter(|&i| self.reg.chars[i].mugen)
+            .collect();
         let quarantined: Vec<Quarantined> = self.reg.quarantined.clone();
         let stages = self.reg.stages.iter().filter(|s| s.mugen).count();
         self.catalog_header(loaded.len(), &quarantined, stages);
@@ -38,8 +40,16 @@ impl App {
             view = if view == GALLERY { QUARANTINE } else { GALLERY };
             page = 0;
         }
-        let per = if view == GALLERY { COLS * ROWS } else { LIST_ROWS };
-        let total = if view == GALLERY { loaded.len() } else { quarantined.len() };
+        let per = if view == GALLERY {
+            COLS * ROWS
+        } else {
+            LIST_ROWS
+        };
+        let total = if view == GALLERY {
+            loaded.len()
+        } else {
+            quarantined.len()
+        };
         let pages = total.div_ceil(per).max(1);
         if self.c.pressed(nav::RIGHT) && page + 1 < pages {
             page += 1;
@@ -63,7 +73,15 @@ impl App {
     }
 
     fn catalog_header(&self, loaded: usize, quarantined: &[Quarantined], stages: usize) {
-        self.ui.text("PERSONAGENS E CENÁRIOS M.U.G.E.N", 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
+        self.ui.text(
+            "PERSONAGENS E CENÁRIOS M.U.G.E.N",
+            40.0,
+            56.0,
+            30.0,
+            hex("#ffcc33"),
+            Align::Left,
+            true,
+        );
         self.ui.text(
             &format!(
                 "Carregados: {loaded} personagens   ·   Em quarentena: {}   ·   Cenários: {stages}",
@@ -103,7 +121,12 @@ impl App {
     fn catalog_gallery(&mut self, loaded: &[usize], page: usize) {
         let x0 = 40.0;
         let mut streamed = 0;
-        for (k, &i) in loaded.iter().skip(page * COLS * ROWS).take(COLS * ROWS).enumerate() {
+        for (k, &i) in loaded
+            .iter()
+            .skip(page * COLS * ROWS)
+            .take(COLS * ROWS)
+            .enumerate()
+        {
             let (cx, cy) = (
                 x0 + (k % COLS) as f32 * (TILE_W + GAP),
                 TOP + (k / COLS) as f32 * (TILE_H + GAP),
@@ -113,9 +136,13 @@ impl App {
                 c.stream_portrait();
                 streamed += 1;
             }
-            self.ui.rect(cx, cy, TILE_W, TILE_H, Color::new(0.06, 0.04, 0.12, 0.92));
+            self.ui
+                .rect(cx, cy, TILE_W, TILE_H, Color::new(0.06, 0.04, 0.12, 0.92));
             self.ui.rect(cx, cy, TILE_W, 4.0, alpha(rgb(c.color), 0.9));
-            if let Some(im) = c.portrait().and_then(|p| p.image.clone().map(|im| (im, p.width, p.height))) {
+            if let Some(im) = c
+                .portrait()
+                .and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)))
+            {
                 let (im, pw, ph) = im;
                 let tex = self.g.texture(&im, true);
                 let k = ((TILE_W - 12.0) / pw).min((TILE_H - 52.0) / ph);
@@ -130,22 +157,81 @@ impl App {
                     },
                 );
             }
-            self.ui.text(&short(&c.name, 24), cx + 8.0, cy + TILE_H - 40.0, 16.0, WHITE, Align::Left, true);
-            let author = if c.author.is_empty() { "autor desconhecido".to_string() } else { format!("por {}", c.author) };
-            self.ui.text(&short(&author, 30), cx + 8.0, cy + TILE_H - 20.0, 13.0, hex("#8a8fa6"), Align::Left, false);
+            self.ui.text(
+                &short(&c.name, 24),
+                cx + 8.0,
+                cy + TILE_H - 40.0,
+                16.0,
+                WHITE,
+                Align::Left,
+                true,
+            );
+            let author = if c.author.is_empty() {
+                "autor desconhecido".to_string()
+            } else {
+                format!("por {}", c.author)
+            };
+            self.ui.text(
+                &short(&author, 30),
+                cx + 8.0,
+                cy + TILE_H - 20.0,
+                13.0,
+                hex("#8a8fa6"),
+                Align::Left,
+                false,
+            );
         }
     }
 
     fn catalog_list(&self, quarantined: &[Quarantined], page: usize) {
-        for (k, q) in quarantined.iter().skip(page * LIST_ROWS).take(LIST_ROWS).enumerate() {
+        for (k, q) in quarantined
+            .iter()
+            .skip(page * LIST_ROWS)
+            .take(LIST_ROWS)
+            .enumerate()
+        {
             let y = TOP + k as f32 * LIST_H;
-            self.ui.rect(40.0, y, 1200.0, LIST_H - 6.0, Color::new(0.06, 0.04, 0.12, 0.92));
-            self.ui.text(&short(&q.name, 40), 52.0, y + 6.0, 19.0, WHITE, Align::Left, true);
-            let reason = q.problems.first().map(|p| crate::registry::reason_label(p)).unwrap_or("");
-            self.ui.text(&format!("{reason}  ·  {}", short(&q.def, 70)), 52.0, y + 25.0, 15.0, hex("#ff9b9b"), Align::Left, false);
+            self.ui.rect(
+                40.0,
+                y,
+                1200.0,
+                LIST_H - 6.0,
+                Color::new(0.06, 0.04, 0.12, 0.92),
+            );
+            self.ui.text(
+                &short(&q.name, 40),
+                52.0,
+                y + 6.0,
+                19.0,
+                WHITE,
+                Align::Left,
+                true,
+            );
+            let reason = q
+                .problems
+                .first()
+                .map(|p| crate::registry::reason_label(p))
+                .unwrap_or("");
+            self.ui.text(
+                &format!("{reason}  ·  {}", short(&q.def, 70)),
+                52.0,
+                y + 25.0,
+                15.0,
+                hex("#ff9b9b"),
+                Align::Left,
+                false,
+            );
         }
         if quarantined.is_empty() {
-            self.ui.text("Nada em quarentena.", 52.0, TOP + 8.0, 20.0, hex("#9fe8a8"), Align::Left, false);
+            self.ui.text(
+                "Nada em quarentena.",
+                52.0,
+                TOP + 8.0,
+                20.0,
+                hex("#9fe8a8"),
+                Align::Left,
+                false,
+            );
         }
     }
 
@@ -155,9 +241,14 @@ impl App {
         } else {
             format!("galeria   [QUARENTENA: {total}]")
         };
-        self.ui.text(&tabs, 40.0, 656.0, 18.0, hex("#ffcc33"), Align::Left, true);
+        self.ui
+            .text(&tabs, 40.0, 656.0, 18.0, hex("#ffcc33"), Align::Left, true);
         self.ui.text(
-            &format!("Página {}/{}   ·   TAB alterna   ·   ESQ/DIR páginas   ·   ESC voltar", page + 1, pages),
+            &format!(
+                "Página {}/{}   ·   TAB alterna   ·   ESQ/DIR páginas   ·   ESC voltar",
+                page + 1,
+                pages
+            ),
             40.0,
             686.0,
             15.0,

@@ -57,7 +57,10 @@ static BAMBOO: Profile = Profile {
         glow(0.197, 0.52, 0.02, 0xd8ff90, 0.30, 0.6, 2.0),
         glow(0.70, 0.64, 0.02, 0xd8ff90, 0.30, 0.6, 2.7),
     ],
-    beams: &[beam(0.60, 0.10, -0.10, 0xd8f0ff, 0.10, 11.0), beam(0.72, 0.07, -0.06, 0xd8f0ff, 0.07, 8.0)],
+    beams: &[
+        beam(0.60, 0.10, -0.10, 0xd8f0ff, 0.10, 11.0),
+        beam(0.72, 0.07, -0.06, 0xd8f0ff, 0.07, 8.0),
+    ],
 };
 
 static PLAINS: Profile = Profile {

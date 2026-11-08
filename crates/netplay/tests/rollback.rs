@@ -10,7 +10,12 @@ use ume_netplay::{checksum, run_sync_test, MemorySocket, Netplay, Replay, Rollba
 
 fn kfm() -> Arc<CharDef> {
     let mut v = Vfs::new();
-    add_zip(&mut v, include_bytes!("../../../assets/mugen/elecbyte.zip"), "").unwrap();
+    add_zip(
+        &mut v,
+        include_bytes!("../../../assets/mugen/elecbyte.zip"),
+        "",
+    )
+    .unwrap();
     Arc::new(load_mugen_char(&v, "chars/kfm/kfm.def", 1, false).unwrap())
 }
 
@@ -25,7 +30,9 @@ fn new_match(d: &Arc<CharDef>) -> Match {
 const MOVES: [u32; 12] = [0, R, L, R | X, X, Y, A, B, D | X, D | R | X, U, L | D];
 
 fn bot(seed: u64, player: usize, frame: u64) -> u32 {
-    let mut x = seed ^ (player as u64 + 1).wrapping_mul(0x9e37_79b9_7f4a_7c15) ^ (frame / 6).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+    let mut x = seed
+        ^ (player as u64 + 1).wrapping_mul(0x9e37_79b9_7f4a_7c15)
+        ^ (frame / 6).wrapping_mul(0xbf58_476d_1ce4_e5b9);
     x ^= x >> 31;
     x = x.wrapping_mul(0x94d0_49bb_1331_11eb);
     x ^= x >> 29;
@@ -33,7 +40,9 @@ fn bot(seed: u64, player: usize, frame: u64) -> u32 {
 }
 
 fn script(seed: u64, frames: u64) -> Vec<[u32; 2]> {
-    (0..frames).map(|f| [bot(seed, 0, f), bot(seed, 1, f)]).collect()
+    (0..frames)
+        .map(|f| [bot(seed, 0, f), bot(seed, 1, f)])
+        .collect()
 }
 
 #[test]
@@ -136,14 +145,27 @@ fn p2p_fight(d: &Arc<CharDef>, seed: u64, latency: u64, frames: i32) -> (u128, u
             }
         }
     }
-    let at = |i: usize| peers[i].2.checksum_at(frames).expect("checksum of the final frame");
-    (at(0), at(1), peers[0].2.rollbacks + peers[1].2.rollbacks, peers[0].2.game.round_no)
+    let at = |i: usize| {
+        peers[i]
+            .2
+            .checksum_at(frames)
+            .expect("checksum of the final frame")
+    };
+    (
+        at(0),
+        at(1),
+        peers[0].2.rollbacks + peers[1].2.rollbacks,
+        peers[0].2.game.round_no,
+    )
 }
 
 #[test]
 fn p2p_fights_at_100ms_stay_in_sync() {
     let d = kfm();
-    let fights: u64 = std::env::var("UME_NETPLAY_FIGHTS").ok().and_then(|v| v.parse().ok()).unwrap_or(50);
+    let fights: u64 = std::env::var("UME_NETPLAY_FIGHTS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(50);
     let mut rollbacks = 0;
     for seed in 0..fights {
         let (a, b, r, _) = p2p_fight(&d, seed, 6, 2400);
@@ -194,7 +216,10 @@ fn udp_localhost_fight_stays_in_sync() {
         for (me, s, rb) in peers.iter_mut() {
             s.poll_remote_clients();
             for e in s.events() {
-                assert!(!matches!(e, GgrsEvent::DesyncDetected { .. }), "desync over udp");
+                assert!(
+                    !matches!(e, GgrsEvent::DesyncDetected { .. }),
+                    "desync over udp"
+                );
             }
             if s.current_state() != SessionState::Running {
                 continue;
@@ -207,5 +232,8 @@ fn udp_localhost_fight_stays_in_sync() {
         }
         std::thread::sleep(std::time::Duration::from_millis(1));
     }
-    assert_eq!(peers[0].2.checksum_at(target), peers[1].2.checksum_at(target));
+    assert_eq!(
+        peers[0].2.checksum_at(target),
+        peers[1].2.checksum_at(target)
+    );
 }

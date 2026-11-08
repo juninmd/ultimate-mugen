@@ -93,7 +93,10 @@ impl InputSource for Ai {
             self.ranged_attack.clear();
             let mask = 1u32 << (f.form as u32).min(31);
             for (idx, c) in f.def.commands.iter().enumerate() {
-                if matches!(c.name.as_str(), "fly_toggle" | "speed_toggle" | "teleport_cmd" | "charge_cmd") {
+                if matches!(
+                    c.name.as_str(),
+                    "fly_toggle" | "speed_toggle" | "teleport_cmd" | "charge_cmd"
+                ) {
                     continue;
                 }
                 let form_ok = f
@@ -102,7 +105,10 @@ impl InputSource for Ai {
                     .iter()
                     .find(|mv| mv.command == c.name)
                     .is_none_or(|mv| (mv.forms & mask) != 0);
-                if form_ok && f.def.ai_commands.contains(&c.name) && c.steps.iter().any(|s| s.btns != 0) {
+                if form_ok
+                    && f.def.ai_commands.contains(&c.name)
+                    && c.steps.iter().any(|s| s.btns != 0)
+                {
                     self.attack.push(idx);
                     if c.steps.len() > 1 {
                         self.ranged_attack.push(idx);
@@ -160,14 +166,31 @@ impl InputSource for Ai {
         let threat = e.move_type == 'A' || m.projectiles.iter().any(|p| p.side == e.side);
         if threat
             && dist < 140.0
-            && r < (0.25 + skill * 0.6).min(if final_boss { 0.68 } else if boss { 0.55 } else { 1.0 })
+            && r < (0.25 + skill * 0.6).min(if final_boss {
+                0.68
+            } else if boss {
+                0.55
+            } else {
+                1.0
+            })
             && f.move_type != 'H'
         {
-            self.hold = back | if e.state_type == 'C' || self.r() < 0.3 { k::D } else { 0 };
+            self.hold = back
+                | if e.state_type == 'C' || self.r() < 0.3 {
+                    k::D
+                } else {
+                    0
+                };
             self.hold_ticks = 8 + (self.r() * 10.0) as i32;
             return self.hold;
         }
-        let near = if final_boss { 120.0 } else if boss { 105.0 } else { 70.0 };
+        let near = if final_boss {
+            120.0
+        } else if boss {
+            105.0
+        } else {
+            70.0
+        };
         let scale = (f.def.local_w / 320.0).clamp(0.5, 2.0);
         let near = near * scale;
         if self.cooldown > 0 {
@@ -179,14 +202,32 @@ impl InputSource for Ai {
         }
         if !self.attack.is_empty()
             && (dist < near
-                || (dist > 110.0 * scale && self.r() < 0.08 + skill * if final_boss { 0.28 } else if boss { 0.2 } else { 0.06 }))
+                || (dist > 110.0 * scale
+                    && self.r()
+                        < 0.08
+                            + skill
+                                * if final_boss {
+                                    0.28
+                                } else if boss {
+                                    0.2
+                                } else {
+                                    0.06
+                                }))
             && self.r() < 0.2 + skill * 0.5
         {
-            let n = if dist < near { self.attack.len() } else { self.ranged_attack.len() };
+            let n = if dist < near {
+                self.attack.len()
+            } else {
+                self.ranged_attack.len()
+            };
             if n > 0 {
                 let r = self.r();
                 let pick = (r * n as f32) as usize % n;
-                let cmd_idx = if dist < near { self.attack[pick] } else { self.ranged_attack[pick] };
+                let cmd_idx = if dist < near {
+                    self.attack[pick]
+                } else {
+                    self.ranged_attack[pick]
+                };
                 let c = &f.def.commands[cmd_idx];
                 Self::append_seq(&mut self.queue, c, f.facing);
                 self.cooldown = if final_boss {

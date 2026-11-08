@@ -30,7 +30,12 @@ impl ClsnMod {
 }
 
 fn normalized(b: Box4) -> Box4 {
-    [b[0].min(b[2]), b[1].min(b[3]), b[0].max(b[2]), b[1].max(b[3])]
+    [
+        b[0].min(b[2]),
+        b[1].min(b[3]),
+        b[0].max(b[2]),
+        b[1].max(b[3]),
+    ]
 }
 
 pub fn apply(mods: &[ClsnMod], kind: u8, boxes: &[Box4]) -> Vec<Box4> {
@@ -49,13 +54,23 @@ pub fn apply(mods: &[ClsnMod], kind: u8, boxes: &[Box4]) -> Vec<Box4> {
             ClsnOp::Resize { index, delta } => {
                 for (k, b) in out.iter_mut().enumerate() {
                     if *index < 0 || *index as usize == k {
-                        *b = normalized([b[0] + delta[0], b[1] + delta[1], b[2] + delta[2], b[3] + delta[3]]);
+                        *b = normalized([
+                            b[0] + delta[0],
+                            b[1] + delta[1],
+                            b[2] + delta[2],
+                            b[3] + delta[3],
+                        ]);
                     }
                 }
             }
             ClsnOp::Transform { scale, offset } => {
                 for b in out.iter_mut() {
-                    *b = normalized([b[0] * scale[0] + offset[0], b[1] * scale[1] + offset[1], b[2] * scale[0] + offset[0], b[3] * scale[1] + offset[1]]);
+                    *b = normalized([
+                        b[0] * scale[0] + offset[0],
+                        b[1] * scale[1] + offset[1],
+                        b[2] * scale[0] + offset[0],
+                        b[3] * scale[1] + offset[1],
+                    ]);
                 }
             }
         }
@@ -79,12 +94,22 @@ fn push(m: &mut Match, i: usize, new: ClsnMod) {
 }
 
 pub fn run(m: &mut Match, i: usize, sc: &Controller) {
-    let kind = if m.num(i, sc, "clsn", 2.0, 0) as i32 == 1 { 1 } else { 2 };
-    let time = match m.num(i, sc, "time", 1.0, 0) as i32 { 0 => 1, t => t };
+    let kind = if m.num(i, sc, "clsn", 2.0, 0) as i32 == 1 {
+        1
+    } else {
+        2
+    };
+    let time = match m.num(i, sc, "time", 1.0, 0) as i32 {
+        0 => 1,
+        t => t,
+    };
     let index = m.num(i, sc, "index", -1.0, 0) as i32;
     let op = match sc.kind.as_str() {
         "overrideclsn" => match quad(m, i, sc, "value", 0.0) {
-            Some(v) => ClsnOp::Override { index, rect: normalized(v) },
+            Some(v) => ClsnOp::Override {
+                index,
+                rect: normalized(v),
+            },
             None => return,
         },
         "resizeclsn" => match quad(m, i, sc, "value", 0.0) {
@@ -92,8 +117,18 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             None => return,
         },
         _ => {
-            let scale = [m.num(i, sc, "scale", 1.0, 0) as f32, if sc.has("scale", 1) { m.num(i, sc, "scale", 1.0, 1) as f32 } else { m.num(i, sc, "scale", 1.0, 0) as f32 }];
-            let offset = [m.num(i, sc, "offset", 0.0, 0) as f32, m.num(i, sc, "offset", 0.0, 1) as f32];
+            let scale = [
+                m.num(i, sc, "scale", 1.0, 0) as f32,
+                if sc.has("scale", 1) {
+                    m.num(i, sc, "scale", 1.0, 1) as f32
+                } else {
+                    m.num(i, sc, "scale", 1.0, 0) as f32
+                },
+            ];
+            let offset = [
+                m.num(i, sc, "offset", 0.0, 0) as f32,
+                m.num(i, sc, "offset", 0.0, 1) as f32,
+            ];
             ClsnOp::Transform { scale, offset }
         }
     };

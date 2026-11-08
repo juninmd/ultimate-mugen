@@ -15,7 +15,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     game.start_round();
     for _ in 0..600 {
         game.tick(&[0, 0]);
-        if game.round_state == 2 && game.fighters[0].ctrl { break; }
+        if game.round_state == 2 && game.fighters[0].ctrl {
+            break;
+        }
     }
     game.fighters[0].pos.x = -120.0;
     game.fighters[1].pos.x = 120.0;
@@ -37,10 +39,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     let fighter = &game.fighters[0];
     println!("states={states:?} run_frames={frames:?} displacement={} ground_error={max_ground_error} final_state={} final_y={} final_vx={}", fighter.pos.x - start, fighter.state_no, fighter.pos.y, fighter.vel.x);
-    assert!(frames.len() >= 4, "running animation did not visit four frames");
+    assert!(
+        frames.len() >= 4,
+        "running animation did not visit four frames"
+    );
     assert!(fighter.pos.x > start, "runner did not move forward");
     assert!(max_ground_error < 0.01, "running left the floor");
-    assert_eq!(fighter.state_no, 0, "runner did not return to neutral after release");
+    assert_eq!(
+        fighter.state_no, 0,
+        "runner did not return to neutral after release"
+    );
     assert!(fighter.pos.y.abs() < 0.01 && fighter.vel.x.abs() < 0.01);
     Ok(())
 }

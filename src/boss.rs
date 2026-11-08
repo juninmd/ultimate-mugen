@@ -19,7 +19,9 @@ impl BossProgression {
         let mut prog = Self::default();
         if let Some(text) = crate::storage::read("boss_save.txt") {
             for line in text.lines() {
-                let Some((k, v)) = line.split_once('=') else { continue };
+                let Some((k, v)) = line.split_once('=') else {
+                    continue;
+                };
                 match k.trim() {
                     "clears" => prog.clears = v.trim().parse().unwrap_or(0),
                     "unlocked_oboro" => prog.unlocked_oboro = v.trim() == "1",

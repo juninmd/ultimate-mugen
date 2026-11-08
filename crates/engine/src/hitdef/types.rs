@@ -29,4 +29,4 @@ pub(super) fn groundtype(s: &str) -> Option<i32> {
     } else {
         None
     }
-}
+}

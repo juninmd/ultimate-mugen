@@ -1,6 +1,6 @@
-use ume_engine::chardef::ImageData;
 use super::{decode_illustration, illustrated, StageEntry, StageKind};
 use std::sync::{Arc, OnceLock};
+use ume_engine::chardef::ImageData;
 
 pub const WONDER_IDS: [&str; 14] = [
     "great_wall",
@@ -89,85 +89,85 @@ pub fn builtin() -> Vec<StageEntry> {
         entry(
             "great_wall",
             "Grande Muralha da China",
-            0,
+            7,
             [[145, 138, 144], [128, 122, 115], [95, 80, 66]],
         ),
         entry(
             "petra",
             "Petra — Al-Khazneh",
-            3,
+            8,
             [[139, 105, 90], [165, 87, 51], [185, 116, 68]],
         ),
         entry(
             "christ_redeemer",
             "Cristo Redentor — Corcovado",
-            3,
+            9,
             [[110, 96, 113], [118, 85, 77], [121, 94, 90]],
         ),
         entry(
             "texas",
             "Cidade do Interior — Texas, EUA",
-            3,
+            10,
             [[198, 90, 99], [164, 89, 63], [201, 112, 58]],
         ),
         entry(
             "chichen_itza",
             "Chichén Itzá — Templo de Kukulcán",
-            4,
+            11,
             [[80, 51, 94], [92, 61, 62], [135, 113, 91]],
         ),
         entry(
             "colosseum",
             "Coliseu de Roma",
-            5,
+            12,
             [[167, 126, 115], [127, 81, 65], [221, 165, 86]],
         ),
         entry(
             "taj_mahal",
             "Taj Mahal — Palácio de Mármore",
-            0,
+            13,
             [[223, 205, 207], [174, 151, 129], [219, 211, 203]],
         ),
         entry(
             "pyramids_giza",
             "Pirâmides de Gizé",
-            3,
+            14,
             [[216, 129, 44], [141, 91, 46], [160, 105, 51]],
         ),
         entry(
             "hanging_gardens",
             "Jardins Suspensos da Babilônia",
-            4,
+            15,
             [[168, 200, 192], [154, 160, 125], [123, 140, 132]],
         ),
         entry(
             "temple_artemis",
             "Templo de Ártemis em Éfeso",
-            4,
+            16,
             [[47, 74, 78], [55, 86, 86], [146, 171, 169]],
         ),
         entry(
             "statue_zeus",
             "Estátua de Zeus em Olímpia",
-            5,
+            17,
             [[81, 62, 43], [113, 79, 41], [112, 93, 79]],
         ),
         entry(
             "mausoleum_halicarnassus",
             "Mausoléu de Halicarnasso",
-            0,
+            18,
             [[228, 183, 127], [186, 164, 119], [211, 194, 172]],
         ),
         entry(
             "colossus_rhodes",
             "Colosso de Rodes",
-            5,
+            19,
             [[64, 106, 122], [77, 102, 117], [94, 110, 101]],
         ),
         entry(
             "lighthouse_alexandria",
             "Farol de Alexandria — Pharos",
-            1,
+            20,
             [[71, 67, 58], [29, 38, 54], [149, 153, 156]],
         ),
     ]

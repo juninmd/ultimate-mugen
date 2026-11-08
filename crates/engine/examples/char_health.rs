@@ -16,7 +16,9 @@ fn main() {
             let found = problems(&vfs, &def);
             if found.is_empty() {
                 healthy += 1;
-                if std::env::var_os("HEALTHY").is_some() { println!("OK {def}"); }
+                if std::env::var_os("HEALTHY").is_some() {
+                    println!("OK {def}");
+                }
                 continue;
             }
             broken += 1;

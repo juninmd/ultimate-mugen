@@ -163,7 +163,11 @@ fn alternate_palettes_recolour_the_sprite_art() {
             .zip(after.rgba.chunks_exact(4))
             .filter(|(a, b)| a[..3] != b[..3])
             .count();
-        let opaque = before.rgba.chunks_exact(4).filter(|pixel| pixel[3] > 0).count();
+        let opaque = before
+            .rgba
+            .chunks_exact(4)
+            .filter(|pixel| pixel[3] > 0)
+            .count();
         assert!(
             changed * 4 > opaque,
             "{id}: palette 2 must repaint a meaningful part of the fighter ({changed} of {opaque})"

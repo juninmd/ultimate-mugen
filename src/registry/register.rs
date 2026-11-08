@@ -11,10 +11,14 @@ impl Registry {
         let (mut cs, mut ss, mut errs) = (vec![], vec![], vec![]);
         // roster identity kept in sets: a linear scan per imported fighter is
         // quadratic and dominates the startup of large collections
-        let mut char_ids: std::collections::HashSet<String> = self.chars.iter().map(|c| c.id.clone()).collect();
-        let mut char_keys: std::collections::HashSet<String> = self.chars.iter().map(|c| c.key.clone()).collect();
-        let mut stage_ids: std::collections::HashSet<String> = self.stages.iter().map(|s| s.id.clone()).collect();
-        let mut stage_keys: std::collections::HashSet<String> = self.stages.iter().map(|s| s.key.clone()).collect();
+        let mut char_ids: std::collections::HashSet<String> =
+            self.chars.iter().map(|c| c.id.clone()).collect();
+        let mut char_keys: std::collections::HashSet<String> =
+            self.chars.iter().map(|c| c.key.clone()).collect();
+        let mut stage_ids: std::collections::HashSet<String> =
+            self.stages.iter().map(|s| s.id.clone()).collect();
+        let mut stage_keys: std::collections::HashSet<String> =
+            self.stages.iter().map(|s| s.key.clone()).collect();
         let char_defs = find_char_defs(&vfs);
         // header parse and content key hit different files: fan the I/O out
         let chart: Vec<(String, String, String)> = ume_formats::par::map(&char_defs, |def| {
@@ -42,7 +46,11 @@ impl Registry {
             }
             let problems = ume_formats::health::problems(&vfs, &def);
             if !problems.is_empty() {
-                self.quarantined.push(Quarantined { name: name.clone(), def: def.clone(), problems });
+                self.quarantined.push(Quarantined {
+                    name: name.clone(),
+                    def: def.clone(),
+                    problems,
+                });
                 continue;
             }
             let e = CharEntry {

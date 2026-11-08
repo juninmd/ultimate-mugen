@@ -31,11 +31,19 @@ impl<'a> Cursor<'a> {
     }
 
     fn u32(&mut self) -> Result<u32, String> {
-        Ok(u32::from_le_bytes(self.take(4)?.try_into().map_err(|_| "bundle is truncated")?))
+        Ok(u32::from_le_bytes(
+            self.take(4)?
+                .try_into()
+                .map_err(|_| "bundle is truncated")?,
+        ))
     }
 
     fn u64(&mut self) -> Result<u64, String> {
-        Ok(u64::from_le_bytes(self.take(8)?.try_into().map_err(|_| "bundle is truncated")?))
+        Ok(u64::from_le_bytes(
+            self.take(8)?
+                .try_into()
+                .map_err(|_| "bundle is truncated")?,
+        ))
     }
 }
 
@@ -69,7 +77,11 @@ mod tests {
     use super::*;
 
     fn sample() -> Files {
-        vec![("chars/a/a.def".into(), b"[Info]".to_vec()), ("music/x.ogg".into(), vec![0, 1, 2, 255]), ("empty.txt".into(), vec![])]
+        vec![
+            ("chars/a/a.def".into(), b"[Info]".to_vec()),
+            ("music/x.ogg".into(), vec![0, 1, 2, 255]),
+            ("empty.txt".into(), vec![]),
+        ]
     }
 
     #[test]

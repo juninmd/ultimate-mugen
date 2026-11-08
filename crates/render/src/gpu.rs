@@ -3,7 +3,11 @@ use crate::batch::{Batch, Blend, Vertex};
 use crate::{PALETTE_ROWS, SHADER};
 use wgpu::util::DeviceExt;
 
-pub struct Target<'a> { pub view: &'a wgpu::TextureView, pub size: [f32; 2], pub clear: Option<wgpu::Color> }
+pub struct Target<'a> {
+    pub view: &'a wgpu::TextureView,
+    pub size: [f32; 2],
+    pub clear: Option<wgpu::Color>,
+}
 
 pub struct Renderer {
     pub atlas_size: [u32; 2],
@@ -22,10 +26,20 @@ pub struct Renderer {
     iscratch: Vec<u16>,
 }
 
-fn texture(device: &wgpu::Device, label: &str, w: u32, h: u32, format: wgpu::TextureFormat) -> wgpu::Texture {
+fn texture(
+    device: &wgpu::Device,
+    label: &str,
+    w: u32,
+    h: u32,
+    format: wgpu::TextureFormat,
+) -> wgpu::Texture {
     device.create_texture(&wgpu::TextureDescriptor {
         label: Some(label),
-        size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        size: wgpu::Extent3d {
+            width: w,
+            height: h,
+            depth_or_array_layers: 1,
+        },
         mip_level_count: 1,
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
@@ -36,21 +50,48 @@ fn texture(device: &wgpu::Device, label: &str, w: u32, h: u32, format: wgpu::Tex
 }
 
 fn blend_state(b: Blend) -> wgpu::BlendState {
-    let c = |src, dst, operation| wgpu::BlendComponent { src_factor: src, dst_factor: dst, operation };
+    let c = |src, dst, operation| wgpu::BlendComponent {
+        src_factor: src,
+        dst_factor: dst,
+        operation,
+    };
     use wgpu::{BlendFactor as F, BlendOperation as O};
     match b {
         Blend::Alpha => wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING,
-        Blend::Add => wgpu::BlendState { color: c(F::One, F::One, O::Add), alpha: c(F::Zero, F::One, O::Add) },
-        Blend::Sub => wgpu::BlendState { color: c(F::One, F::One, O::ReverseSubtract), alpha: c(F::Zero, F::One, O::Add) },
+        Blend::Add => wgpu::BlendState {
+            color: c(F::One, F::One, O::Add),
+            alpha: c(F::Zero, F::One, O::Add),
+        },
+        Blend::Sub => wgpu::BlendState {
+            color: c(F::One, F::One, O::ReverseSubtract),
+            alpha: c(F::Zero, F::One, O::Add),
+        },
     }
 }
 
 fn write_region(queue: &wgpu::Queue, tex: &wgpu::Texture, r: Rect, bpp: u32, data: &[u8]) {
     queue.write_texture(
-        wgpu::TexelCopyTextureInfo { texture: tex, mip_level: 0, origin: wgpu::Origin3d { x: r.x, y: r.y, z: 0 }, aspect: wgpu::TextureAspect::All },
+        wgpu::TexelCopyTextureInfo {
+            texture: tex,
+            mip_level: 0,
+            origin: wgpu::Origin3d {
+                x: r.x,
+                y: r.y,
+                z: 0,
+            },
+            aspect: wgpu::TextureAspect::All,
+        },
         data,
-        wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(r.w * bpp), rows_per_image: Some(r.h) },
-        wgpu::Extent3d { width: r.w, height: r.h, depth_or_array_layers: 1 },
+        wgpu::TexelCopyBufferLayout {
+            offset: 0,
+            bytes_per_row: Some(r.w * bpp),
+            rows_per_image: Some(r.h),
+        },
+        wgpu::Extent3d {
+            width: r.w,
+            height: r.h,
+            depth_or_array_layers: 1,
+        },
     );
 }
 
@@ -60,122 +101,295 @@ fn prefill_web_atlas(queue: &wgpu::Queue, tex: &wgpu::Texture, w: u32, h: u32, b
     let mut y = 0;
     while y < h {
         let rows = BAND.min(h - y);
-        write_region(queue, tex, Rect { x: 0, y, w, h: rows }, bpp, &zeros[..(w * rows * bpp) as usize]);
+        write_region(
+            queue,
+            tex,
+            Rect {
+                x: 0,
+                y,
+                w,
+                h: rows,
+            },
+            bpp,
+            &zeros[..(w * rows * bpp) as usize],
+        );
         y += rows;
     }
 }
 
 impl Renderer {
-    pub fn new(device: &wgpu::Device, queue: &wgpu::Queue, format: wgpu::TextureFormat, atlas_size: [u32; 2]) -> Self {
+    pub fn new(
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        format: wgpu::TextureFormat,
+        atlas_size: [u32; 2],
+    ) -> Self {
         let [aw, ah] = atlas_size;
-        let index_tex = texture(device, "ume-index-atlas", aw, ah, wgpu::TextureFormat::R8Unorm);
-        let rgba_tex = texture(device, "ume-rgba-atlas", aw, ah, wgpu::TextureFormat::Rgba8Unorm);
-        let palette_tex = texture(device, "ume-palettes", 256, PALETTE_ROWS, wgpu::TextureFormat::Rgba8Unorm);
+        let index_tex = texture(
+            device,
+            "ume-index-atlas",
+            aw,
+            ah,
+            wgpu::TextureFormat::R8Unorm,
+        );
+        let rgba_tex = texture(
+            device,
+            "ume-rgba-atlas",
+            aw,
+            ah,
+            wgpu::TextureFormat::Rgba8Unorm,
+        );
+        let palette_tex = texture(
+            device,
+            "ume-palettes",
+            256,
+            PALETTE_ROWS,
+            wgpu::TextureFormat::Rgba8Unorm,
+        );
         if cfg!(target_arch = "wasm32") {
             prefill_web_atlas(queue, &index_tex, aw, ah, 1);
             prefill_web_atlas(queue, &rgba_tex, aw, ah, 4);
             prefill_web_atlas(queue, &palette_tex, 256, PALETTE_ROWS, 4);
         }
-        let globals = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: Some("ume-globals"), contents: &[0u8; 16], usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST });
-        let nearest = device.create_sampler(&wgpu::SamplerDescriptor { label: Some("ume-nearest"), ..Default::default() });
-        let linear = device.create_sampler(&wgpu::SamplerDescriptor { label: Some("ume-linear"), mag_filter: wgpu::FilterMode::Linear, min_filter: wgpu::FilterMode::Linear, ..Default::default() });
+        let globals = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("ume-globals"),
+            contents: &[0u8; 16],
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+        let nearest = device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("ume-nearest"),
+            ..Default::default()
+        });
+        let linear = device.create_sampler(&wgpu::SamplerDescriptor {
+            label: Some("ume-linear"),
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            ..Default::default()
+        });
         let tex_entry = |binding| wgpu::BindGroupLayoutEntry {
             binding,
             visibility: wgpu::ShaderStages::FRAGMENT,
-            ty: wgpu::BindingType::Texture { sample_type: wgpu::TextureSampleType::Float { filterable: true }, view_dimension: wgpu::TextureViewDimension::D2, multisampled: false },
+            ty: wgpu::BindingType::Texture {
+                sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                view_dimension: wgpu::TextureViewDimension::D2,
+                multisampled: false,
+            },
             count: None,
         };
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("ume-sprite-layout"),
             entries: &[
-                wgpu::BindGroupLayoutEntry { binding: 0, visibility: wgpu::ShaderStages::VERTEX, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: None }, count: None },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                },
                 tex_entry(1),
                 tex_entry(2),
                 tex_entry(3),
-                wgpu::BindGroupLayoutEntry { binding: 4, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering), count: None },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 4,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
             ],
         });
         let view = |t: &wgpu::Texture| t.create_view(&wgpu::TextureViewDescriptor::default());
         let (iv, rv, pv) = (view(&index_tex), view(&rgba_tex), view(&palette_tex));
-        let bind_group = |sampler: &wgpu::Sampler| device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("ume-sprite-bind"),
-            layout: &layout,
-            entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: globals.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(&iv) },
-                wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&rv) },
-                wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::TextureView(&pv) },
-                wgpu::BindGroupEntry { binding: 4, resource: wgpu::BindingResource::Sampler(sampler) },
-            ],
-        });
+        let bind_group = |sampler: &wgpu::Sampler| {
+            device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("ume-sprite-bind"),
+                layout: &layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: globals.as_entire_binding(),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: wgpu::BindingResource::TextureView(&iv),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 2,
+                        resource: wgpu::BindingResource::TextureView(&rv),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 3,
+                        resource: wgpu::BindingResource::TextureView(&pv),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 4,
+                        resource: wgpu::BindingResource::Sampler(sampler),
+                    },
+                ],
+            })
+        };
         let bind_groups = [bind_group(&nearest), bind_group(&linear)];
-        let module = device.create_shader_module(wgpu::ShaderModuleDescriptor { label: Some("ume-sprite"), source: wgpu::ShaderSource::Wgsl(SHADER.into()) });
-        let pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor { label: Some("ume-sprite-pl"), bind_group_layouts: &[Some(&layout)], immediate_size: 0 });
-        let attrs = wgpu::vertex_attr_array![0 => Float32x2, 1 => Float32x2, 2 => Uint32, 3 => Unorm16x4, 4 => Unorm16x4, 5 => Float32];
-        let pipeline = |b: Blend| device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("ume-sprite-pipeline"),
-            layout: Some(&pl),
-            vertex: wgpu::VertexState {
-                module: &module,
-                entry_point: Some("vs_main"),
-                compilation_options: Default::default(),
-                buffers: &[Some(wgpu::VertexBufferLayout { array_stride: std::mem::size_of::<Vertex>() as u64, step_mode: wgpu::VertexStepMode::Vertex, attributes: &attrs })],
-            },
-            primitive: wgpu::PrimitiveState::default(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            fragment: Some(wgpu::FragmentState {
-                module: &module,
-                entry_point: Some("fs_main"),
-                compilation_options: Default::default(),
-                targets: &[Some(wgpu::ColorTargetState { format, blend: Some(blend_state(b)), write_mask: wgpu::ColorWrites::ALL })],
-            }),
-            multiview_mask: None,
-            cache: None,
+        let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("ume-sprite"),
+            source: wgpu::ShaderSource::Wgsl(SHADER.into()),
         });
-        let pipelines = [pipeline(Blend::Alpha), pipeline(Blend::Add), pipeline(Blend::Sub)];
+        let pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("ume-sprite-pl"),
+            bind_group_layouts: &[Some(&layout)],
+            immediate_size: 0,
+        });
+        let attrs = wgpu::vertex_attr_array![0 => Float32x2, 1 => Float32x2, 2 => Uint32, 3 => Unorm16x4, 4 => Unorm16x4, 5 => Float32];
+        let pipeline = |b: Blend| {
+            device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: Some("ume-sprite-pipeline"),
+                layout: Some(&pl),
+                vertex: wgpu::VertexState {
+                    module: &module,
+                    entry_point: Some("vs_main"),
+                    compilation_options: Default::default(),
+                    buffers: &[Some(wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::<Vertex>() as u64,
+                        step_mode: wgpu::VertexStepMode::Vertex,
+                        attributes: &attrs,
+                    })],
+                },
+                primitive: wgpu::PrimitiveState::default(),
+                depth_stencil: None,
+                multisample: wgpu::MultisampleState::default(),
+                fragment: Some(wgpu::FragmentState {
+                    module: &module,
+                    entry_point: Some("fs_main"),
+                    compilation_options: Default::default(),
+                    targets: &[Some(wgpu::ColorTargetState {
+                        format,
+                        blend: Some(blend_state(b)),
+                        write_mask: wgpu::ColorWrites::ALL,
+                    })],
+                }),
+                multiview_mask: None,
+                cache: None,
+            })
+        };
+        let pipelines = [
+            pipeline(Blend::Alpha),
+            pipeline(Blend::Add),
+            pipeline(Blend::Sub),
+        ];
         let (vcap, icap) = (4096u64, 6144u64);
-        let vbuf = Self::buffer(device, vcap * std::mem::size_of::<Vertex>() as u64, wgpu::BufferUsages::VERTEX);
+        let vbuf = Self::buffer(
+            device,
+            vcap * std::mem::size_of::<Vertex>() as u64,
+            wgpu::BufferUsages::VERTEX,
+        );
         let ibuf = Self::buffer(device, icap * 4, wgpu::BufferUsages::INDEX);
-        Renderer { atlas_size, pipelines, bind_groups, linear: false, scissor_scale: [1.0, 1.0], globals, index_tex, rgba_tex, palette_tex, vbuf, ibuf, vcap, icap, iscratch: Vec::new() }
+        Renderer {
+            atlas_size,
+            pipelines,
+            bind_groups,
+            linear: false,
+            scissor_scale: [1.0, 1.0],
+            globals,
+            index_tex,
+            rgba_tex,
+            palette_tex,
+            vbuf,
+            ibuf,
+            vcap,
+            icap,
+            iscratch: Vec::new(),
+        }
     }
 
     fn buffer(device: &wgpu::Device, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
-        device.create_buffer(&wgpu::BufferDescriptor { label: Some("ume-batch"), size, usage: usage | wgpu::BufferUsages::COPY_DST, mapped_at_creation: false })
+        device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("ume-batch"),
+            size,
+            usage: usage | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        })
     }
 
-    pub fn set_linear(&mut self, linear: bool) { self.linear = linear; }
+    pub fn set_linear(&mut self, linear: bool) {
+        self.linear = linear;
+    }
 
-    pub fn set_scissor_scale(&mut self, scale: [f32; 2]) { self.scissor_scale = scale; }
+    pub fn set_scissor_scale(&mut self, scale: [f32; 2]) {
+        self.scissor_scale = scale;
+    }
 
-    pub fn upload_indexed(&self, queue: &wgpu::Queue, r: Rect, pixels: &[u8]) { write_region(queue, &self.index_tex, r, 1, pixels); }
+    pub fn upload_indexed(&self, queue: &wgpu::Queue, r: Rect, pixels: &[u8]) {
+        write_region(queue, &self.index_tex, r, 1, pixels);
+    }
 
-    pub fn upload_rgba(&self, queue: &wgpu::Queue, r: Rect, pixels: &[u8]) { write_region(queue, &self.rgba_tex, r, 4, pixels); }
+    pub fn upload_rgba(&self, queue: &wgpu::Queue, r: Rect, pixels: &[u8]) {
+        write_region(queue, &self.rgba_tex, r, 4, pixels);
+    }
 
     pub fn set_palette(&self, queue: &wgpu::Queue, row: u32, colors: &[[u8; 4]; 256]) {
-        write_region(queue, &self.palette_tex, Rect { x: 0, y: row, w: 256, h: 1 }, 4, bytemuck::cast_slice(colors));
+        write_region(
+            queue,
+            &self.palette_tex,
+            Rect {
+                x: 0,
+                y: row,
+                w: 256,
+                h: 1,
+            },
+            4,
+            bytemuck::cast_slice(colors),
+        );
     }
 
-    pub fn draw(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, encoder: &mut wgpu::CommandEncoder, target: Target, batch: &Batch) {
+    pub fn draw(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        encoder: &mut wgpu::CommandEncoder,
+        target: Target,
+        batch: &Batch,
+    ) {
         self.draw_calls(device, queue, encoder, target, batch, 0..batch.calls.len());
     }
 
-    pub fn draw_calls(&mut self, device: &wgpu::Device, queue: &wgpu::Queue, encoder: &mut wgpu::CommandEncoder, target: Target, batch: &Batch, calls: std::ops::Range<usize>) {
-        let Target { view: target, size: screen, clear } = target;
+    pub fn draw_calls(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        encoder: &mut wgpu::CommandEncoder,
+        target: Target,
+        batch: &Batch,
+        calls: std::ops::Range<usize>,
+    ) {
+        let Target {
+            view: target,
+            size: screen,
+            clear,
+        } = target;
         if batch.vertices.len() as u64 > self.vcap {
             self.vcap = (batch.vertices.len() as u64).next_power_of_two();
-            self.vbuf = Self::buffer(device, self.vcap * std::mem::size_of::<Vertex>() as u64, wgpu::BufferUsages::VERTEX);
+            self.vbuf = Self::buffer(
+                device,
+                self.vcap * std::mem::size_of::<Vertex>() as u64,
+                wgpu::BufferUsages::VERTEX,
+            );
         }
         if batch.indices.len() as u64 > self.icap {
             self.icap = (batch.indices.len() as u64).next_power_of_two();
             self.ibuf = Self::buffer(device, self.icap * 4, wgpu::BufferUsages::INDEX);
         }
-        queue.write_buffer(&self.globals, 0, bytemuck::cast_slice(&[screen[0], screen[1], 0.0, 0.0]));
+        queue.write_buffer(
+            &self.globals,
+            0,
+            bytemuck::cast_slice(&[screen[0], screen[1], 0.0, 0.0]),
+        );
         if !batch.vertices.is_empty() {
             queue.write_buffer(&self.vbuf, 0, bytemuck::cast_slice(&batch.vertices));
             if batch.fits_u16() {
                 self.iscratch.clear();
-                self.iscratch.extend(batch.indices.iter().map(|&i| i as u16));
+                self.iscratch
+                    .extend(batch.indices.iter().map(|&i| i as u16));
                 if self.iscratch.len() % 2 == 1 {
                     self.iscratch.push(0);
                 }
@@ -187,20 +401,49 @@ impl Renderer {
         let load = clear.map(wgpu::LoadOp::Clear).unwrap_or(wgpu::LoadOp::Load);
         let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("ume-sprites"),
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment { view: target, depth_slice: None, resolve_target: None, ops: wgpu::Operations { load, store: wgpu::StoreOp::Store } })],
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view: target,
+                depth_slice: None,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load,
+                    store: wgpu::StoreOp::Store,
+                },
+            })],
             ..Default::default()
         });
-        let calls = &batch.calls[calls.start.min(batch.calls.len())..calls.end.min(batch.calls.len())];
-        if calls.is_empty() { return; }
+        let calls =
+            &batch.calls[calls.start.min(batch.calls.len())..calls.end.min(batch.calls.len())];
+        if calls.is_empty() {
+            return;
+        }
         pass.set_bind_group(0, &self.bind_groups[self.linear as usize], &[]);
         pass.set_vertex_buffer(0, self.vbuf.slice(..));
-        pass.set_index_buffer(self.ibuf.slice(..), if batch.fits_u16() { wgpu::IndexFormat::Uint16 } else { wgpu::IndexFormat::Uint32 });
+        pass.set_index_buffer(
+            self.ibuf.slice(..),
+            if batch.fits_u16() {
+                wgpu::IndexFormat::Uint16
+            } else {
+                wgpu::IndexFormat::Uint32
+            },
+        );
         let [kx, ky] = self.scissor_scale;
-        let (tw, th) = ((screen[0] * kx).round().max(1.0) as u32, (screen[1] * ky).round().max(1.0) as u32);
+        let (tw, th) = (
+            (screen[0] * kx).round().max(1.0) as u32,
+            (screen[1] * ky).round().max(1.0) as u32,
+        );
         let scaled = |v: u32, k: f32| (v as f32 * k).round() as u32;
         for c in calls {
-            let [x, y, w, h] = c.scissor.map(|[x, y, w, h]| { let (x, y) = (scaled(x, kx).min(tw), scaled(y, ky).min(th)); [x, y, scaled(w, kx).min(tw - x), scaled(h, ky).min(th - y)] }).unwrap_or([0, 0, tw, th]);
-            if w == 0 || h == 0 { continue; }
+            let [x, y, w, h] = c
+                .scissor
+                .map(|[x, y, w, h]| {
+                    let (x, y) = (scaled(x, kx).min(tw), scaled(y, ky).min(th));
+                    [x, y, scaled(w, kx).min(tw - x), scaled(h, ky).min(th - y)]
+                })
+                .unwrap_or([0, 0, tw, th]);
+            if w == 0 || h == 0 {
+                continue;
+            }
             pass.set_scissor_rect(x, y, w, h);
             pass.set_pipeline(&self.pipelines[c.blend as usize]);
             pass.draw_indexed(c.first_index..c.first_index + c.index_count, 0, 0..1);

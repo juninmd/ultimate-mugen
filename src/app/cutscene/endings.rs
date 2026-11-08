@@ -113,7 +113,10 @@ pub fn ending_script(hero_id: &str, hero: &str, hero_quote: &str) -> Vec<Page> {
         pg(0, epilogue_2),
         pg(
             0,
-            format!("FIM DA JORNADA DE {} — O ECLIPSE FOI SUPERADO.", first.to_uppercase()),
+            format!(
+                "FIM DA JORNADA DE {} — O ECLIPSE FOI SUPERADO.",
+                first.to_uppercase()
+            ),
         ),
     ]
 }

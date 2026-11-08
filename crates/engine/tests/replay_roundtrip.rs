@@ -1,6 +1,6 @@
 mod support;
-use support::*;
 use std::sync::Arc;
+use support::*;
 use ume_engine::chardef::CharDef;
 use ume_engine::commands::parse_command;
 use ume_engine::common::{common_def, flat_stage};
@@ -30,8 +30,21 @@ fn fresh() -> Match {
 }
 
 fn input(i: usize) -> [u32; 2] {
-    let a = match (i / 7) % 5 { 0 => k::L, 1 => k::R, 2 => k::X, 3 => k::D, _ => 0 };
-    let b = match (i / 11) % 6 { 0 => k::R, 1 => k::Y, 2 => k::L, 3 => k::U, 4 => k::A, _ => 0 };
+    let a = match (i / 7) % 5 {
+        0 => k::L,
+        1 => k::R,
+        2 => k::X,
+        3 => k::D,
+        _ => 0,
+    };
+    let b = match (i / 11) % 6 {
+        0 => k::R,
+        1 => k::Y,
+        2 => k::L,
+        3 => k::U,
+        4 => k::A,
+        _ => 0,
+    };
     [a, b]
 }
 
@@ -50,11 +63,21 @@ fn a_recorded_input_stream_reproduces_the_same_checksum() {
     for bits in &rec {
         replayed.tick(bits);
     }
-    assert_eq!(replayed.checksum(), expected, "1200 ticks reproduce the same state");
+    assert_eq!(
+        replayed.checksum(),
+        expected,
+        "1200 ticks reproduce the same state"
+    );
 
     let mut different = fresh();
-    for _ in 0..1200 { different.tick(&[0, 0]); }
-    assert_ne!(different.checksum(), expected, "the checksum notices different inputs");
+    for _ in 0..1200 {
+        different.tick(&[0, 0]);
+    }
+    assert_ne!(
+        different.checksum(),
+        expected,
+        "the checksum notices different inputs"
+    );
 }
 
 #[test]

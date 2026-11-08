@@ -47,7 +47,12 @@ time = -1
 pos = 25, 0
 ";
 
-fn helper(m: &ume_engine::matchs::Match) -> usize { m.fighters.iter().position(|f| f.is_helper).expect("helper exists") }
+fn helper(m: &ume_engine::matchs::Match) -> usize {
+    m.fighters
+        .iter()
+        .position(|f| f.is_helper)
+        .expect("helper exists")
+}
 
 #[test]
 fn helper_supermovetime_moves_during_superpause() {
@@ -82,7 +87,11 @@ fn ownpal_zero_shares_the_parent_palfx() {
     let mut m = duel(mugen_char("a", CNS), mugen_char("b", ""));
     enter(&mut m, 0, 800);
     m.tick(&[0, 0]);
-    m.fighters[0].palfx = Some(ume_engine::fighter::PalFx::new(10, [50.0, 0.0, 0.0], [256.0; 3]));
+    m.fighters[0].palfx = Some(ume_engine::fighter::PalFx::new(
+        10,
+        [50.0, 0.0, 0.0],
+        [256.0; 3],
+    ));
     let h = helper(&m);
     assert_eq!(m.palfx_of(h).map(|p| p.add[0]), Some(50.0));
     m.fighters[h].own_pal = true;
@@ -95,11 +104,21 @@ fn bind_is_reapplied_after_push() {
     face_off(&mut m, 30.0);
     m.fighters[0].pos.x = m.fighters[1].pos.x - 10.0;
     let to = m.fighters[0].id;
-    m.fighters[1].bind = Some(ume_engine::fighter::Bind { to, time: -1, x: 10.0, y: 0.0, kind: ume_engine::fighter::BindKind::Target });
+    m.fighters[1].bind = Some(ume_engine::fighter::Bind {
+        to,
+        time: -1,
+        x: 10.0,
+        y: 0.0,
+        kind: ume_engine::fighter::BindKind::Target,
+    });
     for _ in 0..3 {
         m.tick(&[0, 0]);
         let (a, b) = (&m.fighters[0], &m.fighters[1]);
-        assert_eq!(b.pos.x, a.pos.x + 10.0 * a.facing, "push must not leave the bound player off its anchor");
+        assert_eq!(
+            b.pos.x,
+            a.pos.x + 10.0 * a.facing,
+            "push must not leave the bound player off its anchor"
+        );
     }
 }
 
@@ -114,6 +133,9 @@ fn custom_state_from_a_destroyed_giver_falls_back_to_own_states() {
     m.fighters[1].state_giver = Some(hid);
     m.destroy_helper(h);
     m.tick(&[0, 0]);
-    assert!(std::sync::Arc::ptr_eq(&m.fighters[1].st_def, &m.fighters[1].def));
+    assert!(std::sync::Arc::ptr_eq(
+        &m.fighters[1].st_def,
+        &m.fighters[1].def
+    ));
     assert_ne!(m.fighters[1].state_no, 810);
 }

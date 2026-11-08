@@ -5,7 +5,10 @@ const REQUIRED: [&str; 3] = ["sprite", "anim", "cns"];
 
 pub fn problems(vfs: &Vfs, def_path: &str) -> Vec<String> {
     let def_path = norm_path(def_path);
-    let base = def_path.rsplit_once('/').map(|(b, _)| b.to_string()).unwrap_or_default();
+    let base = def_path
+        .rsplit_once('/')
+        .map(|(b, _)| b.to_string())
+        .unwrap_or_default();
     let Some(raw) = vfs.get(&def_path) else {
         return vec!["arquivo .def não encontrado".into()];
     };
@@ -15,19 +18,29 @@ pub fn problems(vfs: &Vfs, def_path: &str) -> Vec<String> {
     };
     REQUIRED
         .iter()
-        .filter_map(|key| match files.get(key).map(unquote_str).filter(|v| !v.is_empty()) {
-            None => Some(format!("[Files] sem '{key}'")),
-            Some(name) if !in_pack(vfs, &base, name) => Some(format!("{key} '{name}' não existe")),
-            Some(_) => None,
-        })
+        .filter_map(
+            |key| match files.get(key).map(unquote_str).filter(|v| !v.is_empty()) {
+                None => Some(format!("[Files] sem '{key}'")),
+                Some(name) if !in_pack(vfs, &base, name) => {
+                    Some(format!("{key} '{name}' não existe"))
+                }
+                Some(_) => None,
+            },
+        )
         .collect()
 }
 
 fn in_pack(vfs: &Vfs, base: &str, name: &str) -> bool {
     let n = norm_path(&unquote_str(name).replace('\\', "/"));
     let base = norm_path(base.trim_end_matches(['/', '\\']));
-    let own = if base.is_empty() { n.clone() } else { format!("{base}/{n}") };
-    [own, n.clone(), format!("data/{n}")].iter().any(|k| vfs.contains_key(k))
+    let own = if base.is_empty() {
+        n.clone()
+    } else {
+        format!("{base}/{n}")
+    };
+    [own, n.clone(), format!("data/{n}")]
+        .iter()
+        .any(|k| vfs.contains_key(k))
 }
 
 #[cfg(test)]
@@ -54,7 +67,10 @@ mod tests {
     #[test]
     fn missing_sprite_file_is_reported() {
         let vfs = pack(DEF, &[("f.air", "x"), ("f.cns", "x")]);
-        assert_eq!(problems(&vfs, "c/fighter.def"), vec!["sprite 'f.sff' não existe"]);
+        assert_eq!(
+            problems(&vfs, "c/fighter.def"),
+            vec!["sprite 'f.sff' não existe"]
+        );
     }
 
     #[test]
@@ -69,11 +85,17 @@ mod tests {
     fn file_borrowed_from_another_folder_is_not_accepted() {
         let mut vfs = pack(DEF, &[("f.air", "x"), ("f.cns", "x")]);
         vfs.insert("c/other/f.sff".into(), b"x".to_vec());
-        assert_eq!(problems(&vfs, "c/fighter.def"), vec!["sprite 'f.sff' não existe"]);
+        assert_eq!(
+            problems(&vfs, "c/fighter.def"),
+            vec!["sprite 'f.sff' não existe"]
+        );
     }
 
     #[test]
     fn missing_def_is_reported() {
-        assert_eq!(problems(&Vfs::new(), "c/fighter.def"), vec!["arquivo .def não encontrado"]);
+        assert_eq!(
+            problems(&Vfs::new(), "c/fighter.def"),
+            vec!["arquivo .def não encontrado"]
+        );
     }
 }

@@ -3,10 +3,14 @@ use ume_formats::vfs::Vfs;
 
 #[test]
 fn detects_gltf_model_requests() {
-    assert!(stage_requests_3d("[StageInfo]\nlocalcoord = 1280, 720\nmodel = arena.glb\n"));
+    assert!(stage_requests_3d(
+        "[StageInfo]\nlocalcoord = 1280, 720\nmodel = arena.glb\n"
+    ));
     assert!(stage_requests_3d("[Model]\nfile = arena.gltf\n"));
     assert!(stage_requests_3d("[StageInfo]\nscene = city\n"));
-    assert!(!stage_requests_3d("[StageInfo]\nlocalcoord = 320, 240\n[BGDef]\nspr = stage.sff\n"));
+    assert!(!stage_requests_3d(
+        "[StageInfo]\nlocalcoord = 320, 240\n[BGDef]\nspr = stage.sff\n"
+    ));
 }
 
 #[test]

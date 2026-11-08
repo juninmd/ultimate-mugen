@@ -135,7 +135,11 @@ pub async fn run(app: &mut App, dir: &str) {
         s.m.fighters[1].pos.x = 55.0;
         s.m.fighters[1].power = 3000.0;
         let d = s.m.fighters[1].def.clone();
-        let st = if d.states.contains_key(&3002) { 3002 } else { 3000 };
+        let st = if d.states.contains_key(&3002) {
+            3002
+        } else {
+            3000
+        };
         if d.states.contains_key(&st) {
             s.m.change_state(1, st, d);
         }

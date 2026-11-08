@@ -15,4 +15,4 @@ pub(super) fn skip_digits(b: &[u8], mut i: usize) -> usize {
         i += 1;
     }
     i
-}
+}

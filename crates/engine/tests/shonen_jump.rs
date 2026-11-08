@@ -18,7 +18,11 @@ fn stages_root() -> PathBuf {
 fn find_case_insensitive_dir(root: &Path, name: &str) -> Option<PathBuf> {
     if let Ok(entries) = std::fs::read_dir(root) {
         for entry in entries.flatten() {
-            if entry.file_name().to_string_lossy().eq_ignore_ascii_case(name) {
+            if entry
+                .file_name()
+                .to_string_lossy()
+                .eq_ignore_ascii_case(name)
+            {
                 return Some(entry.path());
             }
         }
@@ -43,7 +47,10 @@ fn load_char(dir_name: &str, def: &str) -> Option<Arc<ume_engine::chardef::CharD
 fn test_shonen_jump_naruto_roster() {
     let root = chars_root();
     if !root.exists() {
-        println!("skipping: {} not found (run scripts/fetch-jump-chars.ps1 to populate)", root.display());
+        println!(
+            "skipping: {} not found (run scripts/fetch-jump-chars.ps1 to populate)",
+            root.display()
+        );
         return;
     }
 
@@ -54,7 +61,11 @@ fn test_shonen_jump_naruto_roster() {
         ("Kakashi Kid", "kakashi kid.def", "Kakashi"),
         ("itachi", "uchiha itachi.def", "Uchiha Itachi"),
         ("Naruto Sage", "naruto sage.def", "Sage Naruto by MG"),
-        ("AkatsukiMadara299", "akatsukimadara299.def", "AkatsukiMadara"),
+        (
+            "AkatsukiMadara299",
+            "akatsukimadara299.def",
+            "AkatsukiMadara",
+        ),
         ("rock_lee", "rlee.def", "LEE"),
         ("minato", "yondaime.def", "Yondaime"),
         ("sakura", "haruno sakura.def", "Sakura"),
@@ -63,7 +74,13 @@ fn test_shonen_jump_naruto_roster() {
     let mut loaded = 0;
     for (dir, def, expected) in naruto_roster {
         if let Some(c) = load_char(dir, def) {
-            println!("Loaded Naruto character: {} (anims={}, states={}, sprites={})", c.name, c.anims.len(), c.states.len(), c.sprites.len());
+            println!(
+                "Loaded Naruto character: {} (anims={}, states={}, sprites={})",
+                c.name,
+                c.anims.len(),
+                c.states.len(),
+                c.sprites.len()
+            );
             assert!(!c.anims.is_empty(), "No anims for {}", expected);
             assert!(!c.states.is_empty(), "No states for {}", expected);
             loaded += 1;
@@ -79,7 +96,11 @@ fn test_shonen_jump_naruto_roster() {
         }
     }
     if loaded > 0 {
-        assert!(loaded >= 8, "Expected at least 8 Naruto fighters, got {}", loaded);
+        assert!(
+            loaded >= 8,
+            "Expected at least 8 Naruto fighters, got {}",
+            loaded
+        );
     }
 }
 
@@ -99,7 +120,13 @@ fn test_shonen_jump_jojo_roster() {
     let mut loaded = 0;
     for (dir, def, expected) in jojo_roster {
         if let Some(c) = load_char(dir, def) {
-            println!("Loaded JoJo character: {} (anims={}, states={}, sprites={})", c.name, c.anims.len(), c.states.len(), c.sprites.len());
+            println!(
+                "Loaded JoJo character: {} (anims={}, states={}, sprites={})",
+                c.name,
+                c.anims.len(),
+                c.states.len(),
+                c.sprites.len()
+            );
             assert!(!c.anims.is_empty(), "No anims for {}", expected);
             assert!(!c.states.is_empty(), "No states for {}", expected);
             loaded += 1;
@@ -115,7 +142,10 @@ fn test_shonen_jump_jojo_roster() {
         }
     }
     if loaded > 0 {
-        assert_eq!(loaded, 2, "Both JoJo fighters (Jotaro, Dio) must load successfully");
+        assert_eq!(
+            loaded, 2,
+            "Both JoJo fighters (Jotaro, Dio) must load successfully"
+        );
     }
 }
 
@@ -136,7 +166,13 @@ fn test_shonen_jump_dbgt_roster() {
     let mut loaded = 0;
     for (dir, def, expected) in gt_roster {
         if let Some(c) = load_char(dir, def) {
-            println!("Loaded DB GT character: {} (anims={}, states={}, sprites={})", c.name, c.anims.len(), c.states.len(), c.sprites.len());
+            println!(
+                "Loaded DB GT character: {} (anims={}, states={}, sprites={})",
+                c.name,
+                c.anims.len(),
+                c.states.len(),
+                c.sprites.len()
+            );
             assert!(!c.anims.is_empty(), "No anims for {}", expected);
             assert!(!c.states.is_empty(), "No states for {}", expected);
             loaded += 1;
@@ -160,7 +196,10 @@ fn test_shonen_jump_dbgt_roster() {
 fn test_shonen_jump_bleach_roster() {
     let root = chars_root();
     if !root.exists() {
-        println!("skipping: {} not found (run scripts/fetch-jump-chars.ps1 to populate)", root.display());
+        println!(
+            "skipping: {} not found (run scripts/fetch-jump-chars.ps1 to populate)",
+            root.display()
+        );
         return;
     }
 
@@ -180,7 +219,13 @@ fn test_shonen_jump_bleach_roster() {
     let mut loaded = 0;
     for (dir, def, expected) in bleach_roster {
         if let Some(c) = load_char(dir, def) {
-            println!("Loaded Bleach character: {} (anims={}, states={}, sprites={})", c.name, c.anims.len(), c.states.len(), c.sprites.len());
+            println!(
+                "Loaded Bleach character: {} (anims={}, states={}, sprites={})",
+                c.name,
+                c.anims.len(),
+                c.states.len(),
+                c.sprites.len()
+            );
             assert!(!c.anims.is_empty(), "No anims for {}", expected);
             assert!(!c.states.is_empty(), "No states for {}", expected);
             loaded += 1;
@@ -196,7 +241,11 @@ fn test_shonen_jump_bleach_roster() {
         }
     }
     if loaded > 0 {
-        assert!(loaded >= 8, "Expected at least 8 Bleach fighters, got {}", loaded);
+        assert!(
+            loaded >= 8,
+            "Expected at least 8 Bleach fighters, got {}",
+            loaded
+        );
     }
 }
 
@@ -236,6 +285,9 @@ fn test_shonen_jump_stages() {
         }
     }
     if !v.is_empty() {
-        assert!(verified > 0, "At least one Shonen Jump stage should be verified if folder populated");
+        assert!(
+            verified > 0,
+            "At least one Shonen Jump stage should be verified if folder populated"
+        );
     }
 }

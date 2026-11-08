@@ -3,7 +3,9 @@
 mod common;
 use common::*;
 use ume_formats::air::{parse_air, Blend};
-use ume_formats::ini::{find_section, nums, parse_float, parse_ini, parse_int, split_top, strip_comment, unquote};
+use ume_formats::ini::{
+    find_section, nums, parse_float, parse_ini, parse_int, split_top, strip_comment, unquote,
+};
 use ume_formats::stage::load_stage;
 use ume_formats::vfs::{add_zip, find_char_defs, find_stage_defs, norm_path, resolve, text, Vfs};
 
@@ -19,11 +21,17 @@ fn ini_basic() {
     let info = find_section(&secs, "INFO").unwrap();
     assert_eq!(info.name, "Info");
     assert_eq!(info.get("NAME"), Some("\"Kung Fu Man\""));
-    assert_eq!(info.get_all("name").collect::<Vec<_>>(), vec!["\"Kung Fu Man\"", "dup"]);
+    assert_eq!(
+        info.get_all("name").collect::<Vec<_>>(),
+        vec!["\"Kung Fu Man\"", "dup"]
+    );
     assert_eq!(unquote(info.get("name").unwrap()), "Kung Fu Man");
     let files = find_section(&secs, "files").unwrap();
     assert_eq!(files.entries.len(), 2); // "-1, 2 = x" is not a key
-    assert_eq!(files.lines, vec!["cns = kfm.cns", "-1, 2 = x", "Sprite=kfm.sff"]);
+    assert_eq!(
+        files.lines,
+        vec!["cns = kfm.cns", "-1, 2 = x", "Sprite=kfm.sff"]
+    );
     assert_eq!(files.get("sprite"), Some("kfm.sff"));
     assert_eq!(find_section(&secs, "data").unwrap().lname, "data");
 }
@@ -34,11 +42,17 @@ fn ini_helpers() {
     assert_eq!(unquote("  \"abc\" trailing"), "abc");
     assert_eq!(unquote(" plain "), "plain");
     assert_eq!(unquote("\"open"), "open");
-    assert_eq!(nums(Some("1, .5,abc, -2e1x"), &[9.0, 9.0, 7.0]), vec![1.0, 0.5, 7.0, -20.0]);
+    assert_eq!(
+        nums(Some("1, .5,abc, -2e1x"), &[9.0, 9.0, 7.0]),
+        vec![1.0, 0.5, 7.0, -20.0]
+    );
     assert_eq!(nums(None, &[320.0, 240.0]), vec![320.0, 240.0]);
     assert_eq!(nums(Some("  "), &[1.0]), vec![1.0]);
     assert_eq!(nums(Some("5,"), &[1.0, 2.0]), vec![5.0, 2.0]);
-    assert_eq!(split_top("a, f(b, c), [d,e], \"x,y\" ,z"), vec!["a", "f(b, c)", "[d,e]", "\"x,y\"", "z"]);
+    assert_eq!(
+        split_top("a, f(b, c), [d,e], \"x,y\" ,z"),
+        vec!["a", "f(b, c)", "[d,e]", "\"x,y\"", "z"]
+    );
     assert_eq!(parse_float("  -.25abc"), Some(-0.25));
     assert_eq!(parse_float("1e"), Some(1.0));
     assert_eq!(parse_float("."), None);
@@ -83,10 +97,16 @@ fn air_parse() {
     assert_eq!(a0.loop_start, 2);
     assert_eq!(a0.total_time, -1);
     let f0 = &a0.frames[0];
-    assert_eq!(f0.clsn2, vec![[-13.0, -79.0, 16.0, 0.0], [-7.0, -93.0, 5.0, -79.0]]);
+    assert_eq!(
+        f0.clsn2,
+        vec![[-13.0, -79.0, 16.0, 0.0], [-7.0, -93.0, 5.0, -79.0]]
+    );
     assert!(f0.clsn1.is_empty());
     let f1 = &a0.frames[1];
-    assert_eq!((f1.group, f1.index, f1.x, f1.y, f1.time), (0, 1, 1.0, -2.0, 5));
+    assert_eq!(
+        (f1.group, f1.index, f1.x, f1.y, f1.time),
+        (0, 1, 1.0, -2.0, 5)
+    );
     assert!(f1.flip_h && !f1.flip_v);
     assert_eq!(f1.blend, Blend::Add);
     assert_eq!(f1.clsn1, vec![[10.0, -60.0, 40.0, -50.0]]);
@@ -149,8 +169,14 @@ fn zip_round_trip_and_discovery() {
     assert_eq!(vfs.get("test/t.sff").unwrap().to_vec(), big);
     assert_eq!(find_char_defs(&vfs), vec!["test/t.def"]);
     assert_eq!(find_stage_defs(&vfs), vec!["test/stage.def"]);
-    assert_eq!(resolve(&vfs, "test", "sub\\T.air").map(|b| b.len()), Some("[Begin Action 0]\n0,0,0,0,1\n".len()));
-    assert_eq!(resolve(&vfs, "test", "\"t.sff\"").map(|b| b.len()), Some(20000));
+    assert_eq!(
+        resolve(&vfs, "test", "sub\\T.air").map(|b| b.len()),
+        Some("[Begin Action 0]\n0,0,0,0,1\n".len())
+    );
+    assert_eq!(
+        resolve(&vfs, "test", "\"t.sff\"").map(|b| b.len()),
+        Some(20000)
+    );
     assert!(resolve(&vfs, "test", "elsewhere/T.AIR").is_some()); // basename fallback
     assert!(resolve(&vfs, "test", "nope.cns").is_none());
     assert!(resolve(&vfs, "test", "").is_none());
@@ -325,13 +351,24 @@ fn add_dir_expands_zips() {
     let _ = std::fs::remove_dir_all(&root);
     std::fs::create_dir_all(root.join("Chars/Pack")).unwrap();
     std::fs::write(root.join("Chars/Loose.DEF"), b"x").unwrap();
-    std::fs::write(root.join("Chars/Pack/c.zip"), encode_zip(&[("Guy/guy.def", b"[Files]\ncns=a\nsprite=b\n", true)])).unwrap();
+    std::fs::write(
+        root.join("Chars/Pack/c.zip"),
+        encode_zip(&[("Guy/guy.def", b"[Files]\ncns=a\nsprite=b\n", true)]),
+    )
+    .unwrap();
     std::fs::write(root.join("Chars/Pack/bad.zip"), b"not a zip").unwrap();
     let mut vfs = Vfs::new();
     let n = add_dir(&mut vfs, &root, "My\\Root").unwrap();
     assert_eq!(n, 3);
     let keys: Vec<&str> = vfs.keys().map(|k| k.as_str()).collect();
-    assert_eq!(keys, vec!["my/root/chars/loose.def", "my/root/chars/pack/bad.zip", "my/root/chars/pack/guy/guy.def"]);
+    assert_eq!(
+        keys,
+        vec![
+            "my/root/chars/loose.def",
+            "my/root/chars/pack/bad.zip",
+            "my/root/chars/pack/guy/guy.def"
+        ]
+    );
     assert_eq!(find_char_defs(&vfs), vec!["my/root/chars/pack/guy/guy.def"]);
     let _ = std::fs::remove_dir_all(&root);
 }
@@ -357,7 +394,16 @@ fn folder_fallback_prefers_character_subtree_over_prefix_siblings() {
         ("chars/kfm/nested/fight.air".into(), vec![2]),
         ("shared/common.cns".into(), vec![3]),
     ]);
-    assert_eq!(resolve(&vfs, "Chars\\KFM", "wrong/fight.air").map(|b| b.to_vec()), Some(vec![2]));
-    assert_eq!(resolve(&vfs, "chars/kfm", "common.cns").map(|b| b.to_vec()), Some(vec![3]));
-    assert_eq!(resolve(&vfs, "", "fight.air").map(|b| b.to_vec()), Some(vec![1]));
+    assert_eq!(
+        resolve(&vfs, "Chars\\KFM", "wrong/fight.air").map(|b| b.to_vec()),
+        Some(vec![2])
+    );
+    assert_eq!(
+        resolve(&vfs, "chars/kfm", "common.cns").map(|b| b.to_vec()),
+        Some(vec![3])
+    );
+    assert_eq!(
+        resolve(&vfs, "", "fight.air").map(|b| b.to_vec()),
+        Some(vec![1])
+    );
 }

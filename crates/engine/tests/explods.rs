@@ -86,7 +86,10 @@ fn setup() -> ume_engine::matchs::Match {
 }
 
 fn explod(m: &ume_engine::matchs::Match, id: i32) -> &ume_engine::matchs::Explod {
-    m.explods.iter().find(|e| e.owner == m.fighters[0].id && e.id == id).expect("explod")
+    m.explods
+        .iter()
+        .find(|e| e.owner == m.fighters[0].id && e.id == id)
+        .expect("explod")
 }
 
 #[test]
@@ -95,8 +98,15 @@ fn ignorehitpause_zero_freezes_with_the_owner() {
     let (t1, t2) = (explod(&m, 1).time, explod(&m, 2).time);
     m.fighters[0].hit_pause = 5;
     ticks(&mut m, 2);
-    assert_eq!(explod(&m, 1).time, t1, "ignorehitpause = 0 waits for the owner");
-    assert!(explod(&m, 2).time > t2, "the default ignorehitpause = 1 keeps animating");
+    assert_eq!(
+        explod(&m, 1).time,
+        t1,
+        "ignorehitpause = 0 waits for the owner"
+    );
+    assert!(
+        explod(&m, 2).time > t2,
+        "the default ignorehitpause = 1 keeps animating"
+    );
 }
 
 #[test]
@@ -108,7 +118,10 @@ fn screen_explods_follow_the_camera() {
     assert!(explod(&m, 3).screen && explod(&m, 4).screen);
     assert_eq!(explod(&m, 3).world_pos(m.camera).x, left.x + 50.0);
     assert_eq!(explod(&m, 4).world_pos(m.camera).x, anchored.x + 50.0);
-    assert_eq!(explod(&m, 3).pos.x, -m.view_w / 2.0 + 30.0 * m.fighters[0].lscl);
+    assert_eq!(
+        explod(&m, 3).pos.x,
+        -m.view_w / 2.0 + 30.0 * m.fighters[0].lscl
+    );
 }
 
 #[test]
@@ -135,11 +148,27 @@ fn modifyexplod_sets_facing_from_the_owner_and_updates_every_field() {
     let e = explod(&m, 2);
     assert_eq!(e.facing, -owner_facing);
     assert_eq!(e.vfacing, -1.0);
-    assert_eq!((e.spr_priority, e.on_top, e.ignore_hit_pause, e.bind_time), (7, false, false, 5));
-    assert_eq!(explod(&m, 1).bind_time, 0, "ExplodBindTime does not touch other ids");
+    assert_eq!(
+        (e.spr_priority, e.on_top, e.ignore_hit_pause, e.bind_time),
+        (7, false, false, 5)
+    );
+    assert_eq!(
+        explod(&m, 1).bind_time,
+        0,
+        "ExplodBindTime does not touch other ids"
+    );
     enter(&mut m, 0, 310);
     ticks(&mut m, 1);
-    assert_eq!(explod(&m, 2).facing, -owner_facing, "a second ModifyExplod does not flip it back");
+    assert_eq!(
+        explod(&m, 2).facing,
+        -owner_facing,
+        "a second ModifyExplod does not flip it back"
+    );
     ticks(&mut m, 30);
-    assert!(m.explods.iter().all(|e| !(e.owner == m.fighters[0].id && e.id == 2)), "removetime = 30 removes it");
+    assert!(
+        m.explods
+            .iter()
+            .all(|e| !(e.owner == m.fighters[0].id && e.id == 2)),
+        "removetime = 30 removes it"
+    );
 }

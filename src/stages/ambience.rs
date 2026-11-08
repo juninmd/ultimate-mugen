@@ -82,12 +82,21 @@ pub struct Profile {
 }
 
 impl Profile {
-    pub const EMPTY: Profile = Profile { mist: &[], motes: &[], glows: &[], beams: &[] };
+    pub const EMPTY: Profile = Profile {
+        mist: &[],
+        motes: &[],
+        glows: &[],
+        beams: &[],
+    };
 
     /// Upper bound of polygons drawn per frame at full density; the budget test keeps every stage under `PRIMITIVE_BUDGET`.
     pub fn primitives(&self) -> usize {
         self.mist.iter().map(|m| m.blobs as usize).sum::<usize>()
-            + self.motes.iter().map(|m| m.count as usize * if m.kind == MoteKind::Bird { 2 } else { 1 }).sum::<usize>()
+            + self
+                .motes
+                .iter()
+                .map(|m| m.count as usize * if m.kind == MoteKind::Bird { 2 } else { 1 })
+                .sum::<usize>()
             + self.glows.len()
             + self.beams.len()
     }
@@ -109,14 +118,21 @@ mod tests {
     fn every_stage_profile_fits_the_primitive_budget() {
         for id in profiles::ALL_STAGE_IDS {
             let profile = profile_for(id);
-            assert!(profile.primitives() <= PRIMITIVE_BUDGET, "{id}: {} primitives", profile.primitives());
+            assert!(
+                profile.primitives() <= PRIMITIVE_BUDGET,
+                "{id}: {} primitives",
+                profile.primitives()
+            );
         }
     }
 
     #[test]
     fn every_builtin_illustration_has_a_living_profile() {
         for id in profiles::ALL_STAGE_IDS {
-            assert!(profile_for(id).primitives() > 0, "{id} has no ambient layers");
+            assert!(
+                profile_for(id).primitives() > 0,
+                "{id} has no ambient layers"
+            );
         }
     }
 
@@ -125,16 +141,42 @@ mod tests {
         for id in profiles::ALL_STAGE_IDS {
             let p = profile_for(id);
             for m in p.mist {
-                assert!((0.0..=1.0).contains(&m.v) && (0.0..=1.0).contains(&m.alpha) && m.blobs >= 1 && (0.0..=1.0).contains(&m.depth), "{id} mist {m:?}");
+                assert!(
+                    (0.0..=1.0).contains(&m.v)
+                        && (0.0..=1.0).contains(&m.alpha)
+                        && m.blobs >= 1
+                        && (0.0..=1.0).contains(&m.depth),
+                    "{id} mist {m:?}"
+                );
             }
             for m in p.motes {
-                assert!(m.band[0] < m.band[1] && m.band[0] >= 0.0 && m.band[1] <= 1.0 && (0.0..=1.0).contains(&m.alpha) && m.size > 0.0, "{id} motes {m:?}");
+                assert!(
+                    m.band[0] < m.band[1]
+                        && m.band[0] >= 0.0
+                        && m.band[1] <= 1.0
+                        && (0.0..=1.0).contains(&m.alpha)
+                        && m.size > 0.0,
+                    "{id} motes {m:?}"
+                );
             }
             for g in p.glows {
-                assert!((0.0..=1.0).contains(&g.u) && (0.0..=1.0).contains(&g.v) && g.radius > 0.0 && g.period > 0.0 && (0.0..=1.0).contains(&g.alpha), "{id} glow {g:?}");
+                assert!(
+                    (0.0..=1.0).contains(&g.u)
+                        && (0.0..=1.0).contains(&g.v)
+                        && g.radius > 0.0
+                        && g.period > 0.0
+                        && (0.0..=1.0).contains(&g.alpha),
+                    "{id} glow {g:?}"
+                );
             }
             for b in p.beams {
-                assert!((0.0..=1.0).contains(&b.u) && b.width > 0.0 && b.period > 0.0 && (0.0..=1.0).contains(&b.alpha), "{id} beam {b:?}");
+                assert!(
+                    (0.0..=1.0).contains(&b.u)
+                        && b.width > 0.0
+                        && b.period > 0.0
+                        && (0.0..=1.0).contains(&b.alpha),
+                    "{id} beam {b:?}"
+                );
             }
         }
     }

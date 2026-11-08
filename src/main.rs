@@ -20,6 +20,8 @@ mod postfx;
 mod registry;
 mod render;
 mod replays;
+#[cfg(not(target_arch = "wasm32"))]
+mod scan_report;
 mod screenpack;
 mod session;
 mod settings;
@@ -32,13 +34,11 @@ mod storage;
 mod texgen;
 mod ui;
 mod update;
-#[cfg(target_arch = "wasm32")]
-mod web_sprites;
-#[cfg(not(target_arch = "wasm32"))]
-mod scan_report;
 mod vfx;
 #[cfg(test)]
 mod vfx_camera_tests;
+#[cfg(target_arch = "wasm32")]
+mod web_sprites;
 
 use crate::gfx::*;
 
@@ -95,7 +95,8 @@ fn conf() -> WindowConf {
     }
     // a browser only grants fullscreen from a user gesture: never auto-request it there, the request would be
     // rejected and the window would end up believing it is fullscreen
-    let fullscreen = !cfg!(target_arch = "wasm32") && (st.fullscreen || args.iter().any(|a| a == "--fullscreen"));
+    let fullscreen = !cfg!(target_arch = "wasm32")
+        && (st.fullscreen || args.iter().any(|a| a == "--fullscreen"));
     ume_shell::Config {
         title: "Ultimate MUGEN".into(),
         width: w,
@@ -148,28 +149,49 @@ pub fn take_imports() -> Vec<Vec<u8>> {
 /// Query string of the page (`?p1=...)`, percent-decoded, for the web deep link.
 #[cfg(target_arch = "wasm32")]
 pub fn query_params() -> Vec<(String, String)> {
-    let Ok(location) = js_sys::Reflect::get(&js_sys::global(), &"location".into()) else { return vec![] };
-    let Ok(search) = js_sys::Reflect::get(&location, &"search".into()) else { return vec![] };
+    let Ok(location) = js_sys::Reflect::get(&js_sys::global(), &"location".into()) else {
+        return vec![];
+    };
+    let Ok(search) = js_sys::Reflect::get(&location, &"search".into()) else {
+        return vec![];
+    };
     let raw = search.as_string().unwrap_or_default();
-    raw.trim_start_matches('?').split('&').filter(|p| !p.is_empty()).map(|pair| {
-        let (k, v) = pair.split_once('=').unwrap_or((pair, ""));
-        (percent_decode(k), percent_decode(v))
-    }).collect()
+    raw.trim_start_matches('?')
+        .split('&')
+        .filter(|p| !p.is_empty())
+        .map(|pair| {
+            let (k, v) = pair.split_once('=').unwrap_or((pair, ""));
+            (percent_decode(k), percent_decode(v))
+        })
+        .collect()
 }
 
 /// Console log from Rust, used by the browser diagnostics (`?perf=1`).
 #[cfg(target_arch = "wasm32")]
 pub fn web_log(msg: &str) {
-    let Ok(console) = js_sys::Reflect::get(&js_sys::global(), &"console".into()) else { return };
-    let Ok(log) = js_sys::Reflect::get(&console, &"log".into()) else { return };
-    if let Some(f) = wasm_bindgen::JsCast::dyn_ref::<js_sys::Function>(&log) { let _ = f.call1(&console, &js_sys::JsString::from(msg)); }
+    let Ok(console) = js_sys::Reflect::get(&js_sys::global(), &"console".into()) else {
+        return;
+    };
+    let Ok(log) = js_sys::Reflect::get(&console, &"log".into()) else {
+        return;
+    };
+    if let Some(f) = wasm_bindgen::JsCast::dyn_ref::<js_sys::Function>(&log) {
+        let _ = f.call1(&console, &js_sys::JsString::from(msg));
+    }
 }
 
 fn perf_clock() -> f64 {
     #[cfg(target_arch = "wasm32")]
-    { js_sys::Date::now() }
+    {
+        js_sys::Date::now()
+    }
     #[cfg(not(target_arch = "wasm32"))]
-    { std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs_f64() * 1000.0).unwrap_or(0.0) }
+    {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs_f64() * 1000.0)
+            .unwrap_or(0.0)
+    }
 }
 
 pub fn init_perf() {
@@ -182,14 +204,20 @@ pub fn init_perf() {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn perf_log(msg: &str) { eprintln!("{msg}"); }
+fn perf_log(msg: &str) {
+    eprintln!("{msg}");
+}
 
 #[allow(dead_code)]
 pub fn perf_enabled() -> bool {
     #[cfg(target_arch = "wasm32")]
-    if query_params().iter().any(|(k, v)| k == "perf" && v != "0") { return true; }
+    if query_params().iter().any(|(k, v)| k == "perf" && v != "0") {
+        return true;
+    }
     #[cfg(not(target_arch = "wasm32"))]
-    if std::env::var("UME_TRACE").is_ok_and(|v| v != "0") { return true; }
+    if std::env::var("UME_TRACE").is_ok_and(|v| v != "0") {
+        return true;
+    }
     false
 }
 
@@ -201,11 +229,23 @@ fn percent_decode(s: &str) -> String {
     while i < b.len() {
         match b[i] {
             b'%' if i + 2 < b.len() => match u8::from_str_radix(&s[i + 1..i + 3], 16) {
-                Ok(v) => { out.push(v); i += 3; }
-                Err(_) => { out.push(b'%'); i += 1; }
+                Ok(v) => {
+                    out.push(v);
+                    i += 3;
+                }
+                Err(_) => {
+                    out.push(b'%');
+                    i += 1;
+                }
             },
-            b'+' => { out.push(b' '); i += 1; }
-            c => { out.push(c); i += 1; }
+            b'+' => {
+                out.push(b' ');
+                i += 1;
+            }
+            c => {
+                out.push(c);
+                i += 1;
+            }
         }
     }
     String::from_utf8_lossy(&out).into_owned()
@@ -223,17 +263,35 @@ async fn game() {
     let args: Vec<String> = std::env::args().collect();
     let has = |f: &str| args.iter().any(|a| a == f);
     init_perf();
-    let shots = args.iter().position(|a| a == "--shots").and_then(|i| args.get(i + 1)).cloned();
+    let shots = args
+        .iter()
+        .position(|a| a == "--shots")
+        .and_then(|i| args.get(i + 1))
+        .cloned();
     #[cfg(target_arch = "wasm32")]
     let touch_dev = ume_is_touch() != 0;
     #[cfg(not(target_arch = "wasm32"))]
     let touch_dev = cfg!(any(target_os = "android", target_os = "ios"));
-    let mut app = app::App::new(has("--touch") || touch_dev, (shots.is_none() || has("--shots-audio")) && !has("--mute")).await;
+    let mut app = app::App::new(
+        has("--touch") || touch_dev,
+        (shots.is_none() || has("--shots-audio")) && !has("--mute"),
+    )
+    .await;
     #[cfg(target_arch = "wasm32")]
     app.apply_deep_link();
     #[cfg(target_arch = "wasm32")]
-    crate::web_sprites::prefetch_roster(app.reg.chars.iter().filter(|entry| !entry.mugen).map(|entry| entry.id.trim_start_matches("umf:").to_string()).collect());
-    if let Some(dir) = shots { shots::run(&mut app, &dir).await; return; }
+    crate::web_sprites::prefetch_roster(
+        app.reg
+            .chars
+            .iter()
+            .filter(|entry| !entry.mugen)
+            .map(|entry| entry.id.trim_start_matches("umf:").to_string())
+            .collect(),
+    );
+    if let Some(dir) = shots {
+        shots::run(&mut app, &dir).await;
+        return;
+    }
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     match netlink::NetArgs::parse(&args) {
         Ok(Some(n)) => app.start_netplay(&n).await,

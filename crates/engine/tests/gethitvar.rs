@@ -51,7 +51,9 @@ anim = 5000
 ctrl = 0
 ";
 
-fn ghv(m: &Match, i: usize, k: &str) -> f64 { m.ev(i, &Expr::new(parse(&format!("GetHitVar({k})")).unwrap())) }
+fn ghv(m: &Match, i: usize, k: &str) -> f64 {
+    m.ev(i, &Expr::new(parse(&format!("GetHitVar({k})")).unwrap()))
+}
 
 fn after_hit() -> Match {
     let mut m = duel(mugen_char("p1", ATTACKER), mugen_char("p2", ""));
@@ -67,12 +69,36 @@ fn every_parameter_reports_the_hitdef_after_a_hit() {
     let m = after_hit();
     let attacker_id = m.fighters[0].id as f64;
     let table: [(&str, f64); 30] = [
-        ("damage", 30.0), ("hitdamage", 30.0), ("guarddamage", 5.0), ("priority", 5.0), ("facing", 1.0),
-        ("power", 15.0), ("hitpower", 40.0), ("guardpower", 20.0), ("attr", 65.0), ("guardflag", 7.0),
-        ("dizzypoints", 25.0), ("guardpoints", 12.0), ("redlife", 18.0), ("score", 3.0), ("teamside", 1.0),
-        ("projid", -1.0), ("playerid", attacker_id), ("id", attacker_id), ("p1stateno", 210.0), ("p2stateno", 5100.0),
-        ("down.recover", 0.0), ("fall", 1.0), ("fall.recover", 1.0), ("fall.recovertime", 10.0), ("guarded", 0.0),
-        ("hitcount", 1.0), ("guardcount", 0.0), ("hittime", 12.0), ("isbound", 0.0), ("playerno", m.fighters[0].player_no as f64),
+        ("damage", 30.0),
+        ("hitdamage", 30.0),
+        ("guarddamage", 5.0),
+        ("priority", 5.0),
+        ("facing", 1.0),
+        ("power", 15.0),
+        ("hitpower", 40.0),
+        ("guardpower", 20.0),
+        ("attr", 65.0),
+        ("guardflag", 7.0),
+        ("dizzypoints", 25.0),
+        ("guardpoints", 12.0),
+        ("redlife", 18.0),
+        ("score", 3.0),
+        ("teamside", 1.0),
+        ("projid", -1.0),
+        ("playerid", attacker_id),
+        ("id", attacker_id),
+        ("p1stateno", 210.0),
+        ("p2stateno", 5100.0),
+        ("down.recover", 0.0),
+        ("fall", 1.0),
+        ("fall.recover", 1.0),
+        ("fall.recovertime", 10.0),
+        ("guarded", 0.0),
+        ("hitcount", 1.0),
+        ("guardcount", 0.0),
+        ("hittime", 12.0),
+        ("isbound", 0.0),
+        ("playerno", m.fighters[0].player_no as f64),
     ];
     for (name, want) in table {
         assert_eq!(ghv(&m, 1, name), want, "GetHitVar({name})");
@@ -90,7 +116,10 @@ fn recover_time_counts_down_from_the_hitdef_value() {
 
 #[test]
 fn recover_time_is_zero_without_a_fall() {
-    let mut m = duel(mugen_char("p1", &ATTACKER.replace("fall = 1", "fall = 0")), mugen_char("p2", ""));
+    let mut m = duel(
+        mugen_char("p1", &ATTACKER.replace("fall = 1", "fall = 0")),
+        mugen_char("p2", ""),
+    );
     face_off(&mut m, 40.0);
     enter(&mut m, 0, 200);
     ticks(&mut m, 4);
@@ -100,7 +129,13 @@ fn recover_time_is_zero_without_a_fall() {
 #[test]
 fn isbound_follows_the_live_bind() {
     let mut m = after_hit();
-    m.fighters[1].bind = Some(Bind { to: m.fighters[0].id, time: 5, x: 0.0, y: 0.0, kind: BindKind::Target });
+    m.fighters[1].bind = Some(Bind {
+        to: m.fighters[0].id,
+        time: 5,
+        x: 0.0,
+        y: 0.0,
+        kind: BindKind::Target,
+    });
     assert_eq!(ghv(&m, 1, "isbound"), 1.0);
 }
 
@@ -114,7 +149,14 @@ fn unknown_parameters_evaluate_to_zero() {
 #[test]
 fn defaults_before_any_hit_are_neutral() {
     let m = duel(mugen_char("a", ""), mugen_char("b", ""));
-    for name in ["hitdamage", "priority", "attr", "score", "teamside", "power"] {
+    for name in [
+        "hitdamage",
+        "priority",
+        "attr",
+        "score",
+        "teamside",
+        "power",
+    ] {
         assert_eq!(ghv(&m, 0, name), 0.0, "GetHitVar({name})");
     }
     assert_eq!(ghv(&m, 0, "down.recover"), 1.0);

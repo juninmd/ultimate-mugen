@@ -75,8 +75,12 @@ impl Hud {
             }
             alive_fallback.or(first)
         };
-        let Some(r0) = main_of(0) else { return; };
-        let Some(r1) = main_of(1) else { return; };
+        let Some(r0) = main_of(0) else {
+            return;
+        };
+        let Some(r1) = main_of(1) else {
+            return;
+        };
         let roots = [r0, r1];
         let partners: Vec<&Fighter> = if m.fighters.len() > 2 {
             m.roots()
@@ -1361,4 +1365,3 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
     }
     let _ = (s, frame, col);
 }
-

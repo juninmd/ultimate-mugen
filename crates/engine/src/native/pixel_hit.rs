@@ -10,11 +10,20 @@ const BACK_STRIKE_CENTER: f32 = -0.30;
 pub const HIGHEST_TOP: f32 = -0.95;
 
 pub fn standing_height(nc: &NativeChar) -> f32 {
-    let declared = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(100.0) as f32;
+    let declared = nc
+        .stats
+        .height
+        .filter(|height| height.is_finite() && *height > 0.0)
+        .unwrap_or(100.0) as f32;
     STANDING_UNITS * declared / 100.0
 }
 
-pub(super) fn fit_to_character(nc: &NativeChar, fr: &NativeFrame, render: &mut RigRender, height_ratio: f32) {
+pub(super) fn fit_to_character(
+    nc: &NativeChar,
+    fr: &NativeFrame,
+    render: &mut RigRender,
+    height_ratio: f32,
+) {
     if let Some(boxes) = declared_strike_boxes(nc, fr) {
         render.hit = boxes;
     }
@@ -39,11 +48,21 @@ fn declared_strike_boxes(nc: &NativeChar, fr: &NativeFrame) -> Option<Vec<Box4>>
     };
     let mut geometry = render_pose(&nc.art.style, &pose, Some(active), false, None);
     if geometry.hit.is_empty() {
-        let leading_limb = ActiveSpec { part: "handF".into(), radius: active.radius, bx: None };
+        let leading_limb = ActiveSpec {
+            part: "handF".into(),
+            radius: active.radius,
+            bx: None,
+        };
         geometry = render_pose(&nc.art.style, &pose, Some(&leading_limb), false, None);
     }
     let height = standing_height(nc);
-    (!geometry.hit.is_empty()).then(|| geometry.hit.into_iter().map(|tip| playable_strike_box(tip, height)).collect())
+    (!geometry.hit.is_empty()).then(|| {
+        geometry
+            .hit
+            .into_iter()
+            .map(|tip| playable_strike_box(tip, height))
+            .collect()
+    })
 }
 
 pub fn playable_strike_box(mut bounds: Box4, height: f32) -> Box4 {

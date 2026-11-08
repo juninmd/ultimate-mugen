@@ -11,7 +11,10 @@ impl App {
                 if !self.reg.chars[i].boss {
                     true
                 } else {
-                    let id = self.reg.chars[i].id.strip_prefix("umf:").unwrap_or(&self.reg.chars[i].id);
+                    let id = self.reg.chars[i]
+                        .id
+                        .strip_prefix("umf:")
+                        .unwrap_or(&self.reg.chars[i].id);
                     self.boss_progression.is_unlocked(id)
                 }
             })
@@ -19,9 +22,11 @@ impl App {
     }
 
     pub(crate) fn player_char_id(&self) -> String {
-        self.reg.chars.get(self.sel.0).map(|c| {
-            c.id.strip_prefix("umf:").unwrap_or(&c.id).to_string()
-        }).unwrap_or_default()
+        self.reg
+            .chars
+            .get(self.sel.0)
+            .map(|c| c.id.strip_prefix("umf:").unwrap_or(&c.id).to_string())
+            .unwrap_or_default()
     }
 
     pub(crate) fn boss_idx(&self) -> Option<usize> {
@@ -29,18 +34,29 @@ impl App {
         let target = self.boss_progression.current_boss_id(&player);
         (0..self.reg.chars.len())
             .find(|&i| {
-                let id = self.reg.chars[i].id.strip_prefix("umf:").unwrap_or(&self.reg.chars[i].id);
+                let id = self.reg.chars[i]
+                    .id
+                    .strip_prefix("umf:")
+                    .unwrap_or(&self.reg.chars[i].id);
                 id == target && !self.reg.chars[i].broken.get()
             })
             .or_else(|| {
-                (0..self.reg.chars.len()).find(|&i| self.reg.chars[i].boss && !self.reg.chars[i].broken.get())
+                (0..self.reg.chars.len())
+                    .find(|&i| self.reg.chars[i].boss && !self.reg.chars[i].broken.get())
             })
     }
 
     pub(crate) fn boss_stage_idx(&self, boss_char_idx: usize) -> usize {
-        let id = self.reg.chars[boss_char_idx].id.strip_prefix("umf:").unwrap_or(&self.reg.chars[boss_char_idx].id);
+        let id = self.reg.chars[boss_char_idx]
+            .id
+            .strip_prefix("umf:")
+            .unwrap_or(&self.reg.chars[boss_char_idx].id);
         let target_stage = crate::boss::BossProgression::boss_stage(id);
-        self.reg.stages.iter().position(|s| s.id.contains(target_stage)).unwrap_or(1)
+        self.reg
+            .stages
+            .iter()
+            .position(|s| s.id.contains(target_stage))
+            .unwrap_or(1)
     }
 
     pub(crate) fn arcade_return_to_select(&mut self) -> Screen {
@@ -51,7 +67,10 @@ impl App {
         self.arcade = None;
         let mut cur_p1 = self.sel.0;
         if let Some(oboro) = (0..self.reg.chars.len()).find(|&i| {
-            let id = self.reg.chars[i].id.strip_prefix("umf:").unwrap_or(&self.reg.chars[i].id);
+            let id = self.reg.chars[i]
+                .id
+                .strip_prefix("umf:")
+                .unwrap_or(&self.reg.chars[i].id);
             id == "oboro" && self.boss_progression.is_unlocked(id)
         }) {
             if self.boss_progression.clears == 1 {
@@ -76,9 +95,13 @@ impl App {
                     && Some(i) != mate
                     && !self.reg.chars[i].broken.get()
                     && Some(i) != boss
-                    && (!self.reg.chars[i].boss || self.boss_progression.is_unlocked(
-                        self.reg.chars[i].id.strip_prefix("umf:").unwrap_or(&self.reg.chars[i].id)
-                    ))
+                    && (!self.reg.chars[i].boss
+                        || self.boss_progression.is_unlocked(
+                            self.reg.chars[i]
+                                .id
+                                .strip_prefix("umf:")
+                                .unwrap_or(&self.reg.chars[i].id),
+                        ))
             })
             .collect();
         let seed = (get_time() * 1000.0) as usize;
@@ -90,7 +113,10 @@ impl App {
             ladder.push(me);
         }
         let is_oboro = boss.is_some_and(|b| {
-            let id = self.reg.chars[b].id.strip_prefix("umf:").unwrap_or(&self.reg.chars[b].id);
+            let id = self.reg.chars[b]
+                .id
+                .strip_prefix("umf:")
+                .unwrap_or(&self.reg.chars[b].id);
             id == "oboro"
         });
         let has_boss = boss
@@ -129,11 +155,31 @@ impl App {
             let (tw, th) = (760.0, 72.0);
             let tx = (screen_width() - tw) / 2.0;
             let ty = 32.0;
-            self.ui.rect(tx, ty, tw, th, Color::new(0.04, 0.02, 0.08, 0.94));
+            self.ui
+                .rect(tx, ty, tw, th, Color::new(0.04, 0.02, 0.08, 0.94));
             self.ui.rect_lines(tx, ty, tw, th, 2.0, hex("#ffcc33"));
-            self.ui.text_bold(&toast.title, tx + tw / 2.0, ty + 28.0, 22.0, hex("#ffcc33"), BLACK, Align::Center);
-            self.ui.text(&toast.subtitle, tx + tw / 2.0, ty + 54.0, 16.0, WHITE, Align::Center, false);
-            if self.c.pressed(nav::OK | nav::START | nav::UP | nav::DOWN | nav::LEFT | nav::RIGHT) {
+            self.ui.text_bold(
+                &toast.title,
+                tx + tw / 2.0,
+                ty + 28.0,
+                22.0,
+                hex("#ffcc33"),
+                BLACK,
+                Align::Center,
+            );
+            self.ui.text(
+                &toast.subtitle,
+                tx + tw / 2.0,
+                ty + 54.0,
+                16.0,
+                WHITE,
+                Align::Center,
+                false,
+            );
+            if self
+                .c
+                .pressed(nav::OK | nav::START | nav::UP | nav::DOWN | nav::LEFT | nav::RIGHT)
+            {
                 self.boss_progression.toast = None;
             }
         }

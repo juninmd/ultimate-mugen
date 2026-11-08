@@ -9,9 +9,13 @@ use ume_engine::stage_bg::BgState;
 use ume_formats::stage::load_stage;
 use ume_formats::vfs::Vfs;
 
-fn ev(m: &Match, i: usize, src: &str) -> f64 { m.ev(i, &Expr::new(parse(src).unwrap())) }
+fn ev(m: &Match, i: usize, src: &str) -> f64 {
+    m.ev(i, &Expr::new(parse(src).unwrap()))
+}
 
-fn near(a: f64, b: f64) -> bool { (a - b).abs() < 1e-2 }
+fn near(a: f64, b: f64) -> bool {
+    (a - b).abs() < 1e-2
+}
 
 fn hd_char() -> Arc<CharDef> {
     let mut d = Arc::try_unwrap(mugen_char("hd", "")).ok().unwrap();
@@ -20,7 +24,9 @@ fn hd_char() -> Arc<CharDef> {
     Arc::new(d)
 }
 
-fn field() -> Match { duel(mugen_char("sd", ""), hd_char()) }
+fn field() -> Match {
+    duel(mugen_char("sd", ""), hd_char())
+}
 
 #[test]
 fn screen_size_is_the_visible_area_in_each_localcoord() {
@@ -74,8 +80,14 @@ fn stage_edge_distances_follow_facing_and_the_stage_bounds() {
 #[test]
 fn localcoord_components_and_the_1080p_constant() {
     let m = field();
-    assert_eq!((ev(&m, 0, "LocalCoord X"), ev(&m, 0, "LocalCoord Y")), (320.0, 240.0));
-    assert_eq!((ev(&m, 1, "LocalCoord X"), ev(&m, 1, "LocalCoord Y")), (1280.0, 720.0));
+    assert_eq!(
+        (ev(&m, 0, "LocalCoord X"), ev(&m, 0, "LocalCoord Y")),
+        (320.0, 240.0)
+    );
+    assert_eq!(
+        (ev(&m, 1, "LocalCoord X"), ev(&m, 1, "LocalCoord Y")),
+        (1280.0, 720.0)
+    );
     assert!(near(ev(&m, 1, "Const1080p(30)"), 30.0 * 1280.0 / 1920.0));
     assert!(near(ev(&m, 0, "Const1080p(60)"), 10.0));
 }
@@ -109,7 +121,9 @@ fn bg_match() -> Match {
     let mut v = Vfs::new();
     v.insert("stages/b.def".into(), BG_DEF.as_bytes().to_vec());
     let mut m = field();
-    m.bg = Some(BgState::new(Arc::new(load_stage(&v, "stages/b.def").unwrap())));
+    m.bg = Some(BgState::new(Arc::new(
+        load_stage(&v, "stages/b.def").unwrap(),
+    )));
     m
 }
 
@@ -124,7 +138,9 @@ fn stage_background_queries() {
     assert_eq!(ev(&m, 0, "StageBGVar(3,layerno)"), 1.0);
     assert_eq!(ev(&m, 0, "StageBGVar(3,sprite.group)"), 5.0);
     assert_eq!(ev(&m, 0, "StageBGVar(3,pos.x)"), 10.0);
-    for _ in 0..3 { m.bg.as_mut().unwrap().step(); }
+    for _ in 0..3 {
+        m.bg.as_mut().unwrap().step();
+    }
     assert_eq!(ev(&m, 0, "StageBGVar(3,pos.x)"), 13.0);
     assert_eq!(ev(&m, 0, "StageBGVar(3,velocity.x)"), 1.0);
     assert_eq!(ev(&m, 0, "StageBGVar(9,pos.x)"), 0.0);
@@ -155,5 +171,13 @@ fn drawing_state_triggers_read_the_fighter() {
     assert_eq!((ev(&m, 0, "Scale X"), ev(&m, 0, "Scale Y")), (1.5, 2.0));
     assert_eq!((ev(&m, 0, "Alpha X"), ev(&m, 0, "Alpha Y")), (200.0, 100.0));
     assert_eq!(ev(&m, 0, "SprPriority"), 3.0);
-    assert_eq!((ev(&m, 0, "XAngle"), ev(&m, 0, "YAngle"), ev(&m, 0, "XShear"), ev(&m, 0, "LayerNo")), (0.0, 0.0, 0.0, 0.0));
+    assert_eq!(
+        (
+            ev(&m, 0, "XAngle"),
+            ev(&m, 0, "YAngle"),
+            ev(&m, 0, "XShear"),
+            ev(&m, 0, "LayerNo")
+        ),
+        (0.0, 0.0, 0.0, 0.0)
+    );
 }

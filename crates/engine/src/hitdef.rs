@@ -146,17 +146,19 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     } else {
         1.3 * guard_vel
     };
-    let parse_shake = |time_k: &str, freq_k: &str, ampl_k: &str, phase_k: &str, dir_k: &str, time_default: f64| -> Shake {
+    let parse_shake = |time_k: &str,
+                       freq_k: &str,
+                       ampl_k: &str,
+                       phase_k: &str,
+                       dir_k: &str,
+                       time_default: f64|
+     -> Shake {
         let freq = num(freq_k, 60.0, 0).clamp(0.0, 180.0);
         Shake {
             time: num(time_k, time_default, 0) as i32,
             freq,
             ampl: num(ampl_k, -4.0, 0) * l,
-            phase: num(
-                phase_k,
-                if freq >= 90.0 { 90.0 } else { 0.0 },
-                0,
-            ),
+            phase: num(phase_k, if freq >= 90.0 { 90.0 } else { 0.0 }, 0),
             dir: (num(dir_k, 0.0, 0) as u8).min(2),
         }
     };
@@ -371,8 +373,22 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
             ght
         },
         down_bounce: num("down.bounce", 0.0, 0) != 0.0,
-        fall_env_shake: parse_shake("fall.envshake.time", "fall.envshake.freq", "fall.envshake.ampl", "fall.envshake.phase", "fall.envshake.dir", 0.0),
-        env_shake: parse_shake("envshake.time", "envshake.freq", "envshake.ampl", "envshake.phase", "envshake.dir", 0.0),
+        fall_env_shake: parse_shake(
+            "fall.envshake.time",
+            "fall.envshake.freq",
+            "fall.envshake.ampl",
+            "fall.envshake.phase",
+            "fall.envshake.dir",
+            0.0,
+        ),
+        env_shake: parse_shake(
+            "envshake.time",
+            "envshake.freq",
+            "envshake.ampl",
+            "envshake.phase",
+            "envshake.dir",
+            0.0,
+        ),
         ground_corner_push,
         air_corner_push: if has("air.cornerpush.veloff", 0) {
             num("air.cornerpush.veloff", 0.0, 0) * l

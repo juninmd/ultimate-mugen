@@ -28,13 +28,24 @@ fn load(def: &str) -> ume_formats::stage::MugenStage {
 #[test]
 fn missing_camera_parameters_keep_the_previous_behaviour() {
     let st = load("[Camera]\nboundhigh = -40\n\n[BGdef]\n");
-    assert_eq!((st.vertical_follow_delta, st.y_scroll_speed, st.zoom_in_speed, st.zoom_out_speed), (0.0, 0.3, 0.04, 0.04));
+    assert_eq!(
+        (
+            st.vertical_follow_delta,
+            st.y_scroll_speed,
+            st.zoom_in_speed,
+            st.zoom_out_speed
+        ),
+        (0.0, 0.3, 0.04, 0.04)
+    );
     assert!(!st.lowest_cap && !st.dynamic_bound_high && st.auto_turn);
     assert_eq!(st.bound_high_delta, 0.0);
     let mut m = field();
     lift(&mut m, -30.0);
     m.update_camera();
-    assert!((m.camera.y + 9.0).abs() < 1e-4, "0.3 of the way to the target, no jump");
+    assert!(
+        (m.camera.y + 9.0).abs() < 1e-4,
+        "0.3 of the way to the target, no jump"
+    );
 }
 
 #[test]
@@ -120,13 +131,19 @@ fn zoom_speeds_are_clamped_and_directional() {
     m.stage.camera.zoom_out_speed = 7.0;
     m.update_camera();
     let target = (500.0 + 150.0) / ume_engine::matchs::BASE_W;
-    assert!((m.zoom - target).abs() < 1e-4, "speeds above 1 clamp to a one-tick snap");
+    assert!(
+        (m.zoom - target).abs() < 1e-4,
+        "speeds above 1 clamp to a one-tick snap"
+    );
     m.fighters[0].pos.x = -20.0;
     m.fighters[1].pos.x = 20.0;
     m.stage.camera.zoom_in_speed = 0.0;
     let held = m.zoom;
     m.update_camera();
-    assert_eq!(m.zoom, held, "zoom-in speed is separate from zoom-out speed");
+    assert_eq!(
+        m.zoom, held,
+        "zoom-in speed is separate from zoom-out speed"
+    );
     m.stage.camera.zoom_in_speed = 1.0;
     m.update_camera();
     assert!((m.zoom - m.zoom_min).abs() < 1e-4);
@@ -157,7 +174,11 @@ fn a_cornered_fighter_holds_still_while_the_opponent_closes_in() {
     for _ in 0..140 {
         m.fighters[1].pos.x -= 1.0;
         m.update_camera();
-        assert!((m.fighters[0].pos.x - m.camera.x - screen_x).abs() < 1e-3, "the cornered fighter drifted to {}", m.fighters[0].pos.x - m.camera.x);
+        assert!(
+            (m.fighters[0].pos.x - m.camera.x - screen_x).abs() < 1e-3,
+            "the cornered fighter drifted to {}",
+            m.fighters[0].pos.x - m.camera.x
+        );
     }
 }
 
@@ -172,15 +193,26 @@ fn the_camera_pans_until_a_fighter_leaves_the_tension_band() {
         m.update_camera();
     }
     let screen_x = m.fighters[0].pos.x - m.camera.x + half;
-    assert!((screen_x - m.stage.tension).abs() < 1e-2, "expected tension {0} px from the edge, got {screen_x}", m.stage.tension);
+    assert!(
+        (screen_x - m.stage.tension).abs() < 1e-2,
+        "expected tension {0} px from the edge, got {screen_x}",
+        m.stage.tension
+    );
 }
 
 #[test]
 fn stagevar_reports_the_camera_parameters() {
-    let st = Arc::new(load("[Camera]\nverticalfollowdelta = 4\nzoominspeed = 0.1\nlowestcap = 1\n\n[BGdef]\n"));
+    let st = Arc::new(load(
+        "[Camera]\nverticalfollowdelta = 4\nzoominspeed = 0.1\nlowestcap = 1\n\n[BGdef]\n",
+    ));
     let mut m = duel(mugen_char("a", ""), mugen_char("b", ""));
     m.bg = Some(ume_engine::stage_bg::BgState::new(st));
-    let ev = |src: &str| m.ev(0, &ume_engine::expr::Expr::new(ume_engine::expr::parse(src).unwrap()));
+    let ev = |src: &str| {
+        m.ev(
+            0,
+            &ume_engine::expr::Expr::new(ume_engine::expr::parse(src).unwrap()),
+        )
+    };
     assert_eq!(ev("StageVar(camera.verticalfollowdelta)"), 4.0);
     assert!((ev("StageVar(camera.zoominspeed)") - 0.1).abs() < 1e-6);
     assert_eq!(ev("StageVar(camera.lowestcap)"), 1.0);

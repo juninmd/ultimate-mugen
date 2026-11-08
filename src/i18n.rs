@@ -19,13 +19,23 @@ pub fn set(l: Lang) {
     CURRENT.store(if l == Lang::En { 1 } else { 0 }, Ordering::Relaxed);
 }
 pub fn get() -> Lang {
-    if CURRENT.load(Ordering::Relaxed) == 1 { Lang::En } else { Lang::Pt }
+    if CURRENT.load(Ordering::Relaxed) == 1 {
+        Lang::En
+    } else {
+        Lang::Pt
+    }
 }
-pub fn default_lang() -> Lang { Lang::En }
+pub fn default_lang() -> Lang {
+    Lang::En
+}
 
 /// Legacy helper: pick one of two literals. Prefer `t(key)` in new code.
 pub fn tr<'a>(pt: &'a str, en: &'a str) -> &'a str {
-    if get() == Lang::En { en } else { pt }
+    if get() == Lang::En {
+        en
+    } else {
+        pt
+    }
 }
 
 /// Translate a catalog key. Unknown keys fall back to English, then to the key itself.

@@ -4,13 +4,47 @@ use crate::hitdef::build;
 use crate::matchs::Match;
 
 const HIT_VAR_KEYS: &[&str] = &[
-    "hittype", "animtype", "airtype", "groundtype", "damage", "hitcount", "guardcount", "hitshaketime", "hittime", "slidetime", "ctrltime",
-    "xvel", "yvel", "yaccel", "chainid", "guarded", "fall", "fall.damage", "fall.xvel", "fall.yvel", "fall.recover", "fall.time",
-    "fall.recovertime", "fall.kill", "kill", "id", "playerno", "xaccel", "down.recover", "dizzypoints", "guardpoints", "redlife", "score",
+    "hittype",
+    "animtype",
+    "airtype",
+    "groundtype",
+    "damage",
+    "hitcount",
+    "guardcount",
+    "hitshaketime",
+    "hittime",
+    "slidetime",
+    "ctrltime",
+    "xvel",
+    "yvel",
+    "yaccel",
+    "chainid",
+    "guarded",
+    "fall",
+    "fall.damage",
+    "fall.xvel",
+    "fall.yvel",
+    "fall.recover",
+    "fall.time",
+    "fall.recovertime",
+    "fall.kill",
+    "kill",
+    "id",
+    "playerno",
+    "xaccel",
+    "down.recover",
+    "dizzypoints",
+    "guardpoints",
+    "redlife",
+    "score",
 ];
 
 pub fn get_hit_var_set(m: &mut Match, i: usize, sc: &Controller) {
-    let sets: Vec<(&str, f64)> = HIT_VAR_KEYS.iter().filter(|k| sc.has(k, 0)).map(|k| (*k, m.num(i, sc, k, 0.0, 0))).collect();
+    let sets: Vec<(&str, f64)> = HIT_VAR_KEYS
+        .iter()
+        .filter(|k| sc.has(k, 0))
+        .map(|k| (*k, m.num(i, sc, k, 0.0, 0)))
+        .collect();
     let f = &mut m.fighters[i];
     let l = f.lscl;
     for (k, v) in sets {
@@ -56,7 +90,8 @@ pub fn get_hit_var_set(m: &mut Match, i: usize, sc: &Controller) {
 }
 
 fn shake_key(prefix: &str, key: &str) -> bool {
-    key.strip_prefix(prefix).is_some_and(|rest| matches!(rest, ".time" | ".freq" | ".ampl" | ".phase" | ".dir"))
+    key.strip_prefix(prefix)
+        .is_some_and(|rest| matches!(rest, ".time" | ".freq" | ".ampl" | ".phase" | ".dir"))
 }
 
 fn copy_shake(dst: &mut Shake, src: &Shake, key: &str, prefix: &str) {
@@ -77,21 +112,47 @@ pub fn merge_hitdef(dst: &mut HitDefData, src: &HitDefData, sc: &Controller) {
     for (key, _) in &sc.params {
         let k = key.as_str();
         copy_shake(&mut dst.env_shake, &src.env_shake, k, "envshake");
-        copy_shake(&mut dst.fall_env_shake, &src.fall_env_shake, k, "fall.envshake");
+        copy_shake(
+            &mut dst.fall_env_shake,
+            &src.fall_env_shake,
+            k,
+            "fall.envshake",
+        );
         match k {
-            "attr" => { dst.attr_state = src.attr_state.clone(); dst.attr_kind = src.attr_kind.clone(); }
+            "attr" => {
+                dst.attr_state = src.attr_state.clone();
+                dst.attr_kind = src.attr_kind.clone();
+            }
             "hitflag" => dst.hitflag = src.hitflag.clone(),
             "guardflag" => dst.guardflag = src.guardflag.clone(),
             "animtype" => dst.animtype = src.animtype,
             "air.animtype" => dst.air_animtype = src.air_animtype,
             "fall.animtype" => dst.fall_animtype = src.fall_animtype,
             "priority" => dst.priority = src.priority,
-            "damage" => { dst.damage = src.damage; dst.guard_damage = src.guard_damage; }
-            "pausetime" => { dst.pause_p1 = src.pause_p1; dst.pause_p2 = src.pause_p2; }
-            "guard.pausetime" => { dst.guard_pause_p1 = src.guard_pause_p1; dst.guard_pause_p2 = src.guard_pause_p2; }
-            "sparkno" => { dst.spark_no = src.spark_no; dst.spark_own = src.spark_own; }
-            "guard.sparkno" => { dst.guard_spark_no = src.guard_spark_no; dst.guard_spark_own = src.guard_spark_own; }
-            "sparkxy" => { dst.spark_x = src.spark_x; dst.spark_y = src.spark_y; }
+            "damage" => {
+                dst.damage = src.damage;
+                dst.guard_damage = src.guard_damage;
+            }
+            "pausetime" => {
+                dst.pause_p1 = src.pause_p1;
+                dst.pause_p2 = src.pause_p2;
+            }
+            "guard.pausetime" => {
+                dst.guard_pause_p1 = src.guard_pause_p1;
+                dst.guard_pause_p2 = src.guard_pause_p2;
+            }
+            "sparkno" => {
+                dst.spark_no = src.spark_no;
+                dst.spark_own = src.spark_own;
+            }
+            "guard.sparkno" => {
+                dst.guard_spark_no = src.guard_spark_no;
+                dst.guard_spark_own = src.guard_spark_own;
+            }
+            "sparkxy" => {
+                dst.spark_x = src.spark_x;
+                dst.spark_y = src.spark_y;
+            }
             "hitsound" => dst.hit_sound = src.hit_sound,
             "guardsound" => dst.guard_sound = src.guard_sound,
             "ground.type" => dst.ground_type = src.ground_type,
@@ -129,8 +190,14 @@ pub fn merge_hitdef(dst: &mut HitDefData, src: &HitDefData, sc: &Controller) {
             "fall.kill" => dst.fall_kill = src.fall_kill,
             "kill" => dst.kill = src.kill,
             "guard.kill" => dst.guard_kill = src.guard_kill,
-            "getpower" => { dst.get_power = src.get_power; dst.guard_get_power = src.guard_get_power; }
-            "givepower" => { dst.give_power = src.give_power; dst.guard_give_power = src.guard_give_power; }
+            "getpower" => {
+                dst.get_power = src.get_power;
+                dst.guard_get_power = src.guard_get_power;
+            }
+            "givepower" => {
+                dst.give_power = src.give_power;
+                dst.guard_give_power = src.guard_give_power;
+            }
             "id" => dst.id = src.id,
             "chainid" => dst.chain_id = src.chain_id,
             "nochainid" => dst.no_chain_id = src.no_chain_id,

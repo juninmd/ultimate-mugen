@@ -31,7 +31,9 @@ fn simul_one_versus_two() -> Match {
     m.team_simul = true;
     m.start_round();
     for _ in 0..600 {
-        if m.round_state == 2 { break; }
+        if m.round_state == 2 {
+            break;
+        }
         m.tick(&[0, 0]);
     }
     m
@@ -39,7 +41,13 @@ fn simul_one_versus_two() -> Match {
 
 fn strike(m: &mut Match, target: usize) -> f32 {
     for (k, f) in m.fighters.iter_mut().enumerate() {
-        let x = if k == 0 { 0.0 } else if k == target { 55.0 } else { 900.0 };
+        let x = if k == 0 {
+            0.0
+        } else if k == target {
+            55.0
+        } else {
+            900.0
+        };
         f.pos.x = x;
     }
     m.fighters[0].facing = 1.0;
@@ -49,7 +57,9 @@ fn strike(m: &mut Match, target: usize) -> f32 {
     m.change_state(0, 200, d);
     for _ in 0..40 {
         m.tick(&[0, 0]);
-        if m.fighters[target].life < before { break; }
+        if m.fighters[target].life < before {
+            break;
+        }
     }
     before - m.fighters[target].life
 }
@@ -62,8 +72,16 @@ fn combo_damage_belongs_to_the_defender_being_hit() {
     let second = strike(&mut m, 2);
     assert!(second > 0.0, "the hit on the other defender landed");
     assert_eq!(m.fighters[0].combo_target, Some(m.fighters[2].id));
-    assert!((m.fighters[0].combo_damage - second).abs() < 0.001, "combo damage shows only the current defender: {} vs {}", m.fighters[0].combo_damage, second);
-    assert!((m.fighters[0].combo_damage - (first + second)).abs() > 0.001, "damage from the previous defender is not carried over");
+    assert!(
+        (m.fighters[0].combo_damage - second).abs() < 0.001,
+        "combo damage shows only the current defender: {} vs {}",
+        m.fighters[0].combo_damage,
+        second
+    );
+    assert!(
+        (m.fighters[0].combo_damage - (first + second)).abs() > 0.001,
+        "damage from the previous defender is not carried over"
+    );
 }
 
 #[test]
@@ -71,7 +89,9 @@ fn combo_accumulator_clears_after_the_window() {
     let mut m = simul_one_versus_two();
     let first = strike(&mut m, 1);
     assert!((m.fighters[0].combo_damage - first).abs() < 0.001);
-    for _ in 0..(ume_engine::matchs::COMBO_WINDOW + 2) { m.tick(&[0, 0]); }
+    for _ in 0..(ume_engine::matchs::COMBO_WINDOW + 2) {
+        m.tick(&[0, 0]);
+    }
     assert_eq!(m.fighters[0].combo_count, 0);
     assert_eq!(m.fighters[0].combo_damage, 0.0);
     assert_eq!(m.fighters[0].combo_target, None);
@@ -100,11 +120,21 @@ ground.hittime = 10
     let mut m = duel(mugen_char("a", stats), mugen_char("b", ""));
     face_off(&mut m, 55.0);
     enter(&mut m, 0, 200);
-    for _ in 0..40 { m.tick(&[0, 0]); if m.fighters[1].received_hits > 0 { break; } }
+    for _ in 0..40 {
+        m.tick(&[0, 0]);
+        if m.fighters[1].received_hits > 0 {
+            break;
+        }
+    }
     assert_eq!(m.fighters[1].received_hits, 1);
     assert!(m.fighters[1].received_damage > 0.0);
     assert_eq!(m.first_attack, Some(0));
-    let ev = |m: &Match, i: usize, e: &str| m.ev(i, &ume_engine::expr::Expr::new(ume_engine::expr::parse(e).unwrap()));
+    let ev = |m: &Match, i: usize, e: &str| {
+        m.ev(
+            i,
+            &ume_engine::expr::Expr::new(ume_engine::expr::parse(e).unwrap()),
+        )
+    };
     assert!(ev(&m, 0, "FirstAttack") == 1.0);
     assert!(ev(&m, 0, "Round") > 0.0);
     assert!(ev(&m, 0, "TimeElapsed") >= 0.0);
@@ -127,10 +157,18 @@ value = 30
     let mut m = duel(mugen_char("a", scorer), mugen_char("b", ""));
     enter(&mut m, 0, 450);
     m.tick(&[0, 0]);
-    assert!((m.fighters[0].score - 25.0).abs() < 1e-6, "score {}", m.fighters[0].score);
+    assert!(
+        (m.fighters[0].score - 25.0).abs() < 1e-6,
+        "score {}",
+        m.fighters[0].score
+    );
     assert_eq!(m.timer, 30 * 60);
     assert!((ev(&m, 0, "Score") - 25.0).abs() < 1e-6);
-    assert!((ev(&m, 0, "TimeRemaining") - 30.0).abs() < 1e-6, "remaining {}", ev(&m, 0, "TimeRemaining"));
+    assert!(
+        (ev(&m, 0, "TimeRemaining") - 30.0).abs() < 1e-6,
+        "remaining {}",
+        ev(&m, 0, "TimeRemaining")
+    );
 }
 
 #[test]
@@ -160,13 +198,28 @@ value = 2
     let mut m = duel(mugen_char("a", asserted), mugen_char("b", ""));
     enter(&mut m, 0, 500);
     m.tick(&[0, 0]);
-    assert!(m.has_command(0, "hadou"), "AssertCommand makes the command visible");
+    assert!(
+        m.has_command(0, "hadou"),
+        "AssertCommand makes the command visible"
+    );
     let t1 = m.fighters[0].history.tick;
     m.tick(&[0, 0]);
-    assert_eq!(m.fighters[0].history.tick - t1, 3, "ShiftInput pushes two extra history ticks before the current one");
-    assert!(m.fighters[0].history.at(m.fighters[0].history.tick) & 32 != 0, "AssertInput injects the button bits");
-    for _ in 0..6 { m.tick(&[0, 0]); }
-    assert!(!m.has_command(0, "hadou"), "the assertion expires after its time");
+    assert_eq!(
+        m.fighters[0].history.tick - t1,
+        3,
+        "ShiftInput pushes two extra history ticks before the current one"
+    );
+    assert!(
+        m.fighters[0].history.at(m.fighters[0].history.tick) & 32 != 0,
+        "AssertInput injects the button bits"
+    );
+    for _ in 0..6 {
+        m.tick(&[0, 0]);
+    }
+    assert!(
+        !m.has_command(0, "hadou"),
+        "the assertion expires after its time"
+    );
 }
 
 const DIZZY_DEFENDER: &str = "
@@ -238,37 +291,71 @@ ctrl = 1
 
 #[test]
 fn miss_on_override_shows_the_miss_text() {
-    let mut m = duel(mugen_char("a", &striker_with("missonoverride = 1")), mugen_char("b", OVERRIDE_DEFENDER));
+    let mut m = duel(
+        mugen_char("a", &striker_with("missonoverride = 1")),
+        mugen_char("b", OVERRIDE_DEFENDER),
+    );
     face_off(&mut m, 55.0);
     enter(&mut m, 0, 200);
     let mut seen = false;
     for _ in 0..40 {
         m.tick(&[0, 0]);
-        if m.texts.iter().any(|t| t.text == "MISS") { seen = true; break; }
+        if m.texts.iter().any(|t| t.text == "MISS") {
+            seen = true;
+            break;
+        }
     }
     assert!(seen, "a miss-on-override hit spawns the MISS text");
 }
 
 #[test]
 fn unhittable_time_freezes_during_hit_pause_and_xaccel_is_recorded() {
-    let mut m = duel(mugen_char("a", &striker_with("pausetime = 10, 10\nunhittabletime = 5\nxaccel = 1")), mugen_char("b", DIZZY_DEFENDER));
+    let mut m = duel(
+        mugen_char(
+            "a",
+            &striker_with("pausetime = 10, 10\nunhittabletime = 5\nxaccel = 1"),
+        ),
+        mugen_char("b", DIZZY_DEFENDER),
+    );
     face_off(&mut m, 55.0);
     enter(&mut m, 0, 200);
-    for _ in 0..40 { m.tick(&[0, 0]); if m.fighters[1].unhittable > 0 { break; } }
+    for _ in 0..40 {
+        m.tick(&[0, 0]);
+        if m.fighters[1].unhittable > 0 {
+            break;
+        }
+    }
     let start = m.fighters[1].unhittable;
     assert!(start > 0, "unhittabletime grants invincibility");
     assert!(m.fighters[1].hit_shake > 0, "the hit pause is running");
-    for _ in 0..3 { m.tick(&[0, 0]); }
-    assert_eq!(m.fighters[1].unhittable, start, "hit pause does not consume invincibility");
-    for _ in 0..40 { m.tick(&[0, 0]); }
-    assert!(m.fighters[1].unhittable < start, "the invincibility ticks down after the pause");
-    assert!(m.fighters[1].ghv.xaccel.abs() > 0.0 || m.fighters[1].unhittable == 0, "xaccel is parsed");
+    for _ in 0..3 {
+        m.tick(&[0, 0]);
+    }
+    assert_eq!(
+        m.fighters[1].unhittable, start,
+        "hit pause does not consume invincibility"
+    );
+    for _ in 0..40 {
+        m.tick(&[0, 0]);
+    }
+    assert!(
+        m.fighters[1].unhittable < start,
+        "the invincibility ticks down after the pause"
+    );
+    assert!(
+        m.fighters[1].ghv.xaccel.abs() > 0.0 || m.fighters[1].unhittable == 0,
+        "xaccel is parsed"
+    );
 }
 
-
 fn striker_with(params: &str) -> String {
-    let pause = if params.contains("pausetime") { "" } else { "pausetime = 0, 0\n" };
-    format!("
+    let pause = if params.contains("pausetime") {
+        ""
+    } else {
+        "pausetime = 0, 0\n"
+    };
+    format!(
+        "
 [Statedef 200]
 type = S
 movetype = A
@@ -286,38 +373,64 @@ guardflag = MAF
 {pause}ground.velocity = -2
 ground.hittime = 10
 {params}
-")
+"
+    )
 }
 
 #[test]
 fn dizzy_and_guard_break_enter_their_states_and_restore_meters() {
-    let mut m = duel(mugen_char("a", &striker_with("dizzypoints = 60\nredlife = 50")), mugen_char("b", DIZZY_DEFENDER));
+    let mut m = duel(
+        mugen_char("a", &striker_with("dizzypoints = 60\nredlife = 50")),
+        mugen_char("b", DIZZY_DEFENDER),
+    );
     m.fighters[1].ikemen.dizzy_max = 100.0;
     m.fighters[1].ikemen.dizzy_points = 5.0;
     face_off(&mut m, 55.0);
     enter(&mut m, 0, 200);
-    for _ in 0..40 { m.tick(&[0, 0]); if m.fighters[1].ikemen.dizzy { break; } }
+    for _ in 0..40 {
+        m.tick(&[0, 0]);
+        if m.fighters[1].ikemen.dizzy {
+            break;
+        }
+    }
     let d = &m.fighters[1];
     assert!(d.ikemen.dizzy, "the dizzy meter was drained to zero");
     assert_eq!(d.state_no, 5300, "the dizzy state is entered");
-    assert!((d.ikemen.dizzy_points - d.ikemen.dizzy_max).abs() < 1e-6, "dizzy points refill after the stun");
+    assert!(
+        (d.ikemen.dizzy_points - d.ikemen.dizzy_max).abs() < 1e-6,
+        "dizzy points refill after the stun"
+    );
 
-    let mut m = duel(mugen_char("a", &striker_with("guardpoints = 60")), mugen_char("b", GUARD_DEFENDER));
+    let mut m = duel(
+        mugen_char("a", &striker_with("guardpoints = 60")),
+        mugen_char("b", GUARD_DEFENDER),
+    );
     m.fighters[1].asserts |= ume_engine::flags::asf::AUTOGUARD;
     m.fighters[1].ikemen.guard_max = 100.0;
     m.fighters[1].ikemen.guard_points = 5.0;
     face_off(&mut m, 55.0);
     enter(&mut m, 0, 200);
-    for _ in 0..40 { m.tick(&[0, 0]); if m.fighters[1].ikemen.guard_break { break; } }
+    for _ in 0..40 {
+        m.tick(&[0, 0]);
+        if m.fighters[1].ikemen.guard_break {
+            break;
+        }
+    }
     let d = &m.fighters[1];
     assert!(d.ikemen.guard_break, "the guard meter was drained to zero");
     assert_eq!(d.state_no, 5400, "the guard break state is entered");
-    assert!((d.ikemen.guard_points - d.ikemen.guard_max).abs() < 1e-6, "guard points refill after the break");
+    assert!(
+        (d.ikemen.guard_points - d.ikemen.guard_max).abs() < 1e-6,
+        "guard points refill after the break"
+    );
 }
 
 #[test]
 fn five_guarded_hits_break_the_guard() {
-    let mut m = duel(mugen_char("a", &striker_with("guardpoints = 10")), mugen_char("b", GUARD_DEFENDER));
+    let mut m = duel(
+        mugen_char("a", &striker_with("guardpoints = 10")),
+        mugen_char("b", GUARD_DEFENDER),
+    );
     m.fighters[1].asserts |= ume_engine::flags::asf::AUTOGUARD;
     m.fighters[1].ikemen.guard_max = 50.0;
     m.fighters[1].ikemen.guard_points = 50.0;
@@ -327,7 +440,12 @@ fn five_guarded_hits_break_the_guard() {
         face_off(&mut m, 55.0);
         let before = m.fighters[1].ikemen.guard_points;
         enter(&mut m, 0, 200);
-        for _ in 0..60 { m.tick(&[0, 0]); if (m.fighters[1].ikemen.guard_points - before).abs() > 0.01 { break; } }
+        for _ in 0..60 {
+            m.tick(&[0, 0]);
+            if (m.fighters[1].ikemen.guard_points - before).abs() > 0.01 {
+                break;
+            }
+        }
         hits += 1;
         m.fighters[1].move_type = 'I';
         m.fighters[1].state_type = 'S';
@@ -337,7 +455,10 @@ fn five_guarded_hits_break_the_guard() {
         m.fighters[0].hit_pause = 0;
     }
     assert_eq!(hits, 5);
-    assert!(m.fighters[1].ikemen.guard_break, "5 guarded hits drain the guard meter");
+    assert!(
+        m.fighters[1].ikemen.guard_break,
+        "5 guarded hits drain the guard meter"
+    );
     assert_eq!(m.fighters[1].state_no, 5400);
 }
 
@@ -372,13 +493,30 @@ unhittabletime = 8
     m.fighters[1].ikemen.guard_points = 5.0;
     face_off(&mut m, 55.0);
     enter(&mut m, 0, 200);
-    for _ in 0..40 { m.tick(&[0, 0]); if m.fighters[1].received_hits > 0 { break; } }
+    for _ in 0..40 {
+        m.tick(&[0, 0]);
+        if m.fighters[1].received_hits > 0 {
+            break;
+        }
+    }
     let d = &m.fighters[1];
     assert_eq!(d.received_hits, 1);
-    assert!(d.ikemen.red_life > d.life, "red life {} > life {}", d.ikemen.red_life, d.life);
+    assert!(
+        d.ikemen.red_life > d.life,
+        "red life {} > life {}",
+        d.ikemen.red_life,
+        d.life
+    );
     assert!(d.ikemen.dizzy, "the dizzy meter was drained");
-    assert!(d.unhittable > 0, "unhittabletime grants invincibility ticks");
-    assert!((m.fighters[0].score - 10.0).abs() < 1e-6, "attacker score {}", m.fighters[0].score);
+    assert!(
+        d.unhittable > 0,
+        "unhittabletime grants invincibility ticks"
+    );
+    assert!(
+        (m.fighters[0].score - 10.0).abs() < 1e-6,
+        "attacker score {}",
+        m.fighters[0].score
+    );
 }
 
 #[test]
@@ -405,14 +543,25 @@ time = 2
     let mut m = duel(mugen_char("a", cns), mugen_char("b", ""));
     enter(&mut m, 0, 510);
     m.tick(&[0, 0]);
-    let remap = m.fighters[0].sprite_remap.first().copied().expect("a remap is registered");
+    let remap = m.fighters[0]
+        .sprite_remap
+        .first()
+        .copied()
+        .expect("a remap is registered");
     assert_eq!((remap.0, remap.1), ((0, 0), (9000, 1)));
     assert!(remap.2 > 0);
-    let (scale, angle, _, life) = m.fighters[0].sprite_transform.expect("a transform is registered");
+    let (scale, angle, _, life) = m.fighters[0]
+        .sprite_transform
+        .expect("a transform is registered");
     assert!((scale - 2.0).abs() < 1e-6 && (angle - 90.0).abs() < 1e-6 && life > 0);
-    for _ in 0..6 { m.tick(&[0, 0]); }
+    for _ in 0..6 {
+        m.tick(&[0, 0]);
+    }
     assert!(m.fighters[0].sprite_remap.is_empty(), "the remap expires");
-    assert!(m.fighters[0].sprite_transform.is_none(), "the transform expires");
+    assert!(
+        m.fighters[0].sprite_transform.is_none(),
+        "the transform expires"
+    );
 }
 
 #[test]
@@ -447,14 +596,30 @@ loopend = 400
     enter(&mut m, 0, 340);
     m.tick(&[0, 0]);
     let sound = m.events.iter().find_map(|e| match e {
-        ume_engine::matchs::Event::Sound { channel: 2, loop_start, loop_end, loop_count, looping, .. } => Some((*loop_start, *loop_end, *loop_count, *looping)),
+        ume_engine::matchs::Event::Sound {
+            channel: 2,
+            loop_start,
+            loop_end,
+            loop_count,
+            looping,
+            ..
+        } => Some((*loop_start, *loop_end, *loop_count, *looping)),
         _ => None,
     });
-    assert_eq!(sound, Some((100, 500, 3, true)), "PlaySnd carries the loop window and count");
+    assert_eq!(
+        sound,
+        Some((100, 500, 3, true)),
+        "PlaySnd carries the loop window and count"
+    );
     enter(&mut m, 0, 341);
     m.tick(&[0, 0]);
     let retune = m.events.iter().find_map(|e| match e {
-        ume_engine::matchs::Event::SoundLoop { channel: 2, start, end, .. } => Some((*start, *end)),
+        ume_engine::matchs::Event::SoundLoop {
+            channel: 2,
+            start,
+            end,
+            ..
+        } => Some((*start, *end)),
         _ => None,
     });
     assert_eq!(retune, Some((200, 400)), "ModifySnd retunes a live channel");
@@ -479,16 +644,36 @@ stoponchangestate = 1
     let mut m = duel(mugen_char("a", cns), mugen_char("b", ""));
     enter(&mut m, 0, 400);
     m.tick(&[0, 0]);
-    let flagged = m.events.iter().any(|e| matches!(e, ume_engine::matchs::Event::Sound { channel: 3, stop_on_get_hit: true, stop_on_change_state: true, .. }));
-    assert!(flagged, "PlaySnd carries the stop-on-hit and stop-on-state flags");
-    let changed = m.events.iter().any(|e| matches!(e, ume_engine::matchs::Event::StateChange { .. }));
-    assert!(changed, "entering a state emits StateChange so flagged channels can stop");
+    let flagged = m.events.iter().any(|e| {
+        matches!(
+            e,
+            ume_engine::matchs::Event::Sound {
+                channel: 3,
+                stop_on_get_hit: true,
+                stop_on_change_state: true,
+                ..
+            }
+        )
+    });
+    assert!(
+        flagged,
+        "PlaySnd carries the stop-on-hit and stop-on-state flags"
+    );
+    let changed = m
+        .events
+        .iter()
+        .any(|e| matches!(e, ume_engine::matchs::Event::StateChange { .. }));
+    assert!(
+        changed,
+        "entering a state emits StateChange so flagged channels can stop"
+    );
 }
 
 #[test]
 fn env_shake_dir_restricts_the_axis() {
     for (dir, horizontal, vertical) in [(0u8, true, true), (1, true, false), (2, false, true)] {
-        let shaker = format!("
+        let shaker = format!(
+            "
 [Statedef 900]
 type = S
 physics = S
@@ -500,7 +685,8 @@ time = 20
 freq = 60
 ampl = -8
 dir = {dir}
-");
+"
+        );
         let mut m = duel(mugen_char("a", &shaker), mugen_char("b", ""));
         enter(&mut m, 0, 900);
         m.tick(&[0, 0]);
@@ -520,9 +706,18 @@ fn classic_pushbox_pushes_only_the_defender() {
     classic.fighters[1].state_type = 'S';
     let (a0, b0) = (classic.fighters[0].pos.x, classic.fighters[1].pos.x);
     classic.tick(&[0, 0]);
-    let (da, db) = (classic.fighters[0].pos.x - a0, classic.fighters[1].pos.x - b0);
-    assert!(da < -0.5, "the attacker is pushed back in classic mode: {da}");
-    assert!(db.abs() < 0.5, "the defender does not move in classic mode: {db}");
+    let (da, db) = (
+        classic.fighters[0].pos.x - a0,
+        classic.fighters[1].pos.x - b0,
+    );
+    assert!(
+        da < -0.5,
+        "the attacker is pushed back in classic mode: {da}"
+    );
+    assert!(
+        db.abs() < 0.5,
+        "the defender does not move in classic mode: {db}"
+    );
 
     let mut modern = duel(mugen_char("a", ""), mugen_char("b", ""));
     modern.classic_pushbox = false;
@@ -533,7 +728,10 @@ fn classic_pushbox_pushes_only_the_defender() {
     let (a0, b0) = (modern.fighters[0].pos.x, modern.fighters[1].pos.x);
     modern.tick(&[0, 0]);
     let (da, db) = (modern.fighters[0].pos.x - a0, modern.fighters[1].pos.x - b0);
-    assert!(da < -0.5 && db > 0.5, "modern mode splits the push: {da} / {db}");
+    assert!(
+        da < -0.5 && db > 0.5,
+        "modern mode splits the push: {da} / {db}"
+    );
 }
 
 #[test]
@@ -566,5 +764,8 @@ velocity = 4
     m.fighters[0].facing = -1.0;
     m.fighters[0].side = 1;
     m.tick(&[0, 0]);
-    assert_eq!(m.projectiles[0].teamside, before, "teamside is captured at spawn");
+    assert_eq!(
+        m.projectiles[0].teamside, before,
+        "teamside is captured at spawn"
+    );
 }

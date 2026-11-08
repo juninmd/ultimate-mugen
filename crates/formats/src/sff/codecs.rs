@@ -178,4 +178,4 @@ pub fn decode_lz5(src: &[u8], size: usize) -> Vec<u8> {
         }
     }
     out
-}
+}

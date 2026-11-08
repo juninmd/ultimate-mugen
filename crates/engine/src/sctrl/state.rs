@@ -21,7 +21,18 @@ pub fn run_state(m: &mut Match, i: usize, sc: &Controller) {
 
 pub fn height(m: &mut Match, i: usize, sc: &Controller) {
     let l = m.fighters[i].lscl;
-    let top = m.num(i, sc, "value", m.fighters[i].c("size.height", 60.0) as f64, 0) as f32 * l;
-    let bottom = if sc.has("value", 1) { m.num(i, sc, "value", 0.0, 1) as f32 * l } else { 0.0 };
+    let top = m.num(
+        i,
+        sc,
+        "value",
+        m.fighters[i].c("size.height", 60.0) as f64,
+        0,
+    ) as f32
+        * l;
+    let bottom = if sc.has("value", 1) {
+        m.num(i, sc, "value", 0.0, 1) as f32 * l
+    } else {
+        0.0
+    };
     m.fighters[i].height_override = Some((top, bottom));
 }

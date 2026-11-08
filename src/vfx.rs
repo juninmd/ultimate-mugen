@@ -694,12 +694,17 @@ impl Vfx {
             Event::Fight => {
                 if let Some(b) = m.roots().find(|f| f.def.boss) {
                     if b.form >= 2 {
-                        self.banner("DESAFIO FINAL", "OBORO · ECLIPSE ABSOLUTO", [1.0, 0.78, 0.22]);
+                        self.banner(
+                            "DESAFIO FINAL",
+                            "OBORO · ECLIPSE ABSOLUTO",
+                            [1.0, 0.78, 0.22],
+                        );
                     } else {
                         let name = b.def.display_name.to_uppercase();
                         self.banner("CHEFE FINAL", &name, [1.0, 0.15, 0.3]);
                     }
                     self.sfx.push("ko");
+                    self.sfx.push("crowd");
                 }
                 self.ring(
                     m.camera.x,

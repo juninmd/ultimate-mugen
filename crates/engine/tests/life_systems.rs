@@ -15,14 +15,30 @@ fn with_constants(name: &str, constants: &[(&str, f64)]) -> Arc<CharDef> {
 
 fn hit(damage: f32) -> HitDefData {
     HitDefData {
-        attr_state: "S".into(), hitflag: "MAFD".into(), guardflag: "MA".into(), damage, guard_damage: 0.0,
-        red_life: [damage * 0.75, 0.0], dizzy_points: damage * 1.8, guard_points: damage * 1.5,
-        ground_hit_time: 12, guard_hit_time: 10, airjuggle: 100, kill: true, guard_kill: false, p1stateno: -1, p2stateno: -1, ..Default::default()
+        attr_state: "S".into(),
+        hitflag: "MAFD".into(),
+        guardflag: "MA".into(),
+        damage,
+        guard_damage: 0.0,
+        red_life: [damage * 0.75, 0.0],
+        dizzy_points: damage * 1.8,
+        guard_points: damage * 1.5,
+        ground_hit_time: 12,
+        guard_hit_time: 10,
+        airjuggle: 100,
+        kill: true,
+        guard_kill: false,
+        p1stateno: -1,
+        p2stateno: -1,
+        ..Default::default()
     }
 }
 
 fn pair(constants: &[(&str, f64)]) -> Match {
-    duel(mugen_char("attacker", ""), with_constants("defender", constants))
+    duel(
+        mugen_char("attacker", ""),
+        with_constants("defender", constants),
+    )
 }
 
 #[test]
@@ -87,7 +103,10 @@ fn five_hits_make_the_defender_dizzy() {
     assert!(defender.ikemen.dizzy);
     assert_eq!(defender.state_no, 5300);
     assert!(!defender.ctrl);
-    assert_eq!(m.ev(1, &ume_engine::chardef::safe_expr("Dizzy && !Ctrl")), 1.0);
+    assert_eq!(
+        m.ev(1, &ume_engine::chardef::safe_expr("Dizzy && !Ctrl")),
+        1.0
+    );
 }
 
 #[test]
@@ -191,7 +210,9 @@ EXTRA
 ";
 
 fn built_hitdef(extra: &str, hyper: bool, constants: &[(&str, f64)]) -> HitDefData {
-    let cns = PARAM_CNS.replace("EXTRA", extra).replace("S, NA", if hyper { "S, HA" } else { "S, NA" });
+    let cns = PARAM_CNS
+        .replace("EXTRA", extra)
+        .replace("S, NA", if hyper { "S, HA" } else { "S, NA" });
     let mut def = Arc::try_unwrap(mugen_char("p1", &cns)).ok().unwrap();
     for (key, value) in constants {
         def.constants.insert(key.to_string(), *value);
@@ -215,7 +236,11 @@ fn hitdef_defaults_come_from_the_life_multipliers() {
 
 #[test]
 fn hitdef_parameters_override_the_multipliers() {
-    let hd = built_hitdef("redlife = 40, 8\ndizzypoints = 12\nguardpoints = 7\nscore = 3, -1", false, &[]);
+    let hd = built_hitdef(
+        "redlife = 40, 8\ndizzypoints = 12\nguardpoints = 7\nscore = 3, -1",
+        false,
+        &[],
+    );
     assert_eq!(hd.red_life, [40.0, 8.0]);
     assert_eq!(hd.dizzy_points, 12.0);
     assert_eq!(hd.guard_points, 7.0);
@@ -226,7 +251,11 @@ fn hitdef_parameters_override_the_multipliers() {
 fn constants_section_sets_the_multipliers() {
     let mut constants = std::collections::HashMap::new();
     let mut provided = std::collections::HashSet::new();
-    ume_engine::cns::parse_constants("[Constants]\ndefault.lifetoredlifemul = 0.5\n", &mut constants, &mut provided);
+    ume_engine::cns::parse_constants(
+        "[Constants]\ndefault.lifetoredlifemul = 0.5\n",
+        &mut constants,
+        &mut provided,
+    );
     assert_eq!(constants.get("default.lifetoredlifemul"), Some(&0.5));
     let hd = built_hitdef("", false, &[("default.lifetoredlifemul", 0.5)]);
     assert_eq!(hd.red_life, [50.0, 10.0]);

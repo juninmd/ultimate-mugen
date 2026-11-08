@@ -141,7 +141,9 @@ anim = 0
 ctrl = 0
 ";
 
-fn ev(m: &Match, i: usize, src: &str) -> f64 { m.ev(i, &Expr::new(parse(src).unwrap())) }
+fn ev(m: &Match, i: usize, src: &str) -> f64 {
+    m.ev(i, &Expr::new(parse(src).unwrap()))
+}
 
 fn setup(gap: f32) -> Match {
     let mut m = duel(mugen_char("a", CNS), mugen_char("b", CNS));
@@ -149,7 +151,11 @@ fn setup(gap: f32) -> Match {
     m
 }
 
-fn helper(m: &Match, id: i32) -> usize { (0..m.fighters.len()).find(|&i| m.fighters[i].is_helper && m.fighters[i].helper_id == id).expect("helper") }
+fn helper(m: &Match, id: i32) -> usize {
+    (0..m.fighters.len())
+        .find(|&i| m.fighters[i].is_helper && m.fighters[i].helper_id == id)
+        .expect("helper")
+}
 
 fn hurt_size(m: &Match, i: usize) -> (f32, f32) {
     let b = m.fighters[i].boxes(2)[0];
@@ -163,13 +169,32 @@ fn projectile_helper_hits_like_a_projectile() {
     ticks(&mut m, 3);
     let h = helper(&m, 1);
     assert!(m.fighters[h].helper_projectile && !m.fighters[h].helper_player);
-    assert!(m.fighters[1].life < m.fighters[1].life_max, "it landed a hit");
-    assert_eq!(m.fighters[h].hit_pause, 0, "no attacker hit pause, like a projectile");
+    assert!(
+        m.fighters[1].life < m.fighters[1].life_max,
+        "it landed a hit"
+    );
+    assert_eq!(
+        m.fighters[h].hit_pause, 0,
+        "no attacker hit pause, like a projectile"
+    );
     assert_eq!(m.fighters[0].hit_pause, 0);
-    assert!(ev(&m, h, "ProjHit") == 1.0 && ev(&m, h, "ProjContact") == 1.0, "proj triggers fire on the helper");
-    assert!(ev(&m, 0, "ProjHitTime(1)") >= 0.0 && ev(&m, 0, "ProjContactTime(1)") >= 0.0, "and on its root, keyed by the helper id");
-    let hd = ume_engine::fighter::HitDefData { hitflag: "MAF".into(), attr_state: "S".into(), ..Default::default() };
-    assert!(!m.can_be_hit(h, &hd, 1), "a projectile helper has no hurtbox");
+    assert!(
+        ev(&m, h, "ProjHit") == 1.0 && ev(&m, h, "ProjContact") == 1.0,
+        "proj triggers fire on the helper"
+    );
+    assert!(
+        ev(&m, 0, "ProjHitTime(1)") >= 0.0 && ev(&m, 0, "ProjContactTime(1)") >= 0.0,
+        "and on its root, keyed by the helper id"
+    );
+    let hd = ume_engine::fighter::HitDefData {
+        hitflag: "MAF".into(),
+        attr_state: "S".into(),
+        ..Default::default()
+    };
+    assert!(
+        !m.can_be_hit(h, &hd, 1),
+        "a projectile helper has no hurtbox"
+    );
 }
 
 #[test]
@@ -179,7 +204,10 @@ fn normal_helper_keeps_player_style_contact() {
     ticks(&mut m, 3);
     let h = helper(&m, 1);
     assert!(m.fighters[1].life < m.fighters[1].life_max);
-    assert!(m.fighters[h].hit_pause > 0 || m.fighters[h].move_hit > 0, "regular helpers still pause on contact");
+    assert!(
+        m.fighters[h].hit_pause > 0 || m.fighters[h].move_hit > 0,
+        "regular helpers still pause on contact"
+    );
     assert_eq!(ev(&m, h, "ProjHit"), 0.0);
 }
 
@@ -191,8 +219,16 @@ fn ownprojectile_keeps_the_projectile_on_the_helper() {
     let (own, shared) = (helper(&m, 2), helper(&m, 3));
     assert_eq!(m.projectiles.len(), 2);
     assert_eq!(ev(&m, own, "NumProj"), 1.0);
-    assert_eq!(ev(&m, shared, "NumProj"), 1.0, "the sharing helper counts the root's pool");
-    assert_eq!(ev(&m, 0, "NumProj"), 1.0, "the root only counts what is not owned by a helper");
+    assert_eq!(
+        ev(&m, shared, "NumProj"),
+        1.0,
+        "the sharing helper counts the root's pool"
+    );
+    assert_eq!(
+        ev(&m, 0, "NumProj"),
+        1.0,
+        "the root only counts what is not owned by a helper"
+    );
     assert_eq!(ev(&m, own, "NumProjID(9)"), 1.0);
 }
 
@@ -217,6 +253,14 @@ fn ownclsnscale_stops_a_child_helper_from_inheriting_the_parent_scale() {
     ticks(&mut m, 4);
     let (plain, inherited, own) = (helper(&m, 5), helper(&m, 6), helper(&m, 7));
     let (pw, _) = hurt_size(&m, plain);
-    assert_eq!(hurt_size(&m, inherited).0, pw * 2.0, "children inherit the parent's size overrides");
-    assert_eq!(hurt_size(&m, own).0, pw, "ownclsnscale = 1 starts from the character's own constants");
+    assert_eq!(
+        hurt_size(&m, inherited).0,
+        pw * 2.0,
+        "children inherit the parent's size overrides"
+    );
+    assert_eq!(
+        hurt_size(&m, own).0,
+        pw,
+        "ownclsnscale = 1 starts from the character's own constants"
+    );
 }

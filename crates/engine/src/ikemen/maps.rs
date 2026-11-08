@@ -11,7 +11,11 @@ pub struct MapStore {
 
 impl MapStore {
     pub fn get(&self, key: &str) -> f32 {
-        self.entries.iter().find(|(k, _)| k.eq_ignore_ascii_case(key)).map(|(_, v)| *v).unwrap_or(0.0)
+        self.entries
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case(key))
+            .map(|(_, v)| *v)
+            .unwrap_or(0.0)
     }
 
     pub fn set(&mut self, key: &str, v: f32, add: bool) {
@@ -29,9 +33,13 @@ impl MapStore {
         }
     }
 
-    pub fn len(&self) -> usize { self.entries.len() }
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
 
-    pub fn is_empty(&self) -> bool { self.entries.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -49,9 +57,15 @@ fn map_key(sc: &Controller) -> Option<String> {
 }
 
 fn split_kind(kind: &str) -> Option<(Scope, &str)> {
-    for (prefix, scope) in [("team", Scope::Team), ("root", Scope::Root), ("parent", Scope::Parent)] {
+    for (prefix, scope) in [
+        ("team", Scope::Team),
+        ("root", Scope::Root),
+        ("parent", Scope::Parent),
+    ] {
         if let Some(op) = kind.strip_prefix(prefix) {
-            if matches!(op, "mapset" | "mapadd" | "mapreset") { return Some((scope, op)); }
+            if matches!(op, "mapset" | "mapadd" | "mapreset") {
+                return Some((scope, op));
+            }
         }
     }
     matches!(kind, "mapset" | "mapadd" | "mapreset").then_some((Scope::Local, kind))
@@ -76,11 +90,16 @@ fn store_for(m: &mut Match, i: usize, scope: Scope) -> Option<&mut MapStore> {
 }
 
 pub fn team_value(m: &Match, i: usize, key: &str) -> f32 {
-    m.team_maps.get(m.fighters[i].side).map(|s| s.get(key)).unwrap_or(0.0)
+    m.team_maps
+        .get(m.fighters[i].side)
+        .map(|s| s.get(key))
+        .unwrap_or(0.0)
 }
 
 fn run_root_var(m: &mut Match, i: usize, sc: &Controller) {
-    let Some(root) = m.idx(m.fighters[i].root) else { return };
+    let Some(root) = m.idx(m.fighters[i].root) else {
+        return;
+    };
     crate::controllers::set_vars(m, i, sc, sc.kind == "rootvaradd", root);
 }
 
@@ -90,17 +109,23 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         run_root_var(m, i, sc);
         return true;
     }
-    let Some((scope, op)) = split_kind(kind) else { return false };
+    let Some((scope, op)) = split_kind(kind) else {
+        return false;
+    };
     let key = map_key(sc);
     match op {
         "mapreset" => {
-            if let Some(store) = store_for(m, i, scope) { store.reset(key.as_deref()); }
+            if let Some(store) = store_for(m, i, scope) {
+                store.reset(key.as_deref());
+            }
         }
         _ => {
             let Some(key) = key else { return true };
             let v = m.num(i, sc, "value", 0.0, 0) as f32;
             let add = op == "mapadd" || m.num(i, sc, "type", 0.0, 0) as i32 == 1;
-            if let Some(store) = store_for(m, i, scope) { store.set(&key, v, add); }
+            if let Some(store) = store_for(m, i, scope) {
+                store.set(&key, v, add);
+            }
         }
     }
     true

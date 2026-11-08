@@ -62,15 +62,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let default_anims = defaults.get("anims").cloned().unwrap_or(Value::Null);
 
     let mut char_paths: Vec<PathBuf> = Vec::new();
-    let mut roots: Vec<PathBuf> = vec![chars_dir.clone(), chars_dir.join("../umf"), chars_dir.join("../mugen/umf")];
+    let mut roots: Vec<PathBuf> = vec![
+        chars_dir.clone(),
+        chars_dir.join("../umf"),
+        chars_dir.join("../mugen/umf"),
+    ];
     if let Some(dir) = std::env::var_os("UME_UMF_DIR") {
         roots.push(PathBuf::from(dir));
     }
     for root in &roots {
-        let Ok(entries) = std::fs::read_dir(root) else { continue };
-        char_paths.extend(entries.filter_map(Result::ok).map(|entry| entry.path())
-            .filter(|path| path.extension().and_then(|ext| ext.to_str()).is_some_and(|ext| ext.eq_ignore_ascii_case("json"))
-                && path.file_stem().is_some_and(|stem| stem != "index")));
+        let Ok(entries) = std::fs::read_dir(root) else {
+            continue;
+        };
+        char_paths.extend(
+            entries
+                .filter_map(Result::ok)
+                .map(|entry| entry.path())
+                .filter(|path| {
+                    path.extension()
+                        .and_then(|ext| ext.to_str())
+                        .is_some_and(|ext| ext.eq_ignore_ascii_case("json"))
+                        && path.file_stem().is_some_and(|stem| stem != "index")
+                }),
+        );
     }
     char_paths.sort();
     char_paths.dedup();
@@ -79,18 +93,34 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     for char_path in &char_paths {
-        if std::fs::metadata(char_path).map(|meta| meta.len() > MAX_SOURCE_BYTES).unwrap_or(true) {
-            eprintln!("[{}] skipped (source JSON larger than {} bytes)", char_path.display(), MAX_SOURCE_BYTES);
+        if std::fs::metadata(char_path)
+            .map(|meta| meta.len() > MAX_SOURCE_BYTES)
+            .unwrap_or(true)
+        {
+            eprintln!(
+                "[{}] skipped (source JSON larger than {} bytes)",
+                char_path.display(),
+                MAX_SOURCE_BYTES
+            );
             continue;
         }
-        let char_json: Value = match std::fs::read(char_path).map_err(|error| error.to_string()).and_then(|bytes| serde_json::from_slice(&bytes).map_err(|error| error.to_string())) {
+        let char_json: Value = match std::fs::read(char_path)
+            .map_err(|error| error.to_string())
+            .and_then(|bytes| serde_json::from_slice(&bytes).map_err(|error| error.to_string()))
+        {
             Ok(json) => json,
             Err(error) => {
                 eprintln!("[{}] skipped ({error})", char_path.display());
                 continue;
             }
         };
-        let Some(id) = char_json.get("id").and_then(Value::as_str).map(str::to_string) else { continue };
+        let Some(id) = char_json
+            .get("id")
+            .and_then(Value::as_str)
+            .map(str::to_string)
+        else {
+            continue;
+        };
         if !pose_map::safe_name(&id) {
             eprintln!("[{id}] skipped (id is not a plain identifier)");
             continue;
@@ -99,9 +129,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("[{id}] non-rig character, skipped");
             continue;
         }
-        let style = char_json.pointer("/art/style").cloned().unwrap_or(Value::Null);
+        let style = char_json
+            .pointer("/art/style")
+            .cloned()
+            .unwrap_or(Value::Null);
         let mut poses: Value = default_poses.clone();
-        if let (Some(target), Some(source)) = (poses.as_object_mut(), char_json.pointer("/art/poses").and_then(Value::as_object)) {
+        if let (Some(target), Some(source)) = (
+            poses.as_object_mut(),
+            char_json.pointer("/art/poses").and_then(Value::as_object),
+        ) {
             for (key, value) in source {
                 target.insert(key.clone(), value.clone());
             }
@@ -136,9 +172,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let mut targets: BTreeMap<String, Value> = BTreeMap::new();
         for anims_value in [Some(&default_anims), char_json.get("anims")] {
-            let Some(anims) = anims_value.and_then(Value::as_object) else { continue };
+            let Some(anims) = anims_value.and_then(Value::as_object) else {
+                continue;
+            };
             for anim in anims.values() {
-                let Some(frames) = anim.get("frames").and_then(Value::as_array) else { continue };
+                let Some(frames) = anim.get("frames").and_then(Value::as_array) else {
+                    continue;
+                };
                 for frame in frames {
                     if let Some(target) = frame_targets(frame, &files, &poses) {
                         targets.insert(target.0, target.1);
@@ -153,7 +193,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         if targets.len() > MAX_TARGETS {
-            eprintln!("[{id}] skipped ({} frames requested, limit {MAX_TARGETS})", targets.len());
+            eprintln!(
+                "[{id}] skipped ({} frames requested, limit {MAX_TARGETS})",
+                targets.len()
+            );
             continue;
         }
 
@@ -165,7 +208,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             continue;
         }
 
-        let idle_pose = poses.get("idle0").or_else(|| poses.get("idle")).unwrap_or(&Value::Null);
+        let idle_pose = poses
+            .get("idle0")
+            .or_else(|| poses.get("idle"))
+            .unwrap_or(&Value::Null);
         let ref_render = render_pose(&style, idle_pose, None, true, None);
         let mut standing_h = 320.0f32;
         if let Some(img) = ref_render.image.as_deref().and_then(to_pixmap) {
@@ -205,13 +251,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let center_x = (min_x + max_x) / 2.0;
             let dx = AXIS_X - center_x * scale;
             let dy = AXIS_Y - 1.0 - max_y * scale;
-            let paint = PixmapPaint { quality: FilterQuality::Nearest, ..Default::default() };
+            let paint = PixmapPaint {
+                quality: FilterQuality::Nearest,
+                ..Default::default()
+            };
             let transform = Transform::from_row(scale, 0.0, 0.0, scale, dx, dy);
             canvas.draw_pixmap(0, 0, src.as_ref(), &paint, transform, None);
 
             let out_png = char_sprites_dir.join(format!("{name}.png"));
             canvas.save_png(&out_png)?;
-            meta["frames"][name.as_str()] = serde_json::json!({"axisX": AXIS_X, "axisY": AXIS_Y, "refHeight": REF_HEIGHT});
+            meta["frames"][name.as_str()] =
+                serde_json::json!({"axisX": AXIS_X, "axisY": AXIS_Y, "refHeight": REF_HEIGHT});
         }
 
         let staged_meta = char_sprites_dir.join("meta.json.tmp");

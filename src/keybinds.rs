@@ -51,7 +51,8 @@ impl Default for KeyMap {
                     Up, Down, Left, Right, Q, W, E, A, S, D, Key1, Key2, Key3, T, F, R,
                 ],
                 [
-                    I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal,
+                    I, K, J, L, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter,
+                    KpDecimal,
                 ],
             ],
         }
@@ -63,7 +64,8 @@ fn previous_defaults() -> [[KeyCode; N]; 2] {
     [
         [W, S, A, D, U, I, O, J, K, L, Key1, Key2, Key3, T, F, R],
         [
-            Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter, KpDecimal,
+            Up, Down, Left, Right, Kp4, Kp5, Kp6, Kp1, Kp2, Kp3, Kp7, Kp8, Kp9, Kp0, KpEnter,
+            KpDecimal,
         ],
     ]
 }
@@ -123,18 +125,30 @@ impl KeyMap {
             };
             if (1..=2).contains(&p) && i < N {
                 m.slots[p - 1][i] = kc;
-                if i == N - 1 { has_start[p - 1] = true; }
+                if i == N - 1 {
+                    has_start[p - 1] = true;
+                }
             }
         }
         for p in 0..2 {
             if !has_start[p] {
                 if p == 0 && m.slots[p][14] == KeyCode::R {
-                    if let Some(key) = [KeyCode::F].into_iter().chain(KEYS.iter().map(|entry| entry.0)).find(|key| *key != KeyCode::R && !m.slots[p][..14].contains(key)) {
+                    if let Some(key) = [KeyCode::F]
+                        .into_iter()
+                        .chain(KEYS.iter().map(|entry| entry.0))
+                        .find(|key| *key != KeyCode::R && !m.slots[p][..14].contains(key))
+                    {
                         m.slots[p][14] = key;
                     }
                 }
                 if m.slots[p][..N - 1].contains(&m.slots[p][N - 1]) {
-                    if let Some(key) = KEYS.iter().map(|entry| entry.0).find(|key| !m.slots[p][..N - 1].contains(key)) { m.slots[p][N - 1] = key; }
+                    if let Some(key) = KEYS
+                        .iter()
+                        .map(|entry| entry.0)
+                        .find(|key| !m.slots[p][..N - 1].contains(key))
+                    {
+                        m.slots[p][N - 1] = key;
+                    }
                 }
             }
         }

@@ -1,6 +1,5 @@
 use super::*;
 
-
 /// A stage being loaded off the render thread (MUGEN stages decode a whole SFF).
 pub struct StageJob {
     pub(super) index: usize,
@@ -68,7 +67,10 @@ impl StageJob {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn join_stage_thread(thread: Option<std::thread::JoinHandle<Result<StageBuild, String>>>) -> Result<StageBuild, String> {
+fn join_stage_thread(
+    thread: Option<std::thread::JoinHandle<Result<StageBuild, String>>>,
+) -> Result<StageBuild, String> {
     let h = thread.ok_or("stage job already collected")?;
-    h.join().unwrap_or_else(|_| Err("stage loader thread panicked".into()))
+    h.join()
+        .unwrap_or_else(|_| Err("stage loader thread panicked".into()))
 }

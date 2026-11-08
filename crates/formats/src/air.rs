@@ -212,7 +212,10 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
                 let mut alpha = None;
                 if bl.len() >= 2 && (bl_b[0] == b'A' || bl_b[0] == b'a') && bl_b[1] == b'1' {
                     blend = Blend::Add1;
-                } else if bl.len() >= 2 && (bl_b[0] == b'A' || bl_b[0] == b'a') && (bl_b[1] == b'S' || bl_b[1] == b's') {
+                } else if bl.len() >= 2
+                    && (bl_b[0] == b'A' || bl_b[0] == b'a')
+                    && (bl_b[1] == b'S' || bl_b[1] == b's')
+                {
                     blend = Blend::Add;
                     alpha = parse_as_d(bl);
                 } else if !bl.is_empty() && (bl_b[0] == b'A' || bl_b[0] == b'a') {
@@ -250,7 +253,12 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
         if line.starts_with('[') {
             finish(&mut cur, &mut anims);
             if let Some(id) = parse_begin_action(line) {
-                cur = Some(Animation { id, frames: Vec::with_capacity(8), loop_start: 0, total_time: 0 });
+                cur = Some(Animation {
+                    id,
+                    frames: Vec::with_capacity(8),
+                    loop_start: 0,
+                    total_time: 0,
+                });
             }
             def1.clear();
             def2.clear();
@@ -282,13 +290,25 @@ pub fn parse_air(text: &str) -> HashMap<i32, Animation> {
             let bx = norm_box(&vals);
             match pending {
                 Some((k, true)) if k == kind => {
-                    if kind == 1 { def1.push(bx) } else { def2.push(bx) }
+                    if kind == 1 {
+                        def1.push(bx)
+                    } else {
+                        def2.push(bx)
+                    }
                 }
                 Some((k, false)) if k == kind => {
-                    if kind == 1 { next1.get_or_insert_with(Vec::new).push(bx) } else { next2.get_or_insert_with(Vec::new).push(bx) }
+                    if kind == 1 {
+                        next1.get_or_insert_with(Vec::new).push(bx)
+                    } else {
+                        next2.get_or_insert_with(Vec::new).push(bx)
+                    }
                 }
                 _ => {
-                    if kind == 1 { next1.get_or_insert_with(Vec::new).push(bx) } else { next2.get_or_insert_with(Vec::new).push(bx) }
+                    if kind == 1 {
+                        next1.get_or_insert_with(Vec::new).push(bx)
+                    } else {
+                        next2.get_or_insert_with(Vec::new).push(bx)
+                    }
                 }
             }
             continue;

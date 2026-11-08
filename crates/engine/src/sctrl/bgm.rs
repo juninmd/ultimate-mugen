@@ -14,7 +14,14 @@ pub fn play_bgm(m: &mut Match, i: usize, sc: &Controller) {
     let loop_start = n(m, "loopstart", 0.0).max(0.0) as usize;
     let loop_end = n(m, "loopend", 0.0).max(0.0) as usize;
     let freq_mul = n(m, "freqmul", 1.0).clamp(0.05, 8.0) as f32;
-    m.events.push(Event::Bgm(BgmAction::Play { file, looping, volume, loop_start, loop_end, freq_mul }));
+    m.events.push(Event::Bgm(BgmAction::Play {
+        file,
+        looping,
+        volume,
+        loop_start,
+        loop_end,
+        freq_mul,
+    }));
 }
 
 pub fn modify_bgm(m: &mut Match, i: usize, sc: &Controller) {
@@ -30,7 +37,8 @@ pub fn modify_bgm(m: &mut Match, i: usize, sc: &Controller) {
     if sc.has("loopstart", 0) || sc.has("loopend", 0) {
         let start = n(m, "loopstart", 0.0).max(0.0) as usize;
         let end = n(m, "loopend", 0.0).max(0.0) as usize;
-        m.events.push(Event::Bgm(BgmAction::LoopPoints { start, end }));
+        m.events
+            .push(Event::Bgm(BgmAction::LoopPoints { start, end }));
     }
     if sc.has("freqmul", 0) {
         let rate = n(m, "freqmul", 1.0).clamp(0.05, 8.0) as f32;

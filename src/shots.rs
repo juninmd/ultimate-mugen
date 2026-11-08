@@ -653,7 +653,9 @@ async fn native_coverage(app: &mut App, dir: &str) {
                 fighter.vel.x = 0.0;
                 fighter.vel.y = 0.0;
                 fighter.change_anim(0, &fighter.def.clone(), 1);
-                if index == 0 && std::env::var("UME_AWAKENED").as_deref() == Ok("1") { fighter.form = 1; }
+                if index == 0 && std::env::var("UME_AWAKENED").as_deref() == Ok("1") {
+                    fighter.form = 1;
+                }
             }
         }
         snap(app, dir, &format!("height-{id}"), |app| {
@@ -692,7 +694,10 @@ pub async fn run(app: &mut App, dir: &str) {
         native_coverage(app, dir).await;
         return;
     }
-    if matches!(std::env::var("UME_TOUR").as_deref(), Ok("mugen" | "moves" | "duel" | "clips")) {
+    if matches!(
+        std::env::var("UME_TOUR").as_deref(),
+        Ok("mugen" | "moves" | "duel" | "clips")
+    ) {
         crate::mugen_tour::run(app, dir).await;
         return;
     }

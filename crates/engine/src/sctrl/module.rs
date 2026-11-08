@@ -23,15 +23,23 @@ pub const MODULE_CONTROLLERS: &[(&str, ModuleStatus)] = &[
 ];
 
 pub fn module_status(kind: &str) -> Option<ModuleStatus> {
-    MODULE_CONTROLLERS.iter().find(|(name, _)| *name == kind).map(|(_, status)| *status)
+    MODULE_CONTROLLERS
+        .iter()
+        .find(|(name, _)| *name == kind)
+        .map(|(_, status)| *status)
 }
 
 pub fn rejected_by_design() -> impl Iterator<Item = &'static str> {
-    MODULE_CONTROLLERS.iter().filter(|(_, s)| *s == ModuleStatus::RejectedByDesign).map(|(name, _)| *name)
+    MODULE_CONTROLLERS
+        .iter()
+        .filter(|(_, s)| *s == ModuleStatus::RejectedByDesign)
+        .map(|(name, _)| *name)
 }
 
 pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
-    let Some(status) = module_status(sc.kind.as_str()) else { return false };
+    let Some(status) = module_status(sc.kind.as_str()) else {
+        return false;
+    };
     if sc.kind == "matchrestart" {
         m.restart_pending = true;
         return true;

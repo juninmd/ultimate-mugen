@@ -59,7 +59,11 @@ fn out_of_range_frame_index_does_not_overflow() {
 
 #[test]
 fn writer_output_at_the_decoded_limit_remains_readable() {
-    let replay = Replay { players: 1, meta: Vec::new(), frames: (0..16_777_216u32).collect() };
+    let replay = Replay {
+        players: 1,
+        meta: Vec::new(),
+        frames: (0..16_777_216u32).collect(),
+    };
     let encoded = replay.to_bytes().unwrap();
 
     assert!(encoded.len() > 64 * 1024 * 1024);

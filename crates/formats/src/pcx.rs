@@ -155,14 +155,32 @@ pub fn decode_pcx(buf: &[u8], read_palette: bool) -> Result<PcxImage, String> {
         ));
     }
     let (pixels, data_end) = if h.encoding == 1 {
-        decode_pcx_rle(buf, h.width, h.height, h.bytes_per_line, PCX_HEADER_SIZE, buf.len())
+        decode_pcx_rle(
+            buf,
+            h.width,
+            h.height,
+            h.bytes_per_line,
+            PCX_HEADER_SIZE,
+            buf.len(),
+        )
     } else {
         let (w, bpl) = (h.width as usize, h.bytes_per_line as usize);
         let px = raw_rows(buf, w, h.height as usize, bpl);
         (px, buf.len().min(PCX_HEADER_SIZE + h.height as usize * bpl))
     };
-    let palette = if read_palette { find_pcx_palette(buf, data_end).map(|po| read_rgb_palette(buf, po)) } else { None };
-    Ok(PcxImage { width: h.width, height: h.height, bytes_per_line: h.bytes_per_line, pixels, palette, data_end })
+    let palette = if read_palette {
+        find_pcx_palette(buf, data_end).map(|po| read_rgb_palette(buf, po))
+    } else {
+        None
+    };
+    Ok(PcxImage {
+        width: h.width,
+        height: h.height,
+        bytes_per_line: h.bytes_per_line,
+        pixels,
+        palette,
+        data_end,
+    })
 }
 
 /// Uncompressed scanlines starting right after the header.

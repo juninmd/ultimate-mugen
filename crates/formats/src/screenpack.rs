@@ -39,15 +39,27 @@ fn key(prefix: &str, k: &str) -> String {
 pub fn element(sec: &Section, prefix: &str) -> Element {
     let get = |k: &str| sec.get(&key(prefix, k));
     let n = |k: &str, d: &[f32]| nums(get(k), d);
-    let anim = get("anim").map(|_| n("anim", &[-1.0])[0] as i32).filter(|&a| a >= 0);
-    let spr = get("spr").map(|_| n("spr", &[-1.0, 0.0])).filter(|v| v[0] >= 0.0).map(|v| (v[0] as i32, v[1] as i32));
+    let anim = get("anim")
+        .map(|_| n("anim", &[-1.0])[0] as i32)
+        .filter(|&a| a >= 0);
+    let spr = get("spr")
+        .map(|_| n("spr", &[-1.0, 0.0]))
+        .filter(|v| v[0] >= 0.0)
+        .map(|v| (v[0] as i32, v[1] as i32));
     let font = get("font").map(|_| {
         let v = n("font", &[-1.0, 0.0, 0.0]);
-        [v[0] as i32, v.get(1).copied().unwrap_or(0.0) as i32, v.get(2).copied().unwrap_or(0.0) as i32]
+        [
+            v[0] as i32,
+            v.get(1).copied().unwrap_or(0.0) as i32,
+            v.get(2).copied().unwrap_or(0.0) as i32,
+        ]
     });
     let scale = n("scale", &[1.0, 1.0]);
     let offset = n("offset", &[0.0, 0.0]);
-    let window = get("window").map(|_| n("window", &[0.0, 0.0, 0.0, 0.0])).filter(|v| v.len() >= 4).map(|v| [v[0], v[1], v[2], v[3]]);
+    let window = get("window")
+        .map(|_| n("window", &[0.0, 0.0, 0.0, 0.0]))
+        .filter(|v| v.len() >= 4)
+        .map(|v| [v[0], v[1], v[2], v[3]]);
     Element {
         anim,
         spr,
@@ -73,7 +85,9 @@ pub fn int(sec: Option<&Section>, k: &str, d: i32) -> i32 {
 }
 
 pub fn string(sec: Option<&Section>, k: &str) -> Option<String> {
-    sec.and_then(|s| s.get(k)).map(unquote).filter(|s| !s.is_empty())
+    sec.and_then(|s| s.get(k))
+        .map(unquote)
+        .filter(|s| !s.is_empty())
 }
 
 #[derive(Clone, Debug, Default)]
@@ -87,9 +101,18 @@ pub fn background(secs: &[Section], anims: &HashMap<i32, Animation>, name: &str)
     let def = secs.iter().find(|s| s.lname == format!("{name}def"));
     let clear_color = def.and_then(|s| s.get("bgclearcolor")).map(|v| {
         let c = nums(Some(v), &[0.0, 0.0, 0.0]);
-        [c[0] as u8, c.get(1).copied().unwrap_or(0.0) as u8, c.get(2).copied().unwrap_or(0.0) as u8]
+        [
+            c[0] as u8,
+            c.get(1).copied().unwrap_or(0.0) as u8,
+            c.get(2).copied().unwrap_or(0.0) as u8,
+        ]
     });
-    let is_layer = |s: &&Section| s.lname == name || s.lname.strip_prefix(name.as_str()).is_some_and(|r| r.starts_with(char::is_whitespace));
+    let is_layer = |s: &&Section| {
+        s.lname == name
+            || s.lname
+                .strip_prefix(name.as_str())
+                .is_some_and(|r| r.starts_with(char::is_whitespace))
+    };
     let layers = secs
         .iter()
         .filter(is_layer)
@@ -112,7 +135,9 @@ pub fn background(secs: &[Section], anims: &HashMap<i32, Animation>, name: &str)
                 layer: n("layerno", &[0.0])[0] as i32,
                 trans: s.get("trans").unwrap_or("none").to_ascii_lowercase(),
                 mask: n("mask", &[0.0])[0] != 0.0,
-                anim: (kind == "anim").then(|| anims.get(&(n("actionno", &[0.0])[0] as i32)).cloned()).flatten(),
+                anim: (kind == "anim")
+                    .then(|| anims.get(&(n("actionno", &[0.0])[0] as i32)).cloned())
+                    .flatten(),
                 kind,
                 id: n("id", &[0.0])[0] as i32,
                 position_link: false,
@@ -129,7 +154,10 @@ pub fn background(secs: &[Section], anims: &HashMap<i32, Animation>, name: &str)
             }
         })
         .collect();
-    Background { clear_color, layers }
+    Background {
+        clear_color,
+        layers,
+    }
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -164,14 +192,29 @@ pub struct Bgm {
 }
 
 const MENU_ITEMS: [&str; 13] = [
-    "arcade", "versus", "teamarcade", "teamversus", "teamcoop", "survival", "survivalcoop", "training", "watch", "netplayversus", "options", "exit", "storymode",
+    "arcade",
+    "versus",
+    "teamarcade",
+    "teamversus",
+    "teamcoop",
+    "survival",
+    "survivalcoop",
+    "training",
+    "watch",
+    "netplayversus",
+    "options",
+    "exit",
+    "storymode",
 ];
 
 fn localcoord(secs: &[Section]) -> [f32; 2] {
     let info = find_section(secs, "info");
     let v = nums(info.and_then(|s| s.get("localcoord")), &[320.0, 240.0]);
     let w = if v[0] > 0.0 { v[0] } else { 320.0 };
-    [w, v.get(1).copied().filter(|&h| h > 0.0).unwrap_or(w * 0.75)]
+    [
+        w,
+        v.get(1).copied().filter(|&h| h > 0.0).unwrap_or(w * 0.75),
+    ]
 }
 
 fn fonts(files: Option<&Section>) -> BTreeMap<i32, String> {
@@ -179,7 +222,11 @@ fn fonts(files: Option<&Section>) -> BTreeMap<i32, String> {
         .map(|s| {
             s.entries
                 .iter()
-                .filter_map(|(k, v)| k.strip_prefix("font").and_then(|n| n.parse().ok()).map(|n| (n, unquote(v))))
+                .filter_map(|(k, v)| {
+                    k.strip_prefix("font")
+                        .and_then(|n| n.parse().ok())
+                        .map(|n| (n, unquote(v)))
+                })
                 .filter(|(_, v)| !v.is_empty())
                 .collect()
         })
@@ -194,10 +241,18 @@ pub fn parse_system(src: &str) -> SystemDef {
     if let Some(m) = music_sec {
         for (k, v) in &m.entries {
             if let Some(name) = k.strip_suffix(".bgm") {
-                let g = |s: &str, d: i64| nums(m.get(&format!("{name}.bgm.{s}")), &[d as f32])[0] as i64;
+                let g = |s: &str, d: i64| {
+                    nums(m.get(&format!("{name}.bgm.{s}")), &[d as f32])[0] as i64
+                };
                 music.insert(
                     name.to_string(),
-                    Bgm { file: unquote(v), volume: g("volume", 100) as i32, loop_start: g("loopstart", 0), loop_end: g("loopend", 0), looping: g("loop", 1) != 0 },
+                    Bgm {
+                        file: unquote(v),
+                        volume: g("volume", 100) as i32,
+                        loop_start: g("loopstart", 0),
+                        loop_end: g("loopend", 0),
+                        looping: g("loop", 1) != 0,
+                    },
                 );
             }
         }
@@ -208,8 +263,14 @@ pub fn parse_system(src: &str) -> SystemDef {
         .filter_map(|id| {
             let label = string(title, &format!("menu.itemname.{id}"));
             match (title, label) {
-                (None, _) => Some(MenuItem { id: id.to_string(), label: id.to_ascii_uppercase() }),
-                (Some(_), Some(label)) => Some(MenuItem { id: id.to_string(), label }),
+                (None, _) => Some(MenuItem {
+                    id: id.to_string(),
+                    label: id.to_ascii_uppercase(),
+                }),
+                (Some(_), Some(label)) => Some(MenuItem {
+                    id: id.to_string(),
+                    label,
+                }),
                 _ => None,
             }
         })
@@ -248,7 +309,11 @@ impl SystemDef {
             columns: int(s, "columns", 5).max(1),
             wrapping: int(s, "wrapping", 0) != 0,
             pos: pos(s, "pos"),
-            cell_size: if size == [0.0, 0.0] { [27.0, 27.0] } else { size },
+            cell_size: if size == [0.0, 0.0] {
+                [27.0, 27.0]
+            } else {
+                size
+            },
             cell_spacing: [spacing[0], spacing.get(1).copied().unwrap_or(spacing[0])],
             show_empty_boxes: int(s, "showemptyboxes", 0) != 0,
             move_over_empty_boxes: int(s, "moveoveremptyboxes", 0) != 0,
@@ -274,7 +339,11 @@ pub struct SelectGrid {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum SelectSlot {
-    Char { path: String, stage: Option<String>, params: BTreeMap<String, String> },
+    Char {
+        path: String,
+        stage: Option<String>,
+        params: BTreeMap<String, String>,
+    },
     Random,
     Empty,
 }
@@ -314,21 +383,36 @@ pub fn parse_select(src: &str) -> SelectDef {
                             Some((k, v)) => {
                                 params.insert(k.trim().to_ascii_lowercase(), unquote(v.trim()));
                             }
-                            None if stage.is_none() && !p.trim().is_empty() => stage = Some(unquote(p.trim())),
+                            None if stage.is_none() && !p.trim().is_empty() => {
+                                stage = Some(unquote(p.trim()))
+                            }
                             None => {}
                         }
                     }
-                    SelectSlot::Char { path: first, stage, params }
+                    SelectSlot::Char {
+                        path: first,
+                        stage,
+                        params,
+                    }
                 }
             };
             out.slots.push(slot);
         }
     }
     if let Some(st) = find_section(&secs, "extrastages") {
-        out.extra_stages = st.lines.iter().map(|l| unquote(split_top(l).first().map(|s| s.as_str()).unwrap_or(""))).filter(|s| !s.is_empty()).collect();
+        out.extra_stages = st
+            .lines
+            .iter()
+            .map(|l| unquote(split_top(l).first().map(|s| s.as_str()).unwrap_or("")))
+            .filter(|s| !s.is_empty())
+            .collect();
     }
     if let Some(o) = find_section(&secs, "options") {
-        out.options = o.entries.iter().map(|(k, v)| (k.clone(), unquote(v))).collect();
+        out.options = o
+            .entries
+            .iter()
+            .map(|(k, v)| (k.clone(), unquote(v)))
+            .collect();
     }
     out
 }
@@ -379,13 +463,18 @@ impl FightDef {
     }
 
     pub fn element(&self, section: &str, prefix: &str) -> Element {
-        self.section(section).map(|s| element(s, prefix)).unwrap_or_default()
+        self.section(section)
+            .map(|s| element(s, prefix))
+            .unwrap_or_default()
     }
 
     pub fn bar(&self, section: &str, player: usize) -> Bar {
         let s = self.section(section);
         let p = format!("p{player}");
-        let e = |k: &str| s.map(|s| element(s, &format!("{p}.{k}"))).unwrap_or_default();
+        let e = |k: &str| {
+            s.map(|s| element(s, &format!("{p}.{k}")))
+                .unwrap_or_default()
+        };
         Bar {
             pos: pos(s, &format!("{p}.pos")),
             range_x: pos(s, &format!("{p}.range.x")),
@@ -438,7 +527,11 @@ pub struct Storyboard {
 
 impl Storyboard {
     pub fn total_ticks(&self) -> i64 {
-        self.scenes.iter().skip(self.start_scene).map(|s| s.end_time.max(0) as i64).sum()
+        self.scenes
+            .iter()
+            .skip(self.start_scene)
+            .map(|s| s.end_time.max(0) as i64)
+            .sum()
     }
 
     pub fn background(&self, name: &str) -> Background {
@@ -451,24 +544,39 @@ pub fn parse_storyboard(src: &str) -> Storyboard {
     let def = find_section(&secs, "scenedef");
     let scenes = secs
         .iter()
-        .filter(|s| s.lname == "scene" || s.lname.strip_prefix("scene").is_some_and(|r| r.starts_with(char::is_whitespace)))
+        .filter(|s| {
+            s.lname == "scene"
+                || s.lname
+                    .strip_prefix("scene")
+                    .is_some_and(|r| r.starts_with(char::is_whitespace))
+        })
         .map(|s| {
             let sec = Some(s);
             let clear = s.get("clearcolor").map(|v| {
                 let c = nums(Some(v), &[0.0, 0.0, 0.0]);
-                [c[0] as u8, c.get(1).copied().unwrap_or(0.0) as u8, c.get(2).copied().unwrap_or(0.0) as u8]
+                [
+                    c[0] as u8,
+                    c.get(1).copied().unwrap_or(0.0) as u8,
+                    c.get(2).copied().unwrap_or(0.0) as u8,
+                ]
             });
             let layer_ids: std::collections::BTreeSet<i32> = s
                 .entries
                 .iter()
-                .filter_map(|(k, _)| k.strip_prefix("layer").and_then(|r| r.split('.').next()).and_then(|n| n.parse().ok()))
+                .filter_map(|(k, _)| {
+                    k.strip_prefix("layer")
+                        .and_then(|r| r.split('.').next())
+                        .and_then(|n| n.parse().ok())
+                })
                 .collect();
             let layers = layer_ids
                 .into_iter()
                 .map(|n| SceneLayer {
                     element: element(s, &format!("layer{n}")),
                     start_time: int(sec, &format!("layer{n}.starttime"), 0),
-                    end_time: s.get(&format!("layer{n}.endtime")).map(|_| int(sec, &format!("layer{n}.endtime"), 0)),
+                    end_time: s
+                        .get(&format!("layer{n}.endtime"))
+                        .map(|_| int(sec, &format!("layer{n}.endtime"), 0)),
                 })
                 .collect();
             Scene {
@@ -516,10 +624,18 @@ fn dir_of(p: &str) -> &str {
 }
 
 fn find<'a>(vfs: &'a Vfs, base: &str, name: &str) -> Option<VfsFile<'a>> {
-    resolve(vfs, base, name).or_else(|| resolve(vfs, "data", name)).or_else(|| resolve(vfs, "font", name)).or_else(|| resolve(vfs, "", name))
+    resolve(vfs, base, name)
+        .or_else(|| resolve(vfs, "data", name))
+        .or_else(|| resolve(vfs, "font", name))
+        .or_else(|| resolve(vfs, "", name))
 }
 
-fn load_fonts(vfs: &Vfs, base: &str, names: &BTreeMap<i32, String>, warnings: &mut Vec<String>) -> BTreeMap<i32, Font> {
+fn load_fonts(
+    vfs: &Vfs,
+    base: &str,
+    names: &BTreeMap<i32, String>,
+    warnings: &mut Vec<String>,
+) -> BTreeMap<i32, Font> {
     let mut out = BTreeMap::new();
     for (&n, name) in names {
         match find(vfs, base, name).map(|b| decode_fnt(&b)) {
@@ -533,7 +649,12 @@ fn load_fonts(vfs: &Vfs, base: &str, names: &BTreeMap<i32, String>, warnings: &m
     out
 }
 
-fn load_sff(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut Vec<String>) -> Option<DecodedSff> {
+fn load_sff(
+    vfs: &Vfs,
+    base: &str,
+    name: Option<&String>,
+    warnings: &mut Vec<String>,
+) -> Option<DecodedSff> {
     let name = name?;
     match find(vfs, base, name).map(|b| decode_sff(&b)) {
         Some(Ok(s)) => Some(s),
@@ -548,8 +669,15 @@ fn load_sff(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut Vec<Str
     }
 }
 
-fn load_snd(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut Vec<String>) -> HashMap<(i32, i32), Vec<u8>> {
-    let Some(name) = name else { return HashMap::new() };
+fn load_snd(
+    vfs: &Vfs,
+    base: &str,
+    name: Option<&String>,
+    warnings: &mut Vec<String>,
+) -> HashMap<(i32, i32), Vec<u8>> {
+    let Some(name) = name else {
+        return HashMap::new();
+    };
     match find(vfs, base, name).map(|b| decode_snd_checked(&b)) {
         Some(Ok(s)) => s,
         Some(Err(e)) => {
@@ -563,7 +691,12 @@ fn load_snd(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut Vec<Str
     }
 }
 
-fn load_storyboard(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut Vec<String>) -> Option<Storyboard> {
+fn load_storyboard(
+    vfs: &Vfs,
+    base: &str,
+    name: Option<&String>,
+    warnings: &mut Vec<String>,
+) -> Option<Storyboard> {
     let name = name?;
     match find(vfs, base, name) {
         Some(b) => Some(parse_storyboard(&text(&b))),
@@ -576,7 +709,9 @@ fn load_storyboard(vfs: &Vfs, base: &str, name: Option<&String>, warnings: &mut 
 
 pub fn load_screenpack(vfs: &Vfs, system_path: &str) -> Result<Screenpack, String> {
     let path = norm_path(system_path);
-    let src = vfs.get(&path).ok_or_else(|| format!("screenpack: {path} not found"))?;
+    let src = vfs
+        .get(&path)
+        .ok_or_else(|| format!("screenpack: {path} not found"))?;
     let dir = dir_of(&path).to_string();
     let system = parse_system(&text(&src));
     let mut warnings = Vec::new();
@@ -589,10 +724,16 @@ pub fn load_screenpack(vfs: &Vfs, system_path: &str) -> Result<Screenpack, Strin
     };
     let fight_path = system.fight.as_ref().and_then(|n| {
         let candidates = [format!("{dir}/{n}"), format!("data/{n}"), n.clone()];
-        candidates.into_iter().map(|c| norm_path(&c)).find(|c| vfs.contains_key(c))
+        candidates
+            .into_iter()
+            .map(|c| norm_path(&c))
+            .find(|c| vfs.contains_key(c))
     });
     let (fight, fight_dir) = match &fight_path {
-        Some(p) => (parse_fight(&vfs.get(p).map(|b| text(&b)).unwrap_or_default()), dir_of(p).to_string()),
+        Some(p) => (
+            parse_fight(&vfs.get(p).map(|b| text(&b)).unwrap_or_default()),
+            dir_of(p).to_string(),
+        ),
         None => {
             warnings.push(format!("fight.def {:?}: not found", system.fight));
             (FightDef::default(), dir.clone())
@@ -606,5 +747,19 @@ pub fn load_screenpack(vfs: &Vfs, system_path: &str) -> Result<Screenpack, Strin
     let fight_fonts = load_fonts(vfs, &fight_dir, &fight.fonts, &mut warnings);
     let logo = load_storyboard(vfs, &dir, system.logo_storyboard.as_ref(), &mut warnings);
     let intro = load_storyboard(vfs, &dir, system.intro_storyboard.as_ref(), &mut warnings);
-    Ok(Screenpack { dir, system, select, fight, sprites, fight_sprites, sounds, fight_sounds, fonts, fight_fonts, logo, intro, warnings })
+    Ok(Screenpack {
+        dir,
+        system,
+        select,
+        fight,
+        sprites,
+        fight_sprites,
+        sounds,
+        fight_sounds,
+        fonts,
+        fight_fonts,
+        logo,
+        intro,
+        warnings,
+    })
 }

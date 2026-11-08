@@ -43,12 +43,31 @@ fn spawners_stay_bounded() {
     for k in 0..2000 {
         m.tick(&[0, 0]);
         if k % 400 == 399 {
-            println!("tick {k}: {} ms, explods {}, projectiles {}, fighters {}", t.elapsed().as_millis(), m.explods.len(), m.projectiles.len(), m.fighters.len());
+            println!(
+                "tick {k}: {} ms, explods {}, projectiles {}, fighters {}",
+                t.elapsed().as_millis(),
+                m.explods.len(),
+                m.projectiles.len(),
+                m.fighters.len()
+            );
         }
     }
     let ms = t.elapsed().as_millis();
-    println!("2000 ticks spam: {ms} ms, explods {}, projectiles {}, fighters {}", m.explods.len(), m.projectiles.len(), m.fighters.len());
-    assert!(m.explods.len() <= 256, "explods unbounded: {}", m.explods.len());
-    assert!(m.projectiles.len() <= 256, "projectiles unbounded: {}", m.projectiles.len());
+    println!(
+        "2000 ticks spam: {ms} ms, explods {}, projectiles {}, fighters {}",
+        m.explods.len(),
+        m.projectiles.len(),
+        m.fighters.len()
+    );
+    assert!(
+        m.explods.len() <= 256,
+        "explods unbounded: {}",
+        m.explods.len()
+    );
+    assert!(
+        m.projectiles.len() <= 256,
+        "projectiles unbounded: {}",
+        m.projectiles.len()
+    );
     assert!(m.fighters.len() <= 64);
 }

@@ -1,6 +1,9 @@
 use crate::bundle::Files;
 use crate::catalog::{detect, Catalog, FileRef, Item};
-use crate::client::{check_request, file_request, interpret_file, interpret_tree, is_transient, tree_request, MarketError, RateLimit, Request, Response, TreeOutcome};
+use crate::client::{
+    check_request, file_request, interpret_file, interpret_tree, is_transient, tree_request,
+    MarketError, RateLimit, Request, Response, TreeOutcome,
+};
 use crate::ops::{InstallJob, Progress, PARALLEL_DOWNLOADS};
 use crate::repo::RepoRef;
 use crate::safety::url_allowed;
@@ -14,7 +17,15 @@ use web_sys::{Headers, RequestInit, RequestMode, Response as WebResponse, Worker
 const ATTEMPTS: usize = 3;
 
 fn js_err(e: JsValue) -> MarketError {
-    MarketError::Network(e.as_string().or_else(|| js_sys::Reflect::get(&e, &"message".into()).ok().and_then(|m| m.as_string())).unwrap_or_else(|| "request failed".into()))
+    MarketError::Network(
+        e.as_string()
+            .or_else(|| {
+                js_sys::Reflect::get(&e, &"message".into())
+                    .ok()
+                    .and_then(|m| m.as_string())
+            })
+            .unwrap_or_else(|| "request failed".into()),
+    )
 }
 
 async fn sleep_ms(ms: i32) {
@@ -46,12 +57,16 @@ pub async fn get(req: &Request) -> Result<Response, MarketError> {
     check_request(req)?;
     let headers = Headers::new().map_err(js_err)?;
     if req.url.starts_with("https://api.github.com/") {
-        headers.set("Accept", "application/vnd.github+json").map_err(js_err)?;
+        headers
+            .set("Accept", "application/vnd.github+json")
+            .map_err(js_err)?;
         if let Some(e) = &req.etag {
             headers.set("If-None-Match", e).map_err(js_err)?;
         }
         if let Some(t) = &req.token {
-            headers.set("Authorization", &format!("Bearer {t}")).map_err(js_err)?;
+            headers
+                .set("Authorization", &format!("Bearer {t}"))
+                .map_err(js_err)?;
         }
     }
     let init = RequestInit::new();
@@ -59,25 +74,47 @@ pub async fn get(req: &Request) -> Result<Response, MarketError> {
     init.set_mode(RequestMode::Cors);
     init.set_headers(&headers);
     let request = web_sys::Request::new_with_str_and_init(&req.url, &init).map_err(js_err)?;
-    let resp: WebResponse = JsFuture::from(fetch_promise(&request)).await.map_err(js_err)?.dyn_into().map_err(|_| MarketError::Network("unexpected response".into()))?;
+    let resp: WebResponse = JsFuture::from(fetch_promise(&request))
+        .await
+        .map_err(js_err)?
+        .dyn_into()
+        .map_err(|_| MarketError::Network("unexpected response".into()))?;
     if !url_allowed(&resp.url()) && !resp.url().is_empty() {
         return Err(MarketError::HostNotAllowed);
     }
     let status = resp.status();
     let h = resp.headers();
     let header = |n: &str| h.get(n).ok().flatten();
-    let rate = match (header("x-ratelimit-remaining").and_then(|v| v.parse().ok()), header("x-ratelimit-reset").and_then(|v| v.parse().ok())) {
-        (Some(remaining), Some(reset_epoch)) => Some(RateLimit { remaining, reset_epoch }),
+    let rate = match (
+        header("x-ratelimit-remaining").and_then(|v| v.parse().ok()),
+        header("x-ratelimit-reset").and_then(|v| v.parse().ok()),
+    ) {
+        (Some(remaining), Some(reset_epoch)) => Some(RateLimit {
+            remaining,
+            reset_epoch,
+        }),
         _ => None,
     };
-    let mut out = Response { status, etag: header("etag"), body: Vec::new(), rate, retry_after_secs: header("retry-after").and_then(|v| v.parse().ok()), location: None };
+    let mut out = Response {
+        status,
+        etag: header("etag"),
+        body: Vec::new(),
+        rate,
+        retry_after_secs: header("retry-after").and_then(|v| v.parse().ok()),
+        location: None,
+    };
     if status != 200 {
         return Ok(out);
     }
-    if header("content-length").and_then(|v| v.parse::<u64>().ok()).is_some_and(|n| n > req.max_bytes) {
+    if header("content-length")
+        .and_then(|v| v.parse::<u64>().ok())
+        .is_some_and(|n| n > req.max_bytes)
+    {
         return Err(MarketError::TooLarge);
     }
-    let buf = JsFuture::from(resp.array_buffer().map_err(js_err)?).await.map_err(js_err)?;
+    let buf = JsFuture::from(resp.array_buffer().map_err(js_err)?)
+        .await
+        .map_err(js_err)?;
     let bytes = Uint8Array::new(&buf);
     if bytes.length() as u64 > req.max_bytes {
         return Err(MarketError::TooLarge);
@@ -105,24 +142,43 @@ async fn get_retry(req: &Request, cancel: &AtomicBool) -> Result<Response, Marke
 
 pub enum ListOutcome {
     NotModified,
-    Fresh { catalog: Catalog, etag: Option<String> },
+    Fresh {
+        catalog: Catalog,
+        etag: Option<String>,
+    },
 }
 
-pub async fn list_repo(repo: &RepoRef, etag: Option<&str>, token: Option<&str>) -> Result<ListOutcome, MarketError> {
+pub async fn list_repo(
+    repo: &RepoRef,
+    etag: Option<&str>,
+    token: Option<&str>,
+) -> Result<ListOutcome, MarketError> {
     let resp = get_retry(&tree_request(repo, etag, token), &AtomicBool::new(false)).await?;
     match interpret_tree(&resp)? {
         TreeOutcome::NotModified => Ok(ListOutcome::NotModified),
-        TreeOutcome::Fresh { tree, etag } => Ok(ListOutcome::Fresh { catalog: detect(&tree, &repo.subdir, &repo.name), etag }),
+        TreeOutcome::Fresh { tree, etag } => Ok(ListOutcome::Fresh {
+            catalog: detect(&tree, &repo.subdir, &repo.name),
+            etag,
+        }),
     }
 }
 
-async fn download_one(repo: &RepoRef, f: &FileRef, cancel: &AtomicBool) -> Result<Vec<u8>, MarketError> {
+async fn download_one(
+    repo: &RepoRef,
+    f: &FileRef,
+    cancel: &AtomicBool,
+) -> Result<Vec<u8>, MarketError> {
     let limit = f.size.max(1).saturating_mul(2).max(1 << 20);
     let resp = get_retry(&file_request(repo, &f.path, limit), cancel).await?;
     interpret_file(&resp, limit)
 }
 
-pub async fn download_files(repo: &RepoRef, wanted: &[FileRef], cancel: &AtomicBool, on_file: &dyn Fn(u64)) -> Result<Files, MarketError> {
+pub async fn download_files(
+    repo: &RepoRef,
+    wanted: &[FileRef],
+    cancel: &AtomicBool,
+    on_file: &dyn Fn(u64),
+) -> Result<Files, MarketError> {
     let mut out: Files = Vec::with_capacity(wanted.len());
     for chunk in wanted.chunks(PARALLEL_DOWNLOADS) {
         let results = join_all(chunk.iter().map(|f| download_one(repo, f, cancel))).await;
@@ -138,9 +194,16 @@ pub async fn download_files(repo: &RepoRef, wanted: &[FileRef], cancel: &AtomicB
     Ok(out)
 }
 
-pub async fn install_item(repo: &RepoRef, item: &Item, catalog: &Catalog, cancel: &AtomicBool, progress: &dyn Fn(Progress)) -> Result<Files, MarketError> {
+pub async fn install_item(
+    repo: &RepoRef,
+    item: &Item,
+    catalog: &Catalog,
+    cancel: &AtomicBool,
+    progress: &dyn Fn(Progress),
+) -> Result<Files, MarketError> {
     let mut job = InstallJob::new(item, catalog)?;
-    let (mut done_files, mut done_bytes, mut total_files, mut total_bytes) = (0usize, 0u64, 0usize, 0u64);
+    let (mut done_files, mut done_bytes, mut total_files, mut total_bytes) =
+        (0usize, 0u64, 0usize, 0u64);
     while !job.is_done() {
         let wanted: Vec<FileRef> = job.pending().to_vec();
         total_files += wanted.len();
@@ -150,7 +213,12 @@ pub async fn install_item(repo: &RepoRef, item: &Item, catalog: &Catalog, cancel
         let downloaded = download_files(repo, &wanted, cancel, &|n| {
             let (f, b) = counters.get();
             counters.set((f + 1, b + n));
-            progress(Progress { done_files: f + 1, total_files: tf, done_bytes: b + n, total_bytes: tb });
+            progress(Progress {
+                done_files: f + 1,
+                total_files: tf,
+                done_bytes: b + n,
+                total_bytes: tb,
+            });
         })
         .await?;
         (done_files, done_bytes) = counters.get();

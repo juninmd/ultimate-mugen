@@ -45,10 +45,28 @@ impl Fnv {
 pub fn checksum(m: &Match) -> u128 {
     let mut h = Fnv::default();
     h.i64(m.game_time);
-    for v in [m.round_state, m.round_no, m.round_time, m.timer, m.wins[0], m.wins[1], m.winner_side, m.slow_mo, m.shake_time] {
+    for v in [
+        m.round_state,
+        m.round_no,
+        m.round_time,
+        m.timer,
+        m.wins[0],
+        m.wins[1],
+        m.winner_side,
+        m.slow_mo,
+        m.shake_time,
+    ] {
         h.i32(v);
     }
-    for v in [m.tag_cooldown[0], m.tag_cooldown[1], m.tag_ko_timer[0], m.tag_ko_timer[1], m.team_member[0] as i32, m.team_member[1] as i32, m.round_ticks] {
+    for v in [
+        m.tag_cooldown[0],
+        m.tag_cooldown[1],
+        m.tag_ko_timer[0],
+        m.tag_ko_timer[1],
+        m.team_member[0] as i32,
+        m.team_member[1] as i32,
+        m.round_ticks,
+    ] {
         h.i32(v);
     }
     h.i32(m.first_attack.map_or(-1, |s| s as i32));
@@ -72,13 +90,41 @@ pub fn checksum(m: &Match) -> u128 {
         h.v2(f.pos);
         h.v2(f.vel);
         h.f32(f.facing);
-        for v in [f.state_no, f.prev_state_no, f.state_time, f.anim_no, f.anim_real, f.elem as i32, f.elem_time, f.anim_elapsed] {
+        for v in [
+            f.state_no,
+            f.prev_state_no,
+            f.state_time,
+            f.anim_no,
+            f.anim_real,
+            f.elem as i32,
+            f.elem_time,
+            f.anim_elapsed,
+        ] {
             h.i32(v);
         }
-        for v in [f.hit_pause, f.hit_shake, f.hit_over_time, f.slide_time, f.fall_time, f.juggle_used, f.move_contact, f.move_hit, f.move_guarded, f.move_reversed, f.hit_count, f.uniq_hit_count, f.combo_count] {
+        for v in [
+            f.hit_pause,
+            f.hit_shake,
+            f.hit_over_time,
+            f.slide_time,
+            f.fall_time,
+            f.juggle_used,
+            f.move_contact,
+            f.move_hit,
+            f.move_guarded,
+            f.move_reversed,
+            f.hit_count,
+            f.uniq_hit_count,
+            f.combo_count,
+        ] {
             h.i32(v);
         }
-        for v in [f.pause_move_time, f.super_move_time, f.air_jumps, f.form_time] {
+        for v in [
+            f.pause_move_time,
+            f.super_move_time,
+            f.air_jumps,
+            f.form_time,
+        ] {
             h.i32(v);
         }
         h.u32(f.form as u32);
@@ -89,7 +135,14 @@ pub fn checksum(m: &Match) -> u128 {
         h.f32(f.ghv.yvel);
         h.f32(f.ghv.damage);
         h.u32(f.ghv.fall as u32);
-        h.bytes(&[f.state_type as u8, f.move_type as u8, f.physics as u8, f.ctrl as u8, f.alive as u8, f.hitdef_active as u8]);
+        h.bytes(&[
+            f.state_type as u8,
+            f.move_type as u8,
+            f.physics as u8,
+            f.ctrl as u8,
+            f.alive as u8,
+            f.hitdef_active as u8,
+        ]);
         h.f32(f.life);
         h.u32(f.ikemen.standby as u32);
         h.f32(f.power);

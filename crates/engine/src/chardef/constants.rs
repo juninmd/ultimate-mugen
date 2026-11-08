@@ -71,4 +71,4 @@ pub fn default_constants() -> HashMap<String, f64> {
     s("movement.air.gethit.airrecover.yaccel", 0.35);
     s("movement.air.gethit.trip.groundlevel", 15.0);
     m
-}
+}

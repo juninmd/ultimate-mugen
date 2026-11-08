@@ -33,8 +33,8 @@ fn is_reserved_device_name(seg: &str) -> bool {
         None => seg,
     };
     const NAMES: [&str; 22] = [
-        "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
-        "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+        "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8",
+        "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
     ];
     NAMES.iter().any(|&r| stem.eq_ignore_ascii_case(r))
 }
@@ -43,7 +43,9 @@ pub fn safe_rel_path(p: &str) -> Option<String> {
     if p.is_empty() || p.len() > MAX_PATH_BYTES || p.starts_with('/') || p.ends_with('/') {
         return None;
     }
-    if p.chars().any(|c| c.is_control() || matches!(c, '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|')) {
+    if p.chars()
+        .any(|c| c.is_control() || matches!(c, '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|'))
+    {
         return None;
     }
     for seg in p.split('/') {
@@ -72,15 +74,31 @@ pub fn safe_subdir(p: &str) -> Option<String> {
 }
 
 pub fn valid_owner(s: &str) -> bool {
-    !s.is_empty() && s.len() <= 39 && !s.starts_with('-') && !s.ends_with('-') && s.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
+    !s.is_empty()
+        && s.len() <= 39
+        && !s.starts_with('-')
+        && !s.ends_with('-')
+        && s.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
 }
 
 pub fn valid_repo_name(s: &str) -> bool {
-    !s.is_empty() && s.len() <= 100 && s != "." && s != ".." && s.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'))
+    !s.is_empty()
+        && s.len() <= 100
+        && s != "."
+        && s != ".."
+        && s.chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'))
 }
 
 pub fn valid_ref(s: &str) -> bool {
-    !s.is_empty() && s.len() <= 100 && !s.starts_with(['/', '-', '.']) && !s.ends_with(['/', '.']) && !s.contains("..") && !s.contains("//") && s.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.' | '/'))
+    !s.is_empty()
+        && s.len() <= 100
+        && !s.starts_with(['/', '-', '.'])
+        && !s.ends_with(['/', '.'])
+        && !s.contains("..")
+        && !s.contains("//")
+        && s.chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.' | '/'))
 }
 
 pub fn percent_encode_path(p: &str) -> String {
@@ -126,21 +144,48 @@ mod tests {
     #[test]
     fn rejects_traversal_and_absolute_paths() {
         let bad = [
-            "", "/etc/passwd", "../x", "a/../b", "a/./b", "a//b", "a\\b", "C:/x", "a/b/",
-            "x\0y", "a/b.", "con:", "a/b?c", "con", "aux.def", "nul.sff", "prn", "com1.cns",
-            "lpt1.txt", "a/ b/c",
+            "",
+            "/etc/passwd",
+            "../x",
+            "a/../b",
+            "a/./b",
+            "a//b",
+            "a\\b",
+            "C:/x",
+            "a/b/",
+            "x\0y",
+            "a/b.",
+            "con:",
+            "a/b?c",
+            "con",
+            "aux.def",
+            "nul.sff",
+            "prn",
+            "com1.cns",
+            "lpt1.txt",
+            "a/ b/c",
         ];
         for b in bad {
             assert!(safe_rel_path(b).is_none(), "{b:?}");
         }
-        assert_eq!(safe_rel_path("chars/KFM/kfm.def").as_deref(), Some("chars/KFM/kfm.def"));
-        assert_eq!(safe_rel_path("sprites/ç é.sff").as_deref(), Some("sprites/ç é.sff"));
+        assert_eq!(
+            safe_rel_path("chars/KFM/kfm.def").as_deref(),
+            Some("chars/KFM/kfm.def")
+        );
+        assert_eq!(
+            safe_rel_path("sprites/ç é.sff").as_deref(),
+            Some("sprites/ç é.sff")
+        );
     }
 
     #[test]
     fn only_github_hosts_over_https_are_allowed() {
-        assert!(url_allowed("https://api.github.com/repos/a/b/git/trees/HEAD"));
-        assert!(url_allowed("https://raw.githubusercontent.com/a/b/HEAD/x.def"));
+        assert!(url_allowed(
+            "https://api.github.com/repos/a/b/git/trees/HEAD"
+        ));
+        assert!(url_allowed(
+            "https://raw.githubusercontent.com/a/b/HEAD/x.def"
+        ));
         assert!(!url_allowed("http://api.github.com/x"));
         assert!(!url_allowed("https://evil.com/x"));
         assert!(!url_allowed("https://api.github.com.evil.com/x"));
@@ -158,9 +203,22 @@ mod tests {
 
     #[test]
     fn ref_and_owner_validation() {
-        assert!(valid_owner("juninmd") && !valid_owner("-x") && !valid_owner("a b") && !valid_owner(""));
-        assert!(valid_repo_name("ultimate-mugen") && valid_repo_name("a.b_c") && !valid_repo_name("..") && !valid_repo_name("a/b"));
-        assert!(valid_ref("main") && valid_ref("feature/x") && !valid_ref("../x") && !valid_ref("a..b") && !valid_ref("-x"));
+        assert!(
+            valid_owner("juninmd") && !valid_owner("-x") && !valid_owner("a b") && !valid_owner("")
+        );
+        assert!(
+            valid_repo_name("ultimate-mugen")
+                && valid_repo_name("a.b_c")
+                && !valid_repo_name("..")
+                && !valid_repo_name("a/b")
+        );
+        assert!(
+            valid_ref("main")
+                && valid_ref("feature/x")
+                && !valid_ref("../x")
+                && !valid_ref("a..b")
+                && !valid_ref("-x")
+        );
     }
 
     #[test]

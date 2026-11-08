@@ -10,9 +10,18 @@ pub(super) fn build_forms(nc: &NativeChar, pal_no: i32, with_images: bool) -> Ve
     let mut forms = vec![];
     if let Some(spec) = &nc.abilities {
         for f in &spec.forms {
-            let target = f.character.as_deref().and_then(find_native).map(|target_nc| {
-                Arc::new(super::compile::compile_native_with(&target_nc, pal_no, with_images, None))
-            });
+            let target = f
+                .character
+                .as_deref()
+                .and_then(find_native)
+                .map(|target_nc| {
+                    Arc::new(super::compile::compile_native_with(
+                        &target_nc,
+                        pal_no,
+                        with_images,
+                        None,
+                    ))
+                });
             forms.push(FormInfo {
                 name: f.name.clone(),
                 cost: f.cost.unwrap_or(1000.0).max(0.0),
@@ -38,7 +47,10 @@ pub(super) fn build_forms(nc: &NativeChar, pal_no: i32, with_images: bool) -> Ve
 
 pub fn form_palette(form: &FormSpec, palette: Option<&Value>) -> Option<Value> {
     let pal = form.palette.as_ref()?;
-    let mut colors = palette.and_then(|p| p.get("colors").unwrap_or(p).as_object()).cloned().unwrap_or_default();
+    let mut colors = palette
+        .and_then(|p| p.get("colors").unwrap_or(p).as_object())
+        .cloned()
+        .unwrap_or_default();
     if let Some(parts) = &form.parts {
         if let Some(overrides) = pal.get("colors").unwrap_or(pal).as_object() {
             for (k, v) in overrides {
@@ -62,31 +74,54 @@ pub(super) fn insert_form_sprites(
     with_images: bool,
     palette: Option<&Value>,
 ) {
-    if !with_images || fr.effect.is_some() { return; }
-    let Some(spec) = &nc.abilities else { return; };
+    if !with_images || fr.effect.is_some() {
+        return;
+    }
+    let Some(spec) = &nc.abilities else {
+        return;
+    };
     for (i, form) in spec.forms.iter().enumerate() {
         if let Some(p) = form_palette(form, palette) {
             let rendered = super::compile::render_frame(nc, fr, true, Some(&p));
-            sprites.insert((2 + i as i32, index), Sprite {
-                image: rendered.image,
-                width: rendered.width,
-                height: rendered.height,
-                axis_x: rendered.axis_x,
-                axis_y: rendered.axis_y,
-                scale: rendered.scale,
-            });
+            sprites.insert(
+                (2 + i as i32, index),
+                Sprite {
+                    image: rendered.image,
+                    width: rendered.width,
+                    height: rendered.height,
+                    axis_x: rendered.axis_x,
+                    axis_y: rendered.axis_y,
+                    scale: rendered.scale,
+                },
+            );
         }
     }
 }
 
-pub(super) fn collect_form_moves<'a>(nc: &'a NativeChar) -> Vec<(&'a NativeMove, Option<String>, u32)> {
+pub(super) fn collect_form_moves<'a>(
+    nc: &'a NativeChar,
+) -> Vec<(&'a NativeMove, Option<String>, u32)> {
     let mut out = vec![];
     let Some(spec) = &nc.abilities else {
-        for m in &nc.moves { out.push((m, None, u32::MAX)); }
+        for m in &nc.moves {
+            out.push((m, None, u32::MAX));
+        }
         return out;
     };
-    let replacing: Vec<u32> = spec.forms.iter().enumerate().filter(|(_, f)| f.replace_moves).map(|(i, _)| (i + 1) as u32).collect();
-    let base_cond = (!replacing.is_empty()).then(|| replacing.iter().map(|n| format!("form != {n}")).collect::<Vec<_>>().join(" && "));
+    let replacing: Vec<u32> = spec
+        .forms
+        .iter()
+        .enumerate()
+        .filter(|(_, f)| f.replace_moves)
+        .map(|(i, _)| (i + 1) as u32)
+        .collect();
+    let base_cond = (!replacing.is_empty()).then(|| {
+        replacing
+            .iter()
+            .map(|n| format!("form != {n}"))
+            .collect::<Vec<_>>()
+            .join(" && ")
+    });
     let base_mask = replacing.iter().fold(u32::MAX, |mask, n| mask & !(1 << n));
     for m in &nc.moves {
         out.push((m, base_cond.clone(), base_mask));

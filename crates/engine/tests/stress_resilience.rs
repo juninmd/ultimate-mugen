@@ -10,7 +10,10 @@ use ume_engine::triggers::Ctx;
 use ume_formats::vfs::{add_zip, find_char_defs, Vfs};
 
 fn load_kfm() -> ume_engine::chardef::CharDef {
-    let zip_path = format!("{}/../../assets/mugen/elecbyte.zip", env!("CARGO_MANIFEST_DIR"));
+    let zip_path = format!(
+        "{}/../../assets/mugen/elecbyte.zip",
+        env!("CARGO_MANIFEST_DIR")
+    );
     let mut vfs = Vfs::new();
     add_zip(&mut vfs, &std::fs::read(zip_path).unwrap(), "").unwrap();
     let def = find_char_defs(&vfs).into_iter().next().unwrap();

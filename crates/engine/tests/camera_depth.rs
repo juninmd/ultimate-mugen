@@ -3,16 +3,25 @@ use support::*;
 use ume_engine::expr::{parse, Expr};
 use ume_engine::matchs::Match;
 
-fn ev(m: &Match, i: usize, src: &str) -> f64 { m.ev(i, &Expr::new(parse(src).unwrap())) }
+fn ev(m: &Match, i: usize, src: &str) -> f64 {
+    m.ev(i, &Expr::new(parse(src).unwrap()))
+}
 
-fn step(m: &mut Match, n: usize) { for _ in 0..n { m.tick(&[0, 0]); } }
+fn step(m: &mut Match, n: usize) {
+    for _ in 0..n {
+        m.tick(&[0, 0]);
+    }
+}
 
 fn once(kind: &str, params: &str) -> String {
     format!("[Statedef 800]\ntype = S\nphysics = S\n\n[State 800, run]\ntype = {kind}\ntrigger1 = var(0) = 0\n{params}\n\n[State 800, once]\ntype = VarSet\ntrigger1 = 1\nv = 0\nvalue = 1\n\n[State 800, shot]\ntype = Projectile\ntrigger1 = Time = 3\nprojanim = 1000\nattr = S, NP\ndamage = 10\nhitflag = MAF\npausetime = 0, 0\nvelocity = 0\noffset = 0, -30\n")
 }
 
 fn scripted(kind: &str, params: &str) -> Match {
-    let mut m = duel(mugen_char("scripted", &once(kind, params)), mugen_char("dummy", ""));
+    let mut m = duel(
+        mugen_char("scripted", &once(kind, params)),
+        mugen_char("dummy", ""),
+    );
     enter(&mut m, 0, 800);
     m
 }
@@ -22,8 +31,15 @@ fn ground_level_offset_raises_the_floor_under_the_character() {
     let mut m = scripted("GroundLevelOffset", "value = 20");
     step(&mut m, 2);
     assert_eq!(m.fighters[0].pos.y, -20.0);
-    assert_eq!(ev(&m, 0, "Pos Y"), 0.0, "Pos Y is measured from the character's own ground");
-    assert!((ev(&m, 1, "ScreenPos Y") - ev(&m, 0, "ScreenPos Y") - 20.0).abs() < 1e-3, "the raised floor shows on screen");
+    assert_eq!(
+        ev(&m, 0, "Pos Y"),
+        0.0,
+        "Pos Y is measured from the character's own ground"
+    );
+    assert!(
+        (ev(&m, 1, "ScreenPos Y") - ev(&m, 0, "ScreenPos Y") - 20.0).abs() < 1e-3,
+        "the raised floor shows on screen"
+    );
     assert_eq!(ev(&m, 1, "Pos Y"), 0.0);
 }
 
@@ -32,7 +48,11 @@ fn ground_level_offset_moves_the_projectile_spawn_height() {
     let mut m = scripted("GroundLevelOffset", "value = 20");
     step(&mut m, 5);
     assert_eq!(m.projectiles.len(), 1);
-    assert!((m.projectiles[0].pos.y - (-20.0 - 30.0)).abs() < 1.5, "{}", m.projectiles[0].pos.y);
+    assert!(
+        (m.projectiles[0].pos.y - (-20.0 - 30.0)).abs() < 1.5,
+        "{}",
+        m.projectiles[0].pos.y
+    );
 }
 
 #[test]

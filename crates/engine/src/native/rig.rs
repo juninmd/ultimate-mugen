@@ -15,7 +15,8 @@
 //! the coverage (downsampled for wide blurs), a 3-pass box blur (sigma = blur / 2), then tinting
 //! and compositing. Cel shading resolves the three canvas clip/fill passes per pixel from one
 //! coverage mask and its shifted copies.
-#[path = "rig/dragon.rs"] mod dragon;
+#[path = "rig/dragon.rs"]
+mod dragon;
 use super::types::{ActiveSpec, Box4};
 use crate::chardef::ImageData;
 use serde_json::Value;

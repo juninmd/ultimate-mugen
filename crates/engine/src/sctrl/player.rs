@@ -2,14 +2,20 @@ use crate::chardef::Controller;
 use crate::matchs::Match;
 
 fn target_index(m: &Match, i: usize, sc: &Controller) -> Option<usize> {
-    if !sc.has("id", 0) { return Some(i); }
+    if !sc.has("id", 0) {
+        return Some(i);
+    }
     let id = m.num(i, sc, "id", -1.0, 0);
-    if id < 0.0 { return Some(i); }
+    if id < 0.0 {
+        return Some(i);
+    }
     m.idx(id as u32)
 }
 
 pub fn modify_player(m: &mut Match, i: usize, sc: &Controller) {
-    let Some(t) = target_index(m, i, sc) else { return };
+    let Some(t) = target_index(m, i, sc) else {
+        return;
+    };
     let n = |m: &Match, k: &str| m.num(i, sc, k, 0.0, 0);
     if sc.has("lifemax", 0) {
         let v = n(m, "lifemax") as f32;

@@ -62,4 +62,4 @@ pub fn decode(bytes: &[u8]) -> Option<Pcm> {
         }
     }
     (!out.frames.is_empty()).then_some(out)
-}
+}

@@ -22,7 +22,10 @@ pub use state::{Installed, MarketState, RepoRecord};
 pub fn now_secs() -> u64 {
     #[cfg(not(target_arch = "wasm32"))]
     {
-        std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0)
     }
     #[cfg(target_arch = "wasm32")]
     {

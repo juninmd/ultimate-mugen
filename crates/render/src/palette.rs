@@ -65,9 +65,17 @@ mod tests {
     #[test]
     fn identical_palettes_share_one_row() {
         let mut rows = PaletteRows::new();
-        assert_eq!(rows.row(&colors(1)), Some((0, true)), "first palette is uploaded");
+        assert_eq!(
+            rows.row(&colors(1)),
+            Some((0, true)),
+            "first palette is uploaded"
+        );
         for _ in 0..50 {
-            assert_eq!(rows.row(&colors(1)), Some((0, false)), "same palette, already resident");
+            assert_eq!(
+                rows.row(&colors(1)),
+                Some((0, false)),
+                "same palette, already resident"
+            );
         }
         assert_eq!(rows.used(), 1);
     }
@@ -90,8 +98,15 @@ mod tests {
             assert!(rows.row(&colors(seed)).is_some(), "row {seed} fits");
         }
         assert_eq!(rows.used(), crate::PALETTE_ROWS);
-        assert!(rows.row(&colors(crate::PALETTE_ROWS)).is_none(), "no room left");
-        assert_eq!(rows.row(&colors(5)), Some((5, false)), "resident palettes still work");
+        assert!(
+            rows.row(&colors(crate::PALETTE_ROWS)).is_none(),
+            "no room left"
+        );
+        assert_eq!(
+            rows.row(&colors(5)),
+            Some((5, false)),
+            "resident palettes still work"
+        );
     }
 
     #[test]

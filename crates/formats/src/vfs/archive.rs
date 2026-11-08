@@ -21,7 +21,13 @@ pub(crate) enum Source {
     #[cfg(not(target_arch = "wasm32"))]
     Disk(Arc<PathBuf>),
     /// Member of a zip archive, inflated when requested.
-    Zip { archive: ZipArchive, method: u16, csize: u64, usize: u64, local: u64 },
+    Zip {
+        archive: ZipArchive,
+        method: u16,
+        csize: u64,
+        usize: u64,
+        local: u64,
+    },
 }
 
 pub(crate) struct File {
@@ -31,23 +37,35 @@ pub(crate) struct File {
 
 impl File {
     pub(super) fn new(source: Source) -> Self {
-        File { source, cache: Mutex::new(None) }
+        File {
+            source,
+            cache: Mutex::new(None),
+        }
     }
 
     pub(super) fn bytes(&self) -> Option<Arc<Vec<u8>>> {
         if let Source::Bytes(data) = &self.source {
             return Some(data.clone());
         }
-        if let Some(hit) = self.cache.lock().unwrap_or_else(|e| e.into_inner()).as_ref() {
+        if let Some(hit) = self
+            .cache
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .as_ref()
+        {
             return Some(hit.clone());
         }
         let data = match &self.source {
             Source::Bytes(_) => unreachable!(),
             #[cfg(not(target_arch = "wasm32"))]
             Source::Disk(path) => Arc::new(std::fs::read(&**path).ok()?),
-            Source::Zip { archive, method, csize, usize, local } => {
-                Arc::new(read_zip_member(archive, *method, *csize, *usize, *local)?)
-            }
+            Source::Zip {
+                archive,
+                method,
+                csize,
+                usize,
+                local,
+            } => Arc::new(read_zip_member(archive, *method, *csize, *usize, *local)?),
         };
         if data.len() <= CACHE_MAX_BYTES {
             *self.cache.lock().unwrap_or_else(|e| e.into_inner()) = Some(data.clone());
@@ -59,7 +77,11 @@ impl File {
     /// of a multi-megabyte bank. Used to deduplicate imported packs.
     pub(super) fn signature(&self) -> Option<(u64, u64)> {
         const SAMPLE: usize = 64 << 10;
-        let h = |bytes: &[u8]| bytes.iter().fold(super::find::FNV_OFFSET, |h, &b| (h ^ b as u64).wrapping_mul(super::find::FNV_PRIME));
+        let h = |bytes: &[u8]| {
+            bytes.iter().fold(super::find::FNV_OFFSET, |h, &b| {
+                (h ^ b as u64).wrapping_mul(super::find::FNV_PRIME)
+            })
+        };
         match &self.source {
             Source::Bytes(data) => Some((data.len() as u64, h(data))),
             #[cfg(not(target_arch = "wasm32"))]
@@ -67,10 +89,19 @@ impl File {
                 let len = std::fs::metadata(&**path).ok()?.len();
                 let mut file = std::fs::File::open(&**path).ok()?;
                 let head = read_at(&mut file, 0, SAMPLE.min(len as usize))?;
-                let tail = read_at(&mut file, len.saturating_sub(SAMPLE as u64), SAMPLE.min(len as usize))?;
+                let tail = read_at(
+                    &mut file,
+                    len.saturating_sub(SAMPLE as u64),
+                    SAMPLE.min(len as usize),
+                )?;
                 Some((len, h(&head).rotate_left(1) ^ h(&tail)))
             }
-            Source::Zip { archive, csize, usize: size, .. } => {
+            Source::Zip {
+                archive,
+                csize,
+                usize: size,
+                ..
+            } => {
                 let sample = match archive {
                     ZipArchive::Bytes(b) => h(&b[..b.len().min(SAMPLE)]),
                     #[cfg(not(target_arch = "wasm32"))]

@@ -24,4 +24,4 @@ pub(crate) fn wav(samples: &[f32]) -> Vec<u8> {
         dst[i * 2 + 1] = b[1];
     }
     v
-}
+}

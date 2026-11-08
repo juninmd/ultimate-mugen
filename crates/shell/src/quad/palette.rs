@@ -20,7 +20,10 @@ impl Palette {
             let at = |k: usize| pal.get(i * 4 + k).copied().unwrap_or(0);
             *c = [at(0), at(1), at(2), if rgba { at(3) } else { 255 }];
         }
-        Palette(Rc::new(PaletteInner { slot: Cell::new(None), colors }))
+        Palette(Rc::new(PaletteInner {
+            slot: Cell::new(None),
+            colors,
+        }))
     }
 
     pub(super) fn row(&self, f: &mut Frame) -> Option<u32> {
@@ -38,7 +41,9 @@ impl Palette {
             }
         };
         if fresh {
-            f.gpu.renderer.set_palette(&f.gpu.queue, row, &self.0.colors);
+            f.gpu
+                .renderer
+                .set_palette(&f.gpu.queue, row, &self.0.colors);
             note_upload(256 * 4);
         }
         self.0.slot.set(Some((gen, row)));
@@ -46,6 +51,9 @@ impl Palette {
     }
 
     pub fn is_resident(&self) -> bool {
-        self.0.slot.get().is_some_and(|(g, _)| g == index_generation())
+        self.0
+            .slot
+            .get()
+            .is_some_and(|(g, _)| g == index_generation())
     }
 }

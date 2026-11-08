@@ -9,8 +9,8 @@ use crate::vfs::{norm_path, resolve, text, Vfs};
 use std::collections::HashMap;
 
 mod detect;
-pub use detect::{stage_requests_3d, stage_requests_3d_secs};
 use detect::warn_3d_once;
+pub use detect::{stage_requests_3d, stage_requests_3d_secs};
 
 #[derive(Clone, Debug)]
 pub struct BgLayer {
@@ -45,7 +45,9 @@ pub struct BgLayer {
 
 impl BgLayer {
     pub fn scale_at(&self, camera: [f32; 2]) -> [f32; 2] {
-        [0, 1].map(|a| (self.scale_start[a] + self.scale_delta[a] * camera[a] * self.delta[a]).clamp(0.0, 64.0))
+        [0, 1].map(|a| {
+            (self.scale_start[a] + self.scale_delta[a] * camera[a] * self.delta[a]).clamp(0.0, 64.0)
+        })
     }
 
     pub fn window_scroll(&self) -> [f32; 2] {
@@ -54,26 +56,62 @@ impl BgLayer {
 
     pub fn clip_window(&self) -> Option<[f32; 4]> {
         match (self.window, self.mask_window) {
-            (Some(a), Some(b)) => Some([a[0].max(b[0]), a[1].max(b[1]), a[2].min(b[2]), a[3].min(b[3])]),
+            (Some(a), Some(b)) => Some([
+                a[0].max(b[0]),
+                a[1].max(b[1]),
+                a[2].min(b[2]),
+                a[3].min(b[3]),
+            ]),
             (a, b) => a.or(b),
         }
     }
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum BgCtrlKind { Null, Visible(bool), Enable(bool), VelSet(Option<f32>, Option<f32>), VelAdd(Option<f32>, Option<f32>), PosSet(Option<f32>, Option<f32>), PosAdd(Option<f32>, Option<f32>), Anim(i32), SinX([f32; 3]), SinY([f32; 3]) }
+pub enum BgCtrlKind {
+    Null,
+    Visible(bool),
+    Enable(bool),
+    VelSet(Option<f32>, Option<f32>),
+    VelAdd(Option<f32>, Option<f32>),
+    PosSet(Option<f32>, Option<f32>),
+    PosAdd(Option<f32>, Option<f32>),
+    Anim(i32),
+    SinX([f32; 3]),
+    SinY([f32; 3]),
+}
 
 #[derive(Clone, Debug)]
-pub struct BgCtrl { pub kind: BgCtrlKind, pub start: i32, pub end: i32, pub loop_time: i32, pub ids: Vec<i32> }
+pub struct BgCtrl {
+    pub kind: BgCtrlKind,
+    pub start: i32,
+    pub end: i32,
+    pub loop_time: i32,
+    pub ids: Vec<i32>,
+}
 
 #[derive(Clone, Debug)]
-pub struct BgCtrlDef { pub loop_time: i32, pub ids: Vec<i32>, pub ctrls: Vec<BgCtrl> }
+pub struct BgCtrlDef {
+    pub loop_time: i32,
+    pub ids: Vec<i32>,
+    pub ctrls: Vec<BgCtrl>,
+}
 
 #[derive(Clone, Debug, Default, PartialEq)]
-pub struct StageMusic { pub file: String, pub volume: f32, pub loop_start: i64, pub loop_end: i64 }
+pub struct StageMusic {
+    pub file: String,
+    pub volume: f32,
+    pub loop_start: i64,
+    pub loop_end: i64,
+}
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct StageShadow { pub intensity: f32, pub color: [f32; 3], pub yscale: f32, pub fade_range: [f32; 2] }
+pub struct StageShadow {
+    pub intensity: f32,
+    pub color: [f32; 3],
+    pub yscale: f32,
+    pub fade_range: [f32; 2],
+}
 
 #[derive(Clone)]
 pub struct StageImage {
@@ -143,9 +181,20 @@ pub struct MugenStage {
 }
 
 fn bgctrl_kind(s: &Section) -> Option<BgCtrlKind> {
-    let f = |k: &str| s.get(k).and_then(|v| v.split(',').next()).and_then(|v| v.trim().parse::<f32>().ok());
+    let f = |k: &str| {
+        s.get(k)
+            .and_then(|v| v.split(',').next())
+            .and_then(|v| v.trim().parse::<f32>().ok())
+    };
     let v = || nums(s.get("value"), &[0.0])[0];
-    let tri = || { let v = nums(s.get("value"), &[0.0, 0.0, 0.0]); [v[0], v.get(1).copied().unwrap_or(0.0), v.get(2).copied().unwrap_or(0.0)] };
+    let tri = || {
+        let v = nums(s.get("value"), &[0.0, 0.0, 0.0]);
+        [
+            v[0],
+            v.get(1).copied().unwrap_or(0.0),
+            v.get(2).copied().unwrap_or(0.0),
+        ]
+    };
     Some(match s.get("type")?.trim().to_ascii_lowercase().as_str() {
         "null" => BgCtrlKind::Null,
         "visible" => BgCtrlKind::Visible(v() != 0.0),
@@ -161,43 +210,77 @@ fn bgctrl_kind(s: &Section) -> Option<BgCtrlKind> {
     })
 }
 
-fn ids(s: &Section) -> Vec<i32> { s.get("ctrlid").map(|v| v.split(',').filter_map(|x| x.trim().parse().ok()).collect()).unwrap_or_default() }
+fn ids(s: &Section) -> Vec<i32> {
+    s.get("ctrlid")
+        .map(|v| v.split(',').filter_map(|x| x.trim().parse().ok()).collect())
+        .unwrap_or_default()
+}
 
 fn parse_bgctrls(secs: &[Section]) -> Vec<BgCtrlDef> {
     let mut defs: Vec<BgCtrlDef> = vec![];
     for s in secs {
         if s.lname.starts_with("bgctrldef") {
-            defs.push(BgCtrlDef { loop_time: nums(s.get("looptime"), &[-1.0])[0] as i32, ids: ids(s), ctrls: vec![] });
+            defs.push(BgCtrlDef {
+                loop_time: nums(s.get("looptime"), &[-1.0])[0] as i32,
+                ids: ids(s),
+                ctrls: vec![],
+            });
         } else if s.lname.starts_with("bgctrl") {
-            let (Some(def), Some(kind)) = (defs.last_mut(), bgctrl_kind(s)) else { continue };
+            let (Some(def), Some(kind)) = (defs.last_mut(), bgctrl_kind(s)) else {
+                continue;
+            };
             let t = nums(s.get("time"), &[0.0]);
             let start = t[0] as i32;
             let end = t.get(1).map(|v| *v as i32).unwrap_or(start);
             let loop_time = t.get(2).map(|v| *v as i32).unwrap_or(-1);
             let own = ids(s);
-            def.ctrls.push(BgCtrl { kind, start, end, loop_time, ids: if own.is_empty() { def.ids.clone() } else { own } });
+            def.ctrls.push(BgCtrl {
+                kind,
+                start,
+                end,
+                loop_time,
+                ids: if own.is_empty() { def.ids.clone() } else { own },
+            });
         }
     }
     defs
 }
 
-fn pair3(v: Vec<f32>) -> [f32; 3] { [v.first().copied().unwrap_or(0.0), v.get(1).copied().unwrap_or(0.0), v.get(2).copied().unwrap_or(0.0)] }
+fn pair3(v: Vec<f32>) -> [f32; 3] {
+    [
+        v.first().copied().unwrap_or(0.0),
+        v.get(1).copied().unwrap_or(0.0),
+        v.get(2).copied().unwrap_or(0.0),
+    ]
+}
 
 fn pair(v: Vec<f32>, def: [f32; 2]) -> [f32; 2] {
-    [v.first().copied().unwrap_or(def[0]), v.get(1).copied().unwrap_or(def[1])]
+    [
+        v.first().copied().unwrap_or(def[0]),
+        v.get(1).copied().unwrap_or(def[1]),
+    ]
 }
 
 pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
     let def_path = norm_path(def_path);
     let base_dir = def_path.rfind('/').map(|i| &def_path[..i]).unwrap_or("");
-    let t = text(vfs.get(&def_path).ok_or_else(|| format!("stage: {def_path} not found"))?);
+    let t = text(
+        vfs.get(&def_path)
+            .ok_or_else(|| format!("stage: {def_path} not found"))?,
+    );
     let secs = parse_ini_no_lines(&t);
-    if stage_requests_3d_secs(&secs) { warn_3d_once(&def_path); }
+    if stage_requests_3d_secs(&secs) {
+        warn_3d_once(&def_path);
+    }
     let get = |s: &str, k: &str| find_section(&secs, s).and_then(|s| s.get(k));
     let g = |s: &str, k: &str, d: f32| nums(get(s, k), &[d])[0];
 
     let name = {
-        let n = unquote(get("info", "displayname").or_else(|| get("info", "name")).unwrap_or(""));
+        let n = unquote(
+            get("info", "displayname")
+                .or_else(|| get("info", "name"))
+                .unwrap_or(""),
+        );
         if n.is_empty() {
             def_path.clone()
         } else {
@@ -216,17 +299,31 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         if let Some(buf) = buf {
             let sff = decode_sff(&buf).map_err(|e| format!("stage {def_path}: {e}"))?;
             let mut seen = std::collections::HashSet::new();
-            let unique: Vec<_> = sff.sprites.iter().filter(|s| seen.insert((s.group, s.index))).collect();
+            let unique: Vec<_> = sff
+                .sprites
+                .iter()
+                .filter(|s| seen.insert((s.group, s.index)))
+                .collect();
             let rgba = crate::par::map(&unique, |s| sprite_to_rgba(s, None));
             for (s, rgba) in unique.into_iter().zip(rgba) {
-                sprites.insert((s.group, s.index), StageImage { w: s.width, h: s.height, axis_x: s.axis_x, axis_y: s.axis_y, rgba });
+                sprites.insert(
+                    (s.group, s.index),
+                    StageImage {
+                        w: s.width,
+                        h: s.height,
+                        axis_x: s.axis_x,
+                        axis_y: s.axis_y,
+                        rgba,
+                    },
+                );
             }
         }
     }
 
     let anims = parse_air(&t);
     let is_bg = |s: &Section| {
-        s.lname == "bg" || (s.lname.starts_with("bg") && s.lname[2..].starts_with(|c: char| c.is_whitespace()))
+        s.lname == "bg"
+            || (s.lname.starts_with("bg") && s.lname[2..].starts_with(|c: char| c.is_whitespace()))
     };
     let mut layers = Vec::new();
     for s in secs.iter().filter(|s| is_bg(s)) {
@@ -236,12 +333,32 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         let delta_v = n("delta", &[1.0, 1.0]);
         let delta = [delta_v[0], delta_v.get(1).copied().unwrap_or(delta_v[0])];
         let tile = pair(n("tile", &[0.0, 0.0]), [0.0, 0.0]);
-        let anim = if kind == "anim" { anims.get(&(n("actionno", &[0.0])[0] as i32)).cloned() } else { None };
-        let rect = |k: &str| s.get(k).map(|_| n(k, &[0.0, 0.0, 0.0, 0.0])).filter(|w| w.len() >= 4).map(|w| [w[0], w[1], w[2], w[3]]);
-        let spacing_key = if s.get("tilespacing").is_some() { "tilespacing" } else { "spacing" };
+        let anim = if kind == "anim" {
+            anims.get(&(n("actionno", &[0.0])[0] as i32)).cloned()
+        } else {
+            None
+        };
+        let rect = |k: &str| {
+            s.get(k)
+                .map(|_| n(k, &[0.0, 0.0, 0.0, 0.0]))
+                .filter(|w| w.len() >= 4)
+                .map(|w| [w[0], w[1], w[2], w[3]])
+        };
+        let spacing_key = if s.get("tilespacing").is_some() {
+            "tilespacing"
+        } else {
+            "spacing"
+        };
         let scale_start = pair(n("scalestart", &[1.0, 1.0]), [1.0, 1.0]);
         let scale_delta = pair(n("scaledelta", &[0.0, 0.0]), [0.0, 0.0]);
-        let three = |k: &str| { let v = n(k, &[0.0, 0.0, 0.0]); [v[0], v.get(1).copied().unwrap_or(0.0), v.get(2).copied().unwrap_or(0.0)] };
+        let three = |k: &str| {
+            let v = n(k, &[0.0, 0.0, 0.0]);
+            [
+                v[0],
+                v.get(1).copied().unwrap_or(0.0),
+                v.get(2).copied().unwrap_or(0.0),
+            ]
+        };
         let alpha = n("alpha", &[256.0, 0.0]);
         layers.push(BgLayer {
             sprite: (sp[0] as i32, sp[1] as i32),
@@ -258,7 +375,9 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
             position_link: n("positionlink", &[0.0])[0] != 0.0,
             window: rect("window"),
             mask_window: rect("maskwindow"),
-            window_delta: s.get("windowdelta").map(|_| pair(n("windowdelta", &[0.0, 0.0]), [0.0, 0.0])),
+            window_delta: s
+                .get("windowdelta")
+                .map(|_| pair(n("windowdelta", &[0.0, 0.0]), [0.0, 0.0])),
             scale_start,
             scale_delta,
             angle: n("angle", &[0.0])[0],
@@ -286,12 +405,15 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         layers,
         sprites,
         ctrl_defs: parse_bgctrls(&secs),
-        music: get("music", "bgmusic").map(unquote).filter(|f| !f.is_empty()).map(|file| StageMusic {
-            file,
-            volume: g("music", "bgvolume", 0.0),
-            loop_start: g("music", "bgmloopstart", 0.0) as i64,
-            loop_end: g("music", "bgmloopend", 0.0) as i64,
-        }),
+        music: get("music", "bgmusic")
+            .map(unquote)
+            .filter(|f| !f.is_empty())
+            .map(|file| StageMusic {
+                file,
+                volume: g("music", "bgvolume", 0.0),
+                loop_start: g("music", "bgmloopstart", 0.0) as i64,
+                loop_end: g("music", "bgmloopend", 0.0) as i64,
+            }),
         shadow: StageShadow {
             intensity: g("shadow", "intensity", 128.0).clamp(0.0, 256.0),
             color: pair3(nums(get("shadow", "color"), &[0.0, 0.0, 0.0])),
@@ -316,7 +438,20 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         lowest_cap: g("camera", "lowestcap", 0.0) != 0.0,
         dynamic_bound_high: g("camera", "dynamicboundhigh", 0.0) != 0.0,
         bound_high_delta: g("camera", "boundhighdelta", 0.0).max(0.0),
-        constants: find_section(&secs, "constants").map(|s| s.entries.iter().filter_map(|(k, v)| nums(Some(v.as_str()), &[f32::NAN]).first().copied().filter(|n| !n.is_nan()).map(|n| (k.clone(), n))).collect()).unwrap_or_default(),
+        constants: find_section(&secs, "constants")
+            .map(|s| {
+                s.entries
+                    .iter()
+                    .filter_map(|(k, v)| {
+                        nums(Some(v.as_str()), &[f32::NAN])
+                            .first()
+                            .copied()
+                            .filter(|n| !n.is_nan())
+                            .map(|n| (k.clone(), n))
+                    })
+                    .collect()
+            })
+            .unwrap_or_default(),
         anims,
     })
 }

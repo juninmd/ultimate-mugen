@@ -48,7 +48,9 @@ pub fn analyze_ground(file: &str, img: &DecodedPng, use_box_center: bool) -> Opt
             }
         }
     }
-    if count == 0 { return None; }
+    if count == 0 {
+        return None;
+    }
 
     let center_x = if use_box_center {
         (min_x + max_x) / 2
@@ -72,9 +74,20 @@ pub fn analyze_ground(file: &str, img: &DecodedPng, use_box_center: bool) -> Opt
 
 fn collect_pngs(path: &Path) -> Vec<PathBuf> {
     if path.is_file() {
-        if path.extension().is_some_and(|e| e.eq_ignore_ascii_case("png")) { vec![path.to_path_buf()] } else { vec![] }
+        if path
+            .extension()
+            .is_some_and(|e| e.eq_ignore_ascii_case("png"))
+        {
+            vec![path.to_path_buf()]
+        } else {
+            vec![]
+        }
     } else if let Ok(entries) = fs::read_dir(path) {
-        let mut v: Vec<_> = entries.filter_map(Result::ok).map(|e| e.path()).filter(|p| p.extension().is_some_and(|e| e.eq_ignore_ascii_case("png"))).collect();
+        let mut v: Vec<_> = entries
+            .filter_map(Result::ok)
+            .map(|e| e.path())
+            .filter(|p| p.extension().is_some_and(|e| e.eq_ignore_ascii_case("png")))
+            .collect();
         v.sort();
         v
     } else {
@@ -108,8 +121,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut results = vec![];
     for p in &files {
-        let buf = match fs::read(p) { Ok(b) => b, Err(e) => { eprintln!("Read err {}: {e}", p.display()); continue; } };
-        let img = match decode_png(&buf) { Ok(im) => im, Err(e) => { eprintln!("Decode err {}: {e}", p.display()); continue; } };
+        let buf = match fs::read(p) {
+            Ok(b) => b,
+            Err(e) => {
+                eprintln!("Read err {}: {e}", p.display());
+                continue;
+            }
+        };
+        let img = match decode_png(&buf) {
+            Ok(im) => im,
+            Err(e) => {
+                eprintln!("Decode err {}: {e}", p.display());
+                continue;
+            }
+        };
         if let Some(res) = analyze_ground(&p.display().to_string(), &img, box_center) {
             results.push(res);
         } else {
@@ -118,27 +143,41 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     if json_mode {
-        let json_items: Vec<_> = results.iter().map(|r| serde_json::json!({
-            "file": r.file,
-            "size": [r.width, r.height],
-            "bounds": [r.min_x, r.min_y, r.max_x, r.max_y],
-            "axis_x": r.center_x,
-            "axis_y": r.ground_y,
-            "opaque_pixels": r.opaque_pixels
-        })).collect();
+        let json_items: Vec<_> = results
+            .iter()
+            .map(|r| {
+                serde_json::json!({
+                    "file": r.file,
+                    "size": [r.width, r.height],
+                    "bounds": [r.min_x, r.min_y, r.max_x, r.max_y],
+                    "axis_x": r.center_x,
+                    "axis_y": r.ground_y,
+                    "opaque_pixels": r.opaque_pixels
+                })
+            })
+            .collect();
         println!("{}", serde_json::to_string_pretty(&json_items)?);
     } else {
-        println!("{:<45} {:>9} {:>17} {:>14} {:>10}", "Sprite File", "Dim", "BBox [X, Y]", "Axis (X, Y)", "Opaque");
+        println!(
+            "{:<45} {:>9} {:>17} {:>14} {:>10}",
+            "Sprite File", "Dim", "BBox [X, Y]", "Axis (X, Y)", "Opaque"
+        );
         println!("{}", "-".repeat(100));
         for r in &results {
             let dim = format!("{}x{}", r.width, r.height);
             let bbox = format!("[{}..{}, {}..{}]", r.min_x, r.max_x, r.min_y, r.max_y);
             let axis = format!("{}, {}", r.center_x, r.ground_y);
-            println!("{:<45} {:>9} {:>17} {:>14} {:>10}", r.file, dim, bbox, axis, r.opaque_pixels);
+            println!(
+                "{:<45} {:>9} {:>17} {:>14} {:>10}",
+                r.file, dim, bbox, axis, r.opaque_pixels
+            );
         }
         if !results.is_empty() {
             println!("{}", "-".repeat(100));
-            println!("Recommended global idle floor axis_y: {}", results.iter().map(|r| r.ground_y).max().unwrap_or(0));
+            println!(
+                "Recommended global idle floor axis_y: {}",
+                results.iter().map(|r| r.ground_y).max().unwrap_or(0)
+            );
         }
     }
     Ok(())

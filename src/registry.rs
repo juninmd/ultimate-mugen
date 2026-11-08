@@ -41,7 +41,6 @@ pub enum Src {
     Mugen { vfs: Arc<Vfs>, def: String },
 }
 
-
 fn build(src: &Src, pal: i32, name: &str) -> Result<CharDef, String> {
     match src {
         Src::Native(nc) => Ok(compile_native(nc, pal, true)),
@@ -256,7 +255,8 @@ impl CharEntry {
     }
     pub fn unload(&self) {
         let full: Vec<Arc<CharDef>> = self.cache.borrow_mut().drain().map(|(_, d)| d).collect();
-        let previews: Vec<Arc<CharDef>> = self.preview.borrow_mut().drain().map(|(_, d)| d).collect();
+        let previews: Vec<Arc<CharDef>> =
+            self.preview.borrow_mut().drain().map(|(_, d)| d).collect();
         if !full.is_empty() {
             drop_off_thread(full);
         }
@@ -276,7 +276,11 @@ fn drop_off_thread<T: Send + 'static>(value: T) {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        if std::thread::Builder::new().name("char-free".into()).spawn(move || drop(value)).is_err() {}
+        if std::thread::Builder::new()
+            .name("char-free".into())
+            .spawn(move || drop(value))
+            .is_err()
+        {}
     }
 }
 
@@ -304,7 +308,10 @@ pub enum StageSrc {
     Mugen { vfs: Arc<Vfs>, def: String },
 }
 
-type StagePreviewPayload = (Option<Arc<ume_engine::chardef::ImageData>>, Option<Arc<ume_formats::stage::MugenStage>>);
+type StagePreviewPayload = (
+    Option<Arc<ume_engine::chardef::ImageData>>,
+    Option<Arc<ume_formats::stage::MugenStage>>,
+);
 
 enum Preview {
     Unknown,
@@ -612,15 +619,15 @@ impl Registry {
                 #[cfg(not(target_arch = "wasm32"))]
                 {
                     let (vfs, def) = (vfs.clone(), def.clone());
-                    let job = std::thread::Builder::new().name("stage-preview".into()).spawn(move || {
-                        match load_stage(&vfs, &def) {
+                    let job = std::thread::Builder::new()
+                        .name("stage-preview".into())
+                        .spawn(move || match load_stage(&vfs, &def) {
                             Ok(st) => {
                                 let arc = Arc::new(st);
                                 (stages::mugen_preview(&arc), Some(arc))
                             }
                             Err(_) => (None, None),
-                        }
-                    });
+                        });
                     if let Ok(job) = job {
                         *entry.preview.borrow_mut() = Preview::Loading(job);
                     }
@@ -641,14 +648,23 @@ impl Registry {
                         index: i,
                         future: Some(Box::pin(async move {
                             let _ = stages::prepare_illustration(&id).await;
-                            StageBuild { stage: (stages::builtin()[idx].build)(), preview: None }
+                            StageBuild {
+                                stage: (stages::builtin()[idx].build)(),
+                                preview: None,
+                            }
                         })),
                         immediate: None,
                     };
                 }
                 #[cfg(not(target_arch = "wasm32"))]
                 {
-                    StageJob::ready(i, StageBuild { stage: (self.builtin_stages[*b].build)(), preview: None })
+                    StageJob::ready(
+                        i,
+                        StageBuild {
+                            stage: (self.builtin_stages[*b].build)(),
+                            preview: None,
+                        },
+                    )
                 }
             }
             StageSrc::Mugen { vfs, def } => {
@@ -656,26 +672,45 @@ impl Registry {
                 if let Some(cached) = self.stages[i].stage.borrow().as_ref() {
                     let mut st = stages::from_mugen((**cached).clone());
                     st.bgm = stage_bgm(vfs, def).map(Arc::new);
-                    return StageJob::ready(i, StageBuild { stage: st, preview: None });
+                    return StageJob::ready(
+                        i,
+                        StageBuild {
+                            stage: st,
+                            preview: None,
+                        },
+                    );
                 }
                 let (vfs, def) = (vfs.clone(), def.clone());
                 #[cfg(not(target_arch = "wasm32"))]
                 {
-                    let job = std::thread::Builder::new().name("stage-load".into()).spawn(move || {
-                        let mugen = match load_stage(&vfs, &def) {
-                            Ok(s) => s,
-                            Err(e) => return Err(e),
-                        };
-                        let preview = stages::mugen_preview(&mugen);
-                        let mut stage = stages::from_mugen(mugen);
-                        stage.bgm = stage_bgm(&vfs, &def).map(Arc::new);
-                        Ok(StageBuild { stage, preview })
-                    });
+                    let job =
+                        std::thread::Builder::new()
+                            .name("stage-load".into())
+                            .spawn(move || {
+                                let mugen = match load_stage(&vfs, &def) {
+                                    Ok(s) => s,
+                                    Err(e) => return Err(e),
+                                };
+                                let preview = stages::mugen_preview(&mugen);
+                                let mut stage = stages::from_mugen(mugen);
+                                stage.bgm = stage_bgm(&vfs, &def).map(Arc::new);
+                                Ok(StageBuild { stage, preview })
+                            });
                     return match job {
-                        Ok(thread) => StageJob { index: i, thread: Some(thread), immediate: None },
+                        Ok(thread) => StageJob {
+                            index: i,
+                            thread: Some(thread),
+                            immediate: None,
+                        },
                         Err(e) => {
                             eprintln!("stage thread: {e}");
-                            StageJob::ready(i, StageBuild { stage: (self.builtin_stages[0].build)(), preview: None })
+                            StageJob::ready(
+                                i,
+                                StageBuild {
+                                    stage: (self.builtin_stages[0].build)(),
+                                    preview: None,
+                                },
+                            )
                         }
                     };
                 }
@@ -685,13 +720,23 @@ impl Registry {
                         Ok(s) => stages::from_mugen(s),
                         Err(_) => (self.builtin_stages[0].build)(),
                     };
-                    StageJob::ready(i, StageBuild { stage, preview: None })
+                    StageJob::ready(
+                        i,
+                        StageBuild {
+                            stage,
+                            preview: None,
+                        },
+                    )
                 }
             }
         }
     }
     /// Registered once a [`StageJob`] finishes, so the stage grid reuses it.
-    pub fn adopt_stage_preview(&self, i: usize, preview: Option<Arc<ume_engine::chardef::ImageData>>) {
+    pub fn adopt_stage_preview(
+        &self,
+        i: usize,
+        preview: Option<Arc<ume_engine::chardef::ImageData>>,
+    ) {
         if let Some(e) = self.stages.get(i) {
             if preview.is_some() {
                 *e.preview.borrow_mut() = Preview::Ready(preview);
@@ -701,7 +746,9 @@ impl Registry {
     /// True once the thumbnail job finished (with or without art), so callers can
     /// tell "still decoding" from "this stage has no preview".
     pub fn preview_settled(&self, i: usize) -> bool {
-        let Some(e) = self.stages.get(i) else { return false };
+        let Some(e) = self.stages.get(i) else {
+            return false;
+        };
         let settled = matches!(&*e.preview.borrow(), Preview::Ready(_));
         settled
     }
@@ -791,7 +838,6 @@ impl Registry {
         n
     }
 }
-
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests;

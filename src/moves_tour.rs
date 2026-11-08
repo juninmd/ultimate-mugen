@@ -2,6 +2,7 @@
 //! forces every special, super and throw of each listed fighter against a dummy rival, prints the damage it dealt and saves the
 //! frame a few ticks after the first hit (`<dir>/M-<fighter>-<move>.png`).
 //! `UME_BOXES=1` draws the hit and hurt boxes on the captured frames; `UME_AFTER_HIT=<ticks>` changes the capture delay.
+pub mod duel;
 use crate::app::{App, Mode};
 use crate::gfx::*;
 use crate::shots::{find, stage};

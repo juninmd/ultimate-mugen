@@ -1,4 +1,6 @@
+use crate::gfx::KeyCode;
 use std::collections::BTreeMap;
+use ume_engine::input::k;
 
 pub const SLOT_COUNT: usize = 4;
 const FILE: &str = "ultimate-mugen.shortcuts";
@@ -6,6 +8,16 @@ const FILE: &str = "ultimate-mugen.shortcuts";
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Shortcuts {
     by_fighter: BTreeMap<String, [String; SLOT_COUNT]>,
+    /// slot bits held last frame, so a binding fires once per press
+    pub prev: [u32; 2],
+}
+
+/// Engine bits of the keyboard shortcut keys 1-4 that are held.
+pub fn key_bits(down: impl Fn(KeyCode) -> bool) -> u32 {
+    [KeyCode::Key1, KeyCode::Key2, KeyCode::Key3, KeyCode::Key4]
+        .into_iter()
+        .zip(k::SLOTS)
+        .fold(0, |b, (kc, bit)| if down(kc) { b | bit } else { b })
 }
 
 impl Shortcuts {

@@ -3,7 +3,6 @@
   "crates/engine/examples/rig_sheet.rs": 305,
   "crates/engine/src/bytecode.rs": 904,
   "crates/engine/src/chardef.rs": 420,
-  "crates/engine/src/commands.rs": 403,
   "crates/engine/src/controllers.rs": 374,
   "crates/engine/src/diagnostics.rs": 333,
   "crates/engine/src/expr.rs": 381,

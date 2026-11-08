@@ -19,22 +19,12 @@ pub fn set(l: Lang) {
     CURRENT.store(if l == Lang::En { 1 } else { 0 }, Ordering::Relaxed);
 }
 pub fn get() -> Lang {
-    if CURRENT.load(Ordering::Relaxed) == 1 {
-        Lang::En
-    } else {
-        Lang::Pt
-    }
+    if CURRENT.load(Ordering::Relaxed) == 1 { Lang::En } else { Lang::Pt }
 }
-pub fn default_lang() -> Lang {
-    Lang::En
-}
+pub fn default_lang() -> Lang { Lang::En }
 
 pub fn tr<'a>(pt: &'a str, en: &'a str) -> &'a str {
-    if get() == Lang::En {
-        en
-    } else {
-        pt
-    }
+    if get() == Lang::En { en } else { pt }
 }
 
 pub fn t(key: &'static str) -> &'static str {
@@ -163,7 +153,6 @@ catalog! {
     "pause.menu" => "Main menu", "Menu principal";
     "pause.moves" => "MOVES", "GOLPES";
     "pause.no_moves" => "This character does not define commands in the .cmd", "Este personagem não define comandos no .cmd";
-    "pause.shortcuts_hint" => "◀ ▶ select a move, then press 1-4 / L1 L2 R1 R2 to bind it to a shortcut", "◀ ▶ escolha um golpe e aperte 1-4 / L1 L2 R1 R2 para atribuir um atalho";
     "pause.page" => "page", "página";
 
     "replays.title" => "REPLAYS", "REPLAYS";

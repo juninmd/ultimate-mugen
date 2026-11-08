@@ -60,8 +60,8 @@ fn draw_mist(f: &Frame, m: &Mist) {
     for i in 0..m.blobs as usize {
         let seed = hash(i as u32, 7);
         let x = ((i as f32 + seed * 0.6) / m.blobs as f32 * span + travel).rem_euclid(span) - (span - r.view_w) * 0.5 - rx * 0.4;
-        let y = r.view_h * m.v + (f.t * 0.35 + seed * 6.28).sin() * ry * 0.18 + (hash(i as u32, 3) - 0.5) * ry * 0.5;
-        let a = m.alpha * (0.65 + 0.35 * wave(f.t, 11.0 + seed * 9.0, seed * 6.28));
+        let y = r.view_h * m.v + (f.t * 0.35 + seed * std::f32::consts::TAU).sin() * ry * 0.18 + (hash(i as u32, 3) - 0.5) * ry * 0.5;
+        let a = m.alpha * (0.65 + 0.35 * wave(f.t, 11.0 + seed * 9.0, seed * std::f32::consts::TAU));
         blob(f.ox + x * f.s, f.oy + y * f.s, rx * (0.7 + seed * 0.6) * f.s, ry * f.s, rgb(m.color, a), rgb(m.color, 0.0));
     }
 }
@@ -73,10 +73,10 @@ fn draw_mote(f: &Frame, m: &Motes, i: usize) {
     let span = r.view_w * 1.2;
     let cycle = (h2 - m.rise * f.t / band_h.max(1.0)).rem_euclid(1.0);
     let y = r.view_h * m.band[0] + cycle * band_h;
-    let sway = (f.t * (0.6 + h3) + h1 * 6.28).sin() * m.sway;
+    let sway = (f.t * (0.6 + h3) + h1 * std::f32::consts::TAU).sin() * m.sway;
     let x = (h1 * span + m.drift * f.t - r.cam_x * m.depth * 0.6).rem_euclid(span) - (span - r.view_w) * 0.5 + sway;
     let fade = (cycle * (1.0 - cycle) * 4.0).clamp(0.0, 1.0);
-    let twinkle = if m.kind == MoteKind::Firefly || m.kind == MoteKind::Spark { 0.35 + 0.65 * wave(f.t, 1.4 + h3 * 2.0, h2 * 6.28) } else { 1.0 };
+    let twinkle = if m.kind == MoteKind::Firefly || m.kind == MoteKind::Spark { 0.35 + 0.65 * wave(f.t, 1.4 + h3 * 2.0, h2 * std::f32::consts::TAU) } else { 1.0 };
     let a = m.alpha * fade * twinkle;
     let (px, py, sz) = (f.ox + x * f.s, f.oy + y * f.s, m.size * (0.6 + h3 * 0.8) * f.s);
     match m.kind {
@@ -86,12 +86,12 @@ fn draw_mote(f: &Frame, m: &Motes, i: usize) {
             draw_circle(px, py, sz * 0.6, rgb(0xffffff, a));
         }
         MoteKind::Petal | MoteKind::Leaf => {
-            let ang = f.t * (1.0 + h3) + h1 * 6.28;
+            let ang = f.t * (1.0 + h3) + h1 * std::f32::consts::TAU;
             let (dx, dy) = (ang.cos() * sz, ang.sin() * sz * 0.45);
             quad([(px - dx, py - dy), (px, py - sz * 0.35), (px + dx, py + dy), (px, py + sz * 0.35)], [rgb(m.color, a); 4]);
         }
         MoteKind::Bird => {
-            let flap = (f.t * (5.0 + h3 * 3.0) + h1 * 6.28).sin() * sz * 0.5;
+            let flap = (f.t * (5.0 + h3 * 3.0) + h1 * std::f32::consts::TAU).sin() * sz * 0.5;
             draw_line(px - sz, py + flap, px, py, (sz * 0.18).max(1.0), rgb(m.color, a));
             draw_line(px, py, px + sz, py + flap, (sz * 0.18).max(1.0), rgb(m.color, a));
         }

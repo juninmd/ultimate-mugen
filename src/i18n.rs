@@ -7,6 +7,7 @@ use std::sync::Mutex;
 mod catalog;
 mod es_catalog;
 mod es_phrases;
+pub mod system;
 #[cfg(test)]
 mod tests;
 

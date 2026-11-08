@@ -116,3 +116,11 @@ fn spanish_inline_translation_falls_back_to_english() {
 fn fill_replaces_named_slots() {
     assert_eq!(fill("{a} and {b}", &[("a", "1"), ("b", "2")]), "1 and 2");
 }
+
+#[test]
+fn system_locale_codes_map_to_supported_languages() {
+    assert_eq!(system::from_code("pt-BR"), Lang::Pt);
+    assert_eq!(system::from_code("es_MX.UTF-8"), Lang::Es);
+    assert_eq!(system::from_code("de-DE"), Lang::En);
+    assert_eq!(system::from_code(""), Lang::En);
+}

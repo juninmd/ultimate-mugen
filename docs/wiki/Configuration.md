@@ -68,7 +68,7 @@ The UI ships three locales: **English** (default), **Portuguese (Brazil)** and *
 - The catalogs are compiled in, so switching has no I/O cost and works on web/mobile.
 - Unit tests keep the catalogs in sync and fail if the migrated screens go back to hardcoded Portuguese.
 - Still Portuguese-only: story cutscenes and boss dialogue, fighter bios and stage names (content data).
-- The web boot page picks its language from `navigator.language`.
+- First launch (no saved config) picks the system language: `navigator.language` on the web, `LC_ALL`/`LC_MESSAGES`/`LANG` on desktop; English when unsupported.
 
 ## Importing M.U.G.E.N content
 

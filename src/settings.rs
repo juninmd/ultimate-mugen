@@ -242,7 +242,7 @@ impl Settings {
     pub fn load() -> Self {
         crate::storage::read(FILE)
             .map(|t| Self::from_text(&t))
-            .unwrap_or_default()
+            .unwrap_or_else(|| Settings { lang: crate::i18n::system::language(), ..Settings::default() })
     }
     pub fn save(&self) {
         crate::storage::write(FILE, &self.to_text());

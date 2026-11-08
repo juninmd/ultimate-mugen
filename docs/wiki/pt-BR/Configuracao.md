@@ -66,7 +66,7 @@ A interface traz três idiomas: **inglês** (padrão), **português (Brasil)** e
 - Textos avulsos usam `i18n::tr3(pt, en, es)`; o antigo `i18n::tr(pt, en)` acha o espanhol em `src/i18n/es_phrases.rs`, indexado pelo texto em inglês. Marcadores usam `i18n::fill("{nome}", &[("nome", valor)])`.
 - Uma chave ausente é impressa uma única vez no log (`i18n: missing key '<key>'`).
 - Ainda só em português: cutscenes e diálogos do modo história, biografias dos lutadores e nomes dos cenários (dados de conteúdo).
-- A página de carregamento da web escolhe o idioma por `navigator.language`.
+- No primeiro uso (sem configuração salva) o idioma do sistema é escolhido: `navigator.language` na web, `LC_ALL`/`LC_MESSAGES`/`LANG` no desktop; inglês quando não houver suporte.
 
 ## Importar conteúdo M.U.G.E.N
 

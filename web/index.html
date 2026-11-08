@@ -13,6 +13,7 @@
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0716; touch-action: none; }
     canvas { margin: 0; padding: 0; width: 100%; height: 100%; display: block; position: absolute; outline: none; }
     #imp { position: fixed; display: none; z-index: 5; opacity: 0; cursor: pointer; overflow: hidden; font-size: 0; }
+    #imp input { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
     #boot { position: fixed; inset: 0; z-index: 8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #0b0716; color: #e9e4ff; font: 600 15px system-ui, sans-serif; transition: opacity .25s; }
     #boot.done { opacity: 0; pointer-events: none; }
     #boot b { font: 800 28px system-ui, sans-serif; letter-spacing: .08em; color: #22e8ff; }
@@ -24,7 +25,7 @@
 </head>
 <body>
   <canvas id="glcanvas" tabindex="1"></canvas>
-  <label id="imp" aria-label="Import M.U.G.E.N">Import M.U.G.E.N<input id="ume-file" type="file" accept=".zip" multiple hidden /></label>
+  <label id="imp" aria-label="Import M.U.G.E.N">Import M.U.G.E.N<input id="ume-file" type="file" accept=".zip" multiple /></label>
   <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar"><i></i></div><span id="bootmsg">Downloading the game…</span></div>
   <div id="rot">Rotate your device to play in landscape &rarr;</div>
   <script src="gamepad.js"></script>

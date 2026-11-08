@@ -30,6 +30,7 @@ pub mod palette;
 pub mod stage_bg;
 pub mod stagevar;
 pub mod native;
+pub mod passive_time;
 pub mod passives;
 pub mod raster;
 

@@ -33,7 +33,7 @@ fn at_life_ratio(m: &mut Match, i: usize, ratio: f32) {
 
 fn cast(m: &mut Match, i: usize, state: i32) {
     m.fighters[i].state_no = state;
-    m.fighters[i].tick_passive();
+    m.fighters[i].tick_passive(true);
 }
 
 #[test]
@@ -117,7 +117,7 @@ fn stacks_grow_per_special_cap_and_decay() {
     }
     assert_eq!(m.fighters[0].passive.stacks, 10);
     for _ in 0..420 {
-        m.fighters[0].tick_passive();
+        m.fighters[0].tick_passive(true);
     }
     assert_eq!(m.fighters[0].passive.stacks, 9);
 }

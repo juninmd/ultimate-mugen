@@ -1,4 +1,5 @@
 use crate::fighter::Fighter;
+use crate::passive_time::TimeRule;
 
 pub const TOTAL_ATTACK_CAP: f32 = 8.0;
 pub const RAGE_MULTIPLIER_CAP: f32 = 6.0;
@@ -63,11 +64,12 @@ impl StackRule {
 pub struct PassiveRules {
     pub rage: Option<RageRule>,
     pub stacks: Option<StackRule>,
+    pub time: Option<TimeRule>,
 }
 
 impl PassiveRules {
     pub fn is_empty(&self) -> bool {
-        self.rage.is_none() && self.stacks.is_none()
+        self.rage.is_none() && self.stacks.is_none() && self.time.is_none()
     }
 }
 
@@ -76,12 +78,15 @@ pub struct PassiveState {
     pub stacks: i32,
     pub idle_ticks: i32,
     pub last_state: i32,
+    pub fight_ticks: i32,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct PassiveView {
     pub rage: Option<f32>,
     pub rage_multiplier: f32,
+    pub time: Option<f32>,
+    pub time_multiplier: f32,
     pub stacks: i32,
     pub max_stacks: i32,
     pub aura: f32,
@@ -110,12 +115,19 @@ impl Fighter {
         }
     }
 
+    pub fn time_multiplier(&self) -> f32 {
+        match &self.base_def.passives.time {
+            Some(rule) if self.alive => rule.multiplier(self.passive.fight_ticks),
+            _ => 1.0,
+        }
+    }
+
     pub fn effective_attack(&self) -> f32 {
         if self.base_def.passives.is_empty() {
             return self.attack_mul;
         }
         let boosted = self.attack_mul
-            * (self.rage_multiplier() * self.stack_damage_multiplier())
+            * (self.rage_multiplier() * self.stack_damage_multiplier() * self.time_multiplier())
                 .min(RAGE_MULTIPLIER_CAP * 2.0);
         boosted.min(TOTAL_ATTACK_CAP.max(self.attack_mul))
     }
@@ -139,7 +151,10 @@ impl Fighter {
         }
     }
 
-    pub fn tick_passive(&mut self) {
+    pub fn tick_passive(&mut self, fighting: bool) {
+        if fighting && self.alive && self.base_def.passives.time.is_some() {
+            self.passive.fight_ticks += 1;
+        }
         let Some(rule) = self.base_def.passives.stacks else {
             return;
         };
@@ -160,6 +175,7 @@ impl Fighter {
     }
 
     pub fn reset_passive_for_round(&mut self) {
+        self.passive.fight_ticks = 0;
         let keeps = self
             .base_def
             .passives
@@ -189,10 +205,16 @@ impl Fighter {
         } else {
             0.0
         };
-        let aura = rage.unwrap_or(0.0).max(stack_share);
+        let time = rules
+            .time
+            .filter(|_| self.alive)
+            .map(|rule| rule.progress(self.passive.fight_ticks));
+        let aura = rage.unwrap_or(0.0).max(stack_share).max(time.unwrap_or(0.0));
         Some(PassiveView {
             rage,
             rage_multiplier: self.rage_multiplier(),
+            time,
+            time_multiplier: self.time_multiplier(),
             stacks,
             max_stacks,
             aura: if aura < AURA_FLOOR { 0.0 } else { aura },

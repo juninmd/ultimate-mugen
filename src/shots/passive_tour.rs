@@ -2,6 +2,7 @@ use super::{find, screen, stage};
 use crate::app::{App, Mode};
 
 const BRUNO_LIFE_SHARES: [(f32, &str); 4] = [(1.0, "100"), (0.5, "50"), (0.1, "10"), (0.01, "01")];
+const GARAN_FIGHT_SECONDS: [(i32, &str); 4] = [(0, "000"), (30, "030"), (67, "067"), (120, "120")];
 const SYLENE_STACKS: [i32; 3] = [0, 4, 10];
 
 async fn open_duel(app: &mut App, first: &str, second: &str) {
@@ -47,5 +48,15 @@ pub(crate) async fn run(app: &mut App, dir: &str) {
         }
         settle(app).await;
         screen(app, dir, &format!("sylene-stacks-{stacks:02}"), 2).await;
+    }
+    open_duel(app, "garan", "kaito").await;
+    for (seconds, tag) in GARAN_FIGHT_SECONDS {
+        if let Some(s) = app.session.as_mut() {
+            s.m.fighters[0].passive.fight_ticks = seconds * 60;
+            s.m.fighters[0].ctrl = false;
+            s.m.fighters[1].ctrl = false;
+        }
+        settle(app).await;
+        screen(app, dir, &format!("garan-enrage-{tag}"), 2).await;
     }
 }

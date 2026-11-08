@@ -7,6 +7,7 @@ Native (UMF) fighters opt into passive systems through the `passives` object of 
   "meterRegen": 0.35,
   "lifeRegen": 0.04,
   "rage": { "maxMultiplier": 4.0, "exponent": 1.0, "startRatio": 1.0, "fullRatio": 0.01 },
+  "enrageTime": { "maxMultiplier": 5.0, "startSeconds": 15, "rampSeconds": 105, "exponent": 1.0 },
   "stacks": { "damageGain": 0.07, "defenceGain": 0.015, "speedGain": 0.015, "maxStacks": 10, "decayTicks": 420, "resetOnRound": true, "specials": true, "supers": true }
 }
 ```
@@ -47,21 +48,40 @@ Used by Sylene. Each time the fighter enters a special state (1000 to 1999) or a
 | `resetOnRound` | true | Stacks are cleared when a round starts |
 | `specials`, `supers` | true | Which move kinds count |
 
+## Enrage over time (stronger the longer the fight lasts)
+
+Used by Garan, the Ashen Oni. Damage grows with the time spent fighting in the current round. The counter runs only while the round is live (not during intro, KO or victory), stops when the fighter dies and restarts at every round.
+
+```
+progress   = clamp((fightSeconds - startSeconds) / rampSeconds, 0, 1)
+multiplier = 1 + (maxMultiplier - 1) * progress ^ exponent
+```
+
+| Key | Default | Range | Meaning |
+|---|---|---|---|
+| `maxMultiplier` | 5.0 | 1 to 6 | Damage multiplier reached at the end of the ramp |
+| `startSeconds` | 0 | 0 and up | Seconds of fight before the bonus starts |
+| `rampSeconds` | 60 | above 0 | Seconds from the start to the maximum |
+| `exponent` | 1.0 | 0.25 to 4 | 1 is linear, above 1 ramps late, below 1 ramps early |
+
+Garan uses 15 s of grace and 105 s of ramp: 1x until 0:15, 3x at 1:07, 5x from 2:00.
+
 ## Composition rule and cap
 
 ```
-effective attack  = min(attackMul * rage * (1 + damageGain * stacks), max(attackMul, 8.0))
+effective attack  = min(attackMul * rage * time * (1 + damageGain * stacks), max(attackMul, 8.0))
 effective defence = defenceMul * superDefenceMul * (1 + defenceGain * stacks)
 ```
 
-`attackMul` already contains the base `stats.attack` and the awakened or ascended form multipliers (PR #415), so every source multiplies. The global ceiling is 8x the base damage; a fighter whose own `attackMul` is already higher (for example a M.U.G.E.N. `AttackMulSet`) keeps it. Without a `rage` or `stacks` key the original multipliers are used unchanged.
+`attackMul` already contains the base `stats.attack` and the awakened or ascended form multipliers (PR #415), so every source multiplies. A time enrage of 5x alone is never clipped (even with a 1.3x awakened form it stays under the ceiling); combined with a full rage the 8x ceiling applies. The global ceiling is 8x the base damage; a fighter whose own `attackMul` is already higher (for example a M.U.G.E.N. `AttackMulSet`) keeps it. Without a `rage` or `stacks` key the original multipliers are used unchanged.
 
 ## HUD and effects
 
 - A thin strip along the bottom of the health bar shows rage progress (orange to gold) and a row of pips shows stacks.
-- The awakened-form aura is reused: it appears once rage or stacks pass 8% and grows with the larger of the two. Rage alone tints it red.
+- A second strip (violet to red) above the rage strip shows the time enrage progress.
+- The awakened-form aura is reused: it appears once rage or stacks pass 8% and grows with the largest of the three. Rage alone tints it red, time alone tints it violet.
 - Stack state is part of the netplay checksum.
 
 ## Code
 
-`crates/engine/src/passives.rs` (rules, state, `Fighter::effective_attack`), `crates/engine/src/native/passive_spec.rs` (JSON), `src/hud/passive_meter.rs`, `src/passive_fx.rs`. Tests: `crates/engine/tests/passives.rs`. Screenshots: `UME_TOUR=passives ultimate-mugen --shots <dir>`.
+`crates/engine/src/passives.rs` (rules, state, `Fighter::effective_attack`), `crates/engine/src/native/passive_spec.rs` (JSON), `src/hud/passive_meter.rs`, `src/passive_fx.rs`, `crates/engine/src/passive_time.rs`. Tests: `crates/engine/tests/passives.rs`, `crates/engine/tests/passive_time.rs`. Screenshots: `UME_TOUR=passives ultimate-mugen --shots <dir>`.

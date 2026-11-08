@@ -32,15 +32,31 @@ Usados pela Sylene. Cada vez que o lutador entra em um golpe especial (estados 1
 - `decayTicks`: acima de 0, perde um acúmulo após esse tempo sem ganhar outro.
 - `resetOnRound`: zera os acúmulos a cada round (padrão: sim).
 
+## Fúria por tempo (mais forte quanto mais a luta demora)
+
+Usada pelo Garan, o Oni das Cinzas. O dano cresce com o tempo de luta no round atual. O contador só roda com o round ativo (não na introdução, KO ou vitória), para quando o lutador morre e reinicia a cada round.
+
+```
+progresso = clamp((segundosDeLuta - startSeconds) / rampSeconds, 0, 1)
+multiplicador = 1 + (maxMultiplier - 1) * progresso ^ exponent
+```
+
+- `maxMultiplier` (padrão 5, de 1 a 6): dano máximo no fim da rampa.
+- `startSeconds` (padrão 0): segundos de luta antes do bônus começar.
+- `rampSeconds` (padrão 60): segundos do início até o máximo.
+- `exponent` (padrão 1): 1 linear, acima de 1 sobe tarde, abaixo de 1 sobe cedo.
+
+O Garan usa 15 s de carência e 105 s de rampa: 1x até 0:15, 3x em 1:07 e 5x a partir de 2:00.
+
 ## Regra de composição e limite
 
 ```
-ataque efetivo = min(attackMul * fúria * (1 + damageGain * acúmulos), max(attackMul, 8.0))
+ataque efetivo = min(attackMul * fúria * tempo * (1 + damageGain * acúmulos), max(attackMul, 8.0))
 defesa efetiva = defenceMul * superDefenceMul * (1 + defenceGain * acúmulos)
 ```
 
-`attackMul` já inclui `stats.attack` e os multiplicadores das formas despertada e ascendida (PR #415), então tudo se multiplica. O teto global é 8x o dano base. Sem `rage` nem `stacks` os multiplicadores originais ficam intactos.
+`attackMul` já inclui `stats.attack` e os multiplicadores das formas despertada e ascendida (PR #415), então tudo se multiplica. O teto global é 8x o dano base; os 5x do tempo sozinhos nunca são cortados, e combinados com fúria máxima vale o teto de 8x. Sem `rage` nem `stacks` os multiplicadores originais ficam intactos.
 
 ## HUD e efeitos
 
-Uma faixa fina na base da barra de vida mostra o progresso da fúria e fileira de marcadores mostra os acúmulos. A aura das formas é reaproveitada e cresce com a fúria ou os acúmulos.
+Uma segunda faixa (violeta para vermelho) acima da faixa de fúria mostra a fúria por tempo. Uma faixa fina na base da barra de vida mostra o progresso da fúria e fileira de marcadores mostra os acúmulos. A aura das formas é reaproveitada e cresce com a fúria ou os acúmulos.

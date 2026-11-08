@@ -8,6 +8,8 @@ const PIP_WIDTH: f32 = 3.4;
 const PIP_GAP: f32 = 0.9;
 const PIP_SPAN_SHARE: f32 = 0.55;
 const RAGE_LOW: [f32; 3] = [1.0, 0.2, 0.12];
+const TIME_LOW: [f32; 3] = [0.65, 0.2, 1.0];
+const TIME_HIGH: [f32; 3] = [1.0, 0.25, 0.15];
 const RAGE_HIGH: [f32; 3] = [1.0, 0.82, 0.3];
 
 fn rect<P: Fn(f32, f32) -> Vec2>(p: &P, s: f32, x: f32, y: f32, w: f32, h: f32) -> [Vec2; 4] {
@@ -37,6 +39,37 @@ pub(super) struct Bar {
     pub side: usize,
 }
 
+fn strip<P: Fn(f32, f32) -> Vec2>(
+    p: &P,
+    s: f32,
+    gt: f32,
+    bar: &Bar,
+    y: f32,
+    progress: f32,
+    colors: ([f32; 3], [f32; 3]),
+) {
+    let inset = bar.h * 0.45;
+    let (span_x, span_w) = (bar.x + inset, bar.w - inset * 2.0);
+    poly::solid(
+        &rect(p, s, span_x, y, span_w, STRIP_HEIGHT),
+        Color::new(0.0, 0.0, 0.0, 0.35),
+    );
+    let filled = span_w * progress;
+    if filled > 0.2 {
+        let x = if bar.side == 0 {
+            span_x
+        } else {
+            span_x + span_w - filled
+        };
+        let pulse = 0.8 + 0.2 * (gt * (4.0 + progress * 8.0)).sin();
+        let hot = mix(colors.0, colors.1, progress);
+        poly::solid(
+            &rect(p, s, x, y, filled, STRIP_HEIGHT),
+            poly::with_a(hot, pulse),
+        );
+    }
+}
+
 pub(super) fn draw<P: Fn(f32, f32) -> Vec2>(p: &P, s: f32, gt: f32, f: &Fighter, bar: &Bar) {
     let Some(view) = f.passive_view() else { return };
     if !f.alive {
@@ -46,24 +79,15 @@ pub(super) fn draw<P: Fn(f32, f32) -> Vec2>(p: &P, s: f32, gt: f32, f: &Fighter,
     let inset = bar.h * 0.45;
     let (span_x, span_w) = (bar.x + inset, bar.w - inset * 2.0);
     if let Some(progress) = view.rage {
-        poly::solid(
-            &rect(p, s, span_x, y, span_w, STRIP_HEIGHT),
-            Color::new(0.0, 0.0, 0.0, 0.35),
-        );
-        let filled = span_w * progress;
-        if filled > 0.2 {
-            let x = if bar.side == 0 {
-                span_x
-            } else {
-                span_x + span_w - filled
-            };
-            let pulse = 0.8 + 0.2 * (gt * (4.0 + progress * 8.0)).sin();
-            let hot = mix(RAGE_LOW, RAGE_HIGH, progress);
-            poly::solid(
-                &rect(p, s, x, y, filled, STRIP_HEIGHT),
-                poly::with_a(hot, pulse),
-            );
-        }
+        strip(p, s, gt, bar, y, progress, (RAGE_LOW, RAGE_HIGH));
+    }
+    if let Some(progress) = view.time {
+        let lift = if view.rage.is_some() {
+            STRIP_HEIGHT + 0.8
+        } else {
+            0.0
+        };
+        strip(p, s, gt, bar, y - lift, progress, (TIME_LOW, TIME_HIGH));
     }
     if view.max_stacks > 0 {
         let pitch = (PIP_WIDTH + PIP_GAP).min(span_w * PIP_SPAN_SHARE / view.max_stacks as f32);

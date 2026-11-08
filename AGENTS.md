@@ -87,6 +87,7 @@
 - Static roster audit (inputs, cancels, throws, hit boxes): `python scripts/audit_native_moves.py [dir]`
 - CPU-vs-CPU balance duel (round-robin of every UMF fighter, win rate, damage, hits, knockout rate; `UME_DUEL_SKIP=oboro` leaves the boss out, `UME_DUEL_LEVEL`, `UME_DUEL_SEED_OFFSET`): `cargo run --release -p ume-engine --example native_duel -- assets/chars`
 - Hit box audit (every strike frame of every UMF fighter: height, reach, start, width against the M.U.G.E.N-measured proportions): `cargo test --release -p ume-engine --test native_hitbox_audit -- --nocapture`; per-fighter normal reach and damage: `--test native_normal_reach`
+- Stuck-state audit (no UMF fighter may idle 150 ticks inside one hit state across every CPU-vs-CPU pairing): `cargo test --release -p ume-engine --test native_no_stuck_states`
 - Draw hit and hurt boxes on the move showcase: `UME_BOXES=1 UME_AFTER_HIT=0` with `UME_TOUR=moves`
 - Move showcase screenshots (every special, super and throw against a dummy): `UME_TOUR=moves UME_CHARS=akio,bruno UME_RIVAL=kaito ultimate-mugen --shots <dir> --res 1280x720 --mute`
 - Living stage layers on/off for A/B captures: `UME_AMBIENCE=0` disables them (`UME_SHOTS_ONLY=stages` captures all 21 stages)

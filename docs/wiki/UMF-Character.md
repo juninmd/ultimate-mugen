@@ -209,6 +209,10 @@ Validate with `cargo test --release --test native_roster_lab -- --nocapture` (ev
 
 Every native fighter can charge its meter: hold **R** (the `s` / Start input; the pause key in a fight is **Esc** or **P**). The fighter enters state `3920`, plays its `powerUp` animation on a loop with a blue glow and gains 4 power per tick (a 1000-power super in about four seconds) until the button is released (after at least 6 ticks) or the meter is full. The state is `movetype = I`, so a hit interrupts it, and a form-capable fighter still transforms with `T` once the meter reaches the form cost. The command is `charge_cmd` (`/s`) and shows as `Charge Energy` in the move list. The built-in AI charges only at level 3 or above, with less than 700 power, when the rival is more than 190 units away and is not attacking.
 
+## Air abilities (every special and super)
+
+Every `special` and `super` with `when` unset or `"stand"` also gets an air version (state `20000 + ground state`, label `State -1, air <name>`), entered with the same command while the fighter is airborne. The fighter hovers at the start of the move (drift kept at 40 %), gravity returns at 45 % after 12 ticks, the move ends into the jump fall state (`50`) with control, and touching the ground interrupts it with the landing state (`52`). Air versions deal 70 % of the ground damage, projectiles leave angled down (slope 0.85) so they reach a grounded rival, and each jump allows one air special (`var(57)`, cleared on landing). Throws, flight moves and moves that declare `when: "crouch"` or `"air"` keep their own rules.
+
 ## Pixel-art sprites (optional)
 
 If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files instead of the rig. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size for every file of one fighter. A pose without a PNG falls back to `01_idle.png`; a fighter without the folder keeps its rig. After extending the rig, run `cargo run --release -p ume-engine --example generate_missing_sprites` to render a dedicated PNG for every pose the loader would otherwise take from the idle canvas.

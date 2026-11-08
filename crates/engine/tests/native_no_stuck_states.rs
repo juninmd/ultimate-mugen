@@ -7,7 +7,7 @@ use ume_engine::native::{compile_native, NativeChar};
 
 const ROUND_TICKS: usize = 60 * 40;
 const LONGEST_HIT_STATE: i32 = 150;
-const LYING_STATES: [i32; 4] = [5110, 5120, 5150, 5170];
+const LYING_STATES: [i32; 5] = [5110, 5120, 5150, 5170, 5300];
 
 fn roster() -> Vec<(String, Arc<ume_engine::chardef::CharDef>)> {
     let mut chars: Vec<NativeChar> = std::fs::read_dir("../../assets/chars").unwrap().filter_map(|entry| {

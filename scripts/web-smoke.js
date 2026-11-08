@@ -23,6 +23,7 @@ const server = staticServer(dir, types);
     consoleTail.push(`${m.type()}: ${m.text().slice(0, 160)}`); if (consoleTail.length > 40) consoleTail.shift();
     if (/panicked|PanicHookInfo|renderbufferStorageMultisample/.test(m.text())) problems.push(`console: ${m.text().slice(0, 200)}`);
   });
+  if (process.env.WEB_SMOKE_FRAME_DELAY) await p.addInitScript(d => { const raf = window.requestAnimationFrame.bind(window); window.requestAnimationFrame = cb => raf(() => setTimeout(() => cb(performance.now()), d)); }, Number(process.env.WEB_SMOKE_FRAME_DELAY));
   await p.goto(url);
   await p.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
   await p.waitForTimeout(12000);
@@ -30,7 +31,10 @@ const server = staticServer(dir, types);
   const shotDir = process.env.WEB_SMOKE_SHOTS; if (shotDir) fs.mkdirSync(shotDir, { recursive: true });
   const snap = async name => { if (shotDir) await p.screenshot({ path: path.join(shotDir, `${name}.png`) }).catch(() => {}); };
   await snap('00-after-boot');
-  const key = async (k, wait = 1000) => { await p.keyboard.down(k); await p.waitForTimeout(200); await p.keyboard.up(k); await p.waitForTimeout(wait); };
+  // A tap shorter than one frame is invisible to a game that samples keys per frame, and software GL on a CI runner can
+  // take more than 200 ms per frame: hold every key for two animation frames instead of a fixed time.
+  const frames = n => p.evaluate(n => new Promise(done => { const step = i => (i ? requestAnimationFrame(() => step(i - 1)) : done()); step(n); }), n);
+  const key = async (k, wait = 1000) => { await p.keyboard.down(k); await frames(2); await p.keyboard.up(k); await frames(5); await p.waitForTimeout(wait); };
   await key('Enter');                       // title → menu
   await snap('01-menu');
   await key('ArrowDown'); await key('ArrowDown'); await key('Enter', 1500);  // Arcade, Survival → CPU (Versus CPU) → select

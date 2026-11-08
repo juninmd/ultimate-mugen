@@ -73,19 +73,23 @@ Settings › Language switches at runtime and stores `lang=en|pt` in `ultimate-m
 | Action | Keyboard P1 | Keyboard P2 | Gamepad | Touch |
 |---|---|---|---|---|
 | Move | arrows | `I` `K` `J` `L` | D-pad / stick | virtual stick |
-| Punches `x` `y` `z` | `Q` `W` `E` | Num `4` `5` `6` | □ △ R1 | LP HP |
-| Kicks `a` `b` `c` | `A` `S` `D` | Num `1` `2` `3` | ✕ ○ R2 | LK HK |
-| Quick specials | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | ESPECIAL, SUPER |
-| Super | `1`+`2` | Num `7`+`8` | L1+L2 | SUPER |
-| Awakening | `T` | Num `0` | R3 / SELECT | — |
-| Tag swap (Tag mode) | `F` | Num Enter | R3 / SELECT | awaken button |
-| Charge ki (Start) | `R` | Num Decimal | — | — |
+| Punches `x` `y` `z` | `Q` `W` `E` | Num `4` `5` `6` | □ △ | LP HP |
+| Kicks `a` `b` `c` | `A` `S` `D` | Num `1` `2` `3` | ✕ ○ | LK HK |
+| Quick specials | `V` `B` `N` | Num `7` `8` `9` | — | ESPECIAL, SUPER |
+| Move shortcuts (slots 1-4) | `1` `2` `3` `4` | — | L1, L2, R1, R2 | — |
+| Awakening (transform) | `T` | Num `0` | L3 + R3 / SELECT | — |
+| Tag swap (Tag mode) | `F` | Num Enter | L3 + R3 / SELECT | awaken button |
+| Charge ki | `R` | Num Decimal | R3 (alone) / START | — |
 | Pause / hitboxes | `Esc` / `F2` | `Esc` / `F2` | START | ❚❚ |
 | Fullscreen / FPS | `F11` / `F3` | — | — | — |
 
 The names `x y z a b c` are the same ones used in character commands (`input`).
 
 While jumping, `x` `y` `a` `b` each throw an air normal, and down + `b` is the diving down kick (generated for every native fighter by `native/air_normals.rs`, reusing the fighter's own air animations).
+
+## Move shortcuts
+
+Open the pause menu, pick a move in the move list and press `1`-`4` (or L1, L2, R1, R2 on a gamepad) to bind it to that slot. Pressing the same slot again clears it. From then on the bound move is performed by one key or button press, with the right motion and buttons played for you. Bindings are stored per fighter in `ultimate-mugen.shortcuts` next to the executable. On the web the gamepad mapping follows the same layout.
 
 ## Button prompts
 

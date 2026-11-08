@@ -168,11 +168,7 @@ pub(crate) async fn fight(
             let ev = ume_engine::matchs::Event::Hit {
                 attacker_side: 0,
                 defender_side: 1,
-                damage: match want {
-                    "hyper" => 200.0,
-                    "heavy" => 120.0,
-                    _ => 60.0,
-                },
+                damage: [60.0, 120.0, 200.0][(want == "heavy") as usize + 2 * (want == "hyper") as usize],
                 guarded: want == "guard",
                 heavy: want == "heavy",
                 attacker: 0,

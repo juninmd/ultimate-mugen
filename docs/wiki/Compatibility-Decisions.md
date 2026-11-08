@@ -28,3 +28,10 @@ glTF stages are **rejected by design**. The stage loader detects a model request
 ## Tracker music
 
 `xm`, `it`, `mod` and `s3m` music is **rejected by design** for now. The audio backend decodes ogg/vorbis, mp3, flac and wav; an unsupported track logs a warning and the fight continues with the built-in music instead of going silent.
+
+## Deliberate physics deviations
+
+| Behaviour | M.U.G.E.N | Ultimate MUGEN | Reason |
+|---|---|---|---|
+| Airborne hit state with `physics = N` | No gravity: a fighter hit by repeated `yvel = 0` attacks stays in mid-air | The fighter falls, as if its state had ground-or-air gravity | Stops fighters from hovering while a projectile keeps hitting them. Attack states with `physics = N` (hover and flight moves) keep their scripted height. |
+

@@ -8,6 +8,7 @@ use std::cell::RefCell;
 use std::sync::Arc;
 
 mod armor;
+mod bounds;
 mod forms;
 mod types;
 pub use types::*;
@@ -432,7 +433,8 @@ impl Match {
             let f = &mut self.fighters[i];
             f.pos.x += f.vel.x * f.facing;
             f.pos.y += f.vel.y;
-            match f.physics {
+            let physics = if f.physics == 'N' && f.move_type == 'H' && f.state_type == 'A' { 'A' } else { f.physics };
+            match physics {
                 'S' | 'C' => {
                     let sliding = f.move_type == 'H' && f.slide_time > 0;
                     if !sliding {
@@ -767,6 +769,7 @@ impl Match {
         self.rebind();
         self.orphan_custom_states();
         self.detect_hits();
+        self.bound_fighters();
         crate::ikemen::life::maintain(self);
         for f in self.fighters.iter_mut() {
             for o in f.hit_overrides.iter_mut() { if let Some(h) = o { if h.time > 0 { h.time -= 1; if h.time == 0 { *o = None; } } } }
@@ -892,16 +895,7 @@ impl Match {
                 }
             }
         }
-        let left = self.camera.x - self.view_w / 2.0; let right = self.camera.x + self.view_w / 2.0;
-        let (bl, br, vw) = (self.stage.bound_left, self.stage.bound_right, self.view_w);
-        for f in self.fighters.iter_mut() {
-            if f.destroyed || (f.is_helper && !f.helper_player) { continue; }
-            if !f.screen_bound { f.screen_bound = true; continue; }
-            let lw = if f.facing > 0.0 { f.back_width() } else { f.front_width() };
-            let rw = if f.facing > 0.0 { f.front_width() } else { f.back_width() };
-            let minx = left.max(bl - vw / 2.0) + lw; let maxx = right.min(br + vw / 2.0) - rw;
-            f.pos.x = f.pos.x.clamp(minx, maxx.max(minx));
-        }
+        self.bound_fighters();
     }
 
     pub fn update_camera(&mut self) {

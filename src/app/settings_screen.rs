@@ -400,7 +400,7 @@ impl App {
                 }
             }
             Act::Reset if ok => {
-                *s = Settings::default();
+                *s = Settings { survival_best: s.survival_best, ..Settings::default() };
                 self.ai_level = s.difficulty;
                 self.msg = tr("Configurações restauradas", "Settings restored").into();
             }

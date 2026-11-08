@@ -8,6 +8,7 @@ mod i18n;
 mod keybinds;
 mod market;
 mod menu_art;
+mod moves_tour;
 mod mugen_tour;
 #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
 mod netlink;

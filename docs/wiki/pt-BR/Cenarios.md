@@ -138,6 +138,10 @@ As vinte e uma arenas nativas usam imagens PNG coloridas incorporadas de `assets
 
 `StageArt::Illustrated` desenha o fundo com filtro nearest-neighbor, alinha o piso a 85% da altura da imagem e limita o movimento horizontal da câmera às bordas da imagem. O zoom de equipes mantém a proporção nativa do chão. Sombras, reflexos dos lutadores e efeitos de combate continuam ativos; as antigas animações de objetos ficam exclusivas da arte procedural.
 
+### Camadas vivas
+
+Todo cenário ilustrado também carrega um **perfil de ambiência** (`src/stages/ambience.rs`, dados em `src/stages/ambience/profiles/`): bancos de névoa translúcidos que derivam para os lados, partículas (pétalas, brasas, vaga-lumes, poeira, folhas, faíscas, pássaros), poças de luz aditivas ancoradas em lanternas, janelas, fogo e sol, e raios de luz inclinados. Tudo é desenhado a cada quadro com polígonos de cor por vértice sobre a arte plana (camadas `front: true` passam na frente dos lutadores), reage ao paralaxe da câmera, usa `Match::game_time` para o movimento e escala a quantidade de partículas com a configuração de efeitos. Um teste unitário limita cada perfil a 420 polígonos por quadro e valida todos os intervalos. Para animar um cenário ilustrado novo, adicione um `Profile` para o id dele em `profiles/classic.rs` ou `profiles/wonders.rs`; ids desconhecidos usam algumas partículas de poeira.
+
 O seletor exibe as mesmas imagens, recortadas nos cartões sem alterar sua proporção. A seleção aleatória e os cenários M.U.G.E.N importados mantêm os cartões com gradiente. Os cenários importados preservam sua própria arte durante a luta.
 
 Use `UME_STAGE_ART=procedural` para comparar os cenários procedurais originais. O seletor continua mostrando as ilustrações em pixel art padrão. Capture o seletor com `UME_SHOTS_ONLY=stage-select ultimate-mugen --shots out/ --res 1280x720 --mute`, ou as sete lutas com `UME_SHOTS_ONLY=stages`.

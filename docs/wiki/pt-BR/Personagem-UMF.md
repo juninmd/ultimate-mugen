@@ -135,7 +135,24 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `teleport` | quadro | Reaparece atrás do oponente |
 | `fx` | `aura` | Efeito visual extra |
 | `voice` | `1000, 0` | Grupo e índice do som do personagem tocado no início do golpe, quando o áudio estiver incluído |
-| `airPhysics` | `true` | Mantém física aérea |
+| `airPhysics` | `true` | Mantém a física aérea |
+| `cancels` | lista de ids | Este golpe pode ser cancelado **para** esses golpes em contato (acerto, defesa ou projétil que encosta). Declarar substitui o gatling automático a partir deste golpe |
+| `throw` | `{ "damage", "bind", "launch", "at" }` | Agarrão: veja [Traços de combate](#traços-de-combate) |
+| `armor` | `{ "hits", "threshold" }` | Absorve golpes enquanto o movimento está ativo |
+| `parry` | `{ "window": [de, até], "spark" }` | Devolve ataques na janela de elementos da animação |
+| `timestop` | ticks | Congela todos os outros |
+| `burst` | `true` | Quebra de combo usável ao apanhar |
+| `flight` | `true` | Pairar em 8 direções enquanto o golpe dura |
+
+### Traços de combate
+
+- **Gatling automático.** Um golpe sem `cancels` segue o gênero: um normal cancela em qualquer normal *mais forte* (`light` < `medium` < `heavy` pelo maior nível de acerto, empate pela ordem de declaração, então sequências nunca entram em loop), normais em pé ligam nos agachados, normais aéreos encadeiam com aéreos, e todo normal cancela em todo especial e super no contato. Especiais só cancelam em outros especiais por `cancels` explícito; supers cancelam a partir de qualquer golpe.
+- **Rotas explícitas.** `"cancels": ["strong", "rush"]` no `jab` faz `strong` e `rush` aceitarem o `jab` no contato. Um especial de projétil pode ser cancelado quando o projétil toca o oponente. Um especial `air` pode começar de um lançador no chão que o liste (uppercut, depois mergulho).
+- **`throw`** (`damage`, `bind` `[x, y]` à frente de quem agarra, `launch` `[vx, vy]`, `at` = frame do agarrão, padrão 1). O HitDef do agarrão dispara no elemento `at` (dê uma caixa `hit` a esse frame), a vítima fica presa em `at + 1`, leva o dano em `at + 2` e é lançada, então a animação precisa de pelo menos `at + 2` frames. Agarrões ignoram defesa e falham fora do alcance.
+- **`armor`** (`hits` absorvidos, `threshold` opcional = dano acima do qual a armadura quebra). Do início até o último frame de acerto o golpe recebe 35 % de dano reduzido e não é interrompido; gastos os `hits`, o próximo golpe derruba normalmente.
+- **Cola de multi-hit.** Golpes com três ou mais `hits` empurram o alvo só um pouco a cada acerto exceto o último (a sequência inteira conecta) e projéteis perfurantes (4+ acertos) não empurram o alvo para fora do feixe. Defina `knockback` para desativar.
+
+Valide com `cargo test --release --test native_roster_lab -- --nocapture` (todo estado de ataque precisa conectar; imprime dano e alcance), `--test native_combo_routes` (todo cancel declarado encadeia de ponta a ponta) e `python scripts/audit_native_moves.py`.
 
 ### `hits[]`
 

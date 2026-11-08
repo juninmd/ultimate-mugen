@@ -136,6 +136,23 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `fx` | `aura` | Extra visual effect |
 | `voice` | `1000, 0` | Character sound group and index played at move start, when that sample is bundled |
 | `airPhysics` | `true` | Keeps air physics |
+| `cancels` | list of move ids | This move may be cancelled **into** those moves on contact (hit, guard or projectile contact). Declaring it replaces the automatic gatling out of this move |
+| `throw` | `{ "damage", "bind", "launch", "at" }` | Grab: see [Combat traits](#combat-traits) |
+| `armor` | `{ "hits", "threshold" }` | Absorbs hits while the move is active |
+| `parry` | `{ "window": [from, to], "spark" }` | Returns attacks during the animation-element window |
+| `timestop` | ticks | Freezes everyone else |
+| `burst` | `true` | Combo breaker usable while being hit |
+| `flight` | `true` | 8-way hover while the move lasts |
+
+### Combat traits
+
+- **Automatic gatling.** A move without `cancels` follows the genre rules: a normal cancels into any *stronger* normal (`light` < `medium` < `heavy` by the strongest hit level, ties by declaration order, so strings can never loop), ground normals link into crouching ones, air normals chain with air normals, and every normal cancels into every special and super on contact. Specials cancel into other specials only through explicit `cancels`; supers cancel out of any move.
+- **Explicit routes.** `"cancels": ["strong", "rush"]` on `jab` makes `strong` and `rush` accept `jab` on contact. A projectile special can be cancelled once its projectile touches the opponent. An `air` special may start from a ground launcher that lists it (uppercut, then dive).
+- **`throw`** (`damage`, `bind` `[x, y]` in front of the thrower, `launch` `[vx, vy]`, `at` = grab frame, default 1). The grab HitDef fires on animation element `at` (give that frame a `hit` box), the victim is held on `at + 1`, takes the damage on `at + 2` and is launched, so the animation needs at least `at + 2` frames. Throws ignore guarding and whiff when the target is out of reach.
+- **`armor`** (`hits` absorbed, optional `threshold` = damage above which the armor breaks). From move start until the last hit frame the move takes 35 % chip damage and is not interrupted; once `hits` are spent the next hit staggers normally.
+- **Multi-hit glue.** Moves with three or more `hits` push the target away only a little on every hit except the last (so the whole string connects) and piercing projectiles (4+ hits) do not shove the target out of the beam. Set `knockback` explicitly to opt out.
+
+Validate with `cargo test --release --test native_roster_lab -- --nocapture` (every attack state must connect; prints damage and reach per move), `--test native_combo_routes` (every declared cancel chains end to end) and `python scripts/audit_native_moves.py`.
 
 ### `hits[]`
 

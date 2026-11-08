@@ -7,6 +7,7 @@ use crate::triggers::Ctx;
 use std::cell::RefCell;
 use std::sync::Arc;
 
+mod armor;
 mod forms;
 mod types;
 pub use types::*;
@@ -1146,12 +1147,13 @@ impl Match {
     }
 
     fn hit_override(&self, d: usize, hd: &HitDefData) -> Option<(i32, bool)> {
-        self.fighters[d].hit_overrides.iter().flatten().find(|o| o.time != 0 && Self::attr_match(hd, &o.attr)).map(|o| (o.state_no, o.force_air))
+        self.fighters[d].hit_overrides.iter().flatten().find(|o| o.time != 0 && !o.keep && Self::attr_match(hd, &o.attr)).map(|o| (o.state_no, o.force_air))
     }
 
     pub fn apply_hit(&mut self, a: usize, d: usize, hd: &HitDefData, at: (f32, f32), proj: Option<(i32, f32)>) {
         let guarded = !self.fighters[a].has_assert(asf::UNGUARDABLE) && self.is_guarding(d, hd);
         let overridden = if guarded { None } else { self.hit_override(d, hd) };
+        if !guarded && self.absorb_armored_hit(a, d, hd, at, proj) { return; }
         let from_proj = proj.is_some();
         let a_facing = proj.map(|p| p.1).unwrap_or(self.fighters[a].facing);
         let (aid, aside, apos, aroot) = { let f = &self.fighters[a]; (f.id, f.side, f.pos, f.root) };
@@ -1232,7 +1234,7 @@ impl Match {
             let training = self.training;
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
-            let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale(prev_hc) } else { 1.0 };
+            let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale_for(prev_hc, hd.attr_kind.iter().any(|k| k.starts_with('H'))) } else { 1.0 };
             let mut dmg = (hd.damage * attack_mul * scale / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             if self.fighters[d].has_assert(asf::NOHITDAMAGE) { dmg = 0.0; }

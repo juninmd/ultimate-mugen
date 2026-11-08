@@ -63,6 +63,7 @@ pub enum StageArt {
     },
     Illustrated {
         image: Arc<ImageData>,
+        ambience: &'static ambience::Profile,
     },
     Mugen(Box<MugenBg>),
 }
@@ -3277,6 +3278,7 @@ fn volcano() -> Stage {
     }
 }
 
+pub mod ambience;
 mod wonders;
 
 const ILLUSTRATION_IDS: [&str; 7] = [
@@ -3378,6 +3380,7 @@ fn illustrated(id: &str, name: &str, music: u32, kind: StageKind) -> Stage {
         info: info(name),
         art: StageArt::Illustrated {
             image: illustration(id).expect("builtin stage image"),
+            ambience: ambience::profile_for(id),
         },
         music,
         kind,

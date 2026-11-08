@@ -117,6 +117,8 @@ fn test_throw_and_passives_mechanics() {
             damage: 130.0,
             bind: Some([35.0, -15.0]),
             p2_state: Some(820),
+            at: None,
+            launch: None,
         }),
         cancels: None,
     });

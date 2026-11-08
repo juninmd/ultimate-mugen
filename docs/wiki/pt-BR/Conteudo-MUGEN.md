@@ -11,6 +11,10 @@ Uma importação web mostra uma tela de carregamento em tela cheia desde o momen
 
 Centenas de personagens são registradas sem decodificar tudo; só o que está sob o cursor é carregado, e um cache LRU limita a memória.
 
+Antes de um personagem entrar na lista, o catálogo confere se cada arquivo que o `.def` cita em `[Files]` existe dentro da própria pasta do personagem (ou na raiz do pacote, ou em `data/`): `sprite`, `anim` e `cns` são obrigatórios. Quem falha na conferência vai para a **quarentena**: fica fora da seleção e o motivo é listado. Arquivos nunca são emprestados da pasta de outro personagem, então um `.def` copiado que aponta para os sprites de outro lutador não carrega esses sprites pelo nome. A conferência é estrutural (presença dos arquivos), rápida o bastante para a varredura de inicialização; um lutador cujos arquivos existem, mas cujas animações referenciam sprites faltando, continua carregando e aparece com os frames faltantes.
+
+Abra **Personagens MUGEN** no menu principal para ver o resumo: quantos personagens carregaram, quantos estão em quarentena e os motivos mais comuns, além de uma galeria de todos os personagens carregados (retrato, nome e autor; `←/→` trocam de página) e a lista da quarentena (`TAB` alterna a visão; `ESC` volta).
+
 ## Cenários
 
 Coloque `<nome>.def` e o `.sff` em `mugen/stages/`, ou dentro de um `.zip` em `mugen/`.

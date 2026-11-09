@@ -10,10 +10,10 @@ use ume_market::persist::{catalog_key, item_key, STATE_KEY};
 use ume_market::safety::lower_ext;
 use ume_market::{Catalog, Installed, Item, Kind, MarketError, MarketState, Persist, RepoRef};
 
-pub const SUGGESTED: [(&str, &str); 1] = [(
-    "juninmd/ultimate-mugen",
-    "Official project · Elecbyte sample pack",
-)];
+pub const SUGGESTED: [(&str, &str); 2] = [
+    ("juninmd/ultimate-mugen", "Official project · Elecbyte sample pack"),
+    ("Carlmundo/NooksVsCrans", "NooksVsCrans · chars, stages, music and packs"),
+];
 
 const STALE_AFTER_SECS: u64 = 600;
 

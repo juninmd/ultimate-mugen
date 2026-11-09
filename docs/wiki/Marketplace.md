@@ -13,6 +13,15 @@ Install characters, stages and music straight from any public GitHub repository.
 
 Everything is stored locally, so the repository list, the installed items and their on/off state are still there next time.
 
+## Suggested repositories
+
+| Repository | Characters | Stages | Music | Packs |
+|---|---|---|---|---|
+| [juninmd/ultimate-mugen](https://github.com/juninmd/ultimate-mugen) | — | — | — | [elecbyte.zip](https://github.com/juninmd/ultimate-mugen/blob/master/assets/mugen/elecbyte.zip) |
+| [Carlmundo/NooksVsCrans](https://github.com/Carlmundo/NooksVsCrans) | [chars](https://github.com/Carlmundo/NooksVsCrans/tree/master/chars) | [stages](https://github.com/Carlmundo/NooksVsCrans/tree/master/stages) | [sound](https://github.com/Carlmundo/NooksVsCrans/tree/master/sound) | [Rayman.zip](https://github.com/Carlmundo/NooksVsCrans/blob/master/chars/Rayman.zip) |
+
+Both repositories are in the in-game suggestion list (`SUGGESTED` in `src/market.rs`). To add one by hand, type `owner/repo` in the marketplace; the links above open each folder on GitHub.
+
 ## What is detected
 
 | Kind | Rule | Installed files |

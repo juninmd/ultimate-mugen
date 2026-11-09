@@ -13,6 +13,15 @@ Instale personagens, cenários e músicas direto de qualquer repositório públi
 
 Tudo fica salvo localmente: a lista de repositórios, os itens instalados e o estado de ativação continuam lá na próxima abertura.
 
+## Repositórios sugeridos
+
+| Repositório | Personagens | Stages | Músicas | Packs |
+|---|---|---|---|---|
+| [juninmd/ultimate-mugen](https://github.com/juninmd/ultimate-mugen) | — | — | — | [elecbyte.zip](https://github.com/juninmd/ultimate-mugen/blob/master/assets/mugen/elecbyte.zip) |
+| [Carlmundo/NooksVsCrans](https://github.com/Carlmundo/NooksVsCrans) | [chars](https://github.com/Carlmundo/NooksVsCrans/tree/master/chars) | [stages](https://github.com/Carlmundo/NooksVsCrans/tree/master/stages) | [sound](https://github.com/Carlmundo/NooksVsCrans/tree/master/sound) | [Rayman.zip](https://github.com/Carlmundo/NooksVsCrans/blob/master/chars/Rayman.zip) |
+
+Os dois repositórios estão na lista de sugestões do jogo (`SUGGESTED` em `src/market.rs`). Para adicionar outro, digite `owner/repo` no mercado; os links acima abrem cada pasta no GitHub.
+
 ## O que é detectado
 
 | Tipo | Regra | O que é instalado |

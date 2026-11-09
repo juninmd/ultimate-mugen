@@ -112,7 +112,7 @@ anti-aliasing, blur, gradient, soft shading, 3D render, realistic, photo, extra 
 1. Reduzir/quantizar para a paleta da referência (sem novas cores); índice 0 = fundo.
 2. Remover o fundo magenta, alinhar pivô (pés = linha fixa) e recortar com canvas constante.
 3. Comparar com `reference.png`: altura ±2 px, cores idênticas, contorno 1 px. Descartar quadros que divergem e regerar.
-4. Rodar `sprite_audit` e `native_sprite_coverage.py` ao final.
+4. Rodar `sprite_audit` e `native_sprite_audit --require-complete` ao final.
 
 ### E.6 Checklist de fidelidade
 - [ ] `reference.png` + `reference.md` existem e foram aprovados.

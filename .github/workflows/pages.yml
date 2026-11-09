@@ -15,7 +15,6 @@ jobs:
         with: { targets: wasm32-unknown-unknown }
       - uses: Swatinem/rust-cache@v2
       - run: cargo install wasm-bindgen-cli --locked --version "$(grep -A1 '^name = "wasm-bindgen"$' Cargo.lock | sed -n 's/^version = "\(.*\)"/\1/p')"
-      - run: python3 -m pip install --user --break-system-packages "pillow>=11,<13"
       - run: ./scripts/build-web.sh
       - run: touch web/dist/.nojekyll
       - uses: peaceiris/actions-gh-pages@v4

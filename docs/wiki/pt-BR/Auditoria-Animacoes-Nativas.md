@@ -21,9 +21,8 @@ consegue nomear resolve para o próprio arquivo PNG. Os canvases numerados compa
   limites de tamanho de origem e de quantidade de quadros por personagem, porque o JSON UMF
   varrido é conteúdo importado pelo usuário.
 - Verificação: `cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> --require-complete`
-  deve passar para todos os lutadores, e `python scripts/audit_native_sprites.py --out <report.json>` deve
-  ficar limpo em geometria e bordas alfa. O `python scripts/native_sprite_coverage.py` reproduz as regras de
-  resolução em Python sem compilar o motor.
+  deve passar para todos os lutadores, e `cargo run --release -p ume-devtools --bin ume-tools -- audit-sprites --out <report.json>` deve
+  ficar limpo em geometria e bordas alfa. O `cargo run --release -p ume-devtools --bin ume-tools -- audit-moves` é a auditoria estática do elenco (inputs, cancels, throws, hit boxes).
 
 ## Ciclo de QA com sprite-gen
 

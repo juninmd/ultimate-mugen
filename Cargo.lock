@@ -2621,6 +2621,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ume-devtools"
+version = "0.2.0"
+dependencies = [
+ "serde_json",
+ "ume-charforge",
+ "ume-formats",
+]
+
+[[package]]
 name = "ume-engine"
 version = "0.2.0"
 dependencies = [

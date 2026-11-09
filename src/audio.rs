@@ -174,6 +174,13 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
             noise(&mut out, 0.0, 0.02, 0.8, 2, 2800.0, 2800.0, 0.7, 0.0);
             tone(&mut out, 0.0, 240.0, 120.0, 0.06, 0.4, 1);
         }
+        "guardbreak" => {
+            metal(&mut out, 980.0, 0.45, 0.6);
+            metal(&mut out, 480.0, 0.35, 0.3);
+            noise(&mut out, 0.0, 0.25, 0.9, 1, 3400.0, 800.0, 0.6, 0.0);
+            tone(&mut out, 0.0, 140.0, 45.0, 0.4, 0.8, 0);
+            reverb(&mut out, 0.35, 0.4);
+        }
         "swing" => {
             noise(&mut out, 0.0, 0.16, 0.5, 1, 500.0 * p, 2800.0, 0.5, 1.5);
         }
@@ -466,6 +473,7 @@ impl Audio {
                 ("hitheavy", 3),
                 ("counter", 1),
                 ("guard", 3),
+                ("guardbreak", 2),
                 ("swing", 3),
                 ("swingh", 2),
                 ("land", 2),
@@ -1086,6 +1094,7 @@ mod tests {
             "hitheavy",
             "counter",
             "guard",
+            "guardbreak",
             "swing",
             "swingh",
             "land",

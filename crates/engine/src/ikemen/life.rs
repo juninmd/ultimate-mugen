@@ -69,6 +69,9 @@ pub fn maintain(m: &mut Match) {
             f.ikemen.guard_break = false;
             f.ikemen.guard_points = f.ikemen.guard_max;
         }
+        if f.move_type != 'H' && !f.ikemen.guard_break && f.ikemen.guard_points < f.ikemen.guard_max {
+            f.ikemen.guard_points = (f.ikemen.guard_points + 0.5).min(f.ikemen.guard_max);
+        }
     }
 }
 

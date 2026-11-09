@@ -161,7 +161,7 @@ impl Hud {
                 let (py0, ph) = (4.0, 23.0);
                 let tint = side_tint(side);
                 let (dk, cl) = (
-                    Color::new(0.02, 0.04, 0.12, 0.7),
+                    Color::new(0.02, 0.04, 0.12, 0.5),
                     Color::new(0.02, 0.04, 0.12, 0.0),
                 );
                 let hl = |y: f32| {
@@ -191,7 +191,7 @@ impl Hud {
                 let (solid_x0, solid_x1, fade_x0, fade_x1) = if side == 0 {
                     (px0 - 4.0, bx + bw + 2.0, bx + bw + 2.0, bx + bw + 2.0 + fade)
                 } else {
-                    (bx - 2.0, px0 + panel_w, bx - 2.0 - fade, bx - 2.0)
+                    (bx - 2.0, w, bx - 2.0 - fade, bx - 2.0)
                 };
                 let quad = |x0: f32, x1: f32| {
                     [

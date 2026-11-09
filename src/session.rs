@@ -408,7 +408,8 @@ impl Session {
                                 match index {
                                     0 => "hitlight",
                                     1 => "hit",
-                                    _ => "hitheavy",
+                                    2..=3 => "hitheavy",
+                                    _ => "burst",
                                 }
                             }
                             6 => "guard",

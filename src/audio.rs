@@ -68,8 +68,8 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
         "super" => 2.1,
         "defeat" => 1.7,
         "round" | "fight" | "win" | "perfect" => 1.1,
-        "hitheavy" | "counter" => 0.6,
-        "meter" => 0.5,
+        "hitheavy" | "counter" | "burst" => 0.6,
+        "meter" | "danger" => 0.5,
         _ => 0.4,
     };
     let mut out = vec![0.0f32; sec(total)];
@@ -276,6 +276,17 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
             tone(&mut out, 0.0, 1480.0, 1480.0, 0.16, 0.22, 0);
             tone(&mut out, 0.07, 2217.0, 2217.0, 0.25, 0.16, 0);
             reverb(&mut out, 0.3, 0.2);
+        }
+        "burst" => {
+            noise(&mut out, 0.0, 0.03, 1.0, 2, 3800.0, 3800.0, 0.7, 0.0);
+            tone(&mut out, 0.0, 180.0 * p, 32.0, 0.45, 1.2, 0);
+            noise(&mut out, 0.0, 0.35, 0.85, 1, 2400.0 * p, 180.0, 0.3, 0.0);
+            metal(&mut out, 880.0 * p, 0.25, 0.2);
+            reverb(&mut out, 0.25, 0.15);
+        }
+        "danger" => {
+            tone(&mut out, 0.0, 85.0, 42.0, 0.12, 0.6, 0);
+            tone(&mut out, 0.15, 75.0, 38.0, 0.14, 0.5, 0);
         }
         "select" => {
             tone(&mut out, 0.0, 1500.0, 1050.0, 0.03, 0.2, 0);
@@ -1089,6 +1100,8 @@ mod tests {
             "win",
             "perfect",
             "meter",
+            "burst",
+            "danger",
             "select",
             "back",
             "confirm",

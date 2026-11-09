@@ -111,6 +111,7 @@ pub fn merge_hitdef(dst: &mut HitDefData, src: &HitDefData, sc: &Controller) {
             "down.velocity" => dst.down_vel = src.down_vel,
             "down.hittime" => dst.down_hit_time = src.down_hit_time,
             "down.bounce" => dst.down_bounce = src.down_bounce,
+            "wall.bounce" => dst.wall_bounce = src.wall_bounce,
             "p1sprpriority" => dst.p1sprpriority = src.p1sprpriority,
             "p2sprpriority" => dst.p2sprpriority = src.p2sprpriority,
             "p1facing" => dst.p1facing = src.p1facing,

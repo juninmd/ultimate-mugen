@@ -1255,7 +1255,7 @@ impl Match {
                 g.hittime = if down { hd.down_hit_time } else if air { hd.air_hit_time } else { hd.ground_hit_time };
                 g.slidetime = hd.ground_slide_time; g.ctrltime = hd.ground_hit_time;
                 let v = if down { hd.down_vel } else if air { hd.air_vel } else { hd.ground_vel };
-                g.hit_id = hd.id; g.fall_env_shake = hd.fall_env_shake; g.down_bounce = hd.down_bounce;
+                g.hit_id = hd.id; g.fall_env_shake = hd.fall_env_shake; g.down_bounce = hd.down_bounce; g.wall_bounce = hd.wall_bounce; g.wall_bounced = false;
                 g.xvel = v[0] * dir; g.yvel = v[1]; g.yaccel = hd.yaccel; g.xaccel = hd.xaccel * dir;
                 g.fall_xvel = hd.fall_xvel.map(|x| x * dir).unwrap_or(g.xvel); g.fall_yvel = hd.fall_yvel;
                 g.fall_recover = hd.fall_recover; g.fall_recover_time = hd.fall_recover_time; g.fall_damage = hd.fall_damage; g.fall_kill = hd.fall_kill; g.kill = hd.kill;

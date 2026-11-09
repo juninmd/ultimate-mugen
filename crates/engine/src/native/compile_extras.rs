@@ -37,6 +37,7 @@ pub(super) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_proj: bool) 
     if let Some(t) = h.shake { s += &format!("envshake.time = {t}\n"); }
     if let Some(cp) = h.cornerpush { s += &format!("ground.cornerpush.veloff = {cp}\n"); }
     if h.ground_bounce.unwrap_or(false) { s += "fall.damage = 15\nfall.envshake.time = 8\ndown.bounce = 1\n"; }
+    if h.wall_bounce.unwrap_or(false) { s += "fall.damage = 15\nfall.envshake.time = 8\nwall.bounce = 1\n"; }
     s
 }
 
@@ -44,7 +45,7 @@ pub(super) fn hitdef_projectile(damage: f32, lvl: Option<&str>, kb: Option<[f32;
     let spec = HitSpec {
         at: 0, damage, guard_damage: None, level: lvl.map(|s| s.into()), guard: None, knockback: kb, air_knockback: None,
         launch: Some(launch), hitstop: None, hitstun: None, spark: None, shake: None, priority: Some(4), hitflag: None,
-        pausetime: None, cornerpush: None, hit_sound: None, guard_sound: None, spark_pos: None, ground_bounce: None,
+        pausetime: None, cornerpush: None, hit_sound: None, guard_sound: None, spark_pos: None, ground_bounce: None, wall_bounce: None,
     };
     hitdef_from_spec(&spec, 1.0, attr, true)
 }

@@ -15,6 +15,7 @@
 //! * [`stage`] – stage .def loader (data only, no rendering)
 
 pub mod act;
+pub mod audit;
 pub mod air;
 pub mod fnt;
 pub mod health;

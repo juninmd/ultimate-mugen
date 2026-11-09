@@ -38,6 +38,11 @@ cargo run --release -p ume-engine --example mugen_check -- mugen/chars/kfm
 cargo run --release -p ume-engine --example sprite_audit -- mugen/chars/kfm
 cargo run --release -p ume-engine --example hover_check -- mugen/chars/kfm
 ```
+cargo run --release -p ume-formats --example mugen_refs -- mugen/chars
+cargo run --release -p ume-formats --example mugen_lint -- mugen/chars
+cargo run --release -p ume-engine --example mugen_pairs -- --matrix mugen/chars
+cargo run --release -p ume-formats --example mkselectdef -- mugen > mugen/select.def
+```
 
 | Ferramenta | Mostra |
 |---|---|

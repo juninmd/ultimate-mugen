@@ -4,7 +4,6 @@
 //! folder with hundreds of fighters costs a directory walk, not gigabytes of
 //! RAM. Zip members are inflated when first read, never at index time.
 
-use crate::Reader;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 

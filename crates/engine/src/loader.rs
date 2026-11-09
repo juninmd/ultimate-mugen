@@ -216,7 +216,7 @@ pub fn load_mugen_char(
             })
             .or_else(|| sff.palettes.first().map(|p| p.data.to_vec()));
         let overrides_palette = |s: &ume_formats::sff::DecodedSprite|
-            over.is_some() && s.group != 9000 && (s.palette_index == target || sff.version == 1);
+            over.is_some() && s.group != 9000 && s.palette_index == target;
         let shared_key = |s: &ume_formats::sff::DecodedSprite| -> (i32, i32) {
             if sff.version == 1 {
                 return if overrides_palette(s) || s.palette_index == target || s.palette.is_none() {

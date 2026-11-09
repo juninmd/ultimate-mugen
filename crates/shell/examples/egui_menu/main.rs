@@ -1,3 +1,4 @@
+mod art;
 mod gfx;
 mod menu;
 mod shot;

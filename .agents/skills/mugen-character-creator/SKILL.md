@@ -1283,6 +1283,8 @@ value = 1000 ; Cancela Jab direto em Projétil
 | **Combo aéreo para de conectar de repente** | Limite global de juggle esgotado (`airjuggle`) | Eleve `airjuggle` no `[Data]` ou adicione `AssertSpecial: nojugglecheck` |
 | **Atacante fica colado no oponente defendendo no canto** | Ausência de recuo manual de canto | Insira `PosAdd x = -8` quando `FrontEdgeBodyDist <= 20 && MoveContact` |
 
+Checklist de pré-voo (parâmetros obrigatórios, versões, paletas, variáveis, avisos do emulador): `references/checklist_lint_editor.md`.
+
 ### Comandos de Validação e Ferramental do Motor (Rust)
 ```powershell
 # 1. Gerar scaffold completo do novo personagem via CLI Rust nativa

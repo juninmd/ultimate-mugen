@@ -1641,12 +1641,12 @@ impl App {
                 .rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.7));
             let up = self.names_up[i].as_str();
             let nm = if emugen {
-                clip(up, 13)
+                crate::credit_line::truncate(up, 13)
             } else {
-                clip(up.split_whitespace().next().unwrap_or(""), 12)
+                clip(up.split_whitespace().next().unwrap_or(""), 12).to_string()
             };
             self.ui.text(
-                nm,
+                &nm,
                 cx + cw / 2.0,
                 cy + ch - 4.0,
                 (cw * 0.125).min(12.0),
@@ -2246,15 +2246,15 @@ impl App {
             );
         }
         let e = &self.reg.chars[i];
-        let by = py + ph - 72.0;
+        let by = py + ph - 94.0;
         self.ui
-            .rect(px, by, pw, 72.0, Color::new(0.0, 0.0, 0.05, 0.7));
-        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 66.0); self.draw_stat_gauges(px, by - 4.0, pw, i);
+            .rect(px, by, pw, 94.0, Color::new(0.0, 0.0, 0.05, 0.7));
+        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 88.0); self.draw_stat_gauges(px, by + 20.0, pw, i);
         let nm = self.names_up[i].as_str();
         self.ui.text_bold(
             nm,
             cx,
-            by + 28.0,
+            by + 50.0,
             if nm.chars().count() > 14 { 19.0 } else { 26.0 },
             if locked { hex("#ffcc33") } else { WHITE },
             BLACK,
@@ -2263,7 +2263,7 @@ impl App {
         self.ui.text(
             &crate::credit_line::truncate(&e.series, 30),
             cx,
-            by + 48.0,
+            by + 70.0,
             14.0,
             hex("#a49cc0"),
             Align::Center,

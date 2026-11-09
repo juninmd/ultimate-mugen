@@ -19,7 +19,6 @@ pub(crate) async fn screen(app: &mut App, dir: &str, name: &str, warm: usize) {
     next_frame().await;
 }
 async fn snap(app: &mut App, dir: &str, name: &str, draw: impl Fn(&mut App)) {
-    // draw twice (first frame warms textures), capture the second
     for i in 0..2 {
         draw(app);
         if i == 1 {

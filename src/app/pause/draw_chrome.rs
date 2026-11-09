@@ -19,14 +19,14 @@ pub(super) fn tab_label(tab: Tab) -> &'static str {
 }
 
 impl App {
-    pub(super) fn pause_chrome(&self, lay: &Layout, tab: Tab, fighter: &str, a: f32) {
+    pub(super) fn pause_chrome(&self, lay: &Layout, tab: Tab, fighter: &str, author: &str, a: f32) {
         let ui = &self.ui;
         glass(ui, lay.panel, 22.0, [0.25, 0.32, 0.7], a);
         ui.rect(lay.panel.x, lay.panel.y, lay.panel.w, lay.panel.h, Color::new(0.03, 0.04, 0.1, 0.5 * a));
         ui.rect(lay.panel.x + 24.0, lay.panel.y + 1.0, lay.panel.w - 48.0, 1.0, Color::new(1.0, 1.0, 1.0, 0.22 * a));
         let f = lay.font;
         let w = ui.text(crate::i18n::t("pause.title"), lay.title.0, lay.title.1, 36.0 * f, fade(hex(GOLD), a), Align::Left, true);
-        ui.text(
+        let nw = ui.text(
             &fighter.to_uppercase(),
             lay.title.0 + w + 18.0,
             lay.title.1 - 2.0,
@@ -35,6 +35,11 @@ impl App {
             Align::Left,
             true,
         );
+        let room = lay.panel.right() - (lay.title.0 + w + 18.0 + nw + 14.0) - 24.0;
+        let max = ((room / (11.0 * f)).max(0.0) as usize).min(28);
+        if let Some(by) = crate::credit_line::by_author(author, max).filter(|_| max >= 8) {
+            ui.text(&by, lay.title.0 + w + 18.0 + nw + 14.0, lay.title.1 - 2.0, 15.0 * f, fade(hex(CYAN), 0.8 * a), Align::Left, false);
+        }
         for (i, t) in Tab::ALL.iter().enumerate() {
             let r = lay.tabs[i];
             let on = *t == tab;

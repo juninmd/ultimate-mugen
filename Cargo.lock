@@ -2599,6 +2599,7 @@ dependencies = [
  "sha2",
  "symphonia",
  "tiny-skia",
+ "toml",
  "ume-engine",
  "ume-formats",
  "ume-market",

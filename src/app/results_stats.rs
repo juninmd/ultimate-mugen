@@ -64,4 +64,57 @@ impl App {
             None => crate::i18n::tf("results.wins", &[("{name}", &name(lead))]),
         }
     }
+
+    pub(super) fn results_panel(&self, accent: Color) {
+        let k = self.results_enter();
+        let (x, y, w, h) = (160.0, 200.0 + (1.0 - k) * 24.0, 960.0, 300.0);
+        self.ui
+            .gradient_v(x, y, w, h, alpha(accent, 0.55 * k), Color::new(0.06, 0.04, 0.14, 0.92 * k));
+        crate::menu_art::glass(&self.ui, x, y, w, h, k);
+        self.ui.rect(x, y, 6.0, h, alpha(accent, k));
+        self.ui.rect(x, y, w, 3.0, alpha(accent, 0.9 * k));
+    }
+
+    fn results_enter(&self) -> f32 {
+        let t = (self.screen_t / 0.3).clamp(0.0, 1.0);
+        1.0 - (1.0 - t).powi(3)
+    }
+
+    pub(super) fn results_buttons(&self, items: &[&str], cur: usize) -> (usize, bool) {
+        let k = self.results_enter();
+        let (x0, y, h, gap) = (480.0, 382.0, 52.0, 10.0);
+        let span = 4.0 * 150.0 + 3.0 * gap;
+        let n = items.len().max(1) as f32;
+        let w = (span - gap * (n - 1.0)) / n;
+        let (mut cur, mut clicked) = (cur, false);
+        for (i, it) in items.iter().enumerate() {
+            let x = x0 + i as f32 * (w + gap);
+            if self.hover_rect(x, y, w, h) && mouse_delta_position().length() > 0.0 {
+                cur = i;
+            }
+            if self.clicked_rect(x, y, w, h) {
+                cur = i;
+                clicked = true;
+            }
+            let on = i == cur;
+            let fill = if on {
+                let pulse = 0.9 + 0.1 * (self.ui.t * 5.0).sin();
+                Color::new(1.0 * pulse, 0.30 * pulse, 0.43 * pulse, k)
+            } else {
+                Color::new(1.0, 1.0, 1.0, 0.08 * k)
+            };
+            self.ui.rect(x, y, w, h, fill);
+            self.ui.rect(x, y + h - 2.0, w, 2.0, Color::new(1.0, 1.0, 1.0, if on { 0.6 * k } else { 0.14 * k }));
+            self.ui.text(
+                it,
+                x + w * 0.5,
+                y + 34.0,
+                20.0,
+                Color::new(1.0, 1.0, 1.0, if on { k } else { 0.82 * k }),
+                Align::Center,
+                true,
+            );
+        }
+        (cur, clicked)
+    }
 }

@@ -16,7 +16,6 @@ mod impact;
 mod ko;
 mod sheet;
 pub mod quality;
-
 #[derive(Clone, Copy, PartialEq)]
 enum Kind {
     Spark,

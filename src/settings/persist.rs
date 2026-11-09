@@ -33,6 +33,7 @@ impl Settings {
                 "master" => s.master = pick(v, 8, VOLUME_STEPS),
                 "music" => s.music = pick(v, 10, VOLUME_STEPS),
                 "sfx" => s.sfx = pick(v, 10, VOLUME_STEPS),
+                "voice" => s.voice = pick(v, 10, VOLUME_STEPS),
                 "mute" => s.mute = v == "1",
                 "difficulty" => s.difficulty = pick(v, 4, 8).max(1),
                 "round_time" => s.round_time = pick(v, 0, ROUND_SECONDS.len() - 1),
@@ -60,8 +61,8 @@ impl Settings {
 
     pub fn to_text(&self) -> String {
         format!(
-            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nsingle_round={}\nclassic_pushbox={}\nteam_lifeshare={}\ngamespeed={}\nsurvival_recovery={}\nsurvival_best={}\npal1={}\npal2={}\nlang={}\ngrid={}\nsort={}\n",
-            FORMAT_VERSION, self.fullscreen as i32, self.res, self.quality, self.fps as i32, self.fx, self.impact, self.keep_aspect as i32, if self.linear { "linear" } else { "nearest" }, self.window.0, self.window.1, self.vsync as i32, self.fps_cap, self.master, self.music, self.sfx, self.mute as i32,
+            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nvoice={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nsingle_round={}\nclassic_pushbox={}\nteam_lifeshare={}\ngamespeed={}\nsurvival_recovery={}\nsurvival_best={}\npal1={}\npal2={}\nlang={}\ngrid={}\nsort={}\n",
+            FORMAT_VERSION, self.fullscreen as i32, self.res, self.quality, self.fps as i32, self.fx, self.impact, self.keep_aspect as i32, if self.linear { "linear" } else { "nearest" }, self.window.0, self.window.1, self.vsync as i32, self.fps_cap, self.master, self.music, self.sfx, self.voice, self.mute as i32,
             self.difficulty, self.round_time, self.rounds, self.life, self.single_round as i32, self.classic_pushbox as i32, self.team_life_share as i32, self.game_speed, self.survival_recovery, self.survival_best, self.pal1, self.pal2, self.lang.code(), self.grid, self.sort,
         )
     }

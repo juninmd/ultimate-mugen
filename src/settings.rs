@@ -59,6 +59,7 @@ pub struct Settings {
     pub master: u8,
     pub music: u8,
     pub sfx: u8,
+    pub voice: u8,
     pub mute: bool,
     pub difficulty: i32,
     pub round_time: usize,
@@ -96,6 +97,7 @@ impl Default for Settings {
             master: 8,
             music: 10,
             sfx: 10,
+            voice: 10,
             mute: false,
             difficulty: 4,
             round_time: 0,
@@ -195,6 +197,7 @@ impl Settings {
         crate::i18n::set(self.lang);
         set_vsync(self.vsync);
         set_frame_cap(self.fps_cap_value());
+        crate::voice::set_gain(self.voice as f32 / VOLUME_STEPS as f32);
     }
     /// Physical (pixel) height of the drawable area.
     pub fn physical_h() -> f32 {

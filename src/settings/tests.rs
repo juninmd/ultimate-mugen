@@ -58,6 +58,7 @@ fn text_round_trips() {
         master: 3,
         music: 0,
         sfx: 7,
+        voice: 4,
         mute: true,
         difficulty: 7,
         round_time: 3,

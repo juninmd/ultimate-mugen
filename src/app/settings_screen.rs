@@ -18,6 +18,7 @@ enum Act {
     Master,
     Music,
     Sfx,
+    Voice,
     Mute,
     Keys,
     Guide,
@@ -164,39 +165,11 @@ impl App {
                 r
             }
             1 => vec![
-                level(
-                    Act::Master,
-                    tr("Volume geral", "Master volume"),
-                    s.master,
-                    tr(
-                        "Controla música e efeitos juntos",
-                        "Scales music and effects together",
-                    ),
-                ),
-                level(
-                    Act::Music,
-                    tr("Música", "Music"),
-                    s.music,
-                    tr("Trilha dos cenários", "Stage soundtrack"),
-                ),
-                level(
-                    Act::Sfx,
-                    tr("Efeitos e vozes", "Effects and voices"),
-                    s.sfx,
-                    tr(
-                        "Golpes, vozes dos lutadores e menus",
-                        "Hits, fighter voices and menus",
-                    ),
-                ),
-                row(
-                    Act::Mute,
-                    tr("Mudo", "Mute"),
-                    on_off(s.mute),
-                    tr(
-                        "Silencia tudo sem perder os níveis",
-                        "Silences everything without losing the levels",
-                    ),
-                ),
+                level(Act::Master, tr("Volume geral", "Master volume"), s.master, tr("Controla música e efeitos juntos", "Scales music and effects together")),
+                level(Act::Music, tr("Música", "Music"), s.music, tr("Trilha dos cenários", "Stage soundtrack")),
+                level(Act::Sfx, tr("Efeitos", "Effects"), s.sfx, tr("Golpes, impactos e menus", "Hits, impacts and menus")),
+                level(Act::Voice, tr("Vozes dos golpes", "Move voices"), s.voice, tr("Grito de cada habilidade · 0% desliga", "Each ability's shout · 0% turns it off")),
+                row(Act::Mute, tr("Mudo", "Mute"), on_off(s.mute), tr("Silencia tudo sem perder os níveis", "Silences everything without losing the levels")),
             ],
             2 => {
                 let pads = &self.c.pad_info;
@@ -367,13 +340,10 @@ impl App {
             Act::FpsCounter if go => s.fps = !s.fps,
             Act::Vsync if go => s.vsync = !s.vsync,
             Act::FpsCap if go => s.fps_cap = cycle(s.fps_cap, step, FPS_CAPS.len()),
-            Act::Master if go => {
-                s.master = cycle(s.master as usize, step, VOLUME_STEPS as usize + 1) as u8
-            }
-            Act::Music if go => {
-                s.music = cycle(s.music as usize, step, VOLUME_STEPS as usize + 1) as u8
-            }
+            Act::Master if go => s.master = cycle(s.master as usize, step, VOLUME_STEPS as usize + 1) as u8,
+            Act::Music if go => s.music = cycle(s.music as usize, step, VOLUME_STEPS as usize + 1) as u8,
             Act::Sfx if go => s.sfx = cycle(s.sfx as usize, step, VOLUME_STEPS as usize + 1) as u8,
+            Act::Voice if go => s.voice = cycle(s.voice as usize, step, VOLUME_STEPS as usize + 1) as u8,
             Act::Mute if go => s.mute = !s.mute,
             Act::Difficulty if go => {
                 s.difficulty = (s.difficulty + step).clamp(1, 8);

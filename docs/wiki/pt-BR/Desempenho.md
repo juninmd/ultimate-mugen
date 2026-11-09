@@ -441,3 +441,7 @@ etain_mut.
   - `Recolor::apply_in_region` usa um hasher multiplicativo e memoria do ultimo tom no lugar de SipHash por pixel.
   - O cache de pacotes guarda 64 pacotes, entao elencos acima de 24 personagens nao se expulsam mais.
   - Medido com o profiler no Chromium headless (tela de selecao, 53 movimentos de cursor): tempo ocupado da thread principal caiu de cerca de 98 s para cerca de 2,5 s.
+
+## Efeitos em sprite-sheet
+
+`src/vfx/sheet.rs` toca sheets de efeito CC0 de `assets/fx/` (embutidas com `include_bytes!`, decodificadas e enviadas à GPU no primeiro desenho). Uma faísca de impacto toca em todo golpe não bloqueado; uma explosão toca em golpes de 150 de dano ou mais e no KO. No máximo 12 sprites de sheet ficam vivos, com blend aditivo, e são limpos ao iniciar o round. Sheets e créditos estão em `assets/fx/CREDITS.md`.

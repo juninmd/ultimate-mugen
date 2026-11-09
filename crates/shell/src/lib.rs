@@ -1,11 +1,13 @@
 pub mod sprites;
 pub mod audio;
-pub mod quad;
+pub mod alpha_scale; pub mod quad;
 pub mod platform;
 mod screenshot;
 use screenshot::Save;
 pub mod text;
 pub mod watchdog;
+#[cfg(feature = "egui")]
+pub mod egui_layer;
 
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -122,9 +124,11 @@ pub struct Frame<'a> {
 pub trait Game {
     fn init(&mut self, _gpu: &mut Gpu) {}
     fn frame(&mut self, f: &mut Frame);
+    #[cfg(feature = "egui")]
+    fn ui(&mut self, _ctx: &egui::Context) {}
 }
 
-struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas, post: PostFx }
+struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu::SurfaceConfiguration, gpu: Gpu, canvas: Canvas, post: PostFx, #[cfg(feature = "egui")] ui: egui_layer::Layer }
 
 pub const STRETCH_ASPECT: f32 = 16.0 / 9.0;
 
@@ -194,7 +198,9 @@ async fn init_live(instance: wgpu::Instance, window: Arc<Window>) -> Result<Live
     let canvas = Canvas::new(&renderer, &queue, &mut rgba_atlas).ok_or("atlas too small")?;
     let post = PostFx::new(&device, config.format);
     let gpu = Gpu { device, queue, renderer, rgba_atlas, index_atlas: Atlas::new(side, side), palette_rows: PaletteRows::new() };
-    Ok(Live { window, surface, config, gpu, canvas, post })
+    #[cfg(feature = "egui")]
+    let ui = egui_layer::Layer::new(&window, &gpu.device, config.format);
+    Ok(Live { window, surface, config, gpu, canvas, post, #[cfg(feature = "egui")] ui })
 }
 
 type Pending = Rc<RefCell<Option<Result<Live, String>>>>;
@@ -248,6 +254,8 @@ impl<G: Game> Shell<G> {
         if let Some([w, h]) = resize { let _ = live.window.request_inner_size(PhysicalSize::new(w, h)); }
         if let Some(fs) = fullscreen { platform::set_window_fullscreen(&live.window, fs); }
         let view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
+        #[cfg(feature = "egui")]
+        live.ui.run(&live.window, &live.gpu.device, &live.gpu.queue, [live.config.width, live.config.height], |c| self.game.ui(c));
         let gpu = &mut live.gpu;
         let mut enc = gpu.device.create_command_encoder(&wgpu::CommandEncoderDescriptor::default());
         let clear = Some(wgpu::Color { r: c[0], g: c[1], b: c[2], a: c[3] });
@@ -265,8 +273,12 @@ impl<G: Game> Shell<G> {
                 None => gpu.renderer.draw(&gpu.device, &gpu.queue, &mut enc, Target { view: v, size, clear }, &live.canvas.batch),
             }
         }
+        #[cfg(feature = "egui")]
+        let extra = live.ui.draw(&gpu.device, &gpu.queue, &mut enc, &view);
+        #[cfg(not(feature = "egui"))]
+        let extra: Vec<wgpu::CommandBuffer> = Vec::new();
         let readback = shot.map(|path| (path, screenshot::copy(&gpu.device, &mut enc, offscreen.as_ref().unwrap_or(&frame.texture))));
-        gpu.queue.submit([enc.finish()]);
+        gpu.queue.submit(extra.into_iter().chain([enc.finish()]));
         if let Some((path, rb)) = readback {
             if let Err(e) = rb.save(&gpu.device, &path) { eprintln!("screenshot {path}: {e}"); }
         }
@@ -311,6 +323,8 @@ impl<G: Game> ApplicationHandler for Shell<G> {
     fn suspended(&mut self, _: &ActiveEventLoop) { self.input.release_all(); if cfg!(target_os = "android") { self.live = None; self.pending = None; } }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _: WindowId, event: WindowEvent) {
+        #[cfg(feature = "egui")]
+        if let Some(live) = self.live.as_mut() { live.ui.on_event(&live.window, &event); }
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
             // focus and visibility changes swallow the matching key-up: forget what was held so the fighter
@@ -392,78 +406,4 @@ pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{ElementState, Input, Pacer, KeyCode};
-
-    /// Holding a key and alt-tabbing: the window that loses focus never sees the key-up, so the shell has to
-    /// forget it. Otherwise the fighter keeps walking (or keeps an attack button pressed, which makes every
-    /// command stop firing because commands need a fresh press edge).
-    #[test]
-    fn a_lost_key_up_is_cleared_when_the_window_loses_focus() {
-        let mut i = Input::default();
-        i.key(ElementState::Pressed, Some(KeyCode::ArrowRight), false, "");
-        i.key(ElementState::Pressed, Some(KeyCode::KeyX), false, "x");
-        assert!(i.is_down(KeyCode::ArrowRight) && i.is_down(KeyCode::KeyX));
-        i.release_all();
-        assert!(!i.is_down(KeyCode::ArrowRight) && !i.is_down(KeyCode::KeyX), "nothing stays held");
-        assert!(!i.is_pressed(KeyCode::KeyX) && i.pressed_order.is_empty(), "no stale press survives the focus change");
-    }
-
-    #[test]
-    fn focus_loss_clears_the_mouse_and_every_finger() {
-        let mut i = Input::default();
-        i.mouse_down = true; i.mouse_pressed = true;
-        i.touch(3, super::Phase::Started, [40.0, 50.0]);
-        i.touch(4, super::Phase::Started, [60.0, 70.0]);
-        i.release_all();
-        assert!(!i.mouse_down && !i.mouse_pressed);
-        assert!(i.touches.is_empty(), "no finger stays pressed on the touch pad");
-    }
-
-    #[test]
-    fn releasing_a_key_normally_is_unchanged() {
-        let mut i = Input::default();
-        i.key(ElementState::Pressed, Some(KeyCode::KeyQ), false, "q");
-        i.key(ElementState::Released, Some(KeyCode::KeyQ), false, "");
-        assert!(!i.is_down(KeyCode::KeyQ) && i.is_pressed(KeyCode::KeyQ), "the press is still readable this frame");
-        assert_eq!(i.typed, "q");
-    }
-
-    #[test]
-    fn a_repeated_key_does_not_queue_extra_presses() {
-        let mut i = Input::default();
-        i.key(ElementState::Pressed, Some(KeyCode::ArrowUp), false, "");
-        i.key(ElementState::Pressed, Some(KeyCode::ArrowUp), true, "");
-        assert_eq!(i.pressed_order, vec![KeyCode::ArrowUp]);
-        assert!(i.is_down(KeyCode::ArrowUp));
-    }
-
-    #[test]
-    fn stretch_forces_sixteen_nine_logical_space_on_any_window() {
-        assert_eq!(super::logical_size([1000.0, 500.0], None), [1000.0, 500.0]);
-        let [w, h] = super::logical_size([1000.0, 900.0], Some(super::STRETCH_ASPECT));
-        assert_eq!(h, 900.0);
-        assert!((w / h - 16.0 / 9.0).abs() < 1e-5);
-    }
-
-    #[test]
-    fn jittery_vsync_frames_become_exact_periods() {
-        let mut p = Pacer::default();
-        for raw in [0.0163, 0.0171, 0.0165, 0.0168, 0.0166] { assert_eq!(p.pace(raw), 1.0 / 60.0); }
-    }
-
-    #[test]
-    fn long_run_keeps_real_time() {
-        let mut p = Pacer::default();
-        let raw = 1.0 / 59.5;
-        let total: f32 = (0..6000).map(|_| p.pace(raw)).sum();
-        assert!((total - raw * 6000.0).abs() < 1.0 / 60.0 + 1e-3);
-    }
-
-    #[test]
-    fn hitches_pass_through() {
-        let mut p = Pacer::default();
-        assert_eq!(p.pace(0.05), 0.05);
-        assert_eq!(p.pace(1.0), 0.25);
-    }
-}
+mod tests;

@@ -22,11 +22,13 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Route files](Route-Files.md) | Creators | Arcade routes and unlock rules in TOML |
 | [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
 | [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
+| [Bleach-inspired kits](Bleach-Inspired-Kits.md) | Players | Abilities inspired by Bleach in three native fighters |
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
 | [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |
 | [AssertSpecial flags](AssertSpecial.md) | Creators | All 77 Ikemen flags and what each one does |
 | [Red life, dizzy and guard points](Life-Systems.md) | Creators | RedLife, DizzyPoints, GuardPoints, states 5300/5400 and HitDef defaults |
 | [Screenpacks](Screenpacks.md) | Creators | Menu and HUD screenpack support |
+| [Screenpack study](Screenpack-Study.md) | Creators | Screenpack differentials and what the engine adopted |
 | [Sprite atlas import](Sprite-Atlas-Import.md) | Creators | Turn a sprite sheet into a fighter |
 | [Dev tools](Dev-Tools.md) | Contributors | Rust build and audit tools (`ume-tools`) |
 | [Sprite toolkit](Sprite-Toolkit.md) | Creators | Slice sheets, palette variants, auto collision boxes |

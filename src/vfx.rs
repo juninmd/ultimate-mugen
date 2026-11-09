@@ -14,6 +14,7 @@ mod dash;
 mod cost_tests;
 mod impact;
 mod ko;
+mod sheet;
 pub mod quality;
 
 #[derive(Clone, Copy, PartialEq)]
@@ -122,6 +123,7 @@ pub struct FxParams {
 }
 
 pub struct Vfx {
+    sheets: sheet::SheetFx,
     lights: Vec<Light>,
     pub weather: Weather,
     clock: f32,
@@ -178,6 +180,7 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 {
 impl Vfx {
     pub fn new() -> Self {
         Vfx {
+            sheets: sheet::SheetFx::default(),
             lights: vec![],
             weather: Weather::None,
             clock: 0.0,
@@ -584,6 +587,7 @@ impl Vfx {
                 self.radial = 0.3;
             }
             Event::RoundStart(_) => {
+                self.sheets.clear();
                 self.slow_t = 0.0;
                 self.ko_t = 0.0;
                 self.first_hit = false;
@@ -783,6 +787,7 @@ impl Vfx {
 
     /// Per rendered frame (real time).
     pub fn update(&mut self, dt: f32) {
+        self.sheets.update(dt);
         let k = dt * 60.0;
         for p in &mut self.parts {
             p.life -= dt;
@@ -951,7 +956,6 @@ impl Vfx {
             let amb = if f.form > 0 { 1.0 } else { 0.55f32.max(crate::passive_fx::aura(f)) };
             let hgt = f.def.c("size.height", 60.0) as f32 * 1.35;
             let t = self.clock;
-            // light pillar while the awakening plays
             if f.form > 0 && f.form_time < 85 {
                 let k = (f.form_time as f32 / 85.0).min(1.0);
                 let a = (1.0 - k).powf(0.6) * (f.form_time as f32 / 8.0).min(1.0);
@@ -981,7 +985,6 @@ impl Vfx {
                     },
                 );
             }
-            // flame tongues licking up the body
             for layer in 0..2 {
                 let n = 9;
                 for i in 0..n {
@@ -1048,7 +1051,6 @@ impl Vfx {
                         Color::new(0.7, 0.85, 1.0, 0.16 + hs * 0.14),
                     );
                 }
-                // ground splashes
                 for i in 0..22 {
                     let f = i as f32 + 300.0;
                     let ph = (t * (1.2 + hash(f, 4.0)) + hash(f, 5.0)).fract();
@@ -1123,7 +1125,6 @@ impl Vfx {
             )
         };
         self.draw_cracks(&tp, s);
-        // normal blend
         for p in self
             .parts
             .iter()
@@ -1138,7 +1139,6 @@ impl Vfx {
                     Color::new(p.col[0], p.col[1], p.col[2], 0.35 * a),
                 ),
                 _ => {
-                    // irregular 5-point shard, lit on one side
                     let r = p.size * s * 1.4;
                     let (sn, cs) = p.rot.sin_cos();
                     let pts: Vec<Vec2> = [
@@ -1165,6 +1165,7 @@ impl Vfx {
         }
         // additive
         set_blend(GfxBlend::Add);
+        self.sheets.draw(&tp, s, g.fx_gain);
         for p in self
             .parts
             .iter()

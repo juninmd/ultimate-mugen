@@ -307,6 +307,7 @@ impl Session {
         self.vfx.pre_tick(&self.m);
         self.m.tick(&bits);
         self.vfx.tick(&self.m);
+        crate::match_stats::observe(&self.m);
         self.drain_events(c, audio);
     }
 

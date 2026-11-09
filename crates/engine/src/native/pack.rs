@@ -1,7 +1,7 @@
 use std::cell::{Cell, RefCell};
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 use std::path::Path;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 const MAGIC: &[u8; 4] = b"UMEP";
 const VERSION: u8 = 2;
@@ -11,6 +11,7 @@ pub struct SpritePack {
     pub character: String,
     files: HashMap<String, Arc<Vec<u8>>>,
     revision: u64,
+    partial: bool,
 }
 
 impl SpritePack {
@@ -40,15 +41,25 @@ impl SpritePack {
             at = data_end;
             if files.insert(name.clone(), Arc::new(data.to_vec())).is_some() { return Err(format!("sprite pack: duplicate entry {name}")); }
         }
-        Ok(SpritePack { character, files, revision: 0 })
+        Ok(SpritePack { character, files, revision: 0, partial: false })
     }
 }
 
 pub(super) fn read_sprite(root: &Path, name: &str) -> Option<Arc<Vec<u8>>> {
-    if let Some(character) = root.file_name().and_then(|name| name.to_str()) {
-        if let Some(bytes) = read(character, name) { return Some(bytes); }
+    let packed = root.file_name().and_then(|character| character.to_str()).and_then(|character| read(character, name));
+    let bytes = packed.or_else(|| std::fs::read(root.join(name)).ok().map(Arc::new))?;
+    if let Some(seen) = TRACE.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).as_mut() {
+        seen.insert(name.to_string());
     }
-    std::fs::read(root.join(name)).ok().map(Arc::new)
+    Some(bytes)
+}
+
+static TRACE: Mutex<Option<BTreeSet<String>>> = Mutex::new(None);
+
+pub(super) fn trace_reads(work: impl FnOnce()) -> Vec<String> {
+    *TRACE.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) = Some(BTreeSet::new());
+    work();
+    TRACE.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).take().unwrap_or_default().into_iter().collect()
 }
 
 thread_local! {
@@ -57,7 +68,21 @@ thread_local! {
 }
 
 pub fn insert(character: &str, bytes: &[u8]) -> Result<(), String> {
+    store(character, bytes, false)
+}
+
+pub fn insert_menu(character: &str, bytes: &[u8]) -> Result<(), String> {
+    if contains(character) { return Ok(()); }
+    store(character, bytes, true)
+}
+
+pub fn complete(character: &str) -> bool {
+    PACKS.with(|packs| packs.borrow().iter().any(|(name, pack)| name == character && !pack.partial))
+}
+
+fn store(character: &str, bytes: &[u8], partial: bool) -> Result<(), String> {
     let mut pack = SpritePack::parse(bytes)?;
+    pack.partial = partial;
     if pack.character != character { return Err(format!("sprite pack: {} sent for {character}", pack.character)); }
     pack.revision = REVISION.with(|revision| {
         let next = revision.get().wrapping_add(1).max(1);
@@ -130,6 +155,20 @@ mod tests {
         header.extend_from_slice(b"kaito");
         header.extend_from_slice(&u32::MAX.to_le_bytes());
         assert!(SpritePack::parse(&header).is_err());
+    }
+
+    #[test]
+    fn menu_pack_never_replaces_a_full_pack_and_is_upgraded_by_one() {
+        let menu = pack("menu_tier", &[("portrait.png", b"face")]);
+        let full = pack("menu_tier", &[("portrait.png", b"face"), ("01_idle.png", b"idle")]);
+        insert_menu("menu_tier", &menu).unwrap();
+        assert!(contains("menu_tier") && !complete("menu_tier"));
+        assert!(read("menu_tier", "01_idle.png").is_none());
+        let before = revision("menu_tier");
+        insert("menu_tier", &full).unwrap();
+        assert!(complete("menu_tier") && revision("menu_tier") != before);
+        insert_menu("menu_tier", &menu).unwrap();
+        assert!(complete("menu_tier") && read("menu_tier", "01_idle.png").is_some());
     }
 
     #[test]

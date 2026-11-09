@@ -2,7 +2,7 @@ use serde_json::json;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 use ume_devtools::audit_moves::audit;
-use ume_devtools::pack::{encode_sprite, lanczos_resize, pack_character, rescale_meta, Image};
+use ume_devtools::pack::{encode_sprite, lanczos_resize, pack_character, pack_tiers, rescale_meta, Image};
 use ume_formats::png::{decode_png, png_indexed_to_rgba};
 
 fn temp_dir(name: &str) -> PathBuf {
@@ -70,6 +70,28 @@ fn meta_anchors_follow_the_image_scale() {
     assert_eq!(out["frames"]["idle"]["awakeningHair"], json!([5, 5, 6, 7]));
     assert_eq!(out["frames"]["walk"]["refHeight"], 100.0);
     assert!(out["frames"].get("same").is_none());
+}
+
+#[test]
+fn menu_tier_keeps_only_the_wanted_sprites_and_the_metadata() {
+    let dir = temp_dir("tiers");
+    let folder = dir.join("hero");
+    std::fs::create_dir_all(&folder).unwrap();
+    for name in ["idle.png", "kick.png", "portrait.png"] {
+        std::fs::write(folder.join(name), png_bytes(&gradient(64, 64))).unwrap();
+    }
+    std::fs::write(folder.join("meta.json"), "{}").unwrap();
+    let wanted = vec!["idle.png".to_string(), "portrait.png".to_string()];
+    let menu = dir.join("hero.menu.pack");
+    pack_tiers("hero", &folder, &dir.join("hero.pack"), Some((menu.as_path(), wanted.as_slice()))).unwrap();
+    let count = |path: &std::path::Path| {
+        let bytes = std::fs::read(path).unwrap();
+        (u32::from_le_bytes([bytes[11], bytes[12], bytes[13], bytes[14]]), bytes)
+    };
+    let (full, _) = count(&dir.join("hero.pack"));
+    let (slim, bytes) = count(&menu);
+    assert_eq!((full, slim), (4, 3));
+    assert!(!bytes.windows(8).any(|window| window == b"kick.png"));
 }
 
 #[test]

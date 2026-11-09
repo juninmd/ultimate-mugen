@@ -63,6 +63,8 @@ Caveats: several pages are older (2023 to 2025), and popularity is inferred from
 - **Select categories:** Tab now cycles four categories: all, originals (no bosses), M.U.G.E.N, and bosses (`src/app/select_category.rs`). Labels are localized.
 - **Per-element HUD opacity:** the advantage banner, passive meter and guard tag draw at 80, 85 and 90 percent alpha (`src/hud/opacity.rs`, `ume_shell::alpha_scale`). Glass panels from the post pass are not affected yet.
 
-## Grid density evaluation
+## Grid density
 
-The grid chooses its column count from the roster size, clamped between 6 and 10 columns over a fixed row count. A configurable density (compact, normal, large) would be a small follow-up: it needs one setting, a cfg key and a settings row. It is not done yet because the settings files are at their size budget and need splitting first. Recommendation: add the three presets after that split, and keep the automatic choice as the default.
+The select grid has three presets, cycled with `G` on the select screen and saved as `grid=` in the config: compact (9 rows), normal (7 rows, the previous default) and large (4 rows). The settings file was split into `settings/persist.rs`, `settings/window.rs` and `settings/tests.rs` to make room.
+
+Preview: `UME_SHOTS_ONLY=results` also writes `grid-0.png`, `grid-1.png` and `grid-2.png`.

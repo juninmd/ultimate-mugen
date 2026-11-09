@@ -27,3 +27,7 @@ A tela de resultados mostra quatro chips de vidro: tempo de luta, maior combo de
 2. Frase de vitória sob o nome do vencedor.
 3. Nota (S a D) por tempo, vida restante e combo.
 4. Melhores tempos por personagem no time attack.
+
+## Densidade do grid
+
+O grid de seleção tem três predefinições, alternadas com `G` na tela de seleção e salvas como `grid=` na configuração: compacto (9 linhas), normal (7 linhas, o padrão anterior) e grande (4 linhas). O arquivo de configurações foi dividido em `settings/persist.rs`, `settings/window.rs` e `settings/tests.rs`.

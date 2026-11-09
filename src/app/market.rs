@@ -531,7 +531,7 @@ impl App {
             },
         );
         self.ui.text(
-            "+ Adicionar",
+            mt("+ Adicionar"),
             lx + lw - 70.0,
             ly + 31.0,
             17.0,

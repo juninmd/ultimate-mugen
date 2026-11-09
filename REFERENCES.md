@@ -18,6 +18,9 @@
 - [Internet Archive - Warusaki3 MUGEN Characters](https://archive.org/details/warusaki3-mugen-characters): Conversões CPS3 de alta fidelidade de JoJo's Bizarre Adventure (Jotaro Kujo, Dio Brando).
 - [Internet Archive - Naruto Shippuden Ultimate Ninja Storm Generation MUGEN](https://archive.org/details/Naruto-Ultimate-Ninja-Storm-Generation-MUGEN): Lutadores de alta fidelidade do projeto Storm (Naruto Sennin, Sasuke Hawk, Might Guy, Pain, Akatsuki Madara, Kakashi Kid).
 
+## Tooling
+- [potsmugen/mugen-char-linter](https://github.com/potsmugen/mugen-char-linter) (MIT, Copyright (c) 2026 PotS): rule set behind `ume_engine::lint` (duplicate parameters, closed-enum values, `persistent` in negative states, `[State]`/`[Statedef]` number mismatch, garbage lines, duplicate `.cmd` keys, duplicate and empty `.air` actions). Rules reimplemented in Rust, no code copied.
+
 ## Ultimate MUGEN Engine
 - [Ultimate MUGEN Engine](https://github.com/juninmd/ultimate-mugen): 2D fighting game engine in Rust with full MUGEN and UMF compatibility.
 

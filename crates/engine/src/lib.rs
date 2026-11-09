@@ -6,6 +6,7 @@ pub mod commands;
 pub mod input;
 pub mod chardef;
 pub mod diagnostics;
+pub mod lint;
 pub mod probe_def;
 mod watchdog;
 pub mod cns;

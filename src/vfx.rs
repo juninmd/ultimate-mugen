@@ -570,7 +570,6 @@ impl Vfx {
                     }
                     self.sfx.extend(["ko", "crowd"]);
                 }
-                }
                 self.ring(
                     m.camera.x,
                     m.stage.zoffset - 60.0,

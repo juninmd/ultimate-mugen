@@ -273,6 +273,74 @@ trigger2 = Time >= 6
 value = 0
 ctrl = 1
 
+;---------------------------------------------------------------- airdash fwd
+[Statedef 110]
+type = A
+physics = N
+ctrl = 0
+sprpriority = 2
+
+[State 110, anim]
+type = ChangeAnim
+trigger1 = Time = 0 && Anim != 100 && SelfAnimExist(100)
+value = 100
+
+[State 110, vel]
+type = VelSet
+trigger1 = Time = 0
+x = ifelse(const(velocity.run.fwd.x) > 0, const(velocity.run.fwd.x) * 1.15, 6.8)
+y = 0
+
+[State 110, ai]
+type = AfterImage
+trigger1 = Time = 0
+time = 14
+length = 6
+palbright = 20, 20, 50
+palcontrast = 120, 160, 240
+paladd = 0, 0, 0
+palmul = .85, .85, .85
+
+[State 110, end]
+type = ChangeState
+trigger1 = Time >= 12
+value = 50
+ctrl = 1
+
+;---------------------------------------------------------------- airdash back
+[Statedef 115]
+type = A
+physics = N
+ctrl = 0
+sprpriority = 2
+
+[State 115, anim]
+type = ChangeAnim
+trigger1 = Time = 0 && Anim != 105 && SelfAnimExist(105)
+value = 105
+
+[State 115, vel]
+type = VelSet
+trigger1 = Time = 0
+x = ifelse(const(velocity.run.back.x) < 0, const(velocity.run.back.x) * 1.1, -5.4)
+y = 0
+
+[State 115, ai]
+type = AfterImage
+trigger1 = Time = 0
+time = 12
+length = 5
+palbright = 20, 20, 50
+palcontrast = 120, 160, 240
+paladd = 0, 0, 0
+palmul = .85, .85, .85
+
+[State 115, end]
+type = ChangeState
+trigger1 = Time >= 10
+value = 50
+ctrl = 1
+
 ;---------------------------------------------------------------- guard
 [Statedef 120]
 type = U

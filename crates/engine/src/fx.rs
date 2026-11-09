@@ -36,7 +36,7 @@ fn spark(size: f32, t: f32, core: Color, mid: Color, outer: Color, scale: f32) -
         Point::from_xy(0.0, 0.0),
         Point::from_xy(0.0, 0.0),
         rad,
-        vec![
+        /* f32 */ vec![
             GradientStop::new(0.0, c0),
             GradientStop::new(0.35, c1),
             GradientStop::new(1.0, Color::TRANSPARENT),
@@ -125,7 +125,7 @@ fn super_flash(size: f32, t: f32) -> Pixmap {
         Point::from_xy(0.0, 0.0),
         Point::from_xy(0.0, 0.0),
         r * (0.3 + t * 0.7),
-        vec![
+        /* f32 */ vec![
             GradientStop::new(0.0, rgba("#ffffff", 0.95 * a)),
             GradientStop::new(0.3, rgba("#ffdc78", 0.7 * a)),
             GradientStop::new(1.0, Color::TRANSPARENT),

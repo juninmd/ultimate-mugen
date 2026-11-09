@@ -533,6 +533,7 @@ impl Ctx {
                     blend_mode: blend,
                     anti_alias: true,
                     force_hq_pipeline: false,
+                    colorspace: Default::default(),
                 });
             }
             Fill::Lin(x0, y0, x1, y1, s) => LinearGradient::new(
@@ -553,7 +554,7 @@ impl Ctx {
                     }
                 }
                 let c = Point::from_xy(*x as f32, *y as f32);
-                RadialGradient::new(c, c, *r1 as f32, stops(&st), SpreadMode::Pad, ts)?
+                RadialGradient::new(c, *r1 as f32, c, /* f32 */, stops(&st), SpreadMode::Pad, ts)?
             }
         };
         if self.st.alpha < 1.0 {
@@ -564,6 +565,7 @@ impl Ctx {
             blend_mode: blend,
             anti_alias: true,
             force_hq_pipeline: false,
+            colorspace: Default::default(),
         })
     }
     fn stroke_style(&self) -> Stroke {

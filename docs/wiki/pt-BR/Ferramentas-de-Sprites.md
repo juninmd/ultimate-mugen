@@ -20,7 +20,7 @@ python3 -m unittest tools.spritekit.test_spritekit
 
 ## O que não foi portado
 
-Os editores gráficos, o assistente de IA e o servidor MCP do CharFactory, o simulador tick a tick, o gerador de golpes CNS/ZSS e os escritores SFF/SND se sobrepõem ao próprio motor (`crates/formats`, `crates/engine`, `mugen_check`) ou são grandes. Ficam como candidatos futuros: um comando `validate` sobre `crates/formats` e um renderizador de contact sheet para revisar animações.
+O gerador de golpes está em [Gerador de Golpes](Gerador-de-Golpes.md). Os editores gráficos, o assistente de IA e o servidor MCP do CharFactory, o simulador tick a tick e os escritores SFF/SND se sobrepõem ao próprio motor (`crates/formats`, `crates/engine`, `mugen_check`) ou são grandes. Os candidatos futuros estão na página do Gerador de Golpes.
 
 ## Créditos
 

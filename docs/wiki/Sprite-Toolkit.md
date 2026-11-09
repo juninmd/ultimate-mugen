@@ -20,7 +20,7 @@ Library functions in `collision_boxes.py` also offer `interpolate_boxes` for in-
 
 ## What was not ported
 
-CharFactory's GUI editors, AI assistant and MCP server, tick-by-tick simulator, CNS/ZSS move generator and SFF/SND writers overlap with the engine itself (`crates/formats`, `crates/engine`, `mugen_check`) or are large. They are candidates for later work: a `validate` command over `crates/formats`, and a contact-sheet renderer for animation review.
+The move generator is in [Move Generator](Move-Generator.md). CharFactory's GUI editors, AI assistant and MCP server, tick-by-tick simulator and SFF/SND writers overlap with the engine itself (`crates/formats`, `crates/engine`, `mugen_check`) or are large. Candidates for later work are listed in the Move Generator page.
 
 ## Acknowledgments
 

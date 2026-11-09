@@ -26,4 +26,4 @@
 - [Seven Wonders of the Ancient World - Encyclopedia Britannica](https://www.britannica.com/topic/Seven-Wonders-of-the-Ancient-World): Classical historical reference for the 7 Ancient Wonders (Great Pyramid of Giza, Hanging Gardens of Babylon, Temple of Artemis, Statue of Zeus at Olympia, Mausoleum at Halicarnassus, Colossus of Rhodes, Lighthouse of Alexandria).
 
 ## Sprite Tooling
-- [eduardovbe/CharFactory](https://github.com/eduardovbe/CharFactory): MIT-licensed M.U.G.E.N character editor (Copyright (c) 2026 eduardovbe). The sheet slicing, shared-palette indexing, palette variants and collision box heuristics in `tools/spritekit/` are re-implemented from its documented approach; see `docs/wiki/Sprite-Toolkit.md`.
+- [eduardovbe/CharFactory](https://github.com/eduardovbe/CharFactory): MIT-licensed M.U.G.E.N character editor (Copyright (c) 2026 eduardovbe). The sheet slicing, shared-palette indexing, palette variants and collision box heuristics in `tools/spritekit/` and the move generator in `tools/movekit/` are re-implemented from its documented approach; see `docs/wiki/Sprite-Toolkit.md`.

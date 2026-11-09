@@ -1,0 +1,35 @@
+[defaults]
+sprite_manifests = ["sprites/manifest.json"]
+clsn1_height = 60
+hitsound = "S5,0"
+guardsound = "S6,0"
+super_sound = "S8,0"
+
+[[move]]
+name = "Light punch"
+kind = "normal"
+state = 200
+command = "a"
+frames = [[9000, 0, 3], [9000, 1, 3, "hit"], [9000, 0, 5]]
+hit = [{ damage = [30, 4] }]
+sounds = [{ elem = 2, value = "S0,0" }]
+
+[[move]]
+name = "Fireball"
+kind = "special"
+state = 1000
+command = "~D, DF, F, x"
+frames = [[9000, 0, 4], [9000, 1, 4, "hit"], [9000, 0, 8]]
+hit = [{ damage = [80, 12], animtype = "Heavy" }]
+cancel = ["a:200"]
+
+[[move]]
+name = "Rush super"
+kind = "super"
+state = 3000
+command = "~D, DF, F, D, DF, F, y"
+power = 3000
+frames = [[9000, 0, 6], [9000, 1, 4, "hit"], [9000, 0, 10]]
+superpause = { time = 30 }
+hit = [{ damage = [250, 40] }]
+phases = [{ name = "finisher", frames = [[9000, 1, 6, "hit"], [9000, 0, 8]], hit = [{ damage = [100, 10] }] }]

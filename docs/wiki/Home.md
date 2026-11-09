@@ -27,6 +27,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Screenpacks](Screenpacks.md) | Creators | Menu and HUD screenpack support |
 | [Sprite atlas import](Sprite-Atlas-Import.md) | Creators | Turn a sprite sheet into a fighter |
 | [Sprite toolkit](Sprite-Toolkit.md) | Creators | Slice sheets, palette variants, auto collision boxes |
+| [Move generator](Move-Generator.md) | Creators | TOML to AIR, CNS, CMD and Statedef -1 |
 | [ZSS scripts](ZSS.md) | Creators | Ikemen ZSS state scripts |
 | [Ikemen extensions](Ikemen-Extensions.md) | Creators | Ikemen GO controllers and triggers the engine accepts |
 | [Creating stages](Stages.md) | Creators | M.U.G.E.N `.def` stages and native stages |

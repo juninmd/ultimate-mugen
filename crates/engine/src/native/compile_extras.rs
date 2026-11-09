@@ -82,7 +82,7 @@ pub(super) fn voice_and_traits_state(m: &NativeMove, sid: i32) -> String {
         }
     }
     if m.burst == Some(true) {
-        out += &format!("[State {sid}, burst_inv]\ntype = NotHitBy\ntrigger1 = 1\nvalue = SCA\ntime = 1\n\n[State {sid}, burst_push]\ntype = VelSet\ntrigger1 = Time = 0\nx = 0\ny = 0\n\n");
+        out += &format!("[State {sid}, burst_inv]\ntype = NotHitBy\ntrigger1 = 1\nvalue = SCA\ntime = 1\n\n[State {sid}, burst_push]\ntype = VelSet\ntrigger1 = Time = 0\nx = 0\ny = 0\n\n[State {sid}, burst_snd]\ntype = PlaySnd\ntrigger1 = Time = 0\nvalue = F5, 4\n\n");
     }
     if m.flight == Some(true) {
         out += &format!("[State {sid}, flight_hover]\ntype = VelSet\ntrigger1 = 1\nx = ifelse(command = \"holdfwd\", 3, ifelse(command = \"holdback\", -3, 0))\ny = ifelse(command = \"holdup\", -3, ifelse(command = \"holddown\", 3, 0))\n\n");

@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod energy; mod energy_gem; mod palette; mod passive_meter; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
+mod danger; mod energy; mod energy_gem; mod palette; mod passive_meter; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -210,6 +210,7 @@ impl Hud {
                     |x: f32, y: f32, ww: f32, hh: f32| sp(poly::chamfer(x, y, ww, hh, hh * 0.42));
                 if show_life {
                     if low && ratio > 0.0 {
+                        danger::draw_badge(&p, &text, s, gt, bx, by, bw, side, ratio);
                         let pul = 0.10 + 0.12 * (gt * 11.0).sin().abs();
                         poly::solid(
                             &capsule(bx - 2.0, by - 2.0, bw + 4.0, bh + 4.0),
@@ -829,6 +830,9 @@ impl Hud {
                         Color::new(1.0, 0.7, 0.2, a * (0.5 - 0.15 * k as f32)),
                     );
                 }
+                if att.move_countered > 0 {
+                    outlined("COUNTER", x, cy0 + 68.0, 7.0, Color::new(1.0, 0.45, 0.25, a), al);
+                }
                 outlined(
                     &c.0.to_string(),
                     x,
@@ -877,7 +881,7 @@ impl Hud {
             let sc = if age < 8.0 { 2.0 - age / 8.0 } else { 1.0 };
             let al = (a.time as f32 / 12.0).min(1.0);
             let size = if a.text.len() > 10 { 20.0 } else { 30.0 } * sc;
-            let ko = a.text == "K.O.";
+            let ko = a.text == "K.O." || a.text == "DOUBLE K.O.";
             let glow = if ko {
                 Color::new(1.0, 0.12, 0.25, 0.25 * al)
             } else {

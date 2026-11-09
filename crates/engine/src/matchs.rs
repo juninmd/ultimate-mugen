@@ -618,7 +618,7 @@ impl Match {
                         self.winner_side = if sides_dead[0] && sides_dead[1] { -2 } else if sides_dead[0] { 1 } else { 0 };
                         let slow = self.global_asserts & gsf::NOKOSLOW == 0;
                         self.slow_mo = if slow { 75 } else { 0 };
-                        self.announce = Some(Announce { text: "K.O.".into(), time: 110, total: 110, kind: AnnounceKind::Ko });
+                        self.announce = Some(Announce { text: if sides_dead[0] && sides_dead[1] { "DOUBLE K.O.".into() } else { "K.O.".into() }, time: 110, total: 110, kind: AnnounceKind::Ko });
                         self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side, silent: self.global_asserts & gsf::NOKOSND != 0, slow });
                     } else {
                         let (l0, l1) = (team_life(self, 0), team_life(self, 1));

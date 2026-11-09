@@ -32,7 +32,8 @@ mod survival;
 mod update_banner;
 mod results_stats;
 mod select_category;
-mod select_grid; mod select_stats;
+mod select_grid;
+mod select_palette; mod select_stats;
 mod versus;
 mod menu_view;
 use select_category::CATEGORY_COUNT;
@@ -1826,59 +1827,7 @@ impl App {
                 label,
             );
             if idx.is_some() {
-                let (px, py) = (if side == 0 { 24.0 } else { VW - 304.0 }, 100.0);
-                let y = py + 38.0;
-                self.ui
-                    .rect(px + 12.0, y, 256.0, 46.0, Color::new(0.0, 0.0, 0.0, 0.42));
-                self.ui.text(
-                    &format!(
-                        "{} {pal}/{} · {}",
-                        crate::i18n::t("select.palette"),
-                        crate::settings::PALETTE_COUNT,
-                        crate::i18n::t("select.palette_hint")
-                    ),
-                    px + 20.0,
-                    y + 16.0,
-                    12.0,
-                    hex("#d8d0f0"),
-                    Align::Left,
-                    true,
-                );
-                for n in 1..=crate::settings::PALETTE_COUNT as i32 {
-                    let bx = px + 14.0 + (n - 1) as f32 * 20.0;
-                    let by = y + 22.0;
-                    let on = n == pal;
-                    if self.clicked_rect(bx, by, 18.0, 20.0) {
-                        if team_mode {
-                            self.pal_pick = n;
-                        } else {
-                            self.pal[side.min(1)] = n;
-                        }
-                        self.settings.pal1 = self.side_pal(0) as usize;
-                        self.settings.pal2 = self.side_pal(1) as usize;
-                        self.settings.save();
-                    }
-                    self.ui.rect(
-                        bx,
-                        by,
-                        18.0,
-                        20.0,
-                        if on {
-                            hex("#ffcc33")
-                        } else {
-                            Color::new(1.0, 1.0, 1.0, 0.12)
-                        },
-                    );
-                    self.ui.text(
-                        &n.to_string(),
-                        bx + 9.0,
-                        by + 15.0,
-                        11.0,
-                        if on { BLACK } else { WHITE },
-                        Align::Center,
-                        true,
-                    );
-                }
+                self.select_palette_strip(side, pal, team_mode);
             }
         }
         self.sel_flash.1 = (self.sel_flash.1 - dt * 3.0).max(0.0);

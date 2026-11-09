@@ -25,6 +25,7 @@ ume-engine = { path = "crates/engine" }
 ume-market = { path = "crates/market" }
 tiny-skia = "0.11"
 serde_json = "1"
+toml = "=0.8.23"
 symphonia = { version = "=0.5.5", default-features = false, features = ["ogg", "vorbis", "mp3", "flac", "wav", "pcm", "adpcm"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]

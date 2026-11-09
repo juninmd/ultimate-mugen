@@ -182,3 +182,19 @@ fn glass_panel_blurs_and_leaves_the_rest_alone() {
     assert!(px(&glass, 18, 32)[0] < px(&plain, 18, 32)[0], "the panel casts a soft shadow just outside its edge");
     assert!(!{ let mut g = ume_render::Glass::default(); (0..ume_render::MAX_GLASS + 1).all(|_| g.push(0.0, 0.0, 4.0, 4.0, 1.0, [0.0; 3])) }, "capacity is bounded");
 }
+
+#[test]
+fn shockwave_bends_the_edge_and_tonemap_compresses_highlights() {
+    let Some((device, queue)) = gpu() else { eprintln!("no GPU adapter, skipping"); return; };
+    let plain = post_render(&device, &queue, &ume_render::PostParams::default());
+    let mut p = ume_render::PostParams::default();
+    assert!(p.waves.push(46.0, 32.0, 14.0, 10.0, 1.0));
+    let wave = post_render(&device, &queue, &p);
+    assert_eq!(px(&wave, 2, 2), px(&plain, 2, 2), "far from the ring nothing moves");
+    assert_ne!(px(&wave, 33, 32), px(&plain, 33, 32), "pixels on the ring are displaced");
+    let toned = post_render(&device, &queue, &ume_render::PostParams { grade: ume_render::Grade { tonemap: 1.0, ..Default::default() }, ..Default::default() });
+    assert!(px(&toned, 8, 32)[0] < 255, "ACES rolls the clipped red off: {:?}", px(&toned, 8, 32));
+    assert!(px(&toned, 56, 32)[0] <= 2, "black stays black");
+    let tinted = post_render(&device, &queue, &ume_render::PostParams { grade: ume_render::Grade { split: 1.0, highlights: [0.5, 1.0, 1.0], ..Default::default() }, ..Default::default() });
+    assert!(px(&tinted, 8, 32)[0] < px(&plain, 8, 32)[0], "highlight tint pulls red down");
+}

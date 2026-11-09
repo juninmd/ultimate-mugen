@@ -1,6 +1,6 @@
 pub mod sprites;
 pub mod audio;
-pub mod quad;
+pub mod quad; pub mod waves;
 pub mod platform;
 mod screenshot;
 use screenshot::Save;
@@ -14,7 +14,7 @@ use std::rc::Rc;
 use web_time::Instant;
 pub use web_time::Instant as Clock;
 use ume_render::{Atlas, Canvas, PaletteRows, PostFx, Renderer, Target};
-pub use ume_render::PostParams;
+pub use ume_render::{Grade, PostParams};
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
 use winit::event::{ElementState, MouseButton, MouseScrollDelta, TouchPhase, WindowEvent};

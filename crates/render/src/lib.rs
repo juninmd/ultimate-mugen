@@ -1,4 +1,5 @@
 pub mod atlas;
+mod grade;
 pub mod batch;
 pub mod canvas;
 pub mod gpu;
@@ -10,6 +11,7 @@ pub use canvas::{Canvas, Color};
 pub use batch::{Batch, Blend, DrawCall, PalFx, Quad, Vertex};
 pub use gpu::{Renderer, Target};
 pub use palette::{PaletteColors, PaletteRows};
+pub use grade::{Grade, Waves, MAX_WAVES};
 pub use post::{Glass, PostFx, PostParams, MAX_GLASS, POST_SHADER};
 
 pub const SHADER: &str = include_str!("sprite.wgsl");

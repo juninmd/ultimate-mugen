@@ -2,6 +2,8 @@ pub const POST_SHADER: &str = include_str!("post.wgsl");
 
 pub const MAX_GLASS: usize = 16;
 
+use crate::grade::{Grade, Waves};
+
 #[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub struct Glass { pub n: usize, pub rects: [[f32; 8]; MAX_GLASS] }
 
@@ -29,16 +31,19 @@ pub struct PostParams {
     pub tint: [f32; 3],
     pub invert: f32,
     pub glass: Glass,
+    pub grade: Grade,
+    pub waves: Waves,
 }
 
 impl Default for PostParams {
     fn default() -> Self {
-        PostParams { chroma: 0.0, vignette: 0.0, bloom: 0.0, grain: 0.0, saturation: 1.0, contrast: 1.0, flash: 0.0, time: 0.0, radial: 0.0, center: [0.5, 0.5], tint: [1.0; 3], invert: 0.0, glass: Glass::default() }
+        PostParams { chroma: 0.0, vignette: 0.0, bloom: 0.0, grain: 0.0, saturation: 1.0, contrast: 1.0, flash: 0.0, time: 0.0, radial: 0.0, center: [0.5, 0.5], tint: [1.0; 3], invert: 0.0, glass: Glass::default(), grade: Grade::default(), waves: Waves::default() }
     }
 }
 
 const SLOT: u64 = 1024;
-const UNIFORM_BYTES: u64 = 80 + MAX_GLASS as u64 * 32;
+const HEAD: usize = 68;
+const UNIFORM_BYTES: u64 = HEAD as u64 * 4 + MAX_GLASS as u64 * 32;
 const PASSES: usize = 6;
 
 struct Targets { size: [u32; 2], scene: wgpu::Texture, scene_view: wgpu::TextureView, groups: [wgpu::BindGroup; PASSES], glass_groups: [wgpu::BindGroup; 4], half: [wgpu::TextureView; 2], glass: [wgpu::TextureView; 2], half_size: [u32; 2] }
@@ -142,7 +147,9 @@ impl PostFx {
         let bloom_on = p.bloom > 0.001;
         let [hw, hh] = [t.half_size[0] as f32, t.half_size[1] as f32];
         let mut data = [0f32; (SLOT as usize / 4) * PASSES];
-        let mut slot = |i: usize, v: [f32; 20]| data[i * SLOT as usize / 4..][..20].copy_from_slice(&v);
+        let g = p.grade;
+        let tail = [g.tonemap, g.exposure, g.split, g.heat, 0.0, g.threshold, 0.0, 0.0, g.shadows[0], g.shadows[1], g.shadows[2], p.waves.n as f32, g.highlights[0], g.highlights[1], g.highlights[2], 0.0];
+        let mut slot = |i: usize, v: [f32; 20]| { let o = i * SLOT as usize / 4; data[o..o + 20].copy_from_slice(&v); data[o + 20..o + 36].copy_from_slice(&tail); };
         let glass_on = p.glass.n > 0;
         let dir = |x: f32, y: f32| { let mut v = [0f32; 20]; v[0] = x; v[1] = y; v };
         let mut copy = [0f32; 20];
@@ -162,8 +169,12 @@ impl PostFx {
             p.invert, t.size[0] as f32, t.size[1] as f32, (t.size[1] as f32 / 720.0).max(1.0),
         ]);
         for (i, r) in p.glass.rects[..p.glass.n].iter().enumerate() {
-            let o = 5 * SLOT as usize / 4 + 20 + i * 8;
+            let o = 5 * SLOT as usize / 4 + HEAD + i * 8;
             data[o..o + 8].copy_from_slice(r);
+        }
+        for (i, w) in p.waves.items[..p.waves.n].iter().enumerate() {
+            let o = 5 * SLOT as usize / 4 + 36 + i * 8;
+            data[o..o + 8].copy_from_slice(w);
         }
         queue.write_buffer(&self.uniforms, 0, bytemuck::cast_slice(&data));
         let mut pass = |pipeline: &wgpu::RenderPipeline, group: &wgpu::BindGroup, dst: &wgpu::TextureView| {

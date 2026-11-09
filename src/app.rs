@@ -621,6 +621,7 @@ impl App {
             Screen::Replays { .. } => self.replays_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
         }
+        crate::e2e::publish(self);
         if is_key_pressed(KeyCode::F11) {
             self.toggle_fullscreen();
         }

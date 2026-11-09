@@ -1,5 +1,6 @@
 mod app;
 mod audio;
+mod e2e;
 mod boss;
 mod controls;
 mod credit_line;

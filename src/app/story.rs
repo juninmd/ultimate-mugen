@@ -173,6 +173,11 @@ impl App {
         );
     }
 
+    pub(crate) fn story_snapshot(&self) -> Option<(usize, usize, u8, i64, String)> {
+        let run = self.story.as_ref()?;
+        Some((run.stage, run.wave, run.credits, run.score, format!("{:?}", run.phase)))
+    }
+
     pub(crate) fn story_life(&self) -> [f32; 2] {
         self.story.as_ref().map(|run| [run.life, 1.0]).unwrap_or([1.0, 1.0])
     }

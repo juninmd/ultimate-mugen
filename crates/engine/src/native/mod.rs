@@ -28,7 +28,7 @@ mod portrait;
 mod preview;
 mod sprite_set;
 pub use compile::{compile_native, compile_native_with, STANDARD_ANIMS};
-pub use preview::compile_native_preview;
+pub use preview::{compile_native_preview, menu_sprite_files};
 pub use types::*;
 pub use ability_spec::*;
 pub use passive_spec::*;
@@ -36,4 +36,4 @@ pub use lookup::register_native;
 pub use portrait::select_portrait;
 
 pub use pixel::{audit_native_sprite_frames, native_frame_sprite_key};
-pub use pack::{contains as has_sprite_pack, insert as insert_sprite_pack, revision as sprite_pack_revision};
+pub use pack::{complete as has_full_sprite_pack, contains as has_sprite_pack, insert as insert_sprite_pack, insert_menu as insert_menu_sprite_pack, revision as sprite_pack_revision};

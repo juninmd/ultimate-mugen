@@ -1512,6 +1512,8 @@ impl App {
                 continue;
             }
             let e = &self.reg.chars[i];
+            #[cfg(target_arch = "wasm32")]
+            if self.sel_dwell >= 0.25 { let _ = crate::web_sprites::ready(e); }
             if e.peek(pal).is_some() || e.broken.get() || !e.tile_art_ready() {
                 continue;
             }
@@ -2563,6 +2565,8 @@ impl App {
         let n = plan.len();
         let st = step as usize;
         if st < n {
+            #[cfg(target_arch = "wasm32")]
+            for p in &plan { let _ = crate::web_sprites::ready(&self.reg.chars[p.2]); }
             #[cfg(target_arch = "wasm32")]
             if !crate::web_sprites::ready(&self.reg.chars[plan[st].2])? { return Ok(false); }
             ume_shell::watchdog::label("load:character");

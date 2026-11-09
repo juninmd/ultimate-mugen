@@ -3313,14 +3313,7 @@ impl App {
         self.ui.motes(70, 1.6);
         let w = if winner == 0 { self.sel.0 } else { self.sel.1 };
         let e = &self.reg.chars[w];
-        self.ui.gradient_v(
-            160.0,
-            200.0,
-            960.0,
-            300.0,
-            alpha(rgb(e.color), 0.9),
-            Color::new(0.08, 0.05, 0.16, 0.95),
-        );
+        self.results_panel(alpha(rgb(e.color), 1.0));
         let done =
             self.mode == Mode::Arcade && self.arcade.as_ref().is_some_and(|(l, i)| *i >= l.len());
         let title = self.results_title(winner, w, done);
@@ -3374,26 +3367,9 @@ impl App {
             cur = (cur + nitems - 1) % nitems;
         }
         let mut ok = self.c.pressed(nav::OK | nav::START);
-        for (i, it) in items.iter().enumerate() {
-            let (bx, by) = (480.0 + i as f32 * 160.0, 380.0);
-            if self.clicked_rect(bx, by, 150.0, 50.0) {
-                cur = i;
-                ok = true;
-            }
-            self.ui.rect(
-                bx,
-                by,
-                150.0,
-                50.0,
-                if i == cur {
-                    hex("#ff4d6d")
-                } else {
-                    Color::new(1.0, 1.0, 1.0, 0.08)
-                },
-            );
-            self.ui
-                .text(it, bx + 75.0, by + 33.0, 20.0, WHITE, Align::Center, true);
-        }
+        let (picked, clicked) = self.results_buttons(&items, cur);
+        cur = picked;
+        ok = ok || clicked;
         self.screen = Screen::Results { winner, cur };
         if ok {
             self.audio.stop_music();

@@ -48,7 +48,6 @@ impl App {
             })
             .collect();
     }
-
     fn fight_label(&self, r: &Replay) -> String {
         let name = |i: usize| {
             self.reg
@@ -386,6 +385,7 @@ impl App {
             }
             return;
         }
+        self.replay_selection_bar(cur);
         for (i, e) in self.replay_list.iter().enumerate().take(12) {
             let y = 100.0 + i as f32 * 46.0;
             let selected = i == cur;
@@ -403,7 +403,7 @@ impl App {
                 1180.0,
                 40.0,
                 if selected {
-                    alpha(hex("#ff4d6d"), 0.5)
+                    Color::new(1.0, 1.0, 1.0, 0.0)
                 } else {
                     Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.07 } else { 0.03 })
                 },

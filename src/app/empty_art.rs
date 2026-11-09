@@ -28,6 +28,11 @@ impl App {
         );
     }
 
+    pub(super) fn replay_selection_bar(&self, cur: usize) {
+        let y = crate::spring::follow("replays.sel", 100.0 + cur as f32 * 46.0);
+        self.ui.rect(50.0, y, 1180.0, 40.0, alpha(hex("#ff4d6d"), 0.5));
+    }
+
     pub(super) fn replays_empty_state(&self) {
         let cx = VW / 2.0;
         let pulse = 0.5 + 0.4 * (ume_shell::quad::get_time() as f32 * 2.0).sin().abs();

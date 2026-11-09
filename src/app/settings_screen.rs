@@ -679,8 +679,8 @@ impl App {
             note,
             VW - 56.0,
             696.0,
-            16.0,
-            hex("#a49cc0"),
+            18.0,
+            hex("#c9c2e2"),
             Align::Right,
             false,
         );

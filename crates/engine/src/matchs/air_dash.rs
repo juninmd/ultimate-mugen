@@ -4,7 +4,12 @@ use crate::flags::asf;
 impl Match {
     pub(super) fn check_air_dash(&mut self, i: usize) -> bool {
         let f = &self.fighters[i];
-        if f.state_type != 'A' || !f.ctrl || f.has_assert(asf::NOHARDCODEDKEYS) {
+        if f.state_type != 'A'
+            || !f.ctrl
+            || f.has_assert(asf::NOHARDCODEDKEYS)
+            || f.state_no == 110
+            || f.state_no == 115
+        {
             return false;
         }
         let max_dashes = f.c("movement.airdash.num", 1.0) as i32;

@@ -277,7 +277,7 @@ ctrl = 1
 [Statedef 110]
 type = A
 physics = N
-ctrl = 0
+ctrl = 1
 sprpriority = 2
 
 [State 110, anim]
@@ -311,7 +311,7 @@ ctrl = 1
 [Statedef 115]
 type = A
 physics = N
-ctrl = 0
+ctrl = 1
 sprpriority = 2
 
 [State 115, anim]

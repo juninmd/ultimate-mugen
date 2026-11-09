@@ -16,14 +16,12 @@ use ume_engine::common::common_def;
 use ume_engine::fx::build_fx;
 use ume_engine::input::{k, InputSource};
 use ume_engine::matchs::{Event, Match};
-/// `Replay(inputs, cursor)`: feeds back recorded inputs (the simulation is deterministic, so this reproduces the fight exactly).
 pub enum Pilot {
     Human(usize),
     Cpu(Ai),
     Dummy,
     Replay(Vec<u32>, usize),
 }
-/// Team roster shown by the HUD (sequence / parallel team modes).
 #[derive(Clone, Default)]
 pub struct TeamInfo {
     pub names: [Vec<(String, [u8; 3])>; 2],
@@ -116,7 +114,6 @@ impl Session {
             },
             ground_k,
         );
-        // face-off at the start of the first round (fighters trade lines before "FIGHT!")
         if !training {
             m.intro_ticks = 170;
         }
@@ -190,7 +187,6 @@ impl Session {
     pub fn speed(&self) -> f32 {
         self.speed
     }
-    /// Advance exactly one simulation tick (frame step while a replay is paused).
     pub fn step_frame(&mut self, c: &mut Controls, audio: &mut Audio) {
         self.step_visual(c, audio);
     }

@@ -25,6 +25,9 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Vida vermelha, tontura e defesa](Sistemas-de-Vida.md) | Criadores | RedLife, DizzyPoints, GuardPoints, estados 5300/5400 e padrões do HitDef |
 | [Screenpacks](Screenpacks.md) | Criadores | Suporte a screenpacks de menu e HUD |
 | [Importar sprite atlas](Importacao-Sprite-Atlas.md) | Criadores | Transformar uma folha de sprites em lutador |
+| [Ferramentas de desenvolvimento](Ferramentas-de-Desenvolvimento.md) | Contribuidores | Ferramentas Rust de build e auditoria (`ume-tools`) |
+| [Ferramentas de sprites](Ferramentas-de-Sprites.md) | Criadores | Fatiar folhas, variantes de paleta, caixas de colisão automáticas |
+| [Gerador de golpes](Gerador-de-Golpes.md) | Criadores | TOML para AIR, CNS, CMD e Statedef -1 |
 | [Criar cenários](Cenarios.md) | Criadores | Cenário M.U.G.E.N `.def` e cenário nativo |
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
 | [Layout de arquivos](Layout-de-Arquivos.md) | Desenvolvedores | A regra de 250 linhas, uma responsabilidade por arquivo, dividir arquivos, PRs paralelos |

@@ -10,8 +10,8 @@
   ],
   "verification": [
     "cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> --require-complete passes for all 16 fighters (0 uncovered requirements)",
-    "python scripts/native_sprite_coverage.py reports 0 gaps",
-    "python scripts/audit_native_sprites.py --out <report.json> reports 0 geometry issues"
+    "cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> --require-complete reports 0 gaps",
+    "cargo run --release -p ume-devtools --bin ume-tools -- audit-sprites --out <report.json> reports 0 geometry issues"
   ],
   "remainingManual": [
     "natural gameplay transitions, palette-wide visual review and hitbox fit must still be validated in Training",

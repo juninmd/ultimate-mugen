@@ -13,5 +13,5 @@ mkdir -p web/dist/assets/stages
 cp assets/stages/*.png web/dist/assets/stages/
 mkdir -p web/dist/assets/stages/story
 cp assets/stages/story/*.png web/dist/assets/stages/story/
-python3 scripts/pack_sprites.py web/dist
+cargo run --release -p ume-devtools --bin ume-tools -- pack-sprites web/dist
 echo "OK: web/dist  (ex.: python3 -m http.server -d web/dist 8080)"

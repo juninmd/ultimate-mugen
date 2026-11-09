@@ -19,19 +19,18 @@ design; both are approved resolutions, not gaps.
   names are accepted, and the pass enforces per-character source-size and target-count caps, because the
   scanned UMF JSON is importable user content.
 - Verification: `cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> --require-complete`
-  must pass for every fighter, and `python scripts/audit_native_sprites.py --out <report.json>` must stay clean
-  on geometry and alpha edges. `python scripts/native_sprite_coverage.py` reproduces the resolution rules in
-  Python without building the engine.
+  must pass for every fighter, and `cargo run --release -p ume-devtools --bin ume-tools -- audit-sprites --out <report.json>` must stay clean
+  on geometry and alpha edges. `cargo run --release -p ume-devtools --bin ume-tools -- audit-moves` is the static roster audit (inputs, cancels, throws, hit boxes).
 
 ## sprite-gen QA loop
 
 The [sprite-gen](https://github.com/aldegad/sprite-gen) skill remains the tool of record for art quality QA on
 the native loops, with no image-generation credentials required:
 
-- `python scripts/native_motion_descriptor.py --character assets/chars/<id>.json --sprites assets/chars/sprites/<id> --animation walk --out walk.json`
+- `ume-tools motion-descriptor --character assets/chars/<id>.json --sprites assets/chars/sprites/<id> --animation walk --out walk.json`
 - `sprite-gen inspect-motion --source walk.json --out walk-report.json` measures anchors, duplicate frames,
   bbox drift and edge contact; foot contact needs explicit `--contacts` and `--foot-box` inputs.
-- `scripts/preview_native_motion.py` and `scripts/preview_native_scene.py` render review GIFs and MP4s with the
+- `ume-tools preview-motion` and `ume-tools preview-scene` render review GIFs and MP4s with the
   sprite-gen stages. See [Sprite Atlas Import](Sprite-Atlas-Import.md) for the component-row import path when
   AI-generated art is wanted.
 

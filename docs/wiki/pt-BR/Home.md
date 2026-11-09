@@ -17,6 +17,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Dossiê dos Personagens](Personagens.md) | Jogadores e Criadores | Fichas biográficas, retratos, golpes, rivalidades e cenários associados |
 | [Replays](Replays-Rede.md) | Jogadores | Lutas gravadas, navegador de replays, velocidade de reprodução |
 | [Decisões de compatibilidade](Decisoes-de-Compatibilidade.md) | Criadores | Recursos rejeitados por decisão e o motivo |
+| [Scripts Lua](Scripts-Lua.md) | Criadores | Para que serve Lua em pacotes M.U.G.E.N e as alternativas sem Lua |
 | [Criar personagem UMF](Personagem-UMF.md) | Criadores | Lutador completo em um único JSON |
 | [Passivos](Passivos.md) | Criadores | Fúria, acúmulos de habilidade e regeneração por dados |
 | [Arte do esqueleto (rig)](Rig.md) | Criadores | Estilo, poses, articulações e paletas |

@@ -153,6 +153,7 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `parry` | `{ "window": [de, até], "spark" }` | Devolve ataques na janela de elementos da animação |
 | `timestop` | ticks | Congela todos os outros |
 | `burst` | `true` | Quebra de combo usável ao apanhar |
+| `requires` | `{ "life": {"max": 0.5}, "enemyLife": {"min": 0.1, "max": 0.5} }` | Condição de vida: o golpe só inicia enquanto a vida do lutador (`life`) e/ou do rival (`enemyLife`) estiver entre `min` e `max`, como fração da vida máxima (0 a 1). Qualquer limite pode ser omitido. Compila para triggers `life <= lifemax * max` e `enemy,life <= enemy,lifemax * max` |
 | `flight` | `true` | Pairar em 8 direções enquanto o golpe dura |
 
 ### Traços de combate

@@ -1,4 +1,5 @@
 use super::quality;
+use super::sheet::SheetKind;
 use super::{Kind, Vfx, P};
 use ume_engine::matchs::Match;
 
@@ -148,6 +149,11 @@ impl Vfx {
             0.4,
         );
         self.glow(x, y, t.glow, 0.12, t.col);
+        let spark_rot = self.rr(0.0, std::f32::consts::TAU);
+        self.sheets.spawn(SheetKind::HitSpark, x, y, t.flare * 1.8, spark_rot);
+        if damage >= 150.0 {
+            self.sheets.spawn(SheetKind::Explosion, x, y, t.ring * 1.4, 0.0);
+        }
         self.glow(x, y, t.glow * 0.45, 0.09, t.core);
         self.slashes(x, y, dir, quality::count(t.slashes), t.slash_len, t.core);
         self.ring(x, y, t.ring, 0.24, 1.4, t.col);

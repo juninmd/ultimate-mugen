@@ -30,12 +30,16 @@ mod story;
 mod story_screen;
 mod survival;
 mod update_banner;
+mod results_stats;
+mod select_category;
+mod select_grid;
 mod versus;
+use select_category::CATEGORY_COUNT;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
 mod controls_screen;
+mod empty_art;
 pub(crate) use keyedit::KeyEdit;
-
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode {
     Arcade,
@@ -214,7 +218,6 @@ impl Team {
     }
 }
 const VIEW_ROWS: usize = 4;
-const SELECT_ROWS: usize = 7;
 const NUMS: [&str; 5] = ["1", "2", "3", "4", "5"];
 
 fn opaque_box(d: &CharDef, key: (i32, i32), s: &ume_engine::chardef::Sprite) -> (f32, f32, f32, f32) {
@@ -645,9 +648,9 @@ impl App {
                     | Screen::Stages { .. }
             )
         {
-            self.quality_check = 0.0;
-            self.apply_quality();
+            self.quality_check = 0.0; self.apply_quality();
         }
+        if let Some(note) = crate::tweaks::poll(dt) { self.msg = note; }
         if self.msg != self.msg_seen {
             self.msg_seen.clone_from(&self.msg);
             self.msg_ttl = if self.msg.is_empty() { 0.0 } else { 6.0 };
@@ -1326,11 +1329,7 @@ impl App {
         let mut v: Vec<usize> = self
             .playable()
             .into_iter()
-            .filter(|&i| match self.sel_filter {
-                1 => !self.reg.chars[i].mugen,
-                2 => self.reg.chars[i].mugen,
-                _ => true,
-            })
+            .filter(|&i| self.category_matches(i))
             .collect();
         if v.is_empty() {
             v = self.playable();
@@ -1386,7 +1385,7 @@ impl App {
         }
         let m = view.len();
         let pos_of = |view: &[usize], i: usize| view.iter().position(|&v| v == i).unwrap_or(0);
-        let cols = m.div_ceil(SELECT_ROWS).clamp(6, 10);
+        let cols = self.grid_cols(m);
         let total_rows = m.div_ceil(cols);
         let two = self.mode == Mode::Versus;
         let coop_mode = self.coop && matches!(self.mode, Mode::Arcade | Mode::Survival);
@@ -1417,10 +1416,13 @@ impl App {
             };
         }
         if is_key_pressed(KeyCode::PageDown) {
-            pos = (pos + cols * SELECT_ROWS).min(m - 1);
+            pos = (pos + cols * self.grid_rows()).min(m - 1);
         }
         if is_key_pressed(KeyCode::PageUp) {
-            pos = pos.saturating_sub(cols * SELECT_ROWS);
+            pos = pos.saturating_sub(cols * self.grid_rows());
+        }
+        if is_key_pressed(KeyCode::G) {
+            self.cycle_grid();
         }
         if is_key_pressed(KeyCode::Home) {
             pos = 0;
@@ -1438,7 +1440,7 @@ impl App {
             pos = (get_time() * 1000.0) as usize % m;
         }
         if is_key_pressed(KeyCode::Tab) {
-            self.sel_filter = (self.sel_filter + 1) % 3;
+            self.sel_filter = (self.sel_filter + 1) % CATEGORY_COUNT;
             view = self.char_view();
             if view.len() == self.playable().len() {
                 self.sel_filter = 0;
@@ -1472,10 +1474,10 @@ impl App {
         if crow < self.sel_row {
             self.sel_row = crow;
         }
-        if crow >= self.sel_row + SELECT_ROWS {
-            self.sel_row = crow + 1 - SELECT_ROWS;
+        if crow >= self.sel_row + self.grid_rows() {
+            self.sel_row = crow + 1 - self.grid_rows();
         }
-        self.sel_row = self.sel_row.min(total_rows.saturating_sub(SELECT_ROWS));
+        self.sel_row = self.sel_row.min(total_rows.saturating_sub(self.grid_rows()));
 
         self.ui.background();
         if self.mode.is_team() {
@@ -1640,7 +1642,7 @@ impl App {
         let gw = cols as f32 * cw + (cols as f32 - 1.0) * gap;
         let gx = (VW - gw) / 2.0;
         let gy = 98.0;
-        let gh = SELECT_ROWS as f32 * (ch + gap) - gap;
+        let gh = self.grid_rows() as f32 * (ch + gap) - gap;
         crate::menu_art::glass(&self.ui, gx - 12.0, gy - 12.0, gw + 24.0, gh + 24.0, 1.0);
         self.ui.rect_lines(
             gx - 12.0,
@@ -1652,7 +1654,7 @@ impl App {
         );
         let mut click = None;
         let first = self.sel_row * cols;
-        let last = ((self.sel_row + SELECT_ROWS) * cols).min(m);
+        let last = ((self.sel_row + self.grid_rows()) * cols).min(m);
         for k in first..last {
             let i = view[k];
             let (cx, cy) = (
@@ -1808,14 +1810,14 @@ impl App {
                 );
             }
         }
-        if total_rows > SELECT_ROWS {
+        if total_rows > self.grid_rows() {
             let bx = gx + gw + 3.0;
             self.ui
                 .rect(bx, gy, 5.0, gh, Color::new(1.0, 1.0, 1.0, 0.1));
-            let th = (gh * SELECT_ROWS as f32 / total_rows as f32).max(18.0);
+            let th = (gh * self.grid_rows() as f32 / total_rows as f32).max(18.0);
             self.ui.rect(
                 bx,
-                gy + (gh - th) * self.sel_row as f32 / (total_rows - SELECT_ROWS) as f32,
+                gy + (gh - th) * self.sel_row as f32 / (total_rows - self.grid_rows()) as f32,
                 5.0,
                 th,
                 hex("#ff4d6d"),
@@ -2086,17 +2088,14 @@ impl App {
             Align::Center,
             false,
         );
-        let flabel = [
-            crate::i18n::t("select.filter_all"),
-            crate::i18n::t("select.filter_originals"),
-            crate::i18n::t("select.filter_mugen"),
-        ][self.sel_filter as usize % 3];
+        let flabel = self.category_label();
         self.sel_buf.clear();
         let _ = write!(
             self.sel_buf,
-            "[Tab] {flabel} · {}/{m} · [R] {} · PgUp/PgDn",
+            "[Tab] {flabel} · {}/{m} · [R] {} · [G] {} · PgUp/PgDn",
             pos + 1,
-            crate::i18n::t("select.random").to_lowercase()
+            crate::i18n::t("select.random").to_lowercase(),
+            self.grid_label()
         );
         self.ui.text(
             &self.sel_buf,
@@ -3434,31 +3433,7 @@ impl App {
         );
         let done =
             self.mode == Mode::Arcade && self.arcade.as_ref().is_some_and(|(l, i)| *i >= l.len());
-        let title = if done {
-            crate::i18n::t("results.arcade_complete").to_string()
-        } else if self.team.is_some() {
-            {
-                let lead = self
-                    .team
-                    .as_ref()
-                    .and_then(|t| t.members[winner.min(1)].first().copied())
-                    .unwrap_or(w);
-                crate::i18n::tf(
-                    "results.team_wins",
-                    &[(
-                        "{name}",
-                        &self.reg.chars[lead]
-                            .name
-                            .split_whitespace()
-                            .next()
-                            .unwrap_or("")
-                            .to_uppercase(),
-                    )],
-                )
-            }
-        } else {
-            crate::i18n::tf("results.wins", &[("{name}", &e.name.to_uppercase())])
-        };
+        let title = self.results_title(winner, w, done);
         let pal = if winner == 1 && self.sel.0 == self.sel.1 {
             2
         } else {
@@ -3485,6 +3460,7 @@ impl App {
             BLACK,
             Align::Left,
         );
+        self.draw_results_stats();
         let can_replay = self.last_fight.is_some();
         let items: Vec<&str> = if can_replay {
             vec![

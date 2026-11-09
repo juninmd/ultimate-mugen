@@ -30,3 +30,7 @@
 
 ## Sprite Tooling
 - [eduardovbe/CharFactory](https://github.com/eduardovbe/CharFactory): MIT-licensed M.U.G.E.N character editor (Copyright (c) 2026 eduardovbe). The sheet slicing, shared-palette indexing, palette variants and collision box heuristics in `crates/charforge/` are re-implemented from its documented approach; see `docs/wiki/Sprite-Toolkit.md`.
+
+## Effect Sprites
+- [Spark effect](https://opengameart.org/content/spark-effect) by kurohina (CC0): hit spark sheet in `assets/fx/hit_spark.png`.
+- [More Explosions](https://opengameart.org/content/more-explosions) by StumpyStrust (CC0): explosion sheet repacked into `assets/fx/explosion.png`. Details in `assets/fx/CREDITS.md`.

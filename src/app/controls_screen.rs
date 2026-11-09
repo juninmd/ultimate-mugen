@@ -170,6 +170,8 @@ impl App {
         if !touch {
             self.ui
                 .rect(300.0, 610.0, 360.0, 60.0, Color::new(1.0, 1.0, 1.0, 0.1));
+            let glow = 0.25 + 0.3 * (ume_shell::quad::get_time() as f32 * 2.0).sin().abs();
+            self.ui.rect_lines(300.0, 610.0, 360.0, 60.0, 2.0, Color::new(0.13, 0.9, 1.0, glow));
             self.ui.text(
                 crate::i18n::t("controls.customize"),
                 480.0,

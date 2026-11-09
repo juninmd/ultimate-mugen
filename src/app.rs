@@ -34,8 +34,8 @@ mod versus;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
 mod controls_screen;
+mod empty_art;
 pub(crate) use keyedit::KeyEdit;
-
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode {
     Arcade,

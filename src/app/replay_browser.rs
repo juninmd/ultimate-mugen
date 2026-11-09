@@ -268,24 +268,7 @@ impl App {
             true,
         );
         if self.replay_list.is_empty() {
-            self.ui.text(
-                crate::i18n::t("replays.empty"),
-                VW / 2.0,
-                300.0,
-                26.0,
-                hex("#a49cc0"),
-                Align::Center,
-                false,
-            );
-            self.ui.text(
-                crate::i18n::t("replays.empty_hint"),
-                VW / 2.0,
-                340.0,
-                20.0,
-                hex("#a49cc0"),
-                Align::Center,
-                false,
-            );
+            self.replays_empty_state();
         }
         let count = self.replay_list.len();
         cur = cur.min(count.saturating_sub(1));

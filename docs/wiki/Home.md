@@ -36,6 +36,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Research: fighting games](Research-Fighting-Games.md) | Developers | Survey of other fighters and prioritized improvement list |
 | [Stress and resilience](Stress-and-Resilience.md) | Developers | Fuzzing, spawner caps, hot path numbers |
 | [Native animation audit](Native-Animation-Audit.md) | Developers | Pose coverage of the native roster |
+| [Authoring tool survey](Authoring-Tool-Survey.md) | Developers | What Fighter Factory Studio checks and how to match it |
 | [Research: story mode](Research-Story-Mode.md) | Developers | Survey behind the story mode design |
 | [Media capture](Media-Capture.md) | Developers | Screenshots and GIFs from the web build in headless Chromium |
 | [Troubleshooting](Troubleshooting.md) | Everyone | Common errors and diagnostic tools |

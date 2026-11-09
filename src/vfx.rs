@@ -497,7 +497,6 @@ impl Vfx {
         self.float(x, y, text.to_string(), 6.0, col);
     }
     pub fn banner(&mut self, text: &str, sub: &str, col: [f32; 3]) {
-        // never stack the same banner twice (e.g. both fighters landing a counter in the same exchange)
         if self.banners.iter().any(|b| b.text == text && b.t < 0.8) {
             return;
         }

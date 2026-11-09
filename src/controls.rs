@@ -25,15 +25,15 @@ pub fn face(g: Glyphs, keys: &KeyMap, bit: u32) -> Face {
     match g {
         Glyphs::Touch => {
             let t = match bit {
-                k::X => "SOCO",
-                k::Y => "SOCO+",
-                k::Z => "SOCO 3",
-                k::A => "CHUTE",
-                k::B => "CHUTE+",
-                k::C => "CHUTE 3",
-                k::D2 => "ESPECIAL",
+                k::X => crate::i18n::tr3("SOCO", "PUNCH", "PUÑO"),
+                k::Y => crate::i18n::tr3("SOCO+", "PUNCH+", "PUÑO+"),
+                k::Z => crate::i18n::tr3("SOCO 3", "PUNCH 3", "PUÑO 3"),
+                k::A => crate::i18n::tr3("CHUTE", "KICK", "PATA"),
+                k::B => crate::i18n::tr3("CHUTE+", "KICK+", "PATA+"),
+                k::C => crate::i18n::tr3("CHUTE 3", "KICK 3", "PATA 3"),
+                k::D2 => crate::i18n::tr3("ESPECIAL", "SPECIAL", "ESPECIAL"),
                 k::W => "SUPER",
-                k::T => "DESPERTAR",
+                k::T => crate::i18n::tr3("DESPERTAR", "AWAKEN", "DESPERTAR"),
                 _ => "II",
             };
             Face::chip(

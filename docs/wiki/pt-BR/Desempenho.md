@@ -49,6 +49,7 @@ O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria th
 |---|---|---|
 | Paleta no shader | `Gfx::sprite_tex`, `IndexedTexture`, `Palette` | Sprites M.U.G.E.N com pixels indexados vão para o atlas de índices de 8 bits e são coloridos por uma linha de paleta no shader: 4x menos upload e espaço de atlas que RGBA. `RemapPal` troca a linha de paleta em vez de gerar uma nova imagem RGBA |
 | Reinício separado dos atlas | `ume_shell::quad` | O atlas RGBA (UI, texto, sprites true-color) e o atlas de índices (+ linhas de paleta) reiniciam cada um por conta própria quando enchem, então encher um nunca obriga o outro a refazer uploads |
+| Caminhos rápidos da composição | `post.wgsl` `fs_composite` | Sem desfoque radial o passe em resolução total usa 1 amostra por pixel (3 com aberração cromática) em vez de 21, e painéis de vidro pulam pixels fora do alcance da sombra. Saída idêntica; tempo de quadro em GPU por software em `UME_TOUR=perf` caiu de 44 ms para 25 ms |
 
 ## Medindo
 

@@ -62,6 +62,7 @@ fn glass_layer(base: vec3<f32>, uv: vec2<f32>, blurred: vec3<f32>) -> vec3<f32> 
         let h = (a.zw - a.xy) * 0.5;
         let d = rounded_box(px, c, h, b.x);
         let reach = b.x * 1.2 + 9.0 * th;
+        if (d > reach + 3.0 * th) { continue; }
         let ds = rounded_box(px, c + vec2<f32>(0.0, 3.0 * th), h, b.x);
         let shadow = (1.0 - smoothstep(-reach * 0.15, reach, ds)) * 0.42 * step(0.0, d);
         col = col * (1.0 - shadow);
@@ -123,12 +124,21 @@ fn fs_composite(v: VOut) -> @location(0) vec4<f32> {
     let r = length(c * vec2<f32>(u.p2.w, 1.0));
     let dir = c / max(length(c), 0.0001);
     let ca = u.p0.x * 0.0045 * (0.25 + r);
-    var acc = vec3<f32>(0.0);
-    for (var i = 0; i < 7; i++) {
-        let p = uvd - c * u.p2.x * 0.10 * (f32(i) / 6.0);
-        acc += vec3<f32>(textureSample(src, samp, p + dir * ca).r, textureSample(src, samp, p).g, textureSample(src, samp, p - dir * ca).b);
+    var col: vec3<f32>;
+    if (u.p2.x <= 0.0) {
+        if (u.p0.x <= 0.0) {
+            col = textureSample(src, samp, uvd).rgb;
+        } else {
+            col = vec3<f32>(textureSample(src, samp, uvd + dir * ca).r, textureSample(src, samp, uvd).g, textureSample(src, samp, uvd - dir * ca).b);
+        }
+    } else {
+        var acc = vec3<f32>(0.0);
+        for (var i = 0; i < 7; i++) {
+            let p = uvd - c * u.p2.x * 0.10 * (f32(i) / 6.0);
+            acc += vec3<f32>(textureSample(src, samp, p + dir * ca).r, textureSample(src, samp, p).g, textureSample(src, samp, p - dir * ca).b);
+        }
+        col = acc / 7.0;
     }
-    var col = acc / 7.0;
     if (u.p6.x > 0.0) {
         let t = 1.0 / u.p4.yz;
         let nb = (textureSample(src, samp, uvd + vec2<f32>(t.x, 0.0)).rgb + textureSample(src, samp, uvd - vec2<f32>(t.x, 0.0)).rgb + textureSample(src, samp, uvd + vec2<f32>(0.0, t.y)).rgb + textureSample(src, samp, uvd - vec2<f32>(0.0, t.y)).rgb) * 0.25;

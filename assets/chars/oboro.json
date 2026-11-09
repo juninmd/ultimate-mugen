@@ -4205,6 +4205,188 @@
             ]
           }
         ]
+      },
+      {
+        "id": "eclipse_primordial",
+        "name": "Eclipse Primordial",
+        "cost": 1000.0,
+        "attack": 1.62,
+        "defense": 1.48,
+        "palette": {
+          "colors": {
+            "skin": "#f4f8ff",
+            "hair": "#f0fcff",
+            "eye": "#00f0ff",
+            "top": "#05020c",
+            "top2": "#00f0ff",
+            "trim": "#00f0ff",
+            "pants": "#0a0518",
+            "cloth": "#ff0055",
+            "belt": "#00f0ff",
+            "wrap": "#16082c",
+            "boot": "#040108",
+            "weapon": "#00f0ff",
+            "weapon2": "#ffffff",
+            "hilt": "#ff0055",
+            "accent": "#00f0ff",
+            "energy": "#00f0ff",
+            "aura": "#00d9ff",
+            "undershirt": "#080314"
+          }
+        },
+        "replaceMoves": false,
+        "moves": [
+          {
+            "id": "colapso_primordial",
+            "name": "Colapso Primordial",
+            "input": "~D, DB, B, b",
+            "kind": "special",
+            "anim": "espelho",
+            "teleport": 3,
+            "invuln": [
+              1,
+              4
+            ],
+            "fx": "aura",
+            "hits": [
+              {
+                "at": 4,
+                "damage": 110,
+                "level": "heavy",
+                "launch": true,
+                "knockback": [
+                  -6,
+                  -7
+                ]
+              }
+            ],
+            "projectile": [
+              {
+                "at": 4,
+                "anim": "blackFlame",
+                "hitAnim": "blackFlameHit",
+                "speed": [
+                  4.2,
+                  0
+                ],
+                "offset": [
+                  48,
+                  -28
+                ],
+                "damage": 40,
+                "hits": 6,
+                "level": "heavy",
+                "priority": 6,
+                "removeTime": 100
+              },
+              {
+                "at": 4,
+                "anim": "spectralWave",
+                "hitAnim": "spectralHit",
+                "speed": [
+                  5.5,
+                  0
+                ],
+                "offset": [
+                  52,
+                  -34
+                ],
+                "damage": 45,
+                "hits": 4,
+                "level": "heavy",
+                "launch": true,
+                "priority": 7,
+                "removeTime": 80
+              }
+            ]
+          },
+          {
+            "id": "supernova_primordial",
+            "name": "Supernova do Eclipse Primordial",
+            "input": "~D, DF, F, D, DF, F, x+y",
+            "kind": "super",
+            "anim": "kyoka",
+            "cost": 1000.0,
+            "teleport": 2,
+            "invuln": [
+              1,
+              10
+            ],
+            "fx": "aura",
+            "hits": [
+              {
+                "at": 3,
+                "damage": 50,
+                "level": "heavy"
+              },
+              {
+                "at": 4,
+                "damage": 50,
+                "level": "heavy"
+              },
+              {
+                "at": 5,
+                "damage": 50,
+                "level": "heavy"
+              },
+              {
+                "at": 6,
+                "damage": 55,
+                "level": "heavy"
+              },
+              {
+                "at": 9,
+                "damage": 130,
+                "level": "heavy",
+                "launch": true,
+                "knockback": [
+                  -8,
+                  -9
+                ]
+              }
+            ],
+            "projectile": [
+              {
+                "at": 3,
+                "anim": "moonBeam",
+                "hitAnim": "moonHit",
+                "speed": [
+                  0,
+                  0
+                ],
+                "offset": [
+                  90,
+                  -65
+                ],
+                "damage": 50,
+                "hits": 5,
+                "level": "heavy",
+                "launch": true,
+                "priority": 8,
+                "removeTime": 40
+              },
+              {
+                "at": 9,
+                "anim": "kyokaFlame",
+                "hitAnim": "blackFlameHit",
+                "speed": [
+                  0,
+                  0
+                ],
+                "offset": [
+                  60,
+                  -10
+                ],
+                "damage": 65,
+                "hits": 6,
+                "level": "heavy",
+                "launch": true,
+                "priority": 8,
+                "removeTime": 40
+              }
+            ]
+          }
+        ]
       }
     ]
   },

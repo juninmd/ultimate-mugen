@@ -102,6 +102,7 @@ impl App {
                 ladder.push(b);
                 if is_oboro {
                     ladder.push(b);
+                    ladder.push(b);
                 }
             })
             .is_some();

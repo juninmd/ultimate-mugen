@@ -343,6 +343,9 @@ impl Vfx {
     }
     /// Colour of a fighter's awakened aura: its own colour pushed towards bright.
     pub fn form_color(f: &ume_engine::fighter::Fighter) -> [f32; 3] {
+        if f.def.boss && f.form >= 3 {
+            return [0.15, 0.92, 1.0];
+        }
         if f.def.boss && f.form >= 2 {
             return [1.0, 0.78, 0.22];
         }
@@ -352,11 +355,7 @@ impl Vfx {
             f.def.color[2] as f32 / 255.0,
         ];
         let mx = c[0].max(c[1]).max(c[2]).max(0.2);
-        [
-            lerp(c[0] / mx, 1.0, 0.18),
-            lerp(c[1] / mx, 1.0, 0.18),
-            lerp(c[2] / mx, 1.0, 0.18),
-        ]
+        [lerp(c[0] / mx, 1.0, 0.18), lerp(c[1] / mx, 1.0, 0.18), lerp(c[2] / mx, 1.0, 0.18)]
     }
     fn ember(
         &mut self,
@@ -561,7 +560,9 @@ impl Vfx {
             Event::Transform { fighter } => self.on_transform(*fighter, m),
             Event::Fight => {
                 if let Some(b) = m.roots().find(|f| f.def.boss) {
-                    if b.form >= 2 {
+                    if b.form >= 3 {
+                        self.banner(crate::i18n::tr3("CLÍMAX SUPREMO", "SUPREME CLIMAX", "CLÍMAX SUPREMO"), crate::i18n::tr3("OBORO · ECLIPSE PRIMORDIAL", "OBORO · PRIMORDIAL ECLIPSE", "OBORO · ECLIPSE PRIMORDIAL"), [0.15, 0.92, 1.0]);
+                    } else if b.form >= 2 {
                         self.banner(crate::i18n::tr3("DESAFIO FINAL", "FINAL CHALLENGE", "DESAFÍO FINAL"), crate::i18n::tr3("OBORO · ECLIPSE ABSOLUTO", "OBORO · ABSOLUTE ECLIPSE", "OBORO · ECLIPSE ABSOLUTO"), [1.0, 0.78, 0.22]);
                     } else {
                         let name = b.def.display_name.to_uppercase();

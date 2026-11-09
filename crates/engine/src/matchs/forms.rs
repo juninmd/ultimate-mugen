@@ -58,11 +58,7 @@ impl Match {
         if f.is_helper || !f.alive || !f.ctrl || f.state_type == 'A' || f.power < cost || self.round_state != 2 || self.pause.is_some() || !f.def.anims.contains_key(&196) { return false; }
         let id = f.id;
         let defeated_once = f.def.boss && self.wins[1 - f.side.min(1)] >= 1;
-        let target_form = if defeated_once {
-            f.base_def.forms.len().max(1) as u8
-        } else {
-            f.form + 1
-        };
+        let target_form = (f.form + 1).min(f.base_def.forms.len().max(1) as u8);
         let (old_a, old_d) = form_multipliers(&f.base_def, f.form);
         let (new_a, new_d) = form_multipliers(&f.base_def, target_form);
         let target = f.base_def.forms.get((target_form as usize).saturating_sub(1)).and_then(|fm| fm.target.clone());
@@ -97,19 +93,25 @@ impl Match {
         }
     }
 
-    pub fn awaken_boss_final(&mut self) {
+    pub fn awaken_boss_phase(&mut self, phase: u8) {
         for f in self.fighters.iter_mut().filter(|f| !f.is_helper && f.def.boss) {
             let max_form = f.base_def.forms.len().max(1) as u8;
+            let target_form = phase.clamp(1, max_form);
             let (old_a, old_d) = form_multipliers(&f.base_def, f.form);
-            let (new_a, new_d) = form_multipliers(&f.base_def, max_form);
+            let (new_a, new_d) = form_multipliers(&f.base_def, target_form);
             let base_life = f.base_def.c("data.life", 1000.0) as f32;
-            f.form = max_form;
+            f.form = target_form;
             f.form_time = 1;
             f.attack_mul = f.attack_mul / old_a * new_a;
             f.defence_mul = f.defence_mul / old_d * new_d;
-            f.life_max = f.life_max.max((base_life * 1.15).round());
+            let mult = if target_form >= 3 { 1.30 } else { 1.15 };
+            f.life_max = f.life_max.max((base_life * mult).round());
             f.life = f.life_max;
             f.power = f.power_max;
         }
+    }
+
+    pub fn awaken_boss_final(&mut self) {
+        self.awaken_boss_phase(2);
     }
 }

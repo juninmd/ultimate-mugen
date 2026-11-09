@@ -157,8 +157,11 @@ impl Ai {
         let fwd = if f.facing > 0.0 { k::R } else { k::L };
         let back = if f.facing > 0.0 { k::L } else { k::R };
         let boss = f.def.boss;
+        let primordial = boss && f.form >= 3;
         let final_boss = boss && f.form >= 2;
-        let skill = if final_boss {
+        let skill = if primordial {
+            1.48
+        } else if final_boss {
             1.35
         } else if boss {
             1.15
@@ -169,14 +172,14 @@ impl Ai {
         let threat = e.move_type == 'A' || m.projectiles.iter().any(|p| p.side == e.side);
         if threat
             && dist < 140.0
-            && r < (0.25 + skill * 0.6).min(if final_boss { 0.68 } else if boss { 0.55 } else { 1.0 })
+            && r < (0.25 + skill * 0.6).min(if primordial { 0.75 } else if final_boss { 0.68 } else if boss { 0.55 } else { 1.0 })
             && f.move_type != 'H'
         {
             self.hold = back | if e.state_type == 'C' || self.r() < 0.3 { k::D } else { 0 };
             self.hold_ticks = 8 + (self.r() * 10.0) as i32;
             return self.hold;
         }
-        let near = if final_boss { 120.0 } else if boss { 105.0 } else { 70.0 };
+        let near = if primordial { 135.0 } else if final_boss { 120.0 } else if boss { 105.0 } else { 70.0 };
         let scale = (f.def.local_w / 320.0).clamp(0.5, 2.0);
         let near = near * scale;
         if self.cooldown > 0 {
@@ -198,7 +201,9 @@ impl Ai {
                 let cmd_idx = if dist < near { self.attack[pick] } else { self.ranged_attack[pick] };
                 let c = &f.def.commands[cmd_idx];
                 Self::append_seq(&mut self.queue, c, f.facing);
-                self.cooldown = if final_boss {
+                self.cooldown = if primordial {
+                    (2.0 + self.r() * 5.0) as i32
+                } else if final_boss {
                     (4.0 + self.r() * 8.0) as i32
                 } else if boss {
                     (8.0 + self.r() * 12.0) as i32

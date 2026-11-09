@@ -1225,7 +1225,9 @@ impl App {
         kv: f32,
         mirror: bool,
     ) {
-        let (form_g, anim) = if anim <= -1000 {
+        let (form_g, anim) = if anim <= -2000 {
+            (4, -anim - 2000)
+        } else if anim <= -1000 {
             (3, -anim - 1000)
         } else {
             (1, anim)
@@ -1317,6 +1319,7 @@ impl App {
             mirror,
         );
     }
+
 
     /// Registry indices visible under the current filter (never empty).
     fn char_view(&self) -> Vec<usize> {
@@ -2795,17 +2798,21 @@ impl App {
             ume_shell::watchdog::label("load:session");
             let stage = self.pending.stage.take().ok_or("stage")?;
             let teams = std::mem::take(&mut self.pending.defs);
-            let boss_phase2 = self.mode == Mode::Arcade
-                && self.arcade.as_ref().is_some_and(|(l, i)| {
-                    *i > 0 && l.get(*i) == l.get(*i - 1) && l.get(*i).copied() == self.boss_idx()
-                });
+            let boss_phase = if self.mode == Mode::Arcade {
+                self.arcade.as_ref().map(|(l, i)| {
+                    let b = self.boss_idx();
+                    if Some(l.get(*i).copied().unwrap_or(usize::MAX)) == b {
+                        l[..=*i].iter().filter(|&&x| Some(x) == b).count()
+                    } else { 0 }
+                }).unwrap_or(0)
+            } else { 0 };
             let lvl = if let Some(story_lvl) = self.story_level() {
                 story_lvl
             } else if self.mode == Mode::Survival {
                 self.survival
                     .map(|s| s.ai_level(self.ai_level))
                     .unwrap_or(self.ai_level)
-            } else if boss_phase2 {
+            } else if boss_phase >= 2 {
                 8
             } else {
                 match &self.arcade {
@@ -2930,8 +2937,8 @@ impl App {
                 .unwrap_or_else(|| self.settings.rules());
             sess.apply_rules(self.fight_rules);
             self.story_tune(&mut sess);
-            if boss_phase2 {
-                sess.m.awaken_boss_final();
+            if boss_phase >= 2 {
+                sess.m.awaken_boss_phase(boss_phase as u8);
             }
             if seq {
                 if let Some(t) = &self.team {
@@ -3337,17 +3344,21 @@ impl App {
                 *i += 1;
                 if *i < ladder.len() {
                     let is_boss = Some(ladder[*i]) == boss;
-                    let is_phase2 = is_boss && *i > 0 && Some(ladder[*i - 1]) == boss;
-                    next_action = Some((*i, ladder[*i], is_boss, is_phase2, false));
+                    let boss_cnt = if is_boss {
+                        ladder[..=*i].iter().filter(|&&x| Some(x) == boss).count()
+                    } else {
+                        0
+                    };
+                    next_action = Some((*i, ladder[*i], is_boss, boss_cnt, false));
                 } else if *i == ladder.len()
                     && !self.ending_shown
                     && boss.is_some_and(|b| ladder.last() == Some(&b))
                 {
                     self.ending_shown = true;
-                    next_action = Some((*i, 0, false, false, true));
+                    next_action = Some((*i, 0, false, 0, true));
                 }
             }
-            if let Some((idx, next_char, is_boss, is_phase2, is_ending)) = next_action {
+            if let Some((idx, next_char, is_boss, boss_cnt, is_ending)) = next_action {
                 self.audio.stop_music();
                 if is_ending {
                     let hero_id = self.player_char_id();
@@ -3362,7 +3373,7 @@ impl App {
                         .unwrap_or_default();
                     self.boss_progression.on_clear(&hero_id, &boss_entry_id);
                     self.screen = Screen::Cutscene {
-                        kind: 2,
+                        kind: 5,
                         page: 0,
                         t: 0.0,
                     };
@@ -3370,7 +3381,7 @@ impl App {
                 }
                 self.sel.1 = next_char;
                 let st_spirit = self.reg.stages.iter().position(|s| s.id.contains("spirit"));
-                self.sel.2 = if is_phase2 {
+                self.sel.2 = if boss_cnt >= 2 {
                     st_spirit.unwrap_or(0)
                 } else if is_boss {
                     self.boss_stage_idx(next_char)
@@ -3382,20 +3393,23 @@ impl App {
                         t.members[1] = vec![next_char];
                     }
                 }
-                self.screen = if is_phase2 {
-                    Screen::Cutscene {
+                self.screen = match (is_boss, boss_cnt) {
+                    (true, 3..) => Screen::Cutscene {
+                        kind: 4,
+                        page: 0,
+                        t: 0.0,
+                    },
+                    (true, 2) => Screen::Cutscene {
                         kind: 3,
                         page: 0,
                         t: 0.0,
-                    }
-                } else if is_boss {
-                    Screen::Cutscene {
+                    },
+                    (true, _) => Screen::Cutscene {
                         kind: 1,
                         page: 0,
                         t: 0.0,
-                    }
-                } else {
-                    Screen::Vs { t: 0.0, step: 0 }
+                    },
+                    _ => Screen::Vs { t: 0.0, step: 0 },
                 };
                 return;
             }

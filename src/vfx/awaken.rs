@@ -90,7 +90,9 @@ impl Vfx {
                 if nm.is_empty() { crate::i18n::tr3("DESPERTAR", "AWAKEN", "DESPERTAR") } else { &nm },
                 col,
             );
-            if f.def.boss && f.form >= 2 {
+            if f.def.boss && f.form >= 3 {
+                self.banner(crate::i18n::tr3("ECLIPSE PRIMORDIAL", "PRIMORDIAL ECLIPSE", "ECLIPSE PRIMORDIAL"), crate::i18n::tr3("FORMA SUPREMA DE MIKAZUKI OBORO", "SUPREME FORM OF MIKAZUKI OBORO", "FORMA SUPREMA DE MIKAZUKI OBORO"), col);
+            } else if f.def.boss && f.form >= 2 {
                 self.banner(crate::i18n::tr3("ECLIPSE ABSOLUTO", "ABSOLUTE ECLIPSE", "ECLIPSE ABSOLUTO"), crate::i18n::tr3("FORMA FINAL DE MIKAZUKI OBORO", "FINAL FORM OF MIKAZUKI OBORO", "FORMA FINAL DE MIKAZUKI OBORO"), col);
             }
         }

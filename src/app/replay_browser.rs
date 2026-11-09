@@ -385,7 +385,9 @@ impl App {
             }
             return;
         }
-        self.replay_selection_bar(cur);
+        if count > 0 {
+            self.replay_selection_bar(cur);
+        }
         for (i, e) in self.replay_list.iter().enumerate().take(12) {
             let y = 100.0 + i as f32 * 46.0;
             let selected = i == cur;

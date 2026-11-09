@@ -1,12 +1,15 @@
+#[path = "story/advance.rs"]
+mod advance;
+
 use crate::app::{App, Mode, Screen, Team};
 use crate::gfx::*;
 use crate::session::Session;
 use crate::story::{text, Next, Phase, StoryRun};
 use crate::ui::*;
 
-const BOSS_LIFE_FACTOR: f32 = 1.5;
-const BOSS_ATTACK_FACTOR: f32 = 1.1;
-const FOE_START_LANES: [f32; 4] = [-10.0, 6.0, -3.0, 8.0];
+pub(super) const BOSS_LIFE_FACTOR: f32 = 1.5;
+pub(super) const BOSS_ATTACK_FACTOR: f32 = 1.1;
+pub(super) const FOE_START_LANES: [f32; 4] = [-10.0, 6.0, -3.0, 8.0];
 
 fn story_scroll(sess: &mut Session, def: &crate::story::StageDef, fight: usize) {
     let Some(strip) = crate::stages::story_strip(def.arena) else { return };
@@ -22,8 +25,10 @@ fn story_scroll(sess: &mut Session, def: &crate::story::StageDef, fight: usize) 
     stage.bound_left = center - crate::story::FIGHT_HALF_RANGE;
     stage.bound_right = center + crate::story::FIGHT_HALF_RANGE;
     stage.start_x = center;
-    stage.p1x += center;
-    stage.p2x += center;
+    stage.p1x = center + sess.stage.info.p1x;
+    stage.p2x = center + sess.stage.info.p2x;
+    sess.m.lanes.target_x = center;
+    sess.m.lanes.bound_span = crate::story::FIGHT_HALF_RANGE;
     sess.m.camera.x = center;
     for fighter in sess.m.fighters.iter_mut().filter(|f| !f.is_helper) {
         fighter.pos.x += center;
@@ -31,14 +36,14 @@ fn story_scroll(sess: &mut Session, def: &crate::story::StageDef, fight: usize) 
 }
 
 impl App {
-    fn story_char(&self, id: &str) -> Option<usize> {
+    pub(super) fn story_char(&self, id: &str) -> Option<usize> {
         (0..self.reg.chars.len()).find(|&i| {
             let entry = &self.reg.chars[i];
             entry.id.strip_prefix("umf:").unwrap_or(&entry.id) == id && !entry.broken.get()
         })
     }
 
-    fn story_foes(&self, run: &StoryRun) -> Vec<usize> {
+    pub(super) fn story_foes(&self, run: &StoryRun) -> Vec<usize> {
         let player = self.player_char_id();
         run.foes(&player).into_iter().filter_map(|id| self.story_char(id)).collect()
     }
@@ -55,6 +60,7 @@ impl App {
 
     pub(crate) fn story_prepare_fight(&mut self) {
         let Some(run) = self.story.clone() else { return };
+        self.story_prefetch_stage();
         let foes = self.story_foes(&run);
         let Some(&first) = foes.first() else { return };
         let me = self.sel.0;
@@ -93,13 +99,18 @@ impl App {
         let remaining = self.story_remaining_life();
         let Some(run) = self.story.as_mut() else { return };
         let next = run.won_fight(gained, remaining);
-        self.audio.stop_music();
         match next {
             Next::Wave => {
-                self.story_prepare_fight();
-                self.screen = Screen::Vs { t: 1.8, step: 0 };
+                if self.story_advance_in_place() {
+                    self.screen = Screen::Fight;
+                } else {
+                    self.audio.stop_music();
+                    self.story_prepare_fight();
+                    self.screen = Screen::Vs { t: 1.8, step: 0 };
+                }
             }
             Next::StageCleared | Next::Finished => {
+                self.audio.stop_music();
                 self.session = None;
                 self.screen = Screen::Story { t: 0.0 };
             }
@@ -132,13 +143,25 @@ impl App {
         sess.m.rounds_to_win = 1;
         let accent = run.stage_def().accent;
         let def = run.stage_def();
-        sess.m.lanes = ume_engine::lane::LaneRules { active: true, far: def.lane_far, near: def.lane_near, show_foe_hud: run.is_boss_fight() };
+        sess.m.lanes = ume_engine::lane::LaneRules { active: true, far: def.lane_far, near: def.lane_near, show_foe_hud: run.is_boss_fight(), target_x: 0.0, bound_span: 0.0 };
         sess.team = None;
         story_scroll(sess, def, run.fight_index());
         for (slot, fighter) in sess.m.fighters.iter_mut().filter(|f| !f.is_helper && f.side == 1).enumerate() {
             fighter.lane = FOE_START_LANES[slot % FOE_START_LANES.len()].clamp(def.lane_far, def.lane_near);
         }
+        let hero_life_max = sess
+            .m
+            .fighters
+            .iter()
+            .find(|f| !f.is_helper && f.side == 0)
+            .map(|f| f.life_max)
+            .unwrap_or(1000.0);
         if !run.is_boss_fight() {
+            for fighter in sess.m.fighters.iter_mut().filter(|f| !f.is_helper && f.side == 1) {
+                let ratio = crate::story::villain_life_ratio(&fighter.def.id);
+                fighter.life_max = (hero_life_max * ratio).max(1.0);
+                fighter.life = fighter.life_max;
+            }
             let label = text::wave_label(run.wave, run.stage_def().waves.len(), false);
             sess.vfx.banner(&text::stage_label(run.stage), &format!("{label} · {}", text::go()), accent);
             return;
@@ -205,31 +228,5 @@ impl App {
         }
         self.story_prepare_fight();
         self.screen = Screen::Vs { t: 0.0, step: 0 };
-    }
-}
-
-impl App {
-    pub(crate) fn run_life(&self) -> [f32; 2] {
-        if self.story.is_some() && self.mode == Mode::Story {
-            self.story_life()
-        } else {
-            self.survival_life()
-        }
-    }
-
-    pub(crate) fn run_win(&mut self) {
-        if self.mode == Mode::Story {
-            self.story_win();
-        } else {
-            self.survival_win();
-        }
-    }
-
-    pub(crate) fn run_loss(&mut self) {
-        if self.mode == Mode::Story {
-            self.story_loss();
-        } else {
-            self.survival_loss();
-        }
     }
 }

@@ -85,6 +85,9 @@ impl Ai {
 
 impl InputSource for Ai {
     fn poll(&mut self, m: &Match, me: usize) -> u32 {
+        if m.is_lane_scrolling() {
+            return 0;
+        }
         self.poll_fight(m, me) | crate::lane::ai_lane_bits(m, me)
     }
 }

@@ -6,9 +6,9 @@ use crate::story::STAGES;
 use ume_engine::ai::Ai;
 
 const FIGHT_WARMUP_TICKS: usize = 150;
-const FIGHT_LIMIT_TICKS: usize = 5400;
+const FIGHT_LIMIT_TICKS: usize = 7200;
 const PLAYER_LIFE_FACTOR: f32 = 3.0;
-const PLAYER_ATTACK_FACTOR: f32 = 2.0;
+const PLAYER_ATTACK_FACTOR: f32 = 3.0;
 
 async fn frames(app: &mut App, n: usize) {
     for _ in 0..n {
@@ -102,24 +102,42 @@ async fn cap_guard(app: &mut App, dir: &str, name: &str) {
     cap_fight(app, dir, &format!("{name}-guard")).await;
 }
 
+fn wait_ready(app: &mut App) {
+    for _ in 0..400 {
+        let ready = app
+            .session
+            .as_ref()
+            .is_some_and(|s| s.m.round_state == 2 && !s.m.is_lane_scrolling());
+        if ready {
+            break;
+        }
+        step(app, 1, false);
+    }
+}
+
 async fn play_fight(app: &mut App, dir: &str, name: &str, strong: bool, band: Option<(f32, f32)>) -> bool {
-    app.start_fight().await;
-    automate_player(app, strong);
+    if app.session.is_none() {
+        app.start_fight().await;
+        automate_player(app, strong);
+    } else if let Some(s) = app.session.as_mut() {
+        s.pilots[0] = Pilot::Cpu(Ai::new(7, 5));
+    }
     if let Some((far, near)) = band {
-        step(app, 400, false);
+        wait_ready(app);
         cap_lane_extremes(app, dir, name, far, near).await;
         cap_guard(app, dir, name).await;
         app.session = None;
         app.start_fight().await;
         automate_player(app, strong);
     }
-    step(app, 400, false);
-    step(app, FIGHT_WARMUP_TICKS, false);
+    wait_ready(app);
+    let warmup = if name.ends_with("-boss") { FIGHT_WARMUP_TICKS } else { 15 };
+    step(app, warmup, true);
     println!("{name}: {} foe(s) alive at capture", foes_alive(app));
     cap_fight(app, dir, name).await;
     let over = step(app, FIGHT_LIMIT_TICKS, true);
     if over == Some(0) {
-        step(app, 30, false);
+        step(app, 10, false);
         cap_fight(app, dir, &format!("{name}-ko")).await;
     }
     over == Some(0)

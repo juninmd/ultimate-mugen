@@ -1,6 +1,8 @@
 [bloom]
-intensity = 1.0
-threshold = 0.52
+intensity = 1.25
+threshold = 0.5
+knee = 0.3
+tint = [1.0, 0.93, 0.85]
 
 [grade]
 tonemap = 0.5
@@ -17,6 +19,7 @@ heat = 1.0
 chroma = 1.0
 vignette = 1.0
 grain = 0.03
+sharpen = 0.22
 
 [quality]
 grade_from_level = 1

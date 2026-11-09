@@ -1,4 +1,4 @@
-struct Params { p0: vec4<f32>, p1: vec4<f32>, p2: vec4<f32>, p3: vec4<f32>, p4: vec4<f32>, p5: vec4<f32>, p6: vec4<f32>, p7: vec4<f32>, p8: vec4<f32>, waves: array<vec4<f32>, 8>, glass: array<vec4<f32>, 32> }
+struct Params { p0: vec4<f32>, p1: vec4<f32>, p2: vec4<f32>, p3: vec4<f32>, p4: vec4<f32>, p5: vec4<f32>, p6: vec4<f32>, p7: vec4<f32>, p8: vec4<f32>, p9: vec4<f32>, waves: array<vec4<f32>, 8>, glass: array<vec4<f32>, 32> }
 
 @group(0) @binding(0) var<uniform> u: Params;
 @group(0) @binding(1) var src: texture_2d<f32>;
@@ -21,7 +21,10 @@ fn vs_full(@builtin(vertex_index) i: u32) -> VOut {
 fn fs_bright(v: VOut) -> @location(0) vec4<f32> {
     let c = textureSample(src, samp, v.uv).rgb;
     let l = max(c.r, max(c.g, c.b));
-    return vec4<f32>(c * smoothstep(u.p6.y, u.p6.y + 0.37, l) * 1.15, 1.0);
+    let k = max(u.p6.z, 0.0001);
+    let soft = clamp(l - u.p6.y + k, 0.0, 2.0 * k);
+    let gain = max(soft * soft / (4.0 * k), l - u.p6.y) / max(l, 0.0001);
+    return vec4<f32>(c * gain * 1.25, 1.0);
 }
 
 @fragment
@@ -126,7 +129,12 @@ fn fs_composite(v: VOut) -> @location(0) vec4<f32> {
         acc += vec3<f32>(textureSample(src, samp, p + dir * ca).r, textureSample(src, samp, p).g, textureSample(src, samp, p - dir * ca).b);
     }
     var col = acc / 7.0;
-    col += textureSample(bloom, samp, uvd).rgb * u.p0.z;
+    if (u.p6.x > 0.0) {
+        let t = 1.0 / u.p4.yz;
+        let nb = (textureSample(src, samp, uvd + vec2<f32>(t.x, 0.0)).rgb + textureSample(src, samp, uvd - vec2<f32>(t.x, 0.0)).rgb + textureSample(src, samp, uvd + vec2<f32>(0.0, t.y)).rgb + textureSample(src, samp, uvd - vec2<f32>(0.0, t.y)).rgb) * 0.25;
+        col = max(col + (col - nb) * u.p6.x, vec3<f32>(0.0));
+    }
+    col += textureSample(bloom, samp, uvd).rgb * u.p0.z * u.p9.xyz;
     col = grade_color(col);
     let luma = dot(col, vec3<f32>(0.299, 0.587, 0.114));
     col = mix(vec3<f32>(luma), col, u.p1.x);

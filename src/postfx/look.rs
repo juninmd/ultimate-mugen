@@ -7,6 +7,9 @@ const FILE: &str = "postfx.toml";
 pub struct Look {
     pub bloom: f32,
     pub threshold: f32,
+    pub knee: f32,
+    pub bloom_tint: [f32; 3],
+    pub sharpen: f32,
     pub tonemap: f32,
     pub exposure: f32,
     pub split: f32,
@@ -53,6 +56,9 @@ impl Look {
         Look {
             bloom: number(&t, "bloom", "intensity", 1.0).clamp(0.0, 3.0),
             threshold: number(&t, "bloom", "threshold", 0.58).clamp(0.05, 0.95),
+            knee: number(&t, "bloom", "knee", 0.0).clamp(0.0, 0.8),
+            bloom_tint: triple(&t, "bloom", "tint", [1.0; 3]),
+            sharpen: number(&t, "lens", "sharpen", 0.0).clamp(0.0, 1.0),
             tonemap: number(&t, "grade", "tonemap", 0.0).clamp(0.0, 1.0),
             exposure: number(&t, "grade", "exposure", 1.0).clamp(0.4, 2.0),
             split: number(&t, "grade", "split", 0.0).clamp(0.0, 1.0),
@@ -86,7 +92,8 @@ mod tests {
     fn shipped_default_parses_with_grading_on() {
         let l = Look::parse(DEFAULT);
         assert!(l.tonemap > 0.0 && l.shockwave > 0.0 && l.heat > 0.0);
-        assert_eq!(l.shadows.len(), 3);
+        assert!(l.knee > 0.0 && l.sharpen > 0.0);
+        assert_eq!(l.bloom_tint.len(), 3);
     }
 
     #[test]

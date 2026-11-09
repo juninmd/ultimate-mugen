@@ -17,12 +17,24 @@ Presentation-only effects live in `src/vfx.rs` and `src/vfx/`; the simulation ne
 
 | Section | Keys | Effect |
 |---|---|---|
-| `bloom` | `intensity`, `threshold` | Glow strength and the brightness where it starts |
+| `bloom` | `intensity`, `threshold`, `knee`, `tint` | Glow strength, where it starts, soft-knee width (Bevy/Unreal style, no hard cut) and a warm halation tint |
 | `grade` | `tonemap`, `exposure`, `split`, `shadows`, `highlights` | ACES filmic curve (0 off, 1 full), exposure, and a split tone that tints shadows and highlights |
 | `distortion` | `shockwave`, `heat` | Screen refraction from impact rings and heat haze around supers |
-| `lens` | `chroma`, `vignette`, `grain` | Multipliers for the existing lens effects |
+| `lens` | `chroma`, `vignette`, `grain`, `sharpen` | Multipliers for the existing lens effects and contrast-adaptive sharpening (4 extra taps) |
 | `quality` | `grade_from_level`, `shockwave_from_level`, `heat_from_level`, `bloom_from_level` | Lowest `fx` level (0 to 2) where each effect runs |
 
 - Shockwaves: rings with a radius of 24 or more push up to 4 refraction bands (`ume_shell::waves::shockwave`) into the composite pass; no extra render pass.
 - All of it lives in the single composite shader, so the cost is one extra texture-free math block per pixel; `fx` level 0 skips post-processing entirely.
 - Tests: `cargo test -p ume-render --test headless` and `cargo test --bin ultimate-mugen postfx`.
+
+### How it compares
+
+| Technique | Where it comes from | Here |
+|---|---|---|
+| Soft-knee bloom threshold | Bevy, Unreal | `bloom.knee` |
+| Warm halation tint | Film look, Godot glow colour | `bloom.tint` |
+| Contrast-adaptive sharpening | FidelityFX CAS, Bevy `ContrastAdaptiveSharpening` | `lens.sharpen` |
+| ACES filmic tonemap | Godot, Bevy tonemapping | `grade.tonemap` |
+| Impact refraction | SF6 and Strive hit shockwaves | `distortion.shockwave` |
+
+Not done yet: HDR scene target (Godot/Bevy glow on float textures; the scene is 8-bit here), multi-mip bloom and anamorphic streaks, and normal-mapped 2D lights.

@@ -42,7 +42,7 @@ impl Default for PostParams {
 }
 
 const SLOT: u64 = 1024;
-const HEAD: usize = 68;
+const HEAD: usize = 72;
 const UNIFORM_BYTES: u64 = HEAD as u64 * 4 + MAX_GLASS as u64 * 32;
 const PASSES: usize = 6;
 
@@ -148,8 +148,8 @@ impl PostFx {
         let [hw, hh] = [t.half_size[0] as f32, t.half_size[1] as f32];
         let mut data = [0f32; (SLOT as usize / 4) * PASSES];
         let g = p.grade;
-        let tail = [g.tonemap, g.exposure, g.split, g.heat, 0.0, g.threshold, 0.0, 0.0, g.shadows[0], g.shadows[1], g.shadows[2], p.waves.n as f32, g.highlights[0], g.highlights[1], g.highlights[2], 0.0];
-        let mut slot = |i: usize, v: [f32; 20]| { let o = i * SLOT as usize / 4; data[o..o + 20].copy_from_slice(&v); data[o + 20..o + 36].copy_from_slice(&tail); };
+        let tail = [g.tonemap, g.exposure, g.split, g.heat, g.sharpen, g.threshold, g.knee, 0.0, g.shadows[0], g.shadows[1], g.shadows[2], p.waves.n as f32, g.highlights[0], g.highlights[1], g.highlights[2], 0.0, g.bloom_tint[0], g.bloom_tint[1], g.bloom_tint[2], 0.0];
+        let mut slot = |i: usize, v: [f32; 20]| { let o = i * SLOT as usize / 4; data[o..o + 20].copy_from_slice(&v); data[o + 20..o + 40].copy_from_slice(&tail); };
         let glass_on = p.glass.n > 0;
         let dir = |x: f32, y: f32| { let mut v = [0f32; 20]; v[0] = x; v[1] = y; v };
         let mut copy = [0f32; 20];
@@ -173,7 +173,7 @@ impl PostFx {
             data[o..o + 8].copy_from_slice(r);
         }
         for (i, w) in p.waves.items[..p.waves.n].iter().enumerate() {
-            let o = 5 * SLOT as usize / 4 + 36 + i * 8;
+            let o = 5 * SLOT as usize / 4 + 40 + i * 8;
             data[o..o + 8].copy_from_slice(w);
         }
         queue.write_buffer(&self.uniforms, 0, bytemuck::cast_slice(&data));

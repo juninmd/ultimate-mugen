@@ -35,6 +35,11 @@ impl PostFx {
             g.heat = ((p.radial * 0.7 + p.flash * 1.5) * l.heat).min(1.5);
         }
         g.threshold = l.threshold;
+        g.knee = l.knee;
+        g.bloom_tint = l.bloom_tint;
+        if self.level >= l.grade_level {
+            g.sharpen = l.sharpen;
+        }
         g
     }
 

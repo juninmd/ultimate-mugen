@@ -7,13 +7,16 @@ pub struct Grade {
     pub split: f32,
     pub heat: f32,
     pub threshold: f32,
+    pub knee: f32,
+    pub sharpen: f32,
+    pub bloom_tint: [f32; 3],
     pub shadows: [f32; 3],
     pub highlights: [f32; 3],
 }
 
 impl Default for Grade {
     fn default() -> Self {
-        Grade { tonemap: 0.0, exposure: 1.0, split: 0.0, heat: 0.0, threshold: 0.58, shadows: [1.0; 3], highlights: [1.0; 3] }
+        Grade { tonemap: 0.0, exposure: 1.0, split: 0.0, heat: 0.0, threshold: 0.58, knee: 0.0, sharpen: 0.0, bloom_tint: [1.0; 3], shadows: [1.0; 3], highlights: [1.0; 3] }
     }
 }
 

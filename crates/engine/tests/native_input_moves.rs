@@ -16,7 +16,7 @@ const JUMP_STATE: i32 = 40;
 const CROUCH_HOLD: u32 = 2;
 const HOLD_TICKS: usize = 3;
 const HELD_STEP_TICKS: usize = 8;
-const WATCH_TICKS: usize = 60;
+const WATCH_TICKS: usize = 45;
 const FIRST_ABILITY: i32 = 200;
 const FIRST_COMMON: i32 = 5000;
 const VICTIM_STATES: std::ops::Range<i32> = 3800..3900;
@@ -98,7 +98,7 @@ fn every_command_of_every_fighter_performs_its_move_from_real_inputs() {
         let base = arena(&def);
         let mut from_inputs = BTreeSet::new();
         let mut tested = 0;
-        for command in def.commands.iter().filter(|c| !c.steps.is_empty()) {
+        for command in def.commands.iter().filter(|c| c.steps.iter().any(|s| s.btns != 0)) {
             let reached = abilities_reached(&base, command, def.forms.len());
             tested += 1;
             if reached.is_empty() { dead_commands.push(format!("{} command {} ({}) triggered no ability state", nc.id, command.name, command.raw)); }

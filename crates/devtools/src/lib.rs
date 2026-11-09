@@ -1,4 +1,10 @@
+pub mod json_order;
+pub mod motion;
+pub mod story_npcs;
 pub mod audit_moves;
 pub mod audit_sprites;
 pub mod pack;
 pub mod thumbnails;
+pub mod ability_reel;
+pub mod reel_font;
+pub mod umf_edit;

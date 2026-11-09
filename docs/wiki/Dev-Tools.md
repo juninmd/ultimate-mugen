@@ -15,4 +15,4 @@ Run them with `cargo run --release -p ume-devtools --bin ume-tools -- <command>`
 
 ## Still Python
 
-These scripts have not been ported: `scripts/gen_story_npcs.py` and `scripts/umf_edit.py` (need key-order-preserving JSON output), `scripts/native_motion_descriptor.py`, `scripts/preview_native_motion.py`, `scripts/preview_native_scene.py`, `scripts/ability_reel.py`, `scripts/build_motion_showcase.py` (captioned GIF/MP4 renderers over ffmpeg) and `tools/story_segments.py` (procedural stage art).
+Only `tools/story_segments.py` remains: it draws the story stage strips with Python's random generator and Pillow rasterizers, and the committed stage art must stay byte-identical, so it is not ported. Everything else is `ume-tools`: `gen-story-npcs` (byte-identical to the old script, but it overwrites drifted committed NPC files), `motion-descriptor`, `preview-motion`, `preview-scene`, `ability-reel` (ffmpeg; captions use a built-in bitmap font) and the `umf_edit` library (key-order and line-ending preserving JSON edits). The one-off motion showcase image script was dropped; its output stays committed.

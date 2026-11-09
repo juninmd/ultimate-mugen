@@ -116,3 +116,29 @@ fn roster_audit_is_clean() {
         assert!(result["problems"].as_array().unwrap().is_empty(), "{}: {}", result["id"], result["problems"]);
     }
 }
+
+#[test]
+fn umf_edit_preserves_style() {
+    let dir = std::env::temp_dir().join(format!("ume-umf-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    for (name, text) in [("a.json", "{\r\n  \"b\": 1,\r\n  \"a\": [1, 2]\r\n}\r\n"), ("c.json", "{\"z\":1,\"y\":2}")] {
+        let path = dir.join(name);
+        std::fs::write(&path, text).unwrap();
+        let mut doc = ume_devtools::umf_edit::load(&path).unwrap();
+        doc.data.set("n", ume_devtools::json_order::Json::int(3));
+        doc.save(&path).unwrap();
+        let out = std::fs::read_to_string(&path).unwrap();
+        assert!(out.contains("\"n\""));
+        assert_eq!(out.ends_with("\r\n"), text.ends_with("\r\n"));
+        assert_eq!(out.contains('\n'), text.contains('\n'));
+    }
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn effective_ticks_matches_runtime_rounding() {
+    use ume_devtools::{json_order::Json, motion::effective_ticks};
+    assert_eq!(effective_ticks(Some(&Json::int(6)), Some(&Json::float(1.5))).unwrap(), 4);
+    assert_eq!(effective_ticks(Some(&Json::int(6)), None).unwrap(), 6);
+    assert!(effective_ticks(Some(&Json::int(0)), None).is_err());
+}

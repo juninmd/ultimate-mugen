@@ -3442,7 +3442,8 @@
           ],
           "damage": 20,
           "level": "light",
-          "hits": 2
+          "hits": 2,
+          "element": "fire"
         },
         {
           "at": 3,
@@ -3458,7 +3459,8 @@
           ],
           "damage": 20,
           "level": "light",
-          "hits": 2
+          "hits": 2,
+          "element": "fire"
         },
         {
           "at": 3,
@@ -3474,7 +3476,8 @@
           ],
           "damage": 20,
           "level": "light",
-          "hits": 2
+          "hits": 2,
+          "element": "fire"
         }
       ],
       "cancels": [
@@ -3505,7 +3508,8 @@
         "hits": 7,
         "level": "medium",
         "priority": 3,
-        "removeTime": 120
+        "removeTime": 120,
+        "element": "fire"
       },
       "cancels": [
         "tsukuyomi"
@@ -3563,7 +3567,8 @@
         "level": "heavy",
         "launch": true,
         "priority": 4,
-        "removeTime": 30
+        "removeTime": 30,
+        "element": "lightning"
       },
       "cancels": [
         "susanoo",
@@ -3600,7 +3605,8 @@
           "level": "heavy",
           "launch": true,
           "priority": 7,
-          "removeTime": 90
+          "removeTime": 90,
+          "element": "lightning"
         },
         {
           "at": 4,
@@ -3619,7 +3625,8 @@
           "level": "heavy",
           "launch": true,
           "priority": 6,
-          "removeTime": 70
+          "removeTime": 70,
+          "element": "lightning"
         }
       ]
     },
@@ -3753,7 +3760,8 @@
           "damage": 26.0,
           "level": "heavy",
           "hits": 3,
-          "priority": 2
+          "priority": 2,
+          "element": "fire"
         },
         {
           "at": 3,
@@ -3770,7 +3778,8 @@
           "damage": 26.0,
           "level": "heavy",
           "hits": 3,
-          "priority": 2
+          "priority": 2,
+          "element": "fire"
         },
         {
           "at": 3,
@@ -3787,7 +3796,8 @@
           "damage": 26.0,
           "level": "heavy",
           "hits": 3,
-          "priority": 2
+          "priority": 2,
+          "element": "fire"
         }
       ],
       "cancels": [
@@ -3819,7 +3829,8 @@
           "hits": 8,
           "level": "heavy",
           "priority": 4,
-          "removeTime": 120
+          "removeTime": 120,
+          "element": "fire"
         }
       ],
       "cancels": [

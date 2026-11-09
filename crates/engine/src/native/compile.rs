@@ -218,7 +218,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
             cns += &format!("[State {sid}, proj]\ntype = Projectile\ntrigger1 = AnimElem = {}\nprojid = {pid}\nprojanim = {pa}\n{ph2}offset = {}, {}\nvelocity = {}, {}\n{}projhits = {}\nprojmisstime = 6\nprojpriority = {}\nprojremovetime = {}\n{}\n",
                 p.at, p.offset[0], p.offset[1], p.speed[0], p.speed[1], p.accel.map(|a| format!("accel = {}, {}\n", a[0], a[1])).unwrap_or_default(),
                 p.hits.unwrap_or(1), p.priority.unwrap_or(1), p.remove_time.unwrap_or(-1),
-                extras::hitdef_projectile(p.damage * sm, Some(p.level.as_deref().unwrap_or("medium")), super::multihit::projectile_knockback(&p), p.launch.unwrap_or(false), &pattr));
+                extras::hitdef_projectile(p.damage * sm, Some(p.level.as_deref().unwrap_or("medium")), super::multihit::projectile_knockback(&p), p.launch.unwrap_or(false), &pattr, p.element.as_deref(), p.stun));
             pid += 1;
         }
         if when != "air" { cns += &format!("[State {sid}, end]\ntype = ChangeState\ntrigger1 = AnimTime = 0\nvalue = {}\nctrl = 1\n\n", if when == "crouch" { 11 } else { 0 }); }

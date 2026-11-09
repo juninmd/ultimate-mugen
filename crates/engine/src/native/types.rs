@@ -43,6 +43,8 @@ pub struct HitSpec {
     #[serde(default, rename = "sparkPos")] pub spark_pos: Option<[f32; 2]>,
     #[serde(default, rename = "groundBounce")] pub ground_bounce: Option<bool>,
     #[serde(default, rename = "wallBounce")] pub wall_bounce: Option<bool>,
+    #[serde(default)] pub element: Option<String>,
+    #[serde(default)] pub stun: Option<i32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -59,6 +61,8 @@ pub struct ProjectileSpec {
     #[serde(default)] pub knockback: Option<[f32; 2]>,
     #[serde(default, rename = "removeTime")] pub remove_time: Option<i32>,
     #[serde(default)] pub priority: Option<i32>,
+    #[serde(default)] pub element: Option<String>,
+    #[serde(default)] pub stun: Option<i32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

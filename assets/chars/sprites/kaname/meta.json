@@ -18,56 +18,6 @@
     "06_victory": {
       "refHeight": 362
     },
-    "idle0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "idle1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "idle2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "idle3": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk3": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk4": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk5": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
     "airGuard": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -233,12 +183,52 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "idle0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "idle1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "idle2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "idle3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_021e9969b6ab68b6": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "inline_1cda5df7ecfd1b62": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "inline_282e2507e149aa22": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_2cdd134a69aabfbf": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "inline_325beea3d661fe78": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_385ffe023b743a7d": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -253,6 +243,36 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "inline_4362387def07ae7a": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_4642bd6b75a305a8": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_4a5b82897bece4b5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_6024007266145d23": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_77949bc0c0fe50ca": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_7bce21d00d833441": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "inline_969c08b63632c366": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -263,7 +283,22 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "inline_b3540c4f422f879c": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_d580a69b7cf04c8d": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "inline_f4ead780ee459475": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_f4f80989ec6dd44f": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -303,6 +338,26 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "sg_run_run0": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run1": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run2": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run3": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
     "ss0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -323,25 +378,35 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "sg_run_run0": {
+    "walk0": {
       "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0
+      "axisY": 392.0,
+      "refHeight": 320.0
     },
-    "sg_run_run1": {
+    "walk1": {
       "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0
+      "axisY": 392.0,
+      "refHeight": 320.0
     },
-    "sg_run_run2": {
+    "walk2": {
       "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0
+      "axisY": 392.0,
+      "refHeight": 320.0
     },
-    "sg_run_run3": {
+    "walk3": {
       "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk4": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
     }
   },
   "refHeight": 362

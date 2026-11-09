@@ -2862,7 +2862,8 @@
      -3,
      -5
     ],
-    "launch": true
+    "launch": true,
+    "element": "earth"
    },
    "cancels": [
     "avalanche"
@@ -2957,7 +2958,8 @@
       -3
      ],
      "launch": true,
-     "shake": 8
+     "shake": 8,
+     "element": "earth"
     }
    ]
   },
@@ -2986,7 +2988,8 @@
     {
      "at": 2,
      "damage": 60,
-     "level": "heavy"
+     "level": "heavy",
+     "element": "earth"
     },
     {
      "at": 4,
@@ -2997,7 +3000,8 @@
      "knockback": [
       -4,
       -5
-     ]
+     ],
+     "element": "earth"
     }
    ],
    "projectile": {
@@ -3020,7 +3024,8 @@
     "knockback": [
      -2,
      -5
-    ]
+    ],
+    "element": "earth"
    }
   },
   {
@@ -3038,7 +3043,8 @@
      "knockback": [
       1,
       5
-     ]
+     ],
+     "element": "earth"
     }
    ],
    "moves": [

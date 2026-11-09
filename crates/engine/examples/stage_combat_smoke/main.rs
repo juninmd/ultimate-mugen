@@ -72,14 +72,27 @@ fn main() {
     let mut results = vec![];
 
     println!("==================================================================");
-    println!("  ULTIMATE MUGEN — SMOKE TEST DE COMBATE EM {} CENÁRIOS", catalog.len());
+    println!(
+        "  ULTIMATE MUGEN — SMOKE TEST DE COMBATE EM {} CENÁRIOS",
+        catalog.len()
+    );
     println!("==================================================================\n");
 
     for (i, spec) in catalog.iter().enumerate() {
-        let slug = format!("{:02}_{}", i + 1, spec.def.replace(['.', ' ', '\'', '-'], "_").to_lowercase());
+        let slug = format!(
+            "{:02}_{}",
+            i + 1,
+            spec.def.replace(['.', ' ', '\'', '-'], "_").to_lowercase()
+        );
         let mut vfs = Vfs::new();
-        if let Err(e) = add_dir(&mut vfs, Path::new(spec.dir), "s") {
-            println!("[FAIL #{:02}] {} - IO error: {e}", i + 1, spec.name);
+        let stage_dir = spec.resolved_dir();
+        if let Err(e) = add_dir(&mut vfs, &stage_dir, "s") {
+            println!(
+                "[FAIL #{:02}] {} ({}) - IO error: {e}",
+                i + 1,
+                spec.name,
+                stage_dir.display()
+            );
             continue;
         }
 
@@ -153,19 +166,49 @@ fn main() {
             hits, total_dmg, load_ms, spec.origin
         );
 
-        results.push((spec.clone(), arc_st.layers.len(), arc_st.sprites.len(), arc_st.anims.len(), hits, total_dmg, load_ms, slug));
+        results.push((
+            spec.clone(),
+            arc_st.layers.len(),
+            arc_st.sprites.len(),
+            arc_st.anims.len(),
+            hits,
+            total_dmg,
+            load_ms,
+            slug,
+        ));
     }
 
     write_report(&format!("{out_dir}/REPORT.md"), &results);
-    println!("\nAUDIT SUMMARY: {}/{} stages tested successfully! Report saved to {}/REPORT.md", results.len(), catalog.len(), out_dir);
+    println!(
+        "\nAUDIT SUMMARY: {}/{} stages tested successfully! Report saved to {}/REPORT.md",
+        results.len(),
+        catalog.len(),
+        out_dir
+    );
 }
 
-fn write_report(path: &str, results: &[(catalog::StageSpec, usize, usize, usize, i32, f32, u128, String)]) {
+fn write_report(
+    path: &str,
+    results: &[(
+        catalog::StageSpec,
+        usize,
+        usize,
+        usize,
+        i32,
+        f32,
+        u128,
+        String,
+    )],
+) {
     let mut doc = String::new();
     doc.push_str("# ⚔️ Relatório de Smoke Test de Combate Individual de Stages M.U.G.E.N\n\n");
     doc.push_str("Auditoria e validação automatizada de compatibilidade, execução de golpes, animações de camadas e estabilidade de combate em **43 cenários reais da comunidade M.U.G.E.N coletados na internet**.\n\n");
     doc.push_str("## 📊 Resumo Executivo\n\n");
-    doc.push_str(&format!("- **Total de Cenários Avaliados**: {} / {}\n", results.len(), results.len()));
+    doc.push_str(&format!(
+        "- **Total de Cenários Avaliados**: {} / {}\n",
+        results.len(),
+        results.len()
+    ));
     doc.push_str("- **Taxa de Sucesso**: 100% (zero panics, zero crashes, zero desvios de colisão de piso)\n");
     doc.push_str("- **Lutadores do Teste de Combate**: Akio (Nativo) vs Kaname (Nativo)\n");
     doc.push_str("- **Métricas Validadas**: Carregamento .DEF e decodificação SFF, deltas de paralaxe, controladores BgCtrl, colisões de limites (bound_left / bound_right / zoffset), animações em 60 FPS, registro de golpes (HitDef) e dano.\n\n");
@@ -175,7 +218,16 @@ fn write_report(path: &str, results: &[(catalog::StageSpec, usize, usize, usize,
     for (i, (spec, layers, sprites, anims, hits, dmg, ms, _)) in results.iter().enumerate() {
         doc.push_str(&format!(
             "| {:02} | **{}** | {} | `{}` | {} | {} | {} | {} | {:.0} | {}ms |\n",
-            i + 1, spec.name, spec.origin, spec.repo, layers, sprites, anims, hits, dmg, ms
+            i + 1,
+            spec.name,
+            spec.origin,
+            spec.repo,
+            layers,
+            sprites,
+            anims,
+            hits,
+            dmg,
+            ms
         ));
     }
     std::fs::write(path, doc).unwrap();

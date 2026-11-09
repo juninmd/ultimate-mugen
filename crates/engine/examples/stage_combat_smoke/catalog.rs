@@ -1,63 +1,84 @@
+use std::path::{Path, PathBuf};
+
 #[derive(Clone, Debug)]
 pub struct StageSpec {
-    pub dir: &'static str,
+    pub subpath: &'static str,
     pub def: &'static str,
     pub name: &'static str,
     pub origin: &'static str,
     pub repo: &'static str,
 }
 
+impl StageSpec {
+    pub fn resolved_dir(&self) -> PathBuf {
+        if let Ok(env_dir) = std::env::var("UME_STAGES_DIR") {
+            let p = Path::new(&env_dir).join(self.subpath);
+            if p.exists() { return p; }
+        }
+        let mugen_dir = Path::new("mugen/stages").join(self.subpath);
+        if mugen_dir.exists() { return mugen_dir; }
+        let tmp_dir = Path::new("/tmp/stage_sources").join(self.subpath);
+        if tmp_dir.exists() { return tmp_dir; }
+        mugen_dir
+    }
+}
+
+const fn s(subpath: &'static str, def: &'static str, name: &'static str, origin: &'static str, repo: &'static str) -> StageSpec {
+    StageSpec { subpath, def, name, origin, repo }
+}
+
+#[rustfmt::skip]
 pub fn all_stages() -> Vec<StageSpec> {
     vec![
         // Chrono Trigger Collection (jbahamon/ctm-stages)
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "ZenanBridge.def", name: "Zenan Bridge", origin: "Chrono Trigger (Middle Ages)", repo: "jbahamon/ctm-stages" },
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "MagusCastle.def", name: "Magus' Castle", origin: "Chrono Trigger (600 A.D.)", repo: "jbahamon/ctm-stages" },
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "MagusRoom.def", name: "Magus' Room", origin: "Chrono Trigger (Inner Sanctum)", repo: "jbahamon/ctm-stages" },
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "Courtroom.def", name: "Court Room", origin: "Chrono Trigger (Guardia Castle)", repo: "jbahamon/ctm-stages" },
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "GuardiaPrison.def", name: "Guardia Prison", origin: "Chrono Trigger (Dungeon Towers)", repo: "jbahamon/ctm-stages" },
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "InnerLavos.def", name: "Inner Lavos", origin: "Chrono Trigger (Core of Lavos)", repo: "jbahamon/ctm-stages" },
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "GenoDome.def", name: "Geno Dome", origin: "Chrono Trigger (2300 A.D. Robot Lab)", repo: "jbahamon/ctm-stages" },
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "OceanPalaceElevator.def", name: "Ocean Palace Elevator", origin: "Chrono Trigger (12000 B.C.)", repo: "jbahamon/ctm-stages" },
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "TyrannoLair.def", name: "Tyranno Lair", origin: "Chrono Trigger (65M B.C. Fortress)", repo: "jbahamon/ctm-stages" },
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "BlackOmenElevator.def", name: "Black Omen Elevator", origin: "Chrono Trigger (Floating Citadel)", repo: "jbahamon/ctm-stages" },
-        StageSpec { dir: "/tmp/stage_sources/ctm-stages", def: "Blackbird.def", name: "Blackbird Wing", origin: "Chrono Trigger (Dalton's Battleship)", repo: "jbahamon/ctm-stages" },
+        s("ctm-stages", "ZenanBridge.def", "Zenan Bridge", "Chrono Trigger (Middle Ages)", "jbahamon/ctm-stages"),
+        s("ctm-stages", "MagusCastle.def", "Magus' Castle", "Chrono Trigger (600 A.D.)", "jbahamon/ctm-stages"),
+        s("ctm-stages", "MagusRoom.def", "Magus' Room", "Chrono Trigger (Inner Sanctum)", "jbahamon/ctm-stages"),
+        s("ctm-stages", "Courtroom.def", "Court Room", "Chrono Trigger (Guardia Castle)", "jbahamon/ctm-stages"),
+        s("ctm-stages", "GuardiaPrison.def", "Guardia Prison", "Chrono Trigger (Dungeon Towers)", "jbahamon/ctm-stages"),
+        s("ctm-stages", "InnerLavos.def", "Inner Lavos", "Chrono Trigger (Core of Lavos)", "jbahamon/ctm-stages"),
+        s("ctm-stages", "GenoDome.def", "Geno Dome", "Chrono Trigger (2300 A.D. Robot Lab)", "jbahamon/ctm-stages"),
+        s("ctm-stages", "OceanPalaceElevator.def", "Ocean Palace Elevator", "Chrono Trigger (12000 B.C.)", "jbahamon/ctm-stages"),
+        s("ctm-stages", "TyrannoLair.def", "Tyranno Lair", "Chrono Trigger (65M B.C. Fortress)", "jbahamon/ctm-stages"),
+        s("ctm-stages", "BlackOmenElevator.def", "Black Omen Elevator", "Chrono Trigger (Floating Citadel)", "jbahamon/ctm-stages"),
+        s("ctm-stages", "Blackbird.def", "Blackbird Wing", "Chrono Trigger (Dalton's Battleship)", "jbahamon/ctm-stages"),
 
         // Mountainside Temple Collection (CableDorado2/Ikemen-Plus-Ultra)
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Suave's Corridor.def", name: "Suave's Corridor", origin: "Mountainside Temple (Grand Hall)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Destroyed Temple.def", name: "Destroyed Temple", origin: "Mountainside Temple (Ruins)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Clone Laboratory.def", name: "Clone Laboratory", origin: "Mountainside Temple (Bio Facility)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Clone Laboratory 2.def", name: "Clone Laboratory 2", origin: "Mountainside Temple (Deep Lab)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Dark Corridor.def", name: "Dark Corridor", origin: "Mountainside Temple (Shadow Corridor)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Entrance Pathway.def", name: "Entrance Pathway", origin: "Mountainside Temple (Stone Walkway)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Hidden Path.def", name: "Hidden Path Day", origin: "Mountainside Temple (Nature Trail)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Hidden Path Night.def", name: "Hidden Path Night", origin: "Mountainside Temple (Moonlit Forest)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Hidden Room.def", name: "Hidden Room", origin: "Mountainside Temple (Secret Chamber)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Lobby.def", name: "Temple Lobby", origin: "Mountainside Temple (Central Atrium)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Lobby Night.def", name: "Temple Lobby Night", origin: "Mountainside Temple (Night Atrium)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Lobby 2 Night.def", name: "Temple Lobby Upper Night", origin: "Mountainside Temple (Mezzanine)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Outside.def", name: "Outside Courtyard", origin: "Mountainside Temple (Mountain Vista)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Roof Night.def", name: "Pagoda Roof Night", origin: "Mountainside Temple (High Pagoda)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Secret Hallway.def", name: "Secret Hallway", origin: "Mountainside Temple (Hidden Passage)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Stairs - 1st Floor.def", name: "Grand Staircase 1F", origin: "Mountainside Temple (Lower Stairs)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Stairs - 2nd Floor.def", name: "Grand Staircase 2F", origin: "Mountainside Temple (Mid Stairs)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Stairs - 3rd Floor.def", name: "Grand Staircase 3F", origin: "Mountainside Temple (Upper Stairs)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Winter.def", name: "Temple Winter Garden", origin: "Mountainside Temple (Snow Zen)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Temple Entrance Afternoon.def", name: "Temple Entrance Afternoon", origin: "Mountainside Temple (Sunlit Gate)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Temple Entrance Dusk.def", name: "Temple Entrance Dusk", origin: "Mountainside Temple (Sunset Gate)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple", def: "Temple Entrance Night.def", name: "Temple Entrance Night", origin: "Mountainside Temple (Midnight Gate)", repo: "CableDorado2/Ikemen-Plus-Ultra" },
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Suave's Corridor.def", "Suave's Corridor", "Mountainside Temple (Grand Hall)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Destroyed Temple.def", "Destroyed Temple", "Mountainside Temple (Ruins)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Clone Laboratory.def", "Clone Laboratory", "Mountainside Temple (Bio Facility)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Clone Laboratory 2.def", "Clone Laboratory 2", "Mountainside Temple (Deep Lab)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Dark Corridor.def", "Dark Corridor", "Mountainside Temple (Shadow Corridor)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Entrance Pathway.def", "Entrance Pathway", "Mountainside Temple (Stone Walkway)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Hidden Path.def", "Hidden Path Day", "Mountainside Temple (Nature Trail)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Hidden Path Night.def", "Hidden Path Night", "Mountainside Temple (Moonlit Forest)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Hidden Room.def", "Hidden Room", "Mountainside Temple (Secret Chamber)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Lobby.def", "Temple Lobby", "Mountainside Temple (Central Atrium)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Lobby Night.def", "Temple Lobby Night", "Mountainside Temple (Night Atrium)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Lobby 2 Night.def", "Temple Lobby Upper Night", "Mountainside Temple (Mezzanine)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Outside.def", "Outside Courtyard", "Mountainside Temple (Mountain Vista)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Roof Night.def", "Pagoda Roof Night", "Mountainside Temple (High Pagoda)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Secret Hallway.def", "Secret Hallway", "Mountainside Temple (Hidden Passage)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Stairs - 1st Floor.def", "Grand Staircase 1F", "Mountainside Temple (Lower Stairs)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Stairs - 2nd Floor.def", "Grand Staircase 2F", "Mountainside Temple (Mid Stairs)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Stairs - 3rd Floor.def", "Grand Staircase 3F", "Mountainside Temple (Upper Stairs)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Winter.def", "Temple Winter Garden", "Mountainside Temple (Snow Zen)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Temple Entrance Afternoon.def", "Temple Entrance Afternoon", "Mountainside Temple (Sunlit Gate)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Temple Entrance Dusk.def", "Temple Entrance Dusk", "Mountainside Temple (Sunset Gate)", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Mountainside Temple", "Temple Entrance Night.def", "Temple Entrance Night", "Mountainside Temple (Midnight Gate)", "CableDorado2/Ikemen-Plus-Ultra"),
 
         // Arcade & Global Collection (CableDorado2/Ikemen-Plus-Ultra/stages/Others)
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Others", def: "China.def", name: "Chinatown Street", origin: "Arcade Fighting Classic", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Others", def: "Mountain Valley.def", name: "Mountain Valley", origin: "Scenic Nature Vista", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Others", def: "Sakura.def", name: "Sakura Blossom Garden", origin: "Japanese Cherry Blossom", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Others", def: "Space Rainbow.def", name: "Cosmic Space Rainbow", origin: "Retro Psychedelic Galaxy", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Others", def: "Sunday Afternoon.def", name: "Sunday Afternoon Park", origin: "City Park Peaceful Noon", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Others", def: "The Red Dragon's Lair.def", name: "The Red Dragon's Lair", origin: "Dragon Volcanic Cavern", repo: "CableDorado2/Ikemen-Plus-Ultra" },
-        StageSpec { dir: "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Others", def: "Training Room.def", name: "Cyber Training Dojo", origin: "Simulation Combat Matrix", repo: "CableDorado2/Ikemen-Plus-Ultra" },
+        s("Ikemen-Plus-Ultra/stages/Others", "China.def", "Chinatown Street", "Arcade Fighting Classic", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Others", "Mountain Valley.def", "Mountain Valley", "Scenic Nature Vista", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Others", "Sakura.def", "Sakura Blossom Garden", "Japanese Cherry Blossom", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Others", "Space Rainbow.def", "Cosmic Space Rainbow", "Retro Psychedelic Galaxy", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Others", "Sunday Afternoon.def", "Sunday Afternoon Park", "City Park Peaceful Noon", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Others", "The Red Dragon's Lair.def", "The Red Dragon's Lair", "Dragon Volcanic Cavern", "CableDorado2/Ikemen-Plus-Ultra"),
+        s("Ikemen-Plus-Ultra/stages/Others", "Training Room.def", "Cyber Training Dojo", "Simulation Combat Matrix", "CableDorado2/Ikemen-Plus-Ultra"),
 
         // REBROT Community Stages (davifelipef/rebrot-fighter)
-        StageSpec { dir: "/tmp/stage_sources/rebrot-fighter/stages", def: "nersograd.def", name: "Nersogrado Metro", origin: "REBROT Fighter (Cyber City)", repo: "davifelipef/rebrot-fighter" },
-        StageSpec { dir: "/tmp/stage_sources/rebrot-fighter/stages", def: "dark_forest.def", name: "Floresta Sombria", origin: "REBROT Fighter (Dark Woods)", repo: "davifelipef/rebrot-fighter" },
-        StageSpec { dir: "/tmp/stage_sources/rebrot-fighter/stages", def: "anarchy_ruins.def", name: "Ruínas da Anarquia", origin: "REBROT Fighter (Ruins)", repo: "davifelipef/rebrot-fighter" },
+        s("rebrot-fighter/stages", "nersograd.def", "Nersogrado Metro", "REBROT Fighter (Cyber City)", "davifelipef/rebrot-fighter"),
+        s("rebrot-fighter/stages", "dark_forest.def", "Floresta Sombria", "REBROT Fighter (Dark Woods)", "davifelipef/rebrot-fighter"),
+        s("rebrot-fighter/stages", "anarchy_ruins.def", "Ruínas da Anarquia", "REBROT Fighter (Ruins)", "davifelipef/rebrot-fighter"),
     ]
 }

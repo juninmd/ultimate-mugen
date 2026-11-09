@@ -45,7 +45,12 @@ fn load_fighter_json(json: &str) -> Arc<ume_engine::chardef::CharDef> {
     Arc::new(compile_native(&nc, 1, true))
 }
 
-fn run_stage_combat(vfs: &Vfs, def: &str, p1: &Arc<ume_engine::chardef::CharDef>, p2: &Arc<ume_engine::chardef::CharDef>) -> (usize, i32, f32) {
+fn run_stage_combat(
+    vfs: &Vfs,
+    def: &str,
+    p1: &Arc<ume_engine::chardef::CharDef>,
+    p2: &Arc<ume_engine::chardef::CharDef>,
+) -> (usize, i32, f32) {
     let st = load_stage(vfs, def).expect("stage load failed");
     assert!(!st.name.is_empty(), "stage name must not be empty");
     let info = stage_to_info(&st);
@@ -73,9 +78,18 @@ fn run_stage_combat(vfs: &Vfs, def: &str, p1: &Arc<ume_engine::chardef::CharDef>
         }
         let f1 = &m.fighters[roots[0]];
         let f2 = &m.fighters[roots[1]];
-        assert!(f1.pos.x.is_finite() && f1.pos.y.is_finite(), "P1 position must be finite");
-        assert!(f2.pos.x.is_finite() && f2.pos.y.is_finite(), "P2 position must be finite");
-        assert!(m.camera.x.is_finite() && m.camera.y.is_finite(), "Camera position must be finite");
+        assert!(
+            f1.pos.x.is_finite() && f1.pos.y.is_finite(),
+            "P1 position must be finite"
+        );
+        assert!(
+            f2.pos.x.is_finite() && f2.pos.y.is_finite(),
+            "P2 position must be finite"
+        );
+        assert!(
+            m.camera.x.is_finite() && m.camera.y.is_finite(),
+            "Camera position must be finite"
+        );
     }
 
     (arc_st.layers.len(), hits, damage)
@@ -89,39 +103,75 @@ fn bundled_stages_combat_smoke() {
     let p1 = load_fighter_json(include_str!("../../../assets/chars/akio.json"));
     let p2 = load_fighter_json(include_str!("../../../assets/chars/kaname.json"));
 
-    for def in ["stages/kfm.def", "stages/stage0.def", "stages/stage0-720.def"] {
+    for def in [
+        "stages/kfm.def",
+        "stages/stage0.def",
+        "stages/stage0-720.def",
+    ] {
         let (layers, hits, damage) = run_stage_combat(&vfs, def, &p1, &p2);
         assert!(layers > 0, "Stage {def} must have at least 1 layer");
         println!("Bundled stage {def}: layers={layers}, hits={hits}, damage={damage:.0}");
     }
 }
 
+fn resolve_stage_dirs() -> Vec<std::path::PathBuf> {
+    let mut dirs = Vec::new();
+    if let Ok(dir) = std::env::var("UME_STAGES_DIR") {
+        dirs.push(std::path::PathBuf::from(dir));
+    }
+    let subpaths = [
+        "ctm-stages",
+        "Ikemen-Plus-Ultra/stages/Mountainside Temple",
+        "Ikemen-Plus-Ultra/stages/Others",
+        "rebrot-fighter/stages",
+    ];
+    let mugen_stages = Path::new("mugen/stages");
+    let tmp_stages = Path::new("/tmp/stage_sources");
+
+    for sub in subpaths {
+        let p_mugen = mugen_stages.join(sub);
+        if p_mugen.exists() {
+            dirs.push(p_mugen);
+            continue;
+        }
+        let p_tmp = tmp_stages.join(sub);
+        if p_tmp.exists() {
+            dirs.push(p_tmp);
+        }
+    }
+    dirs
+}
+
 #[test]
 fn internet_stages_combat_smoke() {
-    let dirs = [
-        "/tmp/stage_sources/ctm-stages",
-        "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Mountainside Temple",
-        "/tmp/stage_sources/Ikemen-Plus-Ultra/stages/Others",
-        "/tmp/stage_sources/rebrot-fighter/stages",
-    ];
+    let dirs = resolve_stage_dirs();
+    if dirs.is_empty() {
+        println!("skipping: internet stage sources not found (populate mugen/stages or set UME_STAGES_DIR)");
+        return;
+    }
 
     let p1 = load_fighter_json(include_str!("../../../assets/chars/akio.json"));
     let p2 = load_fighter_json(include_str!("../../../assets/chars/kaname.json"));
     let mut tested = 0;
 
-    for dir in dirs {
-        let p = Path::new(dir);
-        if !p.exists() { continue; }
+    for p in &dirs {
         let mut vfs = Vfs::new();
-        if add_dir(&mut vfs, p, "stg").is_err() { continue; }
+        if add_dir(&mut vfs, p, "stg").is_err() {
+            continue;
+        }
         for def in find_stage_defs(&vfs) {
             let (layers, hits, damage) = run_stage_combat(&vfs, &def, &p1, &p2);
             assert!(layers > 0, "Stage {def} must have layers");
             tested += 1;
-            println!("Internet stage #{tested} {def}: layers={layers}, hits={hits}, damage={damage:.0}");
+            println!(
+                "Internet stage #{tested} {def}: layers={layers}, hits={hits}, damage={damage:.0}"
+            );
         }
     }
 
     println!("Total internet stages verified in test: {tested}");
-    assert!(tested >= 30, "Expected at least 30 internet stages tested, found {tested}");
+    assert!(
+        tested >= 30,
+        "Expected at least 30 internet stages tested, found {tested}"
+    );
 }

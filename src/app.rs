@@ -1345,8 +1345,8 @@ impl App {
         v
     }
 
-    /// Menu label honouring a loaded screenpack (`system.def` `menu.itemname.*`), else the i18n catalog.
     fn menu_text(&self, key: &'static str) -> String {
+        if let Some(label) = crate::tweaks::label(key) { return label; }
         let mugen = match key {
             "menu.arcade" => "arcade",
             "menu.survival" => "survival",

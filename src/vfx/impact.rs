@@ -1,5 +1,4 @@
 use super::quality;
-use super::sheet::SheetKind;
 use super::{Kind, Vfx, P};
 use ume_engine::matchs::Match;
 
@@ -130,6 +129,8 @@ impl Vfx {
                 [0.5, 0.8, 1.0],
             );
             self.glow(x, y, 10.0, 0.1, [0.5, 0.8, 1.0]);
+            let frost_at = big.then_some((df.pos.x, df.pos.y + df.lane));
+            self.sheets.guard(x, y, if big { 70.0 } else { 48.0 }, frost_at);
             self.trauma = (self.trauma + if big { 0.09 } else { 0.05 }).min(1.0);
             self.tag(x, y - 14.0, "GUARD", [0.55, 0.8, 1.0]);
             return;
@@ -150,11 +151,8 @@ impl Vfx {
         );
         self.glow(x, y, t.glow, 0.12, t.col);
         let spark_rot = self.rr(0.0, std::f32::consts::TAU);
-        self.sheets.spawn(SheetKind::HitSpark, x, y, t.flare * 1.8, spark_rot);
-        if damage >= 150.0 {
-            self.sheets.spawn(SheetKind::Explosion, x, y, t.ring * 1.4, 0.0);
-        }
-        self.glow(x, y, t.glow * 0.45, 0.09, t.core);
+        let feet_at = grounded.then_some((df.pos.x, feet));
+        self.sheets.hit(x, y, damage, heavy, t.flare, t.ring, spark_rot, feet_at);
         self.slashes(x, y, dir, quality::count(t.slashes), t.slash_len, t.core);
         self.ring(x, y, t.ring, 0.24, 1.4, t.col);
         self.flare(x, y, t.flare, t.core);

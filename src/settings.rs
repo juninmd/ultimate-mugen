@@ -164,7 +164,7 @@ impl Settings {
         }
     }
     pub fn rules(&self) -> Rules {
-        Rules {
+        crate::tweaks::apply_rules(Rules {
             rounds_to_win: ROUNDS_TO_WIN[self.rounds.min(ROUNDS_TO_WIN.len() - 1)],
             round_ticks: ROUND_SECONDS[self.round_time.min(ROUND_SECONDS.len() - 1)] as i32 * 60,
             life_percent: LIFE_PERCENT[self.life.min(LIFE_PERCENT.len() - 1)],
@@ -172,7 +172,7 @@ impl Settings {
             classic_pushbox: self.classic_pushbox,
             team_life_share: self.team_life_share,
             game_speed: GAME_SPEEDS[self.game_speed.min(GAME_SPEEDS.len() - 1)],
-        }
+        })
     }
     pub fn fps_cap_value(&self) -> u32 {
         FPS_CAPS[self.fps_cap.min(FPS_CAPS.len() - 1)]

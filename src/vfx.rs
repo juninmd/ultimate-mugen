@@ -14,8 +14,12 @@ mod dash;
 mod cost_tests;
 mod impact;
 mod ko;
+mod shock;
 mod sheet;
+mod speed_lines;
 pub mod quality;
+pub use speed_lines::speed_lines;
+
 #[derive(Clone, Copy, PartialEq)]
 enum Kind {
     Spark,
@@ -243,7 +247,6 @@ impl Vfx {
         if self.slow_t <= 0.0 {
             return 1.0;
         }
-        // hold at 25% speed, then ease back to normal
         let t = self.slow_t;
         if t > 0.5 {
             0.25
@@ -497,7 +500,6 @@ impl Vfx {
         self.float(x, y, text.to_string(), 6.0, col);
     }
     pub fn banner(&mut self, text: &str, sub: &str, col: [f32; 3]) {
-        // never stack the same banner twice (e.g. both fighters landing a counter in the same exchange)
         if self.banners.iter().any(|b| b.text == text && b.t < 0.8) {
             return;
         }
@@ -1124,6 +1126,7 @@ impl Vfx {
             )
         };
         self.draw_cracks(&tp, s);
+        self.sheets.draw(&tp, s, g.fx_gain, false);
         for p in self
             .parts
             .iter()
@@ -1164,7 +1167,7 @@ impl Vfx {
         }
         // additive
         set_blend(GfxBlend::Add);
-        self.sheets.draw(&tp, s, g.fx_gain);
+        self.sheets.draw(&tp, s, g.fx_gain, true);
         for p in self
             .parts
             .iter()
@@ -1237,17 +1240,7 @@ impl Vfx {
                 );
             }
         }
-        for r in &self.rings {
-            let t = r.t / r.dur;
-            let e = 1.0 - (1.0 - t).powi(3);
-            let c = tp(r.x, r.y);
-            poly::ring(
-                c,
-                lerp(r.r0, r.r1, e) * s,
-                (r.w * (1.0 - t) + 0.4) * s,
-                Color::new(r.col[0], r.col[1], r.col[2], (1.0 - t) * 0.9),
-            );
-        }
+        self.draw_rings(&tp, s, if g.post.shockwaves_on() { g.post.look.shockwave } else { 0.0 });
         set_blend(GfxBlend::Alpha);
         // damage numbers / labels
         for f in &self.floats {
@@ -1346,36 +1339,6 @@ impl Vfx {
                 );
             }
         }
-    }
-}
-
-/// Radial manga-style speed lines converging on `focus` (screen px). `seed` animates them in steps.
-pub fn speed_lines(focus: (f32, f32), a: f32, col: [f32; 3], seed: u32, n: usize) {
-    let (w, h) = (screen_width(), screen_height());
-    let reach = (w * w + h * h).sqrt();
-    let seed = seed as f32;
-    set_blend(GfxBlend::Alpha);
-    for i in 0..n {
-        let h1 = ((i as f32 * 12.9898 + seed * 7.13).sin() * 43_758.547)
-            .fract()
-            .abs();
-        let h2 = ((i as f32 * 78.233 + seed * 3.7).sin() * 12543.1)
-            .fract()
-            .abs();
-        let ang = (i as f32 + h1 * 0.8) / n as f32 * std::f32::consts::TAU;
-        let (r0, r1, wd) = (
-            reach * (0.28 + h2 * 0.18),
-            reach * (0.75 + h1 * 0.3),
-            0.012 + h2 * 0.018,
-        );
-        let (c, s) = (ang.cos(), ang.sin());
-        let (pc, ps) = ((ang + wd).cos(), (ang + wd).sin());
-        draw_triangle(
-            vec2(focus.0 + c * r0, focus.1 + s * r0),
-            vec2(focus.0 + c * r1, focus.1 + s * r1),
-            vec2(focus.0 + pc * r1, focus.1 + ps * r1),
-            Color::new(col[0], col[1], col[2], a * (0.4 + h1 * 0.6)),
-        );
     }
 }
 

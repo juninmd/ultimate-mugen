@@ -550,6 +550,12 @@ type = CtrlSet
 trigger1 = HitOver
 value = 1
 
+[State 155, land]
+type = ChangeState
+trigger1 = Time > 0 && Pos Y >= 0
+value = 52
+ctrl = 1
+
 ;---------------------------------------------------------------- round end
 [Statedef 170]
 type = S

@@ -97,7 +97,7 @@ final_im.save('assets/stages/<id>.png', optimize=True)
 Sempre que uma nova arena for gerada ou alterada, execute o script oficial:
 
 ```bash
-python scripts/generate-stage-thumbnails.py
+cargo run --release -p ume-devtools --bin ume-tools -- stage-thumbs
 ```
 Isso gera automaticamente `assets/stages/thumbs/<id>.png` na resolução `240 × 135` com filtro Lanczos e compressão otimizada.
 

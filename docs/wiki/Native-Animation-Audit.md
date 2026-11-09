@@ -19,9 +19,8 @@ design; both are approved resolutions, not gaps.
   names are accepted, and the pass enforces per-character source-size and target-count caps, because the
   scanned UMF JSON is importable user content.
 - Verification: `cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> --require-complete`
-  must pass for every fighter, and `python scripts/audit_native_sprites.py --out <report.json>` must stay clean
-  on geometry and alpha edges. `python scripts/native_sprite_coverage.py` reproduces the resolution rules in
-  Python without building the engine.
+  must pass for every fighter, and `cargo run --release -p ume-devtools --bin ume-tools -- audit-sprites --out <report.json>` must stay clean
+  on geometry and alpha edges. `cargo run --release -p ume-devtools --bin ume-tools -- audit-moves` is the static roster audit (inputs, cancels, throws, hit boxes).
 
 ## sprite-gen QA loop
 

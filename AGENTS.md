@@ -127,13 +127,12 @@
 - Hover scan (fighters stuck off the floor): `cargo run --release -p ume-engine --example hover_check -- <char_dir>` (`TRACE=1` for transitions)
 - Missing/blank sprite audit: `cargo run --release -p ume-engine --example sprite_audit -- <char_dir>`
 - Strict native sprite coverage: `cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> [--require-complete]`
-- Native pose resolution mirror (no Rust build): `python scripts/native_sprite_coverage.py [--out report.json] [--targets]`
 - Render dedicated PNGs for every native pose (inline poses, df* defeats, idle-reuse fixes; scans assets/chars + umf dirs): `cargo run --release -p ume-engine --example generate_missing_sprites [--dry-run]`
-- Native PNG inventory (dimensions, alpha edges, geometry metadata): `python scripts/audit_native_sprites.py --out <report.json>`
+- Native PNG inventory (dimensions, alpha edges, geometry metadata): `cargo run --release -p ume-devtools --bin ume-tools -- audit-sprites --out <report.json>`
 - Sprite payload per fighter (sizes the atlas warm-up budget): `cargo run --release -p ume-engine --example sprite_mem -- <char_dir>...`
 - Native roster lab (every attack state of every UMF fighter must connect; prints damage and reach, `UME_LAB_ONLY=id,id`, `UME_CHARS_DIR=<dir>`): `cargo test --release -p ume-engine --test native_roster_lab -- --nocapture`
 - Declared cancel routes chain end to end: `cargo test --release -p ume-engine --test native_combo_routes -- --nocapture`; throws and armor: `--test native_throw_and_armor`
-- Static roster audit (inputs, cancels, throws, hit boxes): `python scripts/audit_native_moves.py [dir]`
+- Static roster audit (inputs, cancels, throws, hit boxes): `cargo run --release -p ume-devtools --bin ume-tools -- audit-moves [dir] [--json]`
 - CPU-vs-CPU balance duel (round-robin of every UMF fighter, win rate, damage, hits, knockout rate; `UME_DUEL_SKIP=oboro` leaves the boss out, `UME_DUEL_LEVEL`, `UME_DUEL_SEED_OFFSET`): `cargo run --release -p ume-engine --example native_duel -- assets/chars`
 - Native fighter boxes rule: hit boxes and hurt boxes only exist where the rendered sprite has opaque pixels. Every box edge must touch visible pixels, and each strike or body pose must be split into at least 3 smaller boxes that follow the limb or body shape (`crates/engine/src/native/pixel_fit.rs` derives them from the sprite alpha, offset, axis and scale). Never hand-widen a box into empty space and never edit sprite images to fix a box; enforced by `cargo test --release -p ume-engine --test native_box_sprite_fit -- --nocapture`. Review with `UME_BOXES=1` or `cargo run --release -p ume-engine --example box_overlay -- <fighter> <out.png>`.
 - Hit box audit (every strike frame of every UMF fighter: height, reach, start, width against the M.U.G.E.N-measured proportions): `cargo test --release -p ume-engine --test native_hitbox_audit -- --nocapture`; per-fighter normal reach and damage: `--test native_normal_reach`

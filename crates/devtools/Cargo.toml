@@ -1,0 +1,19 @@
+[package]
+name = "ume-devtools"
+version = "0.2.0"
+edition = "2021"
+description = "Build and audit tools for the repository: web sprite packs, stage thumbnails, roster audits"
+license = "MIT"
+
+[lib]
+name = "ume_devtools"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ume-tools"
+path = "src/main.rs"
+
+[dependencies]
+ume-formats = { path = "../formats" }
+ume-charforge = { path = "../charforge" }
+serde_json = "1"

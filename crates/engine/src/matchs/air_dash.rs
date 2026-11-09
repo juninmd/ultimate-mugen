@@ -65,6 +65,7 @@ mod tests {
         m.fighters[0].air_dashes = 0;
         m.fighters[0].pos.y = -50.0;
         m.fighters[0].state_type = 'A';
+        m.fighters[0].state_no = 50;
         m.fighters[0].ctrl = true;
         m.fighters[0].cmd.active.clear();
         m.fighters[0].cmd.active.insert("BB".into());

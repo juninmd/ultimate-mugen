@@ -554,7 +554,7 @@ impl Ctx {
                     }
                 }
                 let c = Point::from_xy(*x as f32, *y as f32);
-                RadialGradient::new(c, *r1 as f32, c, /* f32 */, stops(&st), SpreadMode::Pad, ts)?
+                RadialGradient::new(c, *r1 as f32, c, *r1 as f32, stops(&st), SpreadMode::Pad, ts)?
             }
         };
         if self.st.alpha < 1.0 {

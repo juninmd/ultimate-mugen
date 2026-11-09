@@ -22,6 +22,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Route files](Route-Files.md) | Creators | Arcade routes and unlock rules in TOML |
 | [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
 | [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
+| [Bleach-inspired kits](Bleach-Inspired-Kits.md) | Players | Abilities inspired by Bleach in three native fighters |
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
 | [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |
 | [AssertSpecial flags](AssertSpecial.md) | Creators | All 77 Ikemen flags and what each one does |

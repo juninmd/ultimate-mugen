@@ -38,3 +38,22 @@ Preview: `UME_SHOTS_ONLY=results xvfb-run -a target/release/ultimate-mugen --sho
 2. Victory quote line typed under the winner name.
 3. Rank grade (S to D) from time, life left and combo.
 4. Best-time records per character in the select screen for time-attack modes.
+
+## Deeper survey (second pass)
+
+Community screenpacks checked by their stated features (no art or layout copied):
+
+| Pack | Differential | Takeaway for the engine |
+|---|---|---|
+| [IKEMEN Generations HD (OroCrimson)](https://www.andersonkenya1.net/files/file/23994-ikemen-generations-hd-screenpack-by-orocrimson-ikemen-go-099/) | Category-first select: up/down picks a category, left/right a character; custom KOF 2002 style lifebars | Category navigation for big rosters |
+| [Infinite Legacy X HD](https://mugenfreeforall.com/topic/49257-infinite-legacy-x-screenpack-for-ikemen-go-hd-1280-x-720-by-orocrimson-updated-january-2025/) | Very large slot counts (700 slots); author notes the engine struggles with huge grids | Paging and virtualized grid already exist; keep it that way |
+| [Capcom vs SNK HD Black Edition](https://mugenfreeforall.com/topic/48495-capcom-vs-snk-hd-black-edition-for-ikemen-go-hd-1280-x-720-099-updated-05032024/) | Selectable slot densities (120 to 840) | Grid density as a setting |
+| [Anything VS Anything](https://www.andersonkenya1.net/files/file/42054-anything-vs-anything-ikemen-go-screenpack/) | 999 slots navigated only up and down; users report it is slow to pick | Confirms need for jump keys (PgUp/PgDn already in place) |
+| [Ikemen-GO-Screenpack](https://github.com/ikemen-engine/Ikemen-GO-Screenpack) and [PR #56](https://github.com/ikemen-engine/Ikemen-GO-Screenpack/pull/56) | Official default motif being replaced with original art and MIT fonts | Reference for a clean default motif |
+| [Engine PR #4146](https://github.com/ikemen-engine/Ikemen-GO/pull/4146) | Alpha and blend on every animation and text element; slot cycling; stage select buttons | Per-element alpha is worth copying in our HUD tokens |
+| [Ikemen-GO-Plus screenpack.lua](https://github.com/Windblade-GR01/Ikemen-GO-Plus/blob/K4-experimental/script/screenpack.lua) | Lua hooks read localcoord from `system.def` | Scripting is out of scope; keep data-driven |
+| [external-lua-modules](https://github.com/doomjoshuaboy/external-lua-modules) | Carousel-style select as external modules | Candidate for a future carousel layout |
+
+Also noted: the grid in recent Ikemen nightlies is oblique and capped near 80 slots by default, which suggests a single fixed grid model is a weak point for the whole ecosystem.
+
+Caveats: several pages are older (2023 to 2025), and popularity is inferred from forum and listing pages, not download counts.

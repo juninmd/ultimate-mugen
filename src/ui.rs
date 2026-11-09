@@ -447,7 +447,7 @@ impl Ui {
     }
     pub fn background(&self) {
         let (w, h) = (screen_width(), screen_height());
-        draw_rectangle(0.0, 0.0, w, h, hex("#0b0716"));
+        let theme = crate::tweaks::current(); draw_rectangle(0.0, 0.0, w, h, rgb(theme.background));
         let steps = 30;
         for i in 0..steps {
             let t = i as f32 / steps as f32;
@@ -459,9 +459,9 @@ impl Ui {
                 Color::new(0.04 + 0.05 * t, 0.03 + 0.02 * t, 0.09 + 0.08 * t, 1.0),
             );
         }
-        glow(w * 0.5, h * 1.15, h * 0.8, Color::new(1.0, 0.3, 0.43, 0.35));
-        glow(w * 0.1, h * 0.05, h * 0.5, Color::new(0.13, 0.9, 1.0, 0.22));
-        glow(w * 0.9, h * 0.12, h * 0.45, Color::new(1.0, 0.8, 0.2, 0.18));
+        glow(w * 0.5, h * 1.15, h * 0.8, alpha(rgb(theme.glow_bottom), 0.35));
+        glow(w * 0.1, h * 0.05, h * 0.5, alpha(rgb(theme.glow_left), 0.22));
+        glow(w * 0.9, h * 0.12, h * 0.45, alpha(rgb(theme.glow_right), 0.18));
         let t = self.t * 20.0;
         let gap = 40.0 * self.s;
         let mut x = -((t * self.s) % gap) - h;

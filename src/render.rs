@@ -12,9 +12,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use ume_engine::palette::{BlendMode, PalParams};
 
-mod layers;
-mod warm;
-mod wide_image;
+mod layers; mod rim; mod warm; mod wide_image;
 use layers::draw_transformed_layer_quad;
 
 pub struct Gfx {
@@ -345,8 +343,8 @@ impl MatchRenderer {
         g.ox = px + (ox0 - px) * zoom;
         g.oy = py + (oy0 - py) * zoom;
         let s = g.view_scale;
-        self.fx.begin_frame(m, gain);
-        self.draw_stage(g, m, stage, false, shx, shy);
+        self.fx.begin_frame(m, gain); crate::stagelook::select(stage.kind);
+        self.draw_stage(g, m, stage, false, shx, shy); crate::stageprops::draw(g, stage.kind, false, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0);
         if m.pause.as_ref().is_some_and(|p| p.darken) {
             draw_rectangle(
                 g.ox,
@@ -379,8 +377,7 @@ impl MatchRenderer {
             let hgt = (-f.pos.y).max(0.0);
             let r = 22.0 * (1.0 - hgt / 200.0).max(0.4);
             let a = 0.17 * (1.0 - hgt / 150.0).max(0.3);
-            for (k, m2) in [(1.0, 1.0), (0.72, 1.0), (0.45, 1.0)].iter().enumerate() {
-                let _ = m2;
+            for k in 0..3 {
                 draw_ellipse(
                     g.ox + (Self::sx(m, f.pos.x) + shx) * s,
                     g.oy + (Self::sy(m, f.lane) + shy) * s,
@@ -584,7 +581,7 @@ impl MatchRenderer {
                 }
             }
         }
-        self.draw_stage(g, m, stage, true, shx, shy);
+        self.draw_stage(g, m, stage, true, shx, shy); crate::stageprops::draw(g, stage.kind, true, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0);
         self.draw_markers(g, m, shx, shy);
         if gain > 0.0 {
             vfx.draw_world(g, m, shx, shy, ui);
@@ -636,7 +633,7 @@ impl MatchRenderer {
             (focus_screen.0 / w, focus_screen.1 / h),
             bloom,
         );
-        self.fx.grade(&mut p, gain);
+        self.fx.grade(&mut p, gain); crate::stagelook::grade(&mut p, stage.kind, m.game_time as f32);
         p
     }
 
@@ -974,6 +971,7 @@ impl MatchRenderer {
         let sq = self.squash.get(fi).copied().unwrap_or([1.0, 1.0]);
         let ds = [extra[0] * sq[0], extra[1] * sq[1]];
         o.angle += angle_extra;
+        rim::draw(g, m, f, fr, x, ds, &o, shx, shy);
         Self::draw_sprite(
             g,
             m,

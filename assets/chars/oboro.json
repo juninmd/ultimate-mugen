@@ -3264,6 +3264,92 @@
           "ticks": 4
         }
       ]
+    },
+    "corvosEx": {
+      "frames": [
+        {
+          "pose": "cr0",
+          "ticks": 6
+        },
+        {
+          "pose": {
+            "shoulderF": 172,
+            "elbowF": 25,
+            "shoulderB": 150,
+            "elbowB": 45,
+            "thighF": 24,
+            "kneeF": 28,
+            "thighB": -20,
+            "kneeB": 14,
+            "lean": -10,
+            "head": -6,
+            "blade": 205,
+            "phase": 2,
+            "glow": true,
+            "wind": 0.6
+          },
+          "ticks": 3
+        },
+        {
+          "pose": "cr1",
+          "ticks": 4,
+          "hit": {
+            "part": "weapon",
+            "radius": 5
+          }
+        },
+        {
+          "pose": "cr2",
+          "ticks": 11
+        },
+        {
+          "pose": "idle0",
+          "ticks": 4
+        }
+      ]
+    },
+    "amaterasuEx": {
+      "frames": [
+        {
+          "pose": "cr0",
+          "ticks": 6
+        },
+        {
+          "pose": {
+            "shoulderF": 172,
+            "elbowF": 25,
+            "shoulderB": 150,
+            "elbowB": 45,
+            "thighF": 24,
+            "kneeF": 28,
+            "thighB": -20,
+            "kneeB": 14,
+            "lean": -10,
+            "head": -6,
+            "blade": 205,
+            "phase": 2,
+            "glow": true,
+            "wind": 0.6
+          },
+          "ticks": 3
+        },
+        {
+          "pose": "cr1",
+          "ticks": 4,
+          "hit": {
+            "part": "weapon",
+            "radius": 5
+          }
+        },
+        {
+          "pose": "cr2",
+          "ticks": 11
+        },
+        {
+          "pose": "idle0",
+          "ticks": 4
+        }
+      ]
     }
   },
   "moves": [
@@ -3743,7 +3829,7 @@
       "name": "Corvos EX",
       "input": "~D, DF, F, x+y",
       "kind": "special",
-      "anim": "corvos",
+      "anim": "corvosEx",
       "projectile": [
         {
           "at": 3,
@@ -3804,14 +3890,15 @@
         "amaterasu",
         "tsukuyomi"
       ],
-      "cost": 250.0
+      "cost": 250.0,
+      "fx": "aura"
     },
     {
       "id": "ex_amaterasu",
       "name": "Mirror Strike EX",
       "input": "~D, DB, B, y+b",
       "kind": "special",
-      "anim": "amaterasu",
+      "anim": "amaterasuEx",
       "projectile": [
         {
           "at": 3,
@@ -3840,7 +3927,8 @@
       "invuln": [
         1,
         6
-      ]
+      ],
+      "fx": "aura"
     },
     {
       "id": "overhead",

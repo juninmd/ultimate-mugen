@@ -13,7 +13,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
   fs.mkdirSync(out, { recursive: true });
   await new Promise(ok => server.listen(0, '127.0.0.1', ok));
-  const url = `http://127.0.0.1:${server.address().port}/index.html?e2e=${god ? 'god' : '1'}`;
+  const url = `http://127.0.0.1:${server.address().port}/index.html?e2e=${god ? 'god' : '1'}${process.env.STORY_STAGE ? `&e2e_stage=${process.env.STORY_STAGE}` : ''}`;
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
   const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const problems = [], log = [], failedRequests = [];
@@ -35,7 +35,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await tap('Enter'); await wait(1200);
   await shot('00-menu');
   await tap('ArrowDown'); await wait(300); await shot('01-menu-story'); await tap('Enter'); await wait(1500);
-  for (let i = 0; i < pickSteps; i++) { await tap('ArrowRight'); await wait(200); }
+  for (let i = 0; i < pickSteps; i++) { await tap(process.env.STORY_PICK_KEY || 'ArrowRight'); await wait(200); }
   await shot('02-select');
   await tap('Enter'); await wait(2500);
   const held = new Set();
@@ -76,7 +76,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
       await frames(3);
     } else {
       await setKeys(new Set());
-      if (['vs', 'story', 'results', 'cutscene'].includes(s.screen)) await tap('Enter');
+      if (s.screen === 'story' && st && (st.phase === 'Victory' || st.phase === 'Defeated')) { await wait(2500); await shot(`end-${st.phase}-${s.screen}-${Date.now() - t0}`); }
+      if (['vs', 'story', 'cutscene'].includes(s.screen)) await tap('Enter');
       await wait(700);
     }
     if (Date.now() - stuckSince > 15 * 60000 && sig === lastSig) { problems.push(`stuck on ${sig} for 15 min`); break; }

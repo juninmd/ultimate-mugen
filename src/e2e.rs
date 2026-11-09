@@ -47,6 +47,10 @@ mod web {
         if !ON.with(|on| *on) {
             return;
         }
+        let jump = crate::query_params().iter().find(|(k, _)| k == "e2e_stage").and_then(|(_, v)| v.parse::<usize>().ok());
+        if let (Some(stage), Screen::Story { .. }, Some((0, 0, _, 0, _))) = (jump, &app.screen, app.story_snapshot()) {
+            app.story_jump_to_stage(stage);
+        }
         let god = god_requested();
         let mut fighters = String::new();
         let mut over = -1i64;

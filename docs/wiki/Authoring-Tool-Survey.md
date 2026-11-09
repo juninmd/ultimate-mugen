@@ -7,6 +7,10 @@ Static study of a public Windows build of Fighter Factory Studio (FFS 3, portabl
 - The archive was extracted into an empty folder and only inspected: file listing, XML/HTML/Lua data files and `strings` on the engine-module DLL. No binary was executed.
 - REA (`rea-agents` 6.8.0) installs and runs, but native decompilation needs Hopper, Ghidra, IDA or Rizin, none of which exist in this environment. Native analysis was therefore limited to string tables. A later pass with a provider could decompile `ff.mugen.dll` to confirm the exact rule behind each message.
 
+## Disassembly pass (radare2)
+
+Hopper and IDA are commercial and Ghidra's host is blocked by the network policy; Rizin is not in the package repositories. radare2 5.5 (Ubuntu) was used instead, read-only on the 32-bit `ff.mugen.dll`, nothing executed. Confirmed so far: the guard handler branches on the defender state type, value 1 starts state 150, 2 starts 152, 3 starts 154, anything else prints "Guard state error: wrong move type". So the warning is about the defender's `statetype`, not the attacker's `movetype`. The remaining messages are still unconfirmed against code.
+
 ## What the package contains
 
 | Area | Finding |

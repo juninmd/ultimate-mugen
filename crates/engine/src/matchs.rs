@@ -9,6 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
+mod award;
 mod armor;
 mod bounds;
 mod forms;
@@ -372,7 +373,7 @@ impl Match {
         let src = if f.is_helper { if f.key_ctrl { self.idx(f.root) } else { None } } else { Some(i) };
         let Some(s) = src else { return false };
         if f.asserted_commands.iter().any(|(n, t)| *t > 0 && n.eq_ignore_ascii_case(name)) { return true; }
-        let accepting = if f.is_helper { self.round_state == 2 } else { self.round_state == 2 || self.round_state == 3 };
+        let accepting = if f.is_helper { self.round_state == 2 } else { self.round_state == 2 || (self.round_state == 3 && self.won_by_ko) };
         if !accepting && !self.training && !self.fighters[s].has_assert(asf::POSTROUNDINPUT) { return false; }
         if !Arc::ptr_eq(&f.st_def, &f.def) && !Arc::ptr_eq(&f.st_def, &self.common) {
             return f.st_def.commands.iter().find(|c| c.name == name).is_some_and(|c| crate::commands::match_command(&self.fighters[s].history, c));
@@ -645,7 +646,7 @@ impl Match {
                         let no = if self.winner_side == s { 180 } else if self.winner_side == -2 { 175 } else { 170 };
                         self.change_state(i, no, d);
                     }
-                    if self.winner_side >= 0 { self.wins[self.winner_side as usize] += 1; }
+                    self.award_round();
                     let text = if self.winner_side >= 0 { self.winner_text(self.winner_side as usize) } else { "DRAW".into() };
                     self.announce = Some(Announce { text, time: 150, total: 150, kind: AnnounceKind::Win });
                     self.events.push(Event::RoundEnd(self.winner_side));
@@ -997,7 +998,7 @@ impl Match {
             if hd.chain_id.is_some_and(|c| f.ghv.hit_id != c) { return false; }
             if f.ghv.hit_id >= 0 && hd.no_chain_id.contains(&Some(f.ghv.hit_id)) { return false; }
         }
-        if self.round_state != 2 && !(self.round_state == 3 && f.alive) { return false; }
+        if self.round_state != 2 && !(self.round_state == 3 && f.alive && self.won_by_ko) { return false; }
         if f.state_no == 5150 || f.unhittable > 0 { return false; }
         let hf = &hd.hitflag; let st = f.state_type;
         if hf.contains('+') && f.move_type != 'H' { return false; }
@@ -1461,13 +1462,13 @@ impl Match {
             }
             "left" => {
                 x = -half + px;
-                y = py;
+                y = py - self.stage.zoffset;
                 bind_to = None;
                 facing = fac;
             }
             "right" => {
                 x = half + px;
-                y = py;
+                y = py - self.stage.zoffset;
                 bind_to = None;
                 facing = fac;
             }
@@ -1479,7 +1480,7 @@ impl Match {
             }
         }
         let lscl = if from_fx { 1.0 } else { f.lscl };
-        let y = if screen_space { y - self.stage.zoffset } else { y }; let mut e = self.make_explod(f, def, anim_no, x, y, lscl);
+        let mut e = self.make_explod(f, def, anim_no, x, y, lscl);
         e.id = num(self, "id", -1.0, 0) as i32;
         e.facing = facing;
         e.vfacing = if num(self, "vfacing", 1.0, 0) < 0.0 { -1.0 } else { 1.0 };

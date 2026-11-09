@@ -52,7 +52,6 @@
   "src/controls.rs": 433,
   "src/gamepad.rs": 569,
   "src/hud.rs": 1364,
-  "src/i18n.rs": 297,
   "src/market.rs": 996,
   "src/menu_art.rs": 441,
   "src/netlink.rs": 328,

@@ -8,6 +8,10 @@ mod hud;
 mod i18n;
 mod keybinds;
 mod market;
+mod import_button;
+mod loading_tips;
+#[cfg(not(target_arch = "wasm32"))]
+mod native_import;
 mod menu_art;
 mod moves_tour;
 mod mugen_tour;
@@ -23,6 +27,7 @@ mod replays;
 mod screenpack;
 mod session;
 mod settings;
+mod settings_labels;
 mod shots;
 mod sound_mix;
 mod stage_tour;
@@ -111,23 +116,6 @@ fn conf() -> WindowConf {
 #[wasm_bindgen::prelude::wasm_bindgen]
 extern "C" {
     fn ume_is_touch() -> i32;
-    fn ume_set_import_visible(v: i32);
-}
-
-/// Show the page's "Importar MUGEN" button only outside fights (web).
-pub fn set_import_button(visible: bool) {
-    #[cfg(target_arch = "wasm32")]
-    {
-        static mut LAST: i32 = -1;
-        let v = visible as i32;
-        if unsafe { LAST } != v {
-            unsafe {
-                LAST = v;
-            }
-            ume_set_import_visible(v);
-        }
-    }
-    let _ = visible;
 }
 
 /// Browser imports: JS writes a .zip into wasm memory and queues it for the registry.
@@ -142,6 +130,11 @@ pub fn take_imports() -> Vec<Vec<u8>> {
             .unwrap_or_default();
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        native_import::take()
+    }
+    #[cfg(target_arch = "wasm32")]
     vec![]
 }
 
@@ -232,7 +225,7 @@ async fn game() {
     #[cfg(target_arch = "wasm32")]
     app.apply_deep_link();
     #[cfg(target_arch = "wasm32")]
-    crate::web_sprites::prefetch_roster(app.reg.chars.iter().filter(|entry| !entry.mugen).map(|entry| entry.id.trim_start_matches("umf:").to_string()).collect());
+    crate::web_sprites::prefetch_roster(app.reg.chars.iter().filter(|entry| !entry.mugen).map(crate::web_sprites::pack_name).collect());
     if let Some(dir) = shots { shots::run(&mut app, &dir).await; return; }
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     match netlink::NetArgs::parse(&args) {

@@ -72,15 +72,49 @@ Teclado, toque, Xbox, DualShock 4 e DualSense com **vibração e lightbar**. Arc
 </tr>
 </table>
 
+---
+
+## 🖼️ Elenco em pixel art, mapas e jogabilidade
+
 <p align="center">
-  <img src="screenshots/06-fight-dojo.jpg" alt="Luta" width="100%">
+  <img src="docs/assets/readme/fight.gif" alt="Jogabilidade: dois lutadores nativos trocando golpes no cenário Bambuzal" width="70%">
 </p>
 
-| | |
-|---|---|
-| ![Super](screenshots/08-fight-super.jpg) | ![Kung Fu Man do M.U.G.E.N contra lutador nativo](screenshots/12-mugen-kfm-vs-native.jpg) |
-| ![5v5 paralelo](screenshots/33-team-5v5-parallel.jpg) | ![Impacto neon](screenshots/21-fx-neon-hit.jpg) |
-| ![Super em 4K](screenshots/36-4k-super.jpg) | ![Celular](screenshots/15-mobile-fight.jpg) |
+<p align="center"><i>Jogabilidade real capturada da versão web (renderização por software, por isso o GIF roda abaixo da taxa de quadros nativa).</i></p>
+
+### Lutadores em pixel art
+
+O elenco nativo é desenhado em pixel art arcade de 32 bits, com um conjunto de poses dedicado por lutador, paletas, especiais de ki, voo, teletransporte e transformações. Cada personagem é declarado em um único JSON UMF.
+
+![Seleção de personagens com o elenco em pixel art](docs/assets/readme/roster-select.jpg)
+
+### Mapas
+
+21 arenas ilustradas, do telhado do dojo ao pôr do sol e uma metrópole neon até as maravilhas do mundo (Petra, Taj Mahal, Cristo Redentor, Coliseu, Grande Muralha, Chichén Itzá e mais), cada uma com camadas de ambiente vivas e sua própria trilha embutida.
+
+![Escolha do cenário](docs/assets/readme/stage-select.jpg)
+
+O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil, Neon, Bambu, Vulcão e Dojo): um trecho por luta, quatro ondas de capangas mais um chefe de fase, com a vida carregada entre as lutas. Veja o [guia do modo História](docs/wiki/Story-Mode.md).
+
+![Cenários roláveis do modo História](docs/assets/readme/story-stages.jpg)
+
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Tela de versus"></td>
+<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 no cenário Bambuzal"></td>
+</tr>
+</table>
+
+---
+
+## 🆕 Novidades
+
+- **Modo História:** cinco fases de ondas, capangas com traços próprios e um chefe por fase, com cutscenes e finais. [Guia](docs/wiki/Story-Mode.md)
+- **Música e áudio:** uma trilha embutida por cenário, sons de golpe em níveis, música abaixando nos impactos e torcida no KO. [Áudio](docs/wiki/Audio.md)
+- **Atalhos de golpe:** ligue qualquer golpe da lista de pausa em `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforma e `R3` sozinho carrega ki. [Controles](docs/wiki/pt-BR/Configuracao.md#controles)
+- **Golpes mais ricos:** todo lutador nativo tem especiais EX, hyper nível 3, explosão de escape, forma ascendida com hyper próprio e versões aéreas dos especiais. [Kit compartilhado](docs/wiki/Characters.md#shared-toolkit)
+- **Atualização automática e releases:** cada merge no `master` publica uma release e a versão desktop se atualiza sozinha. [Atualização automática](docs/wiki/pt-BR/Atualizacao-Automatica.md)
+- **Compatibilidade M.U.G.E.N:** correções achadas ao carregar personagens reais da comunidade (saídas de andar e defesa, provocações, intros, ações AIR duplicadas). [Decisões de compatibilidade](docs/wiki/pt-BR/Decisoes-de-Compatibilidade.md)
 
 ---
 
@@ -171,13 +205,14 @@ Teclado, vários controles e toque funcionam ao mesmo tempo. As listas de golpes
 | **Mover / Pular / Agachar** | Setas | `I` `K` `J` `L` | D-Pad ou analógico esquerdo | Analógico virtual |
 | **Soco fraco** | `Q` | Numpad `4` | `□` / `X` | **LP** |
 | **Soco forte** | `W` | Numpad `5` | `△` / `Y` | **HP** |
-| **Soco extra (Z)** | `E` | Numpad `6` | `R1` / `RB` | — |
+| **Soco extra (Z)** | `E` | Numpad `6` | — | — |
 | **Chute fraco** | `A` | Numpad `1` | `✕` / `A` | **LK** |
 | **Chute forte** | `S` | Numpad `2` | `○` / `B` | **HK** |
-| **Chute extra (C)** | `D` | Numpad `3` | `R2` / `RT` | — |
-| **Especiais rápidos** | `1`, `2`, `3` | Numpad `7`, `8`, `9` | `L1`, `L2` | **ESPECIAL**, **SUPER** |
-| **Super** | `1` + `2` | Numpad `7` + `8` | `L1` + `L2` | **SUPER** |
-| **Transformação** | `T` | Numpad `0` | Analógico direito / `SELECT` | — |
+| **Chute extra (C)** | `D` | Numpad `3` | — | — |
+| **Especiais rápidos** | `V`, `B`, `N` | Numpad `7`, `8`, `9` | — | **ESPECIAL**, **SUPER** |
+| **Atalhos de golpe** (ligue no menu de pausa) | `1`, `2`, `3`, `4` | — | `L1`, `L2`, `R1`, `R2` | — |
+| **Transformação** | `T` | Numpad `0` | `L3` + `R3` / `SELECT` | — |
+| **Carregar ki** | `R` | Numpad `.` | `R3` (sozinho) | — |
 | **Pausa / Hitboxes** | `Esc` / `F2` | `Esc` / `F2` | `OPTIONS` / `START` | `❚❚` |
 | **Tela cheia / FPS** | `F11` / `F3` | — | — | — |
 | **Trocar lutador (time paralelo)** | `Tab` | — | — | — |

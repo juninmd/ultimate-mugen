@@ -33,12 +33,18 @@ impl Recolor {
     }
 
     pub(super) fn apply_in_region(&self, rgba: &mut [u8], width: u32, region: Option<[u32; 4]>) {
-        let mut cache: std::collections::HashMap<([u8; 3], bool), [u8; 3]> = std::collections::HashMap::new();
+        let mut cache: std::collections::HashMap<u32, [u8; 3], std::hash::BuildHasherDefault<ColourHasher>> = Default::default();
+        let mut last: Option<(u32, [u8; 3])> = None;
         for (index, pixel) in rgba.chunks_exact_mut(4).enumerate() {
             if pixel[3] == 0 { continue; }
             let key = [pixel[0], pixel[1], pixel[2]];
             let allow_hair = !self.restrict_hair || region.is_some_and(|[x1, y1, x2, y2]| width > 0 && (index as u32 % width) >= x1 && (index as u32 % width) < x2 && (index as u32 / width) >= y1 && (index as u32 / width) < y2);
-            let mapped = *cache.entry((key, allow_hair)).or_insert_with(|| self.swap(key, allow_hair));
+            let packed = u32::from_le_bytes([key[0], key[1], key[2], allow_hair as u8]);
+            let mapped = match last {
+                Some((previous, mapped)) if previous == packed => mapped,
+                _ => *cache.entry(packed).or_insert_with(|| self.swap(key, allow_hair)),
+            };
+            last = Some((packed, mapped));
             pixel[..3].copy_from_slice(&mapped);
         }
     }
@@ -77,6 +83,15 @@ impl Recolor {
             _ => [r, g, b],
         }
     }
+}
+
+#[derive(Default)]
+struct ColourHasher(u64);
+
+impl std::hash::Hasher for ColourHasher {
+    fn finish(&self) -> u64 { self.0 }
+    fn write(&mut self, bytes: &[u8]) { for byte in bytes { self.0 = (self.0 ^ *byte as u64).wrapping_mul(0x100000001b3); } }
+    fn write_u32(&mut self, value: u32) { self.0 = (value as u64).wrapping_mul(0x9E3779B97F4A7C15); }
 }
 
 fn rgb(hex: &str) -> Option<[f32; 3]> {

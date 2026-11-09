@@ -15,3 +15,5 @@ temp_extract/
 
 /shots/
 /.forge/
+__pycache__/
+*.pyc

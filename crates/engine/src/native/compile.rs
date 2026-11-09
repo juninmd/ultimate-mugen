@@ -22,7 +22,6 @@ pub const STANDARD_ANIMS: &[(&str, i32)] = &[
 /// Full compile (all animations).
 pub fn compile_native(nc: &NativeChar, pal_no: i32, with_images: bool) -> CharDef { compile_native_with(nc, pal_no, with_images, None) }
 /// Fast compile for menus (select grid, VS screen): rasterizes only idle + win animations (~10x cheaper than the full set).
-pub fn compile_native_preview(nc: &NativeChar, pal_no: i32) -> CharDef { compile_native_with(nc, pal_no, true, Some(&[0, 181])) }
 
 fn frame_key(fr: &NativeFrame) -> String { serde_json::to_string(&(&fr.pose, &fr.effect, &fr.hit, &fr.sprite)).unwrap_or_default() }
 
@@ -78,11 +77,11 @@ pub(super) fn with_defaults(nc: &NativeChar) -> NativeChar {
             if out.anims.get(k).is_none() { if let Ok(a) = serde_json::from_value::<NativeAnim>(v.clone()) { out.anims.0.push((k.clone(), a)); } }
         }
     }
-    out
+    super::air_normals::complete(out)
 }
 
 pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only: Option<&[i32]>) -> CharDef {
-    let nc = &with_defaults(nc);
+    let nc = &super::power_normals::with_power_normals(with_defaults(nc));
     let palette = if pal_no > 1 && !nc.palettes.is_empty() { Some(&nc.palettes[(pal_no as usize - 2) % nc.palettes.len()]) } else { None };
     let mut sprites = HashMap::new();
     let mut anims = HashMap::new();
@@ -118,7 +117,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
                 (k, r.hurt, r.hit)
             });
             let hurt = match &fr.hurt { Some(Value::String(s)) if s == "none" => vec![], Some(v @ Value::Array(_)) => serde_json::from_value(v.clone()).unwrap_or(entry.1.clone()), _ => entry.1.clone() };
-            let hit = fr.hit.as_ref().and_then(|h| h.bx).map(|b| vec![b]).unwrap_or(entry.2.clone());
+            let hit = entry.2.clone();
             frames.push(AnimFrame {
                 group: entry.0 .0, index: entry.0 .1, x: fr.offset.map(|o| o[0]).unwrap_or(0.0), y: fr.offset.map(|o| o[1]).unwrap_or(0.0), time: if fr.ticks > 0 && nc.speed.is_some_and(|k| k > 1.0) { ((fr.ticks as f32 / nc.speed.unwrap_or(1.0)).round() as i32).max(1) } else { fr.ticks },
                 flip_h: false, flip_v: false, blend: if fr.effect.as_ref().is_some_and(|effect| effect.get("type").and_then(Value::as_str) != Some("dragon")) { Blend::Add } else { Blend::None }, alpha: None, xscale: 1.0, yscale: 1.0, angle: 0.0,

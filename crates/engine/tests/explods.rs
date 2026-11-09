@@ -143,3 +143,11 @@ fn modifyexplod_sets_facing_from_the_owner_and_updates_every_field() {
     ticks(&mut m, 30);
     assert!(m.explods.iter().all(|e| !(e.owner == m.fighters[0].id && e.id == 2)), "removetime = 30 removes it");
 }
+
+#[test]
+fn left_postype_y_is_measured_from_the_top_of_the_screen() {
+    let m = setup();
+    let e = explod(&m, 3);
+    let screen_y = e.world_pos(m.camera).y - m.camera.y + m.stage.zoffset;
+    assert_eq!(screen_y, 40.0);
+}

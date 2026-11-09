@@ -205,6 +205,10 @@ Valide com `cargo test --release --test native_roster_lab -- --nocapture` (todo 
 | `>` | Sem nenhuma outra entrada entre os passos | `F, >F` |
 | `N` | Direção neutra (nenhuma direção pressionada) | `N, x` |
 
+## Normais de poder (Soco 3 e Chute 3)
+
+Todo lutador nativo que não declara um golpe em `z` ou `c` ganha quatro normais extras na compilação (`native/power_normals.rs`): `power_punch` e `crouch_power_punch` em `z` (tecla padrão **E**, exibido como *Soco 3*), `power_kick` e `crouch_power_kick` em `c` (tecla padrão **D**, exibido como *Chute 3*). Cada um reaproveita animação, tempo, altura de defesa e `cancels` da normal de chão mais forte da família (`y` e depois `x` nos socos, `b` e depois `a` nos chutes; as versões agachadas usam a normal agachada), com o nome `<nome base> Max`. Os golpes causam 130 % de dano, viram `heavy`, ganham 4 de hit-stun e 2 de hit-stop quando definidos e empurram 25 % mais. Golpes que cancelam na normal base também cancelam na versão de poder, e os novos golpes aparecem na lista de golpes da pausa. Declare um golpe próprio em `z` ou `c` para não usar o automático. Versões aéreas não são geradas aqui.
+
 ## Carregar energia (todo lutador)
 
 Todo lutador nativo pode carregar o medidor: segure **R** (a entrada `s` / Start; para pausar a luta use **Esc** ou **P**). O lutador entra no estado `3920`, repete a animação `powerUp` com um brilho azul e ganha 4 de energia por tick (um super de 1000 em cerca de quatro segundos) até soltar o botão (depois de pelo menos 6 ticks) ou encher o medidor. O estado é `movetype = I`, então um golpe o interrompe, e um lutador com formas ainda se transforma com `T` quando o medidor chega ao custo da forma. O comando é `charge_cmd` (`/s`) e aparece como `Charge Energy` na lista de golpes. A IA embutida só carrega no nível 3 ou mais, com menos de 700 de energia, quando o rival está a mais de 190 unidades e não está atacando.

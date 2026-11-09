@@ -1,4 +1,5 @@
 use super::*;
+use super::market_text::mt;
 use crate::market::{ask_text, typing_supported, SUGGESTED};
 use std::collections::HashSet;
 use ume_market::Kind;
@@ -94,10 +95,10 @@ const FILTERS: [(Option<Kind>, &str); 5] = [
 
 fn kind_label(k: Kind) -> &'static str {
     match k {
-        Kind::Character => "PERSONAGEM",
-        Kind::Stage => "CENÁRIO",
-        Kind::Music => "MÚSICA",
-        Kind::Pack => "PACOTE",
+        Kind::Character => mt("PERSONAGEM"),
+        Kind::Stage => mt("CENÁRIO"),
+        Kind::Music => mt("MÚSICA"),
+        Kind::Pack => mt("PACOTE"),
     }
 }
 
@@ -134,15 +135,15 @@ fn short(s: &str, n: usize) -> String {
 fn ago(secs: u64) -> String {
     let d = ume_market::now_secs().saturating_sub(secs);
     if secs == 0 {
-        "não listado".into()
+        mt("não listado").into()
     } else if d < 90 {
-        "agora há pouco".into()
+        mt("agora há pouco").into()
     } else if d < 5400 {
-        format!("há {} min", d / 60)
+        crate::i18n::fill(crate::i18n::tr3("há {n} min", "{n} min ago", "hace {n} min"), &[("n", &(d / 60).to_string())])
     } else if d < 172_800 {
-        format!("há {} h", d / 3600)
+        crate::i18n::fill(crate::i18n::tr3("há {n} h", "{n} h ago", "hace {n} h"), &[("n", &(d / 3600).to_string())])
     } else {
-        format!("há {} dias", d / 86_400)
+        crate::i18n::fill(crate::i18n::tr3("há {n} dias", "{n} days ago", "hace {n} días"), &[("n", &(d / 86_400).to_string())])
     }
 }
 
@@ -277,9 +278,9 @@ impl App {
         self.ui.rect_lines(x, y, w, h, 2.0, hex("#ff4d6d"));
         self.ui.text(
             if e.token {
-                "TOKEN DO GITHUB (opcional)"
+                mt("TOKEN DO GITHUB (opcional)")
             } else {
-                "ADICIONAR REPOSITÓRIO DO GITHUB"
+                mt("ADICIONAR REPOSITÓRIO DO GITHUB")
             },
             x + 30.0,
             y + 48.0,
@@ -288,7 +289,7 @@ impl App {
             Align::Left,
             true,
         );
-        self.ui.text(if e.token { "Aumenta o limite de requisições da API. Fica salvo só neste aparelho." } else { "Cole ou digite o link (ex.: https://github.com/dono/repositorio) ou apenas dono/repositorio." }, x + 30.0, y + 82.0, 17.0, hex("#a49cc0"), Align::Left, false);
+        self.ui.text(if e.token { mt("Aumenta o limite de requisições da API. Fica salvo só neste aparelho.") } else { mt("Cole ou digite o link (ex.: https://github.com/dono/repositorio) ou apenas dono/repositorio.") }, x + 30.0, y + 82.0, 17.0, hex("#a49cc0"), Align::Left, false);
         self.ui.rect(
             x + 30.0,
             y + 104.0,
@@ -317,7 +318,7 @@ impl App {
         );
         if !typing_supported() && !e.token {
             self.ui.text(
-                "Este aparelho não tem teclado em jogo: escolha uma sugestão abaixo.",
+                mt("Este aparelho não tem teclado em jogo: escolha uma sugestão abaixo."),
                 x + 30.0,
                 y + 176.0,
                 17.0,
@@ -328,7 +329,7 @@ impl App {
         }
         if !e.token {
             self.ui.text(
-                "Sugestões",
+                mt("Sugestões"),
                 x + 30.0,
                 y + 206.0,
                 18.0,
@@ -388,7 +389,7 @@ impl App {
                 x + w - 170.0,
                 y + h - 70.0,
                 140.0,
-                "Cancelar",
+                mt("Cancelar"),
                 "Esc",
                 hex("#ff4d6d"),
             );
@@ -424,9 +425,9 @@ impl App {
     fn market_open_entry(&mut self, token: bool) {
         if let Some(v) = ask_text(
             if token {
-                "Token do GitHub (deixe vazio para remover)"
+                mt("Token do GitHub (deixe vazio para remover)")
             } else {
-                "Link do repositório no GitHub (dono/repositorio)"
+                mt("Link do repositório no GitHub (dono/repositorio)")
             },
             "",
         ) {
@@ -450,7 +451,7 @@ impl App {
     pub(super) fn market_screen(&mut self) {
         self.ui.background();
         self.ui.text(
-            "MERCADO · REPOSITÓRIOS GITHUB",
+            mt("MERCADO · REPOSITÓRIOS GITHUB"),
             40.0,
             56.0,
             30.0,
@@ -459,7 +460,7 @@ impl App {
             true,
         );
         self.ui.text(
-            "Importe personagens, cenários e músicas de qualquer repositório público do GitHub",
+            mt("Importe personagens, cenários e músicas de qualquer repositório público do GitHub"),
             40.0,
             86.0,
             18.0,
@@ -469,7 +470,7 @@ impl App {
         );
         if !self.market.ready {
             self.ui.text(
-                "Carregando dados locais…",
+                mt("Carregando dados locais…"),
                 VW / 2.0,
                 360.0,
                 26.0,
@@ -509,7 +510,7 @@ impl App {
         self.ui
             .rect(lx, ly, lw, 484.0, Color::new(1.0, 1.0, 1.0, 0.05));
         self.ui.text(
-            "REPOSITÓRIOS",
+            mt("REPOSITÓRIOS"),
             lx + 16.0,
             ly + 30.0,
             20.0,
@@ -543,7 +544,7 @@ impl App {
         }
         if n_repos == 0 {
             self.ui.text(
-                "Nenhum repositório ainda.",
+                mt("Nenhum repositório ainda."),
                 lx + 16.0,
                 ly + 90.0,
                 18.0,
@@ -552,7 +553,7 @@ impl App {
                 false,
             );
             self.ui.text(
-                "Pressione U ou toque em Adicionar.",
+                mt("Pressione U ou toque em Adicionar."),
                 lx + 16.0,
                 ly + 116.0,
                 16.0,
@@ -608,7 +609,7 @@ impl App {
                 true,
             );
             let sub = if self.market.listing.contains(&key) {
-                "listando…".to_string()
+                mt("listando…").to_string()
             } else {
                 format!("{count} itens · {}", ago(listed))
             };
@@ -635,9 +636,9 @@ impl App {
         let tok = self.market.token().is_some();
         self.ui.text(
             if tok {
-                "Token do GitHub: ativo (T altera)"
+                mt("Token do GitHub: ativo (T altera)")
             } else {
-                "Sem token: limite de 60 requisições/h (T define)"
+                mt("Sem token: limite de 60 requisições/h (T define)")
             },
             lx + 16.0,
             ly + 476.0,
@@ -650,7 +651,7 @@ impl App {
         let (rx, ry, rw) = (390.0, 112.0, 850.0);
         self.ui
             .rect(rx, ry, rw, 484.0, Color::new(1.0, 1.0, 1.0, 0.05));
-        for (i, (v, label)) in [(View::Browse, "Explorar"), (View::Installed, "Instalados")]
+        for (i, (v, label)) in [(View::Browse, mt("Explorar")), (View::Installed, mt("Instalados"))]
             .iter()
             .enumerate()
         {
@@ -685,7 +686,7 @@ impl App {
                 acts.push(Act::ToggleView);
             }
         }
-        for (i, (f, label)) in FILTERS.iter().enumerate() {
+        for (i, (f, label)) in FILTERS.iter().map(|(f, l)| (f, mt(l))).enumerate() {
             let x = rx + 330.0 + i as f32 * 100.0;
             let on = self.market_ui.filter == *f;
             self.ui.rect(
@@ -737,13 +738,13 @@ impl App {
             .is_some_and(|k| self.market.listing.contains(k));
         if total == 0 {
             let msg = if !browse {
-                "Nenhum item instalado ainda. Use Explorar para baixar."
+                mt("Nenhum item instalado ainda. Use Explorar para baixar.")
             } else if cur_repo.is_none() {
-                "Adicione um repositório para começar."
+                mt("Adicione um repositório para começar.")
             } else if listing_now {
-                "Lendo o repositório no GitHub…"
+                mt("Lendo o repositório no GitHub…")
             } else {
-                "Nada encontrado aqui (ou ainda não listado). Pressione R para atualizar."
+                mt("Nada encontrado aqui (ou ainda não listado). Pressione R para atualizar.")
             };
             self.ui.text(
                 msg,
@@ -827,11 +828,11 @@ impl App {
             );
             let (label, col) = match row.installed {
                 _ if installing.as_deref() == Some(row.name.as_str()) && self.market.busy() => {
-                    ("baixando…", hex("#22e8ff"))
+                    (mt("baixando…"), hex("#22e8ff"))
                 }
-                Some(true) => ("ATIVO", hex("#6dff9e")),
-                Some(false) => ("instalado", hex("#ffcc33")),
-                None if !row.installable => ("grande demais", hex("#ff4d6d")),
+                Some(true) => (mt("ATIVO"), hex("#6dff9e")),
+                Some(false) => (mt("instalado"), hex("#ffcc33")),
+                None if !row.installable => (mt("grande demais"), hex("#ff4d6d")),
                 None => ("", WHITE),
             };
             self.ui.text(
@@ -886,17 +887,9 @@ impl App {
                 .rect(px, py, rw * frac.clamp(0.0, 1.0), 14.0, hex("#22e8ff"));
             let q = self.market.queue.len();
             self.ui.text(
-                &format!(
-                    "Baixando {} · {}/{} arquivos · {}{}",
-                    self.market.current_name().unwrap_or_default(),
-                    p.done_files,
-                    p.total_files,
-                    fmt_bytes(p.done_bytes),
-                    if q > 0 {
-                        format!(" · {q} na fila")
-                    } else {
-                        String::new()
-                    }
+                &crate::i18n::fill(
+                    crate::i18n::tr3("Baixando {name} · {done}/{total} arquivos · {bytes}{queue}", "Downloading {name} · {done}/{total} files · {bytes}{queue}", "Descargando {name} · {done}/{total} archivos · {bytes}{queue}"),
+                    &[("name", &self.market.current_name().unwrap_or_default()), ("done", &p.done_files.to_string()), ("total", &p.total_files.to_string()), ("bytes", &fmt_bytes(p.done_bytes)), ("queue", &if q > 0 { format!(" · {q} {}", crate::i18n::tr3("na fila", "queued", "en cola")) } else { String::new() })],
                 ),
                 px,
                 py + 32.0,
@@ -916,7 +909,7 @@ impl App {
                 alpha(hex("#ff4d6d"), 0.7),
             );
             self.ui.text(
-                "Cancelar",
+                mt("Cancelar"),
                 px + rw - 55.0,
                 py + 31.0,
                 15.0,
@@ -940,12 +933,9 @@ impl App {
             );
         } else {
             self.ui.text(
-                &format!(
-                    "{} marcados · {} instalados · {} no disco · {} músicas ativas",
-                    self.market_ui.marked.len(),
-                    self.market.state.installed.len(),
-                    fmt_bytes(self.market.state.total_bytes()),
-                    self.market.active_tracks()
+                &crate::i18n::fill(
+                    crate::i18n::tr3("{marked} marcados · {installed} instalados · {disk} no disco · {tracks} músicas ativas", "{marked} marked · {installed} installed · {disk} on disk · {tracks} active tracks", "{marked} marcados · {installed} instalados · {disk} en disco · {tracks} pistas activas"),
+                    &[("marked", &self.market_ui.marked.len().to_string()), ("installed", &self.market.state.installed.len().to_string()), ("disk", &fmt_bytes(self.market.state.total_bytes())), ("tracks", &self.market.active_tracks().to_string())],
                 ),
                 px,
                 py + 20.0,
@@ -958,13 +948,13 @@ impl App {
         let by = 640.0;
         let mut x = rx;
         let buttons: [(&str, &str, Color, Act); 7] = [
-            ("Todos", "M", hex("#5865f2"), Act::MarkAll),
-            ("Nenhum", "N", hex("#5865f2"), Act::ClearMarks),
-            ("Instalar", "I", hex("#2ecc71"), Act::Install),
-            ("Ativar", "E", hex("#22b8cf"), Act::Enable),
-            ("Desativar", "O", hex("#f59f00"), Act::Disable),
-            ("Remover", "X", hex("#ff4d6d"), Act::Remove),
-            ("Atualizar", "R", hex("#8a2be2"), Act::Refresh),
+            (mt("Todos"), "M", hex("#5865f2"), Act::MarkAll),
+            (mt("Nenhum"), "N", hex("#5865f2"), Act::ClearMarks),
+            (mt("Instalar"), "I", hex("#2ecc71"), Act::Install),
+            (mt("Ativar"), "E", hex("#22b8cf"), Act::Enable),
+            (mt("Desativar"), "O", hex("#f59f00"), Act::Disable),
+            (mt("Remover"), "X", hex("#ff4d6d"), Act::Remove),
+            (mt("Atualizar"), "R", hex("#8a2be2"), Act::Refresh),
         ];
         for (label, key, col, act) in buttons {
             let w = 114.0;
@@ -975,11 +965,11 @@ impl App {
         }
         self.ui.rect(40.0, by, 330.0, 48.0, hex("#ff4d6d"));
         self.ui
-            .text("Voltar", 205.0, by + 32.0, 26.0, WHITE, Align::Center, true);
+            .text(mt("Voltar"), 205.0, by + 32.0, 26.0, WHITE, Align::Center, true);
         if self.clicked_rect(40.0, by, 330.0, 48.0) && !modal {
             acts.push(Act::Back);
         }
-        self.ui.text("U adicionar · T token · Tab explorar/instalados · F filtro · Espaço marca · Enter/Start aplica", 40.0, 706.0, 13.0, hex("#7d7596"), Align::Left, false);
+        self.ui.text(mt("U adicionar · T token · Tab explorar/instalados · F filtro · Espaço marca · Enter/Start aplica"), 40.0, 706.0, 13.0, hex("#7d7596"), Align::Left, false);
 
         self.market_entry_modal();
         if !modal {
@@ -1149,7 +1139,7 @@ impl App {
                     if let Some(k) = cur_repo.clone() {
                         let n = self.market.queue_install(&k, &ids);
                         self.market.notice = if n == 0 {
-                            "Nada novo para baixar (itens grandes demais são ignorados).".into()
+                            mt("Nada novo para baixar (itens grandes demais são ignorados).").into()
                         } else {
                             format!("{n} item(ns) na fila de download.")
                         };
@@ -1157,7 +1147,7 @@ impl App {
                     self.market_ui.marked.clear();
                 }
                 Act::Install => {
-                    self.market.notice = "Volte para Explorar para baixar novos itens.".into()
+                    self.market.notice = mt("Volte para Explorar para baixar novos itens.").into()
                 }
                 Act::Enable | Act::Disable => {
                     let on = act == Act::Enable;
@@ -1170,8 +1160,9 @@ impl App {
                         .market
                         .set_active(pairs.iter().map(|(a, b)| (a.as_str(), b.as_str())), on);
                     self.market.notice = format!(
-                        "{n} item(ns) {}.",
-                        if on { "ativado(s)" } else { "desativado(s)" }
+                        "{n} {} {}.",
+                        mt("item(ns)"),
+                        if on { mt("ativado(s)") } else { mt("desativado(s)") }
                     );
                 }
                 Act::Remove => {
@@ -1192,7 +1183,7 @@ impl App {
                         self.market.remove_repo(&k);
                         self.market_ui.repo = 0;
                         self.market.notice =
-                            "Repositório removido da lista (itens instalados continuam).".into();
+                            mt("Repositório removido da lista (itens instalados continuam).").into();
                     }
                 }
                 Act::StopDownloads => {

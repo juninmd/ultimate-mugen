@@ -15,7 +15,18 @@ Character sounds come from the `.snd` file. Music files can be WAV, OGG Vorbis, 
 - `SndPan` moves sounds that are already playing on that channel (or every channel and looping sound of the character with `channel = -1`); playback continues from the same point.
 - A sound that fails to decode still plays, without panning.
 
-## Stage music
+## Built-in music per stage
+
+Every stage without a `[Music]` entry plays one of the built-in synthesized themes, picked by the stage (`Stage.music`), so the dojo, neon city, bamboo grove, volcano and the other arenas each have their own track. Themes are rendered once at startup on a background thread (`music-synth`) and loop until the fight ends.
+
+## Hit sounds and impact ducking
+
+- Hits come in tiers: `hitlight`, `hit` and `hitheavy`, each with three detuned variants, so repeated hits never sound identical. Counter hits, supers, transformations and the KO have their own sounds.
+- Impact ducking dips the music for a moment on a hit (`hit` 0.8, `hitheavy` 0.55, `counter` 0.45, `super` 0.35, `ko` 0.2 of the current level) and recovers smoothly.
+- A crowd cheer plays on the KO.
+- `AssertSpecial` `nomusic` silences the music and keeps the effects.
+
+## Stage music (M.U.G.E.N stages)
 
 ```
 [Music]

@@ -90,3 +90,27 @@ fn a_fighter_with_forms_charges_first_and_transforms_on_the_next_press() {
     }
     assert!(transformed >= 2, "expected the form fighters to be covered");
 }
+
+#[test]
+fn charging_accelerates_with_hold_time_and_restarts_after_release() {
+    use ume_engine::native::charge_ramp::gain_at;
+    let (_, def) = roster().into_iter().next().unwrap();
+    let mut m = arena(&def);
+    let mut gains = vec![];
+    let mut last = 0.0;
+    for _ in 0..120 {
+        m.tick(&[k::S, 0]);
+        gains.push(m.fighters[0].power - last);
+        last = m.fighters[0].power;
+    }
+    let early: f32 = gains[10..20].iter().sum();
+    let late: f32 = gains[100..110].iter().sum();
+    assert!(late > early * 2.0, "early {early} late {late}");
+    assert!(gains[110] <= gain_at(1000) + 0.01);
+    for _ in 0..RELEASE_RECOVERY_TICKS { m.tick(&[0, 0]); }
+    let before = m.fighters[0].power;
+    for _ in 0..14 { m.tick(&[k::S, 0]); }
+    let restarted = m.fighters[0].power - before;
+    assert!(restarted < early * 1.5 + 60.0, "ramp did not reset: {restarted}");
+    println!("early10={early} late10={late} total120={last}");
+}

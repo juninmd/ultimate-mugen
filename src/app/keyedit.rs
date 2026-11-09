@@ -37,7 +37,7 @@ impl App {
                     ed.msg = format!("{}: {}", ACTIONS[ed.cur].0, keybinds::label(kc));
                     ed.waiting = false;
                 } else {
-                    ed.msg = "Essa tecla não pode ser usada. Tente outra (Esc cancela).".into();
+                    ed.msg = crate::i18n::tr3("Essa tecla não pode ser usada. Tente outra (Esc cancela).", "That key cannot be used. Try another (Esc cancels).", "Esa tecla no se puede usar. Prueba otra (Esc cancela).").into();
                 }
             }
         } else {
@@ -58,7 +58,7 @@ impl App {
             if is_key_pressed(KeyCode::Delete) {
                 self.c.keys.reset_slot(ed.slot);
                 self.c.keys.save();
-                ed.msg = format!("Jogador {} restaurado ao padrão.", ed.slot + 1);
+                ed.msg = format!("{} {} {}", crate::i18n::tr3("Jogador", "Player", "Jugador"), ed.slot + 1, crate::i18n::tr3("restaurado ao padrão.", "reset to default.", "restaurado por defecto."));
             }
             if self.c.pressed(nav::BACK) {
                 close = true;
@@ -96,7 +96,7 @@ impl App {
                 }
                 let kc = self.c.keys.slots[slot][i];
                 let shown = if sel && ed.waiting {
-                    "pressione uma tecla…"
+                    crate::i18n::tr3("pressione uma tecla…", "press a key…", "pulsa una tecla…")
                 } else {
                     keybinds::label(kc)
                 };
@@ -128,7 +128,7 @@ impl App {
                 false,
             );
         }
-        self.ui.text("Cima/Baixo: ação · Esq/Dir: jogador · Enter ou clique: trocar tecla · Del: restaurar padrão do jogador · Esc: voltar", 40.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
+        self.ui.text(crate::i18n::tr3("Cima/Baixo: ação · Esq/Dir: jogador · Enter ou clique: trocar tecla · Del: restaurar padrão do jogador · Esc: voltar", "Up/Down: action · Left/Right: player · Enter or click: rebind key · Del: reset player defaults · Esc: back", "Arriba/Abajo: acción · Izq/Der: jugador · Enter o clic: cambiar tecla · Supr: restaurar jugador · Esc: volver"), 40.0, 690.0, 18.0, hex("#a49cc0"), Align::Left, false);
         if !close {
             self.key_edit = Some(ed);
         }

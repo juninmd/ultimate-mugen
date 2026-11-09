@@ -2,7 +2,7 @@
 use crate::app::{App, Mode, Screen, Team};
 use crate::gfx::*;
 use crate::shots::replay::replay_determinism;
-mod replay; mod story_tour; mod storymode_tour; mod suzume_tour;
+mod i18n_tour; mod pause_tour; mod replay; mod story_tour; mod storymode_tour; mod suzume_tour;
 
 async fn frames(app: &mut App, n: usize) {
     for _ in 0..n {
@@ -10,7 +10,7 @@ async fn frames(app: &mut App, n: usize) {
         next_frame().await;
     }
 }
-async fn screen(app: &mut App, dir: &str, name: &str, warm: usize) {
+pub(crate) async fn screen(app: &mut App, dir: &str, name: &str, warm: usize) {
     frames(app, warm).await;
     app.trans = 0.0;
     app.frame().await;
@@ -154,7 +154,7 @@ pub(crate) async fn fight(
                 }
             }
         }
-        "counter" | "guard" | "heavy" => {
+        "counter" | "guard" | "heavy" | "hyper" => {
             for _ in 0..600 {
                 if s.m.round_state == 2 && s.m.fighters[0].ctrl {
                     break;
@@ -168,7 +168,7 @@ pub(crate) async fn fight(
             let ev = ume_engine::matchs::Event::Hit {
                 attacker_side: 0,
                 defender_side: 1,
-                damage: if want == "heavy" { 120.0 } else { 60.0 },
+                damage: [60.0, 120.0, 200.0][(want == "heavy") as usize + 2 * (want == "hyper") as usize],
                 guarded: want == "guard",
                 heavy: want == "heavy",
                 attacker: 0,
@@ -361,6 +361,7 @@ async fn fx_tour(app: &mut App, dir: &str) {
     for (name, want) in [
         ("fx1-hit", "hit"),
         ("fx2-heavy", "heavy"),
+        ("fx6-hyper", "hyper"),
         ("fx3-counter", "counter"),
         ("fx4-guard", "guard"),
         ("fx5-super", "super"),
@@ -739,23 +740,20 @@ pub async fn run(app: &mut App, dir: &str) {
         screen(app, dir, "select-team5", 60).await;
         return;
     }
-    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("fx") {
-        fx_tour(app, dir).await;
-        return;
-    }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("fx") { fx_tour(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("menu") {
         app.screen = Screen::Title;
         screen(app, dir, "menu-title", 30).await;
-        for (n, cur) in [(0, 0usize), (1, 1), (2, 3), (3, 7), (4, 9)] {
+        for (n, cur) in [(0, 0usize), (1, 1), (2, 3), (3, 7), (4, 10), (5, 12), (6, 15)] {
             app.screen = Screen::Menu { cur };
             screen(app, dir, &format!("menu-{n}"), 40).await;
         }
+        app.screen = Screen::Mugen { view: 0, page: 0 }; screen(app, dir, "mugen-import", 20).await;
         return;
     }
-    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") {
-        hud_tour(app, dir).await;
-        return;
-    }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("i18n") { i18n_tour::run(app, dir).await; return; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("pause") { return pause_tour::run(app, dir).await; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") { return hud_tour(app, dir).await; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("market") {
         market_tour(app, dir).await;
         return;

@@ -4,6 +4,7 @@ use crate::controls::Controls;
 use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
 #[path = "session/kaito.rs"] mod kaito;
+#[path = "session/tension.rs"] mod tension;
 mod shortcut;
 use crate::stages::Stage;
 use crate::ui::Ui;
@@ -53,7 +54,7 @@ pub struct Session {
     speed: f32,
     /// initial RNG seed of the match (stored in replays so a recorded fight rebuilds identically)
     pub seed: u32,
-    tag_last: [Option<usize>; 2],
+    tag_last: [Option<usize>; 2], tension_tick: u32,
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub net: Option<crate::netlink::NetLink>,
 }
@@ -176,7 +177,7 @@ impl Session {
             flag_sounds: vec![],
             speed: 1.0,
             seed,
-            tag_last: [None; 2],
+            tag_last: [None; 2], tension_tick: 0,
             #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
             net: None,
         }
@@ -340,6 +341,7 @@ impl Session {
     }
 
     fn drain_events(&mut self, c: &mut Controls, audio: &mut Audio) {
+        tension::update(&self.m, audio, &mut self.tension_tick);
         for k in std::mem::take(&mut self.vfx.sfx) {
             audio.sfx(k);
         }
@@ -473,6 +475,7 @@ impl Session {
                     Self::stop_flagged(&mut self.flag_sounds, audio, hit_id, true);
                 }
                 Event::Super { side, .. } => {
+                    audio.sfx("super");
                     for (s, p) in self.pilots.iter().enumerate() {
                         if let Pilot::Human(sl) = p {
                             c.rumble(*sl, if s == side { 0.6 } else { 0.3 }, 0.6, 400);

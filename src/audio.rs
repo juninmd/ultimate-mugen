@@ -292,8 +292,9 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
             reverb(&mut out, 0.25, 0.15);
         }
         "danger" => {
-            tone(&mut out, 0.0, 85.0, 42.0, 0.12, 0.6, 0);
-            tone(&mut out, 0.15, 75.0, 38.0, 0.14, 0.5, 0);
+            tone(&mut out, 0.0, 76.0, 38.0, 0.12, 0.7, 0);
+            tone(&mut out, 0.14, 66.0, 34.0, 0.14, 0.6, 0);
+            reverb(&mut out, 0.18, 0.08);
         }
         "select" => {
             tone(&mut out, 0.0, 1500.0, 1050.0, 0.03, 0.2, 0);
@@ -533,7 +534,7 @@ impl Audio {
             "hitheavy" => 0.55,
             "counter" => 0.45,
             "ko" => 0.2,
-            "super" => 0.35,
+            "super" => 0.22,
             "hit" => 0.8,
             _ => 1.0,
         };

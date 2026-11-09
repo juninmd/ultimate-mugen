@@ -27,6 +27,12 @@ wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
 web-sys = { version = "0.3", features = ["Window", "Document", "Element", "HtmlCanvasElement", "AudioContext", "AudioBuffer", "AudioBufferSourceNode", "AudioNode", "AudioParam", "AudioDestinationNode", "GainNode", "BaseAudioContext", "AudioContextState", "AudioScheduledSourceNode", "console"] }
 
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+egui = "=0.36.2"
+egui-wgpu = "=0.36.2"
+egui-winit = { version = "=0.36.2", default-features = false }
+egui-phosphor = "=0.14.0"
+
 [dev-dependencies]
 ume-engine = { path = "../engine" }
 ume-formats = { path = "../formats" }

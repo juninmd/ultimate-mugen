@@ -194,6 +194,10 @@ Valide com `cargo test --release --test native_roster_lab -- --nocapture` (todo 
 | `removeTime` | Ticks até sumir |
 | `priority` | Prioridade contra outros projéteis |
 
+### Elementos e atordoamento
+
+`hits[]` e `projectile` aceitam `element` (`fire`, `ice`, `lightning`, `earth`, `wind`, `water`) e `stun` (ticks extras de hit-stun). O compilador soma o hit-stun e o tremor do elemento e tinge a vítima por um instante (`PalFX`): `ice` congela por mais tempo (+16), `lightning` eletrocuta (+22 e tremor de 8 ticks), `fire` queima em vermelho, `earth` treme a tela, `wind` e `water` aplicam um tom curto. `stun` soma por cima e adiciona tremor de 5 ticks quando não há outro. Elementos desconhecidos são ignorados.
+
 ### Sintaxe de comando
 
 | Símbolo | Significado | Exemplo |

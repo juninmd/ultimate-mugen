@@ -195,6 +195,10 @@ Validate with `cargo test --release --test native_roster_lab -- --nocapture` (ev
 | `removeTime` | Ticks until it disappears |
 | `priority` | Priority against other projectiles |
 
+### Elements and stun
+
+`hits[]` and `projectile` accept `element` (`fire`, `ice`, `lightning`, `earth`, `wind`, `water`) and `stun` (extra hit-stun ticks). The compiler adds the element's hit-stun and shake and tints the victim for a moment (`PalFX`): `ice` freezes longest (+16), `lightning` shocks (+22 and a 8-tick shake), `fire` burns red, `earth` shakes the screen, `wind` and `water` add a short tint. `stun` stacks on top and adds a 5-tick shake when none is set. Unknown elements are ignored.
+
 ### Command syntax
 
 | Symbol | Meaning | Example |

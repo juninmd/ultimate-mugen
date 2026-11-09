@@ -18,7 +18,7 @@ pub(super) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_proj: bool) 
     let launch = h.launch.unwrap_or(false);
     let air = h.air_knockback.unwrap_or([kb[0] * 0.8, if launch { -6.0 } else { -3.5 }]);
     let stop = h.hitstop.unwrap_or(lv.stop);
-    let stun = h.hitstun.unwrap_or(lv.stun);
+    let stun = h.hitstun.unwrap_or(lv.stun) + crate::native::element::extra_stun(h.element.as_deref(), h.stun);
     let spark = h.spark.unwrap_or(match h.level.as_deref() { Some("heavy") => 2, Some("light") => 0, _ => 1 });
     let prio = h.priority.unwrap_or(4);
     let hflag = h.hitflag.as_deref().unwrap_or("MAF");
@@ -35,17 +35,18 @@ pub(super) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_proj: bool) 
         launch as i32, (launch || h.level.as_deref() == Some("heavy")) as i32,
         (damage * 1.2).round(), (damage * 0.5).round(), (damage * 0.6).round(), (damage * 0.3).round());
     if let Some(t) = h.shake { s += &format!("envshake.time = {t}\n"); }
+    s += &crate::native::element::hitdef_lines(h.element.as_deref(), h.stun, h.shake);
     if let Some(cp) = h.cornerpush { s += &format!("ground.cornerpush.veloff = {cp}\n"); }
     if h.ground_bounce.unwrap_or(false) { s += "fall.damage = 15\nfall.envshake.time = 8\ndown.bounce = 1\n"; }
     if h.wall_bounce.unwrap_or(false) { s += "fall.damage = 15\nfall.envshake.time = 8\nwall.bounce = 1\n"; }
     s
 }
 
-pub(super) fn hitdef_projectile(damage: f32, lvl: Option<&str>, kb: Option<[f32; 2]>, launch: bool, attr: &str) -> String {
+pub(super) fn hitdef_projectile(damage: f32, lvl: Option<&str>, kb: Option<[f32; 2]>, launch: bool, attr: &str, element: Option<&str>, stun: Option<i32>) -> String {
     let spec = HitSpec {
         at: 0, damage, guard_damage: None, level: lvl.map(|s| s.into()), guard: None, knockback: kb, air_knockback: None,
         launch: Some(launch), hitstop: None, hitstun: None, spark: None, shake: None, priority: Some(4), hitflag: None,
-        pausetime: None, cornerpush: None, hit_sound: None, guard_sound: None, spark_pos: None, ground_bounce: None, wall_bounce: None,
+        pausetime: None, cornerpush: None, hit_sound: None, guard_sound: None, spark_pos: None, ground_bounce: None, wall_bounce: None, element: element.map(|e| e.into()), stun,
     };
     hitdef_from_spec(&spec, 1.0, attr, true)
 }

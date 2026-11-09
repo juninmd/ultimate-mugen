@@ -3013,7 +3013,8 @@
      46,
      -68
     ],
-    "damage": 80
+    "damage": 80,
+    "element": "lightning"
    }
   },
   {
@@ -3082,7 +3083,8 @@
      "damage": 87,
      "level": "heavy",
      "guard": "high",
-     "shake": 8
+     "shake": 8,
+     "element": "earth"
     }
    ]
   },
@@ -3125,7 +3127,8 @@
      "knockback": [
       -1,
       0
-     ]
+     ],
+     "element": "lightning"
     },
     {
      "at": 6,
@@ -3134,7 +3137,8 @@
      "knockback": [
       -4,
       -2
-     ]
+     ],
+     "element": "lightning"
     }
    ],
    "armor": {
@@ -3173,7 +3177,8 @@
      "knockback": [
       -1,
       -3
-     ]
+     ],
+     "element": "earth"
     }
    ]
   },
@@ -3225,7 +3230,8 @@
     "removeTime": 44,
     "level": "heavy",
     "launch": true,
-    "priority": 6
+    "priority": 6,
+    "element": "lightning"
    }
   },
   {
@@ -3260,31 +3266,36 @@
      "at": 4,
      "damage": 40,
      "level": "medium",
-     "guard": "low"
+     "guard": "low",
+     "element": "earth"
     },
     {
      "at": 6,
      "damage": 40,
      "level": "medium",
-     "guard": "low"
+     "guard": "low",
+     "element": "earth"
     },
     {
      "at": 8,
      "damage": 40,
      "level": "medium",
-     "guard": "low"
+     "guard": "low",
+     "element": "earth"
     },
     {
      "at": 10,
      "damage": 40,
      "level": "medium",
-     "guard": "low"
+     "guard": "low",
+     "element": "earth"
     },
     {
      "at": 12,
      "damage": 40,
      "level": "medium",
-     "guard": "low"
+     "guard": "low",
+     "element": "earth"
     },
     {
      "at": 14,
@@ -3296,7 +3307,8 @@
       -3,
       -8
      ],
-     "shake": 10
+     "shake": 10,
+     "element": "earth"
     }
    ]
   }

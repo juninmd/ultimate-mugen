@@ -2970,7 +2970,8 @@
      46,
      -68
     ],
-    "damage": 72
+    "damage": 72,
+    "element": "lightning"
    }
   },
   {
@@ -3003,7 +3004,8 @@
      "knockback": [
       -1,
       -3
-     ]
+     ],
+     "element": "lightning"
     },
     {
      "at": 3,
@@ -3013,7 +3015,8 @@
      "knockback": [
       -3,
       -8
-     ]
+     ],
+     "element": "lightning"
     }
    ],
    "cancels": [
@@ -3173,7 +3176,8 @@
     "removeTime": 44,
     "level": "heavy",
     "launch": true,
-    "priority": 6
+    "priority": 6,
+    "element": "lightning"
    }
   },
   {
@@ -3204,7 +3208,8 @@
      "hits": 3,
      "level": "heavy",
      "removeTime": 70,
-     "priority": 6
+     "priority": 6,
+     "element": "lightning"
     },
     {
      "at": 4,
@@ -3222,7 +3227,8 @@
      "hits": 3,
      "level": "heavy",
      "removeTime": 70,
-     "priority": 6
+     "priority": 6,
+     "element": "lightning"
     },
     {
      "at": 4,
@@ -3240,7 +3246,8 @@
      "hits": 3,
      "level": "heavy",
      "removeTime": 70,
-     "priority": 6
+     "priority": 6,
+     "element": "lightning"
     },
     {
      "at": 4,
@@ -3258,7 +3265,8 @@
      "hits": 3,
      "level": "heavy",
      "removeTime": 70,
-     "priority": 6
+     "priority": 6,
+     "element": "lightning"
     }
    ]
   }

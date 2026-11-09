@@ -3039,7 +3039,8 @@
      -70
     ],
     "damage": 62,
-    "level": "light"
+    "level": "light",
+    "element": "wind"
    },
    "cancels": [
     "clone"
@@ -3139,7 +3140,8 @@
      "damage": 42,
      "level": "medium",
      "launch": false,
-     "hits": 2
+     "hits": 2,
+     "element": "wind"
     },
     {
      "at": 3,
@@ -3156,7 +3158,8 @@
      "damage": 42,
      "level": "medium",
      "launch": false,
-     "hits": 2
+     "hits": 2,
+     "element": "wind"
     },
     {
      "at": 4,
@@ -3173,7 +3176,8 @@
      "damage": 42,
      "level": "medium",
      "launch": false,
-     "hits": 2
+     "hits": 2,
+     "element": "wind"
     },
     {
      "at": 5,
@@ -3190,7 +3194,8 @@
      "damage": 42,
      "level": "medium",
      "launch": false,
-     "hits": 2
+     "hits": 2,
+     "element": "wind"
     },
     {
      "at": 6,
@@ -3207,7 +3212,8 @@
      "damage": 42,
      "level": "medium",
      "launch": true,
-     "hits": 2
+     "hits": 2,
+     "element": "wind"
     }
    ]
   },
@@ -3231,7 +3237,8 @@
       -72
      ],
      "damage": 26,
-     "level": "light"
+     "level": "light",
+     "element": "wind"
     },
     {
      "at": 2,
@@ -3246,7 +3253,8 @@
       -68
      ],
      "damage": 26,
-     "level": "light"
+     "level": "light",
+     "element": "wind"
     },
     {
      "at": 2,
@@ -3261,7 +3269,8 @@
       -64
      ],
      "damage": 26,
-     "level": "light"
+     "level": "light",
+     "element": "wind"
     }
    ]
   },

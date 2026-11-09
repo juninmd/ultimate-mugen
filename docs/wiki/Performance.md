@@ -51,6 +51,7 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 |---|---|---|
 | Palette in the shader | `Gfx::sprite_tex`, `IndexedTexture`, `Palette` | M.U.G.E.N sprites with indexed pixels go to the 8-bit index atlas and are colored by a palette row in the shader: 4x less upload and atlas space than RGBA. `RemapPal` swaps the palette row instead of baking a new RGBA image |
 | Separate atlas resets | `ume_shell::quad` | The RGBA atlas (UI, text, true-color sprites) and the index atlas (+ palette rows) each reset on their own when full, so filling one never forces the other to re-upload |
+| Composite fast paths | `post.wgsl` `fs_composite` | Without radial blur the full-resolution pass takes 1 sample per pixel (3 with chroma) instead of 21, and glass panels skip pixels beyond their shadow reach. Output is unchanged; software-GPU frame time in `UME_TOUR=perf` went from 44 ms to 25 ms |
 
 ## Measuring
 

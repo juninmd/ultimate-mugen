@@ -10,7 +10,7 @@ const bandLuminance = (page, buffer) => page.evaluate(async base64 => {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
   const ctx = canvas.getContext('2d');
   ctx.drawImage(bitmap, 0, 0);
-  const y0 = Math.floor(bitmap.height * 0.08), y1 = Math.floor(bitmap.height * 0.3);
+  const y0 = Math.floor(bitmap.height * 0.8), y1 = Math.floor(bitmap.height * 1.0);
   const data = ctx.getImageData(0, y0, bitmap.width, y1 - y0).data;
   let sum = 0;
   for (let i = 0; i < data.length; i += 4) sum += (data[i] + data[i + 1] + data[i + 2]) / 3;

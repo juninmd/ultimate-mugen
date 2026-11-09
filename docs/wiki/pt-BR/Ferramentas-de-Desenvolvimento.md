@@ -15,4 +15,4 @@ Rode com `cargo run --release -p ume-devtools --bin ume-tools -- <comando>`. A c
 
 ## Ainda em Python
 
-Estes scripts ainda não foram portados: `scripts/gen_story_npcs.py` e `scripts/umf_edit.py` (precisam de JSON que preserve a ordem das chaves), `scripts/native_motion_descriptor.py`, `scripts/preview_native_motion.py`, `scripts/preview_native_scene.py`, `scripts/ability_reel.py`, `scripts/build_motion_showcase.py` (GIF/MP4 com legenda via ffmpeg) e `tools/story_segments.py` (arte procedural de cenário).
+Resta apenas `tools/story_segments.py`: ele desenha as faixas dos cenários do modo história com o gerador aleatório do Python e rasterizadores do Pillow, e a arte já versionada precisa continuar idêntica, então não foi portado. O resto é `ume-tools`: `gen-story-npcs` (idêntico ao script antigo, mas sobrescreve arquivos de NPC que divergiram), `motion-descriptor`, `preview-motion`, `preview-scene`, `ability-reel` (ffmpeg; legendas com fonte bitmap embutida) e a biblioteca `umf_edit` (edição de JSON preservando ordem das chaves e fim de linha). O script avulso da imagem de showcase foi removido; a imagem continua versionada.

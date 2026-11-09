@@ -26,6 +26,7 @@ pub(super) fn mt(pt: &'static str) -> &'static str {
         "Importe personagens, cenários e músicas de qualquer repositório público do GitHub" => tr3("Importe personagens, cenários e músicas de qualquer repositório público do GitHub", "Import characters, stages and music from any public GitHub repository", "Importa personajes, escenarios y música de cualquier repositorio público de GitHub"),
         "Carregando dados locais…" => tr3("Carregando dados locais…", "Loading local data…", "Cargando datos locales…"),
         "REPOSITÓRIOS" => tr3("REPOSITÓRIOS", "REPOSITORIES", "REPOSITORIOS"),
+        "+ Adicionar" => tr3("+ Adicionar", "+ Add", "+ Añadir"),
         "Nenhum repositório ainda." => tr3("Nenhum repositório ainda.", "No repositories yet.", "Aún no hay repositorios."),
         "Pressione U ou toque em Adicionar." => tr3("Pressione U ou toque em Adicionar.", "Press U or tap Add.", "Pulsa U o toca Añadir."),
         "listando…" => tr3("listando…", "listing…", "listando…"),

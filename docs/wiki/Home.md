@@ -19,6 +19,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Character Dossiers](Characters.md) | Players & Creators | Roster bios, portraits, moves, rivalries and home stages |
 | [Compatibility decisions](Compatibility-Decisions.md) | Creators | Features the engine rejects by design and why |
 | [Lua scripts](Lua-Scripts.md) | Creators | What Lua in M.U.G.E.N packs does and the Lua-free alternatives |
+| [Route files](Route-Files.md) | Creators | Arcade routes and unlock rules in TOML |
 | [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
 | [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
@@ -39,6 +40,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Reverse engineering the browser port](Ikemen-Web-Reverse-Engineering.md) | Developers | How a 78-fighter M.U.G.E.N build runs in a browser, and what we took from it |
 | [Replays](Netplay-and-Replays.md#saved-replays-in-the-game-replays) | Players | Saved fights, replay browser, playback speed |
 | [Research: fighting games](Research-Fighting-Games.md) | Developers | Survey of other fighters and prioritized improvement list |
+| [M.U.G.E.N code study](MUGEN-Code-Study.md) | Developers | Goku GT and four Mortal Kombat fighters read line by line |
 | [Fighter study](Fighter-Study.md) | Developers | 50+ fighters surveyed and the moves they inspired |
 | [Stress and resilience](Stress-and-Resilience.md) | Developers | Fuzzing, spawner caps, hot path numbers |
 | [Native animation audit](Native-Animation-Audit.md) | Developers | Pose coverage of the native roster |

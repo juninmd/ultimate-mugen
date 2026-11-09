@@ -531,7 +531,7 @@ impl App {
             },
         );
         self.ui.text(
-            "+ Adicionar",
+            mt("+ Adicionar"),
             lx + lw - 70.0,
             ly + 31.0,
             17.0,
@@ -737,24 +737,7 @@ impl App {
             .as_ref()
             .is_some_and(|k| self.market.listing.contains(k));
         if total == 0 {
-            let msg = if !browse {
-                mt("Nenhum item instalado ainda. Use Explorar para baixar.")
-            } else if cur_repo.is_none() {
-                mt("Adicione um repositório para começar.")
-            } else if listing_now {
-                mt("Lendo o repositório no GitHub…")
-            } else {
-                mt("Nada encontrado aqui (ou ainda não listado). Pressione R para atualizar.")
-            };
-            self.ui.text(
-                msg,
-                rx + rw / 2.0,
-                ry + 240.0,
-                20.0,
-                hex("#a49cc0"),
-                Align::Center,
-                false,
-            );
+            self.market_empty_state(browse, cur_repo.is_some(), listing_now, rx, ry, rw);
         }
         let installing = self.market.current_name();
         for (vi, row) in rows
@@ -969,7 +952,7 @@ impl App {
         if self.clicked_rect(40.0, by, 330.0, 48.0) && !modal {
             acts.push(Act::Back);
         }
-        self.ui.text(mt("U adicionar · T token · Tab explorar/instalados · F filtro · Espaço marca · Enter/Start aplica"), 40.0, 706.0, 13.0, hex("#7d7596"), Align::Left, false);
+        self.ui.text(mt("U adicionar · T token · Tab explorar/instalados · F filtro · Espaço marca · Enter/Start aplica"), 40.0, 702.0, 15.0, hex("#a79fc4"), Align::Left, false);
 
         self.market_entry_modal();
         if !modal {

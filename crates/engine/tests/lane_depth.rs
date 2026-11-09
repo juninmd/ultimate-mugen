@@ -105,3 +105,30 @@ fn the_guard_button_blocks_without_holding_back_and_only_in_lane_mode() {
     let (outside, outside_guarded) = defender_damage(false, k::GUARD);
     assert!(!outside_guarded && outside > 0.0, "the button does nothing outside lane mode");
 }
+
+#[test]
+fn lane_scroll_advances_hero_and_camera_to_the_right_segment() {
+    let mut m = arena(true);
+    let start_hero_x = m.fighters[0].pos.x;
+    let start_cam_x = m.camera.x;
+    m.stage.bound_left = -380.0;
+    m.stage.bound_right = 880.0;
+    m.stage.p1x = 430.0;
+    m.stage.p2x = 570.0;
+    m.lanes.target_x = 500.0;
+    m.lanes.bound_span = 380.0;
+    m.fighters[1].pos.x = 610.0;
+    m.fighters[1].ctrl = false;
+    assert!(m.is_lane_scrolling());
+    for _ in 0..90 {
+        m.tick(&[0, 0]);
+        if !m.is_lane_scrolling() {
+            break;
+        }
+    }
+    assert!(!m.is_lane_scrolling());
+    assert!(m.fighters[0].pos.x > start_hero_x + 250.0);
+    assert!(m.camera.x > start_cam_x + 250.0);
+    assert!((m.stage.bound_left - 120.0).abs() < 1e-3);
+    assert!(m.fighters[0].ctrl && m.fighters[1].ctrl);
+}

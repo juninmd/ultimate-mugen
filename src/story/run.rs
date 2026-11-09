@@ -204,6 +204,24 @@ mod tests {
             assert_ne!(stage.boss, stage.alt_boss);
         }
     }
+
+    #[test]
+    fn wave_villains_have_around_ten_percent_of_protagonist_life_and_advance_right_to_boss() {
+        for stage in STAGES.iter() {
+            for wave in stage.waves {
+                for &id in *wave {
+                    let ratio = super::super::stages::villain_life_ratio(id);
+                    assert!((0.08..=0.12).contains(&ratio), "{id} ratio {ratio} must be ~10%");
+                }
+            }
+            let total = super::super::stages::fights_in(stage);
+            for i in 1..total {
+                let prev = super::super::stages::fight_center(stage, i - 1);
+                let next = super::super::stages::fight_center(stage, i);
+                assert!(next > prev, "fight {i} must advance right ({prev} -> {next})");
+            }
+        }
+    }
 }
 
 #[cfg(test)]

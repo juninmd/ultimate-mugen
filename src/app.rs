@@ -3238,8 +3238,8 @@ impl App {
             }
             return;
         }
-        if let Some(w) = s.over {
-            if s.over_timer > 1.0 && !self.team_next(w) {
+        if let Some((w, t)) = s.over.map(|w| (w, s.over_timer)) {
+            if !self.story_wave_next(w) && t > 1.0 && !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
                 if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad())
                 {

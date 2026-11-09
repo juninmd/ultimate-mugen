@@ -10,6 +10,17 @@ pub struct StageDef {
 
 pub const SEGMENT_WORLD: f32 = 640.0;
 pub const FIGHT_HALF_RANGE: f32 = 100.0;
+pub const VILLAIN_BASE_LIFE_RATIO: f32 = 0.10;
+
+pub fn villain_life_ratio(id: &str) -> f32 {
+    match id.strip_prefix("umf:").unwrap_or(id) {
+        "npc_razor" | "npc_phantom" => 0.09,
+        "npc_spitfire" => 0.10,
+        "npc_brute" => 0.11,
+        "npc_colossus" => 0.12,
+        _ => VILLAIN_BASE_LIFE_RATIO,
+    }
+}
 
 pub fn fights_in(def: &StageDef) -> usize {
     def.waves.len() + 1

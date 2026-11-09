@@ -706,7 +706,7 @@ impl Match {
                 if f.ikemen.standby { bits = 0; }
             }
             if bits & crate::input::k::T != 0 && awaken_len < awaken.len() { awaken[awaken_len] = fi; awaken_len += 1; }
-            k += 1; if self.lanes.active { f.lane_step(bits, &self.lanes); } f.guard_button = self.lanes.active && bits & crate::input::k::GUARD != 0; bits &= !crate::input::k::BRAWLER_MASK;
+            k += 1; if self.lanes.active { f.lane_step(&mut bits, &self.lanes, &self.stage); } f.guard_button = self.lanes.active && bits & crate::input::k::GUARD != 0; bits &= !crate::input::k::BRAWLER_MASK;
             if f.assert_input.1 > 0 { bits |= f.assert_input.0; f.assert_input.1 -= 1; }
             if f.input_shift > 0 { let (b, fa) = (bits, f.facing as i32); for _ in 0..f.input_shift { f.history.push(b, fa); } }
             else if f.input_shift < 0 { f.history.rewind(f.input_shift); }
@@ -783,7 +783,7 @@ impl Match {
         let paused = paused_by.is_some();
         self.update_projectiles(paused);
         self.update_explods(paused);
-        if self.global_asserts & gsf::CAMERAFREEZE == 0 { self.update_camera(); }
+        if !self.lane_scroll_step() && self.global_asserts & gsf::CAMERAFREEZE == 0 { self.update_camera(); }
         if !paused { if let Some(bg) = self.bg.as_mut() { bg.step(); } }
         self.visual_timers();
         self.skip_asserted_announcements();

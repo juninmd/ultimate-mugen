@@ -24,3 +24,14 @@ Each reaction fires with probability `0.35 + 0.6 * skill` and sets a short coold
 | Rounds with stuck fighter | 0 | 0 |
 
 Tests: `cargo test --release -p ume-engine --test ai_tactics` and the unit tests in `ai/tactics.rs`.
+
+## Reading the rival (`ai/reading.rs`)
+
+| Skill | Behaviour |
+|---|---|
+| Reaction delay | The CPU only sees an attack after `(8 - level) * 2` ticks, so low levels block late and level 8 reads at once |
+| Guard height | Blocks low or high from the attack's `guardflag` instead of guessing |
+| Block punish | Rival move was guarded and he is still recovering: answers with a single-input normal (more often at higher levels) |
+| Rival profile | Moving averages of how often the rival jumps and guards: jumpy rivals raise the anti-air chance, turtles raise the attack chance |
+
+Evidence in `docs/evidence/ai-reading/`: `cargo run --release -p ume-engine --example ai_ladder` plays mirror matches between levels (level 8 beats level 3 in 66.7 % to 86.5 % of rounds, level 6 beats 3 in 54.8 % to 81.0 %), and `native_duel` shows 96.7 % to 99.4 % knockouts with the average round going from 54.5 s to 45.6 s.

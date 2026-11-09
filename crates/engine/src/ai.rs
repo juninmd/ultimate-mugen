@@ -2,6 +2,7 @@ use crate::input::{k, InputSource};
 use crate::matchs::Match;
 
 mod charge;
+mod reading;
 mod tactics;
 
 pub struct Ai {
@@ -15,6 +16,7 @@ pub struct Ai {
     ranged_attack: Vec<usize>,
     init: bool,
     last_form: u8,
+    profile: reading::Profile,
 }
 
 impl Ai {
@@ -30,6 +32,7 @@ impl Ai {
             ranged_attack: vec![],
             init: false,
             last_form: u8::MAX,
+            profile: Default::default(),
         }
     }
     pub fn reset(&mut self) {
@@ -147,20 +150,22 @@ impl Ai {
             self.level as f32 / 8.0
         };
         let r = self.r();
-        let threat = e.move_type == 'A' || m.projectiles.iter().any(|p| p.side == e.side);
+        self.profile.observe(e);
+        let threat = self.sees_attack(e) || m.projectiles.iter().any(|p| p.side == e.side);
         if threat
             && dist < 140.0
             && r < (0.25 + skill * 0.6).min(if primordial { 0.75 } else if final_boss { 0.68 } else if boss { 0.55 } else { 1.0 })
             && f.move_type != 'H'
         {
-            self.hold = back | if e.state_type == 'C' || self.r() < 0.3 { k::D } else { 0 };
+            self.hold = self.block_hold(e, back);
             self.hold_ticks = 8 + (self.r() * 10.0) as i32;
             return self.hold;
         }
         let near = if primordial { 135.0 } else if final_boss { 120.0 } else if boss { 105.0 } else { 70.0 };
         let scale = (f.def.local_w / 320.0).clamp(0.5, 2.0);
         let near = near * scale;
-        if let Some(cmd_idx) = self.reaction(m, me, ei, near, skill) {
+        let reply = if self.level >= 3 { self.punish_guarded(m, me, ei, near) } else { None };
+        if let Some(cmd_idx) = reply.or_else(|| self.reaction(m, me, ei, near, skill)) {
             Self::append_seq(&mut self.queue, &f.def.commands[cmd_idx], f.facing);
             return self.queue.pop_front().unwrap_or(0);
         }
@@ -174,7 +179,7 @@ impl Ai {
         if !self.attack.is_empty()
             && (dist < near
                 || (dist > 110.0 * scale && self.r() < 0.08 + skill * if final_boss { 0.28 } else if boss { 0.2 } else { 0.06 }))
-            && self.r() < 0.2 + skill * 0.5
+            && self.r() < 0.2 + skill * 0.5 + self.profile.pressure_bonus()
         {
             if let Some(cmd_idx) = self.pick_attack(m, me, ei, dist >= near) {
                 let c = &f.def.commands[cmd_idx];

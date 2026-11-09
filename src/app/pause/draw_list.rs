@@ -79,8 +79,22 @@ impl App {
                 ui.text(&cost, pr.x + tw / 2.0, mid + 5.5 * f, 15.0 * f, fade(hex(GOLD), a), Align::Center, true);
             }
         }
+        self.list_edge_fade(lay, moves.len(), a);
         unclip();
         self.pause_scrollbar(lay, moves.len(), a);
+    }
+
+    fn list_edge_fade(&self, lay: &Layout, total: usize, a: f32) {
+        let l = lay.list;
+        let band = 26.0;
+        let shade = Color::new(0.03, 0.02, 0.06, 0.85 * a);
+        let clear = Color::new(0.03, 0.02, 0.06, 0.0);
+        if self.pause.scroll > 0.0 {
+            self.ui.gradient_v(l.x, l.y, l.w, band, shade, clear);
+        }
+        if self.pause.scroll < lay.max_scroll(total) {
+            self.ui.gradient_v(l.x, l.y + l.h - band, l.w, band, clear, shade);
+        }
     }
 
     fn pause_scrollbar(&self, lay: &Layout, total: usize, a: f32) {

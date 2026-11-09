@@ -317,7 +317,6 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
         }
         _ => {}
     }
-    // gentle soft clip so layered peaks stay punchy, not harsh
     for x in out.iter_mut() {
         *x = (*x * 0.9).tanh();
     }

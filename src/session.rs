@@ -23,7 +23,6 @@ pub enum Pilot {
     Dummy,
     Replay(Vec<u32>, usize),
 }
-/// Team roster shown by the HUD (sequence / parallel team modes).
 #[derive(Clone, Default)]
 pub struct TeamInfo {
     pub names: [Vec<(String, [u8; 3])>; 2],
@@ -31,7 +30,6 @@ pub struct TeamInfo {
     pub ko: [Vec<bool>; 2],
     pub simul: bool,
 }
-
 pub struct Session {
     pub team: Option<TeamInfo>,
     pub m: Match,
@@ -116,7 +114,7 @@ impl Session {
             },
             ground_k,
         );
-        // face-off at the start of the first round (fighters trade lines before "FIGHT!")
+        
         if !training {
             m.intro_ticks = 170;
         }
@@ -190,7 +188,6 @@ impl Session {
     pub fn speed(&self) -> f32 {
         self.speed
     }
-    /// Advance exactly one simulation tick (frame step while a replay is paused).
     pub fn step_frame(&mut self, c: &mut Controls, audio: &mut Audio) {
         self.step_visual(c, audio);
     }

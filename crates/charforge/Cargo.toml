@@ -16,6 +16,6 @@ path = "src/main.rs"
 [dependencies]
 ume-formats = { path = "../formats" }
 ume-engine = { path = "../engine" }
-miniz_oxide = "0.8"
+miniz_oxide = "0.9"
 serde_json = "1"
-toml = "=0.8.23"
+toml = "=1.2.0"

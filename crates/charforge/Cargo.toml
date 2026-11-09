@@ -1,0 +1,21 @@
+[package]
+name = "ume-charforge"
+version = "0.2.0"
+edition = "2021"
+description = "Offline character toolkit: sprite sheet slicing, palette variants, collision boxes and TOML move generation"
+license = "MIT"
+
+[lib]
+name = "ume_charforge"
+path = "src/lib.rs"
+
+[[bin]]
+name = "charforge"
+path = "src/main.rs"
+
+[dependencies]
+ume-formats = { path = "../formats" }
+ume-engine = { path = "../engine" }
+miniz_oxide = "0.8"
+serde_json = "1"
+toml = "=0.8.23"

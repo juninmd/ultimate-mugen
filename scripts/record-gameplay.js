@@ -6,7 +6,6 @@ const path = require('path');
 const os = require('os');
 const { execSync } = require('child_process');
 const { staticServer } = require('./web-smoke-server');
-const { chromium } = require('playwright');
 
 function parseArgs(argv) {
   const opts = {
@@ -44,6 +43,7 @@ async function driveRecording(opts) {
   const url = `http://127.0.0.1:${port}/index.html`;
 
   const tmpVideoDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ume-rec-'));
+  const { chromium } = require('playwright');
   const browser = await chromium.launch({
     args: [
       '--no-sandbox',

@@ -2,130 +2,12 @@ use crate::gfx::*;
 use std::cell::OnceCell;
 use ume_formats::png::decode_png;
 
-const HIT_SPARK_PNG: &[u8] = include_bytes!("../../assets/fx/hit_spark.png");
-const EXPLOSION_PNG: &[u8] = include_bytes!("../../assets/fx/explosion.png");
-const PUNCH_HIT_PNG: &[u8] = include_bytes!("../../assets/fx/pvfx_punch_hit.png");
-const CRIT_HIT_PNG: &[u8] = include_bytes!("../../assets/fx/pvfx_crit_hit.png");
-const SHOCKWAVE_RING_PNG: &[u8] = include_bytes!("../../assets/fx/pvfx_shockwave_ring.png");
-const GROUND_SLAM_PNG: &[u8] = include_bytes!("../../assets/fx/pvfx_ground_slam.png");
-const PARRY_PNG: &[u8] = include_bytes!("../../assets/fx/pvfx_parry.png");
-const DASH_DUST_PNG: &[u8] = include_bytes!("../../assets/fx/pvfx_dash_dust.png");
-const MAX_SPRITES: usize = 16;
-const KINDS: usize = 8;
+mod kind;
 
-#[derive(Clone, Copy, PartialEq)]
-pub(super) enum SheetKind {
-    HitSpark,
-    Explosion,
-    PunchHit,
-    CritHit,
-    ShockwaveRing,
-    GroundSlam,
-    Parry,
-    DashDust,
-}
+use kind::KINDS;
+pub(super) use kind::SheetKind;
 
-struct SheetSpec {
-    png: &'static [u8],
-    cell: (f32, f32),
-    pivot: (f32, f32),
-    cols: usize,
-    frames: usize,
-    seconds: f32,
-    additive: bool,
-    pixel_art: bool,
-}
-
-impl SheetKind {
-    fn index(self) -> usize {
-        self as usize
-    }
-
-    fn spec(self) -> SheetSpec {
-        match self {
-            SheetKind::HitSpark => SheetSpec {
-                png: HIT_SPARK_PNG,
-                cell: (32.0, 32.0),
-                pivot: (16.0, 16.0),
-                cols: 9,
-                frames: 9,
-                seconds: 0.2,
-                additive: true,
-                pixel_art: false,
-            },
-            SheetKind::Explosion => SheetSpec {
-                png: EXPLOSION_PNG,
-                cell: (100.0, 100.0),
-                pivot: (50.0, 50.0),
-                cols: 6,
-                frames: 22,
-                seconds: 0.55,
-                additive: true,
-                pixel_art: false,
-            },
-            SheetKind::PunchHit => SheetSpec {
-                png: PUNCH_HIT_PNG,
-                cell: (48.0, 40.0),
-                pivot: (17.0, 21.0),
-                cols: 8,
-                frames: 11,
-                seconds: 0.66,
-                additive: false,
-                pixel_art: true,
-            },
-            SheetKind::CritHit => SheetSpec {
-                png: CRIT_HIT_PNG,
-                cell: (96.0, 80.0),
-                pivot: (48.0, 40.0),
-                cols: 8,
-                frames: 11,
-                seconds: 0.77,
-                additive: false,
-                pixel_art: true,
-            },
-            SheetKind::ShockwaveRing => SheetSpec {
-                png: SHOCKWAVE_RING_PNG,
-                cell: (120.0, 52.0),
-                pivot: (60.0, 30.0),
-                cols: 8,
-                frames: 16,
-                seconds: 1.12,
-                additive: false,
-                pixel_art: true,
-            },
-            SheetKind::Parry => SheetSpec {
-                png: PARRY_PNG,
-                cell: (96.0, 80.0),
-                pivot: (48.0, 38.0),
-                cols: 8,
-                frames: 13,
-                seconds: 0.78,
-                additive: false,
-                pixel_art: true,
-            },
-            SheetKind::DashDust => SheetSpec {
-                png: DASH_DUST_PNG,
-                cell: (68.0, 32.0),
-                pivot: (24.0, 28.0),
-                cols: 8,
-                frames: 13,
-                seconds: 0.78,
-                additive: false,
-                pixel_art: true,
-            },
-            SheetKind::GroundSlam => SheetSpec {
-                png: GROUND_SLAM_PNG,
-                cell: (128.0, 64.0),
-                pivot: (64.0, 44.0),
-                cols: 8,
-                frames: 19,
-                seconds: 1.33,
-                additive: false,
-                pixel_art: true,
-            },
-        }
-    }
-}
+const MAX_SPRITES: usize = 20;
 
 struct SheetSprite {
     kind: SheetKind,
@@ -169,8 +51,24 @@ impl SheetFx {
         }
     }
 
-    pub(super) fn guard(&mut self, x: f32, y: f32, size: f32) {
+    pub(super) fn guard(&mut self, x: f32, y: f32, size: f32, frost_at: Option<(f32, f32)>) {
         self.spawn(SheetKind::Parry, x, y, size, 0.0);
+        if let Some((fx, fy)) = frost_at {
+            self.spawn(SheetKind::FrostNova, fx, fy, 120.0, 0.0);
+        }
+    }
+
+    pub(super) fn super_cast(&mut self, x: f32, chest_y: f32, feet: f32) {
+        self.spawn(SheetKind::LightningStrike, x, feet, 110.0, 0.0);
+        self.spawn(SheetKind::StaticBurst, x, chest_y, 100.0, 0.0);
+    }
+
+    pub(super) fn transform(&mut self, x: f32, feet: f32) {
+        self.spawn(SheetKind::FirePillar, x, feet, 96.0, 0.0);
+    }
+
+    pub(super) fn knockout(&mut self, x: f32, feet: f32) {
+        self.spawn(SheetKind::SmokeBomb, x, feet, 120.0, 0.0);
     }
 
     #[allow(clippy::too_many_arguments)]

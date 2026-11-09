@@ -75,6 +75,7 @@ pub struct Settings {
     pub pal1: usize,
     pub pal2: usize,
     pub grid: usize,
+    pub sort: usize,
     pub lang: crate::i18n::Lang,
 }
 
@@ -109,6 +110,7 @@ impl Default for Settings {
             pal1: 1,
             pal2: 1,
             grid: 1,
+            sort: 0,
             lang: crate::i18n::Lang::En,
         }
     }

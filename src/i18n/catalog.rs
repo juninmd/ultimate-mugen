@@ -63,6 +63,14 @@ catalog! {
     "select.filter_all" => "ALL", "TODOS";
     "select.filter_originals" => "ORIGINALS", "ORIGINAIS";
     "select.filter_mugen" => "M.U.G.E.N", "M.U.G.E.N";
+    "select.sort_roster" => "ROSTER", "ELENCO";
+    "select.sort_force" => "FORCE", "FORÇA";
+    "select.sort_life" => "LIFE", "VIDA";
+    "select.sort_speed" => "SPEED", "VELOCIDADE";
+    "select.sort_name" => "NAME", "NOME";
+    "select.stat_force" => "FOR", "FOR";
+    "select.stat_life" => "VID", "VID";
+    "select.stat_speed" => "VEL", "VEL";
     "select.filter_bosses" => "BOSSES", "CHEFES";
 
     "results.rematch" => "Rematch", "Revanche";

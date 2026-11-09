@@ -32,8 +32,9 @@ mod survival;
 mod update_banner;
 mod results_stats;
 mod select_category;
-mod select_grid;
+mod select_grid; mod select_stats;
 mod versus;
+mod menu_view;
 use select_category::CATEGORY_COUNT;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
@@ -959,22 +960,7 @@ impl App {
         self.menu_backdrop(cur_v);
         let ui = &self.ui;
         let accent = crate::menu_art::accent_of(cur_v);
-        crate::menu_art::glass(ui, -400.0, 0.0, 400.0 + 600.0, VH, 1.0);
-        ui.rect(
-            -400.0,
-            0.0,
-            400.0 + 600.0,
-            VH,
-            Color::new(0.0, 0.0, 0.0, 0.18),
-        );
-        ui.rect(
-            600.0,
-            0.0,
-            3.0,
-            VH,
-            Color::new(accent.r, accent.g, accent.b, 0.8),
-        );
-        ui.logo(250.0, 118.0, 74.0);
+        self.menu_chrome(accent);
         let n = MENU.len();
         let step = 456.0 / n as f32;
         for (i, (key, _)) in MENU.iter().enumerate() {
@@ -1051,103 +1037,7 @@ impl App {
                 );
             }
         }
-        let title = self.menu_text(MENU[cur_v].0);
-        let desc = crate::i18n::t(MENU[cur_v].1);
-        let ta = ((self.menu_art_fade()) * 1.0).clamp(0.0, 1.0);
-        ui.text_bold(
-            &title.to_uppercase(),
-            VW - 60.0,
-            590.0,
-            if title.chars().count() > 12 {
-                44.0
-            } else {
-                64.0
-            },
-            Color::new(1.0, 1.0, 1.0, ta),
-            Color::new(0.05, 0.02, 0.1, ta),
-            Align::Right,
-        );
-        ui.rect(
-            VW - 460.0,
-            608.0,
-            400.0,
-            4.0,
-            Color::new(accent.r, accent.g, accent.b, ta),
-        );
-        ui.text(
-            desc,
-            VW - 60.0,
-            646.0,
-            22.0,
-            Color::new(1.0, 1.0, 1.0, 0.9 * ta),
-            Align::Right,
-            false,
-        );
-        let (nm, nn) = (
-            self.reg.chars.iter().filter(|c| c.mugen).count(),
-            self.playable().len(),
-        );
-        let stats = crate::i18n::fill(
-            crate::i18n::tr3("{nn} lutadores · {st} cenários · {nm} MUGEN", "{nn} fighters · {st} stages · {nm} MUGEN", "{nn} luchadores · {st} escenarios · {nm} MUGEN"),
-            &[("nn", &nn.to_string()), ("st", &self.reg.stages.len().to_string()), ("nm", &nm.to_string())],
-        );
-        ui.text(
-            &stats,
-            VW - 40.0,
-            44.0,
-            20.0,
-            Color::new(1.0, 1.0, 1.0, 0.85),
-            Align::Right,
-            false,
-        );
-        if cur_v <= 8 {
-            ui.text(
-                crate::i18n::tr3("Dificuldade CPU (esq./dir.)", "CPU difficulty (left/right)", "Dificultad CPU (izq./der.)"),
-                VW - 40.0,
-                86.0,
-                16.0,
-                hex("#d8d0f0"),
-                Align::Right,
-                false,
-            );
-            for i in 0..8 {
-                ui.rect(
-                    VW - 40.0 - 8.0 * 26.0 + i as f32 * 26.0,
-                    96.0,
-                    20.0,
-                    12.0,
-                    if i < self.ai_level {
-                        accent
-                    } else {
-                        Color::new(1.0, 1.0, 1.0, 0.18)
-                    },
-                );
-            }
-        }
-        ui.text(
-            &crate::update::build_label(),
-            40.0,
-            VH - 20.0,
-            16.0,
-            hex("#a49cc0"),
-            Align::Left,
-            false,
-        );
-        let pads = &self.c.pad_info;
-        let pad_line = if pads.is_empty() {
-            crate::i18n::tr3("teclado", "keyboard", "teclado").to_string()
-        } else {
-            format!("{} {}", pads.len(), crate::i18n::tr3("controle(s)", "controller(s)", "mando(s)"))
-        };
-        ui.text(
-            &pad_line,
-            560.0,
-            VH - 20.0,
-            16.0,
-            hex("#a49cc0"),
-            Align::Right,
-            false,
-        );
+        self.menu_info(cur_v, accent);
         self.screen = Screen::Menu { cur: cur_v };
         if self.c.pressed(nav::BACK) {
             self.screen = Screen::Title;
@@ -1323,7 +1213,6 @@ impl App {
         );
     }
 
-
     /// Registry indices visible under the current filter (never empty).
     fn char_view(&self) -> Vec<usize> {
         let mut v: Vec<usize> = self
@@ -1342,6 +1231,7 @@ impl App {
                     .unwrap_or(usize::MAX)
             });
         }
+        self.sort_view(&mut v);
         v
     }
 
@@ -1421,9 +1311,7 @@ impl App {
         if is_key_pressed(KeyCode::PageUp) {
             pos = pos.saturating_sub(cols * self.grid_rows());
         }
-        if is_key_pressed(KeyCode::G) {
-            self.cycle_grid();
-        }
+        self.handle_select_keys();
         if is_key_pressed(KeyCode::Home) {
             pos = 0;
         }
@@ -1674,6 +1562,7 @@ impl App {
             self.ui.rect(cx, cy, cw, ch * 0.62, alpha(col, 0.5));
             self.ui
                 .rect(cx, cy + ch * 0.62, cw, ch * 0.38, alpha(col, 0.18));
+            self.draw_tile_force(cx, cy, cw, ch, i);
             let mut got = self.reg.chars[i].peek(1);
             let tile_thumb = if emugen { None } else { self.reg.chars[i].tile_portrait(1) };
             if got.is_none() && tile_thumb.is_none() && !emugen && !loaded_one && !broken && self.reg.chars[i].tile_art_ready() {
@@ -2092,10 +1981,11 @@ impl App {
         self.sel_buf.clear();
         let _ = write!(
             self.sel_buf,
-            "[Tab] {flabel} · {}/{m} · [R] {} · [G] {} · PgUp/PgDn",
+            "[Tab] {flabel} · {}/{m} · [R] {} · [G] {} · [O] {} · PgUp/PgDn",
             pos + 1,
             crate::i18n::t("select.random").to_lowercase(),
-            self.grid_label()
+            self.grid_label(),
+            self.sort_label()
         );
         self.ui.text(
             &self.sel_buf,
@@ -2410,7 +2300,7 @@ impl App {
         let by = py + ph - 72.0;
         self.ui
             .rect(px, by, pw, 72.0, Color::new(0.0, 0.0, 0.05, 0.7));
-        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 66.0);
+        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 66.0); self.draw_stat_gauges(px, by - 4.0, pw, i);
         let nm = self.names_up[i].as_str();
         self.ui.text_bold(
             nm,

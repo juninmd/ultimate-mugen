@@ -21,6 +21,14 @@ pub fn chapter_title(kind: u8, hero_name: &str) -> (&'static str, String) {
             "CLÍMAX · SELO QUEBRADO",
             "DESPERTAR: ECLIPSE ABSOLUTO".to_string(),
         ),
+        4 => (
+            "CLÍMAX CÓSMICO · DUELO DAS ERAS",
+            "DESPERTAR: ECLIPSE PRIMORDIAL".to_string(),
+        ),
+        5 => (
+            "O GOLPE DECISIVO · A QUEDA DO ECLIPSE",
+            "A DERROTA DO SOBERANO DO VAZIO".to_string(),
+        ),
         _ => (
             "EPÍLOGO · ALVORADA",
             format!("A LENDA DE {}", hero_name.to_uppercase()),

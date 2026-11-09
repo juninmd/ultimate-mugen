@@ -39,67 +39,45 @@ pub async fn run(app: &mut App, dir: &str) {
 
     app.mode = Mode::Arcade;
     app.sel = (kaito, oboro, stage(app, "volcano"));
-    app.arcade = Some((vec![oboro, oboro], 0));
+    app.arcade = Some((vec![oboro, oboro, oboro], 0));
     app.ending_shown = false;
 
-    app.screen = Screen::Cutscene {
-        kind: 0,
-        page: 3,
-        t: 5.0,
-    };
+    app.screen = Screen::Cutscene { kind: 0, page: 3, t: 5.0 };
     cap_screen(app, dir, "story-01-opening-kaito", 35).await;
 
-    app.screen = Screen::Cutscene {
-        kind: 1,
-        page: 3,
-        t: 5.0,
-    };
+    app.screen = Screen::Cutscene { kind: 1, page: 3, t: 5.0 };
     cap_screen(app, dir, "story-02-preboss-oboro", 35).await;
 
     app.mode = Mode::Watch;
     app.sel = (kaito, oboro, stage(app, "volcano"));
     app.start_fight().await;
     {
-        let App {
-            session, c, audio, ..
-        } = app;
+        let App { session, c, audio, .. } = app;
         let s = session.as_mut().unwrap();
         for _ in 0..600 {
-            if s.m.round_state == 2 && s.m.fighters[1].ctrl {
-                break;
-            }
+            if s.m.round_state == 2 && s.m.fighters[1].ctrl { break; }
             s.step_visual(c, audio);
         }
         s.m.fighters[1].power = 3000.0;
         s.m.fighters[1].life = s.m.fighters[1].life_max * 0.55;
         s.m.try_transform(1);
-        for _ in 0..110 {
-            s.step_visual(c, audio);
-        }
+        for _ in 0..110 { s.step_visual(c, audio); }
     }
     cap_fight(app, dir, "story-03-boss-phase1-mangekyo").await;
 
     app.session = None;
     app.mode = Mode::Arcade;
     app.sel = (kaito, oboro, stage(app, "spirit"));
-    app.arcade = Some((vec![oboro, oboro], 0));
+    app.arcade = Some((vec![oboro, oboro, oboro], 0));
     app.ending_shown = false;
     app.screen = Screen::Results { winner: 0, cur: 0 };
     frames(app, 2).await;
     if let Screen::Cutscene { kind: 3, .. } = app.screen {
-        app.screen = Screen::Cutscene {
-            kind: 3,
-            page: 3,
-            t: 5.0,
-        };
+        app.screen = Screen::Cutscene { kind: 3, page: 3, t: 5.0 };
     }
     cap_screen(app, dir, "story-04-boss-transform-cutscene", 35).await;
 
-    app.screen = Screen::Cutscene {
-        kind: 3,
-        page: 4,
-        t: 5.0,
-    };
+    app.screen = Screen::Cutscene { kind: 3, page: 4, t: 5.0 };
     cap_screen(app, dir, "story-05-hero-challenge-eclipse", 25).await;
 
     app.screen = Screen::Vs { t: 0.0, step: 0 };
@@ -109,26 +87,18 @@ pub async fn run(app: &mut App, dir: &str) {
 
     app.start_fight().await;
     {
-        let App {
-            session, c, audio, ..
-        } = app;
+        let App { session, c, audio, .. } = app;
         let s = session.as_mut().unwrap();
         s.pilots[0] = Pilot::Cpu(Ai::new(7, 21));
-        for _ in 0..278 {
-            s.step_visual(c, audio);
-        }
+        for _ in 0..278 { s.step_visual(c, audio); }
     }
     cap_fight(app, dir, "story-07-boss-phase2-banner").await;
 
     {
-        let App {
-            session, c, audio, ..
-        } = app;
+        let App { session, c, audio, .. } = app;
         let s = session.as_mut().unwrap();
         for _ in 0..600 {
-            if s.m.round_state == 2 && s.m.fighters[1].ctrl {
-                break;
-            }
+            if s.m.round_state == 2 && s.m.fighters[1].ctrl { break; }
             s.step_visual(c, audio);
         }
         s.m.fighters[0].pos.x = -55.0;
@@ -136,50 +106,73 @@ pub async fn run(app: &mut App, dir: &str) {
         s.m.fighters[1].power = 3000.0;
         let d = s.m.fighters[1].def.clone();
         let st = if d.states.contains_key(&3002) { 3002 } else { 3000 };
-        if d.states.contains_key(&st) {
-            s.m.change_state(1, st, d);
-        }
-        for _ in 0..42 {
-            s.step_visual(c, audio);
-        }
+        if d.states.contains_key(&st) { s.m.change_state(1, st, d); }
+        for _ in 0..42 { s.step_visual(c, audio); }
     }
     cap_fight(app, dir, "story-08-boss-eclipse-super").await;
 
     app.session = None;
     app.mode = Mode::Arcade;
     app.sel = (kaito, oboro, stage(app, "spirit"));
-    app.arcade = Some((vec![oboro, oboro], 1));
-    app.ending_shown = false;
+    app.arcade = Some((vec![oboro, oboro, oboro], 1));
     app.screen = Screen::Results { winner: 0, cur: 0 };
     frames(app, 2).await;
-    app.screen = Screen::Cutscene {
-        kind: 2,
-        page: 1,
-        t: 5.0,
-    };
+    app.screen = Screen::Cutscene { kind: 4, page: 0, t: 1.2 };
+    cap_screen(app, dir, "story-14-boss-clash-battle", 30).await;
+
+    app.screen = Screen::Cutscene { kind: 4, page: 4, t: 3.5 };
+    cap_screen(app, dir, "story-15-boss-form3-awakening", 30).await;
+
+    app.arcade = Some((vec![oboro, oboro, oboro], 2));
+    app.screen = Screen::Vs { t: 1.35, step: 0 };
+    cap_screen(app, dir, "story-16-vs-supreme-climax", 2).await;
+
+    app.start_fight().await;
+    {
+        let App { session, c, audio, .. } = app;
+        let s = session.as_mut().unwrap();
+        s.pilots[0] = Pilot::Cpu(Ai::new(8, 21));
+        for _ in 0..278 { s.step_visual(c, audio); }
+    }
+    cap_fight(app, dir, "story-17-boss-form3-primordial-fight").await;
+
+    {
+        let App { session, c, audio, .. } = app;
+        let s = session.as_mut().unwrap();
+        s.m.fighters[0].pos.x = -60.0;
+        s.m.fighters[1].pos.x = 60.0;
+        s.m.fighters[1].power = 3000.0;
+        let d = s.m.fighters[1].def.clone();
+        let st = if d.states.contains_key(&3003) { 3003 } else if d.states.contains_key(&3002) { 3002 } else { 3000 };
+        if d.states.contains_key(&st) { s.m.change_state(1, st, d); }
+        for _ in 0..40 { s.step_visual(c, audio); }
+    }
+    cap_fight(app, dir, "story-18-boss-primordial-super").await;
+
+    app.session = None;
+    app.mode = Mode::Arcade;
+    app.sel = (kaito, oboro, stage(app, "spirit"));
+    app.arcade = Some((vec![oboro, oboro, oboro], 2));
+    app.screen = Screen::Results { winner: 0, cur: 0 };
+    frames(app, 2).await;
+    app.screen = Screen::Cutscene { kind: 5, page: 0, t: 0.85 };
+    cap_screen(app, dir, "story-19-boss-finishing-strike", 30).await;
+
+    app.screen = Screen::Cutscene { kind: 5, page: 4, t: 4.0 };
+    cap_screen(app, dir, "story-20-eclipse-shattered-dawn", 30).await;
+
+    app.screen = Screen::Cutscene { kind: 2, page: 1, t: 5.0 };
     cap_screen(app, dir, "story-09-ending-kaito-quote", 30).await;
 
-    app.screen = Screen::Cutscene {
-        kind: 2,
-        page: 3,
-        t: 5.0,
-    };
+    app.screen = Screen::Cutscene { kind: 2, page: 3, t: 5.0 };
     cap_screen(app, dir, "story-10-ending-kaito-epilogue", 25).await;
 
     app.sel.0 = suzume;
-    app.screen = Screen::Cutscene {
-        kind: 2,
-        page: 1,
-        t: 5.0,
-    };
+    app.screen = Screen::Cutscene { kind: 2, page: 1, t: 5.0 };
     cap_screen(app, dir, "story-11-ending-suzume", 30).await;
 
     app.sel.0 = akio;
-    app.screen = Screen::Cutscene {
-        kind: 2,
-        page: 1,
-        t: 5.0,
-    };
+    app.screen = Screen::Cutscene { kind: 2, page: 1, t: 5.0 };
     cap_screen(app, dir, "story-12-ending-akio", 30).await;
 
     app.cutscene_done(2);

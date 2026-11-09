@@ -522,7 +522,7 @@ impl Match {
         self.zoom_request = None;
         if let Some(bg) = self.bg.as_mut() { bg.reset(); }
         let mut slot = [0usize; 2];
-        let boss_final = self.fighters.iter().any(|f| !f.is_helper && f.def.boss && f.form >= 2);
+        let boss_phase = self.fighters.iter().filter_map(|f| (!f.is_helper && f.def.boss && f.form >= 2).then_some(f.form)).max();
         let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()];
         for i in 0..self.fighters.len() {
             if self.fighters[i].is_helper { continue; }
@@ -547,7 +547,7 @@ impl Match {
             self.change_state(i, 5900, d);
             self.fighters[i].ctrl = false;
         }
-        if boss_final { self.awaken_boss_final(); }
+        if let Some(phase) = boss_phase { self.awaken_boss_phase(phase); }
         if self.team_tag { self.reset_tag_round(); }
         let decider = self.rounds_to_win > 1 && self.wins[0] == self.rounds_to_win - 1 && self.wins[1] == self.rounds_to_win - 1;
         self.announce = Some(Announce { text: if decider { "FINAL ROUND".into() } else { format!("ROUND {}", self.round_no) }, time: 70, total: 70, kind: AnnounceKind::Round });
@@ -743,7 +743,7 @@ impl Match {
             f.state_time += 1;
             if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); }
             // the final boss keeps charging on its own (a super every ~10 s even when not hitting)
-            if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + if f.form >= 2 { 0.85 } else { 0.35 }).min(f.power_max); if f.form >= 2 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.12).min(f.life_max); } }
+            if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + if f.form >= 3 { 1.2 } else if f.form >= 2 { 0.85 } else { 0.35 }).min(f.power_max); if f.form >= 3 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.22).min(f.life_max); } else if f.form >= 2 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.12).min(f.life_max); } }
             if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_used = 0; f.super_defence_mul = 1.0; }
             if f.move_contact > 0 { f.move_contact += 1; }
             if f.move_hit > 0 { f.move_hit += 1; }

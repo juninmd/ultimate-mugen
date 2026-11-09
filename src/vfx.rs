@@ -333,20 +333,11 @@ impl Vfx {
     }
     /// Colour of a fighter's awakened aura: its own colour pushed towards bright.
     pub fn form_color(f: &ume_engine::fighter::Fighter) -> [f32; 3] {
-        if f.def.boss && f.form >= 2 {
-            return [1.0, 0.78, 0.22];
-        }
-        let c = [
-            f.def.color[0] as f32 / 255.0,
-            f.def.color[1] as f32 / 255.0,
-            f.def.color[2] as f32 / 255.0,
-        ];
+        if f.def.boss && f.form >= 3 { return [0.15, 0.92, 1.0]; }
+        if f.def.boss && f.form >= 2 { return [1.0, 0.78, 0.22]; }
+        let c = [f.def.color[0] as f32 / 255.0, f.def.color[1] as f32 / 255.0, f.def.color[2] as f32 / 255.0];
         let mx = c[0].max(c[1]).max(c[2]).max(0.2);
-        [
-            lerp(c[0] / mx, 1.0, 0.18),
-            lerp(c[1] / mx, 1.0, 0.18),
-            lerp(c[2] / mx, 1.0, 0.18),
-        ]
+        [lerp(c[0] / mx, 1.0, 0.18), lerp(c[1] / mx, 1.0, 0.18), lerp(c[2] / mx, 1.0, 0.18)]
     }
     fn ember(
         &mut self,
@@ -678,7 +669,9 @@ impl Vfx {
                         if nm.is_empty() { "DESPERTAR" } else { &nm },
                         col,
                     );
-                    if f.def.boss && f.form >= 2 {
+                    if f.def.boss && f.form >= 3 {
+                        self.banner("ECLIPSE PRIMORDIAL", "FORMA SUPREMA DE MIKAZUKI OBORO", col);
+                    } else if f.def.boss && f.form >= 2 {
                         self.banner("ECLIPSE ABSOLUTO", "FORMA FINAL DE MIKAZUKI OBORO", col);
                     }
                 }
@@ -693,7 +686,9 @@ impl Vfx {
             }
             Event::Fight => {
                 if let Some(b) = m.roots().find(|f| f.def.boss) {
-                    if b.form >= 2 {
+                    if b.form >= 3 {
+                        self.banner("CLÍMAX SUPREMO", "OBORO · ECLIPSE PRIMORDIAL", [0.15, 0.92, 1.0]);
+                    } else if b.form >= 2 {
                         self.banner("DESAFIO FINAL", "OBORO · ECLIPSE ABSOLUTO", [1.0, 0.78, 0.22]);
                     } else {
                         self.banner("CHEFE FINAL", "MIKAZUKI OBORO", [1.0, 0.15, 0.3]);

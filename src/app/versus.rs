@@ -229,16 +229,11 @@ impl App {
                     .filter(|_| !self.reg.chars[b].mugen)
             })
         {
-            self.draw_char_fit(
-                &d,
-                0,
-                pt,
-                950.0 + ro * 1.25,
-                596.0 + bob,
-                520.0,
-                520.0,
-                true,
-            );
+            let b_anim = if self.boss_idx() == Some(b) && self.mode == Mode::Arcade {
+                let c = self.arcade.as_ref().map(|(l, i)| l[..=*i].iter().filter(|&&x| x == b).count()).unwrap_or(0);
+                if c >= 3 { -2000 } else if c == 2 { -1000 } else { 0 }
+            } else { 0 };
+            self.draw_char_fit(&d, b_anim, pt, 950.0 + ro * 1.25, 596.0 + bob, 520.0, 520.0, true);
         }
 
         let line = 0.5 + 0.5 * (self.ui.t * 5.0).sin();
@@ -394,7 +389,10 @@ impl App {
                 format!("{} · {}º vs {}º", tr("EQUIPE SEQUÊNCIA", "TEAM TURNS"), tm.idx[0] + 1, tm.idx[1] + 1)
             }
         } else if let Some((l, i)) = &self.arcade {
-            if *i > 0 && l.get(*i) == l.get(*i - 1) {
+            let bcnt = if self.boss_idx().is_some_and(|b| l.get(*i) == Some(&b)) { l[..=*i].iter().filter(|&&x| Some(x) == self.boss_idx()).count() } else { 0 };
+            if bcnt >= 3 {
+                tr("ARCADE · CLÍMAX SUPREMO: ECLIPSE PRIMORDIAL", "ARCADE · SUPREME CLIMAX: PRIMORDIAL ECLIPSE").to_string()
+            } else if bcnt == 2 {
                 tr("ARCADE · DESAFIO FINAL: ECLIPSE ABSOLUTO", "ARCADE · FINAL CHALLENGE: ABSOLUTE ECLIPSE").to_string()
             } else {
                 format!("ARCADE · {} {}/{}", tr("LUTA", "FIGHT"), i + 1, l.len())

@@ -156,6 +156,8 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `requires` | `{ "life": {"max": 0.5}, "enemyLife": {"min": 0.1, "max": 0.5} }` | Condição de vida: o golpe só inicia enquanto a vida do lutador (`life`) e/ou do rival (`enemyLife`) estiver entre `min` e `max`, como fração da vida máxima (0 a 1). Qualquer limite pode ser omitido. Compila para triggers `life <= lifemax * max` e `enemy,life <= enemy,lifemax * max` |
 | `flight` | `true` | Pairar em 8 direções enquanto o golpe dura |
 
+**Finisher.** Um golpe com `"kind": "finisher"` (use `throw` ou `hits` para o efeito) só fica disponível após um nocaute (`RoundState = 3` e `WinKO`). Quando o round final termina em nocaute e o vencedor tem um finisher, o round espera até 6 segundos em "FINISH HIM" para o vencedor executá-lo; executar (ou o tempo acabar) encerra a espera. Elencos sem finisher não mudam.
+
 ### Traços de combate
 
 - **Gatling automático.** Um golpe sem `cancels` segue o gênero: um normal cancela em qualquer normal *mais forte* (`light` < `medium` < `heavy` pelo maior nível de acerto, empate pela ordem de declaração, então sequências nunca entram em loop), normais em pé ligam nos agachados, normais aéreos encadeiam com aéreos, e todo normal cancela em todo especial e super no contato. Especiais só cancelam em outros especiais por `cancels` explícito; supers cancelam a partir de qualquer golpe.

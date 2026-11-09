@@ -23,6 +23,7 @@ pub mod hitdef;
 pub mod matchs;
 pub mod lane;
 pub mod tag;
+pub mod finish;
 pub mod camera;
 pub mod scene_triggers;
 pub mod common;

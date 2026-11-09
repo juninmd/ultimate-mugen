@@ -157,6 +157,8 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `requires` | `{ "life": {"max": 0.5}, "enemyLife": {"min": 0.1, "max": 0.5} }` | Life condition: the move only starts while the fighter's life (`life`) and/or the rival's (`enemyLife`) is inside `min`..`max`, as a fraction of max life (0 to 1). Either bound may be omitted. Compiles to `life <= lifemax * max` and `enemy,life <= enemy,lifemax * max` triggers |
 | `flight` | `true` | 8-way hover while the move lasts |
 
+**Finisher.** A move with `"kind": "finisher"` (use `throw` or `hits` for the effect) is only available after a KO (`RoundState = 3` and `WinKO`). When the final round ends by KO and the winner has a finisher, the round waits up to 6 seconds on "FINISH HIM" for the winner to perform it; performing it (or the timeout) ends the wait. Rosters with no finisher are unaffected.
+
 ### Combat traits
 
 - **Automatic gatling.** A move without `cancels` follows the genre rules: a normal cancels into any *stronger* normal (`light` < `medium` < `heavy` by the strongest hit level, ties by declaration order, so strings can never loop), ground normals link into crouching ones, air normals chain with air normals, and every normal cancels into every special and super on contact. Specials cancel into other specials only through explicit `cancels`; supers cancel out of any move.

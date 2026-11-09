@@ -164,8 +164,8 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let (cns_start, minus1_start) = (cns.len(), minus1.len());
         let cname = format!("m_{}", m.id);
         let simple_btn = m.input.trim().split('+').all(|t| ["a", "b", "c", "x", "y", "z"].contains(&t.trim()));
-        let mut cdef = parse_command(&cname, &m.input, if m.kind == "super" { 30 } else if m.kind == "special" { 20 } else { 15 }, if simple_btn { 2 } else { 4 });
-        cdef.pause_buffer = if m.kind == "super" { 8 } else if m.kind == "special" { 6 } else { 4 };
+        let mut cdef = parse_command(&cname, &m.input, if m.kind == "super" { 30 } else if m.kind == "special" { 20 } else { 15 }, if simple_btn { 1 } else { 4 });
+        cdef.pause_buffer = if m.kind == "super" { 8 } else if m.kind == "special" { 6 } else if simple_btn { 0 } else { 4 };
         commands.push(cdef);
         let cost = m.cost.unwrap_or(if m.kind == "super" { 1000.0 } else { 0.0 });
         movelist.push(MoveInfo { name: m.name.clone(), input: m.input.clone(), command: cname.clone(), cost, drain: false, forms: forms_mask });

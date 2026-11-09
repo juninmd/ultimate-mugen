@@ -63,6 +63,7 @@
 ## CI and Release
 - Jobs in `.github/workflows/ci.yml`: `release-scripts` (`node --test scripts/*.test.mjs`, `node scripts/file-size.mjs`), `test` (`cargo test --workspace --release` and `mugen_check --strict` over `crates/engine/tests/data/chars`), `wasm` (`cargo build --release --target wasm32-unknown-unknown`), `web-smoke` (`scripts/web-smoke.js` and `scripts/web-story-smoke.js` in Playwright 1.56.1), `android` (`cargo apk`, throwaway keystore), `ios` (`aarch64-apple-ios` build) and `desktop` (3 OSes). `commit-lint.yml` runs `scripts/commit-lint.mjs`.
 - PR title (squash flow) or every commit (merge flow) must be `type(scope)?(!)?: description`, type in `feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert`. A title without a type fails `commit-lint`.
+- Mandatory PR evidence: Every pull request must include visual evidence — screenshots (prints) and animated GIFs whenever possible — documenting changes, before/after states, or test verification directly in the PR description.
 - Releases are automatic on every push to `master` (`release.yml`, `scripts/release-plan.mjs`): `feat` is minor, `fix`/`perf` is patch, `!` or `BREAKING CHANGE:` is major; `docs`/`chore`/`ci`/`test`/`refactor`/`style`/`build` alone cut no release. The git tag is the version source of truth; the build is stamped through `UME_RELEASE_VERSION`, built on Linux, Windows and macOS, verified as a draft and then published. The desktop build self-updates from `latest.json` (`src/update/`, `docs/wiki/Auto-Update.md`).
 - Web deploys to https://juninmd.github.io/ultimate-mugen/ (`pages.yml`) on every `master` merge.
 - Merge policy: Antonio wants PRs merged once CI is green (repo auto-merge is off, so merge manually). Base branch is `master`.
@@ -87,6 +88,7 @@
 - Atlas side is 4096 on desktop/web and 2048 on Android/iOS, clamped by the device limit (`crates/shell/src/platform.rs`).
 
 ## Evidence Conventions
+- **Mandatory PR Visual Evidence**: Every pull request MUST include visual evidence — screenshots (prints) and animated GIFs whenever possible — documenting features, bug fixes, UI/rendering changes, before/after states (`antes-depois`), or test execution runs. Attach them directly to the PR description and the thread reply.
 - Screenshots and reports for a PR go to `/mnt/project-files/<topic>/` (for example `hud-glass/`, `menu/`, `mobile/`, `import-fix/`, `mugen-gogeta/`, `mugen-goku/`), with before/after images named `antes-depois`, and are attached to the thread reply and the PR.
 - MUGEN compatibility QA uses real characters: frames per command in `frames/`, a `commands.md` and a `REPORT.md`/`engine/*.txt` audit per character.
 

@@ -487,16 +487,10 @@ impl App {
         } else {
             usable.get(cur - 1).copied()
         };
-        self.ui.rect(
-            120.0,
-            140.0,
-            VW - 240.0,
-            520.0,
-            Color::new(0.08, 0.05, 0.16, 0.72),
-        );
+        crate::menu_art::glass(&self.ui, 56.0, 136.0, VW - 112.0, 524.0, 1.0);
 
         let mut act_now: Option<(Act, i32, bool)> = focused_row.map(|i| (rows[i].act, dir_v, ok));
-        let (x, w, h) = (150.0, VW - 300.0, 54.0);
+        let (x, w, h) = (88.0, VW - 176.0, 54.0);
         let mut y = 156.0;
         let mut new_cur = cur;
         for (i, r) in rows.iter().enumerate() {

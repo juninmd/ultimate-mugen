@@ -41,6 +41,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Replays](Netplay-and-Replays.md#saved-replays-in-the-game-replays) | Players | Saved fights, replay browser, playback speed |
 | [Research: fighting games](Research-Fighting-Games.md) | Developers | Survey of other fighters and prioritized improvement list |
 | [M.U.G.E.N code study](MUGEN-Code-Study.md) | Developers | Goku GT and four Mortal Kombat fighters read line by line |
+| [CPU tactics](AI-Tactics.md) | Developers | Anti-air, whiff punish, hit confirm and meter rules of the CPU |
 | [Fighter study](Fighter-Study.md) | Developers | 50+ fighters surveyed and the moves they inspired |
 | [Stress and resilience](Stress-and-Resilience.md) | Developers | Fuzzing, spawner caps, hot path numbers |
 | [Native animation audit](Native-Animation-Audit.md) | Developers | Pose coverage of the native roster |

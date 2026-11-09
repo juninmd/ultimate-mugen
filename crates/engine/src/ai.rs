@@ -1,8 +1,8 @@
-use crate::commands::CommandDef;
 use crate::input::{k, InputSource};
 use crate::matchs::Match;
 
 mod charge;
+mod tactics;
 
 pub struct Ai {
     pub level: i32,
@@ -57,28 +57,6 @@ impl Ai {
             rel & 15
         } else {
             (rel & 3) | ((bf & 4) << 1) | ((bf & 8) >> 1)
-        }
-    }
-    fn append_seq(queue: &mut std::collections::VecDeque<u32>, c: &CommandDef, facing: f32) {
-        queue.clear();
-        for s in &c.steps {
-            let d = Self::abs(s.dir, facing);
-            if s.release {
-                queue.push_back(d | s.btns);
-                queue.push_back(d | s.btns);
-                for _ in 0..s.charge {
-                    queue.push_back(d | s.btns);
-                }
-                continue;
-            }
-            if s.btns != 0 {
-                let pd = queue.back().map(|x| x & 15).unwrap_or(0);
-                queue.push_back(if d != 0 { d } else { pd } | s.btns);
-                queue.push_back(0);
-            } else {
-                queue.push_back(d);
-                queue.push_back(d);
-            }
         }
     }
 }
@@ -182,6 +160,10 @@ impl Ai {
         let near = if primordial { 135.0 } else if final_boss { 120.0 } else if boss { 105.0 } else { 70.0 };
         let scale = (f.def.local_w / 320.0).clamp(0.5, 2.0);
         let near = near * scale;
+        if let Some(cmd_idx) = self.reaction(m, me, ei, near, skill) {
+            Self::append_seq(&mut self.queue, &f.def.commands[cmd_idx], f.facing);
+            return self.queue.pop_front().unwrap_or(0);
+        }
         if self.cooldown > 0 {
             self.cooldown -= 1;
             return self.idle(dist, fwd, back);
@@ -194,11 +176,7 @@ impl Ai {
                 || (dist > 110.0 * scale && self.r() < 0.08 + skill * if final_boss { 0.28 } else if boss { 0.2 } else { 0.06 }))
             && self.r() < 0.2 + skill * 0.5
         {
-            let n = if dist < near { self.attack.len() } else { self.ranged_attack.len() };
-            if n > 0 {
-                let r = self.r();
-                let pick = (r * n as f32) as usize % n;
-                let cmd_idx = if dist < near { self.attack[pick] } else { self.ranged_attack[pick] };
+            if let Some(cmd_idx) = self.pick_attack(m, me, ei, dist >= near) {
                 let c = &f.def.commands[cmd_idx];
                 Self::append_seq(&mut self.queue, c, f.facing);
                 self.cooldown = if primordial {
@@ -222,26 +200,5 @@ impl Ai {
             return self.queue.pop_front().unwrap();
         }
         self.idle(dist, fwd, back)
-    }
-}
-
-impl Ai {
-    fn idle(&mut self, dist: f32, fwd: u32, back: u32) -> u32 {
-        if dist > 80.0 {
-            self.hold = fwd;
-            self.hold_ticks = 6 + (self.r() * 10.0) as i32;
-            return fwd;
-        }
-        if dist < 35.0 && self.r() < 0.1 {
-            self.hold = back;
-            self.hold_ticks = 8;
-            return back;
-        }
-        if self.r() < 0.03 {
-            self.hold = k::D;
-            self.hold_ticks = 10;
-            return k::D;
-        }
-        0
     }
 }

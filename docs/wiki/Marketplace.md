@@ -58,3 +58,19 @@ To raise the API limit press `T` and paste a personal access token (no scopes ne
 |---|---|
 | Desktop | type in the game (paste is not available in the game window; type `owner/repo`) |
 | Web and phone browser | the browser's own prompt, with paste |
+
+## Featured repository: zinclee123/mugen_chars
+
+Community roster of M.U.G.E.N characters. Paste a folder link in **Mercado GitHub** (`U`) to install a single character.
+
+| Kind | Link |
+|---|---|
+| Repository | [zinclee123/mugen_chars](https://github.com/zinclee123/mugen_chars) |
+| Characters | [Hinako](https://github.com/zinclee123/mugen_chars/tree/master/Hinako) · [K'](https://github.com/zinclee123/mugen_chars/tree/master/K') · [Lin](https://github.com/zinclee123/mugen_chars/tree/master/Lin) · [MasterRyu](https://github.com/zinclee123/mugen_chars/tree/master/MasterRyu) · [Rugal2nd](https://github.com/zinclee123/mugen_chars/tree/master/Rugal2nd) · [kusanagi-XIII](https://github.com/zinclee123/mugen_chars/tree/master/kusanagi-XIII) |
+| Stages | none in the repository |
+| Music | none in the repository |
+| Packs | none installable (the `.rar` in the repository is not a marketplace pack) |
+
+`98-kim` and `yujiro` are AI patches without sprites: they are not listed as characters and need the original fighter installed first. `MasterRyu` holds four fighters (Ryu, NormalRyu, EvilRyu, MasterRyu) in one folder, so all four appear after installing it.
+
+Smoke test results and evidence: [docs/evidence/mugen-chars-smoke](../evidence/mugen-chars-smoke).

@@ -58,3 +58,19 @@ Para aumentar o limite, aperte `T` e cole um personal access token (não precisa
 |---|---|
 | Desktop | digitar no próprio jogo (colar não funciona na janela do jogo; digite `dono/repo`) |
 | Web e celular | prompt nativo do navegador, com colar |
+
+## Repositório em destaque: zinclee123/mugen_chars
+
+Coleção comunitária de personagens M.U.G.E.N. Cole o link da pasta no **Mercado GitHub** (`U`) para instalar um personagem.
+
+| Tipo | Link |
+|---|---|
+| Repositório | [zinclee123/mugen_chars](https://github.com/zinclee123/mugen_chars) |
+| Personagens | [Hinako](https://github.com/zinclee123/mugen_chars/tree/master/Hinako) · [K'](https://github.com/zinclee123/mugen_chars/tree/master/K') · [Lin](https://github.com/zinclee123/mugen_chars/tree/master/Lin) · [MasterRyu](https://github.com/zinclee123/mugen_chars/tree/master/MasterRyu) · [Rugal2nd](https://github.com/zinclee123/mugen_chars/tree/master/Rugal2nd) · [kusanagi-XIII](https://github.com/zinclee123/mugen_chars/tree/master/kusanagi-XIII) |
+| Stages | nenhum no repositório |
+| Músicas | nenhuma no repositório |
+| Packs | nenhum instalável (o `.rar` do repositório não é um pack do marketplace) |
+
+`98-kim` e `yujiro` são patches de IA sem sprites: não aparecem como personagens e exigem o personagem original instalado antes. `MasterRyu` traz quatro lutadores (Ryu, NormalRyu, EvilRyu, MasterRyu) em uma pasta só, então os quatro aparecem após instalá-la.
+
+Resultados do smoke test e evidências: [docs/evidence/mugen-chars-smoke](../../evidence/mugen-chars-smoke).

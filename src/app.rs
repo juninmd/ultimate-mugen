@@ -34,8 +34,8 @@ mod versus;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
 mod controls_screen;
+mod empty_art;
 pub(crate) use keyedit::KeyEdit;
-
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode {
     Arcade,
@@ -645,9 +645,9 @@ impl App {
                     | Screen::Stages { .. }
             )
         {
-            self.quality_check = 0.0;
-            self.apply_quality();
+            self.quality_check = 0.0; self.apply_quality();
         }
+        if let Some(note) = crate::tweaks::poll(dt) { self.msg = note; }
         if self.msg != self.msg_seen {
             self.msg_seen.clone_from(&self.msg);
             self.msg_ttl = if self.msg.is_empty() { 0.0 } else { 6.0 };

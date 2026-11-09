@@ -154,6 +154,7 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `parry` | `{ "window": [from, to], "spark" }` | Returns attacks during the animation-element window |
 | `timestop` | ticks | Freezes everyone else |
 | `burst` | `true` | Combo breaker usable while being hit |
+| `requires` | `{ "life": {"max": 0.5}, "enemyLife": {"min": 0.1, "max": 0.5} }` | Life condition: the move only starts while the fighter's life (`life`) and/or the rival's (`enemyLife`) is inside `min`..`max`, as a fraction of max life (0 to 1). Either bound may be omitted. Compiles to `life <= lifemax * max` and `enemy,life <= enemy,lifemax * max` triggers |
 | `flight` | `true` | 8-way hover while the move lasts |
 
 ### Combat traits

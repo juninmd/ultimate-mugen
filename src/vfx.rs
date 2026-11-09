@@ -246,7 +246,6 @@ impl Vfx {
         if self.slow_t <= 0.0 {
             return 1.0;
         }
-        // hold at 25% speed, then ease back to normal
         let t = self.slow_t;
         if t > 0.5 {
             0.25
@@ -1127,6 +1126,7 @@ impl Vfx {
             )
         };
         self.draw_cracks(&tp, s);
+        self.sheets.draw(&tp, s, g.fx_gain, false);
         for p in self
             .parts
             .iter()
@@ -1167,7 +1167,7 @@ impl Vfx {
         }
         // additive
         set_blend(GfxBlend::Add);
-        self.sheets.draw(&tp, s, g.fx_gain);
+        self.sheets.draw(&tp, s, g.fx_gain, true);
         for p in self
             .parts
             .iter()

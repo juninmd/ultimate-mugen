@@ -34,3 +34,4 @@
 ## Effect Sprites
 - [Spark effect](https://opengameart.org/content/spark-effect) by kurohina (CC0): hit spark sheet in `assets/fx/hit_spark.png`.
 - [More Explosions](https://opengameart.org/content/more-explosions) by StumpyStrust (CC0): explosion sheet repacked into `assets/fx/explosion.png`. Details in `assets/fx/CREDITS.md`.
+- [PVFX Foundry](https://nerijs.itch.io/pvfx-foundry) by Pixel VFX Studio (nerijs), CC0 sprite sheets: punch hit, crit hit, shockwave ring, ground slam, parry and dash dust in `assets/fx/`.

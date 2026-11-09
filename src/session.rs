@@ -428,6 +428,7 @@ impl Session {
                     }
                 }
                 Event::StateChange { fighter } => {
+                    if self.m.idx(fighter).map(|i| self.m.fighters[i].state_no == 5400).unwrap_or(false) { audio.sfx("guardbreak"); }
                     Self::stop_flagged(&mut self.flag_sounds, audio, fighter, false)
                 }
                 Event::Hit {

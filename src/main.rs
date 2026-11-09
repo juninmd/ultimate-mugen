@@ -12,6 +12,7 @@ mod keybinds;
 mod market;
 mod import_button;
 mod loading_tips;
+mod match_stats;
 #[cfg(not(target_arch = "wasm32"))]
 mod native_import;
 mod menu_art;

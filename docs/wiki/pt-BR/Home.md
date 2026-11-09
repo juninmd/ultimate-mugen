@@ -24,6 +24,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Flags do AssertSpecial](Flags-AssertSpecial.md) | Criadores | As 77 flags do Ikemen e o efeito de cada uma |
 | [Vida vermelha, tontura e defesa](Sistemas-de-Vida.md) | Criadores | RedLife, DizzyPoints, GuardPoints, estados 5300/5400 e padrões do HitDef |
 | [Screenpacks](Screenpacks.md) | Criadores | Suporte a screenpacks de menu e HUD |
+| [Estudo de screenpacks](Estudo-Screenpacks.md) | Criadores | Diferenciais de screenpacks e o que o motor adotou |
 | [Importar sprite atlas](Importacao-Sprite-Atlas.md) | Criadores | Transformar uma folha de sprites em lutador |
 | [Ferramentas de desenvolvimento](Ferramentas-de-Desenvolvimento.md) | Contribuidores | Ferramentas Rust de build e auditoria (`ume-tools`) |
 | [Ferramentas de sprites](Ferramentas-de-Sprites.md) | Criadores | Fatiar folhas, variantes de paleta, caixas de colisão automáticas |

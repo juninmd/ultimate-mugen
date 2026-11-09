@@ -30,6 +30,7 @@ mod story;
 mod story_screen;
 mod survival;
 mod update_banner;
+mod results_stats;
 mod versus;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
@@ -3434,31 +3435,7 @@ impl App {
         );
         let done =
             self.mode == Mode::Arcade && self.arcade.as_ref().is_some_and(|(l, i)| *i >= l.len());
-        let title = if done {
-            crate::i18n::t("results.arcade_complete").to_string()
-        } else if self.team.is_some() {
-            {
-                let lead = self
-                    .team
-                    .as_ref()
-                    .and_then(|t| t.members[winner.min(1)].first().copied())
-                    .unwrap_or(w);
-                crate::i18n::tf(
-                    "results.team_wins",
-                    &[(
-                        "{name}",
-                        &self.reg.chars[lead]
-                            .name
-                            .split_whitespace()
-                            .next()
-                            .unwrap_or("")
-                            .to_uppercase(),
-                    )],
-                )
-            }
-        } else {
-            crate::i18n::tf("results.wins", &[("{name}", &e.name.to_uppercase())])
-        };
+        let title = self.results_title(winner, w, done);
         let pal = if winner == 1 && self.sel.0 == self.sel.1 {
             2
         } else {
@@ -3485,6 +3462,7 @@ impl App {
             BLACK,
             Align::Left,
         );
+        self.draw_results_stats();
         let can_replay = self.last_fight.is_some();
         let items: Vec<&str> = if can_replay {
             vec![

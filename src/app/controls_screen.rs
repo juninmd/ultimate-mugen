@@ -72,6 +72,7 @@ impl App {
                 true,
             );
         }
+        self.ui.rect(50.0, top + 14.0, 1180.0, 2.0, Color::new(1.0, 1.0, 1.0, 0.18));
         for (i, (act, bits, sep)) in rows.iter().enumerate() {
             let y = top + 18.0 + i as f32 * rh;
             self.ui.rect(

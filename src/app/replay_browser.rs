@@ -520,9 +520,9 @@ impl App {
             self.ui.text(
                 key,
                 x + 110.0,
-                706.0,
-                11.0,
-                Color::new(1.0, 1.0, 1.0, 0.6),
+                707.0,
+                13.0,
+                Color::new(1.0, 1.0, 1.0, 0.78),
                 Align::Center,
                 false,
             );

@@ -96,6 +96,14 @@
 - Bundled MUGEN packs: `assets/mugen/elecbyte.zip`.
 - GitHub marketplace: logic in `crates/market` (listing, safety limits, bundles, downloads), app glue in `src/market.rs`, screen in `src/app/market.rs`, web storage in `web/market.js`. Docs: `docs/wiki/Marketplace.md`.
 
+## Native Pixel-Art Sprite Standard
+- Before generating or replacing a native combat sprite, inspect that fighter's existing pack and select its approved canonical pose for identity. Use the target's old image only to guide pose when it conflicts with the design; Garan's identity anchor is `04_special.png`. Never let another fighter's image define character design.
+- Native combat PNGs use a transparent 400×400 RGBA canvas and retain the pack's scale, floor line, and `meta.json` axes/refHeight. Keep portraits at their existing high-resolution UI-art standard; they do not use the combat canvas.
+- Generate one pose at a time, preserve an explicit mapping from each result to fighter and filename, and review a pilot before generating a sequence. Large concurrent batches can lose result-to-file mapping when generation is interrupted.
+- Require crisp pixel clusters and hard edges. Do not accept antialiasing, blur, gradients, glow, aura, particles, scenery, text, added shadows, or invented details. Effects are permitted only when present in the target pose and explicitly requested.
+- Review candidates next to the fighter's canonical art, prior target, and neighboring poses at native and enlarged sizes. Check identity, pose readability, silhouette, scale, alpha edges, and unintended effects independently. Keep candidates separate until approved; after integration, rebuild and inspect the labeled contact sheet. Structural coverage does not prove visual quality.
+- See `.agents/skills/ume-character-creator/references/guia_sprites_rig_e_pixel.md` for the prompt template, identity-reference hierarchy, normalization, portrait exception, and full review workflow.
+
 ## Repository Map
 - `docs/wiki/` (EN) and `docs/wiki/pt-BR/` (PT): the wiki, indexed by `Home.md`. `docs/assets/` holds README media; `docs/evidence/` and `docs/research/` hold audit output.
 - `.agents/skills/`: agent skills (`mugen-character-creator`, `ume-character-creator`, `ume-stage-creator`). One copy only; do not duplicate them elsewhere.

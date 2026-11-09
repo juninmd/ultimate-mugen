@@ -19,6 +19,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Character Dossiers](Characters.md) | Players & Creators | Roster bios, portraits, moves, rivalries and home stages |
 | [Compatibility decisions](Compatibility-Decisions.md) | Creators | Features the engine rejects by design and why |
 | [Lua scripts](Lua-Scripts.md) | Creators | What Lua in M.U.G.E.N packs does and the Lua-free alternatives |
+| [Route files](Route-Files.md) | Creators | Arcade routes and unlock rules in TOML |
 | [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
 | [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
@@ -43,6 +44,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Fighter study](Fighter-Study.md) | Developers | 50+ fighters surveyed and the moves they inspired |
 | [Stress and resilience](Stress-and-Resilience.md) | Developers | Fuzzing, spawner caps, hot path numbers |
 | [Native animation audit](Native-Animation-Audit.md) | Developers | Pose coverage of the native roster |
+| [Authoring tool survey](Authoring-Tool-Survey.md) | Developers | What Fighter Factory Studio checks and how to match it |
 | [Research: story mode](Research-Story-Mode.md) | Developers | Survey behind the story mode design |
 | [Media capture](Media-Capture.md) | Developers | Screenshots and GIFs from the web build in headless Chromium |
 | [Troubleshooting](Troubleshooting.md) | Everyone | Common errors and diagnostic tools |

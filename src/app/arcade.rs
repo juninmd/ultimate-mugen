@@ -4,11 +4,15 @@ use crate::controls::nav;
 use crate::gfx::*;
 use crate::ui::*;
 
+mod route;
+
 impl App {
     pub(crate) fn playable(&self) -> Vec<usize> {
         (0..self.reg.chars.len())
             .filter(|&i| {
-                if !self.reg.chars[i].boss {
+                if !self.route_allows(i) {
+                    false
+                } else if !self.reg.chars[i].boss {
                     true
                 } else {
                     let id = self.reg.chars[i].id.strip_prefix("umf:").unwrap_or(&self.reg.chars[i].id);
@@ -106,6 +110,11 @@ impl App {
                 }
             })
             .is_some();
+        let routed = self.route_ladder(me, mate, &ladder, boss);
+        let has_boss = has_boss && routed.is_none();
+        if let Some(route_ladder) = routed {
+            ladder = route_ladder;
+        }
         self.sel = (me, ladder[0], self.sel.2);
         self.team = mate.map(|m| Team::new(vec![me, m], vec![ladder[0]], true));
         self.team_pal = if mate.is_some() {

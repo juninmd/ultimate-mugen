@@ -26,6 +26,7 @@ mod postfx;
 mod registry;
 mod render;
 mod replays;
+mod route;
 mod screenpack;
 mod session;
 mod settings;

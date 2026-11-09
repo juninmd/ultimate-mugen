@@ -35,4 +35,14 @@ pub(crate) async fn grid_presets(app: &mut App, dir: &str) {
         screen(app, dir, &format!("grid-{preset}"), 60).await;
     }
     app.settings.grid = 1;
+    for sort in [0, 1] {
+        app.settings.sort = sort;
+        app.screen = Screen::Select {
+            cur: [find(app, ids[0]), find(app, ids[1])],
+            picking: 0,
+            picked: [None, None],
+        };
+        screen(app, dir, &format!("sort-{sort}"), 60).await;
+    }
+    app.settings.sort = 0;
 }

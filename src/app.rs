@@ -32,7 +32,7 @@ mod survival;
 mod update_banner;
 mod results_stats;
 mod select_category;
-mod select_grid;
+mod select_grid; mod select_stats;
 mod versus;
 mod menu_view;
 use select_category::CATEGORY_COUNT;
@@ -1213,7 +1213,6 @@ impl App {
         );
     }
 
-
     /// Registry indices visible under the current filter (never empty).
     fn char_view(&self) -> Vec<usize> {
         let mut v: Vec<usize> = self
@@ -1232,6 +1231,7 @@ impl App {
                     .unwrap_or(usize::MAX)
             });
         }
+        self.sort_view(&mut v);
         v
     }
 
@@ -1311,9 +1311,7 @@ impl App {
         if is_key_pressed(KeyCode::PageUp) {
             pos = pos.saturating_sub(cols * self.grid_rows());
         }
-        if is_key_pressed(KeyCode::G) {
-            self.cycle_grid();
-        }
+        self.handle_select_keys();
         if is_key_pressed(KeyCode::Home) {
             pos = 0;
         }
@@ -1564,6 +1562,7 @@ impl App {
             self.ui.rect(cx, cy, cw, ch * 0.62, alpha(col, 0.5));
             self.ui
                 .rect(cx, cy + ch * 0.62, cw, ch * 0.38, alpha(col, 0.18));
+            self.draw_tile_force(cx, cy, cw, ch, i);
             let mut got = self.reg.chars[i].peek(1);
             let tile_thumb = if emugen { None } else { self.reg.chars[i].tile_portrait(1) };
             if got.is_none() && tile_thumb.is_none() && !emugen && !loaded_one && !broken && self.reg.chars[i].tile_art_ready() {
@@ -1982,10 +1981,11 @@ impl App {
         self.sel_buf.clear();
         let _ = write!(
             self.sel_buf,
-            "[Tab] {flabel} · {}/{m} · [R] {} · [G] {} · PgUp/PgDn",
+            "[Tab] {flabel} · {}/{m} · [R] {} · [G] {} · [O] {} · PgUp/PgDn",
             pos + 1,
             crate::i18n::t("select.random").to_lowercase(),
-            self.grid_label()
+            self.grid_label(),
+            self.sort_label()
         );
         self.ui.text(
             &self.sel_buf,
@@ -2300,7 +2300,7 @@ impl App {
         let by = py + ph - 72.0;
         self.ui
             .rect(px, by, pw, 72.0, Color::new(0.0, 0.0, 0.05, 0.7));
-        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 66.0);
+        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 66.0); self.draw_stat_gauges(px, by - 4.0, pw, i);
         let nm = self.names_up[i].as_str();
         self.ui.text_bold(
             nm,

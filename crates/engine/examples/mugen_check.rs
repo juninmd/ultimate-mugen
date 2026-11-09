@@ -1,5 +1,5 @@
 //! Load MUGEN characters from folders and run headless CPU-vs-CPU matches to validate compatibility.
-//! Usage: cargo run --release -p ume-engine --example mugen_check -- [--strict] <char_dir>...
+//! Usage: cargo run --release -p ume-engine --example mugen_check -- [--strict] [--lint] <char_dir>...
 use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::common::{common_def, flat_stage};
@@ -10,10 +10,12 @@ use ume_formats::vfs::{add_dir, find_char_defs, Vfs};
 
 fn main() {
     let strict = std::env::args().any(|a| a == "--strict");
+    let lint = std::env::args().any(|a| a == "--lint");
     let mut unsupported_chars = 0;
-    for dir in std::env::args().skip(1).filter(|a| a != "--strict") {
+    for dir in std::env::args().skip(1).filter(|a| a != "--strict" && a != "--lint") {
         let mut vfs = Vfs::new();
         if let Err(e) = add_dir(&mut vfs, std::path::Path::new(&dir), "c") { println!("{dir}: io error {e}"); continue; }
+        if lint { lint_report(&vfs, &dir); }
         for def in find_char_defs(&vfs) {
             let t = std::time::Instant::now();
             let d = match load_mugen_char(&vfs, &def, 1, true) { Ok(d) => Arc::new(d), Err(e) => { println!("FAIL load {def}: {e}"); continue; } };
@@ -51,4 +53,22 @@ fn main() {
         eprintln!("{unsupported_chars} character(s) use unsupported controllers, triggers or parameters");
         std::process::exit(1);
     }
+}
+
+fn lint_report(vfs: &Vfs, dir: &str) {
+    let mut keys: Vec<&String> = vfs.keys().collect();
+    keys.sort();
+    let mut counts: std::collections::BTreeMap<ume_engine::lint::Rule, usize> = Default::default();
+    let mut detail = String::new();
+    for key in keys {
+        let Some(file) = vfs.get(key) else { continue };
+        for issue in ume_engine::lint::lint_file(key, &ume_formats::vfs::text(file.as_slice())) {
+            *counts.entry(issue.rule).or_default() += 1;
+            detail.push_str(&format!("  {}:{} {}: {}\n", issue.file, issue.line, issue.rule.label(), issue.message));
+        }
+    }
+    if counts.is_empty() { println!("LINT {dir}: clean"); return; }
+    let summary: Vec<String> = counts.iter().map(|(r, n)| format!("{n} {}", r.label())).collect();
+    println!("LINT {dir}: {}", summary.join(", "));
+    if std::env::var_os("TRACE").is_some() { print!("{detail}"); }
 }

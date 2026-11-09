@@ -43,7 +43,7 @@ cargo run --release -p ume-engine --example hover_check -- mugen/chars/kfm
 
 | Tool | Shows |
 |---|---|
-| `mugen_check` | Loads and simulates a fight without a window; lists parse errors, invalid states and unsupported controllers, triggers and parameters (`--strict` fails on them) |
+| `mugen_check` | Loads and simulates a fight without a window; lists parse errors, invalid states and unsupported controllers, triggers and parameters (`--strict` fails on them); `--lint` adds source checks: duplicate parameters, invalid `trans`/`postype`/`space` values, `persistent` in negative states, `[State N]` not matching its `[Statedef]`, garbage lines, duplicate `[Command]` keys, duplicate and empty `.air` actions (`TRACE=1` lists each line) |
 | `sprite_audit` | Missing or blank sprites referenced by the `.air` |
 | `hover_check` | Fighter stuck off the floor (`TRACE=1` shows transitions) |
 

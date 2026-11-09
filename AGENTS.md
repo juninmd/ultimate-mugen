@@ -106,7 +106,7 @@
 
 ## Repository Map
 - `docs/wiki/` (EN) and `docs/wiki/pt-BR/` (PT): the wiki, indexed by `Home.md`. `docs/assets/` holds README media; `docs/evidence/` and `docs/research/` hold audit output.
-- `.agents/skills/`: agent skills (`mugen-character-creator`, `ume-character-creator`, `ume-stage-creator`). One copy only; do not duplicate them elsewhere.
+- `.agents/skills/`: agent skills (`mugen-character-creator`, `ume-character-creator`, `ume-stage-creator`, `ume-media-capture`). One copy only; do not duplicate them elsewhere.
 - `scripts/`: build, audit and capture tools; `tools/`: asset generators.
 
 ## External Resource Sources

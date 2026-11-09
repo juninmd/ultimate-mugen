@@ -102,6 +102,8 @@ Percorrer o roster nativo também mostra o atlas ciclando: quatro lutadores deix
 | Zerar atlas | `Renderer::new` | Texturas de atlas e paleta são inicializadas uma vez, então `texSubImage2D` não força mais limpeza lazy (aviso do Firefox) |
 | Retry da surface | `Shell::redraw` | Falha em `get_current_texture` pede novo frame em vez de travar o laço (tela preta) |
 | Loader + cache | `web/index.html`, `web/sw.js` | Progresso do download do wasm, JS e wasm buscados como `?v=<build>` (carimbado pelo `build-web.sh`) e cacheados de forma imutável, então o cache nunca mistura dois builds e recarga automática se o contexto WebGL for perdido |
+| Perfil de build `web` | `Cargo.toml` `[profile.web]`, `scripts/build-web.sh` | O build do navegador usa LTO completo, uma unidade de codegen e `opt-level = "s"`, mantendo `opt-level = 3` nos crates quentes (`ume-engine`, `ume-formats`, `ume-render`, `tiny-skia`, `png`, `miniz_oxide`, `fdeflate`, `simd-adler32`). O wasm foi de 17,9 MB para 13,2 MB (7,6 MB para 6,7 MB com gzip) |
+| Laços de recolor e recorte | `native::recolor`, `native::pixel_fit` | O recolor de paleta usa um cache de cores de mapeamento direto e uma janela de cabelo por linha em vez de `HashMap` e teste de região por pixel; o recorte de sprites varre linhas em vez de colunas. Mesmos pixels (cobertos por testes de referência); o trabalho na thread principal do boot até a luta na sonda de perfil foi de 5,0 s para 4,0 s |
 
 Sonda: `NODE_PATH=$(npm root -g) node scripts/web-profile.js Enter Enter Enter` (Chromium headless, rode `./scripts/build-web.sh` antes).
 

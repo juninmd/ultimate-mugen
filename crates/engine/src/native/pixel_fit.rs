@@ -29,6 +29,7 @@ impl<'a> SpriteMask<'a> {
         }
     }
 
+    #[cfg(test)]
     fn solid(&self, x: usize, y: usize) -> bool {
         self.alpha
             .get((y * self.width + x) * 4 + 3)
@@ -67,10 +68,19 @@ impl<'a> SpriteMask<'a> {
     }
 
     fn trim_pixels(&self, [x0, y0, x1, y1]: [usize; 4]) -> Option<[usize; 4]> {
-        let cols = (x0..x1).filter(|x| (y0..y1).any(|y| self.solid(*x, y)));
-        let (first, last) = (cols.clone().next()?, cols.last()?);
-        let rows = (y0..y1).filter(|y| (first..=last).any(|x| self.solid(x, *y)));
-        Some([first, rows.clone().next()?, last + 1, rows.last()? + 1])
+        let (x1, y1) = (x1.min(self.width), y1.min(self.height));
+        let mut found: Option<[usize; 4]> = None;
+        for y in y0..y1 {
+            let Some(row) = self.alpha.get(y * self.width * 4..(y + 1) * self.width * 4) else { break };
+            let solid = |x: &usize| row[*x * 4 + 3] >= OPAQUE;
+            let Some(first) = (x0..x1).find(solid) else { continue };
+            let last = (x0..x1).rev().find(solid).unwrap_or(first);
+            found = Some(match found {
+                Some([left, top, right, _]) => [left.min(first), top, right.max(last + 1), y + 1],
+                None => [first, y, last + 1, y + 1],
+            });
+        }
+        found
     }
 }
 
@@ -143,4 +153,37 @@ pub(super) fn fit_boxes(render: &mut RigRender, frame: &NativeFrame) {
         .iter()
         .flat_map(|hit| slices(&mask, fit_strike(&mask, bounds, *hit), true))
         .collect();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn slow_trim(mask: &SpriteMask, [x0, y0, x1, y1]: [usize; 4]) -> Option<[usize; 4]> {
+        let cols = (x0..x1).filter(|x| (y0..y1).any(|y| mask.solid(*x, y)));
+        let (first, last) = (cols.clone().next()?, cols.last()?);
+        let rows = (y0..y1).filter(|y| (first..=last).any(|x| mask.solid(x, *y)));
+        Some([first, rows.clone().next()?, last + 1, rows.last()? + 1])
+    }
+
+    #[test]
+    fn row_scan_trim_matches_the_column_scan() {
+        let (width, height) = (37usize, 23usize);
+        let mut seed = 0x2545_F491u32;
+        for round in 0..200 {
+            let mut rgba = vec![0u8; width * height * 4];
+            for pixel in rgba.chunks_exact_mut(4) {
+                seed ^= seed << 13;
+                seed ^= seed >> 17;
+                seed ^= seed << 5;
+                pixel[3] = if seed % (2 + round % 40) == 0 { (seed >> 8) as u8 } else { 0 };
+            }
+            let image = ImageData::new(width as u32, height as u32, rgba);
+            let mask = SpriteMask::new(&image, [0.0, 0.0], 1.0, [0.0, 0.0]);
+            let (a, b) = ((seed >> 4) as usize % width, (seed >> 12) as usize % height);
+            for rect in [[0, 0, width, height], [a, b, width, height], [0, 0, a, b], [a / 2, b / 2, a, b]] {
+                assert_eq!(mask.trim_pixels(rect), slow_trim(&mask, rect), "round {round} rect {rect:?}");
+            }
+        }
+    }
 }

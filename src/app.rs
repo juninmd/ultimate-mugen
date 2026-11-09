@@ -31,7 +31,9 @@ mod story_screen;
 mod survival;
 mod update_banner;
 mod results_stats;
+mod select_category;
 mod versus;
+use select_category::CATEGORY_COUNT;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
 mod controls_screen;
@@ -1327,11 +1329,7 @@ impl App {
         let mut v: Vec<usize> = self
             .playable()
             .into_iter()
-            .filter(|&i| match self.sel_filter {
-                1 => !self.reg.chars[i].mugen,
-                2 => self.reg.chars[i].mugen,
-                _ => true,
-            })
+            .filter(|&i| self.category_matches(i))
             .collect();
         if v.is_empty() {
             v = self.playable();
@@ -1439,7 +1437,7 @@ impl App {
             pos = (get_time() * 1000.0) as usize % m;
         }
         if is_key_pressed(KeyCode::Tab) {
-            self.sel_filter = (self.sel_filter + 1) % 3;
+            self.sel_filter = (self.sel_filter + 1) % CATEGORY_COUNT;
             view = self.char_view();
             if view.len() == self.playable().len() {
                 self.sel_filter = 0;
@@ -2087,11 +2085,7 @@ impl App {
             Align::Center,
             false,
         );
-        let flabel = [
-            crate::i18n::t("select.filter_all"),
-            crate::i18n::t("select.filter_originals"),
-            crate::i18n::t("select.filter_mugen"),
-        ][self.sel_filter as usize % 3];
+        let flabel = self.category_label();
         self.sel_buf.clear();
         let _ = write!(
             self.sel_buf,

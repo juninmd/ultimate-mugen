@@ -57,3 +57,12 @@ Community screenpacks checked by their stated features (no art or layout copied)
 Also noted: the grid in recent Ikemen nightlies is oblique and capped near 80 slots by default, which suggests a single fixed grid model is a weak point for the whole ecosystem.
 
 Caveats: several pages are older (2023 to 2025), and popularity is inferred from forum and listing pages, not download counts.
+
+## Implemented in the second pass
+
+- **Select categories:** Tab now cycles four categories: all, originals (no bosses), M.U.G.E.N, and bosses (`src/app/select_category.rs`). Labels are localized.
+- **Per-element HUD opacity:** the advantage banner, passive meter and guard tag draw at 80, 85 and 90 percent alpha (`src/hud/opacity.rs`, `ume_shell::alpha_scale`). Glass panels from the post pass are not affected yet.
+
+## Grid density evaluation
+
+The grid chooses its column count from the roster size, clamped between 6 and 10 columns over a fixed row count. A configurable density (compact, normal, large) would be a small follow-up: it needs one setting, a cfg key and a settings row. It is not done yet because the settings files are at their size budget and need splitting first. Recommendation: add the three presets after that split, and keep the automatic choice as the default.

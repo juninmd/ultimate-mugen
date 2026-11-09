@@ -53,6 +53,7 @@ pub(super) const ES: &[(&str, &str)] = &[
     ("select.filter_all", "TODOS"),
     ("select.filter_originals", "ORIGINALES"),
     ("select.filter_mugen", "M.U.G.E.N"),
+    ("select.filter_bosses", "JEFES"),
     ("results.rematch", "Revancha"),
     ("results.replay", "Repetición"),
     ("results.characters", "Personajes"),

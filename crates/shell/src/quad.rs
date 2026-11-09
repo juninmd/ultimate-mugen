@@ -112,7 +112,7 @@ impl Color {
     pub const fn new(r: f32, g: f32, b: f32, a: f32) -> Color { Color { r, g, b, a } }
     pub fn from_rgba(r: u8, g: u8, b: u8, a: u8) -> Color { Color::new(r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0, a as f32 / 255.0) }
     pub fn to_array(self) -> [f32; 4] { [self.r, self.g, self.b, self.a] }
-    fn render(self) -> ume_render::Color { ume_render::Color(self.to_array()) }
+    fn render(self) -> ume_render::Color { ume_render::Color(crate::alpha_scale::apply(self.to_array())) }
 }
 
 impl From<[f32; 4]> for Color { fn from(c: [f32; 4]) -> Color { Color::new(c[0], c[1], c[2], c[3]) } }

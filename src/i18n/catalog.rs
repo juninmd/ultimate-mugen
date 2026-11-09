@@ -63,6 +63,7 @@ catalog! {
     "select.filter_all" => "ALL", "TODOS";
     "select.filter_originals" => "ORIGINALS", "ORIGINAIS";
     "select.filter_mugen" => "M.U.G.E.N", "M.U.G.E.N";
+    "select.filter_bosses" => "BOSSES", "CHEFES";
 
     "results.rematch" => "Rematch", "Revanche";
     "results.replay" => "Replay", "Replay";

@@ -1,6 +1,6 @@
 pub mod sprites;
 pub mod audio;
-pub mod quad;
+pub mod alpha_scale; pub mod quad;
 pub mod platform;
 mod screenshot;
 use screenshot::Save;

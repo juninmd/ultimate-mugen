@@ -499,6 +499,9 @@ impl Audio {
     pub fn set_levels(&mut self, master: f32, music: f32, sfx: f32) {
         self.volume = master * sfx;
         self.music_volume = master * music;
+        for v in self.channels.values() {
+            set_sound_volume(&v.sound, self.volume * v.opts.volume.clamp(0.0, 1.5));
+        }
     }
     pub fn sfx(&mut self, k: &str) {
         self.sfx_at(k, 0.0);

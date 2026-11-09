@@ -28,7 +28,7 @@ Derivado do estudo estático do Fighter Factory Studio (ver `docs/wiki/Authoring
 - Liste o uso de `var`, `fvar` e `sysvar` por arquivo e por helper; um mesmo índice com dois significados é bug.
 - `var` fica em 0 a 59, `fvar` em 0 a 39 e `sysvar` em 0 a 4; índices de persistência (`IntPersistIndex`, `FloatPersistIndex`) não colidem com variáveis temporárias.
 - Todo `ChangeState` e `SelfState` aponta para um estado que existe, toda `ChangeAnim` para uma ação que existe, todo `AnimElem` para um elemento que existe.
-- O motor escolhe o início do guard pelo `statetype` do defensor: S vai ao estado 150, C ao 152, A ao 154. Defensor em outro tipo (por exemplo `L`) dispara "wrong move type". Garanta que 150, 152 e 154 existam.
+- Ao defender um golpe, o motor escolhe o estado de reação pelo `statetype` do defensor: S entra no estado 150, C no 152, A no 154 (valores lidos na DLL; confira os nomes no common1 do motor alvo). Defensor em outro tipo (por exemplo `L`) dispara "wrong move type". Garanta que 150, 152 e 154 existam.
 - `RemapPal` em Helper e Explod aponta para grupos e índices de paleta reais.
 - `Explod` com `bindtime` ou bind id inexistente não prende em nada; confira o `id`.
 - `PalFX`: `time`, `add`, `mul` dentro de faixa válida.

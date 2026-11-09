@@ -9,7 +9,7 @@ Static study of a public Windows build of Fighter Factory Studio (FFS 3, portabl
 
 ## Disassembly pass (radare2)
 
-Hopper and IDA are commercial and Ghidra's host is blocked by the network policy; Rizin is not in the package repositories. radare2 5.5 (Ubuntu) was used instead, read-only on the 32-bit `ff.mugen.dll`, nothing executed. Confirmed so far: the guard handler branches on the defender state type, value 1 starts state 150, 2 starts 152, 3 starts 154, anything else prints "Guard state error: wrong move type". So the warning is about the defender's `statetype`, not the attacker's `movetype`. The remaining messages are still unconfirmed against code.
+Hopper and IDA are commercial and Ghidra's host is blocked by the network policy; Rizin is not in the package repositories. radare2 5.5 (Ubuntu) was used instead, read-only on the 32-bit `ff.mugen.dll`, nothing executed. Confirmed so far: the guard handler branches on the defender state type, value 1 enters state 150, 2 enters 152, 3 enters 154 (the reaction to a guarded hit; state names should be checked against the target engine's common1), anything else prints "Guard state error: wrong move type". So the warning is about the defender's `statetype`, not the attacker's `movetype`. The remaining messages are still unconfirmed against code.
 
 ## What the package contains
 

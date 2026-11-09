@@ -102,7 +102,7 @@ impl App {
             (crate::i18n::t("select.stat_speed"), fraction(s.speed, 6.0), hex("#3fa9ff")),
         ];
         let third = pw / 3.0;
-        self.ui.rect(px, y - 14.0, pw, 14.0, Color::new(0.0, 0.02, 0.06, 0.78));
+        self.ui.rect(px + 8.0, y + 1.0, pw - 16.0, 1.0, Color::new(1.0, 1.0, 1.0, 0.12));
         for (k, (label, f, col)) in rows.iter().enumerate() {
             let x = px + k as f32 * third + 6.0;
             self.ui.text(label, x, y - 2.0, 11.0, WHITE, Align::Left, true);

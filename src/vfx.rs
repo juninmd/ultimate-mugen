@@ -14,6 +14,7 @@ mod dash;
 mod cost_tests;
 mod impact;
 mod ko;
+mod shock;
 mod sheet;
 mod speed_lines;
 pub mod quality;
@@ -1240,17 +1241,7 @@ impl Vfx {
                 );
             }
         }
-        for r in &self.rings {
-            let t = r.t / r.dur;
-            let e = 1.0 - (1.0 - t).powi(3);
-            let c = tp(r.x, r.y);
-            poly::ring(
-                c,
-                lerp(r.r0, r.r1, e) * s,
-                (r.w * (1.0 - t) + 0.4) * s,
-                Color::new(r.col[0], r.col[1], r.col[2], (1.0 - t) * 0.9),
-            );
-        }
+        self.draw_rings(&tp, s, if g.post.shockwaves_on() { g.post.look.shockwave } else { 0.0 });
         set_blend(GfxBlend::Alpha);
         // damage numbers / labels
         for f in &self.floats {

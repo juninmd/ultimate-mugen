@@ -1,4 +1,4 @@
-struct Params { p0: vec4<f32>, p1: vec4<f32>, p2: vec4<f32>, p3: vec4<f32>, p4: vec4<f32>, glass: array<vec4<f32>, 32> }
+struct Params { p0: vec4<f32>, p1: vec4<f32>, p2: vec4<f32>, p3: vec4<f32>, p4: vec4<f32>, p5: vec4<f32>, p6: vec4<f32>, p7: vec4<f32>, p8: vec4<f32>, p9: vec4<f32>, waves: array<vec4<f32>, 8>, glass: array<vec4<f32>, 32> }
 
 @group(0) @binding(0) var<uniform> u: Params;
 @group(0) @binding(1) var src: texture_2d<f32>;
@@ -21,7 +21,10 @@ fn vs_full(@builtin(vertex_index) i: u32) -> VOut {
 fn fs_bright(v: VOut) -> @location(0) vec4<f32> {
     let c = textureSample(src, samp, v.uv).rgb;
     let l = max(c.r, max(c.g, c.b));
-    return vec4<f32>(c * smoothstep(0.58, 0.95, l) * 1.15, 1.0);
+    let k = max(u.p6.z, 0.0001);
+    let soft = clamp(l - u.p6.y + k, 0.0, 2.0 * k);
+    let gain = max(soft * soft / (4.0 * k), l - u.p6.y) / max(l, 0.0001);
+    return vec4<f32>(c * gain * 1.25, 1.0);
 }
 
 @fragment
@@ -79,19 +82,60 @@ fn glass_layer(base: vec3<f32>, uv: vec2<f32>, blurred: vec3<f32>) -> vec3<f32> 
 
 fn hash(p: vec2<f32>) -> f32 { return fract(sin(dot(p, vec2<f32>(12.9898, 78.233))) * 43758.5453); }
 
+fn aces(x: vec3<f32>) -> vec3<f32> {
+    return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), vec3<f32>(0.0), vec3<f32>(1.0));
+}
+
+fn distortion(uv: vec2<f32>) -> vec2<f32> {
+    let size = u.p4.yz;
+    let px = uv * size;
+    var off = vec2<f32>(0.0);
+    let n = i32(u.p7.w);
+    for (var i = 0; i < n; i++) {
+        let a = u.waves[2 * i];
+        let b = u.waves[2 * i + 1];
+        let d = px - a.xy;
+        let len = max(length(d), 0.001);
+        let k = (len - a.z) / a.w;
+        off += d / len * exp(-k * k) * b.x * a.w * 0.5 / size;
+    }
+    let heat = u.p5.w;
+    if (heat > 0.0) {
+        let mask = 1.0 - smoothstep(0.08, 0.75, length((uv - u.p2.yz) * vec2<f32>(u.p2.w, 1.0)));
+        let ph = u.p1.w * 0.11;
+        off += vec2<f32>(sin(uv.y * 70.0 + ph) + 0.5 * sin(uv.y * 150.0 - ph * 1.7), cos(uv.x * 55.0 + ph * 0.8)) * heat * mask * 0.0014;
+    }
+    return off;
+}
+
+fn grade_color(col: vec3<f32>) -> vec3<f32> {
+    let lit = col * u.p5.y;
+    var c = mix(lit, aces(lit), u.p5.x);
+    let l = dot(c, vec3<f32>(0.299, 0.587, 0.114));
+    let tone = mix(u.p7.xyz, u.p8.xyz, smoothstep(0.12, 0.85, l));
+    return c * mix(vec3<f32>(1.0), tone, u.p5.z);
+}
+
 @fragment
 fn fs_composite(v: VOut) -> @location(0) vec4<f32> {
+    let uvd = v.uv + distortion(v.uv);
     let c = v.uv - u.p2.yz;
     let r = length(c * vec2<f32>(u.p2.w, 1.0));
     let dir = c / max(length(c), 0.0001);
     let ca = u.p0.x * 0.0045 * (0.25 + r);
     var acc = vec3<f32>(0.0);
     for (var i = 0; i < 7; i++) {
-        let p = v.uv - c * u.p2.x * 0.10 * (f32(i) / 6.0);
+        let p = uvd - c * u.p2.x * 0.10 * (f32(i) / 6.0);
         acc += vec3<f32>(textureSample(src, samp, p + dir * ca).r, textureSample(src, samp, p).g, textureSample(src, samp, p - dir * ca).b);
     }
     var col = acc / 7.0;
-    col += textureSample(bloom, samp, v.uv).rgb * u.p0.z;
+    if (u.p6.x > 0.0) {
+        let t = 1.0 / u.p4.yz;
+        let nb = (textureSample(src, samp, uvd + vec2<f32>(t.x, 0.0)).rgb + textureSample(src, samp, uvd - vec2<f32>(t.x, 0.0)).rgb + textureSample(src, samp, uvd + vec2<f32>(0.0, t.y)).rgb + textureSample(src, samp, uvd - vec2<f32>(0.0, t.y)).rgb) * 0.25;
+        col = max(col + (col - nb) * u.p6.x, vec3<f32>(0.0));
+    }
+    col += textureSample(bloom, samp, uvd).rgb * u.p0.z * u.p9.xyz;
+    col = grade_color(col);
     let luma = dot(col, vec3<f32>(0.299, 0.587, 0.114));
     col = mix(vec3<f32>(luma), col, u.p1.x);
     col = (col - 0.5) * u.p1.y + 0.5;

@@ -110,5 +110,8 @@ Created next to the executable on first run (localStorage on web) with the defau
 | `[theme]` | `background` | Menu background base color |
 | `[theme]` | `glow_bottom`, `glow_left`, `glow_right` | Menu light glows |
 | `[hud]` | `p1_tint`, `p2_tint` | Lifebar accent color per side |
+| `[hud]` | `bar_offset_y` | Moves the lifebars down (-4 to 40) |
+| `[rules]` | `rounds_to_win` (1-9), `round_seconds` (0 = no limit, up to 999), `life_percent` (10-500), `game_speed` (0.5-2.0) | Override the Settings menu values for every match; remove the line to go back to the menu value |
+| `[menu]` | `arcade`, `story`, `survival`, `cpu`, `versus`, `training`, `watch`, `team_seq`, `team_simul`, `team_tag`, `mugen`, `market`, `controls`, `settings`, `replays`, `quit` | Text of that main-menu entry |
 
 Colors are `"#rrggbb"` or `"#rgb"`. Plan and comparison with other engines: `docs/research/customization-comparison.md`.

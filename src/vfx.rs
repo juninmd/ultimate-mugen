@@ -1388,7 +1388,7 @@ mod tests {
         let mut v = Vfx::new();
         let mut fired = 0;
         for _i in 0..60 {
-            // one second at 60 fps, a big flash requested every frame
+            
             let before = v.flash_level();
             v.flash = 0.0;
             v.flash_add(0.9);

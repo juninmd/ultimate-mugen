@@ -60,6 +60,35 @@
 - Parallel PRs: put new logic in a new file and wire it with a single line in the shared file (`mod.rs`, `controllers.rs`, `triggers.rs`, `index.json`). No reformatting or renames of shared files inside a feature PR.
 - No `utils.rs`, `helpers.rs`, `misc.rs`, `common.rs` or `manager.rs`: name the concept instead.
 
+## CI and Release
+- Jobs in `.github/workflows/ci.yml`: `release-scripts` (`node --test scripts/*.test.mjs`, `node scripts/file-size.mjs`), `test` (`cargo test --workspace --release` and `mugen_check --strict` over `crates/engine/tests/data/chars`), `wasm` (`cargo build --release --target wasm32-unknown-unknown`), `web-smoke` (`scripts/web-smoke.js` and `scripts/web-story-smoke.js` in Playwright 1.56.1), `android` (`cargo apk`, throwaway keystore), `ios` (`aarch64-apple-ios` build) and `desktop` (3 OSes). `commit-lint.yml` runs `scripts/commit-lint.mjs`.
+- PR title (squash flow) or every commit (merge flow) must be `type(scope)?(!)?: description`, type in `feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert`. A title without a type fails `commit-lint`.
+- Releases are automatic on every push to `master` (`release.yml`, `scripts/release-plan.mjs`): `feat` is minor, `fix`/`perf` is patch, `!` or `BREAKING CHANGE:` is major; `docs`/`chore`/`ci`/`test`/`refactor`/`style`/`build` alone cut no release. The git tag is the version source of truth; the build is stamped through `UME_RELEASE_VERSION`, built on Linux, Windows and macOS, verified as a draft and then published. The desktop build self-updates from `latest.json` (`src/update/`, `docs/wiki/Auto-Update.md`).
+- Web deploys to https://juninmd.github.io/ultimate-mugen/ (`pages.yml`) on every `master` merge.
+- Merge policy: Antonio wants PRs merged once CI is green (repo auto-merge is off, so merge manually). Base branch is `master`.
+
+## Pitfalls
+- Never run `cargo fmt --all`: master is not rustfmt-clean and it rewrites hundreds of unrelated files. Format only new files with `rustfmt --edition 2021 <file>`.
+- The 250-line ceiling and the baseline: files like `render.rs`, `app.rs`, `session.rs`, `i18n.rs` are grandfathered and may not grow by a single line. Put new code in a new file and wire it with one line; remove a baseline entry by hand once a file drops under 250 instead of running `--update` (it rewrites unrelated entries).
+- Cloud container build deps: `libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config`.
+- Importing a character must go through `Registry::import_zip` or `add_vfs_lazy` (identity is `CharEntry.key`/`StageEntry.key` from `ume_formats::vfs::{char_key, stage_key}`); never push entries directly, or duplicates return.
+- Flaky unrelated test: `preview_is_light_and_art_res_scales` (global art_res race); rerun it.
+- The user recreates character and stage art elsewhere: do not touch native character sprites or stages unless explicitly asked (non-art data and new story stage extensions are fine).
+- Never write that the engine will "beat" or "surpass" Ikemen GO; only credit it (and Elecbyte) as inspiration.
+- Never bypass logins or Cloudflare challenges to fetch chars.
+
+## Localization
+- `src/i18n.rs` plus `src/i18n/`: keyed catalogs `catalog.rs` (`EN`, `PT`) and `es_catalog.rs`/`es_phrases.rs` (`ES`), `Lang::{Pt,En,Es}`. Lookup is current locale, then English, then the key (a missing key is logged once). The system language is detected in `i18n/system.rs`. Every new UI string needs en, pt and es entries; `src/i18n/tests.rs` guards the catalogs.
+
+## Native Fighter Data
+- Passives live in `PassiveSpec` (`crates/engine/src/native/types.rs`) and compile to `[Statedef -2]` in `compile_extras.rs::passives_cns`. On master only `meterRegen` and `lifeRegen` exist.
+- Open PRs extend this and are not merged yet: #441 (data-driven `passives.rage` and ability stacks for Bruno and Sylene) and #446 (time-based `enrageTime` passive with a damage ceiling, Oni/Garan up to 5x). Read their code after merge before documenting field names.
+- Other open PRs: #444 (slice the web MUGEN import with real progress and a way out) and #445 (apply master/sfx volume to sounds already playing). The web import is already incremental per pack (`src/webimport.rs`), and the in-game sprite atlas side is 4096 on desktop/web and 2048 on Android/iOS, clamped by the device limit.
+
+## Evidence Conventions
+- Screenshots and reports for a PR go to `/mnt/project-files/<topic>/` (for example `hud-glass/`, `menu/`, `mobile/`, `import-fix/`, `mugen-gogeta/`, `mugen-goku/`), with before/after images named `antes-depois`, and are attached to the thread reply and the PR.
+- MUGEN compatibility QA uses real characters: frames per command in `frames/`, a `commands.md` and a `REPORT.md`/`engine/*.txt` audit per character.
+
 ## Character Directories
 - Built-in UMF: `assets/chars/` (embedded at compile time via `build.rs` and `index.json`).
 - MUGEN Chars: `mugen/chars/<char_name>/` (auto-scanned by `scan_folders()` at startup, git-ignored).

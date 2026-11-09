@@ -1,15 +1,15 @@
 # Kits inspirados em Bleach
 
-Tres lutadores nativos usam ideias de personagens de Bleach. Tudo e dado em `assets/chars/*.json`; nenhum sprite, cenario ou codigo do engine mudou, e os golpes novos reutilizam as animacoes existentes.
+Tres lutadores nativos copiam habilidades de personagens de Bleach. Os nomes dos personagens nao mudam: e so inspiracao. Tudo e dado em `assets/chars/*.json`; nenhum sprite, cenario ou codigo do engine mudou.
 
-## Kaname Fuyutsuki (Byakuya Kuchiki)
+## Kaname Fuyutsuki (estilo Byakuya)
 
-Espadachim nobre e preciso: passos rapidos, cortes finos, petalas. Golpes: Senbonzakura (`frostarc`), Hado 4 Byakurai (`byakurai`, `~D, DF, F, y`), Hado 31 Shakkaho (`shakkaho`, `~D, DB, B, x`), Shunpo (`blinkcut` e `shunpo_behind`, `D, D, a`) e o super Bankai Senbonzakura Kageyoshi (`kageyoshi`, `~D, DF, F, D, DF, F, y`). A regeneracao de energia sobe para 0.5.
+Espadachim nobre e preciso: `byakurai` (`~D, DF, F, y`, raio fino rapido), `shakkaho` (`~D, DB, B, x`, bola vermelha), `shunpo_behind` (`D, D, a`, passo relampago com corte) e o super `kageyoshi` (`~D, DF, F, D, DF, F, y`, tempestade de petalas). Regeneracao de energia sobe para 0.5.
 
-## Suzume Kagerou (Yoruichi Shihoin)
+## Suzume Kagerou (estilo Yoruichi)
 
-Velocidade: Shunpo Flash Goddess (`shadow`), Shunko (`shunko`, `~D, DB, B, y`) e Flash Cat Burst (`flash_cat`, `D, D, b`). Ganho de velocidade por pilha sobe para 0.04.
+`shunko` (`~D, DB, B, y`) e `flash_cat` (`D, D, b`). Ganho de velocidade por pilha sobe para 0.04.
 
-## Shion Kurogane (Kenpachi Zaraki)
+## Shion Kurogane (estilo Zaraki)
 
-Brutamontes com espadao: Reckless Reiatsu Swing (`reckless`, `D, D, x`, armadura de dois golpes), Kenpachi Cleave (`cleave`) e furia a partir de 50% de vida (ate 1.5x) somada ao enrage por tempo.
+`reckless` (`D, D, x`, armadura de dois golpes) e furia a partir de 50% de vida (ate 1.5x) somada ao enrage por tempo.

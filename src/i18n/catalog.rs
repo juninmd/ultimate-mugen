@@ -63,12 +63,17 @@ catalog! {
     "select.filter_all" => "ALL", "TODOS";
     "select.filter_originals" => "ORIGINALS", "ORIGINAIS";
     "select.filter_mugen" => "M.U.G.E.N", "M.U.G.E.N";
+    "select.filter_bosses" => "BOSSES", "CHEFES";
 
     "results.rematch" => "Rematch", "Revanche";
     "results.replay" => "Replay", "Replay";
     "results.characters" => "Characters", "Personagens";
     "results.menu" => "Menu", "Menu";
     "results.arcade_complete" => "ARCADE COMPLETE!", "ARCADE COMPLETO!";
+    "results.time" => "TIME", "TEMPO";
+    "results.best_combo" => "BEST COMBO", "MAIOR COMBO";
+    "results.damage" => "DAMAGE", "DANO";
+    "results.life_left" => "LIFE LEFT", "VIDA RESTANTE";
     "results.wins" => "{name} WINS!", "{name} VENCE!";
     "results.team_wins" => "TEAM {name} WINS!", "TIME {name} VENCEU!";
     "boss.unlocked_oboro" => "★ NEW FIGHTER UNLOCKED: OBORO! ★", "★ NOVO PERSONAGEM DESBLOQUEADO: OBORO! ★";

@@ -81,9 +81,10 @@
 - `src/i18n.rs` plus `src/i18n/`: keyed catalogs `catalog.rs` (`EN`, `PT`) and `es_catalog.rs`/`es_phrases.rs` (`ES`), `Lang::{Pt,En,Es}`. Lookup is current locale, then English, then the key (a missing key is logged once). The system language is detected in `i18n/system.rs`. Every new UI string needs en, pt and es entries; `src/i18n/tests.rs` guards the catalogs.
 
 ## Native Fighter Data
-- Passives live in `PassiveSpec` (`crates/engine/src/native/types.rs`) and compile to `[Statedef -2]` in `compile_extras.rs::passives_cns`. On master only `meterRegen` and `lifeRegen` exist.
-- Open PRs extend this and are not merged yet: #441 (data-driven `passives.rage` and ability stacks for Bruno and Sylene) and #446 (time-based `enrageTime` passive with a damage ceiling, Oni/Garan up to 5x). Read their code after merge before documenting field names.
-- Other open PRs: #444 (slice the web MUGEN import with real progress and a way out) and #445 (apply master/sfx volume to sounds already playing). The web import is already incremental per pack (`src/webimport.rs`), and the in-game sprite atlas side is 4096 on desktop/web and 2048 on Android/iOS, clamped by the device limit.
+- Passives are data in `passives` of a UMF fighter: `PassiveSpec` and its parts in `crates/engine/src/native/passive_spec.rs`, runtime rules in `crates/engine/src/passives.rs` and `passive_time.rs`. Fields: `meterRegen`, `lifeRegen` (compiled to `[Statedef -2]` by `compile_extras.rs::passives_cns`), `rage` (`maxMultiplier`, `exponent`, `startRatio`, `fullRatio`), `stacks` (`damageGain`, `defenceGain`, `speedGain`, `maxStacks`, `decayTicks`, `resetOnRound`, `specials`, `supers`) and `enrageTime` (`maxMultiplier`, `startSeconds`, `rampSeconds`, `exponent`; damage grows with fight time).
+- Hard ceilings in `passives.rs`: `TOTAL_ATTACK_CAP` 8x total damage, `RAGE_MULTIPLIER_CAP` 6x per rule, `STACK_DEFENCE_CAP` 3x, `STACK_SPEED_CAP` 1.5x, `STACK_LIMIT` 30 stacks. Data cannot exceed them; tests are `tests/passives.rs` and `tests/passive_time.rs`.
+- Web MUGEN import is sliced: `ume_formats::vfs::zip_job::ZipJob::step(budget)` inflates a bounded amount per frame so the browser paints real progress and the user can cancel (`src/app/web_import.rs`, `src/webimport.rs`). Keep any new import work incremental on `wasm32`.
+- Atlas side is 4096 on desktop/web and 2048 on Android/iOS, clamped by the device limit (`crates/shell/src/platform.rs`).
 
 ## Evidence Conventions
 - Screenshots and reports for a PR go to `/mnt/project-files/<topic>/` (for example `hud-glass/`, `menu/`, `mobile/`, `import-fix/`, `mugen-gogeta/`, `mugen-goku/`), with before/after images named `antes-depois`, and are attached to the thread reply and the PR.

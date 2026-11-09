@@ -69,3 +69,5 @@ Modules are `.lua` files in `external/mods`, listed in `Common.Modules`, or load
 2. Make the importer detect `.lua` files and report them once per character as "ignored: Lua scripts are not supported", so creators know why a menu or mode is missing.
 3. Add the same line to the `mugen_check` report.
 4. When a real pack depends on its Lua, read the script and port the effect to Rust or data case by case, instead of interpreting arbitrary Lua.
+
+The TOML replacement for arcade paths and unlock conditions is described in [Route files](Route-Files.md).

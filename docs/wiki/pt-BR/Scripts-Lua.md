@@ -69,3 +69,5 @@ Módulos são arquivos `.lua` em `external/mods`, listados em `Common.Modules`, 
 2. Fazer o importador detectar `.lua` e avisar uma vez por personagem: "ignorado: scripts Lua não são suportados", para o criador saber por que falta um menu ou modo.
 3. Incluir a mesma linha no relatório do `mugen_check`.
 4. Quando um pacote real depender do Lua, ler o script e portar o efeito para Rust ou dados caso a caso, sem interpretar Lua arbitrário.
+
+O substituto em TOML para caminhos de arcade e condições de desbloqueio está em [Arquivos de rota](Arquivos-de-Rota.md).

@@ -51,6 +51,7 @@ O motor já roda personagens MUGEN legados direto da pasta ou do zip. Migre para
 | Teleporte (`PosSet` atrás do inimigo) | `abilities.teleport` ou `moves[].teleport` |
 | `ChangeState` de transformação | `abilities.forms[]` |
 | Raiva, regeneração, buffs por var | `passives` (`rage`, `enrageTime`, `stacks`, `lifeRegen`, `meterRegen`) |
+| `life <= lifemax/2`, `p2life <= ...` no gatilho do comando | `requires.life` / `requires.enemyLife` (`min`/`max` em fração da vida) |
 | Cancels com `var(1)`/`movecontact` | `cancels: [ids]` |
 
 ## O que não migra

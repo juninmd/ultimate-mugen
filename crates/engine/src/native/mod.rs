@@ -4,6 +4,7 @@ pub mod ability_spec;
 pub mod passive_spec;
 mod abilities;
 mod armor;
+mod requires;
 mod chain;
 mod multihit;
 mod throw;

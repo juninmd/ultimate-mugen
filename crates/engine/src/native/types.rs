@@ -84,6 +84,15 @@ pub struct ThrowSpec {
     #[serde(default)] pub launch: Option<[f32; 2]>,
 }
 
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct LifeRange { #[serde(default)] pub min: Option<f32>, #[serde(default)] pub max: Option<f32> }
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct MoveRequirements {
+    #[serde(default)] pub life: Option<LifeRange>,
+    #[serde(default, rename = "enemyLife")] pub enemy_life: Option<LifeRange>,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NativeMove {
     pub id: String, pub name: String, pub input: String,
@@ -108,6 +117,7 @@ pub struct NativeMove {
     #[serde(default)] pub timestop: Option<i32>,
     #[serde(default)] pub throw: Option<ThrowSpec>,
     #[serde(default)] pub cancels: Option<Vec<String>>,
+    #[serde(default)] pub requires: Option<MoveRequirements>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

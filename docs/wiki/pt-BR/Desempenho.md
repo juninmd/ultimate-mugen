@@ -444,4 +444,4 @@ etain_mut.
 
 ## Efeitos em sprite-sheet
 
-`src/vfx/sheet.rs` toca sheets de efeito CC0 de `assets/fx/` (embutidas com `include_bytes!`, decodificadas e enviadas à GPU no primeiro desenho). Uma faísca de impacto toca em todo golpe não bloqueado; uma explosão toca em golpes de 150 de dano ou mais e no KO. No máximo 12 sprites de sheet ficam vivos, com blend aditivo, e são limpos ao iniciar o round. Sheets e créditos estão em `assets/fx/CREDITS.md`.
+`src/vfx/sheet.rs` toca sheets de efeito CC0 de `assets/fx/` (embutidas com `include_bytes!`, decodificadas e enviadas à GPU no primeiro desenho). Uma faísca de impacto toca em todo golpe não bloqueado; uma explosão toca em golpes de 150 de dano ou mais e no KO. No máximo 12 sprites de sheet ficam vivos, com blend aditivo, e são limpos ao iniciar o round. Sheets pixel-art do PVFX Foundry (filtro nearest, blend alpha) adicionam soco em golpes leves, crítico em golpes pesados, onda de choque e impacto no chão em golpes de 150+ de dano no chão, defesa em golpes bloqueados e poeira de dash. Sheets e créditos estão em `assets/fx/CREDITS.md`.

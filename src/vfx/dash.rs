@@ -1,4 +1,5 @@
 use super::quality;
+use super::sheet::SheetKind;
 use super::{Kind, Vfx, P};
 
 impl Vfx {
@@ -8,6 +9,7 @@ impl Vfx {
         } else {
             0.0
         };
+        self.sheets.spawn_facing(SheetKind::DashDust, x - facing * 6.0, feet, 54.0, facing);
         for _ in 0..quality::count(4) {
             let height = self.rr(8.0, 52.0);
             let size = self.rr(26.0, 52.0);

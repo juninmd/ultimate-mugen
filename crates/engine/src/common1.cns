@@ -379,7 +379,7 @@ value = 140 + (StateType = C) + (StateType = A) * 2
 [State 140, end]
 type = ChangeState
 trigger1 = AnimTime = 0
-trigger2 = !SelfAnimExist(140) && Time >= 1
+trigger2 = !SelfAnimExist(140 + (StateType = C) + (StateType = A) * 2) && Time >= 1
 value = ifelse(StateType = C, 11, ifelse(StateType = A, 50, 0))
 ctrl = 1
 

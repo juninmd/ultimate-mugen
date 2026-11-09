@@ -457,7 +457,7 @@ impl Match {
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl;
-                    if f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; if f.move_type != 'H' { land = true; } }
+                    if f.pos.y >= f.ground_level + if f.lands_by_script() { 24.0 } else { 0.0 } && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; if f.move_type != 'H' { land = true; } }
                 }
                 _ => {}
             }
@@ -575,7 +575,7 @@ impl Match {
                         if seen[s] || !self.fighters[i].def.anims.contains_key(&190) || (190..=199).contains(&self.fighters[i].state_no) { continue; }
                         seen[s] = true;
                         let taunt = s == 1 && self.fighters[i].def.anims.contains_key(&195);
-                        self.change_engine_state(i, if taunt { ENGINE_STATE_FACE_OFF_TAUNT } else { ENGINE_STATE_FACE_OFF });
+                        self.enter_face_off(i, taunt);
                     }
                 }
             }
@@ -861,10 +861,10 @@ impl Match {
         for i in 0..self.fighters.len() {
             let free = { let f = &self.fighters[i]; f.alive && !f.is_helper && f.round_free(self.round_state == 2, self.pause.is_some()) };
             let f = &mut self.fighters[i];
-            f.no_ctrl_ticks = if free && !f.ctrl { f.no_ctrl_ticks + 1 } else { 0 };
+            f.no_ctrl_ticks = if free && !f.ctrl && f.counts_as_stuck() { f.no_ctrl_ticks + 1 } else { 0 };
             let lying = free && f.state_no == 5110 && f.state_time > f.def.c("data.liedown.time", 60.0) as i32 + 30;
-            if !lying && f.no_ctrl_ticks <= NO_CTRL_LIMIT { continue; }
-            f.no_ctrl_ticks = 0;
+            if !lying && f.no_ctrl_ticks <= NO_CTRL_LIMIT && !f.hit_state_overstay(free) { continue; }
+            f.no_ctrl_ticks = 0; f.ikemen.rescued += 1; eprintln!("watchdog: {} stuck in state {} (ctrl {}), forcing recovery", f.def.name, f.state_no, f.ctrl);
             let def = f.def.clone();
             let getup = lying && (def.states.contains_key(&5120) || self.common.states.contains_key(&5120));
             if !getup { let f = &mut self.fighters[i]; f.vel = V2::default(); f.ctrl = true; }

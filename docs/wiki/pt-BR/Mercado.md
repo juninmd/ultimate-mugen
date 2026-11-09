@@ -20,7 +20,7 @@ Tudo fica salvo localmente: a lista de repositórios, os itens instalados e o es
 | [juninmd/ultimate-mugen](https://github.com/juninmd/ultimate-mugen) | — | — | — | [elecbyte.zip](https://github.com/juninmd/ultimate-mugen/blob/master/assets/mugen/elecbyte.zip) |
 | [Carlmundo/NooksVsCrans](https://github.com/Carlmundo/NooksVsCrans) | [chars](https://github.com/Carlmundo/NooksVsCrans/tree/master/chars) | [stages](https://github.com/Carlmundo/NooksVsCrans/tree/master/stages) | [sound](https://github.com/Carlmundo/NooksVsCrans/tree/master/sound) | [Rayman.zip](https://github.com/Carlmundo/NooksVsCrans/blob/master/chars/Rayman.zip) |
 
-Os dois repositórios estão na lista de sugestões do jogo (`SUGGESTED` em `src/market.rs`). Para adicionar outro, digite `owner/repo` no mercado; os links acima abrem cada pasta no GitHub.
+Só `juninmd/ultimate-mugen` está na lista de sugestões do jogo (`SUGGESTED` em `src/market.rs`). A outra linha é uma referência: os links abrem cada pasta no GitHub. Para adicioná-la no mercado, digite `owner/repo`.
 
 ## O que é detectado
 

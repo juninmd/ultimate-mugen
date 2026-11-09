@@ -20,7 +20,7 @@ Everything is stored locally, so the repository list, the installed items and th
 | [juninmd/ultimate-mugen](https://github.com/juninmd/ultimate-mugen) | — | — | — | [elecbyte.zip](https://github.com/juninmd/ultimate-mugen/blob/master/assets/mugen/elecbyte.zip) |
 | [Carlmundo/NooksVsCrans](https://github.com/Carlmundo/NooksVsCrans) | [chars](https://github.com/Carlmundo/NooksVsCrans/tree/master/chars) | [stages](https://github.com/Carlmundo/NooksVsCrans/tree/master/stages) | [sound](https://github.com/Carlmundo/NooksVsCrans/tree/master/sound) | [Rayman.zip](https://github.com/Carlmundo/NooksVsCrans/blob/master/chars/Rayman.zip) |
 
-Both repositories are in the in-game suggestion list (`SUGGESTED` in `src/market.rs`). To add one by hand, type `owner/repo` in the marketplace; the links above open each folder on GitHub.
+Only `juninmd/ultimate-mugen` is in the in-game suggestion list (`SUGGESTED` in `src/market.rs`). The other row is a reference: the links open each folder on GitHub. To add it in the marketplace, type `owner/repo`.
 
 ## What is detected
 

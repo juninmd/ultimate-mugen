@@ -14,9 +14,39 @@ M.U.G.E.N 1.0 and 1.1 have no Lua. It comes from Ikemen GO, which uses it in thr
 |---|---|---|
 | Engine and screenpack layer | Menus, game modes, select screen, win screen, hooks | `main.lua`, `start.lua`, motif and module files |
 | External modules | Optional add-ons loaded by the engine: extra modes, stats, training tools | `external/mods/*.lua` |
-| Content packs | Rare. A fighter or screenpack bundling a module that adds a menu, a mode or a HUD tweak | `*.lua` next to the `.def` |
+| Fighter DEF | `arcadepath` in `[Arcade]`: that fighter's own arcade route, storyboards and rivals | `arcade.lua` next to the `.def` |
+| Content packs | A screenpack or pack bundling a module that adds a menu, a mode or a HUD tweak | `*.lua` next to the `.def` |
 
-Fighter logic is not written in Lua. Fighter logic lives in CNS and ZSS (state controllers, triggers, commands, AI), which the engine already runs. So a `.lua` file inside a fighter folder almost never changes how the fighter fights; it extends menus, modes or screens around it.
+Fighter combat logic is not written in Lua. It lives in CNS and ZSS (state controllers, triggers, commands, AI), which the engine already runs. So a `.lua` file in a fighter folder, such as its arcade path, does not change how the fighter fights; it shapes the modes and screens around it.
+
+## Examples from the Ikemen GO wiki
+
+Source: the official Lua page of the Ikemen GO wiki. Reference modules live in the `ikemen-engine/modules` repository.
+
+A fighter can point to a Lua file from its own DEF, under the `[Arcade]` section. The file is a custom arcade path: it decides the opponents, storyboards and branches for that fighter.
+
+```ini
+[Arcade]
+arcadepath = arcade.lua
+```
+
+```lua
+launchStoryboard('chars/kfm/intro.def')
+for i = 1, 6 do
+	if not launchFight{} then return end
+end
+if getConsecutiveWins(1) == 7 then
+	if not launchFight{p2char = {"SuaveDude"}} then return end
+else
+	if not launchFight{order = 3, winscreen = true} then return end
+end
+launchStoryboard('chars/kfm/ending.def')
+setMatchNo(-1)
+```
+
+`select.def` accepts a Lua condition after `unlock =` to unlock a hidden fighter, for example `stats.modes ~= nil and stats.modes.arcade ~= nil and stats.modes.arcade.clear >= 1`, or `gameMode() ~= "bossrush"` to hide a fighter from one mode.
+
+Modules are `.lua` files in `external/mods`, listed in `Common.Modules`, or loaded by a screenpack with `module = file.lua` in its `[Files]` section. They can add game modes and attach to hooks in the default scripts.
 
 ## What the engine does today
 

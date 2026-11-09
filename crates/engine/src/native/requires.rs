@@ -7,11 +7,19 @@ fn range_lines(owner: &str, range: &LifeRange) -> String {
     out
 }
 
+pub(super) fn finisher_lines(m: &NativeMove) -> String {
+    if m.kind == "finisher" { "triggerall = RoundState = 3\ntriggerall = WinKO\n".into() } else { String::new() }
+}
+
+pub(super) fn finisher_done(m: &NativeMove, sid: i32) -> String {
+    if m.kind == "finisher" { format!("[State {sid}, finish_done]\ntype = FinishDone\ntrigger1 = Time = 0\n\n") } else { String::new() }
+}
+
 pub(super) fn trigger_lines(m: &NativeMove) -> String {
-    let Some(req) = &m.requires else { return String::new() };
+    let Some(req) = &m.requires else { return finisher_lines(m) };
     let own = req.life.as_ref().map(|r| range_lines("", r)).unwrap_or_default();
     let enemy = req.enemy_life.as_ref().map(|r| range_lines("enemy,", r)).unwrap_or_default();
-    own + &enemy
+    own + &enemy + &finisher_lines(m)
 }
 
 #[cfg(test)]

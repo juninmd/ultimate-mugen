@@ -87,7 +87,7 @@ impl Ai {
         0
     }
 
-    fn choose(
+    pub(super) fn choose(
         &mut self,
         m: &Match,
         me: usize,
@@ -136,7 +136,7 @@ impl Ai {
         }
         let (f, e) = (&m.fighters[me], &m.fighters[ei]);
         let dist = (e.pos.x - f.pos.x).abs();
-        let chance = 0.35 + skill * 0.6;
+        let chance = 0.35 + skill * 0.6 + if e.state_type == 'A' { self.profile.anti_air_bonus() } else { 0.0 };
         let roll = self.r();
         let pool = self.attack.clone();
         if f.move_type == 'A' && f.move_hit > 0 && !f.ctrl {

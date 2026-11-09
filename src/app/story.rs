@@ -173,6 +173,17 @@ impl App {
         );
     }
 
+    pub(crate) fn story_snapshot(&self) -> Option<(usize, usize, u8, i64, String)> {
+        let run = self.story.as_ref()?;
+        Some((run.stage, run.wave, run.credits, run.score, format!("{:?}", run.phase)))
+    }
+
+    pub(crate) fn story_jump_to_stage(&mut self, stage: usize) {
+        let Some(run) = self.story.as_mut() else { return };
+        run.stage = stage.min(crate::story::STAGES.len() - 1);
+        self.story_prepare_fight();
+    }
+
     pub(crate) fn story_life(&self) -> [f32; 2] {
         self.story.as_ref().map(|run| [run.life, 1.0]).unwrap_or([1.0, 1.0])
     }

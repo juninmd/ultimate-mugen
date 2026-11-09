@@ -27,4 +27,13 @@ Screenshots and GIFs for the README come from the real web build running in head
 - `hold` with `ms` keeps a key down for that long.
 - `shot` saves `<shot>.png` after the step; `video` records the whole session as WebM.
 
-Convert a WebM to a small GIF with `ffmpeg -i fight.webm -vf "fps=12,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse" fight.gif`. Software rendering is slower than a GPU, so the GIFs show the game at a reduced frame rate.
+Convert a WebM to a small GIF with `ffmpeg -i fight.webm -vf "fps=20,scale=480:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=3" fight.gif`.
+
+## Automated Pipeline: `record-gameplay.js` & Skill
+
+For automated recording of gameplay, milestone screenshots (1280x720) and Bayer-dithered GIFs in headless Linux environments:
+```bash
+node scripts/record-gameplay.js --out docs/evidence/<topic> --gif gameplay.gif --duration 6
+```
+See the complete guide in `.agents/skills/ume-media-capture/SKILL.md`.
+

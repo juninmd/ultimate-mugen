@@ -42,6 +42,7 @@ fn test_hit_priority_and_advanced_hitdef_flags() {
             guard_sound: Some([6, 1]),
             spark_pos: Some([35.0, -55.0]),
             ground_bounce: Some(true),
+            wall_bounce: None,
         }],
         moves: vec![],
         projectile: None,

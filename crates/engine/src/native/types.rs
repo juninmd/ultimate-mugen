@@ -42,6 +42,7 @@ pub struct HitSpec {
     #[serde(default, rename = "guardSound")] pub guard_sound: Option<[i32; 2]>,
     #[serde(default, rename = "sparkPos")] pub spark_pos: Option<[f32; 2]>,
     #[serde(default, rename = "groundBounce")] pub ground_bounce: Option<bool>,
+    #[serde(default, rename = "wallBounce")] pub wall_bounce: Option<bool>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

@@ -21,7 +21,7 @@ pub struct HitDefData {
     /** juggle points this move costs on an airborne, falling target (its Statedef `juggle`) and the attacker's `data.airjuggle` budget */
     pub juggle: i32, pub airjuggle: i32,
     pub no_chain_id: [Option<i32>; 2], pub hit_once: bool, pub snap: Option<V2>, pub min_dist: [Option<f32>; 2], pub max_dist: [Option<f32>; 2], pub affect_team: char,
-    pub down_vel: [f32; 2], pub down_hit_time: i32, pub down_bounce: bool, pub fall_env_shake: Shake, pub env_shake: Shake,
+    pub down_vel: [f32; 2], pub down_hit_time: i32, pub down_bounce: bool, pub wall_bounce: bool, pub fall_env_shake: Shake, pub env_shake: Shake,
     pub ground_corner_push: f32, pub air_corner_push: f32, pub guard_corner_push: f32, pub air_guard_corner_push: f32,
     pub target_palfx: Option<PalFx>,
     pub dizzy_points: f32, pub guard_points: f32, pub red_life: [f32; 2], pub score: [f32; 2], pub down_recover: bool,
@@ -40,7 +40,7 @@ pub struct GetHitVars {
     pub hittime: i32, pub slidetime: i32, pub ctrltime: i32, pub xvel: f32, pub yvel: f32, pub yaccel: f32, pub xaccel: f32, pub chainid: i32,
     pub guarded: bool, pub fall: bool, pub fall_damage: f32, pub fall_xvel: f32, pub fall_yvel: f32, pub fall_recover: bool,
     pub fall_recover_time: i32, pub fall_kill: bool, pub kill: bool, pub attacker_id: u32, pub attacker_no: usize,
-    pub hit_id: i32, pub fall_env_shake: Shake, pub down_bounce: bool,
+    pub hit_id: i32, pub fall_env_shake: Shake, pub down_bounce: bool, pub wall_bounce: bool, pub wall_bounced: bool,
     pub priority: i32, pub facing: i32, pub power: f32, pub attr: i32, pub guardflag: i32,
     pub hit_damage: f32, pub guard_damage: f32, pub hit_power: f32, pub guard_power: f32,
     pub dizzy_points: f32, pub guard_points: f32, pub red_life: f32, pub score: f32,
@@ -64,7 +64,7 @@ impl Default for GetHitVars {
         GetHitVars { kind: 0, animtype: 0, airtype: 0, groundtype: 0, damage: 0.0, hitcount: 0, guardcount: 0, hittime: 0, slidetime: 0, ctrltime: 0,
             xvel: 0.0, yvel: 0.0, yaccel: 0.44, xaccel: 0.0, chainid: -1, guarded: false, fall: false, fall_damage: 0.0, fall_xvel: 0.0, fall_yvel: -4.5,
             fall_recover: true, fall_recover_time: 4, fall_kill: true, kill: true, attacker_id: 0, attacker_no: 0,
-            hit_id: -1, fall_env_shake: Shake::default(), down_bounce: false,
+            hit_id: -1, fall_env_shake: Shake::default(), down_bounce: false, wall_bounce: false, wall_bounced: false,
             priority: 0, facing: 0, power: 0.0, attr: 0, guardflag: 0, hit_damage: 0.0, guard_damage: 0.0, hit_power: 0.0, guard_power: 0.0,
             dizzy_points: 0.0, guard_points: 0.0, red_life: 0.0, score: 0.0, team_side: 0, proj_id: -1, p1stateno: -1, p2stateno: -1, down_recover: true }
     }

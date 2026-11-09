@@ -370,7 +370,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         } else {
             ght
         },
-        down_bounce: num("down.bounce", 0.0, 0) != 0.0,
+        down_bounce: num("down.bounce", 0.0, 0) != 0.0, wall_bounce: num("wall.bounce", 0.0, 0) != 0.0,
         fall_env_shake: parse_shake("fall.envshake.time", "fall.envshake.freq", "fall.envshake.ampl", "fall.envshake.phase", "fall.envshake.dir", 0.0),
         env_shake: parse_shake("envshake.time", "envshake.freq", "envshake.ampl", "envshake.phase", "envshake.dir", 0.0),
         ground_corner_push,

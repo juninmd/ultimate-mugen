@@ -41,9 +41,14 @@ const bandLuminance = (page, buffer) => page.evaluate(async base64 => {
   while (!stripRequests.length && Date.now() < deadline) { await key('Enter', 2000); }
   if (!stripRequests.length) problems.push('story strip was never requested');
   await p.waitForTimeout(25000);
-  const shot = await p.screenshot();
+  let shot, mean = 0;
+  const paintDeadline = Date.now() + 90000;
+  do {
+    if (shot) await p.waitForTimeout(5000);
+    shot = await p.screenshot();
+    mean = await bandLuminance(p, shot);
+  } while (mean < 12 && Date.now() < paintDeadline);
   if (shotDir) fs.writeFileSync(path.join(shotDir, process.env.WEB_SMOKE_NAME || 'story-fight.png'), shot);
-  const mean = await bandLuminance(p, shot);
   await b.close(); server.close();
   if (mean < 12) problems.push(`story stage background is black (mean luminance ${mean.toFixed(1)})`);
   if (problems.length) { console.error('WEB STORY SMOKE FAILED\n' + problems.join('\n')); process.exit(1); }

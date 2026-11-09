@@ -81,7 +81,7 @@ impl Fighter {
             parent: None, root: id, destroyed: false, pal_no: 1, ai_level: 0,
             pos: V2::default(), vel: V2::default(), facing: 1.0, lscl,
             state_no: 0, prev_state_no: 0, state_time: 0, state_type: 'S', move_type: 'I', physics: 'S', ctrl: true,
-            life, life_max: life, power: 0.0, power_max: def.c("data.power", 3000.0) as f32, alive: true,
+            life, life_max: life, power: 0.0, power_max: (def.c("data.power", 3000.0) as f32).max(0.0), alive: true,
             vars: [0; 60], fvars: [0.0; 40], sysvars: [0; 5], sysfvars: [0.0; 5],
             anim_no: -1, anim_real: -1, elem: 0, elem_time: 0, anim_elapsed: 0, anim_changed: false, anim_total_time: 0, anim_loop_start: 0,
             hitdef: None, hitdef_active: false, hitdef_targets: vec![], move_contact: 0, move_hit: 0, move_guarded: 0, move_reversed: 0, hit_count: 0, uniq_hit_count: 0, uniq_hit_keys: vec![],

@@ -440,3 +440,7 @@ etain_mut.
   - `Recolor::apply_in_region` uses a multiplicative hasher and a last-colour memo instead of SipHash per pixel.
   - The sprite pack cache holds 64 packs, so rosters above 24 fighters no longer evict each other.
   - Measured with the profiler in headless Chromium (select screen, 53 cursor moves): main-thread busy time dropped from about 98 s to about 2.5 s.
+
+## Sprite-sheet effects
+
+`src/vfx/sheet.rs` plays CC0 effect sheets from `assets/fx/` (embedded with `include_bytes!`, decoded and uploaded on first draw). A hit spark plays on every non-guarded hit; an explosion plays on hits of 150 damage or more and on KO. At most 12 sheet sprites are alive, drawn with additive blending, and they are cleared on round start. Sheets and credits are listed in `assets/fx/CREDITS.md`.

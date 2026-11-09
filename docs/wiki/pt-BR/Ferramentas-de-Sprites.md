@@ -1,13 +1,13 @@
 # Ferramentas de Sprites
 
-Ferramentas locais (Python 3, Pillow, NumPy) em `tools/spritekit/` que transformam arte gerada em assets prontos para MUGEN. Nunca tocam `assets/chars` nem cenários: a saída vai para a pasta escolhida.
+Ferramentas locais (Rust, `charforge` binary) em `crates/charforge/` (`spritekit` module) que transformam arte gerada em assets prontos para MUGEN. Nunca tocam `assets/chars` nem cenários: a saída vai para a pasta escolhida.
 
 ```
-python3 -m tools.spritekit slice folha.png saida/ --group 9000 --axis feet
-python3 -m tools.spritekit slice folha.png saida/ --mode grid --grid 6 2
-python3 -m tools.spritekit palettes base.act variantes/ --only red blue dark --keep 1 2
-python3 -m tools.spritekit air saida/manifest.json --action 200 --ticks 4 --attack
-python3 -m unittest tools.spritekit.test_spritekit
+cargo run --release -p ume-charforge -- slice folha.png saida/ --group 9000 --axis feet
+cargo run --release -p ume-charforge -- slice folha.png saida/ --mode grid --grid 6 2
+cargo run --release -p ume-charforge -- palettes base.act variantes/ --only red blue dark --keep 1 2
+cargo run --release -p ume-charforge -- air saida/manifest.json --action 200 --ticks 4 --attack
+cargo test --release -p ume-charforge
 ```
 
 | Ferramenta | O que faz |

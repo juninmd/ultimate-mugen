@@ -1,13 +1,13 @@
 # Gerador de Golpes
 
-`tools/movekit` transforma uma descrição TOML dos golpes em texto MUGEN: animações com caixas Clsn automáticas, statedefs, entradas de comando e um bloco `[Statedef -1]`. Edite o spec e gere de novo em vez de editar a saída à mão.
+`crates/charforge/` (`movekit` module) transforma uma descrição TOML dos golpes em texto MUGEN: animações com caixas Clsn automáticas, statedefs, entradas de comando e um bloco `[Statedef -1]`. Edite o spec e gere de novo em vez de editar a saída à mão.
 
 ```
-python3 -m tools.movekit golpes.toml saida/
-python3 -m unittest tools.movekit.test_movekit
+cargo run --release -p ume-charforge -- moves golpes.toml saida/
+cargo test --release -p ume-charforge
 ```
 
-Grava `moves.air`, `moves.cns`, `moves.cmd` e `statedef-1.cns`. Um exemplo completo está em `tools/movekit/examples/moves.toml`; ele espera sprites fatiados pelas [Ferramentas de sprites](Ferramentas-de-Sprites.md) em `sprites/manifest.json`.
+Grava `moves.air`, `moves.cns`, `moves.cmd` e `statedef-1.cns`. Um exemplo completo está em `crates/charforge/examples/moves.toml`; ele espera sprites fatiados pelas [Ferramentas de sprites](Ferramentas-de-Sprites.md) em `sprites/manifest.json`.
 
 ## Spec
 
@@ -25,9 +25,13 @@ Grava `moves.air`, `moves.cns`, `moves.cmd` e `statedef-1.cns`. Um exemplo compl
 
 As entradas geradas no `[Statedef -1]` ficam na ordem super, especial, agarrão, normal e usam `roundstate = 2`, tipo de estado e poder.
 
+## Validação
+
+`cargo run --release -p ume-charforge -- check <pasta_do_char> --strict` carrega o personagem com o loader do motor e mostra os mesmos diagnósticos do `mugen_check`; `--strict` falha em controladores, triggers ou parâmetros sem suporte.
+
 ## Próximos candidatos do CharFactory
 
-Comando `validate` ligado ao `mugen_check`, simulador de golpes tick a tick para frame data, ajuste de combos, ferramentas de faixas de paleta e renderizador de contact sheet. Ainda não portados.
+Simulador de golpes tick a tick para frame data, ajuste de combos, ferramentas de faixas de paleta e renderizador de contact sheet. Ainda não portados.
 
 ## Créditos
 

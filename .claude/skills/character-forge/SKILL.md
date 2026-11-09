@@ -5,16 +5,16 @@ description: Generate MUGEN character assets locally from generated art: slice s
 
 # Character forge
 
-Offline pipeline in `tools/spritekit` and `tools/movekit` (Python 3, Pillow, NumPy). Never write into `assets/chars` sprites or stages unless the user asks; send output to a scratch or user-chosen folder.
+Offline Rust pipeline in `crates/charforge` (`charforge` binary: `slice`, `palettes`, `air`, `moves`, `check`). Never write into `assets/chars` sprites or stages unless the user asks; send output to a scratch or user-chosen folder.
 
 ## Steps
 
-1. Slice art: `python3 -m tools.spritekit slice sheet.png out/sprites --group 9000 --axis feet` (grid sheets: `--mode grid --grid COLS ROWS`). Check `manifest.json` (axis, `exact_palette`; false means quantized).
-2. Palettes: `python3 -m tools.spritekit palettes base.act out/pal --only red blue dark --keep 1 2`.
-3. Describe moves in a TOML spec (see `tools/movekit/examples/moves.toml`): `kind`, `state`, `command`, `frames = [[group, item, ticks, "hit"?]]`, `hit`, `sounds`, `vfx`, `cancel`, `phases`, `superpause`.
-4. Generate: `python3 -m tools.movekit moves.toml out/moves` writes `moves.air`, `moves.cns`, `moves.cmd`, `statedef-1.cns`. Re-running overwrites; edit the TOML, not the output.
-5. Merge the files into the character, then run `mugen_check --strict` on it and play it in Training with hitboxes on (F2).
-6. Run `python3 -m unittest tools.spritekit.test_spritekit tools.movekit.test_movekit` after changing the tools.
+1. Slice art: `cargo run --release -p ume-charforge -- slice sheet.png out/sprites --group 9000 --axis feet` (grid sheets: `--mode grid --grid COLS ROWS`). Check `manifest.json` (axis, `exact_palette`; false means quantized).
+2. Palettes: `cargo run --release -p ume-charforge -- palettes base.act out/pal --only red blue dark --keep 1 2`.
+3. Describe moves in a TOML spec (see `crates/charforge/examples/moves.toml`): `kind`, `state`, `command`, `frames = [[group, item, ticks, "hit"?]]`, `hit`, `sounds`, `vfx`, `cancel`, `phases`, `superpause`.
+4. Generate: `cargo run --release -p ume-charforge -- moves moves.toml out/moves` writes `moves.air`, `moves.cns`, `moves.cmd`, `statedef-1.cns`. Re-running overwrites; edit the TOML, not the output.
+5. Merge the files into the character, then run `cargo run --release -p ume-charforge -- check <char_dir> --strict` (engine loader diagnostics, same as `mugen_check`) and play it in Training with hitboxes on (F2).
+6. Run `cargo test --release -p ume-charforge` after changing the tools.
 
 ## Rules
 

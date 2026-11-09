@@ -1,13 +1,13 @@
 # Sprite Toolkit
 
-Local, dependency-light tools (Python 3, Pillow, NumPy) in `tools/spritekit/` that turn generated art into MUGEN-ready assets. They never touch `assets/chars` or stages: output goes to a folder you choose.
+Local, dependency-light tools (Rust, `charforge` binary) in `crates/charforge/` (`spritekit` module) that turn generated art into MUGEN-ready assets. They never touch `assets/chars` or stages: output goes to a folder you choose.
 
 ```
-python3 -m tools.spritekit slice sheet.png out/ --group 9000 --axis feet
-python3 -m tools.spritekit slice sheet.png out/ --mode grid --grid 6 2
-python3 -m tools.spritekit palettes base.act variants/ --only red blue dark --keep 1 2
-python3 -m tools.spritekit air out/manifest.json --action 200 --ticks 4 --attack
-python3 -m unittest tools.spritekit.test_spritekit
+cargo run --release -p ume-charforge -- slice sheet.png out/ --group 9000 --axis feet
+cargo run --release -p ume-charforge -- slice sheet.png out/ --mode grid --grid 6 2
+cargo run --release -p ume-charforge -- palettes base.act variants/ --only red blue dark --keep 1 2
+cargo run --release -p ume-charforge -- air out/manifest.json --action 200 --ticks 4 --attack
+cargo test --release -p ume-charforge
 ```
 
 | Tool | What it does |

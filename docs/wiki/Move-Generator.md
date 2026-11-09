@@ -1,13 +1,13 @@
 # Move Generator
 
-`tools/movekit` turns a TOML description of moves into MUGEN text: animations with automatic Clsn boxes, statedefs, command entries and a `[Statedef -1]` block. Edit the spec and regenerate instead of hand-editing the output.
+`crates/charforge/` (`movekit` module) turns a TOML description of moves into MUGEN text: animations with automatic Clsn boxes, statedefs, command entries and a `[Statedef -1]` block. Edit the spec and regenerate instead of hand-editing the output.
 
 ```
-python3 -m tools.movekit moves.toml out/
-python3 -m unittest tools.movekit.test_movekit
+cargo run --release -p ume-charforge -- moves moves.toml out/
+cargo test --release -p ume-charforge
 ```
 
-Writes `moves.air`, `moves.cns`, `moves.cmd` and `statedef-1.cns`. A full example is in `tools/movekit/examples/moves.toml`; it expects sprites sliced by [Sprite toolkit](Sprite-Toolkit.md) at `sprites/manifest.json`.
+Writes `moves.air`, `moves.cns`, `moves.cmd` and `statedef-1.cns`. A full example is in `crates/charforge/examples/moves.toml`; it expects sprites sliced by [Sprite toolkit](Sprite-Toolkit.md) at `sprites/manifest.json`.
 
 ## Spec
 
@@ -25,9 +25,13 @@ Writes `moves.air`, `moves.cns`, `moves.cmd` and `statedef-1.cns`. A full exampl
 
 Generated entries in `[Statedef -1]` are ordered super, special, throw, normal and gated by `roundstate = 2`, state type and power.
 
+## Validating
+
+`cargo run --release -p ume-charforge -- check <char_dir> --strict` loads the character with the engine loader and prints the same diagnostics as `mugen_check`; `--strict` fails on unsupported controllers, triggers or parameters.
+
 ## Next candidates from CharFactory
 
-A `validate` command wired to `mugen_check`, a tick-by-tick move simulator for frame data, a combo tuner, palette range tools and a contact-sheet renderer. Not ported yet.
+A tick-by-tick move simulator for frame data, a combo tuner, palette range tools and a contact-sheet renderer. Not ported yet.
 
 ## Acknowledgments
 

@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod passive_meter; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod passive_meter; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -19,6 +19,7 @@ pub struct Hud {
     last_hits: [i32; 2],
     pub bars: Option<[Option<(f32, f32)>; 2]>,
     energy: energy::EnergyFx,
+    pub advantage: advantage::AdvantageTracker,
 }
 
 impl Hud {
@@ -32,6 +33,7 @@ impl Hud {
             last_hits: [0; 2],
             bars: None,
             energy: Default::default(),
+            advantage: advantage::AdvantageTracker::new(),
         }
     }
 
@@ -1145,6 +1147,10 @@ impl Hud {
                     Align::Center,
                     true,
                 );
+            }
+            self.advantage.update(m);
+            if let Some(ref res) = self.advantage.result {
+                advantage_draw::draw(res, &p, &text, s, w);
             }
             // input history (newest at the bottom): direction arrow, buttons, frames held
             let n = self.inputs.len();

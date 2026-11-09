@@ -2,6 +2,7 @@ mod app;
 mod audio;
 mod boss;
 mod controls;
+mod credit_line;
 mod gamepad;
 mod gfx;
 mod hud;

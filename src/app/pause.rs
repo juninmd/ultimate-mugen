@@ -23,11 +23,12 @@ impl App {
         let ease = self.pause.ease();
         let def = self.session.as_ref().unwrap().m.fighters[0].def.clone();
         let (name, moves) = (def.display_name.clone(), &def.movelist[..]);
+        let author = def.author.clone();
         let base = Layout::new(self.ui.s);
         let outcome = self.pause_input(&base, &name, moves, accept_back);
         let lay = base.shifted((1.0 - ease) * 22.0);
         draw_rectangle(0.0, 0.0, screen_width(), screen_height(), Color::new(0.02, 0.01, 0.06, 0.55 * ease));
-        self.pause_chrome(&lay, self.pause.tab, &name, ease);
+        self.pause_chrome(&lay, self.pause.tab, &name, &author, ease);
         let selected = moves.get(self.pause.move_cur);
         let cards: [SlotCard; 4] = std::array::from_fn(|i| {
             let command = self.c.shortcuts.command(&name, i);

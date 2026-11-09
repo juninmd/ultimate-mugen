@@ -2404,10 +2404,10 @@ impl App {
             );
         }
         let e = &self.reg.chars[i];
-        let by = py + ph - 56.0;
+        let by = py + ph - 72.0;
         self.ui
-            .rect(px, by, pw, 56.0, Color::new(0.0, 0.0, 0.05, 0.7));
-        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9));
+            .rect(px, by, pw, 72.0, Color::new(0.0, 0.0, 0.05, 0.7));
+        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 66.0);
         let nm = self.names_up[i].as_str();
         self.ui.text_bold(
             nm,
@@ -2419,7 +2419,7 @@ impl App {
             Align::Center,
         );
         self.ui.text(
-            &e.series,
+            &crate::credit_line::truncate(&e.series, 30),
             cx,
             by + 48.0,
             14.0,

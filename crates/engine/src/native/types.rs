@@ -83,12 +83,6 @@ pub struct ThrowSpec {
     #[serde(default)] pub launch: Option<[f32; 2]>,
 }
 
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct PassiveSpec {
-    #[serde(default, rename = "meterRegen")] pub meter_regen: Option<f32>,
-    #[serde(default, rename = "lifeRegen")] pub life_regen: Option<f32>,
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NativeMove {
     pub id: String, pub name: String, pub input: String,
@@ -136,7 +130,7 @@ pub struct NativeChar {
     #[serde(default)] pub description: Option<String>,
     pub color: String,
     #[serde(default)] pub stats: NativeStats,
-    #[serde(default)] pub passives: Option<PassiveSpec>,
+    #[serde(default)] pub passives: Option<super::passive_spec::PassiveSpec>,
     #[serde(default)] pub abilities: Option<super::ability_spec::AbilitySpec>,
     pub art: NativeArt,
     pub anims: indexmap_like::OrderedMap<NativeAnim>,

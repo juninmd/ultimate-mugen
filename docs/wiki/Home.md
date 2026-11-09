@@ -19,6 +19,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Character Dossiers](Characters.md) | Players & Creators | Roster bios, portraits, moves, rivalries and home stages |
 | [Compatibility decisions](Compatibility-Decisions.md) | Creators | Features the engine rejects by design and why |
 | [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
+| [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
 | [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |
 | [AssertSpecial flags](AssertSpecial.md) | Creators | All 77 Ikemen flags and what each one does |

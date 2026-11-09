@@ -1,6 +1,7 @@
 //! UMF (Ultimate Mugen Format): simple declarative characters compiled to the MUGEN-compatible VM.
 pub mod types;
 pub mod ability_spec;
+pub mod passive_spec;
 mod abilities;
 mod armor;
 mod chain;
@@ -29,6 +30,7 @@ pub use compile::{compile_native, compile_native_with, STANDARD_ANIMS};
 pub use preview::compile_native_preview;
 pub use types::*;
 pub use ability_spec::*;
+pub use passive_spec::*;
 pub use lookup::register_native;
 pub use portrait::select_portrait;
 

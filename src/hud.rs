@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod energy; mod energy_gem; mod palette; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
+mod energy; mod energy_gem; mod palette; mod passive_meter; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -416,6 +416,7 @@ impl Hud {
                         text(&label, tx + 6.2, ty + 4.2, 4.0, WHITE, Align::Left, true);
                     }
                 }
+                if show_life { passive_meter::draw(&p, s, gt, f, &passive_meter::Bar { x: bx, y: by, w: bw, h: bh, side }); }
                 if show_wins {
                     for i in 0..m.rounds_to_win {
                         let won = m.wins[side] > i;
@@ -435,11 +436,7 @@ impl Hud {
                         poly::outline(
                             &dia,
                             0.6 * s,
-                            if won {
-                                WHITE
-                            } else {
-                                Color::new(1.0, 1.0, 1.0, 0.5)
-                            },
+                            if won { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.5) },
                         );
                     }
                 }

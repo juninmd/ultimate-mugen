@@ -944,11 +944,10 @@ impl Vfx {
         for f in m
             .fighters
             .iter()
-            .filter(|f| !f.is_helper && (f.form > 0 || f.def.boss) && f.alive)
+            .filter(|f| !f.is_helper && (f.form > 0 || f.def.boss || crate::passive_fx::aura(f) > 0.0) && f.alive)
         {
-            let col = Self::form_color(f);
-            // the final boss always smoulders; awakening makes it blaze
-            let amb = if f.form > 0 { 1.0 } else { 0.55 };
+            let col = if f.form > 0 || f.def.boss { Self::form_color(f) } else { crate::passive_fx::color(f) };
+            let amb = if f.form > 0 { 1.0 } else { 0.55f32.max(crate::passive_fx::aura(f)) };
             let hgt = f.def.c("size.height", 60.0) as f32 * 1.35;
             let t = self.clock;
             // light pillar while the awakening plays

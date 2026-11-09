@@ -88,6 +88,7 @@ fn test_throw_and_passives_mechanics() {
     nc.passives = Some(PassiveSpec {
         meter_regen: Some(1.2),
         life_regen: Some(0.3),
+        ..Default::default()
     });
 
     nc.moves.push(NativeMove {

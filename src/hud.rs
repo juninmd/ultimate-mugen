@@ -162,16 +162,6 @@ impl Hud {
                     Color::new(0.02, 0.04, 0.12, 0.7),
                     Color::new(0.02, 0.04, 0.12, 0.0),
                 );
-                poly::grad_h(
-                    &[
-                        p(px0 - 4.0, 0.0),
-                        p(px0 + panel_w, 0.0),
-                        p(px0 + panel_w, py0 + ph),
-                        p(px0 - 4.0, py0 + ph),
-                    ],
-                    if side == 0 { dk } else { cl },
-                    if side == 0 { cl } else { dk },
-                );
                 let hl = |y: f32| {
                     let (a, b) = (p(px0 + 6.0, y), p(px0 + panel_w - 6.0, y));
                     draw_line(
@@ -192,6 +182,28 @@ impl Hud {
                 if let Some(Some((x, ww))) = self.bars.as_ref().map(|b| b[side].as_ref().copied()) {
                     bx = x.clamp(0.0, w - 20.0);
                     bw = ww.clamp(20.0, (w - bx - 4.0).max(20.0));
+                }
+                let backdrop_top = 0.0;
+                let backdrop_bottom = py0 + ph;
+                let fade = 22.0;
+                let (solid_x0, solid_x1, fade_x0, fade_x1) = if side == 0 {
+                    (px0 - 4.0, bx + bw + 2.0, bx + bw + 2.0, bx + bw + 2.0 + fade)
+                } else {
+                    (bx - 2.0, px0 + panel_w, bx - 2.0 - fade, bx - 2.0)
+                };
+                let quad = |x0: f32, x1: f32| {
+                    [
+                        p(x0, backdrop_top),
+                        p(x1, backdrop_top),
+                        p(x1, backdrop_bottom),
+                        p(x0, backdrop_bottom),
+                    ]
+                };
+                poly::solid(&quad(solid_x0, solid_x1), dk);
+                if side == 0 {
+                    poly::grad_h(&quad(fade_x0, fade_x1), dk, cl);
+                } else {
+                    poly::grad_h(&quad(fade_x0, fade_x1), cl, dk);
                 }
                 let ratio = (f.life / f.life_max).max(0.0);
                 if !(f.move_type == 'H' && f.hit_shake > 0) {
@@ -337,21 +349,22 @@ impl Hud {
                     let cc = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
                     let name = f.def.display_name.to_uppercase();
                     let nsz = 6.4;
+                    let name_dy = if f.ikemen.guard_max > 0.0 { 3.0 } else { 0.0 };
                     text(
                         &name,
                         nx + 0.5,
-                        by + bh + 6.6,
+                        by + bh + 6.6 + name_dy,
                         nsz,
                         Color::new(0.0, 0.0, 0.05, 0.7),
                         al,
                         true,
                     );
-                    text(&name, nx, by + bh + 6.1, nsz, WHITE, al, true);
+                    text(&name, nx, by + bh + 6.1 + name_dy, nsz, WHITE, al, true);
                     let name_w =
                         measure_text(&name, Some(&ui.display), ((nsz * s).max(9.0)) as u16, 1.0)
                             .width
                             / s;
-                    let uly = p(0.0, by + bh + 8.0).y;
+                    let uly = p(0.0, by + bh + 8.0 + name_dy).y;
                     let (ux0, ux1) = if side == 0 {
                         (p(nx, 0.0).x, p(nx + name_w, 0.0).x)
                     } else {
@@ -399,7 +412,7 @@ impl Hud {
                         } else {
                             nx - name_w - 6.0 - tw
                         };
-                        let ty = by + bh + 2.2;
+                        let ty = by + bh + 2.2 + name_dy;
                         poly::grad_h(
                             &sp(poly::chamfer(tx, ty, tw, 5.2, 2.2)),
                             poly::with_a(poly::shade(fcol, 0.5), 0.9 * pulse),

@@ -158,7 +158,7 @@ impl Hud {
                 let show_name = !f.has_assert(asf::NONAMEDISPLAY);
                 let show_wins = !f.has_assert(asf::NOWINICONDISPLAY);
                 let px0 = if side == 0 { 4.0 } else { w / 2.0 + 22.0 };
-                let (py0, ph) = (4.0, 23.0);
+                let (py0, ph) = (4.0 + crate::tweaks::current().bar_offset_y, 23.0);
                 let tint = side_tint(side);
                 let (dk, cl) = (
                     Color::new(0.02, 0.04, 0.12, 0.5),

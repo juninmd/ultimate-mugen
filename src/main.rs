@@ -36,6 +36,8 @@ mod shots;
 mod sound_mix;
 mod stage_tour;
 mod stagefx;
+mod stagelook;
+mod stageprops;
 mod stages;
 mod storage;
 mod story;

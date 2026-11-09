@@ -14,6 +14,7 @@ impl Vfx {
         self.ring(x, y, 190.0, 1.0, 2.0, [1.0, 0.6, 0.55]);
         self.ring(x, feet, 150.0, 0.9, 2.2, [1.0, 0.9, 0.85]);
         self.sheets.spawn(super::sheet::SheetKind::Explosion, x, y, 110.0, 0.0);
+        self.sheets.knockout(x, feet);
         self.glow(x, y, 54.0, 0.45, red);
         self.glow(x, y, 22.0, 0.3, [1.0, 1.0, 1.0]);
         self.light(x, y, 200.0, 0.7, red);

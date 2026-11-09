@@ -99,7 +99,8 @@ jobs:
       - name: Verify the draft against its manifest
         if: env.SKIP != '1'
         run: |
-          mkdir verify && gh release download "$TAG" --dir verify
+          mkdir verify
+          for i in 1 2 3 4 5; do rm -rf verify/*; gh release download "$TAG" --dir verify && break; [ "$i" = 5 ] && exit 1; sleep $((i * 10)); done
           node scripts/release-manifest.mjs --verify verify/latest.json --dir verify --version "$VERSION" --repo "$GITHUB_REPOSITORY"
       - name: Publish (creates the tag at the planned commit)
         if: env.SKIP != '1'

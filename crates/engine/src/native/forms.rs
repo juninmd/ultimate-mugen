@@ -85,11 +85,11 @@ pub(super) fn collect_form_moves<'a>(nc: &'a NativeChar) -> Vec<(&'a NativeMove,
         for m in &nc.moves { out.push((m, None, u32::MAX)); }
         return out;
     };
-    let has_replace = spec.forms.iter().any(|f| f.replace_moves);
+    let replacing: Vec<u32> = spec.forms.iter().enumerate().filter(|(_, f)| f.replace_moves).map(|(i, _)| (i + 1) as u32).collect();
+    let base_cond = (!replacing.is_empty()).then(|| replacing.iter().map(|n| format!("form != {n}")).collect::<Vec<_>>().join(" && "));
+    let base_mask = replacing.iter().fold(u32::MAX, |mask, n| mask & !(1 << n));
     for m in &nc.moves {
-        let cond = if has_replace { Some("form = 0".into()) } else { None };
-        let mask = if has_replace { 1 } else { u32::MAX };
-        out.push((m, cond, mask));
+        out.push((m, base_cond.clone(), base_mask));
     }
     for (i, form) in spec.forms.iter().enumerate() {
         let form_no = (i + 1) as u32;

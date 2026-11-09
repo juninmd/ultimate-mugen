@@ -4,7 +4,7 @@ use crate::commands::CommandState;
 use crate::input::InputHistory;
 use std::sync::Arc;
 
-mod data;
+mod anim_time; mod data;
 pub use data::*;
 use crate::palette::Trans;
 pub use crate::flags::asf;
@@ -32,7 +32,7 @@ pub struct Fighter {
     pub destroyed: bool,
     pub pal_no: i32,
     pub ai_level: i32,
-    pub pos: V2, pub vel: V2, pub facing: f32, pub lscl: f32,
+    pub pos: V2, pub lane: f32, pub guard_button: bool, pub vel: V2, pub facing: f32, pub lscl: f32,
     pub state_no: i32, pub prev_state_no: i32, pub state_time: i32,
     pub state_type: char, pub move_type: char, pub physics: char, pub ctrl: bool,
     pub life: f32, pub life_max: f32, pub power: f32, pub power_max: f32, pub alive: bool,
@@ -65,7 +65,7 @@ pub asserts: u64,
     pub asserted_commands: Vec<(String, i32)>, pub assert_input: (u32, i32), pub input_shift: i32,
     pub sprite_remap: Vec<((i32, i32), (i32, i32), i32)>, pub sprite_transform: Option<(f32, f32, f32, i32)>,
     /// 0 = base form, n = nth transformation (CharDef::forms, legacy awakening = 1) until the round ends
-    pub form: u8, pub form_time: i32, pub base_def: Arc<CharDef>,
+    pub form: u8, pub form_time: i32, pub base_def: Arc<CharDef>, pub passive: crate::passives::PassiveState,
     pub draw_offset: V2, pub victory_quote: i32, pub clipboard: Vec<String>, pub unhittable: i32, pub super_defence_mul: f32,
     pub reversal: Option<(String, HitDefData)>, pub hit_overrides: [Option<HitOverride>; 8],
     pub ikemen: crate::ikemen::IkemenState,
@@ -87,11 +87,11 @@ impl Fighter {
             hitdef: None, hitdef_active: false, hitdef_targets: vec![], move_contact: 0, move_hit: 0, move_guarded: 0, move_reversed: 0, hit_count: 0, uniq_hit_count: 0, uniq_hit_keys: vec![],
             move_countered: 0, move_hit_var: MoveHitVars::default(), hit_overridden_at: 0, prev_state_type: 'S', prev_move_type: 'I', prev_anim: -1,
             ghv: GetHitVars::default(), juggle_used: 0, no_ctrl_ticks: 0, hit_pause: 0, hit_shake: 0, hit_over_time: 0, slide_time: 0, fall_time: 0, asserts: 0,
-            width_override: None, height_override: None, clsn_mods: vec![], run_state_depth: 0, player_push: true, screen_bound: true, pos_freeze: false, spr_priority: 0, targets: vec![],
+            width_override: None, height_override: None, clsn_mods: vec![], run_state_depth: 0, player_push: true, screen_bound: true, pos_freeze: false, spr_priority: 0, lane: 0.0, guard_button: false, targets: vec![],
             not_hit_by: vec![], hit_by: vec![], attack_mul: def.c("data.attack", 100.0) as f32 / 100.0, defence_mul: 1.0,
             persist: Vec::new(), air_jumps: 0, ground_level: 0.0, bind: None, palfx: None, trans: None, remap: vec![], angle: 0.0, angle_draw: false, draw_scale: [1.0, 1.0],
             after_image: None, proj_contacts: vec![], last_hit_by: None, history: InputHistory::default(), cmd: CommandState::default(),
-            combo_count: 0, combo_damage: 0.0, combo_target: None, combo_timer: 0, received_damage: 0.0, received_hits: 0, score: 0.0, score_total: 0.0, asserted_commands: vec![], assert_input: (0, 0), input_shift: 0, sprite_remap: vec![], sprite_transform: None, form: 0, form_time: 0, base_def: def.clone(), reversal: None, hit_overrides: Default::default(), ikemen: crate::ikemen::IkemenState::new(&def),
+            combo_count: 0, combo_damage: 0.0, combo_target: None, combo_timer: 0, received_damage: 0.0, received_hits: 0, score: 0.0, score_total: 0.0, asserted_commands: vec![], assert_input: (0, 0), input_shift: 0, sprite_remap: vec![], sprite_transform: None, form: 0, form_time: 0, base_def: def.clone(), passive: Default::default(), reversal: None, hit_overrides: Default::default(), ikemen: crate::ikemen::IkemenState::new(&def),
             pause_move_time: 0, super_move_time: 0, pause_bool: false, preserve: false, own_pal: true, state_giver: None,
             draw_offset: V2::default(), victory_quote: -1, clipboard: vec![], unhittable: 0, super_defence_mul: 1.0, def,
         }
@@ -124,7 +124,7 @@ impl Fighter {
     pub fn frame(&self) -> Option<&AnimFrame> { self.anim().and_then(|a| a.frames.get(self.elem)) }
 
     pub fn anim_time_trig(&self) -> i32 {
-        if self.anim_total_time < 0 { -1 } else { self.anim_elapsed - self.anim_total_time }
+        self.anim_time_value()
     }
     pub fn elem_start(&self, n: usize) -> i32 {
         if n <= 1 { return 0; }
@@ -277,7 +277,7 @@ impl Fighter {
             (self.c("size.xscale", 1.0), self.c("size.yscale", 1.0))
         };
         let sx = xscale * s;
-        let sy = yscale * s;
+        let sy = yscale * self.lscl * self.draw_scale[1];
         let flip = fr.flip_h != (self.facing < 0.0);
         out.reserve(list.len());
         for b in list {

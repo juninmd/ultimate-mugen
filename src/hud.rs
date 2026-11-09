@@ -8,8 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod palette;
-use palette::{poly_pt, side_tint};
+mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod passive_meter; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -19,6 +18,7 @@ pub struct Hud {
     pop: [f32; 2],
     last_hits: [i32; 2],
     pub bars: Option<[Option<(f32, f32)>; 2]>,
+    energy: energy::EnergyFx,
 }
 
 impl Hud {
@@ -31,6 +31,7 @@ impl Hud {
             pop: [0.0; 2],
             last_hits: [0; 2],
             bars: None,
+            energy: Default::default(),
         }
     }
 
@@ -80,12 +81,13 @@ impl Hud {
         let roots = [r0, r1];
         let partners: Vec<&Fighter> = if m.fighters.len() > 2 {
             m.roots()
-                .filter(|f| f.id != r0.id && f.id != r1.id)
+                .filter(|f| f.id != r0.id && f.id != r1.id && !(m.lanes.active && f.side == 1))
                 .collect()
         } else {
             Vec::new()
         };
         let w = BASE_W;
+        if m.lanes.active && m.lanes.show_foe_hud { story_hud::draw_boss_bar(ui, g, r1); }
         let text = |t: &str, x: f32, y: f32, size: f32, c: Color, al: Align, disp: bool| {
             let font = if disp { &ui.display } else { &ui.body };
             let fs = (size * s).max(9.0) as u16;
@@ -146,7 +148,7 @@ impl Hud {
         let hide_combo = roots.iter().any(|f| f.has_assert(asf::NOCOMBODISPLAY));
         if roots.len() >= 2 && !hide_bars {
             let panel_w = w / 2.0 - 26.0;
-            for side in 0..2 {
+            for side in 0..(if m.lanes.active { 1 } else { 2 }) {
                 let f = roots[side];
                 let show_life = !f.has_assert(asf::NOLIFEBARDISPLAY);
                 let show_power = !f.has_assert(asf::NOPOWERBARDISPLAY);
@@ -208,6 +210,7 @@ impl Hud {
                     |x: f32, y: f32, ww: f32, hh: f32| sp(poly::chamfer(x, y, ww, hh, hh * 0.42));
                 if show_life {
                     if low && ratio > 0.0 {
+                        danger::draw_badge(&p, &text, s, gt, bx, by, bw, side, ratio);
                         let pul = 0.10 + 0.12 * (gt * 11.0).sin().abs();
                         poly::solid(
                             &capsule(bx - 2.0, by - 2.0, bw + 4.0, bh + 4.0),
@@ -414,6 +417,7 @@ impl Hud {
                         text(&label, tx + 6.2, ty + 4.2, 4.0, WHITE, Align::Left, true);
                     }
                 }
+                if show_life { passive_meter::draw(&p, s, gt, f, &passive_meter::Bar { x: bx, y: by, w: bw, h: bh, side }); guard::draw(&p, &text, s, gt, f, bx, by, bw, bh, side); }
                 if show_wins {
                     for i in 0..m.rounds_to_win {
                         let won = m.wins[side] > i;
@@ -433,17 +437,13 @@ impl Hud {
                         poly::outline(
                             &dia,
                             0.6 * s,
-                            if won {
-                                WHITE
-                            } else {
-                                Color::new(1.0, 1.0, 1.0, 0.5)
-                            },
+                            if won { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.5) },
                         );
                     }
                 }
                 if show_power {
-                    let (cw, gap, ph2, py) = (26.0, 3.0, 5.0, BASE_H - 15.0);
-                    let pw = cw * 3.0 + gap * 2.0;
+                    let (ph2, py) = (6.0, BASE_H - 14.5);
+                    let pw = energy::bar_width();
                     let pxm = if side == 0 { 14.0 } else { w - 14.0 - pw };
                     let lvl = (f.power / 1000.0).floor() as i32;
                     let colors = [
@@ -452,73 +452,44 @@ impl Hud {
                         hex("#ffcc33"),
                         hex("#ff4fd8"),
                     ];
+                    let nforms = f.form_count();
+                    let ready = f.next_form_cost().is_some_and(|c| f.power >= c);
                     let (gx, gw) = if side == 0 {
                         (4.0, pw + 36.0)
                     } else {
                         (w - 4.0 - (pw + 36.0), pw + 36.0)
                     };
-                    glass(&p, s, gx, py - 5.0, gw, ph2 + 10.0, 5.0, tint);
-                    for i in 0..3 {
-                        let cxp = if side == 0 {
-                            pxm + i as f32 * (cw + gap)
-                        } else {
-                            pxm + pw - (i as f32 + 1.0) * cw - i as f32 * gap
+                    let top = if nforms > 0 { 11.0 } else { 5.0 };
+                    glass(&p, s, gx, py - top, gw, ph2 + 5.0 + top, 5.0, tint);
+                    self.energy.track(side, f.power);
+                    let bcx = self.energy.draw(&energy::Cell {
+                        p: &p,
+                        s,
+                        gt,
+                        side,
+                        x: pxm,
+                        y: py,
+                        h: ph2,
+                        power: f.power,
+                        awaken: ready,
+                        form: f.form,
+                        forms: nforms,
+                        colors,
+                    });
+                    if nforms > 0 {
+                        let lbl = match f.next_form_cost() {
+                            Some(c) => format!("{} {}/{} · {} {}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), f.form + 1, nforms + 1, crate::i18n::tr3("PRÓX", "NEXT", "SIG"), c as i32),
+                            None => format!("{} {1}/{1} · MAX", crate::i18n::tr3("FORMA", "FORM", "FORMA"), nforms + 1),
                         };
-                        let col = colors[i.min(3)];
-                        poly::solid(
-                            &sp(poly::chamfer(cxp - 0.7, py - 0.7, cw + 1.4, ph2 + 1.4, 2.2)),
-                            Color::new(1.0, 1.0, 1.0, 0.2),
-                        );
-                        poly::solid(
-                            &sp(poly::chamfer(cxp, py, cw, ph2, 2.0)),
-                            Color::new(0.0, 0.0, 0.05, 0.6),
-                        );
-                        let fr = if lvl >= 3 {
-                            1.0
-                        } else {
-                            (f.power / 1000.0 - i as f32).clamp(0.0, 1.0)
-                        };
-                        if fr > 0.01 {
-                            let fw = cw * fr;
-                            let fx = if side == 0 { cxp } else { cxp + cw - fw };
-                            let cell = sp(poly::chamfer(fx, py, fw, ph2, 2.0));
-                            poly::grad_v(&cell, poly::shade(col, 1.35), poly::shade(col, 0.7));
-                            poly::grad_v(
-                                &sp(poly::chamfer(
-                                    fx + 0.5,
-                                    py + 0.4,
-                                    (fw - 1.0).max(0.0),
-                                    ph2 * 0.45,
-                                    1.0,
-                                )),
-                                Color::new(1.0, 1.0, 1.0, 0.55),
-                                Color::new(1.0, 1.0, 1.0, 0.0),
-                            );
-                            if fr >= 0.999 && (m.game_time >> 3) % 2 == 1 {
-                                poly::solid(&cell, Color::new(1.0, 1.0, 1.0, 0.25));
-                            }
-                        }
+                        let al = if side == 0 { Align::Left } else { Align::Right };
+                        let tx = if side == 0 { pxm + 6.2 * (nforms + 1).min(7) as f32 + 2.0 } else { pxm + pw - 6.2 * (nforms + 1).min(7) as f32 - 2.0 };
+                        text(&lbl, tx, py - 2.6, 4.4, Color::new(1.0, 1.0, 1.0, 0.85), al, true);
                     }
                     let lab = if lvl >= 3 {
                         "MAX".to_string()
                     } else {
                         lvl.to_string()
                     };
-                    let bump = if lvl >= 1 {
-                        1.0 + 0.1 * (gt * 8.0).sin().abs()
-                    } else {
-                        1.0
-                    };
-                    let bcx = if side == 0 {
-                        pxm + pw + 11.0
-                    } else {
-                        pxm - 11.0
-                    };
-                    let bc = p(bcx, py + ph2 / 2.0);
-                    let bcol = colors[(lvl.max(1) - 1).min(3) as usize];
-                    let hexa = poly::regular(bc, 6.8 * s * bump, 6, 0.0);
-                    poly::grad_v(&hexa, poly::shade(bcol, 1.2), poly::shade(bcol, 0.45));
-                    poly::outline(&hexa, 0.8 * s, WHITE);
                     text(
                         &lab,
                         bcx,
@@ -528,13 +499,6 @@ impl Hud {
                         Align::Center,
                         true,
                     );
-                    if lvl >= 3 {
-                        let a = 0.08 + 0.07 * (gt * 9.0).sin().abs();
-                        poly::solid(
-                            &sp(poly::chamfer(pxm - 2.0, py - 2.0, pw + 4.0, ph2 + 4.0, 3.0)),
-                            Color::new(1.0, 0.3, 0.85, a),
-                        );
-                    }
                 }
             }
             let strip_y = 30.5;
@@ -726,7 +690,7 @@ impl Hud {
                     }
                 }
             }
-            if m.team_simul {
+            if m.team_simul && !m.lanes.active {
                 let alive = |sd: usize| m.roots().filter(|f| f.side == sd && f.alive).count();
                 let tot = |sd: usize| m.roots().filter(|f| f.side == sd).count();
                 outlined(
@@ -747,12 +711,12 @@ impl Hud {
                 );
                 if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 {
                     text(
-                        "TAB · TROCAR DE LUTADOR",
-                        10.0,
-                        BASE_H - 24.0,
+                        crate::i18n::tr3("TAB · TROCAR DE LUTADOR", "TAB · SWITCH FIGHTER", "TAB · CAMBIAR DE LUCHADOR"),
+                        w / 2.0,
+                        BASE_H - 20.0,
                         5.2,
                         Color::new(1.0, 1.0, 1.0, 0.6),
-                        Align::Left,
+                        Align::Center,
                         true,
                     );
                 }
@@ -772,7 +736,7 @@ impl Hud {
                     (w - off, Align::Right)
                 };
                 outlined(
-                    &format!("TIME {lead}"),
+                    &format!("{} {lead}", crate::i18n::tr3("TIME", "TEAM", "EQUIPO")),
                     x,
                     41.0,
                     5.2,
@@ -866,6 +830,9 @@ impl Hud {
                         Color::new(1.0, 0.7, 0.2, a * (0.5 - 0.15 * k as f32)),
                     );
                 }
+                if att.move_countered > 0 {
+                    outlined("COUNTER", x, cy0 + 68.0, 7.0, Color::new(1.0, 0.45, 0.25, a), al);
+                }
                 outlined(
                     &c.0.to_string(),
                     x,
@@ -914,7 +881,7 @@ impl Hud {
             let sc = if age < 8.0 { 2.0 - age / 8.0 } else { 1.0 };
             let al = (a.time as f32 / 12.0).min(1.0);
             let size = if a.text.len() > 10 { 20.0 } else { 30.0 } * sc;
-            let ko = a.text == "K.O.";
+            let ko = a.text == "K.O." || a.text == "DOUBLE K.O.";
             let glow = if ko {
                 Color::new(1.0, 0.12, 0.25, 0.25 * al)
             } else {
@@ -1001,7 +968,7 @@ impl Hud {
                     } else {
                         (100.0, 210.0)
                     };
-                    if rt < t0 || rt > t1 {
+                    if rt < t0 || rt > t1 || matches!(f.def.source, ume_engine::chardef::Source::Mugen) {
                         continue;
                     }
                     let txt = face_off_line(f, side == 1);
@@ -1114,7 +1081,7 @@ impl Hud {
                 {
                     let a = 0.55 + 0.45 * (gt * 5.0).sin().abs();
                     text(
-                        "T · DESPERTAR",
+                        &format!("T · {} {}/{}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), f.form + 2, f.form_count() + 1),
                         BASE_W / 2.0,
                         BASE_H - 8.0,
                         6.0,
@@ -1157,7 +1124,7 @@ impl Hud {
             let (hits, dmg) = (self.combo[0].0, self.combo[0].1);
             if hits >= 2 {
                 text(
-                    &format!("ÚLTIMO COMBO  {hits} HITS · {} DMG", dmg as i32),
+                    &format!("{}  {hits} HITS · {} DMG", crate::i18n::tr3("ÚLTIMO COMBO", "LAST COMBO", "ÚLTIMO COMBO"), dmg as i32),
                     w / 2.0,
                     38.0,
                     5.6,
@@ -1251,26 +1218,12 @@ fn face_off_line(f: &Fighter, answer: bool) -> String {
     if !own.is_empty() {
         return own.clone();
     }
-    const A: [&str; 5] = [
-        "Vamos ver do que você é capaz!",
-        "Prepare-se!",
-        "Não vou pegar leve!",
-        "Que vença o melhor!",
-        "Mostre sua força!",
-    ];
-    const B: [&str; 5] = [
-        "Só isso?",
-        "Você não me assusta.",
-        "Venha com tudo!",
-        "Hmpf... entediante.",
-        "Vai se arrepender.",
-    ];
     let h = f
         .def
         .display_name
         .bytes()
         .fold(7usize, |a, b| a.wrapping_mul(31).wrapping_add(b as usize));
-    (if answer { B } else { A })[h % 5].to_string()
+    taunts::generic_line(answer, h).to_string()
 }
 
 const TILE_W: f32 = 10.5;

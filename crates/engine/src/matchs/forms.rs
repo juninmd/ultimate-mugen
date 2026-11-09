@@ -19,6 +19,12 @@ impl Fighter {
         forms.get(next).map(|form| form.cost)
     }
 
+    pub fn form_count(&self) -> usize {
+        let forms = &self.base_def.forms;
+        if !forms.is_empty() { return forms.len(); }
+        usize::from(self.base_def.anims.contains_key(&196))
+    }
+
     pub fn active_form_name(&self) -> &str {
         if self.form == 0 {
             return &self.def.form_name;

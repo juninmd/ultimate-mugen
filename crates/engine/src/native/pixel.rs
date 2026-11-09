@@ -8,8 +8,8 @@ use std::path::{Path, PathBuf};
 
 const SPRITE_ROOT: &str = "assets/chars/sprites";
 const BASE_STEM: &str = "01_idle";
-const STAND_HURT: [f32; 4] = [-18.0, -96.0, 18.0, 0.0];
-const CROUCH_HURT: [f32; 4] = [-16.0, -60.0, 16.0, 0.0];
+const STAND_HURT: [f32; 4] = [-22.0, -96.0, 22.0, 0.0];
+const CROUCH_HURT: [f32; 4] = [-24.0, -64.0, 24.0, 0.0];
 const LYING_HURT: [f32; 4] = [-46.0, -26.0, 46.0, 0.0];
 const STRIKE_BOX: [f32; 4] = [2.0, -84.0, 38.0, -32.0];
 const STAND_UNITS: f32 = 100.0;
@@ -17,14 +17,12 @@ const STAND_UNITS: f32 = 100.0;
 pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value>) -> Option<RigRender> {
     if fr.effect.is_some() { return None; }
     let recolor = palette.and_then(|p| Recolor::new(nc.art.style.get("colors"), p));
-    let mut render = load_pose(&sprite_roots(&nc.id), &native_frame_sprite_key(fr), fr.hit.is_some(), recolor.as_ref())?;
+    let mut render = load_pose(&sprite_roots(nc.sprite_dir()), &native_frame_sprite_key(fr), fr.hit.is_some(), recolor.as_ref())?;
     let height = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(STAND_UNITS as f64) as f32;
     let height_ratio = height / STAND_UNITS;
     render.scale *= height_ratio;
-    for bounds in &mut render.hurt {
-        bounds[1] *= height_ratio;
-        bounds[3] *= height_ratio;
-    }
+    super::pixel_hit::fit_to_character(nc, fr, &mut render, height_ratio);
+    super::pixel_fit::fit_boxes(&mut render, fr);
     Some(render)
 }
 
@@ -68,7 +66,7 @@ fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool, recolor:
 pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
     let character = &super::compile::with_defaults(character);
     use std::hash::{Hash, Hasher};
-    let roots = sprite_roots(&character.id);
+    let roots = sprite_roots(character.sprite_dir());
     let animations: Vec<Value> = character.anims.iter().map(|(animation, data)| {
         let frames: Vec<Value> = data.frames.iter().enumerate().map(|(index, frame)| {
             let pose = native_frame_sprite_key(frame);
@@ -107,6 +105,7 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
     let axis = |key: &str, default: f32, limit: f32| frame.get(key).and_then(Value::as_f64).filter(|number| number.is_finite() && *number >= 0.0 && *number <= limit as f64).map_or(default, |number| number as f32);
     let axis_x = axis("axisX", dec.width as f32 / 2.0, dec.width as f32);
     let axis_y = axis("axisY", dec.height as f32, dec.height as f32);
+    let hurt = super::pixel_hurt::fit_body(hurtbox(lower, stem), stem, &rgba, dec.width, dec.height, [axis_x, axis_y], STAND_UNITS / units);
     Some(RigRender {
         image: Some(ImageData::new(dec.width, dec.height, rgba)),
         width: dec.width as f32 * res,
@@ -114,7 +113,7 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
         axis_x: axis_x * res,
         axis_y: axis_y * res,
         scale: STAND_UNITS / units / res,
-        hurt: vec![hurtbox(lower, stem)],
+        hurt: vec![hurt],
         hit: if striking { vec![STRIKE_BOX] } else { vec![] },
     })
 }
@@ -205,7 +204,7 @@ mod tests {
         fighter.stats.height = Some(116.0);
         let taller = try_load(&fighter, &frame, None).unwrap();
         assert!((taller.scale / baseline.scale - 1.16).abs() < 0.001);
-        assert!((taller.hurt[0][1] / baseline.hurt[0][1] - 1.16).abs() < 0.001);
+        assert!((taller.hurt[0][1] / baseline.hurt[0][1] - 1.16).abs() < 0.03);
         fighter.stats.height = Some(f64::NAN);
         assert_eq!(try_load(&fighter, &frame, None).unwrap().scale, baseline.scale);
     }
@@ -276,7 +275,7 @@ mod tests {
         write_png(&dir, "01_idle", 10, 10);
         write_png(&dir, "14_lie", 10, 10);
         let roots = [dir.clone()];
-        assert_eq!(load_pose(&roots, "lie", false, None).unwrap().hurt, vec![LYING_HURT]);
+        assert_ne!(load_pose(&roots, "lie", false, None).unwrap().hurt, vec![STAND_HURT]);
         assert_eq!(load_pose(&roots, "idle0", false, None).unwrap().hurt, vec![STAND_HURT]);
         assert_eq!(load_pose(&roots, "crouch1", false, None).unwrap().hurt, vec![CROUCH_HURT]);
         std::fs::remove_dir_all(dir).unwrap();

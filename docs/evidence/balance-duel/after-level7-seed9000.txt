@@ -1,0 +1,18 @@
+roster 15 fighters, 630 CPU-vs-CPU rounds (level 7, 3 seeds, both sides)
+shion    win  67.9%  dmg/round    720  hits/round  35.0  best combo  8
+sylene   win  60.7%  dmg/round    937  hits/round  37.5  best combo 25
+daichi   win  57.1%  dmg/round    737  hits/round  36.1  best combo  8
+kaito    win  52.4%  dmg/round    778  hits/round  41.6  best combo 18
+garan    win  51.2%  dmg/round    758  hits/round  36.5  best combo  7
+jin      win  51.2%  dmg/round    719  hits/round  42.7  best combo 13
+bruno    win  48.8%  dmg/round    571  hits/round  28.5  best combo  7
+suzume   win  48.8%  dmg/round    706  hits/round  32.0  best combo  7
+akio     win  47.6%  dmg/round    709  hits/round  35.5  best combo  9
+valdric  win  47.6%  dmg/round    722  hits/round  31.7  best combo  5
+marlow   win  45.2%  dmg/round    819  hits/round  35.5  best combo 11
+kaname   win  44.0%  dmg/round    724  hits/round  36.0  best combo 10
+lian     win  44.0%  dmg/round    723  hits/round  41.2  best combo  8
+volta    win  44.0%  dmg/round    677  hits/round  39.8  best combo  9
+haruki   win  39.3%  dmg/round    675  hits/round  34.7  best combo  7
+win-rate spread (std dev) 7.1 pts, best 67.9%, worst 39.3%
+knockout rate 63.5%, draws 0.0%, average round 90.1s, avg damage/round 1463, avg hits/round 72.6, rounds with a stuck fighter 0

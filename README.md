@@ -72,15 +72,49 @@ Keyboard, touch, Xbox, DualShock 4 and DualSense with **rumble and lightbars**. 
 </tr>
 </table>
 
+---
+
+## 🖼️ Pixel-art roster, maps and gameplay
+
 <p align="center">
-  <img src="screenshots/06-fight-dojo.jpg" alt="Fight" width="100%">
+  <img src="docs/assets/readme/fight.gif" alt="Gameplay: two native fighters trading hits on the Bamboo stage" width="70%">
 </p>
 
-| | |
-|---|---|
-| ![Super](screenshots/08-fight-super.jpg) | ![M.U.G.E.N Kung Fu Man vs a native fighter](screenshots/12-mugen-kfm-vs-native.jpg) |
-| ![5v5 parallel](screenshots/33-team-5v5-parallel.jpg) | ![Neon impact](screenshots/21-fx-neon-hit.jpg) |
-| ![4K super](screenshots/36-4k-super.jpg) | ![Mobile](screenshots/15-mobile-fight.jpg) |
+<p align="center"><i>Real gameplay captured from the web build (software rendering, so the GIF runs below the native frame rate).</i></p>
+
+### Pixel-art fighters
+
+The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set per fighter, with palettes, ki/energy specials, flight, teleport and transformations. Characters are declared in a single UMF JSON each.
+
+![Character select with the pixel-art roster](docs/assets/readme/roster-select.jpg)
+
+### Maps
+
+21 illustrated arenas, from a sunset dojo roof and a neon metropolis to the wonders of the world (Petra, Taj Mahal, Christ the Redeemer, the Colosseum, the Great Wall, Chichen Itza and more), each with living ambience layers and its own built-in music theme.
+
+![Stage select](docs/assets/readme/stage-select.jpg)
+
+**Story mode** adds five long scrolling extensions of the arenas (Brazil, Neon, Bamboo, Volcano and Dojo): one segment per fight, four waves of thugs plus a stage boss, with health carry-over between fights. See the [Story mode guide](docs/wiki/Story-Mode.md).
+
+![Story mode scrolling stages](docs/assets/readme/story-stages.jpg)
+
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Versus screen"></td>
+<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 on the Bamboo stage"></td>
+</tr>
+</table>
+
+---
+
+## 🆕 What's new
+
+- **Story mode:** five stages of waves, thugs with their own traits and a boss per stage, with cutscenes and endings. [Guide](docs/wiki/Story-Mode.md)
+- **Music and audio:** a built-in music theme per stage, tiered hit sounds, music ducking on impacts and a crowd cheer on the KO. [Audio](docs/wiki/Audio.md)
+- **Move shortcuts:** bind any move from the pause list to `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforms and `R3` alone charges ki. [Controls](docs/wiki/Configuration.md#controls)
+- **Richer movesets:** every native fighter has EX specials, a level 3 hyper, an escape burst, an ascended form with its own hyper, and air versions of its specials. [Shared toolkit](docs/wiki/Characters.md#shared-toolkit)
+- **Automatic updates and releases:** every merge to `master` publishes a release; the desktop build updates itself. [Auto-update](docs/wiki/Auto-Update.md)
+- **M.U.G.E.N compatibility:** fixes found loading real community characters (walk and guard exits, taunts, intros, duplicate AIR actions). [Compatibility decisions](docs/wiki/Compatibility-Decisions.md)
 
 ---
 
@@ -109,7 +143,7 @@ Details in the [Performance wiki page](docs/wiki/Performance.md).
 
 ## 🏁 Quick start
 
-**Play now:** open the [web build](https://juninmd.github.io/ultimate-mugen/) and drag a character `.zip` into the window.
+**Play now:** open the [web build](https://juninmd.github.io/ultimate-mugen/) and drag a character `.zip` into the window (or use Import M.U.G.E.N in the main menu).
 
 **Desktop:**
 
@@ -171,13 +205,14 @@ Keyboard, multiple gamepads and touch work at the same time. Move lists show the
 | **Move / Jump / Crouch** | Arrow keys | `I` `K` `J` `L` | D-Pad or left stick | Virtual stick |
 | **Light Punch** | `Q` | Numpad `4` | `□` / `X` | **LP** |
 | **Heavy Punch** | `W` | Numpad `5` | `△` / `Y` | **HP** |
-| **Extra Punch (Z)** | `E` | Numpad `6` | `R1` / `RB` | — |
+| **Extra Punch (Z)** | `E` | Numpad `6` | — | — |
 | **Light Kick** | `A` | Numpad `1` | `✕` / `A` | **LK** |
 | **Heavy Kick** | `S` | Numpad `2` | `○` / `B` | **HK** |
-| **Extra Kick (C)** | `D` | Numpad `3` | `R2` / `RT` | — |
-| **Quick specials** | `1`, `2`, `3` | Numpad `7`, `8`, `9` | `L1`, `L2` | **ESPECIAL**, **SUPER** |
-| **Super** | `1` + `2` | Numpad `7` + `8` | `L1` + `L2` | **SUPER** |
-| **Transformation** | `T` | Numpad `0` | Right stick / `SELECT` | — |
+| **Extra Kick (C)** | `D` | Numpad `3` | — | — |
+| **Quick specials** | `V`, `B`, `N` | Numpad `7`, `8`, `9` | — | **ESPECIAL**, **SUPER** |
+| **Move shortcuts** (bind in the pause menu) | `1`, `2`, `3`, `4` | — | `L1`, `L2`, `R1`, `R2` | — |
+| **Transformation** | `T` | Numpad `0` | `L3` + `R3` / `SELECT` | — |
+| **Charge ki** | `R` | Numpad `.` | `R3` (alone) | — |
 | **Pause / Hitboxes** | `Esc` / `Enter` / `F2` | `Esc` / `Enter` / `F2` | `OPTIONS` / `START` | `❚❚` |
 | **Fullscreen / FPS** | `F11` / `F3` | — | — | — |
 | **Switch fighter (parallel team)** | `Tab` | — | — | — |

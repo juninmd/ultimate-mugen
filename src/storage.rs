@@ -41,6 +41,9 @@ pub fn write(name: &str, text: &str) {
     ume_storage_set(name, text);
     #[cfg(not(target_arch = "wasm32"))]
     {
-        let _ = std::fs::write(path(name), text);
+        let tmp = path(&format!("{name}.tmp"));
+        if std::fs::write(&tmp, text).is_ok() {
+            let _ = std::fs::rename(&tmp, path(name));
+        }
     }
 }

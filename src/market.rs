@@ -12,7 +12,7 @@ use ume_market::{Catalog, Installed, Item, Kind, MarketError, MarketState, Persi
 
 pub const SUGGESTED: [(&str, &str); 1] = [(
     "juninmd/ultimate-mugen",
-    "Projeto oficial · pacote de exemplo Elecbyte",
+    "Official project · Elecbyte sample pack",
 )];
 
 const STALE_AFTER_SECS: u64 = 600;
@@ -49,25 +49,24 @@ fn push(queue: &Queue, e: Event) {
 
 pub fn describe(e: &MarketError) -> String {
     match e {
-        MarketError::Network(m) => format!("Falha de rede: {m}"),
+        MarketError::Network(m) => format!("{}: {m}", crate::i18n::tr3("Falha de rede", "Network error", "Error de red")),
         MarketError::NotFound => {
-            "Repositório ou arquivo não encontrado (repositórios privados não são suportados)."
-                .into()
+            crate::i18n::tr3("Repositório ou arquivo não encontrado (repositórios privados não são suportados).", "Repository or file not found (private repositories are not supported).", "Repositorio o archivo no encontrado (los repositorios privados no son compatibles).").into()
         }
         MarketError::RateLimited {
             reset_epoch: Some(t),
         } => {
             let wait = t.saturating_sub(ume_market::now_secs()).div_ceil(60);
-            format!("Limite de requisições do GitHub atingido; tente em ~{wait} min ou informe um token.")
+            crate::i18n::fill(crate::i18n::tr3("Limite de requisições do GitHub atingido; tente em ~{wait} min ou informe um token.", "GitHub rate limit reached; try again in ~{wait} min or provide a token.", "Límite de peticiones de GitHub alcanzado; prueba en ~{wait} min o indica un token."), &[("wait", &wait.to_string())])
         }
         MarketError::RateLimited { reset_epoch: None } => {
-            "Limite de requisições do GitHub atingido; tente mais tarde ou informe um token.".into()
+            crate::i18n::tr3("Limite de requisições do GitHub atingido; tente mais tarde ou informe um token.", "GitHub rate limit reached; try again later or provide a token.", "Límite de peticiones de GitHub alcanzado; prueba más tarde o indica un token.").into()
         }
-        MarketError::Forbidden => "Acesso negado pelo GitHub.".into(),
-        MarketError::Http(c) => format!("Resposta inesperada do GitHub (HTTP {c})."),
-        MarketError::TooLarge => "Download maior que o limite permitido.".into(),
+        MarketError::Forbidden => crate::i18n::tr3("Acesso negado pelo GitHub.", "Access denied by GitHub.", "Acceso denegado por GitHub.").into(),
+        MarketError::Http(c) => format!("{} (HTTP {c}).", crate::i18n::tr3("Resposta inesperada do GitHub", "Unexpected GitHub response", "Respuesta inesperada de GitHub")),
+        MarketError::TooLarge => crate::i18n::tr3("Download maior que o limite permitido.", "Download exceeds the allowed limit.", "La descarga supera el límite permitido.").into(),
         MarketError::Invalid(m) => m.clone(),
-        MarketError::HostNotAllowed => "Bloqueado: só é permitido baixar de github.com.".into(),
+        MarketError::HostNotAllowed => crate::i18n::tr3("Bloqueado: só é permitido baixar de github.com.", "Blocked: downloads are only allowed from github.com.", "Bloqueado: solo se permite descargar de github.com.").into(),
         MarketError::Cancelled => "Cancelado.".into(),
     }
 }
@@ -507,10 +506,9 @@ impl Market {
                             r.item_count = catalog.items.len();
                         }
                         self.notice = if catalog.truncated {
-                            "Repositório muito grande: a listagem do GitHub veio truncada.".into()
+                            crate::i18n::tr3("Repositório muito grande: a listagem do GitHub veio truncada.", "Repository too large: the GitHub listing was truncated.", "Repositorio demasiado grande: el listado de GitHub llegó truncado.").into()
                         } else if catalog.items.is_empty() {
-                            "Nenhum personagem, cenário ou música encontrado neste repositório."
-                                .into()
+                            crate::i18n::tr3("Nenhum personagem, cenário ou música encontrado neste repositório.", "No characters, stages or music found in this repository.", "No se encontraron personajes, escenarios ni música en este repositorio.").into()
                         } else {
                             format!("{} itens encontrados.", catalog.items.len())
                         };

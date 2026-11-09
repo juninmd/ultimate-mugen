@@ -7,9 +7,14 @@ use serde_json::Value;
 
 const MAX_PORTRAIT_EDGE: u32 = 256;
 
+pub fn select_portrait(nc: &NativeChar, pal_no: i32) -> Option<Sprite> {
+    let palette = if pal_no > 1 && !nc.palettes.is_empty() { Some(&nc.palettes[(pal_no as usize - 2) % nc.palettes.len()]) } else { None };
+    portrait(nc, palette)
+}
+
 pub(super) fn portrait(nc: &NativeChar, palette: Option<&Value>) -> Option<Sprite> {
     let recolor = palette.and_then(|palette| Recolor::new(nc.art.style.get("colors"), palette));
-    sprite_roots(&nc.id).iter().find_map(|root| {
+    sprite_roots(nc.sprite_dir()).iter().find_map(|root| {
         let bytes = read_sprite(root, "portrait.png")?;
         let png = ume_formats::png::decode_png(&bytes).ok()?;
         let rgba = match &png.rgba { Some(rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&png) };

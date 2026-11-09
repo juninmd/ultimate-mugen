@@ -11,5 +11,7 @@ BUILD="${UME_BUILD_ID:-$(git rev-parse --short HEAD 2>/dev/null || echo dev)-$(d
 sed "s/__BUILD__/$BUILD/g" web/index.html > web/dist/index.html
 mkdir -p web/dist/assets/stages
 cp assets/stages/*.png web/dist/assets/stages/
+mkdir -p web/dist/assets/stages/story
+cp assets/stages/story/*.png web/dist/assets/stages/story/
 python3 scripts/pack_sprites.py web/dist
 echo "OK: web/dist  (ex.: python3 -m http.server -d web/dist 8080)"

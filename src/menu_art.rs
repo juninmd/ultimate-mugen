@@ -79,9 +79,9 @@ const THEMES: [Theme; 11] = [
 ];
 
 pub struct MenuArt {
-    prev: usize,
-    cur: usize,
-    fade: f32,
+    pub(crate) prev: usize,
+    pub(crate) cur: usize,
+    pub(crate) fade: f32,
 }
 
 fn col(h: u32) -> Color {

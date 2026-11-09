@@ -221,7 +221,7 @@ pub(crate) fn note_param_read(name: &str) {
 fn probe_match() -> Match {
     let common = COMMON.with(|c| c.borrow_mut().get_or_insert_with(common_def).clone());
     let mut m = Match::new(common, None, flat_stage());
-    let def = Arc::new(CharDef::empty("diagnostics-probe"));
+    let def = Arc::new(crate::probe_def::probe_def());
     m.add_player(def.clone(), 0, 0, 1);
     m.add_player(def, 1, 0, 1);
     m

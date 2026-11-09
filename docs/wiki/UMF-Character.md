@@ -43,6 +43,7 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | `format` | yes | Always `umf/1` |
 | `id`, `name`, `series`, `author`, `color` | yes | Identity; `color` is the select card color |
 | `boss` | no | `true` hides it from select and makes it the final Arcade boss |
+| `npc` | no | `true` hides it from select and every random pool; used by Story mode thugs, no boss empowerment |
 | `speed` | no | Animation speed multiplier (>1 = faster moves) |
 | `stats` | no | Attributes, table below |
 | `art` | yes | Art, see [Rig](Rig.md) |
@@ -87,6 +88,17 @@ Each animation is a list of frames:
 | `effect` | Draws an effect instead of the body (projectiles, sparks), see [Rig](Rig.md#effects) |
 | `offset` | Drawing offset `[x, y]` |
 | `loop` | Frame index where the loop restarts |
+
+#### How an attack frame becomes a hit box
+
+Frames drawn from pixel sprites take their strike box from the rig geometry of the frame's `pose` and `hit` (`part` + `radius`), or from the explicit `box` when given, so every move keeps its own reach. The compiler then reshapes it to the proportions measured on 605 M.U.G.E.N characters (`native/pixel_hit.rs`, `H` = standing height, 96 units for `height` 100):
+
+- like a M.U.G.E.N `Clsn1`, the box spans from the body to the tip: it starts at most `0.10 H` in front of the origin and reaches at least `0.60 H` (the M.U.G.E.N median for punches is `0.72 H`, kicks `0.80 H`);
+- at least `0.36 H` tall and never above `0.95 H` or below the floor (M.U.G.E.N punches sit between `-0.75 H` and `-0.33 H`, kicks down to `-0.05 H`);
+- the standing hurtbox is `0.46 H` wide (M.U.G.E.N median `0.46 H`) and the crouching one `0.67 H` tall (M.U.G.E.N median `0.67 H`);
+- an explicit `box` is used as written, so keep it inside those proportions; the audit fails otherwise.
+
+`cargo test --release -p ume-engine --test native_hitbox_audit` checks every strike frame of the roster (height, reach, start, width, above the head, under the floor), and `native_normal_reach` prints and compares the reach and damage of the four stand normals of every fighter.
 
 ### Standard names
 
@@ -136,6 +148,23 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `fx` | `aura` | Extra visual effect |
 | `voice` | `1000, 0` | Character sound group and index played at move start, when that sample is bundled |
 | `airPhysics` | `true` | Keeps air physics |
+| `cancels` | list of move ids | This move may be cancelled **into** those moves on contact (hit, guard or projectile contact). Declaring it replaces the automatic gatling out of this move |
+| `throw` | `{ "damage", "bind", "launch", "at" }` | Grab: see [Combat traits](#combat-traits) |
+| `armor` | `{ "hits", "threshold" }` | Absorbs hits while the move is active |
+| `parry` | `{ "window": [from, to], "spark" }` | Returns attacks during the animation-element window |
+| `timestop` | ticks | Freezes everyone else |
+| `burst` | `true` | Combo breaker usable while being hit |
+| `flight` | `true` | 8-way hover while the move lasts |
+
+### Combat traits
+
+- **Automatic gatling.** A move without `cancels` follows the genre rules: a normal cancels into any *stronger* normal (`light` < `medium` < `heavy` by the strongest hit level, ties by declaration order, so strings can never loop), ground normals link into crouching ones, air normals chain with air normals, and every normal cancels into every special and super on contact. Specials cancel into other specials only through explicit `cancels`; supers cancel out of any move.
+- **Explicit routes.** `"cancels": ["strong", "rush"]` on `jab` makes `strong` and `rush` accept `jab` on contact. A projectile special can be cancelled once its projectile touches the opponent. An `air` special may start from a ground launcher that lists it (uppercut, then dive).
+- **`throw`** (`damage`, `bind` `[x, y]` in front of the thrower, `launch` `[vx, vy]`, `at` = grab frame, default 1). The grab HitDef fires on animation element `at` (give that frame a `hit` box), the victim is held on `at + 1`, takes the damage on `at + 2` and is launched, so the animation needs at least `at + 2` frames. Throws ignore guarding and whiff when the target is out of reach.
+- **`armor`** (`hits` absorbed, optional `threshold` = damage above which the armor breaks). From move start until the last hit frame the move takes 35 % chip damage and is not interrupted; once `hits` are spent the next hit staggers normally.
+- **Multi-hit glue.** Moves with three or more `hits` push the target away only a little on every hit except the last (so the whole string connects) and piercing projectiles (4+ hits) do not shove the target out of the beam. Set `knockback` explicitly to opt out.
+
+Validate with `cargo test --release --test native_roster_lab -- --nocapture` (every attack state must connect; prints damage and reach per move), `--test native_combo_routes` (every declared cancel chains end to end) and `python scripts/audit_native_moves.py`.
 
 ### `hits[]`
 
@@ -176,6 +205,18 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `$` | Inclusive direction (`$D` accepts DB, D, DF) | `$D, x` |
 | `>` | No other input between steps | `F, >F` |
 | `N` | Neutral direction (no direction held) | `N, x` |
+
+## Power normals (Punch 3 and Kick 3)
+
+Every native fighter that does not declare a move bound to `z` or `c` gets four extra normals at compile time (`native/power_normals.rs`): `power_punch` and `crouch_power_punch` on `z` (default key **E**, shown as *Punch 3*), `power_kick` and `crouch_power_kick` on `c` (default key **D**, shown as *Kick 3*). Each one reuses the animation, timing, guard height and `cancels` of the fighter's heaviest ground normal of that family (`y` then `x` for punches, `b` then `a` for kicks, crouching variants take the crouching normal), named `<base name> Max`. Hits deal 130 % damage, are promoted to `heavy`, gain 4 hit-stun and 2 hit-stop ticks when those are set, and push 25 % harder. Moves that cancel into the base normal also cancel into its power version, and the new moves appear in the pause move list. Declare your own `z` or `c` move to opt out. Air versions are not generated here.
+
+## Energy charge (every fighter)
+
+Every native fighter can charge its meter: hold **R** (the `s` / Start input; the pause key in a fight is **Esc** or **P**). The fighter enters state `3920`, plays its `powerUp` animation on a loop with a blue glow and gains 4 power per tick (a 1000-power super in about four seconds) until the button is released (after at least 6 ticks) or the meter is full. The state is `movetype = I`, so a hit interrupts it, and a form-capable fighter still transforms with `T` once the meter reaches the form cost. The command is `charge_cmd` (`/s`) and shows as `Charge Energy` in the move list. The built-in AI charges only at level 3 or above, with less than 700 power, when the rival is more than 190 units away and is not attacking.
+
+## Air abilities (every special and super)
+
+Every `special` and `super` with `when` unset or `"stand"` also gets an air version (state `20000 + ground state`, label `State -1, air <name>`), entered with the same command while the fighter is airborne. The fighter hovers at the start of the move (drift kept at 40 %), gravity returns at 45 % after 12 ticks, the move ends into the jump fall state (`50`) with control, and touching the ground interrupts it with the landing state (`52`). Air versions deal 70 % of the ground damage, projectiles leave angled down (slope 0.85) so they reach a grounded rival, and each jump allows one air special (`var(57)`, cleared on landing). Throws, flight moves and moves that declare `when: "crouch"` or `"air"` keep their own rules.
 
 ## Pixel-art sprites (optional)
 

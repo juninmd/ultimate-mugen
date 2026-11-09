@@ -13,12 +13,21 @@ use std::sync::Arc;
 use ume_engine::ai::Ai;
 use ume_engine::chardef::CharDef;
 
+mod arcade;
 mod cutscene;
+mod fight_seed;
 mod keyedit;
 mod loading;
+mod pause;
 mod market;
+mod market_text;
+mod menu_fighters;
+mod mugen_catalog;
+mod mugen_gallery;
 mod replay_browser;
 mod settings_screen;
+mod story;
+mod story_screen;
 mod survival;
 mod update_banner;
 mod versus;
@@ -30,6 +39,7 @@ pub(crate) use keyedit::KeyEdit;
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Mode {
     Arcade,
+    Story,
     Survival,
     Cpu,
     Versus,
@@ -43,6 +53,7 @@ impl Mode {
     fn label(self) -> &'static str {
         crate::i18n::t(match self {
             Mode::Arcade => "mode.arcade",
+            Mode::Story => return crate::i18n::tr("HISTÓRIA", "STORY"),
             Mode::Survival => "mode.survival",
             Mode::Cpu => "mode.cpu",
             Mode::Versus => "mode.versus",
@@ -61,6 +72,7 @@ impl Mode {
     pub fn key(self) -> &'static str {
         match self {
             Mode::Arcade => "Arcade",
+            Mode::Story => "Story",
             Mode::Survival => "Survival",
             Mode::Cpu => "Cpu",
             Mode::Versus => "Versus",
@@ -74,6 +86,7 @@ impl Mode {
     pub fn from_key(key: &str) -> Mode {
         match key {
             "Arcade" => Mode::Arcade,
+            "Story" => Mode::Story,
             "Survival" => Mode::Survival,
             "Versus" => Mode::Versus,
             "Training" => Mode::Training,
@@ -108,13 +121,19 @@ pub enum Screen {
         winner: usize,
         cur: usize,
     },
+    Story {
+        t: f32,
+    },
     /// Survival game over: final score and fights won
     SurvivalOver {
         score: i64,
         rounds: usize,
     },
     Controls,
-    Mugen,
+    Mugen {
+        view: u8,
+        page: usize,
+    },
     Market,
     /// on-disk replay browser
     Replays {
@@ -243,7 +262,8 @@ pub struct App {
     pub sel: (usize, usize, usize),
     pub session: Option<Session>,
     pub arcade: Option<(Vec<usize>, usize)>,
-    pub pause_cur: usize,
+    pub boss_progression: crate::boss::BossProgression,
+    pause: pause::PauseState,
     pub debug_boxes: bool,
     pub quit: bool,
     pub msg: String,
@@ -253,8 +273,6 @@ pub struct App {
     preview_t: f32,
     pub settings: Settings,
     pub(crate) key_edit: Option<keyedit::KeyEdit>,
-    /** page of the pause-screen move list (14 moves per page) */
-    move_page: usize,
     pending: Pending,
     import_jobs: Vec<std::thread::JoinHandle<Result<(String, ume_formats::vfs::Vfs), String>>>,
     import_progress: Option<ume_formats::vfs::ZipProgress>,
@@ -263,6 +281,7 @@ pub struct App {
     pub team: Option<Team>,
     /// Survival run in progress (round, score, carried life)
     survival: Option<survival::Survival>,
+    story: Option<crate::story::StoryRun>,
     /// Arcade/Survival with a second human on the same side (couch co-op)
     pub coop: bool,
     /// Screenpack loaded from mugen/data or mugen/screenpacks (menu labels, roster order, storyboards, lifebar geometry)
@@ -317,8 +336,9 @@ pub struct App {
     warm_key: String,
 }
 
-const MENU: [(&str, &str); 15] = [
+const MENU: [(&str, &str); 16] = [
     ("menu.arcade", "desc.arcade"),
+    ("menu.story", "desc.story"),
     ("menu.survival", "desc.survival"),
     ("menu.cpu", "desc.cpu"),
     ("menu.versus", "desc.versus"),
@@ -378,8 +398,9 @@ impl App {
                         Self::boot(
                             &mut ui,
                             p,
-                            &format!(
-                                "Catalogando MUGEN: {files} arquivos · {chars} lutadores · {stages} cenários · {secs:.1}s"
+                            &crate::i18n::fill(
+                                crate::i18n::tr3("Catalogando MUGEN: {f} arquivos · {c} lutadores · {s} cenários · {t}s", "Cataloguing MUGEN: {f} files · {c} fighters · {s} stages · {t}s", "Catalogando MUGEN: {f} archivos · {c} luchadores · {s} escenarios · {t}s"),
+                                &[("f", &files.to_string()), ("c", &chars.to_string()), ("s", &stages.to_string()), ("t", &format!("{secs:.1}"))],
                             ),
                         )
                         .await;
@@ -424,9 +445,9 @@ impl App {
                 first.join(" | ")
             )
         };
-        Self::boot(&mut ui, 0.9, "Áudio…").await;
+        Self::boot(&mut ui, 0.9, crate::i18n::tr3("Áudio…", "Audio…", "Audio…")).await;
         let audio = Audio::new(audio_on).await;
-        Self::boot(&mut ui, 1.0, "Pronto!").await;
+        Self::boot(&mut ui, 1.0, crate::i18n::tr3("Pronto!", "Ready!", "¡Listo!")).await;
         App {
             reg,
             market: crate::market::Market::open(),
@@ -441,7 +462,8 @@ impl App {
             sel: (0, 1, 0),
             session: None,
             arcade: None,
-            pause_cur: 0,
+            boss_progression: crate::boss::BossProgression::load(),
+            pause: pause::PauseState::new(),
             debug_boxes: false,
             quit: false,
             msg: import_msg,
@@ -451,7 +473,6 @@ impl App {
             deep: None,
             settings,
             key_edit: None,
-            move_page: 0,
             pending: Pending::default(),
             import_jobs: vec![],
             import_progress: None,
@@ -492,6 +513,7 @@ impl App {
             desync_reported: false,
             warm_key: String::new(),
             survival: None,
+            story: None,
             coop: false,
             sp: crate::screenpack::probe(),
             pal: [settings.pal1 as i32, settings.pal2 as i32],
@@ -565,7 +587,7 @@ impl App {
             );
             self.applied = Some(self.settings);
         }
-        self.g.post.level = self.settings.fx as u8;
+        self.g.post.level = crate::vfx::quality::set(self.settings.fx);
         set_keep_aspect(self.settings.keep_aspect);
         set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;
@@ -574,7 +596,7 @@ impl App {
         let dt = get_frame_time();
         #[cfg(target_arch = "wasm32")]
         if self.wasm_import.is_some() {
-            self.wasm_import_step();
+            self.wasm_import_step(dt);
             if self.wasm_import.is_some() {
                 self.draw_import_overlay();
                 self.apply_update_if_ready();
@@ -592,12 +614,14 @@ impl App {
             Screen::Fight => self.fight(dt).await,
             Screen::Results { .. } => self.results().await,
             Screen::Controls => self.controls_screen(),
-            Screen::Mugen => self.mugen_screen(),
+            Screen::Mugen { .. } => self.mugen_screen(),
             Screen::Market => self.market_screen(),
+            Screen::Story { .. } => self.story_screen(dt),
             Screen::SurvivalOver { .. } => self.survival_over_screen(),
             Screen::Replays { .. } => self.replays_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
         }
+        crate::e2e::publish(self);
         if is_key_pressed(KeyCode::F11) {
             self.toggle_fullscreen();
         }
@@ -647,7 +671,7 @@ impl App {
             let ft_ms = dt * 1000.0;
             self.ui.text(
                 &format!(
-                    "{} FPS ({:.1} ms) · {}T · {}×{} · arte {:.1}×",
+                    "{} FPS ({:.1} ms) · {}T · {}×{} · art {:.1}×",
                     fps,
                     ft_ms,
                     threads,
@@ -690,16 +714,13 @@ impl App {
                     | Screen::Market
                     | Screen::Settings { .. }
                     | Screen::Controls
-                    | Screen::Mugen
+                    | Screen::Mugen { .. }
             )
             && self.market.apply_to(&mut self.reg)
         {
             self.after_registry_change();
         }
-        crate::set_import_button(!matches!(
-            self.screen,
-            Screen::Fight | Screen::Vs { .. } | Screen::Results { .. } | Screen::Cutscene { .. }
-        ));
+        crate::import_button::flush();
         #[cfg(not(target_arch = "wasm32"))]
         let incoming = crate::take_imports();
         #[cfg(not(target_arch = "wasm32"))]
@@ -715,7 +736,7 @@ impl App {
                 .spawn(move || crate::registry::read_zip_with_progress(&zip, Some(&prog)))
             {
                 self.import_jobs.push(h);
-                self.msg = "Importando recursos MUGEN…".into();
+                self.msg = crate::i18n::tr3("Importando recursos MUGEN…", "Importing MUGEN resources…", "Importando recursos MUGEN…").into();
             }
         }
         #[cfg(target_arch = "wasm32")]
@@ -731,12 +752,8 @@ impl App {
                 )
             {
                 ume_shell::watchdog::label("import");
-                self.wasm_import = Some(web_import::WasmImport {
-                    pending: None,
-                    show_overlay: false,
-                });
-                self.msg = "Importando recursos MUGEN…".into();
-                crate::set_import_button(false);
+                self.wasm_import = Some(web_import::WasmImport::new());
+                self.msg = crate::i18n::tr3("Importando recursos MUGEN…", "Importing MUGEN resources…", "Importando recursos MUGEN…").into();
             }
             self.resolve_deep_link(dt);
         }
@@ -770,12 +787,12 @@ impl App {
             self.ui.rect(0.0, VH - banner_h, VW, banner_h, Color::new(0.04, 0.03, 0.08, 0.94));
             self.ui.rect(0.0, VH - banner_h, VW, 2.0, hex("#00f0ff"));
             let label = if !cur_file.is_empty() {
-                format!("IMPORTANDO RECURSOS MUGEN: {} ({}/{})", cur_file, done, total)
+                format!("{}: {} ({}/{})", crate::i18n::tr3("IMPORTANDO RECURSOS MUGEN", "IMPORTING MUGEN RESOURCES", "IMPORTANDO RECURSOS MUGEN"), cur_file, done, total)
             } else {
-                format!("IMPORTANDO RECURSOS MUGEN ({}/{})", done, total)
+                format!("{} ({}/{})", crate::i18n::tr3("IMPORTANDO RECURSOS MUGEN", "IMPORTING MUGEN RESOURCES", "IMPORTANDO RECURSOS MUGEN"), done, total)
             };
             self.ui.progress_bar(80.0, VH - banner_h + 12.0, VW - 160.0, ratio, &label);
-            let hw = format!("⚡ PIPELINE: {} THREADS PARALELAS · SIMD", ume_formats::par::workers(total.max(1)));
+            let hw = format!("⚡ PIPELINE: {} {} · SIMD", ume_formats::par::workers(total.max(1)), crate::i18n::tr3("THREADS PARALELAS", "PARALLEL THREADS", "HILOS PARALELOS"));
             self.ui.text(&hw, VW - 80.0, VH - banner_h + 8.0, 13.0, hex("#00f0ff"), Align::Right, true);
         } else if !self.msg.is_empty() {
             self.ui
@@ -875,7 +892,7 @@ impl App {
         self.menu_art.draw(&self.ui);
         self.ui.logo(VW / 2.0, 330.0, 200.0);
         self.ui.text(
-            "ENGINE DE LUTA · RUST · DESKTOP · WEB · MOBILE",
+            crate::i18n::tr3("ENGINE DE LUTA · RUST · DESKTOP · WEB · MOBILE", "FIGHTING ENGINE · RUST · DESKTOP · WEB · MOBILE", "MOTOR DE LUCHA · RUST · ESCRITORIO · WEB · MÓVIL"),
             VW / 2.0,
             420.0,
             20.0,
@@ -885,7 +902,7 @@ impl App {
         );
         if (self.ui.t * 2.0) as i32 % 2 == 0 {
             self.ui.text_bold(
-                "PRESSIONE START / ENTER",
+                crate::i18n::tr3("PRESSIONE START / ENTER", "PRESS START / ENTER", "PULSA START / ENTER"),
                 VW / 2.0,
                 540.0,
                 30.0,
@@ -895,7 +912,7 @@ impl App {
             );
         }
         self.ui.text(
-            "Compatível com personagens M.U.G.E.N  ·  DualShock 4 / DualSense com vibração",
+            crate::i18n::tr3("Compatível com personagens M.U.G.E.N  ·  DualShock 4 / DualSense com vibração", "Compatible with M.U.G.E.N characters  ·  DualShock 4 / DualSense with rumble", "Compatible con personajes M.U.G.E.N  ·  DualShock 4 / DualSense con vibración"),
             VW / 2.0,
             690.0,
             18.0,
@@ -936,8 +953,7 @@ impl App {
         } else {
             None
         };
-        self.menu_art.select(cur_v);
-        self.menu_art.draw(&self.ui);
+        self.menu_backdrop(cur_v);
         let ui = &self.ui;
         let accent = crate::menu_art::accent_of(cur_v);
         crate::menu_art::glass(ui, -400.0, 0.0, 400.0 + 600.0, VH, 1.0);
@@ -1068,9 +1084,9 @@ impl App {
             self.reg.chars.iter().filter(|c| c.mugen).count(),
             self.playable().len(),
         );
-        let stats = format!(
-            "{nn} lutadores · {} cenários · {nm} MUGEN",
-            self.reg.stages.len()
+        let stats = crate::i18n::fill(
+            crate::i18n::tr3("{nn} lutadores · {st} cenários · {nm} MUGEN", "{nn} fighters · {st} stages · {nm} MUGEN", "{nn} luchadores · {st} escenarios · {nm} MUGEN"),
+            &[("nn", &nn.to_string()), ("st", &self.reg.stages.len().to_string()), ("nm", &nm.to_string())],
         );
         ui.text(
             &stats,
@@ -1083,7 +1099,7 @@ impl App {
         );
         if cur_v <= 8 {
             ui.text(
-                "Dificuldade CPU (esq./dir.)",
+                crate::i18n::tr3("Dificuldade CPU (esq./dir.)", "CPU difficulty (left/right)", "Dificultad CPU (izq./der.)"),
                 VW - 40.0,
                 86.0,
                 16.0,
@@ -1116,9 +1132,9 @@ impl App {
         );
         let pads = &self.c.pad_info;
         let pad_line = if pads.is_empty() {
-            "teclado".to_string()
+            crate::i18n::tr3("teclado", "keyboard", "teclado").to_string()
         } else {
-            format!("{} controle(s)", pads.len())
+            format!("{} {}", pads.len(), crate::i18n::tr3("controle(s)", "controller(s)", "mando(s)"))
         };
         ui.text(
             &pad_line,
@@ -1136,6 +1152,7 @@ impl App {
         if let Some(i) = chosen {
             let mode = [
                 Mode::Arcade,
+                Mode::Story,
                 Mode::Survival,
                 Mode::Cpu,
                 Mode::Versus,
@@ -1146,7 +1163,7 @@ impl App {
                 Mode::TeamTag,
             ];
             match i {
-                0..=8 => {
+                0..=9 => {
                     self.mode = mode[i];
                     self.team = None;
                     self.team_pick.clear();
@@ -1163,18 +1180,18 @@ impl App {
                         picked: [None, None],
                     });
                 }
-                9 => self.go(Screen::Mugen),
-                10 => self.go(Screen::Market),
-                11 => {
+                10 => self.go(Screen::Mugen { view: 0, page: 0 }),
+                11 => self.go(Screen::Market),
+                12 => {
                     self.settings_back = None;
                     self.go(Screen::Controls)
                 }
-                12 => self.go(Screen::Settings {
+                13 => self.go(Screen::Settings {
                     tab: 0,
                     cur: 0,
                     from_fight: false,
                 }),
-                13 => {
+                14 => {
                     self.refresh_replays();
                     self.go(Screen::Replays { cur: 0 })
                 }
@@ -1303,63 +1320,6 @@ impl App {
         );
     }
 
-    fn playable(&self) -> Vec<usize> {
-        (0..self.reg.chars.len())
-            .filter(|&i| !self.reg.chars[i].boss)
-            .collect()
-    }
-    fn boss_idx(&self) -> Option<usize> {
-        (0..self.reg.chars.len())
-            .find(|&i| self.reg.chars[i].boss && !self.reg.chars[i].broken.get())
-    }
-
-    fn arcade_start(&mut self, me: usize, mate: Option<usize>) {
-        let n = self.reg.chars.len();
-        let mut ladder: Vec<usize> = (0..n)
-            .filter(|&i| {
-                i != me
-                    && Some(i) != mate
-                    && !self.reg.chars[i].broken.get()
-                    && !self.reg.chars[i].boss
-            })
-            .collect();
-        let seed = (get_time() * 1000.0) as usize;
-        let ll = ladder.len().max(1);
-        ladder.rotate_left(seed % ll);
-        ladder.sort_by_key(|&i| self.reg.chars[i].mugen as u8);
-        ladder.truncate(8);
-        if ladder.is_empty() {
-            ladder.push(me);
-        }
-        let has_boss = self
-            .boss_idx()
-            .filter(|&b| b != me && Some(b) != mate)
-            .map(|b| {
-                ladder.push(b);
-                ladder.push(b);
-                ladder.push(b);
-            })
-            .is_some();
-        self.sel = (me, ladder[0], self.sel.2);
-        self.team = mate.map(|m| Team::new(vec![me, m], vec![ladder[0]], true));
-        self.team_pal = if mate.is_some() {
-            vec![self.side_pal(0), self.side_pal(1)]
-        } else {
-            vec![]
-        };
-        self.arcade = Some((ladder, 0));
-        self.survival = None;
-        self.ending_shown = false;
-        self.screen = if has_boss {
-            Screen::Cutscene {
-                kind: 0,
-                page: 0,
-                t: 0.0,
-            }
-        } else {
-            Screen::Stages { cur: 1 }
-        };
-    }
 
     /// Registry indices visible under the current filter (never empty).
     fn char_view(&self) -> Vec<usize> {
@@ -1661,7 +1621,7 @@ impl App {
                 continue;
             }
             let e = &self.reg.chars[i];
-            if e.peek(pal).is_some() || e.broken.get() {
+            if e.peek(pal).is_some() || e.broken.get() || !e.tile_art_ready() {
                 continue;
             }
             if self.sel_dwell < if e.mugen { 0.18 } else { 0.03 } {
@@ -1669,7 +1629,7 @@ impl App {
             }
             e.stream_preview(pal);
             if e.errs_has(pal) {
-                self.msg = format!("Falha ao carregar {}", e.name);
+                self.msg = format!("{} {}", crate::i18n::tr3("Falha ao carregar", "Failed to load", "Error al cargar"), e.name);
             }
             loaded_one = true;
         }
@@ -1713,7 +1673,8 @@ impl App {
             self.ui
                 .rect(cx, cy + ch * 0.62, cw, ch * 0.38, alpha(col, 0.18));
             let mut got = self.reg.chars[i].peek(1);
-            if got.is_none() && !emugen && !loaded_one && !broken {
+            let tile_thumb = if emugen { None } else { self.reg.chars[i].tile_portrait(1) };
+            if got.is_none() && tile_thumb.is_none() && !emugen && !loaded_one && !broken && self.reg.chars[i].tile_art_ready() {
                 got = self.reg.chars[i].load_preview(1).ok();
                 loaded_one = got.is_some();
             }
@@ -1730,8 +1691,10 @@ impl App {
             let thumb = if emugen {
                 self.reg.chars[i].portrait()
             } else {
-                got.as_ref()
-                    .and_then(|d| d.sprites.get(&(9000, 1)).cloned())
+                tile_thumb.or_else(|| {
+                    got.as_ref()
+                        .and_then(|d| d.sprites.get(&(9000, 1)).cloned())
+                })
             };
             if thumb.is_some() || got.is_some() {
                 let por = thumb.and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)));
@@ -2131,8 +2094,9 @@ impl App {
         self.sel_buf.clear();
         let _ = write!(
             self.sel_buf,
-            "[Tab] {flabel} · {}/{m} · [R] aleatório · PgUp/PgDn",
-            pos + 1
+            "[Tab] {flabel} · {}/{m} · [R] {} · PgUp/PgDn",
+            pos + 1,
+            crate::i18n::t("select.random").to_lowercase()
         );
         self.ui.text(
             &self.sel_buf,
@@ -2149,7 +2113,7 @@ impl App {
         self.reg.trim_cache(&keep);
         if confirm {
             if self.reg.chars[cur[picking]].broken.get() {
-                self.msg = "Este personagem não pôde ser carregado.".into();
+                self.msg = crate::i18n::tr3("Este personagem não pôde ser carregado.", "This character could not be loaded.", "No se pudo cargar este personaje.").into();
                 self.screen = Screen::Select {
                     cur,
                     picking,
@@ -2162,7 +2126,7 @@ impl App {
             if self.mode.is_team() {
                 let me = cur[0];
                 if self.team_pick.contains(&me) {
-                    self.msg = "Este lutador já está na equipe.".into();
+                    self.msg = crate::i18n::tr3("Este lutador já está na equipe.", "This fighter is already on the team.", "Este luchador ya está en el equipo.").into();
                     self.screen = Screen::Select {
                         cur,
                         picking: 0,
@@ -2218,6 +2182,9 @@ impl App {
                 picking = 1;
             } else if picking == 0 && self.mode == Mode::Arcade {
                 self.arcade_start(cur[0], None);
+                return;
+            } else if picking == 0 && self.mode == Mode::Story {
+                self.story_begin(cur[0]);
                 return;
             } else if picking == 0 && self.mode == Mode::Survival {
                 self.survival_begin(cur[0], None);
@@ -2280,14 +2247,18 @@ impl App {
             picking,
             picked,
         };
+        self.draw_boss_toast(dt);
     }
+
+
 
     fn portrait_fit(&mut self, i: usize, x: f32, y: f32, w: f32, h: f32) {
         let e = &self.reg.chars[i];
         let por = if e.mugen {
             e.portrait()
         } else {
-            e.peek(1).and_then(|d| d.sprites.get(&(9000, 1)).cloned())
+            e.tile_portrait(1)
+                .or_else(|| e.peek(1).and_then(|d| d.sprites.get(&(9000, 1)).cloned()))
         };
         let Some((im, pw, ph)) =
             por.and_then(|p| p.image.clone().map(|im| (im, p.width, p.height)))
@@ -2353,9 +2324,9 @@ impl App {
             );
             self.ui.text(
                 if self.mode.is_team() {
-                    "ADVERSÁRIOS SORTEADOS"
+                    crate::i18n::tr3("ADVERSÁRIOS SORTEADOS", "RANDOM OPPONENTS", "RIVALES AL AZAR")
                 } else {
-                    "AGUARDANDO"
+                    crate::i18n::tr3("AGUARDANDO", "WAITING", "ESPERANDO")
                 },
                 cx,
                 py + ph - 24.0,
@@ -2421,7 +2392,7 @@ impl App {
                 py + 300.0,
                 180.0,
                 (self.sel_dwell / 0.4).min(0.95),
-                "Carregando…",
+                crate::i18n::t("common.loading"),
             );
         }
         if self.sel_flash.0 == side && self.sel_flash.1 > 0.0 {
@@ -2437,10 +2408,10 @@ impl App {
             );
         }
         let e = &self.reg.chars[i];
-        let by = py + ph - 56.0;
+        let by = py + ph - 72.0;
         self.ui
-            .rect(px, by, pw, 56.0, Color::new(0.0, 0.0, 0.05, 0.7));
-        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9));
+            .rect(px, by, pw, 72.0, Color::new(0.0, 0.0, 0.05, 0.7));
+        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 66.0);
         let nm = self.names_up[i].as_str();
         self.ui.text_bold(
             nm,
@@ -2452,7 +2423,7 @@ impl App {
             Align::Center,
         );
         self.ui.text(
-            &e.series,
+            &crate::credit_line::truncate(&e.series, 30),
             cx,
             by + 48.0,
             14.0,
@@ -2548,7 +2519,7 @@ impl App {
         let mut ok = self.c.pressed(nav::OK | nav::START);
         self.ui.background();
         self.ui.text(
-            "ESCOLHA O CENÁRIO",
+            crate::i18n::t("select.choose_stage"),
             40.0,
             56.0,
             30.0,
@@ -2557,7 +2528,7 @@ impl App {
             true,
         );
         self.ui.text(
-            &format!("{}/{} · PgUp/PgDn · roda do mouse", cur + 1, n),
+            &format!("{}/{} · PgUp/PgDn · {}", cur + 1, n, crate::i18n::tr3("roda do mouse", "mouse wheel", "rueda del ratón")),
             VW - 40.0,
             56.0,
             18.0,
@@ -2579,7 +2550,7 @@ impl App {
             }
             let (name, th, mugen) = if i == 0 {
                 (
-                    "Aleatório".to_string(),
+                    crate::i18n::t("select.random").to_string(),
                     [[255, 47, 208], [34, 232, 255], [255, 226, 58]],
                     false,
                 )
@@ -2783,7 +2754,31 @@ impl App {
             }
             let (side, _, r) = plan[st];
             let job = self.pending.jobs.get_mut(st).and_then(|j| j.take());
-            let d = self.reg.chars[r].finish_load(self.pal_for(&plan, st), job)?;
+            let mut d = self.reg.chars[r].finish_load(self.pal_for(&plan, st), job)?;
+            let is_boss_match = self.mode == Mode::Arcade
+                && side == 1
+                && self
+                    .arcade
+                    .as_ref()
+                    .is_some_and(|(l, i)| *i + 1 == l.len() && l.last() == Some(&r));
+            if is_boss_match {
+                if let crate::registry::Src::Native(nc) = &self.reg.chars[r].src {
+                    let mut boss_nc = (**nc).clone();
+                    boss_nc.boss = true;
+                    let mut def = ume_engine::native::compile_native(
+                        &boss_nc,
+                        self.pal_for(&plan, st),
+                        true,
+                    );
+                    if def.c("data.life", 0.0) < 1800.0 {
+                        def.constants.insert("data.life".into(), 2000.0);
+                    }
+                    if def.c("data.attack", 0.0) < 115.0 {
+                        def.constants.insert("data.attack".into(), 125.0);
+                    }
+                    d = Arc::new(def);
+                }
+            }
             self.pending.defs[side].push(d);
         } else if st == n {
             ume_shell::watchdog::label("load:stage");
@@ -2811,7 +2806,9 @@ impl App {
                     } else { 0 }
                 }).unwrap_or(0)
             } else { 0 };
-            let lvl = if self.mode == Mode::Survival {
+            let lvl = if let Some(story_lvl) = self.story_level() {
+                story_lvl
+            } else if self.mode == Mode::Survival {
                 self.survival
                     .map(|s| s.ai_level(self.ai_level))
                     .unwrap_or(self.ai_level)
@@ -2872,8 +2869,8 @@ impl App {
             );
             let life = if let Some(r) = &replay {
                 r.life
-            } else if self.mode == Mode::Survival {
-                self.survival_life()
+            } else if matches!(self.mode, Mode::Survival | Mode::Story) {
+                self.run_life()
             } else {
                 self.team
                     .as_ref()
@@ -2931,15 +2928,15 @@ impl App {
             }
             sess.team = info;
             sess.is_replay = replay.is_some();
-            if let Some(r) = &replay {
-                sess.m.rng = r.seed;
-                sess.seed = r.seed;
-            }
+            let seed = replay.as_ref().map_or_else(crate::app::fight_seed::fresh_seed, |r| r.seed);
+            sess.m.rng = seed;
+            sess.seed = seed;
             self.fight_rules = replay
                 .as_ref()
                 .map(|r| r.rules)
                 .unwrap_or_else(|| self.settings.rules());
             sess.apply_rules(self.fight_rules);
+            self.story_tune(&mut sess);
             if boss_phase >= 2 {
                 sess.m.awaken_boss_phase(boss_phase as u8);
             }
@@ -2960,7 +2957,7 @@ impl App {
             sess.r.debug = self.debug_boxes;
             if seq && self.team.as_ref().is_some_and(|t| t.idx != [0, 0]) {
                 sess.vfx.banner(
-                    "PRÓXIMO LUTADOR",
+                    crate::i18n::tr3("PRÓXIMO LUTADOR", "NEXT FIGHTER", "SIGUIENTE LUCHADOR"),
                     &format!(
                         "{} vs {}",
                         self.reg.chars[self.sel.0].name, self.reg.chars[self.sel.1].name
@@ -3009,7 +3006,7 @@ impl App {
     fn finish_import(&mut self, read: Result<(String, ume_formats::vfs::Vfs), String>) {
         match read.map(|(pack, vfs)| self.reg.finish_import(pack, vfs)) {
             Ok(r) if r.duplicate_pack || (r.chars + r.stages == 0 && r.errors == 0) => {
-                self.msg = "Pacote já importado".into()
+                self.msg = crate::i18n::tr3("Pacote já importado", "Pack already imported", "Paquete ya importado").into()
             }
             Ok(r) => {
                 self.reg.sort_mugen();
@@ -3018,18 +3015,12 @@ impl App {
                     self.sel.1.min(self.reg.chars.len() - 1),
                     self.sel.2.min(self.reg.stages.len() - 1),
                 );
-                self.msg = format!(
-                    "Importado: {} personagem(ns), {} cenário(s){}",
-                    r.chars,
-                    r.stages,
-                    if r.errors == 0 {
-                        String::new()
-                    } else {
-                        format!(" · {} erro(s)", r.errors)
-                    }
+                self.msg = crate::i18n::fill(
+                    crate::i18n::tr3("Importado: {c} personagem(ns), {s} cenário(s){e}", "Imported: {c} character(s), {s} stage(s){e}", "Importado: {c} personaje(s), {s} escenario(s){e}"),
+                    &[("c", &r.chars.to_string()), ("s", &r.stages.to_string()), ("e", &if r.errors == 0 { String::new() } else { format!(" · {} {}", r.errors, crate::i18n::tr3("erro(s)", "error(s)", "error(es)")) })],
                 );
             }
-            Err(e) => self.msg = format!("Zip inválido: {e}"),
+            Err(e) => self.msg = format!("{}: {e}", crate::i18n::tr3("Zip inválido", "Invalid zip", "Zip no válido")),
         }
     }
 
@@ -3155,15 +3146,14 @@ impl App {
         let pause_btn = if replaying {
             is_key_pressed(KeyCode::Space) || self.c.pressed(nav::START)
         } else {
-            (self.c.pressed(nav::START) && !is_key_pressed(KeyCode::Enter) && !is_key_pressed(KeyCode::KpEnter))
+            (self.c.pressed(nav::START) && !is_key_down(self.c.keys.slots[0][15]) && !is_key_pressed(KeyCode::Enter) && !is_key_pressed(KeyCode::KpEnter))
                 || is_key_pressed(KeyCode::Escape)
                 || is_key_pressed(KeyCode::P)
                 || (!s.paused && is_key_pressed(KeyCode::Enter))
         };
         let (paused, accept_back) = pause_step(s.paused, pause_btn);
         if pause_btn {
-            self.pause_cur = 0;
-            self.move_page = 0;
+            self.pause.reset();
             self.audio.sfx("select");
         }
         s.paused = paused;
@@ -3204,6 +3194,9 @@ impl App {
         if self.survival_is_playing() {
             self.survival_hud();
         }
+        if self.story_is_playing() {
+            self.story_hud();
+        }
         self.c.touch.draw();
         if self.c.touch.enabled {
             self.ui
@@ -3223,12 +3216,8 @@ impl App {
             self.net_overlay(n);
             if n.desyncs > 0 && !self.desync_reported {
                 self.desync_reported = true;
-                let frame = n.rollbacks.min(u32::MAX as u64) as u32;
-                let (checksum, rec) = self
-                    .session
-                    .as_ref()
-                    .map(|s| (s.m.checksum(), s.rec.clone()))
-                    .unwrap_or((0, vec![]));
+                let (frame, checksum) = n.desync_at.unwrap_or((0, 0));
+                let rec = self.session.as_ref().map(|s| s.rec.clone()).unwrap_or_default();
                 match crate::replays::save_desync(
                     &crate::replays::dir(),
                     Some(&n.config),
@@ -3239,7 +3228,7 @@ impl App {
                 ) {
                     Ok(p) => {
                         self.msg = format!(
-                            "Dessincronização: relatório em {}",
+                            "Desync: report at {}",
                             p.file_name()
                                 .map(|f| f.to_string_lossy().into_owned())
                                 .unwrap_or_default()
@@ -3256,8 +3245,8 @@ impl App {
             }
             return;
         }
-        if let Some(w) = s.over {
-            if s.over_timer > 1.0 && !self.team_next(w) {
+        if let Some((w, t)) = s.over.map(|w| (w, s.over_timer)) {
+            if !self.story_wave_next(w) && t > 1.0 && !self.team_next(w) {
                 // keep the fight so it can be replayed (not for replays themselves or sequence team bouts)
                 if self.replaying.is_none() && !self.team.as_ref().is_some_and(|t| !t.whole_squad())
                 {
@@ -3269,7 +3258,7 @@ impl App {
                             rec: s.rec.clone(),
                             rules: self.fight_rules,
                             seed: s.seed,
-                            life: self.survival_life(),
+                            life: self.run_life(),
                             pal: self.pal,
                             team_pal: self.team_pal.clone(),
                             net: s.netplay_config(),
@@ -3331,235 +3320,6 @@ impl App {
         }
     }
 
-    async fn pause_menu(&mut self, accept_back: bool) {
-        let items = [
-            crate::i18n::t("pause.continue"),
-            crate::i18n::t("pause.hitboxes"),
-            crate::i18n::t("pause.restart"),
-            crate::i18n::t("pause.change"),
-            crate::i18n::t("pause.settings"),
-            crate::i18n::t("pause.menu"),
-        ];
-        if self.c.pressed(nav::DOWN) {
-            self.pause_cur = (self.pause_cur + 1) % items.len();
-        }
-        if self.c.pressed(nav::UP) {
-            self.pause_cur = (self.pause_cur + items.len() - 1) % items.len();
-        }
-        let mut ok = accept_back && self.c.pressed(nav::OK);
-        draw_rectangle(
-            0.0,
-            0.0,
-            screen_width(),
-            screen_height(),
-            Color::new(0.02, 0.01, 0.06, 0.72),
-        );
-        let (x, y) = (120.0, 110.0);
-        self.ui
-            .rect(x, y, 1040.0, 520.0, Color::new(0.08, 0.05, 0.16, 0.92));
-        self.ui.text(
-            crate::i18n::t("pause.title"),
-            x + 30.0,
-            y + 52.0,
-            34.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
-        let s = self.session.as_ref().unwrap();
-        for (i, it) in items.iter().enumerate() {
-            let (bx, by) = (x + 30.0, y + 80.0 + i as f32 * 56.0);
-            if self.clicked_rect(bx, by, 330.0, 48.0) {
-                self.pause_cur = i;
-                ok = true;
-            }
-            self.ui.rect(
-                bx,
-                by,
-                330.0,
-                48.0,
-                if i == self.pause_cur {
-                    hex("#ff4d6d")
-                } else {
-                    Color::new(1.0, 1.0, 1.0, 0.06)
-                },
-            );
-            let label = if i == 1 {
-                format!(
-                    "{}: {}",
-                    crate::i18n::t("pause.hitboxes"),
-                    if s.r.debug { "ON" } else { "OFF" }
-                )
-            } else {
-                it.to_string()
-            };
-            self.ui.text(
-                &label,
-                bx + 16.0,
-                by + 32.0,
-                22.0,
-                WHITE,
-                Align::Left,
-                false,
-            );
-        }
-        let f = &s.m.fighters[0];
-        self.ui.text(
-            &format!(
-                "{} — {}",
-                crate::i18n::t("pause.moves"),
-                f.def.display_name.to_uppercase()
-            ),
-            x + 400.0,
-            y + 52.0,
-            22.0,
-            hex("#22e8ff"),
-            Align::Left,
-            true,
-        );
-        const PER_PAGE: usize = 9;
-        let total = f.def.movelist.len();
-        let pages = total.div_ceil(PER_PAGE).max(1);
-        if self.c.pressed(nav::RIGHT) {
-            self.move_page = (self.move_page + 1) % pages;
-        }
-        if self.c.pressed(nav::LEFT) {
-            self.move_page = (self.move_page + pages - 1) % pages;
-        }
-        self.move_page = self.move_page.min(pages - 1);
-        if total == 0 {
-            self.ui.text(
-                crate::i18n::t("pause.no_moves"),
-                x + 400.0,
-                y + 90.0,
-                18.0,
-                WHITE,
-                Align::Left,
-                false,
-            );
-        }
-        for (i, mv) in f
-            .def
-            .movelist
-            .iter()
-            .enumerate()
-            .skip(self.move_page * PER_PAGE)
-            .take(PER_PAGE)
-        {
-            let yy = y + 78.0 + (i - self.move_page * PER_PAGE) as f32 * 46.0;
-            self.ui.rect(
-                x + 390.0,
-                yy,
-                630.0,
-                40.0,
-                Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.06 } else { 0.03 }),
-            );
-            self.ui.text(
-                &mv.name.chars().take(26).collect::<String>(),
-                x + 402.0,
-                yy + 27.0,
-                19.0,
-                WHITE,
-                Align::Left,
-                false,
-            );
-            if mv.cost > 0.0 {
-                let cost_label = if mv.drain {
-                    format!("{:.0}/s PWR", mv.cost)
-                } else if mv.cost >= 1000.0 && mv.cost % 1000.0 == 0.0 {
-                    let b = (mv.cost / 1000.0) as i32;
-                    if b == 1 { "1 BAR".to_string() } else { format!("{b} BARS") }
-                } else {
-                    format!("{:.0} PWR", mv.cost)
-                };
-                self.ui.text(&cost_label, x + 1010.0, yy + 27.0, 15.0, hex("#ffd13b"), Align::Right, false);
-            }
-            let c = &self.c;
-            self.ui
-                .input_icons(&mv.input, x + 690.0, yy + 34.0, 28.0, |b| c.face(b));
-        }
-        if pages > 1 {
-            self.ui.rect(
-                x + 880.0,
-                y + 20.0,
-                60.0,
-                44.0,
-                Color::new(1.0, 1.0, 1.0, 0.12),
-            );
-            self.ui.rect(
-                x + 950.0,
-                y + 20.0,
-                60.0,
-                44.0,
-                Color::new(1.0, 1.0, 1.0, 0.12),
-            );
-            self.ui.arrow(x + 910.0, y + 42.0, 26.0, (-1.0, 0.0), WHITE);
-            self.ui.arrow(x + 980.0, y + 42.0, 26.0, (1.0, 0.0), WHITE);
-            if self.clicked_rect(x + 880.0, y + 20.0, 60.0, 44.0) {
-                self.move_page = (self.move_page + pages - 1) % pages;
-            }
-            if self.clicked_rect(x + 950.0, y + 20.0, 60.0, 44.0) {
-                self.move_page = (self.move_page + 1) % pages;
-            }
-            self.ui.text(
-                &format!(
-                    "{} {}/{}",
-                    crate::i18n::t("pause.page"),
-                    self.move_page + 1,
-                    pages
-                ),
-                x + 400.0,
-                y + 505.0,
-                16.0,
-                hex("#a49cc0"),
-                Align::Left,
-                false,
-            );
-        }
-        if accept_back && self.c.pressed(nav::BACK) {
-            self.session.as_mut().unwrap().paused = false;
-            return;
-        }
-        if ok {
-            match self.pause_cur {
-                0 => self.session.as_mut().unwrap().paused = false,
-                1 => {
-                    let s = self.session.as_mut().unwrap();
-                    s.r.debug = !s.r.debug;
-                    self.debug_boxes = s.r.debug;
-                }
-                2 => {
-                    self.reset_team();
-                    self.start_fight().await;
-                }
-                3 => {
-                    self.audio.stop_music();
-                    self.session = None;
-                    self.team = None;
-                    self.team_pick.clear();
-                    self.screen = Screen::Select {
-                        cur: [self.sel.0, self.sel.1],
-                        picking: 0,
-                        picked: [None, None],
-                    };
-                }
-                4 => {
-                    self.screen = Screen::Settings {
-                        tab: 0,
-                        cur: 0,
-                        from_fight: true,
-                    }
-                }
-                _ => {
-                    self.audio.stop_music();
-                    self.session = None;
-                    self.team = None;
-                    self.screen = Screen::Menu { cur: 0 };
-                }
-            }
-        }
-    }
-
     async fn results(&mut self) {
         let Screen::Results { winner, mut cur } = self.screen else {
             return;
@@ -3568,19 +3328,18 @@ impl App {
             s.draw(&mut self.g, &self.ui);
         }
         // survival: win advances to the next opponent, loss ends the run
-        if self.mode == Mode::Survival && self.replaying.is_none() {
+        if matches!(self.mode, Mode::Survival | Mode::Story) && self.replaying.is_none() {
             if winner == 0 {
-                self.survival_win();
+                self.run_win();
                 return;
             }
-            self.survival_loss();
+            self.run_loss();
             return;
         }
         // arcade progression
         if self.mode == Mode::Arcade && winner == 0 {
             let boss = self.boss_idx();
-            let st_volcano = self.reg.stages.iter().position(|s| s.id.contains("volcano"));
-            let st_spirit = self.reg.stages.iter().position(|s| s.id.contains("spirit"));
+            let mut next_action = None;
             if let Some((ladder, i)) = self.arcade.as_mut() {
                 *i += 1;
                 if *i < ladder.len() {
@@ -3590,46 +3349,29 @@ impl App {
                     } else {
                         0
                     };
-                    self.sel.1 = ladder[*i];
-                    self.sel.2 = if boss_cnt >= 2 {
-                        st_spirit.or(st_volcano).unwrap_or(0)
-                    } else if is_boss {
-                        st_volcano.unwrap_or((*i * 3 + 1) % self.reg.stages.len())
-                    } else {
-                        (*i * 3 + 1) % self.reg.stages.len()
-                    };
-                    self.audio.stop_music();
-                    if self.coop {
-                        if let Some(t) = self.team.as_mut() {
-                            t.members[1] = vec![ladder[*i]];
-                        }
-                    }
-                    self.screen = match (is_boss, boss_cnt) {
-                        (true, 3..) => Screen::Cutscene {
-                            kind: 4,
-                            page: 0,
-                            t: 0.0,
-                        },
-                        (true, 2) => Screen::Cutscene {
-                            kind: 3,
-                            page: 0,
-                            t: 0.0,
-                        },
-                        (true, _) => Screen::Cutscene {
-                            kind: 1,
-                            page: 0,
-                            t: 0.0,
-                        },
-                        _ => Screen::Vs { t: 0.0, step: 0 },
-                    };
-                    return;
-                }
-                if *i == ladder.len()
+                    next_action = Some((*i, ladder[*i], is_boss, boss_cnt, false));
+                } else if *i == ladder.len()
                     && !self.ending_shown
                     && boss.is_some_and(|b| ladder.last() == Some(&b))
                 {
                     self.ending_shown = true;
-                    self.audio.stop_music();
+                    next_action = Some((*i, 0, false, 0, true));
+                }
+            }
+            if let Some((idx, next_char, is_boss, boss_cnt, is_ending)) = next_action {
+                self.audio.stop_music();
+                if is_ending {
+                    let hero_id = self.player_char_id();
+                    let boss_entry_id = boss
+                        .map(|b| {
+                            self.reg.chars[b]
+                                .id
+                                .strip_prefix("umf:")
+                                .unwrap_or(&self.reg.chars[b].id)
+                                .to_string()
+                        })
+                        .unwrap_or_default();
+                    self.boss_progression.on_clear(&hero_id, &boss_entry_id);
                     self.screen = Screen::Cutscene {
                         kind: 5,
                         page: 0,
@@ -3637,6 +3379,39 @@ impl App {
                     };
                     return;
                 }
+                self.sel.1 = next_char;
+                let st_spirit = self.reg.stages.iter().position(|s| s.id.contains("spirit"));
+                self.sel.2 = if boss_cnt >= 2 {
+                    st_spirit.unwrap_or(0)
+                } else if is_boss {
+                    self.boss_stage_idx(next_char)
+                } else {
+                    (idx * 3 + 1) % self.reg.stages.len()
+                };
+                if self.coop {
+                    if let Some(t) = self.team.as_mut() {
+                        t.members[1] = vec![next_char];
+                    }
+                }
+                self.screen = match (is_boss, boss_cnt) {
+                    (true, 3..) => Screen::Cutscene {
+                        kind: 4,
+                        page: 0,
+                        t: 0.0,
+                    },
+                    (true, 2) => Screen::Cutscene {
+                        kind: 3,
+                        page: 0,
+                        t: 0.0,
+                    },
+                    (true, _) => Screen::Cutscene {
+                        kind: 1,
+                        page: 0,
+                        t: 0.0,
+                    },
+                    _ => Screen::Vs { t: 0.0, step: 0 },
+                };
+                return;
             }
         }
         draw_rectangle(
@@ -3756,6 +3531,10 @@ impl App {
         self.screen = Screen::Results { winner, cur };
         if ok {
             self.audio.stop_music();
+            if done {
+                self.screen = self.arcade_return_to_select();
+                return;
+            }
             // with a replay available the menu is Revanche / Replay / Personagens / Menu; without it Revanche / Personagens / Menu
             let choice = if can_replay {
                 cur
@@ -3807,7 +3586,7 @@ impl App {
                 rec: s.rec.clone(),
                 rules: self.fight_rules,
                 seed: s.seed,
-                life: self.survival_life(),
+                life: self.run_life(),
                 pal: self.pal,
                 team_pal: self.team_pal.clone(),
                 net: s.netplay_config(),
@@ -3828,7 +3607,7 @@ impl App {
             None => (Some(0), Some(1.min(self.reg.chars.len() - 1))),
         };
         let (Some(c1), Some(c2)) = (c1, c2) else {
-            self.msg = format!("Netplay: personagem não encontrado ({:?})", a.chars);
+            self.msg = format!("Netplay: character not found ({:?})", a.chars);
             return;
         };
         let stage = a.stage.as_ref().map_or(Some(0), |id| {
@@ -3838,7 +3617,7 @@ impl App {
                 .position(|s| s.id.eq_ignore_ascii_case(id) || s.name.eq_ignore_ascii_case(id))
         });
         let Some(stage) = stage else {
-            self.msg = format!("Netplay: cenário não encontrado ({:?})", a.stage);
+            self.msg = format!("Netplay: stage not found ({:?})", a.stage);
             return;
         };
         let link = match crate::netlink::NetLink::connect(a) {
@@ -3863,11 +3642,15 @@ impl App {
             round_time: 0,
             rounds: 1,
             life: 2,
+            single_round: false,
+            classic_pushbox: true,
             ..saved
         };
         self.start_fight().await;
         self.settings = saved;
         if let Some(s) = self.session.as_mut() {
+            s.m.rng = ume_engine::matchs::DEFAULT_SEED;
+            s.seed = ume_engine::matchs::DEFAULT_SEED;
             s.net = Some(link);
         }
     }
@@ -3876,16 +3659,18 @@ impl App {
     fn net_overlay(&self, n: &crate::netlink::NetLink) {
         use crate::netlink::NetStatus;
         let (text, color) = match n.status() {
-            NetStatus::Connecting => ("CONECTANDO AO ADVERSÁRIO…".to_string(), hex("#ffcc33")),
-            NetStatus::Waiting => ("SINCRONIZANDO…".to_string(), hex("#ffcc33")),
-            NetStatus::Lost(e) => (format!("CONEXÃO PERDIDA: {e}"), hex("#ff4d6d")),
+            NetStatus::Connecting => (crate::i18n::tr3("CONECTANDO AO ADVERSÁRIO…", "CONNECTING TO OPPONENT…", "CONECTANDO CON EL RIVAL…").to_string(), hex("#ffcc33")),
+            NetStatus::Waiting => (crate::i18n::tr3("SINCRONIZANDO…", "SYNCING…", "SINCRONIZANDO…").to_string(), hex("#ffcc33")),
+            NetStatus::Lost(e) => (format!("{}: {e}", crate::i18n::tr3("CONEXÃO PERDIDA", "CONNECTION LOST", "CONEXIÓN PERDIDA")), hex("#ff4d6d")),
             NetStatus::Running => {
                 if n.spectate {
                     (
                         format!(
-                            "ESPECTADOR · {} ms · {} atrás",
+                            "{} · {} ms · {} {}",
+                            crate::i18n::tr3("ESPECTADOR", "SPECTATOR", "ESPECTADOR"),
                             n.ping_ms().unwrap_or(0),
-                            n.frames_behind()
+                            n.frames_behind(),
+                            crate::i18n::tr3("atrás", "behind", "atrás")
                         ),
                         hex("#a49cc0"),
                     )
@@ -3927,78 +3712,11 @@ impl App {
     }
 
     fn mugen_screen(&mut self) {
-        self.ui.background();
-        self.ui.text(
-            "PERSONAGENS E CENÁRIOS M.U.G.E.N",
-            40.0,
-            56.0,
-            30.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
-        let lines = [
-            "O motor lê os formatos originais do M.U.G.E.N 1.0/1.1 e do Ikemen GO:",
-            "  .def · .sff (v1 PCX e v2 RLE8/RLE5/LZ5/PNG) · .air (Clsn1/Clsn2) · .cmd · .cns · .snd · .act · stages",
-            "  Triggers, redirecionamentos, ~90 state controllers, HitDef completo, helpers, projéteis, explods, super pause.",
-            "",
-            "Como adicionar (desktop): coloque pastas ou arquivos .zip dentro da pasta  mugen/  ao lado do jogo",
-            "  ex.: mugen/chars/kfm/kfm.def   ·   mugen/stages/meu_cenario.def   ·   mugen/goku.zip",
-            "  (ou defina a variável de ambiente UME_MUGEN_DIR). Eles aparecem automaticamente na seleção.",
-            "Versão web: botão \"Importar\" da página (arraste .zip).",
-            "",
-            "Personagens de anime/jogos (Dragon Ball, Bleach, Naruto…) feitos por fãs pertencem a seus autores",
-            "e detentores dos direitos — não são distribuídos com o jogo. Veja docs/ROSTER.md.",
-        ];
-        for (i, l) in lines.iter().enumerate() {
-            self.ui.text(
-                l,
-                40.0,
-                120.0 + i as f32 * 32.0,
-                20.0,
-                if l.starts_with("  ") {
-                    hex("#c9f7ff")
-                } else {
-                    WHITE
-                },
-                Align::Left,
-                false,
-            );
-        }
-        let found: Vec<String> = self
-            .reg
-            .chars
-            .iter()
-            .filter(|c| c.mugen)
-            .map(|c| format!("{} ({})", c.name, c.author))
-            .collect();
-        self.ui.text(
-            &format!(
-                "Encontrados: {} personagens MUGEN, {} cenários MUGEN",
-                found.len(),
-                self.reg.stages.iter().filter(|s| s.mugen).count()
-            ),
-            40.0,
-            520.0,
-            22.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
-        for (i, f) in found.iter().enumerate().take(4) {
-            self.ui.text(
-                f,
-                60.0,
-                556.0 + i as f32 * 26.0,
-                19.0,
-                WHITE,
-                Align::Left,
-                false,
-            );
-        }
-        if self.c.pressed(nav::BACK | nav::OK) {
-            self.screen = Screen::Menu { cur: 8 };
-        }
+        let Screen::Mugen { view, page } = self.screen else { return };
+        self.screen = match self.mugen_catalog(view, page) {
+            Some((view, page)) => Screen::Mugen { view, page },
+            None => Screen::Menu { cur: 10 },
+        };
     }
 
     // used by the screenshot tour

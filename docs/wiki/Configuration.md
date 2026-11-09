@@ -21,7 +21,7 @@ Lives next to the executable and is written by the **Settings** menu (main menu 
 | `round_time` | `0` 99 s, `1` 60 s, `2` 30 s, `3` infinite | Round timer |
 | `rounds` | `0` first to 1, `1` first to 2, `2` first to 3 | Rounds needed to win |
 | `life` | `0` 50%, `1` 75%, `2` 100%, `3` 150%, `4` 200% | Life bar multiplier |
-| `lang` | `pt` / `en` | Language of the settings and versus screens |
+| `lang` | `en` / `pt` / `es` | Language of the whole interface |
 | `keep_aspect` | `1` (default) / `0` | `1` letterboxes the 16:9 picture inside any window shape; `0` stretches it to fill the window |
 | `filter` | `nearest` (default) / `linear` | Sprite sampling when scaled: crisp pixels or bilinear smoothing |
 | `window` | `WIDTHxHEIGHT`, `0x0` when unset | Windowed size, saved automatically about one second after you stop resizing; overrides `res` until you pick a size in the Video menu |
@@ -60,30 +60,42 @@ The window can be dragged to any size. The game draws into a fixed 16:9 logical 
 
 ## Language and localization
 
-The UI ships two locales in a keyed string table (`src/i18n.rs`): **English** (default) and **Portuguese (Brazil)**.
-Settings › Language switches at runtime and stores `lang=en|pt` in `ultimate-mugen.cfg`.
+The UI ships three locales: **English** (default), **Portuguese (Brazil)** and **Spanish**. Settings › Language cycles through them at runtime and stores `lang=en|pt|es` in `ultimate-mugen.cfg`.
 
-- Lookup order is current locale → English → the key name, so an incomplete catalog never shows a blank label.
+- `src/i18n/catalog.rs` holds the keyed table (English and Portuguese) and `src/i18n/es_catalog.rs` the Spanish column; `i18n::t(key)` looks up current locale → English → the key name, so an incomplete catalog never shows a blank label.
+- Inline strings use `i18n::tr3(pt, en, es)`; the older `i18n::tr(pt, en)` finds its Spanish text through `src/i18n/es_phrases.rs`, keyed by the English string. Placeholders use `i18n::fill("{name}", &[("name", value)])`.
 - A missing key is printed once to the log (`i18n: missing key '<key>'`).
 - The catalogs are compiled in, so switching has no I/O cost and works on web/mobile.
-- A unit test keeps the two catalogs in sync, and a grep test fails if the migrated screens (menu, select, results, pause, replays, survival, controls) go back to hardcoded Portuguese.
+- Unit tests keep the catalogs in sync and fail if the migrated screens go back to hardcoded Portuguese.
+- Still Portuguese-only: story cutscenes and boss dialogue, fighter bios and stage names (content data).
+- First launch (no saved config) picks the system language: `navigator.language` on the web, `LC_ALL`/`LC_MESSAGES`/`LANG` on desktop; English when unsupported.
+
+## Importing M.U.G.E.N content
+
+Main menu › **Import M.U.G.E.N** is the single entry point. On the web the button opens the browser file picker (the page overlays an invisible `<label>` exactly on the button so the click is a real user gesture) and `.zip` files can also be dropped on the window. On desktop the button opens the system file dialog (PowerShell on Windows, `osascript` on macOS, `zenity` or `kdialog` on Linux); folders under `chars/` and `stages/` are still scanned at start.
 
 ## Controls
 
 | Action | Keyboard P1 | Keyboard P2 | Gamepad | Touch |
 |---|---|---|---|---|
 | Move | arrows | `I` `K` `J` `L` | D-pad / stick | virtual stick |
-| Punches `x` `y` `z` | `Q` `W` `E` | Num `4` `5` `6` | □ △ R1 | LP HP |
-| Kicks `a` `b` `c` | `A` `S` `D` | Num `1` `2` `3` | ✕ ○ R2 | LK HK |
-| Quick specials | `1` `2` `3` | Num `7` `8` `9` | L1, L2 | ESPECIAL, SUPER |
-| Super | `1`+`2` | Num `7`+`8` | L1+L2 | SUPER |
-| Awakening | `T` | Num `0` | R3 / SELECT | — |
-| Tag swap (Tag mode) | `F` | Num Enter | R3 / SELECT | awaken button |
-| Charge ki (Start) | `R` | Num Decimal | — | — |
+| Punches `x` `y` `z` | `Q` `W` `E` | Num `4` `5` `6` | □ △ | LP HP |
+| Kicks `a` `b` `c` | `A` `S` `D` | Num `1` `2` `3` | ✕ ○ | LK HK |
+| Quick specials | `V` `B` `N` | Num `7` `8` `9` | — | ESPECIAL, SUPER |
+| Move shortcuts (slots 1-4) | `1` `2` `3` `4` | — | L1, L2, R1, R2 | — |
+| Awakening (transform) | `T` | Num `0` | L3 + R3 / SELECT | — |
+| Tag swap (Tag mode) | `F` | Num Enter | L3 + R3 / SELECT | awaken button |
+| Charge ki | `R` | Num Decimal | R3 (alone) / START | — |
 | Pause / hitboxes | `Esc` / `F2` | `Esc` / `F2` | START | ❚❚ |
 | Fullscreen / FPS | `F11` / `F3` | — | — | — |
 
 The names `x y z a b c` are the same ones used in character commands (`input`).
+
+While jumping, `x` `y` `a` `b` each throw an air normal, and down + `b` is the diving down kick (generated for every native fighter by `native/air_normals.rs`, reusing the fighter's own air animations).
+
+## Move shortcuts
+
+Open the pause menu, pick a move in the move list and press `1`-`4` (or L1, L2, R1, R2 on a gamepad) to bind it to that slot. Pressing the same slot again clears it. From then on the bound move is performed by one key or button press, with the right motion and buttons played for you. Bindings are stored per fighter in `ultimate-mugen.shortcuts` next to the executable. On the web the gamepad mapping follows the same layout.
 
 ## Button prompts
 

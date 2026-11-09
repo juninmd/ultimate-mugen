@@ -27,12 +27,12 @@ impl App {
     pub(super) fn load_label(&self, step: u8) -> String {
         let plan = self.load_plan();
         match plan.get(step as usize) {
-            Some((_, _, r)) => format!("Carregando {}…", self.reg.chars[*r].name),
+            Some((_, _, r)) => format!("{} {}…", crate::i18n::t("common.loading"), self.reg.chars[*r].name),
             None => [
-                "Montando o cenário…",
-                "Preparando a luta…",
-                "Sintetizando a música…",
-                "Enviando sprites…",
+                crate::i18n::tr3("Montando o cenário…", "Building the stage…", "Montando el escenario…"),
+                crate::i18n::tr3("Preparando a luta…", "Preparing the fight…", "Preparando el combate…"),
+                crate::i18n::tr3("Sintetizando a música…", "Synthesizing the music…", "Sintetizando la música…"),
+                crate::i18n::tr3("Enviando sprites…", "Uploading sprites…", "Enviando sprites…"),
             ][(step as usize - plan.len()).min(3)]
             .to_string(),
         }

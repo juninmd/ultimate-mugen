@@ -7,7 +7,9 @@ use std::collections::HashMap;
 use std::f32::consts::PI;
 use ume_engine::matchs::BgmAction;
 
+mod score;
 mod wav;
+use score::music;
 use wav::wav;
 
 const SR: u32 = 32000;
@@ -61,12 +63,13 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
     let sec = |s: f32| (s * SR as f32) as usize;
     let total = match kind {
         "transform" => 2.6,
-        "ko" => 1.9,
+        "ko" => 2.4,
+        "crowd" => 1.6,
         "super" => 2.1,
         "defeat" => 1.7,
         "round" | "fight" | "win" | "perfect" => 1.1,
-        "hitheavy" | "counter" => 0.6,
-        "meter" => 0.5,
+        "hitheavy" | "counter" | "burst" => 0.6,
+        "meter" | "danger" => 0.5,
         _ => 0.4,
     };
     let mut out = vec![0.0f32; sec(total)];
@@ -134,6 +137,16 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
         }
     };
     match kind {
+        "hitlight" => {
+            noise(&mut out, 0.0, 0.012, 0.8, 2, 3400.0, 3400.0, 0.7, 0.0);
+            tone(&mut out, 0.0, 240.0 * p, 90.0, 0.07, 0.7, 0);
+            noise(&mut out, 0.0, 0.05, 0.5, 1, 2200.0 * p, 900.0, 0.35, 0.0);
+        }
+        "crowd" => {
+            noise(&mut out, 0.0, 1.5, 0.5, 1, 700.0, 1400.0, 0.5, 1.2);
+            noise(&mut out, 0.0, 1.5, 0.3, 0, 1800.0, 900.0, 0.6, 1.0);
+            reverb(&mut out, 0.3, 0.1);
+        }
         "hit" => {
             noise(&mut out, 0.0, 0.015, 0.9, 2, 3000.0, 3000.0, 0.7, 0.0);
             tone(&mut out, 0.0, 190.0 * p, 55.0, 0.13, 0.95, 0);
@@ -160,6 +173,13 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
             metal(&mut out, 620.0 * p, 0.16, 0.3);
             noise(&mut out, 0.0, 0.02, 0.8, 2, 2800.0, 2800.0, 0.7, 0.0);
             tone(&mut out, 0.0, 240.0, 120.0, 0.06, 0.4, 1);
+        }
+        "guardbreak" => {
+            metal(&mut out, 980.0, 0.45, 0.6);
+            metal(&mut out, 480.0, 0.35, 0.3);
+            noise(&mut out, 0.0, 0.25, 0.9, 1, 3400.0, 800.0, 0.6, 0.0);
+            tone(&mut out, 0.0, 140.0, 45.0, 0.4, 0.8, 0);
+            reverb(&mut out, 0.35, 0.4);
         }
         "swing" => {
             noise(&mut out, 0.0, 0.16, 0.5, 1, 500.0 * p, 2800.0, 0.5, 1.5);
@@ -225,6 +245,9 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
             noise(&mut out, 0.0, 0.6, 0.7, 1, 1200.0, 150.0, 0.3, 0.0);
             metal(&mut out, 300.0, 0.9, 0.12);
             reverb(&mut out, 0.38, 0.5);
+            tone(&mut out, 0.0, 70.0, 22.0, 0.9, 1.2, 0);
+            metal(&mut out, 260.0, 1.6, 0.18);
+            noise(&mut out, 0.05, 0.4, 0.6, 1, 1500.0, 200.0, 0.3, 0.0);
         }
         "round" => {
             for (f, g) in [(110.0, 0.3), (165.0, 0.22), (220.0, 0.18)] {
@@ -261,6 +284,17 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
             tone(&mut out, 0.07, 2217.0, 2217.0, 0.25, 0.16, 0);
             reverb(&mut out, 0.3, 0.2);
         }
+        "burst" => {
+            noise(&mut out, 0.0, 0.03, 1.0, 2, 3800.0, 3800.0, 0.7, 0.0);
+            tone(&mut out, 0.0, 180.0 * p, 32.0, 0.45, 1.2, 0);
+            noise(&mut out, 0.0, 0.35, 0.85, 1, 2400.0 * p, 180.0, 0.3, 0.0);
+            metal(&mut out, 880.0 * p, 0.25, 0.2);
+            reverb(&mut out, 0.25, 0.15);
+        }
+        "danger" => {
+            tone(&mut out, 0.0, 85.0, 42.0, 0.12, 0.6, 0);
+            tone(&mut out, 0.15, 75.0, 38.0, 0.14, 0.5, 0);
+        }
         "select" => {
             tone(&mut out, 0.0, 1500.0, 1050.0, 0.03, 0.2, 0);
             noise(&mut out, 0.0, 0.01, 0.2, 2, 4000.0, 4000.0, 0.7, 0.0);
@@ -285,95 +319,6 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
     // gentle soft clip so layered peaks stay punchy, not harsh
     for x in out.iter_mut() {
         *x = (*x * 0.9).tanh();
-    }
-    out
-}
-
-fn music(seed: u32) -> Vec<f32> {
-    let bpm = 138.0 + (seed % 3) as f32 * 8.0;
-    let step = 60.0 / bpm / 4.0;
-    let scales: [&[i32]; 3] = [
-        &[0, 3, 5, 7, 10, 12],
-        &[0, 2, 3, 7, 8, 12],
-        &[0, 3, 5, 6, 7, 10],
-    ];
-    let sc = scales[seed as usize % 3];
-    let root = 41 + (seed % 5) as i32;
-    let prog = [0, 0, 5, 3, 0, 0, 7, 5];
-    let steps = 16 * 8;
-    let total = (steps as f32 * step * SR as f32) as usize;
-    let mut out = vec![0.0f32; total];
-    let midi = |n: i32| 440.0 * 2f32.powf((n - 69) as f32 / 12.0);
-    let mut nz = Noise(seed.wrapping_mul(7919) | 1);
-    for i in 0..steps {
-        let bar = (i / 16) % 8;
-        let s = i % 16;
-        let t0 = (i as f32 * step * SR as f32) as usize;
-        let r = root + prog[bar];
-        let mut add = |f: &dyn Fn(f32) -> f32, dur: f32| {
-            let n = (dur * SR as f32) as usize;
-            for k in 0..n {
-                let idx = (t0 + k) % total;
-                out[idx] += f(k as f32 / SR as f32);
-            }
-        };
-        if s % 4 == 0 {
-            add(
-                &|t| {
-                    (2.0 * PI * (150.0 * (0.25f32).powf(t / 0.15)) * t).sin()
-                        * (1.0 - t / 0.18).max(0.0)
-                        * 0.9
-                },
-                0.18,
-            );
-        }
-        if s % 8 == 4 {
-            let ns: Vec<f32> = (0..(0.15 * SR as f32) as usize).map(|_| nz.n()).collect();
-            add(
-                &|t| {
-                    ns[((t * SR as f32) as usize).min(ns.len() - 1)]
-                        * (1.0 - t / 0.15).max(0.0)
-                        * 0.45
-                },
-                0.15,
-            );
-        }
-        if s % 2 == 0 {
-            let ns: Vec<f32> = (0..(0.04 * SR as f32) as usize).map(|_| nz.n()).collect();
-            add(
-                &|t| {
-                    let i = ((t * SR as f32) as usize).min(ns.len() - 1);
-                    (ns[i] - if i > 0 { ns[i - 1] } else { 0.0 }) * (1.0 - t / 0.04).max(0.0) * 0.12
-                },
-                0.04,
-            );
-        }
-        if s % 2 == 0 {
-            let f = midi(r - 12 + if s % 8 == 6 { 12 } else { 0 });
-            add(
-                &|t| {
-                    let ph = (t * f).fract();
-                    (ph * 2.0 - 1.0) * 0.22 * (1.0 - t / (step * 1.8)).max(0.0)
-                },
-                step * 1.8,
-            );
-        }
-        if s % 2 == 1 || s % 3 == 0 {
-            let f = midi(r + 12 + sc[(s * 3 + bar) % sc.len()]);
-            add(
-                &|t| {
-                    let sq = if (t * f).fract() < 0.5 { 1.0 } else { -1.0 };
-                    sq * 0.06 * (1.0 - t / (step * 0.9)).max(0.0)
-                },
-                step * 0.9,
-            );
-        }
-    }
-    // gentle low-pass
-    let mut y = 0.0;
-    for s in out.iter_mut() {
-        y += (*s - y) * 0.45;
-        *s = y * 0.7;
     }
     out
 }
@@ -522,10 +467,13 @@ impl Audio {
         };
         if enabled {
             for (k, n) in [
-                ("hit", 3u32),
+                ("hitlight", 3u32),
+                ("crowd", 1),
+                ("hit", 3),
                 ("hitheavy", 3),
                 ("counter", 1),
                 ("guard", 3),
+                ("guardbreak", 2),
                 ("swing", 3),
                 ("swingh", 2),
                 ("land", 2),
@@ -570,6 +518,9 @@ impl Audio {
     pub fn set_levels(&mut self, master: f32, music: f32, sfx: f32) {
         self.volume = master * sfx;
         self.music_volume = master * music;
+        for v in self.channels.values() {
+            set_sound_volume(&v.sound, self.volume * v.opts.volume.clamp(0.0, 1.5));
+        }
     }
     pub fn sfx(&mut self, k: &str) {
         self.sfx_at(k, 0.0);
@@ -578,6 +529,15 @@ impl Audio {
         if !self.enabled {
             return;
         }
+        let dip = match k {
+            "hitheavy" => 0.55,
+            "counter" => 0.45,
+            "ko" => 0.2,
+            "super" => 0.35,
+            "hit" => 0.8,
+            _ => 1.0,
+        };
+        self.duck_now = self.duck_now.min(dip);
         let Some((&name, v)) = self.builtin.get_key_value(k) else {
             return;
         };
@@ -936,7 +896,7 @@ impl Audio {
         let bytes = self
             .music_wav
             .remove(&id)
-            .unwrap_or_else(|| wav(&music(id)));
+            .unwrap_or_else(|| ume_formats::perf::time(&format!("music:{id}"), || wav(&music(id))));
         if let Ok(s) = load_sound_from_bytes(&bytes).await {
             self.music.insert(id, s);
         }
@@ -1128,10 +1088,13 @@ mod tests {
     #[test]
     fn every_effect_is_audible_finite_and_clipped() {
         for k in [
+            "hitlight",
+            "crowd",
             "hit",
             "hitheavy",
             "counter",
             "guard",
+            "guardbreak",
             "swing",
             "swingh",
             "land",
@@ -1146,6 +1109,8 @@ mod tests {
             "win",
             "perfect",
             "meter",
+            "burst",
+            "danger",
             "select",
             "back",
             "confirm",
@@ -1158,6 +1123,23 @@ mod tests {
                 "{k}: finite, within [-1,1]"
             );
             assert!(energy(&s) > 1e-5, "{k}: not silent");
+        }
+    }
+    #[test]
+    fn every_stage_theme_renders_distinct_normalised_loops() {
+        let tracks: Vec<Vec<f32>> = (0..score::theme_count()).map(score::music).collect();
+        for t in &tracks {
+            assert!(t.iter().all(|x| x.is_finite() && x.abs() <= 1.0));
+            assert!(energy(t) > 1e-3);
+        }
+        for a in 0..tracks.len() {
+            for b in a + 1..tracks.len() {
+                let n = tracks[a].len().min(tracks[b].len()).min(20000);
+                assert!(
+                    tracks[a][..n].iter().zip(&tracks[b][..n]).any(|(x, y)| (x - y).abs() > 1e-3),
+                    "themes {a} and {b} differ"
+                );
+            }
         }
     }
     #[test]

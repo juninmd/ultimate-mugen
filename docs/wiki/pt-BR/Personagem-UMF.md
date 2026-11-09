@@ -88,6 +88,17 @@ Cada animação é uma lista de quadros:
 | `offset` | Deslocamento `[x, y]` do desenho |
 | `loop` | Índice do quadro onde o loop recomeça |
 
+#### Como um frame de ataque vira hitbox
+
+Frames desenhados com sprites em pixel usam como caixa de golpe a geometria do rig da `pose` e do `hit` do frame (`part` + `radius`), ou o `box` explícito quando existe, então cada golpe mantém o próprio alcance. O compilador então remodela a caixa para as proporções medidas em 605 personagens M.U.G.E.N (`native/pixel_hit.rs`, `H` = altura em pé, 96 unidades para `height` 100):
+
+- como um `Clsn1` do M.U.G.E.N, a caixa vai do corpo até a ponta: começa no máximo `0.10 H` à frente da origem e alcança pelo menos `0.60 H` (a mediana do M.U.G.E.N é `0.72 H` nos socos e `0.80 H` nos chutes);
+- pelo menos `0.36 H` de altura, nunca acima de `0.95 H` nem abaixo do chão (socos do M.U.G.E.N ficam entre `-0.75 H` e `-0.33 H`, chutes descem até `-0.05 H`);
+- a hurtbox em pé tem `0.46 H` de largura (mediana do M.U.G.E.N `0.46 H`) e a agachada `0.67 H` de altura (mediana `0.67 H`);
+- um `box` explícito é usado como escrito, então mantenha-o dentro dessas proporções; a auditoria falha caso contrário.
+
+`cargo test --release -p ume-engine --test native_hitbox_audit` verifica todos os frames de golpe do elenco (altura, alcance, início, largura, acima da cabeça, abaixo do chão) e `native_normal_reach` imprime e compara alcance e dano dos quatro golpes normais em pé de cada lutador.
+
 ### Nomes padrão
 
 Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os estados comuns funcionam sem código.
@@ -135,7 +146,24 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `teleport` | quadro | Reaparece atrás do oponente |
 | `fx` | `aura` | Efeito visual extra |
 | `voice` | `1000, 0` | Grupo e índice do som do personagem tocado no início do golpe, quando o áudio estiver incluído |
-| `airPhysics` | `true` | Mantém física aérea |
+| `airPhysics` | `true` | Mantém a física aérea |
+| `cancels` | lista de ids | Este golpe pode ser cancelado **para** esses golpes em contato (acerto, defesa ou projétil que encosta). Declarar substitui o gatling automático a partir deste golpe |
+| `throw` | `{ "damage", "bind", "launch", "at" }` | Agarrão: veja [Traços de combate](#traços-de-combate) |
+| `armor` | `{ "hits", "threshold" }` | Absorve golpes enquanto o movimento está ativo |
+| `parry` | `{ "window": [de, até], "spark" }` | Devolve ataques na janela de elementos da animação |
+| `timestop` | ticks | Congela todos os outros |
+| `burst` | `true` | Quebra de combo usável ao apanhar |
+| `flight` | `true` | Pairar em 8 direções enquanto o golpe dura |
+
+### Traços de combate
+
+- **Gatling automático.** Um golpe sem `cancels` segue o gênero: um normal cancela em qualquer normal *mais forte* (`light` < `medium` < `heavy` pelo maior nível de acerto, empate pela ordem de declaração, então sequências nunca entram em loop), normais em pé ligam nos agachados, normais aéreos encadeiam com aéreos, e todo normal cancela em todo especial e super no contato. Especiais só cancelam em outros especiais por `cancels` explícito; supers cancelam a partir de qualquer golpe.
+- **Rotas explícitas.** `"cancels": ["strong", "rush"]` no `jab` faz `strong` e `rush` aceitarem o `jab` no contato. Um especial de projétil pode ser cancelado quando o projétil toca o oponente. Um especial `air` pode começar de um lançador no chão que o liste (uppercut, depois mergulho).
+- **`throw`** (`damage`, `bind` `[x, y]` à frente de quem agarra, `launch` `[vx, vy]`, `at` = frame do agarrão, padrão 1). O HitDef do agarrão dispara no elemento `at` (dê uma caixa `hit` a esse frame), a vítima fica presa em `at + 1`, leva o dano em `at + 2` e é lançada, então a animação precisa de pelo menos `at + 2` frames. Agarrões ignoram defesa e falham fora do alcance.
+- **`armor`** (`hits` absorvidos, `threshold` opcional = dano acima do qual a armadura quebra). Do início até o último frame de acerto o golpe recebe 35 % de dano reduzido e não é interrompido; gastos os `hits`, o próximo golpe derruba normalmente.
+- **Cola de multi-hit.** Golpes com três ou mais `hits` empurram o alvo só um pouco a cada acerto exceto o último (a sequência inteira conecta) e projéteis perfurantes (4+ acertos) não empurram o alvo para fora do feixe. Defina `knockback` para desativar.
+
+Valide com `cargo test --release --test native_roster_lab -- --nocapture` (todo estado de ataque precisa conectar; imprime dano e alcance), `--test native_combo_routes` (todo cancel declarado encadeia de ponta a ponta) e `python scripts/audit_native_moves.py`.
 
 ### `hits[]`
 
@@ -176,6 +204,18 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `$` | Direção inclusiva (`$D` aceita DB, D, DF) | `$D, x` |
 | `>` | Sem nenhuma outra entrada entre os passos | `F, >F` |
 | `N` | Direção neutra (nenhuma direção pressionada) | `N, x` |
+
+## Normais de poder (Soco 3 e Chute 3)
+
+Todo lutador nativo que não declara um golpe em `z` ou `c` ganha quatro normais extras na compilação (`native/power_normals.rs`): `power_punch` e `crouch_power_punch` em `z` (tecla padrão **E**, exibido como *Soco 3*), `power_kick` e `crouch_power_kick` em `c` (tecla padrão **D**, exibido como *Chute 3*). Cada um reaproveita animação, tempo, altura de defesa e `cancels` da normal de chão mais forte da família (`y` e depois `x` nos socos, `b` e depois `a` nos chutes; as versões agachadas usam a normal agachada), com o nome `<nome base> Max`. Os golpes causam 130 % de dano, viram `heavy`, ganham 4 de hit-stun e 2 de hit-stop quando definidos e empurram 25 % mais. Golpes que cancelam na normal base também cancelam na versão de poder, e os novos golpes aparecem na lista de golpes da pausa. Declare um golpe próprio em `z` ou `c` para não usar o automático. Versões aéreas não são geradas aqui.
+
+## Carregar energia (todo lutador)
+
+Todo lutador nativo pode carregar o medidor: segure **R** (a entrada `s` / Start; para pausar a luta use **Esc** ou **P**). O lutador entra no estado `3920`, repete a animação `powerUp` com um brilho azul e ganha 4 de energia por tick (um super de 1000 em cerca de quatro segundos) até soltar o botão (depois de pelo menos 6 ticks) ou encher o medidor. O estado é `movetype = I`, então um golpe o interrompe, e um lutador com formas ainda se transforma com `T` quando o medidor chega ao custo da forma. O comando é `charge_cmd` (`/s`) e aparece como `Charge Energy` na lista de golpes. A IA embutida só carrega no nível 3 ou mais, com menos de 700 de energia, quando o rival está a mais de 190 unidades e não está atacando.
+
+## Habilidades no ar (todo especial e super)
+
+Todo `special` e `super` com `when` ausente ou `"stand"` ganha também uma versão aérea (estado `20000 + estado de chão`, rótulo `State -1, air <nome>`), acionada pelo mesmo comando com o lutador no ar. O lutador flutua no começo do golpe (mantém 40 % do deslize), a gravidade volta a 45 % depois de 12 ticks, o golpe termina no estado de queda do salto (`50`) com controle, e tocar o chão o interrompe com o estado de pouso (`52`). As versões aéreas causam 70 % do dano de chão, os projéteis saem inclinados para baixo (inclinação 0,85) para alcançar um rival no chão, e cada salto permite um especial aéreo (`var(57)`, zerada ao pousar). Agarrões, golpes de voo e golpes com `when: "crouch"` ou `"air"` mantêm suas próprias regras.
 
 ## Sprites pixel art (opcional)
 

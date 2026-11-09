@@ -264,7 +264,7 @@ fn move_frame_and_counter_flags_expire() {
 fn hit_override_sets_hitoverridden_and_overridden_flags() {
     let mut m = duel(mugen_char("striker", STRIKER), mugen_char("dummy", ""));
     face_off(&mut m, 40.0);
-    m.fighters[1].hit_overrides[0] = Some(ume_engine::fighter::HitOverride { attr: "SCA, AA, AT, AP".into(), state_no: 5000, time: 30, force_air: false });
+    m.fighters[1].hit_overrides[0] = Some(ume_engine::fighter::HitOverride { attr: "SCA, AA, AT, AP".into(), state_no: 5000, time: 30, force_air: false, keep: false, hits: 1, threshold: 0.0, chip: 0.0 });
     enter(&mut m, 0, 200);
     while m.fighters[0].move_hit_var.hit_time == 0 && m.game_time < 2000 { m.tick(&[0, 0]); }
     assert_eq!(ev(&m, 1, "HitOverridden"), 1.0);

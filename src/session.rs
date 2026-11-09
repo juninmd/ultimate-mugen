@@ -4,6 +4,7 @@ use crate::controls::Controls;
 use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
 #[path = "session/kaito.rs"] mod kaito;
+mod shortcut;
 use crate::stages::Stage;
 use crate::ui::Ui;
 use crate::vfx::Vfx;
@@ -210,31 +211,6 @@ impl Session {
         }
     }
 
-    fn mugen_macro(facing: f32, which: u32) -> Vec<u32> {
-        let (f, b, d) = (
-            if facing >= 0.0 { k::R } else { k::L },
-            if facing >= 0.0 { k::L } else { k::R },
-            k::D,
-        );
-        let qcf = [d, d, d | f, d | f, f, f];
-        match which {
-            1 => {
-                let mut v = qcf.to_vec();
-                v.extend([f | k::X, 0]);
-                v
-            }
-            2 => vec![f, f, d, d, d | f, d | f | k::X, 0],
-            3 => vec![d, d, d | b, d | b, b, b | k::A, 0],
-            _ => {
-                let mut v = qcf.to_vec();
-                v.push(0);
-                v.extend(qcf);
-                v.extend([f | k::X, 0]);
-                v
-            }
-        }
-    }
-
     pub fn step(&mut self, c: &mut Controls, audio: &mut Audio) {
         #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
         if self.net.is_some() {
@@ -282,7 +258,9 @@ impl Session {
                     b
                 }
                 Pilot::Human(s) => {
-                    let mut b = c.player_bits(*s, self.duo);
+                    let raw = c.player_bits(*s, self.duo);
+                    let f = &self.m.fighters[fi];
+                    let mut b = shortcut::take_slots(c, (*s).min(1), raw, &f.def.display_name, &f.def.commands, f.facing);
                     if tag && b & k::T != 0 {
                         b = (b & !k::T) | k::TAG;
                     }
@@ -300,7 +278,7 @@ impl Session {
                             3
                         };
                         c.touch.macro_q[(*s).min(1)]
-                            .extend(Self::mugen_macro(self.m.fighters[fi].facing, which));
+                            .extend(shortcut::mugen_macro(self.m.fighters[fi].facing, which));
                         b &= !(k::D2 | k::W | k::E);
                     }
                     b
@@ -340,7 +318,7 @@ impl Session {
         let Some(mut link) = self.net.take() else {
             return;
         };
-        let bits = c.player_bits(0, false);
+        let bits = c.player_bits(0, false) & !k::SLOT_MASK;
         let (vfx, rec) = (&mut self.vfx, &mut self.rec);
         let advanced = link.step(&mut self.m, bits, |m, inputs, newest| {
             if newest {
@@ -427,10 +405,11 @@ impl Session {
                     if !played {
                         let kind = builtin.unwrap_or(match group {
                             5 => {
-                                if index >= 2 {
-                                    "hitheavy"
-                                } else {
-                                    "hit"
+                                match index {
+                                    0 => "hitlight",
+                                    1 => "hit",
+                                    2..=3 => "hitheavy",
+                                    _ => "burst",
                                 }
                             }
                             6 => "guard",
@@ -449,6 +428,7 @@ impl Session {
                     }
                 }
                 Event::StateChange { fighter } => {
+                    if self.m.idx(fighter).map(|i| self.m.fighters[i].state_no == 5400).unwrap_or(false) { audio.sfx("guardbreak"); }
                     Self::stop_flagged(&mut self.flag_sounds, audio, fighter, false)
                 }
                 Event::Hit {

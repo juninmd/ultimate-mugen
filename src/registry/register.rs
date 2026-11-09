@@ -40,6 +40,11 @@ impl Registry {
             if char_ids.contains(&id) || char_keys.contains(&key) {
                 continue;
             }
+            let problems = ume_formats::health::problems(&vfs, &def);
+            if !problems.is_empty() {
+                self.quarantined.push(Quarantined { name: name.clone(), def: def.clone(), problems });
+                continue;
+            }
             let e = CharEntry {
                 key: key.clone(),
                 id: id.clone(),

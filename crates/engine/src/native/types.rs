@@ -79,12 +79,8 @@ pub struct ThrowSpec {
     pub damage: f32,
     #[serde(default)] pub bind: Option<[f32; 2]>,
     #[serde(default, rename = "p2State")] pub p2_state: Option<i32>,
-}
-
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
-pub struct PassiveSpec {
-    #[serde(default, rename = "meterRegen")] pub meter_regen: Option<f32>,
-    #[serde(default, rename = "lifeRegen")] pub life_regen: Option<f32>,
+    #[serde(default)] pub at: Option<i32>,
+    #[serde(default)] pub launch: Option<[f32; 2]>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -134,7 +130,7 @@ pub struct NativeChar {
     #[serde(default)] pub description: Option<String>,
     pub color: String,
     #[serde(default)] pub stats: NativeStats,
-    #[serde(default)] pub passives: Option<PassiveSpec>,
+    #[serde(default)] pub passives: Option<super::passive_spec::PassiveSpec>,
     #[serde(default)] pub abilities: Option<super::ability_spec::AbilitySpec>,
     pub art: NativeArt,
     pub anims: indexmap_like::OrderedMap<NativeAnim>,
@@ -148,6 +144,8 @@ pub struct NativeChar {
     #[serde(default)] pub form: Option<String>,
     /// final boss: hidden from the select screen, closes the arcade ladder
     #[serde(default)] pub boss: bool,
+    #[serde(default)] pub npc: bool,
+    #[serde(default, rename = "spriteSet")] pub sprite_set: Option<String>,
     /// animation speed multiplier (> 1 = every timed frame is shorter: faster moves, startup and recovery)
     #[serde(default)] pub speed: Option<f32>,
 }

@@ -53,10 +53,10 @@ pub(super) fn passives_cns(nc: &NativeChar) -> String {
     let mut out = String::from("[Statedef -2]\n\n");
     if let Some(pass) = &nc.passives {
         if let Some(mr) = pass.meter_regen {
-            if mr > 0.0 { out += &format!("[State -2, meter_regen]\ntype = PowerAdd\ntrigger1 = 1\nvalue = {mr}\n\n"); }
+            if mr > 0.0 { out += &format!("[State -2, meter_regen]\ntype = PowerAdd\ntrigger1 = alive && roundstate = 2\nvalue = {mr}\n\n"); }
         }
         if let Some(lr) = pass.life_regen {
-            if lr != 0.0 { out += &format!("[State -2, life_regen]\ntype = LifeAdd\ntrigger1 = 1\nvalue = {lr}\n\n"); }
+            if lr != 0.0 { out += &format!("[State -2, life_regen]\ntype = LifeAdd\ntrigger1 = alive && roundstate = 2 && life < lifemax\nvalue = {lr}\n\n"); }
         }
     }
     out
@@ -72,9 +72,6 @@ pub(super) fn voice_state(m: &NativeMove, sid: i32) -> String {
 
 pub(super) fn voice_and_traits_state(m: &NativeMove, sid: i32) -> String {
     let mut out = voice_state(m, sid);
-    if m.armor.is_some() {
-        out += &format!("[State {sid}, armor]\ntype = HitOverride\ntrigger1 = 1\nattr = SCA,AA,AP,AT\nslot = 0\nstateno = {sid}\ntime = 2\nforceair = 0\n\n");
-    }
     if let Some(p) = &m.parry {
         let sp = p.spark.unwrap_or(2);
         out += &format!("[State {sid}, parry]\ntype = ReversalDef\ntrigger1 = AnimElemNo(0) >= {} && AnimElemNo(0) <= {}\nreversal.attr = SCA,NA,SA,HA,NP,SP,HP\npausetime = 15, 15\nsparkno = {sp}\nhitsound = 5, 0\n\n", p.window[0], p.window[1]);
@@ -85,18 +82,10 @@ pub(super) fn voice_and_traits_state(m: &NativeMove, sid: i32) -> String {
         }
     }
     if m.burst == Some(true) {
-        out += &format!("[State {sid}, burst_inv]\ntype = NotHitBy\ntrigger1 = 1\nvalue = SCA\ntime = 1\n\n[State {sid}, burst_push]\ntype = VelSet\ntrigger1 = Time = 0\nx = 0\ny = 0\n\n");
+        out += &format!("[State {sid}, burst_inv]\ntype = NotHitBy\ntrigger1 = 1\nvalue = SCA\ntime = 1\n\n[State {sid}, burst_push]\ntype = VelSet\ntrigger1 = Time = 0\nx = 0\ny = 0\n\n[State {sid}, burst_snd]\ntype = PlaySnd\ntrigger1 = Time = 0\nvalue = F5, 4\n\n");
     }
     if m.flight == Some(true) {
         out += &format!("[State {sid}, flight_hover]\ntype = VelSet\ntrigger1 = 1\nx = ifelse(command = \"holdfwd\", 3, ifelse(command = \"holdback\", -3, 0))\ny = ifelse(command = \"holdup\", -3, ifelse(command = \"holddown\", 3, 0))\n\n");
-    }
-    if let Some(th) = &m.throw {
-        let p2st = th.p2_state.unwrap_or(820);
-        out += &format!("[State {sid}, throw_hit]\ntype = HitDef\ntrigger1 = AnimElem = 1\nattr = S, NT\nhitflag = M-\npriority = 7, Miss\nsparkno = -1\np1stateno = {sid}\np2stateno = {p2st}\n\n");
-        if let Some(b) = th.bind {
-            out += &format!("[State {sid}, throw_bind]\ntype = TargetBind\ntrigger1 = AnimElem = 2\npos = {}, {}\n\n", b[0], b[1]);
-        }
-        out += &format!("[State {sid}, throw_dmg]\ntype = TargetLifeAdd\ntrigger1 = AnimElem = 3\nvalue = -{}\nkill = 1\n\n", th.damage as i32);
     }
     out
 }

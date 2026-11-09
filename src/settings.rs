@@ -153,7 +153,7 @@ impl Settings {
     pub fn art_res(&self, physical_h: f32) -> f32 {
         let q = QUALITY[self.quality.min(QUALITY.len() - 1)].0;
         if q <= 0.0 {
-            auto_quality(physical_h)
+            auto_quality(physical_h).min(if cfg!(target_arch = "wasm32") { 3.0 } else { f32::MAX })
         } else {
             q
         }
@@ -223,13 +223,8 @@ impl Settings {
                 "survival_best" => s.survival_best = v.parse().unwrap_or(0),
                 "pal1" => s.pal1 = pick(v, 1, PALETTE_COUNT),
                 "pal2" => s.pal2 = pick(v, 1, PALETTE_COUNT),
-                "lang" => {
-                    s.lang = if v == "en" {
-                        crate::i18n::Lang::En
-                    } else {
-                        crate::i18n::Lang::Pt
-                    }
-                }
+                "lang" => s.lang = crate::i18n::Lang::from_code(v),
+
                 _ => {}
             }
         }
@@ -240,14 +235,14 @@ impl Settings {
         format!(
             "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nsingle_round={}\nclassic_pushbox={}\nteam_lifeshare={}\ngamespeed={}\nsurvival_recovery={}\nsurvival_best={}\npal1={}\npal2={}\nlang={}\n",
             FORMAT_VERSION, self.fullscreen as i32, self.res, self.quality, self.fps as i32, self.fx, self.impact, self.keep_aspect as i32, if self.linear { "linear" } else { "nearest" }, self.window.0, self.window.1, self.vsync as i32, self.fps_cap, self.master, self.music, self.sfx, self.mute as i32,
-            self.difficulty, self.round_time, self.rounds, self.life, self.single_round as i32, self.classic_pushbox as i32, self.team_life_share as i32, self.game_speed, self.survival_recovery, self.survival_best, self.pal1, self.pal2, if self.lang == crate::i18n::Lang::En { "en" } else { "pt" },
+            self.difficulty, self.round_time, self.rounds, self.life, self.single_round as i32, self.classic_pushbox as i32, self.team_life_share as i32, self.game_speed, self.survival_recovery, self.survival_best, self.pal1, self.pal2, self.lang.code(),
         )
     }
 
     pub fn load() -> Self {
         crate::storage::read(FILE)
             .map(|t| Self::from_text(&t))
-            .unwrap_or_default()
+            .unwrap_or_else(|| Settings { lang: crate::i18n::system::language(), ..Settings::default() })
     }
     pub fn save(&self) {
         crate::storage::write(FILE, &self.to_text());

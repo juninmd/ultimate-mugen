@@ -61,9 +61,7 @@ pub enum StageArt {
         particles: Vec<Particle>,
         tint: Option<[f32; 4]>,
     },
-    Illustrated {
-        image: Arc<ImageData>,
-    },
+    Illustrated { image: Arc<ImageData>, ambience: &'static ambience::Profile, span: f32 },
     Mugen(Box<MugenBg>),
 }
 pub struct Stage {
@@ -3277,13 +3275,16 @@ fn volcano() -> Stage {
     }
 }
 
+pub mod ambience;
+mod story_strip;
+pub use story_strip::*;
 mod wonders;
 
 const ILLUSTRATION_IDS: [&str; 7] = [
     "dojo", "neon", "bamboo", "plains", "spirit", "volcano", "brazil",
 ];
 
-fn decode_illustration(bytes: &[u8]) -> Result<Arc<ImageData>, String> {
+pub(crate) fn decode_illustration(bytes: &[u8]) -> Result<Arc<ImageData>, String> {
     let png = ume_formats::png::decode_png(bytes).map_err(|e| e.to_string())?;
     let rgba = png.rgba.ok_or("expected truecolor stage PNG")?;
     Ok(ImageData::new(png.width, png.height, rgba))
@@ -3359,6 +3360,7 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
     extern "C" {
         fn ume_fetch_asset(path: &str) -> js_sys::Promise;
     }
+    story_strip::prepare().await?;
     if illustration(id).is_some() {
         return Ok(());
     }
@@ -3376,9 +3378,7 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
 fn illustrated(id: &str, name: &str, music: u32, kind: StageKind) -> Stage {
     Stage {
         info: info(name),
-        art: StageArt::Illustrated {
-            image: illustration(id).expect("builtin stage image"),
-        },
+        art: StageArt::Illustrated { image: illustration(id).expect("builtin stage image"), ambience: ambience::profile_for(id), span: 0.0 },
         music,
         kind,
         bgm: None,
@@ -3452,7 +3452,7 @@ pub fn builtin() -> Vec<StageEntry> {
             id: "brazil".into(),
             name: "Praça do Interior — Brasil".into(),
             thumb: [[97, 59, 132], [238, 163, 69], [166, 106, 70]],
-            build: Box::new(|| illustrated("brazil", "Praça do Interior — Brasil", 3, StageKind::Custom)),
+            build: Box::new(|| illustrated("brazil", "Praça do Interior — Brasil", 6, StageKind::Custom)),
         },
     ];
     stages.extend(wonders::builtin());

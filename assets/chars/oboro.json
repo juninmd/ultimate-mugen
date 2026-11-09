@@ -2135,7 +2135,7 @@
           "ticks": 4,
           "hit": {
             "part": "weapon",
-            "radius": 4
+            "radius": 7
           }
         },
         {
@@ -2163,7 +2163,7 @@
           "ticks": 4,
           "hit": {
             "part": "weapon",
-            "radius": 5
+            "radius": 8
           }
         },
         {
@@ -2206,7 +2206,7 @@
           "ticks": 4,
           "hit": {
             "part": "footF",
-            "radius": 9
+            "radius": 10
           }
         },
         {
@@ -2234,7 +2234,7 @@
           "ticks": 4,
           "hit": {
             "part": "weapon",
-            "radius": 5
+            "radius": 8
           }
         },
         {
@@ -2242,7 +2242,7 @@
           "ticks": 4,
           "hit": {
             "part": "weapon",
-            "radius": 5
+            "radius": 8
           }
         },
         {
@@ -2270,7 +2270,7 @@
           "ticks": 3,
           "hit": {
             "part": "weapon",
-            "radius": 4
+            "radius": 7
           }
         },
         {
@@ -2314,7 +2314,7 @@
           "ticks": 5,
           "hit": {
             "part": "weapon",
-            "radius": 5
+            "radius": 8
           }
         },
         {
@@ -2342,7 +2342,7 @@
           "ticks": 6,
           "hit": {
             "part": "weapon",
-            "radius": 4
+            "radius": 7
           }
         },
         {
@@ -2366,7 +2366,7 @@
           "ticks": 9,
           "hit": {
             "part": "weapon",
-            "radius": 5
+            "radius": 8
           }
         },
         {
@@ -2705,11 +2705,7 @@
         },
         {
           "pose": "ss1",
-          "ticks": 4,
-          "hit": {
-            "part": "weapon",
-            "radius": 6
-          }
+          "ticks": 4
         },
         {
           "pose": {
@@ -2736,7 +2732,11 @@
         },
         {
           "pose": "ss2",
-          "ticks": 10
+          "ticks": 10,
+          "hit": {
+            "part": "weapon",
+            "radius": 6
+          }
         },
         {
           "pose": "idle0",
@@ -3153,6 +3153,117 @@
           "ticks": 4
         }
       ]
+    },
+    "espelhoStrike": {
+      "frames": [
+        {
+          "pose": "ss0",
+          "ticks": 7
+        },
+        {
+          "pose": "ss1",
+          "ticks": 4
+        },
+        {
+          "pose": {
+            "shoulderF": 92,
+            "elbowF": 2,
+            "shoulderB": -30,
+            "elbowB": 30,
+            "thighF": 70,
+            "kneeF": 50,
+            "thighB": -30,
+            "kneeB": 20,
+            "lean": 30,
+            "head": -22,
+            "blade": 92,
+            "ankleF": 15,
+            "ankleB": 15,
+            "wind": 1,
+            "phase": 2,
+            "face": "shout",
+            "glow": true,
+            "aura": true
+          },
+          "ticks": 5
+        },
+        {
+          "pose": "ss2",
+          "ticks": 10,
+          "hit": {
+            "part": "weapon",
+            "radius": 8
+          }
+        },
+        {
+          "pose": "idle0",
+          "ticks": 4
+        }
+      ]
+    },
+    "kageCounter": {
+      "frames": [
+        {
+          "pose": "guard",
+          "ticks": 4
+        },
+        {
+          "pose": "guard",
+          "ticks": 4
+        },
+        {
+          "pose": "guard",
+          "ticks": 4
+        },
+        {
+          "pose": "crouchGuard",
+          "ticks": 4
+        },
+        {
+          "pose": "crouchGuard",
+          "ticks": 4
+        },
+        {
+          "pose": "str1",
+          "ticks": 4,
+          "hit": {
+            "part": "weapon",
+            "radius": 9
+          }
+        },
+        {
+          "pose": "str1",
+          "ticks": 6
+        },
+        {
+          "pose": "idle0",
+          "ticks": 4
+        }
+      ]
+    },
+    "seize": {
+      "frames": [
+        {
+          "pose": "sp0",
+          "ticks": 4,
+          "hit": {
+            "part": "handF",
+            "radius": 24
+          }
+        },
+        {
+          "pose": "str1",
+          "ticks": 6
+        },
+        {
+          "pose": "str1",
+          "ticks": 8
+        },
+        {
+          "pose": "idle0",
+          "ticks": 4
+        }
+      ]
     }
   },
   "moves": [
@@ -3165,9 +3276,13 @@
       "hits": [
         {
           "at": 2,
-          "damage": 34,
+          "damage": 30,
           "level": "light"
         }
+      ],
+      "cancels": [
+        "strong",
+        "cjab"
       ]
     },
     {
@@ -3179,9 +3294,13 @@
       "hits": [
         {
           "at": 3,
-          "damage": 73,
+          "damage": 80,
           "level": "heavy"
         }
+      ],
+      "cancels": [
+        "corvos",
+        "amaterasu"
       ]
     },
     {
@@ -3193,7 +3312,7 @@
       "hits": [
         {
           "at": 2,
-          "damage": 34,
+          "damage": 30,
           "level": "light"
         }
       ]
@@ -3207,12 +3326,12 @@
       "hits": [
         {
           "at": 3,
-          "damage": 70,
+          "damage": 78,
           "level": "heavy",
           "launch": true,
           "knockback": [
-            -2,
-            -6
+            -3,
+            -7
           ]
         }
       ]
@@ -3227,7 +3346,7 @@
       "hits": [
         {
           "at": 2,
-          "damage": 29,
+          "damage": 27,
           "level": "light"
         }
       ]
@@ -3242,7 +3361,7 @@
       "hits": [
         {
           "at": 2,
-          "damage": 31,
+          "damage": 29,
           "level": "light",
           "guard": "low"
         }
@@ -3258,7 +3377,7 @@
       "hits": [
         {
           "at": 2,
-          "damage": 68,
+          "damage": 66,
           "level": "heavy",
           "guard": "low",
           "launch": true,
@@ -3279,7 +3398,7 @@
       "hits": [
         {
           "at": 2,
-          "damage": 37,
+          "damage": 35,
           "level": "light",
           "guard": "high"
         }
@@ -3295,7 +3414,7 @@
       "hits": [
         {
           "at": 2,
-          "damage": 64,
+          "damage": 70,
           "level": "medium",
           "guard": "high"
         }
@@ -3321,7 +3440,7 @@
             50,
             -56
           ],
-          "damage": 36,
+          "damage": 20,
           "level": "light",
           "hits": 2
         },
@@ -3337,7 +3456,7 @@
             52,
             -54
           ],
-          "damage": 36,
+          "damage": 20,
           "level": "light",
           "hits": 2
         },
@@ -3353,10 +3472,14 @@
             50,
             -52
           ],
-          "damage": 36,
+          "damage": 20,
           "level": "light",
           "hits": 2
         }
+      ],
+      "cancels": [
+        "amaterasu",
+        "tsukuyomi"
       ]
     },
     {
@@ -3378,19 +3501,22 @@
           48,
           -30
         ],
-        "damage": 30,
+        "damage": 15,
         "hits": 7,
         "level": "medium",
         "priority": 3,
         "removeTime": 120
-      }
+      },
+      "cancels": [
+        "tsukuyomi"
+      ]
     },
     {
       "id": "espelho",
       "name": "Kyoka Suigetsu: Espelho Partido",
       "input": "F, D, DF, y",
       "kind": "special",
-      "anim": "espelho",
+      "anim": "espelhoStrike",
       "simple": "sp3",
       "teleport": 3,
       "invuln": [
@@ -3432,13 +3558,17 @@
           60,
           -62
         ],
-        "damage": 36,
+        "damage": 26,
         "hits": 4,
         "level": "heavy",
         "launch": true,
         "priority": 4,
         "removeTime": 30
-      }
+      },
+      "cancels": [
+        "susanoo",
+        "kyoka"
+      ]
     },
     {
       "id": "susanoo",
@@ -3557,6 +3687,222 @@
         "priority": 6,
         "removeTime": 26
       }
+    },
+    {
+      "id": "kageCounter",
+      "name": "Sombra Contra-Eclipse",
+      "input": "D, D, y",
+      "kind": "special",
+      "anim": "kageCounter",
+      "armor": {
+        "hits": 2,
+        "threshold": 85
+      },
+      "hits": [
+        {
+          "at": 6,
+          "damage": 82,
+          "level": "heavy",
+          "launch": true,
+          "knockback": [
+            -4,
+            -6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seize",
+      "name": "Garra das Sombras",
+      "input": "y+b",
+      "kind": "normal",
+      "when": "stand",
+      "anim": "seize",
+      "throw": {
+        "damage": 100,
+        "bind": [
+          34,
+          0
+        ],
+        "launch": [
+          -4,
+          -6
+        ],
+        "at": 1
+      }
+    },
+    {
+      "id": "ex_corvos",
+      "name": "Corvos EX",
+      "input": "~D, DF, F, x+y",
+      "kind": "special",
+      "anim": "corvos",
+      "projectile": [
+        {
+          "at": 3,
+          "anim": "crowFx",
+          "hitAnim": "crowHit",
+          "speed": [
+            8.8,
+            -1.1
+          ],
+          "offset": [
+            50,
+            -56
+          ],
+          "damage": 26.0,
+          "level": "heavy",
+          "hits": 3,
+          "priority": 2
+        },
+        {
+          "at": 3,
+          "anim": "crowFx",
+          "hitAnim": "crowHit",
+          "speed": [
+            9.2,
+            0
+          ],
+          "offset": [
+            52,
+            -54
+          ],
+          "damage": 26.0,
+          "level": "heavy",
+          "hits": 3,
+          "priority": 2
+        },
+        {
+          "at": 3,
+          "anim": "crowFx",
+          "hitAnim": "crowHit",
+          "speed": [
+            8.8,
+            1.1
+          ],
+          "offset": [
+            50,
+            -52
+          ],
+          "damage": 26.0,
+          "level": "heavy",
+          "hits": 3,
+          "priority": 2
+        }
+      ],
+      "cancels": [
+        "amaterasu",
+        "tsukuyomi"
+      ],
+      "cost": 250.0
+    },
+    {
+      "id": "ex_amaterasu",
+      "name": "Mirror Strike EX",
+      "input": "~D, DB, B, y+b",
+      "kind": "special",
+      "anim": "amaterasu",
+      "projectile": [
+        {
+          "at": 3,
+          "anim": "blackFlame",
+          "hitAnim": "blackFlameHit",
+          "speed": [
+            3.2,
+            0
+          ],
+          "offset": [
+            48,
+            -30
+          ],
+          "damage": 19.5,
+          "hits": 8,
+          "level": "heavy",
+          "priority": 4,
+          "removeTime": 120
+        }
+      ],
+      "cancels": [
+        "tsukuyomi"
+      ],
+      "cost": 500.0,
+      "invuln": [
+        1,
+        6
+      ]
+    },
+    {
+      "id": "overhead",
+      "name": "Eclipse Chop",
+      "input": "x+b",
+      "kind": "normal",
+      "anim": "hkick",
+      "hits": [
+        {
+          "at": 3,
+          "damage": 74.1,
+          "level": "medium",
+          "launch": true,
+          "knockback": [
+            -3,
+            -7
+          ],
+          "guard": "high",
+          "hitstun": 20
+        }
+      ]
+    },
+    {
+      "id": "launcher",
+      "name": "Moonrise Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [
+        {
+          "at": 3,
+          "damage": 58.0,
+          "level": "heavy",
+          "launch": true,
+          "knockback": [
+            -1,
+            -6
+          ],
+          "hitstun": 22
+        }
+      ]
+    },
+    {
+      "id": "divekick",
+      "name": "Crow Dive",
+      "input": "y",
+      "kind": "normal",
+      "anim": "akick",
+      "when": "air",
+      "hits": [
+        {
+          "at": 2,
+          "damage": 77.0,
+          "level": "heavy",
+          "guard": "high",
+          "groundBounce": true,
+          "launch": true,
+          "knockback": [
+            -1,
+            4
+          ]
+        }
+      ],
+      "moves": [
+        {
+          "at": 1,
+          "vel": [
+            1.8,
+            2.5
+          ]
+        }
+      ]
     }
   ],
   "palettes": [
@@ -4040,8 +4386,10 @@
               }
             ]
           }
-        ]
       }
     ]
+  },
+  "passives": {
+    "meterRegen": 0.4
   }
 }

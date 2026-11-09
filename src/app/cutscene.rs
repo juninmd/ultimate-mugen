@@ -23,9 +23,20 @@ pub fn script(kind: u8, hero: &str, hero_quote: &str, boss: &str, boss_line: &st
 }
 
 pub fn script_for(kind: u8, hero_id: &str, hero: &str, hero_quote: &str, boss: &str, boss_line: &str) -> Vec<Page> {
+    let clean_boss = boss.strip_prefix("umf:").unwrap_or(boss).to_lowercase();
     match kind {
         0 => story::opening_script(hero_id, hero),
-        1 => story::preboss_script(hero_id, boss, boss_line),
+        1 => {
+            if clean_boss.contains("garan") || clean_boss.contains("valdric") {
+                let boss_key = if clean_boss.contains("garan") { "garan" } else { "valdric" };
+                crate::boss::dialogue::script(1, hero, hero_quote, boss_key, boss, boss_line)
+                    .into_iter()
+                    .map(|p| Page { who: p.who, text: p.text })
+                    .collect()
+            } else {
+                story::preboss_script(hero_id, boss, boss_line)
+            }
+        }
         3 => story::awakening_script(hero_id, hero),
         4 => climax::climax_script(hero_id, hero, boss),
         5 => climax::defeat_script(hero_id, hero, boss),
@@ -177,6 +188,11 @@ impl App {
             "ENTER avançar · ESC pular"
         };
         self.ui.text(hint, 1240.0, 702.0, 14.0, Color::new(1.0, 1.0, 1.0, 0.45), Align::Right, false);
+        if kind == 0 {
+            if let Some(txt) = self.sp.as_ref().and_then(|sp| sp.intro_text((t * 60.0) as i64)) {
+                self.ui.text(&txt, VW / 2.0, 96.0, 26.0, hex("#ffcc33"), Align::Center, true);
+            }
+        }
         let adv = self.c.pressed(nav::OK) || is_mouse_button_pressed(MouseButton::Left) || is_key_pressed(KeyCode::Space);
         if self.c.pressed(nav::BACK | nav::START) { self.cutscene_done(kind); return; }
         if adv {

@@ -7,8 +7,14 @@ use crate::triggers::Ctx;
 use std::cell::RefCell;
 use std::sync::Arc;
 
+pub const DEFAULT_SEED: u32 = 0x2545_f491;
+
+mod award;
+mod armor;
+mod bounds;
 mod forms;
 mod types;
+mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -37,6 +43,7 @@ pub struct Match {
     /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
     pub team_simul: bool,
     pub team_tag: bool,
+    pub lanes: crate::lane::LaneRules,
     /// MUGEN-style pushbox: an attacking fighter does not get pushed back by the defender; off = symmetric split.
     pub classic_pushbox: bool,
     pub tag_cooldown: [i32; 2],
@@ -78,9 +85,9 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, team_tag: false, classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, team_tag: false, lanes: Default::default(), classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
-            events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: 0x2545_f491, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
+            events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
         }
     }
@@ -366,7 +373,7 @@ impl Match {
         let src = if f.is_helper { if f.key_ctrl { self.idx(f.root) } else { None } } else { Some(i) };
         let Some(s) = src else { return false };
         if f.asserted_commands.iter().any(|(n, t)| *t > 0 && n.eq_ignore_ascii_case(name)) { return true; }
-        let accepting = if f.is_helper { self.round_state == 2 } else { self.round_state == 2 || self.round_state == 3 };
+        let accepting = if f.is_helper { self.round_state == 2 } else { self.round_state == 2 || (self.round_state == 3 && self.won_by_ko) };
         if !accepting && !self.training && !self.fighters[s].has_assert(asf::POSTROUNDINPUT) { return false; }
         if !Arc::ptr_eq(&f.st_def, &f.def) && !Arc::ptr_eq(&f.st_def, &self.common) {
             return f.st_def.commands.iter().find(|c| c.name == name).is_some_and(|c| crate::commands::match_command(&self.fighters[s].history, c));
@@ -395,12 +402,13 @@ impl Match {
         if self.fighters[i].has_assert(asf::NOHARDCODEDKEYS) { return; }
         if st == 'S' || st == 'C' {
             let guard_blocked = self.fighters[i].has_assert(if st == 'S' { asf::NOSTANDGUARD } else { asf::NOCROUCHGUARD });
-            let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD);
+            let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD) || self.fighters[i].guard_button;
+            if self.builtin_guard_exit(i, s, guard_input) { return; }
             if guard_input && !guard_blocked && self.in_guard_dist(i) && !(120..=155).contains(&s) { let own = self.fighters[i].def.clone(); self.change_state(i, 120, own); return; }
             if st == 'S' {
                 if cmd(self, "holdup") && !self.fighters[i].has_assert(asf::NOJUMP) { let own = self.fighters[i].def.clone(); self.change_state(i, 40, own); return; }
                 if cmd(self, "holddown") && s != 10 && s != 11 && !self.fighters[i].has_assert(asf::NOCROUCH) { let own = self.fighters[i].def.clone(); self.change_state(i, 10, own); return; }
-                if (cmd(self, "holdfwd") || cmd(self, "holdback")) && s != 20 && !self.fighters[i].has_assert(asf::NOWALK) && (s == 0 || s == 52) { let own = self.fighters[i].def.clone(); self.change_state(i, 20, own); }
+                self.builtin_walk(i, s);
             } else if !cmd(self, "holddown") && s == 11 && !self.fighters[i].has_assert(asf::NOSTAND) { let own = self.fighters[i].def.clone(); self.change_state(i, 12, own); }
         } else if st == 'A' {
             let f = &self.fighters[i];
@@ -429,9 +437,10 @@ impl Match {
         let mut land = false;
         {
             let f = &mut self.fighters[i];
-            f.pos.x += f.vel.x * f.facing;
+            f.pos.x += f.vel.x * f.facing * f.passive_speed();
             f.pos.y += f.vel.y;
-            match f.physics {
+            let physics = if f.physics == 'N' && f.move_type == 'H' && f.state_type == 'A' { 'A' } else { f.physics };
+            match physics {
                 'S' | 'C' => {
                     let sliding = f.move_type == 'H' && f.slide_time > 0;
                     if !sliding {
@@ -448,7 +457,7 @@ impl Match {
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl;
-                    if f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; if f.move_type != 'H' { land = true; } }
+                    if f.pos.y >= f.ground_level + if f.lands_by_script() { 24.0 } else { 0.0 } && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; if f.move_type != 'H' { land = true; } }
                 }
                 _ => {}
             }
@@ -537,7 +546,7 @@ impl Match {
                 f.ground_level = 0.0;
                 f.facing = if f.side == 0 { 1.0 } else { -1.0 };
                 f.life = f.life_max; f.alive = true;
-                f.revert_form();
+                f.revert_form(); f.reset_passive_for_round();
                 if first { f.power = 0.0; }
                 f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false;
                 f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5];
@@ -563,10 +572,10 @@ impl Match {
                     let mut seen = [false; 2];
                     for i in self.root_indices() {
                         let s = self.fighters[i].side.min(1);
-                        if seen[s] || !self.fighters[i].def.anims.contains_key(&190) { continue; }
+                        if seen[s] || !self.fighters[i].def.anims.contains_key(&190) || (190..=199).contains(&self.fighters[i].state_no) { continue; }
                         seen[s] = true;
                         let taunt = s == 1 && self.fighters[i].def.anims.contains_key(&195);
-                        self.change_engine_state(i, if taunt { ENGINE_STATE_FACE_OFF_TAUNT } else { ENGINE_STATE_FACE_OFF });
+                        self.enter_face_off(i, taunt);
                     }
                 }
             }
@@ -609,7 +618,7 @@ impl Match {
                         self.winner_side = if sides_dead[0] && sides_dead[1] { -2 } else if sides_dead[0] { 1 } else { 0 };
                         let slow = self.global_asserts & gsf::NOKOSLOW == 0;
                         self.slow_mo = if slow { 75 } else { 0 };
-                        self.announce = Some(Announce { text: "K.O.".into(), time: 110, total: 110, kind: AnnounceKind::Ko });
+                        self.announce = Some(Announce { text: if sides_dead[0] && sides_dead[1] { "DOUBLE K.O.".into() } else { "K.O.".into() }, time: 110, total: 110, kind: AnnounceKind::Ko });
                         self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side, silent: self.global_asserts & gsf::NOKOSND != 0, slow });
                     } else {
                         let (l0, l1) = (team_life(self, 0), team_life(self, 1));
@@ -637,7 +646,7 @@ impl Match {
                         let no = if self.winner_side == s { 180 } else if self.winner_side == -2 { 175 } else { 170 };
                         self.change_state(i, no, d);
                     }
-                    if self.winner_side >= 0 { self.wins[self.winner_side as usize] += 1; }
+                    self.award_round();
                     let text = if self.winner_side >= 0 { self.winner_text(self.winner_side as usize) } else { "DRAW".into() };
                     self.announce = Some(Announce { text, time: 150, total: 150, kind: AnnounceKind::Win });
                     self.events.push(Event::RoundEnd(self.winner_side));
@@ -697,7 +706,7 @@ impl Match {
                 if f.ikemen.standby { bits = 0; }
             }
             if bits & crate::input::k::T != 0 && awaken_len < awaken.len() { awaken[awaken_len] = fi; awaken_len += 1; }
-            k += 1;
+            k += 1; if self.lanes.active { f.lane_step(&mut bits, &self.lanes, &self.stage); } f.guard_button = self.lanes.active && bits & crate::input::k::GUARD != 0; bits &= !crate::input::k::BRAWLER_MASK;
             if f.assert_input.1 > 0 { bits |= f.assert_input.0; f.assert_input.1 -= 1; }
             if f.input_shift > 0 { let (b, fa) = (bits, f.facing as i32); for _ in 0..f.input_shift { f.history.push(b, fa); } }
             else if f.input_shift < 0 { f.history.rewind(f.input_shift); }
@@ -741,7 +750,7 @@ impl Match {
             self.physics_step(i);
             let f = &mut self.fighters[i];
             f.state_time += 1;
-            if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); }
+            if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); } f.tick_passive(self.round_state == 2);
             // the final boss keeps charging on its own (a super every ~10 s even when not hitting)
             if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + if f.form >= 3 { 1.2 } else if f.form >= 2 { 0.85 } else { 0.35 }).min(f.power_max); if f.form >= 3 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.22).min(f.life_max); } else if f.form >= 2 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.12).min(f.life_max); } }
             if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_used = 0; f.super_defence_mul = 1.0; }
@@ -766,6 +775,7 @@ impl Match {
         self.rebind();
         self.orphan_custom_states();
         self.detect_hits();
+        self.bound_fighters();
         crate::ikemen::life::maintain(self);
         for f in self.fighters.iter_mut() {
             for o in f.hit_overrides.iter_mut() { if let Some(h) = o { if h.time > 0 { h.time -= 1; if h.time == 0 { *o = None; } } } }
@@ -773,7 +783,7 @@ impl Match {
         let paused = paused_by.is_some();
         self.update_projectiles(paused);
         self.update_explods(paused);
-        if self.global_asserts & gsf::CAMERAFREEZE == 0 { self.update_camera(); }
+        if !self.lane_scroll_step() && self.global_asserts & gsf::CAMERAFREEZE == 0 { self.update_camera(); }
         if !paused { if let Some(bg) = self.bg.as_mut() { bg.step(); } }
         self.visual_timers();
         self.skip_asserted_announcements();
@@ -851,10 +861,10 @@ impl Match {
         for i in 0..self.fighters.len() {
             let free = { let f = &self.fighters[i]; f.alive && !f.is_helper && f.round_free(self.round_state == 2, self.pause.is_some()) };
             let f = &mut self.fighters[i];
-            f.no_ctrl_ticks = if free && !f.ctrl { f.no_ctrl_ticks + 1 } else { 0 };
+            f.no_ctrl_ticks = if free && !f.ctrl && f.counts_as_stuck() { f.no_ctrl_ticks + 1 } else { 0 };
             let lying = free && f.state_no == 5110 && f.state_time > f.def.c("data.liedown.time", 60.0) as i32 + 30;
-            if !lying && f.no_ctrl_ticks <= NO_CTRL_LIMIT { continue; }
-            f.no_ctrl_ticks = 0;
+            if !lying && f.no_ctrl_ticks <= NO_CTRL_LIMIT && !f.hit_state_overstay(free) { continue; }
+            f.no_ctrl_ticks = 0; f.ikemen.rescued += 1; eprintln!("watchdog: {} stuck in state {} (ctrl {}), forcing recovery", f.def.name, f.state_no, f.ctrl);
             let def = f.def.clone();
             let getup = lying && (def.states.contains_key(&5120) || self.common.states.contains_key(&5120));
             if !getup { let f = &mut self.fighters[i]; f.vel = V2::default(); f.ctrl = true; }
@@ -869,7 +879,7 @@ impl Match {
             for b in a + 1..n {
                 let (fa, fb) = (&self.fighters[a], &self.fighters[b]);
                 let pushable = |f: &Fighter| !f.destroyed && (!f.is_helper || f.helper_player) && f.player_push && f.state_type != 'L';
-                if fa.side == fb.side || !pushable(fa) || !pushable(fb) { continue; }
+                if fa.side == fb.side || !pushable(fa) || !pushable(fb) || !self.same_lane(a, b) { continue; }
                 if fa.pos.y - fa.height_top() > fb.pos.y + fb.height_bottom() || fb.pos.y - fb.height_top() > fa.pos.y + fa.height_bottom() { continue; }
                 let (l, r) = if fa.pos.x <= fb.pos.x { (a, b) } else { (b, a) };
                 let (fl, fr) = (&self.fighters[l], &self.fighters[r]);
@@ -891,16 +901,7 @@ impl Match {
                 }
             }
         }
-        let left = self.camera.x - self.view_w / 2.0; let right = self.camera.x + self.view_w / 2.0;
-        let (bl, br, vw) = (self.stage.bound_left, self.stage.bound_right, self.view_w);
-        for f in self.fighters.iter_mut() {
-            if f.destroyed || (f.is_helper && !f.helper_player) { continue; }
-            if !f.screen_bound { f.screen_bound = true; continue; }
-            let lw = if f.facing > 0.0 { f.back_width() } else { f.front_width() };
-            let rw = if f.facing > 0.0 { f.front_width() } else { f.back_width() };
-            let minx = left.max(bl - vw / 2.0) + lw; let maxx = right.min(br + vw / 2.0) - rw;
-            f.pos.x = f.pos.x.clamp(minx, maxx.max(minx));
-        }
+        self.bound_fighters();
     }
 
     pub fn update_camera(&mut self) {
@@ -997,7 +998,7 @@ impl Match {
             if hd.chain_id.is_some_and(|c| f.ghv.hit_id != c) { return false; }
             if f.ghv.hit_id >= 0 && hd.no_chain_id.contains(&Some(f.ghv.hit_id)) { return false; }
         }
-        if self.round_state != 2 && !(self.round_state == 3 && f.alive) { return false; }
+        if self.round_state != 2 && !(self.round_state == 3 && f.alive && self.won_by_ko) { return false; }
         if f.state_no == 5150 || f.unhittable > 0 { return false; }
         let hf = &hd.hitflag; let st = f.state_type;
         if hf.contains('+') && f.move_type != 'H' { return false; }
@@ -1024,7 +1025,7 @@ impl Match {
         let ok = (st == 'S' && (gf.contains('H') || gf.contains('M'))) || (st == 'C' && (gf.contains('L') || gf.contains('M'))) || (st == 'A' && gf.contains('A'));
         if !ok { return false; }
         if (120..=155).contains(&f.state_no) { return true; }
-        f.ctrl && f.move_type != 'H' && st != 'A' && !f.is_helper && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD))
+        f.ctrl && f.move_type != 'H' && st != 'A' && !f.is_helper && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD) || f.guard_button)
     }
 
     fn detect_reversals(&mut self) {
@@ -1084,7 +1085,7 @@ impl Match {
             if self.scratch_c1.is_empty() { continue; }
             for d in 0..self.fighters.len() {
                 let fd = &self.fighters[d];
-                if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) { continue; }
+                if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) || !self.same_lane(a, d) { continue; }
                 if hd.hit_once && !fa.hitdef_targets.is_empty() { continue; }
                 if hd.p2clsncheck && fd.frame().is_none_or(|f| f.clsn2.is_empty()) { continue; }
                 if !self.can_be_hit(d, hd, fa.side) { continue; }
@@ -1145,13 +1146,10 @@ impl Match {
         f.pos.x <= minx + 2.0 || f.pos.x >= maxx - 2.0
     }
 
-    fn hit_override(&self, d: usize, hd: &HitDefData) -> Option<(i32, bool)> {
-        self.fighters[d].hit_overrides.iter().flatten().find(|o| o.time != 0 && Self::attr_match(hd, &o.attr)).map(|o| (o.state_no, o.force_air))
-    }
-
     pub fn apply_hit(&mut self, a: usize, d: usize, hd: &HitDefData, at: (f32, f32), proj: Option<(i32, f32)>) {
         let guarded = !self.fighters[a].has_assert(asf::UNGUARDABLE) && self.is_guarding(d, hd);
         let overridden = if guarded { None } else { self.hit_override(d, hd) };
+        if !guarded && self.absorb_armored_hit(a, d, hd, at, proj) { return; }
         let from_proj = proj.is_some();
         let a_facing = proj.map(|p| p.1).unwrap_or(self.fighters[a].facing);
         let (aid, aside, apos, aroot) = { let f = &self.fighters[a]; (f.id, f.side, f.pos, f.root) };
@@ -1164,7 +1162,7 @@ impl Match {
             fa.move_contact = 1;
             if !fa.targets.iter().any(|t| t.0 == did) { fa.targets.push((did, hd.id)); }
         }
-        let attack_mul = self.idx(aroot).map(|r| self.fighters[r].attack_mul).unwrap_or(1.0);
+        let attack_mul = self.idx(aroot).map(|r| self.fighters[r].effective_attack()).unwrap_or(1.0);
         {
             let fd = &mut self.fighters[d];
             fd.last_hit_by = Some(aid);
@@ -1221,7 +1219,7 @@ impl Match {
             let st = if self.fighters[d].air_height() < -1.0 { 'A' } else { self.fighters[d].state_type };
             let dd = self.fighters[d].def.clone();
             self.change_state(d, if st == 'A' { 154 } else if st == 'C' { 152 } else { 150 }, dd);
-            let point_mul = attack_mul / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01);
+            let point_mul = attack_mul / self.fighters[d].effective_defence().max(0.01);
             crate::ikemen::life::apply_hit_points(self, d, hd, true, point_mul);
             crate::ikemen::life::enter_stun_states(self, d, true);
             self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
@@ -1232,8 +1230,8 @@ impl Match {
             let training = self.training;
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
-            let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale(prev_hc) } else { 1.0 };
-            let mut dmg = (hd.damage * attack_mul * scale / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01)).round();
+            let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale_for(prev_hc, hd.attr_kind.iter().any(|k| k.starts_with('H'))) } else { 1.0 };
+            let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].effective_defence().max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             if self.fighters[d].has_assert(asf::NOHITDAMAGE) { dmg = 0.0; }
             let prev_fall = self.fighters[d].ghv.fall;
@@ -1285,7 +1283,7 @@ impl Match {
                 let no = if st == 'A' || st == 'L' { 5020 } else if st == 'C' && !hd.forcestand { 5010 } else { 5000 };
                 self.change_state(d, no, dd);
             }
-            let point_mul = attack_mul * scale / (self.fighters[d].defence_mul * self.fighters[d].super_defence_mul).max(0.01);
+            let point_mul = attack_mul * scale / self.fighters[d].effective_defence().max(0.01);
             crate::ikemen::life::apply_hit_points(self, d, hd, false, point_mul);
             if hd.p2stateno < 0 { crate::ikemen::life::enter_stun_states(self, d, false); }
             if hd.p1stateno >= 0 && !from_proj { let ad = self.fighters[a].def.clone(); self.change_state(a, hd.p1stateno, ad); }
@@ -1464,13 +1462,13 @@ impl Match {
             }
             "left" => {
                 x = -half + px;
-                y = py;
+                y = py - self.stage.zoffset;
                 bind_to = None;
                 facing = fac;
             }
             "right" => {
                 x = half + px;
-                y = py;
+                y = py - self.stage.zoffset;
                 bind_to = None;
                 facing = fac;
             }

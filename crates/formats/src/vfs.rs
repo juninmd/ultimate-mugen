@@ -10,11 +10,11 @@ use std::sync::Arc;
 
 mod archive;
 mod find;
-mod zip;
+mod zip; mod zip_job;
 
 use archive::{File, Source};
 pub use find::{char_key, content_hash, find_char_defs, find_stage_defs, resolve, resolve_key, stage_key};
-pub use zip::{add_zip, add_zip_with_progress, ZipProgress};
+pub use {zip::{add_zip, add_zip_with_progress, ZipProgress}, zip_job::ZipJob};
 
 /// Recursively index every file under `dir` (keys relative to `dir`, under
 /// `prefix`). `.zip` files are indexed in place (their entries are keyed

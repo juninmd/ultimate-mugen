@@ -111,6 +111,25 @@ pub fn combo_scale(hits_before: i32) -> f32 {
     const T: [f32; 10] = [1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.25];
     T[(hits_before.max(0) as usize).min(T.len() - 1)].max(0.2)
 }
+/// Hyper (super) hits never scale below half damage so a multi-hit finisher still feels like one, whatever combo led into it.
+pub const HYPER_SCALE_FLOOR: f32 = 0.5;
+pub fn combo_scale_for(hits_before: i32, hyper: bool) -> f32 {
+    let scale = combo_scale(hits_before);
+    if hyper { scale.max(HYPER_SCALE_FLOOR) } else { scale }
+}
+
+#[cfg(test)]
+mod scale_tests {
+    use super::*;
+
+    #[test]
+    fn normal_hits_keep_scaling_down_but_hyper_hits_stop_at_half() {
+        assert_eq!(combo_scale_for(0, false), 1.0);
+        assert_eq!(combo_scale_for(9, false), 0.25);
+        assert_eq!(combo_scale_for(9, true), HYPER_SCALE_FLOOR);
+        assert_eq!(combo_scale_for(2, true), 0.9, "early hits are not raised");
+    }
+}
 /// How far (game px) the attacker is shoved back when the defender is cornered, given the hit's knock-back speed.
 pub fn corner_push(xvel: f32) -> f32 { (xvel.abs() * 0.5).clamp(1.2, 4.5) }
 

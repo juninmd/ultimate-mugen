@@ -5,11 +5,15 @@
 1. Coloque a pasta em `mugen/chars/<nome>/` com o `.def` dentro, ou jogue o `.zip` direto em `mugen/`.
 2. Abra o jogo: o personagem aparece na seleção. `Tab` filtra entre todos, originais e M.U.G.E.N.
 
-Na versão web, use o botão **Importar MUGEN (.zip)** ou arraste o `.zip` para a janela. A importação é idempotente: o mesmo arquivo, ou o mesmo lutador ou cenário encontrado de novo em outro caminho, nome ou caixa de letras, é registrado uma única vez (a identidade é um hash do `.def` normalizado mais o arquivo de sprites). Pacotes salvos no navegador por versões antigas são deduplicados automaticamente no próximo carregamento.
+Use Menu principal › **Importar M.U.G.E.N** (o único botão de importação; na web abre o seletor do navegador, no desktop o diálogo de arquivos do sistema) ou arraste o `.zip` para a janela da web. A importação é idempotente: o mesmo arquivo, ou o mesmo lutador ou cenário encontrado de novo em outro caminho, nome ou caixa de letras, é registrado uma única vez (a identidade é um hash do `.def` normalizado mais o arquivo de sprites). Pacotes salvos no navegador por versões antigas são deduplicados automaticamente no próximo carregamento.
 
 Uma importação web mostra uma tela de carregamento em tela cheia desde o momento em que os arquivos são escolhidos até o último pacote ser registrado. Os arquivos são lidos, descompactados e registrados **um por frame**, com no máximo dois pacotes brutos aguardando na memória do wasm; um lote de pacotes grandes não roda mais em um único frame congelado. A mesma tela aparece na inicialização enquanto os pacotes salvos no IndexedDB são restaurados, um de cada vez.
 
 Centenas de personagens são registradas sem decodificar tudo; só o que está sob o cursor é carregado, e um cache LRU limita a memória.
+
+Antes de um personagem entrar na lista, o catálogo confere se cada arquivo que o `.def` cita em `[Files]` existe dentro da própria pasta do personagem (ou na raiz do pacote, ou em `data/`): `sprite`, `anim` e `cns` são obrigatórios. Quem falha na conferência vai para a **quarentena**: fica fora da seleção e o motivo é listado. Arquivos nunca são emprestados da pasta de outro personagem, então um `.def` copiado que aponta para os sprites de outro lutador não carrega esses sprites pelo nome. A conferência é estrutural (presença dos arquivos), rápida o bastante para a varredura de inicialização; um lutador cujos arquivos existem, mas cujas animações referenciam sprites faltando, continua carregando e aparece com os frames faltantes.
+
+Abra **Personagens MUGEN** no menu principal para ver o resumo: quantos personagens carregaram, quantos estão em quarentena e os motivos mais comuns, além de uma galeria de todos os personagens carregados (retrato, nome e autor; `←/→` trocam de página) e a lista da quarentena (`TAB` alterna a visão; `ESC` volta).
 
 ## Cenários
 
@@ -37,7 +41,7 @@ cargo run --release -p ume-engine --example hover_check -- mugen/chars/kfm
 
 | Ferramenta | Mostra |
 |---|---|
-| `mugen_check` | Carrega e simula uma luta sem janela; lista erros de parse, estados inválidos e controladores, triggers e parâmetros não suportados (`--strict` falha neles) |
+| `mugen_check` | Carrega e simula uma luta sem janela; lista erros de parse, estados inválidos e controladores, triggers e parâmetros não suportados (`--strict` falha neles); `--lint` adiciona checagens de fonte: parâmetros duplicados, valores inválidos de `trans`/`postype`/`space`, `persistent` em estados negativos, `[State N]` diferente do `[Statedef]`, linhas inválidas, chaves duplicadas em `[Command]`, ações `.air` duplicadas e vazias (`TRACE=1` lista cada linha) |
 | `sprite_audit` | Sprites ausentes ou em branco referenciados pelo `.air` |
 | `hover_check` | Lutador preso fora do chão (`TRACE=1` mostra as transições) |
 

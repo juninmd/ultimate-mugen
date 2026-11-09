@@ -542,6 +542,26 @@ Oboro views mortal reality as an agonizing, chaotic nightmare filled with suffer
 
 ---
 
+## Shared Toolkit
+
+Every playable fighter ships the same combo-and-ability toolkit on top of its dossier moves, so each one has the depth of a feature-rich MUGEN character:
+
+| Addition | Input | Notes |
+|---|---|---|
+| EX projectile | fireball motion + `x+y` | 250 meter, stronger multi-hit shot |
+| EX anti-air | uppercut motion + `y+b` | 500 meter, longer invulnerability |
+| Overhead | `x+b` | high-guard medium hit |
+| Crouch launcher | crouch + `y` | starts juggles |
+| Dive strike | air `y` | ground-bounces the opponent |
+| Level 3 hyper | super motion + `x+y` | costs the full 3000 meter |
+| Awakened special | fireball motion + `a+b` | only while transformed, three-way spread |
+| Transformation | L3+R3 / awaken | attack and defense boost, unlocks form moves |
+| Slide kick | `F+a` | low launching mixup against the overhead |
+| Escape burst | `x+a+b` | 500 meter, breaks out of hit-stun |
+| Ascended form | second transformation | 2000 meter, unlocks an ascended hyper (`a+b`) |
+
+Ki fighters also carry flight, teleport or super speed (Akio, Daichi, Jin, Kaito, Kaname, Lian, Sylene, Haruki, Shion, Volta), and every fighter has a passive (meter or life regeneration). All of these appear in the pause move list and can be bound to the 1-4 / L1, L2, R1, R2 shortcuts.
+
 ## Inter-Character Relationship Matrix
 
 ```mermaid

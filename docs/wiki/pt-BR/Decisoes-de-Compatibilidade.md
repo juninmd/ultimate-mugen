@@ -28,3 +28,10 @@ Cenários glTF são **rejeitados por decisão**. O loader de cenário detecta o 
 ## Música de tracker
 
 Música `xm`, `it`, `mod` e `s3m` é **rejeitada por decisão** por enquanto. O backend de áudio decodifica ogg/vorbis, mp3, flac e wav; uma faixa não suportada gera aviso e a luta continua com a música embutida em vez de ficar muda.
+
+## Desvios de física intencionais
+
+| Comportamento | M.U.G.E.N | Ultimate MUGEN | Motivo |
+|---|---|---|---|
+| Estado de hit aéreo com `physics = N` | Sem gravidade: um lutador atingido por golpes repetidos com `yvel = 0` fica suspenso no ar | O lutador cai, como se o estado tivesse gravidade | Impede que lutadores flutuem enquanto um projétil continua acertando. Estados de ataque com `physics = N` (golpes de voo e pairar) mantêm a altura programada. |
+

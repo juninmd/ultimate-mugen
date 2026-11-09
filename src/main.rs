@@ -48,6 +48,7 @@ mod web_sprites;
 #[cfg(not(target_arch = "wasm32"))]
 mod scan_report;
 mod vfx;
+mod voice;
 #[cfg(test)]
 mod vfx_camera_tests;
 

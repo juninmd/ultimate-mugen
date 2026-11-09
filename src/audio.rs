@@ -7,8 +7,7 @@ use std::collections::HashMap;
 use std::f32::consts::PI;
 use ume_engine::matchs::BgmAction;
 
-mod score;
-mod wav;
+mod score; mod wav; mod voice;
 use score::music;
 use wav::wav;
 

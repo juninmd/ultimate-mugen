@@ -13,7 +13,7 @@ pub(super) fn charge_code(anim_no: &HashMap<String, i32>) -> AbilityCode {
     let anim = ["charge", "powerUp"].iter().find_map(|name| anim_no.get(*name).copied()).unwrap_or(POWER_UP_ANIM);
     let mut code = AbilityCode::default();
     code.commands.push(parse_command(CHARGE_COMMAND, "/s", 1, 1));
-    code.movelist.push(MoveInfo { name: "Charge Energy".into(), input: "hold Start".into(), command: CHARGE_COMMAND.into(), cost: 0.0, drain: false, forms: u32::MAX });
+    code.movelist.push(MoveInfo { name: "Charge Energy".into(), input: "hold Start".into(), command: CHARGE_COMMAND.into(), cost: 0.0, drain: false, forms: u32::MAX, state: -1 });
     code.minus1 += &format!("[State -1, charge]\ntype = ChangeState\nvalue = {CHARGE_STATE}\ntriggerall = command = \"{CHARGE_COMMAND}\"\ntriggerall = power < powermax\ntrigger1 = ctrl && statetype = S\n\n");
     code.states += &format!(
         "[Statedef {CHARGE_STATE}]\ntype = S\nmovetype = I\nphysics = S\nanim = {anim}\nctrl = 0\nvelset = 0, 0\nsprpriority = 1\n\n\

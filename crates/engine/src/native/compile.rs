@@ -168,7 +168,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         cdef.pause_buffer = if m.kind == "super" { 8 } else if m.kind == "special" || m.kind == "finisher" { 6 } else if simple_btn { 0 } else { 4 };
         commands.push(cdef);
         let cost = m.cost.unwrap_or(if m.kind == "super" { 1000.0 } else { 0.0 });
-        movelist.push(MoveInfo { name: m.name.clone(), input: m.input.clone(), command: cname.clone(), cost, drain: false, forms: forms_mask });
+        movelist.push(MoveInfo { name: m.name.clone(), input: m.input.clone(), command: cname.clone(), cost, drain: false, forms: forms_mask, state: sid });
         let mut simple_cmd = String::new();
         if let Some(sp) = &m.simple {
             let sc = format!("simple_{sp}_{}", m.id);

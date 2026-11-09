@@ -4239,7 +4239,7 @@
           {
             "id": "colapso_primordial",
             "name": "Colapso Primordial",
-            "input": "~D, DB, B, y",
+            "input": "~D, DB, B, b",
             "kind": "special",
             "anim": "espelho",
             "teleport": 3,

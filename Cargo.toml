@@ -51,6 +51,29 @@ opt-level = 3
 [profile.release]
 opt-level = 3
 lto = "thin"
+[profile.web]
+inherits = "release"
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+[profile.web.package.ume-engine]
+opt-level = 3
+[profile.web.package.ume-formats]
+opt-level = 3
+[profile.web.package.ume-render]
+opt-level = 3
+[profile.web.package.tiny-skia]
+opt-level = 3
+[profile.web.package.tiny-skia-path]
+opt-level = 3
+[profile.web.package.miniz_oxide]
+opt-level = 3
+[profile.web.package.png]
+opt-level = 3
+[profile.web.package.fdeflate]
+opt-level = 3
+[profile.web.package.simd-adler32]
+opt-level = 3
 
 [package.metadata.bundle]
 name = "Ultimate MUGEN"

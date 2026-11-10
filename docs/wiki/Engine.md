@@ -51,6 +51,7 @@ Put the decoder in `crates/formats/src/<format>.rs`, export it in `lib.rs` and t
 | `cargo test -p ume-formats` | Decoders |
 | `cargo clippy --workspace -- -D warnings` | Lint |
 | `node scripts/web-smoke.js web/dist` | Web build in Chromium |
+| `node scripts/web-match-smoke.js web/dist` | Full match in Chromium: inputs, rounds, no freeze, results |
 
 ## Code rules
 

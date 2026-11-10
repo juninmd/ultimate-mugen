@@ -34,6 +34,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Gerador de golpes](Gerador-de-Golpes.md) | Criadores | TOML para AIR, CNS, CMD e Statedef -1 |
 | [Criar cenários](Cenarios.md) | Criadores | Cenário M.U.G.E.N `.def` e cenário nativo |
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
+| [Smoke da partida web](Smoke-Partida-Web.md) | Desenvolvedores | Teste de CI que joga partidas completas no navegador e pega travamentos |
 | [Layout de arquivos](Layout-de-Arquivos.md) | Desenvolvedores | A regra de 250 linhas, uma responsabilidade por arquivo, dividir arquivos, PRs paralelos |
 | [Desempenho](Desempenho.md) | Desenvolvedores | Carga paralela, ritmo de quadros, benchmarks |
 | [Engenharia reversa do port para navegador](Engenharia-Reversa-Ikemen-Web.md) | Desenvolvedores | Como uma build de M.U.G.E.N com 78 lutadores roda no navegador, e o que copiamos dela |

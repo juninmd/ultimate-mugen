@@ -37,6 +37,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Ikemen extensions](Ikemen-Extensions.md) | Creators | Ikemen GO controllers and triggers the engine accepts |
 | [Creating stages](Stages.md) | Creators | M.U.G.E.N `.def` stages and native stages |
 | [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
+| [Web match smoke](Web-Match-Smoke.md) | Developers | CI test that plays full matches in the browser and catches freezes |
 | [File layout](File-Layout.md) | Developers | The 250-line rule, one responsibility per file, splitting a file, parallel PRs |
 | [Performance](Performance.md) | Developers | Parallel loading, frame pacing, benchmarks |
 | [Reverse engineering the browser port](Ikemen-Web-Reverse-Engineering.md) | Developers | How a 78-fighter M.U.G.E.N build runs in a browser, and what we took from it |

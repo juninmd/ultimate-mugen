@@ -54,6 +54,9 @@ jobs:
       - run: node scripts/web-story-smoke.js web/dist
         env:
           WEB_SMOKE_SHOTS: web-smoke-shots
+      - run: node scripts/web-match-smoke.js web/dist
+        env:
+          WEB_SMOKE_SHOTS: web-smoke-shots
       - uses: actions/upload-artifact@v7
         if: failure()
         with:

@@ -33,14 +33,8 @@ impl App {
         if let Some(s) = CACHE.with(|c| c.borrow().get(&key).copied()) {
             return s;
         }
-        let stats = match self.reg.chars[i].load_preview(1) {
-            Ok(d) => stats_from(
-                d.c("data.attack", 100.0),
-                d.c("data.life", 1000.0),
-                d.c("velocity.walk.fwd.x", 2.4),
-            ),
-            Err(_) => CharStats::default(),
-        };
+        let (attack, life, speed) = self.reg.chars[i].stats();
+        let stats = stats_from(attack, life, speed);
         CACHE.with(|c| c.borrow_mut().insert(key, stats));
         stats
     }

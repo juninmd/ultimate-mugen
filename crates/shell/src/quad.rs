@@ -186,28 +186,10 @@ pub fn draw_circle_lines(x: f32, y: f32, r: f32, thickness: f32, c: Color) { wit
 pub fn draw_triangle(a: Vec2, b: Vec2, c: Vec2, color: Color) { with(|f| f.canvas.triangle(a.into(), b.into(), c.into(), color.render())) }
 
 pub fn draw_poly(x: f32, y: f32, sides: u8, radius: f32, rotation: f32, c: Color) {
-    draw_ellipse_poly(x, y, radius, radius, rotation.to_radians(), sides.max(3) as u32, c)
+    draw_ellipse_segments(x, y, radius, radius, rotation.to_radians(), sides.max(3) as u32, c)
 }
 
-pub fn draw_ellipse(x: f32, y: f32, w: f32, h: f32, rotation: f32, c: Color) { draw_ellipse_poly(x, y, w, h, rotation.to_radians(), 32, c) }
-
-fn draw_ellipse_poly(x: f32, y: f32, rx: f32, ry: f32, rot: f32, n: u32, c: Color) {
-    let (s, co) = rot.sin_cos();
-    let mut pts = Vec::with_capacity(n as usize + 1);
-    pts.push([x, y]);
-    for i in 0..n {
-        let t = i as f32 / n as f32 * std::f32::consts::TAU;
-        let (px, py) = (t.cos() * rx, t.sin() * ry);
-        pts.push([x + px * co - py * s, y + px * s + py * co]);
-    }
-    let mut idx = Vec::with_capacity(n as usize * 3);
-    for i in 0..n {
-        idx.push(0);
-        idx.push(1 + i);
-        idx.push(1 + (i + 1) % n);
-    }
-    with(|f| f.canvas.mesh(&pts, &[c.render()], &idx));
-}
+pub fn draw_ellipse(x: f32, y: f32, w: f32, h: f32, rotation: f32, c: Color) { draw_ellipse_segments(x, y, w, h, rotation.to_radians(), 32, c) }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FilterMode { Linear, Nearest }
@@ -340,6 +322,8 @@ impl IndexedTexture {
 }
 
 mod palette;
+mod shapes;
+pub use shapes::*;
 
 pub use palette::Palette;
 

@@ -449,3 +449,16 @@ etain_mut.
 ## Efeitos em sprite-sheet
 
 `src/vfx/sheet.rs` toca sheets de efeito CC0 de `assets/fx/` (embutidas com `include_bytes!`, decodificadas e enviadas à GPU no primeiro desenho). Uma faísca de impacto toca em todo golpe não bloqueado; uma explosão toca em golpes de 150 de dano ou mais e no KO. No máximo 12 sprites de sheet ficam vivos, com blend aditivo, e são limpos ao iniciar o round. Sheets pixel-art do PVFX Foundry (filtro nearest, blend alpha) adicionam soco em golpes leves, crítico em golpes pesados, onda de choque e impacto no chão em golpes de 150+ de dano no chão, defesa em golpes bloqueados e poeira de dash. Raio e estática tocam nos supers, pilar de fogo nas transformações, bomba de fumaça no KO e explosão de gelo em defesas de golpes pesados. Sheets e créditos estão em `assets/fx/CREDITS.md`.
+
+## Rasterização paralela das variantes de sprite
+
+Compilar um lutador UMF rasterizava os frames base em paralelo e depois recoloria cada variante de forma e de despertar de cada frame em uma única thread, o que era 80 a 90% da carga. `native/frame_raster.rs` agora renderiza cada frame junto com suas variantes no mesmo pool de workers (`min(núcleos, 8)`, uma thread em `wasm32`), e as paletas de forma são montadas uma vez por lutador em vez de uma vez por frame.
+
+`cargo run --release -p ume-engine --example load_bench` na máquina de nuvem de 4 núcleos, três execuções de cada:
+
+| | Elenco inteiro (21 lutadores) | Oboro | Kaito | Suzume |
+|---|---|---|---|---|
+| Antes | 11,40 / 11,76 / 11,79 s | 1674 ms | 1250 ms | 900 ms |
+| Depois | 4,70 / 4,46 / 4,54 s | 551 ms | 405 ms | 319 ms |
+
+A saída não muda: um checksum de todos os sprites (pixels, tamanho, eixo, escala) e de todos os frames de animação dos 21 lutadores em duas paletas é idêntico antes e depois. Lutadores sem formas (`npc_*`) não mudam, pois não têm variantes para renderizar.

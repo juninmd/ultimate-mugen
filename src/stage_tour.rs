@@ -96,7 +96,7 @@ pub async fn run(app: &mut App, dir: &str) {
         )
         .await;
         if let Some(frames) = std::env::var("UME_GIF_FRAMES").ok().and_then(|v| v.parse::<usize>().ok()) {
-            app.session.as_mut().unwrap().pilots.iter_mut().for_each(|p| *p = crate::session::Pilot::Dummy);
+            app.session.as_mut().unwrap().pilots.iter_mut().for_each(|p| *p = crate::session::Pilot::Dummy(Default::default()));
             for k in 0..frames {
                 {
                     let App { session, c, audio, .. } = app;

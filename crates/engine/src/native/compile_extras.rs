@@ -1,4 +1,4 @@
-use super::{render_frame, CharDef, HashMap, HitSpec, NativeChar, NativeFrame, NativeMove, Sprite, Value};
+use super::{CharDef, HitSpec, NativeChar, NativeMove, Value};
 
 pub(super) struct Lv { pub stop: i32, pub stun: i32, pub kb: f32, pub anim: &'static str }
 pub(super) fn level(l: Option<&str>) -> Lv {
@@ -98,14 +98,6 @@ pub(super) fn awakening_palette(nc: &NativeChar, palette: Option<&Value>) -> Opt
     colors.extend(awake.get("colors").unwrap_or(awake).as_object()?.clone());
     colors.insert("_awakening".into(), Value::Bool(true));
     Some(Value::Object(colors))
-}
-
-pub(super) fn insert_awakened(sprites: &mut HashMap<(i32, i32), Sprite>, nc: &NativeChar, fr: &NativeFrame, index: i32, with_images: bool, palette: Option<&Value>) {
-    if !with_images || fr.effect.is_some() { return; }
-    if let Some(palette) = palette {
-        let awake = render_frame(nc, fr, true, Some(palette));
-        sprites.insert((2, index), Sprite { image: awake.image, width: awake.width, height: awake.height, axis_x: awake.axis_x, axis_y: awake.axis_y, scale: awake.scale });
-    }
 }
 
 pub(super) fn insert_voices(d: &mut CharDef, nc: &NativeChar) {

@@ -12,6 +12,7 @@ pub enum Action {
     Continue,
     Restart,
     Change,
+    Dummy,
     Hitboxes,
     Settings,
     MainMenu,
@@ -29,8 +30,9 @@ impl Tab {
         Tab::ALL[(self.index() as i32 + delta).rem_euclid(n) as usize]
     }
 
-    pub fn actions(self) -> &'static [Action] {
+    pub fn actions(self, training: bool) -> &'static [Action] {
         match self {
+            Tab::Game if training => &[Action::Continue, Action::Restart, Action::Change, Action::Dummy],
             Tab::Game => &[Action::Continue, Action::Restart, Action::Change],
             Tab::Moves => &[],
             Tab::System => &[Action::Hitboxes, Action::Settings, Action::MainMenu],
@@ -131,8 +133,9 @@ mod tests {
 
     #[test]
     fn every_action_is_reachable_once() {
-        let all: Vec<Action> = Tab::ALL.iter().flat_map(|t| t.actions().iter().copied()).collect();
-        assert_eq!(all.len(), 6);
+        let all: Vec<Action> = Tab::ALL.iter().flat_map(|t| t.actions(true).iter().copied()).collect();
+        assert_eq!(all.len(), 7);
+        assert!(!Tab::Game.actions(false).contains(&Action::Dummy));
         for a in &all {
             assert_eq!(all.iter().filter(|b| *b == a).count(), 1);
         }

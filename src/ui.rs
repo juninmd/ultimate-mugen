@@ -89,21 +89,7 @@ pub fn alpha(mut c: Color, a: f32) -> Color {
     c.a = a;
     c
 }
-/// Soft radial glow (concentric translucent discs).
-pub fn glow(x: f32, y: f32, r: f32, c: Color) {
-    let n = 14;
-    for i in 0..n {
-        let t = 1.0 - i as f32 / n as f32;
-        draw_poly(
-            x,
-            y,
-            64,
-            r * t,
-            0.0,
-            Color::new(c.r, c.g, c.b, c.a / n as f32 * 1.4 * (1.0 - t * 0.4)),
-        );
-    }
-}
+pub use crate::glow::glow;
 
 impl Ui {
     pub fn new() -> Self {
@@ -442,8 +428,7 @@ impl Ui {
     }
     pub fn quad(&self, p: [Vec2; 4], c: Color) {
         let v = p.map(|q| vec2(self.x(q.x), self.y(q.y)));
-        draw_triangle(v[0], v[1], v[2], c);
-        draw_triangle(v[0], v[2], v[3], c);
+        draw_convex(&v, c);
     }
     pub fn background(&self) {
         let (w, h) = (screen_width(), screen_height());

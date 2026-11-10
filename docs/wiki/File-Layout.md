@@ -58,6 +58,24 @@ crates/engine/src/native/
 - Move a type with the code that owns it. Keep the old path working with a re-export (`pub use collision::ResolvedHit;`) so a split does not become a rename across the whole tree.
 - The app mirrors the same idea: `src/app.rs` keeps the frame and state, `src/app/<screen>.rs` owns one screen each.
 
+### `src/app/` screen map
+
+`src/app.rs` keeps the `App` state, the per-frame dispatcher (`App::frame`) and the screens not split yet (character select, VS loading). Every other screen is one file, so a change to one screen never touches another:
+
+| File | Owns |
+|---|---|
+| `mode.rs`, `screen.rs`, `team.rs` | `Mode`, `Screen` and `Team` types (re-exported from `app`) |
+| `title_screen.rs`, `menu_screen.rs`, `menu_focus.rs` | Title, main menu, eased menu focus |
+| `stage_select.rs` | Stage grid |
+| `load_plan.rs`, `vs_screen.rs` | Who loads with which palette, VS screen, `start_fight` |
+| `fight_screen.rs` | The fight frame and team rotation |
+| `results_screen.rs` | Results screen |
+| `netplay_session.rs` | Netplay start, overlay and replay capture |
+| `fighter_draw.rs` | Fighter preview drawing shared by menus |
+| `pause/`, `arcade/`, `story/`, `cutscene/` | Features that already had a folder |
+
+A screen file is `use super::*;` plus one `impl App` block; its entry method is `pub(super)`. Add a screen by creating the file and wiring it with one `mod` line and one `match` arm in `App::frame`.
+
 ## Splitting an existing file
 
 1. List the responsibilities in the file. If the list is not obvious, read the callers first; the file is not understood yet.
@@ -82,7 +100,7 @@ These files hold the most unrelated responsibilities and are the current source 
 |---|---|---|
 | `crates/engine/src/native/rig.rs` | 2265 | `rig/skeleton.rs`, `rig/pose.rs`, `rig/palette.rs` next to the existing `body.rs`, `detail.rs`, `face.rs` |
 | `crates/engine/src/matchs.rs` | 1751 | `matchs/round.rs`, `matchs/collision.rs`, `matchs/camera.rs`, `matchs/tick.rs` |
-| `src/app.rs` | 1486 | `src/app/<screen>.rs`, one screen each, frame and state left in `app.rs` |
+| `src/app.rs` | 2238 | Nine screens already live in `src/app/`; next are `select` (830 lines, split by grid, side panel and input) and `load_step_inner` |
 | `src/stages.rs` | 1069 | `stages/load.rs`, `stages/layers.rs`, `stages/motion.rs` |
 | `src/stagefx.rs` | 704 | `stagefx/scenes.rs` already exists; extract `stagefx/particles.rs`, `stagefx/weather.rs` |
 | `src/market.rs` | 700 | `market/install.rs`, `market/listing.rs`; the crate keeps the logic |

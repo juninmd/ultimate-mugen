@@ -58,6 +58,24 @@ crates/engine/src/native/
 - Leve o tipo junto do código que o possui. Mantenha o caminho antigo funcionando com um reexport (`pub use collision::ResolvedHit;`) para a divisão não virar um rename na árvore inteira.
 - A aplicação segue a mesma ideia: `src/app.rs` mantém o frame e o estado, `src/app/<tela>.rs` é dona de uma tela cada.
 
+### Mapa de telas em `src/app/`
+
+`src/app.rs` guarda o estado de `App`, o despachante por frame (`App::frame`) e as telas ainda não divididas (seleção de personagem, carregamento do VS). Cada outra tela é um arquivo, então mudar uma tela nunca toca em outra:
+
+| Arquivo | Responsável por |
+|---|---|
+| `mode.rs`, `screen.rs`, `team.rs` | Tipos `Mode`, `Screen` e `Team` (reexportados por `app`) |
+| `title_screen.rs`, `menu_screen.rs`, `menu_focus.rs` | Título, menu principal, foco suavizado do menu |
+| `stage_select.rs` | Grade de cenários |
+| `load_plan.rs`, `vs_screen.rs` | Quem carrega com qual paleta, tela de VS, `start_fight` |
+| `fight_screen.rs` | Frame da luta e rotação de equipe |
+| `results_screen.rs` | Tela de resultados |
+| `netplay_session.rs` | Início do netplay, overlay e captura de replay |
+| `fighter_draw.rs` | Desenho do lutador compartilhado pelos menus |
+| `pause/`, `arcade/`, `story/`, `cutscene/` | Recursos que já tinham pasta |
+
+Um arquivo de tela é `use super::*;` mais um bloco `impl App`; o método de entrada é `pub(super)`. Para adicionar uma tela, crie o arquivo e ligue com uma linha `mod` e um braço do `match` em `App::frame`.
+
 ## Dividir um arquivo existente
 
 1. Liste as responsabilidades do arquivo. Se a lista não é óbvia, leia os chamadores primeiro; o arquivo ainda não foi entendido.
@@ -82,7 +100,7 @@ Estes arquivos concentram as responsabilidades mais independentes e são a orige
 |---|---|---|
 | `crates/engine/src/native/rig.rs` | 2265 | `rig/skeleton.rs`, `rig/pose.rs`, `rig/palette.rs` ao lado de `body.rs`, `detail.rs`, `face.rs` |
 | `crates/engine/src/matchs.rs` | 1751 | `matchs/round.rs`, `matchs/collision.rs`, `matchs/camera.rs`, `matchs/tick.rs` |
-| `src/app.rs` | 1486 | `src/app/<tela>.rs`, uma tela cada, frame e estado ficam em `app.rs` |
+| `src/app.rs` | 2238 | Nove telas já vivem em `src/app/`; as próximas são `select` (830 linhas, dividir em grade, painel lateral e entrada) e `load_step_inner` |
 | `src/stages.rs` | 1069 | `stages/load.rs`, `stages/layers.rs`, `stages/motion.rs` |
 | `src/stagefx.rs` | 704 | `stagefx/scenes.rs` já existe; extraia `stagefx/particles.rs`, `stagefx/weather.rs` |
 | `src/market.rs` | 700 | `market/install.rs`, `market/listing.rs`; a crate mantém a lógica |

@@ -3,6 +3,8 @@ use crate::batch::{Batch, Blend, Quad, Vertex};
 use crate::gpu::Renderer;
 use crate::RGBA_SPRITE;
 
+mod shape;
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Color(pub [f32; 4]);
 
@@ -18,6 +20,8 @@ pub struct Canvas {
     atlas: [u32; 2],
     white: [f32; 2],
     circle_segments: u32,
+    shape_vertices: Vec<Vertex>,
+    shape_indices: Vec<u32>,
 }
 
 impl Canvas {
@@ -29,7 +33,7 @@ impl Canvas {
 
     pub fn with_white(white: Rect, atlas: [u32; 2]) -> Canvas {
         let white = [(white.x as f32 + 0.5) / atlas[0] as f32, (white.y as f32 + 0.5) / atlas[1] as f32];
-        Canvas { batch: Batch::new(), blend: Blend::Alpha, atlas, white, circle_segments: 32 }
+        Canvas { batch: Batch::new(), blend: Blend::Alpha, atlas, white, circle_segments: 32, shape_vertices: Vec::new(), shape_indices: Vec::new() }
     }
 
     pub fn clear(&mut self) { self.batch.clear(); }
@@ -54,41 +58,6 @@ impl Canvas {
         self.rect(x, y + h - t, w, t, color);
         self.rect(x, y + t, t, h - 2.0 * t, color);
         self.rect(x + w - t, y + t, t, h - 2.0 * t, color);
-    }
-
-    pub fn line(&mut self, a: [f32; 2], b: [f32; 2], thickness: f32, color: Color) {
-        let (dx, dy) = (b[0] - a[0], b[1] - a[1]);
-        let len = (dx * dx + dy * dy).sqrt();
-        if len == 0.0 { return; }
-        let (nx, ny) = (-dy / len * thickness * 0.5, dx / len * thickness * 0.5);
-        let vs = [self.v(a[0] + nx, a[1] + ny, color), self.v(b[0] + nx, b[1] + ny, color), self.v(b[0] - nx, b[1] - ny, color), self.v(a[0] - nx, a[1] - ny, color)];
-        self.batch.push_tris(&vs, &[0, 1, 2, 0, 2, 3], self.blend);
-    }
-
-    pub fn circle(&mut self, center: [f32; 2], radius: f32, color: Color) {
-        let n = self.circle_segments;
-        let mut vs = Vec::with_capacity(n as usize + 1);
-        vs.push(self.v(center[0], center[1], color));
-        for i in 0..n {
-            let t = i as f32 / n as f32 * std::f32::consts::TAU;
-            vs.push(self.v(center[0] + t.cos() * radius, center[1] + t.sin() * radius, color));
-        }
-        let idx: Vec<u32> = (0..n).flat_map(|i| [0, 1 + i, 1 + (i + 1) % n]).collect();
-        self.batch.push_tris(&vs, &idx, self.blend);
-    }
-
-    pub fn circle_lines(&mut self, center: [f32; 2], radius: f32, thickness: f32, color: Color) {
-        let n = self.circle_segments;
-        let (ro, ri) = (radius + thickness * 0.5, (radius - thickness * 0.5).max(0.0));
-        let mut vs = Vec::with_capacity(n as usize * 2);
-        for i in 0..n {
-            let t = i as f32 / n as f32 * std::f32::consts::TAU;
-            let (c, s) = (t.cos(), t.sin());
-            vs.push(self.v(center[0] + c * ro, center[1] + s * ro, color));
-            vs.push(self.v(center[0] + c * ri, center[1] + s * ri, color));
-        }
-        let idx: Vec<u32> = (0..n).flat_map(|i| { let (a, b) = (i * 2, ((i + 1) % n) * 2); [a, b, a + 1, b, b + 1, a + 1] }).collect();
-        self.batch.push_tris(&vs, &idx, self.blend);
     }
 
     pub fn mesh(&mut self, points: &[[f32; 2]], colors: &[Color], indices: &[u32]) {
@@ -118,9 +87,6 @@ mod tests {
         assert_eq!(c.batch.vertices[6].pos, [10.0, -1.0]);
         c.line([1.0, 1.0], [1.0, 1.0], 2.0, Color::BLACK);
         assert_eq!(c.batch.vertices.len(), 8);
-        c.circle([0.0, 0.0], 4.0, Color::WHITE);
-        assert_eq!(c.batch.vertices.len(), 8 + 33);
-        assert_eq!(c.batch.indices.len(), 12 + 96);
         assert_eq!(c.batch.calls.len(), 1);
         c.blend = Blend::Add;
         c.triangle([0.0, 0.0], [1.0, 0.0], [0.0, 1.0], Color::WHITE);

@@ -5,7 +5,7 @@ use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
 #[path = "session/kaito.rs"] mod kaito;
 #[path = "session/tension.rs"] mod tension;
-mod shortcut;
+mod shortcut; pub mod dummy;
 use crate::stages::Stage;
 use crate::ui::Ui;
 use crate::vfx::Vfx;
@@ -19,7 +19,7 @@ use ume_engine::matchs::{Event, Match};
 pub enum Pilot {
     Human(usize),
     Cpu(Ai),
-    Dummy,
+    Dummy(dummy::DummyPlan),
     Replay(Vec<u32>, usize),
 }
 #[derive(Clone, Default)]
@@ -248,7 +248,7 @@ impl Session {
             }
             let mut b = match &mut *p {
                 Pilot::Cpu(ai) => ai.poll(&self.m, fi),
-                Pilot::Dummy => 0,
+                Pilot::Dummy(plan) => plan.bits(&self.m, fi),
                 Pilot::Replay(v, i) => {
                     let b = v.get(*i).copied().unwrap_or(0);
                     *i += 1;

@@ -90,6 +90,12 @@ catalog! {
     "pause.title" => "PAUSED", "PAUSA";
     "pause.continue" => "Continue", "Continuar";
     "pause.hitboxes" => "Hitboxes", "Hitboxes";
+    "pause.dummy" => "Dummy behaviour", "Comportamento do boneco";
+    "dummy.stand" => "STAND", "PARADO";
+    "dummy.crouch" => "CROUCH", "AGACHADO";
+    "dummy.jump" => "JUMP", "PULANDO";
+    "dummy.guard" => "GUARD", "DEFENDENDO";
+    "dummy.crouch_guard" => "LOW GUARD", "DEFESA BAIXA";
     "pause.restart" => "Restart fight", "Reiniciar luta";
     "pause.change" => "Change fighters", "Trocar personagens";
     "pause.settings" => "Settings", "Configurações";

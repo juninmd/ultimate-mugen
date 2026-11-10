@@ -25,12 +25,13 @@
 - Vertices are 40 bytes (positions and UVs as `f32`, PalFx multipliers packed as `unorm16`); indices switch to 16-bit while the frame stays under 65536 vertices, so a sprite quad costs 172 bytes instead of 248.
 - Atlas side is 4096 on desktop and 2048 on Android/iOS (80 MB versus 20 MB of VRAM); `UME_ATLAS=<side>` overrides it and the device limit always wins.
 - Draw calls are split by blend state (alpha, add, sub) and scissor; pipeline switches are the main CPU cost of the batch loop.
+- Vector shapes (`draw_convex`, circles, rings, ellipses, diagonal lines) carry a one-pixel alpha fringe built in `crates/render/src/canvas/shape.rs`; axis-aligned edges, `draw_triangle` and `draw_mesh` stay hard so mesh pieces never show seams. Draw a whole convex outline with `draw_convex` instead of two triangles.
 - Post-processing (bright, separable blur, copy, composite) runs only when effects are enabled and reuses its targets; HUD glass reuses a quarter-resolution blurred copy.
 - Adapter selection prefers the high-performance GPU and honours `WGPU_POWER_PREF`; vsync and frame cap are runtime toggles (`PresentMode::AutoVsync`/`AutoNoVsync`).
 
 ## Concurrency
 - The simulation is single-threaded on purpose: `Match` stays `Clone` with a stable checksum so ggrs rollback and replays keep working. Never parallelize `Match::tick`.
-- Loading and decoding fan out through `ume_formats::par::map` (`std::thread::scope`, work-stealing chunks, `min(cores, 8)` workers); UMF frame raster uses the same rule in `native/compile.rs`.
+- Loading and decoding fan out through `ume_formats::par::map` (`std::thread::scope`, work-stealing chunks, `min(cores, 8)` workers); UMF frame raster uses the same rule in `native/frame_raster.rs`, which renders each frame and its form/awakening recolors in the same worker.
 - Long jobs run on named threads: `char-load`, `char-preview`, `char-portrait`, `sfx-decode`, `music-synth`, `zip-import`, marketplace fetch.
 - The render batch is built on the main thread; GPU uploads are budgeted by `Gfx::prefetch_step` (4 MiB per frame, up to 50% atlas).
 - Audio: `symphonia` decodes, `quad-snd` plays; decode runs off the main thread.
@@ -54,6 +55,7 @@
 
 ## File Size and Layout
 - Hard ceiling: **250 lines per source file**, checked by `node scripts/file-size.mjs` (Rust, JS, TS, CSS, HTML, WGSL). Content and docs (UMF JSON, `.cns`, `.air`, `.def`, atlas, `.md`) are out.
+- `src/app.rs` holds `App` state and the frame dispatcher; each screen is `src/app/<screen>.rs` (`use super::*;` plus one `impl App`, entry method `pub(super)`). The screen map is in `docs/wiki/File-Layout.md`.
 - One file, one responsibility: the file name states what it does, the folder names the feature, and `mod.rs` is a facade with declarations and re-exports only. Rules and examples: `docs/wiki/File-Layout.md`.
 - Split by axis of change, not by size: a feature becomes `feature.rs` (shared types and entry points) plus `feature/<concern>.rs` (body, collision, palette, screen...), so two PRs working on the same feature touch different files.
 - Existing files over the ceiling are grandfathered in `scripts/file-size-baseline.json`. They may not grow; split them and run `--update` in the same PR. Never raise a number in the baseline.

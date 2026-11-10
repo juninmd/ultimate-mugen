@@ -56,7 +56,7 @@ impl App {
     }
 
     fn pause_actions_input(&mut self, lay: &Layout) -> Option<Outcome> {
-        let actions = self.pause.tab.actions();
+        let actions = self.pause.tab.actions(self.mode == super::super::Mode::Training);
         let n = actions.len();
         if self.c.pressed(nav::DOWN) {
             self.pause.cur = (self.pause.cur + 1) % n;
@@ -66,7 +66,7 @@ impl App {
         }
         let mut ok = self.c.pressed(nav::OK);
         for i in 0..n {
-            let r = lay.action_row(i);
+            let r = lay.action_row(i, actions.len());
             if self.clicked_rect(r.x, r.y, r.w, r.h) {
                 self.pause.cur = i;
                 ok = true;

@@ -117,7 +117,7 @@ impl App {
         let _ = l;
         for (i, act) in actions.iter().enumerate() {
             let on = i == self.pause.cur;
-            let r = lay.action_row(i);
+            let r = lay.action_row(i, actions.len());
             let (x, y, row_h) = (r.x, r.y, r.h);
             let hover = self.hover_rect(r.x, r.y, r.w, r.h);
             let (top, bot, edge) = if on {
@@ -138,6 +138,10 @@ impl App {
                 let pr = super::layout::Rect::new(r.right() - 90.0, mid - 15.0 * f, 66.0, 30.0 * f);
                 pill(ui, pr, 7.0, fade(Color::new(0.0, 0.0, 0.0, 0.35), a), fade(Color::new(0.0, 0.0, 0.0, 0.2), a), Some(fade(col, 0.8 * a)));
                 ui.text(txt, pr.x + pr.w / 2.0, mid + 6.0 * f, 17.0 * f, fade(col, a), Align::Center, true);
+            } else if *act == Action::Dummy {
+                let pr = super::layout::Rect::new(r.right() - 214.0, mid - 15.0 * f, 190.0, 30.0 * f);
+                pill(ui, pr, 7.0, fade(Color::new(0.0, 0.0, 0.0, 0.35), a), fade(Color::new(0.0, 0.0, 0.0, 0.2), a), Some(fade(hex("#ffcc33"), 0.8 * a)));
+                ui.text(crate::i18n::t(self.dummy_plan.label_key()), pr.x + pr.w / 2.0, mid + 6.0 * f, 17.0 * f, fade(hex("#ffcc33"), a), Align::Center, true);
             } else {
                 ui.arrow(r.right() - 36.0, mid, 20.0 * f, (1.0, 0.0), fade(if on { WHITE } else { hex(MUTED) }, a));
             }
@@ -150,6 +154,7 @@ impl App {
             Action::Continue => (t("pause.continue").to_string(), tr("Voltar para a luta", "Back to the fight")),
             Action::Restart => (t("pause.restart").to_string(), tr("Recomeca a partida do zero", "Start the match over")),
             Action::Change => (t("pause.change").to_string(), tr("Volta para a selecao de personagens", "Back to character select")),
+            Action::Dummy => (t("pause.dummy").to_string(), tr("Parado, agachado, pulando ou defendendo", "Standing, crouching, jumping or guarding")),
             Action::Hitboxes => (t("pause.hitboxes").to_string(), tr("Mostra caixas de dano e colisao", "Show hit and hurt boxes")),
             Action::Settings => (t("pause.settings").to_string(), tr("Video, audio e controles", "Video, audio and controls")),
             Action::MainMenu => (t("pause.menu").to_string(), tr("Sai da luta atual", "Leave the current match")),

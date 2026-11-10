@@ -100,7 +100,7 @@ pub async fn run(app: &mut App, dir: &str) {
             let App { session, c, audio, .. } = app;
             let s = session.as_mut().unwrap();
             for pilot in &mut s.pilots {
-                *pilot = crate::session::Pilot::Dummy;
+                *pilot = crate::session::Pilot::Dummy(Default::default());
             }
             s.r.debug = std::env::var("UME_BOXES").is_ok();
             for _ in 0..WARM_UP_TICKS {

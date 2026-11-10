@@ -33,6 +33,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Dev tools](Dev-Tools.md) | Contributors | Rust build and audit tools (`ume-tools`) |
 | [Sprite toolkit](Sprite-Toolkit.md) | Creators | Slice sheets, palette variants, auto collision boxes |
 | [Move generator](Move-Generator.md) | Creators | TOML to AIR, CNS, CMD and Statedef -1 |
+| [Combo strings](Combo-Strings.md) | Creators | Signature three-part strings per native fighter |
 | [ZSS scripts](ZSS.md) | Creators | Ikemen ZSS state scripts |
 | [Ikemen extensions](Ikemen-Extensions.md) | Creators | Ikemen GO controllers and triggers the engine accepts |
 | [Creating stages](Stages.md) | Creators | M.U.G.E.N `.def` stages and native stages |

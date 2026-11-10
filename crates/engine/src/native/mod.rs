@@ -12,6 +12,7 @@ mod throw;
 pub mod forms;
 pub mod lookup;
 pub mod compile;
+mod frame_raster;
 pub mod rig;
 mod pixel;
 mod air_variant;

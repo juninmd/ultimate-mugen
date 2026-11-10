@@ -38,3 +38,15 @@ Presentation-only effects live in `src/vfx.rs` and `src/vfx/`; the simulation ne
 | Impact refraction | SF6 and Strive hit shockwaves | `distortion.shockwave` |
 
 Not done yet: HDR scene target (Godot/Bevy glow on float textures; the scene is 8-bit here), multi-mip bloom and anamorphic streaks, and normal-mapped 2D lights.
+
+## Antialiased shapes
+
+Vector shapes drawn through `ume_shell::quad` carry a one-pixel alpha fringe built in the vertex data (`crates/render/src/canvas/shape.rs`), so slanted UI bars, circles, rings and diagonal lines have smooth edges on every backend without MSAA.
+
+- `draw_convex` (used by `Ui::quad`), `draw_circle`, `draw_ellipse`, `draw_poly`, `draw_circle_lines` and `draw_line` are feathered. `draw_triangle`, `draw_mesh` and rectangles stay hard, because they are used as pieces of larger meshes and a fringe would leave seams.
+- Axis-aligned edges are never feathered: they already land on the pixel grid, and stacked strips keep touching.
+- Corners are mitered with a 3x limit, and shapes with an inradius under 1 px fall back to the plain fan.
+- Lines and rings thinner than 1 px keep their width and fade their alpha instead, so hairlines stop flickering.
+- `glow` (`src/glow.rs`) is one radial gradient mesh (241 vertices, one layer of overdraw) whose falloff integrates the 14 stacked discs it replaced (910 vertices, 14 layers), so the look is the same without banding.
+
+Cost, measured with `UME_TOUR=perf` (Kaito vs Shion, 1280x720): fight frames went from 2999 to 3921 vertices on average and batch build from 0.20 to 0.23 ms; draw calls did not change (12.5).

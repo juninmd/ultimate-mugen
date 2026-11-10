@@ -448,3 +448,16 @@ etain_mut.
 ## Sprite-sheet effects
 
 `src/vfx/sheet.rs` plays CC0 effect sheets from `assets/fx/` (embedded with `include_bytes!`, decoded and uploaded on first draw). A hit spark plays on every non-guarded hit; an explosion plays on hits of 150 damage or more and on KO. At most 12 sheet sprites are alive, drawn with additive blending, and they are cleared on round start. Pixel-art PVFX Foundry sheets (nearest filter, alpha blend) add punch hit on light hits, crit hit on heavy hits, shockwave ring and ground slam on 150+ damage grounded hits, parry on guarded hits and dash dust on dashes. Lightning strike and static burst play on supers, a fire pillar on transformations, a smoke bomb on KO and a frost nova on heavy guarded hits. Sheets and credits are listed in `assets/fx/CREDITS.md`.
+
+## Parallel variant sprite raster
+
+Compiling a UMF fighter rasterized the base frames in parallel and then recolored every form and awakening variant of every frame on one thread, which was 80 to 90% of the load. `native/frame_raster.rs` now renders each frame together with its variants inside the same worker pool (`min(cores, 8)`, one thread on `wasm32`), and the form palettes are built once per fighter instead of once per frame.
+
+`cargo run --release -p ume-engine --example load_bench` on the 4-core cloud machine, three runs each:
+
+| | Whole roster (21 fighters) | Oboro | Kaito | Suzume |
+|---|---|---|---|---|
+| Before | 11.40 / 11.76 / 11.79 s | 1674 ms | 1250 ms | 900 ms |
+| After | 4.70 / 4.46 / 4.54 s | 551 ms | 405 ms | 319 ms |
+
+The output is unchanged: a checksum of every sprite (pixels, size, axis, scale) and every animation frame of the 21 fighters in two palettes is identical before and after. Fighters without forms (`npc_*`) do not change, since they have no variants to render.

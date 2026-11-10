@@ -5,7 +5,7 @@ mod boss;
 mod controls;
 mod credit_line;
 mod gamepad;
-mod gfx;
+mod gfx; mod glow;
 mod hud;
 mod i18n;
 mod keybinds;

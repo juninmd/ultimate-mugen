@@ -4,8 +4,8 @@ Every native fighter (the 16 roster fighters and the 5 Story NPCs) has a signatu
 
 | Input | Move id | Role |
 |---|---|---|
-| `F+x` | `string_a` | Opener. Also reachable by cancelling `jab` on contact |
-| `B+x` | `string_b` | Middle link. Cancel from `string_a` on contact |
+| `B+x` | `string_a` | Opener. Also reachable by cancelling `jab` on contact |
+| `B+a` | `string_b` | Middle link. Cancel from `string_a` on contact |
 | `B+y` | `string_c` | Finisher. Launch, wall bounce or ground bounce depending on the fighter; heavy fighters get one hit of armor |
 
 `string_a` and `string_b` cancel into `string_c` and into the fighter's two signature specials on contact, so every fighter has its own route. Examples:

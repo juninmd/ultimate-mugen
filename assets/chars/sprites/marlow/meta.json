@@ -1,22 +1,34 @@
 {
   "frames": {
     "01_idle": {
-      "refHeight": 359
+      "refHeight": 359.0,
+      "axisX": 162.0,
+      "axisY": 400.0
     },
     "02_attack1": {
-      "refHeight": 359
+      "refHeight": 359.0,
+      "axisX": 189.0,
+      "axisY": 400.0
     },
     "03_attack2": {
-      "refHeight": 359
+      "refHeight": 333.953,
+      "axisX": 178.605,
+      "axisY": 399.698
     },
     "04_special": {
-      "refHeight": 359
+      "refHeight": 359.0,
+      "axisX": 186.0,
+      "axisY": 400.0
     },
     "05_projectile": {
-      "refHeight": 359
+      "refHeight": 328.604,
+      "axisX": 172.082,
+      "axisY": 399.773
     },
     "06_victory": {
-      "refHeight": 359
+      "refHeight": 359.0,
+      "axisX": 198.0,
+      "axisY": 400.0
     },
     "run0": {
       "axisX": 200.0,
@@ -344,6 +356,66 @@
       "refHeight": 360.0
     },
     "sg_run_run3": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "07_idle1": {
+      "axisX": 162.0,
+      "axisY": 400.0,
+      "refHeight": 359.0
+    },
+    "08_idle2": {
+      "axisX": 161.0,
+      "axisY": 400.0,
+      "refHeight": 359.0
+    },
+    "09_hit1": {
+      "axisX": 159.0,
+      "axisY": 400.0,
+      "refHeight": 359.0
+    },
+    "10_hit2": {
+      "axisX": 171.0,
+      "axisY": 400.0,
+      "refHeight": 359.0
+    },
+    "11_hit3": {
+      "axisX": 174.0,
+      "axisY": 400.0,
+      "refHeight": 359.0
+    },
+    "12_fall1": {
+      "axisX": 197.0,
+      "axisY": 400.0,
+      "refHeight": 359.0
+    },
+    "13_fall2": {
+      "axisX": 197.579,
+      "axisY": 400.467,
+      "refHeight": 347.7
+    },
+    "14_lie": {
+      "axisX": 189.815,
+      "axisY": 400.0,
+      "refHeight": 332.407
+    },
+    "15_power0": {
+      "axisX": 201.0,
+      "axisY": 400.0,
+      "refHeight": 359.0
+    },
+    "16_power1": {
+      "axisX": 200.0,
+      "axisY": 400.0,
+      "refHeight": 359.0
+    },
+    "17_power2": {
+      "axisX": 204.0,
+      "axisY": 400.0,
+      "refHeight": 359.0
+    },
+    "sg_run_mid": {
       "axisX": 200.0,
       "axisY": 363.0,
       "refHeight": 360.0

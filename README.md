@@ -84,9 +84,9 @@ Keyboard, touch, Xbox, DualShock 4 and DualSense with **rumble and lightbars**. 
 
 ### Pixel-art fighters
 
-The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set per fighter, with palettes, ki/energy specials, flight, teleport and transformations. Characters are declared in a single UMF JSON each.
+The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set per fighter, with palettes, ki/energy specials, flight, teleport and transformations. All 16 built-in fighters have dedicated four-frame run cycles. Characters are declared in a single UMF JSON each.
 
-![Character select with the pixel-art roster](docs/assets/readme/roster-select.jpg)
+![Character select with portraits loaded across the native roster](docs/assets/readme/roster-select.jpg)
 
 ### Maps
 
@@ -101,7 +101,7 @@ The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set pe
 <table>
 <tr>
 <td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Versus screen"></td>
-<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 on the Bamboo stage"></td>
+<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 on the Bamboo stage with two native fighters"></td>
 </tr>
 </table>
 

@@ -479,7 +479,7 @@ impl App {
                 true,
             );
             if self.c.pressed(nav::BACK) {
-                self.screen = Screen::Menu { cur: 8 };
+                self.screen = Screen::Menu { cur: 11 };
             }
             return;
         }
@@ -946,9 +946,9 @@ impl App {
             }
             x += w + 8.0;
         }
+        self.market_links(rows.get(self.market_ui.cur).map(|r| (r.repo_key.clone(), r.id.clone())), modal);
         self.ui.rect(40.0, by, 330.0, 48.0, hex("#ff4d6d"));
-        self.ui
-            .text(mt("Voltar"), 205.0, by + 32.0, 26.0, WHITE, Align::Center, true);
+        self.ui.text(mt("Voltar"), 205.0, by + 32.0, 26.0, WHITE, Align::Center, true);
         if self.clicked_rect(40.0, by, 330.0, 48.0) && !modal {
             acts.push(Act::Back);
         }
@@ -1077,7 +1077,7 @@ impl App {
             match act {
                 Act::Back => {
                     self.market_ui.opened = false;
-                    self.screen = Screen::Menu { cur: 8 };
+                    self.screen = Screen::Menu { cur: 11 };
                 }
                 Act::Add => self.market_open_entry(false),
                 Act::Token => self.market_open_entry(true),

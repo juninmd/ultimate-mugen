@@ -1,5 +1,6 @@
 //! Input hub: keyboard maps, gamepads (with rumble), touch controls; menu navigation.
 use crate::gamepad::{PadInfo, PadKind, Pads};
+mod nav_repeat;
 mod touch;
 pub mod shortcuts;
 use crate::gfx::*;
@@ -85,7 +86,7 @@ pub struct Controls {
     pub keys: KeyMap,
     pub pads: Pads,
     pub pad_info: Vec<PadInfo>,
-    prev_menu: u32,
+    nav_repeat: nav_repeat::NavRepeat,
     pub menu_pressed: u32,
     pub touch: TouchPad,
     pub glyphs: Glyphs,
@@ -130,7 +131,7 @@ impl Controls {
             keys: KeyMap::load(),
             pads: Pads::new(),
             pad_info: vec![],
-            prev_menu: 0,
+            nav_repeat: Default::default(),
             menu_pressed: 0,
             touch: TouchPad::new(touch),
             shortcuts: Shortcuts::load(),
@@ -216,8 +217,7 @@ impl Controls {
                 m |= nav::START;
             }
         }
-        self.menu_pressed = m & !self.prev_menu;
-        self.prev_menu = m;
+        self.menu_pressed = self.nav_repeat.pressed(m, get_frame_time());
     }
     pub fn clear_macros(&mut self) {
         for q in self.touch.macro_q.iter_mut() {

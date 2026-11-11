@@ -23,7 +23,7 @@ pub(crate) fn stats_from(attack: f64, life: f64, speed: f64) -> CharStats {
     }
 }
 
-fn fraction(v: f32, full: f32) -> f32 {
+pub(crate) fn fraction(v: f32, full: f32) -> f32 {
     (v / full).clamp(0.0, 1.0)
 }
 

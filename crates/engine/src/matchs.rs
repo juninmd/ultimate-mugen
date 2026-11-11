@@ -1552,7 +1552,7 @@ impl Match {
         let id = self.next_id;
         let mut h = Fighter::new(id, root.def.clone(), f.side, f.player_no);
         h.is_helper = true;
-        h.helper_id = num(self, "id", 0.0, 0) as i32;
+        h.helper_id = self.num(i, sc, "id", 0.0, 0) as i32;
         h.parent = Some(f.id); h.root = root.id;
         h.key_ctrl = num(self, "keyctrl", 0.0, 0) != 0.0;
         h.pause_move_time = num(self, "pausemovetime", 0.0, 0) as i32;
@@ -1586,9 +1586,9 @@ impl Match {
             }
             _ => V2 { x: f.pos.x + px * f.facing, y: f.pos.y + py },
         };
-        h.state_no = -1; h.ctrl = false;
+        h.state_no = 0; h.ctrl = false;
         let owner = if Arc::ptr_eq(&f.st_def, &f.def) { h.def.clone() } else { f.st_def.clone() };
-        let st = num(self, "stateno", 0.0, 0) as i32;
+        let st = self.num(i, sc, "stateno", 0.0, 0) as i32;
         self.next_id += 1;
         self.fighters.push(h);
         let hi = self.fighters.len() - 1;
@@ -1606,7 +1606,7 @@ impl Match {
         if self.projectiles.len() >= 256 { return; }
         let num = |m: &Match, k: &str, d: f64, idx: usize| m.num(i, sc, k, d, idx) as f32;
         let f = &self.fighters[i];
-        let anim = num(self, "projanim", 0.0, 0) as i32;
+        let anim = self.num(i, sc, "projanim", 0.0, 0) as i32;
         if !f.def.anims.contains_key(&anim) { return; }
         let hd = crate::hitdef::build(self, i, sc);
         let f = &self.fighters[i];
@@ -1618,7 +1618,7 @@ impl Match {
         let has = |k: &str| sc.has(k, 0);
         let hit_anim = if has("projhitanim") { num(self, "projhitanim", -1.0, 0) as i32 } else { -1 };
         let p = Projectile {
-            owner: f.id, side: f.side, teamside: f.side, root: f.root, tally: f.projectile_tally_id(), id: num(self, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
+            owner: f.id, side: f.side, teamside: f.side, root: f.root, tally: f.projectile_tally_id(), id: self.num(i, sc, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
             hit_anim, rem_anim: if has("projremanim") { num(self, "projremanim", -1.0, 0) as i32 } else { hit_anim },
             cancel_anim: if has("projcancelanim") { num(self, "projcancelanim", -1.0, 0) as i32 } else { -1 },
             pos: V2 { x, y }, vel: V2 { x: num(self, "velocity", 0.0, 0) * f.lscl, y: num(self, "velocity", 0.0, 1) * f.lscl },

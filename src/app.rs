@@ -33,7 +33,7 @@ mod update_banner;
 mod results_stats;
 mod select_category;
 mod select_grid;
-mod select_palette; mod select_stats;
+mod select_palette; mod select_stats; mod select_search;
 mod versus; mod versus_compare;
 mod menu_view; mod menu_icons;
 mod menu_focus;
@@ -817,6 +817,7 @@ impl App {
         else {
             return;
         };
+        if self.search_page() { return; }
         let dt = get_frame_time();
         let mut view = self.char_view();
         if self.sel_filter != 0 && view.len() == self.playable().len() {
@@ -956,8 +957,7 @@ impl App {
         }
 
         crate::menu_art::glass(&self.ui, 0.0, 0.0, VW, 84.0, 1.0);
-        self.ui
-            .rect(0.0, 82.0, VW, 2.0, alpha(accents[picking.min(1)], 0.85));
+        self.ui.rect(0.0, 82.0, VW, 2.0, alpha(accents[picking.min(1)], 0.85));
         let team_mode = self.mode.is_team();
         let pal_dir = if is_key_pressed(KeyCode::Period) {
             1
@@ -1480,11 +1480,10 @@ impl App {
         self.sel_buf.clear();
         let _ = write!(
             self.sel_buf,
-            "[Tab] {flabel} · {}/{m} · [R] {} · [G] {} · [O] {} · PgUp/PgDn",
+            "[Tab] {flabel} · {}/{m} · [R] {} · [G] {} · [O] {} · [/] {}",
             pos + 1,
             crate::i18n::t("select.random").to_lowercase(),
-            self.grid_label(),
-            self.sort_label()
+            self.grid_label(), self.sort_label(), self.search_label()
         );
         self.ui.text(
             &self.sel_buf,

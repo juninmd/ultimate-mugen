@@ -33,7 +33,7 @@ mod update_banner;
 mod results_stats;
 mod select_category;
 mod select_grid;
-mod select_palette; mod select_stats; mod select_search; mod select_mode;
+mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips;
 mod versus; mod versus_compare;
 mod menu_view; mod menu_icons;
 mod menu_focus;
@@ -1031,6 +1031,7 @@ impl App {
             Align::Right,
             false,
         );
+        if self.select_chips() { return; }
 
         let focus = cur[picking];
         if self.sel_last[picking] != focus {
@@ -1465,8 +1466,8 @@ impl App {
             desc,
             VW / 2.0,
             680.0,
-            18.0,
-            hex("#d8d0f0"),
+            16.0,
+            Color::new(0.85, 0.82, 0.94, 0.7),
             Align::Center,
             false,
         );
@@ -1483,8 +1484,8 @@ impl App {
             &self.sel_buf,
             VW / 2.0,
             706.0,
-            14.0,
-            hex("#a49cc0"),
+            12.0,
+            Color::new(0.64, 0.61, 0.75, 0.6),
             Align::Center,
             false,
         );

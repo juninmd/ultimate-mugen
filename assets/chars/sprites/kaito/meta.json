@@ -1,13 +1,13 @@
 {
   "frames": {
     "01_idle": {
-      "axisX": 99.0,
-      "axisY": 358.0,
+      "axisX": 200.0,
+      "axisY": 399.0,
       "refHeight": 358.0
     },
     "02_attack1": {
-      "axisX": 111.5,
-      "axisY": 362.0,
+      "axisX": 199.5,
+      "axisY": 400.0,
       "refHeight": 362.0
     },
     "03_attack2": {
@@ -38,8 +38,8 @@
       "refHeight": 358.0
     },
     "06_victory": {
-      "axisX": 102.0,
-      "axisY": 379.0,
+      "axisX": 200.0,
+      "axisY": 400.0,
       "refHeight": 379.0
     },
     "airGuard": {
@@ -322,19 +322,25 @@
     },
     "jab0": {
       "awakeningHair": [
-        66,
-        0,
-        132,
-        36
-      ]
+        154,
+        38,
+        220,
+        74
+      ],
+      "axisX": 199.5,
+      "axisY": 400.0,
+      "refHeight": 362.0
     },
     "jab1": {
       "awakeningHair": [
-        66,
-        0,
-        132,
-        36
-      ]
+        154,
+        38,
+        220,
+        74
+      ],
+      "axisX": 199.5,
+      "axisY": 400.0,
+      "refHeight": 362.0
     },
     "jumpDown": {
       "awakeningHair": [
@@ -523,85 +529,91 @@
     },
     "walk0": {
       "awakeningHair": [
-        548,
-        15,
-        779,
-        204
+        181,
+        0,
+        257,
+        55
       ],
-      "axisX": 595.5,
-      "axisY": 1196.0,
-      "refHeight": 1109.0
+      "axisX": 196.567,
+      "axisY": 380.952,
+      "refHeight": 364.204
     },
     "walk1": {
       "awakeningHair": [
-        553,
-        31,
-        784,
-        220
+        190,
+        0,
+        273,
+        48
       ],
-      "axisX": 595.5,
-      "axisY": 1196.0,
-      "refHeight": 1109.0
+      "axisX": 205.155,
+      "axisY": 400.0,
+      "refHeight": 400.0
     },
     "walk2": {
       "awakeningHair": [
-        484,
+        156,
         0,
-        715,
-        149
+        233,
+        42
       ],
-      "axisX": 595.5,
-      "axisY": 1196.0,
-      "refHeight": 1109.0
+      "axisX": 193.258,
+      "axisY": 389.073,
+      "refHeight": 367.219
     },
     "walk3": {
       "awakeningHair": [
-        529,
+        164,
         0,
-        760,
-        163
+        241,
+        51
       ],
-      "axisX": 595.5,
-      "axisY": 1196.0,
-      "refHeight": 1109.0
+      "axisX": 186.23,
+      "axisY": 397.596,
+      "refHeight": 372.46
     },
     "walk4": {
       "awakeningHair": [
-        550,
-        52,
-        781,
-        241
+        176,
+        14,
+        251,
+        76
       ],
-      "axisX": 595.5,
-      "axisY": 1196.0,
-      "refHeight": 1109.0
+      "axisX": 190.59,
+      "axisY": 386.96,
+      "refHeight": 361.532
     },
     "walk5": {
       "awakeningHair": [
-        506,
+        158,
         0,
-        737,
-        164
+        234,
+        48
       ],
-      "axisX": 595.5,
-      "axisY": 1196.0,
-      "refHeight": 1109.0
+      "axisX": 187.661,
+      "axisY": 388.76,
+      "refHeight": 366.612
     },
     "win0": {
       "awakeningHair": [
-        70,
-        0,
-        136,
-        38
-      ]
+        168,
+        21,
+        234,
+        59
+      ],
+      "axisX": 200.0,
+      "axisY": 400.0,
+      "refHeight": 379.0
     },
     "win1": {
       "awakeningHair": [
-        70,
-        0,
-        136,
-        38
-      ]
+        168,
+        21,
+        234,
+        59
+      ],
+      "axisX": 200.0,
+      "axisY": 400.0,
+      "refHeight": 379.0
     },
     "rise0": {
       "awakeningHair": [
@@ -810,6 +822,22 @@
         54,
         279,
         108
+      ]
+    },
+    "punch": {
+      "axisX": 199.5,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "sg_run_mid": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0,
+      "awakeningHair": [
+        200,
+        71,
+        266,
+        125
       ]
     }
   }

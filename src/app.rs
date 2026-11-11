@@ -34,7 +34,7 @@ mod results_stats;
 mod select_category;
 mod select_grid;
 mod select_palette; mod select_stats;
-mod versus;
+mod versus; mod versus_compare;
 mod menu_view;
 mod menu_focus;
 mod mode;

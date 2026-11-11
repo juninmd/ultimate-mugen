@@ -36,11 +36,20 @@ impl App {
                 (step_now as f32 + within) / total as f32,
                 &self.load_label(step_now),
             );
-        } else if t > 1.8
-            || self.c.pressed(nav::OK | nav::START)
-            || is_mouse_button_pressed(MouseButton::Left)
-        {
-            self.finish_fight().await;
+        } else {
+            let blink = 0.55 + 0.45 * (self.ui.t * 6.0).sin().abs();
+            self.ui.text(
+                crate::i18n::tr3("PRONTO · PRESSIONE QUALQUER TECLA", "READY · PRESS ANY KEY", "LISTO · PULSA UNA TECLA"),
+                640.0,
+                104.0,
+                18.0,
+                Color::new(1.0, 0.8, 0.2, blink),
+                Align::Center,
+                true,
+            );
+            if t > 1.8 || self.c.pressed(nav::OK | nav::START) || is_mouse_button_pressed(MouseButton::Left) {
+                self.finish_fight().await;
+            }
         }
     }
 

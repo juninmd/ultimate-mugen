@@ -34,7 +34,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const t0 = Date.now();
   await tap('Enter'); await wait(1200);
   await shot('00-menu');
-  await tap('ArrowDown'); await wait(300); await shot('01-menu-story'); await tap('Enter'); await wait(1500);
+  await shot('01-menu-story'); await tap('Enter'); await wait(1500);
   for (let i = 0; i < pickSteps; i++) { await tap(process.env.STORY_PICK_KEY || 'ArrowRight'); await wait(200); }
   await shot('02-select');
   await tap('Enter'); await wait(2500);

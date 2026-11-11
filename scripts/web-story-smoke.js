@@ -34,7 +34,6 @@ const bandLuminance = (page, buffer) => page.evaluate(async base64 => {
   const frames = n => p.evaluate(n => new Promise(done => { const step = i => (i ? requestAnimationFrame(() => step(i - 1)) : done()); step(n); }), n);
   const key = async (k, wait = 1000) => { await p.keyboard.down(k); await frames(2); await p.keyboard.up(k); await frames(5); await p.waitForTimeout(wait); };
   await key('Enter');
-  await key('ArrowDown');
   await key('Enter', 1500);
   await key('Enter', 1500);
   const deadline = Date.now() + 120000;

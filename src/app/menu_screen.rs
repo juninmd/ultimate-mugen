@@ -76,7 +76,8 @@ impl App {
                 menu_focus::mix(light.b, ink.b, lit),
                 menu_focus::mix(light.a, k_in, lit),
             );
-            ui.text(&label, x + off + 30.0, y + h * 0.72, menu_focus::mix(22.0, 24.0, lit), label_color, Align::Left, true);
+            self.menu_icon(i, x + off + 38.0, y + h * 0.5, label_color);
+            ui.text(&label, x + off + 70.0, y + h * 0.72, menu_focus::mix(22.0, 24.0, lit), label_color, Align::Left, true);
         }
         self.menu_info(cur_v, accent);
         self.screen = Screen::Menu { cur: cur_v };
@@ -85,8 +86,8 @@ impl App {
         }
         if let Some(i) = chosen {
             let mode = [
-                Mode::Arcade,
                 Mode::Story,
+                Mode::Arcade,
                 Mode::Survival,
                 Mode::Cpu,
                 Mode::Versus,

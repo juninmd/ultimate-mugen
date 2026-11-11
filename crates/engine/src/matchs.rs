@@ -453,7 +453,7 @@ impl Match {
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl;
-                    if f.pos.y >= f.ground_level + if f.lands_by_script() { 24.0 } else { 0.0 } && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; if f.move_type != 'H' { land = true; } }
+                    if !f.lands_by_script() && f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; if f.move_type != 'H' { land = true; } }
                 }
                 _ => {}
             }

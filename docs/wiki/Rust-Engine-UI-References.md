@@ -38,6 +38,19 @@ Ordered by player-visible impact and by how little they cost to build on the cur
 6. **Screen transitions as a small state machine.** Bevy's state pattern. Fade or slide between title, select, fight and results, with easing matching the existing menu entry animation (ease-out cubic, 0.28 s).
 7. **Headless widget behaviour.** Bevy's `bevy_ui_widgets` idea: separate hit-testing and focus logic from drawing so the same button logic serves the menu, pause and settings screens.
 
+## Status against the current code
+
+The recommendations above were checked against the code on 2026-11-10. Most of the list already exists, so the work is to keep it and fill the real gaps.
+
+| Item | Status |
+|---|---|
+| Loading screen with progress bar and tips | Already there: `Ui::loading_screen`, `progress_bar`, `src/loading_tips.rs`, real step labels in `src/app/loading.rs`. Keep. |
+| Smooth menu focus | Already there: `src/app/menu_focus.rs` (frame-rate independent easing). Keep. |
+| Confirm dialogs | Present for replay deletion in `replay_browser.rs`; pause has its own skin. Other destructive actions could reuse the pattern. |
+| Screen transitions | Already there: diagonal wipe in `src/app.rs`. Keep. |
+| Key repeat when a direction is held | Was missing: the shell drops OS key repeats on purpose, so menus and sliders moved one step per tap. Added in `src/controls/nav_repeat.rs` (0.38 s delay, then every 75 ms, directions only). |
+| Dropdown, tabs, tooltips, theme struct | Not implemented. Candidates for later small PRs. |
+
 ## What we will not do
 
 - Adopt macroquad, egui or any engine's runtime. That breaks the stack decision in [Engine](Engine.md).

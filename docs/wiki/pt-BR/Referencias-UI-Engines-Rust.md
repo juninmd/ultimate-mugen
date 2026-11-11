@@ -38,6 +38,19 @@ Ordenadas pelo impacto visível para o jogador e pelo custo de construir sobre o
 6. **Transições entre telas como máquina de estados pequena.** O padrão de estados do Bevy. Fade ou slide entre título, seleção, luta e resultados, com easing igual ao da animação atual dos itens do menu (ease-out cúbico, 0,28 s).
 7. **Comportamento de widget sem aparência.** A ideia do `bevy_ui_widgets`: separar teste de clique e lógica de foco do desenho, para a mesma lógica de botão servir menu, pausa e configurações.
 
+## Situação frente ao código atual
+
+As recomendações acima foram conferidas com o código em 2026-11-10. A maior parte da lista já existe, então o trabalho é manter isso e preencher as lacunas reais.
+
+| Item | Situação |
+|---|---|
+| Loading com barra de progresso e dicas | Já existe: `Ui::loading_screen`, `progress_bar`, `src/loading_tips.rs` e rótulos reais de etapa em `src/app/loading.rs`. Manter. |
+| Foco suave no menu | Já existe: `src/app/menu_focus.rs` (easing independente da taxa de quadros). Manter. |
+| Diálogos de confirmação | Existe para apagar replay em `replay_browser.rs`; a pausa tem skin própria. Outras ações destrutivas podem reusar o padrão. |
+| Transições entre telas | Já existe: wipe diagonal em `src/app.rs`. Manter. |
+| Repetição de tecla ao segurar uma direção | Faltava: o shell descarta as repetições do sistema de propósito, então menus e sliders andavam um passo por toque. Adicionado em `src/controls/nav_repeat.rs` (atraso de 0,38 s, depois a cada 75 ms, só direções). |
+| Dropdown, abas, tooltips, struct de tema | Não implementados. Candidatos a PRs pequenos depois. |
+
 ## O que não vamos fazer
 
 - Adotar macroquad, egui ou o runtime de qualquer engine. Isso quebra a decisão de stack em [Engine](Engine.md).

@@ -20,7 +20,7 @@ mod keyedit;
 mod loading;
 mod pause;
 mod market;
-mod market_text;
+mod market_text; mod market_links;
 mod menu_fighters;
 mod mugen_catalog;
 mod mugen_gallery;

@@ -9,7 +9,7 @@ mod gfx; mod glow;
 mod hud;
 mod i18n;
 mod keybinds;
-mod market;
+mod market; mod open_link;
 mod import_button;
 mod loading_tips;
 mod match_stats;

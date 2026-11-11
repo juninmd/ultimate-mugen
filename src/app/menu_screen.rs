@@ -1,3 +1,4 @@
+use super::menu_icons::ICON_OF;
 use super::*;
 
 impl App {
@@ -76,7 +77,7 @@ impl App {
                 menu_focus::mix(light.b, ink.b, lit),
                 menu_focus::mix(light.a, k_in, lit),
             );
-            self.menu_icon(i, x + off + 38.0, y + h * 0.5, label_color);
+            self.menu_icon(ICON_OF[i], x + off + 38.0, y + h * 0.5, label_color);
             ui.text(&label, x + off + 70.0, y + h * 0.72, menu_focus::mix(22.0, 24.0, lit), label_color, Align::Left, true);
         }
         self.menu_info(cur_v, accent);
@@ -85,48 +86,27 @@ impl App {
             self.screen = Screen::Title;
         }
         if let Some(i) = chosen {
-            let mode = [
-                Mode::Story,
-                Mode::Arcade,
-                Mode::Survival,
-                Mode::Cpu,
-                Mode::Versus,
-                Mode::Training,
-                Mode::Watch,
-                Mode::TeamSeq,
-                Mode::TeamSimul,
-                Mode::TeamTag,
-            ];
+            let mode = [Mode::Story, Mode::Arcade, Mode::Survival, Mode::Cpu, Mode::Training];
             match i {
-                0..=9 => {
-                    self.mode = mode[i];
-                    self.team = None;
-                    self.team_pick.clear();
-                    if self.mode == Mode::TeamSimul {
-                        self.team_n = 5;
-                    } else if self.mode == Mode::TeamSeq {
-                        self.team_n = 3;
-                    } else if self.mode == Mode::TeamTag {
-                        self.team_n = 2;
-                    }
+                0..=4 => {
+                    self.set_mode(mode[i]);
                     self.go(Screen::Select {
                         cur: [self.sel.0, self.sel.1],
                         picking: 0,
                         picked: [None, None],
                     });
                 }
-                10 => self.go(Screen::Mugen { view: 0, page: 0 }),
-                11 => self.go(Screen::Market),
-                12 => {
+                5 => self.go(Screen::Mugen { view: 0, page: 0 }),
+                6 => self.go(Screen::Market),
+                7 => {
                     self.settings_back = None;
-                    self.go(Screen::Controls)
+                    self.go(Screen::Settings {
+                        tab: 0,
+                        cur: 0,
+                        from_fight: false,
+                    })
                 }
-                13 => self.go(Screen::Settings {
-                    tab: 0,
-                    cur: 0,
-                    from_fight: false,
-                }),
-                14 => {
+                8 => {
                     self.refresh_replays();
                     self.go(Screen::Replays { cur: 0 })
                 }

@@ -479,7 +479,7 @@ impl App {
                 true,
             );
             if self.c.pressed(nav::BACK) {
-                self.screen = Screen::Menu { cur: 11 };
+                self.screen = Screen::Menu { cur: 6 };
             }
             return;
         }
@@ -1077,7 +1077,7 @@ impl App {
             match act {
                 Act::Back => {
                     self.market_ui.opened = false;
-                    self.screen = Screen::Menu { cur: 11 };
+                    self.screen = Screen::Menu { cur: 6 };
                 }
                 Act::Add => self.market_open_entry(false),
                 Act::Token => self.market_open_entry(true),

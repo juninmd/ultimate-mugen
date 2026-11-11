@@ -33,7 +33,7 @@ mod update_banner;
 mod results_stats;
 mod select_category;
 mod select_grid;
-mod select_palette; mod select_stats; mod select_search;
+mod select_palette; mod select_stats; mod select_search; mod select_mode;
 mod versus; mod versus_compare;
 mod menu_view; mod menu_icons;
 mod menu_focus;
@@ -210,20 +210,14 @@ pub struct App {
     warm_key: String,
 }
 
-const MENU: [(&str, &str); 16] = [
+const MENU: [(&str, &str); 10] = [
     ("menu.story", "desc.story"),
     ("menu.arcade", "desc.arcade"),
     ("menu.survival", "desc.survival"),
-    ("menu.cpu", "desc.cpu"),
     ("menu.versus", "desc.versus"),
     ("menu.training", "desc.training"),
-    ("menu.watch", "desc.watch"),
-    ("menu.team_seq", "desc.team_seq"),
-    ("menu.team_simul", "desc.team_simul"),
-    ("menu.team_tag", "desc.team_tag"),
     ("menu.mugen", "desc.mugen"),
     ("menu.market", "desc.market"),
-    ("menu.controls", "desc.controls"),
     ("menu.settings", "desc.settings"),
     ("menu.replays", "desc.replays"),
     ("menu.quit", "desc.quit"),
@@ -861,7 +855,7 @@ impl App {
         if is_key_pressed(KeyCode::PageUp) {
             pos = pos.saturating_sub(cols * self.grid_rows());
         }
-        self.handle_select_keys();
+        if self.handle_select_keys() { return; }
         if is_key_pressed(KeyCode::Home) {
             pos = 0;
         }
@@ -1480,10 +1474,10 @@ impl App {
         self.sel_buf.clear();
         let _ = write!(
             self.sel_buf,
-            "[Tab] {flabel} · {}/{m} · [R] {} · [G] {} · [O] {} · [/] {}",
+            "[Tab] {flabel} · {}/{m} · [R] {} · [G] {} · [O] {} · {}",
             pos + 1,
             crate::i18n::t("select.random").to_lowercase(),
-            self.grid_label(), self.sort_label(), self.search_label()
+            self.grid_label(), self.sort_label(), self.select_tail()
         );
         self.ui.text(
             &self.sel_buf,
@@ -2196,7 +2190,7 @@ impl App {
         let Screen::Mugen { view, page } = self.screen else { return };
         self.screen = match self.mugen_catalog(view, page) {
             Some((view, page)) => Screen::Mugen { view, page },
-            None => Screen::Menu { cur: 10 },
+            None => Screen::Menu { cur: 5 },
         };
     }
 

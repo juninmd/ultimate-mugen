@@ -672,7 +672,7 @@ impl App {
             self.screen = if from_fight {
                 Screen::Fight
             } else {
-                Screen::Menu { cur: 12 }
+                Screen::Menu { cur: 7 }
             };
             return;
         }

@@ -35,7 +35,7 @@ mod select_category;
 mod select_grid;
 mod select_palette; mod select_stats;
 mod versus; mod versus_compare;
-mod menu_view;
+mod menu_view; mod menu_icons;
 mod menu_focus;
 mod mode;
 mod screen;
@@ -211,8 +211,8 @@ pub struct App {
 }
 
 const MENU: [(&str, &str); 16] = [
-    ("menu.arcade", "desc.arcade"),
     ("menu.story", "desc.story"),
+    ("menu.arcade", "desc.arcade"),
     ("menu.survival", "desc.survival"),
     ("menu.cpu", "desc.cpu"),
     ("menu.versus", "desc.versus"),

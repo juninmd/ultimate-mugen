@@ -197,7 +197,7 @@ impl App {
                     cur: 1,
                     from_fight,
                 },
-                None => Screen::Menu { cur: 11 },
+                None => Screen::Menu { cur: 7 },
             };
         }
     }

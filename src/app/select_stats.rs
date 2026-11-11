@@ -70,7 +70,10 @@ impl App {
         ][self.settings.sort % SORT_MODES]
     }
 
-    pub(crate) fn handle_select_keys(&mut self) {
+    pub(crate) fn handle_select_keys(&mut self) -> bool {
+        if is_key_pressed(KeyCode::M) && self.cycle_select_mode() {
+            return true;
+        }
         if is_key_pressed(KeyCode::G) {
             self.cycle_grid();
         }
@@ -79,6 +82,7 @@ impl App {
             self.settings.save();
             self.audio.sfx("select");
         }
+        false
     }
 
     pub(crate) fn draw_tile_force(&self, cx: f32, cy: f32, cw: f32, ch: f32, i: usize) {

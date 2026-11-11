@@ -9,7 +9,7 @@ catalog! {
     "menu.arcade" => "Arcade", "Arcade";
     "menu.survival" => "Survival", "Sobrevivência";
     "menu.cpu" => "Versus CPU", "Versus CPU";
-    "menu.versus" => "2 Players", "2 Jogadores";
+    "menu.versus" => "Versus", "Versus";
     "menu.training" => "Training", "Treino";
     "menu.watch" => "CPU vs CPU", "CPU vs CPU";
     "menu.team_seq" => "Team · Sequence", "Equipe · Sequência";
@@ -25,7 +25,7 @@ catalog! {
     "desc.arcade" => "Fight a sequence of opponents", "Enfrente uma sequência de oponentes";
     "desc.survival" => "Endless opponents, life refilled after each win, score", "Oponentes sem fim, vida recuperada a cada vitória e pontuação";
     "desc.cpu" => "You against the computer", "Você contra o computador";
-    "desc.versus" => "Shared keyboard or two controllers", "Teclado compartilhado ou dois controles";
+    "desc.versus" => "VS CPU, 2 players, CPU vs CPU or teams · press M on the select screen to switch", "VS CPU, 2 jogadores, CPU vs CPU ou equipes · M na seleção alterna";
     "desc.training" => "Training dummy, infinite bar, hitboxes", "Boneco de treino, barra infinita, hitboxes";
     "desc.watch" => "Watch the AI fight", "Assista a IA lutar";
     "desc.team_seq" => "Up to 5v5, one at a time; the winner keeps its life", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida";

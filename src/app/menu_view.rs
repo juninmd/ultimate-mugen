@@ -54,7 +54,7 @@ impl App {
             &[("nn", &nn.to_string()), ("st", &self.reg.stages.len().to_string()), ("nm", &nm.to_string())],
         );
         ui.text(&stats, right, 44.0, TEXT_MD, Color::new(1.0, 1.0, 1.0, ALPHA_BODY), Align::Right, false);
-        if cur_v <= 8 {
+        if cur_v <= 4 {
             ui.text(
                 crate::i18n::tr3("Dificuldade CPU (esq./dir.)", "CPU difficulty (left/right)", "Dificultad CPU (izq./der.)"),
                 right,

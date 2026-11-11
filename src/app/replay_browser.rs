@@ -581,7 +581,7 @@ impl App {
             _ => {}
         }
         if self.c.pressed(nav::BACK) || is_key_pressed(KeyCode::Escape) {
-            self.screen = Screen::Menu { cur: 13 };
+            self.screen = Screen::Menu { cur: 8 };
             return;
         }
         self.screen = Screen::Replays { cur };

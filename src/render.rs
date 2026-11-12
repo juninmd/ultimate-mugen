@@ -1076,7 +1076,7 @@ impl MatchRenderer {
                     }
                 }
             }
-            StageArt::Illustrated { image, ambience, span } => {
+            StageArt::Illustrated { image, frames, ambience, span } => {
                 let ground = m.stage.zoffset - m.camera.y;
                 let top_ground = m.stage.zoffset - m.stage.bound_high.min(0.0);
                 let bottom_ground = m.stage.zoffset - m.stage.bound_low.max(0.0);
@@ -1086,7 +1086,7 @@ impl MatchRenderer {
                 let (h, w, x) = crate::stages::illustration_layout(*span, image.w as f32 / image.h as f32, h, m.view_w, m.camera.x, m.zoom);
                 let rect = ImageRect { x: x + shx, y: ground - h * 0.85 + shy, w, h, view_w: m.view_w, view_h: m.view_h, cam_x: m.camera.x };
                 if front { return if *span > 0.0 { } else { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true) }; }
-                g.draw_wide_image(image, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
+                g.draw_wide_image(if frames.is_empty() { image } else { &frames[crate::stages::looping::frame_index(m.game_time as usize)] }, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
                 if *span <= 0.0 { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false); }
             }
             StageArt::Mugen(bg) => {

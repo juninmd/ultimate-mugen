@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-12",
+  "character": "suzume",
+  "family": "hitCrouch",
+  "status": "integrated_static_review_pass_runtime_pending",
+  "identityAnchor": "assets/chars/sprites/suzume/04_special.png",
+  "anchorSha256": "3621301628480a47e63dd77a0084d766f69da01d44bb419a532b73be0f9885be",
+  "beforeSha256": "233dfcff6036e44fd49e6432e56074844f4b6a0809701c5fa96d0adb14dfdfdf",
+  "candidateSha256": "fe74c407818a75749164f827a70384de75ba795b63d334eb0541ceb7d45d50d8",
+  "weaponEvidence": {
+    "type": "kunai",
+    "source": "assets/chars/suzume.json art.style.weapon; art.poses.hitCrouch leaves both hands open and does not disable weapon",
+    "renderer": "crates/engine/src/native/rig.rs weapon_geo emits canonical weapon unless weapon:false/noWeapon",
+    "renderProbeSha256": "a9848e4a4bb38870f47d9ede0ffe96abcb0de5c81dbc7361ec17f39c992b148d"
+  },
+  "staticChecks": {
+    "canvas": [
+      400,
+      400
+    ],
+    "binaryAlpha": true,
+    "axis": [
+      200,
+      392
+    ],
+    "refHeight": 320,
+    "bbox": [
+      69,
+      72,
+      350,
+      392
+    ],
+    "opaqueColors": 47,
+    "maxDeltaE": 0.12204,
+    "gate": 0.13,
+    "offPalettePixels": 0,
+    "partialAlphaPixels": 0
+  },
+  "visualEvidence": [
+    "candidates/suzume-hitCrouch-pilot/review/v2-kunai-native-review.png",
+    "candidates/suzume-hitCrouch-pilot/review/v2-kunai-2x-nearest-review.png"
+  ],
+  "limitations": [
+    "The canonical kunai is present. Pose identity and static rendering reviewed.",
+    "Runtime animation, timing and collision remain pending.",
+    "Other Suzume guard/hit families still need correction."
+  ]
+}

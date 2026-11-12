@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-12",
+  "fighter": "garan",
+  "pose": "airLowKick",
+  "target": "assets/chars/sprites/garan/airLowKick.png",
+  "activeSha256": "ee7c8da21dc0deef320da012bd3336357ca566596cc4cf12a4d6663a6c8cd766",
+  "backup": "integrated/garan-airlowKick-before/airLowKick.png",
+  "backupSha256": "0ae78eafd05c3e4f7ecae58fbd0aa272935012fb4c6c587e41af443503551367",
+  "identityPose": "Retained canonical Garan airborne low-kick pose; local retouch removes the clipped top mane and tapers it to a five-pixel margin.",
+  "frame": {
+    "pose": "airLowKick",
+    "sha256": "ee7c8da21dc0deef320da012bd3336357ca566596cc4cf12a4d6663a6c8cd766",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 32,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      24,
+      5,
+      375,
+      400
+    ],
+    "axis": {
+      "axisX": 201.0,
+      "axisY": 400.0,
+      "refHeight": 390.0
+    },
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "topMarginAtLeast5": true,
+      "bottomGeometryUnchanged": true,
+      "pixelsBelowRow9Unchanged": true,
+      "palettePreserved": true,
+      "sourcePaletteSubset": true
+    },
+    "changedPixelCount": 266,
+    "changedRegion": "rows 0-9 only"
+  },
+  "visualEvidence": "candidates/garan-airlowkick-borderfix-20261112/native-comparison.png; candidates/garan-airlowkick-borderfix-20261112/nearest-2x-comparison.png",
+  "integration": "Promoted after parent review. No resize, axis change, recolor, added effect or pixels below row 9 changed.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

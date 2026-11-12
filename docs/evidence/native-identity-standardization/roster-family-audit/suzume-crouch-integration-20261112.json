@@ -1,0 +1,69 @@
+{
+  "date": "2026-11-12",
+  "character": "suzume",
+  "families": [
+    "crouchStart",
+    "crouch",
+    "crouchEnd",
+    "crouchTurn",
+    "hitCrouch"
+  ],
+  "promotedSprites": [
+    {
+      "file": "crouch.png",
+      "sha256": "75657ab02aa5f7c3479aec4775a4d0fe161b84eb5e4ad302b99bd693f3768e2b",
+      "candidate": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/final-strict-013/clean.png",
+      "maxDeltaE": 0.12204
+    },
+    {
+      "file": "crouch0.png",
+      "sha256": "ef2cfc31d4d7648aa0b324b98618ed9f249f5e1441dc852f6833941572382b94",
+      "candidate": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch0-pilot/floor-registered-v2/shared-crouch-palette/clean.png",
+      "maxDeltaE": 0.078079
+    },
+    {
+      "file": "crouch1.png",
+      "sha256": "6f22f35328e00fd7bca89c4319c3068cf84a26e1e6c5faaf74e8e8ac4e273c4f",
+      "candidate": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/crouch1-retry/final-strict-013/clean.png",
+      "maxDeltaE": 0.104921
+    }
+  ],
+  "promotionManifest": "docs\\evidence\\native-identity-standardization\\roster-family-audit\\integrated\\suzume-crouch-before\\promotion-manifest.json",
+  "nativeContact": "docs\\evidence\\native-identity-standardization\\roster-family-audit\\integrated\\suzume-crouch-before\\suzume-crouch-integrated-native.png",
+  "nearest2xContact": "docs\\evidence\\native-identity-standardization\\roster-family-audit\\integrated\\suzume-crouch-before\\suzume-crouch-integrated-2x-nearest.png",
+  "technicalChecks": {
+    "canvas": "400x400 RGBA",
+    "floorY": 392,
+    "axis": [
+      200,
+      392
+    ],
+    "refHeight": 320,
+    "paletteColorsIncludingTransparency": 48,
+    "alphaValues": [
+      0,
+      255
+    ],
+    "maxDeltaE": {
+      "crouch.png": 0.12204,
+      "crouch0.png": 0.078079,
+      "crouch1.png": 0.104921
+    },
+    "gate": 0.13,
+    "sharedPalette": "All three promoted images were reapplied with the same 48-entry palette; output images use subsets as needed."
+  },
+  "claimCeiling": "Static identity/pose review passes for the three promoted crouch poses. Runtime sequence validation remains pending. Other Suzume crouch-adjacent families (crouchGuard/crouchGuardHit) still require correction; the full-family report retains pre-promotion hashes until it is regenerated.",
+  "independentReview": {
+    "reviewer": "parallel agent pilot_volta_jab",
+    "result": "pass",
+    "checks": [
+      "five active pose hashes match their promotion manifests",
+      "all five canvases are 400x400 RGBA with binary alpha",
+      "all share the same 48-entry palette and are subsets of it",
+      "axis [200,392], refHeight 320, bbox bottom exclusive y=392",
+      "identity, scale and pose readability reviewed at native/2x",
+      "crouch0 is an entry transition; crouch/crouch1 are similar but distinct; guard-hit differs from held guard"
+    ],
+    "runtime": "pending"
+  }
+}

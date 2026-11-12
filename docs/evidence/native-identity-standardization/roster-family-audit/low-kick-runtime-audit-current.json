@@ -1,0 +1,395 @@
+{
+  "date": "2026-11-12",
+  "runtime": "target/release/ultimate-mugen.exe, compiled from current low-kick worktree",
+  "scopeCharacters": [
+    "akio",
+    "bruno",
+    "daichi",
+    "garan",
+    "haruki",
+    "jin",
+    "kaito",
+    "kaname",
+    "lian",
+    "marlow",
+    "oboro",
+    "shion",
+    "suzume",
+    "sylene",
+    "valdric",
+    "volta"
+  ],
+  "normalLowKickAt52": {
+    "umeGap": 52,
+    "hits": 8,
+    "damage": {
+      "akio": 26,
+      "bruno": 27,
+      "daichi": null,
+      "garan": null,
+      "haruki": 26,
+      "jin": null,
+      "kaito": 29,
+      "kaname": 28,
+      "lian": 25,
+      "marlow": null,
+      "oboro": 37,
+      "shion": null,
+      "suzume": null,
+      "sylene": 33,
+      "valdric": null,
+      "volta": null
+    },
+    "note": "The move showcase places fighters at 52 units by default; no-hit outcomes indicate this short low attack did not reach at that spacing."
+  },
+  "normalLowKickAt36": {
+    "umeGap": 36,
+    "hits": 16,
+    "damage": {
+      "akio": 26,
+      "bruno": 27,
+      "daichi": 27,
+      "garan": 25,
+      "haruki": 26,
+      "jin": 26,
+      "kaito": 29,
+      "kaname": 28,
+      "lian": 25,
+      "marlow": 31,
+      "oboro": 37,
+      "shion": 28,
+      "suzume": 27,
+      "sylene": 33,
+      "valdric": 34,
+      "volta": 34
+    },
+    "allSixteenHit": true,
+    "evidenceDirectory": "low-kick-runtime-pointblank",
+    "screenshots": [
+      {
+        "file": "M-akio-low-kick.png",
+        "bytes": 2067360,
+        "sha256": "4cd78e46f66f4ff62fad7e9df057eb547f90e4182619a5ea54d658558bf2cb47",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-bruno-low-kick.png",
+        "bytes": 2058829,
+        "sha256": "9c74a727234cb2a1d7ccdb628acabdb1360091901a2137c2b3851be862570cd2",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-daichi-low-kick.png",
+        "bytes": 385344,
+        "sha256": "49737765964c405bcb45c966ff405f12da13f56697ac88c0e3354a9e7a696bff",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-garan-low-kick.png",
+        "bytes": 2072420,
+        "sha256": "3eddfe22afb4e69cbc34289d7df757283284f58ed06dd89b4fb7b46cc303bd09",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-haruki-low-kick.png",
+        "bytes": 2070072,
+        "sha256": "c1377b1abaf8f74062481791985e4d90477cbb9ccd0b2e2b5a87a2bc3cc41823",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-jin-low-kick.png",
+        "bytes": 342453,
+        "sha256": "c8b21d103e337182fb6777955ffa7093d42881a898be7ebcc4c0f3cc2f6ef977",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-kaito-low-kick.png",
+        "bytes": 2067960,
+        "sha256": "4ede5007e088841f22fb7f68b0e3a720fa868dffe7196d9dee90120913cfe0d7",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-kaname-low-kick.png",
+        "bytes": 2069403,
+        "sha256": "9d0cd9de85a1fa56a8a403efe797a66d2f59b1b9958b63ec8b3d3dc4383935f0",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-lian-low-kick.png",
+        "bytes": 369456,
+        "sha256": "85beaa672d8a10ed379518ebdd1fe97171cd4f1119c03a1c13d539f677d2320f",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-marlow-low-kick.png",
+        "bytes": 2067179,
+        "sha256": "8f6102038492dd26739d9caad2a3105732dba2e8c3a417ebc94ecf522822c702",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-oboro-low-kick.png",
+        "bytes": 2068894,
+        "sha256": "4e8412be5bb5b23a3cac294acf9536d87a2e4380a1d428bf2d1a5feb44e6b044",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-shion-low-kick.png",
+        "bytes": 371286,
+        "sha256": "df478d7a69dd8dabfc624ba69b0f8f4d48fb43f8ed2e60366b47e69aed03f91c",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-suzume-low-kick.png",
+        "bytes": 2068394,
+        "sha256": "b85e5b7ea89aae251ef43c28f952adc0f3de98199ab9a4bcff01354f22e76c56",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-sylene-low-kick.png",
+        "bytes": 2072856,
+        "sha256": "3eb1a8181b4f8810a8117e7bb3d9d22d0453d3aaae61ca6d0c5752142d3a38de",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-valdric-low-kick.png",
+        "bytes": 367485,
+        "sha256": "a85d87c3d88b1c8e8e57aaa8a88aaf7fb31470c0f77658d443bc382bc3ece2fb",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      },
+      {
+        "file": "M-volta-low-kick.png",
+        "bytes": 2062319,
+        "sha256": "700bbbc80500b97902435e670e28560afd18b6a9dea9347da52cbcc9bf4db4f7",
+        "evidenceDirectory": "low-kick-runtime-pointblank"
+      }
+    ]
+  },
+  "airLowKickAt52": {
+    "hits": 16,
+    "damage": {
+      "akio": 55,
+      "bruno": 55,
+      "daichi": 51,
+      "garan": 53,
+      "haruki": 60,
+      "jin": 54,
+      "kaito": 55,
+      "kaname": 63,
+      "lian": 51,
+      "marlow": 80,
+      "oboro": 90,
+      "shion": 55,
+      "suzume": 51,
+      "sylene": 77,
+      "valdric": 65,
+      "volta": 52
+    },
+    "evidenceDirectory": "low-kick-runtime-current",
+    "screenshots": [
+      {
+        "file": "M-akio-air-low-kick.png",
+        "bytes": 2079044,
+        "sha256": "b9000f9b12254cc4cd74c5515143de73a6d4ce57aefb92d51b038d6417fdba38",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-bruno-air-low-kick.png",
+        "bytes": 2071926,
+        "sha256": "d1566b2d2793e82837e2aa1b44fc1f6a3aa153b8f1665c99f7af6911242b63fe",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-daichi-air-low-kick.png",
+        "bytes": 225975,
+        "sha256": "74890814b35480e473a4c64f2d44a21542950e8303a5ffccbcc90c7f5d1c3795",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-garan-air-low-kick.png",
+        "bytes": 2077442,
+        "sha256": "08339ae89d59d9397004e7bc58a33fde123f5ace7427d8cb50650b69a71951f9",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-haruki-air-low-kick.png",
+        "bytes": 2074356,
+        "sha256": "94810c528f57a86f40d08a01f4a729748deb8b9a30d418e824e024d3f6ed5d07",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-jin-air-low-kick.png",
+        "bytes": 341545,
+        "sha256": "0e65b3941306a0cb6c9efa623a32a126dd2b6507ab6693955095c3b929a4cfb5",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-kaito-air-low-kick.png",
+        "bytes": 2067585,
+        "sha256": "b0275ffd6bd70c0609ce510c35a0a55a6b2e31afccbc1114ac9481fde474fd87",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-kaname-air-low-kick.png",
+        "bytes": 2078232,
+        "sha256": "ca2d31ef80287e8a72649cb2d6b1efe114de40a7598e6645f27e825d663ee4cb",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-lian-air-low-kick.png",
+        "bytes": 2074946,
+        "sha256": "9ac690e9dbd3d53d697395f251f4eb45de226588471923d23c48269af5e3ded2",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-marlow-air-low-kick.png",
+        "bytes": 2052717,
+        "sha256": "ed4de65c6d656e8d464e4bc57ec8c33a8887f0e8b1f710e5d1a3758368079f23",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-oboro-air-low-kick.png",
+        "bytes": 2048759,
+        "sha256": "a6bdbacd15066775cddab81cbc248bccdad58284d1124ba3065663645ad47514",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-shion-air-low-kick.png",
+        "bytes": 383765,
+        "sha256": "98205ffce333da85cd9589626da759940e3ee26c36babbeb37384c3a83ed7ee3",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-suzume-air-low-kick.png",
+        "bytes": 2079649,
+        "sha256": "39c0cebf555f25513abd230471ac6e86c2128e68c8b6acfa0604332f5b5e043b",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-sylene-air-low-kick.png",
+        "bytes": 2063012,
+        "sha256": "9d298e031b5f3b20361244c79c3a4238693c09c3f66e414b12fbd83215ee86b6",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-valdric-air-low-kick.png",
+        "bytes": 211118,
+        "sha256": "bdeddf32e5df1e6611fd28092db5a0adc1d91f3eb95ee4af819516cf32cc7ce0",
+        "evidenceDirectory": "low-kick-runtime-current"
+      },
+      {
+        "file": "M-volta-air-low-kick.png",
+        "bytes": 2066284,
+        "sha256": "1261fc8d7c62838c3379b41a007102b35402ed6f36791d55d7597df38db2756f",
+        "evidenceDirectory": "low-kick-runtime-current"
+      }
+    ]
+  },
+  "airLowKickVisualProbe": {
+    "umeGap": 36,
+    "umeAfterHit": 0,
+    "umeBoxes": true,
+    "stage": "plains",
+    "hits": 16,
+    "screenshots": [
+      {
+        "file": "M-akio-air-low-kick.png",
+        "bytes": 1977203,
+        "sha256": "bc69dd82bfc526528744cdbe5aa795942a8cda89d566dd40f5e80b7ea0499e09",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-bruno-air-low-kick.png",
+        "bytes": 1984998,
+        "sha256": "b33cfa080c3b8a9ba252e78e3e4e1c8848d66abdb7501ed918e7c4acde559252",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-daichi-air-low-kick.png",
+        "bytes": 328584,
+        "sha256": "4ca3568f08f3182dfea1da3904328f73d34c36c1f8488225ff473117121a121e",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-garan-air-low-kick.png",
+        "bytes": 1992994,
+        "sha256": "83d2c8ebde2b4ca8ecbc78a0cb05dcbdd6392dbabd6f7050c31b1ad4fefeb70c",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-haruki-air-low-kick.png",
+        "bytes": 1976243,
+        "sha256": "04509231dc1ba0f1d1d26ab8f6c215fd3f8eea7023cd444d09838121318a1607",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-jin-air-low-kick.png",
+        "bytes": 310940,
+        "sha256": "3c65d572142e61cd1aac35bcf87df0e5aef8fe57967623130ec0e465e0ba10a8",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-kaito-air-low-kick.png",
+        "bytes": 1980250,
+        "sha256": "fcdf8a2053b6a13a8c67c9efebca4e3eb6e3f7897579b9aa9995e90d8d4246a3",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-kaname-air-low-kick.png",
+        "bytes": 1983443,
+        "sha256": "467f3c902468573032b62c1696eded9b7c859d3af40bd71780481e41e470f118",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-lian-air-low-kick.png",
+        "bytes": 297523,
+        "sha256": "c81b0a9103d2c4613cfa1df36dd164dbe154b043cd49ca467a8fc43612f7bd3a",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-marlow-air-low-kick.png",
+        "bytes": 1978967,
+        "sha256": "d5b2f465affe7d0d701dae27d27ffade15765c08dda10a932b08451e5b26f44c",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-oboro-air-low-kick.png",
+        "bytes": 1925836,
+        "sha256": "ef81459291cc876db160faea0559d617ee09e8bbcc35bb81a5dfa4bc0b25128d",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-shion-air-low-kick.png",
+        "bytes": 363167,
+        "sha256": "c777644349c3d40ae89667003fadf0368dd4ac2690db0e766f9486a8ad081a9c",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-suzume-air-low-kick.png",
+        "bytes": 1980004,
+        "sha256": "be54d4904473fa574482e36c6047da08812ba56aa06e686619979f3b2887f24d",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-sylene-air-low-kick.png",
+        "bytes": 1975675,
+        "sha256": "0602711f35117fae15a0d63da0b177c9527ca980880b7a6d88aac8680a41abcf",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-valdric-air-low-kick.png",
+        "bytes": 345397,
+        "sha256": "11e8a771d70eedd44e49de1cd63ee7d8d092405c03e873f6cc6322593ce057f0",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      },
+      {
+        "file": "M-volta-air-low-kick.png",
+        "bytes": 1977361,
+        "sha256": "ce8dd4a3d5f69e8014d69ad01caf9d347dd036a0f1be32c4c94409a195825cf4",
+        "evidenceDirectory": "low-kick-air-visibility-probe"
+      }
+    ],
+    "visuallyReviewedAllCharacters": true,
+    "finding": "All 16 airborne attackers are visible at the first strike tick and the hit registers. Earlier captures five ticks after contact missed some attackers after the strike window; the first-tick screenshots resolve that capture-timing ambiguity."
+  },
+  "claimCeiling": "This validates one strike frame and contact for each lowKick/airLowKick move. It does not validate every frame, family consistency, animation smoothness, or the 741 outstanding visual corrections."
+}

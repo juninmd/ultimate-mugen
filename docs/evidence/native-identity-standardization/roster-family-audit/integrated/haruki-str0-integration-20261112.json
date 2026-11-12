@@ -1,0 +1,60 @@
+{
+  "date": "2026-11-12",
+  "fighter": "haruki",
+  "pose": "str0",
+  "target": "assets/chars/sprites/haruki/str0.png",
+  "activeSha256": "573cfc48a6cceb9fed453f9fd1bcd0c103dd94bf4feff82bf6113f6774747df8",
+  "backup": "integrated/haruki-str0-before/str0.png",
+  "backupSha256": "3d04e9885eb1abbdcc3ce475f3807f9169be7772c40910bf8351fe2979cc5acb",
+  "candidateReview": "candidates/haruki-str0-high-reuse/candidate-review.json",
+  "frame": {
+    "pose": "str0",
+    "sha256": "573cfc48a6cceb9fed453f9fd1bcd0c103dd94bf4feff82bf6113f6774747df8",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 45,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      124,
+      74,
+      295,
+      392
+    ],
+    "axis": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+    "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "floorY392": true,
+      "axis200x392Ref320": true,
+      "exactPaletteSubset": true
+    }
+  },
+  "sharedOccurrences": 11,
+  "affectedAnimations": [
+    "pageThrow",
+    "stringB",
+    "stringC",
+    "strong",
+    "theorem"
+  ],
+  "visualReview": {
+    "native": "review/str0-review-native.png",
+    "nearest2x": "review/str0-review-2x-nearest.png",
+    "result": "Compared with canonical 04_special, the candidate restores Haruki brown hair, violet eyes, long violet coat with gold edging/embroidery and pale lining, gold cuffs, white gloves, dark trousers and purple shoes. It preserves the target standing spell-ready gesture with one raised open glove and the other low near the waist, without adding talismans or effects. At native and nearest 2x the silhouette and stepped clusters are clear; binary alpha and shared-palette QA pass. The candidate body height matches active str0 at 318 px. Pose reproduction is visually close, with a small hand-placement/stylization difference that should be considered in parent review."
+  },
+  "integration": "Promoted after parent native and nearest-2x review. Neighbor frames, metadata and timings remain unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

@@ -1,0 +1,1413 @@
+{
+  "date": "2026-11-12",
+  "scope": "40 currently promoted sprite files across six native fighters",
+  "method": "Pillow decode, RGBA dimensions, alpha set, opaque color count, bbox floor, meta registration and exact shared palette membership",
+  "result": "pass",
+  "images": [
+    {
+      "fighter": "suzume",
+      "pose": "crouch0",
+      "sha256": "ef2cfc31d4d7648aa0b324b98618ed9f249f5e1441dc852f6833941572382b94",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 36,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        82,
+        73,
+        301,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "crouch",
+      "sha256": "75657ab02aa5f7c3479aec4775a4d0fe161b84eb5e4ad302b99bd693f3768e2b",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 47,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        52,
+        70,
+        333,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "crouch1",
+      "sha256": "6f22f35328e00fd7bca89c4319c3068cf84a26e1e6c5faaf74e8e8ac4e273c4f",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 47,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        64,
+        71,
+        323,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "crouchGuard",
+      "sha256": "f2dcef4ebedf97b1b11e434aeedfeb827f2932a507def579068de74be8be5d1d",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 47,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        72,
+        72,
+        309,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "crouchGuardHit",
+      "sha256": "42ae91773c8c7930b1862ae67f8984041bd66902e51fce9916af679477cd14b7",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 42,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        36,
+        72,
+        302,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "hitCrouch",
+      "sha256": "fe74c407818a75749164f827a70384de75ba795b63d334eb0541ceb7d45d50d8",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 47,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        69,
+        72,
+        350,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "hitL1",
+      "sha256": "2e20ecdea19768c3f8c83ae9667cbc3717c2bf198b6119ddfbb3e433b4340fd7",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 46,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        89,
+        73,
+        306,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "hitL2",
+      "sha256": "f0f9cf8dc418828c9b75a392b328797e025c239cbb3c16297853dc20f51b4f84",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 47,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        86,
+        73,
+        300,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "haruki",
+      "pose": "jab0",
+      "sha256": "f302f5772592c4aa4e18a0b803c8b70da93ca8f1453c77c5e030887119e0620a",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 44,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        93,
+        71,
+        300,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/haruki-jab-shared-palette-final-20261112/palette/palette.json",
+      "sharedPaletteSha256": "709b253ce751d1171ea35209a3a0c203a56e024941ef1f266e98ad44bebfaa2c",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "haruki",
+      "pose": "jab1",
+      "sha256": "8c29dde8c56a69909be510325447745aef54b9949c1c4e5c1e7659b62c7162af",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 44,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        77,
+        71,
+        315,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/haruki-jab-shared-palette-final-20261112/palette/palette.json",
+      "sharedPaletteSha256": "709b253ce751d1171ea35209a3a0c203a56e024941ef1f266e98ad44bebfaa2c",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "haruki",
+      "pose": "jab2",
+      "sha256": "d37fd0f5cdfaf90cdef6610b118b21aae34b327dd93293f122cc4acd3ce28ad6",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 46,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        70,
+        71,
+        283,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/haruki-jab-shared-palette-final-20261112/palette/palette.json",
+      "sharedPaletteSha256": "709b253ce751d1171ea35209a3a0c203a56e024941ef1f266e98ad44bebfaa2c",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "volta",
+      "pose": "jab0",
+      "sha256": "d51d88b3ae623e240fc854f0c89e12acc3248e6353a402dcd4a02ecf13f65a8c",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 34,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        96,
+        71,
+        273,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/volta-jab1-impact-pilot/shared-palette-seed-13/palette.json",
+      "sharedPaletteSha256": "25f9eaf37d1054396f7305e861a5f54ce0e5eb5395ac17f2a7231c213995434f",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "volta",
+      "pose": "jab1",
+      "sha256": "6370f2d57b801d316a47fdc1e7c9daa525793cb9847cd486394caa7382a004f9",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 43,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        36,
+        94,
+        356,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/volta-jab1-impact-pilot/shared-palette-seed-13/palette.json",
+      "sharedPaletteSha256": "25f9eaf37d1054396f7305e861a5f54ce0e5eb5395ac17f2a7231c213995434f",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "volta",
+      "pose": "jab2",
+      "sha256": "b2fb0228721b6e65faa3b42b676f21cd17960389e1e37bad0f8076eb30249b9e",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 43,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        30,
+        71,
+        292,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/volta-jab1-impact-pilot/shared-palette-seed-13/palette.json",
+      "sharedPaletteSha256": "25f9eaf37d1054396f7305e861a5f54ce0e5eb5395ac17f2a7231c213995434f",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "valdric",
+      "pose": "sb0",
+      "sha256": "3058a0920cb9bd8597d04c268fa7f4e84fba1a4efc240792fee3fd7508e04c74",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 48,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        50,
+        73,
+        253,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/valdric-royallance-sb0-pilot/palette-48-20261112/palette.json",
+      "sharedPaletteSha256": "36044de67eb8f63090ff46ba03a61a588e57fc29820ae6caab6ffcee7dcedc28",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "valdric",
+      "pose": "sb1",
+      "sha256": "0a5c8cdfd6ff077774159b3745e31558bbbe0fbb60fa3d2ad739da5b94c202dd",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 48,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        78,
+        74,
+        390,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/valdric-royallance-sb0-pilot/palette-48-20261112/palette.json",
+      "sharedPaletteSha256": "36044de67eb8f63090ff46ba03a61a588e57fc29820ae6caab6ffcee7dcedc28",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "valdric",
+      "pose": "sb2",
+      "sha256": "c88eb38b15440a1ea159e3aab21065c50d46a02a6fe70774b5f72ff20a8ca3e8",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 45,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        46,
+        73,
+        350,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/valdric-royallance-sb0-pilot/palette-48-20261112/palette.json",
+      "sharedPaletteSha256": "36044de67eb8f63090ff46ba03a61a588e57fc29820ae6caab6ffcee7dcedc28",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "garan",
+      "pose": "jumpTop",
+      "sha256": "165c39aa1ef346cc84883040a6544b0a8a4ab6ee32d55371de8c2ba61b3cac7c",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 45,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        107,
+        119,
+        293,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/garan-jumpTop-pilot/palette-v1/palette.json",
+      "sharedPaletteSha256": "40e64f15ac418bf16f927ab345c180ae6d264a5a494da0222d9467b0a93a614f",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "valdric",
+      "pose": "jab0",
+      "sha256": "e3d7561cac5e86521210846ae686e6c0994c41adb7ca1cecc15d75aa0248ba17",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 45,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        25,
+        71,
+        253,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "../valdric-royallance-sb0-pilot/palette-48-20261112/palette.json",
+      "sharedPaletteSha256": "36044de67eb8f63090ff46ba03a61a588e57fc29820ae6caab6ffcee7dcedc28",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "kaname",
+      "pose": "crouch",
+      "sha256": "0ed557751c74a60607362de8b095f12b85d1c93f2261f5a23cb78b25c7a3a876",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 46,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        94,
+        60,
+        378,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/kaname-cjab0-pilot/pipeline-v1/palette/palette.json",
+      "sharedPaletteSha256": "d9fb31a37fb45f1778cd258b2ea983362368fb4e1bacde1457417a3e107da506",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "hitL3",
+      "sha256": "14727f9b77837f2d92321a400f80260488d8f9a339fb13db21477a9445efd25d",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 45,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        13,
+        72,
+        263,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "haruki",
+      "pose": "gale0",
+      "sha256": "06c5b8a871a0946b5abd650ff8fdbc2e44a21449db5d06f2a9eba11a4ceed100",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 48,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        132,
+        91,
+        268,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "haruki",
+      "pose": "gale1",
+      "sha256": "852f9f6939af4c3500efeadf430586d435386b4c650a97d945658d78f8a2abd9",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 48,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        105,
+        91,
+        371,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "haruki",
+      "pose": "gale2",
+      "sha256": "08b66547b673d09f519ba1b826a0844fdc3818916cc43180a61dc1cc633cec32",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 47,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        96,
+        93,
+        351,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "kaname",
+      "pose": "guard",
+      "sha256": "d27d35be16c41b14e119b91780d428400af108d27fb3550ab487020f43d2efec",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 46,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        44,
+        21,
+        262,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/kaname-cjab0-pilot/pipeline-v1/palette/palette.json",
+      "sharedPaletteSha256": "d9fb31a37fb45f1778cd258b2ea983362368fb4e1bacde1457417a3e107da506",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "garan",
+      "pose": "jumpDown",
+      "sha256": "c71f1c8aed1c52744a00b089ca4b10b116b2dec8b4aac3d2bcc5b1ec16825e01",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 43,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        130,
+        119,
+        271,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/garan-jumpDown-pilot/palette-canonical-seed-0/palette.json",
+      "sharedPaletteSha256": "0002a7e4c9f089f76c04c5f7cab5789131039c4a2f591e021200f61d560b648f",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "kaname",
+      "pose": "guardHit",
+      "sha256": "0dce8d0b1dcbc76d3bb59c8c7cc476e39e896ece4519d204195de5155d77b825",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 46,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        34,
+        21,
+        246,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/kaname-cjab0-pilot/pipeline-v1/palette/palette.json",
+      "sharedPaletteSha256": "d9fb31a37fb45f1778cd258b2ea983362368fb4e1bacde1457417a3e107da506",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "guard",
+      "sha256": "db2717181979c87db744d67e5280c8a469053f05e7dbee40306d2d98ca0d749e",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 47,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        113,
+        72,
+        298,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "haruki",
+      "pose": "str0",
+      "sha256": "573cfc48a6cceb9fed453f9fd1bcd0c103dd94bf4feff82bf6113f6774747df8",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 45,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        124,
+        74,
+        295,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "guardHit",
+      "sha256": "0cdba0ef80c224b928ae531f1d5888bfcecd204a26722fa52c34a96b51436a75",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 46,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        74,
+        73,
+        284,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "garan",
+      "pose": "hop",
+      "sha256": "4fed2eca98eb9dc18803cfe8e5d6bd4d55647b3fe9d8a0124ec33c7f6b890ce7",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 43,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        119,
+        102,
+        281,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/garan-hop-pilot/palette-seed-1/palette.json",
+      "sharedPaletteSha256": "42d9bb308a1a965be6f147c0a589d3a8519ccf6885b937e2893f8ca256a5b881",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "haruki",
+      "pose": "str1",
+      "sha256": "13db71a0a637259ac07a294e56c3bbe49b202b9a5cdbed770e67402871ae3279",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 45,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        77,
+        92,
+        366,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "airGuard",
+      "sha256": "cff39d2650f86efa03a08df0cc3165ac2b6bbbaf69725558ace63e636fd7f13e",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 47,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        85,
+        72,
+        310,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "kaname",
+      "pose": "mr0",
+      "sha256": "735b822b2d4c7002c550bce65d615cac9a44dc4746e909eaf6c1cbd7c54431c9",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 48,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        92,
+        21,
+        307,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/kaname-cjab0-pilot/pipeline-v1/palette/palette.json",
+      "sharedPaletteSha256": "d9fb31a37fb45f1778cd258b2ea983362368fb4e1bacde1457417a3e107da506",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "suzume",
+      "pose": "airGuardHit",
+      "sha256": "8336bd6a40db40a35ff5d9253e6ecfc43d4e695b5ff511e99ba1755c12dcfb4e",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 46,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        68,
+        73,
+        312,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+      "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "garan",
+      "pose": "jumpUp",
+      "sha256": "d06adec8cd128b3227f85d33e1179615e3062b5f95db6729d56a60fa07e6b1b6",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 44,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        111,
+        93,
+        289,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/garan-jumpUp-pilot/palette-seed-0/palette.json",
+      "sharedPaletteSha256": "16519d2e752cbe69b8c3b387c8f87457a9cd406d85cf20301853c857c861d83a",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "kaname",
+      "pose": "mr2",
+      "sha256": "9abd5920073df60284f5dc5b91b4182cd4d371971519136863c2ed6b92673768",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 48,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        73,
+        21,
+        327,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/kaname-cjab0-pilot/pipeline-v1/palette/palette.json",
+      "sharedPaletteSha256": "d9fb31a37fb45f1778cd258b2ea983362368fb4e1bacde1457417a3e107da506",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "haruki",
+      "pose": "lk0",
+      "sha256": "b8d218946fd88e5e881ab1394fd728a0ad9d8215b686eca5afd9d390abd98028",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 44,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        126,
+        85,
+        275,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "haruki",
+      "pose": "lk1",
+      "sha256": "5cd39c88166963c770e2a3707ffea0595677e5c4af1eebd357c6921970f0b34b",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 43,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        80,
+        76,
+        320,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "fighter": "garan",
+      "pose": "airLowKick",
+      "sha256": "ee7c8da21dc0deef320da012bd3336357ca566596cc4cf12a4d6663a6c8cd766",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 32,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        24,
+        5,
+        375,
+        400
+      ],
+      "axis": {
+        "axisX": 201.0,
+        "axisY": 400.0,
+        "refHeight": 390.0
+      },
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "topMarginAtLeast5": true,
+        "bottomGeometryUnchanged": true,
+        "pixelsBelowRow9Unchanged": true,
+        "palettePreserved": true,
+        "sourcePaletteSubset": true
+      },
+      "changedPixelCount": 266,
+      "changedRegion": "rows 0-9 only",
+      "sharedPaletteFile": null,
+      "sharedPaletteSha256": null
+    }
+  ],
+  "claimCeiling": "Technical image structure/palette/registration only; static appearance is documented separately and runtime is pending."
+}

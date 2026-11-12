@@ -375,6 +375,11 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 388.0
+    },
     "mh0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -494,6 +499,26 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
+    },
+    "run0": {
+      "axisX": 200.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
+    },
+    "run1": {
+      "axisX": 200.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
+    },
+    "run2": {
+      "axisX": 200.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
+    },
+    "run3": {
+      "axisX": 200.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
     }
   },
   "refHeight": 388

@@ -1,0 +1,100 @@
+{
+  "date": "2026-11-12",
+  "character": "garan",
+  "family": "airLowKick",
+  "status": "visual_static_pass_after_jumpDown_integration",
+  "sequence": [
+    {
+      "index": 0,
+      "sprite": "jumpTop.png",
+      "sha256": "165c39aa1ef346cc84883040a6544b0a8a4ab6ee32d55371de8c2ba61b3cac7c"
+    },
+    {
+      "index": 1,
+      "sprite": "akick.png",
+      "sha256": "55205da68bb00a4c63b2e0dc879fc25fdb828fc809ff2a1a5cfb9aeca461d026"
+    },
+    {
+      "index": 2,
+      "sprite": "airLowKick.png",
+      "sha256": "0ae78eafd05c3e4f7ecae58fbd0aa272935012fb4c6c587e41af443503551367"
+    },
+    {
+      "index": 3,
+      "sprite": "jumpDown.png",
+      "sha256": "c71f1c8aed1c52744a00b089ca4b10b116b2dec8b4aac3d2bcc5b1ec16825e01"
+    },
+    {
+      "index": 4,
+      "sprite": "jumpDown.png",
+      "sha256": "c71f1c8aed1c52744a00b089ca4b10b116b2dec8b4aac3d2bcc5b1ec16825e01"
+    }
+  ],
+  "sources": {
+    "airLowKick": {
+      "path": "assets/chars/sprites/garan/airLowKick.png",
+      "sha256": "0ae78eafd05c3e4f7ecae58fbd0aa272935012fb4c6c587e41af443503551367",
+      "bbox_alpha_gt_16": [
+        24,
+        0,
+        375,
+        400
+      ]
+    },
+    "akick": {
+      "path": "assets/chars/sprites/garan/akick.png",
+      "sha256": "55205da68bb00a4c63b2e0dc879fc25fdb828fc809ff2a1a5cfb9aeca461d026",
+      "bbox_alpha_gt_16": [
+        63,
+        116,
+        336,
+        391
+      ]
+    },
+    "jumpDown": {
+      "path": "assets/chars/sprites/garan/jumpDown.png",
+      "sha256": "c71f1c8aed1c52744a00b089ca4b10b116b2dec8b4aac3d2bcc5b1ec16825e01",
+      "bbox_alpha_gt_16": [
+        130,
+        119,
+        271,
+        392
+      ]
+    },
+    "jumpTop": {
+      "path": "assets/chars/sprites/garan/jumpTop.png",
+      "sha256": "165c39aa1ef346cc84883040a6544b0a8a4ab6ee32d55371de8c2ba61b3cac7c",
+      "bbox_alpha_gt_16": [
+        107,
+        119,
+        293,
+        392
+      ]
+    }
+  },
+  "canonicalAnchor": {
+    "path": "assets/chars/sprites/garan/04_special.png",
+    "sha256": "1079c6081d3c350989b7389790dc6a7a6ae22ea9c709d3479aad9c4d46cf8b0a"
+  },
+  "visualReview": {
+    "identity": "pass",
+    "pose_readability": "pass",
+    "scale_and_floor": "pass",
+    "pixel_art_consistency": "pass",
+    "unrequested_effects": "none",
+    "nativeEvidence": "contact-native.png",
+    "nearest2xEvidence": "contact-nearest-2x.png"
+  },
+  "paletteQA": {
+    "status": "pass",
+    "colors": 48,
+    "strict": true,
+    "deltaEThreshold": 0.13,
+    "maxDeltaE": 0.063574,
+    "report": "palette-seed-0/palette-qa.json"
+  },
+  "runtimeReview": "not_performed",
+  "testsRun": false,
+  "supersedes": "The earlier correction_required family finding predated the integrated Garan jumpDown replacement; current ordered frames were reviewed after integration.",
+  "activeAssetsChanged": false
+}

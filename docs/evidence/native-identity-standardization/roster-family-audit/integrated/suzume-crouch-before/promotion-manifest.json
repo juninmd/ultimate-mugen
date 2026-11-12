@@ -1,0 +1,31 @@
+[
+  {
+    "file": "crouch0.png",
+    "originalSha256": "9510554812735a95b75d0fc86746b5c087a294722fdf3ed734be98f297f1d072",
+    "candidate": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch0-pilot/floor-registered-v2/shared-crouch-palette/clean.png",
+    "candidateSha256": "ef2cfc31d4d7648aa0b324b98618ed9f249f5e1441dc852f6833941572382b94",
+    "maxDeltaE": 0.078079,
+    "palette": "identity-locked-retry/palette/palette.json"
+  },
+  {
+    "file": "crouch.png",
+    "originalSha256": "ca5cf0ab56c45db2c044243abbacb9442aa2b483cfa7c0edc5636777e926068f",
+    "candidate": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/final-strict-013/clean.png",
+    "candidateSha256": "75657ab02aa5f7c3479aec4775a4d0fe161b84eb5e4ad302b99bd693f3768e2b",
+    "maxDeltaE": 0.12204,
+    "palette": "identity-locked-retry/palette/palette.json"
+  },
+  {
+    "file": "crouch1.png",
+    "originalSha256": "1ec2d53a5ea8d997278e4b2af2648e7c359191c33ac89b073be773b1bcff0057",
+    "candidate": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouch-pilot/identity-locked-retry/crouch1-retry/final-strict-013/clean.png",
+    "candidateSha256": "6f22f35328e00fd7bca89c4319c3068cf84a26e1e6c5faaf74e8e8ac4e273c4f",
+    "maxDeltaE": 0.104921,
+    "palette": "identity-locked-retry/palette/palette.json"
+  },
+  {
+    "file": "crouch0-prior-candidate.png",
+    "sha256": "fb16b0e1d90f19aa1922309d2e41aab26fb28df784ee8385e6ecafacdae82040",
+    "disposition": "replaced by shared-palette version; original candidate remains in candidate folder"
+  }
+]

@@ -1,0 +1,70 @@
+{
+  "status": "pass",
+  "method": "forge_palette.quantize_image: OKLab-nearest palette colour per pixel (exact palette colours kept), alpha binary at the threshold, then the written PNGs re-read and measured with forge_palette.fit_report against the palette",
+  "notProven": [
+    "Visual quality after snapping: compare an output with its input.",
+    "Indexed PNGs are engine exports; they are not checked by builders."
+  ],
+  "checks": [
+    {
+      "id": "output_off_palette_px",
+      "status": "pass",
+      "value": 0,
+      "threshold": 0
+    },
+    {
+      "id": "output_partial_alpha_px",
+      "status": "pass",
+      "value": 0,
+      "threshold": 0
+    },
+    {
+      "id": "max_delta_e",
+      "status": "pass",
+      "value": 0.056425,
+      "threshold": 0.13
+    }
+  ],
+  "inputs": [
+    {
+      "path": "../../../../../../../assets/chars/sprites/volta/jab0.png",
+      "sha256": "719842ee823a2e639c51e6f6117d5824559d4aa35cfd26f7d9ad9d8734c8b8fd",
+      "bytes": 34884
+    },
+    {
+      "path": "../../../candidates/volta-jab1-impact-pilot/shared-palette-seed-13/palette.json",
+      "sha256": "25f9eaf37d1054396f7305e861a5f54ce0e5eb5395ac17f2a7231c213995434f",
+      "bytes": 1963
+    }
+  ],
+  "outputs": [
+    {
+      "path": "jab0.png",
+      "sha256": "d51d88b3ae623e240fc854f0c89e12acc3248e6353a402dcd4a02ecf13f65a8c",
+      "bytes": 30356
+    }
+  ],
+  "tool": {
+    "name": "palette_tool",
+    "version": "0.5.0"
+  },
+  "fit": {
+    "jab0.png": {
+      "measured_px": 28618,
+      "alpha_threshold": 16,
+      "off_palette_px": 26373,
+      "partial_alpha_px": 0,
+      "colors": 41,
+      "palette_colors_used": 34,
+      "mean_delta_e": 0.005927,
+      "p95_delta_e": 0.016744,
+      "max_delta_e": 0.056425
+    }
+  },
+  "totals": {
+    "max_delta_e": 0.056425,
+    "worst_p95_delta_e": 0.016744,
+    "off_palette_px": 26373
+  },
+  "locked_inputs": []
+}

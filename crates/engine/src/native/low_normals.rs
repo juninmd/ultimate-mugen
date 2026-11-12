@@ -1,4 +1,5 @@
-use super::types::{NativeAnim, NativeChar, NativeMove, VelChange};
+use super::types::{NativeAnim, NativeChar, NativeFrame, NativeMove, VelChange};
+use serde_json::Value;
 
 const DOWN_LIGHT_KICK: &str = "D+a";
 const AIR_FORWARD_SPEED: f32 = 2.2;
@@ -17,7 +18,7 @@ fn air_low_animation(nc: &NativeChar) -> Option<NativeAnim> {
     let mut start = kick.frames.first()?.clone();
     start.ticks = 3;
     start.hit = None;
-    let mut prep = kick.frames.get(2)?.clone();
+    let mut prep = kick.frames.get(1)?.clone();
     prep.ticks = 2;
     prep.hit = None;
     let mut strike = prep.clone();
@@ -39,9 +40,53 @@ fn air_low_animation(nc: &NativeChar) -> Option<NativeAnim> {
 
 fn add_animation(nc: &mut NativeChar, id: &str, source: &str) {
     if nc.anims.get(id).is_none() {
-        if let Some(anim) = animation(nc, source) {
+        if id == "lowKick" {
+            if let Some(anim) = low_kick_animation(nc, source) {
+                nc.anims.0.push((id.into(), anim));
+            }
+        } else if let Some(anim) = animation(nc, source) {
             nc.anims.0.push((id.into(), anim));
         }
+    }
+}
+
+fn set_sprite(frame: &mut NativeFrame, sprite: &str) {
+    frame.sprite = Some(sprite.into());
+    frame.pose = None;
+}
+
+fn low_kick_animation(nc: &NativeChar, source: &str) -> Option<NativeAnim> {
+    let base = animation(nc, source)?;
+    let mut windup = base.frames.first()?.clone();
+    set_sprite(&mut windup, "crouch0");
+    windup.hit = None;
+    let mut strike = base.frames.get(1)?.clone();
+    set_sprite(&mut strike, "lowKick");
+    let mut recovery = base.frames.get(2)?.clone();
+    set_sprite(&mut recovery, "crouch1");
+    recovery.hit = None;
+    let mut settle = base.frames.last()?.clone();
+    set_sprite(&mut settle, "crouch");
+    settle.hit = None;
+    Some(NativeAnim {
+        frames: vec![windup, strike, recovery, settle],
+        loop_start: None,
+    })
+}
+
+fn replace_inline_recovery(nc: &mut NativeChar, animation: &str, frame: usize, sprite: &str) {
+    let Some(frame) = nc
+        .anims
+        .0
+        .iter_mut()
+        .find(|(name, _)| name == animation)
+        .and_then(|(_, animation)| animation.frames.get_mut(frame))
+    else {
+        return;
+    };
+    if frame.sprite.is_none() && frame.pose.as_ref().is_some_and(Value::is_object) {
+        set_sprite(frame, sprite);
+        frame.hit = None;
     }
 }
 
@@ -80,6 +125,9 @@ fn taken(nc: &NativeChar, id: &str, when: &str) -> bool {
 }
 
 pub(super) fn complete(mut nc: NativeChar) -> NativeChar {
+    replace_inline_recovery(&mut nc, "clk", 2, "crouch1");
+    replace_inline_recovery(&mut nc, "ajab", 2, "jumpDown");
+    replace_inline_recovery(&mut nc, "akick", 2, "jumpDown");
     if let Some(base) = move_by_id(&nc, "clk").filter(|m| m.when.as_deref() == Some("crouch")) {
         if !taken(&nc, "lowkick", "crouch") {
             add_animation(&mut nc, "lowKick", &base.anim);
@@ -101,78 +149,5 @@ pub(super) fn complete(mut nc: NativeChar) -> NativeChar {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    fn akio() -> NativeChar {
-        serde_json::from_str(include_str!("../../../../assets/chars/akio.json")).unwrap()
-    }
-
-    #[test]
-    fn every_roster_fighter_gets_ground_and_air_low_kicks() {
-        for entry in std::fs::read_dir("../../assets/chars").unwrap() {
-            let path = entry.unwrap().path();
-            if path.extension().is_none_or(|e| e != "json")
-                || path.file_stem().is_some_and(|s| s == "index")
-            {
-                continue;
-            }
-            let nc: NativeChar =
-                serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
-            if nc.npc {
-                continue;
-            }
-            let out = complete(super::super::air_normals::complete(nc));
-            for id in ["lowkick", "airlowkick"] {
-                assert!(
-                    out.moves.iter().any(|m| m.id == id),
-                    "{} lacks {id}",
-                    out.id
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn low_kicks_use_down_light_kick_and_low_guard() {
-        let out = complete(super::super::air_normals::complete(akio()));
-        for (id, when) in [("lowkick", "crouch"), ("airlowkick", "air")] {
-            let attack = out.moves.iter().find(|m| m.id == id).unwrap();
-            assert_eq!(
-                (attack.input.as_str(), attack.when.as_deref()),
-                (DOWN_LIGHT_KICK, Some(when))
-            );
-            assert!(attack
-                .hits
-                .iter()
-                .all(|hit| hit.guard.as_deref() == Some("low")));
-            assert!(out.anims.get(&attack.anim).is_some());
-        }
-        let animation = out.anims.get("airLowKick").unwrap();
-        assert_eq!(animation.frames.len(), 5);
-        assert_eq!(animation.frames[2].sprite.as_deref(), Some("airLowKick"));
-        assert!(animation.frames[2].hit.is_some());
-        let air = out.moves.iter().find(|m| m.id == "airlowkick").unwrap();
-        assert_eq!(
-            air.moves[0].vel,
-            [Some(AIR_FORWARD_SPEED), Some(AIR_DOWN_SPEED)]
-        );
-        assert_eq!(air.hits[0].at, 3);
-    }
-
-    #[test]
-    fn existing_authored_down_light_kicks_are_preserved() {
-        let mut fighter = akio();
-        let mut authored = fighter
-            .moves
-            .iter()
-            .find(|m| m.id == "clk")
-            .unwrap()
-            .clone();
-        authored.id = "authored_lowkick".into();
-        authored.input = DOWN_LIGHT_KICK.into();
-        fighter.moves.push(authored);
-        let out = complete(super::super::air_normals::complete(fighter));
-        assert!(!out.moves.iter().any(|m| m.id == "lowkick"));
-        assert!(out.moves.iter().any(|m| m.id == "authored_lowkick"));
-    }
-}
+#[path = "low_normals/tests.rs"]
+mod tests;

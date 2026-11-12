@@ -1,0 +1,97 @@
+{
+  "date": "2026-11-12",
+  "fighter": "haruki",
+  "family": "standing low kick",
+  "affectedAnimations": [
+    "lkick",
+    "stringA",
+    "stringB"
+  ],
+  "familyRowsAffected": 3,
+  "poses": [
+    {
+      "pose": "lk0",
+      "sha256": "b8d218946fd88e5e881ab1394fd728a0ad9d8215b686eca5afd9d390abd98028",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 44,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        126,
+        85,
+        275,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      },
+      "backup": "integrated/haruki-lowkick-before/lk0.png",
+      "backupSha256": "ce1b92007f53ae764f4c515ba64f8a13d2e12e37b515f7939152325232275c6f"
+    },
+    {
+      "pose": "lk1",
+      "sha256": "5cd39c88166963c770e2a3707ffea0595677e5c4af1eebd357c6921970f0b34b",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 43,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        80,
+        76,
+        320,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      },
+      "backup": "integrated/haruki-lowkick-before/lk1.png",
+      "backupSha256": "290043c07c5e23788520eb1852741727e1e7e350cd945ea5774e10dccf096f78"
+    }
+  ],
+  "candidateReports": [
+    "candidates/haruki-lk0-high-reuse/candidate-review.json",
+    "candidates/haruki-lk1-high-reuse/candidate-review.json"
+  ],
+  "visualReview": {
+    "native": "candidates/haruki-lk1-high-reuse/review/lk0-lk1-lk0-sequence-native.png",
+    "nearest2x": "candidates/haruki-lk1-high-reuse/review/lk0-lk1-lk0-sequence-2x-nearest.png",
+    "result": "Complete canonical sequence: raised-knee preparation, horizontal extension, raised-knee recovery. Both frames use the same palette/scale/floor and no added effects. lk1 is within one pixel of the old target bbox; lk0 width is 14 px narrower but body height and pose remain consistent."
+  },
+  "integration": "Both frames promoted together after parent review to avoid leaving the active legacy lk1 between corrected poses. Timing/metadata unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

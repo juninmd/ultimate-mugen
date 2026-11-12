@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-12",
+  "fighter": "suzume",
+  "pose": "guard",
+  "target": "assets/chars/sprites/suzume/guard.png",
+  "activeSha256": "db2717181979c87db744d67e5280c8a469053f05e7dbee40306d2d98ca0d749e",
+  "backup": "integrated/suzume-guard-before/guard.png",
+  "backupSha256": "3d4f03d9cde534a9eb6388316b4dd50c46c1a3f21a780c19d37e795da98359b4",
+  "identityAnchor": "assets/chars/sprites/suzume/04_special.png",
+  "candidateReview": "candidates/suzume-guard-pilot/qa-report.json",
+  "frame": {
+    "pose": "guard",
+    "sha256": "db2717181979c87db744d67e5280c8a469053f05e7dbee40306d2d98ca0d749e",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 47,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      113,
+      72,
+      298,
+      392
+    ],
+    "axis": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sharedPaletteFile": "candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+    "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "floorY392": true,
+      "axis200x392Ref320": true,
+      "exactPaletteSubset": true
+    }
+  },
+  "visualReview": {
+    "native": "review/native-review.png",
+    "nearest_2x": "review/nearest-2x-review.png",
+    "rig_pose_reference": "rig-source-guard-zoom.png",
+    "result": "Candidate preserves a held high guard: forearms protect face/upper chest, elbows bent, staggered braced legs. Compared against active target and rig geometry only. No weapon or effect was added.",
+    "identity": "Candidate follows 04_special identity: violet ponytail/red bow, purple gi/mask and pink trim. It removes the old hood, armor and metallic greaves. Hard pixel clusters remain legible in native and 2x nearest review."
+  },
+  "integration": "Promoted after parent review of native and nearest-2x evidence. guardHit remains a separate pending pose; animation timing and metadata unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

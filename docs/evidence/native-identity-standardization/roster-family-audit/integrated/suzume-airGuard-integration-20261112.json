@@ -1,0 +1,96 @@
+{
+  "date": "2026-11-12",
+  "fighter": "suzume",
+  "pose": "airGuard",
+  "target": "assets/chars/sprites/suzume/airGuard.png",
+  "activeSha256": "cff39d2650f86efa03a08df0cc3165ac2b6bbbaf69725558ace63e636fd7f13e",
+  "backup": "integrated/suzume-airGuard-before/airGuard.png",
+  "backupSha256": "c05eb68de98cd24920ef937d0493c49f1fe277396db2d23de42e3c556ee995ab",
+  "candidateReview": "candidates/suzume-airGuard-pilot/qa-report.json",
+  "frame": {
+    "pose": "airGuard",
+    "sha256": "cff39d2650f86efa03a08df0cc3165ac2b6bbbaf69725558ace63e636fd7f13e",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 47,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      85,
+      72,
+      310,
+      392
+    ],
+    "axis": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sharedPaletteFile": "candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+    "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "floorY392": true,
+      "axis200x392Ref320": true,
+      "exactPaletteSubset": true
+    }
+  },
+  "visualReview": {
+    "native": "review/native-review.png",
+    "nearest_2x": "review/nearest-2x-review.png",
+    "rig_pose_reference": "rig-source-airGuard-zoom.png",
+    "result": "Candidate preserves airborne high guard with forearms shielding the face/chest and knees tucked with both feet airborne. It remains visibly distinct from the integrated ground guard and keeps the target's compact airborne silhouette. No weapon or effect was added.",
+    "identity": "Canonical Suzume violet ponytail/red bow, purple ninja outfit and pink trim; legacy hood, armor and greaves removed."
+  },
+  "animationEvidence": {
+    "json": "assets/chars/suzume.json",
+    "airGuard": {
+      "frames": [
+        {
+          "pose": "airGuard",
+          "ticks": -1
+        }
+      ]
+    },
+    "airGuardHit": {
+      "frames": [
+        {
+          "pose": "airGuardHit",
+          "ticks": 3
+        },
+        {
+          "pose": "airGuard",
+          "ticks": -1
+        }
+      ]
+    },
+    "airGuard_pose": {
+      "thighF": 78,
+      "kneeF": 120,
+      "thighB": 50,
+      "kneeB": 118,
+      "lean": 4,
+      "head": 10,
+      "wind": 0.4
+    },
+    "airGuardHit_pose": {
+      "thighF": 78,
+      "kneeF": 120,
+      "thighB": 50,
+      "kneeB": 118,
+      "lean": -8,
+      "head": 10,
+      "wind": 0.4
+    },
+    "weapon": "No weapon is declared by airGuard; none is shown in candidate."
+  },
+  "integration": "Promoted after parent native and nearest-2x review. airGuardHit remains a separate pending pose. Metadata/timing unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

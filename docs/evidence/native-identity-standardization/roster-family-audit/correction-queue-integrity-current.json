@@ -1,0 +1,16 @@
+{
+  "queueEntries": 379,
+  "packs": 14,
+  "reviewEpoch": 3,
+  "statusCounts": {
+    "adjudicated_consistent_no_correction": 15,
+    "confirmed_finish_or_equipment_mismatch_pending_correction": 33,
+    "confirmed_style_family_mismatch_pending_correction": 157,
+    "confirmed_visual_family_mismatch_pending_identity_adjudication": 18,
+    "confirmed_hair_face_rendering_mismatch_pending_correction": 21,
+    "confirmed_outfit_family_mismatch_pending_correction": 99,
+    "candidate_integrated_static_review_pending_full_family_runtime_validation": 1,
+    "confirmed_visual_family_mismatch_pending_correction": 35
+  },
+  "errors": []
+}

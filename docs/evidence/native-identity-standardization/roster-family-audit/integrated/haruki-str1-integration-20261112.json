@@ -1,0 +1,103 @@
+{
+  "date": "2026-11-12",
+  "fighter": "haruki",
+  "pose": "str1",
+  "target": "assets/chars/sprites/haruki/str1.png",
+  "activeSha256": "13db71a0a637259ac07a294e56c3bbe49b202b9a5cdbed770e67402871ae3279",
+  "backup": "integrated/haruki-str1-before/str1.png",
+  "backupSha256": "1ae08e430a5dd786b27fa7fa1da27301a2d2ff42f58d1dd2cfc3e316f94a2ef2",
+  "candidateReview": "candidates/haruki-str1-high-reuse/candidate-review.json",
+  "frame": {
+    "pose": "str1",
+    "sha256": "13db71a0a637259ac07a294e56c3bbe49b202b9a5cdbed770e67402871ae3279",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 45,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      77,
+      92,
+      366,
+      392
+    ],
+    "axis": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+    "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "floorY392": true,
+      "axis200x392Ref320": true,
+      "exactPaletteSubset": true
+    }
+  },
+  "sharedOccurrences": 10,
+  "affectedAnimations": [
+    "pageThrow",
+    "stringB",
+    "stringC",
+    "strong",
+    "theorem"
+  ],
+  "visualReview": {
+    "native": "review/five-sequence-continuity-native.png",
+    "nearest2x": "review/five-sequence-continuity-2x-nearest.png",
+    "sequences": {
+      "pageThrow": [
+        "candidate str1",
+        "candidate str1",
+        "integrated str0",
+        "active idle0"
+      ],
+      "stringB": [
+        "active lk0",
+        "active lk1",
+        "integrated str0",
+        "integrated str0",
+        "candidate str1",
+        "candidate str1",
+        "integrated str0",
+        "active idle0"
+      ],
+      "stringC": [
+        "integrated str0",
+        "integrated str0",
+        "candidate str1",
+        "candidate str1",
+        "integrated str0",
+        "active idle0"
+      ],
+      "strong": [
+        "integrated str0",
+        "integrated str0",
+        "candidate str1",
+        "candidate str1",
+        "integrated str0",
+        "active idle0"
+      ],
+      "theorem": [
+        "active guard",
+        "active guard",
+        "active guard",
+        "candidate str1",
+        "candidate str1",
+        "integrated str0",
+        "active idle0"
+      ]
+    },
+    "result": "Candidate str1 is a visually distinct forward-leaning, flexed-knee two-arm follow-through. In each sequence where str0 precedes it, the transition reads as the upright palm-ready pose advancing into a grounded projection, then returning to str0 and/or idle. pageThrow starts with the projection and resolves through str0 to idle. Repeated str1 occurrences are exact repeats in the current timing data; this candidate does not add motion between repeated frames. The old active guard and lk0/lk1 frames in theorem/stringB remain visually inconsistent with canonical Haruki; those adjacent frames are outside this candidate scope and should be corrected separately. Candidate and integrated str0 share floor line 392; heights are 302 and 318 px, matching the active str1 target and integrated str0 respectively."
+  },
+  "integration": "Promoted after parent review of all five native/nearest-2x sequences. Candidate shifted down one pixel after independent floor-line audit. Adjacent legacy guard/lk0/lk1 frames remain open. Metadata and timings unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

@@ -2,8 +2,11 @@ use crate::input::{k, InputSource};
 use crate::matchs::Match;
 
 mod charge;
+mod guard_budget;
 mod reading;
 mod tactics;
+
+use guard_budget::GuardBudget;
 
 pub struct Ai {
     pub level: i32,
@@ -17,6 +20,7 @@ pub struct Ai {
     init: bool,
     last_form: u8,
     profile: reading::Profile,
+    guard: GuardBudget,
 }
 
 impl Ai {
@@ -33,11 +37,13 @@ impl Ai {
             init: false,
             last_form: u8::MAX,
             profile: Default::default(),
+            guard: GuardBudget::default(),
         }
     }
     pub fn reset(&mut self) {
         self.init = false;
         self.last_form = u8::MAX;
+        self.guard = GuardBudget::default();
         self.queue.clear();
         self.hold = 0;
         self.hold_ticks = 0;
@@ -76,6 +82,7 @@ impl InputSource for Ai {
 impl Ai {
     fn poll_fight(&mut self, m: &Match, me: usize) -> u32 {
         let f = &m.fighters[me];
+        self.guard.on_rest_tick();
         if !self.init || self.last_form != f.form {
             self.init = true;
             self.last_form = f.form;
@@ -154,13 +161,16 @@ impl Ai {
         let threat = self.sees_attack(e) || m.projectiles.iter().any(|p| p.side == e.side);
         if threat
             && dist < 140.0
+            && self.guard.can_guard()
             && r < (0.25 + skill * 0.6).min(if primordial { 0.75 } else if final_boss { 0.68 } else if boss { 0.55 } else { 1.0 })
             && f.move_type != 'H'
         {
             self.hold = self.block_hold(e, back);
             self.hold_ticks = 8 + (self.r() * 10.0) as i32;
+            self.guard.on_guard(self.hold_ticks + 1);
             return self.hold;
         }
+        self.guard.on_free();
         let near = if primordial { 135.0 } else if final_boss { 120.0 } else if boss { 105.0 } else { 70.0 };
         let scale = (f.def.local_w / 320.0).clamp(0.5, 2.0);
         let near = near * scale;

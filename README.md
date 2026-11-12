@@ -77,31 +77,31 @@ Keyboard, touch, Xbox, DualShock 4 and DualSense with **rumble and lightbars**. 
 ## 🖼️ Pixel-art roster, maps and gameplay
 
 <p align="center">
-  <img src="docs/assets/readme/fight.gif" alt="Gameplay: two native fighters trading hits on the Bamboo stage" width="70%">
+  <img src="docs/assets/readme/readme-fight-pixel-art.png" alt="Pixel art illustration of two fighters trading a hit in a bamboo arena" width="70%">
 </p>
 
-<p align="center"><i>Real gameplay captured from the web build (software rendering, so the GIF runs below the native frame rate).</i></p>
+<p align="center"><i>Illustrative pixel art created for this README; this image is not a live gameplay capture.</i></p>
 
 ### Pixel-art fighters
 
 The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set per fighter, with palettes, ki/energy specials, flight, teleport and transformations. Characters are declared in a single UMF JSON each.
 
-![Character select with the pixel-art roster](docs/assets/readme/roster-select.jpg)
+![Pixel art illustration of a character-select screen](docs/assets/readme/readme-roster-pixel-art.png)
 
 ### Maps
 
 21 illustrated arenas, from a sunset dojo roof and a neon metropolis to the wonders of the world (Petra, Taj Mahal, Christ the Redeemer, the Colosseum, the Great Wall, Chichen Itza and more), each with living ambience layers and its own built-in music theme.
 
-![Stage select](docs/assets/readme/stage-select.jpg)
+![Pixel art illustration of an arena-select screen](docs/assets/readme/readme-stage-select-pixel-art.png)
 
 **Story mode** adds five long scrolling extensions of the arenas (Brazil, Neon, Bamboo, Volcano and Dojo): one segment per fight, four waves of thugs plus a stage boss, with health carry-over between fights. See the [Story mode guide](docs/wiki/Story-Mode.md).
 
-![Story mode scrolling stages](docs/assets/readme/story-stages.jpg)
+![Pixel art panoramas inspired by the five story stages](docs/assets/readme/readme-story-stages-pixel-art.png)
 
 <table>
 <tr>
-<td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Versus screen"></td>
-<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 on the Bamboo stage"></td>
+<td width="50%"><img src="docs/assets/readme/readme-versus-pixel-art.png" alt="Pixel art illustration of two fighters facing off before a match"></td>
+<td width="50%"><img src="docs/assets/readme/readme-fight-round1-pixel-art.png" alt="Pixel art illustration of a fight on a bamboo arena"></td>
 </tr>
 </table>
 

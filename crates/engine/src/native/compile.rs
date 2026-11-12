@@ -129,7 +129,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     commands.extend(ab.commands);
     let mut minus1 = String::from("[Statedef -1]\n\n[State -1, run]\ntype = ChangeState\nvalue = 100\ntriggerall = command = \"FF\"\ntrigger1 = statetype = S && ctrl\n\n[State -1, hop]\ntype = ChangeState\nvalue = 105\ntriggerall = command = \"BB\"\ntrigger1 = statetype = S && ctrl\n\n") + &ab.minus1;
     let mut cns = String::new();
-    let rank = |m: &NativeMove| (match m.kind.as_str() { "super" => 300, "special" | "finisher" => 200, _ => 100 }) + m.input.split(',').count() as i32 * 5 + m.input.contains('+') as i32 * 2;
+    let rank = |m: &NativeMove| (if super::ultimate::is(&m.id) { 400 } else { match m.kind.as_str() { "super" => 300, "special" | "finisher" => 200, _ => 100 } }) + m.input.split(',').count() as i32 * 5 + m.input.contains('+') as i32 * 2;
     let mut order = super::forms::collect_form_moves(nc);
     order.sort_by_key(|(m, _, _)| -rank(m));
     let plan = super::chain::ChainPlan::new(order.iter().map(|(m, _, _)| *m));
@@ -144,7 +144,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let mut cdef = parse_command(&cname, &m.input, if m.kind == "super" { 30 } else if m.kind == "special" || m.kind == "finisher" { 20 } else { 15 }, if simple_btn { 1 } else { 4 });
         cdef.pause_buffer = if m.kind == "super" { 8 } else if m.kind == "special" || m.kind == "finisher" { 6 } else if simple_btn { 0 } else { 4 };
         commands.push(cdef);
-        let cost = m.cost.unwrap_or(if m.kind == "super" { 1000.0 } else { 0.0 });
+        let cost = m.cost.unwrap_or(if super::ultimate::is(&m.id) { super::ultimate::COST } else if m.kind == "super" { 1000.0 } else { 0.0 });
         movelist.push(MoveInfo { name: m.name.clone(), input: m.input.clone(), command: cname.clone(), cost, drain: false, forms: forms_mask, state: sid });
         let mut simple_cmd = String::new();
         if let Some(sp) = &m.simple {
@@ -167,8 +167,9 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let ph = match when { "air" => 'A', "crouch" => 'C', _ => if jumps || m.flight == Some(true) { 'N' } else { 'S' } };
         let pa = if cost > 0.0 { -cost } else if m.kind == "special" { 30.0 } else { 15.0 };
         cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" }); cns += &super::armor::armor_state(nc, m, sid); cns += &extras::voice_and_traits_state(m, sid); let (throw_cns, throw_def) = super::throw::throw_states(m, sid); cns += &throw_cns; throw_defs += &throw_def; cns += &super::requires::finisher_done(m, sid);
+        let freeze = if super::ultimate::is(&m.id) { super::ultimate::FREEZE } else { 55 };
         if m.kind == "super" {
-            cns += &format!("[State {sid}, super]\ntype = SuperPause\ntrigger1 = Time = 0\ntime = 55\nanim = 30\npos = 0, -60\nsound = -1\n\n[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\nframegap = 2\npalbright = 0, 0, 0\npalcontrast = 100, 150, 256\npaladd = 0, 0, 0\npalmul = .85, .85, .85\ntime = 60\nlength = 10\n\n");
+            cns += &format!("[State {sid}, super]\ntype = SuperPause\ntrigger1 = Time = 0\ntime = {freeze}\nanim = 30\npos = 0, -60\nsound = -1\n\n[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\nframegap = 2\npalbright = 0, 0, 0\npalcontrast = 100, 150, 256\npaladd = 0, 0, 0\npalmul = .85, .85, .85\ntime = 60\nlength = 10\n\n");
         } else if m.fx.as_deref() == Some("aura") {
             cns += &format!("[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\nframegap = 2\npalbright = 0, 0, 0\npalcontrast = 100, 150, 256\npaladd = 0, 0, 0\npalmul = .85, .85, .85\ntime = 20\nlength = 6\n\n");
         }
@@ -180,8 +181,8 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         if ph == 'N' && when != "air" {
             cns += &format!("[State {sid}, grav]\ntype = VelAdd\ntrigger1 = Pos Y < 0 || Vel Y < 0\ny = const(movement.yaccel)\n\n[State {sid}, land]\ntype = ChangeState\ntrigger1 = Pos Y >= 0 && Vel Y > 0\nvalue = 52\n\n[State {sid}, fix]\ntype = PosSet\ntrigger1 = Pos Y > 0\ny = 0\n\n");
         }
-        // supers hit 30 % harder than their data (grander, deadlier finishers)
-        let sm = if m.kind == "super" { 1.3 } else { 1.0 };
+        // ultimates hit 70 % harder than their data; supers hit 30 % harder (grander, deadlier finishers)
+        let sm = if super::ultimate::is(&m.id) { super::ultimate::DAMAGE } else if m.kind == "super" { 1.3 } else { 1.0 };
         let attr = format!("{st}, {}A", match m.kind.as_str() { "normal" => "N", "special" | "finisher" => "S", _ => "H" });
         for h in super::multihit::glue(&m.hits).iter() {
             cns += &format!("[State {sid}, hit]\ntype = HitDef\ntrigger1 = AnimElem = {}\n{}\n", h.at,

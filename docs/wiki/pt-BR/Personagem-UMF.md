@@ -158,6 +158,8 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 
 **Finisher.** Um golpe com `"kind": "finisher"` (use `throw` ou `hits` para o efeito) só fica disponível após um nocaute (`RoundState = 3` e `WinKO`). Quando o round final termina em nocaute e o vencedor tem um finisher, o round espera até 6 segundos em "FINISH HIM" para o vencedor executá-lo; executar (ou o tempo acabar) encerra a espera. Elencos sem finisher não mudam.
 
+**Ultimate.** Um golpe cujo `id` começa com `ult_` é a ultimate do lutador, e todo lutador nativo declara uma (o comando é `~D, DF, F, D, DF, F, x+y`). O compilador gasta o medidor inteiro nela: `cost` passa a valer `3000` por padrão (as três barras do HUD), o golpe recebe 70 % de bônus de dano onde um `super` comum recebe 30 %, e o congelamento de super dura 75 ticks em vez de 55. `cargo test --release -p ume-engine --test native_ultimates` falha quando um lutador não tem ultimate, quando o custo não é de três barras, quando a ultimate não inicia pelo comando ou não drena o medidor, ou quando o dano medido fica abaixo de 380 ou não supera todos os supers do lutador.
+
 ### Traços de combate
 
 - **Gatling automático.** Um golpe sem `cancels` segue o gênero: um normal cancela em qualquer normal *mais forte* (`light` < `medium` < `heavy` pelo maior nível de acerto, empate pela ordem de declaração, então sequências nunca entram em loop), normais em pé ligam nos agachados, normais aéreos encadeiam com aéreos, e todo normal cancela em todo especial e super no contato. Especiais só cancelam em outros especiais por `cancels` explícito; supers cancelam a partir de qualquer golpe.

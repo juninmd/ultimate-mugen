@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/banner.pt-BR.jpg" alt="Ultimate MUGEN" width="100%">
+  <img src="docs/assets/banner-pixel-art-pt-BR.png" alt="Ultimate MUGEN" width="100%">
 </p>
 
 <p align="center">

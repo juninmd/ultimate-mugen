@@ -40,12 +40,13 @@ Só as três plataformas publicadas se atualizam sozinhas. Web, Android, iOS, Li
 ## Fluxo
 
 1. Na inicialização o jogo busca `releases/latest/download/latest.json` por HTTPS (timeout de 8 s, ignorado em silêncio quando offline).
-2. Uma `version` mais nova com entrada `binary` para a plataforma atual inicia o download em segundo plano (timeout de 180 s) para `.update-v<versão>[.exe]` ao lado do executável em execução.
-3. O download só é aceito se o `sha256` e o tamanho em bytes baterem com o manifesto e se o executável baixado responder `--version` com `ultimate-mugen <versão>`.
-4. Na tela de título ou no menu principal o arquivo baixado substitui o executável instalado (no Windows o executável em uso é renomeado para `.old` antes) e o jogo reinicia com `--no-update-check`, para que um manifesto ruim não cause laço de reinícios.
-5. O `.old` anterior é apagado na inicialização seguinte.
+2. Uma `version` mais nova com entrada `binary` para a plataforma atual mostra um painel no título/menu com a versão instalada e a disponível. Nada é baixado até a pessoa aceitar "Atualizar agora".
+3. Ao aceitar, o download roda em segundo plano (timeout de 180 s) para `.update-v<versão>[.exe]` ao lado do executável em execução.
+4. O download só é aceito se o `sha256` e o tamanho em bytes baterem com o manifesto e se o executável baixado responder `--version` com `ultimate-mugen <versão>`.
+5. Verificado o pacote, ele substitui o executável instalado (no Windows o executável em uso é renomeado para `.old` antes) e o jogo reinicia com `--no-update-check`, para que um manifesto ruim não cause laço de reinícios.
+6. O `.old` anterior é apagado na inicialização seguinte.
 
-Falha de download, máquina offline ou pasta de instalação somente leitura mudam apenas a linha de status; a build em execução continua funcionando.
+Falha de download, máquina offline ou pasta de instalação somente leitura mudam apenas a linha de status; a build em execução continua funcionando. "Agora não" esquece a versão até o próximo boot, e o aviso do rodapé continua visível.
 
 ## Linha de comando e como desligar
 
@@ -53,7 +54,7 @@ Falha de download, máquina offline ou pasta de instalação somente leitura mud
 | --- | --- |
 | `--check-update` | Mostra se existe release mais nova e sai |
 | `--update` | Baixa, verifica e instala a release mais nova, depois sai |
-| `--no-auto-update` / `UME_NO_AUTO_UPDATE=1` | Mantém o aviso, mas nunca baixa nem instala |
+| `--no-auto-update` / `UME_NO_AUTO_UPDATE=1` | Mantém o aviso no rodapé e nunca mostra a pergunta (então nunca baixa nem instala) |
 | `--no-update-check` / `UME_NO_UPDATE_CHECK=1` | Nenhuma requisição de rede |
 
 Builds locais `-dev` nunca se atualizam.

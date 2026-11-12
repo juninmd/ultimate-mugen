@@ -43,6 +43,7 @@ enum Event {
 pub struct Updater {
     rx: Option<Receiver<Event>>,
     state: State,
+    prompt: bool,
 }
 
 impl Updater {
@@ -55,15 +56,16 @@ impl Updater {
                 || manifest::platform().is_none()
                 || args.iter().any(|a| a == "--shots");
             if !off {
-                let auto =
+                let prompt =
                     !auto_disabled(args, std::env::var("UME_NO_AUTO_UPDATE").ok().as_deref());
                 let (tx, rx) = std::sync::mpsc::channel();
                 let _ = std::thread::Builder::new()
                     .name("update".into())
-                    .spawn(move || work(VERSION, auto, tx));
+                    .spawn(move || work(VERSION, tx));
                 return Updater {
                     rx: Some(rx),
                     state: State::Checking,
+                    prompt,
                 };
             }
         }
@@ -72,6 +74,7 @@ impl Updater {
         Updater {
             rx: None,
             state: State::Idle,
+            prompt: false,
         }
     }
 
@@ -132,28 +135,66 @@ impl Updater {
         self.state = state;
         self.rx = None;
     }
+
+    /// `--no-auto-update` / `UME_NO_AUTO_UPDATE`: mantém o aviso da versão nova no rodapé e nunca
+    /// pergunta, para quem não quer o app interrompendo. O `--update` manual continua valendo.
+    pub fn prompt_allowed(&self) -> bool {
+        self.prompt
+    }
+
+    /// O usuário aceitou no aviso: baixa e verifica o pacote que o `check` já encontrou. Só um
+    /// `Ready` nascido daqui chega ao instalador — nada troca o binário sem esse aceite.
+    pub fn accept(&mut self) {
+        #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+        {
+            let State::Available(update) = &self.state else {
+                return;
+            };
+            let Some(binary) = update.binary.clone() else {
+                return;
+            };
+            let version = update.version.clone();
+            let (tx, rx) = std::sync::mpsc::channel();
+            self.state = State::Downloading {
+                version: version.clone(),
+                done: 0,
+                total: binary.size,
+            };
+            self.rx = Some(rx);
+            let _ = std::thread::Builder::new()
+                .name("update-download".into())
+                .spawn(move || download_work(version, binary, tx));
+        }
+    }
+
+    /// "Agora não": esquece a versão encontrada até o próximo boot (o aviso do rodapé some junto).
+    pub fn dismiss(&mut self) {
+        if matches!(self.state, State::Available(_)) {
+            self.state = State::Idle;
+        }
+    }
 }
 
 #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
-fn work(current: &'static str, auto: bool, tx: Sender<Event>) {
-    let update = match download::fetch_manifest(current) {
-        Ok(Some(update)) => update,
+fn work(current: &'static str, tx: Sender<Event>) {
+    match download::fetch_manifest(current) {
+        Ok(Some(update)) => {
+            let _ = tx.send(Event::Found(update));
+        }
         Ok(None) => {
             let _ = tx.send(Event::UpToDate);
-            return;
         }
         Err(error) => {
             let _ = tx.send(Event::Failed(error));
-            return;
         }
-    };
-    let _ = tx.send(Event::Found(update.clone()));
-    let (Some(binary), true) = (update.binary.clone(), auto) else {
-        return;
-    };
+    }
+}
+
+#[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+fn download_work(version: String, binary: super::manifest::Asset, tx: Sender<Event>) {
     let progress_tx = tx.clone();
     let mut last_bucket = u64::MAX;
-    let result = download::download_and_stage(&update.version, &binary, |done, total| {
+    let result = download::download_and_stage(&version, &binary, |done, total| {
         let percent = if total > 0 {
             done.saturating_mul(100) / total
         } else {
@@ -166,10 +207,7 @@ fn work(current: &'static str, auto: bool, tx: Sender<Event>) {
     });
     match result {
         Ok(staged) => {
-            let _ = tx.send(Event::Ready {
-                version: update.version,
-                staged,
-            });
+            let _ = tx.send(Event::Ready { version, staged });
         }
         Err(error) => {
             let _ = tx.send(Event::Failed(error));

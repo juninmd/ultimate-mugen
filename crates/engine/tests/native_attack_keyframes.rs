@@ -1,8 +1,8 @@
 use serde_json::Value;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
-use ume_engine::native::{native_frame_sprite_key, NativeFrame};
+use ume_engine::native::{audit_native_sprite_frames, NativeChar};
 
 fn character_files() -> Vec<PathBuf> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets/chars");
@@ -19,15 +19,8 @@ fn character_files() -> Vec<PathBuf> {
     files
 }
 
-fn pose_key(frame: &Value) -> Option<String> {
-    if let Some(sprite) = frame.get("sprite").and_then(Value::as_str) {
-        return Some(format!("sprite:{sprite}"));
-    }
-    frame.get("pose").map(|pose| format!("pose:{pose}"))
-}
-
 #[test]
-fn every_native_attack_has_three_distinct_poses() {
+fn every_native_attack_has_three_distinct_rendered_images() {
     let mut attacks = 0;
     let mut failures = Vec::new();
     for path in character_files() {
@@ -36,7 +29,19 @@ fn every_native_attack_has_three_distinct_poses() {
         if id.starts_with("npc_") {
             continue;
         }
-        let animations = &character["anims"];
+        let native: NativeChar = serde_json::from_value(character.clone()).unwrap();
+        let audit = audit_native_sprite_frames(&native);
+        let animations: HashMap<_, _> = audit["animations"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(|animation| {
+                Some((
+                    animation["animation"].as_str()?,
+                    animation["uniqueBodyImages"].as_u64()?,
+                ))
+            })
+            .collect();
         let forms = character["abilities"]["forms"]
             .as_array()
             .into_iter()
@@ -55,17 +60,11 @@ fn every_native_attack_has_three_distinct_poses() {
         {
             attacks += 1;
             let name = attack["anim"].as_str().unwrap_or("unknown");
-            let keys: HashSet<_> = animations[name]["frames"]
-                .as_array()
-                .into_iter()
-                .flatten()
-                .filter_map(pose_key)
-                .collect();
-            if keys.len() < 3 {
+            let image_count = animations.get(name).copied().unwrap_or_default();
+            if image_count < 3 {
                 failures.push(format!(
-                    "{id}/{} ({name}): {} distinct poses",
+                    "{id}/{} ({name}): {image_count} distinct rendered images",
                     attack["id"],
-                    keys.len()
                 ));
             }
         }
@@ -73,30 +72,30 @@ fn every_native_attack_has_three_distinct_poses() {
     assert_eq!(attacks, 510, "native attack inventory changed");
     assert!(
         failures.is_empty(),
-        "attacks with fewer than 3 poses: {failures:#?}"
+        "attacks with fewer than 3 rendered images: {failures:#?}"
     );
 }
 
 #[test]
-fn generated_attack_keyframes_are_crisp_400_pixel_sprites() {
+fn every_native_combat_sprite_is_crisp_pixel_art() {
     let mut checked = 0;
-    for path in character_files() {
-        let character: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
-        let id = character["id"].as_str().unwrap();
-        let sprite_root =
-            Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("../../assets/chars/sprites/{id}"));
-        for name in ["clk", "ajab", "akick"] {
-            let Some(frames) = character["anims"][name]["frames"].as_array() else {
-                continue;
-            };
-            let Some(frame) = frames.get(2) else {
-                continue;
-            };
-            if frame.get("pose").is_none_or(|pose| !pose.is_object()) {
+    let sprite_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets/chars/sprites");
+    for directory in fs::read_dir(sprite_root).unwrap() {
+        let directory = directory.unwrap().path();
+        if !directory.is_dir() {
+            continue;
+        }
+        for entry in fs::read_dir(directory).unwrap() {
+            let sprite_path = entry.unwrap().path();
+            if sprite_path
+                .extension()
+                .is_none_or(|extension| extension != "png")
+                || sprite_path
+                    .file_stem()
+                    .is_some_and(|stem| stem == "portrait")
+            {
                 continue;
             }
-            let frame: NativeFrame = serde_json::from_value(frame.clone()).unwrap();
-            let sprite_path = sprite_root.join(format!("{}.png", native_frame_sprite_key(&frame)));
             let decoded = ume_formats::png::decode_png(
                 &fs::read(&sprite_path)
                     .unwrap_or_else(|error| panic!("{}: {error}", sprite_path.display())),
@@ -108,7 +107,11 @@ fn generated_attack_keyframes_are_crisp_400_pixel_sprites() {
                 "{}",
                 sprite_path.display()
             );
-            let rgba = decoded.rgba.expect("generated sprite must be RGBA");
+            let rgba = decoded
+                .rgba
+                .as_ref()
+                .cloned()
+                .unwrap_or_else(|| ume_formats::png::png_indexed_to_rgba(&decoded));
             let mut colors = HashSet::new();
             for pixel in rgba.chunks_exact(4) {
                 assert!(
@@ -129,8 +132,5 @@ fn generated_attack_keyframes_are_crisp_400_pixel_sprites() {
             checked += 1;
         }
     }
-    assert_eq!(
-        checked, 44,
-        "expected all 44 generated keyframes to be checked"
-    );
+    assert_eq!(checked, 2162, "native combat sprite inventory changed");
 }

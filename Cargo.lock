@@ -2924,6 +2924,7 @@ name = "ume-charforge"
 version = "0.2.0"
 dependencies = [
  "miniz_oxide 0.8.9",
+ "png",
  "serde_json",
  "toml",
  "ume-engine",

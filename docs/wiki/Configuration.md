@@ -44,7 +44,7 @@ The window can be dragged to any size. The game draws into a fixed 16:9 logical 
 | `--version` | Print the version |
 | `--check-update` | Print whether a newer release exists and exit |
 | `--update` | Download, verify and install the newest release, then exit |
-| `--no-auto-update` / `--no-update-check` | Keep the notice only / skip the update check |
+| `--no-auto-update` / `--no-update-check` | Keep the notice, hide the update prompt / skip the update check |
 
 ## Environment variables
 

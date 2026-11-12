@@ -14,7 +14,9 @@ const MAX_SRC_PIXELS: u64 = 24_000_000;
 pub fn safe_name(value: &str) -> bool {
     !value.is_empty()
         && value.len() <= MAX_NAME
-        && value.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+        && value
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
 }
 
 pub fn to_pixmap(img: &ume_engine::chardef::ImageData) -> Option<Pixmap> {
@@ -22,7 +24,11 @@ pub fn to_pixmap(img: &ume_engine::chardef::ImageData) -> Option<Pixmap> {
         return None;
     }
     let mut pm = Pixmap::new(img.w, img.h)?;
-    for (d, s) in pm.data_mut().chunks_exact_mut(4).zip(img.rgba.chunks_exact(4)) {
+    for (d, s) in pm
+        .data_mut()
+        .chunks_exact_mut(4)
+        .zip(img.rgba.chunks_exact(4))
+    {
         let a = s[3] as u32;
         for i in 0..3 {
             d[i] = ((s[i] as u32 * a + 127) / 255) as u8;
@@ -37,13 +43,21 @@ fn has(needles: &[&str], lower: &str) -> bool {
 }
 
 fn basic_stem(lower: &str) -> &'static str {
-    if has(&["idle", "walk", "run", "stand", "turn", "crouch", "land", "hop", "guard", "getup", "recover"], lower) {
+    if has(
+        &[
+            "idle", "walk", "run", "stand", "turn", "crouch", "land", "hop", "guard", "getup",
+            "recover",
+        ],
+        lower,
+    ) {
         BASE_STEM
     } else if has(&["jab", "punch"], lower) || lower.starts_with("str") {
         "02_attack1"
     } else if has(&["kick", "lk", "hk", "sweep"], lower) {
         "03_attack2"
-    } else if has(&["special", "super", "arc", "frost", "cut", "rise"], lower) || lower.starts_with("sp") {
+    } else if has(&["special", "super", "arc", "frost", "cut", "rise"], lower)
+        || lower.starts_with("sp")
+    {
         "04_special"
     } else if has(&["proj", "blast", "fireball", "wave", "gale"], lower) {
         "05_projectile"
@@ -74,12 +88,21 @@ fn pose_stem(lower: &str) -> &'static str {
 
 fn inline_pose_key(pose: &Value) -> String {
     let bytes = serde_json::to_vec(pose).unwrap_or_default();
-    let hash = bytes.iter().fold(0xcbf29ce484222325u64, |hash, byte| (hash ^ *byte as u64).wrapping_mul(0x100000001b3));
+    let hash = bytes.iter().fold(0xcbf29ce484222325u64, |hash, byte| {
+        (hash ^ *byte as u64).wrapping_mul(0x100000001b3)
+    });
     format!("inline_{hash:016x}")
 }
 
-pub fn frame_targets(frame: &Value, files: &BTreeSet<String>, poses: &Value) -> Option<(String, Value)> {
-    let is_effect = frame.get("effect").map_or(false, |effect| !effect.is_null());
+pub fn frame_targets(
+    frame: &Value,
+    files: &BTreeSet<String>,
+    poses: &Value,
+    exact_only: bool,
+) -> Option<(String, Value)> {
+    let is_effect = frame
+        .get("effect")
+        .map_or(false, |effect| !effect.is_null());
     if is_effect || frame.get("sprite").is_some() {
         return None;
     }
@@ -100,7 +123,7 @@ pub fn frame_targets(frame: &Value, files: &BTreeSet<String>, poses: &Value) -> 
         if files.contains(name) {
             return None;
         }
-        if stem != BASE_STEM && files.contains(stem) {
+        if !exact_only && stem != BASE_STEM && files.contains(stem) {
             return None;
         }
         return Some((name.to_string(), pose_value.clone()));
@@ -113,4 +136,32 @@ pub fn frame_targets(frame: &Value, files: &BTreeSet<String>, poses: &Value) -> 
         return Some((key, pose.clone()));
     }
     None
+}
+
+pub fn attack_animations(character: &Value) -> BTreeSet<String> {
+    character
+        .get("moves")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .chain(
+            character
+                .pointer("/abilities/forms")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten()
+                .flat_map(|form| {
+                    form.get("moves")
+                        .and_then(Value::as_array)
+                        .into_iter()
+                        .flatten()
+                }),
+        )
+        .filter_map(|attack| {
+            attack
+                .get("anim")
+                .and_then(Value::as_str)
+                .map(str::to_string)
+        })
+        .collect()
 }

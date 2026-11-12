@@ -35,9 +35,10 @@ impl App {
             false,
         );
         self.draw_update_status();
-        if self.c.pressed(nav::OK | nav::START)
-            || is_mouse_button_pressed(MouseButton::Left)
-            || !touches().is_empty() && touches()[0].phase == TouchPhase::Started
+        if !self.update_prompt_takes_click()
+            && (self.c.pressed(nav::OK | nav::START)
+                || is_mouse_button_pressed(MouseButton::Left)
+                || !touches().is_empty() && touches()[0].phase == TouchPhase::Started)
         {
             self.go(Screen::Menu { cur: 0 });
         }

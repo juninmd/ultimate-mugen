@@ -2,7 +2,7 @@
 
 ## Baixar pronto
 
-Baixe o arquivo da sua plataforma na página de [Releases](https://github.com/juninmd/ultimate-mugen/releases), descompacte e rode `ultimate-mugen` (Windows: `ultimate-mugen.exe` ou `run.bat`). A versão desktop se atualiza sozinha a partir da release mais nova por HTTPS; veja [Atualização automática](Atualizacao-Automatica.md). Para não baixar use `--no-auto-update` / `UME_NO_AUTO_UPDATE=1`; para não verificar nada use `--no-update-check` / `UME_NO_UPDATE_CHECK=1`.
+Baixe o arquivo da sua plataforma na página de [Releases](https://github.com/juninmd/ultimate-mugen/releases), descompacte e rode `ultimate-mugen` (Windows: `ultimate-mugen.exe` ou `run.bat`). A versão desktop confere a release mais nova por HTTPS e pergunta antes de baixar e instalar; veja [Atualização automática](Atualizacao-Automatica.md). Esconda a pergunta com `--no-auto-update` / `UME_NO_AUTO_UPDATE=1` ou nem verifique com `--no-update-check` / `UME_NO_UPDATE_CHECK=1`.
 
 ## Compilar
 

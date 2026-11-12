@@ -374,7 +374,7 @@ pub fn load_mugen_char(
         if is_hold || is_rec || movelist.iter().any(|m| m.command == c.name) {
             continue;
         }
-        movelist.push(MoveInfo { name: c.name.replace('_', " "), input: c.raw.clone(), command: c.name.clone(), cost: 0.0, drain: false, forms: u32::MAX });
+        movelist.push(MoveInfo { name: c.name.replace('_', " "), input: c.raw.clone(), command: c.name.clone(), cost: crate::move_cost::cost_of(&states, &c.name), drain: false, forms: u32::MAX });
     }
     let ai_commands = commands
         .iter()

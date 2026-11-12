@@ -36,5 +36,6 @@ pub mod native;
 pub mod passive_time;
 pub mod passives;
 pub mod raster;
+pub mod move_cost;
 
 pub use ume_formats as formats;

@@ -118,6 +118,12 @@ impl Fighter {
             None => fallback(&self.def),
         }
     }
+    pub fn sprite_scale(&self) -> [f32; 2] {
+        if self.size_overrides.is_empty() { return self.draw_scale; }
+        let rx = self.c("size.xscale", 1.0) / self.anim_def.scale_x.max(f32::EPSILON);
+        let ry = self.c("size.yscale", 1.0) / self.anim_def.scale_y.max(f32::EPSILON);
+        [self.draw_scale[0] * rx, self.draw_scale[1] * ry]
+    }
     pub fn projectile_tally_id(&self) -> u32 { if self.own_projectile { self.id } else { self.root } }
 
     pub fn anim(&self) -> Option<&Animation> { self.anim_def.anims.get(&self.anim_real) }

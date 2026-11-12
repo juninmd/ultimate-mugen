@@ -714,7 +714,7 @@ impl MatchRenderer {
         if f.def.source == ume_engine::chardef::Source::Mugen {
             let tint = self.fx.ambient(f.pos.x, m.camera.x);
             let o = DrawOpts { alpha: a0, tint, vflip: true, ..Default::default() };
-            Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y + f.lane, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
+            Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y + f.lane, f.facing, f.lscl, f.sprite_scale(), &o, shx, shy);
             return;
         }
         let def = &f.anim_def;
@@ -832,7 +832,7 @@ impl MatchRenderer {
                     t.y,
                     t.facing,
                     f.lscl,
-                    f.draw_scale,
+                    f.sprite_scale(),
                     &o,
                     shx,
                     shy,

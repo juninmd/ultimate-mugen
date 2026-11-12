@@ -434,6 +434,11 @@
       "axisX": 200.0,
       "axisY": 363.0,
       "refHeight": 360.0
+    },
+    "airLowKick": {
+      "axisX": 202.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
     }
   },
   "refHeight": 343

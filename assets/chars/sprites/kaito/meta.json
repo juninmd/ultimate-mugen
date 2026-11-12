@@ -839,6 +839,17 @@
         266,
         125
       ]
+    },
+    "airLowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0,
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ]
     }
   }
 }

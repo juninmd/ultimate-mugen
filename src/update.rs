@@ -38,6 +38,8 @@ pub fn disabled_by(args: &[String], env_flag: Option<&str>) -> bool {
         || env_flag.is_some_and(|v| !v.is_empty() && v != "0")
 }
 
+/// `--no-auto-update` / `UME_NO_AUTO_UPDATE`: nunca pergunta (o aviso da versão nova continua no
+/// rodapé e o `--update` manual continua valendo).
 pub fn auto_disabled(args: &[String], env_flag: Option<&str>) -> bool {
     args.iter().any(|a| a == "--no-auto-update")
         || env_flag.is_some_and(|v| !v.is_empty() && v != "0")

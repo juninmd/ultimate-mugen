@@ -84,9 +84,9 @@ Teclado, toque, Xbox, DualShock 4 e DualSense com **vibração e lightbar**. Arc
 
 ### Lutadores em pixel art
 
-O elenco nativo é desenhado em pixel art arcade de 32 bits, com um conjunto de poses dedicado por lutador, paletas, especiais de ki, voo, teletransporte e transformações. Os 16 lutadores nativos têm ciclos de corrida dedicados em quatro quadros. Cada personagem é declarado em um único JSON UMF.
+O elenco nativo é desenhado em pixel art arcade de 32 bits, com um conjunto de poses dedicado por lutador, paletas, especiais de ki, voo, teletransporte e transformações. Cada personagem é declarado em um único JSON UMF.
 
-![Seleção de personagens com retratos carregados no elenco nativo](docs/assets/readme/roster-select.jpg)
+![Seleção de personagens com o elenco em pixel art](docs/assets/readme/roster-select.jpg)
 
 ### Mapas
 
@@ -101,7 +101,7 @@ O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil
 <table>
 <tr>
 <td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Tela de versus"></td>
-<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 no cenário Bambuzal com dois lutadores nativos"></td>
+<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 no cenário Bambuzal"></td>
 </tr>
 </table>
 
@@ -113,7 +113,7 @@ O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil
 - **Música e áudio:** uma trilha embutida por cenário, sons de golpe em níveis, música abaixando nos impactos e torcida no KO. [Áudio](docs/wiki/Audio.md)
 - **Atalhos de golpe:** ligue qualquer golpe da lista de pausa em `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforma e `R3` sozinho carrega ki. [Controles](docs/wiki/pt-BR/Configuracao.md#controles)
 - **Golpes mais ricos:** todo lutador nativo tem especiais EX, hyper nível 3, explosão de escape, forma ascendida com hyper próprio e versões aéreas dos especiais. [Kit compartilhado](docs/wiki/Characters.md#shared-toolkit)
-- **Atualização automática e releases:** cada merge no `master` publica uma release e a versão desktop se atualiza sozinha. [Atualização automática](docs/wiki/pt-BR/Atualizacao-Automatica.md)
+- **Atualização automática e releases:** cada merge no `master` publica uma release e a versão desktop avisa, pergunta e só então se atualiza. [Atualização automática](docs/wiki/pt-BR/Atualizacao-Automatica.md)
 - **Compatibilidade M.U.G.E.N:** correções achadas ao carregar personagens reais da comunidade (saídas de andar e defesa, provocações, intros, ações AIR duplicadas). [Decisões de compatibilidade](docs/wiki/pt-BR/Decisoes-de-Compatibilidade.md)
 
 ---
@@ -267,7 +267,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:
 
 A tag git é a fonte da verdade da versão. A cada push na `master`, o workflow `Release` calcula o bump a partir dos commits (`feat` → minor, `fix`/`perf` → patch), compila Linux, Windows e macOS, sobe os pacotes com `latest.json` e `SHA256SUMS.txt`, verifica o draft e publica.
 
-O jogo no desktop lê o `latest.json` em segundo plano (só HTTPS, silencioso offline) e apenas mostra um aviso na tela de título. Nada é baixado nem executado automaticamente. Desative com `--no-update-check` ou `UME_NO_UPDATE_CHECK=1`.
+O jogo no desktop lê o `latest.json` em segundo plano (só HTTPS, silencioso offline) e mostra um painel com a versão instalada e a disponível. Nada é baixado nem executado até você aceitar "Atualizar agora"; "Agora não" mantém a versão atual até o próximo boot. Desative a pergunta com `--no-auto-update` / `UME_NO_AUTO_UPDATE=1` ou a checagem inteira com `--no-update-check` / `UME_NO_UPDATE_CHECK=1`.
 
 </details>
 

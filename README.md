@@ -84,9 +84,9 @@ Keyboard, touch, Xbox, DualShock 4 and DualSense with **rumble and lightbars**. 
 
 ### Pixel-art fighters
 
-The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set per fighter, with palettes, ki/energy specials, flight, teleport and transformations. All 16 built-in fighters have dedicated four-frame run cycles. Characters are declared in a single UMF JSON each.
+The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set per fighter, with palettes, ki/energy specials, flight, teleport and transformations. Characters are declared in a single UMF JSON each.
 
-![Character select with portraits loaded across the native roster](docs/assets/readme/roster-select.jpg)
+![Character select with the pixel-art roster](docs/assets/readme/roster-select.jpg)
 
 ### Maps
 
@@ -101,7 +101,7 @@ The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set pe
 <table>
 <tr>
 <td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Versus screen"></td>
-<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 on the Bamboo stage with two native fighters"></td>
+<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 on the Bamboo stage"></td>
 </tr>
 </table>
 
@@ -113,7 +113,7 @@ The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set pe
 - **Music and audio:** a built-in music theme per stage, tiered hit sounds, music ducking on impacts and a crowd cheer on the KO. [Audio](docs/wiki/Audio.md)
 - **Move shortcuts:** bind any move from the pause list to `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforms and `R3` alone charges ki. [Controls](docs/wiki/Configuration.md#controls)
 - **Richer movesets:** every native fighter has EX specials, a level 3 hyper, an escape burst, an ascended form with its own hyper, and air versions of its specials. [Shared toolkit](docs/wiki/Characters.md#shared-toolkit)
-- **Automatic updates and releases:** every merge to `master` publishes a release; the desktop build updates itself. [Auto-update](docs/wiki/Auto-Update.md)
+- **Automatic updates and releases:** every merge to `master` publishes a release; the desktop build asks before updating. [Auto-update](docs/wiki/Auto-Update.md)
 - **M.U.G.E.N compatibility:** fixes found loading real community characters (walk and guard exits, taunts, intros, duplicate AIR actions). [Compatibility decisions](docs/wiki/Compatibility-Decisions.md)
 
 ---
@@ -267,7 +267,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:
 
 The git tag is the source of truth for the version. On every push to `master`, the `Release` workflow plans the bump from commits (`feat` → minor, `fix`/`perf` → patch), builds Linux, Windows and macOS, uploads the packages, a raw executable per platform plus `latest.json` and `SHA256SUMS.txt`, verifies the draft and publishes it.
 
-The installed desktop build checks `latest.json` at boot (HTTPS only), downloads the raw executable for its platform, verifies the manifest `sha256` and the downloaded binary's `--version`, replaces itself and restarts on the title/menu screen. Progress and failures show on the title screen; offline, a failed check or an unwritable install directory leave the running build untouched. Opt out of installing with `--no-auto-update` / `UME_NO_AUTO_UPDATE=1`, or of the check itself with `--no-update-check` / `UME_NO_UPDATE_CHECK=1`. `--check-update` only prints the available version and `--update` downloads and installs from a terminal.
+The installed desktop build checks `latest.json` at boot (HTTPS only) and shows an update panel with the installed and the available versions; downloading the raw executable for its platform starts only after the player accepts. Accepting verifies the manifest `sha256` and the downloaded binary's `--version`, then replaces the executable and restarts on the title/menu screen. Progress and failures show on the title screen; offline, a failed check or an unwritable install directory leave the running build untouched. Hide the prompt with `--no-auto-update` / `UME_NO_AUTO_UPDATE=1`, or skip the check itself with `--no-update-check` / `UME_NO_UPDATE_CHECK=1`. `--check-update` only prints the available version and `--update` downloads and installs from a terminal.
 
 </details>
 

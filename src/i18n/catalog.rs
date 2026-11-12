@@ -9,7 +9,7 @@ catalog! {
     "menu.arcade" => "Arcade", "Arcade";
     "menu.survival" => "Survival", "Sobrevivência";
     "menu.cpu" => "Versus CPU", "Versus CPU";
-    "menu.versus" => "2 Players", "2 Jogadores";
+    "menu.versus" => "Versus", "Versus";
     "menu.training" => "Training", "Treino";
     "menu.watch" => "CPU vs CPU", "CPU vs CPU";
     "menu.team_seq" => "Team · Sequence", "Equipe · Sequência";
@@ -25,7 +25,7 @@ catalog! {
     "desc.arcade" => "Fight a sequence of opponents", "Enfrente uma sequência de oponentes";
     "desc.survival" => "Endless opponents, life refilled after each win, score", "Oponentes sem fim, vida recuperada a cada vitória e pontuação";
     "desc.cpu" => "You against the computer", "Você contra o computador";
-    "desc.versus" => "Shared keyboard or two controllers", "Teclado compartilhado ou dois controles";
+    "desc.versus" => "VS CPU, 2 players, CPU vs CPU or teams · press M on the select screen to switch", "VS CPU, 2 jogadores, CPU vs CPU ou equipes · M na seleção alterna";
     "desc.training" => "Training dummy, infinite bar, hitboxes", "Boneco de treino, barra infinita, hitboxes";
     "desc.watch" => "Watch the AI fight", "Assista a IA lutar";
     "desc.team_seq" => "Up to 5v5, one at a time; the winner keeps its life", "Até 5 contra 5, um de cada vez; o vencedor mantém a vida";
@@ -63,12 +63,25 @@ catalog! {
     "select.filter_all" => "ALL", "TODOS";
     "select.filter_originals" => "ORIGINALS", "ORIGINAIS";
     "select.filter_mugen" => "M.U.G.E.N", "M.U.G.E.N";
+    "select.sort_roster" => "ROSTER", "ELENCO";
+    "select.sort_force" => "FORCE", "FORÇA";
+    "select.sort_life" => "LIFE", "VIDA";
+    "select.sort_speed" => "SPEED", "VELOCIDADE";
+    "select.sort_name" => "NAME", "NOME";
+    "select.stat_force" => "FOR", "FOR";
+    "select.stat_life" => "VID", "VID";
+    "select.stat_speed" => "VEL", "VEL";
+    "select.filter_bosses" => "BOSSES", "CHEFES";
 
     "results.rematch" => "Rematch", "Revanche";
     "results.replay" => "Replay", "Replay";
     "results.characters" => "Characters", "Personagens";
     "results.menu" => "Menu", "Menu";
     "results.arcade_complete" => "ARCADE COMPLETE!", "ARCADE COMPLETO!";
+    "results.time" => "TIME", "TEMPO";
+    "results.best_combo" => "BEST COMBO", "MAIOR COMBO";
+    "results.damage" => "DAMAGE", "DANO";
+    "results.life_left" => "LIFE LEFT", "VIDA RESTANTE";
     "results.wins" => "{name} WINS!", "{name} VENCE!";
     "results.team_wins" => "TEAM {name} WINS!", "TIME {name} VENCEU!";
     "boss.unlocked_oboro" => "★ NEW FIGHTER UNLOCKED: OBORO! ★", "★ NOVO PERSONAGEM DESBLOQUEADO: OBORO! ★";
@@ -77,6 +90,12 @@ catalog! {
     "pause.title" => "PAUSED", "PAUSA";
     "pause.continue" => "Continue", "Continuar";
     "pause.hitboxes" => "Hitboxes", "Hitboxes";
+    "pause.dummy" => "Dummy behaviour", "Comportamento do boneco";
+    "dummy.stand" => "STAND", "PARADO";
+    "dummy.crouch" => "CROUCH", "AGACHADO";
+    "dummy.jump" => "JUMP", "PULANDO";
+    "dummy.guard" => "GUARD", "DEFENDENDO";
+    "dummy.crouch_guard" => "LOW GUARD", "DEFESA BAIXA";
     "pause.restart" => "Restart fight", "Reiniciar luta";
     "pause.change" => "Change fighters", "Trocar personagens";
     "pause.settings" => "Settings", "Configurações";

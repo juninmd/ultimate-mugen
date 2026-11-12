@@ -43,6 +43,8 @@ pub struct HitSpec {
     #[serde(default, rename = "sparkPos")] pub spark_pos: Option<[f32; 2]>,
     #[serde(default, rename = "groundBounce")] pub ground_bounce: Option<bool>,
     #[serde(default, rename = "wallBounce")] pub wall_bounce: Option<bool>,
+    #[serde(default)] pub element: Option<String>,
+    #[serde(default)] pub stun: Option<i32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -59,6 +61,8 @@ pub struct ProjectileSpec {
     #[serde(default)] pub knockback: Option<[f32; 2]>,
     #[serde(default, rename = "removeTime")] pub remove_time: Option<i32>,
     #[serde(default)] pub priority: Option<i32>,
+    #[serde(default)] pub element: Option<String>,
+    #[serde(default)] pub stun: Option<i32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -82,6 +86,15 @@ pub struct ThrowSpec {
     #[serde(default, rename = "p2State")] pub p2_state: Option<i32>,
     #[serde(default)] pub at: Option<i32>,
     #[serde(default)] pub launch: Option<[f32; 2]>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct LifeRange { #[serde(default)] pub min: Option<f32>, #[serde(default)] pub max: Option<f32> }
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct MoveRequirements {
+    #[serde(default)] pub life: Option<LifeRange>,
+    #[serde(default, rename = "enemyLife")] pub enemy_life: Option<LifeRange>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -108,6 +121,7 @@ pub struct NativeMove {
     #[serde(default)] pub timestop: Option<i32>,
     #[serde(default)] pub throw: Option<ThrowSpec>,
     #[serde(default)] pub cancels: Option<Vec<String>>,
+    #[serde(default)] pub requires: Option<MoveRequirements>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

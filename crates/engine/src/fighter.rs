@@ -4,7 +4,7 @@ use crate::commands::CommandState;
 use crate::input::InputHistory;
 use std::sync::Arc;
 
-mod anim_time; mod data;
+mod anim_time; mod data; mod sprite_scale;
 pub use data::*;
 use crate::palette::Trans;
 pub use crate::flags::asf;

@@ -154,7 +154,10 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `parry` | `{ "window": [from, to], "spark" }` | Returns attacks during the animation-element window |
 | `timestop` | ticks | Freezes everyone else |
 | `burst` | `true` | Combo breaker usable while being hit |
+| `requires` | `{ "life": {"max": 0.5}, "enemyLife": {"min": 0.1, "max": 0.5} }` | Life condition: the move only starts while the fighter's life (`life`) and/or the rival's (`enemyLife`) is inside `min`..`max`, as a fraction of max life (0 to 1). Either bound may be omitted. Compiles to `life <= lifemax * max` and `enemy,life <= enemy,lifemax * max` triggers |
 | `flight` | `true` | 8-way hover while the move lasts |
+
+**Finisher.** A move with `"kind": "finisher"` (use `throw` or `hits` for the effect) is only available after a KO (`RoundState = 3` and `WinKO`). When the final round ends by KO and the winner has a finisher, the round waits up to 6 seconds on "FINISH HIM" for the winner to perform it; performing it (or the timeout) ends the wait. Rosters with no finisher are unaffected.
 
 ### Combat traits
 
@@ -192,6 +195,10 @@ Validate with `cargo test --release --test native_roster_lab -- --nocapture` (ev
 | `removeTime` | Ticks until it disappears |
 | `priority` | Priority against other projectiles |
 
+### Elements and stun
+
+`hits[]` and `projectile` accept `element` (`fire`, `ice`, `lightning`, `earth`, `wind`, `water`) and `stun` (extra hit-stun ticks). The compiler adds the element's hit-stun and shake and tints the victim for a moment (`PalFX`): `ice` freezes longest (+16), `lightning` shocks (+22 and a 8-tick shake), `fire` burns red, `earth` shakes the screen, `wind` and `water` add a short tint. `stun` stacks on top and adds a 5-tick shake when none is set. Unknown elements are ignored.
+
 ### Command syntax
 
 | Symbol | Meaning | Example |
@@ -209,6 +216,8 @@ Validate with `cargo test --release --test native_roster_lab -- --nocapture` (ev
 ## Power normals (Punch 3 and Kick 3)
 
 Every native fighter that does not declare a move bound to `z` or `c` gets four extra normals at compile time (`native/power_normals.rs`): `power_punch` and `crouch_power_punch` on `z` (default key **E**, shown as *Punch 3*), `power_kick` and `crouch_power_kick` on `c` (default key **D**, shown as *Kick 3*). Each one reuses the animation, timing, guard height and `cancels` of the fighter's heaviest ground normal of that family (`y` then `x` for punches, `b` then `a` for kicks, crouching variants take the crouching normal), named `<base name> Max`. Hits deal 130 % damage, are promoted to `heavy`, gain 4 hit-stun and 2 hit-stop ticks when those are set, and push 25 % harder. Moves that cancel into the base normal also cancel into its power version, and the new moves appear in the pause move list. Declare your own `z` or `c` move to opt out. Air versions are not generated here.
+
+All native fighters also receive two down-light-kick normals at compile time (`native/low_normals.rs`): `lowkick` on `D+a` while crouching and `airlowkick` on `D+a` in the air. They use the character's existing crouch-light-kick and air-kick animations, respectively, keep their pixel-art frames, and use low guard. The aerial version moves forward and downward to close short gaps. A fighter that already declares a move with the same id or `D+a` state/input keeps its authored move.
 
 ## Energy charge (every fighter)
 

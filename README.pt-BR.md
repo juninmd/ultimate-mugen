@@ -84,9 +84,9 @@ Teclado, toque, Xbox, DualShock 4 e DualSense com **vibração e lightbar**. Arc
 
 ### Lutadores em pixel art
 
-O elenco nativo é desenhado em pixel art arcade de 32 bits, com um conjunto de poses dedicado por lutador, paletas, especiais de ki, voo, teletransporte e transformações. Cada personagem é declarado em um único JSON UMF.
+O elenco nativo é desenhado em pixel art arcade de 32 bits, com um conjunto de poses dedicado por lutador, paletas, especiais de ki, voo, teletransporte e transformações. Os 16 lutadores nativos têm ciclos de corrida dedicados em quatro quadros. Cada personagem é declarado em um único JSON UMF.
 
-![Seleção de personagens com o elenco em pixel art](docs/assets/readme/roster-select.jpg)
+![Seleção de personagens com retratos carregados no elenco nativo](docs/assets/readme/roster-select.jpg)
 
 ### Mapas
 
@@ -101,7 +101,7 @@ O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil
 <table>
 <tr>
 <td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Tela de versus"></td>
-<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 no cenário Bambuzal"></td>
+<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 no cenário Bambuzal com dois lutadores nativos"></td>
 </tr>
 </table>
 

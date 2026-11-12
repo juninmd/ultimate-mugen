@@ -55,9 +55,15 @@ mod web {
         let mut fighters = String::new();
         let mut over = -1i64;
         let mut paused = false;
+        let mut clock = String::from("null");
         if let Some(session) = app.session.as_mut() {
             over = session.over.map(|w| w as i64).unwrap_or(-1);
             paused = session.paused;
+            let m = &session.m;
+            clock = format!(
+                "{{\"tick\":{},\"round\":{},\"round_state\":{},\"round_time\":{},\"wins\":[{},{}]}}",
+                m.game_time, m.round_no, m.round_state, m.round_time, m.wins[0], m.wins[1]
+            );
             for f in session.m.fighters.iter_mut().filter(|f| !f.is_helper) {
                 if god && f.side == 0 && f.alive {
                     f.life = f.life_max;
@@ -75,11 +81,12 @@ mod web {
             })
             .unwrap_or_else(|| "null".into());
         let json = format!(
-            "{{\"screen\":\"{}\",\"story_mode\":{},\"over\":{},\"paused\":{},\"story\":{},\"fighters\":[{}]}}",
+            "{{\"screen\":\"{}\",\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"story\":{},\"fighters\":[{}]}}",
             screen_name(&app.screen),
             app.mode == Mode::Story,
             over,
             paused,
+            clock,
             story,
             fighters
         );

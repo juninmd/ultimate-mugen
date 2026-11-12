@@ -33,19 +33,26 @@ impl Recolor {
     }
 
     pub(super) fn apply_in_region(&self, rgba: &mut [u8], width: u32, region: Option<[u32; 4]>) {
-        let mut cache: std::collections::HashMap<u32, [u8; 3], std::hash::BuildHasherDefault<ColourHasher>> = Default::default();
-        let mut last: Option<(u32, [u8; 3])> = None;
-        for (index, pixel) in rgba.chunks_exact_mut(4).enumerate() {
+        let mut cache = vec![(u32::MAX, [0u8; 3]); SLOTS];
+        let window = region.filter(|_| self.restrict_hair && width > 0);
+        let Some([x1, y1, x2, y2]) = window else {
+            self.apply_row(rgba, &mut cache, !self.restrict_hair, 0..0);
+            return;
+        };
+        for (y, row) in rgba.chunks_mut(width as usize * 4).enumerate() {
+            let inside = (y as u32) >= y1 && (y as u32) < y2 && x1 < x2;
+            self.apply_row(row, &mut cache, false, if inside { x1 as usize..x2 as usize } else { 0..0 });
+        }
+    }
+
+    fn apply_row(&self, row: &mut [u8], cache: &mut [(u32, [u8; 3])], allow: bool, hair: std::ops::Range<usize>) {
+        for (x, pixel) in row.chunks_exact_mut(4).enumerate() {
             if pixel[3] == 0 { continue; }
-            let key = [pixel[0], pixel[1], pixel[2]];
-            let allow_hair = !self.restrict_hair || region.is_some_and(|[x1, y1, x2, y2]| width > 0 && (index as u32 % width) >= x1 && (index as u32 % width) < x2 && (index as u32 / width) >= y1 && (index as u32 / width) < y2);
-            let packed = u32::from_le_bytes([key[0], key[1], key[2], allow_hair as u8]);
-            let mapped = match last {
-                Some((previous, mapped)) if previous == packed => mapped,
-                _ => *cache.entry(packed).or_insert_with(|| self.swap(key, allow_hair)),
-            };
-            last = Some((packed, mapped));
-            pixel[..3].copy_from_slice(&mapped);
+            let allow_hair = allow || hair.contains(&x);
+            let packed = u32::from_le_bytes([pixel[0], pixel[1], pixel[2], allow_hair as u8]);
+            let slot = &mut cache[(packed.wrapping_mul(0x9E37_79B1) >> (32 - SLOT_BITS)) as usize];
+            if slot.0 != packed { *slot = (packed, self.swap([pixel[0], pixel[1], pixel[2]], allow_hair)); }
+            pixel[..3].copy_from_slice(&slot.1);
         }
     }
 
@@ -85,14 +92,8 @@ impl Recolor {
     }
 }
 
-#[derive(Default)]
-struct ColourHasher(u64);
-
-impl std::hash::Hasher for ColourHasher {
-    fn finish(&self) -> u64 { self.0 }
-    fn write(&mut self, bytes: &[u8]) { for byte in bytes { self.0 = (self.0 ^ *byte as u64).wrapping_mul(0x100000001b3); } }
-    fn write_u32(&mut self, value: u32) { self.0 = (value as u64).wrapping_mul(0x9E3779B97F4A7C15); }
-}
+const SLOT_BITS: u32 = 12;
+const SLOTS: usize = 1 << SLOT_BITS;
 
 fn rgb(hex: &str) -> Option<[f32; 3]> {
     let digits = hex.trim().trim_start_matches('#').as_bytes();
@@ -173,6 +174,37 @@ mod tests {
         let empty = serde_json::json!({});
         let same = try_load(&fighter, &frame, Some(&empty)).unwrap().image.unwrap();
         assert_eq!(plain.rgba, same.rgba);
+    }
+
+    #[test]
+    fn cached_recolour_matches_a_swap_per_pixel() {
+        let colors = serde_json::json!({"hair":"#3a2418", "skin":"#e2a97e", "top":"#2f8f9d", "pants":"#2a2f3a"});
+        let (width, height) = (61u32, 47u32);
+        let mut seed = 0x9E37_79B9u32;
+        let mut rgba = vec![0u8; (width * height * 4) as usize];
+        for byte in rgba.iter_mut() {
+            seed ^= seed << 13;
+            seed ^= seed >> 17;
+            seed ^= seed << 5;
+            *byte = (seed >> 11) as u8;
+        }
+        for awakening in [false, true] {
+            let palette = serde_json::json!({"hair":"#f6c83e", "top":"#b8433a", "_awakening":awakening});
+            let recolor = Recolor::new(Some(&colors), &palette).unwrap();
+            for region in [None, Some([5, 7, 40, 30]), Some([0, 0, width, height]), Some([9, 9, 9, 9])] {
+                let mut fast = rgba.clone();
+                recolor.apply_in_region(&mut fast, width, region);
+                let mut slow = rgba.clone();
+                for (index, pixel) in slow.chunks_exact_mut(4).enumerate() {
+                    if pixel[3] == 0 { continue; }
+                    let (x, y) = (index as u32 % width, index as u32 / width);
+                    let allow = !awakening || region.is_some_and(|[x1, y1, x2, y2]| x >= x1 && x < x2 && y >= y1 && y < y2);
+                    let mapped = recolor.swap([pixel[0], pixel[1], pixel[2]], allow);
+                    pixel[..3].copy_from_slice(&mapped);
+                }
+                assert!(fast == slow, "awakening {awakening} region {region:?}");
+            }
+        }
     }
 
     #[test]

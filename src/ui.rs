@@ -89,21 +89,7 @@ pub fn alpha(mut c: Color, a: f32) -> Color {
     c.a = a;
     c
 }
-/// Soft radial glow (concentric translucent discs).
-pub fn glow(x: f32, y: f32, r: f32, c: Color) {
-    let n = 14;
-    for i in 0..n {
-        let t = 1.0 - i as f32 / n as f32;
-        draw_poly(
-            x,
-            y,
-            64,
-            r * t,
-            0.0,
-            Color::new(c.r, c.g, c.b, c.a / n as f32 * 1.4 * (1.0 - t * 0.4)),
-        );
-    }
-}
+pub use crate::glow::glow;
 
 impl Ui {
     pub fn new() -> Self {
@@ -442,12 +428,11 @@ impl Ui {
     }
     pub fn quad(&self, p: [Vec2; 4], c: Color) {
         let v = p.map(|q| vec2(self.x(q.x), self.y(q.y)));
-        draw_triangle(v[0], v[1], v[2], c);
-        draw_triangle(v[0], v[2], v[3], c);
+        draw_convex(&v, c);
     }
     pub fn background(&self) {
         let (w, h) = (screen_width(), screen_height());
-        draw_rectangle(0.0, 0.0, w, h, hex("#0b0716"));
+        let theme = crate::tweaks::current(); draw_rectangle(0.0, 0.0, w, h, rgb(theme.background));
         let steps = 30;
         for i in 0..steps {
             let t = i as f32 / steps as f32;
@@ -459,9 +444,9 @@ impl Ui {
                 Color::new(0.04 + 0.05 * t, 0.03 + 0.02 * t, 0.09 + 0.08 * t, 1.0),
             );
         }
-        glow(w * 0.5, h * 1.15, h * 0.8, Color::new(1.0, 0.3, 0.43, 0.35));
-        glow(w * 0.1, h * 0.05, h * 0.5, Color::new(0.13, 0.9, 1.0, 0.22));
-        glow(w * 0.9, h * 0.12, h * 0.45, Color::new(1.0, 0.8, 0.2, 0.18));
+        glow(w * 0.5, h * 1.15, h * 0.8, alpha(rgb(theme.glow_bottom), 0.35));
+        glow(w * 0.1, h * 0.05, h * 0.5, alpha(rgb(theme.glow_left), 0.22));
+        glow(w * 0.9, h * 0.12, h * 0.45, alpha(rgb(theme.glow_right), 0.18));
         let t = self.t * 20.0;
         let gap = 40.0 * self.s;
         let mut x = -((t * self.s) % gap) - h;

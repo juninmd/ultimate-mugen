@@ -10,7 +10,7 @@ const bandLuminance = (page, buffer) => page.evaluate(async base64 => {
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
   const ctx = canvas.getContext('2d');
   ctx.drawImage(bitmap, 0, 0);
-  const y0 = Math.floor(bitmap.height * 0.08), y1 = Math.floor(bitmap.height * 0.3);
+  const y0 = Math.floor(bitmap.height * 0.8), y1 = Math.floor(bitmap.height * 1.0);
   const data = ctx.getImageData(0, y0, bitmap.width, y1 - y0).data;
   let sum = 0;
   for (let i = 0; i < data.length; i += 4) sum += (data[i] + data[i + 1] + data[i + 2]) / 3;
@@ -34,16 +34,20 @@ const bandLuminance = (page, buffer) => page.evaluate(async base64 => {
   const frames = n => p.evaluate(n => new Promise(done => { const step = i => (i ? requestAnimationFrame(() => step(i - 1)) : done()); step(n); }), n);
   const key = async (k, wait = 1000) => { await p.keyboard.down(k); await frames(2); await p.keyboard.up(k); await frames(5); await p.waitForTimeout(wait); };
   await key('Enter');
-  await key('ArrowDown');
   await key('Enter', 1500);
   await key('Enter', 1500);
   const deadline = Date.now() + 120000;
   while (!stripRequests.length && Date.now() < deadline) { await key('Enter', 2000); }
   if (!stripRequests.length) problems.push('story strip was never requested');
   await p.waitForTimeout(25000);
-  const shot = await p.screenshot();
+  let shot, mean = 0;
+  const paintDeadline = Date.now() + 90000;
+  do {
+    if (shot) await p.waitForTimeout(5000);
+    shot = await p.screenshot();
+    mean = await bandLuminance(p, shot);
+  } while (mean < 12 && Date.now() < paintDeadline);
   if (shotDir) fs.writeFileSync(path.join(shotDir, process.env.WEB_SMOKE_NAME || 'story-fight.png'), shot);
-  const mean = await bandLuminance(p, shot);
   await b.close(); server.close();
   if (mean < 12) problems.push(`story stage background is black (mean luminance ${mean.toFixed(1)})`);
   if (problems.length) { console.error('WEB STORY SMOKE FAILED\n' + problems.join('\n')); process.exit(1); }

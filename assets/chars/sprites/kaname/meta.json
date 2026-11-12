@@ -1,72 +1,34 @@
 {
   "frames": {
     "01_idle": {
-      "refHeight": 362
+      "refHeight": 362.0,
+      "axisX": 201.0,
+      "axisY": 400.0
     },
     "02_attack1": {
-      "refHeight": 362
+      "refHeight": 362.0,
+      "axisX": 167.0,
+      "axisY": 400.0
     },
     "03_attack2": {
-      "refHeight": 362
+      "refHeight": 362.0,
+      "axisX": 201.0,
+      "axisY": 400.0
     },
     "04_special": {
-      "refHeight": 362
+      "refHeight": 362.0,
+      "axisX": 190.0,
+      "axisY": 400.0
     },
     "05_projectile": {
-      "refHeight": 362
+      "refHeight": 360.199,
+      "axisX": 146.269,
+      "axisY": 399.682
     },
     "06_victory": {
-      "refHeight": 362
-    },
-    "idle0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "idle1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "idle2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "idle3": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk3": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk4": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "walk5": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "refHeight": 362.0,
+      "axisX": 201.0,
+      "axisY": 400.0
     },
     "airGuard": {
       "axisX": 200.0,
@@ -233,12 +195,52 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "idle0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "idle1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "idle2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "idle3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_021e9969b6ab68b6": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "inline_1cda5df7ecfd1b62": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "inline_282e2507e149aa22": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_2cdd134a69aabfbf": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "inline_325beea3d661fe78": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_385ffe023b743a7d": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -253,6 +255,36 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "inline_4362387def07ae7a": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_4642bd6b75a305a8": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_4a5b82897bece4b5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_6024007266145d23": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_77949bc0c0fe50ca": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_7bce21d00d833441": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "inline_969c08b63632c366": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -263,7 +295,22 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "inline_b3540c4f422f879c": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_d580a69b7cf04c8d": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "inline_f4ead780ee459475": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_f4f80989ec6dd44f": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -303,6 +350,26 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "sg_run_run0": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run1": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run2": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run3": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
     "ss0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -323,25 +390,100 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "sg_run_run0": {
+    "walk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk4": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "07_idle1": {
+      "axisX": 200.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "08_idle2": {
+      "axisX": 200.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "09_hit1": {
+      "axisX": 208.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "10_hit2": {
+      "axisX": 212.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "11_hit3": {
+      "axisX": 195.62,
+      "axisY": 399.937,
+      "refHeight": 352.311
+    },
+    "12_fall1": {
+      "axisX": 199.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "13_fall2": {
+      "axisX": 209.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "14_lie": {
+      "axisX": 209.246,
+      "axisY": 400.27,
+      "refHeight": 352.311
+    },
+    "15_power0": {
+      "axisX": 205.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "16_power1": {
+      "axisX": 198.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "17_power2": {
+      "axisX": 198.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "sg_run_mid": {
       "axisX": 200.0,
       "axisY": 363.0,
       "refHeight": 360.0
     },
-    "sg_run_run1": {
-      "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0
-    },
-    "sg_run_run2": {
-      "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0
-    },
-    "sg_run_run3": {
-      "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0
+    "airLowKick": {
+      "axisX": 201.0,
+      "axisY": 400.0,
+      "refHeight": 362.0
     }
   },
   "refHeight": 362

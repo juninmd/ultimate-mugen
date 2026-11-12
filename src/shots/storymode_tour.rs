@@ -160,7 +160,7 @@ async fn npc_lineup(app: &mut App, dir: &str) {
 
 pub async fn run(app: &mut App, dir: &str) {
     let hero = find(app, "kaito");
-    app.screen = Screen::Menu { cur: 1 };
+    app.screen = Screen::Menu { cur: 0 };
     cap_screen(app, dir, "story-00-menu").await;
     npc_lineup(app, dir).await;
 

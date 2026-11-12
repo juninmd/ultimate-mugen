@@ -2,7 +2,7 @@
 use crate::app::{App, Mode, Screen, Team};
 use crate::gfx::*;
 use crate::shots::replay::replay_determinism;
-mod i18n_tour; mod passive_tour; mod pause_tour; mod replay; mod story_tour; mod storymode_tour; mod suzume_tour;
+mod i18n_tour; mod menu_motion_tour; mod passive_tour; mod pause_tour; mod replay; mod results_tour; mod story_tour; mod storymode_tour; mod suzume_tour;
 
 async fn frames(app: &mut App, n: usize) {
     for _ in 0..n {
@@ -19,7 +19,6 @@ pub(crate) async fn screen(app: &mut App, dir: &str, name: &str, warm: usize) {
     next_frame().await;
 }
 async fn snap(app: &mut App, dir: &str, name: &str, draw: impl Fn(&mut App)) {
-    // draw twice (first frame warms textures), capture the second
     for i in 0..2 {
         draw(app);
         if i == 1 {
@@ -745,15 +744,16 @@ pub async fn run(app: &mut App, dir: &str) {
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("menu") {
         app.screen = Screen::Title;
         screen(app, dir, "menu-title", 30).await;
-        for (n, cur) in [(0, 0usize), (1, 1), (2, 3), (3, 7), (4, 10), (5, 12), (6, 15)] {
+        for (n, cur) in [(0, 0usize), (1, 1), (2, 3), (3, 5), (4, 7), (5, 9)] {
             app.screen = Screen::Menu { cur };
             screen(app, dir, &format!("menu-{n}"), 40).await;
         }
         app.screen = Screen::Mugen { view: 0, page: 0 }; screen(app, dir, "mugen-import", 20).await;
-        return;
+        return menu_motion_tour::run(app, dir).await;
     }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("i18n") { i18n_tour::run(app, dir).await; return; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("pause") { return pause_tour::run(app, dir).await; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("results") { return results_tour::run(app, dir).await; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("hud") { return hud_tour(app, dir).await; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("market") {
         market_tour(app, dir).await;

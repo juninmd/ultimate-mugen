@@ -100,3 +100,18 @@ Open the pause menu, pick a move in the move list and press `1`-`4` (or L1, L2, 
 ## Button prompts
 
 The pause move list and the Controls screen show the real key or button of the device you used last: keyboard keys, Xbox (A/B/X/Y, LB/LT/RB/RT) or PlayStation (✕ ○ □ △, L1/L2/R1/R2). On touch screens they show the virtual button names. Xbox pads are detected by name or by vendor ID `045E`, PlayStation pads by `054C`. Rumble works on both: Xbox through gilrs force feedback (and the Gamepad API on the web), DualShock 4 / DualSense through direct HID reports.
+
+## Tweaks (`tweaks.toml`)
+
+Created next to the executable on first run (localStorage on web) with the defaults. Edit and save: the game reloads it within about one second and shows a toast. Mistakes never stop the game; the affected value keeps its default and the toast and log name the key, with a "did you mean" hint and the line for syntax errors.
+
+| Section | Key | Effect |
+|---|---|---|
+| `[theme]` | `background` | Menu background base color |
+| `[theme]` | `glow_bottom`, `glow_left`, `glow_right` | Menu light glows |
+| `[hud]` | `p1_tint`, `p2_tint` | Lifebar accent color per side |
+| `[hud]` | `bar_offset_y` | Moves the lifebars down (-4 to 40) |
+| `[rules]` | `rounds_to_win` (1-9), `round_seconds` (0 = no limit, up to 999), `life_percent` (10-500), `game_speed` (0.5-2.0) | Override the Settings menu values for every match; remove the line to go back to the menu value |
+| `[menu]` | `arcade`, `story`, `survival`, `cpu`, `versus`, `training`, `watch`, `team_seq`, `team_simul`, `team_tag`, `mugen`, `market`, `controls`, `settings`, `replays`, `quit` | Text of that main-menu entry |
+
+Colors are `"#rrggbb"` or `"#rgb"`. Plan and comparison with other engines: `docs/research/customization-comparison.md`.

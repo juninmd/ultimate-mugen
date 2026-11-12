@@ -18,28 +18,38 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Universe and Lore](Lore.md) | Players & Creators | Cosmology, factions, energy systems and the Great Convergence |
 | [Character Dossiers](Characters.md) | Players & Creators | Roster bios, portraits, moves, rivalries and home stages |
 | [Compatibility decisions](Compatibility-Decisions.md) | Creators | Features the engine rejects by design and why |
+| [Lua scripts](Lua-Scripts.md) | Creators | What Lua in M.U.G.E.N packs does and the Lua-free alternatives |
+| [Route files](Route-Files.md) | Creators | Arcade routes and unlock rules in TOML |
 | [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
 | [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
+| [Bleach-inspired kits](Bleach-Inspired-Kits.md) | Players | Abilities inspired by Bleach in three native fighters |
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
 | [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |
 | [AssertSpecial flags](AssertSpecial.md) | Creators | All 77 Ikemen flags and what each one does |
 | [Red life, dizzy and guard points](Life-Systems.md) | Creators | RedLife, DizzyPoints, GuardPoints, states 5300/5400 and HitDef defaults |
 | [Screenpacks](Screenpacks.md) | Creators | Menu and HUD screenpack support |
+| [Screenpack study](Screenpack-Study.md) | Creators | Screenpack differentials and what the engine adopted |
 | [Sprite atlas import](Sprite-Atlas-Import.md) | Creators | Turn a sprite sheet into a fighter |
 | [Dev tools](Dev-Tools.md) | Contributors | Rust build and audit tools (`ume-tools`) |
 | [Sprite toolkit](Sprite-Toolkit.md) | Creators | Slice sheets, palette variants, auto collision boxes |
 | [Move generator](Move-Generator.md) | Creators | TOML to AIR, CNS, CMD and Statedef -1 |
+| [Combo strings](Combo-Strings.md) | Creators | Signature three-part strings per native fighter |
 | [ZSS scripts](ZSS.md) | Creators | Ikemen ZSS state scripts |
 | [Ikemen extensions](Ikemen-Extensions.md) | Creators | Ikemen GO controllers and triggers the engine accepts |
 | [Creating stages](Stages.md) | Creators | M.U.G.E.N `.def` stages and native stages |
 | [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
+| [Web match smoke](Web-Match-Smoke.md) | Developers | CI test that plays full matches in the browser and catches freezes |
 | [File layout](File-Layout.md) | Developers | The 250-line rule, one responsibility per file, splitting a file, parallel PRs |
 | [Performance](Performance.md) | Developers | Parallel loading, frame pacing, benchmarks |
 | [Reverse engineering the browser port](Ikemen-Web-Reverse-Engineering.md) | Developers | How a 78-fighter M.U.G.E.N build runs in a browser, and what we took from it |
 | [Replays](Netplay-and-Replays.md#saved-replays-in-the-game-replays) | Players | Saved fights, replay browser, playback speed |
 | [Research: fighting games](Research-Fighting-Games.md) | Developers | Survey of other fighters and prioritized improvement list |
+| [M.U.G.E.N code study](MUGEN-Code-Study.md) | Developers | Goku GT and four Mortal Kombat fighters read line by line |
+| [CPU tactics](AI-Tactics.md) | Developers | Anti-air, whiff punish, hit confirm and meter rules of the CPU |
+| [Fighter study](Fighter-Study.md) | Developers | 50+ fighters surveyed and the moves they inspired |
 | [Stress and resilience](Stress-and-Resilience.md) | Developers | Fuzzing, spawner caps, hot path numbers |
 | [Native animation audit](Native-Animation-Audit.md) | Developers | Pose coverage of the native roster |
+| [Authoring tool survey](Authoring-Tool-Survey.md) | Developers | What Fighter Factory Studio checks and how to match it |
 | [Research: story mode](Research-Story-Mode.md) | Developers | Survey behind the story mode design |
 | [Media capture](Media-Capture.md) | Developers | Screenshots and GIFs from the web build in headless Chromium |
 | [Troubleshooting](Troubleshooting.md) | Everyone | Common errors and diagnostic tools |

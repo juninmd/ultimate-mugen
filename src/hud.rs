@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod passive_meter; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod passive_meter; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -158,10 +158,10 @@ impl Hud {
                 let show_name = !f.has_assert(asf::NONAMEDISPLAY);
                 let show_wins = !f.has_assert(asf::NOWINICONDISPLAY);
                 let px0 = if side == 0 { 4.0 } else { w / 2.0 + 22.0 };
-                let (py0, ph) = (4.0, 23.0);
+                let (py0, ph) = (4.0 + crate::tweaks::current().bar_offset_y, 23.0);
                 let tint = side_tint(side);
                 let (dk, cl) = (
-                    Color::new(0.02, 0.04, 0.12, 0.7),
+                    Color::new(0.02, 0.04, 0.12, 0.5),
                     Color::new(0.02, 0.04, 0.12, 0.0),
                 );
                 let hl = |y: f32| {
@@ -191,7 +191,7 @@ impl Hud {
                 let (solid_x0, solid_x1, fade_x0, fade_x1) = if side == 0 {
                     (px0 - 4.0, bx + bw + 2.0, bx + bw + 2.0, bx + bw + 2.0 + fade)
                 } else {
-                    (bx - 2.0, px0 + panel_w, bx - 2.0 - fade, bx - 2.0)
+                    (bx - 2.0, w, bx - 2.0 - fade, bx - 2.0)
                 };
                 let quad = |x0: f32, x1: f32| {
                     [
@@ -432,7 +432,7 @@ impl Hud {
                         text(&label, tx + 6.2, ty + 4.2, 4.0, WHITE, Align::Left, true);
                     }
                 }
-                if show_life { passive_meter::draw(&p, s, gt, f, &passive_meter::Bar { x: bx, y: by, w: bw, h: bh, side }); guard::draw(&p, &text, s, gt, f, bx, by, bw, bh, side); }
+                if show_life { opacity::scope(opacity::PASSIVE, || passive_meter::draw(&p, s, gt, f, &passive_meter::Bar { x: bx, y: by, w: bw, h: bh, side })); opacity::scope(opacity::GUARD, || guard::draw(&p, &text, s, gt, f, bx, by, bw, bh, side)); }
                 if show_wins {
                     for i in 0..m.rounds_to_win {
                         let won = m.wins[side] > i;
@@ -1150,7 +1150,7 @@ impl Hud {
             }
             self.advantage.update(m);
             if let Some(ref res) = self.advantage.result {
-                advantage_draw::draw(res, &p, &text, s, w);
+                opacity::scope(opacity::ADVANTAGE, || advantage_draw::draw(res, &p, &text, s, w));
             }
             // input history (newest at the bottom): direction arrow, buttons, frames held
             let n = self.inputs.len();

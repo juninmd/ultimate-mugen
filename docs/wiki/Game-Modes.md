@@ -95,3 +95,17 @@ Each side lists 2 or 3 fighters. Only the first one is in play at the start of e
 - **Replays** record the Tag button like any other input, so a Tag fight replays exactly.
 
 Engine switches (`Match`): `team_tag`, `tag_cooldown_max`, `tag_cancel_window`. Events: `Event::Tag { side, fighter }`.
+
+## Training dummy
+
+In Training the pause menu (Game tab) has a **Dummy behaviour** row. Confirming it cycles the plan, which applies at once and is kept across restarts of the fight:
+
+| Plan | What the dummy holds |
+|---|---|
+| Stand | Nothing |
+| Crouch | Down |
+| Jump | Up on every landing |
+| Guard | Back, only while the rival attacks or a projectile is alive (it does not walk away) |
+| Low guard | Down, plus back while threatened |
+
+The plan lives in `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); the dummy presses real input bits, so guard rules, pushback and chip damage are the engine's own. Screenshots: `UME_SHOTS_ONLY=pause` writes `training-dummy-*.png` and `pause-training-dummy.png`.

@@ -53,7 +53,7 @@ pub struct Match {
     pub corner_pushes: u32,
     /// extra ticks the first round waits before "FIGHT!" so the fighters can face off / trade lines (0 = none)
     pub intro_ticks: i32,
-    pub won_by_ko: bool,
+    pub won_by_ko: bool, pub finish_window: i32,
     pub timer: i32, pub round_ticks: i32, pub wins: [i32; 2], pub rounds_to_win: i32, pub winner_side: i32, pub match_over: bool, pub training: bool,
     pub global_asserts: u32,
     pub pause: Option<PauseState>,
@@ -80,7 +80,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, team_tag: false, lanes: Default::default(), classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, team_tag: false, lanes: Default::default(), classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
@@ -453,7 +453,7 @@ impl Match {
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl;
-                    if f.pos.y >= f.ground_level + if f.lands_by_script() { 24.0 } else { 0.0 } && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; if f.move_type != 'H' { land = true; } }
+                    if !f.lands_by_script() && f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; if f.move_type != 'H' { land = true; } }
                 }
                 _ => {}
             }
@@ -615,7 +615,7 @@ impl Match {
                         let slow = self.global_asserts & gsf::NOKOSLOW == 0;
                         self.slow_mo = if slow { 75 } else { 0 };
                         self.announce = Some(Announce { text: if sides_dead[0] && sides_dead[1] { "DOUBLE K.O.".into() } else { "K.O.".into() }, time: 110, total: 110, kind: AnnounceKind::Ko });
-                        self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side, silent: self.global_asserts & gsf::NOKOSND != 0, slow });
+                        self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side, silent: self.global_asserts & gsf::NOKOSND != 0, slow }); self.finish_arm();
                     } else {
                         let (l0, l1) = (team_life(self, 0), team_life(self, 1));
                         let (r0, r1) = (l0.0 / l0.1.max(1.0), l1.0 / l1.1.max(1.0));
@@ -626,7 +626,7 @@ impl Match {
             }
             3 => {
                 let settled = self.roots().all(|f| f.ikemen.standby || if f.alive { f.move_type != 'H' && (f.ctrl || f.state_no == 0) } else { f.state_no == 5150 || f.state_no == 5110 });
-                if ((settled && self.round_time > 90) || self.round_time > 300) && (self.global_asserts & crate::flags::gsf::ROUNDNOTOVER == 0 || self.round_time > 900) {
+                if ((settled && self.round_time > 90) || self.round_time > 300) && (self.global_asserts & crate::flags::gsf::ROUNDNOTOVER == 0 || self.round_time > 900) && !self.finish_holding() {
                     self.round_state = 4; self.round_time = 0;
                     let decides = self.winner_side >= 0 && self.wins[self.winner_side as usize] + 1 >= self.rounds_to_win;
                     for (k, i) in self.root_indices().into_iter().enumerate() {
@@ -1552,7 +1552,7 @@ impl Match {
         let id = self.next_id;
         let mut h = Fighter::new(id, root.def.clone(), f.side, f.player_no);
         h.is_helper = true;
-        h.helper_id = num(self, "id", 0.0, 0) as i32;
+        h.helper_id = self.num(i, sc, "id", 0.0, 0) as i32;
         h.parent = Some(f.id); h.root = root.id;
         h.key_ctrl = num(self, "keyctrl", 0.0, 0) != 0.0;
         h.pause_move_time = num(self, "pausemovetime", 0.0, 0) as i32;
@@ -1586,9 +1586,9 @@ impl Match {
             }
             _ => V2 { x: f.pos.x + px * f.facing, y: f.pos.y + py },
         };
-        h.state_no = -1; h.ctrl = false;
+        h.state_no = 0; h.ctrl = false;
         let owner = if Arc::ptr_eq(&f.st_def, &f.def) { h.def.clone() } else { f.st_def.clone() };
-        let st = num(self, "stateno", 0.0, 0) as i32;
+        let st = self.num(i, sc, "stateno", 0.0, 0) as i32;
         self.next_id += 1;
         self.fighters.push(h);
         let hi = self.fighters.len() - 1;
@@ -1606,7 +1606,7 @@ impl Match {
         if self.projectiles.len() >= 256 { return; }
         let num = |m: &Match, k: &str, d: f64, idx: usize| m.num(i, sc, k, d, idx) as f32;
         let f = &self.fighters[i];
-        let anim = num(self, "projanim", 0.0, 0) as i32;
+        let anim = self.num(i, sc, "projanim", 0.0, 0) as i32;
         if !f.def.anims.contains_key(&anim) { return; }
         let hd = crate::hitdef::build(self, i, sc);
         let f = &self.fighters[i];
@@ -1618,7 +1618,7 @@ impl Match {
         let has = |k: &str| sc.has(k, 0);
         let hit_anim = if has("projhitanim") { num(self, "projhitanim", -1.0, 0) as i32 } else { -1 };
         let p = Projectile {
-            owner: f.id, side: f.side, teamside: f.side, root: f.root, tally: f.projectile_tally_id(), id: num(self, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
+            owner: f.id, side: f.side, teamside: f.side, root: f.root, tally: f.projectile_tally_id(), id: self.num(i, sc, "projid", 0.0, 0) as i32, cur: AnimCursor::new(f.def.clone(), anim),
             hit_anim, rem_anim: if has("projremanim") { num(self, "projremanim", -1.0, 0) as i32 } else { hit_anim },
             cancel_anim: if has("projcancelanim") { num(self, "projcancelanim", -1.0, 0) as i32 } else { -1 },
             pos: V2 { x, y }, vel: V2 { x: num(self, "velocity", 0.0, 0) * f.lscl, y: num(self, "velocity", 0.0, 1) * f.lscl },

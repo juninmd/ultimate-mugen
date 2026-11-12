@@ -153,7 +153,10 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `parry` | `{ "window": [de, até], "spark" }` | Devolve ataques na janela de elementos da animação |
 | `timestop` | ticks | Congela todos os outros |
 | `burst` | `true` | Quebra de combo usável ao apanhar |
+| `requires` | `{ "life": {"max": 0.5}, "enemyLife": {"min": 0.1, "max": 0.5} }` | Condição de vida: o golpe só inicia enquanto a vida do lutador (`life`) e/ou do rival (`enemyLife`) estiver entre `min` e `max`, como fração da vida máxima (0 a 1). Qualquer limite pode ser omitido. Compila para triggers `life <= lifemax * max` e `enemy,life <= enemy,lifemax * max` |
 | `flight` | `true` | Pairar em 8 direções enquanto o golpe dura |
+
+**Finisher.** Um golpe com `"kind": "finisher"` (use `throw` ou `hits` para o efeito) só fica disponível após um nocaute (`RoundState = 3` e `WinKO`). Quando o round final termina em nocaute e o vencedor tem um finisher, o round espera até 6 segundos em "FINISH HIM" para o vencedor executá-lo; executar (ou o tempo acabar) encerra a espera. Elencos sem finisher não mudam.
 
 ### Traços de combate
 
@@ -191,6 +194,10 @@ Valide com `cargo test --release --test native_roster_lab -- --nocapture` (todo 
 | `removeTime` | Ticks até sumir |
 | `priority` | Prioridade contra outros projéteis |
 
+### Elementos e atordoamento
+
+`hits[]` e `projectile` aceitam `element` (`fire`, `ice`, `lightning`, `earth`, `wind`, `water`) e `stun` (ticks extras de hit-stun). O compilador soma o hit-stun e o tremor do elemento e tinge a vítima por um instante (`PalFX`): `ice` congela por mais tempo (+16), `lightning` eletrocuta (+22 e tremor de 8 ticks), `fire` queima em vermelho, `earth` treme a tela, `wind` e `water` aplicam um tom curto. `stun` soma por cima e adiciona tremor de 5 ticks quando não há outro. Elementos desconhecidos são ignorados.
+
 ### Sintaxe de comando
 
 | Símbolo | Significado | Exemplo |
@@ -208,6 +215,8 @@ Valide com `cargo test --release --test native_roster_lab -- --nocapture` (todo 
 ## Normais de poder (Soco 3 e Chute 3)
 
 Todo lutador nativo que não declara um golpe em `z` ou `c` ganha quatro normais extras na compilação (`native/power_normals.rs`): `power_punch` e `crouch_power_punch` em `z` (tecla padrão **E**, exibido como *Soco 3*), `power_kick` e `crouch_power_kick` em `c` (tecla padrão **D**, exibido como *Chute 3*). Cada um reaproveita animação, tempo, altura de defesa e `cancels` da normal de chão mais forte da família (`y` e depois `x` nos socos, `b` e depois `a` nos chutes; as versões agachadas usam a normal agachada), com o nome `<nome base> Max`. Os golpes causam 130 % de dano, viram `heavy`, ganham 4 de hit-stun e 2 de hit-stop quando definidos e empurram 25 % mais. Golpes que cancelam na normal base também cancelam na versão de poder, e os novos golpes aparecem na lista de golpes da pausa. Declare um golpe próprio em `z` ou `c` para não usar o automático. Versões aéreas não são geradas aqui.
+
+Todos os lutadores nativos também recebem dois chutes baixos normais na compilação (`native/low_normals.rs`): `lowkick` em `D+a` agachado e `airlowkick` em `D+a` no ar. Eles reutilizam as animações de chute baixo agachado e de chute aéreo do próprio personagem, preservando os quadros de pixel art, e acertam a guarda baixa. A versão aérea avança e desce para alcançar o adversário em distâncias curtas. Se o lutador já declarar um golpe com o mesmo id ou a mesma combinação `D+a` e estado, o golpe declarado é preservado.
 
 ## Carregar energia (todo lutador)
 

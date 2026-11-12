@@ -31,3 +31,17 @@ Common traits of well-known fighting-game select screens (Street Fighter, Tekken
 
 - Only visible tiles are drawn and decoded; one portrait is decoded per frame.
 - Upper-case names and the stage/filter labels are cached or written into a reused buffer, so the screen allocates nothing per frame in steady state.
+
+## Strength, life and sorting
+
+Each tile has a thin gold bar at its bottom edge for strength. The side panel shows three gauges above the name plate: FOR (strength), VID (life) and VEL (walk speed).
+
+Definitions, read from each character's data (native and M.U.G.E.N alike):
+
+- **Strength** = `data.attack` × `data.life` / 1000 (defaults 100 and 1000, so an average character is 100). Gauge full at 200.
+- **Life** = `data.life` (default 1000). Gauge full at 2000.
+- **Speed** = `velocity.walk.fwd.x` (default 2.4). Gauge full at 6.0.
+
+Press `O` on the select screen to cycle the order: roster, strength, life, speed, name. The choice is saved as `sort=` in the config. Stats come from the character's cached preview and are computed once per character.
+
+Limitation: sorting by a stat loads the preview of every character in the view the first time, so a very large M.U.G.E.N roster can take a moment on that first press.

@@ -17,19 +17,24 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Dossiê dos Personagens](Personagens.md) | Jogadores e Criadores | Fichas biográficas, retratos, golpes, rivalidades e cenários associados |
 | [Replays](Replays-Rede.md) | Jogadores | Lutas gravadas, navegador de replays, velocidade de reprodução |
 | [Decisões de compatibilidade](Decisoes-de-Compatibilidade.md) | Criadores | Recursos rejeitados por decisão e o motivo |
+| [Scripts Lua](Scripts-Lua.md) | Criadores | Para que serve Lua em pacotes M.U.G.E.N e as alternativas sem Lua |
+| [Arquivos de rota](Arquivos-de-Rota.md) | Criadores | Rotas de arcade e regras de desbloqueio em TOML |
 | [Criar personagem UMF](Personagem-UMF.md) | Criadores | Lutador completo em um único JSON |
 | [Passivos](Passivos.md) | Criadores | Fúria, acúmulos de habilidade e regeneração por dados |
+| [Kits inspirados em Bleach](Kits-Inspirados-em-Bleach.md) | Jogadores | Ideias de Byakuya, Yoruichi e Zaraki em tres nativos |
 | [Arte do esqueleto (rig)](Rig.md) | Criadores | Estilo, poses, articulações e paletas |
 | [Scripts CNS](Scripts-CNS.md) | Criadores | Estados, controllers, triggers e comandos suportados |
 | [Flags do AssertSpecial](Flags-AssertSpecial.md) | Criadores | As 77 flags do Ikemen e o efeito de cada uma |
 | [Vida vermelha, tontura e defesa](Sistemas-de-Vida.md) | Criadores | RedLife, DizzyPoints, GuardPoints, estados 5300/5400 e padrões do HitDef |
 | [Screenpacks](Screenpacks.md) | Criadores | Suporte a screenpacks de menu e HUD |
+| [Estudo de screenpacks](Estudo-Screenpacks.md) | Criadores | Diferenciais de screenpacks e o que o motor adotou |
 | [Importar sprite atlas](Importacao-Sprite-Atlas.md) | Criadores | Transformar uma folha de sprites em lutador |
 | [Ferramentas de desenvolvimento](Ferramentas-de-Desenvolvimento.md) | Contribuidores | Ferramentas Rust de build e auditoria (`ume-tools`) |
 | [Ferramentas de sprites](Ferramentas-de-Sprites.md) | Criadores | Fatiar folhas, variantes de paleta, caixas de colisão automáticas |
 | [Gerador de golpes](Gerador-de-Golpes.md) | Criadores | TOML para AIR, CNS, CMD e Statedef -1 |
 | [Criar cenários](Cenarios.md) | Criadores | Cenário M.U.G.E.N `.def` e cenário nativo |
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
+| [Smoke da partida web](Smoke-Partida-Web.md) | Desenvolvedores | Teste de CI que joga partidas completas no navegador e pega travamentos |
 | [Layout de arquivos](Layout-de-Arquivos.md) | Desenvolvedores | A regra de 250 linhas, uma responsabilidade por arquivo, dividir arquivos, PRs paralelos |
 | [Desempenho](Desempenho.md) | Desenvolvedores | Carga paralela, ritmo de quadros, benchmarks |
 | [Engenharia reversa do port para navegador](Engenharia-Reversa-Ikemen-Web.md) | Desenvolvedores | Como uma build de M.U.G.E.N com 78 lutadores roda no navegador, e o que copiamos dela |

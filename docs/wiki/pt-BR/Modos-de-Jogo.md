@@ -86,3 +86,17 @@ Cada lado tem 2 ou 3 lutadores. No início de todo round só o primeiro está em
 - **Replays** gravam o botão Tag como qualquer entrada, então uma luta Tag se repete exatamente.
 
 Chaves da engine (`Match`): `team_tag`, `tag_cooldown_max`, `tag_cancel_window`. Evento: `Event::Tag { side, fighter }`.
+
+## Boneco de treino
+
+No Treino, o menu de pausa (aba Jogo) tem a linha **Comportamento do boneco**. Confirmar alterna o plano, que vale na hora e é mantido ao reiniciar a luta:
+
+| Plano | O que o boneco segura |
+|---|---|
+| Parado | Nada |
+| Agachado | Baixo |
+| Pulando | Cima a cada aterrissagem |
+| Defendendo | Trás, só enquanto o rival ataca ou há projétil vivo (ele não sai andando) |
+| Defesa baixa | Baixo, mais trás enquanto ameaçado |
+
+O plano fica em `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); o boneco aperta bits reais de entrada, então regras de defesa, empurrão e dano de chip são os da própria engine. Capturas: `UME_SHOTS_ONLY=pause` grava `training-dummy-*.png` e `pause-training-dummy.png`.

@@ -18,6 +18,7 @@ enum Act {
     Master,
     Music,
     Sfx,
+    Voice,
     Mute,
     Keys,
     Guide,
@@ -164,39 +165,11 @@ impl App {
                 r
             }
             1 => vec![
-                level(
-                    Act::Master,
-                    tr("Volume geral", "Master volume"),
-                    s.master,
-                    tr(
-                        "Controla música e efeitos juntos",
-                        "Scales music and effects together",
-                    ),
-                ),
-                level(
-                    Act::Music,
-                    tr("Música", "Music"),
-                    s.music,
-                    tr("Trilha dos cenários", "Stage soundtrack"),
-                ),
-                level(
-                    Act::Sfx,
-                    tr("Efeitos e vozes", "Effects and voices"),
-                    s.sfx,
-                    tr(
-                        "Golpes, vozes dos lutadores e menus",
-                        "Hits, fighter voices and menus",
-                    ),
-                ),
-                row(
-                    Act::Mute,
-                    tr("Mudo", "Mute"),
-                    on_off(s.mute),
-                    tr(
-                        "Silencia tudo sem perder os níveis",
-                        "Silences everything without losing the levels",
-                    ),
-                ),
+                level(Act::Master, tr("Volume geral", "Master volume"), s.master, tr("Controla música e efeitos juntos", "Scales music and effects together")),
+                level(Act::Music, tr("Música", "Music"), s.music, tr("Trilha dos cenários", "Stage soundtrack")),
+                level(Act::Sfx, tr("Efeitos", "Effects"), s.sfx, tr("Golpes, impactos e menus", "Hits, impacts and menus")),
+                level(Act::Voice, tr("Vozes dos golpes", "Move voices"), s.voice, tr("Grito de cada habilidade · 0% desliga", "Each ability's shout · 0% turns it off")),
+                row(Act::Mute, tr("Mudo", "Mute"), on_off(s.mute), tr("Silencia tudo sem perder os níveis", "Silences everything without losing the levels")),
             ],
             2 => {
                 let pads = &self.c.pad_info;
@@ -367,13 +340,10 @@ impl App {
             Act::FpsCounter if go => s.fps = !s.fps,
             Act::Vsync if go => s.vsync = !s.vsync,
             Act::FpsCap if go => s.fps_cap = cycle(s.fps_cap, step, FPS_CAPS.len()),
-            Act::Master if go => {
-                s.master = cycle(s.master as usize, step, VOLUME_STEPS as usize + 1) as u8
-            }
-            Act::Music if go => {
-                s.music = cycle(s.music as usize, step, VOLUME_STEPS as usize + 1) as u8
-            }
+            Act::Master if go => s.master = cycle(s.master as usize, step, VOLUME_STEPS as usize + 1) as u8,
+            Act::Music if go => s.music = cycle(s.music as usize, step, VOLUME_STEPS as usize + 1) as u8,
             Act::Sfx if go => s.sfx = cycle(s.sfx as usize, step, VOLUME_STEPS as usize + 1) as u8,
+            Act::Voice if go => s.voice = cycle(s.voice as usize, step, VOLUME_STEPS as usize + 1) as u8,
             Act::Mute if go => s.mute = !s.mute,
             Act::Difficulty if go => {
                 s.difficulty = (s.difficulty + step).clamp(1, 8);
@@ -517,16 +487,10 @@ impl App {
         } else {
             usable.get(cur - 1).copied()
         };
-        self.ui.rect(
-            120.0,
-            140.0,
-            VW - 240.0,
-            520.0,
-            Color::new(0.08, 0.05, 0.16, 0.72),
-        );
+        crate::menu_art::glass(&self.ui, 56.0, 136.0, VW - 112.0, 524.0, 1.0);
 
         let mut act_now: Option<(Act, i32, bool)> = focused_row.map(|i| (rows[i].act, dir_v, ok));
-        let (x, w, h) = (150.0, VW - 300.0, 54.0);
+        let (x, w, h) = (88.0, VW - 176.0, 54.0);
         let mut y = 156.0;
         let mut new_cur = cur;
         for (i, r) in rows.iter().enumerate() {
@@ -679,8 +643,8 @@ impl App {
             note,
             VW - 56.0,
             696.0,
-            16.0,
-            hex("#a49cc0"),
+            18.0,
+            hex("#c9c2e2"),
             Align::Right,
             false,
         );
@@ -708,7 +672,7 @@ impl App {
             self.screen = if from_fight {
                 Screen::Fight
             } else {
-                Screen::Menu { cur: 12 }
+                Screen::Menu { cur: 7 }
             };
             return;
         }

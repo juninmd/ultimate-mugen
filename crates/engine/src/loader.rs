@@ -6,8 +6,7 @@ use crate::cns::{parse_cmd, parse_constants, parse_states, scale_default_constan
 use crate::commands::parse_command;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use ume_formats::act::decode_act;
-use ume_formats::air::parse_air;
+use ume_formats::{act::decode_act, air::parse_air};
 use ume_formats::ini::{find_section, parse_ini_no_lines, unquote_str};
 use ume_formats::sff::{decode_sff, sprite_to_rgba};
 use ume_formats::snd::decode_snd;
@@ -15,8 +14,9 @@ use ume_formats::vfs::{norm_path, resolve, text, Vfs};
 
 mod format;
 mod portrait;
+mod stats;
 use format::local_size;
-pub use portrait::load_mugen_portrait;
+pub use {portrait::load_mugen_portrait, stats::load_mugen_stats};
 
 pub fn load_mugen_char(
     vfs: &Vfs,
@@ -374,7 +374,7 @@ pub fn load_mugen_char(
         if is_hold || is_rec || movelist.iter().any(|m| m.command == c.name) {
             continue;
         }
-        movelist.push(MoveInfo { name: c.name.replace('_', " "), input: c.raw.clone(), command: c.name.clone(), cost: crate::move_cost::cost_of(&states, &c.name), drain: false, forms: u32::MAX });
+        movelist.push(MoveInfo { name: c.name.replace('_', " "), input: c.raw.clone(), command: c.name.clone(), cost: crate::move_cost::cost_of(&states, &c.name), drain: false, forms: u32::MAX, state: -1 });
     }
     let ai_commands = commands
         .iter()

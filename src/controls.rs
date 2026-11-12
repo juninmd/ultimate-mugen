@@ -1,5 +1,6 @@
 //! Input hub: keyboard maps, gamepads (with rumble), touch controls; menu navigation.
 use crate::gamepad::{PadInfo, PadKind, Pads};
+mod nav_repeat;
 mod touch;
 pub mod shortcuts;
 use crate::gfx::*;
@@ -25,15 +26,15 @@ pub fn face(g: Glyphs, keys: &KeyMap, bit: u32) -> Face {
     match g {
         Glyphs::Touch => {
             let t = match bit {
-                k::X => "SOCO",
-                k::Y => "SOCO+",
-                k::Z => "SOCO 3",
-                k::A => "CHUTE",
-                k::B => "CHUTE+",
-                k::C => "CHUTE 3",
-                k::D2 => "ESPECIAL",
+                k::X => crate::i18n::tr3("SOCO", "PUNCH", "PUÑO"),
+                k::Y => crate::i18n::tr3("SOCO+", "PUNCH+", "PUÑO+"),
+                k::Z => crate::i18n::tr3("SOCO 3", "PUNCH 3", "PUÑO 3"),
+                k::A => crate::i18n::tr3("CHUTE", "KICK", "PATA"),
+                k::B => crate::i18n::tr3("CHUTE+", "KICK+", "PATA+"),
+                k::C => crate::i18n::tr3("CHUTE 3", "KICK 3", "PATA 3"),
+                k::D2 => crate::i18n::tr3("ESPECIAL", "SPECIAL", "ESPECIAL"),
                 k::W => "SUPER",
-                k::T => "DESPERTAR",
+                k::T => crate::i18n::tr3("DESPERTAR", "AWAKEN", "DESPERTAR"),
                 _ => "II",
             };
             Face::chip(
@@ -85,7 +86,7 @@ pub struct Controls {
     pub keys: KeyMap,
     pub pads: Pads,
     pub pad_info: Vec<PadInfo>,
-    prev_menu: u32,
+    nav_repeat: nav_repeat::NavRepeat,
     pub menu_pressed: u32,
     pub touch: TouchPad,
     pub glyphs: Glyphs,
@@ -130,7 +131,7 @@ impl Controls {
             keys: KeyMap::load(),
             pads: Pads::new(),
             pad_info: vec![],
-            prev_menu: 0,
+            nav_repeat: Default::default(),
             menu_pressed: 0,
             touch: TouchPad::new(touch),
             shortcuts: Shortcuts::load(),
@@ -216,8 +217,7 @@ impl Controls {
                 m |= nav::START;
             }
         }
-        self.menu_pressed = m & !self.prev_menu;
-        self.prev_menu = m;
+        self.menu_pressed = self.nav_repeat.pressed(m, get_frame_time());
     }
     pub fn clear_macros(&mut self) {
         for q in self.touch.macro_q.iter_mut() {

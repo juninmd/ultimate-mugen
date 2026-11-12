@@ -1,0 +1,5 @@
+level 8 vs level 3: higher level wins 86.5% of 126 mirror rounds
+level 6 vs level 3: higher level wins 81.0% of 126 mirror rounds
+level 8 vs level 6: higher level wins 61.9% of 126 mirror rounds
+win-rate spread (std dev) 22.1 pts, best 100.0%, worst 5.0%
+knockout rate 99.4%, draws 0.0%, average round 45.6s, avg damage/round 1538, avg hits/round 46.1, rounds with a stuck fighter 0

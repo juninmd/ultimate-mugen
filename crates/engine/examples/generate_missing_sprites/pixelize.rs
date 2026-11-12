@@ -1,9 +1,10 @@
+use serde_json::Value;
 use std::collections::BTreeMap;
 use tiny_skia::Pixmap;
 
 const OPAQUE_ALPHA: u8 = 40;
 
-pub fn apply(source: &Pixmap) -> Option<Pixmap> {
+pub fn apply(source: &Pixmap, style: &Value) -> Option<Pixmap> {
     let mut counts = BTreeMap::<[u8; 3], u32>::new();
     for pixel in source.data().chunks_exact(4) {
         if pixel[3] >= OPAQUE_ALPHA {
@@ -17,7 +18,7 @@ pub fn apply(source: &Pixmap) -> Option<Pixmap> {
         }
     }
     let colors: Vec<_> = counts.into_iter().collect();
-    let palette = palette(&colors);
+    let palette = palette(&colors, color_anchors(style));
     if palette.is_empty() {
         return None;
     }
@@ -46,9 +47,10 @@ pub fn apply(source: &Pixmap) -> Option<Pixmap> {
     Some(result)
 }
 
-fn palette(colors: &[([u8; 3], u32)]) -> Vec<[u8; 3]> {
+fn palette(colors: &[([u8; 3], u32)], anchors: Vec<[u8; 3]>) -> Vec<[u8; 3]> {
     let mut buckets = vec![colors.to_vec()];
-    while buckets.len() < 47 {
+    let limit = 47usize.saturating_sub(anchors.len());
+    while buckets.len() < limit.max(1) {
         let Some((index, channel)) = buckets
             .iter()
             .enumerate()
@@ -75,24 +77,53 @@ fn palette(colors: &[([u8; 3], u32)]) -> Vec<[u8; 3]> {
         buckets.push(bucket);
         buckets.push(right);
     }
-    buckets
-        .iter()
-        .map(|bucket| {
-            let mut total = 0u64;
-            let mut sum = [0u64; 3];
-            for (color, count) in bucket {
-                total += *count as u64;
-                for channel in 0..3 {
-                    sum[channel] += color[channel] as u64 * *count as u64;
-                }
+    let mut palette = anchors;
+    palette.extend(buckets.iter().map(|bucket| {
+        let mut total = 0u64;
+        let mut sum = [0u64; 3];
+        for (color, count) in bucket {
+            total += *count as u64;
+            for channel in 0..3 {
+                sum[channel] += color[channel] as u64 * *count as u64;
             }
-            [
-                (sum[0] / total) as u8,
-                (sum[1] / total) as u8,
-                (sum[2] / total) as u8,
-            ]
-        })
-        .collect()
+        }
+        [
+            (sum[0] / total) as u8,
+            (sum[1] / total) as u8,
+            (sum[2] / total) as u8,
+        ]
+    }));
+    palette.truncate(47);
+    palette
+}
+
+fn color_anchors(style: &Value) -> Vec<[u8; 3]> {
+    let mut anchors = Vec::new();
+    for color in style
+        .pointer("/colors")
+        .and_then(Value::as_object)
+        .into_iter()
+        .flatten()
+        .filter_map(|(_, value)| value.as_str())
+    {
+        let Some(hex) = color.strip_prefix('#').filter(|hex| hex.len() == 6) else {
+            continue;
+        };
+        let Ok(bytes) = hex
+            .as_bytes()
+            .chunks_exact(2)
+            .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap_or(""), 16))
+            .collect::<Result<Vec<_>, _>>()
+        else {
+            continue;
+        };
+        let rgb = [bytes[0], bytes[1], bytes[2]];
+        if !anchors.contains(&rgb) {
+            anchors.push(rgb);
+        }
+    }
+    anchors.truncate(46);
+    anchors
 }
 
 fn range(bucket: &[([u8; 3], u32)]) -> (usize, u8) {

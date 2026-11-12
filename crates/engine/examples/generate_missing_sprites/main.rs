@@ -231,7 +231,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             canvas.draw_pixmap(0, 0, src.as_ref(), &paint, transform, None);
 
             let out_png = char_sprites_dir.join(format!("{name}.png"));
-            pixelize::apply(&canvas).ok_or("cannot quantize attack frame")?.save_png(&out_png)?;
+            pixelize::apply(&canvas, &style).ok_or("cannot quantize attack frame")?.save_png(&out_png)?;
             meta["frames"][name.as_str()] = serde_json::json!({"axisX": AXIS_X, "axisY": AXIS_Y, "refHeight": REF_HEIGHT});
         }
 

@@ -33,6 +33,22 @@ fn air_attack(id: &str, input: u32) -> (i32, bool) {
     (attacked, m.fighters[1].life < life)
 }
 
+fn ground_low_kick(id: &str) -> (i32, bool) {
+    let def = Arc::new(compile_native(&load(id), 1, false));
+    let mut m = Match::new(common_def(), None, flat_stage());
+    m.add_player(def.clone(), 0, 0, 1);
+    m.add_player(def, 1, 0, 2);
+    m.start_round();
+    while m.round_state != 2 { m.tick(&[0, 0]); }
+    face_off(&mut m, 50.0);
+    m.fighters[0].ctrl = true;
+    let life = m.fighters[1].life;
+    let mut attacked = 0;
+    for _ in 0..4 { m.tick(&[D | A, 0]); if m.fighters[0].move_type == 'A' { attacked = m.fighters[0].state_no; } }
+    for _ in 0..30 { m.tick(&[0, 0]); }
+    (attacked, m.fighters[1].life < life)
+}
+
 #[test]
 fn every_button_attacks_in_the_air_and_down_kick_is_a_separate_move() {
     for id in KIT {
@@ -50,5 +66,14 @@ fn every_button_attacks_in_the_air_and_down_kick_is_a_separate_move() {
 fn the_down_kick_lands_on_a_close_opponent() {
     for id in KIT {
         assert!(air_attack(id, D | B).1, "{id} down kick did not hit");
+    }
+}
+
+#[test]
+fn every_native_fighter_has_a_grounded_low_kick() {
+    for id in KIT {
+        let (state, hit) = ground_low_kick(id);
+        assert!(state != 0, "{id} crouch + A did not start its low kick");
+        assert!(hit, "{id} low kick did not hit a close opponent");
     }
 }

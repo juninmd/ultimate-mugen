@@ -1,64 +1,89 @@
 {
   "frames": {
     "01_idle": {
-      "refHeight": 388.0,
       "axisX": 200.5,
-      "axisY": 400.0
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
     "02_attack1": {
-      "refHeight": 388.0,
       "axisX": 198.5,
-      "axisY": 400.0
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
     "03_attack2": {
-      "refHeight": 388.0,
       "axisX": 190.5,
-      "axisY": 400.0
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
     "04_special": {
-      "refHeight": 388.0,
       "axisX": 198.5,
-      "axisY": 400.0
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
     "05_projectile": {
-      "refHeight": 388.0,
       "axisX": 176.5,
-      "axisY": 400.0
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
     "06_victory": {
-      "refHeight": 388.0,
       "axisX": 197.5,
-      "axisY": 400.0
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
-    "walk0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+    "07_idle1": {
+      "axisX": 200.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
-    "walk1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+    "08_idle2": {
+      "axisX": 200.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
-    "walk2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+    "09_hit1": {
+      "axisX": 196.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
-    "walk3": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+    "10_hit2": {
+      "axisX": 198.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
-    "walk4": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+    "11_hit3": {
+      "axisX": 198.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
-    "walk5": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+    "12_fall1": {
+      "axisX": 184.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
+    },
+    "13_fall2": {
+      "axisX": 195.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
+    },
+    "14_lie": {
+      "axisX": 194.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
+    },
+    "15_power0": {
+      "axisX": 198.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
+    },
+    "16_power1": {
+      "axisX": 195.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
+    },
+    "17_power2": {
+      "axisX": 200.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
     },
     "airGuard": {
       "axisX": 200.0,
@@ -66,6 +91,36 @@
       "refHeight": 320.0
     },
     "airGuardHit": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "airLowKick": {
+      "axisX": 190.5,
+      "axisY": 400.0,
+      "refHeight": 388.0
+    },
+    "ajab": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "akick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "cjab0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "cjab1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "clk": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -215,6 +270,16 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "hk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "hop": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -230,7 +295,17 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "inline_5d3b693e708bfa8e": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "inline_8e846cf6a23f96c7": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_8edd27c26a9dcfab": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -246,6 +321,21 @@
       "refHeight": 320.0
     },
     "inline_f0ca448d673ece1e": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_f5002e7c7e5a3a1d": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab1": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -271,6 +361,16 @@
       "refHeight": 320.0
     },
     "land": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "lk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "lk1": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -315,10 +415,10 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "turn": {
+    "sg_run_mid": {
       "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisY": 363.0,
+      "refHeight": 360.0
     },
     "sg_run_run0": {
       "axisX": 200.0,
@@ -340,82 +440,57 @@
       "axisY": 363.0,
       "refHeight": 360.0
     },
-    "07_idle1": {
-      "axisX": 200.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "08_idle2": {
-      "axisX": 200.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "09_hit1": {
-      "axisX": 196.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "10_hit2": {
-      "axisX": 198.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "11_hit3": {
-      "axisX": 198.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "12_fall1": {
-      "axisX": 184.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "13_fall2": {
-      "axisX": 195.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "14_lie": {
-      "axisX": 194.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "15_power0": {
-      "axisX": 198.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "16_power1": {
-      "axisX": 195.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "17_power2": {
-      "axisX": 200.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "sg_run_mid": {
-      "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0
-    },
-    "airLowKick": {
-      "axisX": 190.5,
-      "axisY": 400.0,
-      "refHeight": 388.0
-    },
-    "inline_5d3b693e708bfa8e": {
+    "str0": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "inline_8edd27c26a9dcfab": {
+    "str1": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "inline_f5002e7c7e5a3a1d": {
+    "sweep0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sweep1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "turn": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk4": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "walk5": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0

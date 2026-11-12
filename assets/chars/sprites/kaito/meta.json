@@ -11,15 +11,15 @@
       "refHeight": 362.0
     },
     "03_attack2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
       "awakeningHair": [
         158,
         90,
         248,
         166
-      ]
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
     },
     "04_special": {
       "awakeningHair": [
@@ -52,6 +52,33 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "airLowKick": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "ajab": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "akick": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "bar1": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -68,6 +95,27 @@
       "refHeight": 320.0
     },
     "bounce": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "cjab0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "cjab1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "clk": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -189,6 +237,39 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "gale0": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "gale1": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "gale2": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "getUp1": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -265,6 +346,28 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "hk0": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hk1": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "hop": {
       "awakeningHair": [
         156,
@@ -320,6 +423,32 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "inline_0172e9bbe547734f": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_04cdb9fa2bf5530d": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_ccfe38b2ee6cffc1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_f211493aa5265fce": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "jab0": {
       "awakeningHair": [
         154,
@@ -332,15 +461,9 @@
       "refHeight": 362.0
     },
     "jab1": {
-      "awakeningHair": [
-        154,
-        38,
-        220,
-        74
-      ],
-      "axisX": 199.5,
-      "axisY": 400.0,
-      "refHeight": 362.0
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
     },
     "jumpDown": {
       "awakeningHair": [
@@ -402,6 +525,28 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "lk0": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "lk1": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "lose": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -435,6 +580,44 @@
         72,
         310,
         150
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "punch": {
+      "axisX": 199.5,
+      "axisY": 400.0,
+      "refHeight": 362.0
+    },
+    "rise0": {
+      "awakeningHair": [
+        198,
+        74,
+        301,
+        160
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "rise1": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "rise2": {
+      "awakeningHair": [
+        170,
+        76,
+        270,
+        164
       ],
       "axisX": 200.0,
       "axisY": 392.0,
@@ -484,32 +667,119 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "sg_run_mid": {
+      "awakeningHair": [
+        200,
+        71,
+        266,
+        125
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run0": {
+      "awakeningHair": [
+        217,
+        61,
+        283,
+        115
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run1": {
+      "awakeningHair": [
+        200,
+        71,
+        266,
+        125
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run2": {
+      "awakeningHair": [
+        193,
+        61,
+        259,
+        115
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run3": {
+      "awakeningHair": [
+        213,
+        54,
+        279,
+        108
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "str0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "str1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "sup0": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "tk0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
+    "sweep0": {
       "awakeningHair": [
         158,
         90,
         248,
         166
-      ]
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sweep1": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "tk0": {
+      "awakeningHair": [
+        158,
+        90,
+        248,
+        166
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
     },
     "tk1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
       "awakeningHair": [
         158,
         90,
         248,
         166
-      ]
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
     },
     "trip": {
       "axisX": 200.0,
@@ -614,257 +884,6 @@
       "axisX": 200.0,
       "axisY": 400.0,
       "refHeight": 379.0
-    },
-    "rise0": {
-      "awakeningHair": [
-        198,
-        74,
-        301,
-        160
-      ],
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "rise1": {
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ],
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "rise2": {
-      "awakeningHair": [
-        170,
-        76,
-        270,
-        164
-      ],
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "gale0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "gale1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "gale2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "lk0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "lk1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "hk0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "hk1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "clk": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "sweep0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "sweep1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "akick": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "inline_0172e9bbe547734f": {
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ],
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "sg_run_run0": {
-      "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0,
-      "awakeningHair": [
-        217,
-        61,
-        283,
-        115
-      ]
-    },
-    "sg_run_run1": {
-      "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0,
-      "awakeningHair": [
-        200,
-        71,
-        266,
-        125
-      ]
-    },
-    "sg_run_run2": {
-      "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0,
-      "awakeningHair": [
-        193,
-        61,
-        259,
-        115
-      ]
-    },
-    "sg_run_run3": {
-      "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0,
-      "awakeningHair": [
-        213,
-        54,
-        279,
-        108
-      ]
-    },
-    "punch": {
-      "axisX": 199.5,
-      "axisY": 400.0,
-      "refHeight": 362.0
-    },
-    "sg_run_mid": {
-      "axisX": 200.0,
-      "axisY": 363.0,
-      "refHeight": 360.0,
-      "awakeningHair": [
-        200,
-        71,
-        266,
-        125
-      ]
-    },
-    "airLowKick": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0,
-      "awakeningHair": [
-        158,
-        90,
-        248,
-        166
-      ]
-    },
-    "inline_04cdb9fa2bf5530d": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_ccfe38b2ee6cffc1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_f211493aa5265fce": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
     }
   }
 }

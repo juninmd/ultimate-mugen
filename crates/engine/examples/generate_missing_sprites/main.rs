@@ -11,6 +11,7 @@
 //! style. Output canvas and metadata follow the established convention: 400x400 canvas, axis
 //! (200, 392), `refHeight` 320. Resolution classification lives in `pose_map.rs`.
 mod pose_map;
+mod pixelize;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
@@ -54,6 +55,12 @@ fn alpha_bounds(pm: &Pixmap) -> Option<(f32, f32, f32, f32)> {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     set_art_res(3.0);
     let dry_run = std::env::args().any(|arg| arg == "--dry-run");
+    let attack_only = std::env::args().any(|arg| arg == "--attack-keyframes");
+    let rebuild_list = std::env::args()
+        .find_map(|arg| arg.strip_prefix("--rebuild-list=").map(str::to_string))
+        .map(std::fs::read_to_string)
+        .transpose()?
+        .unwrap_or_default();
     let chars_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../assets/chars");
     let sprites_dir = chars_dir.join("sprites");
     let defaults_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src/native/defaults.json");
@@ -125,7 +132,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             meta["frames"] = serde_json::json!({});
         }
 
-        let files: BTreeSet<String> = char_sprites_dir
+        let mut files: BTreeSet<String> = char_sprites_dir
             .read_dir()?
             .filter_map(Result::ok)
             .filter_map(|entry| {
@@ -133,14 +140,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 name.strip_suffix(".png").map(str::to_string)
             })
             .collect();
+        for name in rebuild_list.lines().filter_map(|entry| {
+            entry.strip_prefix(&format!("{id}/")).and_then(|name| name.strip_suffix(".png"))
+        }) {
+            files.remove(name);
+        }
 
         let mut targets: BTreeMap<String, Value> = BTreeMap::new();
+        let attack_anims = pose_map::attack_animations(&char_json);
         for anims_value in [Some(&default_anims), char_json.get("anims")] {
             let Some(anims) = anims_value.and_then(Value::as_object) else { continue };
-            for anim in anims.values() {
+            for (anim_name, anim) in anims {
+                if attack_only && !attack_anims.contains(anim_name) { continue; }
                 let Some(frames) = anim.get("frames").and_then(Value::as_array) else { continue };
                 for frame in frames {
-                    if let Some(target) = frame_targets(frame, &files, &poses) {
+                    if let Some(target) = frame_targets(frame, &files, &poses, attack_only) {
                         targets.insert(target.0, target.1);
                     }
                 }
@@ -180,6 +194,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 eprintln!("  unsafe pose name {name} skipped for {id}");
                 continue;
             }
+            let mut pose_val = pose_val.clone();
+            if attack_only {
+                if let Some(pose) = pose_val.as_object_mut() {
+                    pose.remove("aura");
+                    pose.remove("glow");
+                }
+            }
             let render = render_pose(&style, &pose_val, None, true, None);
             let Some(src) = render.image.as_deref().and_then(to_pixmap) else {
                 eprintln!("  failed to render {name} for {id}");
@@ -210,7 +231,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             canvas.draw_pixmap(0, 0, src.as_ref(), &paint, transform, None);
 
             let out_png = char_sprites_dir.join(format!("{name}.png"));
-            canvas.save_png(&out_png)?;
+            pixelize::apply(&canvas).ok_or("cannot quantize attack frame")?.save_png(&out_png)?;
             meta["frames"][name.as_str()] = serde_json::json!({"axisX": AXIS_X, "axisY": AXIS_Y, "refHeight": REF_HEIGHT});
         }
 

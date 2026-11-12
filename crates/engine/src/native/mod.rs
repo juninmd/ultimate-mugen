@@ -17,6 +17,7 @@ pub mod rig;
 mod pixel;
 mod air_variant;
 mod air_normals;
+mod low_normals;
 mod power_normals;
 mod charge;
 pub mod charge_ramp;

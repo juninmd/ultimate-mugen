@@ -24,20 +24,361 @@
     "lighthouse_alexandria": "Use case: stylized-concept. Asset: production background for a side-view 2D fighting game. One single wide 16:9 landscape. Primary request: Lighthouse of Alexandria (Pharos of Alexandria), ancient Egypt at midnight under a starry sky: monumental three-tiered lighthouse tower with a massive square stone base, an octagonal middle section, and a cylindrical upper tower, topped with a giant blazing bronze mirror furnace casting a sweeping, powerful beam of golden light across the dark turbulent Mediterranean sea. Coastal rocks with crashing white foam and ancient Ptolemaic fortress battlements behind the fight area. Ptolemaic royal banners fluttering in the sea wind framing the far sides, broad continuous horizontal level white limestone fortress rampart fighting floor. Masterful retro arcade fighting game pixel art aesthetic, deliberate crisp pixel clusters, stunning dark night and blazing beacon beam lighting contrast. Composition: orthographic side view, broad continuous horizontal fighting floor in bottom 22 percent, fighter foot line at 85 percent image height. Keep center unobstructed and readable for fighters. Full bleed. No people, characters, UI, readable text, logos, watermark, borders."
   },
   "animations": {
+    "dojo": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "dojo.png",
+      "size": "1672x941",
+      "event": "pink cherry-blossom petals drift across the shrine breeze",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: pink cherry-blossom petals drift across the shrine breeze.",
+        "the breeze carries particles across the left background: pink cherry-blossom petals drift across the shrine breeze.",
+        "particles drift through the center background: pink cherry-blossom petals drift across the shrine breeze.",
+        "particles pass behind the landmark: pink cherry-blossom petals drift across the shrine breeze.",
+        "particles move into the right background: pink cherry-blossom petals drift across the shrine breeze.",
+        "the breeze carries particles toward the right edge: pink cherry-blossom petals drift across the shrine breeze.",
+        "the trail thins as particles leave the frame: pink cherry-blossom petals drift across the shrine breeze.",
+        "the first particles reappear at the upper-left edge: pink cherry-blossom petals drift across the shrine breeze."
+      ]
+    },
+    "neon": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "neon.png",
+      "size": "1672x941",
+      "event": "slanted rain streaks and neon-lit rooftop reflections",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: slanted rain streaks and neon-lit rooftop reflections.",
+        "the breeze carries particles across the left background: slanted rain streaks and neon-lit rooftop reflections.",
+        "particles drift through the center background: slanted rain streaks and neon-lit rooftop reflections.",
+        "particles pass behind the landmark: slanted rain streaks and neon-lit rooftop reflections.",
+        "particles move into the right background: slanted rain streaks and neon-lit rooftop reflections.",
+        "the breeze carries particles toward the right edge: slanted rain streaks and neon-lit rooftop reflections.",
+        "the trail thins as particles leave the frame: slanted rain streaks and neon-lit rooftop reflections.",
+        "the first particles reappear at the upper-left edge: slanted rain streaks and neon-lit rooftop reflections."
+      ]
+    },
+    "bamboo": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "bamboo.png",
+      "size": "1672x941",
+      "event": "green and gold leaves sway through the moonlit grove",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: green and gold leaves sway through the moonlit grove.",
+        "the breeze carries particles across the left background: green and gold leaves sway through the moonlit grove.",
+        "particles drift through the center background: green and gold leaves sway through the moonlit grove.",
+        "particles pass behind the landmark: green and gold leaves sway through the moonlit grove.",
+        "particles move into the right background: green and gold leaves sway through the moonlit grove.",
+        "the breeze carries particles toward the right edge: green and gold leaves sway through the moonlit grove.",
+        "the trail thins as particles leave the frame: green and gold leaves sway through the moonlit grove.",
+        "the first particles reappear at the upper-left edge: green and gold leaves sway through the moonlit grove."
+      ]
+    },
+    "plains": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "plains.png",
+      "size": "1672x941",
+      "event": "windblown grass seeds and golden dust cross the canyon",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: windblown grass seeds and golden dust cross the canyon.",
+        "the breeze carries particles across the left background: windblown grass seeds and golden dust cross the canyon.",
+        "particles drift through the center background: windblown grass seeds and golden dust cross the canyon.",
+        "particles pass behind the landmark: windblown grass seeds and golden dust cross the canyon.",
+        "particles move into the right background: windblown grass seeds and golden dust cross the canyon.",
+        "the breeze carries particles toward the right edge: windblown grass seeds and golden dust cross the canyon.",
+        "the trail thins as particles leave the frame: windblown grass seeds and golden dust cross the canyon.",
+        "the first particles reappear at the upper-left edge: windblown grass seeds and golden dust cross the canyon."
+      ]
+    },
+    "spirit": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "spirit.png",
+      "size": "1672x941",
+      "event": "cyan spirit motes float around the torii and lanterns",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: cyan spirit motes float around the torii and lanterns.",
+        "the breeze carries particles across the left background: cyan spirit motes float around the torii and lanterns.",
+        "particles drift through the center background: cyan spirit motes float around the torii and lanterns.",
+        "particles pass behind the landmark: cyan spirit motes float around the torii and lanterns.",
+        "particles move into the right background: cyan spirit motes float around the torii and lanterns.",
+        "the breeze carries particles toward the right edge: cyan spirit motes float around the torii and lanterns.",
+        "the trail thins as particles leave the frame: cyan spirit motes float around the torii and lanterns.",
+        "the first particles reappear at the upper-left edge: cyan spirit motes float around the torii and lanterns."
+      ]
+    },
+    "volcano": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "volcano.png",
+      "size": "1672x941",
+      "event": "orange embers rise from the volcanic heat",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: orange embers rise from the volcanic heat.",
+        "the breeze carries particles across the left background: orange embers rise from the volcanic heat.",
+        "particles drift through the center background: orange embers rise from the volcanic heat.",
+        "particles pass behind the landmark: orange embers rise from the volcanic heat.",
+        "particles move into the right background: orange embers rise from the volcanic heat.",
+        "the breeze carries particles toward the right edge: orange embers rise from the volcanic heat.",
+        "the trail thins as particles leave the frame: orange embers rise from the volcanic heat.",
+        "the first particles reappear at the upper-left edge: orange embers rise from the volcanic heat."
+      ]
+    },
+    "brazil": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "brazil.png",
+      "size": "1672x941",
+      "event": "bright leaves and warm pollen move through the plaza",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: bright leaves and warm pollen move through the plaza.",
+        "the breeze carries particles across the left background: bright leaves and warm pollen move through the plaza.",
+        "particles drift through the center background: bright leaves and warm pollen move through the plaza.",
+        "particles pass behind the landmark: bright leaves and warm pollen move through the plaza.",
+        "particles move into the right background: bright leaves and warm pollen move through the plaza.",
+        "the breeze carries particles toward the right edge: bright leaves and warm pollen move through the plaza.",
+        "the trail thins as particles leave the frame: bright leaves and warm pollen move through the plaza.",
+        "the first particles reappear at the upper-left edge: bright leaves and warm pollen move through the plaza."
+      ]
+    },
+    "great_wall": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "great_wall.png",
+      "size": "1672x941",
+      "event": "small banners flutter and pale cloud motes drift",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: small banners flutter and pale cloud motes drift.",
+        "the breeze carries particles across the left background: small banners flutter and pale cloud motes drift.",
+        "particles drift through the center background: small banners flutter and pale cloud motes drift.",
+        "particles pass behind the landmark: small banners flutter and pale cloud motes drift.",
+        "particles move into the right background: small banners flutter and pale cloud motes drift.",
+        "the breeze carries particles toward the right edge: small banners flutter and pale cloud motes drift.",
+        "the trail thins as particles leave the frame: small banners flutter and pale cloud motes drift.",
+        "the first particles reappear at the upper-left edge: small banners flutter and pale cloud motes drift."
+      ]
+    },
+    "petra": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "petra.png",
+      "size": "1672x941",
+      "event": "warm sandstone dust catches the canyon light",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: warm sandstone dust catches the canyon light.",
+        "the breeze carries particles across the left background: warm sandstone dust catches the canyon light.",
+        "particles drift through the center background: warm sandstone dust catches the canyon light.",
+        "particles pass behind the landmark: warm sandstone dust catches the canyon light.",
+        "particles move into the right background: warm sandstone dust catches the canyon light.",
+        "the breeze carries particles toward the right edge: warm sandstone dust catches the canyon light.",
+        "the trail thins as particles leave the frame: warm sandstone dust catches the canyon light.",
+        "the first particles reappear at the upper-left edge: warm sandstone dust catches the canyon light."
+      ]
+    },
+    "christ_redeemer": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "christ_redeemer.png",
+      "size": "1672x941",
+      "event": "soft luminous motes drift through the sunset air",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: soft luminous motes drift through the sunset air.",
+        "the breeze carries particles across the left background: soft luminous motes drift through the sunset air.",
+        "particles drift through the center background: soft luminous motes drift through the sunset air.",
+        "particles pass behind the landmark: soft luminous motes drift through the sunset air.",
+        "particles move into the right background: soft luminous motes drift through the sunset air.",
+        "the breeze carries particles toward the right edge: soft luminous motes drift through the sunset air.",
+        "the trail thins as particles leave the frame: soft luminous motes drift through the sunset air.",
+        "the first particles reappear at the upper-left edge: soft luminous motes drift through the sunset air."
+      ]
+    },
+    "texas": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "texas.png",
+      "size": "1672x941",
+      "event": "windblown dust and a few glowing fireflies cross the town",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: windblown dust and a few glowing fireflies cross the town.",
+        "the breeze carries particles across the left background: windblown dust and a few glowing fireflies cross the town.",
+        "particles drift through the center background: windblown dust and a few glowing fireflies cross the town.",
+        "particles pass behind the landmark: windblown dust and a few glowing fireflies cross the town.",
+        "particles move into the right background: windblown dust and a few glowing fireflies cross the town.",
+        "the breeze carries particles toward the right edge: windblown dust and a few glowing fireflies cross the town.",
+        "the trail thins as particles leave the frame: windblown dust and a few glowing fireflies cross the town.",
+        "the first particles reappear at the upper-left edge: windblown dust and a few glowing fireflies cross the town."
+      ]
+    },
+    "chichen_itza": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "chichen_itza.png",
+      "size": "1672x941",
+      "event": "golden dust motes rise around the temple at dusk",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: golden dust motes rise around the temple at dusk.",
+        "the breeze carries particles across the left background: golden dust motes rise around the temple at dusk.",
+        "particles drift through the center background: golden dust motes rise around the temple at dusk.",
+        "particles pass behind the landmark: golden dust motes rise around the temple at dusk.",
+        "particles move into the right background: golden dust motes rise around the temple at dusk.",
+        "the breeze carries particles toward the right edge: golden dust motes rise around the temple at dusk.",
+        "the trail thins as particles leave the frame: golden dust motes rise around the temple at dusk.",
+        "the first particles reappear at the upper-left edge: golden dust motes rise around the temple at dusk."
+      ]
+    },
+    "colosseum": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "colosseum.png",
+      "size": "1672x941",
+      "event": "small sparks lift from the arena braziers",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: small sparks lift from the arena braziers.",
+        "the breeze carries particles across the left background: small sparks lift from the arena braziers.",
+        "particles drift through the center background: small sparks lift from the arena braziers.",
+        "particles pass behind the landmark: small sparks lift from the arena braziers.",
+        "particles move into the right background: small sparks lift from the arena braziers.",
+        "the breeze carries particles toward the right edge: small sparks lift from the arena braziers.",
+        "the trail thins as particles leave the frame: small sparks lift from the arena braziers.",
+        "the first particles reappear at the upper-left edge: small sparks lift from the arena braziers."
+      ]
+    },
+    "taj_mahal": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "taj_mahal.png",
+      "size": "1672x941",
+      "event": "cool luminous motes drift over the reflecting pool",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: cool luminous motes drift over the reflecting pool.",
+        "the breeze carries particles across the left background: cool luminous motes drift over the reflecting pool.",
+        "particles drift through the center background: cool luminous motes drift over the reflecting pool.",
+        "particles pass behind the landmark: cool luminous motes drift over the reflecting pool.",
+        "particles move into the right background: cool luminous motes drift over the reflecting pool.",
+        "the breeze carries particles toward the right edge: cool luminous motes drift over the reflecting pool.",
+        "the trail thins as particles leave the frame: cool luminous motes drift over the reflecting pool.",
+        "the first particles reappear at the upper-left edge: cool luminous motes drift over the reflecting pool."
+      ]
+    },
+    "pyramids_giza": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "pyramids_giza.png",
+      "size": "1672x941",
+      "event": "fine sand motes cross the sunset near the pyramids",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: fine sand motes cross the sunset near the pyramids.",
+        "the breeze carries particles across the left background: fine sand motes cross the sunset near the pyramids.",
+        "particles drift through the center background: fine sand motes cross the sunset near the pyramids.",
+        "particles pass behind the landmark: fine sand motes cross the sunset near the pyramids.",
+        "particles move into the right background: fine sand motes cross the sunset near the pyramids.",
+        "the breeze carries particles toward the right edge: fine sand motes cross the sunset near the pyramids.",
+        "the trail thins as particles leave the frame: fine sand motes cross the sunset near the pyramids.",
+        "the first particles reappear at the upper-left edge: fine sand motes cross the sunset near the pyramids."
+      ]
+    },
+    "hanging_gardens": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "hanging_gardens.png",
+      "size": "1672x941",
+      "event": "pink petals drift between the garden terraces",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: pink petals drift between the garden terraces.",
+        "the breeze carries particles across the left background: pink petals drift between the garden terraces.",
+        "particles drift through the center background: pink petals drift between the garden terraces.",
+        "particles pass behind the landmark: pink petals drift between the garden terraces.",
+        "particles move into the right background: pink petals drift between the garden terraces.",
+        "the breeze carries particles toward the right edge: pink petals drift between the garden terraces.",
+        "the trail thins as particles leave the frame: pink petals drift between the garden terraces.",
+        "the first particles reappear at the upper-left edge: pink petals drift between the garden terraces."
+      ]
+    },
+    "temple_artemis": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "temple_artemis.png",
+      "size": "1672x941",
+      "event": "pale cloud motes pass the moonlit columns",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: pale cloud motes pass the moonlit columns.",
+        "the breeze carries particles across the left background: pale cloud motes pass the moonlit columns.",
+        "particles drift through the center background: pale cloud motes pass the moonlit columns.",
+        "particles pass behind the landmark: pale cloud motes pass the moonlit columns.",
+        "particles move into the right background: pale cloud motes pass the moonlit columns.",
+        "the breeze carries particles toward the right edge: pale cloud motes pass the moonlit columns.",
+        "the trail thins as particles leave the frame: pale cloud motes pass the moonlit columns.",
+        "the first particles reappear at the upper-left edge: pale cloud motes pass the moonlit columns."
+      ]
+    },
+    "statue_zeus": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "statue_zeus.png",
+      "size": "1672x941",
+      "event": "warm sparks rise from the temple braziers",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: warm sparks rise from the temple braziers.",
+        "the breeze carries particles across the left background: warm sparks rise from the temple braziers.",
+        "particles drift through the center background: warm sparks rise from the temple braziers.",
+        "particles pass behind the landmark: warm sparks rise from the temple braziers.",
+        "particles move into the right background: warm sparks rise from the temple braziers.",
+        "the breeze carries particles toward the right edge: warm sparks rise from the temple braziers.",
+        "the trail thins as particles leave the frame: warm sparks rise from the temple braziers.",
+        "the first particles reappear at the upper-left edge: warm sparks rise from the temple braziers."
+      ]
+    },
+    "mausoleum_halicarnassus": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "mausoleum_halicarnassus.png",
+      "size": "1672x941",
+      "event": "fine Mediterranean dust moves in the late sun",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: fine Mediterranean dust moves in the late sun.",
+        "the breeze carries particles across the left background: fine Mediterranean dust moves in the late sun.",
+        "particles drift through the center background: fine Mediterranean dust moves in the late sun.",
+        "particles pass behind the landmark: fine Mediterranean dust moves in the late sun.",
+        "particles move into the right background: fine Mediterranean dust moves in the late sun.",
+        "the breeze carries particles toward the right edge: fine Mediterranean dust moves in the late sun.",
+        "the trail thins as particles leave the frame: fine Mediterranean dust moves in the late sun.",
+        "the first particles reappear at the upper-left edge: fine Mediterranean dust moves in the late sun."
+      ]
+    },
     "colossus_rhodes": {
-      "generator": "Built-in image_gen",
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
       "source": "colossus_rhodes.png",
       "size": "1672x941",
-      "shared_prompt": "Edit the same pixel-art 16:9 stage. Preserve camera, Colossus silhouette, harbor architecture, ships, skyline, lightning sky, colors and the entire foreground fighting deck. Change only the harbor water event and rain. Keep the lower stone fighting floor unchanged. Crisp deliberate pixel clusters; no text, UI, characters, collage or panels.",
+      "event": "rain streaks fall over the harbor water",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
       "phases": [
-        "A turquoise wave crashes against the left breakwater, peaking at center-left.",
-        "The large wave moves toward center-left and rises, with spray trailing behind.",
-        "The turquoise crest rises behind the Colossus legs, just below the statue base.",
-        "The crest passes center and breaks toward the right harbor wall behind the right ship.",
-        "The wave collapses into spray at the far-right wall; center water is lower and turbulent.",
-        "The large wave recedes; choppy turquoise water and rain remain, with a smaller swell forming at far left.",
-        "A low rolling swell travels in from the left as beacon reflections shimmer across the water.",
-        "The new swell rises at center-left with restrained spray behind the left breakwater."
+        "particles enter along the upper-left edge: rain streaks fall over the harbor water.",
+        "the breeze carries particles across the left background: rain streaks fall over the harbor water.",
+        "particles drift through the center background: rain streaks fall over the harbor water.",
+        "particles pass behind the landmark: rain streaks fall over the harbor water.",
+        "particles move into the right background: rain streaks fall over the harbor water.",
+        "the breeze carries particles toward the right edge: rain streaks fall over the harbor water.",
+        "the trail thins as particles leave the frame: rain streaks fall over the harbor water.",
+        "the first particles reappear at the upper-left edge: rain streaks fall over the harbor water."
+      ]
+    },
+    "lighthouse_alexandria": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "lighthouse_alexandria.png",
+      "size": "1672x941",
+      "event": "sea spray and rain streaks move around the lighthouse beam",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: sea spray and rain streaks move around the lighthouse beam.",
+        "the breeze carries particles across the left background: sea spray and rain streaks move around the lighthouse beam.",
+        "particles drift through the center background: sea spray and rain streaks move around the lighthouse beam.",
+        "particles pass behind the landmark: sea spray and rain streaks move around the lighthouse beam.",
+        "particles move into the right background: sea spray and rain streaks move around the lighthouse beam.",
+        "the breeze carries particles toward the right edge: sea spray and rain streaks move around the lighthouse beam.",
+        "the trail thins as particles leave the frame: sea spray and rain streaks move around the lighthouse beam.",
+        "the first particles reappear at the upper-left edge: sea spray and rain streaks move around the lighthouse beam."
       ]
     }
   }

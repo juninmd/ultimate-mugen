@@ -3360,18 +3360,18 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
     extern "C" {
         fn ume_fetch_asset(path: &str) -> js_sys::Promise;
     }
-    story_strip::prepare().await?; looping::prepare(id).await?;
-    if illustration(id).is_some() {
-        return Ok(());
+    story_strip::prepare().await?;
+    if illustration(id).is_none() {
+        if !ILLUSTRATION_IDS.contains(&id) && !wonders::WONDER_IDS.contains(&id) {
+            return Err(format!("Unknown stage: {id}"));
+        }
+        let data = js_sys::futures::JsFuture::from(ume_fetch_asset(&format!("assets/stages/{id}.png")))
+            .await
+            .map_err(|e| format!("Stage download failed: {e:?}"))?;
+        let image = decode_illustration(&js_sys::Uint8Array::new(&data).to_vec())?;
+        WEB_ILLUSTRATION.with(|cache| *cache.borrow_mut() = Some((id.to_string(), image)));
     }
-    if !ILLUSTRATION_IDS.contains(&id) && !wonders::WONDER_IDS.contains(&id) {
-        return Err(format!("Unknown stage: {id}"));
-    }
-    let data = js_sys::futures::JsFuture::from(ume_fetch_asset(&format!("assets/stages/{id}.png")))
-        .await
-        .map_err(|e| format!("Stage download failed: {e:?}"))?;
-    let image = decode_illustration(&js_sys::Uint8Array::new(&data).to_vec())?;
-    WEB_ILLUSTRATION.with(|cache| *cache.borrow_mut() = Some((id.to_string(), image)));
+    looping::prepare(id).await?;
     Ok(())
 }
 

@@ -138,7 +138,7 @@ The twenty-one native arenas use embedded full-color PNG artwork in `assets/stag
 
 `StageArt::Illustrated` draws the background with nearest-neighbor filtering, aligns the fighting floor at 85% of the image height, and clamps horizontal camera movement to the image edges. Team zoom retains the native ground proportion. Fighter shadows, reflections and combat effects remain active; the old procedural prop animations are exclusive to procedural artwork.
 
-The Colossus of Rhodes also has an eight-frame harbor-wave loop in `assets/stages/animation/colossus_rhodes/` (`00.png` to `07.png`). Frames are 1672×941 and advance every eight simulation ticks. Native builds embed them; the web build fetches them only when this stage is prepared. Add future full-scene loops under `assets/stages/animation/<stage_id>/` and register their frames in `src/stages/looping.rs`.
+All twenty-one built-in stages have eight ambient animation phases under `assets/stages/animation/<stage_id>/`. Each 1672×941 transparent PNG adds stage-specific petals, leaves, embers, rain, dust, or spirit motes while preserving the original artwork and fight floor. The game composites the overlays once when a stage loads, then advances the loop every eight simulation ticks. Native builds embed the small overlays; the web build fetches them only for the selected stage. Regenerate the overlays with `python tools/gen_stage_loops.py`; prompts and event descriptions are recorded in `assets/stages/prompts.json`.
 
 ### Living layers
 

@@ -51,8 +51,10 @@ fn add_animation(nc: &mut NativeChar, id: &str, source: &str) {
 }
 
 fn set_sprite(frame: &mut NativeFrame, sprite: &str) {
+    // Mantem a pose: `native_frame_sprite_key` ja prefere o sprite no render, mas
+    // `declared_strike_boxes` precisa da pose para calcular a caixa de acerto quando
+    // a imagem nao esta disponivel (compile headless / with_images = false).
     frame.sprite = Some(sprite.into());
-    frame.pose = None;
 }
 
 fn low_kick_animation(nc: &NativeChar, source: &str) -> Option<NativeAnim> {

@@ -123,6 +123,10 @@ impl Fighter {
     }
 
     pub fn effective_attack(&self) -> f32 {
+        self.passive_attack() * self.rush.attack_gain()
+    }
+
+    fn passive_attack(&self) -> f32 {
         if self.base_def.passives.is_empty() {
             return self.attack_mul;
         }

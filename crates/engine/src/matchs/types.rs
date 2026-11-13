@@ -93,6 +93,8 @@ pub enum Event {
     Ko { loser_side: usize, silent: bool, slow: bool },
     /// a fighter awakened into its transformed form (id of the root fighter)
     Transform { fighter: u32 },
+    /// `fighter` spent meter to cancel a connected move (rush cancel)
+    Rush { fighter: u32, side: usize, guarded: bool },
     StopSound { owner: u32, channel: i32 },
     SoundPan { owner: u32, channel: i32, pan: f32 },
     SoundVolume { owner: u32, channel: i32, volume: f32 },

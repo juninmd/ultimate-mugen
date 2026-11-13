@@ -14,6 +14,7 @@ mod dash;
 mod cost_tests;
 mod impact;
 mod ko;
+mod rush;
 mod shock;
 mod sheet;
 mod speed_lines;
@@ -562,6 +563,7 @@ impl Vfx {
                 }
             }
             Event::Transform { fighter } => self.on_transform(*fighter, m),
+            Event::Rush { fighter, guarded, .. } => self.on_rush(*fighter, *guarded, m),
             Event::Fight => {
                 if let Some(b) = m.roots().find(|f| f.def.boss) {
                     if b.form >= 3 {
@@ -684,6 +686,7 @@ impl Vfx {
             self.meter[side] = lv;
         }
         self.super_active = m.pause.as_ref().is_some_and(|p| p.is_super);
+        self.overdrive_embers(m);
         // awakened fighters burn with rising embers and crackling arcs; defeats get their own beat
         for f in m.fighters.iter().filter(|f| !f.is_helper) {
             if (f.form > 0 || f.def.boss)

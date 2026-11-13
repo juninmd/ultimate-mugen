@@ -74,6 +74,18 @@ mod tests {
     }
 
     #[test]
+    fn accessibility_section() {
+        let (t, _, w) = parse("[accessibility]\nhud_opacity = 0.5\ncolorblind = true\nreduce_motion = true\n");
+        assert_eq!(t.hud_opacity, 0.5);
+        assert!(t.colorblind && t.reduce_motion);
+        assert!(w.is_empty());
+        let (t, _, w) = parse("[accessibility]\nhud_opacity = 0.1\ncolorblind = 1\n");
+        assert_eq!(t.hud_opacity, 1.0);
+        assert!(!t.colorblind);
+        assert_eq!(w.len(), 2);
+    }
+
+    #[test]
     fn typos_and_bad_values_warn_but_keep_defaults() {
         let (t, _, w) = parse("[hud]\np1_tin = \"#f00\"\np2_tint = 5\n[hudd]\na = 1\n");
         assert_eq!(t, Tweaks::default());

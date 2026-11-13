@@ -3360,25 +3360,32 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
     extern "C" {
         fn ume_fetch_asset(path: &str) -> js_sys::Promise;
     }
-    story_strip::prepare().await?; looping::prepare(id).await?;
+    story_strip::prepare().await?;
     if illustration(id).is_some() {
         return Ok(());
     }
     if !ILLUSTRATION_IDS.contains(&id) && !wonders::WONDER_IDS.contains(&id) {
         return Err(format!("Unknown stage: {id}"));
     }
-    let data = js_sys::futures::JsFuture::from(ume_fetch_asset(&format!("assets/stages/{id}.png")))
-        .await
-        .map_err(|e| format!("Stage download failed: {e:?}"))?;
-    let image = decode_illustration(&js_sys::Uint8Array::new(&data).to_vec())?;
-    WEB_ILLUSTRATION.with(|cache| *cache.borrow_mut() = Some((id.to_string(), image)));
+    if illustration(id).is_none() {
+        let data = js_sys::futures::JsFuture::from(ume_fetch_asset(&format!("assets/stages/{id}.png")))
+            .await
+            .map_err(|e| format!("Stage download failed: {e:?}"))?;
+        let image = decode_illustration(&js_sys::Uint8Array::new(&data).to_vec())?;
+        WEB_ILLUSTRATION.with(|cache| *cache.borrow_mut() = Some((id.to_string(), image)));
+    }
+    if let Some(image) = illustration(id) {
+        looping::prepare(id, &image).await?;
+    }
     Ok(())
 }
 
 fn illustrated(id: &str, name: &str, music: u32, kind: StageKind) -> Stage {
+    let image = illustration(id).expect("builtin stage image");
+    let frames = looping::frames(id, &image);
     Stage {
         info: info(name),
-        art: StageArt::Illustrated { image: illustration(id).expect("builtin stage image"), frames: looping::frames(id), ambience: ambience::profile_for(id), span: 0.0 },
+        art: StageArt::Illustrated { image, frames, ambience: ambience::profile_for(id), span: 0.0 },
         music,
         kind,
         bgm: None,

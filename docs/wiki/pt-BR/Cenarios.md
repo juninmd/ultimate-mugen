@@ -138,7 +138,7 @@ As vinte e uma arenas nativas usam imagens PNG coloridas incorporadas de `assets
 
 `StageArt::Illustrated` desenha o fundo com filtro nearest-neighbor, alinha o piso a 85% da altura da imagem e limita o movimento horizontal da câmera às bordas da imagem. O zoom de equipes mantém a proporção nativa do chão. Sombras, reflexos dos lutadores e efeitos de combate continuam ativos; as antigas animações de objetos ficam exclusivas da arte procedural.
 
-O Colosso de Rodes também tem um loop de oito quadros com ondas no porto em `assets/stages/animation/colossus_rhodes/` (`00.png` a `07.png`). Os quadros têm 1672×941 pixels e avançam a cada oito ticks da simulação. Builds nativas os incorporam; a versão web só os busca ao preparar esse cenário. Para adicionar outros loops de cenário completo, use `assets/stages/animation/<stage_id>/` e registre os quadros em `src/stages/looping.rs`.
+Todas as vinte e uma arenas nativas têm oito fases de animação ambiente em `assets/stages/animation/<stage_id>/`. Cada PNG transparente de 1672×941 acrescenta pétalas, folhas, brasas, chuva, poeira ou partículas espirituais próprias do cenário, preservando a arte original e o piso de luta. O jogo compõe as camadas uma vez ao carregar o cenário e avança o loop a cada oito ticks da simulação. Builds nativas incorporam as pequenas camadas; a versão web só as busca para o cenário selecionado. Gere novamente as camadas com `python tools/gen_stage_loops.py`; os eventos e prompts estão em `assets/stages/prompts.json`.
 
 ### Camadas vivas
 

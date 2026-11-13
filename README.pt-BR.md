@@ -77,31 +77,31 @@ Teclado, toque, Xbox, DualShock 4 e DualSense com **vibração e lightbar**. Arc
 ## 🖼️ Elenco em pixel art, mapas e jogabilidade
 
 <p align="center">
-  <img src="docs/assets/readme/fight.gif" alt="Jogabilidade: dois lutadores nativos trocando golpes no cenário Bambuzal" width="70%">
+  <img src="docs/assets/readme/readme-fight-pixel-art.png" alt="Ilustração em pixel art de dois lutadores trocando golpes em um bambuzal" width="70%">
 </p>
 
-<p align="center"><i>Jogabilidade real capturada da versão web (renderização por software, por isso o GIF roda abaixo da taxa de quadros nativa).</i></p>
+<p align="center"><i>Ilustração em pixel art criada para este README; não é uma captura de gameplay.</i></p>
 
 ### Lutadores em pixel art
 
 O elenco nativo é desenhado em pixel art arcade de 32 bits, com um conjunto de poses dedicado por lutador, paletas, especiais de ki, voo, teletransporte e transformações. Cada personagem é declarado em um único JSON UMF.
 
-![Seleção de personagens com o elenco em pixel art](docs/assets/readme/roster-select.jpg)
+![Ilustração em pixel art de uma tela de seleção de lutadores](docs/assets/readme/readme-roster-pixel-art.png)
 
 ### Mapas
 
 21 arenas ilustradas, do telhado do dojo ao pôr do sol e uma metrópole neon até as maravilhas do mundo (Petra, Taj Mahal, Cristo Redentor, Coliseu, Grande Muralha, Chichén Itzá e mais), cada uma com camadas de ambiente vivas e sua própria trilha embutida.
 
-![Escolha do cenário](docs/assets/readme/stage-select.jpg)
+![Ilustração em pixel art de uma tela de seleção de arenas](docs/assets/readme/readme-stage-select-pixel-art.png)
 
 O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil, Neon, Bambu, Vulcão e Dojo): um trecho por luta, quatro ondas de capangas mais um chefe de fase, com a vida carregada entre as lutas. Veja o [guia do modo História](docs/wiki/Story-Mode.md).
 
-![Cenários roláveis do modo História](docs/assets/readme/story-stages.jpg)
+![Panoramas em pixel art inspirados nas cinco fases da História](docs/assets/readme/readme-story-stages-pixel-art.png)
 
 <table>
 <tr>
-<td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Tela de versus"></td>
-<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 no cenário Bambuzal"></td>
+<td width="50%"><img src="docs/assets/readme/readme-versus-pixel-art.png" alt="Ilustração em pixel art de dois lutadores antes da partida"></td>
+<td width="50%"><img src="docs/assets/readme/readme-fight-round1-pixel-art.png" alt="Ilustração em pixel art de uma luta em um bambuzal"></td>
 </tr>
 </table>
 

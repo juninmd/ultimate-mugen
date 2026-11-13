@@ -61,7 +61,7 @@ pub enum StageArt {
         particles: Vec<Particle>,
         tint: Option<[f32; 4]>,
     },
-    Illustrated { image: Arc<ImageData>, ambience: &'static ambience::Profile, span: f32 },
+    Illustrated { image: Arc<ImageData>, frames: Vec<Arc<ImageData>>, ambience: &'static ambience::Profile, span: f32 },
     Mugen(Box<MugenBg>),
 }
 pub struct Stage {
@@ -3278,7 +3278,7 @@ fn volcano() -> Stage {
 pub mod ambience;
 mod story_strip;
 pub use story_strip::*;
-mod wonders;
+mod wonders; pub(crate) mod looping;
 
 const ILLUSTRATION_IDS: [&str; 7] = [
     "dojo", "neon", "bamboo", "plains", "spirit", "volcano", "brazil",
@@ -3360,7 +3360,7 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
     extern "C" {
         fn ume_fetch_asset(path: &str) -> js_sys::Promise;
     }
-    story_strip::prepare().await?;
+    story_strip::prepare().await?; looping::prepare(id).await?;
     if illustration(id).is_some() {
         return Ok(());
     }
@@ -3378,7 +3378,7 @@ pub async fn prepare_illustration(id: &str) -> Result<(), String> {
 fn illustrated(id: &str, name: &str, music: u32, kind: StageKind) -> Stage {
     Stage {
         info: info(name),
-        art: StageArt::Illustrated { image: illustration(id).expect("builtin stage image"), ambience: ambience::profile_for(id), span: 0.0 },
+        art: StageArt::Illustrated { image: illustration(id).expect("builtin stage image"), frames: looping::frames(id), ambience: ambience::profile_for(id), span: 0.0 },
         music,
         kind,
         bgm: None,

@@ -25,7 +25,7 @@ fn every_native_attack_has_three_distinct_rendered_images() {
     let mut failures = Vec::new();
     for path in character_files() {
         let character: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
-        let id = character["id"].as_str().unwrap_or("unknown");
+        let id = character["id"].as_str().unwrap_or("unknown").to_owned();
         if id.starts_with("npc_") {
             continue;
         }
@@ -69,11 +69,50 @@ fn every_native_attack_has_three_distinct_rendered_images() {
             }
         }
     }
-    assert_eq!(attacks, 510, "native attack inventory changed");
+    assert_eq!(attacks, 532, "native attack inventory changed");
     assert!(
         failures.is_empty(),
         "attacks with fewer than 3 rendered images: {failures:#?}"
     );
+}
+
+#[test]
+fn every_native_transformation_uses_three_distinct_powerup_images() {
+    let mut characters = 0;
+    let mut failures = Vec::new();
+    for path in character_files() {
+        let character: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+        let id = character["id"].as_str().unwrap_or("unknown").to_owned();
+        let native: NativeChar = serde_json::from_value(character).unwrap();
+        let audit = audit_native_sprite_frames(&native);
+        let power_up = audit["animations"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .find(|animation| animation["animation"] == "powerUp");
+        let frames = power_up.and_then(|animation| animation["frames"].as_array());
+        let image_count = power_up
+            .and_then(|animation| animation["uniqueBodyImages"].as_u64())
+            .unwrap_or_default();
+        let sprite_files: Vec<_> = frames
+            .into_iter()
+            .flatten()
+            .filter_map(|frame| frame["file"].as_str())
+            .collect();
+        if image_count < 3 || sprite_files.len() != 3 {
+            failures.push(format!("{id}: {image_count} distinct powerUp images from {} resolved files", sprite_files.len()));
+        }
+        if id == "garan"
+            && !["15_power0.png", "16_power1.png", "17_power2.png"]
+                .iter()
+                .all(|name| sprite_files.iter().any(|file| file.ends_with(name)))
+        {
+            failures.push(format!("{id}: transformation does not resolve all three authored powerUp sprites"));
+        }
+        characters += 1;
+    }
+    assert_eq!(characters, 21, "native character inventory changed");
+    assert!(failures.is_empty(), "transformation keyframe failures: {failures:#?}");
 }
 
 #[test]

@@ -72,17 +72,17 @@
     },
     "15_power0": {
       "axisX": 202.0,
-      "axisY": 400.0,
+      "axisY": 391.0,
       "refHeight": 390.0
     },
     "16_power1": {
       "axisX": 195.577,
-      "axisY": 400.138,
+      "axisY": 391.0,
       "refHeight": 383.292
     },
     "17_power2": {
       "axisX": 202.0,
-      "axisY": 400.0,
+      "axisY": 391.0,
       "refHeight": 390.0
     },
     "airGuard": {

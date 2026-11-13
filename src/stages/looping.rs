@@ -68,7 +68,7 @@ fn decode_frame(bytes: &[u8], base: &ImageData) -> Result<Arc<ImageData>, String
     if (png.width, png.height) != (base.w, base.h) {
         return Err("stage loop overlay does not match its background".into());
     }
-    let mut composed = base.rgba.clone();
+    let mut composed = base.rgba.to_vec();
     for (pixel, overlay) in composed.chunks_exact_mut(4).zip(rgba.chunks_exact(4)) {
         let alpha = overlay[3] as u16;
         if alpha == 0 {
@@ -85,7 +85,7 @@ fn decode_frame(bytes: &[u8], base: &ImageData) -> Result<Arc<ImageData>, String
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn frames(id: &str, base: &Arc<ImageData>) -> Vec<Arc<ImageData>> {
+pub fn frames(id: &str) -> Vec<Arc<ImageData>> {
     static CACHE: std::sync::OnceLock<std::sync::Mutex<Option<(String, Vec<Arc<ImageData>>)>>> =
         std::sync::OnceLock::new();
     let Some(bytes) = stage_bytes_for(id) else {
@@ -96,9 +96,12 @@ pub fn frames(id: &str, base: &Arc<ImageData>) -> Vec<Arc<ImageData>> {
     if let Some((_, images)) = guard.as_ref().filter(|(cached_id, _)| cached_id == id) {
         return images.clone();
     }
+    let Some(base) = super::illustration(id) else {
+        return Vec::new();
+    };
     let images = bytes
         .iter()
-        .map(|frame| decode_frame(frame, base).expect("built-in stage loop frame"))
+        .map(|frame| decode_frame(frame, &base).expect("built-in stage loop frame"))
         .collect::<Vec<_>>();
     *guard = Some((id.to_owned(), images.clone()));
     images
@@ -118,10 +121,13 @@ pub fn frames(id: &str) -> Vec<Arc<ImageData>> {
 }
 
 #[cfg(target_arch = "wasm32")]
-pub async fn prepare(id: &str, base: &Arc<ImageData>) -> Result<(), String> {
+pub async fn prepare(id: &str) -> Result<(), String> {
     if !is_animated(id) || !frames(id).is_empty() {
         return Ok(());
     }
+    let Some(base) = super::illustration(id) else {
+        return Ok(());
+    };
     use wasm_bindgen::prelude::*;
     #[wasm_bindgen]
     extern "C" {
@@ -131,7 +137,7 @@ pub async fn prepare(id: &str, base: &Arc<ImageData>) -> Result<(), String> {
     for frame in 0..FRAME_COUNT {
         let path = format!("assets/stages/animation/{id}/{frame:02}.png");
         let Ok(data) = js_sys::futures::JsFuture::from(ume_fetch_asset(&path)).await else { return Ok(()); };
-        let Ok(image) = decode_frame(&js_sys::Uint8Array::new(&data).to_vec(), base) else { return Ok(()); };
+        let Ok(image) = decode_frame(&js_sys::Uint8Array::new(&data).to_vec(), &base) else { return Ok(()); };
         images.push(image);
     }
     WEB_FRAMES.with(|cache| *cache.borrow_mut() = Some((id.to_string(), images)));
@@ -179,13 +185,11 @@ mod tests {
             "colossus_rhodes",
             "lighthouse_alexandria",
         ] {
-            let base = super::super::illustration(id).expect("built-in stage artwork");
-            let images = frames(id, &base);
+            let images = frames(id);
             assert_eq!(images.len(), FRAME_COUNT, "{id}");
             assert!(images.iter().all(|frame| (frame.w, frame.h) == (1672, 941)), "{id}");
             assert!(images.windows(2).all(|pair| pair[0].rgba != pair[1].rgba), "{id}");
         }
-        let base = super::super::illustration("dojo").expect("built-in stage artwork");
-        assert!(frames("custom", &base).is_empty());
+        assert!(frames("custom").is_empty());
     }
 }

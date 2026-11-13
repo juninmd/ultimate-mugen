@@ -21,6 +21,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Arquivos de rota](Arquivos-de-Rota.md) | Criadores | Rotas de arcade e regras de desbloqueio em TOML |
 | [Criar personagem UMF](Personagem-UMF.md) | Criadores | Lutador completo em um único JSON |
 | [Passivos](Passivos.md) | Criadores | Fúria, acúmulos de habilidade e regeneração por dados |
+| [Rush Cancel](Rush-Cancel.md) | Jogadores e Criadores | Gaste energia para cancelar um golpe conectado, Overdrive e a apresentação |
 | [Kits inspirados em Bleach](Kits-Inspirados-em-Bleach.md) | Jogadores | Ideias de Byakuya, Yoruichi e Zaraki em tres nativos |
 | [Arte do esqueleto (rig)](Rig.md) | Criadores | Estilo, poses, articulações e paletas |
 | [Scripts CNS](Scripts-CNS.md) | Criadores | Estados, controllers, triggers e comandos suportados |

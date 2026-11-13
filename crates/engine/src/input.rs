@@ -80,6 +80,11 @@ impl InputHistory {
             self.buf[(t as usize) & (HIST - 1)]
         }
     }
+    pub fn mask_latest(&mut self, mask: u32) {
+        if self.tick >= 0 {
+            self.buf[(self.tick as usize) & (HIST - 1)] &= !mask;
+        }
+    }
     pub fn rewind(&mut self, n: i32) {
         self.tick = (self.tick - n.abs() as i64).max(-1);
     }

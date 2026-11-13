@@ -702,7 +702,7 @@ impl Match {
                 if f.ikemen.standby { bits = 0; }
             }
             if bits & crate::input::k::T != 0 && awaken_len < awaken.len() { awaken[awaken_len] = fi; awaken_len += 1; }
-            k += 1; if self.lanes.active { f.lane_step(&mut bits, &self.lanes, &self.stage); } f.guard_button = self.lanes.active && bits & crate::input::k::GUARD != 0; bits &= !crate::input::k::BRAWLER_MASK;
+            k += 1; bits = f.rush.sense(bits); if self.lanes.active { f.lane_step(&mut bits, &self.lanes, &self.stage); } f.guard_button = self.lanes.active && bits & crate::input::k::GUARD != 0; bits &= !crate::input::k::BRAWLER_MASK;
             if f.assert_input.1 > 0 { bits |= f.assert_input.0; f.assert_input.1 -= 1; }
             if f.input_shift > 0 { let (b, fa) = (bits, f.facing as i32); for _ in 0..f.input_shift { f.history.push(b, fa); } }
             else if f.input_shift < 0 { f.history.rewind(f.input_shift); }
@@ -712,7 +712,7 @@ impl Match {
             f.cmd.update(&f.history, &f.def.commands, paused);
             f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0];
         }
-        for &fi in &awaken[..awaken_len] { self.try_transform(fi); }
+        for &fi in &awaken[..awaken_len] { self.try_transform(fi); } self.rush_step();
         if tagged { self.tag_step(&tag_requests[..tag_len]); }
         let mut ids = std::mem::take(&mut self.tick_ids);
         ids.clear();

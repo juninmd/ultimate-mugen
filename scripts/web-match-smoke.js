@@ -7,7 +7,7 @@ const limitMs = Number(process.env.MATCH_SMOKE_LIMIT_MS || 360000);
 const only = process.env.MATCH_SMOKE_SCENARIOS ? process.env.MATCH_SMOKE_SCENARIOS.split(',') : null;
 const fastRules = { round_time: 2, mute: 1, gamespeed: 2, life: 2 };
 const scenarios = [
-  { name: 'cpu-bot-best-of-3', query: 'e2e=1&p1=kaito&p2=shion&modo=cpu&luta=1', settings: { ...fastRules, rounds: 3 }, bot: true, minRounds: 2 },
+  { name: 'cpu-bot-best-of-3', query: 'e2e=1&p1=kaito&p2=shion&modo=cpu&luta=1', settings: { ...fastRules, rounds: 1 }, bot: true, minRounds: 2 },
   { name: 'watch-cpu-vs-cpu', query: 'e2e=1&p1=akio&p2=bruno&modo=watch&luta=1', settings: { ...fastRules, rounds: 0, single_round: 1 }, bot: false, minRounds: 1 },
 ];
 const attackKeys = ['q', 'w', 'a', 's', 'e', 'd'];

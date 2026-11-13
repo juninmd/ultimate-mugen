@@ -59,4 +59,36 @@ fn main() {
         out,
     )
     .unwrap();
+
+    let animation_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/stages/animation");
+    println!("cargo:rerun-if-changed={}", animation_dir.display());
+    let mut loops = fs::read_dir(&animation_dir)
+        .into_iter()
+        .flatten()
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.path().is_dir())
+        .map(|entry| entry.file_name().to_string_lossy().to_string())
+        .filter(|id| (0..8).all(|frame| animation_dir.join(id).join(format!("{frame:02}.png")).is_file()))
+        .collect::<Vec<_>>();
+    loops.sort();
+    let mut stage_loops = String::from("pub const STAGE_LOOP_IDS: &[&str] = &[\n");
+    for id in &loops {
+        stage_loops += &format!("    {id:?},\n");
+    }
+    stage_loops += "];\n#[cfg(not(target_arch = \"wasm32\"))]\npub const STAGE_LOOP_FRAMES: &[(&str, [&[u8]; 8])] = &[\n";
+    for id in &loops {
+        stage_loops += &format!("    ({id:?}, [\n");
+        for frame in 0..8 {
+            let path = animation_dir.join(id).join(format!("{frame:02}.png"));
+            println!("cargo:rerun-if-changed={}", path.display());
+            stage_loops += &format!("        include_bytes!({:?}).as_slice(),\n", path.display().to_string());
+        }
+        stage_loops += "    ]),\n";
+    }
+    stage_loops += "];\n";
+    fs::write(
+        Path::new(&env::var("OUT_DIR").unwrap()).join("stage_loops_gen.rs"),
+        stage_loops,
+    )
+    .unwrap();
 }

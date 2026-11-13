@@ -77,6 +77,8 @@ mod tests {
     fn accessibility_section() {
         let (t, _, w) = parse("[accessibility]\nhud_opacity = 0.5\ncolorblind = true\nreduce_motion = true\n");
         assert_eq!(t.hud_opacity, 0.5);
+        let (s, _, _) = parse("[accessibility]\nhud_scale = 1.2\n");
+        assert_eq!(s.hud_scale, 1.2);
         assert!(t.colorblind && t.reduce_motion);
         assert!(w.is_empty());
         let (t, _, w) = parse("[accessibility]\nhud_opacity = 0.1\ncolorblind = 1\n");

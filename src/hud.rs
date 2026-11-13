@@ -53,7 +53,7 @@ impl Hud {
         cpu: &[u32],
     ) {
         // the world may be zoomed out (big teams) — the HUD always lays out on the base 426×240 view
-        g.fit(BASE_W, BASE_H);
+        g.fit(BASE_W / crate::tweaks::current().hud_scale, BASE_H / crate::tweaks::current().hud_scale);
         let s = g.view_scale;
         let (gox, goy) = (g.ox, g.oy);
         let p = |x: f32, y: f32| vec2(gox + x * s, goy + y * s);

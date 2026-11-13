@@ -6,9 +6,10 @@ pub const MENU_KEYS: [&str; 16] = [
     "team_simul", "team_tag", "mugen", "market", "controls", "settings", "replays", "quit",
 ];
 
-pub const SECTIONS: [(&str, &[&str]); 4] = [
+pub const SECTIONS: [(&str, &[&str]); 5] = [
     ("theme", &["background", "glow_bottom", "glow_left", "glow_right"]),
     ("hud", &["p1_tint", "p2_tint", "bar_offset_y"]),
+    ("accessibility", &["hud_opacity", "colorblind", "reduce_motion"]),
     ("rules", &["rounds_to_win", "round_seconds", "life_percent", "game_speed"]),
     ("menu", &MENU_KEYS),
 ];
@@ -44,6 +45,9 @@ pub fn apply(section: &str, key: &str, v: &Value, t: &mut Tweaks, labels: &mut L
         ("hud", "p1_tint") => t.p1_tint = c().ok_or_else(bad_color)?,
         ("hud", "p2_tint") => t.p2_tint = c().ok_or_else(bad_color)?,
         ("hud", "bar_offset_y") => t.bar_offset_y = ranged(v, -4.0, 40.0).ok_or_else(|| bad_range("-4", "40"))? as f32,
+        ("accessibility", "hud_opacity") => t.hud_opacity = ranged(v, 0.3, 1.0).ok_or_else(|| bad_range("0.3", "1.0"))? as f32,
+        ("accessibility", "colorblind") => t.colorblind = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
+        ("accessibility", "reduce_motion") => t.reduce_motion = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
         ("rules", "rounds_to_win") => t.rules.rounds_to_win = Some(ranged(v, 1.0, 9.0).ok_or_else(|| bad_range("1", "9"))? as i32),
         ("rules", "round_seconds") => t.rules.round_seconds = Some(ranged(v, 0.0, 999.0).ok_or_else(|| bad_range("0 (no limit)", "999"))? as u32),
         ("rules", "life_percent") => t.rules.life_percent = Some(ranged(v, 10.0, 500.0).ok_or_else(|| bad_range("10", "500"))? as u32),

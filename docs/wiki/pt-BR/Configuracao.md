@@ -109,6 +109,9 @@ Criado ao lado do executável na primeira execução (localStorage na web) com o
 | `[theme]` | `glow_bottom`, `glow_left`, `glow_right` | Brilhos de luz do menu |
 | `[hud]` | `p1_tint`, `p2_tint` | Cor de destaque das barras por lado |
 | `[hud]` | `bar_offset_y` | Desce as barras de vida (-4 a 40) |
+| `[accessibility]` | `hud_opacity` | Multiplicador de opacidade do HUD (0.3 a 1.0) |
+| `[accessibility]` | `colorblind` | `true` usa azul/laranja nas cores dos lados em vez dos tons padrão |
+| `[accessibility]` | `reduce_motion` | `true` desliga o tremor da câmera (lido, aplicado em uma etapa futura) |
 | `[rules]` | `rounds_to_win` (1-9), `round_seconds` (0 = sem limite, até 999), `life_percent` (10-500), `game_speed` (0.5-2.0) | Sobrescrevem os valores do menu Settings em toda luta; remova a linha para voltar ao valor do menu |
 | `[menu]` | `arcade`, `story`, `survival`, `cpu`, `versus`, `training`, `watch`, `team_seq`, `team_simul`, `team_tag`, `mugen`, `market`, `controls`, `settings`, `replays`, `quit` | Texto dessa entrada do menu principal |
 

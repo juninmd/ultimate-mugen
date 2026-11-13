@@ -15,6 +15,9 @@ pub struct Tweaks {
     pub p1_tint: [u8; 3],
     pub p2_tint: [u8; 3],
     pub bar_offset_y: f32,
+    pub hud_opacity: f32,
+    pub colorblind: bool,
+    pub reduce_motion: bool,
     pub rules: RuleOverrides,
 }
 
@@ -30,6 +33,9 @@ impl Default for Tweaks {
             p1_tint: [0x4d, 0xb8, 0xff],
             p2_tint: [0xff, 0x61, 0x85],
             bar_offset_y: 0.0,
+            hud_opacity: 1.0,
+            colorblind: false,
+            reduce_motion: false,
             rules: RuleOverrides::default(),
         }
     }

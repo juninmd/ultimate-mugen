@@ -1,0 +1,67 @@
+{
+  "date": "2026-11-12",
+  "fighter": "kaname",
+  "pose": "guard",
+  "target": "assets/chars/sprites/kaname/guard.png",
+  "activeSha256": "d27d35be16c41b14e119b91780d428400af108d27fb3550ab487020f43d2efec",
+  "backup": "integrated/kaname-guard-before/guard.png",
+  "backupSha256": "1691c2e335a87cf1c182f6f8f436bd8e0fef333c7003e8a52718233788349490",
+  "reuse": {
+    "uses": [
+      "guardStart",
+      "guard",
+      "guardEnd",
+      "guardHit recovery frame"
+    ],
+    "highReuse": true,
+    "remainingTarget": "guardHit.png remains old-design and requires its own impact-pose candidate."
+  },
+  "frame": {
+    "pose": "guard",
+    "sha256": "d27d35be16c41b14e119b91780d428400af108d27fb3550ab487020f43d2efec",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 46,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      44,
+      21,
+      262,
+      392
+    ],
+    "axis": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sharedPaletteFile": "candidates/kaname-cjab0-pilot/pipeline-v1/palette/palette.json",
+    "sharedPaletteSha256": "d9fb31a37fb45f1778cd258b2ea983362368fb4e1bacde1457417a3e107da506",
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "floorY392": true,
+      "axis200x392Ref320": true,
+      "exactPaletteSubset": true
+    }
+  },
+  "visualReview": {
+    "evidence": [
+      "pipeline-v1/evidence/native-contact.png",
+      "pipeline-v1/evidence/2x-contact.png"
+    ],
+    "identity": "pass: blue tied-back hair, white haori with navy trim, black sash, navy hakama, sandals and katana match the canonical identity. No old sleeveless/cyan body design remains.",
+    "pose": "pass: upright standing guard, feet separated and katana held overhead; reads as a block and retains the active guard silhouette.",
+    "scale": "visual body height about 280 px from hair to floor, close to the 288 px active body; no apparent stretch, clipping or floor drift.",
+    "pixelFinish": "pass at native and nearest 2x; hard clusters and shared-palette snapping at max-dE 0.075789.",
+    "effects": "no aura, trail, hit spark, shadow or scenery."
+  },
+  "integration": "Promoted after parent review of native and nearest-2x comparisons. GuardHit remains a separate correction target.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

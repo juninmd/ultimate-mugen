@@ -17,12 +17,12 @@
     },
     "04_special": {
       "axisX": 186.341,
-      "axisY": 400.244,
+      "axisY": 400.0,
       "refHeight": 380.488
     },
     "05_projectile": {
       "axisX": 162.291,
-      "axisY": 400.482,
+      "axisY": 400.0,
       "refHeight": 372.315
     },
     "06_victory": {
@@ -57,7 +57,7 @@
     },
     "12_fall1": {
       "axisX": 189.268,
-      "axisY": 400.024,
+      "axisY": 400.0,
       "refHeight": 380.488
     },
     "13_fall2": {
@@ -67,7 +67,7 @@
     },
     "14_lie": {
       "axisX": 192.233,
-      "axisY": 400.117,
+      "axisY": 400.0,
       "refHeight": 378.641
     },
     "15_power0": {
@@ -325,22 +325,12 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "inline_04dace6ce7251648": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
     "inline_07f866e067c10f3f": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
     },
     "inline_28e135275fabc1a6": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_2cd6c10b5c5c959f": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -361,11 +351,6 @@
       "refHeight": 320.0
     },
     "inline_9d9aa9e1b98a58b0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_9fa7852454b04445": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -424,6 +409,11 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
+    },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 390.0
     },
     "sg_run_mid": {
       "axisX": 200.0,
@@ -501,6 +491,11 @@
       "refHeight": 320.0
     },
     "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "da1": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0

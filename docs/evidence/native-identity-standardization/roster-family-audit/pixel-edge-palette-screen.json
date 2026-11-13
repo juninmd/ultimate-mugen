@@ -1,0 +1,153 @@
+{
+  "scope": "all combat PNGs; 64 colors is a screening threshold, not a quality verdict",
+  "fighters": [
+    {
+      "character": "akio",
+      "frames": 104,
+      "median_opaque_colors": 42.0,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "bruno",
+      "frames": 113,
+      "median_opaque_colors": 40,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "daichi",
+      "frames": 104,
+      "median_opaque_colors": 40.0,
+      "max_opaque_colors": 47,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "garan",
+      "frames": 100,
+      "median_opaque_colors": 38.0,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "haruki",
+      "frames": 105,
+      "median_opaque_colors": 40,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "jin",
+      "frames": 107,
+      "median_opaque_colors": 41,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "kaito",
+      "frames": 112,
+      "median_opaque_colors": 40.0,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "kaname",
+      "frames": 120,
+      "median_opaque_colors": 38.0,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "lian",
+      "frames": 104,
+      "median_opaque_colors": 41.0,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "marlow",
+      "frames": 106,
+      "median_opaque_colors": 37.0,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "npc_brute",
+      "frames": 98,
+      "median_opaque_colors": 41.0,
+      "max_opaque_colors": 44,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "npc_colossus",
+      "frames": 98,
+      "median_opaque_colors": 40.0,
+      "max_opaque_colors": 41,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "npc_phantom",
+      "frames": 97,
+      "median_opaque_colors": 41,
+      "max_opaque_colors": 42,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "npc_razor",
+      "frames": 93,
+      "median_opaque_colors": 40,
+      "max_opaque_colors": 44,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "npc_spitfire",
+      "frames": 99,
+      "median_opaque_colors": 43,
+      "max_opaque_colors": 45,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "oboro",
+      "frames": 101,
+      "median_opaque_colors": 35,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "shion",
+      "frames": 110,
+      "median_opaque_colors": 37.0,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "suzume",
+      "frames": 99,
+      "median_opaque_colors": 40,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "sylene",
+      "frames": 100,
+      "median_opaque_colors": 39.0,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "valdric",
+      "frames": 105,
+      "median_opaque_colors": 40,
+      "max_opaque_colors": 48,
+      "frames_over_64_colors": 0
+    },
+    {
+      "character": "volta",
+      "frames": 100,
+      "median_opaque_colors": 42.0,
+      "max_opaque_colors": 46,
+      "frames_over_64_colors": 0
+    }
+  ],
+  "outlier_frames": []
+}

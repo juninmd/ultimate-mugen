@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-12",
+  "character": "valdric",
+  "target": "assets/chars/sprites/valdric/jab0.png",
+  "candidate": "pixel-finished/candidate.png",
+  "candidateOnly": false,
+  "integrated": true,
+  "artSource": "host_image_gen",
+  "generationCount": 1,
+  "identityAnchor": "assets/chars/sprites/valdric/04_special.png",
+  "poseReference": "assets/chars/sprites/valdric/jab0.png",
+  "comparisonFrames": [
+    "assets/chars/sprites/valdric/jab1.png",
+    "assets/chars/sprites/valdric/01_idle.png"
+  ],
+  "sourceHashes": {
+    "anchor": "28968edb0eeb0b819410cc109563225de1aebf3a62d3ae37d4edfe48e97b2489",
+    "target": "fed043c4bdd0c874b251ccef7823ee16e099043bc769686077a75223c146971b",
+    "jab1": "6f09c7984c97cfa1c0017dfc7bc30561cd67569878f08514c33a006fca351049",
+    "idle": "6c5d9850a94ebfa62945c507d22737b19df9d1bd20e2db58364223aa4af6db71",
+    "generated": "a3a0e3811b7456570d5421b5402602d4124f39c9ceccc9f88814ffee1bf19801"
+  },
+  "sharedPalette": "../valdric-royallance-sb0-pilot/palette-48-20261112/palette.json",
+  "sharedPaletteSha256": "36044de67eb8f63090ff46ba03a61a588e57fc29820ae6caab6ffcee7dcedc28",
+  "geometry": {
+    "canvas": [
+      400,
+      400
+    ],
+    "format": "RGBA",
+    "axis": [
+      200,
+      392
+    ],
+    "refHeight": 320,
+    "alphaBBox": [
+      25,
+      71,
+      253,
+      392
+    ],
+    "lastOpaqueY": 391,
+    "bodyHeightPx": 321,
+    "alphaValues": [
+      0,
+      255
+    ]
+  },
+  "pixelFinish": {
+    "sharedPaletteEntries": 48,
+    "opaquePaletteColorsUsed": 45,
+    "totalRgbaColors": 46,
+    "paletteApplyStrict": "pass",
+    "maxDeltaE": 0.106889,
+    "partialAlphaPixels": 0,
+    "rawGridStrict": "refused; best period 32 phase (17,0), score 0.011, uniformity 0.371; no --force used",
+    "sourcePixelsOutsidePaletteBeforeSnap": 44991,
+    "outputPixelsOutsidePalette": 0
+  },
+  "visualReview": {
+    "identity": "pass",
+    "pose": "pass",
+    "silhouette": "pass",
+    "pixelArtAtNativeAnd2x": "pass",
+    "canonicalOutfit": "pass",
+    "noCrown": "pass",
+    "noUnrequestedEffects": "pass",
+    "phaseDistinctFromJab1": "pass",
+    "notes": "Long purple mane, red eye-band, black/gold armor, red trousers and cape match 04_special. Right-facing jab0 remains grounded with lead fist bent high by the face and rear hand near torso; it is visibly different from jab1 extended impact. No crown, energy device, impact flash, particles or ground shadow."
+  },
+  "evidence": {
+    "native": "pixel-finished/candidate.png",
+    "nearest2x": "pixel-finished/candidate-2x-nearest.png",
+    "comparisonNative": "comparison-native.png",
+    "comparison2x": "comparison-2x.png",
+    "raw": "raw/generated.png",
+    "prompt": "prompt.txt",
+    "process": "processed-out/pipeline-meta.json",
+    "registration": "registered-out/scale-frames.json",
+    "paletteApply": "palette-out/apply-qa.json",
+    "generationPrompt": "generation-prompt.txt",
+    "processPrompt": "prompt.txt"
+  },
+  "limitations": [
+    "No runtime or test run; candidate is not integrated.",
+    "The raw generator image has no clean logical pixel grid; it was downsampled to the game canvas, hard palette-snapped and reviewed, not passed through pixel_reduce."
+  ],
+  "sourceHashesUnchanged": true,
+  "status": "candidate_only_static_pass_pending_parent_integration",
+  "promptSha256": "de24ff42123f68288eeba4cdb98e91eaf4c102393605681f729bb50bc2e0dcf2",
+  "integrationDate": "2026-11-12",
+  "activeSha256": "e3d7561cac5e86521210846ae686e6c0994c41adb7ca1cecc15d75aa0248ba17",
+  "backup": "integrated/valdric-jab0-before/jab0.png",
+  "backupSha256": "fed043c4bdd0c874b251ccef7823ee16e099043bc769686077a75223c146971b",
+  "runtimeStatus": "pending",
+  "testStatus": "pending",
+  "integrationNotes": "Promoted after native-size and nearest-2x visual review; active animation timing and hit frame unchanged."
+}

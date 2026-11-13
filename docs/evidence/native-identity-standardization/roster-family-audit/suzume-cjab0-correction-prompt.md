@@ -1,0 +1,5 @@
+# Suzume cjab pilot prompt
+
+Target: `assets/chars/sprites/suzume/cjab0.png` (400×400 RGBA pack frame; `axisX=200`, `axisY=392`, `refHeight=320`). Preserve the existing crouching jab pose and silhouette from the target image only as motion geometry. Use `04_special.png` as the exclusive identity, palette and finish anchor. Suzume is a purple-haired, red-bow ninja wearing the violet-and-magenta shinobi outfit, with a visible face, red cloth accents, and her short blade. Do not copy the target's masked face, red ponytail/scarf, dark armor, or gray trousers. Hard-edged pixel-art clusters, transparent background, no antialiasing, gradients, glow, aura, extra weapon, text, floor, or cast shadow. Keep full body inside the canvas and align feet/pivot to the pack's existing `cjab0` geometry. One pose only. Review the output at 400×400 and enlarged next to `04_special.png` and the neighboring `cjab1.png` before integration.
+
+This is preparation only; the image generator is temporarily quota-limited. No candidate has been generated or integrated.

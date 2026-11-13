@@ -1,0 +1,79 @@
+{
+  "date": "2026-11-12",
+  "fighter": "suzume",
+  "pose": "airGuardHit",
+  "target": "assets/chars/sprites/suzume/airGuardHit.png",
+  "activeSha256": "8336bd6a40db40a35ff5d9253e6ecfc43d4e695b5ff511e99ba1755c12dcfb4e",
+  "backup": "integrated/suzume-airGuardHit-before/airGuardHit.png",
+  "backupSha256": "8e43154bc522ad161ab6547f0b787ab3355750cb96f1b91ef96e463228c98b9c",
+  "candidateReview": "candidates/suzume-airGuardHit-pilot/qa-report.json",
+  "frame": {
+    "pose": "airGuardHit",
+    "sha256": "8336bd6a40db40a35ff5d9253e6ecfc43d4e695b5ff511e99ba1755c12dcfb4e",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 46,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      68,
+      73,
+      312,
+      392
+    ],
+    "axis": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sharedPaletteFile": "candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+    "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "floorY392": true,
+      "axis200x392Ref320": true,
+      "exactPaletteSubset": true
+    }
+  },
+  "visualReview": {
+    "selected": "generated-v2.png",
+    "rejected": "generated-v1.png was not used because its ponytail rose away from the integrated airGuard silhouette and would create an avoidable silhouette jump.",
+    "sequence": "integrated airGuard -> candidate airGuardHit (3 ticks) -> airGuard hold",
+    "native": "review/native-sequence-review.png",
+    "nearest_2x": "review/nearest-2x-sequence-review.png",
+    "result": "V2 keeps the tucked legs and most of the integrated hair arc; it adds a brief wince and compact upper-body recoil while both arms continue to shield the face/chest. The transition reads as a short impact and stays close in scale, axis and lower-body placement. No weapon or impact effect was added.",
+    "identity": "Canonical Suzume violet ponytail/red bow, purple ninja outfit and pink trim; no legacy hood, armor or greaves."
+  },
+  "animationEvidence": {
+    "json": "assets/chars/suzume.json",
+    "airGuardHit": {
+      "frames": [
+        {
+          "pose": "airGuardHit",
+          "ticks": 3
+        },
+        {
+          "pose": "airGuard",
+          "ticks": -1
+        }
+      ]
+    },
+    "airGuardHit_pose": {
+      "lean": -8,
+      "head": 10,
+      "thighB": 50,
+      "kneeB": 118,
+      "wind": 0.4
+    },
+    "weapon": "No weapon is declared by airGuardHit; none is shown in candidate."
+  },
+  "integration": "Promoted after parent review of native and nearest-2x airborne guard→impact sequence. Metadata and timing unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

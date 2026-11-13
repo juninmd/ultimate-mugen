@@ -430,6 +430,11 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 333.0
+    },
     "qs0": {
       "axisX": 200.0,
       "axisY": 392.0,

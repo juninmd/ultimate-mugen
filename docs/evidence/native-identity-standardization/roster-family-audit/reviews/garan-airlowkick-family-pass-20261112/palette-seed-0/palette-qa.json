@@ -1,0 +1,150 @@
+{
+  "status": "pass",
+  "method": "forge_palette.build_palette (weighted k-means++ in OKLab over unique colours, reserved colours fixed, coverage skipping) then forge_palette.fit_report of every input: OKLab dE of each pixel with alpha >= the threshold to its nearest palette colour",
+  "notProven": [
+    "Visual quality of the palette: look at swatches.png and an applied frame.",
+    "Colours of pixels below the alpha threshold were not sampled or measured."
+  ],
+  "checks": [
+    {
+      "id": "palette_colors",
+      "status": "pass",
+      "value": 48,
+      "threshold": 48
+    },
+    {
+      "id": "inputs_without_samples",
+      "status": "pass",
+      "value": 0,
+      "threshold": 0,
+      "files": []
+    },
+    {
+      "id": "max_delta_e",
+      "status": "pass",
+      "value": 0.063574,
+      "threshold": 0.13
+    }
+  ],
+  "inputs": [
+    {
+      "path": "../../../../../../../assets/chars/sprites/garan/04_special.png",
+      "sha256": "1079c6081d3c350989b7389790dc6a7a6ae22ea9c709d3479aad9c4d46cf8b0a",
+      "bytes": 90393
+    },
+    {
+      "path": "../../../../../../../assets/chars/sprites/garan/jumpTop.png",
+      "sha256": "165c39aa1ef346cc84883040a6544b0a8a4ab6ee32d55371de8c2ba61b3cac7c",
+      "bytes": 39242
+    },
+    {
+      "path": "../../../../../../../assets/chars/sprites/garan/akick.png",
+      "sha256": "55205da68bb00a4c63b2e0dc879fc25fdb828fc809ff2a1a5cfb9aeca461d026",
+      "bytes": 70416
+    },
+    {
+      "path": "../../../../../../../assets/chars/sprites/garan/airLowKick.png",
+      "sha256": "0ae78eafd05c3e4f7ecae58fbd0aa272935012fb4c6c587e41af443503551367",
+      "bytes": 118081
+    },
+    {
+      "path": "../../../../../../../assets/chars/sprites/garan/jumpDown.png",
+      "sha256": "c71f1c8aed1c52744a00b089ca4b10b116b2dec8b4aac3d2bcc5b1ec16825e01",
+      "bytes": 27818
+    }
+  ],
+  "outputs": [
+    {
+      "path": "palette.json",
+      "sha256": "ab6fdeddec18b4e7f6b05dff0f4bc6565014bf3af4276be723bf78d447cdc4d3",
+      "bytes": 1962
+    },
+    {
+      "path": "palette.gpl",
+      "sha256": "b5c59bf9f73832716fbd3982eb90d57b4b3121c43a68f3fd9549297b4c304a24",
+      "bytes": 1018
+    },
+    {
+      "path": "palette.hex",
+      "sha256": "4bcf4812eb80796f615f308fc5385187eaac1aa26597a050b4d39a0b18bc5150",
+      "bytes": 336
+    },
+    {
+      "path": "swatches.png",
+      "sha256": "5e838dd069da9f8b88496babb7ab37d42bfc94fb84c7d85f98c8bf004a3379cf",
+      "bytes": 687
+    }
+  ],
+  "tool": {
+    "name": "palette_tool",
+    "version": "0.5.0"
+  },
+  "palette": {
+    "colors": 48,
+    "reserved": 0,
+    "transparent_index": 255,
+    "seed": 0
+  },
+  "fit": {
+    "../../../../../../../assets/chars/sprites/garan/04_special.png": {
+      "measured_px": 48547,
+      "alpha_threshold": 16,
+      "off_palette_px": 47533,
+      "partial_alpha_px": 0,
+      "colors": 38,
+      "palette_colors_used": 27,
+      "mean_delta_e": 0.00835,
+      "p95_delta_e": 0.029746,
+      "max_delta_e": 0.035955
+    },
+    "../../../../../../../assets/chars/sprites/garan/jumpTop.png": {
+      "measured_px": 33338,
+      "alpha_threshold": 16,
+      "off_palette_px": 32997,
+      "partial_alpha_px": 0,
+      "colors": 45,
+      "palette_colors_used": 39,
+      "mean_delta_e": 0.006828,
+      "p95_delta_e": 0.020893,
+      "max_delta_e": 0.038661
+    },
+    "../../../../../../../assets/chars/sprites/garan/akick.png": {
+      "measured_px": 36501,
+      "alpha_threshold": 16,
+      "off_palette_px": 36116,
+      "partial_alpha_px": 0,
+      "colors": 47,
+      "palette_colors_used": 12,
+      "mean_delta_e": 0.007324,
+      "p95_delta_e": 0.013211,
+      "max_delta_e": 0.063574
+    },
+    "../../../../../../../assets/chars/sprites/garan/airLowKick.png": {
+      "measured_px": 66155,
+      "alpha_threshold": 16,
+      "off_palette_px": 60669,
+      "partial_alpha_px": 0,
+      "colors": 32,
+      "palette_colors_used": 19,
+      "mean_delta_e": 0.011933,
+      "p95_delta_e": 0.02466,
+      "max_delta_e": 0.054891
+    },
+    "../../../../../../../assets/chars/sprites/garan/jumpDown.png": {
+      "measured_px": 22909,
+      "alpha_threshold": 16,
+      "off_palette_px": 20836,
+      "partial_alpha_px": 0,
+      "colors": 43,
+      "palette_colors_used": 34,
+      "mean_delta_e": 0.00825,
+      "p95_delta_e": 0.02604,
+      "max_delta_e": 0.045056
+    }
+  },
+  "totals": {
+    "max_delta_e": 0.063574,
+    "worst_p95_delta_e": 0.029746,
+    "off_palette_px": 198151
+  }
+}

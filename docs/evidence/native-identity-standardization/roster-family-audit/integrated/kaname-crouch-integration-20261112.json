@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-12",
+  "candidateVersion": "pipeline-v2-canonical-crouch-settle",
+  "target": "assets/chars/sprites/kaname/crouch.png",
+  "status": "integrated_after_parent_native_and_2x_review",
+  "approvalStatus": "approved_for_integration",
+  "integrationStatus": "integrated",
+  "source": {
+    "artSource": "built-in Codex image_gen",
+    "raw": "generated-host-v2/generated.png",
+    "rawSha256": "88578bb9e7def288894d890e247c6710b83da605ca0552cffbc7707184310438",
+    "prompt": "prompt-v2.txt"
+  },
+  "references": {
+    "canonicalIdentityAnchor": {
+      "path": "../../../../../../assets/chars/sprites/kaname/04_special.png",
+      "sha256": "36d6a2488fb22afc6dc4f5f3eda145bf5d6bde713be42def1f1be21d41b7c837"
+    },
+    "poseOnly": {
+      "path": "../../../../../../assets/chars/sprites/kaname/crouch.png",
+      "sha256": "a5a78203865067f6fdd04299903dd1110f70e3273524e1a1b36e93589bd4cae3"
+    },
+    "comparisonStyleOnly": {
+      "path": "../kaname-cjab0-pilot/pipeline-v1/final-strict-16-de010-registered/frames/clean.png",
+      "sha256": "96b2f7e33a47b2cec66f8aa041e81520e435d77f7be58097cd1766594a604104"
+    }
+  },
+  "targetMetadata": {
+    "axisX": 200,
+    "axisY": 392,
+    "refHeight": 320
+  },
+  "iterations": [
+    {
+      "version": "pipeline-v1",
+      "status": "registration_failed",
+      "reason": "fixed 400x400 at anchor (200,392) overflowed right by 32 px; retained as rejected geometry evidence."
+    },
+    {
+      "version": "pipeline-v2",
+      "status": "pass",
+      "note": "steeper forward-right katana angle and hands closer to torso preserved the full blade and crouched body at registered scale."
+    }
+  ],
+  "pipeline": {
+    "process": "generate2dsprite.py process --target asset --mode single --single-size 436 --fit-scale 0.76 --align feet --scale-strategy fit --resampler lanczos --background-mode native_alpha --alpha-geometry-threshold 16 --strict-qc",
+    "register": "scale_frames.py --scale-from 1 --resampler nearest --anchor feet --canvas 400,400 --anchor-px 200,392 --alpha-threshold 16",
+    "palette": "palette_tool.py apply --palette ../kaname-cjab0-pilot/pipeline-v1/palette/palette.json --alpha-threshold 16 --max-delta-e 0.13 --strict",
+    "sharedPaletteSha256": "d9fb31a37fb45f1778cd258b2ea983362368fb4e1bacde1457417a3e107da506",
+    "processQa": "pipeline-v2/processed/pipeline-meta.json",
+    "registrationQa": "pipeline-v2/registered/scale-frames.json",
+    "paletteQa": "pipeline-v2/palette/apply-qa.json",
+    "finalSha256": "0ed557751c74a60607362de8b095f12b85d1c93f2261f5a23cb78b25c7a3a876"
+  },
+  "technicalChecks": {
+    "dimensions": {
+      "value": [
+        400,
+        400
+      ],
+      "expected": [
+        400,
+        400
+      ],
+      "status": "pass"
+    },
+    "alpha16BoundsExclusive": {
+      "value": [
+        94,
+        60,
+        378,
+        392
+      ],
+      "status": "pass"
+    },
+    "floor": {
+      "bottomExclusiveY": 392,
+      "expected": 392,
+      "status": "pass"
+    },
+    "anchor": {
+      "value": [
+        200,
+        392
+      ],
+      "status": "pass"
+    },
+    "edgeMargins": {
+      "left": 94,
+      "right": 22,
+      "top": 60,
+      "bottom": 8,
+      "status": "pass"
+    },
+    "opaquePaletteColors": {
+      "value": 46,
+      "maximum": 48,
+      "status": "pass"
+    },
+    "alphaValues": {
+      "value": [
+        0,
+        255
+      ],
+      "expected": [
+        0,
+        255
+      ],
+      "status": "pass"
+    },
+    "maxDeltaE": {
+      "value": 0.09306,
+      "maximum": 0.13,
+      "status": "pass"
+    },
+    "offPaletteOutputPixels": {
+      "value": 0,
+      "status": "pass"
+    },
+    "partialAlphaOutputPixels": {
+      "value": 0,
+      "status": "pass"
+    }
+  },
+  "visualReview": {
+    "evidence": [
+      "pipeline-v2/evidence/native-contact.png",
+      "pipeline-v2/evidence/2x-contact.png"
+    ],
+    "identity": "pass: blue tied-back hair, white haori with navy trim, black sash, navy hakama, tabi sandals and katana follow 04_special; the old dark/cyan outfit is removed.",
+    "pose": "pass as a held low crouch/guard settle, facing right with both knees bent and sword held close. It is not an attack follow-through. The hand and sword angle differ from the active reference, while the low crouch silhouette is retained.",
+    "scale": "visual body height about 281 px from hair to floor, close to the 288 px active body; no apparent stretch or squash.",
+    "pixelFinish": "pass at native and nearest 2x; hard clusters, 46 shared-palette colors and binary alpha.",
+    "effects": "no aura, trail or scenery was copied."
+  },
+  "decision": "Integrated following parent review of native and nearest-2x comparison; target pose is held low crouch/guard settle. No metadata, timing or hit behavior changed.",
+  "integrationDate": "2026-11-12",
+  "activeSha256": "0ed557751c74a60607362de8b095f12b85d1c93f2261f5a23cb78b25c7a3a876",
+  "backup": "integrated/kaname-crouch-before/crouch.png",
+  "backupSha256": "a5a78203865067f6fdd04299903dd1110f70e3273524e1a1b36e93589bd4cae3",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

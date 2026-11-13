@@ -1,0 +1,3863 @@
+[
+  {
+    "character": "bruno",
+    "sprite": "br0.png",
+    "sha256": "61a1cacf970d6d2e67eeb0f39e4d52b4087a478215d5170712051190edba63d9",
+    "familyPatterns": [
+      "br0"
+    ],
+    "affectedAnimations": [
+      "bullrush",
+      "slam",
+      "titanSuplex",
+      "titanSuplexUlt"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "br1.png",
+    "sha256": "8f054a299aeb0a3a580579a95e22ad71cf3b0a465817725d989c3b959a1c6255",
+    "familyPatterns": [
+      "br1"
+    ],
+    "affectedAnimations": [
+      "bullrush",
+      "titanSuplex",
+      "titanSuplexUlt"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "cjab0.png",
+    "sha256": "a62a010c5b5d3ad219b356bdb9539c56d6c4f93f67f05471cd5d79aac2100464",
+    "familyPatterns": [
+      "cjab0"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_confirmed_style_mismatch_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "cjab1.png",
+    "sha256": "401e0a5f32fbf5f5937958f988ae65582961d080d079314b848ab913f1644778",
+    "familyPatterns": [
+      "cjab1"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_confirmed_style_mismatch_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "clk.png",
+    "sha256": "4d1463d6002c72a25ebb3ae4a1e45c077ebd274b93be64cf3aeb5095bf617a77",
+    "familyPatterns": [
+      "clk"
+    ],
+    "affectedAnimations": [
+      "clk"
+    ],
+    "review": "native_size_confirmed_style_mismatch_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "crouch0.png",
+    "sha256": "43feb6a7eae558e873187a70f6a58e26b42eb93d894a5586da2f5f6831d60556",
+    "familyPatterns": [
+      "crouch0"
+    ],
+    "affectedAnimations": [
+      "crouchEnd",
+      "crouchStart",
+      "lowKick"
+    ],
+    "review": "native_size_confirmed_style_mismatch_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "crouch1.png",
+    "sha256": "514f90b6cd3892c865626242963db144f1cc9ff41e741c9eb3d516683037c9d0",
+    "familyPatterns": [
+      "crouch1"
+    ],
+    "affectedAnimations": [
+      "clk",
+      "crouch",
+      "lowKick"
+    ],
+    "review": "native_size_confirmed_style_mismatch_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "crouchGuard.png",
+    "sha256": "e9e01e9f73713c9dcd3a1e4e71dcfddc99fdeae0a77de1cbe1b137b719e7fbb5",
+    "familyPatterns": [
+      "crouchGuard*"
+    ],
+    "affectedAnimations": [
+      "crouchGuard",
+      "crouchGuardHit",
+      "crouchGuardStart"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "crouchGuardHit.png",
+    "sha256": "ad68406909757df571c74af7079a08b8d4d01c76fbb7b316be8bb925000321e6",
+    "familyPatterns": [
+      "crouchGuard*"
+    ],
+    "affectedAnimations": [
+      "crouchGuardHit"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "dfKneel0.png",
+    "sha256": "f96364bfb280b50184ae3a7ab423bd83368812af5fa6423d22d4758324ffa986",
+    "familyPatterns": [
+      "dfKneel*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "dfKneel1.png",
+    "sha256": "a0fc0528db25a49adee85af2a40378a5a653e98cb2dd58a7d3a78f72d57f3b7c",
+    "familyPatterns": [
+      "dfKneel*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "dfSit0.png",
+    "sha256": "35e0ef0728cd55c6ec7422b43348355483d727c3066c8a5e6cb63d9ed9d9afce",
+    "familyPatterns": [
+      "dfSit*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "dfSit1.png",
+    "sha256": "f186984617fa5227652450f2af4f45ce48ef744b414ec78bedab62695a2bba92",
+    "familyPatterns": [
+      "dfSit*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "flip0.png",
+    "sha256": "4a0e973e502d5c390ff221f0a3e8ffdf31dc75b875e2d4788753dbb4008399a6",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "jumpFwd"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "flip1.png",
+    "sha256": "fa8f0953055a213df656d73d01697e41f2896368f03b87ed17c50eaa03b59ea1",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "jumpFwd"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "flip2.png",
+    "sha256": "7ac29007be0d9fdcb7d1a295ad338b5c831c1ddb2a0d4a4bb171bf015c8408ae",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "jumpFwd"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "flip3.png",
+    "sha256": "17490f1399cc9ff21e9e8045261ac45e12a299a9a9b02e64d9e44d5f0d1ee211",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "jumpFwd"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "getUp1.png",
+    "sha256": "ec831284741517ea4cca8d1422ce138c2e2a54efedd88da91c303fc505fc5acf",
+    "familyPatterns": [
+      "getUp1"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "getUp2.png",
+    "sha256": "e9aa88f17d2dd01f7912defe37cd55218492a442bd3f3e7aad63520b8fa295c3",
+    "familyPatterns": [
+      "getUp2"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "hitCrouch.png",
+    "sha256": "d6ea061bf10a9bbe6c42c00dd96122867fb797e33d73d0f10c8de47b3df6c8ec",
+    "familyPatterns": [
+      "hitCrouch"
+    ],
+    "affectedAnimations": [
+      "hitCrouch"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "hk0.png",
+    "sha256": "68cd72c727a3d00a68beafba5693643e03918b91f17898ba8cf79bde3accaeab",
+    "familyPatterns": [
+      "hk*"
+    ],
+    "affectedAnimations": [
+      "hkick",
+      "stringC"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "hk1.png",
+    "sha256": "39048d5e24a17492bd28bfe14150f292f94d23178f718dd2f1d4dd2bcd3c88cf",
+    "familyPatterns": [
+      "hk*"
+    ],
+    "affectedAnimations": [
+      "hkick",
+      "stringC"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "hop.png",
+    "sha256": "75e3bdbc91e4259dd816e5ca564a4e9d01e00c69ab563a421e41e86edb36bfe3",
+    "familyPatterns": [
+      "hop"
+    ],
+    "affectedAnimations": [
+      "hop"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "jumpDown.png",
+    "sha256": "cd01fb1805a4f7b7f08fd33051b7ebc2df9ff8b3ea0bd13792ce586bd3e85ae1",
+    "familyPatterns": [
+      "jumpDown"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "airRecover",
+      "ajab",
+      "akick",
+      "cornerDive",
+      "jumpDown",
+      "lariat",
+      "lariatEx"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "land.png",
+    "sha256": "b79085e802a4f1f9b5ec2dd70d635e9802f5a04fe0d6f58cc0b951d123328d74",
+    "familyPatterns": [
+      "land"
+    ],
+    "affectedAnimations": [
+      "land"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "qs0.png",
+    "sha256": "b45e5f2b9ca4f943e9352eba1e051163cabb7cfc05447641c35fa69cc3624c08",
+    "familyPatterns": [
+      "qs*"
+    ],
+    "affectedAnimations": [
+      "quake",
+      "quakeEx"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "qs1.png",
+    "sha256": "8f24aa4f2a840138431b160836f8e75de8a0976284b1585627cfa7462f922ece",
+    "familyPatterns": [
+      "qs*"
+    ],
+    "affectedAnimations": [
+      "quake",
+      "quakeEx"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "sl0.png",
+    "sha256": "2fa07b80631a2ff411df4c1e50a5bb4dfd5f2e430e45a3c4ae685615126b1748",
+    "familyPatterns": [
+      "sl*"
+    ],
+    "affectedAnimations": [
+      "ironClaw",
+      "lariat",
+      "lariatEx",
+      "slam",
+      "titanSuplex",
+      "titanSuplexUlt"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "sl1.png",
+    "sha256": "aa681b39e43ab4bfb242b479f8f16b0b04a342dcf934e81a1d24b58562114042",
+    "familyPatterns": [
+      "sl*"
+    ],
+    "affectedAnimations": [
+      "ironClaw",
+      "lariat",
+      "lariatEx",
+      "slam",
+      "titanSuplex",
+      "titanSuplexUlt"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "sl2.png",
+    "sha256": "0e958a6173b8cf3a1d5943922a345427f3e158482a8305d3aec7457d0848cf12",
+    "familyPatterns": [
+      "sl*"
+    ],
+    "affectedAnimations": [
+      "ironClaw",
+      "lariat",
+      "lariatEx",
+      "slam",
+      "titanSuplex",
+      "titanSuplexUlt"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "sweep0.png",
+    "sha256": "cc24ade3882fa6fb3b96385f389113857677cdafcd4622672af4a4e01c5e8601",
+    "familyPatterns": [
+      "sweep*"
+    ],
+    "affectedAnimations": [
+      "sweep"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "sweep1.png",
+    "sha256": "325a10dbbe1d0dc085a85e728aa4367e71c7660e37555ab1b2759fd5068efd12",
+    "familyPatterns": [
+      "sweep*"
+    ],
+    "affectedAnimations": [
+      "sweep"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "bruno",
+    "sprite": "turn.png",
+    "sha256": "5b0e995dd081816674b3e49503cb0138fbb60fef18b655bf8d047a97fb66d2e9",
+    "familyPatterns": [
+      "turn"
+    ],
+    "affectedAnimations": [
+      "turn"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "cjab0.png",
+    "sha256": "79a6a313ac699f4b581733f8d2d3fd6facbbdd3ccdcd1e104af388c07fd2c62f",
+    "familyPatterns": [
+      "cjab*"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "cjab1.png",
+    "sha256": "ca38ad002873945e4d3b80df7ec2920528646add646bff31827f692585938145",
+    "familyPatterns": [
+      "cjab*"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "clk.png",
+    "sha256": "29b3143f5c43ba5a55caf6ede2b93d9843cb34b5ba83e3fe4ea836feae203106",
+    "familyPatterns": [
+      "clk"
+    ],
+    "affectedAnimations": [
+      "clk"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "crouch0.png",
+    "sha256": "955ee7dc42e855a23ac1de43f2f8b01b0ab33042219b3c38cd38fe4e096b1c0c",
+    "familyPatterns": [
+      "crouch0"
+    ],
+    "affectedAnimations": [
+      "crouchEnd",
+      "crouchStart",
+      "lowKick"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "crouch1.png",
+    "sha256": "9ef1ce55812e74cc568495389cafd4d66c11b4ac0a54afd6aed1aa2925e485bb",
+    "familyPatterns": [
+      "crouch1"
+    ],
+    "affectedAnimations": [
+      "clk",
+      "crouch",
+      "lowKick"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "dfKneel0.png",
+    "sha256": "7df3496b32dcc970026f3f8b02a6e3675d7915f3ce4138d2368a7f1c4f44e616",
+    "familyPatterns": [
+      "dfKneel*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "dfKneel1.png",
+    "sha256": "277b6840c28589f136cc21b8125d8acbe44cf75635e9686e361421868f86005c",
+    "familyPatterns": [
+      "dfKneel*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "dfProp.png",
+    "sha256": "1e2680b0b107e4c697e1fd37b79f56f962782888fc3db9e4844483e66d465425",
+    "familyPatterns": [
+      "dfProp*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "dfProp2.png",
+    "sha256": "5933cd9d385d08550530fe7125102fbb6735b16d4ba1dcb23273d0d04ce51292",
+    "familyPatterns": [
+      "dfProp*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "dfSit0.png",
+    "sha256": "64952fea09ab548080e7a585c9e9e87775b871e387f7d21e6875a151126aaa16",
+    "familyPatterns": [
+      "dfSit*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "dfSit1.png",
+    "sha256": "1242174a40603a96fc3548d91d7e612e457c98a9036154bef9164ef105e20525",
+    "familyPatterns": [
+      "dfSit*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "flip0.png",
+    "sha256": "5bdcdb885cfa30fa495007524df7cbceeff59dd60741bea9d334bb9376c2e987",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "jumpFwd"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "daichi",
+    "sprite": "flip1.png",
+    "sha256": "14777edbf8c8286ccf53273fa21c0ffef60903de43cce3a4d45636eb97bdb48e",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "jumpFwd"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "flip2.png",
+    "sha256": "d012ad7a366b4e61348c6518ca880de9d0368515cbb103982efd9e44343d4514",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "jumpFwd"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "flip3.png",
+    "sha256": "778e88709d4e03f88632efb4847c721dc3b2eb881dbde13daf8e0956254874fe",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "jumpFwd"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "getUp1.png",
+    "sha256": "b7481dac7cf7062b3b74e8a95f4ec4f9bdbcae58e5cf78ea78ea79ba2334398b",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "daichi",
+    "sprite": "getUp2.png",
+    "sha256": "f2f7a45c13a700f95568b1f4765d444c5bc6793ac2404ee81f95cea9fb8bfe78",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "getUp3.png",
+    "sha256": "955ee7dc42e855a23ac1de43f2f8b01b0ab33042219b3c38cd38fe4e096b1c0c",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "hitCrouch.png",
+    "sha256": "069c6d2ab60df6a32878e58b669b386b7fb5b39e79ef930095f9b6f397180489",
+    "familyPatterns": [
+      "hitCrouch"
+    ],
+    "affectedAnimations": [
+      "hitCrouch"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "hop.png",
+    "sha256": "462b0262ff97dde09163f17269e035335b87a9f0067f1869d65aa5a386cdb737",
+    "familyPatterns": [
+      "hop"
+    ],
+    "affectedAnimations": [
+      "hop"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "daichi",
+    "sprite": "jumpDown.png",
+    "sha256": "688c2f727a75b8f1bfc7b561ef45a7822f3ac2417a4749fe2d00442688ed429f",
+    "familyPatterns": [
+      "jumpDown"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "airRecover",
+      "ajab",
+      "akick",
+      "daybreak",
+      "daybreakEx",
+      "jumpDown",
+      "summitDrop"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "garan",
+    "sprite": "hop.png",
+    "sha256": "5a082b27103ba61f8940ebcb210cfadf3a2ea3af2cc3b9e176058af67fe68f00",
+    "familyPatterns": [
+      "hop"
+    ],
+    "affectedAnimations": [
+      "hop"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "garan",
+    "sprite": "jumpDown.png",
+    "sha256": "66037a60f804ab993c8fce7506f4f771b6e0bce9b6264e307eae5b7ce4d26b40",
+    "familyPatterns": [
+      "jumpDown"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "airRecover",
+      "ajab",
+      "akick",
+      "ascent",
+      "ascentEx",
+      "emberDive",
+      "jumpDown"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "garan",
+    "sprite": "jumpTop.png",
+    "sha256": "45335e1d0d584799caefc0b4d1868d1586b42af6b3f936095e506ed81ccf0fdf",
+    "familyPatterns": [
+      "jumpTop"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "ajab",
+      "akick",
+      "emberDive",
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "garan",
+    "sprite": "jumpUp.png",
+    "sha256": "af7b579807303eff264b1a41e532b1b8c9859a4e41f0378dfb50a4cda1d6cc0e",
+    "familyPatterns": [
+      "jumpUp"
+    ],
+    "affectedAnimations": [
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "airGuard.png",
+    "sha256": "e16f50d75200a3e6879f097fa697c33bd05a0acd2d232ee66022025af190531f",
+    "familyPatterns": [
+      "airGuardStart",
+      "airGuard",
+      "airGuardHit"
+    ],
+    "affectedAnimations": [
+      "airGuardStart",
+      "airGuard",
+      "airGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "airGuardHit.png",
+    "sha256": "e43895758dd8cca36d8c200f888f7dd1855e0d6a7c3ac0329f47804299ca57f9",
+    "familyPatterns": [
+      "airGuardHit"
+    ],
+    "affectedAnimations": [
+      "airGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "airLowKick.png",
+    "sha256": "3fc6bde495da7008d4c0670bc0ab277448422011c411b9157a1eb1416c8a68ed",
+    "familyPatterns": [
+      "airLowKick"
+    ],
+    "affectedAnimations": [
+      "airLowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "ajab.png",
+    "sha256": "74f1e83fc7e6931d86cbdc7ba439412da0783ac2bbe670d5ed962cb507e720b1",
+    "familyPatterns": [
+      "ajab"
+    ],
+    "affectedAnimations": [
+      "ajab"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "akick.png",
+    "sha256": "b099ff046c3fbd8e9f4ed708c345b478bffd2f90d939110a89b83059cdf4e66c",
+    "familyPatterns": [
+      "akick",
+      "airLowKick"
+    ],
+    "affectedAnimations": [
+      "akick",
+      "airLowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "cjab0.png",
+    "sha256": "9ad788162d379dd3ee192e5cd32e9039ea8e17791e095aaf0436c783fbc2f81f",
+    "familyPatterns": [
+      "cjab"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "cjab1.png",
+    "sha256": "69f71e0211dbd986b44dfa1481fdb16998b88d82bb6cdb4de519ab6a2b486c90",
+    "familyPatterns": [
+      "cjab"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "clk.png",
+    "sha256": "c557e111941fb226f9b3efe6bf007fabb4279cc9ca198345b767f36ed8a2ede1",
+    "familyPatterns": [
+      "clk"
+    ],
+    "affectedAnimations": [
+      "clk"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "crouch.png",
+    "sha256": "c2bc9cf3d3b82f3f39d34e198050ebe84cea8555b9d06065be61470232b22584",
+    "familyPatterns": [
+      "crouchStart",
+      "crouch",
+      "crouchTurn",
+      "hitCrouch",
+      "cjab",
+      "clk",
+      "sweep",
+      "lowKick"
+    ],
+    "affectedAnimations": [
+      "crouchStart",
+      "crouch",
+      "crouchTurn",
+      "hitCrouch",
+      "cjab",
+      "clk",
+      "sweep",
+      "lowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "crouch0.png",
+    "sha256": "e0c2b87ff3bbea8398f9fa25891effd35592bb3f43794599dd1844a732844d9c",
+    "familyPatterns": [
+      "crouchStart",
+      "crouchEnd",
+      "lowKick"
+    ],
+    "affectedAnimations": [
+      "crouchStart",
+      "crouchEnd",
+      "lowKick"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "crouch1.png",
+    "sha256": "553f636ef2ff9f6b7441054bd81c34e4a58fa51ab1fc1b74826562b4426dad63",
+    "familyPatterns": [
+      "crouch",
+      "clk",
+      "lowKick"
+    ],
+    "affectedAnimations": [
+      "crouch",
+      "clk",
+      "lowKick"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "crouchGuard.png",
+    "sha256": "fade74477da1972a238e9fbe1dd725bf74851f3d87e7f6adb707df9600fc42b6",
+    "familyPatterns": [
+      "crouchGuardStart",
+      "crouchGuard",
+      "crouchGuardHit"
+    ],
+    "affectedAnimations": [
+      "crouchGuardStart",
+      "crouchGuard",
+      "crouchGuardHit"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "crouchGuardHit.png",
+    "sha256": "a269b7540872e7dc18084b67bab568e9ac5f05e11b81ba39a0750917ef57b045",
+    "familyPatterns": [
+      "crouchGuardHit"
+    ],
+    "affectedAnimations": [
+      "crouchGuardHit"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "dfKneel0.png",
+    "sha256": "7b7c2e6be46f4c01edaea00101879db2506fbf7d7b5f7f93d9ce83a06f3627b0",
+    "familyPatterns": [
+      "defeat3"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "dfKneel1.png",
+    "sha256": "6a64a1bb6046bc7761a0c90fcb07033cab63845ad11546851e3cdb4108bf4b59",
+    "familyPatterns": [
+      "defeat3"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "dfLie.png",
+    "sha256": "cc968933051d355e25e0901071d543329f59a1a73d6121c85cd58772f8a0e2b7",
+    "familyPatterns": [
+      "defeat1",
+      "defeat2",
+      "defeat3",
+      "defeat4"
+    ],
+    "affectedAnimations": [
+      "defeat1",
+      "defeat2",
+      "defeat3",
+      "defeat4"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "dfProp.png",
+    "sha256": "bea6be834e05dccfc735c7f40b083a20a528081d90619ba62ce936ee050a7fa4",
+    "familyPatterns": [
+      "defeat1"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "dfProp2.png",
+    "sha256": "2d0c1e18b2191a53ce13e9141f200d6e83b8c12c162815fab3456739ef599af6",
+    "familyPatterns": [
+      "defeat1"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "dfReach0.png",
+    "sha256": "d8c23d69bb39c9455bf6e36555f8580e846b79c6949e4acf7c587d6892aa4459",
+    "familyPatterns": [
+      "defeat4"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "dfReach1.png",
+    "sha256": "a7b4058f6d0f834a3cf5dc0920337f32864861e645a3e03137999a9fa0a0249b",
+    "familyPatterns": [
+      "defeat4"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "dfSit0.png",
+    "sha256": "fa11775b08188de8cf5e78da352f94a400a20f8cad69c2418005e131876d87b6",
+    "familyPatterns": [
+      "defeat2"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "dfSit1.png",
+    "sha256": "f20961e267e804b3567bcc406c7f85d8753b47afe3d7c1fe00dbd85cc912b722",
+    "familyPatterns": [
+      "defeat2"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "flip0.png",
+    "sha256": "129350edc1846eb400190a418cca4b58e9b3170d5528a6e9cfd3cfe5ec4f9d3e",
+    "familyPatterns": [
+      "jumpFwd",
+      "airRecover"
+    ],
+    "affectedAnimations": [
+      "jumpFwd",
+      "airRecover"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "flip1.png",
+    "sha256": "37cdd8f889ca23f4ecc76ccc9a2b43883aac12b95a0e33d27c07683a2e861430",
+    "familyPatterns": [
+      "jumpFwd",
+      "airRecover"
+    ],
+    "affectedAnimations": [
+      "jumpFwd",
+      "airRecover"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "flip2.png",
+    "sha256": "eb985717f1caa72cf12e1bc9833e6e752f87547a4572654791b455d307dc134e",
+    "familyPatterns": [
+      "jumpFwd",
+      "airRecover"
+    ],
+    "affectedAnimations": [
+      "jumpFwd",
+      "airRecover"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "flip3.png",
+    "sha256": "515eb6a0f3d56311b00316ea04494ccb29cc550dbf20c954b4d0371ce24e1f94",
+    "familyPatterns": [
+      "jumpFwd",
+      "airRecover"
+    ],
+    "affectedAnimations": [
+      "jumpFwd",
+      "airRecover"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "getUp1.png",
+    "sha256": "a21c2ecdf7a0b2b7fc083118a7fd78877fb5ef543fdb637d4af29aafcf17b05c",
+    "familyPatterns": [
+      "getUp"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "haruki",
+    "sprite": "getUp2.png",
+    "sha256": "5c8b97c5c26d7a25ea601a981178182a4571e10c299cc4a03a2b24e24837a29f",
+    "familyPatterns": [
+      "getUp"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "getUp3.png",
+    "sha256": "e4b89ad34aa3b8e0489a5c1ac9d88213bb12b6ef4c60e7a1d9fc3937c4ad1386",
+    "familyPatterns": [
+      "getUp"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "guard.png",
+    "sha256": "9a10466bae380befd94f7e75325cd592acc8b04663ba897ceba012df9a0813cf",
+    "familyPatterns": [
+      "guardStart",
+      "guard",
+      "guardEnd",
+      "guardHit",
+      "theorem"
+    ],
+    "affectedAnimations": [
+      "guardStart",
+      "guard",
+      "guardEnd",
+      "guardHit",
+      "theorem"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "haruki",
+    "sprite": "guardHit.png",
+    "sha256": "a7b023521adc29f9f8815253f6d526b045d7647fb08c9a34d91905482b9dd328",
+    "familyPatterns": [
+      "guardHit"
+    ],
+    "affectedAnimations": [
+      "guardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "hitCrouch.png",
+    "sha256": "a8490b553b89f69d21e21229cddae20e449b327a6c00c23ef27a54c239be096e",
+    "familyPatterns": [
+      "hitCrouch"
+    ],
+    "affectedAnimations": [
+      "hitCrouch"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "hitL1.png",
+    "sha256": "3b8a8d8ffffb5dbf761ca59cb02e6a4a91cc01d07f7c7f0d4a689ca58c5fe155",
+    "familyPatterns": [
+      "hitLowLight",
+      "hitLowMedium",
+      "hitLowHeavy"
+    ],
+    "affectedAnimations": [
+      "hitLowLight",
+      "hitLowMedium",
+      "hitLowHeavy"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "hitL2.png",
+    "sha256": "4e0db3256ec14cfc10ddcc0903936fb3ae87641e604b218b866cc3d0215447e6",
+    "familyPatterns": [
+      "hitLowMedium",
+      "hitLowHeavy"
+    ],
+    "affectedAnimations": [
+      "hitLowMedium",
+      "hitLowHeavy"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "hitL3.png",
+    "sha256": "695ee04629a807894186cb4055977f36cd8fd5778ea91bc2d11768b7a5f487be",
+    "familyPatterns": [
+      "hitLowHeavy"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "hk0.png",
+    "sha256": "0180906cd185b8907485da4a5c97ece9828718a99ff6e75d0f8e5f6076ba2fb0",
+    "familyPatterns": [
+      "hkick"
+    ],
+    "affectedAnimations": [
+      "hkick"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "hk1.png",
+    "sha256": "9b23e752d1726684b0802ca0d08374cc86309c9bf61d92b5553c1e21434ce9e7",
+    "familyPatterns": [
+      "hkick"
+    ],
+    "affectedAnimations": [
+      "hkick"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "hop.png",
+    "sha256": "3687e152c92a0c5248314ee9e13ace288f0986fdbbffa53a0d9fb00485c0fd4d",
+    "familyPatterns": [
+      "hop"
+    ],
+    "affectedAnimations": [
+      "hop"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "jab0.png",
+    "sha256": "6ddfefc91b954c62f326bfa53d3cc9f7a103cd327b43a88c1464e1c66fbecd56",
+    "familyPatterns": [
+      "jab",
+      "sigil",
+      "sigilMark",
+      "sigilEx",
+      "stringA"
+    ],
+    "affectedAnimations": [
+      "jab",
+      "sigil",
+      "sigilMark",
+      "sigilEx",
+      "stringA"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "jab1.png",
+    "sha256": "851ecfedf3554c9bf6837a08a98c5da20a0d679727fe15453f6583a284592782",
+    "familyPatterns": [
+      "jab",
+      "stringA"
+    ],
+    "affectedAnimations": [
+      "jab",
+      "stringA"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "jumpDown.png",
+    "sha256": "f65665ba04b7c628794e64c0f8f19ea07951e92680bc9953fbfce25e4616518d",
+    "familyPatterns": [
+      "jumpDown",
+      "airRecover",
+      "ajab",
+      "akick",
+      "ascend",
+      "super",
+      "ascendEx",
+      "airLowKick"
+    ],
+    "affectedAnimations": [
+      "jumpDown",
+      "airRecover",
+      "ajab",
+      "akick",
+      "ascend",
+      "super",
+      "ascendEx",
+      "airLowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "jumpStart.png",
+    "sha256": "ce1a3bc4687bb3d30084223d88777da7c038a7e41d9640eb277ea07428b2972e",
+    "familyPatterns": [
+      "jumpStart",
+      "land"
+    ],
+    "affectedAnimations": [
+      "jumpStart",
+      "land"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "jumpTop.png",
+    "sha256": "14f8afa3a43bfc1b38951324c33814ae537f47dca330e9802096a70d68098d1f",
+    "familyPatterns": [
+      "jumpUp",
+      "jumpFwd",
+      "jumpBack",
+      "ajab",
+      "akick",
+      "airLowKick"
+    ],
+    "affectedAnimations": [
+      "jumpUp",
+      "jumpFwd",
+      "jumpBack",
+      "ajab",
+      "akick",
+      "airLowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "jumpUp.png",
+    "sha256": "71af6f6738dc0547e2dc10a366aa90bf549a24c65b90d8d174f7b48953ff145d",
+    "familyPatterns": [
+      "jumpUp",
+      "jumpFwd",
+      "jumpBack"
+    ],
+    "affectedAnimations": [
+      "jumpUp",
+      "jumpFwd",
+      "jumpBack"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "land.png",
+    "sha256": "c49d3de6c349833286ac929954ef74593e32abadbca37415ac483028a5596472",
+    "familyPatterns": [
+      "land"
+    ],
+    "affectedAnimations": [
+      "land"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "lk0.png",
+    "sha256": "ce1b92007f53ae764f4c515ba64f8a13d2e12e37b515f7939152325232275c6f",
+    "familyPatterns": [
+      "lkick",
+      "stringA",
+      "stringB"
+    ],
+    "affectedAnimations": [
+      "lkick",
+      "stringA",
+      "stringB"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "lk1.png",
+    "sha256": "290043c07c5e23788520eb1852741727e1e7e350cd945ea5774e10dccf096f78",
+    "familyPatterns": [
+      "lkick",
+      "stringA",
+      "stringB"
+    ],
+    "affectedAnimations": [
+      "lkick",
+      "stringA",
+      "stringB"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "lowKick.png",
+    "sha256": "6c7840a48f080e1982b0d23e392d7cfe5e91d364e690f312800732f8648d137a",
+    "familyPatterns": [
+      "lowKick"
+    ],
+    "affectedAnimations": [
+      "lowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "haruki",
+    "sprite": "str0.png",
+    "sha256": "3d04e9885eb1abbdcc3ce475f3807f9169be7772c40910bf8351fe2979cc5acb",
+    "familyPatterns": [
+      "strong",
+      "theorem",
+      "pageThrow",
+      "stringB",
+      "stringC"
+    ],
+    "affectedAnimations": [
+      "strong",
+      "theorem",
+      "pageThrow",
+      "stringB",
+      "stringC"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "str1.png",
+    "sha256": "1ae08e430a5dd786b27fa7fa1da27301a2d2ff42f58d1dd2cfc3e316f94a2ef2",
+    "familyPatterns": [
+      "strong",
+      "theorem",
+      "pageThrow",
+      "stringB",
+      "stringC"
+    ],
+    "affectedAnimations": [
+      "strong",
+      "theorem",
+      "pageThrow",
+      "stringB",
+      "stringC"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "sweep0.png",
+    "sha256": "d64fbf890ea9cbd5f188f6487f5a15caba8321290d0a406e2ad935d30d8b5190",
+    "familyPatterns": [
+      "sweep"
+    ],
+    "affectedAnimations": [
+      "sweep"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "sweep1.png",
+    "sha256": "209a65b7aaf42d59afa4f6e41054331ae7e58344d2b17640d38d65ae09543305",
+    "familyPatterns": [
+      "sweep"
+    ],
+    "affectedAnimations": [
+      "sweep"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "haruki",
+    "sprite": "tk0.png",
+    "sha256": "08df7f41e272857110e07b78e5f0d2c8b397564c5e3c042f9a07efc1bae00226",
+    "familyPatterns": [
+      "margin",
+      "super",
+      "proof",
+      "proofUlt"
+    ],
+    "affectedAnimations": [
+      "margin",
+      "super",
+      "proof",
+      "proofUlt"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "tk1.png",
+    "sha256": "909621afa7ef58b2f8e57a827629cd7a67ce78d7a0f664a1a1cc7258e8a5df4e",
+    "familyPatterns": [
+      "margin"
+    ],
+    "affectedAnimations": [
+      "margin"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "haruki",
+    "sprite": "turn.png",
+    "sha256": "9d5bfadc1d1b72b653b014636c8d072c7f1c6f7f6e71192f420316f8ef8f48d6",
+    "familyPatterns": [
+      "turn"
+    ],
+    "affectedAnimations": [
+      "turn"
+    ],
+    "review": "native_size_confirmed_outfit_family_mismatch_pending_correction"
+  },
+  {
+    "character": "jin",
+    "sprite": "airGuard.png",
+    "sha256": "e85014250b8151893d174eaa2f3cc3c37498328fe95abb5a47154fa74e2f7d8b",
+    "familyPatterns": [
+      "airGuardStart",
+      "airGuard",
+      "airGuardHit"
+    ],
+    "affectedAnimations": [
+      "airGuardStart",
+      "airGuard",
+      "airGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "airGuardHit.png",
+    "sha256": "819db8b424bc6bff78926f757ee7fa9536372bbce2d6286a78cfe2223b433be4",
+    "familyPatterns": [
+      "airGuardHit"
+    ],
+    "affectedAnimations": [
+      "airGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "airLowKick.png",
+    "sha256": "2a340b71eb8cb47ca426479167c529eb28449a337220c2df2fd81fe60f1d8532",
+    "familyPatterns": [
+      "airLowKick"
+    ],
+    "affectedAnimations": [
+      "airLowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "ajab.png",
+    "sha256": "1d2079fc23edebb69896f7b9d551845660d692a5232edcc837ef4c384243299b",
+    "familyPatterns": [
+      "ajab"
+    ],
+    "affectedAnimations": [
+      "ajab"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "akick.png",
+    "sha256": "379791cc5bd90db322eff50078ca329133ea7c8b440397fe99df0c0e276195f7",
+    "familyPatterns": [
+      "akick",
+      "airLowKick"
+    ],
+    "affectedAnimations": [
+      "akick",
+      "airLowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "cjab0.png",
+    "sha256": "55c0fc77d8111cd516265733c14320066a331ac10b23dc37bfaf29da3f477176",
+    "familyPatterns": [
+      "cjab",
+      "shadowhold"
+    ],
+    "affectedAnimations": [
+      "cjab",
+      "shadowhold"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "cjab1.png",
+    "sha256": "98756ca109c669077e44a3e8d5fbde729d8d0b325701e137cadb40fa94093034",
+    "familyPatterns": [
+      "cjab",
+      "shadowhold"
+    ],
+    "affectedAnimations": [
+      "cjab",
+      "shadowhold"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "clk.png",
+    "sha256": "18c08453b7db610417ae9970636fc00a5d218210f23f4d330e78dfc9c798428f",
+    "familyPatterns": [
+      "clk"
+    ],
+    "affectedAnimations": [
+      "clk"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "crouch.png",
+    "sha256": "f7c6287e1be467dba3be4cb87b87840ef2c13338005ec3c2a3519811a696f747",
+    "familyPatterns": [
+      "crouchStart",
+      "crouch",
+      "crouchTurn",
+      "hitCrouch",
+      "cjab",
+      "clk",
+      "sweep",
+      "lowKick"
+    ],
+    "affectedAnimations": [
+      "crouchStart",
+      "crouch",
+      "crouchTurn",
+      "hitCrouch",
+      "cjab",
+      "clk",
+      "sweep",
+      "lowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "dfKneel0.png",
+    "sha256": "d3e86ebb45696bce3e237cdc3f58b5ab20a0720154c1d6721586d020d83417e7",
+    "familyPatterns": [
+      "defeat3"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "guard.png",
+    "sha256": "b104a893aba2ff95b03d1247ab6960dd3f80fa0d72e2041d01c4ba7f9145335e",
+    "familyPatterns": [
+      "guardStart",
+      "guard",
+      "guardEnd",
+      "guardHit"
+    ],
+    "affectedAnimations": [
+      "guardStart",
+      "guard",
+      "guardEnd",
+      "guardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "jin",
+    "sprite": "hitL1.png",
+    "sha256": "5ed463168cf2c7608b56ceb731e8b4f58f41d8e3718d36b4258bd22949c52cf9",
+    "familyPatterns": [
+      "hitLowLight",
+      "hitLowMedium",
+      "hitLowHeavy"
+    ],
+    "affectedAnimations": [
+      "hitLowLight",
+      "hitLowMedium",
+      "hitLowHeavy"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "kaito",
+    "sprite": "airGuard.png",
+    "sha256": "ddb5bf29519b890718a3c5d54756ff7a02ecba6288973ab74ef850d5908b5765",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuard",
+      "airGuardHit",
+      "airGuardStart"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "kaito",
+    "sprite": "airGuardHit.png",
+    "sha256": "558c6f0d4f7ad708e4dbfb2635ebd0b83806d1d4c9808c40078d341deb4a0ac3",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuardHit"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "kaito",
+    "sprite": "cjab0.png",
+    "sha256": "a9d0f4f2defdcadbd5a603516f052e1f3fde20b277f40420a51ec2bf89f2d76b",
+    "familyPatterns": [
+      "cjab*"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "kaito",
+    "sprite": "cjab1.png",
+    "sha256": "b7625bafc64adcd0c16d2a33a7a3d3cca76a88322374c6d606935bcf946d03b1",
+    "familyPatterns": [
+      "cjab*"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "lian",
+    "sprite": "airGuard.png",
+    "sha256": "bb09a10f664db2254938cc04785c5ff9e7345aae65aefe105eaf8c7b1a7c4fdf",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuard",
+      "airGuardHit",
+      "airGuardStart"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "lian",
+    "sprite": "airGuardHit.png",
+    "sha256": "dd546a2c20de7ab8a5c2f6003595c6f056ad0bea7e663be7d706bbb1493603df",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "crouch.png",
+    "sha256": "957ec408098ab2ea680d7fc04d79a1427ec7bc73957fd5721e2d97ca584cbc2a",
+    "familyPatterns": [
+      "crouch"
+    ],
+    "affectedAnimations": [
+      "cjab",
+      "clk",
+      "crouch",
+      "crouchStart",
+      "crouchTurn",
+      "hitCrouch",
+      "lowKick",
+      "sweep"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "lian",
+    "sprite": "crouch1.png",
+    "sha256": "298d38af6338dd9f649a6ba995396fee5452f72a677275994ceafae3a8cabffe",
+    "familyPatterns": [
+      "crouch1"
+    ],
+    "affectedAnimations": [
+      "clk",
+      "crouch",
+      "lowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "crouchGuardHit.png",
+    "sha256": "ceaf7d1a305bae9001468f0f36facc5a2fc116edb19301faf21c0f319ceccb33",
+    "familyPatterns": [
+      "crouchGuardHit"
+    ],
+    "affectedAnimations": [
+      "crouchGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "dfKneel0.png",
+    "sha256": "e1ddfc4da6ec0c4dadb31277a6aeaa1b9393e06869e6ee361eb499ddaf4073f5",
+    "familyPatterns": [
+      "dfKneel*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "lian",
+    "sprite": "dfKneel1.png",
+    "sha256": "a2f6f7e66db1ad54b19318ff503b5d67533bf23945cc2ccad8fca14595d405bc",
+    "familyPatterns": [
+      "dfKneel*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "dfProp.png",
+    "sha256": "bd4c51f72bd47d2833b8d95f68f94bbe92355263dc1a1c154428e04a9fc7fa8a",
+    "familyPatterns": [
+      "dfProp*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "dfProp2.png",
+    "sha256": "0b7efc28e086831b47151f022faacdad5fc24b45fdbe83389011c6f29392f3c5",
+    "familyPatterns": [
+      "dfProp*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "dfReach0.png",
+    "sha256": "42df0ff04d9fbcc711f90017f7f211fe1b9510a506cb5a5f321ea110fd4eb6cd",
+    "familyPatterns": [
+      "dfReach*"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "dfReach1.png",
+    "sha256": "30e2ea9277b7febf34cbee40f1a70df331feb63856168ebc0e5ea7a9023a3350",
+    "familyPatterns": [
+      "dfReach*"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "dfSit0.png",
+    "sha256": "e2127ccb3080ebe9bddf24bbeebbfb09772db06fb55dc5ccd5a8c73f17ca901d",
+    "familyPatterns": [
+      "dfSit*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "dfSit1.png",
+    "sha256": "2d51dab91305e91803d9f21baed2df210915762f6f488b001a863ab9ed8268db",
+    "familyPatterns": [
+      "dfSit*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "flip0.png",
+    "sha256": "50afb64c55f01345082e938fd91857539a241410c8d17e89de801b144ce07457",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "crane",
+      "craneEx",
+      "dive",
+      "jumpFwd"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "flip1.png",
+    "sha256": "cdf59dfc9c37e9dd3a0400dca31a800ff91f0295e75580cb51cd07c980dc0436",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "crane",
+      "craneEx",
+      "dive",
+      "jumpFwd"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "flip2.png",
+    "sha256": "82497480ef5dfeeaeec4ab67d114d52cdcc43369569490e6e28957ef658bc6b7",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "jumpFwd"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "flip3.png",
+    "sha256": "7b1f2cbf511455d399a7725b9b1556b899074decca7ce9d6a991ec86ddb94225",
+    "familyPatterns": [
+      "flip*"
+    ],
+    "affectedAnimations": [
+      "airRecover",
+      "jumpFwd"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "getUp1.png",
+    "sha256": "246f0b1f3d2f14be38c8d472c8b0f7319d426fd406f2fa9d8676669621c5e65c",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "getUp2.png",
+    "sha256": "cb602edc3fa59a7f028022f403248c42d86b46ec52b58e014de2175c67a3df51",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "getUp3.png",
+    "sha256": "d3c83bc5175bae0851e7dbcd23397aa3e0ffe9c5383c69548af5daddea3a3708",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "guard.png",
+    "sha256": "87a04e40c30b579b2380a948327c7186028d7bac9c91856d3d3714836c7c7a79",
+    "familyPatterns": [
+      "guard*"
+    ],
+    "affectedAnimations": [
+      "guard",
+      "guardEnd",
+      "guardHit",
+      "guardStart"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "guardHit.png",
+    "sha256": "6c484326aeed36065e5484d8b682de0eeb1b2d027804a36531f2bb1e67875afc",
+    "familyPatterns": [
+      "guard*"
+    ],
+    "affectedAnimations": [
+      "guardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "hitCrouch.png",
+    "sha256": "3b4d6b8972ab359f7102b90f87d54860d82dff671194e55d8796dde2ccf09cd5",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitCrouch"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "hitL1.png",
+    "sha256": "e2eceb769d1b8539012effda01e816da9f9d69b3510565d5a56f75743fe4f81a",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowLight",
+      "hitLowMedium"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "hitL2.png",
+    "sha256": "28dd06b829f946db47b5c277a18b5bf1d42a9f4bcb7948a22dbaf0e9f76f320b",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowMedium"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "hitL3.png",
+    "sha256": "bc6fca600f7d51aa4b920f41d9c751c35958fa60c379022ade224177e14cf28a",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "hop.png",
+    "sha256": "4e0c051e827f6f69f8b925919bcfc2edecf6cc24c4fb21676615ffc758d8cab9",
+    "familyPatterns": [
+      "hop"
+    ],
+    "affectedAnimations": [
+      "hop"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "jumpDown.png",
+    "sha256": "04f531fda711b6bff4355b73a543c3c9cc58cf03ada3c1759aa9c41954678415",
+    "familyPatterns": [
+      "jumpDown"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "airRecover",
+      "ajab",
+      "akick",
+      "crane",
+      "craneEx",
+      "dive",
+      "jumpDown",
+      "super"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "jumpTop.png",
+    "sha256": "08d0775baf638ca3d65fdf8c5551ec8ce8c5fc8453d38b49ab5af1a4d7cfdcc8",
+    "familyPatterns": [
+      "jumpTop"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "ajab",
+      "akick",
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "jumpUp.png",
+    "sha256": "e08a7df78d5bef98aa493e239146d999159a87855df0e358be8a724d4c219f0d",
+    "familyPatterns": [
+      "jumpUp"
+    ],
+    "affectedAnimations": [
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "lian",
+    "sprite": "land.png",
+    "sha256": "c9d3f68a415f7d8f55d3b0cf963c519c96dbabd4020b399c364a24bcd522e9c2",
+    "familyPatterns": [
+      "land"
+    ],
+    "affectedAnimations": [
+      "land"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "airGuard.png",
+    "sha256": "3cb024bb89d0ea34ec810a9522b60026f55100b4e073b2a05c73b1bbf4418b4c",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuard",
+      "airGuardHit",
+      "airGuardStart"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "marlow",
+    "sprite": "airGuardHit.png",
+    "sha256": "4a7d5a4c9c0b1d3acb6fdae36ea1eabf83599173f53159d76a14cfa9308104fe",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "cjab0.png",
+    "sha256": "bd25825b9330c13e77fa0eacba377a6ab979d19ee870860e02753f598377024d",
+    "familyPatterns": [
+      "cjab*"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "marlow",
+    "sprite": "cjab1.png",
+    "sha256": "3b3ecbb18e4b271b834beea23327639b0085bd6430c4d138f05df0dea3d192a3",
+    "familyPatterns": [
+      "cjab*"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "crouch.png",
+    "sha256": "0435b0189fd72d9e7dd1f5b5d921eb61b5549843576a8416fd2166c6b01de79d",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "cjab",
+      "clk",
+      "crouch",
+      "crouchStart",
+      "crouchTurn",
+      "hitCrouch",
+      "lowKick",
+      "sweep"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "crouch0.png",
+    "sha256": "146b07a3930dde215842d24feb63de9a721b0bb44dd6c9c9a875e12a8fef6b4e",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchEnd",
+      "crouchStart",
+      "lowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "crouch1.png",
+    "sha256": "652c463b5c9ede531f2d12709c3303ddd300efcee6d36f018d36547154cc5911",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "clk",
+      "crouch",
+      "lowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "crouchGuard.png",
+    "sha256": "ad3355f531eb6cfc59538e563d585714ad4500ce020eae0dd6d92e5500f83310",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchGuard",
+      "crouchGuardHit",
+      "crouchGuardStart",
+      "riposte"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "crouchGuardHit.png",
+    "sha256": "2bda3fb6c38abcc2447e4db2098aea1c4d6188fd660c32bb602c715a42e10680",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "dfKneel0.png",
+    "sha256": "08170cdcf46b1184e861bae7ab6ec4085d3495679c09e3943c0796c4ee93c6eb",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "marlow",
+    "sprite": "dfKneel1.png",
+    "sha256": "4c82db402ea89777478a67887e83d207d53386d6541dcb244f730d9ca12d5a3e",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "dfLie.png",
+    "sha256": "44437e0f67dd3fc59d78289c44943b987e3f229e1a5fb8238e713ab3287e16db",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1",
+      "defeat2",
+      "defeat3",
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "dfProp.png",
+    "sha256": "24f56eb2401893edbe644246dc801a92194c91d6ea7cbe225a17f4af07fadcce",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "dfProp2.png",
+    "sha256": "9c10a102dfe9b3aa8bc97ae495607b5fca13151b9657ca603a6a7c2277dccc15",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "dfReach0.png",
+    "sha256": "f1c2e0f38c6ba10b9bfdfe55dd96a903cdf69500e02edbb8bb97a2fbd1bb80d0",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "dfReach1.png",
+    "sha256": "f85e6668c349447dfafd6052b8790a2486e34a42c00d1ce1e175d8c7658c565a",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "dfSit0.png",
+    "sha256": "60f772d5ddb4cce4c007161a7d8a2c3e3ed88311cdcc6ccc080909a5970c66f7",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "dfSit1.png",
+    "sha256": "fdd6a861c5442726add87fb3bb45dd2cdc9c4a129b405465b50f0541c6340e03",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "getUp1.png",
+    "sha256": "456b035393e957789951688494043554f7db4092f3d1b91bd759d07102f8cf34",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "getUp2.png",
+    "sha256": "e35d60d2f16b8d36a5b664f63ed4ccac2ad0fcb943763f821f660b81ecfc9626",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "getUp3.png",
+    "sha256": "146b07a3930dde215842d24feb63de9a721b0bb44dd6c9c9a875e12a8fef6b4e",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "guard.png",
+    "sha256": "4e33cc00fc4fa5ab69e86f2be47c65e4cda9882289808736405995a17304ea06",
+    "familyPatterns": [
+      "guard*"
+    ],
+    "affectedAnimations": [
+      "guard",
+      "guardEnd",
+      "guardHit",
+      "guardStart",
+      "riposte"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "guardHit.png",
+    "sha256": "a0a603f5d8cac1262fe63a28e1f62469681cbf19020216b1a882f545c5f489d9",
+    "familyPatterns": [
+      "guard*"
+    ],
+    "affectedAnimations": [
+      "guardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "hitCrouch.png",
+    "sha256": "e6aa6400c2fab5afb2224d889d37b3b906e9c67383b346b8ad728f173a438ecc",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitCrouch"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "hitL1.png",
+    "sha256": "02310aec40ae9302f884fbf362fb8cd89d4c672928c824e10dc8a516ec49fc94",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowLight",
+      "hitLowMedium"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "hitL2.png",
+    "sha256": "939a6903711add9af8387a11d5aa2daec7e46db1f99aa38b111f8c01034fd029",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowMedium"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "marlow",
+    "sprite": "hitL3.png",
+    "sha256": "9aef3ee409a60bcf736d46e4f7336a2afb7d8eba5ae39e7a92c1bf8e17f554e0",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "oboro",
+    "sprite": "jumpDown.png",
+    "sha256": "5de8374169d9c86765f17ef4a11abc7ba0fa316a12009f40b8262069c7437977",
+    "familyPatterns": [
+      "jumpDown"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "airRecover",
+      "ajab",
+      "jumpDown"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "oboro",
+    "sprite": "jumpTop.png",
+    "sha256": "9c23da5d00f000e9c231936b3da274183be876d957e9ccad7f91df5db230c387",
+    "familyPatterns": [
+      "jumpTop"
+    ],
+    "affectedAnimations": [
+      "ajab",
+      "akick",
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "oboro",
+    "sprite": "jumpUp.png",
+    "sha256": "c2c7c9cb7261df3c0c2b328f2a437d04defec30d6dc630d87a8258f113f67529",
+    "familyPatterns": [
+      "jumpUp"
+    ],
+    "affectedAnimations": [
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "suzume",
+    "sprite": "airGuard.png",
+    "sha256": "c05eb68de98cd24920ef937d0493c49f1fe277396db2d23de42e3c556ee995ab",
+    "familyPatterns": [
+      "airGuard"
+    ],
+    "affectedAnimations": [
+      "airGuard",
+      "airGuardHit",
+      "airGuardStart"
+    ],
+    "review": "native_size_confirmed_wrong_identity_family_pending_correction"
+  },
+  {
+    "character": "suzume",
+    "sprite": "airLowKick.png",
+    "sha256": "4593bf52d10760e85a0a814b113503ef05f06f6917f34433486b2298887293ea",
+    "familyPatterns": [
+      "airLowKick"
+    ],
+    "affectedAnimations": [
+      "airLowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "suzume",
+    "sprite": "cjab0.png",
+    "sha256": "072372bed37a631f067a5c3971d35af83828da52691524ebfa4b7855d07e6348",
+    "familyPatterns": [
+      "cjab"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "suzume",
+    "sprite": "cjab1.png",
+    "sha256": "5f85d1520204f0a3074c4338dd5b70e31c272cd21617015622d472f5d55d6c52",
+    "familyPatterns": [
+      "cjab"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "suzume",
+    "sprite": "jumpTop.png",
+    "sha256": "2f534c64c952b55daef8f900253ff4d2e24d456ffebdab2603a3c1f503631043",
+    "familyPatterns": [
+      "jumpTop"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "ajab",
+      "akick",
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp",
+      "super"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "suzume",
+    "sprite": "lowKick.png",
+    "sha256": "f512357cf484fdee15a94ea0bb203e625f4320cfc2787428d9d1ea09af30d244",
+    "familyPatterns": [
+      "lowKick"
+    ],
+    "affectedAnimations": [
+      "lowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "sylene",
+    "sprite": "airGuard.png",
+    "sha256": "0d6173a1ab29e830b1fbbffbe28d7ff2c3dbf4147a52a2b49a7fe4efd6564dfc",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuard",
+      "airGuardHit",
+      "airGuardStart"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "sylene",
+    "sprite": "airGuardHit.png",
+    "sha256": "0176fd55aa5785ddce56411786497f88b227c04e6675ee4f20e4b34788c02989",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "airLowKick.png",
+    "sha256": "deaaada7dea3abf06f0f9e4ef74c23a3f6cfda11467e82575aaa0c7832b054eb",
+    "familyPatterns": [
+      "airLowKick"
+    ],
+    "affectedAnimations": [
+      "airLowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "sylene",
+    "sprite": "cjab0.png",
+    "sha256": "5fd932a14f8503a842bd7efc3590858377356101d997f723a95771e9b7f5dff0",
+    "familyPatterns": [
+      "cjab*"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "cjab1.png",
+    "sha256": "2393387a9a945edeefaab2ca6a86aaca76adac3571819d485a78127876d422fd",
+    "familyPatterns": [
+      "cjab*"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "crouch.png",
+    "sha256": "4d6c7ec89407193f1e6462c4941eacb3e763b37306497e8bc183661a12386e9c",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "cjab",
+      "clk",
+      "crouch",
+      "crouchStart",
+      "crouchTurn",
+      "glide",
+      "hitCrouch",
+      "lowKick",
+      "sweep"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "crouch0.png",
+    "sha256": "1e740ed90027ee15d5c981f11aa6dea79ec295ef9c32b0417b0fd0392065f6f5",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchEnd",
+      "crouchStart",
+      "lowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "sylene",
+    "sprite": "crouch1.png",
+    "sha256": "52e1d0f91cf0dad32531635de429d64dbda16b6891a8e6052cae3054f5d7da79",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "clk",
+      "crouch",
+      "lowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "crouchGuard.png",
+    "sha256": "df8ab4a91d07228cd5262595d302341c673a1e901054cf0190226ada87096697",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchGuard",
+      "crouchGuardHit",
+      "crouchGuardStart"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "crouchGuardHit.png",
+    "sha256": "d90728f7ec669e268b111c70d683c5beadcd8ddbf314091a28203589cb977478",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "dfKneel0.png",
+    "sha256": "f9d93de909ed59d4611c2a989b9486ae8281970c668847d58b637f02e146bfe5",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "dfKneel1.png",
+    "sha256": "1f381703b685cbdefa0862a1d8bccf9cbef8883cd11ba4b487fe81516444caa7",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "dfLie.png",
+    "sha256": "a5802132261d504fc2ad272a8fb57d80b9e01de18206b8e95b5b0c087a08521e",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1",
+      "defeat2",
+      "defeat3",
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "dfProp.png",
+    "sha256": "c17ff1b032537d0def16206942b56dabb468a25ed67dd443b216b07ee7cf0ce3",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "dfProp2.png",
+    "sha256": "8607e137b493907a40ba7138bb31de36e9c9affe22f2e10987ca1ab8f76a4c79",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "dfReach0.png",
+    "sha256": "19b0ce1d267ee0f84262927c37610540278d0f37de054686d461ac0eb50921bb",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "dfReach1.png",
+    "sha256": "59816960fd3a62b11f82d5fc04f525d702b33ba9a51be47c7ede390149a955a1",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "dfSit0.png",
+    "sha256": "b3cc069b17192edf973e60503436f302521b76fafd66d799cfb203a64ab9b487",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "dfSit1.png",
+    "sha256": "01bb1e081e4c67f5a52cb6a1063602f893d706488606cab9b62b0620c806495f",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "getUp1.png",
+    "sha256": "db1cd9b40b55686472dd1ae4e4cfb79a7e3b2f019e24a80131b7386246bdb1fd",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "getUp2.png",
+    "sha256": "df7701f44fa1bcd2774fe46e5d0c5034a73d71e547782f7d3a9deb994509e47c",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "getUp3.png",
+    "sha256": "1e740ed90027ee15d5c981f11aa6dea79ec295ef9c32b0417b0fd0392065f6f5",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "guard.png",
+    "sha256": "431602a060b19cb009fd72e9fbafd580a6942f06406fb775645548c8460a2f42",
+    "familyPatterns": [
+      "guard*"
+    ],
+    "affectedAnimations": [
+      "guard",
+      "guardEnd",
+      "guardHit",
+      "guardStart"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "guardHit.png",
+    "sha256": "c89865a7f06acb9500bf27633bec024ca44276ea229aa42a044c88e4594f6818",
+    "familyPatterns": [
+      "guard*"
+    ],
+    "affectedAnimations": [
+      "guardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "hitCrouch.png",
+    "sha256": "fce8fb08f1d301123d8d96480b6e8e68b351ef3249dcde83344af36cbeb07b04",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitCrouch"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "hitL1.png",
+    "sha256": "515c4620ccff46788ef7ae47be6a2530310197e8fc0646a80075a7d1cd555097",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowLight",
+      "hitLowMedium"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "hitL2.png",
+    "sha256": "8ab5f1576a8c66ce44d1e4cefaa23c9bb0b2a704d914e0a07a01dd63046e1a5f",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowMedium"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "hitL3.png",
+    "sha256": "3dcaeb9a2ff3d30d5f8c70e61c6980148373d053b9d4c09b29fe4065e935e6a1",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "sylene",
+    "sprite": "jumpTop.png",
+    "sha256": "053f95eebf31f921c7e26a76e87eb66df72f05a0be584ba5fd75ee0450a6f392",
+    "familyPatterns": [
+      "jumpTop"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "ajab",
+      "akick",
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "sylene",
+    "sprite": "lowKick.png",
+    "sha256": "faaa898ea6520876ce284aa5fdf72f519d9d7686cab0bf45d15607d7d434d320",
+    "familyPatterns": [
+      "lowKick"
+    ],
+    "affectedAnimations": [
+      "lowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "valdric",
+    "sprite": "airGuard.png",
+    "sha256": "9e2a4de7e38976ad33695930118bc831333e20d5c294aa57565dca01d6aa04db",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuard",
+      "airGuardHit",
+      "airGuardStart"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "valdric",
+    "sprite": "airGuardHit.png",
+    "sha256": "c371a6697119e8e7178c9278284cbd259870cead56b113f3830addae76f463a4",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "airLowKick.png",
+    "sha256": "84659e7d5d36dd011664a6508a0668a8736fa926295d22bcf65e1db866f35d3e",
+    "familyPatterns": [
+      "airLowKick"
+    ],
+    "affectedAnimations": [
+      "airLowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "valdric",
+    "sprite": "cjab0.png",
+    "sha256": "44c9b832d7d709e173ac3784bd774d01cd790eee5f665f126776c7f72be1ba14",
+    "familyPatterns": [
+      "cjab*"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "cjab1.png",
+    "sha256": "d3b5eed46c611884c2963144a3e4e444771348bc05d4f2ddb033912a58b1fbba",
+    "familyPatterns": [
+      "cjab*"
+    ],
+    "affectedAnimations": [
+      "cjab"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "crouch.png",
+    "sha256": "95dacac5e1227b34a24e49be6612809b031b94a2e18cacca41b5bad75f350318",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "cjab",
+      "clk",
+      "crouch",
+      "crouchStart",
+      "crouchTurn",
+      "hitCrouch",
+      "lowKick",
+      "sweep"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "crouch0.png",
+    "sha256": "01a8c8328821109c55fcde2a4df148c3c0871e5ce6f4b11a3b4e4db63eff5b12",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchEnd",
+      "crouchStart",
+      "lowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "valdric",
+    "sprite": "crouch1.png",
+    "sha256": "f12d7d7b15aaea6e4aeffb0f769534eccced6f83c522baad759660a9181a35f0",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "clk",
+      "crouch",
+      "lowKick"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "crouchGuard.png",
+    "sha256": "62dccab18f1d69b523224a8944ce75a4d7ed88ca9681fc2a0f4c46c9cb1679db",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchGuard",
+      "crouchGuardHit",
+      "crouchGuardStart"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "crouchGuardHit.png",
+    "sha256": "5a9932d81b195c830e790310112bb6a775adc34b6c7a599511a55f0fc4962e92",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchGuardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "dfKneel0.png",
+    "sha256": "48da6b4e6fb03e98a2d69e0aa37d5b1359e72251ddf73d09affcebd475ebb974",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "dfKneel1.png",
+    "sha256": "a35d27933027bca605cfa1ec70c6f506f7db75e4f48072febd7a595d10f5ece1",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "dfLie.png",
+    "sha256": "1b27ab2080f04ffc27e06971626c1fd6f8bf2fdd1de53f7c6ca9a5fc0d4ef7df",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1",
+      "defeat2",
+      "defeat3",
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "dfProp.png",
+    "sha256": "cbb77def96bd8bf38d870f6579e40dd0ac9f5599f0ec50a44f1276316e17681e",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "dfProp2.png",
+    "sha256": "7b47b3efe31ac59e9e6a961954c3576e7d9002f01c48ec905400a28bd75c03c4",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "dfReach0.png",
+    "sha256": "0b668f09ef70b9f63c55270fb23b6292d278359be4554d5d2cfeb33834d14753",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "dfReach1.png",
+    "sha256": "74efeb4a09f7ef97f3bef98c8948e8c185675fd0622654bc83923e284573ee70",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "dfSit0.png",
+    "sha256": "f7731bd24201ff8837a0654b1a5c746f3678eb2685799dc7d55c1268dc0e62eb",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "dfSit1.png",
+    "sha256": "4e2697c38b3a99639a3526466cde23844fc46660e94cc36ee85c4f4985097740",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "getUp1.png",
+    "sha256": "bf39bad350610fe137e25acb75e84c2476eebca04ffb3445c3f83e9e0626080d",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "getUp2.png",
+    "sha256": "35991798f9f13d31534e7865d017e60f2c753815fe21c83e36840d0f4d737f02",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "getUp3.png",
+    "sha256": "01a8c8328821109c55fcde2a4df148c3c0871e5ce6f4b11a3b4e4db63eff5b12",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "guard.png",
+    "sha256": "02ea3e41c8f4027234881f18b6f279238b897415de63345a5aaa05640422707d",
+    "familyPatterns": [
+      "guard*"
+    ],
+    "affectedAnimations": [
+      "guard",
+      "guardEnd",
+      "guardHit",
+      "guardStart"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "guardHit.png",
+    "sha256": "a8dc14efd416c230c32e924b798cb0f860275b5fe3bdcf7a6cd1ed697ef59b04",
+    "familyPatterns": [
+      "guard*"
+    ],
+    "affectedAnimations": [
+      "guardHit"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "hitCrouch.png",
+    "sha256": "a35ffe738477290716a372bc7e8e7b70e83167a7cfe70afe05ba9496c2fffa53",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitCrouch"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "hitL1.png",
+    "sha256": "66d78f6259017c844dcf94d06428991c73ae279b81777a3efc63cefef571ec1a",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowLight",
+      "hitLowMedium"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "hitL2.png",
+    "sha256": "e17cbb3474bed5def290a23490514c1aae0597803cca16060f287b6cbeeee785",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowMedium"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "hitL3.png",
+    "sha256": "32737b6a1a8d94522c2bb87d2fc848362ac9a3974526f4103e8dda214cfde865",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy"
+    ],
+    "review": "native_size_identity_consistent"
+  },
+  {
+    "character": "valdric",
+    "sprite": "jumpTop.png",
+    "sha256": "d1062b550e864b9abc5eaecb4f48dbb1390b49c7453c16b78b95cb11fdbb301a",
+    "familyPatterns": [
+      "jumpTop"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "ajab",
+      "akick",
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "valdric",
+    "sprite": "lowKick.png",
+    "sha256": "bc298477b7de49558e550cdd4e166223a124fc4c81930d55e84ec00a0b8ca70e",
+    "familyPatterns": [
+      "lowKick"
+    ],
+    "affectedAnimations": [
+      "lowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "volta",
+    "sprite": "airGuard.png",
+    "sha256": "1303d212d5390181eacec95c0da6958a2ac0b6195efcd9530df968839731a06e",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuard",
+      "airGuardHit",
+      "airGuardStart"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "airGuardHit.png",
+    "sha256": "9ffc6e2c9f2b9f359cff801c2d40314380c61deb78bad0d4dfe108072a9cad01",
+    "familyPatterns": [
+      "airGuard*"
+    ],
+    "affectedAnimations": [
+      "airGuardHit"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "airLowKick.png",
+    "sha256": "e86df4a0d66715bb90473dba681ccf07537f3748bff7075e737a9e7fcdfa88d4",
+    "familyPatterns": [
+      "airLowKick"
+    ],
+    "affectedAnimations": [
+      "airLowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "volta",
+    "sprite": "crouch.png",
+    "sha256": "73c92b0ee34d105a5093f9e96eab729f4fcd8447b50c0115da9deaea39019b94",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "cjab",
+      "clk",
+      "crouch",
+      "crouchStart",
+      "crouchTurn",
+      "hitCrouch",
+      "lowKick",
+      "sweep"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "crouch0.png",
+    "sha256": "4af033470775247564421e59ef44792e8fbe45302805fc7eb649672a92b16218",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchEnd",
+      "crouchStart",
+      "lowKick"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "crouch1.png",
+    "sha256": "c6c82ff45188a5251cb9780dfe870db68e47a9601113aefa8077a6dbd932f18e",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "clk",
+      "crouch",
+      "lowKick"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "crouchGuard.png",
+    "sha256": "d3666a3086196f3b1c2cb7e00025a1086f022fa6ef3498b9b1931a1cb34f6175",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchGuard",
+      "crouchGuardHit",
+      "crouchGuardStart"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "crouchGuardHit.png",
+    "sha256": "a66624192381ccbd6b8c5c07c84a4e0db5487c5f7052720deb60c6efd2d3bec3",
+    "familyPatterns": [
+      "crouch*"
+    ],
+    "affectedAnimations": [
+      "crouchGuardHit"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "dfKneel0.png",
+    "sha256": "59ffcbb0425942f661a660fd07b61b93723006fcfc146564690b0c5722a238a4",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "dfKneel1.png",
+    "sha256": "0f7719c4187d31f71546ff37352e8576274b9a9365f264a3c6a1bbb617cb1e19",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "dfLie.png",
+    "sha256": "7f915a4c538339eb1ee6a20442060aff48e0e35e1939ad35094a220ef4f2167e",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1",
+      "defeat2",
+      "defeat3",
+      "defeat4"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "dfProp.png",
+    "sha256": "bffc3d72b3090da500ab20c107fcd64f1393956c7e17bde398a1d469bc95dffb",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "dfProp2.png",
+    "sha256": "068c5f1201b32f8f1da77a2a39212d23334a9d1f661515601da3223ae73aa151",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "dfReach0.png",
+    "sha256": "0a43bc88c6c2e158883aba93fd6abe46b89879b6f8c9c47c03d8b91b72a41412",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "dfReach1.png",
+    "sha256": "8e982f5217a75808ba2943bb1148e9819e5d794091230aa25ad496d187b388bd",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "dfSit0.png",
+    "sha256": "700a49e1b0f4dacbad16857406c0e728b5a0f3dfc8114c33b46037b3d37f1b5c",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "dfSit1.png",
+    "sha256": "cd88680a52114349be89f4cc67899ed377fbf85e98e33c539383cc35c7a75825",
+    "familyPatterns": [
+      "df*"
+    ],
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "getUp1.png",
+    "sha256": "43388839d4e437c6cbb2a45f4b0904904715e6933c0e788a6177275af731401d",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "getUp2.png",
+    "sha256": "51a368330474c812e7582490a0fd2aed4f3f4fce2eac0290e95e69186d31e687",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "getUp3.png",
+    "sha256": "4af033470775247564421e59ef44792e8fbe45302805fc7eb649672a92b16218",
+    "familyPatterns": [
+      "getUp*"
+    ],
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "guard.png",
+    "sha256": "08d084be535c99706570b73d73318a90a6f8f8b83798ffbdfe26678f084163af",
+    "familyPatterns": [
+      "guard*"
+    ],
+    "affectedAnimations": [
+      "capacitor",
+      "guard",
+      "guardEnd",
+      "guardHit",
+      "guardStart"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "guardHit.png",
+    "sha256": "c3eb5e211b7949ee3cbf1aef7e052f724b64084b74dee0ccf278f6d8adc54cc2",
+    "familyPatterns": [
+      "guard*"
+    ],
+    "affectedAnimations": [
+      "guardHit"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "hitCrouch.png",
+    "sha256": "7138f3cfa723a1e13f281ab0cdc6ff026d37076bc04e7ba4cf5182e243ac255f",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitCrouch"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "hitL1.png",
+    "sha256": "430606784940efc7bc7b5f979b13afd0008dc0142a730e9b12545bd41351c490",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowLight",
+      "hitLowMedium"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "hitL2.png",
+    "sha256": "7a538ae6dd37569634915af0a4c97617216c15fe16dfff80697eb9eba96f0151",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowMedium"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "hitL3.png",
+    "sha256": "a1ba5a5a183af7d00c3557ab8c18ff4a74099073bc65627118e665aff2406e20",
+    "familyPatterns": [
+      "hit*"
+    ],
+    "affectedAnimations": [
+      "hitLowHeavy"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "jumpDown.png",
+    "sha256": "8d6ff915c0796d277a6b8f03b9272668a03ef1a41ea622a1761b316546a01015",
+    "familyPatterns": [
+      "jumpDown"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "airRecover",
+      "ajab",
+      "akick",
+      "jumpDown",
+      "tesla",
+      "teslaEx"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "jumpTop.png",
+    "sha256": "7face5b0374d823885f9cd22d2e9c38013f46f7eedb24ddc050c8e3231803e4f",
+    "familyPatterns": [
+      "jumpTop"
+    ],
+    "affectedAnimations": [
+      "airLowKick",
+      "ajab",
+      "akick",
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "volta",
+    "sprite": "land.png",
+    "sha256": "c8cf8eec49c25e6014a29a75abb23c24f1a94875529392e952bee48d274db4ab",
+    "familyPatterns": [
+      "land"
+    ],
+    "affectedAnimations": [
+      "land"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  },
+  {
+    "character": "volta",
+    "sprite": "lowKick.png",
+    "sha256": "7d7e360952f5eed32ac009f9ca33701de5607e474372d17dab187d90d7f228d2",
+    "familyPatterns": [
+      "lowKick"
+    ],
+    "affectedAnimations": [
+      "lowKick"
+    ],
+    "review": "native_size_reviewed_identity_retained_style_pending"
+  },
+  {
+    "character": "volta",
+    "sprite": "turn.png",
+    "sha256": "202d554adb03d323c9ad9e7a982a7c464518b217b0edbd2ab8f508871c370027",
+    "familyPatterns": [
+      "turn"
+    ],
+    "affectedAnimations": [
+      "turn"
+    ],
+    "review": "native_size_confirmed_visual_inconsistency_pending_correction"
+  }
+]

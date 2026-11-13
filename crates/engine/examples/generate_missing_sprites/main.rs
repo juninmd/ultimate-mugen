@@ -56,6 +56,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     set_art_res(3.0);
     let dry_run = std::env::args().any(|arg| arg == "--dry-run");
     let attack_only = std::env::args().any(|arg| arg == "--attack-keyframes");
+    let only_character = std::env::args().find_map(|arg| arg.strip_prefix("--character=").map(str::to_string));
     let rebuild_list = std::env::args()
         .find_map(|arg| arg.strip_prefix("--rebuild-list=").map(str::to_string))
         .map(std::fs::read_to_string)
@@ -98,6 +99,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         };
         let Some(id) = char_json.get("id").and_then(Value::as_str).map(str::to_string) else { continue };
+        if only_character.as_deref().is_some_and(|only| only != id) { continue; }
         if !pose_map::safe_name(&id) {
             eprintln!("[{id}] skipped (id is not a plain identifier)");
             continue;

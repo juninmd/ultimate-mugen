@@ -67,7 +67,7 @@
     },
     "14_lie": {
       "axisX": 209.246,
-      "axisY": 400.27,
+      "axisY": 400.0,
       "refHeight": 352.311
     },
     "15_power0": {
@@ -475,6 +475,11 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 362.0
+    },
     "mr0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -586,6 +591,11 @@
       "refHeight": 320.0
     },
     "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "mr1": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0

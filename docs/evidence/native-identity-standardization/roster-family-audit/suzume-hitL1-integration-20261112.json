@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-12",
+  "character": "suzume",
+  "family": "hitL1 / hitLowLight",
+  "status": "integrated_static_review_pass_runtime_pending",
+  "canonicalSha256": "3621301628480a47e63dd77a0084d766f69da01d44bb419a532b73be0f9885be",
+  "beforeSha256": "7781e0c3f7118680b685bde61a8d400c5013c4e9f003b9e33972a1a801bcccee",
+  "activeSha256": "2e20ecdea19768c3f8c83ae9667cbc3717c2bf198b6119ddfbb3e433b4340fd7",
+  "candidateQa": "candidates/suzume-hitL1-pilot/qa-report.json",
+  "candidateSha256": "2e20ecdea19768c3f8c83ae9667cbc3717c2bf198b6119ddfbb3e433b4340fd7",
+  "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+  "weapon": "One canonical kunai in front hand; confirmed by hitLowLight JSON/rig render.",
+  "staticChecks": {
+    "canvas": [
+      400,
+      400
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "bbox": [
+      89,
+      73,
+      306,
+      392
+    ],
+    "axis": [
+      200,
+      392
+    ],
+    "visibleFloorY": 391,
+    "refHeight": 320,
+    "colorsUsed": 46,
+    "maxDeltaE": 0.12204,
+    "gate": 0.13,
+    "offPalettePixels": 0,
+    "partialAlphaPixels": 0
+  },
+  "reviewEvidence": [
+    "candidates/suzume-hitL1-pilot/review/native-review.png",
+    "candidates/suzume-hitL1-pilot/review/nearest-2x-review.png"
+  ],
+  "limitations": [
+    "Pose, canonical identity and weapon details reviewed at native/2x.",
+    "Runtime sequence and collision alignment remain pending; hitL2/hitL3 and other old guard/hit sprites are still open."
+  ]
+}

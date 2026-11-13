@@ -3604,6 +3604,117 @@
    ]
   },
   {
+   "id": "ult_cometstorm",
+   "name": "Supernova Barrage",
+   "input": "~D, DF, F, D, DF, F, x+y",
+   "kind": "super",
+   "anim": "stormSuper",
+   "cost": 3000,
+   "invuln": [
+    1,
+    7
+   ],
+   "fx": "aura",
+   "projectile": [
+    {
+     "at": 4,
+     "anim": "starOrb",
+     "hitAnim": "starHit",
+     "speed": [
+      6,
+      -0.6
+     ],
+     "offset": [
+      50,
+      -80
+     ],
+     "damage": 50,
+     "hits": 4,
+     "removeTime": 70,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "lightning",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "anim": "starOrb",
+     "hitAnim": "starHit",
+     "speed": [
+      6,
+      0
+     ],
+     "offset": [
+      50,
+      -70
+     ],
+     "damage": 50,
+     "hits": 4,
+     "removeTime": 70,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "lightning",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "anim": "starOrb",
+     "hitAnim": "starHit",
+     "speed": [
+      6,
+      0.6
+     ],
+     "offset": [
+      50,
+      -60
+     ],
+     "damage": 50,
+     "hits": 4,
+     "removeTime": 70,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "lightning",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "anim": "starOrb",
+     "hitAnim": "starHit",
+     "speed": [
+      6,
+      1.2
+     ],
+     "offset": [
+      50,
+      -50
+     ],
+     "damage": 50,
+     "hits": 4,
+     "removeTime": 70,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "lightning",
+     "knockback": [
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
    "id": "ex_starburst",
    "name": "Star Burst EX",
    "input": "~D, DF, F, x+y",
@@ -3682,97 +3793,6 @@
     "fallstar"
    ],
    "cost": 500,
-   "fx": "aura"
-  },
-  {
-   "id": "ult_cometstorm",
-   "name": "Supernova Barrage",
-   "input": "~D, DF, F, D, DF, F, x+y",
-   "kind": "super",
-   "anim": "stormSuperUlt",
-   "cost": 3000,
-   "invuln": [
-    1,
-    7
-   ],
-   "projectile": [
-    {
-     "at": 4,
-     "anim": "starOrb",
-     "hitAnim": "starHit",
-     "speed": [
-      6,
-      -0.6
-     ],
-     "offset": [
-      50,
-      -80
-     ],
-     "damage": 43.2,
-     "hits": 5,
-     "level": "heavy",
-     "removeTime": 70,
-     "priority": 6,
-     "element": "lightning"
-    },
-    {
-     "at": 4,
-     "anim": "starOrb",
-     "hitAnim": "starHit",
-     "speed": [
-      6,
-      0
-     ],
-     "offset": [
-      50,
-      -70
-     ],
-     "damage": 43.2,
-     "hits": 5,
-     "level": "heavy",
-     "removeTime": 70,
-     "priority": 6,
-     "element": "lightning"
-    },
-    {
-     "at": 4,
-     "anim": "starOrb",
-     "hitAnim": "starHit",
-     "speed": [
-      6,
-      0.6
-     ],
-     "offset": [
-      50,
-      -60
-     ],
-     "damage": 43.2,
-     "hits": 5,
-     "level": "heavy",
-     "removeTime": 70,
-     "priority": 6,
-     "element": "lightning"
-    },
-    {
-     "at": 4,
-     "anim": "starOrb",
-     "hitAnim": "starHit",
-     "speed": [
-      6,
-      1.2
-     ],
-     "offset": [
-      50,
-      -50
-     ],
-     "damage": 43.2,
-     "hits": 5,
-     "level": "heavy",
-     "removeTime": 70,
-     "priority": 6,
-     "element": "lightning"
-    }
-   ],
    "fx": "aura"
   },
   {

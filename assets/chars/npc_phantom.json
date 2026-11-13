@@ -3117,7 +3117,7 @@
     {
      "at": 1,
      "vel": [
-      5.0,
+      5,
       0
      ]
     }
@@ -3593,6 +3593,139 @@
    ]
   },
   {
+   "id": "ult_shadowslash",
+   "name": "Hundred Gale Phantom",
+   "input": "~D, DF, F, D, DF, F, x+y",
+   "kind": "super",
+   "anim": "shadowslash",
+   "cost": 3000,
+   "invuln": [
+    1,
+    6
+   ],
+   "teleport": 2,
+   "fx": "aura",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 48,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "damage": 48,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "damage": 48,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 5,
+     "damage": 48,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 6,
+     "damage": 48,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 9,
+     "damage": 180,
+     "level": "heavy",
+     "launch": true,
+     "knockback": [
+      -3,
+      -8
+     ]
+    }
+   ],
+   "projectile": [
+    {
+     "at": 2,
+     "anim": "tempestFx",
+     "hitAnim": "windHit",
+     "speed": [
+      8,
+      1.2
+     ],
+     "offset": [
+      36,
+      -66
+     ],
+     "damage": 44,
+     "hits": 3,
+     "removeTime": 60,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "wind"
+    },
+    {
+     "at": 4,
+     "anim": "tempestFx",
+     "hitAnim": "windHit",
+     "speed": [
+      8,
+      2
+     ],
+     "offset": [
+      36,
+      -56
+     ],
+     "damage": 44,
+     "hits": 3,
+     "removeTime": 60,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "wind"
+    },
+    {
+     "at": 6,
+     "anim": "tempestFx",
+     "hitAnim": "windHit",
+     "speed": [
+      8,
+      2.6
+     ],
+     "offset": [
+      36,
+      -46
+     ],
+     "damage": 44,
+     "hits": 3,
+     "removeTime": 60,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "wind"
+    }
+   ]
+  },
+  {
    "id": "ex_chakram",
    "name": "Chakram EX",
    "input": "~D, DF, F, x+y",
@@ -3658,67 +3791,6 @@
     }
    ],
    "cost": 500,
-   "fx": "aura"
-  },
-  {
-   "id": "ult_shadowslash",
-   "name": "Hundred Gale Phantom",
-   "input": "~D, DF, F, D, DF, F, x+y",
-   "kind": "super",
-   "anim": "shadowslashUlt",
-   "cost": 3000,
-   "invuln": [
-    1,
-    6
-   ],
-   "teleport": 2,
-   "hits": [
-    {
-     "at": 2,
-     "damage": 55.2,
-     "level": "light"
-    },
-    {
-     "at": 3,
-     "damage": 55.2,
-     "level": "light"
-    },
-    {
-     "at": 4,
-     "damage": 55.2,
-     "level": "light"
-    },
-    {
-     "at": 5,
-     "damage": 55.2,
-     "level": "light"
-    },
-    {
-     "at": 6,
-     "damage": 55.2,
-     "level": "light"
-    },
-    {
-     "at": 7,
-     "damage": 55.2,
-     "level": "light"
-    },
-    {
-     "at": 8,
-     "damage": 55.2,
-     "level": "light"
-    },
-    {
-     "at": 9,
-     "damage": 72,
-     "level": "heavy",
-     "launch": true,
-     "knockback": [
-      -3,
-      -8
-     ]
-    }
-   ],
    "fx": "aura"
   },
   {

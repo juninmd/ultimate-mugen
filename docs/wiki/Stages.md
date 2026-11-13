@@ -138,6 +138,8 @@ The twenty-one native arenas use embedded full-color PNG artwork in `assets/stag
 
 `StageArt::Illustrated` draws the background with nearest-neighbor filtering, aligns the fighting floor at 85% of the image height, and clamps horizontal camera movement to the image edges. Team zoom retains the native ground proportion. Fighter shadows, reflections and combat effects remain active; the old procedural prop animations are exclusive to procedural artwork.
 
+The Colossus of Rhodes also has an eight-frame harbor-wave loop in `assets/stages/animation/colossus_rhodes/` (`00.png` to `07.png`). Frames are 1672×941 and advance every eight simulation ticks. Native builds embed them; the web build fetches them only when this stage is prepared. Add future full-scene loops under `assets/stages/animation/<stage_id>/` and register their frames in `src/stages/looping.rs`.
+
 ### Living layers
 
 Every illustrated stage also carries an **ambience profile** (`src/stages/ambience.rs`, data in `src/stages/ambience/profiles/`): translucent mist banks that drift sideways, particles (petals, embers, fireflies, dust, leaves, sparks, birds), additive light pools anchored to lanterns, windows, fire and sun, and slanted god rays. They are drawn every frame with vertex-coloured polygons over the flat artwork (`front: true` layers pass in front of the fighters), react to camera parallax, use `Match::game_time` for motion and scale their particle count with the effects setting. A unit test caps every profile at 420 polygons per frame and checks every value range. To animate a new illustrated stage add a `Profile` for its id in `profiles/classic.rs` or `profiles/wonders.rs`; unknown ids fall back to a few drifting dust motes.

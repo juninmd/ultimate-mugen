@@ -3693,6 +3693,125 @@
    ]
   },
   {
+   "id": "ult_avalanche",
+   "name": "Mountain Spirit Ultimate",
+   "input": "~D, DF, F, D, DF, F, x+y",
+   "kind": "super",
+   "anim": "avalanche",
+   "cost": 3000,
+   "invuln": [
+    1,
+    7
+   ],
+   "fx": "aura",
+   "moves": [
+    {
+     "at": 2,
+     "vel": [
+      1,
+      0
+     ]
+    },
+    {
+     "at": 13,
+     "vel": [
+      2,
+      0
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 4,
+     "damage": 42,
+     "level": "medium",
+     "guard": "low",
+     "element": "earth",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 6,
+     "damage": 42,
+     "level": "medium",
+     "guard": "low",
+     "element": "earth",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 8,
+     "damage": 42,
+     "level": "medium",
+     "guard": "low",
+     "element": "earth",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 10,
+     "damage": 42,
+     "level": "medium",
+     "guard": "low",
+     "element": "earth",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 12,
+     "damage": 42,
+     "level": "medium",
+     "guard": "low",
+     "element": "earth",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 14,
+     "damage": 120,
+     "level": "heavy",
+     "guard": "low",
+     "element": "earth",
+     "launch": true,
+     "knockback": [
+      -3,
+      -8
+     ],
+     "shake": 10
+    }
+   ],
+   "projectile": {
+    "at": 6,
+    "anim": "sunbreakBeam",
+    "hitAnim": "sunbreakHit",
+    "speed": [
+     0,
+     0
+    ],
+    "offset": [
+     44,
+     -68
+    ],
+    "damage": 54,
+    "hits": 7,
+    "removeTime": 44,
+    "level": "heavy",
+    "launch": true,
+    "priority": 6,
+    "element": "lightning"
+   }
+  },
+  {
    "id": "ex_ridgeblast",
    "name": "Ridge Blast EX",
    "input": "~D, DF, F, x+y",
@@ -3764,85 +3883,6 @@
     }
    ],
    "cost": 500,
-   "fx": "aura"
-  },
-  {
-   "id": "ult_avalanche",
-   "name": "Mountain Spirit Ultimate",
-   "input": "~D, DF, F, D, DF, F, x+y",
-   "kind": "super",
-   "anim": "avalancheUlt",
-   "cost": 3000,
-   "invuln": [
-    1,
-    7
-   ],
-   "moves": [
-    {
-     "at": 2,
-     "vel": [
-      1,
-      0
-     ]
-    },
-    {
-     "at": 13,
-     "vel": [
-      2,
-      0
-     ]
-    }
-   ],
-   "hits": [
-    {
-     "at": 4,
-     "damage": 48,
-     "level": "medium",
-     "guard": "low",
-     "element": "earth"
-    },
-    {
-     "at": 6,
-     "damage": 48,
-     "level": "medium",
-     "guard": "low",
-     "element": "earth"
-    },
-    {
-     "at": 8,
-     "damage": 48,
-     "level": "medium",
-     "guard": "low",
-     "element": "earth"
-    },
-    {
-     "at": 10,
-     "damage": 48,
-     "level": "medium",
-     "guard": "low",
-     "element": "earth"
-    },
-    {
-     "at": 12,
-     "damage": 48,
-     "level": "medium",
-     "guard": "low",
-     "element": "earth"
-    },
-    {
-     "at": 14,
-     "damage": 115.2,
-     "level": "heavy",
-     "guard": "low",
-     "launch": true,
-     "knockback": [
-      -3,
-      -8
-     ],
-     "shake": 10,
-     "element": "earth"
-    }
-   ],
    "fx": "aura"
   },
   {

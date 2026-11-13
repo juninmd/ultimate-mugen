@@ -3749,6 +3749,128 @@
    ]
   },
   {
+   "id": "ult_veil",
+   "name": "Lótus do Julgamento: Mil Sombras",
+   "input": "~D, DF, F, D, DF, F, x+y",
+   "kind": "super",
+   "anim": "veil",
+   "cost": 3000,
+   "invuln": [
+    1,
+    7
+   ],
+   "teleport": 2,
+   "fx": "aura",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 5,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 6,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 7,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 8,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 9,
+     "damage": 120,
+     "level": "heavy",
+     "launch": true,
+     "knockback": [
+      -6,
+      -6
+     ]
+    }
+   ],
+   "projectile": [
+    {
+     "at": 4,
+     "anim": "stormKunai",
+     "hitAnim": "kunaiHit",
+     "speed": [
+      8,
+      1.8
+     ],
+     "offset": [
+      36,
+      -60
+     ],
+     "damage": 44,
+     "hits": 3,
+     "removeTime": 60,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "wind"
+    },
+    {
+     "at": 6,
+     "anim": "stormKunai",
+     "hitAnim": "kunaiHit",
+     "speed": [
+      8,
+      2.4
+     ],
+     "offset": [
+      36,
+      -50
+     ],
+     "damage": 44,
+     "hits": 3,
+     "removeTime": 60,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "wind"
+    }
+   ]
+  },
+  {
    "id": "ex_volley",
    "name": "Kunai Volley EX",
    "input": "~D, DF, F, x+y",

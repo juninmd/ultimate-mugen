@@ -66,7 +66,7 @@ fn every_native_attack_has_three_distinct_rendered_images() {
             }
         }
     }
-    assert_eq!(attacks, 681, "native attack inventory changed");
+    assert_eq!(attacks, 688, "native attack inventory changed");
     assert!(
         failures.is_empty(),
         "attacks with fewer than 3 rendered images: {failures:#?}"
@@ -203,5 +203,5 @@ fn every_native_combat_sprite_is_crisp_pixel_art() {
             checked += 1;
         }
     }
-    assert_eq!(checked, 2175, "native combat sprite inventory changed");
+    assert_eq!(checked, 2155, "native combat sprite inventory changed");
 }

@@ -159,6 +159,8 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 
 **Finisher.** A move with `"kind": "finisher"` (use `throw` or `hits` for the effect) is only available after a KO (`RoundState = 3` and `WinKO`). When the final round ends by KO and the winner has a finisher, the round waits up to 6 seconds on "FINISH HIM" for the winner to perform it; performing it (or the timeout) ends the wait. Rosters with no finisher are unaffected.
 
+**Ultimate.** A move whose `id` starts with `ult_` is the fighter's ultimate, and every native fighter declares one (the command is `~D, DF, F, D, DF, F, x+y`). The compiler spends the whole meter on it: `cost` defaults to `3000` (the three bars drawn by the HUD), the move gets a 70 % damage bonus where a normal `super` gets 30 %, and its super freeze lasts 75 ticks instead of 55. `cargo test --release -p ume-engine --test native_ultimates` fails when a fighter has no ultimate, when the cost is not three bars, when the ultimate does not start from its command or drains the meter, or when the measured damage is below 380 or not above every one of the fighter's supers.
+
 ### Combat traits
 
 - **Automatic gatling.** A move without `cancels` follows the genre rules: a normal cancels into any *stronger* normal (`light` < `medium` < `heavy` by the strongest hit level, ties by declaration order, so strings can never loop), ground normals link into crouching ones, air normals chain with air normals, and every normal cancels into every special and super on contact. Specials cancel into other specials only through explicit `cancels`; supers cancel out of any move.

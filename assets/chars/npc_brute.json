@@ -3411,6 +3411,31 @@
    }
   },
   {
+   "id": "ult_bulldozer",
+   "name": "Bulldozer Apocalypse",
+   "input": "~D, DF, F, D, DF, F, x+y",
+   "kind": "super",
+   "anim": "titanSuplex",
+   "cost": 3000,
+   "invuln": [
+    1,
+    7
+   ],
+   "fx": "aura",
+   "throw": {
+    "damage": 340,
+    "at": 2,
+    "bind": [
+     34,
+     0
+    ],
+    "launch": [
+     -4,
+     -6
+    ]
+   }
+  },
+  {
    "id": "ex_quake",
    "name": "Quake EX",
    "input": "~D, DF, F, x+y",
@@ -3494,31 +3519,6 @@
     "threshold": 80
    },
    "cost": 500,
-   "fx": "aura"
-  },
-  {
-   "id": "ult_titansuplex",
-   "name": "Bulldozer Apocalypse",
-   "input": "~D, DF, F, D, DF, F, x+y",
-   "kind": "super",
-   "anim": "titanSuplexUlt",
-   "cost": 3000,
-   "throw": {
-    "damage": 300,
-    "at": 2,
-    "bind": [
-     34,
-     0
-    ],
-    "launch": [
-     -4,
-     -6
-    ]
-   },
-   "invuln": [
-    1,
-    7
-   ],
    "fx": "aura"
   },
   {

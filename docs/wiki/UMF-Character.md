@@ -232,7 +232,7 @@ Every `special` and `super` with `when` unset or `"stand"` also gets an air vers
 
 ## Pixel-art sprites (optional)
 
-If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files instead of the rig. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size for every file of one fighter. A pose without a PNG falls back to `01_idle.png`; a fighter without the folder keeps its rig. After extending the rig, run `cargo run --release -p ume-engine --example generate_missing_sprites` to render a dedicated PNG for every pose the loader would otherwise take from the idle canvas.
+If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files instead of the rig. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size (400×400 RGBA) for every file of one fighter. Generate missing combat PNGs using `generate_image` with a validated canonical pixel-art anchor of that fighter (never use the deprecated procedural vector rig).
 
 | File | Poses that use it |
 |---|---|

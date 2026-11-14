@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#0b0716" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Ultimate MUGEN</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0716; touch-action: none; }
+    canvas { margin: 0; padding: 0; width: 100%; height: 100%; display: block; position: absolute; outline: none; }
+    #imp { position: fixed; display: none; z-index: 5; opacity: 0; cursor: pointer; overflow: hidden; font-size: 0; }
+    #imp input { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
+    #boot { position: fixed; inset: 0; z-index: 8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #0b0716; color: #e9e4ff; font: 600 15px system-ui, sans-serif; transition: opacity .25s; }
+    #boot.done { opacity: 0; pointer-events: none; }
+    #boot b { font: 800 28px system-ui, sans-serif; letter-spacing: .08em; color: #22e8ff; }
+    #bar { width: min(320px, 70vw); height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
+    #bar i { display: block; height: 100%; width: 0; background: #22e8ff; transition: width .15s; }
+    #rot { display: none; }
+    @media (orientation: portrait) and (max-width: 700px) { #rot { display: block; position: fixed; bottom: 0; left: 0; right: 0; padding: 8px; text-align: center; background: #ff4d6d; color: #fff; font: 600 14px system-ui; z-index: 9; } }
+  </style>
+</head>
+<body>
+  <canvas id="glcanvas" tabindex="1"></canvas>
+  <label id="imp" aria-label="Import M.U.G.E.N">Import M.U.G.E.N<input id="ume-file" type="file" accept=".zip" multiple /></label>
+  <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar"><i></i></div><span id="bootmsg">Downloading the game…</span></div>
+  <div id="rot">Rotate your device to play in landscape &rarr;</div>
+  <script src="gamepad.js"></script>
+  <script src="assets.js"></script>
+  <script src="market.js"></script>
+  <script type="module">
+    import init, * as ume from './ultimate-mugen.js?v=05e18e9-1794691718';
+    const TEXTS = {
+      pt: { download: 'Baixando o jogo…', fail: 'Falha ao carregar', lost: 'Contexto gráfico perdido, recarregando…', rotate: 'Gire o aparelho para jogar na horizontal →', import: 'Importar M.U.G.E.N' },
+      es: { download: 'Descargando el juego…', fail: 'Error al cargar', lost: 'Contexto gráfico perdido, recargando…', rotate: 'Gira el dispositivo para jugar en horizontal →', import: 'Importar M.U.G.E.N' },
+      en: { download: 'Downloading the game…', fail: 'Failed to load', lost: 'Graphics context lost, reloading…', rotate: 'Rotate your device to play in landscape →', import: 'Import M.U.G.E.N' },
+    };
+    const tx = TEXTS[(navigator.language || 'en').slice(0, 2)] || TEXTS.en;
+    document.documentElement.lang = (navigator.language || 'en');
+    document.getElementById('bootmsg').textContent = tx.download;
+    document.getElementById('rot').textContent = tx.rotate;
+    document.getElementById('imp').setAttribute('aria-label', tx.import);
+    const boot = document.getElementById('boot'), bar = document.querySelector('#bar i'), msg = document.getElementById('bootmsg');
+    const hide = () => { boot.classList.add('done'); setTimeout(() => boot.remove(), 400); };
+    async function load() {
+      const url = new URL('./ultimate-mugen_bg.wasm?v=05e18e9-1794691718', import.meta.url);
+      const res = await fetch(url);
+      const total = +res.headers.get('content-length') || 0;
+      let got = 0;
+      const body = res.body ? res.body.pipeThrough(new TransformStream({ transform(chunk, ctl) { got += chunk.length; if (total) bar.style.width = Math.min(95, got / total * 100) + '%'; ctl.enqueue(chunk); } })) : res.body;
+      msg.textContent = tx.download;
+      return new Response(body, { headers: { 'content-type': 'application/wasm' } });
+    }
+    try {
+      await init({ module_or_path: await load().catch(() => new URL('./ultimate-mugen_bg.wasm?v=05e18e9-1794691718', import.meta.url)) });
+    } catch (e) { msg.textContent = tx.fail + ': ' + (e && e.message || e); throw e; }
+    bar.style.width = '100%';
+    window.umeStartImports(ume);
+    window.umeStartMarket(ume);
+    setTimeout(hide, 600);
+    const cv = document.getElementById('glcanvas');
+    cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); msg.textContent = tx.lost; boot.classList.remove('done'); document.body.appendChild(boot); setTimeout(() => location.reload(), 800); });
+  </script>
+  <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>

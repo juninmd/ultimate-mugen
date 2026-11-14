@@ -23,6 +23,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
 | [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
 | [Rush Cancel](Rush-Cancel.md) | Players & Creators | Spend meter to cancel a connected move, Overdrive and the presentation |
+| [Combo Tiers](Combo-Tiers.md) | Players & Creators | Combo badges, energy notch, air dashes and bounces |
 | [Bleach-inspired kits](Bleach-Inspired-Kits.md) | Players | Abilities inspired by Bleach in three native fighters |
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
 | [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |

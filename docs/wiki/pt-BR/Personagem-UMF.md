@@ -63,6 +63,7 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `jump` | `[-8.4, -2.5, 0, 2.6]` | Velocidade vertical, horizontal para trás, neutra e para frente |
 | `gravity` | — | Aceleração vertical |
 | `airJumps` | — | Pulos extras no ar |
+| `airDashes` | 1 | Air dashes por pulo (`movement.airdash.num`) |
 | `height` | `100` | Altura do corpo |
 | `width` | `[16, 15]` | Largura frente / trás para empurrão |
 

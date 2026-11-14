@@ -117,7 +117,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     if let Some(r) = s.run { set("velocity.run.fwd.x", r[0]); set("velocity.run.back.x", -r[1].abs()); }
     if let Some(j) = s.jump { set("velocity.jump.y", j[0]); set("velocity.jump.back.x", j[1]); set("velocity.jump.neu.x", j[2]); set("velocity.jump.fwd.x", j[3]); set("velocity.airjump.y", j[0] * 0.9); }
     if let Some(v) = s.gravity { set("movement.yaccel", v); }
-    if let Some(v) = s.air_jumps { set("movement.airjump.num", v); }
+    if let Some(v) = s.air_jumps { set("movement.airjump.num", v); } if let Some(v) = s.air_dashes { set("movement.airdash.num", v); }
     if let Some(v) = s.height { set("size.height", v); }
     if let Some(w) = s.width { set("size.ground.front", w[0]); set("size.ground.back", w[1]); }
 

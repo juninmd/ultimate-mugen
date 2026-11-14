@@ -64,6 +64,7 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | `jump` | `[-8.4, -2.5, 0, 2.6]` | Vertical speed, horizontal back, neutral and forward |
 | `gravity` | — | Vertical acceleration |
 | `airJumps` | — | Extra air jumps |
+| `airDashes` | 1 | Air dashes per jump (`movement.airdash.num`) |
 | `height` | `100` | Body height |
 | `width` | `[16, 15]` | Front / back width for pushing |
 

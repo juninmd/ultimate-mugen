@@ -101,7 +101,9 @@
 - GitHub marketplace: logic in `crates/market` (listing, safety limits, bundles, downloads), app glue in `src/market.rs`, screen in `src/app/market.rs`, web storage in `web/market.js`. Docs: `docs/wiki/Marketplace.md`.
 
 ## Native Pixel-Art Sprite Standard
-- Before generating or replacing a native combat sprite, inspect that fighter's existing pack and select its approved canonical pose for identity. Use the target's old image only to guide pose when it conflicts with the design; Garan's identity anchor is `04_special.png`. Never let another fighter's image define character design.
+- **NEVER use the procedural vector rig (`frame_raster` / `pixelize::apply`) or any deprecated vector-rig PNG as a sprite or reference**: the vector-rig generator (`generate_missing_sprites`) has been removed because it produced the deprecated flat/cartoon appearance instead of the repository's true arcade pixel-art character designs. Always generate native character PNGs with `generate_image` using ONLY a validated canonical pixel-art sprite as explicit visual reference.
+- **Validate every reference image BEFORE generating**: never pass a deprecated vector-rig sprite as Reference 1 or Reference 2 (even as a pose guide, passing a deprecated rig image contaminates the generated character's head/body). Use `scripts/validate-sprite-ref.py` (or inspect visually) to verify the reference is true arcade pixel art before calling `generate_image`.
+- Before generating or replacing a native combat sprite, inspect that fighter's existing pack and select its approved canonical pose for identity. Garan's identity anchor is `04_special.png`. Never let another fighter's image define character design.
 - Native combat PNGs use a transparent 400×400 RGBA canvas and retain the pack's scale, floor line, and `meta.json` axes/refHeight. Keep portraits at their existing high-resolution UI-art standard; they do not use the combat canvas.
 - Generate one pose at a time, preserve an explicit mapping from each result to fighter and filename, and review a pilot before generating a sequence. Large concurrent batches can lose result-to-file mapping when generation is interrupted.
 - Require crisp pixel clusters and hard edges. Do not accept antialiasing, blur, gradients, glow, aura, particles, scenery, text, added shadows, or invented details. Effects are permitted only when present in the target pose and explicitly requested.
@@ -131,7 +133,6 @@
 - Hover scan (fighters stuck off the floor): `cargo run --release -p ume-engine --example hover_check -- <char_dir>` (`TRACE=1` for transitions)
 - Missing/blank sprite audit: `cargo run --release -p ume-engine --example sprite_audit -- <char_dir>`
 - Strict native sprite coverage: `cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> [--require-complete]`
-- Render dedicated PNGs for every native pose (inline poses, df* defeats, idle-reuse fixes; scans assets/chars + umf dirs): `cargo run --release -p ume-engine --example generate_missing_sprites [--dry-run]`
 - Native PNG inventory (dimensions, alpha edges, geometry metadata): `cargo run --release -p ume-devtools --bin ume-tools -- audit-sprites --out <report.json>`
 - Sprite payload per fighter (sizes the atlas warm-up budget): `cargo run --release -p ume-engine --example sprite_mem -- <char_dir>...`
 - Native roster lab (every attack state of every UMF fighter must connect; prints damage and reach, `UME_LAB_ONLY=id,id`, `UME_CHARS_DIR=<dir>`): `cargo test --release -p ume-engine --test native_roster_lab -- --nocapture`

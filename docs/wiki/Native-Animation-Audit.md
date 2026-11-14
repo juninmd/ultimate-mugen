@@ -11,13 +11,7 @@ design; both are approved resolutions, not gaps.
 - Every string pose referenced by an animation now has a dedicated PNG in `assets/chars/sprites/<id>/`,
   including the guard, crouch, jump, flip, turn, land, win, intro, taunt, `df*` defeat set, and the
   previously idle-reusing low-hit poses. Inline pose objects have their `inline_<hash>` frame rendered once.
-- The regeneration tool is `cargo run --release -p ume-engine --example generate_missing_sprites`. It merges
-  `crates/engine/src/native/defaults.json` poses with each character's own table, renders missing poses
-  through the rig, and writes 400x400 frames with axis (200, 392) and `refHeight` 320 metadata, matching the
-  existing convention. It scans `assets/chars`, the `umf/` and `mugen/umf` scan folders and `UME_UMF_DIR`, so
-  a newly created UMF character gets its sprite set with one command. Only plain-identifier ids and frame
-  names are accepted, and the pass enforces per-character source-size and target-count caps, because the
-  scanned UMF JSON is importable user content.
+- Dedicated PNGs must be generated in arcade pixel art via `generate_image` using a validated canonical anchor of the fighter (the deprecated vector-rig `generate_missing_sprites` tool has been removed). Write 400×400 RGBA frames with axis (200, 392) and `refHeight` 320 metadata, matching the existing convention.
 - Verification: `cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> --require-complete`
   must pass for every fighter, and `cargo run --release -p ume-devtools --bin ume-tools -- audit-sprites --out <report.json>` must stay clean
   on geometry and alpha edges. `cargo run --release -p ume-devtools --bin ume-tools -- audit-moves` is the static roster audit (inputs, cancels, throws, hit boxes).

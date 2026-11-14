@@ -134,9 +134,3 @@ Retratos como `portrait.png` podem usar uma pixel art de alta resolução, com c
 - Mantenha poses distintas ao longo de sequências de ataque: quadros de carga, impacto e recuperação não devem repetir o mesmo desenho só para preencher nomes. Se a geração produzir uma pose inadequada, gere outra ou use a pose intacta mais próxima apenas quando a silhueta e a função continuarem legíveis.
 - Em spritesheets multi-quadro, não confie apenas na contagem ou na grade regular: compare pose, silhueta, roupa e acessórios de cada quadro com o `walk0` e a referência de estilo. Um modelo pode repetir quadros não adjacentes (por exemplo, 1≈3 e 2≈4) mesmo quando todas as células estão presentes. Rejeite repetições não intencionais ou desvios de identidade; regenere o quadro defeituoso individualmente e componha a folha novamente.
 
-## 4. Gerador Automático de Sprites Faltantes
-Para gerar imagens PNG dedicadas a partir do modelo vetorial:
-```bash
-cargo run --release -p ume-engine --example generate_missing_sprites
-```
-O comando analisa `assets/chars/*.json` e renderiza os quadros transparentes pré-alinhados no pivô dos pés.

@@ -300,21 +300,6 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "inline_3b6fc26d0a07335a": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_405f89d1d05e2467": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_6b0dc023ff7d88a8": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
     "inline_8a0d6a36167cc073": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -361,11 +346,6 @@
       "refHeight": 320.0
     },
     "jab1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "jab2": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -516,6 +496,11 @@
       "refHeight": 320.0
     },
     "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab2": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0

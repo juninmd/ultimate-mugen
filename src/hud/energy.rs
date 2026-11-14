@@ -114,6 +114,8 @@ impl EnergyFx {
                 Color::new(0.0, 0.0, 0.03, 0.82),
                 Color::new(0.03, 0.04, 0.09, 0.6),
             );
+            let mid_x = cx + CELL_W * 0.5;
+            poly::solid(&sp(poly::slanted(mid_x - 0.4, c.y, 0.8, h, 1.0)), Color::new(1.0, 1.0, 1.0, 0.22));
             if fr > 0.01 {
                 let fw = CELL_W * fr;
                 let fx = if side == 0 { cx } else { cx + CELL_W - fw };

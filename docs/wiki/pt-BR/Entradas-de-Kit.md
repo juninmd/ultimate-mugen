@@ -24,3 +24,9 @@ Um golpe só começa a partir de outro declarando `rekka` no JSON do personagem:
 `after` lista os ids dos golpes de origem, `window` é o intervalo de tempo de estado (ticks dentro do golpe de origem, a pausa de acerto não conta) em que o comando é aceito, e `contact: true` exige também que a origem acerte ou seja defendida. Sem isso a continuação funciona também no erro. A continuação nunca começa do neutro, então pode reaproveitar um botão simples já usado por um normal. Código: `crates/engine/src/native/rekka.rs`.
 
 Em uso: Lian (Flowing Silk Kicks, depois `y`), Kaito (Storm Rush, depois `x`) e Jin (Gust Dash, depois `b`).
+
+## Requisitos de distância e estado
+
+`requires` também aceita `distance` (pixels entre os corpos, `min` e/ou `max`) e `enemyState` (`air`, `ground`, `crouch`, `down`, `hit` ou `attack`). Dois golpes podem dividir o mesmo comando e a engine escolhe pela situação, desde que as condições não se sobreponham. A variante deve vir antes do golpe que ela substitui na lista `moves`, porque vale o primeiro que servir.
+
+Em uso: Daichi (Landslide Point Blank a até 55 pixels, senão Landslide Heel) e Bruno (Bull Catch contra inimigo no ar, senão Bulldozer Rush).

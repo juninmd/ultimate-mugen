@@ -1,4 +1,4 @@
-use super::types::{LifeRange, NativeMove};
+use super::types::{LifeRange, MoveRequirements, NativeMove};
 
 fn range_lines(owner: &str, range: &LifeRange) -> String {
     let mut out = String::new();
@@ -19,7 +19,26 @@ pub(super) fn trigger_lines(m: &NativeMove) -> String {
     let Some(req) = &m.requires else { return finisher_lines(m) };
     let own = req.life.as_ref().map(|r| range_lines("", r)).unwrap_or_default();
     let enemy = req.enemy_life.as_ref().map(|r| range_lines("enemy,", r)).unwrap_or_default();
-    own + &enemy + &finisher_lines(m)
+    own + &enemy + &distance_lines(req) + &finisher_lines(m)
+}
+
+fn distance_lines(req: &MoveRequirements) -> String {
+    let mut out = String::new();
+    if let Some(d) = &req.distance {
+        if let Some(min) = d.min { out += &format!("triggerall = p2bodydist x >= {min}\n"); }
+        if let Some(max) = d.max { out += &format!("triggerall = p2bodydist x <= {max}\n"); }
+    }
+    let cond = match req.enemy_state.as_deref() {
+        Some("air") => "enemy,statetype = A",
+        Some("ground") => "enemy,statetype != A",
+        Some("crouch") => "enemy,statetype = C",
+        Some("down") => "enemy,statetype = L",
+        Some("hit") => "enemy,movetype = H",
+        Some("attack") => "enemy,movetype = A",
+        _ => "",
+    };
+    if !cond.is_empty() { out += &format!("triggerall = {cond}\n"); }
+    out
 }
 
 #[cfg(test)]
@@ -39,6 +58,16 @@ mod tests {
         assert!(lines.contains("triggerall = life <= lifemax * 0.5\n"));
         assert!(lines.contains("triggerall = enemy,life >= enemy,lifemax * 0.1\n"));
         assert!(lines.contains("triggerall = enemy,life <= enemy,lifemax * 0.5\n"));
+    }
+
+    #[test]
+    fn distance_and_enemy_state_become_triggers() {
+        let m = move_with(serde_json::json!({ "distance": { "max": 55 }, "enemyState": "air" }));
+        let lines = trigger_lines(&m);
+        assert!(lines.contains("triggerall = p2bodydist x <= 55\n"));
+        assert!(!lines.contains(">="));
+        assert!(lines.contains("triggerall = enemy,statetype = A\n"));
+        assert!(trigger_lines(&move_with(serde_json::json!({ "enemyState": "nonsense" }))).is_empty());
     }
 
     #[test]

@@ -980,7 +980,7 @@ impl Hud {
                     if rt < t0 || rt > t1 || matches!(f.def.source, ume_engine::chardef::Source::Mugen) {
                         continue;
                     }
-                    let txt = face_off_line(f, side == 1);
+                    let txt = face_off_line(f, lead[1 - side], side == 1);
                     let shown: String = txt.chars().take(((rt - t0) * 1.5) as usize + 1).collect();
                     let a = ((rt - t0) / 6.0)
                         .min(1.0)
@@ -1226,7 +1226,10 @@ impl Hud {
 }
 
 /// Round-start line of a fighter: its own `intro` (first speaker) / `taunt` (answer), or a generic one.
-fn face_off_line(f: &Fighter, answer: bool) -> String {
+fn face_off_line(f: &Fighter, other: &Fighter, answer: bool) -> String {
+    if let Some(line) = f.base_def.rivals.line_against(&other.base_def.rivals.id, answer) {
+        return line.to_string();
+    }
     let own = if answer { &f.def.taunt } else { &f.def.intro };
     if !own.is_empty() {
         return own.clone();

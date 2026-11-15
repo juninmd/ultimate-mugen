@@ -1158,7 +1158,7 @@ impl Match {
             fa.move_contact = 1;
             if !fa.targets.iter().any(|t| t.0 == did) { fa.targets.push((did, hd.id)); }
         }
-        let attack_mul = self.idx(aroot).map(|r| self.fighters[r].effective_attack()).unwrap_or(1.0);
+        let attack_mul = self.idx(aroot).map(|r| self.fighters[r].effective_attack() * self.fighters[r].base_def.rivals.attack_against(&self.fighters[d].base_def.rivals.id)).unwrap_or(1.0);
         {
             let fd = &mut self.fighters[d];
             fd.last_hit_by = Some(aid);

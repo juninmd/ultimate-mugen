@@ -146,6 +146,7 @@ pub struct NativeChar {
     pub color: String,
     #[serde(default)] pub stats: NativeStats,
     #[serde(default)] pub passives: Option<super::passive_spec::PassiveSpec>,
+    #[serde(default)] pub rivals: BTreeMap<String, crate::rivals::RivalLines>,
     #[serde(default)] pub abilities: Option<super::ability_spec::AbilitySpec>,
     pub art: NativeArt,
     pub anims: indexmap_like::OrderedMap<NativeAnim>,

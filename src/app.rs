@@ -33,7 +33,7 @@ mod update_banner;
 mod results_stats;
 mod select_category;
 mod select_grid;
-mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips;
+mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile;
 mod versus; mod versus_compare;
 mod menu_view; mod menu_icons;
 mod menu_focus;
@@ -1461,16 +1461,7 @@ impl App {
         }
         self.ui
             .rect(0.0, 652.0, VW, 1.5, alpha(accents[picking.min(1)], 0.7));
-        let desc = &self.reg.chars[cur[picking]].description;
-        self.ui.text(
-            desc,
-            VW / 2.0,
-            680.0,
-            16.0,
-            Color::new(0.85, 0.82, 0.94, 0.7),
-            Align::Center,
-            false,
-        );
+        self.draw_select_profile(cur[picking], accents[picking.min(1)]);
         let flabel = self.category_label();
         self.sel_buf.clear();
         let _ = write!(
@@ -1483,8 +1474,8 @@ impl App {
         self.ui.text(
             &self.sel_buf,
             VW / 2.0,
-            706.0,
-            12.0,
+            713.0,
+            11.0,
             Color::new(0.64, 0.61, 0.75, 0.6),
             Align::Center,
             false,

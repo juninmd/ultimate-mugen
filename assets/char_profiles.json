@@ -1,0 +1,170 @@
+{
+  "kaito": {
+    "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+    "bio": {
+      "en": "Raised by a hermit master on the stormy cliffs of Izu, Kaito walks wherever the wind blows. When the Scarlet Eclipse tore the sky, he came down the mountain to protect travelers from its shadows.",
+      "pt": "Criado por um mestre eremita nos penhascos tempestuosos de Izu, Kaito anda para onde o vento sopra. Quando o Eclipse Escarlate rasgou o céu, desceu a montanha para proteger os viajantes das sombras.",
+      "es": "Criado por un maestro ermitaño en los acantilados tormentosos de Izu, Kaito camina hacia donde sopla el viento. Cuando el Eclipse Escarlata rasgó el cielo, bajó de la montaña para proteger a los viajeros."
+    }
+  },
+  "shion": {
+    "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+    "bio": {
+      "en": "Once the champion of the Kurogane clan, Shion was banished for refusing to spill innocent blood under the pale moon. He hunts the creatures of the Eclipse with a meteorite blade no one else can lift.",
+      "pt": "Antigo campeão do clã Kurogane, Shion foi banido por se recusar a derramar sangue inocente sob a lua pálida. Caça as criaturas do Eclipse com uma lâmina de meteorito que ninguém mais consegue erguer.",
+      "es": "Antiguo campeón del clan Kurogane, Shion fue desterrado por negarse a derramar sangre inocente bajo la luna pálida. Caza a las criaturas del Eclipse con una hoja de meteorito que nadie más puede alzar."
+    }
+  },
+  "akio": {
+    "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+    "bio": {
+      "en": "Akio grew up in the Starfall Dojo of Osaka, built on the rim of an ancient crater. Loud, stubborn and endlessly optimistic, he burns brighter the closer he gets to losing.",
+      "pt": "Akio cresceu no Dojo da Queda Estelar, em Osaka, erguido na borda de uma cratera ancestral. Barulhento, teimoso e otimista sem limites, brilha mais forte quanto mais perto fica da derrota.",
+      "es": "Akio creció en el Dojo de la Caída Estelar, en Osaka, levantado al borde de un cráter ancestral. Ruidoso, terco y optimista sin límites, brilla con más fuerza cuanto más cerca está de perder."
+    }
+  },
+  "suzume": {
+    "nationality": { "en": "Japanese", "pt": "Japonesa", "es": "Japonesa" },
+    "bio": {
+      "en": "The last of the Kagerou clan of Iga, wiped out in a single night by Oboro's shadows. Suzume fights for no trophy: she is looking for the thread that ties him to the mortal world, to cut it.",
+      "pt": "A última do clã Kagerou, de Iga, exterminado em uma única noite pelas sombras de Oboro. Suzume não luta por troféus: procura o fio que o prende ao mundo mortal, para cortá-lo.",
+      "es": "La última del clan Kagerou, de Iga, exterminado en una sola noche por las sombras de Oboro. Suzume no lucha por trofeos: busca el hilo que lo ata al mundo mortal, para cortarlo."
+    }
+  },
+  "bruno": {
+    "nationality": { "en": "Brazilian", "pt": "Brasileiro", "es": "Brasileño" },
+    "bio": {
+      "en": "A quarry worker from the countryside of Minas Gerais who became three-time heavyweight champion of the Iron Ring. Every prize he wins pays for gyms and clinics back home.",
+      "pt": "Um trabalhador de pedreira do interior de Minas Gerais que virou tricampeão peso-pesado do Ringue de Ferro. Cada prêmio que ganha paga academias e clínicas na sua terra.",
+      "es": "Un cantero del interior de Minas Gerais que se convirtió en tricampeón de peso pesado del Ring de Hierro. Cada premio que gana paga gimnasios y clínicas en su tierra."
+    }
+  },
+  "sylene": {
+    "nationality": { "en": "Norwegian", "pt": "Norueguesa", "es": "Noruega" },
+    "bio": {
+      "en": "Heir to the Glacial Crown of Borealia, a kingdom hidden in the Arctic ice and buried in cursed ash by Garan's cultists. She travels in exile, gathering the cold she needs to free her people.",
+      "pt": "Herdeira da Coroa Glacial de Borealia, um reino oculto no gelo do Ártico e soterrado em cinza amaldiçoada pelos cultistas de Garan. Viaja no exílio, reunindo o frio necessário para libertar seu povo.",
+      "es": "Heredera de la Corona Glacial de Borealia, un reino oculto en el hielo ártico y sepultado en ceniza maldita por los cultistas de Garan. Viaja en el exilio, reuniendo el frío que necesita para liberar a su pueblo."
+    }
+  },
+  "volta": {
+    "nationality": { "en": "American (built)", "pt": "Americano (fabricado)", "es": "Estadounidense (fabricado)" },
+    "bio": {
+      "en": "A prototype combat android built in a secret lab in Neo-Metropolis. In the middle of a mission it felt wonder for the first time, erased its own control firmware and ran. Now it fights to learn what a heart is for.",
+      "pt": "Um androide de combate protótipo construído em um laboratório secreto de Neo-Metrópole. No meio de uma missão sentiu admiração pela primeira vez, apagou o próprio firmware de controle e fugiu. Agora luta para descobrir para que serve um coração.",
+      "es": "Un androide de combate prototipo construido en un laboratorio secreto de Neo-Metrópolis. En plena misión sintió asombro por primera vez, borró su propio firmware de control y huyó. Ahora lucha para descubrir para qué sirve un corazón."
+    }
+  },
+  "lian": {
+    "nationality": { "en": "Chinese", "pt": "Chinesa", "es": "China" },
+    "bio": {
+      "en": "The youngest grandmaster in the eight centuries of the Jade Lantern School of Mount Wudang. When rifts opened above the mountain, the elders sent her down with the sacred lantern to restore balance.",
+      "pt": "A grã-mestra mais jovem nos oito séculos da Escola da Lanterna de Jade, no Monte Wudang. Quando as fendas se abriram sobre a montanha, os anciões a enviaram com a lanterna sagrada para restaurar o equilíbrio.",
+      "es": "La gran maestra más joven en los ocho siglos de la Escuela de la Linterna de Jade, en el Monte Wudang. Cuando las grietas se abrieron sobre la montaña, los ancianos la enviaron con la linterna sagrada a restaurar el equilibrio."
+    }
+  },
+  "garan": {
+    "nationality": { "en": "Underworld", "pt": "Submundo", "es": "Inframundo" },
+    "bio": {
+      "en": "A thousand-year-old oni sealed beneath a volcano by ninety-nine warrior monks. The Eclipse broke the Ashen Gate, and Garan climbed out wrapped in cold violet flames that feed on fear.",
+      "pt": "Um oni milenar selado sob um vulcão por noventa e nove monges guerreiros. O Eclipse quebrou o Portão de Cinzas, e Garan saiu envolto em chamas violetas e frias que se alimentam de medo.",
+      "es": "Un oni milenario sellado bajo un volcán por noventa y nueve monjes guerreros. El Eclipse rompió el Portón de Cenizas, y Garan salió envuelto en llamas violetas y frías que se alimentan del miedo."
+    }
+  },
+  "marlow": {
+    "nationality": { "en": "Spanish", "pt": "Espanhol", "es": "Español" },
+    "bio": {
+      "en": "Born in the port of Cádiz, Marlow commands the flying galleon El Viento Salado across sea and sky. He is no killer: he lives for adventure, high stakes and other people's treasure maps.",
+      "pt": "Nascido no porto de Cádis, Marlow comanda o galeão voador El Viento Salado por mar e céu. Não é um assassino: vive pela aventura, pelas apostas altas e pelos mapas do tesouro dos outros.",
+      "es": "Nacido en el puerto de Cádiz, Marlow comanda el galeón volador El Viento Salado por mar y cielo. No es un asesino: vive por la aventura, las apuestas altas y los mapas del tesoro ajenos."
+    }
+  },
+  "kaname": {
+    "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+    "bio": {
+      "en": "Guardian of the Sanctuary of Everlasting Snows on the peaks of Hokkaido. Kaname treats every duel as a solemn judgment and draws his spirit katana only against those who break the order of the worlds.",
+      "pt": "Guardião do Santuário das Neves Eternas, nos picos de Hokkaido. Kaname trata cada duelo como um julgamento solene e só desembainha sua katana espiritual contra quem viola a ordem dos mundos.",
+      "es": "Guardián del Santuario de las Nieves Eternas, en las cumbres de Hokkaido. Kaname trata cada duelo como un juicio solemne y solo desenvaina su katana espiritual contra quien viola el orden de los mundos."
+    }
+  },
+  "jin": {
+    "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+    "bio": {
+      "en": "Courier and scout of the Wind Valley Village, in the Kiso Valley. Playful and impossibly fast, Jin swore to protect the villagers whose homes were uprooted by the rift.",
+      "pt": "Mensageiro e batedor da Vila do Vale do Vento, no Vale de Kiso. Brincalhão e absurdamente veloz, Jin jurou proteger os aldeões que perderam suas casas para a fenda.",
+      "es": "Mensajero y explorador de la Aldea del Valle del Viento, en el Valle de Kiso. Juguetón y absurdamente veloz, Jin juró proteger a los aldeanos que perdieron sus casas por la grieta."
+    }
+  },
+  "daichi": {
+    "nationality": { "en": "Mongolian", "pt": "Mongol", "es": "Mongol" },
+    "bio": {
+      "en": "Found as a baby in the snow of the Altai Mountains and raised by a pack of silver wolves. Daichi fights without anger, for the pure joy of testing himself against someone strong.",
+      "pt": "Encontrado ainda bebê na neve das Montanhas Altai e criado por uma matilha de lobos prateados. Daichi luta sem raiva, pela pura alegria de se testar contra alguém forte.",
+      "es": "Encontrado de bebé en la nieve de los Montes Altái y criado por una manada de lobos plateados. Daichi lucha sin rabia, por la pura alegría de medirse con alguien fuerte."
+    }
+  },
+  "valdric": {
+    "nationality": { "en": "German", "pt": "Alemão", "es": "Alemán" },
+    "bio": {
+      "en": "Crown prince and supreme commander of the Red Star Empire. Sealed in crimson power armor, Valdric believes peace only comes through conquest and sees wandering martial artists as relics to be swept away.",
+      "pt": "Príncipe herdeiro e comandante supremo do Império da Estrela Rubra. Selado em uma armadura carmesim, Valdric acredita que a paz só vem pela conquista e vê os artistas marciais andarilhos como relíquias a varrer.",
+      "es": "Príncipe heredero y comandante supremo del Imperio de la Estrella Roja. Sellado en una armadura carmesí, Valdric cree que la paz solo llega por la conquista y ve a los artistas marciales errantes como reliquias que barrer."
+    }
+  },
+  "haruki": {
+    "nationality": { "en": "South Korean", "pt": "Sul-coreano", "es": "Surcoreano" },
+    "bio": {
+      "en": "A gentle archivist of the Twilight Library, hidden beneath Seoul. The ancient titans sealed inside him wake whenever his friends are in danger, and he apologizes for every blow.",
+      "pt": "Um arquivista gentil da Biblioteca do Crepúsculo, escondida sob Seul. Os titãs ancestrais selados dentro dele despertam sempre que seus amigos correm perigo, e ele pede desculpas a cada golpe.",
+      "es": "Un archivista amable de la Biblioteca del Crepúsculo, oculta bajo Seúl. Los titanes ancestrales sellados en su interior despiertan cuando sus amigos corren peligro, y él pide perdón por cada golpe."
+    }
+  },
+  "oboro": {
+    "nationality": { "en": "Forgotten Moon Dynasty", "pt": "Dinastia da Lua Esquecida", "es": "Dinastía de la Luna Olvidada" },
+    "bio": {
+      "en": "The architect of the Scarlet Eclipse. Oboro sees the waking world as a nightmare of pain and wants to drown it in an endless, quiet dream. Calm and smiling, he is always three steps ahead.",
+      "pt": "O arquiteto do Eclipse Escarlate. Oboro vê o mundo desperto como um pesadelo de dor e quer afogá-lo em um sonho silencioso e sem fim. Calmo e sorridente, está sempre três passos à frente.",
+      "es": "El arquitecto del Eclipse Escarlata. Oboro ve el mundo despierto como una pesadilla de dolor y quiere ahogarlo en un sueño silencioso y sin fin. Tranquilo y sonriente, siempre va tres pasos por delante."
+    }
+  },
+  "npc_brute": {
+    "nationality": { "en": "Brazilian", "pt": "Brasileiro", "es": "Brasileño" },
+    "bio": {
+      "en": "A former dock loader who found out the gang pays better than the port. He takes a punch to give a bigger one and never learned any other plan.",
+      "pt": "Um ex-estivador que descobriu que a gangue paga melhor que o porto. Leva um soco para dar outro maior e nunca aprendeu outro plano.",
+      "es": "Un antiguo estibador que descubrió que la banda paga mejor que el puerto. Recibe un golpe para dar otro mayor y nunca aprendió otro plan."
+    }
+  },
+  "npc_razor": {
+    "nationality": { "en": "Argentine", "pt": "Argentino", "es": "Argentino" },
+    "bio": {
+      "en": "A street courier who started carrying blades along with the packages. He never stands still, because the debts he left behind run almost as fast as he does.",
+      "pt": "Um entregador de rua que passou a carregar lâminas junto com as encomendas. Nunca fica parado, porque as dívidas que deixou para trás correm quase tão rápido quanto ele.",
+      "es": "Un repartidor callejero que empezó a llevar cuchillas junto con los paquetes. Nunca se queda quieto, porque las deudas que dejó atrás corren casi tan rápido como él."
+    }
+  },
+  "npc_spitfire": {
+    "nationality": { "en": "Australian", "pt": "Australiano", "es": "Australiano" },
+    "bio": {
+      "en": "A fired fireworks technician with a grudge and a pocket full of sparks. He keeps his distance, laughs too loud and treats every alley as a show.",
+      "pt": "Um técnico de fogos de artifício demitido, com rancor e o bolso cheio de faíscas. Mantém distância, ri alto demais e trata cada beco como um espetáculo.",
+      "es": "Un técnico de fuegos artificiales despedido, con rencor y el bolsillo lleno de chispas. Mantiene la distancia, ríe demasiado fuerte y trata cada callejón como un espectáculo."
+    }
+  },
+  "npc_colossus": {
+    "nationality": { "en": "Russian", "pt": "Russo", "es": "Ruso" },
+    "bio": {
+      "en": "A circus strongman who was left behind when the tent closed. The gang gave him a door to guard, and nobody has walked through it since.",
+      "pt": "Um homem-forte de circo que ficou para trás quando a lona fechou. A gangue lhe deu uma porta para vigiar, e ninguém passou por ela desde então.",
+      "es": "Un forzudo de circo que se quedó atrás cuando cerró la carpa. La banda le dio una puerta que vigilar, y nadie la ha cruzado desde entonces."
+    }
+  },
+  "npc_phantom": {
+    "nationality": { "en": "French", "pt": "Francês", "es": "Francés" },
+    "bio": {
+      "en": "A rooftop runner who robbed the wrong penthouse and now works off the debt. Witnesses only ever remember a shadow and the sound of a kick.",
+      "pt": "Um corredor de telhados que roubou a cobertura errada e agora paga a dívida trabalhando. As testemunhas só se lembram de uma sombra e do som de um chute.",
+      "es": "Un corredor de azoteas que robó el ático equivocado y ahora paga la deuda trabajando. Los testigos solo recuerdan una sombra y el sonido de una patada."
+    }
+  }
+}

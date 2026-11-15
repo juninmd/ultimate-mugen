@@ -2,6 +2,8 @@
 mod advance;
 #[path = "story/bonus.rs"]
 mod bonus;
+#[path = "story/boss_profile.rs"]
+mod boss_profile;
 #[path = "story/hud.rs"]
 mod hud;
 

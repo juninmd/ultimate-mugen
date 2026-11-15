@@ -43,6 +43,7 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `format` | sim | Sempre `umf/1` |
 | `id`, `name`, `series`, `author`, `color` | sim | Identidade; `color` é a cor do cartão na seleção |
 | `boss` | não | `true` esconde da seleção e coloca como chefe final do Arcade |
+| `profile` | não | Nacionalidade e biografia, ver [Perfil](#perfil-nacionalidade-e-biografia) |
 | `speed` | não | Multiplicador de velocidade das animações (>1 = golpes mais rápidos) |
 | `stats` | não | Atributos, tabela abaixo |
 | `art` | sim | Arte, ver [Rig](Rig.md) |
@@ -50,6 +51,23 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `awakeningPalette` | não | Cores aplicadas sobre a paleta selecionada durante o despertar; sprites de efeitos não mudam |
 | `anims` | sim | Animações por nome |
 | `moves` | sim | Golpes |
+
+## Perfil (nacionalidade e biografia)
+
+Todo lutador tem uma nacionalidade e uma biografia curta, escritas em inglês (`en`), português do Brasil (`pt`) e espanhol (`es`). Um idioma ausente cai para `en`.
+
+```json
+"profile": {
+  "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+  "bio": { "en": "Two short sentences.", "pt": "Duas frases curtas.", "es": "Dos frases cortas." }
+}
+```
+
+- Os lutadores nativos, o chefe final e os capangas do modo História guardam seus perfis em `assets/char_profiles.json`, indexados por `id`. Um campo `profile` dentro do arquivo do lutador vence essa tabela, então lutadores UMF importados levam o próprio perfil.
+- Mantenha cada biografia abaixo de 260 caracteres: ela precisa caber em duas linhas da tela de seleção.
+- A tela de seleção mostra a nacionalidade e a biografia do lutador em destaque abaixo do elenco (capangas e o chefe aparecem com o filtro Chefes). O cartão de fase do modo História mostra o perfil do chefe da fase.
+- Lutadores sem perfil (conteúdo M.U.G.E.N) continuam mostrando `description`.
+- `cargo test --release -p ultimate-mugen profile` confere que todo arquivo de lutador em `assets/chars` tem perfil completo nos três idiomas.
 
 ## `stats`
 

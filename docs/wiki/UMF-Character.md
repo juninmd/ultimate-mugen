@@ -44,6 +44,7 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | `id`, `name`, `series`, `author`, `color` | yes | Identity; `color` is the select card color |
 | `boss` | no | `true` hides it from select and makes it the final Arcade boss |
 | `npc` | no | `true` hides it from select and every random pool; used by Story mode thugs, no boss empowerment |
+| `profile` | no | Nationality and biography, see [Profile](#profile-nationality-and-biography) |
 | `speed` | no | Animation speed multiplier (>1 = faster moves) |
 | `stats` | no | Attributes, table below |
 | `art` | yes | Art, see [Rig](Rig.md) |
@@ -51,6 +52,23 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | `awakeningPalette` | no | Color overrides applied on top of the selected palette while awakened; effect sprites are unchanged |
 | `anims` | yes | Animations by name |
 | `moves` | yes | Moves |
+
+## Profile (nationality and biography)
+
+Every fighter has a nationality and a short biography, written in English (`en`), Brazilian Portuguese (`pt`) and Spanish (`es`). A missing language falls back to `en`.
+
+```json
+"profile": {
+  "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+  "bio": { "en": "Two short sentences.", "pt": "Duas frases curtas.", "es": "Dos frases cortas." }
+}
+```
+
+- Built-in fighters, the final boss and the Story mode thugs keep their profiles in `assets/char_profiles.json`, keyed by `id`. A `profile` field inside the fighter file wins over that table, so imported UMF fighters carry their own.
+- Keep each biography under 260 characters: it must fit two lines of the select screen.
+- The select screen shows the nationality and the biography of the highlighted fighter under the roster (thugs and the boss appear with the Bosses filter). The Story mode stage card shows the profile of the stage boss.
+- Fighters without a profile (M.U.G.E.N content) keep showing `description`.
+- `cargo test --release -p ultimate-mugen profile` checks that every fighter file of `assets/chars` has a complete profile in the three languages.
 
 ## `stats`
 

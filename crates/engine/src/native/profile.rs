@@ -26,6 +26,8 @@ pub struct CharProfile {
     pub nationality: LocalText,
     #[serde(default)]
     pub bio: LocalText,
+    #[serde(default)]
+    pub tags: Vec<String>,
 }
 
 #[cfg(test)]
@@ -48,6 +50,13 @@ mod tests {
     fn missing_language_falls_back_to_english_then_to_any() {
         assert_eq!(profile().nationality.pick("es"), "Japanese");
         assert_eq!(profile().bio.pick("es"), "Só em português.");
+    }
+
+    #[test]
+    fn tags_are_optional_and_keep_their_order() {
+        assert!(CharProfile::default().tags.is_empty());
+        let tagged: CharProfile = serde_json::from_str(r#"{"tags":["rushdown","zoner"]}"#).unwrap();
+        assert_eq!(tagged.tags, ["rushdown", "zoner"]);
     }
 
     #[test]

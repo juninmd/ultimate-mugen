@@ -328,7 +328,7 @@ When Mikazuki Oboro cast the Scarlet Eclipse, the dimensional shockwaves shatter
 *Standard In-Game Combat Stance*
 
 #### Biography & Background
-Flamboyant, charming, and utterly fearless, Captain Marlow Reyes is the commander of the legendary flying galleon *El Viento Salgado*. Having spent two decades navigating both the high seas of the Atlantic and the perilous cloud reefs of the Sky Archipelago, Marlow has plundered every tyrannical merchant fleet from Madrid to Neo-Metropolis. His cutlass was quenched in the heart of a maelstrom and crackles with perpetual tidal electricity.
+Flamboyant, charming, and utterly fearless, Captain Marlow Reyes is the commander of the legendary flying galleon *El Viento Salado*. Having spent two decades navigating both the high seas of the Atlantic and the perilous cloud reefs of the Sky Archipelago, Marlow has plundered every tyrannical merchant fleet from Madrid to Neo-Metropolis. His cutlass was quenched in the heart of a maelstrom and crackles with perpetual tidal electricity.
 
 Marlow is not a cruel killer; he lives for adventure, high stakes, and the thrill of discovery. When the Convergence fused cloud kingdoms with mortal continents, Marlow saw the opportunity of a lifetime: dozens of uncharted civilizations, mythical relics, and legendary fighters to challenge for treasure maps.
 

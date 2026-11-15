@@ -96,6 +96,16 @@ mod tests {
     }
 
     #[test]
+    fn touch_section() {
+        let (t, _, w) = parse("[touch]\nscale = 1.3\nopacity = 0.5\nleft_handed = true\n");
+        assert_eq!((t.touch_scale, t.touch_opacity, t.touch_left_handed), (1.3, 0.5, true));
+        assert!(w.is_empty());
+        let (t, _, w) = parse("[touch]\nscale = 3\nleft_handed = \"yes\"\n");
+        assert_eq!((t.touch_scale, t.touch_left_handed), (1.0, false));
+        assert_eq!(w.len(), 2);
+    }
+
+    #[test]
     fn typos_and_bad_values_warn_but_keep_defaults() {
         let (t, _, w) = parse("[hud]\np1_tin = \"#f00\"\np2_tint = 5\n[hudd]\na = 1\n");
         assert_eq!(t, Tweaks::default());

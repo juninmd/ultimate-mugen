@@ -37,14 +37,19 @@ impl TouchPad {
     }
     pub fn layout() -> (Vec<Vec2>, f32, Vec2, f32) {
         let (w, h) = (screen_width(), screen_height());
-        let r = (h * 0.09).clamp(24.0, 52.0);
+        let tweaks = crate::tweaks::current();
+        let r = (h * 0.09).clamp(24.0, 52.0) * tweaks.touch_scale;
         let gap = r * 2.25;
         let (bx, by) = (w - r * 1.3 - gap * 2.0, h - r * 1.3);
         let mut v: Vec<Vec2> = (0..6)
             .map(|i| vec2(bx + (i % 3) as f32 * gap, by - (1 - i / 3) as f32 * gap))
             .collect();
         v.push(vec2(bx + gap, by - gap * 2.0));
-        let stick = vec2(r * 3.0, h - r * 3.0);
+        let mut stick = vec2(r * 3.0, h - r * 3.0);
+        if tweaks.touch_left_handed {
+            v.iter_mut().for_each(|p| p.x = w - p.x);
+            stick.x = w - stick.x;
+        }
         (v, r, stick, r * 2.2)
     }
     fn radius(i: usize, r: f32) -> f32 {
@@ -144,6 +149,10 @@ impl TouchPad {
         if !self.enabled {
             return;
         }
+        ume_shell::alpha_scale::with(crate::tweaks::current().touch_opacity, || self.draw_pad());
+    }
+
+    fn draw_pad(&self) {
         let (btns, r, stick, sr) = Self::layout();
         let c = self.stick_center.unwrap_or(stick);
         draw_circle(c.x, c.y, sr, Color::new(1.0, 1.0, 1.0, 0.08));

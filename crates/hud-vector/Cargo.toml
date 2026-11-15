@@ -1,0 +1,12 @@
+[package]
+name = "ume-hud-vector"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+vello = { version = "0.12", default-features = true }
+wgpu = "30"
+pollster = "0.4"
+
+

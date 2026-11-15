@@ -121,6 +121,9 @@ Created next to the executable on first run (localStorage on web) with the defau
 | `[accessibility]` | `colorblind` | `true` uses blue/orange side colors instead of the tints |
 | `[accessibility]` | `hud_scale` | HUD size multiplier (0.8 to 1.25) |
 | `[accessibility]` | `reduce_motion` | `true` turns off screen shake |
+| `[touch]` | `scale` | on-screen pad size, 0.7 to 1.5 |
+| `[touch]` | `opacity` | on-screen pad opacity, 0.2 to 1.0 |
+| `[touch]` | `left_handed` | `true` mirrors the pad (stick right, buttons left) |
 | `[rules]` | `rounds_to_win` (1-9), `round_seconds` (0 = no limit, up to 999), `life_percent` (10-500), `game_speed` (0.5-2.0) | Override the Settings menu values for every match; remove the line to go back to the menu value |
 | `[menu]` | `arcade`, `story`, `survival`, `cpu`, `versus`, `training`, `watch`, `team_seq`, `team_simul`, `team_tag`, `mugen`, `market`, `controls`, `settings`, `replays`, `quit` | Text of that main-menu entry |
 

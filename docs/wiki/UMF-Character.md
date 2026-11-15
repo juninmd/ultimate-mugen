@@ -101,12 +101,15 @@ Every fighter has a nationality and a short biography, written in English (`en`)
 
 ```json
 "profile": {
+  "country": "jp",
   "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
   "bio": { "en": "Two short sentences.", "pt": "Duas frases curtas.", "es": "Dos frases cortas." }
 }
 ```
 
 - Built-in fighters, the final boss and the Story mode thugs keep their profiles in `assets/char_profiles.json`, keyed by `id`. A `profile` field inside the fighter file wins over that table, so imported UMF fighters carry their own.
+- `country` picks the flag drawn next to the nationality: `jp`, `br`, `no`, `us`, `cn`, `es`, `mn`, `de`, `kr`, `ar`, `au`, `ru`, `fr`, plus the fictional `underworld` and `eclipse`. Flags are vector shapes in `src/flag/designs.rs` (no image files); add a new entry there for another country. An unknown code simply shows no flag. `UME_SHOTS_ONLY=flags` saves a sheet with every flag.
+- The flag appears on the roster tile, on the fighter card, in the profile strip under the roster and on the Story mode stage card.
 - Keep each biography under 260 characters: it must fit two lines of the select screen.
 - The select screen shows the nationality and the biography of the highlighted fighter under the roster (thugs and the boss appear with the Bosses filter). The Story mode stage card shows the profile of the stage boss.
 - Fighters without a profile (M.U.G.E.N content) keep showing `description`.

@@ -3,7 +3,7 @@ mod audio;
 mod e2e;
 mod boss;
 mod controls;
-mod credit_line;
+mod credit_line; mod flag;
 mod gamepad;
 mod gfx; mod glow;
 mod hud;

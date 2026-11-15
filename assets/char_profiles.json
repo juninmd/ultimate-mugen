@@ -1,5 +1,6 @@
 {
   "kaito": {
+    "country": "jp",
     "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
     "bio": {
       "en": "Raised by a hermit master on the stormy cliffs of Izu, Kaito walks wherever the wind blows. When the Scarlet Eclipse tore the sky, he came down the mountain to protect travelers from its shadows.",
@@ -8,6 +9,7 @@
     }
   },
   "shion": {
+    "country": "jp",
     "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
     "bio": {
       "en": "Once the champion of the Kurogane clan, Shion was banished for refusing to spill innocent blood under the pale moon. He hunts the creatures of the Eclipse with a meteorite blade no one else can lift.",
@@ -16,6 +18,7 @@
     }
   },
   "akio": {
+    "country": "jp",
     "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
     "bio": {
       "en": "Akio grew up in the Starfall Dojo of Osaka, built on the rim of an ancient crater. Loud, stubborn and endlessly optimistic, he burns brighter the closer he gets to losing.",
@@ -24,6 +27,7 @@
     }
   },
   "suzume": {
+    "country": "jp",
     "nationality": { "en": "Japanese", "pt": "Japonesa", "es": "Japonesa" },
     "bio": {
       "en": "The last of the Kagerou clan of Iga, wiped out in a single night by Oboro's shadows. Suzume fights for no trophy: she is looking for the thread that ties him to the mortal world, to cut it.",
@@ -32,6 +36,7 @@
     }
   },
   "bruno": {
+    "country": "br",
     "nationality": { "en": "Brazilian", "pt": "Brasileiro", "es": "Brasileño" },
     "bio": {
       "en": "A quarry worker from the countryside of Minas Gerais who became three-time heavyweight champion of the Iron Ring. Every prize he wins pays for gyms and clinics back home.",
@@ -40,6 +45,7 @@
     }
   },
   "sylene": {
+    "country": "no",
     "nationality": { "en": "Norwegian", "pt": "Norueguesa", "es": "Noruega" },
     "bio": {
       "en": "Heir to the Glacial Crown of Borealia, a kingdom hidden in the Arctic ice and buried in cursed ash by Garan's cultists. She travels in exile, gathering the cold she needs to free her people.",
@@ -48,6 +54,7 @@
     }
   },
   "volta": {
+    "country": "us",
     "nationality": { "en": "American (built)", "pt": "Americano (fabricado)", "es": "Estadounidense (fabricado)" },
     "bio": {
       "en": "A prototype combat android built in a secret lab in Neo-Metropolis. In the middle of a mission it felt wonder for the first time, erased its own control firmware and ran. Now it fights to learn what a heart is for.",
@@ -56,6 +63,7 @@
     }
   },
   "lian": {
+    "country": "cn",
     "nationality": { "en": "Chinese", "pt": "Chinesa", "es": "China" },
     "bio": {
       "en": "The youngest grandmaster in the eight centuries of the Jade Lantern School of Mount Wudang. When rifts opened above the mountain, the elders sent her down with the sacred lantern to restore balance.",
@@ -64,6 +72,7 @@
     }
   },
   "garan": {
+    "country": "underworld",
     "nationality": { "en": "Underworld", "pt": "Submundo", "es": "Inframundo" },
     "bio": {
       "en": "A thousand-year-old oni sealed beneath a volcano by ninety-nine warrior monks. The Eclipse broke the Ashen Gate, and Garan climbed out wrapped in cold violet flames that feed on fear.",
@@ -72,6 +81,7 @@
     }
   },
   "marlow": {
+    "country": "es",
     "nationality": { "en": "Spanish", "pt": "Espanhol", "es": "Español" },
     "bio": {
       "en": "Born in the port of Cádiz, Marlow commands the flying galleon El Viento Salado across sea and sky. He is no killer: he lives for adventure, high stakes and other people's treasure maps.",
@@ -80,6 +90,7 @@
     }
   },
   "kaname": {
+    "country": "jp",
     "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
     "bio": {
       "en": "Guardian of the Sanctuary of Everlasting Snows on the peaks of Hokkaido. Kaname treats every duel as a solemn judgment and draws his spirit katana only against those who break the order of the worlds.",
@@ -88,6 +99,7 @@
     }
   },
   "jin": {
+    "country": "jp",
     "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
     "bio": {
       "en": "Courier and scout of the Wind Valley Village, in the Kiso Valley. Playful and impossibly fast, Jin swore to protect the villagers whose homes were uprooted by the rift.",
@@ -96,6 +108,7 @@
     }
   },
   "daichi": {
+    "country": "mn",
     "nationality": { "en": "Mongolian", "pt": "Mongol", "es": "Mongol" },
     "bio": {
       "en": "Found as a baby in the snow of the Altai Mountains and raised by a pack of silver wolves. Daichi fights without anger, for the pure joy of testing himself against someone strong.",
@@ -104,6 +117,7 @@
     }
   },
   "valdric": {
+    "country": "de",
     "nationality": { "en": "German", "pt": "Alemão", "es": "Alemán" },
     "bio": {
       "en": "Crown prince and supreme commander of the Red Star Empire. Sealed in crimson power armor, Valdric believes peace only comes through conquest and sees wandering martial artists as relics to be swept away.",
@@ -112,6 +126,7 @@
     }
   },
   "haruki": {
+    "country": "kr",
     "nationality": { "en": "South Korean", "pt": "Sul-coreano", "es": "Surcoreano" },
     "bio": {
       "en": "A gentle archivist of the Twilight Library, hidden beneath Seoul. The ancient titans sealed inside him wake whenever his friends are in danger, and he apologizes for every blow.",
@@ -120,6 +135,7 @@
     }
   },
   "oboro": {
+    "country": "eclipse",
     "nationality": { "en": "Forgotten Moon Dynasty", "pt": "Dinastia da Lua Esquecida", "es": "Dinastía de la Luna Olvidada" },
     "bio": {
       "en": "The architect of the Scarlet Eclipse. Oboro sees the waking world as a nightmare of pain and wants to drown it in an endless, quiet dream. Calm and smiling, he is always three steps ahead.",
@@ -128,6 +144,7 @@
     }
   },
   "npc_brute": {
+    "country": "br",
     "nationality": { "en": "Brazilian", "pt": "Brasileiro", "es": "Brasileño" },
     "bio": {
       "en": "A former dock loader who found out the gang pays better than the port. He takes a punch to give a bigger one and never learned any other plan.",
@@ -136,6 +153,7 @@
     }
   },
   "npc_razor": {
+    "country": "ar",
     "nationality": { "en": "Argentine", "pt": "Argentino", "es": "Argentino" },
     "bio": {
       "en": "A street courier who started carrying blades along with the packages. He never stands still, because the debts he left behind run almost as fast as he does.",
@@ -144,6 +162,7 @@
     }
   },
   "npc_spitfire": {
+    "country": "au",
     "nationality": { "en": "Australian", "pt": "Australiano", "es": "Australiano" },
     "bio": {
       "en": "A fired fireworks technician with a grudge and a pocket full of sparks. He keeps his distance, laughs too loud and treats every alley as a show.",
@@ -152,6 +171,7 @@
     }
   },
   "npc_colossus": {
+    "country": "ru",
     "nationality": { "en": "Russian", "pt": "Russo", "es": "Ruso" },
     "bio": {
       "en": "A circus strongman who was left behind when the tent closed. The gang gave him a door to guard, and nobody has walked through it since.",
@@ -160,6 +180,7 @@
     }
   },
   "npc_phantom": {
+    "country": "fr",
     "nationality": { "en": "French", "pt": "Francês", "es": "Francés" },
     "bio": {
       "en": "A rooftop runner who robbed the wrong penthouse and now works off the debt. Witnesses only ever remember a shadow and the sound of a kick.",

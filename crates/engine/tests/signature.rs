@@ -95,7 +95,22 @@ fn volta_overload_costs_life_at_the_top_but_never_kills() {
 
 #[test]
 fn fighters_without_signature_are_untouched() {
-    let m = duel("suzume", "bruno");
+    let m = duel("bruno", "kaito");
     assert!(m.fighters[0].signature_view().is_none());
     assert_eq!(m.fighters[0].signature_attack(), 1.0);
+}
+
+#[test]
+fn suzume_marlow_jin_and_sylene_declare_their_signatures() {
+    for id in ["suzume", "marlow", "jin", "sylene"] {
+        let mut m = duel(id, "kaito");
+        for _ in 0..12 {
+            cast(&mut m, 0, 1000);
+            cast(&mut m, 0, 0);
+        }
+        let view = m.fighters[0].signature_view().unwrap_or_else(|| panic!("{id} has no signature"));
+        assert!(view.tiers >= 3 && view.tier >= 1, "{id}: {view:?}");
+        let (a, d, s) = (m.fighters[0].signature_attack(), m.fighters[0].signature_defence(), m.fighters[0].passive_speed());
+        assert!(a > 1.0 || d > 1.0 || s > 1.0, "{id} gets no bonus from its signature");
+    }
 }

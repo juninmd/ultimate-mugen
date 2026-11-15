@@ -9,3 +9,5 @@ Chaves: `max`, `gainHit`, `gainSpecial`, `gainHurt`, `decayDelaySeconds`, `decay
 O ataque continua limitado pelo teto global de [Passivos](../Passives.md). O medidor zera a cada round e aparece como uma faixa sob a barra de vida.
 
 Lutadores atuais: **Kaito** (Tempestade, acumula e acelera) e **Volta** (Sobrecarga, forte com o medidor cheio, mas custa vida).
+
+Mais lutadores: **Suzume** (Lótus, sobe com especiais e acelera), **Marlow** (Maré, também sobe ao apanhar e dá defesa), **Jin** (Corrente de vento, sobe e cai rápido, dá velocidade) e **Sylene** (Camadas de gelo, sobe principalmente ao apanhar, dá defesa).

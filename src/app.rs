@@ -16,7 +16,7 @@ use ume_engine::chardef::CharDef;
 mod arcade;
 mod cutscene;
 mod fight_seed;
-mod keyedit;
+mod keyedit; pub(crate) mod keyedit_note;
 mod loading;
 mod pause;
 mod market;

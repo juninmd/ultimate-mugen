@@ -38,7 +38,7 @@ pub fn apply_hit_points(m: &mut Match, d: usize, hd: &HitDefData, guarded: bool,
 pub fn enter_stun_states(m: &mut Match, d: usize, guarded: bool) {
     let f = &m.fighters[d];
     if !f.alive || f.life <= 0.0 { return; }
-    let airborne = f.state_type == 'A' || f.pos.y < -1.0;
+    let airborne = f.state_type == 'A' || f.pos.y < -1.0 || f.vel.y < 0.0 || f.ghv.yvel < 0.0;
     let (target, due) = if guarded {
         (GUARD_BREAK_STATE, f.ikemen.guard_max > 0.0 && f.ikemen.guard_points <= 0.0 && !f.ikemen.guard_break)
     } else {

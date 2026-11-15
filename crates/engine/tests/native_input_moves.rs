@@ -29,7 +29,7 @@ fn is_ability_state(state: i32) -> bool { (FIRST_ABILITY..FIRST_COMMON).contains
 
 fn follow_up_states(nc: &NativeChar, def: &CharDef) -> BTreeSet<i32> {
     let mut out = BTreeSet::new();
-    for m in nc.moves.iter().filter(|m| m.rekka.is_some()) {
+    for m in nc.moves.iter().filter(|m| m.rekka.is_some() || m.requires.as_ref().is_some_and(|r| r.enemy_state.is_some())) {
         if let Some(info) = def.movelist.iter().find(|i| i.name == m.name) { out.insert(info.state); out.insert(info.state + 20000); }
     }
     out

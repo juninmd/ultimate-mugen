@@ -33,7 +33,7 @@ fn toolkit_ids_and_inputs_do_not_collide() {
             assert!(ids.insert(m.id.clone()), "{id} duplicate id {}", m.id);
         }
         for m in nc.moves.iter().filter(|m| m.rekka.is_none()) {
-            let key = format!("{}|{}", m.input, m.when.as_deref().unwrap_or("stand"));
+            let key = format!("{}|{}|{:?}", m.input, m.when.as_deref().unwrap_or("stand"), m.requires.as_ref().map(|r| (&r.distance, &r.enemy_state)));
             assert!(inputs.insert(key), "{id} duplicate input {} for {}", m.input, m.id);
         }
     }

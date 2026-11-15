@@ -98,6 +98,8 @@ pub struct LifeRange { #[serde(default)] pub min: Option<f32>, #[serde(default)]
 pub struct MoveRequirements {
     #[serde(default)] pub life: Option<LifeRange>,
     #[serde(default, rename = "enemyLife")] pub enemy_life: Option<LifeRange>,
+    #[serde(default)] pub distance: Option<LifeRange>,
+    #[serde(default, rename = "enemyState")] pub enemy_state: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

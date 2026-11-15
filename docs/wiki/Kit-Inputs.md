@@ -34,3 +34,9 @@ A move can only start from another move by declaring `rekka` in the character JS
 `after` lists the source move ids, `window` is the range of state time (ticks inside the source move, hit pause does not count) where the follow-up input is accepted, and `contact: true` also requires the source to hit or be guarded. Without it the follow-up works on whiff too. The follow-up never starts from neutral, so it may reuse a plain button already used by a normal. Code: `crates/engine/src/native/rekka.rs`.
 
 In use: Lian (Flowing Silk Kicks, then `y`), Kaito (Storm Rush, then `x`) and Jin (Gust Dash, then `b`).
+
+## Distance and state requirements
+
+`requires` also accepts `distance` (pixels between the bodies, `min` and/or `max`) and `enemyState` (`air`, `ground`, `crouch`, `down`, `hit` or `attack`). Two moves can share one input and the engine picks by situation, as long as the conditions do not overlap. A variant must come before the move it overrides in the `moves` list, because the first move that fits wins.
+
+In use: Daichi (Landslide Point Blank within 55 pixels, otherwise Landslide Heel) and Bruno (Bull Catch against an airborne enemy, otherwise Bulldozer Rush).

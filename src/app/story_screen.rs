@@ -11,6 +11,9 @@ impl App {
             self.screen = Screen::Menu { cur: 0 };
             return;
         };
+        if self.story_epilogue(&run, t, dt) {
+            return;
+        }
         let accent = run.stage_def().accent;
         let accent_color = Color::new(accent[0], accent[1], accent[2], 1.0);
         self.ui.background();

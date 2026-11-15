@@ -47,7 +47,7 @@
 ## Verification
 - Every change gets a browser smoke test: `scripts/build-web.sh`, serve `web/dist`, drive it in headless Chromium with Playwright (hold keys at least 100 ms), and look at screenshots.
 - Screenshot tours: `UME_SHOTS_ONLY=pause|hud|menu xvfb-run -a target/release/ultimate-mugen --shots <dir> --res 1280x720 --mute`.
-- Story tours: `UME_TOUR=storymode` plays the whole run; `UME_TOUR=storyobjects` captures breakables, pickups and the bonus round.
+- Story tours: `UME_TOUR=storymode` plays the whole run; `UME_TOUR=storyobjects` captures breakables, pickups and the bonus round; `UME_TOUR=epilogue` captures the per-fighter epilogues (`?e2e_epilogue=1` opens one in the web build).
 
 ## Code Style
 - No comments in code: names must explain intent. Explanations go to the wiki in `docs/wiki/`.
@@ -64,7 +64,7 @@
 - No `utils.rs`, `helpers.rs`, `misc.rs`, `common.rs` or `manager.rs`: name the concept instead.
 
 ## CI and Release
-- Jobs in `.github/workflows/ci.yml`: `release-scripts` (`node --test scripts/*.test.mjs`, `node scripts/file-size.mjs`), `test` (`cargo test --workspace --release` and `mugen_check --strict` over `crates/engine/tests/data/chars`), `wasm` (`cargo build --release --target wasm32-unknown-unknown`), `web-smoke` (`scripts/web-smoke.js`, `scripts/web-story-smoke.js` and `scripts/web-match-smoke.js` in Playwright 1.56.1), `android` (`cargo apk`, throwaway keystore), `ios` (`aarch64-apple-ios` build) and `desktop` (3 OSes). `commit-lint.yml` runs `scripts/commit-lint.mjs`.
+- Jobs in `.github/workflows/ci.yml`: `release-scripts` (`node --test scripts/*.test.mjs`, `node scripts/file-size.mjs`), `test` (`cargo test --workspace --release` and `mugen_check --strict` over `crates/engine/tests/data/chars`), `wasm` (`cargo build --release --target wasm32-unknown-unknown`), `web-smoke` (`scripts/web-smoke.js`, `scripts/web-story-smoke.js`, `scripts/web-epilogue-smoke.js` and `scripts/web-match-smoke.js` in Playwright 1.56.1), `android` (`cargo apk`, throwaway keystore), `ios` (`aarch64-apple-ios` build) and `desktop` (3 OSes). `commit-lint.yml` runs `scripts/commit-lint.mjs`.
 - PR title (squash flow) or every commit (merge flow) must be `type(scope)?(!)?: description`, type in `feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert`. A title without a type fails `commit-lint`.
 - Mandatory PR evidence: Every pull request must include visual evidence — screenshots (prints) and animated GIFs whenever possible — documenting changes, before/after states, or test verification directly in the PR description.
 - Releases are automatic on every push to `master` (`release.yml`, `scripts/release-plan.mjs`): `feat` is minor, `fix`/`perf` is patch, `!` or `BREAKING CHANGE:` is major; `docs`/`chore`/`ci`/`test`/`refactor`/`style`/`build` alone cut no release. The git tag is the version source of truth; the build is stamped through `UME_RELEASE_VERSION`, built on Linux, Windows and macOS, verified as a draft and then published. The desktop build self-updates from `latest.json` (`src/update/`, `docs/wiki/Auto-Update.md`).

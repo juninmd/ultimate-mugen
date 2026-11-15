@@ -32,6 +32,7 @@ pub struct StoryRun {
     pub credits: u8,
     pub phase: Phase,
     pub bonus: bool,
+    pub epilogue: usize,
 }
 
 impl Default for StoryRun {
@@ -44,6 +45,7 @@ impl Default for StoryRun {
             credits: STARTING_CREDITS,
             phase: Phase::Intro,
             bonus: false,
+            epilogue: 0,
         }
     }
 }

@@ -3,6 +3,7 @@ mod grade;
 pub mod batch;
 pub mod canvas;
 pub mod gpu;
+pub mod large;
 pub mod palette;
 pub mod post;
 

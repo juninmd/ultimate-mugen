@@ -45,3 +45,22 @@ Definitions, read from each character's data (native and M.U.G.E.N alike):
 Press `O` on the select screen to cycle the order: roster, strength, life, speed, name. The choice is saved as `sort=` in the config. Stats come from the character's cached preview and are computed once per character.
 
 Limitation: sorting by a stat loads the preview of every character in the view the first time, so a very large M.U.G.E.N roster can take a moment on that first press.
+
+## Large rosters (1000+ fighters and stages)
+
+- The visible list (filter, search and sort) is computed once and reused until the filter, sort, search text or the playable set changes (`src/app/select_view.rs`). With 1017 fighters a name sort costs about 0.9 ms when rebuilt and 0.08 ms when reused.
+- The grid only uses as many rows as fit above the footer, or above the team slots in team modes, so the slots never cover the last row (`src/app/select_grid.rs`).
+- The cursor tag (P1, P2, CPU) is drawn inside the tile, so it no longer covers the name of the tile above. Tile names are cut to the tile width with an ellipsis (`App::fit_label`).
+- A search pill under the title shows the current search and the number of results; `/` or a click opens the search page, `Esc` or a click clears it. Search matches name, id, author and series. On the search page the arrows and `PgUp`/`PgDn` choose a result and `Enter` moves the cursor to it.
+- The footer shows the page (`page 3/15`) next to the position.
+
+## Stage select
+
+- Filter chips (All, Originals, M.U.G.E.N), cycled with `Tab`, and a search box opened with `/` or a click; `Esc` clears the search.
+- Names are cut to the tile width with an ellipsis; `Home`/`End` jump to the ends; the footer shows position and page.
+- `Random` picks among the stages that match the current filter and search.
+- M.U.G.E.N stage previews start only after the cursor rests for 0.12 s, one per frame, and previews more than six rows away are released, so scrolling through hundreds of M.U.G.E.N stages does not keep every decoded stage in memory.
+
+## Stress mode
+
+`UME_STRESS=<n>` (desktop) or `?stress=<n>` (web) adds `n` generated fighters and `n` generated stages (up to 5000) that reuse the bundled content with generated names, authors and series. It is a test hook only. `UME_STRESS=1000 UME_SHOTS_ONLY=roster ultimate-mugen --shots <dir> --res 1280x720 --mute` prints `roster-perf:` lines (view cost per sort, CPU time per frame while walking the grid and the stage list, memory) and saves screenshots of the grid, search and stage filters.

@@ -1,0 +1,10 @@
+roster-perf: 1023 fighters · 1025 stages · rss 259 MB
+roster-perf: char view sort 0 · 1017 fighters · uncached 0.009 ms · cached 0.067 ms
+roster-perf: char view sort 1 · 1017 fighters · uncached 1.187 ms · cached 0.080 ms
+roster-perf: char view sort 2 · 1017 fighters · uncached 0.615 ms · cached 0.055 ms
+roster-perf: char view sort 3 · 1017 fighters · uncached 0.518 ms · cached 0.052 ms
+roster-perf: char view sort 4 · 1017 fighters · uncached 0.935 ms · cached 0.083 ms
+roster-perf: select idle · 120 frames · cpu mean 7.04 ms · p95 1.42 ms · max 645.16 ms · rss 309 MB
+roster-perf: select walking 1000 fighters · 240 frames · cpu mean 1.03 ms · p95 1.29 ms · max 1.76 ms · rss 309 MB
+roster-perf: stages idle · 120 frames · cpu mean 0.77 ms · p95 0.89 ms · max 19.96 ms · rss 375 MB
+roster-perf: stages walking 1000 stages · 240 frames · cpu mean 0.60 ms · p95 0.74 ms · max 6.18 ms · rss 375 MB

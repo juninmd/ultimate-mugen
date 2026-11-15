@@ -8,3 +8,7 @@ Os lutadores nativos não compartilham mais o mesmo conjunto de entradas. Cada a
 - **Bruno** (Lariat) e **Daichi** (Aura Rush): movimento de 360° + botão, estilo grappler.
 
 Golpes com variante aérea mantêm entradas que podem ser feitas no ar.
+
+## Mobilidade aérea
+
+`stats.airDashes` define quantos air dashes o lutador tem antes de pousar (padrão 1). Rushdown e aéreos ganham mais, grapplers menos: Suzume, Jin, Akio, Lian e Kaito têm 2, Bruno tem 0 e os demais têm 1.

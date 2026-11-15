@@ -306,7 +306,7 @@ impl Session {
         self.rec.push(bits.clone());
         self.vfx.pre_tick(&self.m);
         self.m.tick(&bits);
-        self.vfx.tick(&self.m);
+        self.vfx.tick(&self.m); self.vfx.stage_objects(&mut self.m);
         crate::match_stats::observe(&self.m);
         self.drain_events(c, audio);
     }

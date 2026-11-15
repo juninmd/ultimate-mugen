@@ -13,6 +13,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Mercado GitHub](Mercado.md) | Jogadores | Instalar personagens, cenários e músicas de qualquer repositório do GitHub |
 | [Seleção de personagem](Character-Select.md) | Jogadores | Tela de seleção, retratos, equipes e atalhos |
 | [Modos de jogo](Modos-de-Jogo.md) | Jogadores | Arcade, equipes (Sequência, Paralelo, Tag) e suas regras |
+| [Objetos de cenário](Objetos-de-Cenario.md) | Jogadores, criadores | Caixotes, barris e carros quebráveis, comida, fases bônus e seus dados em TOML |
 | [Universo e Lore](Lore.md) | Jogadores e Criadores | Cosmologia, facções, sistemas de energia e a Grande Convergência |
 | [Dossiê dos Personagens](Personagens.md) | Jogadores e Criadores | Fichas biográficas, retratos, golpes, rivalidades e cenários associados |
 | [Replays](Replays-Rede.md) | Jogadores | Lutas gravadas, navegador de replays, velocidade de reprodução |

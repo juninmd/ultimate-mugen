@@ -79,7 +79,7 @@ impl Hud {
             alive_fallback.or(first)
         };
         let Some(r0) = main_of(0) else { return; };
-        let Some(r1) = main_of(1) else { return; };
+        let Some(r1) = main_of(1).or(m.lanes.active.then_some(r0)) else { return; };
         let roots = [r0, r1];
         let partners: Vec<&Fighter> = if m.fighters.len() > 2 {
             m.roots()

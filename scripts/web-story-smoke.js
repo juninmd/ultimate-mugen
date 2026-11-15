@@ -18,7 +18,7 @@ const bandLuminance = (page, buffer) => page.evaluate(async base64 => {
 }, buffer.toString('base64'));
 (async () => {
   await new Promise(ok => server.listen(0, '127.0.0.1', ok));
-  const url = `http://127.0.0.1:${server.address().port}/index.html`;
+  const url = `http://127.0.0.1:${server.address().port}/index.html?e2e=1`;
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const problems = [];
@@ -48,6 +48,8 @@ const bandLuminance = (page, buffer) => page.evaluate(async base64 => {
     mean = await bandLuminance(p, shot);
   } while (mean < 12 && Date.now() < paintDeadline);
   if (shotDir) fs.writeFileSync(path.join(shotDir, process.env.WEB_SMOKE_NAME || 'story-fight.png'), shot);
+  const state = await p.evaluate(() => { try { return JSON.parse(globalThis.__ume_state || 'null'); } catch { return null; } });
+  if (!state || state.screen !== 'fight' || !state.objects || state.objects.breakables < 1) problems.push(`story fight has no breakable objects (${JSON.stringify(state && { screen: state.screen, objects: state.objects })})`);
   await b.close(); server.close();
   if (mean < 12) problems.push(`story stage background is black (mean luminance ${mean.toFixed(1)})`);
   if (problems.length) { console.error('WEB STORY SMOKE FAILED\n' + problems.join('\n')); process.exit(1); }

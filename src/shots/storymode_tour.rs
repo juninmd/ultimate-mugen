@@ -183,6 +183,12 @@ pub async fn run(app: &mut App, dir: &str) {
                 println!("{name}: player lost");
             }
             app.story_win();
+            if app.story_bonus_active() {
+                step(app, 60, false);
+                cap_fight(app, dir, &format!("story-s{}-bonus", index + 1)).await;
+                step(app, FIGHT_LIMIT_TICKS, true);
+                app.story_win();
+            }
             if wave < waves {
                 frames(app, 2).await;
             }

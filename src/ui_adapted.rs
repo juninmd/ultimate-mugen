@@ -3,7 +3,7 @@ use crate::poly;
 use crate::ui::{alpha, hex, Align, Ui};
 
 impl Ui {
-    fn pts(&self, v: Vec<Vec2>) -> Vec<Vec2> {
+    pub(crate) fn pts(&self, v: Vec<Vec2>) -> Vec<Vec2> {
         v.into_iter()
             .map(|q| vec2(self.x(q.x), self.y(q.y)))
             .collect()
@@ -105,18 +105,17 @@ impl Ui {
         }
     }
 
-    pub fn adapted_button(&self, x: f32, y: f32, w: f32, h: f32, label: &str, hot: bool) {
+    pub fn adapted_plate(&self, x: f32, y: f32, w: f32, h: f32, tint: Option<Color>) {
         let shape = self.pts(poly::chamfer(x, y, w, h, h * 0.35));
-        if hot {
-            poly::grad_v(
-                &shape,
-                crate::tweaks::accent(0.9),
-                crate::tweaks::accent_deep(0.75),
-            );
-        } else {
-            poly::grad_v(&shape, alpha(WHITE, 0.14), alpha(WHITE, 0.05));
+        match tint {
+            Some(c) => poly::grad_v(&shape, c, poly::shade(c, 0.6)),
+            None => poly::grad_v(&shape, alpha(WHITE, 0.14), alpha(WHITE, 0.05)),
         }
         poly::outline(&shape, 0.8 * self.s, alpha(WHITE, 0.25));
+    }
+
+    pub fn adapted_button(&self, x: f32, y: f32, w: f32, h: f32, label: &str, hot: bool) {
+        self.adapted_plate(x, y, w, h, hot.then(|| crate::tweaks::accent(0.9)));
         self.text(
             label,
             x + w / 2.0,
@@ -128,6 +127,28 @@ impl Ui {
         );
     }
 
+    pub fn adapted_modal(&self, x: f32, y: f32, w: f32, h: f32, vw: f32, vh: f32) {
+        self.rect(0.0, 0.0, vw, vh, Color::new(0.0, 0.0, 0.0, 0.7));
+        let shape = self.pts(poly::chamfer(x, y, w, h, 18.0));
+        poly::grad_v(&shape, hex("#2a1846"), hex("#120a24"));
+        poly::grad_v(
+            &self.pts(poly::chamfer(x + 2.0, y + 2.0, w - 4.0, 60.0, 16.0)),
+            alpha(WHITE, 0.08),
+            alpha(WHITE, 0.0),
+        );
+        poly::outline(&shape, 1.6 * self.s, crate::tweaks::accent(0.85));
+    }
+
+    pub fn adapted_field(&self, x: f32, y: f32, w: f32, h: f32) {
+        let shape = self.pts(poly::chamfer(x, y, w, h, 8.0));
+        poly::grad_v(
+            &shape,
+            Color::new(0.0, 0.0, 0.0, 0.45),
+            Color::new(0.1, 0.05, 0.16, 0.5),
+        );
+        poly::outline(&shape, 1.0 * self.s, alpha(WHITE, 0.3));
+    }
+
     pub fn adapted_level(&self, x: f32, y: f32, steps: usize, on: usize) {
         for n in 0..steps {
             let cell = self.pts(poly::slanted(x + n as f32 * 22.0, y, 17.0, 20.0, 3.0));
@@ -137,22 +158,5 @@ impl Ui {
                 poly::solid(&cell, alpha(WHITE, 0.12));
             }
         }
-    }
-
-    pub fn adapted_keycap(&self, x: f32, y: f32, label: &str) -> f32 {
-        let w = self.measure(label, 15.0, true) + 16.0;
-        let cap = self.pts(poly::chamfer(x, y, w, 24.0, 5.0));
-        poly::grad_v(&cap, alpha(WHITE, 0.22), alpha(WHITE, 0.08));
-        poly::outline(&cap, 0.8 * self.s, alpha(WHITE, 0.4));
-        self.text(
-            label,
-            x + w / 2.0,
-            y + 17.0,
-            15.0,
-            WHITE,
-            Align::Center,
-            true,
-        );
-        w
     }
 }

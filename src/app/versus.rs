@@ -27,14 +27,7 @@ impl App {
     }
 
     pub(super) fn glass(&self, x: f32, y: f32, w: f32, h: f32, accent: Color, alpha: f32) {
-        self.ui
-            .rect(x, y, w, h, Color::new(0.04, 0.03, 0.1, 0.55 * alpha));
-        self.ui
-            .rect(x, y, w, h * 0.5, Color::new(1.0, 1.0, 1.0, 0.09 * alpha));
-        self.ui
-            .rect(x, y, w, 2.0, Color::new(1.0, 1.0, 1.0, 0.55 * alpha));
-        self.ui
-            .rect(x, y + h - 2.0, w, 2.0, tint(accent, 0.9 * alpha));
+        self.ui.adapted_glass(x, y, w, h, accent, alpha);
     }
 
     fn versus_team_strip(&mut self, side: usize, x0: f32, y: f32, t: f32) {
@@ -284,7 +277,7 @@ impl App {
                 false,
             );
             let chip_x = if side == 0 { x + w - 90.0 } else { x + 20.0 };
-            self.ui.rect(chip_x, y + 56.0, 70.0, 22.0, tint(col, 0.9));
+            self.ui.adapted_plate(chip_x, y + 56.0, 70.0, 22.0, Some(tint(col, 0.9)));
             self.ui.text(
                 tags[side],
                 chip_x + 35.0,

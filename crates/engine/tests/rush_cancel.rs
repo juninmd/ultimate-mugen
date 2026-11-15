@@ -118,3 +118,43 @@ fn window_is_open_only_while_a_connected_move_can_be_cancelled() {
     m.fighters[0].power = 0.0;
     assert!(m.rush_window(0).is_none());
 }
+
+#[test]
+fn a_whiffed_move_can_be_cancelled_for_a_higher_price() {
+    use ume_engine::rush::{WHIFF_COST, WHIFF_MAX_TICKS, WHIFF_MIN_TICKS};
+    let mut m = arena(&fighter("akio"));
+    face_off(&mut m, 400.0);
+    m.fighters[0].power = WHIFF_COST + 200.0;
+    enter(&mut m, 0, JAB_STATE);
+    m.tick(&[k::S, 0]);
+    assert_eq!(m.fighters[0].state_no, JAB_STATE, "cancelled before the move had time to whiff");
+    for _ in 0..(WHIFF_MIN_TICKS + 2) { m.tick(&[0, 0]); }
+    assert!(m.fighters[0].move_contact == 0 && m.fighters[0].move_type == 'A', "jab should still be whiffing");
+    let before = m.fighters[0].power;
+    m.tick(&[k::S, 0]);
+    let f = &m.fighters[0];
+    assert!(f.ctrl && f.move_type != 'A', "no control back after the whiff cancel (state {})", f.state_no);
+    assert!((f.power - (before - WHIFF_COST)).abs() < 2.0, "wrong whiff price ({} to {})", before, f.power);
+    assert_eq!(f.rush.cancels, 0, "a whiff cancel must not count as a rush cancel");
+    assert_eq!(f.rush.overdrive, 0, "a whiff cancel gives no overdrive");
+    assert!(f.rush.cooldown > 0 && f.rush.cooldown <= COOLDOWN_TICKS);
+    assert!(WHIFF_COST > COST && WHIFF_MAX_TICKS > WHIFF_MIN_TICKS);
+}
+
+#[test]
+fn whiff_cancel_needs_meter_and_is_not_used_after_contact() {
+    use ume_engine::rush::{WHIFF_COST, WHIFF_MIN_TICKS};
+    let mut poor = arena(&fighter("akio"));
+    face_off(&mut poor, 400.0);
+    poor.fighters[0].power = WHIFF_COST - 80.0;
+    enter(&mut poor, 0, JAB_STATE);
+    for _ in 0..(WHIFF_MIN_TICKS + 2) { poor.tick(&[0, 0]); }
+    poor.tick(&[k::S, 0]);
+    assert!(poor.fighters[0].power >= WHIFF_COST - 80.0, "paid without enough meter: {}", poor.fighters[0].power);
+
+    let mut m = arena(&fighter("akio"));
+    assert!(connect_jab(&mut m));
+    m.fighters[0].power = WHIFF_COST + 500.0;
+    m.tick(&[k::S, 0]);
+    assert_eq!(m.fighters[0].rush.cancels, 1, "a connected move uses the cheaper rush cancel");
+}

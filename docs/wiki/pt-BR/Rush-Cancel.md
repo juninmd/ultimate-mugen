@@ -25,6 +25,10 @@ A mesma tecla continua carregando energia parado: um lutador com controle e sem 
 4. A partida entra em câmera lenta por 15 ticks, o lutador pisca em azul e deixa um rastro de afterimage.
 5. O **Overdrive** começa: por 150 ticks o lutador causa 20 % a mais de dano (`effective_attack`, aplicado sobre os passivos e abaixo dos tetos deles).
 
+## Whiff cancel
+
+Apertar Start durante um golpe que não tocou em nada também cancela, por um preço maior. Custa 1000 de barra (o Rush Cancel custa 500), vale de 10 a 60 ticks depois do início do golpe e divide a recarga do Rush Cancel. Devolve o controle como o Rush Cancel, mas sem Overdrive, sem câmera lenta e sem contar como Rush Cancel. Golpe que conectou ou foi bloqueado continua usando o Rush Cancel mais barato. Constantes em `crates/engine/src/rush/whiff.rs`.
+
 ## Mapa da engine
 
 | Peça | Arquivo |

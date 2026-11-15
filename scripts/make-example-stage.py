@@ -109,6 +109,7 @@ spriteno = 0, 0
 layerno = 0
 start = 0, 0
 delta = 1, 1
+tile = 1, 0
 
 [BG Hills]
 type = normal

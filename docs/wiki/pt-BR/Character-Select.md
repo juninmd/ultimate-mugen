@@ -19,6 +19,9 @@ Cada cartão tem uma barra dourada fina na borda inferior, que mostra a força. 
 - O selo do cursor (P1, P2, CPU) fica dentro do tile e não cobre mais o nome do tile de cima. Os nomes são cortados na largura do tile com reticências (`App::fit_label`).
 - Uma pílula de busca abaixo do título mostra a busca atual e o número de resultados; `/` ou um clique abre a página de busca, `Esc` ou um clique limpa. A busca procura nome, id, autor e série. Na página de busca, as setas e `PgUp`/`PgDn` escolhem um resultado e `Enter` leva o cursor até ele.
 - O rodapé mostra a página (`pág 3/15`) ao lado da posição.
+- `F` ou o botão de estrela marca o lutador sob o cursor como favorito; favoritos ganham uma estrela dourada no tile e são salvos (`favorites.txt`). Cada escolha entra nas 24 escolhas recentes (`recent.txt`). Os chips FAVORITOS e RECENTES mostram só esses lutadores, os recentes do mais novo ao mais antigo (`src/app/select_marks.rs`).
+- O chip de autor (`U`, `Shift+U` ou clique) percorre os autores ordenados pelo número de lutadores e se combina com os outros filtros (`src/app/select_author.rs`).
+- Em telas de toque a página de busca mostra um teclado na tela (letras, números, espaço, apagar, OK, fechar) e menos linhas de resultado; tocar num resultado o escolhe (`src/app/select_search/keyboard.rs`). `UME_OSK=1` força o teclado no desktop.
 
 ## Seleção de cenário
 

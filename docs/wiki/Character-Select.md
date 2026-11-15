@@ -53,6 +53,9 @@ Limitation: sorting by a stat loads the preview of every character in the view t
 - The cursor tag (P1, P2, CPU) is drawn inside the tile, so it no longer covers the name of the tile above. Tile names are cut to the tile width with an ellipsis (`App::fit_label`).
 - A search pill under the title shows the current search and the number of results; `/` or a click opens the search page, `Esc` or a click clears it. Search matches name, id, author and series. On the search page the arrows and `PgUp`/`PgDn` choose a result and `Enter` moves the cursor to it.
 - The footer shows the page (`page 3/15`) next to the position.
+- `F` or the star button marks the fighter under the cursor as a favorite; favorites show a gold star on their tile and are saved (`favorites.txt`). Every pick is recorded in the 24 most recent picks (`recent.txt`). The FAVORITES and RECENT filter chips show only those fighters, recent ones newest first (`src/app/select_marks.rs`).
+- The author chip (`U`, `Shift+U` or a click) cycles through authors ordered by fighter count and combines with the other filters (`src/app/select_author.rs`).
+- On touch devices the search page shows an on-screen keyboard (letters, digits, space, delete, OK, close) and fewer result rows; tapping a result picks it (`src/app/select_search/keyboard.rs`). `UME_OSK=1` forces it on desktop.
 
 ## Stage select
 

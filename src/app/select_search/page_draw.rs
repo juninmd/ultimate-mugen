@@ -2,7 +2,7 @@ use super::*;
 use crate::i18n::tr3;
 
 impl App {
-    pub(super) fn draw_search_page(&self, hits: &[usize]) {
+    pub(super) fn draw_search_page(&self, hits: &[usize], rows: usize) {
         self.ui.background();
         self.ui.text(
             tr3("BUSCAR LUTADOR", "SEARCH FIGHTER", "BUSCAR LUCHADOR"),
@@ -36,9 +36,9 @@ impl App {
             false,
         );
         let pick = PICK.with(|p| p.get()).min(hits.len().saturating_sub(1));
-        let top = pick.saturating_sub(ROWS - 1);
-        for (row, &i) in hits.iter().skip(top).take(ROWS).enumerate() {
-            let y = 150.0 + row as f32 * 38.0;
+        let top = pick.saturating_sub(rows - 1);
+        for (row, &i) in hits.iter().skip(top).take(rows).enumerate() {
+            let y = ROW_Y + row as f32 * ROW_STEP;
             let on = top + row == pick;
             self.ui.rect(
                 40.0,
@@ -101,7 +101,9 @@ impl App {
             "Type a name, author or series · Arrows pick · Enter applies · Esc clears",
             "Escribe nombre, autor o serie · Flechas eligen · Enter aplica · Esc limpia",
         );
-        self.ui
-            .text(tip, 40.0, 700.0, 15.0, hex("#a79fc4"), Align::Left, false);
+        if !self.osk_shown() {
+            self.ui
+                .text(tip, 40.0, 700.0, 15.0, hex("#a79fc4"), Align::Left, false);
+        }
     }
 }

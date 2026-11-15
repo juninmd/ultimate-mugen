@@ -6,6 +6,7 @@ struct ViewKey {
     sort: usize,
     query: String,
     has_roster: bool,
+    marks: (u64, Option<String>),
     base: Vec<usize>,
 }
 
@@ -18,11 +19,16 @@ impl App {
         let base = self.playable();
         let query = super::select_search::query();
         let has_roster = self.sp.is_some();
+        let marks = (
+            super::select_marks::marks_revision(),
+            super::select_author::author_filter(),
+        );
         let hit = VIEW.with(|c| {
             c.borrow().as_ref().and_then(|(k, v)| {
                 (k.filter == self.sel_filter
                     && k.sort == self.settings.sort
                     && k.has_roster == has_roster
+                    && k.marks == marks
                     && k.query == query
                     && k.base == base)
                     .then(|| v.clone())
@@ -37,6 +43,7 @@ impl App {
             sort: self.settings.sort,
             query,
             has_roster,
+            marks,
             base,
         };
         VIEW.with(|c| *c.borrow_mut() = Some((key, v.clone())));
@@ -61,6 +68,9 @@ impl App {
             });
         }
         self.sort_view(&mut v);
+        if self.sel_filter == super::select_marks::FILTER_RECENT {
+            v.sort_by_key(|&i| self.recent_rank(i).unwrap_or(usize::MAX));
+        }
         v
     }
 }

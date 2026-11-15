@@ -1,0 +1,28 @@
+{
+  "format": "umf-kit/1",
+  "id": "core",
+  "description": "Universal system moves every roster fighter shares. Both reuse the fighter's own `strong` animation.",
+  "moves": [
+    {
+      "id": "launcher",
+      "name": "Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [{ "at": 3, "damage": 58, "level": "heavy", "launch": true, "hitstun": 22, "knockback": [-1, -6] }]
+    },
+    {
+      "id": "escape_burst",
+      "name": "Escape Burst",
+      "input": "x+a+b",
+      "kind": "special",
+      "when": "stand",
+      "anim": "strong",
+      "cost": 500,
+      "burst": true,
+      "invuln": [1, 3],
+      "hits": [{ "at": 3, "damage": 30, "level": "heavy", "knockback": [-6, -4], "launch": true, "hitstop": 12 }]
+    }
+  ]
+}

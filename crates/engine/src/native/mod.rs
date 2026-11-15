@@ -8,6 +8,7 @@ mod armor;
 mod element;
 mod requires;
 mod chain;
+mod rekka;
 mod multihit;
 mod throw;
 pub mod forms;

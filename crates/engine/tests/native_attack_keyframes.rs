@@ -66,7 +66,7 @@ fn every_native_attack_has_three_distinct_rendered_images() {
             }
         }
     }
-    assert_eq!(attacks, 688, "native attack inventory changed");
+    assert_eq!(attacks, 691, "native attack inventory changed");
     assert!(
         failures.is_empty(),
         "attacks with fewer than 3 rendered images: {failures:#?}"

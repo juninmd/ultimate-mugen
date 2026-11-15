@@ -27,6 +27,14 @@ const FLY_FALL_STATE: i32 = 3901;
 
 fn is_ability_state(state: i32) -> bool { (FIRST_ABILITY..FIRST_COMMON).contains(&state) && !VICTIM_STATES.contains(&state) && state != FLY_FALL_STATE || AIR_VARIANTS.contains(&state) }
 
+fn follow_up_states(nc: &NativeChar, def: &CharDef) -> BTreeSet<i32> {
+    let mut out = BTreeSet::new();
+    for m in nc.moves.iter().filter(|m| m.rekka.is_some()) {
+        if let Some(info) = def.movelist.iter().find(|i| i.name == m.name) { out.insert(info.state); out.insert(info.state + 20000); }
+    }
+    out
+}
+
 fn characters() -> Vec<NativeChar> {
     let mut out: Vec<NativeChar> = std::fs::read_dir("../../assets/chars").unwrap().filter_map(|entry| {
         let path = entry.unwrap().path();
@@ -104,7 +112,8 @@ fn every_command_of_every_fighter_performs_its_move_from_real_inputs() {
             if reached.is_empty() { dead_commands.push(format!("{} command {} ({}) triggered no ability state", nc.id, command.name, command.raw)); }
             from_inputs.extend(reached);
         }
-        let declared: BTreeSet<i32> = def.states.keys().copied().filter(|n| is_ability_state(*n)).collect();
+        let follow_ups = follow_up_states(&nc, &def);
+        let declared: BTreeSet<i32> = def.states.keys().copied().filter(|n| is_ability_state(*n) && !follow_ups.contains(n)).collect();
         let missed: Vec<i32> = declared.difference(&from_inputs).copied().collect();
         println!("{:8} {tested:2} button commands, {:2}/{:2} ability states reached from inputs, not reached {missed:?}", nc.id, declared.len() - missed.len(), declared.len());
         if !missed.is_empty() { unreachable_moves.push(format!("{} states {missed:?} cannot be started from any command", nc.id)); }

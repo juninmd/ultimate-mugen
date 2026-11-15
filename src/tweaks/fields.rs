@@ -7,8 +7,8 @@ pub const MENU_KEYS: [&str; 16] = [
 ];
 
 pub const SECTIONS: [(&str, &[&str]); 5] = [
-    ("theme", &["background", "glow_bottom", "glow_left", "glow_right"]),
-    ("hud", &["p1_tint", "p2_tint", "bar_offset_y"]),
+    ("theme", &["preset", "background", "glow_bottom", "glow_left", "glow_right", "accent", "title", "info", "muted", "text"]),
+    ("hud", &["p1_tint", "p2_tint", "bar_offset_y", "life", "life_low", "damage"]),
     ("accessibility", &["hud_opacity", "hud_scale", "colorblind", "reduce_motion"]),
     ("rules", &["rounds_to_win", "round_seconds", "life_percent", "game_speed"]),
     ("menu", &MENU_KEYS),
@@ -38,6 +38,15 @@ pub fn apply(section: &str, key: &str, v: &Value, t: &mut Tweaks, labels: &mut L
     let bad_range = |lo: &str, hi: &str| format!("[{section}] `{key}` must be a number from {lo} to {hi}");
     let c = || v.as_str().and_then(color);
     match (section, key) {
+        ("theme", "preset") => super::presets::apply(v.as_str().unwrap_or(""), t).map_err(|names| format!("[theme] `preset` must be one of: {names}"))?,
+        ("theme", "accent") => t.accent = c().ok_or_else(bad_color)?,
+        ("theme", "title") => t.title = c().ok_or_else(bad_color)?,
+        ("theme", "info") => t.info = c().ok_or_else(bad_color)?,
+        ("theme", "muted") => t.muted = c().ok_or_else(bad_color)?,
+        ("theme", "text") => t.text = c().ok_or_else(bad_color)?,
+        ("hud", "life") => t.life = c().ok_or_else(bad_color)?,
+        ("hud", "life_low") => t.life_low = c().ok_or_else(bad_color)?,
+        ("hud", "damage") => t.damage = c().ok_or_else(bad_color)?,
         ("theme", "background") => t.background = c().ok_or_else(bad_color)?,
         ("theme", "glow_bottom") => t.glow_bottom = c().ok_or_else(bad_color)?,
         ("theme", "glow_left") => t.glow_left = c().ok_or_else(bad_color)?,

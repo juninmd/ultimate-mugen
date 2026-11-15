@@ -252,16 +252,12 @@ impl Hud {
                         let (fx, fw) = fill_rect(self.trail[side]);
                         poly::grad_v(
                             &capsule(fx, by, fw, bh),
-                            Color::new(1.0, 0.55, 0.55, 0.85),
-                            Color::new(0.75, 0.1, 0.2, 0.85),
+                            crate::tweaks::life_trail().0,
+                            crate::tweaks::life_trail().1,
                         );
                     }
                     if ratio > 0.002 {
-                        let (top, bot) = if low {
-                            (hex("#ffb066"), hex("#e0501a"))
-                        } else {
-                            (hex("#fff2a8"), hex("#f0a812"))
-                        };
+                        let (top, bot) = crate::tweaks::life_fill(low);
                         let (fx, fw) = fill_rect(ratio);
                         poly::grad_v(&capsule(fx, by, fw, bh), top, bot);
                         poly::grad_v(

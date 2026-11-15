@@ -20,6 +20,11 @@ fn path(name: &str) -> std::path::PathBuf {
         .unwrap_or_else(|| name.into())
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+pub fn beside_config(name: &str) -> std::path::PathBuf {
+    path(name)
+}
+
 pub fn read(name: &str) -> Option<String> {
     #[cfg(target_arch = "wasm32")]
     {

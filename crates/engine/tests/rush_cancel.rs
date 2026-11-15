@@ -107,3 +107,14 @@ fn a_rush_cancel_replays_identically() {
     };
     assert_eq!(run(), run());
 }
+
+#[test]
+fn window_is_open_only_while_a_connected_move_can_be_cancelled() {
+    let mut m = arena(&fighter("akio"));
+    assert!(m.rush_window(0).is_none());
+    assert!(connect_jab(&mut m));
+    let open = m.rush_window(0).expect("window open after the jab connects");
+    assert!(open > 0.0 && open <= 1.0);
+    m.fighters[0].power = 0.0;
+    assert!(m.rush_window(0).is_none());
+}

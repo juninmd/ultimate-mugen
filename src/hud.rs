@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod passive_meter; mod story_hud; mod taunts; mod training_panel; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod passive_meter; mod rush_marker; mod story_hud; mod taunts; mod training_panel; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -428,7 +428,7 @@ impl Hud {
                         text(&label, tx + 6.2, ty + 4.2, 4.0, WHITE, Align::Left, true);
                     }
                 }
-                if show_life { opacity::scope(opacity::PASSIVE, || passive_meter::draw(&p, s, gt, f, &passive_meter::Bar { x: bx, y: by, w: bw, h: bh, side })); opacity::scope(opacity::GUARD, || guard::draw(&p, &text, s, gt, f, bx, by, bw, bh, side)); }
+                if show_life { opacity::scope(opacity::PASSIVE, || passive_meter::draw(&p, s, gt, f, &passive_meter::Bar { x: bx, y: by, w: bw, h: bh, side })); opacity::scope(opacity::GUARD, || guard::draw(&p, &text, s, gt, f, bx, by, bw, bh, side)); opacity::scope(opacity::GUARD, || rush_marker::draw(&p, &text, s, gt, m.fighters.iter().position(|x| x.id == f.id).and_then(|i| m.rush_window(i)), (bx, by, bw, bh), side)); }
                 if show_wins {
                     for i in 0..m.rounds_to_win {
                         let won = m.wins[side] > i;

@@ -486,7 +486,7 @@ impl App {
             Screen::Controls => self.controls_screen(),
             Screen::Mugen { .. } => self.mugen_screen(),
             Screen::Market => self.market_screen(),
-            Screen::Story { .. } => self.story_screen(dt),
+            Screen::Story { .. } => self.story_screen(dt).await,
             Screen::SurvivalOver { .. } => self.survival_over_screen(),
             Screen::Replays { .. } => self.replays_screen(),
             Screen::Cutscene { .. } => self.cutscene(),

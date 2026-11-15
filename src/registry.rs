@@ -11,7 +11,7 @@ use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::stage::load_stage;
 use ume_formats::vfs::{char_key, find_char_defs, find_stage_defs, stage_key, text, Vfs};
 
-mod bgm; mod kits; mod stress; mod preview_gate;
+mod bgm; mod kits; mod stress; mod preview_gate; mod tuning;
 #[path = "registry_sprite_cache.rs"]
 mod sprite_cache;
 pub use bgm::stage_bgm;
@@ -119,7 +119,7 @@ impl CharEntry {
         }
     }
     fn store(&self, pal: i32, r: Result<CharDef, String>) -> Result<Arc<CharDef>, String> {
-        let d = match r {
+        let d = match self.tuned(r) {
             Ok(d) => Arc::new(d),
             Err(e) => {
                 if self.mugen {

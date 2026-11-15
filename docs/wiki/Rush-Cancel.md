@@ -31,6 +31,8 @@ The same key still charges energy when you are idle: a fighter with control and 
 |---|---|
 | State, buffer, constants | `crates/engine/src/rush.rs` |
 | The cancel itself (`Match::rush_step`, `rush_ready`) | `crates/engine/src/rush/cancel.rs` |
+| Cancel window query for the HUD (`Match::rush_window`: `None` when no cancel is possible, otherwise the share of the window left) | `crates/engine/src/rush/cancel.rs` |
+| "RUSH CANCEL" marker with a shrinking window bar under the lifebar | `src/hud/rush_marker.rs` (`UME_SHOTS_ONLY=rush` captures it) |
 | Event for the presentation | `Event::Rush { fighter, side, guarded }` in `crates/engine/src/matchs/types.rs` |
 | Effects (rings, glow, sparks, tag, Overdrive embers) | `src/vfx/rush.rs` |
 | Rollback checksum | `overdrive`, `cooldown` and `cancels` in `crates/netplay/src/checksum.rs` |

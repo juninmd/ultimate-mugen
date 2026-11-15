@@ -1,0 +1,15 @@
+name: Feature request
+description: Propose a feature, a compatibility gap or an improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes: { label: Problem or goal }
+    validations: { required: true }
+  - type: textarea
+    id: proposal
+    attributes: { label: Proposal, description: Include the M.U.G.E.N or Ikemen GO behavior to match when it is a compatibility request }
+    validations: { required: true }
+  - type: textarea
+    id: alternatives
+    attributes: { label: Alternatives considered }

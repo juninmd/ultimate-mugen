@@ -244,14 +244,15 @@ M.U.G.E.N characters and native **UMF** fighters (one declarative JSON file each
 
 ## 📚 Documentation
 
-- **[Wiki](docs/wiki/Home.md)**: installation, configuration, UMF characters, CNS scripts, stages, screenpacks, netplay and performance.
+- **[Wiki site](https://juninmd.github.io/ultimate-mugen/wiki/)** ([sources](docs/wiki/Home.md)): installation, configuration, UMF characters, CNS scripts, stages, screenpacks, netplay and performance.
+- [Contributing guide](CONTRIBUTING.md) · [Architecture](docs/wiki/Architecture.md) · [ADRs](docs/wiki/adr/README.md)
 - [Roadmap](docs/ROADMAP.md) · [AAA features](docs/AAA_FEATURES.md) · [Roster](docs/ROSTER.md) · [Format research](docs/research-mugen-en.md)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome. Before opening a PR:
+Contributions are welcome. Read the [contributing guide](CONTRIBUTING.md) first. Before opening a PR:
 
 ```bash
 cargo fmt --check

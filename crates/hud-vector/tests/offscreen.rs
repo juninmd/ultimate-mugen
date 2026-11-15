@@ -6,7 +6,7 @@ fn device() -> Option<(wgpu::Device, wgpu::Queue)> {
     let instance = wgpu::Instance::default();
     let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions::default())).ok()?;
     pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
-        required_limits: wgpu::Limits::downlevel_defaults().using_resolution(adapter.limits()),
+        required_limits: adapter.limits(),
         ..Default::default()
     }))
     .ok()
@@ -53,7 +53,7 @@ fn renders_bar_pixels_offscreen() {
     };
     hud.render(&device, &queue, &view, w, h, &[spec]).expect("render");
 
-    let bytes_per_row = 256u32;
+    let bytes_per_row = 512u32;
     let buf = device.create_buffer(&wgpu::BufferDescriptor {
         label: None,
         size: (bytes_per_row * h) as u64,

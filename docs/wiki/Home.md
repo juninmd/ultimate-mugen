@@ -47,6 +47,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Creating stages](Stages.md) | Creators | Full reference: M.U.G.E.N `.def` stages and native stages |
 | [Architecture](Architecture.md) | Developers | Crate map, dependency direction, where new code goes |
 | [Contributing](https://github.com/juninmd/ultimate-mugen/blob/master/CONTRIBUTING.md) | Contributors | Build, checks, rules and pull request flow |
+| [Extension points](Extension-Points.md) | Creators, Contributors | Which file defines each kind of content and whether it needs Rust |
 | [Architecture decisions](adr/README.md) | Contributors | ADRs: why the engine is built this way |
 | [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
 | [Web match smoke](Web-Match-Smoke.md) | Developers | CI test that plays full matches in the browser and catches freezes |

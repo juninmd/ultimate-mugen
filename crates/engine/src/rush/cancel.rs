@@ -66,6 +66,14 @@ impl Match {
         }
     }
 
+    pub fn rush_window(&self, i: usize) -> Option<f32> {
+        let f = &self.fighters[i];
+        if self.round_state != 2 || self.pause.is_some() || !eligible(f) {
+            return None;
+        }
+        Some(((CONTACT_WINDOW + 1 - f.move_contact) as f32 / CONTACT_WINDOW as f32).clamp(0.0, 1.0))
+    }
+
     pub fn rush_ready(&self, i: usize) -> bool {
         let f = &self.fighters[i];
         f.rush.requested() && self.round_state == 2 && self.pause.is_none() && eligible(f)

@@ -33,7 +33,7 @@ mod survival;
 mod update_banner;
 mod results_stats;
 mod select_category;
-mod select_grid;
+mod select_grid; mod select_cursor;
 mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_tags; mod select_view; mod text_fit; mod select_marks; mod select_author;
 mod versus; mod versus_compare;
 mod menu_view; mod menu_icons;
@@ -1262,44 +1262,7 @@ impl App {
             }
             let (rx, ry) = (self.sel_cur[side].0, self.sel_cur[side].1);
             let a = accents[side];
-            let pad = 2.0 + 2.0 * pulse + side as f32 * 3.0;
-            self.ui.rect(
-                rx - pad,
-                ry - pad,
-                cw + pad * 2.0,
-                ch + pad * 2.0,
-                alpha(a, 0.10 + 0.08 * pulse),
-            );
-            self.ui.rect_lines(
-                rx - pad,
-                ry - pad,
-                cw + pad * 2.0,
-                ch + pad * 2.0,
-                2.0,
-                alpha(a, 0.9),
-            );
-            let (bl, bt) = (16.0, 4.0);
-            for (ox, oy, dx, dy) in [
-                (rx - pad, ry - pad, 1.0, 1.0),
-                (rx + cw + pad, ry - pad, -1.0, 1.0),
-                (rx - pad, ry + ch + pad, 1.0, -1.0),
-                (rx + cw + pad, ry + ch + pad, -1.0, -1.0),
-            ] {
-                self.ui.rect(
-                    ox.min(ox + dx * bl),
-                    oy + if dy > 0.0 { -2.0 } else { 2.0 - bt },
-                    bl,
-                    bt,
-                    WHITE,
-                );
-                self.ui.rect(
-                    ox + if dx > 0.0 { -2.0 } else { 2.0 - bt },
-                    oy.min(oy + dy * bl),
-                    bt,
-                    bl,
-                    WHITE,
-                );
-            }
+            self.draw_select_cursor(rx, ry, cw, ch, a, pulse, side);
             if picked[side].is_none() {
                 let tag_w = if side == 0 { 26.0 } else if two { 26.0 } else { 32.0 };
                 let (tag_x, tag_y) = if side == 0 { (rx, ry) } else { (rx, ry + ch - 33.0) };

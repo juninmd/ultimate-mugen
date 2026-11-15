@@ -424,25 +424,10 @@ impl App {
         let mut dir_v = dir;
 
         self.ui.background();
-        self.ui
-            .rect(0.0, 0.0, VW, 118.0, Color::new(0.0, 0.0, 0.0, 0.35));
-        self.ui.text(
+        self.ui.adapted_header(
             tr("CONFIGURAÇÕES", "SETTINGS"),
-            56.0,
-            62.0,
-            38.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
-        self.ui.text(
             &format!("Ultimate MUGEN  v{}", crate::update::VERSION),
-            VW - 56.0,
-            58.0,
-            20.0,
-            hex("#a49cc0"),
-            Align::Right,
-            false,
+            VW,
         );
 
         let tab_w = (VW - 112.0) / TABS.len() as f32;
@@ -455,22 +440,10 @@ impl App {
                 cur = 0;
                 self.audio.sfx("select");
             }
-            let col = if focused {
-                hex("#ff4d6d")
-            } else if active {
-                crate::tweaks::accent(0.38)
-            } else {
-                Color::new(1.0, 1.0, 1.0, 0.06)
-            };
-            self.ui.quad(
-                [
-                    vec2(x + 10.0, 80.0),
-                    vec2(x + tab_w, 80.0),
-                    vec2(x + tab_w - 10.0, 118.0),
-                    vec2(x, 118.0),
-                ],
-                col,
-            );
+            self.ui.adapted_tab(x, 80.0, tab_w - 4.0, 38.0, active);
+            if focused {
+                self.ui.adapted_highlight(("set.tab.x", "set.tab.y"), x, 80.0, tab_w - 4.0, 38.0);
+            }
             self.ui.text(
                 tr(pt, en),
                 x + tab_w / 2.0,
@@ -528,17 +501,10 @@ impl App {
                     act_now = Some((r.act, click_dir, click_dir == 0));
                 }
             }
-            self.ui.rect(
-                x,
-                y,
-                w,
-                h,
-                if f {
-                    hex("#ff4d6d")
-                } else {
-                    Color::new(1.0, 1.0, 1.0, if interactive { 0.07 } else { 0.03 })
-                },
-            );
+            self.ui.adapted_row(x, y, w, h, interactive);
+            if f {
+                self.ui.adapted_highlight(("set.row.x", "set.row.y"), x, y, w, h);
+            }
             self.ui.text(
                 &r.label,
                 x + 22.0,
@@ -558,21 +524,8 @@ impl App {
                 false,
             );
             if let Some(v) = r.level {
-                let bx = x + w - 360.0;
-                for n in 0..VOLUME_STEPS {
-                    let on = n < v && !self.settings.mute;
-                    self.ui.rect(
-                        bx + n as f32 * 22.0,
-                        y + 17.0,
-                        17.0,
-                        20.0,
-                        if on {
-                            hex("#ffcc33")
-                        } else {
-                            Color::new(1.0, 1.0, 1.0, 0.14)
-                        },
-                    );
-                }
+                let on = if self.settings.mute { 0 } else { v };
+                self.ui.adapted_level(x + w - 360.0, y + 17.0, VOLUME_STEPS as usize, on as usize);
                 self.ui.text(
                     &r.value,
                     x + w - 22.0,
@@ -628,17 +581,9 @@ impl App {
         }
 
         let back = self.clicked_rect(56.0, 668.0, 150.0, 40.0);
+        let hot = self.hover_rect(56.0, 668.0, 150.0, 40.0);
         self.ui
-            .rect(56.0, 668.0, 150.0, 40.0, Color::new(1.0, 1.0, 1.0, 0.1));
-        self.ui.text(
-            tr("Voltar", "Back"),
-            131.0,
-            696.0,
-            20.0,
-            WHITE,
-            Align::Center,
-            true,
-        );
+            .adapted_button(56.0, 668.0, 150.0, 40.0, tr("Voltar", "Back"), hot);
         let note = if from_fight {
             tr(
                 "Em luta: regras de jogabilidade valem na próxima luta",

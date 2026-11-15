@@ -73,16 +73,7 @@ impl App {
             .map(|c| c.name.clone())
             .unwrap_or_else(|| "-".into());
         self.ui.background();
-        self.ui.rect(0.0, 0.0, VW, 118.0, Color::new(0.0, 0.0, 0.0, 0.35));
-        self.ui.text(
-            tr("AJUSTES DE PERSONAGEM", "CHARACTER TUNING"),
-            56.0,
-            62.0,
-            38.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
+        self.ui.adapted_header(tr("AJUSTES DE PERSONAGEM", "CHARACTER TUNING"), &name, VW);
         let mut y = ROW_TOP - ROW_H;
         for (i, label) in std::iter::once(("Personagem", "Character"))
             .chain(PARAMS.iter().map(|p| p.label))
@@ -91,17 +82,18 @@ impl App {
         {
             let focused = i == cur;
             y += ROW_H;
+            self.ui.adapted_row(48.0, y - 30.0, VW - 96.0, ROW_H - 6.0, true);
             if focused {
-                self.ui.rect(48.0, y - 30.0, VW - 96.0, ROW_H - 6.0, Color::new(1.0, 0.8, 0.2, 0.14));
+                self.ui.adapted_highlight(("tune.x", "tune.y"), 48.0, y - 30.0, VW - 96.0, ROW_H - 6.0);
             }
             let text = tr(label.0, label.1);
-            self.ui.text(text, 80.0, y, 26.0, hex("#d8d0f0"), Align::Left, focused);
+            self.ui.text(text, 80.0, y, 26.0, if focused { WHITE } else { hex("#d8d0f0") }, Align::Left, focused);
             let value = match i {
                 0 => format!("‹ {name} ›"),
                 _ if i == RESET_ROW => String::new(),
                 _ => format!("‹ {}% ›", tuning.0[i - 1]),
             };
-            self.ui.text(&value, VW - 80.0, y, 26.0, hex("#22e8ff"), Align::Right, focused);
+            self.ui.text(&value, VW - 80.0, y, 26.0, if focused { WHITE } else { hex("#22e8ff") }, Align::Right, focused);
         }
         self.ui.text(
             tr(

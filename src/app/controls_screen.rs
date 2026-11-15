@@ -10,15 +10,7 @@ impl App {
             return;
         }
         self.ui.background();
-        self.ui.text(
-            crate::i18n::t("controls.title"),
-            60.0,
-            70.0,
-            34.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
+        self.ui.adapted_header(crate::i18n::t("controls.title"), "", VW);
         let kl = |i: usize| crate::keybinds::id(self.c.keys.slots[0][i]).unwrap_or("?");
         let touch = self.c.touch.enabled;
         let mut cols = vec![
@@ -59,7 +51,7 @@ impl App {
             _ => None,
         };
         let xs = [60.0, 280.0, 520.0, 760.0, 1000.0];
-        let (top, rh) = (120.0, 52.0);
+        let (top, rh) = (140.0, 52.0);
         for (j, g) in cols.iter().enumerate() {
             let on = matches!((self.c.glyphs, g), (a, b) if a == *b);
             self.ui.text(
@@ -75,13 +67,7 @@ impl App {
         self.ui.rect(50.0, top + 14.0, 1180.0, 2.0, Color::new(1.0, 1.0, 1.0, 0.18));
         for (i, (act, bits, sep)) in rows.iter().enumerate() {
             let y = top + 18.0 + i as f32 * rh;
-            self.ui.rect(
-                50.0,
-                y,
-                1180.0,
-                rh - 8.0,
-                Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.07 } else { 0.03 }),
-            );
+            self.ui.adapted_row(50.0, y, 1180.0, rh - 8.0, i % 2 == 0);
             self.ui.text(
                 act,
                 xs[0],
@@ -156,31 +142,12 @@ impl App {
                 self.c.rumble(i, 0.8, 0.8, 300);
             }
         }
-        self.ui.rect(60.0, 610.0, 200.0, 60.0, hex("#ff4d6d"));
-        self.ui.text(
-            crate::i18n::t("controls.back"),
-            160.0,
-            649.0,
-            26.0,
-            WHITE,
-            Align::Center,
-            true,
-        );
+        self.ui
+            .adapted_button(60.0, 610.0, 200.0, 60.0, crate::i18n::t("controls.back"), true);
         let back = self.clicked_rect(60.0, 610.0, 200.0, 60.0);
         if !touch {
-            self.ui
-                .rect(300.0, 610.0, 360.0, 60.0, Color::new(1.0, 1.0, 1.0, 0.1));
-            let glow = 0.25 + 0.3 * (ume_shell::quad::get_time() as f32 * 2.0).sin().abs();
-            self.ui.rect_lines(300.0, 610.0, 360.0, 60.0, 2.0, Color::new(0.13, 0.9, 1.0, glow));
-            self.ui.text(
-                crate::i18n::t("controls.customize"),
-                480.0,
-                649.0,
-                22.0,
-                WHITE,
-                Align::Center,
-                true,
-            );
+            let hot = self.hover_rect(300.0, 610.0, 360.0, 60.0);
+            self.ui.adapted_button(300.0, 610.0, 360.0, 60.0, crate::i18n::t("controls.customize"), hot);
             if is_key_pressed(KeyCode::Tab) || self.clicked_rect(300.0, 610.0, 360.0, 60.0) {
                 self.key_edit = Some(keyedit::KeyEdit {
                     slot: 0,

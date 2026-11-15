@@ -97,14 +97,10 @@ impl App {
                 clicked = true;
             }
             let on = i == cur;
-            let fill = if on {
-                let pulse = 0.9 + 0.1 * (self.ui.t * 5.0).sin();
-                Color::new(1.0 * pulse, 0.30 * pulse, 0.43 * pulse, k)
-            } else {
-                Color::new(1.0, 1.0, 1.0, 0.08 * k)
-            };
-            self.ui.rect(x, y, w, h, fill);
-            self.ui.rect(x, y + h - 2.0, w, 2.0, Color::new(1.0, 1.0, 1.0, if on { 0.6 * k } else { 0.14 * k }));
+            self.ui.adapted_row(x, y, w, h, k > 0.5);
+            if on && k > 0.5 {
+                self.ui.adapted_highlight(("res.x", "res.y"), x, y, w, h);
+            }
             self.ui.text(
                 it,
                 x + w * 0.5,

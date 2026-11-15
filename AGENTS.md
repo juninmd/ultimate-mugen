@@ -112,7 +112,7 @@
 - See `.agents/skills/ume-character-creator/references/guia_sprites_rig_e_pixel.md` for the prompt template, identity-reference hierarchy, normalization, portrait exception, and full review workflow.
 
 ## Repository Map
-- `docs/wiki/` (EN) and `docs/wiki/pt-BR/` (PT): the wiki, indexed by `Home.md`. `docs/assets/` holds README media; `docs/evidence/` and `docs/research/` hold audit output.
+- `docs/wiki/` (EN) and `docs/wiki/pt-BR/` (PT): the wiki, indexed by `Home.md`, published at https://juninmd.github.io/ultimate-mugen/wiki/ by `scripts/build-wiki.sh` (mdBook, sections in `scripts/wiki-book.mjs`). `docs/wiki/Architecture.md` is the crate map and `docs/wiki/adr/` holds decision records; `CONTRIBUTING.md` is the contributor entry point. `docs/assets/` holds README media; `docs/evidence/` and `docs/research/` hold audit output.
 - `.agents/skills/`: agent skills (`mugen-character-creator`, `ume-character-creator`, `ume-stage-creator`, `ume-media-capture`). One copy only; do not duplicate them elsewhere.
 - `scripts/`: build, audit and capture tools; `tools/`: asset generators.
 
@@ -125,6 +125,8 @@
 - **Regra de ouro**: Baixar e descompactar todos os personagens primeiro; executar suites de teste (`cargo test`, `mugen_check`) **apenas uma vez ao final** da instalação completa.
 - **Browser smoke test (always)**: every change that can affect gameplay, rendering, loading, input or the web build must be checked in a real browser before the PR is opened, not only with `cargo test`. Build the wasm bundle and drive it in headless Chromium: `rustup target add wasm32-unknown-unknown`, `cargo install wasm-bindgen-cli --locked --version <version in Cargo.lock>`, `./scripts/build-web.sh`, then `NODE_PATH=$(npm root -g) WEB_SMOKE_SHOTS=<dir> node scripts/web-smoke.js web/dist` (title, menu, select, stage and fight must finish with `WEB SMOKE OK`; look at the screenshots, a black or frozen frame is a failure). For a M.U.G.E.N. character, also import its zip through `#ume-file`, pick it on the select screen, fight and attach the screenshots to the PR. CI runs the same script as `web-smoke`.
 - Capture README media with `CAPTURE_OUT=<dir> node scripts/web-capture.js <plan.json>` (see `docs/wiki/Media-Capture.md`).
+- Crate boundary gate: `node scripts/crate-boundaries.mjs` (forbidden runtime dependencies per crate).
+- Wiki book: `./scripts/build-wiki.sh` (needs `mdbook` 0.4.52), output in `web/dist/wiki`.
 - File size gate: `node scripts/file-size.mjs` (add `--update` only when a split removed a baseline entry).
 - Engine compatibility: `cargo test --workspace --release`
 - DBZ integration test: `cargo test -p ume-engine --test dbz -- --nocapture`

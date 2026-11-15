@@ -244,7 +244,7 @@ Personagens M.U.G.E.N e lutadores nativos **UMF** (um arquivo JSON declarativo c
 
 ## 📚 Documentação
 
-- **[Wiki](docs/wiki/pt-BR/Home.md)**: instalação, configuração, personagens UMF, scripts CNS, cenários e desempenho.
+- **[Site da wiki](https://juninmd.github.io/ultimate-mugen/wiki/pt-BR/Home.html)** ([fontes](docs/wiki/pt-BR/Home.md)) · [Guia de contribuição](CONTRIBUTING.pt-BR.md) · [Arquitetura](docs/wiki/pt-BR/Arquitetura.md): instalação, configuração, personagens UMF, scripts CNS, cenários e desempenho.
 - [Roadmap](docs/ROADMAP.pt-BR.md) · [Recursos AAA](docs/AAA_FEATURES.md) · [Elenco](docs/ROSTER.md) · [Pesquisa](docs/PESQUISA.md)
 
 ---

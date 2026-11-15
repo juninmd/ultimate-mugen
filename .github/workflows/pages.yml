@@ -16,6 +16,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo install wasm-bindgen-cli --locked --version "$(grep -A1 '^name = "wasm-bindgen"$' Cargo.lock | sed -n 's/^version = "\(.*\)"/\1/p')"
       - run: ./scripts/build-web.sh
+      - run: |
+          curl -fsSL https://github.com/rust-lang/mdBook/releases/download/v0.4.52/mdbook-v0.4.52-x86_64-unknown-linux-gnu.tar.gz | sudo tar -xz -C /usr/local/bin
+          ./scripts/build-wiki.sh
       - run: touch web/dist/.nojekyll
       - uses: peaceiris/actions-gh-pages@v4
         with:

@@ -1,0 +1,27 @@
+name: Bug report
+description: Something behaves wrongly in the game, the web build or the tools
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes: { label: What happened, description: What you expected and what you saw instead }
+    validations: { required: true }
+  - type: textarea
+    id: steps
+    attributes: { label: Steps to reproduce }
+    validations: { required: true }
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options: [Windows, Linux, macOS, Web, Android, iOS]
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes: { label: Version or commit }
+  - type: textarea
+    id: content
+    attributes: { label: Character or stage involved, description: Native fighter id, or the M.U.G.E.N pack name and where it came from }
+  - type: textarea
+    id: logs
+    attributes: { label: Logs or screenshots, render: shell }

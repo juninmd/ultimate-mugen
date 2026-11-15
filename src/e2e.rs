@@ -51,11 +51,16 @@ mod web {
         if let (Some(stage), Screen::Story { .. }, Some((0, 0, _, 0, _))) = (jump, &app.screen, app.story_snapshot()) {
             app.story_jump_to_stage(stage);
         }
+        let ending = crate::query_params().iter().any(|(k, _)| k == "e2e_epilogue");
+        if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (ending, &app.screen, app.story_snapshot()) {
+            app.story_epilogue_begin(app.sel.0, 0);
+        }
         let god = god_requested();
         let mut fighters = String::new();
         let mut over = -1i64;
         let mut paused = false;
         let mut clock = String::from("null");
+        let mut objects = String::from("null");
         if let Some(session) = app.session.as_mut() {
             over = session.over.map(|w| w as i64).unwrap_or(-1);
             paused = session.paused;
@@ -63,6 +68,14 @@ mod web {
             clock = format!(
                 "{{\"tick\":{},\"round\":{},\"round_state\":{},\"round_time\":{},\"wins\":[{},{}]}}",
                 m.game_time, m.round_no, m.round_state, m.round_time, m.wins[0], m.wins[1]
+            );
+            let o = &m.objects;
+            objects = format!(
+                "{{\"breakables\":{},\"intact\":{},\"pickups\":{},\"goal_ticks\":{}}}",
+                o.breakables.len(),
+                o.intact_count(),
+                o.pickups.len(),
+                o.goal_ticks_left().unwrap_or(-1)
             );
             for f in session.m.fighters.iter_mut().filter(|f| !f.is_helper) {
                 if god && f.side == 0 && f.alive {
@@ -80,14 +93,16 @@ mod web {
                 format!("{{\"stage\":{stage},\"wave\":{wave},\"credits\":{credits},\"score\":{score},\"phase\":\"{phase}\"}}")
             })
             .unwrap_or_else(|| "null".into());
+        let epilogue = app.story_epilogue_page().map_or("null".to_string(), |page| page.to_string());
         let json = format!(
-            "{{\"screen\":\"{}\",\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"story\":{},\"fighters\":[{}]}}",
+            "{{\"screen\":\"{}\",\"epilogue\":{epilogue},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
             screen_name(&app.screen),
             app.mode == Mode::Story,
             over,
             paused,
             clock,
             story,
+            objects,
             fighters
         );
         let _ = Reflect::set(&js_sys::global(), &"__ume_state".into(), &JsValue::from_str(&json));

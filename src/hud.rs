@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod passive_meter; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod passive_meter; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -53,7 +53,7 @@ impl Hud {
         cpu: &[u32],
     ) {
         // the world may be zoomed out (big teams) — the HUD always lays out on the base 426×240 view
-        g.fit(BASE_W, BASE_H);
+        g.fit(BASE_W / crate::tweaks::current().hud_scale, BASE_H / crate::tweaks::current().hud_scale);
         let s = g.view_scale;
         let (gox, goy) = (g.ox, g.oy);
         let p = |x: f32, y: f32| vec2(gox + x * s, goy + y * s);
@@ -79,7 +79,7 @@ impl Hud {
             alive_fallback.or(first)
         };
         let Some(r0) = main_of(0) else { return; };
-        let Some(r1) = main_of(1) else { return; };
+        let Some(r1) = main_of(1).or(m.lanes.active.then_some(r0)) else { return; };
         let roots = [r0, r1];
         let partners: Vec<&Fighter> = if m.fighters.len() > 2 {
             m.roots()
@@ -252,16 +252,12 @@ impl Hud {
                         let (fx, fw) = fill_rect(self.trail[side]);
                         poly::grad_v(
                             &capsule(fx, by, fw, bh),
-                            Color::new(1.0, 0.55, 0.55, 0.85),
-                            Color::new(0.75, 0.1, 0.2, 0.85),
+                            crate::tweaks::life_trail().0,
+                            crate::tweaks::life_trail().1,
                         );
                     }
                     if ratio > 0.002 {
-                        let (top, bot) = if low {
-                            (hex("#ffb066"), hex("#e0501a"))
-                        } else {
-                            (hex("#fff2a8"), hex("#f0a812"))
-                        };
+                        let (top, bot) = crate::tweaks::life_fill(low);
                         let (fx, fw) = fill_rect(ratio);
                         poly::grad_v(&capsule(fx, by, fw, bh), top, bot);
                         poly::grad_v(
@@ -845,9 +841,7 @@ impl Hud {
                         Color::new(1.0, 0.7, 0.2, a * (0.5 - 0.15 * k as f32)),
                     );
                 }
-                if att.move_countered > 0 {
-                    outlined("COUNTER", x, cy0 + 68.0, 7.0, Color::new(1.0, 0.45, 0.25, a), al);
-                }
+                combo_tier::draw_badges(&outlined, x, cy0, c.0, att.move_countered > 0, a, al);
                 outlined(
                     &c.0.to_string(),
                     x,

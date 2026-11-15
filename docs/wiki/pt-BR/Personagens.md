@@ -328,7 +328,7 @@ Quando as ondas de choque do ritual de Oboro quebraram os selos ancestrais, Gara
 *Postura de Luta em Pixel Art*
 
 #### Biografia e Background
-Espirituoso, galanteador e destemido, o Capitão Marlow Reyes comanda o lendário galeão voador *El Viento Salgado*. Tendo navegado por vinte anos tanto as águas do Atlântico quanto os mares de nuvens do Arquipélago Celeste, Marlow acumulou a reputação de saquear todas as frotas imperiais que cruzaram seu caminho. Seu sabre foi forjado nas profundezas de um redemoinho mágico e estala com a eletricidade das tormentas marítimas.
+Espirituoso, galanteador e destemido, o Capitão Marlow Reyes comanda o lendário galeão voador *El Viento Salado*. Tendo navegado por vinte anos tanto as águas do Atlântico quanto os mares de nuvens do Arquipélago Celeste, Marlow acumulou a reputação de saquear todas as frotas imperiais que cruzaram seu caminho. Seu sabre foi forjado nas profundezas de um redemoinho mágico e estala com a eletricidade das tormentas marítimas.
 
 Marlow não é um assassino sanguinário: ele vive pela adrenalina da exploração e pelo prazer de descobrir segredos proibidos. Quando a Convergência fundiu continentes flutuantes e terras antigas, Marlow enxergou o maior mapa do tesouro já visto, partindo imediatamente para desafiar os maiores campeões mundiais por relíquias e cartas de navegação.
 

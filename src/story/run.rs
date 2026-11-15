@@ -31,6 +31,8 @@ pub struct StoryRun {
     pub life: f32,
     pub credits: u8,
     pub phase: Phase,
+    pub bonus: bool,
+    pub epilogue: usize,
 }
 
 impl Default for StoryRun {
@@ -42,6 +44,8 @@ impl Default for StoryRun {
             life: 1.0,
             credits: STARTING_CREDITS,
             phase: Phase::Intro,
+            bonus: false,
+            epilogue: 0,
         }
     }
 }
@@ -84,6 +88,7 @@ impl StoryRun {
             return Next::Wave;
         }
         self.wave = 0;
+        self.bonus = false;
         self.stage += 1;
         self.recover(STAGE_RECOVERY);
         if self.stage >= STAGES.len() {

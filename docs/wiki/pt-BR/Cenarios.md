@@ -66,7 +66,7 @@ delta = .8, .8
 | `[PlayerInfo]` | `p1startx`, `p2startx` |
 | `[StageInfo]` | `zoffset`, `localcoord` |
 | `[BGdef]` | `spr` |
-| `[BG ...]` | `type` (`normal`, `anim`), `spriteno`, `actionno`, `layerno` (0 atrás, 1 na frente), `start`, `delta`, `tile`, `tilespacing`, `velocity`, `trans`, `mask`, `scalestart`, `scaledelta`, `angle`, `xshear`, `window`, `maskwindow`, `windowdelta`, `spacing` |
+| `[BG ...]` | `type` (`normal`, `anim`, `parallax`), `spriteno`, `actionno`, `layerno` (0 atrás, 1 na frente), `start`, `delta`, `tile`, `tilespacing`, `velocity`, `trans`, `mask`, `scalestart`, `scaledelta`, `angle`, `xshear`, `window`, `maskwindow`, `windowdelta`, `spacing` |
 
 Parâmetros de transformação da camada (Ikemen / M.U.G.E.N 1.1), aplicados tanto pelo renderizador quanto pela pré-visualização na seleção de cenário:
 
@@ -81,7 +81,62 @@ Parâmetros de transformação da camada (Ikemen / M.U.G.E.N 1.1), aplicados tan
 | `windowdelta = x, y` | Quão rápido a janela de recorte acompanha a câmera (padrão: o `delta` da camada). |
 | `spacing = x, y` | Espaço entre os ladrilhos; usado quando `tilespacing` não existe (`tilespacing` vence se ambos existirem). |
 
-Planejado: `[Music]`, sombras e reflexos configuráveis, `type = parallax`.
+Planejado: sombras e reflexos configuráveis.
+
+## Música, céu e camada de paralaxe
+
+`[Music]` toca a faixa do cenário no início da luta e substitui a música padrão. O arquivo é resolvido em relação ao `.def` e, depois, pela raiz da pasta de conteúdo.
+
+```ini
+[Music]
+bgmusic = sound/meu_tema.ogg
+bgmvolume = 80
+bgmloopstart = 0
+bgmloopend = 0
+```
+
+| Chave | Padrão | Significado |
+|---|---|---|
+| `bgmusic` | nenhum | Arquivo da faixa (`.ogg`, `.mp3`, `.flac` ou `.wav`) |
+| `bgmvolume` | 100 | Percentual do volume normal da música |
+| `bgmloopstart`, `bgmloopend` | 0 | Pontos de loop em amostras; 0 e 0 repete o arquivo inteiro |
+
+`type = parallax` é uma camada que se repete sem fim no eixo X e desliza com o `velocity`, sem precisar de `tile = 1, 0`. Use para uma faixa de céu, colinas distantes ou nuvens. O `delta` continua definindo quanto a camada acompanha a câmera.
+
+```ini
+[BG Cordilheira]
+type = parallax
+spriteno = 2, 0
+layerno = 0
+start = 0, 140
+delta = 0.8, 1
+velocity = 0.1, 0
+```
+
+`[Sky]` desenha um céu animado atrás dos lutadores, sobre a primeira camada de fundo. Funciona em qualquer cenário, inclusive nos que vêm de um `.def`. `type` pode ser:
+
+| Tipo | Aparência |
+|---|---|
+| `aurora` | Faixas verde-azuladas de luz que derivam para os lados no alto da tela |
+| `godrays` | Raios de luz saindo do centro do alto da tela |
+| `stars` | Campo de estrelas que cintilam |
+| `clouds` | Nuvens suaves que atravessam a parte de cima da tela |
+
+| Chave | Padrão | Significado |
+|---|---|---|
+| `color` | `255, 255, 255` | Tom, `r, g, b` de 0 a 255 |
+| `intensity` | 0.6 | Opacidade no ponto mais forte, de 0 a 1 |
+| `speed` | 1 | Velocidade da deriva e da pulsação, de 0 a 8 |
+
+```ini
+[Sky]
+type = aurora
+color = 120, 255, 200
+intensity = 0.5
+speed = 1
+```
+
+O cenário de exemplo `assets/stages/data/example/` usa os três recursos.
 
 ## Ler o cenário a partir de scripts
 
@@ -115,6 +170,20 @@ O grupo `[Camera]` aceita estas chaves extras. Todas são opcionais e o padrão 
 | `boundhighdelta` | 0 | Usado por `dynamicboundhigh` |
 
 `autoturn` em `[PlayerInfo]` (padrão 1) define se os lutadores se viram sozinhos quando o oponente passa por cima deles nos estados parado, andando e agachado. `autoturn = 0` mantém a direção até um controlador mudá-la (`AssertSpecial flag = noautoturn` continua desligando por personagem). `StageVar(camera.<chave>)` e `StageVar(playerinfo.autoturn)` leem todos esses valores.
+
+## Cenário embutido só com dados
+
+Um cenário embutido não precisa de Rust. Crie a pasta `assets/stages/data/<id>/` com um `stage.def` e o arquivo de sprites que ele citar (por exemplo `example.sff`). Na compilação, cada pasta ali é embutida no binário (`build.rs`), aparece no seletor de cenários como cenário embutido e é carregada como qualquer cenário M.U.G.E.N, com `[Music]`, `[Sky]` e camadas de paralaxe. O nome exibido vem de `[Info] displayname`.
+
+```
+assets/stages/data/example/
+  stage.def
+  example.sff
+```
+
+A pasta `example` é um cenário funcional com céu aurora e uma cordilheira em paralaxe. `scripts/make-example-stage.py` a regenera. Recompile depois de adicionar ou alterar arquivos, porque eles são embutidos.
+
+Os cenários nativos em Rust continuam disponíveis para arte procedural e efeitos reativos (veja abaixo).
 
 ## Cenário nativo
 

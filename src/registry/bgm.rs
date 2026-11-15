@@ -1,6 +1,7 @@
 use super::MusicLoop;
 use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::vfs::{text, Vfs};
+
 pub fn stage_bgm(vfs: &Vfs, def: &str) -> Option<(Vec<u8>, MusicLoop)> {
     let secs = parse_ini(&text(vfs.get(&ume_formats::vfs::norm_path(def))?));
     let m = find_section(&secs, "music")?;
@@ -16,11 +17,16 @@ pub fn stage_bgm(vfs: &Vfs, def: &str) -> Option<(Vec<u8>, MusicLoop)> {
             .and_then(|v| v.trim().parse::<usize>().ok())
             .unwrap_or(0)
     };
+    let percent = m
+        .get("bgmvolume")
+        .and_then(|v| v.trim().parse::<f32>().ok())
+        .unwrap_or(100.0);
     Some((
         bytes.to_vec(),
         MusicLoop {
             start: n("bgmloopstart"),
             end: n("bgmloopend"),
+            gain: Some((percent / 100.0).clamp(0.0, 2.5)),
         },
     ))
-}
+}

@@ -437,5 +437,5 @@ pub fn glass(ui: &Ui, x: f32, y: f32, w: f32, h: f32, a: f32) {
 }
 
 pub fn accent_of(idx: usize) -> Color {
-    col(THEMES[idx % THEMES.len()].accent)
+    crate::tweaks::menu_accent().unwrap_or(col(THEMES[idx % THEMES.len()].accent))
 }

@@ -128,7 +128,7 @@ pub struct NativeMove {
 pub struct NativeStats {
     #[serde(default)] pub life: Option<f64>, #[serde(default)] pub power: Option<f64>, #[serde(default)] pub attack: Option<f64>, #[serde(default)] pub defense: Option<f64>,
     #[serde(default)] pub walk: Option<[f64; 2]>, #[serde(default)] pub run: Option<[f64; 2]>, #[serde(default)] pub jump: Option<[f64; 4]>,
-    #[serde(default)] pub gravity: Option<f64>, #[serde(default, rename = "airJumps")] pub air_jumps: Option<f64>,
+    #[serde(default)] pub gravity: Option<f64>, #[serde(default, rename = "airJumps")] pub air_jumps: Option<f64>, #[serde(default, rename = "airDashes")] pub air_dashes: Option<f64>,
     #[serde(default)] pub height: Option<f64>, #[serde(default)] pub width: Option<[f64; 2]>,
 }
 
@@ -142,7 +142,7 @@ pub struct NativeArt {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NativeChar {
     pub format: String, pub id: String, pub name: String, pub series: String, pub author: String,
-    #[serde(default)] pub description: Option<String>,
+    #[serde(default)] pub description: Option<String>, #[serde(default)] pub profile: Option<super::profile::CharProfile>,
     pub color: String,
     #[serde(default)] pub stats: NativeStats,
     #[serde(default)] pub passives: Option<super::passive_spec::PassiveSpec>,

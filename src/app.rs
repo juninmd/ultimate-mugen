@@ -33,7 +33,7 @@ mod update_banner;
 mod results_stats;
 mod select_category;
 mod select_grid;
-mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips;
+mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile;
 mod versus; mod versus_compare;
 mod menu_view; mod menu_icons;
 mod menu_focus;
@@ -1183,7 +1183,7 @@ impl App {
                 );
             }
             self.ui
-                .rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.7));
+                .rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.7)); self.draw_tile_flag(i, cx, cy, cw, cy + ch - 18.0);
             let up = self.names_up[i].as_str();
             let nm = if emugen {
                 crate::credit_line::truncate(up, 13)
@@ -1461,16 +1461,7 @@ impl App {
         }
         self.ui
             .rect(0.0, 652.0, VW, 1.5, alpha(accents[picking.min(1)], 0.7));
-        let desc = &self.reg.chars[cur[picking]].description;
-        self.ui.text(
-            desc,
-            VW / 2.0,
-            680.0,
-            16.0,
-            Color::new(0.85, 0.82, 0.94, 0.7),
-            Align::Center,
-            false,
-        );
+        self.draw_select_profile(cur[picking], accents[picking.min(1)]);
         let flabel = self.category_label();
         self.sel_buf.clear();
         let _ = write!(
@@ -1483,8 +1474,8 @@ impl App {
         self.ui.text(
             &self.sel_buf,
             VW / 2.0,
-            706.0,
-            12.0,
+            713.0,
+            11.0,
             Color::new(0.64, 0.61, 0.75, 0.6),
             Align::Center,
             false,
@@ -1793,7 +1784,7 @@ impl App {
         let by = py + ph - 94.0;
         self.ui
             .rect(px, by, pw, 94.0, Color::new(0.0, 0.0, 0.05, 0.7));
-        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 88.0); self.draw_stat_gauges(px, by + 20.0, pw, i);
+        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 88.0); self.draw_card_flag(i, px + pw, by); self.draw_stat_gauges(px, by + 20.0, pw, i);
         let nm = self.names_up[i].as_str();
         self.ui.text_bold(
             nm,

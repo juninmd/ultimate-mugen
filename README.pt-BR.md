@@ -109,7 +109,7 @@ O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil
 
 ## 🆕 Novidades
 
-- **Modo História:** cinco fases de ondas, capangas com traços próprios e um chefe por fase, com cutscenes e finais. [Guia](docs/wiki/Story-Mode.md)
+- **Modo História:** cinco fases de ondas, capangas com traços próprios e um chefe por fase, com cutscenes e finais, além de caixotes e barris quebráveis, comida que recupera vida e fases bônus de destruir o carro. [Guia](docs/wiki/Story-Mode.md) · [Objetos de cenário](docs/wiki/pt-BR/Objetos-de-Cenario.md)
 - **Música e áudio:** uma trilha embutida por cenário, sons de golpe em níveis, música abaixando nos impactos e torcida no KO. [Áudio](docs/wiki/Audio.md)
 - **Atalhos de golpe:** ligue qualquer golpe da lista de pausa em `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforma e `R3` sozinho carrega ki. [Controles](docs/wiki/pt-BR/Configuracao.md#controles)
 - **Golpes mais ricos:** todo lutador nativo tem especiais EX, hyper nível 3, explosão de escape, forma ascendida com hyper próprio e versões aéreas dos especiais. [Kit compartilhado](docs/wiki/Characters.md#shared-toolkit)

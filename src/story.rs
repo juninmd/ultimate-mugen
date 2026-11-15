@@ -1,3 +1,7 @@
+pub mod epilogue;
+pub mod objects;
+pub mod objects_art;
+pub mod objects_textures;
 mod run;
 mod stages;
 pub mod text;

@@ -44,7 +44,7 @@ impl App {
             (crate::i18n::t("controls.super"), &[k::D2, k::W], "+"),
             (crate::i18n::t("controls.awaken"), &[k::T], ""),
             (crate::i18n::t("controls.pause"), &[k::S], ""),
-            (crate::i18n::tr("Carregar ki", "Charge ki"), &[k::S], ""),
+            (crate::i18n::tr("Carregar / Rush", "Charge / Rush"), &[k::S], ""),
         ];
         let move_text = |g: Glyphs| match g {
             Glyphs::Keyboard => format!("{} {} {} {}", kl(0), kl(1), kl(2), kl(3)),

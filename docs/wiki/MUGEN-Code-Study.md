@@ -30,6 +30,36 @@ Read-only study of public M.U.G.E.N packages: Goku GT (Fighter Factory pack from
 
 These map to the `lunge`, `falcondive`, `shoulder` and `meteordrop` moves added to the native roster, see [Fighter study](Fighter-Study.md).
 
+## Census: how much of a package is repetition
+
+`ume-tools mugen-census <zip-or-dir>...` (`crates/devtools/src/mugen_census.rs`) reads only the text files of a package (`.cns`, `.st`, `.cmd`, `.air`) and counts states, controllers, commands and animation actions. Three packages measured, nothing extracted or copied:
+
+| Package | Code files | Code lines | Statedefs | Common states redeclared | Controllers | Commands | AI commands | AIR actions |
+|---|---|---|---|---|---|---|---|---|
+| Goku GT (DBFZ style) | 11 | 35092 | 329 | 56 | 3114 | 78 | 2 | 529 |
+| Goku UI (DBFZ style) | 7 | 27742 | 258 | 68 | 2241 | 78 | 2 | 294 |
+| Kung Fu Man (bundled) | 6 | 10646 | 118 | 10 | 711 | 74 | 0 | 234 |
+
+| Controller | Uses | Share | UMF equivalent |
+|---|---|---|---|
+| `changestate` | 997 | 16% | generated from `cancels`, `when` and move `kind` |
+| `playsnd` | 813 | 13% | `voice` and per-level hit sounds |
+| `explod` | 552 | 9% | `fx`, `spark`, `hitAnim` |
+| `velset` | 352 | 6% | `vel` on frames |
+| `helper` | 311 | 5% | `projectile`, `throw`, abilities |
+| `hitdef` | 272 | 4% | `hits[]` |
+| `changeanim` | 249 | 4% | `anim` per move |
+| `destroyself` | 224 | 4% | projectile `removeTime` |
+
+What the numbers say:
+
+1. **A fighter is 10k to 35k lines of code**, and the eight controllers above are 61% of all controller blocks. Every one of them is something UMF generates from a field instead of a hand-written state.
+2. **Common states are copied and edited by hand.** Each package redeclares 10 to 68 of the engine's common states (stand, walk, jump, guard, get-hit) to tweak them. UMF fighters never touch them: the differences are fields in `stats` and `anims`.
+3. **Variants are full copies.** EX and form versions of a move are whole new statedefs. In UMF a variant is one entry with `"use": "<move>"` and the fields that change.
+4. **Nothing is shared between packages.** Two Goku packages by the same author family share no file. UMF has `extends` and kits, so a new fighter can inherit a whole fighter or a move pack and stay in sync with it.
+
+The same measurement on the native roster (21 fighters, 652 moves): 355 moves have a body identical to a move of another fighter, and 1136 of 1535 animations equal the most common version of that animation. That duplication is what `extends`, `use` and kits remove, see [Reuse](UMF-Character.md#reuse-extends-use-and-kits). The example fighter `docs/examples/umf/mika.json` is 671 bytes and plays with 40+ moves.
+
 ## Limits
 
 UMF cannot yet express scripted finishers, stage interactions (pit) or AI command scripts. Life conditions are now available through `requires` (see [UMF character](UMF-Character.md)).

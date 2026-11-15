@@ -49,7 +49,7 @@ impl App {
             let on = i == self.pause.move_cur;
             let hover = self.hover_rect(row.x, row.y, row.w, row.h) && self.hover_rect(l.x, l.y, l.w, l.h);
             let (top, bot, edge) = if on {
-                (Color::new(1.0, 0.3, 0.43, 0.55), Color::new(0.6, 0.12, 0.3, 0.45), Some(fade(hex(PINK), 0.9 * a)))
+                (crate::tweaks::accent(0.55), crate::tweaks::accent_deep(0.45), Some(fade(hex(PINK), 0.9 * a)))
             } else if hover {
                 (Color::new(1.0, 1.0, 1.0, 0.14), Color::new(1.0, 1.0, 1.0, 0.08), None)
             } else {
@@ -121,7 +121,7 @@ impl App {
             let (x, y, row_h) = (r.x, r.y, r.h);
             let hover = self.hover_rect(r.x, r.y, r.w, r.h);
             let (top, bot, edge) = if on {
-                (Color::new(1.0, 0.3, 0.43, 0.85), Color::new(0.62, 0.12, 0.3, 0.85), Some(fade(hex("#ffd0da"), 0.7 * a)))
+                (crate::tweaks::accent(0.85), crate::tweaks::accent_deep(0.85), Some(fade(hex("#ffd0da"), 0.7 * a)))
             } else if hover {
                 (Color::new(1.0, 1.0, 1.0, 0.16), Color::new(1.0, 1.0, 1.0, 0.08), None)
             } else {

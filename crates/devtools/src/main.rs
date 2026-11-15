@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use ume_devtools::{ability_reel, audit_moves, audit_sprites, motion, pack, story_npcs, thumbnails};
+use ume_devtools::{ability_reel, audit_moves, audit_sprites, motion, mugen_census, pack, story_npcs, thumbnails};
 
 const USAGE: &str = "usage: ume-tools <command>\n\
   pack-sprites [out_root=web/dist] [--sprites dir]  pack assets/chars/sprites into web .pack files\n\
@@ -7,6 +7,7 @@ const USAGE: &str = "usage: ume-tools <command>\n\
   audit-moves [dir=assets/chars] [--json] static roster audit (inputs, cancels, throws, hit boxes)\n\
   audit-sprites --out <report.json> [--root <repo>]  native PNG inventory\n\
   gen-story-npcs [chars=assets/chars]    regenerate assets/chars/npc_*.json (overwrites them)\n\
+  mugen-census <zip-or-dir>...           count states, controllers, commands and actions of M.U.G.E.N packages\n\
   ability-reel <frames_dir> <out_dir> [width=448] [colors=64] [fps=14] [--no-normals]  captioned GIF per fighter (needs ffmpeg)\n\
   motion-descriptor --character f --sprites dir --animation name --out file  sprite-gen asset descriptor\n\
   preview-motion|preview-scene --character f --sprites dir --animation name --sprite-gen exe --out dir [--loop|--cycles n]";
@@ -45,6 +46,10 @@ fn run(args: &[String]) -> Result<(), String> {
         Some("gen-story-npcs") => {
             let written = story_npcs::generate(Path::new(positional.first().map(|s| s.as_str()).unwrap_or("assets/chars")))?;
             println!("OK: {}", written.join(", "));
+        }
+        Some("mugen-census") => {
+            let all = positional.iter().map(|path| mugen_census::census_path(Path::new(path.as_str()))).collect::<Result<Vec<_>, _>>()?;
+            mugen_census::report(&all).iter().for_each(|l| println!("{l}"));
         }
         Some("ability-reel") => {
             let num = |i: usize, default: usize| positional.get(i).map(|v| v.parse::<usize>().map_err(|e| e.to_string())).transpose().map(|v| v.unwrap_or(default));

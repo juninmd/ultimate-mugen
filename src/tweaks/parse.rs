@@ -2,7 +2,7 @@ use super::fields::{apply, SECTIONS};
 use super::model::{Labels, Tweaks};
 use toml::{Table, Value};
 
-pub const DEFAULT_TEXT: &str = "[theme]\nbackground = \"#0b0716\"\nglow_bottom = \"#ff4d6e\"\nglow_left = \"#21e6ff\"\nglow_right = \"#ffcc33\"\n\n[hud]\np1_tint = \"#4db8ff\"\np2_tint = \"#ff6185\"\nbar_offset_y = 0\n\n# [rules]\n# rounds_to_win = 2\n# round_seconds = 99\n# life_percent = 100\n# game_speed = 1.0\n\n# [menu]\n# arcade = \"Fight!\"\n";
+pub const DEFAULT_TEXT: &str = "[theme]\nbackground = \"#0b0716\"\nglow_bottom = \"#ff4d6e\"\nglow_left = \"#21e6ff\"\nglow_right = \"#ffcc33\"\n\n[hud]\np1_tint = \"#4db8ff\"\np2_tint = \"#ff6185\"\nbar_offset_y = 0\n\n# [theme] also takes: preset = \"emerald\" (or sunset, mono, default), accent, title, info, muted, text\n# [hud] also takes: life, life_low, damage\n\n# [music]\n# fight = \"music/my-theme.ogg\"\n# dojo = \"music/dojo.ogg\"\n\n# [rules]\n# rounds_to_win = 2\n# round_seconds = 99\n# life_percent = 100\n# game_speed = 1.0\n\n# [menu]\n# arcade = \"Fight!\"\n";
 
 fn closest<'a>(name: &str, options: impl Iterator<Item = &'a str>) -> Option<&'a str> {
     options.into_iter().find(|o| o.starts_with(&name[..1.min(name.len())]) && (o.contains(name) || name.contains(o) || o.len().abs_diff(name.len()) <= 2))
@@ -21,7 +21,13 @@ pub fn parse(text: &str) -> (Tweaks, Labels, Vec<String>) {
             return (t, labels, warnings);
         }
     };
-    for (name, value) in &root {
+    let mut sections: Vec<(&String, &Value)> = root.iter().collect();
+    sections.sort_by_key(|(name, _)| name.as_str() != "theme");
+    for (name, value) in sections {
+        if name == "music" {
+            super::music::collect(value, &mut labels, &mut warnings);
+            continue;
+        }
         let Some((_, keys)) = SECTIONS.iter().find(|(s, _)| s == name) else {
             let hint = closest(name, SECTIONS.iter().map(|(s, _)| *s)).map(|s| format!(" (did you mean [{s}]?)")).unwrap_or_default();
             warnings.push(format!("unknown section [{name}]{hint}"));
@@ -31,7 +37,9 @@ pub fn parse(text: &str) -> (Tweaks, Labels, Vec<String>) {
             warnings.push(format!("`{name}` must be a [{name}] section"));
             continue;
         };
-        for (key, v) in table {
+        let mut entries: Vec<(&String, &Value)> = table.iter().collect();
+        entries.sort_by_key(|(key, _)| key.as_str() != "preset");
+        for (key, v) in entries {
             if !keys.contains(&key.as_str()) {
                 let hint = closest(key, keys.iter().copied()).map(|k| format!(" (did you mean `{k}`?)")).unwrap_or_default();
                 warnings.push(format!("[{name}] unknown key `{key}`{hint}"));
@@ -71,6 +79,20 @@ mod tests {
         assert_eq!(l, vec![("menu.arcade".to_string(), "Fight!".to_string())]);
         assert_eq!(w.len(), 1);
         assert!(w[0].contains("1 to 9"));
+    }
+
+    #[test]
+    fn accessibility_section() {
+        let (t, _, w) = parse("[accessibility]\nhud_opacity = 0.5\ncolorblind = true\nreduce_motion = true\n");
+        assert_eq!(t.hud_opacity, 0.5);
+        let (s, _, _) = parse("[accessibility]\nhud_scale = 1.2\n");
+        assert_eq!(s.hud_scale, 1.2);
+        assert!(t.colorblind && t.reduce_motion);
+        assert!(w.is_empty());
+        let (t, _, w) = parse("[accessibility]\nhud_opacity = 0.1\ncolorblind = 1\n");
+        assert_eq!(t.hud_opacity, 1.0);
+        assert!(!t.colorblind);
+        assert_eq!(w.len(), 2);
     }
 
     #[test]

@@ -12,7 +12,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use ume_engine::palette::{BlendMode, PalParams};
 
-mod layers; mod rim; mod warm; mod wide_image;
+mod layers; mod rim; mod warm; mod story_loop; mod wide_image;
 use layers::draw_transformed_layer_quad;
 
 pub struct Gfx {
@@ -1086,7 +1086,7 @@ impl MatchRenderer {
                 let (h, w, x) = crate::stages::illustration_layout(*span, image.w as f32 / image.h as f32, h, m.view_w, m.camera.x, m.zoom);
                 let rect = ImageRect { x: x + shx, y: ground - h * 0.85 + shy, w, h, view_w: m.view_w, view_h: m.view_h, cam_x: m.camera.x };
                 if front { return if *span > 0.0 { } else { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true) }; }
-                g.draw_wide_image(if frames.is_empty() { image } else { &frames[crate::stages::looping::frame_index(m.game_time as usize)] }, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
+                g.draw_backdrop(image, frames, *span, m.game_time as usize, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
                 if *span <= 0.0 { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false); }
             }
             StageArt::Mugen(bg) => {

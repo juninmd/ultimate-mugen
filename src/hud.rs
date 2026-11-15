@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod passive_meter; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,

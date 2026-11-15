@@ -2,7 +2,7 @@
 use crate::app::{App, Mode, Screen, Team};
 use crate::gfx::*;
 use crate::shots::replay::replay_determinism;
-mod epilogue_tour; mod flag_tour; mod i18n_tour; mod menu_motion_tour; mod passive_tour; mod pause_tour; mod replay; mod results_tour; mod story_tour; mod story_loop_tour; mod theme_tour; mod umf_kit_tour; mod story_objects_tour; mod storymode_tour; mod suzume_tour; mod touch_tour; mod training_tour; mod rush_tour; mod keys_tour;
+mod epilogue_tour; mod flag_tour; mod i18n_tour; mod menu_motion_tour; mod passive_tour; mod pause_tour; mod replay; mod results_tour; mod story_tour; mod story_loop_tour; mod theme_tour; mod umf_kit_tour; mod story_objects_tour; mod storymode_tour; mod suzume_tour; mod touch_tour; mod training_tour; mod rush_tour; mod keys_tour; mod roster_tour;
 
 async fn frames(app: &mut App, n: usize) {
     for _ in 0..n {
@@ -740,7 +740,7 @@ pub async fn run(app: &mut App, dir: &str) {
         screen(app, dir, "select-team5", 60).await;
         return;
     }
-    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("fx") { fx_tour(app, dir).await; return; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("flags") { return flag_tour::run(app, dir).await; }
+    if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("fx") { fx_tour(app, dir).await; return; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("flags") { return flag_tour::run(app, dir).await; } if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("roster") { return roster_tour::run(app, dir).await; }
     if std::env::var("UME_SHOTS_ONLY").as_deref() == Ok("menu") {
         app.screen = Screen::Title;
         screen(app, dir, "menu-title", 30).await;

@@ -20,12 +20,17 @@ impl App {
             .with_text("player", &self.player_char_id())
     }
 
-    pub(crate) fn route_allows(&self, char_index: usize) -> bool {
+    pub(crate) fn route_gate(&self) -> impl Fn(usize) -> bool + '_ {
+        let context = self.route_context();
+        move |char_index| self.route_allows_in(char_index, &context)
+    }
+
+    fn route_allows_in(&self, char_index: usize, context: &Context) -> bool {
         let id = self.reg.chars[char_index]
             .id
             .strip_prefix("umf:")
             .unwrap_or(&self.reg.chars[char_index].id);
-        unlock_rules().allows(&format!("char:{id}"), &self.route_context())
+        unlock_rules().allows(&format!("char:{id}"), context)
     }
 
     fn route_opponent(

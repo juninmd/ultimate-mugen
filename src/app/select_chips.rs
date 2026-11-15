@@ -10,7 +10,7 @@ const FILTER_Y: f32 = 12.0;
 const SORT_Y: f32 = 44.0;
 
 impl App {
-    fn select_chip(&self, x: f32, y: f32, label: &str, on: bool) -> bool {
+    pub(crate) fn select_chip(&self, x: f32, y: f32, label: &str, on: bool) -> bool {
         let hover = self.hover_rect(x, y, W, H);
         let fill = if on {
             Color::new(1.0, 0.8, 0.2, 0.9)
@@ -29,6 +29,9 @@ impl App {
         let Screen::Select { mut cur, picking, picked } = self.screen else {
             return false;
         };
+        if self.search_pill() {
+            return true;
+        }
         let filters = [
             crate::i18n::t("select.filter_all"),
             crate::i18n::t("select.filter_originals"),

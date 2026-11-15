@@ -68,7 +68,7 @@ Rules of the merge, applied by `crates/engine/src/native/kit.rs` before the norm
 
 - Objects (`stats`, `art`, `abilities`, `passives`) merge key by key, so `"stats": { "life": 1080 }` changes one number. An animation in `anims` replaces the inherited one as a whole. A value of `null` removes the inherited key.
 - `moves` are matched by `id`. An entry with only some fields keeps the rest (`{ "id": "gale", "name": "Crimson Gale" }`), a bare string (`"launcher"`) lists an inherited move unchanged, and `{ "id": "slide", "remove": true }` drops one. Moves you list come first, in your order; inherited moves you did not mention follow.
-- Identity is personal: `name`, `author`, `description`, `boss` and `npc` are never inherited from a fighter.
+- Identity is personal: `name`, `author`, `description`, `profile`, `boss` and `npc` are never inherited from a fighter.
 - `spriteSet` lets the new fighter reuse the parent's pixel-art pack. Recolour it with `palettes` and leave `art.style.colors` inherited: those are the reference colours of the pack.
 - Mistakes name the culprit (`unknown kit or fighter`, `move x uses y, which no kit or earlier move defines`), and `extends` chains deeper than 8 are rejected.
 

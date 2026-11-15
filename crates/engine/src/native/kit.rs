@@ -5,7 +5,7 @@ use std::sync::{OnceLock, RwLock};
 
 pub const KIT_FORMAT: &str = "umf-kit/1";
 const MAX_DEPTH: usize = 8;
-const PERSONAL_KEYS: [&str; 5] = ["name", "boss", "npc", "description", "author"];
+const PERSONAL_KEYS: [&str; 6] = ["name", "boss", "npc", "description", "author", "profile"];
 const BUILT_IN: [&str; 1] = [include_str!("kits/core.json")];
 
 pub(super) struct Kit {

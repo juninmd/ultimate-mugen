@@ -66,7 +66,7 @@ Regras da mescla, aplicadas por `crates/engine/src/native/kit.rs` antes do parse
 
 - Objetos (`stats`, `art`, `abilities`, `passives`) mesclam chave a chave: `"stats": { "life": 1080 }` muda um número só. Uma animação em `anims` substitui a herdada por inteiro. O valor `null` remove a chave herdada.
 - `moves` casam por `id`. Uma entrada com parte dos campos mantém o resto (`{ "id": "gale", "name": "Crimson Gale" }`), um texto simples (`"launcher"`) lista um golpe herdado sem mudanças e `{ "id": "slide", "remove": true }` remove um. Os golpes listados vêm primeiro, na sua ordem; os herdados não citados vêm depois.
-- Identidade é pessoal: `name`, `author`, `description`, `boss` e `npc` nunca são herdados de um lutador.
+- Identidade é pessoal: `name`, `author`, `description`, `profile`, `boss` e `npc` nunca são herdados de um lutador.
 - `spriteSet` reaproveita o pacote de pixel art do pai. Recolora com `palettes` e deixe `art.style.colors` herdado: são as cores de referência do pacote.
 - Erros apontam o culpado (`unknown kit or fighter`, `move x uses y, which no kit or earlier move defines`) e cadeias de `extends` com mais de 8 níveis são recusadas.
 

@@ -27,6 +27,7 @@ async fn draw_frames(app: &mut App, n: usize, shot: Option<String>) {
 pub async fn run(app: &mut App, dir: &str) {
     let only = std::env::var("UME_STAGE").ok();
     for (st, p1, p2) in [
+        ("example", "kaito", "shion"),
         ("dojo", "kaito", "shion"),
         ("neon", "volta", "suzume"),
         ("bamboo", "lian", "sylene"),

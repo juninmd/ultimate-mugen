@@ -377,7 +377,7 @@ impl Registry {
                 Err(e) => eprintln!("bad builtin char: {e}"),
             }
         }
-        let builtin_stages = stages::builtin();
+        let builtin_stages = crate::stage_data::builtin_all();
         let stages = builtin_stages
             .iter()
             .enumerate()
@@ -641,7 +641,7 @@ impl Registry {
                         index: i,
                         future: Some(Box::pin(async move {
                             let _ = stages::prepare_illustration(&id).await;
-                            StageBuild { stage: (stages::builtin()[idx].build)(), preview: None }
+                            StageBuild { stage: (crate::stage_data::builtin_all()[idx].build)(), preview: None }
                         })),
                         immediate: None,
                     };

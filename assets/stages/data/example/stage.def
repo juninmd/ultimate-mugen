@@ -1,0 +1,63 @@
+[Info]
+name = "Example Aurora Dock"
+displayname = "Cais da Aurora (exemplo)"
+author = "Ultimate MUGEN"
+mugenversion = 1.1
+
+[Camera]
+startx = 0
+starty = 0
+boundleft = -120
+boundright = 120
+boundhigh = -25
+boundlow = 0
+verticalfollow = 0.2
+tension = 50
+
+[PlayerInfo]
+p1startx = -70
+p2startx = 70
+
+[StageInfo]
+zoffset = 200
+localcoord = 320, 240
+
+[BGdef]
+spr = example.sff
+
+[BG Sky]
+type = normal
+spriteno = 0, 0
+layerno = 0
+start = 0, 0
+delta = 1, 1
+
+[BG Hills]
+type = normal
+spriteno = 1, 0
+layerno = 0
+start = 0, 70
+delta = 0.5, 1
+tile = 1, 0
+
+[BG Ridge]
+type = parallax
+spriteno = 2, 0
+layerno = 0
+start = 0, 140
+delta = 0.8, 1
+velocity = 0.1, 0
+
+[BG Floor]
+type = normal
+spriteno = 3, 0
+layerno = 0
+start = 0, 170
+delta = 1, 1
+tile = 1, 0
+
+[Sky]
+type = aurora
+color = 120, 255, 200
+intensity = 0.5
+speed = 1

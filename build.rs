@@ -59,4 +59,36 @@ fn main() {
         out,
     )
     .unwrap();
+    stage_data();
+}
+
+// Every folder under assets/stages/data/<id>/ is a built-in stage: its files are embedded and
+// <id>/stage.def is loaded like a MUGEN stage. Adding a folder adds a stage, no Rust needed.
+fn stage_data() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/stages/data");
+    println!("cargo:rerun-if-changed={}", root.display());
+    let mut dirs: Vec<_> = fs::read_dir(&root)
+        .map(|rd| rd.filter_map(|e| e.ok()).map(|e| e.path()).filter(|p| p.is_dir()).collect())
+        .unwrap_or_default();
+    dirs.sort();
+    let mut out = String::from("pub static STAGE_DATA: &[(&str, &[(&str, &[u8])])] = &[\n");
+    for dir in &dirs {
+        let id = dir.file_name().unwrap().to_string_lossy().to_string();
+        let mut files: Vec<_> = fs::read_dir(dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .map(|e| e.path())
+            .filter(|p| p.is_file())
+            .collect();
+        files.sort();
+        out += &format!("    ({id:?}, &[\n");
+        for f in &files {
+            println!("cargo:rerun-if-changed={}", f.display());
+            let name = f.file_name().unwrap().to_string_lossy().to_string();
+            out += &format!("        ({:?}, include_bytes!({:?}) as &[u8]),\n", format!("{id}/{name}"), f.display().to_string());
+        }
+        out += "    ]),\n";
+    }
+    out += "];\n";
+    fs::write(Path::new(&env::var("OUT_DIR").unwrap()).join("stage_data_gen.rs"), out).unwrap();
 }

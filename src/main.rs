@@ -32,6 +32,7 @@ mod settings;
 mod settings_labels;
 mod shots;
 mod sound_mix;
+mod stage_data;
 mod stage_tour;
 mod stagefx;
 mod stages;

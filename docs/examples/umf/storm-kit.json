@@ -1,0 +1,16 @@
+{
+  "format": "umf-kit/1",
+  "id": "storm-kit",
+  "description": "A shared pack of moves. Any fighter with a `tempest` animation can extend it.",
+  "moves": [
+    {
+      "id": "storm_step",
+      "name": "Storm Step",
+      "input": "F, F, a",
+      "kind": "special",
+      "anim": "tempest",
+      "moves": [{ "at": 2, "vel": [8, 0] }, { "at": 4, "vel": [2, 0] }],
+      "hits": [{ "at": 2, "damage": 48, "level": "medium", "knockback": [-5, -1], "element": "lightning" }]
+    }
+  ]
+}

@@ -10,7 +10,7 @@ UMF (*Ultimate Mugen Format*) descreve um lutador inteiro em **um arquivo JSON**
 4. Rode `cargo run --release`. O `build.rs` embute todos os `.json` da pasta no executável.
 5. Teste no **Treino** com `F2` ligado para ver hitboxes e hurtboxes.
 
-Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add_native_json`, falta ligar à pasta `mugen/`).
+Lutadores UMF também carregam de uma pasta, sem recompilar: coloque o `.json` em `umf/` ao lado do jogo (ou em `mugen/umf/`, ou na pasta indicada por `UME_UMF_DIR`). Arquivos de kit na mesma pasta são registrados antes, seja qual for o nome.
 
 ## Esqueleto do arquivo
 
@@ -50,6 +50,26 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `awakeningPalette` | não | Cores aplicadas sobre a paleta selecionada durante o despertar; sprites de efeitos não mudam |
 | `anims` | sim | Animações por nome |
 | `moves` | sim | Golpes |
+
+## Reuso: `extends`, `use` e kits
+
+Um lutador não precisa ser escrito do zero. Três recursos eliminam o copiar e colar que os pacotes M.U.G.E.N exigem (os números estão em [Estudo de código M.U.G.E.N](../MUGEN-Code-Study.md)):
+
+| Recurso | Onde | O que faz |
+|---|---|---|
+| `"extends": "kaito"` | raiz | Herda tudo de um lutador ou kit já carregado: atributos, arte, animações e golpes. Uma lista (`["kaito", "storm-kit"]`) empilha vários, da esquerda para a direita. |
+| `"use": "gale"` | dentro de um golpe | Clona outro golpe (de um pai ou de um golpe anterior do mesmo arquivo) com um novo `id`, mudando só os campos escritos. |
+| arquivo de kit | `"format": "umf-kit/1"` | Definição parcial (golpes, animações, poses, atributos) com um `id`, compartilhada por vários lutadores. O kit `core` já vem embutido com `launcher` e `escape_burst`. |
+
+Regras da mescla, aplicadas por `crates/engine/src/native/kit.rs` antes do parser UMF normal:
+
+- Objetos (`stats`, `art`, `abilities`, `passives`) mesclam chave a chave: `"stats": { "life": 1080 }` muda um número só. Uma animação em `anims` substitui a herdada por inteiro. O valor `null` remove a chave herdada.
+- `moves` casam por `id`. Uma entrada com parte dos campos mantém o resto (`{ "id": "gale", "name": "Crimson Gale" }`), um texto simples (`"launcher"`) lista um golpe herdado sem mudanças e `{ "id": "slide", "remove": true }` remove um. Os golpes listados vêm primeiro, na sua ordem; os herdados não citados vêm depois.
+- Identidade é pessoal: `name`, `author`, `description`, `boss` e `npc` nunca são herdados de um lutador.
+- `spriteSet` reaproveita o pacote de pixel art do pai. Recolora com `palettes` e deixe `art.style.colors` herdado: são as cores de referência do pacote.
+- Erros apontam o culpado (`unknown kit or fighter`, `move x uses y, which no kit or earlier move defines`) e cadeias de `extends` com mais de 8 níveis são recusadas.
+
+Um lutador completo em 20 linhas está em [`docs/examples/umf/mika.json`](../../examples/umf/mika.json): ele herda uma definição de 39 KB e o kit [`storm-kit.json`](../../examples/umf/storm-kit.json). Teste com `UME_UMF_DIR=docs/examples/umf cargo run --release`.
 
 ## `stats`
 

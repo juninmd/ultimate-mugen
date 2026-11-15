@@ -10,7 +10,7 @@ UMF (*Ultimate Mugen Format*) describes a whole fighter in **one JSON file**. Th
 4. Run `cargo run --release`. `build.rs` embeds every `.json` in the folder into the executable.
 5. Test in **Training** with `F2` on to see hitboxes and hurtboxes.
 
-Loading a UMF fighter from a folder without recompiling is **planned** (the registry already has `add_native_json`; it only needs to be wired to the `mugen/` folder).
+UMF fighters also load from a folder without recompiling: drop the `.json` in `umf/` next to the game (or in `mugen/umf/`, or in the folder named by `UME_UMF_DIR`). Kit files in the same folder are registered first, whatever their names.
 
 ## File skeleton
 
@@ -41,6 +41,7 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | Field | Required | Description |
 |---|---|---|
 | `format` | yes | Always `umf/1` |
+| `extends` | no | Fighter or kit ids to inherit from, see [Reuse](#reuse-extends-use-and-kits). Required fields may then come from the parent |
 | `id`, `name`, `series`, `author`, `color` | yes | Identity; `color` is the select card color |
 | `boss` | no | `true` hides it from select and makes it the final Arcade boss |
 | `npc` | no | `true` hides it from select and every random pool; used by Story mode thugs, no boss empowerment |
@@ -51,6 +52,47 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | `awakeningPalette` | no | Color overrides applied on top of the selected palette while awakened; effect sprites are unchanged |
 | `anims` | yes | Animations by name |
 | `moves` | yes | Moves |
+
+## Reuse: `extends`, `use` and kits
+
+A fighter does not have to be written from scratch. Three tools remove the copy and paste that M.U.G.E.N packages need (see the numbers in [M.U.G.E.N code study](MUGEN-Code-Study.md)):
+
+| Tool | Where | What it does |
+|---|---|---|
+| `"extends": "kaito"` | top level | Inherits everything from a loaded fighter or kit: stats, art, animations, moves. A list (`["kaito", "storm-kit"]`) layers several, left to right. |
+| `"use": "gale"` | inside a move | Clones another move (from a parent or from an earlier move of the same file) under a new `id`, changing only the fields you write. |
+| kit file | `"format": "umf-kit/1"` | A partial definition (moves, animations, poses, stats) with an `id`, shared by many fighters. `core` is built in and carries the universal `launcher` and `escape_burst`. |
+
+Rules of the merge, applied by `crates/engine/src/native/kit.rs` before the normal UMF parser runs:
+
+- Objects (`stats`, `art`, `abilities`, `passives`) merge key by key, so `"stats": { "life": 1080 }` changes one number. An animation in `anims` replaces the inherited one as a whole. A value of `null` removes the inherited key.
+- `moves` are matched by `id`. An entry with only some fields keeps the rest (`{ "id": "gale", "name": "Crimson Gale" }`), a bare string (`"launcher"`) lists an inherited move unchanged, and `{ "id": "slide", "remove": true }` drops one. Moves you list come first, in your order; inherited moves you did not mention follow.
+- Identity is personal: `name`, `author`, `description`, `boss` and `npc` are never inherited from a fighter.
+- `spriteSet` lets the new fighter reuse the parent's pixel-art pack. Recolour it with `palettes` and leave `art.style.colors` inherited: those are the reference colours of the pack.
+- Mistakes name the culprit (`unknown kit or fighter`, `move x uses y, which no kit or earlier move defines`), and `extends` chains deeper than 8 are rejected.
+
+A complete fighter in 20 lines ([`docs/examples/umf/mika.json`](../examples/umf/mika.json), which inherits a 39 KB definition and the kit [`storm-kit.json`](../examples/umf/storm-kit.json)):
+
+```json
+{
+  "format": "umf/1",
+  "id": "mika",
+  "name": "Mika Arashi",
+  "author": "Ultimate MUGEN",
+  "color": "#b8433a",
+  "extends": ["kaito", "storm-kit"],
+  "spriteSet": "kaito",
+  "stats": { "life": 1080, "attack": 104 },
+  "palettes": [{ "top": "#b8433a", "trim": "#6a1e1a", "hair": "#1a1a22" }],
+  "moves": [
+    { "id": "gale", "name": "Crimson Gale" },
+    { "id": "squall", "use": "gale", "name": "Squall Volley", "input": "~D, DF, F, x+a", "cost": 500, "fx": "aura" },
+    { "id": "slide", "remove": true }
+  ]
+}
+```
+
+Try it with `UME_UMF_DIR=docs/examples/umf cargo run --release`.
 
 ## `stats`
 

@@ -10,6 +10,7 @@ Repository build and audit tools are Rust binaries, not scripts. `crates/devtool
 | `ume-tools stage-thumbs [stages]` | `scripts/generate-stage-thumbnails.py` | Writes 240x135 Lanczos thumbnails to `<stages>/thumbs` |
 | `ume-tools audit-moves [dir] [--json]` | `scripts/audit_native_moves.py` | Static roster audit: inputs, cancels, throws, hit boxes |
 | `ume-tools audit-sprites --out report.json` | `scripts/audit_native_sprites.py` | Exact-file PNG inventory with alpha bounds |
+| `ume-tools mugen-census <zip-or-dir>...` | new | Counts states, controllers, commands and animation actions of M.U.G.E.N packages and maps the top controllers to UMF fields, see [M.U.G.E.N code study](MUGEN-Code-Study.md) |
 
 Run them with `cargo run --release -p ume-devtools --bin ume-tools -- <command>`. Pose-resolution coverage is `native_sprite_audit --require-complete` (the removed `native_sprite_coverage.py` only mirrored it). Character creation tools live in `crates/charforge` ([Sprite toolkit](Sprite-Toolkit.md), [Move generator](Move-Generator.md)).
 

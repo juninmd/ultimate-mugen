@@ -11,6 +11,9 @@ mod multihit;
 mod throw;
 pub mod forms;
 pub mod lookup;
+pub mod kit;
+mod kit_merge;
+mod kit_parse;
 pub mod compile;
 mod frame_raster;
 pub mod rig;
@@ -37,6 +40,8 @@ pub use types::*;
 pub use ability_spec::*;
 pub use passive_spec::*;
 pub use lookup::register_native;
+pub use kit::{is_kit_text, register_kit};
+pub use kit_parse::parse_char;
 pub use portrait::select_portrait;
 
 pub use pixel::{audit_native_sprite_frames, native_frame_sprite_key};

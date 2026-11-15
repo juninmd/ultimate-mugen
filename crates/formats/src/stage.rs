@@ -249,7 +249,7 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         ctrl_defs: parse_bgctrls(&secs),
         music: get("music", "bgmusic").map(unquote).filter(|f| !f.is_empty()).map(|file| StageMusic {
             file,
-            volume: g("music", "bgmvolume", 100.0),
+            volume: g("music", "bgmvolume", g("music", "bgvolume", 100.0)),
             loop_start: g("music", "bgmloopstart", 0.0) as i64,
             loop_end: g("music", "bgmloopend", 0.0) as i64,
         }),

@@ -2,8 +2,10 @@ use crate::input::k;
 
 mod cancel;
 mod dash;
+mod perfect;
 mod whiff;
 
+pub use perfect::{PERFECT_FLASH, PERFECT_WINDOW};
 pub use dash::{DASH_COST, DASH_WINDOW};
 pub use whiff::{WHIFF_COST, WHIFF_MAX_TICKS, WHIFF_MIN_TICKS};
 
@@ -22,6 +24,8 @@ pub struct RushState {
     pub overdrive: i32,
     pub cooldown: i32,
     pub cancels: i32,
+    pub guard_hold: i32,
+    pub perfect: i32,
     buffered: i32,
     held: bool,
     locked: bool,
@@ -47,6 +51,7 @@ impl RushState {
         self.overdrive = (self.overdrive - 1).max(0);
         self.cooldown = (self.cooldown - 1).max(0);
         self.buffered = (self.buffered - 1).max(0);
+        self.perfect = (self.perfect - 1).max(0);
     }
 
     pub fn requested(&self) -> bool {

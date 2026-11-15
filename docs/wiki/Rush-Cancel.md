@@ -33,6 +33,10 @@ Pressing Start during a move that has not touched anything also cancels it, for 
 
 A connected normal (jab through heavy, standing or crouching) can be cancelled into a forward or back dash by double tapping the direction within 20 ticks of contact, for 250 meter. It is cheaper than a Rush Cancel, does not trigger Overdrive and does not use the cooldown. It needs contact (hit or guard) and enough meter, so a whiffed normal cannot be dash cancelled. Code: `crates/engine/src/rush/dash.rs`.
 
+## Perfect guard
+
+Pressing back within 6 ticks before a hit lands, with the guard not already held, makes the block perfect: no chip damage and the guard stun is a third shorter. Holding back early is a normal guard, and releasing back locks the window for 12 ticks, so mashing back does not work. It applies to grounded native fighters only and gives no meter (meter from guarding fed Shion's flight indefinitely). Code: `crates/engine/src/rush/perfect.rs`.
+
 ## Engine map
 
 | Piece | File |

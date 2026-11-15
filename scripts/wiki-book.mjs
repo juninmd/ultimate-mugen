@@ -8,7 +8,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const EN_SECTIONS = [
   ['Players', ['Installation', 'Auto-Update', 'Configuration', 'MUGEN-Content', 'Marketplace', 'Story-Mode', 'Stage-Objects', 'Audio', 'Character-Select', 'Game-Modes', 'Netplay-and-Replays', 'Lore', 'Characters', 'Troubleshooting']],
   ['Creators', ['Compatibility-Decisions', 'Lua-Scripts', 'Route-Files', 'Make-a-Character', 'UMF-Character', 'Passives', 'Rush-Cancel', 'Combo-Tiers', 'Combo-Strings', 'Bleach-Inspired-Kits', 'Rig', 'CNS-Scripts', 'AssertSpecial', 'Life-Systems', 'ZSS', 'Ikemen-Extensions', 'Screenpacks', 'Screenpack-Study', 'Sprite-Atlas-Import', 'Sprite-Toolkit', 'Move-Generator', 'Make-a-Stage', 'Stages', 'Visual-Effects', 'AI-Tactics']],
-  ['Contributors', ['Contributing', 'Architecture', 'Engine', 'File-Layout', 'Dev-Tools', 'Performance', 'Web-Match-Smoke', 'Media-Capture', 'Stress-and-Resilience', 'Native-Animation-Audit']],
+  ['Contributors', ['Contributing', 'Architecture', 'Extension-Points', 'Engine', 'File-Layout', 'Dev-Tools', 'Performance', 'Web-Match-Smoke', 'Media-Capture', 'Stress-and-Resilience', 'Native-Animation-Audit']],
   ['Research', ['MUGEN-Code-Study', 'Fighter-Study', 'Research-Fighting-Games', 'Research-Story-Mode', 'Rust-Engine-UI-References', 'Authoring-Tool-Survey', 'Ikemen-Web-Reverse-Engineering']],
 ];
 

@@ -2,12 +2,18 @@ use super::*;
 use crate::i18n::tr3;
 use std::cell::{Cell, RefCell};
 
+mod keyboard;
 mod page_draw;
 mod pill;
 
+use keyboard::Osk;
+
 const MAX_QUERY: usize = 24;
 const ROWS: usize = 13;
-const PILL: (f32, f32, f32, f32) = (40.0, 63.0, 360.0, 20.0);
+const ROWS_WITH_KEYBOARD: usize = 6;
+const ROW_Y: f32 = 150.0;
+const ROW_STEP: f32 = 38.0;
+const PILL: (f32, f32, f32, f32) = (40.0, 63.0, 236.0, 20.0);
 
 thread_local! {
     static QUERY: RefCell<String> = const { RefCell::new(String::new()) };
@@ -75,14 +81,19 @@ impl App {
             return false;
         }
         let before = QUERY.with(|q| q.borrow().clone());
+        let osk = self.osk_press();
         QUERY.with(|q| {
             let mut q = q.borrow_mut();
-            for c in typed_text().chars().filter(|c| !c.is_control()) {
+            let typed: String = match osk {
+                Some(Osk::Char(c)) => c.to_string(),
+                _ => typed_text(),
+            };
+            for c in typed.chars().filter(|c| !c.is_control()) {
                 if q.chars().count() < MAX_QUERY {
                     q.push(c);
                 }
             }
-            if is_key_pressed(KeyCode::Backspace) {
+            if is_key_pressed(KeyCode::Backspace) || osk == Some(Osk::Back) {
                 q.pop();
             }
         });
@@ -90,51 +101,83 @@ impl App {
             PICK.with(|p| p.set(0));
         }
         let hits = self.search_hits();
+        let rows = self.search_rows();
         let step = |p: usize, d: isize| {
             (p as isize + d).clamp(0, hits.len().saturating_sub(1) as isize) as usize
         };
         for (key, d) in [
             (KeyCode::Down, 1),
             (KeyCode::Up, -1),
-            (KeyCode::PageDown, ROWS as isize),
-            (KeyCode::PageUp, -(ROWS as isize)),
+            (KeyCode::PageDown, rows as isize),
+            (KeyCode::PageUp, -(rows as isize)),
         ] {
             if is_key_pressed(key) {
                 PICK.with(|p| p.set(step(p.get(), d)));
             }
         }
-        if is_key_pressed(KeyCode::Escape) {
+        let tapped = self.search_row_tap(&hits, rows);
+        if let Some(k) = tapped {
+            PICK.with(|p| p.set(k));
+        }
+        if is_key_pressed(KeyCode::Escape) || osk == Some(Osk::Close) {
             clear_query();
             OPEN.with(|o| o.set(false));
             self.sel_row = 0;
-        } else if is_key_pressed(KeyCode::Enter) || is_key_pressed(KeyCode::KpEnter) {
-            OPEN.with(|o| o.set(false));
-            self.audio.sfx("confirm");
-            self.sel_row = 0;
-            let chosen = hits.get(PICK.with(|p| p.get())).copied();
-            if let Screen::Select {
+        } else if is_key_pressed(KeyCode::Enter)
+            || is_key_pressed(KeyCode::KpEnter)
+            || osk == Some(Osk::Ok)
+            || tapped.is_some()
+        {
+            self.apply_search_pick(&hits);
+            return true;
+        }
+        self.draw_search_page(&hits, rows);
+        if self.osk_shown() {
+            self.draw_osk();
+        }
+        true
+    }
+
+    fn apply_search_pick(&mut self, hits: &[usize]) {
+        OPEN.with(|o| o.set(false));
+        self.audio.sfx("confirm");
+        self.sel_row = 0;
+        let chosen = hits.get(PICK.with(|p| p.get())).copied();
+        let Screen::Select {
+            mut cur,
+            picking,
+            picked,
+        } = self.screen
+        else {
+            return;
+        };
+        let view = self.char_view();
+        if let Some(first) = chosen
+            .filter(|i| view.contains(i))
+            .or_else(|| view.first().copied())
+        {
+            cur[picking.min(1)] = first;
+            self.screen = Screen::Select {
                 cur,
                 picking,
                 picked,
-            } = self.screen
-            {
-                let view = self.char_view();
-                if let Some(first) = chosen
-                    .filter(|i| view.contains(i))
-                    .or_else(|| view.first().copied())
-                {
-                    let mut cur = cur;
-                    cur[picking.min(1)] = first;
-                    self.screen = Screen::Select {
-                        cur,
-                        picking,
-                        picked,
-                    };
-                }
-            }
-            return true;
+            };
         }
-        self.draw_search_page(&hits);
-        true
+    }
+
+    fn search_rows(&self) -> usize {
+        if self.osk_shown() {
+            ROWS_WITH_KEYBOARD
+        } else {
+            ROWS
+        }
+    }
+
+    fn search_row_tap(&self, hits: &[usize], rows: usize) -> Option<usize> {
+        let pick = PICK.with(|p| p.get()).min(hits.len().saturating_sub(1));
+        let top = pick.saturating_sub(rows - 1);
+        (0..rows.min(hits.len().saturating_sub(top)))
+            .find(|&row| self.clicked_rect(40.0, ROW_Y + row as f32 * ROW_STEP, 1200.0, 34.0))
+            .map(|row| top + row)
     }
 }

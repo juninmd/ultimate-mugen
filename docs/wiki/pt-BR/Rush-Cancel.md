@@ -31,6 +31,8 @@ A mesma tecla continua carregando energia parado: um lutador com controle e sem 
 |---|---|
 | Estado, buffer, constantes | `crates/engine/src/rush.rs` |
 | O cancelamento (`Match::rush_step`, `rush_ready`) | `crates/engine/src/rush/cancel.rs` |
+| Consulta da janela para o HUD (`Match::rush_window`: `None` sem cancelamento possível, senão a fração da janela que resta) | `crates/engine/src/rush/cancel.rs` |
+| Marcador "RUSH CANCEL" com barra de janela decrescente sob a barra de vida | `src/hud/rush_marker.rs` (`UME_SHOTS_ONLY=rush` captura) |
 | Evento para a apresentação | `Event::Rush { fighter, side, guarded }` em `crates/engine/src/matchs/types.rs` |
 | Efeitos (anéis, brilho, faíscas, rótulo, brasas do Overdrive) | `src/vfx/rush.rs` |
 | Checksum de rollback | `overdrive`, `cooldown` e `cancels` em `crates/netplay/src/checksum.rs` |

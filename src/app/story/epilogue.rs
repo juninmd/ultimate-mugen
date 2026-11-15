@@ -1,7 +1,7 @@
 use crate::app::{App, Screen};
 use crate::controls::nav;
 use crate::gfx::*;
-use crate::story::epilogue;
+use crate::story::{epilogue, epilogue_music};
 use crate::story::{Phase, StoryRun};
 
 const INPUT_DELAY: f32 = 0.25;
@@ -22,13 +22,11 @@ impl App {
         }
         let boss = self.story_char(epilogue::final_boss(&player));
         let revealed = self.draw_story_epilogue(script, &beats, run.epilogue, t, boss);
-        if self.c.pressed(nav::BACK | nav::START) || is_key_pressed(KeyCode::Escape) {
+        if self.skip_chip() || self.c.pressed(nav::BACK | nav::START) || is_key_pressed(KeyCode::Escape) {
             self.story_epilogue_goto(beats.len() + 1);
             return true;
         }
-        let advance = self.c.pressed(nav::OK)
-            || is_mouse_button_pressed(MouseButton::Left)
-            || is_key_pressed(KeyCode::Space);
+        let advance = self.c.pressed(nav::OK) || self.tap_any() || is_key_pressed(KeyCode::Space);
         if advance && t > INPUT_DELAY {
             if revealed {
                 self.audio.sfx("select");
@@ -40,6 +38,24 @@ impl App {
         }
         self.screen = Screen::Story { t: t + dt };
         true
+    }
+
+    pub(crate) async fn story_epilogue_music(&mut self, run: &StoryRun, t: f32) {
+        if run.phase != Phase::Victory || t > 0.0 {
+            return;
+        }
+        let player = self.player_char_id();
+        let Some(script) = epilogue::of(&player) else {
+            return;
+        };
+        if run.epilogue == 0 {
+            let track = epilogue_music::wav();
+            self.audio
+                .play_music_file(&track, crate::audio::MusicLoop::default())
+                .await;
+        } else if run.epilogue > script.beats(crate::profile::lang()).len() {
+            self.audio.stop_music();
+        }
     }
 
     pub(crate) fn story_epilogue_page(&self) -> Option<usize> {

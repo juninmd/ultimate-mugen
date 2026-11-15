@@ -105,9 +105,9 @@ impl App {
             true,
         );
         let hint = tr3(
-            "OK avançar · ESC pular",
-            "OK next · ESC skip",
-            "OK avanzar · ESC saltar",
+            "OK/A avançar · ESC/START pular",
+            "OK/A next · ESC/START skip",
+            "OK/A avanzar · ESC/START saltar",
         );
         self.ui.text(
             hint,

@@ -5,12 +5,13 @@ use crate::story::{text, Phase};
 use crate::ui::*;
 
 impl App {
-    pub(crate) fn story_screen(&mut self, dt: f32) {
+    pub(crate) async fn story_screen(&mut self, dt: f32) {
         let Screen::Story { t } = self.screen else { return };
         let Some(run) = self.story.clone() else {
             self.screen = Screen::Menu { cur: 0 };
             return;
         };
+        self.story_epilogue_music(&run, t).await;
         if self.story_epilogue(&run, t, dt) {
             return;
         }

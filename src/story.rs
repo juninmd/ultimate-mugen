@@ -1,4 +1,5 @@
 pub mod epilogue;
+pub mod epilogue_music;
 pub mod objects;
 pub mod objects_art;
 pub mod objects_textures;

@@ -18,7 +18,7 @@ impl App {
         self.ui.text(
             tr3("PULAR · ESC/START", "SKIP · ESC/START", "SALTAR · ESC/START"),
             x + w / 2.0,
-            y + 7.0,
+            y + 18.0,
             13.0,
             WHITE,
             Align::Center,

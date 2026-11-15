@@ -1,8 +1,10 @@
 use crate::input::k;
 
 mod cancel;
+mod dash;
 mod whiff;
 
+pub use dash::{DASH_COST, DASH_WINDOW};
 pub use whiff::{WHIFF_COST, WHIFF_MAX_TICKS, WHIFF_MIN_TICKS};
 
 pub const COST: f32 = 500.0;

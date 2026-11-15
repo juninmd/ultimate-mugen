@@ -158,3 +158,36 @@ fn whiff_cancel_needs_meter_and_is_not_used_after_contact() {
     m.tick(&[k::S, 0]);
     assert_eq!(m.fighters[0].rush.cancels, 1, "a connected move uses the cheaper rush cancel");
 }
+
+#[test]
+fn a_connected_normal_can_be_dash_cancelled_for_a_small_price() {
+    use ume_engine::rush::{DASH_COST, DASH_WINDOW};
+    let mut m = arena(&fighter("akio"));
+    assert!(connect_jab(&mut m));
+    m.fighters[0].power = 1000.0;
+    let before = m.fighters[0].power;
+    let mut dashed = false;
+    for bits in [k::R, 0, k::R, k::R, 0, 0] {
+        m.tick(&[bits, 0]);
+        if m.fighters[0].state_no == 100 { dashed = true; break; }
+    }
+    assert!(dashed, "double tap forward after a connected jab did not dash (state {})", m.fighters[0].state_no);
+    assert!(m.fighters[0].power < before - DASH_COST + 5.0 && m.fighters[0].power > before - DASH_COST - 40.0, "power {}", m.fighters[0].power);
+    assert_eq!(m.fighters[0].rush.cancels, 0, "a dash cancel is not a rush cancel");
+    assert!(DASH_WINDOW > 0 && DASH_COST < COST);
+}
+
+#[test]
+fn dash_cancel_needs_contact_and_meter() {
+    let mut whiff = arena(&fighter("akio"));
+    face_off(&mut whiff, 400.0);
+    enter(&mut whiff, 0, JAB_STATE);
+    for bits in [k::R, 0, k::R, k::R, 0, 0] { whiff.tick(&[bits, 0]); }
+    assert_ne!(whiff.fighters[0].state_no, 100, "dash cancelled a whiffed jab for free");
+
+    let mut broke = arena(&fighter("akio"));
+    assert!(connect_jab(&mut broke));
+    broke.fighters[0].power = 0.0;
+    for bits in [k::R, 0, k::R, k::R, 0, 0] { broke.tick(&[bits, 0]); }
+    assert_ne!(broke.fighters[0].state_no, 100, "dash cancelled without meter");
+}

@@ -29,6 +29,10 @@ The same key still charges energy when you are idle: a fighter with control and 
 
 Pressing Start during a move that has not touched anything also cancels it, for a higher price. It needs 1000 meter (a Rush Cancel costs 500), works from 10 to 60 ticks into the move and shares the Rush Cancel cooldown. It returns control like a Rush Cancel but gives no Overdrive, no slow motion and does not count as a Rush Cancel. A move that has connected or been blocked still uses the cheaper Rush Cancel. Constants live in `crates/engine/src/rush/whiff.rs` (`WHIFF_COST`, `WHIFF_MIN_TICKS`, `WHIFF_MAX_TICKS`).
 
+## Dash cancel
+
+A connected normal (jab through heavy, standing or crouching) can be cancelled into a forward or back dash by double tapping the direction within 20 ticks of contact, for 250 meter. It is cheaper than a Rush Cancel, does not trigger Overdrive and does not use the cooldown. It needs contact (hit or guard) and enough meter, so a whiffed normal cannot be dash cancelled. Code: `crates/engine/src/rush/dash.rs`.
+
 ## Engine map
 
 | Piece | File |

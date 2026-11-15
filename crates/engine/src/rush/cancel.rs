@@ -74,6 +74,8 @@ impl Match {
                 self.rush_cancel(i);
             } else if self.whiff_ready(i) {
                 self.whiff_cancel(i);
+            } else if let Some(target) = self.dash_cancel_target(i) {
+                self.dash_cancel(i, target);
             }
         }
     }

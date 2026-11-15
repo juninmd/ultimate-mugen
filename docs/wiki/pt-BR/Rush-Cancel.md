@@ -29,6 +29,10 @@ A mesma tecla continua carregando energia parado: um lutador com controle e sem 
 
 Apertar Start durante um golpe que não tocou em nada também cancela, por um preço maior. Custa 1000 de barra (o Rush Cancel custa 500), vale de 10 a 60 ticks depois do início do golpe e divide a recarga do Rush Cancel. Devolve o controle como o Rush Cancel, mas sem Overdrive, sem câmera lenta e sem contar como Rush Cancel. Golpe que conectou ou foi bloqueado continua usando o Rush Cancel mais barato. Constantes em `crates/engine/src/rush/whiff.rs`.
 
+## Dash cancel
+
+Um golpe normal que conectou (fraco a forte, em pé ou agachado) pode ser cancelado em dash para frente ou para trás tocando duas vezes a direção em até 20 ticks do contato, por 250 de barra. É mais barato que o Rush Cancel, não ativa Overdrive e não usa o cooldown. Exige contato (acerto ou defesa) e barra suficiente, então um normal que errou não pode ser cancelado. Código: `crates/engine/src/rush/dash.rs`.
+
 ## Mapa da engine
 
 | Peça | Arquivo |

@@ -96,6 +96,8 @@ catalog! {
     "dummy.jump" => "JUMP", "PULANDO";
     "dummy.guard" => "GUARD", "DEFENDENDO";
     "dummy.crouch_guard" => "LOW GUARD", "DEFESA BAIXA";
+    "dummy.record" => "RECORD MY INPUTS", "GRAVAR MEUS COMANDOS";
+    "dummy.playback" => "PLAY RECORDING", "REPRODUZIR GRAVAÇÃO";
     "pause.restart" => "Restart fight", "Reiniciar luta";
     "pause.change" => "Change fighters", "Trocar personagens";
     "pause.settings" => "Settings", "Configurações";

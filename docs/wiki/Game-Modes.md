@@ -109,5 +109,7 @@ In Training the pause menu (Game tab) has a **Dummy behaviour** row. Confirming 
 | Jump | Up on every landing |
 | Guard | Back, only while the rival attacks or a projectile is alive (it does not walk away) |
 | Low guard | Down, plus back while threatened |
+| Record my inputs | Nothing; every input you press is recorded (up to 10 s) |
+| Play recording | Your recorded inputs on a loop, mirrored to the dummy's facing |
 
-The plan lives in `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); the dummy presses real input bits, so guard rules, pushback and chip damage are the engine's own. Screenshots: `UME_SHOTS_ONLY=pause` writes `training-dummy-*.png` and `pause-training-dummy.png`.
+The plan lives in `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); the dummy presses real input bits, so guard rules, pushback and chip damage are the engine's own. The recording lives in `src/session/dummy_tape.rs`; a right-side panel shows the best combo and the tape length (`src/hud/training_panel.rs`). Screenshots: `UME_SHOTS_ONLY=pause` writes `training-dummy-*.png` and `pause-training-dummy.png`; `UME_SHOTS_ONLY=training` writes `training-tape-playback.png`.

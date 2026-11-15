@@ -87,6 +87,7 @@ impl App {
             return;
         };
         let lang = crate::profile::lang();
+        self.draw_select_tags(&profile.tags, accent);
         self.ui.gradient_v(
             0.0,
             STRIP_Y,

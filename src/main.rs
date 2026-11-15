@@ -22,7 +22,7 @@ mod mugen_tour;
 mod netlink;
 mod perf_tour;
 mod pixel_tour;
-mod poly; mod profile;
+mod poly; mod profile; mod profile_tags;
 mod postfx;
 mod registry;
 mod render;

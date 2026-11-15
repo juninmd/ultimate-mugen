@@ -33,7 +33,7 @@ mod update_banner;
 mod results_stats;
 mod select_category;
 mod select_grid;
-mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile;
+mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_tags;
 mod versus; mod versus_compare;
 mod menu_view; mod menu_icons;
 mod menu_focus;

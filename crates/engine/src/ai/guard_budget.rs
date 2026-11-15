@@ -1,4 +1,4 @@
-const GUARD_LIMIT: i32 = 48;
+const GUARD_LIMIT: i32 = 16;
 const GUARD_REST: i32 = 45;
 
 #[derive(Default)]
@@ -38,7 +38,7 @@ mod tests {
         let mut g = GuardBudget::default();
         let mut blocks = 0;
         while g.can_guard() && blocks < 100 {
-            g.on_guard(14);
+            g.on_guard(5);
             blocks += 1;
         }
         assert_eq!(blocks, 4);
@@ -53,14 +53,14 @@ mod tests {
     #[test]
     fn idle_time_restores_the_budget() {
         let mut g = GuardBudget::default();
-        g.on_guard(14);
-        g.on_guard(14);
-        for _ in 0..40 {
+        g.on_guard(5);
+        g.on_guard(5);
+        for _ in 0..20 {
             g.on_free();
         }
-        g.on_guard(14);
-        g.on_guard(14);
-        g.on_guard(14);
+        g.on_guard(5);
+        g.on_guard(5);
+        g.on_guard(5);
         assert!(g.can_guard());
     }
 }

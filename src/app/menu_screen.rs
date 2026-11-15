@@ -62,9 +62,15 @@ impl App {
             if lit > 0.005 {
                 let reach = menu_focus::mix(w - 80.0, w, lit);
                 ui.quad(
+                    [vec2(x + off + 12.0, y - 6.0), vec2(x + off + reach + 8.0, y - 6.0), vec2(x + off + reach - 14.0, y + h + 6.0), vec2(x + off - 8.0, y + h + 6.0)],
+                    Color::new(accent.r, accent.g, accent.b, 0.16 * pulse * k_in * lit),
+                );
+                ui.quad(
                     [vec2(x + off + 18.0, y), vec2(x + off + reach, y), vec2(x + off + reach - 18.0, y + h), vec2(x + off, y + h)],
                     Color::new(accent.r * pulse, accent.g * pulse, accent.b * pulse, 0.92 * k_in * lit),
                 );
+                let gloss = [vec2(x + off + 18.0, y + 2.0), vec2(x + off + reach - 2.0, y + 2.0), vec2(x + off + reach - 9.0, y + h * 0.45), vec2(x + off + 9.0, y + h * 0.45)].map(|q| vec2(ui.x(q.x), ui.y(q.y)));
+                crate::poly::grad_v(&gloss, Color::new(1.0, 1.0, 1.0, 0.32 * k_in * lit), Color::new(1.0, 1.0, 1.0, 0.0));
                 ui.quad(
                     [vec2(x + off - 14.0, y), vec2(x + off - 4.0, y), vec2(x + off - 18.0, y + h), vec2(x + off - 28.0, y + h)],
                     Color::new(1.0, 1.0, 1.0, k_in * lit),

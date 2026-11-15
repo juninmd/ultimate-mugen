@@ -1,0 +1,138 @@
+[kinds.crate]
+sprite = "crate"
+frames = 3
+size = [48.0, 48.0]
+half_width = 20.0
+height = 42.0
+depth = 10.0
+life = 120.0
+score = 100.0
+solid = false
+debris = [0.78, 0.55, 0.3]
+sound = "wood"
+
+[kinds.barrel]
+sprite = "barrel"
+frames = 3
+size = [40.0, 56.0]
+half_width = 16.0
+height = 50.0
+depth = 10.0
+life = 190.0
+score = 150.0
+solid = false
+debris = [0.25, 0.62, 0.74]
+sound = "metal"
+
+[kinds.car]
+sprite = "car"
+frames = 4
+size = [208.0, 88.0]
+half_width = 92.0
+height = 62.0
+depth = 26.0
+life = 2200.0
+score = 5000.0
+solid = true
+debris = [0.95, 0.58, 0.22]
+sound = "metal"
+
+[pickups.apple]
+sprite = "apple"
+heal = 0.12
+score = 100.0
+
+[pickups.pizza]
+sprite = "pizza"
+heal = 0.25
+score = 200.0
+
+[pickups.roast]
+sprite = "roast"
+heal = 0.5
+score = 400.0
+
+[pickups.gem]
+sprite = "gem"
+score = 1500.0
+
+[pickups.battery]
+sprite = "battery"
+power = 0.34
+score = 150.0
+
+[stages.brazil]
+objects = [
+  { fight = 0, kind = "crate", x = -78.0, lane = -22.0, drop = "apple" },
+  { fight = 0, kind = "barrel", x = 82.0, lane = -19.0 },
+  { fight = 1, kind = "crate", x = 70.0, lane = -22.0, drop = "pizza" },
+  { fight = 2, kind = "barrel", x = -80.0, lane = -22.0, drop = "gem" },
+  { fight = 2, kind = "crate", x = 84.0, lane = -19.0, drop = "apple" },
+  { fight = 3, kind = "crate", x = -74.0, lane = -22.0, drop = "pizza" },
+  { fight = 3, kind = "barrel", x = 78.0, lane = -19.0, drop = "battery" },
+  { fight = 4, kind = "barrel", x = -84.0, lane = -22.0, drop = "roast" },
+]
+
+[stages.brazil.bonus]
+seconds = 30
+objects = [
+  { kind = "car", x = 34.0, lane = -16.0 },
+]
+
+[stages.neon]
+objects = [
+  { fight = 0, kind = "barrel", x = -80.0, lane = -18.0, drop = "apple" },
+  { fight = 0, kind = "crate", x = 84.0, lane = -15.0, drop = "gem" },
+  { fight = 1, kind = "crate", x = -72.0, lane = -18.0, drop = "pizza" },
+  { fight = 2, kind = "barrel", x = 80.0, lane = -18.0, drop = "battery" },
+  { fight = 2, kind = "barrel", x = -84.0, lane = -15.0 },
+  { fight = 3, kind = "crate", x = 76.0, lane = -18.0, drop = "pizza" },
+  { fight = 3, kind = "crate", x = -80.0, lane = -15.0, drop = "apple" },
+  { fight = 4, kind = "crate", x = -84.0, lane = -18.0, drop = "roast" },
+]
+
+[stages.bamboo]
+objects = [
+  { fight = 0, kind = "crate", x = -80.0, lane = -16.0, drop = "apple" },
+  { fight = 1, kind = "barrel", x = 78.0, lane = -16.0, drop = "pizza" },
+  { fight = 1, kind = "crate", x = -82.0, lane = -13.0, drop = "gem" },
+  { fight = 2, kind = "crate", x = 80.0, lane = -16.0, drop = "roast" },
+  { fight = 3, kind = "barrel", x = -78.0, lane = -16.0, drop = "battery" },
+  { fight = 3, kind = "crate", x = 82.0, lane = -13.0, drop = "apple" },
+  { fight = 4, kind = "barrel", x = 84.0, lane = -16.0, drop = "roast" },
+]
+
+[stages.bamboo.bonus]
+seconds = 25
+objects = [
+  { kind = "barrel", x = -70.0, lane = -10.0 },
+  { kind = "crate", x = -14.0, lane = -14.0 },
+  { kind = "barrel", x = 42.0, lane = -8.0 },
+  { kind = "crate", x = 98.0, lane = -14.0 },
+  { kind = "barrel", x = 154.0, lane = -10.0 },
+  { kind = "crate", x = 210.0, lane = -12.0 },
+]
+
+[stages.volcano]
+objects = [
+  { fight = 0, kind = "barrel", x = -82.0, lane = -16.0, drop = "pizza" },
+  { fight = 0, kind = "barrel", x = 80.0, lane = -13.0 },
+  { fight = 1, kind = "crate", x = -76.0, lane = -16.0, drop = "apple" },
+  { fight = 1, kind = "barrel", x = 84.0, lane = -13.0, drop = "gem" },
+  { fight = 2, kind = "barrel", x = 78.0, lane = -16.0, drop = "roast" },
+  { fight = 3, kind = "crate", x = -80.0, lane = -16.0, drop = "pizza" },
+  { fight = 3, kind = "barrel", x = 82.0, lane = -13.0, drop = "battery" },
+  { fight = 4, kind = "barrel", x = -84.0, lane = -16.0, drop = "roast" },
+]
+
+[stages.dojo]
+objects = [
+  { fight = 0, kind = "crate", x = -80.0, lane = -12.0, drop = "pizza" },
+  { fight = 1, kind = "barrel", x = 80.0, lane = -12.0, drop = "apple" },
+  { fight = 1, kind = "crate", x = -84.0, lane = -9.0, drop = "battery" },
+  { fight = 2, kind = "crate", x = 78.0, lane = -12.0, drop = "roast" },
+  { fight = 3, kind = "barrel", x = -80.0, lane = -12.0, drop = "pizza" },
+  { fight = 3, kind = "crate", x = 84.0, lane = -9.0, drop = "gem" },
+  { fight = 4, kind = "crate", x = -84.0, lane = -12.0, drop = "roast" },
+  { fight = 4, kind = "barrel", x = 84.0, lane = -9.0, drop = "pizza" },
+]

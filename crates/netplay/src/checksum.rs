@@ -134,5 +134,14 @@ pub fn checksum(m: &Match) -> u128 {
         h.i32(p.hits);
         h.i32(p.time);
     }
+    for b in &m.objects.breakables {
+        h.f32(b.life);
+        h.i32(b.rehit);
+        h.u32(b.broken as u32);
+    }
+    for p in &m.objects.pickups {
+        h.v2(p.pos);
+        h.i32(p.age);
+    }
     h.finish() as u128
 }

@@ -47,6 +47,7 @@
 ## Verification
 - Every change gets a browser smoke test: `scripts/build-web.sh`, serve `web/dist`, drive it in headless Chromium with Playwright (hold keys at least 100 ms), and look at screenshots.
 - Screenshot tours: `UME_SHOTS_ONLY=pause|hud|menu xvfb-run -a target/release/ultimate-mugen --shots <dir> --res 1280x720 --mute`.
+- Story tours: `UME_TOUR=storymode` plays the whole run; `UME_TOUR=storyobjects` captures breakables, pickups and the bonus round.
 
 ## Code Style
 - No comments in code: names must explain intent. Explanations go to the wiki in `docs/wiki/`.

@@ -109,7 +109,7 @@ The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set pe
 
 ## 🆕 What's new
 
-- **Story mode:** five stages of waves, thugs with their own traits and a boss per stage, with cutscenes and endings. [Guide](docs/wiki/Story-Mode.md)
+- **Story mode:** five stages of waves, thugs with their own traits and a boss per stage, with cutscenes and endings, plus breakable crates and barrels, food pickups and car-wrecking bonus rounds. [Guide](docs/wiki/Story-Mode.md) · [Stage objects](docs/wiki/Stage-Objects.md)
 - **Music and audio:** a built-in music theme per stage, tiered hit sounds, music ducking on impacts and a crowd cheer on the KO. [Audio](docs/wiki/Audio.md)
 - **Move shortcuts:** bind any move from the pause list to `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforms and `R3` alone charges ki. [Controls](docs/wiki/Configuration.md#controls)
 - **Richer movesets:** every native fighter has EX specials, a level 3 hyper, an escape burst, an ascended form with its own hyper, and air versions of its specials. [Shared toolkit](docs/wiki/Characters.md#shared-toolkit)

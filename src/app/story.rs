@@ -1,11 +1,13 @@
 #[path = "story/advance.rs"]
 mod advance;
+#[path = "story/bonus.rs"]
+mod bonus;
+#[path = "story/hud.rs"]
+mod hud;
 
 use crate::app::{App, Mode, Screen, Team};
-use crate::gfx::*;
 use crate::session::Session;
 use crate::story::{text, Next, Phase, StoryRun};
-use crate::ui::*;
 
 pub(super) const BOSS_LIFE_FACTOR: f32 = 1.5;
 pub(super) const BOSS_ATTACK_FACTOR: f32 = 1.1;
@@ -95,7 +97,10 @@ impl App {
     }
 
     pub(crate) fn story_win(&mut self) {
-        let gained = self.story_fight_score();
+        if self.story_bonus_begin() {
+            return;
+        }
+        let gained = self.story_fight_score() + self.story_bonus_reward();
         let remaining = self.story_remaining_life();
         let Some(run) = self.story.as_mut() else { return };
         let next = run.won_fight(gained, remaining);
@@ -146,6 +151,7 @@ impl App {
         sess.m.lanes = ume_engine::lane::LaneRules { active: true, far: def.lane_far, near: def.lane_near, show_foe_hud: run.is_boss_fight(), target_x: 0.0, bound_span: 0.0 };
         sess.team = None;
         story_scroll(sess, def, run.fight_index());
+        crate::story::objects::spawn_stage(&mut sess.m, def, run.fight_index());
         for (slot, fighter) in sess.m.fighters.iter_mut().filter(|f| !f.is_helper && f.side == 1).enumerate() {
             fighter.lane = FOE_START_LANES[slot % FOE_START_LANES.len()].clamp(def.lane_far, def.lane_near);
         }
@@ -172,28 +178,6 @@ impl App {
             fighter.attack_mul *= BOSS_ATTACK_FACTOR;
         }
         sess.vfx.banner(text::boss_banner(), &text::stage_title(run.stage).to_string(), accent);
-    }
-
-    pub(crate) fn story_hud(&self) {
-        let Some(run) = self.story.as_ref() else { return };
-        let line = text::hud(
-            run.stage,
-            run.wave,
-            run.stage_def().waves.len(),
-            run.is_boss_fight(),
-            run.score,
-        );
-        self.ui.rect(VW / 2.0 - 230.0, 652.0, 460.0, 44.0, Color::new(0.02, 0.01, 0.06, 0.6));
-        self.ui.text(&line, VW / 2.0, 674.0, 17.0, hex("#ffcc33"), Align::Center, true);
-        self.ui.text(
-            &text::credits_line(run.credits),
-            VW / 2.0,
-            690.0,
-            12.0,
-            hex("#a49cc0"),
-            Align::Center,
-            false,
-        );
     }
 
     pub(crate) fn story_snapshot(&self) -> Option<(usize, usize, u8, i64, String)> {

@@ -13,10 +13,14 @@ impl App {
     }
 
     pub(crate) fn story_jump_to_boss(&mut self) {
+        self.story_jump_to_wave(usize::MAX);
+    }
+
+    pub(crate) fn story_jump_to_wave(&mut self, wave: usize) {
         let Some(run) = self.story.as_mut() else {
             return;
         };
-        run.wave = run.stage_def().waves.len();
+        run.wave = wave.min(run.stage_def().waves.len());
         self.story_prepare_fight();
     }
 

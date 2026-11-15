@@ -3278,7 +3278,7 @@ fn volcano() -> Stage {
 pub mod ambience;
 mod story_strip;
 pub use story_strip::*;
-mod wonders; pub(crate) mod looping;
+mod wonders; pub(crate) mod looping; pub(crate) mod story_loop;
 
 const ILLUSTRATION_IDS: [&str; 7] = [
     "dojo", "neon", "bamboo", "plains", "spirit", "volcano", "brazil",

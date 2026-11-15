@@ -37,6 +37,7 @@ pub mod native;
 pub mod passive_time;
 pub mod passives;
 pub mod rush;
+pub mod signature;
 pub mod raster;
 pub mod move_cost;
 

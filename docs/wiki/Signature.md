@@ -36,3 +36,5 @@ Each native fighter can declare a `signature` block under `passives` in its JSON
 Attack still goes through the global cap in [Passives](Passives.md). The meter resets each round and shows as a strip under the life bar.
 
 Current fighters: **Kaito** (Storm, builds and speeds him up) and **Volta** (Overload, strong at full meter but costs life).
+
+More fighters: **Suzume** (Lotus, builds from specials and speeds her up), **Marlow** (Tide, gains from being hit as well and adds defence), **Jin** (Wind Chain, builds fast and decays fast for speed) and **Sylene** (Ice Layers, mostly gained by taking hits, adds defence).

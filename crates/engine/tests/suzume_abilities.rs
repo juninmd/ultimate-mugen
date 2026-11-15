@@ -98,3 +98,13 @@ fn test_suzume_multi_transformations_and_metamorphosis() {
     assert!((m.fighters[0].attack_mul - base_atk).abs() < 1e-4);
     assert!((m.fighters[0].defence_mul - base_def).abs() < 1e-4);
 }
+
+#[test]
+fn test_replaced_form_keeps_normal_attacks() {
+    let nc = suzume();
+    let def = compile_native(&nc, 1, false);
+    let jab = def.movelist.iter().find(|m| m.command == "m_jab").unwrap();
+    let shadow = def.movelist.iter().find(|m| m.command == "m_shadow").unwrap();
+    assert_ne!(jab.forms & (1 << 2), 0);
+    assert_eq!(shadow.forms & (1 << 2), 0);
+}

@@ -8,12 +8,12 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod passive_meter; mod rush_marker; mod story_hud; mod taunts; mod training_panel; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
     pub inputs: Vec<(u32, u16)>,
-    trail: [f32; 2],
+    life: life_bar::LifeFx,
     combo: [(i32, f32, i32); 2],
     pop: [f32; 2],
     last_hits: [i32; 2],
@@ -27,7 +27,7 @@ impl Hud {
         Hud {
             replay: false,
             inputs: vec![],
-            trail: [1.0, 1.0],
+            life: Default::default(),
             combo: [(0, 0.0, 0); 2],
             pop: [0.0; 2],
             last_hits: [0; 2],
@@ -208,15 +208,8 @@ impl Hud {
                     poly::grad_h(&quad(fade_x0, fade_x1), cl, dk);
                 }
                 let ratio = (f.life / f.life_max).max(0.0);
-                if !(f.move_type == 'H' && f.hit_shake > 0) {
-                    self.trail[side] = if self.trail[side] > ratio {
-                        (self.trail[side] - 0.006).max(ratio)
-                    } else {
-                        ratio
-                    };
-                }
+                self.life.track(side, ratio, gt, f.move_type == 'H' && f.hit_shake > 0);
                 let low = ratio < 0.25;
-                let cut = bh * 0.42;
                 let sp = |pts: Vec<Vec2>| -> Vec<Vec2> {
                     pts.into_iter().map(|q| p(q.x, q.y)).collect()
                 };
@@ -231,69 +224,7 @@ impl Hud {
                             Color::new(1.0, 0.1, 0.1, pul),
                         );
                     }
-                    poly::solid(
-                        &capsule(bx - 0.8, by - 0.8, bw + 1.6, bh + 1.6),
-                        Color::new(1.0, 1.0, 1.0, 0.22),
-                    );
-                    poly::grad_v(
-                        &capsule(bx, by, bw, bh),
-                        Color::new(0.02, 0.03, 0.08, 0.62),
-                        Color::new(0.05, 0.07, 0.14, 0.42),
-                    );
-                    let fill_rect = |r: f32| -> (f32, f32) {
-                        let ww = (bw * r).max(0.0);
-                        if side == 0 {
-                            (bx + bw - ww, ww)
-                        } else {
-                            (bx, ww)
-                        }
-                    };
-                    if self.trail[side] > ratio + 0.002 {
-                        let (fx, fw) = fill_rect(self.trail[side]);
-                        poly::grad_v(
-                            &capsule(fx, by, fw, bh),
-                            crate::tweaks::life_trail().0,
-                            crate::tweaks::life_trail().1,
-                        );
-                    }
-                    if ratio > 0.002 {
-                        let (top, bot) = crate::tweaks::life_fill(low);
-                        let (fx, fw) = fill_rect(ratio);
-                        poly::grad_v(&capsule(fx, by, fw, bh), top, bot);
-                        poly::grad_v(
-                            &sp(poly::chamfer(
-                                fx + cut * 0.4,
-                                by + 0.7,
-                                (fw - cut * 0.8).max(0.0),
-                                bh * 0.42,
-                                bh * 0.2,
-                            )),
-                            Color::new(1.0, 1.0, 1.0, if low { 0.32 } else { 0.55 }),
-                            Color::new(1.0, 1.0, 1.0, 0.0),
-                        );
-                        let ex = if side == 0 { fx } else { fx + fw };
-                        let (e0, e1) = (p(ex, by + 1.0), p(ex, by + bh - 1.0));
-                        draw_line(
-                            e0.x,
-                            e0.y,
-                            e1.x,
-                            e1.y,
-                            0.8 * s,
-                            Color::new(1.0, 1.0, 0.92, 0.45),
-                        );
-                    }
-                    for i in 1..10 {
-                        let t = i as f32 / 10.0;
-                        let (a, b) = (p(bx + bw * t, by + 1.0), p(bx + bw * t, by + bh - 1.0));
-                        draw_line(
-                            a.x,
-                            a.y,
-                            b.x,
-                            b.y,
-                            0.45 * s,
-                            Color::new(0.0, 0.0, 0.0, 0.25),
-                        );
-                    }
+                    self.life.draw(&p, s, gt, life_bar::Bar { side, x: bx, y: by, w: bw, h: bh, ratio, low });
                     let acx = if side == 0 {
                         px0 + 12.0
                     } else {
@@ -761,11 +692,6 @@ impl Hud {
             }
             let (cx, cy) = (w / 2.0, 13.0);
             if show_timer {
-                for k in 0..9 {
-                    let tx = cx - 8.0 + k as f32 * 2.0;
-                    let (a, b) = (p(tx, 21.5), p(tx, 23.0));
-                    draw_line(a.x, a.y, b.x, b.y, 0.4 * s, Color::new(1.0, 1.0, 1.0, 0.4));
-                }
                 let t = if m.training || m.round_ticks == 0 {
                     "--".to_string()
                 } else {
@@ -777,13 +703,8 @@ impl Hud {
                 } else {
                     1.0
                 };
-                if urgent {
-                    let a = 0.12 + 0.1 * (gt * 9.0).sin().abs();
-                    poly::solid(
-                        &sp_box(&p, cx - 15.0, 5.0, 30.0, 17.0, 6.0),
-                        Color::new(1.0, 0.1, 0.1, a),
-                    );
-                }
+                let frac = if m.training || m.round_ticks <= 0 { 1.0 } else { m.timer as f32 / m.round_ticks as f32 };
+                timer_ring::draw(&p, s, gt, timer_ring::Ring { cx, cy: cy + 0.5, r: 10.5, frac, urgent });
                 outlined(
                     &t,
                     cx,
@@ -1294,13 +1215,6 @@ fn glass(
         Color::new(0.05, 0.06, 0.12, 0.62),
     );
     poly::outline(&pts, 0.8 * s, Color::new(1.0, 1.0, 1.0, 0.3));
-}
-
-fn sp_box(p: &impl Fn(f32, f32) -> Vec2, x: f32, y: f32, w: f32, h: f32, r: f32) -> Vec<Vec2> {
-    poly::chamfer(x, y, w, h, r * 0.6)
-        .into_iter()
-        .map(|q| p(q.x, q.y))
-        .collect()
 }
 
 /// Round avatar on a soft character-coloured glow: head crop of the idle sprite (M.U.G.E.N.: the 9000,x portrait) with a transparent background.

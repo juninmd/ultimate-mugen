@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod air_dash; mod armor; mod award; mod bounds; mod forms; mod types; mod walk;
+mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod types; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -1203,12 +1203,12 @@ impl Match {
                 let gc = fd.ghv.guardcount;
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
-                g.guarded = true; g.hittime = if fd.rush.perfect == crate::rush::PERFECT_FLASH { hd.guard_hit_time * 2 / 3 } else { hd.guard_hit_time }; g.slidetime = hd.guard_slide_time; g.ctrltime = hd.guard_ctrl_time;
+                g.guarded = true; g.hittime = guard::guard_hit_time(hd.guard_hit_time, fd.rush.perfect == crate::rush::PERFECT_FLASH); g.slidetime = guard::scaled_ticks(hd.guard_slide_time); g.ctrltime = guard::scaled_ticks(hd.guard_ctrl_time);
                 g.xvel = (if fd.state_type == 'A' { hd.air_guard_vel[0] } else { hd.guard_vel }) * dir;
                 g.yvel = if fd.state_type == 'A' { hd.air_guard_vel[1] } else { 0.0 };
                 g.yaccel = hd.yaccel; g.damage = dmg; g.guardcount = gc + 1;
                 g.record_hitdef(hd, true, (aid, aside, ano), a_facing, proj.map(|p| p.0));
-                fd.hit_shake = hd.guard_pause_p2; fd.hit_over_time = hd.guard_hit_time; fd.slide_time = hd.guard_slide_time;
+                fd.hit_shake = guard::scaled_ticks(hd.guard_pause_p2); fd.hit_over_time = g.hittime; fd.slide_time = g.slidetime;
                 fd.ctrl = false; fd.move_type = 'H';
             }
             if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('g', pid, gt)); } else { self.fighters[a].move_guarded = 1; self.fighters[a].hit_pause = pause_p1; }

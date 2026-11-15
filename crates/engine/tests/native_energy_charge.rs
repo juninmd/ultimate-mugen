@@ -9,7 +9,7 @@ use ume_engine::native::{compile_native, NativeChar};
 
 const CHARGE_STATE: i32 = 3920;
 const HOLD_TICKS: usize = 100;
-const MINIMUM_GAIN_PER_TICK: f32 = 3.0;
+const MINIMUM_GAIN_PER_TICK: f32 = 9.0;
 const RELEASE_RECOVERY_TICKS: usize = 14;
 const JAB_STATE: i32 = 200;
 

@@ -166,7 +166,7 @@ impl Ai {
             && f.move_type != 'H'
         {
             self.hold = self.block_hold(e, back);
-            self.hold_ticks = 8 + (self.r() * 10.0) as i32;
+            self.hold_ticks = 3 + (self.r() * 3.0) as i32;
             self.guard.on_guard(self.hold_ticks + 1);
             return self.hold;
         }

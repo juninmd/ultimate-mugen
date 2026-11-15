@@ -33,7 +33,7 @@ mod update_banner;
 mod results_stats;
 mod select_category;
 mod select_grid;
-mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile;
+mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_view;
 mod versus; mod versus_compare;
 mod menu_view; mod menu_icons;
 mod menu_focus;
@@ -758,24 +758,7 @@ impl App {
 
     /// Registry indices visible under the current filter (never empty).
     fn char_view(&self) -> Vec<usize> {
-        let mut v: Vec<usize> = self
-            .playable()
-            .into_iter()
-            .filter(|&i| self.category_matches(i))
-            .collect();
-        if v.is_empty() {
-            v = self.playable();
-        }
-        if let Some(sp) = &self.sp {
-            v.sort_by_key(|&i| {
-                let e = &self.reg.chars[i];
-                sp.roster_pos(&e.id)
-                    .or_else(|| sp.roster_pos(&e.name))
-                    .unwrap_or(usize::MAX)
-            });
-        }
-        self.sort_view(&mut v);
-        v
+        self.cached_char_view()
     }
 
     fn menu_text(&self, key: &'static str) -> String {

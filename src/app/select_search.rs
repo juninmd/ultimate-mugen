@@ -10,7 +10,7 @@ thread_local! {
     static OPEN: Cell<bool> = const { Cell::new(false) };
 }
 
-fn query() -> String {
+pub(super) fn query() -> String {
     QUERY.with(|q| q.borrow().to_lowercase())
 }
 

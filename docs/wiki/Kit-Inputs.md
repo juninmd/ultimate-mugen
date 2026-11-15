@@ -6,7 +6,7 @@ Native fighters no longer share one input set. Each archetype swaps some quarter
 
 | Fighter | Move | Input | Style |
 | --- | --- | --- | --- |
-| Valdric | Lance Wall | hold back 40 ticks, forward + a | Charge (zone control) |
+| Valdric | Sovereign | hold back 40 ticks, forward + y | Charge (zone control) |
 | Volta | Tesla | hold back 40 ticks, forward + y | Charge (zoner) |
 | Bruno | Lariat | 360° motion + y | Grappler, command throw |
 | Daichi | Aura Rush | 360° motion + x | Grappler rush |

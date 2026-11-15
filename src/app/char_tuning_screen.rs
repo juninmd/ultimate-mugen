@@ -5,8 +5,8 @@ use crate::i18n::tr;
 
 const ROWS: usize = PARAMS.len() + 2;
 const RESET_ROW: usize = ROWS - 1;
-const ROW_TOP: f32 = 200.0;
-const ROW_H: f32 = 52.0;
+const ROW_TOP: f32 = 150.0;
+const ROW_H: f32 = 44.0;
 
 impl App {
     pub(super) fn char_tuning_screen(&mut self) {
@@ -105,12 +105,12 @@ impl App {
         }
         self.ui.text(
             tr(
-                "←→ ajustar · ↑↓ navegar · Enter restaurar · Esc voltar",
-                "←→ adjust · ↑↓ navigate · Enter reset · Esc back",
+                "Cima/Baixo: navegar · Esq/Dir: ajustar · Enter: restaurar · Esc: voltar",
+                "Up/Down: navigate · Left/Right: adjust · Enter: reset · Esc: back",
             ),
             VW / 2.0,
-            VH - 40.0,
-            20.0,
+            VH - 18.0,
+            18.0,
             hex("#a49cc0"),
             Align::Center,
             false,

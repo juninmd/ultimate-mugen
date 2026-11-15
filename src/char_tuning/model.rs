@@ -8,7 +8,8 @@ pub const RUN: usize = 4;
 pub const JUMP: usize = 5;
 pub const GRAVITY: usize = 6;
 pub const POWER: usize = 7;
-pub const COUNT: usize = 8;
+pub const POWER_COST: usize = 8;
+pub const COUNT: usize = 9;
 
 pub const NEUTRAL: u16 = 100;
 
@@ -29,6 +30,7 @@ pub const PARAMS: [Param; COUNT] = [
     Param { key: "jump", label: ("Força do pulo", "Jump force"), min: 25, max: 300, step: 5 },
     Param { key: "gravity", label: ("Gravidade", "Gravity"), min: 25, max: 300, step: 5 },
     Param { key: "power", label: ("Barra de poder", "Power bar"), min: 0, max: 300, step: 10 },
+    Param { key: "power_cost", label: ("Custo de energia", "Energy cost"), min: 0, max: 300, step: 10 },
 ];
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -54,6 +56,7 @@ impl Tuning {
         scale(d, &["velocity.jump.y", "velocity.airjump.y"], self.0[JUMP]);
         scale(d, &["movement.yaccel"], self.0[GRAVITY]);
         scale(d, &["data.power"], self.0[POWER]);
+        d.constants.insert("tuning.power_cost".into(), self.0[POWER_COST] as f64);
     }
 }
 

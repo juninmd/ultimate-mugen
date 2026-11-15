@@ -1,4 +1,5 @@
 ; Definition file for MeuLutador
+; Regra multiplataforma: use sempre '/' e caixa exata nos caminhos abaixo.
 [Info]
 name = "MeuLutador"
 displayname = "Lutador Master"
@@ -6,7 +7,7 @@ versiondate = 01,01,2026
 mugenversion = 1.0
 author = "SeuNome"
 pal.defaults = 1,2,3,4,5,6
-localcoord = 1280,720
+localcoord = 1280,720        ; Opcoes comuns: 1280,720 (HD), 428,240 (16:9), 320,240 (Lo-Res)
 
 [Files]
 sprite   = files/sprites.sff
@@ -22,6 +23,8 @@ st3      = states/supers.cns
 st4      = states/helpers.cns
 st5      = states/state-2-3.cns
 st6      = config.txt
+; movelist = movelist.dat            ; Opcional: Menu Move List no Ikemen GO
+; st90     = states/ikemen_addon.zss ; Slot alto: ignorado no MUGEN, carregado no Ikemen/UME
 
 [Palette Keymap]
 x = 1

@@ -1,0 +1,77 @@
+# Exemplo Didático ZSS: Funções, HitSparks Procedurais, Mapas e StateDef -4
+# Testado e compatível com Ikemen GO e ultimate-mugen (crates/engine/src/zss/mod.rs)
+
+[Function SpawnHitSpark(animId, ox, oy)]
+{
+    explod{
+        anim: animId;
+        pos: ox, oy;
+        postype: p2;
+        sprpriority: 6;
+        ownpal: 1;
+        removetime: -2;
+        scale: const240p(0.5), const240p(0.5);
+        ignorehitpause: 1;
+    }
+}
+
+[StateDef -1]
+if roundState = 2 && !aiLevelF {
+    let podeEspecial = (stateType != A && ctrl) || ((stateNo = [200, 299] || stateNo = [400, 499]) && stateNo != 440 && moveContact);
+    ignoreHitPause {
+        mapSet{map: "can_special"; value: podeEspecial}
+    }
+
+    if command = "Hadouken" && podeEspecial {
+        changeState{value: 1000}
+    }
+}
+
+[StateDef 200; type: S; movetype: A; physics: S; anim: 200; ctrl: 0;]
+if time = 0 {
+    playSnd{value: 0, 0; channel: 0}
+}
+
+if animElem = 2 {
+    hitDef{
+        attr: S, NA;
+        damage: 32, 0;
+        animtype: Light;
+        guardflag: MA;
+        hitflag: MAF;
+        priority: 4, Hit;
+        pausetime: 8, 8;
+        sparkno: -1;
+        hitsound: 5, 1;
+        guardsound: 6, 0;
+        ground.type: High;
+        ground.slidetime: 10;
+        ground.hittime: 12;
+        ground.velocity: -const240p(4.5), 0;
+    }
+}
+
+if moveHit = 1 && !hitPauseTime {
+    persistent(0) ignoreHitPause {
+        call SpawnHitSpark(8001, 0, -const240p(60));
+        mapAdd{map: "combo_hits"; value: 1}
+    }
+}
+
+if animTime = 0 {
+    changeState{value: 0; ctrl: 1}
+}
+
+[StateDef -4]
+ignoreHitPause {
+    if !isHelper {
+        # Reseta contador semântico quando o oponente recupera controle
+        if numEnemy && enemyNear, moveType != H {
+            mapSet{map: "combo_hits"; value: 0}
+        }
+        # Corta voz de golpe ao entrar em hitstun
+        if moveType = H {
+            stopSnd{channel: 0}
+        }
+    }
+}

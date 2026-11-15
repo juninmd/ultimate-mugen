@@ -1,6 +1,9 @@
 use crate::input::k;
 
 mod cancel;
+mod whiff;
+
+pub use whiff::{WHIFF_COST, WHIFF_MAX_TICKS, WHIFF_MIN_TICKS};
 
 pub const COST: f32 = 500.0;
 pub const CONTACT_WINDOW: i32 = 45;
@@ -58,6 +61,12 @@ impl RushState {
 
     pub fn overdrive_ratio(&self) -> f32 {
         self.overdrive as f32 / OVERDRIVE_TICKS as f32
+    }
+
+    pub(crate) fn begin_whiff(&mut self) {
+        self.cooldown = COOLDOWN_TICKS;
+        self.buffered = 0;
+        self.locked = self.held;
     }
 
     pub(crate) fn begin(&mut self) {

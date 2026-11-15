@@ -25,6 +25,10 @@ The same key still charges energy when you are idle: a fighter with control and 
 4. The match drops into slow motion for 15 ticks, the fighter flashes blue and leaves an afterimage trail.
 5. **Overdrive** starts: for 150 ticks the fighter deals 20 % more damage (`effective_attack`, applied on top of passives and under their ceilings).
 
+## Whiff cancel
+
+Pressing Start during a move that has not touched anything also cancels it, for a higher price. It needs 1000 meter (a Rush Cancel costs 500), works from 10 to 60 ticks into the move and shares the Rush Cancel cooldown. It returns control like a Rush Cancel but gives no Overdrive, no slow motion and does not count as a Rush Cancel. A move that has connected or been blocked still uses the cheaper Rush Cancel. Constants live in `crates/engine/src/rush/whiff.rs` (`WHIFF_COST`, `WHIFF_MIN_TICKS`, `WHIFF_MAX_TICKS`).
+
 ## Engine map
 
 | Piece | File |

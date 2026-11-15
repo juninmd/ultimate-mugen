@@ -23,7 +23,7 @@ fn eligible(f: &Fighter) -> bool {
         && (1..=CONTACT_WINDOW).contains(&f.move_contact)
 }
 
-fn landing_state(f: &Fighter) -> i32 {
+pub(super) fn landing_state(f: &Fighter) -> i32 {
     match f.state_type {
         'A' => JUMP_FALL_STATE,
         'C' => CROUCH_STATE,
@@ -48,12 +48,22 @@ fn trail() -> AfterImage {
     }
 }
 
-fn flash() -> PalFx {
+pub(super) fn flash() -> PalFx {
     PalFx {
         time: FLASH_TICKS,
         add: FLASH_ADD,
         ..Default::default()
     }
+}
+
+pub(super) fn swallow_start(f: &mut Fighter) {
+    f.history.mask_latest(k::S);
+    let (commands, active) = (&f.def.commands, &mut f.cmd.active);
+    active.retain(|name| {
+        !commands
+            .iter()
+            .any(|c| *c.name == **name && c.steps.iter().any(|s| s.btns & k::S != 0))
+    });
 }
 
 impl Match {
@@ -62,6 +72,8 @@ impl Match {
             self.fighters[i].rush.tick();
             if self.rush_ready(i) {
                 self.rush_cancel(i);
+            } else if self.whiff_ready(i) {
+                self.whiff_cancel(i);
             }
         }
     }
@@ -96,13 +108,7 @@ impl Match {
         if f.state_type != 'A' {
             f.vel.x = 0.0;
         }
-        f.history.mask_latest(k::S);
-        let (commands, active) = (&f.def.commands, &mut f.cmd.active);
-        active.retain(|name| {
-            !commands
-                .iter()
-                .any(|c| *c.name == **name && c.steps.iter().any(|s| s.btns & k::S != 0))
-        });
+        swallow_start(f);
         f.palfx = Some(flash());
         f.after_image = Some(trail());
         f.rush.begin();

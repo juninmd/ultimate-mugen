@@ -78,12 +78,15 @@ Todo lutador tem uma nacionalidade e uma biografia curta, escritas em inglês (`
 
 ```json
 "profile": {
+  "country": "jp",
   "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
   "bio": { "en": "Two short sentences.", "pt": "Duas frases curtas.", "es": "Dos frases cortas." }
 }
 ```
 
 - Os lutadores nativos, o chefe final e os capangas do modo História guardam seus perfis em `assets/char_profiles.json`, indexados por `id`. Um campo `profile` dentro do arquivo do lutador vence essa tabela, então lutadores UMF importados levam o próprio perfil.
+- `country` escolhe a bandeira desenhada ao lado da nacionalidade: `jp`, `br`, `no`, `us`, `cn`, `es`, `mn`, `de`, `kr`, `ar`, `au`, `ru`, `fr`, além das fictícias `underworld` e `eclipse`. As bandeiras são formas vetoriais em `src/flag/designs.rs` (sem arquivos de imagem); adicione uma entrada lá para outro país. Um código desconhecido apenas não mostra bandeira. `UME_SHOTS_ONLY=flags` salva uma folha com todas as bandeiras.
+- A bandeira aparece no quadro do elenco, no cartão do lutador, na faixa de perfil abaixo do elenco e no cartão de fase do modo História.
 - Mantenha cada biografia abaixo de 260 caracteres: ela precisa caber em duas linhas da tela de seleção.
 - A tela de seleção mostra a nacionalidade e a biografia do lutador em destaque abaixo do elenco (capangas e o chefe aparecem com o filtro Chefes). O cartão de fase do modo História mostra o perfil do chefe da fase.
 - Lutadores sem perfil (conteúdo M.U.G.E.N) continuam mostrando `description`.

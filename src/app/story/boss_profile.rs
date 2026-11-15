@@ -10,6 +10,7 @@ const BIO_LINE: f32 = 18.0;
 const BIO_SIZE: f32 = 15.0;
 const BIO_WIDTH: f32 = 760.0;
 const BIO_LINES: usize = 3;
+const FLAG_W: f32 = 24.0;
 
 pub(crate) fn stage_boss(run: &StoryRun, player: &str) -> &'static str {
     let def = run.stage_def();
@@ -58,6 +59,14 @@ impl App {
             Color::new(1.0, 1.0, 1.0, 0.75 * reveal),
             Align::Center,
             true,
+        );
+        let flag_x = (VW - self.ui.measure(&nationality, 13.0, true)) / 2.0 - FLAG_W - 8.0;
+        self.ui.flag(
+            &profile.country,
+            flag_x,
+            NATIONALITY_Y - 14.0,
+            FLAG_W,
+            reveal,
         );
         let ink = Color::new(0.85, 0.82, 0.94, 0.85 * reveal);
         let lines = crate::profile::wrap(profile.bio.pick(lang), BIO_WIDTH, |s| {

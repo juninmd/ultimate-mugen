@@ -1183,7 +1183,7 @@ impl App {
                 );
             }
             self.ui
-                .rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.7));
+                .rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.7)); self.draw_tile_flag(i, cx, cy, cw, cy + ch - 18.0);
             let up = self.names_up[i].as_str();
             let nm = if emugen {
                 crate::credit_line::truncate(up, 13)
@@ -1784,7 +1784,7 @@ impl App {
         let by = py + ph - 94.0;
         self.ui
             .rect(px, by, pw, 94.0, Color::new(0.0, 0.0, 0.05, 0.7));
-        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 88.0); self.draw_stat_gauges(px, by + 20.0, pw, i);
+        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 88.0); self.draw_card_flag(i, px + pw, by); self.draw_stat_gauges(px, by + 20.0, pw, i);
         let nm = self.names_up[i].as_str();
         self.ui.text_bold(
             nm,

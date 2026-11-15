@@ -40,6 +40,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Criar cenários](Cenarios.md) | Criadores | Referência completa: cenário M.U.G.E.N `.def` e cenário nativo |
 | [Arquitetura](Arquitetura.md) | Desenvolvedores | Mapa de crates, direção das dependências, onde o código novo entra |
 | [Contribuindo](https://github.com/juninmd/ultimate-mugen/blob/master/CONTRIBUTING.pt-BR.md) | Contribuidores | Compilar, verificações, regras e fluxo de pull request |
+| [Pontos de extensão](Pontos-de-Extensao.md) | Criadores, Contribuidores | Qual arquivo define cada tipo de conteúdo e se precisa de Rust |
 | [Decisões de arquitetura](../adr/README.md) | Contribuidores | ADRs: por que o engine é feito assim |
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
 | [Smoke da partida web](Smoke-Partida-Web.md) | Desenvolvedores | Teste de CI que joga partidas completas no navegador e pega travamentos |

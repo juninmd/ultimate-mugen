@@ -24,6 +24,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Make a character (quick start)](Make-a-Character.md) | Creators | A working fighter in ten lines, inherited from another one |
 | [Creating a UMF character](UMF-Character.md) | Creators | Full reference: every field of a fighter in a single JSON |
 | [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
+| [Signature](Signature.md) | Creators | Per-fighter signature meter with tiers, declared in JSON |
 | [Rush Cancel](Rush-Cancel.md) | Players & Creators | Spend meter to cancel a connected move, Overdrive and the presentation |
 | [Combo Tiers](Combo-Tiers.md) | Players & Creators | Combo badges, energy notch, air dashes and bounces |
 | [Bleach-inspired kits](Bleach-Inspired-Kits.md) | Players | Abilities inspired by Bleach in three native fighters |

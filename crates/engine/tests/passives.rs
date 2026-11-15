@@ -190,7 +190,7 @@ fn passives_compose_multiplicatively_under_a_global_cap() {
 #[test]
 fn mugen_characters_and_unopted_natives_are_untouched() {
     let mugen = mugen_char("plain", "");
-    let mut m = duel(mugen, Arc::new(compile_native(&native("kaito"), 1, false)));
+    let mut m = duel(mugen, Arc::new(compile_native(&native("oboro"), 1, false)));
     m.fighters[0].attack_mul = 12.0;
     at_life_ratio(&mut m, 0, 0.01);
     cast(&mut m, 0, 1001);

@@ -45,7 +45,7 @@ impl App {
             let on = *t == tab;
             let hover = self.hover_rect(r.x, r.y, r.w, r.h);
             let (top, bot, edge) = if on {
-                (Color::new(1.0, 0.3, 0.43, 0.9), Color::new(0.65, 0.12, 0.3, 0.9), Some(fade(hex("#ffd0da"), 0.7 * a)))
+                (crate::tweaks::accent(0.9), crate::tweaks::accent_deep(0.9), Some(fade(hex("#ffd0da"), 0.7 * a)))
             } else if hover {
                 (Color::new(1.0, 1.0, 1.0, 0.16), Color::new(1.0, 1.0, 1.0, 0.08), None)
             } else {

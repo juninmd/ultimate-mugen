@@ -91,7 +91,7 @@ impl App {
             return;
         };
         let music = sess.stage.music;
-        let bgm = sess.stage.bgm.clone().or_else(|| self.market.pick_track());
+        let bgm = self.reg.stages.get(self.sel.2).and_then(|stage| crate::tweaks::track_for(&stage.id)).or_else(|| sess.stage.bgm.clone()).or_else(|| self.market.pick_track());
         // DualShock/DualSense lightbars: P1 blue, P2 red
         self.c.pads.set_light(0, [30, 90, 255]);
         self.c.pads.set_light(1, [255, 40, 60]);

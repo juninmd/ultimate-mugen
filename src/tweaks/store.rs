@@ -22,6 +22,7 @@ fn state() -> &'static Mutex<State> {
         }
         let (tweaks, labels, warnings) = parse(text.as_deref().unwrap_or(DEFAULT_TEXT));
         warnings.iter().for_each(|w| eprintln!("tweaks: {w}"));
+        super::theme::install(&tweaks);
         Mutex::new(State { tweaks, labels, last_text: text.or_else(|| Some(DEFAULT_TEXT.into())), idle: 0.0 })
     })
 }
@@ -50,6 +51,7 @@ fn refresh(s: &mut State) -> Option<String> {
         return None;
     }
     let (tweaks, labels, warnings) = parse(text.as_deref().unwrap_or(DEFAULT_TEXT));
+    super::theme::install(&tweaks);
     s.tweaks = tweaks;
     s.labels = labels;
     s.last_text = text;

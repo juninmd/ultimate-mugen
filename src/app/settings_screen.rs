@@ -447,7 +447,7 @@ impl App {
             let col = if focused {
                 hex("#ff4d6d")
             } else if active {
-                Color::new(1.0, 0.3, 0.43, 0.38)
+                crate::tweaks::accent(0.38)
             } else {
                 Color::new(1.0, 1.0, 1.0, 0.06)
             };

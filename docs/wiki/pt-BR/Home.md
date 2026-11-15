@@ -38,6 +38,9 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Gerador de golpes](Gerador-de-Golpes.md) | Criadores | TOML para AIR, CNS, CMD e Statedef -1 |
 | [Criar um cenário (guia rápido)](Criar-um-Cenario.md) | Criadores | Cenário a partir de um `.def`, dados do modo história e o que ainda precisa de código |
 | [Criar cenários](Cenarios.md) | Criadores | Referência completa: cenário M.U.G.E.N `.def` e cenário nativo |
+| [Arquitetura](Arquitetura.md) | Desenvolvedores | Mapa de crates, direção das dependências, onde o código novo entra |
+| [Contribuindo](https://github.com/juninmd/ultimate-mugen/blob/master/CONTRIBUTING.pt-BR.md) | Contribuidores | Compilar, verificações, regras e fluxo de pull request |
+| [Decisões de arquitetura](../adr/README.md) | Contribuidores | ADRs: por que o engine é feito assim |
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
 | [Smoke da partida web](Smoke-Partida-Web.md) | Desenvolvedores | Teste de CI que joga partidas completas no navegador e pega travamentos |
 | [Layout de arquivos](Layout-de-Arquivos.md) | Desenvolvedores | A regra de 250 linhas, uma responsabilidade por arquivo, dividir arquivos, PRs paralelos |

@@ -36,9 +36,9 @@ These map to the `lunge`, `falcondive`, `shoulder` and `meteordrop` moves added 
 
 | Package | Code files | Code lines | Statedefs | Common states redeclared | Controllers | Commands | AI commands | AIR actions |
 |---|---|---|---|---|---|---|---|---|
-| Goku GT (DBFZ style) | 11 | 35092 | 329 | 59 | 3114 | 78 | 2 | 529 |
-| Goku UI (DBFZ style) | 7 | 27742 | 258 | 71 | 2241 | 78 | 2 | 294 |
-| Kung Fu Man (bundled) | 6 | 10646 | 118 | 14 | 711 | 74 | 0 | 234 |
+| Goku GT (DBFZ style) | 11 | 35092 | 329 | 56 | 3114 | 78 | 2 | 529 |
+| Goku UI (DBFZ style) | 7 | 27742 | 258 | 68 | 2241 | 78 | 2 | 294 |
+| Kung Fu Man (bundled) | 6 | 10646 | 118 | 10 | 711 | 74 | 0 | 234 |
 
 | Controller | Uses | Share | UMF equivalent |
 |---|---|---|---|
@@ -54,7 +54,7 @@ These map to the `lunge`, `falcondive`, `shoulder` and `meteordrop` moves added 
 What the numbers say:
 
 1. **A fighter is 10k to 35k lines of code**, and the eight controllers above are 61% of all controller blocks. Every one of them is something UMF generates from a field instead of a hand-written state.
-2. **Common states are copied and edited by hand.** Each package redeclares 14 to 71 of the engine's common states (stand, walk, jump, guard, get-hit) to tweak them. UMF fighters never touch them: the differences are fields in `stats` and `anims`.
+2. **Common states are copied and edited by hand.** Each package redeclares 10 to 68 of the engine's common states (stand, walk, jump, guard, get-hit) to tweak them. UMF fighters never touch them: the differences are fields in `stats` and `anims`.
 3. **Variants are full copies.** EX and form versions of a move are whole new statedefs. In UMF a variant is one entry with `"use": "<move>"` and the fields that change.
 4. **Nothing is shared between packages.** Two Goku packages by the same author family share no file. UMF has `extends` and kits, so a new fighter can inherit a whole fighter or a move pack and stay in sync with it.
 

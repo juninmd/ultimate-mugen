@@ -74,6 +74,15 @@ fn value_of<'a>(line: &'a str, key: &str) -> Option<&'a str> {
     name.trim().eq_ignore_ascii_case(key).then(|| value.trim())
 }
 
+fn is_ai_name(name: &str) -> bool {
+    let lower = name.trim_matches('"').to_ascii_lowercase();
+    lower.strip_prefix("ai").is_some_and(|rest| {
+        rest.chars()
+            .next()
+            .is_none_or(|next| next.is_ascii_digit() || "_- ".contains(next))
+    })
+}
+
 pub fn scan_text(census: &mut Census, text: &str) {
     let mut section = Section::Other;
     for raw in text.lines() {
@@ -95,7 +104,7 @@ pub fn scan_text(census: &mut Census, text: &str) {
                     .next()
                     .and_then(|id| id.parse::<i64>().ok())
                     .unwrap_or(0);
-                if id < COMMON_STATE_LIMIT || HIT_STATES.contains(&id) {
+                if (0..COMMON_STATE_LIMIT).contains(&id) || HIT_STATES.contains(&id) {
                     census.common_statedefs += 1;
                 }
                 Section::Statedef
@@ -122,11 +131,7 @@ pub fn scan_text(census: &mut Census, text: &str) {
                 }
             }
             Section::Command => {
-                if value_of(line, "name").is_some_and(|name| {
-                    name.trim_matches('"')
-                        .to_ascii_lowercase()
-                        .starts_with("ai")
-                }) {
+                if value_of(line, "name").is_some_and(is_ai_name) {
                     census.ai_commands += 1;
                 }
             }

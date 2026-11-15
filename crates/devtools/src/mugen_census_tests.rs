@@ -1,17 +1,17 @@
 use super::*;
 
-const SAMPLE: &str = "[Statedef 200]\ntype = S\n[State 200, hit]\ntype = HitDef\ndamage = 20\n[State 200, end]\ntype = ChangeState ; back\nvalue = 0\n[Statedef 5000]\ntype = S\n[State 5000, a]\ntype = ChangeState\n[Command]\nname = \"AI01\"\ncommand = a\n[Command]\nname = \"fwd\"\n[Begin Action 0]\n0,0, 0,0, 5\n";
+const SAMPLE: &str = "[Statedef 200]\ntype = S\n[State 200, hit]\ntype = HitDef\ndamage = 20\n[State 200, end]\ntype = ChangeState ; back\nvalue = 0\n[Statedef 5000]\ntype = S\n[State 5000, a]\ntype = ChangeState\n[Command]\nname = \"AI01\"\ncommand = a\n[Command]\nname = \"airdash\"\n[Statedef -2]\n[Command]\nname = \"fwd\"\n[Begin Action 0]\n0,0, 0,0, 5\n";
 
 #[test]
 fn counts_states_controllers_commands_and_actions() {
     let mut census = Census::default();
     scan_text(&mut census, SAMPLE);
-    assert_eq!((census.statedefs, census.common_statedefs), (2, 1));
+    assert_eq!((census.statedefs, census.common_statedefs), (3, 1));
     assert_eq!(census.controllers.get("changestate"), Some(&2));
     assert_eq!(census.controllers.get("hitdef"), Some(&1));
     assert_eq!(
         (census.commands, census.ai_commands, census.actions),
-        (2, 1, 1)
+        (3, 1, 1)
     );
 }
 

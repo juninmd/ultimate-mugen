@@ -31,23 +31,7 @@ impl App {
         if let Some(v) = hit {
             return v;
         }
-        let mut v: Vec<usize> = base
-            .iter()
-            .copied()
-            .filter(|&i| self.category_matches(i))
-            .collect();
-        if v.is_empty() {
-            v = base.clone();
-        }
-        if let Some(sp) = &self.sp {
-            v.sort_by_key(|&i| {
-                let e = &self.reg.chars[i];
-                sp.roster_pos(&e.id)
-                    .or_else(|| sp.roster_pos(&e.name))
-                    .unwrap_or(usize::MAX)
-            });
-        }
-        self.sort_view(&mut v);
+        let v = self.compute_char_view(&base);
         let key = ViewKey {
             filter: self.sel_filter,
             sort: self.settings.sort,
@@ -58,4 +42,29 @@ impl App {
         VIEW.with(|c| *c.borrow_mut() = Some((key, v.clone())));
         v
     }
+
+    pub(crate) fn compute_char_view(&self, base: &[usize]) -> Vec<usize> {
+        let mut v: Vec<usize> = base
+            .iter()
+            .copied()
+            .filter(|&i| self.category_matches(i))
+            .collect();
+        if v.is_empty() {
+            v = base.to_vec();
+        }
+        if let Some(sp) = &self.sp {
+            v.sort_by_key(|&i| {
+                let e = &self.reg.chars[i];
+                sp.roster_pos(&e.id)
+                    .or_else(|| sp.roster_pos(&e.name))
+                    .unwrap_or(usize::MAX)
+            });
+        }
+        self.sort_view(&mut v);
+        v
+    }
+}
+
+pub(crate) fn last_view_len() -> usize {
+    VIEW.with(|c| c.borrow().as_ref().map_or(1, |(_, v)| v.len().max(1)))
 }

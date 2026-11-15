@@ -8,9 +8,10 @@ mod route;
 
 impl App {
     pub(crate) fn playable(&self) -> Vec<usize> {
+        let allows = self.route_gate();
         (0..self.reg.chars.len())
             .filter(|&i| {
-                if !self.route_allows(i) {
+                if !allows(i) {
                     false
                 } else if !self.reg.chars[i].boss {
                     true

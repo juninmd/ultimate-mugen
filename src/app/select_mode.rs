@@ -31,7 +31,11 @@ impl App {
     }
 
     pub(crate) fn select_tail(&self) -> String {
-        let search = self.search_label();
+        let rows = self.grid_rows().max(1);
+        let total_rows = super::select_view::last_view_len().div_ceil(self.grid_cols(super::select_view::last_view_len()));
+        let pages = total_rows.div_ceil(rows).max(1);
+        let page = (self.sel_row.div_ceil(rows)).min(pages - 1) + 1;
+        let search = format!("{} {page}/{pages} · {}", tr3("pág", "page", "pág"), self.search_label());
         if FAMILY.contains(&self.mode) {
             format!("[/] {search} · [M] {}", tr3("modo", "mode", "modo"))
         } else {

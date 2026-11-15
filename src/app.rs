@@ -33,7 +33,7 @@ mod update_banner;
 mod results_stats;
 mod select_category;
 mod select_grid;
-mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_view;
+mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_view; mod text_fit;
 mod versus; mod versus_compare;
 mod menu_view; mod menu_icons;
 mod menu_focus;
@@ -298,7 +298,7 @@ impl App {
             reg.sort_mugen();
             reg
         };
-        let import_msg = if reg.import_errors.is_empty() {
+        reg.add_stress_roster(); let import_msg = if reg.import_errors.is_empty() {
             String::new()
         } else {
             let first: Vec<&str> = reg
@@ -809,7 +809,7 @@ impl App {
         let mut confirm = false;
         let p = picking;
         let mut pos = pos_of(&view, cur[p]);
-        let old = pos;
+        let old = if view.contains(&cur[p]) { pos } else { usize::MAX };
         if self.c.pressed(nav::RIGHT) {
             pos = (pos + 1) % m;
         }
@@ -1054,11 +1054,10 @@ impl App {
         }
 
         let gap = 6.0;
-        let cw = ((640.0 - (cols as f32 - 1.0) * gap) / cols as f32).min(96.0);
-        let ch = cw * 1.17;
+        let (cw, ch) = Self::grid_tile(cols);
         let gw = cols as f32 * cw + (cols as f32 - 1.0) * gap;
         let gx = (VW - gw) / 2.0;
-        let gy = 98.0;
+        let gy = select_grid::GRID_Y;
         let gh = self.grid_rows() as f32 * (ch + gap) - gap;
         crate::menu_art::glass(&self.ui, gx - 12.0, gy - 12.0, gw + 24.0, gh + 24.0, 1.0);
         self.ui.rect_lines(
@@ -1168,16 +1167,13 @@ impl App {
             self.ui
                 .rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.7)); self.draw_tile_flag(i, cx, cy, cw, cy + ch - 18.0);
             let up = self.names_up[i].as_str();
-            let nm = if emugen {
-                crate::credit_line::truncate(up, 13)
-            } else {
-                clip(up.split_whitespace().next().unwrap_or(""), 12).to_string()
-            };
+            let name_size = (cw * 0.125).min(12.0);
+            let nm = self.fit_label(if emugen { up } else { up.split_whitespace().next().unwrap_or("") }, name_size, cw - 4.0);
             self.ui.text(
                 &nm,
                 cx + cw / 2.0,
                 cy + ch - 4.0,
-                (cw * 0.125).min(12.0),
+                name_size,
                 WHITE,
                 Align::Center,
                 true,
@@ -1304,8 +1300,8 @@ impl App {
             }
             if picked[side].is_none() {
                 let tag_w = if side == 0 { 26.0 } else if two { 26.0 } else { 32.0 };
-                let tag_x = if side == 0 { rx - pad } else { rx + cw + pad - tag_w };
-                self.ui.rect(tag_x, ry - pad - 15.0, tag_w, 15.0, a);
+                let (tag_x, tag_y) = if side == 0 { (rx, ry) } else { (rx, ry + ch - 33.0) };
+                self.ui.rect(tag_x, tag_y, tag_w, 15.0, a);
                 self.ui.text(
                     if side == 0 {
                         "P1"
@@ -1315,7 +1311,7 @@ impl App {
                         "CPU"
                     },
                     tag_x + tag_w / 2.0,
-                    ry - pad - 3.0,
+                    tag_y + 12.0,
                     12.0,
                     BLACK,
                     Align::Center,

@@ -10,7 +10,7 @@ pub(super) fn level(l: Option<&str>) -> Lv {
 }
 pub(super) fn guardflag(g: Option<&str>) -> &'static str { match g.unwrap_or("mid") { "high" => "HA", "low" => "L", "unblockable" => "", _ => "MA" } }
 
-pub(super) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_proj: bool) -> String {
+pub(in crate::native) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_proj: bool) -> String {
     let damage = h.damage * sm;
     let gd = h.guard_damage.map(|g| g * sm).unwrap_or((damage / 8.0).round());
     let lv = level(h.level.as_deref());
@@ -42,7 +42,7 @@ pub(super) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_proj: bool) 
     s
 }
 
-pub(super) fn hitdef_projectile(damage: f32, lvl: Option<&str>, kb: Option<[f32; 2]>, launch: bool, attr: &str, element: Option<&str>, stun: Option<i32>) -> String {
+pub(in crate::native) fn hitdef_projectile(damage: f32, lvl: Option<&str>, kb: Option<[f32; 2]>, launch: bool, attr: &str, element: Option<&str>, stun: Option<i32>) -> String {
     let spec = HitSpec {
         at: 0, damage, guard_damage: None, level: lvl.map(|s| s.into()), guard: None, knockback: kb, air_knockback: None,
         launch: Some(launch), hitstop: None, hitstun: None, spark: None, shake: None, priority: Some(4), hitflag: None,
@@ -106,4 +106,44 @@ pub(super) fn insert_voices(d: &mut CharDef, nc: &NativeChar) {
     d.sounds.insert((1000, 1), include_bytes!("../../../../assets/chars/voices/kaito/rush.wav").to_vec());
     d.sounds.insert((1000, 2), include_bytes!("../../../../assets/chars/voices/kaito/gale.wav").to_vec());
     d.sounds.insert((1000, 3), include_bytes!("../../../../assets/chars/voices/kaito/awake.wav").to_vec());
+}
+
+pub(super) fn anim_numbers(nc: &NativeChar) -> std::collections::HashMap<String, i32> {
+    let mut anim_no = std::collections::HashMap::new();
+    let mut used = std::collections::HashSet::new();
+    for (name, a) in nc.anims.iter() {
+        if let Some(pinned) = a.id.or_else(|| super::STANDARD_ANIMS.iter().find(|(n, _)| n == name).map(|(_, v)| *v)) {
+            anim_no.insert(name.clone(), pinned);
+            used.insert(pinned);
+        }
+    }
+    let mut next = 1000;
+    for (name, _) in nc.anims.iter() {
+        if anim_no.contains_key(name) { continue; }
+        while used.contains(&next) { next += 1; }
+        anim_no.insert(name.clone(), next);
+        used.insert(next);
+        next += 1;
+    }
+    anim_no
+}
+
+pub(super) fn append_exotic(
+    nc: &NativeChar,
+    anim_no: &std::collections::HashMap<String, i32>,
+    move_states: &std::collections::HashMap<String, i32>,
+    commands: &mut Vec<crate::commands::CommandDef>,
+    movelist: &mut Vec<crate::chardef::MoveInfo>,
+    minus1: &mut String,
+    minus2: &mut String,
+    cns: &mut String,
+) {
+    let comp = crate::native::companions::compile(nc.helpers.as_ref(), anim_no, move_states, &nc.moves);
+    commands.extend(comp.commands);
+    *minus1 += &comp.minus1;
+    *minus2 += &comp.minus2;
+    *cns += &comp.states;
+    movelist.extend(comp.movelist);
+    crate::native::scripts::script_commands(nc.scripts.as_ref(), commands, movelist);
+    *cns += &crate::native::boss_ui::boss_ui_cns(nc.boss_rules.as_ref());
 }

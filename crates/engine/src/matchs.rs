@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod air_dash; mod armor; mod award; mod bounds; mod forms; mod types; mod walk;
+mod air_dash; mod armor; mod award; mod bounds; mod forms; mod minus4; mod types; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -332,35 +332,6 @@ impl Match {
             if f.state_no != sno || !Arc::ptr_eq(&f.st_def, &sdef) || (f.state_time == 0 && st != 0) { return true; }
         }
         false
-    }
-
-    fn run_states(&mut self, i: usize) {
-        let in_pause = self.fighters[i].hit_pause > 0 || self.fighters[i].hit_shake > 0;
-        {
-            let f = &mut self.fighters[i];
-            f.asserts = if in_pause { f.asserts & !asf::ANIMATEHITPAUSE } else { 0 };
-            if f.ikemen.standby { f.asserts |= asf::INVISIBLE; }
-        }
-        let own = self.fighters[i].def.clone();
-        let custom = !Arc::ptr_eq(&self.fighters[i].st_def, &own) && !Arc::ptr_eq(&self.fighters[i].st_def, &self.common);
-        let helper = self.fighters[i].is_helper;
-        let id = self.fighters[i].id;
-        if !helper && !custom { self.run_state(i, &own, -3, in_pause); }
-        let Some(i) = self.idx(id) else { return };
-        self.run_state(i, &own, -2, in_pause);
-        let Some(i) = self.idx(id) else { return };
-        if (!helper || self.fighters[i].key_ctrl) && !custom {
-            self.run_state(i, &own, -1, in_pause);
-            let Some(i) = self.idx(id) else { return };
-            if !in_pause { self.builtin_transitions(i); }
-        }
-        for _ in 0..16 {
-            let Some(i) = self.idx(id) else { return };
-            let (same, no) = { let f = &self.fighters[i]; (Arc::ptr_eq(&f.st_def, &own), f.state_no) };
-            let owner;
-            let st_ref = if same { &own } else { owner = self.fighters[i].st_def.clone(); &owner };
-            if !self.run_state(i, st_ref, no, in_pause) { break; }
-        }
     }
 
     pub fn has_command(&self, i: usize, name: &str) -> bool {
@@ -710,7 +681,7 @@ impl Match {
             f.history.push(bits, f.facing as i32);
             let paused = f.hit_pause > 0 || f.hit_shake > 0 || frozen_by_pause(f);
             f.cmd.update(&f.history, &f.def.commands, paused);
-            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0];
+            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0]; f.move_camera = [true, true];
         }
         for &fi in &awaken[..awaken_len] { self.try_transform(fi); } self.rush_step();
         if tagged { self.tag_step(&tag_requests[..tag_len]); }
@@ -719,7 +690,7 @@ impl Match {
         self.collect_run_order(&mut ids);
         for (order_i, &id) in ids.iter().enumerate() {
             let Some(i) = self.idx_hint(id, order_i) else { continue };
-            if frozen_by_pause(&self.fighters[i]) { continue; }
+            if frozen_by_pause(&self.fighters[i]) { self.run_minus4_paused(i); continue; }
             let f = &mut self.fighters[i];
             let frozen = f.hit_pause > 0 || f.hit_shake > 0;
             f.width_override = None; f.height_override = None; f.clsn_mods.retain_mut(|c| { if c.time > 0 { c.time -= 1; } c.time != 0 }); f.player_push = !f.ikemen.standby; f.trans = None; f.draw_offset = V2::default();
@@ -901,23 +872,22 @@ impl Match {
     }
 
     pub fn update_camera(&mut self) {
-        let (mut minx, mut maxx, mut highest, mut any) = (f32::MAX, f32::MIN, f32::MAX, false);
+        let (mut minx, mut maxx, mut highest, mut any, mut any_y) = (f32::MAX, f32::MIN, f32::MAX, false, false);
         let (mut lo, mut hi, mut live) = (f32::MAX, f32::MIN, false);
         for f in self.roots() {
             if f.destroyed { continue; }
             if !f.ikemen.standby {
-                minx = minx.min(f.pos.x);
-                maxx = maxx.max(f.pos.x);
-                highest = highest.min(f.pos.y);
-                any = true;
+                if f.move_camera[0] { minx = minx.min(f.pos.x); maxx = maxx.max(f.pos.x); any = true; }
+                if f.move_camera[1] { highest = highest.min(f.pos.y); any_y = true; }
             }
-            if f.alive {
+            if f.alive && f.move_camera[0] {
                 lo = lo.min(f.pos.x);
                 hi = hi.max(f.pos.x);
                 live = true;
             }
         }
         if !any { return; }
+        if !any_y { highest = 0.0; }
         let natural = if self.zoom_max > 1.0 {
             let need = if !live { self.zoom_min } else { (hi - lo + 150.0) / BASE_W };
             need.clamp(self.zoom_min, self.zoom_max)

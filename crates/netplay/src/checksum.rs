@@ -93,6 +93,8 @@ pub fn checksum(m: &Match) -> u128 {
         h.i32(f.rush.overdrive);
         h.i32(f.rush.cooldown);
         h.i32(f.rush.cancels);
+        h.i32(f.rush.guard_hold);
+        h.i32(f.rush.perfect);
         for v in [f.ghv.kind, f.ghv.hittime, f.ghv.slidetime, f.ghv.ctrltime] {
             h.i32(v);
         }

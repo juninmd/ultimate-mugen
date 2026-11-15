@@ -70,6 +70,7 @@ impl Match {
     pub(crate) fn rush_step(&mut self) {
         for i in 0..self.fighters.len() {
             self.fighters[i].rush.tick();
+            self.track_guard_hold(i);
             if self.rush_ready(i) {
                 self.rush_cancel(i);
             } else if self.whiff_ready(i) {

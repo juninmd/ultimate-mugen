@@ -1194,7 +1194,7 @@ impl Match {
         }
         if guarded {
             let training = self.training;
-            let dmg = if self.fighters[d].has_assert(asf::NOGUARDDAMAGE) { 0.0 } else { (hd.guard_damage * attack_mul).round() };
+            let dmg = if self.fighters[d].has_assert(asf::NOGUARDDAMAGE) || self.perfect_guard(d) { 0.0 } else { (hd.guard_damage * attack_mul).round() };
             let pause_p1 = hd.guard_pause_p1;
             {
                 let fd = &mut self.fighters[d];
@@ -1203,7 +1203,7 @@ impl Match {
                 let gc = fd.ghv.guardcount;
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
-                g.guarded = true; g.hittime = hd.guard_hit_time; g.slidetime = hd.guard_slide_time; g.ctrltime = hd.guard_ctrl_time;
+                g.guarded = true; g.hittime = if fd.rush.perfect == crate::rush::PERFECT_FLASH { hd.guard_hit_time * 2 / 3 } else { hd.guard_hit_time }; g.slidetime = hd.guard_slide_time; g.ctrltime = hd.guard_ctrl_time;
                 g.xvel = (if fd.state_type == 'A' { hd.air_guard_vel[0] } else { hd.guard_vel }) * dir;
                 g.yvel = if fd.state_type == 'A' { hd.air_guard_vel[1] } else { 0.0 };
                 g.yaccel = hd.yaccel; g.damage = dmg; g.guardcount = gc + 1;

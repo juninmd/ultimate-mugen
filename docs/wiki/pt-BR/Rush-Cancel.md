@@ -33,6 +33,10 @@ Apertar Start durante um golpe que não tocou em nada também cancela, por um pr
 
 Um golpe normal que conectou (fraco a forte, em pé ou agachado) pode ser cancelado em dash para frente ou para trás tocando duas vezes a direção em até 20 ticks do contato, por 250 de barra. É mais barato que o Rush Cancel, não ativa Overdrive e não usa o cooldown. Exige contato (acerto ou defesa) e barra suficiente, então um normal que errou não pode ser cancelado. Código: `crates/engine/src/rush/dash.rs`.
 
+## Defesa perfeita
+
+Apertar para trás até 6 ticks antes do golpe acertar, sem já estar segurando a guarda, torna o bloqueio perfeito: sem dano de chip e com o atordoamento da guarda um terço menor. Segurar cedo é guarda normal, e soltar trava a janela por 12 ticks, então martelar o botão não funciona. Vale só para nativos no chão e não dá barra (barra por guarda sustentava o voo da Shion sem fim). Código: `crates/engine/src/rush/perfect.rs`.
+
 ## Mapa da engine
 
 | Peça | Arquivo |

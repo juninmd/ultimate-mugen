@@ -11,6 +11,7 @@ use ume_engine::rush::{COST, COOLDOWN_TICKS, OVERDRIVE_ATTACK_GAIN};
 const JAB_STATE: i32 = 200;
 const CHARGE_STATE: i32 = 3920;
 const CLOSE_GAP: f32 = 34.0;
+const GUARD_GAP: f32 = 30.0;
 const WATCH_TICKS: usize = 90;
 const FIGHTERS: [&str; 4] = ["akio", "bruno", "jin", "kaito"];
 
@@ -190,4 +191,30 @@ fn dash_cancel_needs_contact_and_meter() {
     broke.fighters[0].power = 0.0;
     for bits in [k::R, 0, k::R, k::R, 0, 0] { broke.tick(&[bits, 0]); }
     assert_ne!(broke.fighters[0].state_no, 100, "dash cancelled without meter");
+}
+
+fn guard_run(pre_hold: usize) -> (bool, bool) {
+    use ume_engine::rush::PERFECT_FLASH;
+    let mut m = arena(&fighter("akio"));
+    for _ in 0..pre_hold { m.tick(&[0, k::R]); }
+    face_off(&mut m, GUARD_GAP);
+    m.tick(&[k::X, k::R]);
+    let mut perfect = false;
+    let mut guarded = false;
+    for _ in 0..WATCH_TICKS {
+        m.tick(&[0, k::R]);
+        perfect |= m.fighters[1].rush.perfect == PERFECT_FLASH;
+        guarded |= (150..=155).contains(&m.fighters[1].state_no);
+    }
+    (perfect, guarded)
+}
+
+#[test]
+fn guard_pressed_at_the_last_moment_is_perfect_and_early_guard_is_not() {
+    let (perfect, guarded) = guard_run(0);
+    assert!(guarded, "the jab never reached the guard");
+    assert!(perfect, "guard pressed with the hit did not count as perfect");
+    let (early_perfect, early_guarded) = guard_run(30);
+    assert!(early_guarded);
+    assert!(!early_perfect, "holding back for a long time must not be perfect");
 }

@@ -12,6 +12,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Adding M.U.G.E.N content](MUGEN-Content.md) | Players | Install `.def`/`.zip` characters and stages, and validate them |
 | [GitHub marketplace](Marketplace.md) | Players | Install characters, stages and music from any GitHub repository |
 | [Story mode](Story-Mode.md) | Players | Five scrolling stages, waves, bosses, cutscenes and health carry-over |
+| [Stage objects](Stage-Objects.md) | Players, creators | Breakable crates, barrels and cars, food pickups, bonus rounds and their TOML data |
 | [Audio](Audio.md) | Players & Creators | Character sounds, music per stage, formats and panning |
 | [Character select](Character-Select.md) | Players | Select screen, portraits, teams and shortcuts |
 | [Game modes](Game-Modes.md) | Players | Arcade, teams (Sequence, Parallel, Tag) and their rules |
@@ -20,10 +21,12 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Compatibility decisions](Compatibility-Decisions.md) | Creators | Features the engine rejects by design and why |
 | [Lua scripts](Lua-Scripts.md) | Creators | What Lua in M.U.G.E.N packs does and the Lua-free alternatives |
 | [Route files](Route-Files.md) | Creators | Arcade routes and unlock rules in TOML |
-| [Creating a UMF character](UMF-Character.md) | Creators | A full fighter in a single JSON |
+| [Make a character (quick start)](Make-a-Character.md) | Creators | A working fighter in ten lines, inherited from another one |
+| [Creating a UMF character](UMF-Character.md) | Creators | Full reference: every field of a fighter in a single JSON |
 | [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
 | [Signature](Signature.md) | Creators | Per-fighter signature meter with tiers, declared in JSON |
 | [Rush Cancel](Rush-Cancel.md) | Players & Creators | Spend meter to cancel a connected move, Overdrive and the presentation |
+| [Combo Tiers](Combo-Tiers.md) | Players & Creators | Combo badges, energy notch, air dashes and bounces |
 | [Bleach-inspired kits](Bleach-Inspired-Kits.md) | Players | Abilities inspired by Bleach in three native fighters |
 | [Skeleton art (rig)](Rig.md) | Creators | Style, poses, joints and palettes |
 | [CNS scripts](CNS-Scripts.md) | Creators | States, controllers, triggers and commands |
@@ -38,7 +41,8 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Combo strings](Combo-Strings.md) | Creators | Signature three-part strings per native fighter |
 | [ZSS scripts](ZSS.md) | Creators | Ikemen ZSS state scripts |
 | [Ikemen extensions](Ikemen-Extensions.md) | Creators | Ikemen GO controllers and triggers the engine accepts |
-| [Creating stages](Stages.md) | Creators | M.U.G.E.N `.def` stages and native stages |
+| [Make a stage (quick start)](Make-a-Stage.md) | Creators | A stage from a `.def` file, story arena data, and what still needs code |
+| [Creating stages](Stages.md) | Creators | Full reference: M.U.G.E.N `.def` stages and native stages |
 | [Customizing the engine](Engine.md) | Developers | Architecture, new controller, new trigger, tests |
 | [Web match smoke](Web-Match-Smoke.md) | Developers | CI test that plays full matches in the browser and catches freezes |
 | [File layout](File-Layout.md) | Developers | The 250-line rule, one responsibility per file, splitting a file, parallel PRs |

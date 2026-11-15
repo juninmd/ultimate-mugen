@@ -1,0 +1,101 @@
+use super::stages::STAGES;
+use serde::Deserialize;
+use std::collections::BTreeMap;
+use std::sync::OnceLock;
+use ume_engine::native::LocalText;
+
+const BUNDLED_TEXT: &str = include_str!("../../assets/story/epilogues.json");
+pub const FILE: &str = "story-epilogues.json";
+pub const FALLBACK: &str = "*";
+pub const ROOFTOP_BEATS: usize = 2;
+
+#[derive(Clone, Debug, Default, Deserialize, PartialEq)]
+pub struct Epilogue {
+    #[serde(default)]
+    pub scene: String,
+    #[serde(default)]
+    pub title: LocalText,
+    #[serde(default)]
+    pub boss: LocalText,
+    #[serde(default)]
+    pub reply: LocalText,
+    #[serde(default)]
+    pub pages: Vec<LocalText>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Speaker {
+    Boss,
+    Hero,
+    Narrator,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Beat {
+    pub speaker: Speaker,
+    pub text: String,
+    pub home: bool,
+}
+
+pub type Table = BTreeMap<String, Epilogue>;
+
+impl Epilogue {
+    pub fn beats(&self, lang: &str) -> Vec<Beat> {
+        let spoken = [(Speaker::Boss, &self.boss), (Speaker::Hero, &self.reply)];
+        let rooftop = spoken.into_iter().map(|(speaker, text)| Beat {
+            speaker,
+            text: text.pick(lang).to_string(),
+            home: false,
+        });
+        let home = self.pages.iter().map(|text| Beat {
+            speaker: Speaker::Narrator,
+            text: text.pick(lang).to_string(),
+            home: true,
+        });
+        rooftop
+            .chain(home)
+            .filter(|beat| !beat.text.is_empty())
+            .collect()
+    }
+
+    pub fn page_count(&self, lang: &str) -> usize {
+        self.beats(lang).len() + 1
+    }
+}
+
+pub fn parse(text: &str) -> Option<Table> {
+    serde_json::from_str(text).ok()
+}
+
+pub fn merged(custom: Option<Table>) -> Table {
+    let mut table = parse(BUNDLED_TEXT).unwrap_or_default();
+    table.extend(custom.unwrap_or_default());
+    table
+}
+
+fn table() -> &'static Table {
+    static TABLE: OnceLock<Table> = OnceLock::new();
+    TABLE.get_or_init(|| merged(crate::storage::read(FILE).and_then(|text| parse(&text))))
+}
+
+pub fn pick<'a>(table: &'a Table, fighter_id: &str) -> Option<&'a Epilogue> {
+    let id = fighter_id.strip_prefix("umf:").unwrap_or(fighter_id);
+    table.get(id).or_else(|| table.get(FALLBACK))
+}
+
+pub fn of(fighter_id: &str) -> Option<&'static Epilogue> {
+    pick(table(), fighter_id)
+}
+
+pub fn final_boss(player_id: &str) -> &'static str {
+    let last = &STAGES[STAGES.len() - 1];
+    if last.boss == player_id {
+        last.alt_boss
+    } else {
+        last.boss
+    }
+}
+
+#[cfg(test)]
+#[path = "epilogue_tests.rs"]
+mod tests;

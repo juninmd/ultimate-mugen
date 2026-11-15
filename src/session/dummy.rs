@@ -10,15 +10,19 @@ pub enum DummyPlan {
     Jump,
     Guard,
     CrouchGuard,
+    Record,
+    Playback,
 }
 
 impl DummyPlan {
-    pub const ALL: [DummyPlan; 5] = [
+    pub const ALL: [DummyPlan; 7] = [
         DummyPlan::Stand,
         DummyPlan::Crouch,
         DummyPlan::Jump,
         DummyPlan::Guard,
         DummyPlan::CrouchGuard,
+        DummyPlan::Record,
+        DummyPlan::Playback,
     ];
 
     pub fn next(self) -> DummyPlan {
@@ -33,6 +37,8 @@ impl DummyPlan {
             DummyPlan::Jump => "dummy.jump",
             DummyPlan::Guard => "dummy.guard",
             DummyPlan::CrouchGuard => "dummy.crouch_guard",
+            DummyPlan::Record => "dummy.record",
+            DummyPlan::Playback => "dummy.playback",
         }
     }
 
@@ -40,7 +46,7 @@ impl DummyPlan {
         let away = if facing >= 0.0 { k::L } else { k::R };
         let block = if threatened { away } else { 0 };
         match self {
-            DummyPlan::Stand => 0,
+            DummyPlan::Stand | DummyPlan::Record | DummyPlan::Playback => 0,
             DummyPlan::Crouch => k::D,
             DummyPlan::Jump => {
                 if airborne {
@@ -61,6 +67,9 @@ impl DummyPlan {
             .iter()
             .any(|f| f.side != me.side && f.alive && f.move_type == 'A');
         let threatened = attacked || !m.projectiles.is_empty();
+        if self == DummyPlan::Playback {
+            return super::dummy_tape::playback(me.facing);
+        }
         self.held_bits(me.facing, me.state_type == 'A', threatened)
     }
 }
@@ -74,6 +83,10 @@ impl Session {
     }
 
     pub fn set_dummy_plan(&mut self, plan: DummyPlan) {
+        match plan {
+            DummyPlan::Record => super::dummy_tape::start_recording(),
+            _ => super::dummy_tape::stop_recording(),
+        }
         for pilot in &mut self.pilots {
             if let Pilot::Dummy(current) = pilot {
                 *current = plan;

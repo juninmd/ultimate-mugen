@@ -1,0 +1,64 @@
+const fs = require('fs'), path = require('path');
+const { staticServer } = require('./web-smoke-server');
+const { chromium } = require('playwright');
+const dir = path.resolve(process.argv[2] || path.join(__dirname, '..', 'web', 'dist'));
+const shotDir = process.env.WEB_SMOKE_SHOTS;
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.wasm': 'application/wasm', '.svg': 'image/svg+xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.zip': 'application/zip' };
+const server = staticServer(dir, types);
+const sceneLuminance = (page, buffer) => page.evaluate(async base64 => {
+  const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${base64}`)).blob());
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(bitmap, 0, 0);
+  const y0 = Math.floor(bitmap.height * 0.15), y1 = Math.floor(bitmap.height * 0.7);
+  const data = ctx.getImageData(0, y0, bitmap.width, y1 - y0).data;
+  let sum = 0;
+  for (let i = 0; i < data.length; i += 4) sum += (data[i] + data[i + 1] + data[i + 2]) / 3;
+  return sum / (data.length / 4);
+}, buffer.toString('base64'));
+(async () => {
+  await new Promise(ok => server.listen(0, '127.0.0.1', ok));
+  const url = `http://127.0.0.1:${server.address().port}/index.html?e2e=1&e2e_epilogue=1`;
+  const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
+  const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
+  const problems = [];
+  p.on('pageerror', e => { if (!/register_plugin/.test(e.message)) problems.push(`pageerror: ${e.message}`); });
+  p.on('console', m => { if (/panicked|PanicHookInfo/.test(m.text())) problems.push(`console: ${m.text().slice(0, 200)}`); });
+  await p.goto(url);
+  await p.locator('#boot').waitFor({ state: 'detached', timeout: 45000 }).catch(() => {});
+  await p.waitForTimeout(12000);
+  await p.locator('#glcanvas').focus();
+  if (shotDir) fs.mkdirSync(shotDir, { recursive: true });
+  const frames = n => p.evaluate(n => new Promise(done => { const step = i => (i ? requestAnimationFrame(() => step(i - 1)) : done()); step(n); }), n);
+  const key = async (k, wait = 1000) => { await p.keyboard.down(k); await frames(2); await p.keyboard.up(k); await frames(5); await p.waitForTimeout(wait); };
+  const state = () => p.evaluate(() => { try { return JSON.parse(globalThis.__ume_state || 'null'); } catch { return null; } });
+  const page = async () => { const s = await state(); return s && s.screen === 'story' && typeof s.epilogue === 'number' ? s.epilogue : -1; };
+  const capture = async name => {
+    const shot = await p.screenshot();
+    if (shotDir) fs.writeFileSync(path.join(shotDir, name), shot);
+    return sceneLuminance(p, shot);
+  };
+  const reach = async (target, label) => {
+    const deadline = Date.now() + 90000;
+    while ((await page()) < target && Date.now() < deadline) await key('Enter', 1200);
+    if ((await page()) < target) problems.push(`epilogue never reached ${label} (${JSON.stringify(await state())})`);
+  };
+  await reach(0, 'the rooftop scene');
+  await p.waitForTimeout(2500);
+  const rooftop = await capture('epilogue-rooftop.png');
+  await reach(2, 'the home scene');
+  await p.waitForTimeout(2500);
+  const home = await capture('epilogue-home.png');
+  await reach(4, 'the end card');
+  await p.waitForTimeout(1500);
+  await capture('epilogue-end.png');
+  await key('Enter', 1500);
+  await key('Enter', 1500);
+  const after = await state();
+  await b.close(); server.close();
+  if (rooftop < 8) problems.push(`rooftop scene is black (mean luminance ${rooftop.toFixed(1)})`);
+  if (home < 8) problems.push(`home scene is black (mean luminance ${home.toFixed(1)})`);
+  if (!after || after.screen !== 'menu') problems.push(`story did not return to the menu after the epilogue (${after && after.screen})`);
+  if (problems.length) { console.error('WEB EPILOGUE SMOKE FAILED\n' + problems.join('\n')); process.exit(1); }
+  console.log(`WEB EPILOGUE SMOKE OK rooftop ${rooftop.toFixed(1)} home ${home.toFixed(1)}`);
+})().catch(e => { console.error('SCRIPT FAIL', e); process.exit(2); });

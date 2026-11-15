@@ -22,6 +22,7 @@ pub mod sctrl;
 pub mod hitdef;
 pub mod matchs;
 pub mod lane;
+pub mod stage_objects;
 pub mod tag;
 pub mod finish;
 pub mod camera;

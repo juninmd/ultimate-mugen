@@ -1,0 +1,10 @@
+{
+  "format": "umf/1",
+  "id": "hello",
+  "name": "Hello Fighter",
+  "author": "you",
+  "color": "#2a9d8f",
+  "extends": "kaito",
+  "palettes": [{ "top": "#2a9d8f", "trim": "#16544d" }],
+  "moves": [{ "id": "gale", "name": "Sky Gale", "cost": 500 }]
+}

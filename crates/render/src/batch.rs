@@ -64,15 +64,15 @@ impl Quad {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct DrawCall { pub blend: Blend, pub first_index: u32, pub index_count: u32, pub scissor: Option<[u32; 4]> }
+pub struct DrawCall { pub blend: Blend, pub first_index: u32, pub index_count: u32, pub scissor: Option<[u32; 4]>, pub bind: u32 }
 
 #[derive(Default)]
-pub struct Batch { pub vertices: Vec<Vertex>, pub indices: Vec<u32>, pub calls: Vec<DrawCall>, pub scissor: Option<[u32; 4]>, pub overlay_from: Option<usize>, pub max_index: u32 }
+pub struct Batch { pub vertices: Vec<Vertex>, pub indices: Vec<u32>, pub calls: Vec<DrawCall>, pub scissor: Option<[u32; 4]>, pub overlay_from: Option<usize>, pub max_index: u32, pub bind: u32 }
 
 impl Batch {
     pub fn new() -> Self { Batch::default() }
 
-    pub fn clear(&mut self) { self.vertices.clear(); self.indices.clear(); self.calls.clear(); self.scissor = None; self.overlay_from = None; self.max_index = 0; }
+    pub fn clear(&mut self) { self.vertices.clear(); self.indices.clear(); self.calls.clear(); self.scissor = None; self.overlay_from = None; self.max_index = 0; self.bind = 0; }
 
     pub fn fits_u16(&self) -> bool { self.max_index <= u16::MAX as u32 }
 
@@ -122,8 +122,8 @@ impl Batch {
         let first = self.indices.len() as u32 - count;
         let at_overlay = self.overlay_from == Some(self.calls.len());
         match self.calls.last_mut() {
-            Some(c) if c.blend == blend && c.scissor == self.scissor && !at_overlay => c.index_count += count,
-            _ => self.calls.push(DrawCall { blend, first_index: first, index_count: count, scissor: self.scissor }),
+            Some(c) if c.blend == blend && c.scissor == self.scissor && c.bind == self.bind && !at_overlay => c.index_count += count,
+            _ => self.calls.push(DrawCall { blend, first_index: first, index_count: count, scissor: self.scissor, bind: self.bind }),
         }
     }
 }
@@ -192,9 +192,9 @@ mod tests {
         b.push(&q);
         assert_eq!(b.vertices.len(), 16);
         assert_eq!(b.calls, vec![
-            DrawCall { blend: Blend::Alpha, first_index: 0, index_count: 12, scissor: None },
-            DrawCall { blend: Blend::Add, first_index: 12, index_count: 6, scissor: None },
-            DrawCall { blend: Blend::Alpha, first_index: 18, index_count: 6, scissor: None },
+            DrawCall { blend: Blend::Alpha, first_index: 0, index_count: 12, scissor: None, bind: 0 },
+            DrawCall { blend: Blend::Add, first_index: 12, index_count: 6, scissor: None, bind: 0 },
+            DrawCall { blend: Blend::Alpha, first_index: 18, index_count: 6, scissor: None, bind: 0 },
         ]);
     }
 

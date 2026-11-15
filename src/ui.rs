@@ -79,7 +79,7 @@ impl Face {
 }
 
 pub fn hex(h: &str) -> Color {
-    let v = u32::from_str_radix(h.trim_start_matches('#'), 16).unwrap_or(0);
+    let v = crate::tweaks::remap(u32::from_str_radix(h.trim_start_matches('#'), 16).unwrap_or(0));
     Color::from_rgba((v >> 16) as u8, (v >> 8) as u8, v as u8, 255)
 }
 pub fn rgb(c: [u8; 3]) -> Color {
@@ -527,7 +527,7 @@ impl Ui {
         let x0 = (1.0 - e) * (w + slant * 2.0) - slant;
         for (k, (off, col)) in [
             (0.0, Color::new(0.03, 0.02, 0.09, 1.0)),
-            (34.0, Color::new(1.0, 0.3, 0.43, 1.0)),
+            (34.0, crate::tweaks::accent(1.0)),
             (62.0, Color::new(0.13, 0.9, 1.0, 1.0)),
         ]
         .iter()

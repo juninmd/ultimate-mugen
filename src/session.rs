@@ -5,7 +5,7 @@ use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
 #[path = "session/kaito.rs"] mod kaito;
 #[path = "session/tension.rs"] mod tension;
-mod shortcut; pub mod dummy;
+mod shortcut; pub mod dummy; pub mod dummy_tape;
 use crate::stages::Stage;
 use crate::ui::Ui;
 use crate::vfx::Vfx;
@@ -289,7 +289,7 @@ impl Session {
             };
             bits[target] = b;
             if matches!(self.pilots[slot], Pilot::Human(0)) {
-                human_bits = Some(b);
+                human_bits = Some(dummy_tape::record(b, self.m.fighters[fi].facing));
             }
         }
         if let Some(b) = human_bits {
@@ -306,7 +306,7 @@ impl Session {
         self.rec.push(bits.clone());
         self.vfx.pre_tick(&self.m);
         self.m.tick(&bits);
-        self.vfx.tick(&self.m);
+        self.vfx.tick(&self.m); self.vfx.stage_objects(&mut self.m);
         crate::match_stats::observe(&self.m);
         self.drain_events(c, audio);
     }

@@ -10,7 +10,7 @@ UMF (*Ultimate Mugen Format*) descreve um lutador inteiro em **um arquivo JSON**
 4. Rode `cargo run --release`. O `build.rs` embute todos os `.json` da pasta no executável.
 5. Teste no **Treino** com `F2` ligado para ver hitboxes e hurtboxes.
 
-Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add_native_json`, falta ligar à pasta `mugen/`).
+Lutadores UMF também carregam de uma pasta, sem recompilar: coloque o `.json` em `umf/` ao lado do jogo (ou em `mugen/umf/`, ou na pasta indicada por `UME_UMF_DIR`). Arquivos de kit na mesma pasta são registrados antes, seja qual for o nome.
 
 ## Esqueleto do arquivo
 
@@ -43,6 +43,7 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `format` | sim | Sempre `umf/1` |
 | `id`, `name`, `series`, `author`, `color` | sim | Identidade; `color` é a cor do cartão na seleção |
 | `boss` | não | `true` esconde da seleção e coloca como chefe final do Arcade |
+| `profile` | não | Nacionalidade e biografia, ver [Perfil](#perfil-nacionalidade-e-biografia) |
 | `speed` | não | Multiplicador de velocidade das animações (>1 = golpes mais rápidos) |
 | `stats` | não | Atributos, tabela abaixo |
 | `art` | sim | Arte, ver [Rig](Rig.md) |
@@ -50,6 +51,46 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `awakeningPalette` | não | Cores aplicadas sobre a paleta selecionada durante o despertar; sprites de efeitos não mudam |
 | `anims` | sim | Animações por nome |
 | `moves` | sim | Golpes |
+
+## Reuso: `extends`, `use` e kits
+
+Um lutador não precisa ser escrito do zero. Três recursos eliminam o copiar e colar que os pacotes M.U.G.E.N exigem (os números estão em [Estudo de código M.U.G.E.N](../MUGEN-Code-Study.md)):
+
+| Recurso | Onde | O que faz |
+|---|---|---|
+| `"extends": "kaito"` | raiz | Herda tudo de um lutador ou kit já carregado: atributos, arte, animações e golpes. Uma lista (`["kaito", "storm-kit"]`) empilha vários, da esquerda para a direita. |
+| `"use": "gale"` | dentro de um golpe | Clona outro golpe (de um pai ou de um golpe anterior do mesmo arquivo) com um novo `id`, mudando só os campos escritos. |
+| arquivo de kit | `"format": "umf-kit/1"` | Definição parcial (golpes, animações, poses, atributos) com um `id`, compartilhada por vários lutadores. O kit `core` já vem embutido com `launcher` e `escape_burst`. |
+
+Regras da mescla, aplicadas por `crates/engine/src/native/kit.rs` antes do parser UMF normal:
+
+- Objetos (`stats`, `art`, `abilities`, `passives`) mesclam chave a chave: `"stats": { "life": 1080 }` muda um número só. Uma animação em `anims` substitui a herdada por inteiro. O valor `null` remove a chave herdada.
+- `moves` casam por `id`. Uma entrada com parte dos campos mantém o resto (`{ "id": "gale", "name": "Crimson Gale" }`), um texto simples (`"launcher"`) lista um golpe herdado sem mudanças e `{ "id": "slide", "remove": true }` remove um. Os golpes listados vêm primeiro, na sua ordem; os herdados não citados vêm depois.
+- Identidade é pessoal: `name`, `author`, `description`, `profile`, `boss` e `npc` nunca são herdados de um lutador.
+- `spriteSet` reaproveita o pacote de pixel art do pai. Recolora com `palettes` e deixe `art.style.colors` herdado: são as cores de referência do pacote.
+- Erros apontam o culpado (`unknown kit or fighter`, `move x uses y, which no kit or earlier move defines`) e cadeias de `extends` com mais de 8 níveis são recusadas.
+
+Um lutador completo em 20 linhas está em [`docs/examples/umf/mika.json`](../../examples/umf/mika.json): ele herda uma definição de 39 KB e o kit [`storm-kit.json`](../../examples/umf/storm-kit.json). Teste com `UME_UMF_DIR=docs/examples/umf cargo run --release`.
+
+## Perfil (nacionalidade e biografia)
+
+Todo lutador tem uma nacionalidade e uma biografia curta, escritas em inglês (`en`), português do Brasil (`pt`) e espanhol (`es`). Um idioma ausente cai para `en`.
+
+```json
+"profile": {
+  "country": "jp",
+  "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+  "bio": { "en": "Two short sentences.", "pt": "Duas frases curtas.", "es": "Dos frases cortas." }
+}
+```
+
+- Os lutadores nativos, o chefe final e os capangas do modo História guardam seus perfis em `assets/char_profiles.json`, indexados por `id`. Um campo `profile` dentro do arquivo do lutador vence essa tabela, então lutadores UMF importados levam o próprio perfil.
+- `country` escolhe a bandeira desenhada ao lado da nacionalidade: `jp`, `br`, `no`, `us`, `cn`, `es`, `mn`, `de`, `kr`, `ar`, `au`, `ru`, `fr`, além das fictícias `underworld` e `eclipse`. As bandeiras são formas vetoriais em `src/flag/designs.rs` (sem arquivos de imagem); adicione uma entrada lá para outro país. Um código desconhecido apenas não mostra bandeira. `UME_SHOTS_ONLY=flags` salva uma folha com todas as bandeiras.
+- A bandeira aparece no quadro do elenco, no cartão do lutador, na faixa de perfil abaixo do elenco e no cartão de fase do modo História.
+- Mantenha cada biografia abaixo de 260 caracteres: ela precisa caber em duas linhas da tela de seleção.
+- A tela de seleção mostra a nacionalidade e a biografia do lutador em destaque abaixo do elenco (capangas e o chefe aparecem com o filtro Chefes). O cartão de fase do modo História mostra o perfil do chefe da fase.
+- Lutadores sem perfil (conteúdo M.U.G.E.N) continuam mostrando `description`.
+- `cargo test --release -p ultimate-mugen profile` confere que todo arquivo de lutador em `assets/chars` tem perfil completo nos três idiomas.
 
 ## `stats`
 
@@ -63,6 +104,7 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `jump` | `[-8.4, -2.5, 0, 2.6]` | Velocidade vertical, horizontal para trás, neutra e para frente |
 | `gravity` | — | Aceleração vertical |
 | `airJumps` | — | Pulos extras no ar |
+| `airDashes` | 1 | Air dashes por pulo (`movement.airdash.num`) |
 | `height` | `100` | Altura do corpo |
 | `width` | `[16, 15]` | Largura frente / trás para empurrão |
 
@@ -230,7 +272,7 @@ Todo `special` e `super` com `when` ausente ou `"stand"` ganha também uma vers�
 
 ## Sprites pixel art (opcional)
 
-Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG em vez do rig. Use PNGs transparentes voltados para a direita, com os pés na borda inferior e o mesmo tamanho de tela em todos os arquivos de um lutador. Uma pose sem PNG usa `01_idle.png`; um lutador sem a pasta continua com o rig. Depois de estender o rig, execute `cargo run --release -p ume-engine --example generate_missing_sprites` para renderizar um PNG dedicado para cada pose que o carregador buscaria no canvas idle.
+Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG em vez do rig. Use PNGs transparentes voltados para a direita, com os pés na borda inferior e o mesmo tamanho de tela (400×400 RGBA) em todos os arquivos de um lutador. Gere PNGs de combate faltantes com `generate_image` usando uma âncora canônica em pixel art validada do próprio personagem (nunca use o rig vetorial procedural depreciado).
 
 | Arquivo | Poses que o usam |
 |---|---|

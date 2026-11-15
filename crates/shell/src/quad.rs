@@ -2,7 +2,7 @@ use crate::{text, Config, Frame, Game, Phase};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use std::task::{Context, Poll, Waker};
 use std::sync::Arc;
 use ume_render::RGBA_SPRITE;
@@ -244,7 +244,7 @@ pub struct DrawTextureParams { pub dest_size: Option<Vec2>, pub source: Option<R
 pub fn draw_texture(t: &Texture2D, x: f32, y: f32, c: Color) { draw_texture_ex(t, x, y, c, DrawTextureParams::default()) }
 
 pub fn draw_texture_ex(t: &Texture2D, x: f32, y: f32, c: Color, p: DrawTextureParams) {
-    with(|f| {
+    with(|f| { if large::try_draw(f, t, x, y, c, &p) { return; }
         let Some(r) = t.rect(f) else { return };
         push_textured(f, r, RGBA_SPRITE, [t.width(), t.height()], x, y, c, p);
     })
@@ -321,7 +321,7 @@ impl IndexedTexture {
     }
 }
 
-mod palette;
+mod palette; mod large;
 mod shapes;
 pub use shapes::*;
 

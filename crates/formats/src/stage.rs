@@ -9,6 +9,9 @@ use crate::vfs::{norm_path, resolve, text, Vfs};
 use std::collections::HashMap;
 
 mod detect;
+mod layers;
+mod sky;
+pub use sky::{SkyKind, StageSky};
 pub use detect::{stage_requests_3d, stage_requests_3d_secs};
 use detect::warn_3d_once;
 
@@ -116,6 +119,7 @@ pub struct MugenStage {
     pub vertical_follow: f32,
     pub tension: f32,
     pub layers: Vec<BgLayer>,
+    pub sky: Option<StageSky>,
     pub sprites: HashMap<(i32, i32), StageImage>,
     pub anims: HashMap<i32, Animation>,
     pub ctrl_defs: Vec<BgCtrlDef>,
@@ -183,7 +187,7 @@ fn parse_bgctrls(secs: &[Section]) -> Vec<BgCtrlDef> {
 
 fn pair3(v: Vec<f32>) -> [f32; 3] { [v.first().copied().unwrap_or(0.0), v.get(1).copied().unwrap_or(0.0), v.get(2).copied().unwrap_or(0.0)] }
 
-fn pair(v: Vec<f32>, def: [f32; 2]) -> [f32; 2] {
+pub(super) fn pair(v: Vec<f32>, def: [f32; 2]) -> [f32; 2] {
     [v.first().copied().unwrap_or(def[0]), v.get(1).copied().unwrap_or(def[1])]
 }
 
@@ -225,51 +229,7 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
     }
 
     let anims = parse_air(&t);
-    let is_bg = |s: &Section| {
-        s.lname == "bg" || (s.lname.starts_with("bg") && s.lname[2..].starts_with(|c: char| c.is_whitespace()))
-    };
-    let mut layers = Vec::new();
-    for s in secs.iter().filter(|s| is_bg(s)) {
-        let kind = s.get("type").unwrap_or("normal").to_lowercase();
-        let n = |k: &str, d: &[f32]| nums(s.get(k), d);
-        let sp = pair(n("spriteno", &[0.0, 0.0]), [0.0, 0.0]);
-        let delta_v = n("delta", &[1.0, 1.0]);
-        let delta = [delta_v[0], delta_v.get(1).copied().unwrap_or(delta_v[0])];
-        let tile = pair(n("tile", &[0.0, 0.0]), [0.0, 0.0]);
-        let anim = if kind == "anim" { anims.get(&(n("actionno", &[0.0])[0] as i32)).cloned() } else { None };
-        let rect = |k: &str| s.get(k).map(|_| n(k, &[0.0, 0.0, 0.0, 0.0])).filter(|w| w.len() >= 4).map(|w| [w[0], w[1], w[2], w[3]]);
-        let spacing_key = if s.get("tilespacing").is_some() { "tilespacing" } else { "spacing" };
-        let scale_start = pair(n("scalestart", &[1.0, 1.0]), [1.0, 1.0]);
-        let scale_delta = pair(n("scaledelta", &[0.0, 0.0]), [0.0, 0.0]);
-        let three = |k: &str| { let v = n(k, &[0.0, 0.0, 0.0]); [v[0], v.get(1).copied().unwrap_or(0.0), v.get(2).copied().unwrap_or(0.0)] };
-        let alpha = n("alpha", &[256.0, 0.0]);
-        layers.push(BgLayer {
-            sprite: (sp[0] as i32, sp[1] as i32),
-            start: pair(n("start", &[0.0, 0.0]), [0.0, 0.0]),
-            delta,
-            tile: [tile[0] as i32, tile[1] as i32],
-            tile_spacing: pair(n(spacing_key, &[0.0, 0.0]), [0.0, 0.0]),
-            velocity: pair(n("velocity", &[0.0, 0.0]), [0.0, 0.0]),
-            layer: n("layerno", &[0.0])[0] as i32,
-            trans: s.get("trans").unwrap_or("none").to_lowercase(),
-            mask: n("mask", &[0.0])[0] != 0.0,
-            anim,
-            id: n("id", &[0.0])[0] as i32,
-            position_link: n("positionlink", &[0.0])[0] != 0.0,
-            window: rect("window"),
-            mask_window: rect("maskwindow"),
-            window_delta: s.get("windowdelta").map(|_| pair(n("windowdelta", &[0.0, 0.0]), [0.0, 0.0])),
-            scale_start,
-            scale_delta,
-            angle: n("angle", &[0.0])[0],
-            x_shear: n("xshear", &[0.0])[0],
-            sin_x: three("sin.x"),
-            sin_y: three("sin.y"),
-            alpha: [alpha[0], alpha.get(1).copied().unwrap_or(0.0)],
-            kind,
-        });
-    }
-
+    let layers = layers::parse_layers(&secs, &anims);
     Ok(MugenStage {
         name,
         local_w,
@@ -284,11 +244,12 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
         vertical_follow: g("camera", "verticalfollow", 0.2),
         tension: g("camera", "tension", 50.0),
         layers,
+        sky: sky::parse_sky(&secs),
         sprites,
         ctrl_defs: parse_bgctrls(&secs),
         music: get("music", "bgmusic").map(unquote).filter(|f| !f.is_empty()).map(|file| StageMusic {
             file,
-            volume: g("music", "bgvolume", 0.0),
+            volume: g("music", "bgmvolume", g("music", "bgvolume", 100.0)),
             loop_start: g("music", "bgmloopstart", 0.0) as i64,
             loop_end: g("music", "bgmloopend", 0.0) as i64,
         }),

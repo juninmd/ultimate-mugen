@@ -10,4 +10,4 @@ Not verified: the exact enemy roster of each Final Fight stage beyond the first 
 
 Depth (beat 'em up convention, from community dev guides, not Final Fight's own code): characters walk a floor band, attacks test a depth tolerance first and then the usual box overlap, and a thin tolerance makes hits miss unless fighters are nearly aligned, so the tolerance is kept generous (14 units) and the CPU aligns itself to the target.
 
-Mapping: five stages (not six) of three thug waves plus a boss, carried life with recovery between waves and stages (food), three credits (continues). Weapons, bonus rounds and rewind are not implemented.
+Mapping: five stages (not six) of three thug waves plus a boss, carried life with recovery between waves and stages (food), three credits (continues). Breakable objects, food pickups and two bonus rounds are implemented with original content (see [Stage objects](Stage-Objects.md)); weapons and rewind are not.

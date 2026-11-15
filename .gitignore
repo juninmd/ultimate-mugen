@@ -17,3 +17,5 @@ temp_extract/
 /.forge/
 __pycache__/
 *.pyc
+package.json
+package-lock.json

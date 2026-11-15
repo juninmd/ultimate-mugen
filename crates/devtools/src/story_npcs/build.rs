@@ -20,7 +20,7 @@ pub const NPCS: [Npc; 5] = [
     Npc { base: "bruno", id: "npc_brute", name: "Brute", hue: 38.0, sat: 1.0, val: 1.05, life: 0.55, atk: 0.8, blurb: "Street bruiser. His heavy swings carry armor: a light hit does not interrupt them.", ability: brute },
     Npc { base: "suzume", id: "npc_razor", name: "Razor", hue: 150.0, sat: 1.1, val: 1.0, life: 0.5, atk: 0.85, blurb: "Knife runner. Fast on his feet and lunges forward with every kick.", ability: blade },
     Npc { base: "akio", id: "npc_spitfire", name: "Spitfire", hue: 95.0, sat: 1.1, val: 1.0, life: 0.5, atk: 0.8, blurb: "Firebug. His jab throws a small orb, so he pressures from range.", ability: pyro },
-    Npc { base: "daichi", id: "npc_colossus", name: "Colossus", hue: -60.0, sat: 0.9, val: 0.9, life: 0.9, atk: 0.95, blurb: "Mad Gear giant. Slow, tall and armored on every basic strike.", ability: colossus },
+    Npc { base: "daichi", id: "npc_colossus", name: "Colossus", hue: -60.0, sat: 0.9, val: 0.9, life: 0.9, atk: 0.95, blurb: "Gang giant. Slow, tall and armored on every basic strike.", ability: colossus },
     Npc { base: "jin", id: "npc_phantom", name: "Phantom", hue: 210.0, sat: 0.8, val: 0.85, life: 0.5, atk: 0.85, blurb: "Shadow runner. Quick on foot and invulnerable while he kicks.", ability: phantom },
 ];
 

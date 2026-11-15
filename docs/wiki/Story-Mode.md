@@ -13,3 +13,37 @@ Remaining health carries over between fights and recovers a little after each wa
 ## Breakables, food and bonus rounds
 
 Crates and barrels along each strip break when struck and can drop food, a gem or a battery; stages 1 and 3 end with a bonus round (wreck the car, break the stash). See [Stage objects](Stage-Objects.md).
+
+## Final boss and epilogues
+
+The last stage (Kingpin Rooftop) ends against **Valdric Morn**, commander of the Red Star Empire and the kingpin behind the street gang. A player who picked Valdric faces **Kaito Arashi** instead (`final_boss` in `src/story/epilogue.rs`, which reads the last entry of `STAGES`).
+
+Beating the final boss plays an epilogue before the `STORY COMPLETE` card. Every fighter of the roster has its own, in English, Portuguese and Spanish, made of five pages:
+
+| Page | Scene | Content |
+|---|---|---|
+| 1 | Rooftop at night, boss on the ground | the boss speaks to this fighter |
+| 2 | Rooftop, fighter in the victory pose | the fighter answers |
+| 3 | The fighter's home scenery at dawn | narration |
+| 4 | Home scenery in daylight, victory pose | narration |
+| 5 | Home scenery, dimmed | `THE END` card with the fighter and the epilogue title |
+
+The scenery is the illustration of an existing stage with a slow pan, drifting light motes, letterbox bars, a fade when the scene changes and text typed letter by letter. `OK` reveals the line and then advances, `ESC` skips to the final card.
+
+Texts live in `assets/story/epilogues.json`, keyed by fighter id; `*` is the fallback used by fighters with no entry (imported or custom ones):
+
+```json
+{
+  "mika": {
+    "scene": "neon",
+    "title": { "en": "Storm Season", "pt": "Temporada de Tempestade" },
+    "boss": { "en": "Line the final boss says to this fighter." },
+    "reply": { "en": "The fighter's answer." },
+    "pages": [{ "en": "First narration page." }, { "en": "Second narration page." }]
+  }
+}
+```
+
+`scene` is any built-in stage id. A missing language falls back to English. To change or add epilogues without rebuilding, save a file with the same shape as `story-epilogues.json` next to the executable (or in browser storage): its entries replace the bundled ones fighter by fighter.
+
+Code: data and lookup in `src/story/epilogue.rs`, flow in `src/app/story/epilogue.rs`, drawing in `src/app/story/epilogue_draw.rs` and `epilogue_text.rs`. Evidence in `screenshots/story-epilogues/`, captured with `UME_TOUR=epilogue ultimate-mugen --shots <dir> --res 1280x720 --mute`; the browser check is `node scripts/web-epilogue-smoke.js web/dist`.

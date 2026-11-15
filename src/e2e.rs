@@ -51,6 +51,10 @@ mod web {
         if let (Some(stage), Screen::Story { .. }, Some((0, 0, _, 0, _))) = (jump, &app.screen, app.story_snapshot()) {
             app.story_jump_to_stage(stage);
         }
+        let ending = crate::query_params().iter().any(|(k, _)| k == "e2e_epilogue");
+        if let (true, Screen::Story { .. }, Some((0, 0, _, 0, _))) = (ending, &app.screen, app.story_snapshot()) {
+            app.story_epilogue_begin(app.sel.0, 0);
+        }
         let god = god_requested();
         let mut fighters = String::new();
         let mut over = -1i64;
@@ -89,8 +93,9 @@ mod web {
                 format!("{{\"stage\":{stage},\"wave\":{wave},\"credits\":{credits},\"score\":{score},\"phase\":\"{phase}\"}}")
             })
             .unwrap_or_else(|| "null".into());
+        let epilogue = app.story_epilogue_page().map_or("null".to_string(), |page| page.to_string());
         let json = format!(
-            "{{\"screen\":\"{}\",\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
+            "{{\"screen\":\"{}\",\"epilogue\":{epilogue},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
             screen_name(&app.screen),
             app.mode == Mode::Story,
             over,

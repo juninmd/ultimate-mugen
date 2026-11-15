@@ -2,6 +2,12 @@
 mod advance;
 #[path = "story/bonus.rs"]
 mod bonus;
+#[path = "story/epilogue.rs"]
+mod epilogue;
+#[path = "story/epilogue_draw.rs"]
+mod epilogue_draw;
+#[path = "story/epilogue_text.rs"]
+mod epilogue_text;
 #[path = "story/boss_profile.rs"]
 mod boss_profile;
 #[path = "story/hud.rs"]

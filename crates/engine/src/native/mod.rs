@@ -2,6 +2,7 @@
 pub mod types;
 pub mod ability_spec;
 pub mod passive_spec;
+pub mod profile;
 mod abilities;
 mod armor;
 mod element;
@@ -39,6 +40,7 @@ pub use preview::{compile_native_preview, menu_sprite_files};
 pub use types::*;
 pub use ability_spec::*;
 pub use passive_spec::*;
+pub use profile::{CharProfile, LocalText};
 pub use lookup::register_native;
 pub use kit::{is_kit_text, register_kit};
 pub use kit_parse::parse_char;

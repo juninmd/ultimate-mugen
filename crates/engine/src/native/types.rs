@@ -142,7 +142,7 @@ pub struct NativeArt {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NativeChar {
     pub format: String, pub id: String, pub name: String, pub series: String, pub author: String,
-    #[serde(default)] pub description: Option<String>,
+    #[serde(default)] pub description: Option<String>, #[serde(default)] pub profile: Option<super::profile::CharProfile>,
     pub color: String,
     #[serde(default)] pub stats: NativeStats,
     #[serde(default)] pub passives: Option<super::passive_spec::PassiveSpec>,

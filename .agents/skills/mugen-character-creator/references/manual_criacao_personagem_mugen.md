@@ -1,25 +1,21 @@
----
-name: mugen-character-creator
-description: >-
-  Comprehensive guide, runbook, reference manual, blueprints, and modern
-  innovation roadmap for creating custom fighting game characters from scratch
-  for M.U.G.E.N, IKEMEN GO, and Ultimate MUGEN. Covers classic 6-file MUGEN
-  pipelines, 8-bit/32-bit sprites, SFFv2 codecs, hitboxes, state controllers,
-  11 functional move blueprints, competitive AI, and modern declarative UMF 2.0
-  traits and automated Rust tooling (Auto-Clsn, Auto-Ground, Live Hot-Reload).
----
-
 # Enciclopédia Master de Criação de Personagens M.U.G.E.N: Da Sprite ao Motor
 
-Este é o documento definitivo, exaustivo e cumulativo para concepção, desenho, programação, balanceamento e homologação de personagens autônomos para os motores **M.U.G.E.N** (1.0, 1.1), **IKEMEN GO** e **Ultimate MUGEN**.
+Este é o documento definitivo, exaustivo e cumulativo para concepção, desenho, programação, balanceamento e homologação de personagens autônomos para os motores **M.U.G.E.N** (1.0, 1.1), **IKEMEN GO** (CNS + ZSS) e **Ultimate MUGEN**.
 
-Nenhuma informação histórica ou técnica foi descartada. Este manual reúne a síntese de engenharia reversa dos lutadores de referência do repositório:
-- **Kung Fu Man 720 (`kfm720`)**: O padrão canônico oficial HD da Elecbyte (arquitetura limpa, arremessos precisos com failsafe, flags de combo reutilizáveis).
-- **Gogeta SSJ4 (`Gogeta-Ssj4`)**: Referência clássica de DBZ (voo tridimensional livre, Ki charge, transformações dinâmicas em `Statedef -2`, raios multi-hit e assistentes).
-- **Team Z2 (`BuuZ2`, `GohanZ2`)**: O padrão competitivo moderno (arquitetura multi-arquivos, Super Armor via Helper/`HitOverride`, Damage Dampener, `config.txt` e inicialização limpa com `Statedef 5900`).
-- **JoJo's Bizarre Adventure (`DIO_K`)**: Mecânica de Time Stop ("The World") usando `Pause`/`SuperPause` com `movetime` sincronizado e imunidade em entidades.
-- **Anime Fighters (`Arcueid`)**: Sistema de Burst defensivo para quebra de combo enquanto sofre dano (`movetype = H`).
-- **JUS Style (`Accelerator`, `Gojo Satoru`)**: Inteligência artificial ágil reativa a projéteis (`enemy,numproj > 0`), neutral game e buffers limpos.
+Nenhuma informação histórica ou técnica foi descartada. Além da análise detalhada dos pilares históricos, esta edição incorpora o **estudo empírico em larga escala de 2.625 definições `.def` (1.914 pastas únicas de lutadores) em 27 repositórios públicos**, somando **9.130 arquivos `.cns`/`.st`**, **1.827 `.cmd`**, **1.835 `.air`** e **58 `.zss`**:
+- **Kung Fu Man / 720 (`kfm`, `kfm720` - Elecbyte)**: O padrão canônico oficial SD/HD (arquitetura limpa, arremessos precisos com failsafe `!gethitvar(isbound)`, flags de combo reutilizáveis).
+- **PotS / CvS (`mredraith/CVS-P` - 266 defs / 171 chars)**: O padrão competitivo Capcom/SNK (`localcoord = 428,240`, Tick Fix no `-1`, Corner Push, Parry, Custom Combo, projéteis `Helper`, HitSparks procedurais em 1 sprite via `AngleDraw` e `var(58) = gametime`).
+- **Team Z2 (`BuuZ2`, `GohanZ2`, `SSJ_GokuZ2`)**: Arquitetura multi-arquivos de alta maturidade (`config.txt` no `Statedef 5900`, `2OS Helper(2)`, Damage Dampener + Counter-Hit `1.2x`, Super Armor via `Helper`/`HitOverride` e trava `!WinKO`).
+- **Gogeta SSJ4 (`Gogeta-Ssj4`) & JoJo (`DIO_K`)**: Voo tridimensional livre (`physics = N`), Ki charge, transformações dinâmicas e Time Stop sincronizado via `Pause`/`SuperPause` (`time = movetime`).
+- **JUS / Naruto WOS (`Meiloorun`, `BillsLasa`, `Loco1911`, `Xandrarre`)**: Escala universal por `Helper(999999), Fvar(16)`, transformações por deslocamento `+10000`/`var(11)`, clones/marionetes com `HitOverride`, Burst e IA reativa a projéteis.
+- **MvC / MUGENX (`DocDamage/MUGENX` - 1.205 defs) & Ikemen GO ZSS (`kfm_zss`, `ikemenarmor`, `glow.zss`, `tag.zss`)**: Magic Series, Super Jump (`90`), OTG (`MAFD`), Pushblock, e código moderno em **ZSS** (`[Function]`, `let`, `map()`, `[StateDef -4]`, `redlife`/`dizzy`/`guardbreak`).
+
+> **Guias modulares complementares desta skill:**
+> - [Estudo Empírico (2.625 `.def`) & 8 Arquétipos da Comunidade](estudo_empirico_e_arquetipos.md)
+> - [Guia Prático de Ikemen GO & ZSS (Zantei State Script)](guia_zss_e_ikemen_go.md)
+> - [Checklist de Pré-Voo, 8 Regras de Lint & Diagnóstico](checklist_lint_editor.md)
+> - [Passo a Passo de Sprites, Paletas e Animações AIR](sprites_animacoes_passo_a_passo.md)
+> - [Exemplos prontos: `meu_lutador.def`, `constants.cns` e `exemplo_ikemen_zss.zss`](../examples/exemplo_ikemen_zss.zss)
 
 ---
 
@@ -33,30 +29,35 @@ Nenhuma informação histórica ou técnica foi descartada. Este manual reúne a
 7. [Engenharia de Animações, Caixas Clsn e Tabela Universal de Ações (0 a 5900)](#7-engenharia-de-animações-caixas-clsn-e-tabela-universal-de-ações-0-a-5900)
 8. [Guia de Referência: Controladores de Estado (Sctrls) e Gatilhos (Triggers)](#8-guia-de-referência-controladores-de-estado-sctrls-e-gatilhos-triggers)
 9. [Mecânicas Avançadas e Padrões Profissionais de Combate](#9-mecânicas-avançadas-e-padrões-profissionais-de-combate)
-10. [Biblioteca Mestre de Blueprints Funcionais com Código](#10-biblioteca-mestre-de-blueprints-funcionais-com-código)
+10. [Biblioteca Mestre de Blueprints Funcionais com Código (10.1 a 10.18)](#10-biblioteca-mestre-de-blueprints-funcionais-com-código)
 11. [Programação de Inteligência Artificial (IA) Competitiva](#11-programação-de-inteligência-artificial-ia-competitiva)
-12. [Guia de Homologação, Solução de Problemas e Testes Automatizados](#12-guia-de-homologação-solução-de-problemas-e-testes-automatizados)
+12. [Guia de Homologação, Top 10 Bugs Reais e Testes Automatizados](#12-guia-de-homologação-top-10-bugs-reais-e-testes-automatizados)
+13. [Lições de 50+ Lutadores (Rápidos vs Fortes) e Comparativo UMF](#13-lições-de-50-lutadores-rápidos-vs-fortes-e-comparativo-umf)
+14. [Síntese Empírica do Corpus (2.625 `.def` / 27 Repositórios)](#14-síntese-empírica-do-corpus-2625-def--27-repositórios)
+15. [Arquitetura Moderna Ikemen GO / ZSS e Compatibilidade Dual (`st90=`)](#15-arquitetura-moderna-ikemen-go--zss-e-compatibilidade-dual-st90)
 
 ---
 
 ## 1. Engenharia Reversa Comparativa: Os Pilares do MUGEN
 
-A análise detalhada de lutadores históricos revela a evolução técnica da programação em MUGEN:
+A análise detalhada do corpus histórico e moderno revela a evolução técnica dos principais estilos de programação:
 
-| Critério Técnico | Kung Fu Man 720 (Elecbyte) | Gogeta SSJ4 (Pocket_Danyell) | Buu Z2 (Team Z2) | DIO_K (Knidds / Mercer) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Resolução (`localcoord`)** | 1280x720 (HD) | 320x240 (Lo-Res Clássico) | 320x240 (Escala 1:1 competitiva) | 320x240 (Compatível 1.0/1.1) |
-| **Formato de Sprite** | SFF v2.00 (PNG comprimido) | SFF v1.01 (PCX 8-bit, 4 `.act`) | SFF v1/v2 com 69+ paletas `.act` | SFF v2 com efeitos alinhados |
-| **Organização de Código** | 1 arquivo `.cns` limpo (3465 linhas) | 3 arquivos `.cns` + `common1` custom | 8 arquivos modulares em `states/` | 5 arquivos categorizados |
-| **Filosofia de Combate** | Padrão Capcom/Street Fighter | Padrão Dragon Ball (Voo, Ki, Beams) | Padrão VS Series (Armor, Focus, EX) | Padrão JoJo (Time Stop, Stands) |
-| **Arremesso (Throws)** | Padrão ouro com `!gethitvar(isbound)` | Danos diretos via `TargetState` | Custom Tech Throws com colisão | Command Grabs com dreno de vida |
-| **Gestão de IA** | Nativa via `AILevel` no `.cmd` | Loop clássico de comandos impossíveis | IA de neutral game e anti-aéreo | IA agressiva com reações frame-1 |
+| Critério Técnico | KFM 720 (Elecbyte) | PotS / CvS (`CVS-P`) | Team Z2 (`BuuZ2`, `GokuZ2`) | JUS / WOS (`Meiloorun`, `Xandrarre`) | Ikemen GO (`kfm_zss`, `ikemenarmor`) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Resolução (`localcoord`)** | `1280,720` (HD) | `428,240` (16:9 widescreen) | `320,240` (1:1 competitivo) | `320,240` + `Helper(999999)` ou `380,360` | `const240p()` / `const720p()` responsivo |
+| **Formato de Sprite** | SFF v2.00 (PNG) | SFF v2 (paletas separadas + `movelist.dat`) | SFF v1/v2 com 69+ `.act` | SFF v1/v2 compacto estilo Jump | SFF v2 + PNG32 / sprites alfa |
+| **Organização de Código** | 1 `.cns` limpo | 7–8 `.st` (`System`, `Normal`, `EX`, `Helpers`, `Custom`) | 8 `.cns` + `config.txt` em `Statedef 5900` | Multi-`.cns` por forma/invocação (`Bankai`, `Clones`) | `.zss` modular (`[Function]`, `-4`, `+1`) |
+| **Filosofia de Combate** | Capcom clássico | Capcom/SNK (Parry, Dodge, Custom Combo) | VS/DBZ (Focus Armor, EMO, Beams) | Anime/Naruto (Awake `+10000`, Kawarimi, Clones) | Nativo engine (`RedLife`, `Dizzy`, `GuardBreak`, `Tag`) |
+| **Projéteis & FX** | `Type = Projectile` | `Helper` com `HitOverride` + Spark 1-sprite `AngleDraw` | `Helper` + `Explod` com `config.txt` FX | `Helper` scaled via `Fvar(16)` | `Helper` ou `ModifyProjectile` + `under: 1` |
+| **Gestão de IA & Variáveis** | `AILevel` no `.cmd` | `AILevel` + Tick Fix + `var(58) = gametime` | `AILevel` + `2OS Helper(2)` + dampener | `var(59)` / `AILevel` reativo | `aiLevelF` + `map(nome)` / `teamMap(nome)` |
 
 ### Lições Extraídas da Comparação
-1. **Kung Fu Man**: Demonstra a importância da variável de combo única (`var(1)`). Em vez de repetir condições de cancelamento em 20 golpes, avalia-se a condição uma única vez no topo do `[Statedef -1]`.
-2. **Gogeta SSJ4**: Mostra como desvincular a física do motor (`physics = N`) para criar sistemas manuais de inércia, como o flutuar suave em eixos $X/Y$ e o acúmulo contínuo de energia via verificação de tecla pressionada (`command != "charge"`).
-3. **Team Z2**: Estabelece o padrão de ouro da indústria amadora: nenhum arquivo deve ser gigantesco. Os estados são distribuídos por responsabilidade (`normals.cns`, `specials.cns`, `helpers.cns`), permitindo desenvolvimento paralelo sem conflitos.
-4. **DIO_K**: Soluciona o congelamento do tempo em jogos de luta através da sincronização do `Pause` com `movetime` idêntico, permitindo ao usuário agir enquanto o restante do universo do jogo permanece imóvel.
+1. **Kung Fu Man (`kfm` / `kfm720`)**: Padronizou a flag única de combo (`var(1)`) no topo do `[Statedef -1]` e o failsafe `!gethitvar(isbound)` em estados de arremesso.
+2. **PotS / CvS (`CVS-P`)**: Introduziu o **Tick Fix** no topo do `[Statedef -1]` (recupera controle no frame exato de `!animtime` sem perder 1 frame), **HitSparks procedurais em 1 sprite** via `AngleDraw scale` + `AddAlpha`, **Projéteis em `Helper` com `HitOverride`/`HitBy`** para colisão real entre magias, e **`var(58) = gametime`** no `-3` para detectar congelamentos.
+3. **Team Z2 (`BuuZ2`, `SSJ_GokuZ2`)**: Consolidou `config.txt` em `Statedef 5900` para customização sem editar golpes, o **2OS Helper (`Helper(2)`)** para medição exata de dano por diferença de `life`, e a trava obrigatória **`!WinKO`** em `TimerFreeze`/`RoundNotOver`.
+4. **JUS / Naruto WOS (`Meiloorun`, `BillsLasa`, `Xandrarre`)**: Popularizou **`Helper(999999), Fvar(16)`** como escala universal de `Explod` entre resoluções, troca de formas sem duplicar máquina de estados (`anim + var(11)`), e clones/marionetes autônomos protegidos por `HitOverride`.
+5. **DIO_K & MvC (`MUGENX`)**: Time Stop via `Pause`/`SuperPause` com `movetime = time`, Super Jump (`Statedef 90`), OTG (`hitflag = MAFD`) e Advancing Guard/Pushblock em blockstun.
+6. **Ikemen GO ZSS (`kfm_zss`, `armor.zss`, `glow.zss`, `tag.zss`)**: Substitui índices numéricos frágeis `var(0..59)` por **`map(nome)` / `teamMap(nome)`**, adiciona `[Function]`, `if/switch/for`, blocos `ignoreHitPause {}` e `[StateDef -4]` (ativo mesmo em pausas).
 
 ---
 
@@ -85,6 +86,9 @@ flowchart TD
 ```
 
 ### 2.1. Template Mestre: `meu_lutador.def`
+
+> **Regra de ouro multiplataforma (Linux / Web WASM / Android):** No corpus de **2.625 `.def`**, foram encontradas **287 referências quebradas por divergência de maiúsculas/minúsculas** (ex.: `States/System.cns` vs `states/system.cns`). Sempre use barras `/` (nunca `\`) e exata correspondência de caixa nos caminhos do `.def`.
+
 ```ini
 ;=============================================================================
 ; Manifesto do Lutador: Padrão Modular Profissional
@@ -93,10 +97,10 @@ flowchart TD
 name = "MeuLutador"          ; Identificador interno único
 displayname = "Mestre Ryu"   ; Nome visível na tela e HUD
 versiondate = 01,01,2026     ; Data de compilação
-mugenversion = 1.0           ; Compatibilidade alvo (1.0 ou 1.1)
+mugenversion = 1.0           ; Sempre 1.0 ou 1.1 (evite datas WinMUGEN por causa do bug Floor(2**n))
 author = "SeuNome"           ; Autor
 pal.defaults = 1,2,3,4,5,6   ; Ordem preferencial de paletas
-localcoord = 1280,720        ; Resolução de coordenadas (1280,720 HD ou 320,240 Lo-Res)
+localcoord = 1280,720        ; 1280,720 (HD), 428,240 (16:9 PotS/CvS) ou 320,240 (1:1 Lo-Res)
 
 [Files]
 sprite   = files/sprites.sff
@@ -112,6 +116,8 @@ st3      = states/supers.cns
 st4      = states/helpers.cns
 st5      = states/state-2-3.cns
 st6      = config.txt
+; movelist = movelist.dat              ; Opcional: exibe golpes e custos no menu do Ikemen GO
+; st90     = states/ikemen_addon.zss   ; Slot alto: ignorado no MUGEN 1.0/1.1, carregado no Ikemen GO/UME
 
 [Palette Keymap]
 x = 1 ; Quadrado / Botão X
@@ -160,10 +166,13 @@ value = 190
 
 ## 3. Boilerplate Mestre de Constantes e Física (`constants.cns`)
 
+> **Modas empíricas do corpus (`2.625 .def`):** `life = 1000` (1.518x), `power = 3000` (848x), `airjuggle = 15` (1.486x), `IntPersistIndex = 60` (nenhuma `var` persiste — 750x) ou `50` (persiste `50..59`), `FloatPersistIndex = 40` (1.037x), `yaccel = .44` em 240p (703x). **Atenção ZSS:** variáveis locais `let` no ZSS do `ume-engine` usam `var(40..59)`; se combinar `.zss` e `.cns`, prefira `map(nome)` para persistência e `IntPersistIndex = 40`. Em MUGEN 1.0+/Ikemen, prefira `volumescale = 100` em vez do legado `volume = 0`, ou normalize velocidades com `const240p()`.
+
 ```ini
 ;=============================================================================
 ; CONSTANTES GLOBAIS DE BIOMETRIA E FÍSICA (Padrão 1280x720 HD)
-; Para converter para 320x240, divida as velocidades e posições por 4.
+; Para 320x240 ou 428x240 (16:9), divida velocidades/posições por 4 (yaccel = 0.44)
+; ou use const240p(x) nas expressões de movimento em MUGEN 1.0+/Ikemen GO.
 ;=============================================================================
 
 [Data]
@@ -177,9 +186,9 @@ airjuggle = 15               ; Pontos do pool de juggle aéreo
 sparkno = 2                  ; Spark de impacto padrão
 guard.sparkno = 40           ; Spark de defesa padrão
 KO.echo = 0                  ; Eco sonoro no K.O. (0 = não, 1 = sim)
-volume = 0                   ; Ajuste geral de decibéis (-255 a 255)
-IntPersistIndex = 50         ; var(50..59) sobrevivem entre rounds
-FloatPersistIndex = 30       ; fvar(30..39) sobrevivem entre rounds
+volumescale = 100            ; MUGEN 1.0+/Ikemen (substitui 'volume = 0' legado em dB)
+IntPersistIndex = 50         ; var(50..59) sobrevivem entre rounds (use 60 para resetar todas)
+FloatPersistIndex = 40       ; fvar() resetadas entre rounds (use 30 para preservar fvar(30..39))
 
 [Size]
 xscale = 1                   ; Escala horizontal
@@ -225,33 +234,54 @@ crouch.friction.threshold = 8; Velocidade mínima para estancar agachado
 
 ## 4. Boilerplate Mestre de Comandos e Buffers (`comandos.cmd`)
 
+> **Padrões do corpus (`1.827 .cmd`):** `[Remap]` aparece em **1.091** arquivos; `[Defaults]` mais usado é `command.time = 15` (652x) e `command.buffer.time = 1` (680x). Modificadores críticos: `~` (release / negative edge, **71.225** usos), `/` (hold), `$` (qualquer direção próxima / 4-way), `+` (botões simultâneos) e `buffer.time = 3..6` por comando especial (**3.146** usos).
+
 ```ini
+;-| Remapeamento de Botões |------------------------------------------------
+[Remap]
+x = x
+y = y
+z = z
+a = a
+b = b
+c = c
+s = s
+
+[Defaults]
+command.time = 15
+command.buffer.time = 1
+
 ;-| Super Motions (Buffer de 30 ticks) |-------------------------------------
 [Command]
 name = "SuperHadouken"
 command = ~D, DF, F, D, DF, F, x
 time = 30
+buffer.time = 4
 
 [Command]
 name = "SuperShoryuken"
 command = ~D, DF, F, D, DF, F, y
 time = 30
+buffer.time = 4
 
 ;-| Special Motions (Buffer de 15 a 16 ticks) |-----------------------------
 [Command]
 name = "DragonPunch"
 command = ~F, D, DF, x
 time = 16
+buffer.time = 3
 
 [Command]
 name = "Hadouken"
 command = ~D, DF, F, x
 time = 15
+buffer.time = 3
 
 [Command]
 name = "Tatsumaki"
 command = ~D, DB, B, a
 time = 15
+buffer.time = 3
 
 ;-| Double Tap Dash |-------------------------------------------------------
 [Command]
@@ -323,9 +353,18 @@ time = 1
 
 ;===========================================================================
 ; ROTEAMENTO DE ENTRADAS: [Statedef -1]
-; Ordem de Prioridade Rígida: Supers -> Especiais -> Normais -> Movimento
+; Ordem de Prioridade Rígida: Tick Fix -> Supers -> Especiais -> Normais -> Movimento
 ;===========================================================================
 [Statedef -1]
+
+; Tick Fix (Padrão PotS/CvS): elimina 1 frame morto após pouso, backdash, getup e hitstun
+[State -1, Tick Fix]
+type = CtrlSet
+triggerall = !ctrl
+trigger1 = (stateno = 52 || stateno = 101 || stateno = 106 || stateno = 5120) && !animtime
+trigger2 = (stateno = [200, 499]) && !animtime
+trigger3 = (stateno = 5001 || stateno = 5011 || stateno = 151 || stateno = 153) && hitover
+value = 1
 
 ; Flag Única Reutilizável de Combo (Padrão KFM)
 [State -1, Reset Combo Flag]
@@ -749,9 +788,10 @@ channel = 0
 ### 9.6. Sparks Customizados com Explod
 ```ini
 ; Desativa spark padrão no HitDef: sparkno = -1
+; ATENÇÃO: Em CNS sempre use '=' para igualdade (nunca '==')!
 [State 210, Custom Spark]
 type = Explod
-trigger1 = MoveHit = 1 && NumExplod(8001) == 0
+trigger1 = MoveHit = 1 && !NumExplod(8001)
 anim = 8001
 id = 8001
 postype = p2
@@ -1040,23 +1080,23 @@ anim = 1501
 [State 1501, Flutuacao Cima]
 type = VelAdd
 triggerall = command != "holdup" && command != "holddown"
-trigger1 = var(2) == 0
+trigger1 = var(2) = 0
 y = -0.15
 
 [State 1501, Vira Cima]
 type = VarSet
-trigger1 = var(2) == 0 && Vel Y <= -1.2
+trigger1 = var(2) = 0 && Vel Y <= -1.2
 var(2) = 1
 
 [State 1501, Flutuacao Baixo]
 type = VelAdd
 triggerall = command != "holdup" && command != "holddown"
-trigger1 = var(2) == 1
+trigger1 = var(2) = 1
 y = 0.15
 
 [State 1501, Vira Baixo]
 type = VarSet
-trigger1 = var(2) == 1 && Vel Y >= 1.2
+trigger1 = var(2) = 1 && Vel Y >= 1.2
 var(2) = 0
 
 [State 1501, Frente]
@@ -1088,7 +1128,7 @@ value = 10
 
 [State 705, Tremor]
 type = EnvShake
-trigger1 = (Time % 6) == 0
+trigger1 = (Time % 6) = 0
 time = 6
 ampl = -3
 
@@ -1139,28 +1179,48 @@ trigger1 = root,stateno != 1300
 
 ---
 
-### 10.9. Escalonamento de Dano (Damage Dampener)
+### 10.9. Escalonamento de Dano Real com Counter-Hit (Padrão PotS / Team Z2)
+Evite `hitpausetime = 1` simples (que falha quando `hitpausetime` é zero ou multi-hit). O padrão competitivo conta hits com `!HitPauseTime`, reseta apenas quando o inimigo sai de hitstun (`EnemyNear, MoveType != H`) e aplica bônus de **Counter-Hit (`1.2x`)** quando `EnemyNear, MoveType = A`:
+
 ```ini
-; No [Statedef -2]
-[State -2, Reset Dampener]
+; Em [Statedef -2]
+[State -2, Reset Combo Count]
 type = VarSet
-trigger1 = ctrl && movetype != A
-fvar(13) = 1.0
+trigger1 = NumEnemy
+trigger1 = EnemyNear, MoveType != H
+var(13) = 0
 
-[State -2, Reduz Dano no Combo]
+[State -2, Incrementa Contagem de Hits]
+type = VarAdd
+trigger1 = MoveHit = 1 && !HitPauseTime
+trigger1 = !(HitDefAttr = SCA, AT) ; Não escala antes do golpe principal ou arremesso
+var(13) = 1
+ignorehitpause = 1
+
+[State -2, Calcula Dampener (Decaimento e Piso de 20%)]
 type = VarSet
-trigger1 = movehit = 1 && hitpausetime = 1
-fvar(13) = fvar(13) * 0.85
+trigger1 = 1
+fvar(10) = ifelse(var(13) <= 1, 1.0, ifelse((1.0 - var(13) * 0.08) < 0.20, 0.20, 1.0 - var(13) * 0.08))
+ignorehitpause = 1
 
-[State -2, Piso de 20%]
+[State -2, Detecta Counter Hit (+20%)]
 type = VarSet
-trigger1 = fvar(13) < 0.20
-fvar(13) = 0.20
+trigger1 = NumEnemy
+trigger1 = EnemyNear, MoveType = A && !MoveContact
+var(14) = 1
+ignorehitpause = 1
 
-[State -2, Aplica Multiplicador]
+[State -2, Limpa Counter Hit]
+type = VarSet
+trigger1 = var(14) && (MoveType = H || (NumEnemy && EnemyNear, MoveType != H && !MoveContact))
+var(14) = 0
+ignorehitpause = 1
+
+[State -2, Aplica Multiplicador Combinado]
 type = AttackMulSet
 trigger1 = 1
-value = fvar(13)
+value = fvar(10) * ifelse(var(14), 1.2, 1.0)
+ignorehitpause = 1
 ```
 
 ---
@@ -1237,121 +1297,380 @@ value = 50
 
 ---
 
+### 10.12. Híbrido ZSS para Ikemen GO / UME (`[Function]`, `let`, `mapSet`, `[StateDef -4]`)
+Arquivo modular em `states/ikemen_addon.zss` (veja exemplo completo compilável em [examples/exemplo_ikemen_zss.zss](../examples/exemplo_ikemen_zss.zss)):
+
+```zss
+[Function RegistraEscala(base, bonus)]
+{
+    let sc = base + bonus * 0.25;
+    mapSet{map: "escala_fx"; value: sc}
+}
+
+[StateDef -4]
+ignoreHitPause {
+    if roundState = 2 && !isHelper {
+        persistent(0) {
+            mapSet{map: "ikemen_ativo"; value: 1}
+        }
+    }
+    if time = 0 && stateNo = 200 {
+        call RegistraEscala(1.0, power / 1000.0);
+        mapAdd{map: "combo_score"; value: 1}
+    }
+}
+```
+
+---
+
+### 10.13. HitSpark Procedural com 1 Único Sprite (Padrão PotS / CvS `Statedef 8000`)
+Elimina a criação de 8 sprites por spark usando `AngleDraw` para crescer e `Trans = AddAlpha` para desaparecer:
+
+```ini
+[Statedef 8000]
+type = A
+movetype = I
+physics = N
+anim = 8000 ; Frame único centralizado com Add
+sprpriority = 8
+
+[State 8000, Gira no Spawn]
+type = AngleDraw
+trigger1 = Time = 0
+scale = 0.125, 0.125
+
+[State 8000, Cresce Suavemente]
+type = AngleDraw
+trigger1 = 1
+scale = 0.125 + (0.046875 * Time), 0.125 + (0.046875 * Time)
+
+[State 8000, Transparencia Progressiva]
+type = Trans
+trigger1 = 1
+trans = AddAlpha
+alpha = ifelse(Time < 4, 256, 256 - 64 * (Time - 4)), 256
+
+[State 8000, Destroi]
+type = DestroySelf
+trigger1 = Time >= 8
+```
+
+---
+
+### 10.14. Custom Combo (`Statedef 760`) e Advancing Guard / Pushblock (MvC)
+```ini
+; Custom Combo (ativa cancelamentos livres e velocidade por 240 ticks)
+[Statedef 760]
+type = S
+movetype = I
+physics = S
+anim = 760
+poweradd = -1000
+ctrl = 0
+
+[State 760, Ativa Timer]
+type = VarSet
+trigger1 = AnimElem = 1
+var(20) = 240
+
+[State 760, Fim]
+type = ChangeState
+trigger1 = !AnimTime
+value = 0
+ctrl = 1
+
+; Em [Statedef -2]: drena timer e limpa AfterImage automaticamente ao terminar
+[State -2, Drena Custom Combo]
+type = VarAdd
+trigger1 = var(20) > 0 && !PauseTime
+var(20) = -1
+
+[State -2, Limpa AfterImage Fim CC]
+type = AfterImageTime
+trigger1 = var(20) = 0 || MoveType = H
+time = 0
+
+; Pushblock / Advancing Guard durante Blockstun ([150, 155]) no [Statedef -1]:
+[State -1, Advancing Guard]
+type = Helper
+triggerall = (stateno = [150, 155]) && (command = "x" && command = "y") && !NumHelper(750)
+trigger1 = NumEnemy && EnemyNear, MoveContact
+helpertype = normal
+name = "Pushblock"
+id = 750
+stateno = 750
+pos = 0, 0
+postype = p1
+```
+
+---
+
+### 10.15. Recuo de Canto (`fvar(5)`) e Prevenção de Underground Juggles (`Statedef -3`)
+Padrões combinados de `CVS-P` (canto fluido mesmo após troca de estado) e `ctm-magus` (impede alvo em `hitfall` de atravessar `y = 0`):
+
+```ini
+; Em [Statedef -3]
+[State -3, Corner Push Armazena]
+type = VarSet
+trigger1 = MoveContact = 1 && !HitPauseTime
+fvar(5) = ifelse(HitDefAttr = SCA, HA || HitDefAttr = SCA, SA, -7.5, -4.5)
+ignorehitpause = 1
+
+[State -3, Corner Push Aplica]
+type = PosAdd
+triggerall = fvar(5) != 0 && NumTarget
+trigger1 = Target, BackEdgeBodyDist <= 0 || Target, FrontEdgeBodyDist <= 0
+x = fvar(5)
+
+[State -3, Corner Push Atrito]
+type = VarSet
+trigger1 = fvar(5) != 0
+fvar(5) = ifelse(abs(fvar(5)) < 0.25, 0, fvar(5) * 0.85)
+
+[State -3, Prevent Underground Juggles]
+type = TargetBind
+trigger1 = NumTarget = 1
+trigger1 = Target, HitFall && Target, Pos Y > 0
+pos = ceil(P2Dist X), ceil(-Pos Y)
+time = 1
+```
+
+---
+
+### 10.16. Super Jump (`Statedef 90`) e Ataque OTG (`hitflag = MAFD`)
+```ini
+[Statedef 90]
+type    = A
+movetype= I
+physics = N
+anim = 41
+ctrl = 1
+velset = ifelse(command = "holdfwd", 4.5, ifelse(command = "holdback", -4.0, 0)), -13.5 ; Padrão 240p
+
+[State 90, Gravidade Super Jump]
+type = VelAdd
+trigger1 = 1
+y = 0.42
+
+[State 90, Pouso]
+type = ChangeState
+trigger1 = Vel Y > 0 && Pos Y >= 0
+value = 52
+ctrl = 0
+
+; Ataque OTG (acerta oponente derrubado no chão com flag 'D')
+[State 445, OTG HitDef]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = C, NA
+damage = 45, 5
+hitflag = MAFD
+guardflag = L
+down.velocity = -3, -5
+ground.velocity = -4, -3
+pausetime = 10, 12
+```
+
+---
+
+### 10.17. Clones / Marionetes Autônomas (`HitOverride` + Sync com `parent`)
+Extraído dos lutadores JUS / Naruto WOS (`Loco1911`, `Xandrarre`):
+
+```ini
+[Statedef 15000]
+type = S
+movetype = I
+physics = N
+anim = 0
+ctrl = 0
+
+[State 15000, Ignora Limite de Camera]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0, 0
+
+[State 15000, HitOverride Dissipacao]
+type = HitOverride
+trigger1 = 1
+attr = SCA, AA, AT, AP
+stateno = 15001
+time = 1
+
+[State 15000, Remove se Pai Vencer ou Morrer]
+type = ChangeState
+trigger1 = !NumParent || Parent, Life <= 0 || Parent, StateNo = 181 || Time > 360
+value = 15001
+
+[Statedef 15001] ; Dissipação segura
+type = A
+physics = N
+anim = 15001 ; Fumaça
+[State 15001, Desaparece]
+type = DestroySelf
+trigger1 = !AnimTime || Time > 30
+```
+
+---
+
+### 10.18. Escala Responsiva (`const240p` vs JUS `Fvar(16)`) e Trava `!WinKO`
+- **Padrão Oficial 1.0+ / Ikemen GO (`const240p`)**: Em vez de multiplicar manualmente por resolução, expresse deslocamentos e velocidades com `const240p(x)`:
+  ```ini
+  [State 200, Step Fwd]
+  type = PosAdd
+  trigger1 = AnimElem = 2
+  x = const240p(6)
+  ```
+- **Padrão Comunidade JUS (`Helper(999999), Fvar(16)`)**: Ao criar `Explod`s portáteis para screenpacks JUS mistos, guarde `scale = 1.0 * Helper(999999), Fvar(16), 1.0 * Helper(999999), Fvar(16)`.
+- **Trava `!WinKO` Obrigatória (`Team Z2` / Armadilha #9)**: Nunca congele tempo nem estenda o round durante um KO final:
+  ```ini
+  [State -2, TimerFreeze Seguro]
+  type = AssertSpecial
+  trigger1 = StateNo = [3000, 3999]
+  trigger1 = !WinKO
+  flag = timerfreeze
+  flag2 = roundnotover
+  ```
+
+---
+
 ## 11. Programação de Inteligência Artificial (IA) Competitiva
+
+O estudo do corpus revelou **3 padrões reais** de IA em M.U.G.E.N e Ikemen GO:
+
+### 11.1. Padrão 1: `AILevel` Nativo (MUGEN 1.0+ / 1.1) e `aiLevelF` (Ikemen GO)
+Use `AILevel` (`1` a `8`) ou `aiLevelF` (contínuo em Ikemen GO para ajuste fino) no `[Statedef -1]` / `[Statedef -2]`, combinando com detecção de projéteis e anti-aéreo:
 
 ```ini
 ; Em states/state-2-3.cns sob o [Statedef -2]
 
-; 1. Reação Imediata a Projéteis (Guarda ou Desvio):
-[State -2, IA Bloqueia Projeteis]
+; 1. Reação Imediata a Projéteis ou Ataque Próximo:
+[State -2, IA Bloqueia]
 type = ChangeState
-triggerall = ailevel > 0 && roundstate = 2 && ctrl
-triggerall = (enemy,numproj > 0) || (p2movetype = A && p2bodydist x < 80)
-trigger1 = random < (ailevel * 115)
-value = ifelse(statetype = A, 140, 120) ; Guarda no ar ou em pé
+triggerall = AILevel > 0 && RoundState = 2 && Ctrl
+triggerall = (Enemy, NumProj > 0) || (P2MoveType = A && P2BodyDist X < const240p(30))
+trigger1 = Random < (AILevel * 115)
+value = ifelse(StateType = A, 140, 120)
 
 ; 2. Anti-Aéreo Inteligente:
 [State -2, IA Anti-Aereo]
 type = ChangeState
-triggerall = ailevel > 0 && roundstate = 2 && ctrl && statetype != A
-triggerall = EnemyNear,StateType = A && EnemyNear,Pos Y < -80
-triggerall = p2bodydist x = [20, 120]
-trigger1 = random < (ailevel * 110)
-value = 1100 ; Shoryuken
+triggerall = AILevel > 0 && RoundState = 2 && Ctrl && StateType != A
+triggerall = NumEnemy && EnemyNear, StateType = A && EnemyNear, Pos Y < const240p(-20)
+triggerall = P2BodyDist X = [const240p(5), const240p(45)]
+trigger1 = Random < (AILevel * 110)
+value = 1100
 
 ; 3. Confirmação de Combo (Hit-Confirm):
 [State -2, IA Hit Confirm]
 type = ChangeState
-triggerall = ailevel > 0 && roundstate = 2
-triggerall = stateno = 200 && movehit = 1
-trigger1 = random < (ailevel * 125)
-value = 1000 ; Cancela Jab direto em Projétil
+triggerall = AILevel > 0 && RoundState = 2
+triggerall = StateNo = 200 && MoveHit = 1
+trigger1 = Random < (AILevel * 125)
+value = 1000
 ```
+
+### 11.2. Padrão 2: Compatibilidade Legada WinMUGEN (`var(59)`) e Helper-Switch
+Personagens pré-1.0 detectam CPU comparando comandos humanos contra triggers internos e gravando em `var(59)`. Em projetos novos, **sempre use `AILevel` nativo** — só leia `var(59)` como fallback se `!AILevel` e lembre de desativar qualquer comando humano (`triggerall = !AILevel`) nas regras de jogador do `[Statedef -1]`.
+
+### 11.3. Padrão 3: Cooperação em Equipe (`TeamMode = Simul` / `Partner`)
+Presente nos melhores chars de `CVS-P` e `Ikemen GO`: antes de gastar barra em Super cooperativo ou lançar projéteis, cheque o parceiro:
+```ini
+triggerall = NumPartner && Partner, Alive && Partner, Life > 0
+triggerall = Partner, MoveType != H && Partner, P2BodyDist X < const240p(90)
+```
+Em `tag.zss` (Ikemen GO), proteja rotinas de IA com `triggerall = !standby` para que reservas fora da tela não gastem comandos nem energia.
 
 ---
 
-## 12. Guia de Homologação, Solução de Problemas e Testes Automatizados
+## 12. Guia de Homologação, Top 10 Bugs Reais e Testes Automatizados
 
-| Sintoma de Falha | Causa Raiz | Solução Técnica |
+Além dos clássicos problemas de eixo e paleta, a auditoria de **9.130 arquivos reais** identificou os **10 bugs mais frequentes** em produção:
+
+| Sintoma de Falha | Causa Raiz (e Incidência no Corpus) | Solução Técnica |
 | :--- | :--- | :--- |
-| **Lutador "afunda" ou "flutua" ao socar** | O `Axis Y` da sprite de ataque diverge do Idle ($Y=0$) | Reancore a sola do pé no chão usando o Onion Skin do Fighter Factory |
-| **Personagem pisca transparente ou corrompe** | Cores salvas em 24/32 bits sem o Índice 0 transparente | Salve em 256 cores Indexadas e reserve a célula 0 para a transparência |
-| **Oponente fica congelado na tela após o arremesso** | Faltou o gatilho `!gethitvar(isbound)` no estado customizado | Insira `SelfState` com `value = 5050` sob `trigger1 = !gethitvar(isbound)` |
-| **Ataque conecta infinitamente sem parar (Loop)** | Falta de verificação de `movecontact` ou `hitflag` incorreta | No arremesso, use `hitflag = M-`; em ataques, exija `trigger1 = AnimTime = 0` para voltar ao estado 0 |
-| **Golpe causa dano mas não empurra o inimigo** | `ground.velocity` configurado como `0, 0` | Defina `ground.velocity = -6` |
-| **Voz do golpe continua tocando após levar soco** | Áudio sem canal ou sem cancelamento no dano | Use `channel = 0` no `PlaySnd` e `StopSnd` no `[Statedef -2]` com `trigger1 = movetype = H` |
-| **Combo aéreo para de conectar de repente** | Limite global de juggle esgotado (`airjuggle`) | Eleve `airjuggle` no `[Data]` ou adicione `AssertSpecial: nojugglecheck` |
-| **Atacante fica colado no oponente defendendo no canto** | Ausência de recuo manual de canto | Insira `PosAdd x = -8` quando `FrontEdgeBodyDist <= 20 && MoveContact` |
+| **`[State X]` não bate com `[Statedef Y]`** | `StateNumberMismatch` por copiar/colar blocos (**1.391.086** casos) | Mantenha `[State N, ...]` igual ao `[Statedef N]` (aprovado em `--lint`) |
+| **Rastro fantasma (`AfterImage`) preso na tela** | `AfterImage` sem limpeza (`AfterImageTime = 0`) (**42%** dos arquivos) | Emita `AfterImageTime { time = 0 }` ao levar hit (`MoveType = H`) no `-2` |
+| **Projéteis/FX param de sair no meio da luta** | Vazamento de `Helper` sem `DestroySelf` (**1.833** arquivos) | Sempre defina condição de saída (`!AnimTime`, `Time > max`, `root,stateno !=`) e cheque `!NumHelper(id)` |
+| **Funciona no Windows mas quebra no Web/Linux** | Diferença de maiúsculas/minúsculas ou `\` no `.def` (**287** casos) | Use caminhos relativos POSIX `/` idênticos ao disco em caixa |
+| **`persistent = 0` ignorado no `-1/-2/-3`** | `NegativeStatePersistent` (**12.585** casos) | Controle cooldown em `-2/-3` usando `var(...)` ou `gametime` |
+| **Oponente preso/congelado após arremesso** | Falta de `!gethitvar(isbound)` no estado custom (**271** arquivos) | Adicione `SelfState { value = 5050 }` com `trigger1 = !gethitvar(isbound)` |
+| **Round trava após vencer com Super** | `AssertSpecial: timerfreeze/roundnotover` sem `!WinKO` | Adicione `triggerall = !WinKO` ao bloco do `AssertSpecial` |
+| **Inimigo afunda no chão durante combo** | Underground juggle (`target, hitfall && pos y > 0`) | Corrija no `[Statedef -3]` via `TargetBind` com `ceil(-pos y)` |
+| **Expressão falha silenciosamente ou no parse** | Uso de `==` em `.cns`, parâmetros duplicados (**16.810**) ou Latin-1/NUL | Use `=` em `.cns` (never `==`), remova chaves duplicadas e salve em UTF-8 |
+| **Lutador afunda, pisca ou fica sem pushback** | `Axis Y != 0`, PNG 32-bit sem cor 0 transparente ou falta de corner push | Onion Skin (`Axis Y = 0`), paleta indexada e `fvar(5)` Corner Push |
 
-### Comandos de Validação e Ferramental do Motor (Rust)
-```powershell
-# 1. Gerar scaffold completo do novo personagem via CLI Rust nativa
+Checklist completo de pré-voo, 8 regras do linter e regras do `.air`: [`references/checklist_lint_editor.md`](checklist_lint_editor.md).
+
+### Comandos de Validação e Ferramental do Motor (`ultimate-mugen`)
+```bash
+# 1. Auditoria estrita + Lint (8 regras estáticas + simulação 60s contra KFM)
+cargo run --release -p ume-engine --example mugen_check -- --strict --lint mugen/chars/meu_lutador/
+
+# 2. Gerar scaffold completo do novo personagem via CLI Rust nativa
 cargo run --release -p ume-engine --example scaffold_char -- "MeuLutador" "mugen/chars/meu_lutador"
 
-# 2. Auditoria de tamanho de arquivos e conformidade do repositório
+# 3. Auditoria de tamanho de arquivos e conformidade do repositório
 node scripts/file-size.mjs
 
-# 3. Executar suíte completa de compatibilidade e testes do motor Rust
+# 4. Executar suíte completa de compatibilidade e testes do motor Rust
 cargo test --workspace --release
 
-# 4. Auditoria estrita de cobertura de sprites nativas
-cargo run --release -p ume-engine --example native_sprite_audit -- mugen/chars/meu_lutador/
-
-# 5. Verificação de personagens presos/flutuando fora do chão (Hover check)
+# 5. Verificação de personagens presos/flutuando fora do chão e sprites faltantes
 cargo run --release -p ume-engine --example hover_check -- mugen/chars/meu_lutador/
+cargo run --release -p ume-engine --example sprite_audit -- mugen/chars/meu_lutador/
 ```
 
 
 ---
 
-## 13. Análise Comparativa e Plano Diretor de Inovação (MUGEN Tradicional vs Ultimate MUGEN)
+## 13. Lições de 50+ Lutadores (Rápidos vs Fortes) e Comparativo UMF
 
-Este documento apresenta uma análise comparativa aprofundada entre:
-1. **O Modelo Tradicional do M.U.G.E.N / Fighter Factory** (anos 1999–2015).
-2. **A Skill Desenvolvida (`mugen-character-creator`)** (baseada na engenharia reversa de KFM 720, Gogeta SSJ4, Buu Z2 e DIO_K).
-3. **O Sistema Nativo do Repositório (`ultimate-mugen`)** (arquitetura declarativa UMF JSON, compilador Rust em `crates/engine/src/native/` e renderizador WGPU).
+Resumo completo do estudo de kit em `docs/wiki/Fighter-Study.md` e em [`references/estudo_empirico_e_arquetipos.md`](estudo_empirico_e_arquetipos.md):
 
-O objetivo é traçar o mapa completo de inovações técnicas necessárias para atingir e superar a qualidade, profundidade e equilíbrio dos melhores personagens de MUGEN, eliminando 90% do atrito, complexidade manual e fragilidade do desenvolvimento tradicional.
+1. **Rápidos** (Ken, Chun-Li, Chipp, Kyo, Wolverine, Jin): normais leves com startup de 3 a 5 ticks, avanço curto (`lunge`) cancelável em especial, mergulho aéreo com velocidade angular, teleporte ou super velocidade, dano baixo por golpe e combos longos.
+2. **Fortes** (Zangief, Bison, Broly, Heihachi, Bruno): normais pesados com startup de 8 a 14 ticks, investida com armadura de um golpe (`HitOverride`/`armor`), lançadores com quique na parede ou no chão, arremessos de comando e passivas de raiva.
+3. **Cadeia de cancelamento**: normal → especial → super com flag única (`var(1)`); especiais cancelam em outros só por rota explícita (estilo Kyo rekka).
+4. **Anti-aéreo com invulnerabilidade** (`NotHitBy` nos primeiros quadros) e uma ferramenta de projétil (fireball, Sonic Boom, Tiger Shot) por lutador.
+5. **Migração** para o formato nativo UMF (`assets/chars/*.json`): veja a skill `mugen-to-ume-migrator`.
 
 ---
 
-## 1. Matriz Comparativa Tridimensional
+### 13.1. Matriz Comparativa Tridimensional (MUGEN vs Skill vs UMF)
 
 | Dimensão Técnica | MUGEN Tradicional (Fighter Factory) | Skill Atual (`mugen-character-creator`) | Motor Nativo (`ultimate-mugen` / UMF) | Meta Inovadora (Próxima Geração) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Formato de Dados** | 6 arquivos fragmentados (`.def`, `.cns`, `.cmd`, `.air`, `.sff`, `.snd`) | Multi-arquivo modular em `states/` + `.def` | Arquivo único declarativo UMF (`assets/chars/<id>.json`) | **UMF 2.0 / TOML Estruturado com Composição de Traits** |
+| **Formato de Dados** | 6 arquivos fragmentados (`.def`, `.cns`, `.cmd`, `.air`, `.sff`, `.snd`) | Multi-arquivo modular em `states/` + `.def`/`.zss` | Arquivo único declarativo UMF (`assets/chars/<id>.json`) | **UMF 2.0 / TOML Estruturado com Composição de Traits** |
 | **Criação de Hitboxes** | Desenho manual vetor a vetor em cada quadro (horas por golpe) | Especificação por caixas `Clsn1`/`Clsn2` na `.air` | Caixas heurísticas padrão geradas por constantes | **Auto-Clsn por Convex Hull da Silhueta Alfa via Rust** |
 | **Alinhamento de Eixos** | Arrastar e alinhar pivô $(X, Y)$ quadro a quadro (sujeito a jitter) | Fórmula matemática + técnica manual de Onion Skin | Rig procedural 2D com esqueleto fixo | **Auto-Ground Anchor & Centróide Automático de Apoio** |
-| **Geração de Sprites** | Desenho puramente manual de 300–800 sprites em pixel art | Documentação de pipelines (Pixel, 3D Render e Ripping) | Rig procedural 2D em tempo real ou PNGs dedicados | **Híbrido: Rig 2D vetorial + Skinning + Shaders de Iluminação WGPU** |
-| **Lógica de Ataques** | Dezenas de blocos `[State]` e `HitDef` com 25 parâmetros repetidos | 11 Blueprints prontos para cópia | Array de golpes de alto nível (`"moves": [{"id": "jab", ...}]`) | **Macros Declarativas (`Strike`, `Projectile`, `Parry`)** |
-| **Mecânicas Especiais** | Helpers invisíveis complexos, `HitOverride`, `Pause` milimétrico | Blueprints de Super Armor, Time Stop, Voo e Burst | Limitado a disparos simples, teleporte e dash | **Componentes Nativos (`armor: 1`, `timestop: 120t`, `burst: true`)** |
-| **Feedback e Teste** | Fechar editor, abrir MUGEN, carregar luta, testar, fechar | Comandos Rust de checagem (`hover_check`, `native_sprite_audit`) | Compilação em memória no startup do jogo | **Hot-Reload em Tempo Real a 60 Hz sem Reiniciar a Partida** |
-| **Inteligência Artificial** | Linhas extensas de triggers manuais ou loops arcaicos de CPU | Regras estruturadas com `AILevel` e detecção de projéteis | Árvore de decisão embutida no motor Rust (`crates/engine/src/ai.rs`)| **IA com Planejamento de Frames, Anti-Aéreo Automático e Hit-Confirm** |
+| **Geração de Sprites** | Desenho puramente manual de 300–800 sprites em pixel art | Documentação de pipelines (Pixel, 3D Render e Ripping) | PNGs dedicados de pixel art (pipeline canônico) | **Pipeline Pixel Art + Shaders de Iluminação WGPU** |
+| **Lógica de Ataques** | Dezenas de blocos `[State]` e `HitDef` com 25 parâmetros repetidos | 18 Blueprints prontos para cópia (CNS + ZSS) | Array de golpes de alto nível (`"moves": [{"id": "jab", ...}]`) | **Macros Declarativas (`Strike`, `Projectile`, `Parry`)** |
+| **Mecânicas Especiais** | Helpers invisíveis complexos, `HitOverride`, `Pause` milimétrico | Blueprints de Armor, Time Stop, Voo, Burst, Clones, Custom Combo | Limitado a disparos simples, teleporte e dash | **Componentes Nativos (`armor: 1`, `timestop: 120t`, `burst: true`)** |
+| **Feedback e Teste** | Fechar editor, abrir MUGEN, carregar luta, testar, fechar | `mugen_check --strict --lint`, `hover_check`, `sprite_audit` | Compilação em memória no startup do jogo | **Hot-Reload em Tempo Real a 60 Hz sem Reiniciar a Partida** |
+| **Inteligência Artificial** | Linhas extensas de triggers manuais ou loops arcaicos de CPU | 3 camadas: `AILevel`/`aiLevelF`, `var(59)` legado, `Simul`/`Tag` | Árvore de decisão embutida no motor Rust (`crates/engine/src/ai.rs`)| **IA com Planejamento de Frames, Anti-Aéreo Automático e Hit-Confirm** |
 
 ---
 
-## 2. Diagnóstico dos Gargalos Atuais
+### 13.2. Diagnóstico dos Gargalos Atuais
 
-### 2.1. Onde o MUGEN Tradicional é Superior ao Repositório Atual
-1. **Granularidade e Expressividade Total**: No MUGEN tradicional, cada quadro de animação pode ter uma hitbox milimétrica única, múltiplos pontos de emissão de partículas, binds de posição de arremesso (`TargetBind`), e desvios de colisão dinâmicos (`Width`).
-2. **Acervo de Mecânicas Competitivas**: Personagens como `BuuZ2` e `DIO_K` possuem cancelamentos avançados (Super Cancel, Focus Attack, Time Stop, armaduras parciais) difíceis de representar no schema JSON rígido do UMF atual.
+#### Onde o MUGEN Tradicional é Superior ao UMF Atual
+1. **Granularidade e Expressividade Total**: Cada quadro de animação pode ter uma hitbox milimétrica única, múltiplos pontos de emissão de partículas, binds de posição de arremesso (`TargetBind`), e desvios de colisão dinâmicos (`Width`).
+2. **Acervo de Mecânicas Competitivas**: Personagens como `BuuZ2`, `CVS-P` e `DIO_K` possuem cancelamentos avançados (Super Cancel, Focus Attack, Time Stop, armaduras parciais) e custom states avançados.
 3. **Controle de Efeitos Visuais**: Suporte nativo completo a centenas de `Explod` independentes com rotação, escala, prioridade de desenho (`sprpriority`) e modos de mistura alfa customizados (`ASxxxDxxx`).
 
-### 2.2. Onde o MUGEN Tradicional é Obsoleto e Doloroso
-1. **Fragilidade Extrema**: Errar uma vírgula ou nome de estado pode travar o motor silenciosamente ou prender o oponente em congelamento perpétuo.
-2. **Custo de Produção Inviável**: Criar um personagem completo do zero no MUGEN tradicional exige desenhar ou ripar entre 400 e 900 sprites, alinhar eixos manualmente 900 vezes e desenhar caixas de colisão em mais de 1.500 quadros. Pouquíssimos projetos amadores chegam ao fim.
-3. **Falta de Tipagem e Validação**: Arquivos INI/CNS não possuem verificação estática de tipos, permitindo que bugs de digitação passem despercebidos.
+#### Onde o MUGEN Tradicional é Obsoleto e Doloroso
+1. **Fragilidade Extrema**: Errar uma vírgula ou esquecer `DestroySelf` / `!gethitvar(isbound)` pode travar o motor silenciosamente ou prender o oponente em congelamento perpétuo.
+2. **Custo de Produção Inviável**: Criar um personagem completo do zero exige desenhar ou ripar entre 300 e 900 sprites, alinhar eixos e desenhar caixas de colisão em mais de 1.500 quadros.
+3. **Falta de Tipagem e Validação**: Arquivos INI/CNS sem lint acumulam milhões de `StateNumberMismatch` e parâmetros duplicados (sanados pelo `--strict --lint` do `ume-engine`).
 
-### 2.3. Onde o Repositório (`ultimate-mugen`) Já Está Muito à Frente
-1. **Pipeline de Alto Nível Compilado em Rust**: O motor em Rust compila em nanossegundos o formato UMF diretamente para structs em memória e bytecode determinístico (`crates/engine/src/native/compile.rs`).
+#### Onde o Repositório (`ultimate-mugen`) Já Está Muito à Frente
+1. **Pipeline de Alto Nível Compilado em Rust**: O motor em Rust compila o formato UMF diretamente para structs em memória e bytecode determinístico (`crates/engine/src/native/compile.rs`).
 2. **Renderização Moderna WGPU**: Shaders em WGSL, processamento de paleta diretamente na GPU sem alocar texturas RGBA redundantes para cada skin, e orçamento estrito de Texture Atlas (4096 no desktop / 2048 em mobile).
-3. **Ferramental Automatizado**: Exemplos em Rust como `native_sprite_audit`, `hover_check`, `sprite_mem` e `scaffold_char` que validam matematicamente a integridade física e geométrica dos lutadores.
+3. **Ferramental Automatizado**: Exemplos em Rust como `mugen_check --strict --lint`, `native_sprite_audit`, `hover_check`, `sprite_mem` e `scaffold_char` que validam estaticamente e em runtime a integridade dos lutadores.
 
 ---
 
-## 3. Os 7 Pilares de Inovação para a Criação de Próxima Geração
-
-Para permitir que qualquer criador (humano ou agente de IA) crie lutadores com o polimento de um jogo profissional da Capcom/ArcSys sem a sobrecarga do MUGEN clássico, implementaremos as seguintes inovações:
+### 13.3. Os 7 Pilares de Inovação para a Criação de Próxima Geração
 
 ```mermaid
 flowchart LR
@@ -1365,7 +1684,7 @@ flowchart LR
 
 ---
 
-### Pilar 1: UMF 2.0 com Componentes Modulares (Traits)
+#### Pilar 1: UMF 2.0 com Componentes Modulares (Traits)
 Em vez de forçar o autor a escrever 50 linhas de controladores para cada golpe especial, o formato de personagem passa a utilizar **Componentes Reutilizáveis**:
 
 ```json
@@ -1391,7 +1710,7 @@ Em vez de forçar o autor a escrever 50 linhas de controladores para cada golpe 
 
 ---
 
-### Pilar 2: Geração Automática de Hitboxes e Hurtboxes (Auto-Clsn via Alfa)
+#### Pilar 2: Geração Automática de Hitboxes e Hurtboxes (Auto-Clsn via Alfa)
 No MUGEN clássico, desenhar caixas azuis e vermelhas no Fighter Factory consome até 60% do tempo de desenvolvimento.
 
 **Inovação Técnica em Rust**:
@@ -1406,7 +1725,7 @@ No MUGEN clássico, desenhar caixas azuis e vermelhas no Fighter Factory consome
 
 ---
 
-### Pilar 3: Ancoragem Automática ao Chão (Auto-Ground & Auto-Pivot)
+#### Pilar 3: Ancoragem Automática ao Chão (Auto-Ground & Auto-Pivot)
 Eliminação completa do erro de "lutador flutuando" ou "afundando no chão":
 
 **Inovação Técnica em Rust**:
@@ -1418,8 +1737,8 @@ Eliminação completa do erro de "lutador flutuando" ou "afundando no chão":
 
 ---
 
-### Pilar 4: Biblioteca de Comportamentos Especiais Prontos
-Transformar os 11 blueprints do manual em abstrações nativas de 1 linha:
+#### Pilar 4: Biblioteca de Comportamentos Especiais Prontos
+Transformar os blueprints do manual em abstrações nativas de 1 linha:
 
 | Habilidade | No MUGEN Tradicional | No Modelo Inovador UMF 2.0 |
 | :--- | :--- | :--- |
@@ -1433,7 +1752,7 @@ Transformar os 11 blueprints do manual em abstrações nativas de 1 linha:
 
 ---
 
-### Pilar 5: Hot-Reload e Inspeção Visual ao Vivo (Live Hitbox Overlay)
+#### Pilar 5: Hot-Reload e Inspeção Visual ao Vivo (Live Hitbox Overlay)
 Em vez do ciclo lento e fragmentado do Fighter Factory:
 - O motor `ultimate-mugen` ganha um observador de arquivos (`notify` crate ou watchdog de modificação).
 - Ao alterar o arquivo de sprites ou a definição do lutador, o motor recarrega o `CharDef` **em tempo de execução**, mantendo o estado da luta intacto.
@@ -1441,24 +1760,23 @@ Em vez do ciclo lento e fragmentado do Fighter Factory:
 
 ---
 
-### Pilar 6: Sistema Híbrido de Sprites (Rigs 2D Suaves + Efeitos WGPU)
-- Em vez de forçar autores a desenharem centenas de quadros estáticos, o motor suporta animação esquelética leve (como já iniciado em `crates/engine/src/native/rig.rs`).
-- Adição de interpolação linear/cúbica de rotações entre poses chaves (`idle0` para `idle1`), permitindo animações de 60 FPS incrivelmente fluidas com apenas 4 poses bases cadastradas.
-- Aplicação de shaders de iluminação dinâmica em tempo real (PalFX avançado, auras de energia e sombras de chão projetadas) processadas na GPU, eliminando a necessidade de desenhar efeitos de luz quadro a quadro.
+#### Pilar 6: Sprites em Pixel Art + Shaders WGPU
+- O padrão visual nativo do repositório segue o pipeline de sprites PNG dedicados em pixel art e renderização via shader WGPU.
+- Aplicação de shaders de iluminação dinâmica em tempo real (`PalFX`, auras de energia e sombras de chão projetadas) processadas na GPU, eliminando a necessidade de duplicar texturas para paletas alternativas.
 
 ---
 
-### Pilar 7: Auditoria Automatizada em Linha de Comando (CI/CD de Balanceamento)
+#### Pilar 7: Auditoria Automatizada em Linha de Comando (CI/CD de Balanceamento)
 Nenhum personagem chega ao jogo com bugs ou desbalanceamento grotesco:
-- `cargo run -p ume-engine --example char_audit -- <id>` analisa:
-  - **Dano Teórico Máximo**: Simula todos os cancels possíveis e alerta se o personagem tiver Touch of Death (100% de vida em 1 combo).
+- `cargo run -p ume-engine --example char_audit -- <id>` e `mugen_check --strict --lint` analisam:
+  - **Dano Teórico Máximo**: Simula cancels e alerta se o personagem tiver Touch of Death (100% de vida em 1 combo).
   - **Inviolabilidade**: Alerta se houver golpes com frames ativos sem caixa azul de vulnerabilidade (hitboxes sem risco).
   - **Desconexão de Pouso**: Verifica se todos os estados aéreos garantem transição segura para o solo.
   - **Consistência de Hitstop e Vantagem de Quadros**: Calcula se o golpe deixa o atacante em vantagem (+frames) ou desvantagem (-frames) na defesa.
 
 ---
 
-## 4. Roteiro Prático de Implementação (Roadmap)
+### 13.4. Roteiro Prático de Implementação (Roadmap)
 
 ```
 [FASE 1: FERRAMENTAL CLI RUST] - [CONCLUÍDO E HOMOLOGADO]
@@ -1478,9 +1796,9 @@ Nenhum personagem chega ao jogo com bugs ou desbalanceamento grotesco:
 
 ---
 
-## 5. Ferramentas e Traits Homologados e Prontos para Uso
+### 13.5. Ferramentas e Traits Homologados e Prontos para Uso
 
-### A. Gerador Automático de Hitboxes (`auto_clsn`)
+#### A. Gerador Automático de Hitboxes (`auto_clsn`)
 Gera caixas proporcionais de corpo (cabeça, tronco, pernas) e caixas ativas de ataque escaneando os pixels da silhueta da sprite:
 ```bash
 # Formato AIR M.U.G.E.N clássico
@@ -1490,7 +1808,7 @@ cargo run --release -p ume-engine --example auto_clsn -- <caminho_ou_pasta_png> 
 cargo run --release -p ume-engine --example auto_clsn -- <sprite.png> --attack --json
 ```
 
-### B. Ancorador Automático de Chão e Eixos (`auto_ground`)
+#### B. Ancorador Automático de Chão e Eixos (`auto_ground`)
 Calcula o pixel de contato mais baixo ($Y_{max}$) e o centro de massa horizontal ($X$) para eliminar o efeito de personagens flutuando ou tremendo:
 ```bash
 # Relatório de alinhamento e eixo global recomendado
@@ -1500,7 +1818,7 @@ cargo run --release -p ume-engine --example auto_ground -- assets/chars/sprites/
 cargo run --release -p ume-engine --example auto_ground -- assets/chars/sprites/meu_char/ --json
 ```
 
-### C. Traits Declarativos UMF 2.0 (`crates/engine/src/native/`)
+#### C. Traits Declarativos UMF 2.0 (`crates/engine/src/native/`)
 Em vez de programar controladores complexos manualmente, adicione os atributos diretamente no JSON do golpe:
 ```json
 {
@@ -1522,7 +1840,7 @@ Em vez de programar controladores complexos manualmente, adicione os atributos d
 - `"burst"`: Habilita ativação direta durante `movetype = H` (fora de KO) com invulnerabilidade `NotHitBy`.
 - `"flight"`: Configura `physics = N` e aplica vetor 8-direcional de levitação no ar.
 
-### D. Arquitetura Suprema Nativa UMF Next (Fechamento dos 8 Gaps do M.U.G.E.N)
+#### D. Arquitetura Suprema Nativa UMF Next (Fechamento dos 8 Gaps do M.U.G.E.N)
 Comparando o lutador nativo flagship **Kaito** (`assets/chars/kaito.json`) com os expoentes do MUGEN (`kfm720`, `BuuZ2`, `DIO_K`), a nova arquitetura suprema do compilador nativo fecha todos os 8 gaps históricos de combate através de parâmetros declarativos:
 
 ```json
@@ -1597,7 +1915,32 @@ Comparando o lutador nativo flagship **Kaito** (`assets/chars/kaito.json`) com o
 
 ---
 
-Com essa arquitetura, a barreira técnica de meses de trabalho artesanal cai para **algumas horas de parametrização elegante e declarativa**, preservando a mesma profundidade, competitividade e impacto visual que tornaram o M.U.G.E.N uma lenda dos jogos de luta.
+> **Passo a passo de sprites e regras de animação perfeita:** ver [`references/sprites_animacoes_passo_a_passo.md`](sprites_animacoes_passo_a_passo.md).
 
-> **Passo a passo de sprites e regras de animação perfeita:** ver [references/sprites_animacoes_passo_a_passo.md](references/sprites_animacoes_passo_a_passo.md).
+---
+
+## 14. Síntese Empírica do Corpus (2.625 `.def` / 27 Repositórios)
+
+Os dados completos — por repositório, distribuições de constantes, frequências de sctrls/triggers e padrões por arquétipo — estão documentados em [`references/estudo_empirico_e_arquetipos.md`](estudo_empirico_e_arquetipos.md). Resumo executivo para decisões rápidas de design:
+
+- **Escala analisada**: **2.625** `.def` / **1.914** pastas únicas de personagens em **27** fontes (`assets/mugen/elecbyte.zip` + 26 repositórios públicos: `DocDamage/MUGENX`, `UMTIkemen`, `Loco1911/naruto-r36s`, `mredraith/CVS-P`, `dippypixel/Section-8-IKEMEN`, `Xandrarre/wos`, `CableDorado2/Ikemen-Plus-Ultra`, `IDOTTTTT/Anime-Mugen`, `anevilwizardcat-gif`, `Otaku-Wars`, etc.), totalizando **8.078** `.cns`/`.st` (e **9.130** na varredura de bugs), **1.827** `.cmd`, **1.835** `.air`, **58** `.zss` e **498.987** ações de animação.
+- **Modularidade real**: **1.147** `.def` utilizam **6 a 8 arquivos de estado** (`system`, `normals`, `specials`, `ex`, `supers`, `helpers`, `custom`, `-2/-3`), contra **484** monolíticos de 1 arquivo.
+- **`localcoord` & versão**: `mugenversion = 1.0` (**988**) e `1.1` (**303**) superam datas WinMUGEN (**929+**, evite pelo bug `Floor(2**n)`). `428,240` (widescreen 16:9 PotS/CvS — **265**) e `320,240` (**201**) lideram em sprites Lo-Res; `1280,720` é padrão HD.
+- **Uso dominante de `.air`**: `Clsn2` (**978.362** blocos), `Clsn1` (**245.089**), transparência aditiva `A`/`AS` (**881.325**) vs subtrativa `S` (**31.098**), `Loopstart` (**45.346**) e escala/ângulo MUGEN 1.1 (**10.124**).
+- **Ferramentas e integrações modernas**: `movelist.dat` (**385**), `[Palette Keymap]` (**385**), `UnoTag` (**140**) e extensões `.zss` (**16** defs / **58** arquivos).
+- **Regra anti-bugs**: antes de empacotar, elimine `StateNumberMismatch`, adicione `AfterImageTime = 0` no hitstun, exija `DestroySelf` em todo `Helper`, use `/` e caixa exata nos caminhos do `.def`, proteja arremessos com `!gethitvar(isbound)` e exija `!WinKO` no `TimerFreeze`/`RoundNotOver`.
+
+---
+
+## 15. Arquitetura Moderna Ikemen GO / ZSS e Compatibilidade Dual (`st90=`)
+
+Documentação técnica completa e compatibilidade validada com [`crates/engine/src/zss/mod.rs`](../../../../crates/engine/src/zss/mod.rs), [`crates/engine/src/ikemen/mod.rs`](../../../../crates/engine/src/ikemen/mod.rs) e [`crates/engine/src/flags.rs`](../../../../crates/engine/src/flags.rs) em [`references/guia_zss_e_ikemen_go.md`](guia_zss_e_ikemen_go.md) e exemplo pronto em [`examples/exemplo_ikemen_zss.zss`](../examples/exemplo_ikemen_zss.zss):
+
+1. **Sintaxe ZSS**: comentários começam com `#` (não `;`), parâmetros usam `:` dentro de `{}` (`velSet{x: 4; y: 0}`), condicionais usam `if / else / switch`, loops `for init; cond; step { ... }` / `while` (até **`LOOP_CAP = 32`** por tick no `ume-engine`), blocos agrupados `ignoreHitPause { ... }` / `persistent(0) { ... }`, e funções `[Function Nome(args)] { ... }` invocadas via `call Nome(args);` (profundidade máx. **8**).
+2. **Semântica sem colisão de `var()`**: `let nome = valor;` aloca internamente em `var(40..59)` no `ume-engine` (referenciada pelo nome sem `$` em expressões portáteis); use `mapSet{map: "chave"; value: v}` / `mapAdd` para escrita portátil e `map(chave)` / `teamMap(chave)` para leitura compartilhada entre módulos e parceiros de Tag/Simul.
+3. **Estados Especiais & Recursos Nativos**:
+   - **`[StateDef -4]`**: roda **inclusive durante `Pause`/`SuperPause` e em Helpers** — ideal para Tag (`TagIn`/`TagOut`), detecção de engine, limpeza e mecânicas globais.
+   - **Sistemas Ikemen/UME**: `RedLifeSet`/`RedLifeAdd` (`redLife`), `DizzyPointsAdd`/`DizzySet` (`dizzy`), `GuardPointsAdd`/`GuardBreakSet` (`guardBreak`), `Text`/`RemoveText`, `ModifyProjectile`/`ModifySnd` (`volumescale`), `OverrideClsn`/`clsnOverlap`.
+   - **`AssertSpecial`**: o `ume-engine` suporta **59 flags de personagem** (`asf`: incluindo `animatehitpause`, `animfreeze`, `drawunder`, `nocornerpush`, `noredlifedamage`, `noguardko`, `immovable`) + **19 flags globais** (`gsf`: incluindo `camerafreeze`, `roundfreeze`, `notimedisplay`, `timerfreeze`, `roundnotover`).
+4. **Truque do Slot `st90=` para Dual-Engine**: coloque `st90 = states/ikemen_addon.zss` no `[Files]` do `.def`. O MUGEN 1.0/1.1 ignora slots acima de `st9`, enquanto o Ikemen GO e o `ultimate-mugen` carregam `st90` normalmente — permitindo adicionar `movelist.dat`, `Text`, `Dizzy`, `RedLife` e `Tag` sem quebrar retrocompatibilidade.
 

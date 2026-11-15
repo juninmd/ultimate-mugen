@@ -32,7 +32,7 @@ fn toolkit_ids_and_inputs_do_not_collide() {
         for m in nc.moves.iter().chain(forms) {
             assert!(ids.insert(m.id.clone()), "{id} duplicate id {}", m.id);
         }
-        for m in &nc.moves {
+        for m in nc.moves.iter().filter(|m| m.rekka.is_none()) {
             let key = format!("{}|{}", m.input, m.when.as_deref().unwrap_or("stand"));
             assert!(inputs.insert(key), "{id} duplicate input {} for {}", m.input, m.id);
         }

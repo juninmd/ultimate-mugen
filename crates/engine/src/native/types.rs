@@ -77,6 +77,9 @@ pub struct VelChange { pub at: i32, pub vel: [Option<f32>; 2] }
 pub struct ArmorSpec { pub hits: u32, #[serde(default)] pub threshold: Option<f32> }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct RekkaSpec { pub after: Vec<String>, pub window: [i32; 2], #[serde(default)] pub contact: bool }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ParrySpec { pub window: [i32; 2], #[serde(default)] pub spark: Option<i32> }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -121,6 +124,7 @@ pub struct NativeMove {
     #[serde(default)] pub timestop: Option<i32>,
     #[serde(default)] pub throw: Option<ThrowSpec>,
     #[serde(default)] pub cancels: Option<Vec<String>>,
+    #[serde(default)] pub rekka: Option<RekkaSpec>,
     #[serde(default)] pub requires: Option<MoveRequirements>,
 }
 

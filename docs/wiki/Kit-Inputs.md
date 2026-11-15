@@ -12,3 +12,13 @@ Native fighters no longer share one input set. Each archetype swaps some quarter
 | Daichi | Aura Rush | 360° motion + x | Grappler rush |
 
 Charge motions use the `~40$B, F, x` syntax and work in the training mode, versus and online. Air variants of a move need a motion that can be done in the air, so charge inputs are kept for ground-only moves.
+
+## Air mobility
+
+`stats.airDashes` sets how many air dashes a fighter has before landing (default 1). Rushdown and aerial fighters get more, grapplers fewer.
+
+| Fighter | Air dashes |
+| --- | --- |
+| Suzume, Jin, Akio, Lian, Kaito | 2 |
+| Bruno | 0 |
+| Everyone else | 1 |

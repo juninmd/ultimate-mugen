@@ -27,6 +27,15 @@ fn double_air_dashers_declare_two_dashes() {
 }
 
 #[test]
+fn archetypes_set_their_air_dash_count() {
+    for (id, dashes) in [("akio", 2.0), ("lian", 2.0), ("kaito", 2.0), ("bruno", 0.0)] {
+        let nc: NativeChar = serde_json::from_str(&raw(id)).unwrap();
+        assert_eq!(nc.stats.air_dashes, Some(dashes), "{id}");
+        compile_native(&nc, 1, true);
+    }
+}
+
+#[test]
 fn bouncing_moves_carry_their_hit_flag() {
     for (id, flag) in BOUNCERS {
         assert!(raw(id).contains(&format!("\"{flag}\":true")), "{id} {flag}");

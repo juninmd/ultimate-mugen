@@ -1,9 +1,9 @@
-use super::select_category::CATEGORY_COUNT;
 use super::select_stats::SORT_MODES;
 use super::*;
 
 const X0: f32 = 430.0;
 const W: f32 = 98.0;
+const FILTER_W: f32 = 84.0;
 const GAP: f32 = 6.0;
 const H: f32 = 26.0;
 const FILTER_Y: f32 = 12.0;
@@ -11,7 +11,11 @@ const SORT_Y: f32 = 44.0;
 
 impl App {
     pub(crate) fn select_chip(&self, x: f32, y: f32, label: &str, on: bool) -> bool {
-        let hover = self.hover_rect(x, y, W, H);
+        self.select_chip_w(x, y, W, label, on)
+    }
+
+    fn select_chip_w(&self, x: f32, y: f32, w: f32, label: &str, on: bool) -> bool {
+        let hover = self.hover_rect(x, y, w, H);
         let fill = if on {
             Color::new(1.0, 0.8, 0.2, 0.9)
         } else if hover {
@@ -19,25 +23,22 @@ impl App {
         } else {
             Color::new(1.0, 1.0, 1.0, 0.08)
         };
-        self.ui.rect(x, y, W, H, fill);
+        self.ui.rect(x, y, w, H, fill);
         let ink = if on { BLACK } else { Color::new(1.0, 1.0, 1.0, 0.75) };
-        self.ui.text(label, x + W / 2.0, y + 18.0, 12.0, ink, Align::Center, true);
-        self.clicked_rect(x, y, W, H)
+        let text = self.fit_label(label, 12.0, w - 6.0);
+        self.ui.text(&text, x + w / 2.0, y + 18.0, 12.0, ink, Align::Center, true);
+        self.clicked_rect(x, y, w, H)
     }
 
     pub(crate) fn select_chips(&mut self) -> bool {
         let Screen::Select { mut cur, picking, picked } = self.screen else {
             return false;
         };
-        if self.search_pill() {
+        if self.search_pill() || self.author_chip() {
             return true;
         }
-        let filters = [
-            crate::i18n::t("select.filter_all"),
-            crate::i18n::t("select.filter_originals"),
-            crate::i18n::t("select.filter_mugen"),
-            crate::i18n::t("select.filter_bosses"),
-        ];
+        self.favorite_button(cur[picking.min(1)]);
+        let filters = Self::category_labels();
         let sorts = [
             crate::i18n::t("select.sort_roster"),
             crate::i18n::t("select.sort_force"),
@@ -46,9 +47,9 @@ impl App {
             crate::i18n::t("select.sort_name"),
         ];
         let mut changed = false;
-        for (n, label) in filters.iter().enumerate().take(CATEGORY_COUNT as usize) {
-            let x = X0 + n as f32 * (W + GAP);
-            if self.select_chip(x, FILTER_Y, label, self.sel_filter as usize == n) && self.sel_filter as usize != n {
+        for (n, label) in filters.iter().enumerate() {
+            let x = X0 + n as f32 * (FILTER_W + GAP);
+            if self.select_chip_w(x, FILTER_Y, FILTER_W, label, self.sel_filter as usize == n) && self.sel_filter as usize != n {
                 self.sel_filter = n as u8;
                 changed = true;
             }
@@ -66,6 +67,14 @@ impl App {
         }
         let view = self.char_view();
         if self.sel_filter != 0 && view.len() == self.playable().len() {
+            if self.sel_filter >= super::select_marks::FILTER_FAVORITES {
+                self.msg = crate::i18n::tr3(
+                    "Nenhum lutador aqui ainda: [F] favorita, escolher um lutador o põe em recentes",
+                    "Nothing here yet: [F] adds a favorite, picking a fighter adds it to recent",
+                    "Nada aquí todavía: [F] marca favorito, elegir un luchador lo pone en recientes",
+                )
+                .to_string();
+            }
             self.sel_filter = 0;
         }
         let p = picking.min(1);

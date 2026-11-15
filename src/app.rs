@@ -33,7 +33,7 @@ mod update_banner;
 mod results_stats;
 mod select_category;
 mod select_grid;
-mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_tags; mod select_view; mod text_fit;
+mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_tags; mod select_view; mod text_fit; mod select_marks; mod select_author;
 mod versus; mod versus_compare;
 mod menu_view; mod menu_icons;
 mod menu_focus;
@@ -1178,7 +1178,7 @@ impl App {
                 Align::Center,
                 true,
             );
-            if emugen {
+            if self.is_favorite(i) { self.draw_favorite_mark(cx, cy); } if emugen {
                 self.ui
                     .rect(cx + cw - 44.0, cy + 3.0, 41.0, 13.0, hex("#22e8ff"));
                 self.ui.text(
@@ -1486,7 +1486,7 @@ impl App {
                     };
                     return;
                 }
-                self.team_pick.push(me);
+                self.team_pick.push(me); self.note_recent(me);
                 self.team_pal.push(
                     self.pal_pick
                         .clamp(1, crate::settings::PALETTE_COUNT as i32),
@@ -1528,7 +1528,7 @@ impl App {
                 self.screen = Screen::Stages { cur: 1 };
                 return;
             }
-            picked[picking] = Some(cur[picking]);
+            picked[picking] = Some(cur[picking]); self.note_recent(cur[picking]);
             let coop = self.coop && matches!(self.mode, Mode::Arcade | Mode::Survival);
             if picking == 0 && coop {
                 picking = 1;

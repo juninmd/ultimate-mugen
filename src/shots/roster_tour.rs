@@ -90,6 +90,24 @@ pub(super) async fn run(app: &mut App, dir: &str) {
     app.set_search_query("warusaki", true);
     screen(app, dir, "roster-search-page", 20).await;
     app.set_search_query("", false);
+    for k in [3usize, 10, 40, 77, 120, 300, 640] {
+        let i = (k * 13) % count;
+        if !app.is_favorite(i) {
+            app.toggle_favorite(i);
+        }
+        app.note_recent((k * 31) % count);
+    }
+    select_at(app, 39);
+    screen(app, dir, "roster-favorite-marks", 40).await;
+    app.set_select_filter(4);
+    select_at(app, 39);
+    screen(app, dir, "roster-filter-favorites", 40).await;
+    app.set_select_filter(5);
+    screen(app, dir, "roster-filter-recent", 40).await;
+    app.set_select_filter(0);
+    app.set_author_filter(Some("Kong"));
+    screen(app, dir, "roster-filter-author", 40).await;
+    app.set_author_filter(None);
     app.mode = Mode::TeamSimul;
     app.team_n = 5;
     select_at(app, count / 3);

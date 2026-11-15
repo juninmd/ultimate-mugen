@@ -1,4 +1,5 @@
 //! Keyboard rebinding screen (reached from CONTROLES): one column per player, pick an action and press the new key.
+use super::keyedit_note::conflict_note;
 use super::*;
 use crate::keybinds::{self, ACTIONS};
 
@@ -32,9 +33,10 @@ impl App {
                 ed.msg = "Cancelado.".into();
             } else if let Some(kc) = get_last_key_pressed() {
                 if keybinds::id(kc).is_some() {
+                    let conflicts = self.c.keys.conflicts(ed.slot, ed.cur, kc);
                     self.c.keys.assign(ed.slot, ed.cur, kc);
                     self.c.keys.save();
-                    ed.msg = format!("{}: {}", ACTIONS[ed.cur].0, keybinds::label(kc));
+                    ed.msg = format!("{}: {}{}", ACTIONS[ed.cur].0, keybinds::label(kc), conflict_note(conflicts));
                     ed.waiting = false;
                 } else {
                     ed.msg = crate::i18n::tr3("Essa tecla não pode ser usada. Tente outra (Esc cancela).", "That key cannot be used. Try another (Esc cancels).", "Esa tecla no se puede usar. Prueba otra (Esc cancela).").into();
@@ -120,8 +122,8 @@ impl App {
         if !ed.msg.is_empty() {
             self.ui.text(
                 &ed.msg,
-                40.0,
-                640.0,
+                560.0,
+                54.0,
                 20.0,
                 hex("#6dff9e"),
                 Align::Left,

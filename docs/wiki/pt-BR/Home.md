@@ -20,7 +20,8 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Decisões de compatibilidade](Decisoes-de-Compatibilidade.md) | Criadores | Recursos rejeitados por decisão e o motivo |
 | [Scripts Lua](Scripts-Lua.md) | Criadores | Para que serve Lua em pacotes M.U.G.E.N e as alternativas sem Lua |
 | [Arquivos de rota](Arquivos-de-Rota.md) | Criadores | Rotas de arcade e regras de desbloqueio em TOML |
-| [Criar personagem UMF](Personagem-UMF.md) | Criadores | Lutador completo em um único JSON |
+| [Criar um personagem (guia rápido)](Criar-um-Personagem.md) | Criadores | Um lutador funcionando em dez linhas, herdado de outro |
+| [Criar personagem UMF](Personagem-UMF.md) | Criadores | Referência completa: todos os campos de um lutador em um único JSON |
 | [Passivos](Passivos.md) | Criadores | Fúria, acúmulos de habilidade e regeneração por dados |
 | [Rush Cancel](Rush-Cancel.md) | Jogadores e Criadores | Gaste energia para cancelar um golpe conectado, Overdrive e a apresentação |
 | [Níveis de Combo](Niveis-de-Combo.md) | Jogadores e Criadores | Selos de combo, marca de energia, air dashes e rebotes |
@@ -35,7 +36,8 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Ferramentas de desenvolvimento](Ferramentas-de-Desenvolvimento.md) | Contribuidores | Ferramentas Rust de build e auditoria (`ume-tools`) |
 | [Ferramentas de sprites](Ferramentas-de-Sprites.md) | Criadores | Fatiar folhas, variantes de paleta, caixas de colisão automáticas |
 | [Gerador de golpes](Gerador-de-Golpes.md) | Criadores | TOML para AIR, CNS, CMD e Statedef -1 |
-| [Criar cenários](Cenarios.md) | Criadores | Cenário M.U.G.E.N `.def` e cenário nativo |
+| [Criar um cenário (guia rápido)](Criar-um-Cenario.md) | Criadores | Cenário a partir de um `.def`, dados do modo história e o que ainda precisa de código |
+| [Criar cenários](Cenarios.md) | Criadores | Referência completa: cenário M.U.G.E.N `.def` e cenário nativo |
 | [Customizar a engine](Engine.md) | Desenvolvedores | Arquitetura, novo controller, novo trigger, testes |
 | [Smoke da partida web](Smoke-Partida-Web.md) | Desenvolvedores | Teste de CI que joga partidas completas no navegador e pega travamentos |
 | [Layout de arquivos](Layout-de-Arquivos.md) | Desenvolvedores | A regra de 250 linhas, uma responsabilidade por arquivo, dividir arquivos, PRs paralelos |

@@ -20,6 +20,11 @@ pub(crate) fn bundled(id: &str) -> Option<&'static CharProfile> {
     bundled_table().get(id.strip_prefix("umf:").unwrap_or(id))
 }
 
+#[cfg(test)]
+pub(crate) fn bundled_all() -> impl Iterator<Item = (&'static String, &'static CharProfile)> {
+    bundled_table().iter()
+}
+
 pub(crate) fn of(entry: &CharEntry) -> Option<&CharProfile> {
     let own = match &entry.src {
         Src::Native(native) => native.profile.as_ref(),

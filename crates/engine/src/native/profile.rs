@@ -21,6 +21,8 @@ impl LocalText {
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct CharProfile {
     #[serde(default)]
+    pub country: String,
+    #[serde(default)]
     pub nationality: LocalText,
     #[serde(default)]
     pub bio: LocalText,

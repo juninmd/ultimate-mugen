@@ -54,7 +54,7 @@ Warriors in Ultimate MUGEN channel their fighting spirits through distinct energ
 11. **Sealed Twilight Titans (*Crepúsculo Selado*)**: Locked inside **Haruki Sumi**. Forbidden eldritch power contained by paper talismans; if cracked by mortal peril, it unleashes cataclysmic calamity.
 12. **Lunar Requiem (*Kurogane Tsuki*)**: Channelled by **Shion Kurogane**. Gravitational tides of the Pale Moon condensed into an impossibly heavy broadsword.
 13. **Shadow Lotus Mirage (*Kagerou-Ryu*)**: Inherited by **Suzume Kagerou**. Phantom displacement, sensory blind-spot manipulation, and silent assassination daggers.
-14. **The Scarlet Mangekyo (*Meikyō Escarlate*)**: The supreme illusion eye of **Mikazuki Oboro**. Bends optical perception, summons murder-crows, and rewrites the physical consequences of combat inside the victim's subconscious.
+14. **The Scarlet Veil**: The supreme illusion eye of **Mikazuki Oboro**. Bends optical perception, summons murder-crows, and rewrites the physical consequences of combat inside the victim's subconscious.
 
 ---
 

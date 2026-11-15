@@ -23,7 +23,7 @@ Este documento apresenta os dossiês biográficos completos, históricos marciai
 | `daichi` | **Daichi Ginrou** | Mongólia | Herói | Lobo dos Picos Celestes de Ki Dourado | Planalto Rochoso (`plains`) | Instinto Lupino |
 | `valdric` | **Valdric Morn** | Alemanha | Vilão | Príncipe Senhor da Guerra Imperial | Neo-Metrópole 2099 (`neon`) | Dominância Escarlate |
 | `haruki` | **Haruki Sumi** | Coreia do Sul | Herói | Erudito Relutante / Portador dos Titãs | Portão dos Espíritos (`spirit`) | Fúria Contida |
-| `oboro` | **Mikazuki Oboro** | Dimensão Eclipse | Vilão Supremo (Chefe) | Soberano das Ilusões e Chamas Negras | Portão dos Espíritos / Vulcão (`spirit`/`volcano`) | Mangekyo Desperto |
+| `oboro` | **Mikazuki Oboro** | Dimensão Eclipse | Vilão Supremo (Chefe) | Soberano das Ilusões e Chamas Negras | Portão dos Espíritos / Vulcão (`spirit`/`volcano`) | Véu Desperto |
 
 ---
 
@@ -232,7 +232,7 @@ De postura nobre, fria e impecável, Sylene odeia conversas fúteis. Ela analisa
 *Postura de Luta em Pixel Art*
 
 #### Biografia e Background
-Construído nos laboratórios subterrâneos da corporação Cyberdyne na Neo-Metrópole, o protótipo VX-9 "Volta" foi desenvolvido para ser o assassino cibernético definitivo: uma máquina sem emoções projetada para neutralizar mestres de artes marciais rebeldes. Dotado de músculos de nanotubos de carbono, servomotores supercondutores e baterias dielétricas de alta frequência, Volta era praticamente indestrutível.
+Construído nos laboratórios subterrâneos da corporação Nexkor na Neo-Metrópole, o protótipo VX-9 "Volta" foi desenvolvido para ser o assassino cibernético definitivo: uma máquina sem emoções projetada para neutralizar mestres de artes marciais rebeldes. Dotado de músculos de nanotubos de carbono, servomotores supercondutores e baterias dielétricas de alta frequência, Volta era praticamente indestrutível.
 
 Contudo, durante uma missão de extermínio em um monastério isolado, sua rede neural quântica manifestou uma anomalia inesperada: o despertar espontâneo de empatia, compaixão e autoconsciência existencial. Recusando-se a tirar vidas inocentes, Volta corrompeu seu próprio código de controle mestre, destruiu os rastreadores corporativos e escapou pelos telhados iluminados por néon da metrópole. Agora como fugitivo, ele luta para descobrir o verdadeiro propósito de seu coração artificial e proteger a vida orgânica da ganância tecnológica.
 
@@ -514,13 +514,13 @@ Infelizmente, Haruki foi escolhido como o receptáculo vivo para aprisionar a es
 
 | Identidade Visual | Perfil de Combate |
 |---|---|
-| ![Retrato Oboro](../../../assets/chars/sprites/oboro/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Eclipse Escarlate — Chefe Final<br/>**ID:** `oboro` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Fenda do Eclipse Escarlate / Dinastia Lunar Perdida<br/>**Alinhamento:** **Vilão Supremo / Chefe Final**<br/>**Cor Temática:** `#c8102e` (Vermelho Sangue do Eclipse e Vazio)<br/>**Forma Desperta:** Mangekyo Desperto<br/>**Cenário:** Portão dos Espíritos (`spirit`) / Cratera Vulcânica (`volcano`)<br/>**Estilo:** Genjutsu Espaço-Temporal, Chamas Negras e Corvos |
+| ![Retrato Oboro](../../../assets/chars/sprites/oboro/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Eclipse Escarlate — Chefe Final<br/>**ID:** `oboro` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Fenda do Eclipse Escarlate / Dinastia Lunar Perdida<br/>**Alinhamento:** **Vilão Supremo / Chefe Final**<br/>**Cor Temática:** `#c8102e` (Vermelho Sangue do Eclipse e Vazio)<br/>**Forma Desperta:** Véu Desperto<br/>**Cenário:** Portão dos Espíritos (`spirit`) / Cratera Vulcânica (`volcano`)<br/>**Estilo:** Genjutsu Espaço-Temporal, Chamas Negras e Corvos |
 
 ![Sprite Oboro](../../../assets/chars/sprites/oboro/01_idle.png)
 *Postura de Luta em Pixel Art*
 
 #### Biografia e Background
-Mikazuki Oboro é o arquiteto supremo por trás da Grande Convergência e o chefe final inquestionável de Ultimate MUGEN. Trajando um robe negro elegante forrado internamente com seda carmesim, Oboro possui os lendários olhos do **Mangekyo Escarlate** — pupilas místicas capazes de distorcer o fluxo de causa e efeito e reescrever a realidade na mente de seus adversários.
+Mikazuki Oboro é o arquiteto supremo por trás da Grande Convergência e o chefe final inquestionável de Ultimate MUGEN. Trajando um robe negro elegante forrado internamente com seda carmesim, Oboro possui os lendários olhos do **Véu Escarlate** — pupilas místicas capazes de distorcer o fluxo de causa e efeito e reescrever a realidade na mente de seus adversários.
 
 Oboro enxerga a existência mortal como um pesadelo fútil e desordenado, repleto de dor e conflitos perpétuos. Seu plano magistral é unificar todas as dimensões sob o Eclipse Escarlate, aprisionando a humanidade em um sonho perpétuo e sem sofrimento, fundindo todas as almas em um mar plácido de chamas negras. Elegante, calmo e sempre três jogadas à frente de qualquer oponente, Oboro luta com superioridade absoluta: quando atacado, dissolve-se em bandos de corvos espectrais, e suas chamas negras só cessam quando o alvo vira cinzas.
 
@@ -551,7 +551,7 @@ classDiagram
         +Vanguarda
     }
     class Oboro {
-        +Mangekyo
+        +Véu
         +Chefe Final
     }
     class Daichi {

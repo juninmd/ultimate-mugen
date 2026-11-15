@@ -16,6 +16,7 @@ mod web {
             Screen::Story { .. } => "story",
             Screen::SurvivalOver { .. } => "survival_over",
             Screen::Controls => "controls",
+            Screen::CharTuning { .. } => "char_tuning",
             Screen::Mugen { .. } => "mugen",
             Screen::Market => "market",
             Screen::Replays { .. } => "replays",

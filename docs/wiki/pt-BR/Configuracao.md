@@ -119,6 +119,9 @@ Criado ao lado do executável na primeira execução (localStorage na web) com o
 | `[accessibility]` | `colorblind` | `true` usa azul/laranja nas cores dos lados em vez dos tons padrão |
 | `[accessibility]` | `hud_scale` | Multiplicador do tamanho do HUD (0.8 a 1.25) |
 | `[accessibility]` | `reduce_motion` | `true` desliga o tremor da tela |
+| `[touch]` | `scale` | tamanho do controle na tela, 0,7 a 1,5 |
+| `[touch]` | `opacity` | opacidade do controle na tela, 0,2 a 1,0 |
+| `[touch]` | `left_handed` | `true` espelha o controle (direcional à direita, botões à esquerda) |
 | `[rules]` | `rounds_to_win` (1-9), `round_seconds` (0 = sem limite, até 999), `life_percent` (10-500), `game_speed` (0.5-2.0) | Sobrescrevem os valores do menu Settings em toda luta; remova a linha para voltar ao valor do menu |
 | `[menu]` | `arcade`, `story`, `survival`, `cpu`, `versus`, `training`, `watch`, `team_seq`, `team_simul`, `team_tag`, `mugen`, `market`, `controls`, `settings`, `replays`, `quit` | Texto dessa entrada do menu principal |
 

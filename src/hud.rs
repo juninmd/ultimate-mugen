@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod passive_meter; mod rush_marker; mod story_hud; mod taunts; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod passive_meter; mod rush_marker; mod story_hud; mod taunts; mod training_panel; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -1142,7 +1142,7 @@ impl Hud {
                     true,
                 );
             }
-            self.advantage.update(m);
+            self.advantage.update(m); training_panel::draw(&p, &text, s, w, self.combo[0].0, self.combo[0].1);
             if let Some(ref res) = self.advantage.result {
                 opacity::scope(opacity::ADVANTAGE, || advantage_draw::draw(res, &p, &text, s, w));
             }

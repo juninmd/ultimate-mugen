@@ -101,5 +101,7 @@ No Treino, o menu de pausa (aba Jogo) tem a linha **Comportamento do boneco**. C
 | Pulando | Cima a cada aterrissagem |
 | Defendendo | Trás, só enquanto o rival ataca ou há projétil vivo (ele não sai andando) |
 | Defesa baixa | Baixo, mais trás enquanto ameaçado |
+| Gravar meus comandos | Nada; tudo que você aperta é gravado (até 10 s) |
+| Reproduzir gravação | Seus comandos gravados em loop, espelhados para o lado do boneco |
 
-O plano fica em `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); o boneco aperta bits reais de entrada, então regras de defesa, empurrão e dano de chip são os da própria engine. Capturas: `UME_SHOTS_ONLY=pause` grava `training-dummy-*.png` e `pause-training-dummy.png`.
+O plano fica em `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); o boneco aperta bits reais de entrada, então regras de defesa, empurrão e dano de chip são os da própria engine. A gravação fica em `src/session/dummy_tape.rs`; um painel à direita mostra o melhor combo e o tamanho da fita (`src/hud/training_panel.rs`). Capturas: `UME_SHOTS_ONLY=pause` grava `training-dummy-*.png` e `pause-training-dummy.png`; `UME_SHOTS_ONLY=training` grava `training-tape-playback.png`.

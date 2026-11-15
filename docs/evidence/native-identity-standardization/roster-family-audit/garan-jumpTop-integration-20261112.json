@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-12",
+  "character": "garan",
+  "family": "shared jumpTop source",
+  "status": "integrated_static_review_pass_runtime_pending",
+  "canonicalSha256": "1079c6081d3c350989b7389790dc6a7a6ae22ea9c709d3479aad9c4d46cf8b0a",
+  "beforeSha256": "45335e1d0d584799caefc0b4d1868d1586b42af6b3f936095e506ed81ccf0fdf",
+  "activeSha256": "165c39aa1ef346cc84883040a6544b0a8a4ab6ee32d55371de8c2ba61b3cac7c",
+  "candidateQa": "candidates/garan-jumpTop-pilot/candidate-review.json",
+  "candidateSha256": "165c39aa1ef346cc84883040a6544b0a8a4ab6ee32d55371de8c2ba61b3cac7c",
+  "sharedPaletteSha256": "40e64f15ac418bf16f927ab345c180ae6d264a5a494da0222d9467b0a93a614f",
+  "staticChecks": {
+    "canvas": [
+      400,
+      400
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "bbox": [
+      107,
+      119,
+      293,
+      392
+    ],
+    "axis": [
+      200,
+      392
+    ],
+    "visibleFloorY": 391,
+    "refHeight": 320,
+    "bodyHeight": 273,
+    "colorsUsed": 46,
+    "paletteEntries": 48,
+    "maxDeltaE": 0.086491,
+    "gate": 0.13,
+    "offPalettePixels": 0,
+    "partialAlphaPixels": 0
+  },
+  "sharedReferences": [
+    "jumpUp",
+    "jumpFwd",
+    "jumpBack",
+    "ajab",
+    "akick",
+    "airLowKick"
+  ],
+  "evidence": [
+    "candidates/garan-jumpTop-pilot/review-native.png",
+    "candidates/garan-jumpTop-pilot/review-2x-nearest.png"
+  ],
+  "limitations": [
+    "Identity/pose/registration reviewed statically.",
+    "Other frames in shared families, especially jumpDown, remain open.",
+    "Runtime timing, collision alignment and all affected sequences remain pending."
+  ]
+}

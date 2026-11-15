@@ -16,4 +16,5 @@ path = "src/main.rs"
 [dependencies]
 ume-formats = { path = "../formats" }
 ume-charforge = { path = "../charforge" }
+ume-engine = { path = "../engine" }
 serde_json = "1"

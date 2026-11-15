@@ -86,7 +86,7 @@
     "thick": 2.2,
     "shape": "angry"
    },
-   "faceShade": 1.0,
+   "faceShade": 1,
    "footwear": {
     "sole": true,
     "laces": true,
@@ -1601,19 +1601,28 @@
    "frames": [
     {
      "pose": "run0",
+     "sprite": "sg_run_run0",
      "ticks": 4
     },
     {
      "pose": "run1",
-     "ticks": 4
+     "sprite": "sg_run_run1",
+     "ticks": 3
+    },
+    {
+     "pose": "runMid",
+     "sprite": "sg_run_mid",
+     "ticks": 3
     },
     {
      "pose": "run2",
-     "ticks": 4
+     "sprite": "sg_run_run2",
+     "ticks": 3
     },
     {
      "pose": "run3",
-     "ticks": 4
+     "sprite": "sg_run_run3",
+     "ticks": 3
     }
    ]
   },
@@ -2152,8 +2161,24 @@
      }
     },
     {
+     "pose": {
+      "elbowF": 80,
+      "thighF": 80,
+      "head": -12,
+      "ankleF": 25,
+      "kneeB": 125,
+      "elbowB": 90,
+      "lean": 10,
+      "shoulderB": 35,
+      "shoulderF": 45,
+      "kneeF": 60,
+      "thighB": 38
+     },
+     "ticks": 4
+    },
+    {
      "pose": "crouch",
-     "ticks": 8
+     "ticks": 4
     }
    ]
   },
@@ -2200,7 +2225,22 @@
      }
     },
     {
-     "pose": "ajab",
+     "pose": {
+      "elbowF": 53.5,
+      "handF": "open",
+      "thighF": 78,
+      "head": -8,
+      "ankleF": 30,
+      "kneeB": 118,
+      "elbowB": 110,
+      "wind": 0.4,
+      "lean": 9,
+      "shoulderB": 45,
+      "shoulderF": 64,
+      "kneeF": 120,
+      "ankleB": 35,
+      "thighB": 50
+     },
      "ticks": 6
     },
     {
@@ -2224,7 +2264,22 @@
      }
     },
     {
-     "pose": "akick",
+     "pose": {
+      "elbowF": 82.5,
+      "thighF": 81.5,
+      "head": 6,
+      "ankleF": 55,
+      "kneeB": 61.5,
+      "elbowB": 110,
+      "wind": 0.6,
+      "rot": 10,
+      "lean": -18,
+      "shoulderB": 45,
+      "shoulderF": 45,
+      "kneeF": 60,
+      "ankleB": 57.5,
+      "thighB": 65
+     },
      "ticks": 8
     },
     {
@@ -2670,6 +2725,232 @@
      "ticks": 6
     }
    ]
+  },
+  "quakeEx": {
+   "frames": [
+    {
+     "pose": "qs0",
+     "ticks": 8
+    },
+    {
+     "pose": {
+      "shoulderF": 120,
+      "elbowF": 50,
+      "shoulderB": 110,
+      "elbowB": 60,
+      "thighF": 100,
+      "kneeF": 100,
+      "thighB": -4,
+      "kneeB": 6,
+      "lean": -8,
+      "head": -4,
+      "phase": 1,
+      "ankleF": 10
+     },
+     "ticks": 3
+    },
+    {
+     "pose": "qs1",
+     "ticks": 3
+    },
+    {
+     "pose": "qs1",
+     "ticks": 11
+    },
+    {
+     "pose": "idle0",
+     "ticks": 4
+    }
+   ]
+  },
+  "lariatEx": {
+   "frames": [
+    {
+     "pose": "sl0",
+     "ticks": 3
+    },
+    {
+     "pose": "sl1",
+     "ticks": 4,
+     "hit": {
+      "part": "handF",
+      "radius": 16
+     }
+    },
+    {
+     "pose": "sl2",
+     "ticks": 4,
+     "hit": {
+      "part": "handF",
+      "radius": 16
+     }
+    },
+    {
+     "pose": {
+      "shoulderF": 100,
+      "elbowF": 0,
+      "shoulderB": -80,
+      "elbowB": 10,
+      "thighF": 30,
+      "kneeF": 30,
+      "thighB": -10,
+      "kneeB": 50,
+      "lean": -6,
+      "head": -10,
+      "ankleF": 30,
+      "ankleB": 40,
+      "wind": 1,
+      "handF": "open",
+      "face": "shout",
+      "phase": 3
+     },
+     "ticks": 5
+    },
+    {
+     "pose": "jumpDown",
+     "ticks": 1
+    }
+   ]
+  },
+  "titanSuplexUlt": {
+   "frames": [
+    {
+     "pose": "sl0",
+     "ticks": 8
+    },
+    {
+     "pose": "sl1",
+     "ticks": 6,
+     "hit": {
+      "part": "handF",
+      "radius": 26
+     }
+    },
+    {
+     "pose": "sl2",
+     "ticks": 8
+    },
+    {
+     "pose": "br0",
+     "ticks": 12
+    },
+    {
+     "pose": "br1",
+     "ticks": 6
+    },
+    {
+     "pose": "idle0",
+     "ticks": 6
+    }
+   ]
+  },
+  "stringA": {
+   "frames": [
+    {
+     "pose": "jab0",
+     "ticks": 6
+    },
+    {
+     "pose": "jab1",
+     "ticks": 4,
+     "hit": {
+      "part": "handF",
+      "radius": 8
+     }
+    },
+    {
+     "pose": "str0",
+     "ticks": 8
+    },
+    {
+     "pose": "str0",
+     "ticks": 5
+    },
+    {
+     "pose": "str1",
+     "ticks": 5,
+     "hit": {
+      "part": "handF",
+      "radius": 17
+     }
+    },
+    {
+     "pose": "str1",
+     "ticks": 4
+    },
+    {
+     "pose": "str0",
+     "ticks": 11
+    },
+    {
+     "pose": "idle0",
+     "ticks": 4
+    }
+   ]
+  },
+  "stringB": {
+   "frames": [
+    {
+     "pose": "str0",
+     "ticks": 7
+    },
+    {
+     "pose": "str0",
+     "ticks": 4
+    },
+    {
+     "pose": "str1",
+     "ticks": 4,
+     "hit": {
+      "part": "handF",
+      "radius": 17
+     }
+    },
+    {
+     "pose": "str1",
+     "ticks": 4
+    },
+    {
+     "pose": "str0",
+     "ticks": 11
+    },
+    {
+     "pose": "idle0",
+     "ticks": 4
+    }
+   ]
+  },
+  "stringC": {
+   "frames": [
+    {
+     "pose": "hk0",
+     "ticks": 7
+    },
+    {
+     "pose": "hk0",
+     "ticks": 5
+    },
+    {
+     "pose": "hk1",
+     "ticks": 6,
+     "hit": {
+      "part": "footF",
+      "radius": 14
+     }
+    },
+    {
+     "pose": "hk1",
+     "ticks": 5
+    },
+    {
+     "pose": "hk0",
+     "ticks": 13
+    },
+    {
+     "pose": "idle0",
+     "ticks": 5
+    }
+   ]
   }
  },
  "moves": [
@@ -2688,7 +2969,11 @@
    ],
    "cancels": [
     "cjab",
-    "strong"
+    "strong",
+    "launcher",
+    "overhead",
+    "slide",
+    "string_a"
    ]
   },
   {
@@ -2709,7 +2994,8 @@
     "quake",
     "lariat",
     "ironclaw",
-    "slam"
+    "slam",
+    "overhead"
    ],
    "armor": {
     "hits": 1,
@@ -2862,7 +3148,8 @@
      -3,
      -5
     ],
-    "launch": true
+    "launch": true,
+    "element": "earth"
    },
    "cancels": [
     "avalanche"
@@ -2957,7 +3244,8 @@
       -3
      ],
      "launch": true,
-     "shake": 8
+     "shake": 8,
+     "element": "earth"
     }
    ]
   },
@@ -2986,7 +3274,8 @@
     {
      "at": 2,
      "damage": 60,
-     "level": "heavy"
+     "level": "heavy",
+     "element": "earth"
     },
     {
      "at": 4,
@@ -2997,7 +3286,8 @@
      "knockback": [
       -4,
       -5
-     ]
+     ],
+     "element": "earth"
     }
    ],
    "projectile": {
@@ -3005,8 +3295,8 @@
     "anim": "quakeFx",
     "hitAnim": "quakeHit",
     "speed": [
-     5.0,
-     0.0
+     5,
+     0
     ],
     "offset": [
      40,
@@ -3020,7 +3310,8 @@
     "knockback": [
      -2,
      -5
-    ]
+    ],
+    "element": "earth"
    }
   },
   {
@@ -3038,15 +3329,16 @@
      "knockback": [
       1,
       5
-     ]
+     ],
+     "element": "earth"
     }
    ],
    "moves": [
     {
      "at": 1,
      "vel": [
-      3.0,
-      6.0
+      3,
+      6
      ]
     }
    ]
@@ -3117,10 +3409,472 @@
      -6
     ]
    }
+  },
+  {
+   "id": "ult_bulldozer",
+   "name": "Bulldozer Apocalypse",
+   "input": "~D, DF, F, D, DF, F, x+y",
+   "kind": "super",
+   "anim": "titanSuplex",
+   "cost": 3000,
+   "invuln": [
+    1,
+    7
+   ],
+   "fx": "aura",
+   "throw": {
+    "damage": 340,
+    "at": 2,
+    "bind": [
+     34,
+     0
+    ],
+    "launch": [
+     -4,
+     -6
+    ]
+   }
+  },
+  {
+   "id": "ex_quake",
+   "name": "Quake EX",
+   "input": "~D, DF, F, x+y",
+   "kind": "special",
+   "anim": "quakeEx",
+   "projectile": [
+    {
+     "at": 3,
+     "anim": "quakeFx",
+     "hitAnim": "quakeHit",
+     "speed": [
+      5.8,
+      0
+     ],
+     "offset": [
+      34,
+      0
+     ],
+     "damage": 91,
+     "level": "heavy",
+     "knockback": [
+      -3,
+      -5
+     ],
+     "launch": true,
+     "hits": 2,
+     "priority": 2,
+     "element": "earth"
+    }
+   ],
+   "cancels": [
+    "avalanche"
+   ],
+   "cost": 250,
+   "fx": "aura"
+  },
+  {
+   "id": "ex_lariat",
+   "name": "Iron Lariat EX",
+   "input": "F, D, DF, y+b",
+   "kind": "special",
+   "anim": "lariatEx",
+   "invuln": [
+    1,
+    6
+   ],
+   "moves": [
+    {
+     "at": 2,
+     "vel": [
+      1.6,
+      -6.6
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 2,
+     "damage": 91,
+     "level": "heavy",
+     "launch": true,
+     "hitstun": 24,
+     "knockback": [
+      -1,
+      -3
+     ]
+    },
+    {
+     "at": 3,
+     "damage": 44.2,
+     "level": "heavy",
+     "launch": true,
+     "knockback": [
+      -3,
+      -8
+     ]
+    }
+   ],
+   "armor": {
+    "hits": 1,
+    "threshold": 80
+   },
+   "cost": 500,
+   "fx": "aura"
+  },
+  {
+   "id": "overhead",
+   "name": "Belt Hammer",
+   "input": "x+b",
+   "kind": "normal",
+   "anim": "hkick",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 93.1,
+     "level": "medium",
+     "hitstop": 13,
+     "guard": "high",
+     "hitstun": 20
+    }
+   ]
+  },
+  {
+   "id": "launcher",
+   "name": "Gut Hook Launcher",
+   "input": "y",
+   "kind": "normal",
+   "when": "crouch",
+   "anim": "strong",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 58,
+     "level": "heavy",
+     "launch": true,
+     "hitstun": 22,
+     "knockback": [
+      -1,
+      -6
+     ]
+    }
+   ]
+  },
+  {
+   "id": "divekick",
+   "name": "Elbow Drop",
+   "input": "y",
+   "kind": "normal",
+   "anim": "akick",
+   "when": "air",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 66,
+     "level": "heavy",
+     "guard": "high",
+     "groundBounce": true,
+     "launch": true,
+     "knockback": [
+      -1,
+      4
+     ]
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      1.8,
+      2.5
+     ]
+    }
+   ]
+  },
+  {
+   "id": "slide",
+   "name": "Bulldozer Slide",
+   "input": "F+a",
+   "kind": "normal",
+   "anim": "sweep",
+   "when": "stand",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 59.5,
+     "level": "heavy",
+     "guard": "low",
+     "launch": true,
+     "knockback": [
+      -2,
+      -5
+     ]
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      3,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      1.2,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "id": "escape_burst",
+   "name": "Iron Burst",
+   "input": "x+a+b",
+   "kind": "special",
+   "when": "stand",
+   "anim": "strong",
+   "cost": 500,
+   "burst": true,
+   "invuln": [
+    1,
+    3
+   ],
+   "hits": [
+    {
+     "at": 3,
+     "damage": 30,
+     "level": "heavy",
+     "hitstop": 12,
+     "launch": true,
+     "knockback": [
+      -6,
+      -4
+     ]
+    }
+   ]
+  },
+  {
+   "id": "shoulder",
+   "name": "Armored Shoulder",
+   "input": "F+y",
+   "kind": "normal",
+   "anim": "strong",
+   "armor": {
+    "hits": 1
+   },
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      3,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      0.8,
+      0
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 3,
+     "damage": 115.2,
+     "level": "heavy",
+     "hitstop": 14,
+     "wallBounce": true,
+     "knockback": [
+      -5,
+      -2
+     ]
+    }
+   ]
+  },
+  {
+   "id": "meteordrop",
+   "name": "Meteor Drop",
+   "input": "F+b",
+   "kind": "normal",
+   "when": "air",
+   "anim": "akick",
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      1.2,
+      3.5
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 2,
+     "damage": 78,
+     "level": "heavy",
+     "guard": "high",
+     "groundBounce": true,
+     "launch": true,
+     "knockback": [
+      -1,
+      4
+     ]
+    }
+   ]
+  },
+  {
+   "id": "string_a",
+   "name": "Piston Jabs",
+   "input": "B+x",
+   "kind": "normal",
+   "anim": "stringA",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 30,
+     "level": "light",
+     "knockback": [
+      -0.5,
+      0
+     ]
+    },
+    {
+     "at": 5,
+     "damage": 60,
+     "level": "medium"
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      1.2,
+      0
+     ]
+    },
+    {
+     "at": 5,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "string_b",
+    "string_c",
+    "quake",
+    "lariat"
+   ]
+  },
+  {
+   "id": "string_b",
+   "name": "Clinch Knee Chain",
+   "input": "B+a",
+   "kind": "normal",
+   "anim": "stringB",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 88,
+     "level": "medium"
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      1,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "string_c",
+    "quake",
+    "lariat"
+   ]
+  },
+  {
+   "id": "string_c",
+   "name": "Ring Breaker",
+   "input": "B+y",
+   "kind": "normal",
+   "anim": "stringC",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 120,
+     "level": "heavy",
+     "wallBounce": true,
+     "knockback": [
+      -5,
+      -2
+     ],
+     "hitstun": 22
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      2,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "quake",
+    "lariat"
+   ],
+   "armor": {
+    "hits": 1,
+    "threshold": 80
+   }
+  },
+  {
+   "id": "halfmoon",
+   "name": "Meia-Lua",
+   "input": "~B, DB, D, DF, F, a+x",
+   "kind": "special",
+   "anim": "hkick",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 88,
+     "level": "heavy",
+     "hitstop": 13
+    }
+   ]
   }
  ],
  "country": "Brasil",
  "stage": "brazil",
+ "passives": {
+  "lifeRegen": 0.04,
+  "rage": {
+   "maxMultiplier": 4,
+   "exponent": 1,
+   "startRatio": 1,
+   "fullRatio": 0.01
+  }
+ },
  "boss": false,
  "npc": true,
  "spriteSet": "bruno"

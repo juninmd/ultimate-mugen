@@ -102,10 +102,11 @@ impl Layout {
         Rect::new(self.list.x, self.list.y + i as f32 * self.pitch - scroll, self.list.w - SCROLLBAR_W - 6.0, self.row_h)
     }
 
-    pub fn action_row(&self, i: usize) -> Rect {
-        let h = self.row_h + 14.0 * self.font;
+    pub fn action_row(&self, i: usize, count: usize) -> Rect {
+        let rows = count.max(3) as f32;
+        let h = (self.row_h + 14.0 * self.font).min((self.list.h - 4.0) / rows - 10.0);
         let w = self.list.w.min(640.0);
-        let block = 3.0 * (h + 10.0);
+        let block = rows * (h + 10.0);
         let top = self.list.y + ((self.list.h - block) / 3.0).max(4.0);
         Rect::new(self.list.x + (self.list.w - w) / 2.0, top + i as f32 * (h + 10.0), w, h)
     }
@@ -223,8 +224,10 @@ mod tests {
     fn action_rows_fit_the_list() {
         for s in SCALES {
             let l = Layout::new(s);
-            let last = l.action_row(2);
-            assert!(last.bottom() <= l.list.bottom(), "{s}");
+            for count in [3, 4] {
+                let last = l.action_row(count - 1, count);
+                assert!(last.bottom() <= l.list.bottom() && last.h > 0.0, "{s} {count}");
+            }
         }
     }
 

@@ -41,6 +41,27 @@ impl CharEntry {
             Src::Mugen { .. } => true,
         }
     }
+    pub fn stats(&self) -> (f64, f64, f64) {
+        if let Some(d) = self.peek(1) {
+            (
+                d.c("data.attack", 100.0),
+                d.c("data.life", 1000.0),
+                d.c("velocity.walk.fwd.x", 2.4),
+            )
+        } else {
+            match &self.src {
+                Src::Native(nc) => (
+                    nc.stats.attack.unwrap_or(100.0),
+                    nc.stats.life.unwrap_or(1000.0),
+                    nc.stats.walk.map(|w| w[0]).unwrap_or(2.4),
+                ),
+                Src::Mugen { vfs, def } => {
+                    ume_engine::loader::load_mugen_stats(vfs, def)
+                        .unwrap_or((100.0, 1000.0, 2.4))
+                }
+            }
+        }
+    }
     pub fn load_preview(&self, pal: i32) -> Result<Arc<CharDef>, String> {
         if let Some(d) = self.peek(pal) {
             self.touch();

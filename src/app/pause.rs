@@ -45,7 +45,7 @@ impl App {
             let slot_of = |command: &str| self.c.shortcuts.slot_of(&name, command);
             self.pause_moves_list(&lay, moves, &slot_of, ease);
         } else {
-            self.pause_actions_list(&lay, self.pause.tab.actions(), ease);
+            self.pause_actions_list(&lay, self.pause.tab.actions(self.mode == Mode::Training), ease);
         }
         self.pause_footer(lay.footer, &lay, self.pause.tab, ease);
         match outcome {
@@ -70,6 +70,10 @@ impl App {
     async fn pause_run(&mut self, action: Action) {
         match action {
             Action::Continue => self.session.as_mut().unwrap().paused = false,
+            Action::Dummy => {
+                self.dummy_plan = self.dummy_plan.next();
+                if let Some(s) = self.session.as_mut() { s.set_dummy_plan(self.dummy_plan); }
+            }
             Action::Hitboxes => {
                 let s = self.session.as_mut().unwrap();
                 s.r.debug = !s.r.debug;

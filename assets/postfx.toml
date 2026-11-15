@@ -1,0 +1,28 @@
+[bloom]
+intensity = 1.25
+threshold = 0.5
+knee = 0.3
+tint = [1.0, 0.93, 0.85]
+
+[grade]
+tonemap = 0.5
+exposure = 1.04
+split = 0.45
+shadows = [0.93, 0.98, 1.1]
+highlights = [1.1, 1.03, 0.9]
+
+[distortion]
+shockwave = 1.0
+heat = 1.0
+
+[lens]
+chroma = 1.0
+vignette = 1.0
+grain = 0.03
+sharpen = 0.22
+
+[quality]
+grade_from_level = 1
+shockwave_from_level = 1
+heat_from_level = 2
+bloom_from_level = 2

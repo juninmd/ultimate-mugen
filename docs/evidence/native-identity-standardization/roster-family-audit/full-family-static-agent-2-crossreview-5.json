@@ -1,0 +1,634 @@
+{
+  "report": "full-family-static-agent-2-crossreview-5",
+  "reviewEpoch": "NATIVE-ROSTER-2026-11-12-FULL-FAMILY-AGENT-2",
+  "reviewer": "agent-5",
+  "scope": [
+    "kaname",
+    "jin",
+    "garan",
+    "npc_spitfire"
+  ],
+  "method": "Read-only static cross-review of generic incomplete-adjudication unresolved rows only. Rows unresolved solely for native canvas edge contact were excluded, except npc_spitfire idle which appeared in the generic set and retains its edge-specific uncertainty. Ordered frame list is copied from report 2 and checked against checklist plus pack anchor, queue and declared forms/spriteSet. No runtime claim.",
+  "sourceReport": "full-family-static-agent-2.json",
+  "sourceChecklist": "family-review-checklist.json",
+  "canonicalAnchors": {
+    "kaname": "assets/chars/sprites/kaname/01_idle.png",
+    "jin": "assets/chars/sprites/jin/01_idle.png",
+    "garan": "assets/chars/sprites/garan/04_special.png",
+    "npc_spitfire": "assets/chars/sprites/npc_spitfire/hop.png (temporary-family-sheet proxy only; actual identity is shared Akio-derived Spitfire style; no own approved 04_special or idle PNG found)"
+  },
+  "declaredForms": {
+    "kaname": [
+      "kaname_awakened",
+      "kaname_ascended (palette: aura/energy only)"
+    ],
+    "jin": [
+      "jin_awakened",
+      "jin_ascended (palette: aura/energy only)"
+    ],
+    "garan": [
+      "garan_awakened",
+      "garan_ascended (palette: aura/energy only)"
+    ],
+    "npc_spitfire": []
+  },
+  "counts": {
+    "inputUnresolvedRows": 44,
+    "static_pass": 27,
+    "correction_required": 1,
+    "unresolved": 16
+  },
+  "families": [
+    {
+      "character": "garan",
+      "animation": "run",
+      "resolvedFiles": [
+        "assets/chars/sprites/garan/sg_run_run0.png",
+        "assets/chars/sprites/garan/sg_run_run1.png",
+        "assets/chars/sprites/garan/sg_run_mid.png",
+        "assets/chars/sprites/garan/sg_run_run2.png",
+        "assets/chars/sprites/garan/sg_run_run3.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/garan/04_special.png. Ordered poses retain the canonical red oni body, long white mane, paired horns, prayer beads, purple trousers, rope belt and bracers. Any action poses marked correction-required by the exact queue are handled as separate rows; this animation has no queued mismatch and passes static identity/continuity review. Palette-only forms do not declare outfit changes. Ordered frames inspected: sg_run_run0.png, sg_run_run1.png, sg_run_mid.png, sg_run_run2.png, sg_run_run3.png.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "hitAir",
+      "resolvedFiles": [
+        "assets/chars/sprites/garan/12_fall1.png",
+        "assets/chars/sprites/garan/13_fall2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/garan/04_special.png. Ordered poses retain the canonical red oni body, long white mane, paired horns, prayer beads, purple trousers, rope belt and bracers. Any action poses marked correction-required by the exact queue are handled as separate rows; this animation has no queued mismatch and passes static identity/continuity review. Palette-only forms do not declare outfit changes. Ordered frames inspected: 12_fall1.png, 13_fall2.png.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "fall",
+      "resolvedFiles": [
+        "assets/chars/sprites/garan/12_fall1.png",
+        "assets/chars/sprites/garan/13_fall2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/garan/04_special.png. Ordered poses retain the canonical red oni body, long white mane, paired horns, prayer beads, purple trousers, rope belt and bracers. Any action poses marked correction-required by the exact queue are handled as separate rows; this animation has no queued mismatch and passes static identity/continuity review. Palette-only forms do not declare outfit changes. Ordered frames inspected: 12_fall1.png, 13_fall2.png.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "lieDown",
+      "resolvedFiles": [
+        "assets/chars/sprites/garan/14_lie.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/garan/04_special.png. Ordered poses retain the canonical red oni body, long white mane, paired horns, prayer beads, purple trousers, rope belt and bracers. Any action poses marked correction-required by the exact queue are handled as separate rows; this animation has no queued mismatch and passes static identity/continuity review. Palette-only forms do not declare outfit changes. Ordered frames inspected: 14_lie.png.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "getUp",
+      "resolvedFiles": [
+        "assets/chars/sprites/garan/14_lie.png",
+        "assets/chars/sprites/garan/getUp1.png",
+        "assets/chars/sprites/garan/getUp2.png",
+        "assets/chars/sprites/garan/getUp3.png",
+        "assets/chars/sprites/garan/01_idle.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/garan/04_special.png. Ordered poses retain the canonical red oni body, long white mane, paired horns, prayer beads, purple trousers, rope belt and bracers. Any action poses marked correction-required by the exact queue are handled as separate rows; this animation has no queued mismatch and passes static identity/continuity review. Palette-only forms do not declare outfit changes. Ordered frames inspected: 14_lie.png, getUp1.png, getUp2.png, getUp3.png, 01_idle.png.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "dead",
+      "resolvedFiles": [
+        "assets/chars/sprites/garan/14_lie.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/garan/04_special.png. Ordered poses retain the canonical red oni body, long white mane, paired horns, prayer beads, purple trousers, rope belt and bracers. Any action poses marked correction-required by the exact queue are handled as separate rows; this animation has no queued mismatch and passes static identity/continuity review. Palette-only forms do not declare outfit changes. Ordered frames inspected: 14_lie.png.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "trip",
+      "resolvedFiles": [
+        "assets/chars/sprites/garan/12_fall1.png",
+        "assets/chars/sprites/garan/12_fall1.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/garan/04_special.png. Ordered poses retain the canonical red oni body, long white mane, paired horns, prayer beads, purple trousers, rope belt and bracers. Any action poses marked correction-required by the exact queue are handled as separate rows; this animation has no queued mismatch and passes static identity/continuity review. Palette-only forms do not declare outfit changes. Ordered frames inspected: 12_fall1.png, 12_fall1.png.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "lose",
+      "resolvedFiles": [
+        "assets/chars/sprites/garan/14_lie.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/garan/04_special.png. Ordered poses retain the canonical red oni body, long white mane, paired horns, prayer beads, purple trousers, rope belt and bracers. Any action poses marked correction-required by the exact queue are handled as separate rows; this animation has no queued mismatch and passes static identity/continuity review. Palette-only forms do not declare outfit changes. Ordered frames inspected: 14_lie.png.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "hellFx",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "hellHit",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "brimstone",
+      "resolvedFiles": [
+        "assets/chars/sprites/garan/bd0.png",
+        "assets/chars/sprites/garan/bd1.png",
+        "assets/chars/sprites/garan/bd2.png",
+        "assets/chars/sprites/garan/inline_8de768a154d49e7f.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/garan/04_special.png. Ordered poses retain the canonical red oni body, long white mane, paired horns, prayer beads, purple trousers, rope belt and bracers. Any action poses marked correction-required by the exact queue are handled as separate rows; this animation has no queued mismatch and passes static identity/continuity review. Palette-only forms do not declare outfit changes. Ordered frames inspected: bd0.png, bd1.png, bd2.png, inline_8de768a154d49e7f.png.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "garan",
+      "animation": "pillarFx",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "garan_awakened",
+        "garan_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "jin",
+      "animation": "hitHeavy",
+      "resolvedFiles": [
+        "assets/chars/sprites/jin/11_hit3.png",
+        "assets/chars/sprites/jin/10_hit2.png",
+        "assets/chars/sprites/jin/09_hit1.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/jin/01_idle.png. Ordered resolved poses retain the canonical red scarf, spiky black hair, teal sleeveless tunic, charcoal trousers and cyan wind motif, with readable transitions and consistent native tile scale. Form definitions change palette/effects, not clothing. This row can be cleared as a static pass. Any named FX-only rows remain unresolved separately. Ordered frames inspected: 11_hit3.png, 10_hit2.png, 09_hit1.png.",
+      "declaredForms": [
+        "jin_awakened",
+        "jin_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "jin",
+      "animation": "hitAir",
+      "resolvedFiles": [
+        "assets/chars/sprites/jin/12_fall1.png",
+        "assets/chars/sprites/jin/13_fall2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/jin/01_idle.png. Ordered resolved poses retain the canonical red scarf, spiky black hair, teal sleeveless tunic, charcoal trousers and cyan wind motif, with readable transitions and consistent native tile scale. Form definitions change palette/effects, not clothing. This row can be cleared as a static pass. Any named FX-only rows remain unresolved separately. Ordered frames inspected: 12_fall1.png, 13_fall2.png.",
+      "declaredForms": [
+        "jin_awakened",
+        "jin_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "jin",
+      "animation": "fall",
+      "resolvedFiles": [
+        "assets/chars/sprites/jin/12_fall1.png",
+        "assets/chars/sprites/jin/13_fall2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/jin/01_idle.png. Ordered resolved poses retain the canonical red scarf, spiky black hair, teal sleeveless tunic, charcoal trousers and cyan wind motif, with readable transitions and consistent native tile scale. Form definitions change palette/effects, not clothing. This row can be cleared as a static pass. Any named FX-only rows remain unresolved separately. Ordered frames inspected: 12_fall1.png, 13_fall2.png.",
+      "declaredForms": [
+        "jin_awakened",
+        "jin_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "jin",
+      "animation": "bounce",
+      "resolvedFiles": [
+        "assets/chars/sprites/jin/13_fall2.png",
+        "assets/chars/sprites/jin/13_fall2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/jin/01_idle.png. Ordered resolved poses retain the canonical red scarf, spiky black hair, teal sleeveless tunic, charcoal trousers and cyan wind motif, with readable transitions and consistent native tile scale. Form definitions change palette/effects, not clothing. This row can be cleared as a static pass. Any named FX-only rows remain unresolved separately. Ordered frames inspected: 13_fall2.png, 13_fall2.png.",
+      "declaredForms": [
+        "jin_awakened",
+        "jin_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "jin",
+      "animation": "bounceAir",
+      "resolvedFiles": [
+        "assets/chars/sprites/jin/13_fall2.png",
+        "assets/chars/sprites/jin/13_fall2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/jin/01_idle.png. Ordered resolved poses retain the canonical red scarf, spiky black hair, teal sleeveless tunic, charcoal trousers and cyan wind motif, with readable transitions and consistent native tile scale. Form definitions change palette/effects, not clothing. This row can be cleared as a static pass. Any named FX-only rows remain unresolved separately. Ordered frames inspected: 13_fall2.png, 13_fall2.png.",
+      "declaredForms": [
+        "jin_awakened",
+        "jin_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "jin",
+      "animation": "chakramFx",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "jin_awakened",
+        "jin_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "jin",
+      "animation": "windHit",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "jin_awakened",
+        "jin_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "jin",
+      "animation": "mirage",
+      "resolvedFiles": [
+        "assets/chars/sprites/jin/tp0.png",
+        "assets/chars/sprites/jin/tp2.png",
+        "assets/chars/sprites/jin/tp2.png",
+        "assets/chars/sprites/jin/idle0.png"
+      ],
+      "disposition": "unresolved",
+      "finding": "Anchor: assets/chars/sprites/jin/01_idle.png. Resolved fighter frames match the character design, but 2 effect/procedural frame(s) have no PNG source in this family; static identity of that complete sequence cannot be adjudicated. Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "jin_awakened",
+        "jin_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "jin",
+      "animation": "tempestFx",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "jin_awakened",
+        "jin_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "jin",
+      "animation": "powerUp",
+      "resolvedFiles": [
+        "assets/chars/sprites/jin/15_power0.png",
+        "assets/chars/sprites/jin/16_power1.png",
+        "assets/chars/sprites/jin/17_power2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/jin/01_idle.png. Ordered resolved poses retain the canonical red scarf, spiky black hair, teal sleeveless tunic, charcoal trousers and cyan wind motif, with readable transitions and consistent native tile scale. Form definitions change palette/effects, not clothing. This row can be cleared as a static pass. Any named FX-only rows remain unresolved separately. Ordered frames inspected: 15_power0.png, 16_power1.png, 17_power2.png.",
+      "declaredForms": [
+        "jin_awakened",
+        "jin_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "kaname",
+      "animation": "hitHeavy",
+      "resolvedFiles": [
+        "assets/chars/sprites/kaname/11_hit3.png",
+        "assets/chars/sprites/kaname/10_hit2.png",
+        "assets/chars/sprites/kaname/09_hit1.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/kaname/01_idle.png. Ordered body frames preserve the canonical white haori, navy hakama, blue ponytail and katana; however the exact queue maps these frame(s) to the auxiliary dark blue/cyan armored outfit, which neither palette-only form declares. Correct the sequence to the white-haori/navy-hakama design and retain pose, scale, floor placement and crisp cluster treatment. Outfit discontinuity is a true correction requirement. Ordered frames inspected: 11_hit3.png, 10_hit2.png, 09_hit1.png.",
+      "declaredForms": [
+        "kaname_awakened",
+        "kaname_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "kaname",
+      "animation": "lieDown",
+      "resolvedFiles": [
+        "assets/chars/sprites/kaname/14_lie.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/kaname/01_idle.png. Ordered body frames preserve the canonical white haori, navy hakama, blue ponytail and katana; however the exact queue maps these frame(s) to the auxiliary dark blue/cyan armored outfit, which neither palette-only form declares. Correct the sequence to the white-haori/navy-hakama design and retain pose, scale, floor placement and crisp cluster treatment. Outfit discontinuity is a true correction requirement. Ordered frames inspected: 14_lie.png.",
+      "declaredForms": [
+        "kaname_awakened",
+        "kaname_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "kaname",
+      "animation": "getUp",
+      "resolvedFiles": [
+        "assets/chars/sprites/kaname/14_lie.png",
+        "assets/chars/sprites/kaname/getUp1.png",
+        "assets/chars/sprites/kaname/getUp2.png",
+        "assets/chars/sprites/kaname/getUp3.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "disposition": "correction_required",
+      "finding": "Anchor: assets/chars/sprites/kaname/01_idle.png. Ordered body frames preserve the canonical white haori, navy hakama, blue ponytail and katana; however the exact queue maps these frame(s) to the auxiliary dark blue/cyan armored outfit, which neither palette-only form declares. Correct the sequence to the white-haori/navy-hakama design and retain pose, scale, floor placement and crisp cluster treatment. Outfit discontinuity is a true correction requirement. Matched correction-queue files: getUp1.png, getUp2.png, getUp3.png.",
+      "declaredForms": [
+        "kaname_awakened",
+        "kaname_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "kaname",
+      "animation": "dead",
+      "resolvedFiles": [
+        "assets/chars/sprites/kaname/14_lie.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/kaname/01_idle.png. Ordered body frames preserve the canonical white haori, navy hakama, blue ponytail and katana; however the exact queue maps these frame(s) to the auxiliary dark blue/cyan armored outfit, which neither palette-only form declares. Correct the sequence to the white-haori/navy-hakama design and retain pose, scale, floor placement and crisp cluster treatment. Outfit discontinuity is a true correction requirement. Ordered frames inspected: 14_lie.png.",
+      "declaredForms": [
+        "kaname_awakened",
+        "kaname_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "kaname",
+      "animation": "lose",
+      "resolvedFiles": [
+        "assets/chars/sprites/kaname/14_lie.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/kaname/01_idle.png. Ordered body frames preserve the canonical white haori, navy hakama, blue ponytail and katana; however the exact queue maps these frame(s) to the auxiliary dark blue/cyan armored outfit, which neither palette-only form declares. Correct the sequence to the white-haori/navy-hakama design and retain pose, scale, floor placement and crisp cluster treatment. Outfit discontinuity is a true correction requirement. Ordered frames inspected: 14_lie.png.",
+      "declaredForms": [
+        "kaname_awakened",
+        "kaname_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "kaname",
+      "animation": "frostArcFx",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "kaname_awakened",
+        "kaname_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "kaname",
+      "animation": "frostHit",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "kaname_awakened",
+        "kaname_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "kaname",
+      "animation": "winterFangFx",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "kaname_awakened",
+        "kaname_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "kaname",
+      "animation": "winterFangHit",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [
+        "kaname_awakened",
+        "kaname_ascended (palette: aura/energy only)"
+      ],
+      "spriteSet": null
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "idle",
+      "resolvedFiles": [
+        "assets/chars/sprites/akio/01_idle.png",
+        "assets/chars/sprites/akio/07_idle1.png",
+        "assets/chars/sprites/akio/08_idle2.png",
+        "assets/chars/sprites/akio/07_idle1.png"
+      ],
+      "disposition": "unresolved",
+      "finding": "Anchor: assets/chars/sprites/npc_spitfire/hop.png (temporary-family-sheet proxy only; actual identity is shared Akio-derived Spitfire style; no own approved 04_special or idle PNG found). The NPC explicitly sets spriteSet=akio; resolved body frames correctly reuse Akio's red-haired black-star-shirt design, recolored/selected for Spitfire's declared dark palette. This reuse is documented rather than an accidental source-pack mismatch. Its animation is structurally consistent; the source reference is indirect through the declared spriteSet. Static pass; no runtime claim. The prior unresolved reason is an edge-touch/alpha boundary concern and is deliberately preserved outside this 88-row generic-adjudication cross-review; inspect source alpha/crop before clearing.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "hitAir",
+      "resolvedFiles": [
+        "assets/chars/sprites/akio/12_fall1.png",
+        "assets/chars/sprites/akio/13_fall2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/npc_spitfire/hop.png (temporary-family-sheet proxy only; actual identity is shared Akio-derived Spitfire style; no own approved 04_special or idle PNG found). The NPC explicitly sets spriteSet=akio; resolved body frames correctly reuse Akio's red-haired black-star-shirt design, recolored/selected for Spitfire's declared dark palette. This reuse is documented rather than an accidental source-pack mismatch. Its animation is structurally consistent; the source reference is indirect through the declared spriteSet. Static pass; no runtime claim. Ordered frames inspected: 12_fall1.png, 13_fall2.png.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "fall",
+      "resolvedFiles": [
+        "assets/chars/sprites/akio/12_fall1.png",
+        "assets/chars/sprites/akio/13_fall2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/npc_spitfire/hop.png (temporary-family-sheet proxy only; actual identity is shared Akio-derived Spitfire style; no own approved 04_special or idle PNG found). The NPC explicitly sets spriteSet=akio; resolved body frames correctly reuse Akio's red-haired black-star-shirt design, recolored/selected for Spitfire's declared dark palette. This reuse is documented rather than an accidental source-pack mismatch. Its animation is structurally consistent; the source reference is indirect through the declared spriteSet. Static pass; no runtime claim. Ordered frames inspected: 12_fall1.png, 13_fall2.png.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "bounce",
+      "resolvedFiles": [
+        "assets/chars/sprites/akio/13_fall2.png",
+        "assets/chars/sprites/akio/13_fall2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/npc_spitfire/hop.png (temporary-family-sheet proxy only; actual identity is shared Akio-derived Spitfire style; no own approved 04_special or idle PNG found). The NPC explicitly sets spriteSet=akio; resolved body frames correctly reuse Akio's red-haired black-star-shirt design, recolored/selected for Spitfire's declared dark palette. This reuse is documented rather than an accidental source-pack mismatch. Its animation is structurally consistent; the source reference is indirect through the declared spriteSet. Static pass; no runtime claim. Ordered frames inspected: 13_fall2.png, 13_fall2.png.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "bounceAir",
+      "resolvedFiles": [
+        "assets/chars/sprites/akio/13_fall2.png",
+        "assets/chars/sprites/akio/13_fall2.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/npc_spitfire/hop.png (temporary-family-sheet proxy only; actual identity is shared Akio-derived Spitfire style; no own approved 04_special or idle PNG found). The NPC explicitly sets spriteSet=akio; resolved body frames correctly reuse Akio's red-haired black-star-shirt design, recolored/selected for Spitfire's declared dark palette. This reuse is documented rather than an accidental source-pack mismatch. Its animation is structurally consistent; the source reference is indirect through the declared spriteSet. Static pass; no runtime claim. Ordered frames inspected: 13_fall2.png, 13_fall2.png.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "lieDown",
+      "resolvedFiles": [
+        "assets/chars/sprites/akio/14_lie.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/npc_spitfire/hop.png (temporary-family-sheet proxy only; actual identity is shared Akio-derived Spitfire style; no own approved 04_special or idle PNG found). The NPC explicitly sets spriteSet=akio; resolved body frames correctly reuse Akio's red-haired black-star-shirt design, recolored/selected for Spitfire's declared dark palette. This reuse is documented rather than an accidental source-pack mismatch. Its animation is structurally consistent; the source reference is indirect through the declared spriteSet. Static pass; no runtime claim. Ordered frames inspected: 14_lie.png.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "getUp",
+      "resolvedFiles": [
+        "assets/chars/sprites/akio/14_lie.png",
+        "assets/chars/sprites/akio/getUp1.png",
+        "assets/chars/sprites/akio/getUp2.png",
+        "assets/chars/sprites/akio/getUp3.png",
+        "assets/chars/sprites/akio/01_idle.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/npc_spitfire/hop.png (temporary-family-sheet proxy only; actual identity is shared Akio-derived Spitfire style; no own approved 04_special or idle PNG found). The NPC explicitly sets spriteSet=akio; resolved body frames correctly reuse Akio's red-haired black-star-shirt design, recolored/selected for Spitfire's declared dark palette. This reuse is documented rather than an accidental source-pack mismatch. Its animation is structurally consistent; the source reference is indirect through the declared spriteSet. Static pass; no runtime claim. Ordered frames inspected: 14_lie.png, getUp1.png, getUp2.png, getUp3.png, 01_idle.png.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "dead",
+      "resolvedFiles": [
+        "assets/chars/sprites/akio/14_lie.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/npc_spitfire/hop.png (temporary-family-sheet proxy only; actual identity is shared Akio-derived Spitfire style; no own approved 04_special or idle PNG found). The NPC explicitly sets spriteSet=akio; resolved body frames correctly reuse Akio's red-haired black-star-shirt design, recolored/selected for Spitfire's declared dark palette. This reuse is documented rather than an accidental source-pack mismatch. Its animation is structurally consistent; the source reference is indirect through the declared spriteSet. Static pass; no runtime claim. Ordered frames inspected: 14_lie.png.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "lose",
+      "resolvedFiles": [
+        "assets/chars/sprites/akio/14_lie.png"
+      ],
+      "disposition": "static_pass",
+      "finding": "Anchor: assets/chars/sprites/npc_spitfire/hop.png (temporary-family-sheet proxy only; actual identity is shared Akio-derived Spitfire style; no own approved 04_special or idle PNG found). The NPC explicitly sets spriteSet=akio; resolved body frames correctly reuse Akio's red-haired black-star-shirt design, recolored/selected for Spitfire's declared dark palette. This reuse is documented rather than an accidental source-pack mismatch. Its animation is structurally consistent; the source reference is indirect through the declared spriteSet. Static pass; no runtime claim. Ordered frames inspected: 14_lie.png.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "starOrb",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "starHit",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "novaBeam",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    },
+    {
+      "character": "npc_spitfire",
+      "animation": "novaHit",
+      "resolvedFiles": [],
+      "disposition": "unresolved",
+      "finding": "Effect-only family has no resolved body PNG in the source checklist; retain unresolved pending effect/body separation. No runtime claim.",
+      "declaredForms": [],
+      "spriteSet": "akio"
+    }
+  ]
+}

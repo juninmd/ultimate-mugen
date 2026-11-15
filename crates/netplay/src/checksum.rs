@@ -56,6 +56,7 @@ pub fn checksum(m: &Match) -> u128 {
     h.i32(m.rounds_to_win);
     h.u32(m.corner_pushes);
     h.u32(m.won_by_ko as u32);
+    h.i32(m.finish_window);
     h.u32(m.rng);
     h.u32(m.next_id);
     h.u32(m.global_asserts);
@@ -89,6 +90,9 @@ pub fn checksum(m: &Match) -> u128 {
         h.i32(f.passive.stacks);
         h.i32(f.passive.idle_ticks);
         h.i32(f.passive.fight_ticks);
+        h.i32(f.rush.overdrive);
+        h.i32(f.rush.cooldown);
+        h.i32(f.rush.cancels);
         for v in [f.ghv.kind, f.ghv.hittime, f.ghv.slidetime, f.ghv.ctrltime] {
             h.i32(v);
         }
@@ -129,6 +133,15 @@ pub fn checksum(m: &Match) -> u128 {
         h.v2(p.pos);
         h.i32(p.hits);
         h.i32(p.time);
+    }
+    for b in &m.objects.breakables {
+        h.f32(b.life);
+        h.i32(b.rehit);
+        h.u32(b.broken as u32);
+    }
+    for p in &m.objects.pickups {
+        h.v2(p.pos);
+        h.i32(p.age);
     }
     h.finish() as u128
 }

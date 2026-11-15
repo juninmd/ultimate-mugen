@@ -25,12 +25,13 @@
 - Vertices are 40 bytes (positions and UVs as `f32`, PalFx multipliers packed as `unorm16`); indices switch to 16-bit while the frame stays under 65536 vertices, so a sprite quad costs 172 bytes instead of 248.
 - Atlas side is 4096 on desktop and 2048 on Android/iOS (80 MB versus 20 MB of VRAM); `UME_ATLAS=<side>` overrides it and the device limit always wins.
 - Draw calls are split by blend state (alpha, add, sub) and scissor; pipeline switches are the main CPU cost of the batch loop.
+- Vector shapes (`draw_convex`, circles, rings, ellipses, diagonal lines) carry a one-pixel alpha fringe built in `crates/render/src/canvas/shape.rs`; axis-aligned edges, `draw_triangle` and `draw_mesh` stay hard so mesh pieces never show seams. Draw a whole convex outline with `draw_convex` instead of two triangles.
 - Post-processing (bright, separable blur, copy, composite) runs only when effects are enabled and reuses its targets; HUD glass reuses a quarter-resolution blurred copy.
 - Adapter selection prefers the high-performance GPU and honours `WGPU_POWER_PREF`; vsync and frame cap are runtime toggles (`PresentMode::AutoVsync`/`AutoNoVsync`).
 
 ## Concurrency
 - The simulation is single-threaded on purpose: `Match` stays `Clone` with a stable checksum so ggrs rollback and replays keep working. Never parallelize `Match::tick`.
-- Loading and decoding fan out through `ume_formats::par::map` (`std::thread::scope`, work-stealing chunks, `min(cores, 8)` workers); UMF frame raster uses the same rule in `native/compile.rs`.
+- Loading and decoding fan out through `ume_formats::par::map` (`std::thread::scope`, work-stealing chunks, `min(cores, 8)` workers); UMF frame raster uses the same rule in `native/frame_raster.rs`, which renders each frame and its form/awakening recolors in the same worker.
 - Long jobs run on named threads: `char-load`, `char-preview`, `char-portrait`, `sfx-decode`, `music-synth`, `zip-import`, marketplace fetch.
 - The render batch is built on the main thread; GPU uploads are budgeted by `Gfx::prefetch_step` (4 MiB per frame, up to 50% atlas).
 - Audio: `symphonia` decodes, `quad-snd` plays; decode runs off the main thread.
@@ -46,6 +47,7 @@
 ## Verification
 - Every change gets a browser smoke test: `scripts/build-web.sh`, serve `web/dist`, drive it in headless Chromium with Playwright (hold keys at least 100 ms), and look at screenshots.
 - Screenshot tours: `UME_SHOTS_ONLY=pause|hud|menu xvfb-run -a target/release/ultimate-mugen --shots <dir> --res 1280x720 --mute`.
+- Story tours: `UME_TOUR=storymode` plays the whole run; `UME_TOUR=storyobjects` captures breakables, pickups and the bonus round; `UME_TOUR=epilogue` captures the per-fighter epilogues (`?e2e_epilogue=1` opens one in the web build).
 
 ## Code Style
 - No comments in code: names must explain intent. Explanations go to the wiki in `docs/wiki/`.
@@ -54,6 +56,7 @@
 
 ## File Size and Layout
 - Hard ceiling: **250 lines per source file**, checked by `node scripts/file-size.mjs` (Rust, JS, TS, CSS, HTML, WGSL). Content and docs (UMF JSON, `.cns`, `.air`, `.def`, atlas, `.md`) are out.
+- `src/app.rs` holds `App` state and the frame dispatcher; each screen is `src/app/<screen>.rs` (`use super::*;` plus one `impl App`, entry method `pub(super)`). The screen map is in `docs/wiki/File-Layout.md`.
 - One file, one responsibility: the file name states what it does, the folder names the feature, and `mod.rs` is a facade with declarations and re-exports only. Rules and examples: `docs/wiki/File-Layout.md`.
 - Split by axis of change, not by size: a feature becomes `feature.rs` (shared types and entry points) plus `feature/<concern>.rs` (body, collision, palette, screen...), so two PRs working on the same feature touch different files.
 - Existing files over the ceiling are grandfathered in `scripts/file-size-baseline.json`. They may not grow; split them and run `--update` in the same PR. Never raise a number in the baseline.
@@ -61,7 +64,7 @@
 - No `utils.rs`, `helpers.rs`, `misc.rs`, `common.rs` or `manager.rs`: name the concept instead.
 
 ## CI and Release
-- Jobs in `.github/workflows/ci.yml`: `release-scripts` (`node --test scripts/*.test.mjs`, `node scripts/file-size.mjs`), `test` (`cargo test --workspace --release` and `mugen_check --strict` over `crates/engine/tests/data/chars`), `wasm` (`cargo build --release --target wasm32-unknown-unknown`), `web-smoke` (`scripts/web-smoke.js` and `scripts/web-story-smoke.js` in Playwright 1.56.1), `android` (`cargo apk`, throwaway keystore), `ios` (`aarch64-apple-ios` build) and `desktop` (3 OSes). `commit-lint.yml` runs `scripts/commit-lint.mjs`.
+- Jobs in `.github/workflows/ci.yml`: `release-scripts` (`node --test scripts/*.test.mjs`, `node scripts/file-size.mjs`), `test` (`cargo test --workspace --release` and `mugen_check --strict` over `crates/engine/tests/data/chars`), `wasm` (`cargo build --release --target wasm32-unknown-unknown`), `web-smoke` (`scripts/web-smoke.js`, `scripts/web-story-smoke.js`, `scripts/web-epilogue-smoke.js` and `scripts/web-match-smoke.js` in Playwright 1.56.1), `android` (`cargo apk`, throwaway keystore), `ios` (`aarch64-apple-ios` build) and `desktop` (3 OSes). `commit-lint.yml` runs `scripts/commit-lint.mjs`.
 - PR title (squash flow) or every commit (merge flow) must be `type(scope)?(!)?: description`, type in `feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert`. A title without a type fails `commit-lint`.
 - Mandatory PR evidence: Every pull request must include visual evidence — screenshots (prints) and animated GIFs whenever possible — documenting changes, before/after states, or test verification directly in the PR description.
 - Releases are automatic on every push to `master` (`release.yml`, `scripts/release-plan.mjs`): `feat` is minor, `fix`/`perf` is patch, `!` or `BREAKING CHANGE:` is major; `docs`/`chore`/`ci`/`test`/`refactor`/`style`/`build` alone cut no release. The git tag is the version source of truth; the build is stamped through `UME_RELEASE_VERSION`, built on Linux, Windows and macOS, verified as a draft and then published. The desktop build self-updates from `latest.json` (`src/update/`, `docs/wiki/Auto-Update.md`).
@@ -99,7 +102,9 @@
 - GitHub marketplace: logic in `crates/market` (listing, safety limits, bundles, downloads), app glue in `src/market.rs`, screen in `src/app/market.rs`, web storage in `web/market.js`. Docs: `docs/wiki/Marketplace.md`.
 
 ## Native Pixel-Art Sprite Standard
-- Before generating or replacing a native combat sprite, inspect that fighter's existing pack and select its approved canonical pose for identity. Use the target's old image only to guide pose when it conflicts with the design; Garan's identity anchor is `04_special.png`. Never let another fighter's image define character design.
+- **NEVER use the procedural vector rig (`frame_raster` / `pixelize::apply`) or any deprecated vector-rig PNG as a sprite or reference**: the vector-rig generator (`generate_missing_sprites`) has been removed because it produced the deprecated flat/cartoon appearance instead of the repository's true arcade pixel-art character designs. Always generate native character PNGs with `generate_image` using ONLY a validated canonical pixel-art sprite as explicit visual reference.
+- **Validate every reference image BEFORE generating**: never pass a deprecated vector-rig sprite as Reference 1 or Reference 2 (even as a pose guide, passing a deprecated rig image contaminates the generated character's head/body). Use `scripts/validate-sprite-ref.py` (or inspect visually) to verify the reference is true arcade pixel art before calling `generate_image`.
+- Before generating or replacing a native combat sprite, inspect that fighter's existing pack and select its approved canonical pose for identity. Garan's identity anchor is `04_special.png`. Never let another fighter's image define character design.
 - Native combat PNGs use a transparent 400×400 RGBA canvas and retain the pack's scale, floor line, and `meta.json` axes/refHeight. Keep portraits at their existing high-resolution UI-art standard; they do not use the combat canvas.
 - Generate one pose at a time, preserve an explicit mapping from each result to fighter and filename, and review a pilot before generating a sequence. Large concurrent batches can lose result-to-file mapping when generation is interrupted.
 - Require crisp pixel clusters and hard edges. Do not accept antialiasing, blur, gradients, glow, aura, particles, scenery, text, added shadows, or invented details. Effects are permitted only when present in the target pose and explicitly requested.
@@ -129,7 +134,6 @@
 - Hover scan (fighters stuck off the floor): `cargo run --release -p ume-engine --example hover_check -- <char_dir>` (`TRACE=1` for transitions)
 - Missing/blank sprite audit: `cargo run --release -p ume-engine --example sprite_audit -- <char_dir>`
 - Strict native sprite coverage: `cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> [--require-complete]`
-- Render dedicated PNGs for every native pose (inline poses, df* defeats, idle-reuse fixes; scans assets/chars + umf dirs): `cargo run --release -p ume-engine --example generate_missing_sprites [--dry-run]`
 - Native PNG inventory (dimensions, alpha edges, geometry metadata): `cargo run --release -p ume-devtools --bin ume-tools -- audit-sprites --out <report.json>`
 - Sprite payload per fighter (sizes the atlas warm-up budget): `cargo run --release -p ume-engine --example sprite_mem -- <char_dir>...`
 - Native roster lab (every attack state of every UMF fighter must connect; prints damage and reach, `UME_LAB_ONLY=id,id`, `UME_CHARS_DIR=<dir>`): `cargo test --release -p ume-engine --test native_roster_lab -- --nocapture`

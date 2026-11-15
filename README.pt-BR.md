@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/banner.pt-BR.jpg" alt="Ultimate MUGEN" width="100%">
+  <img src="docs/assets/banner-pixel-art-pt-BR.png" alt="Ultimate MUGEN" width="100%">
 </p>
 
 <p align="center">
@@ -77,31 +77,31 @@ Teclado, toque, Xbox, DualShock 4 e DualSense com **vibração e lightbar**. Arc
 ## 🖼️ Elenco em pixel art, mapas e jogabilidade
 
 <p align="center">
-  <img src="docs/assets/readme/fight.gif" alt="Jogabilidade: dois lutadores nativos trocando golpes no cenário Bambuzal" width="70%">
+  <img src="docs/assets/readme/readme-fight-pixel-art.png" alt="Ilustração em pixel art de dois lutadores trocando golpes em um bambuzal" width="70%">
 </p>
 
-<p align="center"><i>Jogabilidade real capturada da versão web (renderização por software, por isso o GIF roda abaixo da taxa de quadros nativa).</i></p>
+<p align="center"><i>Ilustração em pixel art criada para este README; não é uma captura de gameplay.</i></p>
 
 ### Lutadores em pixel art
 
 O elenco nativo é desenhado em pixel art arcade de 32 bits, com um conjunto de poses dedicado por lutador, paletas, especiais de ki, voo, teletransporte e transformações. Cada personagem é declarado em um único JSON UMF.
 
-![Seleção de personagens com o elenco em pixel art](docs/assets/readme/roster-select.jpg)
+![Ilustração em pixel art de uma tela de seleção de lutadores](docs/assets/readme/readme-roster-pixel-art.png)
 
 ### Mapas
 
 21 arenas ilustradas, do telhado do dojo ao pôr do sol e uma metrópole neon até as maravilhas do mundo (Petra, Taj Mahal, Cristo Redentor, Coliseu, Grande Muralha, Chichén Itzá e mais), cada uma com camadas de ambiente vivas e sua própria trilha embutida.
 
-![Escolha do cenário](docs/assets/readme/stage-select.jpg)
+![Ilustração em pixel art de uma tela de seleção de arenas](docs/assets/readme/readme-stage-select-pixel-art.png)
 
 O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil, Neon, Bambu, Vulcão e Dojo): um trecho por luta, quatro ondas de capangas mais um chefe de fase, com a vida carregada entre as lutas. Veja o [guia do modo História](docs/wiki/Story-Mode.md).
 
-![Cenários roláveis do modo História](docs/assets/readme/story-stages.jpg)
+![Panoramas em pixel art inspirados nas cinco fases da História](docs/assets/readme/readme-story-stages-pixel-art.png)
 
 <table>
 <tr>
-<td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Tela de versus"></td>
-<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 no cenário Bambuzal"></td>
+<td width="50%"><img src="docs/assets/readme/readme-versus-pixel-art.png" alt="Ilustração em pixel art de dois lutadores antes da partida"></td>
+<td width="50%"><img src="docs/assets/readme/readme-fight-round1-pixel-art.png" alt="Ilustração em pixel art de uma luta em um bambuzal"></td>
 </tr>
 </table>
 
@@ -109,11 +109,11 @@ O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil
 
 ## 🆕 Novidades
 
-- **Modo História:** cinco fases de ondas, capangas com traços próprios e um chefe por fase, com cutscenes e finais. [Guia](docs/wiki/Story-Mode.md)
+- **Modo História:** cinco fases de ondas, capangas com traços próprios e um chefe por fase, com cutscenes e finais, além de caixotes e barris quebráveis, comida que recupera vida e fases bônus de destruir o carro. [Guia](docs/wiki/Story-Mode.md) · [Objetos de cenário](docs/wiki/pt-BR/Objetos-de-Cenario.md)
 - **Música e áudio:** uma trilha embutida por cenário, sons de golpe em níveis, música abaixando nos impactos e torcida no KO. [Áudio](docs/wiki/Audio.md)
 - **Atalhos de golpe:** ligue qualquer golpe da lista de pausa em `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforma e `R3` sozinho carrega ki. [Controles](docs/wiki/pt-BR/Configuracao.md#controles)
 - **Golpes mais ricos:** todo lutador nativo tem especiais EX, hyper nível 3, explosão de escape, forma ascendida com hyper próprio e versões aéreas dos especiais. [Kit compartilhado](docs/wiki/Characters.md#shared-toolkit)
-- **Atualização automática e releases:** cada merge no `master` publica uma release e a versão desktop se atualiza sozinha. [Atualização automática](docs/wiki/pt-BR/Atualizacao-Automatica.md)
+- **Atualização automática e releases:** cada merge no `master` publica uma release e a versão desktop avisa, pergunta e só então se atualiza. [Atualização automática](docs/wiki/pt-BR/Atualizacao-Automatica.md)
 - **Compatibilidade M.U.G.E.N:** correções achadas ao carregar personagens reais da comunidade (saídas de andar e defesa, provocações, intros, ações AIR duplicadas). [Decisões de compatibilidade](docs/wiki/pt-BR/Decisoes-de-Compatibilidade.md)
 
 ---
@@ -267,7 +267,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:
 
 A tag git é a fonte da verdade da versão. A cada push na `master`, o workflow `Release` calcula o bump a partir dos commits (`feat` → minor, `fix`/`perf` → patch), compila Linux, Windows e macOS, sobe os pacotes com `latest.json` e `SHA256SUMS.txt`, verifica o draft e publica.
 
-O jogo no desktop lê o `latest.json` em segundo plano (só HTTPS, silencioso offline) e apenas mostra um aviso na tela de título. Nada é baixado nem executado automaticamente. Desative com `--no-update-check` ou `UME_NO_UPDATE_CHECK=1`.
+O jogo no desktop lê o `latest.json` em segundo plano (só HTTPS, silencioso offline) e mostra um painel com a versão instalada e a disponível. Nada é baixado nem executado até você aceitar "Atualizar agora"; "Agora não" mantém a versão atual até o próximo boot. Desative a pergunta com `--no-auto-update` / `UME_NO_AUTO_UPDATE=1` ou a checagem inteira com `--no-update-check` / `UME_NO_UPDATE_CHECK=1`.
 
 </details>
 

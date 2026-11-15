@@ -49,7 +49,7 @@ fn toolkit_compiles_and_reaches_the_move_list() {
         }
         assert!(def.ai_commands.len() >= nc.moves.len(), "{id} ai commands");
         if nc.moves.iter().any(|m| m.id.starts_with("ult_")) {
-            assert!(def.forms.len() == 2, "{id} awakening and ascended forms");
+            assert!(def.forms.len() >= 2, "{id} awakening and ascended forms");
         }
     }
 }

@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-12",
+  "character": "valdric",
+  "family": "royalLance shared source frames",
+  "status": "integrated_static_review_pass_runtime_pending",
+  "canonical": "assets/chars/sprites/valdric/04_special.png",
+  "sharedPalette": "candidates/valdric-royallance-sb0-pilot/palette-48-20261112/palette.json",
+  "beforeHashes": {
+    "sb0.png": "246dcc6ebed1be8a2df3444b070fd8ffdf49af3c463f14eaafd42fecaf7b7248",
+    "sb1.png": "e4652aa0c7be4d11fe7c69afc8b7906f5b7bb0438fe0c1e3b0072929ecba355f",
+    "sb2.png": "e3a5545309135394aed3b96d723d1f0be5083159b3f874adc9b1ba28fda06958"
+  },
+  "activeHashes": {
+    "sb0": "3058a0920cb9bd8597d04c268fa7f4e84fba1a4efc240792fee3fd7508e04c74",
+    "sb1": "0a5c8cdfd6ff077774159b3745e31558bbbe0fbb60fa3d2ad739da5b94c202dd",
+    "sb2": "c88eb38b15440a1ea159e3aab21065c50d46a02a6fe70774b5f72ff20a8ca3e8"
+  },
+  "phases": {
+    "sb0": "charge/start with two declared orbs, 8 ticks in royalLance",
+    "sb1": "hit/extension with one declared orb, 4 ticks in royalLance",
+    "sb2": "empty-hand recovery, 15 ticks in royalLance"
+  },
+  "animation": "royalLance order and timing unchanged; no JSON/meta change",
+  "evidence": [
+    "candidates/valdric-royallance-sb2-pilot/full-family-comparison-native.png",
+    "candidates/valdric-royallance-sb2-pilot/full-family-comparison-2x.png"
+  ],
+  "staticChecks": {
+    "canvas": [
+      400,
+      400
+    ],
+    "alpha": "binary",
+    "axis": [
+      200,
+      392
+    ],
+    "paletteEntries": 48,
+    "maxDeltaE": 0.104288,
+    "rightMarginSb1Px": 10,
+    "sb1Clipped": false
+  },
+  "sharedReferencesNotIndependentlyReviewed": [
+    "lanceWall",
+    "royalLanceEx",
+    "super",
+    "barrage",
+    "barrageUlt"
+  ],
+  "limitations": [
+    "Static canonical identity, palette, scale, pose phases and geometry reviewed.",
+    "sb1 has only 10px right clearance but remains inside the canvas.",
+    "Runtime timing/collision and every alias family remain pending."
+  ]
+}

@@ -43,6 +43,8 @@ fn test_hit_priority_and_advanced_hitdef_flags() {
             spark_pos: Some([35.0, -55.0]),
             ground_bounce: Some(true),
             wall_bounce: None,
+            element: None,
+            stun: None,
         }],
         moves: vec![],
         projectile: None,
@@ -60,6 +62,7 @@ fn test_hit_priority_and_advanced_hitdef_flags() {
         timestop: None,
         throw: None,
         cancels: Some(vec!["gale".into()]),
+        requires: None,
     });
 
     let def = compile_native(&nc, 1, false);
@@ -123,6 +126,7 @@ fn test_throw_and_passives_mechanics() {
             launch: None,
         }),
         cancels: None,
+        requires: None,
     });
 
     let def = compile_native(&nc, 1, false);

@@ -29,6 +29,7 @@ impl Vfx {
             self.debris(f.pos.x, feet, quality::count(6), [0.75, 0.68, 0.6]);
             self.light(x, y, 180.0, 0.6, gold);
             self.pillar(f.pos.x, feet, gold, quality::count(16));
+            self.sheets.super_cast(f.pos.x, y, feet);
             if quality::level() >= 2 {
                 self.cracks(f.pos.x, feet, 1.0, 54.0);
                 self.cracks(f.pos.x, feet, -1.0, 54.0);
@@ -61,6 +62,7 @@ impl Vfx {
             self.glow(x, y, 30.0, 0.5, [1.0, 1.0, 1.0]);
             self.light(x, y, 240.0, 1.1, col);
             self.pillar(f.pos.x, feet, col, quality::count(34));
+            self.sheets.transform(f.pos.x, feet);
             self.spark_burst(
                 x,
                 y,

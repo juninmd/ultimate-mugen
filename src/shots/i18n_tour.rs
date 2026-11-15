@@ -7,7 +7,7 @@ pub(super) async fn run(app: &mut App, dir: &str) {
         app.settings.lang = lang;
         crate::i18n::set(lang);
         let code = lang.code();
-        app.screen = Screen::Menu { cur: 10 };
+        app.screen = Screen::Menu { cur: 5 };
         screen(app, dir, &format!("{code}-menu"), 40).await;
         app.screen = Screen::Mugen { view: 0, page: 0 };
         screen(app, dir, &format!("{code}-import"), 12).await;

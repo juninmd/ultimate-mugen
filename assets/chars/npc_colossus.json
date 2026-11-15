@@ -4,7 +4,7 @@
  "name": "Colossus",
  "series": "Story Mode · Street Thugs",
  "author": "Ultimate MUGEN",
- "description": "Mad Gear giant. Slow, tall and armored on every basic strike.",
+ "description": "Gang giant. Slow, tall and armored on every basic strike.",
  "color": "#718b30",
  "stats": {
   "life": 1498,
@@ -86,7 +86,7 @@
     "shape": "arched",
     "color": "#aeb6c8"
    },
-   "faceShade": 1.0,
+   "faceShade": 1,
    "scars": [
     "cheek"
    ],
@@ -1592,17 +1592,22 @@
     },
     {
      "pose": "run1",
-     "ticks": 4,
+     "ticks": 3,
      "sprite": "sg_run_run1"
     },
     {
+     "pose": "runMid",
+     "sprite": "sg_run_mid",
+     "ticks": 3
+    },
+    {
      "pose": "run2",
-     "ticks": 4,
+     "ticks": 3,
      "sprite": "sg_run_run2"
     },
     {
      "pose": "run3",
-     "ticks": 4,
+     "ticks": 3,
      "sprite": "sg_run_run3"
     }
    ]
@@ -2142,8 +2147,24 @@
      }
     },
     {
+     "pose": {
+      "elbowF": 95,
+      "thighF": 80,
+      "head": -12,
+      "ankleF": 25,
+      "kneeB": 125,
+      "elbowB": 110,
+      "lean": 10,
+      "shoulderB": 40,
+      "shoulderF": 60,
+      "kneeF": 60,
+      "thighB": 38
+     },
+     "ticks": 3
+    },
+    {
      "pose": "crouch",
-     "ticks": 6
+     "ticks": 3
     }
    ]
   },
@@ -2190,7 +2211,21 @@
      }
     },
     {
-     "pose": "ajab",
+     "pose": {
+      "elbowF": 53.5,
+      "thighF": 78,
+      "head": -5,
+      "ankleF": 30,
+      "kneeB": 118,
+      "elbowB": 110,
+      "wind": 0.4,
+      "lean": 9,
+      "shoulderB": 45,
+      "shoulderF": 64,
+      "kneeF": 120,
+      "ankleB": 35,
+      "thighB": 50
+     },
      "ticks": 6
     },
     {
@@ -2214,7 +2249,21 @@
      }
     },
     {
-     "pose": "akick",
+     "pose": {
+      "elbowF": 107.5,
+      "thighF": 65,
+      "head": 4,
+      "ankleF": 46,
+      "kneeB": 121.5,
+      "elbowB": 110,
+      "wind": 0.55,
+      "lean": -6,
+      "shoulderB": 45,
+      "shoulderF": 60,
+      "kneeF": 60,
+      "ankleB": 35,
+      "thighB": 62.5
+     },
      "ticks": 8
     },
     {
@@ -2817,6 +2866,330 @@
      "ticks": 5
     }
    ]
+  },
+  "ridgeBlastEx": {
+   "frames": [
+    {
+     "pose": "sb0",
+     "ticks": 6
+    },
+    {
+     "pose": {
+      "shoulderF": -25,
+      "elbowF": 110,
+      "shoulderB": -35,
+      "elbowB": 110,
+      "thighF": 30,
+      "kneeF": 36,
+      "thighB": -20,
+      "kneeB": 14,
+      "lean": -8,
+      "head": -2,
+      "phase": 2,
+      "handF": "open",
+      "handB": "open",
+      "charge": "both",
+      "chargeSize": 6,
+      "face": "shout"
+     },
+     "ticks": 4
+    },
+    {
+     "pose": "sb1",
+     "ticks": 3
+    },
+    {
+     "pose": "sb2",
+     "ticks": 12
+    },
+    {
+     "pose": "jab0",
+     "ticks": 4
+    },
+    {
+     "pose": "idle0",
+     "ticks": 2
+    }
+   ]
+  },
+  "daybreakEx": {
+   "frames": [
+    {
+     "pose": "cu0",
+     "ticks": 2
+    },
+    {
+     "pose": {
+      "shoulderF": 128,
+      "elbowF": 16,
+      "shoulderB": 25,
+      "elbowB": 120,
+      "thighF": 25,
+      "kneeF": 15,
+      "thighB": -15,
+      "kneeB": 80,
+      "lean": 12,
+      "head": -10,
+      "ankleF": 50,
+      "ankleB": 40,
+      "wind": 1,
+      "face": "shout",
+      "hairWind": -1.3,
+      "aura": true,
+      "charge": "F",
+      "chargeSize": 7
+     },
+     "ticks": 4,
+     "hit": {
+      "part": "handF",
+      "radius": 13
+     }
+    },
+    {
+     "pose": {
+      "shoulderF": 168,
+      "elbowF": 6,
+      "shoulderB": 25,
+      "elbowB": 120,
+      "thighF": 25,
+      "kneeF": 15,
+      "thighB": -15,
+      "kneeB": 80,
+      "lean": 6,
+      "head": -16,
+      "ankleF": 50,
+      "ankleB": 40,
+      "wind": 1,
+      "face": "shout",
+      "hairWind": -1.3,
+      "aura": true,
+      "charge": "F",
+      "chargeSize": 7,
+      "phase": 2
+     },
+     "ticks": 4,
+     "hit": {
+      "part": "handF",
+      "radius": 12
+     }
+    },
+    {
+     "pose": "cu2",
+     "ticks": 8
+    },
+    {
+     "pose": "jumpDown",
+     "ticks": 1
+    }
+   ]
+  },
+  "avalancheUlt": {
+   "frames": [
+    {
+     "pose": "sb0",
+     "ticks": 10
+    },
+    {
+     "pose": "mh0",
+     "ticks": 6
+    },
+    {
+     "pose": "mh1",
+     "ticks": 4
+    },
+    {
+     "pose": "mh2",
+     "ticks": 4,
+     "hit": {
+      "part": "footF",
+      "radius": 14
+     }
+    },
+    {
+     "pose": "mh1",
+     "ticks": 4
+    },
+    {
+     "pose": "mh2",
+     "ticks": 4,
+     "hit": {
+      "part": "footF",
+      "radius": 14
+     }
+    },
+    {
+     "pose": "mh1",
+     "ticks": 4
+    },
+    {
+     "pose": "mh2",
+     "ticks": 4,
+     "hit": {
+      "part": "footF",
+      "radius": 14
+     }
+    },
+    {
+     "pose": "mh1",
+     "ticks": 4
+    },
+    {
+     "pose": "mh2",
+     "ticks": 4,
+     "hit": {
+      "part": "footF",
+      "radius": 14
+     }
+    },
+    {
+     "pose": "mh1",
+     "ticks": 4
+    },
+    {
+     "pose": "mh2",
+     "ticks": 4,
+     "hit": {
+      "part": "footF",
+      "radius": 14
+     }
+    },
+    {
+     "pose": "mh1",
+     "ticks": 4
+    },
+    {
+     "pose": "mh2",
+     "ticks": 12,
+     "hit": {
+      "part": "footF",
+      "radius": 18
+     }
+    },
+    {
+     "pose": "idle0",
+     "ticks": 5
+    }
+   ]
+  },
+  "stringA": {
+   "frames": [
+    {
+     "pose": "jab0",
+     "ticks": 3
+    },
+    {
+     "pose": "jab1",
+     "ticks": 3,
+     "hit": {
+      "part": "handF",
+      "radius": 11
+     }
+    },
+    {
+     "pose": "str0",
+     "ticks": 3
+    },
+    {
+     "pose": "str0",
+     "ticks": 2
+    },
+    {
+     "pose": "str1",
+     "ticks": 3,
+     "hit": {
+      "part": "handB",
+      "radius": 15
+     }
+    },
+    {
+     "pose": "str1",
+     "ticks": 3
+    },
+    {
+     "pose": "str0",
+     "ticks": 7
+    },
+    {
+     "pose": "idle0",
+     "ticks": 3
+    }
+   ]
+  },
+  "stringB": {
+   "frames": [
+    {
+     "pose": "lk0",
+     "ticks": 3
+    },
+    {
+     "pose": "lk1",
+     "ticks": 3,
+     "hit": {
+      "part": "footF",
+      "radius": 12
+     }
+    },
+    {
+     "pose": "str0",
+     "ticks": 3
+    },
+    {
+     "pose": "str0",
+     "ticks": 2
+    },
+    {
+     "pose": "str1",
+     "ticks": 3,
+     "hit": {
+      "part": "handB",
+      "radius": 15
+     }
+    },
+    {
+     "pose": "str1",
+     "ticks": 3
+    },
+    {
+     "pose": "str0",
+     "ticks": 7
+    },
+    {
+     "pose": "idle0",
+     "ticks": 3
+    }
+   ]
+  },
+  "stringC": {
+   "frames": [
+    {
+     "pose": "str0",
+     "ticks": 4
+    },
+    {
+     "pose": "str0",
+     "ticks": 2
+    },
+    {
+     "pose": "str1",
+     "ticks": 4,
+     "hit": {
+      "part": "handB",
+      "radius": 15
+     }
+    },
+    {
+     "pose": "str1",
+     "ticks": 3
+    },
+    {
+     "pose": "str0",
+     "ticks": 8
+    },
+    {
+     "pose": "idle0",
+     "ticks": 3
+    }
+   ]
   }
  },
  "moves": [
@@ -2836,7 +3209,11 @@
    ],
    "cancels": [
     "strong",
-    "aurarush"
+    "aurarush",
+    "launcher",
+    "overhead",
+    "slide",
+    "string_a"
    ],
    "armor": {
     "hits": 2,
@@ -2864,7 +3241,8 @@
    "cancels": [
     "aurarush",
     "ridgeblast",
-    "daybreak"
+    "daybreak",
+    "overhead"
    ],
    "armor": {
     "hits": 2,
@@ -2885,7 +3263,9 @@
     }
    ],
    "cancels": [
-    "jab"
+    "jab",
+    "launcher",
+    "slide"
    ],
    "armor": {
     "hits": 2,
@@ -3013,7 +3393,8 @@
      46,
      -68
     ],
-    "damage": 80
+    "damage": 80,
+    "element": "lightning"
    }
   },
   {
@@ -3082,7 +3463,8 @@
      "damage": 87,
      "level": "heavy",
      "guard": "high",
-     "shake": 8
+     "shake": 8,
+     "element": "earth"
     }
    ]
   },
@@ -3125,7 +3507,8 @@
      "knockback": [
       -1,
       0
-     ]
+     ],
+     "element": "lightning"
     },
     {
      "at": 6,
@@ -3134,7 +3517,8 @@
      "knockback": [
       -4,
       -2
-     ]
+     ],
+     "element": "lightning"
     }
    ],
    "armor": {
@@ -3173,7 +3557,8 @@
      "knockback": [
       -1,
       -3
-     ]
+     ],
+     "element": "earth"
     }
    ]
   },
@@ -3225,7 +3610,8 @@
     "removeTime": 44,
     "level": "heavy",
     "launch": true,
-    "priority": 6
+    "priority": 6,
+    "element": "lightning"
    }
   },
   {
@@ -3260,31 +3646,36 @@
      "at": 4,
      "damage": 40,
      "level": "medium",
-     "guard": "low"
+     "guard": "low",
+     "element": "earth"
     },
     {
      "at": 6,
      "damage": 40,
      "level": "medium",
-     "guard": "low"
+     "guard": "low",
+     "element": "earth"
     },
     {
      "at": 8,
      "damage": 40,
      "level": "medium",
-     "guard": "low"
+     "guard": "low",
+     "element": "earth"
     },
     {
      "at": 10,
      "damage": 40,
      "level": "medium",
-     "guard": "low"
+     "guard": "low",
+     "element": "earth"
     },
     {
      "at": 12,
      "damage": 40,
      "level": "medium",
-     "guard": "low"
+     "guard": "low",
+     "element": "earth"
     },
     {
      "at": 14,
@@ -3296,7 +3687,551 @@
       -3,
       -8
      ],
+     "shake": 10,
+     "element": "earth"
+    }
+   ]
+  },
+  {
+   "id": "ult_avalanche",
+   "name": "Mountain Spirit Ultimate",
+   "input": "~D, DF, F, D, DF, F, x+y",
+   "kind": "super",
+   "anim": "avalanche",
+   "cost": 3000,
+   "invuln": [
+    1,
+    7
+   ],
+   "fx": "aura",
+   "moves": [
+    {
+     "at": 2,
+     "vel": [
+      1,
+      0
+     ]
+    },
+    {
+     "at": 13,
+     "vel": [
+      2,
+      0
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 4,
+     "damage": 42,
+     "level": "medium",
+     "guard": "low",
+     "element": "earth",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 6,
+     "damage": 42,
+     "level": "medium",
+     "guard": "low",
+     "element": "earth",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 8,
+     "damage": 42,
+     "level": "medium",
+     "guard": "low",
+     "element": "earth",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 10,
+     "damage": 42,
+     "level": "medium",
+     "guard": "low",
+     "element": "earth",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 12,
+     "damage": 42,
+     "level": "medium",
+     "guard": "low",
+     "element": "earth",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 14,
+     "damage": 120,
+     "level": "heavy",
+     "guard": "low",
+     "element": "earth",
+     "launch": true,
+     "knockback": [
+      -3,
+      -8
+     ],
      "shake": 10
+    }
+   ],
+   "projectile": {
+    "at": 6,
+    "anim": "sunbreakBeam",
+    "hitAnim": "sunbreakHit",
+    "speed": [
+     0,
+     0
+    ],
+    "offset": [
+     44,
+     -68
+    ],
+    "damage": 54,
+    "hits": 7,
+    "removeTime": 44,
+    "level": "heavy",
+    "launch": true,
+    "priority": 6,
+    "element": "lightning"
+   }
+  },
+  {
+   "id": "ex_ridgeblast",
+   "name": "Ridge Blast EX",
+   "input": "~D, DF, F, x+y",
+   "kind": "special",
+   "anim": "ridgeBlastEx",
+   "projectile": [
+    {
+     "at": 3,
+     "anim": "ridgeOrb",
+     "hitAnim": "ridgeHit",
+     "speed": [
+      5.6,
+      0
+     ],
+     "offset": [
+      46,
+      -68
+     ],
+     "damage": 104,
+     "hits": 2,
+     "priority": 2,
+     "level": "heavy",
+     "element": "lightning"
+    }
+   ],
+   "cost": 250,
+   "fx": "aura"
+  },
+  {
+   "id": "ex_daybreak",
+   "name": "Daybreak EX",
+   "input": "F, D, DF, y+b",
+   "kind": "special",
+   "anim": "daybreakEx",
+   "invuln": [
+    1,
+    6
+   ],
+   "moves": [
+    {
+     "at": 2,
+     "vel": [
+      2.2,
+      -9
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 2,
+     "damage": 93.6,
+     "level": "heavy",
+     "launch": true,
+     "hitstun": 24,
+     "knockback": [
+      -1,
+      -3
+     ]
+    },
+    {
+     "at": 3,
+     "damage": 52,
+     "level": "heavy",
+     "launch": true,
+     "knockback": [
+      -3,
+      -8
+     ]
+    }
+   ],
+   "cost": 500,
+   "fx": "aura"
+  },
+  {
+   "id": "overhead",
+   "name": "Axe Heel",
+   "input": "x+b",
+   "kind": "normal",
+   "anim": "hkick",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 79.8,
+     "level": "medium",
+     "guard": "high",
+     "hitstun": 20
+    }
+   ]
+  },
+  {
+   "id": "launcher",
+   "name": "Summit Launcher",
+   "input": "y",
+   "kind": "normal",
+   "when": "crouch",
+   "anim": "strong",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 58,
+     "level": "heavy",
+     "launch": true,
+     "hitstun": 22,
+     "knockback": [
+      -1,
+      -6
+     ]
+    }
+   ]
+  },
+  {
+   "id": "divekick",
+   "name": "Peak Plunge",
+   "input": "y",
+   "kind": "normal",
+   "anim": "akick",
+   "when": "air",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 68.2,
+     "level": "heavy",
+     "guard": "high",
+     "groundBounce": true,
+     "launch": true,
+     "knockback": [
+      -1,
+      4
+     ]
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      1.8,
+      2.5
+     ]
+    }
+   ]
+  },
+  {
+   "id": "slide",
+   "name": "Wolf Slide",
+   "input": "F+a",
+   "kind": "normal",
+   "anim": "sweep",
+   "when": "stand",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 59.5,
+     "level": "heavy",
+     "guard": "low",
+     "launch": true,
+     "knockback": [
+      -2,
+      -5
+     ]
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      3,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      1.2,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "id": "escape_burst",
+   "name": "Summit Burst",
+   "input": "x+a+b",
+   "kind": "special",
+   "when": "stand",
+   "anim": "strong",
+   "cost": 500,
+   "burst": true,
+   "invuln": [
+    1,
+    3
+   ],
+   "hits": [
+    {
+     "at": 3,
+     "damage": 30,
+     "level": "heavy",
+     "knockback": [
+      -6,
+      -4
+     ],
+     "launch": true,
+     "hitstop": 12
+    }
+   ]
+  },
+  {
+   "id": "shoulder",
+   "name": "Armored Shoulder",
+   "input": "F+y",
+   "kind": "normal",
+   "anim": "strong",
+   "armor": {
+    "hits": 1
+   },
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      3,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      0.8,
+      0
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 3,
+     "damage": 86.4,
+     "level": "heavy",
+     "hitstun": 24,
+     "knockback": [
+      -5,
+      -2
+     ],
+     "wallBounce": true
+    }
+   ]
+  },
+  {
+   "id": "meteordrop",
+   "name": "Meteor Drop",
+   "input": "F+b",
+   "kind": "normal",
+   "when": "air",
+   "anim": "akick",
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      1.2,
+      3.5
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 2,
+     "damage": 80.6,
+     "level": "heavy",
+     "guard": "high",
+     "groundBounce": true,
+     "launch": true,
+     "knockback": [
+      -1,
+      4
+     ]
+    }
+   ]
+  },
+  {
+   "id": "string_a",
+   "name": "Mountain Palm",
+   "input": "B+x",
+   "kind": "normal",
+   "anim": "stringA",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 28,
+     "level": "light",
+     "knockback": [
+      -0.5,
+      0
+     ]
+    },
+    {
+     "at": 5,
+     "damage": 58,
+     "level": "medium"
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      1.8,
+      0
+     ]
+    },
+    {
+     "at": 5,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "string_b",
+    "string_c",
+    "ridgeblast",
+    "daybreak"
+   ]
+  },
+  {
+   "id": "string_b",
+   "name": "Ridge Combination",
+   "input": "B+a",
+   "kind": "normal",
+   "anim": "stringB",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 30,
+     "level": "light",
+     "guard": "low",
+     "knockback": [
+      -0.5,
+      0
+     ]
+    },
+    {
+     "at": 5,
+     "damage": 64,
+     "level": "medium"
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      1.5,
+      0
+     ]
+    },
+    {
+     "at": 5,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "string_c",
+    "ridgeblast",
+    "daybreak"
+   ]
+  },
+  {
+   "id": "string_c",
+   "name": "Summit Rise",
+   "input": "B+y",
+   "kind": "normal",
+   "anim": "stringC",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 100,
+     "level": "heavy",
+     "launch": true,
+     "knockback": [
+      -1,
+      -6
+     ],
+     "hitstun": 22
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      2.2,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "ridgeblast",
+    "daybreak"
+   ],
+   "armor": {
+    "hits": 1,
+    "threshold": 80
+   }
+  },
+  {
+   "id": "halfmoon",
+   "name": "Meia-Lua",
+   "input": "~B, DB, D, DF, F, a+x",
+   "kind": "special",
+   "anim": "hkick",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 76,
+     "level": "heavy"
     }
    ]
   }
@@ -3330,6 +4265,17 @@
  "country": "Mongólia",
  "stage": "plains",
  "speed": 0.92,
+ "passives": {
+  "meterRegen": 0.35,
+  "stacks": {
+   "defenceGain": 0.04,
+   "damageGain": 0.02,
+   "maxStacks": 5,
+   "resetOnRound": true,
+   "specials": true,
+   "supers": true
+  }
+ },
  "boss": false,
  "npc": true,
  "spriteSet": "daichi"

@@ -29,6 +29,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) -> bool {
         "victoryquote" => { let v = m.num(i, sc, "value", -1.0, 0) as i32; m.fighters[i].victory_quote = v; }
         "forcefeedback" => force_feedback(m, i, sc),
         "envshake" => env_shake(m, i, sc),
+        "finishdone" => m.finish_done(),
         "zoom" => camera::zoom(m, i, sc),
         "camera" => camera::camera(m, i, sc),
         "groundleveloffset" => camera::ground_level_offset(m, i, sc),

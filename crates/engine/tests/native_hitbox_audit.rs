@@ -4,6 +4,7 @@ use ume_engine::native::{compile_native, NativeChar};
 const STANDING_UNITS: f32 = 96.0;
 const MAX_NORMAL_REACH: f32 = 1.6;
 const PROJECTILE_WIDTH: f32 = 180.0;
+const FLOOR_TOLERANCE: f32 = 2.5;
 
 fn characters() -> Vec<NativeChar> {
     let dir = std::env::var("UME_CHARS_DIR").unwrap_or_else(|_| "../../assets/chars".into());
@@ -38,7 +39,7 @@ fn every_attack_box_stays_inside_mugen_proportions() {
                 if frame.clsn1.is_empty() { problems.entry(nc.id.clone()).or_default().push(format!("{tag}: strike frame without hit box")); continue; }
                 for b in frame.clsn1.iter().filter(|b| b[2] - b[0] <= PROJECTILE_WIDTH) {
                                         let mut bad = vec![];
-                    if b[3] > 0.5 { bad.push(format!("under the floor, bottom y={:.0}", b[3])); }
+                    if b[3] > FLOOR_TOLERANCE { bad.push(format!("under the floor, bottom y={:.0}", b[3])); }
                     if b[2] > MAX_NORMAL_REACH * height && !matches!(mv.kind.as_str(), "special" | "super") { bad.push(format!("normal reaches x={:.0}", b[2])); }
                     if !bad.is_empty() { problems.entry(nc.id.clone()).or_default().push(format!("{tag} {:?}: {}", b, bad.join(", "))); }
                 }

@@ -71,7 +71,15 @@ pub fn decode_pcx_rle(
 ) -> (Vec<u8>, usize) {
     let (w, h, bpl) = (width as usize, height as usize, bytes_per_line as usize);
     let end = end.min(data.len());
-    let mut out = vec![0u8; w * h];
+    let total = match w.checked_mul(h) {
+        Some(t) => t,
+        None => return (Vec::new(), start),
+    };
+    let mut out = Vec::new();
+    if out.try_reserve_exact(total).is_err() {
+        return (Vec::new(), start);
+    }
+    out.resize(total, 0);
     let mut i = start;
     for y in 0..h {
         let row = y * w;
@@ -166,7 +174,15 @@ pub fn decode_pcx(buf: &[u8], read_palette: bool) -> Result<PcxImage, String> {
 
 /// Uncompressed scanlines starting right after the header.
 pub(crate) fn raw_rows(buf: &[u8], w: usize, h: usize, bpl: usize) -> Vec<u8> {
-    let mut px = vec![0u8; w * h];
+    let total = match w.checked_mul(h) {
+        Some(t) => t,
+        None => return Vec::new(),
+    };
+    let mut px = Vec::new();
+    if px.try_reserve_exact(total).is_err() {
+        return Vec::new();
+    }
+    px.resize(total, 0);
     for y in 0..h {
         let src = PCX_HEADER_SIZE + y * bpl;
         if src >= buf.len() {

@@ -1,0 +1,65 @@
+[
+  {
+    "character": "garan",
+    "pose": "hop",
+    "targetFile": "assets/chars/sprites/garan/hop.png",
+    "targetSha256": "5a082b27103ba61f8940ebcb210cfadf3a2ea3af2cc3b9e176058af67fe68f00",
+    "anchorFile": "assets/chars/sprites/garan/04_special.png",
+    "anchorSha256": "1079c6081d3c350989b7389790dc6a7a6ae22ea9c709d3479aad9c4d46cf8b0a",
+    "affectedAnimations": [
+      "hop"
+    ],
+    "status": "confirmed_identity_mismatch_pending_candidate"
+  },
+  {
+    "character": "garan",
+    "pose": "jumpDown",
+    "targetFile": "assets/chars/sprites/garan/jumpDown.png",
+    "targetSha256": "66037a60f804ab993c8fce7506f4f771b6e0bce9b6264e307eae5b7ce4d26b40",
+    "anchorFile": "assets/chars/sprites/garan/04_special.png",
+    "anchorSha256": "1079c6081d3c350989b7389790dc6a7a6ae22ea9c709d3479aad9c4d46cf8b0a",
+    "affectedAnimations": [
+      "jumpDown",
+      "airRecover",
+      "ajab",
+      "akick",
+      "ascent",
+      "emberDive",
+      "ascentEx",
+      "airLowKick"
+    ],
+    "status": "confirmed_identity_mismatch_pending_candidate"
+  },
+  {
+    "character": "garan",
+    "pose": "jumpTop",
+    "targetFile": "assets/chars/sprites/garan/jumpTop.png",
+    "targetSha256": "45335e1d0d584799caefc0b4d1868d1586b42af6b3f936095e506ed81ccf0fdf",
+    "anchorFile": "assets/chars/sprites/garan/04_special.png",
+    "anchorSha256": "1079c6081d3c350989b7389790dc6a7a6ae22ea9c709d3479aad9c4d46cf8b0a",
+    "affectedAnimations": [
+      "jumpUp",
+      "jumpFwd",
+      "jumpBack",
+      "ajab",
+      "akick",
+      "emberDive",
+      "airLowKick"
+    ],
+    "status": "confirmed_identity_mismatch_pending_candidate"
+  },
+  {
+    "character": "garan",
+    "pose": "jumpUp",
+    "targetFile": "assets/chars/sprites/garan/jumpUp.png",
+    "targetSha256": "af7b579807303eff264b1a41e532b1b8c9859a4e41f0378dfb50a4cda1d6cc0e",
+    "anchorFile": "assets/chars/sprites/garan/04_special.png",
+    "anchorSha256": "1079c6081d3c350989b7389790dc6a7a6ae22ea9c709d3479aad9c4d46cf8b0a",
+    "affectedAnimations": [
+      "jumpUp",
+      "jumpFwd",
+      "jumpBack"
+    ],
+    "status": "confirmed_identity_mismatch_pending_candidate"
+  }
+]

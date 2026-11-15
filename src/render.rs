@@ -14,9 +14,12 @@ use ume_engine::palette::{BlendMode, PalParams};
 
 mod layers;
 mod mugen_layers;
+mod rim;
 mod sky;
+mod story_loop;
 mod warm;
 mod wide_image;
+use layers::draw_transformed_layer_quad;
 
 pub struct Gfx {
     tex: HashMap<u64, Texture2D>,
@@ -316,7 +319,7 @@ impl MatchRenderer {
         let gain = g.fx_gain;
         clear_background(BLACK);
         let (mut shx, mut shy) = (0.0, 0.0);
-        if m.shake_time > 0 {
+        if m.shake_time > 0 && !crate::tweaks::current().reduce_motion {
             if m.shake_vertical() {
                 shy = m.shake_offset();
             }
@@ -324,7 +327,7 @@ impl MatchRenderer {
                 shx = (rand::gen_range(-0.5, 0.5)) * m.shake_ampl.abs() * 0.3;
             }
         }
-        let (tx, ty) = vfx.shake(gain);
+        let (tx, ty) = vfx.shake(if crate::tweaks::current().reduce_motion { 0.0 } else { gain });
         shx += tx;
         shy += ty;
         // cinematic camera: punch-in on hits, KO / super zoom about the action
@@ -348,8 +351,8 @@ impl MatchRenderer {
         g.ox = px + (ox0 - px) * zoom;
         g.oy = py + (oy0 - py) * zoom;
         let s = g.view_scale;
-        self.fx.begin_frame(m, gain);
-        self.draw_stage(g, m, stage, false, shx, shy);
+        self.fx.begin_frame(m, gain); crate::stagelook::select(stage.kind);
+        self.draw_stage(g, m, stage, false, shx, shy); crate::stageprops::draw(g, stage.kind, false, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0); crate::story::objects_art::draw(g, m, false, shx, shy);
         if m.pause.as_ref().is_some_and(|p| p.darken) {
             draw_rectangle(
                 g.ox,
@@ -382,8 +385,7 @@ impl MatchRenderer {
             let hgt = (-f.pos.y).max(0.0);
             let r = 22.0 * (1.0 - hgt / 200.0).max(0.4);
             let a = 0.17 * (1.0 - hgt / 150.0).max(0.3);
-            for (k, m2) in [(1.0, 1.0), (0.72, 1.0), (0.45, 1.0)].iter().enumerate() {
-                let _ = m2;
+            for k in 0..3 {
                 draw_ellipse(
                     g.ox + (Self::sx(m, f.pos.x) + shx) * s,
                     g.oy + (Self::sy(m, f.lane) + shy) * s,
@@ -587,7 +589,7 @@ impl MatchRenderer {
                 }
             }
         }
-        self.draw_stage(g, m, stage, true, shx, shy);
+        crate::story::objects_art::draw(g, m, true, shx, shy); self.draw_stage(g, m, stage, true, shx, shy); crate::stageprops::draw(g, stage.kind, true, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0);
         self.draw_markers(g, m, shx, shy);
         if gain > 0.0 {
             vfx.draw_world(g, m, shx, shy, ui);
@@ -639,7 +641,7 @@ impl MatchRenderer {
             (focus_screen.0 / w, focus_screen.1 / h),
             bloom,
         );
-        self.fx.grade(&mut p, gain);
+        self.fx.grade(&mut p, gain); crate::stagelook::grade(&mut p, stage.kind, m.game_time as f32);
         p
     }
 
@@ -720,7 +722,7 @@ impl MatchRenderer {
         if f.def.source == ume_engine::chardef::Source::Mugen {
             let tint = self.fx.ambient(f.pos.x, m.camera.x);
             let o = DrawOpts { alpha: a0, tint, vflip: true, ..Default::default() };
-            Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y + f.lane, f.facing, f.lscl, f.draw_scale, &o, shx, shy);
+            Self::draw_sprite(g, m, &f.anim_def, fr, f.pos.x, -f.pos.y + f.lane, f.facing, f.lscl, f.sprite_scale(), &o, shx, shy);
             return;
         }
         let def = &f.anim_def;
@@ -838,7 +840,7 @@ impl MatchRenderer {
                     t.y,
                     t.facing,
                     f.lscl,
-                    f.draw_scale,
+                    f.sprite_scale(),
                     &o,
                     shx,
                     shy,
@@ -977,6 +979,7 @@ impl MatchRenderer {
         let sq = self.squash.get(fi).copied().unwrap_or([1.0, 1.0]);
         let ds = [extra[0] * sq[0], extra[1] * sq[1]];
         o.angle += angle_extra;
+        rim::draw(g, m, f, fr, x, ds, &o, shx, shy);
         Self::draw_sprite(
             g,
             m,
@@ -1081,7 +1084,7 @@ impl MatchRenderer {
                     }
                 }
             }
-            StageArt::Illustrated { image, ambience, span } => {
+            StageArt::Illustrated { image, frames, ambience, span } => {
                 let ground = m.stage.zoffset - m.camera.y;
                 let top_ground = m.stage.zoffset - m.stage.bound_high.min(0.0);
                 let bottom_ground = m.stage.zoffset - m.stage.bound_low.max(0.0);
@@ -1091,7 +1094,7 @@ impl MatchRenderer {
                 let (h, w, x) = crate::stages::illustration_layout(*span, image.w as f32 / image.h as f32, h, m.view_w, m.camera.x, m.zoom);
                 let rect = ImageRect { x: x + shx, y: ground - h * 0.85 + shy, w, h, view_w: m.view_w, view_h: m.view_h, cam_x: m.camera.x };
                 if front { return if *span > 0.0 { } else { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true) }; }
-                g.draw_wide_image(image, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
+                g.draw_backdrop(image, frames, *span, m.game_time as usize, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
                 if *span <= 0.0 { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false); }
             }
             StageArt::Mugen(bg) => mugen_layers::draw_mugen_stage(g, m, bg, front, shx, shy, &mut self.sky),

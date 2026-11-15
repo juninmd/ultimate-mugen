@@ -40,12 +40,13 @@ Only the three published platforms can self-update. Other targets (web, Android,
 ## Flow
 
 1. At boot the game requests `releases/latest/download/latest.json` over HTTPS (8 s timeout, silently ignored when offline).
-2. A newer `version` with a `binary` entry for the current platform starts a background download (180 s timeout) to `.update-v<version>[.exe]` next to the running executable.
-3. The download is rejected unless its `sha256` and byte size match the manifest and the staged executable answers `--version` with `ultimate-mugen <version>`.
-4. On the title or main menu the staged file replaces the installed executable (on Windows the running file is first renamed to `.old`) and the game restarts with `--no-update-check`, so a bad manifest cannot cause a restart loop.
-5. The previous `.old` file is removed at the next boot.
+2. A newer `version` with a `binary` entry for the current platform shows an update panel on the title/menu with the installed and the available versions. Nothing is downloaded until the player accepts "Update now".
+3. Accepting starts the background download (180 s timeout) to `.update-v<version>[.exe]` next to the running executable.
+4. The download is rejected unless its `sha256` and byte size match the manifest and the staged executable answers `--version` with `ultimate-mugen <version>`.
+5. Once verified, the staged file replaces the installed executable (on Windows the running file is first renamed to `.old`) and the game restarts with `--no-update-check`, so a bad manifest cannot cause a restart loop.
+6. The previous `.old` file is removed at the next boot.
 
-A failed download, an offline machine or a read-only install folder only changes the status line; the running build keeps working.
+A failed download, an offline machine or a read-only install folder only changes the status line; the running build keeps working. "Not now" forgets the version until the next boot, and the footer notice stays visible.
 
 ## Command line and opt-outs
 
@@ -53,7 +54,7 @@ A failed download, an offline machine or a read-only install folder only changes
 | --- | --- |
 | `--check-update` | Prints whether a newer release exists and exits |
 | `--update` | Downloads, verifies and installs the newest release, then exits |
-| `--no-auto-update` / `UME_NO_AUTO_UPDATE=1` | Keeps the notice, never downloads or installs |
+| `--no-auto-update` / `UME_NO_AUTO_UPDATE=1` | Keeps the footer notice, never shows the prompt (so never downloads or installs) |
 | `--no-update-check` / `UME_NO_UPDATE_CHECK=1` | No network request at all |
 
 Local `-dev` builds never self-update.

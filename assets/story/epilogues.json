@@ -1,0 +1,482 @@
+{
+  "*": {
+    "scene": "plains",
+    "title": {
+      "en": "A New Dawn",
+      "pt": "Um Novo Amanhecer",
+      "es": "Un Nuevo Amanecer"
+    },
+    "boss": {
+      "en": "So this is how an empire ends: on a rooftop, at the hands of a stranger.",
+      "pt": "Então é assim que um império termina: numa cobertura, pelas mãos de um desconhecido.",
+      "es": "Así que así termina un imperio: en una azotea, a manos de un desconocido."
+    },
+    "reply": {
+      "en": "Not a stranger. Just someone who lives in this city.",
+      "pt": "Desconhecido, não. Só alguém que mora nesta cidade.",
+      "es": "Desconocido, no. Solo alguien que vive en esta ciudad."
+    },
+    "pages": [
+      {
+        "en": "By morning the gang's colours had vanished from the alleys, and the shutters opened one by one.",
+        "pt": "Pela manhã, as cores da gangue tinham sumido dos becos, e as portas se abriram uma a uma.",
+        "es": "Por la mañana, los colores de la banda habían desaparecido de los callejones, y las persianas se abrieron una a una."
+      },
+      {
+        "en": "Nobody knew the name of the fighter who walked away at sunrise. The city remembered anyway.",
+        "pt": "Ninguém sabia o nome de quem foi embora ao nascer do sol. A cidade lembrou mesmo assim.",
+        "es": "Nadie sabía el nombre de quien se marchó al amanecer. La ciudad lo recordó de todos modos."
+      }
+    ]
+  },
+  "kaito": {
+    "scene": "plains",
+    "title": {
+      "en": "The Wind Comes Home",
+      "pt": "O Vento Volta para Casa",
+      "es": "El Viento Vuelve a Casa"
+    },
+    "boss": {
+      "en": "A wanderer with no banner... and my empire falls to a single fist?",
+      "pt": "Um andarilho sem bandeira... e o meu império cai diante de um único punho?",
+      "es": "Un vagabundo sin bandera... ¿y mi imperio cae ante un solo puño?"
+    },
+    "reply": {
+      "en": "The wind carries no banner, Valdric. It just goes where people need to breathe.",
+      "pt": "O vento não carrega bandeira, Valdric. Ele só vai aonde as pessoas precisam respirar.",
+      "es": "El viento no lleva bandera, Valdric. Solo va adonde la gente necesita respirar."
+    },
+    "pages": [
+      {
+        "en": "By morning the Red Star flags were gone from the alleys, and the city heard its own voices again.",
+        "pt": "Pela manhã, as bandeiras da Estrela Rubra tinham sumido dos becos, e a cidade voltou a ouvir a própria voz.",
+        "es": "Por la mañana, las banderas de la Estrella Roja habían desaparecido de los callejones, y la ciudad volvió a oír su propia voz."
+      },
+      {
+        "en": "Kaito climbed back to the cliffs of Izu. His master's hut was empty, but the kettle was still warm.",
+        "pt": "Kaito subiu de volta aos penhascos de Izu. A cabana do mestre estava vazia, mas a chaleira ainda estava morna.",
+        "es": "Kaito volvió a subir a los acantilados de Izu. La cabaña del maestro estaba vacía, pero la tetera seguía tibia."
+      }
+    ]
+  },
+  "shion": {
+    "scene": "petra",
+    "title": {
+      "en": "A Blade Without a Master",
+      "pt": "Uma Lâmina sem Dono",
+      "es": "Una Hoja sin Dueño"
+    },
+    "boss": {
+      "en": "The Kurogane sold me their champion once. Why refuse my gold now?",
+      "pt": "Os Kurogane já me venderam o campeão deles uma vez. Por que recusar o meu ouro agora?",
+      "es": "Los Kurogane ya me vendieron a su campeón una vez. ¿Por qué rechazar mi oro ahora?"
+    },
+    "reply": {
+      "en": "They sold you a name. I left that name on this rooftop, next to your crown.",
+      "pt": "Eles venderam um nome. Eu deixei esse nome nesta cobertura, ao lado da sua coroa.",
+      "es": "Te vendieron un nombre. Dejé ese nombre en esta azotea, junto a tu corona."
+    },
+    "pages": [
+      {
+        "en": "Shion let the meteorite blade rest for the first time in years. No innocent blood had been asked of it tonight.",
+        "pt": "Shion deixou a lâmina de meteorito descansar pela primeira vez em anos. Nesta noite ninguém lhe pediu sangue inocente.",
+        "es": "Shion dejó descansar la hoja de meteorito por primera vez en años. Esta noche nadie le pidió sangre inocente."
+      },
+      {
+        "en": "He took the desert road alone. Somewhere behind him, a clan that had banished him began to say his name again.",
+        "pt": "Ele seguiu sozinho pela estrada do deserto. Em algum lugar atrás dele, o clã que o baniu voltou a dizer o seu nome.",
+        "es": "Tomó solo el camino del desierto. En algún lugar tras él, el clan que lo desterró volvió a pronunciar su nombre."
+      }
+    ]
+  },
+  "akio": {
+    "scene": "dojo",
+    "title": {
+      "en": "Louder Than Thunder",
+      "pt": "Mais Alto que o Trovão",
+      "es": "Más Fuerte que el Trueno"
+    },
+    "boss": {
+      "en": "You were beaten three times over. Why do you keep getting up?",
+      "pt": "Você já estava derrotado três vezes. Por que continua se levantando?",
+      "es": "Ya estabas derrotado tres veces. ¿Por qué sigues levantándote?"
+    },
+    "reply": {
+      "en": "Because the fourth time is when I start having fun!",
+      "pt": "Porque é na quarta vez que eu começo a me divertir!",
+      "es": "¡Porque a la cuarta es cuando empiezo a divertirme!"
+    },
+    "pages": [
+      {
+        "en": "Akio ran all the way back to Osaka and burst into the Starfall Dojo before breakfast, still wrapped in bandages.",
+        "pt": "Akio correu até Osaka e invadiu o Dojo da Queda Estelar antes do café da manhã, ainda coberto de ataduras.",
+        "es": "Akio corrió hasta Osaka e irrumpió en el Dojo de la Caída Estelar antes del desayuno, todavía cubierto de vendas."
+      },
+      {
+        "en": "The students asked what the kingpin was like. He only laughed and tightened their white belts: class starts now.",
+        "pt": "Os alunos perguntaram como era o chefão. Ele só riu e apertou as faixas brancas: a aula começa agora.",
+        "es": "Los alumnos preguntaron cómo era el jefe. Él solo rió y les apretó los cinturones blancos: la clase empieza ya."
+      }
+    ]
+  },
+  "suzume": {
+    "scene": "spirit",
+    "title": {
+      "en": "The Thread",
+      "pt": "O Fio",
+      "es": "El Hilo"
+    },
+    "boss": {
+      "en": "You were never after me. Whose shadow are you chasing, girl?",
+      "pt": "Você nunca esteve atrás de mim. De quem é a sombra que você persegue, garota?",
+      "es": "Nunca me buscabas a mí. ¿De quién es la sombra que persigues, niña?"
+    },
+    "reply": {
+      "en": "One that stood behind your throne. You were only a knot along the thread.",
+      "pt": "A que ficava atrás do seu trono. Você era só um nó no meio do fio.",
+      "es": "La que estaba detrás de tu trono. Tú eras solo un nudo en el hilo."
+    },
+    "pages": [
+      {
+        "en": "Among the kingpin's papers Suzume found a seal from a forgotten dynasty: the first trace of Oboro in years.",
+        "pt": "Entre os papéis do chefão, Suzume achou um selo de uma dinastia esquecida: o primeiro rastro de Oboro em anos.",
+        "es": "Entre los papeles del jefe, Suzume halló un sello de una dinastía olvidada: el primer rastro de Oboro en años."
+      },
+      {
+        "en": "She lit one lantern for each name of the Kagerou clan, and followed the thread into the mist.",
+        "pt": "Ela acendeu uma lanterna para cada nome do clã Kagerou e seguiu o fio para dentro da névoa.",
+        "es": "Encendió un farol por cada nombre del clan Kagerou y siguió el hilo hacia la niebla."
+      }
+    ]
+  },
+  "bruno": {
+    "scene": "brazil",
+    "title": {
+      "en": "Champion of the Block",
+      "pt": "Campeão do Bairro",
+      "es": "Campeón del Barrio"
+    },
+    "boss": {
+      "en": "A quarry worker... You could have had a seat at my table.",
+      "pt": "Um trabalhador de pedreira... Você podia ter um lugar à minha mesa.",
+      "es": "Un obrero de cantera... Podrías haber tenido un sitio en mi mesa."
+    },
+    "reply": {
+      "en": "I already have a table, chief. Sunday lunch, whole street invited.",
+      "pt": "Mesa eu já tenho, chefia. Almoço de domingo, a rua inteira convidada.",
+      "es": "Mesa ya tengo, jefe. Almuerzo de domingo, toda la calle invitada."
+    },
+    "pages": [
+      {
+        "en": "The gang's money went back where it came from: a gym with a new roof and a clinic with its lights on.",
+        "pt": "O dinheiro da gangue voltou para onde saiu: uma academia de telhado novo e uma clínica de luzes acesas.",
+        "es": "El dinero de la banda volvió a donde salió: un gimnasio con techo nuevo y una clínica con las luces encendidas."
+      },
+      {
+        "en": "Bruno hung the gloves on the wall for one day only. On Monday the kids were already waiting by the ring.",
+        "pt": "Bruno pendurou as luvas na parede por um dia só. Na segunda, a molecada já esperava ao lado do ringue.",
+        "es": "Bruno colgó los guantes en la pared solo por un día. El lunes los chicos ya esperaban junto al ring."
+      }
+    ]
+  },
+  "sylene": {
+    "scene": "lighthouse_alexandria",
+    "title": {
+      "en": "North Wind",
+      "pt": "Vento Norte",
+      "es": "Viento del Norte"
+    },
+    "boss": {
+      "en": "Your kingdom is ash under ice. What is left for you to rule?",
+      "pt": "O seu reino é cinza debaixo do gelo. O que resta para você governar?",
+      "es": "Tu reino es ceniza bajo el hielo. ¿Qué te queda por gobernar?"
+    },
+    "reply": {
+      "en": "The cold, Valdric. And tonight you learned how much of it I carry.",
+      "pt": "O frio, Valdric. E esta noite você descobriu o quanto dele eu carrego.",
+      "es": "El frío, Valdric. Y esta noche descubriste cuánto llevo conmigo."
+    },
+    "pages": [
+      {
+        "en": "With the gang's ships seized in the harbour, Sylene finally had a fleet willing to sail north.",
+        "pt": "Com os navios da gangue apreendidos no porto, Sylene enfim tinha uma frota disposta a navegar para o norte.",
+        "es": "Con los barcos de la banda incautados en el puerto, Sylene por fin tenía una flota dispuesta a navegar al norte."
+      },
+      {
+        "en": "She stood at the prow as the lighthouse faded behind her. Borealia had waited long enough.",
+        "pt": "Ela ficou na proa enquanto o farol sumia atrás dela. Borealia já tinha esperado demais.",
+        "es": "Se quedó en la proa mientras el faro se perdía tras ella. Borealia ya había esperado bastante."
+      }
+    ]
+  },
+  "volta": {
+    "scene": "neon",
+    "title": {
+      "en": "What a Heart Is For",
+      "pt": "Para que Serve um Coração",
+      "es": "Para Qué Sirve un Corazón"
+    },
+    "boss": {
+      "en": "A machine built to obey. Who gave you the order to defy me?",
+      "pt": "Uma máquina feita para obedecer. Quem deu a ordem para me desafiar?",
+      "es": "Una máquina hecha para obedecer. ¿Quién te dio la orden de desafiarme?"
+    },
+    "reply": {
+      "en": "Nobody. That is the part I am starting to like.",
+      "pt": "Ninguém. E é dessa parte que eu estou começando a gostar.",
+      "es": "Nadie. Y esa es la parte que empieza a gustarme."
+    },
+    "pages": [
+      {
+        "en": "Volta walked the neon avenues until sunrise, logging every face that was no longer afraid.",
+        "pt": "Volta caminhou pelas avenidas de neon até o sol nascer, registrando cada rosto que já não tinha medo.",
+        "es": "Volta recorrió las avenidas de neón hasta el amanecer, registrando cada rostro que ya no tenía miedo."
+      },
+      {
+        "en": "New memory entry: purpose found. Not a mission, not an order. A city worth staying in.",
+        "pt": "Nova entrada na memória: propósito encontrado. Não é missão nem ordem. É uma cidade onde vale a pena ficar.",
+        "es": "Nueva entrada en memoria: propósito encontrado. Ni misión ni orden. Una ciudad donde vale la pena quedarse."
+      }
+    ]
+  },
+  "lian": {
+    "scene": "great_wall",
+    "title": {
+      "en": "The Lantern Returns",
+      "pt": "A Lanterna Retorna",
+      "es": "El Farol Regresa"
+    },
+    "boss": {
+      "en": "Every blow I threw came back to me. What kind of art is that?",
+      "pt": "Cada golpe que eu dei voltou para mim. Que tipo de arte é essa?",
+      "es": "Cada golpe que lancé volvió a mí. ¿Qué clase de arte es ese?"
+    },
+    "reply": {
+      "en": "The oldest kind. You pushed the city; I only let it push back.",
+      "pt": "A mais antiga. Você empurrou a cidade; eu só deixei que ela empurrasse de volta.",
+      "es": "El más antiguo. Tú empujaste a la ciudad; yo solo dejé que empujara de vuelta."
+    },
+    "pages": [
+      {
+        "en": "Lian carried the jade lantern up the mountain steps, its flame steadier than when she had left.",
+        "pt": "Lian levou a lanterna de jade escadaria acima, com a chama mais firme do que quando partiu.",
+        "es": "Lian subió el farol de jade por la escalinata de la montaña, con la llama más firme que cuando partió."
+      },
+      {
+        "en": "The elders asked for a report. She poured them tea first: balance, she said, is never in a hurry.",
+        "pt": "Os anciões pediram um relatório. Ela serviu o chá primeiro: o equilíbrio, disse, nunca tem pressa.",
+        "es": "Los ancianos pidieron un informe. Ella sirvió el té primero: el equilibrio, dijo, nunca tiene prisa."
+      }
+    ]
+  },
+  "garan": {
+    "scene": "volcano",
+    "title": {
+      "en": "Cold Flame",
+      "pt": "Chama Fria",
+      "es": "Llama Fría"
+    },
+    "boss": {
+      "en": "A demon in my city... I never feared you, monster.",
+      "pt": "Um demônio na minha cidade... Eu nunca tive medo de você, monstro.",
+      "es": "Un demonio en mi ciudad... Nunca te tuve miedo, monstruo."
+    },
+    "reply": {
+      "en": "I know. That is why you tasted of nothing.",
+      "pt": "Eu sei. Por isso você não tinha gosto de nada.",
+      "es": "Lo sé. Por eso no sabías a nada."
+    },
+    "pages": [
+      {
+        "en": "The gang scattered before dawn. Fear had a new owner now, and it burned violet over the rooftops.",
+        "pt": "A gangue se dispersou antes do amanhecer. O medo tinha um novo dono, e ele ardia violeta sobre os telhados.",
+        "es": "La banda se dispersó antes del alba. El miedo tenía un nuevo dueño, y ardía violeta sobre los tejados."
+      },
+      {
+        "en": "Garan went back to the Gate of Ashes to wait. Empires fall quickly; hunger is patient.",
+        "pt": "Garan voltou ao Portão de Cinzas para esperar. Impérios caem depressa; a fome é paciente.",
+        "es": "Garan volvió al Portón de Cenizas a esperar. Los imperios caen deprisa; el hambre es paciente."
+      }
+    ]
+  },
+  "marlow": {
+    "scene": "colossus_rhodes",
+    "title": {
+      "en": "The House Always Loses",
+      "pt": "A Banca Sempre Perde",
+      "es": "La Banca Siempre Pierde"
+    },
+    "boss": {
+      "en": "You bet your life against an empire. A fool's wager.",
+      "pt": "Você apostou a vida contra um império. Aposta de tolo.",
+      "es": "Apostaste tu vida contra un imperio. Apuesta de necios."
+    },
+    "reply": {
+      "en": "Best odds I had all year, amigo. And look who is paying.",
+      "pt": "Foi a melhor cotação do ano, amigo. E olha só quem está pagando.",
+      "es": "La mejor cuota del año, amigo. Y mira quién paga."
+    },
+    "pages": [
+      {
+        "en": "Marlow left the rooftop with the kingpin's treasure map tucked in his hat, and nothing else.",
+        "pt": "Marlow deixou a cobertura com o mapa do tesouro do chefão escondido no chapéu, e mais nada.",
+        "es": "Marlow dejó la azotea con el mapa del tesoro del jefe escondido en el sombrero, y nada más."
+      },
+      {
+        "en": "El Viento Salado weighed anchor over the harbour at sunrise. The next bet was already on the horizon.",
+        "pt": "El Viento Salado levantou âncora sobre o porto ao nascer do sol. A próxima aposta já estava no horizonte.",
+        "es": "El Viento Salado levó anclas sobre el puerto al amanecer. La próxima apuesta ya estaba en el horizonte."
+      }
+    ]
+  },
+  "kaname": {
+    "scene": "dojo",
+    "title": {
+      "en": "Verdict",
+      "pt": "Veredito",
+      "es": "Veredicto"
+    },
+    "boss": {
+      "en": "You judge me, shrine keeper? By whose law?",
+      "pt": "Você me julga, guardião de santuário? Pela lei de quem?",
+      "es": "¿Tú me juzgas, guardián del santuario? ¿Por la ley de quién?"
+    },
+    "reply": {
+      "en": "By the order you broke. The sentence was one cut, and it is served.",
+      "pt": "Pela ordem que você violou. A sentença era um corte, e está cumprida.",
+      "es": "Por el orden que violaste. La sentencia era un corte, y está cumplida."
+    },
+    "pages": [
+      {
+        "en": "Kaname sheathed the spirit katana and bowed to the empty rooftop. A trial ends when the blade is clean.",
+        "pt": "Kaname embainhou a katana espiritual e fez uma reverência à cobertura vazia. Um julgamento termina quando a lâmina está limpa.",
+        "es": "Kaname envainó la katana espiritual y se inclinó ante la azotea vacía. Un juicio termina cuando la hoja está limpia."
+      },
+      {
+        "en": "Snow was falling over Hokkaido when he returned. He swept the shrine steps, as on any other morning.",
+        "pt": "Nevava em Hokkaido quando ele voltou. Varreu os degraus do santuário, como em qualquer outra manhã.",
+        "es": "Nevaba en Hokkaido cuando regresó. Barrió los escalones del santuario, como cualquier otra mañana."
+      }
+    ]
+  },
+  "jin": {
+    "scene": "bamboo",
+    "title": {
+      "en": "First One Home",
+      "pt": "O Primeiro a Chegar",
+      "es": "El Primero en Llegar"
+    },
+    "boss": {
+      "en": "I blinked and you were behind me. What are you?",
+      "pt": "Eu pisquei e você estava atrás de mim. O que é você?",
+      "es": "Parpadeé y ya estabas detrás de mí. ¿Qué eres?"
+    },
+    "reply": {
+      "en": "The delivery guy! Message from the Wind Valley: we want our homes back.",
+      "pt": "O mensageiro! Recado do Vale do Vento: a gente quer as nossas casas de volta.",
+      "es": "¡El mensajero! Recado del Valle del Viento: queremos nuestras casas de vuelta."
+    },
+    "pages": [
+      {
+        "en": "Jin ran the whole way back without stopping once, just to be the first to tell the good news.",
+        "pt": "Jin correu o caminho inteiro sem parar uma única vez, só para ser o primeiro a dar a boa notícia.",
+        "es": "Jin corrió todo el camino sin detenerse ni una vez, solo para ser el primero en dar la buena noticia."
+      },
+      {
+        "en": "The villagers started rebuilding that same week. He carried the timber two beams at a time, grinning.",
+        "pt": "Os aldeões começaram a reconstruir naquela mesma semana. Ele carregou a madeira de duas vigas por vez, sorrindo.",
+        "es": "Los aldeanos empezaron a reconstruir esa misma semana. Él cargó la madera de dos vigas a la vez, sonriendo."
+      }
+    ]
+  },
+  "daichi": {
+    "scene": "plains",
+    "title": {
+      "en": "A Good Fight",
+      "pt": "Uma Boa Luta",
+      "es": "Una Buena Pelea"
+    },
+    "boss": {
+      "en": "You smiled through the whole fight. Do you not hate me?",
+      "pt": "Você sorriu a luta inteira. Não me odeia?",
+      "es": "Sonreíste toda la pelea. ¿No me odias?"
+    },
+    "reply": {
+      "en": "Hate? You were strong! Come find me when you are stronger.",
+      "pt": "Odiar? Você era forte! Me procure quando estiver mais forte ainda.",
+      "es": "¿Odiar? ¡Eras fuerte! Búscame cuando seas aún más fuerte."
+    },
+    "pages": [
+      {
+        "en": "Daichi left the city without a glance at the kingpin's gold. He had already got what he came for.",
+        "pt": "Daichi saiu da cidade sem olhar para o ouro do chefão. Já tinha conseguido o que veio buscar.",
+        "es": "Daichi dejó la ciudad sin mirar el oro del jefe. Ya había conseguido lo que vino a buscar."
+      },
+      {
+        "en": "On the Altai steppe the silver wolves ran out to meet him, and he raced them home under the open sky.",
+        "pt": "Na estepe de Altai, os lobos prateados correram ao seu encontro, e ele apostou corrida com eles até em casa, sob o céu aberto.",
+        "es": "En la estepa de Altái, los lobos plateados salieron a su encuentro, y corrió con ellos hasta casa bajo el cielo abierto."
+      }
+    ]
+  },
+  "valdric": {
+    "scene": "colosseum",
+    "title": {
+      "en": "The Crimson Throne",
+      "pt": "O Trono Carmesim",
+      "es": "El Trono Carmesí"
+    },
+    "boss": {
+      "en": "You tore down your own lieutenants just to prove you could. What is left to conquer?",
+      "pt": "Você derrubou os próprios tenentes só para provar que podia. O que sobra para conquistar?",
+      "es": "Derribaste a tus propios tenientes solo para probar que podías. ¿Qué queda por conquistar?"
+    },
+    "reply": {
+      "en": "Everything, wanderer. A blade must be tested before it is trusted.",
+      "pt": "Tudo, andarilho. Uma lâmina precisa ser testada antes de merecer confiança.",
+      "es": "Todo, vagabundo. Una hoja debe probarse antes de merecer confianza."
+    },
+    "pages": [
+      {
+        "en": "The traitors who ran the city in his name were gone. Valdric took the rooftop back, and with it the streets.",
+        "pt": "Os traidores que mandavam na cidade em seu nome se foram. Valdric retomou a cobertura e, com ela, as ruas.",
+        "es": "Los traidores que mandaban en la ciudad en su nombre ya no estaban. Valdric recuperó la azotea y, con ella, las calles."
+      },
+      {
+        "en": "From the old arena he watched his banners rise again. Peace, he believed, had finally found its commander.",
+        "pt": "Da velha arena, ele viu seus estandartes subirem outra vez. A paz, acreditava, enfim tinha encontrado o seu comandante.",
+        "es": "Desde la vieja arena vio alzarse de nuevo sus estandartes. La paz, creía, por fin había encontrado a su comandante."
+      }
+    ]
+  },
+  "haruki": {
+    "scene": "temple_artemis",
+    "title": {
+      "en": "Overdue",
+      "pt": "Devolução Atrasada",
+      "es": "Devolución Atrasada"
+    },
+    "boss": {
+      "en": "Those titans inside you... With them I could rule the world.",
+      "pt": "Esses titãs dentro de você... Com eles eu governaria o mundo.",
+      "es": "Esos titanes dentro de ti... Con ellos gobernaría el mundo."
+    },
+    "reply": {
+      "en": "I am so sorry. They are not for lending. Library rules.",
+      "pt": "Me desculpe mesmo. Eles não podem ser emprestados. Regras da biblioteca.",
+      "es": "Lo siento mucho. No se prestan. Normas de la biblioteca."
+    },
+    "pages": [
+      {
+        "en": "Haruki apologised to every thug on the way down the stairs, and helped two of them find the exit.",
+        "pt": "Haruki pediu desculpas a cada capanga enquanto descia as escadas, e ajudou dois deles a achar a saída.",
+        "es": "Haruki se disculpó con cada matón mientras bajaba las escaleras, y ayudó a dos de ellos a encontrar la salida."
+      },
+      {
+        "en": "Back under Seoul he shelved one new volume in the Twilight Library: the night his friends were safe.",
+        "pt": "De volta ao subsolo de Seul, guardou um novo volume na Biblioteca do Crepúsculo: a noite em que seus amigos ficaram a salvo.",
+        "es": "De vuelta bajo Seúl, guardó un nuevo volumen en la Biblioteca del Crepúsculo: la noche en que sus amigos estuvieron a salvo."
+      }
+    ]
+  }
+}

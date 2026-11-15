@@ -156,7 +156,7 @@ pub struct MoveInfo {
     pub command: String,
     pub cost: f32,
     pub drain: bool,
-    pub forms: u32,
+    pub forms: u32, pub state: i32,
 }
 
 #[derive(Debug)]

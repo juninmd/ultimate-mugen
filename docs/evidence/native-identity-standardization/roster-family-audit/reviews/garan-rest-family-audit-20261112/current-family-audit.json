@@ -1,0 +1,684 @@
+{
+  "auditDate": "2026-11-12",
+  "scope": "Garan current active native sprite files and requested hit, guard, cjab, turn, plus aerial/run follow-up.",
+  "baselineReport": "NATIVE-ROSTER-2026-11-12-D",
+  "baselineClaimCeiling": "Static ordered-family review only. All 1,703 family rows are classified, but native-resolution cluster inspection is incomplete in reports with contact-sheet-only review; all runtimeReview values remain not_performed. Effects with no resolved body PNG remain unresolved.",
+  "baselineGaranRows": 80,
+  "baselineCorrectionFamilies": [
+    "airLowKick",
+    "airRecover",
+    "ajab",
+    "akick",
+    "ascent",
+    "ascentEx",
+    "emberDive",
+    "hop",
+    "jumpBack",
+    "jumpDown",
+    "jumpFwd",
+    "jumpUp"
+  ],
+  "baselineUnresolvedFamilies": [
+    "hellFx",
+    "hellHit",
+    "pillarFx"
+  ],
+  "reportHashDrift": {
+    "assets/chars/sprites/garan/jumpUp.png": {
+      "reportSha256": "af7b579807303eff264b1a41e532b1b8c9859a4e41f0378dfb50a4cda1d6cc0e",
+      "currentSha256": "d06adec8cd128b3227f85d33e1179615e3062b5f95db6729d56a60fa07e6b1b6"
+    },
+    "assets/chars/sprites/garan/jumpTop.png": {
+      "reportSha256": "45335e1d0d584799caefc0b4d1868d1586b42af6b3f936095e506ed81ccf0fdf",
+      "currentSha256": "165c39aa1ef346cc84883040a6544b0a8a4ab6ee32d55371de8c2ba61b3cac7c"
+    },
+    "assets/chars/sprites/garan/jumpDown.png": {
+      "reportSha256": "66037a60f804ab993c8fce7506f4f771b6e0bce9b6264e307eae5b7ce4d26b40",
+      "currentSha256": "c71f1c8aed1c52744a00b089ca4b10b116b2dec8b4aac3d2bcc5b1ec16825e01"
+    },
+    "assets/chars/sprites/garan/sg_run_mid.png": {
+      "reportSha256": "cf150843db3171c61a11c6d69d4d97abb581d92a5aacc73763c98018505b09b8",
+      "currentSha256": "685cacd4ae27e67c74f644f940afe6dfc269247636d1ce9d449a94b2e6ca06ef"
+    },
+    "assets/chars/sprites/garan/hop.png": {
+      "reportSha256": "5a082b27103ba61f8940ebcb210cfadf3a2ea3af2cc3b9e176058af67fe68f00",
+      "currentSha256": "4fed2eca98eb9dc18803cfe8e5d6bd4d55647b3fe9d8a0124ec33c7f6b890ce7"
+    },
+    "assets/chars/sprites/garan/airLowKick.png": {
+      "reportSha256": "0ae78eafd05c3e4f7ecae58fbd0aa272935012fb4c6c587e41af443503551367",
+      "currentSha256": "ee7c8da21dc0deef320da012bd3336357ca566596cc4cf12a4d6663a6c8cd766"
+    }
+  },
+  "visualFindings": {
+    "identityOrPoseMismatchesConfirmed": [],
+    "cjabFalsePositive": "cjab0 and cjab1 are Garan and the crouched punches are legible; keep them distinct from any wrong-identity cjab pilot.",
+    "hitGuardTurn": "Reviewed native and nearest-2x; identity and pose family pass.",
+    "aerial": "After the current jumpTop/jumpUp/jumpDown/hop and airLowKick integrations, inspected Garan body poses read as canonical.",
+    "confirmedRemainingVisualDefects": [],
+    "integratedCorrectionsInThisAudit": [
+      {
+        "file": "assets/chars/sprites/garan/sg_run_mid.png",
+        "defect": "Top mane touched row 0.",
+        "activeSha256": "685cacd4ae27e67c74f644f940afe6dfc269247636d1ce9d449a94b2e6ca06ef",
+        "backupSha256": "cf150843db3171c61a11c6d69d4d97abb581d92a5aacc73763c98018505b09b8"
+      },
+      {
+        "file": "assets/chars/sprites/garan/airLowKick.png",
+        "defect": "Top mane touched row 0.",
+        "activeSha256": "ee7c8da21dc0deef320da012bd3336357ca566596cc4cf12a4d6663a6c8cd766",
+        "integratedBy": "parent agent"
+      }
+    ],
+    "followUpObservations": [
+      {
+        "files": "assets/chars/sprites/garan/sg_run_mid.png and sg_run_run0..3.png",
+        "finding": "Their measured alpha bbox heights differ substantially despite shared run metadata; do not infer an error solely from this static comparison. Review in animation/runtime before changing scale."
+      }
+    ],
+    "uncertain": [
+      {
+        "file": "assets/chars/sprites/garan/inline_c75becbcbc592dc9.png",
+        "finding": "Top edge includes attack effect; body/hair crop is not confirmed separately, so not counted as a confirmed defect."
+      }
+    ],
+    "effectOnlyUnresolved": [
+      "hellFx",
+      "hellHit",
+      "pillarFx"
+    ]
+  },
+  "frameMetrics": {
+    "guard": {
+      "file": "assets/chars/sprites/garan/guard.png",
+      "sha256": "c51b7cda8b303a1ba8dec5310341729adac533bf9886ec9367194c18fbf94239",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        114,
+        72,
+        286,
+        392
+      ],
+      "bboxWidth": 172,
+      "bboxHeight": 320,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "guardHit": {
+      "file": "assets/chars/sprites/garan/guardHit.png",
+      "sha256": "ff39dd8b4dc7c0936c38049636cf37d345262a2e387b79ff4c95e5fe51be9776",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        74,
+        72,
+        325,
+        392
+      ],
+      "bboxWidth": 251,
+      "bboxHeight": 320,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "crouchGuard": {
+      "file": "assets/chars/sprites/garan/crouchGuard.png",
+      "sha256": "fc276555ea57dc6267482ecc85e7b93a447666e8d8a06f856a50ddc9836d8528",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        30,
+        72,
+        371,
+        392
+      ],
+      "bboxWidth": 341,
+      "bboxHeight": 320,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "crouchGuardHit": {
+      "file": "assets/chars/sprites/garan/crouchGuardHit.png",
+      "sha256": "20f21c101278077044a1e00ff28508e1ff8a81095ab2f75f2a5be92d28108075",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        76,
+        72,
+        324,
+        392
+      ],
+      "bboxWidth": 248,
+      "bboxHeight": 320,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "airGuard": {
+      "file": "assets/chars/sprites/garan/airGuard.png",
+      "sha256": "1c997e5d822304cb66fb94671d296e774b0507cf0ffddbeebc5cb4b5c2dbbad0",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        106,
+        72,
+        294,
+        392
+      ],
+      "bboxWidth": 188,
+      "bboxHeight": 320,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "airGuardHit": {
+      "file": "assets/chars/sprites/garan/airGuardHit.png",
+      "sha256": "26fe8578afb2aff4194137a90f85b0cdd2af610c602deccce7890cd4fac65754",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        69,
+        72,
+        331,
+        392
+      ],
+      "bboxWidth": 262,
+      "bboxHeight": 320,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "09_hit1": {
+      "file": "assets/chars/sprites/garan/09_hit1.png",
+      "sha256": "974d896e2856c6c781ff46a1fd7f05ce34bb58a27abeee1297e1fca82a6961c8",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        56,
+        3,
+        343,
+        400
+      ],
+      "bboxWidth": 287,
+      "bboxHeight": 397,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 35
+    },
+    "10_hit2": {
+      "file": "assets/chars/sprites/garan/10_hit2.png",
+      "sha256": "c3dbbd2ced83bcacfa0800d32b6d59cfacee7dc6c23073c1d3530cb4311759b5",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        27,
+        5,
+        373,
+        400
+      ],
+      "bboxWidth": 346,
+      "bboxHeight": 395,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 39
+    },
+    "11_hit3": {
+      "file": "assets/chars/sprites/garan/11_hit3.png",
+      "sha256": "afd78a40528fd657df2413983ffaba69219fe92883c045789899de803c5cae9c",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        3,
+        15,
+        396,
+        400
+      ],
+      "bboxWidth": 393,
+      "bboxHeight": 385,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 66
+    },
+    "hitL1": {
+      "file": "assets/chars/sprites/garan/hitL1.png",
+      "sha256": "0b17342cbdba5c516cdb6f5240e047641606df0d2801a6f89901dd5ef3fce503",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        83,
+        72,
+        317,
+        392
+      ],
+      "bboxWidth": 234,
+      "bboxHeight": 320,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "hitL2": {
+      "file": "assets/chars/sprites/garan/hitL2.png",
+      "sha256": "edf2ed9697d4145c7d38f4a66277e4e777d076c132133e1d254a7f126e05aa43",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        52,
+        72,
+        348,
+        392
+      ],
+      "bboxWidth": 296,
+      "bboxHeight": 320,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "hitL3": {
+      "file": "assets/chars/sprites/garan/hitL3.png",
+      "sha256": "46af95331a363b9492d380eb3903c0e3d568cb5cfe683334e8570f85e683a7ee",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        34,
+        72,
+        367,
+        392
+      ],
+      "bboxWidth": 333,
+      "bboxHeight": 320,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "hitCrouch": {
+      "file": "assets/chars/sprites/garan/hitCrouch.png",
+      "sha256": "37fe28d0866c030f6fdca23ca15b71c3fb0ca0d3d8ce258a78abd6e0fafcbae9",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        30,
+        72,
+        371,
+        392
+      ],
+      "bboxWidth": 341,
+      "bboxHeight": 320,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "12_fall1": {
+      "file": "assets/chars/sprites/garan/12_fall1.png",
+      "sha256": "ff490160569d401b39520090969f2b7a4a951dbc7268eb54776fd2240fe9bcb9",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        0,
+        81,
+        400,
+        400
+      ],
+      "bboxWidth": 400,
+      "bboxHeight": 319,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 1
+    },
+    "13_fall2": {
+      "file": "assets/chars/sprites/garan/13_fall2.png",
+      "sha256": "59b8f9e728380195969fa356d5f7867731664567852520aee884bd875b8df985",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        6,
+        229,
+        393,
+        400
+      ],
+      "bboxWidth": 387,
+      "bboxHeight": 171,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 12
+    },
+    "14_lie": {
+      "file": "assets/chars/sprites/garan/14_lie.png",
+      "sha256": "58f636a9c23f357f06861fd23cd04ec8064cf5948b956b9c41e50e2b86b79f3c",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        0,
+        304,
+        400,
+        400
+      ],
+      "bboxWidth": 400,
+      "bboxHeight": 96,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 26
+    },
+    "cjab0": {
+      "file": "assets/chars/sprites/garan/cjab0.png",
+      "sha256": "5618b0a6737baadb7aa3724502f46cdd28dd744d676ba94a7a862b0f2386f594",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        64,
+        130,
+        336,
+        391
+      ],
+      "bboxWidth": 272,
+      "bboxHeight": 261,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "cjab1": {
+      "file": "assets/chars/sprites/garan/cjab1.png",
+      "sha256": "31abb618ab0c72cc4c2fe9283424d3fdbc8e1bdb543a9b4815e953a03f508ec2",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        27,
+        131,
+        373,
+        391
+      ],
+      "bboxWidth": 346,
+      "bboxHeight": 260,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "turn": {
+      "file": "assets/chars/sprites/garan/turn.png",
+      "sha256": "82bdefe25752f92894594e7b753f2e80dc21709d9538552f9f1b50912aacc053",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        107,
+        67,
+        273,
+        386
+      ],
+      "bboxWidth": 166,
+      "bboxHeight": 319,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "jumpTop": {
+      "file": "assets/chars/sprites/garan/jumpTop.png",
+      "sha256": "165c39aa1ef346cc84883040a6544b0a8a4ab6ee32d55371de8c2ba61b3cac7c",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        107,
+        119,
+        293,
+        392
+      ],
+      "bboxWidth": 186,
+      "bboxHeight": 273,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "jumpUp": {
+      "file": "assets/chars/sprites/garan/jumpUp.png",
+      "sha256": "d06adec8cd128b3227f85d33e1179615e3062b5f95db6729d56a60fa07e6b1b6",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        111,
+        93,
+        289,
+        392
+      ],
+      "bboxWidth": 178,
+      "bboxHeight": 299,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "jumpDown": {
+      "file": "assets/chars/sprites/garan/jumpDown.png",
+      "sha256": "c71f1c8aed1c52744a00b089ca4b10b116b2dec8b4aac3d2bcc5b1ec16825e01",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        130,
+        119,
+        271,
+        392
+      ],
+      "bboxWidth": 141,
+      "bboxHeight": 273,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "hop": {
+      "file": "assets/chars/sprites/garan/hop.png",
+      "sha256": "4fed2eca98eb9dc18803cfe8e5d6bd4d55647b3fe9d8a0124ec33c7f6b890ce7",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        119,
+        102,
+        281,
+        392
+      ],
+      "bboxWidth": 162,
+      "bboxHeight": 290,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "ajab": {
+      "file": "assets/chars/sprites/garan/ajab.png",
+      "sha256": "9be15e3262fa335aaa0347e0ce3091e36712e66bb6bc7cea387c51d1eebfa416",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        42,
+        117,
+        357,
+        391
+      ],
+      "bboxWidth": 315,
+      "bboxHeight": 274,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "akick": {
+      "file": "assets/chars/sprites/garan/akick.png",
+      "sha256": "55205da68bb00a4c63b2e0dc879fc25fdb828fc809ff2a1a5cfb9aeca461d026",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        63,
+        116,
+        336,
+        391
+      ],
+      "bboxWidth": 273,
+      "bboxHeight": 275,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "airLowKick": {
+      "file": "assets/chars/sprites/garan/airLowKick.png",
+      "sha256": "ee7c8da21dc0deef320da012bd3336357ca566596cc4cf12a4d6663a6c8cd766",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        24,
+        5,
+        375,
+        400
+      ],
+      "bboxWidth": 351,
+      "bboxHeight": 395,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 13
+    },
+    "land": {
+      "file": "assets/chars/sprites/garan/land.png",
+      "sha256": "2591f1e319347e12c166c78afdc1ea2613d68313f5b5b8d1c762855aa2f2ffac",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        116,
+        93,
+        285,
+        387
+      ],
+      "bboxWidth": 169,
+      "bboxHeight": 294,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "sg_run_mid": {
+      "file": "assets/chars/sprites/garan/sg_run_mid.png",
+      "sha256": "685cacd4ae27e67c74f644f940afe6dfc269247636d1ce9d449a94b2e6ca06ef",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        24,
+        6,
+        376,
+        363
+      ],
+      "bboxWidth": 352,
+      "bboxHeight": 357,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "sg_run_run0": {
+      "file": "assets/chars/sprites/garan/sg_run_run0.png",
+      "sha256": "8b68d398eebeb343d4f889304b22932c9a6bfc5ed3e7ac7c1c7404fb1d750f17",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        48,
+        112,
+        313,
+        379
+      ],
+      "bboxWidth": 265,
+      "bboxHeight": 267,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "sg_run_run1": {
+      "file": "assets/chars/sprites/garan/sg_run_run1.png",
+      "sha256": "f0e4722ca984bf43738d1c7b996d0c46f4e61d959eb9a482711ead65720a4a18",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        51,
+        120,
+        305,
+        391
+      ],
+      "bboxWidth": 254,
+      "bboxHeight": 271,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "sg_run_run2": {
+      "file": "assets/chars/sprites/garan/sg_run_run2.png",
+      "sha256": "d17d0eb1a3cbb07c9d3ab382f1a00d6c688b346ee395145284d3df9c25d9b100",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        75,
+        53,
+        324,
+        354
+      ],
+      "bboxWidth": 249,
+      "bboxHeight": 301,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    },
+    "sg_run_run3": {
+      "file": "assets/chars/sprites/garan/sg_run_run3.png",
+      "sha256": "3620b56854f31da3cec84581409f2e3eb1a9dec0caf6f6fe8e38fad67d2ba046",
+      "size": [
+        400,
+        400
+      ],
+      "bboxAlpha": [
+        43,
+        119,
+        313,
+        383
+      ],
+      "bboxWidth": 270,
+      "bboxHeight": 264,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0
+    }
+  },
+  "evidence": {
+    "requestedFamiliesNative": "guard-hit-native.png",
+    "requestedFamiliesNearest2x": "guard-hit-nearest-2x.png",
+    "crouchCjabTurnNative": "crouch-cjab-turn-native.png",
+    "crouchCjabTurnNearest2x": "crouch-cjab-turn-nearest-2x.png",
+    "aerialNative": "aerial-family-native.png",
+    "aerialNearest2x": "aerial-family-nearest-2x.png",
+    "runNative": "run-family-native.png",
+    "runNearest2x": "run-family-nearest-2x.png",
+    "airLowKickIntegratedNative": "../candidates/garan-airlowkick-borderfix-20261112/native-comparison.png",
+    "airLowKickIntegratedNearest2x": "../candidates/garan-airlowkick-borderfix-20261112/nearest-2x-comparison.png",
+    "runCorrectionNative": "../candidates/garan-sg-run-mid-edge-v1/run-neighbor-native.png",
+    "runCorrectionNearest2x": "../candidates/garan-sg-run-mid-edge-v1/active-candidate-nearest-2x.png",
+    "runNeighborDetailNearest2x": "../candidates/garan-sg-run-mid-edge-v1/run-neighbors-nearest-2x.png"
+  },
+  "testsRuntimeAndIntegration": "Only the promoted sg_run_mid PNG structural checks were performed; no engine tests or runtime review."
+}

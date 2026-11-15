@@ -22,7 +22,9 @@ pub mod sctrl;
 pub mod hitdef;
 pub mod matchs;
 pub mod lane;
+pub mod stage_objects;
 pub mod tag;
+pub mod finish;
 pub mod camera;
 pub mod scene_triggers;
 pub mod common;
@@ -35,6 +37,8 @@ pub mod stagevar;
 pub mod native;
 pub mod passive_time;
 pub mod passives;
+pub mod rush;
 pub mod raster;
+pub mod move_cost;
 
 pub use ume_formats as formats;

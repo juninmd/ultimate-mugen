@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-12",
+  "fighter": "kaname",
+  "pose": "mr0",
+  "target": "assets/chars/sprites/kaname/mr0.png",
+  "activeSha256": "735b822b2d4c7002c550bce65d615cac9a44dc4746e909eaf6c1cbd7c54431c9",
+  "backup": "integrated/kaname-mr0-before/mr0.png",
+  "backupSha256": "0a50e168d9b971e91f249345e9969fa4297e33f12913a9a14956afbcd85788e2",
+  "candidateReview": "candidates/kaname-mr0-pilot/candidate-review-v3.json",
+  "reusesFamilies": [
+    "hoarfrost",
+    "hoarfrostEx",
+    "trap"
+  ],
+  "visualReview": {
+    "identity": "pass: canonical tied-back blue hair, white haori with navy trim, black sash, navy hakama, sandals and steel katana",
+    "pose": "pass: airborne descending preparation consistent with mr0 phase; full figure and full blade at approximately active mr0 height",
+    "effect": "pass: preserves the existing broad cyan-blue sword trail as a hard-edged pixel effect; no added effects beyond that target trail",
+    "sequence": "pass: mr0 candidate transitions into the mr1 grounded crouching follow-through clearly at native and nearest 2x",
+    "evidence": [
+      "pipeline-v3/evidence/native-mr0-mr1.png",
+      "pipeline-v3/evidence/2x-mr0-mr1.png"
+    ],
+    "runtime_review": "not performed"
+  },
+  "integration": "Promoted after parent native and nearest-2x sequence review; corrected version preserves the original cyan sword trail as hard pixel FX. v2 was rejected as it omitted the target effect. Metadata and timings unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

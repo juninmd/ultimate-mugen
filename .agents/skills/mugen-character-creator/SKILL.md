@@ -1283,6 +1283,8 @@ value = 1000 ; Cancela Jab direto em Projétil
 | **Combo aéreo para de conectar de repente** | Limite global de juggle esgotado (`airjuggle`) | Eleve `airjuggle` no `[Data]` ou adicione `AssertSpecial: nojugglecheck` |
 | **Atacante fica colado no oponente defendendo no canto** | Ausência de recuo manual de canto | Insira `PosAdd x = -8` quando `FrontEdgeBodyDist <= 20 && MoveContact` |
 
+Checklist de pré-voo (parâmetros obrigatórios, versões, paletas, variáveis, avisos do emulador): `references/checklist_lint_editor.md`.
+
 ### Comandos de Validação e Ferramental do Motor (Rust)
 ```powershell
 # 1. Gerar scaffold completo do novo personagem via CLI Rust nativa
@@ -1601,3 +1603,15 @@ Com essa arquitetura, a barreira técnica de meses de trabalho artesanal cai par
 
 > **Passo a passo de sprites e regras de animação perfeita:** ver [references/sprites_animacoes_passo_a_passo.md](references/sprites_animacoes_passo_a_passo.md).
 
+---
+
+## 13. Lições de 50+ lutadores estudados (rápidos e fortes)
+
+Resumo completo em `docs/wiki/Fighter-Study.md`. Aplique ao desenhar o kit:
+
+1. **Rápidos** (Ken, Chun-Li, Chipp, Kyo, Wolverine, Jin): normais leves com startup de 3 a 5 ticks, avanço curto (`lunge`) cancelável em especial, mergulho aéreo com velocidade angular, teleporte ou super velocidade, dano baixo por golpe e combos longos.
+2. **Fortes** (Zangief, Bison, Broly, Heihachi, Bruno): normais pesados com startup de 8 a 14 ticks, investida com armadura de um golpe (`HitOverride`/`armor`), lançadores com quique na parede ou no chão, arremessos de comando e passivas de raiva.
+3. **Cadeia de cancelamento**: normal → especial → super com flag única (`var(1)`); especiais cancelam em outros só por rota explícita (estilo Kyo rekka).
+4. **Anti-aéreo com invulnerabilidade** (`NotHitBy` nos primeiros quadros) e uma ferramenta de projétil (fireball, Sonic Boom, Tiger Shot) por lutador.
+5. **Do zero**: projetar o kit, desenhar com paleta única (índice 0 transparente), recorte justo com eixo nos pés, empacotar no Fighter Factory, medir frame data, testar em Training com hitboxes.
+6. **Migração** para o formato nativo: veja a skill `mugen-to-ume-migrator`.

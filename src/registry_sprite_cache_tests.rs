@@ -73,3 +73,18 @@ fn late_sprite_packs_replace_cached_native_definitions() {
         [0, 0, 0, 255].into()
     );
 }
+
+#[test]
+fn entry_stats_does_not_load_preview_or_decode_sprites() {
+    let mut reg = Registry::new();
+    reg.add_bundled_mugen();
+    let native_idx = reg.chars.iter().position(|c| !c.mugen).unwrap();
+    let mugen_idx = reg.chars.iter().position(|c| c.mugen).unwrap();
+    let (nat_atk, nat_life, nat_spd) = reg.chars[native_idx].stats();
+    assert!(nat_atk > 0.0 && nat_life > 0.0 && nat_spd > 0.0);
+    assert!(reg.chars[native_idx].peek(1).is_none(), "native preview must not be forced");
+
+    let (mugen_atk, mugen_life, mugen_spd) = reg.chars[mugen_idx].stats();
+    assert!(mugen_atk > 0.0 && mugen_life > 0.0 && mugen_spd > 0.0);
+    assert!(reg.chars[mugen_idx].peek(1).is_none(), "mugen preview/definition must not be loaded");
+}

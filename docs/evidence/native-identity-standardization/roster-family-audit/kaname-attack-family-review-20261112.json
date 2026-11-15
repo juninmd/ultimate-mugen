@@ -1,0 +1,2357 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-12",
+  "character": "kaname",
+  "scope": "native-size cross-review of attack families and active sprite aliases; no active assets edited",
+  "canonicalIdentity": {
+    "primary": "assets/chars/sprites/kaname/04_special.png",
+    "supplementary": "assets/chars/sprites/kaname/01_idle.png",
+    "description": "blue-haired swordsman in white long-sleeved haori with navy trim, black sash, navy pleated hakama, sandals and canonical katana; 04_special special effects are identity reference only and must not be copied into ordinary attacks."
+  },
+  "sourceAudit": {
+    "familyRows": 85,
+    "sourceReportDispositionCounts": {
+      "static_pass": 37,
+      "correction_required": 44,
+      "unresolved": 4
+    },
+    "sourceReport": "full-family-static-review-current.json",
+    "correctionBacklog": "native-family-correction-backlog-current.json",
+    "existingContactSheet": "kaname-sprites.png",
+    "hashMismatchesAmongReviewedRows": 0,
+    "reviewedUniqueReferencedFiles": 50
+  },
+  "reviewMethod": {
+    "existingFullRosterSheet": "kaname-sprites.png",
+    "newNativeAnd2xComparisons": [
+      "kaname-attack-family-review/kaname-basic-native.png",
+      "kaname-attack-family-review/kaname-basic-2x.png",
+      "kaname-attack-family-review/kaname-special_aliases-native.png",
+      "kaname-attack-family-review/kaname-special_aliases-2x.png"
+    ],
+    "directNativeSpotComparisons": [
+      "assets/chars/sprites/kaname/jab0.png",
+      "assets/chars/sprites/kaname/lk0.png",
+      "assets/chars/sprites/kaname/cjab0.png",
+      "assets/chars/sprites/kaname/ajab.png",
+      "assets/chars/sprites/kaname/akick0.png",
+      "assets/chars/sprites/kaname/airLowKick.png",
+      "assets/chars/sprites/kaname/lowKick.png",
+      "assets/chars/sprites/kaname/cr0.png",
+      "assets/chars/sprites/kaname/cr1.png",
+      "assets/chars/sprites/kaname/cr2.png",
+      "assets/chars/sprites/kaname/sp0.png",
+      "assets/chars/sprites/kaname/sp1.png",
+      "assets/chars/sprites/kaname/mr0.png",
+      "assets/chars/sprites/kaname/mr1.png",
+      "assets/chars/sprites/kaname/ss0.png",
+      "assets/chars/sprites/kaname/ss1.png",
+      "assets/chars/sprites/kaname/04_special.png"
+    ]
+  },
+  "formsChecked": [
+    {
+      "id": "kaname_awakened",
+      "name": "Lâmina Espiritual",
+      "palette": null,
+      "characterSwap": null,
+      "spriteSet": null,
+      "artStyle": null
+    },
+    {
+      "id": "kaname_ascended",
+      "name": "Eternal Winter",
+      "palette": {
+        "colors": {
+          "aura": "#fff3b0",
+          "energy": "#fff3b0"
+        }
+      },
+      "characterSwap": null,
+      "spriteSet": null,
+      "artStyle": null
+    }
+  ],
+  "families": [
+    {
+      "animation": "jab",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/jab0.png",
+        "assets/chars/sprites/kaname/jab1.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "jab0.png",
+        "jab1.png",
+        "jab0.png",
+        "idle0.png"
+      ],
+      "finding": "jab0.png and jab1.png show the older sleeveless navy/cyan outfit; idle0.png is the canonical return frame."
+    },
+    {
+      "animation": "strong",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/str0.png",
+        "assets/chars/sprites/kaname/str1.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "str0.png",
+        "str0.png",
+        "str1.png",
+        "str1.png",
+        "str0.png",
+        "idle0.png"
+      ],
+      "finding": "str0.png and str1.png show the older sleeveless navy/cyan outfit; several moves reuse this animation."
+    },
+    {
+      "animation": "lkick",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/lk0.png",
+        "assets/chars/sprites/kaname/lk1.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "lk0.png",
+        "lk1.png",
+        "lk0.png",
+        "idle0.png"
+      ],
+      "finding": "lk0.png and lk1.png show the older sleeveless navy/cyan outfit; idle0.png is canonical."
+    },
+    {
+      "animation": "hkick",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/hk0.png",
+        "assets/chars/sprites/kaname/hk1.png",
+        "assets/chars/sprites/kaname/hk2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "hk0.png",
+        "hk0.png",
+        "hk1.png",
+        "hk2.png",
+        "hk2.png",
+        "hk0.png",
+        "idle0.png"
+      ],
+      "finding": "hk0.png, hk1.png and hk2.png use the older outfit."
+    },
+    {
+      "animation": "cjab",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/cjab0.png",
+        "assets/chars/sprites/kaname/cjab1.png",
+        "assets/chars/sprites/kaname/crouch.png"
+      ],
+      "framesInOrder": [
+        "cjab0.png",
+        "cjab1.png",
+        "cjab0.png",
+        "crouch.png"
+      ],
+      "finding": "cjab0.png and cjab1.png use the older outfit; cjab0 has a separately reviewed canonical-outfit candidate. Isolated cjab0 candidate is approved as visual pixel-art pending runtime and unintegrated; cjab1 v7 is unresolved for a short katana and v8 is rejected by fixed-canvas registration."
+    },
+    {
+      "animation": "clk",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/crouch.png",
+        "assets/chars/sprites/kaname/clk.png",
+        "assets/chars/sprites/kaname/crouch1.png"
+      ],
+      "framesInOrder": [
+        "crouch.png",
+        "clk.png",
+        "crouch1.png",
+        "crouch.png"
+      ],
+      "finding": "crouch.png, clk.png and crouch1.png use the older outfit."
+    },
+    {
+      "animation": "sweep",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/sweep0.png",
+        "assets/chars/sprites/kaname/sweep1.png",
+        "assets/chars/sprites/kaname/crouch.png"
+      ],
+      "framesInOrder": [
+        "sweep0.png",
+        "sweep1.png",
+        "sweep1.png",
+        "sweep0.png",
+        "crouch.png"
+      ],
+      "finding": "sweep0.png and sweep1.png use the older outfit; crouch.png is a shared old-design return."
+    },
+    {
+      "animation": "ajab",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/jumpTop.png",
+        "assets/chars/sprites/kaname/ajab.png",
+        "assets/chars/sprites/kaname/jumpDown.png"
+      ],
+      "framesInOrder": [
+        "jumpTop.png",
+        "ajab.png",
+        "jumpDown.png",
+        "jumpTop.png"
+      ],
+      "finding": "jumpTop.png, ajab.png and jumpDown.png use the older outfit."
+    },
+    {
+      "animation": "akick",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/akick0.png",
+        "assets/chars/sprites/kaname/akick.png",
+        "assets/chars/sprites/kaname/jumpTop.png"
+      ],
+      "framesInOrder": [
+        "akick0.png",
+        "akick.png",
+        "akick.png",
+        "jumpTop.png"
+      ],
+      "finding": "akick0.png, akick.png and jumpTop.png use the older outfit."
+    },
+    {
+      "animation": "lowKick",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/crouch0.png",
+        "assets/chars/sprites/kaname/lowKick.png",
+        "assets/chars/sprites/kaname/crouch1.png",
+        "assets/chars/sprites/kaname/crouch.png"
+      ],
+      "framesInOrder": [
+        "crouch0.png",
+        "lowKick.png",
+        "crouch1.png",
+        "crouch.png"
+      ],
+      "finding": "Family remains mixed because crouch0.png/crouch1.png/crouch.png use the old outfit; lowKick.png itself matches the canonical white haori/hakama and should be preserved."
+    },
+    {
+      "animation": "airLowKick",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/akick0.png",
+        "assets/chars/sprites/kaname/akick.png",
+        "assets/chars/sprites/kaname/airLowKick.png",
+        "assets/chars/sprites/kaname/jumpDown.png"
+      ],
+      "framesInOrder": [
+        "akick0.png",
+        "akick.png",
+        "airLowKick.png",
+        "jumpDown.png",
+        "jumpDown.png"
+      ],
+      "finding": "Family remains mixed because akick0.png/akick.png/jumpDown.png use the old outfit; airLowKick.png itself matches the canonical white haori/hakama and should be preserved."
+    },
+    {
+      "animation": "stringA",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/str0.png",
+        "assets/chars/sprites/kaname/str1.png",
+        "assets/chars/sprites/kaname/jab0.png",
+        "assets/chars/sprites/kaname/jab1.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "str0.png",
+        "str0.png",
+        "str1.png",
+        "jab0.png",
+        "jab1.png",
+        "jab0.png",
+        "idle0.png"
+      ],
+      "finding": "Reuses str0.png/str1.png and jab0.png/jab1.png; correction required."
+    },
+    {
+      "animation": "stringB",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/jab0.png",
+        "assets/chars/sprites/kaname/jab1.png",
+        "assets/chars/sprites/kaname/lk0.png",
+        "assets/chars/sprites/kaname/lk1.png",
+        "assets/chars/sprites/kaname/str0.png",
+        "assets/chars/sprites/kaname/str1.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "jab0.png",
+        "jab1.png",
+        "lk0.png",
+        "lk1.png",
+        "str0.png",
+        "str0.png",
+        "str1.png",
+        "str1.png",
+        "str0.png",
+        "idle0.png"
+      ],
+      "finding": "Reuses jab0.png/jab1.png, lk0.png/lk1.png and str0.png/str1.png; correction required."
+    },
+    {
+      "animation": "stringC",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/hk0.png",
+        "assets/chars/sprites/kaname/hk1.png",
+        "assets/chars/sprites/kaname/hk2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "hk0.png",
+        "hk0.png",
+        "hk1.png",
+        "hk2.png",
+        "hk2.png",
+        "hk0.png",
+        "idle0.png"
+      ],
+      "finding": "Reuses hk0.png/hk1.png/hk2.png; correction required."
+    },
+    {
+      "animation": "drawThrow",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/cr1.png",
+        "assets/chars/sprites/kaname/cr2.png",
+        "assets/chars/sprites/kaname/str0.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "cr1.png",
+        "cr2.png",
+        "str0.png",
+        "idle0.png"
+      ],
+      "finding": "cr1.png/cr2.png and str0.png use old design; idle0.png is canonical return."
+    },
+    {
+      "animation": "frostArc",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/cr0.png",
+        "assets/chars/sprites/kaname/inline_3f649693d432dce5.png",
+        "assets/chars/sprites/kaname/cr1.png",
+        "assets/chars/sprites/kaname/cr2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "cr0.png",
+        "inline_3f649693d432dce5.png",
+        "cr1.png",
+        "cr2.png",
+        "idle0.png"
+      ],
+      "finding": "cr0.png/cr1.png/cr2.png are old-design poses, mixed with canonical inline_3f649693d432dce5.png."
+    },
+    {
+      "animation": "frostArcEx",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/cr0.png",
+        "assets/chars/sprites/kaname/inline_3f649693d432dce5.png",
+        "assets/chars/sprites/kaname/cr1.png",
+        "assets/chars/sprites/kaname/cr2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "cr0.png",
+        "inline_3f649693d432dce5.png",
+        "cr1.png",
+        "cr2.png",
+        "idle0.png"
+      ],
+      "finding": "Same cr0/cr1/cr2 old-design sources as frostArc, mixed with canonical inline_3f649693d432dce5.png."
+    },
+    {
+      "animation": "hoarfrost",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/mr0.png",
+        "assets/chars/sprites/kaname/mr1.png",
+        "assets/chars/sprites/kaname/mr2.png",
+        "assets/chars/sprites/kaname/jumpDown.png"
+      ],
+      "framesInOrder": [
+        "mr0.png",
+        "mr1.png",
+        "mr1.png",
+        "mr2.png",
+        "jumpDown.png"
+      ],
+      "finding": "mr0.png/mr1.png/mr2.png and jumpDown.png show the older outfit; already correction_required in source report."
+    },
+    {
+      "animation": "hoarfrostEx",
+      "reportStatus": "correction_required",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/mr0.png",
+        "assets/chars/sprites/kaname/mr1.png",
+        "assets/chars/sprites/kaname/mr2.png",
+        "assets/chars/sprites/kaname/jumpDown.png"
+      ],
+      "framesInOrder": [
+        "mr0.png",
+        "mr1.png",
+        "mr1.png",
+        "mr2.png",
+        "jumpDown.png"
+      ],
+      "finding": "Same old mr0.png/mr1.png/mr2.png/jumpDown.png sources as hoarfrost; already correction_required."
+    },
+    {
+      "animation": "blinkCut",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/ss0.png",
+        "assets/chars/sprites/kaname/ss1.png",
+        "assets/chars/sprites/kaname/ss2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "ss0.png",
+        "ss1.png",
+        "ss1.png",
+        "ss2.png",
+        "idle0.png"
+      ],
+      "finding": "ss0.png/ss1.png/ss2.png use the older outfit; source report static_pass is contradicted by native comparison."
+    },
+    {
+      "animation": "iai",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/cr0.png",
+        "assets/chars/sprites/kaname/cr1.png",
+        "assets/chars/sprites/kaname/cr2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "cr0.png",
+        "cr0.png",
+        "cr1.png",
+        "cr2.png",
+        "cr2.png",
+        "idle0.png"
+      ],
+      "finding": "Reuses old-design cr0.png/cr1.png/cr2.png; source report static_pass is contradicted."
+    },
+    {
+      "animation": "trap",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/mr0.png",
+        "assets/chars/sprites/kaname/mr1.png",
+        "assets/chars/sprites/kaname/mr2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "mr0.png",
+        "mr1.png",
+        "mr2.png",
+        "idle0.png"
+      ],
+      "finding": "mr0.png/mr1.png/mr2.png show the older outfit; source report static_pass is contradicted."
+    },
+    {
+      "animation": "thousand",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/cr0.png",
+        "assets/chars/sprites/kaname/cr1.png",
+        "assets/chars/sprites/kaname/cr2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "cr0.png",
+        "cr1.png",
+        "cr2.png",
+        "cr1.png",
+        "cr2.png",
+        "cr1.png",
+        "cr2.png",
+        "cr1.png",
+        "cr2.png",
+        "cr2.png",
+        "idle0.png"
+      ],
+      "finding": "Reuses old-design cr0.png/cr1.png/cr2.png across the super sequence; source report static_pass is contradicted."
+    },
+    {
+      "animation": "thousandUlt",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/cr0.png",
+        "assets/chars/sprites/kaname/cr1.png",
+        "assets/chars/sprites/kaname/cr2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "cr0.png",
+        "cr1.png",
+        "cr2.png",
+        "cr1.png",
+        "cr2.png",
+        "cr1.png",
+        "cr2.png",
+        "cr1.png",
+        "cr2.png",
+        "cr2.png",
+        "idle0.png"
+      ],
+      "finding": "Reuses old-design cr0.png/cr1.png/cr2.png across the ultimate; source report static_pass is contradicted."
+    },
+    {
+      "animation": "super",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/sp0.png",
+        "assets/chars/sprites/kaname/inline_325beea3d661fe78.png",
+        "assets/chars/sprites/kaname/sp1.png",
+        "assets/chars/sprites/kaname/inline_f4ead780ee459475.png",
+        "assets/chars/sprites/kaname/cr2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "sp0.png",
+        "inline_325beea3d661fe78.png",
+        "sp1.png",
+        "inline_f4ead780ee459475.png",
+        "cr2.png",
+        "idle0.png"
+      ],
+      "finding": "sp0.png/sp1.png/cr2.png are old-design poses, interleaved with canonical inline_325beea3d661fe78.png and inline_f4ead780ee459475.png; source report static_pass misses the outfit alternation."
+    },
+    {
+      "animation": "needleBeam",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/inline_2cdd134a69aabfbf.png",
+        "assets/chars/sprites/kaname/inline_4a5b82897bece4b5.png",
+        "assets/chars/sprites/kaname/inline_282e2507e149aa22.png",
+        "assets/chars/sprites/kaname/cr2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "inline_2cdd134a69aabfbf.png",
+        "inline_4a5b82897bece4b5.png",
+        "inline_282e2507e149aa22.png",
+        "cr2.png",
+        "idle0.png"
+      ],
+      "finding": "inline_2cdd134a69aabfbf.png, inline_4a5b82897bece4b5.png and inline_282e2507e149aa22.png show old outfit with cyan blade/aura."
+    },
+    {
+      "animation": "crimsonCannon",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/inline_f4f80989ec6dd44f.png",
+        "assets/chars/sprites/kaname/inline_385ffe023b743a7d.png",
+        "assets/chars/sprites/kaname/inline_6024007266145d23.png",
+        "assets/chars/sprites/kaname/cr2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "inline_f4f80989ec6dd44f.png",
+        "inline_385ffe023b743a7d.png",
+        "inline_6024007266145d23.png",
+        "cr2.png",
+        "idle0.png"
+      ],
+      "finding": "inline_f4f80989ec6dd44f.png, inline_385ffe023b743a7d.png and inline_6024007266145d23.png show old outfit with cyan aura."
+    },
+    {
+      "animation": "flashStep",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/inline_4362387def07ae7a.png",
+        "assets/chars/sprites/kaname/inline_4642bd6b75a305a8.png",
+        "assets/chars/sprites/kaname/inline_d580a69b7cf04c8d.png",
+        "assets/chars/sprites/kaname/ss2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "inline_4362387def07ae7a.png",
+        "inline_4642bd6b75a305a8.png",
+        "inline_d580a69b7cf04c8d.png",
+        "ss2.png",
+        "idle0.png"
+      ],
+      "finding": "inline_4362387def07ae7a.png, inline_4642bd6b75a305a8.png and inline_d580a69b7cf04c8d.png show the older outfit."
+    },
+    {
+      "animation": "petalStorm",
+      "reportStatus": "static_pass",
+      "nativeReviewStatus": "correction_required",
+      "files": [
+        "assets/chars/sprites/kaname/sp0.png",
+        "assets/chars/sprites/kaname/inline_b3540c4f422f879c.png",
+        "assets/chars/sprites/kaname/sp1.png",
+        "assets/chars/sprites/kaname/inline_7bce21d00d833441.png",
+        "assets/chars/sprites/kaname/cr2.png",
+        "assets/chars/sprites/kaname/idle0.png"
+      ],
+      "framesInOrder": [
+        "sp0.png",
+        "inline_b3540c4f422f879c.png",
+        "sp1.png",
+        "inline_7bce21d00d833441.png",
+        "cr2.png",
+        "idle0.png"
+      ],
+      "finding": "sp0.png/sp1.png/cr2.png and inline_b3540c4f422f879c.png/inline_7bce21d00d833441.png show the old design; source report static_pass is contradicted."
+    },
+    {
+      "animation": "frostArcFx",
+      "reportStatus": "unresolved",
+      "nativeReviewStatus": "unresolved_non_body_fx",
+      "files": [],
+      "framesInOrder": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "finding": "See source report; no new individual correction claim."
+    },
+    {
+      "animation": "frostHit",
+      "reportStatus": "unresolved",
+      "nativeReviewStatus": "unresolved_non_body_fx",
+      "files": [],
+      "framesInOrder": [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "finding": "See source report; no new individual correction claim."
+    },
+    {
+      "animation": "winterFangFx",
+      "reportStatus": "unresolved",
+      "nativeReviewStatus": "unresolved_non_body_fx",
+      "files": [],
+      "framesInOrder": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "finding": "See source report; no new individual correction claim."
+    },
+    {
+      "animation": "winterFangHit",
+      "reportStatus": "unresolved",
+      "nativeReviewStatus": "unresolved_non_body_fx",
+      "files": [],
+      "framesInOrder": [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "finding": "See source report; no new individual correction claim."
+    }
+  ],
+  "staticPassRowsChangedByNativeCrossReview": [
+    {
+      "animation": "frostArc",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "frostArcEx",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "blinkCut",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "iai",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "trap",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "thousand",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "thousandUlt",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "super",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "needleBeam",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "crimsonCannon",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "flashStep",
+      "newStatus": "correction_required"
+    },
+    {
+      "animation": "petalStorm",
+      "newStatus": "correction_required"
+    }
+  ],
+  "highImpactSharedLegacySources": {
+    "cr0.png": [
+      "frostArc",
+      "frostArcEx",
+      "iai",
+      "thousand",
+      "thousandUlt"
+    ],
+    "cr1.png": [
+      "frostArc",
+      "frostArcEx",
+      "iai",
+      "thousand",
+      "thousandUlt",
+      "drawThrow"
+    ],
+    "cr2.png": [
+      "frostArc",
+      "frostArcEx",
+      "super",
+      "iai",
+      "thousand",
+      "thousandUlt",
+      "drawThrow"
+    ],
+    "sp0.png": [
+      "super",
+      "petalStorm"
+    ],
+    "sp1.png": [
+      "super",
+      "petalStorm"
+    ],
+    "mr0.png": [
+      "hoarfrost",
+      "hoarfrostEx",
+      "trap"
+    ],
+    "mr1.png": [
+      "hoarfrost",
+      "hoarfrostEx",
+      "trap"
+    ],
+    "mr2.png": [
+      "hoarfrost",
+      "hoarfrostEx",
+      "trap"
+    ],
+    "ss0.png": [
+      "blinkCut"
+    ],
+    "ss1.png": [
+      "blinkCut"
+    ],
+    "ss2.png": [
+      "blinkCut"
+    ]
+  },
+  "activeOldDesignInlineAliases": {
+    "frostArc": [
+      "inline_3f649693d432dce5.png (canonical newer outfit)"
+    ],
+    "super": [
+      "inline_325beea3d661fe78.png (canonical newer outfit)",
+      "inline_f4ead780ee459475.png (canonical newer outfit)"
+    ],
+    "needleBeam": [
+      "inline_2cdd134a69aabfbf.png",
+      "inline_4a5b82897bece4b5.png",
+      "inline_282e2507e149aa22.png"
+    ],
+    "crimsonCannon": [
+      "inline_f4f80989ec6dd44f.png",
+      "inline_385ffe023b743a7d.png",
+      "inline_6024007266145d23.png"
+    ],
+    "flashStep": [
+      "inline_4362387def07ae7a.png",
+      "inline_4642bd6b75a305a8.png",
+      "inline_d580a69b7cf04c8d.png"
+    ],
+    "petalStorm": [
+      "inline_b3540c4f422f879c.png",
+      "inline_7bce21d00d833441.png"
+    ]
+  },
+  "preserveCanonicalSources": [
+    "assets/chars/sprites/kaname/idle0.png",
+    "assets/chars/sprites/kaname/lowKick.png",
+    "assets/chars/sprites/kaname/airLowKick.png",
+    "assets/chars/sprites/kaname/inline_3f649693d432dce5.png",
+    "assets/chars/sprites/kaname/inline_325beea3d661fe78.png",
+    "assets/chars/sprites/kaname/inline_f4ead780ee459475.png"
+  ],
+  "unresolvedEffects": [
+    "frostArcFx",
+    "frostHit",
+    "winterFangFx",
+    "winterFangHit"
+  ],
+  "notes": [
+    "Most old references are active source frames, not orphans. Replacing the entire named attack family indiscriminately would overwrite valid pose files: lowKick.png and airLowKick.png already match the canonical outfit, and some inline aliases in frostArc/super are already canonical.",
+    "The declared kaname_ascended form recolors aura and energy only; no declared costume or character/sprite-set swap explains the older short navy/cyan outfit. The awakened form introduces moves but no body swap.",
+    "The report currently marks 12 mixed/legacy special and super families static_pass; the native comparisons contradict those labels. This is a supplemental cross-review; the consolidated report was not edited.",
+    "Unresolved projectile/hit FX are not body sprites and remain unresolved pending separate effect review."
+  ],
+  "sourceFiles": [
+    {
+      "file": "assets/chars/sprites/kaname/jab0.png",
+      "sha256Current": "fa9f1651421e29ed11799cc6ff28678852acc35c9c58005ecbc3bdbb56045647",
+      "sha256InReport": "fa9f1651421e29ed11799cc6ff28678852acc35c9c58005ecbc3bdbb56045647",
+      "matchesReport": true,
+      "poses": [
+        "jab0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/jab1.png",
+      "sha256Current": "f20cece69ac77222fbfc97bf59dd90749f45d214298749923d2ddc519c7776e1",
+      "sha256InReport": "f20cece69ac77222fbfc97bf59dd90749f45d214298749923d2ddc519c7776e1",
+      "matchesReport": true,
+      "poses": [
+        "jab1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/idle0.png",
+      "sha256Current": "263a974d66432352755395bcde270cbb42394d202f16acd20663fd676c531b5e",
+      "sha256InReport": "263a974d66432352755395bcde270cbb42394d202f16acd20663fd676c531b5e",
+      "matchesReport": true,
+      "poses": [
+        "idle0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/str0.png",
+      "sha256Current": "c53d3fbca477e3e514d7f841b90cb7a34191df9bc94628b8da44bf9670309c8f",
+      "sha256InReport": "c53d3fbca477e3e514d7f841b90cb7a34191df9bc94628b8da44bf9670309c8f",
+      "matchesReport": true,
+      "poses": [
+        "str0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/str1.png",
+      "sha256Current": "85f0c5d8fe58522e9f1d683d8af27416c4b050a94e3b9323f03b94dbddb2791b",
+      "sha256InReport": "85f0c5d8fe58522e9f1d683d8af27416c4b050a94e3b9323f03b94dbddb2791b",
+      "matchesReport": true,
+      "poses": [
+        "str1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/lk0.png",
+      "sha256Current": "b4235bc5ead1ac298213b8c4350dc179695f49d6684d078fe90e6f93e4f9e3bc",
+      "sha256InReport": "b4235bc5ead1ac298213b8c4350dc179695f49d6684d078fe90e6f93e4f9e3bc",
+      "matchesReport": true,
+      "poses": [
+        "lk0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/lk1.png",
+      "sha256Current": "fa15d15cbf92fbe4c35cbebfa73534b23a98522dd20b0a32a1ea84d9da05bbc3",
+      "sha256InReport": "fa15d15cbf92fbe4c35cbebfa73534b23a98522dd20b0a32a1ea84d9da05bbc3",
+      "matchesReport": true,
+      "poses": [
+        "lk1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/hk0.png",
+      "sha256Current": "e3d5997e704b01d6f02cba5b836d6a33b92f4d2022c909233aabaee1a59ecd57",
+      "sha256InReport": "e3d5997e704b01d6f02cba5b836d6a33b92f4d2022c909233aabaee1a59ecd57",
+      "matchesReport": true,
+      "poses": [
+        "hk0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/hk1.png",
+      "sha256Current": "5a9024eb4d02936b136242f977d4d0e4a318cb75a32d1531ed44e8772a5a8c0d",
+      "sha256InReport": "5a9024eb4d02936b136242f977d4d0e4a318cb75a32d1531ed44e8772a5a8c0d",
+      "matchesReport": true,
+      "poses": [
+        "hk1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/hk2.png",
+      "sha256Current": "ed2801dd3a1be3f93f646d4b050de945c29a49793181b4b876844fbd8c6dd5e3",
+      "sha256InReport": "ed2801dd3a1be3f93f646d4b050de945c29a49793181b4b876844fbd8c6dd5e3",
+      "matchesReport": true,
+      "poses": [
+        "hk2"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/cjab0.png",
+      "sha256Current": "17db726e708511bc52d450a1aaa1303effa65d5314fb9b66e20e56a52d32ab4d",
+      "sha256InReport": "17db726e708511bc52d450a1aaa1303effa65d5314fb9b66e20e56a52d32ab4d",
+      "matchesReport": true,
+      "poses": [
+        "cjab0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/cjab1.png",
+      "sha256Current": "5d7737af31c33188705fdcfe6668fdbe085a21a2473e54296531aa1d18a57910",
+      "sha256InReport": "5d7737af31c33188705fdcfe6668fdbe085a21a2473e54296531aa1d18a57910",
+      "matchesReport": true,
+      "poses": [
+        "cjab1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/crouch.png",
+      "sha256Current": "a5a78203865067f6fdd04299903dd1110f70e3273524e1a1b36e93589bd4cae3",
+      "sha256InReport": "a5a78203865067f6fdd04299903dd1110f70e3273524e1a1b36e93589bd4cae3",
+      "matchesReport": true,
+      "poses": [
+        "crouch"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/clk.png",
+      "sha256Current": "bbb1c6fe32155c8e1cc3067aa5b132480e9a42f4afd340253fa0e6120d095509",
+      "sha256InReport": "bbb1c6fe32155c8e1cc3067aa5b132480e9a42f4afd340253fa0e6120d095509",
+      "matchesReport": true,
+      "poses": [
+        "clk"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/crouch1.png",
+      "sha256Current": "cb074d0c6c564449b065adfe2bacfb3dff1dc59e5ab3ca8969a34aebf96c9aba",
+      "sha256InReport": "cb074d0c6c564449b065adfe2bacfb3dff1dc59e5ab3ca8969a34aebf96c9aba",
+      "matchesReport": true,
+      "poses": [
+        "crouch1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/sweep0.png",
+      "sha256Current": "243649619a509c5da30dcf32c05d364a06a1cdb549ca170de22d2f01e6743e03",
+      "sha256InReport": "243649619a509c5da30dcf32c05d364a06a1cdb549ca170de22d2f01e6743e03",
+      "matchesReport": true,
+      "poses": [
+        "sweep0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/sweep1.png",
+      "sha256Current": "bbb118c301ec8edfe36a50718ed56e6ed17db7a1e04d3b87356a170458234554",
+      "sha256InReport": "bbb118c301ec8edfe36a50718ed56e6ed17db7a1e04d3b87356a170458234554",
+      "matchesReport": true,
+      "poses": [
+        "sweep1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/jumpTop.png",
+      "sha256Current": "c4c515a5fb8f5865d9bb426999bcb2b142ac0d06896eae299f3904b8e78e64f3",
+      "sha256InReport": "c4c515a5fb8f5865d9bb426999bcb2b142ac0d06896eae299f3904b8e78e64f3",
+      "matchesReport": true,
+      "poses": [
+        "jumpTop"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/ajab.png",
+      "sha256Current": "9296f88d5700516a8d90fbf1a30471df42665230bab0cb3b7982d18f777490d6",
+      "sha256InReport": "9296f88d5700516a8d90fbf1a30471df42665230bab0cb3b7982d18f777490d6",
+      "matchesReport": true,
+      "poses": [
+        "ajab"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/jumpDown.png",
+      "sha256Current": "accba7ea5663848033c589b3cd77db476f9547b97eab5d1c9fd87c7f83c629b0",
+      "sha256InReport": "accba7ea5663848033c589b3cd77db476f9547b97eab5d1c9fd87c7f83c629b0",
+      "matchesReport": true,
+      "poses": [
+        "jumpDown"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/akick0.png",
+      "sha256Current": "b591d3b489571ab94d98a61aae19a36a77c415d14e7ba6e4fc44eddcd393fdce",
+      "sha256InReport": "b591d3b489571ab94d98a61aae19a36a77c415d14e7ba6e4fc44eddcd393fdce",
+      "matchesReport": true,
+      "poses": [
+        "akick0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/akick.png",
+      "sha256Current": "03e6503ccf0e2ecd93d80de2eed9f0a4588a81c19381fe9e53891bd55254ab4d",
+      "sha256InReport": "03e6503ccf0e2ecd93d80de2eed9f0a4588a81c19381fe9e53891bd55254ab4d",
+      "matchesReport": true,
+      "poses": [
+        "akick"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/crouch0.png",
+      "sha256Current": "01451168454290229d930143b72adb4b199768e61666c53e59822b2eabe1ae87",
+      "sha256InReport": "01451168454290229d930143b72adb4b199768e61666c53e59822b2eabe1ae87",
+      "matchesReport": true,
+      "poses": [
+        "crouch0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/lowKick.png",
+      "sha256Current": "5e8b3c634c2042a249ed08f50214014ef82a02a7a0adf5ab1c56bd8cc261cb90",
+      "sha256InReport": "5e8b3c634c2042a249ed08f50214014ef82a02a7a0adf5ab1c56bd8cc261cb90",
+      "matchesReport": true,
+      "poses": [
+        "lowKick"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/airLowKick.png",
+      "sha256Current": "d2c36676015ed5bbdb23529be632e27f394a589f0798ffaab95ff87ba3654068",
+      "sha256InReport": "d2c36676015ed5bbdb23529be632e27f394a589f0798ffaab95ff87ba3654068",
+      "matchesReport": true,
+      "poses": [
+        "airLowKick"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/cr1.png",
+      "sha256Current": "1c3ba885d43a26565e67a776fd14fc12966452686b801beeb8a5e4754752040a",
+      "sha256InReport": "1c3ba885d43a26565e67a776fd14fc12966452686b801beeb8a5e4754752040a",
+      "matchesReport": true,
+      "poses": [
+        "cr1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/cr2.png",
+      "sha256Current": "35be0b1f1396684d9218a8ab5bc0ec1d6740e941911e2ab6ae675e5a6e2d279f",
+      "sha256InReport": "35be0b1f1396684d9218a8ab5bc0ec1d6740e941911e2ab6ae675e5a6e2d279f",
+      "matchesReport": true,
+      "poses": [
+        "cr2"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/cr0.png",
+      "sha256Current": "4ed618f69f52dd188f00b9eecae3918f1483fa48cb888d26fbfdc8498625f01f",
+      "sha256InReport": "4ed618f69f52dd188f00b9eecae3918f1483fa48cb888d26fbfdc8498625f01f",
+      "matchesReport": true,
+      "poses": [
+        "cr0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_3f649693d432dce5.png",
+      "sha256Current": "bb39b213679f01fe4fb1a19c27dbaa23e6110478d39c1aaf18c1978670bd6ec5",
+      "sha256InReport": "bb39b213679f01fe4fb1a19c27dbaa23e6110478d39c1aaf18c1978670bd6ec5",
+      "matchesReport": true,
+      "poses": [
+        "inline_3f649693d432dce5"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/mr0.png",
+      "sha256Current": "0a50e168d9b971e91f249345e9969fa4297e33f12913a9a14956afbcd85788e2",
+      "sha256InReport": "0a50e168d9b971e91f249345e9969fa4297e33f12913a9a14956afbcd85788e2",
+      "matchesReport": true,
+      "poses": [
+        "mr0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/mr1.png",
+      "sha256Current": "c51e639e480538624856e32c9b5908beb237dc0ecff5cc6ed712d898d3c07095",
+      "sha256InReport": "c51e639e480538624856e32c9b5908beb237dc0ecff5cc6ed712d898d3c07095",
+      "matchesReport": true,
+      "poses": [
+        "mr1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/mr2.png",
+      "sha256Current": "c6740216f11fe23a2ffec6198505771c3ece3d873728f79e6620bb07578db2a6",
+      "sha256InReport": "c6740216f11fe23a2ffec6198505771c3ece3d873728f79e6620bb07578db2a6",
+      "matchesReport": true,
+      "poses": [
+        "mr2"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/ss0.png",
+      "sha256Current": "6aa29130bf1d600714ee8e0fb3e994c392dc5edf61750ee642fd27873c5fc021",
+      "sha256InReport": "6aa29130bf1d600714ee8e0fb3e994c392dc5edf61750ee642fd27873c5fc021",
+      "matchesReport": true,
+      "poses": [
+        "ss0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/ss1.png",
+      "sha256Current": "77a41118e6eff716b0795bdf9b8c75b539d2631bebae497356a75efbea2b90a3",
+      "sha256InReport": "77a41118e6eff716b0795bdf9b8c75b539d2631bebae497356a75efbea2b90a3",
+      "matchesReport": true,
+      "poses": [
+        "ss1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/ss2.png",
+      "sha256Current": "915938b22062bc154bc95c16438530d1cb297f77bae87b5f40d8a4b705296e61",
+      "sha256InReport": "915938b22062bc154bc95c16438530d1cb297f77bae87b5f40d8a4b705296e61",
+      "matchesReport": true,
+      "poses": [
+        "ss2"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/sp0.png",
+      "sha256Current": "dedacdc5c82d44b242c6c4fd44da4b36962a5a7d41cce879a2c02704bcba4422",
+      "sha256InReport": "dedacdc5c82d44b242c6c4fd44da4b36962a5a7d41cce879a2c02704bcba4422",
+      "matchesReport": true,
+      "poses": [
+        "sp0"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_325beea3d661fe78.png",
+      "sha256Current": "55ab38274d924543ceef9676d0689cd0a46562ac4d1dbe8ad494ca26c9708d1c",
+      "sha256InReport": "55ab38274d924543ceef9676d0689cd0a46562ac4d1dbe8ad494ca26c9708d1c",
+      "matchesReport": true,
+      "poses": [
+        "inline_325beea3d661fe78"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/sp1.png",
+      "sha256Current": "17f53b4e1f949a97a3629fa4bfce5211e2ad312a56c67c15f23efa0dded96384",
+      "sha256InReport": "17f53b4e1f949a97a3629fa4bfce5211e2ad312a56c67c15f23efa0dded96384",
+      "matchesReport": true,
+      "poses": [
+        "sp1"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_f4ead780ee459475.png",
+      "sha256Current": "5bed2f752fb88e096e52016a3437c25a4f2a636e83aa8dba3f81dbf038965bea",
+      "sha256InReport": "5bed2f752fb88e096e52016a3437c25a4f2a636e83aa8dba3f81dbf038965bea",
+      "matchesReport": true,
+      "poses": [
+        "inline_f4ead780ee459475"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_2cdd134a69aabfbf.png",
+      "sha256Current": "6f928e9c8686e916efb4c7a351b40383b994dd6ed9ed517cb24038a361ccb3cc",
+      "sha256InReport": "6f928e9c8686e916efb4c7a351b40383b994dd6ed9ed517cb24038a361ccb3cc",
+      "matchesReport": true,
+      "poses": [
+        "inline_2cdd134a69aabfbf"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_4a5b82897bece4b5.png",
+      "sha256Current": "39e85c55488348ec845f9052d4337d04c767d6699d1b545de1a6f25e8d1bf156",
+      "sha256InReport": "39e85c55488348ec845f9052d4337d04c767d6699d1b545de1a6f25e8d1bf156",
+      "matchesReport": true,
+      "poses": [
+        "inline_4a5b82897bece4b5"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_282e2507e149aa22.png",
+      "sha256Current": "7cfc51cbbdb8f74abe6cb0f0425a25df218b8866ff514f9b734d6ba11f197db0",
+      "sha256InReport": "7cfc51cbbdb8f74abe6cb0f0425a25df218b8866ff514f9b734d6ba11f197db0",
+      "matchesReport": true,
+      "poses": [
+        "inline_282e2507e149aa22"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_f4f80989ec6dd44f.png",
+      "sha256Current": "da16ca7caf771607a201b1dcc08ae48447d5b1567dfc4b69ea196b6fb8688f35",
+      "sha256InReport": "da16ca7caf771607a201b1dcc08ae48447d5b1567dfc4b69ea196b6fb8688f35",
+      "matchesReport": true,
+      "poses": [
+        "inline_f4f80989ec6dd44f"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_385ffe023b743a7d.png",
+      "sha256Current": "5ee1b097cc10b9844c116b4dd1b929d8eed0626fcde92b78a805e91123c4bb54",
+      "sha256InReport": "5ee1b097cc10b9844c116b4dd1b929d8eed0626fcde92b78a805e91123c4bb54",
+      "matchesReport": true,
+      "poses": [
+        "inline_385ffe023b743a7d"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_6024007266145d23.png",
+      "sha256Current": "c92c7eb082a4d0ae4174f210d19d9feb6b58a385bb8b8c242c2b67cfdc02b71b",
+      "sha256InReport": "c92c7eb082a4d0ae4174f210d19d9feb6b58a385bb8b8c242c2b67cfdc02b71b",
+      "matchesReport": true,
+      "poses": [
+        "inline_6024007266145d23"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_4362387def07ae7a.png",
+      "sha256Current": "bcf4d4a2f0401c54118c4d170cada62ea9c0a8d8f7128c6da6d6945e77378b77",
+      "sha256InReport": "bcf4d4a2f0401c54118c4d170cada62ea9c0a8d8f7128c6da6d6945e77378b77",
+      "matchesReport": true,
+      "poses": [
+        "inline_4362387def07ae7a"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_4642bd6b75a305a8.png",
+      "sha256Current": "33cadc13bcb6a355e00a7462ef47618b53b9358a0fcc484dfa4487c1b6d593ba",
+      "sha256InReport": "33cadc13bcb6a355e00a7462ef47618b53b9358a0fcc484dfa4487c1b6d593ba",
+      "matchesReport": true,
+      "poses": [
+        "inline_4642bd6b75a305a8"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_d580a69b7cf04c8d.png",
+      "sha256Current": "0413f309d81a3d13f162a79c81f20ecee2acb8a12aaf0018541b48e332ed3fc5",
+      "sha256InReport": "0413f309d81a3d13f162a79c81f20ecee2acb8a12aaf0018541b48e332ed3fc5",
+      "matchesReport": true,
+      "poses": [
+        "inline_d580a69b7cf04c8d"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_b3540c4f422f879c.png",
+      "sha256Current": "2a71b411cafb51c055bfe64a778c9f3db5d0110d86fa2a09bd5050ee44cbf38e",
+      "sha256InReport": "2a71b411cafb51c055bfe64a778c9f3db5d0110d86fa2a09bd5050ee44cbf38e",
+      "matchesReport": true,
+      "poses": [
+        "inline_b3540c4f422f879c"
+      ]
+    },
+    {
+      "file": "assets/chars/sprites/kaname/inline_7bce21d00d833441.png",
+      "sha256Current": "48f4f2595c956c6b27c73e267b056bf934249ea79bf90e2411b52dddb5d64e79",
+      "sha256InReport": "48f4f2595c956c6b27c73e267b056bf934249ea79bf90e2411b52dddb5d64e79",
+      "matchesReport": true,
+      "poses": [
+        "inline_7bce21d00d833441"
+      ]
+    }
+  ],
+  "sourceHashMismatches": [],
+  "decision": "Kaname attack-family static cross-review inventory updated: high-impact legacy sources remain correction-required; candidate outcomes are recorded separately; no active sprite or character data changed; runtime review not performed.",
+  "additionalInventory20261112": {
+    "currentCharacterDataSha256": "63c456f629f158e47334313b6f07b9c09633767b47a2361751b9ef2998fcf975",
+    "activeDataSnapshot": "assets/chars/kaname.json as inspected 2026-11-12; activeMoves comes from moves[].id/name grouped by moves[].anim; pose order comes from anims[anim].frames.",
+    "scope": "All attack families with nativeCrossReviewStatus=correction_required, including families mislabeled static_pass by the consolidated static screen. Static art/data linkage only; runtime not validated.",
+    "correctionFamilyCount": 29,
+    "sharedLegacyAliasesByCorrectionFamily": {
+      "cr2.png": [
+        "drawThrow",
+        "frostArc",
+        "frostArcEx",
+        "iai",
+        "thousand",
+        "thousandUlt",
+        "super",
+        "needleBeam",
+        "crimsonCannon",
+        "petalStorm"
+      ],
+      "cr1.png": [
+        "drawThrow",
+        "frostArc",
+        "frostArcEx",
+        "iai",
+        "thousand",
+        "thousandUlt"
+      ],
+      "cr0.png": [
+        "frostArc",
+        "frostArcEx",
+        "iai",
+        "thousand",
+        "thousandUlt"
+      ],
+      "crouch.png": [
+        "cjab",
+        "clk",
+        "sweep",
+        "lowKick"
+      ],
+      "jumpDown.png": [
+        "ajab",
+        "airLowKick",
+        "hoarfrost",
+        "hoarfrostEx"
+      ],
+      "str0.png": [
+        "strong",
+        "stringA",
+        "stringB",
+        "drawThrow"
+      ],
+      "jab0.png": [
+        "jab",
+        "stringA",
+        "stringB"
+      ],
+      "jab1.png": [
+        "jab",
+        "stringA",
+        "stringB"
+      ],
+      "mr0.png": [
+        "hoarfrost",
+        "hoarfrostEx",
+        "trap"
+      ],
+      "mr1.png": [
+        "hoarfrost",
+        "hoarfrostEx",
+        "trap"
+      ],
+      "mr2.png": [
+        "hoarfrost",
+        "hoarfrostEx",
+        "trap"
+      ],
+      "str1.png": [
+        "strong",
+        "stringA",
+        "stringB"
+      ],
+      "akick.png": [
+        "akick",
+        "airLowKick"
+      ],
+      "akick0.png": [
+        "akick",
+        "airLowKick"
+      ],
+      "crouch1.png": [
+        "clk",
+        "lowKick"
+      ],
+      "hk0.png": [
+        "hkick",
+        "stringC"
+      ],
+      "hk1.png": [
+        "hkick",
+        "stringC"
+      ],
+      "hk2.png": [
+        "hkick",
+        "stringC"
+      ],
+      "inline_3f649693d432dce5.png": [
+        "frostArc",
+        "frostArcEx"
+      ],
+      "jumpTop.png": [
+        "ajab",
+        "akick"
+      ],
+      "lk0.png": [
+        "lkick",
+        "stringB"
+      ],
+      "lk1.png": [
+        "lkick",
+        "stringB"
+      ],
+      "sp0.png": [
+        "super",
+        "petalStorm"
+      ],
+      "sp1.png": [
+        "super",
+        "petalStorm"
+      ],
+      "ss2.png": [
+        "blinkCut",
+        "flashStep"
+      ]
+    },
+    "families": [
+      {
+        "family": "jab",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "jab",
+            "name": "Pommel Tap"
+          }
+        ],
+        "animationFramePoses": [
+          "jab0",
+          "jab1",
+          "jab0",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "jab0.png",
+          "jab1.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "jab0.png and jab1.png show the older sleeveless navy/cyan outfit; idle0.png is the canonical return frame.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "strong",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "strong",
+            "name": "Snowfall Cut"
+          },
+          {
+            "id": "launcher",
+            "name": "Rising Draw"
+          },
+          {
+            "id": "escape_burst",
+            "name": "Winter Burst"
+          },
+          {
+            "id": "lunge",
+            "name": "Lunge Strike"
+          },
+          {
+            "id": "halfmoon",
+            "name": "Meia-Lua"
+          }
+        ],
+        "animationFramePoses": [
+          "str0",
+          "str0",
+          "str1",
+          "str1",
+          "str0",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "str0.png",
+          "str1.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "str0.png and str1.png show the older sleeveless navy/cyan outfit; several moves reuse this animation.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "lkick",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "lkick",
+            "name": "Front Kick"
+          }
+        ],
+        "animationFramePoses": [
+          "lk0",
+          "lk1",
+          "lk0",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "lk0.png",
+          "lk1.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "lk0.png and lk1.png show the older sleeveless navy/cyan outfit; idle0.png is canonical.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "hkick",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "hkick",
+            "name": "Rising Frost Edge"
+          },
+          {
+            "id": "overhead",
+            "name": "Sheath Strike"
+          }
+        ],
+        "animationFramePoses": [
+          "hk0",
+          "hk0",
+          "hk1",
+          "hk2",
+          "hk2",
+          "hk0",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "hk0.png",
+          "hk1.png",
+          "hk2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "hk0.png, hk1.png and hk2.png use the older outfit.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "cjab",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "cjab",
+            "name": "Kneeling Slice"
+          }
+        ],
+        "animationFramePoses": [
+          "cjab0",
+          "cjab1",
+          "cjab0",
+          "crouch"
+        ],
+        "reviewedSourceFiles": [
+          "cjab0.png",
+          "cjab1.png",
+          "crouch.png"
+        ],
+        "objectiveVisualGap": "cjab0.png and cjab1.png use the older outfit; cjab0 has a separately reviewed canonical-outfit candidate.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "cjab0 visual candidate is approved pending runtime but unintegrated. cjab1 v7 remains unresolved (katana too short); v8 is rejected (full katana overflows fixed canvas by 43 px). Resolve a full-length-katana composition before promotion."
+      },
+      {
+        "family": "clk",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "clk",
+            "name": "Shin Kick"
+          }
+        ],
+        "animationFramePoses": [
+          "crouch",
+          "clk",
+          "inline-rig-pose",
+          "crouch"
+        ],
+        "reviewedSourceFiles": [
+          "crouch.png",
+          "clk.png",
+          "crouch1.png"
+        ],
+        "objectiveVisualGap": "crouch.png, clk.png and crouch1.png use the older outfit.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "sweep",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "sweep",
+            "name": "Drift Sweep"
+          },
+          {
+            "id": "slide",
+            "name": "Frost Slide"
+          }
+        ],
+        "animationFramePoses": [
+          "sweep0",
+          "sweep1",
+          "sweep1",
+          "sweep0",
+          "crouch"
+        ],
+        "reviewedSourceFiles": [
+          "sweep0.png",
+          "sweep1.png",
+          "crouch.png"
+        ],
+        "objectiveVisualGap": "sweep0.png and sweep1.png use the older outfit; crouch.png is a shared old-design return.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "ajab",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "ajab",
+            "name": "Falling Petal Cut"
+          }
+        ],
+        "animationFramePoses": [
+          "jumpTop",
+          "ajab",
+          "inline-rig-pose",
+          "jumpTop"
+        ],
+        "reviewedSourceFiles": [
+          "jumpTop.png",
+          "ajab.png",
+          "jumpDown.png"
+        ],
+        "objectiveVisualGap": "jumpTop.png, ajab.png and jumpDown.png use the older outfit.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "akick",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "akick",
+            "name": "Icicle Drop"
+          },
+          {
+            "id": "divekick",
+            "name": "Plunge Slash"
+          },
+          {
+            "id": "falcondive",
+            "name": "Falcon Dive"
+          }
+        ],
+        "animationFramePoses": [
+          "akick0",
+          "akick",
+          "akick",
+          "jumpTop"
+        ],
+        "reviewedSourceFiles": [
+          "akick0.png",
+          "akick.png",
+          "jumpTop.png"
+        ],
+        "objectiveVisualGap": "akick0.png, akick.png and jumpTop.png use the older outfit.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "lowKick",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": false,
+        "activeMoves": [],
+        "animationFramePoses": [],
+        "reviewedSourceFiles": [
+          "crouch0.png",
+          "lowKick.png",
+          "crouch1.png",
+          "crouch.png"
+        ],
+        "objectiveVisualGap": "The dynamically injected move resolves; its crouch entry/return poses still use the older outfit, while lowKick.png itself matches the canonical white haori/hakama.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Preserve lowKick.png and replace only the confirmed old-design crouch0/crouch1/crouch poses; review the full injected animation.",
+        "engineInjectedAfterCompletion": true,
+        "injectedFromMove": "clk",
+        "animationFramePosesAfterCompletion": [
+          "crouch0",
+          "lowKick",
+          "crouch1",
+          "crouch"
+        ]
+      },
+      {
+        "family": "airLowKick",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": false,
+        "activeMoves": [],
+        "animationFramePoses": [],
+        "reviewedSourceFiles": [
+          "akick0.png",
+          "akick.png",
+          "airLowKick.png",
+          "jumpDown.png"
+        ],
+        "objectiveVisualGap": "The dynamically injected move resolves; akick0.png, akick.png and jumpDown.png retain the older outfit, while airLowKick.png itself is canonical.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Preserve airLowKick.png and replace only confirmed old-design frames in the full injected air-low-kick sequence.",
+        "engineInjectedAfterCompletion": true,
+        "injectedFromMove": "akick",
+        "animationFramePosesAfterCompletion": [
+          "jumpTop",
+          "jumpTop",
+          "airLowKick",
+          "jumpDown",
+          "jumpDown"
+        ]
+      },
+      {
+        "family": "stringA",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "string_a",
+            "name": "Iai Quick Draw"
+          }
+        ],
+        "animationFramePoses": [
+          "str0",
+          "str0",
+          "str1",
+          "jab0",
+          "jab1",
+          "jab0",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "str0.png",
+          "str1.png",
+          "jab0.png",
+          "jab1.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "Reuses str0.png/str1.png and jab0.png/jab1.png; correction required.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "stringB",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "string_b",
+            "name": "Frost Draw Chain"
+          }
+        ],
+        "animationFramePoses": [
+          "jab0",
+          "jab1",
+          "lk0",
+          "lk1",
+          "str0",
+          "str0",
+          "str1",
+          "str1",
+          "str0",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "jab0.png",
+          "jab1.png",
+          "lk0.png",
+          "lk1.png",
+          "str0.png",
+          "str1.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "Reuses jab0.png/jab1.png, lk0.png/lk1.png and str0.png/str1.png; correction required.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "stringC",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "string_c",
+            "name": "Winter Sheath"
+          }
+        ],
+        "animationFramePoses": [
+          "hk0",
+          "hk0",
+          "hk1",
+          "hk2",
+          "hk2",
+          "hk0",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "hk0.png",
+          "hk1.png",
+          "hk2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "Reuses hk0.png/hk1.png/hk2.png; correction required.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "drawThrow",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "drawThrow",
+            "name": "Frost Draw Throw"
+          }
+        ],
+        "animationFramePoses": [
+          "cr1",
+          "cr2",
+          "str0",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "cr1.png",
+          "cr2.png",
+          "str0.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "cr1.png/cr2.png and str0.png use old design; idle0.png is canonical return.",
+        "priority": "P1 core normal/cancel",
+        "nextStep": "Use approved Kaname identity refs and create distinct art per phase; replace only confirmed aliases and retain already canonical frames."
+      },
+      {
+        "family": "frostArc",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "frostarc",
+            "name": "Frostmoon Arc"
+          }
+        ],
+        "animationFramePoses": [
+          "cr0",
+          "inline-rig-pose",
+          "cr1",
+          "cr2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "cr0.png",
+          "inline_3f649693d432dce5.png",
+          "cr1.png",
+          "cr2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "cr0.png/cr1.png/cr2.png are old-design poses, mixed with canonical inline_3f649693d432dce5.png.",
+        "priority": "P1 shared cr/sp poses",
+        "nextStep": "Replace only old-design poses; preserve canonical inline_3f649693d432dce5 in frostArc and inline_325beea3d661fe78/inline_f4ead780ee459475 in super. Do not copy special-only VFX."
+      },
+      {
+        "family": "frostArcEx",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "ex_frostarc",
+            "name": "Frost Arc EX"
+          }
+        ],
+        "animationFramePoses": [
+          "cr0",
+          "inline-rig-pose",
+          "cr1",
+          "cr2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "cr0.png",
+          "inline_3f649693d432dce5.png",
+          "cr1.png",
+          "cr2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "Same cr0/cr1/cr2 old-design sources as frostArc, mixed with canonical inline_3f649693d432dce5.png.",
+        "priority": "P1 shared cr/sp poses",
+        "nextStep": "Replace only old-design poses; preserve canonical inline_3f649693d432dce5 in frostArc and inline_325beea3d661fe78/inline_f4ead780ee459475 in super. Do not copy special-only VFX."
+      },
+      {
+        "family": "hoarfrost",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "hoarfrost",
+            "name": "Rising Hoarfrost"
+          }
+        ],
+        "animationFramePoses": [
+          "mr0",
+          "mr1",
+          "mr1",
+          "mr2",
+          "jumpDown"
+        ],
+        "reviewedSourceFiles": [
+          "mr0.png",
+          "mr1.png",
+          "mr2.png",
+          "jumpDown.png"
+        ],
+        "objectiveVisualGap": "mr0.png/mr1.png/mr2.png and jumpDown.png show the older outfit; already correction_required in source report.",
+        "priority": "P1 shared mr poses",
+        "nextStep": "Make separate approved candidates for mr0/mr1/mr2 across hoarfrost, EX and trap; review jumpDown separately."
+      },
+      {
+        "family": "hoarfrostEx",
+        "sourceReportStatus": "correction_required",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "ex_hoarfrost",
+            "name": "Hoarfrost EX"
+          }
+        ],
+        "animationFramePoses": [
+          "mr0",
+          "mr1",
+          "mr1",
+          "mr2",
+          "jumpDown"
+        ],
+        "reviewedSourceFiles": [
+          "mr0.png",
+          "mr1.png",
+          "mr2.png",
+          "jumpDown.png"
+        ],
+        "objectiveVisualGap": "Same old mr0.png/mr1.png/mr2.png/jumpDown.png sources as hoarfrost; already correction_required.",
+        "priority": "P1 shared mr poses",
+        "nextStep": "Make separate approved candidates for mr0/mr1/mr2 across hoarfrost, EX and trap; review jumpDown separately."
+      },
+      {
+        "family": "blinkCut",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "blinkcut",
+            "name": "Silent Snow Step"
+          }
+        ],
+        "animationFramePoses": [
+          "ss0",
+          "ss1",
+          "ss1",
+          "ss2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "ss0.png",
+          "ss1.png",
+          "ss2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "ss0.png/ss1.png/ss2.png use the older outfit; source report static_pass is contradicted by native comparison.",
+        "priority": "P2 dedicated attack/inline poses",
+        "nextStep": "Review each alias as a separate action pose; correct only old-design sources, then compare complete ordered move at native/2x."
+      },
+      {
+        "family": "iai",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "iai",
+            "name": "Iai Frost Counter"
+          }
+        ],
+        "animationFramePoses": [
+          "cr0",
+          "cr0",
+          "cr1",
+          "cr2",
+          "cr2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "cr0.png",
+          "cr1.png",
+          "cr2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "Reuses old-design cr0.png/cr1.png/cr2.png; source report static_pass is contradicted.",
+        "priority": "P1 shared cr/sp poses",
+        "nextStep": "Correct each distinct cr/sp phase once; retain canonical inline aliases/effects/timing, then update and review all active users together."
+      },
+      {
+        "family": "trap",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "trap",
+            "name": "Frost Trap Ward"
+          }
+        ],
+        "animationFramePoses": [
+          "mr0",
+          "mr1",
+          "mr2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "mr0.png",
+          "mr1.png",
+          "mr2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "mr0.png/mr1.png/mr2.png show the older outfit; source report static_pass is contradicted.",
+        "priority": "P1 shared mr poses",
+        "nextStep": "Make separate approved candidates for mr0/mr1/mr2 across hoarfrost, EX and trap; review jumpDown separately."
+      },
+      {
+        "family": "thousand",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "thousand",
+            "name": "Thousand Frost Iai"
+          }
+        ],
+        "animationFramePoses": [
+          "cr0",
+          "cr1",
+          "cr2",
+          "cr1",
+          "cr2",
+          "cr1",
+          "cr2",
+          "cr1",
+          "cr2",
+          "cr2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "cr0.png",
+          "cr1.png",
+          "cr2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "Reuses old-design cr0.png/cr1.png/cr2.png across the super sequence; source report static_pass is contradicted.",
+        "priority": "P1 shared cr/sp poses",
+        "nextStep": "Correct each distinct cr/sp phase once; retain canonical inline aliases/effects/timing, then update and review all active users together."
+      },
+      {
+        "family": "thousandUlt",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "ult_thousand",
+            "name": "Winter Blade Ultimate"
+          }
+        ],
+        "animationFramePoses": [
+          "cr0",
+          "cr1",
+          "cr2",
+          "cr1",
+          "cr2",
+          "cr1",
+          "cr2",
+          "cr1",
+          "cr2",
+          "cr2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "cr0.png",
+          "cr1.png",
+          "cr2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "Reuses old-design cr0.png/cr1.png/cr2.png across the ultimate; source report static_pass is contradicted.",
+        "priority": "P1 shared cr/sp poses",
+        "nextStep": "Correct each distinct cr/sp phase once; retain canonical inline aliases/effects/timing, then update and review all active users together."
+      },
+      {
+        "family": "super",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "winterfang",
+            "name": "Awakened Blade: Winter Fang"
+          }
+        ],
+        "animationFramePoses": [
+          "sp0",
+          "inline-rig-pose",
+          "sp1",
+          "inline-rig-pose",
+          "cr2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "sp0.png",
+          "inline_325beea3d661fe78.png",
+          "sp1.png",
+          "inline_f4ead780ee459475.png",
+          "cr2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "sp0.png/sp1.png/cr2.png are old-design poses, interleaved with canonical inline_325beea3d661fe78.png and inline_f4ead780ee459475.png; source report static_pass misses the outfit alternation.",
+        "priority": "P1 shared cr/sp poses",
+        "nextStep": "Replace only old-design poses; preserve canonical inline_3f649693d432dce5 in frostArc and inline_325beea3d661fe78/inline_f4ead780ee459475 in super. Do not copy special-only VFX."
+      },
+      {
+        "family": "needleBeam",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "byakurai",
+            "name": "Piercing Needle Beam"
+          }
+        ],
+        "animationFramePoses": [
+          "inline-rig-pose",
+          "inline-rig-pose",
+          "inline-rig-pose",
+          "cr2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "inline_2cdd134a69aabfbf.png",
+          "inline_4a5b82897bece4b5.png",
+          "inline_282e2507e149aa22.png",
+          "cr2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "inline_2cdd134a69aabfbf.png, inline_4a5b82897bece4b5.png and inline_282e2507e149aa22.png show old outfit with cyan blade/aura.",
+        "priority": "P2 dedicated attack/inline poses",
+        "nextStep": "Review each alias as a separate action pose; correct only old-design sources, then compare complete ordered move at native/2x."
+      },
+      {
+        "family": "crimsonCannon",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "shakkaho",
+            "name": "Crimson Cannon"
+          }
+        ],
+        "animationFramePoses": [
+          "inline-rig-pose",
+          "inline-rig-pose",
+          "inline-rig-pose",
+          "cr2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "inline_f4f80989ec6dd44f.png",
+          "inline_385ffe023b743a7d.png",
+          "inline_6024007266145d23.png",
+          "cr2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "inline_f4f80989ec6dd44f.png, inline_385ffe023b743a7d.png and inline_6024007266145d23.png show old outfit with cyan aura.",
+        "priority": "P2 dedicated attack/inline poses",
+        "nextStep": "Review each alias as a separate action pose; correct only old-design sources, then compare complete ordered move at native/2x."
+      },
+      {
+        "family": "flashStep",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "shunpo_behind",
+            "name": "Flash Step Behind"
+          }
+        ],
+        "animationFramePoses": [
+          "inline-rig-pose",
+          "inline-rig-pose",
+          "inline-rig-pose",
+          "ss2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "inline_4362387def07ae7a.png",
+          "inline_4642bd6b75a305a8.png",
+          "inline_d580a69b7cf04c8d.png",
+          "ss2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "inline_4362387def07ae7a.png, inline_4642bd6b75a305a8.png and inline_d580a69b7cf04c8d.png show the older outfit.",
+        "priority": "P2 dedicated attack/inline poses",
+        "nextStep": "Review each alias as a separate action pose; correct only old-design sources, then compare complete ordered move at native/2x."
+      },
+      {
+        "family": "petalStorm",
+        "sourceReportStatus": "static_pass",
+        "nativeCrossReviewStatus": "correction_required",
+        "activeInCurrentKanameJson": true,
+        "activeMoves": [
+          {
+            "id": "kageyoshi",
+            "name": "Thousand Petal Storm"
+          }
+        ],
+        "animationFramePoses": [
+          "sp0",
+          "inline-rig-pose",
+          "sp1",
+          "inline-rig-pose",
+          "cr2",
+          "idle0"
+        ],
+        "reviewedSourceFiles": [
+          "sp0.png",
+          "inline_b3540c4f422f879c.png",
+          "sp1.png",
+          "inline_7bce21d00d833441.png",
+          "cr2.png",
+          "idle0.png"
+        ],
+        "objectiveVisualGap": "sp0.png/sp1.png/cr2.png and inline_b3540c4f422f879c.png/inline_7bce21d00d833441.png show the old design; source report static_pass is contradicted.",
+        "priority": "P1 shared cr/sp poses",
+        "nextStep": "Replace only old-design poses; preserve canonical inline_3f649693d432dce5 in frostArc and inline_325beea3d661fe78/inline_f4ead780ee459475 in super. Do not copy special-only VFX."
+      }
+    ],
+    "candidateStatus": {
+      "cjab0": {
+        "decision": "approved_as_visual_pixel_art_candidate_pending_runtime",
+        "candidate": "candidates/kaname-cjab0-pilot/pipeline-v1/final-strict-16-de010-registered/frames/clean.png",
+        "integrated": false
+      },
+      "cjab1": {
+        "v7": "unresolved: 400x400/y392/binary alpha/shared palette pass, but katana too short.",
+        "v8": "rejected: full-length katana exceeds fixed canvas by 43 px at (200,392); processed body height 197 px versus active cjab1 bbox height 288 px.",
+        "integrated": false
+      }
+    },
+    "notLinkedInCurrentDataSnapshot": [
+      {
+        "file": "assets/chars/sprites/kaname/lowKick.png",
+        "exists": true,
+        "referencedByCurrentAnimationPose": false,
+        "referencedByCurrentMoveAnimation": false
+      },
+      {
+        "file": "assets/chars/sprites/kaname/airLowKick.png",
+        "exists": true,
+        "referencedByCurrentAnimationPose": false,
+        "referencedByCurrentMoveAnimation": false
+      }
+    ],
+    "recommendedOrder": [
+      "P1-A: shared cr0/cr1/cr2 and sp0/sp1 across frostArc/frostArcEx/iai/thousand/thousandUlt/super/petalStorm; preserve canonical outfit inline poses.",
+      "P1-B: normals jab/strong/lk/hk and shared crouch poses; they feed strings, throw and cancel moves.",
+      "P1-C: mr0/mr1/mr2 shared by hoarfrost/hoarfrostEx/trap; retain action phases.",
+      "P2: ss poses and old special inline aliases in needleBeam/crimsonCannon/flashStep.",
+      "Resolve lowKick/airLowKick source-to-data mapping before claiming those files as active moves."
+    ],
+    "activeSpriteOrCharacterDataEditedByThisInventory": false,
+    "runtimeReviewed": false,
+    "lowNormalCompletionAudit": {
+      "source": "crates/engine/src/native/low_normals.rs::complete",
+      "finding": "The normal moves are injected after JSON deserialization; absence from kaname.json is expected and is not a data linkage defect.",
+      "groundPrerequisite": "Kaname clk crouching normal; adds lowkick move and lowKick animation using crouch0, lowKick, crouch1, crouch.",
+      "airPrerequisite": "Kaname akick air normal; adds airlowkick move and airLowKick animation using the native sprite and jump recovery frames.",
+      "rosterTestsAdded": "crates/engine/src/native/low_normals/tests.rs checks every roster character receives both moves and at least three distinct resolved images; not run during this art pass."
+    }
+  }
+}

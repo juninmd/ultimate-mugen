@@ -1,0 +1,14 @@
+[
+  {
+    "candidate": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouchGuard-pilot/candidate-final.png",
+    "candidateSha256": "f2dcef4ebedf97b1b11e434aeedfeb827f2932a507def579068de74be8be5d1d",
+    "file": "crouchGuard.png",
+    "originalSha256": "b07cda24ab46b35569d35bd86a31f610ef33a8d10f0d708944808e9a15d424dd"
+  },
+  {
+    "candidate": "docs/evidence/native-identity-standardization/roster-family-audit/candidates/suzume-crouchGuardHit-pilot/candidate-final.png",
+    "candidateSha256": "42ae91773c8c7930b1862ae67f8984041bd66902e51fce9916af679477cd14b7",
+    "file": "crouchGuardHit.png",
+    "originalSha256": "60dcc5212849bb632adaf425d0d1bf752f19b46060dbc8cfe6eaa3b4aff0fe13"
+  }
+]

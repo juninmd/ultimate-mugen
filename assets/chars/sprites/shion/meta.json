@@ -1,22 +1,89 @@
 {
   "frames": {
     "01_idle": {
-      "refHeight": 343
+      "axisX": 158.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
     },
     "02_attack1": {
-      "refHeight": 343
+      "axisX": 182.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
     },
     "03_attack2": {
-      "refHeight": 343
+      "axisX": 202.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
     },
     "04_special": {
-      "refHeight": 343
+      "axisX": 207.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
     },
     "05_projectile": {
-      "refHeight": 343
+      "axisX": 143.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
     },
     "06_victory": {
-      "refHeight": 343
+      "axisX": 217.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
+    },
+    "07_idle1": {
+      "axisX": 158.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
+    },
+    "08_idle2": {
+      "axisX": 161.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
+    },
+    "09_hit1": {
+      "axisX": 158.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
+    },
+    "10_hit2": {
+      "axisX": 195.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
+    },
+    "11_hit3": {
+      "axisX": 180.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
+    },
+    "12_fall1": {
+      "axisX": 211.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
+    },
+    "13_fall2": {
+      "axisX": 194.527,
+      "axisY": 400.0,
+      "refHeight": 341.294
+    },
+    "14_lie": {
+      "axisX": 200.0,
+      "axisY": 400.0,
+      "refHeight": 329.017
+    },
+    "15_power0": {
+      "axisX": 200.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
+    },
+    "16_power1": {
+      "axisX": 190.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
+    },
+    "17_power2": {
+      "axisX": 191.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
     },
     "airGuard": {
       "axisX": 200.0,
@@ -24,6 +91,41 @@
       "refHeight": 320.0
     },
     "airGuardHit": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "airLowKick": {
+      "axisX": 202.5,
+      "axisY": 400.0,
+      "refHeight": 343.0
+    },
+    "ajab": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "akick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "akick0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "cjab0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "cjab1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "clk": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -183,6 +285,21 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "hk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hk2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "hop": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -208,6 +325,21 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "inline_51980e6c3a475bfd": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_729b2f3a43092ed8": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_906e0713fab89071": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "inline_969c08b63632c366": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -219,6 +351,21 @@
       "refHeight": 320.0
     },
     "inline_f4ead780ee459475": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "inline_fbaa3095e6a9dd8c": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab1": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -247,6 +394,21 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
+    },
+    "lk0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "lk1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 343.0
     },
     "mr0": {
       "axisX": 200.0,
@@ -278,6 +440,41 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "sg_run_mid": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run0": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run1": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run2": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run3": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sp0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sp1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "ss0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -289,6 +486,26 @@
       "refHeight": 320.0
     },
     "ss2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "str0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "str1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sweep0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sweep1": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -324,6 +541,11 @@
       "refHeight": 320.0
     },
     "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "mr1": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0

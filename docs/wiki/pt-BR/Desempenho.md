@@ -49,6 +49,7 @@ O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria th
 |---|---|---|
 | Paleta no shader | `Gfx::sprite_tex`, `IndexedTexture`, `Palette` | Sprites M.U.G.E.N com pixels indexados vão para o atlas de índices de 8 bits e são coloridos por uma linha de paleta no shader: 4x menos upload e espaço de atlas que RGBA. `RemapPal` troca a linha de paleta em vez de gerar uma nova imagem RGBA |
 | Reinício separado dos atlas | `ume_shell::quad` | O atlas RGBA (UI, texto, sprites true-color) e o atlas de índices (+ linhas de paleta) reiniciam cada um por conta própria quando enchem, então encher um nunca obriga o outro a refazer uploads |
+| Caminhos rápidos da composição | `post.wgsl` `fs_composite` | Sem desfoque radial o passe em resolução total usa 1 amostra por pixel (3 com aberração cromática) em vez de 21, e painéis de vidro pulam pixels fora do alcance da sombra. Saída idêntica; tempo de quadro em GPU por software em `UME_TOUR=perf` caiu de 44 ms para 25 ms |
 
 ## Medindo
 
@@ -101,6 +102,9 @@ Percorrer o roster nativo também mostra o atlas ciclando: quatro lutadores deix
 | Zerar atlas | `Renderer::new` | Texturas de atlas e paleta são inicializadas uma vez, então `texSubImage2D` não força mais limpeza lazy (aviso do Firefox) |
 | Retry da surface | `Shell::redraw` | Falha em `get_current_texture` pede novo frame em vez de travar o laço (tela preta) |
 | Loader + cache | `web/index.html`, `web/sw.js` | Progresso do download do wasm, JS e wasm buscados como `?v=<build>` (carimbado pelo `build-web.sh`) e cacheados de forma imutável, então o cache nunca mistura dois builds e recarga automática se o contexto WebGL for perdido |
+| Pacotes de sprites sob demanda | `src/web_sprites.rs`, `ume-tools pack-sprites` | Cada lutador tem um `<id>.pack` completo e um `<id>.menu.pack` pequeno com exatamente os arquivos que o retrato da seleção e a prévia do menu leem (registrados por `ume_engine::native::menu_sprite_files`). O boot baixa só os pacotes de menu; o pacote completo é baixado quando o lutador recebe foco na seleção ou entra em uma luta. Os bytes baixados no boot foram de 37,2 MB para 17,0 MB |
+| Perfil de build `web` | `Cargo.toml` `[profile.web]`, `scripts/build-web.sh` | O build do navegador usa LTO completo, uma unidade de codegen e `opt-level = "s"`, mantendo `opt-level = 3` nos crates quentes (`ume-engine`, `ume-formats`, `ume-render`, `tiny-skia`, `png`, `miniz_oxide`, `fdeflate`, `simd-adler32`). O wasm foi de 17,9 MB para 13,2 MB (7,6 MB para 6,7 MB com gzip) |
+| Laços de recolor e recorte | `native::recolor`, `native::pixel_fit` | O recolor de paleta usa um cache de cores de mapeamento direto e uma janela de cabelo por linha em vez de `HashMap` e teste de região por pixel; o recorte de sprites varre linhas em vez de colunas. Mesmos pixels (cobertos por testes de referência); o trabalho na thread principal do boot até a luta na sonda de perfil foi de 5,0 s para 4,0 s |
 
 Sonda: `NODE_PATH=$(npm root -g) node scripts/web-profile.js Enter Enter Enter` (Chromium headless, rode `./scripts/build-web.sh` antes).
 
@@ -441,3 +445,20 @@ etain_mut.
   - `Recolor::apply_in_region` usa um hasher multiplicativo e memoria do ultimo tom no lugar de SipHash por pixel.
   - O cache de pacotes guarda 64 pacotes, entao elencos acima de 24 personagens nao se expulsam mais.
   - Medido com o profiler no Chromium headless (tela de selecao, 53 movimentos de cursor): tempo ocupado da thread principal caiu de cerca de 98 s para cerca de 2,5 s.
+
+## Efeitos em sprite-sheet
+
+`src/vfx/sheet.rs` toca sheets de efeito CC0 de `assets/fx/` (embutidas com `include_bytes!`, decodificadas e enviadas à GPU no primeiro desenho). Uma faísca de impacto toca em todo golpe não bloqueado; uma explosão toca em golpes de 150 de dano ou mais e no KO. No máximo 12 sprites de sheet ficam vivos, com blend aditivo, e são limpos ao iniciar o round. Sheets pixel-art do PVFX Foundry (filtro nearest, blend alpha) adicionam soco em golpes leves, crítico em golpes pesados, onda de choque e impacto no chão em golpes de 150+ de dano no chão, defesa em golpes bloqueados e poeira de dash. Raio e estática tocam nos supers, pilar de fogo nas transformações, bomba de fumaça no KO e explosão de gelo em defesas de golpes pesados. Sheets e créditos estão em `assets/fx/CREDITS.md`.
+
+## Rasterização paralela das variantes de sprite
+
+Compilar um lutador UMF rasterizava os frames base em paralelo e depois recoloria cada variante de forma e de despertar de cada frame em uma única thread, o que era 80 a 90% da carga. `native/frame_raster.rs` agora renderiza cada frame junto com suas variantes no mesmo pool de workers (`min(núcleos, 8)`, uma thread em `wasm32`), e as paletas de forma são montadas uma vez por lutador em vez de uma vez por frame.
+
+`cargo run --release -p ume-engine --example load_bench` na máquina de nuvem de 4 núcleos, três execuções de cada:
+
+| | Elenco inteiro (21 lutadores) | Oboro | Kaito | Suzume |
+|---|---|---|---|---|
+| Antes | 11,40 / 11,76 / 11,79 s | 1674 ms | 1250 ms | 900 ms |
+| Depois | 4,70 / 4,46 / 4,54 s | 551 ms | 405 ms | 319 ms |
+
+A saída não muda: um checksum de todos os sprites (pixels, tamanho, eixo, escala) e de todos os frames de animação dos 21 lutadores em duas paletas é idêntico antes e depois. Lutadores sem formas (`npc_*`) não mudam, pois não têm variantes para renderizar.

@@ -78,7 +78,7 @@
    "weave": "rib",
    "pantsWeave": "hatch",
    "knuckles": true,
-   "faceShade": 1.0,
+   "faceShade": 1,
    "brow": {
     "thick": 1.9,
     "shape": "angry"
@@ -1612,19 +1612,28 @@
    "frames": [
     {
      "pose": "run0",
+     "sprite": "sg_run_run0",
      "ticks": 4
     },
     {
      "pose": "run1",
-     "ticks": 4
+     "sprite": "sg_run_run1",
+     "ticks": 3
+    },
+    {
+     "pose": "runMid",
+     "sprite": "sg_run_mid",
+     "ticks": 3
     },
     {
      "pose": "run2",
-     "ticks": 4
+     "sprite": "sg_run_run2",
+     "ticks": 3
     },
     {
      "pose": "run3",
-     "ticks": 4
+     "sprite": "sg_run_run3",
+     "ticks": 3
     }
    ]
   },
@@ -2163,8 +2172,24 @@
      }
     },
     {
+     "pose": {
+      "elbowF": 95,
+      "thighF": 80,
+      "head": -12,
+      "ankleF": 25,
+      "kneeB": 125,
+      "elbowB": 110,
+      "lean": 10,
+      "shoulderB": 40,
+      "shoulderF": 60,
+      "kneeF": 60,
+      "thighB": 38
+     },
+     "ticks": 3
+    },
+    {
      "pose": "crouch",
-     "ticks": 6
+     "ticks": 3
     }
    ]
   },
@@ -2211,7 +2236,21 @@
      }
     },
     {
-     "pose": "ajab",
+     "pose": {
+      "elbowF": 53.5,
+      "thighF": 78,
+      "head": -5,
+      "ankleF": 30,
+      "kneeB": 118,
+      "elbowB": 110,
+      "wind": 0.4,
+      "lean": 9,
+      "shoulderB": 45,
+      "shoulderF": 64,
+      "kneeF": 120,
+      "ankleB": 35,
+      "thighB": 50
+     },
      "ticks": 6
     },
     {
@@ -2235,7 +2274,21 @@
      }
     },
     {
-     "pose": "akick",
+     "pose": {
+      "elbowF": 107.5,
+      "thighF": 65,
+      "head": 4,
+      "ankleF": 46,
+      "kneeB": 121.5,
+      "elbowB": 110,
+      "wind": 0.55,
+      "lean": -6,
+      "shoulderB": 45,
+      "shoulderF": 60,
+      "kneeF": 60,
+      "ankleB": 35,
+      "thighB": 62.5
+     },
      "ticks": 8
     },
     {
@@ -2772,6 +2825,278 @@
      "ticks": 4
     }
    ]
+  },
+  "starburstEx": {
+   "frames": [
+    {
+     "pose": "sb0",
+     "ticks": 6
+    },
+    {
+     "pose": {
+      "shoulderF": -25,
+      "elbowF": 110,
+      "shoulderB": -35,
+      "elbowB": 110,
+      "thighF": 30,
+      "kneeF": 36,
+      "thighB": -20,
+      "kneeB": 14,
+      "lean": -8,
+      "head": -2,
+      "phase": 2,
+      "handF": "open",
+      "handB": "open",
+      "charge": "both",
+      "chargeSize": 6,
+      "face": "shout"
+     },
+     "ticks": 4
+    },
+    {
+     "pose": "sb1",
+     "ticks": 3
+    },
+    {
+     "pose": "sb2",
+     "ticks": 12
+    },
+    {
+     "pose": "jab0",
+     "ticks": 4
+    },
+    {
+     "pose": "idle0",
+     "ticks": 2
+    }
+   ]
+  },
+  "cometEx": {
+   "frames": [
+    {
+     "pose": "cu0",
+     "ticks": 2
+    },
+    {
+     "pose": {
+      "shoulderF": 128,
+      "elbowF": 16,
+      "shoulderB": 25,
+      "elbowB": 120,
+      "thighF": 25,
+      "kneeF": 15,
+      "thighB": -15,
+      "kneeB": 80,
+      "lean": 12,
+      "head": -10,
+      "ankleF": 50,
+      "ankleB": 40,
+      "wind": 1,
+      "face": "shout",
+      "hairWind": -1.3,
+      "aura": true,
+      "charge": "F",
+      "chargeSize": 7
+     },
+     "ticks": 4,
+     "hit": {
+      "part": "handF",
+      "radius": 13
+     }
+    },
+    {
+     "pose": {
+      "shoulderF": 168,
+      "elbowF": 6,
+      "shoulderB": 25,
+      "elbowB": 120,
+      "thighF": 25,
+      "kneeF": 15,
+      "thighB": -15,
+      "kneeB": 80,
+      "lean": 6,
+      "head": -16,
+      "ankleF": 50,
+      "ankleB": 40,
+      "wind": 1,
+      "face": "shout",
+      "hairWind": -1.3,
+      "aura": true,
+      "charge": "F",
+      "chargeSize": 7,
+      "phase": 2
+     },
+     "ticks": 4,
+     "hit": {
+      "part": "handF",
+      "radius": 12
+     }
+    },
+    {
+     "pose": "cu2",
+     "ticks": 8
+    },
+    {
+     "pose": "jumpDown",
+     "ticks": 1
+    }
+   ]
+  },
+  "stormSuperUlt": {
+   "frames": [
+    {
+     "pose": "nc0",
+     "ticks": 10
+    },
+    {
+     "pose": "nc1",
+     "ticks": 5
+    },
+    {
+     "pose": "sb1",
+     "ticks": 4
+    },
+    {
+     "pose": "sb2",
+     "ticks": 16
+    },
+    {
+     "pose": "cu1",
+     "ticks": 6
+    },
+    {
+     "pose": "jumpTop",
+     "ticks": 8
+    },
+    {
+     "pose": "idle0",
+     "ticks": 4
+    }
+   ]
+  },
+  "stringA": {
+   "frames": [
+    {
+     "pose": "jab0",
+     "ticks": 2
+    },
+    {
+     "pose": "jab1",
+     "ticks": 2,
+     "hit": {
+      "part": "handF",
+      "radius": 8
+     }
+    },
+    {
+     "pose": "jab0",
+     "ticks": 2
+    },
+    {
+     "pose": "jab1",
+     "ticks": 2,
+     "hit": {
+      "part": "handF",
+      "radius": 8
+     }
+    },
+    {
+     "pose": "jab0",
+     "ticks": 3
+    },
+    {
+     "pose": "idle0",
+     "ticks": 2
+    }
+   ]
+  },
+  "stringB": {
+   "frames": [
+    {
+     "pose": "jab0",
+     "ticks": 2
+    },
+    {
+     "pose": "jab1",
+     "ticks": 2,
+     "hit": {
+      "part": "handF",
+      "radius": 8
+     }
+    },
+    {
+     "pose": "lk0",
+     "ticks": 2
+    },
+    {
+     "pose": "lk1",
+     "ticks": 3,
+     "hit": {
+      "part": "footF",
+      "radius": 13
+     }
+    },
+    {
+     "pose": "str0",
+     "ticks": 3
+    },
+    {
+     "pose": "str0",
+     "ticks": 1
+    },
+    {
+     "pose": "str1",
+     "ticks": 3,
+     "hit": {
+      "part": "handB",
+      "radius": 11
+     }
+    },
+    {
+     "pose": "str1",
+     "ticks": 2
+    },
+    {
+     "pose": "str0",
+     "ticks": 6
+    },
+    {
+     "pose": "idle0",
+     "ticks": 2
+    }
+   ]
+  },
+  "stringC": {
+   "frames": [
+    {
+     "pose": "hk0",
+     "ticks": 4
+    },
+    {
+     "pose": "hk0",
+     "ticks": 2
+    },
+    {
+     "pose": "hk1",
+     "ticks": 4,
+     "hit": {
+      "part": "footF",
+      "radius": 11
+     }
+    },
+    {
+     "pose": "hk1",
+     "ticks": 3
+    },
+    {
+     "pose": "hk0",
+     "ticks": 6
+    },
+    {
+     "pose": "idle0",
+     "ticks": 4
+    }
+   ]
   }
  },
  "moves": [
@@ -2793,7 +3118,11 @@
     "strong",
     "lkick",
     "starburst",
-    "comet"
+    "comet",
+    "launcher",
+    "overhead",
+    "slide",
+    "string_a"
    ],
    "projectile": {
     "at": 3,
@@ -2807,7 +3136,8 @@
      46,
      -68
     ],
-    "damage": 34
+    "damage": 34,
+    "element": "lightning"
    }
   },
   {
@@ -2831,7 +3161,8 @@
    "cancels": [
     "lkick",
     "stardash",
-    "comet"
+    "comet",
+    "overhead"
    ]
   },
   {
@@ -2849,7 +3180,9 @@
    ],
    "cancels": [
     "comet",
-    "starburst"
+    "starburst",
+    "launcher",
+    "slide"
    ]
   },
   {
@@ -2970,7 +3303,8 @@
      46,
      -68
     ],
-    "damage": 72
+    "damage": 72,
+    "element": "lightning"
    }
   },
   {
@@ -3003,7 +3337,8 @@
      "knockback": [
       -1,
       -3
-     ]
+     ],
+     "element": "lightning"
     },
     {
      "at": 3,
@@ -3013,7 +3348,8 @@
      "knockback": [
       -3,
       -8
-     ]
+     ],
+     "element": "lightning"
     }
    ],
    "cancels": [
@@ -3173,7 +3509,8 @@
     "removeTime": 44,
     "level": "heavy",
     "launch": true,
-    "priority": 6
+    "priority": 6,
+    "element": "lightning"
    }
   },
   {
@@ -3204,7 +3541,8 @@
      "hits": 3,
      "level": "heavy",
      "removeTime": 70,
-     "priority": 6
+     "priority": 6,
+     "element": "lightning"
     },
     {
      "at": 4,
@@ -3222,7 +3560,8 @@
      "hits": 3,
      "level": "heavy",
      "removeTime": 70,
-     "priority": 6
+     "priority": 6,
+     "element": "lightning"
     },
     {
      "at": 4,
@@ -3240,7 +3579,8 @@
      "hits": 3,
      "level": "heavy",
      "removeTime": 70,
-     "priority": 6
+     "priority": 6,
+     "element": "lightning"
     },
     {
      "at": 4,
@@ -3258,7 +3598,546 @@
      "hits": 3,
      "level": "heavy",
      "removeTime": 70,
-     "priority": 6
+     "priority": 6,
+     "element": "lightning"
+    }
+   ]
+  },
+  {
+   "id": "ult_cometstorm",
+   "name": "Supernova Barrage",
+   "input": "~D, DF, F, D, DF, F, x+y",
+   "kind": "super",
+   "anim": "stormSuper",
+   "cost": 3000,
+   "invuln": [
+    1,
+    7
+   ],
+   "fx": "aura",
+   "projectile": [
+    {
+     "at": 4,
+     "anim": "starOrb",
+     "hitAnim": "starHit",
+     "speed": [
+      6,
+      -0.6
+     ],
+     "offset": [
+      50,
+      -80
+     ],
+     "damage": 50,
+     "hits": 4,
+     "removeTime": 70,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "lightning",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "anim": "starOrb",
+     "hitAnim": "starHit",
+     "speed": [
+      6,
+      0
+     ],
+     "offset": [
+      50,
+      -70
+     ],
+     "damage": 50,
+     "hits": 4,
+     "removeTime": 70,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "lightning",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "anim": "starOrb",
+     "hitAnim": "starHit",
+     "speed": [
+      6,
+      0.6
+     ],
+     "offset": [
+      50,
+      -60
+     ],
+     "damage": 50,
+     "hits": 4,
+     "removeTime": 70,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "lightning",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "anim": "starOrb",
+     "hitAnim": "starHit",
+     "speed": [
+      6,
+      1.2
+     ],
+     "offset": [
+      50,
+      -50
+     ],
+     "damage": 50,
+     "hits": 4,
+     "removeTime": 70,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "lightning",
+     "knockback": [
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ex_starburst",
+   "name": "Star Burst EX",
+   "input": "~D, DF, F, x+y",
+   "kind": "special",
+   "anim": "starburstEx",
+   "projectile": [
+    {
+     "at": 3,
+     "anim": "starOrb",
+     "hitAnim": "starHit",
+     "speed": [
+      7.5,
+      0
+     ],
+     "offset": [
+      46,
+      -68
+     ],
+     "damage": 93.6,
+     "hits": 2,
+     "priority": 2,
+     "level": "heavy",
+     "element": "lightning"
+    }
+   ],
+   "cost": 250,
+   "fx": "aura"
+  },
+  {
+   "id": "ex_comet",
+   "name": "Comet Uppercut EX",
+   "input": "F, D, DF, y+b",
+   "kind": "special",
+   "anim": "cometEx",
+   "invuln": [
+    1,
+    6
+   ],
+   "moves": [
+    {
+     "at": 2,
+     "vel": [
+      2.2,
+      -9
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 2,
+     "damage": 98.8,
+     "level": "heavy",
+     "launch": true,
+     "hitstun": 24,
+     "knockback": [
+      -1,
+      -3
+     ],
+     "element": "lightning"
+    },
+    {
+     "at": 3,
+     "damage": 57.2,
+     "level": "heavy",
+     "launch": true,
+     "knockback": [
+      -3,
+      -8
+     ],
+     "element": "lightning"
+    }
+   ],
+   "cancels": [
+    "nova",
+    "cometstorm",
+    "fallstar"
+   ],
+   "cost": 500,
+   "fx": "aura"
+  },
+  {
+   "id": "overhead",
+   "name": "Falling Star Chop",
+   "input": "x+b",
+   "kind": "normal",
+   "anim": "hkick",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 55.1,
+     "level": "medium",
+     "hitstop": 10,
+     "guard": "high",
+     "hitstun": 20
+    }
+   ]
+  },
+  {
+   "id": "launcher",
+   "name": "Rising Starfall",
+   "input": "y",
+   "kind": "normal",
+   "when": "crouch",
+   "anim": "strong",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 58,
+     "level": "heavy",
+     "launch": true,
+     "hitstun": 22,
+     "knockback": [
+      -1,
+      -6
+     ]
+    }
+   ]
+  },
+  {
+   "id": "divekick",
+   "name": "Meteor Spike",
+   "input": "y",
+   "kind": "normal",
+   "anim": "akick",
+   "when": "air",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 57.2,
+     "level": "heavy",
+     "guard": "high",
+     "groundBounce": true,
+     "launch": true,
+     "knockback": [
+      -1,
+      4
+     ]
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      1.8,
+      2.5
+     ]
+    }
+   ]
+  },
+  {
+   "id": "slide",
+   "name": "Comet Slide",
+   "input": "F+a",
+   "kind": "normal",
+   "anim": "sweep",
+   "when": "stand",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 56.1,
+     "level": "heavy",
+     "guard": "low",
+     "launch": true,
+     "knockback": [
+      -2,
+      -5
+     ]
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      3,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      1.2,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "id": "escape_burst",
+   "name": "Starlight Burst",
+   "input": "x+a+b",
+   "kind": "special",
+   "when": "stand",
+   "anim": "strong",
+   "cost": 500,
+   "burst": true,
+   "invuln": [
+    1,
+    3
+   ],
+   "hits": [
+    {
+     "at": 3,
+     "damage": 30,
+     "level": "heavy",
+     "knockback": [
+      -6,
+      -4
+     ],
+     "launch": true,
+     "hitstop": 12
+    }
+   ]
+  },
+  {
+   "id": "lunge",
+   "name": "Lunge Strike",
+   "input": "F+y",
+   "kind": "normal",
+   "anim": "strong",
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      5.5,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      1.5,
+      0
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 3,
+     "damage": 57.5,
+     "level": "heavy",
+     "hitstun": 16,
+     "knockback": [
+      -3,
+      -1
+     ]
+    }
+   ]
+  },
+  {
+   "id": "falcondive",
+   "name": "Falcon Dive",
+   "input": "F+b",
+   "kind": "normal",
+   "when": "air",
+   "anim": "akick",
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      4.5,
+      2.2
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 2,
+     "damage": 57.2,
+     "level": "medium",
+     "guard": "high"
+    }
+   ]
+  },
+  {
+   "id": "string_a",
+   "name": "Star Flurry",
+   "input": "B+x",
+   "kind": "normal",
+   "anim": "stringA",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 22,
+     "level": "light",
+     "knockback": [
+      -0.5,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "damage": 24,
+     "level": "light"
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      2.5,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "string_b",
+    "string_c",
+    "starburst",
+    "comet"
+   ]
+  },
+  {
+   "id": "string_b",
+   "name": "Spark Chain",
+   "input": "B+a",
+   "kind": "normal",
+   "anim": "stringB",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 22,
+     "level": "light",
+     "knockback": [
+      -0.5,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "damage": 26,
+     "level": "light",
+     "knockback": [
+      -0.5,
+      0
+     ]
+    },
+    {
+     "at": 7,
+     "damage": 34,
+     "level": "light"
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      2,
+      0
+     ]
+    },
+    {
+     "at": 7,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "string_c",
+    "starburst",
+    "comet"
+   ]
+  },
+  {
+   "id": "string_c",
+   "name": "Falling Comet Kick",
+   "input": "B+y",
+   "kind": "normal",
+   "anim": "stringC",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 92,
+     "level": "heavy",
+     "launch": true,
+     "knockback": [
+      -1,
+      -6
+     ],
+     "hitstun": 22
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      3,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "starburst",
+    "comet"
+   ]
+  },
+  {
+   "id": "halfmoon",
+   "name": "Meia-Lua",
+   "input": "~B, DB, D, DF, F, a+x",
+   "kind": "special",
+   "anim": "hkick",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 52,
+     "level": "medium",
+     "hitstop": 10
     }
    ]
   }
@@ -3266,6 +4145,15 @@
  "country": "Japão",
  "stage": "dojo",
  "speed": 1.08,
+ "passives": {
+  "meterRegen": 0.45,
+  "rage": {
+   "maxMultiplier": 1.4,
+   "exponent": 1.15,
+   "startRatio": 0.35,
+   "fullRatio": 0.05
+  }
+ },
  "boss": false,
  "npc": true,
  "spriteSet": "akio"

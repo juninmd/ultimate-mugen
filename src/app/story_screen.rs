@@ -11,6 +11,9 @@ impl App {
             self.screen = Screen::Menu { cur: 0 };
             return;
         };
+        if self.story_epilogue(&run, t, dt) {
+            return;
+        }
         let accent = run.stage_def().accent;
         let accent_color = Color::new(accent[0], accent[1], accent[2], 1.0);
         self.ui.background();
@@ -48,6 +51,9 @@ impl App {
         self.ui.text(&headline, VW / 2.0, 296.0, 26.0, accent_color, Align::Center, true);
         self.ui.text_bold(&sub, VW / 2.0, 360.0, 56.0, WHITE, BLACK, Align::Center);
         self.ui.text(&line, VW / 2.0, 410.0, 20.0, hex("#d8d0f0"), Align::Center, false);
+        if run.phase == Phase::Intro {
+            self.draw_story_boss_profile(&run, accent_color, reveal);
+        }
         let prompt = match run.phase {
             Phase::Defeated if run.can_continue() => text::continue_label(),
             Phase::Defeated | Phase::Victory => text::quit_label(),

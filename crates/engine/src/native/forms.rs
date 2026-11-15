@@ -1,9 +1,8 @@
 use super::ability_spec::FormSpec;
 use super::lookup::find_native;
-use super::types::{NativeChar, NativeFrame, NativeMove};
-use crate::chardef::{FormInfo, Sprite};
+use super::types::{NativeChar, NativeMove};
+use crate::chardef::FormInfo;
 use serde_json::Value;
-use std::collections::HashMap;
 use std::sync::Arc;
 
 pub(super) fn build_forms(nc: &NativeChar, pal_no: i32, with_images: bool) -> Vec<FormInfo> {
@@ -52,31 +51,6 @@ pub fn form_palette(form: &FormSpec, palette: Option<&Value>) -> Option<Value> {
     }
     colors.insert("_awakening".into(), Value::Bool(true));
     Some(Value::Object(colors))
-}
-
-pub(super) fn insert_form_sprites(
-    sprites: &mut HashMap<(i32, i32), Sprite>,
-    nc: &NativeChar,
-    fr: &NativeFrame,
-    index: i32,
-    with_images: bool,
-    palette: Option<&Value>,
-) {
-    if !with_images || fr.effect.is_some() { return; }
-    let Some(spec) = &nc.abilities else { return; };
-    for (i, form) in spec.forms.iter().enumerate() {
-        if let Some(p) = form_palette(form, palette) {
-            let rendered = super::compile::render_frame(nc, fr, true, Some(&p));
-            sprites.insert((2 + i as i32, index), Sprite {
-                image: rendered.image,
-                width: rendered.width,
-                height: rendered.height,
-                axis_x: rendered.axis_x,
-                axis_y: rendered.axis_y,
-                scale: rendered.scale,
-            });
-        }
-    }
 }
 
 pub(super) fn collect_form_moves<'a>(nc: &'a NativeChar) -> Vec<(&'a NativeMove, Option<String>, u32)> {

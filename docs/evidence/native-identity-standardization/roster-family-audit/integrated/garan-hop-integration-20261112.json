@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-12",
+  "fighter": "garan",
+  "pose": "hop",
+  "target": "assets/chars/sprites/garan/hop.png",
+  "activeSha256": "4fed2eca98eb9dc18803cfe8e5d6bd4d55647b3fe9d8a0124ec33c7f6b890ce7",
+  "backup": "integrated/garan-hop-before/hop.png",
+  "backupSha256": "5a082b27103ba61f8940ebcb210cfadf3a2ea3af2cc3b9e176058af67fe68f00",
+  "identityAnchor": "assets/chars/sprites/garan/04_special.png",
+  "candidateReview": "candidates/garan-hop-pilot/candidate-review.json",
+  "frame": {
+    "pose": "hop",
+    "sha256": "4fed2eca98eb9dc18803cfe8e5d6bd4d55647b3fe9d8a0124ec33c7f6b890ce7",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 43,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      119,
+      102,
+      281,
+      392
+    ],
+    "axis": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sharedPaletteFile": "candidates/garan-hop-pilot/palette-seed-1/palette.json",
+    "sharedPaletteSha256": "42d9bb308a1a965be6f147c0a589d3a8519ccf6885b937e2893f8ca256a5b881",
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "floorY392": true,
+      "axis200x392Ref320": true,
+      "exactPaletteSubset": true
+    }
+  },
+  "visualReview": {
+    "native": "contact-native.png",
+    "nearest_2x": "contact-nearest-2x.png",
+    "identity": "pass",
+    "pose": "pass",
+    "scale_vs_jumpUp": "pass",
+    "feet_readable": "both visible",
+    "alpha_edges": "pass",
+    "unrequested_effects": "none"
+  },
+  "integration": "Promoted after parent review of native and nearest-2x family comparison. Sprite metadata and animation references unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

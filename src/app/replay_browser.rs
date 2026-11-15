@@ -48,7 +48,6 @@ impl App {
             })
             .collect();
     }
-
     fn fight_label(&self, r: &Replay) -> String {
         let name = |i: usize| {
             self.reg
@@ -268,24 +267,7 @@ impl App {
             true,
         );
         if self.replay_list.is_empty() {
-            self.ui.text(
-                crate::i18n::t("replays.empty"),
-                VW / 2.0,
-                300.0,
-                26.0,
-                hex("#a49cc0"),
-                Align::Center,
-                false,
-            );
-            self.ui.text(
-                crate::i18n::t("replays.empty_hint"),
-                VW / 2.0,
-                340.0,
-                20.0,
-                hex("#a49cc0"),
-                Align::Center,
-                false,
-            );
+            self.replays_empty_state();
         }
         let count = self.replay_list.len();
         cur = cur.min(count.saturating_sub(1));
@@ -403,6 +385,9 @@ impl App {
             }
             return;
         }
+        if count > 0 {
+            self.replay_selection_bar(cur);
+        }
         for (i, e) in self.replay_list.iter().enumerate().take(12) {
             let y = 100.0 + i as f32 * 46.0;
             let selected = i == cur;
@@ -420,7 +405,7 @@ impl App {
                 1180.0,
                 40.0,
                 if selected {
-                    alpha(hex("#ff4d6d"), 0.5)
+                    Color::new(1.0, 1.0, 1.0, 0.0)
                 } else {
                     Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.07 } else { 0.03 })
                 },
@@ -520,9 +505,9 @@ impl App {
             self.ui.text(
                 key,
                 x + 110.0,
-                706.0,
-                11.0,
-                Color::new(1.0, 1.0, 1.0, 0.6),
+                707.0,
+                13.0,
+                Color::new(1.0, 1.0, 1.0, 0.78),
                 Align::Center,
                 false,
             );
@@ -596,7 +581,7 @@ impl App {
             _ => {}
         }
         if self.c.pressed(nav::BACK) || is_key_pressed(KeyCode::Escape) {
-            self.screen = Screen::Menu { cur: 13 };
+            self.screen = Screen::Menu { cur: 8 };
             return;
         }
         self.screen = Screen::Replays { cur };

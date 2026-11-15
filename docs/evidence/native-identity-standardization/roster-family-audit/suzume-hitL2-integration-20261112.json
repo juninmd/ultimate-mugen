@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-12",
+  "character": "suzume",
+  "family": "hitL2 / hitLowMedium",
+  "status": "integrated_static_review_pass_runtime_pending",
+  "canonicalSha256": "3621301628480a47e63dd77a0084d766f69da01d44bb419a532b73be0f9885be",
+  "beforeSha256": "500217b87ad3541b25763e10f6ca7f8c82f01188ac46c87a539b5fdbaf93dd5e",
+  "activeSha256": "f0f9cf8dc418828c9b75a392b328797e025c239cbb3c16297853dc20f51b4f84",
+  "candidateQa": "candidates/suzume-hitL2-pilot/qa-report.json",
+  "candidateSha256": "f0f9cf8dc418828c9b75a392b328797e025c239cbb3c16297853dc20f51b4f84",
+  "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+  "weapon": "One canonical kunai in front hand; confirmed by hitLowMedium JSON/rig render.",
+  "staticChecks": {
+    "canvas": [
+      400,
+      400
+    ],
+    "alphaValues": [
+      0,
+      255
+    ],
+    "bbox": [
+      86,
+      73,
+      300,
+      392
+    ],
+    "axis": [
+      200,
+      392
+    ],
+    "visibleFloorY": 391,
+    "refHeight": 320,
+    "colorsUsed": 47,
+    "maxDeltaE": 0.07771,
+    "gate": 0.13,
+    "offPalettePixels": 0,
+    "partialAlphaPixels": 0
+  },
+  "reviewEvidence": [
+    "candidates/suzume-hitL2-pilot/review/native-review.png",
+    "candidates/suzume-hitL2-pilot/review/nearest-2x-review.png"
+  ],
+  "sequence": "hitLowMedium: hitL2 3 ticks -> hitL1 8 ticks -> idle0 3 ticks; hitL1 now uses its corrected canonical sprite.",
+  "limitations": [
+    "Static identity, pose, palette and kunai detail reviewed.",
+    "Runtime sequence and collision alignment remain pending; hitL3 and other old guard/hit frames remain open."
+  ]
+}

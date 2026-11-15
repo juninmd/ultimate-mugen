@@ -26,7 +26,7 @@ impl App {
         }
     }
 
-    fn glass(&self, x: f32, y: f32, w: f32, h: f32, accent: Color, alpha: f32) {
+    pub(super) fn glass(&self, x: f32, y: f32, w: f32, h: f32, accent: Color, alpha: f32) {
         self.ui
             .rect(x, y, w, h, Color::new(0.04, 0.03, 0.1, 0.55 * alpha));
         self.ui
@@ -300,8 +300,7 @@ impl App {
             self.versus_team_strip(1, VW - 40.0, 88.0, t);
         }
 
-        let cx = 640.0;
-        let cy = 318.0;
+        let (cx, cy) = (640.0, 318.0);
         let ek = ease_back((t - 0.35) / 0.35);
         if ek > 0.0 {
             let pulse = 1.0 + 0.035 * (self.ui.t * 6.0).sin();
@@ -419,6 +418,7 @@ impl App {
             false,
         );
 
+        self.draw_versus_compare(t);
         let flash =
             (1.0 - ((t - 0.45).abs() / 0.12)).clamp(0.0, 1.0) * self.g.fx_gain.min(1.0) * 0.55;
         if flash > 0.01 {

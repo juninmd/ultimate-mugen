@@ -3,15 +3,16 @@ mod audio;
 mod e2e;
 mod boss;
 mod controls;
-mod credit_line;
+mod credit_line; mod flag;
 mod gamepad;
-mod gfx;
+mod gfx; mod glow;
 mod hud;
 mod i18n;
 mod keybinds;
-mod market;
+mod market; mod open_link;
 mod import_button;
 mod loading_tips;
+mod match_stats;
 #[cfg(not(target_arch = "wasm32"))]
 mod native_import;
 mod menu_art;
@@ -21,30 +22,33 @@ mod mugen_tour;
 mod netlink;
 mod perf_tour;
 mod pixel_tour;
-mod poly;
+mod poly; mod profile;
 mod postfx;
 mod registry;
 mod render;
 mod replays;
+mod route;
 mod screenpack;
 mod session;
 mod settings;
 mod settings_labels;
 mod shots;
 mod sound_mix;
-mod stage_data;
-mod stage_tour;
+mod stage_data; mod stage_tour;
 mod stagefx;
+mod stagelook;
+mod stageprops;
 mod stages;
 mod storage;
 mod story;
-mod passive_fx; mod texgen; mod ui;
+mod passive_fx; mod spring; mod texgen; mod tweaks; mod ui; mod ui_tokens;
 mod update;
 #[cfg(target_arch = "wasm32")]
 mod web_sprites;
 #[cfg(not(target_arch = "wasm32"))]
 mod scan_report;
 mod vfx;
+mod voice;
 #[cfg(test)]
 mod vfx_camera_tests;
 
@@ -228,7 +232,7 @@ async fn game() {
     #[cfg(target_arch = "wasm32")]
     app.apply_deep_link();
     #[cfg(target_arch = "wasm32")]
-    crate::web_sprites::prefetch_roster(app.reg.chars.iter().filter(|entry| !entry.mugen).map(crate::web_sprites::pack_name).collect());
+    crate::web_sprites::prefetch_menu(app.reg.chars.iter().filter(|entry| !entry.mugen).map(crate::web_sprites::pack_name).collect());
     if let Some(dir) = shots { shots::run(&mut app, &dir).await; return; }
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     match netlink::NetArgs::parse(&args) {

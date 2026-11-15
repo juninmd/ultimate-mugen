@@ -1,0 +1,339 @@
+    Finished `test` profile [optimized + debuginfo] target(s) in 1.18s
+     Running unittests src\lib.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\ume_engine-a4990a7417465aba.exe)
+
+running 118 tests
+test ai::guard_budget::tests::continuous_guarding_hits_the_limit_and_rests ... ok
+test ai::guard_budget::tests::idle_time_restores_the_budget ... ok
+test ai::reading::tests::low_levels_read_attacks_later ... ok
+test chardef::portrait::portrait_tests::solid_dark_placeholders_are_rejected ... ok
+test chardef::portrait::portrait_tests::transparent_portraits_are_rejected ... ok
+test bytecode::tests::folds_constants ... ok
+test chardef::portrait::portrait_tests::portraits_with_visible_colour_are_kept ... ok
+test bytecode::tests::propagates_bottom ... ok
+test chardef::portrait::portrait_tests::uniformly_dark_but_visible_portraits_are_kept ... ok
+test commands::tests::a_button_that_never_gets_released_stops_matching_until_the_history_clears ... ok
+test bytecode::tests::matches_tree_on_samples ... ok
+test commands::tests::combo ... ok
+test commands::tests::dash_hold ... ok
+test commands::tests::left ... ok
+test commands::tests::macro_fires_the_command_for_both_facings ... ok
+test commands::tests::macro_is_empty_for_a_command_without_steps ... ok
+test commands::tests::neutral_step ... ok
+test commands::tests::neutral_with_button_in_one_step ... ok
+test commands::tests::pause_buffer_keeps_command_while_paused ... ok
+test commands::tests::pause_buffer_only_arms_during_pause ... ok
+test commands::tests::qcf ... ok
+test commands::tests::super_motion ... ok
+test commands::tests::wrong ... ok
+test expr::tests::intervals ... ok
+test expr::tests::ints ... ok
+test expr::tests::logic ... ok
+test expr::tests::misc ... ok
+test hitdef::tests::test_animtype_and_groundtype ... ok
+test hitdef::tests::test_parse_sound_ref ... ok
+test ikemen::tests::format_text_specifiers ... ok
+test bytecode::tests::matches_tree_on_common1 ... ok
+test ikemen::tests::map_reset_clears_one_key_or_whole_scope ... ok
+test ikemen::tests::map_set_add_and_trigger ... ok
+test ikemen::tests::map_store_bounds_keys ... ok
+test ikemen::tests::tag_out_hides_and_protects ... ok
+test ikemen::tests::points_and_flags ... ok
+test ikemen::tests::root_var_set_and_add_write_to_root ... ok
+test ikemen::tests::root_and_parent_maps_write_to_other_fighters ... ok
+test ikemen::tests::team_map_is_shared_between_teammates_only ... ok
+test ikemen::tests::text_lifecycle_and_format ... ok
+test loader::stats::tests::load_mugen_stats_reads_attack_life_speed_without_decoding_sprites ... ok
+test loader::tests::localcoord_accepts_two_values ... ok
+test loader::tests::localcoord_missing_or_invalid_falls_back ... ok
+test loader::tests::localcoord_single_value_does_not_panic ... ok
+test matchs::types::scale_tests::normal_hits_keep_scaling_down_but_hyper_hits_stop_at_half ... ok
+test move_cost::tests::cost_comes_from_entry_power_add_of_the_command_target ... ok
+test native::air_normals::tests::existing_air_inputs_are_kept ... ok
+test native::air_normals::tests::the_air_gets_every_button_and_the_dive_kick_moves_to_down_kick ... ok
+test move_cost::tests::unknown_or_drain_costs_are_not_guessed ... ok
+test native::air_variant::tests::the_air_body_hovers_lands_and_returns_to_the_jump ... ok
+test native::air_variant::tests::air_projectiles_dive_toward_the_ground ... ok
+test native::air_variant::tests::the_entry_only_fires_in_the_air ... ok
+test native::chain::tests::explicit_cancels_name_the_moves_they_feed ... ok
+test native::chain::tests::gatling_only_climbs_in_strength_so_chains_cannot_loop ... ok
+test native::charge_ramp::tests::expression_matches_constants ... ok
+test native::charge_ramp::tests::full_bar_takes_a_few_seconds ... ok
+test native::charge_ramp::tests::negative_ticks_restart_the_ramp ... ok
+test native::charge_ramp::tests::gain_accelerates_then_caps ... ok
+test native::element::tests::unknown_element_adds_nothing ... ok
+test native::frame_raster::tests::a_later_palette_replaces_the_same_group ... ok
+test matchs::air_dash::tests::air_dash_and_retreat_transitions_and_limits ... ok
+test native::compile::tests::hitstop_scales_with_attack_strength ... ok
+test native::element::tests::element_tints_the_victim ... ok
+test native::element::tests::explicit_stun_stacks_and_shakes ... ok
+test native::element::tests::lightning_stuns_longer_than_fire ... ok
+test native::frame_raster::tests::worker_count_is_capped_and_never_zero ... ok
+test native::multihit::tests::explicit_knockback_and_short_moves_are_left_alone ... ok
+test native::multihit::tests::strings_keep_the_target_close_until_the_finisher ... ok
+test native::low_normals::tests::tests::existing_authored_down_light_kicks_are_preserved ... ok
+test native::low_normals::tests::tests::low_kicks_use_down_light_kick_and_low_guard ... ok
+test native::pack::tests::rejects_an_entry_count_that_cannot_fit ... ok
+test native::pack::tests::rejects_foreign_or_truncated_payloads ... ok
+test native::pixel::tests::attack_poses_keep_their_base_stems ... ok
+test native::pack::tests::menu_pack_never_replaces_a_full_pack_and_is_upgraded_by_one ... ok
+test native::pack::tests::reads_every_file_back ... ok
+test native::pack::tests::rejects_a_pack_for_another_fighter ... ok
+test native::pack::tests::a_pack_feeds_the_sprite_loader ... ok
+test native::pixel::tests::effect_frames_do_not_fall_back_to_fighter_idle ... ok
+test native::pixel::tests::every_standard_state_pose_has_its_own_stem ... ok
+test native::pixel_hurt::tests::a_falling_body_follows_its_opaque_pixels ... ok
+test native::pixel::tests::missing_art_returns_none_so_the_rig_takes_over ... ok
+test native::pixel_hurt::tests::a_body_lying_across_the_ground_gets_a_flat_wide_box ... ok
+test native::pixel_fit::tests::row_scan_trim_matches_the_column_scan ... ok
+test native::pixel::tests::exact_file_wins_then_stem_then_idle ... ok
+test native::pixel::tests::lying_body_gets_a_low_wide_hurtbox ... ok
+test native::pixel_hurt::tests::standing_and_empty_poses_keep_the_pose_box ... ok
+test native::power_normals::tests::explicit_cancels_into_the_base_also_reach_the_power_version ... ok
+test native::pixel::tests::reference_height_keeps_every_pose_at_one_scale ... ok
+test native::pixel::tests::declared_height_scales_body_and_hurtboxes_together ... ok
+test native::recolor::tests::colour_parser_accepts_short_and_long_hex ... ok
+test native::recolor::tests::awakening_hair_is_confined_to_the_authored_region ... ok
+test native::pixel::tests::frame_geometry_overrides_preserve_floor_anchor_and_body_scale ... ok
+test native::power_normals::tests::fighters_with_their_own_z_or_c_are_left_alone ... ok
+test native::requires::tests::moves_without_requirements_add_nothing ... ok
+test native::power_normals::tests::power_normals_use_z_and_c_and_hit_harder_than_their_base ... ok
+test native::recolor::tests::cached_recolour_matches_a_swap_per_pixel ... ok
+test native::recolor::tests::palette_swap_rebuilds_a_base_colour_along_its_own_shading ... ok
+test native::recolor::tests::palette_swap_leaves_a_colour_the_palette_does_not_name ... ok
+test zss::tests::appends_to_negative_states ... ok
+test zss::tests::a_compile_error_skips_the_file ... ok
+test native::requires::tests::own_and_enemy_ranges_become_triggers ... ok
+test zss::tests::functions_inline_and_check_arguments ... ok
+test native::recolor::tests::palette_swap_keeps_the_silhouette_and_replaces_the_gi ... ok
+test zss::tests::for_loops_unroll_with_bound_and_step ... ok
+test native::recolor::tests::palette_swap_without_overrides_decodes_the_same_pixels ... ok
+test native::power_normals::tests::every_roster_fighter_gets_both_ground_power_normals ... ok
+test zss::tests::break_and_continue_gate_the_body ... ok
+test native::low_normals::tests::tests::every_roster_fighter_gets_ground_and_air_low_kicks ... ok
+test zss::tests::parses_states_and_controllers ... ok
+test zss::tests::skips_existing_without_override ... ok
+test zss::tests::let_locals_rewrite_params_and_conditions ... ok
+test zss::tests::while_loop_stops_on_its_condition ... ok
+test ai::tactics::tests::ex_moves_keep_one_bar_in_reserve ... ok
+test ai::tactics::tests::desperate_fighters_spend_supers ... ok
+test ai::tactics::tests::supers_need_a_bar_and_a_reason ... ok
+test ai::reading::tests::profile_notices_jumps_and_turtling ... ok
+test ai::tactics::tests::dragon_punch_motions_are_anti_airs ... ok
+test native::low_normals::tests::tests::every_ground_and_air_low_kick_resolves_three_distinct_images ... ok
+
+test result: ok. 118 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.68s
+
+     Running tests\ai_tactics.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\ai_tactics-003934cc4f457285.exe)
+
+running 1 test
+test a_descending_rival_in_range_is_met_with_a_dragon_punch ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s
+
+     Running tests\air_dash.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\air_dash-d8f739c8e369c606.exe)
+
+running 2 tests
+test air_dash_propulsion_and_state_recovery ... ok
+test air_retreat_and_landing_reset ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\air_hits.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\air_hits-616061451fa27ddd.exe)
+
+running 6 tests
+test juggle_budget_stops_air_combos ... ok
+test grounded_defender_still_gets_the_stand_hit_state ... ok
+test defender_off_the_floor_gets_the_air_hit_state_even_if_its_state_type_says_ground ... ok
+test idle_fighter_left_in_mid_air_drops_back_to_the_floor ... ok
+test fighter_lying_down_without_an_exit_state_gets_up ... ok
+test watchdog_returns_control_after_fifteen_seconds_without_it ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\angle_draw.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\angle_draw-da6cf64c1a7e433f.exe)
+
+running 1 test
+test angle_draw_lasts_only_the_tick_that_asked_for_it ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\assert_special.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\assert_special-7b42ac9f2ccf2422.exe)
+
+running 18 tests
+test every_ikemen_flag_has_a_bit_and_names_are_unique ... ok
+test noinput_blanks_the_input_history ... ok
+test nofallhitflag_makes_a_falling_target_ignore_the_f_flag ... ok
+test animfreeze_stops_the_animation_without_a_pause ... ok
+test is_asserted_reads_character_and_global_flags ... ok
+test character_flags_clear_when_no_longer_asserted ... ok
+test runfirst_and_runlast_reorder_execution ... ok
+test camerafreeze_and_roundfreeze_hold_the_world ... ok
+test immovable_fighter_is_not_pushed_by_the_opponent ... ok
+test guard_direction_flags_block_guarding ... ok
+test assertspecial_enabled_zero_asserts_nothing ... ok
+test global_display_flags_skip_announcements ... ok
+test unknown_flags_are_reported_once_per_name ... ok
+test nocornerpush_stops_the_attacker_being_pushed_back ... ok
+test nokovelocity_keeps_the_hitdef_velocity_on_ko ... ok
+test animatehitpause_keeps_the_animation_running_during_hitpause ... ok
+test nodestroyself_prevents_helper_destruction ... ok
+test nohitdamage_and_noko_keep_the_target_alive_at_zero_life ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\boss_story.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\boss_story-ad017c8865dd8749.exe)
+
+running 3 tests
+test oboro_has_multi_form_abilities_and_phase2_and_phase3_moves ... ok
+test oboro_transforms_into_next_form_when_defeated_at_least_once ... ok
+test awaken_boss_phase_starts_oboro_in_primordial_form_with_boosted_stats_and_ai ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\camera_depth.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\camera_depth-4f0cc55eb273b338.exe)
+
+running 7 tests
+test ground_level_offset_raises_the_floor_under_the_character ... ok
+test camera_controller_without_zoom_keeps_the_current_scale ... ok
+test a_raised_floor_does_not_count_as_airborne ... ok
+test ground_level_offset_moves_the_projectile_spawn_height ... ok
+test camera_controller_moves_and_zooms_the_camera ... ok
+test a_negative_offset_digs_the_floor_and_zero_restores_it ... ok
+test depth_controllers_are_ignored_with_one_warning ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\camera_zoom.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\camera_zoom-157bc84ddfd3c213.exe)
+
+running 10 tests
+test lag_smooths_the_zoom_change ... ok
+test zoom_sctrl_is_read_back_by_camera_zoom ... ok
+test zoom_out_is_bounded_by_the_stage ... ok
+test camera_zoom_defaults_to_one ... ok
+test zoom_in_delay_postpones_the_zoom_in ... ok
+test zoom_in_is_bounded_by_the_stage_unless_bound_is_off ... ok
+test the_zoom_returns_to_normal_after_the_request_ends ... ok
+test delta_keeps_changing_the_requested_scale ... ok
+test the_zoom_is_deterministic ... ok
+test pos_moves_the_camera_and_bound_keeps_it_inside_the_stage ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\char_coverage.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\char_coverage-2cfa8f20c821a997.exe)
+
+running 5 tests
+test audit_has_no_unsupported_controllers_or_triggers ... ok
+test every_state_runs_and_returns ... ok
+test every_palette_loads ... ok
+test coverage_report ... ok
+test intro_bubble_lasts_until_fight ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\char_fuzz.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\char_fuzz-413d41c4c8eaf3c4.exe)
+
+running 2 tests
+test fuzzed_duels_never_need_the_watchdog ... ok
+test goku_against_every_native_fighter_never_gets_stuck ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\char_intro.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\char_intro-2a9245c7cdc4868b.exe)
+
+running 1 test
+test intro_frames ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\combat_logic.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\combat_logic-631bca4f89465416.exe)
+
+running 6 tests
+test test_box_overlap_pure_math ... ok
+test test_hit_filtering_can_be_hit ... ok
+test test_fighter_boxes_facing_and_scaling ... ok
+test test_uniq_hit_count_resets_with_hit_count ... ok
+test test_match_state_change_and_vars ... ok
+test test_uniq_hit_count_diverges_from_hit_count_on_repeated_hitdef ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\combo_state.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\combo_state-3fedaf795e3e4204.exe)
+
+running 15 tests
+test hitdef_life_parameters_feed_the_life_systems ... ok
+test playsnd_flags_are_exposed_for_stop_on_hit_and_state_change ... ok
+test miss_on_override_shows_the_miss_text ... ok
+test projectiles_keep_their_teamside_after_the_owner_turns ... ok
+test sprite_sctrls_register_overrides ... ok
+test input_override_controllers_act_deterministically ... ok
+test unhittable_time_freezes_during_hit_pause_and_xaccel_is_recorded ... ok
+test playsnd_loop_points_and_modifysnd_retune_emit_events ... ok
+test combo_damage_belongs_to_the_defender_being_hit ... ok
+test five_guarded_hits_break_the_guard ... ok
+test classic_pushbox_pushes_only_the_defender ... ok
+test dizzy_and_guard_break_enter_their_states_and_restore_meters ... ok
+test stats_score_and_round_time_follow_the_match ... ok
+test combo_accumulator_clears_after_the_window ... ok
+test env_shake_dir_restricts_the_axis ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\control_handover.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\control_handover-ceafb9efc9a5b1d8.exe)
+
+running 3 tests
+test a_state_given_by_the_opponent_still_owns_the_fighter ... ok
+test the_character_keeps_its_scripts_during_a_common_hit_state ... ok
+test the_face_off_hands_control_back_to_the_character ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\coop.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\coop-6f09315ba90071cd.exe)
+
+running 3 tests
+test a_side_only_falls_when_both_members_are_koed ... ok
+test both_coop_fighters_take_input_and_move_independently ... ok
+test two_humans_and_an_ai_run_sixty_seconds_headless ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\dbz.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\dbz-a382681a0a47d5e6.exe)
+
+running 1 test
+test test_dbz_characters_load_and_fight ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\diagnostics.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\diagnostics-bde667032fe318a8.exe)
+
+running 6 tests
+test repeated_unknowns_are_deduplicated ... ok
+test supported_features_produce_no_findings ... ok
+test reports_one_unknown_of_each_kind ... ok
+test summary_counts_distinct_names ... ok
+test fixture_character_has_no_unsupported_features ... ok
+test probing_standard_names_never_panics ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\distance_localcoord.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\distance_localcoord-1e7fbd2c03293eda.exe)
+
+running 7 tests
+test p2dist_converts_each_side_to_its_own_localcoord ... ok
+test p2dist_ignores_the_camera ... ok
+test screen_position_is_in_the_fighters_localcoord ... ok
+test p2dist_inside_a_throw_state_uses_only_the_two_positions ... ok
+test body_dist_reports_the_gap_in_each_fighters_own_localcoord ... ok
+test edges_follow_a_widescreen_view_in_the_fighters_localcoord ... ok
+test body_dist_is_zero_when_hd_and_sd_boxes_touch ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\edge_triggers.rs (D:/cargo-build-cache/ed\c847c521243232\debug\deps\edge_triggers-6acfdf0b9e1d10f3.exe)
+
+running 4 tests
+test front_edge_agrees_with_front_edge_dist_for_both_facings ... ok
+test front_edge_is_the_left_edge_when_facing_left ... ok
+test front_edge_is_the_right_edge_when_facing_right ... ok
+test left_and_right_edges_ignore_facing ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

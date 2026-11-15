@@ -90,6 +90,14 @@ impl RepoRef {
     pub fn web_url(&self) -> String {
         format!("https://github.com/{}/{}", self.owner, self.name)
     }
+
+    pub fn tree_url(&self, item_id: &str) -> String {
+        let root = item_id.split_once(':').map_or(item_id, |(_, r)| r);
+        if root.is_empty() || root == "." {
+            return self.web_url();
+        }
+        format!("{}/tree/{}/{}", self.web_url(), self.git_ref(), root)
+    }
 }
 
 fn host_path(rest: &str) -> Result<String, String> {
@@ -136,5 +144,13 @@ mod tests {
     #[test]
     fn key_is_case_insensitive() {
         assert_eq!(p("Foo/Bar").key(), p("foo/bar").key());
+    }
+
+    #[test]
+    fn tree_url_points_at_the_item_folder() {
+        let r = p("Foo/Bar/tree/dev");
+        assert_eq!(r.tree_url("char:chars/kaito"), "https://github.com/Foo/Bar/tree/dev/chars/kaito");
+        assert_eq!(r.tree_url("char:."), "https://github.com/Foo/Bar");
+        assert_eq!(p("a/b").tree_url("stage:s/x"), "https://github.com/a/b/tree/HEAD/s/x");
     }
 }

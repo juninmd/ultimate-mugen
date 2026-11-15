@@ -1,0 +1,5 @@
+ladder (mirror matches, 126 rounds each, before)
+level 8 vs level 3: higher level wins 66.7%
+level 6 vs level 3: higher level wins 54.8%
+level 8 vs level 6: higher level wins 61.1%
+native_duel level 6 (after #495): knockout rate 96.7%, average round 54.5s, avg damage/round 1527

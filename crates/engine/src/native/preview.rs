@@ -15,3 +15,10 @@ pub fn compile_native_preview(nc: &NativeChar, pal_no: i32) -> CharDef {
     }
     compile_native_with(nc, pal_no, true, Some(&MENU_ANIMS))
 }
+
+pub fn menu_sprite_files(nc: &NativeChar) -> Vec<String> {
+    super::pack::trace_reads(|| {
+        super::portrait::select_portrait(nc, 1);
+        compile_native_preview(nc, 1);
+    })
+}

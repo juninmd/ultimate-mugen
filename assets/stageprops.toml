@@ -1,0 +1,80 @@
+[[dojo]]
+sprite = "torch"
+u = 0.148
+base = 0.57
+height = 0.14
+depth = 0.0
+glow = 0.5
+glow_color = [1.0, 0.6, 0.25]
+
+[[dojo]]
+sprite = "torch"
+u = 0.449
+base = 0.57
+height = 0.14
+depth = 0.0
+glow = 0.5
+glow_color = [1.0, 0.6, 0.25]
+
+[[volcano]]
+sprite = "torch"
+u = 0.05
+base = 0.7
+height = 0.22
+depth = 0.2
+tint = [1.0, 0.55, 0.4]
+glow = 0.6
+glow_color = [1.0, 0.35, 0.12]
+
+[[volcano]]
+sprite = "torch"
+u = 0.95
+base = 0.7
+height = 0.22
+depth = 0.2
+tint = [1.0, 0.55, 0.4]
+glow = 0.6
+glow_color = [1.0, 0.35, 0.12]
+
+[[spirit]]
+sprite = "torch"
+u = 0.1
+base = 0.64
+height = 0.18
+depth = 0.15
+tint = [0.45, 0.9, 1.0]
+glow = 0.55
+glow_color = [0.3, 0.9, 1.0]
+
+[[spirit]]
+sprite = "torch"
+u = 0.9
+base = 0.64
+height = 0.18
+depth = 0.15
+tint = [0.45, 0.9, 1.0]
+glow = 0.55
+glow_color = [0.3, 0.9, 1.0]
+
+[[bamboo]]
+sprite = "bamboo"
+u = 0.04
+base = 1.04
+height = 0.95
+depth = 0.3
+front = true
+alpha = 0.9
+tint = [0.04, 0.08, 0.1]
+sway = 1.4
+
+[[bamboo]]
+sprite = "bamboo"
+u = 0.97
+base = 1.04
+height = 0.8
+depth = 0.3
+front = true
+flip = true
+alpha = 0.9
+tint = [0.04, 0.08, 0.1]
+sway = 1.1

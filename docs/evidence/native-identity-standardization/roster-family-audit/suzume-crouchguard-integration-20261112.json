@@ -1,0 +1,50 @@
+{
+  "character": "suzume",
+  "families": [
+    "crouchGuardStart",
+    "crouchGuard",
+    "crouchGuardHit"
+  ],
+  "promotedFrames": [
+    {
+      "file": "crouchGuard.png",
+      "sha256": "f2dcef4ebedf97b1b11e434aeedfeb827f2932a507def579068de74be8be5d1d",
+      "bbox": [
+        72,
+        72,
+        309,
+        392
+      ],
+      "colors": 48,
+      "alphaValues": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "crouchGuardHit.png",
+      "sha256": "42ae91773c8c7930b1862ae67f8984041bd66902e51fce9916af679477cd14b7",
+      "bbox": [
+        36,
+        72,
+        302,
+        392
+      ],
+      "colors": 43,
+      "alphaValues": [
+        0,
+        255
+      ]
+    }
+  ],
+  "sharedPalette": "identity-locked-retry/palette/palette.json (48 entries; outputs use palette subsets)",
+  "strictMaxDeltaE": {
+    "crouchGuard": 0.082346,
+    "crouchGuardHit": 0.070542
+  },
+  "evidence": [
+    "docs\\evidence\\native-identity-standardization\\roster-family-audit\\integrated\\suzume-crouchguard-before\\suzume-crouchguard-integrated-native.png",
+    "docs\\evidence\\native-identity-standardization\\roster-family-audit\\integrated\\suzume-crouchguard-before\\suzume-crouchguard-integrated-2x-nearest.png"
+  ],
+  "claimCeiling": "Static identity, pose and pixel-finish review only. Runtime validation pending; hitCrouch remains open until candidate review."
+}

@@ -1,0 +1,135 @@
+{
+  "scope": "Current native combat PNG files in all sprite packs; portrait.png excluded",
+  "combatPngs": 2153,
+  "packs": 21,
+  "perPack": {
+    "akio": {
+      "combatPngs": 100,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "bruno": {
+      "combatPngs": 113,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "daichi": {
+      "combatPngs": 104,
+      "maxOpaqueColors": 46,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "garan": {
+      "combatPngs": 100,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "haruki": {
+      "combatPngs": 102,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "jin": {
+      "combatPngs": 104,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "kaito": {
+      "combatPngs": 112,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "kaname": {
+      "combatPngs": 120,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "lian": {
+      "combatPngs": 101,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "marlow": {
+      "combatPngs": 106,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "npc_brute": {
+      "combatPngs": 98,
+      "maxOpaqueColors": 43,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "npc_colossus": {
+      "combatPngs": 98,
+      "maxOpaqueColors": 40,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "npc_phantom": {
+      "combatPngs": 97,
+      "maxOpaqueColors": 41,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "npc_razor": {
+      "combatPngs": 93,
+      "maxOpaqueColors": 43,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "npc_spitfire": {
+      "combatPngs": 99,
+      "maxOpaqueColors": 44,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "oboro": {
+      "combatPngs": 99,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "shion": {
+      "combatPngs": 109,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "suzume": {
+      "combatPngs": 96,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "sylene": {
+      "combatPngs": 97,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "valdric": {
+      "combatPngs": 105,
+      "maxOpaqueColors": 47,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    },
+    "volta": {
+      "combatPngs": 100,
+      "maxOpaqueColors": 45,
+      "partialAlphaFiles": 0,
+      "partialAlphaNames": []
+    }
+  },
+  "issues": [],
+  "result": "PASS"
+}

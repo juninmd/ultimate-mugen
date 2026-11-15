@@ -1,0 +1,153 @@
+{
+  "schema": "generate2dsprite.palette.v1",
+  "name": "garan-air-lowkick-family",
+  "colors": [
+    {
+      "hex": "#000000"
+    },
+    {
+      "hex": "#0c0209"
+    },
+    {
+      "hex": "#130611"
+    },
+    {
+      "hex": "#1c0917"
+    },
+    {
+      "hex": "#240d1f"
+    },
+    {
+      "hex": "#2d1635"
+    },
+    {
+      "hex": "#3d1527"
+    },
+    {
+      "hex": "#2c232f"
+    },
+    {
+      "hex": "#431741"
+    },
+    {
+      "hex": "#452946"
+    },
+    {
+      "hex": "#64152c"
+    },
+    {
+      "hex": "#4f2355"
+    },
+    {
+      "hex": "#503423"
+    },
+    {
+      "hex": "#622153"
+    },
+    {
+      "hex": "#4b4059"
+    },
+    {
+      "hex": "#7b2351"
+    },
+    {
+      "hex": "#712570"
+    },
+    {
+      "hex": "#881c3a"
+    },
+    {
+      "hex": "#782776"
+    },
+    {
+      "hex": "#663d73"
+    },
+    {
+      "hex": "#5c4b5c"
+    },
+    {
+      "hex": "#714d2a"
+    },
+    {
+      "hex": "#a3253c"
+    },
+    {
+      "hex": "#734b7b"
+    },
+    {
+      "hex": "#a93849"
+    },
+    {
+      "hex": "#81598c"
+    },
+    {
+      "hex": "#c9223a"
+    },
+    {
+      "hex": "#9704f4"
+    },
+    {
+      "hex": "#92666b"
+    },
+    {
+      "hex": "#9d6630"
+    },
+    {
+      "hex": "#d3233a"
+    },
+    {
+      "hex": "#9379aa"
+    },
+    {
+      "hex": "#c13ef9"
+    },
+    {
+      "hex": "#bd8236"
+    },
+    {
+      "hex": "#bb8b6a"
+    },
+    {
+      "hex": "#a991c3"
+    },
+    {
+      "hex": "#a89cad"
+    },
+    {
+      "hex": "#dc73f7"
+    },
+    {
+      "hex": "#daa53a"
+    },
+    {
+      "hex": "#bdabd3"
+    },
+    {
+      "hex": "#e4b56c"
+    },
+    {
+      "hex": "#f5b7f9"
+    },
+    {
+      "hex": "#d7d0e9"
+    },
+    {
+      "hex": "#f7d98b"
+    },
+    {
+      "hex": "#e7d5f3"
+    },
+    {
+      "hex": "#e6d8f1"
+    },
+    {
+      "hex": "#fcdf91"
+    },
+    {
+      "hex": "#ece1ef"
+    }
+  ],
+  "transparent_index": 255,
+  "locked": false,
+  "source": "palette_tool build: OKLab k-means++ of 5 image(s), 48 colours, seed 0"
+}

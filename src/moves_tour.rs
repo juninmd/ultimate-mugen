@@ -2,6 +2,7 @@
 //! forces every special, super and throw of each listed fighter against a dummy rival, prints the damage it dealt and saves the
 //! frame a few ticks after the first hit (`<dir>/M-<fighter>-<move>.png`).
 //! `UME_BOXES=1` draws the hit and hurt boxes on the captured frames; `UME_AFTER_HIT=<ticks>` changes the capture delay.
+//! `UME_MOVE_FILTER=move-slug,...` selects matching move labels, including normals.
 pub mod clips;
 pub mod duel;
 use crate::app::{App, Mode};
@@ -12,6 +13,7 @@ use ume_engine::chardef::CharDef;
 
 const MAX_WAIT_TICKS: usize = 150;
 const TICKS_AFTER_HIT: usize = 5;
+const ROUND_INTRO_TICKS: usize = 45;
 
 struct Showcase {
     name: String,
@@ -22,6 +24,13 @@ struct Showcase {
 
 fn showcases(def: &CharDef) -> Vec<Showcase> {
     let Some(minus_one) = def.states.get(&-1) else { return vec![] };
+    let filter: Vec<String> = std::env::var("UME_MOVE_FILTER")
+        .unwrap_or_default()
+        .split(',')
+        .map(str::trim)
+        .filter(|name| !name.is_empty())
+        .map(slug)
+        .collect();
     let mut out = vec![];
     for controller in &minus_one.controllers {
         let Some(name) = controller.label.strip_prefix("State -1, ") else { continue };
@@ -29,7 +38,8 @@ fn showcases(def: &CharDef) -> Vec<Showcase> {
         let Some(body) = def.states.get(&state) else { continue };
         let is_throw = body.controllers.iter().any(|c| c.label.ends_with("throw_grab"));
         let is_special = (1000..3800).contains(&state);
-        if !is_throw && !is_special || out.iter().any(|s: &Showcase| s.state == state) {
+        let selected = filter.is_empty() || filter.contains(&slug(name));
+        if !selected || (filter.is_empty() && !is_throw && !is_special) || out.iter().any(|s: &Showcase| s.state == state) {
             continue;
         }
         let gap = if is_throw { 34.0 } else if state >= 3000 { 48.0 } else { 52.0 };
@@ -58,13 +68,20 @@ pub async fn run(app: &mut App, dir: &str) {
             let App { session, c, audio, .. } = app;
             let s = session.as_mut().unwrap();
             for pilot in &mut s.pilots {
-                *pilot = crate::session::Pilot::Dummy;
+                *pilot = crate::session::Pilot::Dummy(Default::default());
             }
             s.r.debug = std::env::var("UME_BOXES").is_ok();
             for _ in 0..600 {
                 if s.m.round_state == 2 && s.m.fighters[0].ctrl {
                     break;
                 }
+                s.step_visual(c, audio);
+            }
+        }
+        {
+            let App { session, c, audio, .. } = app;
+            let s = session.as_mut().unwrap();
+            for _ in 0..ROUND_INTRO_TICKS {
                 s.step_visual(c, audio);
             }
         }

@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-12",
+  "fighter": "garan",
+  "pose": "jumpUp",
+  "target": "assets/chars/sprites/garan/jumpUp.png",
+  "activeSha256": "d06adec8cd128b3227f85d33e1179615e3062b5f95db6729d56a60fa07e6b1b6",
+  "backup": "integrated/garan-jumpUp-before/jumpUp.png",
+  "backupSha256": "af7b579807303eff264b1a41e532b1b8c9859a4e41f0378dfb50a4cda1d6cc0e",
+  "identityAnchor": "assets/chars/sprites/garan/04_special.png",
+  "candidateReview": "candidates/garan-jumpUp-pilot/candidate-review.json",
+  "frame": {
+    "pose": "jumpUp",
+    "sha256": "d06adec8cd128b3227f85d33e1179615e3062b5f95db6729d56a60fa07e6b1b6",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 44,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      111,
+      93,
+      289,
+      392
+    ],
+    "axis": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sharedPaletteFile": "candidates/garan-jumpUp-pilot/palette-seed-0/palette.json",
+    "sharedPaletteSha256": "16519d2e752cbe69b8c3b387c8f87457a9cd406d85cf20301853c857c861d83a",
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "floorY392": true,
+      "axis200x392Ref320": true,
+      "exactPaletteSubset": true
+    }
+  },
+  "visualReview": {
+    "native": "contact-native.png",
+    "nearest_2x": "contact-nearest-2x.png",
+    "identity": "pass",
+    "pose": "pass",
+    "scale_vs_jumpUp_family": "pass",
+    "alpha_edges": "pass",
+    "unrequested_effects": "none"
+  },
+  "integration": "Promoted after parent review of native and nearest-2x jump-family comparison. Existing metadata/animation references unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

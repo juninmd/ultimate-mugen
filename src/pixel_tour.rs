@@ -58,7 +58,7 @@ pub async fn run(app: &mut App, dir: &str) {
 }
 
 pub(crate) fn probe(s: &mut crate::session::Session, c: &mut crate::controls::Controls, audio: &mut crate::audio::Audio, want: &str, name: &str) {
-    for pilot in &mut s.pilots { *pilot = crate::session::Pilot::Dummy; }
+    for pilot in &mut s.pilots { *pilot = crate::session::Pilot::Dummy(Default::default()); }
     for _ in 0..600 {
         if s.m.round_state == 2 && s.m.fighters[0].ctrl { break; }
         s.step_visual(c, audio);

@@ -11,7 +11,7 @@ use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::stage::load_stage;
 use ume_formats::vfs::{char_key, find_char_defs, find_stage_defs, stage_key, text, Vfs};
 
-mod bgm;
+mod bgm; mod kits;
 #[path = "registry_sprite_cache.rs"]
 mod sprite_cache;
 pub use bgm::stage_bgm;
@@ -349,7 +349,7 @@ impl Registry {
     pub fn new() -> Self {
         let mut chars = vec![];
         for (_, json) in BUILTIN.iter() {
-            match serde_json::from_str::<NativeChar>(json) {
+            match ume_engine::native::parse_char(json) {
                 Ok(nc) => {
                     let arc = Arc::new(nc);
                     ume_engine::native::register_native(arc.clone());
@@ -411,7 +411,7 @@ impl Registry {
         }
     }
     pub fn add_native_json(&mut self, json: &str) -> Result<String, String> {
-        let nc: NativeChar = serde_json::from_str(json).map_err(|e| e.to_string())?;
+        if ume_engine::native::is_kit_text(json) { return ume_engine::native::register_kit(json); } let nc: NativeChar = ume_engine::native::parse_char(json)?;
         let id = format!("umf:{}", nc.id);
         if let Some(old) = self.chars.iter().find(|c| c.id == id) {
             eprintln!(
@@ -713,7 +713,7 @@ impl Registry {
     }
     #[cfg(not(target_arch = "wasm32"))]
     pub fn scan_umf_dir(&mut self, dir: &std::path::Path) -> usize {
-        let Ok(rd) = std::fs::read_dir(dir) else {
+        let Ok(rd) = std::fs::read_dir(dir).inspect(|_| kits::register_dir(dir)) else {
             return 0;
         };
         let mut files: Vec<std::path::PathBuf> = rd

@@ -1,0 +1,9 @@
+pub const MARGIN: f32 = 40.0;
+pub const LIST_X: f32 = 40.0;
+pub const LIST_W: f32 = 520.0;
+pub const PANEL_W: f32 = 600.0;
+pub const TEXT_SM: f32 = 16.0;
+pub const TEXT_MD: f32 = 20.0;
+pub const TEXT_LG: f32 = 22.0;
+pub const ALPHA_BODY: f32 = 0.9;
+pub const ALPHA_MUTED: f32 = 0.7;

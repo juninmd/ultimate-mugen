@@ -44,7 +44,7 @@ A janela pode ser arrastada para qualquer tamanho. O jogo desenha em um espaço 
 | `--version` | Mostra a versão |
 | `--check-update` | Mostra se existe release mais nova e sai |
 | `--update` | Baixa, verifica e instala a release mais nova, depois sai |
-| `--no-auto-update` / `--no-update-check` | Mantém só o aviso / não procura atualização |
+| `--no-auto-update` / `--no-update-check` | Mantém só o aviso, sem pergunta / não procura atualização |
 
 ## Variáveis de ambiente
 
@@ -54,7 +54,7 @@ A janela pode ser arrastada para qualquer tamanho. O jogo desenha em um espaço 
 | `UME_MARKET_HOME` | Pasta dos downloads e do estado do [mercado](Mercado.md) |
 | `UME_GITHUB_TOKEN` / `GITHUB_TOKEN` | Token opcional do GitHub para o mercado (aumenta o limite da API) |
 | `UME_NO_UPDATE_CHECK=1` | Não procura atualizações |
-| `UME_NO_AUTO_UPDATE=1` | Mantém o aviso, mas nunca baixa nem instala |
+| `UME_NO_AUTO_UPDATE=1` | Mantém o aviso, mas nunca pergunta, baixa ou instala |
 | `UME_NOFX=1` | Desliga a camada animada dos cenários (teste de desempenho) |
 | `UME_TOUR=mugen` + `UME_CHARS=a,b` + `UME_STAGE=<id>` | Com `--shots`, fotografa lutadores importados |
 
@@ -98,3 +98,49 @@ No menu de pausa, escolha um golpe na lista e aperte `1`-`4` (ou L1, L2, R1, R2 
 ## Botões na tela
 
 A lista de golpes da pausa e a tela de Controles mostram a tecla ou o botão real do último dispositivo usado: teclado, Xbox (A/B/X/Y, LB/LT/RB/RT) ou PlayStation (✕ ○ □ △, L1/L2/R1/R2). Em telas de toque aparecem os nomes dos botões virtuais. Controles Xbox são detectados pelo nome ou pelo vendor ID `045E`, PlayStation pelo `054C`. A vibração funciona nos dois: Xbox via force feedback do gilrs (e Gamepad API na web), DualShock 4 / DualSense via relatórios HID diretos.
+
+## Tweaks (`tweaks.toml`)
+
+Criado ao lado do executável na primeira execução (localStorage na web) com os padrões. Edite e salve: o jogo recarrega em cerca de um segundo e mostra um aviso. Erros nunca param o jogo; o valor afetado mantém o padrão e o aviso e o log citam a chave, com dica "você quis dizer" e a linha em erros de sintaxe.
+
+| Seção | Chave | Efeito |
+|---|---|---|
+| `[theme]` | `background` | Cor base do fundo do menu |
+| `[theme]` | `glow_bottom`, `glow_left`, `glow_right` | Brilhos de luz do menu |
+| `[theme]` | `preset` | `"default"`, `"emerald"`, `"sunset"` ou `"mono"`: define de uma vez o fundo, os brilhos, os cinco papéis abaixo, a barra de vida e as cores dos lados. Qualquer outra chave do arquivo continua valendo sobre o preset |
+| `[theme]` | `accent` | Cor de seleção: destaque do menu principal, botões da pausa e das configurações, controles deslizantes |
+| `[theme]` | `title`, `info`, `muted`, `text` | Títulos e valores (dourado), dicas e links (ciano), texto secundário e texto comum, em todos os menus e no HUD |
+| `[hud]` | `life`, `life_low`, `damage` | Preenchimento da barra de vida, a cor abaixo de 25% de vida e o trecho de dano que escorre. O topo de cada degradê é derivado da cor |
+| `[music]` | `fight` | Arquivo de áudio tocado em toda luta no lugar do tema embutido (`.ogg`, `.mp3`, `.wav`, `.flac`). Caminhos relativos à pasta do `tweaks.toml`. Só no desktop |
+| `[music]` | `<id do cenário>` (`dojo`, `neon`, `bamboo`, `volcano`, `brazil`, ...) | Arquivo de áudio daquele cenário; vale sobre `fight` e sobre a música do próprio cenário |
+| `[hud]` | `p1_tint`, `p2_tint` | Cor de destaque das barras por lado |
+| `[hud]` | `bar_offset_y` | Desce as barras de vida (-4 a 40) |
+| `[accessibility]` | `hud_opacity` | Multiplicador de opacidade do HUD (0.3 a 1.0) |
+| `[accessibility]` | `colorblind` | `true` usa azul/laranja nas cores dos lados em vez dos tons padrão |
+| `[accessibility]` | `hud_scale` | Multiplicador do tamanho do HUD (0.8 a 1.25) |
+| `[accessibility]` | `reduce_motion` | `true` desliga o tremor da tela |
+| `[rules]` | `rounds_to_win` (1-9), `round_seconds` (0 = sem limite, até 999), `life_percent` (10-500), `game_speed` (0.5-2.0) | Sobrescrevem os valores do menu Settings em toda luta; remova a linha para voltar ao valor do menu |
+| `[menu]` | `arcade`, `story`, `survival`, `cpu`, `versus`, `training`, `watch`, `team_seq`, `team_simul`, `team_tag`, `mugen`, `market`, `controls`, `settings`, `replays`, `quit` | Texto dessa entrada do menu principal |
+
+Cores são `"#rrggbb"` ou `"#rgb"`. Exemplo de um visual próprio completo:
+
+```toml
+[theme]
+preset = "mono"
+accent = "#7a3cff"
+title = "#b8ff5c"
+
+[hud]
+life = "#5cc8ff"
+life_low = "#ff5ca8"
+damage = "#7a3cff"
+
+[menu]
+arcade = "Fliperama"
+
+[music]
+fight = "music/meu-tema.ogg"
+dojo = "music/dojo.ogg"
+```
+
+Capturas de todos os presets ficam em `screenshots/themes/` (`UME_TOUR=themes`). Plano e comparação com outras engines: `docs/research/customization-comparison.pt-BR.md`.

@@ -2,7 +2,7 @@ use crate::{text, Config, Frame, Game, Phase};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use std::task::{Context, Poll, Waker};
 use std::sync::Arc;
 use ume_render::RGBA_SPRITE;
@@ -112,7 +112,7 @@ impl Color {
     pub const fn new(r: f32, g: f32, b: f32, a: f32) -> Color { Color { r, g, b, a } }
     pub fn from_rgba(r: u8, g: u8, b: u8, a: u8) -> Color { Color::new(r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0, a as f32 / 255.0) }
     pub fn to_array(self) -> [f32; 4] { [self.r, self.g, self.b, self.a] }
-    fn render(self) -> ume_render::Color { ume_render::Color(self.to_array()) }
+    fn render(self) -> ume_render::Color { ume_render::Color(crate::alpha_scale::apply(self.to_array())) }
 }
 
 impl From<[f32; 4]> for Color { fn from(c: [f32; 4]) -> Color { Color::new(c[0], c[1], c[2], c[3]) } }
@@ -150,7 +150,7 @@ pub fn request_new_screen_size(w: f32, h: f32) { with(|f| f.resize = Some([w.max
 pub fn set_fullscreen(on: bool) { with(|f| f.fullscreen = Some(on)) }
 pub fn set_vsync(on: bool) { with(|f| f.vsync = Some(on)) }
 pub fn set_frame_cap(fps: u32) { with(|f| f.frame_cap = Some(fps)) }
-pub fn set_post(p: Option<PostParams>) { with(|f| { f.post = p; f.canvas.batch.begin_overlay(); }) }
+pub fn set_post(p: Option<PostParams>) { with(|f| { let w = crate::waves::take(); f.post = p.map(|p| PostParams { waves: w, ..p }); f.canvas.batch.begin_overlay(); }) }
 pub fn glass_panel(x: f32, y: f32, w: f32, h: f32, radius: f32, tint: [f32; 3]) -> bool { with(|f| f.post.as_mut().is_some_and(|p| p.glass.push(x, y, w, h, radius, tint))) }
 pub fn set_blend(b: Blend) { with(|f| f.canvas.blend = b) }
 pub fn quit() { with(|f| f.quit = true) }
@@ -186,28 +186,10 @@ pub fn draw_circle_lines(x: f32, y: f32, r: f32, thickness: f32, c: Color) { wit
 pub fn draw_triangle(a: Vec2, b: Vec2, c: Vec2, color: Color) { with(|f| f.canvas.triangle(a.into(), b.into(), c.into(), color.render())) }
 
 pub fn draw_poly(x: f32, y: f32, sides: u8, radius: f32, rotation: f32, c: Color) {
-    draw_ellipse_poly(x, y, radius, radius, rotation.to_radians(), sides.max(3) as u32, c)
+    draw_ellipse_segments(x, y, radius, radius, rotation.to_radians(), sides.max(3) as u32, c)
 }
 
-pub fn draw_ellipse(x: f32, y: f32, w: f32, h: f32, rotation: f32, c: Color) { draw_ellipse_poly(x, y, w, h, rotation.to_radians(), 32, c) }
-
-fn draw_ellipse_poly(x: f32, y: f32, rx: f32, ry: f32, rot: f32, n: u32, c: Color) {
-    let (s, co) = rot.sin_cos();
-    let mut pts = Vec::with_capacity(n as usize + 1);
-    pts.push([x, y]);
-    for i in 0..n {
-        let t = i as f32 / n as f32 * std::f32::consts::TAU;
-        let (px, py) = (t.cos() * rx, t.sin() * ry);
-        pts.push([x + px * co - py * s, y + px * s + py * co]);
-    }
-    let mut idx = Vec::with_capacity(n as usize * 3);
-    for i in 0..n {
-        idx.push(0);
-        idx.push(1 + i);
-        idx.push(1 + (i + 1) % n);
-    }
-    with(|f| f.canvas.mesh(&pts, &[c.render()], &idx));
-}
+pub fn draw_ellipse(x: f32, y: f32, w: f32, h: f32, rotation: f32, c: Color) { draw_ellipse_segments(x, y, w, h, rotation.to_radians(), 32, c) }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FilterMode { Linear, Nearest }
@@ -262,7 +244,7 @@ pub struct DrawTextureParams { pub dest_size: Option<Vec2>, pub source: Option<R
 pub fn draw_texture(t: &Texture2D, x: f32, y: f32, c: Color) { draw_texture_ex(t, x, y, c, DrawTextureParams::default()) }
 
 pub fn draw_texture_ex(t: &Texture2D, x: f32, y: f32, c: Color, p: DrawTextureParams) {
-    with(|f| {
+    with(|f| { if large::try_draw(f, t, x, y, c, &p) { return; }
         let Some(r) = t.rect(f) else { return };
         push_textured(f, r, RGBA_SPRITE, [t.width(), t.height()], x, y, c, p);
     })
@@ -339,7 +321,9 @@ impl IndexedTexture {
     }
 }
 
-mod palette;
+mod palette; mod large;
+mod shapes;
+pub use shapes::*;
 
 pub use palette::Palette;
 

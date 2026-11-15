@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "character": "volta",
+  "file": "assets/chars/sprites/volta/jab0.png",
+  "sourceSha256": "719842ee823a2e639c51e6f6117d5824559d4aa35cfd26f7d9ad9d8734c8b8fd",
+  "promotedSha256": "d51d88b3ae623e240fc854f0c89e12acc3248e6353a402dcd4a02ecf13f65a8c",
+  "sourcePath": "integrated/volta-jab-palette-reapply/backup/jab0.before-shared-palette.png",
+  "candidatePath": "integrated/volta-jab-palette-reapply/reapplied-run1/jab0.png",
+  "palettePath": "candidates/volta-jab1-impact-pilot/shared-palette-seed-13/palette.json",
+  "paletteSha256": "25f9eaf37d1054396f7305e861a5f54ce0e5eb5395ac17f2a7231c213995434f",
+  "strictApplyQa": "integrated/volta-jab-palette-reapply/reapplied-run1/apply-qa.json",
+  "strictMaxDeltaE": 0.056425,
+  "strictGate": 0.13,
+  "backupHashes": {
+    "jab0Before": "719842ee823a2e639c51e6f6117d5824559d4aa35cfd26f7d9ad9d8734c8b8fd",
+    "nativeContactBefore": "1c8d52d0ade4ca2e8bf89fab9a7efa71fed07b706e800ab4fe06c3ba331752c4",
+    "nearest2xContactBefore": "f3a17d3f3029562dd6bbc33a50d9226e319666a7e4916678522ca0c1ff0cfd7a"
+  },
+  "result": "pass",
+  "activeReplaced": true
+}

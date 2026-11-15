@@ -1,0 +1,24 @@
+roster 21 fighters, 1260 CPU-vs-CPU rounds (level 6, 3 seeds, both sides)
+oboro    win 100.0%  dmg/round    872  hits/round  54.8  best combo 15
+bruno    win  86.7%  dmg/round    966  hits/round  17.4  best combo  3
+garan    win  76.7%  dmg/round    862  hits/round  22.6  best combo  7
+npc_colossus win  73.3%  dmg/round    682  hits/round  28.8  best combo  8
+sylene   win  65.8%  dmg/round    895  hits/round  27.9  best combo  9
+haruki   win  62.5%  dmg/round    800  hits/round  28.4  best combo  9
+daichi   win  59.2%  dmg/round    728  hits/round  28.4  best combo  8
+kaname   win  56.7%  dmg/round    741  hits/round  31.4  best combo  9
+suzume   win  56.7%  dmg/round    761  hits/round  30.1  best combo 10
+marlow   win  55.0%  dmg/round    722  hits/round  28.0  best combo  6
+jin      win  53.3%  dmg/round    733  hits/round  35.4  best combo 11
+shion    win  53.3%  dmg/round    721  hits/round  25.3  best combo  6
+volta    win  48.3%  dmg/round    716  hits/round  31.6  best combo  7
+lian     win  47.5%  dmg/round    736  hits/round  31.1  best combo  8
+valdric  win  45.8%  dmg/round    715  hits/round  27.6  best combo  5
+akio     win  38.3%  dmg/round    666  hits/round  25.1  best combo  8
+kaito    win  33.3%  dmg/round    640  hits/round  28.2  best combo 20
+npc_brute win  12.5%  dmg/round    442  hits/round  17.0  best combo  8
+npc_razor win  12.5%  dmg/round    456  hits/round  22.1  best combo  7
+npc_phantom win   8.3%  dmg/round    389  hits/round  23.9  best combo 12
+npc_spitfire win   4.2%  dmg/round    326  hits/round  17.1  best combo  8
+win-rate spread (std dev) 24.7 pts, best 100.0%, worst 4.2%
+knockout rate 83.4%, draws 0.0%, average round 70.9s, avg damage/round 1388, avg hits/round 55.5, rounds with a stuck fighter 0

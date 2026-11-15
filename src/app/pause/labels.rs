@@ -45,7 +45,7 @@ mod tests {
     use super::*;
 
     fn mv(cost: f32, drain: bool) -> MoveInfo {
-        MoveInfo { name: "m".into(), input: "x".into(), command: "m".into(), cost, drain, forms: u32::MAX }
+        MoveInfo { name: "m".into(), input: "x".into(), command: "m".into(), cost, drain, forms: u32::MAX, state: -1 }
     }
 
     #[test]

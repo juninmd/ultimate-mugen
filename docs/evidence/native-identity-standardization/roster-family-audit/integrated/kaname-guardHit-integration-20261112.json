@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-12",
+  "fighter": "kaname",
+  "pose": "guardHit",
+  "target": "assets/chars/sprites/kaname/guardHit.png",
+  "activeSha256": "0dce8d0b1dcbc76d3bb59c8c7cc476e39e896ece4519d204195de5155d77b825",
+  "backup": "integrated/kaname-guardHit-before/guardHit.png",
+  "backupSha256": "379d81a9a9bc63cd47b9579869982e85f00bb5adb25003bd8089c091eba520c1",
+  "identityAnchor": "assets/chars/sprites/kaname/04_special.png",
+  "candidateReview": "candidates/kaname-guardhit-pilot/candidate-review-pipeline-v1.json",
+  "frame": {
+    "pose": "guardHit",
+    "sha256": "0dce8d0b1dcbc76d3bb59c8c7cc476e39e896ece4519d204195de5155d77b825",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 46,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      34,
+      21,
+      246,
+      392
+    ],
+    "axis": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sharedPaletteFile": "candidates/kaname-cjab0-pilot/pipeline-v1/palette/palette.json",
+    "sharedPaletteSha256": "d9fb31a37fb45f1778cd258b2ea983362368fb4e1bacde1457417a3e107da506",
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "floorY392": true,
+      "axis200x392Ref320": true,
+      "exactPaletteSubset": true
+    }
+  },
+  "visualReview": {
+    "identity": "pass: blue tied hair, white haori with navy pattern, navy hakama, canonical katana silhouette; no unsupported effects",
+    "pose": "pass: braced, lower recoil/impact guard distinct from upright integrated guard; retain current active guardHit pose as action guide only",
+    "sequence": "pass: guard to guardHit reads as a compressed backward impact reaction at native and nearest 2x",
+    "evidence": [
+      "pipeline-v1/evidence/native-sequence-review.png",
+      "pipeline-v1/evidence/2x-sequence-review.png"
+    ],
+    "runtime_review": "not performed"
+  },
+  "integration": "Promoted after parent review of native and nearest-2x guard→guardHit sequence. Metadata and timing unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

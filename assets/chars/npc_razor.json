@@ -95,13 +95,13 @@
    },
    "arms": 0.95,
    "waist": 0.92,
-   "folds": 1.0,
+   "folds": 1,
    "stitch": "top2",
    "weave": "weave",
    "knuckles": true,
-   "faceShade": 1.0,
+   "faceShade": 1,
    "brow": {
-    "thick": 1.0
+    "thick": 1
    },
    "pouches": 2,
    "talisman": {
@@ -1668,17 +1668,22 @@
     },
     {
      "pose": "run1",
-     "ticks": 4,
+     "ticks": 3,
      "sprite": "sg_run_run1"
     },
     {
+     "pose": "runMid",
+     "sprite": "sg_run_mid",
+     "ticks": 3
+    },
+    {
      "pose": "run2",
-     "ticks": 4,
+     "ticks": 3,
      "sprite": "sg_run_run2"
     },
     {
      "pose": "run3",
-     "ticks": 4,
+     "ticks": 3,
      "sprite": "sg_run_run3"
     }
    ]
@@ -2218,8 +2223,24 @@
      }
     },
     {
+     "pose": {
+      "elbowF": 70,
+      "thighF": 80,
+      "head": -12,
+      "ankleF": 25,
+      "kneeB": 125,
+      "elbowB": 125,
+      "lean": 10,
+      "shoulderB": 25,
+      "shoulderF": 65,
+      "kneeF": 60,
+      "thighB": 38
+     },
+     "ticks": 2
+    },
+    {
      "pose": "crouch",
-     "ticks": 5
+     "ticks": 3
     }
    ]
   },
@@ -2266,7 +2287,21 @@
      }
     },
     {
-     "pose": "ajab",
+     "pose": {
+      "elbowF": 53.5,
+      "thighF": 78,
+      "head": -9,
+      "ankleF": 30,
+      "kneeB": 118,
+      "elbowB": 110,
+      "wind": 0.4,
+      "lean": 9,
+      "shoulderB": 45,
+      "shoulderF": 64,
+      "kneeF": 120,
+      "ankleB": 35,
+      "thighB": 50
+     },
      "ticks": 6
     },
     {
@@ -2290,7 +2325,21 @@
      }
     },
     {
-     "pose": "akick",
+     "pose": {
+      "elbowF": 107.5,
+      "thighF": 65,
+      "head": 0,
+      "ankleF": 46,
+      "kneeB": 121.5,
+      "elbowB": 110,
+      "wind": 0.55,
+      "lean": -6,
+      "shoulderB": 45,
+      "shoulderF": 60,
+      "kneeF": 60,
+      "ankleB": 35,
+      "thighB": 62.5
+     },
      "ticks": 8
     },
     {
@@ -2846,6 +2895,280 @@
      "ticks": 4
     }
    ]
+  },
+  "flashCat": {
+   "frames": [
+    {
+     "pose": "kv0",
+     "ticks": 6
+    },
+    {
+     "effect": {
+      "type": "burst",
+      "size": 26,
+      "color": "#ffb347",
+      "phase": 0.3,
+      "nohit": true
+     },
+     "ticks": 5,
+     "hurt": "none"
+    },
+    {
+     "effect": {
+      "type": "burst",
+      "size": 26,
+      "color": "#ffb347",
+      "phase": 0.7,
+      "nohit": true
+     },
+     "ticks": 4,
+     "hurt": "none"
+    },
+    {
+     "pose": "ks1",
+     "ticks": 5,
+     "hit": {
+      "part": "weapon",
+      "radius": 8
+     }
+    },
+    {
+     "pose": "ks2",
+     "ticks": 8
+    },
+    {
+     "pose": "idle0",
+     "ticks": 4
+    }
+   ]
+  },
+  "lightningPalm": {
+   "frames": [
+    {
+     "pose": "kv0",
+     "ticks": 6
+    },
+    {
+     "pose": "tp0",
+     "ticks": 3
+    },
+    {
+     "pose": "tp2",
+     "ticks": 3,
+     "hit": {
+      "part": "weapon",
+      "radius": 9
+     }
+    },
+    {
+     "pose": "ks1",
+     "ticks": 3,
+     "hit": {
+      "part": "weapon",
+      "radius": 9
+     }
+    },
+    {
+     "pose": "ks2",
+     "ticks": 3,
+     "hit": {
+      "part": "weapon",
+      "radius": 9
+     }
+    },
+    {
+     "pose": "kv1",
+     "ticks": 9
+    },
+    {
+     "pose": "idle0",
+     "ticks": 4
+    }
+   ]
+  },
+  "volleyEx": {
+   "frames": [
+    {
+     "pose": "kv0",
+     "ticks": 5
+    },
+    {
+     "pose": "kv1",
+     "ticks": 2
+    },
+    {
+     "pose": "kv1",
+     "ticks": 11
+    },
+    {
+     "pose": "jab0",
+     "ticks": 4
+    },
+    {
+     "pose": "idle0",
+     "ticks": 2
+    }
+   ]
+  },
+  "swallowEx": {
+   "frames": [
+    {
+     "pose": "sf0",
+     "ticks": 2
+    },
+    {
+     "pose": "sf1",
+     "ticks": 5,
+     "hit": {
+      "part": "footF",
+      "radius": 12
+     }
+    },
+    {
+     "pose": "sf2",
+     "ticks": 3
+    },
+    {
+     "pose": "sf3",
+     "ticks": 3
+    },
+    {
+     "pose": "sf4",
+     "ticks": 3
+    },
+    {
+     "pose": "jumpDown",
+     "ticks": 1
+    }
+   ]
+  },
+  "stringA": {
+   "frames": [
+    {
+     "pose": "jab0",
+     "ticks": 1
+    },
+    {
+     "pose": "jab1",
+     "ticks": 1,
+     "hit": {
+      "part": "handF",
+      "radius": 6
+     }
+    },
+    {
+     "pose": "jab0",
+     "ticks": 1
+    },
+    {
+     "pose": "jab1",
+     "ticks": 1,
+     "hit": {
+      "part": "handF",
+      "radius": 6
+     }
+    },
+    {
+     "pose": "jab0",
+     "ticks": 1
+    },
+    {
+     "pose": "jab1",
+     "ticks": 1,
+     "hit": {
+      "part": "handF",
+      "radius": 6
+     }
+    },
+    {
+     "pose": "jab0",
+     "ticks": 2
+    },
+    {
+     "pose": "idle0",
+     "ticks": 1
+    }
+   ]
+  },
+  "stringB": {
+   "frames": [
+    {
+     "pose": "lk0",
+     "ticks": 2
+    },
+    {
+     "pose": "lk1",
+     "ticks": 3,
+     "hit": {
+      "part": "footF",
+      "radius": 8
+     }
+    },
+    {
+     "pose": "jab0",
+     "ticks": 1
+    },
+    {
+     "pose": "jab1",
+     "ticks": 1,
+     "hit": {
+      "part": "handF",
+      "radius": 6
+     }
+    },
+    {
+     "pose": "lk0",
+     "ticks": 2
+    },
+    {
+     "pose": "lk1",
+     "ticks": 3,
+     "hit": {
+      "part": "footF",
+      "radius": 8
+     }
+    },
+    {
+     "pose": "lk0",
+     "ticks": 3
+    },
+    {
+     "pose": "idle0",
+     "ticks": 2
+    }
+   ]
+  },
+  "stringC": {
+   "frames": [
+    {
+     "pose": "hk0",
+     "ticks": 3
+    },
+    {
+     "pose": "hk0",
+     "ticks": 2
+    },
+    {
+     "pose": "hk1",
+     "ticks": 4,
+     "hit": {
+      "part": "footF",
+      "radius": 9
+     }
+    },
+    {
+     "pose": "hk1",
+     "ticks": 2
+    },
+    {
+     "pose": "hk0",
+     "ticks": 5
+    },
+    {
+     "pose": "idle0",
+     "ticks": 3
+    }
+   ]
   }
  },
  "moves": [
@@ -2864,7 +3187,8 @@
    ],
    "cancels": [
     "lkick",
-    "strong"
+    "strong",
+    "string_a"
    ]
   },
   {
@@ -3039,7 +3363,8 @@
      -70
     ],
     "damage": 62,
-    "level": "light"
+    "level": "light",
+    "element": "wind"
    },
    "cancels": [
     "clone"
@@ -3104,7 +3429,7 @@
      ]
     }
    ],
-   "cost": 250.0
+   "cost": 250
   },
   {
    "id": "storm",
@@ -3139,7 +3464,8 @@
      "damage": 42,
      "level": "medium",
      "launch": false,
-     "hits": 2
+     "hits": 2,
+     "element": "wind"
     },
     {
      "at": 3,
@@ -3156,7 +3482,8 @@
      "damage": 42,
      "level": "medium",
      "launch": false,
-     "hits": 2
+     "hits": 2,
+     "element": "wind"
     },
     {
      "at": 4,
@@ -3173,7 +3500,8 @@
      "damage": 42,
      "level": "medium",
      "launch": false,
-     "hits": 2
+     "hits": 2,
+     "element": "wind"
     },
     {
      "at": 5,
@@ -3190,7 +3518,8 @@
      "damage": 42,
      "level": "medium",
      "launch": false,
-     "hits": 2
+     "hits": 2,
+     "element": "wind"
     },
     {
      "at": 6,
@@ -3207,7 +3536,8 @@
      "damage": 42,
      "level": "medium",
      "launch": true,
-     "hits": 2
+     "hits": 2,
+     "element": "wind"
     }
    ]
   },
@@ -3231,7 +3561,8 @@
       -72
      ],
      "damage": 26,
-     "level": "light"
+     "level": "light",
+     "element": "wind"
     },
     {
      "at": 2,
@@ -3246,7 +3577,8 @@
       -68
      ],
      "damage": 26,
-     "level": "light"
+     "level": "light",
+     "element": "wind"
     },
     {
      "at": 2,
@@ -3261,7 +3593,8 @@
       -64
      ],
      "damage": 26,
-     "level": "light"
+     "level": "light",
+     "element": "wind"
     }
    ]
   },
@@ -3414,11 +3747,580 @@
      ]
     }
    ]
+  },
+  {
+   "id": "ult_veil",
+   "name": "Lótus do Julgamento: Mil Sombras",
+   "input": "~D, DF, F, D, DF, F, x+y",
+   "kind": "super",
+   "anim": "veil",
+   "cost": 3000,
+   "invuln": [
+    1,
+    7
+   ],
+   "teleport": 2,
+   "fx": "aura",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 5,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 6,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 7,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 8,
+     "damage": 46,
+     "level": "light",
+     "knockback": [
+      0,
+      0
+     ]
+    },
+    {
+     "at": 9,
+     "damage": 120,
+     "level": "heavy",
+     "launch": true,
+     "knockback": [
+      -6,
+      -6
+     ]
+    }
+   ],
+   "projectile": [
+    {
+     "at": 4,
+     "anim": "stormKunai",
+     "hitAnim": "kunaiHit",
+     "speed": [
+      8,
+      1.8
+     ],
+     "offset": [
+      36,
+      -60
+     ],
+     "damage": 44,
+     "hits": 3,
+     "removeTime": 60,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "wind"
+    },
+    {
+     "at": 6,
+     "anim": "stormKunai",
+     "hitAnim": "kunaiHit",
+     "speed": [
+      8,
+      2.4
+     ],
+     "offset": [
+      36,
+      -50
+     ],
+     "damage": 44,
+     "hits": 3,
+     "removeTime": 60,
+     "level": "heavy",
+     "launch": false,
+     "priority": 6,
+     "element": "wind"
+    }
+   ]
+  },
+  {
+   "id": "ex_volley",
+   "name": "Kunai Volley EX",
+   "input": "~D, DF, F, x+y",
+   "kind": "special",
+   "anim": "volleyEx",
+   "projectile": [
+    {
+     "at": 2,
+     "anim": "kunaiFx",
+     "hitAnim": "kunaiHit",
+     "speed": [
+      11.2,
+      0
+     ],
+     "offset": [
+      44,
+      -70
+     ],
+     "damage": 80.6,
+     "level": "heavy",
+     "hits": 2,
+     "priority": 2,
+     "element": "wind"
+    }
+   ],
+   "cancels": [
+    "clone"
+   ],
+   "cost": 250,
+   "fx": "aura"
+  },
+  {
+   "id": "ex_swallow",
+   "name": "Swallow EX",
+   "input": "F, D, DF, y+b",
+   "kind": "special",
+   "anim": "swallowEx",
+   "invuln": [
+    1,
+    5
+   ],
+   "moves": [
+    {
+     "at": 2,
+     "vel": [
+      1.5,
+      -9
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      -1,
+      null
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 2,
+     "damage": 109.2,
+     "level": "heavy",
+     "launch": true
+    }
+   ],
+   "cost": 500,
+   "fx": "aura"
+  },
+  {
+   "id": "overhead",
+   "name": "Veil Chop",
+   "input": "x+b",
+   "kind": "normal",
+   "anim": "hkick",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 55.1,
+     "level": "medium",
+     "guard": "high",
+     "hitstun": 20
+    }
+   ]
+  },
+  {
+   "id": "launcher",
+   "name": "Crescent Launcher",
+   "input": "y",
+   "kind": "normal",
+   "when": "crouch",
+   "anim": "strong",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 58,
+     "level": "heavy",
+     "launch": true,
+     "knockback": [
+      -1,
+      -6
+     ],
+     "hitstun": 22
+    }
+   ]
+  },
+  {
+   "id": "divekick",
+   "name": "Night Dive",
+   "input": "y",
+   "kind": "normal",
+   "anim": "akick",
+   "when": "air",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 50.6,
+     "level": "heavy",
+     "guard": "high",
+     "groundBounce": true,
+     "launch": true,
+     "knockback": [
+      -1,
+      4
+     ]
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      1.8,
+      2.5
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lunge",
+   "name": "Lunge Strike",
+   "input": "F+y",
+   "kind": "normal",
+   "anim": "strong",
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      5.5,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      1.5,
+      0
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 3,
+     "damage": 57.5,
+     "level": "heavy",
+     "knockback": [
+      -3,
+      -1
+     ]
+    }
+   ]
+  },
+  {
+   "id": "falcondive",
+   "name": "Falcon Dive",
+   "input": "F+b",
+   "kind": "normal",
+   "when": "air",
+   "anim": "akick",
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      4.5,
+      2.2
+     ]
+    }
+   ],
+   "hits": [
+    {
+     "at": 2,
+     "damage": 50.6,
+     "level": "medium",
+     "guard": "high"
+    }
+   ]
+  },
+  {
+   "id": "shunko",
+   "name": "Lightning Palm",
+   "input": "~D, DB, B, y",
+   "kind": "special",
+   "anim": "lightningPalm",
+   "teleport": 2,
+   "invuln": [
+    1,
+    3
+   ],
+   "hits": [
+    {
+     "at": 3,
+     "damage": 58,
+     "level": "medium",
+     "knockback": [
+      -1,
+      0
+     ],
+     "element": "lightning"
+    },
+    {
+     "at": 4,
+     "damage": 58,
+     "level": "medium",
+     "knockback": [
+      -1,
+      0
+     ],
+     "element": "lightning"
+    },
+    {
+     "at": 5,
+     "damage": 96,
+     "level": "heavy",
+     "launch": true,
+     "knockback": [
+      -5,
+      -6
+     ],
+     "element": "lightning"
+    }
+   ],
+   "cost": 300
+  },
+  {
+   "id": "flash_cat",
+   "name": "Flash Cat Burst",
+   "input": "D, D, b",
+   "kind": "special",
+   "anim": "flashCat",
+   "teleport": 3,
+   "invuln": [
+    2,
+    3
+   ],
+   "hits": [
+    {
+     "at": 4,
+     "damage": 64,
+     "level": "heavy",
+     "knockback": [
+      -3,
+      -3
+     ],
+     "element": "lightning"
+    }
+   ],
+   "cost": 150
+  },
+  {
+   "id": "string_a",
+   "name": "Needle Flicks",
+   "input": "B+x",
+   "kind": "normal",
+   "anim": "stringA",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 14,
+     "level": "light",
+     "knockback": [
+      -0.5,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "damage": 14,
+     "level": "light",
+     "knockback": [
+      -0.5,
+      0
+     ]
+    },
+    {
+     "at": 6,
+     "damage": 18,
+     "level": "light"
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      3,
+      0
+     ]
+    },
+    {
+     "at": 6,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "string_b",
+    "string_c",
+    "volley",
+    "spread"
+   ]
+  },
+  {
+   "id": "string_b",
+   "name": "Shadow Fan Chain",
+   "input": "B+a",
+   "kind": "normal",
+   "anim": "stringB",
+   "hits": [
+    {
+     "at": 2,
+     "damage": 20,
+     "level": "light",
+     "knockback": [
+      -0.5,
+      0
+     ]
+    },
+    {
+     "at": 4,
+     "damage": 16,
+     "level": "light",
+     "knockback": [
+      -0.5,
+      0
+     ]
+    },
+    {
+     "at": 6,
+     "damage": 26,
+     "level": "light"
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      2.5,
+      0
+     ]
+    },
+    {
+     "at": 6,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "string_c",
+    "volley",
+    "spread"
+   ]
+  },
+  {
+   "id": "string_c",
+   "name": "Afterimage Heel",
+   "input": "B+y",
+   "kind": "normal",
+   "anim": "stringC",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 72,
+     "level": "heavy",
+     "groundBounce": true,
+     "launch": true,
+     "knockback": [
+      -1,
+      4
+     ],
+     "hitstun": 22
+    }
+   ],
+   "moves": [
+    {
+     "at": 1,
+     "vel": [
+      3.2,
+      0
+     ]
+    },
+    {
+     "at": 3,
+     "vel": [
+      0.5,
+      0
+     ]
+    }
+   ],
+   "cancels": [
+    "volley",
+    "spread"
+   ]
+  },
+  {
+   "id": "halfmoon",
+   "name": "Meia-Lua",
+   "input": "~B, DB, D, DF, F, a+x",
+   "kind": "special",
+   "anim": "hkick",
+   "hits": [
+    {
+     "at": 3,
+     "damage": 52,
+     "level": "heavy"
+    }
+   ]
   }
  ],
  "country": "Japão",
  "stage": "bamboo",
  "speed": 1.375,
+ "passives": {
+  "meterRegen": 0.4,
+  "rage": {
+   "maxMultiplier": 1.25,
+   "exponent": 1,
+   "startRatio": 0.3,
+   "fullRatio": 0.05
+  },
+  "stacks": {
+   "speedGain": 0.04,
+   "damageGain": 0.02,
+   "maxStacks": 4,
+   "decayTicks": 240,
+   "resetOnRound": true,
+   "specials": true,
+   "supers": true
+  }
+ },
  "boss": false,
  "npc": true,
  "spriteSet": "suzume"

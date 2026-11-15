@@ -51,6 +51,7 @@ The helper is `ume_formats::par::map`. On the web (`wasm32`) it runs on the call
 |---|---|---|
 | Palette in the shader | `Gfx::sprite_tex`, `IndexedTexture`, `Palette` | M.U.G.E.N sprites with indexed pixels go to the 8-bit index atlas and are colored by a palette row in the shader: 4x less upload and atlas space than RGBA. `RemapPal` swaps the palette row instead of baking a new RGBA image |
 | Separate atlas resets | `ume_shell::quad` | The RGBA atlas (UI, text, true-color sprites) and the index atlas (+ palette rows) each reset on their own when full, so filling one never forces the other to re-upload |
+| Composite fast paths | `post.wgsl` `fs_composite` | Without radial blur the full-resolution pass takes 1 sample per pixel (3 with chroma) instead of 21, and glass panels skip pixels beyond their shadow reach. Output is unchanged; software-GPU frame time in `UME_TOUR=perf` went from 44 ms to 25 ms |
 
 ## Measuring
 
@@ -104,6 +105,9 @@ Rotating the whole native roster also shows the atlas cycling: four fighters lea
 | Atlas zero-fill | `Renderer::new` | Atlas and palette textures are initialized once, so `texSubImage2D` no longer triggers lazy clears (Firefox warning) |
 | Surface retry | `Shell::redraw` | A failed `get_current_texture` re-requests the frame instead of stalling the loop (black screen) |
 | Loader + cache | `web/index.html`, `web/sw.js` | Download progress while the wasm loads; JS glue and wasm are fetched as `?v=<build>` (stamped by `build-web.sh`) and cached immutably, so a cache can never mix two builds, auto-reload on WebGL context loss |
+| Sprite packs on demand | `src/web_sprites.rs`, `ume-tools pack-sprites` | Each fighter ships a full `<id>.pack` and a small `<id>.menu.pack` with exactly the files the select portrait and menu preview read (recorded by `ume_engine::native::menu_sprite_files`). Boot fetches only the menu packs; the full pack is fetched when the fighter is focused on the select screen or enters a match. Bytes fetched at boot went from 37.2 MB to 17.0 MB |
+| `web` build profile | `Cargo.toml` `[profile.web]`, `scripts/build-web.sh` | The browser build uses fat LTO, one codegen unit and `opt-level = "s"`, keeping `opt-level = 3` for the hot crates (`ume-engine`, `ume-formats`, `ume-render`, `tiny-skia`, `png`, `miniz_oxide`, `fdeflate`, `simd-adler32`). The wasm went from 17.9 MB to 13.2 MB (7.6 MB to 6.7 MB gzipped) |
+| Recolor and trim loops | `native::recolor`, `native::pixel_fit` | Palette recolor uses a direct-mapped color cache and a per-row hair window instead of a `HashMap` and a per-pixel region test; sprite trimming scans rows instead of columns. Same pixels (covered by reference tests); main-thread work from boot to fight in the profile probe went from 5.0 s to 4.0 s |
 
 Probe: `NODE_PATH=$(npm root -g) node scripts/web-profile.js Enter Enter Enter` (headless Chromium, needs `./scripts/build-web.sh` first).
 
@@ -440,3 +444,20 @@ etain_mut.
   - `Recolor::apply_in_region` uses a multiplicative hasher and a last-colour memo instead of SipHash per pixel.
   - The sprite pack cache holds 64 packs, so rosters above 24 fighters no longer evict each other.
   - Measured with the profiler in headless Chromium (select screen, 53 cursor moves): main-thread busy time dropped from about 98 s to about 2.5 s.
+
+## Sprite-sheet effects
+
+`src/vfx/sheet.rs` plays CC0 effect sheets from `assets/fx/` (embedded with `include_bytes!`, decoded and uploaded on first draw). A hit spark plays on every non-guarded hit; an explosion plays on hits of 150 damage or more and on KO. At most 12 sheet sprites are alive, drawn with additive blending, and they are cleared on round start. Pixel-art PVFX Foundry sheets (nearest filter, alpha blend) add punch hit on light hits, crit hit on heavy hits, shockwave ring and ground slam on 150+ damage grounded hits, parry on guarded hits and dash dust on dashes. Lightning strike and static burst play on supers, a fire pillar on transformations, a smoke bomb on KO and a frost nova on heavy guarded hits. Sheets and credits are listed in `assets/fx/CREDITS.md`.
+
+## Parallel variant sprite raster
+
+Compiling a UMF fighter rasterized the base frames in parallel and then recolored every form and awakening variant of every frame on one thread, which was 80 to 90% of the load. `native/frame_raster.rs` now renders each frame together with its variants inside the same worker pool (`min(cores, 8)`, one thread on `wasm32`), and the form palettes are built once per fighter instead of once per frame.
+
+`cargo run --release -p ume-engine --example load_bench` on the 4-core cloud machine, three runs each:
+
+| | Whole roster (21 fighters) | Oboro | Kaito | Suzume |
+|---|---|---|---|---|
+| Before | 11.40 / 11.76 / 11.79 s | 1674 ms | 1250 ms | 900 ms |
+| After | 4.70 / 4.46 / 4.54 s | 551 ms | 405 ms | 319 ms |
+
+The output is unchanged: a checksum of every sprite (pixels, size, axis, scale) and every animation frame of the 21 fighters in two palettes is identical before and after. Fighters without forms (`npc_*`) do not change, since they have no variants to render.

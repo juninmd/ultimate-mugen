@@ -1,0 +1,87 @@
+{
+  "date": "2026-11-12",
+  "fighter": "suzume",
+  "pose": "hitL3",
+  "target": "assets/chars/sprites/suzume/hitL3.png",
+  "activeSha256": "14727f9b77837f2d92321a400f80260488d8f9a339fb13db21477a9445efd25d",
+  "backup": "integrated/suzume-hitL3-before/hitL3.png",
+  "backupSha256": "4b169f55df45283c6562fe37ec63f1ec6c2abed35edc7132590f2ee070c1086f",
+  "identityAnchor": "assets/chars/sprites/suzume/04_special.png",
+  "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+  "imageQa": {
+    "file": "candidate-final.png",
+    "sha256": "14727f9b77837f2d92321a400f80260488d8f9a339fb13db21477a9445efd25d",
+    "size": [
+      400,
+      400
+    ],
+    "mode": "RGBA",
+    "alpha_values": [
+      0,
+      255
+    ],
+    "bbox_exclusive": [
+      13,
+      72,
+      263,
+      392
+    ],
+    "visible_floor_y": 391,
+    "anchor_xy": [
+      200,
+      392
+    ],
+    "refHeight": 320,
+    "unique_rgba_colors": 46,
+    "palette_colors_used": 45,
+    "off_palette_pixels": 0,
+    "partial_alpha_pixels": 0,
+    "max_delta_e": 0.07839,
+    "max_delta_e_limit": 0.13,
+    "palette_apply_status": "pass",
+    "scale_registration_status": "pass",
+    "nearest_resampler": "nearest"
+  },
+  "animationEvidence": {
+    "json": "assets/chars/suzume.json",
+    "animation": "hitLowHeavy",
+    "frames": [
+      {
+        "pose": "hitL3",
+        "ticks": 3
+      },
+      {
+        "pose": "hitL2",
+        "ticks": 10
+      },
+      {
+        "pose": "hitL1",
+        "ticks": 4
+      }
+    ],
+    "pose": {
+      "lean": 38,
+      "head": 26,
+      "kneeF": 32,
+      "kneeB": 36,
+      "handF": "open",
+      "handB": "open",
+      "face": "hurt"
+    },
+    "weapon": {
+      "type": "kunai",
+      "length": 12,
+      "angle": 100
+    },
+    "weapon_review": "Actual rig renders one default kunai; candidate retains one, no extra weapon/effect."
+  },
+  "visualReview": {
+    "native": "review/native-review.png",
+    "nearest_2x": "review/nearest-2x-review.png",
+    "result": "The candidate now reads as a backward high-recoil pose: head/chest behind the pelvis, legs braced, and a single kunai on the front hand. It is clearly distinct from corrected hitL2 and hitL1 and follows the declared hitLowHeavy phase order without the forward-crouch error from v1.",
+    "identity": "Matches Suzume 04_special canonical violet ponytail/red bow, purple ninja clothing and pink trim; no old armor/hood identity or added effects."
+  },
+  "integration": "Promoted after native-size and nearest-2x parent visual review. Existing animation timing, move data and metadata unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

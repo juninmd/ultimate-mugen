@@ -19,7 +19,7 @@ pub(super) struct AbilityCode {
 }
 
 fn entry(name: &str, input: &str, command: &str, cost: f32, drain: bool) -> MoveInfo {
-    MoveInfo { name: name.into(), input: input.into(), command: command.into(), cost, drain, forms: u32::MAX }
+    MoveInfo { name: name.into(), input: input.into(), command: command.into(), cost, drain, forms: u32::MAX, state: -1 }
 }
 
 fn anim_of(anim_no: &HashMap<String, i32>, wanted: Option<&String>, fallbacks: &[&str], default: i32) -> i32 {

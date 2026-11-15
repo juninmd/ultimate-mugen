@@ -44,7 +44,7 @@ The window can be dragged to any size. The game draws into a fixed 16:9 logical 
 | `--version` | Print the version |
 | `--check-update` | Print whether a newer release exists and exit |
 | `--update` | Download, verify and install the newest release, then exit |
-| `--no-auto-update` / `--no-update-check` | Keep the notice only / skip the update check |
+| `--no-auto-update` / `--no-update-check` | Keep the notice, hide the update prompt / skip the update check |
 
 ## Environment variables
 
@@ -100,3 +100,49 @@ Open the pause menu, pick a move in the move list and press `1`-`4` (or L1, L2, 
 ## Button prompts
 
 The pause move list and the Controls screen show the real key or button of the device you used last: keyboard keys, Xbox (A/B/X/Y, LB/LT/RB/RT) or PlayStation (✕ ○ □ △, L1/L2/R1/R2). On touch screens they show the virtual button names. Xbox pads are detected by name or by vendor ID `045E`, PlayStation pads by `054C`. Rumble works on both: Xbox through gilrs force feedback (and the Gamepad API on the web), DualShock 4 / DualSense through direct HID reports.
+
+## Tweaks (`tweaks.toml`)
+
+Created next to the executable on first run (localStorage on web) with the defaults. Edit and save: the game reloads it within about one second and shows a toast. Mistakes never stop the game; the affected value keeps its default and the toast and log name the key, with a "did you mean" hint and the line for syntax errors.
+
+| Section | Key | Effect |
+|---|---|---|
+| `[theme]` | `background` | Menu background base color |
+| `[theme]` | `glow_bottom`, `glow_left`, `glow_right` | Menu light glows |
+| `[theme]` | `preset` | `"default"`, `"emerald"`, `"sunset"` or `"mono"`: sets background, glows, the five roles below, the life bar and the side tints at once. Any other key in the file still wins over the preset |
+| `[theme]` | `accent` | Selection colour: main-menu highlight, pause and settings buttons, sliders |
+| `[theme]` | `title`, `info`, `muted`, `text` | Headings and values (gold), hints and links (cyan), secondary text, body text, across every menu and the HUD |
+| `[hud]` | `life`, `life_low`, `damage` | Life bar fill, its colour under 25% life, and the trailing damage chunk. The top of each gradient is derived from the colour |
+| `[music]` | `fight` | Audio file played in every fight instead of the built-in theme (`.ogg`, `.mp3`, `.wav`, `.flac`). Paths are relative to the folder of `tweaks.toml`. Desktop only |
+| `[music]` | `<stage id>` (`dojo`, `neon`, `bamboo`, `volcano`, `brazil`, ...) | Audio file for that stage; wins over `fight` and over the stage's own music |
+| `[hud]` | `p1_tint`, `p2_tint` | Lifebar accent color per side |
+| `[hud]` | `bar_offset_y` | Moves the lifebars down (-4 to 40) |
+| `[accessibility]` | `hud_opacity` | HUD opacity multiplier (0.3 to 1.0) |
+| `[accessibility]` | `colorblind` | `true` uses blue/orange side colors instead of the tints |
+| `[accessibility]` | `hud_scale` | HUD size multiplier (0.8 to 1.25) |
+| `[accessibility]` | `reduce_motion` | `true` turns off screen shake |
+| `[rules]` | `rounds_to_win` (1-9), `round_seconds` (0 = no limit, up to 999), `life_percent` (10-500), `game_speed` (0.5-2.0) | Override the Settings menu values for every match; remove the line to go back to the menu value |
+| `[menu]` | `arcade`, `story`, `survival`, `cpu`, `versus`, `training`, `watch`, `team_seq`, `team_simul`, `team_tag`, `mugen`, `market`, `controls`, `settings`, `replays`, `quit` | Text of that main-menu entry |
+
+Colors are `"#rrggbb"` or `"#rgb"`. Example of a full custom look:
+
+```toml
+[theme]
+preset = "mono"
+accent = "#7a3cff"
+title = "#b8ff5c"
+
+[hud]
+life = "#5cc8ff"
+life_low = "#ff5ca8"
+damage = "#7a3cff"
+
+[menu]
+arcade = "Fliperama"
+
+[music]
+fight = "music/my-theme.ogg"
+dojo = "music/dojo.ogg"
+```
+
+Screenshots of every preset are in `screenshots/themes/` (`UME_TOUR=themes`). Plan and comparison with other engines: `docs/research/customization-comparison.md`.

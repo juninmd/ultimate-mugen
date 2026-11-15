@@ -1,6 +1,6 @@
-pub const START_GAIN: f32 = 3.0;
-pub const GAIN_GROWTH_PER_TICK: f32 = 0.08;
-pub const MAX_GAIN: f32 = 16.0;
+pub const START_GAIN: f32 = 9.0;
+pub const GAIN_GROWTH_PER_TICK: f32 = 0.24;
+pub const MAX_GAIN: f32 = 48.0;
 
 pub fn gain_at(held_ticks: i32) -> f32 {
     (START_GAIN + held_ticks.max(0) as f32 * GAIN_GROWTH_PER_TICK).min(MAX_GAIN)
@@ -39,11 +39,11 @@ mod tests {
     #[test]
     fn full_bar_takes_a_few_seconds() {
         let seconds = ticks_to_fill(3000.0) as f32 / 60.0;
-        assert!((3.0..=6.0).contains(&seconds), "{seconds}");
+        assert!((1.0..=3.0).contains(&seconds), "{seconds}");
     }
 
     #[test]
     fn expression_matches_constants() {
-        assert_eq!(gain_expression(), "min(16.0, 3.0 + Time * 0.08)");
+        assert_eq!(gain_expression(), "min(48.0, 9.0 + Time * 0.24)");
     }
 }

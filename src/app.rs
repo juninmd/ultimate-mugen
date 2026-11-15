@@ -26,6 +26,7 @@ mod mugen_catalog;
 mod mugen_gallery;
 mod replay_browser;
 mod settings_screen;
+mod char_tuning_screen;
 mod story;
 mod story_screen;
 mod survival;
@@ -484,6 +485,7 @@ impl App {
             Screen::Fight => self.fight(dt).await,
             Screen::Results { .. } => self.results().await,
             Screen::Controls => self.controls_screen(),
+            Screen::CharTuning { .. } => self.char_tuning_screen(),
             Screen::Mugen { .. } => self.mugen_screen(),
             Screen::Market => self.market_screen(),
             Screen::Story { .. } => self.story_screen(dt).await,

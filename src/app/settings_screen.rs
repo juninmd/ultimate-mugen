@@ -21,6 +21,7 @@ enum Act {
     Voice,
     Mute,
     Keys,
+    CharTuning,
     Guide,
     Difficulty,
     RoundTime,
@@ -225,6 +226,12 @@ impl App {
                     ),
                 ),
                 row(
+                    Act::CharTuning,
+                    tr("Ajustes de personagens", "Character tuning"),
+                    tr("Abrir", "Open"),
+                    tr("Vida, dano, defesa, velocidades, gravidade e barra de poder", "Life, damage, defence, speeds, gravity and power bar"),
+                ),
+                row(
                     Act::Rounds,
                     tr("Rounds para vencer", "Rounds to win"),
                     format!(
@@ -373,6 +380,10 @@ impl App {
                     msg: String::new(),
                 });
                 self.screen = Screen::Controls;
+                changed = false;
+            }
+            Act::CharTuning if ok => {
+                self.screen = Screen::CharTuning { ch: 0, cur: 0 };
                 changed = false;
             }
             Act::Guide if ok => {
@@ -572,7 +583,7 @@ impl App {
                     true,
                 );
             } else if !r.value.is_empty() {
-                let shown = if matches!(r.act, Act::Keys | Act::Guide | Act::Reset) {
+                let shown = if matches!(r.act, Act::Keys | Act::CharTuning | Act::Guide | Act::Reset) {
                     r.value.clone()
                 } else if interactive {
                     format!("‹ {} ›", r.value)
@@ -664,6 +675,9 @@ impl App {
             }
         }
 
+        if matches!(self.screen, Screen::CharTuning { .. }) {
+            return;
+        }
         if matches!(self.screen, Screen::Controls) {
             self.settings_back = Some((tab, from_fight));
             return;

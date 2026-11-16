@@ -16,7 +16,7 @@ O teste de cobertura está em `crates/engine/tests/mugen_coverage_matrix.rs`. El
 
 - `DestroySelf`: `recursive` também destrói os helpers que ele criou, e `removeexplods` remove os explods que ele possui (semântica conforme a documentação do Ikemen GO).
 - `Helper`: os parâmetros `inheritjuggle` e `size.xscale`/`sprpriority` não são lidos no caminho de criação.
-- `Explod`: `shadow` e `layerno` não são lidos.
+- `Explod`: `layerno = 1` se comporta como `ontop` (conforme a wiki do Ikemen GO). `layerno = -1` e `shadow` não são lidos.
 - `PlaySnd`, `Pause`, `VarSet` e `Trans`: a verificação de parâmetros pelo teste de despacho é inconclusiva; precisam de uma revisão manual contra a documentação do MUGEN antes de afirmar cobertura total de parâmetros.
 - `MakeDust`: `spacing` é respeitado (poeira a cada `spacing` ticks, padrão 1).
 

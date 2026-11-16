@@ -1456,7 +1456,7 @@ impl Match {
         if e.bind_time != 0 { e.bind_to = bind_to; e.bind_off = V2 { x: px, y: py }; }
         e.remove_time = num(self, "removetime", -2.0, 0) as i32;
         e.spr_priority = num(self, "sprpriority", 0.0, 0) as i32;
-        e.on_top = num(self, "ontop", 0.0, 0) != 0.0;
+        e.on_top = num(self, "ontop", 0.0, 0) != 0.0 || num(self, "layerno", 0.0, 0) as i32 == 1;
         e.under = num(self, "under", 0.0, 0) != 0.0;
         e.scale = [num(self, "scale", 1.0, 0), num(self, "scale", 1.0, 1)];
         e.remove_on_get_hit = num(self, "removeongethit", 0.0, 0) != 0.0;

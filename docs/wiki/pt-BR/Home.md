@@ -24,6 +24,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Criar personagem UMF](Personagem-UMF.md) | Criadores | Referência completa: todos os campos de um lutador em um único JSON |
 | [Passivos](Passivos.md) | Criadores | Fúria, acúmulos de habilidade e regeneração por dados |
 | [Potencial Liberado](Potencial-Liberado.md) | Jogadores | Transformação genérica para personagens importados: Potencial, depois Fúria |
+| [Câmera de Replay](Camera-de-Replay.md) | Jogadores | Enquadramento cinematográfico do replay: aproxima em lutas próximas e acompanha o ataque |
 | [Mutadores](Mutadores.md) | Criadores | Mudanças de regra por partida; gravidade é o primeiro mutador |
 | [Rush Cancel](Rush-Cancel.md) | Jogadores e Criadores | Gaste energia para cancelar um golpe conectado, Overdrive e a apresentação |
 | [Níveis de Combo](Niveis-de-Combo.md) | Jogadores e Criadores | Selos de combo, marca de energia, air dashes e rebotes |

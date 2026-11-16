@@ -26,9 +26,9 @@ pub fn finish_label() -> &'static str {
 
 pub fn hint() -> &'static str {
     tr3(
-        "← e → para escolher",
-        "← and → to choose",
-        "← y → para elegir",
+        "Esquerda ou direita para escolher",
+        "Left or right to choose",
+        "Izquierda o derecha para elegir",
     )
 }
 

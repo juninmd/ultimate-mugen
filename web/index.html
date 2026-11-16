@@ -20,14 +20,15 @@
     #bar { width: min(320px, 70vw); height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
     #bar i { display: block; height: 100%; width: 0; background: #22e8ff; transition: width .15s; }
     #rot { display: none; }
-    @media (orientation: portrait) and (max-width: 700px) { #rot { display: block; position: fixed; bottom: 0; left: 0; right: 0; padding: 8px; text-align: center; background: #ff4d6d; color: #fff; font: 600 14px system-ui; z-index: 9; } }
+    #rot.off { display: none; }
+    @media (orientation: portrait) and (max-width: 700px) { #rot { display: flex; align-items: center; gap: 8px; position: fixed; top: calc(env(safe-area-inset-top) + 8px); left: 50%; transform: translateX(-50%); max-width: calc(100% - 32px); padding: 6px 6px 6px 12px; border-radius: 999px; background: rgba(11,7,22,.82); color: #e9e4ff; font: 600 12px system-ui; z-index: 9; pointer-events: auto; } #rot button { border: 0; background: none; color: #22e8ff; font: 700 16px system-ui; padding: 2px 8px; cursor: pointer; } }
   </style>
 </head>
 <body>
   <canvas id="glcanvas" tabindex="1"></canvas>
   <label id="imp" aria-label="Import M.U.G.E.N">Import M.U.G.E.N<input id="ume-file" type="file" accept=".zip" multiple /></label>
   <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar"><i></i></div><span id="bootmsg">Downloading the game…</span></div>
-  <div id="rot">Rotate your device to play in landscape &rarr;</div>
+  <div id="rot" role="status"><span id="rottx"></span><button id="rotx" type="button" aria-label="Close">&times;</button></div>
   <script src="gamepad.js"></script>
   <script src="assets.js"></script>
   <script src="market.js"></script>
@@ -41,7 +42,14 @@
     const tx = TEXTS[(navigator.language || 'en').slice(0, 2)] || TEXTS.en;
     document.documentElement.lang = (navigator.language || 'en');
     document.getElementById('bootmsg').textContent = tx.download;
-    document.getElementById('rot').textContent = tx.rotate;
+    const rot = document.getElementById('rot');
+    let rotSeen = false;
+    try { rotSeen = sessionStorage.getItem('ume-rot-dismissed') === '1'; } catch (e) {}
+    document.getElementById('rottx').textContent = tx.rotate;
+    const dismissRot = () => { rot.classList.add('off'); try { sessionStorage.setItem('ume-rot-dismissed', '1'); } catch (e) {} };
+    if (rotSeen) rot.classList.add('off');
+    document.getElementById('rotx').addEventListener('click', dismissRot);
+    setTimeout(dismissRot, 6000);
     document.getElementById('imp').setAttribute('aria-label', tx.import);
     const boot = document.getElementById('boot'), bar = document.querySelector('#bar i'), msg = document.getElementById('bootmsg');
     const hide = () => { boot.classList.add('done'); setTimeout(() => boot.remove(), 400); };

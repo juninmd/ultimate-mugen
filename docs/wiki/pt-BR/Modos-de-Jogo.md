@@ -103,5 +103,6 @@ No Treino, o menu de pausa (aba Jogo) tem a linha **Comportamento do boneco**. C
 | Defesa baixa | Baixo, mais trás enquanto ameaçado |
 | Gravar meus comandos | Nada; tudo que você aperta é gravado (até 10 s) |
 | Reproduzir gravação | Seus comandos gravados em loop, espelhados para o lado do boneco |
+| IA aprende você | Conta como você troca de ação (andar, agachar, pular, atacar) e responde à ação mais provável: defesa para trás se você vai atacar; ataque ao pular, andar ou agachar. Não zera ao trocar de plano |
 
 O plano fica em `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); o boneco aperta bits reais de entrada, então regras de defesa, empurrão e dano de chip são os da própria engine. A gravação fica em `src/session/dummy_tape.rs`; um painel à direita mostra o melhor combo e o tamanho da fita (`src/hud/training_panel.rs`). Capturas: `UME_SHOTS_ONLY=pause` grava `training-dummy-*.png` e `pause-training-dummy.png`; `UME_SHOTS_ONLY=training` grava `training-tape-playback.png`.

@@ -5,7 +5,7 @@ use crate::hud::Hud;
 use crate::render::{Gfx, MatchRenderer};
 #[path = "session/kaito.rs"] mod kaito;
 #[path = "session/tension.rs"] mod tension;
-mod shortcut; pub mod dummy; pub mod dummy_tape;
+mod shortcut; pub mod dummy; pub mod dummy_tape; pub mod dummy_learn;
 use crate::stages::Stage;
 use crate::ui::Ui;
 use crate::vfx::Vfx;
@@ -52,7 +52,7 @@ pub struct Session {
     speed: f32,
     /// initial RNG seed of the match (stored in replays so a recorded fight rebuilds identically)
     pub seed: u32,
-    tag_last: [Option<usize>; 2], tension_tick: u32,
+    tag_last: [Option<usize>; 2], tension_tick: u32, learner: dummy_learn::PlayerModel,
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     pub net: Option<crate::netlink::NetLink>,
 }
@@ -174,7 +174,7 @@ impl Session {
             flag_sounds: vec![],
             speed: 1.0,
             seed,
-            tag_last: [None; 2], tension_tick: 0,
+            tag_last: [None; 2], tension_tick: 0, learner: Default::default(),
             #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
             net: None,
         }
@@ -248,7 +248,7 @@ impl Session {
             }
             let mut b = match &mut *p {
                 Pilot::Cpu(ai) => ai.poll(&self.m, fi),
-                Pilot::Dummy(plan) => plan.bits(&self.m, fi),
+                Pilot::Dummy(plan) => plan.bits(&self.m, fi, &self.learner),
                 Pilot::Replay(v, i) => {
                     let b = v.get(*i).copied().unwrap_or(0);
                     *i += 1;
@@ -289,7 +289,7 @@ impl Session {
             };
             bits[target] = b;
             if matches!(self.pilots[slot], Pilot::Human(0)) {
-                human_bits = Some(dummy_tape::record(b, self.m.fighters[fi].facing));
+                self.learner.observe(b, self.m.fighters[fi].facing); human_bits = Some(dummy_tape::record(b, self.m.fighters[fi].facing));
             }
         }
         if let Some(b) = human_bits {

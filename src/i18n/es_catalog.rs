@@ -89,6 +89,7 @@ pub(super) const ES: &[(&str, &str)] = &[
     ("dummy.crouch_guard", "DEFENSA BAJA"),
     ("dummy.record", "GRABAR MIS COMANDOS"),
     ("dummy.playback", "REPRODUCIR GRABACIÓN"),
+    ("dummy.learn", "LA IA TE APRENDE"),
     ("pause.restart", "Reiniciar combate"),
     ("pause.change", "Cambiar luchadores"),
     ("pause.settings", "Ajustes"),

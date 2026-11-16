@@ -1,5 +1,5 @@
 use crate::chardef::Controller;
-use crate::fighter::{asf, AfterImage, Bind, BindKind, PalFx};
+use crate::fighter::{AfterImage, Bind, BindKind, PalFx};
 use crate::palette::{AfterImageParams, Trans};
 use crate::hitdef::{build, parse_sound_ref};
 use crate::matchs::{Event, Match};
@@ -285,7 +285,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             }
         }
         "helper" => m.spawn_helper(i, sc),
-        "destroyself" => { if !m.fighters[i].has_assert(asf::NODESTROYSELF) { m.destroy_helper(i); } }
+        "destroyself" => m.destroy_self(i, sc),
         "projectile" => m.spawn_projectile(i, sc),
         "width" => {
             let k = if sc.has("player", 0) { "player" } else if sc.has("edge", 0) { "edge" } else { "value" };

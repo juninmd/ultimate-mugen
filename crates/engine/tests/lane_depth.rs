@@ -149,6 +149,7 @@ fn the_gate_keeps_the_hero_free_and_the_camera_still_until_he_reaches_the_exit()
     }
     assert!(m.lanes.gate && !m.is_lane_scrolling());
     assert!(m.fighters[0].ctrl && !m.fighters[1].ctrl);
+    assert!((m.fighters[1].pos.x - 300.0).abs() < 1.0, "the waiting wave stays off screen");
     assert!((m.stage.bound_left + 380.0).abs() < 1e-3);
     assert!((m.stage.bound_right - 120.0).abs() < 1e-3);
     m.fighters[0].pos.x = 120.0;

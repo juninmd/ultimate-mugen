@@ -308,7 +308,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             }
         }
         "playerpush" => { let v = n(m, "value", 1.0) != 0.0; m.fighters[i].player_push = v; }
-        "screenbound" => { let v = n(m, "value", 0.0) != 0.0; m.fighters[i].screen_bound = v; }
+        "screenbound" => { let (sb, mc) = (n(m, "value", 0.0) != 0.0, [n2(m, "movecamera", 0.0, 0) != 0.0, n2(m, "movecamera", 0.0, 1) != 0.0]); let f = &mut m.fighters[i]; f.screen_bound = sb; f.move_camera = mc; }
         "afterimage" => {
             let (t, len) = (n(m, "time", 1.0) as i32, n(m, "length", 20.0) as usize);
             let d = AfterImageParams::default();
@@ -363,7 +363,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "attackmulset" => { let v = n(m, "value", 1.0) as f32; m.fighters[i].attack_mul = v; }
         "defencemulset" => { let v = n(m, "value", 1.0) as f32; m.fighters[i].defence_mul = v; }
         "attackdist" => { let v = n(m, "value", 160.0) as f32; if let Some(h) = m.fighters[i].hitdef.as_mut() { h.guard_dist = v; } }
-        "makedust" => { let (px, py) = (n2(m, "pos", 0.0, 0) as f32, n2(m, "pos", 0.0, 1) as f32); let f = &m.fighters[i]; let (x, y) = (f.pos.x + px * f.facing, f.pos.y + py); m.spawn_dust(i, x, y); }
+        "makedust" => { let (px, py) = (n2(m, "pos", 0.0, 0) as f32, n2(m, "pos", 0.0, 1) as f32); let spacing = (n(m, "spacing", 1.0) as i32).max(1); let f = &m.fighters[i]; if f.state_time % spacing == 0 { let (x, y) = (f.pos.x + px * f.facing, f.pos.y + py); m.spawn_dust(i, x, y); } }
         _ => { if !crate::sctrl::run(m, i, sc) && !crate::ikemen::run(m, i, sc) { crate::diagnostics::note_unsupported(crate::diagnostics::Category::Controller, &sc.kind); } }
     }
     let _ = Arc::strong_count(&m.common);

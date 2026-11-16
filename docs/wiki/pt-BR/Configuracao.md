@@ -26,6 +26,10 @@ Fica ao lado do executável e é gravado pelo menu **Configurações** (menu pri
 | `filter` | `nearest` (padrão) / `linear` | Amostragem dos sprites ao ampliar: pixels nítidos ou suavização bilinear |
 | `window` | `LARGURAxALTURA`, `0x0` sem valor | Tamanho da janela, gravado automaticamente cerca de um segundo depois de parar de redimensionar; vale mais que `res` até você escolher um tamanho no menu Vídeo |
 
+## Ficha do Jogador (`player-card.json`)
+
+A tela **Ficha do Jogador** (menu principal) guarda card, partidas, lutadores, rivais e conquistas em `player-card.json`, ao lado do executável (no navegador, no armazenamento local). Partidas de Treino não contam. O arquivo fica só neste aparelho; não há sincronização com servidor.
+
 ## Janela redimensionável
 
 A janela pode ser arrastada para qualquer tamanho. O jogo desenha em um espaço lógico fixo 16:9 que é escalado para a janela, então a área de luta, o HUD e os menus ficam consistentes em todos os tamanhos e o tamanho da janela é independente da resolução do jogo. Com **Manter proporção** ligado, a sobra fica preta; desligado, a imagem é esticada e o mouse e o toque são mapeados de volta ao espaço esticado. A flag `--res LxA` continua definindo o tamanho inicial e tem prioridade sobre o valor salvo em `window`.

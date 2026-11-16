@@ -19,7 +19,11 @@ pub struct NativeFrame {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct NativeAnim { pub frames: Vec<NativeFrame>, #[serde(default, rename = "loop")] pub loop_start: Option<usize> }
+pub struct NativeAnim {
+    #[serde(default)] pub id: Option<i32>,
+    pub frames: Vec<NativeFrame>,
+    #[serde(default, rename = "loop")] pub loop_start: Option<usize>,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct HitSpec {
@@ -82,13 +86,18 @@ pub struct RekkaSpec { pub after: Vec<String>, pub window: [i32; 2], #[serde(def
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ParrySpec { pub window: [i32; 2], #[serde(default)] pub spark: Option<i32> }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ThrowSpec {
     pub damage: f32,
     #[serde(default)] pub bind: Option<[f32; 2]>,
     #[serde(default, rename = "p2State")] pub p2_state: Option<i32>,
+    #[serde(default, rename = "p2Anim")] pub p2_anim: Option<String>,
     #[serde(default)] pub at: Option<i32>,
+    #[serde(default, rename = "releaseAt")] pub release_at: Option<i32>,
     #[serde(default)] pub launch: Option<[f32; 2]>,
+    #[serde(default, rename = "cameraFree")] pub camera_free: bool,
+    #[serde(default)] pub camera: Option<super::throw::ThrowCameraSpec>,
+    #[serde(default)] pub steps: Vec<super::throw::ThrowStepSpec>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -154,6 +163,9 @@ pub struct NativeChar {
     #[serde(default)] pub passives: Option<super::passive_spec::PassiveSpec>,
     #[serde(default)] pub rivals: BTreeMap<String, crate::rivals::RivalLines>,
     #[serde(default)] pub abilities: Option<super::ability_spec::AbilitySpec>,
+    #[serde(default, alias = "companions")] pub helpers: Option<super::companions::CompanionsSpec>,
+    #[serde(default, rename = "bossRules", alias = "ui")] pub boss_rules: Option<super::boss_ui::BossRulesSpec>,
+    #[serde(default)] pub scripts: Option<super::scripts::ScriptSpec>,
     pub art: NativeArt,
     pub anims: indexmap_like::OrderedMap<NativeAnim>,
     pub moves: Vec<NativeMove>,

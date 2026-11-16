@@ -3,7 +3,7 @@ mod audio;
 mod e2e;
 mod boss; mod char_tuning;
 mod controls;
-mod credit_line; mod flag;
+mod credit_line; mod flag; mod player_card;
 mod gamepad;
 mod gfx; mod glow;
 mod hud;
@@ -41,7 +41,7 @@ mod stageprops;
 mod stages;
 mod storage;
 mod story;
-mod passive_fx; mod spring; mod texgen; mod tweaks; mod ui; mod ui_tokens;
+mod passive_fx; mod spring; mod texgen; mod tweaks; mod ui; mod ui_adapted; mod ui_adapted_panels; mod ui_progress; mod ui_tokens;
 mod update;
 #[cfg(target_arch = "wasm32")]
 mod web_sprites;

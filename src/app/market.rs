@@ -219,17 +219,7 @@ impl App {
 
     fn market_button(&self, x: f32, y: f32, w: f32, label: &str, key: &str, accent: Color) -> bool {
         let hover = self.hover_rect(x, y, w, 48.0);
-        self.ui.rect(
-            x,
-            y,
-            w,
-            48.0,
-            if hover {
-                alpha(accent, 0.85)
-            } else {
-                alpha(accent, 0.45)
-            },
-        );
+        self.ui.adapted_plate(x, y, w, 48.0, Some(alpha(accent, if hover { 0.9 } else { 0.55 })));
         self.ui.text(
             label,
             x + w / 2.0,
@@ -272,10 +262,7 @@ impl App {
             self.market_ui.backspace_hold = 0.0;
         }
         let (x, y, w, h) = (190.0, 170.0, 900.0, 380.0);
-        self.ui
-            .rect(0.0, 0.0, VW, VH, Color::new(0.0, 0.0, 0.0, 0.7));
-        self.ui.rect(x, y, w, h, hex("#1a1030"));
-        self.ui.rect_lines(x, y, w, h, 2.0, hex("#ff4d6d"));
+        self.ui.adapted_modal(x, y, w, h, VW, VH);
         self.ui.text(
             if e.token {
                 mt("TOKEN DO GITHUB (opcional)")
@@ -290,13 +277,7 @@ impl App {
             true,
         );
         self.ui.text(if e.token { mt("Aumenta o limite de requisições da API. Fica salvo só neste aparelho.") } else { mt("Cole ou digite o link (ex.: https://github.com/dono/repositorio) ou apenas dono/repositorio.") }, x + 30.0, y + 82.0, 17.0, hex("#a49cc0"), Align::Left, false);
-        self.ui.rect(
-            x + 30.0,
-            y + 104.0,
-            w - 60.0,
-            46.0,
-            Color::new(1.0, 1.0, 1.0, 0.1),
-        );
+        self.ui.adapted_field(x + 30.0, y + 104.0, w - 60.0, 46.0);
         let shown = if e.token {
             "•".repeat(e.buf.chars().count())
         } else {
@@ -340,17 +321,10 @@ impl App {
             for (i, (repo, desc)) in SUGGESTED.iter().enumerate() {
                 let ry = y + 218.0 + i as f32 * 46.0;
                 let sel = i == e.suggestion;
-                self.ui.rect(
-                    x + 30.0,
-                    ry,
-                    w - 60.0,
-                    40.0,
-                    if sel {
-                        alpha(hex("#ff4d6d"), 0.4)
-                    } else {
-                        Color::new(1.0, 1.0, 1.0, 0.06)
-                    },
-                );
+                self.ui.adapted_row(x + 30.0, ry, w - 60.0, 40.0, true);
+                if sel {
+                    self.ui.adapted_highlight(("mkt.sug.x", "mkt.sug.y"), x + 30.0, ry, w - 60.0, 40.0);
+                }
                 self.ui
                     .text(repo, x + 44.0, ry + 26.0, 20.0, WHITE, Align::Left, true);
                 self.ui.text(
@@ -450,19 +424,11 @@ impl App {
 
     pub(super) fn market_screen(&mut self) {
         self.ui.background();
-        self.ui.text(
-            mt("MERCADO · REPOSITÓRIOS GITHUB"),
-            40.0,
-            56.0,
-            30.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
+        self.ui.adapted_header(mt("MERCADO · REPOSITÓRIOS GITHUB"), "", VW);
         self.ui.text(
             mt("Importe personagens, cenários e músicas de qualquer repositório público do GitHub"),
-            40.0,
-            86.0,
+            74.0,
+            96.0,
             18.0,
             hex("#a49cc0"),
             Align::Left,
@@ -507,8 +473,7 @@ impl App {
         let browse = self.market_ui.view == View::Browse;
 
         let (lx, ly, lw) = (40.0, 112.0, 330.0);
-        self.ui
-            .rect(lx, ly, lw, 484.0, Color::new(1.0, 1.0, 1.0, 0.05));
+        crate::menu_art::glass(&self.ui, lx, ly, lw, 484.0, 1.0);
         self.ui.text(
             mt("REPOSITÓRIOS"),
             lx + 16.0,
@@ -519,17 +484,7 @@ impl App {
             true,
         );
         let add_h = self.hover_rect(lx + lw - 130.0, ly + 8.0, 120.0, 32.0);
-        self.ui.rect(
-            lx + lw - 130.0,
-            ly + 8.0,
-            120.0,
-            32.0,
-            if add_h {
-                hex("#2ecc71")
-            } else {
-                alpha(hex("#2ecc71"), 0.6)
-            },
-        );
+        self.ui.adapted_plate(lx + lw - 130.0, ly + 8.0, 120.0, 32.0, Some(alpha(hex("#2ecc71"), if add_h { 1.0 } else { 0.7 })));
         self.ui.text(
             mt("+ Adicionar"),
             lx + lw - 70.0,
@@ -579,26 +534,12 @@ impl App {
             let y = ly + 52.0 + vi as f32 * 48.0;
             let sel = ri == self.market_ui.repo && browse;
             let hov = self.hover_rect(lx + 8.0, y, lw - 16.0, 44.0);
-            self.ui.rect(
-                lx + 8.0,
-                y,
-                lw - 16.0,
-                44.0,
-                if sel {
-                    alpha(
-                        hex("#ff4d6d"),
-                        if self.market_ui.pane == Pane::Repos {
-                            0.6
-                        } else {
-                            0.35
-                        },
-                    )
-                } else if hov {
-                    Color::new(1.0, 1.0, 1.0, 0.12)
-                } else {
-                    Color::new(1.0, 1.0, 1.0, 0.05)
-                },
-            );
+            self.ui.adapted_row(lx + 8.0, y, lw - 16.0, 44.0, hov || sel);
+            if sel && self.market_ui.pane == Pane::Repos {
+                self.ui.adapted_highlight(("mkt.repo.x", "mkt.repo.y"), lx + 8.0, y, lw - 16.0, 44.0);
+            } else if sel {
+                self.ui.adapted_plate(lx + 8.0, y, lw - 16.0, 44.0, Some(crate::tweaks::accent(0.4)));
+            }
             self.ui.text(
                 &short(&name, 28),
                 lx + 20.0,
@@ -649,25 +590,14 @@ impl App {
         );
 
         let (rx, ry, rw) = (390.0, 112.0, 850.0);
-        self.ui
-            .rect(rx, ry, rw, 484.0, Color::new(1.0, 1.0, 1.0, 0.05));
+        crate::menu_art::glass(&self.ui, rx, ry, rw, 484.0, 1.0);
         for (i, (v, label)) in [(View::Browse, mt("Explorar")), (View::Installed, mt("Instalados"))]
             .iter()
             .enumerate()
         {
             let x = rx + 12.0 + i as f32 * 150.0;
             let on = self.market_ui.view == *v;
-            self.ui.rect(
-                x,
-                ry + 8.0,
-                140.0,
-                34.0,
-                if on {
-                    hex("#ff4d6d")
-                } else {
-                    Color::new(1.0, 1.0, 1.0, 0.1)
-                },
-            );
+            self.ui.adapted_tab(x, ry + 8.0, 140.0, 34.0, on);
             let n = if *v == View::Installed {
                 format!(" ({})", self.market.state.installed.len())
             } else {
@@ -689,17 +619,7 @@ impl App {
         for (i, (f, label)) in FILTERS.iter().map(|(f, l)| (f, mt(l))).enumerate() {
             let x = rx + 330.0 + i as f32 * 100.0;
             let on = self.market_ui.filter == *f;
-            self.ui.rect(
-                x,
-                ry + 10.0,
-                94.0,
-                30.0,
-                if on {
-                    alpha(hex("#22e8ff"), 0.55)
-                } else {
-                    Color::new(1.0, 1.0, 1.0, 0.08)
-                },
-            );
+            self.ui.adapted_plate(x, ry + 10.0, 94.0, 30.0, on.then(|| alpha(hex("#22e8ff"), 0.6)));
             self.ui.text(
                 label,
                 x + 47.0,
@@ -752,19 +672,11 @@ impl App {
             if hov && mouse_delta_position().length() > 0.0 && !modal {
                 self.market_ui.cur = vi;
             }
-            self.ui.rect(
-                rx + 8.0,
-                y,
-                rw - 16.0,
-                32.0,
-                if focused {
-                    alpha(hex("#ff4d6d"), 0.4)
-                } else if vi % 2 == 0 {
-                    Color::new(1.0, 1.0, 1.0, 0.04)
-                } else {
-                    Color::new(1.0, 1.0, 1.0, 0.0)
-                },
-            );
+            if focused {
+                self.ui.adapted_highlight(("mkt.item.x", "mkt.item.y"), rx + 8.0, y, rw - 16.0, 32.0);
+            } else if vi % 2 == 0 {
+                self.ui.adapted_row(rx + 8.0, y, rw - 16.0, 32.0, false);
+            }
             let marked = self
                 .market_ui
                 .marked
@@ -864,10 +776,7 @@ impl App {
             } else {
                 0.0
             };
-            self.ui
-                .rect(px, py, rw, 14.0, Color::new(1.0, 1.0, 1.0, 0.1));
-            self.ui
-                .rect(px, py, rw * frac.clamp(0.0, 1.0), 14.0, hex("#22e8ff"));
+            self.ui.adapted_meter(px, py, rw, frac);
             let q = self.market.queue.len();
             self.ui.text(
                 &crate::i18n::fill(
@@ -884,13 +793,7 @@ impl App {
             if self.clicked_rect(px + rw - 110.0, py + 12.0, 110.0, 26.0) {
                 acts.push(Act::StopDownloads);
             }
-            self.ui.rect(
-                px + rw - 110.0,
-                py + 12.0,
-                110.0,
-                26.0,
-                alpha(hex("#ff4d6d"), 0.7),
-            );
+            self.ui.adapted_plate(px + rw - 110.0, py + 12.0, 110.0, 26.0, Some(alpha(hex("#ff4d6d"), 0.8)));
             self.ui.text(
                 mt("Cancelar"),
                 px + rw - 55.0,
@@ -947,7 +850,7 @@ impl App {
             x += w + 8.0;
         }
         self.market_links(rows.get(self.market_ui.cur).map(|r| (r.repo_key.clone(), r.id.clone())), modal);
-        self.ui.rect(40.0, by, 330.0, 48.0, hex("#ff4d6d"));
+        self.ui.adapted_plate(40.0, by, 330.0, 48.0, Some(crate::tweaks::accent(0.9)));
         self.ui.text(mt("Voltar"), 205.0, by + 32.0, 26.0, WHITE, Align::Center, true);
         if self.clicked_rect(40.0, by, 330.0, 48.0) && !modal {
             acts.push(Act::Back);
@@ -1113,7 +1016,7 @@ impl App {
                     }
                 }
                 Act::ClearMarks => self.market_ui.marked.clear(),
-                Act::Install if browse => {
+                Act::Install if browse => { self.audio.sfx("purchase");
                     let ids: Vec<String> = targets
                         .iter()
                         .filter(|r| r.installable)
@@ -1129,10 +1032,10 @@ impl App {
                     }
                     self.market_ui.marked.clear();
                 }
-                Act::Install => {
+                Act::Install => { self.audio.sfx("error");
                     self.market.notice = mt("Volte para Explorar para baixar novos itens.").into()
                 }
-                Act::Enable | Act::Disable => {
+                Act::Enable | Act::Disable => { self.audio.sfx("toggle");
                     let on = act == Act::Enable;
                     let pairs: Vec<(String, String)> = targets
                         .iter()

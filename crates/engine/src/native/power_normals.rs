@@ -55,7 +55,17 @@ fn build(base: &NativeMove, spec: &Spec) -> NativeMove {
 }
 
 fn taken(nc: &NativeChar) -> bool {
-    nc.moves.iter().any(|m| m.input == "z" || m.input == "c")
+    let uses_zc = |inp: &str| matches!(inp.trim(), "z" | "c");
+    if nc.moves.iter().any(|m| uses_zc(&m.input)) { return true; }
+    if let Some(h) = &nc.helpers {
+        if let Some(st) = &h.stand {
+            if st.input.as_deref().is_some_and(uses_zc) || st.moves.iter().any(|m| m.input.as_deref().is_some_and(uses_zc)) { return true; }
+        }
+        if let Some(cl) = &h.clones {
+            if uses_zc(&cl.input) { return true; }
+        }
+    }
+    nc.scripts.as_ref().is_some_and(|s| s.commands.iter().any(|c| uses_zc(&c.input)))
 }
 
 pub(super) fn with_power_normals(mut nc: NativeChar) -> NativeChar {

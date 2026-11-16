@@ -178,7 +178,7 @@ impl App {
         self.screen = Screen::Replays { cur: 0 };
     }
 
-    fn play_stored(&mut self, index: usize) {
+    fn play_stored(&mut self, index: usize) { self.audio.sfx("confirm");
         let Some(entry) = self.replay_list.get(index) else {
             return;
         };
@@ -257,15 +257,7 @@ impl App {
         };
         self.ui.background();
         self.ui.motes(30, 0.8);
-        self.ui.text(
-            crate::i18n::t("replays.title"),
-            40.0,
-            56.0,
-            34.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
+        self.ui.adapted_title(40.0, 56.0, crate::i18n::t("replays.title"));
         if self.replay_list.is_empty() {
             self.replays_empty_state();
         }
@@ -277,10 +269,7 @@ impl App {
                 buf.pop();
             }
             let (x, y, w, h) = (240.0, 230.0, 800.0, 260.0);
-            self.ui
-                .rect(0.0, 0.0, VW, VH, Color::new(0.0, 0.0, 0.0, 0.7));
-            self.ui.rect(x, y, w, h, hex("#1a1030"));
-            self.ui.rect_lines(x, y, w, h, 2.0, hex("#ff4d6d"));
+            self.ui.adapted_modal(x, y, w, h, VW, VH);
             self.ui.text(
                 crate::i18n::t("replays.rename_title"),
                 x + 30.0,
@@ -290,13 +279,7 @@ impl App {
                 Align::Left,
                 true,
             );
-            self.ui.rect(
-                x + 30.0,
-                y + 84.0,
-                w - 60.0,
-                48.0,
-                Color::new(1.0, 1.0, 1.0, 0.1),
-            );
+            self.ui.adapted_field(x + 30.0, y + 84.0, w - 60.0, 48.0);
             let caret = if (self.ui.t * 2.0) as i32 % 2 == 0 {
                 "|"
             } else {
@@ -326,13 +309,7 @@ impl App {
                 || self.clicked_rect(x + w - 330.0, y + h - 64.0, 150.0, 44.0);
             let cancel = is_key_pressed(KeyCode::Escape)
                 || self.clicked_rect(x + w - 170.0, y + h - 64.0, 140.0, 44.0);
-            self.ui.rect(
-                x + w - 330.0,
-                y + h - 64.0,
-                150.0,
-                44.0,
-                alpha(hex("#2ecc71"), 0.5),
-            );
+            self.ui.adapted_plate(x + w - 330.0, y + h - 64.0, 150.0, 44.0, Some(alpha(hex("#2ecc71"), 0.8)));
             self.ui.text(
                 crate::i18n::t("common.ok"),
                 x + w - 255.0,
@@ -342,13 +319,7 @@ impl App {
                 Align::Center,
                 true,
             );
-            self.ui.rect(
-                x + w - 170.0,
-                y + h - 64.0,
-                140.0,
-                44.0,
-                alpha(hex("#ff4d6d"), 0.5),
-            );
+            self.ui.adapted_plate(x + w - 170.0, y + h - 64.0, 140.0, 44.0, Some(alpha(hex("#ff4d6d"), 0.8)));
             self.ui.text(
                 crate::i18n::t("common.cancel"),
                 x + w - 100.0,
@@ -399,17 +370,9 @@ impl App {
                 self.play_stored(i);
                 return;
             }
-            self.ui.rect(
-                50.0,
-                y,
-                1180.0,
-                40.0,
-                if selected {
-                    Color::new(1.0, 1.0, 1.0, 0.0)
-                } else {
-                    Color::new(1.0, 1.0, 1.0, if i % 2 == 0 { 0.07 } else { 0.03 })
-                },
-            );
+            if !selected {
+                self.ui.adapted_row(50.0, y, 1180.0, 40.0, i % 2 == 0);
+            }
             self.ui.text(
                 &format!("{:02}", i + 1),
                 66.0,
@@ -489,17 +452,7 @@ impl App {
         for (i, (label, key)) in buttons.iter().enumerate() {
             let x = 60.0 + i as f32 * 236.0;
             let hover = self.hover_rect(x, 668.0, 220.0, 44.0);
-            self.ui.rect(
-                x,
-                668.0,
-                220.0,
-                44.0,
-                if hover {
-                    alpha(hex("#ff4d6d"), 0.7)
-                } else {
-                    Color::new(1.0, 1.0, 1.0, 0.09)
-                },
-            );
+            self.ui.adapted_plate(x, 668.0, 220.0, 44.0, hover.then(|| crate::tweaks::accent(0.9)));
             self.ui
                 .text(label, x + 110.0, 690.0, 17.0, WHITE, Align::Center, true);
             self.ui.text(
@@ -580,7 +533,7 @@ impl App {
             }
             _ => {}
         }
-        if self.c.pressed(nav::BACK) || is_key_pressed(KeyCode::Escape) {
+        if self.c.pressed(nav::BACK) || is_key_pressed(KeyCode::Escape) { self.audio.sfx("back");
             self.screen = Screen::Menu { cur: 8 };
             return;
         }

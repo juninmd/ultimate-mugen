@@ -26,7 +26,7 @@ impl App {
         let (paused, accept_back) = pause_step(s.paused, pause_btn);
         if pause_btn {
             self.pause.reset();
-            self.audio.sfx("select");
+            self.audio.sfx(if paused { "pause" } else { "select" });
         }
         s.paused = paused;
         if replaying {
@@ -52,7 +52,7 @@ impl App {
         if !s.paused && self.c.touch.enabled && is_mouse_button_pressed(MouseButton::Left) {
             let p = self.ui.to_virtual(mouse_position().into());
             if p.x > pb.0 && p.x < pb.0 + pb.2 && p.y > pb.1 && p.y < pb.1 + pb.3 {
-                s.paused = true;
+                s.paused = true; self.audio.sfx("pause");
             }
         }
         if is_key_pressed(KeyCode::Tab) && !s.paused && !replaying {
@@ -138,7 +138,8 @@ impl App {
                     }
                     self.archive_last_fight();
                 }
-                self.screen = Screen::Results { winner: w, cur: 0 };
+                self.record_player_bout(w);
+                self.screen = Screen::Results { winner: w, cur: 0 }; self.audio.sfx("results");
             }
         }
     }

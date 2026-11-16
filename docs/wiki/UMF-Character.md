@@ -290,6 +290,20 @@ All native fighters also receive two down-light-kick normals at compile time (`n
 
 Every native fighter can charge its meter: hold **R** (the `s` / Start input; the pause key in a fight is **Esc** or **P**). The fighter enters state `3920`, plays its `powerUp` animation on a loop with a blue glow and gains 9 to 48 power per tick (`native/charge_ramp.rs`, filling a 1000-power super in about one second) until the button is released (after at least 6 ticks) or the meter is full. The state is `movetype = I`, so a hit interrupts it, and a form-capable fighter still transforms with `T` once the meter reaches the form cost. The command is `charge_cmd` (`/s`) and shows as `Charge Energy` in the move list. The built-in AI charges only at level 3 or above, with less than 700 power, when the rival is more than 190 units away and is not attacking.
 
+`taunt`, `powerUp` and `defeat*` have default versions if you do not define them. Other names get free numbers in file order. Add `"id": 8801` to any animation entry to pin a fixed action number for custom scripts or `p2Anim`.
+
+## Exotic mechanics (`helpers`, cinematic `throw`, `bossRules`, `scripts`)
+
+Every Ikemen GO / M.U.G.E.N expressive pattern works declaratively inside a single UMF JSON without editing Rust:
+
+| Section | Replaces in M.U.G.E.N / ZSS | Key capabilities |
+|---|---|---|
+| `helpers.stand` | Manual `Helper(keyctrl=1)` + `BindToParent` + `HitOverride` | Independent hitbox/hurtbox Stand fighting alongside parent (`input` or `triggerMove`), toggle summon/recall, optional meter `drain`, `lifeTransfer` to parent via `ModifyPlayer` |
+| `helpers.clones` | Manual AI clone `Helper`s | *Kage Bunshin* autonomous clones (`count`, `maxActive`, `duration`, `walkSpeed`, `attackRange`, `oneHitPoof`), chase + random AI attack selection, camera freedom (`ScreenBound movecamera = 0, 0`) |
+| `moves[].throw` (cinematic) | Custom `TargetState` + `ChangeAnim2` choreography | `p2Anim` (`ChangeAnim2`), `cameraFree`, `camera` (`zoom`, `time`, `lag`, `freeze`), beat-by-beat `steps[]` (`at`, `bind`, `p2Anim`, `p2State`, `damage`, `shake`, `facing`, `launch`), auto `!GetHitVar(IsBound)` failsafe |
+| `bossRules` | UI-breaking `[StateDef -4]` `AssertSpecial` / `Text` / `ModifyPlayer` | `hideHud`, `hideLifeBar`, `hidePowerBar`, `hideTimer`, `freezeTimer`, continuous or triggered HUD `texts[]`, `modifyPlayer[]` (self or `"enemy"`), `phases[]` (`lifeBelowRatio`, `when`, `once`, `attackMul`, `defenceMul`) |
+| `scripts` | Raw `.zss` / `.cns` files (`[StateDef -4]`, `map()`) | Inline `zss` and/or `cns` strings (supports `[StateDef -4]` running even during `SuperPause`, `map(k) := v`, `teamMap(k) := v`), custom `commands[]`, and `@anim(name)` / `@move(id)` macro expansion |
+
 ## Air abilities (every special and super)
 
 Every `special` and `super` with `when` unset or `"stand"` also gets an air version (state `20000 + ground state`, label `State -1, air <name>`), entered with the same command while the fighter is airborne. The fighter hovers at the start of the move (drift kept at 40 %), gravity returns at 45 % after 12 ticks, the move ends into the jump fall state (`50`) with control, and touching the ground interrupts it with the landing state (`52`). Air versions deal 70 % of the ground damage, projectiles leave angled down (slope 0.85) so they reach a grounded rival, and each jump allows one air special (`var(57)`, cleared on landing). Throws, flight moves and moves that declare `when: "crouch"` or `"air"` keep their own rules.

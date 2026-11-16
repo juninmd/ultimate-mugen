@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod types; mod walk;
+mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -334,35 +334,6 @@ impl Match {
         false
     }
 
-    fn run_states(&mut self, i: usize) {
-        let in_pause = self.fighters[i].hit_pause > 0 || self.fighters[i].hit_shake > 0;
-        {
-            let f = &mut self.fighters[i];
-            f.asserts = if in_pause { f.asserts & !asf::ANIMATEHITPAUSE } else { 0 };
-            if f.ikemen.standby { f.asserts |= asf::INVISIBLE; }
-        }
-        let own = self.fighters[i].def.clone();
-        let custom = !Arc::ptr_eq(&self.fighters[i].st_def, &own) && !Arc::ptr_eq(&self.fighters[i].st_def, &self.common);
-        let helper = self.fighters[i].is_helper;
-        let id = self.fighters[i].id;
-        if !helper && !custom { self.run_state(i, &own, -3, in_pause); }
-        let Some(i) = self.idx(id) else { return };
-        self.run_state(i, &own, -2, in_pause);
-        let Some(i) = self.idx(id) else { return };
-        if (!helper || self.fighters[i].key_ctrl) && !custom {
-            self.run_state(i, &own, -1, in_pause);
-            let Some(i) = self.idx(id) else { return };
-            if !in_pause { self.builtin_transitions(i); }
-        }
-        for _ in 0..16 {
-            let Some(i) = self.idx(id) else { return };
-            let (same, no) = { let f = &self.fighters[i]; (Arc::ptr_eq(&f.st_def, &own), f.state_no) };
-            let owner;
-            let st_ref = if same { &own } else { owner = self.fighters[i].st_def.clone(); &owner };
-            if !self.run_state(i, st_ref, no, in_pause) { break; }
-        }
-    }
-
     pub fn has_command(&self, i: usize, name: &str) -> bool {
         let f = &self.fighters[i];
         let src = if f.is_helper { if f.key_ctrl { self.idx(f.root) } else { None } } else { Some(i) };
@@ -542,7 +513,7 @@ impl Match {
                 f.ground_level = 0.0;
                 f.facing = if f.side == 0 { 1.0 } else { -1.0 };
                 f.life = f.life_max; f.alive = true;
-                f.revert_form(); f.reset_passive_for_round();
+                f.revert_form(); f.reset_passive_for_round(); f.reset_potential();
                 if first { f.power = 0.0; }
                 f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false;
                 f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5];
@@ -710,16 +681,16 @@ impl Match {
             f.history.push(bits, f.facing as i32);
             let paused = f.hit_pause > 0 || f.hit_shake > 0 || frozen_by_pause(f);
             f.cmd.update(&f.history, &f.def.commands, paused);
-            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0];
+            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0]; f.move_camera = [true, true];
         }
-        for &fi in &awaken[..awaken_len] { self.try_transform(fi); } self.rush_step();
+        for &fi in &awaken[..awaken_len] { if !self.try_transform(fi) { self.try_potential(fi); } } self.rush_step();
         if tagged { self.tag_step(&tag_requests[..tag_len]); }
         let mut ids = std::mem::take(&mut self.tick_ids);
         ids.clear();
         self.collect_run_order(&mut ids);
         for (order_i, &id) in ids.iter().enumerate() {
             let Some(i) = self.idx_hint(id, order_i) else { continue };
-            if frozen_by_pause(&self.fighters[i]) { continue; }
+            if frozen_by_pause(&self.fighters[i]) { self.run_minus4_paused(i); continue; }
             let f = &mut self.fighters[i];
             let frozen = f.hit_pause > 0 || f.hit_shake > 0;
             f.width_override = None; f.height_override = None; f.clsn_mods.retain_mut(|c| { if c.time > 0 { c.time -= 1; } c.time != 0 }); f.player_push = !f.ikemen.standby; f.trans = None; f.draw_offset = V2::default();
@@ -746,7 +717,7 @@ impl Match {
             self.physics_step(i);
             let f = &mut self.fighters[i];
             f.state_time += 1;
-            if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); } f.tick_passive(self.round_state == 2);
+            if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); } f.tick_passive(self.round_state == 2); f.tick_potential();
             // the final boss keeps charging on its own (a super every ~10 s even when not hitting)
             if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + if f.form >= 3 { 1.2 } else if f.form >= 2 { 0.85 } else { 0.35 }).min(f.power_max); if f.form >= 3 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.22).min(f.life_max); } else if f.form >= 2 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.12).min(f.life_max); } }
             if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_used = 0; f.super_defence_mul = 1.0; }
@@ -901,23 +872,22 @@ impl Match {
     }
 
     pub fn update_camera(&mut self) {
-        let (mut minx, mut maxx, mut highest, mut any) = (f32::MAX, f32::MIN, f32::MAX, false);
+        let (mut minx, mut maxx, mut highest, mut any, mut any_y) = (f32::MAX, f32::MIN, f32::MAX, false, false);
         let (mut lo, mut hi, mut live) = (f32::MAX, f32::MIN, false);
         for f in self.roots() {
             if f.destroyed { continue; }
             if !f.ikemen.standby {
-                minx = minx.min(f.pos.x);
-                maxx = maxx.max(f.pos.x);
-                highest = highest.min(f.pos.y);
-                any = true;
+                if f.move_camera[0] { minx = minx.min(f.pos.x); maxx = maxx.max(f.pos.x); any = true; }
+                if f.move_camera[1] { highest = highest.min(f.pos.y); any_y = true; }
             }
-            if f.alive {
+            if f.alive && f.move_camera[0] {
                 lo = lo.min(f.pos.x);
                 hi = hi.max(f.pos.x);
                 live = true;
             }
         }
         if !any { return; }
+        if !any_y { highest = 0.0; }
         let natural = if self.zoom_max > 1.0 {
             let need = if !live { self.zoom_min } else { (hi - lo + 150.0) / BASE_W };
             need.clamp(self.zoom_min, self.zoom_max)

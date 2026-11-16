@@ -1,6 +1,7 @@
 use super::*;
 use std::cell::Cell;
 
+mod cursor;
 mod filter;
 mod footer;
 
@@ -142,7 +143,7 @@ impl App {
                         dest_size: Some(vec2(TILE_W * self.ui.s, TILE_H * self.ui.s)),
                         source: Some(Rect::new(
                             0.0,
-                            (image.h as f32 - image.w as f32 * TILE_H / TILE_W) * 0.5,
+                            (image.h as f32 - image.w as f32 * TILE_H / TILE_W) * cursor::pan(pos == k, self.ui.t),
                             image.w as f32,
                             image.w as f32 * TILE_H / TILE_W,
                         )),
@@ -180,16 +181,10 @@ impl App {
                     true,
                 );
             }
-            if pos == k {
-                self.ui.rect_lines(
-                    x - 3.0,
-                    y - 3.0,
-                    TILE_W + 6.0,
-                    TILE_H + 6.0,
-                    4.0,
-                    hex("#ffcc33"),
-                );
-            }
+        }
+        if (first..last).contains(&pos) {
+            let x = 40.0 + (pos % COLS) as f32 * (TILE_W + 13.0);
+            self.draw_stage_cursor(x, TOP + ((pos / COLS) - self.stage_row) as f32 * (TILE_H + 14.0));
         }
         self.trim_far_previews(&view);
         if total_rows > VIEW_ROWS {

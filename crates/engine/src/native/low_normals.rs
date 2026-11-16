@@ -33,6 +33,7 @@ fn air_low_animation(nc: &NativeChar) -> Option<NativeAnim> {
     fall.ticks = -1;
     fall.hit = None;
     Some(NativeAnim {
+        id: None,
         frames: vec![start, prep, strike, recovery, fall],
         loop_start: None,
     })
@@ -71,6 +72,7 @@ fn low_kick_animation(nc: &NativeChar, source: &str) -> Option<NativeAnim> {
     set_sprite(&mut settle, "crouch");
     settle.hit = None;
     Some(NativeAnim {
+        id: None,
         frames: vec![windup, strike, recovery, settle],
         loop_start: None,
     })

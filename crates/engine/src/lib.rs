@@ -40,6 +40,7 @@ pub mod passives;
 pub mod rivals;
 pub mod rush;
 pub mod signature;
+pub mod potential;
 pub mod raster;
 pub mod move_cost;
 

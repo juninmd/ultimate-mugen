@@ -27,13 +27,8 @@ impl App {
                 run.score,
             ),
         };
-        self.ui.rect(
-            VW / 2.0 - 230.0,
-            652.0,
-            460.0,
-            44.0,
-            Color::new(0.02, 0.01, 0.06, 0.6),
-        );
+        self.ui
+            .adapted_glass(VW / 2.0 - 230.0, 652.0, 460.0, 44.0, hex("#ffcc33"), 1.0);
         self.ui.text(
             &line,
             VW / 2.0,
@@ -67,15 +62,8 @@ impl App {
         };
         let (x, y, w, h) = TARGET_BAR;
         let solid = objects.breakables.iter().any(|b| b.solid);
-        self.ui.rect(
-            x - 6.0,
-            y - 26.0,
-            w + 12.0,
-            h + 36.0,
-            Color::new(0.04, 0.0, 0.06, 0.78),
-        );
         self.ui
-            .rect(x - 6.0, y - 26.0, w + 12.0, 3.0, hex("#ffcc33"));
+            .adapted_glass(x - 6.0, y - 26.0, w + 12.0, h + 36.0, hex("#ffcc33"), 1.0);
         self.ui.text(
             text::bonus_banner(),
             x,

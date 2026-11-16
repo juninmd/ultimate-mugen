@@ -19,11 +19,13 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Universe and Lore](Lore.md) | Players & Creators | Cosmology, factions, energy systems and the Great Convergence |
 | [Character Dossiers](Characters.md) | Players & Creators | Roster bios, portraits, moves, rivalries and home stages |
 | [Compatibility decisions](Compatibility-Decisions.md) | Creators | Features the engine rejects by design and why |
+| [Format coverage](Format-Coverage.md) | Creators | Status of SFF, SND, AIR, ACT, DEF and screenpack support |
 | [Lua scripts](Lua-Scripts.md) | Creators | What Lua in M.U.G.E.N packs does and the Lua-free alternatives |
 | [Route files](Route-Files.md) | Creators | Arcade routes and unlock rules in TOML |
 | [Make a character (quick start)](Make-a-Character.md) | Creators | A working fighter in ten lines, inherited from another one |
 | [Creating a UMF character](UMF-Character.md) | Creators | Full reference: every field of a fighter in a single JSON |
 | [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
+| [Unleashed Potential](Unleashed-Potential.md) | Players | Generic transformation for imported characters: Potential, then Fury |
 | [Signature](Signature.md) | Creators | Per-fighter signature meter with tiers, declared in JSON |
 | [Kit Inputs](Kit-Inputs.md) | Players | Per-archetype charge and 360° inputs for native fighters |
 | [Rivalries](Rivalries.md) | Creators | Per-matchup round-start lines and attack bonus, declared in JSON |

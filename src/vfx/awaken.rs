@@ -47,6 +47,10 @@ impl Vfx {
     }
 
     pub(super) fn on_transform(&mut self, fighter: u32, m: &Match) {
+        if let Some(f) = m.fighters.iter().find(|f| f.id == fighter && f.form == 0 && f.potential.level != ume_engine::potential::PotentialLevel::Idle) {
+            self.on_potential(f);
+            return;
+        }
         self.super_t = 1.0;
         self.super_owner = fighter;
         let mut col = [1.0, 0.85, 0.4];
@@ -104,6 +108,31 @@ impl Vfx {
         self.trauma = 0.6;
         self.vig = 0.3;
         self.lines = 0.8;
+        self.lines_col = col;
+        self.sfx.push("transform");
+    }
+
+    fn on_potential(&mut self, f: &ume_engine::fighter::Fighter) {
+        let fury = f.potential.level == ume_engine::potential::PotentialLevel::Fury;
+        let col = if fury { [1.0, 0.3, 0.2] } else { [0.45, 0.85, 1.0] };
+        let (x, y, _) = Self::chest_of(f);
+        let feet = f.pos.y + f.lane;
+        for (i, r) in [60.0f32, 120.0].iter().enumerate() {
+            self.ring(x, y, *r, 0.5 + i as f32 * 0.15, 2.4 - i as f32 * 0.6, col);
+        }
+        self.glow(x, y, if fury { 70.0 } else { 50.0 }, 0.6, col);
+        self.spark_burst(x, y, 1.0, quality::count(if fury { 26 } else { 16 }), 8.0, col, std::f32::consts::PI);
+        self.pillar(f.pos.x, feet, col, quality::count(10));
+        let text = if fury {
+            crate::i18n::tr3("MODO FÚRIA", "FURY MODE", "MODO FURIA")
+        } else {
+            crate::i18n::tr3("POTENCIAL LIBERADO", "UNLEASHED POTENTIAL", "POTENCIAL LIBERADO")
+        };
+        self.tag(x, y - 46.0, text, col);
+        self.flash_add(0.25);
+        self.chroma = self.chroma.max(0.35);
+        self.trauma = (self.trauma + 0.15).min(0.5);
+        self.lines = 0.5;
         self.lines_col = col;
         self.sfx.push("transform");
     }

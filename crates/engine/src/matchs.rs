@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod walk;
+mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -513,7 +513,7 @@ impl Match {
                 f.ground_level = 0.0;
                 f.facing = if f.side == 0 { 1.0 } else { -1.0 };
                 f.life = f.life_max; f.alive = true;
-                f.revert_form(); f.reset_passive_for_round();
+                f.revert_form(); f.reset_passive_for_round(); f.reset_potential();
                 if first { f.power = 0.0; }
                 f.hit_pause = 0; f.hit_shake = 0; f.targets.clear(); f.bind = None; f.hitdef_active = false; f.ctrl = false;
                 f.st_def = f.def.clone(); f.ghv = GetHitVars::default(); f.sysvars = [0; 5];
@@ -683,7 +683,7 @@ impl Match {
             f.cmd.update(&f.history, &f.def.commands, paused);
             f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0]; f.move_camera = [true, true];
         }
-        for &fi in &awaken[..awaken_len] { self.try_transform(fi); } self.rush_step();
+        for &fi in &awaken[..awaken_len] { if !self.try_transform(fi) { self.try_potential(fi); } } self.rush_step();
         if tagged { self.tag_step(&tag_requests[..tag_len]); }
         let mut ids = std::mem::take(&mut self.tick_ids);
         ids.clear();
@@ -717,7 +717,7 @@ impl Match {
             self.physics_step(i);
             let f = &mut self.fighters[i];
             f.state_time += 1;
-            if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); } f.tick_passive(self.round_state == 2);
+            if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); } f.tick_passive(self.round_state == 2); f.tick_potential();
             // the final boss keeps charging on its own (a super every ~10 s even when not hitting)
             if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + if f.form >= 3 { 1.2 } else if f.form >= 2 { 0.85 } else { 0.35 }).min(f.power_max); if f.form >= 3 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.22).min(f.life_max); } else if f.form >= 2 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.12).min(f.life_max); } }
             if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_used = 0; f.super_defence_mul = 1.0; }

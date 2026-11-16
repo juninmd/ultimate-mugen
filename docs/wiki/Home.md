@@ -24,6 +24,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Make a character (quick start)](Make-a-Character.md) | Creators | A working fighter in ten lines, inherited from another one |
 | [Creating a UMF character](UMF-Character.md) | Creators | Full reference: every field of a fighter in a single JSON |
 | [Passives](Passives.md) | Creators | Rage, ability stacks and regeneration, data-driven |
+| [Unleashed Potential](Unleashed-Potential.md) | Players | Generic transformation for imported characters: Potential, then Fury |
 | [Signature](Signature.md) | Creators | Per-fighter signature meter with tiers, declared in JSON |
 | [Kit Inputs](Kit-Inputs.md) | Players | Per-archetype charge and 360° inputs for native fighters |
 | [Rivalries](Rivalries.md) | Creators | Per-matchup round-start lines and attack bonus, declared in JSON |

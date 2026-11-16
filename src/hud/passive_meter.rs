@@ -1,6 +1,14 @@
 use crate::gfx::*;
 use crate::poly;
 use ume_engine::fighter::Fighter;
+use ume_engine::potential::PotentialLevel;
+
+const POTENTIAL_LOW: [f32; 3] = [0.3, 0.8, 1.0];
+const POTENTIAL_HIGH: [f32; 3] = [0.75, 0.95, 1.0];
+const FURY_LOW: [f32; 3] = [1.0, 0.3, 0.12];
+const FURY_HIGH: [f32; 3] = [1.0, 0.8, 0.2];
+const FORM_LOW: [f32; 3] = [0.9, 0.6, 0.2];
+const FORM_HIGH: [f32; 3] = [1.0, 0.95, 0.5];
 
 const STRIP_HEIGHT: f32 = 1.5;
 const STRIP_LIFT: f32 = 0.6;
@@ -73,11 +81,23 @@ fn strip<P: Fn(f32, f32) -> Vec2>(
 }
 
 pub(super) fn draw<P: Fn(f32, f32) -> Vec2>(p: &P, s: f32, gt: f32, f: &Fighter, bar: &Bar) {
-    let Some(view) = f.passive_view() else { return };
     if !f.alive {
         return;
     }
-    let y = bar.y + bar.h - STRIP_HEIGHT - STRIP_LIFT;
+    let base_y = bar.y + bar.h - STRIP_HEIGHT - STRIP_LIFT;
+    let mut lift = 0.0;
+    let forms = f.form_count();
+    if f.form > 0 && forms > 0 {
+        strip(p, s, gt, bar, base_y, f.form as f32 / forms as f32, (FORM_LOW, FORM_HIGH));
+        lift += STRIP_HEIGHT + 0.8;
+    }
+    if f.potential.level != PotentialLevel::Idle {
+        let colors = if f.potential.level == PotentialLevel::Fury { (FURY_LOW, FURY_HIGH) } else { (POTENTIAL_LOW, POTENTIAL_HIGH) };
+        strip(p, s, gt, bar, base_y - lift, f.potential.remaining_ratio(), colors);
+        lift += STRIP_HEIGHT + 0.8;
+    }
+    let Some(view) = f.passive_view() else { return };
+    let y = base_y - lift;
     let inset = bar.h * 0.45;
     let (span_x, span_w) = (bar.x + inset, bar.w - inset * 2.0);
     if let Some(progress) = view.rage {

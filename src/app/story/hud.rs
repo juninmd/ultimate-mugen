@@ -57,15 +57,29 @@ impl App {
         if !self.session.as_ref().is_some_and(|s| s.m.lanes.gate) {
             return;
         }
+        let pulse = 0.55 + 0.45 * (self.ui.t * 7.0).sin().abs();
+        let slide = (self.ui.t * 3.0).fract() * 18.0;
         self.ui.text(
             text::go(),
-            VW - 90.0,
-            340.0,
-            28.0,
-            hex("#ffcc33"),
+            VW - 120.0,
+            330.0,
+            30.0,
+            Color::new(1.0, 0.8, 0.2, pulse),
             Align::Center,
             true,
         );
+        for k in 0..3 {
+            let fade = pulse * (1.0 - k as f32 * 0.28);
+            self.ui.text(
+                ">",
+                VW - 72.0 + k as f32 * 14.0 + slide,
+                334.0,
+                34.0,
+                Color::new(1.0, 0.8, 0.2, fade),
+                Align::Center,
+                true,
+            );
+        }
     }
 
     fn story_bonus_target_bar(&self, objects: &StageObjects) {

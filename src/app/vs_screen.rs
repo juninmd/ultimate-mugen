@@ -26,8 +26,13 @@ impl App {
             }
         }
         let ready = step_now >= total;
-        self.draw_versus(t);
-        self.draw_versus_burst(t);
+        if self.story_shows_stage_card() {
+            self.draw_story_stage_card(t);
+        } else {
+            self.draw_versus(t);
+            self.draw_versus_burst(t);
+            self.draw_story_boss_tag(t);
+        }
         if !ready {
             let within = if step_now + 1 == total { self.warm_progress() } else { 0.0 };
             self.ui.progress_bar(

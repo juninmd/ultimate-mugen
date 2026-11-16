@@ -1,3 +1,4 @@
+use super::dummy_learn::PlayerModel;
 use super::{Pilot, Session};
 use ume_engine::input::k;
 use ume_engine::matchs::Match;
@@ -12,10 +13,11 @@ pub enum DummyPlan {
     CrouchGuard,
     Record,
     Playback,
+    Learn,
 }
 
 impl DummyPlan {
-    pub const ALL: [DummyPlan; 7] = [
+    pub const ALL: [DummyPlan; 8] = [
         DummyPlan::Stand,
         DummyPlan::Crouch,
         DummyPlan::Jump,
@@ -23,6 +25,7 @@ impl DummyPlan {
         DummyPlan::CrouchGuard,
         DummyPlan::Record,
         DummyPlan::Playback,
+        DummyPlan::Learn,
     ];
 
     pub fn next(self) -> DummyPlan {
@@ -39,6 +42,7 @@ impl DummyPlan {
             DummyPlan::CrouchGuard => "dummy.crouch_guard",
             DummyPlan::Record => "dummy.record",
             DummyPlan::Playback => "dummy.playback",
+            DummyPlan::Learn => "dummy.learn",
         }
     }
 
@@ -46,7 +50,7 @@ impl DummyPlan {
         let away = if facing >= 0.0 { k::L } else { k::R };
         let block = if threatened { away } else { 0 };
         match self {
-            DummyPlan::Stand | DummyPlan::Record | DummyPlan::Playback => 0,
+            DummyPlan::Stand | DummyPlan::Record | DummyPlan::Playback | DummyPlan::Learn => 0,
             DummyPlan::Crouch => k::D,
             DummyPlan::Jump => {
                 if airborne {
@@ -60,7 +64,7 @@ impl DummyPlan {
         }
     }
 
-    pub fn bits(self, m: &Match, fighter: usize) -> u32 {
+    pub fn bits(self, m: &Match, fighter: usize, learner: &PlayerModel) -> u32 {
         let me = &m.fighters[fighter];
         let attacked = m
             .fighters
@@ -69,6 +73,9 @@ impl DummyPlan {
         let threatened = attacked || !m.projectiles.is_empty();
         if self == DummyPlan::Playback {
             return super::dummy_tape::playback(me.facing);
+        }
+        if self == DummyPlan::Learn {
+            return learner.counter_bits(me.facing);
         }
         self.held_bits(me.facing, me.state_type == 'A', threatened)
     }

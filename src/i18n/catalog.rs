@@ -100,6 +100,7 @@ catalog! {
     "dummy.crouch_guard" => "LOW GUARD", "DEFESA BAIXA";
     "dummy.record" => "RECORD MY INPUTS", "GRAVAR MEUS COMANDOS";
     "dummy.playback" => "PLAY RECORDING", "REPRODUZIR GRAVAÇÃO";
+    "dummy.learn" => "AI LEARNS YOU", "IA APRENDE VOCÊ";
     "pause.restart" => "Restart fight", "Reiniciar luta";
     "pause.change" => "Change fighters", "Trocar personagens";
     "pause.settings" => "Settings", "Configurações";

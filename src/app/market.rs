@@ -1032,10 +1032,10 @@ impl App {
                     }
                     self.market_ui.marked.clear();
                 }
-                Act::Install => {
+                Act::Install => { self.audio.sfx("error");
                     self.market.notice = mt("Volte para Explorar para baixar novos itens.").into()
                 }
-                Act::Enable | Act::Disable => {
+                Act::Enable | Act::Disable => { self.audio.sfx("toggle");
                     let on = act == Act::Enable;
                     let pairs: Vec<(String, String)> = targets
                         .iter()

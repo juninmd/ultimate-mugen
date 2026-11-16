@@ -42,6 +42,10 @@ pub enum Screen {
     Replays {
         cur: usize,
     },
+    /// local player card; tab 0 card, 1 fighters, 2 matches, 3 rivals, 4 achievements
+    PlayerCard {
+        tab: usize,
+    },
     Settings {
         tab: usize,
         cur: usize,

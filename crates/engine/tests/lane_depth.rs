@@ -164,3 +164,27 @@ fn the_gate_keeps_the_hero_free_and_the_camera_still_until_he_reaches_the_exit()
     assert!((m.stage.bound_right - 880.0).abs() < 1e-3);
     assert!(m.fighters[0].ctrl && m.fighters[1].ctrl);
 }
+
+#[test]
+fn an_ai_hero_walks_to_the_exit_while_the_gate_is_armed() {
+    use ume_engine::ai::Ai;
+    use ume_engine::input::InputSource;
+    let mut m = arena(true);
+    m.stage.bound_left = -380.0;
+    m.stage.bound_right = 120.0;
+    m.stage.p1x = 430.0;
+    m.stage.p2x = 570.0;
+    m.lanes.target_x = 500.0;
+    m.lanes.bound_span = 380.0;
+    m.lanes.gate = true;
+    m.fighters[1].pos.x = 700.0;
+    let mut hero = Ai::new(4, 3);
+    for _ in 0..900 {
+        let bits = hero.poll(&m, 0);
+        m.tick(&[bits, 0]);
+        if !m.lanes.gate {
+            break;
+        }
+    }
+    assert!(!m.lanes.gate, "the hero reached the exit and released the gate");
+}

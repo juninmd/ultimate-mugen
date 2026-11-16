@@ -38,7 +38,7 @@ fn load_char(dir_name: &str, def: &str) -> Option<Arc<ume_engine::chardef::CharD
 fn test_dbz_characters_load_and_fight() {
     let root = chars_root();
     if !root.exists() {
-        println!("skipping: {} not found (run scripts/fetch-jump-chars.ps1 to populate)", root.display());
+        println!("skipping: {} not found", root.display());
         return;
     }
 

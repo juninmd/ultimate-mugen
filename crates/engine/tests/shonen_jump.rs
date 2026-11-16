@@ -43,7 +43,7 @@ fn load_char(dir_name: &str, def: &str) -> Option<Arc<ume_engine::chardef::CharD
 fn test_shonen_jump_naruto_roster() {
     let root = chars_root();
     if !root.exists() {
-        println!("skipping: {} not found (run scripts/fetch-jump-chars.ps1 to populate)", root.display());
+        println!("skipping: {} not found", root.display());
         return;
     }
 
@@ -160,7 +160,7 @@ fn test_shonen_jump_dbgt_roster() {
 fn test_shonen_jump_bleach_roster() {
     let root = chars_root();
     if !root.exists() {
-        println!("skipping: {} not found (run scripts/fetch-jump-chars.ps1 to populate)", root.display());
+        println!("skipping: {} not found", root.display());
         return;
     }
 

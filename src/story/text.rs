@@ -29,16 +29,6 @@ pub fn stage_title(stage: usize) -> &'static str {
     }
 }
 
-pub fn stage_line(stage: usize) -> &'static str {
-    match stage {
-        0 => tr("A gangue domina as ruas. Abra caminho a socos.", "The gang runs the streets. Fight your way through."),
-        1 => tr("Nos trilhos, ninguém ouve você gritar.", "Down on the tracks, nobody hears you shout."),
-        2 => tr("Sombras se movem entre o bambu.", "Shadows move between the bamboo."),
-        3 => tr("Fornalhas, aço e gigantes de aço.", "Furnaces, steel and giants made of it."),
-        _ => tr("O último andar. O chefão espera.", "The top floor. The kingpin waits."),
-    }
-}
-
 pub fn stage_label(stage: usize) -> String {
     format!("{} {}", tr("FASE", "STAGE"), stage + 1)
 }

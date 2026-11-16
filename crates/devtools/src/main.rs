@@ -1,5 +1,5 @@
 use std::path::{Path, PathBuf};
-use ume_devtools::{ability_reel, audit_moves, audit_sprites, motion, mugen_census, pack, story_npcs, thumbnails};
+use ume_devtools::{ability_reel, audit_moves, audit_sprites, homologate, motion, mugen_census, pack, story_npcs, thumbnails};
 
 const USAGE: &str = "usage: ume-tools <command>\n\
   pack-sprites [out_root=web/dist] [--sprites dir]  pack assets/chars/sprites into web .pack files\n\
@@ -8,6 +8,7 @@ const USAGE: &str = "usage: ume-tools <command>\n\
   audit-sprites --out <report.json> [--root <repo>]  native PNG inventory\n\
   gen-story-npcs [chars=assets/chars]    regenerate assets/chars/npc_*.json (overwrites them)\n\
   mugen-census <zip-or-dir>...           count states, controllers, commands and actions of M.U.G.E.N packages\n\
+  homologate <dir=.> [--out report.md]  PASS/WARN/FAIL per character zip or folder, with missing files\n\
   ability-reel <frames_dir> <out_dir> [width=448] [colors=64] [fps=14] [--no-normals]  captioned GIF per fighter (needs ffmpeg)\n\
   motion-descriptor --character f --sprites dir --animation name --out file  sprite-gen asset descriptor\n\
   preview-motion|preview-scene --character f --sprites dir --animation name --sprite-gen exe --out dir [--loop|--cycles n]";
@@ -28,6 +29,21 @@ fn run(args: &[String]) -> Result<(), String> {
         Some("stage-thumbs") => {
             let count = thumbnails::make_thumbnails(Path::new(positional.first().map(|s| s.as_str()).unwrap_or("assets/stages")))?;
             println!("OK: {count} thumbnails");
+        }
+        Some("homologate") => {
+            let root = PathBuf::from(positional.first().map(|s| s.as_str()).unwrap_or("."));
+            let mut findings = Vec::new();
+            for input in homologate::collect_inputs(&root) {
+                match homologate::check_path(&input) {
+                    Ok(found) => findings.extend(found),
+                    Err(error) => eprintln!("skip: {error}"),
+                }
+            }
+            let markdown = homologate::report(&findings);
+            match flag("--out") {
+                Some(out) => std::fs::write(&out, &markdown).map_err(|e| e.to_string())?,
+                None => print!("{markdown}"),
+            }
         }
         Some("audit-moves") => {
             let results = audit_moves::audit_directory(Path::new(positional.first().map(|s| s.as_str()).unwrap_or("assets/chars")))?;

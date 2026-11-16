@@ -1,7 +1,7 @@
 use crate::app::{App, Screen};
 use crate::controls::nav;
 use crate::gfx::*;
-use crate::story::{beats, text, Phase};
+use crate::story::{beats, choice, text, Phase};
 use crate::ui::*;
 
 impl App {
@@ -15,6 +15,14 @@ impl App {
         if self.story_epilogue(&run, t, dt) {
             return;
         }
+        let deciding = choice::pending(&run);
+        if deciding {
+            if self.c.pressed(nav::LEFT) {
+                self.decide_mercy(true);
+            } else if self.c.pressed(nav::RIGHT) {
+                self.decide_mercy(false);
+            }
+        }
         let accent = run.stage_def().accent;
         let accent_color = Color::new(accent[0], accent[1], accent[2], 1.0);
         self.ui.background();
@@ -26,7 +34,11 @@ impl App {
             Phase::Intro => (
                 text::stage_label(run.stage),
                 text::stage_title(run.stage).to_string(),
-                beats::stage_beat(run.stage, beats::beat_index(t)).to_string(),
+                if deciding {
+                    choice::prompt().to_string()
+                } else {
+                    beats::stage_beat(run.stage, beats::beat_index(t)).to_string()
+                },
             ),
             Phase::Cleared => (
                 text::stage_clear().to_string(),
@@ -56,10 +68,15 @@ impl App {
             hex("#d8d0f0")
         };
         self.ui.text(&line, VW / 2.0, 410.0, 20.0, line_color, Align::Center, false);
-        if run.phase == Phase::Intro {
+        if deciding {
+            self.ui.text(choice::hint(), VW / 2.0, 470.0, 20.0, WHITE, Align::Center, false);
+            self.ui.text(choice::spare_label(), VW * 0.3, 510.0, 26.0, hex("#8fe3a8"), Align::Center, true);
+            self.ui.text(choice::finish_label(), VW * 0.7, 510.0, 26.0, hex("#ff7a6b"), Align::Center, true);
+        } else if run.phase == Phase::Intro {
             self.draw_story_boss_profile(&run, accent_color, reveal);
         }
         let prompt = match run.phase {
+            _ if deciding => "",
             Phase::Defeated if run.can_continue() => text::continue_label(),
             Phase::Defeated | Phase::Victory => text::quit_label(),
             _ => text::press_start(),
@@ -67,7 +84,7 @@ impl App {
         let pulse = 0.65 + 0.35 * (t * 4.0).sin().abs();
         self.ui.text(prompt, VW / 2.0, 520.0, 22.0, Color::new(1.0, 1.0, 1.0, pulse), Align::Center, true);
         let confirmed = self.c.pressed(nav::OK | nav::START) && t > 0.35;
-        if confirmed || self.clicked_rect(0.0, 230.0, VW, 220.0) {
+        if !deciding && (confirmed || self.clicked_rect(0.0, 230.0, VW, 220.0)) {
             self.audio.sfx("confirm");
             self.story_resume();
             return;
@@ -77,5 +94,12 @@ impl App {
             return;
         }
         self.screen = Screen::Story { t: t + dt };
+    }
+
+    fn decide_mercy(&mut self, mercy: bool) {
+        if let Some(run) = self.story.as_mut() {
+            run.mercy = Some(mercy);
+        }
+        self.audio.sfx("select");
     }
 }

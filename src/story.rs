@@ -1,4 +1,5 @@
 pub mod beats;
+pub mod choice;
 pub mod epilogue;
 pub mod epilogue_music;
 pub mod objects;

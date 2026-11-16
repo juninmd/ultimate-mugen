@@ -478,5 +478,35 @@
         "es": "De vuelta bajo Seúl, guardó un nuevo volumen en la Biblioteca del Crepúsculo: la noche en que sus amigos estuvieron a salvo."
       }
     ]
+  },
+  "*:mercy": {
+    "scene": "plains",
+    "title": {
+      "en": "Mercy on the Rooftop",
+      "pt": "Clemência na Cobertura",
+      "es": "Clemencia en la Azotea"
+    },
+    "boss": {
+      "en": "You could have finished me. Why stop?",
+      "pt": "Você podia ter acabado comigo. Por que parou?",
+      "es": "Podías haberme acabado. ¿Por qué paraste?"
+    },
+    "reply": {
+      "en": "Because this city needs more than one kind of winner.",
+      "pt": "Porque esta cidade precisa de mais do que um tipo de vencedor.",
+      "es": "Porque esta ciudad necesita más de un tipo de ganador."
+    },
+    "pages": [
+      {
+        "en": "The kingpin walked out of the tower on his own two feet.",
+        "pt": "O chefão saiu da torre com os próprios pés.",
+        "es": "El jefe salió de la torre por su propio pie."
+      },
+      {
+        "en": "Some called it weakness. The alleys called it the first honest fight in years.",
+        "pt": "Alguns chamaram de fraqueza. Os becos chamaram de a primeira luta honesta em anos.",
+        "es": "Algunos dijeron debilidad. Los callejones dijeron que fue la primera pelea honesta en años."
+      }
+    ]
   }
 }

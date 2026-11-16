@@ -13,7 +13,7 @@ impl App {
             return false;
         }
         let player = self.player_char_id();
-        let Some(script) = epilogue::of(&player) else {
+        let Some(script) = epilogue::of_with(&player, run.mercy) else {
             return false;
         };
         let beats = script.beats(crate::profile::lang());
@@ -45,7 +45,7 @@ impl App {
             return;
         }
         let player = self.player_char_id();
-        let Some(script) = epilogue::of(&player) else {
+        let Some(script) = epilogue::of_with(&player, run.mercy) else {
             return;
         };
         if run.epilogue == 0 {

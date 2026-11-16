@@ -1016,7 +1016,7 @@ impl App {
                     }
                 }
                 Act::ClearMarks => self.market_ui.marked.clear(),
-                Act::Install if browse => {
+                Act::Install if browse => { self.audio.sfx("purchase");
                     let ids: Vec<String> = targets
                         .iter()
                         .filter(|r| r.installable)

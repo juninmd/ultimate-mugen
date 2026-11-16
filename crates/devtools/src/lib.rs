@@ -9,4 +9,5 @@ pub mod ability_reel;
 pub mod reel_font;
 pub mod umf_edit;
 pub mod homologate;
+pub mod homologate_run;
 pub mod mugen_census;

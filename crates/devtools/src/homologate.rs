@@ -26,6 +26,10 @@ fn has_files_section(vfs: &Vfs, def: &str) -> bool {
 }
 
 pub fn check_vfs(source: &str, vfs: &Vfs) -> Vec<Finding> {
+    check_vfs_with(source, vfs, false)
+}
+
+pub fn check_vfs_with(source: &str, vfs: &Vfs, run: bool) -> Vec<Finding> {
     let mut defs: Vec<String> = vfs
         .keys()
         .filter(|key| key.to_ascii_lowercase().ends_with(".def"))
@@ -35,7 +39,10 @@ pub fn check_vfs(source: &str, vfs: &Vfs) -> Vec<Finding> {
     defs.sort();
     defs.into_iter()
         .map(|def| {
-            let problems = health::problems(vfs, &def);
+            let mut problems = health::problems(vfs, &def);
+            if run && problems.is_empty() {
+                problems = crate::homologate_run::runtime_problems(vfs, &def);
+            }
             let warnings = health::warnings(vfs, &def);
             let verdict = match (problems.is_empty(), warnings.is_empty()) {
                 (false, _) => Verdict::Fail,
@@ -53,7 +60,7 @@ pub fn check_vfs(source: &str, vfs: &Vfs) -> Vec<Finding> {
         .collect()
 }
 
-pub fn check_path(path: &Path) -> Result<Vec<Finding>, String> {
+pub fn check_path(path: &Path, run: bool) -> Result<Vec<Finding>, String> {
     let source = path
         .file_name()
         .map(|name| name.to_string_lossy().into_owned())
@@ -65,7 +72,7 @@ pub fn check_path(path: &Path) -> Result<Vec<Finding>, String> {
         let bytes = std::fs::read(path).map_err(|error| format!("{}: {error}", path.display()))?;
         add_zip(&mut vfs, &bytes, "").map_err(|error| format!("{}: {error:?}", path.display()))?;
     }
-    Ok(check_vfs(&source, &vfs))
+    Ok(check_vfs_with(&source, &vfs, run))
 }
 
 pub fn report(findings: &[Finding]) -> String {

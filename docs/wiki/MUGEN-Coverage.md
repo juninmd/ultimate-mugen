@@ -14,7 +14,7 @@ The coverage guard lives in `crates/engine/tests/mugen_coverage_matrix.rs`. It c
 
 ## Known partial items
 
-- `DestroySelf`: the `recursive` and `removeexplods` parameters are not read. The helper is always destroyed alone.
+- `DestroySelf`: `recursive` also destroys the helpers it spawned, and `removeexplods` removes the explods it owns (semantics follow the Ikemen GO documentation).
 - `Helper`: `inheritjuggle` and `size.xscale`/`sprpriority` parameters are not read by the spawn path.
 - `Explod`: `shadow` and `layerno` are not read.
 - `PlaySnd`, `Pause`, `Varset` and `Trans`: parameter-level checks in the probe are inconclusive; these need a manual pass against the MUGEN docs before claiming full parameter coverage.

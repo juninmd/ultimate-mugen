@@ -1,6 +1,7 @@
 //! Ultimate MUGEN engine: MUGEN-compatible fighter VM, match simulation and UMF native characters.
 pub mod expr;
 mod intro_exit;
+mod destroy;
 pub mod bytecode;
 pub mod commands;
 pub mod input;

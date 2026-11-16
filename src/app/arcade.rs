@@ -62,7 +62,7 @@ impl App {
             let id = self.reg.chars[i].id.strip_prefix("umf:").unwrap_or(&self.reg.chars[i].id);
             id == "oboro" && self.boss_progression.is_unlocked(id)
         }) {
-            if self.boss_progression.clears == 1 {
+            if self.boss_progression.clears == 1 { self.audio.sfx("unlock");
                 cur_p1 = oboro;
                 self.sel.0 = oboro;
             }

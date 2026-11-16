@@ -17,7 +17,7 @@ impl App {
                     return;
                 }
                 Ok(true) => {
-                    step_now = step_v + 1;
+                    step_now = step_v + 1; self.audio.sfx("tick");
                     if let Screen::Vs { step, .. } = &mut self.screen {
                         *step = step_now;
                     }

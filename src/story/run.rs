@@ -33,6 +33,7 @@ pub struct StoryRun {
     pub phase: Phase,
     pub bonus: bool,
     pub epilogue: usize,
+    pub mercy: Option<bool>,
 }
 
 impl Default for StoryRun {
@@ -46,6 +47,7 @@ impl Default for StoryRun {
             phase: Phase::Intro,
             bonus: false,
             epilogue: 0,
+            mercy: None,
         }
     }
 }

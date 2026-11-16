@@ -138,6 +138,7 @@ impl App {
                     }
                     self.archive_last_fight();
                 }
+                self.record_player_bout(w);
                 self.screen = Screen::Results { winner: w, cur: 0 };
             }
         }

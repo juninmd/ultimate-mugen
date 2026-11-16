@@ -132,7 +132,6 @@
 - DBZ integration test: `cargo test -p ume-engine --test dbz -- --nocapture`
 - Shonen Jump integration test: `cargo test -p ume-engine --test shonen_jump -- --nocapture`
 - Headless match check: `cargo run --release -p ume-engine --example mugen_check -- [--lint] <char_dir>...`
-- Fetch/verify Jump chars: `powershell -ExecutionPolicy Bypass -File scripts/fetch-jump-chars.ps1 [-VerifyOnly]`
 - Hover scan (fighters stuck off the floor): `cargo run --release -p ume-engine --example hover_check -- <char_dir>` (`TRACE=1` for transitions)
 - Missing/blank sprite audit: `cargo run --release -p ume-engine --example sprite_audit -- <char_dir>`
 - Strict native sprite coverage: `cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> [--require-complete]`

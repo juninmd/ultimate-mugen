@@ -87,6 +87,20 @@ pub fn of(fighter_id: &str) -> Option<&'static Epilogue> {
     pick(table(), fighter_id)
 }
 
+pub fn of_with(fighter_id: &str, mercy: Option<bool>) -> Option<&'static Epilogue> {
+    if mercy == Some(true) {
+        let id = fighter_id.strip_prefix("umf:").unwrap_or(fighter_id);
+        let table = table();
+        if let Some(script) = table
+            .get(&format!("{id}:mercy"))
+            .or_else(|| table.get(&format!("{FALLBACK}:mercy")))
+        {
+            return Some(script);
+        }
+    }
+    of(fighter_id)
+}
+
 pub fn final_boss(player_id: &str) -> &'static str {
     let last = &STAGES[STAGES.len() - 1];
     if last.boss == player_id {

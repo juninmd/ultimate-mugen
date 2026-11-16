@@ -178,7 +178,7 @@ impl App {
         self.screen = Screen::Replays { cur: 0 };
     }
 
-    fn play_stored(&mut self, index: usize) {
+    fn play_stored(&mut self, index: usize) { self.audio.sfx("confirm");
         let Some(entry) = self.replay_list.get(index) else {
             return;
         };
@@ -533,7 +533,7 @@ impl App {
             }
             _ => {}
         }
-        if self.c.pressed(nav::BACK) || is_key_pressed(KeyCode::Escape) {
+        if self.c.pressed(nav::BACK) || is_key_pressed(KeyCode::Escape) { self.audio.sfx("back");
             self.screen = Screen::Menu { cur: 8 };
             return;
         }

@@ -58,7 +58,7 @@ use select_category::CATEGORY_COUNT;
 #[cfg(target_arch = "wasm32")]
 mod web_import;
 mod controls_screen;
-mod empty_art;
+mod empty_art; mod menu_bgm;
 pub(crate) use keyedit::KeyEdit;
 
 
@@ -480,7 +480,7 @@ impl App {
                 return;
             }
         }
-        self.updater.poll();
+        self.updater.poll(); self.menu_bgm_tick().await;
         match &mut self.screen {
             Screen::Title => self.title(),
             Screen::Menu { .. } => self.menu(),

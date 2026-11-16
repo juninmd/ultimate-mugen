@@ -490,7 +490,7 @@ impl Audio {
                 ("combo3", 1),
                 ("combo4", 1),
                 ("combo5", 1),
-                ("combo6", 1), ("error", 1), ("toggle", 1), ("tick", 1), ("pause", 1), ("results", 1), ("purchase", 1), ("unlock", 1),
+                ("combo6", 1), ("error", 1), ("toggle", 1), ("tick", 1), ("load", 1), ("pause", 1), ("results", 1), ("purchase", 1), ("unlock", 1),
             ] {
                 for v in 0..n {
                     let mono = synth(k, v);

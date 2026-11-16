@@ -41,6 +41,10 @@ pub fn render(kind: &str) -> Vec<f32> {
         }
         "toggle" => tone(&mut out, 0.0, 1100.0, 1100.0, 0.03, 0.2, false),
         "tick" => tone(&mut out, 0.0, 1900.0, 1900.0, 0.02, 0.25, false),
+        "load" => {
+            tone(&mut out, 0.0, 660.0, 880.0, 0.08, 0.2, false);
+            tone(&mut out, 0.08, 1320.0, 1320.0, 0.14, 0.2, false);
+        }
         "pause" => tone(&mut out, 0.0, 600.0, 900.0, 0.1, 0.2, false),
         "results" => {
             for (i, f) in [523.25f32, 659.25, 783.99].iter().enumerate() {

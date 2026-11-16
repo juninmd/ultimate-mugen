@@ -10,6 +10,7 @@ As ferramentas de build e auditoria do repositório são binários Rust, não sc
 | `ume-tools stage-thumbs [stages]` | `scripts/generate-stage-thumbnails.py` | Grava miniaturas 240x135 (Lanczos) em `<stages>/thumbs` |
 | `ume-tools audit-moves [dir] [--json]` | `scripts/audit_native_moves.py` | Auditoria estática do elenco: inputs, cancels, throws, hit boxes |
 | `ume-tools audit-sprites --out report.json` | `scripts/audit_native_sprites.py` | Inventário de PNGs por arquivo com limites alfa |
+| `ume-tools mugen-census <zip-ou-pasta>...` | novo | Conta estados, controllers, comandos e ações de animação de pacotes M.U.G.E.N e relaciona os controllers mais usados aos campos do UMF, veja [Estudo de código M.U.G.E.N](../MUGEN-Code-Study.md) |
 
 Rode com `cargo run --release -p ume-devtools --bin ume-tools -- <comando>`. A cobertura de resolução de poses é `native_sprite_audit --require-complete` (o `native_sprite_coverage.py` removido apenas a espelhava). As ferramentas de criação de personagem ficam em `crates/charforge` ([Ferramentas de sprites](Ferramentas-de-Sprites.md), [Gerador de golpes](Gerador-de-Golpes.md)).
 

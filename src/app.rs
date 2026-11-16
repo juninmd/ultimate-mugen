@@ -16,7 +16,7 @@ use ume_engine::chardef::CharDef;
 mod arcade;
 mod cutscene;
 mod fight_seed;
-mod keyedit;
+mod keyedit; pub(crate) mod keyedit_note;
 mod loading;
 mod pause;
 mod market;
@@ -26,15 +26,16 @@ mod mugen_catalog;
 mod mugen_gallery;
 mod replay_browser;
 mod settings_screen;
+mod char_tuning_screen;
 mod story;
 mod story_screen;
 mod survival;
 mod update_banner;
 mod results_stats;
 mod select_category;
-mod select_grid;
-mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips;
-mod versus; mod versus_compare;
+mod select_grid; mod select_cursor;
+mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_tags; mod select_view; mod text_fit; mod select_marks; mod select_author;
+mod versus; mod versus_compare; mod vs_epic; mod vs_emblem;
 mod menu_view; mod menu_icons;
 mod menu_focus;
 mod mode;
@@ -298,7 +299,7 @@ impl App {
             reg.sort_mugen();
             reg
         };
-        let import_msg = if reg.import_errors.is_empty() {
+        reg.add_stress_roster(); let import_msg = if reg.import_errors.is_empty() {
             String::new()
         } else {
             let first: Vec<&str> = reg
@@ -484,9 +485,10 @@ impl App {
             Screen::Fight => self.fight(dt).await,
             Screen::Results { .. } => self.results().await,
             Screen::Controls => self.controls_screen(),
+            Screen::CharTuning { .. } => self.char_tuning_screen(),
             Screen::Mugen { .. } => self.mugen_screen(),
             Screen::Market => self.market_screen(),
-            Screen::Story { .. } => self.story_screen(dt),
+            Screen::Story { .. } => self.story_screen(dt).await,
             Screen::SurvivalOver { .. } => self.survival_over_screen(),
             Screen::Replays { .. } => self.replays_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
@@ -758,24 +760,7 @@ impl App {
 
     /// Registry indices visible under the current filter (never empty).
     fn char_view(&self) -> Vec<usize> {
-        let mut v: Vec<usize> = self
-            .playable()
-            .into_iter()
-            .filter(|&i| self.category_matches(i))
-            .collect();
-        if v.is_empty() {
-            v = self.playable();
-        }
-        if let Some(sp) = &self.sp {
-            v.sort_by_key(|&i| {
-                let e = &self.reg.chars[i];
-                sp.roster_pos(&e.id)
-                    .or_else(|| sp.roster_pos(&e.name))
-                    .unwrap_or(usize::MAX)
-            });
-        }
-        self.sort_view(&mut v);
-        v
+        self.cached_char_view()
     }
 
     fn menu_text(&self, key: &'static str) -> String {
@@ -826,7 +811,7 @@ impl App {
         let mut confirm = false;
         let p = picking;
         let mut pos = pos_of(&view, cur[p]);
-        let old = pos;
+        let old = if view.contains(&cur[p]) { pos } else { usize::MAX };
         if self.c.pressed(nav::RIGHT) {
             pos = (pos + 1) % m;
         }
@@ -1071,11 +1056,10 @@ impl App {
         }
 
         let gap = 6.0;
-        let cw = ((640.0 - (cols as f32 - 1.0) * gap) / cols as f32).min(96.0);
-        let ch = cw * 1.17;
+        let (cw, ch) = Self::grid_tile(cols);
         let gw = cols as f32 * cw + (cols as f32 - 1.0) * gap;
         let gx = (VW - gw) / 2.0;
-        let gy = 98.0;
+        let gy = select_grid::GRID_Y;
         let gh = self.grid_rows() as f32 * (ch + gap) - gap;
         crate::menu_art::glass(&self.ui, gx - 12.0, gy - 12.0, gw + 24.0, gh + 24.0, 1.0);
         self.ui.rect_lines(
@@ -1183,23 +1167,20 @@ impl App {
                 );
             }
             self.ui
-                .rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.7));
+                .rect(cx, cy + ch - 18.0, cw, 18.0, Color::new(0.0, 0.0, 0.0, 0.7)); self.draw_tile_flag(i, cx, cy, cw, cy + ch - 18.0);
             let up = self.names_up[i].as_str();
-            let nm = if emugen {
-                crate::credit_line::truncate(up, 13)
-            } else {
-                clip(up.split_whitespace().next().unwrap_or(""), 12).to_string()
-            };
+            let name_size = (cw * 0.125).min(12.0);
+            let nm = self.fit_label(if emugen { up } else { up.split_whitespace().next().unwrap_or("") }, name_size, cw - 4.0);
             self.ui.text(
                 &nm,
                 cx + cw / 2.0,
                 cy + ch - 4.0,
-                (cw * 0.125).min(12.0),
+                name_size,
                 WHITE,
                 Align::Center,
                 true,
             );
-            if emugen {
+            if self.is_favorite(i) { self.draw_favorite_mark(cx, cy); } if emugen {
                 self.ui
                     .rect(cx + cw - 44.0, cy + 3.0, 41.0, 13.0, hex("#22e8ff"));
                 self.ui.text(
@@ -1281,48 +1262,11 @@ impl App {
             }
             let (rx, ry) = (self.sel_cur[side].0, self.sel_cur[side].1);
             let a = accents[side];
-            let pad = 2.0 + 2.0 * pulse + side as f32 * 3.0;
-            self.ui.rect(
-                rx - pad,
-                ry - pad,
-                cw + pad * 2.0,
-                ch + pad * 2.0,
-                alpha(a, 0.10 + 0.08 * pulse),
-            );
-            self.ui.rect_lines(
-                rx - pad,
-                ry - pad,
-                cw + pad * 2.0,
-                ch + pad * 2.0,
-                2.0,
-                alpha(a, 0.9),
-            );
-            let (bl, bt) = (16.0, 4.0);
-            for (ox, oy, dx, dy) in [
-                (rx - pad, ry - pad, 1.0, 1.0),
-                (rx + cw + pad, ry - pad, -1.0, 1.0),
-                (rx - pad, ry + ch + pad, 1.0, -1.0),
-                (rx + cw + pad, ry + ch + pad, -1.0, -1.0),
-            ] {
-                self.ui.rect(
-                    ox.min(ox + dx * bl),
-                    oy + if dy > 0.0 { -2.0 } else { 2.0 - bt },
-                    bl,
-                    bt,
-                    WHITE,
-                );
-                self.ui.rect(
-                    ox + if dx > 0.0 { -2.0 } else { 2.0 - bt },
-                    oy.min(oy + dy * bl),
-                    bt,
-                    bl,
-                    WHITE,
-                );
-            }
+            self.draw_select_cursor(rx, ry, cw, ch, a, pulse, side);
             if picked[side].is_none() {
                 let tag_w = if side == 0 { 26.0 } else if two { 26.0 } else { 32.0 };
-                let tag_x = if side == 0 { rx - pad } else { rx + cw + pad - tag_w };
-                self.ui.rect(tag_x, ry - pad - 15.0, tag_w, 15.0, a);
+                let (tag_x, tag_y) = if side == 0 { (rx, ry) } else { (rx, ry + ch - 33.0) };
+                self.ui.rect(tag_x, tag_y, tag_w, 15.0, a);
                 self.ui.text(
                     if side == 0 {
                         "P1"
@@ -1332,7 +1276,7 @@ impl App {
                         "CPU"
                     },
                     tag_x + tag_w / 2.0,
-                    ry - pad - 3.0,
+                    tag_y + 12.0,
                     12.0,
                     BLACK,
                     Align::Center,
@@ -1461,16 +1405,7 @@ impl App {
         }
         self.ui
             .rect(0.0, 652.0, VW, 1.5, alpha(accents[picking.min(1)], 0.7));
-        let desc = &self.reg.chars[cur[picking]].description;
-        self.ui.text(
-            desc,
-            VW / 2.0,
-            680.0,
-            16.0,
-            Color::new(0.85, 0.82, 0.94, 0.7),
-            Align::Center,
-            false,
-        );
+        self.draw_select_profile(cur[picking], accents[picking.min(1)]);
         let flabel = self.category_label();
         self.sel_buf.clear();
         let _ = write!(
@@ -1483,8 +1418,8 @@ impl App {
         self.ui.text(
             &self.sel_buf,
             VW / 2.0,
-            706.0,
-            12.0,
+            713.0,
+            11.0,
             Color::new(0.64, 0.61, 0.75, 0.6),
             Align::Center,
             false,
@@ -1516,7 +1451,7 @@ impl App {
                     };
                     return;
                 }
-                self.team_pick.push(me);
+                self.team_pick.push(me); self.note_recent(me);
                 self.team_pal.push(
                     self.pal_pick
                         .clamp(1, crate::settings::PALETTE_COUNT as i32),
@@ -1558,7 +1493,7 @@ impl App {
                 self.screen = Screen::Stages { cur: 1 };
                 return;
             }
-            picked[picking] = Some(cur[picking]);
+            picked[picking] = Some(cur[picking]); self.note_recent(cur[picking]);
             let coop = self.coop && matches!(self.mode, Mode::Arcade | Mode::Survival);
             if picking == 0 && coop {
                 picking = 1;
@@ -1793,7 +1728,7 @@ impl App {
         let by = py + ph - 94.0;
         self.ui
             .rect(px, by, pw, 94.0, Color::new(0.0, 0.0, 0.05, 0.7));
-        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 88.0); self.draw_stat_gauges(px, by + 20.0, pw, i);
+        self.ui.rect(px, by, pw, 2.0, alpha(col, 0.9)); self.select_author(&e.author, cx, by + 88.0); self.draw_card_flag(i, px + pw, by); self.draw_stat_gauges(px, by + 20.0, pw, i);
         let nm = self.names_up[i].as_str();
         self.ui.text_bold(
             nm,

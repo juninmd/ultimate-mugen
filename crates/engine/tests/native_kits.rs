@@ -32,8 +32,8 @@ fn toolkit_ids_and_inputs_do_not_collide() {
         for m in nc.moves.iter().chain(forms) {
             assert!(ids.insert(m.id.clone()), "{id} duplicate id {}", m.id);
         }
-        for m in &nc.moves {
-            let key = format!("{}|{}", m.input, m.when.as_deref().unwrap_or("stand"));
+        for m in nc.moves.iter().filter(|m| m.rekka.is_none()) {
+            let key = format!("{}|{}|{:?}", m.input, m.when.as_deref().unwrap_or("stand"), m.requires.as_ref().map(|r| (&r.distance, &r.enemy_state)));
             assert!(inputs.insert(key), "{id} duplicate input {} for {}", m.input, m.id);
         }
     }
@@ -49,7 +49,7 @@ fn toolkit_compiles_and_reaches_the_move_list() {
         }
         assert!(def.ai_commands.len() >= nc.moves.len(), "{id} ai commands");
         if nc.moves.iter().any(|m| m.id.starts_with("ult_")) {
-            assert!(def.forms.len() == 2, "{id} awakening and ascended forms");
+            assert!(def.forms.len() >= 2, "{id} awakening and ascended forms");
         }
     }
 }

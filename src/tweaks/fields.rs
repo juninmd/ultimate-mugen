@@ -6,9 +6,11 @@ pub const MENU_KEYS: [&str; 16] = [
     "team_simul", "team_tag", "mugen", "market", "controls", "settings", "replays", "quit",
 ];
 
-pub const SECTIONS: [(&str, &[&str]); 4] = [
-    ("theme", &["background", "glow_bottom", "glow_left", "glow_right"]),
-    ("hud", &["p1_tint", "p2_tint", "bar_offset_y"]),
+pub const SECTIONS: [(&str, &[&str]); 6] = [
+    ("theme", &["preset", "background", "glow_bottom", "glow_left", "glow_right", "accent", "title", "info", "muted", "text"]),
+    ("hud", &["p1_tint", "p2_tint", "bar_offset_y", "life", "life_low", "damage"]),
+    ("accessibility", &["hud_opacity", "hud_scale", "colorblind", "reduce_motion"]),
+    ("touch", &["scale", "opacity", "left_handed"]),
     ("rules", &["rounds_to_win", "round_seconds", "life_percent", "game_speed"]),
     ("menu", &MENU_KEYS),
 ];
@@ -37,6 +39,15 @@ pub fn apply(section: &str, key: &str, v: &Value, t: &mut Tweaks, labels: &mut L
     let bad_range = |lo: &str, hi: &str| format!("[{section}] `{key}` must be a number from {lo} to {hi}");
     let c = || v.as_str().and_then(color);
     match (section, key) {
+        ("theme", "preset") => super::presets::apply(v.as_str().unwrap_or(""), t).map_err(|names| format!("[theme] `preset` must be one of: {names}"))?,
+        ("theme", "accent") => t.accent = c().ok_or_else(bad_color)?,
+        ("theme", "title") => t.title = c().ok_or_else(bad_color)?,
+        ("theme", "info") => t.info = c().ok_or_else(bad_color)?,
+        ("theme", "muted") => t.muted = c().ok_or_else(bad_color)?,
+        ("theme", "text") => t.text = c().ok_or_else(bad_color)?,
+        ("hud", "life") => t.life = c().ok_or_else(bad_color)?,
+        ("hud", "life_low") => t.life_low = c().ok_or_else(bad_color)?,
+        ("hud", "damage") => t.damage = c().ok_or_else(bad_color)?,
         ("theme", "background") => t.background = c().ok_or_else(bad_color)?,
         ("theme", "glow_bottom") => t.glow_bottom = c().ok_or_else(bad_color)?,
         ("theme", "glow_left") => t.glow_left = c().ok_or_else(bad_color)?,
@@ -44,6 +55,13 @@ pub fn apply(section: &str, key: &str, v: &Value, t: &mut Tweaks, labels: &mut L
         ("hud", "p1_tint") => t.p1_tint = c().ok_or_else(bad_color)?,
         ("hud", "p2_tint") => t.p2_tint = c().ok_or_else(bad_color)?,
         ("hud", "bar_offset_y") => t.bar_offset_y = ranged(v, -4.0, 40.0).ok_or_else(|| bad_range("-4", "40"))? as f32,
+        ("accessibility", "hud_opacity") => t.hud_opacity = ranged(v, 0.3, 1.0).ok_or_else(|| bad_range("0.3", "1.0"))? as f32,
+        ("accessibility", "hud_scale") => t.hud_scale = ranged(v, 0.8, 1.25).ok_or_else(|| bad_range("0.8", "1.25"))? as f32,
+        ("touch", "scale") => t.touch_scale = ranged(v, 0.7, 1.5).ok_or_else(|| bad_range("0.7", "1.5"))? as f32,
+        ("touch", "opacity") => t.touch_opacity = ranged(v, 0.2, 1.0).ok_or_else(|| bad_range("0.2", "1.0"))? as f32,
+        ("touch", "left_handed") => t.touch_left_handed = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
+        ("accessibility", "colorblind") => t.colorblind = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
+        ("accessibility", "reduce_motion") => t.reduce_motion = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
         ("rules", "rounds_to_win") => t.rules.rounds_to_win = Some(ranged(v, 1.0, 9.0).ok_or_else(|| bad_range("1", "9"))? as i32),
         ("rules", "round_seconds") => t.rules.round_seconds = Some(ranged(v, 0.0, 999.0).ok_or_else(|| bad_range("0 (no limit)", "999"))? as u32),
         ("rules", "life_percent") => t.rules.life_percent = Some(ranged(v, 10.0, 500.0).ok_or_else(|| bad_range("10", "500"))? as u32),

@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-12",
+  "fighter": "kaname",
+  "pose": "mr2",
+  "target": "assets/chars/sprites/kaname/mr2.png",
+  "activeSha256": "9abd5920073df60284f5dc5b91b4182cd4d371971519136863c2ed6b92673768",
+  "backup": "integrated/kaname-mr2-before/mr2.png",
+  "backupSha256": "c6740216f11fe23a2ffec6198505771c3ece3d873728f79e6620bb07578db2a6",
+  "candidateReview": "candidates/kaname-mr2-pilot/candidate-review-v2.json",
+  "reusesFamilies": [
+    "hoarfrost",
+    "hoarfrostEx",
+    "trap"
+  ],
+  "visualReview": {
+    "identity": "pass: tied-back blue hair, canonical white haori with navy trim, black sash, navy hakama, white sandals and steel katana",
+    "pose": "pass: airborne upward follow-through retains raised katana and tucked legs, distinct from mr1 grounded preparation",
+    "effect": "pass: preserves one large cyan-blue sword trail from active mr2; no gray haze, secondary beam or new FX",
+    "sequence": "pass: reviewed mr1→mr2 at native and nearest 2x",
+    "evidence": [
+      "pipeline-v2/evidence/native-mr1-mr2.png",
+      "pipeline-v2/evidence/2x-mr1-mr2.png"
+    ],
+    "runtime_review": "not performed"
+  },
+  "integration": "Promoted after parent native and nearest-2x mr1→mr2 sequence review; original cyan trail retained as hard pixel FX. Metadata and timing unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

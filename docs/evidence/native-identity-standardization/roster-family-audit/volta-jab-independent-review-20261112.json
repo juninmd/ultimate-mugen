@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "review": "independent static cross-review after palette reapply",
+  "date": "2026-11-12",
+  "character": "volta",
+  "scope": [
+    "jab0.png",
+    "jab1.png",
+    "jab2.png",
+    "04_special.png"
+  ],
+  "noEdits": false,
+  "activeSha256": {
+    "jab0": "d51d88b3ae623e240fc854f0c89e12acc3248e6353a402dcd4a02ecf13f65a8c",
+    "jab1": "6370f2d57b801d316a47fdc1e7c9daa525793cb9847cd486394caa7382a004f9",
+    "jab2": "b2fb0228721b6e65faa3b42b676f21cd17960389e1e37bad0f8076eb30249b9e",
+    "04_special": "d0b2eb39e2a5c178d816aff8f3184cae5d400a26fc90b1d827d94ac4ae91ed69"
+  },
+  "candidateManifestShaMatchesActive": {
+    "jab0": false,
+    "jab1": true,
+    "jab2": true
+  },
+  "technical": {
+    "allJabsCanvas400x400": true,
+    "allJabsAlphaBinary": [
+      0,
+      255
+    ],
+    "allJabsAxis": [
+      200,
+      392
+    ],
+    "allJabsFloorY": 392,
+    "allJabsRefHeight": 320,
+    "activeRgbPaletteMembership": {
+      "claimedPaletteSha256": "25f9eaf37d1054396f7305e861a5f54ce0e5eb5395ac17f2a7231c213995434f",
+      "jab0": {
+        "opaqueRgbColors": 34,
+        "colorsMissingFromClaimedSharedPalette": 0,
+        "exactMembership": true
+      },
+      "jab1": {
+        "opaqueRgbColors": 43,
+        "colorsMissingFromClaimedSharedPalette": 0,
+        "exactMembership": true
+      },
+      "jab2": {
+        "opaqueRgbColors": 43,
+        "colorsMissingFromClaimedSharedPalette": 0,
+        "exactMembership": true
+      },
+      "jab0OwnPaletteSha256": "25f9eaf37d1054396f7305e861a5f54ce0e5eb5395ac17f2a7231c213995434f",
+      "jab1Jab2SharedPaletteSha256": "25f9eaf37d1054396f7305e861a5f54ce0e5eb5395ac17f2a7231c213995434f"
+    },
+    "candidateStrictMaxDeltaE": {
+      "jab0": 0.056425,
+      "jab1": 0.08559,
+      "jab2": 0.093804
+    },
+    "reappliedJab0": {
+      "sourceSha256": "719842ee823a2e639c51e6f6117d5824559d4aa35cfd26f7d9ad9d8734c8b8fd",
+      "outputSha256": "d51d88b3ae623e240fc854f0c89e12acc3248e6353a402dcd4a02ecf13f65a8c",
+      "paletteSha256": "25f9eaf37d1054396f7305e861a5f54ce0e5eb5395ac17f2a7231c213995434f",
+      "strictMaxDeltaE": 0.056425,
+      "strictGate": 0.13,
+      "qa": "docs/evidence/native-identity-standardization/roster-family-audit/integrated/volta-jab-palette-reapply/reapplied-run1/apply-qa.json"
+    }
+  },
+  "animation": {
+    "current": [
+      {
+        "pose": "jab0",
+        "ticks": 3
+      },
+      {
+        "pose": "jab1",
+        "ticks": 3,
+        "hit": {
+          "part": "handF",
+          "radius": 8
+        }
+      },
+      {
+        "pose": "jab2",
+        "ticks": 4
+      },
+      {
+        "pose": "idle0",
+        "ticks": 2
+      }
+    ],
+    "totalTicks": 12,
+    "moveHitAt": 2,
+    "baselineBeforeIntegration": [
+      {
+        "pose": "jab0",
+        "ticks": 3
+      },
+      {
+        "pose": "jab1",
+        "ticks": 3,
+        "hit": {
+          "part": "handF",
+          "radius": 8
+        }
+      },
+      {
+        "pose": "jab0",
+        "ticks": 4
+      },
+      {
+        "pose": "idle0",
+        "ticks": 2
+      }
+    ],
+    "hitAndTotalTicksPreserved": true
+  },
+  "visualReview": {
+    "identity": "pass",
+    "sequencePoseReadability": "pass",
+    "scaleFloorConsistency": "pass",
+    "style": "minor tone distribution difference remains: jab1/jab2 silver plates appear brighter than jab0 and 04_special despite exact palette membership; silhouettes, outlines and clusters broadly match",
+    "runtime": "not tested per task"
+  },
+  "finding": "Resolved: active jab0 was reapplied using the exact shared seed-13 palette. Strict apply passed at dE 0.056425; all active jab PNGs now contain colors only from the same 48-entry palette. Source and old contact sheets are backed up, and promotion provenance is recorded.",
+  "promotionManifestShaMatchesActive": {
+    "jab0": "d51d88b3ae623e240fc854f0c89e12acc3248e6353a402dcd4a02ecf13f65a8c",
+    "jab1": "6370f2d57b801d316a47fdc1e7c9daa525793cb9847cd486394caa7382a004f9",
+    "jab2": "b2fb0228721b6e65faa3b42b676f21cd17960389e1e37bad0f8076eb30249b9e"
+  },
+  "findingHistory": [
+    "Before reapply, active jab0 used a different palette and 39 of 41 opaque RGB values were absent from the claimed shared palette."
+  ],
+  "reviewState": "palette_reapply_strict_pass_static_visual_pass_minor_tone_difference_runtime_pending",
+  "evidence": {
+    "native": "integrated/volta-jab-before/volta-jab-integrated-native.png",
+    "2xNearest": "integrated/volta-jab-before/volta-jab-integrated-2x-nearest.png",
+    "promotion": "integrated/volta-jab-palette-reapply/promotion-manifest.json",
+    "strictQA": "integrated/volta-jab-palette-reapply/reapplied-run1/apply-qa.json"
+  }
+}

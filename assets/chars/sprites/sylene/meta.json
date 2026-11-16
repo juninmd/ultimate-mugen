@@ -7,7 +7,7 @@
     },
     "02_attack1": {
       "axisX": 146.19,
-      "axisY": 400.095,
+      "axisY": 400.0,
       "refHeight": 333.333
     },
     "03_attack2": {
@@ -350,22 +350,7 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "inline_80a0e34b697a9fa7": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_8d4fe6a8b9344cfd": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
     "inline_9058d998974b8d84": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_bd0f42e804432d18": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -414,6 +399,11 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
+    },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 350.0
     },
     "sg_run_mid": {
       "axisX": 200.0,

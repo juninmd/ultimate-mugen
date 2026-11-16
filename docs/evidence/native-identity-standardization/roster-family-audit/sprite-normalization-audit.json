@@ -1,0 +1,1856 @@
+{
+  "combat_pngs": 2175,
+  "canvas_sizes": {
+    "(400, 400)": 2175
+  },
+  "alpha_bounds_touching_canvas_edge": 290,
+  "edge_files": [
+    {
+      "file": "assets\\chars\\sprites\\akio\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\03_attack2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\05_projectile.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\07_idle1.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\13_fall2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\14_lie.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\17_power2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\akio\\airLowKick.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\02_attack1.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\03_attack2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\05_projectile.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\13_fall2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\14_lie.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\17_power2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\bruno\\airLowKick.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\03_attack2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\05_projectile.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\11_hit3.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\13_fall2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\14_lie.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\17_power2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\daichi\\airLowKick.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\03_attack2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\04_special.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\05_projectile.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\12_fall1.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\13_fall2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\14_lie.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\airLowKick.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\bd1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\inline_c75becbcbc592dc9.png",
+      "edges": [
+        "top"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\garan\\sg_run_mid.png",
+      "edges": [
+        "top"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\03_attack2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\05_projectile.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\13_fall2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\14_lie.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\17_power2.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\airLowKick.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\bar1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\bar2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\haruki\\bar3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\03_attack2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\05_projectile.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\11_hit3.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\13_fall2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\14_lie.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\17_power2.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\jin\\airLowKick.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaito\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaito\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaito\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaito\\airLowKick.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaito\\jab0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaito\\punch.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaito\\walk1.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaito\\win0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaito\\win1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\03_attack2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\04_special.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\05_projectile.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\11_hit3.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\13_fall2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\14_lie.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\17_power2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\kaname\\airLowKick.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\03_attack2.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\05_projectile.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\13_fall2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\14_lie.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\17_power2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\airLowKick.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\ca0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\ca1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\lian\\ca2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\03_attack2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\04_special.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\05_projectile.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\13_fall2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\14_lie.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\17_power2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\airLowKick.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\marlow\\inline_3933cc4c8655ca1e.png",
+      "edges": [
+        "top"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\02_attack1.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\03_attack2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\05_projectile.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\11_hit3.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\12_fall1.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\13_fall2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\14_lie.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\17_power2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\oboro\\airLowKick.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\03_attack2.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\05_projectile.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\13_fall2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\14_lie.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\17_power2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\airLowKick.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\shion\\inline_1cda5df7ecfd1b62.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\03_attack2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\05_projectile.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\13_fall2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\14_lie.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\17_power2.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\suzume\\airLowKick.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\02_attack1.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\03_attack2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\04_special.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\05_projectile.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\13_fall2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\14_lie.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\17_power2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\airLowKick.png",
+      "edges": [
+        "left",
+        "top",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\sylene\\inline_05b2e2524dd92dc0.png",
+      "edges": [
+        "top"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\03_attack2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\05_projectile.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\06_victory.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\12_fall1.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\13_fall2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\14_lie.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\17_power2.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\valdric\\airLowKick.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\01_idle.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\02_attack1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\03_attack2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\04_special.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\05_projectile.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\06_victory.png",
+      "edges": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\07_idle1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\08_idle2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\09_hit1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\10_hit2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\11_hit3.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\12_fall1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\13_fall2.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\14_lie.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\15_power0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\16_power1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\17_power2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\ab0.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\ab1.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\ab2.png",
+      "edges": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "assets\\chars\\sprites\\volta\\airLowKick.png",
+      "edges": [
+        "left",
+        "right",
+        "bottom"
+      ]
+    }
+  ],
+  "anomalies": []
+}

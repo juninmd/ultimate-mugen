@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-12",
+  "fighter": "suzume",
+  "pose": "guardHit",
+  "target": "assets/chars/sprites/suzume/guardHit.png",
+  "activeSha256": "0cdba0ef80c224b928ae531f1d5888bfcecd204a26722fa52c34a96b51436a75",
+  "backup": "integrated/suzume-guardHit-before/guardHit.png",
+  "backupSha256": "c19cfa9b0a4241d417d1df077f3a3e44763d171d9a56c480306ca4465ac3d05f",
+  "candidateReview": "candidates/suzume-guardHit-pilot/qa-report.json",
+  "frame": {
+    "pose": "guardHit",
+    "sha256": "0cdba0ef80c224b928ae531f1d5888bfcecd204a26722fa52c34a96b51436a75",
+    "width": 400,
+    "height": 400,
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "opaqueColors": 46,
+    "offPaletteColors": 0,
+    "alphaBBoxExclusive": [
+      74,
+      73,
+      284,
+      392
+    ],
+    "axis": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "sharedPaletteFile": "candidates/suzume-crouch-pilot/identity-locked-retry/palette/palette.json",
+    "sharedPaletteSha256": "75f02d7afcfdcb5ff0eaf228dce9be5bbfe4f6270b20519ef28277c1834a7b02",
+    "checks": {
+      "canvas400": true,
+      "binaryAlpha": true,
+      "colorsAtMost48": true,
+      "floorY392": true,
+      "axis200x392Ref320": true,
+      "exactPaletteSubset": true
+    }
+  },
+  "animationEvidence": {
+    "json": "assets/chars/suzume.json",
+    "guard": {
+      "frames": [
+        {
+          "pose": "guard",
+          "ticks": -1
+        }
+      ]
+    },
+    "guardHit": {
+      "frames": [
+        {
+          "pose": "guardHit",
+          "ticks": 3
+        },
+        {
+          "pose": "guard",
+          "ticks": -1
+        }
+      ]
+    },
+    "guard_pose": {
+      "lean": -2,
+      "head": 10,
+      "thighB": -22
+    },
+    "guardHit_pose": {
+      "lean": -8,
+      "head": 14,
+      "thighB": -28,
+      "phase": 1
+    },
+    "weapon": "No weapon is declared by guardHit; none is shown in candidate."
+  },
+  "visualReview": {
+    "sequence": "integrated guard -> candidate guardHit (3 ticks) -> existing guard hold",
+    "native": "review/native-sequence-review.png",
+    "nearest_2x": "review/nearest-2x-sequence-review.png",
+    "rig_pose_reference": "rig-source-guardHit.png",
+    "result": "Candidate keeps both forearms shielding face and chest, adds a compact head/chest recoil and a slightly deeper rear-leg brace. The 3-tick impact phase reads differently from the integrated held guard while keeping the feet line and overall scale stable; no large silhouette jump, weapon or new effect.",
+    "identity": "Matches canonical Suzume design and integrated guard frame; old hood/armor/greaves from active pose were not copied."
+  },
+  "integration": "Promoted after parent review of native and nearest-2x sequence. Timing and metadata unchanged.",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

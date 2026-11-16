@@ -12,14 +12,7 @@ consegue nomear resolve para o próprio arquivo PNG. Os canvases numerados compa
   incluindo defesa, agachamento, salto, flip, turn, land, vitória, intro, taunt, o conjunto de derrotas
   `df*` e as poses de dano baixo que antes reutilizavam idle. Poses inline têm o quadro `inline_<hash>`
   renderizado uma única vez.
-- A ferramenta de regeneração é `cargo run --release -p ume-engine --example generate_missing_sprites`.
-  Ela mescla as poses de `crates/engine/src/native/defaults.json` com a tabela de cada personagem,
-  renderiza as poses que faltam pelo rig e escreve quadros 400x400 com eixo (200, 392) e metadado
-  `refHeight` 320, seguindo a convenção existente. Varre `assets/chars`, as pastas de varredura `umf/`
-  e `mugen/umf` e `UME_UMF_DIR`: criar um personagem UMF novo e rodar o comando já entrega o conjunto
-  de sprites. Só são aceitos ids e nomes de quadro como identificadores simples, e a passagem impõe
-  limites de tamanho de origem e de quantidade de quadros por personagem, porque o JSON UMF
-  varrido é conteúdo importado pelo usuário.
+- Os PNGs dedicados devem ser gerados em pixel art arcade via `generate_image` usando uma âncora canônica validada do próprio personagem (a ferramenta depreciada `generate_missing_sprites` baseada no rig vetorial foi removida). Escreva quadros 400×400 RGBA com eixo (200, 392) e metadado `refHeight` 320, seguindo a convenção existente.
 - Verificação: `cargo run --release -p ume-engine --example native_sprite_audit -- <out.json> --require-complete`
   deve passar para todos os lutadores, e `cargo run --release -p ume-devtools --bin ume-tools -- audit-sprites --out <report.json>` deve
   ficar limpo em geometria e bordas alfa. O `cargo run --release -p ume-devtools --bin ume-tools -- audit-moves` é a auditoria estática do elenco (inputs, cancels, throws, hit boxes).

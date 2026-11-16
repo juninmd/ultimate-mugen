@@ -67,7 +67,7 @@
     },
     "14_lie": {
       "axisX": 191.667,
-      "axisY": 400.255,
+      "axisY": 400.0,
       "refHeight": 385.294
     },
     "15_power0": {
@@ -330,21 +330,6 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "inline_04cdb9fa2bf5530d": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_ccfe38b2ee6cffc1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_f211493aa5265fce": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
     "jab0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -389,6 +374,11 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
+    },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 393.0
     },
     "rise0": {
       "axisX": 200.0,
@@ -516,6 +506,11 @@
       "refHeight": 320.0
     },
     "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab2": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0

@@ -4,6 +4,7 @@ mod binding;
 mod draw_chrome;
 mod draw_list;
 mod draw_slots;
+mod glide;
 mod input;
 mod input_fit;
 mod labels;

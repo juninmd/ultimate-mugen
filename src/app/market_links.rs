@@ -30,7 +30,7 @@ impl App {
             let live = url.is_some() && !modal;
             let hover = live && self.hover_rect(x, y, BTN_W, BTN_H);
             let a = if !live { 0.1 } else if hover { 0.5 } else { 0.28 };
-            self.ui.rect(x, y, BTN_W, BTN_H, Color::new(0.35, 0.4, 0.95, a));
+            self.ui.adapted_plate(x, y, BTN_W, BTN_H, Some(Color::new(0.35, 0.4, 0.95, a * 1.6)));
             let ink = if live { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.4) };
             self.ui.text(&format!("{label}  [{key}]"), x + BTN_W / 2.0, y + 20.0, 15.0, ink, Align::Center, true);
             if live && (self.clicked_rect(x, y, BTN_W, BTN_H) || is_key_pressed(code)) {

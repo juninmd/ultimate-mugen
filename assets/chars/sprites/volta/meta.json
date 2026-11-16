@@ -385,6 +385,11 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 364.0
+    },
     "od0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -491,6 +496,11 @@
       "refHeight": 320.0
     },
     "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "jab2": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0

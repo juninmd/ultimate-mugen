@@ -1,0 +1,127 @@
+{
+  "identityCanonical": "assets/chars/sprites/garan/04_special.png",
+  "poseAndScaleGuide": "assets/chars/sprites/garan/sg_run_mid.png and sg_run_run0..3.png",
+  "sourceActive": "assets/chars/sprites/garan/sg_run_mid.png",
+  "sourceActiveSha256": "cf150843db3171c61a11c6d69d4d97abb581d92a5aacc73763c98018505b09b8",
+  "candidate": "sg_run_mid-edge-v1.png",
+  "candidateSha256": "685cacd4ae27e67c74f644f940afe6dfc269247636d1ce9d449a94b2e6ca06ef",
+  "canvas": [
+    400,
+    400
+  ],
+  "sharedMetadata": {
+    "axisX": 200,
+    "axisY": 363,
+    "refHeight": 360
+  },
+  "operation": "Retouched only the clipped top mane contour within rows 0-12. No resize, body movement, palette replacement, or metadata change.",
+  "activeMetrics": {
+    "sha256": "cf150843db3171c61a11c6d69d4d97abb581d92a5aacc73763c98018505b09b8",
+    "bbox": [
+      24,
+      0,
+      375,
+      362
+    ],
+    "width": 352,
+    "height": 363,
+    "topRowOpaquePixels": 15,
+    "bottomRowOpaquePixels": 0,
+    "partialAlphaPixels": 0,
+    "visibleColors": 30
+  },
+  "candidateMetrics": {
+    "sha256": "685cacd4ae27e67c74f644f940afe6dfc269247636d1ce9d449a94b2e6ca06ef",
+    "bbox": [
+      24,
+      6,
+      375,
+      362
+    ],
+    "width": 352,
+    "height": 357,
+    "topRowOpaquePixels": 0,
+    "bottomRowOpaquePixels": 0,
+    "partialAlphaPixels": 0,
+    "visibleColors": 30
+  },
+  "neighborMetrics": {
+    "sg_run_run0": {
+      "sha256": "8b68d398eebeb343d4f889304b22932c9a6bfc5ed3e7ac7c1c7404fb1d750f17",
+      "bbox": [
+        48,
+        112,
+        312,
+        378
+      ],
+      "width": 265,
+      "height": 267,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0,
+      "partialAlphaPixels": 0,
+      "visibleColors": 39
+    },
+    "sg_run_run1": {
+      "sha256": "f0e4722ca984bf43738d1c7b996d0c46f4e61d959eb9a482711ead65720a4a18",
+      "bbox": [
+        51,
+        120,
+        304,
+        390
+      ],
+      "width": 254,
+      "height": 271,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0,
+      "partialAlphaPixels": 0,
+      "visibleColors": 37
+    },
+    "sg_run_run2": {
+      "sha256": "d17d0eb1a3cbb07c9d3ab382f1a00d6c688b346ee395145284d3df9c25d9b100",
+      "bbox": [
+        75,
+        53,
+        323,
+        353
+      ],
+      "width": 249,
+      "height": 301,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0,
+      "partialAlphaPixels": 0,
+      "visibleColors": 37
+    },
+    "sg_run_run3": {
+      "sha256": "3620b56854f31da3cec84581409f2e3eb1a9dec0caf6f6fe8e38fad67d2ba046",
+      "bbox": [
+        43,
+        119,
+        312,
+        382
+      ],
+      "width": 270,
+      "height": 264,
+      "topRowOpaquePixels": 0,
+      "bottomRowOpaquePixels": 0,
+      "partialAlphaPixels": 0,
+      "visibleColors": 39
+    }
+  },
+  "visualReview": {
+    "identity": "Garan's red oni identity remains unchanged.",
+    "poseAndScale": "All pixels in rows 13-399 are preserved; the active 400x400 canvas and shared axis/refHeight remain unchanged.",
+    "topEdge": "Candidate has five transparent rows above the mane and no opaque pixels on row 0.",
+    "nativeComparison": "run-neighbor-native.png",
+    "nearest2xComparison": "active-candidate-nearest-2x.png and run-neighbors-nearest-2x.png",
+    "runtimeOrTests": "Only structural PNG checks after promotion; no engine tests or runtime capture."
+  },
+  "candidateOnlyAtReview": true,
+  "promotion": {
+    "status": "integrated after parent authorization",
+    "activePath": "assets/chars/sprites/garan/sg_run_mid.png",
+    "backupPath": "sg_run_mid-before.png",
+    "activeSha256": "685cacd4ae27e67c74f644f940afe6dfc269247636d1ce9d449a94b2e6ca06ef",
+    "backupSha256": "cf150843db3171c61a11c6d69d4d97abb581d92a5aacc73763c98018505b09b8",
+    "structuralQa": "promotion-structural-qa.json"
+  }
+}\n

@@ -373,10 +373,7 @@ fn loop_expired(opts: &SoundOpts, elapsed: usize, start: usize, end: usize) -> b
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct MusicLoop {
-    pub start: usize,
-    pub end: usize,
-}
+pub struct MusicLoop { pub start: usize, pub end: usize, pub gain: Option<f32> }
 
 type SampleKey = (String, i32, i32);
 type VoiceKey = (SampleKey, i8, u16);
@@ -925,7 +922,7 @@ impl Audio {
             return false;
         }
         self.stop_music();
-        let v = self.music_volume * 0.35 * self.bgm_gain;
+        let v = self.music_volume * 0.35 * self.bgm_gain * lp.gain.unwrap_or(1.0);
         let pcm = decode(bytes);
         if pcm.is_none() {
             eprintln!(
@@ -1032,6 +1029,7 @@ impl Audio {
                 MusicLoop {
                     start: loop_start,
                     end: loop_end,
+                    gain: lp.gain,
                 }
             } else {
                 lp

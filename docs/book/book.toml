@@ -1,0 +1,17 @@
+[book]
+title = "Ultimate MUGEN Wiki"
+description = "Guides for players, creators and contributors of Ultimate MUGEN"
+language = "en"
+src = "../../target/wiki-book/src"
+
+[build]
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/juninmd/ultimate-mugen"
+site-url = "/ultimate-mugen/wiki/"
+default-theme = "navy"
+preferred-dark-theme = "navy"
+
+[output.html.search]
+enable = true

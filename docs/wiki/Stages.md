@@ -66,7 +66,7 @@ delta = .8, .8
 | `[PlayerInfo]` | `p1startx`, `p2startx` |
 | `[StageInfo]` | `zoffset`, `localcoord` |
 | `[BGdef]` | `spr` |
-| `[BG ...]` | `type` (`normal`, `anim`), `spriteno`, `actionno`, `layerno` (0 behind, 1 in front), `start`, `delta`, `tile`, `tilespacing`, `velocity`, `trans`, `mask`, `scalestart`, `scaledelta`, `angle`, `xshear`, `window`, `maskwindow`, `windowdelta`, `spacing` |
+| `[BG ...]` | `type` (`normal`, `anim`, `parallax`), `spriteno`, `actionno`, `layerno` (0 behind, 1 in front), `start`, `delta`, `tile`, `tilespacing`, `velocity`, `trans`, `mask`, `scalestart`, `scaledelta`, `angle`, `xshear`, `window`, `maskwindow`, `windowdelta`, `spacing` |
 
 Layer transform parameters (Ikemen / M.U.G.E.N 1.1), applied by both the live renderer and the stage-select preview:
 
@@ -81,7 +81,62 @@ Layer transform parameters (Ikemen / M.U.G.E.N 1.1), applied by both the live re
 | `windowdelta = x, y` | How fast the clipping window scrolls with the camera (defaults to the layer `delta`). |
 | `spacing = x, y` | Gap between tiles; used when `tilespacing` is absent (`tilespacing` wins when both are set). |
 
-Planned: `[Music]`, configurable shadows and reflections, `type = parallax`.
+Planned: configurable shadows and reflections.
+
+## Music, sky and parallax
+
+`[Music]` plays the stage track when the fight starts (it replaces the default track; without it the fight uses the usual music). The file is resolved relative to the .def, then from the root of the content folder.
+
+```ini
+[Music]
+bgmusic = sound/my_theme.ogg
+bgmvolume = 80
+bgmloopstart = 0
+bgmloopend = 0
+```
+
+| Key | Default | Meaning |
+|---|---|---|
+| `bgmusic` | none | Track file (`.ogg`, `.mp3`, `.flac` or `.wav`) |
+| `bgmvolume` | 100 | Percent of the normal music volume |
+| `bgmloopstart`, `bgmloopend` | 0 | Loop points in samples; both 0 loops the whole file |
+
+`type = parallax` is a layer that repeats without end on the X axis and drifts with its `velocity`, without `tile = 1, 0`. Use it for a sky strip, far hills or clouds. `delta` still sets how much the layer follows the camera.
+
+```ini
+[BG Ridge]
+type = parallax
+spriteno = 2, 0
+layerno = 0
+start = 0, 140
+delta = 0.8, 1
+velocity = 0.1, 0
+```
+
+`[Sky]` draws an animated sky behind the fighters, on top of the first background layer. It works for every stage, including those that come from a .def. `type` is one of:
+
+| Type | Look |
+|---|---|
+| `aurora` | Green-blue bands of light that drift sideways over the top of the screen |
+| `godrays` | Light rays fanning out from the top centre |
+| `stars` | A starfield that twinkles |
+| `clouds` | Soft clouds that drift across the upper part of the screen |
+
+| Key | Default | Meaning |
+|---|---|---|
+| `color` | `255, 255, 255` | Tint, `r, g, b` from 0 to 255 |
+| `intensity` | 0.6 | Opacity at its brightest, 0 to 1 |
+| `speed` | 1 | Speed of the drift and pulse, 0 to 8 |
+
+```ini
+[Sky]
+type = aurora
+color = 120, 255, 200
+intensity = 0.5
+speed = 1
+```
+
+The bundled example stage `assets/stages/data/example/` uses all three.
 
 ## Reading the stage from scripts
 
@@ -116,6 +171,20 @@ The `[Camera]` group accepts these extra keys. Every key is optional and its def
 
 `autoturn` in `[PlayerInfo]` (default 1) controls whether fighters turn around by themselves when the opponent crosses over them in the stand, walk and crouch states. `autoturn = 0` keeps their facing until a controller changes it (`AssertSpecial flag = noautoturn` still disables it per character). `StageVar(camera.<key>)` and `StageVar(playerinfo.autoturn)` read all of these.
 
+## Built-in stage from data only
+
+A built-in stage does not need Rust. Create a folder `assets/stages/data/<id>/` with a `stage.def` and the sprite file it names (for example `example.sff`). At build time every folder there is embedded in the binary (`build.rs`), appears in the stage selector as a built-in stage, and is loaded like any MUGEN stage, including `[Music]`, `[Sky]` and parallax layers. The display name comes from `[Info] displayname`.
+
+```
+assets/stages/data/example/
+  stage.def
+  example.sff
+```
+
+The `example` folder is a working stage with an aurora sky and a parallax ridge. `scripts/make-example-stage.py` regenerates it. Rebuild after adding or changing files, because the files are embedded.
+
+Native stages in Rust remain available for procedural art and reactive effects (see below).
+
 ## Native stage
 
 Native stages live in `src/stages.rs` and their animated effects in `src/stagefx.rs`.
@@ -137,6 +206,8 @@ Each `Layer` has `delta` (parallax), `y`, `front` (drawn in front of the fighter
 The twenty-one native arenas use embedded full-color PNG artwork in `assets/stages/`: seven core realms (`dojo.png`, `neon.png`, `bamboo.png`, `plains.png`, `spirit.png`, `volcano.png` and `brazil.png`), seven world landmarks (`great_wall.png`, `petra.png`, `christ_redeemer.png`, `texas.png`, `chichen_itza.png`, `colosseum.png`, `taj_mahal.png`), and seven Ancient Wonders of the World (`pyramids_giza.png`, `hanging_gardens.png`, `temple_artemis.png`, `statue_zeus.png`, `mausoleum_halicarnassus.png`, `colossus_rhodes.png`, `lighthouse_alexandria.png`). Generation prompts and tool provenance are recorded in `assets/stages/prompts.json`. No external image service or filesystem access is needed at runtime.
 
 `StageArt::Illustrated` draws the background with nearest-neighbor filtering, aligns the fighting floor at 85% of the image height, and clamps horizontal camera movement to the image edges. Team zoom retains the native ground proportion. Fighter shadows, reflections and combat effects remain active; the old procedural prop animations are exclusive to procedural artwork.
+
+All twenty-one built-in stages have eight ambient animation phases under `assets/stages/animation/<stage_id>/`. Each 1672×941 transparent PNG adds stage-specific petals, leaves, embers, rain, dust, or spirit motes while preserving the original artwork and fight floor. The game composites the overlays once when a stage loads, then advances the loop every eight simulation ticks. Native builds embed the small overlays; the web build fetches them only for the selected stage. Regenerate the overlays with `python tools/gen_stage_loops.py`; prompts and event descriptions are recorded in `assets/stages/prompts.json`.
 
 ### Living layers
 

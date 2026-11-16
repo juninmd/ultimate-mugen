@@ -77,31 +77,31 @@ Teclado, toque, Xbox, DualShock 4 e DualSense com **vibração e lightbar**. Arc
 ## 🖼️ Elenco em pixel art, mapas e jogabilidade
 
 <p align="center">
-  <img src="docs/assets/readme/fight.gif" alt="Jogabilidade: dois lutadores nativos trocando golpes no cenário Bambuzal" width="70%">
+  <img src="docs/assets/readme/readme-fight-pixel-art.png" alt="Ilustração em pixel art de dois lutadores trocando golpes em um bambuzal" width="70%">
 </p>
 
-<p align="center"><i>Jogabilidade real capturada da versão web (renderização por software, por isso o GIF roda abaixo da taxa de quadros nativa).</i></p>
+<p align="center"><i>Ilustração em pixel art criada para este README; não é uma captura de gameplay.</i></p>
 
 ### Lutadores em pixel art
 
 O elenco nativo é desenhado em pixel art arcade de 32 bits, com um conjunto de poses dedicado por lutador, paletas, especiais de ki, voo, teletransporte e transformações. Cada personagem é declarado em um único JSON UMF.
 
-![Seleção de personagens com o elenco em pixel art](docs/assets/readme/roster-select.jpg)
+![Ilustração em pixel art de uma tela de seleção de lutadores](docs/assets/readme/readme-roster-pixel-art.png)
 
 ### Mapas
 
 21 arenas ilustradas, do telhado do dojo ao pôr do sol e uma metrópole neon até as maravilhas do mundo (Petra, Taj Mahal, Cristo Redentor, Coliseu, Grande Muralha, Chichén Itzá e mais), cada uma com camadas de ambiente vivas e sua própria trilha embutida.
 
-![Escolha do cenário](docs/assets/readme/stage-select.jpg)
+![Ilustração em pixel art de uma tela de seleção de arenas](docs/assets/readme/readme-stage-select-pixel-art.png)
 
 O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil, Neon, Bambu, Vulcão e Dojo): um trecho por luta, quatro ondas de capangas mais um chefe de fase, com a vida carregada entre as lutas. Veja o [guia do modo História](docs/wiki/Story-Mode.md).
 
-![Cenários roláveis do modo História](docs/assets/readme/story-stages.jpg)
+![Panoramas em pixel art inspirados nas cinco fases da História](docs/assets/readme/readme-story-stages-pixel-art.png)
 
 <table>
 <tr>
-<td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Tela de versus"></td>
-<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 no cenário Bambuzal"></td>
+<td width="50%"><img src="docs/assets/readme/readme-versus-pixel-art.png" alt="Ilustração em pixel art de dois lutadores antes da partida"></td>
+<td width="50%"><img src="docs/assets/readme/readme-fight-round1-pixel-art.png" alt="Ilustração em pixel art de uma luta em um bambuzal"></td>
 </tr>
 </table>
 
@@ -109,7 +109,7 @@ O **modo História** traz cinco extensões longas e roláveis das arenas (Brasil
 
 ## 🆕 Novidades
 
-- **Modo História:** cinco fases de ondas, capangas com traços próprios e um chefe por fase, com cutscenes e finais. [Guia](docs/wiki/Story-Mode.md)
+- **Modo História:** cinco fases de ondas, capangas com traços próprios e um chefe por fase, com cutscenes e finais, além de caixotes e barris quebráveis, comida que recupera vida e fases bônus de destruir o carro. [Guia](docs/wiki/Story-Mode.md) · [Objetos de cenário](docs/wiki/pt-BR/Objetos-de-Cenario.md)
 - **Música e áudio:** uma trilha embutida por cenário, sons de golpe em níveis, música abaixando nos impactos e torcida no KO. [Áudio](docs/wiki/Audio.md)
 - **Atalhos de golpe:** ligue qualquer golpe da lista de pausa em `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforma e `R3` sozinho carrega ki. [Controles](docs/wiki/pt-BR/Configuracao.md#controles)
 - **Golpes mais ricos:** todo lutador nativo tem especiais EX, hyper nível 3, explosão de escape, forma ascendida com hyper próprio e versões aéreas dos especiais. [Kit compartilhado](docs/wiki/Characters.md#shared-toolkit)
@@ -244,7 +244,7 @@ Personagens M.U.G.E.N e lutadores nativos **UMF** (um arquivo JSON declarativo c
 
 ## 📚 Documentação
 
-- **[Wiki](docs/wiki/pt-BR/Home.md)**: instalação, configuração, personagens UMF, scripts CNS, cenários e desempenho.
+- **[Site da wiki](https://juninmd.github.io/ultimate-mugen/wiki/pt-BR/Home.html)** ([fontes](docs/wiki/pt-BR/Home.md)) · [Guia de contribuição](CONTRIBUTING.pt-BR.md) · [Arquitetura](docs/wiki/pt-BR/Arquitetura.md): instalação, configuração, personagens UMF, scripts CNS, cenários e desempenho.
 - [Roadmap](docs/ROADMAP.pt-BR.md) · [Recursos AAA](docs/AAA_FEATURES.md) · [Elenco](docs/ROSTER.md) · [Pesquisa](docs/PESQUISA.md)
 
 ---

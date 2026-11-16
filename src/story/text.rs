@@ -98,3 +98,31 @@ pub fn hud(stage: usize, wave: usize, total: usize, boss: bool, score: i64) -> S
         score_line(score)
     )
 }
+
+pub fn bonus_banner() -> &'static str {
+    tr("FASE BÔNUS", "BONUS STAGE")
+}
+
+pub fn bonus_goal(solid: bool) -> &'static str {
+    if solid {
+        tr("DESTRUA O CARRO!", "WRECK THE CAR!")
+    } else {
+        tr("QUEBRE TUDO!", "BREAK EVERYTHING!")
+    }
+}
+
+pub fn bonus_cleared() -> &'static str {
+    tr("PERFEITO!", "PERFECT!")
+}
+
+pub fn bonus_timeout() -> &'static str {
+    tr("TEMPO ESGOTADO", "TIME UP")
+}
+
+pub fn bonus_time_left(seconds: i32) -> String {
+    format!("{} {}s", tr("BÔNUS DE TEMPO", "TIME BONUS"), seconds)
+}
+
+pub fn bonus_hud(left: usize, total: usize) -> String {
+    format!("{} · {}/{}", tr("BÔNUS", "BONUS"), total - left.min(total), total)
+}

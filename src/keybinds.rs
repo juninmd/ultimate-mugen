@@ -3,6 +3,8 @@
 use crate::gfx::KeyCode;
 use ume_engine::input::k;
 
+mod conflict;
+pub use conflict::Conflicts;
 mod keys;
 use keys::KEYS;
 

@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod air_dash; mod armor; mod award; mod bounds; mod forms; mod types; mod walk;
+mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -38,7 +38,7 @@ pub struct Match {
     /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
     pub team_simul: bool,
     pub team_tag: bool,
-    pub lanes: crate::lane::LaneRules,
+    pub lanes: crate::lane::LaneRules, pub objects: crate::stage_objects::StageObjects,
     /// MUGEN-style pushbox: an attacking fighter does not get pushed back by the defender; off = symmetric split.
     pub classic_pushbox: bool,
     pub tag_cooldown: [i32; 2],
@@ -80,7 +80,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, team_tag: false, lanes: Default::default(), classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
@@ -332,35 +332,6 @@ impl Match {
             if f.state_no != sno || !Arc::ptr_eq(&f.st_def, &sdef) || (f.state_time == 0 && st != 0) { return true; }
         }
         false
-    }
-
-    fn run_states(&mut self, i: usize) {
-        let in_pause = self.fighters[i].hit_pause > 0 || self.fighters[i].hit_shake > 0;
-        {
-            let f = &mut self.fighters[i];
-            f.asserts = if in_pause { f.asserts & !asf::ANIMATEHITPAUSE } else { 0 };
-            if f.ikemen.standby { f.asserts |= asf::INVISIBLE; }
-        }
-        let own = self.fighters[i].def.clone();
-        let custom = !Arc::ptr_eq(&self.fighters[i].st_def, &own) && !Arc::ptr_eq(&self.fighters[i].st_def, &self.common);
-        let helper = self.fighters[i].is_helper;
-        let id = self.fighters[i].id;
-        if !helper && !custom { self.run_state(i, &own, -3, in_pause); }
-        let Some(i) = self.idx(id) else { return };
-        self.run_state(i, &own, -2, in_pause);
-        let Some(i) = self.idx(id) else { return };
-        if (!helper || self.fighters[i].key_ctrl) && !custom {
-            self.run_state(i, &own, -1, in_pause);
-            let Some(i) = self.idx(id) else { return };
-            if !in_pause { self.builtin_transitions(i); }
-        }
-        for _ in 0..16 {
-            let Some(i) = self.idx(id) else { return };
-            let (same, no) = { let f = &self.fighters[i]; (Arc::ptr_eq(&f.st_def, &own), f.state_no) };
-            let owner;
-            let st_ref = if same { &own } else { owner = self.fighters[i].st_def.clone(); &owner };
-            if !self.run_state(i, st_ref, no, in_pause) { break; }
-        }
     }
 
     pub fn has_command(&self, i: usize, name: &str) -> bool {
@@ -702,7 +673,7 @@ impl Match {
                 if f.ikemen.standby { bits = 0; }
             }
             if bits & crate::input::k::T != 0 && awaken_len < awaken.len() { awaken[awaken_len] = fi; awaken_len += 1; }
-            k += 1; if self.lanes.active { f.lane_step(&mut bits, &self.lanes, &self.stage); } f.guard_button = self.lanes.active && bits & crate::input::k::GUARD != 0; bits &= !crate::input::k::BRAWLER_MASK;
+            k += 1; bits = f.rush.sense(bits); if self.lanes.active { f.lane_step(&mut bits, &self.lanes, &self.stage); } f.guard_button = self.lanes.active && bits & crate::input::k::GUARD != 0; bits &= !crate::input::k::BRAWLER_MASK;
             if f.assert_input.1 > 0 { bits |= f.assert_input.0; f.assert_input.1 -= 1; }
             if f.input_shift > 0 { let (b, fa) = (bits, f.facing as i32); for _ in 0..f.input_shift { f.history.push(b, fa); } }
             else if f.input_shift < 0 { f.history.rewind(f.input_shift); }
@@ -710,16 +681,16 @@ impl Match {
             f.history.push(bits, f.facing as i32);
             let paused = f.hit_pause > 0 || f.hit_shake > 0 || frozen_by_pause(f);
             f.cmd.update(&f.history, &f.def.commands, paused);
-            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0];
+            f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0]; f.move_camera = [true, true];
         }
-        for &fi in &awaken[..awaken_len] { self.try_transform(fi); }
+        for &fi in &awaken[..awaken_len] { self.try_transform(fi); } self.rush_step();
         if tagged { self.tag_step(&tag_requests[..tag_len]); }
         let mut ids = std::mem::take(&mut self.tick_ids);
         ids.clear();
         self.collect_run_order(&mut ids);
         for (order_i, &id) in ids.iter().enumerate() {
             let Some(i) = self.idx_hint(id, order_i) else { continue };
-            if frozen_by_pause(&self.fighters[i]) { continue; }
+            if frozen_by_pause(&self.fighters[i]) { self.run_minus4_paused(i); continue; }
             let f = &mut self.fighters[i];
             let frozen = f.hit_pause > 0 || f.hit_shake > 0;
             f.width_override = None; f.height_override = None; f.clsn_mods.retain_mut(|c| { if c.time > 0 { c.time -= 1; } c.time != 0 }); f.player_push = !f.ikemen.standby; f.trans = None; f.draw_offset = V2::default();
@@ -770,7 +741,7 @@ impl Match {
         self.push_and_bound();
         self.rebind();
         self.orphan_custom_states();
-        self.detect_hits();
+        self.detect_hits(); self.stage_objects_step();
         self.bound_fighters();
         crate::ikemen::life::maintain(self);
         for f in self.fighters.iter_mut() {
@@ -901,23 +872,22 @@ impl Match {
     }
 
     pub fn update_camera(&mut self) {
-        let (mut minx, mut maxx, mut highest, mut any) = (f32::MAX, f32::MIN, f32::MAX, false);
+        let (mut minx, mut maxx, mut highest, mut any, mut any_y) = (f32::MAX, f32::MIN, f32::MAX, false, false);
         let (mut lo, mut hi, mut live) = (f32::MAX, f32::MIN, false);
         for f in self.roots() {
             if f.destroyed { continue; }
             if !f.ikemen.standby {
-                minx = minx.min(f.pos.x);
-                maxx = maxx.max(f.pos.x);
-                highest = highest.min(f.pos.y);
-                any = true;
+                if f.move_camera[0] { minx = minx.min(f.pos.x); maxx = maxx.max(f.pos.x); any = true; }
+                if f.move_camera[1] { highest = highest.min(f.pos.y); any_y = true; }
             }
-            if f.alive {
+            if f.alive && f.move_camera[0] {
                 lo = lo.min(f.pos.x);
                 hi = hi.max(f.pos.x);
                 live = true;
             }
         }
         if !any { return; }
+        if !any_y { highest = 0.0; }
         let natural = if self.zoom_max > 1.0 {
             let need = if !live { self.zoom_min } else { (hi - lo + 150.0) / BASE_W };
             need.clamp(self.zoom_min, self.zoom_max)
@@ -1158,7 +1128,7 @@ impl Match {
             fa.move_contact = 1;
             if !fa.targets.iter().any(|t| t.0 == did) { fa.targets.push((did, hd.id)); }
         }
-        let attack_mul = self.idx(aroot).map(|r| self.fighters[r].effective_attack()).unwrap_or(1.0);
+        let attack_mul = self.idx(aroot).map(|r| self.fighters[r].effective_attack() * self.fighters[r].base_def.rivals.attack_against(&self.fighters[d].base_def.rivals.id)).unwrap_or(1.0);
         {
             let fd = &mut self.fighters[d];
             fd.last_hit_by = Some(aid);
@@ -1194,7 +1164,7 @@ impl Match {
         }
         if guarded {
             let training = self.training;
-            let dmg = if self.fighters[d].has_assert(asf::NOGUARDDAMAGE) { 0.0 } else { (hd.guard_damage * attack_mul).round() };
+            let dmg = if self.fighters[d].has_assert(asf::NOGUARDDAMAGE) || self.perfect_guard(d) { 0.0 } else { (hd.guard_damage * attack_mul).round() };
             let pause_p1 = hd.guard_pause_p1;
             {
                 let fd = &mut self.fighters[d];
@@ -1203,12 +1173,12 @@ impl Match {
                 let gc = fd.ghv.guardcount;
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
-                g.guarded = true; g.hittime = hd.guard_hit_time; g.slidetime = hd.guard_slide_time; g.ctrltime = hd.guard_ctrl_time;
+                g.guarded = true; g.hittime = guard::guard_hit_time(hd.guard_hit_time, fd.rush.perfect == crate::rush::PERFECT_FLASH); g.slidetime = guard::scaled_ticks(hd.guard_slide_time); g.ctrltime = guard::scaled_ticks(hd.guard_ctrl_time);
                 g.xvel = (if fd.state_type == 'A' { hd.air_guard_vel[0] } else { hd.guard_vel }) * dir;
                 g.yvel = if fd.state_type == 'A' { hd.air_guard_vel[1] } else { 0.0 };
                 g.yaccel = hd.yaccel; g.damage = dmg; g.guardcount = gc + 1;
                 g.record_hitdef(hd, true, (aid, aside, ano), a_facing, proj.map(|p| p.0));
-                fd.hit_shake = hd.guard_pause_p2; fd.hit_over_time = hd.guard_hit_time; fd.slide_time = hd.guard_slide_time;
+                fd.hit_shake = guard::scaled_ticks(hd.guard_pause_p2); fd.hit_over_time = g.hittime; fd.slide_time = g.slidetime;
                 fd.ctrl = false; fd.move_type = 'H';
             }
             if let Some((pid, _)) = proj { self.fighters[a].proj_contacts.push(('g', pid, gt)); } else { self.fighters[a].move_guarded = 1; self.fighters[a].hit_pause = pause_p1; }

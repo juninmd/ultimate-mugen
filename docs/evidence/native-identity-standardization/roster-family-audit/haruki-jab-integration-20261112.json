@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-12",
+  "character": "haruki",
+  "family": "standing jab",
+  "status": "integrated_static_review_pass_runtime_pending",
+  "canonical": "assets/chars/sprites/haruki/04_special.png",
+  "sharedPaletteSha256": "709b253ce751d1171ea35209a3a0c203a56e024941ef1f266e98ad44bebfaa2c",
+  "strictMaxDeltaE": 0.110928,
+  "gate": 0.13,
+  "beforeHashes": {
+    "jab0.png": "6ddfefc91b954c62f326bfa53d3cc9f7a103cd327b43a88c1464e1c66fbecd56",
+    "jab1.png": "851ecfedf3554c9bf6837a08a98c5da20a0d679727fe15453f6583a284592782"
+  },
+  "activeHashes": {
+    "jab0": "f302f5772592c4aa4e18a0b803c8b70da93ca8f1453c77c5e030887119e0620a",
+    "jab1": "8c29dde8c56a69909be510325447745aef54b9949c1c4e5c1e7659b62c7162af",
+    "jab2": "d37fd0f5cdfaf90cdef6610b118b21aae34b327dd93293f122cc4acd3ce28ad6"
+  },
+  "animation": "jab0 2t -> jab1 3t (hit remains) -> jab2 3t -> idle0 2t",
+  "totalTicks": 10,
+  "activeRecoveryRetained": "idle0",
+  "reviewEvidence": [
+    "docs\\evidence\\native-identity-standardization\\roster-family-audit\\candidates\\haruki-jab-shared-palette-final-20261112\\sequence-native.png",
+    "docs\\evidence\\native-identity-standardization\\roster-family-audit\\candidates\\haruki-jab-shared-palette-final-20261112\\sequence-2x-nearest.png"
+  ],
+  "limitations": [
+    "Static native and 2x identity, palette, pose progression and registration reviewed.",
+    "Runtime animation and collision alignment remain pending."
+  ]
+}

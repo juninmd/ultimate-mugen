@@ -1,0 +1,341 @@
+[
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/airGuard.png",
+    "targetSha256": "1303d212d5390181eacec95c0da6958a2ac0b6195efcd9530df968839731a06e",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "airGuard",
+      "airGuardHit",
+      "airGuardStart"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/airGuardHit.png",
+    "targetSha256": "9ffc6e2c9f2b9f359cff801c2d40314380c61deb78bad0d4dfe108072a9cad01",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "airGuardHit"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/crouch.png",
+    "targetSha256": "73c92b0ee34d105a5093f9e96eab729f4fcd8447b50c0115da9deaea39019b94",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "cjab",
+      "clk",
+      "crouch",
+      "crouchStart",
+      "crouchTurn",
+      "hitCrouch",
+      "lowKick",
+      "sweep"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/crouch0.png",
+    "targetSha256": "4af033470775247564421e59ef44792e8fbe45302805fc7eb649672a92b16218",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "crouchEnd",
+      "crouchStart",
+      "lowKick"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/crouch1.png",
+    "targetSha256": "c6c82ff45188a5251cb9780dfe870db68e47a9601113aefa8077a6dbd932f18e",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "clk",
+      "crouch",
+      "lowKick"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/crouchGuard.png",
+    "targetSha256": "d3666a3086196f3b1c2cb7e00025a1086f022fa6ef3498b9b1931a1cb34f6175",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "crouchGuard",
+      "crouchGuardHit",
+      "crouchGuardStart"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/crouchGuardHit.png",
+    "targetSha256": "a66624192381ccbd6b8c5c07c84a4e0db5487c5f7052720deb60c6efd2d3bec3",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "crouchGuardHit"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/dfKneel0.png",
+    "targetSha256": "59ffcbb0425942f661a660fd07b61b93723006fcfc146564690b0c5722a238a4",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/dfKneel1.png",
+    "targetSha256": "0f7719c4187d31f71546ff37352e8576274b9a9365f264a3c6a1bbb617cb1e19",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "defeat3"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/dfLie.png",
+    "targetSha256": "7f915a4c538339eb1ee6a20442060aff48e0e35e1939ad35094a220ef4f2167e",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "defeat1",
+      "defeat2",
+      "defeat3",
+      "defeat4"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/dfProp.png",
+    "targetSha256": "bffc3d72b3090da500ab20c107fcd64f1393956c7e17bde398a1d469bc95dffb",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/dfProp2.png",
+    "targetSha256": "068c5f1201b32f8f1da77a2a39212d23334a9d1f661515601da3223ae73aa151",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "defeat1"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/dfReach0.png",
+    "targetSha256": "0a43bc88c6c2e158883aba93fd6abe46b89879b6f8c9c47c03d8b91b72a41412",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/dfReach1.png",
+    "targetSha256": "8e982f5217a75808ba2943bb1148e9819e5d794091230aa25ad496d187b388bd",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "defeat4"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/dfSit0.png",
+    "targetSha256": "700a49e1b0f4dacbad16857406c0e728b5a0f3dfc8114c33b46037b3d37f1b5c",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/dfSit1.png",
+    "targetSha256": "cd88680a52114349be89f4cc67899ed377fbf85e98e33c539383cc35c7a75825",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "defeat2"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/getUp1.png",
+    "targetSha256": "43388839d4e437c6cbb2a45f4b0904904715e6933c0e788a6177275af731401d",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/getUp2.png",
+    "targetSha256": "51a368330474c812e7582490a0fd2aed4f3f4fce2eac0290e95e69186d31e687",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/getUp3.png",
+    "targetSha256": "4af033470775247564421e59ef44792e8fbe45302805fc7eb649672a92b16218",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "getUp"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/guard.png",
+    "targetSha256": "08d084be535c99706570b73d73318a90a6f8f8b83798ffbdfe26678f084163af",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "capacitor",
+      "guard",
+      "guardEnd",
+      "guardHit",
+      "guardStart"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/guardHit.png",
+    "targetSha256": "c3eb5e211b7949ee3cbf1aef7e052f724b64084b74dee0ccf278f6d8adc54cc2",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "guardHit"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/hitCrouch.png",
+    "targetSha256": "7138f3cfa723a1e13f281ab0cdc6ff026d37076bc04e7ba4cf5182e243ac255f",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "hitCrouch"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/hitL1.png",
+    "targetSha256": "430606784940efc7bc7b5f979b13afd0008dc0142a730e9b12545bd41351c490",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowLight",
+      "hitLowMedium"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/hitL2.png",
+    "targetSha256": "7a538ae6dd37569634915af0a4c97617216c15fe16dfff80697eb9eba96f0151",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "hitLowHeavy",
+      "hitLowMedium"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/hitL3.png",
+    "targetSha256": "a1ba5a5a183af7d00c3557ab8c18ff4a74099073bc65627118e665aff2406e20",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "hitLowHeavy"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/jumpDown.png",
+    "targetSha256": "8d6ff915c0796d277a6b8f03b9272668a03ef1a41ea622a1761b316546a01015",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "airLowKick",
+      "airRecover",
+      "ajab",
+      "akick",
+      "jumpDown",
+      "tesla",
+      "teslaEx"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/land.png",
+    "targetSha256": "c8cf8eec49c25e6014a29a75abb23c24f1a94875529392e952bee48d274db4ab",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "land"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  },
+  {
+    "character": "volta",
+    "targetFile": "assets/chars/sprites/volta/turn.png",
+    "targetSha256": "202d554adb03d323c9ad9e7a982a7c464518b217b0edbd2ab8f508871c370027",
+    "identityAnchor": "assets/chars/sprites/volta/04_special.png",
+    "poseReference": "the same target file, pose guidance only",
+    "affectedAnimations": [
+      "turn"
+    ],
+    "status": "confirmed_visual_inconsistency_waiting_for_single_pose_candidate"
+  }
+]

@@ -17,7 +17,7 @@ fn oboro_has_multi_form_abilities_and_phase2_and_phase3_moves() {
     let oboro = load_native("oboro");
     assert!(oboro.boss);
     assert_eq!(oboro.forms.len(), 3);
-    assert_eq!(oboro.forms[0].name, "Mangekyo Desperto");
+    assert_eq!(oboro.forms[0].name, "Véu Desperto");
     assert_eq!(oboro.forms[1].name, "Eclipse Absoluto");
     assert_eq!(oboro.forms[2].name, "Eclipse Primordial");
     let move_names: Vec<&str> = oboro.movelist.iter().map(|m| m.name.as_str()).collect();
@@ -50,7 +50,7 @@ fn oboro_transforms_into_next_form_when_defeated_at_least_once() {
     assert_eq!(m.round_state, 2);
     let boss = &m.fighters[1];
     assert_eq!(boss.form, 1);
-    assert_eq!(boss.active_form_name(), "Mangekyo Desperto");
+    assert_eq!(boss.active_form_name(), "Véu Desperto");
     assert!(boss.attack_mul > 1.3);
     assert!(boss.defence_mul > 1.2);
 }

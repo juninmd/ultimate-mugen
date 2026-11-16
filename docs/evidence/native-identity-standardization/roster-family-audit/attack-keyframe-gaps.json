@@ -1,0 +1,4994 @@
+{
+  "scope": "All native move entries across 21 sprite packs, including declared form moves and story NPCs.",
+  "criterion": "At least 3 distinct resolved body images per move animation.",
+  "attackEntries": 681,
+  "playableAttackEntries": 526,
+  "storyNpcAttackEntries": 155,
+  "belowCriterion": 0,
+  "missingAnimationMappings": [],
+  "lowKickAnimations": {
+    "families": [
+      {
+        "character": "akio",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "akio",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "bruno",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "bruno",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "daichi",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "daichi",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "garan",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "garan",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "haruki",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "haruki",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "jin",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "jin",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "kaito",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "kaito",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "kaname",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "kaname",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "lian",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "lian",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "marlow",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "marlow",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "npc_brute",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "npc_brute",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "npc_colossus",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "npc_colossus",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "npc_phantom",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "npc_phantom",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "npc_razor",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "npc_razor",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "npc_spitfire",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "npc_spitfire",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "oboro",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "oboro",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "shion",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "shion",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "suzume",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "suzume",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "sylene",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "sylene",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "valdric",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "valdric",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "volta",
+        "animation": "lowKick",
+        "distinctImages": 4
+      },
+      {
+        "character": "volta",
+        "animation": "airLowKick",
+        "distinctImages": 4
+      }
+    ],
+    "allMeetThreeImageCriterion": true
+  },
+  "status": "PASS",
+  "entries": [
+    {
+      "character": "akio",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "starburst",
+      "animation": "starburst",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "comet",
+      "animation": "comet",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "meteor",
+      "animation": "meteor",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "fallstar",
+      "animation": "fallstar",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "stardash",
+      "animation": "stardash",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "hurl",
+      "animation": "hurl",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "nova",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "cometstorm",
+      "animation": "stormSuper",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "ex_starburst",
+      "animation": "starburstEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "ex_comet",
+      "animation": "cometEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "ult_cometstorm",
+      "animation": "stormSuperUlt",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "awk_starburst",
+      "animation": "starburst",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "akio",
+      "move": "asc_ult_cometstorm",
+      "animation": "stormSuper",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "quake",
+      "animation": "quake",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "lariat",
+      "animation": "lariat",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "bullrush",
+      "animation": "bullrush",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "avalanche",
+      "animation": "super",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "cornerdive",
+      "animation": "cornerDive",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "ironclaw",
+      "animation": "ironClaw",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "slam",
+      "animation": "slam",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "titansuplex",
+      "animation": "titanSuplex",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "ex_quake",
+      "animation": "quakeEx",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "ex_lariat",
+      "animation": "lariatEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "ult_titansuplex",
+      "animation": "titanSuplexUlt",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "shoulder",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "meteordrop",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "awk_quake",
+      "animation": "quake",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "bruno",
+      "move": "asc_ult_titansuplex",
+      "animation": "titanSuplex",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "ridgeblast",
+      "animation": "ridgeBlast",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "daybreak",
+      "animation": "daybreak",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "landslide",
+      "animation": "landslide",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "aurarush",
+      "animation": "auraRush",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "summit",
+      "animation": "summitDrop",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "clutch",
+      "animation": "clutch",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "sunbreak",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "avalanche",
+      "animation": "avalanche",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "ex_ridgeblast",
+      "animation": "ridgeBlastEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "ex_daybreak",
+      "animation": "daybreakEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "ult_avalanche",
+      "animation": "avalancheUlt",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "shoulder",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "meteordrop",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "awk_ridgeblast",
+      "animation": "ridgeBlast",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "daichi",
+      "move": "asc_ult_avalanche",
+      "animation": "avalanche",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "hellorb",
+      "animation": "hellorb",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "ascent",
+      "animation": "ascent",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "brimstone",
+      "animation": "brimstone",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "gate",
+      "animation": "super",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "snare",
+      "animation": "snare",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "emberdive",
+      "animation": "emberDive",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "grasp",
+      "animation": "grasp",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "onirush",
+      "animation": "oniRush",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "ex_hellorb",
+      "animation": "hellorbEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "ex_ascent",
+      "animation": "ascentEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "ult_onirush",
+      "animation": "oniRushUlt",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "shoulder",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "meteordrop",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "awk_hellorb",
+      "animation": "hellorb",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "garan",
+      "move": "asc_ult_onirush",
+      "animation": "oniRush",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "sigil",
+      "animation": "sigil",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "ascend",
+      "animation": "ascend",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "margin",
+      "animation": "margin",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "unwritten",
+      "animation": "super",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "theorem",
+      "animation": "theorem",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "sigilMark",
+      "animation": "sigilMark",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "proof",
+      "animation": "proof",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "pageThrow",
+      "animation": "pageThrow",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "ex_sigil",
+      "animation": "sigilEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "ex_ascend",
+      "animation": "ascendEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "ult_proof",
+      "animation": "proofUlt",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "awk_sigil",
+      "animation": "sigil",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "haruki",
+      "move": "asc_ult_proof",
+      "animation": "proof",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "chakram",
+      "animation": "chakram",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "cyclone",
+      "animation": "cyclone",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "mirage",
+      "animation": "mirage",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "gustdash",
+      "animation": "gustdash",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "trap",
+      "animation": "trap",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "shadowhold",
+      "animation": "shadowhold",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "tempest",
+      "animation": "super",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "shadowslash",
+      "animation": "shadowslash",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "ex_chakram",
+      "animation": "chakramEx",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "ex_cyclone",
+      "animation": "cycloneEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "ult_shadowslash",
+      "animation": "shadowslashUlt",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "awk_chakram",
+      "animation": "chakram",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "jin",
+      "move": "asc_ult_shadowslash",
+      "animation": "shadowslash",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "gale",
+      "animation": "gale",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "rise",
+      "animation": "rise",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "tempest",
+      "animation": "tempest",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "typhoon",
+      "animation": "super",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "triad",
+      "animation": "triad",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "dragon",
+      "animation": "dragonPunch",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "stormrush",
+      "animation": "stormRush",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "tide",
+      "animation": "tide",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "stormtoss",
+      "animation": "stormToss",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "ex_gale",
+      "animation": "galeEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "ex_rise",
+      "animation": "riseEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "ult_triad",
+      "animation": "triadUlt",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "awk_gale",
+      "animation": "gale",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaito",
+      "move": "asc_ult_triad",
+      "animation": "triad",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "frostarc",
+      "animation": "frostArc",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "hoarfrost",
+      "animation": "hoarfrost",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "blinkcut",
+      "animation": "blinkCut",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "winterfang",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "iai",
+      "animation": "iai",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "trap",
+      "animation": "trap",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "thousand",
+      "animation": "thousand",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "drawThrow",
+      "animation": "drawThrow",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "ex_frostarc",
+      "animation": "frostArcEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "ex_hoarfrost",
+      "animation": "hoarfrostEx",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "ult_thousand",
+      "animation": "thousandUlt",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "byakurai",
+      "animation": "needleBeam",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "shakkaho",
+      "animation": "crimsonCannon",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "shunpo_behind",
+      "animation": "flashStep",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "kageyoshi",
+      "animation": "petalStorm",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "halfmoon",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "awk_frostarc",
+      "animation": "frostArc",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "kaname",
+      "move": "asc_ult_thousand",
+      "animation": "thousand",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "lotus",
+      "animation": "lotus",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "crane",
+      "animation": "crane",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "phoenix",
+      "animation": "phoenix",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "petals",
+      "animation": "super",
+      "distinctResolvedImages": 10,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "flow",
+      "animation": "flow",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "dive",
+      "animation": "dive",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "storm",
+      "animation": "storm",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "hurl",
+      "animation": "hurl",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "ex_lotus",
+      "animation": "lotusEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "ex_crane",
+      "animation": "craneEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "ult_storm",
+      "animation": "stormUlt",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "awk_lotus",
+      "animation": "lotus",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "lian",
+      "move": "asc_ult_storm",
+      "animation": "storm",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "riptide",
+      "animation": "riptide",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "spout",
+      "animation": "spout",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "lunge",
+      "animation": "lunge",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "maelstrom",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "ebb",
+      "animation": "ebb",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "riposte",
+      "animation": "riposte",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "keelhaul",
+      "animation": "keelhaul",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "kraken",
+      "animation": "kraken",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "ex_riptide",
+      "animation": "riptideEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "ex_spout",
+      "animation": "spoutEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "ult_kraken",
+      "animation": "krakenUlt",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "halfmoon",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "awk_riptide",
+      "animation": "riptide",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "marlow",
+      "move": "asc_ult_kraken",
+      "animation": "kraken",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "quake",
+      "animation": "quake",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "lariat",
+      "animation": "lariat",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "bullrush",
+      "animation": "bullrush",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "avalanche",
+      "animation": "super",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "cornerdive",
+      "animation": "cornerDive",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "ironclaw",
+      "animation": "ironClaw",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "slam",
+      "animation": "slam",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "titansuplex",
+      "animation": "titanSuplex",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "ex_quake",
+      "animation": "quakeEx",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "ex_lariat",
+      "animation": "lariatEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "ult_titansuplex",
+      "animation": "titanSuplexUlt",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "shoulder",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "meteordrop",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_brute",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "ridgeblast",
+      "animation": "ridgeBlast",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "daybreak",
+      "animation": "daybreak",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "landslide",
+      "animation": "landslide",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "aurarush",
+      "animation": "auraRush",
+      "distinctResolvedImages": 8,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "summit",
+      "animation": "summitDrop",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "clutch",
+      "animation": "clutch",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "sunbreak",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "avalanche",
+      "animation": "avalanche",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "ex_ridgeblast",
+      "animation": "ridgeBlastEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "ex_daybreak",
+      "animation": "daybreakEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "ult_avalanche",
+      "animation": "avalancheUlt",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "shoulder",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "meteordrop",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_colossus",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "chakram",
+      "animation": "chakram",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "cyclone",
+      "animation": "cyclone",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "mirage",
+      "animation": "mirage",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "gustdash",
+      "animation": "gustdash",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "trap",
+      "animation": "trap",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "shadowhold",
+      "animation": "shadowhold",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "tempest",
+      "animation": "super",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "shadowslash",
+      "animation": "shadowslash",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "ex_chakram",
+      "animation": "chakramEx",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "ex_cyclone",
+      "animation": "cycloneEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "ult_shadowslash",
+      "animation": "shadowslashUlt",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_phantom",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "volley",
+      "animation": "volley",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "swallow",
+      "animation": "swallow",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "shadow",
+      "animation": "shadow",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "storm",
+      "animation": "super",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "spread",
+      "animation": "spread",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "clone",
+      "animation": "clone",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "subst",
+      "animation": "subst",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "backstab",
+      "animation": "backstab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "veil",
+      "animation": "veil",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "ex_volley",
+      "animation": "volleyEx",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "ex_swallow",
+      "animation": "swallowEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "shunko",
+      "animation": "lightningPalm",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "flash_cat",
+      "animation": "flashCat",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_razor",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "starburst",
+      "animation": "starburst",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "comet",
+      "animation": "comet",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "meteor",
+      "animation": "meteor",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "fallstar",
+      "animation": "fallstar",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "stardash",
+      "animation": "stardash",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "hurl",
+      "animation": "hurl",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "nova",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "cometstorm",
+      "animation": "stormSuper",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "ex_starburst",
+      "animation": "starburstEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "ex_comet",
+      "animation": "cometEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "ult_cometstorm",
+      "animation": "stormSuperUlt",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "npc_spitfire",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "corvos",
+      "animation": "corvos",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "amaterasu",
+      "animation": "amaterasu",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "espelho",
+      "animation": "espelhoStrike",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "tsukuyomi",
+      "animation": "tsukuyomi",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "susanoo",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "kyoka",
+      "animation": "kyoka",
+      "distinctResolvedImages": 11,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "kageCounter",
+      "animation": "kageCounter",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "seize",
+      "animation": "seize",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "ex_corvos",
+      "animation": "corvosEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "ex_amaterasu",
+      "animation": "amaterasuEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "halfmoon",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "corte_eclipse",
+      "animation": "espelho",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "chama_eclipse",
+      "animation": "amaterasu",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "julgamento_eclipse",
+      "animation": "kyoka",
+      "distinctResolvedImages": 11,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "colapso_primordial",
+      "animation": "espelho",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "oboro",
+      "move": "supernova_primordial",
+      "animation": "kyoka",
+      "distinctResolvedImages": 11,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "crescent",
+      "animation": "crescent",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "moonrise",
+      "animation": "moonrise",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "shadowstep",
+      "animation": "shadowstep",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "requiem",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "cleave",
+      "animation": "lunarCleave",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "silentparry",
+      "animation": "silentParry",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "yoke",
+      "animation": "moonYoke",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "eclipse",
+      "animation": "eclipseCleave",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "ex_crescent",
+      "animation": "crescentEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "ex_moonrise",
+      "animation": "moonriseEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "ult_eclipse",
+      "animation": "eclipseCleaveUlt",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "reckless",
+      "animation": "recklessSwing",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "halfmoon",
+      "animation": "strong",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "awk_crescent",
+      "animation": "crescent",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "shion",
+      "move": "asc_ult_eclipse",
+      "animation": "eclipseCleave",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "volley",
+      "animation": "volley",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "swallow",
+      "animation": "swallow",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "shadow",
+      "animation": "shadow",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "storm",
+      "animation": "super",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "spread",
+      "animation": "spread",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "clone",
+      "animation": "clone",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "subst",
+      "animation": "subst",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "backstab",
+      "animation": "backstab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "veil",
+      "animation": "veil",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "ex_volley",
+      "animation": "volleyEx",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "ex_swallow",
+      "animation": "swallowEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "shunko",
+      "animation": "lightningPalm",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "flash_cat",
+      "animation": "flashCat",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "danca_sombras",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "corte_fantasma",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "suzume",
+      "move": "lotus_julgamento",
+      "animation": "judgement",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "lance",
+      "animation": "lance",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "spire",
+      "animation": "spire",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "glide",
+      "animation": "glide",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "winter",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "blizzard",
+      "animation": "blizzard",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "embrace",
+      "animation": "embrace",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "crown",
+      "animation": "crown",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "ex_lance",
+      "animation": "lanceEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "ex_spire",
+      "animation": "spireEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "ult_crown",
+      "animation": "crownUlt",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "awk_lance",
+      "animation": "lance",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "sylene",
+      "move": "asc_ult_crown",
+      "animation": "crown",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "royallance",
+      "animation": "royalLance",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "sovereign",
+      "animation": "sovereign",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "thronebreaker",
+      "animation": "thronebreaker",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "dominion",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "lancewall",
+      "animation": "lanceWall",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "bastion",
+      "animation": "royalCounter",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "seize",
+      "animation": "seize",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "barrage",
+      "animation": "barrage",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "ex_royallance",
+      "animation": "royalLanceEx",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "ex_sovereign",
+      "animation": "sovereignEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "ult_barrage",
+      "animation": "barrageUlt",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "shoulder",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "meteordrop",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "halfmoon",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "awk_royallance",
+      "animation": "royalLance",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "valdric",
+      "move": "asc_ult_barrage",
+      "animation": "barrage",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "jab",
+      "animation": "jab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "strong",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "lkick",
+      "animation": "lkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "hkick",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "cjab",
+      "animation": "cjab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "clk",
+      "animation": "clk",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "sweep",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "ajab",
+      "animation": "ajab",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "akick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "arcbolt",
+      "animation": "arcbolt",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "tesla",
+      "animation": "tesla",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "overclock",
+      "animation": "overclock",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "core",
+      "animation": "super",
+      "distinctResolvedImages": 6,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "chain",
+      "animation": "chain",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "capacitor",
+      "animation": "capacitor",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "shock",
+      "animation": "shock",
+      "distinctResolvedImages": 4,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "relay",
+      "animation": "relay",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "ex_arcbolt",
+      "animation": "arcboltEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "ex_tesla",
+      "animation": "teslaEx",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "ult_relay",
+      "animation": "relayUlt",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "overhead",
+      "animation": "hkick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "launcher",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "divekick",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "slide",
+      "animation": "sweep",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "escape_burst",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "lunge",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "falcondive",
+      "animation": "akick",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "string_a",
+      "animation": "stringA",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "string_b",
+      "animation": "stringB",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "string_c",
+      "animation": "stringC",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "halfmoon",
+      "animation": "strong",
+      "distinctResolvedImages": 3,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "awk_arcbolt",
+      "animation": "arcbolt",
+      "distinctResolvedImages": 5,
+      "meetsThreeFrameCriterion": true
+    },
+    {
+      "character": "volta",
+      "move": "asc_ult_relay",
+      "animation": "relay",
+      "distinctResolvedImages": 7,
+      "meetsThreeFrameCriterion": true
+    }
+  ]
+}

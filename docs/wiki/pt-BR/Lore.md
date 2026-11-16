@@ -54,7 +54,7 @@ Os combatentes de Ultimate MUGEN canalizam sua determinação e poder através d
 11. **Titãs do Crepúsculo Selados (*Crepúsculo Selado*)**: Aprisionados no corpo de **Haruki Sumi**. Poder arcano cataclísmico contido por pergaminhos e talismãs sagrados; quando o estudioso perde o controle, a fúria ancestral devasta o campo de batalha.
 12. **Réquiem da Lua Pálida (*Kurogane Tsuki*)**: Conduzido por **Shion Kurogane**. A atração gravitacional e a melancolia da Lua Pálida fundidas em uma montante colossal que homem comum algum consegue erguer.
 13. **Miragem do Lótus Carmesim (*Kagerou-Ryu*)**: Herdado por **Suzume Kagerou**. Deslocamento em pontos cegos sensoriais, clones ilusórios e adagas de assassinato velozes como o bater de asas de um pardal.
-14. **Mangekyo Escarlate (*Meikyō Escarlate*)**: O olho de ilusão supremo de **Mikazuki Oboro**. Distorce a percepção óptica, invoca corvos espectrais de pesadelo e reescreve as consequências da luta diretamente na mente do oponente.
+14. **Véu Escarlate**: O olho de ilusão supremo de **Mikazuki Oboro**. Distorce a percepção óptica, invoca corvos espectrais de pesadelo e reescreve as consequências da luta diretamente na mente do oponente.
 
 ---
 

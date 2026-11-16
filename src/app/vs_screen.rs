@@ -27,6 +27,7 @@ impl App {
         }
         let ready = step_now >= total;
         self.draw_versus(t);
+        self.draw_versus_burst(t);
         if !ready {
             let within = if step_now + 1 == total { self.warm_progress() } else { 0.0 };
             self.ui.progress_bar(
@@ -90,7 +91,7 @@ impl App {
             return;
         };
         let music = sess.stage.music;
-        let bgm = sess.stage.bgm.clone().or_else(|| self.market.pick_track());
+        let bgm = self.reg.stages.get(self.sel.2).and_then(|stage| crate::tweaks::track_for(&stage.id)).or_else(|| sess.stage.bgm.clone()).or_else(|| self.market.pick_track());
         // DualShock/DualSense lightbars: P1 blue, P2 red
         self.c.pads.set_light(0, [30, 90, 255]);
         self.c.pads.set_light(1, [255, 40, 60]);
@@ -106,6 +107,38 @@ impl App {
         };
         if !custom {
             self.audio.play_music(music).await;
+        }
+    }
+}
+
+impl App {
+    fn draw_versus_burst(&self, t: f32) {
+        let since = t - 0.45;
+        if since > 0.0 && since < 0.7 {
+            let p = (since / 0.7).clamp(0.0, 1.0);
+            let p = 1.0 - (1.0 - p).powi(3);
+            let fade = 1.0 - p;
+            draw_circle_lines(
+                self.ui.x(640.0),
+                self.ui.y(318.0),
+                (90.0 + p * 760.0) * self.ui.s,
+                (2.0 + 14.0 * fade) * self.ui.s,
+                Color::new(1.0, 0.9, 0.6, 0.9 * fade),
+            );
+        }
+        let slash = (since / 0.35).clamp(0.0, 1.0);
+        if since > 0.0 && slash < 1.0 {
+            let e = 1.0 - (1.0 - slash).powi(3);
+            let x = -300.0 + e * 1500.0;
+            self.ui.quad(
+                [
+                    vec2(x, 0.0),
+                    vec2(x + 26.0, 0.0),
+                    vec2(x - 214.0, VH),
+                    vec2(x - 240.0, VH),
+                ],
+                Color::new(1.0, 0.95, 0.8, 0.85 * (1.0 - slash)),
+            );
         }
     }
 }

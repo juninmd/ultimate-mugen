@@ -1,4 +1,5 @@
 use crate::passive_time::TimeRule;
+use crate::signature::{risk_per_tick, SignatureRule, SignatureTier, SIGNATURE_METER_CAP, TIER_LIMIT};
 use crate::passives::{PassiveRules, RageRule, StackRule, RAGE_MULTIPLIER_CAP, STACK_LIMIT};
 use serde::{Deserialize, Serialize};
 
@@ -73,6 +74,8 @@ pub struct PassiveSpec {
     pub stacks: Option<StackSpec>,
     #[serde(default, rename = "enrageTime")]
     pub enrage_time: Option<TimeSpec>,
+    #[serde(default)]
+    pub signature: Option<SignatureSpec>,
 }
 
 impl RageSpec {
@@ -115,6 +118,71 @@ impl PassiveSpec {
             rage: self.rage.as_ref().map(RageSpec::rule),
             stacks: self.stacks.as_ref().map(StackSpec::rule),
             time: self.enrage_time.as_ref().map(TimeSpec::rule),
+            signature: self.signature.as_ref().map(SignatureSpec::rule),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct SignatureTierSpec {
+    pub at: f32,
+    #[serde(default)]
+    pub attack: Option<f32>,
+    #[serde(default)]
+    pub defence: Option<f32>,
+    #[serde(default)]
+    pub speed: Option<f32>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct SignatureSpec {
+    #[serde(default)]
+    pub name: Option<String>,
+    #[serde(default)]
+    pub max: Option<f32>,
+    #[serde(default, rename = "gainHit")]
+    pub gain_hit: Option<f32>,
+    #[serde(default, rename = "gainSpecial")]
+    pub gain_special: Option<f32>,
+    #[serde(default, rename = "gainHurt")]
+    pub gain_hurt: Option<f32>,
+    #[serde(default, rename = "decayDelaySeconds")]
+    pub decay_delay_seconds: Option<f32>,
+    #[serde(default, rename = "decayPerSecond")]
+    pub decay_per_second: Option<f32>,
+    #[serde(default, rename = "drainOnSuper")]
+    pub drain_on_super: Option<bool>,
+    #[serde(default, rename = "riskPerSecond")]
+    pub risk_per_second: Option<f32>,
+    #[serde(default)]
+    pub tiers: Vec<SignatureTierSpec>,
+}
+
+impl SignatureSpec {
+    pub fn rule(&self) -> SignatureRule {
+        let max = self.max.unwrap_or(100.0).clamp(1.0, SIGNATURE_METER_CAP);
+        let mut tiers: Vec<SignatureTier> = self
+            .tiers
+            .iter()
+            .take(TIER_LIMIT)
+            .map(|t| SignatureTier {
+                at: t.at.clamp(0.0, max),
+                attack: t.attack.unwrap_or(1.0).clamp(0.5, 2.0),
+                defence: t.defence.unwrap_or(1.0).clamp(0.5, 1.5),
+                speed: t.speed.unwrap_or(1.0).clamp(0.8, 1.25),
+            })
+            .collect();
+        tiers.sort_by(|a, b| a.at.total_cmp(&b.at));
+        SignatureRule {
+            max,
+            gain_hit: self.gain_hit.unwrap_or(0.0).clamp(0.0, max),
+            gain_special: self.gain_special.unwrap_or(0.0).clamp(0.0, max),
+            gain_hurt: self.gain_hurt.unwrap_or(0.0).clamp(0.0, max),
+            decay_delay: (self.decay_delay_seconds.unwrap_or(2.0).max(0.0) * 60.0).round() as i32,
+            decay_per_tick: self.decay_per_second.unwrap_or(10.0).max(0.0) / 60.0,
+            drain_on_super: self.drain_on_super.unwrap_or(false),
+            risk_per_tick: risk_per_tick(self.risk_per_second.unwrap_or(0.0)),
+            tiers,
         }
     }
 }

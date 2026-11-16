@@ -67,7 +67,7 @@
     },
     "14_lie": {
       "axisX": 196.03,
-      "axisY": 400.308,
+      "axisY": 400.0,
       "refHeight": 396.03
     },
     "15_power0": {
@@ -295,17 +295,7 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "inline_5d3b693e708bfa8e": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
     "inline_8e846cf6a23f96c7": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_8edd27c26a9dcfab": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -321,11 +311,6 @@
       "refHeight": 320.0
     },
     "inline_f0ca448d673ece1e": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_f5002e7c7e5a3a1d": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -375,6 +360,11 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 399.0
+    },
     "mh0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -411,11 +401,6 @@
       "refHeight": 320.0
     },
     "run2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "run3": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
@@ -511,6 +496,11 @@
       "refHeight": 320.0
     },
     "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "cu1": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0

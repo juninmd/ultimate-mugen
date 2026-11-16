@@ -12,7 +12,13 @@ use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
 use ume_engine::palette::{BlendMode, PalParams};
 
-mod layers; mod rim; mod warm; mod wide_image;
+mod layers;
+mod mugen_layers;
+mod rim;
+mod sky;
+mod story_loop;
+mod warm;
+mod wide_image;
 use layers::draw_transformed_layer_quad;
 
 pub struct Gfx {
@@ -181,6 +187,7 @@ pub struct MatchRenderer {
     pub squash: Vec<[f32; 2]>,
     /** animated + reactive stage layer (see `stagefx`: `fx.react(&[Impulse])`) */
     pub fx: StageReact,
+    sky: sky::SkyCache,
 }
 
 impl MatchRenderer {
@@ -195,6 +202,7 @@ impl MatchRenderer {
             human: vec![],
             squash: vec![],
             fx: StageReact::new(stage.kind),
+            sky: Default::default(),
         }
     }
     fn sx(m: &Match, x: f32) -> f32 {
@@ -311,7 +319,7 @@ impl MatchRenderer {
         let gain = g.fx_gain;
         clear_background(BLACK);
         let (mut shx, mut shy) = (0.0, 0.0);
-        if m.shake_time > 0 {
+        if m.shake_time > 0 && !crate::tweaks::current().reduce_motion {
             if m.shake_vertical() {
                 shy = m.shake_offset();
             }
@@ -319,7 +327,7 @@ impl MatchRenderer {
                 shx = (rand::gen_range(-0.5, 0.5)) * m.shake_ampl.abs() * 0.3;
             }
         }
-        let (tx, ty) = vfx.shake(gain);
+        let (tx, ty) = vfx.shake(if crate::tweaks::current().reduce_motion { 0.0 } else { gain });
         shx += tx;
         shy += ty;
         // cinematic camera: punch-in on hits, KO / super zoom about the action
@@ -344,7 +352,7 @@ impl MatchRenderer {
         g.oy = py + (oy0 - py) * zoom;
         let s = g.view_scale;
         self.fx.begin_frame(m, gain); crate::stagelook::select(stage.kind);
-        self.draw_stage(g, m, stage, false, shx, shy); crate::stageprops::draw(g, stage.kind, false, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0);
+        self.draw_stage(g, m, stage, false, shx, shy); crate::stageprops::draw(g, stage.kind, false, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0); crate::story::objects_art::draw(g, m, false, shx, shy);
         if m.pause.as_ref().is_some_and(|p| p.darken) {
             draw_rectangle(
                 g.ox,
@@ -581,7 +589,7 @@ impl MatchRenderer {
                 }
             }
         }
-        self.draw_stage(g, m, stage, true, shx, shy); crate::stageprops::draw(g, stage.kind, true, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0);
+        crate::story::objects_art::draw(g, m, true, shx, shy); self.draw_stage(g, m, stage, true, shx, shy); crate::stageprops::draw(g, stage.kind, true, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0);
         self.draw_markers(g, m, shx, shy);
         if gain > 0.0 {
             vfx.draw_world(g, m, shx, shy, ui);
@@ -1076,7 +1084,7 @@ impl MatchRenderer {
                     }
                 }
             }
-            StageArt::Illustrated { image, ambience, span } => {
+            StageArt::Illustrated { image, frames, ambience, span } => {
                 let ground = m.stage.zoffset - m.camera.y;
                 let top_ground = m.stage.zoffset - m.stage.bound_high.min(0.0);
                 let bottom_ground = m.stage.zoffset - m.stage.bound_low.max(0.0);
@@ -1086,132 +1094,10 @@ impl MatchRenderer {
                 let (h, w, x) = crate::stages::illustration_layout(*span, image.w as f32 / image.h as f32, h, m.view_w, m.camera.x, m.zoom);
                 let rect = ImageRect { x: x + shx, y: ground - h * 0.85 + shy, w, h, view_w: m.view_w, view_h: m.view_h, cam_x: m.camera.x };
                 if front { return if *span > 0.0 { } else { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, true) }; }
-                g.draw_wide_image(image, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
+                g.draw_backdrop(image, frames, *span, m.game_time as usize, g.ox + rect.x * s, g.oy + rect.y * s, w * s, h * s);
                 if *span <= 0.0 { draw_profile(ambience, rect, s, (g.ox, g.oy), m.game_time as i32, g.fx_gain, false); }
             }
-            StageArt::Mugen(bg) => {
-                let scl = bg.scl;
-                let scl_y = bg.scl_y;
-                let (cx, cy) = (m.camera.x / scl, m.camera.y / scl_y);
-                let state = m.bg.as_ref();
-                for (k, l) in bg.stage.layers.iter().enumerate() {
-                    if (l.layer == 1) != front {
-                        continue;
-                    }
-                    if state.is_some_and(|st| !st.visible(k)) {
-                        continue;
-                    }
-                    let key = match state {
-                        Some(st) => st.sprite(k),
-                        None => l.sprite,
-                    };
-                    let (Some(img), Some(meta)) = (bg.images.get(&key), bg.stage.sprites.get(&key))
-                    else {
-                        continue;
-                    };
-                    let t = g.texture(img, true);
-                    let off = match state {
-                        Some(st) => st.offset(k),
-                        None => {
-                            let gt = m.game_time as f32;
-                            [l.velocity[0] * gt, l.velocity[1] * gt]
-                        }
-                    };
-                    let layer_scale = l.scale_at([cx, cy]);
-                    let (lx, ly) = (scl * layer_scale[0], scl_y * layer_scale[1]);
-                    let sxp = (l.start[0] + off[0] - cx * l.delta[0]) * scl + m.view_w / 2.0 + shx;
-                    let syp = (l.start[1] + off[1] - cy * l.delta[1]) * scl_y
-                        + (m.view_h - 240.0) / 2.0
-                        + shy;
-                    let (w, h) = (meta.w as f32 * lx, meta.h as f32 * ly);
-                    let (axis_dx, axis_dy) = (meta.axis_x as f32 * lx, meta.axis_y as f32 * ly);
-                    let (x0, y0) = (sxp - axis_dx, syp - axis_dy);
-                    let (stx, sty) = (w + l.tile_spacing[0] * scl, h + l.tile_spacing[1] * scl_y);
-                    let add = l.trans.starts_with("add") && l.trans != "addalpha";
-                    let sub = l.trans == "sub";
-                    let alpha = if l.trans == "addalpha" {
-                        (l.alpha[0] / 256.0).clamp(0.0, 1.0)
-                    } else {
-                        1.0
-                    };
-                    if add {
-                        set_blend(GfxBlend::Add);
-                    } else if sub {
-                        set_blend(GfxBlend::Sub);
-                    }
-                    let clip = l.clip_window();
-                    if let Some(win) = clip {
-                        let scroll = l.window_scroll();
-                        let wx = (win[0] - cx * scroll[0]) * scl + m.view_w / 2.0 + shx;
-                        let wy = (win[1] - cy * scroll[1]) * scl_y + (m.view_h - 240.0) / 2.0 + shy;
-                        let (ww, wh) = (
-                            (win[2] - win[0] + 1.0) * scl,
-                            (win[3] - win[1] + 1.0) * scl_y,
-                        );
-                        set_scissor(Some((
-                            (g.ox + wx * s) as i32,
-                            (g.oy + wy * s) as i32,
-                            (ww * s).max(0.0) as i32,
-                            (wh * s).max(0.0) as i32,
-                        )));
-                    }
-                    let tint = Color::new(1.0, 1.0, 1.0, alpha);
-                    let transformed = l.angle != 0.0 || l.x_shear != 0.0;
-                    let for_each_tile = |tile_mode: i32, p0: f32, step: f32, limit: f32, cb: &mut dyn FnMut(f32)| {
-                        match tile_mode {
-                            1 => {
-                                if step > 0.0 {
-                                    let mut p = p0 - (p0 / step).ceil() * step;
-                                    while p < limit {
-                                        cb(p);
-                                        p += step;
-                                    }
-                                } else {
-                                    cb(p0);
-                                }
-                            }
-                            n if n > 1 => {
-                                for i in 0..n {
-                                    cb(p0 + i as f32 * step);
-                                }
-                            }
-                            _ => cb(p0),
-                        }
-                    };
-                    for_each_tile(l.tile[0], x0, stx, m.view_w, &mut |x| {
-                        for_each_tile(l.tile[1], y0, sty, m.view_h, &mut |y| {
-                            if transformed {
-                                draw_transformed_layer_quad(
-                                    &t,
-                                    [g.ox + (x + axis_dx) * s, g.oy + (y + axis_dy) * s],
-                                    [axis_dx * s, axis_dy * s],
-                                    [w * s, h * s],
-                                    l.angle,
-                                    l.x_shear,
-                                    tint,
-                                );
-                            } else {
-                                draw_texture_ex(
-                                    &t,
-                                    g.ox + x * s,
-                                    g.oy + y * s,
-                                    tint,
-                                    DrawTextureParams {
-                                        dest_size: Some(vec2(w * s + 0.5, h * s + 0.5)),
-                                        ..Default::default()
-                                    },
-                                );
-                            }
-                        });
-                    });
-                    if clip.is_some() {
-                        set_scissor(None);
-                    }
-                    if add || sub {
-                        set_blend(GfxBlend::Alpha);
-                    }
-                }
-            }
+            StageArt::Mugen(bg) => mugen_layers::draw_mugen_stage(g, m, bg, front, shx, shy, &mut self.sky),
         }
     }
 

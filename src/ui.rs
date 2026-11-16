@@ -79,7 +79,7 @@ impl Face {
 }
 
 pub fn hex(h: &str) -> Color {
-    let v = u32::from_str_radix(h.trim_start_matches('#'), 16).unwrap_or(0);
+    let v = crate::tweaks::remap(u32::from_str_radix(h.trim_start_matches('#'), 16).unwrap_or(0));
     Color::from_rgba((v >> 16) as u8, (v >> 8) as u8, v as u8, 255)
 }
 pub fn rgb(c: [u8; 3]) -> Color {
@@ -527,7 +527,7 @@ impl Ui {
         let x0 = (1.0 - e) * (w + slant * 2.0) - slant;
         for (k, (off, col)) in [
             (0.0, Color::new(0.03, 0.02, 0.09, 1.0)),
-            (34.0, Color::new(1.0, 0.3, 0.43, 1.0)),
+            (34.0, crate::tweaks::accent(1.0)),
             (62.0, Color::new(0.13, 0.9, 1.0, 1.0)),
         ]
         .iter()
@@ -579,41 +579,6 @@ impl Ui {
     }
 
     /// Progress bar + spinner (virtual coordinates).
-    pub fn progress_bar(&self, x: f32, y: f32, w: f32, p: f32, label: &str) {
-        let p = p.clamp(0.0, 1.0);
-        self.rect(
-            x - 2.0,
-            y - 2.0,
-            w + 4.0,
-            16.0,
-            Color::new(0.0, 0.0, 0.0, 0.55),
-        );
-        self.rect(x, y, w, 12.0, Color::new(1.0, 1.0, 1.0, 0.10));
-        self.rect(x, y, w * p, 12.0, hex("#ff4d6d"));
-        self.rect(x, y, w * p, 5.0, Color::new(1.0, 1.0, 1.0, 0.25));
-        let a = self.t * 6.0;
-        for i in 0..8 {
-            let ang = a - i as f32 * 0.5;
-            let r = 12.0;
-            let c = Color::new(1.0, 0.8, 0.2, 1.0 - i as f32 / 8.0);
-            draw_circle(
-                self.x(x - 30.0 + ang.cos() * r),
-                self.y(y + 6.0 + ang.sin() * r),
-                (3.2 - i as f32 * 0.25).max(1.0) * self.s,
-                c,
-            );
-        }
-        self.text(label, x, y + 28.0, 15.0, hex("#d8d0f0"), Align::Left, false);
-        self.text(
-            &format!("{}%", (p * 100.0) as i32),
-            x + w,
-            y + 28.0,
-            15.0,
-            hex("#ffcc33"),
-            Align::Right,
-            true,
-        );
-    }
     /// Full-screen loading view with rotating tips.
     pub fn loading_screen(&self, p: f32, label: &str) {
         self.background();

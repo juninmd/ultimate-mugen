@@ -62,7 +62,7 @@
     },
     "13_fall2": {
       "axisX": 188.614,
-      "axisY": 400.218,
+      "axisY": 400.0,
       "refHeight": 366.337
     },
     "14_lie": {
@@ -375,6 +375,11 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 370.0
+    },
     "mh0": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -511,6 +516,11 @@
       "refHeight": 320.0
     },
     "walk5": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "cu1": {
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0

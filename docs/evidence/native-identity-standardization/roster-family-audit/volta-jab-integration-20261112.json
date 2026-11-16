@@ -1,0 +1,113 @@
+{
+  "character": "volta",
+  "animation": "jab",
+  "status": "three_attack_pose_frames_integrated_static_review_pass_shared_palette_strict_pass_runtime_pending",
+  "frames": [
+    {
+      "file": "jab0.png",
+      "sha256": "d51d88b3ae623e240fc854f0c89e12acc3248e6353a402dcd4a02ecf13f65a8c",
+      "bbox": [
+        96,
+        71,
+        273,
+        392
+      ],
+      "colors": 35,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "paletteColorsUsed": 34,
+      "paletteReapplyQa": "docs/evidence/native-identity-standardization/roster-family-audit/integrated/volta-jab-palette-reapply/reapplied-run1/apply-qa.json",
+      "candidateSha256": "719842ee823a2e639c51e6f6117d5824559d4aa35cfd26f7d9ad9d8734c8b8fd",
+      "sourceSha256BeforePaletteReapply": "719842ee823a2e639c51e6f6117d5824559d4aa35cfd26f7d9ad9d8734c8b8fd",
+      "reappliedCandidate": "docs/evidence/native-identity-standardization/roster-family-audit/integrated/volta-jab-palette-reapply/reapplied-run1/jab0.png",
+      "strictMaxDeltaE": 0.056425
+    },
+    {
+      "file": "jab1.png",
+      "sha256": "6370f2d57b801d316a47fdc1e7c9daa525793cb9847cd486394caa7382a004f9",
+      "bbox": [
+        36,
+        94,
+        356,
+        392
+      ],
+      "colors": 44,
+      "alphaValues": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "jab2.png",
+      "sha256": "b2fb0228721b6e65faa3b42b676f21cd17960389e1e37bad0f8076eb30249b9e",
+      "bbox": [
+        30,
+        71,
+        292,
+        392
+      ],
+      "colors": 44,
+      "alphaValues": [
+        0,
+        255
+      ]
+    }
+  ],
+  "sequence": [
+    [
+      "jab0",
+      3
+    ],
+    [
+      "jab1",
+      3
+    ],
+    [
+      "jab2",
+      4
+    ],
+    [
+      "idle0",
+      2
+    ]
+  ],
+  "hitTiming": 2,
+  "hitFrame": "jab1 (unchanged)",
+  "totalTicks": 12,
+  "checks": {
+    "all400x400": true,
+    "allFloorY392": true,
+    "allAlphaBinary": true,
+    "shared48ColorPalette": true,
+    "strictMaxDeltaE": {
+      "jab0": 0.056425,
+      "jab1": 0.08559,
+      "jab2": 0.093804
+    },
+    "sharedPaletteExactMembership": true,
+    "sharedPaletteSha256": "25f9eaf37d1054396f7305e861a5f54ce0e5eb5395ac17f2a7231c213995434f",
+    "activePaletteMissingOpaqueColors": {
+      "jab0": 0,
+      "jab1": 0,
+      "jab2": 0
+    },
+    "directCandidateShaMatchesActive": {
+      "jab0": false,
+      "jab1": true,
+      "jab2": true
+    },
+    "promotionOutputShaMatchesActive": {
+      "jab0": true,
+      "jab1": true,
+      "jab2": true
+    }
+  },
+  "evidence": [
+    "docs\\evidence\\native-identity-standardization\\roster-family-audit\\integrated\\volta-jab-before\\volta-jab-integrated-native.png",
+    "docs\\evidence\\native-identity-standardization\\roster-family-audit\\integrated\\volta-jab-before\\volta-jab-integrated-2x-nearest.png"
+  ],
+  "claimCeiling": "Static identity, pose and pixel finish reviewed at native and 2x. Runtime sequence, collision alignment and full Volta family remain pending.",
+  "promotionManifest": "docs/evidence/native-identity-standardization/roster-family-audit/integrated/volta-jab-palette-reapply/promotion-manifest.json"
+}

@@ -57,6 +57,7 @@ fn test_hit_priority_and_advanced_hitdef_flags() {
         voice: None,
         armor: None,
         parry: None,
+        rekka: None,
         burst: None,
         flight: None,
         timestop: None,
@@ -115,6 +116,7 @@ fn test_throw_and_passives_mechanics() {
         voice: None,
         armor: None,
         parry: None,
+        rekka: None,
         burst: None,
         flight: None,
         timestop: None,
@@ -124,6 +126,7 @@ fn test_throw_and_passives_mechanics() {
             p2_state: Some(820),
             at: None,
             launch: None,
+            ..Default::default()
         }),
         cancels: None,
         requires: None,

@@ -1,0 +1,119 @@
+{
+  "date": "2026-11-12",
+  "fighter": "haruki",
+  "animationFamily": "gale",
+  "identityAnchor": "assets/chars/sprites/haruki/04_special.png",
+  "poses": [
+    {
+      "pose": "gale0",
+      "sha256": "06c5b8a871a0946b5abd650ff8fdbc2e44a21449db5d06f2a9eba11a4ceed100",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 48,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        132,
+        91,
+        268,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "pose": "gale1",
+      "sha256": "852f9f6939af4c3500efeadf430586d435386b4c650a97d945658d78f8a2abd9",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 48,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        105,
+        91,
+        371,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    },
+    {
+      "pose": "gale2",
+      "sha256": "08b66547b673d09f519ba1b826a0844fdc3818916cc43180a61dc1cc633cec32",
+      "width": 400,
+      "height": 400,
+      "mode": "RGBA",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "opaqueColors": 47,
+      "offPaletteColors": 0,
+      "alphaBBoxExclusive": [
+        96,
+        93,
+        351,
+        392
+      ],
+      "axis": {
+        "axisX": 200.0,
+        "axisY": 392.0,
+        "refHeight": 320.0
+      },
+      "sharedPaletteFile": "candidates/haruki-gale0-pilot-v4/shared-palette-pose-v5-20261112/palette.json",
+      "sharedPaletteSha256": "c31175090300e64088d241fdba57770f70d7b74debe78a6aa1f51baf1d57c7b5",
+      "checks": {
+        "canvas400": true,
+        "binaryAlpha": true,
+        "colorsAtMost48": true,
+        "floorY392": true,
+        "axis200x392Ref320": true,
+        "exactPaletteSubset": true
+      }
+    }
+  ],
+  "visualReview": {
+    "native": "candidates/haruki-gale0-pilot-v4/gale2/review/gale-family-native.png",
+    "nearest2x": "candidates/haruki-gale0-pilot-v4/gale2/review/gale-family-2x-nearest.png",
+    "result": "Reviewed as a complete charge, orb strike, and open-hand recovery sequence. Canonical coat/hair/trim retained, distinct phase silhouettes, one front orb during the charged attack, no extra effects. Gale2 was shifted down one pixel after independent floor-alignment audit."
+  },
+  "integration": "All three frames promoted after parent native-size and nearest-2x family review. Animation timing, move data, metadata, and hit behavior unchanged.",
+  "backups": "integrated/haruki-gale-before/",
+  "runtimeStatus": "pending",
+  "testStatus": "pending"
+}

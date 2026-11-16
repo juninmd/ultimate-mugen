@@ -10,6 +10,8 @@ const PIP_SPAN_SHARE: f32 = 0.55;
 const RAGE_LOW: [f32; 3] = [1.0, 0.2, 0.12];
 const TIME_LOW: [f32; 3] = [0.65, 0.2, 1.0];
 const TIME_HIGH: [f32; 3] = [1.0, 0.25, 0.15];
+const SIGNATURE_LOW: [f32; 3] = [0.2, 0.85, 1.0];
+const SIGNATURE_HIGH: [f32; 3] = [1.0, 0.95, 0.35];
 const RAGE_HIGH: [f32; 3] = [1.0, 0.82, 0.3];
 
 fn rect<P: Fn(f32, f32) -> Vec2>(p: &P, s: f32, x: f32, y: f32, w: f32, h: f32) -> [Vec2; 4] {
@@ -88,6 +90,10 @@ pub(super) fn draw<P: Fn(f32, f32) -> Vec2>(p: &P, s: f32, gt: f32, f: &Fighter,
             0.0
         };
         strip(p, s, gt, bar, y - lift, progress, (TIME_LOW, TIME_HIGH));
+    }
+    if let Some(sig) = view.signature {
+        let lift = (view.rage.is_some() as i32 + view.time.is_some() as i32) as f32 * (STRIP_HEIGHT + 0.8);
+        strip(p, s, gt, bar, y - lift, sig.ratio, (SIGNATURE_LOW, SIGNATURE_HIGH));
     }
     if view.max_stacks > 0 {
         let pitch = (PIP_WIDTH + PIP_GAP).min(span_w * PIP_SPAN_SHARE / view.max_stacks as f32);

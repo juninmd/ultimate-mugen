@@ -1,5 +1,6 @@
 use crate::fighter::Fighter;
 use crate::passive_time::TimeRule;
+use crate::signature::{SignatureRule, SignatureState};
 
 pub const TOTAL_ATTACK_CAP: f32 = 8.0;
 pub const RAGE_MULTIPLIER_CAP: f32 = 6.0;
@@ -7,9 +8,9 @@ pub const STACK_DEFENCE_CAP: f32 = 3.0;
 pub const STACK_SPEED_CAP: f32 = 1.5;
 pub const STACK_LIMIT: i32 = 30;
 pub const AURA_FLOOR: f32 = 0.08;
-const SPECIAL_STATES: (i32, i32) = (1000, 2000);
-const SUPER_STATES: (i32, i32) = (3000, 3900);
-const AIR_VARIANT_OFFSET: i32 = 20000;
+pub(crate) const SPECIAL_STATES: (i32, i32) = (1000, 2000);
+pub(crate) const SUPER_STATES: (i32, i32) = (3000, 3900);
+pub(crate) const AIR_VARIANT_OFFSET: i32 = 20000;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RageRule {
@@ -65,16 +66,18 @@ pub struct PassiveRules {
     pub rage: Option<RageRule>,
     pub stacks: Option<StackRule>,
     pub time: Option<TimeRule>,
+    pub signature: Option<SignatureRule>,
 }
 
 impl PassiveRules {
     pub fn is_empty(&self) -> bool {
-        self.rage.is_none() && self.stacks.is_none() && self.time.is_none()
+        self.rage.is_none() && self.stacks.is_none() && self.time.is_none() && self.signature.is_none()
     }
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct PassiveState {
+    pub signature: SignatureState,
     pub stacks: i32,
     pub idle_ticks: i32,
     pub last_state: i32,
@@ -90,6 +93,7 @@ pub struct PassiveView {
     pub stacks: i32,
     pub max_stacks: i32,
     pub aura: f32,
+    pub signature: Option<crate::signature::SignatureView>,
 }
 
 impl Fighter {
@@ -123,17 +127,21 @@ impl Fighter {
     }
 
     pub fn effective_attack(&self) -> f32 {
+        self.passive_attack() * self.rush.attack_gain()
+    }
+
+    fn passive_attack(&self) -> f32 {
         if self.base_def.passives.is_empty() {
             return self.attack_mul;
         }
         let boosted = self.attack_mul
-            * (self.rage_multiplier() * self.stack_damage_multiplier() * self.time_multiplier())
+            * (self.rage_multiplier() * self.stack_damage_multiplier() * self.time_multiplier() * self.signature_attack())
                 .min(RAGE_MULTIPLIER_CAP * 2.0);
         boosted.min(TOTAL_ATTACK_CAP.max(self.attack_mul))
     }
 
     pub fn effective_defence(&self) -> f32 {
-        let base = self.defence_mul * self.super_defence_mul;
+        let base = self.defence_mul * self.super_defence_mul * self.signature_defence();
         match &self.base_def.passives.stacks {
             Some(rule) => {
                 base * (1.0 + rule.defence_gain * self.passive.stacks as f32).min(STACK_DEFENCE_CAP)
@@ -143,7 +151,7 @@ impl Fighter {
     }
 
     pub fn passive_speed(&self) -> f32 {
-        match &self.base_def.passives.stacks {
+        self.signature_speed() * match &self.base_def.passives.stacks {
             Some(rule) if self.move_type != 'H' => {
                 (1.0 + rule.speed_gain * self.passive.stacks as f32).min(STACK_SPEED_CAP)
             }
@@ -152,6 +160,7 @@ impl Fighter {
     }
 
     pub fn tick_passive(&mut self, fighting: bool) {
+        self.tick_signature(fighting);
         if fighting && self.alive && self.base_def.passives.time.is_some() {
             self.passive.fight_ticks += 1;
         }
@@ -209,7 +218,12 @@ impl Fighter {
             .time
             .filter(|_| self.alive)
             .map(|rule| rule.progress(self.passive.fight_ticks));
-        let aura = rage.unwrap_or(0.0).max(stack_share).max(time.unwrap_or(0.0));
+        let signature = self.signature_view();
+        let aura = rage
+            .unwrap_or(0.0)
+            .max(stack_share)
+            .max(time.unwrap_or(0.0))
+            .max(signature.map_or(0.0, |v| v.ratio));
         Some(PassiveView {
             rage,
             rage_multiplier: self.rage_multiplier(),
@@ -218,6 +232,7 @@ impl Fighter {
             stacks,
             max_stacks,
             aura: if aura < AURA_FLOOR { 0.0 } else { aura },
+            signature,
         })
     }
 }

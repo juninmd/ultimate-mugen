@@ -1,0 +1,40 @@
+[Info]
+name = "My Stage"
+displayname = "My Stage"
+author = "you"
+
+[Camera]
+startx = 0
+boundleft = -150
+boundright = 150
+boundhigh = -25
+boundlow = 0
+verticalfollow = .2
+tension = 50
+
+[PlayerInfo]
+p1startx = -70
+p2startx = 70
+
+[StageInfo]
+zoffset = 210
+localcoord = 320, 240
+
+[BGdef]
+spr = my-stage.sff
+
+[BG Sky]
+type = normal
+spriteno = 0, 0
+layerno = 0
+start = 0, 0
+delta = .2, .2
+tile = 1, 0
+
+[BG Floor]
+type = normal
+spriteno = 1, 0
+layerno = 0
+start = 0, 160
+delta = 1, 1
+tile = 1, 0

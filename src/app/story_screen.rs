@@ -5,20 +5,23 @@ use crate::story::{text, Phase};
 use crate::ui::*;
 
 impl App {
-    pub(crate) fn story_screen(&mut self, dt: f32) {
+    pub(crate) async fn story_screen(&mut self, dt: f32) {
         let Screen::Story { t } = self.screen else { return };
         let Some(run) = self.story.clone() else {
             self.screen = Screen::Menu { cur: 0 };
             return;
         };
+        self.story_epilogue_music(&run, t).await;
+        if self.story_epilogue(&run, t, dt) {
+            return;
+        }
         let accent = run.stage_def().accent;
         let accent_color = Color::new(accent[0], accent[1], accent[2], 1.0);
         self.ui.background();
         self.ui.motes(40, 1.2);
         let reveal = (t * 2.5).min(1.0);
-        self.ui.rect(0.0, 230.0, VW, 220.0, Color::new(0.02, 0.01, 0.06, 0.78 * reveal));
-        self.ui.rect(0.0, 230.0, VW, 4.0, accent_color);
-        self.ui.rect(0.0, 446.0, VW, 4.0, accent_color);
+        self.ui.adapted_glass(-20.0, 230.0, VW + 40.0, 220.0, accent_color, reveal);
+        self.ui.rect(0.0, 230.0, VW * reveal, 3.0, accent_color);
         let (headline, sub, line) = match run.phase {
             Phase::Intro => (
                 text::stage_label(run.stage),
@@ -48,6 +51,9 @@ impl App {
         self.ui.text(&headline, VW / 2.0, 296.0, 26.0, accent_color, Align::Center, true);
         self.ui.text_bold(&sub, VW / 2.0, 360.0, 56.0, WHITE, BLACK, Align::Center);
         self.ui.text(&line, VW / 2.0, 410.0, 20.0, hex("#d8d0f0"), Align::Center, false);
+        if run.phase == Phase::Intro {
+            self.draw_story_boss_profile(&run, accent_color, reveal);
+        }
         let prompt = match run.phase {
             Phase::Defeated if run.can_continue() => text::continue_label(),
             Phase::Defeated | Phase::Victory => text::quit_label(),

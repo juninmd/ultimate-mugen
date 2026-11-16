@@ -92,6 +92,7 @@ pub async fn run(app: &mut App, dir: &str) {
     let arena = std::env::var("UME_STAGE").unwrap_or_else(|_| "dojo".into());
     let stride: usize = std::env::var("UME_CLIP_STRIDE").ok().and_then(|s| s.parse().ok()).unwrap_or(4);
     let air_only = std::env::var("UME_CLIP_AIR").is_ok();
+    let transform_only = std::env::var_os("UME_CLIP_TRANSFORM_ONLY").is_some();
     for hero in heroes {
         app.mode = Mode::Watch;
         app.sel = (find(app, &hero), find(app, &rival), stage(app, &arena));
@@ -109,9 +110,21 @@ pub async fn run(app: &mut App, dir: &str) {
                 }
                 s.step_visual(c, audio);
             }
+            if transform_only {
+                for _ in 0..100 {
+                    s.step_visual(c, audio);
+                }
+            }
         }
         let def: Arc<CharDef> = app.session.as_ref().unwrap().m.fighters[0].def.clone();
-        let reel = if air_only { air_clips(&def) } else { clips(&def) };
+        let mut reel = if air_only { air_clips(&def) } else { clips(&def) };
+        if transform_only {
+            reel.retain(|clip| clip.transform);
+            for clip in &mut reel {
+                clip.frames = 20;
+                clip.stride_factor = 4;
+            }
+        }
         let label = if air_only { format!("{hero}_air") } else { hero.clone() };
         for (index, clip) in reel.into_iter().enumerate() {
             let center = app.session.as_ref().unwrap().m.camera.x;

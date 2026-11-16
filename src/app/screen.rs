@@ -29,6 +29,10 @@ pub enum Screen {
         rounds: usize,
     },
     Controls,
+    CharTuning {
+        ch: usize,
+        cur: usize,
+    },
     Mugen {
         view: u8,
         page: usize,

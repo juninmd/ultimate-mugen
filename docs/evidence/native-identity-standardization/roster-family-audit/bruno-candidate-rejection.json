@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-12",
+  "anchor": "assets/chars/sprites/bruno/04_special.png",
+  "targets": [
+    {
+      "sprite": "cjab0.png",
+      "restoredSha256": "a62a010c5b5d3ad219b356bdb9539c56d6c4f93f67f05471cd5d79aac2100464",
+      "rejectedCandidateSha256": "6f84f68b05efdc7230ae6701da913ddba1e9531bd31291d3b71e6c88216b9660",
+      "affectedAnimations": [
+        "cjab"
+      ],
+      "reason": "Hair and facial identity drift against canonical 04_special.",
+      "restoredFrom": "before evidence, byte-identical to HEAD."
+    },
+    {
+      "sprite": "cjab1.png",
+      "restoredSha256": "401e0a5f32fbf5f5937958f988ae65582961d080d079314b848ab913f1644778",
+      "rejectedCandidateSha256": "9e0adb51f7f7c4d53eb49621365e7f9ffdacd2121ffe1c38358c1ff91a5b1845",
+      "affectedAnimations": [
+        "cjab"
+      ],
+      "reason": "Hair and facial identity drift against canonical 04_special.",
+      "restoredFrom": "before evidence, byte-identical to HEAD."
+    },
+    {
+      "sprite": "clk.png",
+      "restoredSha256": "4d1463d6002c72a25ebb3ae4a1e45c077ebd274b93be64cf3aeb5095bf617a77",
+      "rejectedCandidateSha256": "808e4e14da619071d6ef6b46bd4e40eeba5daa60adf4c85c4cd5a80cc3b5bbeb",
+      "affectedAnimations": [
+        "clk"
+      ],
+      "reason": "Hair and facial identity drift against canonical 04_special.",
+      "restoredFrom": "before evidence, byte-identical to HEAD."
+    },
+    {
+      "sprite": "crouch0.png",
+      "restoredSha256": "43feb6a7eae558e873187a70f6a58e26b42eb93d894a5586da2f5f6831d60556",
+      "rejectedCandidateSha256": "a50a136b9a08e6a4e6d8cf02a5f6aff538e12f73b89c281e1e19fe633b3ff811",
+      "affectedAnimations": [
+        "crouchEnd",
+        "crouchStart",
+        "lowKick"
+      ],
+      "reason": "Hair and facial identity drift against canonical 04_special.",
+      "restoredFrom": "before evidence, byte-identical to HEAD."
+    },
+    {
+      "sprite": "crouch1.png",
+      "restoredSha256": "514f90b6cd3892c865626242963db144f1cc9ff41e741c9eb3d516683037c9d0",
+      "rejectedCandidateSha256": "31e56a6545b35bf6827995aca3bd9f86cb83063970cdb4a9d30747b18aaa3b7b",
+      "affectedAnimations": [
+        "clk",
+        "crouch",
+        "lowKick"
+      ],
+      "reason": "Hair and facial identity drift against canonical 04_special.",
+      "restoredFrom": "before evidence, byte-identical to HEAD."
+    }
+  ],
+  "result": "All five generated candidates were rejected for identity drift; source sprites were restored to original bytes and exact targets added to the correction queue."
+}

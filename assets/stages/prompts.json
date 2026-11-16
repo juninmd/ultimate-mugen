@@ -22,5 +22,226 @@
     "mausoleum_halicarnassus": "Use case: stylized-concept. Asset: production background for a side-view 2D fighting game. One single wide 16:9 landscape. Primary request: Mausoleum at Halicarnassus, ancient Caria (Asia Minor) at late afternoon golden hour: monumental tomb rising in grand tiers with a massive sculpted podium with warrior friezes (Amazonomachy), surrounded by an open colonnade of 36 slender Ionic marble columns, supporting a 24-step pyramid roof crowned with a colossal marble quadriga (four-horse chariot). Weathered marble lion statues and warrior sculptures standing guard behind the fight plane. Distant view of the turquoise Aegean harbor and ancient coastal fortress, broad continuous horizontal level white Pentelic marble plaza fighting floor. Masterful retro arcade fighting game pixel art aesthetic, deliberate crisp pixel clusters, rich sculptural marble details, radiant Mediterranean lighting. Composition: orthographic side view, broad continuous horizontal fighting floor in bottom 22 percent, fighter foot line at 85 percent image height. Keep center unobstructed and readable for fighters. Full bleed. No people, characters, UI, readable text, logos, watermark, borders.",
     "colossus_rhodes": "Use case: stylized-concept. Asset: production background for a side-view 2D fighting game. One single wide 16:9 landscape. Primary request: Harbor of Rhodes featuring the Colossus of Rhodes, ancient Greece during a dramatic stormy twilight: colossal bronze statue of the sun god Helios standing tall at the harbor entrance, radiant spiked sun halo crown, holding aloft a blazing beacon fire brazier whose orange flames pierce the brooding turquoise and violet storm clouds. Breaking ocean waves crashing against stone breakwaters in the midground, with ancient Greek triremes anchored in the harbor basin. Weathered mooring stones and stone balustrades framing the sides behind the arena, broad continuous horizontal level ancient stone harbor pier fighting floor with wet reflections. Masterful retro arcade fighting game pixel art aesthetic, deliberate crisp pixel clusters, dramatic high-contrast lighting with bronze and sea spray reflections. Composition: orthographic side view, broad continuous horizontal fighting floor in bottom 22 percent, fighter foot line at 85 percent image height. Keep center unobstructed and readable for fighters. Full bleed. No people, characters, UI, readable text, logos, watermark, borders.",
     "lighthouse_alexandria": "Use case: stylized-concept. Asset: production background for a side-view 2D fighting game. One single wide 16:9 landscape. Primary request: Lighthouse of Alexandria (Pharos of Alexandria), ancient Egypt at midnight under a starry sky: monumental three-tiered lighthouse tower with a massive square stone base, an octagonal middle section, and a cylindrical upper tower, topped with a giant blazing bronze mirror furnace casting a sweeping, powerful beam of golden light across the dark turbulent Mediterranean sea. Coastal rocks with crashing white foam and ancient Ptolemaic fortress battlements behind the fight area. Ptolemaic royal banners fluttering in the sea wind framing the far sides, broad continuous horizontal level white limestone fortress rampart fighting floor. Masterful retro arcade fighting game pixel art aesthetic, deliberate crisp pixel clusters, stunning dark night and blazing beacon beam lighting contrast. Composition: orthographic side view, broad continuous horizontal fighting floor in bottom 22 percent, fighter foot line at 85 percent image height. Keep center unobstructed and readable for fighters. Full bleed. No people, characters, UI, readable text, logos, watermark, borders."
+  },
+  "animations": {
+    "dojo": {
+      "generator": "Built-in image_gen",
+      "source": "dojo.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "cherry-blossom branches, drifting petals, clouds, and sunset light",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use dojo.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only cherry-blossom branches, drifting petals, clouds, and sunset light. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "neon": {
+      "generator": "Built-in image_gen",
+      "source": "neon.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "rain bands, neon glow, and wet rooftop reflections",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use neon.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only rain bands, neon glow, and wet rooftop reflections. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "bamboo": {
+      "generator": "Built-in image_gen",
+      "source": "bamboo.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "bamboo leaves, distant fireflies, and moonlit stream highlights",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use bamboo.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only bamboo leaves, distant fireflies, and moonlit stream highlights. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "plains": {
+      "generator": "Built-in image_gen",
+      "source": "plains.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "cloud drift, grasses, and warm canyon light",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use plains.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only cloud drift, grasses, and warm canyon light. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "spirit": {
+      "generator": "Built-in image_gen",
+      "source": "spirit.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "mist, spirit lights, and foliage around the torii",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use spirit.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only mist, spirit lights, and foliage around the torii. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "volcano": {
+      "generator": "Built-in image_gen",
+      "source": "volcano.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "the eruption plume, flowing lava, and heat glow",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use volcano.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only the eruption plume, flowing lava, and heat glow. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "brazil": {
+      "generator": "Built-in image_gen",
+      "source": "brazil.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "jacaranda blossoms, warm clouds, and town-square lighting",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use brazil.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only jacaranda blossoms, warm clouds, and town-square lighting. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "great_wall": {
+      "generator": "Built-in image_gen",
+      "source": "great_wall.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "cloud bands and banners along the mountain wall",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use great_wall.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only cloud bands and banners along the mountain wall. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "petra": {
+      "generator": "Built-in image_gen",
+      "source": "petra.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "desert haze and warm light across the rock-cut facade",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use petra.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only desert haze and warm light across the rock-cut facade. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "christ_redeemer": {
+      "generator": "Built-in image_gen",
+      "source": "christ_redeemer.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "cloud bands, ocean reflections, and distant city lights",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use christ_redeemer.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only cloud bands, ocean reflections, and distant city lights. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "texas": {
+      "generator": "Built-in image_gen",
+      "source": "texas.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "clouds, the Texas flag, windmill, and dry grass",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use texas.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only clouds, the Texas flag, windmill, and dry grass. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "chichen_itza": {
+      "generator": "Built-in image_gen",
+      "source": "chichen_itza.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "twilight clouds, stars, and jungle-edge foliage",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use chichen_itza.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only twilight clouds, stars, and jungle-edge foliage. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "colosseum": {
+      "generator": "Built-in image_gen",
+      "source": "colosseum.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "banners, cloud light, and the arena braziers",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use colosseum.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only banners, cloud light, and the arena braziers. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "taj_mahal": {
+      "generator": "Built-in image_gen",
+      "source": "taj_mahal.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "cloud light, reflecting-pool highlights, and garden edges",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use taj_mahal.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only cloud light, reflecting-pool highlights, and garden edges. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "pyramids_giza": {
+      "generator": "Built-in image_gen",
+      "source": "pyramids_giza.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "sunset clouds, distant haze, and desert dust",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use pyramids_giza.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only sunset clouds, distant haze, and desert dust. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "hanging_gardens": {
+      "generator": "Built-in image_gen",
+      "source": "hanging_gardens.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "waterfall highlights, water reflections, and hanging foliage",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use hanging_gardens.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only waterfall highlights, water reflections, and hanging foliage. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "temple_artemis": {
+      "generator": "Built-in image_gen",
+      "source": "temple_artemis.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "moonlit clouds and existing torch flames",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use temple_artemis.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only moonlit clouds and existing torch flames. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "statue_zeus": {
+      "generator": "Built-in image_gen",
+      "source": "statue_zeus.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "existing torch flames and ambient temple light",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use statue_zeus.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only existing torch flames and ambient temple light. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "mausoleum_halicarnassus": {
+      "generator": "Built-in image_gen",
+      "source": "mausoleum_halicarnassus.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "sunset clouds and warm light across the harbor",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use mausoleum_halicarnassus.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only sunset clouds and warm light across the harbor. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    },
+    "colossus_rhodes": {
+      "generator": "tools/gen_stage_loops.py (Pillow procedural RGBA overlays)",
+      "source": "colossus_rhodes.png",
+      "size": "1672x941",
+      "event": "A harbor swell moves from left to right and breaks across the breakwaters, with rain and beacon reflections.",
+      "shared_prompt": "Preserve the original stage artwork and fighting deck beneath a transparent overlay. Animate only the listed ambient event. Eight deterministic phases form a seamless loop; keep particles behind fighters and away from the floor.",
+      "phases": [
+        "particles enter along the upper-left edge: rain streaks fall over the harbor water.",
+        "the breeze carries particles across the left background: rain streaks fall over the harbor water.",
+        "particles drift through the center background: rain streaks fall over the harbor water.",
+        "particles pass behind the landmark: rain streaks fall over the harbor water.",
+        "particles move into the right background: rain streaks fall over the harbor water.",
+        "the breeze carries particles toward the right edge: rain streaks fall over the harbor water.",
+        "the trail thins as particles leave the frame: rain streaks fall over the harbor water.",
+        "the first particles reappear at the upper-left edge: rain streaks fall over the harbor water."
+      ],
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "frame_strategy": "The eight full-scene frames are the original Colossus of Rhodes harbor-wave sequence from PR #555; no transparent sprite overlays."
+    },
+    "lighthouse_alexandria": {
+      "generator": "Built-in image_gen",
+      "source": "lighthouse_alexandria.png",
+      "size": "1672x941",
+      "format": "Eight opaque full-scene PNG backgrounds",
+      "event": "sea waves, clouds, and the lighthouse beam",
+      "frame_strategy": "Frame 00 uses the existing stage artwork; frames 01-07 are full-frame image variations. Do not generate transparent overlays, standalone sprites, UI, or panels.",
+      "prompt_summary": "Use lighthouse_alexandria.png as the visual reference. Preserve the camera, framing, architecture, landmarks, and complete fighting floor. Generate full-scene variations that change only sea waves, clouds, and the lighthouse beam. Keep the original pixel-art look and dimensions (1672x941).",
+      "prompt_archive_note": "Retrospective prompt summary; exact per-frame image_gen wording was not archived."
+    }
   }
 }

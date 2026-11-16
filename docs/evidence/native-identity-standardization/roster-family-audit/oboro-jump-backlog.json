@@ -1,0 +1,47 @@
+[
+  {
+    "character": "oboro",
+    "pose": "jumpDown",
+    "targetFile": "assets/chars/sprites/oboro/jumpDown.png",
+    "targetSha256": "5de8374169d9c86765f17ef4a11abc7ba0fa316a12009f40b8262069c7437977",
+    "anchorFile": "assets/chars/sprites/oboro/01_idle.png",
+    "anchorSha256": "753fbf96d141a62e7903e13b1ac4aad3a520ab010c3c1ee7fe2ce50a1565519a",
+    "affectedAnimations": [
+      "airLowKick",
+      "airRecover",
+      "ajab",
+      "jumpDown"
+    ],
+    "status": "confirmed_identity_mismatch_pending_candidate"
+  },
+  {
+    "character": "oboro",
+    "pose": "jumpTop",
+    "targetFile": "assets/chars/sprites/oboro/jumpTop.png",
+    "targetSha256": "9c23da5d00f000e9c231936b3da274183be876d957e9ccad7f91df5db230c387",
+    "anchorFile": "assets/chars/sprites/oboro/01_idle.png",
+    "anchorSha256": "753fbf96d141a62e7903e13b1ac4aad3a520ab010c3c1ee7fe2ce50a1565519a",
+    "affectedAnimations": [
+      "ajab",
+      "akick",
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "status": "confirmed_identity_mismatch_pending_candidate"
+  },
+  {
+    "character": "oboro",
+    "pose": "jumpUp",
+    "targetFile": "assets/chars/sprites/oboro/jumpUp.png",
+    "targetSha256": "c2c7c9cb7261df3c0c2b328f2a437d04defec30d6dc630d87a8258f113f67529",
+    "anchorFile": "assets/chars/sprites/oboro/01_idle.png",
+    "anchorSha256": "753fbf96d141a62e7903e13b1ac4aad3a520ab010c3c1ee7fe2ce50a1565519a",
+    "affectedAnimations": [
+      "jumpBack",
+      "jumpFwd",
+      "jumpUp"
+    ],
+    "status": "confirmed_identity_mismatch_pending_candidate"
+  }
+]

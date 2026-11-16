@@ -52,7 +52,7 @@
     },
     "11_hit3": {
       "axisX": 192.271,
-      "axisY": 400.435,
+      "axisY": 400.0,
       "refHeight": 333.333
     },
     "12_fall1": {
@@ -295,21 +295,6 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
-    "inline_03b6c6a59165c029": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_3a59b2e08b98ebff": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "inline_4b1427a3d68cb6b0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
     "inline_85f47d25431dae27": {
       "axisX": 200.0,
       "axisY": 392.0,
@@ -394,6 +379,11 @@
       "axisX": 200.0,
       "axisY": 392.0,
       "refHeight": 320.0
+    },
+    "lowKick": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 345.0
     },
     "run0": {
       "axisX": 200.0,

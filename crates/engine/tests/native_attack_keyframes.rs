@@ -25,10 +25,7 @@ fn every_native_attack_has_three_distinct_rendered_images() {
     let mut failures = Vec::new();
     for path in character_files() {
         let character: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
-        let id = character["id"].as_str().unwrap_or("unknown");
-        if id.starts_with("npc_") {
-            continue;
-        }
+        let id = character["id"].as_str().unwrap_or("unknown").to_owned();
         let native: NativeChar = serde_json::from_value(character.clone()).unwrap();
         let audit = audit_native_sprite_frames(&native);
         let animations: HashMap<_, _> = audit["animations"]
@@ -69,11 +66,85 @@ fn every_native_attack_has_three_distinct_rendered_images() {
             }
         }
     }
-    assert_eq!(attacks, 510, "native attack inventory changed");
+    assert_eq!(attacks, 693, "native attack inventory changed");
     assert!(
         failures.is_empty(),
         "attacks with fewer than 3 rendered images: {failures:#?}"
     );
+}
+
+#[test]
+fn every_native_transformation_uses_three_distinct_powerup_images() {
+    let mut characters = 0;
+    let mut failures = Vec::new();
+    for path in character_files() {
+        let character: Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+        let id = character["id"].as_str().unwrap_or("unknown").to_owned();
+        let native: NativeChar = serde_json::from_value(character).unwrap();
+        let audit = audit_native_sprite_frames(&native);
+        let power_up = audit["animations"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .find(|animation| animation["animation"] == "powerUp");
+        let frames = power_up.and_then(|animation| animation["frames"].as_array());
+        let image_count = power_up
+            .and_then(|animation| animation["uniqueBodyImages"].as_u64())
+            .unwrap_or_default();
+        let sprite_files: Vec<_> = frames
+            .into_iter()
+            .flatten()
+            .filter_map(|frame| frame["file"].as_str())
+            .collect();
+        if image_count < 3 || sprite_files.len() != 3 {
+            failures.push(format!("{id}: {image_count} distinct powerUp images from {} resolved files", sprite_files.len()));
+        }
+        if id == "garan"
+            && !["15_power0.png", "16_power1.png", "17_power2.png"]
+                .iter()
+                .all(|name| sprite_files.iter().any(|file| file.ends_with(name)))
+        {
+            failures.push(format!("{id}: transformation does not resolve all three authored powerUp sprites"));
+        }
+        characters += 1;
+    }
+    assert_eq!(characters, 21, "native character inventory changed");
+    assert!(failures.is_empty(), "transformation keyframe failures: {failures:#?}");
+}
+
+#[test]
+fn every_native_animation_family_avoids_idle_fallbacks() {
+    let mut characters = 0;
+    let mut failures = Vec::new();
+    for path in character_files() {
+        let character: NativeChar = serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
+        let audit = audit_native_sprite_frames(&character);
+        if audit["avatar"] != true {
+            failures.push(format!("{}: dedicated avatar missing", character.id));
+        }
+        for animation in audit["animations"].as_array().into_iter().flatten() {
+            let name = animation["animation"].as_str().unwrap_or("unknown");
+            let unique = animation["uniqueBodyImages"].as_u64().unwrap_or_default();
+            let minimum = match name {
+                "idle" => 3,
+                "walk" | "walkBack" => 6,
+                "run" => 4,
+                "powerUp" => 3,
+                _ => 0,
+            };
+            if unique < minimum {
+                failures.push(format!("{}/{}: {unique} images, needs {minimum}", character.id, name));
+            }
+            for frame in animation["frames"].as_array().into_iter().flatten() {
+                if matches!(frame["resolution"].as_str(), Some("idle-reuse" | "fallback-idle" | "missing")) {
+                    failures.push(format!("{}/{}[{}]: {}", character.id, name, frame["frame"], frame["resolution"]));
+                }
+            }
+        }
+        characters += 1;
+    }
+    assert_eq!(characters, 21, "native character inventory changed");
+    assert!(failures.is_empty(), "native animation sprite gaps: {failures:#?}");
 }
 
 #[test]
@@ -132,5 +203,5 @@ fn every_native_combat_sprite_is_crisp_pixel_art() {
             checked += 1;
         }
     }
-    assert_eq!(checked, 2162, "native combat sprite inventory changed");
+    assert_eq!(checked, 2155, "native combat sprite inventory changed");
 }

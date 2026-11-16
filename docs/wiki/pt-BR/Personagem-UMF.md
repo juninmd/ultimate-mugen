@@ -10,7 +10,7 @@ UMF (*Ultimate Mugen Format*) descreve um lutador inteiro em **um arquivo JSON**
 4. Rode `cargo run --release`. O `build.rs` embute todos os `.json` da pasta no executável.
 5. Teste no **Treino** com `F2` ligado para ver hitboxes e hurtboxes.
 
-Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add_native_json`, falta ligar à pasta `mugen/`).
+Lutadores UMF também carregam de uma pasta, sem recompilar: coloque o `.json` em `umf/` ao lado do jogo (ou em `mugen/umf/`, ou na pasta indicada por `UME_UMF_DIR`). Arquivos de kit na mesma pasta são registrados antes, seja qual for o nome.
 
 ## Esqueleto do arquivo
 
@@ -43,6 +43,7 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `format` | sim | Sempre `umf/1` |
 | `id`, `name`, `series`, `author`, `color` | sim | Identidade; `color` é a cor do cartão na seleção |
 | `boss` | não | `true` esconde da seleção e coloca como chefe final do Arcade |
+| `profile` | não | Nacionalidade e biografia, ver [Perfil](#perfil-nacionalidade-e-biografia) |
 | `speed` | não | Multiplicador de velocidade das animações (>1 = golpes mais rápidos) |
 | `stats` | não | Atributos, tabela abaixo |
 | `art` | sim | Arte, ver [Rig](Rig.md) |
@@ -50,6 +51,47 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `awakeningPalette` | não | Cores aplicadas sobre a paleta selecionada durante o despertar; sprites de efeitos não mudam |
 | `anims` | sim | Animações por nome |
 | `moves` | sim | Golpes |
+
+## Reuso: `extends`, `use` e kits
+
+Um lutador não precisa ser escrito do zero. Três recursos eliminam o copiar e colar que os pacotes M.U.G.E.N exigem (os números estão em [Estudo de código M.U.G.E.N](../MUGEN-Code-Study.md)):
+
+| Recurso | Onde | O que faz |
+|---|---|---|
+| `"extends": "kaito"` | raiz | Herda tudo de um lutador ou kit já carregado: atributos, arte, animações e golpes. Uma lista (`["kaito", "storm-kit"]`) empilha vários, da esquerda para a direita. |
+| `"use": "gale"` | dentro de um golpe | Clona outro golpe (de um pai ou de um golpe anterior do mesmo arquivo) com um novo `id`, mudando só os campos escritos. |
+| arquivo de kit | `"format": "umf-kit/1"` | Definição parcial (golpes, animações, poses, atributos) com um `id`, compartilhada por vários lutadores. O kit `core` já vem embutido com `launcher` e `escape_burst`. |
+
+Regras da mescla, aplicadas por `crates/engine/src/native/kit.rs` antes do parser UMF normal:
+
+- Objetos (`stats`, `art`, `abilities`, `passives`) mesclam chave a chave: `"stats": { "life": 1080 }` muda um número só. Uma animação em `anims` substitui a herdada por inteiro. O valor `null` remove a chave herdada.
+- `moves` casam por `id`. Uma entrada com parte dos campos mantém o resto (`{ "id": "gale", "name": "Crimson Gale" }`), um texto simples (`"launcher"`) lista um golpe herdado sem mudanças e `{ "id": "slide", "remove": true }` remove um. Os golpes listados vêm primeiro, na sua ordem; os herdados não citados vêm depois.
+- Identidade é pessoal: `name`, `author`, `description`, `profile`, `boss` e `npc` nunca são herdados de um lutador.
+- `spriteSet` reaproveita o pacote de pixel art do pai. Recolora com `palettes` e deixe `art.style.colors` herdado: são as cores de referência do pacote.
+- Erros apontam o culpado (`unknown kit or fighter`, `move x uses y, which no kit or earlier move defines`) e cadeias de `extends` com mais de 8 níveis são recusadas.
+
+Um lutador completo em 20 linhas está em [`docs/examples/umf/mika.json`](../../examples/umf/mika.json): ele herda uma definição de 39 KB e o kit [`storm-kit.json`](../../examples/umf/storm-kit.json). Teste com `UME_UMF_DIR=docs/examples/umf cargo run --release`.
+
+## Perfil (nacionalidade e biografia)
+
+Todo lutador tem uma nacionalidade e uma biografia curta, escritas em inglês (`en`), português do Brasil (`pt`) e espanhol (`es`). Um idioma ausente cai para `en`.
+
+```json
+"profile": {
+  "country": "jp",
+  "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+  "bio": { "en": "Two short sentences.", "pt": "Duas frases curtas.", "es": "Dos frases cortas." }
+}
+```
+
+- Os lutadores nativos, o chefe final e os capangas do modo História guardam seus perfis em `assets/char_profiles.json`, indexados por `id`. Um campo `profile` dentro do arquivo do lutador vence essa tabela, então lutadores UMF importados levam o próprio perfil.
+- `country` escolhe a bandeira desenhada ao lado da nacionalidade: `jp`, `br`, `no`, `us`, `cn`, `es`, `mn`, `de`, `kr`, `ar`, `au`, `ru`, `fr`, além das fictícias `underworld` e `eclipse`. As bandeiras são formas vetoriais em `src/flag/designs.rs` (sem arquivos de imagem); adicione uma entrada lá para outro país. Um código desconhecido apenas não mostra bandeira. `UME_SHOTS_ONLY=flags` salva uma folha com todas as bandeiras.
+- A bandeira aparece no quadro do elenco, no cartão do lutador, na faixa de perfil abaixo do elenco e no cartão de fase do modo História.
+- Mantenha cada biografia abaixo de 260 caracteres: ela precisa caber em duas linhas da tela de seleção.
+- `tags` é uma lista opcional de tags de estilo de luta (`"tags": ["rushdown", "zoner"]`). A tela de seleção mostra até três como chips abaixo do elenco. As chaves conhecidas são traduzidas (`rushdown`, `grappler`, `zoner`, `balanced`, `aerial`, `trapper`, `counter`, `power`); qualquer outra aparece em maiúsculas (`storm-caller` vira STORM CALLER). A lista fica em `src/profile_tags.rs`.
+- A tela de seleção mostra a nacionalidade e a biografia do lutador em destaque abaixo do elenco (capangas e o chefe aparecem com o filtro Chefes). O cartão de fase do modo História mostra o perfil do chefe da fase.
+- Lutadores sem perfil (conteúdo M.U.G.E.N) continuam mostrando `description`.
+- `cargo test --release -p ultimate-mugen profile` confere que todo arquivo de lutador em `assets/chars` tem perfil completo nos três idiomas.
 
 ## `stats`
 
@@ -63,6 +105,7 @@ Carregar UMF de uma pasta sem recompilar: **planejado** (o registro já tem `add
 | `jump` | `[-8.4, -2.5, 0, 2.6]` | Velocidade vertical, horizontal para trás, neutra e para frente |
 | `gravity` | — | Aceleração vertical |
 | `airJumps` | — | Pulos extras no ar |
+| `airDashes` | 1 | Air dashes por pulo (`movement.airdash.num`) |
 | `height` | `100` | Altura do corpo |
 | `width` | `[16, 15]` | Largura frente / trás para empurrão |
 
@@ -158,6 +201,8 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 
 **Finisher.** Um golpe com `"kind": "finisher"` (use `throw` ou `hits` para o efeito) só fica disponível após um nocaute (`RoundState = 3` e `WinKO`). Quando o round final termina em nocaute e o vencedor tem um finisher, o round espera até 6 segundos em "FINISH HIM" para o vencedor executá-lo; executar (ou o tempo acabar) encerra a espera. Elencos sem finisher não mudam.
 
+**Ultimate.** Um golpe cujo `id` começa com `ult_` é a ultimate do lutador, e todo lutador nativo declara uma (o comando é `~D, DF, F, D, DF, F, x+y`). O compilador gasta o medidor inteiro nela: `cost` passa a valer `3000` por padrão (as três barras do HUD), o golpe recebe 70 % de bônus de dano onde um `super` comum recebe 30 %, e o congelamento de super dura 75 ticks em vez de 55. `cargo test --release -p ume-engine --test native_ultimates` falha quando um lutador não tem ultimate, quando o custo não é de três barras, quando a ultimate não inicia pelo comando ou não drena o medidor, ou quando o dano medido fica abaixo de 380 ou não supera todos os supers do lutador.
+
 ### Traços de combate
 
 - **Gatling automático.** Um golpe sem `cancels` segue o gênero: um normal cancela em qualquer normal *mais forte* (`light` < `medium` < `heavy` pelo maior nível de acerto, empate pela ordem de declaração, então sequências nunca entram em loop), normais em pé ligam nos agachados, normais aéreos encadeiam com aéreos, e todo normal cancela em todo especial e super no contato. Especiais só cancelam em outros especiais por `cancels` explícito; supers cancelam a partir de qualquer golpe.
@@ -220,15 +265,27 @@ Todos os lutadores nativos também recebem dois chutes baixos normais na compila
 
 ## Carregar energia (todo lutador)
 
-Todo lutador nativo pode carregar o medidor: segure **R** (a entrada `s` / Start; para pausar a luta use **Esc** ou **P**). O lutador entra no estado `3920`, repete a animação `powerUp` com um brilho azul e ganha 4 de energia por tick (um super de 1000 em cerca de quatro segundos) até soltar o botão (depois de pelo menos 6 ticks) ou encher o medidor. O estado é `movetype = I`, então um golpe o interrompe, e um lutador com formas ainda se transforma com `T` quando o medidor chega ao custo da forma. O comando é `charge_cmd` (`/s`) e aparece como `Charge Energy` na lista de golpes. A IA embutida só carrega no nível 3 ou mais, com menos de 700 de energia, quando o rival está a mais de 190 unidades e não está atacando.
+Todo lutador nativo pode carregar o medidor: segure **R** (a entrada `s` / Start; para pausar a luta use **Esc** ou **P**). O lutador entra no estado `3920`, repete a animação `powerUp` com um brilho azul e ganha de 9 a 48 de energia por tick (`native/charge_ramp.rs`, enchendo um super de 1000 em cerca de um segundo) até soltar o botão (depois de pelo menos 6 ticks) ou encher o medidor. O estado é `movetype = I`, então um golpe o interrompe, e um lutador com formas ainda se transforma com `T` quando o medidor chega ao custo da forma. O comando é `charge_cmd` (`/s`) e aparece como `Charge Energy` na lista de golpes. A IA embutida só carrega no nível 3 ou mais, com menos de 700 de energia, quando o rival está a mais de 190 unidades e não está atacando.
 
 ## Habilidades no ar (todo especial e super)
 
 Todo `special` e `super` com `when` ausente ou `"stand"` ganha também uma versão aérea (estado `20000 + estado de chão`, rótulo `State -1, air <nome>`), acionada pelo mesmo comando com o lutador no ar. O lutador flutua no começo do golpe (mantém 40 % do deslize), a gravidade volta a 45 % depois de 12 ticks, o golpe termina no estado de queda do salto (`50`) com controle, e tocar o chão o interrompe com o estado de pouso (`52`). As versões aéreas causam 70 % do dano de chão, os projéteis saem inclinados para baixo (inclinação 0,85) para alcançar um rival no chão, e cada salto permite um especial aéreo (`var(57)`, zerada ao pousar). Agarrões, golpes de voo e golpes com `when: "crouch"` ou `"air"` mantêm suas próprias regras.
 
+## Mecânicas exóticas (`helpers`, `throw` cinemático, `bossRules`, `scripts`)
+
+Qualquer animação em `anims` aceita `"id": 8801` para fixar um número de ação para scripts customizados ou `p2Anim`. Além disso, todo padrão avançado de M.U.G.E.N / Ikemen GO (ZSS) pode ser declarado direto no JSON UMF sem editar Rust:
+
+| Bloco | Substitui no M.U.G.E.N / ZSS | Recursos principais |
+|---|---|---|
+| `helpers.stand` | `Helper(keyctrl=1)` + `BindToParent` + `HitOverride` manuais | Stand estilo JoJo com hitbox/hurtbox independente, comandos próprios (`input`) ou sincronizados (`triggerMove`), evocação/recolhimento, dreno de barra (`drain`) e transferência de dano (`lifeTransfer`) via `ModifyPlayer` |
+| `helpers.clones` | Helpers autônomos de IA | Clones *Kage Bunshin* com IA própria (`count`, `maxActive`, `duration`, `walkSpeed`, `attackRange`, `oneHitPoof`), perseguição, ataques aleatórios e liberdade de câmera (`ScreenBound movecamera = 0, 0`) |
+| `moves[].throw` (cinemático) | `TargetState` + `ChangeAnim2` multi-etapa | `p2Anim` (`ChangeAnim2`), `cameraFree`, `camera` (`zoom`, `time`, `lag`, `freeze`), coreografia em `steps[]` (`at`, `bind`, `p2Anim`, `p2State`, `damage`, `shake`, `facing`, `launch`) e proteção automática `!GetHitVar(IsBound)` |
+| `bossRules` | Quebra de UI em `[StateDef -4]` via `AssertSpecial` / `Text` / `ModifyPlayer` | `hideHud`, `hideLifeBar`, `hidePowerBar`, `hideTimer`, `freezeTimer`, `texts[]`, `modifyPlayer[]` (`"enemy"` ou próprio chefe), `phases[]` (`lifeBelowRatio`, `when`, `once`, `attackMul`, `defenceMul`) |
+| `scripts` | Arquivos `.zss` / `.cns` com `[StateDef -4]` e `map()` | Strings inline `zss` e `cns` (suporta `[StateDef -4]` rodando até durante `SuperPause`, `map(k) := v`, `teamMap(k) := v`), `commands[]` customizados e expansão `@anim(nome)` / `@move(id)` |
+
 ## Sprites pixel art (opcional)
 
-Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG em vez do rig. Use PNGs transparentes voltados para a direita, com os pés na borda inferior e o mesmo tamanho de tela em todos os arquivos de um lutador. Uma pose sem PNG usa `01_idle.png`; um lutador sem a pasta continua com o rig. Depois de estender o rig, execute `cargo run --release -p ume-engine --example generate_missing_sprites` para renderizar um PNG dedicado para cada pose que o carregador buscaria no canvas idle.
+Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG em vez do rig. Use PNGs transparentes voltados para a direita, com os pés na borda inferior e o mesmo tamanho de tela (400×400 RGBA) em todos os arquivos de um lutador. Gere PNGs de combate faltantes com `generate_image` usando uma âncora canônica em pixel art validada do próprio personagem (nunca use o rig vetorial procedural depreciado).
 
 | Arquivo | Poses que o usam |
 |---|---|

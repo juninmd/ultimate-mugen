@@ -77,31 +77,31 @@ Keyboard, touch, Xbox, DualShock 4 and DualSense with **rumble and lightbars**. 
 ## 🖼️ Pixel-art roster, maps and gameplay
 
 <p align="center">
-  <img src="docs/assets/readme/fight.gif" alt="Gameplay: two native fighters trading hits on the Bamboo stage" width="70%">
+  <img src="docs/assets/readme/readme-fight-pixel-art.png" alt="Pixel art illustration of two fighters trading a hit in a bamboo arena" width="70%">
 </p>
 
-<p align="center"><i>Real gameplay captured from the web build (software rendering, so the GIF runs below the native frame rate).</i></p>
+<p align="center"><i>Illustrative pixel art created for this README; this image is not a live gameplay capture.</i></p>
 
 ### Pixel-art fighters
 
 The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set per fighter, with palettes, ki/energy specials, flight, teleport and transformations. Characters are declared in a single UMF JSON each.
 
-![Character select with the pixel-art roster](docs/assets/readme/roster-select.jpg)
+![Pixel art illustration of a character-select screen](docs/assets/readme/readme-roster-pixel-art.png)
 
 ### Maps
 
 21 illustrated arenas, from a sunset dojo roof and a neon metropolis to the wonders of the world (Petra, Taj Mahal, Christ the Redeemer, the Colosseum, the Great Wall, Chichen Itza and more), each with living ambience layers and its own built-in music theme.
 
-![Stage select](docs/assets/readme/stage-select.jpg)
+![Pixel art illustration of an arena-select screen](docs/assets/readme/readme-stage-select-pixel-art.png)
 
 **Story mode** adds five long scrolling extensions of the arenas (Brazil, Neon, Bamboo, Volcano and Dojo): one segment per fight, four waves of thugs plus a stage boss, with health carry-over between fights. See the [Story mode guide](docs/wiki/Story-Mode.md).
 
-![Story mode scrolling stages](docs/assets/readme/story-stages.jpg)
+![Pixel art panoramas inspired by the five story stages](docs/assets/readme/readme-story-stages-pixel-art.png)
 
 <table>
 <tr>
-<td width="50%"><img src="docs/assets/readme/versus-screen.jpg" alt="Versus screen"></td>
-<td width="50%"><img src="docs/assets/readme/fight-round1.jpg" alt="Round 1 on the Bamboo stage"></td>
+<td width="50%"><img src="docs/assets/readme/readme-versus-pixel-art.png" alt="Pixel art illustration of two fighters facing off before a match"></td>
+<td width="50%"><img src="docs/assets/readme/readme-fight-round1-pixel-art.png" alt="Pixel art illustration of a fight on a bamboo arena"></td>
 </tr>
 </table>
 
@@ -109,7 +109,7 @@ The native roster is drawn as 32-bit arcade pixel art, one dedicated pose set pe
 
 ## 🆕 What's new
 
-- **Story mode:** five stages of waves, thugs with their own traits and a boss per stage, with cutscenes and endings. [Guide](docs/wiki/Story-Mode.md)
+- **Story mode:** five stages of waves, thugs with their own traits and a boss per stage, with cutscenes and endings, plus breakable crates and barrels, food pickups and car-wrecking bonus rounds. [Guide](docs/wiki/Story-Mode.md) · [Stage objects](docs/wiki/Stage-Objects.md)
 - **Music and audio:** a built-in music theme per stage, tiered hit sounds, music ducking on impacts and a crowd cheer on the KO. [Audio](docs/wiki/Audio.md)
 - **Move shortcuts:** bind any move from the pause list to `1`-`4` (gamepad `L1`/`L2`/`R1`/`R2`); `L3` + `R3` transforms and `R3` alone charges ki. [Controls](docs/wiki/Configuration.md#controls)
 - **Richer movesets:** every native fighter has EX specials, a level 3 hyper, an escape burst, an ascended form with its own hyper, and air versions of its specials. [Shared toolkit](docs/wiki/Characters.md#shared-toolkit)
@@ -244,14 +244,15 @@ M.U.G.E.N characters and native **UMF** fighters (one declarative JSON file each
 
 ## 📚 Documentation
 
-- **[Wiki](docs/wiki/Home.md)**: installation, configuration, UMF characters, CNS scripts, stages, screenpacks, netplay and performance.
+- **[Wiki site](https://juninmd.github.io/ultimate-mugen/wiki/)** ([sources](docs/wiki/Home.md)): installation, configuration, UMF characters, CNS scripts, stages, screenpacks, netplay and performance.
+- [Contributing guide](CONTRIBUTING.md) · [Architecture](docs/wiki/Architecture.md) · [ADRs](docs/wiki/adr/README.md)
 - [Roadmap](docs/ROADMAP.md) · [AAA features](docs/AAA_FEATURES.md) · [Roster](docs/ROSTER.md) · [Format research](docs/research-mugen-en.md)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome. Before opening a PR:
+Contributions are welcome. Read the [contributing guide](CONTRIBUTING.md) first. Before opening a PR:
 
 ```bash
 cargo fmt --check

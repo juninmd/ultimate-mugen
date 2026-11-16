@@ -1,4 +1,4 @@
-use super::draw_chrome::{CYAN, GOLD, INK, MUTED, PINK};
+use super::draw_chrome::{CYAN, INK, MUTED};
 use super::labels::{cost_label, truncate_to};
 use super::input_fit::fit_input_size;
 use super::layout::{Columns, Layout, SCROLLBAR_W};
@@ -41,6 +41,8 @@ impl App {
             return;
         }
         clip(ui, l);
+        let target = lay.move_row(self.pause.move_cur.min(moves.len() - 1), self.pause.scroll);
+        super::glide::highlight(ui, super::glide::glide("pause.move.x", "pause.move.y", target), 7.0, a * 0.75);
         let first = (self.pause.scroll / lay.pitch).floor().max(0.0) as usize;
         let last = (first + lay.visible_rows() + 2).min(moves.len());
         for (i, mv) in moves.iter().enumerate().take(last).skip(first) {
@@ -48,15 +50,15 @@ impl App {
             let y = row.y;
             let on = i == self.pause.move_cur;
             let hover = self.hover_rect(row.x, row.y, row.w, row.h) && self.hover_rect(l.x, l.y, l.w, l.h);
-            let (top, bot, edge) = if on {
-                (Color::new(1.0, 0.3, 0.43, 0.55), Color::new(0.6, 0.12, 0.3, 0.45), Some(fade(hex(PINK), 0.9 * a)))
+            let (top, bot) = if on {
+                (Color::new(0.0, 0.0, 0.0, 0.0), Color::new(0.0, 0.0, 0.0, 0.0))
             } else if hover {
-                (Color::new(1.0, 1.0, 1.0, 0.14), Color::new(1.0, 1.0, 1.0, 0.08), None)
+                (Color::new(1.0, 1.0, 1.0, 0.14), Color::new(1.0, 1.0, 1.0, 0.08))
             } else {
                 let v = if i % 2 == 0 { 0.07 } else { 0.04 };
-                (Color::new(1.0, 1.0, 1.0, v), Color::new(1.0, 1.0, 1.0, v * 0.6), None)
+                (Color::new(1.0, 1.0, 1.0, v), Color::new(1.0, 1.0, 1.0, v * 0.6))
             };
-            pill(ui, row, 7.0, fade(top, a), fade(bot, a), edge);
+            pill(ui, row, 7.0, fade(top, a), fade(bot, a), None);
             if on {
                 ui.rect(row.x, row.y + 6.0, 4.0, row.h - 12.0, fade(hex(CYAN), a));
             }
@@ -75,8 +77,9 @@ impl App {
             if let Some(cost) = cost_label(mv) {
                 let tw = ui.measure(&cost, 15.0 * f, true) + 22.0;
                 let pr = super::layout::Rect::new(l.x + cols.cost_right - tw, mid - 14.0 * f, tw, 28.0 * f);
-                pill(ui, pr, 6.0, fade(Color::new(1.0, 0.8, 0.2, 0.2), a), fade(Color::new(1.0, 0.8, 0.2, 0.08), a), Some(fade(hex(GOLD), 0.5 * a)));
-                ui.text(&cost, pr.x + tw / 2.0, mid + 5.5 * f, 15.0 * f, fade(hex(GOLD), a), Align::Center, true);
+                let (ink, wash) = super::glide::cost_colors(&cost);
+                pill(ui, pr, 14.0 * f, fade(wash, a), fade(Color::new(0.0, 0.0, 0.0, 0.35), a), Some(fade(ink, 0.8 * a)));
+                ui.text(&cost, pr.x + tw / 2.0, mid + 5.5 * f, 15.0 * f, fade(ink, a), Align::Center, true);
             }
         }
         self.list_edge_fade(lay, moves.len(), a);
@@ -115,13 +118,17 @@ impl App {
         let f = lay.font;
         let l = lay.list;
         let _ = l;
+        if !actions.is_empty() {
+            let target = lay.action_row(self.pause.cur.min(actions.len() - 1), actions.len());
+            super::glide::highlight(ui, super::glide::glide("pause.act.x", "pause.act.y", target), 10.0, a);
+        }
         for (i, act) in actions.iter().enumerate() {
             let on = i == self.pause.cur;
             let r = lay.action_row(i, actions.len());
             let (x, y, row_h) = (r.x, r.y, r.h);
             let hover = self.hover_rect(r.x, r.y, r.w, r.h);
             let (top, bot, edge) = if on {
-                (Color::new(1.0, 0.3, 0.43, 0.85), Color::new(0.62, 0.12, 0.3, 0.85), Some(fade(hex("#ffd0da"), 0.7 * a)))
+                (Color::new(0.0, 0.0, 0.0, 0.0), Color::new(0.0, 0.0, 0.0, 0.0), None)
             } else if hover {
                 (Color::new(1.0, 1.0, 1.0, 0.16), Color::new(1.0, 1.0, 1.0, 0.08), None)
             } else {

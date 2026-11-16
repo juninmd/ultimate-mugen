@@ -2,26 +2,49 @@ use super::*;
 use crate::i18n::tr3;
 use std::cell::{Cell, RefCell};
 
+mod keyboard;
+mod page_draw;
+mod pill;
+
+use keyboard::Osk;
+
 const MAX_QUERY: usize = 24;
-const ROWS: usize = 12;
+const ROWS: usize = 13;
+const ROWS_WITH_KEYBOARD: usize = 6;
+const ROW_Y: f32 = 150.0;
+const ROW_STEP: f32 = 38.0;
+const PILL: (f32, f32, f32, f32) = (40.0, 63.0, 236.0, 20.0);
 
 thread_local! {
     static QUERY: RefCell<String> = const { RefCell::new(String::new()) };
     static OPEN: Cell<bool> = const { Cell::new(false) };
+    static PICK: Cell<usize> = const { Cell::new(0) };
 }
 
-fn query() -> String {
+pub(super) fn query() -> String {
     QUERY.with(|q| q.borrow().to_lowercase())
 }
 
+fn clear_query() {
+    QUERY.with(|q| q.borrow_mut().clear());
+}
+
 impl App {
+    pub(crate) fn set_search_query(&mut self, text: &str, open: bool) {
+        QUERY.with(|q| *q.borrow_mut() = text.to_string());
+        OPEN.with(|o| o.set(open));
+        PICK.with(|p| p.set(0));
+    }
+
     pub(crate) fn search_matches(&self, i: usize) -> bool {
         let q = query();
         if q.is_empty() {
             return true;
         }
         let e = &self.reg.chars[i];
-        e.name.to_lowercase().contains(&q) || e.id.to_lowercase().contains(&q)
+        [&e.name, &e.id, &e.author, &e.series]
+            .iter()
+            .any(|field| field.to_lowercase().contains(&q))
     }
 
     pub(crate) fn search_label(&self) -> String {
@@ -33,71 +56,128 @@ impl App {
         }
     }
 
+    fn search_hits(&self) -> Vec<usize> {
+        let base = self.playable();
+        if query().is_empty() {
+            return base;
+        }
+        base.into_iter()
+            .filter(|&i| self.search_matches(i))
+            .collect()
+    }
+
+    fn open_search(&mut self) {
+        OPEN.with(|o| o.set(true));
+        PICK.with(|p| p.set(0));
+        self.audio.sfx("select");
+    }
+
     pub(crate) fn search_page(&mut self) -> bool {
         if !OPEN.with(|o| o.get()) {
             if is_key_pressed(KeyCode::Slash) {
-                OPEN.with(|o| o.set(true));
-                self.audio.sfx("select");
+                self.open_search();
                 return true;
             }
             return false;
         }
+        let before = QUERY.with(|q| q.borrow().clone());
+        let osk = self.osk_press();
         QUERY.with(|q| {
             let mut q = q.borrow_mut();
-            for c in typed_text().chars().filter(|c| !c.is_control()) {
+            let typed: String = match osk {
+                Some(Osk::Char(c)) => c.to_string(),
+                _ => typed_text(),
+            };
+            for c in typed.chars().filter(|c| !c.is_control()) {
                 if q.chars().count() < MAX_QUERY {
                     q.push(c);
                 }
             }
-            if is_key_pressed(KeyCode::Backspace) {
+            if is_key_pressed(KeyCode::Backspace) || osk == Some(Osk::Back) {
                 q.pop();
             }
         });
-        if is_key_pressed(KeyCode::Escape) {
-            QUERY.with(|q| q.borrow_mut().clear());
-            OPEN.with(|o| o.set(false));
-        } else if is_key_pressed(KeyCode::Enter) || is_key_pressed(KeyCode::KpEnter) {
-            OPEN.with(|o| o.set(false));
-            self.audio.sfx("confirm");
-            self.sel_row = 0;
-            if let Screen::Select { cur, picking, picked } = self.screen {
-                if let Some(&first) = self.char_view().first() {
-                    let mut cur = cur;
-                    cur[picking.min(1)] = first;
-                    self.screen = Screen::Select { cur, picking, picked };
-                }
+        if QUERY.with(|q| *q.borrow() != before) {
+            PICK.with(|p| p.set(0));
+        }
+        let hits = self.search_hits();
+        let rows = self.search_rows();
+        let step = |p: usize, d: isize| {
+            (p as isize + d).clamp(0, hits.len().saturating_sub(1) as isize) as usize
+        };
+        for (key, d) in [
+            (KeyCode::Down, 1),
+            (KeyCode::Up, -1),
+            (KeyCode::PageDown, rows as isize),
+            (KeyCode::PageUp, -(rows as isize)),
+        ] {
+            if is_key_pressed(key) {
+                PICK.with(|p| p.set(step(p.get(), d)));
             }
+        }
+        let tapped = self.search_row_tap(&hits, rows);
+        if let Some(k) = tapped {
+            PICK.with(|p| p.set(k));
+        }
+        if is_key_pressed(KeyCode::Escape) || osk == Some(Osk::Close) {
+            clear_query();
+            OPEN.with(|o| o.set(false));
+            self.sel_row = 0;
+        } else if is_key_pressed(KeyCode::Enter)
+            || is_key_pressed(KeyCode::KpEnter)
+            || osk == Some(Osk::Ok)
+            || tapped.is_some()
+        {
+            self.apply_search_pick(&hits);
             return true;
         }
-        self.draw_search_page();
+        self.draw_search_page(&hits, rows);
+        if self.osk_shown() {
+            self.draw_osk();
+        }
         true
     }
 
-    fn draw_search_page(&self) {
-        self.ui.background();
-        self.ui.text(tr3("BUSCAR LUTADOR", "SEARCH FIGHTER", "BUSCAR LUCHADOR"), 40.0, 56.0, 30.0, hex("#ffcc33"), Align::Left, true);
-        self.ui.rect(40.0, 84.0, 700.0, 50.0, Color::new(1.0, 1.0, 1.0, 0.1));
-        self.ui.rect_lines(40.0, 84.0, 700.0, 50.0, 2.0, hex("#3fa9ff"));
-        let blink = if (self.ui.t * 2.0) as i32 % 2 == 0 { "_" } else { " " };
-        let shown = format!("{}{}", QUERY.with(|q| q.borrow().clone()), blink);
-        self.ui.text(&shown, 56.0, 119.0, 26.0, WHITE, Align::Left, true);
-        let q = query();
-        let hits: Vec<usize> = self.playable().into_iter().filter(|&i| self.search_matches(i)).collect();
-        let count = format!("{} / {}", hits.len(), self.playable().len());
-        self.ui.text(&count, 740.0, 70.0, 16.0, hex("#a49cc0"), Align::Right, false);
-        for (row, &i) in hits.iter().take(ROWS).enumerate() {
-            let y = 160.0 + row as f32 * 36.0;
-            self.ui.rect(40.0, y, 700.0, 32.0, Color::new(1.0, 1.0, 1.0, if row == 0 { 0.16 } else { 0.06 }));
-            let c = rgb(self.reg.chars[i].color);
-            self.ui.rect(40.0, y, 6.0, 32.0, c);
-            self.ui.text(&self.reg.chars[i].name, 62.0, y + 23.0, 20.0, WHITE, Align::Left, true);
-            let s = self.char_stats(i);
-            self.ui.text(&format!("{:.0} / {:.0} / {:.1}", s.force, s.life, s.speed), 724.0, y + 22.0, 14.0, hex("#a49cc0"), Align::Right, false);
+    fn apply_search_pick(&mut self, hits: &[usize]) {
+        OPEN.with(|o| o.set(false));
+        self.audio.sfx("confirm");
+        self.sel_row = 0;
+        let chosen = hits.get(PICK.with(|p| p.get())).copied();
+        let Screen::Select {
+            mut cur,
+            picking,
+            picked,
+        } = self.screen
+        else {
+            return;
+        };
+        let view = self.char_view();
+        if let Some(first) = chosen
+            .filter(|i| view.contains(i))
+            .or_else(|| view.first().copied())
+        {
+            cur[picking.min(1)] = first;
+            self.screen = Screen::Select {
+                cur,
+                picking,
+                picked,
+            };
         }
-        if hits.is_empty() && !q.is_empty() {
-            self.ui.text(tr3("Nenhum lutador encontrado", "No fighters found", "Ningún luchador encontrado"), 40.0, 190.0, 20.0, hex("#ff4d6d"), Align::Left, true);
+    }
+
+    fn search_rows(&self) -> usize {
+        if self.osk_shown() {
+            ROWS_WITH_KEYBOARD
+        } else {
+            ROWS
         }
-        let tip = tr3("Digite para filtrar · Enter aplica · Esc limpa", "Type to filter · Enter applies · Esc clears", "Escribe para filtrar · Enter aplica · Esc limpia");
-        self.ui.text(tip, 40.0, 700.0, 15.0, hex("#a79fc4"), Align::Left, false);
+    }
+
+    fn search_row_tap(&self, hits: &[usize], rows: usize) -> Option<usize> {
+        let pick = PICK.with(|p| p.get()).min(hits.len().saturating_sub(1));
+        let top = pick.saturating_sub(rows - 1);
+        (0..rows.min(hits.len().saturating_sub(top)))
+            .find(|&row| self.clicked_rect(40.0, ROW_Y + row as f32 * ROW_STEP, 1200.0, 34.0))
+            .map(|row| top + row)
     }
 }

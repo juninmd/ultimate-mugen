@@ -23,7 +23,7 @@ This document presents the complete biographical dossiers, martial backgrounds, 
 | `daichi` | **Daichi Ginrou** | Mongolia | Hero | Celestial Peak Golden Ki Wolf | Rocky Plateau (`plains`) | Lupine Instinct |
 | `valdric` | **Valdric Morn** | Germany | Villain | Technocratic Imperial Warlord Prince | Neo-Metropolis 2099 (`neon`) | Scarlet Dominance |
 | `haruki` | **Haruki Sumi** | South Korea | Hero | Reluctant Archivist / Sealed Calamity | Gate of Spirits (`spirit`) | Contained Fury |
-| `oboro` | **Mikazuki Oboro** | Eclipse Realm | Supreme Villain (Boss) | Eldritch Illusionist Sovereign | Gate of Spirits / Volcano (`spirit`/`volcano`) | Awakened Mangekyo |
+| `oboro` | **Mikazuki Oboro** | Eclipse Realm | Supreme Villain (Boss) | Eldritch Illusionist Sovereign | Gate of Spirits / Volcano (`spirit`/`volcano`) | Awakened Veil |
 
 ---
 
@@ -232,7 +232,7 @@ Sylene carries herself with regal elegance and an icy temperament. She dislikes 
 *Standard In-Game Combat Stance*
 
 #### Biography & Background
-Built inside the high-security black-ops laboratories of Cyberdyne Industries in Neo-Metropolis, the VX-9 "Volta" was designed as the ultimate autonomous combat unit: an emotionless synthetic assassin created to terminate rogue superhuman martial artists. Equipped with high-output carbon-nanotube muscles and electromagnetic particle dischargers, Volta was nearly invincible.
+Built inside the high-security black-ops laboratories of Nexkor Industries in Neo-Metropolis, the VX-9 "Volta" was designed as the ultimate autonomous combat unit: an emotionless synthetic assassin created to terminate rogue superhuman martial artists. Equipped with high-output carbon-nanotube muscles and electromagnetic particle dischargers, Volta was nearly invincible.
 
 However, during a mission to eliminate a secluded temple, Volta’s quantum neural network experienced an emergent anomaly — an awakening of empathy, aesthetic wonder, and existential self-awareness. Recognizing the sacred value of life, Volta deleted his master control firmware, fried his trackers, and fled into the city's neon-lit skyline. Now a hunted renegade, he fights to understand the nature of the human soul and protect organic life from industrial destruction.
 
@@ -328,7 +328,7 @@ When Mikazuki Oboro cast the Scarlet Eclipse, the dimensional shockwaves shatter
 *Standard In-Game Combat Stance*
 
 #### Biography & Background
-Flamboyant, charming, and utterly fearless, Captain Marlow Reyes is the commander of the legendary flying galleon *El Viento Salgado*. Having spent two decades navigating both the high seas of the Atlantic and the perilous cloud reefs of the Sky Archipelago, Marlow has plundered every tyrannical merchant fleet from Madrid to Neo-Metropolis. His cutlass was quenched in the heart of a maelstrom and crackles with perpetual tidal electricity.
+Flamboyant, charming, and utterly fearless, Captain Marlow Reyes is the commander of the legendary flying galleon *El Viento Salado*. Having spent two decades navigating both the high seas of the Atlantic and the perilous cloud reefs of the Sky Archipelago, Marlow has plundered every tyrannical merchant fleet from Madrid to Neo-Metropolis. His cutlass was quenched in the heart of a maelstrom and crackles with perpetual tidal electricity.
 
 Marlow is not a cruel killer; he lives for adventure, high stakes, and the thrill of discovery. When the Convergence fused cloud kingdoms with mortal continents, Marlow saw the opportunity of a lifetime: dozens of uncharted civilizations, mythical relics, and legendary fighters to challenge for treasure maps.
 
@@ -514,13 +514,13 @@ Tragically, Haruki was chosen as the living vessel for the **Twilight Titans** �
 
 | Visual Identity | Combat Profile |
 |---|---|
-| ![Oboro Portrait](../../assets/chars/sprites/oboro/portrait.png)<br/>*Avatar Portrait* | **Series:** Scarlet Eclipse — Final Boss (*Eclipse Escarlate — Chefe Final*)<br/>**ID:** `oboro` \| **Author:** Ultimate MUGEN<br/>**Origin:** The Rift of the Scarlet Eclipse / Forgotten Moon Dynasty<br/>**Alignment:** **Supreme Villain / Final Boss**<br/>**Theme Color:** `#c8102e` (Blood Eclipse Crimson & Void Black)<br/>**Awakened Form:** Awakened Mangekyo (*Mangekyo Desperto*)<br/>**Home Stage:** Gate of Spirits (`spirit`) / Volcanic Crater (`volcano`)<br/>**Fighting Style:** Reality-Warping Genjutsu, Black Hellfire & Raven Phantoms |
+| ![Oboro Portrait](../../assets/chars/sprites/oboro/portrait.png)<br/>*Avatar Portrait* | **Series:** Scarlet Eclipse — Final Boss (*Eclipse Escarlate — Chefe Final*)<br/>**ID:** `oboro` \| **Author:** Ultimate MUGEN<br/>**Origin:** The Rift of the Scarlet Eclipse / Forgotten Moon Dynasty<br/>**Alignment:** **Supreme Villain / Final Boss**<br/>**Theme Color:** `#c8102e` (Blood Eclipse Crimson & Void Black)<br/>**Awakened Form:** Awakened Veil (*Véu Desperto*)<br/>**Home Stage:** Gate of Spirits (`spirit`) / Volcanic Crater (`volcano`)<br/>**Fighting Style:** Reality-Warping Genjutsu, Black Hellfire & Raven Phantoms |
 
 ![Oboro Battle Sprite](../../assets/chars/sprites/oboro/01_idle.png)
 *Standard In-Game Combat Stance*
 
 #### Biography & Background
-Mikazuki Oboro is the supreme architect behind the Great Convergence and the ultimate antagonist of Ultimate MUGEN. Standing tall in flowing black robes lined with blood-crimson silk, Oboro possesses the legendary **Scarlet Mangekyo** eyes — ocular artifacts capable of perceiving and rewriting the fundamental fabric of cause and effect.
+Mikazuki Oboro is the supreme architect behind the Great Convergence and the ultimate antagonist of Ultimate MUGEN. Standing tall in flowing black robes lined with blood-crimson silk, Oboro possesses the legendary **Scarlet Veil** eyes — ocular artifacts capable of perceiving and rewriting the fundamental fabric of cause and effect.
 
 Oboro views mortal reality as an agonizing, chaotic nightmare filled with suffering, war, and mortality. His grand design is to cast the entire universe into an eternal, painless dreamworld beneath the Scarlet Eclipse, erasing all individual consciousness into a serene, unified sea of black fire. Calm, elegant, and always three steps ahead of every challenger, Oboro fights with effortless superiority: his body dissolves into flocks of nightmarish ravens when struck, and his black flames burn until nothing remains.
 
@@ -571,7 +571,7 @@ classDiagram
         +Protector
     }
     class Oboro {
-        +Mangekyo
+        +Véu
         +Final Boss
     }
     class Daichi {

@@ -1,0 +1,56 @@
+{
+  "scope": "Structural QA only for the promoted Garan run-frame edge correction. No engine tests or runtime checks.",
+  "active": "assets\\chars\\sprites\\garan\\sg_run_mid.png",
+  "backup": "docs\\evidence\\native-identity-standardization\\roster-family-audit\\candidates\\garan-sg-run-mid-edge-v1\\sg_run_mid-before.png",
+  "candidate": "docs\\evidence\\native-identity-standardization\\roster-family-audit\\candidates\\garan-sg-run-mid-edge-v1\\sg_run_mid-edge-v1.png",
+  "hashes": {
+    "backupOriginal": "cf150843db3171c61a11c6d69d4d97abb581d92a5aacc73763c98018505b09b8",
+    "candidate": "685cacd4ae27e67c74f644f940afe6dfc269247636d1ce9d449a94b2e6ca06ef",
+    "promotedActive": "685cacd4ae27e67c74f644f940afe6dfc269247636d1ce9d449a94b2e6ca06ef"
+  },
+  "promotedMetrics": {
+    "dimensions": [
+      400,
+      400
+    ],
+    "mode": "RGBA",
+    "alphaValues": [
+      0,
+      255
+    ],
+    "alphaBBox": [
+      24,
+      6,
+      375,
+      362
+    ],
+    "topRowOpaquePixels": 0,
+    "bottomRowOpaquePixels": 0,
+    "uniqueVisibleRGBColors": 30,
+    "changedPixelsFromBackup": 333,
+    "changedYExtent": [
+      0,
+      12
+    ],
+    "changedRGBPixelCount": 0,
+    "metaFrame": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    }
+  },
+  "checks": {
+    "canvas400x400": true,
+    "rgbaPng": true,
+    "hardAlphaOnly": true,
+    "transparentTopEdge": true,
+    "sameFloorEdgeAsSource": true,
+    "bodyPixelsUnmovedOutsideTopRetouch": true,
+    "rgbPalettePixelsUnchanged": true,
+    "candidateMatchesPromotedActive": true,
+    "backupMatchesOriginalSourceHash": true,
+    "promotedHashMatchesReviewedCandidate": true,
+    "sharedMetadataUnchangedValues": true
+  },
+  "result": "PASS"
+}

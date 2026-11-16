@@ -16,7 +16,9 @@ pub fn story_strip(arena: &str) -> Option<Arc<ImageData>> {
         include_bytes!("../../assets/stages/story/volcano.png"),
         include_bytes!("../../assets/stages/story/dojo.png"),
     ];
-    Some(STRIPS[index].get_or_init(|| decode_illustration(bytes[index]).expect("embedded story strip")).clone())
+    let image = STRIPS[index].get_or_init(|| decode_illustration(bytes[index]).expect("embedded story strip")).clone();
+    super::story_loop::register(index, &image);
+    Some(image)
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -27,7 +29,9 @@ thread_local! {
 
 #[cfg(target_arch = "wasm32")]
 pub fn story_strip(arena: &str) -> Option<Arc<ImageData>> {
-    WEB_STRIP.with(|cache| cache.borrow().as_ref().filter(|(key, _)| key == arena).map(|(_, image)| image.clone()))
+    let image = WEB_STRIP.with(|cache| cache.borrow().as_ref().filter(|(key, _)| key == arena).map(|(_, image)| image.clone()))?;
+    super::story_loop::register(STORY_ARENAS.iter().position(|name| *name == arena)?, &image);
+    Some(image)
 }
 
 #[cfg(target_arch = "wasm32")]

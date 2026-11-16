@@ -10,7 +10,7 @@ UMF (*Ultimate Mugen Format*) describes a whole fighter in **one JSON file**. Th
 4. Run `cargo run --release`. `build.rs` embeds every `.json` in the folder into the executable.
 5. Test in **Training** with `F2` on to see hitboxes and hurtboxes.
 
-Loading a UMF fighter from a folder without recompiling is **planned** (the registry already has `add_native_json`; it only needs to be wired to the `mugen/` folder).
+UMF fighters also load from a folder without recompiling: drop the `.json` in `umf/` next to the game (or in `mugen/umf/`, or in the folder named by `UME_UMF_DIR`). Kit files in the same folder are registered first, whatever their names.
 
 ## File skeleton
 
@@ -41,9 +41,11 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | Field | Required | Description |
 |---|---|---|
 | `format` | yes | Always `umf/1` |
+| `extends` | no | Fighter or kit ids to inherit from, see [Reuse](#reuse-extends-use-and-kits). Required fields may then come from the parent |
 | `id`, `name`, `series`, `author`, `color` | yes | Identity; `color` is the select card color |
 | `boss` | no | `true` hides it from select and makes it the final Arcade boss |
 | `npc` | no | `true` hides it from select and every random pool; used by Story mode thugs, no boss empowerment |
+| `profile` | no | Nationality and biography, see [Profile](#profile-nationality-and-biography) |
 | `speed` | no | Animation speed multiplier (>1 = faster moves) |
 | `stats` | no | Attributes, table below |
 | `art` | yes | Art, see [Rig](Rig.md) |
@@ -51,6 +53,68 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | `awakeningPalette` | no | Color overrides applied on top of the selected palette while awakened; effect sprites are unchanged |
 | `anims` | yes | Animations by name |
 | `moves` | yes | Moves |
+
+## Reuse: `extends`, `use` and kits
+
+A fighter does not have to be written from scratch. Three tools remove the copy and paste that M.U.G.E.N packages need (see the numbers in [M.U.G.E.N code study](MUGEN-Code-Study.md)):
+
+| Tool | Where | What it does |
+|---|---|---|
+| `"extends": "kaito"` | top level | Inherits everything from a loaded fighter or kit: stats, art, animations, moves. A list (`["kaito", "storm-kit"]`) layers several, left to right. |
+| `"use": "gale"` | inside a move | Clones another move (from a parent or from an earlier move of the same file) under a new `id`, changing only the fields you write. |
+| kit file | `"format": "umf-kit/1"` | A partial definition (moves, animations, poses, stats) with an `id`, shared by many fighters. `core` is built in and carries the universal `launcher` and `escape_burst`. |
+
+Rules of the merge, applied by `crates/engine/src/native/kit.rs` before the normal UMF parser runs:
+
+- Objects (`stats`, `art`, `abilities`, `passives`) merge key by key, so `"stats": { "life": 1080 }` changes one number. An animation in `anims` replaces the inherited one as a whole. A value of `null` removes the inherited key.
+- `moves` are matched by `id`. An entry with only some fields keeps the rest (`{ "id": "gale", "name": "Crimson Gale" }`), a bare string (`"launcher"`) lists an inherited move unchanged, and `{ "id": "slide", "remove": true }` drops one. Moves you list come first, in your order; inherited moves you did not mention follow.
+- Identity is personal: `name`, `author`, `description`, `profile`, `boss` and `npc` are never inherited from a fighter.
+- `spriteSet` lets the new fighter reuse the parent's pixel-art pack. Recolour it with `palettes` and leave `art.style.colors` inherited: those are the reference colours of the pack.
+- Mistakes name the culprit (`unknown kit or fighter`, `move x uses y, which no kit or earlier move defines`), and `extends` chains deeper than 8 are rejected.
+
+A complete fighter in 20 lines ([`docs/examples/umf/mika.json`](../examples/umf/mika.json), which inherits a 39 KB definition and the kit [`storm-kit.json`](../examples/umf/storm-kit.json)):
+
+```json
+{
+  "format": "umf/1",
+  "id": "mika",
+  "name": "Mika Arashi",
+  "author": "Ultimate MUGEN",
+  "color": "#b8433a",
+  "extends": ["kaito", "storm-kit"],
+  "spriteSet": "kaito",
+  "stats": { "life": 1080, "attack": 104 },
+  "palettes": [{ "top": "#b8433a", "trim": "#6a1e1a", "hair": "#1a1a22" }],
+  "moves": [
+    { "id": "gale", "name": "Crimson Gale" },
+    { "id": "squall", "use": "gale", "name": "Squall Volley", "input": "~D, DF, F, x+a", "cost": 500, "fx": "aura" },
+    { "id": "slide", "remove": true }
+  ]
+}
+```
+
+Try it with `UME_UMF_DIR=docs/examples/umf cargo run --release`.
+
+## Profile (nationality and biography)
+
+Every fighter has a nationality and a short biography, written in English (`en`), Brazilian Portuguese (`pt`) and Spanish (`es`). A missing language falls back to `en`.
+
+```json
+"profile": {
+  "country": "jp",
+  "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+  "bio": { "en": "Two short sentences.", "pt": "Duas frases curtas.", "es": "Dos frases cortas." }
+}
+```
+
+- Built-in fighters, the final boss and the Story mode thugs keep their profiles in `assets/char_profiles.json`, keyed by `id`. A `profile` field inside the fighter file wins over that table, so imported UMF fighters carry their own.
+- `country` picks the flag drawn next to the nationality: `jp`, `br`, `no`, `us`, `cn`, `es`, `mn`, `de`, `kr`, `ar`, `au`, `ru`, `fr`, plus the fictional `underworld` and `eclipse`. Flags are vector shapes in `src/flag/designs.rs` (no image files); add a new entry there for another country. An unknown code simply shows no flag. `UME_SHOTS_ONLY=flags` saves a sheet with every flag.
+- The flag appears on the roster tile, on the fighter card, in the profile strip under the roster and on the Story mode stage card.
+- Keep each biography under 260 characters: it must fit two lines of the select screen.
+- `tags` is an optional list of fighting-style tags (`"tags": ["rushdown", "zoner"]`). The select screen shows up to three as chips under the roster. Known keys are translated (`rushdown`, `grappler`, `zoner`, `balanced`, `aerial`, `trapper`, `counter`, `power`); any other key is shown uppercased (`storm-caller` becomes STORM CALLER). The list lives in `src/profile_tags.rs`.
+- The select screen shows the nationality and the biography of the highlighted fighter under the roster (thugs and the boss appear with the Bosses filter). The Story mode stage card shows the profile of the stage boss.
+- Fighters without a profile (M.U.G.E.N content) keep showing `description`.
+- `cargo test --release -p ultimate-mugen profile` checks that every fighter file of `assets/chars` has a complete profile in the three languages.
 
 ## `stats`
 
@@ -64,6 +128,7 @@ Loading a UMF fighter from a folder without recompiling is **planned** (the regi
 | `jump` | `[-8.4, -2.5, 0, 2.6]` | Vertical speed, horizontal back, neutral and forward |
 | `gravity` | — | Vertical acceleration |
 | `airJumps` | — | Extra air jumps |
+| `airDashes` | 1 | Air dashes per jump (`movement.airdash.num`) |
 | `height` | `100` | Body height |
 | `width` | `[16, 15]` | Front / back width for pushing |
 
@@ -159,6 +224,8 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 
 **Finisher.** A move with `"kind": "finisher"` (use `throw` or `hits` for the effect) is only available after a KO (`RoundState = 3` and `WinKO`). When the final round ends by KO and the winner has a finisher, the round waits up to 6 seconds on "FINISH HIM" for the winner to perform it; performing it (or the timeout) ends the wait. Rosters with no finisher are unaffected.
 
+**Ultimate.** A move whose `id` starts with `ult_` is the fighter's ultimate, and every native fighter declares one (the command is `~D, DF, F, D, DF, F, x+y`). The compiler spends the whole meter on it: `cost` defaults to `3000` (the three bars drawn by the HUD), the move gets a 70 % damage bonus where a normal `super` gets 30 %, and its super freeze lasts 75 ticks instead of 55. `cargo test --release -p ume-engine --test native_ultimates` fails when a fighter has no ultimate, when the cost is not three bars, when the ultimate does not start from its command or drains the meter, or when the measured damage is below 380 or not above every one of the fighter's supers.
+
 ### Combat traits
 
 - **Automatic gatling.** A move without `cancels` follows the genre rules: a normal cancels into any *stronger* normal (`light` < `medium` < `heavy` by the strongest hit level, ties by declaration order, so strings can never loop), ground normals link into crouching ones, air normals chain with air normals, and every normal cancels into every special and super on contact. Specials cancel into other specials only through explicit `cancels`; supers cancel out of any move.
@@ -221,7 +288,21 @@ All native fighters also receive two down-light-kick normals at compile time (`n
 
 ## Energy charge (every fighter)
 
-Every native fighter can charge its meter: hold **R** (the `s` / Start input; the pause key in a fight is **Esc** or **P**). The fighter enters state `3920`, plays its `powerUp` animation on a loop with a blue glow and gains 4 power per tick (a 1000-power super in about four seconds) until the button is released (after at least 6 ticks) or the meter is full. The state is `movetype = I`, so a hit interrupts it, and a form-capable fighter still transforms with `T` once the meter reaches the form cost. The command is `charge_cmd` (`/s`) and shows as `Charge Energy` in the move list. The built-in AI charges only at level 3 or above, with less than 700 power, when the rival is more than 190 units away and is not attacking.
+Every native fighter can charge its meter: hold **R** (the `s` / Start input; the pause key in a fight is **Esc** or **P**). The fighter enters state `3920`, plays its `powerUp` animation on a loop with a blue glow and gains 9 to 48 power per tick (`native/charge_ramp.rs`, filling a 1000-power super in about one second) until the button is released (after at least 6 ticks) or the meter is full. The state is `movetype = I`, so a hit interrupts it, and a form-capable fighter still transforms with `T` once the meter reaches the form cost. The command is `charge_cmd` (`/s`) and shows as `Charge Energy` in the move list. The built-in AI charges only at level 3 or above, with less than 700 power, when the rival is more than 190 units away and is not attacking.
+
+`taunt`, `powerUp` and `defeat*` have default versions if you do not define them. Other names get free numbers in file order. Add `"id": 8801` to any animation entry to pin a fixed action number for custom scripts or `p2Anim`.
+
+## Exotic mechanics (`helpers`, cinematic `throw`, `bossRules`, `scripts`)
+
+Every Ikemen GO / M.U.G.E.N expressive pattern works declaratively inside a single UMF JSON without editing Rust:
+
+| Section | Replaces in M.U.G.E.N / ZSS | Key capabilities |
+|---|---|---|
+| `helpers.stand` | Manual `Helper(keyctrl=1)` + `BindToParent` + `HitOverride` | Independent hitbox/hurtbox Stand fighting alongside parent (`input` or `triggerMove`), toggle summon/recall, optional meter `drain`, `lifeTransfer` to parent via `ModifyPlayer` |
+| `helpers.clones` | Manual AI clone `Helper`s | *Kage Bunshin* autonomous clones (`count`, `maxActive`, `duration`, `walkSpeed`, `attackRange`, `oneHitPoof`), chase + random AI attack selection, camera freedom (`ScreenBound movecamera = 0, 0`) |
+| `moves[].throw` (cinematic) | Custom `TargetState` + `ChangeAnim2` choreography | `p2Anim` (`ChangeAnim2`), `cameraFree`, `camera` (`zoom`, `time`, `lag`, `freeze`), beat-by-beat `steps[]` (`at`, `bind`, `p2Anim`, `p2State`, `damage`, `shake`, `facing`, `launch`), auto `!GetHitVar(IsBound)` failsafe |
+| `bossRules` | UI-breaking `[StateDef -4]` `AssertSpecial` / `Text` / `ModifyPlayer` | `hideHud`, `hideLifeBar`, `hidePowerBar`, `hideTimer`, `freezeTimer`, continuous or triggered HUD `texts[]`, `modifyPlayer[]` (self or `"enemy"`), `phases[]` (`lifeBelowRatio`, `when`, `once`, `attackMul`, `defenceMul`) |
+| `scripts` | Raw `.zss` / `.cns` files (`[StateDef -4]`, `map()`) | Inline `zss` and/or `cns` strings (supports `[StateDef -4]` running even during `SuperPause`, `map(k) := v`, `teamMap(k) := v`), custom `commands[]`, and `@anim(name)` / `@move(id)` macro expansion |
 
 ## Air abilities (every special and super)
 
@@ -229,7 +310,7 @@ Every `special` and `super` with `when` unset or `"stand"` also gets an air vers
 
 ## Pixel-art sprites (optional)
 
-If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files instead of the rig. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size for every file of one fighter. A pose without a PNG falls back to `01_idle.png`; a fighter without the folder keeps its rig. After extending the rig, run `cargo run --release -p ume-engine --example generate_missing_sprites` to render a dedicated PNG for every pose the loader would otherwise take from the idle canvas.
+If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files instead of the rig. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size (400×400 RGBA) for every file of one fighter. Generate missing combat PNGs using `generate_image` with a validated canonical pixel-art anchor of that fighter (never use the deprecated procedural vector rig).
 
 | File | Poses that use it |
 |---|---|

@@ -41,6 +41,8 @@ impl ChainPlan {
 
     pub(super) fn sid(&self, index: usize) -> i32 { self.entries[index].sid }
 
+    pub(super) fn sid_of(&self, id: &str) -> Option<i32> { self.entries.iter().find(|e| e.id == id).map(|e| e.sid) }
+
     fn sources(&self, index: usize) -> Vec<i32> {
         let target = &self.entries[index];
         let mut out: Vec<i32> = self.entries.iter().enumerate().filter(|(i, s)| {

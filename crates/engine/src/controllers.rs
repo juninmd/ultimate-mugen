@@ -161,7 +161,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             if sc.has("fvalue", 0) { let last = n(m, "last", 39.0) as usize; let v = n(m, "fvalue", 0.0); for k in first..=last.min(39) { m.fighters[i].fvars[k] = v; } }
             else { let last = n(m, "last", 59.0) as usize; let v = n(m, "value", 0.0) as i32; for k in first..=last.min(59) { m.fighters[i].vars[k] = v; } }
         }
-        "poweradd" => { let v = n(m, "value", 0.0) as f32; m.add_power(i, v); }
+        "poweradd" => { let v = n(m, "value", 0.0) as f32; let cost = if v < 0.0 { m.fighters[i].base_def.c("tuning.power_cost", 100.0) as f32 / 100.0 } else { 1.0 }; m.add_power(i, v * cost); }
         "assertcommand" => {
             let name = sc.raw("value").or_else(|| sc.raw("name")).map(|s| s.trim().trim_matches('"').to_ascii_lowercase()).unwrap_or_default();
             let time = (n(m, "time", 1.0) as i32).max(1);
@@ -308,7 +308,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             }
         }
         "playerpush" => { let v = n(m, "value", 1.0) != 0.0; m.fighters[i].player_push = v; }
-        "screenbound" => { let v = n(m, "value", 0.0) != 0.0; m.fighters[i].screen_bound = v; }
+        "screenbound" => { let (sb, mc) = (n(m, "value", 0.0) != 0.0, [n2(m, "movecamera", 0.0, 0) != 0.0, n2(m, "movecamera", 0.0, 1) != 0.0]); let f = &mut m.fighters[i]; f.screen_bound = sb; f.move_camera = mc; }
         "afterimage" => {
             let (t, len) = (n(m, "time", 1.0) as i32, n(m, "length", 20.0) as usize);
             let d = AfterImageParams::default();

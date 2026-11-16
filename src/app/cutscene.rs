@@ -1,4 +1,5 @@
 use super::*;
+use crate::i18n::tr3;
 use crate::poly;
 
 #[path = "cutscene/battle.rs"]
@@ -7,6 +8,7 @@ mod battle;
 mod climax;
 #[path = "cutscene/endings.rs"]
 mod endings;
+mod skip;
 #[path = "cutscene/story.rs"]
 mod story;
 
@@ -183,9 +185,9 @@ impl App {
             poly::solid(&[c + vec2(-7.0, -8.0) * s, c + vec2(8.0, 0.0) * s, c + vec2(-7.0, 8.0) * s], Color::new(1.0, 1.0, 1.0, a));
         }
         let hint = if kind == 2 && page + 1 == script.len() {
-            "ENTER voltar ao menu principal · ESC pular"
+            tr3("ENTER/A voltar ao menu · ESC/START pular", "ENTER/A back to menu · ESC/START skip", "ENTER/A volver al menú · ESC/START saltar")
         } else {
-            "ENTER avançar · ESC pular"
+            tr3("ENTER/A avançar · ESC/START pular", "ENTER/A next · ESC/START skip", "ENTER/A avanzar · ESC/START saltar")
         };
         self.ui.text(hint, 1240.0, 702.0, 14.0, Color::new(1.0, 1.0, 1.0, 0.45), Align::Right, false);
         if kind == 0 {
@@ -193,8 +195,8 @@ impl App {
                 self.ui.text(&txt, VW / 2.0, 96.0, 26.0, hex("#ffcc33"), Align::Center, true);
             }
         }
-        let adv = self.c.pressed(nav::OK) || is_mouse_button_pressed(MouseButton::Left) || is_key_pressed(KeyCode::Space);
-        if self.c.pressed(nav::BACK | nav::START) { self.cutscene_done(kind); return; }
+        let adv = self.c.pressed(nav::OK) || self.tap_any() || is_key_pressed(KeyCode::Space);
+        if self.skip_chip() || self.c.pressed(nav::BACK | nav::START) { self.cutscene_done(kind); return; }
         if adv {
             if !done { t = 99.0; } else { page += 1; t = 0.0; self.audio.sfx("select"); }
         }

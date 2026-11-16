@@ -81,7 +81,8 @@ fn link_problems(moves: &[Value], anims: &Map<String, Value>, problems: &mut Vec
     for m in moves {
         let id = text(m, "id");
         let when = if text(m, "kind") == "normal" { m.get("when").and_then(Value::as_str).unwrap_or("stand").to_string() } else { String::new() };
-        let key = (text(m, "input").replace(' ', ""), when);
+        let situation = m.get("requires").map(|r| format!("{}{}", r.get("distance").map(Value::to_string).unwrap_or_default(), r.get("enemyState").map(Value::to_string).unwrap_or_default())).unwrap_or_default();
+        let key = (text(m, "input").replace(' ', ""), when + &situation);
         if let Some((_, other)) = seen.iter().find(|(k, _)| *k == key) {
             problems.push(format!("{id}: input '{}' duplicates {other}", text(m, "input")));
         }

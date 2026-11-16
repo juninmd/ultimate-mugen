@@ -12,9 +12,6 @@ fn ease_back(x: f32) -> f32 {
 fn tint(c: Color, a: f32) -> Color {
     Color::new(c.r, c.g, c.b, a)
 }
-fn dark(c: Color, k: f32) -> Color {
-    Color::new(c.r * k, c.g * k, c.b * k, c.a)
-}
 
 impl App {
     fn versus_tags(&self) -> [&'static str; 2] {
@@ -27,14 +24,7 @@ impl App {
     }
 
     pub(super) fn glass(&self, x: f32, y: f32, w: f32, h: f32, accent: Color, alpha: f32) {
-        self.ui
-            .rect(x, y, w, h, Color::new(0.04, 0.03, 0.1, 0.55 * alpha));
-        self.ui
-            .rect(x, y, w, h * 0.5, Color::new(1.0, 1.0, 1.0, 0.09 * alpha));
-        self.ui
-            .rect(x, y, w, 2.0, Color::new(1.0, 1.0, 1.0, 0.55 * alpha));
-        self.ui
-            .rect(x, y + h - 2.0, w, 2.0, tint(accent, 0.9 * alpha));
+        self.ui.adapted_glass(x, y, w, h, accent, alpha);
     }
 
     fn versus_team_strip(&mut self, side: usize, x0: f32, y: f32, t: f32) {
@@ -116,58 +106,14 @@ impl App {
         let k = ease_out(t / 0.5);
         let (lo, ro) = (-(1.0 - k) * 760.0, (1.0 - k) * 760.0);
         let (split, lean) = (640.0, 110.0);
-        clear_background(hex("#05030c"));
-
-        self.ui.quad(
+        self.vs_backdrop(
             [
-                vec2(lo - 40.0, 0.0),
-                vec2(lo + split + lean / 2.0, 0.0),
-                vec2(lo + split - lean / 2.0, VH),
-                vec2(lo - 40.0, VH),
+                super::vs_epic::Side { col: ca, off: lo },
+                super::vs_epic::Side { col: cb, off: ro },
             ],
-            dark(ca, 0.5),
+            split,
+            lean,
         );
-        self.ui.quad(
-            [
-                vec2(lo - 40.0, 0.0),
-                vec2(lo + split - 160.0, 0.0),
-                vec2(lo + split - 160.0 - lean, VH),
-                vec2(lo - 40.0, VH),
-            ],
-            tint(ca, 0.28),
-        );
-        self.ui.quad(
-            [
-                vec2(ro + split + lean / 2.0, 0.0),
-                vec2(ro + VW + 40.0, 0.0),
-                vec2(ro + VW + 40.0, VH),
-                vec2(ro + split - lean / 2.0, VH),
-            ],
-            dark(cb, 0.5),
-        );
-        self.ui.quad(
-            [
-                vec2(ro + split + 160.0 + lean, 0.0),
-                vec2(ro + VW + 40.0, 0.0),
-                vec2(ro + VW + 40.0, VH),
-                vec2(ro + split + 160.0, VH),
-            ],
-            tint(cb, 0.28),
-        );
-
-        let drift = (self.ui.t * 30.0) % 80.0;
-        for i in 0..12 {
-            let x = i as f32 * 80.0 - drift;
-            self.ui.quad(
-                [
-                    vec2(x, 0.0),
-                    vec2(x + 3.0, 0.0),
-                    vec2(x - lean + 3.0, VH),
-                    vec2(x - lean, VH),
-                ],
-                Color::new(1.0, 1.0, 1.0, 0.03),
-            );
-        }
 
         let wm = (t - 0.2).max(0.0).min(1.0);
         let first = |i: usize| {
@@ -209,9 +155,10 @@ impl App {
         let pt = self.preview_t;
         let bob = (self.ui.t * 1.6).sin() * 3.0;
         if let Some(d) = self.reg.chars[a].peek(1) {
+            let pose = if d.anims.contains_key(&181) { 181 } else { 0 };
             self.draw_char_fit(
                 &d,
-                0,
+                pose,
                 pt,
                 330.0 + lo * 1.25,
                 596.0 + bob,
@@ -232,19 +179,11 @@ impl App {
             let b_anim = if self.boss_idx() == Some(b) && self.mode == Mode::Arcade {
                 let c = self.arcade.as_ref().map(|(l, i)| l[..=*i].iter().filter(|&&x| x == b).count()).unwrap_or(0);
                 if c >= 3 { -2000 } else if c == 2 { -1000 } else { 0 }
-            } else { 0 };
+            } else if d.anims.contains_key(&181) { 181 } else { 0 };
             self.draw_char_fit(&d, b_anim, pt, 950.0 + ro * 1.25, 596.0 + bob, 520.0, 520.0, true);
         }
 
-        let line = 0.5 + 0.5 * (self.ui.t * 5.0).sin();
-        let seam = [
-            vec2(split + lean / 2.0 - 5.0, 0.0),
-            vec2(split + lean / 2.0 + 5.0, 0.0),
-            vec2(split - lean / 2.0 + 5.0, VH),
-            vec2(split - lean / 2.0 - 5.0, VH),
-        ];
-        self.ui
-            .quad(seam, Color::new(1.0, 0.92, 0.7, 0.55 + 0.25 * line));
+        self.vs_seam(split, lean);
 
         let tags = self.versus_tags();
         let pk = ease_out((t - 0.3) / 0.35);
@@ -284,7 +223,7 @@ impl App {
                 false,
             );
             let chip_x = if side == 0 { x + w - 90.0 } else { x + 20.0 };
-            self.ui.rect(chip_x, y + 56.0, 70.0, 22.0, tint(col, 0.9));
+            self.ui.adapted_plate(chip_x, y + 56.0, 70.0, 22.0, Some(tint(col, 0.9)));
             self.ui.text(
                 tags[side],
                 chip_x + 35.0,
@@ -302,61 +241,7 @@ impl App {
 
         let (cx, cy) = (640.0, 318.0);
         let ek = ease_back((t - 0.35) / 0.35);
-        if ek > 0.0 {
-            let pulse = 1.0 + 0.035 * (self.ui.t * 6.0).sin();
-            let sc = ek * pulse;
-            glow(
-                self.ui.x(cx),
-                self.ui.y(cy),
-                250.0 * sc * self.ui.s,
-                Color::new(1.0, 0.5, 0.1, 0.7 * ek.min(1.0)),
-            );
-            let spin = self.ui.t * 0.9;
-            for i in 0..14 {
-                let ang = spin + i as f32 * std::f32::consts::TAU / 14.0;
-                let (r0, r1, half) = (
-                    96.0 * sc,
-                    (150.0 + if i % 2 == 0 { 34.0 } else { 0.0 }) * sc,
-                    0.09,
-                );
-                let p = |r: f32, da: f32| {
-                    vec2(
-                        self.ui.x(cx + (ang + da).cos() * r),
-                        self.ui.y(cy + (ang + da).sin() * r),
-                    )
-                };
-                draw_triangle(
-                    p(r0, -half),
-                    p(r0, half),
-                    p(r1, 0.0),
-                    Color::new(1.0, 0.82, 0.3, 0.85 * ek.min(1.0)),
-                );
-            }
-            draw_poly(
-                self.ui.x(cx),
-                self.ui.y(cy),
-                48,
-                100.0 * sc * self.ui.s,
-                0.0,
-                Color::new(0.1, 0.02, 0.06, 0.78 * ek.min(1.0)),
-            );
-            draw_circle_lines(
-                self.ui.x(cx),
-                self.ui.y(cy),
-                100.0 * sc * self.ui.s,
-                4.0 * self.ui.s,
-                hex("#ffcc33"),
-            );
-            self.ui.text_bold(
-                "VS",
-                cx,
-                cy + 46.0 * sc,
-                132.0 * sc,
-                hex("#ffe08a"),
-                hex("#5a0a10"),
-                Align::Center,
-            );
-        }
+        self.vs_emblem(cx, cy, ek, t - 0.35, [ca, cb]);
 
         let tk = ease_out((t - 0.15) / 0.3);
         self.ui.gradient_v(

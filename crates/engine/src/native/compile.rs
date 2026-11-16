@@ -154,10 +154,10 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let air_entry = format!("statetype = A{}", plan.air_entry_states(index));
         let state_cond = match when { "air" => air_entry.as_str(), "crouch" => "statetype = C || (statetype = S && command = \"holddown\")", _ => "statetype = S || statetype = C && command != \"holddown\"" };
         let crouch_ok = match when { "crouch" => "\ntriggerall = command = \"holddown\"", "stand" => "\ntriggerall = command != \"holddown\" || statetype = S", _ => "" };
-        let cancel = plan.triggers(index);
+        let cancel = super::rekka::lead(m, &plan, index);
         let form_line = form_cond.as_ref().map(|fc| format!("triggerall = {fc}\n")).unwrap_or_default();
         let cost_line = if cost > 0.0 { format!("triggerall = power >= {cost}\n") } else { String::new() } + &super::requires::trigger_lines(m);
-        minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = !IsHelper && (command = \"{cname}\"{simple_cmd})\ntriggerall = {state_cond}{crouch_ok}\n{form_line}{cost_line}trigger1 = ctrl{cancel}{}\n\n", m.name, if m.burst == Some(true) { "\ntrigger2 = movetype = H && stateno != [5100, 5150]" } else { "" });
+        minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = !IsHelper && (command = \"{cname}\"{simple_cmd})\ntriggerall = {state_cond}{crouch_ok}\n{form_line}{cost_line}{cancel}{}\n\n", m.name, if m.burst == Some(true) { "\ntrigger2 = movetype = H && stateno != [5100, 5150]" } else { "" });
         let anim = anim_no.get(&m.anim).copied().unwrap_or(0);
         let st = match when { "air" => 'A', "crouch" => 'C', _ => 'S' };
         let jumps = m.moves.iter().any(|v| v.vel[1].is_some_and(|y| y != 0.0));

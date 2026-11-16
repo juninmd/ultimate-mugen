@@ -30,7 +30,7 @@ impl App {
 
     pub(super) fn replay_selection_bar(&self, cur: usize) {
         let y = crate::spring::follow("replays.sel", 100.0 + cur as f32 * 46.0);
-        self.ui.rect(50.0, y, 1180.0, 40.0, alpha(hex("#ff4d6d"), 0.5));
+        self.ui.adapted_highlight(("replays.selx", "replays.sely"), 50.0, y, 1180.0, 40.0);
     }
 
     pub(super) fn replays_empty_state(&self) {

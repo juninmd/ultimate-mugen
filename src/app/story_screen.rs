@@ -20,9 +20,8 @@ impl App {
         self.ui.background();
         self.ui.motes(40, 1.2);
         let reveal = (t * 2.5).min(1.0);
-        self.ui.rect(0.0, 230.0, VW, 220.0, Color::new(0.02, 0.01, 0.06, 0.78 * reveal));
-        self.ui.rect(0.0, 230.0, VW, 4.0, accent_color);
-        self.ui.rect(0.0, 446.0, VW, 4.0, accent_color);
+        self.ui.adapted_glass(-20.0, 230.0, VW + 40.0, 220.0, accent_color, reveal);
+        self.ui.rect(0.0, 230.0, VW * reveal, 3.0, accent_color);
         let (headline, sub, line) = match run.phase {
             Phase::Intro => (
                 text::stage_label(run.stage),

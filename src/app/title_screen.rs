@@ -14,7 +14,9 @@ impl App {
             Align::Center,
             true,
         );
-        if (self.ui.t * 2.0) as i32 % 2 == 0 {
+        let pulse = 0.5 + 0.5 * (self.ui.t * 3.0).sin();
+        self.ui.adapted_row(VW / 2.0 - 230.0, 504.0, 460.0, 52.0, true);
+        if pulse > 0.2 {
             self.ui.text_bold(
                 crate::i18n::tr3("PRESSIONE START / ENTER", "PRESS START / ENTER", "PULSA START / ENTER"),
                 VW / 2.0,

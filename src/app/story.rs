@@ -12,6 +12,8 @@ mod epilogue_text;
 mod boss_profile;
 #[path = "story/hud.rs"]
 mod hud;
+#[path = "story/stage_card.rs"]
+mod stage_card;
 
 use crate::app::{App, Mode, Screen, Team};
 use crate::session::Session;

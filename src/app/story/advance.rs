@@ -175,7 +175,7 @@ impl App {
             {
                 let f = &mut sess.m.fighters[fi];
                 f.pos = V2 {
-                    x: sess.m.stage.p2x + gap * k as f32,
+                    x: center + sess.m.view_w / 2.0 + 24.0 + gap * k as f32,
                     y: 0.0,
                 };
                 f.vel = V2::default();

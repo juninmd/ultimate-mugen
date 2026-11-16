@@ -121,6 +121,37 @@ pub fn checksum(m: &Match) -> u128 {
         h.u32(f.asserts as u32);
         h.u32((f.asserts >> 32) as u32);
         h.i64(f.history.tick);
+        h.i64(set_digest(f.cmd.pause_hold_entries()) as i64);
+        h.i64(set_digest(f.cmd.active_names().map(|n| (n, 0))) as i64);
+        h.u32(f.hitdef_targets.len() as u32);
+        for t in &f.hitdef_targets {
+            h.u32(*t);
+        }
+        h.u32(f.targets.len() as u32);
+        for (id, v) in &f.targets {
+            h.u32(*id);
+            h.i32(*v);
+        }
+        for (name, v) in f.hit_by.iter().chain(f.not_hit_by.iter()) {
+            h.bytes(name.as_bytes());
+            h.i32(*v);
+        }
+        for (id, v) in &f.persist {
+            h.u32(*id);
+            h.i32(*v);
+        }
+        for v in [f.combo_timer, f.combo_count, f.received_hits, f.air_dashes, f.unhittable, f.no_ctrl_ticks, f.move_countered, f.run_state_depth as i32] {
+            h.i32(v);
+        }
+        for v in [f.combo_damage, f.received_damage, f.ground_level, f.angle, f.super_defence_mul] {
+            h.f32(v);
+        }
+        h.f64(f.score);
+        h.f64(f.score_total);
+        h.i64(f.hit_overridden_at);
+        h.u32(f.last_hit_by.unwrap_or(u32::MAX));
+        h.u32(f.combo_target.unwrap_or(u32::MAX));
+        h.i32(f.victory_quote);
     }
     for e in &m.explods {
         h.u32(e.owner);
@@ -145,5 +176,21 @@ pub fn checksum(m: &Match) -> u128 {
         h.v2(p.pos);
         h.i32(p.age);
     }
+    h.i32(m.training as i32);
+    if let Some((t, c)) = m.flash {
+        h.i32(t);
+        for v in c {
+            h.f32(v);
+        }
+    }
     h.finish() as u128
+}
+
+fn set_digest<'a>(items: impl Iterator<Item = (&'a str, i64)>) -> u64 {
+    items.fold(0u64, |acc, (k, v)| {
+        let mut e = Fnv::default();
+        e.bytes(k.as_bytes());
+        e.i64(v);
+        acc.wrapping_add(e.finish())
+    })
 }

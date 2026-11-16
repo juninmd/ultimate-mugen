@@ -215,6 +215,7 @@ pub use macros::input_macro;
 
 #[cfg(test)]
 mod tests;
+mod digest;
 
 #[derive(Clone, Default)]
 pub struct CommandState {

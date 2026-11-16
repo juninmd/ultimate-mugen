@@ -13,7 +13,7 @@ impl App {
         }
         if self.c.pressed(nav::AUX) {
             s.r.debug = !s.r.debug;
-            self.debug_boxes = s.r.debug;
+            self.debug_boxes = s.r.debug; crate::hud::debug_panel::set(s.r.debug);
         }
         let pause_btn = if replaying {
             is_key_pressed(KeyCode::Space) || self.c.pressed(nav::START)

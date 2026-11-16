@@ -140,9 +140,7 @@ impl App {
     pub(crate) fn draw_boss_toast(&mut self, dt: f32) {
         self.boss_progression.tick_toast(dt);
         if let Some(toast) = &self.boss_progression.toast {
-            let (tw, th) = (760.0, 72.0);
-            let tx = (screen_width() - tw) / 2.0;
-            let ty = 32.0;
+            let (tx, ty, tw, th) = boss_toast_rect();
             self.ui.rect(tx, ty, tw, th, Color::new(0.04, 0.02, 0.08, 0.94));
             self.ui.rect_lines(tx, ty, tw, th, 2.0, hex("#ffcc33"));
             self.ui.text_bold(&toast.title, tx + tw / 2.0, ty + 28.0, 22.0, hex("#ffcc33"), BLACK, Align::Center);
@@ -154,8 +152,20 @@ impl App {
     }
 }
 
+pub(crate) fn boss_toast_rect() -> (f32, f32, f32, f32) {
+    let (tw, th) = (760.0_f32.min(VW - 32.0), 72.0);
+    ((VW - tw) / 2.0, 24.0, tw, th)
+}
+
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn boss_toast_fits_the_virtual_screen_and_clears_the_first_banner() {
+        let (x, y, w, h) = super::boss_toast_rect();
+        assert!(x >= 0.0 && x + w <= crate::ui::VW, "toast must stay on screen: x={x} w={w}");
+        assert!(y + h < 124.0 - 24.0, "toast must end above the first banner row (y={y} h={h})");
+    }
+
 
     #[test]
     fn boss_stage_mapping_matches_character_home() {

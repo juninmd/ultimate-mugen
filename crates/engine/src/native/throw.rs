@@ -25,6 +25,10 @@ pub struct ThrowStepSpec {
     #[serde(default)] pub launch: Option<[f32; 2]>,
 }
 
+pub fn is_victim_state(state_no: i32) -> bool {
+    (VICTIM_STATE_BASE..VICTIM_STATE_BASE + 150).contains(&state_no)
+}
+
 pub(super) fn victim_state(sid: i32) -> i32 {
     VICTIM_STATE_BASE + (sid % 100) + if sid >= 3000 { 50 } else { 0 }
 }

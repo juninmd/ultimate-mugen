@@ -401,7 +401,8 @@ impl Hud {
                     } else {
                         (w - 4.0 - (pw + 36.0), pw + 36.0)
                     };
-                    let top = if nforms > 0 { 11.0 } else { 5.0 };
+                    let potential = f.potential.level != ume_engine::potential::PotentialLevel::Idle;
+                    let top = if nforms > 0 || potential { 11.0 } else { 5.0 };
                     glass(&p, s, gx, py - top, gw, ph2 + 5.0 + top, 5.0, tint);
                     self.energy.track(side, f.power);
                     let bcx = self.energy.draw(&energy::Cell {
@@ -418,13 +419,20 @@ impl Hud {
                         forms: nforms,
                         colors,
                     });
-                    if nforms > 0 {
-                        let lbl = match f.next_form_cost() {
-                            Some(c) => format!("{} {}/{} · {} {}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), f.form + 1, nforms + 1, crate::i18n::tr3("PRÓX", "NEXT", "SIG"), c as i32),
-                            None => format!("{} {1}/{1} · MAX", crate::i18n::tr3("FORMA", "FORM", "FORMA"), nforms + 1),
+                    if nforms > 0 || potential {
+                        let lbl = if potential {
+                            let secs = (f.potential.time.max(0) + 59) / 60;
+                            let name = if f.potential.level == ume_engine::potential::PotentialLevel::Fury { crate::i18n::tr3("MODO FÚRIA", "FURY MODE", "MODO FURIA") } else { crate::i18n::tr3("POTENCIAL", "POTENTIAL", "POTENCIAL") };
+                            format!("{} · {}s", name, secs)
+                        } else {
+                            match f.next_form_cost() {
+                                Some(c) => format!("{} {}/{} · {} {}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), f.form + 1, nforms + 1, crate::i18n::tr3("PRÓX", "NEXT", "SIG"), c as i32),
+                                None => format!("{} {1}/{1} · MAX", crate::i18n::tr3("FORMA", "FORM", "FORMA"), nforms + 1),
+                            }
                         };
+                        let slots = if nforms > 0 { (nforms + 1).min(7) } else { 1 };
                         let al = if side == 0 { Align::Left } else { Align::Right };
-                        let tx = if side == 0 { pxm + 6.2 * (nforms + 1).min(7) as f32 + 2.0 } else { pxm + pw - 6.2 * (nforms + 1).min(7) as f32 - 2.0 };
+                        let tx = if side == 0 { pxm + 6.2 * slots as f32 + 2.0 } else { pxm + pw - 6.2 * slots as f32 - 2.0 };
                         text(&lbl, tx, py - 2.6, 4.4, Color::new(1.0, 1.0, 1.0, 0.85), al, true);
                     }
                     let lab = if lvl >= 3 {

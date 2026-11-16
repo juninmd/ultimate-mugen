@@ -118,7 +118,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
 
     let mut commands = vec![
         parse_command("holdfwd", "/$F", 1, 1), parse_command("holdback", "/$B", 1, 1), parse_command("holdup", "/$U", 1, 1), parse_command("holddown", "/$D", 1, 1),
-        parse_command("FF", "F, F", 10, 1), parse_command("BB", "B, B", 10, 1),
+        parse_command("FF", "F, F", 10, 1), parse_command("BB", "B, B", 10, 1), parse_command("UU", "U, U", 10, 1),
     ];
     let ab = super::abilities::ability_code(nc.abilities.as_ref(), &anim_no);
     commands.extend(ab.commands);

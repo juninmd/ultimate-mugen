@@ -76,6 +76,16 @@ pub fn score_line(score: i64) -> String {
     format!("{} {}", score, tr("PONTOS", "POINTS"))
 }
 
+pub fn tally_line(tally: &super::StageTally) -> String {
+    format!(
+        "{} +{}   {} +{}",
+        tr("BÔNUS DE FASE", "STAGE BONUS"),
+        tally.clear,
+        tr("VIDA", "LIFE"),
+        tally.life
+    )
+}
+
 pub fn credits_line(credits: u8) -> String {
     format!("{} {}", tr("CRÉDITOS", "CREDITS"), credits)
 }

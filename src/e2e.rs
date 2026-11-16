@@ -20,6 +20,7 @@ mod web {
             Screen::Mugen { .. } => "mugen",
             Screen::Market => "market",
             Screen::Replays { .. } => "replays",
+            Screen::PlayerCard { .. } => "player_card",
             Screen::Settings { .. } => "settings",
             Screen::Cutscene { .. } => "cutscene",
         }

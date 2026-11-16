@@ -52,6 +52,7 @@ mod load_plan;
 mod stage_select;
 mod fighter_draw;
 mod menu_screen;
+mod player_card_card; pub(crate) mod player_card_edit; mod player_card_lists; mod player_card_screen;
 mod title_screen;
 use select_category::CATEGORY_COUNT;
 #[cfg(target_arch = "wasm32")]
@@ -201,6 +202,8 @@ pub struct App {
     fight_rules: Rules,
     /// replay browser state
     replay_list: Vec<crate::replays::Entry>,
+    pub(crate) player: crate::player_card::Record,
+    pub(crate) card_edit: Option<player_card_edit::CardEdit>,
     replay_problems: Vec<String>,
     replay_rename: Option<String>,
     replay_confirm: bool,
@@ -211,7 +214,7 @@ pub struct App {
     warm_key: String,
 }
 
-const MENU: [(&str, &str); 10] = [
+const MENU: [(&str, &str); 11] = [
     ("menu.story", "desc.story"),
     ("menu.arcade", "desc.arcade"),
     ("menu.survival", "desc.survival"),
@@ -221,6 +224,7 @@ const MENU: [(&str, &str); 10] = [
     ("menu.market", "desc.market"),
     ("menu.settings", "desc.settings"),
     ("menu.replays", "desc.replays"),
+    ("menu.player_card", "desc.player_card"),
     ("menu.quit", "desc.quit"),
 ];
 
@@ -377,6 +381,8 @@ impl App {
             settings_back: None,
             fight_rules: Rules::default(),
             replay_list: vec![],
+            player: crate::player_card::Record::load(),
+            card_edit: None,
             replay_problems: vec![],
             replay_rename: None,
             replay_confirm: false,
@@ -491,6 +497,7 @@ impl App {
             Screen::Story { .. } => self.story_screen(dt).await,
             Screen::SurvivalOver { .. } => self.survival_over_screen(),
             Screen::Replays { .. } => self.replays_screen(),
+            Screen::PlayerCard { .. } => self.player_card_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
         }
         crate::e2e::publish(self);

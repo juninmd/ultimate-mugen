@@ -14,6 +14,8 @@ mod boss_profile;
 mod hud;
 #[path = "story/stage_card.rs"]
 mod stage_card;
+#[path = "story/clear_preview.rs"]
+mod clear_preview;
 
 use crate::app::{App, Mode, Screen, Team};
 use crate::session::Session;

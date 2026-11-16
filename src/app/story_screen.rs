@@ -75,6 +75,9 @@ impl App {
         } else if run.phase == Phase::Intro {
             self.draw_story_boss_profile(&run, accent_color, reveal);
         }
+        if let (Phase::Cleared, Some(tally)) = (run.phase, run.tally) {
+            self.ui.text(&text::tally_line(&tally), VW / 2.0, 480.0, 20.0, hex("#ffcc33"), Align::Center, true);
+        }
         let prompt = match run.phase {
             _ if deciding => "",
             Phase::Defeated if run.can_continue() => text::continue_label(),

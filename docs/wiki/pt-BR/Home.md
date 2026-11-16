@@ -23,6 +23,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Criar um personagem (guia rápido)](Criar-um-Personagem.md) | Criadores | Um lutador funcionando em dez linhas, herdado de outro |
 | [Criar personagem UMF](Personagem-UMF.md) | Criadores | Referência completa: todos os campos de um lutador em um único JSON |
 | [Passivos](Passivos.md) | Criadores | Fúria, acúmulos de habilidade e regeneração por dados |
+| [Potencial Liberado](Potencial-Liberado.md) | Jogadores | Transformação genérica para personagens importados: Potencial, depois Fúria |
 | [Rush Cancel](Rush-Cancel.md) | Jogadores e Criadores | Gaste energia para cancelar um golpe conectado, Overdrive e a apresentação |
 | [Níveis de Combo](Niveis-de-Combo.md) | Jogadores e Criadores | Selos de combo, marca de energia, air dashes e rebotes |
 | [Kits inspirados em Bleach](Kits-Inspirados-em-Bleach.md) | Jogadores | Ideias de Byakuya, Yoruichi e Zaraki em tres nativos |

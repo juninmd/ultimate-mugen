@@ -1,7 +1,7 @@
 use crate::app::{App, Screen};
 use crate::controls::nav;
 use crate::gfx::*;
-use crate::story::{text, Phase};
+use crate::story::{beats, text, Phase};
 use crate::ui::*;
 
 impl App {
@@ -26,7 +26,7 @@ impl App {
             Phase::Intro => (
                 text::stage_label(run.stage),
                 text::stage_title(run.stage).to_string(),
-                text::stage_line(run.stage).to_string(),
+                beats::stage_beat(run.stage, beats::beat_index(t)).to_string(),
             ),
             Phase::Cleared => (
                 text::stage_clear().to_string(),
@@ -50,7 +50,12 @@ impl App {
         };
         self.ui.text(&headline, VW / 2.0, 296.0, 26.0, accent_color, Align::Center, true);
         self.ui.text_bold(&sub, VW / 2.0, 360.0, 56.0, WHITE, BLACK, Align::Center);
-        self.ui.text(&line, VW / 2.0, 410.0, 20.0, hex("#d8d0f0"), Align::Center, false);
+        let line_color = if run.phase == Phase::Intro {
+            Color::new(0.847, 0.816, 0.941, beats::beat_alpha(t))
+        } else {
+            hex("#d8d0f0")
+        };
+        self.ui.text(&line, VW / 2.0, 410.0, 20.0, line_color, Align::Center, false);
         if run.phase == Phase::Intro {
             self.draw_story_boss_profile(&run, accent_color, reveal);
         }

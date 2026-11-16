@@ -49,3 +49,5 @@ Texts live in `assets/story/epilogues.json`, keyed by fighter id; `*` is the fal
 Code: data and lookup in `src/story/epilogue.rs`, flow in `src/app/story/epilogue.rs`, drawing in `src/app/story/epilogue_draw.rs` and `epilogue_text.rs`. Evidence in `screenshots/story-epilogues/`, captured with `UME_TOUR=epilogue ultimate-mugen --shots <dir> --res 1280x720 --mute`; the browser check is `node scripts/web-epilogue-smoke.js web/dist`.
 
 The loading screen is no longer a hero-versus-villain card in the story. Wave fights show a stage card (stage number, title, wave and hero name; `src/app/story/stage_card.rs`) so no enemy is exposed; the classic versus screen is kept for boss fights only, with a BOSS tag and the stage title over it.
+
+Clearing a stage boss now pays a life bonus on top of the boss bonus: `StageTally` (`src/story/tally.rs`) gives `remaining life x 2000 x stage number`, and the Stage Clear screen lists both (`STAGE BONUS +n   LIFE +n`). The browser hook `?e2e_clear=1` opens that screen for smoke checks.

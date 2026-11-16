@@ -51,3 +51,5 @@ Code: data and lookup in `src/story/epilogue.rs`, flow in `src/app/story/epilogu
 The loading screen is no longer a hero-versus-villain card in the story. Wave fights show a stage card (stage number, title, wave and hero name; `src/app/story/stage_card.rs`) so no enemy is exposed; the classic versus screen is kept for boss fights only, with a BOSS tag and the stage title over it.
 
 Clearing a stage boss now pays a life bonus on top of the boss bonus: `StageTally` (`src/story/tally.rs`) gives `remaining life x 2000 x stage number`, and the Stage Clear screen lists both (`STAGE BONUS +n   LIFE +n`). The browser hook `?e2e_clear=1` opens that screen for smoke checks.
+
+Story juice (`src/vfx/story_juice.rs`, active only while lane rules are on): footstep dust while the hero walks, sparkles over pickups, a `K.O.!` pop-up with ring and sparks when a foe falls, a ring and sound when the screen is released, and an animated GO cue (pulse plus sliding chevrons). Everything is procedural, no sprite is touched.

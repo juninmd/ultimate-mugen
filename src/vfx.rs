@@ -17,7 +17,7 @@ mod ko;
 mod rush;
 mod shock;
 mod sheet;
-mod speed_lines; mod stage_objects;
+mod speed_lines; mod stage_objects; mod story_juice;
 pub mod quality;
 pub use speed_lines::speed_lines;
 

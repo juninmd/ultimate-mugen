@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   sast:
-    uses: juninmd/base-actions/.github/workflows/reusable-sast.yml@main
+    uses: juninmd/base-actions/.github/workflows/reusable-sast.yml@ea7982d9e67a7d838f4beaf56ae66c89bf8610e3 # main
     with:
       # Relatorio no primeiro ciclo; aperte para true depois do triage.
       fail-semgrep: false

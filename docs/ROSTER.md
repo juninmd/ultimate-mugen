@@ -127,44 +127,6 @@ Os personagens da comunidade (como os catalogados no warehouse AK1 / Anderson Ke
 | **Arena do Torneio Chunin (Tournament)** | Naruto | `stages/tourn.def` | Paredes da arena e arquibancada |
 | **Floresta da Morte (Forest)** | Naruto | `stages/forest.def` | Vegetação densa e sombras |
 
-## Elenco dublado em PT-BR (`mugen/chars/`)
-
-28 personagens da comunidade com dublagem brasileira (Mugen Br, MFmugen PT BR e Golden
-Mugen Brasil): Dragon Ball (Raditz, Goku UI/MUI, Vegeta SSGSS, Cell EX), Jujutsu Kaisen
-(Itadori, Gojo, Nanami, Maki, Yuta, Panda, Inumaki), One Piece (Luffy e Gear 2), Bleach
-(Ichigo), Demon Slayer (Tanjiro), My Hero Academia (All Might), One Punch Man (Saitama),
-Shield Hero (Naofumi), Attack on Titan (Mikasa, Hange, Annie) e Marvel/DC (Gambit,
-Noturno, Jubileu, Mistica, Mulher Maravilha, Ravena).
-
-Tabela completa com `.def`, autor, quantidade de sons, origem e validação: `docs/PTBR_CHARS.md`.
-Instalação/atualização: `scripts/fetch-ptbr-chars.ps1`; relatório: `scripts/verify-ptbr-chars.ps1`.
-
-## Lutadores dos fullgames M.U.G.E.N mais famosos (`mugen/chars/`)
-
-30 personagens extraídos de três fullgames clássicos: **Mortal Kombat Project 4.9.3**
-(Scorpion, Sub-Zero, Liu Kang, Raiden, Sonya, Jax, Johnny Cage, Mileena, Shang Tsung,
-Shao Kahn), **Super Marvel vs. Capcom: Eternity of Heroes** (Ryu, Ken, Hulk,
-Homem-Aranha, Capitão América, Homem de Ferro, Wolverine, Magneto, Morrigan,
-Deadpool) e **The King of Fighters Zillion SE 2022** (Kyo, Iori, Terry, Mai, Kula,
-Rugal, Ryo, Robert, Leona, Athena).
-
-Detalhes, origem e correções de motor: `docs/FAMOUS_CHARS.md`.
-Instalação: `scripts/fetch-famous-chars.ps1`.
-
-## Pacote Dragon Ball FighterZ (JUS)
-
-40 personagens e 13 cenários do pacote local *Dragon Ball FighterZ Mugen Jus Edition*
-(estilo JUS): Goku (SSJ, SSB, UI, GT, Blizzard), Vegeta (Scouter, SSGSS, SSJ), Gohan,
-Gotenks, Trunks, Piccolo, Tien, Krillin, Yamcha, Videl, Android 16/17/18/21, Cell, Buu,
-Bardock, Broly (Z e DBS), Cooler, Freeza, Ginyu, Beerus, Hit, Jiren, Kefla, Black,
-Zamasu, Gogeta Blue, Vegetto Blue, Janemba, Nappa.
-
-Cenários `[DBFZ]*` incluem Cell Games, World Tournament, West City, Namek, Cavern,
-Glacier, Island, Galactic Arena, Janemba, Land of the Kai's, Asteroid Battlefield,
-Rocky Field e Planet Namek Destroyed.
-
-Detalhes e tabela completa: `docs/DBFZ_PACK.md`. Instalação: `scripts/install-dbfz-pack.ps1`.
-
 ## Personagens MUGEN populares para importar
 Personagens de anime e jogos feitos pela comunidade MUGEN usam sprites e marcas de terceiros, por isso **não são incluídos**. O Ultimate MUGEN lê esses pacotes diretamente: baixe-os das fontes da comunidade (MUGEN Archive, Mugen Free For All, MugenGuild) e use **Menu → Importar MUGEN**. O autor exibido vem do campo `[Info] author=` do próprio personagem.
 

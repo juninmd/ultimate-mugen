@@ -41,6 +41,7 @@ pub struct Match {
     pub lanes: crate::lane::LaneRules, pub objects: crate::stage_objects::StageObjects,
     /// MUGEN-style pushbox: an attacking fighter does not get pushed back by the defender; off = symmetric split.
     pub classic_pushbox: bool,
+    pub mutators: crate::mutators::Mutators,
     pub tag_cooldown: [i32; 2],
     pub tag_cooldown_max: i32,
     pub tag_cancel_window: i32,
@@ -80,7 +81,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
@@ -402,6 +403,7 @@ impl Match {
         if self.fighters[i].pos_freeze { self.fighters[i].pos_freeze = false; self.update_bind(i); return; }
         if self.fighters[i].bind.is_some() { self.update_bind(i); return; }
         let mut land = false;
+        let gravity = self.mutators.gravity;
         {
             let f = &mut self.fighters[i];
             f.pos.x += f.vel.x * f.facing * f.passive_speed();
@@ -419,11 +421,11 @@ impl Match {
                     // idle/hit states with ground physics cannot hold a fighter in mid-air: let it drop back to the floor
                     // (attack states keep their scripted height, e.g. hover or teleport moves)
                     if f.pos.y < f.ground_level && f.state_type != 'A' && f.move_type != 'A' {
-                        f.vel.y = f.vel.y.max(0.0) + f.c("movement.yaccel", 0.44) * f.lscl;
+                        f.vel.y = f.vel.y.max(0.0) + f.c("movement.yaccel", 0.44) * f.lscl * gravity;
                     } else if f.state_type != 'A' { f.vel.y = 0.0; }
                 }
                 'A' => {
-                    f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl;
+                    f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl * gravity;
                     if !f.lands_by_script() && f.pos.y >= f.ground_level && f.vel.y > 0.0 { f.pos.y = f.ground_level; f.vel.y = 0.0; f.air_jumps = 0; f.air_dashes = 0; if f.move_type != 'H' { land = true; } }
                 }
                 _ => {}

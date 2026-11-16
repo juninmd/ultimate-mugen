@@ -8,11 +8,15 @@ const SPARKLE_EVERY_TICKS: i64 = 24;
 const STEP_DUST: [f32; 3] = [0.82, 0.78, 0.7];
 const KO_COLOR: [f32; 3] = [1.0, 0.82, 0.3];
 const GATE_COLOR: [f32; 3] = [1.0, 0.85, 0.3];
+const LOW_LIFE_RATIO: f32 = 0.25;
+const LOW_LIFE_EVERY_TICKS: i64 = 40;
+const LOCK_TRAUMA: f32 = 0.3;
 
 #[derive(Default)]
 struct JuiceState {
     celebrated: Vec<u32>,
     gate: bool,
+    scrolling: bool,
     last_tick: i64,
 }
 
@@ -30,12 +34,15 @@ impl Vfx {
             if m.game_time < state.last_tick {
                 state.celebrated.clear();
                 state.gate = false;
+                state.scrolling = false;
             }
             state.last_tick = m.game_time;
             self.footsteps(m);
             self.pickup_sparkles(m);
             self.foe_defeats(m, &mut state);
             self.gate_cue(m, &mut state);
+            self.lock_cue(m, &mut state);
+            self.low_life_pulse(m);
         });
     }
 
@@ -84,6 +91,38 @@ impl Vfx {
             state.celebrated.clear();
             self.ring(m.stage.bound_right - 20.0, -40.0, 120.0, 0.6, 2.4, GATE_COLOR);
             self.sfx.push("confirm");
+        }
+    }
+}
+
+impl Vfx {
+    fn lock_cue(&mut self, m: &Match, state: &mut JuiceState) {
+        let scrolling = m.is_lane_scrolling();
+        let landed = state.scrolling && !scrolling && !m.lanes.gate;
+        state.scrolling = scrolling;
+        if !landed {
+            return;
+        }
+        for f in m.roots().filter(|f| f.side != 0 && f.alive) {
+            self.dust(f.pos.x, f.lane, 8, 1.6, 0.5, STEP_DUST);
+            self.spark_burst(f.pos.x, f.lane - 30.0, 1.0, 6, 2.0, GATE_COLOR, 3.1);
+        }
+        for edge in [m.stage.bound_left + 12.0, m.stage.bound_right - 12.0] {
+            self.ring(edge, -30.0, 90.0, 0.5, 2.0, GATE_COLOR);
+        }
+        self.trauma = (self.trauma + LOCK_TRAUMA).min(1.0);
+        self.sfx.push("guardbreak");
+    }
+
+    fn low_life_pulse(&mut self, m: &Match) {
+        if m.game_time % LOW_LIFE_EVERY_TICKS != 0 {
+            return;
+        }
+        let hurting = m
+            .roots()
+            .any(|f| f.side == 0 && f.alive && f.life_max > 0.0 && f.life / f.life_max < LOW_LIFE_RATIO);
+        if hurting {
+            self.vig = self.vig.max(0.35);
         }
     }
 }

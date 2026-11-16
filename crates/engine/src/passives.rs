@@ -82,6 +82,7 @@ pub struct PassiveState {
     pub idle_ticks: i32,
     pub last_state: i32,
     pub fight_ticks: i32,
+    pub potential_time: i32,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -127,7 +128,7 @@ impl Fighter {
     }
 
     pub fn effective_attack(&self) -> f32 {
-        self.passive_attack() * self.rush.attack_gain()
+        self.potential_attack_mul() * self.passive_attack() * self.rush.attack_gain()
     }
 
     fn passive_attack(&self) -> f32 {
@@ -141,7 +142,7 @@ impl Fighter {
     }
 
     pub fn effective_defence(&self) -> f32 {
-        let base = self.defence_mul * self.super_defence_mul * self.signature_defence();
+        let base = self.defence_mul * self.super_defence_mul * self.signature_defence() * self.potential_defence_mul();
         match &self.base_def.passives.stacks {
             Some(rule) => {
                 base * (1.0 + rule.defence_gain * self.passive.stacks as f32).min(STACK_DEFENCE_CAP)
@@ -161,6 +162,7 @@ impl Fighter {
 
     pub fn tick_passive(&mut self, fighting: bool) {
         self.tick_signature(fighting);
+        self.tick_potential(fighting);
         if fighting && self.alive && self.base_def.passives.time.is_some() {
             self.passive.fight_ticks += 1;
         }

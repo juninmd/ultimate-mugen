@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod walk;
+mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod potential; mod minus4; mod types; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -683,7 +683,7 @@ impl Match {
             f.cmd.update(&f.history, &f.def.commands, paused);
             f.asserted_commands.retain_mut(|(_, t)| { *t -= 1; *t > 0 }); f.angle_draw = false; f.draw_scale = [1.0, 1.0]; f.move_camera = [true, true];
         }
-        for &fi in &awaken[..awaken_len] { self.try_transform(fi); } self.rush_step();
+        for &fi in &awaken[..awaken_len] { if !self.try_transform(fi) { self.try_potential(fi); } } self.rush_step();
         if tagged { self.tag_step(&tag_requests[..tag_len]); }
         let mut ids = std::mem::take(&mut self.tick_ids);
         ids.clear();

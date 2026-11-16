@@ -78,7 +78,7 @@ impl App {
             Action::Hitboxes => {
                 let s = self.session.as_mut().unwrap();
                 s.r.debug = !s.r.debug;
-                self.debug_boxes = s.r.debug;
+                self.debug_boxes = s.r.debug; crate::hud::debug_panel::set(s.r.debug);
             }
             Action::Restart => {
                 self.reset_team();

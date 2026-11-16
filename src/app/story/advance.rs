@@ -151,16 +151,10 @@ impl App {
         sess.m.stage.start_x = center;
         sess.m.stage.p1x = center + sess.stage.info.p1x;
         sess.m.stage.p2x = center + sess.stage.info.p2x;
-        sess.m.stage.bound_left = sess
-            .m
-            .stage
-            .bound_left
-            .min(prev_center - crate::story::FIGHT_HALF_RANGE);
-        sess.m.stage.bound_right = center + crate::story::FIGHT_HALF_RANGE;
         sess.m.lanes.target_x = center;
         sess.m.lanes.bound_span = crate::story::FIGHT_HALF_RANGE;
         sess.m.lanes.show_foe_hud = run.is_boss_fight();
-        sess.m.camera.x = sess.m.camera.x.min(center - 160.0);
+        sess.m.lanes.gate = true;
         let n_foes = foe_defs.len();
         sess.m.team_simul = n_foes > 1;
         let ground_k = sess.m.ground_k;

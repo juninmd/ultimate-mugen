@@ -271,6 +271,18 @@ Todo lutador nativo pode carregar o medidor: segure **R** (a entrada `s` / Start
 
 Todo `special` e `super` com `when` ausente ou `"stand"` ganha também uma versão aérea (estado `20000 + estado de chão`, rótulo `State -1, air <nome>`), acionada pelo mesmo comando com o lutador no ar. O lutador flutua no começo do golpe (mantém 40 % do deslize), a gravidade volta a 45 % depois de 12 ticks, o golpe termina no estado de queda do salto (`50`) com controle, e tocar o chão o interrompe com o estado de pouso (`52`). As versões aéreas causam 70 % do dano de chão, os projéteis saem inclinados para baixo (inclinação 0,85) para alcançar um rival no chão, e cada salto permite um especial aéreo (`var(57)`, zerada ao pousar). Agarrões, golpes de voo e golpes com `when: "crouch"` ou `"air"` mantêm suas próprias regras.
 
+## Mecânicas exóticas (`helpers`, `throw` cinemático, `bossRules`, `scripts`)
+
+Qualquer animação em `anims` aceita `"id": 8801` para fixar um número de ação para scripts customizados ou `p2Anim`. Além disso, todo padrão avançado de M.U.G.E.N / Ikemen GO (ZSS) pode ser declarado direto no JSON UMF sem editar Rust:
+
+| Bloco | Substitui no M.U.G.E.N / ZSS | Recursos principais |
+|---|---|---|
+| `helpers.stand` | `Helper(keyctrl=1)` + `BindToParent` + `HitOverride` manuais | Stand estilo JoJo com hitbox/hurtbox independente, comandos próprios (`input`) ou sincronizados (`triggerMove`), evocação/recolhimento, dreno de barra (`drain`) e transferência de dano (`lifeTransfer`) via `ModifyPlayer` |
+| `helpers.clones` | Helpers autônomos de IA | Clones *Kage Bunshin* com IA própria (`count`, `maxActive`, `duration`, `walkSpeed`, `attackRange`, `oneHitPoof`), perseguição, ataques aleatórios e liberdade de câmera (`ScreenBound movecamera = 0, 0`) |
+| `moves[].throw` (cinemático) | `TargetState` + `ChangeAnim2` multi-etapa | `p2Anim` (`ChangeAnim2`), `cameraFree`, `camera` (`zoom`, `time`, `lag`, `freeze`), coreografia em `steps[]` (`at`, `bind`, `p2Anim`, `p2State`, `damage`, `shake`, `facing`, `launch`) e proteção automática `!GetHitVar(IsBound)` |
+| `bossRules` | Quebra de UI em `[StateDef -4]` via `AssertSpecial` / `Text` / `ModifyPlayer` | `hideHud`, `hideLifeBar`, `hidePowerBar`, `hideTimer`, `freezeTimer`, `texts[]`, `modifyPlayer[]` (`"enemy"` ou próprio chefe), `phases[]` (`lifeBelowRatio`, `when`, `once`, `attackMul`, `defenceMul`) |
+| `scripts` | Arquivos `.zss` / `.cns` com `[StateDef -4]` e `map()` | Strings inline `zss` e `cns` (suporta `[StateDef -4]` rodando até durante `SuperPause`, `map(k) := v`, `teamMap(k) := v`), `commands[]` customizados e expansão `@anim(nome)` / `@move(id)` |
+
 ## Sprites pixel art (opcional)
 
 Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG em vez do rig. Use PNGs transparentes voltados para a direita, com os pés na borda inferior e o mesmo tamanho de tela (400×400 RGBA) em todos os arquivos de um lutador. Gere PNGs de combate faltantes com `generate_image` usando uma âncora canônica em pixel art validada do próprio personagem (nunca use o rig vetorial procedural depreciado).

@@ -126,6 +126,7 @@ fn test_throw_and_passives_mechanics() {
             p2_state: Some(820),
             at: None,
             launch: None,
+            ..Default::default()
         }),
         cancels: None,
         requires: None,

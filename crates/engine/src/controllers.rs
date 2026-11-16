@@ -308,7 +308,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             }
         }
         "playerpush" => { let v = n(m, "value", 1.0) != 0.0; m.fighters[i].player_push = v; }
-        "screenbound" => { let v = n(m, "value", 0.0) != 0.0; m.fighters[i].screen_bound = v; }
+        "screenbound" => { let (sb, mc) = (n(m, "value", 0.0) != 0.0, [n2(m, "movecamera", 0.0, 0) != 0.0, n2(m, "movecamera", 0.0, 1) != 0.0]); let f = &mut m.fighters[i]; f.screen_bound = sb; f.move_camera = mc; }
         "afterimage" => {
             let (t, len) = (n(m, "time", 1.0) as i32, n(m, "length", 20.0) as usize);
             let d = AfterImageParams::default();

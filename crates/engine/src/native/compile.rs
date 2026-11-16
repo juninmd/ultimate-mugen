@@ -6,7 +6,7 @@ use crate::cns::parse_states;
 use crate::commands::parse_command;
 use serde_json::Value;
 use std::collections::HashMap;
-#[path = "compile_extras.rs"] mod extras;
+#[path = "compile_extras.rs"] pub(super) mod extras;
 
 pub const STANDARD_ANIMS: &[(&str, i32)] = &[
     ("idle", 0), ("turn", 5), ("crouchTurn", 6), ("crouchStart", 10), ("crouch", 11), ("crouchEnd", 12), ("walk", 20), ("walkBack", 21),
@@ -61,12 +61,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     let palette = if pal_no > 1 && !nc.palettes.is_empty() { Some(&nc.palettes[(pal_no as usize - 2) % nc.palettes.len()]) } else { None };
     let mut sprites = HashMap::new();
     let mut anims = HashMap::new();
-    let mut anim_no: HashMap<String, i32> = HashMap::new();
-    let mut next = 1000;
-    for (name, _) in nc.anims.iter() {
-        let no = STANDARD_ANIMS.iter().find(|(n, _)| n == name).map(|(_, v)| *v).unwrap_or_else(|| { next += 1; next - 1 });
-        anim_no.insert(name.clone(), no);
-    }
+    let anim_no = extras::anim_numbers(nc);
     let wanted = |no: i32| only.is_none_or(|o| o.contains(&no));
     // pass 1: unique frames to rasterize (in parallel)
     let mut seen = std::collections::HashSet::new();
@@ -127,17 +122,19 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     ];
     let ab = super::abilities::ability_code(nc.abilities.as_ref(), &anim_no);
     commands.extend(ab.commands);
-    let mut minus1 = String::from("[Statedef -1]\n\n[State -1, run]\ntype = ChangeState\nvalue = 100\ntriggerall = command = \"FF\"\ntrigger1 = statetype = S && ctrl\n\n[State -1, hop]\ntype = ChangeState\nvalue = 105\ntriggerall = command = \"BB\"\ntrigger1 = statetype = S && ctrl\n\n") + &ab.minus1;
+    let mut minus1 = String::from("[Statedef -1]\n\n[State -1, run]\ntype = ChangeState\nvalue = 100\ntriggerall = !IsHelper && command = \"FF\"\ntrigger1 = statetype = S && ctrl\n\n[State -1, hop]\ntype = ChangeState\nvalue = 105\ntriggerall = !IsHelper && command = \"BB\"\ntrigger1 = statetype = S && ctrl\n\n") + &ab.minus1;
     let mut cns = String::new();
     let rank = |m: &NativeMove| (if super::ultimate::is(&m.id) { 400 } else { match m.kind.as_str() { "super" => 300, "special" | "finisher" => 200, _ => 100 } }) + m.input.split(',').count() as i32 * 5 + m.input.contains('+') as i32 * 2;
     let mut order = super::forms::collect_form_moves(nc);
     order.sort_by_key(|(m, _, _)| -rank(m));
     let plan = super::chain::ChainPlan::new(order.iter().map(|(m, _, _)| *m));
     let mut movelist = vec![];
+    let mut move_states = HashMap::new();
     let mut throw_defs = String::new();
     for (index, (m, form_cond, forms_mask)) in order.into_iter().enumerate() {
         let when = m.when.as_deref().unwrap_or("stand");
         let sid = plan.sid(index);
+        move_states.entry(m.id.clone()).or_insert(sid);
         let (cns_start, minus1_start) = (cns.len(), minus1.len());
         let cname = format!("{}_{}", if m.kind == "finisher" { "fin" } else { "m" }, m.id);
         let simple_btn = m.input.trim().split('+').all(|t| ["a", "b", "c", "x", "y", "z"].contains(&t.trim()));
@@ -160,13 +157,13 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let cancel = super::rekka::lead(m, &plan, index);
         let form_line = form_cond.as_ref().map(|fc| format!("triggerall = {fc}\n")).unwrap_or_default();
         let cost_line = if cost > 0.0 { format!("triggerall = power >= {cost}\n") } else { String::new() } + &super::requires::trigger_lines(m);
-        minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = command = \"{cname}\"{simple_cmd}\ntriggerall = {state_cond}{crouch_ok}\n{form_line}{cost_line}{cancel}{}\n\n", m.name, if m.burst == Some(true) { "\ntrigger2 = movetype = H && stateno != [5100, 5150]" } else { "" });
+        minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = !IsHelper && (command = \"{cname}\"{simple_cmd})\ntriggerall = {state_cond}{crouch_ok}\n{form_line}{cost_line}{cancel}{}\n\n", m.name, if m.burst == Some(true) { "\ntrigger2 = movetype = H && stateno != [5100, 5150]" } else { "" });
         let anim = anim_no.get(&m.anim).copied().unwrap_or(0);
         let st = match when { "air" => 'A', "crouch" => 'C', _ => 'S' };
         let jumps = m.moves.iter().any(|v| v.vel[1].is_some_and(|y| y != 0.0));
         let ph = match when { "air" => 'A', "crouch" => 'C', _ => if jumps || m.flight == Some(true) { 'N' } else { 'S' } };
         let pa = if cost > 0.0 { -cost } else if m.kind == "special" { 30.0 } else { 15.0 };
-        cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" }); cns += &super::armor::armor_state(nc, m, sid); cns += &extras::voice_and_traits_state(m, sid); let (throw_cns, throw_def) = super::throw::throw_states(m, sid); cns += &throw_cns; throw_defs += &throw_def; cns += &super::requires::finisher_done(m, sid);
+        cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" }); cns += &super::armor::armor_state(nc, m, sid); cns += &extras::voice_and_traits_state(m, sid); let (throw_cns, throw_def) = super::throw::throw_states(m, sid, &anim_no); cns += &throw_cns; throw_defs += &throw_def; cns += &super::requires::finisher_done(m, sid);
         let freeze = if super::ultimate::is(&m.id) { super::ultimate::FREEZE } else { 55 };
         if m.kind == "super" {
             cns += &format!("[State {sid}, super]\ntype = SuperPause\ntrigger1 = Time = 0\ntime = {freeze}\nanim = 30\npos = 0, -60\nsound = -1\n\n[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\nframegap = 2\npalbright = 0, 0, 0\npalcontrast = 100, 150, 256\npaladd = 0, 0, 0\npalmul = .85, .85, .85\ntime = 60\nlength = 10\n\n");
@@ -181,7 +178,6 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         if ph == 'N' && when != "air" {
             cns += &format!("[State {sid}, grav]\ntype = VelAdd\ntrigger1 = Pos Y < 0 || Vel Y < 0\ny = const(movement.yaccel)\n\n[State {sid}, land]\ntype = ChangeState\ntrigger1 = Pos Y >= 0 && Vel Y > 0\nvalue = 52\n\n[State {sid}, fix]\ntype = PosSet\ntrigger1 = Pos Y > 0\ny = 0\n\n");
         }
-        // ultimates hit 70 % harder than their data; supers hit 30 % harder (grander, deadlier finishers)
         let sm = if super::ultimate::is(&m.id) { super::ultimate::DAMAGE } else if m.kind == "super" { 1.3 } else { 1.0 };
         let attr = format!("{st}, {}A", match m.kind.as_str() { "normal" => "N", "special" | "finisher" => "S", _ => "H" });
         for h in super::multihit::glue(&m.hits).iter() {
@@ -207,8 +203,10 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     }
     cns += &throw_defs; cns += &ab.states; movelist.extend(ab.movelist);
     let mut states = HashMap::new();
-    let minus2 = extras::passives_cns(nc) + &ab.minus2;
+    let mut minus2 = extras::passives_cns(nc) + &ab.minus2;
+    extras::append_exotic(nc, &anim_no, &move_states, &mut commands, &mut movelist, &mut minus1, &mut minus2, &mut cns);
     parse_states(&(minus1 + &minus2 + &cns), &mut states, true);
+    super::scripts::compile_scripts(nc.scripts.as_ref(), &anim_no, &move_states, &mut states);
     if with_images && std::env::var("UME_FORCE_RIG").is_err() {
         if let Some(avatar) = super::portrait::portrait(nc, palette) { sprites.insert((9000, 1), avatar); }
     }

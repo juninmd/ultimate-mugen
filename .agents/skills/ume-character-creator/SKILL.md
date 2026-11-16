@@ -109,6 +109,13 @@ O UME suporta múltiplos estágios de transformação, que podem alterar partes 
 - Defina `character: "outro_personagem_id"`.
 - Em tempo de transformação, o motor carrega e compila o `Arc<CharDef>` do personagem alvo, transferindo vida proporcional, ataques, animações e sprites completos para o lutador.
 
+### 3.5 Mecânicas Exóticas e Expressividade Total (`helpers`, `throw` cinemático, `bossRules`, `scripts`)
+- **Stand Estilo JoJo (`helpers.stand`)**: Helper com hitbox/hurtbox própria (`keyctrl = 1`), `input` para invocar/recolher, `autoSummon`, `drain` por segundo, `bind` ou perseguição suave, `hittable` + `lifeTransfer` (dano transferido ao dono via `ModifyPlayer`) e `moves[]` acionados por `input` independente ou sincronizados com `triggerMove`. Estados reservados `7000..7049`.
+- **Clones Autônomos / *Kage Bunshin* (`helpers.clones`)**: Spawna até `maxActive` clones com IA própria (`walkSpeed`, `attackRange`, perseguição, seleção aleatória de `attacks[]`, `oneHitPoof` via `HitOverride`, `duration` e liberdade de câmera). Estados reservados `7100..7150`.
+- **`throw` Cinemático**: Suporta `p2Anim` (`ChangeAnim2` com anims do atacante e `id` fixável em `anims.<nome>.id`), `cameraFree` (`ScreenBound movecamera = 0, 0`), `camera` (`zoom`, `time`, `lag`, `freeze`), sequência `steps[]` (`at`, `bind`, `p2Anim`, `p2State`, `damage`, `shake`, `facing`, `launch`) e failsafe automático `!GetHitVar(IsBound)`.
+- **Chefes que Quebram a UI (`bossRules`)**: `hideHud`, `hideLifeBar`, `hidePowerBar`, `hideTimer`, `freezeTimer`, `asserts[]`, `texts[]` (renderizados direto no HUD via `Text`), `modifyPlayer[]` (dono ou `"enemy"`) e `phases[]` (`lifeBelowRatio`, `when`, `once`, `attackMul`, `defenceMul`).
+- **ZSS / CNS Inline no JSON (`scripts`)**: Campos `zss`, `cns`, `commands[]` e `override`. Suporta `[StateDef -4]` (executado para todo jogador e helper inclusive durante `SuperPause` com `ignorehitpause = 1`), atribuições ZSS `map(chave) := valor` / `teamMap(chave) += valor` / `rootMap` / `parentMap` e macros `@anim(nome)` e `@move(id)`.
+
 ---
 
 ## 4. Exibição de Consumo de Energia no Menu de Comandos

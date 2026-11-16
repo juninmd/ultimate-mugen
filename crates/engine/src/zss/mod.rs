@@ -5,6 +5,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 use ume_formats::ini::Section;
+mod map_assign;
 
 const LOCALS_TOP: i32 = 59;
 const LOCALS_MIN: i32 = 40;
@@ -212,6 +213,7 @@ impl<'a> Reader<'a> {
             self.assignment(&text, sc, out);
             return;
         }
+        if map_assign::try_emit(self, &lname, sc, out) { return; }
         match lname.as_str() {
             "" => { self.p += 1; }
             "if" => {
@@ -518,12 +520,8 @@ pub fn parse_zss(text: &str, into: &mut HashMap<i32, StateDef>, override_existin
             into.insert(id, StateDef { id, params, controllers: ctrls });
         }
     }
-    let mut unsupported = r.unsupported.borrow().clone();
-    let mut errors = r.errors.borrow().clone();
-    unsupported.sort();
-    unsupported.dedup();
-    errors.sort();
-    errors.dedup();
+    let (mut unsupported, mut errors) = (r.unsupported.borrow().clone(), r.errors.borrow().clone());
+    unsupported.sort(); unsupported.dedup(); errors.sort(); errors.dedup();
     ZssReport { states, unsupported, errors }
 }
 

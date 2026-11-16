@@ -88,6 +88,23 @@ jobs:
         with: { name: release-notes }
       - name: Build manifest
         run: node scripts/release-manifest.mjs --dir dist --version "$VERSION" --repo "$GITHUB_REPOSITORY" --notes release-notes.md
+      - name: Sign release assets (minisign, fail closed)
+        env:
+          MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+          MINISIGN_PUBLIC_KEY: ${{ vars.MINISIGN_PUBLIC_KEY }}
+        run: |
+          test -n "$MINISIGN_SECRET_KEY" || { echo "::error::secret MINISIGN_SECRET_KEY is not set"; exit 1; }
+          test -n "$MINISIGN_PUBLIC_KEY" || { echo "::error::variable MINISIGN_PUBLIC_KEY is not set"; exit 1; }
+          sudo apt-get update -qq && sudo apt-get install -y -qq minisign
+          umask 077
+          printf '%s\n' "$MINISIGN_SECRET_KEY" > sign.key
+          printf '%s\n' "$MINISIGN_PUBLIC_KEY" > sign.pub
+          for f in dist/*; do
+            minisign -S -s sign.key -m "$f" -x "$f.minisig" -t "ultimate-mugen $VERSION"
+            minisign -V -p sign.pub -m "$f" -x "$f.minisig" >/dev/null
+          done
+          rm -f sign.key sign.pub
+          ls dist
       - name: Draft release (idempotent resume)
         run: |
           state="$(gh release view "$TAG" --json isDraft -q .isDraft 2>/dev/null || echo none)"

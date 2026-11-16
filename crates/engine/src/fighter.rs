@@ -165,7 +165,7 @@ impl Fighter {
             Some(r) => r,
             None => {
                 if self.anim().is_some() && Arc::ptr_eq(from, &self.anim_def) { self.anim_no = no; return; }
-                if from.anims.contains_key(&0) { 0 } else { return }
+                if Arc::ptr_eq(from, &self.def) && from.anims.contains_key(&0) { 0 } else { return }
             }
         };
         if !Arc::ptr_eq(from, &self.anim_def) {

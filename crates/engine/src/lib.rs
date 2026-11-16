@@ -44,5 +44,6 @@ pub mod signature;
 pub mod potential;
 pub mod raster;
 pub mod move_cost;
+pub mod mutators;
 
 pub use ume_formats as formats;

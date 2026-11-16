@@ -10,7 +10,7 @@ mod requires;
 mod chain;
 mod rekka;
 mod multihit;
-mod throw;
+pub mod throw;
 pub mod boss_ui;
 pub mod clones;
 pub mod companions;

@@ -60,3 +60,50 @@ fn a_nearly_dead_hero_pulses_the_vignette() {
     vfx.story_juice(&m);
     assert!(vfx.vig > 0.0);
 }
+
+#[test]
+fn a_grabbed_foe_is_announced_once_per_grab() {
+    let mut m = arena(true);
+    m.fighters[1].state_no = 3800;
+    let mut vfx = Vfx::new();
+    vfx.story_juice(&m);
+    assert_eq!(vfx.floats.len(), 1);
+    vfx.story_juice(&m);
+    assert_eq!(vfx.floats.len(), 1);
+    m.fighters[1].state_no = 0;
+    vfx.story_juice(&m);
+    m.fighters[1].state_no = 3800;
+    vfx.story_juice(&m);
+    assert_eq!(vfx.floats.len(), 2);
+}
+
+#[test]
+fn a_combo_is_announced_at_each_milestone_only() {
+    let mut m = arena(true);
+    let mut vfx = Vfx::new();
+    m.fighters[0].combo_count = 2;
+    vfx.story_juice(&m);
+    assert!(vfx.floats.is_empty());
+    m.fighters[0].combo_count = 3;
+    vfx.story_juice(&m);
+    assert_eq!(vfx.floats.len(), 1);
+    m.fighters[0].combo_count = 4;
+    vfx.story_juice(&m);
+    assert_eq!(vfx.floats.len(), 1);
+    m.fighters[0].combo_count = 5;
+    vfx.story_juice(&m);
+    assert_eq!(vfx.floats.len(), 2);
+}
+
+#[test]
+fn a_dropped_combo_can_be_announced_again() {
+    let mut m = arena(true);
+    let mut vfx = Vfx::new();
+    m.fighters[0].combo_count = 3;
+    vfx.story_juice(&m);
+    m.fighters[0].combo_count = 0;
+    vfx.story_juice(&m);
+    m.fighters[0].combo_count = 3;
+    vfx.story_juice(&m);
+    assert_eq!(vfx.floats.len(), 2);
+}

@@ -1,5 +1,6 @@
 use super::Vfx;
 use std::cell::RefCell;
+use story_moves::MoveState;
 use ume_engine::matchs::Match;
 
 const STEP_EVERY_TICKS: i64 = 7;
@@ -18,6 +19,7 @@ struct JuiceState {
     gate: bool,
     scrolling: bool,
     last_tick: i64,
+    moves: MoveState,
 }
 
 thread_local! {
@@ -35,6 +37,7 @@ impl Vfx {
                 state.celebrated.clear();
                 state.gate = false;
                 state.scrolling = false;
+                state.moves = MoveState::default();
             }
             state.last_tick = m.game_time;
             self.footsteps(m);
@@ -43,6 +46,9 @@ impl Vfx {
             self.gate_cue(m, &mut state);
             self.lock_cue(m, &mut state);
             self.low_life_pulse(m);
+            self.grab_cue(m, &mut state.moves);
+            self.combo_cue(m, &mut state.moves);
+            self.entrance_cue(m, &mut state.moves);
         });
     }
 
@@ -126,6 +132,9 @@ impl Vfx {
         }
     }
 }
+
+#[path = "story_moves.rs"]
+mod story_moves;
 
 #[cfg(test)]
 #[path = "story_juice_tests.rs"]

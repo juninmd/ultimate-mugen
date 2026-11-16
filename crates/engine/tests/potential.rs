@@ -59,3 +59,19 @@ fn imported_fighter_unleashes_potential_then_fury_once_per_round() {
     for _ in 0..3 { m.tick(&[T, 0]); }
     assert_eq!(m.fighters[0].potential.level, PotentialLevel::Idle, "potential is once per round");
 }
+
+#[test]
+fn gifts_respect_the_three_transformation_cap() {
+    let mut m = Match::new(common_def(), None, flat_stage());
+    m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 0, 0, 1);
+    m.add_player(Arc::new(compile_native(&load("shion"), 1, false)), 1, 0, 1);
+    m.start_round();
+    for _ in 0..140 { m.tick(&[0, 0]); }
+    let own = m.fighters[0].form_count();
+    assert!(own >= 2, "kaito has own forms");
+    m.fighters[0].form = own as u8;
+    m.fighters[0].power = m.fighters[0].power_max;
+    for _ in 0..3 { m.tick(&[T, 0]); }
+    let expected = if own >= 3 { PotentialLevel::Idle } else { PotentialLevel::Potential };
+    assert_eq!(m.fighters[0].potential.level, expected, "gifts fill up to three transformations");
+}

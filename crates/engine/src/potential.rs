@@ -4,6 +4,8 @@ pub const POTENTIAL_TICKS: i32 = 60 * 12;
 pub const FURY_TICKS: i32 = 60 * 9;
 pub const POTENTIAL_COST: f32 = 0.5;
 pub const FURY_COST: f32 = 1.0;
+pub const MAX_TRANSFORMS: usize = 3;
+pub const GIFT_TRANSFORMS: usize = 2;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum PotentialLevel {

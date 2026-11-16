@@ -7,7 +7,7 @@ Personagens sem transformação própria (importados do M.U.G.E.N. e UME) ganham
 | 1ª | Potencial Liberado / Unleashed Potential | meia barra de poder | 12 s | ataque x1,2, dano recebido x0,9 |
 | 2ª | Modo Fúria / Fury Mode | barra de poder cheia | 9 s | ataque x1,4, dano recebido x0,75 |
 
-Cada etapa vale uma vez por round. O Modo Fúria só vem depois do Potencial Liberado. Personagens com forma própria (`forms` ou a animação 196 legada) mantêm a transformação deles e não ganham esta.
+Cada etapa vale uma vez por round. Um personagem tem no máximo três transformações no total, contando as próprias: quem já tem três formas não ganha nenhuma destas. O Modo Fúria só vem depois do Potencial Liberado. Personagens com forma própria (`forms` ou a animação 196 legada) mantêm a transformação deles e não ganham esta.
 
 Visual: a aura e a cor do lutador mudam (azul no Potencial, vermelho na Fúria), um anel e uma etiqueta curta tocam na ativação, e o HUD mostra uma tira de tempo abaixo do medidor de poder. Nativos com formas também mostram uma tira de forma no HUD.
 

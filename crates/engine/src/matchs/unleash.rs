@@ -1,15 +1,16 @@
 use super::*;
-use crate::potential::{PotentialLevel, FURY_COST, POTENTIAL_COST};
+use crate::potential::{PotentialLevel, FURY_COST, GIFT_TRANSFORMS, MAX_TRANSFORMS, POTENTIAL_COST};
 
 impl Match {
     /// Generic transformation for characters without their own forms (imported MUGEN/UME): first "Potencial Liberado"
-    /// (half a bar, once per round), then "Modo Fúria" while it lasts (a full bar, once per round). Only the stats change.
+    /// (half a bar, once per round), then "Modo Fúria" while it lasts (a full bar, once per round). Only the stats change. A character has at most MAX_TRANSFORMS transformations in total, own forms included, so gifts are capped by the room left.
     pub fn try_potential(&mut self, i: usize) -> bool {
         let f = &self.fighters[i];
-        if f.is_helper || !f.alive || !f.ctrl || f.state_type == 'A' || f.form_count() > 0 || self.round_state != 2 || self.pause.is_some() { return false; }
+        if f.is_helper || !f.alive || !f.ctrl || f.state_type == 'A' || (f.form as usize) < f.form_count() || self.round_state != 2 || self.pause.is_some() { return false; }
+        let budget = MAX_TRANSFORMS.saturating_sub(f.form_count()).min(GIFT_TRANSFORMS);
         let (level, cost) = match f.potential.level {
-            PotentialLevel::Idle if !f.potential.potential_used => (PotentialLevel::Potential, f.power_max * POTENTIAL_COST),
-            PotentialLevel::Potential if !f.potential.fury_used => (PotentialLevel::Fury, f.power_max * FURY_COST),
+            PotentialLevel::Idle if budget >= 1 && !f.potential.potential_used => (PotentialLevel::Potential, f.power_max * POTENTIAL_COST),
+            PotentialLevel::Potential if budget >= 2 && !f.potential.fury_used => (PotentialLevel::Fury, f.power_max * FURY_COST),
             _ => return false,
         };
         if f.power < cost { return false; }

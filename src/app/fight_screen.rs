@@ -26,7 +26,7 @@ impl App {
         let (paused, accept_back) = pause_step(s.paused, pause_btn);
         if pause_btn {
             self.pause.reset();
-            self.audio.sfx("select");
+            self.audio.sfx(if paused { "pause" } else { "select" });
         }
         s.paused = paused;
         if replaying {

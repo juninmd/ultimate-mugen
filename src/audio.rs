@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::f32::consts::PI;
 use ume_engine::matchs::BgmAction;
 
-mod score; mod wav; mod voice;
+mod score; mod wav; mod voice; mod ui_sfx;
 use score::music;
 use wav::wav;
 
@@ -314,7 +314,7 @@ fn synth(kind: &str, v: u32) -> Vec<f32> {
             tone(&mut out, 0.0, f, f, 0.1, 0.18, 0);
             tone(&mut out, 0.0, f * 2.0, f * 2.0, 0.07, 0.07, 0);
         }
-        _ => {}
+        _ => out = ui_sfx::render(kind),
     }
     for x in out.iter_mut() { *x = (*x * 0.9).tanh(); }
     out
@@ -490,7 +490,7 @@ impl Audio {
                 ("combo3", 1),
                 ("combo4", 1),
                 ("combo5", 1),
-                ("combo6", 1),
+                ("combo6", 1), ("error", 1), ("toggle", 1),
             ] {
                 for v in 0..n {
                     let mono = synth(k, v);

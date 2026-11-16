@@ -59,7 +59,11 @@ impl App {
             s.switch_control();
         }
         s.update(dt, &mut self.c, &mut self.audio);
+        let framing = if replaying { ume_engine::replay_camera::frame(&mut s.m) } else { None };
         s.draw(&mut self.g, &self.ui);
+        if let Some(saved) = framing {
+            ume_engine::replay_camera::unframe(&mut s.m, saved);
+        }
         if replaying {
             self.replay_bar();
         }

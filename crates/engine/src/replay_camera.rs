@@ -1,9 +1,9 @@
-pub const ZOOM_MIN: f32 = 1.0;
-pub const ZOOM_MAX: f32 = 1.6;
+use crate::matchs::Match;
+
+pub const TIGHTEN_MAX: f32 = 1.6;
 const SPREAD_BASE: f32 = 260.0;
 const ATTACK_LEAD: f32 = 0.35;
 const PAN_EASE: f32 = 0.12;
-const ZOOM_EASE: f32 = 0.06;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Subject {
@@ -17,36 +17,47 @@ pub struct Shot {
     pub zoom: f32,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct ReplayCamera {
-    shot: Shot,
+pub fn direct(prev_x: f32, base_zoom: f32, subjects: &[Subject]) -> Shot {
+    let valid = subjects.iter().filter(|s| s.x.is_finite());
+    let (lo, hi, attacker) = valid.clone().fold((f32::MAX, f32::MIN, None), |(lo, hi, att), s| {
+        (lo.min(s.x), hi.max(s.x), att.or(s.attacking.then_some(s.x)))
+    });
+    if lo > hi || !prev_x.is_finite() || !base_zoom.is_finite() {
+        return Shot { x: prev_x, zoom: base_zoom };
+    }
+    let mid = (lo + hi) * 0.5;
+    let focus = attacker.map_or(mid, |ax| mid + (ax - mid) * ATTACK_LEAD);
+    let tighten = (SPREAD_BASE / ((hi - lo) + SPREAD_BASE * 0.5)).clamp(1.0, TIGHTEN_MAX);
+    Shot { x: prev_x + (focus - prev_x) * PAN_EASE, zoom: base_zoom * tighten }
 }
 
-impl ReplayCamera {
-    pub fn new(x: f32) -> Self {
-        Self { shot: Shot { x, zoom: ZOOM_MIN } }
-    }
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Framing {
+    camera_x: f32,
+    zoom: f32,
+    view_w: f32,
+    view_h: f32,
+}
 
-    pub fn shot(&self) -> Shot {
-        self.shot
+pub fn frame(m: &mut Match) -> Option<Framing> {
+    if !(m.zoom.is_finite() && m.zoom > 0.0) {
+        return None;
     }
+    let saved = Framing { camera_x: m.camera.x, zoom: m.zoom, view_w: m.view_w, view_h: m.view_h };
+    let subjects: Vec<Subject> = m.roots().map(|f| Subject { x: f.pos.x, attacking: f.hitdef_active }).collect();
+    let shot = direct(m.camera.x, m.zoom, &subjects);
+    let base_w = m.view_w / m.zoom;
+    let base_h = m.view_h / m.zoom;
+    m.camera.x = shot.x;
+    m.zoom = shot.zoom;
+    m.view_w = base_w * shot.zoom;
+    m.view_h = base_h * shot.zoom;
+    Some(saved)
+}
 
-    pub fn update(&mut self, subjects: &[Subject]) -> Shot {
-        let valid: Vec<Subject> = subjects.iter().copied().filter(|s| s.x.is_finite()).collect();
-        if valid.is_empty() {
-            return self.shot;
-        }
-        let (lo, hi) = valid.iter().fold((f32::MAX, f32::MIN), |(lo, hi), s| (lo.min(s.x), hi.max(s.x)));
-        let mid = (lo + hi) * 0.5;
-        let attacker = valid.iter().find(|s| s.attacking);
-        let focus_x = match attacker {
-            Some(a) => mid + (a.x - mid) * ATTACK_LEAD,
-            None => mid,
-        };
-        let spread = hi - lo;
-        let target_zoom = (SPREAD_BASE / (spread + SPREAD_BASE * 0.5)).clamp(ZOOM_MIN, ZOOM_MAX);
-        self.shot.x += (focus_x - self.shot.x) * PAN_EASE;
-        self.shot.zoom += (target_zoom - self.shot.zoom) * ZOOM_EASE;
-        self.shot
-    }
+pub fn unframe(m: &mut Match, saved: Framing) {
+    m.camera.x = saved.camera_x;
+    m.zoom = saved.zoom;
+    m.view_w = saved.view_w;
+    m.view_h = saved.view_h;
 }

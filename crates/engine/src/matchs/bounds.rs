@@ -6,9 +6,11 @@ impl Match {
         let left = self.camera.x - self.view_w / 2.0; let right = self.camera.x + self.view_w / 2.0;
         let (bl, br, vw) = (self.stage.bound_left, self.stage.bound_right, self.view_w);
         let mut bounced = None;
+        let gated = self.lanes.gate;
         for i in 0..self.fighters.len() {
             let f = &mut self.fighters[i];
             if f.destroyed || (f.is_helper && !f.helper_player) { continue; }
+            if gated && f.side != 0 { continue; }
             if !f.screen_bound { f.screen_bound = true; continue; }
             let lw = if f.facing > 0.0 { f.back_width() } else { f.front_width() };
             let rw = if f.facing > 0.0 { f.front_width() } else { f.back_width() };

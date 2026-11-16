@@ -53,3 +53,5 @@ The loading screen is no longer a hero-versus-villain card in the story. Wave fi
 Clearing a stage boss now pays a life bonus on top of the boss bonus: `StageTally` (`src/story/tally.rs`) gives `remaining life x 2000 x stage number`, and the Stage Clear screen lists both (`STAGE BONUS +n   LIFE +n`). The browser hook `?e2e_clear=1` opens that screen for smoke checks.
 
 Story juice (`src/vfx/story_juice.rs`, active only while lane rules are on): footstep dust while the hero walks, sparkles over pickups, a `K.O.!` pop-up with ring and sparks when a foe falls, a ring and sound when the screen is released, and an animated GO cue (pulse plus sliding chevrons). Everything is procedural, no sprite is touched.
+
+When the scroll lands and the screen locks again, `story_juice` adds a screen shake, a thud, rings on both screen edges and dust bursts under the waiting wave; while the hero is below 25 % life the vignette pulses.

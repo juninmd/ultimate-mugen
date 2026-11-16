@@ -1,15 +1,16 @@
-//! Menu ambience: the score theme plays while a menu screen is open and stops when leaving the menus.
+//! Ambience per screen: the menus share one score theme, story cutscenes get another, and music stops elsewhere.
 use super::screen::Screen;
 use super::App;
 use std::cell::Cell;
 
 const MENU_THEME: u32 = 0;
+const CUTSCENE_THEME: u32 = 3;
 
 thread_local! {
-    static MENU_MUSIC: Cell<bool> = const { Cell::new(false) };
+    static CURRENT_THEME: Cell<Option<u32>> = const { Cell::new(None) };
 }
 
-fn is_menu(screen: &Screen) -> bool {
+fn theme_for(screen: &Screen) -> Option<u32> {
     match screen {
         Screen::Title
         | Screen::Menu { .. }
@@ -19,24 +20,26 @@ fn is_menu(screen: &Screen) -> bool {
         | Screen::CharTuning { .. }
         | Screen::Mugen { .. }
         | Screen::Market
-        | Screen::Replays { .. } => true,
-        Screen::Settings { from_fight, .. } => !from_fight,
-        _ => false,
+        | Screen::Replays { .. } => Some(MENU_THEME),
+        Screen::Settings { from_fight, .. } if !from_fight => Some(MENU_THEME),
+        Screen::Cutscene { .. } => Some(CUTSCENE_THEME),
+        _ => None,
     }
 }
 
 impl App {
     pub(crate) async fn menu_bgm_tick(&mut self) {
-        let want = is_menu(&self.screen);
-        if want == MENU_MUSIC.with(|m| m.get()) {
+        let want = theme_for(&self.screen);
+        if want == CURRENT_THEME.with(|c| c.get()) {
             return;
         }
-        MENU_MUSIC.with(|m| m.set(want));
-        if want {
-            self.audio.reset_bgm();
-            self.audio.play_music(MENU_THEME).await;
-        } else {
-            self.audio.stop_music();
+        CURRENT_THEME.with(|c| c.set(want));
+        match want {
+            Some(theme) => {
+                self.audio.reset_bgm();
+                self.audio.play_music(theme).await;
+            }
+            None => self.audio.stop_music(),
         }
     }
 }

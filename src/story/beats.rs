@@ -1,11 +1,15 @@
 use crate::i18n::tr3;
 
-pub const BEATS_PER_STAGE: usize = 3;
+pub const BEATS_PER_STAGE: usize = 4;
+const ALLY_BEAT: usize = 3;
 pub const BEAT_SECONDS: f32 = 2.4;
 pub const BEAT_FADE: f32 = 0.35;
 
 pub fn stage_beat(stage: usize, beat: usize) -> &'static str {
     let beat = beat.min(BEATS_PER_STAGE - 1);
+    if beat == ALLY_BEAT {
+        return ally_line(stage);
+    }
     match (stage, beat) {
         (0, 0) => tr3(
             "A gangue domina as ruas. Abra caminho a socos.",
@@ -85,6 +89,36 @@ pub fn stage_beat(stage: usize, beat: usize) -> &'static str {
     }
 }
 
+pub fn ally_line(stage: usize) -> &'static str {
+    match stage {
+        0 => tr3(
+            "Lobo: Ele cheira a medo. Fique perto de mim.",
+            "Wolf: He smells of fear. Stay close.",
+            "Lobo: Huele a miedo. Quédate cerca.",
+        ),
+        1 => tr3(
+            "Lobo: Os trens não param. Nós também não.",
+            "Wolf: The trains don't stop. Neither do we.",
+            "Lobo: Los trenes no paran. Nosotros tampoco.",
+        ),
+        2 => tr3(
+            "Lobo: Essa sombra tem o seu cheiro.",
+            "Wolf: That shadow carries your scent.",
+            "Lobo: Esa sombra tiene tu olor.",
+        ),
+        3 => tr3(
+            "Lobo: Cuidado com o aço. Ele não sente dor.",
+            "Wolf: Watch the steel. It feels no pain.",
+            "Lobo: Cuidado con el acero. No siente dolor.",
+        ),
+        _ => tr3(
+            "Lobo: Ele não vai cair sozinho. Vamos.",
+            "Wolf: He won't fall alone. Let's go.",
+            "Lobo: No caerá solo. Vamos.",
+        ),
+    }
+}
+
 pub fn beat_index(t: f32) -> usize {
     ((t / BEAT_SECONDS) as usize).min(BEATS_PER_STAGE - 1)
 }
@@ -105,6 +139,8 @@ mod tests {
             assert!(lines.iter().all(|l| !l.is_empty()));
             assert_ne!(lines[0], lines[1]);
             assert_ne!(lines[1], lines[2]);
+            assert_ne!(lines[2], lines[3]);
+            assert!(lines[ALLY_BEAT].starts_with("Lobo:") || lines[ALLY_BEAT].starts_with("Wolf:"));
         }
     }
 

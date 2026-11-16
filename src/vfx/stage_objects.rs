@@ -12,6 +12,7 @@ const SMOKING_DAMAGE: f32 = 0.45;
 
 impl Vfx {
     pub fn stage_objects(&mut self, m: &mut Match) {
+        self.story_juice(m);
         if m.objects.is_idle() {
             return;
         }

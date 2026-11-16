@@ -83,6 +83,7 @@ pub struct PassiveState {
     pub last_state: i32,
     pub fight_ticks: i32,
     pub potential_time: i32,
+    pub potential_uses: u8,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]

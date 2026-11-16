@@ -8,7 +8,7 @@ const USAGE: &str = "usage: ume-tools <command>\n\
   audit-sprites --out <report.json> [--root <repo>]  native PNG inventory\n\
   gen-story-npcs [chars=assets/chars]    regenerate assets/chars/npc_*.json (overwrites them)\n\
   mugen-census <zip-or-dir>...           count states, controllers, commands and actions of M.U.G.E.N packages\n\
-  homologate <dir=.> [--out report.md]  PASS/WARN/FAIL per character zip or folder, with missing files\n\
+  homologate <dir=.> [--run] [--out report.md]  PASS/WARN/FAIL per character zip or folder; --run also loads the engine and ticks a fight\n\
   ability-reel <frames_dir> <out_dir> [width=448] [colors=64] [fps=14] [--no-normals]  captioned GIF per fighter (needs ffmpeg)\n\
   motion-descriptor --character f --sprites dir --animation name --out file  sprite-gen asset descriptor\n\
   preview-motion|preview-scene --character f --sprites dir --animation name --sprite-gen exe --out dir [--loop|--cycles n]";
@@ -34,7 +34,7 @@ fn run(args: &[String]) -> Result<(), String> {
             let root = PathBuf::from(positional.first().map(|s| s.as_str()).unwrap_or("."));
             let mut findings = Vec::new();
             for input in homologate::collect_inputs(&root) {
-                match homologate::check_path(&input) {
+                match homologate::check_path(&input, args.iter().any(|a| a == "--run")) {
                     Ok(found) => findings.extend(found),
                     Err(error) => eprintln!("skip: {error}"),
                 }

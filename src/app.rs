@@ -2053,7 +2053,7 @@ impl App {
                     }
                 }
             }
-            sess.r.debug = self.debug_boxes;
+            sess.r.debug = self.debug_boxes; crate::hud::debug_panel::set(self.debug_boxes);
             if seq && self.team.as_ref().is_some_and(|t| t.idx != [0, 0]) {
                 sess.vfx.banner(
                     crate::i18n::tr3("PRÓXIMO LUTADOR", "NEXT FIGHTER", "SIGUIENTE LUCHADOR"),

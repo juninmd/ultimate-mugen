@@ -37,6 +37,10 @@ Um golpe normal que conectou (fraco a forte, em pé ou agachado) pode ser cancel
 
 Apertar para trás até 6 ticks antes do golpe acertar, sem já estar segurando a guarda, torna o bloqueio perfeito: sem dano de chip e com o atordoamento da guarda um terço menor. Segurar cedo é guarda normal, e soltar trava a janela por 12 ticks, então martelar o botão não funciona. Vale só para nativos no chão e não dá barra (barra por guarda sustentava o voo da Shion sem fim). Código: `crates/engine/src/rush/perfect.rs`.
 
+## Chase
+
+Durante um ataque que conectou (normal ou especial, não super), toque duas vezes para cima em até 30 ticks do acerto para teleportar ao lado de um inimigo lançado, por 500 de barra. Você aparece no ar com controle, a 38 pixels dele e virado para ele, então os combos aéreos continuam depois de um lançador. Exige o inimigo no ar e em hitstun, então nunca funciona em quem está em pé ou defendendo. Código: `crates/engine/src/rush/chase.rs`.
+
 ## Mapa da engine
 
 | Peça | Arquivo |

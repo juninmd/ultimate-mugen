@@ -77,6 +77,8 @@ impl Match {
                 self.whiff_cancel(i);
             } else if let Some(target) = self.dash_cancel_target(i) {
                 self.dash_cancel(i, target);
+            } else if let Some(victim) = self.chase_target(i) {
+                self.chase(i, victim);
             }
         }
     }

@@ -103,7 +103,7 @@ jobs:
             minisign -S -s sign.key -m "$f" -x "$f.minisig" -t "ultimate-mugen $VERSION"
             minisign -V -p sign.pub -m "$f" -x "$f.minisig" >/dev/null
           done
-          rm -f sign.key
+          rm -f sign.key sign.pub
           ls dist
       - name: Draft release (idempotent resume)
         run: |

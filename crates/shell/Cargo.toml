@@ -9,18 +9,18 @@ ume-render = { path = "../render" }
 wgpu = "30"
 winit = "=0.30.13"
 fontdue = "0.9"
-glam = "0.27"
-png = "0.17"
+glam = "0.34"
+png = "0.18"
 web-time = "1"
 
 [features]
 egui = ["dep:egui", "dep:egui-wgpu", "dep:egui-winit"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-egui = { version = "=0.36.2", optional = true }
-egui-wgpu = { version = "=0.36.2", optional = true }
-egui-winit = { version = "=0.36.2", default-features = false, optional = true }
-pollster = "0.4"
+egui = { version = "=0.37.0", optional = true }
+egui-wgpu = { version = "=0.37.0", optional = true }
+egui-winit = { version = "=0.37.0", default-features = false, optional = true }
+pollster = "1.0"
 quad-snd = "0.2"
 
 [target.'cfg(target_os = "android")'.dependencies]
@@ -34,7 +34,7 @@ js-sys = "0.3"
 web-sys = { version = "0.3", features = ["Window", "Document", "Element", "HtmlCanvasElement", "AudioContext", "AudioBuffer", "AudioBufferSourceNode", "AudioNode", "AudioParam", "AudioDestinationNode", "GainNode", "BaseAudioContext", "AudioContextState", "AudioScheduledSourceNode", "console"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
-egui = "=0.36.2"
+egui = "=0.37.0"
 egui-phosphor = "=0.14.0"
 
 [dev-dependencies]

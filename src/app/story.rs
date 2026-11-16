@@ -156,7 +156,7 @@ impl App {
         sess.m.rounds_to_win = 1;
         let accent = run.stage_def().accent;
         let def = run.stage_def();
-        sess.m.lanes = ume_engine::lane::LaneRules { active: true, far: def.lane_far, near: def.lane_near, show_foe_hud: run.is_boss_fight(), target_x: 0.0, bound_span: 0.0 };
+        sess.m.lanes = ume_engine::lane::LaneRules { active: true, far: def.lane_far, near: def.lane_near, show_foe_hud: run.is_boss_fight(), target_x: 0.0, bound_span: 0.0, gate: false };
         sess.team = None;
         story_scroll(sess, def, run.fight_index());
         crate::story::objects::spawn_stage(&mut sess.m, def, run.fight_index());

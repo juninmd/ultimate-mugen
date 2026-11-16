@@ -50,6 +50,22 @@ impl App {
         if let Some(o) = objects.filter(|_| run.bonus) {
             self.story_bonus_target_bar(o);
         }
+        self.story_go_cue();
+    }
+
+    fn story_go_cue(&self) {
+        if !self.session.as_ref().is_some_and(|s| s.m.lanes.gate) {
+            return;
+        }
+        self.ui.text(
+            text::go(),
+            VW - 90.0,
+            340.0,
+            28.0,
+            hex("#ffcc33"),
+            Align::Center,
+            true,
+        );
     }
 
     fn story_bonus_target_bar(&self, objects: &StageObjects) {

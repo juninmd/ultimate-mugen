@@ -45,6 +45,9 @@ impl Registry {
                 self.quarantined.push(Quarantined { name: name.clone(), def: def.clone(), problems });
                 continue;
             }
+            if tag.starts_with("pack-") {
+                super::warnings::record(&name, ume_formats::health::warnings(&vfs, &def));
+            }
             let e = CharEntry {
                 key: key.clone(),
                 id: id.clone(),

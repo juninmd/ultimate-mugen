@@ -114,6 +114,14 @@ impl App {
             let text = format!("· {}: {n}", super::mugen_gallery::reason_text(label));
             self.ui.text(&text, 40.0, 188.0 + k as f32 * 20.0, 16.0, hex("#ff9b9b"), Align::Left, false);
         }
+        let warned = crate::registry::warnings::snapshot();
+        if !warned.is_empty() {
+            let text = fill(
+                tr3("· Avisos de recursos opcionais ausentes: {n} personagens", "· Optional file warnings: {n} characters", "· Avisos de archivos opcionales: {n} personajes"),
+                &[("n", &warned.len().to_string())],
+            );
+            self.ui.text(&text, 40.0, 228.0, 16.0, hex("#ffcc33"), Align::Left, false);
+        }
     }
 
     fn catalog_footer(&self, view: u8, page: usize, pages: usize, total: usize) {

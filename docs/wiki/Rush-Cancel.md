@@ -37,6 +37,10 @@ A connected normal (jab through heavy, standing or crouching) can be cancelled i
 
 Pressing back within 6 ticks before a hit lands, with the guard not already held, makes the block perfect: no chip damage and the guard stun is a third shorter. Holding back early is a normal guard, and releasing back locks the window for 12 ticks, so mashing back does not work. It applies to grounded native fighters only and gives no meter (meter from guarding fed Shion's flight indefinitely). Code: `crates/engine/src/rush/perfect.rs`.
 
+## Chase
+
+During a connected attack (normal, special, not a super), double tap up within 30 ticks of the hit to teleport next to a juggled enemy for 500 meter. You land in the air with control, 38 pixels from them and facing them, so air combos keep going after a launcher. It needs the enemy airborne and in hitstun, so it never works on a standing or guarding opponent. Code: `crates/engine/src/rush/chase.rs`.
+
 ## Engine map
 
 | Piece | File |

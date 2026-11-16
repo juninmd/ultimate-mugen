@@ -1,11 +1,13 @@
 use crate::input::k;
 
 mod cancel;
+mod chase;
 mod dash;
 mod perfect;
 mod whiff;
 
 pub use perfect::{PERFECT_FLASH, PERFECT_WINDOW};
+pub use chase::{CHASE_COST, CHASE_GAP, CHASE_WINDOW};
 pub use dash::{DASH_COST, DASH_WINDOW};
 pub use whiff::{WHIFF_COST, WHIFF_MAX_TICKS, WHIFF_MIN_TICKS};
 

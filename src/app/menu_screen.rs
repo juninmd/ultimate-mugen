@@ -116,6 +116,7 @@ impl App {
                     self.refresh_replays();
                     self.go(Screen::Replays { cur: 0 })
                 }
+                9 => self.open_player_card(),
                 _ => self.quit = true,
             }
         }

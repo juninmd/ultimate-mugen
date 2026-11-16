@@ -26,6 +26,10 @@ Lives next to the executable and is written by the **Settings** menu (main menu 
 | `filter` | `nearest` (default) / `linear` | Sprite sampling when scaled: crisp pixels or bilinear smoothing |
 | `window` | `WIDTHxHEIGHT`, `0x0` when unset | Windowed size, saved automatically about one second after you stop resizing; overrides `res` until you pick a size in the Video menu |
 
+## Player card (`player-card.json`)
+
+The Player card screen (main menu, **Player card**) stores the card, record, roster, rivals and achievements in `player-card.json`, next to the executable (browser: local storage). Training bouts do not count. The file stays on this device; there is no server sync.
+
 ## Resizable window
 
 The window can be dragged to any size. The game draws into a fixed 16:9 logical space that is scaled to the window, so the fight area, HUD and menus stay consistent at every size and the window size is independent from the game resolution. With **Keep aspect** on, the unused strip is black; with it off, the picture is stretched and mouse and touch input are mapped back to the stretched space. The `--res WxH` flag still sets the starting window size and takes priority over the saved `window` value.

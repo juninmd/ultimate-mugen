@@ -20,6 +20,7 @@ catalog! {
     "menu.controls" => "Controls", "Controles";
     "menu.settings" => "Settings", "Configurações";
     "menu.replays" => "Replays", "Replays";
+    "menu.player_card" => "Player card", "Ficha do Jogador";
     "menu.quit" => "Quit", "Sair";
 
     "desc.arcade" => "Fight a sequence of opponents", "Enfrente uma sequência de oponentes";
@@ -36,6 +37,7 @@ catalog! {
     "desc.controls" => "Keyboard, Xbox, PlayStation, touch and rumble", "Teclado, Xbox, PlayStation, toque e vibração";
     "desc.settings" => "Video, audio, controls, gameplay and language", "Vídeo, áudio, controles, jogabilidade e idioma";
     "desc.replays" => "Watch, rename and delete recorded fights", "Assista, renomeie e apague lutas gravadas";
+    "desc.player_card" => "Your local card: record, fighters, rivals and achievements", "Seu card local: partidas, lutadores, rivais e conquistas";
     "desc.quit" => "Close the game", "Fechar o jogo";
 
     "mode.arcade" => "ARCADE", "ARCADE";

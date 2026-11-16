@@ -19,6 +19,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Universe and Lore](Lore.md) | Players & Creators | Cosmology, factions, energy systems and the Great Convergence |
 | [Character Dossiers](Characters.md) | Players & Creators | Roster bios, portraits, moves, rivalries and home stages |
 | [Compatibility decisions](Compatibility-Decisions.md) | Creators | Features the engine rejects by design and why |
+| [Format coverage](Format-Coverage.md) | Creators | Status of SFF, SND, AIR, ACT, DEF and screenpack support |
 | [Lua scripts](Lua-Scripts.md) | Creators | What Lua in M.U.G.E.N packs does and the Lua-free alternatives |
 | [Route files](Route-Files.md) | Creators | Arcade routes and unlock rules in TOML |
 | [Make a character (quick start)](Make-a-Character.md) | Creators | A working fighter in ten lines, inherited from another one |

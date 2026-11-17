@@ -889,6 +889,72 @@
       "axisX": 200.0,
       "axisY": 400.0,
       "refHeight": 379.0
+    },
+    "sg_run_run0_fx": {
+      "awakeningHair": [
+        217,
+        61,
+        283,
+        115
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run1_fx": {
+      "awakeningHair": [
+        200,
+        71,
+        266,
+        125
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_mid_fx": {
+      "awakeningHair": [
+        200,
+        71,
+        266,
+        125
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run2_fx": {
+      "awakeningHair": [
+        193,
+        61,
+        259,
+        115
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run3_fx": {
+      "awakeningHair": [
+        213,
+        54,
+        279,
+        108
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "hop_fx": {
+      "awakeningHair": [
+        156,
+        122,
+        222,
+        176
+      ],
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
     }
   }
 }

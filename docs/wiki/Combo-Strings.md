@@ -33,3 +33,7 @@ Pressing the same attack button again after a hit chains into the next move, wit
 | air `x` | `ajab` > `ajab2` |
 
 Fighter `speed` (> 1 shortens every timed frame) and forward walk/run velocity were raised roster-wide; the final boss is scaled with it so it stays faster. Back-walk speeds are unchanged. Validated by `cargo test --release -p ume-engine --test native_same_button_chains`.
+
+## Projectile variants
+
+Every roster fighter has a slow heavy and a fast low variant of its signature projectile, reusing the same effects: `~D, DB, B, y` (slow, two hits, long range) and `~D, DB, B, x` (fast, low, hits crouching foes). Fighters whose input is already taken use the first free of `~D, DF, F, y` and `~D, DF, F, a`.

@@ -23,3 +23,7 @@ Apertar o mesmo botão de ataque de novo depois de acertar encadeia o próximo g
 | `x` no ar | `ajab` > `ajab2` |
 
 O `speed` do lutador (> 1 encurta cada frame) e a velocidade de andar/correr para frente subiram em todo o elenco; o chefe final acompanha para continuar mais rápido. A velocidade de recuo não mudou. Validado por `cargo test --release -p ume-engine --test native_same_button_chains`.
+
+## Variantes de projétil
+
+Todo lutador do elenco tem uma variante lenta e pesada e uma rápida e baixa do projétil assinatura, com os mesmos efeitos: `~D, DB, B, y` (lenta, dois hits, longo alcance) e `~D, DB, B, x` (rápida, baixa, acerta agachado). Quem já usa o input pega o primeiro livre entre `~D, DF, F, y` e `~D, DF, F, a`.

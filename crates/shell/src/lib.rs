@@ -132,6 +132,19 @@ struct Live { window: Arc<Window>, surface: wgpu::Surface<'static>, config: wgpu
 
 pub const STRETCH_ASPECT: f32 = 16.0 / 9.0;
 
+static POINTER_CORRECTION: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0x3f80_0000);
+
+/// Divides pointer input by the device pixel ratio when the platform reports it in device pixels (web).
+pub fn set_pointer_correction(ratio: f32) {
+    if ratio.is_finite() && ratio > 0.0 {
+        POINTER_CORRECTION.store(ratio.to_bits(), std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
+fn pointer_correction() -> f32 {
+    f32::from_bits(POINTER_CORRECTION.load(std::sync::atomic::Ordering::Relaxed))
+}
+
 pub fn logical_size(surface: [f32; 2], stretch: Option<f32>) -> [f32; 2] {
     match stretch { Some(aspect) => [surface[1] * aspect, surface[1]], None => surface }
 }
@@ -240,7 +253,8 @@ impl<G: Game> Shell<G> {
         live.canvas.clear();
         let surface = [live.config.width as f32, live.config.height as f32];
         let size = logical_size(surface, self.stretch);
-        self.input.pointer_scale = [size[0] / surface[0], size[1] / surface[1]];
+        let correction = pointer_correction();
+        self.input.pointer_scale = [size[0] / surface[0] / correction, size[1] / surface[1] / correction];
         let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, scale: live.window.scale_factor() as f32, window: surface, stretch: self.stretch, linear: self.linear, resize: None, fullscreen: None, vsync: None, frame_cap: None, screenshot: None, quit: false };
         self.game.frame(&mut f);
         let (verts, calls) = (f.canvas.batch.vertices.len(), f.canvas.batch.calls.len());

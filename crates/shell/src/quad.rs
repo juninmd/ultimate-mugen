@@ -194,17 +194,17 @@ pub fn draw_ellipse(x: f32, y: f32, w: f32, h: f32, rotation: f32, c: Color) { d
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FilterMode { Linear, Nearest }
 
-struct TexInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Arc<[u8]>, w: u32, h: u32 }
+struct TexInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Arc<Vec<u8>>, w: u32, h: u32 }
 
 #[derive(Clone)]
 pub struct Texture2D(Rc<TexInner>);
 
 impl Texture2D {
     pub fn from_rgba8(w: u16, h: u16, rgba: &[u8]) -> Texture2D {
-        Self::from_rgba_shared(w, h, Arc::from(rgba))
+        Self::from_rgba_shared(w, h, Arc::new(rgba.to_vec()))
     }
 
-    pub fn from_rgba_shared(w: u16, h: u16, rgba: Arc<[u8]>) -> Texture2D {
+    pub fn from_rgba_shared(w: u16, h: u16, rgba: Arc<Vec<u8>>) -> Texture2D {
         let (w, h) = (w as u32, h as u32);
         let needed = (w * h * 4) as usize;
         let pixels = if rgba.len() == needed {
@@ -212,7 +212,7 @@ impl Texture2D {
         } else {
             let mut v = rgba[..rgba.len().min(needed)].to_vec();
             v.resize(needed, 0);
-            Arc::from(v)
+            Arc::new(v)
         };
         Texture2D(Rc::new(TexInner { slot: Cell::new(None), pixels, w, h }))
     }

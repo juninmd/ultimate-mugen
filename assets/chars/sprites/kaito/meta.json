@@ -945,16 +945,38 @@
       "axisY": 363.0,
       "refHeight": 360.0
     },
-    "hop_fx": {
+    "sg_run_run0_bfx": {
       "awakeningHair": [
-        156,
-        122,
-        222,
-        176
+        217,
+        61,
+        283,
+        115
       ],
       "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run1_bfx": {
+      "awakeningHair": [
+        200,
+        71,
+        266,
+        125
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
+    "sg_run_run2_bfx": {
+      "awakeningHair": [
+        193,
+        61,
+        259,
+        115
+      ],
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
     }
   }
 }

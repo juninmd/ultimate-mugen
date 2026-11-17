@@ -49,11 +49,11 @@ impl App {
         }
         // pause button (touch) top-center
         let pb = (VW / 2.0 - 46.0, 96.0, 92.0, 40.0);
-        if !s.paused && self.c.touch.enabled && is_mouse_button_pressed(MouseButton::Left) {
-            let p = self.ui.to_virtual(mouse_position().into());
-            if p.x > pb.0 && p.x < pb.0 + pb.2 && p.y > pb.1 && p.y < pb.1 + pb.3 {
-                s.paused = true; self.audio.sfx("pause");
-            }
+        let on_pause = |v: Vec2| v.x > pb.0 && v.x < pb.0 + pb.2 && v.y > pb.1 && v.y < pb.1 + pb.3;
+        let mouse_hit = is_mouse_button_pressed(MouseButton::Left) && on_pause(self.ui.to_virtual(mouse_position().into()));
+        let touch_hit = self.c.touch.began.iter().any(|t| on_pause(self.ui.to_virtual(*t)));
+        if !s.paused && self.c.touch.enabled && (mouse_hit || touch_hit) {
+            s.paused = true; self.pause.reset(); self.audio.sfx("pause");
         }
         if is_key_pressed(KeyCode::Tab) && !s.paused && !replaying {
             s.switch_control();

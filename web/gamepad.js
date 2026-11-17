@@ -65,6 +65,7 @@
   };
   window.ume_storage_get = (k) => { try { return localStorage.getItem('ume.' + k) || ''; } catch (e) { return ''; } };
   window.ume_storage_set = (k, v) => { try { localStorage.setItem('ume.' + k, v); } catch (e) {} };
+  window.ume_dpr = () => window.devicePixelRatio || 1;
   window.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0;
 
   window.umeStartImports = function (wasm) {

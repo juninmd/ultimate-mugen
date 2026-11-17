@@ -119,13 +119,9 @@ fn conf() -> WindowConf {
     }
 }
 
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen::prelude::wasm_bindgen]
-extern "C" {
-    fn ume_is_touch() -> i32;
-}
-
 /// Browser imports: JS writes a .zip into wasm memory and queues it for the registry.
+#[cfg(target_arch = "wasm32")]
+pub mod web_input;
 #[cfg(target_arch = "wasm32")]
 pub mod webimport;
 pub fn take_imports() -> Vec<Vec<u8>> {
@@ -225,7 +221,7 @@ async fn game() {
     init_perf();
     let shots = args.iter().position(|a| a == "--shots").and_then(|i| args.get(i + 1)).cloned();
     #[cfg(target_arch = "wasm32")]
-    let touch_dev = ume_is_touch() != 0;
+    let touch_dev = web_input::is_touch();
     #[cfg(not(target_arch = "wasm32"))]
     let touch_dev = cfg!(any(target_os = "android", target_os = "ios"));
     let mut app = app::App::new(has("--touch") || touch_dev, (shots.is_none() || has("--shots-audio")) && !has("--mute")).await;

@@ -62,8 +62,8 @@ fn standby_fighter_is_untargetable_unpushable_and_receives_no_input() {
     assert_eq!(m.enemy(roots[0], 0), Some(roots[1]));
     assert_ne!(m.enemy(roots[0], 1), Some(roots[3]), "standby enemy is never targeted");
     let hd = ume_engine::fighter::HitDefData { hitflag: "MAF".into(), affect_team: 'E', ..Default::default() };
-    assert!(m.can_be_hit(roots[1], &hd, 0));
-    assert!(!m.can_be_hit(roots[3], &hd, 0), "standby fighter cannot be hit");
+    assert!(m.can_be_hit(roots[1], &hd, 0, 0));
+    assert!(!m.can_be_hit(roots[3], &hd, 0, 0), "standby fighter cannot be hit");
     let before = m.fighters[roots[2]].pos;
     for _ in 0..30 { m.tick(&[0, 0, R | X | A, 0]); }
     assert_eq!(m.fighters[roots[2]].pos.x, m.fighters[roots[0]].pos.x, "input never moves the standby fighter ({before:?})");

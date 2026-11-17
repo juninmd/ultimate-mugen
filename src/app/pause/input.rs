@@ -126,11 +126,10 @@ impl App {
     }
 
     fn pause_drag(&mut self, lay: &Layout) {
-        let pos = self.ui.to_virtual(mouse_position().into());
-        if !is_mouse_button_down(MouseButton::Left) {
+        let Some(pos) = self.drag_pointer() else {
             self.pause.drag = None;
             return;
-        }
+        };
         match self.pause.drag {
             Some(last) => {
                 self.pause.scroll -= pos.y - last;
@@ -141,6 +140,18 @@ impl App {
             }
             None if lay.list.contains(pos.x, pos.y) => self.pause.drag = Some(pos.y),
             None => {}
+        }
+    }
+
+    fn drag_pointer(&self) -> Option<Vec2> {
+        let dpi = dpi_scale().max(0.01);
+        let finger = touches()
+            .into_iter()
+            .find(|t| !matches!(t.phase, TouchPhase::Ended | TouchPhase::Cancelled));
+        match finger {
+            Some(t) => Some(self.ui.to_virtual(t.position / dpi)),
+            None if is_mouse_button_down(MouseButton::Left) => Some(self.ui.to_virtual(mouse_position().into())),
+            None => None,
         }
     }
 }

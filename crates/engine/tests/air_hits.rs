@@ -60,13 +60,13 @@ fn juggle_budget_stops_air_combos() {
     f.state_type = 'A'; f.move_type = 'H'; f.ghv.fall = true; f.pos.y = -50.0;
     let mut hd = hit();
     hd.juggle = 10;
-    f.juggle_used = 10;
-    assert!(!m.can_be_hit(b, &hd, 0), "10 used + 10 > 15 budget");
-    m.fighters[b].juggle_used = 5;
-    assert!(m.can_be_hit(b, &hd, 0), "5 used + 10 fits the 15 budget");
+    f.juggle_ledger = vec![(0, 10)];
+    assert!(!m.can_be_hit(b, &hd, 0, 0), "10 used + 10 > 15 budget");
+    m.fighters[b].juggle_ledger = vec![(0, 5)];
+    assert!(m.can_be_hit(b, &hd, 0, 0), "5 used + 10 fits the 15 budget");
     hd.juggle = 0;
-    m.fighters[b].juggle_used = 15;
-    assert!(m.can_be_hit(b, &hd, 0), "zero-point moves are never blocked");
+    m.fighters[b].juggle_ledger = vec![(0, 15)];
+    assert!(m.can_be_hit(b, &hd, 0, 0), "zero-point moves are never blocked");
 }
 
 #[test]

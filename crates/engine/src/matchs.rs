@@ -722,7 +722,7 @@ impl Match {
             if f.form > 0 { f.form_time += 1; f.power = (f.power + 1.2).min(f.power_max); } f.tick_passive(self.round_state == 2); f.tick_potential();
             // the final boss keeps charging on its own (a super every ~10 s even when not hitting)
             if f.def.boss && self.round_state == 2 && f.alive { f.power = (f.power + if f.form >= 3 { 1.2 } else if f.form >= 2 { 0.85 } else { 0.35 }).min(f.power_max); if f.form >= 3 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.22).min(f.life_max); } else if f.form >= 2 && f.move_type != 'H' && f.life < f.life_max { f.life = (f.life + 0.12).min(f.life_max); } }
-            if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_used = 0; f.super_defence_mul = 1.0; }
+            if f.move_type == 'H' { if f.hit_over_time > 0 { f.hit_over_time -= 1; } f.fall_time += 1; } else { f.juggle_ledger.clear(); f.super_defence_mul = 1.0; }
             if f.move_contact > 0 { f.move_contact += 1; }
             if f.move_hit > 0 { f.move_hit += 1; }
             if f.move_guarded > 0 { f.move_guarded += 1; }
@@ -958,7 +958,7 @@ impl Match {
         }
         !has_kinds
     }
-    pub fn can_be_hit(&self, d: usize, hd: &HitDefData, side: usize) -> bool {
+    pub fn can_be_hit(&self, d: usize, hd: &HitDefData, side: usize, juggle_key: u32) -> bool {
         let f = &self.fighters[d];
         let team_ok = match hd.affect_team { 'B' => true, 'F' => f.side == side, _ => f.side != side };
         if f.destroyed || !team_ok || !f.alive || f.ikemen.standby || f.helper_projectile { return false; }
@@ -974,7 +974,7 @@ impl Match {
         let falling = f.move_type == 'H' && f.ghv.fall && st == 'A';
         let hf_falling = hf.contains('F') && !f.has_assert(asf::NOFALLHITFLAG);
         // air juggle budget: a falling, airborne target can only absorb `airjuggle` points of moves in a row
-        if falling && f.juggle_used + hd.juggle > hd.airjuggle { return false; }
+        if falling && f.juggle_spent(juggle_key) + hd.juggle > hd.airjuggle { return false; }
         if st == 'S' && !(hf.contains('H') || hf.contains('M')) { return false; }
         if st == 'C' && !(hf.contains('L') || hf.contains('M')) { return false; }
         if st == 'A' && !hf.contains('A') && !(falling && hf_falling) { return false; }
@@ -1056,7 +1056,7 @@ impl Match {
                 if d == a || fd.root == fa.root || fa.hitdef_targets.contains(&fd.id) || !self.same_lane(a, d) { continue; }
                 if hd.hit_once && !fa.hitdef_targets.is_empty() { continue; }
                 if hd.p2clsncheck && fd.frame().is_none_or(|f| f.clsn2.is_empty()) { continue; }
-                if !self.can_be_hit(d, hd, fa.side) { continue; }
+                if !self.can_be_hit(d, hd, fa.side, self.juggle_source(a)) { continue; }
                 fd.fill_boxes(2, &mut self.scratch_c2);
                 let targets: &[Box4] = if hd.p2clsnrequire >= 0 {
                     let req = hd.p2clsnrequire as usize;
@@ -1204,7 +1204,7 @@ impl Match {
             if self.fighters[d].has_assert(asf::NOHITDAMAGE) { dmg = 0.0; }
             let prev_fall = self.fighters[d].ghv.fall;
             let ko_global_off = self.global_asserts & gsf::GLOBALNOKO != 0;
-            if was_hit && prev_fall && (self.fighters[d].state_type == 'A' || self.fighters[d].air_height() < -1.0) { self.fighters[d].juggle_used += hd.juggle; }
+            if was_hit && prev_fall && (self.fighters[d].state_type == 'A' || self.fighters[d].air_height() < -1.0) { { let key = self.juggle_source(a); self.fighters[d].add_juggle(key, hd.juggle); } }
             {
                 let fd = &mut self.fighters[d];
                 let mut nl = fd.life - dmg;
@@ -1531,6 +1531,7 @@ impl Match {
         h.pause_bool = num(self, "pausebool", 0.0, 0) != 0.0;
         h.super_move_time = num(self, "supermovetime", 0.0, 0) as i32;
         h.preserve = num(self, "preserve", 0.0, 0) != 0.0;
+        h.inherit_juggle = num(self, "inheritjuggle", 0.0, 0).clamp(0.0, 2.0) as u8;
         h.own_pal = num(self, "ownpal", 0.0, 0) != 0.0;
         let helper_type = sc.raw("helpertype").map(|t| t.trim().to_ascii_lowercase()).unwrap_or_default();
         h.helper_player = helper_type == "player";
@@ -1679,7 +1680,7 @@ impl Match {
                 if p.dying || p.remove || p.miss_cd > 0 { break; }
                 let Some(oi) = self.idx(p.owner).or_else(|| self.idx(p.root)) else { break };
                 if self.fighters[d].root == p.root { continue; }
-                if !self.can_be_hit(d, &p.hitdef, p.side) { continue; }
+                if !self.can_be_hit(d, &p.hitdef, p.side, self.juggle_source(oi)) { continue; }
                 let c1 = Self::proj_boxes(p, 1);
                 if c1.is_empty() { break; }
                 let Some(at) = Self::overlap(&c1, &self.fighters[d].boxes(2)) else { continue };

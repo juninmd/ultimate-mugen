@@ -80,7 +80,7 @@ pub fn checksum(m: &Match) -> u128 {
         for v in [f.state_no, f.prev_state_no, f.state_time, f.anim_no, f.anim_real, f.elem as i32, f.elem_time, f.anim_elapsed] {
             h.i32(v);
         }
-        for v in [f.hit_pause, f.hit_shake, f.hit_over_time, f.slide_time, f.fall_time, f.juggle_used, f.move_contact, f.move_hit, f.move_guarded, f.move_reversed, f.hit_count, f.uniq_hit_count, f.combo_count] {
+        for v in [f.hit_pause, f.hit_shake, f.hit_over_time, f.slide_time, f.fall_time, f.juggle_ledger.iter().map(|e| e.1).sum::<i32>(), f.move_contact, f.move_hit, f.move_guarded, f.move_reversed, f.hit_count, f.uniq_hit_count, f.combo_count] {
             h.i32(v);
         }
         for v in [f.pause_move_time, f.super_move_time, f.air_jumps, f.form_time] {

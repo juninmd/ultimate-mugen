@@ -19,3 +19,17 @@ Every native fighter (the 16 roster fighters and the 5 Story NPCs) has a signatu
 | Garan, Lian, Jin, Suzume, Phantom, Razor | Ground-bounce finisher for a follow-up juggle | `string_c` |
 
 Validated by `cargo test --release -p ume-engine --test native_combo_routes` (every declared cancel chains on contact), `native_roster_lab` and `native_hitbox_audit`.
+
+## Same-button mini combos
+
+Pressing the same attack button again after a hit chains into the next move, with no extra direction needed. Each chain move is a `normal` with a `rekka` gate (`after`, `window`, `contact: true`), so it only fires from its source on contact and never from neutral. The chain animations reuse the fighter's existing sprites (same pixel art) in new orders and faster timings.
+
+| Press | Chain |
+|---|---|
+| `x` | `jab` > `jab2` > `jab3` (finisher with small pushback, cancels into the two signature specials) |
+| `a` | `lkick` > `lkick2` > `lkick3` |
+| `y` | `strong` > `strong2` |
+| crouch `x` | `cjab` > `cjab2` |
+| air `x` | `ajab` > `ajab2` |
+
+Fighter `speed` (> 1 shortens every timed frame) and forward walk/run velocity were raised roster-wide; the final boss is scaled with it so it stays faster. Back-walk speeds are unchanged. Validated by `cargo test --release -p ume-engine --test native_same_button_chains`.

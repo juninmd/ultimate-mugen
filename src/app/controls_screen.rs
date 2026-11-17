@@ -46,7 +46,8 @@ impl App {
         let cell_text = |row: usize, g: Glyphs| match (row, g) {
             (0, g) => Some(move_text(g)),
             (6, Glyphs::Keyboard) => Some("Esc / P".to_string()),
-            (7, Glyphs::Keyboard) => None,
+            (6, Glyphs::Touch) => Some("II".to_string()),
+            (7, Glyphs::Keyboard | Glyphs::Touch) => None,
             (7, _) => Some("-".to_string()),
             _ => None,
         };

@@ -13,7 +13,9 @@ pub struct TouchPad {
 }
 
 pub const QUICK_SKILLS: usize = 4;
-pub const BUTTONS: usize = 7 + QUICK_SKILLS;
+pub const CHARGE: usize = 7;
+pub const QUICK_START: usize = 8;
+pub const BUTTONS: usize = QUICK_START + QUICK_SKILLS;
 
 pub const TOUCH_BUTTONS: [(&str, u32); BUTTONS] = [
     ("SOCO", k::X),
@@ -23,6 +25,7 @@ pub const TOUCH_BUTTONS: [(&str, u32); BUTTONS] = [
     ("CHUTE+", k::B),
     ("SUPER", k::D2 | k::W),
     ("DESPERTAR", k::T),
+    ("CARREGAR", k::S),
     ("1", k::SLOT1),
     ("2", k::SLOT2),
     ("3", k::SLOT3),
@@ -52,6 +55,7 @@ impl TouchPad {
             .map(|i| vec2(bx + (i % 3) as f32 * gap, by - (1 - i / 3) as f32 * gap))
             .collect();
         v.push(vec2(bx + gap, by - gap * 2.0));
+        v.push(vec2(bx + gap * 2.0, by - gap * 2.0));
         let quick_y = h - r * 0.9;
         for j in 0..QUICK_SKILLS {
             v.push(vec2(w * 0.57 + (j as f32 - 1.5) * r * 1.8, quick_y));
@@ -66,7 +70,7 @@ impl TouchPad {
     fn radius(i: usize, r: f32) -> f32 {
         if i == 6 {
             r * 0.7
-        } else if i > 6 {
+        } else if i >= QUICK_START {
             r * 0.55
         } else {
             r
@@ -184,7 +188,8 @@ impl TouchPad {
                 3 | 4 => Color::new(1.0, 0.27, 0.4, 0.45),
                 2 => Color::new(1.0, 0.75, 0.15, 0.45),
                 5 => Color::new(0.6, 0.2, 0.95, 0.55),
-                7..=10 => Color::new(0.2, 0.9, 0.8, 0.4),
+                CHARGE => Color::new(1.0, 0.8, 0.2, 0.5),
+                QUICK_START..BUTTONS => Color::new(0.2, 0.9, 0.8, 0.4),
                 _ => Color::new(1.0, 0.45, 0.1, 0.5),
             };
             draw_circle(
@@ -219,8 +224,13 @@ mod tests {
     use super::*;
 
     #[test]
+    fn charge_button_presses_the_ki_charge_key() {
+        assert_eq!(TOUCH_BUTTONS[CHARGE].1, k::S);
+    }
+
+    #[test]
     fn quick_skill_buttons_press_the_shortcut_slots() {
-        let bits: Vec<u32> = TOUCH_BUTTONS[7..].iter().map(|(_, b)| *b).collect();
+        let bits: Vec<u32> = TOUCH_BUTTONS[QUICK_START..].iter().map(|(_, b)| *b).collect();
         assert_eq!(bits, k::SLOTS.to_vec(), "quick skills must press the shortcut slots the pause screen binds");
     }
 }

@@ -2,6 +2,7 @@
 use crate::gamepad::{PadInfo, PadKind, Pads};
 mod nav_repeat;
 mod touch;
+mod touch_label;
 pub mod shortcuts;
 use crate::gfx::*;
 use crate::keybinds::KeyMap;
@@ -25,18 +26,7 @@ pub fn face(g: Glyphs, keys: &KeyMap, bit: u32) -> Face {
     let punch = bit & (k::X | k::Y | k::Z) != 0;
     match g {
         Glyphs::Touch => {
-            let t = match bit {
-                k::X => crate::i18n::tr3("SOCO", "PUNCH", "PUÑO"),
-                k::Y => crate::i18n::tr3("SOCO+", "PUNCH+", "PUÑO+"),
-                k::Z => crate::i18n::tr3("SOCO 3", "PUNCH 3", "PUÑO 3"),
-                k::A => crate::i18n::tr3("CHUTE", "KICK", "PATA"),
-                k::B => crate::i18n::tr3("CHUTE+", "KICK+", "PATA+"),
-                k::C => crate::i18n::tr3("CHUTE 3", "KICK 3", "PATA 3"),
-                k::D2 => crate::i18n::tr3("ESPECIAL", "SPECIAL", "ESPECIAL"),
-                k::W => "SUPER",
-                k::T => crate::i18n::tr3("DESPERTAR", "AWAKEN", "DESPERTAR"),
-                _ => "II",
-            };
+            let t = touch_label::label(bit);
             Face::chip(
                 t,
                 if punch {

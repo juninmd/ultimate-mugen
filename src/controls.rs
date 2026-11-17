@@ -2,6 +2,7 @@
 use crate::gamepad::{PadInfo, PadKind, Pads};
 mod nav_repeat;
 mod touch;
+mod touch_style;
 mod touch_label;
 pub mod shortcuts;
 use crate::gfx::*;

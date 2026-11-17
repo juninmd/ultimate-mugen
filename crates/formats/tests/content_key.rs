@@ -42,3 +42,19 @@ fn content_hash_is_stable_and_discriminating() {
     assert_eq!(content_hash(b"zip"), content_hash(b"zip"));
     assert_ne!(content_hash(b"zip"), content_hash(b"zip2"));
 }
+
+#[test]
+fn patched_copy_of_the_same_fighter_has_the_same_key() {
+    let patched = "; ---- Created by Uno Tag Team Patcher ---- ;\n[Info]\nname = \"A\"\n[Files]\ncmd = a_unotag\\a.cmd\ncns = a.cns\nsprite = a.sff\n";
+    let a = char_vfs("chars/a", DEF, b"sprites");
+    let b = char_vfs("chars/a_unotag", patched, b"sprites");
+    assert_eq!(char_key(&a, "chars/a/a.def"), char_key(&b, "chars/a_unotag/a.def"));
+}
+
+#[test]
+fn backup_copies_are_not_discovered_as_fighters() {
+    let mut v = char_vfs("chars/a", DEF, b"sprites");
+    v.insert("chars/a/backup/2021/a.def".into(), DEF.as_bytes().to_vec());
+    let defs = ume_formats::vfs::find_char_defs(&v);
+    assert_eq!(defs, vec!["chars/a/a.def".to_string()]);
+}

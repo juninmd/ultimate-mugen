@@ -9,6 +9,7 @@ pub struct TouchPad {
     touch_seen: bool,
     stick_center: Option<Vec2>,
     pub stick_pos: Vec2,
+    pub began: Vec<Vec2>,
     pub pressed: [bool; BUTTONS],
     hold: [u8; BUTTONS],
 }
@@ -48,6 +49,7 @@ impl TouchPad {
             touch_seen: false,
             stick_center: None,
             stick_pos: Vec2::ZERO,
+            began: Vec::new(),
             pressed: [false; BUTTONS],
             hold: [0; BUTTONS],
         }
@@ -92,6 +94,7 @@ impl TouchPad {
     }
     pub fn update(&mut self) {
         if !self.enabled {
+            self.began.clear();
             self.bits = 0;
             self.stick_center = None;
             self.stick_pos = Vec2::ZERO;
@@ -113,6 +116,11 @@ impl TouchPad {
         if !all.is_empty() {
             self.touch_seen = true;
         }
+        self.began = touches()
+            .iter()
+            .filter(|t| matches!(t.phase, TouchPhase::Started | TouchPhase::Ended))
+            .map(|t| t.position / dpi)
+            .collect();
         let mut points: Vec<(Vec2, bool)> = all;
         if points.is_empty() && !self.touch_seen && is_mouse_button_down(MouseButton::Left) {
             points.push((mouse_position().into(), false));

@@ -244,8 +244,9 @@ pub struct DrawTextureParams { pub dest_size: Option<Vec2>, pub source: Option<R
 pub fn draw_texture(t: &Texture2D, x: f32, y: f32, c: Color) { draw_texture_ex(t, x, y, c, DrawTextureParams::default()) }
 
 pub fn draw_texture_ex(t: &Texture2D, x: f32, y: f32, c: Color, p: DrawTextureParams) {
-    with(|f| { if large::try_draw(f, t, x, y, c, &p) { return; }
-        let Some(r) = t.rect(f) else { return };
+    with(|f| { if large::try_draw(f, t, x, y, c, &p, false) { return; }
+        // atlas full: draw from a dedicated texture this frame instead of dropping the sprite (black flash)
+        let Some(r) = t.rect(f) else { large::try_draw(f, t, x, y, c, &p, true); return };
         push_textured(f, r, RGBA_SPRITE, [t.width(), t.height()], x, y, c, p);
     })
 }

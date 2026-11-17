@@ -6,9 +6,10 @@ thread_local! {
     static LARGE: RefCell<Vec<(Weak<TexInner>, u32)>> = const { RefCell::new(Vec::new()) };
 }
 
-pub fn try_draw(f: &mut Frame, t: &Texture2D, x: f32, y: f32, c: Color, p: &DrawTextureParams) -> bool {
+/// `overflow` is set when the shared atlas has no room for the texture this frame, so any size qualifies.
+pub fn try_draw(f: &mut Frame, t: &Texture2D, x: f32, y: f32, c: Color, p: &DrawTextureParams, overflow: bool) -> bool {
     let inner = &t.0;
-    if inner.w * inner.h < LARGE_PIXELS || p.rotation != 0.0 || p.pal_fx.is_some() { return false; }
+    if (!overflow && inner.w * inner.h < LARGE_PIXELS) || p.rotation != 0.0 || p.pal_fx.is_some() { return false; }
     let Some(id) = slot_of(f, inner) else { return false };
     let (w, h) = (inner.w as f32, inner.h as f32);
     let src = p.source.unwrap_or(Rect::new(0.0, 0.0, w, h));
@@ -33,7 +34,8 @@ pub fn try_draw(f: &mut Frame, t: &Texture2D, x: f32, y: f32, c: Color, p: &Draw
 }
 
 fn slot_of(f: &mut Frame, inner: &Rc<TexInner>) -> Option<u32> {
-    let known = LARGE.with(|l| l.borrow().iter().find(|(w, _)| std::ptr::eq(w.as_ptr(), Rc::as_ptr(inner))).map(|(_, id)| *id));
+    // a freed texture's address can be reused, so only a live owner may claim the slot
+    let known = LARGE.with(|l| l.borrow().iter().find(|(w, _)| w.upgrade().is_some_and(|rc| Rc::ptr_eq(&rc, inner))).map(|(_, id)| *id));
     if known.is_some() { return known; }
     let dead: Vec<u32> = LARGE.with(|l| {
         let mut l = l.borrow_mut();

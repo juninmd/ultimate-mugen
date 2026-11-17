@@ -48,7 +48,7 @@ impl App {
             s.paused = false;
         }
         // pause button (touch) top-center
-        let pb = (VW / 2.0 - 22.0, 92.0, 44.0, 44.0);
+        let pb = (VW / 2.0 - 46.0, 96.0, 92.0, 40.0);
         if !s.paused && self.c.touch.enabled && is_mouse_button_pressed(MouseButton::Left) {
             let p = self.ui.to_virtual(mouse_position().into());
             if p.x > pb.0 && p.x < pb.0 + pb.2 && p.y > pb.1 && p.y < pb.1 + pb.3 {
@@ -75,13 +75,13 @@ impl App {
         }
         self.c.touch.draw();
         if self.c.touch.enabled {
-            self.ui
-                .rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.0, 0.0, 0.0, 0.35));
+            self.ui.rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.08, 0.04, 0.16, 0.8));
+            self.ui.rect_lines(pb.0, pb.1, pb.2, pb.3, 2.0, Color::new(1.0, 0.8, 0.2, 0.9));
             self.ui.text(
-                "II",
+                crate::i18n::tr3("II  PAUSA", "II  PAUSE", "II  PAUSA"),
                 VW / 2.0,
-                pb.1 + 30.0,
-                20.0,
+                pb.1 + 27.0,
+                18.0,
                 WHITE,
                 Align::Center,
                 true,

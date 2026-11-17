@@ -262,7 +262,7 @@ impl<'a> Host for Ctx<'a> {
             "incustomanim" => b(!std::sync::Arc::ptr_eq(&f.anim_def, &f.def)),
             "jugglepoints" => {
                 let budget = f.last_hit_by.and_then(|id| m.idx(id)).filter(|_| f.move_type == 'H').map(|k| m.fighters[k].def.c("data.airjuggle", 15.0)).unwrap_or_else(|| f.def.c("data.airjuggle", 15.0));
-                (budget - f.juggle_used as f64).max(0.0)
+                (budget - f.juggle_spent(f.last_hit_by.unwrap_or(0)) as f64).max(0.0)
             }
             "hitvel" => (if comp == Some('y') { f.ghv.yvel } else { f.ghv.xvel }) as f64 / l,
             "parentexist" => b(f.parent.and_then(|p| m.idx(p)).is_some_and(|k| !m.fighters[k].destroyed)),

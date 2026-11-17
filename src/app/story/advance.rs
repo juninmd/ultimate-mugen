@@ -135,7 +135,7 @@ impl App {
             hero.facing = 1.0;
             hero.hit_pause = 0;
             hero.hit_shake = 0;
-            hero.juggle_used = 0;
+            hero.juggle_ledger.clear();
             hero.targets.clear();
             hero.bind = None;
             hero.hitdef_active = false;

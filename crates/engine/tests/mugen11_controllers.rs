@@ -142,7 +142,7 @@ fn superpause_and_pause_are_distinct() {
     assert!(p.is_super && p.darken && p.unhittable && p.time > 30);
     assert!(m.fighters[0].unhittable > 0, "the super user cannot be hit while the screen is frozen");
     let hd = ume_engine::fighter::HitDefData { hitflag: "MAF".into(), attr_state: "S".into(), ..Default::default() };
-    assert!(!m.can_be_hit(0, &hd, 1));
+    assert!(!m.can_be_hit(0, &hd, 1, 0));
     assert_eq!(m.fighters[1].super_defence_mul, 2.0, "p2defmul reaches current targets");
     ticks(&mut m, 60);
     assert!(m.pause.is_none() && m.fighters[0].unhittable == 0);

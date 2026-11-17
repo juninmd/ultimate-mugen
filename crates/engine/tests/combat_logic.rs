@@ -243,14 +243,14 @@ fn test_hit_filtering_can_be_hit() {
 
     // Round state must be 2 (fight) for hits to register normally
     m.round_state = 2;
-    assert!(m.can_be_hit(p2_idx, &hd, m.fighters[p1_idx].side));
+    assert!(m.can_be_hit(p2_idx, &hd, m.fighters[p1_idx].side, 0));
 
     // Same side cannot be hit
-    assert!(!m.can_be_hit(p1_idx, &hd, m.fighters[p1_idx].side));
+    assert!(!m.can_be_hit(p1_idx, &hd, m.fighters[p1_idx].side, 0));
 
     // not_hit_by immunity
     m.fighters[p2_idx].not_hit_by.push(("S,NA".into(), 10));
-    assert!(!m.can_be_hit(p2_idx, &hd, m.fighters[p1_idx].side));
+    assert!(!m.can_be_hit(p2_idx, &hd, m.fighters[p1_idx].side, 0));
 }
 
 fn eval_trigger(m: &Match, i: usize, src: &str) -> f64 {

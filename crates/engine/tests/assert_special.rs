@@ -107,9 +107,9 @@ fn nofallhitflag_makes_a_falling_target_ignore_the_f_flag() {
     m.fighters[1].state_type = 'A';
     m.fighters[1].ghv.fall = true;
     let hit = HitDefData { hitflag: "MAFD".into(), attr_state: "S".into(), airjuggle: 100, ..Default::default() };
-    assert!(!m.can_be_hit(1, &hit, 0));
+    assert!(!m.can_be_hit(1, &hit, 0, 0));
     m.fighters[1].asserts = 0;
-    assert!(m.can_be_hit(1, &hit, 0));
+    assert!(m.can_be_hit(1, &hit, 0, 0));
 }
 
 #[test]

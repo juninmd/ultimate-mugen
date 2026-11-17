@@ -75,7 +75,7 @@ fn has_key(t: &str, word: &str) -> bool {
 
 /// Character .def files (has `[Files]` with `cns =` and `sprite =`).
 pub fn find_char_defs(vfs: &Vfs) -> Vec<String> {
-    let candidates: Vec<&String> = vfs.keys().filter(|k| k.ends_with(".def")).collect();
+    let candidates: Vec<&String> = vfs.keys().filter(|k| k.ends_with(".def") && !in_backup_dir(k)).collect();
     let hits = crate::par::map(&candidates, |key| {
         let Some(bytes) = vfs.get(key) else { return false };
         if bytes.len() > 1 << 20 {
@@ -85,6 +85,11 @@ pub fn find_char_defs(vfs: &Vfs) -> Vec<String> {
         t.contains("[files]") && has_key(&t, "cns") && has_key(&t, "sprite")
     });
     candidates.into_iter().zip(hits).filter(|(_, hit)| *hit).map(|(k, _)| k.clone()).collect()
+}
+
+/// Authors keep older copies under `backup/` folders; they are not separate fighters.
+fn in_backup_dir(key: &str) -> bool {
+    key.split('/').rev().skip(1).any(|dir| dir.eq_ignore_ascii_case("backup"))
 }
 
 /// Stage .def files (has `[BGdef` and `[StageInfo]` or `[Camera]`).
@@ -115,13 +120,17 @@ fn def_key(vfs: &Vfs, def: &str, section: &str, sprite_key: &str) -> String {
     let Some(def_bytes) = vfs.get(&def) else {
         return format!("path:{def}");
     };
-    let secs = crate::ini::parse_ini(&text(&def_bytes));
+    let h = fnv(FNV_OFFSET, canonical_def_text(&def_bytes).as_bytes());
+    sprite_key_hash(vfs, &def, &def_bytes, section, sprite_key, h)
+}
+
+fn sprite_key_hash(vfs: &Vfs, def: &str, def_bytes: &[u8], section: &str, sprite_key: &str, mut h: u64) -> String {
+    let secs = crate::ini::parse_ini(&text(def_bytes));
     let sprite = crate::ini::find_section(&secs, section)
         .and_then(|s| s.get(sprite_key))
         .map(|v| unquote(v))
         .unwrap_or_default();
     let base = def.rfind('/').map(|i| &def[..i]).unwrap_or("");
-    let mut h = fnv(FNV_OFFSET, canonical_def_text(&def_bytes).as_bytes());
     match resolve_key(vfs, base, &sprite).and_then(|k| vfs.signature(&k)) {
         Some((len, sample)) => {
             h = fnv(h, &len.to_le_bytes());
@@ -132,10 +141,19 @@ fn def_key(vfs: &Vfs, def: &str, section: &str, sprite_key: &str) -> String {
     format!("{h:016x}")
 }
 
-/// Identity of a character independent of where it was found: hash of its normalized `.def` and sprite file.
-/// The same fighter imported twice, from another path, or with different letter case yields the same key.
+/// Identity of a character independent of where it was found: its display name and its sprite file.
+/// Patched copies (extra header, changed cmd/palette lines) and backup folders share both, so they collapse to one fighter.
 pub fn char_key(vfs: &Vfs, def: &str) -> String {
-    def_key(vfs, def, "files", "sprite")
+    let def = norm_path(def);
+    let Some(def_bytes) = vfs.get(&def) else {
+        return format!("path:{def}");
+    };
+    let secs = crate::ini::parse_ini(&text(&def_bytes));
+    let name = crate::ini::find_section(&secs, "info")
+        .and_then(|s| s.get("displayname").or(s.get("name")))
+        .map(|v| unquote(v).to_lowercase())
+        .unwrap_or_default();
+    sprite_key_hash(vfs, &def, &def_bytes, "files", "sprite", fnv(FNV_OFFSET, name.as_bytes()))
 }
 
 /// Identity of a stage, same idea as [`char_key`] (uses `[BGdef] spr`).

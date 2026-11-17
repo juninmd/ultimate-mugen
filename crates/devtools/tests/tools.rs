@@ -119,6 +119,7 @@ fn move_audit_flags_missing_anims_and_duplicate_inputs() {
         "moves": [
             { "id": "m1", "kind": "normal", "input": "a", "anim": "a", "hits": [{ "at": 1, "damage": 10 }] },
             { "id": "m2", "kind": "normal", "input": "a", "anim": "gone", "cancels": ["nope"] },
+            { "id": "m3", "kind": "normal", "input": "a", "anim": "a", "hits": [{ "at": 1, "damage": 10 }], "rekka": { "after": ["m1"], "window": [1, 9] } },
         ],
     });
     let problems: Vec<String> = audit(&character)["problems"].as_array().unwrap().iter().map(|p| p.as_str().unwrap().to_string()).collect();
@@ -127,6 +128,7 @@ fn move_audit_flags_missing_anims_and_duplicate_inputs() {
     assert!(problems.contains(&"m2: cancels unknown move 'nope'".to_string()));
     assert!(problems.contains(&"m1: ground move ends on an infinite frame (never returns control)".to_string()));
     assert!(problems.contains(&"no throw".to_string()));
+    assert!(!problems.iter().any(|p| p.starts_with("m3: input")), "a rekka follow-up may share its source input");
 }
 
 #[test]

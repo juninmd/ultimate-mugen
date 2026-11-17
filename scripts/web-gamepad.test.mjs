@@ -105,3 +105,29 @@ test('gamepad buttons map to engine bits and idle pads are ignored', () => {
   assert.equal(window.ume_gp_state(0), 16 | 32 | 128);
   assert.equal(window.ume_gp_state(1), 0);
 });
+
+test('a multi-file import keeps every file after the file input is cleared', async () => {
+  const { window } = load();
+  const pushed = [];
+  let open = 0;
+  const wasm = {
+    ume_import_begin: () => { open++; },
+    ume_import_end: () => { open--; },
+    ume_import_pending: () => 0,
+    ume_import: (bytes) => pushed.push(bytes.length),
+  };
+  window.umeStartImports(wasm);
+  await new Promise((r) => setTimeout(r, 0));
+  const picked = [
+    { name: 'Aquaman.zip', arrayBuffer: async () => new Uint8Array(4).buffer },
+    { name: 'Thor_Odinson.zip', arrayBuffer: async () => new Uint8Array(7).buffer },
+  ];
+  const live = { length: picked.length, 0: picked[0], 1: picked[1], [Symbol.iterator]: Array.prototype[Symbol.iterator] };
+  window.umeImport(live);
+  live.length = 0;
+  delete live[0];
+  delete live[1];
+  await new Promise((r) => setTimeout(r, 20));
+  assert.deepEqual(pushed, [4, 7], 'both packs reach the wasm queue even though the input was cleared');
+  assert.equal(open, 0, 'the batch is closed once every file was handed over');
+});

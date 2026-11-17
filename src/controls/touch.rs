@@ -1,5 +1,6 @@
 use crate::gfx::*;
 use ume_engine::input::k;
+use super::touch_style;
 
 pub struct TouchPad {
     pub enabled: bool,
@@ -15,7 +16,8 @@ pub struct TouchPad {
 pub const QUICK_SKILLS: usize = 4;
 pub const CHARGE: usize = 7;
 pub const QUICK_START: usize = 8;
-pub const BUTTONS: usize = QUICK_START + QUICK_SKILLS;
+pub const EXTRA_START: usize = QUICK_START + QUICK_SKILLS;
+pub const BUTTONS: usize = EXTRA_START + 5;
 
 pub const TOUCH_BUTTONS: [(&str, u32); BUTTONS] = [
     ("SOCO", k::X),
@@ -30,6 +32,11 @@ pub const TOUCH_BUTTONS: [(&str, u32); BUTTONS] = [
     ("2", k::SLOT2),
     ("3", k::SLOT3),
     ("4", k::SLOT4),
+    ("TROCA", k::TAG),
+    ("ESPECIAL 3", k::E),
+    ("SOCO 3", k::Z),
+    ("CHUTE 3", k::C),
+    ("DEFESA", k::GUARD),
 ];
 
 impl TouchPad {
@@ -60,6 +67,13 @@ impl TouchPad {
         for j in 0..QUICK_SKILLS {
             v.push(vec2(w * 0.57 + (j as f32 - 1.5) * r * 1.8, quick_y));
         }
+        v.extend([
+            vec2(bx, by - gap * 2.0),
+            vec2(bx - gap, by - gap * 2.0),
+            vec2(bx - gap, by - gap),
+            vec2(bx - gap * 2.0, by - gap * 2.0),
+            vec2(bx - gap * 2.0, by - gap),
+        ]);
         let mut stick = vec2(r * 3.0, h - r * 3.0);
         if tweaks.touch_left_handed {
             v.iter_mut().for_each(|p| p.x = w - p.x);
@@ -70,7 +84,7 @@ impl TouchPad {
     fn radius(i: usize, r: f32) -> f32 {
         if i == 6 {
             r * 0.7
-        } else if i >= QUICK_START {
+        } else if (QUICK_START..EXTRA_START).contains(&i) {
             r * 0.55
         } else {
             r
@@ -183,15 +197,7 @@ impl TouchPad {
         for (i, p) in btns.iter().enumerate() {
             let (label, _) = TOUCH_BUTTONS[i];
             let rr = Self::radius(i, r);
-            let base = match i {
-                0 | 1 => Color::new(0.2, 0.55, 1.0, 0.45),
-                3 | 4 => Color::new(1.0, 0.27, 0.4, 0.45),
-                2 => Color::new(1.0, 0.75, 0.15, 0.45),
-                5 => Color::new(0.6, 0.2, 0.95, 0.55),
-                CHARGE => Color::new(1.0, 0.8, 0.2, 0.5),
-                QUICK_START..BUTTONS => Color::new(0.2, 0.9, 0.8, 0.4),
-                _ => Color::new(1.0, 0.45, 0.1, 0.5),
-            };
+            let base = touch_style::base_color(i);
             draw_circle(
                 p.x,
                 p.y,
@@ -230,7 +236,7 @@ mod tests {
 
     #[test]
     fn quick_skill_buttons_press_the_shortcut_slots() {
-        let bits: Vec<u32> = TOUCH_BUTTONS[QUICK_START..].iter().map(|(_, b)| *b).collect();
+        let bits: Vec<u32> = TOUCH_BUTTONS[QUICK_START..EXTRA_START].iter().map(|(_, b)| *b).collect();
         assert_eq!(bits, k::SLOTS.to_vec(), "quick skills must press the shortcut slots the pause screen binds");
     }
 }

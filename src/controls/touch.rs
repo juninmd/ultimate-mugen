@@ -57,7 +57,7 @@ impl TouchPad {
         let tweaks = crate::tweaks::current();
         let r = (h * 0.09).clamp(24.0, 52.0) * tweaks.touch_scale;
         let gap = r * 2.25;
-        let (bx, by) = (w - r * 1.3 - gap * 2.0, h - r * 1.3);
+        let (bx, by) = (w - r * 1.3 - gap * 2.0, h - r * 2.4);
         let mut v: Vec<Vec2> = (0..6)
             .map(|i| vec2(bx + (i % 3) as f32 * gap, by - (1 - i / 3) as f32 * gap))
             .collect();
@@ -198,29 +198,7 @@ impl TouchPad {
             let (label, _) = TOUCH_BUTTONS[i];
             let rr = Self::radius(i, r);
             let base = touch_style::base_color(i);
-            draw_circle(
-                p.x,
-                p.y,
-                rr,
-                if self.pressed[i] {
-                    Color::new(1.0, 1.0, 1.0, 0.6)
-                } else {
-                    base
-                },
-            );
-            draw_circle_lines(p.x, p.y, rr, 2.0, Color::new(1.0, 1.0, 1.0, 0.55));
-            let mut fs = (rr * 0.5) as u16;
-            while fs > 8 && measure_text(label, None, fs, 1.0).width > rr * 1.8 {
-                fs -= 1;
-            }
-            let d = measure_text(label, None, fs, 1.0);
-            draw_text(
-                label,
-                p.x - d.width / 2.0,
-                p.y + d.offset_y / 2.0,
-                fs as f32,
-                WHITE,
-            );
+            touch_style::draw_button(*p, rr, label, base, self.pressed[i]);
         }
     }
 }

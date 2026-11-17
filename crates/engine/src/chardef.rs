@@ -19,11 +19,11 @@ static IMG_ID: AtomicU64 = AtomicU64::new(1);
 pub struct ImageData {
     pub w: u32,
     pub h: u32,
-    pub rgba: Arc<[u8]>,
+    pub rgba: Arc<Vec<u8>>,
     pub id: u64,
 }
 impl ImageData {
-    pub fn new(w: u32, h: u32, rgba: impl Into<Arc<[u8]>>) -> Arc<Self> {
+    pub fn new(w: u32, h: u32, rgba: impl Into<Arc<Vec<u8>>>) -> Arc<Self> {
         Arc::new(ImageData {
             w,
             h,

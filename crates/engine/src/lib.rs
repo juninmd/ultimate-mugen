@@ -2,6 +2,7 @@
 pub mod expr;
 mod intro_exit;
 mod destroy;
+mod juggle;
 pub mod bytecode;
 pub mod commands;
 pub mod input;

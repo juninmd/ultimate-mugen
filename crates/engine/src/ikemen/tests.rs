@@ -74,10 +74,10 @@ fn tag_out_hides_and_protects() {
     hd.hitflag = "MAFD".into();
     hd.affect_team = 'E';
     m.round_state = 2;
-    assert!(m.can_be_hit(i, &hd, 1));
+    assert!(m.can_be_hit(i, &hd, 1, 0));
     crate::controllers::run(&mut m, i, &sctrl("tagout", &[]));
     assert_eq!(ev(&m, i, "standby"), 1.0);
-    assert!(!m.can_be_hit(i, &hd, 1));
+    assert!(!m.can_be_hit(i, &hd, 1, 0));
     crate::controllers::run(&mut m, i, &sctrl("tagin", &[]));
     assert_eq!(ev(&m, i, "standby"), 0.0);
 }

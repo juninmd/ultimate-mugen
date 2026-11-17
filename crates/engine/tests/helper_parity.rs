@@ -169,7 +169,7 @@ fn projectile_helper_hits_like_a_projectile() {
     assert!(ev(&m, h, "ProjHit") == 1.0 && ev(&m, h, "ProjContact") == 1.0, "proj triggers fire on the helper");
     assert!(ev(&m, 0, "ProjHitTime(1)") >= 0.0 && ev(&m, 0, "ProjContactTime(1)") >= 0.0, "and on its root, keyed by the helper id");
     let hd = ume_engine::fighter::HitDefData { hitflag: "MAF".into(), attr_state: "S".into(), ..Default::default() };
-    assert!(!m.can_be_hit(h, &hd, 1), "a projectile helper has no hurtbox");
+    assert!(!m.can_be_hit(h, &hd, 1, 0), "a projectile helper has no hurtbox");
 }
 
 #[test]

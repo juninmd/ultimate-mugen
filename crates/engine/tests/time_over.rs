@@ -81,5 +81,5 @@ fn no_hits_or_commands_land_during_time_over() {
     assert!(!m.won_by_ko);
     assert!(!m.has_command(0, "holdfwd"));
     let hd = ume_engine::fighter::HitDefData::default();
-    assert!(!m.can_be_hit(1, &hd, 0));
+    assert!(!m.can_be_hit(1, &hd, 0, 0));
 }

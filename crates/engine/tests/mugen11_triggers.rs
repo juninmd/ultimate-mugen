@@ -333,9 +333,9 @@ fn is_asserted_shares_the_assert_special_table() {
 fn juggle_points_parent_and_air_jump_triggers() {
     let mut m = duel(mugen_char("a", ""), mugen_char("b", ""));
     assert_eq!(ev(&m, 0, "JugglePoints"), 15.0);
-    m.fighters[0].juggle_used = 6;
+    m.fighters[0].juggle_ledger = vec![(0, 6)];
     assert_eq!(ev(&m, 0, "JugglePoints"), 9.0);
-    m.fighters[0].juggle_used = 40;
+    m.fighters[0].juggle_ledger = vec![(0, 40)];
     assert_eq!(ev(&m, 0, "JugglePoints"), 0.0);
 
     assert_eq!(ev(&m, 1, "ParentExist"), 0.0);

@@ -51,14 +51,14 @@ fn chainid_and_nochainid_gate_follow_ups() {
         attr_state: "S".into(),
         ..Default::default()
     };
-    assert!(m.can_be_hit(1, &base, 0));
+    assert!(m.can_be_hit(1, &base, 0, 0));
     assert!(m.can_be_hit(
         1,
         &HitDefData {
             chain_id: Some(7),
             ..base.clone()
         },
-        0
+        0, 0
     ));
     assert!(!m.can_be_hit(
         1,
@@ -66,7 +66,7 @@ fn chainid_and_nochainid_gate_follow_ups() {
             chain_id: Some(3),
             ..base.clone()
         },
-        0
+        0, 0
     ));
     assert!(!m.can_be_hit(
         1,
@@ -74,10 +74,10 @@ fn chainid_and_nochainid_gate_follow_ups() {
             no_chain_id: [Some(1), Some(7)],
             ..base.clone()
         },
-        0
+        0, 0
     ));
     assert!(
-        !m.can_be_hit(1, &base, 1),
+        !m.can_be_hit(1, &base, 1, 0),
         "teammates are immune by default"
     );
     assert!(m.can_be_hit(
@@ -86,7 +86,7 @@ fn chainid_and_nochainid_gate_follow_ups() {
             affect_team: 'F',
             ..base.clone()
         },
-        1
+        1, 0
     ));
     assert!(m.can_be_hit(
         1,
@@ -94,7 +94,7 @@ fn chainid_and_nochainid_gate_follow_ups() {
             affect_team: 'B',
             ..base.clone()
         },
-        1
+        1, 0
     ));
     assert!(!m.can_be_hit(
         1,
@@ -102,7 +102,7 @@ fn chainid_and_nochainid_gate_follow_ups() {
             affect_team: 'F',
             ..base
         },
-        0
+        0, 0
     ));
 }
 

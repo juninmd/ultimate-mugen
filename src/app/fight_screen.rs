@@ -53,7 +53,7 @@ impl App {
         let mouse_hit = is_mouse_button_pressed(MouseButton::Left) && on_pause(self.ui.to_virtual(mouse_position().into()));
         let touch_hit = self.c.touch.began.iter().any(|t| on_pause(self.ui.to_virtual(*t)));
         if !s.paused && self.c.touch.enabled && (mouse_hit || touch_hit) {
-            s.paused = true; self.audio.sfx("pause");
+            s.paused = true; self.pause.reset(); self.audio.sfx("pause");
         }
         if is_key_pressed(KeyCode::Tab) && !s.paused && !replaying {
             s.switch_control();

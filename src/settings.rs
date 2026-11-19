@@ -6,7 +6,7 @@ mod window;
 #[cfg(test)]
 mod tests;
 
-pub use window::WindowWatch;
+pub use window::{parse_res_arg, WindowWatch};
 
 pub const RESOLUTIONS: [(u32, u32, &str); 5] = [
     (1280, 720, "1280×720 (HD)"),

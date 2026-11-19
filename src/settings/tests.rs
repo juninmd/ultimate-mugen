@@ -1,5 +1,5 @@
 use super::*;
-use super::window::parse_window;
+use super::window::{parse_res_arg, parse_window};
 
 #[test]
 fn window_size_prefers_saved_window_over_preset() {
@@ -16,6 +16,18 @@ fn window_string_round_trips_and_rejects_garbage() {
     assert_eq!(parse_window("1366x768"), (1366, 768));
     assert_eq!(parse_window("junk"), (0, 0));
     assert_eq!(parse_window("12x"), (0, 0));
+}
+
+#[test]
+fn res_arg_accepts_wxh_and_rejects_sizes_that_break_the_surface() {
+    assert_eq!(parse_res_arg("2560x1440"), Some((2560, 1440)));
+    assert_eq!(parse_res_arg("1280X720"), Some((1280, 720)));
+    assert_eq!(parse_res_arg("0x0"), None);
+    assert_eq!(parse_res_arg("0x720"), None);
+    assert_eq!(parse_res_arg("100x100"), None);
+    assert_eq!(parse_res_arg("99999x99999"), None);
+    assert_eq!(parse_res_arg("junk"), None);
+    assert_eq!(parse_res_arg("1280x"), None);
 }
 
 #[test]

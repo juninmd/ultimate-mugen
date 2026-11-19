@@ -36,100 +36,52 @@
   "type": "rig",
   "style": {
    "female": true,
-   "scale": 0.96,
-   "top": "gi",
+   "build": 0.94,
+   "top": "jacket",
    "sleeves": "short",
    "pants": "tight",
-   "belt": "top2",
-   "beltTails": 1,
    "gloves": "long",
    "boots": "tall",
-   "skirt": {
-    "type": "robe",
-    "length": 20,
-    "color": "top",
-    "width": 0.9
-   },
    "hair": {
-    "type": "ponytail",
-    "length": 34,
-    "spikes": 6,
-    "min": 0.25,
-    "max": 0.5,
-    "bangs": 3,
-    "bangLen": 0.5,
-    "seed": 3,
-    "strands": 6,
-    "locks": 2,
+    "type": "short",
+    "spikes": 5,
+    "sweep": 24,
+    "bangs": 2,
+    "seed": 88,
     "shine": true
    },
-   "scarf": {
-    "color": "cloth",
-    "length": 42
-   },
-   "mask": true,
    "weapon": {
     "type": "kunai",
     "length": 12,
     "angle": 100
    },
-   "undershirt": "mask",
    "colors": {
-    "skin": "#f4d2b8",
-    "hair": "#3a2456",
+    "skin": "#e4ae87",
+    "hair": "#7f233e",
     "eye": "#b04ad8",
-    "top": "#5a3e96",
-    "top2": "#e04a6a",
+    "top": "#727c87",
+    "top2": "#c65361",
     "trim": "#e04a6a",
-    "pants": "#3a2e5e",
+    "pants": "#343a4b",
     "cloth": "#e04a6a",
-    "glove": "#2e2448",
-    "boot": "#2e2448",
+    "glove": "#512633",
+    "boot": "#282a36",
     "mask": "#2e2448",
     "weapon": "#e8eef8",
     "hilt": "#e04a6a",
-    "accent": "#e04a6a",
+    "accent": "#e0a048",
     "energy": "#c86bff",
     "aura": "#c86bff",
-    "legs": "#3a2e5e"
+    "legs": "#3a2e5e",
+    "wrap": "#9e505f",
+    "metal": "#777f91"
    },
-   "arms": 0.95,
-   "waist": 0.92,
-   "folds": 1,
-   "stitch": "top2",
-   "weave": "weave",
+   "eyes": "fierce",
+   "folds": 1.15,
+   "stitch": true,
    "knuckles": true,
-   "faceShade": 1,
-   "brow": {
-    "thick": 1
-   },
-   "pouches": 2,
-   "talisman": {
-    "color": "#e04a6a"
-   },
-   "sash": {
-    "color": "#2e2448",
-    "rounds": true
-   },
-   "emblem": {
-    "type": "lotus",
-    "color": "#e04a6a",
-    "where": "back",
-    "size": 1.5
-   },
-   "hairpin": {
-    "type": "ring",
-    "color": "#e04a6a"
-   },
-   "bandages": [
-    "thigh"
-   ],
-   "footwear": {
-    "sole": true,
-    "laces": true,
-    "buckles": 2,
-    "cuff": true
-   }
+   "belt": "accent",
+   "beltTails": 0
   },
   "poses": {
    "idle0": {
@@ -4328,6 +4280,5 @@
   }
  },
  "boss": false,
- "npc": true,
- "spriteSet": "suzume"
+ "npc": true
 }

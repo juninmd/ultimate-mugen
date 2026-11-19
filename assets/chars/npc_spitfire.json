@@ -34,75 +34,45 @@
  "art": {
   "type": "rig",
   "style": {
-   "build": 1.04,
-   "top": "tank",
-   "sleeves": "none",
+   "build": 1,
+   "top": "jacket",
+   "sleeves": "long",
    "pants": "baggy",
-   "belt": "top2",
-   "beltTails": 0,
    "gloves": "glove",
    "boots": "boot",
    "hair": {
-    "type": "spiky",
-    "spikes": 9,
-    "min": 0.8,
-    "max": 1.65,
-    "sweep": 30,
-    "bangs": 3,
-    "seed": 11,
-    "strands": 7,
-    "locks": 4,
+    "type": "short",
+    "spikes": 4,
+    "sweep": -10,
+    "bangs": 1,
+    "seed": 19,
     "shine": true
    },
-   "eyes": "fierce",
    "colors": {
-    "skin": "#f0c49c",
-    "hair": "#e0303a",
+    "skin": "#c58a66",
+    "hair": "#ba611e",
     "eye": "#2a9ad0",
-    "top": "#1c1c26",
-    "top2": "#e0303a",
+    "top": "#e08428",
+    "top2": "#eecc7b",
     "trim": "#e0303a",
-    "pants": "#5a5e6e",
-    "glove": "#e0303a",
-    "boot": "#2a2a36",
-    "energy": "#4fe3ff",
-    "aura": "#4fe3ff"
+    "pants": "#373f54",
+    "glove": "#823c24",
+    "boot": "#2a2935",
+    "energy": "#ff9d3c",
+    "aura": "#e65922",
+    "wrap": "#ae5224",
+    "accent": "#ffc86a",
+    "metal": "#564536"
    },
-   "muscle": 0.8,
-   "veins": true,
-   "arms": 1.06,
-   "chest": 1.06,
-   "waist": 0.94,
-   "folds": 1.1,
+   "eyes": "fierce",
+   "folds": 1.15,
    "stitch": true,
-   "weave": "rib",
-   "pantsWeave": "hatch",
    "knuckles": true,
-   "faceShade": 1,
-   "brow": {
-    "thick": 1.9,
-    "shape": "angry"
-   },
-   "scars": [
-    "nose"
-   ],
-   "emblem": {
-    "type": "star",
-    "color": "#e0303a",
-    "size": 1.15
-   },
-   "necklace": {
-    "type": "tag"
-   },
-   "buckle": "star",
-   "footwear": {
-    "sole": true,
-    "laces": true,
-    "cuff": true
-   },
-   "bandages": [
-    "calf"
-   ]
+   "belt": "accent",
+   "beltTails": 0,
+   "goggles": {
+    "color": "accent"
+   }
   },
   "poses": {
    "idle0": {
@@ -4161,6 +4131,5 @@
   }
  },
  "boss": false,
- "npc": true,
- "spriteSet": "akio"
+ "npc": true
 }

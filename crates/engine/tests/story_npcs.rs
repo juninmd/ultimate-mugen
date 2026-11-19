@@ -38,10 +38,22 @@ fn story_npcs_are_hidden_and_listed_in_the_index() {
 }
 
 #[test]
-fn every_npc_wears_a_palette_different_from_its_base_fighter() {
+fn every_npc_has_its_own_sprites_and_palettes() {
     for (id, base) in NPCS {
         let (npc, origin) = (load(id), load(base));
-        assert_eq!(npc.sprite_set.as_deref(), Some(base), "{id} reuses the base pixel art");
+        assert_eq!(npc.sprite_dir(), id, "{id} must use its own sprite pack");
+        let report = ume_engine::native::audit_native_sprite_frames(&npc);
+        assert_eq!(report["avatar"], true, "{id} must have its own portrait");
+        for anim in report["animations"].as_array().unwrap() {
+            for frame in anim["frames"].as_array().unwrap() {
+                if frame["resolution"] == "procedural-effect" {
+                    continue;
+                }
+                assert_eq!(frame["resolution"], "exact", "{id}: {frame}");
+                let file = std::path::Path::new(frame["file"].as_str().unwrap());
+                assert_eq!(file.parent().and_then(std::path::Path::file_name).and_then(|name| name.to_str()), Some(id));
+            }
+        }
         assert_ne!(npc.palettes[0], origin.palettes[0], "{id} keeps the base palette");
         assert_ne!(npc.palettes[0], npc.palettes[1], "{id} has two identical palettes");
     }

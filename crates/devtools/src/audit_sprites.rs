@@ -38,11 +38,17 @@ pub fn inspect(root: &Path) -> Result<Value, String> {
     for source in sorted_files(&root.join("assets/chars"), "json") {
         let character = read_json(&source)?;
         let Some(id) = character.get("id").and_then(Value::as_str) else { continue };
-        let folder = root.join("assets/chars/sprites").join(id);
+        let sprite_set = character["spriteSet"].as_str().unwrap_or(id);
+        let fighter_height = character.pointer("/stats/height").and_then(Value::as_f64)
+            .filter(|height| height.is_finite() && *height > 0.0).unwrap_or(100.0);
+        let folder = root.join("assets/chars/sprites").join(sprite_set);
         let meta = if folder.join("meta.json").exists() { read_json(&folder.join("meta.json"))? } else { json!({}) };
         let mut images = serde_json::Map::new();
         for path in sorted_files(&folder, "png") {
-            images.insert(path.file_name().unwrap_or_default().to_string_lossy().into_owned(), alpha_facts(&path)?);
+            let mut facts = alpha_facts(&path)?;
+            let name = path.file_stem().and_then(|stem| stem.to_str()).unwrap_or_default();
+            facts["geometry"] = geometry(&facts, &meta, name, fighter_height);
+            images.insert(path.file_name().unwrap_or_default().to_string_lossy().into_owned(), facts);
         }
         let mut frames = Vec::new();
         if let Some(anims) = character.get("anims").and_then(Value::as_object) {
@@ -55,11 +61,32 @@ pub fn inspect(root: &Path) -> Result<Value, String> {
             }
         }
         fighters.push(json!({
-            "id": id, "declaredHeight": character.pointer("/stats/height"), "referenceHeight": meta.get("refHeight"),
+            "id": id, "spriteSet": sprite_set, "declaredHeight": character.pointer("/stats/height"), "referenceHeight": meta.get("refHeight"),
             "avatar": folder.join("portrait.png").is_file(), "images": images, "frames": frames,
         }));
     }
     Ok(json!({ "scope": "Exact-file inventory; semantic aliases and procedural effects must be reviewed separately. A missing exact file alone does not prove missing runtime art.", "fighters": fighters }))
+}
+
+fn geometry(facts: &Value, meta: &Value, sprite: &str, fighter_height: f64) -> Value {
+    let frame = &meta["frames"][sprite];
+    let width = facts["size"][0].as_f64().unwrap_or(0.0);
+    let height = facts["size"][1].as_f64().unwrap_or(0.0);
+    let axis = |key: &str, fallback: f64, limit: f64| {
+        frame[key].as_f64().filter(|value| (0.0..=limit).contains(value)).unwrap_or(fallback)
+    };
+    let axis_x = axis("axisX", width / 2.0, width);
+    let axis_y = axis("axisY", height, height);
+    let reference_height = frame["refHeight"].as_f64().filter(|value| *value > 0.0)
+        .or_else(|| meta["refHeight"].as_f64().filter(|value| *value > 0.0))
+        .unwrap_or(height).max(1.0);
+    let scale = fighter_height / reference_height;
+    let bounds = facts["alphaBounds"].as_array().map(|points| {
+        points.iter().zip([axis_x, axis_y, axis_x, axis_y])
+            .map(|(position, origin)| (position.as_f64().unwrap_or(0.0) - origin) * scale)
+            .collect::<Vec<_>>()
+    });
+    json!({ "axis": [axis_x, axis_y], "referenceHeight": reference_height, "worldScale": scale, "worldAlphaBounds": bounds })
 }
 
 pub fn summary_lines(report: &Value) -> Vec<String> {

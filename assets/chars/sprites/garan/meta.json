@@ -432,22 +432,22 @@
     },
     "sg_run_run0": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 379.0,
       "refHeight": 360.0
     },
     "sg_run_run1": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 391.0,
       "refHeight": 360.0
     },
     "sg_run_run2": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 391.0,
       "refHeight": 360.0
     },
     "sg_run_run3": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 383.0,
       "refHeight": 360.0
     },
     "str0": {
@@ -512,12 +512,12 @@
     },
     "sg_run_run0_fx": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 379.0,
       "refHeight": 360.0
     },
     "sg_run_run1_fx": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 391.0,
       "refHeight": 360.0
     },
     "sg_run_mid_fx": {
@@ -527,27 +527,27 @@
     },
     "sg_run_run2_fx": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 391.0,
       "refHeight": 360.0
     },
     "sg_run_run3_fx": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 383.0,
       "refHeight": 360.0
     },
     "sg_run_run0_bfx": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 379.0,
       "refHeight": 360.0
     },
     "sg_run_run1_bfx": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 391.0,
       "refHeight": 360.0
     },
     "sg_run_run2_bfx": {
       "axisX": 200.0,
-      "axisY": 363.0,
+      "axisY": 391.0,
       "refHeight": 360.0
     }
   },

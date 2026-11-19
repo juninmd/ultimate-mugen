@@ -1,5 +1,9 @@
 {
   "frames": {
+    "hitAir1": {"axisX": 200.0, "axisY": 400.0, "refHeight": 399.0},
+    "hitAir2": {"axisX": 200.0, "axisY": 400.0, "refHeight": 399.0},
+    "taunt0": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
+    "taunt1": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
     "01_idle": {
       "axisX": 200.5,
       "axisY": 400.0,

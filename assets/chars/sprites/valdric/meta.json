@@ -1,5 +1,7 @@
 {
   "frames": {
+    "taunt0": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
+    "taunt1": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
     "01_idle": {
       "axisX": 212.5,
       "axisY": 400.0,

@@ -29,6 +29,16 @@ pub(super) fn parse_window(v: &str) -> (u32, u32) {
         .unwrap_or((0, 0))
 }
 
+/// `--res WxH` (either `x` or `X`). Sizes below `MIN_WINDOW` or absurdly large would
+/// give the swapchain a zero/invalid surface, so they are rejected instead of applied.
+pub fn parse_res_arg(arg: &str) -> Option<(u32, u32)> {
+    const MAX_SIDE: u32 = 16384;
+    let (w, h) = arg.split_once(['x', 'X'])?;
+    let (w, h): (u32, u32) = (w.trim().parse().ok()?, h.trim().parse().ok()?);
+    let ok = |v: u32, min: u32| (min..=MAX_SIDE).contains(&v);
+    (ok(w, MIN_WINDOW.0) && ok(h, MIN_WINDOW.1)).then_some((w, h))
+}
+
 #[derive(Default)]
 pub struct WindowWatch {
     seen: (u32, u32),

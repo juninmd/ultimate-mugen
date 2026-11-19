@@ -96,10 +96,9 @@ fn conf() -> WindowConf {
         .position(|a| a == "--res")
         .and_then(|i| args.get(i + 1))
     {
-        if let Some((a, b)) = r.split_once(['x', 'X']) {
-            if let (Ok(a), Ok(b)) = (a.parse(), b.parse()) {
-                (w, h) = (a, b);
-            }
+        match settings::parse_res_arg(r) {
+            Some(size) => (w, h) = size,
+            None => eprintln!("ignoring --res {r}: expected WxH between 320x180 and 16384x16384"),
         }
     }
     if args.iter().any(|a| a == "--4k") {

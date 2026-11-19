@@ -492,7 +492,8 @@ impl Registry {
     }
     pub fn trim_cache(&self, keep: &[usize]) {
         const CAP_MUGEN: usize = 6;
-        const CAP_NATIVE: usize = 4;
+        // wasm32 linear memory never shrinks, so a fourth cached fighter on top of a match pair can exhaust it
+        const CAP_NATIVE: usize = if cfg!(target_arch = "wasm32") { 2 } else { 4 };
         for (mugen, cap) in [(true, CAP_MUGEN), (false, CAP_NATIVE)] {
             let total = self
                 .chars

@@ -3,8 +3,8 @@ use ume_engine::chardef::ImageData;
 
 include!(concat!(env!("OUT_DIR"), "/stage_loops_gen.rs"));
 
-const FRAME_COUNT: usize = 8;
-const FRAME_TICKS: usize = 8;
+const KEYFRAME_COUNT: usize = 8;
+const LOOP_TICKS: usize = 64;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn frames(id: &str) -> Vec<Arc<ImageData>> {
@@ -60,9 +60,12 @@ pub async fn prepare(id: &str) -> Result<(), String> {
     extern "C" {
         fn ume_fetch_asset(path: &str) -> js_sys::Promise;
     }
-    let mut images = Vec::with_capacity(FRAME_COUNT);
-    for frame in 0..FRAME_COUNT {
-        let path = format!("assets/stages/animation/{id}/{frame:02}.png");
+    let suffixes: &[&str] = if STAGE_LOOP_MIDPOINT_IDS.contains(&id) { &["", "-mid"] } else { &[""] };
+    let names = (0..KEYFRAME_COUNT).flat_map(|frame| suffixes.iter().map(move |suffix| {
+        format!("assets/stages/animation/{id}/{frame:02}{suffix}.png")
+    }));
+    let mut images = Vec::with_capacity(KEYFRAME_COUNT * suffixes.len());
+    for path in names {
         let Ok(data) = js_sys::futures::JsFuture::from(ume_fetch_asset(&path)).await else {
             return Ok(());
         };
@@ -76,8 +79,8 @@ pub async fn prepare(id: &str) -> Result<(), String> {
     Ok(())
 }
 
-pub fn frame_index(game_time: usize) -> usize {
-    (game_time / FRAME_TICKS) % FRAME_COUNT
+pub fn frame_index(game_time: usize, frame_count: usize) -> usize {
+    (game_time % LOOP_TICKS) * frame_count / LOOP_TICKS
 }
 
 #[cfg(test)]
@@ -85,17 +88,29 @@ mod tests {
     use super::*;
 
     #[test]
-    fn frame_sequence_loops_after_eight_frames() {
-        assert_eq!(frame_index(0), 0);
-        assert_eq!(frame_index(7), 0);
-        assert_eq!(frame_index(8), 1);
-        assert_eq!(frame_index(FRAME_COUNT * FRAME_TICKS), 0);
+    fn both_frame_counts_preserve_the_cycle() {
+        assert_eq!(frame_index(0, 8), 0);
+        assert_eq!(frame_index(7, 8), 0);
+        assert_eq!(frame_index(8, 8), 1);
+        assert_eq!(frame_index(LOOP_TICKS, 8), 0);
+        assert_eq!(frame_index(4, 16), 1);
+        assert_eq!(frame_index(63, 16), 15);
+        assert_eq!(frame_index(LOOP_TICKS, 16), 0);
+    }
+
+    #[test]
+    fn midpoint_loop_has_sixteen_distinct_full_size_frames() {
+        let images = frames("great_wall");
+        assert_eq!(images.len(), KEYFRAME_COUNT * 2);
+        assert!(images.iter().all(|frame| (frame.w, frame.h) == (1672, 941)));
+        assert!(images.windows(2).all(|pair| pair[0].rgba != pair[1].rgba));
+        assert_ne!(images.first().unwrap().rgba, images.last().unwrap().rgba);
     }
 
     #[test]
     fn generated_loop_has_eight_full_size_distinct_frames() {
         let images = frames("colossus_rhodes");
-        assert_eq!(images.len(), FRAME_COUNT);
+        assert_eq!(images.len(), KEYFRAME_COUNT);
         assert!(images.iter().all(|frame| (frame.w, frame.h) == (1672, 941)));
         assert!(images.windows(2).all(|pair| pair[0].rgba != pair[1].rgba));
         assert!(frames("unknown_stage").is_empty());

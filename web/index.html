@@ -68,6 +68,7 @@
     bar.style.width = '100%';
     window.umeStartImports(ume);
     window.umeStartMarket(ume);
+    for (const t of ['pointerdown', 'keydown', 'touchend']) window.addEventListener(t, () => ume.ume_unlock_audio(), { capture: true, passive: true });
     setTimeout(hide, 600);
     const cv = document.getElementById('glcanvas');
     cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); msg.textContent = tx.lost; boot.classList.remove('done'); document.body.appendChild(boot); setTimeout(() => location.reload(), 800); });

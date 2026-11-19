@@ -4,6 +4,9 @@ extern "C" {
     fn ume_dpr() -> f32;
 }
 
+#[wasm_bindgen::prelude::wasm_bindgen]
+pub fn ume_unlock_audio() { ume_shell::audio::unlock() }
+
 pub fn is_touch() -> bool {
     ume_shell::set_pointer_correction(ume_dpr());
     ume_is_touch() != 0

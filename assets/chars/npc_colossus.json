@@ -1720,11 +1720,13 @@
    "frames": [
     {
      "pose": "hitH1",
-     "ticks": 3
+     "ticks": 3,
+     "sprite": "hitLightImpact"
     },
     {
      "pose": "hitH1",
-     "ticks": 6
+     "ticks": 6,
+     "sprite": "hitLightRecoil"
     },
     {
      "pose": "idle0",
@@ -1768,11 +1770,13 @@
    "frames": [
     {
      "pose": "hitL1",
-     "ticks": 3
+     "ticks": 3,
+     "sprite": "hitLowLightImpact"
     },
     {
      "pose": "hitL1",
-     "ticks": 6
+     "ticks": 6,
+     "sprite": "hitLowLightRecoil"
     },
     {
      "pose": "idle0",
@@ -1816,11 +1820,13 @@
    "frames": [
     {
      "pose": "hitCrouch",
-     "ticks": 3
+     "ticks": 3,
+     "sprite": "hitCrouchImpact"
     },
     {
      "pose": "hitCrouch",
-     "ticks": 8
+     "ticks": 8,
+     "sprite": "hitCrouchRecoil"
     },
     {
      "pose": "crouch",

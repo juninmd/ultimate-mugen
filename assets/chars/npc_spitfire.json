@@ -1745,10 +1745,12 @@
    "frames": [
     {
      "pose": "hitH1",
+     "sprite": "hitLightImpact",
      "ticks": 3
     },
     {
      "pose": "hitH1",
+     "sprite": "hitLightRecoil",
      "ticks": 6
     },
     {
@@ -1793,10 +1795,12 @@
    "frames": [
     {
      "pose": "hitL1",
+     "sprite": "hitLowLightImpact",
      "ticks": 3
     },
     {
      "pose": "hitL1",
+     "sprite": "hitLowLightRecoil",
      "ticks": 6
     },
     {
@@ -1841,10 +1845,12 @@
    "frames": [
     {
      "pose": "hitCrouch",
+     "sprite": "hitCrouchImpact",
      "ticks": 3
     },
     {
      "pose": "hitCrouch",
+     "sprite": "hitCrouchRecoil",
      "ticks": 8
     },
     {

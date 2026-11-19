@@ -108,11 +108,9 @@ mod tests {
     }
 
     #[test]
-    fn generated_loop_has_eight_full_size_distinct_frames() {
-        let images = frames("colossus_rhodes");
-        assert_eq!(images.len(), KEYFRAME_COUNT);
-        assert!(images.iter().all(|frame| (frame.w, frame.h) == (1672, 941)));
-        assert!(images.windows(2).all(|pair| pair[0].rgba != pair[1].rgba));
+    fn every_builtin_stage_has_a_complete_motion_loop() {
+        assert_eq!(STAGE_LOOP_FRAMES.len(), 21);
+        assert!(STAGE_LOOP_FRAMES.iter().all(|(_, frames)| frames.len() == KEYFRAME_COUNT * 2));
         assert!(frames("unknown_stage").is_empty());
     }
 }

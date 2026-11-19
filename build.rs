@@ -79,7 +79,7 @@ fn stage_loops() {
     for id in &loops {
         stage_loops += &format!("    {id:?},\n");
     }
-    stage_loops += "];\npub const STAGE_LOOP_MIDPOINT_IDS: &[&str] = &[\n";
+    stage_loops += "];\n#[cfg(target_arch = \"wasm32\")]\npub const STAGE_LOOP_MIDPOINT_IDS: &[&str] = &[\n";
     let has_midpoints = |id: &str| (0..8).all(|frame| animation_dir.join(id).join(format!("{frame:02}-mid.png")).is_file());
     for id in loops.iter().filter(|id| has_midpoints(id)) {
         stage_loops += &format!("    {id:?},\n");

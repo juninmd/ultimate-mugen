@@ -4,13 +4,13 @@
 2. Gere a primeira pose a partir da arte canônica do próprio lutador. Para a segunda, use o primeiro quadro como referência direta e peça a alteração apenas na região que se move. Use a mesma escala nos dois PNGs e registre o corpo pelo apoio dos pés e pela posição do tronco. Confira o canal alfa sobre fundo claro e escuro. A prévia bruta pode conter uma franja semitransparente em torno do desenho.
 3. Inspecione a folha de contato e confira os PNGs integrados e suas entradas em `meta.json`. Audite a resolução novamente e capture os dois quadros em jogo. Para a provocação, abra o build web com `?p1=shion&p2=<id>&modo=versus&luta=1&e2e=1`. O estado `19901` no lado 2 indica a provocação da abertura. Registre mais de um quadro e confira visualmente as poses, pois a captura pode cair na mesma fase do ciclo.
 
-## Backlog de reações a dano
+## Validação de reações a dano
 
 Na primeira medição do elenco de 21 personagens, `hitLight`, `hitLowLight` e `hitCrouch` apresentaram pelo menos um par de quadros consecutivos com a mesma impressão digital em todos os personagens. `hitAir` teve 36 quadros resolvidos por poses compartilhadas. Use esses resultados para priorizar a inspeção e diferenciar uma pausa intencional de uma pose de recuo ausente.
 
-- [ ] Auditar o elenco para `hitLight`, `hitMedium`, `hitHeavy`, `hitLowLight`, `hitLowMedium`, `hitLowHeavy`, `hitCrouch` e `hitAir`. Identificar por lutador quais quadros faltam, resolvem para outra pose ou repetem a mesma imagem. Verificar também a transição para queda, quique, chão e recuperação.
-- [ ] Criar um piloto de reação com impacto e recuo legíveis. Variar a amplitude entre golpes leves e fortes, tratar agachamento e ar, e preservar a identidade, o eixo e os tempos do estado. Diferenciar reação a dano de reação à defesa.
-- [ ] Capturar no jogo golpes reais leves, médios e fortes e as reações baixas, agachadas e aéreas. Revisar impacto, recuo e transição para o estado seguinte antes de estender o padrão ao elenco.
+- Auditar o elenco para `hitLight`, `hitMedium`, `hitHeavy`, `hitLowLight`, `hitLowMedium`, `hitLowHeavy`, `hitCrouch` e `hitAir`. Identificar por lutador quais quadros faltam, resolvem para outra pose ou repetem a mesma imagem. Verificar também a transição para queda, quique, chão e recuperação.
+- Criar um piloto de reação com impacto e recuo legíveis. Variar a amplitude entre golpes leves e fortes, tratar agachamento e ar, e preservar a identidade, o eixo e os tempos do estado. Diferenciar reação a dano de reação à defesa.
+- Capturar no jogo golpes reais leves, médios e fortes e as reações baixas, agachadas e aéreas. Revisar impacto, recuo e transição para o estado seguinte antes de estender o padrão ao elenco.
 
 No piloto aéreo de Akio e Spitfire, uma execução do Whirl Launcher exibiu o segundo elemento de `hitAir` por apenas um tick antes de trocar para `fall`. A duração `-1` no último quadro permite mantê-lo até a troca de animação pelo estado. Use uma simulação tick a tick para confirmar a ordem dos elementos e a aterrissagem quando a captura web saltar um quadro curto.
 
@@ -19,3 +19,7 @@ No piloto de dano leve do Kaito, um jab real do Akio levou ao estado 5000 durant
 Execute `native_sprite_audit <out.json> --require-complete --require-hit-reactions` e confira `hitReactionGaps`. Para verificar uma reação dedicada, compare os dois primeiros elementos pelo `pixelFingerprint` e confirme que ambos resolvem para os PNGs previstos. Em `hitAir`, compare também as impressões digitais com as de `fall` para detectar uma cópia com outro nome. A resolução estrita cobre a disponibilidade dos quadros e pode passar com imagens repetidas.
 
 Quando um NPC de história usa `spriteSet`, verifique o manifesto e a resolução do NPC separadamente. Um PNG novo no pacote compartilhado não muda a sequência do NPC se seu manifesto continuar solicitando a pose antiga. Preserve os tempos originais e confira ambos em combate.
+
+As quatro sequências padronizadas são `hitLight`, `hitLowLight`, `hitCrouch` e `hitAir`. No elenco nativo de 21 entradas, todas passam pela verificação de impacto e recuo distintos, inclusive os NPCs com pacote compartilhado. A mesma auditoria verifica a distinção dos dois primeiros quadros nas quatro famílias médias e fortes.
+
+Na revisão de golpes, use as animações declaradas pelos movimentos base e de transformação. Para cada projétil, verifique a animação em voo e a animação de impacto. Quadros marcados como `procedural-effect` são renderizados pelo motor. Use o laboratório do elenco e o teste de comandos reais para verificar contato e alcance das ações.

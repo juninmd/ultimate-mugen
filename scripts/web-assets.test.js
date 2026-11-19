@@ -41,3 +41,22 @@ test('aborts stalled downloads and clears the timeout', async () => {
   await assert.rejects(run.result, /aborted/);
   assert.equal(run.cleared(), true);
 });
+
+test('streams the body and rearms the stall timer on every chunk', async () => {
+  const timers = [];
+  const cleared = new Set();
+  const scope = {
+    window: {}, document: { baseURI: 'https://example.test/game/index.html' },
+    URL, Uint8Array, AbortController,
+    fetch: async () => {
+      const parts = [new Uint8Array([1]), new Uint8Array([2, 3])];
+      return { ok: true, body: { getReader: () => ({ read: async () => (parts.length ? { done: false, value: parts.shift() } : { done: true }) }) } };
+    },
+    setTimeout: fn => { timers.push(fn); return timers.length - 1; },
+    clearTimeout: id => cleared.add(id),
+  };
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../web/assets.js'), 'utf8'), scope);
+  assert.deepEqual(Array.from(await scope.window.ume_fetch_asset('assets/chars/sprites/x.pack')), [1, 2, 3]);
+  assert.equal(timers.length, 3);
+  assert.deepEqual([...cleared].sort(), [0, 1, 2]);
+});

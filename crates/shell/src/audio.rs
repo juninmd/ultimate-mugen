@@ -19,6 +19,7 @@ pub fn play_sound(s: &Sound, params: PlaySoundParams) { s.0.play(params) }
 pub fn play_sound_once(s: &Sound) { play_sound(s, PlaySoundParams::default()) }
 pub fn stop_sound(s: &Sound) { s.0.stop() }
 pub fn set_sound_volume(s: &Sound, volume: f32) { s.0.set_volume(volume) }
+pub fn unlock() { backend::unlock() }
 
 #[cfg(not(target_arch = "wasm32"))]
 mod backend {
@@ -37,6 +38,8 @@ mod backend {
         pub fn stop(&self) { CTX.with(|c| self.0.stop(c)) }
         pub fn set_volume(&self, v: f32) { CTX.with(|c| self.0.set_volume(c, v)) }
     }
+
+    pub fn unlock() {}
 
     impl Drop for Clip {
         fn drop(&mut self) { let _ = CTX.try_with(|c| self.0.delete(c)); }
@@ -60,6 +63,10 @@ mod backend {
         let promise = promise.map_err(|e| format!("{e:?}"))?;
         let buffer = wasm_bindgen_futures::JsFuture::from(promise).await.map_err(|e| format!("{e:?}"))?;
         Ok(Clip { buffer: buffer.dyn_into().ok(), voices: RefCell::new(vec![]) })
+    }
+
+    pub fn unlock() {
+        CTX.with(|c| { if let Some(c) = c.as_ref() { if c.state() == web_sys::AudioContextState::Suspended { let _ = c.resume(); } } })
     }
 
     impl Clip {

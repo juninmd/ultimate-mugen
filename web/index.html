@@ -19,6 +19,8 @@
     #boot b { font: 800 28px system-ui, sans-serif; letter-spacing: .08em; color: #22e8ff; }
     #bar { width: min(320px, 70vw); height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
     #bar i { display: block; height: 100%; width: 0; background: #22e8ff; transition: width .15s; }
+    #bar.ind i { width: 30%; transition: none; animation: slide 1.1s ease-in-out infinite alternate; }
+    @keyframes slide { from { margin-left: 0; } to { margin-left: 70%; } }
     #fatal { position: fixed; inset: 0; z-index: 10; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; text-align: center; background: #0b0716; color: #e9e4ff; font: 600 15px system-ui, sans-serif; }
     #fatal.on { display: flex; }
     #fatal button { border: 0; border-radius: 6px; padding: 10px 22px; background: #22e8ff; color: #0b0716; font: 700 15px system-ui, sans-serif; cursor: pointer; }
@@ -30,7 +32,7 @@
 <body>
   <canvas id="glcanvas" tabindex="1"></canvas>
   <label id="imp" aria-label="Import M.U.G.E.N">Import M.U.G.E.N<input id="ume-file" type="file" accept=".zip" multiple /></label>
-  <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar"><i></i></div><span id="bootmsg">Downloading the game…</span></div>
+  <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar" role="progressbar" aria-labelledby="bootmsg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div><span id="bootmsg">Downloading the game…</span></div>
   <div id="fatal" role="alert"><span id="fataltx"></span><button id="fatalbtn" type="button"></button></div>
   <div id="rot" role="status"><span id="rottx"></span><button id="rotx" type="button" aria-label="Close">&times;</button></div>
   <script src="gamepad.js"></script>
@@ -55,21 +57,25 @@
     document.getElementById('rotx').addEventListener('click', dismissRot);
     setTimeout(dismissRot, 6000);
     document.getElementById('imp').setAttribute('aria-label', tx.import);
-    const boot = document.getElementById('boot'), bar = document.querySelector('#bar i'), msg = document.getElementById('bootmsg');
+    const boot = document.getElementById('boot'), barBox = document.getElementById('bar'), bar = barBox.querySelector('i'), msg = document.getElementById('bootmsg');
+    const setProgress = (pct) => { bar.style.width = pct + '%'; barBox.setAttribute('aria-valuenow', String(Math.round(pct))); };
     const hide = () => { boot.classList.add('done'); setTimeout(() => boot.remove(), 400); };
     async function load() {
       const url = new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url);
       const res = await fetch(url);
-      const total = +res.headers.get('content-length') || 0;
+      const encoded = !!res.headers.get('content-encoding');
+      const total = encoded ? 0 : +res.headers.get('content-length') || 0;
+      if (!total) barBox.classList.add('ind');
       let got = 0;
-      const body = res.body ? res.body.pipeThrough(new TransformStream({ transform(chunk, ctl) { got += chunk.length; if (total) bar.style.width = Math.min(95, got / total * 100) + '%'; ctl.enqueue(chunk); } })) : res.body;
+      const body = res.body ? res.body.pipeThrough(new TransformStream({ transform(chunk, ctl) { got += chunk.length; if (total) setProgress(Math.min(95, got / total * 100)); ctl.enqueue(chunk); } })) : res.body;
       msg.textContent = tx.download;
       return new Response(body, { headers: { 'content-type': 'application/wasm' } });
     }
     try {
       await init({ module_or_path: await load().catch(() => new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url)) });
     } catch (e) { msg.textContent = tx.fail + ': ' + (e && e.message || e); throw e; }
-    bar.style.width = '100%';
+    barBox.classList.remove('ind');
+    setProgress(100);
     window.umeStartImports(ume);
     window.umeStartMarket(ume);
     for (const t of ['pointerdown', 'keydown', 'touchend']) window.addEventListener(t, () => ume.ume_unlock_audio(), { capture: true, passive: true });

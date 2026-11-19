@@ -79,13 +79,21 @@ fn stage_loops() {
     for id in &loops {
         stage_loops += &format!("    {id:?},\n");
     }
-    stage_loops += "];\n#[cfg(not(target_arch = \"wasm32\"))]\npub const STAGE_LOOP_FRAMES: &[(&str, [&[u8]; 8])] = &[\n";
+    stage_loops += "];\npub const STAGE_LOOP_MIDPOINT_IDS: &[&str] = &[\n";
+    let has_midpoints = |id: &str| (0..8).all(|frame| animation_dir.join(id).join(format!("{frame:02}-mid.png")).is_file());
+    for id in loops.iter().filter(|id| has_midpoints(id)) {
+        stage_loops += &format!("    {id:?},\n");
+    }
+    stage_loops += "];\n#[cfg(not(target_arch = \"wasm32\"))]\npub const STAGE_LOOP_FRAMES: &[(&str, &[&[u8]])] = &[\n";
     for id in &loops {
-        stage_loops += &format!("    ({id:?}, [\n");
+        stage_loops += &format!("    ({id:?}, &[\n");
         for frame in 0..8 {
-            let path = animation_dir.join(id).join(format!("{frame:02}.png"));
-            println!("cargo:rerun-if-changed={}", path.display());
-            stage_loops += &format!("        include_bytes!({:?}).as_slice(),\n", path.display().to_string());
+            let suffixes: &[&str] = if has_midpoints(id) { &["", "-mid"] } else { &[""] };
+            for suffix in suffixes {
+                let path = animation_dir.join(id).join(format!("{frame:02}{suffix}.png"));
+                println!("cargo:rerun-if-changed={}", path.display());
+                stage_loops += &format!("        include_bytes!({:?}).as_slice(),\n", path.display().to_string());
+            }
         }
         stage_loops += "    ]),\n";
     }

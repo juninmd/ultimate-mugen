@@ -28,7 +28,7 @@ impl Gfx {
         w: f32,
         h: f32,
     ) {
-        let frame = frames.get(crate::stages::looping::frame_index(time));
+        let frame = frames.get(crate::stages::looping::frame_index(time, frames.len()));
         if span <= 0.0 {
             return self.draw_wide_image(frame.unwrap_or(image), x, y, w, h);
         }

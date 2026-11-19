@@ -51,7 +51,7 @@ The story mode has five arenas: `brazil`, `neon`, `bamboo`, `volcano` and `dojo`
 | What | Where | Notes |
 |---|---|---|
 | Backdrop strip | `assets/stages/story/<arena>.png` | One segment per fight (four waves and the boss). Regenerate with `python3 tools/story_segments.py` |
-| Animated sky | `assets/stages/animation/<arena>/00.png` … `07.png` | 1672×941 transparent PNGs, looped every eight ticks. Regenerate with `python tools/gen_stage_loops.py` |
+| Animated background | `assets/stages/animation/<arena>/` | Eight opaque 1672×941 keyframes (`00.png` through `07.png`) and eight interleaved `-mid.png` frames. Playback advances every four ticks and wraps after 64 ticks. Keep the camera and fighting floor registered throughout the loop. |
 | Breakables, food, bonus round | `assets/story/objects.toml`, table `[stages.<arena>]` | Full format in [Stage objects](Stage-Objects.md) |
 | Fight music | `tweaks.toml`, section `[music]`, key `<arena id>` | Path to `.ogg`, `.mp3`, `.wav` or `.flac`, relative to `tweaks.toml`. Desktop only. See [Configuration](Configuration.md) |
 

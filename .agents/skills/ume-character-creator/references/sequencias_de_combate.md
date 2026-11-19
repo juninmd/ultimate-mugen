@@ -23,3 +23,5 @@ Quando um NPC de história usa `spriteSet`, verifique o manifesto e a resoluçã
 As quatro sequências padronizadas são `hitLight`, `hitLowLight`, `hitCrouch` e `hitAir`. No elenco nativo de 21 entradas, todas passam pela verificação de impacto e recuo distintos, inclusive os NPCs com pacote compartilhado. A mesma auditoria verifica a distinção dos dois primeiros quadros nas quatro famílias médias e fortes.
 
 Na revisão de golpes, use as animações declaradas pelos movimentos base e de transformação. Para cada projétil, verifique a animação em voo e a animação de impacto. Quadros marcados como `procedural-effect` são renderizados pelo motor. Use o laboratório do elenco e o teste de comandos reais para verificar contato e alcance das ações.
+
+Nas capturas em combate, compare também o atacante com a arte canônica. O Whirl Launcher do Kaito expôs sprites antigos de preparação e ataque em uma captura feita para validar o recuo do Jin.

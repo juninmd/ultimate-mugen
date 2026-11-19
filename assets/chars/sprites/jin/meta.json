@@ -1,5 +1,13 @@
 {
   "frames": {
+    "hitAir1": {"axisX": 230.0, "axisY": 400.0, "refHeight": 345.0},
+    "hitAir2": {"axisX": 230.0, "axisY": 400.0, "refHeight": 345.0},
+    "hitCrouchImpact": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
+    "hitCrouchRecoil": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
+    "hitLowLightImpact": {"axisX": 220.0, "axisY": 392.0, "refHeight": 320.0},
+    "hitLowLightRecoil": {"axisX": 220.0, "axisY": 392.0, "refHeight": 320.0},
+    "hitLightImpact": {"axisX": 220.0, "axisY": 392.0, "refHeight": 320.0},
+    "hitLightRecoil": {"axisX": 220.0, "axisY": 392.0, "refHeight": 320.0},
     "taunt0": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
     "taunt1": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
     "01_idle": {

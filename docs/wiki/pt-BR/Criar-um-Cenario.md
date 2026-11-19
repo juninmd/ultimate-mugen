@@ -51,7 +51,7 @@ O modo história tem cinco cenários: `brazil`, `neon`, `bamboo`, `volcano` e `d
 | O que | Onde | Observações |
 |---|---|---|
 | Faixa de fundo | `assets/stages/story/<cenário>.png` | Um segmento por luta (quatro ondas e o chefe). Regere com `python3 tools/story_segments.py` |
-| Céu animado | `assets/stages/animation/<cenário>/00.png` a `07.png` | PNGs transparentes de 1672×941, em loop a cada oito ticks. Regere com `python tools/gen_stage_loops.py` |
+| Fundo animado | `assets/stages/animation/<cenário>/` | Oito quadros-chave opacos de 1672×941 (`00.png` a `07.png`) e oito quadros intermediários `-mid.png`. A animação avança a cada quatro ticks e completa o ciclo em 64 ticks. Mantenha a câmera e o piso alinhados durante todo o loop. |
 | Quebráveis, comida, fase bônus | `assets/story/objects.toml`, tabela `[stages.<cenário>]` | Formato completo em [Objetos de cenário](Objetos-de-Cenario.md) |
 | Música da luta | `tweaks.toml`, seção `[music]`, chave `<id do cenário>` | Caminho para `.ogg`, `.mp3`, `.wav` ou `.flac`, relativo ao `tweaks.toml`. Só no desktop. Veja [Configuração](Configuracao.md) |
 

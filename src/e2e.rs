@@ -39,8 +39,8 @@ mod web {
 
     fn fighter_json(f: &ume_engine::fighter::Fighter) -> String {
         format!(
-            "{{\"side\":{},\"x\":{:.1},\"lane\":{:.1},\"facing\":{},\"life\":{:.1},\"max\":{:.1},\"state\":{},\"alive\":{}}}",
-            f.side, f.pos.x, f.lane, f.facing, f.life, f.life_max, f.state_no, f.alive
+            "{{\"side\":{},\"x\":{:.1},\"lane\":{:.1},\"facing\":{},\"life\":{:.1},\"max\":{:.1},\"state\":{},\"alive\":{},\"anim\":{},\"anim_elem\":{}}}",
+            f.side, f.pos.x, f.lane, f.facing, f.life, f.life_max, f.state_no, f.alive, f.anim_real, f.elem
         )
     }
 

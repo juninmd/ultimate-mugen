@@ -74,7 +74,7 @@ pub fn prefetch_menu(ids: Vec<String>) {
 
 pub fn pack_name(entry: &crate::registry::CharEntry) -> String {
     match &entry.src {
-        crate::registry::Src::Native(native) => native.sprite_dir().to_string(),
+        crate::registry::Src::Native(native) => native.sprite_set.as_deref().unwrap_or("idle").to_string(),
         _ => entry.id.trim_start_matches("umf:").to_string(),
     }
 }

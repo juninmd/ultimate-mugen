@@ -64,7 +64,7 @@ fn menu_files(sprites_root: &Path) -> BTreeMap<String, Vec<String>> {
         let Some(character) = std::fs::read_to_string(file.path()).ok().and_then(|json| serde_json::from_str::<ume_engine::native::NativeChar>(&json).ok()) else { continue };
         let character = std::sync::Arc::new(character);
         ume_engine::native::register_native(character.clone());
-        let files = wanted.entry(character.sprite_dir().to_string()).or_default();
+        let files = wanted.entry(character.sprite_set.as_deref().unwrap_or("idle").to_string()).or_default();
         for name in ume_engine::native::menu_sprite_files(&character) {
             if !files.contains(&name) {
                 files.push(name);

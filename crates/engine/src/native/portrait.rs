@@ -14,7 +14,7 @@ pub fn select_portrait(nc: &NativeChar, pal_no: i32) -> Option<Sprite> {
 
 pub(super) fn portrait(nc: &NativeChar, palette: Option<&Value>) -> Option<Sprite> {
     let recolor = palette.and_then(|palette| Recolor::new(nc.art.style.get("colors"), palette));
-    sprite_roots(nc.sprite_dir()).iter().find_map(|root| {
+    sprite_roots(nc.sprite_set.as_deref().unwrap_or("idle")).iter().find_map(|root| {
         let bytes = read_sprite(root, "portrait.png")?;
         let png = ume_formats::png::decode_png(&bytes).ok()?;
         let rgba = match &png.rgba { Some(rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&png) };

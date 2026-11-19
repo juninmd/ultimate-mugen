@@ -79,7 +79,15 @@
     document.getElementById('fatalbtn').addEventListener('click', () => location.reload());
     window.addEventListener('error', (e) => showFatal(e.error || e.message));
     window.addEventListener('unhandledrejection', (e) => showFatal(e.reason));
-    cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); msg.textContent = tx.lost; boot.classList.remove('done'); document.body.appendChild(boot); setTimeout(() => location.reload(), 800); });
+    const LOST_KEY = 'ume-ctx-lost', LOST_WINDOW_MS = 60000, LOST_LIMIT = 3;
+    const recentLosses = () => { try { return JSON.parse(sessionStorage.getItem(LOST_KEY) || '[]').filter((t) => Date.now() - t < LOST_WINDOW_MS); } catch (e) { return []; } };
+    cv.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      const losses = recentLosses();
+      if (losses.length >= LOST_LIMIT) { showFatal(new Error('WebGL context lost ' + LOST_LIMIT + ' times in a minute')); return; }
+      try { sessionStorage.setItem(LOST_KEY, JSON.stringify([...losses, Date.now()])); } catch (err) {}
+      msg.textContent = tx.lost; boot.classList.remove('done'); document.body.appendChild(boot); setTimeout(() => location.reload(), 800);
+    });
   </script>
   <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
 </body>

@@ -1,6 +1,8 @@
 // Offline cache. Versioned files (?v=<build>, the wasm and its JS glue) are immutable: cache-first, so the 30+ MB wasm is downloaded once per build.
 // Everything else (index.html, scripts, manifest) is network-first, so a new build is always picked up with a matching JS/wasm pair.
-const CACHE = 'ume-v4';
+// Unversioned data (character packs, stage art) is never cached here: it grew the cache past 200 MB. Only the menu packs are kept for offline use.
+const CACHE = 'ume-v5';
+const SHELL = /(\/|\.html|\.js|\.webmanifest|\.svg|\.menu\.pack)$/;
 self.addEventListener('install', () => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => { e.waitUntil((async () => { for (const k of await caches.keys()) if (k !== CACHE) await caches.delete(k); await self.clients.claim(); })()); });
 self.addEventListener('fetch', (e) => {
@@ -22,7 +24,7 @@ self.addEventListener('fetch', (e) => {
     }
     try {
       const res = await fetch(req);
-      if (res.ok) cache.put(req, res.clone());
+      if (res.ok && SHELL.test(url.pathname)) cache.put(req, res.clone());
       return res;
     } catch {
       const hit = await cache.match(req, { ignoreSearch: true });

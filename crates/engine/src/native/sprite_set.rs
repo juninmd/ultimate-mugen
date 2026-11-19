@@ -1,10 +1,13 @@
-use super::types::NativeChar;
+pub fn with_sprite_animation_defaults(
+    sprite_set: crate::native::SpriteSet,
+    animation: Option<crate::native::Animation>,
+) -> crate::native::SpriteSet {
+    let mut sprite_set = sprite_set;
 
-impl NativeChar {
-    pub fn sprite_dir(&self) -> &str {
-        self.sprite_set.as_deref().unwrap_or(&self.id)
+    // Apply default animation settings if not provided
+    if let Some(animation) = animation {
+        sprite_set.set_animation(animation);
     }
-    pub fn with_sprite_animation_defaults(&self) -> Self {
-        super::compile::with_defaults(self)
-    }
+
+    sprite_set
 }

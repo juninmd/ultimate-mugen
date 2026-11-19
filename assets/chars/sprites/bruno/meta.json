@@ -10,7 +10,7 @@
     "taunt1": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
     "01_idle": {
       "axisX": 198.0,
-      "axisY": 400.0,
+      "axisY": 391.0,
       "refHeight": 333.0
     },
     "02_attack1": {

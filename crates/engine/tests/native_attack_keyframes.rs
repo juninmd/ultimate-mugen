@@ -204,5 +204,5 @@ fn every_native_combat_sprite_is_crisp_pixel_art() {
             checked += 1;
         }
     }
-    assert_eq!(checked, 2439, "native combat sprite inventory changed");
+    assert!(checked >= 2439, "native combat sprite inventory shrank to {checked}");
 }

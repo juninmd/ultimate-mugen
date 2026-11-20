@@ -120,6 +120,6 @@ The plan lives in `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); the dummy 
 
 ## Power Arena
 
-Choose **Power Arena** in the main menu and select both fighters to start a match against the CPU. Jump through the floating platforms from below and land on them while descending. Crossing either amber edge of the main platform immediately eliminates the fighter from the round. The camera pulls back as the fighters separate and reveals both edges at maximum distance.
+Choose **Power Arena** in the main menu and select both fighters to start a match against the CPU. Climb 20 floating platforms across five tiers. Jump through them from below and land on them while descending. Crossing either edge of the main platform immediately eliminates the fighter from the round. The camera follows changes in elevation and zooms out as fighters separate horizontally or vertically.
 
 Open a match directly on the web with `?modo=arena&p1=kaito&p2=shion&luta=1`.

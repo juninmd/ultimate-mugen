@@ -43,7 +43,7 @@ fn arena_camera_reveals_both_edges_when_fighters_separate() {
 }
 
 #[test]
-fn imported_fighter_stays_on_a_platform_after_its_landing_controller() {
+fn imported_fighter_can_climb_the_five_platform_tiers() {
     use std::sync::Arc;
     use ume_engine::input::k;
     use ume_engine::loader::load_mugen_char;
@@ -55,10 +55,28 @@ fn imported_fighter_stays_on_a_platform_after_its_landing_controller() {
     let fighter = Arc::new(load_mugen_char(&vfs, &path, 1, false).unwrap());
     let mut battle = duel(fighter.clone(), fighter);
     battle.enable_power_arena();
-    battle.fighters[0].pos.x = -200.0;
-    battle.tick(&[k::U, 0]);
-    ticks(&mut battle, 75);
-    assert_eq!(battle.fighters[0].ground_level, -50.0);
-    assert_eq!(battle.fighters[0].pos.y, -50.0);
-    assert!(battle.fighters[0].ctrl);
+    battle.fighters[0].pos.x = -240.0;
+    for target in [-50.0, -96.0, -142.0, -188.0, -234.0] {
+        battle.tick(&[k::U, 0]);
+        ticks(&mut battle, 75);
+        assert_eq!(battle.fighters[0].ground_level, target);
+        assert_eq!(battle.fighters[0].pos.y, target);
+        assert!(battle.fighters[0].ctrl);
+    }
+}
+
+#[test]
+fn arena_camera_frames_the_base_and_top_tier_together() {
+    let fighter = mugen_char("arena fighter", "");
+    let mut battle = duel(fighter.clone(), fighter);
+    battle.enable_power_arena();
+    battle.fighters[0].pos.y = ARENA_PLATFORMS.last().unwrap().2;
+    battle.fighters[1].pos.y = 0.0;
+    for _ in 0..90 {
+        battle.update_camera();
+    }
+
+    let screen_y = |side: usize| battle.fighters[side].pos.y + battle.stage.zoffset - battle.camera.y;
+    assert!(screen_y(0) >= 133.0, "upper fighter needs headroom");
+    assert!(screen_y(1) <= battle.view_h - 33.0, "base must remain visible");
 }

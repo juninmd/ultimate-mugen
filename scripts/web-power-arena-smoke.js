@@ -9,20 +9,20 @@ async function run() {
     shotDir: process.env.WEB_SMOKE_SHOTS,
     label: 'power-arena',
   });
-  const wait = (step) => match.page.waitForFunction(step => {
+  const wait = (step, height = 0) => match.page.waitForFunction(({ step, height }) => {
     const state = JSON.parse(window.__ume_state || 'null');
     const clock = state?.clock;
     const player = state?.fighters?.find(f => f.side === 0);
     if (state?.screen !== 'fight' || !clock?.arena || !player) return false;
     switch (step) {
       case 'start': return clock.round_state === 2;
-      case 'approach': return player.x < -178;
-      case 'land': return player.ground === -50 && player.y === player.ground && player.state !== 0;
+      case 'approach': return player.x < -218;
+      case 'land': return player.ground <= height && player.y === player.ground && player.state === 0;
       case 'edge': return player.x < -350 && clock.round_state === 2;
       case 'result': return clock.winner === 1 && !player.alive && player.x < -426;
       default: return false;
     }
-  }, step, { timeout: 35000 });
+  }, { step, height }, { timeout: 35000 });
 
   try {
     await wait('start');
@@ -30,9 +30,13 @@ async function run() {
     await match.page.keyboard.down('ArrowLeft');
     await wait('approach');
     await match.page.keyboard.up('ArrowLeft');
-    await match.tap('ArrowUp');
-    await wait('land');
-    await match.shot('platform');
+    for (const [height, shot] of [[-50, 'platform'], [-96, 'second-tier']]) {
+      await match.page.keyboard.down('ArrowUp');
+      await match.page.waitForTimeout(120);
+      await match.page.keyboard.up('ArrowUp');
+      await wait('land', height);
+      await match.shot(shot);
+    }
     await match.page.keyboard.down('ArrowLeft');
     await wait('edge');
     await match.shot('edge');
@@ -40,7 +44,7 @@ async function run() {
     await match.page.keyboard.up('ArrowLeft');
     await match.shot('ring-out');
     assert.deepEqual(match.problems, []);
-    console.log('POWER ARENA OK platform, arena edge, ring-out');
+    console.log('POWER ARENA OK platform ascent, arena edge, ring-out');
   } finally {
     await match.close();
   }

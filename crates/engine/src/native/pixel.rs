@@ -66,7 +66,7 @@ fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool, recolor:
 pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
     let character = &super::compile::with_defaults(character);
     use std::hash::{Hash, Hasher};
-    let roots = sprite_roots(character.sprite_dir());
+    let roots = sprite_roots(character.sprite_set.as_deref().unwrap_or("idle"));
     let animations: Vec<Value> = character.anims.iter().map(|(animation, data)| {
         let frames: Vec<Value> = data.frames.iter().enumerate().map(|(index, frame)| {
             let pose = native_frame_sprite_key(frame);

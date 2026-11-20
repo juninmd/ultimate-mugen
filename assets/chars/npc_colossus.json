@@ -34,78 +34,49 @@
  "art": {
   "type": "rig",
   "style": {
-   "build": 1.1,
-   "top": "gi",
-   "sleeves": "gi",
+   "build": 1.57,
+   "torsoShape": "heavy",
+   "top": "armor",
    "pants": "baggy",
-   "belt": "top2",
-   "beltTails": 1,
-   "gloves": "wrap",
-   "boots": "wrap",
+   "gloves": "long",
+   "boots": "tall",
    "hair": {
-    "type": "wild",
-    "spikes": 10,
-    "min": 0.6,
-    "max": 1.3,
-    "sweep": 42,
-    "bangs": 2,
-    "seed": 51,
-    "strands": 8,
-    "locks": 3,
-    "shine": true
+    "type": "short",
+    "spikes": 3,
+    "max": 0.24,
+    "seed": 52
    },
-   "eyes": "fierce",
+   "visor": false,
    "colors": {
-    "skin": "#e6b48a",
-    "hair": "#d6dbe6",
+    "skin": "#94634c",
+    "hair": "#2d2120",
     "eye": "#2a8a4a",
-    "top": "#2a9a4a",
-    "top2": "#1c2420",
+    "top": "#7a5746",
+    "top2": "#a78a62",
     "trim": "#f2f0e6",
-    "pants": "#f2f0e6",
+    "pants": "#54505a",
     "belt": "#1c2420",
-    "wrap": "#f2f0e6",
-    "boot": "#2a2a2a",
+    "wrap": "#8e8b83",
+    "boot": "#302b32",
     "energy": "#ffd23a",
     "aura": "#ffd23a",
-    "beard": "#cdd3e0"
+    "beard": "#cdd3e0",
+    "accent": "#cfaa74",
+    "visor": "#d7b484",
+    "glove": "#3f4144",
+    "metal": "#8c7964"
    },
-   "muscle": 0.6,
-   "veins": true,
-   "folds": 1.3,
+   "eyes": "fierce",
+   "folds": 1.15,
    "stitch": true,
-   "weave": "weave",
-   "pantsWeave": "weave",
    "knuckles": true,
+   "belt": "accent",
+   "beltTails": 0,
+   "shoulderPads": true,
    "beard": [
-    "goatee",
+    "stubble",
     "sideburns"
-   ],
-   "brow": {
-    "thick": 1.8,
-    "shape": "arched",
-    "color": "#aeb6c8"
-   },
-   "faceShade": 1,
-   "scars": [
-    "cheek"
-   ],
-   "emblem": {
-    "type": "glyph",
-    "color": "#f2f0e6",
-    "where": "back",
-    "size": 1.5
-   },
-   "necklace": {
-    "type": "beads",
-    "color": "#8a5a34"
-   },
-   "bandages": [
-    "forearm"
-   ],
-   "footwear": {
-    "sole": true
-   }
+   ]
   },
   "poses": {
    "idle0": {
@@ -4283,6 +4254,5 @@
   }
  },
  "boss": false,
- "npc": true,
- "spriteSet": "daichi"
+ "npc": true
 }

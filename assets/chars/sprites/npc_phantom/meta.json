@@ -2,488 +2,564 @@
   "frames": {
     "airGuard": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "airGuardHit": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
+      "refHeight": 320.0
+    },
+    "airLowKick": {
+      "axisX": 200.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "ajab": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "akick": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "bounce": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisX": 225.82945251464844,
+      "axisY": 362.5736389160156,
+      "refHeight": 297.7984313964844
     },
     "cjab0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "cjab1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "clk": {
-      "axisX": 200.0,
-      "axisY": 392.0,
+      "axisX": 183.75509643554688,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "crouch": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "crouch0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "crouch1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 366.61224365234375,
       "refHeight": 320.0
     },
     "crouchGuard": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "crouchGuardHit": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "dead": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisX": 214.20289611816406,
+      "axisY": 359.07244873046875,
+      "refHeight": 278.3768005371094
     },
     "dfKneel0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "dfKneel1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "dfLie": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisX": 214.20289611816406,
+      "axisY": 359.07244873046875,
+      "refHeight": 278.3768005371094
     },
     "dfProp": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisX": 206.125,
+      "axisY": 368.4375,
+      "refHeight": 300.125
     },
     "dfProp2": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 366.61224365234375,
       "refHeight": 320.0
     },
     "dfReach0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisX": 214.20289611816406,
+      "axisY": 367.5942077636719,
+      "refHeight": 278.3768005371094
     },
     "dfReach1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisX": 214.20289611816406,
+      "axisY": 367.5942077636719,
+      "refHeight": 278.3768005371094
     },
     "dfSit0": {
-      "axisX": 200.0,
-      "axisY": 392.0,
+      "axisX": 190.28570556640625,
+      "axisY": 366.61224365234375,
       "refHeight": 320.0
     },
     "dfSit1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
+      "axisX": 183.75509643554688,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "fall1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
+      "axisX": 190.28570556640625,
+      "axisY": 366.61224365234375,
       "refHeight": 320.0
     },
     "fall2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisX": 222.10525512695312,
+      "axisY": 354.7368469238281,
+      "refHeight": 288.84210205078125
     },
     "flip0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 373.1428527832031,
       "refHeight": 320.0
     },
     "flip1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 324.16326904296875,
       "refHeight": 320.0
     },
     "flip2": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 373.1428527832031,
       "refHeight": 320.0
     },
     "flip3": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 373.1428527832031,
       "refHeight": 320.0
     },
     "getUp1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
+      "axisX": 196.81631469726562,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "getUp2": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "getUp3": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "guard": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "guardHit": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "hitAir1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 366.61224365234375,
       "refHeight": 320.0
     },
     "hitAir2": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 366.61224365234375,
       "refHeight": 320.0
     },
-    "hitCrouch": {
+    "hitCrouchImpact": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
+      "refHeight": 320.0
+    },
+    "hitCrouchRecoil": {
+      "axisX": 200.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "hitH1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "hitH2": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "hitH3": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "hitL1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "hitL2": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "hitL3": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
+      "refHeight": 320.0
+    },
+    "hitLightImpact": {
+      "axisX": 200.0,
+      "axisY": 363.346923828125,
+      "refHeight": 320.0
+    },
+    "hitLightRecoil": {
+      "axisX": 200.0,
+      "axisY": 363.346923828125,
+      "refHeight": 320.0
+    },
+    "hitLowLightImpact": {
+      "axisX": 200.0,
+      "axisY": 363.346923828125,
+      "refHeight": 320.0
+    },
+    "hitLowLightRecoil": {
+      "axisX": 200.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "hk0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "hk1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "hop": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
+      "refHeight": 320.0
+    },
+    "idle0": {
+      "axisX": 200.0,
+      "axisY": 363.346923828125,
+      "refHeight": 320.0
+    },
+    "idle1": {
+      "axisX": 200.0,
+      "axisY": 363.346923828125,
+      "refHeight": 320.0
+    },
+    "idle2": {
+      "axisX": 200.0,
+      "axisY": 363.346923828125,
+      "refHeight": 320.0
+    },
+    "idle3": {
+      "axisX": 200.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "inline_85f47d25431dae27": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "inline_cf58c6b7efd2a0fd": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "inline_fc7b31a6c7f6b4b5": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "intro0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "intro1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "jab0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "jab1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "jumpDown": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "jumpStart": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "jumpTop": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "jumpUp": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "ks0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "ks1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "ks2": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "kv0": {
       "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisY": 364.3870849609375,
+      "refHeight": 309.8064270019531
     },
     "kv1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "land": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "lie": {
-      "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisX": 214.20289611816406,
+      "axisY": 359.07244873046875,
+      "refHeight": 278.3768005371094
     },
     "lk0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "lk1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
+      "axisX": 180.4897918701172,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "lose": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
+      "refHeight": 320.0
+    },
+    "lowKick": {
+      "axisX": 183.75509643554688,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "powerup0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "powerup1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "powerup2": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "run0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "run1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 366.61224365234375,
       "refHeight": 320.0
     },
     "run2": {
       "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
-    },
-    "run3": {
-      "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "sf0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "sf1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "sf2": {
-      "axisX": 200.0,
-      "axisY": 392.0,
+      "axisX": 203.18368530273438,
+      "axisY": 373.1428527832031,
       "refHeight": 320.0
     },
     "sf3": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 327.4285583496094,
       "refHeight": 320.0
     },
     "sf4": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 373.1428527832031,
+      "refHeight": 320.0
+    },
+    "sg_run_mid": {
+      "axisX": 200.0,
+      "axisY": 369.8775634765625,
+      "refHeight": 320.0
+    },
+    "sg_run_run0": {
+      "axisX": 200.0,
+      "axisY": 369.8775634765625,
+      "refHeight": 320.0
+    },
+    "sg_run_run1": {
+      "axisX": 200.0,
+      "axisY": 366.61224365234375,
+      "refHeight": 320.0
+    },
+    "sg_run_run2": {
+      "axisX": 200.0,
+      "axisY": 369.8775634765625,
+      "refHeight": 320.0
+    },
+    "sg_run_run3": {
+      "axisX": 200.0,
+      "axisY": 369.8775634765625,
       "refHeight": 320.0
     },
     "str0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "str1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "sweep0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "sweep1": {
-      "axisX": 200.0,
-      "axisY": 392.0,
+      "axisX": 193.55101013183594,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "taunt0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "taunt1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "tp0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "tp2": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "trip": {
-      "axisX": 200.0,
-      "axisY": 392.0,
+      "axisX": 193.55101013183594,
+      "axisY": 366.61224365234375,
       "refHeight": 320.0
     },
     "turn": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "walk0": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "walk1": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "walk2": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "walk3": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "walk4": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "walk5": {
       "axisX": 200.0,
-      "axisY": 392.0,
+      "axisY": 363.346923828125,
       "refHeight": 320.0
     },
     "win0": {
       "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisY": 366.52630615234375,
+      "refHeight": 288.84210205078125
     },
     "win1": {
       "axisX": 200.0,
-      "axisY": 392.0,
-      "refHeight": 320.0
+      "axisY": 366.52630615234375,
+      "refHeight": 288.84210205078125
     }
-  }
+  },
+  "refHeight": 320
 }

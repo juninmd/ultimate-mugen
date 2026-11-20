@@ -34,79 +34,40 @@
  "art": {
   "type": "rig",
   "style": {
-   "scale": 1.1,
-   "build": 1.45,
+   "build": 1.47,
    "torsoShape": "heavy",
-   "top": "bare",
-   "pants": "trunks",
-   "belt": "accent",
-   "beltTails": 0,
-   "gloves": "wrap",
+   "top": "vest",
+   "pants": "baggy",
+   "gloves": "long",
    "boots": "tall",
-   "scar": true,
    "hair": {
-    "type": "short",
-    "spikes": 6,
-    "min": 0.2,
-    "max": 0.45,
-    "bangs": 1,
-    "bangLen": 0.25,
-    "seed": 7,
-    "strands": 5,
-    "locks": 3,
-    "shine": true
+    "type": "bald"
    },
-   "eyes": "fierce",
-   "facePaint": "top2",
-   "colors": {
-    "skin": "#d89a70",
-    "hair": "#3a2214",
-    "eye": "#3a2a20",
-    "pants": "#c02a2a",
-    "top": "#c02a2a",
-    "top2": "#c02a2a",
-    "boot": "#2a2630",
-    "accent": "#f0c030",
-    "wrap": "#f0ece0",
-    "energy": "#ffb060",
-    "aura": "#ff6a2a"
-   },
-   "muscle": 1.25,
-   "veins": true,
-   "arms": 1.1,
-   "chest": 1.1,
-   "waist": 0.92,
-   "knuckles": true,
-   "stitch": true,
    "beard": [
-    "stubble",
+    "goatee",
     "moustache"
    ],
-   "brow": {
-    "thick": 2.2,
-    "shape": "angry"
+   "colors": {
+    "skin": "#98644e",
+    "hair": "#251c20",
+    "eye": "#3a2a20",
+    "pants": "#354b37",
+    "top": "#465d3c",
+    "top2": "#bccb7c",
+    "boot": "#20282a",
+    "accent": "#c1b764",
+    "wrap": "#7d995d",
+    "energy": "#ffb060",
+    "aura": "#ff6a2a",
+    "glove": "#4e6848",
+    "metal": "#58624d"
    },
-   "faceShade": 1,
-   "footwear": {
-    "sole": true,
-    "laces": true,
-    "buckles": 2,
-    "cuff": true
-   },
-   "buckle": "square",
-   "tattoo": {
-    "type": "tribal",
-    "on": [
-     "arm",
-     "back"
-    ],
-    "color": "#2a2230",
-    "backType": "claw"
-   },
-   "scars": [
-    "ribs",
-    "brow"
-   ]
+   "eyes": "fierce",
+   "folds": 1.15,
+   "stitch": true,
+   "knuckles": true,
+   "belt": "accent",
+   "beltTails": 0
   },
   "poses": {
    "idle0": {
@@ -3882,6 +3843,5 @@
   }
  },
  "boss": false,
- "npc": true,
- "spriteSet": "bruno"
+ "npc": true
 }

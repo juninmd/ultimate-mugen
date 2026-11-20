@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod announce_text; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -815,8 +815,9 @@ impl Hud {
             let age = (a.total - a.time) as f32;
             let sc = if age < 8.0 { 2.0 - age / 8.0 } else { 1.0 };
             let al = (a.time as f32 / 12.0).min(1.0);
-            let size = if a.text.len() > 10 { 20.0 } else { 30.0 } * sc;
-            let ko = matches!(a.text.as_str(), "K.O." | "DOUBLE K.O." | "RING OUT");
+            let label = announce_text::label(a);
+            let size = if label.len() > 10 { 20.0 } else { 30.0 } * sc;
+            let ko = a.kind == ume_engine::matchs::AnnounceKind::Ko;
             let glow = if ko {
                 Color::new(1.0, 0.12, 0.25, 0.25 * al)
             } else {
@@ -866,7 +867,7 @@ impl Hud {
                 (o, o * 2.0),
             ] {
                 text(
-                    &a.text,
+                    &label,
                     w / 2.0 + dx,
                     BASE_H * 0.42 + size * 0.35 + dy,
                     size,
@@ -881,7 +882,7 @@ impl Hud {
                 Color::new(1.0, 0.82, 0.25, al)
             };
             text(
-                &a.text,
+                &label,
                 w / 2.0,
                 BASE_H * 0.42 + size * 0.35,
                 size,

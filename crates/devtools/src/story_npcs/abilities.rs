@@ -82,5 +82,12 @@ pub fn phantom(data: &mut Json) -> Result<(), String> {
         find_move(data, id)?.set("invuln", Json::Arr(vec![Json::int(1), Json::int(3)]));
     }
     find_move(data, "strong")?.set("moves", velocity_step(Json::float(5.0)));
+    let projectiles = find_move(data, "ult_shadowslash")?
+        .get_mut("projectile")
+        .and_then(Json::as_array_mut)
+        .ok_or("Phantom's ultimate has no projectiles")?;
+    for projectile in projectiles {
+        projectile.set("damage", Json::int(46));
+    }
     Ok(())
 }

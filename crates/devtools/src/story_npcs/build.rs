@@ -56,7 +56,17 @@ fn build(spec: &Npc, chars: &Path) -> Result<Json, String> {
     for key in ["intro", "taunt", "winQuote", "form", "abilities"] {
         data.remove(key);
     }
-    data.set("spriteSet", Json::str(spec.base));
+    data.set("spriteSet", Json::str(spec.id));
+    let existing_path = chars.join(format!("{}.json", spec.id));
+    if existing_path.is_file() {
+        let existing = parse(&std::fs::read_to_string(&existing_path).map_err(|e| e.to_string())?)?;
+        if let (Some(style), Some(art)) = (
+            existing.get("art").and_then(|art| art.get("style")),
+            data.get_mut("art"),
+        ) {
+            art.set("style", style.clone());
+        }
+    }
     let colors = data.get("art").and_then(|a| a.get("style")).and_then(|s| s.get("colors")).cloned().ok_or("art.style.colors missing")?;
     let kept = match &colors {
         Json::Obj(items) => Json::Obj(items.iter().filter(|(k, _)| !KEEP_KEYS.contains(&k.as_str())).cloned().collect()),

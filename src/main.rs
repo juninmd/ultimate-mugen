@@ -25,7 +25,7 @@ mod pixel_tour;
 mod poly; mod profile; mod profile_tags;
 mod postfx;
 mod registry;
-mod render;
+mod render; mod power_arena;
 mod replays;
 mod route;
 mod screenpack;
@@ -41,6 +41,7 @@ mod stageprops;
 mod stages;
 mod storage;
 mod story;
+mod tower;
 mod passive_fx; mod spring; mod texgen; mod tweaks; mod ui; mod ui_adapted; mod ui_adapted_panels; mod ui_progress; mod ui_tokens;
 mod update;
 #[cfg(target_arch = "wasm32")]

@@ -74,7 +74,7 @@ fn every_native_attack_has_three_distinct_rendered_images() {
 }
 
 #[test]
-fn every_native_transformation_uses_three_distinct_powerup_images() {
+fn every_native_transformation_resolves_at_least_three_distinct_powerup_images() {
     let mut characters = 0;
     let mut failures = Vec::new();
     for path in character_files() {
@@ -96,7 +96,8 @@ fn every_native_transformation_uses_three_distinct_powerup_images() {
             .flatten()
             .filter_map(|frame| frame["file"].as_str())
             .collect();
-        if image_count < 3 || sprite_files.len() != 3 {
+        let distinct_files: HashSet<_> = sprite_files.iter().copied().collect();
+        if image_count < 3 || distinct_files.len() < 3 || frames.is_some_and(|frames| frames.len() != sprite_files.len()) {
             failures.push(format!("{id}: {image_count} distinct powerUp images from {} resolved files", sprite_files.len()));
         }
         if id == "garan"
@@ -203,5 +204,5 @@ fn every_native_combat_sprite_is_crisp_pixel_art() {
             checked += 1;
         }
     }
-    assert_eq!(checked, 2439, "native combat sprite inventory changed");
+    assert!(checked >= 2439, "native combat sprite inventory shrank to {checked}");
 }

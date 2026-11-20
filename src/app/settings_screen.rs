@@ -13,6 +13,8 @@ enum Act {
     Fx,
     Impact,
     FpsCounter,
+    KeepAspect,
+    LinearFilter,
     Vsync,
     FpsCap,
     Master,
@@ -32,7 +34,11 @@ enum Act {
     TeamLifeShare,
     GameSpeed,
     SurvivalRecovery,
+    ShowBoxes,
+    StoryEnabled,
     Language,
+    CheckUpdate,
+    AutoUpdate,
     Reset,
     Info,
 }
@@ -157,6 +163,18 @@ impl App {
                         ),
                     ));
                 }
+                r.push(row(
+                    Act::KeepAspect,
+                    tr3("Manter proporção 16:9", "Keep 16:9 aspect", "Mantener aspecto 16:9"),
+                    on_off(s.keep_aspect),
+                    tr3("Evita esticar a imagem em monitores ultrawide", "Prevents stretching on ultrawide displays", "Evita estirar la imagen en pantallas ultrawide"),
+                ));
+                r.push(row(
+                    Act::LinearFilter,
+                    tr3("Filtro de pixels", "Pixel filter", "Filtro de píxeles"),
+                    if s.linear { tr3("Suave (Linear)", "Smooth (Linear)", "Suave (Lineal)") } else { tr3("Nítido (Pixel Art)", "Crisp (Pixel Art)", "Nítido (Pixel Art)") },
+                    tr3("Nítido preserva os pixels; Suave suaviza a escala", "Crisp preserves pixel clusters; Smooth applies bilinear filtering", "Nítido preserva píxeles; Suave aplica filtro bilineal"),
+                ));
                 r.push(row(
                     Act::FpsCounter,
                     tr("Contador de FPS", "FPS counter"),
@@ -307,6 +325,8 @@ impl App {
                         "How much of the bar comes back after each win",
                     ),
                 ),
+                row(Act::ShowBoxes, tr3("Exibir Hitboxes / Hurtboxes", "Show Hitboxes / Hurtboxes", "Mostrar Hitboxes / Hurtboxes"), on_off(s.show_boxes), tr3("Mostra caixas de ataque e colisão durante as lutas", "Displays attack and body collision boxes during fights", "Muestra cajas de ataque y colisión durante los combates")),
+                row(Act::StoryEnabled, tr3("Modo História (TOML)", "Story mode (TOML)", "Modo Historia (TOML)"), on_off(s.story_enabled && crate::story::active_script().campaign.enabled), tr3("Ative/desative ou personalize em story/campaign.toml", "Enable/disable or customize via story/campaign.toml", "Activa/desactiva o personaliza en story/campaign.toml")),
             ],
             4 => vec![row(
                 Act::Language,
@@ -318,15 +338,41 @@ impl App {
                     .unwrap_or(""),
                 tr3("Idioma de toda a interface", "Language of the whole interface", "Idioma de toda la interfaz"),
             )],
-            _ => vec![row(
-                Act::Reset,
-                tr("Restaurar padrões", "Restore defaults"),
-                tr("Enter", "Enter"),
-                tr(
-                    "Volta todas as configurações ao original",
-                    "Resets every setting to its original value",
-                ),
-            )],
+            _ => {
+                let mut r = vec![];
+                if !web && !mobile {
+                    r.push(row(
+                        Act::CheckUpdate,
+                        tr3("Verificar atualizações", "Check for updates", "Buscar actualizaciones"),
+                        self.update_settings_value(),
+                        tr3(
+                            "Consulta o GitHub Releases e instala se você confirmar",
+                            "Checks GitHub Releases and installs when you confirm",
+                            "Consulta GitHub Releases e instala si confirmas",
+                        ),
+                    ));
+                    r.push(row(
+                        Act::AutoUpdate,
+                        tr3("Avisos de atualização", "Update prompts", "Avisos de actualización"),
+                        on_off(s.auto_update),
+                        tr3(
+                            "Exibe o aviso na tela inicial quando houver versão nova",
+                            "Shows the prompt on the title screen when a new release exists",
+                            "Muestra el aviso en el título cuando haya nueva versión",
+                        ),
+                    ));
+                }
+                r.push(row(
+                    Act::Reset,
+                    tr("Restaurar padrões", "Restore defaults"),
+                    tr("Enter", "Enter"),
+                    tr(
+                        "Volta todas as configurações ao original",
+                        "Resets every setting to its original value",
+                    ),
+                ));
+                r
+            }
         }
     }
 
@@ -345,6 +391,8 @@ impl App {
             Act::Fx if go => s.fx = cycle(s.fx, step, FX_LEVELS.len()),
             Act::Impact if go => s.impact = cycle(s.impact, step, IMPACT.len()),
             Act::FpsCounter if go => s.fps = !s.fps,
+            Act::KeepAspect if go => s.keep_aspect = !s.keep_aspect,
+            Act::LinearFilter if go => s.linear = !s.linear,
             Act::Vsync if go => s.vsync = !s.vsync,
             Act::FpsCap if go => s.fps_cap = cycle(s.fps_cap, step, FPS_CAPS.len()),
             Act::Master if go => s.master = cycle(s.master as usize, step, VOLUME_STEPS as usize + 1) as u8,
@@ -366,7 +414,18 @@ impl App {
             Act::SurvivalRecovery if go => {
                 s.survival_recovery = cycle(s.survival_recovery, step, SURVIVAL_RECOVERY.len())
             }
+            Act::ShowBoxes if go => { s.show_boxes = !s.show_boxes; self.debug_boxes = s.show_boxes; if let Some(sess) = self.session.as_mut() { sess.r.debug = s.show_boxes; } crate::hud::debug_panel::set(s.show_boxes); }
+            Act::StoryEnabled if go => s.story_enabled = !s.story_enabled,
             Act::Language if go => s.lang = s.lang.next(step),
+            Act::AutoUpdate if go => s.auto_update = !s.auto_update,
+            Act::CheckUpdate if ok => {
+                if matches!(self.updater.state(), crate::update::State::Available(u) if u.binary.is_some()) {
+                    self.updater.accept();
+                } else {
+                    self.updater.check_now();
+                }
+                changed = false;
+            }
             Act::Reset if ok => {
                 *s = Settings { survival_best: s.survival_best, ..Settings::default() };
                 self.ai_level = s.difficulty;
@@ -536,7 +595,7 @@ impl App {
                     true,
                 );
             } else if !r.value.is_empty() {
-                let shown = if matches!(r.act, Act::Keys | Act::CharTuning | Act::Guide | Act::Reset) {
+                let shown = if matches!(r.act, Act::Keys | Act::CharTuning | Act::Guide | Act::CheckUpdate | Act::Reset) {
                     r.value.clone()
                 } else if interactive {
                     format!("‹ {} ›", r.value)
@@ -567,11 +626,12 @@ impl App {
                 format!("{}: {}", tr("Plataforma", "Platform"), if cfg!(target_arch = "wasm32") { "Web (WebGL2)" } else if cfg!(target_os = "android") { "Android" } else if cfg!(target_os = "ios") { "iOS" } else { "Desktop (wgpu)" }),
                 tr("Inspirada em M.U.G.E.N (Elecbyte) e Ikemen GO. Código aberto em github.com/juninmd/ultimate-mugen", "Inspired by M.U.G.E.N (Elecbyte) and Ikemen GO. Open source at github.com/juninmd/ultimate-mugen").to_string(),
             ];
+            let info_y = (y + 28.0).max(300.0);
             for (i, l) in lines.iter().enumerate() {
                 self.ui.text(
                     l,
                     150.0 + 22.0,
-                    300.0 + i as f32 * 34.0,
+                    info_y + i as f32 * 34.0,
                     if i == 0 { 26.0 } else { 19.0 },
                     if i == 0 { hex("#ffcc33") } else { WHITE },
                     Align::Left,

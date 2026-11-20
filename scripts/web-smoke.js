@@ -9,7 +9,7 @@ const types = { '.html': 'text/html', '.js': 'text/javascript', '.wasm': 'applic
 const server = staticServer(dir, types);
 (async () => {
   await new Promise(ok => server.listen(0, '127.0.0.1', ok));
-  const url = `http://127.0.0.1:${server.address().port}/index.html`;
+  const url = `http://127.0.0.1:${server.address().port}/index.html?e2e=1`;
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   const problems = [];
@@ -51,7 +51,10 @@ const server = staticServer(dir, types);
     await snap(`05-confirm-${attempt + 1}`);
     timeline.push(`confirm attempt ${attempt + 1} at +${Date.now() - startedAt} ms, stage requests ${stageRequests.length}`);
   }
-  await p.waitForTimeout(6000);             // intro + fight start
+  await p.waitForFunction(() => {
+    const state = JSON.parse(window.__ume_state || 'null');
+    return state?.screen === 'fight' && state.clock?.round_state === 2;
+  }, null, { timeout: 90000 });
   if (stageRequests.length !== 1) problems.push(`Expected one selected stage download, got ${stageRequests.length}`);
   // releaseAll (blur, pagehide, contextmenu) synthesises a pointerup: it must be a real PointerEvent, or the
   // wasm glue throws on event.pointerType and the input stays stuck.

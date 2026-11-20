@@ -7,8 +7,12 @@ pub(super) async fn run(app: &mut App, dir: &str) {
         app.settings.lang = lang;
         crate::i18n::set(lang);
         let code = lang.code();
-        app.screen = Screen::Menu { cur: 5 };
+        app.screen = Screen::Menu { cur: 11 };
         screen(app, dir, &format!("{code}-menu"), 40).await;
+        app.mode = Mode::Tower;
+        app.tower_begin(find(app, "kaito"));
+        app.screen = Screen::Tower { t: 1.0 };
+        screen(app, dir, &format!("{code}-tower"), 10).await;
         app.screen = Screen::Mugen { view: 0, page: 0 };
         screen(app, dir, &format!("{code}-import"), 12).await;
         app.screen = Screen::Market;
@@ -17,10 +21,18 @@ pub(super) async fn run(app: &mut App, dir: &str) {
         screen(app, dir, &format!("{code}-controls"), 12).await;
         app.screen = Screen::Replays { cur: 0 };
         screen(app, dir, &format!("{code}-replays"), 12).await;
-        for tab in [0usize, 3, 4] {
+        for tab in [0usize, 3, 4, 5] {
             app.screen = Screen::Settings { tab, cur: 1, from_fight: false };
             screen(app, dir, &format!("{code}-settings-{tab}"), 6).await;
         }
+        app.mode = Mode::Arcade;
+        app.arcade_start(find(app, "kaito"), None);
+        if let Some((_, idx)) = app.arcade.as_mut() {
+            *idx = 2;
+        }
+        app.screen = Screen::Vs { t: 1.2, step: 0 };
+        screen(app, dir, &format!("{code}-arcade-vs"), 2).await;
+        app.arcade = None;
         app.mode = Mode::Cpu;
         app.screen = Screen::Select { cur: [find(app, "kaito"), find(app, "akio")], picking: 0, picked: [None, None] };
         screen(app, dir, &format!("{code}-select"), 60).await;

@@ -956,18 +956,18 @@ ctrl = 1
 [Statedef 19902]
 type = S
 ctrl = 0
-anim = 196
+anim = 0
 velset = 0,0
 
 [State 19902, inv]
 type = NotHitBy
 trigger1 = Time = 0
 value = SCA
-time = 100
+time = 60
 
 [State 19902, go]
 type = ChangeState
-trigger1 = Time >= 78
+trigger1 = Time >= 58
 value = 0
 ctrl = 1
 

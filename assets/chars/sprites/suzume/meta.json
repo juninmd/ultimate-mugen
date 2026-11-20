@@ -85,6 +85,7 @@
       "axisY": 400.0,
       "refHeight": 370.0
     },
+    "powerup01": {"axisX": 199.5, "axisY": 400.0, "refHeight": 370.0},
     "16_power1": {
       "axisX": 193.0,
       "axisY": 400.0,

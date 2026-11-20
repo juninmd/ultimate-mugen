@@ -602,7 +602,7 @@ Todo lutador jogável recebe o mesmo kit de combos e habilidades além dos golpe
 | Golpe mergulho | `y` no ar | quica o oponente no chão |
 | Hyper nível 3 | movimento do super + `x+y` | gasta a barra inteira (3000) |
 | Especial despertado | movimento do projétil + `a+b` | só transformado, leque de três tiros |
-| Transformação | L3+R3 / despertar | bônus de ataque e defesa, libera golpes da forma |
+| Transformação | L3+R3 / despertar | consome energia, aumenta ataque e movimento, libera golpes da forma e aumenta o dano recebido sem guarda |
 | Slide baixo | `F+a` | golpe baixo que lança, mixup contra o overhead |
 | Escape burst | `x+a+b` | 500 de barra, escapa do hit-stun |
 | Forma ascendida | segunda transformação | 2000 de barra, libera um hyper ascendido (`a+b`) |

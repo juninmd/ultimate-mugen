@@ -245,3 +245,5 @@ fn guard_points_regenerate_passively_during_neutral() {
     assert_eq!(m.fighters[1].ikemen.guard_points, 160.0);
 }
 
+#[path = "life_systems/awakening.rs"]
+mod awakening;

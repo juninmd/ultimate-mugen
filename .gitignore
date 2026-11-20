@@ -17,5 +17,8 @@ temp_extract/
 /.forge/
 __pycache__/
 *.pyc
+*.log
+/cj
+*.cookies
 package.json
 package-lock.json

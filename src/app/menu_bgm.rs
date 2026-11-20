@@ -20,6 +20,7 @@ fn theme_for(screen: &Screen) -> Option<u32> {
         | Screen::CharTuning { .. }
         | Screen::Mugen { .. }
         | Screen::Market
+        | Screen::Tower { .. }
         | Screen::Replays { .. } => Some(MENU_THEME),
         Screen::Settings { from_fight, .. } if !from_fight => Some(MENU_THEME),
         Screen::Cutscene { .. } => Some(CUTSCENE_THEME),

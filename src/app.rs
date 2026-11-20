@@ -29,6 +29,8 @@ mod settings_screen;
 mod char_tuning_screen;
 mod story;
 mod story_screen;
+mod tower;
+mod tower_screen;
 mod survival;
 mod update_banner;
 mod results_stats;
@@ -158,6 +160,7 @@ pub struct App {
     /// Survival run in progress (round, score, carried life)
     survival: Option<survival::Survival>,
     story: Option<crate::story::StoryRun>,
+    tower: Option<crate::tower::TowerRun>,
     /// Arcade/Survival with a second human on the same side (couch co-op)
     pub coop: bool,
     /// Screenpack loaded from mugen/data or mugen/screenpacks (menu labels, roster order, storyboards, lifebar geometry)
@@ -214,7 +217,7 @@ pub struct App {
     warm_key: String,
 }
 
-const MENU: [(&str, &str); 11] = [
+const MENU: [(&str, &str); 13] = [
     ("menu.story", "desc.story"),
     ("menu.arcade", "desc.arcade"),
     ("menu.survival", "desc.survival"),
@@ -225,7 +228,7 @@ const MENU: [(&str, &str); 11] = [
     ("menu.settings", "desc.settings"),
     ("menu.replays", "desc.replays"),
     ("menu.player_card", "desc.player_card"),
-    ("menu.quit", "desc.quit"),
+    ("menu.power_arena", "desc.power_arena"), ("menu.tower", "desc.tower"), ("menu.quit", "desc.quit"),
 ];
 
 impl App {
@@ -337,7 +340,7 @@ impl App {
             arcade: None,
             boss_progression: crate::boss::BossProgression::load(),
             pause: pause::PauseState::new(),
-            debug_boxes: false,
+            debug_boxes: settings.show_boxes,
             dummy_plan: Default::default(),
             menu_focus: Default::default(),
             quit: false,
@@ -391,6 +394,7 @@ impl App {
             warm_key: String::new(),
             survival: None,
             story: None,
+            tower: None,
             coop: false,
             sp: crate::screenpack::probe(),
             pal: [settings.pal1 as i32, settings.pal2 as i32],
@@ -495,6 +499,7 @@ impl App {
             Screen::Mugen { .. } => self.mugen_screen(),
             Screen::Market => self.market_screen(),
             Screen::Story { .. } => self.story_screen(dt).await,
+            Screen::Tower { .. } => self.tower_screen(dt),
             Screen::SurvivalOver { .. } => self.survival_over_screen(),
             Screen::Replays { .. } => self.replays_screen(),
             Screen::PlayerCard { .. } => self.player_card_screen(),
@@ -723,7 +728,7 @@ impl App {
         let screen = get("tela");
         if p1.is_none() && p2.is_none() && screen.is_none() { return; }
         let mode = match get("modo").as_deref() {
-            Some("versus") => Mode::Versus,
+            Some("versus") => Mode::Versus, Some("arena") => Mode::PowerArena,
             Some("treino") => Mode::Training,
             Some("watch") => Mode::Watch,
             _ => Mode::Cpu,
@@ -1510,6 +1515,9 @@ impl App {
             } else if picking == 0 && self.mode == Mode::Story {
                 self.story_begin(cur[0]);
                 return;
+            } else if picking == 0 && self.mode == Mode::Tower {
+                self.tower_begin(cur[0]);
+                return;
             } else if picking == 0 && self.mode == Mode::Survival {
                 self.survival_begin(cur[0], None);
                 return;
@@ -1541,9 +1549,8 @@ impl App {
                 picking = 1;
             } else {
                 self.sel = (picked[0].unwrap(), picked[1].unwrap(), self.sel.2);
-                self.screen = Screen::Stages {
-                    cur: self.sel.2 + 1,
-                };
+                self.screen = if self.mode == Mode::PowerArena { Screen::Vs { t: 0.0, step: 0 } } else { Screen::Stages { cur: self.sel.2 + 1 } };
+
                 return;
             }
         }
@@ -1907,6 +1914,8 @@ impl App {
             } else { 0 };
             let lvl = if let Some(story_lvl) = self.story_level() {
                 story_lvl
+            } else if let Some(tower_lvl) = self.tower_level() {
+                tower_lvl
             } else if self.mode == Mode::Survival {
                 self.survival
                     .map(|s| s.ai_level(self.ai_level))
@@ -2034,11 +2043,9 @@ impl App {
                 .as_ref()
                 .map(|r| r.rules)
                 .unwrap_or_else(|| self.settings.rules());
-            sess.apply_rules(self.fight_rules);
+            sess.apply_rules(self.fight_rules); if self.mode == Mode::PowerArena { sess.m.enable_power_arena(); }
             self.story_tune(&mut sess);
-            if boss_phase >= 2 {
-                sess.m.awaken_boss_phase(boss_phase as u8);
-            }
+            self.tower_tune(&mut sess);
             if seq {
                 if let Some(t) = &self.team {
                     for side in 0..2 {

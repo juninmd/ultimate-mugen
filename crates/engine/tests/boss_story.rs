@@ -48,6 +48,8 @@ fn oboro_transforms_into_next_form_when_defeated_at_least_once() {
         }
     }
     assert_eq!(m.round_state, 2);
+    assert_eq!(m.fighters[1].form, 0);
+    for _ in 0..60 { m.tick(&[0, 0]); }
     let boss = &m.fighters[1];
     assert_eq!(boss.form, 1);
     assert_eq!(boss.active_form_name(), "Véu Desperto");
@@ -76,6 +78,8 @@ fn awaken_boss_phase_starts_oboro_in_primordial_form_with_boosted_stats_and_ai()
             break;
         }
     }
+    assert_eq!(m.fighters[1].form, 0);
+    m.awaken_boss_phase(3);
     let mut ai_p1 = Ai::new(6, 11);
     let mut ai_boss = Ai::new(8, 99);
     for _ in 0..360 {

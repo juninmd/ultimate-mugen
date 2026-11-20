@@ -1,6 +1,31 @@
 use super::*;
 use crate::match_stats::{clock_text, snapshot};
 
+pub(crate) fn performance_rank(life_pct: i32, best_combo: i32, ticks: i64) -> (&'static str, Color) {
+    let mut pts = 0i32;
+    if life_pct >= 75 {
+        pts += 3;
+    } else if life_pct >= 45 {
+        pts += 2;
+    } else if life_pct >= 20 {
+        pts += 1;
+    }
+    if best_combo >= 6 {
+        pts += 2;
+    } else if best_combo >= 3 {
+        pts += 1;
+    }
+    if ticks <= 45 * 60 {
+        pts += 1;
+    }
+    match pts {
+        5.. => ("S", hex("#ffcc33")),
+        3..=4 => ("A", hex("#4ce0ff")),
+        2 => ("B", hex("#6be89b")),
+        _ => ("C", hex("#c9c2e2")),
+    }
+}
+
 impl App {
     pub(super) fn draw_results_stats(&self) {
         let Some(sess) = self.session.as_ref() else {
@@ -19,6 +44,23 @@ impl App {
                 0
             }
         };
+        let winner_side = if life_pct(0) >= life_pct(1) { 0 } else { 1 };
+        let (rank, rank_color) =
+            performance_rank(life_pct(winner_side), stats.best_combo[winner_side], stats.ticks);
+        let (rx, ry, rw, rh) = (1034.0, 212.0, 72.0, 72.0);
+        self.ui.rect(rx, ry, rw, rh, Color::new(0.05, 0.03, 0.12, 0.85));
+        self.ui.rect(rx, ry, rw, 3.0, rank_color);
+        self.ui.text(
+            crate::i18n::tr3("NOTA", "RANK", "RANGO"),
+            rx + rw * 0.5,
+            ry + 18.0,
+            11.0,
+            hex("#a49cc0"),
+            Align::Center,
+            true,
+        );
+        self.ui
+            .text_bold(rank, rx + rw * 0.5, ry + 58.0, 42.0, rank_color, BLACK, Align::Center);
         let chips = [
             (crate::i18n::t("results.time"), clock_text(stats.ticks)),
             (
@@ -112,5 +154,18 @@ impl App {
             );
         }
         (cur, clicked)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn performance_rank_scales_from_c_to_s() {
+        assert_eq!(performance_rank(90, 8, 25 * 60).0, "S");
+        assert_eq!(performance_rank(60, 4, 50 * 60).0, "A");
+        assert_eq!(performance_rank(25, 3, 60 * 60).0, "B");
+        assert_eq!(performance_rank(10, 1, 80 * 60).0, "C");
     }
 }

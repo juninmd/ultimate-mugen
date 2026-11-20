@@ -98,3 +98,18 @@ fn armor_breaks_after_its_hit_budget_is_spent() {
     ticks(&mut m, 8);
     assert_ne!(m.fighters[0].state_no, 1000, "second hit breaks the armor, state {}", m.fighters[0].state_no);
 }
+
+#[test]
+fn awakened_armor_still_takes_additional_unguarded_damage() {
+    let mut base = armored_duel(1);
+    let mut awakened = base.clone();
+    awakened.fighters[0].form = 2;
+    for m in [&mut base, &mut awakened] {
+        enter(m, 1, 200);
+        ticks(m, 6);
+        assert_eq!(m.fighters[0].state_no, 1000);
+    }
+    let base_damage = base.fighters[0].received_damage;
+    assert!(base_damage > 0.0);
+    assert_eq!(awakened.fighters[0].received_damage, (base_damage * 1.3).round());
+}

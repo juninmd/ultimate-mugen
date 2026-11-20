@@ -366,7 +366,6 @@ impl App {
                 cur = i;
             }
             if self.clicked_rect(50.0, y, 1180.0, 40.0) {
-                cur = i;
                 self.play_stored(i);
                 return;
             }

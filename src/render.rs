@@ -352,7 +352,7 @@ impl MatchRenderer {
         g.oy = py + (oy0 - py) * zoom;
         let s = g.view_scale;
         self.fx.begin_frame(m, gain); crate::stagelook::select(stage.kind);
-        self.draw_stage(g, m, stage, false, shx, shy); crate::stageprops::draw(g, stage.kind, false, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0); crate::story::objects_art::draw(g, m, false, shx, shy);
+        if m.power_arena { crate::power_arena::draw(g, m, shx, shy); } else { self.draw_stage(g, m, stage, false, shx, shy); crate::stageprops::draw(g, stage.kind, false, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0); crate::story::objects_art::draw(g, m, false, shx, shy); }
         if m.pause.as_ref().is_some_and(|p| p.darken) {
             draw_rectangle(
                 g.ox,
@@ -589,7 +589,7 @@ impl MatchRenderer {
                 }
             }
         }
-        crate::story::objects_art::draw(g, m, true, shx, shy); self.draw_stage(g, m, stage, true, shx, shy); crate::stageprops::draw(g, stage.kind, true, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0);
+        if !m.power_arena { crate::story::objects_art::draw(g, m, true, shx, shy); self.draw_stage(g, m, stage, true, shx, shy); crate::stageprops::draw(g, stage.kind, true, m.camera.x, (m.view_w, m.view_h), m.game_time as f32 / 60.0); }
         self.draw_markers(g, m, shx, shy);
         if gain > 0.0 {
             vfx.draw_world(g, m, shx, shy, ui);

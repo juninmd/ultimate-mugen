@@ -34,7 +34,12 @@ impl App {
         let n = MENU.len();
         let step = 456.0 / n as f32;
         for (i, (key, _)) in MENU.iter().enumerate() {
-            let label = self.menu_text(key);
+            let story_off = i == 0 && !self.story_enabled();
+            let label = if story_off {
+                format!("{} [{}]", self.menu_text(key), crate::i18n::tr3("OFF", "OFF", "OFF"))
+            } else {
+                self.menu_text(key)
+            };
             let k_in = ((self.screen_t - 0.05 - i as f32 * 0.04) / 0.28).clamp(0.0, 1.0);
             let k_in = 1.0 - (1.0 - k_in).powi(3);
             let (x, y, w, h) = (
@@ -94,8 +99,21 @@ impl App {
         if let Some(i) = chosen {
             let mode = [Mode::Story, Mode::Arcade, Mode::Survival, Mode::Cpu, Mode::Training];
             match i {
-                0..=4 => {
-                    self.set_mode(mode[i]);
+                0 if !self.story_enabled() => {
+                    self.audio.sfx("cancel");
+                    self.msg = crate::i18n::tr3(
+                        "Modo História desativado (ative em Configurações ou story/campaign.toml)",
+                        "Story mode disabled (enable in Settings or story/campaign.toml)",
+                        "Modo Historia desactivado (actívalo en Ajustes o story/campaign.toml)",
+                    )
+                    .into();
+                }
+                0..=4 | 10 | 11 => {
+                    self.set_mode(match i {
+                        10 => Mode::PowerArena,
+                        11 => Mode::Tower,
+                        _ => mode[i],
+                    });
                     self.go(Screen::Select {
                         cur: [self.sel.0, self.sel.1],
                         picking: 0,

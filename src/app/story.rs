@@ -72,13 +72,17 @@ impl App {
         self.screen = Screen::Story { t: 0.0 };
     }
 
+    pub(crate) fn story_enabled(&self) -> bool {
+        self.settings.story_enabled && crate::story::active_script().campaign.enabled
+    }
+
     pub(crate) fn story_prepare_fight(&mut self) {
         let Some(run) = self.story.clone() else { return };
         self.story_prefetch_stage();
         let foes = self.story_foes(&run);
         let Some(&first) = foes.first() else { return };
         let me = self.sel.0;
-        let arena = run.stage_def().arena;
+        let arena = run.stage_arena();
         crate::stages::want_story_strip(arena);
         self.sel.1 = first;
         self.sel.2 = self.reg.stages.iter().position(|s| s.id.contains(arena)).unwrap_or(self.sel.2);
@@ -158,14 +162,16 @@ impl App {
     pub(crate) fn story_tune(&self, sess: &mut Session) {
         let Some(run) = self.story.as_ref().filter(|_| self.story_is_playing()) else { return };
         sess.m.rounds_to_win = 1;
-        let accent = run.stage_def().accent;
+        let meta = &run.script().campaign;
+        let accent = run.stage_accent();
+        let (lane_far, lane_near) = run.stage_lanes();
         let def = run.stage_def();
-        sess.m.lanes = ume_engine::lane::LaneRules { active: true, far: def.lane_far, near: def.lane_near, show_foe_hud: run.is_boss_fight(), target_x: 0.0, bound_span: 0.0, gate: false };
+        sess.m.lanes = ume_engine::lane::LaneRules { active: true, far: lane_far, near: lane_near, show_foe_hud: run.is_boss_fight(), target_x: 0.0, bound_span: 0.0, gate: false };
         sess.team = None;
         story_scroll(sess, def, run.fight_index());
         crate::story::objects::spawn_stage(&mut sess.m, def, run.fight_index());
         for (slot, fighter) in sess.m.fighters.iter_mut().filter(|f| !f.is_helper && f.side == 1).enumerate() {
-            fighter.lane = FOE_START_LANES[slot % FOE_START_LANES.len()].clamp(def.lane_far, def.lane_near);
+            fighter.lane = FOE_START_LANES[slot % FOE_START_LANES.len()].clamp(lane_far, lane_near);
         }
         let hero_life_max = sess
             .m
@@ -180,14 +186,14 @@ impl App {
                 fighter.life_max = (hero_life_max * ratio).max(1.0);
                 fighter.life = fighter.life_max;
             }
-            let label = text::wave_label(run.wave, run.stage_def().waves.len(), false);
+            let label = text::wave_label(run.wave, run.stage_wave_count(), false);
             sess.vfx.banner(&text::stage_label(run.stage), &format!("{label} · {}", text::go()), accent);
             return;
         }
         for fighter in sess.m.fighters.iter_mut().filter(|f| !f.is_helper && f.side == 1) {
-            fighter.life_max *= BOSS_LIFE_FACTOR;
+            fighter.life_max *= meta.boss_life_factor;
             fighter.life = fighter.life_max;
-            fighter.attack_mul *= BOSS_ATTACK_FACTOR;
+            fighter.attack_mul *= meta.boss_attack_factor;
         }
         sess.vfx.banner(text::boss_banner(), &text::stage_title(run.stage).to_string(), accent);
     }

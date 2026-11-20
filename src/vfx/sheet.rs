@@ -9,6 +9,13 @@ pub(super) use kind::SheetKind;
 
 const MAX_SPRITES: usize = 20;
 
+#[derive(Clone, Copy, PartialEq)]
+pub(super) enum SheetLayer {
+    BehindFighters,
+    Foreground,
+    Additive,
+}
+
 struct SheetSprite {
     kind: SheetKind,
     x: f32,
@@ -109,10 +116,17 @@ impl SheetFx {
             .as_ref()
     }
 
-    pub(super) fn draw(&self, tp: &dyn Fn(f32, f32) -> Vec2, scale: f32, gain: f32, additive: bool) {
+    pub(super) fn draw(&self, tp: &dyn Fn(f32, f32) -> Vec2, scale: f32, gain: f32, layer: SheetLayer) {
         for s in &self.sprites {
             let spec = s.kind.spec();
-            if spec.additive != additive {
+            let sprite_layer = if s.kind == SheetKind::FirePillar {
+                SheetLayer::BehindFighters
+            } else if spec.additive {
+                SheetLayer::Additive
+            } else {
+                SheetLayer::Foreground
+            };
+            if layer != sprite_layer {
                 continue;
             }
             let Some(tex) = self.texture(s.kind) else {
@@ -124,7 +138,7 @@ impl SheetFx {
             let k = s.size * scale / spec.cell.0;
             let at = tp(s.x, s.y);
             let pivot_x = if s.flip { spec.cell.0 - spec.pivot.0 } else { spec.pivot.0 };
-            let alpha = if additive { (1.0 - progress).sqrt() } else { 1.0 } * gain.clamp(0.0, 1.0);
+            let alpha = if spec.additive { (1.0 - progress).sqrt() } else { 1.0 } * gain.clamp(0.0, 1.0);
             draw_texture_ex(
                 tex,
                 at.x - pivot_x * k,

@@ -35,80 +35,40 @@
  "art": {
   "type": "rig",
   "style": {
-   "scale": 0.98,
-   "build": 1,
-   "top": "jacket",
-   "sleeves": "short",
+   "build": 0.93,
+   "top": "suit",
    "pants": "tight",
-   "belt": "top2",
-   "beltTails": 1,
-   "gloves": "wrap",
+   "gloves": "long",
    "boots": "tabi",
    "hair": {
-    "type": "short",
-    "spikes": 8,
-    "min": 0.35,
-    "max": 0.75,
-    "sweep": 55,
-    "bangs": 3,
-    "bangLen": 0.5,
-    "seed": 41,
-    "strands": 6,
-    "locks": 3,
-    "shine": true
+    "type": "helmet"
    },
-   "scarf": {
-    "color": "cloth",
-    "length": 54
-   },
-   "eyes": "normal",
+   "visor": true,
    "colors": {
     "skin": "#e8bc98",
     "hair": "#1e1a1e",
     "eye": "#2a8a80",
-    "top": "#1a8f8a",
-    "top2": "#1a1c22",
+    "top": "#292538",
+    "top2": "#453563",
     "trim": "#1a1c22",
-    "pants": "#1a1c22",
+    "pants": "#222234",
     "cloth": "#d0283a",
-    "wrap": "#2a2e36",
-    "boot": "#1a1c22",
-    "accent": "#e8eef0",
+    "wrap": "#7146a1",
+    "boot": "#171924",
+    "accent": "#a880ce",
     "energy": "#5ff0d0",
     "aura": "#5ff0d0",
-    "legs": "#1a1c22"
+    "legs": "#1a1c22",
+    "visor": "#bd8bff",
+    "glove": "#332646",
+    "metal": "#342841"
    },
-   "muscle": 0.7,
-   "veins": true,
-   "arms": 0.96,
-   "waist": 0.94,
-   "folds": 1.1,
+   "eyes": "fierce",
+   "folds": 1.15,
    "stitch": true,
-   "weave": "hatch",
    "knuckles": true,
-   "goggles": {
-    "color": "#2a2e36",
-    "lens": "#5ff0d0"
-   },
-   "pouches": 2,
-   "faceShade": 1,
-   "brow": {
-    "thick": 1.5
-   },
-   "emblem": {
-    "type": "wave",
-    "color": "#e8eef0",
-    "where": "back",
-    "size": 1.4
-   },
-   "earring": "#e8eef0",
-   "footwear": {
-    "sole": true,
-    "split": true
-   },
-   "bandages": [
-    "thigh"
-   ]
+   "belt": "accent",
+   "beltTails": 0
   },
   "poses": {
    "idle0": {
@@ -3681,7 +3641,7 @@
       36,
       -66
      ],
-     "damage": 44,
+     "damage": 46,
      "hits": 3,
      "removeTime": 60,
      "level": "heavy",
@@ -3701,7 +3661,7 @@
       36,
       -56
      ],
-     "damage": 44,
+     "damage": 46,
      "hits": 3,
      "removeTime": 60,
      "level": "heavy",
@@ -3721,7 +3681,7 @@
       36,
       -46
      ],
-     "damage": 44,
+     "damage": 46,
      "hits": 3,
      "removeTime": 60,
      "level": "heavy",
@@ -4189,6 +4149,5 @@
   }
  },
  "boss": false,
- "npc": true,
- "spriteSet": "jin"
+ "npc": true
 }

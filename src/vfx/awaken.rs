@@ -58,12 +58,16 @@ impl Vfx {
             col = Self::form_color(f);
             let (x, y, _) = Self::chest_of(f);
             let feet = f.pos.y + f.lane;
+            let wave_scale = 1.0 + 0.18 * f.form.saturating_sub(1).min(3) as f32;
             for (i, r) in [70.0f32, 140.0, 210.0].iter().enumerate() {
-                self.ring(x, y, *r, 0.55 + i as f32 * 0.2, 2.8 - i as f32 * 0.7, col);
+                self.ring(x, y, *r * wave_scale, 0.55 + i as f32 * 0.2, 2.8 - i as f32 * 0.7, col);
             }
-            self.ring(f.pos.x, feet - 1.0, 190.0, 0.9, 2.4, [1.0, 1.0, 1.0]);
-            self.glow(x, y, 80.0, 0.8, col);
-            self.glow(x, y, 30.0, 0.5, [1.0, 1.0, 1.0]);
+            self.ring(f.pos.x, feet - 1.0, 190.0 * wave_scale, 0.9, 2.4, [1.0, 1.0, 1.0]);
+            if f.form >= 2 {
+                self.ring(f.pos.x, feet - 1.0, 260.0 * wave_scale, 1.15, 3.6, col);
+            }
+            self.glow(x, y, 60.0, 0.65, col);
+            self.glow(x, y, 22.0, 0.35, [1.0, 1.0, 1.0]);
             self.light(x, y, 240.0, 1.1, col);
             self.pillar(f.pos.x, feet, col, quality::count(34));
             self.sheets.transform(f.pos.x, feet);
@@ -108,7 +112,7 @@ impl Vfx {
                 self.banner(title, &detail, col);
             }
         }
-        self.flash_add(0.4);
+        self.flash_add(0.28);
         self.chroma = 0.7;
         self.radial = 0.6;
         self.trauma = 0.6;

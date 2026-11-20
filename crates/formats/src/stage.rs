@@ -230,14 +230,16 @@ pub fn load_stage(vfs: &Vfs, def_path: &str) -> Result<MugenStage, String> {
 
     let anims = parse_air(&t);
     let layers = layers::parse_layers(&secs, &anims);
+    let (left, right) = (g("camera", "boundleft", -150.0), g("camera", "boundright", 150.0));
+    let (high, low) = (g("camera", "boundhigh", -25.0), g("camera", "boundlow", 0.0));
     Ok(MugenStage {
         name,
         local_w,
         local_h,
-        bound_left: g("camera", "boundleft", -150.0),
-        bound_right: g("camera", "boundright", 150.0),
-        bound_high: g("camera", "boundhigh", -25.0),
-        bound_low: g("camera", "boundlow", 0.0),
+        bound_left: left.min(right),
+        bound_right: left.max(right),
+        bound_high: high.min(low),
+        bound_low: high.max(low),
         p1x: g("playerinfo", "p1startx", -70.0),
         p2x: g("playerinfo", "p2startx", 70.0),
         zoffset,

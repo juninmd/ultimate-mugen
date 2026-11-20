@@ -1012,11 +1012,10 @@ impl Hud {
             if let Some(f) = m.roots().find(|f| human.contains(&f.id)) {
                 if f.alive
                     && f.next_form_cost().is_some_and(|c| f.power >= c)
-                    && f.def.anims.contains_key(&196)
                 {
                     let a = 0.55 + 0.45 * (gt * 5.0).sin().abs();
                     text(
-                        &format!("T · {} {}/{}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), f.form + 2, f.form_count() + 1),
+                        &format!("T · {} {}/{}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), usize::from(f.form) + 1, f.form_count()),
                         BASE_W / 2.0,
                         BASE_H - 8.0,
                         6.0,

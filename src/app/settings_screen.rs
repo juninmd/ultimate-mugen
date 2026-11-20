@@ -32,6 +32,7 @@ enum Act {
     TeamLifeShare,
     GameSpeed,
     SurvivalRecovery,
+    StoryEnabled,
     Language,
     CheckUpdate,
     AutoUpdate,
@@ -309,6 +310,16 @@ impl App {
                         "How much of the bar comes back after each win",
                     ),
                 ),
+                row(
+                    Act::StoryEnabled,
+                    tr3("Modo História (TOML)", "Story mode (TOML)", "Modo Historia (TOML)"),
+                    on_off(s.story_enabled && crate::story::active_script().campaign.enabled),
+                    tr3(
+                        "Ative/desative ou personalize em story/campaign.toml",
+                        "Enable/disable or customize via story/campaign.toml",
+                        "Activa/desactiva o personaliza en story/campaign.toml",
+                    ),
+                ),
             ],
             4 => vec![row(
                 Act::Language,
@@ -394,6 +405,7 @@ impl App {
             Act::SurvivalRecovery if go => {
                 s.survival_recovery = cycle(s.survival_recovery, step, SURVIVAL_RECOVERY.len())
             }
+            Act::StoryEnabled if go => s.story_enabled = !s.story_enabled,
             Act::Language if go => s.lang = s.lang.next(step),
             Act::AutoUpdate if go => s.auto_update = !s.auto_update,
             Act::CheckUpdate if ok => {

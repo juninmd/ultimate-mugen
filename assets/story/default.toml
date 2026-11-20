@@ -1,0 +1,208 @@
+[campaign]
+id = "default"
+enabled = true
+credits = 3
+wave_recovery = 0.2
+stage_recovery = 0.6
+boss_life_factor = 1.5
+boss_attack_factor = 1.1
+
+[campaign.title]
+en = "STREETS OF IRON"
+pt = "RUAS DE FERRO"
+es = "CALLES DE HIERRO"
+
+[[stages]]
+arena = "brazil"
+accent = [1.0, 0.72, 0.2]
+lane_far = -26.0
+lane_near = 8.0
+boss = "bruno"
+alt_boss = "daichi"
+waves = [
+  ["npc_brute", "npc_brute"],
+  ["npc_razor", "npc_brute"],
+  ["npc_razor", "npc_razor", "npc_brute"],
+  ["npc_razor", "npc_brute", "npc_spitfire"],
+]
+
+[stages.title]
+en = "BACK ALLEYS"
+pt = "BECOS DA CIDADE"
+es = "CALLEJONES"
+
+[stages.beats]
+en = [
+  "The gang runs the streets. Fight your way through.",
+  "They took your block last night. Take it back.",
+  "Every alley has a lookout. Every lookout talks.",
+  "Wolf: He smells of fear. Stay close.",
+]
+pt = [
+  "A gangue domina as ruas. Abra caminho a socos.",
+  "Ontem à noite levaram o seu bairro. Pegue de volta.",
+  "Cada beco tem um vigia. E todo vigia fala.",
+  "Lobo: Ele cheira a medo. Fique perto de mim.",
+]
+es = [
+  "La banda domina las calles. Abre camino a golpes.",
+  "Anoche se llevaron tu barrio. Recupéralo.",
+  "Cada callejón tiene un vigía. Y todo vigía habla.",
+  "Lobo: Huele a miedo. Quédate cerca.",
+]
+
+[[stages]]
+arena = "neon"
+accent = [0.4, 0.9, 1.0]
+lane_far = -22.0
+lane_near = 8.0
+boss = "marlow"
+alt_boss = "kaname"
+waves = [
+  ["npc_razor", "npc_spitfire"],
+  ["npc_brute", "npc_spitfire", "npc_razor"],
+  ["npc_phantom", "npc_razor"],
+  ["npc_brute", "npc_brute", "npc_spitfire"],
+]
+
+[stages.title]
+en = "SUBWAY"
+pt = "METRÔ"
+es = "METRO"
+
+[stages.beats]
+en = [
+  "Down on the tracks, nobody hears you shout.",
+  "The metro is their last safe route.",
+  "Don't look back. Something is following.",
+  "Wolf: The trains don't stop. Neither do we.",
+]
+pt = [
+  "Nos trilhos, ninguém ouve você gritar.",
+  "O metrô é a última rota segura deles.",
+  "Não olhe para trás. Alguém está seguindo.",
+  "Lobo: Os trens não param. Nós também não.",
+]
+es = [
+  "En las vías, nadie oye tus gritos.",
+  "El metro es su última ruta segura.",
+  "No mires atrás. Alguien te sigue.",
+  "Lobo: Los trenes no paran. Nosotros tampoco.",
+]
+
+[[stages]]
+arena = "bamboo"
+accent = [0.45, 1.0, 0.6]
+lane_far = -20.0
+lane_near = 8.0
+boss = "lian"
+alt_boss = "shion"
+waves = [
+  ["npc_phantom", "npc_phantom"],
+  ["npc_spitfire", "npc_brute", "npc_phantom"],
+  ["npc_colossus"],
+  ["npc_razor", "npc_phantom", "npc_spitfire"],
+]
+
+[stages.title]
+en = "BAMBOO GROVE"
+pt = "BAMBUZAL"
+es = "BOSQUE DE BAMBÚ"
+
+[stages.beats]
+en = [
+  "Shadows move between the bamboo.",
+  "Someone here knows your name.",
+  "The wolf growls. It has seen this before.",
+  "Wolf: That shadow carries your scent.",
+]
+pt = [
+  "Sombras se movem entre o bambu.",
+  "Alguém aqui sabe o seu nome.",
+  "O lobo rosna. Ele já viu isso antes.",
+  "Lobo: Essa sombra tem o seu cheiro.",
+]
+es = [
+  "Las sombras se mueven entre el bambú.",
+  "Alguien aquí sabe tu nombre.",
+  "El lobo gruñe. Ya lo ha visto antes.",
+  "Lobo: Esa sombra tiene tu olor.",
+]
+
+[[stages]]
+arena = "volcano"
+accent = [1.0, 0.4, 0.25]
+lane_far = -20.0
+lane_near = 8.0
+boss = "garan"
+alt_boss = "haruki"
+waves = [
+  ["npc_colossus", "npc_spitfire"],
+  ["npc_phantom", "npc_razor", "npc_brute"],
+  ["npc_colossus", "npc_phantom"],
+  ["npc_brute", "npc_colossus", "npc_razor"],
+]
+
+[stages.title]
+en = "INDUSTRIAL AREA"
+pt = "ÁREA INDUSTRIAL"
+es = "ZONA INDUSTRIAL"
+
+[stages.beats]
+en = [
+  "Furnaces, steel and giants made of it.",
+  "Their boss built this place on debt.",
+  "Every hammer blow is a countdown.",
+  "Wolf: Watch the steel. It feels no pain.",
+]
+pt = [
+  "Fornalhas, aço e gigantes de aço.",
+  "O chefe construiu este lugar com dívidas.",
+  "Cada martelada é uma contagem regressiva.",
+  "Lobo: Cuidado com o aço. Ele não sente dor.",
+]
+es = [
+  "Hornos, acero y gigantes de acero.",
+  "Su jefe levantó este lugar con deudas.",
+  "Cada martillazo es una cuenta regresiva.",
+  "Lobo: Cuidado con el acero. No siente dolor.",
+]
+
+[[stages]]
+arena = "dojo"
+accent = [0.85, 0.4, 1.0]
+lane_far = -16.0
+lane_near = 8.0
+boss = "valdric"
+alt_boss = "kaito"
+waves = [
+  ["npc_brute", "npc_razor", "npc_spitfire"],
+  ["npc_colossus", "npc_phantom", "npc_razor"],
+  ["npc_colossus", "npc_brute", "npc_spitfire", "npc_phantom"],
+  ["npc_phantom", "npc_phantom", "npc_razor", "npc_spitfire"],
+]
+
+[stages.title]
+en = "KINGPIN ROOFTOP"
+pt = "COBERTURA DO CHEFÃO"
+es = "AZOTEA DEL JEFE"
+
+[stages.beats]
+en = [
+  "The top floor. The kingpin waits.",
+  "This is where the city's rule is decided.",
+  "Win, and the streets are yours. Lose, and they forget you.",
+  "Wolf: He won't fall alone. Let's go.",
+]
+pt = [
+  "O último andar. O chefão espera.",
+  "É aqui que se decide quem manda na cidade.",
+  "Vença, e as ruas são suas. Perca, e esquecem você.",
+  "Lobo: Ele não vai cair sozinho. Vamos.",
+]
+es = [
+  "La última planta. El jefe espera.",
+  "Aquí se decide quién manda en la ciudad.",
+  "Gana, y las calles son tuyas. Pierde, y te olvidarán.",
+  "Lobo: No caerá solo. Vamos.",
+]

@@ -1,3 +1,4 @@
+use super::script::{self, ScriptStage, StoryScript};
 use super::stages::{StageDef, STAGES};
 use super::tally::StageTally;
 
@@ -40,12 +41,13 @@ pub struct StoryRun {
 
 impl Default for StoryRun {
     fn default() -> Self {
+        let credits = script::active().campaign.credits;
         StoryRun {
             stage: 0,
             wave: 0,
             score: 0,
             life: 1.0,
-            credits: STARTING_CREDITS,
+            credits,
             phase: Phase::Intro,
             bonus: false,
             epilogue: 0,
@@ -56,21 +58,73 @@ impl Default for StoryRun {
 }
 
 impl StoryRun {
+    pub fn script(&self) -> &'static StoryScript {
+        script::active()
+    }
+
+    pub fn script_stage(&self) -> Option<&'static ScriptStage> {
+        self.script().stage(self.stage)
+    }
+
+    pub fn stage_count(&self) -> usize {
+        self.script().stages.len().max(1)
+    }
+
     pub fn stage_def(&self) -> &'static StageDef {
         &STAGES[self.stage.min(STAGES.len() - 1)]
     }
 
+    pub fn stage_wave_count(&self) -> usize {
+        self.script_stage()
+            .map(|s| s.waves.len())
+            .unwrap_or_else(|| self.stage_def().waves.len())
+    }
+
+    pub fn stage_arena(&self) -> &'static str {
+        self.script_stage()
+            .map(|s| s.arena.as_str())
+            .unwrap_or(self.stage_def().arena)
+    }
+
+    pub fn stage_accent(&self) -> [f32; 3] {
+        self.script_stage()
+            .map(|s| s.accent)
+            .unwrap_or(self.stage_def().accent)
+    }
+
+    pub fn stage_lanes(&self) -> (f32, f32) {
+        self.script_stage()
+            .map(|s| (s.lane_far, s.lane_near))
+            .unwrap_or((self.stage_def().lane_far, self.stage_def().lane_near))
+    }
+
+    pub fn stage_boss_id(&self, player_id: &str) -> &'static str {
+        if let Some(st) = self.script_stage() {
+            if st.boss == player_id {
+                st.alt_boss.as_str()
+            } else {
+                st.boss.as_str()
+            }
+        } else {
+            let def = self.stage_def();
+            if def.boss == player_id { def.alt_boss } else { def.boss }
+        }
+    }
+
     pub fn is_boss_fight(&self) -> bool {
-        self.wave >= self.stage_def().waves.len()
+        self.wave >= self.stage_wave_count()
     }
 
     pub fn foes(&self, player_id: &str) -> Vec<&'static str> {
-        let def = self.stage_def();
         if self.is_boss_fight() {
-            let boss = if def.boss == player_id { def.alt_boss } else { def.boss };
-            return vec![boss];
+            return vec![self.stage_boss_id(player_id)];
         }
-        def.waves[self.wave].to_vec()
+        if let Some(st) = self.script_stage() {
+            if let Some(wave) = st.waves.get(self.wave) {
+                return wave.iter().map(|s| s.as_str()).collect();
+            }
+        }
+        self.stage_def().waves[self.wave].to_vec()
     }
 
     pub fn ai_level(&self, base: i32) -> i32 {
@@ -79,17 +133,18 @@ impl StoryRun {
     }
 
     pub fn fight_index(&self) -> usize {
-        self.wave.min(self.stage_def().waves.len())
+        self.wave.min(self.stage_wave_count())
     }
 
     pub fn won_fight(&mut self, fight_score: i64, remaining_life: f32) -> Next {
+        let meta = &self.script().campaign;
         self.life = remaining_life.clamp(MIN_CARRIED_LIFE, 1.0);
         let bonus = WAVE_BONUS * (self.stage as i64 + 1);
         let boss_fight = self.is_boss_fight();
         self.score += fight_score.max(0) + if boss_fight { bonus * BOSS_BONUS_FACTOR } else { bonus };
         if !boss_fight {
             self.wave += 1;
-            self.recover(WAVE_RECOVERY);
+            self.recover(meta.wave_recovery);
             return Next::Wave;
         }
         let tally = StageTally::new(self.stage, bonus * BOSS_BONUS_FACTOR, remaining_life);
@@ -98,9 +153,10 @@ impl StoryRun {
         self.wave = 0;
         self.bonus = false;
         self.stage += 1;
-        self.recover(STAGE_RECOVERY);
-        if self.stage >= STAGES.len() {
-            self.stage = STAGES.len() - 1;
+        self.recover(meta.stage_recovery);
+        let total = self.stage_count();
+        if self.stage >= total {
+            self.stage = total - 1;
             self.phase = Phase::Victory;
             return Next::Finished;
         }

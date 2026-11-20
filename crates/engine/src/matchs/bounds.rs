@@ -2,7 +2,7 @@ use super::Match;
 
 impl Match {
     pub(super) fn bound_fighters(&mut self) {
-        if self.is_lane_scrolling() { return; }
+        if self.power_arena || self.is_lane_scrolling() { return; }
         let left = self.camera.x - self.view_w / 2.0; let right = self.camera.x + self.view_w / 2.0;
         let (bl, br, vw) = (self.stage.bound_left, self.stage.bound_right, self.view_w);
         let mut bounced = None;

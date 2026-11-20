@@ -81,7 +81,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
             let cx = m.camera.x;
             let f = &mut m.fighters[i];
             if let Some(x) = x { f.pos.x = cx + x * l; }
-            if let Some(y) = y { f.pos.y = y * l; }
+            if let Some(y) = y { f.pos.y = y * l + if m.power_arena { f.ground_level } else { 0.0 }; }
         }
         "posadd" => {
             let x = opt(m, "x").map(|v| v as f32);

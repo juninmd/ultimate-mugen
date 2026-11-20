@@ -167,10 +167,10 @@ pub(super) fn info(name: &str) -> StageInfo {
     StageInfo {
         start_x: 0.0,
         start_y: 0.0,
-        zoom_out: 1.0,
+        zoom_out: 0.5,
         name: name.into(),
-        bound_left: -230.0,
-        bound_right: 230.0,
+        bound_left: -460.0,
+        bound_right: 460.0,
         bound_high: -80.0,
         bound_low: 0.0,
         p1x: -70.0,

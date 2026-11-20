@@ -83,6 +83,7 @@
       "axisY": 400.0,
       "refHeight": 333.0
     },
+    "powerup01": {"axisX": 200.0, "axisY": 400.0, "refHeight": 333.0},
     "16_power1": {
       "axisX": 196.0,
       "axisY": 400.0,
@@ -578,6 +579,7 @@
       "axisY": 363.0,
       "refHeight": 360.0
     },
+    "run01": {"axisX": 200.0, "axisY": 363.0, "refHeight": 360.0},
     "sg_run_run1_fx": {
       "axisX": 200.0,
       "axisY": 363.0,
@@ -593,6 +595,7 @@
       "axisY": 363.0,
       "refHeight": 360.0
     },
+    "run23": {"axisX": 200.0, "axisY": 363.0, "refHeight": 360.0},
     "sg_run_run3_fx": {
       "axisX": 200.0,
       "axisY": 363.0,

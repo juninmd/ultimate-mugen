@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -323,7 +323,7 @@ impl Hud {
                         let pulse = 0.75 + 0.25 * (gt * 6.0).sin();
                         let fnm = f.active_form_name();
                         let label = if fnm.is_empty() {
-                            "DESPERTO".to_string()
+                            crate::i18n::tr3("DESPERTO", "AWAKENED", "DESPIERTO").to_string()
                         } else {
                             fnm.to_uppercase()
                         };
@@ -425,10 +425,7 @@ impl Hud {
                             let name = if f.potential.level == ume_engine::potential::PotentialLevel::Fury { crate::i18n::tr3("MODO FÚRIA", "FURY MODE", "MODO FURIA") } else { crate::i18n::tr3("POTENCIAL", "POTENTIAL", "POTENCIAL") };
                             format!("{} · {}s", name, secs)
                         } else {
-                            match f.next_form_cost() {
-                                Some(c) => format!("{} {}/{} · {} {}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), f.form + 1, nforms + 1, crate::i18n::tr3("PRÓX", "NEXT", "SIG"), c as i32),
-                                None => format!("{} {1}/{1} · MAX", crate::i18n::tr3("FORMA", "FORM", "FORMA"), nforms + 1),
-                            }
+                            form_status::label(f)
                         };
                         let slots = if nforms > 0 { (nforms + 1).min(7) } else { 1 };
                         let al = if side == 0 { Align::Left } else { Align::Right };
@@ -819,7 +816,7 @@ impl Hud {
             let sc = if age < 8.0 { 2.0 - age / 8.0 } else { 1.0 };
             let al = (a.time as f32 / 12.0).min(1.0);
             let size = if a.text.len() > 10 { 20.0 } else { 30.0 } * sc;
-            let ko = a.text == "K.O." || a.text == "DOUBLE K.O.";
+            let ko = matches!(a.text.as_str(), "K.O." | "DOUBLE K.O." | "RING OUT");
             let glow = if ko {
                 Color::new(1.0, 0.12, 0.25, 0.25 * al)
             } else {
@@ -1015,11 +1012,10 @@ impl Hud {
             if let Some(f) = m.roots().find(|f| human.contains(&f.id)) {
                 if f.alive
                     && f.next_form_cost().is_some_and(|c| f.power >= c)
-                    && f.def.anims.contains_key(&196)
                 {
                     let a = 0.55 + 0.45 * (gt * 5.0).sin().abs();
                     text(
-                        &format!("T · {} {}/{}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), f.form + 2, f.form_count() + 1),
+                        &format!("T · {} {}/{}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), usize::from(f.form) + 1, f.form_count()),
                         BASE_W / 2.0,
                         BASE_H - 8.0,
                         6.0,

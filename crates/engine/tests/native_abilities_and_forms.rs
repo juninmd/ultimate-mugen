@@ -228,3 +228,20 @@ fn test_form_palette_parts_alteration() {
     assert_eq!(obj_full.get("hair").unwrap(), "#00ff00");
     assert_eq!(obj_full.get("suit").unwrap(), "#0000ff");
 }
+
+#[test]
+fn awakening_holds_the_final_pose_until_recovery() {
+    let mut native = base_char("awakening_pose", "Awakening Pose");
+    native.form = Some("Awakened".to_owned());
+    let def = Arc::new(compile_native(&native, 1, false));
+    let mut battle = duel(def.clone(), def);
+    battle.fighters[0].power = 3000.0;
+    assert!(battle.try_transform(0));
+    let last_pose = battle.fighters[0].anim().unwrap().frames.len() - 1;
+
+    for _ in 0..36 { battle.tick(&[0, 0]); }
+    assert_eq!(battle.fighters[0].anim_real, 196);
+    assert_eq!(battle.fighters[0].elem, last_pose);
+    for _ in 0..40 { battle.tick(&[0, 0]); }
+    assert!(battle.fighters[0].ctrl);
+}

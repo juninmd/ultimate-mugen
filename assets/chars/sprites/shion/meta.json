@@ -85,6 +85,7 @@
       "axisY": 400.0,
       "refHeight": 343.0
     },
+    "powerup01": {"axisX": 195.5, "axisY": 400.0, "refHeight": 343.0},
     "16_power1": {
       "axisX": 190.5,
       "axisY": 400.0,
@@ -390,6 +391,7 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "jumpTuck": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
     "jumpTop": {
       "axisX": 200.0,
       "axisY": 392.0,

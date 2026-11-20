@@ -9,11 +9,10 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod unleash; mod walk;
+mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
-
 pub struct Match {
     pub fighters: Vec<Fighter>,
     pub explods: Vec<Explod>,
@@ -36,7 +35,7 @@ pub struct Match {
     /// side that landed the first hit of the round (None until someone connects)
     pub first_attack: Option<usize>,
     /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
-    pub team_simul: bool,
+    pub team_simul: bool, pub power_arena: bool,
     pub team_tag: bool,
     pub lanes: crate::lane::LaneRules, pub objects: crate::stage_objects::StageObjects,
     /// MUGEN-style pushbox: an attacking fighter does not get pushed back by the defender; off = symmetric split.
@@ -81,7 +80,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            power_arena: false, team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
@@ -407,6 +406,7 @@ impl Match {
         {
             let f = &mut self.fighters[i];
             f.pos.x += f.vel.x * f.facing * f.passive_speed();
+            if self.power_arena { f.ground_level = power_arena::platform_floor(f.pos.x, f.pos.y, f.vel.y); }
             f.pos.y += f.vel.y;
             let physics = if f.physics == 'N' && f.move_type == 'H' && f.state_type == 'A' { 'A' } else { f.physics };
             match physics {
@@ -500,7 +500,6 @@ impl Match {
         self.zoom_request = None;
         if let Some(bg) = self.bg.as_mut() { bg.reset(); }
         let mut slot = [0usize; 2];
-        let boss_phase = self.fighters.iter().filter_map(|f| (!f.is_helper && f.def.boss && f.form >= 2).then_some(f.form)).max();
         let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()];
         for i in 0..self.fighters.len() {
             if self.fighters[i].is_helper { continue; }
@@ -525,7 +524,6 @@ impl Match {
             self.change_state(i, 5900, d);
             self.fighters[i].ctrl = false;
         }
-        if let Some(phase) = boss_phase { self.awaken_boss_phase(phase); }
         if self.team_tag { self.reset_tag_round(); }
         let decider = self.rounds_to_win > 1 && self.wins[0] == self.rounds_to_win - 1 && self.wins[1] == self.rounds_to_win - 1;
         self.announce = Some(Announce { text: if decider { "FINAL ROUND".into() } else { format!("ROUND {}", self.round_no) }, time: 70, total: 70, kind: AnnounceKind::Round });
@@ -557,9 +555,9 @@ impl Match {
                     if !f.is_helper && (f.state_no == 0 || f.state_no == 5900 || f.state_no == ENGINE_STATE_FACE_OFF || f.state_no == ENGINE_STATE_FACE_OFF_TAUNT) { f.ctrl = true; }
                 }
                 self.leave_intro_states();
-                self.awaken_defeated_boss();
             }
             2 => {
+                if self.round_time >= 50 && self.pause.is_none() && self.wins.iter().any(|&wins| wins > 0) { self.awaken_defeated_boss(); }
                 if !self.training && self.round_ticks > 0 && self.pause.is_none() && self.global_asserts & (gsf::TIMERFREEZE | gsf::ROUNDFREEZE) == 0 { self.timer = (self.timer - 1).max(0); }
                 let (root_buf, root_len) = self.root_index_buf();
                 let roots = &root_buf[..root_len];
@@ -569,7 +567,7 @@ impl Match {
                     return;
                 }
                 let ko_disabled = self.global_asserts & gsf::GLOBALNOKO != 0;
-                let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| self.fighters[i].life <= 0.0 && !ko_disabled && !self.fighters[i].has_assert(asf::NOKO)).collect();
+                let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| (self.power_arena && self.fighters[i].pos.x.abs() > ARENA_HALF_WIDTH) || (self.fighters[i].life <= 0.0 && !ko_disabled && !self.fighters[i].has_assert(asf::NOKO))).collect();
                 let team_life = |m: &Match, s: usize| -> (f32, f32) { roots.iter().filter(|&&i| m.fighters[i].side == s).fold((0.0, 0.0), |a, &i| (a.0 + m.fighters[i].life.max(0.0), a.1 + m.fighters[i].life_max)) };
                 if self.team_simul || self.team_tag {
                     // a fallen teammate stays down; the round ends only when a whole team is KO'd
@@ -587,7 +585,7 @@ impl Match {
                         self.winner_side = if sides_dead[0] && sides_dead[1] { -2 } else if sides_dead[0] { 1 } else { 0 };
                         let slow = self.global_asserts & gsf::NOKOSLOW == 0;
                         self.slow_mo = if slow { 75 } else { 0 };
-                        self.announce = Some(Announce { text: if sides_dead[0] && sides_dead[1] { "DOUBLE K.O.".into() } else { "K.O.".into() }, time: 110, total: 110, kind: AnnounceKind::Ko });
+                        self.announce = Some(Announce { text: if sides_dead[0] && sides_dead[1] { "DOUBLE K.O.".into() } else if self.power_arena && self.fighters[dead[0]].pos.x.abs() > ARENA_HALF_WIDTH { "RING OUT".into() } else { "K.O.".into() }, time: 110, total: 110, kind: AnnounceKind::Ko });
                         self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side, silent: self.global_asserts & gsf::NOKOSND != 0, slow }); self.finish_arm();
                     } else {
                         let (l0, l1) = (team_life(self, 0), team_life(self, 1));
@@ -743,7 +741,7 @@ impl Match {
         self.push_and_bound();
         self.rebind();
         self.orphan_custom_states();
-        self.detect_hits(); self.stage_objects_step();
+        self.detect_hits(); self.stage_objects_step(); self.power_arena_ring_outs();
         self.bound_fighters();
         crate::ikemen::life::maintain(self);
         for f in self.fighters.iter_mut() {
@@ -872,7 +870,6 @@ impl Match {
         }
         self.bound_fighters();
     }
-
     pub fn update_camera(&mut self) {
         let (mut minx, mut maxx, mut highest, mut any, mut any_y) = (f32::MAX, f32::MIN, f32::MAX, false, false);
         let (mut lo, mut hi, mut live) = (f32::MAX, f32::MIN, false);
@@ -889,6 +886,7 @@ impl Match {
             }
         }
         if !any { return; }
+        if self.power_arena { self.track_power_arena(minx, maxx); return; }
         if !any_y { highest = 0.0; }
         let natural = if self.zoom_max > 1.0 {
             let need = if !live { self.zoom_min } else { (hi - lo + 150.0) / BASE_W };
@@ -1199,7 +1197,7 @@ impl Match {
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
             let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale_for(prev_hc, hd.attr_kind.iter().any(|k| k.starts_with('H'))) } else { 1.0 };
-            let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].effective_defence().max(0.01)).round();
+            let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].exposed_defence().max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             if self.fighters[d].has_assert(asf::NOHITDAMAGE) { dmg = 0.0; }
             let prev_fall = self.fighters[d].ghv.fall;
@@ -1251,7 +1249,7 @@ impl Match {
                 let no = if st == 'A' || st == 'L' { 5020 } else if st == 'C' && !hd.forcestand { 5010 } else { 5000 };
                 self.change_state(d, no, dd);
             }
-            let point_mul = attack_mul * scale / self.fighters[d].effective_defence().max(0.01);
+            let point_mul = attack_mul * scale / self.fighters[d].exposed_defence().max(0.01);
             crate::ikemen::life::apply_hit_points(self, d, hd, false, point_mul);
             if hd.p2stateno < 0 { crate::ikemen::life::enter_stun_states(self, d, false); }
             if hd.p1stateno >= 0 && !from_proj { let ad = self.fighters[a].def.clone(); self.change_state(a, hd.p1stateno, ad); }

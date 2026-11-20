@@ -39,8 +39,8 @@ mod web {
 
     fn fighter_json(f: &ume_engine::fighter::Fighter) -> String {
         format!(
-            "{{\"side\":{},\"x\":{:.1},\"lane\":{:.1},\"facing\":{},\"life\":{:.1},\"max\":{:.1},\"state\":{},\"alive\":{},\"anim\":{},\"anim_elem\":{}}}",
-            f.side, f.pos.x, f.lane, f.facing, f.life, f.life_max, f.state_no, f.alive, f.anim_real, f.elem
+            "{{\"side\":{},\"x\":{:.1},\"y\":{:.1},\"ground\":{:.1},\"lane\":{:.1},\"facing\":{},\"life\":{:.1},\"max\":{:.1},\"state\":{},\"alive\":{},\"anim\":{},\"anim_elem\":{},\"form\":{}}}",
+            f.side, f.pos.x, f.pos.y, f.ground_level, f.lane, f.facing, f.life, f.life_max, f.state_no, f.alive, f.anim_real, f.elem, f.form
         )
     }
 
@@ -72,8 +72,8 @@ mod web {
             paused = session.paused;
             let m = &session.m;
             clock = format!(
-                "{{\"tick\":{},\"round\":{},\"round_state\":{},\"round_time\":{},\"wins\":[{},{}]}}",
-                m.game_time, m.round_no, m.round_state, m.round_time, m.wins[0], m.wins[1]
+                "{{\"tick\":{},\"round\":{},\"round_state\":{},\"round_time\":{},\"zoom\":{:.3},\"winner\":{},\"arena\":{},\"wins\":[{},{}]}}",
+                m.game_time, m.round_no, m.round_state, m.round_time, m.zoom, m.winner_side, m.power_arena, m.wins[0], m.wins[1]
             );
             let o = &m.objects;
             objects = format!(

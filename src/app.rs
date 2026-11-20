@@ -214,7 +214,7 @@ pub struct App {
     warm_key: String,
 }
 
-const MENU: [(&str, &str); 11] = [
+const MENU: [(&str, &str); 12] = [
     ("menu.story", "desc.story"),
     ("menu.arcade", "desc.arcade"),
     ("menu.survival", "desc.survival"),
@@ -225,7 +225,7 @@ const MENU: [(&str, &str); 11] = [
     ("menu.settings", "desc.settings"),
     ("menu.replays", "desc.replays"),
     ("menu.player_card", "desc.player_card"),
-    ("menu.quit", "desc.quit"),
+    ("menu.power_arena", "desc.power_arena"), ("menu.quit", "desc.quit"),
 ];
 
 impl App {
@@ -723,7 +723,7 @@ impl App {
         let screen = get("tela");
         if p1.is_none() && p2.is_none() && screen.is_none() { return; }
         let mode = match get("modo").as_deref() {
-            Some("versus") => Mode::Versus,
+            Some("versus") => Mode::Versus, Some("arena") => Mode::PowerArena,
             Some("treino") => Mode::Training,
             Some("watch") => Mode::Watch,
             _ => Mode::Cpu,
@@ -1541,9 +1541,8 @@ impl App {
                 picking = 1;
             } else {
                 self.sel = (picked[0].unwrap(), picked[1].unwrap(), self.sel.2);
-                self.screen = Screen::Stages {
-                    cur: self.sel.2 + 1,
-                };
+                self.screen = if self.mode == Mode::PowerArena { Screen::Vs { t: 0.0, step: 0 } } else { Screen::Stages { cur: self.sel.2 + 1 } };
+
                 return;
             }
         }
@@ -2034,11 +2033,8 @@ impl App {
                 .as_ref()
                 .map(|r| r.rules)
                 .unwrap_or_else(|| self.settings.rules());
-            sess.apply_rules(self.fight_rules);
+            sess.apply_rules(self.fight_rules); if self.mode == Mode::PowerArena { sess.m.enable_power_arena(); }
             self.story_tune(&mut sess);
-            if boss_phase >= 2 {
-                sess.m.awaken_boss_phase(boss_phase as u8);
-            }
             if seq {
                 if let Some(t) = &self.team {
                     for side in 0..2 {

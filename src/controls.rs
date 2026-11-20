@@ -1,5 +1,6 @@
 //! Input hub: keyboard maps, gamepads (with rumble), touch controls; menu navigation.
 use crate::gamepad::{PadInfo, PadKind, Pads};
+mod nav_keys;
 mod nav_repeat;
 mod touch;
 mod touch_style;
@@ -55,7 +56,7 @@ pub fn face(g: Glyphs, keys: &KeyMap, bit: u32) -> Face {
             k::C => Face::chip("R2", dark),
             k::D2 => Face::chip("L1", dark),
             k::W => Face::chip("L2", dark),
-            k::T => Face::chip("R3", dark),
+            k::T => Face::chip("SELECT", dark),
             _ => Face::chip("OPTIONS", dark),
         },
         Glyphs::Pad(_) => match bit {
@@ -67,7 +68,7 @@ pub fn face(g: Glyphs, keys: &KeyMap, bit: u32) -> Face {
             k::C => Face::chip("RT", dark),
             k::D2 => Face::chip("LB", dark),
             k::W => Face::chip("LT", dark),
-            k::T => Face::chip("RS", dark),
+            k::T => Face::chip("SELECT", dark),
             _ => Face::chip("MENU", dark),
         },
     }
@@ -163,25 +164,25 @@ impl Controls {
         }
         let mut m = 0;
         let key = |ks: &[KeyCode]| ks.iter().any(|kc| is_key_down(*kc));
-        if key(&[KeyCode::Up, KeyCode::W]) {
+        if key(nav_keys::UP) {
             m |= nav::UP;
         }
-        if key(&[KeyCode::Down, KeyCode::S]) {
+        if key(nav_keys::DOWN) {
             m |= nav::DOWN;
         }
-        if key(&[KeyCode::Left, KeyCode::A]) {
+        if key(nav_keys::LEFT) {
             m |= nav::LEFT;
         }
-        if key(&[KeyCode::Right, KeyCode::D]) {
+        if key(nav_keys::RIGHT) {
             m |= nav::RIGHT;
         }
-        if key(&[KeyCode::Enter, KeyCode::Space, KeyCode::Q, KeyCode::Kp1]) {
+        if key(nav_keys::OK) {
             m |= nav::OK;
         }
-        if key(&[KeyCode::Escape, KeyCode::Backspace, KeyCode::W]) {
+        if key(nav_keys::BACK) {
             m |= nav::BACK;
         }
-        if key(&[KeyCode::F2]) {
+        if key(nav_keys::AUX) {
             m |= nav::AUX;
         }
         for p in &self.pad_info {

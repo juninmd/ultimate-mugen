@@ -3,7 +3,7 @@ use crate::fighter::Fighter;
 impl Fighter {
     pub(crate) fn lands_by_script(&self) -> bool {
         self.physics == 'N'
-            && matches!(self.st_def.source, crate::chardef::Source::Mugen)
+            && self.st_def.rules().script_landing
             && self.st_def.states.get(&self.state_no).is_some_and(|s| {
                 s.controllers.iter().any(|c| {
                     matches!(c.kind.as_str(), "selfstate" | "changestate")
@@ -20,7 +20,7 @@ impl Fighter {
 
     pub(crate) fn counts_as_stuck(&self) -> bool {
         self.move_type == 'H'
-            || !matches!(self.def.source, crate::chardef::Source::Mugen)
+            || !self.def.rules().script_landing
             || self.state_time > 200
     }
 

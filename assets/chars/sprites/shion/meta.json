@@ -391,6 +391,7 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "jumpTuck": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
     "jumpTop": {
       "axisX": 200.0,
       "axisY": 392.0,

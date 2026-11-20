@@ -15,6 +15,8 @@ pub(super) const ES: &[(&str, &str)] = &[
     ("menu.replays", "Repeticiones"),
     ("menu.player_card", "Ficha del jugador"),
     ("menu.quit", "Salir"),
+    ("menu.power_arena", "Arena del Poder"),
+    ("desc.power_arena", "Lucha en plataformas y empuja a tu rival fuera."),
     ("desc.arcade", "Enfréntate a una secuencia de rivales"),
     ("desc.survival", "Rivales sin fin, vida recuperada tras cada victoria y puntuación"),
     ("desc.cpu", "Tú contra la computadora"),

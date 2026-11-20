@@ -106,3 +106,9 @@ No Treino, o menu de pausa (aba Jogo) tem a linha **Comportamento do boneco**. C
 | IA aprende você | Conta como você troca de ação (andar, agachar, pular, atacar) e responde à ação mais provável: defesa para trás se você vai atacar; ataque ao pular, andar ou agachar. Não zera ao trocar de plano |
 
 O plano fica em `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); o boneco aperta bits reais de entrada, então regras de defesa, empurrão e dano de chip são os da própria engine. A gravação fica em `src/session/dummy_tape.rs`; um painel à direita mostra o melhor combo e o tamanho da fita (`src/hud/training_panel.rs`). Capturas: `UME_SHOTS_ONLY=pause` grava `training-dummy-*.png` e `pause-training-dummy.png`; `UME_SHOTS_ONLY=training` grava `training-tape-playback.png`.
+
+## Arena do Poder
+
+Escolha **Arena do Poder** no menu principal e selecione os dois lutadores para enfrentar a CPU. Salte por baixo das plataformas suspensas e pouse nelas durante a descida. Cruzar qualquer borda âmbar da plataforma principal elimina o lutador do round. A câmera abre o enquadramento à medida que os lutadores se afastam e mostra as duas bordas na distância máxima.
+
+Na versão web, abra uma luta diretamente com `?modo=arena&p1=kaito&p2=shion&luta=1`.

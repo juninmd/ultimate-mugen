@@ -25,7 +25,7 @@ mod pixel_tour;
 mod poly; mod profile; mod profile_tags;
 mod postfx;
 mod registry;
-mod render;
+mod render; mod power_arena;
 mod replays;
 mod route;
 mod screenpack;

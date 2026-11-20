@@ -115,3 +115,9 @@ In Training the pause menu (Game tab) has a **Dummy behaviour** row. Confirming 
 | AI learns you | Counts how you switch actions (walk, crouch, jump, attack) and answers your likeliest next one: back guard before an attack; attack when you jump, walk or crouch. Keeps learning across plan changes |
 
 The plan lives in `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); the dummy presses real input bits, so guard rules, pushback and chip damage are the engine's own. The recording lives in `src/session/dummy_tape.rs`; a right-side panel shows the best combo and the tape length (`src/hud/training_panel.rs`). Screenshots: `UME_SHOTS_ONLY=pause` writes `training-dummy-*.png` and `pause-training-dummy.png`; `UME_SHOTS_ONLY=training` writes `training-tape-playback.png`.
+
+## Power Arena
+
+Choose **Power Arena** in the main menu and select both fighters to start a match against the CPU. Jump through the floating platforms from below and land on them while descending. Crossing either amber edge of the main platform immediately eliminates the fighter from the round. The camera pulls back as the fighters separate and reveals both edges at maximum distance.
+
+Open a match directly on the web with `?modo=arena&p1=kaito&p2=shion&luta=1`.

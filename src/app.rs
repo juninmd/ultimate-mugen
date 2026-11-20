@@ -337,7 +337,7 @@ impl App {
             arcade: None,
             boss_progression: crate::boss::BossProgression::load(),
             pause: pause::PauseState::new(),
-            debug_boxes: false,
+            debug_boxes: settings.show_boxes,
             dummy_plan: Default::default(),
             menu_focus: Default::default(),
             quit: false,

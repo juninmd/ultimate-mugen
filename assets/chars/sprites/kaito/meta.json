@@ -649,6 +649,7 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "run01": {"axisX": 200.0, "axisY": 363.0, "refHeight": 360.0, "awakeningHair": [204, 83, 274, 141]},
     "run1": {
       "awakeningHair": [
         200,

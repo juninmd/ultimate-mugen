@@ -951,6 +951,7 @@ impl Vfx {
                 g.oy + (y - m.camera.y + m.stage.zoffset + shy) * s,
             )
         };
+        self.sheets.draw(&tp, s, g.fx_gain, sheet::SheetLayer::BehindFighters);
         for f in m
             .fighters
             .iter()
@@ -1118,7 +1119,6 @@ impl Vfx {
             Weather::None => {}
         }
     }
-
     /// World-space particles and rings (call inside the zoomed transform).
     pub fn draw_world(&self, g: &Gfx, m: &Match, shx: f32, shy: f32, ui: &Ui) {
         let s = g.view_scale;
@@ -1129,7 +1129,7 @@ impl Vfx {
             )
         };
         self.draw_cracks(&tp, s);
-        self.sheets.draw(&tp, s, g.fx_gain, false);
+        self.sheets.draw(&tp, s, g.fx_gain, sheet::SheetLayer::Foreground);
         for p in self
             .parts
             .iter()
@@ -1170,7 +1170,7 @@ impl Vfx {
         }
         // additive
         set_blend(GfxBlend::Add);
-        self.sheets.draw(&tp, s, g.fx_gain, true);
+        self.sheets.draw(&tp, s, g.fx_gain, sheet::SheetLayer::Additive);
         for p in self
             .parts
             .iter()

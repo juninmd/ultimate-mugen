@@ -69,7 +69,7 @@ More: [moves](UMF-Character.md#moves), [hits](UMF-Character.md#hits), [command s
 
 - **Colours only:** change `palettes`, or add `awakeningPalette` for the transformation.
 - **Stats:** `"stats": { "life": 1080, "attack": 104 }` changes one number and keeps the rest.
-- **Sprites:** your own pixel art goes in `assets/chars/sprites/<id>/`. See [Sprite atlas import](Sprite-Atlas-Import.md) and [Rig](Rig.md).
+- **Sprites:** your own pixel art goes in `assets/chars/sprites/<id>/`. See [Sprite atlas import](Sprite-Atlas-Import.md) and [Effect frames](Effects.md).
 - **Profile:** a nationality and a short bio in English, Portuguese and Spanish. See [Profile](UMF-Character.md#profile-nationality-and-biography).
 
 ## 5. Check it before you play
@@ -84,7 +84,7 @@ The first command checks the examples in this guide. The second plays every atta
 ## Not a UMF fighter?
 
 - **M.U.G.E.N characters** (`.def`, `.sff`, `.cns`) go in `mugen/chars/`. They run without changes. See [Characters](Characters.md) and [CNS scripts](CNS-Scripts.md).
-- **A fighter without sprites:** use the rig (the default `art.type`). See [Rig](Rig.md).
+- **A fighter without sprites:** not supported. Every fighter is drawn from pixel-art PNGs, like M.U.G.E.N characters; there is no procedural fallback.
 
 ## Next
 

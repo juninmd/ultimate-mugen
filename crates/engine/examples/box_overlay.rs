@@ -68,7 +68,7 @@ fn main() {
         let origin = (cx as f32 + CELL as f32 * 0.4, cy as f32 + CELL as f32 * 0.9);
         let s = &def.sprites[&(f.group, f.index)];
         if let Some(img) = &s.image {
-            let unit = ume_engine::native::rig::art_res() * s.scale;
+            let unit = ume_engine::native::effects::art_res() * s.scale;
             for y in 0..CELL {
                 for x in 0..CELL {
                     let (ux, uy) = ((cx + x) as f32 - origin.0, (cy + y) as f32 - origin.1);

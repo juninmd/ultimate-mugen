@@ -24,7 +24,7 @@ O formato **UMF** (*Ultimate Mugen Format*) consolida toda a arquitetura de um l
 | `stats` | `object` | Não | Atributos e constantes de movimentação física. |
 | `abilities` | `object` | Não | Habilidades especiais core (Voo, Teleporte, Super Velocidade, Multi-Transformações). |
 | `passives` | `object` | Não | Regeneração passiva de vida ou barra (`meterRegen`, `lifeRegen`). |
-| `art` | `object` | Sim | Estilo vetorial (rig) e biblioteca de poses anatômicas. |
+| `art` | `object` | Sim | `style.colors` (recoloração das paletas nos sprites PNG) e `poses` (nomes das chaves de pose). |
 | `palettes` | `array` | Não | Paletas alternativas selecionáveis com botões de soco/chute. |
 | `awakeningPalette`| `object` | Não | Substituições de cor ativadas durante transformações. |
 | `anims` | `object` | Sim | Mapeamento de animações por nome. |

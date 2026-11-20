@@ -1,4 +1,4 @@
-use super::rig::{art_res, RigRender};
+use super::effects::{art_res, FrameArt};
 use super::types::{Box4, NativeFrame};
 use crate::chardef::ImageData;
 
@@ -136,7 +136,7 @@ fn slices(mask: &SpriteMask, whole: Box4, along_x: bool) -> Vec<Box4> {
     best
 }
 
-pub(super) fn fit_boxes(render: &mut RigRender, frame: &NativeFrame) {
+pub(super) fn fit_boxes(render: &mut FrameArt, frame: &NativeFrame) {
     let Some(image) = render.image.clone() else {
         return;
     };

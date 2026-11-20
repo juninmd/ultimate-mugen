@@ -19,7 +19,6 @@ fn compiled(id: &str) -> CharDef {
 }
 
 fn compiled_pal(id: &str, pal: i32) -> CharDef {
-    std::env::remove_var("UME_FORCE_RIG");
     let json = std::fs::read_to_string(format!("../../assets/chars/{id}.json")).expect("read json");
     let nc: NativeChar = serde_json::from_str(&json).expect("parse json");
     compile_native(&nc, pal, true)

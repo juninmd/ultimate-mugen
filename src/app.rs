@@ -243,7 +243,7 @@ impl App {
         if touch {
             settings.fx = settings.fx.min(1);
         } // phones: no bloom passes
-        ume_engine::native::rig::set_art_res(settings.art_res(Settings::physical_h()));
+        ume_engine::native::effects::set_art_res(settings.art_res(Settings::physical_h()));
         Self::boot(&mut ui, 0.15, "Lutadores originais…").await;
         #[cfg(not(target_arch = "wasm32"))]
         let mut reg = {
@@ -403,8 +403,8 @@ impl App {
     /// Re-rasterize art when the effective quality changes (resolution switch, fullscreen, setting change).
     fn apply_quality(&mut self) {
         let r = self.settings.art_res(Settings::physical_h());
-        if (r - ume_engine::native::rig::art_res()).abs() > 0.01 {
-            ume_engine::native::rig::set_art_res(r);
+        if (r - ume_engine::native::effects::art_res()).abs() > 0.01 {
+            ume_engine::native::effects::set_art_res(r);
             self.reg.unload_all();
             self.g.trim_next_frame();
         }
@@ -556,7 +556,7 @@ impl App {
                     threads,
                     (screen_width() * dpi_scale()) as i32,
                     Settings::physical_h() as i32,
-                    ume_engine::native::rig::art_res()
+                    ume_engine::native::effects::art_res()
                 ),
                 10.0,
                 20.0,

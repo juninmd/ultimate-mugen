@@ -62,7 +62,7 @@ fn use_clones_a_move_under_a_new_id_and_remove_drops_one() {
 
 #[test]
 fn objects_merge_deeply_and_animations_replace_whole() {
-    register_kit(r#"{"format":"umf-kit/1","id":"test_base","stats":{"life":900,"walk":[2,2]},"art":{"type":"rig","poses":{"a":{"x":1},"b":{"x":2}}},"anims":{"idle":{"frames":[{"pose":"a","ticks":4},{"pose":"b","ticks":4}]},"walk":{"frames":[{"pose":"a","ticks":2}]}}}"#).unwrap();
+    register_kit(r#"{"format":"umf-kit/1","id":"test_base","stats":{"life":900,"walk":[2,2]},"art":{"type":"sprites","poses":{"a":{"x":1},"b":{"x":2}}},"anims":{"idle":{"frames":[{"pose":"a","ticks":4},{"pose":"b","ticks":4}]},"walk":{"frames":[{"pose":"a","ticks":2}]}}}"#).unwrap();
     let fighter = json!({
         "id": "a",
         "extends": ["core", "test_base"],

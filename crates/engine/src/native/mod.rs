@@ -23,7 +23,7 @@ mod kit_merge;
 mod kit_parse;
 pub mod compile;
 mod frame_raster;
-pub mod rig;
+pub mod effects;
 mod pixel;
 mod air_variant;
 mod air_normals;

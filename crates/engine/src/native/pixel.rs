@@ -1,6 +1,6 @@
 use super::pack::read_sprite;
 use super::recolor::Recolor;
-use super::rig::{art_res, RigRender};
+use super::effects::{art_res, FrameArt};
 use super::types::{NativeChar, NativeFrame};
 use crate::chardef::ImageData;
 use serde_json::Value;
@@ -14,7 +14,7 @@ const LYING_HURT: [f32; 4] = [-46.0, -26.0, 46.0, 0.0];
 const STRIKE_BOX: [f32; 4] = [2.0, -84.0, 38.0, -32.0];
 const STAND_UNITS: f32 = 100.0;
 
-pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value>) -> Option<RigRender> {
+pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value>) -> Option<FrameArt> {
     if fr.effect.is_some() { return None; }
     let recolor = palette.and_then(|p| Recolor::new(nc.art.style.get("colors"), p));
     let mut render = load_pose(&sprite_roots(nc.sprite_dir()), &native_frame_sprite_key(fr), fr.hit.is_some(), recolor.as_ref())?;
@@ -50,11 +50,11 @@ pub(super) fn sprite_roots(id: &str) -> Vec<PathBuf> {
     roots
 }
 
-fn load_pose(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<RigRender> {
+fn load_pose(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<FrameArt> {
     load_pose_with_source(roots, pose, striking, recolor).map(|(render, _)| render)
 }
 
-fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<(RigRender, PathBuf)> {
+fn load_pose_with_source(roots: &[PathBuf], pose: &str, striking: bool, recolor: Option<&Recolor>) -> Option<(FrameArt, PathBuf)> {
     let lower = pose.to_ascii_lowercase();
     let stem = pose_stem(&lower);
     [pose, stem, BASE_STEM, "idle"]
@@ -91,7 +91,7 @@ pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
     serde_json::json!({"id": character.id, "declaredHeight": character.stats.height, "avatar": roots.iter().any(|root| root.join("portrait.png").is_file()), "animations": animations})
 }
 
-fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool, recolor: Option<&Recolor>) -> Option<RigRender> {
+fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool, recolor: Option<&Recolor>) -> Option<FrameArt> {
     let bytes = read_sprite(root, &format!("{name}.png"))?;
     let dec = ume_formats::png::decode_png(&bytes).ok()?;
     let mut rgba = match &dec.rgba { Some(rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&dec) };
@@ -106,7 +106,7 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
     let axis_x = axis("axisX", dec.width as f32 / 2.0, dec.width as f32);
     let axis_y = axis("axisY", dec.height as f32, dec.height as f32);
     let hurt = super::pixel_hurt::fit_body(hurtbox(lower, stem), stem, &rgba, dec.width, dec.height, [axis_x, axis_y], STAND_UNITS / units);
-    Some(RigRender {
+    Some(FrameArt {
         image: Some(ImageData::new(dec.width, dec.height, rgba)),
         width: dec.width as f32 * res,
         height: dec.height as f32 * res,
@@ -116,6 +116,23 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
         hurt: vec![hurt],
         hit: if striking { vec![STRIKE_BOX] } else { vec![] },
     })
+}
+
+pub(super) fn boxes_only(nc: &NativeChar, fr: &NativeFrame) -> FrameArt {
+    let lower = native_frame_sprite_key(fr).to_ascii_lowercase();
+    let height = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(STAND_UNITS as f64) as f32;
+    let mut art = FrameArt {
+        image: None,
+        width: 0.0,
+        height: 0.0,
+        axis_x: 0.0,
+        axis_y: 0.0,
+        scale: 1.0,
+        hurt: vec![hurtbox(&lower, pose_stem(&lower))],
+        hit: if fr.hit.is_some() { vec![STRIKE_BOX] } else { vec![] },
+    };
+    super::pixel_hit::fit_to_character(nc, fr, &mut art, height / STAND_UNITS);
+    art
 }
 
 fn hurtbox(lower: &str, stem: &str) -> [f32; 4] {

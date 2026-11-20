@@ -7,7 +7,7 @@ O UMF (*Ultimate Mugen Format*) troca os ~6 arquivos do MUGEN (DEF/SFF/AIR/CMD/C
 const char: NativeChar = {
   format: 'umf/1', id: 'kaze', name: 'Kaze', series: 'Ventos do Leste', author: 'você', color: '#e85d2a',
   stats: { life: 1000, walk: [2.6, 2.2], run: [5, 4.5], jump: [-8.6, -2.6, 0, 2.6], height: 100 },
-  art: { type: 'rig', style: { /* cores, cabelo, roupa, arma */ }, poses: { idle1: { /* ângulos */ } } },
+  art: { type: 'sprites', style: { /* cores, cabelo, roupa, arma */ }, poses: { idle1: { /* ângulos */ } } },
   anims: {
     idle: { frames: [{ pose: 'idle1', ticks: 8 }, { pose: 'idle2', ticks: 8 }] },
     jab:  { frames: [{ pose: 'jab0', ticks: 3 }, { pose: 'jab1', ticks: 3, hit: { part: 'handR', radius: 10 } }, { pose: 'jab0', ticks: 5 }] },
@@ -44,7 +44,7 @@ const char: NativeChar = {
 Animações com nomes padrão (`idle`, `walk`, `hitLight`, `fall`, `lieDown`, `win`, ...) viram as ações reservadas do MUGEN (0, 20, 5000, 5050, 5110, 181...), então os **estados comuns** do motor funcionam sem nenhuma linha extra.
 
 ## Arte
-- `type: 'rig'` — esqueleto 2D vetorial desenhado em tempo de carga (nítido em qualquer resolução, paletas grátis).
+- `type: 'sprites'` — o lutador é desenhado por sprites PNG em pixel art (`assets/chars/sprites/<id>/`); não existe arte procedural.
 - `type: 'sheet'` — spritesheet PNG com retângulos e eixos (para quem desenha pixel art).
 
 ## E se eu quiser usar CNS?

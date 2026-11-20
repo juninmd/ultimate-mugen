@@ -20,7 +20,7 @@ Como a engine mantém o carregamento rápido e os quadros estáveis, e como medi
 | Cache de bytecode de expressões e parâmetros | `ume_engine::chardef` | `safe_expr` e `Param::new` cacheiam AST e bytecode compilados para triggers e parâmetros idênticos via armazenamento thread-local | Por thread |
 | Consultas INI sem alocação | `ume_formats::ini` | `Section::get` e `find_section` usam `eq_ignore_ascii_case` evitando alocações no heap; `strip_comment` atalha linhas sem comentário | Thread chamadora |
 | Retratos da tela de seleção | `load_mugen_portrait` decodifica só os sprites 9000,0, 9000,1 e o primeiro quadro parado (mais as origens dos links) via `decode_sff_only` | 1 |
-| Rig nativo (UMF) | Cada quadro único é rasterizado em paralelo | Todos os núcleos (máx. 8) |
+| Sprites e efeitos nativos (UMF) | Cada quadro único é decodificado ou rasterizado em paralelo | Todos os núcleos (máx. 8) |
 | Personagem inteiro | Carregado numa thread `char-load` enquanto a tela de VS aparece | 1 thread em segundo plano |
 
 O auxiliar é `ume_formats::par::map`. Na web (`wasm32`) ele roda na própria thread, pois o build do navegador não tem threads.
@@ -440,7 +440,7 @@ etain_mut.
 
 - **Tela de selecao na web** (`scripts/web-frame-probe.js`, `scripts/web-profile.js`):
   - Os quadros dos personagens nativos desenham `portrait.png` por `CharEntry::tile_portrait` (uma decodificacao pequena, em cache por revisao do pacote) em vez de compilar uma previa de idle e vitoria por quadro; a previa completa so e montada para o personagem em foco ou escolhido.
-  - As previas esperam o pacote de sprites chegar (`CharEntry::tile_art_ready`), entao o rasterizador de rig nunca serve de substituto durante o download.
+  - As previas esperam o pacote de sprites chegar (`CharEntry::tile_art_ready`), entao nenhuma arte provisória é desenhada durante o download.
   - Em `wasm32`, um personagem sem pacote previsualiza so o primeiro quadro de cada animacao do menu, e a resolucao automatica da arte fica limitada a 3.0.
   - `Recolor::apply_in_region` usa um hasher multiplicativo e memoria do ultimo tom no lugar de SipHash por pixel.
   - O cache de pacotes guarda 64 pacotes, entao elencos acima de 24 personagens nao se expulsam mais.

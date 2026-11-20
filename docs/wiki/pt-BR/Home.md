@@ -29,7 +29,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Rush Cancel](Rush-Cancel.md) | Jogadores e Criadores | Gaste energia para cancelar um golpe conectado, Overdrive e a apresentação |
 | [Níveis de Combo](Niveis-de-Combo.md) | Jogadores e Criadores | Selos de combo, marca de energia, air dashes e rebotes |
 | [Kits inspirados em Bleach](Kits-Inspirados-em-Bleach.md) | Jogadores | Ideias de Byakuya, Yoruichi e Zaraki em tres nativos |
-| [Arte do esqueleto (rig)](Rig.md) | Criadores | Estilo, poses, articulações e paletas |
+| [Quadros de efeito](Efeitos.md) | Criadores | Efeitos de projétil e faíscas |
 | [Scripts CNS](Scripts-CNS.md) | Criadores | Estados, controllers, triggers e comandos suportados |
 | [Flags do AssertSpecial](Flags-AssertSpecial.md) | Criadores | As 77 flags do Ikemen e o efeito de cada uma |
 | [Vida vermelha, tontura e defesa](Sistemas-de-Vida.md) | Criadores | RedLife, DizzyPoints, GuardPoints, estados 5300/5400 e padrões do HitDef |

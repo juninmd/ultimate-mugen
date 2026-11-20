@@ -567,7 +567,7 @@ impl Match {
                     return;
                 }
                 let ko_disabled = self.global_asserts & gsf::GLOBALNOKO != 0;
-                let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| self.fighters[i].life <= 0.0 && !ko_disabled && !self.fighters[i].has_assert(asf::NOKO)).collect();
+                let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| (self.power_arena && self.fighters[i].pos.x.abs() > ARENA_HALF_WIDTH) || (self.fighters[i].life <= 0.0 && !ko_disabled && !self.fighters[i].has_assert(asf::NOKO))).collect();
                 let team_life = |m: &Match, s: usize| -> (f32, f32) { roots.iter().filter(|&&i| m.fighters[i].side == s).fold((0.0, 0.0), |a, &i| (a.0 + m.fighters[i].life.max(0.0), a.1 + m.fighters[i].life_max)) };
                 if self.team_simul || self.team_tag {
                     // a fallen teammate stays down; the round ends only when a whole team is KO'd
@@ -585,7 +585,7 @@ impl Match {
                         self.winner_side = if sides_dead[0] && sides_dead[1] { -2 } else if sides_dead[0] { 1 } else { 0 };
                         let slow = self.global_asserts & gsf::NOKOSLOW == 0;
                         self.slow_mo = if slow { 75 } else { 0 };
-                        self.announce = Some(Announce { text: if sides_dead[0] && sides_dead[1] { "DOUBLE K.O.".into() } else { "K.O.".into() }, time: 110, total: 110, kind: AnnounceKind::Ko });
+                        self.announce = Some(Announce { text: if sides_dead[0] && sides_dead[1] { "DOUBLE K.O.".into() } else if self.power_arena && self.fighters[dead[0]].pos.x.abs() > ARENA_HALF_WIDTH { "RING OUT".into() } else { "K.O.".into() }, time: 110, total: 110, kind: AnnounceKind::Ko });
                         self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side, silent: self.global_asserts & gsf::NOKOSND != 0, slow }); self.finish_arm();
                     } else {
                         let (l0, l1) = (team_life(self, 0), team_life(self, 1));

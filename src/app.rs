@@ -1541,9 +1541,8 @@ impl App {
                 picking = 1;
             } else {
                 self.sel = (picked[0].unwrap(), picked[1].unwrap(), self.sel.2);
-                self.screen = Screen::Stages {
-                    cur: self.sel.2 + 1,
-                };
+                self.screen = if self.mode == Mode::PowerArena { Screen::Vs { t: 0.0, step: 0 } } else { Screen::Stages { cur: self.sel.2 + 1 } };
+
                 return;
             }
         }

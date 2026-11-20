@@ -5,6 +5,7 @@ const shotDir = process.env.WEB_SMOKE_SHOTS;
 const stallMs = Number(process.env.MATCH_SMOKE_STALL_MS || 20000);
 const limitMs = Number(process.env.MATCH_SMOKE_LIMIT_MS || 900000);
 const only = process.env.MATCH_SMOKE_SCENARIOS ? process.env.MATCH_SMOKE_SCENARIOS.split(',') : null;
+const [shardIndex, shardCount] = (process.env.MATCH_SMOKE_SHARD || '1/1').split('/').map(Number);
 const fastRules = { round_time: 2, mute: 1, gamespeed: 2, life: 2 };
 const scenarios = [
   { name: 'cpu-bot-best-of-3', query: 'e2e=1&p1=kaito&p2=shion&modo=cpu&luta=1', settings: { ...fastRules, rounds: 1 }, bot: true, minRounds: 2 },
@@ -97,7 +98,9 @@ async function run(scenario) {
 
 (async () => {
   const failed = [];
-  for (const scenario of scenarios.filter(sc => !only || only.includes(sc.name))) {
+  const selected = scenarios.filter((sc, i) => (!only || only.includes(sc.name)) && i % shardCount === shardIndex - 1);
+  if (!selected.length) { console.error(`WEB MATCH SMOKE: no scenario selected (shard ${shardIndex}/${shardCount}, filter ${only})`); process.exit(1); }
+  for (const scenario of selected) {
     const started = Date.now();
     const out = await run(scenario);
     const summary = out.result ? `fight ${(out.result.fightMs / 1000).toFixed(0)}s, tick ${out.result.maxTick}, rounds ${out.result.rounds}, distinct frames ${out.result.distinctFrames}` : 'no result';

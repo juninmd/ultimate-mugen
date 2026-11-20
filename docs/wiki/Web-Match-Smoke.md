@@ -17,4 +17,4 @@ A scenario fails on any of:
 - the rendered image never changing during the fight;
 - the results screen not being reached within `MATCH_SMOKE_LIMIT_MS` (default 360000 ms), or not being leavable with Enter.
 
-`MATCH_SMOKE_SCENARIOS=<name,...>` runs a subset and `WEB_SMOKE_SHOTS=<dir>` stores screenshots (uploaded by CI on failure).
+`MATCH_SMOKE_SCENARIOS=<name,...>` runs a subset, `MATCH_SMOKE_SHARD=<i>/<n>` runs every n-th scenario starting at i (CI splits the match smoke across parallel jobs this way; an empty selection fails) and `WEB_SMOKE_SHOTS=<dir>` stores screenshots (uploaded by CI on failure).

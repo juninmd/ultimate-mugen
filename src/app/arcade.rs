@@ -4,6 +4,7 @@ use crate::controls::nav;
 use crate::gfx::*;
 use crate::ui::*;
 
+mod ladder_bar;
 mod route;
 
 impl App {

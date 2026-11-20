@@ -41,3 +41,24 @@ fn arena_camera_reveals_both_edges_when_fighters_separate() {
     assert!(battle.camera.x - battle.view_w * 0.5 < -ARENA_HALF_WIDTH);
     assert!(battle.camera.x + battle.view_w * 0.5 > ARENA_HALF_WIDTH);
 }
+
+#[test]
+fn imported_fighter_stays_on_a_platform_after_its_landing_controller() {
+    use std::sync::Arc;
+    use ume_engine::input::k;
+    use ume_engine::loader::load_mugen_char;
+    use ume_formats::vfs::{add_zip, find_char_defs, Vfs};
+
+    let mut vfs = Vfs::new();
+    add_zip(&mut vfs, include_bytes!("../../../assets/mugen/elecbyte.zip"), "").unwrap();
+    let path = find_char_defs(&vfs).into_iter().next().unwrap();
+    let fighter = Arc::new(load_mugen_char(&vfs, &path, 1, false).unwrap());
+    let mut battle = duel(fighter.clone(), fighter);
+    battle.enable_power_arena();
+    battle.fighters[0].pos.x = -200.0;
+    battle.tick(&[k::U, 0]);
+    ticks(&mut battle, 75);
+    assert_eq!(battle.fighters[0].ground_level, -50.0);
+    assert_eq!(battle.fighters[0].pos.y, -50.0);
+    assert!(battle.fighters[0].ctrl);
+}

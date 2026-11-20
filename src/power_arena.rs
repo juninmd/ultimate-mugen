@@ -1,4 +1,6 @@
 use crate::gfx::*;
+use crate::render::Gfx;
+use crate::ui::hex;
 use ume_engine::matchs::{Match, ARENA_HALF_WIDTH, ARENA_PLATFORMS};
 
 thread_local! {

@@ -323,7 +323,7 @@ impl Hud {
                         let pulse = 0.75 + 0.25 * (gt * 6.0).sin();
                         let fnm = f.active_form_name();
                         let label = if fnm.is_empty() {
-                            "DESPERTO".to_string()
+                            crate::i18n::tr3("DESPERTO", "AWAKENED", "DESPIERTO").to_string()
                         } else {
                             fnm.to_uppercase()
                         };

@@ -13,12 +13,7 @@ const BIO_LINES: usize = 3;
 const FLAG_W: f32 = 24.0;
 
 pub(crate) fn stage_boss(run: &StoryRun, player: &str) -> &'static str {
-    let def = run.stage_def();
-    if def.boss == player {
-        def.alt_boss
-    } else {
-        def.boss
-    }
+    run.stage_boss_id(player)
 }
 
 impl App {

@@ -41,7 +41,7 @@ fn story_npcs_are_hidden_and_listed_in_the_index() {
 fn every_npc_has_its_own_sprites_and_palettes() {
     for (id, base) in NPCS {
         let (npc, origin) = (load(id), load(base));
-        assert_eq!(npc.sprite_set.as_deref(), Some(id), "{id} must use its own sprite set");
+        assert_eq!(npc.sprite_dir(), id, "{id} must use its own sprite set");
         let report = ume_engine::native::audit_native_sprite_frames(&npc);
         assert_eq!(report["avatar"], true, "{id} must have its own portrait");
         for anim in report["animations"].as_array().unwrap() {

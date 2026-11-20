@@ -21,6 +21,14 @@ pub(super) async fn run(app: &mut App, dir: &str) {
             app.screen = Screen::Settings { tab, cur: 1, from_fight: false };
             screen(app, dir, &format!("{code}-settings-{tab}"), 6).await;
         }
+        app.mode = Mode::Arcade;
+        app.arcade_start(find(app, "kaito"), None);
+        if let Some((_, idx)) = app.arcade.as_mut() {
+            *idx = 2;
+        }
+        app.screen = Screen::Vs { t: 1.2, step: 0 };
+        screen(app, dir, &format!("{code}-arcade-vs"), 2).await;
+        app.arcade = None;
         app.mode = Mode::Cpu;
         app.screen = Screen::Select { cur: [find(app, "kaito"), find(app, "akio")], picking: 0, picked: [None, None] };
         screen(app, dir, &format!("{code}-select"), 60).await;

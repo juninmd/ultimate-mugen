@@ -32,6 +32,7 @@ impl App {
             self.draw_versus(t);
             self.draw_versus_burst(t);
             self.draw_story_boss_tag(t);
+            self.draw_arcade_ladder_bar(t);
         }
         if !ready {
             let within = if step_now + 1 == total { self.warm_progress() } else { 0.0 };

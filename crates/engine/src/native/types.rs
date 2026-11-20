@@ -184,6 +184,15 @@ pub struct NativeChar {
     #[serde(default)] pub speed: Option<f32>,
 }
 
+impl NativeChar {
+    pub fn sprite_dir(&self) -> &str {
+        self.sprite_set
+            .as_deref()
+            .filter(|s| !s.is_empty())
+            .unwrap_or(&self.id)
+    }
+}
+
 /// Minimal insertion-ordered map for deterministic animation numbering.
 pub mod indexmap_like {
     use serde::de::{MapAccess, Visitor};

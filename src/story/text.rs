@@ -19,7 +19,15 @@ pub fn menu_description() -> &'static str {
     )
 }
 
+pub fn campaign_title() -> &'static str {
+    super::script::active().title(crate::i18n::get())
+}
+
 pub fn stage_title(stage: usize) -> &'static str {
+    let scripted = super::script::active().stage_title(stage, crate::i18n::get());
+    if !scripted.is_empty() {
+        return scripted;
+    }
     match stage {
         0 => tr("BECOS DA CIDADE", "BACK ALLEYS"),
         1 => tr("METRÔ", "SUBWAY"),

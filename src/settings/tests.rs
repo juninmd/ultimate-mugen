@@ -77,6 +77,7 @@ fn text_round_trips() {
         rounds: 2,
         life: 4,
         auto_update: false,
+        story_enabled: false,
         lang: crate::i18n::Lang::En,
         ..Settings::default()
     };

@@ -56,7 +56,7 @@ fn build(spec: &Npc, chars: &Path) -> Result<Json, String> {
     for key in ["intro", "taunt", "winQuote", "form", "abilities"] {
         data.remove(key);
     }
-    data.remove("spriteSet");
+    data.set("spriteSet", Json::str(spec.id));
     let existing_path = chars.join(format!("{}.json", spec.id));
     if existing_path.is_file() {
         let existing = parse(&std::fs::read_to_string(&existing_path).map_err(|e| e.to_string())?)?;

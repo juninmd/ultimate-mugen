@@ -23,13 +23,25 @@ impl App {
                 self.decide_mercy(false);
             }
         }
-        let accent = run.stage_def().accent;
+        let accent = run.stage_accent();
         let accent_color = Color::new(accent[0], accent[1], accent[2], 1.0);
         self.ui.background();
         self.ui.motes(40, 1.2);
         let reveal = (t * 2.5).min(1.0);
         self.ui.adapted_glass(-20.0, 230.0, VW + 40.0, 220.0, accent_color, reveal);
         self.ui.rect(0.0, 230.0, VW * reveal, 3.0, accent_color);
+        let campaign = text::campaign_title();
+        if !campaign.is_empty() && run.phase == Phase::Intro {
+            self.ui.text(
+                campaign,
+                VW / 2.0,
+                214.0,
+                16.0,
+                Color::new(accent[0], accent[1], accent[2], 0.85 * reveal),
+                Align::Center,
+                true,
+            );
+        }
         let (headline, sub, line) = match run.phase {
             Phase::Intro => (
                 text::stage_label(run.stage),

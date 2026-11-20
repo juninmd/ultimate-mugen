@@ -77,6 +77,7 @@ pub struct Settings {
     pub pal2: usize,
     pub grid: usize,
     pub sort: usize,
+    pub auto_update: bool,
     pub lang: crate::i18n::Lang,
 }
 
@@ -113,6 +114,7 @@ impl Default for Settings {
             pal2: 1,
             grid: 1,
             sort: 0,
+            auto_update: true,
             lang: crate::i18n::Lang::En,
         }
     }

@@ -33,6 +33,8 @@ enum Act {
     GameSpeed,
     SurvivalRecovery,
     Language,
+    CheckUpdate,
+    AutoUpdate,
     Reset,
     Info,
 }
@@ -318,15 +320,41 @@ impl App {
                     .unwrap_or(""),
                 tr3("Idioma de toda a interface", "Language of the whole interface", "Idioma de toda la interfaz"),
             )],
-            _ => vec![row(
-                Act::Reset,
-                tr("Restaurar padrões", "Restore defaults"),
-                tr("Enter", "Enter"),
-                tr(
-                    "Volta todas as configurações ao original",
-                    "Resets every setting to its original value",
-                ),
-            )],
+            _ => {
+                let mut r = vec![];
+                if !web && !mobile {
+                    r.push(row(
+                        Act::CheckUpdate,
+                        tr3("Verificar atualizações", "Check for updates", "Buscar actualizaciones"),
+                        self.update_settings_value(),
+                        tr3(
+                            "Consulta o GitHub Releases e instala se você confirmar",
+                            "Checks GitHub Releases and installs when you confirm",
+                            "Consulta GitHub Releases e instala si confirmas",
+                        ),
+                    ));
+                    r.push(row(
+                        Act::AutoUpdate,
+                        tr3("Avisos de atualização", "Update prompts", "Avisos de actualización"),
+                        on_off(s.auto_update),
+                        tr3(
+                            "Exibe o aviso na tela inicial quando houver versão nova",
+                            "Shows the prompt on the title screen when a new release exists",
+                            "Muestra el aviso en el título cuando haya nueva versión",
+                        ),
+                    ));
+                }
+                r.push(row(
+                    Act::Reset,
+                    tr("Restaurar padrões", "Restore defaults"),
+                    tr("Enter", "Enter"),
+                    tr(
+                        "Volta todas as configurações ao original",
+                        "Resets every setting to its original value",
+                    ),
+                ));
+                r
+            }
         }
     }
 
@@ -367,6 +395,15 @@ impl App {
                 s.survival_recovery = cycle(s.survival_recovery, step, SURVIVAL_RECOVERY.len())
             }
             Act::Language if go => s.lang = s.lang.next(step),
+            Act::AutoUpdate if go => s.auto_update = !s.auto_update,
+            Act::CheckUpdate if ok => {
+                if matches!(self.updater.state(), crate::update::State::Available(u) if u.binary.is_some()) {
+                    self.updater.accept();
+                } else {
+                    self.updater.check_now();
+                }
+                changed = false;
+            }
             Act::Reset if ok => {
                 *s = Settings { survival_best: s.survival_best, ..Settings::default() };
                 self.ai_level = s.difficulty;
@@ -536,7 +573,7 @@ impl App {
                     true,
                 );
             } else if !r.value.is_empty() {
-                let shown = if matches!(r.act, Act::Keys | Act::CharTuning | Act::Guide | Act::Reset) {
+                let shown = if matches!(r.act, Act::Keys | Act::CharTuning | Act::Guide | Act::CheckUpdate | Act::Reset) {
                     r.value.clone()
                 } else if interactive {
                     format!("‹ {} ›", r.value)
@@ -567,11 +604,12 @@ impl App {
                 format!("{}: {}", tr("Plataforma", "Platform"), if cfg!(target_arch = "wasm32") { "Web (WebGL2)" } else if cfg!(target_os = "android") { "Android" } else if cfg!(target_os = "ios") { "iOS" } else { "Desktop (wgpu)" }),
                 tr("Inspirada em M.U.G.E.N (Elecbyte) e Ikemen GO. Código aberto em github.com/juninmd/ultimate-mugen", "Inspired by M.U.G.E.N (Elecbyte) and Ikemen GO. Open source at github.com/juninmd/ultimate-mugen").to_string(),
             ];
+            let info_y = (y + 28.0).max(300.0);
             for (i, l) in lines.iter().enumerate() {
                 self.ui.text(
                     l,
                     150.0 + 22.0,
-                    300.0 + i as f32 * 34.0,
+                    info_y + i as f32 * 34.0,
                     if i == 0 { 26.0 } else { 19.0 },
                     if i == 0 { hex("#ffcc33") } else { WHITE },
                     Align::Left,

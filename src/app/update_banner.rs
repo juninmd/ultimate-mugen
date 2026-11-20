@@ -51,7 +51,32 @@ impl App {
             State::Failed(error) => {
                 format!("{}: {error}", tr("Falha na atualização", "Update failed"))
             }
+            State::UpToDate => format!(
+                "{} · {}",
+                crate::update::build_label(),
+                tr3("Atualizado", "Up to date", "Actualizado")
+            ),
             State::Idle => crate::update::build_label(),
+        }
+    }
+
+    pub(super) fn update_settings_value(&self) -> String {
+        match self.updater.state() {
+            State::Checking => tr3("Verificando…", "Checking…", "Buscando…").into(),
+            State::UpToDate => tr3("Atualizado", "Up to date", "Actualizado").into(),
+            State::Available(u) if u.binary.is_some() => format!(
+                "{} v{}",
+                tr3("Instalar", "Install", "Instalar"),
+                u.version
+            ),
+            State::Available(u) => format!("v{}", u.version),
+            State::Downloading { done, total, .. } => {
+                let p = if *total > 0 { done.saturating_mul(100) / *total } else { 0 };
+                format!("{p}%")
+            }
+            State::Ready { .. } => tr3("Reiniciando…", "Restarting…", "Reiniciando…").into(),
+            State::Failed(_) => tr3("Tentar novamente", "Retry", "Reintentar").into(),
+            State::Idle => tr3("Verificar", "Check", "Buscar").into(),
         }
     }
 
@@ -72,10 +97,9 @@ impl App {
         );
     }
 
-    /// O aviso só existe com uma versão encontrada, com binário para esta plataforma e sem o
-    /// `--no-auto-update`; fora do título/menu ele espera (o jogo não pode parar no meio da luta).
     fn update_prompt_open(&self) -> bool {
-        self.updater.prompt_allowed()
+        self.settings.auto_update
+            && self.updater.prompt_allowed()
             && matches!(self.screen, Screen::Title | Screen::Menu { .. })
             && matches!(self.updater.state(), State::Available(update) if update.binary.is_some())
     }
@@ -153,10 +177,11 @@ impl App {
         }
     }
 
-    /// Só instala o que o usuário aceitou: `Ready` nasce exclusivamente de `Updater::accept`.
-    /// Chega sem aceite quando o pacote já veio de um boot anterior — aí vira aviso de novo.
     pub(super) fn apply_update_if_ready(&mut self) {
-        if !matches!(self.screen, Screen::Title | Screen::Menu { .. }) {
+        if !matches!(
+            self.screen,
+            Screen::Title | Screen::Menu { .. } | Screen::Settings { from_fight: false, .. }
+        ) {
             return;
         }
         if let Some((version, staged)) = self.updater.state().ready() {

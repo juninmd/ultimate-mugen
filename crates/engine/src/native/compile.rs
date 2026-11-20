@@ -34,7 +34,7 @@ pub(super) fn render_frame(nc: &NativeChar, fr: &NativeFrame, with_images: bool,
     }
     match &fr.effect {
         Some(effect) => render_effect(effect, with_images, palette),
-        None => super::pixel::boxes_only(nc, fr),
+        None => super::pixel_blank::boxes_only(nc, fr),
     }
 }
 

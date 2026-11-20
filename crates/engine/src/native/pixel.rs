@@ -11,8 +11,8 @@ const BASE_STEM: &str = "01_idle";
 const STAND_HURT: [f32; 4] = [-22.0, -96.0, 22.0, 0.0];
 const CROUCH_HURT: [f32; 4] = [-24.0, -64.0, 24.0, 0.0];
 const LYING_HURT: [f32; 4] = [-46.0, -26.0, 46.0, 0.0];
-const STRIKE_BOX: [f32; 4] = [2.0, -84.0, 38.0, -32.0];
-const STAND_UNITS: f32 = 100.0;
+pub(super) const STRIKE_BOX: [f32; 4] = [2.0, -84.0, 38.0, -32.0];
+pub(super) const STAND_UNITS: f32 = 100.0;
 
 pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value>) -> Option<FrameArt> {
     if fr.effect.is_some() { return None; }
@@ -118,24 +118,7 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
     })
 }
 
-pub(super) fn boxes_only(nc: &NativeChar, fr: &NativeFrame) -> FrameArt {
-    let lower = native_frame_sprite_key(fr).to_ascii_lowercase();
-    let height = nc.stats.height.filter(|height| height.is_finite() && *height > 0.0).unwrap_or(STAND_UNITS as f64) as f32;
-    let mut art = FrameArt {
-        image: None,
-        width: 0.0,
-        height: 0.0,
-        axis_x: 0.0,
-        axis_y: 0.0,
-        scale: 1.0,
-        hurt: vec![hurtbox(&lower, pose_stem(&lower))],
-        hit: if fr.hit.is_some() { vec![STRIKE_BOX] } else { vec![] },
-    };
-    super::pixel_hit::fit_to_character(nc, fr, &mut art, height / STAND_UNITS);
-    art
-}
-
-fn hurtbox(lower: &str, stem: &str) -> [f32; 4] {
+pub(super) fn hurtbox(lower: &str, stem: &str) -> [f32; 4] {
     if stem == "14_lie" {
         LYING_HURT
     } else if lower.contains("crouch") {
@@ -145,7 +128,7 @@ fn hurtbox(lower: &str, stem: &str) -> [f32; 4] {
     }
 }
 
-fn pose_stem(p: &str) -> &'static str {
+pub(super) fn pose_stem(p: &str) -> &'static str {
     match p {
         "idle1" | "idle3" => "07_idle1",
         "idle2" => "08_idle2",

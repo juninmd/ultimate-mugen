@@ -17,7 +17,7 @@ pub(super) async fn run(app: &mut App, dir: &str) {
         screen(app, dir, &format!("{code}-controls"), 12).await;
         app.screen = Screen::Replays { cur: 0 };
         screen(app, dir, &format!("{code}-replays"), 12).await;
-        for tab in [0usize, 3, 4] {
+        for tab in [0usize, 3, 4, 5] {
             app.screen = Screen::Settings { tab, cur: 1, from_fight: false };
             screen(app, dir, &format!("{code}-settings-{tab}"), 6).await;
         }

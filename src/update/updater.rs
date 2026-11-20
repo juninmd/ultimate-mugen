@@ -10,6 +10,7 @@ use std::sync::mpsc::Sender;
 pub enum State {
     Idle,
     Checking,
+    UpToDate,
     Available(super::Update),
     Downloading {
         version: String,
@@ -44,6 +45,7 @@ pub struct Updater {
     rx: Option<Receiver<Event>>,
     state: State,
     prompt: bool,
+    manual: bool,
 }
 
 impl Updater {
@@ -66,6 +68,7 @@ impl Updater {
                     rx: Some(rx),
                     state: State::Checking,
                     prompt,
+                    manual: false,
                 };
             }
         }
@@ -75,6 +78,27 @@ impl Updater {
             rx: None,
             state: State::Idle,
             prompt: false,
+            manual: false,
+        }
+    }
+
+    pub fn check_now(&mut self) {
+        #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
+        {
+            if matches!(
+                self.state,
+                State::Checking | State::Downloading { .. } | State::Ready { .. }
+            ) {
+                return;
+            }
+            let (tx, rx) = std::sync::mpsc::channel();
+            self.state = State::Checking;
+            self.rx = Some(rx);
+            self.manual = true;
+            self.prompt = true;
+            let _ = std::thread::Builder::new()
+                .name("update-manual".into())
+                .spawn(move || work(VERSION, tx));
         }
     }
 
@@ -83,9 +107,13 @@ impl Updater {
             return &self.state;
         };
         let mut keep = true;
-        while keep {
+        loop {
             match rx.try_recv() {
-                Ok(Event::Found(update)) => self.state = State::Available(update),
+                Ok(Event::Found(update)) => {
+                    self.state = State::Available(update);
+                    keep = false;
+                    break;
+                }
                 Ok(Event::Progress { done, total }) => {
                     let version = match &self.state {
                         State::Available(update) => update.version.clone(),
@@ -103,16 +131,23 @@ impl Updater {
                 Ok(Event::Ready { version, staged }) => {
                     self.state = State::Ready { version, staged };
                     keep = false;
+                    break;
                 }
                 Ok(Event::Failed(error)) => {
                     self.state = State::Failed(error);
                     keep = false;
+                    break;
                 }
                 Ok(Event::UpToDate) => {
-                    self.state = State::Idle;
+                    self.state = if self.manual {
+                        State::UpToDate
+                    } else {
+                        State::Idle
+                    };
                     keep = false;
+                    break;
                 }
-                Err(TryRecvError::Empty) => keep = false,
+                Err(TryRecvError::Empty) => break,
                 Err(TryRecvError::Disconnected) => {
                     if matches!(self.state, State::Checking) {
                         self.state = State::Idle;
@@ -120,6 +155,7 @@ impl Updater {
                         self.state = State::Failed("download interrupted".into());
                     }
                     keep = false;
+                    break;
                 }
             }
         }
@@ -138,14 +174,10 @@ impl Updater {
         self.rx = None;
     }
 
-    /// `--no-auto-update` / `UME_NO_AUTO_UPDATE`: mantém o aviso da versão nova no rodapé e nunca
-    /// pergunta, para quem não quer o app interrompendo. O `--update` manual continua valendo.
     pub fn prompt_allowed(&self) -> bool {
         self.prompt
     }
 
-    /// O usuário aceitou no aviso: baixa e verifica o pacote que o `check` já encontrou. Só um
-    /// `Ready` nascido daqui chega ao instalador — nada troca o binário sem esse aceite.
     pub fn accept(&mut self) {
         #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
         {
@@ -157,11 +189,7 @@ impl Updater {
             };
             let version = update.version.clone();
             let (tx, rx) = std::sync::mpsc::channel();
-            self.state = State::Downloading {
-                version: version.clone(),
-                done: 0,
-                total: binary.size,
-            };
+            self.state = State::Downloading { version: version.clone(), done: 0, total: binary.size };
             self.rx = Some(rx);
             let _ = std::thread::Builder::new()
                 .name("update-download".into())
@@ -169,7 +197,6 @@ impl Updater {
         }
     }
 
-    /// "Agora não": esquece a versão encontrada até o próximo boot (o aviso do rodapé some junto).
     pub fn dismiss(&mut self) {
         if matches!(self.state, State::Available(_)) {
             self.state = State::Idle;
@@ -179,17 +206,12 @@ impl Updater {
 
 #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
 fn work(current: &'static str, tx: Sender<Event>) {
-    match download::fetch_manifest(current) {
-        Ok(Some(update)) => {
-            let _ = tx.send(Event::Found(update));
-        }
-        Ok(None) => {
-            let _ = tx.send(Event::UpToDate);
-        }
-        Err(error) => {
-            let _ = tx.send(Event::Failed(error));
-        }
-    }
+    let event = match download::fetch_manifest(current) {
+        Ok(Some(update)) => Event::Found(update),
+        Ok(None) => Event::UpToDate,
+        Err(error) => Event::Failed(error),
+    };
+    let _ = tx.send(event);
 }
 
 #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
@@ -197,24 +219,17 @@ fn download_work(version: String, binary: super::manifest::Asset, tx: Sender<Eve
     let progress_tx = tx.clone();
     let mut last_bucket = u64::MAX;
     let result = download::download_and_stage(&version, &binary, |done, total| {
-        let percent = if total > 0 {
-            done.saturating_mul(100) / total
-        } else {
-            0
-        };
+        let percent = if total > 0 { done.saturating_mul(100) / total } else { 0 };
         if percent / 5 != last_bucket {
             last_bucket = percent / 5;
             let _ = progress_tx.send(Event::Progress { done, total });
         }
     });
-    match result {
-        Ok(staged) => {
-            let _ = tx.send(Event::Ready { version, staged });
-        }
-        Err(error) => {
-            let _ = tx.send(Event::Failed(error));
-        }
-    }
+    let event = match result {
+        Ok(staged) => Event::Ready { version, staged },
+        Err(error) => Event::Failed(error),
+    };
+    let _ = tx.send(event);
 }
 
 #[cfg(test)]

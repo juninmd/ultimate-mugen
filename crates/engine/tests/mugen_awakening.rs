@@ -48,6 +48,18 @@ fn mugen_can_awaken_without_a_native_transformation_action() {
         battle.tick(&[0, 0]);
     }
     assert!(battle.fighters[0].ctrl);
+    let mut base_movement = battle.clone();
+    base_movement.fighters[0].revert_form();
+    let start = battle.fighters[0].pos.x;
+    for _ in 0..12 {
+        battle.tick(&[k::R, 0]);
+        base_movement.tick(&[k::R, 0]);
+    }
+    let base_distance = base_movement.fighters[0].pos.x - start;
+    let awakened_distance = battle.fighters[0].pos.x - start;
+    assert!(base_distance > 0.0);
+    assert!(awakened_distance > base_distance * 1.05);
+
     battle.fighters[0].attack_mul = attack * 0.8;
     assert!((battle.fighters[0].effective_attack() - attack * 0.8 * 1.3).abs() < 0.001);
     battle.start_round();

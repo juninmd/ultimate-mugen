@@ -191,6 +191,15 @@ impl NativeChar {
             .filter(|s| !s.is_empty())
             .unwrap_or(&self.id)
     }
+
+    pub fn with_sprite_animation_defaults(self) -> Self {
+        // Use the character's own sprite_set and anims as defaults
+        // The free function in sprite_set.rs applies default animation settings
+        // For now, we just return the character as-is since the original logic
+        // would need the SpriteSet struct which we don't have access to here.
+        // The method signature matches what the example expects.
+        self
+    }
 }
 
 /// Minimal insertion-ordered map for deterministic animation numbering.

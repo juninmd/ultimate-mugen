@@ -6,6 +6,10 @@ pub const BEAT_SECONDS: f32 = 2.4;
 pub const BEAT_FADE: f32 = 0.35;
 
 pub fn stage_beat(stage: usize, beat: usize) -> &'static str {
+    let scripted = super::script::active().stage_beat(stage, beat, crate::i18n::get());
+    if !scripted.is_empty() {
+        return scripted;
+    }
     let beat = beat.min(BEATS_PER_STAGE - 1);
     if beat == ALLY_BEAT {
         return ally_line(stage);

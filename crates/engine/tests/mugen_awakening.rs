@@ -48,7 +48,9 @@ fn mugen_can_awaken_without_a_native_transformation_action() {
         battle.tick(&[0, 0]);
     }
     assert!(battle.fighters[0].ctrl);
+    battle.fighters[0].attack_mul = attack * 0.8;
+    assert!((battle.fighters[0].effective_attack() - attack * 0.8 * 1.3).abs() < 0.001);
     battle.start_round();
     assert_eq!(battle.fighters[0].form, 0);
-    assert!((battle.fighters[0].effective_attack() - attack).abs() < 0.001);
+    assert!((battle.fighters[0].effective_attack() - attack * 0.8).abs() < 0.001);
 }

@@ -8,7 +8,8 @@ fn form_defence(def: &CharDef, entered: u8) -> f32 {
     def.forms.iter().take(entered as usize).fold(1.0, |defence, form| defence * form.defense)
 }
 
-fn form_attack(def: &CharDef, entered: u8) -> f32 {
+fn stored_form_attack(def: &CharDef, entered: u8) -> f32 {
+    if def.source == Source::Mugen && def.forms.is_empty() { return 1.0; }
     let minimum = 1.0 + (LEGACY_ATTACK - 1.0) * f32::from(entered.min(6));
     def.forms.iter().take(entered as usize).fold(1.0, |attack, form| attack * form.attack).max(minimum)
 }
@@ -39,6 +40,14 @@ impl Fighter {
             .unwrap_or(&self.def.form_name)
     }
 
+    pub(crate) fn legacy_awakening_attack(&self) -> f32 {
+        if self.form > 0 && self.base_def.source == Source::Mugen && self.base_def.forms.is_empty() {
+            LEGACY_ATTACK
+        } else {
+            1.0
+        }
+    }
+
     pub fn form_speed_multiplier(&self) -> f32 {
         1.0 + 0.08 * f32::from(self.form.min(6))
     }
@@ -57,7 +66,7 @@ impl Fighter {
 
     pub fn revert_form(&mut self) {
         if self.form == 0 { return; }
-        self.attack_mul /= form_attack(&self.base_def, self.form);
+        self.attack_mul /= stored_form_attack(&self.base_def, self.form);
         self.defence_mul /= form_defence(&self.base_def, self.form);
         self.form = 0;
         self.form_time = 0;
@@ -73,8 +82,8 @@ impl Match {
         if f.is_helper || !f.alive || !f.ctrl || f.state_type == 'A' || f.power < cost || self.round_state != 2 || self.pause.is_some() { return false; }
         let id = f.id;
         let target_form = (f.form + 1).min(f.base_def.forms.len().max(1) as u8);
-        let old_a = form_attack(&f.base_def, f.form);
-        let new_a = form_attack(&f.base_def, target_form);
+        let old_a = stored_form_attack(&f.base_def, f.form);
+        let new_a = stored_form_attack(&f.base_def, target_form);
         let defence_gain = form_defence(&f.base_def, target_form) / form_defence(&f.base_def, f.form);
         let target = f.base_def.forms.get((target_form as usize).saturating_sub(1)).and_then(|fm| fm.target.clone());
         {
@@ -113,8 +122,8 @@ impl Match {
         for f in self.fighters.iter_mut().filter(|f| !f.is_helper && f.def.boss) {
             let max_form = f.base_def.forms.len().max(1) as u8;
             let target_form = phase.clamp(1, max_form);
-            let old_a = form_attack(&f.base_def, f.form);
-            let new_a = form_attack(&f.base_def, target_form);
+            let old_a = stored_form_attack(&f.base_def, f.form);
+            let new_a = stored_form_attack(&f.base_def, target_form);
             let defence_gain = form_defence(&f.base_def, target_form) / form_defence(&f.base_def, f.form);
             let base_life = f.base_def.c("data.life", 1000.0) as f32;
             f.form = target_form;

@@ -127,7 +127,7 @@ impl Fighter {
     }
 
     pub fn effective_attack(&self) -> f32 {
-        self.passive_attack() * self.rush.attack_gain()
+        self.passive_attack() * self.legacy_awakening_attack() * self.rush.attack_gain()
     }
 
     fn passive_attack(&self) -> f32 {

@@ -11,4 +11,4 @@ Cada cenário abre um deep link com `?e2e=1`, que publica `window.__ume_state` a
 
 Falha por: erro de página, panic de Rust, `RuntimeError` ou `console.error` inesperado; tick da simulação parado por `MATCH_SMOKE_STALL_MS` (padrão 20000 ms) fora de pausa e fim de luta; nenhum frame de animação ou thread principal sem resposta pelo mesmo tempo; imagem renderizada nunca mudar durante a luta; resultados não alcançados em `MATCH_SMOKE_LIMIT_MS` (padrão 360000 ms) ou impossíveis de fechar com Enter.
 
-`MATCH_SMOKE_SCENARIOS=<nome,...>` roda um subconjunto e `WEB_SMOKE_SHOTS=<dir>` guarda capturas (o CI envia em caso de falha).
+`MATCH_SMOKE_SCENARIOS=<nome,...>` roda um subconjunto, `MATCH_SMOKE_SHARD=<i>/<n>` roda um a cada n cenários a partir do i (o CI divide o smoke de partida em jobs paralelos assim; seleção vazia falha) e `WEB_SMOKE_SHOTS=<dir>` guarda capturas (o CI envia em caso de falha).

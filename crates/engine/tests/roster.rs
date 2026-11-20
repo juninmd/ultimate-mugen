@@ -276,7 +276,7 @@ fn awakening_costs_a_bar_boosts_stats_and_ends_with_the_round() {
     assert_eq!(f.form, 1);
     assert!(f.power < 1000.0, "awakening spends a bar ({})", f.power);
     assert!(f.attack_mul > atk * 1.25 && f.defence_mul > def * 1.2, "stronger and tougher");
-    assert!(f.life > 400.0, "small life refill");
+    assert!((f.life - 400.0).abs() < 1e-3, "awakening spends meter, not life");
     assert!(m.events.iter().any(|e| matches!(e, ume_engine::matchs::Event::Transform { .. })));
     // plays the power-up state (engine awakening state), then returns to idle with control; can't awaken twice
     assert_eq!(f.state_no, ume_engine::matchs::ENGINE_STATE_AWAKENING);

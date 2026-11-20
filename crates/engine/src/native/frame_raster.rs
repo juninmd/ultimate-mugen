@@ -1,6 +1,6 @@
 use super::compile::render_frame;
 use super::forms::form_palette;
-use super::rig::RigRender;
+use super::effects::FrameArt;
 use super::types::{NativeChar, NativeFrame};
 use crate::chardef::Sprite;
 use serde_json::Value;
@@ -36,11 +36,11 @@ impl VariantPalettes {
 }
 
 pub(super) struct FrameRaster {
-    pub base: RigRender,
-    pub variants: Vec<(i32, RigRender)>,
+    pub base: FrameArt,
+    pub variants: Vec<(i32, FrameArt)>,
 }
 
-pub(super) fn sprite_of(render: RigRender) -> Sprite {
+pub(super) fn sprite_of(render: FrameArt) -> Sprite {
     Sprite { image: render.image, width: render.width, height: render.height, axis_x: render.axis_x, axis_y: render.axis_y, scale: render.scale }
 }
 

@@ -45,11 +45,9 @@ crates/engine/src/native/
   mod.rs            fachada: declarações e reexports, só isso
   compile.rs        JSON UMF -> estados
   pack.rs           empacotamento de atlas
-  rig.rs            tipos do esqueleto e pontos de entrada públicos
-  rig/
-    body.rs         articulações do corpo
-    detail.rs       articulações de cabelo e roupa
-    face.rs         articulações do rosto
+  effects.rs        efeitos de projétil e faíscas (única arte desenhada pelo motor)
+  effects/
+    dragon.rs       efeito do dragão de energia
 ```
 
 - `feature.rs` guarda os tipos compartilhados por todas as partes e as funções que o resto da crate chama.
@@ -98,13 +96,12 @@ Estes arquivos concentram as responsabilidades mais independentes e são a orige
 
 | Arquivo | Linhas | Divisão sugerida |
 |---|---|---|
-| `crates/engine/src/native/rig.rs` | 2265 | `rig/skeleton.rs`, `rig/pose.rs`, `rig/palette.rs` ao lado de `body.rs`, `detail.rs`, `face.rs` |
+| `crates/engine/src/native/effects.rs` | 1711 | `effects/canvas.rs`, `effects/raster.rs`, `effects/kinds.rs` |
 | `crates/engine/src/matchs.rs` | 1751 | `matchs/round.rs`, `matchs/collision.rs`, `matchs/camera.rs`, `matchs/tick.rs` |
 | `src/app.rs` | 2238 | Nove telas já vivem em `src/app/`; as próximas são `select` (830 linhas, dividir em grade, painel lateral e entrada) e `load_step_inner` |
 | `src/stages.rs` | 1069 | `stages/load.rs`, `stages/layers.rs`, `stages/motion.rs` |
 | `src/stagefx.rs` | 704 | `stagefx/scenes.rs` já existe; extraia `stagefx/particles.rs`, `stagefx/weather.rs` |
 | `src/market.rs` | 700 | `market/install.rs`, `market/listing.rs`; a crate mantém a lógica |
-| `crates/engine/src/native/rig/detail.rs` | 723 | `detail/hair.rs`, `detail/cloth.rs` |
 | `crates/formats/src/screenpack.rs` | 610 | `screenpack/lifebars.rs`, `screenpack/motif.rs` |
 
 ## Checklist de revisão

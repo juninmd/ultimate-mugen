@@ -1,6 +1,6 @@
-use super::rig::{render_pose, RigRender};
+use super::effects::FrameArt;
+use super::pixel_fit::SpriteMask;
 use super::types::{ActiveSpec, Box4, NativeChar, NativeFrame};
-use serde_json::Value;
 
 pub const STANDING_UNITS: f32 = 96.0;
 pub const BODY_START: f32 = 0.10;
@@ -14,8 +14,8 @@ pub fn standing_height(nc: &NativeChar) -> f32 {
     STANDING_UNITS * declared / 100.0
 }
 
-pub(super) fn fit_to_character(nc: &NativeChar, fr: &NativeFrame, render: &mut RigRender, height_ratio: f32) {
-    if let Some(boxes) = declared_strike_boxes(nc, fr) {
+pub(super) fn fit_to_character(nc: &NativeChar, fr: &NativeFrame, render: &mut FrameArt, height_ratio: f32) {
+    if let Some(boxes) = declared_strike_boxes(nc, fr, render) {
         render.hit = boxes;
     }
     for bounds in &mut render.hurt {
@@ -25,25 +25,38 @@ pub(super) fn fit_to_character(nc: &NativeChar, fr: &NativeFrame, render: &mut R
     }
 }
 
-fn declared_strike_boxes(nc: &NativeChar, fr: &NativeFrame) -> Option<Vec<Box4>> {
+fn declared_strike_boxes(nc: &NativeChar, fr: &NativeFrame, render: &FrameArt) -> Option<Vec<Box4>> {
     let active = fr.hit.as_ref()?;
     if let Some(explicit) = active.bx {
         return Some(vec![explicit]);
     }
-    if nc.art.kind != "rig" {
-        return None;
-    }
-    let pose = match fr.pose.as_ref()? {
-        Value::String(name) => nc.art.poses.get(name)?.clone(),
-        other => other.clone(),
-    };
-    let mut geometry = render_pose(&nc.art.style, &pose, Some(active), false, None);
-    if geometry.hit.is_empty() {
-        let leading_limb = ActiveSpec { part: "handF".into(), radius: active.radius, bx: None };
-        geometry = render_pose(&nc.art.style, &pose, Some(&leading_limb), false, None);
-    }
     let height = standing_height(nc);
-    (!geometry.hit.is_empty()).then(|| geometry.hit.into_iter().map(|tip| playable_strike_box(tip, height)).collect())
+    let seed = front_strip(render, fr).unwrap_or_else(|| seed_strike_box(active, height));
+    Some(vec![playable_strike_box(seed, height)])
+}
+
+const FRONT_SHARE: f32 = 0.4;
+
+fn front_strip(render: &FrameArt, fr: &NativeFrame) -> Option<Box4> {
+    let image = render.image.as_ref()?;
+    let offset = fr.offset.unwrap_or([0.0, 0.0]);
+    let mask = SpriteMask::new(image, [render.axis_x, render.axis_y], render.scale, offset);
+    let bounds = mask.bounds()?;
+    let width = (bounds[2] - bounds[0]) * FRONT_SHARE;
+    mask.trim([bounds[2] - width, bounds[1], bounds[2], bounds[3]])
+}
+
+fn seed_strike_box(active: &ActiveSpec, height: f32) -> Box4 {
+    let part = active.part.to_ascii_lowercase();
+    let (top, bottom) = if ["foot", "knee", "shin", "leg", "ankle"].iter().any(|low| part.contains(low)) {
+        (-0.42, -0.02)
+    } else if part.contains("head") {
+        (-0.95, -0.70)
+    } else {
+        (-0.78, -0.42)
+    };
+    let reach = 0.55 * height + active.radius.unwrap_or(10.0);
+    [BODY_START * height, top * height, reach, bottom * height]
 }
 
 pub fn playable_strike_box(mut bounds: Box4, height: f32) -> Box4 {

@@ -2,8 +2,8 @@
 name: ume-character-creator
 description: >-
   Guia definitivo, runbook e manual técnico para criação de personagens nativos UMF 2.0
-  para o motor Ultimate MUGEN (UME). Cobre arquivo único JSON declarativo, pipelines
-  vetorial (Rig) e Pixel-Art (PNG), voo parametrizável, teletransporte, super velocidade,
+  para o motor Ultimate MUGEN (UME). Cobre arquivo único JSON declarativo, renderização
+  somente por sprites Pixel-Art (PNG), voo parametrizável, teletransporte, super velocidade,
   multi-transformações (parciais ou corpo todo, troca de habilidades, troca de personagem),
   exibição automática de consumo de super barra no menu de comandos e bateria de testes.
 ---
@@ -19,7 +19,7 @@ O formato **UMF** (*Ultimate Mugen Format*) é o padrão moderno de personagens 
 | Recurso | MUGEN Clássico (6 arquivos) | UME Nativo (UMF 2.0 JSON) |
 | :--- | :--- | :--- |
 | **Arquitetura de Arquivos** | Fragmentada (`.def`, `.sff`, `.air`, `.cns`, `.cmd`, `.snd`) | Arquivo único JSON (`assets/chars/<id>.json`) |
-| **Renderização** | SFFv1 (PCX 8-bit) ou SFFv2 (PNG) | Híbrido: Rig vetorial procedural OU Sprites PNG em lote |
+| **Renderização** | SFFv1 (PCX 8-bit) ou SFFv2 (PNG) | Sprites PNG em pixel art (sem arte procedural) |
 | **Paletas & Cores** | Arquivos binários `.act` (256 cores) | Hexadecimais declarativos com shading shader em tempo real |
 | **Voo (`Fly`)** | Código manual extenso em CNS (`physics = N` com VelSet) | Declarativo: `abilities.fly` (speed, cost contínuo, input) |
 | **Teletransporte** | PosAdd e Turn amarrados a triggers complexos | Declarativo: `abilities.teleport` (cost, invuln, input) |
@@ -62,7 +62,7 @@ O formato **UMF** (*Ultimate Mugen Format*) é o padrão moderno de personagens 
     "superSpeed": { "mul": 2.0, "cost": 120.0, "input": "a+c" },
     "forms": []
   },
-  "art": { "type": "rig", "style": {}, "poses": {} },
+  "art": { "type": "sprites", "style": {}, "poses": {} },
   "palettes": [],
   "awakeningPalette": { "hair": "#ffe600" },
   "anims": {},
@@ -148,8 +148,8 @@ O painel de pausa do Ultimate MUGEN lê dinamicamente o atributo `cost` e `drain
 Consulte os arquivos complementares incluídos nesta skill:
 - [Exemplo Completo com Todas as Features](examples/exemplo_lutador_completo.json): Arquivo UMF 2.0 funcional com voo, teleporte, super velocidade, multi-transformação e troca de personagem.
 - [Manual de Especificação UMF 2.0](references/manual_umf_especificacao_completa.md): Referência técnica exaustiva de cada propriedade do manifesto JSON.
-- [Guia de Sprites Vetoriais e Pixel Art](references/guia_sprites_rig_e_pixel.md): Runbook detalhado para rigs vetoriais e integração de spritesheets PNG.
+- [Guia de Sprites e Pixel Art](references/guia_sprites_e_pixel.md): Runbook detalhado de sprites PNG e integração de spritesheets.
 
-Para gerar ou corrigir sprites pixel art, primeiro inspecione todas as sprites existentes do próprio personagem e use uma pose aprovada como referência explícita de identidade e acabamento; não presuma que `walk0.png` seja canônica nem comece de um canvas genérico quando já houver pixel art válida. Para sprites de combate nativas, preserve o canvas transparente 400 × 400 RGBA, escala e linha-base do pacote, gere uma pose por chamada e mantenha o mapeamento entre saída e arquivo. Use a pose-alvo antiga só para movimento/enquadramento se ela divergir da identidade aprovada; não carregue efeitos que não existam naquela pose. Siga o prompt-base e os critérios de aprovação em `references/guia_sprites_rig_e_pixel.md`. Para Garan, `04_special.png` é a âncora canônica; use `walk0.png` apenas como referência secundária depois de confirmar que retrata o mesmo oni. Revise cada arquivo e sequência em folhas de contato, separando defeitos visuais da cobertura estrutural. Retratos `portrait.png` são uma exceção: mantenha o acabamento detalhado de alta resolução e use `assets/chars/sprites/kaito/portrait.png` como referência de qualidade, conforme o procedimento específico no guia.
+Para gerar ou corrigir sprites pixel art, primeiro inspecione todas as sprites existentes do próprio personagem e use uma pose aprovada como referência explícita de identidade e acabamento; não presuma que `walk0.png` seja canônica nem comece de um canvas genérico quando já houver pixel art válida. Para sprites de combate nativas, preserve o canvas transparente 400 × 400 RGBA, escala e linha-base do pacote, gere uma pose por chamada e mantenha o mapeamento entre saída e arquivo. Use a pose-alvo antiga só para movimento/enquadramento se ela divergir da identidade aprovada; não carregue efeitos que não existam naquela pose. Siga o prompt-base e os critérios de aprovação em `references/guia_sprites_e_pixel.md`. Para Garan, `04_special.png` é a âncora canônica; use `walk0.png` apenas como referência secundária depois de confirmar que retrata o mesmo oni. Revise cada arquivo e sequência em folhas de contato, separando defeitos visuais da cobertura estrutural. Retratos `portrait.png` são uma exceção: mantenha o acabamento detalhado de alta resolução e use `assets/chars/sprites/kaito/portrait.png` como referência de qualidade, conforme o procedimento específico no guia.
 
 - [Validação de sequências e reações a dano](references/sequencias_de_combate.md)

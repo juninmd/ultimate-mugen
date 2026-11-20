@@ -1,39 +1,12 @@
-# Guia de Sprites, Rig Vetorial e Arte Pixel para UME
+# Guia de Sprites e Arte Pixel para UME
 
-O Ultimate MUGEN oferece dois pipelines de renderização gráfica independentes para personagens UMF:
-1. **Pipeline Procedural / Vetorial (Rig)**: O personagem é descrito por ossos, membros angulares e preenchimentos vetoriais em `art.style` e `art.poses`.
-2. **Pipeline de Arte Pixel (PNG / Sprite Pack)**: Sprites pré-renderizados em arquivos PNG transparentes alinhados na pasta `assets/chars/sprites/<id>/`.
+Todo lutador UMF é desenhado apenas por **sprites PNG em pixel art**, como os personagens M.U.G.E.N são desenhados por sprites: PNGs transparentes alinhados em `assets/chars/sprites/<id>/`. Não existe pipeline procedural/vetorial: nenhum corpo, pose ou golpe de lutador é gerado por código. Só os efeitos de projétil e faíscas (`effect`, veja `docs/wiki/Effects.md`) são desenhados pelo motor.
 
 ---
 
-## 1. O Pipeline Vetorial (Rig)
+## 1. Sprites PNG
 
-No pipeline vetorial, nenhuma textura bitmap externa é necessária. O motor desenha o lutador em tempo real através do rasterizador tiny-skia / wgpu em 60 quadros por segundo.
-
-### Anatomia de `art.style`
-Define a compleição física, roupas e esquema de cores:
-- `build`: Escala global da massa corporal (ex: `1.04`).
-- `top`: Modelo da vestimenta superior (`"gi"`, `"shirt"`, `"jacket"`, `"armor"`, `"none"`).
-- `pants`: Modelo da vestimenta inferior (`"gi"`, `"pants"`, `"shorts"`).
-- `gloves`: `"wrap"` (faixas), `"gloves"`, `"barefoot"`.
-- `hair`: Objeto com estilo de cabelo, quantidade de mechas pontiagudas (`spikes`), curvatura (`sweep`) e brilho.
-- `colors`: Dicionário com `skin`, `hair`, `eye`, `top`, `top2`, `trim`, `pants`, `belt`, `wrap`.
-
-### Poses Angulares (`art.poses`)
-Cada pose define os ângulos em graus de cada junta:
-- `shoulderF` / `elbowF`: Braço frontal (ombro e cotovelo).
-- `shoulderB` / `elbowB`: Braço traseiro.
-- `thighF` / `kneeF`: Perna frontal (coxa e joelho).
-- `thighB` / `kneeB`: Perna traseira.
-- `lean`: Inclinação do tronco em graus.
-- `head`: Rotação da cabeça.
-- `phase`: Fase da animação de respiração / ondulação de faixas e cabelo.
-
----
-
-## 2. O Pipeline de Arte Pixel (Sprites PNG)
-
-Quando a pasta `assets/chars/sprites/<id>/` existe no disco, o motor automaticamente substitui o rig pelos sprites em pixel art.
+Quando a pasta `assets/chars/sprites/<id>/` existe no disco, o motor desenha o lutador pelos sprites em pixel art.
 
 ### Nomenclatura Padrão de Poses
 | Arquivo | Uso no Motor |
@@ -70,7 +43,7 @@ As coordenadas `[left, top, right, bottom]` delimitam onde a nova paleta de cor 
 
 ---
 
-## 3. Geração e integração de Pixel Art com referência
+## 2. Geração e integração de Pixel Art com referência
 
 Use a ferramenta de geração de imagens para criar ou reparar PNGs quando o personagem já usa sprites bitmap. Preserve os demais fluxos UMF deste guia: gerar arte não substitui configurar animações, metadados, poderes ou validar o jogo.
 

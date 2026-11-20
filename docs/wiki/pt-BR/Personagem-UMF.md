@@ -30,7 +30,7 @@ Lutadores UMF também carregam de uma pasta, sem recompilar: coloque o `.json` e
   "boss": false,
   "speed": 1.0,
   "stats": {},
-  "art": { "type": "rig", "style": {}, "poses": {} },
+  "art": { "type": "sprites", "style": {}, "poses": {} },
   "palettes": [],
   "awakeningPalette": { "hair": "#f6c83e" },
   "anims": {},
@@ -46,7 +46,7 @@ Lutadores UMF também carregam de uma pasta, sem recompilar: coloque o `.json` e
 | `profile` | não | Nacionalidade e biografia, ver [Perfil](#perfil-nacionalidade-e-biografia) |
 | `speed` | não | Multiplicador de velocidade das animações (>1 = golpes mais rápidos) |
 | `stats` | não | Atributos, tabela abaixo |
-| `art` | sim | Arte, ver [Rig](Rig.md) |
+| `art` | sim | Arte: `style.colors` guia a recoloração das paletas nos sprites PNG e `poses` nomeia as chaves de pose |
 | `palettes` | não | Cores alternativas; cada item sobrescreve chaves de `art.style.colors` |
 | `awakeningPalette` | não | Cores aplicadas sobre a paleta selecionada durante o despertar; sprites de efeitos não mudam |
 | `anims` | sim | Animações por nome |
@@ -127,13 +127,13 @@ Cada animação é uma lista de quadros:
 | `ticks` | Duração em ticks (60 por segundo); `-1` = infinito |
 | `hit` | Hitbox ativa: `part` (membro ou arma) + `radius`, ou `box` `[x1, y1, x2, y2]` |
 | `hurt` | `"none"` remove a hurtbox (invencível no quadro) |
-| `effect` | Desenha um efeito em vez do corpo (projéteis, faíscas), ver [Rig](Rig.md#efeitos) |
+| `effect` | Desenha um efeito em vez do corpo (projéteis, faíscas), ver [Quadros de efeito](Efeitos.md) |
 | `offset` | Deslocamento `[x, y]` do desenho |
 | `loop` | Índice do quadro onde o loop recomeça |
 
 #### Como um frame de ataque vira hitbox
 
-Frames desenhados com sprites em pixel usam como caixa de golpe a geometria do rig da `pose` e do `hit` do frame (`part` + `radius`), ou o `box` explícito quando existe, então cada golpe mantém o próprio alcance. O compilador então remodela a caixa para as proporções medidas em 605 personagens M.U.G.E.N (`native/pixel_hit.rs`, `H` = altura em pé, 96 unidades para `height` 100):
+Frames desenhados com sprites em pixel usam como caixa de golpe o `box` explícito quando existir, senão uma caixa padrão semeada pelo `part` do `hit` (baixa para pés e joelhos, alta para a cabeça, média nos demais) e pelo `radius`, ajustada à silhueta do sprite; quando existe, então cada golpe mantém o próprio alcance. O compilador então remodela a caixa para as proporções medidas em 605 personagens M.U.G.E.N (`native/pixel_hit.rs`, `H` = altura em pé, 96 unidades para `height` 100):
 
 - como um `Clsn1` do M.U.G.E.N, a caixa vai do corpo até a ponta: começa no máximo `0.10 H` à frente da origem e alcança pelo menos `0.60 H` (a mediana do M.U.G.E.N é `0.72 H` nos socos e `0.80 H` nos chutes);
 - pelo menos `0.36 H` de altura, nunca acima de `0.95 H` nem abaixo do chão (socos do M.U.G.E.N ficam entre `-0.75 H` e `-0.33 H`, chutes descem até `-0.05 H`);
@@ -285,7 +285,7 @@ Qualquer animação em `anims` aceita `"id": 8801` para fixar um número de aç�
 
 ## Sprites pixel art (opcional)
 
-Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG em vez do rig. Use PNGs transparentes voltados para a direita, com os pés na borda inferior e o mesmo tamanho de tela (400×400 RGBA) em todos os arquivos de um lutador. Gere PNGs de combate faltantes com `generate_image` usando uma âncora canônica em pixel art validada do próprio personagem (nunca use o rig vetorial procedural depreciado).
+Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG, como os lutadores M.U.G.E.N são desenhados por sprites. Use PNGs transparentes voltados para a direita, com os pés na borda inferior e o mesmo tamanho de tela (400×400 RGBA) em todos os arquivos de um lutador. Gere PNGs de combate faltantes com `generate_image` usando uma âncora canônica em pixel art validada do próprio personagem (nunca use o rig vetorial procedural depreciado).
 
 | Arquivo | Poses que o usam |
 |---|---|
@@ -303,15 +303,14 @@ Quando `awakeningPalette` altera `hair`, cada sprite define `frames.<nome>.awake
 
 As entradas de `palettes` também valem para esses PNGs: cada pixel é casado com a linha de sombreamento de uma cor declarada em `art.style.colors` e a cor da paleta substitui no mesmo tom. Uma chave de paleta sem entrada correspondente em `art.style.colors`, ou uma cor que nada na arte lembra, fica intocada.
 
-O build web não lê essa pasta do disco. `scripts/build-web.sh` roda `ume-tools pack-sprites` (`crates/devtools`), que grava um `assets/chars/sprites/<id>.pack` por lutador (imagens limitadas a 768 px, 256 cores, âncoras do `meta.json` reescaladas) em `web/dist`; o navegador baixa o pack quando o lutador ganha foco na seleção ou é carregado para a luta, e o engine lê pelo mesmo diretório virtual. Se o download falhar, o rig continua.
+O build web não lê essa pasta do disco. `scripts/build-web.sh` roda `ume-tools pack-sprites` (`crates/devtools`), que grava um `assets/chars/sprites/<id>.pack` por lutador (imagens limitadas a 768 px, 256 cores, âncoras do `meta.json` reescaladas) em `web/dist`; o navegador baixa o pack quando o lutador ganha foco na seleção ou é carregado para a luta, e o engine lê pelo mesmo diretório virtual. Se o download falhar, o lutador fica sem arte: a partida espera o pacote e informa a falha.
 
 ## Validar
 
 ```bash
 cargo test --workspace --release
-cargo run --release -p ume-engine --example rig_sheet
 ```
 
-`rig_sheet` gera uma folha com todas as poses para revisar a arte sem abrir o jogo.
+Revise a arte dos lutadores com `ume-tools audit-sprites`, que lista poses ausentes e reaproveitadas, ou no próprio jogo.
 
 Os pacotes de sprites do navegador carregam de forma assíncrona. Um pacote novo ou substituído invalida as prévias e todas as paletas em cache do lutador afetado; os demais mantêm seus caches. O carregamento da luta aguarda os pacotes dos lutadores nativos escolhidos e informa falhas de download, em vez de iniciar com uma aparência procedural antiga. Definições nativas importadas sem pacote integrado continuam compatíveis.

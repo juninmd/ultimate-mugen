@@ -1,5 +1,5 @@
 //! UMF → CharDef compiler: generates commands, [Statedef -1], move states, HitDefs and projectiles as CNS.
-use super::rig::{render_effect, render_pose, RigRender};
+use super::effects::{render_effect, FrameArt};
 use super::types::*;
 use crate::chardef::{default_constants, AnimFrame, Animation, Blend, CharDef, MoveInfo, Source, Sprite};
 use crate::cns::parse_states;
@@ -25,20 +25,16 @@ pub fn compile_native(nc: &NativeChar, pal_no: i32, with_images: bool) -> CharDe
 
 fn frame_key(fr: &NativeFrame) -> String { serde_json::to_string(&(&fr.pose, &fr.effect, &fr.hit, &fr.sprite)).unwrap_or_default() }
 
-pub(super) fn render_frame(nc: &NativeChar, fr: &NativeFrame, with_images: bool, palette: Option<&Value>) -> RigRender {
-    let force_rig = std::env::var("UME_FORCE_RIG").is_ok();
-    if !force_rig && with_images {
-        if let Some(r) = super::pixel::try_load(nc, fr, palette) {
-            return r;
+pub(super) fn render_frame(nc: &NativeChar, fr: &NativeFrame, with_images: bool, palette: Option<&Value>) -> FrameArt {
+    if let Some(mut art) = super::pixel::try_load(nc, fr, palette.filter(|_| with_images)) {
+        if !with_images {
+            art.image = None;
         }
+        return art;
     }
-    if nc.art.kind != "rig" {
-        RigRender { image: None, width: 0.0, height: 0.0, axis_x: 0.0, axis_y: 0.0, scale: 1.0, hurt: vec![], hit: vec![] }
-    } else if let Some(e) = &fr.effect {
-        render_effect(e, with_images, palette)
-    } else {
-        let pose = match &fr.pose { Some(Value::String(s)) => nc.art.poses.get(s).cloned().unwrap_or(Value::Null), Some(v) => v.clone(), None => Value::Null };
-        render_pose(&nc.art.style, &pose, fr.hit.as_ref(), with_images, palette)
+    match &fr.effect {
+        Some(effect) => render_effect(effect, with_images, palette),
+        None => super::pixel_blank::boxes_only(nc, fr),
     }
 }
 
@@ -207,7 +203,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     extras::append_exotic(nc, &anim_no, &move_states, &mut commands, &mut movelist, &mut minus1, &mut minus2, &mut cns);
     parse_states(&(minus1 + &minus2 + &cns), &mut states, true);
     super::scripts::compile_scripts(nc.scripts.as_ref(), &anim_no, &move_states, &mut states);
-    if with_images && std::env::var("UME_FORCE_RIG").is_err() {
+    if with_images {
         if let Some(avatar) = super::portrait::portrait(nc, palette) { sprites.insert((9000, 1), avatar); }
     }
     let portrait = sprites.get(&(9000, 1)).cloned().or_else(|| anims.get(&0).and_then(|a: &Animation| a.frames.first()).and_then(|f| sprites.get(&(f.group, f.index)).cloned()));

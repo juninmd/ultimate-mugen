@@ -20,7 +20,7 @@ How the engine keeps loading fast and frames smooth, and how to measure it.
 | Expression & param bytecode cache | `ume_engine::chardef` | `safe_expr` and `Param::new` cache parsed AST and bytecode across identical triggers and parameters via thread-local storage | Per thread |
 | Zero-alloc INI lookups | `ume_formats::ini` | `Section::get` and `find_section` use `eq_ignore_ascii_case` avoiding heap allocations; `strip_comment` short-circuits without comments | Calling thread |
 | Select-screen portraits | `load_mugen_portrait` decodes only sprites 9000,0, 9000,1 and the first idle frame (plus their link sources) via `decode_sff_only` | 1 |
-| Native (UMF) rig | Every unique frame is rasterized in parallel | All cores (max 8) |
+| Native (UMF) sprites and effects | Every unique frame is decoded or rasterized in parallel | All cores (max 8) |
 | Whole character | Loaded on a `char-load` thread while the VS screen is shown | 1 background thread |
 | VFS resolution | Short-circuiting single-candidate lookups, zero-alloc ASCII path normalization, and clone-free `BTreeMap::range` queries | Calling thread |
 
@@ -439,8 +439,8 @@ etain_mut.
 
 - **Web select screen** (`scripts/web-frame-probe.js`, `scripts/web-profile.js`):
   - Native roster tiles draw `portrait.png` through `CharEntry::tile_portrait` (one small PNG decode, cached per pack revision) instead of compiling an idle+win preview per tile; the full preview is only built for the focused or picked fighter.
-  - Previews wait until the fighter's sprite pack has arrived (`CharEntry::tile_art_ready`), so the rig rasterizer is never used as a stand-in while the pack downloads.
-  - On `wasm32` a fighter whose pack is missing previews only the first frame of each menu animation, and the automatic art resolution is capped at 3.0 (the rig rasterizer is single-threaded there).
+  - Previews wait until the fighter's sprite pack has arrived (`CharEntry::tile_art_ready`), so no placeholder art is drawn while the pack downloads.
+  - On `wasm32` a fighter whose pack is missing previews only the first frame of each menu animation, and the automatic art resolution is capped at 3.0 (the effect rasterizer is single-threaded there).
   - `Recolor::apply_in_region` uses a multiplicative hasher and a last-colour memo instead of SipHash per pixel.
   - The sprite pack cache holds 64 packs, so rosters above 24 fighters no longer evict each other.
   - Measured with the profiler in headless Chromium (select screen, 53 cursor moves): main-thread busy time dropped from about 98 s to about 2.5 s.

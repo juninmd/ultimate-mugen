@@ -30,7 +30,7 @@ UMF fighters also load from a folder without recompiling: drop the `.json` in `u
   "boss": false,
   "speed": 1.0,
   "stats": {},
-  "art": { "type": "rig", "style": {}, "poses": {} },
+  "art": { "type": "sprites", "style": {}, "poses": {} },
   "palettes": [],
   "awakeningPalette": { "hair": "#f6c83e" },
   "anims": {},
@@ -48,7 +48,7 @@ UMF fighters also load from a folder without recompiling: drop the `.json` in `u
 | `profile` | no | Nationality and biography, see [Profile](#profile-nationality-and-biography) |
 | `speed` | no | Animation speed multiplier (>1 = faster moves) |
 | `stats` | no | Attributes, table below |
-| `art` | yes | Art, see [Rig](Rig.md) |
+| `art` | yes | Art: `style.colors` drives palette recolouring of the PNG sprites, `poses` names the pose keys |
 | `palettes` | no | Alternate colors; each item overrides keys of `art.style.colors` |
 | `awakeningPalette` | no | Color overrides applied on top of the selected palette while awakened; effect sprites are unchanged |
 | `anims` | yes | Animations by name |
@@ -150,13 +150,13 @@ Each animation is a list of frames:
 | `ticks` | Duration in ticks (60 per second); `-1` = forever |
 | `hit` | Active hitbox: `part` (limb or weapon) + `radius`, or `box` `[x1, y1, x2, y2]` |
 | `hurt` | `"none"` removes the hurtbox (invincible frame) |
-| `effect` | Draws an effect instead of the body (projectiles, sparks), see [Rig](Rig.md#effects) |
+| `effect` | Draws an effect instead of the body (projectiles, sparks), see [Effect frames](Effects.md) |
 | `offset` | Drawing offset `[x, y]` |
 | `loop` | Frame index where the loop restarts |
 
 #### How an attack frame becomes a hit box
 
-Frames drawn from pixel sprites take their strike box from the rig geometry of the frame's `pose` and `hit` (`part` + `radius`), or from the explicit `box` when given, so every move keeps its own reach. The compiler then reshapes it to the proportions measured on 605 M.U.G.E.N characters (`native/pixel_hit.rs`, `H` = standing height, 96 units for `height` 100):
+Frames drawn from pixel sprites take their strike box from the explicit `box` when given, otherwise from a standard box seeded by the `hit` `part` (low for feet and knees, high for the head, middle otherwise) and `radius`, trimmed to the sprite silhouette. The compiler then reshapes it to the proportions measured on 605 M.U.G.E.N characters (`native/pixel_hit.rs`, `H` = standing height, 96 units for `height` 100):
 
 - like a M.U.G.E.N `Clsn1`, the box spans from the body to the tip: it starts at most `0.10 H` in front of the origin and reaches at least `0.60 H` (the M.U.G.E.N median for punches is `0.72 H`, kicks `0.80 H`);
 - at least `0.36 H` tall and never above `0.95 H` or below the floor (M.U.G.E.N punches sit between `-0.75 H` and `-0.33 H`, kicks down to `-0.05 H`);
@@ -310,7 +310,7 @@ Every `special` and `super` with `when` unset or `"stand"` also gets an air vers
 
 ## Pixel-art sprites (optional)
 
-If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files instead of the rig. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size (400×400 RGBA) for every file of one fighter. Generate missing combat PNGs using `generate_image` with a validated canonical pixel-art anchor of that fighter (never use the deprecated procedural vector rig).
+If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files, the same way M.U.G.E.N fighters are drawn from sprites. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size (400×400 RGBA) for every file of one fighter. Generate missing combat PNGs using `generate_image` with a validated canonical pixel-art anchor of that fighter (procedural or code-generated fighter art is forbidden).
 
 | File | Poses that use it |
 |---|---|
@@ -328,15 +328,14 @@ When `awakeningPalette` overrides `hair`, each sprite's `frames.<stem>.awakening
 
 Palette entries also apply to these PNGs: each pixel is matched to the shading line of a colour declared in `art.style.colors`, and the matching palette colour replaces it at the same shade. A palette key with no matching `art.style.colors` entry, or a colour nothing in the art resembles, is left untouched.
 
-The web build does not read this folder from disk. `scripts/build-web.sh` runs `ume-tools pack-sprites` (`crates/devtools`), which writes one `assets/chars/sprites/<id>.pack` per fighter (images capped at 768 px, 256 colours, `meta.json` anchors rescaled) into `web/dist`; the browser fetches a pack when the fighter is focused on the select screen or loaded for the fight, and the engine reads it through the same virtual folder. A failed download keeps the rig.
+The web build does not read this folder from disk. `scripts/build-web.sh` runs `ume-tools pack-sprites` (`crates/devtools`), which writes one `assets/chars/sprites/<id>.pack` per fighter (images capped at 768 px, 256 colours, `meta.json` anchors rescaled) into `web/dist`; the browser fetches a pack when the fighter is focused on the select screen or loaded for the fight, and the engine reads it through the same virtual folder. A failed download leaves the fighter without art, so the match waits for the pack and reports the failure.
 
 ## Validate
 
 ```bash
 cargo test --workspace --release
-cargo run --release -p ume-engine --example rig_sheet
 ```
 
-`rig_sheet` generates a sheet with every pose so you can review the art without opening the game.
+Review fighter art with `ume-tools audit-sprites`, which lists missing and reused poses, or in the game itself.
 
 Browser sprite packs load asynchronously. A newly downloaded or replaced pack invalidates the affected native fighter’s cached previews and all palettes; other fighters keep their caches. Match loading waits for the chosen built-in fighters’ packs and reports download failures rather than starting with a cached procedural fallback. Imported native definitions without a bundled pack remain supported.

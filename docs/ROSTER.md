@@ -1,7 +1,7 @@
 # Elenco
 
 ## Lutadores originais (inclusos)
-15 criações originais no formato UMF (`assets/chars/*.json`), com arte procedural.
+15 criações originais no formato UMF (`assets/chars/*.json`), com sprites em pixel art.
 
 | Lutador | Série | Descrição | Especiais / Super |
 |---|---|---|---|

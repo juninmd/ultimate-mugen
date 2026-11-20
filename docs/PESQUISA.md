@@ -32,7 +32,7 @@ Um personagem é uma pasta com arquivos texto/binários:
 |---|---|
 | DSLs sem tipo, erros silenciosos, números mágicos (estado 5000, var(17)) | Formato **UMF** (JSON/TS tipado): golpes declarativos com nomes; o compilador gera os estados |
 | Hitboxes desenhadas à mão, coordenada por coordenada | **Hitboxes automáticas** a partir do esqueleto (`hit: { part: "handR" }`) |
-| Ripar sprites, alinhar eixos, paletas indexadas | Arte **procedural por esqueleto** (vetorial, nítida em qualquer resolução) ou spritesheet PNG; paletas alternativas por objeto |
+| Ripar sprites, alinhar eixos, paletas indexadas | Sprites PNG em pixel art (sem arte procedural); paletas alternativas por objeto |
 | Só desktop Windows, sem toque | **Web/PWA** (desktop, celular, tablet), controles de toque com **modo simples** (especial com 1 botão), gamepad |
 | Distribuição por ZIP em fórum | Importação de `.zip`/pasta direto no navegador, salvo em IndexedDB; funciona offline |
 | Sem netplay | Simulação determinística em passo fixo e separada do render (base para rollback via WebRTC — próximo passo) |
@@ -42,7 +42,7 @@ Um personagem é uma pasta com arquivos texto/binários:
 ```
 crates/formats → decodificadores/parsers MUGEN (SFF v1/v2, AIR, CMD/CNS INI, SND, ACT, PCX, PNG, zip, stages) — Rust puro, compila para WASM
 crates/engine  → VM única: expressões MUGEN (AST avaliado), Fighter, ~90 controllers, HitDef, Match (rounds, colisão,
-                 projéteis, helpers, explods, câmera), common states próprios, IA, efeitos, UMF (compilador + rig tiny-skia)
+                 projéteis, helpers, explods, câmera), common states próprios, IA, efeitos, UMF (compilador + sprites PNG)
 src/           → app macroquad: telas, render (blend aditivo), HUD, áudio sintetizado, DualShock/DualSense (vibração + lightbar), toque
 ```
 

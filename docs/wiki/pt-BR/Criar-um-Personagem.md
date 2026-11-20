@@ -69,7 +69,7 @@ Mais: [golpes](Personagem-UMF.md), [hits](Personagem-UMF.md) e [sintaxe de coman
 
 - **Só cores:** altere `palettes`, ou adicione `awakeningPalette` para a transformação.
 - **Atributos:** `"stats": { "life": 1080, "attack": 104 }` muda um número e mantém o resto.
-- **Sprites:** sua arte em pixel vai em `assets/chars/sprites/<id>/`. Veja [Importação de sprite atlas](Importacao-Sprite-Atlas.md) e [Rig](../Rig.md).
+- **Sprites:** sua arte em pixel vai em `assets/chars/sprites/<id>/`. Veja [Importação de sprite atlas](Importacao-Sprite-Atlas.md) e [Quadros de efeito](Efeitos.md).
 - **Perfil:** nacionalidade e uma biografia curta em inglês, português e espanhol. Veja [Perfil](Personagem-UMF.md).
 
 ## 5. Teste antes de jogar
@@ -84,7 +84,7 @@ O primeiro comando confere os exemplos deste guia. O segundo roda todos os ataqu
 ## Não é um lutador UMF?
 
 - **Personagens M.U.G.E.N** (`.def`, `.sff`, `.cns`) vão em `mugen/chars/` e rodam sem mudanças. Veja [Personagens](Personagens.md) e [Scripts CNS](Scripts-CNS.md).
-- **Lutador sem sprites:** use o rig (padrão de `art.type`). Veja [Rig](../Rig.md).
+- **Lutador sem sprites:** não é suportado. Todo lutador é desenhado por PNGs em pixel art, como os personagens M.U.G.E.N; não existe fallback procedural.
 
 ## Próximos passos
 

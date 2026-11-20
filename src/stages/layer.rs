@@ -15,7 +15,7 @@ pub(super) fn lay(
     paint: Painter,
 ) -> Layer {
     // pixels per game unit follows the art-quality setting (4K → 2x), capped so no layer exceeds 8192 px (GPU texture limit)
-    let r = ume_engine::native::rig::art_res()
+    let r = ume_engine::native::effects::art_res()
         .min(cap)
         .min(8192.0 / w.max(h).max(1.0));
     let mut pm = Pixmap::new(((w * r) as u32).max(1), ((h * r) as u32).max(1)).unwrap();

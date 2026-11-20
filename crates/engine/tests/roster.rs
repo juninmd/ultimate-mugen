@@ -61,7 +61,7 @@ fn smoke(p1: &str, p2: &str) {
 
 #[test]
 fn preview_is_light_and_art_res_scales() {
-    use ume_engine::native::{compile_native_preview, rig::{art_res, set_art_res}};
+    use ume_engine::native::{compile_native_preview, effects::{art_res, set_art_res}};
     let nc = load("kaito");
     let full = compile_native(&nc, 1, true);
     let pv = compile_native_preview(&nc, 1);

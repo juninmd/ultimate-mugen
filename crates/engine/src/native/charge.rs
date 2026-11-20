@@ -4,8 +4,7 @@ use crate::chardef::MoveInfo;
 use crate::commands::parse_command;
 use std::collections::HashMap;
 
-pub(crate) const CHARGE_STATE: i32 = 3920;
-pub(crate) const CHARGE_COMMAND: &str = "charge_cmd";
+pub(crate) use crate::rules::{CHARGE_COMMAND, CHARGE_STATE};
 const MINIMUM_CHARGE_TICKS: i32 = 6;
 const POWER_UP_ANIM: i32 = 196;
 

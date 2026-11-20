@@ -52,6 +52,7 @@ impl Settings {
                 "grid" => s.grid = pick(v, 1, GRID_PRESETS.len() - 1),
                 "sort" => s.sort = pick(v, 0, 4),
                 "auto_update" => s.auto_update = v != "0",
+                "show_boxes" => s.show_boxes = v == "1",
                 "story_enabled" => s.story_enabled = v != "0",
                 "lang" => s.lang = crate::i18n::Lang::from_code(v),
 
@@ -63,9 +64,9 @@ impl Settings {
 
     pub fn to_text(&self) -> String {
         format!(
-            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nvoice={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nsingle_round={}\nclassic_pushbox={}\nteam_lifeshare={}\ngamespeed={}\nsurvival_recovery={}\nsurvival_best={}\npal1={}\npal2={}\nlang={}\ngrid={}\nsort={}\nauto_update={}\nstory_enabled={}\n",
+            "version={}\nfullscreen={}\nres={}\nquality={}\nfps={}\nfx={}\nimpact_lv={}\nkeep_aspect={}\nfilter={}\nwindow={}x{}\nvsync={}\nfps_cap={}\nmaster={}\nmusic={}\nsfx={}\nvoice={}\nmute={}\ndifficulty={}\nround_time={}\nrounds={}\nlife={}\nsingle_round={}\nclassic_pushbox={}\nteam_lifeshare={}\ngamespeed={}\nsurvival_recovery={}\nsurvival_best={}\npal1={}\npal2={}\nlang={}\ngrid={}\nsort={}\nauto_update={}\nshow_boxes={}\nstory_enabled={}\n",
             FORMAT_VERSION, self.fullscreen as i32, self.res, self.quality, self.fps as i32, self.fx, self.impact, self.keep_aspect as i32, if self.linear { "linear" } else { "nearest" }, self.window.0, self.window.1, self.vsync as i32, self.fps_cap, self.master, self.music, self.sfx, self.voice, self.mute as i32,
-            self.difficulty, self.round_time, self.rounds, self.life, self.single_round as i32, self.classic_pushbox as i32, self.team_life_share as i32, self.game_speed, self.survival_recovery, self.survival_best, self.pal1, self.pal2, self.lang.code(), self.grid, self.sort, self.auto_update as i32, self.story_enabled as i32,
+            self.difficulty, self.round_time, self.rounds, self.life, self.single_round as i32, self.classic_pushbox as i32, self.team_life_share as i32, self.game_speed, self.survival_recovery, self.survival_best, self.pal1, self.pal2, self.lang.code(), self.grid, self.sort, self.auto_update as i32, self.show_boxes as i32, self.story_enabled as i32,
         )
     }
 

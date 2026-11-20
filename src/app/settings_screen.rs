@@ -13,6 +13,8 @@ enum Act {
     Fx,
     Impact,
     FpsCounter,
+    KeepAspect,
+    LinearFilter,
     Vsync,
     FpsCap,
     Master,
@@ -32,6 +34,7 @@ enum Act {
     TeamLifeShare,
     GameSpeed,
     SurvivalRecovery,
+    ShowBoxes,
     StoryEnabled,
     Language,
     CheckUpdate,
@@ -160,6 +163,18 @@ impl App {
                         ),
                     ));
                 }
+                r.push(row(
+                    Act::KeepAspect,
+                    tr3("Manter proporção 16:9", "Keep 16:9 aspect", "Mantener aspecto 16:9"),
+                    on_off(s.keep_aspect),
+                    tr3("Evita esticar a imagem em monitores ultrawide", "Prevents stretching on ultrawide displays", "Evita estirar la imagen en pantallas ultrawide"),
+                ));
+                r.push(row(
+                    Act::LinearFilter,
+                    tr3("Filtro de pixels", "Pixel filter", "Filtro de píxeles"),
+                    if s.linear { tr3("Suave (Linear)", "Smooth (Linear)", "Suave (Lineal)") } else { tr3("Nítido (Pixel Art)", "Crisp (Pixel Art)", "Nítido (Pixel Art)") },
+                    tr3("Nítido preserva os pixels; Suave suaviza a escala", "Crisp preserves pixel clusters; Smooth applies bilinear filtering", "Nítido preserva píxeles; Suave aplica filtro bilineal"),
+                ));
                 r.push(row(
                     Act::FpsCounter,
                     tr("Contador de FPS", "FPS counter"),
@@ -310,16 +325,8 @@ impl App {
                         "How much of the bar comes back after each win",
                     ),
                 ),
-                row(
-                    Act::StoryEnabled,
-                    tr3("Modo História (TOML)", "Story mode (TOML)", "Modo Historia (TOML)"),
-                    on_off(s.story_enabled && crate::story::active_script().campaign.enabled),
-                    tr3(
-                        "Ative/desative ou personalize em story/campaign.toml",
-                        "Enable/disable or customize via story/campaign.toml",
-                        "Activa/desactiva o personaliza en story/campaign.toml",
-                    ),
-                ),
+                row(Act::ShowBoxes, tr3("Exibir Hitboxes / Hurtboxes", "Show Hitboxes / Hurtboxes", "Mostrar Hitboxes / Hurtboxes"), on_off(s.show_boxes), tr3("Mostra caixas de ataque e colisão durante as lutas", "Displays attack and body collision boxes during fights", "Muestra cajas de ataque y colisión durante los combates")),
+                row(Act::StoryEnabled, tr3("Modo História (TOML)", "Story mode (TOML)", "Modo Historia (TOML)"), on_off(s.story_enabled && crate::story::active_script().campaign.enabled), tr3("Ative/desative ou personalize em story/campaign.toml", "Enable/disable or customize via story/campaign.toml", "Activa/desactiva o personaliza en story/campaign.toml")),
             ],
             4 => vec![row(
                 Act::Language,
@@ -384,6 +391,8 @@ impl App {
             Act::Fx if go => s.fx = cycle(s.fx, step, FX_LEVELS.len()),
             Act::Impact if go => s.impact = cycle(s.impact, step, IMPACT.len()),
             Act::FpsCounter if go => s.fps = !s.fps,
+            Act::KeepAspect if go => s.keep_aspect = !s.keep_aspect,
+            Act::LinearFilter if go => s.linear = !s.linear,
             Act::Vsync if go => s.vsync = !s.vsync,
             Act::FpsCap if go => s.fps_cap = cycle(s.fps_cap, step, FPS_CAPS.len()),
             Act::Master if go => s.master = cycle(s.master as usize, step, VOLUME_STEPS as usize + 1) as u8,
@@ -405,6 +414,7 @@ impl App {
             Act::SurvivalRecovery if go => {
                 s.survival_recovery = cycle(s.survival_recovery, step, SURVIVAL_RECOVERY.len())
             }
+            Act::ShowBoxes if go => { s.show_boxes = !s.show_boxes; self.debug_boxes = s.show_boxes; if let Some(sess) = self.session.as_mut() { sess.r.debug = s.show_boxes; } crate::hud::debug_panel::set(s.show_boxes); }
             Act::StoryEnabled if go => s.story_enabled = !s.story_enabled,
             Act::Language if go => s.lang = s.lang.next(step),
             Act::AutoUpdate if go => s.auto_update = !s.auto_update,

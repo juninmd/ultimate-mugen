@@ -14,6 +14,7 @@ mod web {
             Screen::Fight => "fight",
             Screen::Results { .. } => "results",
             Screen::Story { .. } => "story",
+            Screen::Tower { .. } => "tower",
             Screen::SurvivalOver { .. } => "survival_over",
             Screen::Controls => "controls",
             Screen::CharTuning { .. } => "char_tuning",

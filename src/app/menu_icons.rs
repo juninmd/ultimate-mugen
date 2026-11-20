@@ -2,7 +2,7 @@ use super::*;
 
 const SIZE: f32 = 13.0;
 
-pub(super) const ICON_OF: [usize; 12] = [0, 1, 2, 4, 5, 10, 11, 13, 14, 3, 4, 15];
+pub(super) const ICON_OF: [usize; 13] = [0, 1, 2, 4, 5, 10, 11, 13, 14, 3, 4, 2, 15];
 
 struct Pen<'a> {
     ui: &'a Ui,

@@ -94,8 +94,12 @@ impl App {
         if let Some(i) = chosen {
             let mode = [Mode::Story, Mode::Arcade, Mode::Survival, Mode::Cpu, Mode::Training];
             match i {
-                0..=4 | 10 => {
-                    self.set_mode(mode.get(i).copied().unwrap_or(Mode::PowerArena));
+                0..=4 | 10 | 11 => {
+                    self.set_mode(match i {
+                        10 => Mode::PowerArena,
+                        11 => Mode::Tower,
+                        _ => mode[i],
+                    });
                     self.go(Screen::Select {
                         cur: [self.sel.0, self.sel.1],
                         picking: 0,

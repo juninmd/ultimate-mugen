@@ -227,6 +227,8 @@ impl App {
     pub(crate) fn run_win(&mut self) {
         if self.mode == crate::app::Mode::Story {
             self.story_win();
+        } else if self.mode == crate::app::Mode::Tower {
+            self.tower_win();
         } else {
             self.survival_win();
         }
@@ -235,6 +237,8 @@ impl App {
     pub(crate) fn run_loss(&mut self) {
         if self.mode == crate::app::Mode::Story {
             self.story_loss();
+        } else if self.mode == crate::app::Mode::Tower {
+            self.tower_loss();
         } else {
             self.survival_loss();
         }

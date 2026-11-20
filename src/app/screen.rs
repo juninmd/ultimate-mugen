@@ -23,6 +23,9 @@ pub enum Screen {
     Story {
         t: f32,
     },
+    Tower {
+        t: f32,
+    },
     /// Survival game over: final score and fights won
     SurvivalOver {
         score: i64,

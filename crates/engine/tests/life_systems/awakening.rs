@@ -26,3 +26,32 @@ fn awakening_increases_open_hit_damage_but_not_guard_chip() {
     assert_eq!(base.fighters[1].ghv.damage, 100.0);
     assert_eq!(awakened.fighters[1].ghv.damage, 115.0);
 }
+
+#[test]
+fn configured_defence_preserves_the_exposed_risk_at_each_level() {
+    use ume_engine::chardef::FormInfo;
+
+    let mut defender = Arc::try_unwrap(mugen_char("defender", "")).ok().unwrap();
+    defender.forms = (1..=2)
+        .map(|level| FormInfo {
+            name: format!("Form {level}"),
+            cost: 1000.0,
+            attack: 1.3,
+            defense: 1.25,
+            target: None,
+        })
+        .collect();
+    let mut battle = duel(mugen_char("attacker", ""), Arc::new(defender));
+
+    for (level, expected) in [(1, 115.0), (2, 130.0)] {
+        battle.fighters[1].power = 1000.0;
+        assert!(battle.try_transform(1));
+        ticks(&mut battle, 75);
+        assert_eq!(battle.fighters[1].form, level);
+        assert!(battle.fighters[1].effective_defence() > 1.0);
+
+        let mut exposed = battle.clone();
+        exposed.apply_hit(0, 1, &hit(100.0), (0.0, 0.0), None);
+        assert_eq!(exposed.fighters[1].ghv.damage, expected);
+    }
+}

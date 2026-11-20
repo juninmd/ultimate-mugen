@@ -47,8 +47,12 @@ impl Fighter {
         1.0 + 0.15 * f32::from(self.form.min(6))
     }
 
+    pub(crate) fn form_exposure(&self) -> f32 {
+        form_defence(&self.base_def, self.form) * self.exposed_damage_multiplier()
+    }
+
     pub(super) fn exposed_defence(&self) -> f32 {
-        self.effective_defence() / form_defence(&self.base_def, self.form) / self.exposed_damage_multiplier()
+        self.effective_defence() / self.form_exposure()
     }
 
     pub fn revert_form(&mut self) {

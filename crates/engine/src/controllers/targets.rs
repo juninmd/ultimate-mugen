@@ -3,7 +3,7 @@ use crate::matchs::Match;
 
 pub(super) fn life_add(m: &mut Match, t: usize, v: f32, kill: bool, absolute: bool) {
     let f = &mut m.fighters[t];
-    let dv = if !absolute && v < 0.0 { v / f.defence_mul } else { v };
+    let dv = if !absolute && v < 0.0 { v * f.form_exposure() / f.defence_mul } else { v };
     let mut nl = f.life + dv.trunc();
     if !kill && nl < 1.0 && f.life > 0.0 {
         nl = 1.0;

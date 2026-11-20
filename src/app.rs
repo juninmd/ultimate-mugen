@@ -2036,9 +2036,6 @@ impl App {
                 .unwrap_or_else(|| self.settings.rules());
             sess.apply_rules(self.fight_rules);
             self.story_tune(&mut sess);
-            if boss_phase >= 2 {
-                sess.m.awaken_boss_phase(boss_phase as u8);
-            }
             if seq {
                 if let Some(t) = &self.team {
                     for side in 0..2 {

@@ -500,7 +500,6 @@ impl Match {
         self.zoom_request = None;
         if let Some(bg) = self.bg.as_mut() { bg.reset(); }
         let mut slot = [0usize; 2];
-        let boss_phase = self.fighters.iter().filter_map(|f| (!f.is_helper && f.def.boss && f.form >= 2).then_some(f.form)).max();
         let team_n = [self.fighters.iter().filter(|f| !f.is_helper && f.side == 0).count(), self.fighters.iter().filter(|f| !f.is_helper && f.side != 0).count()];
         for i in 0..self.fighters.len() {
             if self.fighters[i].is_helper { continue; }
@@ -525,7 +524,6 @@ impl Match {
             self.change_state(i, 5900, d);
             self.fighters[i].ctrl = false;
         }
-        if let Some(phase) = boss_phase { self.awaken_boss_phase(phase); }
         if self.team_tag { self.reset_tag_round(); }
         let decider = self.rounds_to_win > 1 && self.wins[0] == self.rounds_to_win - 1 && self.wins[1] == self.rounds_to_win - 1;
         self.announce = Some(Announce { text: if decider { "FINAL ROUND".into() } else { format!("ROUND {}", self.round_no) }, time: 70, total: 70, kind: AnnounceKind::Round });
@@ -557,9 +555,9 @@ impl Match {
                     if !f.is_helper && (f.state_no == 0 || f.state_no == 5900 || f.state_no == ENGINE_STATE_FACE_OFF || f.state_no == ENGINE_STATE_FACE_OFF_TAUNT) { f.ctrl = true; }
                 }
                 self.leave_intro_states();
-                self.awaken_defeated_boss();
             }
             2 => {
+                if self.round_time == 50 { self.awaken_defeated_boss(); }
                 if !self.training && self.round_ticks > 0 && self.pause.is_none() && self.global_asserts & (gsf::TIMERFREEZE | gsf::ROUNDFREEZE) == 0 { self.timer = (self.timer - 1).max(0); }
                 let (root_buf, root_len) = self.root_index_buf();
                 let roots = &root_buf[..root_len];

@@ -555,7 +555,7 @@ Every playable fighter ships the same combo-and-ability toolkit on top of its do
 | Dive strike | air `y` | ground-bounces the opponent |
 | Level 3 hyper | super motion + `x+y` | costs the full 3000 meter |
 | Awakened special | fireball motion + `a+b` | only while transformed, three-way spread |
-| Transformation | L3+R3 / awaken | attack and defense boost, unlocks form moves |
+| Transformation | L3+R3 / awaken | spends meter, boosts attack and movement, unlocks form moves and increases damage taken on unguarded hits |
 | Slide kick | `F+a` | low launching mixup against the overhead |
 | Escape burst | `x+a+b` | 500 meter, breaks out of hit-stun |
 | Ascended form | second transformation | 2000 meter, unlocks an ascended hyper (`a+b`) |

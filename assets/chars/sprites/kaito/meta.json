@@ -576,6 +576,7 @@
       "axisY": 392.0,
       "refHeight": 320.0
     },
+    "powerup01": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0, "awakeningHair": [182, 74, 271, 152]},
     "powerup1": {
       "awakeningHair": [
         176,

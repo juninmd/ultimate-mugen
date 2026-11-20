@@ -36,6 +36,8 @@ fn is_reserved_device_name(seg: &str) -> bool {
         "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
         "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
     ];
+    // Windows ignores spaces before the extension, so "con .txt" still opens the CON device.
+    let stem = stem.trim_end_matches(' ');
     NAMES.iter().any(|&r| stem.eq_ignore_ascii_case(r))
 }
 
@@ -128,7 +130,7 @@ mod tests {
         let bad = [
             "", "/etc/passwd", "../x", "a/../b", "a/./b", "a//b", "a\\b", "C:/x", "a/b/",
             "x\0y", "a/b.", "con:", "a/b?c", "con", "aux.def", "nul.sff", "prn", "com1.cns",
-            "lpt1.txt", "a/ b/c",
+            "lpt1.txt", "a/ b/c", "con .txt", "a/nul  .def",
         ];
         for b in bad {
             assert!(safe_rel_path(b).is_none(), "{b:?}");

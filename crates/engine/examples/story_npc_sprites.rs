@@ -5,7 +5,6 @@ use ume_engine::native::{
     native_frame_sprite_key,
     rig::{render_pose, set_art_res},
     NativeChar,
-    sprite_set,
 };
 
 fn pixmap(image: &ume_engine::chardef::ImageData) -> Pixmap {
@@ -53,10 +52,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ] {
         let character: NativeChar =
             serde_json::from_slice(&fs::read(root.join(format!("{id}.json")))?)?;
-        let sprite_set = sprite_set::with_sprite_animation_defaults(
-            character.sprite_set.clone().unwrap_or_default(),
-            None,
-        );
+        let character = character.with_sprite_animation_defaults();
         let style = &character.art.style;
         let mut poses = character.art.poses.clone();
         if !poses.contains_key("runMid") {

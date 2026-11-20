@@ -98,8 +98,7 @@ impl Match {
         let (buf, len) = self.root_index_buf();
         for &i in &buf[..len] {
             let f = &self.fighters[i];
-            let max_form = f.base_def.forms.len().max(1) as u8;
-            if f.def.boss && f.alive && self.wins[1 - f.side.min(1)] >= 1 && f.form < max_form {
+            if f.def.boss && f.alive && f.ctrl && f.state_type != 'A' && f.form == 0 && self.wins[1 - f.side.min(1)] >= 1 && f.form_count() > 0 {
                 self.fighters[i].power = self.fighters[i].power_max;
                 self.try_transform(i);
             }

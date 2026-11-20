@@ -7,8 +7,12 @@ pub(super) async fn run(app: &mut App, dir: &str) {
         app.settings.lang = lang;
         crate::i18n::set(lang);
         let code = lang.code();
-        app.screen = Screen::Menu { cur: 5 };
+        app.screen = Screen::Menu { cur: 11 };
         screen(app, dir, &format!("{code}-menu"), 40).await;
+        app.mode = Mode::Tower;
+        app.tower_begin(find(app, "kaito"));
+        app.screen = Screen::Tower { t: 1.0 };
+        screen(app, dir, &format!("{code}-tower"), 10).await;
         app.screen = Screen::Mugen { view: 0, page: 0 };
         screen(app, dir, &format!("{code}-import"), 12).await;
         app.screen = Screen::Market;

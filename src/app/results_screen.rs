@@ -9,7 +9,7 @@ impl App {
             s.draw(&mut self.g, &self.ui);
         }
         // survival: win advances to the next opponent, loss ends the run
-        if matches!(self.mode, Mode::Survival | Mode::Story) && self.replaying.is_none() {
+        if matches!(self.mode, Mode::Survival | Mode::Story | Mode::Tower) && self.replaying.is_none() {
             if winner == 0 {
                 self.run_win();
                 return;

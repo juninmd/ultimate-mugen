@@ -24,6 +24,9 @@ catalog! {
     "menu.quit" => "Quit", "Sair";
     "menu.power_arena" => "Power Arena", "Arena do Poder";
     "desc.power_arena" => "Battle on platforms and push your rival out.", "Lute em plataformas e empurre o rival para fora.";
+    "menu.tower" => "Daily Tower", "Torre Diária";
+    "desc.tower" => "6-floor daily tower with rotating modifiers", "Torre diária de 6 andares com modificadores rotativos";
+    "mode.tower" => "DAILY TOWER", "TORRE DIÁRIA";
 
     "desc.arcade" => "Fight a sequence of opponents", "Enfrente uma sequência de oponentes";
     "desc.survival" => "Endless opponents, life refilled after each win, score", "Oponentes sem fim, vida recuperada a cada vitória e pontuação";

@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -425,10 +425,7 @@ impl Hud {
                             let name = if f.potential.level == ume_engine::potential::PotentialLevel::Fury { crate::i18n::tr3("MODO FÚRIA", "FURY MODE", "MODO FURIA") } else { crate::i18n::tr3("POTENCIAL", "POTENTIAL", "POTENCIAL") };
                             format!("{} · {}s", name, secs)
                         } else {
-                            match f.next_form_cost() {
-                                Some(c) => format!("{} {}/{} · {} {}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), f.form + 1, nforms + 1, crate::i18n::tr3("PRÓX", "NEXT", "SIG"), c as i32),
-                                None => format!("{} {1}/{1} · MAX", crate::i18n::tr3("FORMA", "FORM", "FORMA"), nforms + 1),
-                            }
+                            form_status::label(f)
                         };
                         let slots = if nforms > 0 { (nforms + 1).min(7) } else { 1 };
                         let al = if side == 0 { Align::Left } else { Align::Right };

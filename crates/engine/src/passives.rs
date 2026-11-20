@@ -151,7 +151,7 @@ impl Fighter {
     }
 
     pub fn passive_speed(&self) -> f32 {
-        self.signature_speed() * match &self.base_def.passives.stacks {
+        self.signature_speed() * if self.move_type == 'H' { 1.0 } else { self.form_speed_multiplier() } * match &self.base_def.passives.stacks {
             Some(rule) if self.move_type != 'H' => {
                 (1.0 + rule.speed_gain * self.passive.stacks as f32).min(STACK_SPEED_CAP)
             }

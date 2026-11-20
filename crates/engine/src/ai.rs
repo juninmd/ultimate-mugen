@@ -133,7 +133,6 @@ impl Ai {
             && f.ctrl
             && f.next_form_cost().is_some_and(|c| f.power >= c)
             && self.level >= 3
-            && f.def.anims.contains_key(&196)
         {
             return k::T;
         }

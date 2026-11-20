@@ -100,6 +100,12 @@ impl Vfx {
                 self.banner(crate::i18n::tr3("ECLIPSE PRIMORDIAL", "PRIMORDIAL ECLIPSE", "ECLIPSE PRIMORDIAL"), crate::i18n::tr3("FORMA SUPREMA DE MIKAZUKI OBORO", "SUPREME FORM OF MIKAZUKI OBORO", "FORMA SUPREMA DE MIKAZUKI OBORO"), col);
             } else if f.def.boss && f.form >= 2 {
                 self.banner(crate::i18n::tr3("ECLIPSE ABSOLUTO", "ABSOLUTE ECLIPSE", "ECLIPSE ABSOLUTO"), crate::i18n::tr3("FORMA FINAL DE MIKAZUKI OBORO", "FINAL FORM OF MIKAZUKI OBORO", "FORMA FINAL DE MIKAZUKI OBORO"), col);
+            } else {
+                let risk = (f.exposed_damage_multiplier() - 1.0) * 100.0;
+                let exposed = crate::i18n::tr3("DANO SEM GUARDA", "UNGUARDED DAMAGE", "DAÑO SIN GUARDIA");
+                let detail = format!("+{risk:.0}% {exposed}");
+                let title = if nm.is_empty() { crate::i18n::tr3("DESPERTAR", "AWAKENING", "DESPERTAR") } else { &nm };
+                self.banner(title, &detail, col);
             }
         }
         self.flash_add(0.4);

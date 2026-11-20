@@ -1199,7 +1199,7 @@ impl Match {
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
             let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale_for(prev_hc, hd.attr_kind.iter().any(|k| k.starts_with('H'))) } else { 1.0 };
-            let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].effective_defence().max(0.01)).round();
+            let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].exposed_defence().max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             if self.fighters[d].has_assert(asf::NOHITDAMAGE) { dmg = 0.0; }
             let prev_fall = self.fighters[d].ghv.fall;
@@ -1251,7 +1251,7 @@ impl Match {
                 let no = if st == 'A' || st == 'L' { 5020 } else if st == 'C' && !hd.forcestand { 5010 } else { 5000 };
                 self.change_state(d, no, dd);
             }
-            let point_mul = attack_mul * scale / self.fighters[d].effective_defence().max(0.01);
+            let point_mul = attack_mul * scale / self.fighters[d].exposed_defence().max(0.01);
             crate::ikemen::life::apply_hit_points(self, d, hd, false, point_mul);
             if hd.p2stateno < 0 { crate::ikemen::life::enter_stun_states(self, d, false); }
             if hd.p1stateno >= 0 && !from_proj { let ad = self.fighters[a].def.clone(); self.change_state(a, hd.p1stateno, ad); }

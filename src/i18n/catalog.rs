@@ -22,6 +22,8 @@ catalog! {
     "menu.replays" => "Replays", "Replays";
     "menu.player_card" => "Player card", "Ficha do Jogador";
     "menu.quit" => "Quit", "Sair";
+    "menu.power_arena" => "Power Arena", "Arena do Poder";
+    "desc.power_arena" => "Battle on platforms and push your rival out.", "Lute em plataformas e empurre o rival para fora.";
 
     "desc.arcade" => "Fight a sequence of opponents", "Enfrente uma sequência de oponentes";
     "desc.survival" => "Endless opponents, life refilled after each win, score", "Oponentes sem fim, vida recuperada a cada vitória e pontuação";

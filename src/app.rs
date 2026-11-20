@@ -214,7 +214,7 @@ pub struct App {
     warm_key: String,
 }
 
-const MENU: [(&str, &str); 11] = [
+const MENU: [(&str, &str); 12] = [
     ("menu.story", "desc.story"),
     ("menu.arcade", "desc.arcade"),
     ("menu.survival", "desc.survival"),
@@ -225,7 +225,7 @@ const MENU: [(&str, &str); 11] = [
     ("menu.settings", "desc.settings"),
     ("menu.replays", "desc.replays"),
     ("menu.player_card", "desc.player_card"),
-    ("menu.quit", "desc.quit"),
+    ("menu.power_arena", "desc.power_arena"), ("menu.quit", "desc.quit"),
 ];
 
 impl App {
@@ -723,7 +723,7 @@ impl App {
         let screen = get("tela");
         if p1.is_none() && p2.is_none() && screen.is_none() { return; }
         let mode = match get("modo").as_deref() {
-            Some("versus") => Mode::Versus,
+            Some("versus") => Mode::Versus, Some("arena") => Mode::PowerArena,
             Some("treino") => Mode::Training,
             Some("watch") => Mode::Watch,
             _ => Mode::Cpu,
@@ -2034,7 +2034,7 @@ impl App {
                 .as_ref()
                 .map(|r| r.rules)
                 .unwrap_or_else(|| self.settings.rules());
-            sess.apply_rules(self.fight_rules);
+            sess.apply_rules(self.fight_rules); if self.mode == Mode::PowerArena { sess.m.enable_power_arena(); }
             self.story_tune(&mut sess);
             if seq {
                 if let Some(t) = &self.team {

@@ -100,6 +100,7 @@ impl Match {
         f.ctrl = false;
         if f.def.source == Source::Native && f.def.anims.contains_key(&196) {
             f.change_anim_own(196, 1);
+            f.anim_loop_start = f.anim().map_or(0, |animation| animation.frames.len().saturating_sub(1));
         }
         self.pause = Some(PauseState { by: id, time: 60, move_time: 60, is_super: true, darken: true, unhittable: true, p2_def_mul: 1.0, pause_bg: true, ..Default::default() });
         self.do_shake(40, 5.0);

@@ -11,7 +11,7 @@ impl Match {
         }) else { return false };
         let chip = self.fighters[d].hit_overrides[slot].as_ref().map_or(0.0, |o| o.chip);
         let attack_mul = self.idx(self.fighters[a].root).map(|r| self.fighters[r].effective_attack()).unwrap_or(1.0);
-        let dmg = (hd.damage * attack_mul * chip / 100.0).round().max(1.0);
+        let dmg = (hd.damage * attack_mul * chip * self.fighters[d].exposed_damage_multiplier() / 100.0).round().max(1.0);
         let gt = self.game_time;
         let attacker_id = self.fighters[a].id;
         {

@@ -32,7 +32,14 @@ pub fn parse_version(s: &str) -> Option<(u64, u64, u64)> {
 }
 
 pub fn is_newer(current: &str, latest: &str) -> bool {
-    matches!((parse_version(current), parse_version(latest)), (Some(c), Some(l)) if l > c)
+    match (parse_version(current), parse_version(latest)) {
+        (Some(c), Some(l)) => l > c || (l == c && is_prerelease(current) && !is_prerelease(latest)),
+        _ => false,
+    }
+}
+
+fn is_prerelease(s: &str) -> bool {
+    s.trim().trim_start_matches('v').contains('-')
 }
 
 pub fn platform() -> Option<&'static str> {
@@ -105,6 +112,13 @@ mod tests {
         assert!(is_newer("0.2.0-dev", "v0.2.1"));
         assert!(!is_newer("0.3.0", "0.3.0"));
         assert!(!is_newer("1.0.0", "0.99.99"));
+    }
+
+    #[test]
+    fn a_final_release_outranks_its_own_prerelease() {
+        assert!(is_newer("0.4.0-rc1", "0.4.0"));
+        assert!(!is_newer("0.4.0", "0.4.0-rc1"));
+        assert!(!is_newer("0.4.0-rc1", "0.4.0-rc1"));
     }
 
     #[test]

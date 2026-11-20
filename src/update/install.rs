@@ -14,6 +14,20 @@ pub fn cleanup_previous() {
     if let Some(backup) = backup_path(&exe) {
         let _ = std::fs::remove_file(backup);
     }
+    if let Some(dir) = exe.parent() {
+        remove_stale_stages(dir);
+    }
+}
+
+fn remove_stale_stages(dir: &Path) {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        if entry.file_name().to_string_lossy().starts_with(".update-v") {
+            let _ = std::fs::remove_file(entry.path());
+        }
+    }
 }
 
 fn replace(staged: &Path, exe: &Path) -> Result<(), String> {
@@ -58,6 +72,19 @@ pub fn relaunch(exe: &Path) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn partial_downloads_from_an_interrupted_update_are_removed() {
+        let dir = std::env::temp_dir().join(format!("ume-stale-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join(".update-v0.4.0"), b"partial").unwrap();
+        std::fs::write(dir.join("ultimate-mugen"), b"game").unwrap();
+        remove_stale_stages(&dir);
+        assert!(!dir.join(".update-v0.4.0").exists());
+        assert!(dir.join("ultimate-mugen").exists());
+        let _ = std::fs::remove_dir_all(dir);
+    }
 
     fn temp_dir(tag: &str) -> PathBuf {
         let dir = std::env::temp_dir().join(format!("ume-swap-{tag}-{}", std::process::id()));

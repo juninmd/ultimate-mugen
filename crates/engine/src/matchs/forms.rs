@@ -9,7 +9,7 @@ fn form_defence(def: &CharDef, entered: u8) -> f32 {
 }
 
 fn stored_form_attack(def: &CharDef, entered: u8) -> f32 {
-    if def.source == Source::Mugen && def.forms.is_empty() { return 1.0; }
+    if def.rules().legacy_awakening && def.forms.is_empty() { return 1.0; }
     let minimum = 1.0 + (LEGACY_ATTACK - 1.0) * f32::from(entered.min(6));
     def.forms.iter().take(entered as usize).fold(1.0, |attack, form| attack * form.attack).max(minimum)
 }
@@ -25,7 +25,7 @@ impl Fighter {
     pub fn form_count(&self) -> usize {
         let forms = &self.base_def.forms;
         if !forms.is_empty() { return forms.len(); }
-        usize::from(self.base_def.anims.contains_key(&196) || self.base_def.source == Source::Mugen && self.power_max >= LEGACY_COST)
+        usize::from(self.base_def.anims.contains_key(&196) || self.base_def.rules().legacy_awakening && self.power_max >= LEGACY_COST)
     }
 
     pub fn active_form_name(&self) -> &str {
@@ -41,7 +41,7 @@ impl Fighter {
     }
 
     pub(crate) fn legacy_awakening_attack(&self) -> f32 {
-        if self.form > 0 && self.base_def.source == Source::Mugen && self.base_def.forms.is_empty() {
+        if self.form > 0 && self.base_def.rules().legacy_awakening && self.base_def.forms.is_empty() {
             LEGACY_ATTACK
         } else {
             1.0
@@ -98,7 +98,7 @@ impl Match {
         self.change_engine_state(i, ENGINE_STATE_AWAKENING);
         let f = &mut self.fighters[i];
         f.ctrl = false;
-        if f.def.source == Source::Native && f.def.anims.contains_key(&196) {
+        if f.def.rules().own_awakening_anim && f.def.anims.contains_key(&196) {
             f.change_anim_own(196, 1);
             f.anim_loop_start = f.anim().map_or(0, |animation| animation.frames.len().saturating_sub(1));
         }

@@ -1090,7 +1090,7 @@ impl Match {
                 struck_len += 1;
             }
         }
-        for &a in &struck[..struck_len] { if self.fighters.get(a).is_some_and(|f| f.def.source == Source::Mugen) { self.fighters[a].hitdef_active = false; } }
+        for &a in &struck[..struck_len] { if self.fighters.get(a).is_some_and(|f| f.def.rules().clears_hitdef_on_strike) { self.fighters[a].hitdef_active = false; } }
     }
 
     fn share_projectile_helper_contacts(&mut self, a: usize, from: usize) {
@@ -1191,12 +1191,12 @@ impl Match {
             self.add_power(a, hd.guard_get_power); self.add_power(d, hd.guard_give_power);
             self.spawn_spark(a, hd.guard_spark_no, hd.guard_spark_own, at.0, at.1, true, false, hd.spark_scale);
             if let Some(s) = hd.guard_sound { self.sound(a, s.0, s.1, s.2, Some("guard")); }
-            if cornered && self.fighters[a].def.source == Source::Mugen && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; self.fighters[a].vel.x = corner_pushed; }
+            if cornered && self.fighters[a].def.rules().hitdef_corner_push && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_guard_corner_push } else { hd.guard_corner_push }; self.fighters[a].vel.x = corner_pushed; }
         } else {
             let training = self.training;
             let was_hit = self.fighters[d].move_type == 'H';
             let prev_hc = if was_hit { self.fighters[d].ghv.hitcount } else { 0 };
-            let scale = if self.fighters[a].def.source == crate::chardef::Source::Native { combo_scale_for(prev_hc, hd.attr_kind.iter().any(|k| k.starts_with('H'))) } else { 1.0 };
+            let scale = if self.fighters[a].def.rules().combo_damage_scaling { combo_scale_for(prev_hc, hd.attr_kind.iter().any(|k| k.starts_with('H'))) } else { 1.0 };
             let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].exposed_defence().max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             if self.fighters[d].has_assert(asf::NOHITDAMAGE) { dmg = 0.0; }
@@ -1277,13 +1277,13 @@ impl Match {
             if let Some(s) = hd.hit_sound { self.sound(a, s.0, s.1, s.2, Some(if heavy { "hitheavy" } else { "hit" })); }
             if hd.env_shake.time > 0 { self.shake_with_dir(hd.env_shake.time, hd.env_shake.freq, hd.env_shake.ampl, hd.env_shake.phase, hd.env_shake.dir); }
             if let Some(p) = hd.target_palfx.clone() { self.fighters[d].palfx = Some(p); }
-            if cornered && self.fighters[a].def.source == Source::Mugen && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; self.fighters[a].vel.x = corner_pushed; }
+            if cornered && self.fighters[a].def.rules().hitdef_corner_push && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; self.fighters[a].vel.x = corner_pushed; }
             self.place_target(a, d, hd);
             let droot = self.fighters[d].root;
             self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
         }
         // cornered defenders push the attacker back instead of absorbing all the knock-back (SF/Tekken/GG behaviour)
-        if !from_proj && self.fighters[a].def.source == Source::Native && self.fighters[a].state_type != 'A' && !self.fighters[a].has_assert(asf::NOCORNERPUSH) && self.at_corner(d) {
+        if !from_proj && self.fighters[a].def.rules().engine_corner_push && self.fighters[a].state_type != 'A' && !self.fighters[a].has_assert(asf::NOCORNERPUSH) && self.at_corner(d) {
             let push = corner_push(self.fighters[d].ghv.xvel);
             let away = if apos.x <= self.fighters[d].pos.x { -1.0 } else { 1.0 };
             self.fighters[a].pos.x += away * push;

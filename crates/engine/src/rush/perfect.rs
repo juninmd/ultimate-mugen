@@ -1,4 +1,3 @@
-use crate::chardef::Source;
 use crate::matchs::Match;
 
 pub const PERFECT_WINDOW: i32 = 6;
@@ -21,7 +20,7 @@ impl Match {
     pub(crate) fn perfect_guard(&mut self, d: usize) -> bool {
         let f = &self.fighters[d];
         let hold = f.rush.guard_hold;
-        let perfect = f.def.source == Source::Native
+        let perfect = f.def.rules().perfect_guard
             && !f.is_helper
             && f.state_type != 'A'
             && f.air_height() >= -1.0

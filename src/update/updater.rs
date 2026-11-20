@@ -116,6 +116,8 @@ impl Updater {
                 Err(TryRecvError::Disconnected) => {
                     if matches!(self.state, State::Checking) {
                         self.state = State::Idle;
+                    } else if matches!(self.state, State::Downloading { .. }) {
+                        self.state = State::Failed("download interrupted".into());
                     }
                     keep = false;
                 }
@@ -214,3 +216,6 @@ fn download_work(version: String, binary: super::manifest::Asset, tx: Sender<Eve
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

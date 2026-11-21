@@ -9,7 +9,26 @@ pub fn load_spec(spec: &str) -> Arc<CharDef> {
         .expect("spec is mugen:<dir>[:def] or native:<json>");
     match kind {
         "native" => {
-            let nc = serde_json::from_str(&std::fs::read_to_string(rest).unwrap()).unwrap();
+            let text = std::fs::read_to_string(rest).unwrap();
+            let nc = ume_native::parse_char(&text).unwrap();
+            let sprites = std::path::Path::new(rest).with_file_name("sprites");
+            if let Ok(dir) = std::fs::read_dir(&sprites) {
+                let files: Vec<(String, Vec<u8>)> = dir
+                    .filter_map(|e| e.ok())
+                    .filter(|e| {
+                        e.path().extension().is_some_and(|x| x == "png")
+                            || e.file_name() == "meta.json"
+                    })
+                    .map(|e| {
+                        (
+                            e.file_name().to_string_lossy().to_string(),
+                            std::fs::read(e.path()).unwrap(),
+                        )
+                    })
+                    .collect();
+                let pack = ume_native::encode_sprite_pack(nc.sprite_dir(), &files).unwrap();
+                ume_native::insert_sprite_pack(&nc.id, &pack).unwrap();
+            }
             Arc::new(ume_native::compile_native(&nc, 1, true))
         }
         _ => {

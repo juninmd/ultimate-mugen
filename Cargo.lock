@@ -2911,6 +2911,7 @@ dependencies = [
  "indexmap",
  "toml_datetime",
  "toml_parser",
+ "toml_writer",
  "winnow",
 ]
 
@@ -2998,6 +2999,7 @@ dependencies = [
  "symphonia",
  "tiny-skia",
  "toml",
+ "toml_edit",
  "ume-engine",
  "ume-formats",
  "ume-market",

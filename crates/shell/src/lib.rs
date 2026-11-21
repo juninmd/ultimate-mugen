@@ -193,11 +193,19 @@ fn instance(event_loop: &ActiveEventLoop) -> wgpu::Instance {
     wgpu::Instance::new(desc)
 }
 
+fn report_gpu_error(error: wgpu::Error) {
+    #[cfg(target_arch = "wasm32")]
+    web_sys::console::error_1(&format!("gpu error: {error}").into());
+    #[cfg(not(target_arch = "wasm32"))]
+    eprintln!("gpu error: {error}");
+}
+
 async fn init_live(instance: wgpu::Instance, window: Arc<Window>) -> Result<Live, String> {
     let surface = instance.create_surface(window.clone()).map_err(|e| e.to_string())?;
     let adapter = instance.request_adapter(&wgpu::RequestAdapterOptions { power_preference: platform::power_preference(), compatible_surface: Some(&surface), ..Default::default() }).await.map_err(|e| e.to_string())?;
     let limits = wgpu::Limits::downlevel_webgl2_defaults().using_resolution(adapter.limits());
     let (device, queue) = adapter.request_device(&wgpu::DeviceDescriptor { required_limits: limits, ..Default::default() }).await.map_err(|e| e.to_string())?;
+    device.on_uncaptured_error(Arc::new(report_gpu_error));
     let size = window.inner_size();
     let mut config = surface.get_default_config(&adapter, size.width.max(1), size.height.max(1)).ok_or("surface unsupported by adapter")?;
     let caps = surface.get_capabilities(&adapter);

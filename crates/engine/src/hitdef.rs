@@ -165,6 +165,9 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         None
     };
     let gst = num("ground.slidetime", 0.0, 0) as i32;
+    let guard_hit_time = if has("guard.hittime", 0) { num("guard.hittime", 0.0, 0) as i32 } else { ght };
+    let guard_slide_time = if has("guard.slidetime", 0) { num("guard.slidetime", 0.0, 0) as i32 } else { guard_hit_time };
+    let guard_ctrl_time = if has("guard.ctrltime", 0) { num("guard.ctrltime", 0.0, 0) as i32 } else { guard_slide_time };
     let hyper = attr_kind.iter().any(|k| k.starts_with('H'));
     let life_mul = |name: &str| {
         f.def.c(
@@ -209,25 +212,11 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         ground_type: gt,
         air_type: raw("air.type").and_then(|s| groundtype(&s)).unwrap_or(gt),
         ground_slide_time: gst,
-        guard_slide_time: if has("guard.slidetime", 0) {
-            num("guard.slidetime", 0.0, 0) as i32
-        } else {
-            gst
-        },
+        guard_slide_time,
         ground_hit_time: ght,
-        guard_hit_time: if has("guard.hittime", 0) {
-            num("guard.hittime", 0.0, 0) as i32
-        } else {
-            ght
-        },
+        guard_hit_time,
         air_hit_time: num("air.hittime", 20.0, 0) as i32,
-        guard_ctrl_time: if has("guard.ctrltime", 0) {
-            num("guard.ctrltime", 0.0, 0) as i32
-        } else if has("guard.slidetime", 0) {
-            num("guard.slidetime", 0.0, 0) as i32
-        } else {
-            gst
-        },
+        guard_ctrl_time,
         guard_dist: num("guard.dist", f.c("size.attack.dist", 160.0) as f64, 0),
         yaccel: num("yaccel", f.c("movement.yaccel", 0.44) as f64, 0) * l,
         ground_vel: [gvx, gvy],
@@ -238,7 +227,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
                 num("air.velocity", 0.0, 1) * l,
             ]
         } else {
-            [gvx, gvy]
+            [0.0, 0.0]
         },
         air_guard_vel: if has("airguard.velocity", 0) {
             [

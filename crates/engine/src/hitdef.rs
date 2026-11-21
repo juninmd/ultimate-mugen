@@ -4,7 +4,7 @@ use crate::fighter::{HitDefData, PalFx, Shake, V2};
 use crate::matchs::Match;
 
 mod types;
-use types::{animtype, groundtype};
+use types::{animtype, groundtype, priority_type};
 
 pub fn attr_bits(state: &str, kinds: &[String]) -> i32 {
     let mut bits = 0;
@@ -78,7 +78,6 @@ pub fn guardflag_bits(flags: &str) -> i32 {
     })
 }
 mod sound_ref; pub use sound_ref::{parse_sound_ref, parse_sound_ref_expr};
-
 pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     let f = &m.fighters[i];
     let l = f.lscl;
@@ -184,6 +183,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
             .and_then(|s| animtype(&s))
             .unwrap_or(if at >= 3 { at } else { 4 }),
         priority: (num("priority", 4.0, 0) as i32).clamp(1, 7),
+        priority_type: priority_type(raw("priority").as_deref()),
         damage,
         guard_damage: num("damage", 0.0, 1),
         pause_p1,

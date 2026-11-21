@@ -128,6 +128,8 @@ Created next to the executable on first run (localStorage on web) with the defau
 | `[touch]` | `scale` | on-screen pad size, 0.7 to 1.5 |
 | `[touch]` | `opacity` | on-screen pad opacity, 0.2 to 1.0 |
 | `[touch]` | `left_handed` | `true` mirrors the pad (stick right, buttons left) |
+
+The on-screen pad shows only the six attack buttons and the stick by default. The small `+` button opens the extra buttons (awakening, charge, quick skills, tag, third-character attacks, guard) and `x` closes them. The pad fades to 30% of `opacity` after 2.5 s without touches and stays clear of the notch and home-indicator safe areas on phones.
 | `[rules]` | `rounds_to_win` (1-9), `round_seconds` (0 = no limit, up to 999), `life_percent` (10-500), `game_speed` (0.5-2.0) | Override the Settings menu values for every match; remove the line to go back to the menu value |
 | `[menu]` | `arcade`, `story`, `survival`, `cpu`, `versus`, `training`, `watch`, `team_seq`, `team_simul`, `team_tag`, `mugen`, `market`, `controls`, `settings`, `replays`, `quit` | Text of that main-menu entry |
 

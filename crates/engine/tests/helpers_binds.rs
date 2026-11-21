@@ -95,7 +95,7 @@ fn bind_is_reapplied_after_push() {
     face_off(&mut m, 30.0);
     m.fighters[0].pos.x = m.fighters[1].pos.x - 10.0;
     let to = m.fighters[0].id;
-    m.fighters[1].bind = Some(ume_engine::fighter::Bind { to, time: -1, x: 10.0, y: 0.0, kind: ume_engine::fighter::BindKind::Target });
+    m.fighters[1].bind = Some(ume_engine::fighter::Bind { to, time: -1, x: 10.0, y: 0.0, kind: ume_engine::fighter::BindKind::Target, facing: 0 });
     for _ in 0..3 {
         m.tick(&[0, 0]);
         let (a, b) = (&m.fighters[0], &m.fighters[1]);

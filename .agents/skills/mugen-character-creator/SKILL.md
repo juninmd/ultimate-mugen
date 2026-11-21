@@ -1957,3 +1957,7 @@ Documentação técnica completa e compatibilidade validada com [`crates/engine/
    - **`AssertSpecial`**: o `ume-engine` suporta **59 flags de personagem** (`asf`: incluindo `animatehitpause`, `animfreeze`, `drawunder`, `nocornerpush`, `noredlifedamage`, `noguardko`, `immovable`) + **19 flags globais** (`gsf`: incluindo `camerafreeze`, `roundfreeze`, `notimedisplay`, `timerfreeze`, `roundnotover`).
 4. **Truque do Slot `st90=` para Dual-Engine**: coloque `st90 = states/ikemen_addon.zss` no `[Files]` do `.def`. O MUGEN 1.0/1.1 ignora slots acima de `st9`, enquanto o Ikemen GO e o `ultimate-mugen` carregam `st90` normalmente — permitindo adicionar `movelist.dat`, `Text`, `Dizzy`, `RedLife` e `Tag` sem quebrar retrocompatibilidade.
 
+
+## 12. Dissecação de pacotes reais (Aizen, Gogeta, Goku SSJ e SSJ4)
+
+Antes de criar ou modificar um lutador imitando outro, use a skill `mugen-dissector` (`scripts/dissect.py`) e a tabela de números de referência em `docs/wiki/pt-BR/Dissecacao-MUGEN.md`: pausa e hit time dos normais, padrões de projétil, rush, agarrão, clone por helper, teleporte, contra-ataque e forma por `var`.

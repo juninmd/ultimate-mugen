@@ -5,6 +5,7 @@ use crate::hitdef::build;
 use crate::matchs::{Event, Match};
 use std::sync::Arc;
 
+mod hit_filter;
 mod hit_override;
 mod targets;
 use targets::{life_add, target_indices};
@@ -226,7 +227,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "targetbind" => {
             let (time, x, y) = (n(m, "time", 1.0) as i32, n2(m, "pos", 0.0, 0) as f32 * l, n2(m, "pos", 0.0, 1) as f32 * l);
             let me = m.fighters[i].id;
-            for t in target_indices(m, i, sc).into_iter().flatten() { m.fighters[t].bind = Some(Bind { to: me, time, x, y, kind: BindKind::Target }); m.update_bind(t); }
+            for t in target_indices(m, i, sc).into_iter().flatten() { m.fighters[t].bind = Some(Bind { to: me, time, x, y, kind: BindKind::Target, facing: 0 }); m.update_bind(t); }
         }
         "bindtotarget" | "bindtoparent" | "bindtoroot" => {
             let (time, x, y) = (n(m, "time", 1.0) as i32, n2(m, "pos", 0.0, 0) as f32 * l, n2(m, "pos", 0.0, 1) as f32 * l);
@@ -236,7 +237,8 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 "bindtoparent" => match f.parent { Some(p) => (p, BindKind::Parent), None => return },
                 _ => (f.root, BindKind::Root),
             };
-            m.fighters[i].bind = Some(Bind { to, time, x, y, kind });
+            let facing = if sc.has("facing", 0) { n(m, "facing", 0.0) as i32 } else { 0 };
+            m.fighters[i].bind = Some(Bind { to, time, x, y, kind, facing });
             m.update_bind(i);
         }
         "targetdrop" => { let keep = if sc.has("excludeid", 0) { n(m, "excludeid", -1.0) as i32 } else { -1 }; m.fighters[i].targets.retain(|t| keep >= 0 && t.1 == keep); }
@@ -351,11 +353,10 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "angleadd" => { let v = n(m, "value", 0.0) as f32; m.fighters[i].angle += v; }
         "anglemul" => { let v = n(m, "value", 1.0) as f32; m.fighters[i].angle *= v; }
         "nothitby" | "hitby" => {
-            let attr = sc.raw("value").or(sc.raw("value2")).unwrap_or("").to_ascii_uppercase();
             let t = n(m, "time", 1.0) as i32;
-            let dst = if sc.kind == "nothitby" { &mut m.fighters[i].not_hit_by } else { &mut m.fighters[i].hit_by };
-            dst.clear();
-            dst.push((attr, t));
+            let one = sc.has("value", 0).then(|| sc.raw("value").unwrap_or("").to_ascii_uppercase());
+            let two = sc.has("value2", 0).then(|| sc.raw("value2").unwrap_or("").to_ascii_uppercase());
+            hit_filter::set(m, i, sc.kind == "nothitby", one, two, t);
         }
         "movehitreset" => { let f = &mut m.fighters[i]; f.move_contact = 0; f.move_hit = 0; f.move_guarded = 0; f.move_reversed = 0; }
         "hitadd" => { let v = n(m, "value", 0.0) as i32; m.fighters[i].hit_count += v; }

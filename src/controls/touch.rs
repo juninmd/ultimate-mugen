@@ -1,6 +1,6 @@
 use crate::gfx::*;
 use ume_engine::input::k;
-use super::touch_style;
+use super::{touch_layout, touch_style};
 
 pub struct TouchPad {
     pub enabled: bool,
@@ -12,6 +12,9 @@ pub struct TouchPad {
     pub began: Vec<Vec2>,
     pub pressed: [bool; BUTTONS],
     hold: [u8; BUTTONS],
+    pub more_open: bool,
+    toggle_down: bool,
+    idle_frames: u32,
 }
 
 pub const QUICK_SKILLS: usize = 4;
@@ -19,6 +22,9 @@ pub const CHARGE: usize = 7;
 pub const QUICK_START: usize = 8;
 pub const EXTRA_START: usize = QUICK_START + QUICK_SKILLS;
 pub const BUTTONS: usize = EXTRA_START + 5;
+pub const CORE_BUTTONS: usize = 6;
+const IDLE_FADE_FRAMES: u32 = 150;
+const IDLE_ALPHA: f32 = 0.3;
 
 pub const TOUCH_BUTTONS: [(&str, u32); BUTTONS] = [
     ("SOCO", k::X),
@@ -52,57 +58,29 @@ impl TouchPad {
             began: Vec::new(),
             pressed: [false; BUTTONS],
             hold: [0; BUTTONS],
+            more_open: false,
+            toggle_down: false,
+            idle_frames: IDLE_FADE_FRAMES,
         }
     }
-    pub fn layout() -> (Vec<Vec2>, f32, Vec2, f32) {
-        let (w, h) = (screen_width(), screen_height());
-        let tweaks = crate::tweaks::current();
-        let r = (h * 0.09).clamp(24.0, 52.0) * tweaks.touch_scale;
-        let gap = r * 2.25;
-        let (bx, by) = (w - r * 1.3 - gap * 2.0, h - r * 2.4);
-        let mut v: Vec<Vec2> = (0..6)
-            .map(|i| vec2(bx + (i % 3) as f32 * gap, by - (1 - i / 3) as f32 * gap))
-            .collect();
-        v.push(vec2(bx + gap, by - gap * 2.0));
-        v.push(vec2(bx + gap * 2.0, by - gap * 2.0));
-        let quick_y = h - r * 0.9;
-        for j in 0..QUICK_SKILLS {
-            v.push(vec2(w * 0.57 + (j as f32 - 1.5) * r * 1.8, quick_y));
-        }
-        v.extend([
-            vec2(bx, by - gap * 2.0),
-            vec2(bx - gap, by - gap * 2.0),
-            vec2(bx - gap, by - gap),
-            vec2(bx - gap * 2.0, by - gap * 2.0),
-            vec2(bx - gap * 2.0, by - gap),
-        ]);
-        let mut stick = vec2(r * 3.0, h - r * 3.0);
-        if tweaks.touch_left_handed {
-            v.iter_mut().for_each(|p| p.x = w - p.x);
-            stick.x = w - stick.x;
-        }
-        (v, r, stick, r * 2.2)
+    fn visible(&self, i: usize) -> bool {
+        i < CORE_BUTTONS || self.more_open
     }
-    fn radius(i: usize, r: f32) -> f32 {
-        if i == 6 {
-            r * 0.7
-        } else if (QUICK_START..EXTRA_START).contains(&i) {
-            r * 0.55
-        } else {
-            r
-        }
+    fn reset(&mut self) {
+        self.began.clear();
+        self.bits = 0;
+        self.stick_center = None;
+        self.stick_pos = Vec2::ZERO;
+        self.pressed = [false; BUTTONS];
+        self.hold = [0; BUTTONS];
+        self.toggle_down = false;
     }
     pub fn update(&mut self) {
         if !self.enabled {
-            self.began.clear();
-            self.bits = 0;
-            self.stick_center = None;
-            self.stick_pos = Vec2::ZERO;
-            self.pressed = [false; BUTTONS];
-            self.hold = [0; BUTTONS];
+            self.reset();
             return;
         }
-        let (btns, r, stick, sr) = Self::layout();
+        let lay = touch_layout::compute();
         let dpi = dpi_scale().max(0.01);
         let all: Vec<(Vec2, bool)> = touches()
             .iter()
@@ -121,48 +99,51 @@ impl TouchPad {
             .filter(|t| matches!(t.phase, TouchPhase::Started | TouchPhase::Ended))
             .map(|t| t.position / dpi)
             .collect();
-        let mut points: Vec<(Vec2, bool)> = all;
+        let mut points = all;
         if points.is_empty() && !self.touch_seen && is_mouse_button_down(MouseButton::Left) {
             points.push((mouse_position().into(), false));
         }
+        self.idle_frames = if points.is_empty() { self.idle_frames.saturating_add(1) } else { 0 };
         let mut bits = 0;
         self.pressed = [false; BUTTONS];
         let mut stick_touch = None;
+        let mut toggle_held = false;
         for h in self.hold.iter_mut() {
             *h = h.saturating_sub(1);
         }
         for (p, ended) in &points {
-            if p.x < screen_width() * 0.45 && p.y > screen_height() * 0.3 {
-                if !ended {
-                    stick_touch = Some(*p);
-                }
+            if lay.toggle.distance(*p) < lay.toggle_radius * 1.6 {
+                toggle_held |= !ended;
                 continue;
             }
-            for (i, c) in btns.iter().enumerate() {
-                if c.distance(*p) < Self::radius(i, r) * 1.1 {
-                    if *ended {
-                        self.hold[i] = self.hold[i].max(3);
-                    } else {
-                        self.hold[i] = self.hold[i].max(1);
-                    }
-                }
+            let hit = (0..BUTTONS)
+                .filter(|i| self.visible(*i))
+                .map(|i| (i, lay.pos[i].distance(*p) / lay.radius[i]))
+                .filter(|(_, d)| *d < 1.25)
+                .min_by(|a, b| a.1.total_cmp(&b.1));
+            match hit {
+                Some((i, _)) => self.hold[i] = self.hold[i].max(if *ended { 3 } else { 1 }),
+                None if lay.in_stick_zone(*p) && !ended => stick_touch = Some(*p),
+                None => {}
             }
         }
+        if toggle_held && !self.toggle_down {
+            self.more_open = !self.more_open;
+            self.hold = [0; BUTTONS];
+        }
+        self.toggle_down = toggle_held;
         for i in 0..BUTTONS {
             if self.hold[i] > 0 {
                 bits |= TOUCH_BUTTONS[i].1;
                 self.pressed[i] = true;
             }
         }
+        let sr = lay.stick_radius;
         if let Some(p) = stick_touch {
-            let c = *self.stick_center.get_or_insert(stick);
+            let c = *self.stick_center.get_or_insert(lay.stick);
             let d = p - c;
             let len = d.length();
-            self.stick_pos = if len > sr * 0.6 {
-                d / len * sr * 0.6
-            } else {
-                d
-            };
+            self.stick_pos = if len > sr * 0.6 { d / len * sr * 0.6 } else { d };
             if len > sr * 0.2 {
                 let a = d.y.atan2(d.x);
                 let oct = (a / (std::f32::consts::PI / 4.0)).round() as i32;
@@ -184,30 +165,29 @@ impl TouchPad {
         }
         self.bits = bits;
     }
+    fn fade(&self) -> f32 {
+        let over = self.idle_frames.saturating_sub(IDLE_FADE_FRAMES) as f32 / 30.0;
+        1.0 - (1.0 - IDLE_ALPHA) * over.min(1.0)
+    }
     pub fn draw(&self) {
         if !self.enabled {
             return;
         }
-        ume_shell::alpha_scale::with(crate::tweaks::current().touch_opacity, || self.draw_pad());
+        let opacity = crate::tweaks::current().touch_opacity * self.fade();
+        ume_shell::alpha_scale::with(opacity, || self.draw_pad());
     }
 
     fn draw_pad(&self) {
-        let (btns, r, stick, sr) = Self::layout();
-        let c = self.stick_center.unwrap_or(stick);
-        draw_circle(c.x, c.y, sr, Color::new(1.0, 1.0, 1.0, 0.08));
-        draw_circle_lines(c.x, c.y, sr, 2.0, Color::new(1.0, 1.0, 1.0, 0.35));
-        draw_circle(
-            c.x + self.stick_pos.x,
-            c.y + self.stick_pos.y,
-            sr * 0.42,
-            Color::new(1.0, 1.0, 1.0, 0.35),
-        );
-        for (i, p) in btns.iter().enumerate() {
-            let (label, _) = TOUCH_BUTTONS[i];
-            let rr = Self::radius(i, r);
+        let lay = touch_layout::compute();
+        let c = self.stick_center.unwrap_or(lay.stick);
+        touch_style::draw_stick(c, lay.stick_radius, self.stick_pos);
+        for i in (0..BUTTONS).filter(|i| self.visible(*i)) {
             let base = touch_style::base_color(i);
-            touch_style::draw_button(*p, rr, label, base, self.pressed[i]);
+            touch_style::draw_button(lay.pos[i], lay.radius[i], TOUCH_BUTTONS[i].0, base, self.pressed[i]);
         }
+        let label = if self.more_open { "x" } else { "+" };
+        let base = Color::new(0.6, 0.6, 0.65, 0.5);
+        touch_style::draw_button(lay.toggle, lay.toggle_radius, label, base, self.toggle_down);
     }
 }
 

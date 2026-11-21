@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod unleash; mod walk;
+mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod priority; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -400,11 +400,11 @@ impl Match {
 
     pub fn in_guard_dist(&self, i: usize) -> bool {
         let me = &self.fighters[i];
-        for e in &self.fighters {
-            if e.side == me.side || e.destroyed { continue; }
-            if e.move_type == 'A' && e.hitdef_active { if let Some(h) = &e.hitdef { if (e.pos.x - me.pos.x).abs() <= h.guard_dist * e.lscl { return true; } } }
+        for (enemy, e) in self.fighters.iter().enumerate() {
+            if e.side == me.side || e.destroyed || !e.alive || e.ikemen.standby || e.has_assert(asf::UNGUARDABLE) || !self.same_lane(i, enemy) { continue; }
+            if e.move_type == 'A' && e.hitdef_active { if let Some(h) = &e.hitdef { if !h.guardflag.is_empty() && (e.pos.x - me.pos.x).abs() <= h.guard_dist * e.lscl { return true; } } }
         }
-        self.projectiles.iter().any(|p| p.side != me.side && !p.dying && (p.pos.x - me.pos.x).abs() <= p.guard_dist)
+        self.projectiles.iter().any(|p| p.side != me.side && !p.dying && !p.hitdef.guardflag.is_empty() && (p.pos.x - me.pos.x).abs() <= p.guard_dist)
     }
 
     fn physics_step(&mut self, i: usize) {
@@ -452,6 +452,7 @@ impl Match {
             let f = &mut self.fighters[i];
             f.pos.x = tx + b.x * tf;
             f.pos.y = ty + b.y;
+            if b.facing != 0 { f.facing = if b.facing < 0 { -tf } else { tf }; }
         }
     }
     fn orphan_custom_states(&mut self) {
@@ -478,6 +479,7 @@ impl Match {
         let f = &mut self.fighters[i];
         f.pos.x = tx + b.x * tf;
         f.pos.y = ty + b.y;
+        if b.facing != 0 { f.facing = if b.facing < 0 { -tf } else { tf }; }
         if b.time > 0 { f.bind.as_mut().unwrap().time -= 1; }
     }
 
@@ -734,8 +736,10 @@ impl Match {
             if f.move_hit > 0 { f.move_hit += 1; }
             if f.move_guarded > 0 { f.move_guarded += 1; }
             if f.move_countered > 0 { f.move_countered += 1; }
-            if !f.not_hit_by.is_empty() { f.not_hit_by.retain_mut(|n| { n.1 -= 1; n.1 > 0 }); }
-            if !f.hit_by.is_empty() { f.hit_by.retain_mut(|n| { n.1 -= 1; n.1 > 0 }); }
+            for slot in f.not_hit_by.iter_mut().flatten() { slot.1 -= 1; }
+            for slot in f.hit_by.iter_mut().flatten() { slot.1 -= 1; }
+            for slot in f.not_hit_by.iter_mut() { if slot.as_ref().is_some_and(|n| n.1 <= 0) { *slot = None; } }
+            for slot in f.hit_by.iter_mut() { if slot.as_ref().is_some_and(|n| n.1 <= 0) { *slot = None; } }
             if let Some(p) = f.palfx.as_mut() { p.elapsed += 1; }
             let tp = f.frame().map(|fr| TrailPoint { x: f.pos.x, y: f.pos.y, group: fr.group, index: fr.index, fx: fr.x, fy: fr.y, flip_h: fr.flip_h, facing: f.facing });
             if let Some(ai) = f.after_image.as_mut() {
@@ -987,8 +991,8 @@ impl Match {
         if st == 'A' && !hf.contains('A') && !(falling && hf_falling) { return false; }
         if falling && !hf_falling { return false; }
         if st == 'L' && !hf.contains('D') { return false; }
-        if f.not_hit_by.iter().any(|(a, _)| Self::attr_match(hd, a)) { return false; }
-        if f.hit_by.iter().any(|(a, _)| !Self::attr_match(hd, a)) { return false; }
+        if f.not_hit_by.iter().flatten().any(|(a, t)| *t > 0 && Self::attr_match(hd, a)) { return false; }
+        if f.hit_by.iter().flatten().any(|(a, t)| *t > 0 && !Self::attr_match(hd, a)) { return false; }
         true
     }
     fn is_guarding(&self, d: usize, hd: &HitDefData) -> bool {
@@ -999,8 +1003,8 @@ impl Match {
         if f.has_assert(blocked) { return false; }
         let ok = (st == 'S' && (gf.contains('H') || gf.contains('M'))) || (st == 'C' && (gf.contains('L') || gf.contains('M'))) || (st == 'A' && gf.contains('A'));
         if !ok { return false; }
-        if (120..=155).contains(&f.state_no) { return true; }
-        f.ctrl && f.move_type != 'H' && !f.is_helper && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD) || f.guard_button)
+        if (150..=155).contains(&f.state_no) && (f.hit_over_time > 0 || f.hit_pause > 0 || f.hit_shake > 0) { return true; }
+        let can_guard = matches!(f.state_no, 120..=122 | 130..=132 | 140..=142 | 150..=155) || (f.ctrl && f.move_type != 'H' && !f.is_helper); can_guard && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD) || f.guard_button)
     }
 
     fn detect_reversals(&mut self) {
@@ -1080,12 +1084,20 @@ impl Match {
                 }
             }
         }
+        let keep = priority::keep(self, &pending, pending_len);
+        for i in 0..pending_len {
+            if keep[i] { continue; }
+            let a = pending[i].0;
+            if !(0..pending_len).any(|j| keep[j] && pending[j].0 == a) {
+                self.fighters[a].hitdef_active = false;
+            }
+        }
         let mut struck = [0usize; 8];
         let mut struck_len = 0;
-        for &(a, d, at) in &pending[..pending_len] {
+        for (idx, &(a, d, at)) in pending[..pending_len].iter().enumerate() {
+            if !keep[idx] { continue; }
             let Some(hd) = self.fighters[a].hitdef.clone() else { continue };
             if hd.hit_once && struck[..struck_len].contains(&a) { continue; }
-            if !self.fighters[a].hitdef_active { continue; }
             let did = self.fighters[d].id;
             self.fighters[a].hitdef_targets.push(did);
             if hd.hit_once { self.fighters[a].targets.retain(|t| t.0 == did); }

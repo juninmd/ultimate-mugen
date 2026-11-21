@@ -127,15 +127,15 @@ impl App {
         self.arcade = Some((ladder, 0));
         self.survival = None;
         self.ending_shown = false;
-        self.screen = if has_boss {
-            Screen::Cutscene {
+        if has_boss {
+            self.screen = Screen::Cutscene {
                 kind: 0,
                 page: 0,
                 t: 0.0,
-            }
+            };
         } else {
-            Screen::Stages { cur: 1 }
-        };
+            self.open_stages(1);
+        }
     }
 
     pub(crate) fn draw_boss_toast(&mut self, dt: f32) {

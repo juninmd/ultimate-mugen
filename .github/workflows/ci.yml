@@ -89,6 +89,28 @@ jobs:
         with:
           name: web-smoke-shots-${{ matrix.shard }}
           path: web-smoke-shots/*.png
+  smoke-web:
+    needs: web-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: web, mobile: "0" }
+          - { name: web-mobile, mobile: "1" }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with: { name: web-dist, path: web/dist }
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with: { path: ~/.cache/ms-playwright, key: "playwright-${{ runner.os }}-1.56.1-chromium" }
+      - run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+      - run: node scripts/smoke-web.js web/dist smoke-report
+        env: { SMOKE_MOBILE: "${{ matrix.mobile }}" }
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with: { name: "smoke-${{ matrix.name }}", path: smoke-report, retention-days: 7, if-no-files-found: ignore }
   android:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -124,10 +146,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
       - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config
+        run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config xvfb mesa-vulkan-drivers libxkbcommon-x11-0
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with: { save-if: "${{ github.ref == 'refs/heads/master' }}" }
       - run: cargo build --release
+      - if: runner.os == 'Linux'
+        run: xvfb-run -a target/release/ultimate-mugen --smoke smoke-report --res 1280x720
+      - if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with: { name: smoke-desktop-linux, path: smoke-report, retention-days: 7, if-no-files-found: ignore }
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: ultimate-mugen-${{ matrix.os }}

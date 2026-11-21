@@ -393,6 +393,7 @@ value = 140
 
 [Statedef 130]
 type = S
+movetype = I
 physics = S
 anim = 130
 
@@ -409,6 +410,7 @@ value = 140
 
 [Statedef 131]
 type = C
+movetype = I
 physics = C
 anim = 131
 
@@ -425,6 +427,7 @@ value = 140
 
 [Statedef 132]
 type = A
+movetype = I
 physics = A
 anim = 132
 
@@ -436,6 +439,7 @@ value = 140
 
 [Statedef 140]
 type = U
+movetype = I
 physics = U
 ctrl = 0
 
@@ -446,8 +450,9 @@ value = 140 + (StateType = C) + (StateType = A) * 2
 
 [State 140, end]
 type = ChangeState
-trigger1 = AnimTime = 0
+trigger1 = AnimTime >= 0
 trigger2 = !SelfAnimExist(140 + (StateType = C) + (StateType = A) * 2) && Time >= 1
+trigger3 = Time >= 20
 value = ifelse(StateType = C, 11, ifelse(StateType = A, 50, 0))
 ctrl = 1
 
@@ -545,15 +550,16 @@ trigger1 = Time = 0
 x = 1
 y = 1
 
-[State 155, ctrl]
-type = CtrlSet
-trigger1 = HitOver
-value = 1
-
 [State 155, land]
 type = ChangeState
 trigger1 = Time > 0 && Pos Y >= 0
 value = 52
+ctrl = 1
+
+[State 155, recover]
+type = ChangeState
+trigger1 = HitOver
+value = ifelse(command = "holdback" && InGuardDist, 132, 140)
 ctrl = 1
 
 ;---------------------------------------------------------------- round end

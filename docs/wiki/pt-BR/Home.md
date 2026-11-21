@@ -36,6 +36,8 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Screenpacks](Screenpacks.md) | Criadores | Suporte a screenpacks de menu e HUD |
 | [Matriz de formatos](Matriz-Formatos.md) | Criadores | Status de SFF, SND, AIR, ACT, DEF e screenpacks |
 | [Estudo de screenpacks](Estudo-Screenpacks.md) | Criadores | Diferenciais de screenpacks e o que o motor adotou |
+| [Dissecação de quatro lutadores](Dissecacao-MUGEN.md) | Desenvolvedores | Aizen, Gogeta, Goku SSJ e SSJ4: arquivos, comandos, normais e padrões de golpe |
+| [Recriar um lutador M.U.G.E.N](Recriar-um-Lutador-MUGEN.md) | Criadores | Receita e mapeamento para UMF, com a reconstrução do Captain Marlow Reyes |
 | [Importar sprite atlas](Importacao-Sprite-Atlas.md) | Criadores | Transformar uma folha de sprites em lutador |
 | [Ferramentas de desenvolvimento](Ferramentas-de-Desenvolvimento.md) | Contribuidores | Ferramentas Rust de build e auditoria (`ume-tools`) |
 | [Ferramentas de sprites](Ferramentas-de-Sprites.md) | Criadores | Fatiar folhas, variantes de paleta, caixas de colisão automáticas |
@@ -53,6 +55,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Engenharia reversa do port para navegador](Engenharia-Reversa-Ikemen-Web.md) | Desenvolvedores | Como uma build de M.U.G.E.N com 78 lutadores roda no navegador, e o que copiamos dela |
 | [Pesquisa de jogos de luta](Pesquisa-Jogos-Luta.md) | Desenvolvedores | Pesquisa de outros lutadores e lista priorizada de melhorias |
 | [Auditoria de animações nativas](Auditoria-Animacoes-Nativas.md) | Desenvolvedores | Cobertura de poses do elenco nativo |
+| [Smoke test (modo debug)](Smoke-Test.md) | Desenvolvedores | Um comando valida as features principais no desktop e na web, com prints e relatório |
 | [Estresse e resiliência](Estresse-e-Resiliencia.md) | Desenvolvedores | Fuzzing, limites de spawners e números do caminho quente |
 | [Solução de problemas](Problemas.md) | Todos | Erros comuns e ferramentas de diagnóstico |
 

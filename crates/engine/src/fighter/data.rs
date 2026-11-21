@@ -5,7 +5,7 @@ pub struct V2 { pub x: f32, pub y: f32 }
 #[derive(Clone, Debug, Default)]
 pub struct HitDefData {
     pub attr_state: String, pub attr_kind: Vec<String>, pub hitflag: String, pub guardflag: String,
-    pub animtype: i32, pub air_animtype: i32, pub fall_animtype: i32, pub priority: i32,
+    pub animtype: i32, pub air_animtype: i32, pub fall_animtype: i32, pub priority: i32, pub priority_type: i32,
     pub damage: f32, pub guard_damage: f32, pub pause_p1: i32, pub pause_p2: i32, pub guard_pause_p1: i32, pub guard_pause_p2: i32,
     pub spark_no: i32, pub spark_own: bool, pub guard_spark_no: i32, pub guard_spark_own: bool, pub spark_x: f32, pub spark_y: f32,
     pub hit_sound: Option<(i32, i32, bool)>, pub guard_sound: Option<(i32, i32, bool)>,
@@ -73,7 +73,7 @@ impl Default for GetHitVars {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BindKind { Target, Parent, Root }
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Bind { pub to: u32, pub time: i32, pub x: f32, pub y: f32, pub kind: BindKind }
+pub struct Bind { pub to: u32, pub time: i32, pub x: f32, pub y: f32, pub kind: BindKind, pub facing: i32 }
 
 pub use crate::palette::PalFx;
 

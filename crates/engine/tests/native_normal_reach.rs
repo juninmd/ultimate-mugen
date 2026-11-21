@@ -47,6 +47,7 @@ fn reach(base: &Match, state: i32) -> (i32, i32) {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_fighter_has_its_own_normal_reach_table() {
     let mut tables: HashMap<Vec<i32>, String> = HashMap::new();
     for nc in characters() {

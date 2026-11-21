@@ -100,7 +100,7 @@ fn recover_time_is_zero_without_a_fall() {
 #[test]
 fn isbound_follows_the_live_bind() {
     let mut m = after_hit();
-    m.fighters[1].bind = Some(Bind { to: m.fighters[0].id, time: 5, x: 0.0, y: 0.0, kind: BindKind::Target });
+    m.fighters[1].bind = Some(Bind { to: m.fighters[0].id, time: 5, x: 0.0, y: 0.0, kind: BindKind::Target, facing: 0 });
     assert_eq!(ghv(&m, 1, "isbound"), 1.0);
 }
 

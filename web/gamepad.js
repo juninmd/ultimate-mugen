@@ -77,7 +77,10 @@
     insets = [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].map((v) => parseFloat(v) || 0);
     probe.remove();
   };
-  window.addEventListener('resize', () => { insets = null; });
+  const invalidateInsets = () => { insets = null; };
+  window.addEventListener('resize', invalidateInsets);
+  window.visualViewport?.addEventListener('resize', invalidateInsets);
+  window.addEventListener('pageshow', invalidateInsets);
   window.ume_safe_inset = (i) => { if (!insets) readInsets(); return insets[i]; };
 
   window.umeStartImports = function (wasm) {

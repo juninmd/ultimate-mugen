@@ -4,7 +4,7 @@ use crate::expr::{truthy, Expr};
 use crate::fighter::*;
 use crate::flags::gsf;
 use crate::triggers::Ctx;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
@@ -69,6 +69,7 @@ pub struct Match {
     pub restart_pending: bool,
     pub announce: Option<Announce>,
     pub rng: u32,
+    pub rand_state: Cell<u32>,
     pub next_id: u32,
     pub assigns: RefCell<Vec<(usize, AssignKind, i32, f64)>>,
     pub tick_ids: Vec<u32>,
@@ -82,9 +83,12 @@ impl Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             power_arena: false, team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
-            events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
+            events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, rand_state: Cell::new(DEFAULT_SEED), next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
         }
+    }
+    pub fn next_random(&self) -> u32 {
+        let mut x = self.rand_state.get(); x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rand_state.set(x); x
     }
     pub fn random(&mut self) -> f32 {
         let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x;
@@ -140,7 +144,7 @@ impl Match {
     pub fn checksum(&self) -> u64 {
         fn mix(h: &mut u64, v: u64) { *h ^= v; *h = h.wrapping_mul(0x100_0000_01b3); }
         let mut h: u64 = 0xcbf2_9ce4_8422_2325;
-        for v in [self.game_time as u64, self.timer as u64, self.round_no as u64, self.round_state as u64, self.winner_side as u64, self.wins[0] as u64, self.wins[1] as u64, self.next_id as u64] { mix(&mut h, v); }
+        for v in [self.game_time as u64, self.timer as u64, self.round_no as u64, self.round_state as u64, self.winner_side as u64, self.wins[0] as u64, self.wins[1] as u64, self.next_id as u64, self.rand_state.get() as u64] { mix(&mut h, v); }
         for f in &self.fighters {
             for v in [f.id as u64, f.life.to_bits() as u64, f.life_max.to_bits() as u64, f.pos.x.to_bits() as u64, f.pos.y.to_bits() as u64, f.vel.x.to_bits() as u64, f.vel.y.to_bits() as u64, f.power.to_bits() as u64, f.state_no as u64, f.state_time as u64, f.facing.to_bits() as u64, f.ctrl as u64, f.move_type as u64, f.state_type as u64, f.combo_count as u64, f.combo_damage.to_bits() as u64] { mix(&mut h, v); }
         }

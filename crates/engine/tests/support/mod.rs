@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+pub mod duel;
 pub mod gogeta;
 pub mod render;
 use std::collections::HashMap;

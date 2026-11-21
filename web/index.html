@@ -34,7 +34,7 @@
 <body>
   <canvas id="glcanvas" tabindex="1" aria-label="Ultimate MUGEN"></canvas>
   <label id="imp" aria-label="Import M.U.G.E.N">Import M.U.G.E.N<input id="ume-file" type="file" accept=".zip" multiple /></label>
-  <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar" role="progressbar" aria-labelledby="bootmsg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div><span id="bootmsg" aria-live="polite">Downloading the game…</span></div>
+  <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar" role="progressbar" aria-labelledby="bootmsg" aria-valuemin="0" aria-valuemax="100"><i></i></div><span id="bootmsg" aria-live="polite">Downloading the game…</span></div>
   <div id="fatal" role="alert"><span id="fataltx"></span><button id="fatalbtn" type="button"></button></div>
   <div id="rot" role="status"><span id="rottx"></span><button id="rotx" type="button" aria-label="Close">&times;</button></div>
   <script src="gamepad.js"></script>
@@ -43,9 +43,9 @@
   <script type="module">
     import init, * as ume from './ultimate-mugen.js?v=__BUILD__';
     const TEXTS = {
-      pt: { fatal: 'O jogo parou: faltou memória ou ocorreu um erro interno.', reload: 'Recarregar', download: 'Baixando o jogo…', fail: 'Falha ao carregar', lost: 'Contexto gráfico perdido, recarregando…', rotate: 'Gire o aparelho para jogar na horizontal →', import: 'Importar M.U.G.E.N' },
-      es: { fatal: 'El juego se detuvo: se quedó sin memoria o tuvo un error interno.', reload: 'Recargar', download: 'Descargando el juego…', fail: 'Error al cargar', lost: 'Contexto gráfico perdido, recargando…', rotate: 'Gira el dispositivo para jugar en horizontal →', import: 'Importar M.U.G.E.N' },
-      en: { fatal: 'The game stopped: it ran out of memory or hit an internal error.', reload: 'Reload', download: 'Downloading the game…', fail: 'Failed to load', lost: 'Graphics context lost, reloading…', rotate: 'Rotate your device to play in landscape →', import: 'Import M.U.G.E.N' },
+      pt: { fatal: 'O jogo parou: faltou memória ou ocorreu um erro interno.', reload: 'Recarregar', download: 'Baixando o jogo…', fail: 'Falha ao carregar', lost: 'Contexto gráfico perdido, recarregando…', rotate: 'Gire o aparelho para jogar na horizontal →', import: 'Importar M.U.G.E.N', close: 'Fechar' },
+      es: { fatal: 'El juego se detuvo: se quedó sin memoria o tuvo un error interno.', reload: 'Recargar', download: 'Descargando el juego…', fail: 'Error al cargar', lost: 'Contexto gráfico perdido, recargando…', rotate: 'Gira el dispositivo para jugar en horizontal →', import: 'Importar M.U.G.E.N', close: 'Cerrar' },
+      en: { fatal: 'The game stopped: it ran out of memory or hit an internal error.', reload: 'Reload', download: 'Downloading the game…', fail: 'Failed to load', lost: 'Graphics context lost, reloading…', rotate: 'Rotate your device to play in landscape →', import: 'Import M.U.G.E.N', close: 'Close' },
     };
     const tx = TEXTS[(navigator.language || 'en').slice(0, 2)] || TEXTS.en;
     document.documentElement.lang = (navigator.language || 'en');
@@ -56,32 +56,37 @@
     document.getElementById('rottx').textContent = tx.rotate;
     const dismissRot = () => { rot.classList.add('off'); try { sessionStorage.setItem('ume-rot-dismissed', '1'); } catch (e) {} };
     if (rotSeen) rot.classList.add('off');
-    document.getElementById('rotx').addEventListener('click', dismissRot);
-    setTimeout(dismissRot, 6000);
+    const rotateClose = document.getElementById('rotx');
+    rotateClose.setAttribute('aria-label', tx.close);
+    rotateClose.addEventListener('click', dismissRot);
     document.getElementById('imp').setAttribute('aria-label', tx.import);
     const boot = document.getElementById('boot'), barBox = document.getElementById('bar'), bar = barBox.querySelector('i'), msg = document.getElementById('bootmsg');
     const setProgress = (pct) => { bar.style.width = pct + '%'; barBox.setAttribute('aria-valuenow', String(Math.round(pct))); };
-    const hide = () => { boot.classList.add('done'); setTimeout(() => boot.remove(), 400); };
+    let hideTimer, removeBootTimer;
+    const hide = () => { boot.classList.add('done'); removeBootTimer = setTimeout(() => boot.remove(), 400); };
     async function load() {
       const url = new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url);
       const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.body || typeof TransformStream !== 'function') return res;
       const encoded = !!res.headers.get('content-encoding');
       const total = encoded ? 0 : +res.headers.get('content-length') || 0;
-      if (!total) barBox.classList.add('ind');
+      if (total) setProgress(0);
+      else barBox.classList.add('ind');
       let got = 0;
-      const body = res.body ? res.body.pipeThrough(new TransformStream({ transform(chunk, ctl) { got += chunk.length; if (total) setProgress(Math.min(95, got / total * 100)); ctl.enqueue(chunk); } })) : res.body;
+      const body = res.body.pipeThrough(new TransformStream({ transform(chunk, ctl) { got += chunk.length; if (total) setProgress(Math.min(95, got / total * 100)); ctl.enqueue(chunk); } }));
       msg.textContent = tx.download;
       return new Response(body, { headers: { 'content-type': 'application/wasm' } });
     }
     try {
-      await init({ module_or_path: await load().catch(() => new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url)) });
+      await init({ module_or_path: await load() });
     } catch (e) { msg.textContent = tx.fail + ': ' + (e && e.message || e); throw e; }
     barBox.classList.remove('ind');
     setProgress(100);
     window.umeStartImports(ume);
     window.umeStartMarket(ume);
     for (const t of ['pointerdown', 'keydown', 'touchend']) window.addEventListener(t, () => ume.ume_unlock_audio(), { capture: true, passive: true });
-    setTimeout(hide, 600);
+    hideTimer = setTimeout(hide, 600);
     const cv = document.getElementById('glcanvas');
     const showFatal = (err) => { console.error(err); if (!document.getElementById('fatal').classList.contains('on')) { document.getElementById('fataltx').textContent = tx.fatal; document.getElementById('fatalbtn').textContent = tx.reload; document.getElementById('fatal').classList.add('on'); } };
     document.getElementById('fatalbtn').addEventListener('click', () => location.reload());
@@ -94,6 +99,11 @@
       const losses = recentLosses();
       if (losses.length >= LOST_LIMIT) { showFatal(new Error('WebGL context lost ' + LOST_LIMIT + ' times in a minute')); return; }
       try { sessionStorage.setItem(LOST_KEY, JSON.stringify([...losses, Date.now()])); } catch (err) {}
+      clearTimeout(hideTimer);
+      clearTimeout(removeBootTimer);
+      barBox.classList.add('ind');
+      barBox.removeAttribute('aria-valuenow');
+      bar.style.removeProperty('width');
       msg.textContent = tx.lost; boot.classList.remove('done'); document.body.appendChild(boot); setTimeout(() => location.reload(), 800);
     });
   </script>

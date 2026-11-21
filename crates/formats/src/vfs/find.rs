@@ -94,7 +94,7 @@ fn in_backup_dir(key: &str) -> bool {
 
 /// Stage .def files (has `[BGdef` and `[StageInfo]` or `[Camera]`).
 pub fn find_stage_defs(vfs: &Vfs) -> Vec<String> {
-    let candidates: Vec<&String> = vfs.keys().filter(|k| k.ends_with(".def")).collect();
+    let candidates: Vec<&String> = vfs.keys().filter(|k| k.ends_with(".def") && !in_backup_dir(k)).collect();
     let hits = crate::par::map(&candidates, |key| {
         let Some(bytes) = vfs.get(key) else { return false };
         if bytes.len() > 1 << 20 {

@@ -1428,7 +1428,9 @@ impl Match {
         if !def.anims.contains_key(&anim_no) { return; }
         let postype = sc.raw("postype").unwrap_or("p1").to_ascii_lowercase();
         let screen_space = matches!(postype.as_str(), "front" | "back" | "left" | "right");
-        let (px, py) = (num(self, "pos", 0.0, 0) * f.lscl, num(self, "pos", 0.0, 1) * f.lscl);
+        let (mut px, mut py) = (num(self, "pos", 0.0, 0) * f.lscl, num(self, "pos", 0.0, 1) * f.lscl);
+        let (rx, ry) = (num(self, "random", 0.0, 0) * f.lscl, num(self, "random", 0.0, 1) * f.lscl);
+        if rx != 0.0 { px += (self.random() - 0.5) * rx; } if ry != 0.0 { py += (self.random() - 0.5) * ry; } let f = &self.fighters[i];
         let fac = if num(self, "facing", 1.0, 0) < 0.0 { -1.0 } else { 1.0 };
         let (x, y, facing, bind_to);
         let half = self.view_w / 2.0;
@@ -1477,7 +1479,7 @@ impl Match {
         e.id = num(self, "id", -1.0, 0) as i32;
         e.facing = facing;
         e.vfacing = if num(self, "vfacing", 1.0, 0) < 0.0 { -1.0 } else { 1.0 };
-        e.vel = V2 { x: num(self, "vel", 0.0, 0) * f.lscl, y: num(self, "vel", 0.0, 1) * f.lscl };
+        e.vel = if sc.has("vel", 0) { V2 { x: num(self, "vel", 0.0, 0) * f.lscl, y: num(self, "vel", 0.0, 1) * f.lscl } } else { V2 { x: num(self, "velocity", 0.0, 0) * f.lscl, y: num(self, "velocity", 0.0, 1) * f.lscl } };
         e.accel = V2 { x: num(self, "accel", 0.0, 0) * f.lscl, y: num(self, "accel", 0.0, 1) * f.lscl };
         e.bind_time = num(self, "bindtime", 0.0, 0) as i32;
         if e.bind_time != 0 { e.bind_to = bind_to; e.bind_off = V2 { x: px, y: py }; }
@@ -1488,7 +1490,7 @@ impl Match {
         e.scale = [num(self, "scale", 1.0, 0), num(self, "scale", 1.0, 1)];
         e.remove_on_get_hit = num(self, "removeongethit", 0.0, 0) != 0.0;
         e.super_move = num(self, "supermove", num(self, "supermovetime", 0.0, 0) as f64, 0) as i32;
-        e.pause_move = num(self, "pausemovetime", 0.0, 0) as i32;
+        e.pause_move = num(self, "pausemove", num(self, "pausemovetime", 0.0, 0) as f64, 0) as i32;
         e.add = sc.raw("trans").is_some_and(|t| t.to_ascii_lowercase().starts_with("add"));
         e.ignore_hit_pause = num(self, "ignorehitpause", 1.0, 0) != 0.0;
         e.screen = screen_space || sc.raw("space").is_some_and(|s| s.trim().eq_ignore_ascii_case("screen"));
@@ -1552,9 +1554,10 @@ impl Match {
         h.helper_id = self.num(i, sc, "id", 0.0, 0) as i32;
         h.parent = Some(f.id); h.root = root.id;
         h.key_ctrl = num(self, "keyctrl", 0.0, 0) != 0.0;
-        h.pause_move_time = num(self, "pausemovetime", 0.0, 0) as i32;
+        h.pause_move_time = if num(self, "pausemove", 0.0, 0) != 0.0 { 999_999 } else { num(self, "pausemovetime", 0.0, 0) as i32 };
         h.pause_bool = num(self, "pausebool", 0.0, 0) != 0.0;
-        h.super_move_time = num(self, "supermovetime", 0.0, 0) as i32;
+        h.super_move_time = if num(self, "supermove", 0.0, 0) != 0.0 { 999_999 } else { num(self, "supermovetime", 0.0, 0) as i32 };
+        if sc.has("sprpriority", 0) { h.spr_priority = num(self, "sprpriority", 0.0, 0) as i32; }
         h.preserve = num(self, "preserve", 0.0, 0) != 0.0;
         h.inherit_juggle = num(self, "inheritjuggle", 0.0, 0).clamp(0.0, 2.0) as u8;
         h.own_pal = num(self, "ownpal", 0.0, 0) != 0.0;

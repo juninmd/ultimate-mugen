@@ -161,13 +161,10 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let pa = if cost > 0.0 { -cost } else if m.kind == "special" { 30.0 } else { 15.0 };
         cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" }); cns += &super::armor::armor_state(nc, m, sid); cns += &extras::voice_and_traits_state(m, sid); let (throw_cns, throw_def) = super::throw::throw_states(m, sid, &anim_no); cns += &throw_cns; throw_defs += &throw_def; cns += &super::requires::finisher_done(m, sid);
         let freeze = if super::ultimate::is(&m.id) { super::ultimate::FREEZE } else { 55 };
-        if m.kind == "super" {
-            cns += &format!("[State {sid}, super]\ntype = SuperPause\ntrigger1 = Time = 0\ntime = {freeze}\nanim = 30\npos = 0, -60\nsound = -1\n\n[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\nframegap = 2\npalbright = 0, 0, 0\npalcontrast = 100, 150, 256\npaladd = 0, 0, 0\npalmul = .85, .85, .85\ntime = 60\nlength = 10\n\n");
-        } else if m.fx.as_deref() == Some("aura") {
-            cns += &format!("[State {sid}, ai]\ntype = AfterImage\ntrigger1 = Time = 0\nframegap = 2\npalbright = 0, 0, 0\npalcontrast = 100, 150, 256\npaladd = 0, 0, 0\npalmul = .85, .85, .85\ntime = 20\nlength = 6\n\n");
-        }
+        cns += &super::move_fx::super_pause_cns(m, sid, freeze);
+        cns += &super::move_fx::move_fx_cns(m, sid, &anim_no);
         if let Some(inv) = m.invuln { cns += &format!("[State {sid}, inv]\ntype = NotHitBy\ntrigger1 = AnimElemNo(0) = [{}, {}]\nvalue = SCA\ntime = 1\n\n", inv[0], inv[1]); }
-        if let Some(tp) = m.teleport { cns += &format!("[State {sid}, tp]\ntype = PosAdd\ntrigger1 = AnimElem = {tp}\nx = p2dist x + 40\n\n[State {sid}, tpt]\ntype = Turn\ntrigger1 = AnimElem = {tp}\n\n"); }
+        if let Some(tp) = &m.teleport { for step in tp.to_vec() { cns += &super::move_fx::teleport_cns(&step, sid); } }
         cns += &super::blocks::states(m, sid, &anim_no);
         for v in &m.moves {
             cns += &format!("[State {sid}, vel]\ntype = VelSet\ntrigger1 = AnimElem = {}\n{}{}\n", v.at, v.vel[0].map(|x| format!("x = {x}\n")).unwrap_or_default(), v.vel[1].map(|y| format!("y = {y}\n")).unwrap_or_default());
@@ -186,13 +183,17 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
             let pa = anim_no.get(&p.anim).copied().unwrap_or(0);
             let ph2 = p.hit_anim.as_ref().and_then(|h| anim_no.get(h)).map(|h| format!("projhitanim = {h}\nprojremanim = {h}\n")).unwrap_or_default();
             let pattr = format!("{st}, {}P", if m.kind == "super" { "H" } else { "S" });
-            cns += &format!("[State {sid}, proj]\ntype = Projectile\ntrigger1 = AnimElem = {}\nprojid = {pid}\nprojanim = {pa}\n{ph2}offset = {}, {}\nvelocity = {}, {}\n{}projhits = {}\nprojmisstime = 6\nprojpriority = {}\nprojremovetime = {}\n{}\n",
+            cns += &format!("[State {sid}, proj]\ntype = Projectile\ntrigger1 = AnimElem = {}\nprojid = {pid}\nprojanim = {pa}\n{ph2}offset = {}, {}\nvelocity = {}, {}\n{}projhits = {}\nprojmisstime = {}\nprojpriority = {}\nprojremovetime = {}\n{}\n",
                 p.at, p.offset[0], p.offset[1], p.speed[0], p.speed[1], p.accel.map(|a| format!("accel = {}, {}\n", a[0], a[1])).unwrap_or_default(),
-                p.hits.unwrap_or(1), p.priority.unwrap_or(1), p.remove_time.unwrap_or(-1),
-                extras::hitdef_projectile(p.damage * sm, Some(p.level.as_deref().unwrap_or("medium")), super::multihit::projectile_knockback(&p), p.launch.unwrap_or(false), &pattr, p.element.as_deref(), p.stun));
+                p.hits.unwrap_or(1), p.miss_time.unwrap_or(6), p.priority.unwrap_or(1), p.remove_time.unwrap_or(-1),
+                extras::hitdef_projectile(&p, sm, super::multihit::projectile_knockback(&p), &pattr));
             pid += 1;
         }
-        if when != "air" { cns += &format!("[State {sid}, end]\ntype = ChangeState\ntrigger1 = AnimTime = 0\nvalue = {}\nctrl = 1\n\n", if when == "crouch" { 11 } else { 0 }); }
+        cns += &super::move_fx::follow_up_cns(m, sid, m.follow_up.as_ref().and_then(|f| plan.sid_of(&f.to)));
+        if when != "air" {
+            if m.teleport.is_some() { cns += &format!("[State {sid}, end_air]\ntype = ChangeState\ntrigger1 = AnimTime = 0 && Pos Y < 0\nvalue = 50\nctrl = 1\n\n"); }
+            cns += &format!("[State {sid}, end]\ntype = ChangeState\ntrigger1 = AnimTime = 0\nvalue = {}\nctrl = 1\n\n", if when == "crouch" { 11 } else { 0 });
+        }
         if super::air_variant::eligible(m, when) {
             let (entry, body) = (super::air_variant::entry(&minus1[minus1_start..], sid, &format!("{state_cond}{crouch_ok}")), super::air_variant::body(&cns[cns_start..], sid));
             minus1 += &entry; cns += &body;

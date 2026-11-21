@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod elements; mod advantage; mod advantage_draw; mod announce_text; mod badge_art; mod combo_tier; mod energy_art; mod danger; mod energy; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
+mod elements; mod advantage; mod advantage_draw; mod announce_text; mod art; mod badge_art; mod combo_tier; mod danger; mod energy; mod energy_art; mod guard; mod palette; mod opacity; mod life_art; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -374,18 +374,10 @@ impl Hud {
                             bx + bw - 3.0 - i as f32 * 7.0
                         };
                         let c = p(cx, by - 2.0);
-                        let dia = poly::regular(c, 1.7 * s, 4, std::f32::consts::FRAC_PI_2);
-                        if won {
-                            poly::circle(c, 2.6 * s, Color::new(1.0, 0.8, 0.2, 0.25));
-                            poly::grad_v(&dia, hex("#fff3a0"), hex("#e8a010"));
-                        } else {
-                            poly::solid(&dia, Color::new(0.02, 0.02, 0.06, 0.55));
+                        if !art::draw_round_orb(c, s, won) {
+                            let dia = poly::regular(c, 1.7 * s, 4, std::f32::consts::FRAC_PI_2);
+                            poly::solid(&dia, if won { hex("#e8a010") } else { Color::new(0.02, 0.02, 0.06, 0.55) });
                         }
-                        poly::outline(
-                            &dia,
-                            0.45 * s,
-                            if won { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.5) },
-                        );
                     }
                 }
                 if show_power {
@@ -843,14 +835,10 @@ impl Hud {
                 let a0 = p(w / 2.0 - hw, yy + dy);
                 draw_rectangle(a0.x, a0.y, hw * 2.0 * s, th * s, sl);
             }
-            let band = p(w / 2.0 - hw, yy - size * 0.5);
-            draw_rectangle(
-                band.x,
-                band.y,
-                hw * 2.0 * s,
-                size * 1.05 * s,
-                Color::new(0.04, 0.0, 0.1, 0.2 * al),
-            );
+            if !art::draw_banner_ribbon(cc, (hw * 2.0 * s).min(w * 0.76 * s), size * 1.9 * s, 0.92 * al) {
+                let band = p(w / 2.0 - hw, yy - size * 0.5);
+                draw_rectangle(band.x, band.y, hw * 2.0 * s, size * 1.05 * s, Color::new(0.04, 0.0, 0.1, 0.2 * al));
+            }
             let o = size * 0.08;
             for (dx, dy) in [
                 (-o, 0.0),
@@ -1225,6 +1213,6 @@ fn portrait(g: &mut Gfx, f: &Fighter, pc: Vec2, half: f32, side: usize, s: f32, 
             },
         );
     }
-    let _ = (s, frame, col);
+    let _ = (s, col); life_art::draw_portrait_frame(pc, half, frame);
 }
 

@@ -10,6 +10,8 @@ mod requires;
 mod chain;
 mod rekka;
 mod multihit;
+pub mod move_fx;
+pub mod move_fx_spec;
 pub mod blocks;
 pub mod throw;
 pub mod boss_ui;

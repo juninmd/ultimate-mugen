@@ -118,6 +118,16 @@ O UME suporta múltiplos estágios de transformação, que podem alterar partes 
 - **Chefes que Quebram a UI (`bossRules`)**: `hideHud`, `hideLifeBar`, `hidePowerBar`, `hideTimer`, `freezeTimer`, `asserts[]`, `texts[]` (renderizados direto no HUD via `Text`), `modifyPlayer[]` (dono ou `"enemy"`) e `phases[]` (`lifeBelowRatio`, `when`, `once`, `attackMul`, `defenceMul`).
 - **ZSS / CNS Inline no JSON (`scripts`)**: Campos `zss`, `cns`, `commands[]` e `override`. Suporta `[StateDef -4]` (executado para todo jogador e helper inclusive durante `SuperPause` com `ignorehitpause = 1`), atribuições ZSS `map(chave) := valor` / `teamMap(chave) += valor` / `rootMap` / `parentMap` e macros `@anim(nome)` e `@move(id)`.
 
+### 3.6 FX Declarativo, Feixes de Ki, Hit-Confirm, Carga Customizável, Perfil UME e Kits Reutilizáveis
+- **Carga de Ki Customizável (`abilities.charge`)**: `input` (padrão `"/s"`), `anim`, `auraColor` (`[r, g, b]`), `shake` (`bool`), `sound` (`[g, i]`) e `explod` (nome da anim de aura).
+- **Voo Direcional (`abilities.fly`)**: aceita `upAnim`, `downAnim`, `fwdAnim`, `backAnim` e `sound`.
+- **Teleporte Parametrizável e Multi-Etapa (`abilities.teleport` e `moves[].teleport`)**: em `abilities.teleport` aceita `at` (quadro do blink quando há anim própria), `offset`, `invuln`, `turn` e `sound`; em `moves[].teleport` aceita número simples (`3`), objeto `{ "at", "mode": "behind" | "front" | "above" | "offset", "offset": [x, y], "turn" }` ou **lista de etapas** `[step1, step2]` (ex.: subir para lançar ataque aéreo e teleportar de volta ao chão). Golpes com teleporte que terminam com `Pos Y < 0` caem naturalmente via estado `50`.
+- **FX por Golpe (`crates/native/src/move_fx.rs`)**: `explods[]` (`at`, `anim`, `pos`, `postype`, `bind`, `removeTime`, `priority`, `scale`, `superMove`), `afterimage` (`at`, `time`, `length`, `framegap`, `trans`, `palBright`, `palContrast`, `palAdd`, `palMul`), `shake` (`at`, `time`, `ampl`, `freq`), `flash` (`at`, `time`, `color`, `under`, `superMove`) e `superPause` (`at`, `time`, `pos`, `anim`, `darken`).
+- **Hit-Confirm (`moves[].followUp`)**: `{ "to": "<move_id>", "on": "hit" | "contact" | "end", "at": frame? }` — transita para o golpe cinemático somente quando conecta.
+- **Feixes Multi-Hit (`projectile`)**: além de `hits` e `removeTime`, suporta `missTime`, `guardDamage`, `hitSound`, `pausetime`, `hitflag` (`"MAFP"`), `shake` e `accel`.
+- **Perfil Rico UME (`profile`) e Falas Fiéis**: preencha `profile` com `country`, `nationality`, `origin`, `bio`, `title`, `fightingStyle`, `affiliation` (todos `LocalText` `en`/`pt`/`es`), `element` (elemento principal), `weakness` (fraqueza), `alignment` (`"hero"`, `"villain"`, `"anti-hero"` ou `"neutral"`) e `tags`, além de `intro`, `taunt`, `winQuote` e `description` fiéis ao personagem.
+- **Kits Nativos Reutilizáveis (`extends`)**: herde módulos prontos via `"extends": ["core", "ki_fighter", "clone_arts", "aerial_rush"]` (`crates/native/src/kits/`) e sobrescreva apenas o que mudar, reduzindo dezenas de linhas de JSON por lutador.
+
 ---
 
 ## 4. Exibição de Consumo de Energia no Menu de Comandos

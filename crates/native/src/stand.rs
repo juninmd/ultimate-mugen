@@ -181,7 +181,7 @@ pub(super) fn compile(
                 "[State {sid}, proj_{pi}]\ntype = Projectile\ntrigger1 = AnimElem = {}\nprojid = {pid}\nprojanim = {pa}\noffset = {}, {}\nvelocity = {}, {}\nprojhits = {}\nprojmisstime = 6\nprojpriority = {}\nprojremovetime = {}\n{}\n",
                 p.at, p.offset[0], p.offset[1], p.speed[0], p.speed[1],
                 p.hits.unwrap_or(1), p.priority.unwrap_or(1), p.remove_time.unwrap_or(-1),
-                hitdef_projectile(p.damage, p.level.as_deref(), projectile_knockback(p), p.launch.unwrap_or(false), "S, SP", p.element.as_deref(), p.stun)
+                hitdef_projectile(p, 1.0, projectile_knockback(p), "S, SP")
             );
         }
         attack_states += &format!(

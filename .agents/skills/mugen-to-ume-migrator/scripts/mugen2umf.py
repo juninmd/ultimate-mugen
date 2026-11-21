@@ -6,6 +6,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from mugen_abilities import detect_abilities, detect_cancels
 from mugen_moves import STANDARD, anim_name, build_move, convert_input, routes
 from mugen_parse import contain_axis, nums, png_bytes, read_air, read_commands, read_def, read_snd, read_states, sections, read_text, sprite_image
 from sff_decode import SFF, read_act
@@ -51,6 +52,14 @@ def stats_from(c, height):
     }
 
 
+def _collect_sounds(moves, abilities):
+    keys = {tuple(s["snd"]) for m in moves for s in m.get("sounds", []) if not s.get("fight")}
+    for ab in (abilities or {}).values():
+        if isinstance(ab, dict) and ab.get("sound"):
+            keys.add(tuple(ab["sound"]))
+    return keys
+
+
 def convert(src, out, fighter_id, name, extra):
     d = read_def(src)
     sff = SFF(open(d["sprite"], "rb").read())
@@ -58,26 +67,50 @@ def convert(src, out, fighter_id, name, extra):
     actions = read_air(d["anim"])
     commands = read_commands(d["cmd"])
     states = read_states([d["cmd"]] + d["cns"])
-    moves, wanted, seen = [], [n for n in STANDARD if n in actions], set()
-    for value, label, text, when, cost in routes(states.get(-1, {"ctrl": []})["ctrl"], commands):
-        if value < 200 or value not in states:
+    cmd_ctrls = states.get(-1, {"ctrl": []})["ctrl"]
+    raw_routes = [(v, lb, convert_input(tx), wh, co) for v, lb, tx, wh, co in routes(cmd_ctrls, commands)]
+    abilities, consumed, ab_anims = detect_abilities(states, raw_routes, actions, anim_name)
+    moves, wanted, seen, state_to_id = [], [n for n in STANDARD if n in actions] + ab_anims, set(), {}
+    for value, label, cmd_input, when, cost in raw_routes:
+        if value < 200 or value not in states or value in consumed:
             continue
-        cmd_input = convert_input(text)
         move_id = re.sub(r"\W+", "_", label if when == "stand" else f"{when}_{label}").strip("_").lower()
         if (cmd_input, when) in seen or any(m["id"] == move_id for m in moves):
             continue
-        move, anims = build_move(value, states, actions, move_id, cmd_input, when, cost)
+        move, anims = build_move(value, states, actions, move_id, cmd_input, when, cost, skip=consumed)
         if move:
             seen.add((cmd_input, when))
             moves.append(move)
+            state_to_id.setdefault(value, move_id)
             wanted += [a for a in anims if a in actions]
+    for move in list(moves):
+        fu = move.pop("_followUpState", None)
+        if not fu:
+            continue
+        fu_state, fu_on = fu
+        fu_id = f"{move['id']}_followup"
+        fu_move, fu_anims = build_move(fu_state, states, actions, fu_id, f"~D, DF, F, x+y+z", move.get("when", "stand"), 0, skip=consumed)
+        if fu_move:
+            fu_move.pop("_followUpState", None)
+            fu_move["kind"] = move["kind"]
+            fu_move.pop("cost", None)
+            move["followUp"] = {"to": fu_id, "on": fu_on}
+            moves.append(fu_move)
+            wanted += [a for a in fu_anims if a in actions]
+    cancels = detect_cancels(cmd_ctrls, state_to_id)
+    for move in moves:
+        if move["id"] in cancels:
+            move["cancels"] = cancels[move["id"]]
     hit_anims = {m["anim"] for m in moves} | {p["anim"] for m in moves for p in ([m["projectile"]] if isinstance(m.get("projectile"), dict) else m.get("projectile", []))}
+    no_loop = {"intro", "taunt"} | {m["anim"] for m in moves}
     anims = {}
     for number in dict.fromkeys(wanted):
         name_ = anim_name(number)
         frames = [frame_json(fr, name_ in hit_anims) for fr in actions[number]["frames"]]
+        if name_ in no_loop:
+            frames = [f.replace("*-1", "*6") if isinstance(f, str) else ({**f, "ticks": 6} if f.get("ticks", 1) < 0 else f) for f in frames]
         anims[name_] = {"frames": frames}
-        if actions[number]["loop"] is not None:
+        if actions[number]["loop"] is not None and name_ not in no_loop:
             anims[name_]["loop"] = actions[number]["loop"]
     os.makedirs(os.path.join(out, "sprites"), exist_ok=True)
     meta, used = {"frames": {}}, set()
@@ -103,7 +136,7 @@ def convert(src, out, fighter_id, name, extra):
     if portrait is not None:
         open(os.path.join(out, "sprites", "portrait.png"), "wb").write(png_bytes(portrait))
     bank = read_snd(d["sound"]) if d["sound"] else {}
-    wanted_snd = sorted({tuple(s["snd"]) for m in moves for s in m.get("sounds", []) if not s.get("fight")} & set(bank))
+    wanted_snd = sorted(_collect_sounds(moves, abilities) & set(bank))
     for g, i in wanted_snd:
         open(os.path.join(out, "sprites", f"snd_{g}_{i}.wav"), "wb").write(bank[(g, i)])
     meta["sounds"] = [list(k) for k in wanted_snd]
@@ -113,16 +146,45 @@ def convert(src, out, fighter_id, name, extra):
             m.pop("sounds")
     json.dump(meta, open(os.path.join(out, "sprites", "meta.json"), "w"), indent=1)
     c = constants(d["cns"])
-    fighter = {"format": "umf/2", "id": fighter_id, "name": name, "series": "M.U.G.E.N", "author": d["info"].get("author", "").strip('"'),
-               "color": "#c8321e", "stats": stats_from(c, ref), "art": {"type": "sprites", "style": {"boxes": "exact"}, "poses": {}},
-               "anims": anims, "moves": moves}
+    author = d["info"].get("author", "").strip('"') or "M.U.G.E.N"
+    fighter = {
+        "format": "umf/2", "id": fighter_id, "name": name, "series": "M.U.G.E.N", "author": author,
+        "description": f"{name} converted from M.U.G.E.N to UMF 2.0.", "color": "#c8321e",
+        "intro": "", "taunt": "", "winQuote": "",
+        "profile": {"country": "", "nationality": {}, "origin": {}, "bio": {}, "title": {}, "fightingStyle": {}, "affiliation": {},
+                    "element": None, "weakness": None, "alignment": None, "tags": []},
+        "stats": stats_from(c, ref), "art": {"type": "sprites", "style": {"boxes": "exact"}, "poses": {}},
+        "anims": anims, "moves": moves,
+    }
+    if abilities:
+        fighter["abilities"] = abilities
     if extra:
-        add = json.load(open(extra))
+        add = json.load(open(extra, encoding="utf-8"))
         fighter["moves"] += add.pop("moves", [])
         fighter["anims"].update(add.pop("anims", {}))
+        if isinstance(add.get("profile"), dict):
+            fighter["profile"].update(add.pop("profile"))
         fighter.update(add)
-    json.dump(fighter, open(os.path.join(out, f"{fighter_id}.json"), "w"), ensure_ascii=False)
+    json.dump(fighter, open(os.path.join(out, f"{fighter_id}.json"), "w", encoding="utf-8"), ensure_ascii=False)
     return fighter
+
+
+def print_report(f):
+    ms = f["moves"]
+    counts = {
+        "abilities": sorted((f.get("abilities") or {}).keys()),
+        "explods": sum(len(m.get("explods", [])) for m in ms),
+        "afterimages": sum(1 for m in ms if "afterimage" in m),
+        "shakes": sum(1 for m in ms if "shake" in m),
+        "flashes": sum(1 for m in ms if "flash" in m),
+        "teleports": sum(len(m["teleport"]) if isinstance(m.get("teleport"), list) else (1 if "teleport" in m else 0) for m in ms),
+        "throws": sum(1 for m in ms if "throw" in m),
+        "followUps": sum(1 for m in ms if "followUp" in m),
+        "cancels": sum(1 for m in ms if "cancels" in m),
+        "wallBounces": sum(1 for m in ms for h in m.get("hits", []) if h.get("wallBounce")),
+        "projectiles": sum(1 for m in ms if "projectile" in m),
+    }
+    print("report:", json.dumps(counts, ensure_ascii=False))
 
 
 if __name__ == "__main__":
@@ -131,7 +193,10 @@ if __name__ == "__main__":
     ap.add_argument("out")
     ap.add_argument("--id", required=True)
     ap.add_argument("--name", required=True)
-    ap.add_argument("--extra", help="json merged on top: extra moves, anims, abilities, helpers")
+    ap.add_argument("--extra", help="json merged on top: extra moves, anims, abilities, helpers, profile, intro/taunt/winQuote")
+    ap.add_argument("--report", action="store_true", help="print conversion feature coverage summary")
     a = ap.parse_args()
     f = convert(a.src, a.out, a.id, a.name, a.extra)
     print(f"{a.id}: {len(f['moves'])} moves, {len(f['anims'])} anims, height {f['stats']['height']}")
+    if a.report:
+        print_report(f)

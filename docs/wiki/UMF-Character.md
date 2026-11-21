@@ -217,8 +217,14 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `projectile` | object or list | Projectiles |
 | `cost` | number | Meter spent; `super` defaults to 1000 |
 | `invuln` | `[start, end]` | Invincible frames |
-| `teleport` | frame | Reappears behind the opponent |
+| `teleport` | frame, object, or list of `{ "at", "mode", "offset", "turn" }` | Single or multi-step warp (`behind`, `front`, `above`, or fixed `offset` `[x, y]`); exits cleanly to state `50` when ending airborne (`Pos Y < 0`) |
 | `fx` | `aura` | Extra visual effect |
+| `explods` | `[{ "at", "anim", "pos", "postype", "bind", "removeTime", "priority", "scale", "superMove" }]` | Spawns visual effects (ki charge spheres, auras, super overlays) |
+| `afterimage` | `{ "at", "time", "length", "framegap", "trans", "palBright", "palContrast", "palAdd", "palMul" }` | Customizes the afterimage trail |
+| `shake` | `{ "at", "time", "ampl", "freq" }` (object or list) | Move-level screen shake (`EnvShake`) |
+| `flash` | `{ "at", "time", "color", "under", "superMove" }` (object or list) | Screen flash / background darken (`EnvColor`) |
+| `superPause` | `{ "at", "time", "pos", "anim", "darken" }` | Customizes the super freeze |
+| `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "end", "at" }` | Hit-confirm transition into a cinematic follow-up move |
 | `voice` | `1000, 0` | Character sound group and index played at move start, when that sample is bundled |
 | `airPhysics` | `true` | Keeps air physics |
 | `cancels` | list of move ids | This move may be cancelled **into** those moves on contact (hit, guard or projectile contact). Declaring it replaces the automatic gatling out of this move |
@@ -229,6 +235,8 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `burst` | `true` | Combo breaker usable while being hit |
 | `requires` | `{ "life": {"max": 0.5}, "enemyLife": {"min": 0.1, "max": 0.5} }` | Life condition: the move only starts while the fighter's life (`life`) and/or the rival's (`enemyLife`) is inside `min`..`max`, as a fraction of max life (0 to 1). Either bound may be omitted. Compiles to `life <= lifemax * max` and `enemy,life <= enemy,lifemax * max` triggers |
 | `flight` | `true` | 8-way hover while the move lasts |
+
+**Built-in kits (`extends`).** Fighters can inherit reusable capabilities with `"extends": ["core", "ki_fighter", "clone_arts", "aerial_rush"]` (`crates/native/src/kits/`): `core` provides universal `launcher` and `escape_burst`; `ki_fighter` provides `abilities.fly`, `abilities.teleport`, `abilities.superSpeed`, `abilities.charge` (customizable `auraColor`, `shake`, `sound`, `explod`) and a multi-hit `ki_beam` template (`missTime`, `hitflag`); `clone_arts` attaches autonomous shadow clones (`helpers.clones`); `aerial_rush` adds flight, super speed and double air-jump.
 
 **Finisher.** A move with `"kind": "finisher"` (use `throw` or `hits` for the effect) is only available after a KO (`RoundState = 3` and `WinKO`). When the final round ends by KO and the winner has a finisher, the round waits up to 6 seconds on "FINISH HIM" for the winner to perform it; performing it (or the timeout) ends the wait. Rosters with no finisher are unaffected.
 

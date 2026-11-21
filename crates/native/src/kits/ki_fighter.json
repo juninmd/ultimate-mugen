@@ -1,0 +1,40 @@
+{
+  "format": "umf-kit/1",
+  "id": "ki_fighter",
+  "description": "Reusable Ki fighter core: flight, teleportation, super speed, golden ki charge with shake, and a multi-hit energy beam template.",
+  "abilities": {
+    "fly": { "speed": 4.0, "cost": 45, "input": "a+b" },
+    "teleport": { "cost": 250, "input": "b+c", "invuln": 14 },
+    "superSpeed": { "mul": 1.8, "cost": 90, "input": "a+c" },
+    "charge": { "auraColor": [90, 70, 15], "shake": true }
+  },
+  "moves": [
+    {
+      "id": "ki_beam",
+      "name": "Ki Beam",
+      "input": "~D, DF, F, y",
+      "kind": "super",
+      "when": "stand",
+      "anim": "special",
+      "cost": 1000,
+      "shake": { "at": 2, "time": 24, "ampl": 5, "freq": 70 },
+      "flash": { "at": 1, "time": 12, "color": [10, 10, 30], "under": true },
+      "afterimage": { "time": 40, "length": 8, "palContrast": [220, 200, 100] },
+      "projectile": {
+        "at": 2,
+        "anim": "shot",
+        "speed": [7.0, 0.0],
+        "offset": [36.0, -48.0],
+        "damage": 14,
+        "hits": 12,
+        "missTime": 3,
+        "removeTime": 55,
+        "priority": 4,
+        "level": "heavy",
+        "launch": true,
+        "hitflag": "MAFP",
+        "shake": 6
+      }
+    }
+  ]
+}

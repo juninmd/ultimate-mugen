@@ -59,8 +59,12 @@ impl App {
             s.switch_control();
         }
         s.update(dt, &mut self.c, &mut self.audio);
+        if !s.paused {
+            crate::easter::tick(&s.m, &s.stage.info.name, &mut self.audio);
+        }
         let framing = if replaying { ume_engine::replay_camera::frame(&mut s.m) } else { None };
         s.draw(&mut self.g, &self.ui);
+        crate::easter::draw(&self.ui, if s.paused { 0.0 } else { dt });
         if let Some(saved) = framing {
             ume_engine::replay_camera::unframe(&mut s.m, saved);
         }

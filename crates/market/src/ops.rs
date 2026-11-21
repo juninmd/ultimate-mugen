@@ -114,6 +114,7 @@ mod tests {
                     .map(|(p, s)| TreeEntry {
                         path: p.to_string(),
                         size: *s,
+                        ..Default::default()
                     })
                     .collect(),
                 truncated: false,
@@ -191,10 +192,12 @@ mod tests {
             FileRef {
                 path: "a".into(),
                 size: 1,
+                ..Default::default()
             },
             FileRef {
                 path: "b".into(),
                 size: 1,
+                ..Default::default()
             },
         ];
         assert_eq!(

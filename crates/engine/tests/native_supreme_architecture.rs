@@ -4,7 +4,7 @@
 use ume_native::{compile_native, HitSpec, NativeChar, NativeMove, PassiveSpec, ThrowSpec};
 
 fn base_char() -> NativeChar {
-    let raw = include_str!("../../../assets/chars/kaito/kaito.json");
+    let raw = include_str!("../../../assets/chars/kaito.json");
     serde_json::from_str(raw).expect("valid kaito template")
 }
 

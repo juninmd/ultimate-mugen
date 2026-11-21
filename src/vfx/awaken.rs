@@ -133,6 +133,7 @@ impl Vfx {
         self.glow(x, y, if fury { 70.0 } else { 50.0 }, 0.6, col);
         self.spark_burst(x, y, 1.0, quality::count(if fury { 26 } else { 16 }), 8.0, col, std::f32::consts::PI);
         self.pillar(f.pos.x, feet, col, quality::count(10));
+        self.sheets.transform(f.pos.x, feet);
         let text = if fury {
             crate::i18n::tr3("MODO FÚRIA", "FURY MODE", "MODO FURIA")
         } else {

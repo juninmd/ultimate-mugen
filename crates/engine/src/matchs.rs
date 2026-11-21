@@ -852,9 +852,10 @@ impl Match {
             if !lying { f.ikemen.rescued += 1; eprintln!("watchdog: {} stuck in state {} (ctrl {}), forcing recovery", f.def.name, f.state_no, f.ctrl); }
             let def = f.def.clone();
             let getup = lying && (def.states.contains_key(&5120) || self.common.states.contains_key(&5120));
-            if !getup { let f = &mut self.fighters[i]; f.vel = V2::default(); f.ctrl = true; }
-            self.change_state(i, if getup { 5120 } else { 0 }, def);
-            if !getup { self.fighters[i].ctrl = true; }
+            let airborne = !getup && f.pos.y < f.ground_level - 1.0 && (def.states.contains_key(&50) || self.common.states.contains_key(&50));
+            if !getup { let f = &mut self.fighters[i]; f.vel = V2::default(); f.ctrl = true; if !airborne && f.pos.y < f.ground_level { f.pos.y = f.ground_level; } }
+            self.change_state(i, if getup { 5120 } else if airborne { 50 } else { 0 }, def);
+            if !getup { let f = &mut self.fighters[i]; f.ctrl = true; if airborne { f.state_type = 'A'; f.physics = 'A'; } }
         }
     }
 

@@ -68,10 +68,12 @@ impl SheetFx {
     pub(super) fn super_cast(&mut self, x: f32, chest_y: f32, feet: f32) {
         self.spawn(SheetKind::LightningStrike, x, feet, 110.0, 0.0);
         self.spawn(SheetKind::StaticBurst, x, chest_y, 100.0, 0.0);
+        self.spawn(SheetKind::SuperFlash, x, chest_y, 124.0, 0.0);
     }
 
     pub(super) fn transform(&mut self, x: f32, feet: f32) {
         self.spawn(SheetKind::FirePillar, x, feet, 96.0, 0.0);
+        self.spawn(SheetKind::AwakenBurst, x, feet, 120.0, 0.0);
     }
 
     pub(super) fn knockout(&mut self, x: f32, feet: f32) {
@@ -119,7 +121,7 @@ impl SheetFx {
     pub(super) fn draw(&self, tp: &dyn Fn(f32, f32) -> Vec2, scale: f32, gain: f32, layer: SheetLayer) {
         for s in &self.sprites {
             let spec = s.kind.spec();
-            let sprite_layer = if s.kind == SheetKind::FirePillar {
+            let sprite_layer = if matches!(s.kind, SheetKind::FirePillar | SheetKind::AwakenBurst) {
                 SheetLayer::BehindFighters
             } else if spec.additive {
                 SheetLayer::Additive

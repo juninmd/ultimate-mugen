@@ -14,7 +14,7 @@ fn collect(dir: &Path, out: &mut Vec<PathBuf>) {
 }
 
 fn main() {
-    let dir = std::env::args().nth(1).expect("usage: png_bench <dir>");
+    let dir = std::env::args().nth(1).unwrap_or_else(|| format!("{}/../../assets/chars", env!("CARGO_MANIFEST_DIR")));
     let rounds: usize = std::env::args().nth(2).and_then(|r| r.parse().ok()).unwrap_or(5);
     let mut paths = Vec::new();
     collect(Path::new(&dir), &mut paths);
@@ -35,5 +35,4 @@ fn main() {
     }
     samples.sort_by(|a, b| a.total_cmp(b));
     println!("{} files {:.1} MB  min {:.1} ms  median {:.1} ms  max {:.1} ms  checksum {checksum:x}", files.len(), bytes as f64 / 1e6, samples[0], samples[samples.len() / 2], samples[samples.len() - 1]);
-}
 }

@@ -24,6 +24,7 @@ pub mod num;
 pub mod par;
 pub mod pcx;
 pub mod png;
+mod png_unfilter;
 pub mod perf;
 pub mod sff;
 pub mod screenpack;

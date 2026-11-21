@@ -29,3 +29,25 @@ Ultimate MUGEN includes a presentation-only in-fight Easter Egg system (`src/eas
 18. **GREAT CORNER ESCAPE!** — Reversing out of a prolonged corner trap with a heavy hit.
 19. **HIGH NOON STAREDOWN...** — Both fighters stand idle facing each other for 3 seconds, rolling a pixel-art tumbleweed across the floor.
 20. **INSERT COIN — MAX METER!** — Reaching full super meter drops a spinning 1UP arcade coin flyby.
+
+## Stage-Specific Environmental & Cameo Easter Eggs (20)
+21. **Dojo — Master's Paper Crane**: An animated origami crane drifts across the sunset roof.
+22. **Dojo — Rooftop Tremor**: Heavy impacts shake the ancient dojo roof tiles.
+23. **Neo-Metrópole 2099 — Cyber UFO Sighting**: A blinking neon flying saucer zips across the skyline.
+24. **Neo-Metrópole 2099 — System Overload // 2099**: Firing a Super triggers a neon grid surge banner.
+25. **Moonlit Bamboo — Moonlit Bamboo Spirits**: Spirit masks drift through the grove during combos.
+26. **Rocky Plains — El Viento Salado**: Marlow's flying galleon crosses the distant clouds.
+27. **Spirit Gate — Kitsune Apparition**: A glowing kitsune mask floats above the torii gate on Supers or Awakenings.
+28. **Volcanic Crater — Magma Geyser Spike**: Heavy hits trigger a seismic caldera roar.
+29. **Praça do Interior (Brazil) — Chill Capybara Cameo**: A pixel-art capybara with a tangerine on its head waddles across the plaza.
+30. **Praça do Interior (Brazil) — Caramelo Dog on Patrol**: Plaza guardian cameo on Round 2+.
+31. **Christ the Redeemer (Corcovado) — Corcovado Toucan Flyby**: A vibrant pixel-art toucan glides across the Rio sky.
+32. **Great Wall of China — Sky Dragon Kite**: A paper kite dances along the mountain ridge.
+33. **Petra (Al-Khazneh) — Rose Canyon Scarab**: A golden scarab shimmers over the canyon on heavy impacts.
+34. **Texas — High Noon in Texas**: A desert tumbleweed rolls down Main Street at high noon.
+35. **Chichén Itzá — Feathered Serpent Shadow**: Kukulcán's emerald glow ripples across the temple on Supers.
+36. **Colosseum of Rome — Ave Gladiator!**: The Emperor rewards 6+ hit combos with a golden laurel badge.
+37. **Taj Mahal — White Doves of Agra**: Doves take flight over the marble palace on Round 2+.
+38. **Pyramids of Giza — Pharaoh's Eye Glint**: Reaching full meter awakens the golden scarab of Giza.
+39. **Hanging Gardens of Babylon — Hanging Gardens Peacock**: Emerald-gold plumage glides overhead on air combos.
+40. **Ancient Wonders Blessing** (Statue of Zeus, Lighthouse of Alexandria, Temple of Artemis, Colossus of Rhodes, Mausoleum of Halicarnassus): Unique mythic phenomenon per classical wonder.

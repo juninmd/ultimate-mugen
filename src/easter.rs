@@ -8,6 +8,8 @@ pub(crate) mod catalog;
 mod combat;
 mod draw;
 pub(crate) mod sprite;
+mod stages;
+mod stages_catalog;
 pub(crate) mod state;
 
 pub(crate) use sprite::EggSprite;
@@ -22,6 +24,7 @@ pub fn tick(m: &Match, stage_name: &str, audio: &mut Audio) {
         let mut tracker = cell.borrow_mut();
         tracker.sync_match(m);
         combat::check(m, stage_name, &mut tracker, audio);
+        stages::check(m, stage_name, &mut tracker, audio);
         tracker.record_snapshot(m);
     });
 }

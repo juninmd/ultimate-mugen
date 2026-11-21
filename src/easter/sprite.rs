@@ -2,7 +2,7 @@ use crate::gfx::*;
 use std::cell::OnceCell;
 use ume_formats::png::decode_png;
 
-pub(crate) const SPRITE_COUNT: usize = 6;
+pub(crate) const SPRITE_COUNT: usize = 12;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum EggSprite {
@@ -13,6 +13,12 @@ pub(crate) enum EggSprite {
     CrownPerfect,
     Stopwatch,
     ShieldFortress,
+    OrigamiCrane,
+    UfoNeon,
+    KitsuneMask,
+    Capybara,
+    Toucan,
+    ScarabLaurel,
 }
 
 pub(crate) struct SpriteSpec {
@@ -28,6 +34,12 @@ const COIN_PNG: &[u8] = include_bytes!("../../assets/easter/arcade_coin.png");
 const CROWN_PNG: &[u8] = include_bytes!("../../assets/easter/crown_perfect.png");
 const STOPWATCH_PNG: &[u8] = include_bytes!("../../assets/easter/stopwatch.png");
 const SHIELD_PNG: &[u8] = include_bytes!("../../assets/easter/shield_fortress.png");
+const CRANE_PNG: &[u8] = include_bytes!("../../assets/easter/origami_crane.png");
+const UFO_PNG: &[u8] = include_bytes!("../../assets/easter/ufo_neon.png");
+const KITSUNE_PNG: &[u8] = include_bytes!("../../assets/easter/kitsune_mask.png");
+const CAPYBARA_PNG: &[u8] = include_bytes!("../../assets/easter/capybara.png");
+const TOUCAN_PNG: &[u8] = include_bytes!("../../assets/easter/toucan.png");
+const SCARAB_PNG: &[u8] = include_bytes!("../../assets/easter/scarab_laurel.png");
 
 impl EggSprite {
     pub(crate) fn index(self) -> Option<usize> {
@@ -39,6 +51,12 @@ impl EggSprite {
             EggSprite::CrownPerfect => Some(3),
             EggSprite::Stopwatch => Some(4),
             EggSprite::ShieldFortress => Some(5),
+            EggSprite::OrigamiCrane => Some(6),
+            EggSprite::UfoNeon => Some(7),
+            EggSprite::KitsuneMask => Some(8),
+            EggSprite::Capybara => Some(9),
+            EggSprite::Toucan => Some(10),
+            EggSprite::ScarabLaurel => Some(11),
         }
     }
 
@@ -51,6 +69,12 @@ impl EggSprite {
             EggSprite::CrownPerfect => Some(SpriteSpec { png: CROWN_PNG, cell: (32.0, 32.0), frames: 2, fps: 5.0 }),
             EggSprite::Stopwatch => Some(SpriteSpec { png: STOPWATCH_PNG, cell: (32.0, 32.0), frames: 2, fps: 8.0 }),
             EggSprite::ShieldFortress => Some(SpriteSpec { png: SHIELD_PNG, cell: (32.0, 32.0), frames: 2, fps: 6.0 }),
+            EggSprite::OrigamiCrane => Some(SpriteSpec { png: CRANE_PNG, cell: (32.0, 32.0), frames: 2, fps: 6.0 }),
+            EggSprite::UfoNeon => Some(SpriteSpec { png: UFO_PNG, cell: (32.0, 32.0), frames: 4, fps: 9.0 }),
+            EggSprite::KitsuneMask => Some(SpriteSpec { png: KITSUNE_PNG, cell: (32.0, 32.0), frames: 2, fps: 4.0 }),
+            EggSprite::Capybara => Some(SpriteSpec { png: CAPYBARA_PNG, cell: (32.0, 32.0), frames: 4, fps: 7.0 }),
+            EggSprite::Toucan => Some(SpriteSpec { png: TOUCAN_PNG, cell: (32.0, 32.0), frames: 2, fps: 7.0 }),
+            EggSprite::ScarabLaurel => Some(SpriteSpec { png: SCARAB_PNG, cell: (32.0, 32.0), frames: 2, fps: 5.0 }),
         }
     }
 }

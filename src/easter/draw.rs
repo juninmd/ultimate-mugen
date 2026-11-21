@@ -68,9 +68,10 @@ fn draw_floor_roll(ui: &Ui, egg: &ActiveEgg) {
     let p = (egg.t / egg.dur).clamp(0.0, 1.0);
     let alpha = envelope(egg.t, egg.dur);
     let vx = if egg.flip { VW + 60.0 - p * (VW + 120.0) } else { -60.0 + p * (VW + 120.0) };
-    let bounce = (p * std::f32::consts::PI * 9.0).sin().abs();
-    let vy = VH - 88.0 - bounce * 26.0;
-    let rot = p * 14.0 * if egg.flip { -1.0 } else { 1.0 };
+    let is_roller = egg.sprite == EggSprite::Tumbleweed;
+    let bounce = (p * std::f32::consts::PI * if is_roller { 9.0 } else { 12.0 }).sin().abs();
+    let vy = VH - 88.0 - bounce * if is_roller { 26.0 } else { 8.0 };
+    let rot = if is_roller { p * 14.0 * if egg.flip { -1.0 } else { 1.0 } } else { 0.0 };
 
     draw_sprite(egg.sprite, ui.x(vx), ui.y(vy), 84.0 * ui.s, egg.t, alpha, egg.flip, rot);
     draw_top_ribbon(ui, egg, 0);

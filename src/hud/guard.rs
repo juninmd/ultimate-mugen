@@ -64,8 +64,8 @@ pub(super) fn draw<
     if f.ikemen.guard_break || f.state_no == 5400 {
         let pulse = 0.8 + 0.2 * (gt * 18.0).sin().abs();
         let (cw, ch) = (48.0, 7.5);
-        let cx = if side == 0 { bx + bw - cw - 4.0 } else { bx + 4.0 };
-        let cy = by + bh + 4.5;
+        let cx = if side == 0 { bx + 4.0 } else { bx + bw - cw - 4.0 };
+        let cy = by - 7.5;
         let c_bg = poly::slanted(cx, cy, cw, ch, 2.5);
         let sp_c: Vec<Vec2> = c_bg.into_iter().map(|q| p(q.x, q.y)).collect();
         poly::solid(&sp_c, Color::new(0.05, 0.08, 0.16, 0.92));

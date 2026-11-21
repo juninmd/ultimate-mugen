@@ -43,6 +43,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Screenpack study](Screenpack-Study.md) | Creators | Screenpack differentials and what the engine adopted |
 | [Sprite atlas import](Sprite-Atlas-Import.md) | Creators | Turn a sprite sheet into a fighter |
 | [Dev tools](Dev-Tools.md) | Contributors | Rust build and audit tools (`ume-tools`) |
+| [Roster audit](Roster-Audit.md) | Developers | Fight every character and stage and read a severity report |
 | [Sprite toolkit](Sprite-Toolkit.md) | Creators | Slice sheets, palette variants, auto collision boxes |
 | [Move generator](Move-Generator.md) | Creators | TOML to AIR, CNS, CMD and Statedef -1 |
 | [Combo strings](Combo-Strings.md) | Creators | Signature three-part strings per native fighter |

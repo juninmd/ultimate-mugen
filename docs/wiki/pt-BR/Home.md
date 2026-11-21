@@ -42,6 +42,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Biblioteca de habilidades](Biblioteca-de-Habilidades.md) | Criadores | Blocos reutilizáveis (`blink`, `vfx`, `quake`, `projectile.repeat`, kit `abilities`) e o mapa de lacunas do MUGEN |
 | [Importar sprite atlas](Importacao-Sprite-Atlas.md) | Criadores | Transformar uma folha de sprites em lutador |
 | [Ferramentas de desenvolvimento](Ferramentas-de-Desenvolvimento.md) | Contribuidores | Ferramentas Rust de build e auditoria (`ume-tools`) |
+| [Auditoria de elenco](Auditoria-de-Elenco.md) | Desenvolvedores | Lutar com cada personagem e cenário e ler um relatório por severidade |
 | [Ferramentas de sprites](Ferramentas-de-Sprites.md) | Criadores | Fatiar folhas, variantes de paleta, caixas de colisão automáticas |
 | [Gerador de golpes](Gerador-de-Golpes.md) | Criadores | TOML para AIR, CNS, CMD e Statedef -1 |
 | [Criar um cenário (guia rápido)](Criar-um-Cenario.md) | Criadores | Cenário a partir de um `.def`, dados do modo história e o que ainda precisa de código |

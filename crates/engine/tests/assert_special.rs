@@ -121,7 +121,6 @@ fn guard_direction_flags_block_guarding() {
     ticks(&mut m, 1); enter(&mut m, 1, 150);
     m.fighters[1].state_type = 'S';
     m.fighters[1].asserts |= asf::AUTOGUARD;
-    let events_before = m.events.len();
     m.apply_hit(0, 1, &hit, (0.0, 0.0), None);
     assert!(m.fighters[1].ghv.guarded, "baseline: guard state guards");
     let mut m = duel(mugen_char("a", ""), mugen_char("b", ""));
@@ -131,7 +130,6 @@ fn guard_direction_flags_block_guarding() {
     m.fighters[1].asserts |= asf::AUTOGUARD | asf::NOSTANDGUARD;
     m.apply_hit(0, 1, &hit, (0.0, 0.0), None);
     assert!(!m.fighters[1].ghv.guarded);
-    let _ = events_before;
 }
 
 #[test]

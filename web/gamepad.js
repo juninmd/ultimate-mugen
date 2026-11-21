@@ -60,8 +60,9 @@
     const b = document.getElementById('imp'), c = document.getElementById('glcanvas');
     if (!b || !c) return;
     if (w <= 0) { b.style.display = 'none'; return; }
-    const r = c.getBoundingClientRect(), k = r.width / c.width;
-    Object.assign(b.style, { display: 'block', left: (r.left + x * k) + 'px', top: (r.top + y * k) + 'px', width: (w * k) + 'px', height: (h * k) + 'px' });
+    const r = c.getBoundingClientRect();
+    const scaleX = r.width / c.width, scaleY = r.height / c.height;
+    Object.assign(b.style, { display: 'block', left: (r.left + x * scaleX) + 'px', top: (r.top + y * scaleY) + 'px', width: (w * scaleX) + 'px', height: (h * scaleY) + 'px' });
   };
   window.ume_storage_get = (k) => { try { return localStorage.getItem('ume.' + k) || ''; } catch (e) { return ''; } };
   window.ume_storage_set = (k, v) => { try { localStorage.setItem('ume.' + k, v); } catch (e) {} };

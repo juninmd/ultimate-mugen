@@ -130,7 +130,7 @@ pub fn download_files(t: &dyn Transport, repo: &RepoRef, wanted: &[FileRef], can
                 }
                 let i = next.fetch_add(1, Ordering::Relaxed);
                 let Some(f) = wanted.get(i) else { return };
-                let result = fetch_retry(t, &file_request(repo, &f.path, f.size.max(1).saturating_mul(2).max(1 << 20)), cancel).and_then(|r| interpret_file(&r, f.size.saturating_mul(2).max(1 << 20)));
+                let result = fetch_retry(t, &file_request(repo, &f.path, &f.sha, f.size.max(1).saturating_mul(2).max(1 << 20)), cancel).and_then(|r| interpret_file(&r, f.size.saturating_mul(2).max(1 << 20)));
                 match result {
                     Ok(data) => {
                         on_file(data.len() as u64);
@@ -325,9 +325,9 @@ mod tests {
         let t = fake();
         t.fail_first.store(2, Ordering::Relaxed);
         let repo = RepoRef::parse("a/b").unwrap();
-        let want = vec![FileRef { path: "chars/kfm/kfm.sff".into(), size: 8 }];
+        let want = vec![FileRef { path: "chars/kfm/kfm.sff".into(), size: 8, ..Default::default() }];
         assert_eq!(download_files(&t, &repo, &want, &AtomicBool::new(false), &|_| {}).unwrap().len(), 1);
-        let missing = vec![FileRef { path: "nope.bin".into(), size: 1 }];
+        let missing = vec![FileRef { path: "nope.bin".into(), size: 1, ..Default::default() }];
         assert_eq!(download_files(&t, &repo, &missing, &AtomicBool::new(false), &|_| {}).unwrap_err(), MarketError::NotFound);
     }
 
@@ -335,7 +335,7 @@ mod tests {
     fn cancellation_stops_downloads() {
         let t = fake();
         let repo = RepoRef::parse("a/b").unwrap();
-        let want = vec![FileRef { path: "chars/kfm/kfm.sff".into(), size: 8 }];
+        let want = vec![FileRef { path: "chars/kfm/kfm.sff".into(), size: 8, ..Default::default() }];
         assert_eq!(download_files(&t, &repo, &want, &AtomicBool::new(true), &|_| {}).unwrap_err(), MarketError::Cancelled);
     }
 

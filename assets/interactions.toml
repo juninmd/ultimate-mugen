@@ -372,3 +372,415 @@ color = [0.98, 0.24, 0.42]
 title_pt = "Três passos à frente... como sempre."
 title_en = "Three steps ahead... as always."
 title_es = "Tres pasos adelante... como siempre."
+
+[[fighter_trigger]]
+id = "kaito_taunt"
+fighter = "kaito"
+trigger = "taunt"
+per_round = true
+speaker = "KAITO"
+style = "speech"
+sfx = "easter_bird"
+color = [0.36, 0.88, 1.0]
+title_pt = "O vento já me contou seu próximo golpe."
+title_en = "The wind already told me your next move."
+title_es = "El viento ya me contó tu próximo golpe."
+
+[[fighter_trigger]]
+id = "shion_taunt"
+fighter = "shion"
+trigger = "taunt"
+per_round = true
+speaker = "SHION"
+style = "speech"
+sfx = "easter_clash"
+color = [0.82, 0.88, 1.0]
+title_pt = "Minha lâmina não corta inocentes... mas você pediu."
+title_en = "My blade spares the innocent... but you asked for it."
+title_es = "Mi hoja perdona a inocentes... pero tú lo pediste."
+
+[[fighter_trigger]]
+id = "suzume_taunt"
+fighter = "suzume"
+trigger = "taunt"
+per_round = true
+speaker = "SUZUME"
+style = "speech"
+sfx = "easter_kitsune"
+color = [0.98, 0.34, 0.56]
+title_pt = "Você está atacando a minha sombra."
+title_en = "You're swinging at my shadow."
+title_es = "Estás golpeando a mi sombra."
+
+[[fighter_trigger]]
+id = "sylene_taunt"
+fighter = "sylene"
+trigger = "taunt"
+per_round = true
+speaker = "SYLENE"
+style = "speech"
+sfx = "easter_wonder"
+color = [0.54, 0.88, 1.0]
+title_pt = "Congele aí. Borealia não se curva."
+title_en = "Freeze right there. Borealia never kneels."
+title_es = "Congélate ahí. Borealia nunca se arrodilla."
+
+[[fighter_trigger]]
+id = "volta_taunt"
+fighter = "volta"
+trigger = "taunt"
+per_round = true
+speaker = "VOLTA"
+style = "speech"
+sfx = "easter_ufo"
+color = [0.28, 0.96, 1.0]
+title_pt = "Probabilidade de vitória adversária: 0.04%."
+title_en = "Opponent win probability: 0.04%."
+title_es = "Probabilidad de victoria rival: 0.04%."
+
+[[fighter_trigger]]
+id = "lian_taunt"
+fighter = "lian"
+trigger = "taunt"
+per_round = true
+speaker = "LIAN"
+style = "speech"
+sfx = "easter_kitsune"
+color = [0.24, 0.94, 0.62]
+title_pt = "Respire fundo. Sua postura está aberta."
+title_en = "Breathe deep. Your stance is wide open."
+title_es = "Respira hondo. Tu postura está abierta."
+
+[[fighter_trigger]]
+id = "garan_taunt"
+fighter = "garan"
+trigger = "taunt"
+per_round = true
+speaker = "GARAN"
+style = "speech"
+sfx = "easter_wonder"
+color = [0.78, 0.28, 1.0]
+title_pt = "Noventa e nove monges não me pararam. E você?"
+title_en = "Ninety-nine monks couldn't hold me. Can you?"
+title_es = "Noventa y nueve monjes no me detuvieron. ¿Y tú?"
+
+[[fighter_trigger]]
+id = "kaname_taunt"
+fighter = "kaname"
+trigger = "taunt"
+per_round = true
+speaker = "KANAME"
+style = "speech"
+sfx = "easter_clash"
+color = [0.78, 0.92, 1.0]
+title_pt = "A neve eterna julga os impacientes."
+title_en = "The everlasting snow judges the reckless."
+title_es = "La nieve eterna juzga a los impacientes."
+
+[[fighter_trigger]]
+id = "jin_taunt"
+fighter = "jin"
+trigger = "taunt"
+per_round = true
+speaker = "JIN"
+style = "speech"
+sfx = "easter_bird"
+color = [0.42, 0.96, 0.72]
+title_pt = "Entrega expressa de soco — assina aqui!"
+title_en = "Express knuckle delivery — sign right here!"
+title_es = "Entrega exprés de golpes — ¡firma aquí!"
+
+[[fighter_trigger]]
+id = "daichi_taunt"
+fighter = "daichi"
+trigger = "taunt"
+per_round = true
+speaker = "DAICHI"
+style = "speech"
+sfx = "easter_capybara"
+color = [0.96, 0.72, 0.34]
+title_pt = "Haha! Agora sim parece uma luta de verdade!"
+title_en = "Haha! Now this feels like a real fight!"
+title_es = "¡Jaja! ¡Ahora sí parece una pelea de verdad!"
+
+[[fighter_trigger]]
+id = "valdric_taunt"
+fighter = "valdric"
+trigger = "taunt"
+per_round = true
+speaker = "VALDRIC"
+style = "speech"
+sfx = "easter_clash"
+color = [0.98, 0.28, 0.32]
+title_pt = "Ajoelhe-se diante da Estrela Rubra."
+title_en = "Kneel before the Red Star Empire."
+title_es = "Arrodíllate ante el Imperio de la Estrella Roja."
+
+[[fighter_trigger]]
+id = "haruki_taunt"
+fighter = "haruki"
+trigger = "taunt"
+per_round = true
+speaker = "HARUKI"
+style = "speech"
+sfx = "easter_banter"
+color = [0.68, 0.84, 1.0]
+title_pt = "Com licença... podemos resolver isso conversando?"
+title_en = "Excuse me... could we talk this out instead?"
+title_es = "Disculpa... ¿podemos resolver esto hablando?"
+
+[[fighter_trigger]]
+id = "kaito_transform"
+fighter = "kaito"
+trigger = "transform"
+per_round = false
+speaker = "KAITO"
+style = "speech"
+sfx = "easter_crown"
+color = [0.36, 0.92, 1.0]
+title_pt = "A tempestade de Izu despertou!"
+title_en = "The Storm of Izu has awakened!"
+title_es = "¡La tormenta de Izu ha despertado!"
+
+[[fighter_trigger]]
+id = "jin_first_attack"
+fighter = "jin"
+trigger = "first_attack"
+per_round = true
+speaker = "JIN"
+style = "speech"
+sfx = "easter_coin"
+color = [0.42, 0.96, 0.72]
+title_pt = "Cheguei primeiro! Récorde do Vale do Vento!"
+title_en = "First strike! New Wind Valley record!"
+title_es = "¡Primer golpe! ¡Récord del Valle del Viento!"
+
+[[fighter_trigger]]
+id = "bruno_round_win"
+fighter = "bruno"
+trigger = "round_win"
+per_round = true
+speaker = "BRUNO"
+style = "speech"
+sfx = "easter_capybara"
+color = [0.24, 0.9, 0.44]
+title_pt = "Essa vitória vai pra academia lá em Minas!"
+title_en = "That round's for the folks back in Minas!"
+title_es = "¡Esa ronda va para la gente de Minas!"
+
+[[fighter_trigger]]
+id = "oboro_round_win"
+fighter = "oboro"
+trigger = "round_win"
+per_round = true
+speaker = "OBORO"
+style = "speech"
+sfx = "easter_kitsune"
+color = [0.98, 0.24, 0.42]
+title_pt = "Durma em paz sob o Eclipse Escarlate."
+title_en = "Sleep peacefully beneath the Scarlet Eclipse."
+title_es = "Duerme en paz bajo el Eclipse Escarlata."
+
+[[exchange]]
+id = "ex_suzume_oboro"
+fighters = ["suzume", "oboro"]
+first_id = "suzume"
+first_speaker = "SUZUME"
+second_speaker = "OBORO"
+delay_ticks = 135
+sfx = "easter_banter"
+color_a = [0.98, 0.34, 0.56]
+color_b = [0.86, 0.22, 0.38]
+line_a_pt = "Oboro... finalmente encontrei o seu fio."
+line_a_en = "Oboro... I finally found your thread."
+line_a_es = "Oboro... por fin encontré tu hilo."
+line_b_pt = "Então venha tentar cortá-lo, pequeno pardal."
+line_b_en = "Then come try to cut it, little sparrow."
+line_b_es = "Entonces ven a cortarlo, pequeño gorrión."
+
+[[exchange]]
+id = "ex_sylene_garan"
+fighters = ["sylene", "garan"]
+first_id = "sylene"
+first_speaker = "SYLENE"
+second_speaker = "GARAN"
+delay_ticks = 135
+sfx = "easter_banter"
+color_a = [0.46, 0.86, 1.0]
+color_b = [0.78, 0.28, 1.0]
+line_a_pt = "Suas cinzas nunca apagarão a Coroa Glacial!"
+line_a_en = "Your cursed ash will never melt the Glacial Crown!"
+line_a_es = "¡Tus cenizas jamás derretirán la Corona Glacial!"
+line_b_pt = "O gelo sempre racha quando o fogo violeta queima!"
+line_b_en = "Ice always shatters when violet flames burn!"
+line_b_es = "¡El hielo siempre se quiebra ante llamas violetas!"
+
+[[exchange]]
+id = "ex_akio_kaito"
+fighters = ["akio", "kaito"]
+first_id = "akio"
+first_speaker = "AKIO"
+second_speaker = "KAITO"
+delay_ticks = 130
+sfx = "easter_banter"
+color_a = [1.0, 0.58, 0.24]
+color_b = [0.36, 0.88, 1.0]
+line_a_pt = "Dessa vez eu não perco, Kaito! Sem segurar!"
+line_a_en = "This time I'm winning, Kaito! Don't hold back!"
+line_a_es = "¡Esta vez gano yo, Kaito! ¡Sin contenerte!"
+line_b_pt = "Pode vir, Akio — mas o ramen é por sua conta."
+line_b_en = "Bring it on, Akio — ramen's on you when you lose."
+line_b_es = "Ven con todo, Akio — el ramen corre por tu cuenta."
+
+[[exchange]]
+id = "ex_bruno_daichi"
+fighters = ["bruno", "daichi"]
+first_id = "bruno"
+first_speaker = "BRUNO"
+second_speaker = "DAICHI"
+delay_ticks = 130
+sfx = "easter_capybara"
+color_a = [0.24, 0.9, 0.44]
+color_b = [0.96, 0.72, 0.34]
+line_a_pt = "Bora testar quem aguenta mais no braço, lobão!"
+line_a_en = "Let's test who hits harder, wolf boy!"
+line_a_es = "¡Probemos quién pega más fuerte, lobo!"
+line_b_pt = "Haha! A matilha de Altai nunca recua!"
+line_b_en = "Haha! The Altai pack never backs down!"
+line_b_es = "¡Jaja! ¡La manada de Altái nunca retrocede!"
+
+[[exchange]]
+id = "ex_shion_kaname"
+fighters = ["shion", "kaname"]
+first_id = "kaname"
+first_speaker = "KANAME"
+second_speaker = "SHION"
+delay_ticks = 135
+sfx = "easter_clash"
+color_a = [0.78, 0.92, 1.0]
+color_b = [0.84, 0.88, 0.98]
+line_a_pt = "Sua espada carrega o peso do exílio, Shion."
+line_a_en = "Your blade carries the weight of exile, Shion."
+line_a_es = "Tu espada carga el peso del exilio, Shion."
+line_b_pt = "E mesmo assim ela nunca erra o alvo."
+line_b_en = "And even so, it never misses its mark."
+line_b_es = "Y aun así, nunca falla su objetivo."
+
+[[exchange]]
+id = "ex_marlow_valdric"
+fighters = ["marlow", "valdric"]
+first_id = "valdric"
+first_speaker = "VALDRIC"
+second_speaker = "MARLOW"
+delay_ticks = 130
+sfx = "easter_parrot"
+color_a = [0.98, 0.28, 0.32]
+color_b = [1.0, 0.78, 0.24]
+line_a_pt = "Piratas não têm lugar na nova ordem imperial."
+line_a_en = "Pirates have no place in the imperial order."
+line_a_es = "Los piratas no tienen lugar en el orden imperial."
+line_b_pt = "Que pena — o céu inteiro já tem dono, alteza!"
+line_b_en = "Too bad — the whole sky's already mine, Your Highness!"
+line_b_es = "¡Qué pena — todo el cielo ya es mío, alteza!"
+
+[[exchange]]
+id = "ex_volta_haruki"
+fighters = ["volta", "haruki"]
+first_id = "volta"
+first_speaker = "VOLTA"
+second_speaker = "HARUKI"
+delay_ticks = 135
+sfx = "easter_banter"
+color_a = [0.28, 0.96, 1.0]
+color_b = [0.68, 0.84, 1.0]
+line_a_pt = "Detectando energia titânica... e muita educação."
+line_a_en = "Detecting titan energy... and extreme politeness."
+line_a_es = "Detectando energía titánica... y mucha cortesía."
+line_b_pt = "Ah, obrigado! E já peço desculpas pelo próximo golpe!"
+line_b_en = "Oh, thank you! And sorry in advance for the next hit!"
+line_b_es = "¡Oh, gracias! ¡Y perdón por el próximo golpe!"
+
+[[exchange]]
+id = "ex_kaito_jin"
+fighters = ["kaito", "jin"]
+first_id = "jin"
+first_speaker = "JIN"
+second_speaker = "KAITO"
+delay_ticks = 125
+sfx = "easter_bird"
+color_a = [0.42, 0.96, 0.72]
+color_b = [0.36, 0.88, 1.0]
+line_a_pt = "Aposto que dou duas voltas em você antes do K.O.!"
+line_a_en = "Bet I lap you twice before the K.O.!"
+line_a_es = "¡Apuesto a que te doy dos vueltas antes del K.O.!"
+line_b_pt = "Velocidade sem direção é só brisa, Jin."
+line_b_en = "Speed without direction is just a breeze, Jin."
+line_b_es = "Velocidad sin dirección es solo brisa, Jin."
+
+[[exchange]]
+id = "ex_lian_kaito"
+fighters = ["lian", "kaito"]
+first_id = "lian"
+first_speaker = "LIAN"
+second_speaker = "KAITO"
+delay_ticks = 130
+sfx = "easter_kitsune"
+color_a = [0.24, 0.94, 0.62]
+color_b = [0.36, 0.88, 1.0]
+line_a_pt = "A Lanterna de Jade reconhece sua tempestade, Kaito."
+line_a_en = "The Jade Lantern recognizes your storm, Kaito."
+line_a_es = "La Linterna de Jade reconoce tu tormenta, Kaito."
+line_b_pt = "Honra minha enfrentar a mestra de Wudang."
+line_b_en = "An honor to face the master of Mount Wudang."
+line_b_es = "Es un honor enfrentar a la maestra de Wudang."
+
+[[exchange]]
+id = "ex_suzume_jin"
+fighters = ["suzume", "jin"]
+first_id = "suzume"
+first_speaker = "SUZUME"
+second_speaker = "JIN"
+delay_ticks = 125
+sfx = "easter_clash"
+color_a = [0.98, 0.34, 0.56]
+color_b = [0.42, 0.96, 0.72]
+line_a_pt = "Rápido para um mensageiro... mas faz barulho demais."
+line_a_en = "Fast for a courier... but way too noisy."
+line_a_es = "Rápido para un mensajero... pero demasiado ruidoso."
+line_b_pt = "Ei! Quem faz entrega com estilo tem que anunciar!"
+line_b_en = "Hey! Stylish deliveries deserve an entrance!"
+line_b_es = "¡Oye! ¡Las entregas con estilo merecen entrada!"
+
+[[exchange]]
+id = "ex_valdric_oboro"
+fighters = ["valdric", "oboro"]
+first_id = "valdric"
+first_speaker = "VALDRIC"
+second_speaker = "OBORO"
+delay_ticks = 135
+sfx = "easter_clash"
+color_a = [0.98, 0.28, 0.32]
+color_b = [0.86, 0.22, 0.38]
+line_a_pt = "Seu Eclipse atrapalha a conquista do meu Império."
+line_a_en = "Your Eclipse interferes with my Empire's conquest."
+line_a_es = "Tu Eclipse interfiere con la conquista de mi Imperio."
+line_b_pt = "Que curioso... pensei que sonhávamos o mesmo sonho."
+line_b_en = "How curious... I thought we dreamed the same dream."
+line_b_es = "Qué curioso... creí que soñábamos el mismo sueño."
+
+[[exchange]]
+id = "ex_bruno_akio"
+fighters = ["bruno", "akio"]
+first_id = "akio"
+first_speaker = "AKIO"
+second_speaker = "BRUNO"
+delay_ticks = 130
+sfx = "easter_capybara"
+color_a = [1.0, 0.58, 0.24]
+color_b = [0.24, 0.9, 0.44]
+line_a_pt = "Mestre Bruno! Me ensina aquele golpe do Ringue de Ferro!"
+line_a_en = "Champ Bruno! Teach me that Iron Ring finisher!"
+line_a_es = "¡Campeón Bruno! ¡Enséñame ese golpe del Ring!"
+line_b_pt = "Primeiro aguenta meu direto, garoto!"
+line_b_en = "First survive my right hook, kid!"
+line_b_es = "¡Primero aguanta mi gancho derecho, chico!"

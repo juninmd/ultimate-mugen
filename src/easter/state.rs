@@ -35,6 +35,7 @@ pub(crate) struct FightTracker {
     pub fired_round: u128,
     pub cooldown_until: i64,
     pub active: Vec<ActiveEgg>,
+    pub pending: Vec<(i64, ActiveEgg, &'static str)>,
     pub prev_life: [f32; 2],
     pub prev_power: [f32; 2],
     pub prev_state: [i32; 2],
@@ -66,6 +67,7 @@ impl FightTracker {
             self.still_ticks = 0;
             self.corner_ticks = [0; 2];
             self.sync_jumps = 0;
+            self.pending.clear();
         }
         self.last_tick = m.game_time;
     }
@@ -98,6 +100,37 @@ impl FightTracker {
         }
     }
 
+    pub(crate) fn push_now(&mut self, egg: ActiveEgg, audio: &mut Audio, sfx: &'static str) {
+        if self.active.len() >= MAX_ACTIVE {
+            self.active.remove(0);
+        }
+        self.active.push(egg);
+        if !sfx.is_empty() {
+            audio.sfx(sfx);
+        }
+    }
+
+    pub(crate) fn queue_delayed(&mut self, delay_ticks: i64, egg: ActiveEgg, sfx: &'static str) {
+        let due = self.last_tick + delay_ticks.max(15);
+        self.pending.push((due, egg, sfx));
+    }
+
+    pub(crate) fn flush_pending(&mut self, audio: &mut Audio) {
+        let now = self.last_tick;
+        let mut ready = Vec::new();
+        let mut idx = 0;
+        while idx < self.pending.len() {
+            if self.pending[idx].0 <= now {
+                ready.push(self.pending.remove(idx));
+            } else {
+                idx += 1;
+            }
+        }
+        for (_, egg, sfx) in ready {
+            self.push_now(egg, audio, sfx);
+        }
+    }
+
     pub(crate) fn trigger(&mut self, bit: u8, per_round: bool, egg: ActiveEgg, audio: &mut Audio, sfx: &'static str) -> bool {
         if self.has_fired(bit, per_round) || self.last_tick < self.cooldown_until {
             return false;
@@ -109,13 +142,7 @@ impl FightTracker {
             self.fired_match |= mask;
         }
         self.cooldown_until = self.last_tick + GLOBAL_COOLDOWN_TICKS;
-        if self.active.len() >= MAX_ACTIVE {
-            self.active.remove(0);
-        }
-        self.active.push(egg);
-        if !sfx.is_empty() {
-            audio.sfx(sfx);
-        }
+        self.push_now(egg, audio, sfx);
         true
     }
 }

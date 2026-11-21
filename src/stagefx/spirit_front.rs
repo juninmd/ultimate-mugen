@@ -5,7 +5,7 @@ impl StageReact {
         let (s, t) = (cx.s, self.t);
         for (n, x0) in [20.0f32, 400.0].iter().enumerate() {
             let rope_y = |f: f32| {
-                6.0 + 9.0 * 4.0 * f * (1.0 - f)
+                34.0 + 9.0 * 4.0 * f * (1.0 - f)
                     + self.swing * 4.0 * (f * std::f32::consts::PI).sin()
             };
             let mut prev: Option<Vec2> = None;

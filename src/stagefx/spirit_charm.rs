@@ -35,3 +35,15 @@ pub(super) fn draw(top: Vec2, width: f32, height: f32, angle: f32) -> bool {
         true
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bundled_ofuda_png_decodes_as_rgba() {
+        let image = ume_formats::png::decode_png(PNG).expect("Spirit charm PNG should decode");
+        assert_eq!((image.width, image.height), (128, 192));
+        assert!(image.rgba.is_some());
+    }
+}

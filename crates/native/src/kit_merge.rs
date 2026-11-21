@@ -1,3 +1,4 @@
+use super::kit::LIBRARY_MARK;
 use serde_json::{Map, Value};
 
 pub(super) fn layer(
@@ -41,6 +42,8 @@ pub(super) fn layer(
     }
     Ok(base)
 }
+
+const TUNABLE: [&str; 2] = ["projectile", "blink"];
 
 fn deep(base: Value, own: Value) -> Value {
     match (base, own) {
@@ -101,19 +104,27 @@ fn layer_moves(inherited: Vec<Value>, own: Vec<Value>) -> Result<Vec<Value>, Str
                 "move `{id}` uses `{wanted}`, which no kit or earlier move defines"
             ));
         }
+        let marked = fields.contains_key(LIBRARY_MARK);
         let mut merged = template.unwrap_or_default();
         for (key, value) in fields {
             if value.is_null() {
                 merged.remove(&key);
+            } else if TUNABLE.contains(&key.as_str()) && value.is_object() {
+                let old = merged.remove(&key).unwrap_or(Value::Null);
+                merged.insert(key, if old.is_object() { deep(old, value) } else { value });
             } else {
                 merged.insert(key, value);
             }
+        }
+        if !marked {
+            merged.remove(LIBRARY_MARK);
         }
         merged.insert("id".to_string(), Value::String(id));
         out.push(Value::Object(merged));
     }
     for entry in inherited {
-        if move_id(&entry).is_some_and(|id| !taken.iter().any(|seen| seen == id)) {
+        let opt_in = entry.get(LIBRARY_MARK).is_some();
+        if !opt_in && move_id(&entry).is_some_and(|id| !taken.iter().any(|seen| seen == id)) {
             out.push(entry);
         }
     }

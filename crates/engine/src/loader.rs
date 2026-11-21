@@ -14,8 +14,8 @@ use ume_formats::vfs::{norm_path, resolve, text, Vfs};
 
 mod format;
 mod portrait;
-#[cfg(target_arch = "wasm32")]
-mod sff_slice;
+mod sff_cache;
+#[cfg(target_arch = "wasm32")] mod sff_slice;
 mod stats;
 use format::local_size;
 pub use {portrait::load_mugen_portrait, stats::load_mugen_stats};
@@ -124,7 +124,7 @@ pub fn load_mugen_char(
         {
             std::thread::scope(|sc| {
                 let h_sff = sc.spawn(move || {
-                    sprite_buf.map(|buf| crate::perf::time("sff:decode", || decode_sff(&buf)))
+                    sprite_buf.map(|buf| crate::perf::time("sff:decode", || sff_cache::decode_cached(&buf, &std::collections::HashSet::new())))
                 });
                 let h_anim = sc.spawn(move || {
                     crate::perf::time("air:parse", || {

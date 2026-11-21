@@ -11,6 +11,7 @@ const USER_FILE: &str = "interactions.toml";
 pub(crate) struct InteractionsConfig {
     pub taunts: TauntsSection,
     pub matchup: Vec<MatchupEntry>,
+    pub exchange: Vec<super::toml_exchange::ExchangeEntry>,
     pub stage_interaction: Vec<StageInteraction>,
     pub fighter_trigger: Vec<FighterTrigger>,
 }
@@ -108,6 +109,7 @@ fn merge_config(base: &mut InteractionsConfig, extra: InteractionsConfig) {
     if !extra.taunts.answer_en.is_empty() { base.taunts.answer_en = extra.taunts.answer_en; }
     if !extra.taunts.answer_es.is_empty() { base.taunts.answer_es = extra.taunts.answer_es; }
     base.matchup.extend(extra.matchup);
+    base.exchange.extend(extra.exchange);
     base.stage_interaction.extend(extra.stage_interaction);
     base.fighter_trigger.extend(extra.fighter_trigger);
 }

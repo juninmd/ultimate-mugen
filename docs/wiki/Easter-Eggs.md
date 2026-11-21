@@ -111,3 +111,6 @@ Supported sections:
 - `[[matchup]]`: `fighters = [a, b]` or `mirror = true`, `style`, `sprite`, `sfx`, `color`, localized `title_*` and `sub_*`.
 - `[[stage_interaction]]`: `fighter` + `stage_contains = [...]`.
 - `[[fighter_trigger]]`: `fighter` or `fighter_prefix`, `trigger` (`"low_hp"`, `"combo"`, `"opp_combo"`, `"super"`, `"super_or_combo"`, `"taunt"`), `threshold`, `per_round`.
+
+## Two-Part Rival Exchanges (`[[exchange]]`) & Full-Roster Taunts
+`assets/interactions.toml` also supports back-and-forth two-part `[[exchange]]` dialogues (Fighter A speaks, and Fighter B automatically replies `delay_ticks` later), plus `first_attack`, `transform`, and `round_win` triggers, and dedicated `taunt` lines for all 16 playable fighters.

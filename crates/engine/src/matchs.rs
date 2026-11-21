@@ -745,7 +745,7 @@ impl Match {
             for slot in f.not_hit_by.iter_mut() { if slot.as_ref().is_some_and(|n| n.1 <= 0) { *slot = None; } }
             for slot in f.hit_by.iter_mut() { if slot.as_ref().is_some_and(|n| n.1 <= 0) { *slot = None; } }
             if let Some(p) = f.palfx.as_mut() { p.elapsed += 1; }
-            let tp = f.frame().map(|fr| TrailPoint { x: f.pos.x, y: f.pos.y, group: fr.group, index: fr.index, fx: fr.x, fy: fr.y, flip_h: fr.flip_h, facing: f.facing });
+            let tp = f.after_image.as_ref().and_then(|_| f.frame()).map(|fr| TrailPoint { x: f.pos.x, y: f.pos.y, group: fr.group, index: fr.index, fx: fr.x, fy: fr.y, flip_h: fr.flip_h, facing: f.facing });
             if let Some(ai) = f.after_image.as_mut() {
                 ai.ticks += 1;
                 if let Some(tp) = tp.filter(|_| (ai.ticks - 1) % ai.params.time_gap.max(1) == 0) { ai.trail.insert(0, tp); }

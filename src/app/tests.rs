@@ -37,6 +37,13 @@ fn esc_opening_the_pause_menu_does_not_close_it_on_the_same_frame() {
 }
 
 #[test]
+fn enter_opening_the_pause_menu_does_not_pick_continue_on_the_same_frame() {
+    let (paused, accept_nav) = pause_step(false, true);
+    assert!(paused);
+    assert!(!accept_nav);
+}
+
+#[test]
 fn pause_menu_is_navigable_once_open() {
     assert_eq!(pause_step(true, false), (true, true));
     assert_eq!(pause_step(true, true), (false, true));

@@ -61,3 +61,7 @@ Lua/ZSS arbitrário, helpers com lógica própria, `Statedef -2/-3` customizados
 ## Regras do repositório
 
 Sem comentários em código; arquivos de código até 250 linhas; PR com título `type: description`; teste de fumaça no navegador (wasm) antes de entregar.
+
+## Aprender antes de migrar
+
+Para entender como um pacote foi feito (comandos, hitdefs, helpers, projéteis, formas), rode a skill `mugen-dissector` primeiro; a tabela de padrões e os números de referência estão em `docs/wiki/pt-BR/Dissecacao-MUGEN.md`.

@@ -8,15 +8,14 @@
 use super::*;
 
 impl Gfx {
-    /// Uploads at most `budget` bytes of `keys` starting at `at`, stopping early when the atlas is at
-    /// its occupancy cap. Returns the resume index (`keys.len()` once the art is fully resident).
     pub fn prefetch_step(
         &mut self,
         def: &CharDef,
         keys: &[(i32, i32)],
         at: usize,
         budget: u64,
-    ) -> usize {
+        allow_oversized: bool,
+    ) -> (usize, u64) {
         const ATLAS_CAP: f32 = 0.5;
         let mut used = 0;
         for (i, key) in keys.iter().enumerate().skip(at) {
@@ -30,15 +29,15 @@ impl Gfx {
                 continue;
             }
             let bytes = spr.atlas_bytes();
-            if used > 0 && used + bytes > budget {
-                return i;
+            if used + bytes > budget && (!allow_oversized || used > 0) {
+                return (i, used);
             }
             if !spr.prefetch(ATLAS_CAP) {
-                return keys.len();
+                return (keys.len(), used);
             }
             used += bytes;
         }
-        keys.len()
+        (keys.len(), used)
     }
 }
 

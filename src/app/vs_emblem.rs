@@ -1,6 +1,42 @@
 use super::*;
 use crate::poly;
 use std::f32::consts::TAU;
+use std::sync::Arc;
+
+thread_local! {
+    static VS_SPRITE: Option<Texture2D> = load_vs_sprite();
+}
+
+fn load_vs_sprite() -> Option<Texture2D> {
+    let image = ume_formats::png::decode_png(include_bytes!("../../assets/ui/vs-emblem.png")).ok()?;
+    let rgba = match image.rgba {
+        Some(rgba) => rgba,
+        None => ume_formats::png::png_indexed_to_rgba(&image),
+    };
+    let tex = Texture2D::from_rgba_shared(image.width as u16, image.height as u16, Arc::new(rgba));
+    tex.set_filter(FilterMode::Nearest);
+    Some(tex)
+}
+
+fn draw_vs_sprite(ui: &Ui, cx: f32, cy: f32, sc: f32, a: f32) -> bool {
+    VS_SPRITE.with(|sprite| {
+        let Some(tex) = sprite else {
+            return false;
+        };
+        let sz = 236.0 * sc * ui.s;
+        draw_texture_ex(
+            tex,
+            ui.x(cx) - sz * 0.5,
+            ui.y(cy) - sz * 0.5,
+            Color::new(1.0, 1.0, 1.0, a),
+            DrawTextureParams {
+                dest_size: Some(vec2(sz, sz)),
+                ..Default::default()
+            },
+        );
+        true
+    })
+}
 
 fn hash(n: u32) -> f32 {
     super::vs_epic::hash(n)
@@ -115,6 +151,9 @@ impl App {
         } else {
             0.0
         };
+        if draw_vs_sprite(&self.ui, cx + shake, cy, sc, a) {
+            return;
+        }
         let (x, y, sz) = (cx + shake, cy + 44.0 * sc, 128.0 * sc);
         self.ui.text(
             "VS",

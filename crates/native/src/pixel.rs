@@ -4,7 +4,7 @@ use super::effects::{art_res, FrameArt};
 use super::types::{NativeChar, NativeFrame};
 use ume_engine::chardef::ImageData;
 use serde_json::Value;
-use std::path::{Path, PathBuf};
+use std::{path::{Path, PathBuf}, sync::Arc};
 
 const SPRITE_ROOT: &str = "assets/chars/sprites";
 const BASE_STEM: &str = "01_idle";
@@ -93,10 +93,10 @@ pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
 
 fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool, recolor: Option<&Recolor>) -> Option<FrameArt> {
     let bytes = read_sprite(root, &format!("{name}.png"))?;
-    let dec = ume_formats::png::decode_png(&bytes).ok()?;
+    let dec = super::decode_cache::png(root, name, &bytes)?;
     let mut rgba = match &dec.rgba { Some(rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&dec) };
     let res = art_res().max(0.1);
-    let meta: Value = read_sprite(root, "meta.json").and_then(|bytes| serde_json::from_slice(&bytes).ok()).unwrap_or(Value::Null);
+    let meta = read_sprite(root, "meta.json").map_or_else(|| Arc::new(Value::Null), |bytes| super::decode_cache::meta(root, &bytes));
     let frame = meta.get("frames").and_then(|frames| frames.get(name)).unwrap_or(&Value::Null);
     let hair_region = frame.get("awakeningHair").and_then(|value| serde_json::from_value::<[u32; 4]>(value.clone()).ok());
     if let Some(recolor) = recolor { recolor.apply_in_region(&mut rgba, dec.width, hair_region); }

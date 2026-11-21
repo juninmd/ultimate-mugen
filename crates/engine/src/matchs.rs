@@ -1375,7 +1375,7 @@ impl Match {
     fn make_explod(&self, owner: &Fighter, def: Arc<CharDef>, anim: i32, x: f32, y: f32, lscl: f32) -> Explod {
         Explod { owner: owner.id, id: -1, cur: AnimCursor::new(def, anim), pos: V2 { x, y }, vel: V2::default(), accel: V2::default(), facing: owner.facing, vfacing: 1.0,
             bind_time: 0, bind_to: None, bind_off: V2::default(), remove_time: -2, time: 0, spr_priority: 5, on_top: true, under: false, scale: [1.0, 1.0],
-            add: false, remove_on_get_hit: false, super_move: 0, pause_move: 0, lscl, ignore_hit_pause: true, screen: false }
+            add: false, remove_on_get_hit: false, super_move: 0, pause_move: 0, lscl, ignore_hit_pause: true, screen: false, alpha: 1.0, angle: 0.0 }
     }
     pub fn spawn_spark(&mut self, a: usize, no: i32, own: bool, x: f32, y: f32, guard: bool, heavy: bool, scale: f32) {
         let f = &self.fighters[a];
@@ -1490,7 +1490,7 @@ impl Match {
         e.remove_on_get_hit = num(self, "removeongethit", 0.0, 0) != 0.0;
         e.super_move = num(self, "supermove", num(self, "supermovetime", 0.0, 0) as f64, 0) as i32;
         e.pause_move = num(self, "pausemove", num(self, "pausemovetime", 0.0, 0) as f64, 0) as i32;
-        e.add = sc.raw("trans").is_some_and(|t| t.to_ascii_lowercase().starts_with("add"));
+        e.add = sc.raw("trans").is_some_and(|t| t.to_ascii_lowercase().starts_with("add")); e.alpha = (num(self, "alpha", 256.0, 0) as f32).clamp(0.0, 256.0) / 256.0; e.angle = num(self, "angle", 0.0, 0) as f32;
         e.ignore_hit_pause = num(self, "ignorehitpause", 1.0, 0) != 0.0;
         e.screen = screen_space || sc.raw("space").is_some_and(|s| s.trim().eq_ignore_ascii_case("screen"));
         if e.screen && !screen_space { e.pos.x -= self.camera.x; e.pos.y -= self.camera.y; e.bind_to = None; }
@@ -1566,9 +1566,9 @@ impl Match {
         h.own_projectile = num(self, "ownprojectile", 0.0, 0) != 0.0;
         h.own_clsn_scale = num(self, "ownclsnscale", 0.0, 0) != 0.0;
         if !h.own_clsn_scale { h.size_overrides = f.size_overrides.clone(); }
-        for (name, param) in &sc.params {
+        for (name, _) in &sc.params {
             if !name.starts_with("size.") { continue; }
-            let Some(e) = param.exprs.first() else { continue };
+            let Some(e) = sc.param(name).and_then(|p| p.exprs.first()) else { continue };
             let v = self.ev(i, e) as f32;
             if v.is_nan() { continue; }
             match h.size_overrides.iter_mut().find(|(n, _)| n == name) { Some(slot) => slot.1 = v, None => h.size_overrides.push((name.clone(), v)) }

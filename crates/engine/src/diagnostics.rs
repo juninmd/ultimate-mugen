@@ -11,6 +11,8 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::Arc;
 use ume_formats::ini::parse_ini;
 
+mod params;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Category {
     Controller,
@@ -272,24 +274,11 @@ pub fn controller_supported(kind: &str) -> bool {
 }
 
 pub fn parameter_consumed(kind: &str, name: &str) -> bool {
-    if !sane_name(name) { return false; }
-    cached(format!("parameter {kind} {name}"), || {
-        let out = run_controller(kind, &[(name, "0")]);
-        !out.completed || out.reads.contains(name)
-    })
+    params::parameter_consumed(kind, name)
 }
 
 fn consumed_together(kind: &str, names: &[&str]) -> Arc<HashSet<String>> {
-    let mut sorted: Vec<&str> = names.iter().copied().filter(|n| sane_name(n)).collect();
-    sorted.sort_unstable();
-    sorted.dedup();
-    let key = format!("{kind} {}", sorted.join("|"));
-    if let Some(v) = CONSUMED_CACHE.with(|c| c.borrow().get(&key).cloned()) { return v; }
-    let params: Vec<(&str, &str)> = sorted.iter().map(|n| (*n, "0")).collect();
-    let out = run_controller(kind, &params);
-    let set = Arc::new(if out.completed { out.reads } else { sorted.iter().map(|s| s.to_string()).collect() });
-    CONSUMED_CACHE.with(|c| c.borrow_mut().insert(key, set.clone()));
-    set
+    params::consumed_together(kind, names)
 }
 
 pub fn assert_flag_supported(flag: &str) -> bool {

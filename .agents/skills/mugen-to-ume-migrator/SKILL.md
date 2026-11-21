@@ -29,28 +29,35 @@ O motor já roda personagens MUGEN legados direto da pasta ou do zip. Migre para
 - **Kits reutilizáveis**: para reduzir JSON em lutadores novos ou editados, use `"extends": ["core", "ki_fighter", "clone_arts", "aerial_rush"]` (`crates/native/src/kits/`).
 - **`--extra` e `--report`**: `--extra` mescla JSON por cima (incluindo `profile`, `intro`, `taunt`, `winQuote`, `rivals`); `--report` imprime o resumo de cobertura de features convertidas.
 
-## Enriquecimento UME obrigatório (identidade, perfil e falas fiéis)
+## Enriquecimento UME obrigatório (identidade, país, interações e storyboard)
 
-Ao migrar um lutador M.U.G.E.N para o padrão UMF 2.0, **sempre preencha os metadados exclusivos do UME** (via `--extra` ou editando o JSON final) mantendo **100% de fidelidade ao personagem original**:
+Ao migrar um lutador M.U.G.E.N para o padrão UMF 2.0, **sempre preencha todos os blocos exclusivos do UME** (via `--extra` ou editando o JSON final) mantendo **100% de fidelidade ao personagem original**:
 
-- **Identidade**: `series` (obra/franquia original), `author` (criador original + crédito de conversão), `color` (cor assinatura em hex), `form` (nome da forma/despertar) e `description` (resumo curto fiel).
-- **Falas fiéis ao personagem**:
-  - `intro`: frase de entrada icônica do personagem antes da luta.
-  - `taunt`: provocação autêntica na personalidade do personagem.
-  - `winQuote`: frase de vitória clássica.
-  - `rivals`: interações específicas (`intro`, `taunt`) quando houver rivais no elenco.
-- **Bloco `profile` (`CharProfile`)** — preencher em `en`, `pt` e `es` nos campos `LocalText`:
-  - `country`: código/local (ex.: `"JP"`, `"Planet Vegeta"`).
-  - `nationality`: nacionalidade / raça (`{"en": "...", "pt": "...", "es": "..."}`).
-  - `origin`: origem / planeta / cidade (`{"en": "...", "pt": "...", "es": "..."}`).
-  - `title`: título / epíteto (ex.: `"Super Saiyan 4"`).
-  - `fightingStyle`: estilo de luta (ex.: `"Turtle School Martial Arts"`).
-  - `affiliation`: equipe / facção / clã (ex.: `"Z Fighters"`).
-  - `bio`: mini biografia fiel ao cânone do personagem (`{"en": "...", "pt": "...", "es": "..."}`).
-  - `element`: elemento principal (`"ki"`, `"fire"`, `"wind"`, `"lightning"`, `"ice"`, `"shadow"`, `"earth"`, `"light"`, `"water"`).
-  - `weakness`: elemento fraqueza (ex.: `"dark"`, `"ice"`, `"earth"`).
-  - `alignment`: alinhamento moral — `"hero"`, `"villain"`, `"anti-hero"` ou `"neutral"`.
-  - `tags`: arquétipos de gameplay (ex.: `["rushdown", "beam", "teleport", "aerial"]`).
+1. **Identidade & Falas Fiéis (`<id>.json`)**:
+   - `series` (obra/franquia original), `author` (criador original + crédito de conversão), `color` (cor assinatura em hex), `form` (nome da forma/despertar) e `description` (resumo curto fiel).
+   - `intro`: frase de entrada icônica antes da luta.
+   - `taunt`: provocação autêntica na personalidade do personagem.
+   - `winQuote`: frase de vitória clássica.
+   - `rivals`: interações pré-luta específicas (`{ "<rival_id>": { "intro": "...", "taunt": "...", "attack": 1.06 } }`).
+2. **País de Origem & Perfil Completo (`profile` no `<id>.json` + `assets/char_profiles.json` se nativo fixo)** — preencher em `en`, `pt` e `es`:
+   - `country`: código ISO minúsculo usado pela bandeira no seletor (ex.: `"jp"`, `"br"`, `"cn"`, `"us"`, `"no"`, `"de"`, `"ph"`, `"mx"`).
+   - `nationality`: nacionalidade / raça (`{"en": "...", "pt": "...", "es": "..."}`).
+   - `origin`: cidade, planeta ou reino de origem (`{"en": "...", "pt": "...", "es": "..."}`).
+   - `title`: título / epíteto (ex.: `"Super Saiyan 4"`).
+   - `fightingStyle`: estilo de luta (ex.: `"Turtle School Martial Arts"`).
+   - `affiliation`: equipe / facção / clã (ex.: `"Z Fighters"`).
+   - `bio`: mini biografia fiel ao cânone (`{"en": "...", "pt": "...", "es": "..."}`).
+   - `element`: elemento principal (`"ki"`, `"fire"`, `"wind"`, `"lightning"`, `"ice"`, `"shadow"`, `"earth"`, `"light"`, `"water"`).
+   - `weakness`: elemento fraqueza (ex.: `"dark"`, `"ice"`, `"earth"`).
+   - `alignment`: alinhamento moral — `"hero"`, `"villain"`, `"anti-hero"` ou `"neutral"`.
+   - `tags`: arquétipos de gameplay (ex.: `["rushdown", "beam", "teleport", "aerial"]`).
+3. **Interações com Outros Chars e Cenários (`assets/interactions.toml`)**:
+   - **`[[matchup]]`**: diálogos/banners contra rivais específicos (`fighters = ["id_a", "id_b"]`, `style = "ribbon" | "speech"`, `sprite`, `sfx`, `color`, `title_pt/en/es`, `sub_pt/en/es`).
+   - **`[[stage_interaction]]`**: reações a cenários icônicos (`fighter`, `stage_contains = ["vulc", "volcano", ...]`, `speaker`, `style`, `sprite`, `sfx`, `color`, `title_pt/en/es`, `sub_pt/en/es`).
+   - **`[[fighter_trigger]]`**: falas de provocação (`trigger = "taunt"`, `per_round = true`) e virada com vida baixa (`trigger = "low_hp"`, `threshold = 0.30`).
+4. **Storyboard & Epílogo (`assets/story/epilogues.json`)**:
+   - Adicione a entrada `"<id>"` com `scene` (stage de fundo), `title`, `boss` (fala final do chefe), `reply` (resposta icônica do lutador) e `pages[]` (quadros narrativos do storyboard pós-vitória em `en`, `pt`, `es`). Valide com `UME_TOUR=epilogue` ou `?e2e_epilogue=1`.
+   - Se o pacote M.U.G.E.N trouxer `.def` de storyboard/ending ou texto de história (`MugeNow.txt` / intros CNS), adapte fielmente os diálogos para `epilogues.json` e `intro`/`winQuote`.
 
 Pegadinhas aprendidas (estudo de caso Goku SSJ4): nunca siga `ChangeState` para o estado de voo (`3001`) em cadeias de ataque; remova `loop` e ticks `-1` de `intro`, `taunt` e ataques para `AnimTime = 0` disparar; preserve múltiplos `PosAdd` em `teleport[]` (ex.: subida e retorno da Genki Dama) e garanta saída aérea (`value = 50`) quando `Pos Y < 0`; em `ChangeAnim` de voo, cheque `command = "holdup"` (regex) e não substring `"holdup"` (senão casa `!= "holdup"`); o nome do `.act` pode ter outra caixa; `[State N]` com número diferente do `Statedef` pertence ao `Statedef` corrente; a paleta 1 só vale para sprites `same_pal`.
 

@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod elements; mod advantage; mod advantage_draw; mod announce_text; mod art; mod badge_art; mod combo_tier; mod danger; mod energy; mod energy_art; mod guard; mod palette; mod opacity; mod life_art; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
+mod elements; mod advantage; mod advantage_draw; mod announce_text; mod art; mod badge_art; mod combo_tier; mod danger; mod dialogue_art; mod energy; mod energy_art; mod guard; mod palette; mod opacity; mod life_art; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -939,16 +939,19 @@ impl Hud {
                         &sp(poly::chamfer(bx + 1.5, by + 1.8, wdt, hgt, 3.5)),
                         Color::new(0.0, 0.0, 0.0, 0.35 * a),
                     );
-                    poly::grad_v(
-                        &sp(poly::chamfer(bx, by, wdt, hgt, 3.5)),
-                        Color::new(1.0, 1.0, 1.0, 0.96 * a),
-                        Color::new(0.86, 0.88, 0.96, 0.96 * a),
-                    );
-                    poly::outline(
-                        &sp(poly::chamfer(bx, by, wdt, hgt, 3.5)),
-                        1.1 * s,
-                        poly::with_a(col, a),
-                    );
+                    let pixel_frame = dialogue_art::draw_frame(&p, s, bx, by, wdt, hgt, 0.96 * a);
+                    if !pixel_frame {
+                        poly::grad_v(
+                            &sp(poly::chamfer(bx, by, wdt, hgt, 3.5)),
+                            Color::new(1.0, 1.0, 1.0, 0.96 * a),
+                            Color::new(0.86, 0.88, 0.96, 0.96 * a),
+                        );
+                        poly::outline(
+                            &sp(poly::chamfer(bx, by, wdt, hgt, 3.5)),
+                            1.1 * s,
+                            poly::with_a(col, a),
+                        );
+                    }
                     let tx = if side == 0 {
                         bx + wdt * 0.28
                     } else {
@@ -960,7 +963,11 @@ impl Hud {
                             p(tx + 4.0, by + hgt - 0.3),
                             p(tx + if side == 0 { -2.0 } else { 2.0 }, by + hgt + 9.0),
                         ],
-                        Color::new(0.93, 0.94, 0.98, 0.96 * a),
+                        if pixel_frame {
+                            Color::new(0.98, 0.96, 0.89, 0.96 * a)
+                        } else {
+                            Color::new(0.93, 0.94, 0.98, 0.96 * a)
+                        },
                     );
                     // name tab
                     let nm = f

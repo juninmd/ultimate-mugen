@@ -33,25 +33,25 @@ const server = staticServer(dir, types);
   await snap('00-fight');
   const layout = await p.evaluate(() => {
     const w = innerWidth, h = innerHeight;
-    const r = Math.min(52, Math.max(24, h * 0.09)), gap = r * 2.25;
-    const bx = w - r * 1.3 - gap * 2, by = h - r * 2.4;
-    const quick = [0, 1, 2, 3].map(j => [w * 0.57 + (j - 1.5) * r * 1.8, h - r * 0.9]);
+    const r = Math.min(44, Math.max(20, h * 0.075)), gap = r * 2.1, small = r * 0.72, sg = small * 2.3;
+    const bx = w - r * 1.4 - gap * 2, by = h - r * 2.3;
+    const extra = n => [bx - gap * 0.85 - (3 - (n % 4)) * sg, by - Math.floor(n / 4) * sg];
+    const k = Math.min(w / 1280, h / 720);
     return {
-      soco: [bx, by - gap], socoPlus: [bx + gap, by - gap], especial: [bx + 2 * gap, by - gap],
-      chute: [bx, by], chutePlus: [bx + gap, by], super: [bx + 2 * gap, by],
-      despertar: [bx + gap, by - 2 * gap], carregar: [bx + 2 * gap, by - 2 * gap],
-      troca: [bx, by - 2 * gap], especial3: [bx - gap, by - 2 * gap], soco3: [bx - gap, by - gap],
-      chute3: [bx - 2 * gap, by - 2 * gap], defesa: [bx - 2 * gap, by - gap],
-      quick, pause: [w / 2, (h - 720 * Math.min(w / 1280, h / 720)) / 2 + 116 * Math.min(w / 1280, h / 720)],
+      soco: [bx, by - gap], especial: [bx + 2 * gap, by - gap], chute: [bx, by], super: [bx + 2 * gap, by],
+      toggle: [bx + 2 * gap, by - 2 * gap + r * 0.2],
+      carregar: extra(1), troca: extra(6), defesa: extra(10), soco3: extra(8), chute3: extra(9), especial3: extra(7),
+      quick: [2, 3, 4, 5].map(extra), pause: [w / 2, (h - 720 * k) / 2 + 116 * k],
     };
   });
   const tap = async ([x, y]) => { await p.touchscreen.tap(x, y); await frames(4); await p.waitForTimeout(250); };
-  await tap(layout.carregar); await snap('01-after-carregar');
-  await tap(layout.troca); await tap(layout.defesa); await snap('02-after-troca-defesa');
-  await tap(layout.soco3); await tap(layout.chute3); await tap(layout.especial3); await snap('03-after-3o-ataque');
+  await tap(layout.soco); await tap(layout.chute); await tap(layout.especial); await tap(layout.super); await snap('01-core-buttons');
+  await tap(layout.toggle); await snap('02-extras-open');
+  await tap(layout.carregar);
+  await tap(layout.troca); await tap(layout.defesa); await tap(layout.soco3); await tap(layout.chute3); await tap(layout.especial3);
   for (const q of layout.quick) await tap(q);
-  await snap('04-after-quick-skills');
-  await snap('05a-before-pause');
+  await snap('03-after-extras');
+  await tap(layout.toggle); await snap('04-extras-closed');
   await tap(layout.pause); await p.waitForTimeout(1500); await snap('05-paused');
   if (problems.length) console.error(problems.join('\n'));
   console.log(problems.length ? 'WEB TOUCH SMOKE FAILED' : 'WEB TOUCH SMOKE OK');

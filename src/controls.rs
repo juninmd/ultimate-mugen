@@ -3,6 +3,7 @@ use crate::gamepad::{PadInfo, PadKind, Pads};
 mod nav_keys;
 mod nav_repeat;
 mod touch;
+mod touch_layout;
 mod touch_style;
 mod touch_label;
 pub mod shortcuts;

@@ -40,6 +40,9 @@ pub fn pack_tiers(id: &str, folder: &Path, target: &Path, menu: Option<(&Path, &
         scales.insert(name.clone(), scale);
         files.push((name.clone(), encoded));
     }
+    for name in names.iter().filter(|n| n.to_lowercase().ends_with(".wav")) {
+        files.push((name.clone(), std::fs::read(folder.join(name)).map_err(|e| format!("{name}: {e}"))?));
+    }
     if names.iter().any(|n| n == "meta.json") {
         let raw = std::fs::read(folder.join("meta.json")).map_err(|e| format!("meta.json: {e}"))?;
         files.push(("meta.json".to_string(), rescale_meta(&raw, &scales)?));

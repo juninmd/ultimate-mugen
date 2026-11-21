@@ -772,9 +772,9 @@ impl Hud {
                     col,
                     al,
                 );
-                outlined("HITS", x, cy0 + 90.0, 9.0, Color::new(1.0, 1.0, 1.0, a), al);
+                outlined(crate::i18n::tr3("ACERTOS", "HITS", "GOLPES"), x, cy0 + 90.0, 9.0, Color::new(1.0, 1.0, 1.0, a), al);
                 outlined(
-                    &format!("{} DMG", c.1 as i32),
+                    &format!("{} {}", c.1 as i32, crate::i18n::tr3("DANO", "DMG", "DAÑO")),
                     x,
                     cy0 + 99.0,
                     6.5,
@@ -796,7 +796,7 @@ impl Hud {
                         Color::new(0.1, 0.02, 0.05, 0.5 * a),
                     );
                     text(
-                        &format!("DANO {pct}%"),
+                        &format!("{} {pct}%", crate::i18n::tr3("DANO", "DMG", "DAÑO")),
                         x + if side == 0 { 1.0 } else { -1.0 },
                         cy0 + 107.0,
                         5.2,
@@ -1043,7 +1043,7 @@ impl Hud {
         }
         debug_panel::draw(&p, &text, s, w, m); if m.training {
             text(
-                "TREINO",
+                crate::i18n::tr3("TREINO", "TRAINING", "ENTRENAMIENTO"),
                 w / 2.0,
                 30.0,
                 6.0,
@@ -1055,7 +1055,7 @@ impl Hud {
             let (hits, dmg) = (self.combo[0].0, self.combo[0].1);
             if hits >= 2 {
                 text(
-                    &format!("{}  {hits} HITS · {} DMG", crate::i18n::tr3("ÚLTIMO COMBO", "LAST COMBO", "ÚLTIMO COMBO"), dmg as i32),
+                    &format!("{}  {hits} {} · {} {}", crate::i18n::tr3("ÚLTIMO COMBO", "LAST COMBO", "ÚLTIMO COMBO"), crate::i18n::tr3("ACERTOS", "HITS", "GOLPES"), dmg as i32, crate::i18n::tr3("DANO", "DMG", "DAÑO")),
                     w / 2.0,
                     38.0,
                     5.6,

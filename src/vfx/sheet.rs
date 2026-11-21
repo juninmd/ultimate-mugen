@@ -65,6 +65,14 @@ impl SheetFx {
         }
     }
 
+    pub(super) fn guard_break(&mut self, x: f32, y: f32) {
+        self.spawn(SheetKind::GuardBreak, x, y, 96.0, 0.0);
+    }
+
+    pub(super) fn counter(&mut self, x: f32, y: f32) {
+        self.spawn(SheetKind::CounterFlash, x, y, 86.0, 0.0);
+    }
+
     pub(super) fn super_cast(&mut self, x: f32, chest_y: f32, feet: f32) {
         self.spawn(SheetKind::LightningStrike, x, feet, 110.0, 0.0);
         self.spawn(SheetKind::StaticBurst, x, chest_y, 100.0, 0.0);

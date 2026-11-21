@@ -430,12 +430,12 @@ impl Match {
                         f.vel.x *= fr;
                         if f.vel.x.abs() < 0.05 { f.vel.x = 0.0; }
                     }
-                    if f.pos.y > f.ground_level { f.pos.y = f.ground_level; }
-                    // idle/hit states with ground physics cannot hold a fighter in mid-air: let it drop back to the floor
-                    // (attack states keep their scripted height, e.g. hover or teleport moves)
-                    if f.pos.y < f.ground_level && f.state_type != 'A' && f.move_type != 'A' {
+                    if f.pos.y >= f.ground_level {
+                        f.pos.y = f.ground_level;
+                        if f.state_type != 'A' && f.vel.y > 0.0 { f.vel.y = 0.0; }
+                    } else if f.state_type != 'A' && f.move_type != 'A' {
                         f.vel.y = f.vel.y.max(0.0) + f.c("movement.yaccel", 0.44) * f.lscl * gravity;
-                    } else if f.state_type != 'A' { f.vel.y = 0.0; }
+                    }
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl * gravity;

@@ -33,7 +33,7 @@ impl App {
             self.audio.sfx("select");
         }
 
-        self.ui.background();
+        crate::screen_art::ScreenArt::Workshop.background(&self.ui);
         self.ui.adapted_header(
             tr3("CONTROLES DE TOQUE", "TOUCH CONTROLS", "CONTROLES TÁCTILES"),
             &format!("Ultimate MUGEN  v{}", crate::update::VERSION),

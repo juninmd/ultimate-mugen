@@ -130,6 +130,28 @@ impl SheetFx {
         self.texture(kind).is_some()
     }
 
+    pub(super) fn draw_spark(&self, center: Vec2, size: f32, rotation: f32, progress: f32, tint: Color) -> bool {
+        let kind = SheetKind::HitSpark;
+        let spec = kind.spec();
+        let Some(tex) = self.texture(kind) else { return false };
+        let frame = (progress.clamp(0.0, 0.999) * spec.frames as f32) as usize;
+        let (col, row) = (frame % spec.cols, frame / spec.cols);
+        let k = size / spec.cell.0;
+        draw_texture_ex(
+            tex,
+            center.x - spec.pivot.0 * k,
+            center.y - spec.pivot.1 * k,
+            tint,
+            DrawTextureParams {
+                dest_size: Some(vec2(spec.cell.0 * k, spec.cell.1 * k)),
+                source: Some(Rect::new(col as f32 * spec.cell.0, row as f32 * spec.cell.1, spec.cell.0, spec.cell.1)),
+                rotation,
+                ..Default::default()
+            },
+        );
+        true
+    }
+
     pub(super) fn draw(
         &self,
         tp: &dyn Fn(f32, f32) -> Vec2,

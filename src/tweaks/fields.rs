@@ -9,7 +9,7 @@ pub const MENU_KEYS: [&str; 16] = [
 pub const SECTIONS: [(&str, &[&str]); 6] = [
     ("theme", &["preset", "background", "glow_bottom", "glow_left", "glow_right", "accent", "title", "info", "muted", "text"]),
     ("hud", &["p1_tint", "p2_tint", "bar_offset_y", "life", "life_low", "damage"]),
-    ("accessibility", &["hud_opacity", "hud_scale", "colorblind", "reduce_motion"]),
+    ("accessibility", &["hud_opacity", "hud_scale", "colorblind", "reduce_motion", "title_crt"]),
     ("touch", &["scale", "opacity", "left_handed"]),
     ("rules", &["rounds_to_win", "round_seconds", "life_percent", "game_speed"]),
     ("menu", &MENU_KEYS),
@@ -62,6 +62,7 @@ pub fn apply(section: &str, key: &str, v: &Value, t: &mut Tweaks, labels: &mut L
         ("touch", "left_handed") => t.touch_left_handed = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
         ("accessibility", "colorblind") => t.colorblind = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
         ("accessibility", "reduce_motion") => t.reduce_motion = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
+        ("accessibility", "title_crt") => t.title_crt = v.as_bool().ok_or_else(|| format!("[{section}] `{key}` must be true or false"))?,
         ("rules", "rounds_to_win") => t.rules.rounds_to_win = Some(ranged(v, 1.0, 9.0).ok_or_else(|| bad_range("1", "9"))? as i32),
         ("rules", "round_seconds") => t.rules.round_seconds = Some(ranged(v, 0.0, 999.0).ok_or_else(|| bad_range("0 (no limit)", "999"))? as u32),
         ("rules", "life_percent") => t.rules.life_percent = Some(ranged(v, 10.0, 500.0).ok_or_else(|| bad_range("10", "500"))? as u32),

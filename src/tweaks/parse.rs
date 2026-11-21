@@ -82,6 +82,13 @@ mod tests {
     }
 
     #[test]
+    fn title_crt_defaults_on_and_can_be_disabled() {
+        let (t, _, w) = parse("[accessibility]\ntitle_crt = false\n");
+        assert!(!t.title_crt && w.is_empty());
+        assert!(parse(DEFAULT_TEXT).0.title_crt);
+    }
+
+    #[test]
     fn accessibility_section() {
         let (t, _, w) = parse("[accessibility]\nhud_opacity = 0.5\ncolorblind = true\nreduce_motion = true\n");
         assert_eq!(t.hud_opacity, 0.5);

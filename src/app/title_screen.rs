@@ -6,6 +6,10 @@ impl App {
             self.menu_art.select(0);
             self.menu_art.draw(&self.ui);
         }
+        let tweaks = crate::tweaks::current();
+        if tweaks.title_crt {
+            crate::title_crt::draw(&self.ui, get_time() as f32, !tweaks.reduce_motion);
+        }
         self.ui.text_bold(
             "ULTIMATE MUGEN",
             VW / 2.0,

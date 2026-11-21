@@ -123,6 +123,7 @@ Criado ao lado do executável na primeira execução (localStorage na web) com o
 | `[accessibility]` | `colorblind` | `true` usa azul/laranja nas cores dos lados em vez dos tons padrão |
 | `[accessibility]` | `hud_scale` | Multiplicador do tamanho do HUD (0.8 a 1.25) |
 | `[accessibility]` | `reduce_motion` | `true` desliga o tremor da tela |
+| `[accessibility]` | `title_crt` | `false` desliga o chiado e as scanlines de TV CRT na tela de título; com `reduce_motion = true` ficam só scanlines estáticas |
 | `[touch]` | `scale` | tamanho do controle na tela, 0,7 a 1,5 |
 | `[touch]` | `opacity` | opacidade do controle na tela, 0,2 a 1,0 |
 | `[touch]` | `left_handed` | `true` espelha o controle (direcional à direita, botões à esquerda) |

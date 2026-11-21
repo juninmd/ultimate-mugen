@@ -77,20 +77,7 @@ pub fn guardflag_bits(flags: &str) -> i32 {
         }
     })
 }
-pub fn parse_sound_ref(raw: Option<&str>) -> Option<(i32, i32, bool)> {
-    let s = raw?.trim();
-    let (own, rest) = if let Some(r) = s.strip_prefix(['s', 'S']) {
-        (true, r)
-    } else if let Some(r) = s.strip_prefix(['f', 'F']) {
-        (false, r)
-    } else {
-        (false, s)
-    };
-    let mut it = rest.split(',').map(|x| x.trim().parse::<i32>());
-    let g = it.next()?.ok()?;
-    let n = it.next().and_then(|x| x.ok()).unwrap_or(0);
-    Some((g, n, own))
-}
+mod sound_ref; pub use sound_ref::{parse_sound_ref, parse_sound_ref_expr};
 
 pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
     let f = &m.fighters[i];
@@ -116,14 +103,8 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         match r {
             None => (d, false),
             Some(s) => {
-                let own = s.starts_with(['s', 'S']);
-                (
-                    s.trim_start_matches(['s', 'S', 'f', 'F'])
-                        .trim()
-                        .parse()
-                        .unwrap_or(d),
-                    own,
-                )
+                let (value, own) = crate::value_ref::eval(m, i, &s, false);
+                (value as i32, own)
             }
         }
     };
@@ -223,8 +204,8 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         guard_spark_own,
         spark_x: num("sparkxy", 0.0, 0) * l,
         spark_y: num("sparkxy", 0.0, 1) * l,
-        hit_sound: parse_sound_ref(raw("hitsound").as_deref()).or(Some((5, 0, false))),
-        guard_sound: parse_sound_ref(raw("guardsound").as_deref()).or(Some((6, 0, false))),
+        hit_sound: parse_sound_ref_expr(m, i, raw("hitsound").as_deref(), false).or(Some((5, 0, false))),
+        guard_sound: parse_sound_ref_expr(m, i, raw("guardsound").as_deref(), false).or(Some((6, 0, false))),
         ground_type: gt,
         air_type: raw("air.type").and_then(|s| groundtype(&s)).unwrap_or(gt),
         ground_slide_time: gst,
@@ -449,15 +430,34 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_sound_ref() {
-        assert_eq!(parse_sound_ref(None), None);
-        assert_eq!(parse_sound_ref(Some("")), None);
-        assert_eq!(parse_sound_ref(Some("5, 0")), Some((5, 0, false)));
-        assert_eq!(parse_sound_ref(Some("s5, 2")), Some((5, 2, true)));
-        assert_eq!(parse_sound_ref(Some("S10, 3")), Some((10, 3, true)));
-        assert_eq!(parse_sound_ref(Some("f6, 1")), Some((6, 1, false)));
-        assert_eq!(parse_sound_ref(Some("F8, 4")), Some((8, 4, false)));
-        assert_eq!(parse_sound_ref(Some("7")), Some((7, 0, false)));
-        assert_eq!(parse_sound_ref(Some("invalid")), None);
+    fn prefixed_spark_and_sound_values_are_expressions() {
+        use crate::chardef::{CharDef, Param};
+        use crate::common::{common_def, flat_stage};
+        use std::sync::Arc;
+        let mut m = Match::new(common_def(), None, flat_stage());
+        m.add_player(Arc::new(CharDef::empty("a")), 0, 0, 1);
+        m.fighters[0].vars[1] = 5;
+        m.fighters[0].fvars[0] = 2.0;
+        let sc = Controller {
+            kind: "hitdef".into(),
+            label: String::new(),
+            trigger_all: vec![],
+            triggers: vec![],
+            params: vec![
+                ("sparkno".into(), Param::new("F7200+var(1)")),
+                ("hitsound".into(), Param::new("S5+fvar(0), 0")),
+                ("guard.sparkno".into(), Param::new("S40")),
+                ("guardsound".into(), Param::new("6, 1")),
+            ],
+            persistent: 0,
+            ignore_hitpause: false,
+            uid: 1,
+        };
+        let hd = build(&m, 0, &sc);
+        assert_eq!((hd.spark_no, hd.spark_own), (7205, false));
+        assert_eq!((hd.guard_spark_no, hd.guard_spark_own), (40, true));
+        assert_eq!(hd.hit_sound, Some((7, 0, true)));
+        assert_eq!(hd.guard_sound, Some((6, 1, false)));
     }
+
 }

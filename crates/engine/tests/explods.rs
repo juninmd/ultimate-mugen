@@ -75,6 +75,33 @@ ignorehitpause = 0
 bindtime = 5
 "#;
 
+const PREFIXED: &str = r#"
+[Statedef 320]
+type = S
+movetype = I
+physics = S
+anim = 0
+ctrl = 0
+
+[State 320, fx]
+type = Explod
+trigger1 = Time = 0
+id = 10
+anim = F310+var(1)
+pos = 0, 0
+postype = p1
+removetime = -1
+
+[State 320, own]
+type = Explod
+trigger1 = Time = 0
+id = 11
+anim = S1000+var(1)
+pos = 0, 0
+postype = p1
+removetime = -1
+"#;
+
 fn setup() -> ume_engine::matchs::Match {
     let a = mugen_char("a", CNS);
     let b = mugen_char("b", CNS);
@@ -87,6 +114,28 @@ fn setup() -> ume_engine::matchs::Match {
 
 fn explod(m: &ume_engine::matchs::Match, id: i32) -> &ume_engine::matchs::Explod {
     m.explods.iter().find(|e| e.owner == m.fighters[0].id && e.id == id).expect("explod")
+}
+
+#[test]
+fn prefixed_anim_expressions_pick_fx_and_own_animations() {
+    use std::sync::Arc;
+    use ume_engine::chardef::CharDef;
+    let mut a = mugen_char("a", PREFIXED);
+    Arc::get_mut(&mut a)
+        .unwrap()
+        .anims
+        .insert(1005, anim(1005, vec![frame(-1, vec![], vec![])]));
+    let b = mugen_char("b", "");
+    let mut m = duel(a, b);
+    let mut fx = CharDef::empty("fx");
+    fx.anims.insert(315, anim(315, vec![frame(-1, vec![], vec![])]));
+    m.fx = Some(Arc::new(fx));
+    m.fighters[0].vars[1] = 5;
+    face_off(&mut m, 120.0);
+    enter(&mut m, 0, 320);
+    ticks(&mut m, 1);
+    assert_eq!(explod(&m, 10).cur.anim, 315, "F310+var(1) loads fightfx 315");
+    assert_eq!(explod(&m, 11).cur.anim, 1005, "S1000+var(1) loads the owner animation");
 }
 
 #[test]

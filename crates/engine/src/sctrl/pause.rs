@@ -1,5 +1,5 @@
 use crate::chardef::Controller;
-use crate::hitdef::parse_sound_ref;
+use crate::hitdef::parse_sound_ref_expr;
 use crate::matchs::{Event, Match, PauseState};
 
 pub fn pause(m: &mut Match, i: usize, sc: &Controller) {
@@ -30,15 +30,16 @@ pub fn super_pause(m: &mut Match, i: usize, sc: &Controller) {
     }
     let power = n(m, "poweradd", 0.0, 0) as f32;
     m.add_power(i, power);
-    let anim = sc.raw("anim").map(|s| s.trim().to_string());
-    let own = anim.as_ref().is_some_and(|a| a.starts_with(['s', 'S']));
-    let no = anim.as_ref().and_then(|a| a.trim_start_matches(['s', 'S', 'f', 'F']).trim().parse::<i32>().ok()).unwrap_or(30);
+    let (no, own) = sc.raw("anim").map_or((30, false), |a| {
+        let (value, own) = crate::value_ref::eval(m, i, a, false);
+        (value as i32, own)
+    });
     let (px, py) = (n(m, "pos", 0.0, 0) as f32 * l, n(m, "pos", 0.0, 1) as f32 * l);
     if no >= 0 { m.spawn_super_fx(i, px, py, if own { no } else { -1 }); }
     let snd = sc.raw("sound").map(|s| s.to_string());
     let pan = crate::sctrl::sound_pan(m, i, 0.0, false);
     let f = &m.fighters[i];
-    let ev = match parse_sound_ref(snd.as_deref()) {
+    let ev = match parse_sound_ref_expr(m, i, snd.as_deref(), false) {
         Some((g, idx, own)) if g >= 0 => Event::Sound { def: Some(f.def.clone()), group: g, index: idx, own, volume: 1.0, channel: -1, owner: f.id, builtin: None, pan, looping: false, freq_mul: 1.0, low_priority: false, stop_on_get_hit: false, stop_on_change_state: false, loop_start: 0, loop_end: 0, loop_count: 0 },
         _ => Event::Sound { def: None, group: -1, index: 0, own: false, volume: 1.0, channel: -1, owner: f.id, builtin: Some("super"), pan, looping: false, freq_mul: 1.0, low_priority: false, stop_on_get_hit: false, stop_on_change_state: false, loop_start: 0, loop_end: 0, loop_count: 0 },
     };

@@ -37,6 +37,7 @@ impl Vfx {
                 std::f32::consts::PI,
             );
             self.slashes(x, y, 1.0, 6, 46.0, col);
+            self.sheets.rush_cancel(x, y);
             self.dust(f.pos.x, feet, quality::count(8), 2.2, 0.6, [0.8, 0.85, 0.9]);
             self.tag(
                 x,

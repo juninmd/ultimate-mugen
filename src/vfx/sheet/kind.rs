@@ -1,4 +1,4 @@
-pub(super) const KINDS: usize = 17;
+pub(super) const KINDS: usize = 19;
 
 #[derive(Clone, Copy, PartialEq)]
 pub(in crate::vfx) enum SheetKind {
@@ -19,6 +19,8 @@ pub(in crate::vfx) enum SheetKind {
     SuperFlash,
     CounterFlash,
     GuardBreak,
+    RushBurst,
+    KoImpact,
 }
 
 pub(super) struct SheetSpec {
@@ -49,6 +51,8 @@ const AWAKENBURST_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_awaken_bu
 const SUPERFLASH_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_super_flash.png");
 const COUNTERFLASH_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_counter_flash.png");
 const GUARDBREAK_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_guard_break.png");
+const RUSHBURST_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_rush_burst.png");
+const KOIMPACT_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_ko_impact.png");
 
 const fn spec(png: &'static [u8], cell: (f32, f32), pivot: (f32, f32), cols: usize, frames: usize, millis: u32, additive: bool) -> SheetSpec {
     SheetSpec { png, cell, pivot, cols, frames, seconds: millis as f32 / 1000.0, additive, pixel_art: !additive }
@@ -84,6 +88,8 @@ impl SheetKind {
             SheetKind::SuperFlash => spec(SUPERFLASH_PNG, (96.0, 96.0), (48.0, 48.0), 4, 16, 640, false),
             SheetKind::CounterFlash => spec(COUNTERFLASH_PNG, (96.0, 96.0), (48.0, 48.0), 4, 8, 480, false),
             SheetKind::GuardBreak => spec(GUARDBREAK_PNG, (96.0, 96.0), (48.0, 48.0), 4, 8, 560, false),
+            SheetKind::RushBurst => spec(RUSHBURST_PNG, (96.0, 96.0), (48.0, 48.0), 4, 8, 480, false),
+            SheetKind::KoImpact => spec(KOIMPACT_PNG, (96.0, 96.0), (48.0, 48.0), 4, 8, 640, false),
         }
     }
 }

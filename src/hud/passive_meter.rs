@@ -78,6 +78,7 @@ fn strip<P: Fn(f32, f32) -> Vec2>(
             poly::with_a(hot, pulse),
         );
     }
+    super::passive_art::draw_rail(p, s, span_x, y, span_w, STRIP_HEIGHT);
 }
 
 pub(super) fn draw<P: Fn(f32, f32) -> Vec2>(p: &P, s: f32, gt: f32, f: &Fighter, bar: &Bar) {
@@ -147,17 +148,22 @@ pub(super) fn draw<P: Fn(f32, f32) -> Vec2>(p: &P, s: f32, gt: f32, f: &Fighter,
                 span_x + span_w - pitch * (index as f32 + 1.0) + (pitch - width)
             };
             let on = index < view.stacks;
+            let maxed = view.stacks >= view.max_stacks;
             let flash = if on && index + 1 == view.stacks {
                 0.75 + 0.25 * (gt * 9.0).sin()
             } else {
                 1.0
             };
-            let color = if on {
-                poly::with_a(lit, flash)
-            } else {
-                Color::new(0.0, 0.0, 0.0, 0.4)
-            };
-            poly::solid(&rect(p, s, x, y, width, STRIP_HEIGHT * 1.15), color);
+            let state = if !on { 0 } else if maxed { 2 } else { 1 };
+            let center = p(x + width * 0.5, y + STRIP_HEIGHT * 0.58);
+            if !super::passive_art::draw_gem(center, (width.max(2.8) * 1.15) * s, state, flash) {
+                let color = if on {
+                    poly::with_a(lit, flash)
+                } else {
+                    Color::new(0.0, 0.0, 0.0, 0.4)
+                };
+                poly::solid(&rect(p, s, x, y, width, STRIP_HEIGHT * 1.15), color);
+            }
         }
     }
 }

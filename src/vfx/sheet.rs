@@ -88,6 +88,14 @@ impl SheetFx {
         self.spawn(SheetKind::SmokeBomb, x, feet, 120.0, 0.0);
     }
 
+    pub(super) fn ko_impact(&mut self, x: f32, y: f32) {
+        self.spawn(SheetKind::KoImpact, x, y, 136.0, 0.0);
+    }
+
+    pub(super) fn rush_cancel(&mut self, x: f32, y: f32) {
+        self.spawn(SheetKind::RushBurst, x, y, 116.0, 0.0);
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub(super) fn hit(&mut self, x: f32, y: f32, damage: f32, heavy: bool, flare: f32, ring: f32, spark_rot: f32, feet: Option<(f32, f32)>) {
         self.spawn(SheetKind::HitSpark, x, y, flare * 1.8, spark_rot);

@@ -111,3 +111,6 @@ Seções suportadas:
 - `[[matchup]]`: `fighters = [a, b]` ou `mirror = true`, `style`, `sprite`, `sfx`, `color`, `title_*` e `sub_*`.
 - `[[stage_interaction]]`: `fighter` + `stage_contains = [...]`.
 - `[[fighter_trigger]]`: `fighter` ou `fighter_prefix`, `trigger` (`"low_hp"`, `"combo"`, `"opp_combo"`, `"super"`, `"super_or_combo"`, `"taunt"`), `threshold`, `per_round`.
+
+## Diálogos em Duas Partes (`[[exchange]]`) e Provocações de Todo o Elenco
+`assets/interactions.toml` também suporta diálogos de ida e volta `[[exchange]]` (o lutador A fala e o lutador B responde automaticamente após `delay_ticks`), além dos gatilhos `first_attack`, `transform` e `round_win` e falas dedicadas de provocação (`taunt`) para todos os 16 lutadores jogáveis.

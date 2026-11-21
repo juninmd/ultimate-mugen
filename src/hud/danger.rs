@@ -23,15 +23,17 @@ pub(super) fn draw_badge<
     let (w, h) = (24.0, 5.0);
     let x = if side == 0 { bx + bw - w } else { bx };
     let y = by - 6.4;
-    let sp = |pts: Vec<Vec2>| -> Vec<Vec2> { pts.into_iter().map(|q| p(q.x, q.y)).collect() };
-    let bg = sp(poly::slanted(x, y, w, h, 2.0));
-    poly::solid(&bg, Color::new(0.04, 0.01, 0.02, 0.85));
-    poly::grad_h(
-        &bg,
-        Color::new(0.9, 0.12, 0.15, 0.9 * pulse),
-        Color::new(1.0, 0.45, 0.1, 0.9 * pulse),
-    );
-    poly::outline(&bg, 0.6 * s, Color::new(1.0, 0.9, 0.8, 0.95 * pulse));
+    if !super::badge_art::draw_danger_plate(p, s, x, y, w, h, pulse, side == 1) {
+        let sp = |pts: Vec<Vec2>| -> Vec<Vec2> { pts.into_iter().map(|q| p(q.x, q.y)).collect() };
+        let bg = sp(poly::slanted(x, y, w, h, 2.0));
+        poly::solid(&bg, Color::new(0.04, 0.01, 0.02, 0.85));
+        poly::grad_h(
+            &bg,
+            Color::new(0.9, 0.12, 0.15, 0.9 * pulse),
+            Color::new(1.0, 0.45, 0.1, 0.9 * pulse),
+        );
+        poly::outline(&bg, 0.6 * s, Color::new(1.0, 0.9, 0.8, 0.95 * pulse));
+    }
     let label = crate::i18n::tr3("PERIGO", "DANGER", "PELIGRO");
     text(label, x + w / 2.0, y + 3.8, 4.0, WHITE, Align::Center, true);
 }

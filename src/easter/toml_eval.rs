@@ -1,5 +1,5 @@
 use super::toml_config::{build_egg, config, parse_sfx, pick_text};
-use super::FightTracker;
+use super::{toml_exchange, FightTracker};
 use crate::audio::Audio;
 use ume_engine::fighter::Fighter;
 use ume_engine::matchs::Match;
@@ -15,13 +15,10 @@ fn id_is(f: &Fighter, target: &str) -> bool {
 }
 
 fn slot_bit(base: u8, idx: usize) -> u8 {
-    base.saturating_add((idx as u8) % 28).min(126)
+    base.saturating_add((idx as u8) % 24).min(126)
 }
 
 pub(crate) fn check(m: &Match, stage_name: &str, tr: &mut FightTracker, audio: &mut Audio) {
-    if m.round_state != 2 {
-        return;
-    }
     let Some((p1, p2)) = roots(m) else {
         return;
     };
@@ -29,10 +26,15 @@ pub(crate) fn check(m: &Match, stage_name: &str, tr: &mut FightTracker, audio: &
     let stage = stage_name.to_lowercase();
     let cfg = config();
 
-    if m.round_ticks == 45 && !check_matchups(p1, p2, tr, audio, cfg) {
-        check_stage_interactions(fighters, &stage, tr, audio, cfg);
+    if m.round_state == 2 {
+        if m.round_ticks == 45 && !check_matchups(p1, p2, tr, audio, cfg) {
+            check_stage_interactions(fighters, &stage, tr, audio, cfg);
+        }
+        if m.round_ticks == 200 {
+            toml_exchange::check(p1, p2, tr, audio, &cfg.exchange);
+        }
     }
-    check_fighter_triggers(fighters, tr, audio, cfg);
+    check_fighter_triggers(m, fighters, tr, audio, cfg);
 }
 
 fn check_matchups(
@@ -91,7 +93,7 @@ fn check_stage_interactions(
             let title = pick_text(&entry.title_pt, &entry.title_en, &entry.title_es);
             let sub = pick_text(&entry.sub_pt, &entry.sub_en, &entry.sub_es);
             let egg = build_egg(&entry.style, &entry.sprite, &entry.speaker, title, sub, entry.color, side);
-            if tr.trigger(slot_bit(68, idx), false, egg, audio, parse_sfx(&entry.sfx)) {
+            if tr.trigger(slot_bit(64, idx), false, egg, audio, parse_sfx(&entry.sfx)) {
                 return;
             }
         }
@@ -99,6 +101,7 @@ fn check_stage_interactions(
 }
 
 fn check_fighter_triggers(
+    m: &Match,
     fighters: [&Fighter; 2],
     tr: &mut FightTracker,
     audio: &mut Audio,
@@ -121,13 +124,19 @@ fn check_fighter_triggers(
             let super_fired = tr.prev_power[side] - f.power >= 950.0;
             let hp_ratio = if f.life_max > 0.0 { f.life / f.life_max } else { 1.0 };
             let taunted = f.state_no == 195 && tr.prev_state[side] != 195;
+            let transformed = f.form > tr.prev_form[side];
+            let won_round = m.round_state >= 3 && f.alive && !opp.alive;
+            let first_hit = m.round_state == 2 && m.first_attack == Some(side);
             let fired = match entry.trigger.as_str() {
-                "low_hp" => f.alive && hp_ratio <= entry.threshold.max(0.05),
-                "combo" => f.combo_count as f32 >= entry.threshold.max(1.0),
-                "opp_combo" => opp.combo_count as f32 >= entry.threshold.max(1.0),
-                "super" => super_fired,
-                "super_or_combo" => super_fired || f.combo_count as f32 >= entry.threshold.max(1.0),
-                "taunt" => taunted,
+                "low_hp" => m.round_state == 2 && f.alive && hp_ratio <= entry.threshold.max(0.05),
+                "combo" => m.round_state == 2 && f.combo_count as f32 >= entry.threshold.max(1.0),
+                "opp_combo" => m.round_state == 2 && opp.combo_count as f32 >= entry.threshold.max(1.0),
+                "super" => m.round_state == 2 && super_fired,
+                "super_or_combo" => m.round_state == 2 && (super_fired || f.combo_count as f32 >= entry.threshold.max(1.0)),
+                "taunt" => m.round_state == 2 && taunted,
+                "transform" => m.round_state == 2 && transformed,
+                "first_attack" => first_hit,
+                "round_win" => won_round,
                 _ => false,
             };
             if !fired {
@@ -141,7 +150,7 @@ fn check_fighter_triggers(
             let title = pick_text(&entry.title_pt, &entry.title_en, &entry.title_es);
             let sub = pick_text(&entry.sub_pt, &entry.sub_en, &entry.sub_es);
             let egg = build_egg(&entry.style, &entry.sprite, speaker, title, sub, entry.color, side);
-            tr.trigger(slot_bit(96, idx), entry.per_round, egg, audio, parse_sfx(&entry.sfx));
+            tr.trigger(slot_bit(88, idx), entry.per_round, egg, audio, parse_sfx(&entry.sfx));
         }
     }
 }

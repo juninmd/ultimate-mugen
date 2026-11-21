@@ -101,8 +101,17 @@ mod web {
             })
             .unwrap_or_else(|| "null".into());
         let epilogue = app.story_epilogue_page().map_or("null".to_string(), |page| page.to_string());
+        let roster = format!(
+            "{{\"chars\":{},\"stages\":{},\"errors\":{},\"tail\":[{}]}}",
+            app.reg.chars.len(),
+            app.reg.stages.len(),
+            app.reg.import_errors.len(),
+            app.reg.chars.iter().rev().take(3).map(|c| format!("\"{}\"", c.id.replace('"', ""))).collect::<Vec<_>>().join(",")
+        );
+        let import = format!("{{\"busy\":{},\"queued\":{}}}", crate::webimport::busy(), crate::webimport::queued_imports());
+        let wasm_mb = core::arch::wasm32::memory_size(0) * 65536 / (1024 * 1024);
         let json = format!(
-            "{{\"screen\":\"{}\",\"epilogue\":{epilogue},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
+            "{{\"screen\":\"{}\",\"epilogue\":{epilogue},\"story_mode\":{},\"over\":{},\"paused\":{},\"clock\":{},\"roster\":{roster},\"import\":{import},\"wasm_mb\":{wasm_mb},\"story\":{},\"objects\":{},\"fighters\":[{}]}}",
             screen_name(&app.screen),
             app.mode == Mode::Story,
             over,

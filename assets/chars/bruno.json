@@ -2,6 +2,7 @@
   "format": "umf/2",
   "rivals": {"valdric":{"intro":"Plebeu, é? Vem chamar meu povo disso na minha cara.","taunt":"Campeão do povo não cai pra coroa nenhuma.","attack":1.07}},
   "id": "bruno",
+  "element": "neutral",
   "name": "Bruno \"Bulldozer\" Volk",
   "series": "Federação do Ringue de Ferro",
   "author": "Ultimate MUGEN",

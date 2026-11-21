@@ -68,6 +68,7 @@ pub struct ProjectileSpec {
     #[serde(default)] pub priority: Option<i32>,
     #[serde(default)] pub element: Option<String>,
     #[serde(default)] pub stun: Option<i32>,
+    #[serde(default)] pub repeat: Option<super::blocks::RepeatSpec>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -142,6 +143,9 @@ pub struct NativeMove {
     #[serde(default)] pub cancels: Option<Vec<String>>,
     #[serde(default)] pub rekka: Option<RekkaSpec>,
     #[serde(default)] pub requires: Option<MoveRequirements>,
+    #[serde(default)] pub blink: Option<OneOrMany<super::blocks::BlinkSpec>>,
+    #[serde(default)] pub vfx: Vec<super::blocks::VfxSpec>,
+    #[serde(default)] pub quake: Vec<super::blocks::QuakeSpec>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -163,7 +167,7 @@ pub struct NativeArt {
 pub struct NativeChar {
     pub format: String, pub id: String, pub name: String, pub series: String, pub author: String,
     #[serde(default)] pub description: Option<String>, #[serde(default)] pub profile: Option<super::profile::CharProfile>,
-    pub color: String,
+    pub color: String, #[serde(default, skip_serializing_if = "Option::is_none")] pub element: Option<ume_engine::element::Element>,
     #[serde(default)] pub stats: NativeStats,
     #[serde(default)] pub passives: Option<super::passive_spec::PassiveSpec>,
     #[serde(default)] pub rivals: BTreeMap<String, ume_engine::rivals::RivalLines>,

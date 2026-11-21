@@ -2,6 +2,7 @@
   "format": "umf/2",
   "rivals": {"sylene":{"intro":"Princesa exilada. O gelo julga a todos por igual.","taunt":"Sem emoção. Só o corte."}},
   "id": "kaname",
+  "element": "ice",
   "name": "Kaname Fuyutsuki",
   "series": "Crônicas da Lâmina do Inverno Eterno",
   "author": "Ultimate MUGEN",

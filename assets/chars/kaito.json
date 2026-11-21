@@ -2,6 +2,7 @@
   "format": "umf/2",
   "rivals": {"akio":{"intro":"Akio. Sua estrela brilha, mas a tempestade não pede licença.","taunt":"Vamos ver quem aguenta mais, vento ou estrela."},"garan":{"attack":1.06}},
   "id": "kaito",
+  "element": "wind",
   "name": "Kaito Arashi",
   "series": "Crônicas da Estrada da Tempestade",
   "author": "Ultimate MUGEN",

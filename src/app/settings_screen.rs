@@ -488,7 +488,7 @@ impl App {
         let mut ok = self.c.pressed(nav::OK | nav::START);
         let mut dir_v = dir;
 
-        self.ui.background();
+        crate::screen_art::ScreenArt::Workshop.background(&self.ui);
         self.ui.adapted_header(
             tr("CONFIGURAÇÕES", "SETTINGS"),
             &format!("Ultimate MUGEN  v{}", crate::update::VERSION),

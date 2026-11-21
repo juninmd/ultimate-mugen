@@ -21,6 +21,7 @@ pub struct NativeFrame {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NativeAnim {
     #[serde(default)] pub id: Option<i32>,
+    #[serde(deserialize_with = "super::frame_form::frames")]
     pub frames: Vec<NativeFrame>,
     #[serde(default, rename = "loop")] pub loop_start: Option<usize>,
 }

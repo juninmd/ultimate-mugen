@@ -2163,11 +2163,10 @@ impl App {
     }
 }
 
-/// Pause state for this frame and whether the pause menu may act on `nav::BACK`.
+/// Pause state for this frame and whether the pause menu may act on `nav::BACK`/`nav::OK`.
 ///
-/// Esc is both the pause key and `nav::BACK`. Without this guard the same key press
-/// opens the menu in `fight()` and closes it again in `pause_menu()` on the same frame,
-/// so the pause menu never shows. The opening frame therefore consumes that edge.
+/// Esc is the pause key and `nav::BACK`; Enter is the pause key and `nav::OK` (Continue).
+/// The opening frame consumes both edges, or the menu closes as soon as it shows.
 fn pause_step(was_paused: bool, toggle: bool) -> (bool, bool) {
     (was_paused ^ toggle, was_paused)
 }

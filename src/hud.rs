@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod announce_text; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod announce_text; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -645,7 +645,7 @@ impl Hud {
                     w / 2.0 - 22.0,
                     34.0,
                     6.4,
-                    hex("#22e8ff"),
+                    side_color(0),
                     Align::Center,
                 );
                 outlined(
@@ -653,7 +653,7 @@ impl Hud {
                     w / 2.0 + 22.0,
                     34.0,
                     6.4,
-                    hex("#ff4d6d"),
+                    side_color(1),
                     Align::Center,
                 );
                 if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 {
@@ -687,11 +687,7 @@ impl Hud {
                     x,
                     41.0,
                     5.2,
-                    if side == 0 {
-                        hex("#22e8ff")
-                    } else {
-                        hex("#ff4d6d")
-                    },
+                    side_color(side),
                     al,
                 );
             }
@@ -776,9 +772,9 @@ impl Hud {
                     col,
                     al,
                 );
-                outlined("HITS", x, cy0 + 90.0, 9.0, Color::new(1.0, 1.0, 1.0, a), al);
+                outlined(crate::i18n::tr3("ACERTOS", "HITS", "GOLPES"), x, cy0 + 90.0, 9.0, Color::new(1.0, 1.0, 1.0, a), al);
                 outlined(
-                    &format!("{} DMG", c.1 as i32),
+                    &format!("{} {}", c.1 as i32, crate::i18n::tr3("DANO", "DMG", "DAÑO")),
                     x,
                     cy0 + 99.0,
                     6.5,
@@ -800,7 +796,7 @@ impl Hud {
                         Color::new(0.1, 0.02, 0.05, 0.5 * a),
                     );
                     text(
-                        &format!("DANO {pct}%"),
+                        &format!("{} {pct}%", crate::i18n::tr3("DANO", "DMG", "DAÑO")),
                         x + if side == 0 { 1.0 } else { -1.0 },
                         cy0 + 107.0,
                         5.2,
@@ -1047,7 +1043,7 @@ impl Hud {
         }
         debug_panel::draw(&p, &text, s, w, m); if m.training {
             text(
-                "TREINO",
+                crate::i18n::tr3("TREINO", "TRAINING", "ENTRENAMIENTO"),
                 w / 2.0,
                 30.0,
                 6.0,
@@ -1059,7 +1055,7 @@ impl Hud {
             let (hits, dmg) = (self.combo[0].0, self.combo[0].1);
             if hits >= 2 {
                 text(
-                    &format!("{}  {hits} HITS · {} DMG", crate::i18n::tr3("ÚLTIMO COMBO", "LAST COMBO", "ÚLTIMO COMBO"), dmg as i32),
+                    &format!("{}  {hits} {} · {} {}", crate::i18n::tr3("ÚLTIMO COMBO", "LAST COMBO", "ÚLTIMO COMBO"), crate::i18n::tr3("ACERTOS", "HITS", "GOLPES"), dmg as i32, crate::i18n::tr3("DANO", "DMG", "DAÑO")),
                     w / 2.0,
                     38.0,
                     5.6,

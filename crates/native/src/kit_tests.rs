@@ -21,7 +21,7 @@ fn extends_brings_kit_moves_and_keeps_own_moves_first() {
     let fighter = json!({ "id": "a", "extends": "core", "moves": [{ "id": "jab", "input": "x" }] });
     let expanded = expand(fighter).unwrap();
     assert_eq!(ids(&expanded), ["jab", "launcher", "escape_burst"]);
-    assert_eq!(expanded["format"], "umf/1");
+    assert_eq!(expanded["format"], "umf/2");
     assert!(expanded.get("extends").is_none());
 }
 
@@ -98,7 +98,7 @@ fn mistakes_are_reported_with_the_offending_name() {
             .unwrap_err()
             .contains("ghost")
     );
-    assert!(register_kit(r#"{"format":"umf/1","id":"x"}"#).is_err());
+    assert!(register_kit(r#"{"format":"umf/2","id":"x"}"#).is_err());
     register_kit(r#"{"format":"umf-kit/1","id":"loop_a","extends":"loop_a"}"#).unwrap_err();
 }
 

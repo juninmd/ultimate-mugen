@@ -1269,7 +1269,7 @@ async fn market_tour(app: &mut App, dir: &str) {
     screen(app, dir, "market-installed", 3).await;
 }
 async fn ui_tour(app: &mut App, dir: &str) {
-    for tab in 0..6 {
+    for tab in 0..7 {
         app.screen = Screen::Settings {
             tab,
             cur: if tab == 1 { 2 } else { 1 },

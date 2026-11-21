@@ -11,7 +11,7 @@ use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::stage::load_stage;
 use ume_formats::vfs::{char_key, find_char_defs, find_stage_defs, stage_key, text, Vfs};
 
-mod bgm; mod kits; mod stress; mod preview_gate; mod tuning; pub mod warnings;
+mod bgm; mod umf_bundle; mod kits; mod stress; mod preview_gate; mod tuning; pub mod warnings;
 #[path = "registry_sprite_cache.rs"]
 mod sprite_cache;
 pub use bgm::stage_bgm;

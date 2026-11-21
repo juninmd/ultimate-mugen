@@ -7,8 +7,8 @@ impl Registry {
         tag: &str,
         validate: bool,
     ) -> (Vec<String>, Vec<String>, Vec<String>) {
+        let (mut cs, mut ss, mut errs) = (self.add_umf_bundles(&vfs), vec![], vec![]);
         let vfs = Arc::new(vfs);
-        let (mut cs, mut ss, mut errs) = (vec![], vec![], vec![]);
         // roster identity kept in sets: a linear scan per imported fighter is
         // quadratic and dominates the startup of large collections
         let mut char_ids: std::collections::HashSet<String> = self.chars.iter().map(|c| c.id.clone()).collect();

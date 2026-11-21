@@ -4,8 +4,7 @@ use super::effects::{art_res, FrameArt};
 use super::types::{NativeChar, NativeFrame};
 use ume_engine::chardef::ImageData;
 use serde_json::Value;
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::{path::{Path, PathBuf}, sync::Arc};
 
 const SPRITE_ROOT: &str = "assets/chars/sprites";
 const BASE_STEM: &str = "01_idle";

@@ -74,6 +74,7 @@ impl App {
         }
         ok.then(|| {
             let act = actions[self.pause.cur.min(n - 1)];
+            self.audio.sfx("confirm");
             if act == Action::Continue {
                 Outcome::Resume
             } else {

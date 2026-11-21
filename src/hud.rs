@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod elements; mod advantage; mod advantage_draw; mod announce_text; mod art; mod combo_tier; mod danger; mod energy; mod energy_art; mod guard; mod palette; mod opacity; mod life_art; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
+mod elements; mod advantage; mod advantage_draw; mod announce_text; mod art; mod badge_art; mod combo_tier; mod danger; mod energy; mod energy_art; mod guard; mod palette; mod opacity; mod life_art; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -756,7 +756,7 @@ impl Hud {
                         Color::new(1.0, 0.7, 0.2, a * (0.5 - 0.15 * k as f32)),
                     );
                 }
-                combo_tier::draw_badges(&outlined, x, cy0, c.0, att.move_countered > 0, a, al);
+                combo_tier::draw_badges(&p, s, &outlined, x, cy0, c.0, att.move_countered > 0, a, al);
                 outlined(
                     &c.0.to_string(),
                     x,

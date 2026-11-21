@@ -54,12 +54,17 @@ pub(super) fn draw<
         }
     }
 
-    let border_col = if ratio < 0.3 {
-        Color::new(1.0, 0.3, 0.3, 0.8)
-    } else {
-        Color::new(0.4, 0.6, 0.8, 0.45)
-    };
-    poly::outline(&bg, 0.45 * s, border_col);
+    if !super::badge_art::draw_guard_frame(p, s, gx, gy, gw, gh) {
+        let border_col = if ratio < 0.3 {
+            Color::new(1.0, 0.3, 0.3, 0.8)
+        } else {
+            Color::new(0.4, 0.6, 0.8, 0.45)
+        };
+        poly::outline(&bg, 0.45 * s, border_col);
+    }
+    let shield_x = if side == 0 { gx - 2.6 } else { gx + gw + 2.6 };
+    let cracked = ratio < 0.3 || f.ikemen.guard_break || f.state_no == 5400;
+    super::badge_art::draw_guard_shield(p(shield_x, gy + gh * 0.5), s, cracked);
 
     if f.ikemen.guard_break || f.state_no == 5400 {
         let pulse = 0.8 + 0.2 * (gt * 18.0).sin().abs();

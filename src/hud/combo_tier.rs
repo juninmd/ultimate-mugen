@@ -28,11 +28,22 @@ pub fn rating(hits: i32, a: f32) -> Option<ComboRating> {
     }
 }
 
-pub fn draw_badges<F>(outlined: &F, x: f32, cy0: f32, hits: i32, countered: bool, a: f32, al: Align)
-where
+pub fn draw_badges<P, F>(
+    p: &P,
+    s: f32,
+    outlined: &F,
+    x: f32,
+    cy0: f32,
+    hits: i32,
+    countered: bool,
+    a: f32,
+    al: Align,
+) where
+    P: Fn(f32, f32) -> crate::gfx::Vec2,
     F: Fn(&str, f32, f32, f32, Color, Align),
 {
     if countered {
+        super::badge_art::draw_combo_plate(p, s, x, cy0 + 66.0, al, a);
         outlined(
             "COUNTER!",
             x,
@@ -43,7 +54,8 @@ where
         );
     }
     if let Some(tier) = rating(hits, a) {
-        let y = if countered { cy0 + 73.0 } else { cy0 + 68.0 };
+        let y = if countered { cy0 + 75.0 } else { cy0 + 68.0 };
+        super::badge_art::draw_combo_plate(p, s, x, y, al, a);
         outlined(tier.title, x, y, 6.5, tier.color, al);
     }
 }

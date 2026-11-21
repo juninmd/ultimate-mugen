@@ -32,7 +32,7 @@
   </style>
 </head>
 <body>
-  <canvas id="glcanvas" tabindex="1" aria-label="Ultimate MUGEN"></canvas>
+  <canvas id="glcanvas" tabindex="0" aria-label="Ultimate MUGEN"></canvas>
   <label id="imp" aria-label="Import M.U.G.E.N">Import M.U.G.E.N<input id="ume-file" type="file" accept=".zip" multiple /></label>
   <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar" role="progressbar" aria-labelledby="bootmsg" aria-valuemin="0" aria-valuemax="100"><i></i></div><span id="bootmsg" aria-live="polite">Downloading the game…</span></div>
   <div id="fatal" role="alert"><span id="fataltx"></span><button id="fatalbtn" type="button"></button></div>
@@ -41,7 +41,6 @@
   <script src="assets.js"></script>
   <script src="market.js"></script>
   <script type="module">
-    import init, * as ume from './ultimate-mugen.js?v=__BUILD__';
     const TEXTS = {
       pt: { fatal: 'O jogo parou: faltou memória ou ocorreu um erro interno.', reload: 'Recarregar', download: 'Baixando o jogo…', fail: 'Falha ao carregar', lost: 'Contexto gráfico perdido, recarregando…', rotate: 'Gire o aparelho para jogar na horizontal →', import: 'Importar M.U.G.E.N', close: 'Fechar' },
       es: { fatal: 'El juego se detuvo: se quedó sin memoria o tuvo un error interno.', reload: 'Recargar', download: 'Descargando el juego…', fail: 'Error al cargar', lost: 'Contexto gráfico perdido, recargando…', rotate: 'Gira el dispositivo para jugar en horizontal →', import: 'Importar M.U.G.E.N', close: 'Cerrar' },
@@ -78,34 +77,45 @@
       msg.textContent = tx.download;
       return new Response(body, { headers: { 'content-type': 'application/wasm' } });
     }
+    const fatal = document.getElementById('fatal');
+    const fatalButton = document.getElementById('fatalbtn');
+    fatalButton.textContent = tx.reload;
+    fatalButton.addEventListener('click', () => location.reload());
+    const showFatal = (err, message = tx.fatal) => {
+      console.error(err);
+      if (fatal.classList.contains('on')) return;
+      document.getElementById('fataltx').textContent = message;
+      fatal.classList.add('on');
+      fatalButton.focus();
+    };
+    let ume;
     try {
-      await init({ module_or_path: await load() });
-    } catch (e) { msg.textContent = tx.fail + ': ' + (e && e.message || e); throw e; }
-    barBox.classList.remove('ind');
-    setProgress(100);
-    window.umeStartImports(ume);
-    window.umeStartMarket(ume);
-    for (const t of ['pointerdown', 'keydown', 'touchend']) window.addEventListener(t, () => ume.ume_unlock_audio(), { capture: true, passive: true });
-    hideTimer = setTimeout(hide, 600);
-    const cv = document.getElementById('glcanvas');
-    const showFatal = (err) => { console.error(err); if (!document.getElementById('fatal').classList.contains('on')) { document.getElementById('fataltx').textContent = tx.fatal; document.getElementById('fatalbtn').textContent = tx.reload; document.getElementById('fatal').classList.add('on'); } };
-    document.getElementById('fatalbtn').addEventListener('click', () => location.reload());
-    window.addEventListener('error', (e) => showFatal(e.error || e.message));
-    window.addEventListener('unhandledrejection', (e) => showFatal(e.reason));
-    const LOST_KEY = 'ume-ctx-lost', LOST_WINDOW_MS = 60000, LOST_LIMIT = 3;
-    const recentLosses = () => { try { return JSON.parse(sessionStorage.getItem(LOST_KEY) || '[]').filter((t) => Date.now() - t < LOST_WINDOW_MS); } catch (e) { return []; } };
-    cv.addEventListener('webglcontextlost', (e) => {
-      e.preventDefault();
-      const losses = recentLosses();
-      if (losses.length >= LOST_LIMIT) { showFatal(new Error('WebGL context lost ' + LOST_LIMIT + ' times in a minute')); return; }
-      try { sessionStorage.setItem(LOST_KEY, JSON.stringify([...losses, Date.now()])); } catch (err) {}
-      clearTimeout(hideTimer);
-      clearTimeout(removeBootTimer);
-      barBox.classList.add('ind');
-      barBox.removeAttribute('aria-valuenow');
-      bar.style.removeProperty('width');
-      msg.textContent = tx.lost; boot.classList.remove('done'); document.body.appendChild(boot); setTimeout(() => location.reload(), 800);
-    });
+ume = await import('./ultimate-mugen.js?v=__BUILD__');
+await ume.default({ module_or_path: await load().catch(() => new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url)) });
+} catch (e) {
+  boot.remove();
+  showFatal(e, tx.fail);
+}
+if (ume && !fatal.classList.contains('on')) {
+  barBox.classList.remove('ind');
+  setProgress(100);
+  window.umeStartImports(ume);
+  window.umeStartMarket(ume);
+  for (const t of ['pointerdown', 'keydown', 'touchend']) window.addEventListener(t, () => ume.ume_unlock_audio(), { capture: true, passive: true });
+  setTimeout(hide, 600);
+  const cv = document.getElementById('glcanvas');
+  window.addEventListener('error', (e) => showFatal(e.error || e.message));
+  window.addEventListener('unhandledrejection', (e) => showFatal(e.reason));
+  const LOST_KEY = 'ume-ctx-lost', LOST_WINDOW_MS = 60000, LOST_LIMIT = 3;
+  const recentLosses = () => { try { return JSON.parse(sessionStorage.getItem(LOST_KEY) || '[]').filter((t) => Date.now() - t < LOST_WINDOW_MS); } catch (e) { return []; } };
+  cv.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    const losses = recentLosses();
+    if (losses.length >= LOST_LIMIT) { showFatal(new Error('WebGL context lost ' + LOST_LIMIT + ' times in a minute')); return; }
+    try { sessionStorage.setItem(LOST_KEY, JSON.stringify([...losses, Date.now()])); } catch (err) {}
+    msg.textContent = tx.lost; boot.classList.remove('done'); document.body.appendChild(boot); setTimeout(() => location.reload(), 800);
+  });
+}
   </script>
   <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
 </body>

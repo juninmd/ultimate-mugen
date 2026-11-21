@@ -342,6 +342,7 @@ Marlow não é um assassino sanguinário: ele vive pela adrenalina da exploraç�
 - **Tiro de Pederneira Ricochete**: Disparo com pistola de latão cuja bala salta nas bordas da tela antes de atingir o oponente.
 - **Rolamento do Corsário**: Rolamento evasivo por baixo de projéteis que posiciona Marlow imediatamente atrás do inimigo.
 - **Super — Bombardeio do Vento Salgado**: Assobia para seu galeão voador, que surge no topo da tela disparando uma rajada maciça de balas de canhão.
+- **Passo da Maré** (`~D, DF, F, c`): teleporta atrás do oponente e corta, 200 de power. **Rajada do Cutelo** (`~D, DF, F, a`): cinco golpes leves e finalização que lança. **Canhão de Flanco** (`~B, F, x`): disparo de três acertos. **Tripulação Fantasma** (`F, B, F`): cópia autônoma que persegue e ataca, 500 de power.
 
 #### Dinâmica de Interações
 - **vs. Lian Feng:** Paquera frustrada vs disciplina rígida. Marlow adora provocar Lian, que sempre retruca com chutes secos e ameaças de jogá-lo no mar.

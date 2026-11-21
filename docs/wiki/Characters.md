@@ -342,6 +342,7 @@ Marlow is not a cruel killer; he lives for adventure, high stakes, and the thril
 - **Aether Flintlock Trick**: Fires a ricocheting spark shot from his brass pistol that bounces off the arena walls.
 - **Corsair Roll**: An evasive forward somersault that slips under projectiles and positions Marlow behind the foe.
 - **Super — Broadside of the Salty Wind**: Whistles for his flying galleon, which carpet-bombs the stage with a devastating salvo of cannonballs.
+- **Tide Step** (`~D, DF, F, c`): Teleports behind the foe and cuts, 200 power. **Cutlass Flurry** (`~D, DF, F, a`): five light hits and a launching finisher. **Broadside Cannon** (`~B, F, x`): three-hit shot. **Phantom Crew** (`F, B, F`): an autonomous copy that chases and jabs, 500 power.
 
 #### Key Character Dynamics
 - **vs. Lian Feng:** Playful harassment vs strict discipline. Marlow loves teasing Lian about her serious demeanor, while Lian threatens to throw him overboard.

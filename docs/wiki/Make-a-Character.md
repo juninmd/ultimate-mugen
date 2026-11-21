@@ -12,7 +12,7 @@ Copy this file to `umf/hello.json` (or use the ready one in [`docs/examples/umf/
 
 ```json
 {
-  "format": "umf/1",
+  "format": "umf/2",
   "id": "hello",
   "name": "Hello Fighter",
   "author": "you",
@@ -27,7 +27,7 @@ What it says:
 
 | Line | Meaning |
 |---|---|
-| `format` | Always `umf/1` |
+| `format` | `umf/2` (`umf/1` still loads) |
 | `id` | Unique, lowercase, no spaces. It is also the file's internal name |
 | `name`, `author`, `color` | What the select screen shows. `color` is the card colour |
 | `extends` | Inherit everything from `kaito` (any loaded fighter or kit works) |

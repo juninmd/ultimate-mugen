@@ -30,11 +30,13 @@ O formato **UMF** (*Ultimate Mugen Format*) é o padrão moderno de personagens 
 
 ---
 
+> UMF 2 (ADR 0007): `format` é `umf/2`, quadros só de pose usam `"pose*ticks"`, e `node scripts/umf2-migrate.mjs` grava o layout canônico antes do commit. O piso de qualidade fica em `native_quality_bar`.
+
 ## 2. Visão Geral da Anatomia de um Personagem UMF 2.0
 
 ```json
 {
-  "format": "umf/1",
+  "format": "umf/2",
   "id": "meu_lutador",
   "name": "Meu Lutador",
   "series": "Minha Série",
@@ -157,3 +159,14 @@ Para gerar ou corrigir sprites pixel art, primeiro inspecione todas as sprites e
 ## Recriar um lutador M.U.G.E.N existente
 
 Para copiar features de um pacote M.U.G.E.N em um nativo, siga `docs/wiki/pt-BR/Recriar-um-Lutador-MUGEN.md` (mapeamento M.U.G.E.N para UMF, passos e o caso do Captain Marlow Reyes) e a skill `mugen-dissector`. Anims só com poses que têm PNG; poses de juntas inline não são permitidas.
+
+## Paridade com um lutador M.U.G.E.N
+
+Quando o UMF vem de um pacote MUGEN (via `mugen2umf.py`, skill `mugen-to-ume-migrator`):
+
+- `stats.height` igual a `meta.json.refHeight` mantém o tamanho e a nitidez do original (1 px = 1 unidade).
+- `art.style.boxes: "exact"` usa `hit.box` e `hurt` como escritos (Clsn1/Clsn2), sem recorte automático.
+- `moves[].sounds: [{at, snd:[g,i], fight?}]` toca o som no quadro `at`; os wav ficam em `sprites/snd_{g}_{i}.wav` e são listados em `meta.json.sounds`. `fight: true` usa o fight.snd do motor.
+- Cada lutador UMF compartilhável é uma pasta: `<id>.json` + `sprites/` (PNGs, `meta.json`, wavs, `portrait.png`). O jogo monta o pacote sozinho ao achar o JSON ao lado de `sprites/`.
+- Compare lado a lado com o original no navegador antes de entregar: tamanho, golpes, caixas (debug de caixas em Training) e sons.
+

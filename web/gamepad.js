@@ -12,8 +12,17 @@
   window.addEventListener('pointerdown', keepCursor, true);
   // The engine reads pointerType/pointerId/offsetX from every pointer event, so a MouseEvent disguised
   // as a pointer event (pointerType undefined) crashes the wasm glue in passStringToWasm0.
-  function pointerUp() {
-    const init = { bubbles: true, cancelable: true, button: 0, buttons: 0, pointerId: 1, pointerType: 'mouse', isPrimary: true, clientX: cursor.x, clientY: cursor.y, screenX: cursor.x, screenY: cursor.y };
+  const touchPointers = new Map();
+  const trackTouch = (e) => {
+    if (e.pointerType === 'touch' && (e.target.id === 'glcanvas' || touchPointers.has(e.pointerId))) touchPointers.set(e.pointerId, e);
+  };
+  window.addEventListener('pointerdown', trackTouch, true);
+  window.addEventListener('pointermove', (e) => { if (touchPointers.has(e.pointerId)) trackTouch(e); }, true);
+  for (const type of ['pointerup', 'pointercancel']) {
+    window.addEventListener(type, (e) => touchPointers.delete(e.pointerId), true);
+  }
+  function pointerUp(source = cursor) {
+    const init = { bubbles: true, cancelable: true, button: 0, buttons: 0, pointerId: source.pointerId ?? 1, pointerType: source.pointerType ?? 'mouse', isPrimary: source.isPrimary ?? true, clientX: source.clientX ?? cursor.x, clientY: source.clientY ?? cursor.y };
     const e = typeof PointerEvent === 'function' ? new PointerEvent('pointerup', init) : new MouseEvent('pointerup', init);
     if (e.pointerType === undefined) Object.defineProperty(e, 'pointerType', { value: init.pointerType });
     if (e.pointerId === undefined) Object.defineProperty(e, 'pointerId', { value: init.pointerId });
@@ -25,6 +34,8 @@
     for (const [code, e] of held) c.dispatchEvent(new KeyboardEvent('keyup', { code, key: e.key, keyCode: e.keyCode, bubbles: true }));
     held.clear();
     try { c.dispatchEvent(new MouseEvent('mouseup', { button: 0, buttons: 0, bubbles: true })); } catch (e) {}
+    for (const pointer of touchPointers.values()) c.dispatchEvent(pointerUp(pointer));
+    touchPointers.clear();
     try { c.dispatchEvent(pointerUp()); } catch (e) {}
   }
   window.addEventListener('keydown', (e) => { if (e.code) held.set(e.code, { key: e.key, keyCode: e.keyCode }); }, true);
@@ -34,7 +45,15 @@
   window.addEventListener('pagehide', releaseAll);
   window.addEventListener('contextmenu', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
-  function pads() { return navigator.getGamepads ? Array.from(navigator.getGamepads()).filter((p) => p && p.connected) : []; }
+  function pads() {
+    if (!navigator.getGamepads) return [];
+    try {
+      return Array.from(navigator.getGamepads()).filter((p) => p && p.connected);
+    } catch (error) {
+      if (error.name !== 'SecurityError') throw error;
+      return [];
+    }
+  }
   function state(i) {
     const p = pads()[i]; if (!p || !pageActive || document.hidden) return 0;
     const pr = (n) => !!(p.buttons[n] && p.buttons[n].pressed);
@@ -45,23 +64,26 @@
     if (pr(9)) b |= K.s; if (pr(10) && pr(11)) b |= K.t; else if (pr(11)) b |= K.s;
     return b;
   }
-  function rumble(i, strong, weak, ms) {
+  async function rumble(i, strong, weak, ms) {
     const p = pads()[i]; if (!p) return;
     const a = p.vibrationActuator || (p.hapticActuators && p.hapticActuators[0]);
-    if (a && a.playEffect) a.playEffect(a.type || 'dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak }).catch(() => {});
-    else if (a && a.pulse) a.pulse(Math.max(strong, weak), ms);
-    else if (navigator.vibrate && ('ontouchstart' in window)) navigator.vibrate(ms);
+    try {
+      if (a && a.playEffect) await a.playEffect(a.type || 'dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak });
+      else if (a && a.pulse) await a.pulse(Math.max(strong, weak), ms);
+      else if (navigator.vibrate && ('ontouchstart' in window)) navigator.vibrate(ms);
+    } catch {}
   }
   window.ume_gp_count = () => pads().length;
   window.ume_gp_state = (i) => state(i);
   window.ume_gp_name = (i) => { const p = pads()[i]; return p ? p.id : ''; };
-  window.ume_gp_rumble = (i, s, w, ms) => rumble(i, s, w, ms);
+  window.ume_gp_rumble = (i, s, w, ms) => { void rumble(i, s, w, ms); };
   window.ume_set_import_rect = (x, y, w, h) => {
     const b = document.getElementById('imp'), c = document.getElementById('glcanvas');
     if (!b || !c) return;
     if (w <= 0) { b.style.display = 'none'; return; }
-    const r = c.getBoundingClientRect(), k = r.width / c.width;
-    Object.assign(b.style, { display: 'block', left: (r.left + x * k) + 'px', top: (r.top + y * k) + 'px', width: (w * k) + 'px', height: (h * k) + 'px' });
+    const r = c.getBoundingClientRect();
+    const scaleX = r.width / c.width, scaleY = r.height / c.height;
+    Object.assign(b.style, { display: 'block', left: (r.left + x * scaleX) + 'px', top: (r.top + y * scaleY) + 'px', width: (w * scaleX) + 'px', height: (h * scaleY) + 'px' });
   };
   window.ume_storage_get = (k) => { try { return localStorage.getItem('ume.' + k) || ''; } catch (e) { return ''; } };
   window.ume_storage_set = (k, v) => { try { localStorage.setItem('ume.' + k, v); } catch (e) {} };
@@ -77,7 +99,10 @@
     insets = [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].map((v) => parseFloat(v) || 0);
     probe.remove();
   };
-  window.addEventListener('resize', () => { insets = null; });
+  const invalidateInsets = () => { insets = null; };
+  window.addEventListener('resize', invalidateInsets);
+  window.visualViewport?.addEventListener('resize', invalidateInsets);
+  window.addEventListener('pageshow', invalidateInsets);
   window.ume_safe_inset = (i) => { if (!insets) readInsets(); return insets[i]; };
 
   window.umeStartImports = function (wasm) {
@@ -103,7 +128,8 @@
     }
     async function send(file) { const buf = new Uint8Array(await file.arrayBuffer()); const id = await accept(buf); if (id) store(id, buf); }
     window.umeImport = (files) => {
-      files = Array.from(files);
+      files = Array.from(files).filter((file) => /\.zip$/i.test(file.name));
+      if (!files.length) return;
       wasm.ume_import_begin();
       (async () => { try { for (const f of files) await send(f); } finally { wasm.ume_import_end(); } })();
     };
@@ -124,7 +150,7 @@
     const input = document.getElementById('ume-file');
     if (input) input.addEventListener('change', () => { window.umeImport(input.files); input.value = ''; });
     const imp = document.getElementById('imp');
-    window.addEventListener('keydown', (e) => { if (e.key === 'Enter' && imp && imp.style.display === 'block' && input) input.click(); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.repeat && !e.defaultPrevented && e.target !== input && imp && imp.style.display === 'block' && input) input.click(); });
     window.addEventListener('dragover', (e) => e.preventDefault());
     window.addEventListener('drop', (e) => { e.preventDefault(); window.umeImport(e.dataTransfer.files); });
   };

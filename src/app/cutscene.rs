@@ -75,7 +75,11 @@ impl App {
             5 => (hex("#1a0822"), hex("#020106")),
             _ => (hex("#14061c"), hex("#050208")),
         };
-        self.ui.gradient_v(0.0, 0.0, 1280.0, 720.0, sky_top, sky_bot);
+        if crate::screen_art::ScreenArt::Cutscene.draw(&self.ui, 1.0) {
+            self.ui.gradient_v(0.0, 0.0, 1280.0, 720.0, alpha(sky_top, 0.42), alpha(sky_bot, 0.62));
+        } else {
+            self.ui.gradient_v(0.0, 0.0, 1280.0, 720.0, sky_top, sky_bot);
+        }
         let (mid, s) = (vec2(self.ui.x(640.0), self.ui.y(250.0)), self.ui.s);
         let pulse = 1.0 + 0.03 * (self.ui.t * if kind >= 3 { 2.8 } else { 1.3 }).sin();
         let glow_col = match kind {

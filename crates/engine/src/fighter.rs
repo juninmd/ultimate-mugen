@@ -132,7 +132,7 @@ impl Fighter {
         a.frames.iter().take(n - 1).map(|f| f.time.max(0)).sum()
     }
     pub fn anim_elem_started(&self, n: i32) -> bool {
-        self.elem as i32 + 1 == n && self.elem_time == 0 && (n > 1 || self.anim_elapsed == 0 || self.anim_loop_start == 0)
+        self.elem as i32 + 1 == n && self.elem_time == 0 && (n > 1 || self.anim_elapsed == 0 || (self.anim_loop_start == 0 && self.anim_elapsed != self.anim_total_time))
     }
     pub fn anim_elem_time(&self, n: i32) -> Option<i32> {
         let a = self.anim()?;
@@ -144,7 +144,7 @@ impl Fighter {
         let Some(a) = self.anim() else { return 0 };
         let mut t = self.anim_elapsed + off;
         let tot = a.total_time;
-        if tot > 0 && t >= tot {
+        if tot > 0 && t > tot {
             let ls = self.elem_start(self.anim_loop_start + 1);
             let ll = tot - ls;
             t = if ll > 0 { ls + (t - ls) % ll } else { ls };

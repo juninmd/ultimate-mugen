@@ -21,7 +21,7 @@ fn extends_brings_kit_moves_and_keeps_own_moves_first() {
     let fighter = json!({ "id": "a", "extends": "core", "moves": [{ "id": "jab", "input": "x" }] });
     let expanded = expand(fighter).unwrap();
     assert_eq!(ids(&expanded), ["jab", "launcher", "escape_burst"]);
-    assert_eq!(expanded["format"], "umf/1");
+    assert_eq!(expanded["format"], "umf/2");
     assert!(expanded.get("extends").is_none());
 }
 
@@ -98,11 +98,33 @@ fn mistakes_are_reported_with_the_offending_name() {
             .unwrap_err()
             .contains("ghost")
     );
-    assert!(register_kit(r#"{"format":"umf/1","id":"x"}"#).is_err());
+    assert!(register_kit(r#"{"format":"umf/2","id":"x"}"#).is_err());
     register_kit(r#"{"format":"umf-kit/1","id":"loop_a","extends":"loop_a"}"#).unwrap_err();
 }
 
 #[test]
 fn the_built_in_kit_is_listed() {
     assert!(kit_ids().contains(&"core".to_string()));
+}
+
+#[test]
+fn use_tunes_a_projectile_or_blink_field_by_field() {
+    let fighter = json!({ "id": "a", "extends": "abilities", "moves": [
+        { "id": "orbs", "use": "ki_barrage", "projectile": { "anim": "orb", "damage": 30 } },
+        { "id": "tp", "use": "instant_transmission", "blink": { "gap": 70 } }
+    ] });
+    let moves = expand(fighter).unwrap()["moves"].clone();
+    assert_eq!(moves[0]["projectile"]["anim"], "orb");
+    assert_eq!(moves[0]["projectile"]["damage"], 30);
+    assert_eq!(moves[0]["projectile"]["repeat"]["count"], 5);
+    assert_eq!((moves[1]["blink"]["gap"].clone(), moves[1]["blink"]["to"].clone()), (json!(70), json!("behind")));
+}
+
+#[test]
+fn library_kits_only_add_the_moves_a_fighter_asks_for() {
+    let fighter = json!({ "id": "a", "extends": "abilities", "moves": [{ "id": "jab", "input": "x" }, "ki_blast"] });
+    let expanded = expand(fighter).unwrap();
+    assert_eq!(ids(&expanded), ["jab", "ki_blast"]);
+    assert!(expanded["moves"][1].get("library").is_none());
+    assert!(expanded.get("library").is_none());
 }

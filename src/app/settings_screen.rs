@@ -5,6 +5,8 @@ use crate::settings::{
     VOLUME_STEPS,
 };
 
+mod touch_settings;
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum Act {
     Fullscreen,
@@ -51,13 +53,14 @@ struct Row {
     level: Option<u8>,
 }
 
-const TABS: [(&str, &str); 6] = [
-    ("VÍDEO", "VIDEO"),
-    ("ÁUDIO", "AUDIO"),
-    ("CONTROLES", "CONTROLS"),
-    ("JOGABILIDADE", "GAMEPLAY"),
-    ("IDIOMA", "LANGUAGE"),
-    ("SOBRE", "ABOUT"),
+const TABS: [(&str, &str, &str); 7] = [
+    ("VÍDEO", "VIDEO", "VÍDEO"),
+    ("ÁUDIO", "AUDIO", "AUDIO"),
+    ("CONTROLES", "CONTROLS", "CONTROLES"),
+    ("JOGABILIDADE", "GAMEPLAY", "JUGABILIDAD"),
+    ("IDIOMA", "LANGUAGE", "IDIOMA"),
+    ("SOBRE", "ABOUT", "ACERCA DE"),
+    ("TOQUE", "TOUCH", "TÁCTIL"),
 ];
 
 fn row(act: Act, label: &str, value: impl Into<String>, hint: &str) -> Row {
@@ -463,6 +466,9 @@ impl App {
         else {
             return;
         };
+        if tab == TABS.len() - 1 {
+            return self.touch_settings_screen(from_fight);
+        }
         let rows = self.settings_rows(tab);
         let usable: Vec<usize> = (0..rows.len())
             .filter(|&i| rows[i].act != Act::Info)
@@ -482,7 +488,7 @@ impl App {
         let mut ok = self.c.pressed(nav::OK | nav::START);
         let mut dir_v = dir;
 
-        self.ui.background();
+        crate::screen_art::ScreenArt::Workshop.background(&self.ui);
         self.ui.adapted_header(
             tr("CONFIGURAÇÕES", "SETTINGS"),
             &format!("Ultimate MUGEN  v{}", crate::update::VERSION),
@@ -490,7 +496,7 @@ impl App {
         );
 
         let tab_w = (VW - 112.0) / TABS.len() as f32;
-        for (i, (pt, en)) in TABS.iter().enumerate() {
+        for (i, (pt, en, es)) in TABS.iter().enumerate() {
             let x = 56.0 + i as f32 * tab_w;
             let active = i == tab;
             let focused = active && cur == 0;
@@ -504,7 +510,7 @@ impl App {
                 self.ui.adapted_highlight(("set.tab.x", "set.tab.y"), x, 80.0, tab_w - 4.0, 38.0);
             }
             self.ui.text(
-                tr(pt, en),
+                tr3(pt, en, es),
                 x + tab_w / 2.0,
                 106.0,
                 18.0,

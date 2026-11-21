@@ -255,7 +255,7 @@ impl App {
         let Screen::Replays { mut cur } = self.screen else {
             return;
         };
-        self.ui.background();
+        crate::screen_art::ScreenArt::Records.background(&self.ui);
         self.ui.motes(30, 0.8);
         self.ui.adapted_title(40.0, 56.0, crate::i18n::t("replays.title"));
         if self.replay_list.is_empty() {

@@ -21,6 +21,7 @@ pub struct NativeFrame {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NativeAnim {
     #[serde(default)] pub id: Option<i32>,
+    #[serde(deserialize_with = "super::frame_form::frames")]
     pub frames: Vec<NativeFrame>,
     #[serde(default, rename = "loop")] pub loop_start: Option<usize>,
 }
@@ -67,6 +68,7 @@ pub struct ProjectileSpec {
     #[serde(default)] pub priority: Option<i32>,
     #[serde(default)] pub element: Option<String>,
     #[serde(default)] pub stun: Option<i32>,
+    #[serde(default)] pub repeat: Option<super::blocks::RepeatSpec>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -76,6 +78,9 @@ impl<T: Clone> OneOrMany<T> { pub fn to_vec(&self) -> Vec<T> { match self { OneO
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct VelChange { pub at: i32, pub vel: [Option<f32>; 2] }
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct MoveSound { pub at: i32, pub snd: [u16; 2], #[serde(default)] pub fight: bool }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ArmorSpec { pub hits: u32, #[serde(default)] pub threshold: Option<f32> }
@@ -128,6 +133,7 @@ pub struct NativeMove {
     #[serde(default)] pub teleport: Option<i32>,
     #[serde(default)] pub fx: Option<String>,
     #[serde(default)] pub voice: Option<String>,
+    #[serde(default)] pub sounds: Vec<MoveSound>,
     #[serde(default)] pub armor: Option<ArmorSpec>,
     #[serde(default)] pub parry: Option<ParrySpec>,
     #[serde(default)] pub burst: Option<bool>,
@@ -137,6 +143,9 @@ pub struct NativeMove {
     #[serde(default)] pub cancels: Option<Vec<String>>,
     #[serde(default)] pub rekka: Option<RekkaSpec>,
     #[serde(default)] pub requires: Option<MoveRequirements>,
+    #[serde(default)] pub blink: Option<OneOrMany<super::blocks::BlinkSpec>>,
+    #[serde(default)] pub vfx: Vec<super::blocks::VfxSpec>,
+    #[serde(default)] pub quake: Vec<super::blocks::QuakeSpec>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -158,7 +167,7 @@ pub struct NativeArt {
 pub struct NativeChar {
     pub format: String, pub id: String, pub name: String, pub series: String, pub author: String,
     #[serde(default)] pub description: Option<String>, #[serde(default)] pub profile: Option<super::profile::CharProfile>,
-    pub color: String,
+    pub color: String, #[serde(default, skip_serializing_if = "Option::is_none")] pub element: Option<ume_engine::element::Element>,
     #[serde(default)] pub stats: NativeStats,
     #[serde(default)] pub passives: Option<super::passive_spec::PassiveSpec>,
     #[serde(default)] pub rivals: BTreeMap<String, ume_engine::rivals::RivalLines>,

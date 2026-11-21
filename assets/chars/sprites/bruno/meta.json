@@ -1,13 +1,45 @@
 {
   "frames": {
-    "hitCrouchImpact": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
-    "hitCrouchRecoil": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
-    "hitLowLightImpact": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
-    "hitLowLightRecoil": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
-    "hitLightImpact": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
-    "hitLightRecoil": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
-    "taunt0": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
-    "taunt1": {"axisX": 200.0, "axisY": 392.0, "refHeight": 320.0},
+    "hitCrouchImpact": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitCrouchRecoil": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitLowLightImpact": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitLowLightRecoil": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitLightImpact": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "hitLightRecoil": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "taunt0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "taunt1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
     "01_idle": {
       "axisX": 198.0,
       "axisY": 400.0,
@@ -33,10 +65,25 @@
       "axisY": 400.0,
       "refHeight": 333.0
     },
-    "06_victory": {
-      "axisX": 199.0,
-      "axisY": 400.0,
-      "refHeight": 333.0
+    "defeat1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "defeat2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "defeat3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "defeat4": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
     },
     "07_idle1": {
       "axisX": 198.0,
@@ -83,7 +130,11 @@
       "axisY": 400.0,
       "refHeight": 333.0
     },
-    "powerup01": {"axisX": 200.0, "axisY": 400.0, "refHeight": 333.0},
+    "powerup01": {
+      "axisX": 200.0,
+      "axisY": 400.0,
+      "refHeight": 333.0
+    },
     "16_power1": {
       "axisX": 196.0,
       "axisY": 400.0,
@@ -579,7 +630,11 @@
       "axisY": 363.0,
       "refHeight": 360.0
     },
-    "run01": {"axisX": 200.0, "axisY": 363.0, "refHeight": 360.0},
+    "run01": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
     "sg_run_run1_fx": {
       "axisX": 200.0,
       "axisY": 363.0,
@@ -595,7 +650,11 @@
       "axisY": 363.0,
       "refHeight": 360.0
     },
-    "run23": {"axisX": 200.0, "axisY": 363.0, "refHeight": 360.0},
+    "run23": {
+      "axisX": 200.0,
+      "axisY": 363.0,
+      "refHeight": 360.0
+    },
     "sg_run_run3_fx": {
       "axisX": 200.0,
       "axisY": 363.0,
@@ -617,5 +676,31 @@
       "refHeight": 360.0
     }
   },
-  "refHeight": 333
+  "refHeight": 333,
+  "sounds": [
+    [
+      200,
+      0
+    ],
+    [
+      200,
+      1
+    ],
+    [
+      200,
+      2
+    ],
+    [
+      200,
+      3
+    ],
+    [
+      200,
+      4
+    ],
+    [
+      200,
+      5
+    ]
+  ]
 }

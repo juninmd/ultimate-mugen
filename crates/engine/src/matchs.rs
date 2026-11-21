@@ -4,7 +4,7 @@ use crate::expr::{truthy, Expr};
 use crate::fighter::*;
 use crate::flags::gsf;
 use crate::triggers::Ctx;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
@@ -69,6 +69,7 @@ pub struct Match {
     pub restart_pending: bool,
     pub announce: Option<Announce>,
     pub rng: u32,
+    pub rand_state: Cell<u32>,
     pub next_id: u32,
     pub assigns: RefCell<Vec<(usize, AssignKind, i32, f64)>>,
     pub tick_ids: Vec<u32>,
@@ -82,9 +83,12 @@ impl Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
             power_arena: false, team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
-            events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
+            events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, rand_state: Cell::new(DEFAULT_SEED), next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
         }
+    }
+    pub fn next_random(&self) -> u32 {
+        let mut x = self.rand_state.get(); x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rand_state.set(x); x
     }
     pub fn random(&mut self) -> f32 {
         let mut x = self.rng; x ^= x << 13; x ^= x >> 17; x ^= x << 5; self.rng = x;
@@ -140,7 +144,7 @@ impl Match {
     pub fn checksum(&self) -> u64 {
         fn mix(h: &mut u64, v: u64) { *h ^= v; *h = h.wrapping_mul(0x100_0000_01b3); }
         let mut h: u64 = 0xcbf2_9ce4_8422_2325;
-        for v in [self.game_time as u64, self.timer as u64, self.round_no as u64, self.round_state as u64, self.winner_side as u64, self.wins[0] as u64, self.wins[1] as u64, self.next_id as u64] { mix(&mut h, v); }
+        for v in [self.game_time as u64, self.timer as u64, self.round_no as u64, self.round_state as u64, self.winner_side as u64, self.wins[0] as u64, self.wins[1] as u64, self.next_id as u64, self.rand_state.get() as u64] { mix(&mut h, v); }
         for f in &self.fighters {
             for v in [f.id as u64, f.life.to_bits() as u64, f.life_max.to_bits() as u64, f.pos.x.to_bits() as u64, f.pos.y.to_bits() as u64, f.vel.x.to_bits() as u64, f.vel.y.to_bits() as u64, f.power.to_bits() as u64, f.state_no as u64, f.state_time as u64, f.facing.to_bits() as u64, f.ctrl as u64, f.move_type as u64, f.state_type as u64, f.combo_count as u64, f.combo_damage.to_bits() as u64] { mix(&mut h, v); }
         }
@@ -426,12 +430,12 @@ impl Match {
                         f.vel.x *= fr;
                         if f.vel.x.abs() < 0.05 { f.vel.x = 0.0; }
                     }
-                    if f.pos.y > f.ground_level { f.pos.y = f.ground_level; }
-                    // idle/hit states with ground physics cannot hold a fighter in mid-air: let it drop back to the floor
-                    // (attack states keep their scripted height, e.g. hover or teleport moves)
-                    if f.pos.y < f.ground_level && f.state_type != 'A' && f.move_type != 'A' {
+                    if f.pos.y >= f.ground_level {
+                        f.pos.y = f.ground_level;
+                        if f.state_type != 'A' && f.vel.y > 0.0 { f.vel.y = 0.0; }
+                    } else if f.state_type != 'A' && f.move_type != 'A' {
                         f.vel.y = f.vel.y.max(0.0) + f.c("movement.yaccel", 0.44) * f.lscl * gravity;
-                    } else if f.state_type != 'A' { f.vel.y = 0.0; }
+                    }
                 }
                 'A' => {
                     f.vel.y += f.c("movement.yaccel", 0.44) * f.lscl * gravity;
@@ -741,7 +745,7 @@ impl Match {
             for slot in f.not_hit_by.iter_mut() { if slot.as_ref().is_some_and(|n| n.1 <= 0) { *slot = None; } }
             for slot in f.hit_by.iter_mut() { if slot.as_ref().is_some_and(|n| n.1 <= 0) { *slot = None; } }
             if let Some(p) = f.palfx.as_mut() { p.elapsed += 1; }
-            let tp = f.frame().map(|fr| TrailPoint { x: f.pos.x, y: f.pos.y, group: fr.group, index: fr.index, fx: fr.x, fy: fr.y, flip_h: fr.flip_h, facing: f.facing });
+            let tp = f.after_image.as_ref().and_then(|_| f.frame()).map(|fr| TrailPoint { x: f.pos.x, y: f.pos.y, group: fr.group, index: fr.index, fx: fr.x, fy: fr.y, flip_h: fr.flip_h, facing: f.facing });
             if let Some(ai) = f.after_image.as_mut() {
                 ai.ticks += 1;
                 if let Some(tp) = tp.filter(|_| (ai.ticks - 1) % ai.params.time_gap.max(1) == 0) { ai.trail.insert(0, tp); }
@@ -842,14 +846,16 @@ impl Match {
             let free = { let f = &self.fighters[i]; f.alive && !f.is_helper && f.round_free(self.round_state == 2, self.pause.is_some()) };
             let f = &mut self.fighters[i];
             f.no_ctrl_ticks = if free && !f.ctrl && f.counts_as_stuck() { f.no_ctrl_ticks + 1 } else { 0 };
-            let lying = free && f.state_no == 5110 && f.state_time > f.def.c("data.liedown.time", 60.0) as i32 + 30;
+            let lying = free && f.state_no == 5110 && f.state_time >= f.def.c("data.liedown.time", 60.0) as i32 && (f.asserts & asf::NOGETUPFROMLIEDOWN == 0);
             if !lying && f.no_ctrl_ticks <= NO_CTRL_LIMIT && !f.hit_state_overstay(free) { continue; }
-            f.no_ctrl_ticks = 0; f.ikemen.rescued += 1; eprintln!("watchdog: {} stuck in state {} (ctrl {}), forcing recovery", f.def.name, f.state_no, f.ctrl);
+            f.no_ctrl_ticks = 0;
+            if !lying { f.ikemen.rescued += 1; eprintln!("watchdog: {} stuck in state {} (ctrl {}), forcing recovery", f.def.name, f.state_no, f.ctrl); }
             let def = f.def.clone();
             let getup = lying && (def.states.contains_key(&5120) || self.common.states.contains_key(&5120));
-            if !getup { let f = &mut self.fighters[i]; f.vel = V2::default(); f.ctrl = true; }
-            self.change_state(i, if getup { 5120 } else { 0 }, def);
-            if !getup { self.fighters[i].ctrl = true; }
+            let airborne = !getup && f.pos.y < f.ground_level - 1.0 && (def.states.contains_key(&50) || self.common.states.contains_key(&50));
+            if !getup { let f = &mut self.fighters[i]; f.vel = V2::default(); f.ctrl = true; if !airborne && f.pos.y < f.ground_level { f.pos.y = f.ground_level; } }
+            self.change_state(i, if getup { 5120 } else if airborne { 50 } else { 0 }, def);
+            if !getup { let f = &mut self.fighters[i]; f.ctrl = true; if airborne { f.state_type = 'A'; f.physics = 'A'; } }
         }
     }
 
@@ -1194,7 +1200,7 @@ impl Match {
                 let gc = fd.ghv.guardcount;
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
-                g.guarded = true; g.hittime = guard::guard_hit_time(hd.guard_hit_time, fd.rush.perfect == crate::rush::PERFECT_FLASH); g.slidetime = guard::scaled_ticks(hd.guard_slide_time); g.ctrltime = guard::scaled_ticks(hd.guard_ctrl_time);
+                g.guarded = true; g.hittime = guard::guard_hit_time(hd.guard_hit_time, fd.rush.perfect == crate::rush::PERFECT_FLASH); g.slidetime = guard::scaled_ticks(hd.guard_slide_time); g.ctrltime = guard::scaled_ticks(if d_air { hd.air_guard_ctrl_time } else { hd.guard_ctrl_time });
                 g.xvel = (if fd.state_type == 'A' { hd.air_guard_vel[0] } else { hd.guard_vel }) * dir;
                 g.yvel = if fd.state_type == 'A' { hd.air_guard_vel[1] } else { 0.0 };
                 g.yaccel = hd.yaccel; g.damage = dmg; g.guardcount = gc + 1;
@@ -1238,7 +1244,7 @@ impl Match {
                 g.attacker_id = aid; g.damage = dmg; g.hitcount = prev_hc + 1;
                 g.animtype = if air { hd.air_animtype } else { hd.animtype };
                 g.groundtype = hd.ground_type; g.airtype = hd.air_type; g.kind = if air { 3 } else { hd.ground_type };
-                g.fall = (if air { hd.air_fall } else { hd.fall }) || (was_hit && prev_fall);
+                g.fall = !hd.force_no_fall && ((if air { hd.air_fall } else { hd.fall }) || (was_hit && prev_fall));
                 g.hittime = if down { hd.down_hit_time } else if air { hd.air_hit_time } else { hd.ground_hit_time };
                 g.slidetime = hd.ground_slide_time; g.ctrltime = hd.ground_hit_time;
                 let v = if down { hd.down_vel } else if air { hd.air_vel } else { hd.ground_vel };
@@ -1298,7 +1304,7 @@ impl Match {
             if let Some(s) = hd.hit_sound { self.sound(a, s.0, s.1, s.2, Some(if heavy { "hitheavy" } else { "hit" })); }
             if hd.env_shake.time > 0 { self.shake_with_dir(hd.env_shake.time, hd.env_shake.freq, hd.env_shake.ampl, hd.env_shake.phase, hd.env_shake.dir); }
             if let Some(p) = hd.target_palfx.clone() { self.fighters[d].palfx = Some(p); }
-            if cornered && self.fighters[a].def.rules().hitdef_corner_push && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; self.fighters[a].vel.x = corner_pushed; }
+            if cornered && self.fighters[a].def.rules().hitdef_corner_push && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if st == 'L' { hd.down_corner_push } else if d_air { hd.air_corner_push } else { hd.ground_corner_push }; self.fighters[a].vel.x = corner_pushed; }
             self.place_target(a, d, hd);
             let droot = self.fighters[d].root;
             self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));
@@ -1422,7 +1428,9 @@ impl Match {
         if !def.anims.contains_key(&anim_no) { return; }
         let postype = sc.raw("postype").unwrap_or("p1").to_ascii_lowercase();
         let screen_space = matches!(postype.as_str(), "front" | "back" | "left" | "right");
-        let (px, py) = (num(self, "pos", 0.0, 0) * f.lscl, num(self, "pos", 0.0, 1) * f.lscl);
+        let (mut px, mut py) = (num(self, "pos", 0.0, 0) * f.lscl, num(self, "pos", 0.0, 1) * f.lscl);
+        let (rx, ry) = (num(self, "random", 0.0, 0) * f.lscl, num(self, "random", 0.0, 1) * f.lscl);
+        if rx != 0.0 { px += (self.random() - 0.5) * rx; } if ry != 0.0 { py += (self.random() - 0.5) * ry; } let f = &self.fighters[i];
         let fac = if num(self, "facing", 1.0, 0) < 0.0 { -1.0 } else { 1.0 };
         let (x, y, facing, bind_to);
         let half = self.view_w / 2.0;
@@ -1471,7 +1479,7 @@ impl Match {
         e.id = num(self, "id", -1.0, 0) as i32;
         e.facing = facing;
         e.vfacing = if num(self, "vfacing", 1.0, 0) < 0.0 { -1.0 } else { 1.0 };
-        e.vel = V2 { x: num(self, "vel", 0.0, 0) * f.lscl, y: num(self, "vel", 0.0, 1) * f.lscl };
+        e.vel = if sc.has("vel", 0) { V2 { x: num(self, "vel", 0.0, 0) * f.lscl, y: num(self, "vel", 0.0, 1) * f.lscl } } else { V2 { x: num(self, "velocity", 0.0, 0) * f.lscl, y: num(self, "velocity", 0.0, 1) * f.lscl } };
         e.accel = V2 { x: num(self, "accel", 0.0, 0) * f.lscl, y: num(self, "accel", 0.0, 1) * f.lscl };
         e.bind_time = num(self, "bindtime", 0.0, 0) as i32;
         if e.bind_time != 0 { e.bind_to = bind_to; e.bind_off = V2 { x: px, y: py }; }
@@ -1482,7 +1490,7 @@ impl Match {
         e.scale = [num(self, "scale", 1.0, 0), num(self, "scale", 1.0, 1)];
         e.remove_on_get_hit = num(self, "removeongethit", 0.0, 0) != 0.0;
         e.super_move = num(self, "supermove", num(self, "supermovetime", 0.0, 0) as f64, 0) as i32;
-        e.pause_move = num(self, "pausemovetime", 0.0, 0) as i32;
+        e.pause_move = num(self, "pausemove", num(self, "pausemovetime", 0.0, 0) as f64, 0) as i32;
         e.add = sc.raw("trans").is_some_and(|t| t.to_ascii_lowercase().starts_with("add"));
         e.ignore_hit_pause = num(self, "ignorehitpause", 1.0, 0) != 0.0;
         e.screen = screen_space || sc.raw("space").is_some_and(|s| s.trim().eq_ignore_ascii_case("screen"));
@@ -1546,9 +1554,10 @@ impl Match {
         h.helper_id = self.num(i, sc, "id", 0.0, 0) as i32;
         h.parent = Some(f.id); h.root = root.id;
         h.key_ctrl = num(self, "keyctrl", 0.0, 0) != 0.0;
-        h.pause_move_time = num(self, "pausemovetime", 0.0, 0) as i32;
+        h.pause_move_time = if num(self, "pausemove", 0.0, 0) != 0.0 { 999_999 } else { num(self, "pausemovetime", 0.0, 0) as i32 };
         h.pause_bool = num(self, "pausebool", 0.0, 0) != 0.0;
-        h.super_move_time = num(self, "supermovetime", 0.0, 0) as i32;
+        h.super_move_time = if num(self, "supermove", 0.0, 0) != 0.0 { 999_999 } else { num(self, "supermovetime", 0.0, 0) as i32 };
+        if sc.has("sprpriority", 0) { h.spr_priority = num(self, "sprpriority", 0.0, 0) as i32; }
         h.preserve = num(self, "preserve", 0.0, 0) != 0.0;
         h.inherit_juggle = num(self, "inheritjuggle", 0.0, 0).clamp(0.0, 2.0) as u8;
         h.own_pal = num(self, "ownpal", 0.0, 0) != 0.0;

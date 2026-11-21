@@ -16,7 +16,7 @@ Lutadores UMF também carregam de uma pasta, sem recompilar: coloque o `.json` e
 
 ```json
 {
-  "format": "umf/1",
+  "format": "umf/2",
   "id": "meu",
   "name": "Meu Lutador",
   "series": "Minha Série",
@@ -40,7 +40,7 @@ Lutadores UMF também carregam de uma pasta, sem recompilar: coloque o `.json` e
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
-| `format` | sim | Sempre `umf/1` |
+| `format` | sim | `umf/2` (`umf/1` ainda carrega) |
 | `id`, `name`, `series`, `author`, `color` | sim | Identidade; `color` é a cor do cartão na seleção |
 | `boss` | não | `true` esconde da seleção e coloca como chefe final do Arcade |
 | `profile` | não | Nacionalidade e biografia, ver [Perfil](#perfil-nacionalidade-e-biografia) |
@@ -120,6 +120,14 @@ Cada animação é uma lista de quadros:
   { "pose": "jab0", "ticks": 5 }
 ], "loop": 0 }
 ```
+
+Um quadro só com pose e duração pode ser escrito `"pose*ticks"`, e as duas formas se misturam na mesma lista:
+
+```json
+"jab": { "frames": ["jab0*3", { "pose": "jab1", "ticks": 3, "hit": { "part": "handR", "radius": 10 } }, "jab0*5"], "loop": 0 }
+```
+
+Rode `node scripts/umf2-migrate.mjs` antes de commitar um lutador do jogo: ele grava o layout canônico que o CI confere. Veja o [ADR 0007](../adr/0007-umf2-definitive-fighter-format.md).
 
 | Campo do quadro | Descrição |
 |---|---|
@@ -314,3 +322,19 @@ cargo test --workspace --release
 Revise a arte dos lutadores com `ume-tools audit-sprites`, que lista poses ausentes e reaproveitadas, ou no próprio jogo.
 
 Os pacotes de sprites do navegador carregam de forma assíncrona. Um pacote novo ou substituído invalida as prévias e todas as paletas em cache do lutador afetado; os demais mantêm seus caches. O carregamento da luta aguarda os pacotes dos lutadores nativos escolhidos e informa falhas de download, em vez de iniciar com uma aparência procedural antiga. Definições nativas importadas sem pacote integrado continuam compatíveis.
+
+## Compartilhar um lutador como pacote
+
+Um zip (ou pasta `mugen/`) com um `.json` UMF ao lado de uma pasta `sprites/` com `01_idle.png`, os PNGs das poses e um `meta.json` opcional (`axisX`, `axisY`, `refHeight` por pose) é importado como lutador nativo, sem `.def`. O mercado instala como qualquer outro pacote. O [Goku SSJ4 UMF](https://github.com/juninmd/mugen-assets/tree/main/umf/Goku_SSJ4_UMF) é o exemplo de referência.
+
+### Paridade com M.U.G.E.N
+
+`.agents/skills/mugen-to-ume-migrator/scripts/mugen2umf.py` converte uma pasta M.U.G.E.N nesse pacote. Ele mantém o visual e o jogo do original com três campos:
+
+- `stats.height` igual ao `refHeight` do `meta.json` desenha os sprites 1:1, no tamanho original.
+- `art.style.boxes: "exact"` usa `hit.box` (Clsn1) e o `hurt` de cada quadro (Clsn2) como escritos, sem recorte automático.
+- `moves[].sounds: [{ "at": 3, "snd": [2, 1] }]` toca `sprites/snd_2_1.wav` no quadro 3 (listado em `sounds` do `meta.json`); `"fight": true` toca dos sons de luta do motor.
+
+## Elemento do lutador
+
+O campo opcional `element` aceita `fire`, `ice`, `lightning`, `water`, `earth`, `wind` ou `neutral`. O HUD exibe o elemento ao lado do retrato do lutador, com texto localizado quando o ícone não estiver disponível. O campo não altera o dano nem as regras da luta.

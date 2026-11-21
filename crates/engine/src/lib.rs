@@ -8,6 +8,7 @@ pub mod bytecode;
 pub mod commands;
 pub mod input;
 pub mod chardef;
+pub mod element;
 pub mod diagnostics;
 pub mod lint;
 pub mod probe_def;

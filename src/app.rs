@@ -35,7 +35,8 @@ mod survival;
 mod update_banner;
 mod results_stats;
 mod select_category;
-mod select_grid; mod select_cursor;
+mod select_grid;
+mod select_roster; mod select_cursor;
 mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_tags; mod select_view; mod text_fit; mod select_marks; mod select_author;
 mod versus; mod versus_compare; mod vs_epic; mod vs_emblem;
 mod menu_view; mod menu_icons;
@@ -759,12 +760,15 @@ impl App {
         self.mode = mode;
         self.team = None;
         self.arcade = None;
-        self.screen = match screen.as_deref() {
-            Some("select") => { self.sel_filter = 2; Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] } }
-            Some("stages") => Screen::Stages { cur: self.sel.2 },
-            _ if fight => Screen::Vs { t: 0.0, step: 0 },
-            _ => Screen::Stages { cur: self.sel.2 },
-        };
+        match screen.as_deref() {
+            Some("select") => {
+                self.sel_filter = 2;
+                self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] };
+            }
+            Some("stages") => self.open_stages(self.sel.2 + 1),
+            _ if fight => self.screen = Screen::Vs { t: 0.0, step: 0 },
+            _ => self.open_stages(self.sel.2 + 1),
+        }
         self.deep = None;
     }
 
@@ -908,7 +912,7 @@ impl App {
         }
         self.sel_row = self.sel_row.min(total_rows.saturating_sub(self.grid_rows()));
 
-        self.ui.background();
+        crate::screen_art::ScreenArt::Select.background(&self.ui);
         if self.mode.is_team() {
             if is_key_pressed(KeyCode::E) {
                 self.team_n = (self.team_n + 1).min(if self.mode == Mode::TeamTag { 3 } else { 5 });
@@ -1072,16 +1076,8 @@ impl App {
         let gw = cols as f32 * cw + (cols as f32 - 1.0) * gap;
         let gx = (VW - gw) / 2.0;
         let gy = select_grid::GRID_Y;
-        let gh = self.grid_rows() as f32 * (ch + gap) - gap;
-        crate::menu_art::glass(&self.ui, gx - 12.0, gy - 12.0, gw + 24.0, gh + 24.0, 1.0);
-        self.ui.rect_lines(
-            gx - 12.0,
-            gy - 12.0,
-            gw + 24.0,
-            gh + 24.0,
-            1.0,
-            Color::new(1.0, 1.0, 1.0, 0.14),
-        );
+        let gh = m.div_ceil(cols).saturating_sub(self.sel_row).clamp(1, self.grid_rows()) as f32 * (ch + gap) - gap;
+        self.draw_roster_panel(gx, gy, gw, gh, picking);
         let mut click = None;
         let first = self.sel_row * cols;
         let last = ((self.sel_row + self.grid_rows()) * cols).min(m);
@@ -1099,11 +1095,7 @@ impl App {
                 (e.color, e.mugen, e.broken.get())
             };
             let col = rgb(ecol);
-            self.ui
-                .rect(cx, cy, cw, ch, Color::new(0.06, 0.04, 0.12, 0.92));
-            self.ui.rect(cx, cy, cw, ch * 0.62, alpha(col, 0.5));
-            self.ui
-                .rect(cx, cy + ch * 0.62, cw, ch * 0.38, alpha(col, 0.18));
+            self.draw_roster_tile(cx, cy, cw, ch, col);
             self.draw_tile_force(cx, cy, cw, ch, i);
             let mut got = self.reg.chars[i].peek(1);
             let tile_thumb = if emugen { None } else { self.reg.chars[i].tile_portrait(1) };
@@ -2163,11 +2155,10 @@ impl App {
     }
 }
 
-/// Pause state for this frame and whether the pause menu may act on `nav::BACK`.
+/// Pause state for this frame and whether the pause menu may act on `nav::BACK`/`nav::OK`.
 ///
-/// Esc is both the pause key and `nav::BACK`. Without this guard the same key press
-/// opens the menu in `fight()` and closes it again in `pause_menu()` on the same frame,
-/// so the pause menu never shows. The opening frame therefore consumes that edge.
+/// Esc is the pause key and `nav::BACK`; Enter is the pause key and `nav::OK` (Continue).
+/// The opening frame consumes both edges, or the menu closes as soon as it shows.
 fn pause_step(was_paused: bool, toggle: bool) -> (bool, bool) {
     (was_paused ^ toggle, was_paused)
 }

@@ -105,7 +105,7 @@ impl App {
     }
 
     fn draw_player_card(&mut self, tab: usize) {
-        self.ui.background();
+        crate::screen_art::ScreenArt::Records.background(&self.ui);
         self.ui.motes(30, 0.8);
         self.ui.adapted_header(
             tr3("Ficha do Jogador", "Player card", "Ficha del jugador"),

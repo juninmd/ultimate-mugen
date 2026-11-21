@@ -4,27 +4,30 @@
 const CACHE = 'ume-v5';
 const SHELL = /(\/|\.html|\.js|\.webmanifest|\.svg|\.menu\.pack)$/;
 self.addEventListener('install', () => { self.skipWaiting(); });
-self.addEventListener('activate', (e) => { e.waitUntil((async () => { for (const k of await caches.keys()) if (k !== CACHE) await caches.delete(k); await self.clients.claim(); })()); });
+self.addEventListener('activate', (e) => { e.waitUntil((async () => { for (const k of await caches.keys()) if (/^ume-v\d+$/.test(k) && k !== CACHE) await caches.delete(k); await self.clients.claim(); })()); });
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;
   e.respondWith((async () => {
-    const cache = await caches.open(CACHE);
+    const cache = await caches.open(CACHE).catch(() => null);
+    if (!cache) return fetch(req);
     if (url.searchParams.has('v')) {
-      const hit = await cache.match(req);
+      const hit = await cache.match(req).catch(() => null);
       if (hit) return hit;
       const res = await fetch(req);
       if (res.ok) {
-        const old = (await cache.keys()).filter((k) => new URL(k.url).pathname === url.pathname);
-        await cache.put(req, res.clone());
-        await Promise.all(old.map((k) => cache.delete(k)));
+        await (async () => {
+          const old = (await cache.keys()).filter((k) => new URL(k.url).pathname === url.pathname);
+          await cache.put(req, res.clone());
+          await Promise.all(old.map((k) => cache.delete(k)));
+        })().catch(() => {});
       }
       return res;
     }
     try {
       const res = await fetch(req);
-      if (res.ok && SHELL.test(url.pathname)) cache.put(req, res.clone());
+      if (res.ok && SHELL.test(url.pathname)) await cache.put(req, res.clone()).catch(() => {});
       return res;
     } catch {
       const hit = await cache.match(req, { ignoreSearch: true });

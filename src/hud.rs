@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod announce_text; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_tint};
+mod elements; mod advantage; mod advantage_draw; mod announce_text; mod combo_tier; mod danger; mod energy; mod energy_art; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -24,6 +24,7 @@ pub struct Hud {
 
 impl Hud {
     pub fn new() -> Self {
+        training_panel::reset();
         Hud {
             replay: false,
             inputs: vec![],
@@ -272,7 +273,7 @@ impl Hud {
                         );
                     }
                 }
-                if show_name {
+                if show_name { elements::draw(f.def.element, p(if side == 0 { px0 - 2.0 } else { px0 + panel_w - 6.0 }, py0 - 2.0), s, ui);
                     let nx = if side == 0 { bx } else { bx + bw };
                     let al = if side == 0 { Align::Left } else { Align::Right };
                     let cc = Color::from_rgba(f.def.color[0], f.def.color[1], f.def.color[2], 255);
@@ -322,11 +323,15 @@ impl Hud {
                         let fcol = Color::new(fc[0], fc[1], fc[2], 1.0);
                         let pulse = 0.75 + 0.25 * (gt * 6.0).sin();
                         let fnm = f.active_form_name();
-                        let label = if fnm.is_empty() {
+                        let mut label = if fnm.is_empty() {
                             crate::i18n::tr3("DESPERTO", "AWAKENED", "DESPIERTO").to_string()
                         } else {
                             fnm.to_uppercase()
                         };
+                        if let Some(risk) = form_status::risk(f) {
+                            label.push_str(" · ");
+                            label.push_str(&risk);
+                        }
                         let tw = measure_text(
                             &label,
                             Some(&ui.display),
@@ -341,7 +346,7 @@ impl Hud {
                         } else {
                             nx - name_w - 6.0 - tw
                         };
-                        let ty = by + bh + 2.2 + name_dy;
+                        let ty = by + bh + 10.6 + name_dy;
                         poly::grad_h(
                             &sp(poly::chamfer(tx, ty, tw, 5.2, 2.2)),
                             poly::with_a(poly::shade(fcol, 0.5), 0.9 * pulse),
@@ -364,88 +369,84 @@ impl Hud {
                     for i in 0..m.rounds_to_win {
                         let won = m.wins[side] > i;
                         let cx = if side == 0 {
-                            bx + bw - 4.0 - i as f32 * 9.0
+                            bx + 3.0 + i as f32 * 7.0
                         } else {
-                            bx + 4.0 + i as f32 * 9.0
+                            bx + bw - 3.0 - i as f32 * 7.0
                         };
-                        let c = p(cx, by + bh + 4.6);
-                        let dia = poly::regular(c, 2.6 * s, 4, std::f32::consts::FRAC_PI_2);
+                        let c = p(cx, by - 2.0);
+                        let dia = poly::regular(c, 1.7 * s, 4, std::f32::consts::FRAC_PI_2);
                         if won {
-                            poly::circle(c, 4.0 * s, Color::new(1.0, 0.8, 0.2, 0.25));
+                            poly::circle(c, 2.6 * s, Color::new(1.0, 0.8, 0.2, 0.25));
                             poly::grad_v(&dia, hex("#fff3a0"), hex("#e8a010"));
                         } else {
                             poly::solid(&dia, Color::new(0.02, 0.02, 0.06, 0.55));
                         }
                         poly::outline(
                             &dia,
-                            0.6 * s,
+                            0.45 * s,
                             if won { WHITE } else { Color::new(1.0, 1.0, 1.0, 0.5) },
                         );
                     }
                 }
                 if show_power {
-                    let (ph2, py) = (6.0, BASE_H - 14.5);
-                    let pw = energy::bar_width();
-                    let pxm = if side == 0 { 14.0 } else { w - 14.0 - pw };
-                    let lvl = (f.power / 1000.0).floor() as i32;
+                    let (ph2, py) = (3.2, by + bh + 1.1);
+                    let nforms = f.form_count();
+                    let ready = f.next_form_cost().is_some_and(|c| f.power >= c);
+                    let mine = human.contains(&f.id);
                     let colors = [
                         hex("#2fa8ff"),
                         hex("#33e07a"),
                         hex("#ffcc33"),
                         hex("#ff4fd8"),
                     ];
-                    let nforms = f.form_count();
-                    let ready = f.next_form_cost().is_some_and(|c| f.power >= c);
-                    let (gx, gw) = if side == 0 {
-                        (4.0, pw + 36.0)
-                    } else {
-                        (w - 4.0 - (pw + 36.0), pw + 36.0)
-                    };
                     let potential = f.potential.level != ume_engine::potential::PotentialLevel::Idle;
-                    let top = if nforms > 0 || potential { 11.0 } else { 5.0 };
-                    glass(&p, s, gx, py - top, gw, ph2 + 5.0 + top, 5.0, tint);
+                    let (lbl, col) = if potential {
+                        let secs = (f.potential.time.max(0) + 59) / 60;
+                        let name = if f.potential.level == ume_engine::potential::PotentialLevel::Fury { crate::i18n::tr3("MODO FÚRIA", "FURY MODE", "MODO FURIA") } else { crate::i18n::tr3("POTENCIAL", "POTENTIAL", "POTENCIAL") };
+                        (format!("{} · {}s", name, secs), Color::new(0.65, 1.0, 0.85, 0.9))
+                    } else if nforms > 0 {
+                        let col = if ready && mine && f.alive {
+                            Color::new(1.0, 0.85, 0.3, 0.65 + 0.35 * (gt * 5.0).sin().abs())
+                        } else if f.next_form_cost().is_none() {
+                            Color::new(1.0, 0.9, 0.55, 0.85)
+                        } else {
+                            Color::new(1.0, 1.0, 1.0, 0.75)
+                        };
+                        (form_status::chip(f, ready, mine), col)
+                    } else {
+                        (String::new(), Color::new(0.0, 0.0, 0.0, 0.0))
+                    };
+                    let tw = if lbl.is_empty() {
+                        0.0
+                    } else {
+                        (measure_text(&lbl, Some(&ui.display), ((3.8 * s).max(9.0)) as u16, 1.0).width / s + 8.0).max(18.0)
+                    };
+                    let gauge_w = (bw - if tw > 0.0 { tw + 2.5 } else { 0.0 }).max(20.0);
                     self.energy.track(side, f.power);
-                    let bcx = self.energy.draw(&energy::Cell {
+                    self.energy.draw(&energy::Cell {
                         p: &p,
                         s,
                         gt,
                         side,
-                        x: pxm,
+                        x: bx,
                         y: py,
+                        w: gauge_w,
                         h: ph2,
                         power: f.power,
-                        awaken: ready,
-                        form: f.form,
-                        forms: nforms,
                         colors,
                     });
-                    if nforms > 0 || potential {
-                        let lbl = if potential {
-                            let secs = (f.potential.time.max(0) + 59) / 60;
-                            let name = if f.potential.level == ume_engine::potential::PotentialLevel::Fury { crate::i18n::tr3("MODO FÚRIA", "FURY MODE", "MODO FURIA") } else { crate::i18n::tr3("POTENCIAL", "POTENTIAL", "POTENCIAL") };
-                            format!("{} · {}s", name, secs)
+                    if tw > 0.0 {
+                        let (cx, tx, al) = if side == 0 {
+                            (bx + bw - tw, bx + bw - tw + 3.2, Align::Left)
                         } else {
-                            form_status::label(f)
+                            (bx, bx + tw - 3.2, Align::Right)
                         };
-                        let slots = if nforms > 0 { (nforms + 1).min(7) } else { 1 };
-                        let al = if side == 0 { Align::Left } else { Align::Right };
-                        let tx = if side == 0 { pxm + 6.2 * slots as f32 + 2.0 } else { pxm + pw - 6.2 * slots as f32 - 2.0 };
-                        text(&lbl, tx, py - 2.6, 4.4, Color::new(1.0, 1.0, 1.0, 0.85), al, true);
+                        let cy = py + ph2 / 2.0 - 2.7;
+                        let chip = sp(poly::chamfer(cx, cy, tw, 5.4, 1.8));
+                        poly::solid(&chip, Color::new(0.02, 0.03, 0.08, 0.78));
+                        poly::outline(&chip, 0.5 * s, poly::with_a(col, if ready { 0.95 } else { 0.45 }));
+                        text(&lbl, tx, cy + 0.95, 3.8, col, al, true);
                     }
-                    let lab = if lvl >= 3 {
-                        "MAX".to_string()
-                    } else {
-                        lvl.to_string()
-                    };
-                    text(
-                        &lab,
-                        bcx,
-                        py + ph2 / 2.0 + if lvl >= 3 { 1.6 } else { 2.4 },
-                        if lvl >= 3 { 4.6 } else { 7.0 },
-                        WHITE,
-                        Align::Center,
-                        true,
-                    );
                 }
             }
             let strip_y = 30.5;
@@ -645,7 +646,7 @@ impl Hud {
                     w / 2.0 - 22.0,
                     34.0,
                     6.4,
-                    hex("#22e8ff"),
+                    side_color(0),
                     Align::Center,
                 );
                 outlined(
@@ -653,7 +654,7 @@ impl Hud {
                     w / 2.0 + 22.0,
                     34.0,
                     6.4,
-                    hex("#ff4d6d"),
+                    side_color(1),
                     Align::Center,
                 );
                 if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 {
@@ -687,11 +688,7 @@ impl Hud {
                     x,
                     41.0,
                     5.2,
-                    if side == 0 {
-                        hex("#22e8ff")
-                    } else {
-                        hex("#ff4d6d")
-                    },
+                    side_color(side),
                     al,
                 );
             }
@@ -776,9 +773,9 @@ impl Hud {
                     col,
                     al,
                 );
-                outlined("HITS", x, cy0 + 90.0, 9.0, Color::new(1.0, 1.0, 1.0, a), al);
+                outlined(crate::i18n::tr3("ACERTOS", "HITS", "GOLPES"), x, cy0 + 90.0, 9.0, Color::new(1.0, 1.0, 1.0, a), al);
                 outlined(
-                    &format!("{} DMG", c.1 as i32),
+                    &format!("{} {}", c.1 as i32, crate::i18n::tr3("DANO", "DMG", "DAÑO")),
                     x,
                     cy0 + 99.0,
                     6.5,
@@ -800,7 +797,7 @@ impl Hud {
                         Color::new(0.1, 0.02, 0.05, 0.5 * a),
                     );
                     text(
-                        &format!("DANO {pct}%"),
+                        &format!("{} {pct}%", crate::i18n::tr3("DANO", "DMG", "DAÑO")),
                         x + if side == 0 { 1.0 } else { -1.0 },
                         cy0 + 107.0,
                         5.2,
@@ -1008,25 +1005,6 @@ impl Hud {
                 }
             }
         }
-        // awakening hint: one super bar is enough
-        if m.round_state == 2 && human.len() == 1 {
-            if let Some(f) = m.roots().find(|f| human.contains(&f.id)) {
-                if f.alive
-                    && f.next_form_cost().is_some_and(|c| f.power >= c)
-                {
-                    let a = 0.55 + 0.45 * (gt * 5.0).sin().abs();
-                    text(
-                        &format!("T · {} {}/{}", crate::i18n::tr3("FORMA", "FORM", "FORMA"), usize::from(f.form) + 1, f.form_count()),
-                        BASE_W / 2.0,
-                        BASE_H - 8.0,
-                        6.0,
-                        Color::new(1.0, 0.85, 0.3, a),
-                        Align::Center,
-                        true,
-                    );
-                }
-            }
-        }
         if self.replay {
             let a = 0.6 + 0.4 * (gt * 3.0).sin().abs();
             draw_circle(
@@ -1047,7 +1025,7 @@ impl Hud {
         }
         debug_panel::draw(&p, &text, s, w, m); if m.training {
             text(
-                "TREINO",
+                crate::i18n::tr3("TREINO", "TRAINING", "ENTRENAMIENTO"),
                 w / 2.0,
                 30.0,
                 6.0,
@@ -1059,7 +1037,7 @@ impl Hud {
             let (hits, dmg) = (self.combo[0].0, self.combo[0].1);
             if hits >= 2 {
                 text(
-                    &format!("{}  {hits} HITS · {} DMG", crate::i18n::tr3("ÚLTIMO COMBO", "LAST COMBO", "ÚLTIMO COMBO"), dmg as i32),
+                    &format!("{}  {hits} {} · {} {}", crate::i18n::tr3("ÚLTIMO COMBO", "LAST COMBO", "ÚLTIMO COMBO"), crate::i18n::tr3("ACERTOS", "HITS", "GOLPES"), dmg as i32, crate::i18n::tr3("DANO", "DMG", "DAÑO")),
                     w / 2.0,
                     38.0,
                     5.6,
@@ -1068,7 +1046,7 @@ impl Hud {
                     true,
                 );
             }
-            self.advantage.update(m); training_panel::draw(&p, &text, s, w, self.combo[0].0, self.combo[0].1);
+            self.advantage.update(m); training_panel::draw(&p, &text, s, w, m.fighters.iter().find(|f| f.side == 0 && !f.is_helper).map_or(0, |f| f.id), self.combo[0].0, self.combo[0].1);
             if let Some(ref res) = self.advantage.result {
                 opacity::scope(opacity::ADVANTAGE, || advantage_draw::draw(res, &p, &text, s, w));
             }

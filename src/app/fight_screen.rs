@@ -23,7 +23,7 @@ impl App {
                 || is_key_pressed(KeyCode::P)
                 || (!s.paused && is_key_pressed(KeyCode::Enter))
         };
-        let (paused, accept_back) = pause_step(s.paused, pause_btn);
+        let (paused, accept_nav) = pause_step(s.paused, pause_btn);
         if pause_btn {
             self.pause.reset();
             self.audio.sfx(if paused { "pause" } else { "select" });
@@ -59,8 +59,12 @@ impl App {
             s.switch_control();
         }
         s.update(dt, &mut self.c, &mut self.audio);
+        if !s.paused {
+            crate::easter::tick(&s.m, &s.stage.info.name, &mut self.audio);
+        }
         let framing = if replaying { ume_engine::replay_camera::frame(&mut s.m) } else { None };
         s.draw(&mut self.g, &self.ui);
+        crate::easter::draw(&self.ui, if s.paused { 0.0 } else { dt });
         if let Some(saved) = framing {
             ume_engine::replay_camera::unframe(&mut s.m, saved);
         }
@@ -117,7 +121,7 @@ impl App {
         let s = self.session.as_mut().unwrap();
         if s.paused {
             if !replaying {
-                self.pause_menu(accept_back).await;
+                self.pause_menu(accept_nav).await;
             }
             return;
         }

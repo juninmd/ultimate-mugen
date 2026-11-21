@@ -11,7 +11,7 @@ pub(super) enum Outcome {
 }
 
 impl App {
-    pub(super) fn pause_input(&mut self, lay: &Layout, name: &str, moves: &[MoveInfo], accept_back: bool) -> Outcome {
+    pub(super) fn pause_input(&mut self, lay: &Layout, name: &str, moves: &[MoveInfo], accept_nav: bool) -> Outcome {
         let held = held_slots(self.c.pad_info.iter().map(|p| p.bits), is_key_down);
         let key_slot = fresh_slot(held, self.c.shortcuts.prev[0]);
         self.c.shortcuts.prev[0] = held;
@@ -39,10 +39,10 @@ impl App {
         }
         if self.pause.tab == Tab::Moves {
             self.pause_moves_input(lay, name, moves, slot);
-        } else if let Some(out) = self.pause_actions_input(lay) {
+        } else if let Some(out) = self.pause_actions_input(lay, accept_nav) {
             return out;
         }
-        if accept_back && self.c.pressed(nav::BACK) {
+        if accept_nav && self.c.pressed(nav::BACK) {
             return Outcome::Resume;
         }
         Outcome::None
@@ -55,7 +55,7 @@ impl App {
         self.pause.switch_tab(tab);
     }
 
-    fn pause_actions_input(&mut self, lay: &Layout) -> Option<Outcome> {
+    fn pause_actions_input(&mut self, lay: &Layout, accept_nav: bool) -> Option<Outcome> {
         let actions = self.pause.tab.actions(self.mode == super::super::Mode::Training);
         let n = actions.len();
         if self.c.pressed(nav::DOWN) {
@@ -64,7 +64,7 @@ impl App {
         if self.c.pressed(nav::UP) {
             self.pause.cur = (self.pause.cur + n - 1) % n;
         }
-        let mut ok = self.c.pressed(nav::OK);
+        let mut ok = accept_nav && self.c.pressed(nav::OK);
         for i in 0..n {
             let r = lay.action_row(i, actions.len());
             if self.clicked_rect(r.x, r.y, r.w, r.h) {

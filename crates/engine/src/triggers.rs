@@ -172,7 +172,7 @@ impl<'a> Host for Ctx<'a> {
         let f = self.f();
         if name == "animelem" {
             return match bb {
-                None => f.anim_elem_started(a as i32) != neg,
+                None => if neg { f.anim_elem_no_at(0) != a as i32 } else { f.anim_elem_started(a as i32) },
                 Some(t) => match f.anim_elem_time(a as i32) { Some(dt) => cmp(dt as f64, op2.unwrap_or("="), t) != neg, None => false },
             };
         }
@@ -202,7 +202,7 @@ impl<'a> Host for Ctx<'a> {
             "time" | "statetime" => f.state_time as f64,
             "animtime" => f.anim_time_trig() as f64,
             "anim" => f.anim_no as f64,
-            "animelemno" => f.anim_elem_no_at(a0() as i32) as f64,
+            "animelem" => f.anim_elem_no_at(0) as f64, "animelemno" => f.anim_elem_no_at(a0() as i32) as f64,
             "animelemtime" => f.anim_elem_time(a0() as i32).unwrap_or(-1) as f64,
             "animexist" | "selfanimexist" => b(f.def.anims.contains_key(&(a0() as i32))),
             "stateno" => f.state_no as f64,
@@ -271,8 +271,8 @@ impl<'a> Host for Ctx<'a> {
             "const240p" => a0() * f.def.local_w as f64 / 320.0,
             "const480p" => a0() * f.def.local_w as f64 / 640.0,
             "const720p" => a0() * f.def.local_w as f64 / 1280.0, "const1080p" => a0() * f.def.local_w as f64 / 1920.0,
-            "random" => { let x = (m.game_time as u64).wrapping_mul(2654435761).wrapping_add(f.id as u64 * 40503 + f.state_time as u64 * 977 + m.rng as u64); ((x >> 7) % 1000) as f64 }
-            "randomrange" => { let (lo, hi) = (a0(), self.a(args, 1)); let x = (m.game_time as u64).wrapping_mul(2654435761).wrapping_add(m.rng as u64); lo + ((x >> 7) % ((hi - lo + 1.0).max(1.0) as u64)) as f64 }
+            "random" => (m.next_random() % 1000) as f64,
+            "randomrange" => { let (lo, hi) = (a0(), self.a(args, 1)); lo + (m.next_random() as f64 % (hi - lo + 1.0).max(1.0)) }
             "roundstate" => m.round_state as f64,
             "roundno" => m.round_no as f64,
             "roundsexisted" => (m.round_no - 1) as f64,

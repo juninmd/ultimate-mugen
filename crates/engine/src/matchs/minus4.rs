@@ -38,7 +38,7 @@ impl Match {
         let Some(i) = self.idx(id) else { return };
         if !helper {
             self.run_state(i, &own, -2, in_pause);
-            let Some(i) = self.idx(id) else { return };
+            let Some(_i) = self.idx(id) else { return };
         }
         if (!helper || self.fighters[i].key_ctrl) && !custom {
             self.run_state(i, &own, -1, in_pause);

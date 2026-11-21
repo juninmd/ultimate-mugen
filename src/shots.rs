@@ -2,7 +2,7 @@
 use crate::app::{App, Mode, Screen, Team};
 use crate::gfx::*;
 use crate::shots::replay::replay_determinism;
-mod announce_tour; mod stage_filter_tour; mod epilogue_tour; mod flag_tour; mod i18n_tour; mod menu_motion_tour; mod passive_tour; mod transform_tour; mod pause_tour; mod replay; mod results_tour; mod story_tour; mod story_loop_tour; mod theme_tour; mod umf_kit_tour; mod story_objects_tour; mod storymode_tour; mod suzume_tour; mod touch_tour; mod training_tour; mod rush_tour; mod keys_tour; mod roster_tour; mod player_card_tour;
+mod announce_tour; mod stage_filter_tour; mod epilogue_tour; mod flag_tour; mod i18n_tour; mod ki_tour; mod menu_motion_tour; mod passive_tour; mod transform_tour; mod pause_tour; mod replay; mod results_tour; mod story_tour; mod story_loop_tour; mod theme_tour; mod umf_kit_tour; mod story_objects_tour; mod storymode_tour; mod suzume_tour; mod touch_tour; mod training_tour; mod rush_tour; mod keys_tour; mod roster_tour; mod player_card_tour;
 async fn frames(app: &mut App, n: usize) {
     for _ in 0..n {
         app.frame().await;
@@ -376,6 +376,7 @@ async fn hud_tour(app: &mut App, dir: &str) {
     team_fight(app, dir, "h5-5v5-sequence", false, 5, "volcano", 200, true).await;
     team_win(app, dir, "h6-team-win-parallel", true, 5).await;
     team_win(app, dir, "h7-team-win-sequence", false, 5).await;
+    ki_tour::run(app, dir).await;
 }
 
 /// Story / cinematic features: face-off, awakening, defeats, boss, cutscenes, zoomed-out 5v5.
@@ -1219,7 +1220,7 @@ async fn market_tour(app: &mut App, dir: &str) {
     let tree = Tree {
         entries: files
             .into_iter()
-            .map(|(path, size)| TreeEntry { path, size })
+            .map(|(path, size)| TreeEntry { path, size, ..Default::default() })
             .collect(),
         truncated: false,
     };
@@ -1245,6 +1246,7 @@ async fn market_tour(app: &mut App, dir: &str) {
             files: it.files.len(),
             active: it.name == "kfm",
             installed_at: 1,
+            version: String::new(),
         });
     }
     persist
@@ -1269,7 +1271,7 @@ async fn market_tour(app: &mut App, dir: &str) {
     screen(app, dir, "market-installed", 3).await;
 }
 async fn ui_tour(app: &mut App, dir: &str) {
-    for tab in 0..6 {
+    for tab in 0..7 {
         app.screen = Screen::Settings {
             tab,
             cur: if tab == 1 { 2 } else { 1 },

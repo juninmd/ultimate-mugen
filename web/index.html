@@ -34,7 +34,7 @@
 <body>
   <canvas id="glcanvas" tabindex="1" aria-label="Ultimate MUGEN"></canvas>
   <label id="imp" aria-label="Import M.U.G.E.N">Import M.U.G.E.N<input id="ume-file" type="file" accept=".zip" multiple /></label>
-  <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar" role="progressbar" aria-labelledby="bootmsg" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div><span id="bootmsg" aria-live="polite">Downloading the game…</span></div>
+  <div id="boot"><b>ULTIMATE MUGEN</b><div id="bar" role="progressbar" aria-labelledby="bootmsg" aria-valuemin="0" aria-valuemax="100"><i></i></div><span id="bootmsg" aria-live="polite">Downloading the game…</span></div>
   <div id="fatal" role="alert"><span id="fataltx"></span><button id="fatalbtn" type="button"></button></div>
   <div id="rot" role="status"><span id="rottx"></span><button id="rotx" type="button" aria-label="Close">&times;</button></div>
   <script src="gamepad.js"></script>
@@ -68,7 +68,8 @@
       const res = await fetch(url);
       const encoded = !!res.headers.get('content-encoding');
       const total = encoded ? 0 : +res.headers.get('content-length') || 0;
-      if (!total) barBox.classList.add('ind');
+      if (total) setProgress(0);
+      else barBox.classList.add('ind');
       let got = 0;
       const body = res.body ? res.body.pipeThrough(new TransformStream({ transform(chunk, ctl) { got += chunk.length; if (total) setProgress(Math.min(95, got / total * 100)); ctl.enqueue(chunk); } })) : res.body;
       msg.textContent = tx.download;

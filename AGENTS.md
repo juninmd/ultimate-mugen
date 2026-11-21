@@ -46,6 +46,7 @@
 - Enable probes with `UME_TRACE=1` (desktop), `?perf=1` (web), `UME_WATCHDOG=1` and `UME_HITCH_MS=<ms>` (frame hitch log).
 
 ## Verification
+- Every change runs the in-engine smoke test (`--smoke <dir>`, web `node scripts/smoke-web.js`); the report and screenshots are the evidence (`docs/wiki/Smoke-Test.md`).
 - Every change gets a browser smoke test: `scripts/build-web.sh`, serve `web/dist`, drive it in headless Chromium with Playwright (hold keys at least 100 ms), and look at screenshots.
 - Screenshot tours: `UME_SHOTS_ONLY=pause|hud|menu xvfb-run -a target/release/ultimate-mugen --shots <dir> --res 1280x720 --mute`.
 - Story tours: `UME_TOUR=storymode` plays the whole run; `UME_TOUR=storyobjects` captures breakables, pickups and the bonus round; `UME_TOUR=epilogue` captures the per-fighter epilogues (`?e2e_epilogue=1` opens one in the web build).

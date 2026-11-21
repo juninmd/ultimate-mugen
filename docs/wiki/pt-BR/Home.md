@@ -53,6 +53,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Engenharia reversa do port para navegador](Engenharia-Reversa-Ikemen-Web.md) | Desenvolvedores | Como uma build de M.U.G.E.N com 78 lutadores roda no navegador, e o que copiamos dela |
 | [Pesquisa de jogos de luta](Pesquisa-Jogos-Luta.md) | Desenvolvedores | Pesquisa de outros lutadores e lista priorizada de melhorias |
 | [Auditoria de animações nativas](Auditoria-Animacoes-Nativas.md) | Desenvolvedores | Cobertura de poses do elenco nativo |
+| [Smoke test (modo debug)](Smoke-Test.md) | Desenvolvedores | Um comando valida as features principais no desktop e na web, com prints e relatório |
 | [Estresse e resiliência](Estresse-e-Resiliencia.md) | Desenvolvedores | Fuzzing, limites de spawners e números do caminho quente |
 | [Solução de problemas](Problemas.md) | Todos | Erros comuns e ferramentas de diagnóstico |
 

@@ -33,6 +33,7 @@ mod session;
 mod settings;
 mod settings_labels;
 mod shots;
+mod smoke;
 mod sound_mix;
 mod stage_data; mod stage_tour;
 mod stagefx;
@@ -224,12 +225,13 @@ async fn game() {
     let touch_dev = web_input::is_touch();
     #[cfg(not(target_arch = "wasm32"))]
     let touch_dev = cfg!(any(target_os = "android", target_os = "ios"));
-    let mut app = app::App::new(has("--touch") || touch_dev, (shots.is_none() || has("--shots-audio")) && !has("--mute")).await;
+    let mut app = app::App::new(has("--touch") || touch_dev, (shots.is_none() || has("--shots-audio")) && !has("--mute") && !smoke::requested()).await;
     #[cfg(target_arch = "wasm32")]
     app.apply_deep_link();
     #[cfg(target_arch = "wasm32")]
     crate::web_sprites::prefetch_menu(app.reg.chars.iter().filter(|entry| !entry.mugen).map(crate::web_sprites::pack_name).collect());
     if let Some(dir) = shots { shots::run(&mut app, &dir).await; return; }
+    if smoke::requested() { smoke::run_and_exit(&mut app).await; return; }
     #[cfg(not(any(target_arch = "wasm32", target_os = "android", target_os = "ios")))]
     match netlink::NetArgs::parse(&args) {
         Ok(Some(n)) => app.start_netplay(&n).await,

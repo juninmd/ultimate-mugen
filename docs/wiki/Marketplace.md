@@ -51,6 +51,10 @@ Set `UME_MARKET_HOME` to move the folder on desktop. Each installed item is a si
 
 The listing uses the GitHub API (60 requests per hour without a token) and file downloads use `raw.githubusercontent.com`, which is not limited the same way. Listings send the saved ETag, so an unchanged repository answers `304` and is served from the local cache. A repository is refreshed when you open it if the cache is older than 10 minutes, or on demand with `R`.
 
+### Automatic updates
+
+Every listing entry keeps the Git blob `sha` of each file. An item's version is a hash of its file paths and shas, saved with the installed item. While the game runs (and at startup) each repository that has installed items is re-listed every 10 minutes; any installed item whose version differs from the repository is downloaded again, and only that item. Updated items keep their active or inactive state. Downloads add `?v=<sha>` so a fresh push is never served from the `raw.githubusercontent.com` cache. Items installed before versions existed are reinstalled once.
+
 To raise the API limit press `T` and paste a personal access token (no scopes needed for public repositories), or set `UME_GITHUB_TOKEN` / `GITHUB_TOKEN` on desktop. The token is only ever sent to `api.github.com`.
 
 ## Safety limits

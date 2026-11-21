@@ -64,12 +64,16 @@ pub(super) fn passives_cns(nc: &NativeChar) -> String {
     out
 }
 
-pub(super) fn voice_state(m: &NativeMove, sid: i32) -> String {
+pub(crate) fn voice_state(m: &NativeMove, sid: i32) -> String {
     let Some((group, index)) = m.voice.as_deref().and_then(|voice| {
         let (group, index) = voice.split_once(',')?;
         Some((group.trim().parse::<u16>().ok()?, index.trim().parse::<u16>().ok()?))
-    }) else { return String::new() };
-    format!("[State {sid}, voice]\ntype = PlaySnd\ntrigger1 = Time = 0\nvalue = {group}, {index}\nchannel = 4\nstopongethit = 1\n\n")
+    }) else { return move_sounds(m, sid) };
+    format!("[State {sid}, voice]\ntype = PlaySnd\ntrigger1 = Time = 0\nvalue = {group}, {index}\nchannel = 4\nstopongethit = 1\n\n") + &move_sounds(m, sid)
+}
+
+fn move_sounds(m: &NativeMove, sid: i32) -> String {
+    m.sounds.iter().map(|s| format!("[State {sid}, snd]\ntype = PlaySnd\ntrigger1 = AnimElem = {}\nvalue = {}{}, {}\n\n", s.at.max(1), if s.fight { "F" } else { "" }, s.snd[0], s.snd[1])).collect()
 }
 
 pub(super) fn voice_and_traits_state(m: &NativeMove, sid: i32) -> String {
@@ -101,6 +105,7 @@ pub(super) fn awakening_palette(nc: &NativeChar, palette: Option<&Value>) -> Opt
 }
 
 pub(super) fn insert_voices(d: &mut CharDef, nc: &NativeChar) {
+    for (key, wav) in crate::mugen_parity::pack_sounds(nc) { d.sounds.insert(key, wav); }
     if nc.id != "kaito" { return; }
     d.sounds.insert((1000, 0), include_bytes!("../../../assets/chars/voices/kaito/dragon.wav").to_vec());
     d.sounds.insert((1000, 1), include_bytes!("../../../assets/chars/voices/kaito/rush.wav").to_vec());

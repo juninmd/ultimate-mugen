@@ -22,7 +22,7 @@ pub(super) fn try_load(nc: &NativeChar, fr: &NativeFrame, palette: Option<&Value
     let height_ratio = height / STAND_UNITS;
     render.scale *= height_ratio;
     super::pixel_hit::fit_to_character(nc, fr, &mut render, height_ratio);
-    super::pixel_fit::fit_boxes(&mut render, fr);
+    if !super::mugen_parity::exact_boxes(nc) { super::pixel_fit::fit_boxes(&mut render, fr); }
     Some(render)
 }
 

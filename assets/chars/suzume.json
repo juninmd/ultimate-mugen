@@ -831,13 +831,55 @@
       "simple": "super",
       "moves": [{"at":1,"vel":[0,-6]}],
       "projectile": [
-        {"at":2,"anim":"stormKunai","hitAnim":"kunaiHit","speed":[8,2.4],"offset":[36,-66],"damage":42,"level":"medium","launch":false,"hits":2,"element":"wind"},
-        {"at":3,"anim":"stormKunai","hitAnim":"kunaiHit","speed":[8,2.1999999999999997],"offset":[36,-63],"damage":42,"level":"medium","launch":false,"hits":2,"element":"wind"},
-        {"at":4,"anim":"stormKunai","hitAnim":"kunaiHit","speed":[8,2],"offset":[36,-60],"damage":42,"level":"medium","launch":false,"hits":2,"element":"wind"},
-        {"at":5,"anim":"stormKunai","hitAnim":"kunaiHit","speed":[8,1.7999999999999998],"offset":[36,-57],"damage":42,"level":"medium","launch":false,"hits":2,"element":"wind"},
-        {"at":6,"anim":"stormKunai","hitAnim":"kunaiHit","speed":[8,1.5999999999999999],"offset":[36,-54],"damage":42,"level":"medium","launch":true,"hits":2,"element":"wind"}
+        {"at":2,"anim":"stormKunai","hitAnim":"kunaiHit","speed":[8,2.4],"offset":[36,-66],"damage":42,"level":"medium","launch":false,"hits":2,"element":"wind","missTime":3,"hitflag":"MAFP"},
+        {
+          "at": 3,
+          "anim": "stormKunai",
+          "hitAnim": "kunaiHit",
+          "speed": [8,2.1999999999999997],
+          "offset": [36,-63],
+          "damage": 42,
+          "level": "medium",
+          "launch": false,
+          "hits": 2,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {"at":4,"anim":"stormKunai","hitAnim":"kunaiHit","speed":[8,2],"offset":[36,-60],"damage":42,"level":"medium","launch":false,"hits":2,"element":"wind","missTime":3,"hitflag":"MAFP"},
+        {
+          "at": 5,
+          "anim": "stormKunai",
+          "hitAnim": "kunaiHit",
+          "speed": [8,1.7999999999999998],
+          "offset": [36,-57],
+          "damage": 42,
+          "level": "medium",
+          "launch": false,
+          "hits": 2,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 6,
+          "anim": "stormKunai",
+          "hitAnim": "kunaiHit",
+          "speed": [8,1.5999999999999999],
+          "offset": [36,-54],
+          "damage": 42,
+          "level": "medium",
+          "launch": true,
+          "hits": 2,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[22,8,34],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[215,145,255]}
     },
     {
       "id": "spread",
@@ -891,7 +933,10 @@
         {"at":8,"damage":48,"level":"light","knockback":[0,0]},
         {"at":9,"damage":120,"level":"heavy","launch":true,"knockback":[-6,-6]}
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[22,8,34],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[215,145,255]}
     },
     {
       "id": "ult_judgement",
@@ -904,9 +949,54 @@
       "fx": "aura",
       "hits": [{"at":3,"damage":96,"level":"heavy","knockback":[0,0]}],
       "projectile": [
-        {"at":4,"anim":"stormKunai","hitAnim":"kunaiHit","speed":[7.5,0],"offset":[36,-66],"damage":54,"hits":3,"removeTime":60,"level":"heavy","launch":false,"priority":6,"element":"wind"},
-        {"at":5,"anim":"stormKunai","hitAnim":"kunaiHit","speed":[7.5,0],"offset":[36,-56],"damage":54,"hits":3,"removeTime":60,"level":"heavy","launch":false,"priority":6,"element":"wind"},
-        {"at":6,"anim":"stormKunai","hitAnim":"kunaiHit","speed":[7.5,0],"offset":[36,-46],"damage":54,"hits":3,"removeTime":60,"level":"heavy","launch":false,"priority":6,"element":"wind"},
+        {
+          "at": 4,
+          "anim": "stormKunai",
+          "hitAnim": "kunaiHit",
+          "speed": [7.5,0],
+          "offset": [36,-66],
+          "damage": 54,
+          "hits": 3,
+          "removeTime": 60,
+          "level": "heavy",
+          "launch": false,
+          "priority": 6,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 5,
+          "anim": "stormKunai",
+          "hitAnim": "kunaiHit",
+          "speed": [7.5,0],
+          "offset": [36,-56],
+          "damage": 54,
+          "hits": 3,
+          "removeTime": 60,
+          "level": "heavy",
+          "launch": false,
+          "priority": 6,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 6,
+          "anim": "stormKunai",
+          "hitAnim": "kunaiHit",
+          "speed": [7.5,0],
+          "offset": [36,-46],
+          "damage": 54,
+          "hits": 3,
+          "removeTime": 60,
+          "level": "heavy",
+          "launch": false,
+          "priority": 6,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
         {
           "at": 7,
           "anim": "stormKunai",
@@ -920,10 +1010,15 @@
           "launch": true,
           "priority": 6,
           "element": "wind",
-          "knockback": [-3,-6]
+          "knockback": [-3,-6],
+          "missTime": 3,
+          "hitflag": "MAFP"
         }
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[22,8,34],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[215,145,255]}
     },
     {
       "id": "escape_burst",
@@ -1261,7 +1356,8 @@
         ]
       },
       {"id":"invocacao_oboro","name":"Metamorfose: Oboro","cost":1000,"attack":1.25,"defense":1.2,"character":"oboro","replaceMoves":false,"moves":[]}
-    ]
+    ],
+    "charge": {"auraColor":[85,35,120],"shake":true}
   },
   "speed": 1.16,
   "passives": {
@@ -1279,5 +1375,22 @@
       "drainOnSuper": true,
       "tiers": [{"at":30,"attack":1.06,"speed":1.03},{"at":60,"attack":1.14,"speed":1.06},{"at":100,"attack":1.26,"speed":1.1}]
     }
+  },
+  "profile": {
+    "country": "JP",
+    "nationality": {"en":"Japanese","pt":"Japonesa","es":"Japonesa"},
+    "origin": {"en":"Fallen Kagerou Village","pt":"Vila Extinta Kagerou","es":"Aldea Extinta Kagerou"},
+    "title": {"en":"Phantom Kunoichi of Kagerou","pt":"Kunoichi Fantasma de Kagerou","es":"Kunoichi Fantasma de Kagerou"},
+    "fightingStyle": {"en":"Kagerou Shadow Assassination","pt":"Ninjutsu Sombrio Kagerou","es":"Ninjutsu Sombrío Kagerou"},
+    "affiliation": {"en":"Last of Clan Kagerou","pt":"Última do Clã Kagerou","es":"Última del Clan Kagerou"},
+    "bio": {
+      "en": "A soft-spoken kunoichi of a vanished clan who strikes from every blind spot.",
+      "pt": "Uma kunoichi de fala mansa, de um clã extinto, que ataca sempre no ponto cego.",
+      "es": "Una kunoichi de voz suave de un clan extinto que ataca desde cada punto ciego."
+    },
+    "element": "shadow",
+    "weakness": "wind",
+    "alignment": "anti-hero",
+    "tags": ["kunoichi","teleport","super-speed","mixup"]
   }
 }

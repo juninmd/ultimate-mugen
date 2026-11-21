@@ -1287,7 +1287,9 @@
           "launch": true,
           "knockback": [-2,-8],
           "priority": 6,
-          "element": "fire"
+          "element": "fire",
+          "missTime": 3,
+          "hitflag": "MAFP"
         },
         {
           "at": 4,
@@ -1302,7 +1304,9 @@
           "launch": true,
           "knockback": [-2,-8],
           "priority": 6,
-          "element": "fire"
+          "element": "fire",
+          "missTime": 3,
+          "hitflag": "MAFP"
         },
         {
           "at": 5,
@@ -1317,10 +1321,15 @@
           "launch": true,
           "knockback": [-2,-8],
           "priority": 6,
-          "element": "fire"
+          "element": "fire",
+          "missTime": 3,
+          "hitflag": "MAFP"
         }
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[26,6,38],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[210,120,255]}
     },
     {
       "id": "snare",
@@ -1360,7 +1369,10 @@
         {"at":6,"damage":52,"level":"heavy","knockback":[0.5,0],"element":"fire"},
         {"at":7,"damage":52,"level":"heavy","launch":true,"knockback":[-3,-6],"element":"fire"}
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[26,6,38],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[210,120,255]}
     },
     {
       "id": "ex_hellorb",
@@ -1405,7 +1417,10 @@
         {"at":7,"damage":62.4,"level":"heavy","launch":true,"knockback":[-3,-6],"element":"fire"}
       ],
       "fx": "aura",
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[26,6,38],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[210,120,255]}
     },
     {"id":"overhead","name":"Oni Cleaver","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":76,"level":"medium","guard":"high","hitstun":20}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
@@ -1691,7 +1706,25 @@
         ],
         "replaceMoves": false
       }
-    ]
+    ],
+    "charge": {"auraColor":[85,25,120],"shake":true}
   },
-  "speed": 1.08
+  "speed": 1.08,
+  "profile": {
+    "country": "JP",
+    "nationality": {"en":"Oni Realm","pt":"Reino Oni","es":"Reino Oni"},
+    "origin": {"en":"Sealed Gate of Ash","pt":"Portão Selado das Cinzas","es":"Puerta Sellada de las Cenizas"},
+    "title": {"en":"The Ashen Oni","pt":"O Oni das Cinzas","es":"El Oni de las Cenizas"},
+    "fightingStyle": {"en":"Cursed Flame Brutality","pt":"Brutalidade das Chamas Malditas","es":"Brutalidad de Llamas Malditas"},
+    "affiliation": {"en":"Ashen Gate","pt":"Portão das Cinzas","es":"Puerta de las Cenizas"},
+    "bio": {
+      "en": "An ancient oni who crawled out of a sealed gate, wreathed in violet flames of ruin.",
+      "pt": "Um oni milenar que rastejou de um portão selado, envolto em chamas violetas de ruína.",
+      "es": "Un oni milenario que salió de una puerta sellada, envuelto en llamas violetas de ruina."
+    },
+    "element": "shadow",
+    "weakness": "light",
+    "alignment": "villain",
+    "tags": ["powerhouse","demon","armor","fire"]
+  }
 }

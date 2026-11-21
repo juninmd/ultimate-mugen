@@ -744,8 +744,26 @@
       "invuln": [1,3],
       "moves": [{"at":2,"vel":[3.4,-10]}],
       "hits": [{"at":2,"damage":60,"level":"heavy","element":"earth"},{"at":4,"damage":60,"level":"heavy","launch":true,"shake":18,"knockback":[-4,-5],"element":"earth"}],
-      "projectile": {"at":6,"anim":"quakeFx","hitAnim":"quakeHit","speed":[5,0],"offset":[40,0],"damage":50,"hits":6,"removeTime":40,"level":"heavy","launch":true,"knockback":[-2,-5],"element":"earth"},
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "projectile": {
+        "at": 6,
+        "anim": "quakeFx",
+        "hitAnim": "quakeHit",
+        "speed": [5,0],
+        "offset": [40,0],
+        "damage": 50,
+        "hits": 6,
+        "removeTime": 40,
+        "level": "heavy",
+        "launch": true,
+        "knockback": [-2,-5],
+        "element": "earth",
+        "missTime": 3,
+        "hitflag": "MAFP"
+      },
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[30,18,6],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,200,110]}
     },
     {
       "id": "cornerdive",
@@ -776,7 +794,10 @@
       "anim": "titanSuplex",
       "cost": 1000,
       "throw": {"damage":300,"at":2,"bind":[34,0],"launch":[-4,-6]},
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[30,18,6],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,200,110]}
     },
     {
       "id": "ex_quake",
@@ -814,7 +835,10 @@
       "throw": {"damage":300,"at":2,"bind":[34,0],"launch":[-4,-6]},
       "invuln": [1,7],
       "fx": "aura",
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[30,18,6],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,200,110]}
     },
     {
       "id": "overhead",
@@ -1111,7 +1135,25 @@
         ],
         "replaceMoves": false
       }
-    ]
+    ],
+    "charge": {"auraColor":[105,70,20],"shake":true}
   },
-  "speed": 1.06
+  "speed": 1.06,
+  "profile": {
+    "country": "BR",
+    "nationality": {"en":"Brazilian","pt":"Brasileiro","es":"Brasileño"},
+    "origin": {"en":"Steel Docks, Santos","pt":"Docas de Aço, Santos","es":"Muelles de Acero, Santos"},
+    "title": {"en":"Three-Time Heavyweight Bulldozer","pt":"Tricampeão Peso-Pesado Bulldozer","es":"Tricampeón Peso Pesado Bulldozer"},
+    "fightingStyle": {"en":"Heavyweight Street Boxing & Grappling","pt":"Boxe Pesado de Rua e Agarrão","es":"Boxeo Pesado Callejero y Agarre"},
+    "affiliation": {"en":"Iron Ring Circuit","pt":"Circuito Ringue de Ferro","es":"Circuito Anillo de Hierro"},
+    "bio": {
+      "en": "A three-time heavyweight champion who treats every street corner like a title defense.",
+      "pt": "Tricampeão peso-pesado que trata cada esquina como uma defesa de cinturão.",
+      "es": "Tricampeón de peso pesado que trata cada esquina como una defensa del título."
+    },
+    "element": "earth",
+    "weakness": "wind",
+    "alignment": "hero",
+    "tags": ["grappler","heavy","armor","brawler"]
+  }
 }

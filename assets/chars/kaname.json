@@ -947,7 +947,9 @@
           "priority": 6,
           "removeTime": 70,
           "knockback": [0,0],
-          "element": "ice"
+          "element": "ice",
+          "missTime": 3,
+          "hitflag": "MAFP"
         },
         {
           "at": 3,
@@ -962,7 +964,9 @@
           "priority": 6,
           "removeTime": 70,
           "knockback": [0,0],
-          "element": "ice"
+          "element": "ice",
+          "missTime": 3,
+          "hitflag": "MAFP"
         },
         {
           "at": 3,
@@ -977,10 +981,15 @@
           "priority": 6,
           "removeTime": 70,
           "knockback": [0,0],
-          "element": "ice"
+          "element": "ice",
+          "missTime": 3,
+          "hitflag": "MAFP"
         }
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[10,20,40],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[165,220,255]}
     },
     {
       "id": "iai",
@@ -1020,7 +1029,10 @@
         {"at":9,"damage":42,"level":"light","hitstun":22,"knockback":[-1,0],"element":"ice"},
         {"at":10,"damage":190,"level":"heavy","launch":true,"knockback":[-3,-8],"element":"ice"}
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[10,20,40],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[165,220,255]}
     },
     {
       "id": "drawThrow",
@@ -1077,7 +1089,10 @@
       ],
       "cost": 3000,
       "fx": "aura",
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[10,20,40],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[165,220,255]}
     },
     {
       "id": "overhead",
@@ -1196,14 +1211,101 @@
       "cost": 1000,
       "invuln": [1,4],
       "projectile": [
-        {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[5,-0.6],"offset":[30,-100],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]},
-        {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[5.5,-0.3],"offset":[30,-85],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]},
-        {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[6,0],"offset":[30,-70],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]},
-        {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[6,0],"offset":[30,-55],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]},
-        {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[5.5,0.3],"offset":[30,-40],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]},
-        {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[5,0.6],"offset":[30,-25],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]}
+        {
+          "at": 3,
+          "anim": "winterFangFx",
+          "hitAnim": "winterFangHit",
+          "speed": [5,-0.6],
+          "offset": [30,-100],
+          "damage": 28,
+          "hits": 6,
+          "level": "medium",
+          "priority": 6,
+          "removeTime": 80,
+          "knockback": [0,0],
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 3,
+          "anim": "winterFangFx",
+          "hitAnim": "winterFangHit",
+          "speed": [5.5,-0.3],
+          "offset": [30,-85],
+          "damage": 28,
+          "hits": 6,
+          "level": "medium",
+          "priority": 6,
+          "removeTime": 80,
+          "knockback": [0,0],
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 3,
+          "anim": "winterFangFx",
+          "hitAnim": "winterFangHit",
+          "speed": [6,0],
+          "offset": [30,-70],
+          "damage": 28,
+          "hits": 6,
+          "level": "medium",
+          "priority": 6,
+          "removeTime": 80,
+          "knockback": [0,0],
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 3,
+          "anim": "winterFangFx",
+          "hitAnim": "winterFangHit",
+          "speed": [6,0],
+          "offset": [30,-55],
+          "damage": 28,
+          "hits": 6,
+          "level": "medium",
+          "priority": 6,
+          "removeTime": 80,
+          "knockback": [0,0],
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 3,
+          "anim": "winterFangFx",
+          "hitAnim": "winterFangHit",
+          "speed": [5.5,0.3],
+          "offset": [30,-40],
+          "damage": 28,
+          "hits": 6,
+          "level": "medium",
+          "priority": 6,
+          "removeTime": 80,
+          "knockback": [0,0],
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 3,
+          "anim": "winterFangFx",
+          "hitAnim": "winterFangHit",
+          "speed": [5,0.6],
+          "offset": [30,-25],
+          "damage": 28,
+          "hits": 6,
+          "level": "medium",
+          "priority": 6,
+          "removeTime": 80,
+          "knockback": [0,0],
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[10,20,40],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[165,220,255]}
     },
     {
       "id": "jab2",
@@ -1459,7 +1561,25 @@
         ],
         "replaceMoves": false
       }
-    ]
+    ],
+    "charge": {"auraColor":[45,85,130],"shake":true}
   },
-  "speed": 1.08
+  "speed": 1.08,
+  "profile": {
+    "country": "JP",
+    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "origin": {"en":"Winter Moon Shrine","pt":"Santuário da Lua de Inverno","es":"Santuario de la Luna Invernal"},
+    "title": {"en":"White Haori Frost Guardian","pt":"Guardião do Haori Branco","es":"Guardián del Haori Blanco"},
+    "fightingStyle": {"en":"Fuyutsuki Ice Iaido","pt":"Iaido Glacial Fuyutsuki","es":"Iaido Glacial Fuyutsuki"},
+    "affiliation": {"en":"Winter Moon Order","pt":"Ordem da Lua de Inverno","es":"Orden de la Luna Invernal"},
+    "bio": {
+      "en": "A white-haori guardian whose katana awakens into a freezing blade of absolute winter.",
+      "pt": "Um guardião de haori branco cuja katana desperta como uma lâmina de gelo capaz de congelar o instante.",
+      "es": "Un guardián de haori blanco cuya katana despierta como una hoja helada de invierno absoluto."
+    },
+    "element": "ice",
+    "weakness": "fire",
+    "alignment": "hero",
+    "tags": ["sword","ice","super-speed","counter"]
+  }
 }

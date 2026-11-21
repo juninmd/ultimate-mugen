@@ -1010,10 +1010,43 @@
       "simple": "super",
       "invuln": [1,3],
       "projectile": [
-        {"at":3,"anim":"spectral","hitAnim":"spectralHit","speed":[3.2,0],"offset":[62,-10],"damage":48,"hits":9,"level":"heavy","launch":true,"priority":7,"removeTime":90,"element":"lightning"},
-        {"at":4,"anim":"spectralWave","hitAnim":"spectralHit","speed":[5.5,0],"offset":[40,-34],"damage":40,"hits":4,"level":"heavy","launch":true,"priority":6,"removeTime":70,"element":"lightning"}
+        {
+          "at": 3,
+          "anim": "spectral",
+          "hitAnim": "spectralHit",
+          "speed": [3.2,0],
+          "offset": [62,-10],
+          "damage": 48,
+          "hits": 9,
+          "level": "heavy",
+          "launch": true,
+          "priority": 7,
+          "removeTime": 90,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "spectralWave",
+          "hitAnim": "spectralHit",
+          "speed": [5.5,0],
+          "offset": [40,-34],
+          "damage": 40,
+          "hits": 4,
+          "level": "heavy",
+          "launch": true,
+          "priority": 6,
+          "removeTime": 70,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[34,4,14],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,110,150]}
     },
     {
       "id": "kyoka",
@@ -1032,8 +1065,25 @@
         {"at":6,"damage":40,"level":"medium"},
         {"at":9,"damage":90,"level":"heavy","launch":true,"knockback":[-6,-7]}
       ],
-      "projectile": {"at":9,"anim":"kyokaFlame","hitAnim":"blackFlameHit","speed":[0,0],"offset":[56,-8],"damage":44,"hits":4,"level":"heavy","launch":true,"priority":6,"removeTime":26},
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "projectile": {
+        "at": 9,
+        "anim": "kyokaFlame",
+        "hitAnim": "blackFlameHit",
+        "speed": [0,0],
+        "offset": [56,-8],
+        "damage": 44,
+        "hits": 4,
+        "level": "heavy",
+        "launch": true,
+        "priority": 6,
+        "removeTime": 26,
+        "missTime": 3,
+        "hitflag": "MAFP"
+      },
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[34,4,14],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,110,150]}
     },
     {
       "id": "ult_eclipse",
@@ -1052,12 +1102,75 @@
         {"at":9,"damage":170,"level":"heavy","launch":true,"knockback":[-7,-8]}
       ],
       "projectile": [
-        {"at":3,"anim":"spectral","hitAnim":"spectralHit","speed":[3.4,0],"offset":[62,-10],"damage":48,"hits":9,"removeTime":90,"level":"heavy","launch":true,"priority":7,"element":"lightning"},
-        {"at":4,"anim":"spectral","hitAnim":"spectralHit","speed":[3.6,0],"offset":[54,-10],"damage":48,"hits":9,"removeTime":90,"level":"heavy","launch":true,"priority":7,"element":"lightning"},
-        {"at":4,"anim":"spectralWave","hitAnim":"spectralHit","speed":[5.5,0],"offset":[44,-34],"damage":44,"hits":5,"removeTime":70,"level":"heavy","launch":true,"priority":6,"element":"lightning"},
-        {"at":9,"anim":"kyokaFlame","hitAnim":"blackFlameHit","speed":[0,0],"offset":[56,-8],"damage":56,"hits":4,"removeTime":30,"level":"heavy","launch":true,"priority":6,"element":"fire"}
+        {
+          "at": 3,
+          "anim": "spectral",
+          "hitAnim": "spectralHit",
+          "speed": [3.4,0],
+          "offset": [62,-10],
+          "damage": 48,
+          "hits": 9,
+          "removeTime": 90,
+          "level": "heavy",
+          "launch": true,
+          "priority": 7,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "spectral",
+          "hitAnim": "spectralHit",
+          "speed": [3.6,0],
+          "offset": [54,-10],
+          "damage": 48,
+          "hits": 9,
+          "removeTime": 90,
+          "level": "heavy",
+          "launch": true,
+          "priority": 7,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "spectralWave",
+          "hitAnim": "spectralHit",
+          "speed": [5.5,0],
+          "offset": [44,-34],
+          "damage": 44,
+          "hits": 5,
+          "removeTime": 70,
+          "level": "heavy",
+          "launch": true,
+          "priority": 6,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 9,
+          "anim": "kyokaFlame",
+          "hitAnim": "blackFlameHit",
+          "speed": [0,0],
+          "offset": [56,-8],
+          "damage": 56,
+          "hits": 4,
+          "removeTime": 30,
+          "level": "heavy",
+          "launch": true,
+          "priority": 6,
+          "element": "fire",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[34,4,14],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,110,150]}
     },
     {
       "id": "escape_burst",
@@ -1392,7 +1505,25 @@
           }
         ]
       }
-    ]
+    ],
+    "charge": {"auraColor":[120,15,45],"shake":true}
   },
-  "passives": {"meterRegen":0.4}
+  "passives": {"meterRegen":0.4},
+  "profile": {
+    "country": "JP",
+    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "origin": {"en":"Eclipse Citadel","pt":"Cidadela do Eclipse","es":"Ciudadela del Eclipse"},
+    "title": {"en":"Illusionist of the Eclipse","pt":"O Ilusionista do Eclipse","es":"El Ilusionista del Eclipse"},
+    "fightingStyle": {"en":"Mikazuki Eclipse Arts","pt":"Artes do Eclipse Mikazuki","es":"Artes del Eclipse Mikazuki"},
+    "affiliation": {"en":"Eclipse Sovereign","pt":"Soberano do Eclipse","es":"Soberano del Eclipse"},
+    "bio": {
+      "en": "The Illusionist of the Eclipse: calm, smiling, and always three steps ahead of reality.",
+      "pt": "O Ilusionista do Eclipse: calmo, sorridente e sempre três passos à frente da realidade.",
+      "es": "El Ilusionista del Eclipse: sereno, sonriente y siempre tres pasos por delante de la realidad."
+    },
+    "element": "shadow",
+    "weakness": "light",
+    "alignment": "villain",
+    "tags": ["boss","illusion","teleport","super-speed"]
+  }
 }

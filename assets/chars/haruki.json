@@ -737,7 +737,10 @@
         {"at":8,"damage":36,"level":"light","hitstun":22,"knockback":[-1.5,0],"element":"lightning"},
         {"at":9,"damage":100,"level":"heavy","launch":true,"knockback":[-3,-8],"shake":10,"element":"lightning"}
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[18,10,34],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[190,150,255]}
     },
     {
       "id": "theorem",
@@ -766,11 +769,14 @@
       "anim": "proof",
       "invuln": [1,3],
       "projectile": [
-        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":36,"level":"medium","hits":8,"removeTime":200,"at":4,"offset":[44,-100],"knockback":[0,0]},
-        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":36,"level":"medium","hits":8,"removeTime":200,"at":4,"offset":[44,-68],"knockback":[0,0]},
-        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":36,"level":"medium","hits":8,"removeTime":200,"at":4,"offset":[44,-36],"knockback":[0,0]}
+        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":36,"level":"medium","hits":8,"removeTime":200,"at":4,"offset":[44,-100],"knockback":[0,0],"missTime":3,"hitflag":"MAFP"},
+        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":36,"level":"medium","hits":8,"removeTime":200,"at":4,"offset":[44,-68],"knockback":[0,0],"missTime":3,"hitflag":"MAFP"},
+        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":36,"level":"medium","hits":8,"removeTime":200,"at":4,"offset":[44,-36],"knockback":[0,0],"missTime":3,"hitflag":"MAFP"}
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[18,10,34],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[190,150,255]}
     },
     {
       "id": "pageThrow",
@@ -815,13 +821,16 @@
       "anim": "proofUlt",
       "invuln": [1,7],
       "projectile": [
-        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":43.2,"level":"medium","hits":10,"removeTime":200,"at":4,"offset":[44,-100],"knockback":[0,0]},
-        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":43.2,"level":"medium","hits":10,"removeTime":200,"at":4,"offset":[44,-68],"knockback":[0,0]},
-        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":43.2,"level":"medium","hits":10,"removeTime":200,"at":4,"offset":[44,-36],"knockback":[0,0]}
+        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":43.2,"level":"medium","hits":10,"removeTime":200,"at":4,"offset":[44,-100],"knockback":[0,0],"missTime":3,"hitflag":"MAFP"},
+        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":43.2,"level":"medium","hits":10,"removeTime":200,"at":4,"offset":[44,-68],"knockback":[0,0],"missTime":3,"hitflag":"MAFP"},
+        {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":43.2,"level":"medium","hits":10,"removeTime":200,"at":4,"offset":[44,-36],"knockback":[0,0],"missTime":3,"hitflag":"MAFP"}
       ],
       "cost": 3000,
       "fx": "aura",
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[18,10,34],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[190,150,255]}
     },
     {"id":"overhead","name":"Spine Strike","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":70.3,"level":"medium","guard":"high","hitstun":20}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
@@ -1104,7 +1113,25 @@
         ],
         "replaceMoves": false
       }
-    ]
+    ],
+    "charge": {"auraColor":[70,40,115],"shake":true}
   },
-  "speed": 1.1
+  "speed": 1.1,
+  "profile": {
+    "country": "JP",
+    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "origin": {"en":"Inkwell Archive, Nara","pt":"Arquivo do Tinteiro, Nara","es":"Archivo del Tintero, Nara"},
+    "title": {"en":"Inkblade Scholar","pt":"Estudioso da Lâmina de Tinta","es":"Erudito de la Hoja de Tinta"},
+    "fightingStyle": {"en":"Calligraphy Barrier Arts","pt":"Artes de Barreira Caligráfica","es":"Artes de Barrera Caligráfica"},
+    "affiliation": {"en":"Keepers of the Written Word","pt":"Guardiões da Palavra Escrita","es":"Guardianes de la Palabra Escrita"},
+    "bio": {
+      "en": "A gentle young scholar who prefers books over brawls—until someone threatens the innocent.",
+      "pt": "Um jovem estudioso gentil que prefere livros a brigas — até que alguém ameace inocentes.",
+      "es": "Un joven erudito amable que prefiere los libros a las peleas, hasta que alguien amenaza a los inocentes."
+    },
+    "element": "shadow",
+    "weakness": "fire",
+    "alignment": "hero",
+    "tags": ["zoner","teleport","tactician","aerial"]
+  }
 }

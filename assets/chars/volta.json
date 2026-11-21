@@ -1261,5 +1261,22 @@
     ],
     "charge": {"auraColor":[40,100,130],"shake":true}
   },
-  "speed": 1.08
+  "speed": 1.08,
+  "profile": {
+    "country": "US",
+    "nationality": {"en":"Synthetic (Lab VX)","pt":"Sintético (Lab VX)","es":"Sintético (Lab VX)"},
+    "origin": {"en":"Sector 9 Robotics Facility","pt":"Laboratório Robótico Setor 9","es":"Laboratorio Robótico Sector 9"},
+    "title": {"en":"Rogue Prototype VX-9","pt":"Protótipo Rebelde VX-9","es":"Prototipo Rebelde VX-9"},
+    "fightingStyle": {"en":"High-Voltage Overdrive Combat","pt":"Combate Overdrive de Alta Voltagem","es":"Combate Overdrive de Alto Voltaje"},
+    "affiliation": {"en":"Independent Automaton","pt":"Autômato Independente","es":"Autómata Independiente"},
+    "bio": {
+      "en": "A prototype combat android who escaped the lab and fights to claim its own free will.",
+      "pt": "Um androide de combate protótipo que fugiu do laboratório e luta para conquistar o próprio livre-arbítrio.",
+      "es": "Un androide de combate prototipo que escapó del laboratorio y lucha por su libre albedrío."
+    },
+    "element": "lightning",
+    "weakness": "earth",
+    "alignment": "hero",
+    "tags": ["android","lightning","teleport","super-speed"]
+  }
 }

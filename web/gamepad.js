@@ -87,6 +87,15 @@
   };
   window.ume_storage_get = (k) => { try { return localStorage.getItem('ume.' + k) || ''; } catch (e) { return ''; } };
   window.ume_storage_set = (k, v) => { try { localStorage.setItem('ume.' + k, v); } catch (e) {} };
+  if (/[?&]debug=1/.test(location.search)) {
+    const box = document.createElement('pre');
+    box.style.cssText = 'position:fixed;left:4px;bottom:4px;z-index:20;margin:0;padding:4px 6px;font:11px monospace;color:#9fe;background:rgba(0,0,0,.7);pointer-events:none;white-space:pre-wrap';
+    document.addEventListener('DOMContentLoaded', () => document.body.appendChild(box));
+    const seen = { pointerdown: 0, pointercancel: 0, touchstart: 0, last: '-' };
+    for (const type of ['pointerdown', 'pointercancel', 'touchstart']) {
+      window.addEventListener(type, (e) => { seen[type]++; seen.last = `${type} ${e.pointerType || ''} ${e.target.id || e.target.tagName}`; box.textContent = `touch=${window.ume_is_touch()} dpr=${window.devicePixelRatio} ${innerWidth}x${innerHeight}\n${JSON.stringify(seen)}`; }, true);
+    }
+  }
   window.ume_dpr = () => window.devicePixelRatio || 1;
   window.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0;
 

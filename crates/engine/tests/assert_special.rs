@@ -120,7 +120,6 @@ fn guard_direction_flags_block_guarding() {
     enter(&mut m, 1, 150);
     ticks(&mut m, 1); enter(&mut m, 1, 150);
     m.fighters[1].state_type = 'S';
-    m.fighters[1].guard_button = true;
     let events_before = m.events.len();
     m.apply_hit(0, 1, &hit, (0.0, 0.0), None);
     assert!(m.fighters[1].ghv.guarded, "baseline: guard state guards");
@@ -128,7 +127,6 @@ fn guard_direction_flags_block_guarding() {
     enter(&mut m, 1, 150);
     ticks(&mut m, 1); enter(&mut m, 1, 150);
     m.fighters[1].state_type = 'S';
-    m.fighters[1].guard_button = true;
     m.fighters[1].asserts |= asf::NOSTANDGUARD;
     m.apply_hit(0, 1, &hit, (0.0, 0.0), None);
     assert!(!m.fighters[1].ghv.guarded);

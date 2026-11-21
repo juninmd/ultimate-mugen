@@ -34,7 +34,15 @@
   window.addEventListener('pagehide', releaseAll);
   window.addEventListener('contextmenu', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
-  function pads() { return navigator.getGamepads ? Array.from(navigator.getGamepads()).filter((p) => p && p.connected) : []; }
+  function pads() {
+    if (!navigator.getGamepads) return [];
+    try {
+      return Array.from(navigator.getGamepads()).filter((p) => p && p.connected);
+    } catch (error) {
+      if (error.name !== 'SecurityError') throw error;
+      return [];
+    }
+  }
   function state(i) {
     const p = pads()[i]; if (!p || !pageActive || document.hidden) return 0;
     const pr = (n) => !!(p.buttons[n] && p.buttons[n].pressed);

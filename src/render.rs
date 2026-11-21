@@ -341,6 +341,7 @@ impl MatchRenderer {
                 }
             })
             .collect();
+        let zoom = reduce_motion.map(|m| m.gain).unwrap_or(1.0);
         let (zoom, focus) = vfx.camera(m, if reduce_motion { 0.0 } else { gain });
         let (fvx, fvy) = (
             focus.0 - m.camera.x + m.view_w / 2.0,

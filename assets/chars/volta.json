@@ -754,15 +754,42 @@
         "repeat": {"count":5,"every":1,"offsetStep":[0,8],"speedStep":[0.4,0]}
       }
     },
-    {"id":"jab","name":"Piston Jab","input":"x","kind":"normal","anim":"jab","hits":[{"at":2,"damage":26,"level":"light"}],"cancels":["strong","lkick","launcher","overhead","slide","string_a"]},
-    {"id":"strong","name":"Rail Cross","input":"y","kind":"normal","anim":"strong","hits":[{"at":3,"damage":70,"level":"heavy"}],"cancels":["arcbolt","chain","overhead"]},
-    {"id":"lkick","name":"Servo Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":30,"level":"light"}]},
-    {"id":"hkick","name":"Turbine Kick","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":68,"level":"heavy"}]},
-    {"id":"cjab","name":"Low Piston","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":22,"level":"light"}]},
-    {"id":"clk","name":"Hydraulic Tap","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":34,"level":"light","guard":"low"}]},
-    {"id":"sweep","name":"Gyro Sweep","input":"b","kind":"normal","anim":"sweep","when":"crouch","hits":[{"at":2,"damage":58,"level":"heavy","guard":"low","launch":true,"knockback":[-3,-2]}]},
-    {"id":"ajab","name":"Drop Hammer","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":40,"level":"medium","guard":"high"}]},
-    {"id":"akick","name":"Thruster Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":52,"level":"medium","guard":"high"}]},
+    {
+      "id": "jab",
+      "name": "Piston Jab",
+      "input": "x",
+      "kind": "normal",
+      "anim": "jab",
+      "hits": [{"at":2,"damage":26,"level":"light"}],
+      "cancels": ["strong","lkick","launcher","overhead","slide","string_a"],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {
+      "id": "strong",
+      "name": "Rail Cross",
+      "input": "y",
+      "kind": "normal",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":70,"level":"heavy"}],
+      "cancels": ["arcbolt","chain","overhead"],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {"id":"lkick","name":"Servo Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":30,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"hkick","name":"Turbine Kick","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":68,"level":"heavy"}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {"id":"cjab","name":"Low Piston","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":22,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"clk","name":"Hydraulic Tap","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":34,"level":"light","guard":"low"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {
+      "id": "sweep",
+      "name": "Gyro Sweep",
+      "input": "b",
+      "kind": "normal",
+      "anim": "sweep",
+      "when": "crouch",
+      "hits": [{"at":2,"damage":58,"level":"heavy","guard":"low","launch":true,"knockback":[-3,-2]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {"id":"ajab","name":"Drop Hammer","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":40,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"akick","name":"Thruster Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":52,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
       "id": "arcbolt",
       "name": "Arc Bolt",
@@ -771,7 +798,8 @@
       "anim": "arcbolt",
       "simple": "sp1",
       "projectile": {"at":3,"anim":"boltFx","hitAnim":"boltHit","speed":[6.6,0],"offset":[46,-68],"damage":56,"hits":2,"element":"lightning"},
-      "cancels": ["chain","overclock"]
+      "cancels": ["chain","overclock"],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "tesla",
@@ -785,7 +813,8 @@
       "hits": [
         {"at":2,"damage":72,"level":"heavy","launch":true,"hitstun":24,"knockback":[-1,-3],"element":"lightning"},
         {"at":3,"damage":42,"level":"heavy","launch":true,"knockback":[-3,-8],"element":"lightning"}
-      ]
+      ],
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "overclock",
@@ -797,7 +826,8 @@
       "fx": "aura",
       "moves": [{"at":2,"vel":[8.5,0]},{"at":3,"vel":[7.5,0]},{"at":4,"vel":[3,0]}],
       "hits": [{"at":2,"damage":46,"level":"medium","element":"lightning"},{"at":3,"damage":40,"level":"heavy","knockback":[-6,-3],"launch":true,"element":"lightning"}],
-      "armor": {"hits":1,"threshold":80}
+      "armor": {"hits":1,"threshold":80},
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "core",
@@ -824,6 +854,7 @@
         "missTime": 3,
         "hitflag": "MAFP"
       },
+      "sounds": [{"at":1,"snd":[200,4]}],
       "shake": {"at":2,"time":18,"ampl":5,"freq":75},
       "flash": {"at":1,"time":12,"color":[8,22,42],"under":true,"superMove":true},
       "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[160,240,255]}
@@ -839,7 +870,8 @@
         {"at":2,"anim":"boltFx","hitAnim":"boltHit","speed":[5.2,0],"offset":[44,-64],"damage":14,"hits":2,"level":"light","removeTime":90,"element":"lightning"},
         {"at":2,"anim":"boltFx","hitAnim":"boltHit","speed":[5.2,0],"offset":[44,-44],"damage":14,"hits":2,"level":"light","removeTime":90,"element":"lightning"}
       ],
-      "cancels": ["core"]
+      "cancels": ["core"],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "capacitor",
@@ -848,9 +880,10 @@
       "kind": "special",
       "anim": "capacitor",
       "parry": {"window":[1,4]},
-      "hits": [{"at":5,"damage":92,"level":"heavy","launch":true,"knockback":[-4,-4],"element":"lightning"}]
+      "hits": [{"at":5,"damage":92,"level":"heavy","launch":true,"knockback":[-4,-4],"element":"lightning"}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
-    {"id":"shock","name":"Shock Throw","input":"y+b","kind":"normal","when":"stand","anim":"shock","throw":{"damage":85,"bind":[30,0],"launch":[-4,-6],"at":1}},
+    {"id":"shock","name":"Shock Throw","input":"y+b","kind":"normal","when":"stand","anim":"shock","throw":{"damage":85,"bind":[30,0],"launch":[-4,-6],"at":1},"sounds":[{"at":1,"snd":[200,5]}]},
     {
       "id": "relay",
       "name": "Storm Relay",
@@ -868,6 +901,7 @@
         {"at":8,"damage":52,"level":"light","knockback":[0,0],"element":"lightning"},
         {"at":9,"damage":90,"level":"heavy","launch":true,"knockback":[-5,-6],"element":"lightning"}
       ],
+      "sounds": [{"at":1,"snd":[200,4]}],
       "shake": {"at":2,"time":18,"ampl":5,"freq":75},
       "flash": {"at":1,"time":12,"color":[8,22,42],"under":true,"superMove":true},
       "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[160,240,255]}
@@ -881,7 +915,8 @@
       "projectile": [{"at":3,"anim":"boltFx","hitAnim":"boltHit","speed":[8.2,0],"offset":[46,-68],"damage":72.8,"hits":3,"priority":2,"level":"heavy","element":"lightning"}],
       "cancels": ["chain","overclock"],
       "cost": 250,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ex_tesla",
@@ -896,7 +931,8 @@
         {"at":3,"damage":54.6,"level":"heavy","launch":true,"knockback":[-3,-8],"element":"lightning"}
       ],
       "cost": 500,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "ult_relay",
@@ -916,12 +952,22 @@
         {"at":9,"damage":108,"level":"heavy","launch":true,"knockback":[-5,-6],"element":"lightning"}
       ],
       "fx": "aura",
+      "sounds": [{"at":1,"snd":[200,4]}],
       "shake": {"at":2,"time":18,"ampl":5,"freq":75},
       "flash": {"at":1,"time":12,"color":[8,22,42],"under":true,"superMove":true},
       "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[160,240,255]}
     },
-    {"id":"overhead","name":"Servo Slam","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":64.6,"level":"medium","guard":"high","hitstun":20}]},
-    {"id":"launcher","name":"Coil Launcher","input":"y","kind":"normal","when":"crouch","anim":"strong","hits":[{"at":3,"damage":58,"level":"heavy","launch":true,"hitstun":22,"knockback":[-1,-6]}]},
+    {"id":"overhead","name":"Servo Slam","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":64.6,"level":"medium","guard":"high","hitstun":20}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {
+      "id": "launcher",
+      "name": "Coil Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":58,"level":"heavy","launch":true,"hitstun":22,"knockback":[-1,-6]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
     {
       "id": "divekick",
       "name": "Magnet Drop",
@@ -930,7 +976,8 @@
       "anim": "akick",
       "when": "air",
       "hits": [{"at":2,"damage":57.2,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}],
-      "moves": [{"at":1,"vel":[1.8,2.5]}]
+      "moves": [{"at":1,"vel":[1.8,2.5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "slide",
@@ -940,7 +987,8 @@
       "anim": "sweep",
       "when": "stand",
       "hits": [{"at":2,"damage":49.3,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5]}],
-      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}]
+      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "escape_burst",
@@ -952,7 +1000,8 @@
       "cost": 500,
       "burst": true,
       "invuln": [1,3],
-      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}]
+      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "lunge",
@@ -961,7 +1010,8 @@
       "kind": "normal",
       "anim": "strong",
       "moves": [{"at":1,"vel":[5.5,0]},{"at":3,"vel":[1.5,0]}],
-      "hits": [{"at":3,"damage":80.5,"level":"heavy","knockback":[-3,-1]}]
+      "hits": [{"at":3,"damage":80.5,"level":"heavy","knockback":[-3,-1]}],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "falcondive",
@@ -971,7 +1021,8 @@
       "when": "air",
       "anim": "akick",
       "moves": [{"at":1,"vel":[4.5,2.2]}],
-      "hits": [{"at":2,"damage":57.2,"level":"medium","guard":"high"}]
+      "hits": [{"at":2,"damage":57.2,"level":"medium","guard":"high"}],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab2",
@@ -982,7 +1033,8 @@
       "hits": [{"at":2,"damage":23,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["arcbolt","chain"],
-      "rekka": {"after":["jab"],"window":[1,18],"contact":true}
+      "rekka": {"after":["jab"],"window":[1,18],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab3",
@@ -993,7 +1045,8 @@
       "hits": [{"at":2,"damage":63,"level":"medium","knockback":[-3,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["arcbolt","chain"],
-      "rekka": {"after":["jab2"],"window":[1,13],"contact":true}
+      "rekka": {"after":["jab2"],"window":[1,13],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick2",
@@ -1004,7 +1057,8 @@
       "hits": [{"at":2,"damage":27,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["arcbolt","chain"],
-      "rekka": {"after":["lkick"],"window":[1,20],"contact":true}
+      "rekka": {"after":["lkick"],"window":[1,20],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick3",
@@ -1015,7 +1069,8 @@
       "hits": [{"at":2,"damage":51,"level":"medium","knockback":[-3.5,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["arcbolt","chain"],
-      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true}
+      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong2",
@@ -1026,7 +1081,8 @@
       "hits": [{"at":2,"damage":60,"level":"medium","knockback":[-4,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["arcbolt","chain"],
-      "rekka": {"after":["strong"],"window":[3,28],"contact":true}
+      "rekka": {"after":["strong"],"window":[3,28],"contact":true},
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "cjab2",
@@ -1037,7 +1093,8 @@
       "hits": [{"at":2,"damage":20,"level":"light","knockback":[-0.5,0]}],
       "when": "crouch",
       "cancels": [],
-      "rekka": {"after":["cjab"],"window":[1,17],"contact":true}
+      "rekka": {"after":["cjab"],"window":[1,17],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "ajab2",
@@ -1048,7 +1105,8 @@
       "hits": [{"at":2,"damage":36,"level":"light","guard":"high"}],
       "when": "air",
       "cancels": [],
-      "rekka": {"after":["ajab"],"window":[1,20],"contact":true}
+      "rekka": {"after":["ajab"],"window":[1,20],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_a",
@@ -1062,7 +1120,8 @@
         {"at":7,"damage":48,"level":"medium","element":"lightning"}
       ],
       "moves": [{"at":1,"vel":[2,0]},{"at":7,"vel":[0.5,0]}],
-      "cancels": ["string_b","string_c","arcbolt","chain"]
+      "cancels": ["string_b","string_c","arcbolt","chain"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_b",
@@ -1072,7 +1131,8 @@
       "anim": "stringB",
       "hits": [{"at":2,"damage":26,"level":"light","knockback":[-0.5,0],"element":"lightning"},{"at":5,"damage":54,"level":"medium","element":"lightning"}],
       "moves": [{"at":1,"vel":[1.5,0]},{"at":5,"vel":[0.5,0]}],
-      "cancels": ["string_c","arcbolt","chain"]
+      "cancels": ["string_c","arcbolt","chain"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_c",
@@ -1082,16 +1142,18 @@
       "anim": "stringC",
       "hits": [{"at":3,"damage":90,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22,"element":"lightning"}],
       "moves": [{"at":1,"vel":[2.5,0]},{"at":3,"vel":[0.5,0]}],
-      "cancels": ["arcbolt","chain"]
+      "cancels": ["arcbolt","chain"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"strong","hits":[{"at":3,"damage":63,"level":"heavy"}]},
+    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"strong","hits":[{"at":3,"damage":63,"level":"heavy"}],"sounds":[{"at":2,"snd":[200,2]}]},
     {
       "id": "arcbolt_slow",
       "name": "Arc Bolt Slow",
       "input": "~D, DB, B, y",
       "kind": "special",
       "anim": "arcbolt",
-      "projectile": {"at":3,"anim":"boltFx","hitAnim":"boltHit","speed":[3.63,0],"offset":[46,-68],"damage":76,"hits":2,"element":"lightning","level":"heavy","removeTime":150,"priority":2}
+      "projectile": {"at":3,"anim":"boltFx","hitAnim":"boltHit","speed":[3.63,0],"offset":[46,-68],"damage":76,"hits":2,"element":"lightning","level":"heavy","removeTime":150,"priority":2},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "arcbolt_low",
@@ -1099,7 +1161,8 @@
       "input": "~D, DF, F, y",
       "kind": "special",
       "anim": "arcbolt",
-      "projectile": {"at":3,"anim":"boltFx","hitAnim":"boltHit","speed":[8.91,0],"offset":[46,-30],"damage":42,"hits":2,"element":"lightning"}
+      "projectile": {"at":3,"anim":"boltFx","hitAnim":"boltHit","speed":[8.91,0],"offset":[46,-30],"damage":42,"hits":2,"element":"lightning"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "arcbolt_barrage",
@@ -1107,7 +1170,8 @@
       "input": "~D, DF, F, b",
       "kind": "special",
       "anim": "arcbolt",
-      "projectile": {"at":3,"anim":"boltFx","hitAnim":"boltHit","speed":[5.28,0],"offset":[46,-68],"damage":28,"hits":3,"element":"lightning","level":"medium","removeTime":120}
+      "projectile": {"at":3,"anim":"boltFx","hitAnim":"boltHit","speed":[5.28,0],"offset":[46,-68],"damage":28,"hits":3,"element":"lightning","level":"medium","removeTime":120},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "arcbolt_high",
@@ -1115,7 +1179,8 @@
       "input": "~D, DB, B, b",
       "kind": "special",
       "anim": "arcbolt",
-      "projectile": {"at":3,"anim":"boltFx","hitAnim":"boltHit","speed":[7.26,0],"offset":[46,-80],"damage":48,"hits":2,"element":"lightning"}
+      "projectile": {"at":3,"anim":"boltFx","hitAnim":"boltHit","speed":[7.26,0],"offset":[46,-80],"damage":48,"hits":2,"element":"lightning"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
   "country": "Estados Unidos",

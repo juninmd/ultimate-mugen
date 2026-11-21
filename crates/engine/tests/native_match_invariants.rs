@@ -76,6 +76,7 @@ fn play(a: &Arc<CharDef>, b: &Arc<CharDef>, seeds: (u32, u32), used: &mut [BTree
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_match_keeps_fighters_on_stage_in_range_and_in_control() {
     let roster = roster();
     let mut problems = Vec::new();

@@ -50,6 +50,7 @@ fn ground_low_kick(id: &str) -> (i32, bool) {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_button_attacks_in_the_air_and_down_kick_is_a_separate_move() {
     for id in KIT {
         let mut states = std::collections::HashSet::new();

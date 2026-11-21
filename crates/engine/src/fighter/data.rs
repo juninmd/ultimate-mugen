@@ -73,7 +73,7 @@ impl Default for GetHitVars {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BindKind { Target, Parent, Root }
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Bind { pub to: u32, pub time: i32, pub x: f32, pub y: f32, pub kind: BindKind }
+pub struct Bind { pub to: u32, pub time: i32, pub x: f32, pub y: f32, pub kind: BindKind, pub facing: i32 }
 
 pub use crate::palette::PalFx;
 

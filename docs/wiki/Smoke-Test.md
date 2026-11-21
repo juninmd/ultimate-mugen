@@ -37,3 +37,7 @@ Add a function in `src/smoke/features/` (new file when the module nears 250 line
 ## Not covered yet
 
 Netplay, auto update, zip import and the on-screen touch controls are not exercised by the runner.
+
+## Nightly sweeps
+
+Full-roster simulations that take 10 to 30 s each (`native_roster_lab`, `native_air_abilities`, `native_match_invariants`, `native_input_moves`, `native_normal_reach`, `native_no_stuck_states`, `native_attack_keyframes`, `pixel_states_test` and the air-normals sweep) are marked `#[ignore = "nightly: full-roster sweep"]`. The PR gate skips them; `.github/workflows/nightly.yml` runs them every day (`cargo test --workspace --release -- --ignored`), and locally you can run them the same way.

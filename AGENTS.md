@@ -115,7 +115,7 @@
 
 ## Repository Map
 - `docs/wiki/` (EN) and `docs/wiki/pt-BR/` (PT): the wiki, indexed by `Home.md`, published at https://juninmd.github.io/ultimate-mugen/wiki/ by `scripts/build-wiki.sh` (mdBook, sections in `scripts/wiki-book.mjs`). `docs/wiki/Architecture.md` is the crate map and `docs/wiki/adr/` holds decision records; `CONTRIBUTING.md` is the contributor entry point. `docs/assets/` holds README media; `docs/evidence/` and `docs/research/` hold audit output.
-- `.agents/skills/`: agent skills (`mugen-character-creator`, `ume-character-creator`, `ume-stage-creator`, `ume-media-capture`). One copy only; do not duplicate them elsewhere.
+- `.agents/skills/`: agent skills (`mugen-character-creator`, `mugen-dissector`, `mugen-to-ume-migrator`, `ume-character-creator`, `ume-stage-creator`, `ume-media-capture`). One copy only; do not duplicate them elsewhere.
 - `scripts/`: build, audit and capture tools; `tools/`: asset generators.
 
 ## External Resource Sources

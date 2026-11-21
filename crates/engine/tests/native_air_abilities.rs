@@ -56,6 +56,7 @@ fn perform(base: &Match, state: i32) -> Outcome {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_special_and_super_can_be_used_in_the_air_and_returns_to_the_ground() {
     let (mut problems, mut total, mut connecting) = (Vec::new(), 0, 0);
     for (nc, def) in roster() {

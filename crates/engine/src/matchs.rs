@@ -452,6 +452,7 @@ impl Match {
             let f = &mut self.fighters[i];
             f.pos.x = tx + b.x * tf;
             f.pos.y = ty + b.y;
+            if b.facing != 0 { f.facing = if b.facing < 0 { -tf } else { tf }; }
         }
     }
     fn orphan_custom_states(&mut self) {
@@ -478,6 +479,7 @@ impl Match {
         let f = &mut self.fighters[i];
         f.pos.x = tx + b.x * tf;
         f.pos.y = ty + b.y;
+        if b.facing != 0 { f.facing = if b.facing < 0 { -tf } else { tf }; }
         if b.time > 0 { f.bind.as_mut().unwrap().time -= 1; }
     }
 

@@ -53,6 +53,7 @@ fn opaque_floor_offset(sprite: &Sprite) -> f32 {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_fighter_with_a_sprite_folder_draws_it() {
     let ids = fighters_where("01_idle.png");
     assert!(
@@ -87,6 +88,7 @@ fn every_fighter_with_a_sprite_folder_draws_it() {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn state_animations_use_their_own_art() {
     let ids = fighters_where("17_power2.png");
     assert!(
@@ -137,6 +139,7 @@ fn state_animations_use_their_own_art() {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn alternate_palettes_recolour_the_sprite_art() {
     for id in fighters_where("01_idle.png") {
         let base = compiled(&id);

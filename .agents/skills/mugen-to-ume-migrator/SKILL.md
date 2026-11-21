@@ -22,6 +22,7 @@ O motor já roda personagens MUGEN legados direto da pasta ou do zip. Migre para
 - **HitDef/Projectile/VelSet/PosAdd p2dist/PlaySnd** viram `hits`, `projectile`, `moves`, `teleport` e `sounds` no quadro certo (`AnimElem`, ou `Time` convertido em quadro).
 - **Sons**: o `.snd` é extraído para `sprites/snd_{g}_{i}.wav` e listado em `meta.json.sounds`; o motor carrega esses arquivos e toca `moves[].sounds` (`{at, snd:[g,i], fight?}`) no quadro indicado.
 - **Super**: só com `SuperPause`, `poweradd <= -1000` ou custo ≥ 1000. Número de estado ≥ 3000 não basta, porque teleportes vivem lá.
+- **Efeitos**: `Explod` de animação vira `moves[].vfx` (até 3) e `EnvShake` vira `moves[].quake` (até 2). `command` é comparado sem diferenciar caixa (`SPECIAL 1` no `.cmd` e `"special 1"` no gatilho); sem isso o pacote perde quase todos os especiais.
 - **`--extra`**: um JSON mesclado por cima (moves, anims, abilities, helpers) para o que helpers e variáveis não expressam.
 
 Pegadinhas: o nome do `.act` pode ter outra caixa (a busca não diferencia maiúsculas); `[State N]` com número diferente do `Statedef` pertence ao `Statedef` corrente; a paleta 1 só vale para sprites `same_pal`.
@@ -63,8 +64,10 @@ Pegadinhas: o nome do `.act` pode ter outra caixa (a busca não diferencia maiú
 | `HitOverride` / super armor | `armor.hits` |
 | `SuperPause`, power `poweradd` | `kind: "super"` + `cost` |
 | `Pause`/time stop | `timestop` |
+| `Explod` de aura/flash, `EnvShake` | `moves[].vfx`, `moves[].quake` |
+| Vários `Projectile` em sequência (rajada de ki) | `projectile.repeat {count, every, offsetStep, speedStep}` |
 | Voo `physics = N` | `abilities.fly` ou `flight: true` |
-| Teleporte (`PosSet` atrás do inimigo) | `abilities.teleport` ou `moves[].teleport` |
+| Teleporte (`PosSet` atrás do inimigo) | `abilities.teleport`, `moves[].teleport` ou `moves[].blink {to, gap}` |
 | `ChangeState` de transformação | `abilities.forms[]` |
 | Raiva, regeneração, buffs por var | `passives` (`rage`, `enrageTime`, `stacks`, `lifeRegen`, `meterRegen`) |
 | `life <= lifemax/2`, `p2life <= ...` no gatilho do comando | `requires.life` / `requires.enemyLife` (`min`/`max` em fração da vida) |
@@ -77,6 +80,10 @@ Lua/ZSS arbitrário, helpers com lógica própria, `Statedef -2/-3` customizados
 ## Regras do repositório
 
 Sem comentários em código; arquivos de código até 250 linhas; PR com título `type: description`; teste de fumaça no navegador (wasm) antes de entregar.
+
+## Biblioteca de habilidades
+
+Antes de copiar controladores para um lutador, veja `docs/wiki/pt-BR/Biblioteca-de-Habilidades.md`: blocos (`blink`, `vfx`, `quake`, `projectile.repeat`) e o kit `abilities` (`"extends": ["abilities"]` + `"use": "ki_barrage"`) deixam o JSON do lutador curto. Padrão repetido em duas conversões vira bloco novo no motor, com teste.
 
 ## Aprender antes de migrar
 

@@ -1,6 +1,7 @@
 {
   "format": "umf/2",
   "id": "volta",
+  "element": "lightning",
   "name": "VX-9 Volta",
   "series": "Protocolo Grade Neon",
   "author": "Ultimate MUGEN",
@@ -722,41 +723,15 @@
   },
   "moves": [
     {
-      "id": "jab",
-      "name": "Piston Jab",
-      "input": "x",
-      "kind": "normal",
-      "anim": "jab",
-      "hits": [{"at":2,"damage":26,"level":"light"}],
-      "cancels": ["strong","lkick","launcher","overhead","slide","string_a"],
-      "sounds": [{"at":1,"snd":[200,0]}]
-    },
-    {
-      "id": "strong",
-      "name": "Rail Cross",
-      "input": "y",
-      "kind": "normal",
-      "anim": "strong",
-      "hits": [{"at":3,"damage":70,"level":"heavy"}],
-      "cancels": ["arcbolt","chain","overhead"],
-      "sounds": [{"at":1,"snd":[200,1]}]
-    },
-    {"id":"lkick","name":"Servo Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":30,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]},
-    {"id":"hkick","name":"Turbine Kick","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":68,"level":"heavy"}],"sounds":[{"at":1,"snd":[200,1]}]},
-    {"id":"cjab","name":"Low Piston","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":22,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]},
-    {"id":"clk","name":"Hydraulic Tap","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":34,"level":"light","guard":"low"}],"sounds":[{"at":1,"snd":[200,0]}]},
-    {
-      "id": "sweep",
-      "name": "Gyro Sweep",
-      "input": "b",
-      "kind": "normal",
-      "anim": "sweep",
-      "when": "crouch",
-      "hits": [{"at":2,"damage":58,"level":"heavy","guard":"low","launch":true,"knockback":[-3,-2]}],
-      "sounds": [{"at":1,"snd":[200,1]}]
-    },
-    {"id":"ajab","name":"Drop Hammer","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":40,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]},
-    {"id":"akick","name":"Thruster Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":52,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]},
+{"id":"jab","name":"Piston Jab","input":"x","kind":"normal","anim":"jab","hits":[{"at":2,"damage":26,"level":"light"}],"cancels":["strong","lkick","launcher","overhead","slide","string_a"],"sounds":[{"at":1,"snd":[200,0]}]}
+{"id":"strong","name":"Rail Cross","input":"y","kind":"normal","anim":"strong","hits":[{"at":3,"damage":70,"level":"heavy"}],"cancels":["arcbolt","chain","overhead"],"sounds":[{"at":1,"snd":[200,1]}]}
+{"id":"lkick","name":"Servo Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":30,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]}
+{"id":"hkick","name":"Turbine Kick","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":68,"level":"heavy"}],"sounds":[{"at":1,"snd":[200,1]}]}
+{"id":"cjab","name":"Low Piston","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":22,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]}
+{"id":"clk","name":"Hydraulic Tap","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":34,"level":"light","guard":"low"}],"sounds":[{"at":1,"snd":[200,0]}]}
+{"id":"sweep","name":"Gyro Sweep","input":"b","kind":"normal","anim":"sweep","when":"crouch","hits":[{"at":2,"damage":58,"level":"heavy","guard":"low","launch":true,"knockback":[-3,-2]}],"sounds":[{"at":1,"snd":[200,1]}]}
+{"id":"ajab","name":"Drop Hammer","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":40,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]}
+{"id":"akick","name":"Thruster Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":52,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]}
     {
       "id": "arcbolt",
       "name": "Arc Bolt",

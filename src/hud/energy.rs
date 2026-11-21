@@ -142,18 +142,21 @@ impl EnergyFx {
                         Color::new(1.0, 1.0, 1.0, a),
                     );
                     if charging > 0.25 {
-                        for sk in 0..3 {
-                            let ph = (gt * 2.3 + sk as f32 * 0.37 + i as f32 * 0.11).fract();
-                            let r = (sk as f32 - 1.0).signum().max(0.4);
-                            let sx2 = ex + dir * (0.8 + 3.4 * ph) * r;
-                            let sy = c.y + h * 0.5 - ph * (h + 1.6) * (0.6 + 0.2 * sk as f32);
-                            poly::circle(
-                                p(sx2, sy),
-                                0.45 * s,
-                                Color::new(1.0, 1.0, 1.0, (1.0 - ph) * charging),
-                            );
-                        }
+                        super::energy_art::draw_spark(
+                            p(ex, c.y + h * 0.5),
+                            s,
+                            gt,
+                            Color::new(1.0, 1.0, 1.0, (0.65 + 0.35 * pulse) * charging),
+                        );
                     }
+                } else if flash > 0.05 || lvl >= SEGMENTS as i32 {
+                    let tip_x = if side == 0 { sx + seg - 1.5 } else { sx + 1.5 };
+                    super::energy_art::draw_spark(
+                        p(tip_x, c.y + h * 0.5),
+                        s * 0.85,
+                        gt + i as f32 * 0.3,
+                        Color::new(1.0, 0.96, 0.78, (0.45 + 0.35 * pulse + 0.4 * flash).min(1.0)),
+                    );
                 }
             }
             for t in 1..4 {
@@ -169,5 +172,6 @@ impl EnergyFx {
                 );
             }
         }
+        super::energy_art::draw_frame(p, s, c.x, c.y, c.w, h, side == 1);
     }
 }

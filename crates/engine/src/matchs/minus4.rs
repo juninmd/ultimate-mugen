@@ -31,24 +31,24 @@ impl Match {
         if own.states.contains_key(&-4) {
             self.run_state(i, &own, -4, in_pause);
         }
-        let Some(_i) = self.idx(id) else { return };
+        let Some(i) = self.idx(id) else { return };
         if !helper && !custom {
             self.run_state(i, &own, -3, in_pause);
         }
-        let Some(_i) = self.idx(id) else { return };
+        let Some(i) = self.idx(id) else { return };
         if !helper {
             self.run_state(i, &own, -2, in_pause);
             let Some(_i) = self.idx(id) else { return };
         }
         if (!helper || self.fighters[i].key_ctrl) && !custom {
             self.run_state(i, &own, -1, in_pause);
-            let Some(_i) = self.idx(id) else { return };
+            let Some(i) = self.idx(id) else { return };
             if !in_pause {
                 self.builtin_transitions(i);
             }
         }
         for _ in 0..16 {
-            let Some(_i) = self.idx(id) else { return };
+            let Some(i) = self.idx(id) else { return };
             let (same, no) = {
                 let f = &self.fighters[i];
                 (Arc::ptr_eq(&f.st_def, &own), f.state_no)

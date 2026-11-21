@@ -2,6 +2,7 @@
   "format": "umf/2",
   "rivals": {"valdric":{"intro":"Um trono roubado pesa mais que sua armadura, príncipe.","taunt":"O gelo me devolve o que é meu.","attack":1.06},"kaname":{"intro":"Um juiz de gelo? Esse reino já é meu."}},
   "id": "sylene",
+  "element": "ice",
   "name": "Sylene Vashti",
   "series": "Saga da Coroa Glacial",
   "author": "Ultimate MUGEN",

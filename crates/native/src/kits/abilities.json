@@ -1,0 +1,68 @@
+{
+  "format": "umf-kit/1",
+  "id": "abilities",
+  "library": true,
+  "description": "Reusable ability blocks. Pull one with `extends` and `use`, then change only the fields that differ (input, anim, projectile.anim, damage, cost).",
+  "moves": [
+    {
+      "id": "ki_blast",
+      "name": "Ki Blast",
+      "input": "D, DF, F, x",
+      "kind": "special",
+      "anim": "strong",
+      "cost": 100,
+      "projectile": { "at": 3, "anim": "strong", "speed": [6, 0], "offset": [44, -62], "damage": 60, "level": "medium", "removeTime": 80 }
+    },
+    {
+      "id": "ki_barrage",
+      "name": "Ki Barrage",
+      "input": "D, DF, F, y",
+      "kind": "special",
+      "anim": "strong",
+      "cost": 250,
+      "projectile": { "at": 3, "anim": "strong", "speed": [6, 0], "offset": [44, -78], "damage": 18, "level": "light", "removeTime": 70, "repeat": { "count": 5, "every": 1, "offsetStep": [0, 8], "speedStep": [0.4, 0] } }
+    },
+    {
+      "id": "beam",
+      "name": "Energy Beam",
+      "input": "D, DB, B, x",
+      "kind": "special",
+      "anim": "strong",
+      "cost": 300,
+      "vfx": [{ "at": 1, "anim": "powerUp", "offset": [0, -40], "time": 20 }],
+      "quake": [{ "at": 3, "time": 12, "amp": 2 }],
+      "projectile": { "at": 3, "anim": "strong", "speed": [6, 0], "offset": [46, -62], "damage": 26, "hits": 6, "level": "heavy", "priority": 4, "removeTime": 70 }
+    },
+    {
+      "id": "instant_transmission",
+      "name": "Instant Transmission",
+      "input": "B, F, x",
+      "kind": "special",
+      "anim": "strong",
+      "cost": 250,
+      "invuln": [1, 3],
+      "blink": { "at": 2, "to": "behind", "gap": 40 }
+    },
+    {
+      "id": "blink_strike",
+      "name": "Blink Strike",
+      "input": "B, F, y",
+      "kind": "special",
+      "anim": "strong",
+      "cost": 200,
+      "invuln": [1, 2],
+      "blink": { "at": 2, "to": "front", "gap": 50 },
+      "hits": [{ "at": 3, "damage": 70, "level": "heavy", "launch": true }]
+    },
+    {
+      "id": "power_surge",
+      "name": "Power Surge",
+      "input": "x+y+a",
+      "kind": "special",
+      "anim": "powerUp",
+      "cost": 0,
+      "vfx": [{ "at": 1, "anim": "powerUp", "offset": [0, -50], "follow": true, "time": 40 }],
+      "quake": [{ "at": 1, "time": 16, "amp": 3 }]
+    }
+  ]
+}

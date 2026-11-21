@@ -130,7 +130,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "playsnd" => {
             let r = sc.raw("value").unwrap_or("");
             if let Some((g, idx, own)) = crate::hitdef::parse_sound_ref_expr(m, i, Some(r), true) {
-                let vol = n(m, "volumescale", 100.0) as f32 / 100.0;
+                let vol = if sc.has("volumescale", 0) { n(m, "volumescale", 100.0) as f32 / 100.0 } else if sc.has("volume", 0) { ((255.0 + n(m, "volume", 0.0) as f32) / 255.0).clamp(0.0, 4.0) } else { 1.0 };
                 let ch = n(m, "channel", -1.0) as i32;
                 let (pv, abs) = if sc.has("abspan", 0) { (n(m, "abspan", 0.0), true) } else { (n(m, "pan", 0.0), false) };
                 let pan = crate::sctrl::sound_pan(m, i, pv as f32, abs);

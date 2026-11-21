@@ -1,5 +1,6 @@
 import re
 
+from mugen_fx import MAX_VFX, quake_from, vfx_from
 from mugen_parse import nums
 
 STANDARD = {
@@ -155,7 +156,7 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost):
     move = {"id": label, "name": label.replace("_", " ").title(), "input": cmd_input, "kind": "normal", "anim": anim_name(anim_no)}
     if when != "stand":
         move["when"] = when
-    hits, projectiles, moves, sounds, extra = [], [], [], [], [anim_no]
+    hits, projectiles, moves, sounds, vfx, quake, extra = [], [], [], [], [], [], [anim_no]
     super_pause = False
     for ctrl in state["ctrl"]:
         at = ctrl["at"]
@@ -173,6 +174,13 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost):
             moves.append({"at": at[0], "vel": [x, y]})
         elif kind in ("posadd", "posset") and "p2dist" in " ".join(ctrl["body"].values()).lower() and at:
             move["teleport"] = at[0]
+        elif kind == "explod" and at and len(vfx) < MAX_VFX:
+            effect, anims = vfx_from(ctrl, at[0], actions, anim_name)
+            if effect:
+                vfx.append(effect)
+                extra += anims
+        elif kind == "envshake" and at and len(quake) < 2:
+            quake.append(quake_from(ctrl, at[0]))
         elif kind == "playsnd":
             sounds.append(sound_from(ctrl, (at or [1])[0]))
         elif kind == "superpause":
@@ -185,6 +193,10 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost):
         move["moves"] = moves
     if "fly" in label:
         move["flight"] = True
+    if vfx:
+        move["vfx"] = vfx
+    if quake:
+        move["quake"] = quake
     if sounds:
         move["sounds"] = sounds
     power = nums(state["def"].get("poweradd"), (0,))[0]
@@ -217,6 +229,7 @@ def trigger_groups(ctrl):
 
 
 def routes(cmd_states, commands):
+    commands = {k.lower(): v for k, v in commands.items()}
     out = []
     for ctrl in cmd_states:
         if ctrl["type"] != "changestate":

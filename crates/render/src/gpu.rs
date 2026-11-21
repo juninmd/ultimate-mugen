@@ -152,7 +152,23 @@ impl Renderer {
 
     pub fn upload_indexed(&self, queue: &wgpu::Queue, r: Rect, pixels: &[u8]) { write_region(queue, &self.index_tex, r, 1, pixels); }
 
-    pub fn upload_rgba(&self, queue: &wgpu::Queue, r: Rect, pixels: &[u8]) { write_region(queue, &self.rgba_tex, r, 4, pixels); }
+    pub fn upload_rgba(&self, queue: &wgpu::Queue, r: Rect, pixels: &[u8]) {
+        if r.x == 0 || r.y == 0 || r.x + r.w >= self.atlas_size[0] || r.y + r.h >= self.atlas_size[1] || r.w == 0 || r.h == 0 {
+            write_region(queue, &self.rgba_tex, r, 4, pixels);
+            return;
+        }
+        let stride = r.w as usize * 4;
+        let mut padded = Vec::with_capacity((stride + 8) * (r.h as usize + 2));
+        for y in 0..r.h as usize + 2 {
+            let row = y.saturating_sub(1).min(r.h as usize - 1);
+            let pixels = &pixels[row * stride..(row + 1) * stride];
+            padded.extend_from_slice(&pixels[..4]);
+            padded.extend_from_slice(pixels);
+            padded.extend_from_slice(&pixels[stride - 4..]);
+        }
+        let outer = Rect { x: r.x - 1, y: r.y - 1, w: r.w + 2, h: r.h + 2 };
+        write_region(queue, &self.rgba_tex, outer, 4, &padded);
+    }
 
     pub fn set_palette(&self, queue: &wgpu::Queue, row: u32, colors: &[[u8; 4]; 256]) {
         write_region(queue, &self.palette_tex, Rect { x: 0, y: row, w: 256, h: 1 }, 4, bytemuck::cast_slice(colors));

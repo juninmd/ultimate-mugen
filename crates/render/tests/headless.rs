@@ -198,3 +198,24 @@ fn shockwave_bends_the_edge_and_tonemap_compresses_highlights() {
     let tinted = post_render(&device, &queue, &ume_render::PostParams { grade: ume_render::Grade { split: 1.0, highlights: [0.5, 1.0, 1.0], ..Default::default() }, ..Default::default() });
     assert!(px(&tinted, 8, 32)[0] < px(&plain, 8, 32)[0], "highlight tint pulls red down");
 }
+
+#[test]
+fn linear_filter_preserves_rgba_atlas_edges() {
+    let Some((device, queue)) = gpu() else { eprintln!("no GPU adapter, skipping"); return; };
+    let mut renderer = Renderer::new(&device, &queue, wgpu::TextureFormat::Rgba8Unorm, [64, 64]);
+    let mut atlas = ume_render::Atlas::new(64, 64);
+    let red = atlas.alloc(1, 1).unwrap();
+    let blue = atlas.alloc(1, 1).unwrap();
+    renderer.upload_rgba(&queue, red, &[255, 0, 0, 255]);
+    renderer.upload_rgba(&queue, blue, &[0, 0, 255, 255]);
+    renderer.set_linear(true);
+
+    let mut batch = Batch::new();
+    batch.push(&Quad::new([0.0, 0.0, 16.0, 16.0], red, [64, 64], RGBA_SPRITE));
+    batch.push(&Quad::new([16.0, 0.0, 16.0, 16.0], blue, [64, 64], RGBA_SPRITE));
+    let image = render(&device, &queue, &mut renderer, &batch, wgpu::Color::BLACK);
+    for (x, color) in [(0, [255, 0, 0, 255]), (15, [255, 0, 0, 255]), (16, [0, 0, 255, 255]), (31, [0, 0, 255, 255])] {
+        assert_eq!(px(&image, x, 0), color);
+        assert_eq!(px(&image, x, 15), color);
+    }
+}

@@ -54,6 +54,12 @@ const fn spec(png: &'static [u8], cell: (f32, f32), pivot: (f32, f32), cols: usi
     SheetSpec { png, cell, pivot, cols, frames, seconds: millis as f32 / 1000.0, additive, pixel_art: !additive }
 }
 
+const fn pixel_spec(png: &'static [u8], cell: (f32, f32), pivot: (f32, f32), cols: usize, frames: usize, millis: u32, additive: bool) -> SheetSpec {
+    let mut sheet = spec(png, cell, pivot, cols, frames, millis, additive);
+    sheet.pixel_art = true;
+    sheet
+}
+
 impl SheetKind {
     pub(super) fn index(self) -> usize {
         self as usize
@@ -61,7 +67,7 @@ impl SheetKind {
 
     pub(super) fn spec(self) -> SheetSpec {
         match self {
-            SheetKind::HitSpark => spec(HITSPARK_PNG, (32.0, 32.0), (16.0, 16.0), 9, 9, 200, true),
+            SheetKind::HitSpark => pixel_spec(HITSPARK_PNG, (32.0, 32.0), (16.0, 16.0), 9, 9, 200, true),
             SheetKind::Explosion => spec(EXPLOSION_PNG, (100.0, 100.0), (50.0, 50.0), 6, 22, 550, true),
             SheetKind::PunchHit => spec(PUNCHHIT_PNG, (48.0, 40.0), (17.0, 21.0), 8, 11, 660, false),
             SheetKind::CritHit => spec(CRITHIT_PNG, (96.0, 80.0), (48.0, 40.0), 8, 11, 770, false),

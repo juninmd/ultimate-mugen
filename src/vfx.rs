@@ -17,7 +17,7 @@ mod ko;
 mod rush;
 mod shock;
 mod sheet;
-mod speed_lines; mod stage_objects; mod story_juice;
+mod speed_lines; mod spark; mod stage_objects; mod story_juice;
 pub mod quality;
 pub use speed_lines::speed_lines;
 
@@ -1180,21 +1180,7 @@ impl Vfx {
             let c = tp(p.x, p.y);
             match p.k {
                 Kind::Spark => {
-                    let t = tp(p.x - p.vx * 2.8, p.y - p.vy * 2.8);
-                    let d = (t - c).normalize_or_zero();
-                    let n = vec2(-d.y, d.x) * (p.size * s).max(1.0) * 0.9;
-                    let head = Color::new(1.0, 1.0, 0.92, a);
-                    let tail = Color::new(p.col[0], p.col[1], p.col[2], 0.0);
-                    // 4-point blade: wide bright head, long tapering tail
-                    poly::fill(&[c - d * (p.size * s * 0.6), c + n, t, c - n], |q| {
-                        if (q - t).length() < 0.001 {
-                            tail
-                        } else if (q - c).length() < 0.001 {
-                            head
-                        } else {
-                            Color::new(p.col[0], p.col[1], p.col[2], a)
-                        }
-                    });
+                    self.draw_spark(p, c, s);
                 }
                 Kind::Ember => {
                     let r = p.size * s * (0.6 + 0.4 * a);

@@ -1,0 +1,374 @@
+[taunts]
+opening_pt = [
+  "Vamos ver do que você é capaz!",
+  "Prepare-se!",
+  "Não vou pegar leve!",
+  "Que vença o melhor!",
+  "Mostre sua força!",
+]
+opening_en = [
+  "Let's see what you've got!",
+  "Get ready!",
+  "I won't go easy on you!",
+  "May the best fighter win!",
+  "Show me your strength!",
+]
+opening_es = [
+  "¡Veamos de qué eres capaz!",
+  "¡Prepárate!",
+  "¡No me voy a contener!",
+  "¡Que gane el mejor!",
+  "¡Muestra tu fuerza!",
+]
+answer_pt = [
+  "Só isso?",
+  "Você não me assusta.",
+  "Venha com tudo!",
+  "Hmpf... entediante.",
+  "Vai se arrepender.",
+]
+answer_en = [
+  "Is that all?",
+  "You don't scare me.",
+  "Bring it on!",
+  "Hmpf... boring.",
+  "You'll regret this.",
+]
+answer_es = [
+  "¿Solo eso?",
+  "No me asustas.",
+  "¡Con todo!",
+  "Hmpf... aburrido.",
+  "Te vas a arrepentir.",
+]
+
+[[matchup]]
+id = "mirror_match"
+mirror = true
+style = "speech"
+sfx = "easter_banter"
+color = [0.44, 0.92, 1.0]
+title_pt = "Espera... quem é o original aqui?!"
+title_en = "Wait... which one of us is the real one?!"
+title_es = "Espera... ¿quién es el original aquí?!"
+
+[[matchup]]
+id = "suzume_oboro"
+fighters = ["suzume", "oboro"]
+style = "ribbon"
+sprite = "eclipse_moon"
+sfx = "easter_clash"
+color = [0.98, 0.24, 0.42]
+title_pt = "PELO CLÃ KAGEROU!"
+title_en = "FOR THE KAGEROU CLAN!"
+title_es = "¡POR EL CLAN KAGEROU!"
+sub_pt = "SUZUME CORTA O FIO DO ECLIPSE"
+sub_en = "SUZUME HUNTS OBORO'S THREAD"
+sub_es = "SUZUME CORTA EL HILO DEL ECLIPSE"
+
+[[matchup]]
+id = "sylene_garan"
+fighters = ["sylene", "garan"]
+style = "ribbon"
+sprite = "eclipse_moon"
+sfx = "easter_clash"
+color = [0.46, 0.84, 1.0]
+title_pt = "BOREALIA NÃO ESQUECE!"
+title_en = "BOREALIA REMEMBERS!"
+title_es = "¡BOREALIA NO OLVIDA!"
+sub_pt = "GELO ÁRTICO CONTRA CINZAS VIOLETAS"
+sub_en = "ARCTIC ICE VS ASHEN FLAMES"
+sub_es = "HIELO ÁRTICO CONTRA LLAMAS VIOLETAS"
+
+[[matchup]]
+id = "kaito_oboro"
+fighters = ["kaito", "oboro"]
+style = "ribbon"
+sprite = "eclipse_moon"
+sfx = "easter_clash"
+color = [0.36, 0.88, 1.0]
+title_pt = "O VENTO DISSIPA O ECLIPSE!"
+title_en = "THE WIND CLEARS THE ECLIPSE!"
+title_es = "¡EL VIENTO DISIPA EL ECLIPSE!"
+sub_pt = "TEMPESTADE DE IZU CONTRA LUA ESCARLATE"
+sub_en = "STORM OF IZU VS SCARLET ECLIPSE"
+sub_es = "TORMENTA DE IZU VS ECLIPSE ESCARLATA"
+
+[[matchup]]
+id = "marlow_valdric"
+fighters = ["marlow", "valdric"]
+speaker_id = "marlow"
+speaker = "MARLOW"
+style = "speech"
+sfx = "easter_banter"
+color = [1.0, 0.78, 0.24]
+title_pt = "Bela coroa imperial... posso pegar emprestado?"
+title_en = "Nice imperial crown... mind if I borrow it?"
+title_es = "Linda corona imperial... ¿me la prestas?"
+
+[[matchup]]
+id = "kaito_jin"
+fighters = ["kaito", "jin"]
+style = "ribbon"
+sprite = "origami_crane"
+sfx = "easter_bird"
+color = [0.42, 0.96, 0.76]
+title_pt = "CORRIDA CONTRA O VENTO!"
+title_en = "RACE AGAINST THE WIND!"
+title_es = "¡CARRERA CONTRA EL VIENTO!"
+sub_pt = "PENHASCOS DE IZU VS VALE DE KISO"
+sub_en = "IZU CLIFFS VS WIND VALLEY"
+sub_es = "ACANTILADOS DE IZU VS VALLE DEL VIENTO"
+
+[[matchup]]
+id = "shion_kaname"
+fighters = ["shion", "kaname"]
+style = "ribbon"
+sprite = "crossed_blades"
+sfx = "easter_clash"
+color = [0.86, 0.92, 1.0]
+title_pt = "AÇO CONTRA JULGAMENTO!"
+title_en = "STEEL MEETS JUDGMENT!"
+title_es = "¡ACERO CONTRA JUICIO!"
+sub_pt = "LÂMINA DE METEORITO VS KATANA ESPIRITUAL"
+sub_en = "METEORITE BLADE VS SPIRIT KATANA"
+sub_es = "HOJA DE METEORITO VS KATANA ESPIRITUAL"
+
+[[matchup]]
+id = "bruno_daichi"
+fighters = ["bruno", "daichi"]
+style = "ribbon"
+sprite = "shield_fortress"
+sfx = "easter_clash"
+color = [1.0, 0.62, 0.24]
+title_pt = "CHOQUE DE GIGANTES!"
+title_en = "IRON RING VS ALTAI WOLF!"
+title_es = "¡CHOQUE DE GIGANTES!"
+sub_pt = "FORÇA PURA NA ARENA!"
+sub_en = "PURE HEAVYWEIGHT POWER!"
+sub_es = "¡PURA FUERZA PESO PESADO!"
+
+[[matchup]]
+id = "valdric_oboro"
+fighters = ["valdric", "oboro"]
+style = "ribbon"
+sprite = "crossed_blades"
+sfx = "easter_clash"
+color = [0.98, 0.24, 0.34]
+title_pt = "DUAS COROAS, UM TRONO!"
+title_en = "TWO CROWNS, ONE THRONE!"
+title_es = "¡DOS CORONAS, UN TRONO!"
+sub_pt = "IMPÉRIO RUBRO VS ECLIPSE ESCARLATE"
+sub_en = "RED STAR EMPIRE VS SCARLET ECLIPSE"
+sub_es = "IMPERIO ROJO VS ECLIPSE ESCARLATA"
+
+[[matchup]]
+id = "suzume_jin"
+fighters = ["suzume", "jin"]
+style = "ribbon"
+sprite = "crossed_blades"
+sfx = "easter_clash"
+color = [0.94, 0.44, 0.98]
+title_pt = "PISCOU, PERDEU!"
+title_en = "BLINK AND YOU'LL MISS ME!"
+title_es = "¡PARPADEAS Y PIERDES!"
+sub_pt = "VELOCIDADE DE IGA VS VALE DO VENTO"
+sub_en = "IGA NINJA VS WIND VALLEY SCOUT"
+sub_es = "NINJA DE IGA VS EXPLORADOR DEL VIENTO"
+
+[[matchup]]
+id = "volta_haruki"
+fighters = ["volta", "haruki"]
+speaker_id = "volta"
+speaker = "VOLTA"
+style = "speech"
+sfx = "easter_banter"
+color = [0.44, 0.94, 1.0]
+title_pt = "Consulta: o que faz um coração ser corajoso?"
+title_en = "Query: what makes a heart courageous?"
+title_es = "Consulta: ¿qué hace valiente a un corazón?"
+
+[[matchup]]
+id = "akio_kaito"
+fighters = ["akio", "kaito"]
+speaker_id = "akio"
+style = "ribbon"
+sprite = "ramen_bowl"
+sfx = "easter_banter"
+color = [1.0, 0.72, 0.26]
+title_pt = "QUEM PERDER PAGA O RAMEN!"
+title_en = "LOSER BUYS RAMEN!"
+title_es = "¡QUIEN PIERDA PAGA EL RAMEN!"
+sub_pt = "RIVALIDADE CLÁSSICA: AKIO VS KAITO"
+sub_en = "CLASSIC RIVALS: AKIO VS KAITO"
+sub_es = "RIVALES CLÁSICOS: AKIO VS KAITO"
+
+[[stage_interaction]]
+id = "bruno_brazil"
+fighter = "bruno"
+stage_contains = ["brasil", "brazil", "cristo", "corcovado"]
+style = "ribbon"
+sprite = "crown_perfect"
+sfx = "easter_capybara"
+color = [0.24, 0.9, 0.44]
+title_pt = "A TORCIDA É SUA, BRUNO!"
+title_en = "HOME CROWD FOR BRUNO!"
+title_es = "¡LA AFICIÓN ES TUYA, BRUNO!"
+sub_pt = "O TRICAMPEÃO DE MINAS EM CASA!"
+sub_en = "MINAS GERAIS CHAMPION AT HOME!"
+sub_es = "¡EL TRICAMPEÓN EN CASA!"
+
+[[stage_interaction]]
+id = "volta_neon"
+fighter = "volta"
+stage_contains = ["neo-metr", "neon"]
+speaker = "VOLTA"
+style = "speech"
+sfx = "easter_ufo"
+color = [0.28, 0.94, 1.0]
+title_pt = "Firmware: LIVRE-ARBÍTRIO // Bem-vindo de volta!"
+title_en = "Firmware: FREE WILL // Back at the lab!"
+title_es = "Firmware: LIBRE ALBEDRÍO // ¡De vuelta!"
+
+[[stage_interaction]]
+id = "lian_great_wall"
+fighter = "lian"
+stage_contains = ["muralha", "great wall"]
+style = "ribbon"
+sprite = "origami_crane"
+sfx = "easter_kitsune"
+color = [0.24, 0.94, 0.62]
+title_pt = "LANTERNA DE JADE!"
+title_en = "BALANCE OF MOUNT WUDANG!"
+title_es = "¡LINTERNA DE JADE!"
+sub_pt = "LIAN DEFENDE A GRANDE MURALHA"
+sub_en = "LIAN GUARDS THE GREAT WALL"
+sub_es = "LIAN PROTEGE LA GRAN MURALLA"
+
+[[stage_interaction]]
+id = "garan_volcano"
+fighter = "garan"
+stage_contains = ["vulc", "volcano"]
+style = "ribbon"
+sprite = "eclipse_moon"
+sfx = "easter_wonder"
+color = [0.78, 0.28, 1.0]
+title_pt = "O PORTÃO DE CINZAS SE ABRE!"
+title_en = "THE ASHEN GATE OPENS!"
+title_es = "¡EL PORTÓN DE CENIZAS SE ABRE!"
+sub_pt = "GARAN DESPERTA NO VULCÃO DO SELO"
+sub_en = "GARAN RETURNS TO HIS SEALED CRATER"
+sub_es = "GARAN REGRESA AL CRÁTER DEL SELLO"
+
+[[fighter_trigger]]
+id = "akio_fired_up"
+fighter = "akio"
+trigger = "low_hp"
+threshold = 0.30
+per_round = false
+style = "ribbon"
+sprite = "ramen_bowl"
+sfx = "easter_crown"
+color = [1.0, 0.54, 0.2]
+title_pt = "AGORA SIM FICOU BOM!"
+title_en = "NOW I'M FIRED UP!"
+title_es = "¡AHORA SÍ SE PUSO BUENO!"
+sub_pt = "ESPÍRITO DO DOJO QUEDA ESTELAR!"
+sub_en = "STARFALL DOJO NEVER QUITS!"
+sub_es = "¡EL DOJO ESTELAR NO SE RINDE!"
+
+[[fighter_trigger]]
+id = "haruki_apology"
+fighter = "haruki"
+trigger = "combo"
+threshold = 5.0
+per_round = true
+speaker = "HARUKI"
+style = "speech"
+sfx = "easter_banter"
+color = [0.68, 0.84, 1.0]
+title_pt = "Desculpa!! Você tá bem?! Foi o titã!"
+title_en = "Sorry!! Are you okay?! The titan slipped!"
+title_es = "¡¡Perdón!! ¿Estás bien?! ¡Fue el titán!"
+
+[[fighter_trigger]]
+id = "marlow_parrot"
+fighter = "marlow"
+trigger = "super_or_combo"
+threshold = 6.0
+per_round = true
+style = "flyby"
+sprite = "pirate_parrot"
+sfx = "easter_parrot"
+color = [1.0, 0.36, 0.32]
+title_pt = "ARRR! TESOURO À VISTA!"
+title_en = "ARRR! TREASURE AHEAD!"
+title_es = "¡ARRR! ¡TESORO A LA VISTA!"
+sub_pt = "O PAPAGAIO DO EL VIENTO SALADO!"
+sub_en = "EL VIENTO SALADO'S FIRST MATE!"
+sub_es = "¡EL LORO DE EL VIENTO SALADO!"
+
+[[fighter_trigger]]
+id = "thug_complaint"
+fighter_prefix = "npc_"
+trigger = "opp_combo"
+threshold = 4.0
+per_round = true
+style = "speech"
+sfx = "easter_banter"
+color = [1.0, 0.62, 0.28]
+title_pt = "O chefe não me paga o suficiente pra isso!"
+title_en = "The boss doesn't pay me enough for this!"
+title_es = "¡El jefe no me paga suficiente para esto!"
+
+[[fighter_trigger]]
+id = "bruno_taunt"
+fighter = "bruno"
+trigger = "taunt"
+per_round = true
+speaker = "BRUNO"
+style = "speech"
+sfx = "easter_capybara"
+color = [0.24, 0.9, 0.44]
+title_pt = "Vem pro ringue, campeão! Tô só aquecendo!"
+title_en = "Step into the ring, champ! Just warming up!"
+title_es = "¡Entra al ring, campeón! ¡Solo estoy calentando!"
+
+[[fighter_trigger]]
+id = "akio_taunt"
+fighter = "akio"
+trigger = "taunt"
+per_round = true
+speaker = "AKIO"
+style = "speech"
+sfx = "easter_banter"
+color = [1.0, 0.62, 0.24]
+title_pt = "Haha! Isso é tudo que você tem?!"
+title_en = "Haha! Is that all you've got?!"
+title_es = "¡Jaja! ¿Eso es todo lo que tienes?!"
+
+[[fighter_trigger]]
+id = "marlow_taunt"
+fighter = "marlow"
+trigger = "taunt"
+per_round = true
+speaker = "MARLOW"
+style = "speech"
+sfx = "easter_parrot"
+color = [1.0, 0.78, 0.24]
+title_pt = "Aposto meu chapéu que não acerta o próximo!"
+title_en = "Bet my hat you miss the next one!"
+title_es = "¡Apuesto mi sombrero a que fallas el siguiente!"
+
+[[fighter_trigger]]
+id = "oboro_taunt"
+fighter = "oboro"
+trigger = "taunt"
+per_round = true
+speaker = "OBORO"
+style = "speech"
+sfx = "easter_kitsune"
+color = [0.98, 0.24, 0.42]
+title_pt = "Três passos à frente... como sempre."
+title_en = "Three steps ahead... as always."
+title_es = "Tres pasos adelante... como siempre."

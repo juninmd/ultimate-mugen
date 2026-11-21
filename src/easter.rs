@@ -7,12 +7,12 @@ pub(crate) mod builders;
 pub(crate) mod catalog;
 mod combat;
 mod draw;
-mod lore;
-mod lore_catalog;
 pub(crate) mod sprite;
 mod stages;
 mod stages_catalog;
 pub(crate) mod state;
+pub(crate) mod toml_config;
+mod toml_eval;
 
 pub(crate) use sprite::EggSprite;
 pub(crate) use state::{ActiveEgg, EggStyle, FightTracker};
@@ -27,7 +27,7 @@ pub fn tick(m: &Match, stage_name: &str, audio: &mut Audio) {
         tracker.sync_match(m);
         combat::check(m, stage_name, &mut tracker, audio);
         stages::check(m, stage_name, &mut tracker, audio);
-        lore::check(m, stage_name, &mut tracker, audio);
+        toml_eval::check(m, stage_name, &mut tracker, audio);
         tracker.record_snapshot(m);
     });
 }

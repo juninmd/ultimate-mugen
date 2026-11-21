@@ -59,18 +59,3 @@ pub(crate) fn flyby(sprite: EggSprite, title: &str, sub: &str, color: [f32; 3], 
         flip,
     }
 }
-
-pub(crate) fn speech(speaker: &str, line: &str, color: [f32; 3], side: usize) -> ActiveEgg {
-    ActiveEgg {
-        style: EggStyle::SpeechBubble,
-        sprite: EggSprite::None,
-        title: line.to_string(),
-        sub: String::new(),
-        speaker: speaker.to_string(),
-        color,
-        side,
-        t: 0.0,
-        dur: 2.9,
-        flip: side == 1,
-    }
-}

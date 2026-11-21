@@ -26,6 +26,8 @@ mod draw;
 mod floor;
 mod dojo_layer;
 mod dojo_front;
+mod spirit_charm;
+mod spirit_front;
 #[cfg(test)]
 mod tests;
 pub use primitives::*;

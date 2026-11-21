@@ -147,20 +147,17 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
             None
         }
     };
-    let target_palfx = if has("palfx.time", 0) || has("palfx.add", 0) || has("palfx.mul", 0) {
-        Some(PalFx::new(
+    let target_palfx = if has("palfx.time", 0) || has("palfx.add", 0) || has("palfx.mul", 0) || has("palfx.sinadd", 0) || has("palfx.invertall", 0) || has("palfx.color", 0) {
+        let mut p = PalFx::new(
             num("palfx.time", 0.0, 0) as i32,
-            [
-                num("palfx.add", 0.0, 0),
-                num("palfx.add", 0.0, 1),
-                num("palfx.add", 0.0, 2),
-            ],
-            [
-                num("palfx.mul", 256.0, 0),
-                num("palfx.mul", 256.0, 1),
-                num("palfx.mul", 256.0, 2),
-            ],
-        ))
+            [num("palfx.add", 0.0, 0), num("palfx.add", 0.0, 1), num("palfx.add", 0.0, 2)],
+            [num("palfx.mul", 256.0, 0), num("palfx.mul", 256.0, 1), num("palfx.mul", 256.0, 2)],
+        );
+        p.sin_add = [num("palfx.sinadd", 0.0, 0), num("palfx.sinadd", 0.0, 1), num("palfx.sinadd", 0.0, 2)];
+        p.sin_period = num("palfx.sinadd", 0.0, 3) as i32;
+        p.invert_all = num("palfx.invertall", 0.0, 0) != 0.0;
+        p.color = num("palfx.color", 256.0, 0);
+        Some(p)
     } else {
         None
     };
@@ -237,7 +234,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         } else {
             [guard_vel * 1.5, gvy / 2.0]
         },
-        p1sprpriority: num("p1sprpriority", 1.0, 0) as i32,
+        p1sprpriority: if has("p1sprpriority", 0) { num("p1sprpriority", 1.0, 0) as i32 } else { num("sprpriority", 1.0, 0) as i32 },
         p2sprpriority: num("p2sprpriority", 0.0, 0) as i32,
         p1facing: num("p1facing", 0.0, 0) as i32,
         p2facing: num("p2facing", 0.0, 0) as i32,

@@ -145,7 +145,7 @@ pub fn merge_hitdef(dst: &mut HitDefData, src: &HitDefData, sc: &Controller) {
             "air.cornerpush.veloff" => dst.air_corner_push = src.air_corner_push,
             "guard.cornerpush.veloff" => dst.guard_corner_push = src.guard_corner_push,
             "airguard.cornerpush.veloff" => dst.air_guard_corner_push = src.air_guard_corner_push,
-            "palfx.time" | "palfx.add" | "palfx.mul" => dst.target_palfx = src.target_palfx.clone(),
+            "palfx.time" | "palfx.add" | "palfx.mul" | "palfx.sinadd" | "palfx.invertall" | "palfx.color" => dst.target_palfx = src.target_palfx.clone(),
             "dizzypoints" => dst.dizzy_points = src.dizzy_points,
             "guardpoints" => dst.guard_points = src.guard_points,
             "redlife" => dst.red_life = src.red_life,

@@ -4,7 +4,13 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, OnceLock};
-use ume_formats::png::DecodedPng;
+
+/// Decoded sprite: straight RGBA shared by every frame that uses the file unrecolored.
+pub(super) struct Decoded {
+    pub width: u32,
+    pub height: u32,
+    pub rgba: Arc<Vec<u8>>,
+}
 
 type Key = (PathBuf, String);
 type Entry<T> = (Arc<Vec<u8>>, Arc<T>);
@@ -20,9 +26,13 @@ fn cached<T>(store: &'static OnceLock<Mutex<HashMap<Key, Entry<T>>>>, root: &Pat
     Some(value)
 }
 
-pub(super) fn png(root: &Path, name: &str, bytes: &Arc<Vec<u8>>) -> Option<Arc<DecodedPng>> {
-    static STORE: OnceLock<Mutex<HashMap<Key, Entry<DecodedPng>>>> = OnceLock::new();
-    cached(&STORE, root, name, bytes, |b| ume_formats::png::decode_png(b).ok())
+pub(super) fn png(root: &Path, name: &str, bytes: &Arc<Vec<u8>>) -> Option<Arc<Decoded>> {
+    static STORE: OnceLock<Mutex<HashMap<Key, Entry<Decoded>>>> = OnceLock::new();
+    cached(&STORE, root, name, bytes, |b| {
+        let dec = ume_formats::png::decode_png(b).ok()?;
+        let rgba = match dec.rgba { Some(ref rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&dec) };
+        Some(Decoded { width: dec.width, height: dec.height, rgba: Arc::new(rgba) })
+    })
 }
 
 pub(super) fn meta(root: &Path, bytes: &Arc<Vec<u8>>) -> Arc<Value> {

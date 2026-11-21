@@ -744,7 +744,7 @@
         {"at":9,"damage":90,"level":"heavy","launch":true,"knockback":[-3,-8],"shake":10,"element":"wind"}
       ],
       "sounds": [{"at":1,"snd":[200,4]}]
-    },
+    , "shake": {"at":2,"time":18,"ampl":5,"freq":75}},
     {
       "id": "triad",
       "name": "Hurricane Triad",
@@ -759,7 +759,7 @@
         {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,0.5],"offset":[44,-58],"damage":24,"hits":6,"level":"medium","removeTime":110,"priority":6,"element":"wind"}
       ],
       "sounds": [{"at":1,"snd":[200,4]}]
-    },
+    , "shake": {"at":2,"time":18,"ampl":5,"freq":75}},
     {
       "id": "dragon",
       "name": "Storm Dragon Fist",
@@ -841,7 +841,7 @@
       ],
       "fx": "aura",
       "sounds": [{"at":1,"snd":[200,4]}]
-    },
+    , "shake": {"at":2,"time":18,"ampl":5,"freq":75}},
     {
       "id": "overhead",
       "name": "Tempest Chop",

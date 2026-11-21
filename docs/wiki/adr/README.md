@@ -19,3 +19,4 @@ An ADR records one decision that changes a crate boundary, a dependency or a dat
 | [0004](0004-wiki-mdbook-on-pages.md) | Wiki rendered with mdBook under `/wiki/` on GitHub Pages | Accepted |
 | [0005](0005-crate-boundaries-enforced-in-ci.md) | Crate dependency boundaries enforced in CI | Accepted |
 | [0006](0006-content-is-data-first.md) | Content is data first, with a documented extension table | Accepted |
+| [0007](0007-umf2-definitive-fighter-format.md) | UMF 2: JSON kept, compact frames, canonical layout, quality floor | Accepted |

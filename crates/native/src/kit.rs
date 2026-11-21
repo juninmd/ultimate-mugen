@@ -145,7 +145,7 @@ fn resolve(value: Value, depth: usize) -> Result<Value, String> {
         kit.remove("id");
         base = layer(base, kit)?;
     }
-    base.insert("format".to_string(), Value::String("umf/1".to_string()));
+    base.insert("format".to_string(), Value::String("umf/2".to_string()));
     Ok(Value::Object(layer(base, own)?))
 }
 

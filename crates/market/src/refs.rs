@@ -60,7 +60,7 @@ pub fn followups(def_path: &str, def_text: &str, index: &TreeIndex, have: &HashS
         if have.contains(&e.path) || out.iter().any(|f| f.path == e.path) {
             continue;
         }
-        out.push(FileRef { path: e.path.clone(), size: e.size });
+        out.push(FileRef { path: e.path.clone(), size: e.size, sha: e.sha.clone() });
     }
     out
 }
@@ -70,7 +70,7 @@ mod tests {
     use super::*;
 
     fn entries(paths: &[&str]) -> Vec<TreeEntry> {
-        paths.iter().map(|p| TreeEntry { path: p.to_string(), size: 10 }).collect()
+        paths.iter().map(|p| TreeEntry { path: p.to_string(), size: 10, ..Default::default() }).collect()
     }
 
     #[test]

@@ -16,6 +16,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [Audio](Audio.md) | Players & Creators | Character sounds, music per stage, formats and panning |
 | [Character select](Character-Select.md) | Players | Select screen, portraits, teams and shortcuts |
 | [Game modes](Game-Modes.md) | Players | Arcade, teams (Sequence, Parallel, Tag) and their rules |
+| [In-fight Easter Eggs](Easter-Eggs.md) | Players | Secret combat milestones, stage cameos, and lore matchup interactions |
 | [Universe and Lore](Lore.md) | Players & Creators | Cosmology, factions, energy systems and the Great Convergence |
 | [Character Dossiers](Characters.md) | Players & Creators | Roster bios, portraits, moves, rivalries and home stages |
 | [Compatibility decisions](Compatibility-Decisions.md) | Creators | Features the engine rejects by design and why |

@@ -16,7 +16,7 @@ Lutadores UMF também carregam de uma pasta, sem recompilar: coloque o `.json` e
 
 ```json
 {
-  "format": "umf/1",
+  "format": "umf/2",
   "id": "meu",
   "name": "Meu Lutador",
   "series": "Minha Série",
@@ -40,7 +40,7 @@ Lutadores UMF também carregam de uma pasta, sem recompilar: coloque o `.json` e
 
 | Campo | Obrigatório | Descrição |
 |---|---|---|
-| `format` | sim | Sempre `umf/1` |
+| `format` | sim | `umf/2` (`umf/1` ainda carrega) |
 | `id`, `name`, `series`, `author`, `color` | sim | Identidade; `color` é a cor do cartão na seleção |
 | `boss` | não | `true` esconde da seleção e coloca como chefe final do Arcade |
 | `profile` | não | Nacionalidade e biografia, ver [Perfil](#perfil-nacionalidade-e-biografia) |
@@ -120,6 +120,14 @@ Cada animação é uma lista de quadros:
   { "pose": "jab0", "ticks": 5 }
 ], "loop": 0 }
 ```
+
+Um quadro só com pose e duração pode ser escrito `"pose*ticks"`, e as duas formas se misturam na mesma lista:
+
+```json
+"jab": { "frames": ["jab0*3", { "pose": "jab1", "ticks": 3, "hit": { "part": "handR", "radius": 10 } }, "jab0*5"], "loop": 0 }
+```
+
+Rode `node scripts/umf2-migrate.mjs` antes de commitar um lutador do jogo: ele grava o layout canônico que o CI confere. Veja o [ADR 0007](../adr/0007-umf2-definitive-fighter-format.md).
 
 | Campo do quadro | Descrição |
 |---|---|

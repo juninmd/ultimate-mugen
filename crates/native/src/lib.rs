@@ -22,6 +22,7 @@ pub mod kit;
 mod kit_merge;
 mod kit_parse;
 pub mod compile;
+mod frame_form;
 mod frame_raster;
 pub mod effects;
 mod pixel;

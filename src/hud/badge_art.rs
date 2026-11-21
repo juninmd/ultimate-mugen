@@ -7,6 +7,8 @@ thread_local! {
     static COMBO_PLATE: Option<Texture2D> = load_pixel_art(include_bytes!("../../assets/ui/hud-combo-plate.png"));
     static GUARD_FRAME: Option<Texture2D> = load_pixel_art(include_bytes!("../../assets/ui/hud-guard-frame.png"));
     static GUARD_SHIELD: Option<Texture2D> = load_pixel_art(include_bytes!("../../assets/ui/hud-guard-shield.png"));
+    static DANGER_PLATE: Option<Texture2D> = load_pixel_art(include_bytes!("../../assets/ui/hud-danger-plate.png"));
+    static RUSH_PLATE: Option<Texture2D> = load_pixel_art(include_bytes!("../../assets/ui/hud-rush-plate.png"));
 }
 
 fn load_pixel_art(data: &[u8]) -> Option<Texture2D> {
@@ -103,3 +105,66 @@ pub(super) fn draw_guard_shield(at: Vec2, s: f32, cracked: bool) -> bool {
         true
     })
 }
+
+pub(super) fn draw_danger_plate<P: Fn(f32, f32) -> Vec2>(
+    p: &P,
+    s: f32,
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+    pulse: f32,
+    flip_x: bool,
+) -> bool {
+    DANGER_PLATE.with(|plate| {
+        let Some(tex) = plate else {
+            return false;
+        };
+        let (px, py) = (2.0, 0.8);
+        let tl = p(x - px, y - py);
+        draw_texture_ex(
+            tex,
+            tl.x,
+            tl.y,
+            Color::new(1.0, 0.85 + 0.15 * pulse, 0.85 + 0.15 * pulse, 0.96),
+            DrawTextureParams {
+                dest_size: Some(vec2((w + px * 2.0) * s, (h + py * 2.0) * s)),
+                flip_x,
+                ..Default::default()
+            },
+        );
+        true
+    })
+}
+
+pub(super) fn draw_rush_plate<P: Fn(f32, f32) -> Vec2>(
+    p: &P,
+    s: f32,
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+    pulse: f32,
+    flip_x: bool,
+) -> bool {
+    RUSH_PLATE.with(|plate| {
+        let Some(tex) = plate else {
+            return false;
+        };
+        let (px, py) = (2.0, 0.8);
+        let tl = p(x - px, y - py);
+        draw_texture_ex(
+            tex,
+            tl.x,
+            tl.y,
+            Color::new(0.88 + 0.12 * pulse, 0.95 + 0.05 * pulse, 1.0, 0.96),
+            DrawTextureParams {
+                dest_size: Some(vec2((w + px * 2.0) * s, (h + py * 2.0) * s)),
+                flip_x,
+                ..Default::default()
+            },
+        );
+        true
+    })
+}
+

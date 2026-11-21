@@ -45,17 +45,19 @@
     if (pr(9)) b |= K.s; if (pr(10) && pr(11)) b |= K.t; else if (pr(11)) b |= K.s;
     return b;
   }
-  function rumble(i, strong, weak, ms) {
+  async function rumble(i, strong, weak, ms) {
     const p = pads()[i]; if (!p) return;
     const a = p.vibrationActuator || (p.hapticActuators && p.hapticActuators[0]);
-    if (a && a.playEffect) a.playEffect(a.type || 'dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak }).catch(() => {});
-    else if (a && a.pulse) a.pulse(Math.max(strong, weak), ms);
-    else if (navigator.vibrate && ('ontouchstart' in window)) navigator.vibrate(ms);
+    try {
+      if (a && a.playEffect) await a.playEffect(a.type || 'dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak });
+      else if (a && a.pulse) await a.pulse(Math.max(strong, weak), ms);
+      else if (navigator.vibrate && ('ontouchstart' in window)) navigator.vibrate(ms);
+    } catch {}
   }
   window.ume_gp_count = () => pads().length;
   window.ume_gp_state = (i) => state(i);
   window.ume_gp_name = (i) => { const p = pads()[i]; return p ? p.id : ''; };
-  window.ume_gp_rumble = (i, s, w, ms) => rumble(i, s, w, ms);
+  window.ume_gp_rumble = (i, s, w, ms) => { void rumble(i, s, w, ms); };
   window.ume_set_import_rect = (x, y, w, h) => {
     const b = document.getElementById('imp'), c = document.getElementById('glcanvas');
     if (!b || !c) return;

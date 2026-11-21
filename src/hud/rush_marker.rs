@@ -18,11 +18,11 @@ pub(super) fn draw<P: Fn(f32, f32) -> Vec2, T: Fn(&str, f32, f32, f32, Color, Al
     let pulse = 0.8 + 0.2 * (gt * 14.0).sin().abs();
     let (cw, ch) = (52.0, 7.5);
     let cx = if side == 0 {
-        bx + bw - cw - 4.0
-    } else {
         bx + 4.0
+    } else {
+        bx + bw - cw - 4.0
     };
-    let cy = by + bh + 4.5;
+    let cy = by - 7.5;
     let shape: Vec<Vec2> = poly::slanted(cx, cy, cw, ch, 2.5)
         .into_iter()
         .map(|q| p(q.x, q.y))

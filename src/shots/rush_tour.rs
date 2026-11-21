@@ -32,6 +32,7 @@ pub(crate) async fn run(app: &mut App, dir: &str) {
                 break;
             }
         }
+        s.m.wins[0] = 1;
     }
     screen(app, dir, "rush-cancel-marker", 2).await;
 }

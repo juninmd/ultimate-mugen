@@ -24,6 +24,7 @@ pub struct Hud {
 
 impl Hud {
     pub fn new() -> Self {
+        training_panel::reset();
         Hud {
             replay: false,
             inputs: vec![],
@@ -1064,7 +1065,7 @@ impl Hud {
                     true,
                 );
             }
-            self.advantage.update(m); training_panel::draw(&p, &text, s, w, self.combo[0].0, self.combo[0].1);
+            self.advantage.update(m); training_panel::draw(&p, &text, s, w, m.fighters.iter().find(|f| f.side == 0 && !f.is_helper).map_or(0, |f| f.id), self.combo[0].0, self.combo[0].1);
             if let Some(ref res) = self.advantage.result {
                 opacity::scope(opacity::ADVANTAGE, || advantage_draw::draw(res, &p, &text, s, w));
             }

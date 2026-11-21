@@ -477,7 +477,7 @@
     "getUp": {"frames":["lie*6","getUp1*8","getUp2*7","getUp3*5","idle0*3"]},
     "dead": {"frames":["dead*-1"]},
     "trip": {"frames":["trip*4","fall1*-1"]},
-    "airRecover": {"frames":["flip0*3","flip1*3","flip2*3","flip3*3","jumpDown*-1"]},
+    "airRecover": {"frames":[{"pose":"flip0","ticks":3},{"pose":"recover0","ticks":3},{"pose":"flip2","ticks":3},{"pose":"flip3","ticks":3},{"pose":"jumpDown","ticks":-1}]},
     "win": {"frames":["win0*14","win1*14"]},
     "lose": {"frames":["lose*-1"]},
     "draw": {"frames":["intro1*-1"]},

@@ -1,5 +1,4 @@
 use super::cancel::{flash, landing_state, swallow_start};
-use super::*;
 use crate::fighter::Fighter;
 use crate::matchs::Match;
 

@@ -69,6 +69,7 @@ fn lab(nc: &NativeChar) -> Vec<Probe> {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_native_attack_state_connects_and_stays_finite() {
     let mut failures = vec![];
     for nc in characters() {

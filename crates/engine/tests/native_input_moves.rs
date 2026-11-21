@@ -99,6 +99,7 @@ fn abilities_reached(base: &Match, command: &CommandDef, forms: usize) -> BTreeS
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_command_of_every_fighter_performs_its_move_from_real_inputs() {
     let (mut dead_commands, mut unreachable_moves) = (Vec::new(), Vec::new());
     for nc in characters() {

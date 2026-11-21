@@ -1,0 +1,21 @@
+name: Nightly
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+  CARGO_NET_RETRY: 10
+  CARGO_PROFILE_DEV_DEBUG: 0
+jobs:
+  roster-sweeps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
+      - run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev libx11-dev libxi-dev libgl1-mesa-dev pkg-config
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+      - run: cargo test --workspace --release --no-fail-fast -- --ignored
+        env: { CARGO_PROFILE_RELEASE_LTO: "off", CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16 }

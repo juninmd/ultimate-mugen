@@ -37,3 +37,7 @@ Crie uma função em `src/smoke/features/` (arquivo novo perto de 250 linhas), l
 ## Ainda não coberto
 
 Netplay, atualização automática, importação de zip e controles de toque na tela não são exercitados pelo runner.
+
+## Varreduras noturnas
+
+Simulações do elenco inteiro que levam de 10 a 30 s cada (`native_roster_lab`, `native_air_abilities`, `native_match_invariants`, `native_input_moves`, `native_normal_reach`, `native_no_stuck_states`, `native_attack_keyframes`, `pixel_states_test` e a varredura de golpes aéreos) estão marcadas com `#[ignore = "nightly: full-roster sweep"]`. O gate do PR as pula; `.github/workflows/nightly.yml` roda todas por dia (`cargo test --workspace --release -- --ignored`), e localmente dá para rodar do mesmo jeito.

@@ -2998,6 +2998,7 @@ dependencies = [
  "symphonia",
  "tiny-skia",
  "toml",
+ "toml_edit",
  "ume-engine",
  "ume-formats",
  "ume-market",

@@ -62,7 +62,8 @@
     document.getElementById('imp').setAttribute('aria-label', tx.import);
     const boot = document.getElementById('boot'), barBox = document.getElementById('bar'), bar = barBox.querySelector('i'), msg = document.getElementById('bootmsg');
     const setProgress = (pct) => { bar.style.width = pct + '%'; barBox.setAttribute('aria-valuenow', String(Math.round(pct))); };
-    const hide = () => { boot.classList.add('done'); setTimeout(() => boot.remove(), 400); };
+    let hideTimer, removeBootTimer;
+    const hide = () => { boot.classList.add('done'); removeBootTimer = setTimeout(() => boot.remove(), 400); };
     async function load() {
       const url = new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url);
       const res = await fetch(url);
@@ -83,7 +84,7 @@
     window.umeStartImports(ume);
     window.umeStartMarket(ume);
     for (const t of ['pointerdown', 'keydown', 'touchend']) window.addEventListener(t, () => ume.ume_unlock_audio(), { capture: true, passive: true });
-    setTimeout(hide, 600);
+    hideTimer = setTimeout(hide, 600);
     const cv = document.getElementById('glcanvas');
     const showFatal = (err) => { console.error(err); if (!document.getElementById('fatal').classList.contains('on')) { document.getElementById('fataltx').textContent = tx.fatal; document.getElementById('fatalbtn').textContent = tx.reload; document.getElementById('fatal').classList.add('on'); } };
     document.getElementById('fatalbtn').addEventListener('click', () => location.reload());
@@ -96,6 +97,11 @@
       const losses = recentLosses();
       if (losses.length >= LOST_LIMIT) { showFatal(new Error('WebGL context lost ' + LOST_LIMIT + ' times in a minute')); return; }
       try { sessionStorage.setItem(LOST_KEY, JSON.stringify([...losses, Date.now()])); } catch (err) {}
+      clearTimeout(hideTimer);
+      clearTimeout(removeBootTimer);
+      barBox.classList.add('ind');
+      barBox.removeAttribute('aria-valuenow');
+      bar.style.removeProperty('width');
       msg.textContent = tx.lost; boot.classList.remove('done'); document.body.appendChild(boot); setTimeout(() => location.reload(), 800);
     });
   </script>

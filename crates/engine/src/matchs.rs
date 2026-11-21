@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod unleash; mod walk;
+mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod priority; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -1080,12 +1080,20 @@ impl Match {
                 }
             }
         }
+        let keep = priority::keep(self, &pending, pending_len);
+        for i in 0..pending_len {
+            if keep[i] { continue; }
+            let a = pending[i].0;
+            if !(0..pending_len).any(|j| keep[j] && pending[j].0 == a) {
+                self.fighters[a].hitdef_active = false;
+            }
+        }
         let mut struck = [0usize; 8];
         let mut struck_len = 0;
-        for &(a, d, at) in &pending[..pending_len] {
+        for (idx, &(a, d, at)) in pending[..pending_len].iter().enumerate() {
+            if !keep[idx] { continue; }
             let Some(hd) = self.fighters[a].hitdef.clone() else { continue };
             if hd.hit_once && struck[..struck_len].contains(&a) { continue; }
-            if !self.fighters[a].hitdef_active { continue; }
             let did = self.fighters[d].id;
             self.fighters[a].hitdef_targets.push(did);
             if hd.hit_once { self.fighters[a].targets.retain(|t| t.0 == did); }

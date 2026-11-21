@@ -118,7 +118,7 @@ impl<'a> Host for Ctx<'a> {
             "enemy" | "enemynear" | "p2" => m.enemy(self.i, arg.unwrap_or(0.0) as usize)?,
             "partner" => m.partner(if f.is_helper { m.idx(f.root)? } else { self.i }, arg.map(|a| a.max(0.0) as usize).unwrap_or(0))?,
             "playerid" => { let id = arg?; if id <= 0.0 || !id.is_finite() { return None; } m.idx(id as u32)? },
-            "stateowner" => self.i,
+            "stateowner" => f.state_giver.and_then(|id| m.idx(id)).unwrap_or(self.i),
             _ => { crate::diagnostics::note_unsupported(crate::diagnostics::Category::Redirection, kind); return None }
         };
         Some(Ctx { m, i })

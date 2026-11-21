@@ -42,7 +42,7 @@ fn test_trait_compilation_and_cns_generation() {
         throw: None,
         cancels: None,
         rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 
@@ -74,7 +74,7 @@ fn test_trait_compilation_and_cns_generation() {
         throw: None,
         cancels: None,
         rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 
@@ -106,7 +106,7 @@ fn test_trait_compilation_and_cns_generation() {
         throw: None,
         cancels: None,
         rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 
@@ -138,7 +138,7 @@ fn test_trait_compilation_and_cns_generation() {
         throw: None,
         cancels: None,
         rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 
@@ -170,7 +170,7 @@ fn test_trait_compilation_and_cns_generation() {
         throw: None,
         cancels: None,
         rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 
@@ -240,7 +240,7 @@ fn test_trait_runtime_match_simulation() {
         throw: None,
         cancels: None,
         rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 

@@ -51,6 +51,10 @@ Defina `UME_MARKET_HOME` para trocar a pasta no computador. Cada item instalado 
 
 A listagem usa a API do GitHub (60 requisições por hora sem token) e os downloads usam `raw.githubusercontent.com`, que não tem essa trava. As listagens guardam o ETag recebido: se o repositório não mudou, o GitHub devolve `304` e a listagem vem do cache local. Um repositório é atualizado ao abrir se o cache tiver mais de 10 minutos, ou manualmente com `R`.
 
+### Atualização automática
+
+Cada entrada da listagem guarda o `sha` do blob Git de cada arquivo. A versão de um item é um hash dos caminhos e shas dos arquivos, salva junto do item instalado. Com o jogo aberto (e ao iniciar), cada repositório com itens instalados é listado de novo a cada 10 minutos; só os itens instalados cuja versão difere do repositório são baixados de novo. Itens atualizados mantêm o estado ativo ou inativo. Os downloads usam `?v=<sha>`, então um push recente nunca vem do cache do `raw.githubusercontent.com`. Itens instalados antes de existirem versões são reinstalados uma vez.
+
 Para aumentar o limite, aperte `T` e cole um personal access token (não precisa de permissões para repositórios públicos), ou defina `UME_GITHUB_TOKEN` / `GITHUB_TOKEN` no computador. O token só é enviado para `api.github.com`.
 
 ## Limites de segurança

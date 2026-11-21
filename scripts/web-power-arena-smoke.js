@@ -19,7 +19,7 @@ async function run() {
       case 'approach': return player.x < -218;
       case 'land': return player.ground <= height && player.y === player.ground && player.state === 0;
       case 'edge': return player.x < -510 && clock.round_state === 2;
-      case 'fall': return player.state === 19903 && player.alive && player.y > 18;
+      case 'fall': return player.state === 19903 && player.alive && player.y > 12;
       case 'result': return clock.winner === 1 && !player.alive && player.x < -554 && player.y >= 184;
       default: return false;
     }

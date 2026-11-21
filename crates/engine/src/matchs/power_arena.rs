@@ -128,7 +128,7 @@ impl Match {
             f.hit_pause = 0;
             f.hit_shake = 0;
             f.unhittable = 120;
-            f.vel = V2 { x: (f.vel.x.abs() * 0.7).clamp(2.5, 5.0), y: f.vel.y.max(1.0) };
+            f.vel = V2 { x: (f.vel.x.abs() * 0.7).clamp(2.5, 5.0), y: f.vel.y.clamp(1.0, 3.2) };
             if let Some(animation) = [5050, 5030, 41, 40].into_iter().find(|anim| f.def.anims.contains_key(anim)) {
                 f.change_anim_own(animation, 1);
             }
@@ -142,7 +142,7 @@ impl Match {
         let (highest, lowest) = self.roots()
             .filter(|fighter| !fighter.destroyed && !fighter.ikemen.standby && fighter.move_camera[1])
             .fold((f32::INFINITY, f32::NEG_INFINITY), |(high, low), fighter| {
-                let y = if fighter.state_no == ENGINE_STATE_ARENA_EXIT { fighter.pos.y.min(18.0) } else { fighter.pos.y };
+                let y = if fighter.state_no == ENGINE_STATE_ARENA_EXIT { fighter.pos.y.min(90.0) } else { fighter.pos.y };
                 (high.min(y), low.max(y))
             });
         let vertical_zoom = (lowest - highest + CAMERA_HEADROOM + CAMERA_FLOOR_MARGIN) / super::BASE_H;

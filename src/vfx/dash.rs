@@ -38,7 +38,12 @@ impl Vfx {
             [0.85, 0.82, 0.78],
         );
         if quality::level() >= 1 {
-            self.ring(x, feet - 1.0, 22.0, 0.2, 1.0, [0.9, 0.9, 0.95]);
+            if self.sheets.available(SheetKind::ShockwaveRing) {
+                self.sheets
+                    .spawn(SheetKind::ShockwaveRing, x, feet - 1.0, 52.0, 0.0);
+            } else {
+                self.ring(x, feet - 1.0, 22.0, 0.2, 1.0, [0.9, 0.9, 0.95]);
+            }
         }
     }
 }

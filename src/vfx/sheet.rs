@@ -126,7 +126,17 @@ impl SheetFx {
             .as_ref()
     }
 
-    pub(super) fn draw(&self, tp: &dyn Fn(f32, f32) -> Vec2, scale: f32, gain: f32, layer: SheetLayer) {
+    pub(super) fn available(&self, kind: SheetKind) -> bool {
+        self.texture(kind).is_some()
+    }
+
+    pub(super) fn draw(
+        &self,
+        tp: &dyn Fn(f32, f32) -> Vec2,
+        scale: f32,
+        gain: f32,
+        layer: SheetLayer,
+    ) {
         for s in &self.sprites {
             let spec = s.kind.spec();
             let sprite_layer = if matches!(s.kind, SheetKind::FirePillar | SheetKind::AwakenBurst) {

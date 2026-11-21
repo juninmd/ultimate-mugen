@@ -16,16 +16,15 @@ pub(super) fn portrait(nc: &NativeChar, palette: Option<&Value>) -> Option<Sprit
     let recolor = palette.and_then(|palette| Recolor::new(nc.art.style.get("colors"), palette));
     sprite_roots(nc.sprite_dir()).iter().find_map(|root| {
         let bytes = read_sprite(root, "portrait.png")?;
-        let png = ume_formats::png::decode_png(&bytes).ok()?;
-        let rgba = match &png.rgba { Some(rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&png) };
-        let (width, height, mut rgba) = portrait_thumbnail(png.width, png.height, rgba);
+        let png = super::decode_cache::png(root, "portrait", &bytes)?;
+        let (width, height, mut rgba) = portrait_thumbnail(png.width, png.height, &png.rgba);
         if let Some(recolor) = &recolor { recolor.apply(&mut rgba); }
         Some(Sprite { image: Some(ImageData::new(width, height, rgba)), width: width as f32, height: height as f32, axis_x: 0.0, axis_y: 0.0, scale: 1.0 })
     })
 }
 
-fn portrait_thumbnail(width: u32, height: u32, rgba: Vec<u8>) -> (u32, u32, Vec<u8>) {
-    if width.max(height) <= MAX_PORTRAIT_EDGE { return (width, height, rgba); }
+fn portrait_thumbnail(width: u32, height: u32, rgba: &[u8]) -> (u32, u32, Vec<u8>) {
+    if width.max(height) <= MAX_PORTRAIT_EDGE { return (width, height, rgba.to_vec()); }
     let (target_width, target_height) = if width >= height {
         (MAX_PORTRAIT_EDGE, ((height as u64 * MAX_PORTRAIT_EDGE as u64 + width as u64 / 2) / width as u64).max(1) as u32)
     } else {

@@ -125,6 +125,7 @@ Created next to the executable on first run (localStorage on web) with the defau
 | `[accessibility]` | `colorblind` | `true` uses blue/orange side colors instead of the tints |
 | `[accessibility]` | `hud_scale` | HUD size multiplier (0.8 to 1.25) |
 | `[accessibility]` | `reduce_motion` | `true` turns off screen shake |
+| `[accessibility]` | `title_crt` | `false` turns off the CRT static and scanlines on the title screen; `reduce_motion = true` keeps only still scanlines there |
 | `[touch]` | `scale` | on-screen pad size, 0.7 to 1.5 |
 | `[touch]` | `opacity` | on-screen pad opacity, 0.2 to 1.0 |
 | `[touch]` | `left_handed` | `true` mirrors the pad (stick right, buttons left) |

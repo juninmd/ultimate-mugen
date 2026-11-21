@@ -366,6 +366,15 @@ impl Match {
             }
         }
         if self.fighters[i].has_assert(asf::NOHARDCODEDKEYS) { return; }
+        if st == 'A' {
+            let guard_blocked = self.fighters[i].has_assert(asf::NOAIRGUARD);
+            let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD) || self.fighters[i].guard_button;
+            if guard_input && !guard_blocked && self.in_guard_dist(i) && !(120..=155).contains(&s) {
+                let own = self.fighters[i].def.clone();
+                self.change_state(i, 120, own);
+                return;
+            }
+        }
         if st == 'S' || st == 'C' {
             let guard_blocked = self.fighters[i].has_assert(if st == 'S' { asf::NOSTANDGUARD } else { asf::NOCROUCHGUARD });
             let guard_input = cmd(self, "holdback") || self.fighters[i].has_assert(asf::AUTOGUARD) || self.fighters[i].guard_button;
@@ -991,7 +1000,7 @@ impl Match {
         let ok = (st == 'S' && (gf.contains('H') || gf.contains('M'))) || (st == 'C' && (gf.contains('L') || gf.contains('M'))) || (st == 'A' && gf.contains('A'));
         if !ok { return false; }
         if (120..=155).contains(&f.state_no) { return true; }
-        f.ctrl && f.move_type != 'H' && st != 'A' && !f.is_helper && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD) || f.guard_button)
+        f.ctrl && f.move_type != 'H' && !f.is_helper && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD) || f.guard_button)
     }
 
     fn detect_reversals(&mut self) {

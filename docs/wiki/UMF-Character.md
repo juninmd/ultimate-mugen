@@ -351,3 +351,11 @@ Browser sprite packs load asynchronously. A newly downloaded or replaced pack in
 ## Share a fighter as a pack
 
 A zip (or a `mugen/` folder) that holds one UMF `.json` next to a `sprites/` folder with `01_idle.png`, the pose PNGs and an optional `meta.json` (`axisX`, `axisY`, `refHeight` per pose) is imported as a native fighter, with no `.def`. The marketplace installs it like any other pack. [Goku SSJ4 UMF](https://github.com/juninmd/mugen-assets/tree/main/umf/Goku_SSJ4_UMF) is the reference example.
+
+### M.U.G.E.N parity
+
+`.agents/skills/mugen-to-ume-migrator/scripts/mugen2umf.py` converts a M.U.G.E.N folder into such a pack. It keeps the original look and feel with three fields:
+
+- `stats.height` equal to `meta.json` `refHeight` draws the sprites 1:1, at the original size.
+- `art.style.boxes: "exact"` uses `hit.box` (Clsn1) and per-frame `hurt` (Clsn2) as written, with no automatic trim.
+- `moves[].sounds: [{ "at": 3, "snd": [2, 1] }]` plays `sprites/snd_2_1.wav` on frame 3 (listed in `meta.json` `sounds`); `"fight": true` plays from the engine's fight sounds.

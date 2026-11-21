@@ -736,8 +736,10 @@ impl Match {
             if f.move_hit > 0 { f.move_hit += 1; }
             if f.move_guarded > 0 { f.move_guarded += 1; }
             if f.move_countered > 0 { f.move_countered += 1; }
-            if !f.not_hit_by.is_empty() { f.not_hit_by.retain_mut(|n| { n.1 -= 1; n.1 > 0 }); }
-            if !f.hit_by.is_empty() { f.hit_by.retain_mut(|n| { n.1 -= 1; n.1 > 0 }); }
+            for slot in f.not_hit_by.iter_mut().flatten() { slot.1 -= 1; }
+            for slot in f.hit_by.iter_mut().flatten() { slot.1 -= 1; }
+            for slot in f.not_hit_by.iter_mut() { if slot.as_ref().is_some_and(|n| n.1 <= 0) { *slot = None; } }
+            for slot in f.hit_by.iter_mut() { if slot.as_ref().is_some_and(|n| n.1 <= 0) { *slot = None; } }
             if let Some(p) = f.palfx.as_mut() { p.elapsed += 1; }
             let tp = f.frame().map(|fr| TrailPoint { x: f.pos.x, y: f.pos.y, group: fr.group, index: fr.index, fx: fr.x, fy: fr.y, flip_h: fr.flip_h, facing: f.facing });
             if let Some(ai) = f.after_image.as_mut() {
@@ -989,8 +991,8 @@ impl Match {
         if st == 'A' && !hf.contains('A') && !(falling && hf_falling) { return false; }
         if falling && !hf_falling { return false; }
         if st == 'L' && !hf.contains('D') { return false; }
-        if f.not_hit_by.iter().any(|(a, _)| Self::attr_match(hd, a)) { return false; }
-        if f.hit_by.iter().any(|(a, _)| !Self::attr_match(hd, a)) { return false; }
+        if f.not_hit_by.iter().flatten().any(|(a, t)| *t > 0 && Self::attr_match(hd, a)) { return false; }
+        if f.hit_by.iter().flatten().any(|(a, t)| *t > 0 && !Self::attr_match(hd, a)) { return false; }
         true
     }
     fn is_guarding(&self, d: usize, hd: &HitDefData) -> bool {

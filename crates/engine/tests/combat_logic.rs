@@ -249,7 +249,7 @@ fn test_hit_filtering_can_be_hit() {
     assert!(!m.can_be_hit(p1_idx, &hd, m.fighters[p1_idx].side, 0));
 
     // not_hit_by immunity
-    m.fighters[p2_idx].not_hit_by.push(("S,NA".into(), 10));
+    m.fighters[p2_idx].not_hit_by[0] = Some(("S,NA".into(), 10));
     assert!(!m.can_be_hit(p2_idx, &hd, m.fighters[p1_idx].side, 0));
 }
 

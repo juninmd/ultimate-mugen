@@ -132,9 +132,15 @@ pub fn checksum(m: &Match) -> u128 {
             h.u32(*id);
             h.i32(*v);
         }
-        for (name, v) in f.hit_by.iter().chain(f.not_hit_by.iter()) {
-            h.bytes(name.as_bytes());
-            h.i32(*v);
+        for slot in f.hit_by.iter().chain(f.not_hit_by.iter()) {
+            match slot {
+                Some((name, v)) => {
+                    h.u32(1);
+                    h.bytes(name.as_bytes());
+                    h.i32(*v);
+                }
+                None => h.u32(0),
+            }
         }
         for (id, v) in &f.persist {
             h.u32(*id);

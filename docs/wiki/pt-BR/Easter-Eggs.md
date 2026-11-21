@@ -51,3 +51,25 @@ O Ultimate MUGEN inclui um sistema de Easter Eggs puramente de apresentação (`
 38. **Pirâmides de Gizé — Olho de Hórus**: Encher a super barra desperta o escaravelho dourado de Gizé.
 39. **Jardins Suspensos da Babilônia — Plumas da Babilônia**: Voo colorido sobre os jardins durante combos aéreos.
 40. **Bênção das Maravilhas Antigas** (Estátua de Zeus, Farol de Alexandria, Templo de Ártemis, Colosso de Rodes, Mausoléu de Halicarnasso): Fenômeno mítico exclusivo para cada maravilha clássica.
+
+## Easter Eggs de Lore, Rivalidades e Lutadores (20)
+41. **Espelho (Mirror Match)**: Qualquer lutador enfrentando a si mesmo solta uma fala de "impostor".
+42. **Suzume vs Oboro**: Banner de vingança do clã Kagerou com emblema do Eclipse Escarlate.
+43. **Sylene vs Garan**: Gelo ártico de Borealia contra as chamas violetas do Submundo.
+44. **Kaito vs Oboro**: Tempestade de Izu contra o arquiteto do Eclipse Escarlate.
+45. **Bruno no Brasil / Corcovado**: A torcida da casa vibra pelo tricampeão de Minas Gerais.
+46. **Volta em Neo-Metrópole 2099**: Fala de livre-arbítrio ao retornar à cidade onde foi construído.
+47. **Akio Empolgado (<30% de vida)**: Otimismo do Dojo Queda Estelar com ícone de ramen fumegante.
+48. **Desculpas do Haruki**: O arquivista gentil pede desculpas no meio da luta após um combo de 5+ acertos.
+49. **Marlow vs Valdric**: O pirata dos céus provoca o príncipe sobre sua coroa imperial.
+50. **Kaito vs Jin**: Corrida contra o vento entre os Penhascos de Izu e o Vale de Kiso.
+51. **Shion vs Kaname**: Lâmina de meteorito contra a katana espiritual (`crossed_blades`).
+52. **Lian na Grande Muralha**: A grã-mestra da Lanterna de Jade defende a Grande Muralha.
+53. **Bruno vs Daichi**: Choque de gigantes entre o Ringue de Ferro e o Lobo de Altai.
+54. **Garan na Cratera Vulcânica**: O Portão de Cinzas se abre onde os 99 monges o selaram.
+55. **Valdric vs Oboro**: Duas coroas, um trono — Império Rubro contra Eclipse Escarlate.
+56. **Suzume vs Jin**: Duelo de velocidade entre Iga e o Vale do Vento.
+57. **Volta vs Haruki**: O androide pergunta ao arquivista o que torna um coração corajoso.
+58. **Akio vs Kaito**: Rivalidade clássica — "Quem perder paga o ramen!"
+59. **Papagaio do Marlow**: O imediato do *El Viento Salado* cruza a tela em Supers ou combos de 6+ acertos.
+60. **Reclamação dos Capangas (`npc_*`)**: Os capangas do modo história reclamam do salário ao levar um combo de 4+ acertos.

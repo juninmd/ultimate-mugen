@@ -2,7 +2,7 @@ use crate::gfx::*;
 use std::cell::OnceCell;
 use ume_formats::png::decode_png;
 
-pub(crate) const SPRITE_COUNT: usize = 12;
+pub(crate) const SPRITE_COUNT: usize = 16;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum EggSprite {
@@ -19,6 +19,10 @@ pub(crate) enum EggSprite {
     Capybara,
     Toucan,
     ScarabLaurel,
+    PirateParrot,
+    RamenBowl,
+    CrossedBlades,
+    EclipseMoon,
 }
 
 pub(crate) struct SpriteSpec {
@@ -40,6 +44,10 @@ const KITSUNE_PNG: &[u8] = include_bytes!("../../assets/easter/kitsune_mask.png"
 const CAPYBARA_PNG: &[u8] = include_bytes!("../../assets/easter/capybara.png");
 const TOUCAN_PNG: &[u8] = include_bytes!("../../assets/easter/toucan.png");
 const SCARAB_PNG: &[u8] = include_bytes!("../../assets/easter/scarab_laurel.png");
+const PARROT_PNG: &[u8] = include_bytes!("../../assets/easter/pirate_parrot.png");
+const RAMEN_PNG: &[u8] = include_bytes!("../../assets/easter/ramen_bowl.png");
+const BLADES_PNG: &[u8] = include_bytes!("../../assets/easter/crossed_blades.png");
+const ECLIPSE_PNG: &[u8] = include_bytes!("../../assets/easter/eclipse_moon.png");
 
 impl EggSprite {
     pub(crate) fn index(self) -> Option<usize> {
@@ -57,6 +65,10 @@ impl EggSprite {
             EggSprite::Capybara => Some(9),
             EggSprite::Toucan => Some(10),
             EggSprite::ScarabLaurel => Some(11),
+            EggSprite::PirateParrot => Some(12),
+            EggSprite::RamenBowl => Some(13),
+            EggSprite::CrossedBlades => Some(14),
+            EggSprite::EclipseMoon => Some(15),
         }
     }
 
@@ -75,6 +87,10 @@ impl EggSprite {
             EggSprite::Capybara => Some(SpriteSpec { png: CAPYBARA_PNG, cell: (32.0, 32.0), frames: 4, fps: 7.0 }),
             EggSprite::Toucan => Some(SpriteSpec { png: TOUCAN_PNG, cell: (32.0, 32.0), frames: 2, fps: 7.0 }),
             EggSprite::ScarabLaurel => Some(SpriteSpec { png: SCARAB_PNG, cell: (32.0, 32.0), frames: 2, fps: 5.0 }),
+            EggSprite::PirateParrot => Some(SpriteSpec { png: PARROT_PNG, cell: (32.0, 32.0), frames: 2, fps: 8.0 }),
+            EggSprite::RamenBowl => Some(SpriteSpec { png: RAMEN_PNG, cell: (32.0, 32.0), frames: 2, fps: 4.0 }),
+            EggSprite::CrossedBlades => Some(SpriteSpec { png: BLADES_PNG, cell: (32.0, 32.0), frames: 2, fps: 6.0 }),
+            EggSprite::EclipseMoon => Some(SpriteSpec { png: ECLIPSE_PNG, cell: (32.0, 32.0), frames: 2, fps: 4.0 }),
         }
     }
 }

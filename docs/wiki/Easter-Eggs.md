@@ -51,3 +51,25 @@ Ultimate MUGEN includes a presentation-only in-fight Easter Egg system (`src/eas
 38. **Pyramids of Giza — Pharaoh's Eye Glint**: Reaching full meter awakens the golden scarab of Giza.
 39. **Hanging Gardens of Babylon — Hanging Gardens Peacock**: Emerald-gold plumage glides overhead on air combos.
 40. **Ancient Wonders Blessing** (Statue of Zeus, Lighthouse of Alexandria, Temple of Artemis, Colossus of Rhodes, Mausoleum of Halicarnassus): Unique mythic phenomenon per classical wonder.
+
+## Lore Matchup, Mirror & Fighter Easter Eggs (20)
+41. **Mirror Match Banter**: Any fighter facing themselves triggers an "impostor" speech bubble.
+42. **Suzume vs Oboro**: Kagerou clan vengeance banner with crimson eclipse emblem.
+43. **Sylene vs Garan**: Borealia's Arctic ice vs Underworld ashen flames.
+44. **Kaito vs Oboro**: Storm of Izu vs the Scarlet Eclipse.
+45. **Bruno on Brazil / Corcovado**: Home crowd cheers on the three-time Minas Gerais champion.
+46. **Volta on Neo-Metrópole 2099**: Free-will firmware speech bubble back at its birthplace.
+47. **Akio Fired Up (<30% HP)**: Starfall Dojo optimism kicks in with a steaming ramen badge.
+48. **Haruki's Apology**: Gentle archivist apologizes mid-fight after landing a 5+ hit combo.
+49. **Marlow vs Valdric**: Sky pirate playfully eyes the Red Star Empire's crown.
+50. **Kaito vs Jin**: Wind-runner rivalry between Izu Cliffs and Wind Valley.
+51. **Shion vs Kaname**: Meteorite blade meets Hokkaido's spirit katana (`crossed_blades`).
+52. **Lian on Great Wall**: Jade Lantern grandmaster defending the Great Wall.
+53. **Bruno vs Daichi**: Heavyweight grappler showdown — Iron Ring vs Altai Wolf.
+54. **Garan on Volcanic Crater**: The Ashen Gate opens where 99 monks sealed him.
+55. **Valdric vs Oboro**: Two crowns, one throne — Red Star Empire vs Scarlet Eclipse.
+56. **Suzume vs Jin**: High-speed ninja vs courier duel.
+57. **Volta vs Haruki**: Android asks the gentle archivist what makes a heart courageous.
+58. **Akio vs Kaito**: Classic shonen rivalry — "Loser buys ramen!"
+59. **Marlow's Pirate Parrot**: *El Viento Salado*'s first mate swoops across the screen on Supers or 6+ hit combos.
+60. **Story Thug Bravado (`npc_*`)**: Gang members complain about their paycheck when caught in a 4+ hit combo.

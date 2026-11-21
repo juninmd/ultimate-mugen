@@ -4,6 +4,7 @@ use ume_engine::input::k::*;
 use ume_engine::matchs::Match;
 use ume_native::{compile_native, NativeChar, STANDARD_ANIMS};
 
+static TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 const IDS: [&str; 15] = ["kaito", "shion", "akio", "suzume", "bruno", "sylene", "volta", "lian", "garan", "marlow", "kaname", "jin", "daichi", "valdric", "haruki"];
 fn load(id: &str) -> NativeChar {
     let p = format!("{}/../../assets/chars/{id}.json", env!("CARGO_MANIFEST_DIR"));
@@ -11,7 +12,7 @@ fn load(id: &str) -> NativeChar {
 }
 
 #[test]
-fn roster_compiles() {
+fn roster_compiles() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     for id in IDS {
         let nc = load(id);
         for pal in 1..=3 {
@@ -24,12 +25,12 @@ fn roster_compiles() {
 }
 
 #[test]
-fn roster_match_smoke() {
+fn roster_match_smoke() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     smoke("kaito", "shion");
 }
 
 #[test]
-fn new_fighters_match_smoke() {
+fn new_fighters_match_smoke() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     for id in ["kaname", "jin", "daichi", "valdric", "haruki"] { smoke(id, "kaito"); }
 }
 
@@ -60,7 +61,7 @@ fn smoke(p1: &str, p2: &str) {
 }
 
 #[test]
-fn preview_is_light_and_art_res_scales() {
+fn preview_is_light_and_art_res_scales() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     use ume_native::{compile_native_preview, effects::{art_res, set_art_res}};
     let nc = load("kaito");
     let full = compile_native(&nc, 1, true);
@@ -68,13 +69,12 @@ fn preview_is_light_and_art_res_scales() {
     assert!(pv.anims.contains_key(&0) && pv.anims.contains_key(&181), "idle + win present");
     assert!(pv.anims.len() <= 2 && pv.sprites.len() * 3 < full.sprites.len(), "preview rasterizes far fewer frames");
     // higher art resolution → denser sprites, same on-screen size (scale = 1/res)
-    let base = art_res();
+    let _restore = { struct R(f32); impl Drop for R { fn drop(&mut self) { ume_native::effects::set_art_res(self.0); } } R(art_res()) };
     let key = *pv.sprites.iter().filter(|(k, sp)| sp.image.is_some() && full.sprites.get(*k).is_some_and(|f| f.image.is_some())).map(|(k, _)| k).min().expect("a sprite present in both");
     let (s1, w1) = { let s = &full.sprites[&key]; (s.scale, s.width) };
     set_art_res(6.0);
     let hi = compile_native_preview(&nc, 1);
     let s2 = &hi.sprites[&key];
-    set_art_res(base);
     assert!(s2.scale < s1 && s2.width > w1 * 0.9, "6x art is denser than the default");
 }
 
@@ -90,7 +90,7 @@ fn team_match(simul: bool) -> Match {
 }
 
 #[test]
-fn simul_team_round_ends_only_when_whole_team_is_down() {
+fn simul_team_round_ends_only_when_whole_team_is_down() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut m = team_match(true);
     assert_eq!(m.round_state, 2, "fight started");
     let roots = m.root_indices();
@@ -112,7 +112,7 @@ fn simul_team_round_ends_only_when_whole_team_is_down() {
 }
 
 #[test]
-fn single_fights_still_end_on_first_ko() {
+fn single_fights_still_end_on_first_ko() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut m = Match::new(common_def(), None, flat_stage());
     m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 0, 0, 1);
     m.add_player(Arc::new(compile_native(&load("shion"), 1, false)), 1, 0, 1);
@@ -124,7 +124,7 @@ fn single_fights_still_end_on_first_ko() {
 }
 
 #[test]
-fn five_vs_five_simul_runs_and_ends_only_when_whole_team_falls() {
+fn five_vs_five_simul_runs_and_ends_only_when_whole_team_falls() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut m = Match::new(common_def(), None, flat_stage());
     m.team_simul = true;
     let chars: Vec<Arc<_>> = IDS.iter().take(10).map(|id| Arc::new(compile_native(&load(id), 1, false))).collect();
@@ -157,7 +157,7 @@ fn five_vs_five_simul_runs_and_ends_only_when_whole_team_falls() {
 }
 
 #[test]
-fn deciding_round_is_announced_as_final() {
+fn deciding_round_is_announced_as_final() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut m = Match::new(common_def(), None, flat_stage());
     m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 0, 0, 1);
     m.add_player(Arc::new(compile_native(&load("shion"), 1, false)), 1, 0, 1);
@@ -191,7 +191,7 @@ fn scripted(i: usize, k: usize) -> u32 { // deterministic "button masher" for fi
 
 /// Replays and rollback netcode both need a bit-for-bit deterministic simulation: the same inputs must give the same state.
 #[test]
-fn simulation_is_deterministic_for_replays() {
+fn simulation_is_deterministic_for_replays() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     for (ids, simul) in [(&["kaito", "shion"][..], false), (&["kaito", "shion", "akio", "suzume"][..], true)] {
         let build = || {
             let mut m = Match::new(common_def(), None, flat_stage());
@@ -219,7 +219,7 @@ fn simulation_is_deterministic_for_replays() {
 }
 
 #[test]
-fn combo_damage_scales_down_and_never_vanishes() {
+fn combo_damage_scales_down_and_never_vanishes() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     use ume_engine::matchs::{combo_scale, corner_push};
     let v: Vec<f32> = (0..14).map(combo_scale).collect();
     assert_eq!((v[0], v[1]), (1.0, 1.0), "the first two hits are full damage");
@@ -230,7 +230,7 @@ fn combo_damage_scales_down_and_never_vanishes() {
 
 /// A native fighter's long combo must deal less than the same hits would at full value.
 #[test]
-fn native_combos_are_prorated_and_corners_push_attackers_back() {
+fn native_combos_are_prorated_and_corners_push_attackers_back() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut m = Match::new(common_def(), None, flat_stage());
     m.add_player(Arc::new(compile_native(&load("kaito"), 1, false)), 0, 0, 1);
     m.add_player(Arc::new(compile_native(&load("shion"), 1, false)), 1, 0, 1);
@@ -260,7 +260,7 @@ fn duel() -> Match {
 }
 
 #[test]
-fn awakening_costs_a_bar_boosts_stats_and_ends_with_the_round() {
+fn awakening_costs_a_bar_boosts_stats_and_ends_with_the_round() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut m = duel();
     m.start_round();
     for _ in 0..140 { m.tick(&[0, 0]); }
@@ -297,7 +297,7 @@ fn awakening_costs_a_bar_boosts_stats_and_ends_with_the_round() {
 }
 
 #[test]
-fn first_round_waits_for_the_face_off_and_a_button_skips_it() {
+fn first_round_waits_for_the_face_off_and_a_button_skips_it() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut m = duel();
     m.intro_ticks = 170;
     m.start_round();
@@ -322,7 +322,7 @@ fn first_round_waits_for_the_face_off_and_a_button_skips_it() {
 }
 
 #[test]
-fn every_ko_plays_a_defeat_sequence_and_the_deciding_one_is_the_longest() {
+fn every_ko_plays_a_defeat_sequence_and_the_deciding_one_is_the_longest() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut seen = std::collections::HashSet::new();
     for round in 1..=3 {
         let mut m = duel();
@@ -350,7 +350,7 @@ fn every_ko_plays_a_defeat_sequence_and_the_deciding_one_is_the_longest() {
 }
 
 #[test]
-fn big_teams_zoom_out_and_everyone_stays_inside_the_field() {
+fn big_teams_zoom_out_and_everyone_stays_inside_the_field() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut m = Match::new(common_def(), None, flat_stage());
     m.team_simul = true;
     let chars: Vec<Arc<_>> = IDS.iter().take(10).map(|id| Arc::new(compile_native(&load(id), 1, false))).collect();
@@ -371,7 +371,7 @@ fn big_teams_zoom_out_and_everyone_stays_inside_the_field() {
 }
 
 #[test]
-fn final_boss_is_complete_and_formidable() {
+fn final_boss_is_complete_and_formidable() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let nc = load("oboro");
     assert!(nc.boss && nc.intro.is_some() && nc.taunt.is_some() && nc.form.is_some());
     let d = compile_native(&nc, 1, false);
@@ -404,7 +404,7 @@ fn final_boss_is_complete_and_formidable() {
 }
 
 #[test]
-fn final_boss_is_faster_and_hits_harder_than_the_roster() {
+fn final_boss_is_faster_and_hits_harder_than_the_roster() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let boss = compile_native(&load("oboro"), 1, false);
     let reg = compile_native(&load("kaname"), 1, false); // same katana base kit
     let total = |d: &ume_engine::chardef::CharDef, no: i32| d.anims.get(&no).map(|a| a.frames.iter().filter(|f| f.time > 0).map(|f| f.time).sum::<i32>()).unwrap_or(0);
@@ -428,7 +428,7 @@ fn final_boss_is_faster_and_hits_harder_than_the_roster() {
 }
 
 #[test]
-fn final_boss_beats_a_competent_cpu_most_of_the_time() {
+fn final_boss_beats_a_competent_cpu_most_of_the_time() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     // baseline: a regular fighter at the same AI level against the same opponent, to show how much stronger the boss is
     let base = duel_stats("kaname", false);
     let (wins, hp_boss, hp_foe) = duel_stats("oboro", true);
@@ -464,7 +464,7 @@ fn duel_stats(id: &str, boss: bool) -> (u32, f32, f32) {
 }
 
 #[test]
-fn team_wins_are_announced_by_the_first_member() {
+fn team_wins_are_announced_by_the_first_member() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut m = team_match(true);
     let roots = m.root_indices();
     let lead = m.fighters[roots[0]].def.display_name.split_whitespace().next().unwrap().to_uppercase();
@@ -476,7 +476,7 @@ fn team_wins_are_announced_by_the_first_member() {
 }
 
 #[test]
-fn sequence_teams_use_the_given_leader_and_solo_fights_keep_the_name() {
+fn sequence_teams_use_the_given_leader_and_solo_fights_keep_the_name() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut m = duel();
     assert_eq!(m.team_leader(0), None);
     assert!(m.winner_text(0).ends_with(" WINS") && !m.winner_text(0).starts_with("TEAM "));
@@ -486,7 +486,7 @@ fn sequence_teams_use_the_given_leader_and_solo_fights_keep_the_name() {
 }
 
 #[test]
-fn idle_player_is_not_dragged_by_an_advancing_opponent() {
+fn idle_player_is_not_dragged_by_an_advancing_opponent() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     for p1 in ["kaito", "kaname"] {
         let mut m = Match::new(common_def(), None, flat_stage());
         m.add_player(Arc::new(compile_native(&load(p1), 1, false)), 0, 0, 1);
@@ -506,7 +506,7 @@ fn idle_player_is_not_dragged_by_an_advancing_opponent() {
 }
 
 #[test]
-fn idle_player_vs_cpu_never_walks_by_itself() {
+fn idle_player_vs_cpu_never_walks_by_itself() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     use ume_engine::ai::Ai;
     use ume_engine::input::InputSource;
     for id in IDS {
@@ -533,7 +533,7 @@ fn idle_player_vs_cpu_never_walks_by_itself() {
 }
 
 #[test]
-fn screen_scroll_never_drags_an_idle_or_attacking_player_toward_a_launched_enemy() {
+fn screen_scroll_never_drags_an_idle_or_attacking_player_toward_a_launched_enemy() { let _g = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     use ume_engine::ai::Ai;
     use ume_engine::input::InputSource;
     for p1 in ["marlow", "garan", "shion"] {

@@ -109,8 +109,7 @@ fn five_guarded_hits_break_the_guard() {
     let mut m = pair(&[("data.guardpoints", 200.0)]);
     enter(&mut m, 1, 120);
     ticks(&mut m, 1);
-    enter(&mut m, 1, 120);
-    m.fighters[1].guard_button = true;
+    enter(&mut m, 1, 120); m.fighters[1].guard_button = true;
     let mut hd = hit(5.0);
     hd.guard_damage = 1.0;
     hd.guard_points = 40.0;

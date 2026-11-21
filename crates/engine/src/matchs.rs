@@ -1005,8 +1005,7 @@ impl Match {
         let f = &self.fighters[d];
         if hd.guardflag.is_empty() { return false; }
         let gf = &hd.guardflag; let st = f.state_type;
-        let blocked = match st { 'S' => asf::NOSTANDGUARD, 'C' => asf::NOCROUCHGUARD, 'A' => asf::NOAIRGUARD, _ => 0 };
-        if f.has_assert(blocked) { return false; }
+        let blocked = match st { 'S' => asf::NOSTANDGUARD, 'C' => asf::NOCROUCHGUARD, 'A' => asf::NOAIRGUARD, _ => 0 }; if f.has_assert(blocked) { return false; }
         let ok = (st == 'S' && (gf.contains('H') || gf.contains('M'))) || (st == 'C' && (gf.contains('L') || gf.contains('M'))) || (st == 'A' && gf.contains('A'));
         if !ok { return false; }
         if (150..=155).contains(&f.state_no) && (f.hit_over_time > 0 || f.hit_pause > 0 || f.hit_shake > 0) { return true; }

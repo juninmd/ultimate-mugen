@@ -118,8 +118,8 @@
     async function get(key) { try { const d = await db(); return await new Promise((res) => { const rq = d.transaction(ST).objectStore(ST).get(key); rq.onsuccess = () => res(rq.result); rq.onerror = () => res(null); }); } catch (e) { return null; } }
     async function remove(key) { try { const d = await db(); d.transaction(ST, 'readwrite').objectStore(ST).delete(key); } catch (e) {} }
     async function importSlot() { while (wasm.ume_import_pending() >= 2) await new Promise((r) => setTimeout(r, 40)); }
-    async function accept(buf) {
-      const id = await digest(buf);
+    async function accept(buf, knownId) {
+      const id = knownId || await digest(buf);
       if (seen.has(id)) return false;
       seen.add(id);
       wasm.ume_import(buf);
@@ -142,7 +142,8 @@
           const value = await get(key);
           if (!value) continue;
           const buf = new Uint8Array(value);
-          const id = await accept(buf);
+          // The IndexedDB key is the content digest, so the bootstrap does not hash every pack again.
+          const id = await accept(buf, key);
           if (key !== id) { await remove(key); if (id) await store(id, buf); }
         }
       } finally { wasm.ume_import_end(); }

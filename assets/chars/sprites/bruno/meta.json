@@ -33,10 +33,25 @@
       "axisY": 400.0,
       "refHeight": 333.0
     },
-    "06_victory": {
-      "axisX": 199.0,
-      "axisY": 400.0,
-      "refHeight": 333.0
+    "defeat1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "defeat2": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "defeat3": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
+    },
+    "defeat4": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 320.0
     },
     "07_idle1": {
       "axisX": 198.0,

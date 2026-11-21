@@ -11,4 +11,10 @@ pub(crate) async fn run(app: &mut App, dir: &str) {
     screen(app, dir, "stage-filter-sticky", 8).await;
     app.open_stages(chosen);
     screen(app, dir, "stage-filter-entry", 8).await;
+    let linked = stage(app, "neon");
+    app.sel.2 = linked;
+    app.screen = Screen::Stages { cur: app.sel.2 };
+    screen(app, dir, "stage-link-before", 6).await;
+    app.open_stages(app.sel.2 + 1);
+    screen(app, dir, "stage-link-after", 6).await;
 }

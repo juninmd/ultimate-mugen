@@ -759,12 +759,15 @@ impl App {
         self.mode = mode;
         self.team = None;
         self.arcade = None;
-        self.screen = match screen.as_deref() {
-            Some("select") => { self.sel_filter = 2; Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] } }
-            Some("stages") => Screen::Stages { cur: self.sel.2 },
-            _ if fight => Screen::Vs { t: 0.0, step: 0 },
-            _ => Screen::Stages { cur: self.sel.2 },
-        };
+        match screen.as_deref() {
+            Some("select") => {
+                self.sel_filter = 2;
+                self.screen = Screen::Select { cur: [self.sel.0, self.sel.1], picking: 0, picked: [None, None] };
+            }
+            Some("stages") => self.open_stages(self.sel.2 + 1),
+            _ if fight => self.screen = Screen::Vs { t: 0.0, step: 0 },
+            _ => self.open_stages(self.sel.2 + 1),
+        }
         self.deep = None;
     }
 

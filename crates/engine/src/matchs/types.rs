@@ -53,7 +53,7 @@ pub struct Explod {
     pub owner: u32, pub id: i32, pub cur: AnimCursor, pub pos: V2, pub vel: V2, pub accel: V2, pub facing: f32, pub vfacing: f32,
     pub bind_time: i32, pub bind_to: Option<u32>, pub bind_off: V2, pub remove_time: i32, pub time: i32, pub spr_priority: i32,
     pub on_top: bool, pub under: bool, pub scale: [f32; 2], pub add: bool, pub remove_on_get_hit: bool, pub super_move: i32, pub pause_move: i32, pub lscl: f32,
-    pub ignore_hit_pause: bool, pub screen: bool,
+    pub ignore_hit_pause: bool, pub screen: bool, pub alpha: f32, pub angle: f32,
 }
 
 impl Explod {

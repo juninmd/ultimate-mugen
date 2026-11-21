@@ -49,6 +49,17 @@ postype = p1
 space = screen
 removetime = -1
 
+[State 300, tinted]
+type = Explod
+trigger1 = Time = 0
+id = 5
+anim = 1000
+pos = 0, 0
+postype = p1
+removetime = -1
+alpha = 64, 0
+angle = -90
+
 [Statedef 310]
 type = S
 movetype = I
@@ -136,6 +147,16 @@ fn prefixed_anim_expressions_pick_fx_and_own_animations() {
     ticks(&mut m, 1);
     assert_eq!(explod(&m, 10).cur.anim, 315, "F310+var(1) loads fightfx 315");
     assert_eq!(explod(&m, 11).cur.anim, 1005, "S1000+var(1) loads the owner animation");
+}
+
+#[test]
+fn alpha_and_angle_parameters_reach_the_renderer() {
+    let m = setup();
+    let tinted = explod(&m, 5);
+    assert!((tinted.alpha - 0.25).abs() < 1e-6, "alpha 64 of 256 becomes a 0.25 multiplier, got {}", tinted.alpha);
+    assert_eq!(tinted.angle, -90.0);
+    assert_eq!(explod(&m, 1).alpha, 1.0, "an explod without alpha stays opaque");
+    assert_eq!(explod(&m, 1).angle, 0.0);
 }
 
 #[test]

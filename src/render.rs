@@ -580,6 +580,8 @@ impl MatchRenderer {
                                 add: e.add,
                                 vflip: e.vfacing < 0.0,
                                 remap,
+                                alpha: e.alpha,
+                                angle: e.angle,
                                 ..Default::default()
                             },
                             shx,

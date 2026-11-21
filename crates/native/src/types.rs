@@ -167,7 +167,7 @@ pub struct NativeArt {
 pub struct NativeChar {
     pub format: String, pub id: String, pub name: String, pub series: String, pub author: String,
     #[serde(default)] pub description: Option<String>, #[serde(default)] pub profile: Option<super::profile::CharProfile>,
-    pub color: String,
+    pub color: String, #[serde(default, skip_serializing_if = "Option::is_none")] pub element: Option<ume_engine::element::Element>,
     #[serde(default)] pub stats: NativeStats,
     #[serde(default)] pub passives: Option<super::passive_spec::PassiveSpec>,
     #[serde(default)] pub rivals: BTreeMap<String, ume_engine::rivals::RivalLines>,

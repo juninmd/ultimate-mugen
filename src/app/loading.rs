@@ -66,17 +66,20 @@ impl App {
             }
             self.pending.warm.jobs = jobs;
         }
-        let mut all = true;
+        let mut remaining = WARM_BUDGET;
         for (def, keys, at) in &mut self.pending.warm.jobs {
             if *at >= keys.len() {
                 continue;
             }
-            *at = self.g.prefetch_step(def, keys, *at, WARM_BUDGET);
+            let (next, used) =
+                self.g.prefetch_step(def, keys, *at, remaining, remaining == WARM_BUDGET);
+            *at = next;
+            remaining = remaining.saturating_sub(used);
             if *at < keys.len() {
-                all = false;
+                return false;
             }
         }
-        all
+        true
     }
 
     /// Fraction of the warm-up already copied, for a progress bar.

@@ -581,7 +581,7 @@ impl Ui {
     /// Progress bar + spinner (virtual coordinates).
     /// Full-screen loading view with rotating tips.
     pub fn loading_screen(&self, p: f32, label: &str) {
-        self.background();
+        crate::screen_art::ScreenArt::Loading.background(self);
         self.logo(VW / 2.0, 300.0, 150.0);
         let tip = crate::loading_tips::tip((self.t / 3.5) as usize);
         self.text(

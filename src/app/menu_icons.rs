@@ -1,134 +1,56 @@
+use std::sync::Arc;
+
 use super::*;
 
-const SIZE: f32 = 13.0;
+const CELL: f32 = 48.0;
+const DRAW_SIZE: f32 = 28.0;
 
-pub(super) const ICON_OF: [usize; 13] = [0, 1, 2, 4, 5, 10, 11, 13, 14, 3, 4, 2, 15];
+pub(super) const ICON_OF: [usize; 13] = [0, 1, 4, 2, 5, 8, 9, 13, 10, 11, 7, 3, 15];
 
-struct Pen<'a> {
-    ui: &'a Ui,
-    cx: f32,
-    cy: f32,
-    color: Color,
+thread_local! {
+    static SHEET: Option<Texture2D> = load_sheet();
 }
 
-impl Pen<'_> {
-    fn line(&self, a: (f32, f32), b: (f32, f32)) {
-        draw_line(
-            self.ui.x(self.cx + a.0 * SIZE),
-            self.ui.y(self.cy + a.1 * SIZE),
-            self.ui.x(self.cx + b.0 * SIZE),
-            self.ui.y(self.cy + b.1 * SIZE),
-            2.2 * self.ui.s,
-            self.color,
-        );
-    }
-
-    fn ring(&self, at: (f32, f32), r: f32) {
-        draw_circle_lines(self.ui.x(self.cx + at.0 * SIZE), self.ui.y(self.cy + at.1 * SIZE), r * SIZE * self.ui.s, 2.2 * self.ui.s, self.color);
-    }
-
-    fn dot(&self, at: (f32, f32), r: f32) {
-        draw_circle(self.ui.x(self.cx + at.0 * SIZE), self.ui.y(self.cy + at.1 * SIZE), r * SIZE * self.ui.s, self.color);
-    }
-
-    fn poly(&self, pts: &[(f32, f32)]) {
-        for i in 0..pts.len() {
-            self.line(pts[i], pts[(i + 1) % pts.len()]);
-        }
-    }
+fn load_sheet() -> Option<Texture2D> {
+    let image = ume_formats::png::decode_png(include_bytes!("../../assets/ui/menu-icons.png")).ok()?;
+    let rgba = match image.rgba {
+        Some(rgba) => rgba,
+        None => ume_formats::png::png_indexed_to_rgba(&image),
+    };
+    let tex = Texture2D::from_rgba_shared(image.width as u16, image.height as u16, Arc::new(rgba));
+    tex.set_filter(FilterMode::Nearest);
+    Some(tex)
 }
 
 impl App {
     pub(super) fn menu_icon(&self, index: usize, cx: f32, cy: f32, color: Color) {
-        let p = Pen { ui: &self.ui, cx, cy, color };
-        match index {
-            0 => {
-                p.poly(&[(-0.8, -0.9), (0.8, -0.9), (0.8, 0.9), (-0.8, 0.9)]);
-                p.line((-0.4, -0.3), (0.4, -0.3));
-                p.line((-0.4, 0.2), (0.4, 0.2));
-            }
-            1 => {
-                p.poly(&[(-0.8, -0.8), (0.8, -0.8), (0.6, 0.2), (0.0, 0.7), (-0.6, 0.2)]);
-                p.line((0.0, 0.7), (0.0, 1.0));
-                p.line((-0.5, 1.0), (0.5, 1.0));
-            }
-            2 => {
-                p.line((0.0, 0.9), (0.0, -0.9));
-                p.line((-0.7, 0.2), (0.0, -0.9));
-                p.line((0.7, 0.2), (0.0, -0.9));
-                p.line((-0.6, 0.9), (0.6, 0.9));
-            }
-            3 => {
-                p.poly(&[(-0.9, -0.5), (0.9, -0.5), (0.9, 0.7), (-0.9, 0.7)]);
-                p.dot((-0.35, 0.1), 0.18);
-                p.dot((0.35, 0.1), 0.18);
-                p.line((0.0, -0.5), (0.0, -0.95));
-            }
-            4 => {
-                p.line((-0.9, -0.9), (0.9, 0.9));
-                p.line((0.9, -0.9), (-0.9, 0.9));
-                p.line((-0.9, -0.9), (-0.5, -0.9));
-                p.line((0.9, -0.9), (0.5, -0.9));
-            }
-            5 => {
-                p.ring((0.0, 0.0), 0.9);
-                p.ring((0.0, 0.0), 0.4);
-                p.dot((0.0, 0.0), 0.12);
-            }
-            6 => {
-                p.poly(&[(-0.95, 0.0), (-0.4, -0.55), (0.4, -0.55), (0.95, 0.0), (0.4, 0.55), (-0.4, 0.55)]);
-                p.dot((0.0, 0.0), 0.28);
-            }
-            7 => {
-                for i in 0..3 {
-                    p.ring((-0.65 + i as f32 * 0.65, 0.0), 0.3);
-                }
-                p.line((-0.35, 0.0), (-0.3, 0.0));
-            }
-            8 => {
-                p.ring((-0.4, 0.0), 0.5);
-                p.ring((0.4, 0.0), 0.5);
-            }
-            9 => {
-                p.line((-0.9, -0.4), (0.7, -0.4));
-                p.line((0.4, -0.8), (0.8, -0.4));
-                p.line((0.9, 0.4), (-0.7, 0.4));
-                p.line((-0.4, 0.8), (-0.8, 0.4));
-            }
-            10 => {
-                p.poly(&[(-0.9, -0.7), (0.9, -0.7), (0.9, 0.7), (-0.9, 0.7)]);
-                p.line((-0.9, -0.2), (0.9, -0.2));
-                p.dot((-0.45, 0.35), 0.14);
-            }
-            11 => {
-                p.poly(&[(-0.9, -0.3), (0.9, -0.3), (0.7, 0.9), (-0.7, 0.9)]);
-                p.line((-0.4, -0.3), (-0.2, -0.9));
-                p.line((0.4, -0.3), (0.2, -0.9));
-            }
-            12 => {
-                p.poly(&[(-0.95, -0.4), (0.95, -0.4), (0.95, 0.6), (-0.95, 0.6)]);
-                p.line((-0.5, 0.1), (-0.1, 0.1));
-                p.line((-0.3, -0.1), (-0.3, 0.3));
-                p.dot((0.45, 0.0), 0.14);
-            }
-            13 => {
-                p.ring((0.0, 0.0), 0.5);
-                for i in 0..8 {
-                    let a = i as f32 * std::f32::consts::FRAC_PI_4;
-                    p.line((a.cos() * 0.7, a.sin() * 0.7), (a.cos() * 1.0, a.sin() * 1.0));
-                }
-            }
-            14 => {
-                p.ring((0.0, 0.0), 0.9);
-                p.poly(&[(-0.2, -0.4), (0.5, 0.0), (-0.2, 0.4)]);
-            }
-            _ => {
-                p.line((0.0, -0.95), (0.0, 0.0));
-                p.line((-0.7, -0.6), (-0.7, 0.4));
-                p.line((0.7, -0.6), (0.7, 0.4));
-                p.line((-0.7, 0.4), (0.0, 0.95));
-                p.line((0.7, 0.4), (0.0, 0.95));
-            }
-        }
+        let cell = index.min(15);
+        let col = (cell % 4) as f32;
+        let row = (cell / 4) as f32;
+        let sz = DRAW_SIZE * self.ui.s;
+        let x = self.ui.x(cx) - sz * 0.5;
+        let y = self.ui.y(cy) - sz * 0.5;
+        let tint = Color::new(
+            0.78 + color.r * 0.22,
+            0.78 + color.g * 0.22,
+            0.78 + color.b * 0.22,
+            color.a,
+        );
+        SHEET.with(|sheet| {
+            let Some(tex) = sheet else {
+                return;
+            };
+            draw_texture_ex(
+                tex,
+                x,
+                y,
+                tint,
+                DrawTextureParams {
+                    source: Some(Rect::new(col * CELL, row * CELL, CELL, CELL)),
+                    dest_size: Some(vec2(sz, sz)),
+                    ..Default::default()
+                },
+            );
+        });
     }
 }

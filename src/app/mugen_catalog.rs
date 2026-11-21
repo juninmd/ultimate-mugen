@@ -27,7 +27,7 @@ pub(super) fn short(s: &str, max: usize) -> String {
 
 impl App {
     pub(crate) fn mugen_catalog(&mut self, view: u8, page: usize) -> Option<(u8, usize)> {
-        self.ui.background();
+        crate::screen_art::ScreenArt::Archive.background(&self.ui);
         let loaded: Vec<usize> = (0..self.reg.chars.len()).filter(|&i| self.reg.chars[i].mugen).collect();
         let quarantined: Vec<Quarantined> = self.reg.quarantined.clone();
         let stages = self.reg.stages.iter().filter(|s| s.mugen).count();

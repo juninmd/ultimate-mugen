@@ -25,7 +25,7 @@ impl App {
         }
         let accent = run.stage_accent();
         let accent_color = Color::new(accent[0], accent[1], accent[2], 1.0);
-        self.ui.background();
+        crate::screen_art::ScreenArt::Story.background(&self.ui);
         self.ui.motes(40, 1.2);
         let reveal = (t * 2.5).min(1.0);
         self.ui.adapted_glass(-20.0, 230.0, VW + 40.0, 220.0, accent_color, reveal);

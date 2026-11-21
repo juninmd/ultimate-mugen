@@ -3,7 +3,7 @@ use crate::i18n::tr3;
 
 impl App {
     pub(super) fn draw_search_page(&self, hits: &[usize], rows: usize) {
-        self.ui.background();
+        crate::screen_art::ScreenArt::Select.background(&self.ui);
         self.ui.text(
             tr3("BUSCAR LUTADOR", "SEARCH FIGHTER", "BUSCAR LUCHADOR"),
             40.0,

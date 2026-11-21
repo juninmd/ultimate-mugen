@@ -68,6 +68,7 @@ pub struct ProjectileSpec {
     #[serde(default)] pub priority: Option<i32>,
     #[serde(default)] pub element: Option<String>,
     #[serde(default)] pub stun: Option<i32>,
+    #[serde(default)] pub repeat: Option<super::blocks::RepeatSpec>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -142,6 +143,9 @@ pub struct NativeMove {
     #[serde(default)] pub cancels: Option<Vec<String>>,
     #[serde(default)] pub rekka: Option<RekkaSpec>,
     #[serde(default)] pub requires: Option<MoveRequirements>,
+    #[serde(default)] pub blink: Option<OneOrMany<super::blocks::BlinkSpec>>,
+    #[serde(default)] pub vfx: Vec<super::blocks::VfxSpec>,
+    #[serde(default)] pub quake: Vec<super::blocks::QuakeSpec>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

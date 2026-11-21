@@ -28,12 +28,13 @@ pub fn build_controller(s: &Section) -> Option<Controller> {
 pub fn parse_states(text: &str, into: &mut HashMap<i32, StateDef>, override_existing: bool) {
     let mut cur: Option<i32> = None;
     let mut skip = false;
+    let mut seen = HashSet::new();
     for s in parse_ini_no_lines(text) {
         let ln = s.lname.trim();
         if let Some(rest) = ln.strip_prefix("statedef") {
             let id: i32 = rest.trim().split(|c: char| !(c == '-' || c.is_ascii_digit())).next().and_then(|x| x.parse().ok()).unwrap_or(i32::MIN);
             if id == i32::MIN { cur = None; continue; }
-            if into.contains_key(&id) && !override_existing && id >= 0 { skip = true; cur = None; continue; }
+            if id >= 0 && (!seen.insert(id) || (into.contains_key(&id) && !override_existing)) { skip = true; cur = None; continue; }
             skip = false;
             if !(id < 0 && into.contains_key(&id)) {
                 into.insert(id, StateDef { id, params: Vec::with_capacity(s.entries.len()), controllers: Vec::with_capacity(16) });

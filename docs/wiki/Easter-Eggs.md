@@ -88,3 +88,26 @@ All 60 Easter Eggs trigger one of 12 bespoke 32 kHz synthesized arcade SFX cues 
 - `easter_parrot` — Expressive pirate parrot double-squawk (*Marlow's Parrot*, *El Viento Salado*).
 - `easter_wonder` — Ancient mythic pentatonic harp & deep bronze gong (*Pyramids*, *Petra*, *Chichén Itzá*, *Volcano*, *Classical Wonders*, *Garan*).
 - `easter_banter` — Snappy comic speech-bubble pop & chime (*Mirror Match*, *Haruki Apology*, *Marlow vs Valdric*, *Akio vs Kaito*, *Thug Complaint*).
+
+## TOML Customization (`assets/interactions.toml`)
+Taunts, fighter rivalries, home-turf stage reactions, and in-fight character triggers are all data-driven in `assets/interactions.toml`. Players and creators can place an `interactions.toml` file in their user storage directory to override taunt pools or append custom interactions for both native UMF fighters and imported M.U.G.E.N characters without recompiling:
+
+```toml
+[[matchup]]
+id = "custom_rivalry"
+fighters = ["ryu", "ken"]
+speaker_id = "ken"
+speaker = "KEN"
+style = "speech"
+sfx = "easter_banter"
+color = [1.0, 0.45, 0.2]
+title_pt = "Vamos nessa, Ryu! Sem segurar!"
+title_en = "Come on, Ryu! Don't hold back!"
+title_es = "¡Vamos, Ryu! ¡Sin contenerse!"
+```
+
+Supported sections:
+- `[taunts]`: `opening_pt/en/es` and `answer_pt/en/es` round-start taunt pools.
+- `[[matchup]]`: `fighters = [a, b]` or `mirror = true`, `style`, `sprite`, `sfx`, `color`, localized `title_*` and `sub_*`.
+- `[[stage_interaction]]`: `fighter` + `stage_contains = [...]`.
+- `[[fighter_trigger]]`: `fighter` or `fighter_prefix`, `trigger` (`"low_hp"`, `"combo"`, `"opp_combo"`, `"super"`, `"super_or_combo"`, `"taunt"`), `threshold`, `per_round`.

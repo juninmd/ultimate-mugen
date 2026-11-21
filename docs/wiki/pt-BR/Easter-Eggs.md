@@ -88,3 +88,26 @@ Todos os 60 Easter Eggs disparam um dos 12 efeitos sonoros retrô sintetizados e
 - `easter_parrot` — Grasnar duplo de papagaio pirata (*Papagaio do Marlow*, *El Viento Salado*).
 - `easter_wonder` — Harpa pentatônica mítica com gongo grave de bronze (*Pirâmides*, *Petra*, *Chichén Itzá*, *Vulcão*, *Maravilhas Antigas*, *Garan*).
 - `easter_banter` — Estalo de balão de fala cômico (*Mirror Match*, *Desculpas do Haruki*, *Marlow vs Valdric*, *Akio vs Kaito*, *Capangas*).
+
+## Customização via TOML (`assets/interactions.toml`)
+Provocações de início de round, rivalidades entre personagens, interações de cenário e reações durante a luta são 100% parametrizadas em `assets/interactions.toml`. Jogadores e criadores podem colocar um arquivo `interactions.toml` na pasta de dados do usuário para sobrescrever provocações ou adicionar novas interações tanto para lutadores nativos UMF quanto para personagens M.U.G.E.N importados, sem recompilar o jogo:
+
+```toml
+[[matchup]]
+id = "rivalidade_custom"
+fighters = ["ryu", "ken"]
+speaker_id = "ken"
+speaker = "KEN"
+style = "speech"
+sfx = "easter_banter"
+color = [1.0, 0.45, 0.2]
+title_pt = "Vamos nessa, Ryu! Sem segurar!"
+title_en = "Come on, Ryu! Don't hold back!"
+title_es = "¡Vamos, Ryu! ¡Sin contenerse!"
+```
+
+Seções suportadas:
+- `[taunts]`: listas `opening_pt/en/es` e `answer_pt/en/es` das provocações de abertura e resposta.
+- `[[matchup]]`: `fighters = [a, b]` ou `mirror = true`, `style`, `sprite`, `sfx`, `color`, `title_*` e `sub_*`.
+- `[[stage_interaction]]`: `fighter` + `stage_contains = [...]`.
+- `[[fighter_trigger]]`: `fighter` ou `fighter_prefix`, `trigger` (`"low_hp"`, `"combo"`, `"opp_combo"`, `"super"`, `"super_or_combo"`, `"taunt"`), `threshold`, `per_round`.

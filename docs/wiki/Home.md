@@ -63,6 +63,7 @@ A guide for players and creators who want to customize the engine: install, conf
 | [M.U.G.E.N code study](MUGEN-Code-Study.md) | Developers | Goku GT and four Mortal Kombat fighters read line by line |
 | [Dissection of four fighters](MUGEN-Dissection.md) | Developers | Aizen, Gogeta, Goku SSJ and SSJ4: files, commands, normals, move patterns |
 | [Remaking a M.U.G.E.N fighter](Remaking-a-MUGEN-Fighter.md) | Creators | Recipe and mapping to UMF, with the Captain Marlow Reyes rebuild |
+| [Ability library](Ability-Library.md) | Creators | Reusable blocks (`blink`, `vfx`, `quake`, `projectile.repeat`, kit `abilities`) and the MUGEN gap map |
 | [CPU tactics](AI-Tactics.md) | Developers | Anti-air, whiff punish, hit confirm and meter rules of the CPU |
 | [Fighter study](Fighter-Study.md) | Developers | 50+ fighters surveyed and the moves they inspired |
 | [Smoke test (debug mode)](Smoke-Test.md) | Developers | One command checks every main feature on desktop and web, with screenshots and a report |

@@ -9,7 +9,7 @@ impl App {
             self.key_editor();
             return;
         }
-        self.ui.background();
+        crate::screen_art::ScreenArt::Workshop.background(&self.ui);
         self.ui.adapted_header(crate::i18n::t("controls.title"), "", VW);
         let kl = |i: usize| crate::keybinds::id(self.c.keys.slots[0][i]).unwrap_or("?");
         let touch = self.c.touch.enabled;

@@ -846,14 +846,16 @@ impl Match {
             let free = { let f = &self.fighters[i]; f.alive && !f.is_helper && f.round_free(self.round_state == 2, self.pause.is_some()) };
             let f = &mut self.fighters[i];
             f.no_ctrl_ticks = if free && !f.ctrl && f.counts_as_stuck() { f.no_ctrl_ticks + 1 } else { 0 };
-            let lying = free && f.state_no == 5110 && f.state_time > f.def.c("data.liedown.time", 60.0) as i32 + 30;
+            let lying = free && f.state_no == 5110 && f.state_time >= f.def.c("data.liedown.time", 60.0) as i32 && (f.asserts & asf::NOGETUPFROMLIEDOWN == 0);
             if !lying && f.no_ctrl_ticks <= NO_CTRL_LIMIT && !f.hit_state_overstay(free) { continue; }
-            f.no_ctrl_ticks = 0; f.ikemen.rescued += 1; eprintln!("watchdog: {} stuck in state {} (ctrl {}), forcing recovery", f.def.name, f.state_no, f.ctrl);
+            f.no_ctrl_ticks = 0;
+            if !lying { f.ikemen.rescued += 1; eprintln!("watchdog: {} stuck in state {} (ctrl {}), forcing recovery", f.def.name, f.state_no, f.ctrl); }
             let def = f.def.clone();
             let getup = lying && (def.states.contains_key(&5120) || self.common.states.contains_key(&5120));
-            if !getup { let f = &mut self.fighters[i]; f.vel = V2::default(); f.ctrl = true; }
-            self.change_state(i, if getup { 5120 } else { 0 }, def);
-            if !getup { self.fighters[i].ctrl = true; }
+            let airborne = !getup && f.pos.y < f.ground_level - 1.0 && (def.states.contains_key(&50) || self.common.states.contains_key(&50));
+            if !getup { let f = &mut self.fighters[i]; f.vel = V2::default(); f.ctrl = true; if !airborne && f.pos.y < f.ground_level { f.pos.y = f.ground_level; } }
+            self.change_state(i, if getup { 5120 } else if airborne { 50 } else { 0 }, def);
+            if !getup { let f = &mut self.fighters[i]; f.ctrl = true; if airborne { f.state_type = 'A'; f.physics = 'A'; } }
         }
     }
 

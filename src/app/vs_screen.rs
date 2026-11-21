@@ -69,6 +69,9 @@ impl App {
         for st in 0..total {
             if st + 1 == total {
                 while !self.warm_step() {
+                    self.ui.begin();
+                    let progress = (st as f32 + self.warm_progress()) / total as f32;
+                    self.ui.loading_screen(progress, &self.load_label(st));
                     next_frame().await;
                 }
                 continue;

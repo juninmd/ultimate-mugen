@@ -3,7 +3,6 @@ use std::sync::Arc;
 use support::*;
 use ume_engine::chardef::CharDef;
 use ume_engine::common::{common_def, flat_stage};
-use ume_engine::fighter::HitDefData;
 use ume_engine::input::k;
 use ume_engine::matchs::Match;
 use ume_native::{compile_native, NativeChar};
@@ -12,6 +11,7 @@ const CHARGE_STATE: i32 = 3920;
 const HOLD_TICKS: usize = 100;
 const MINIMUM_GAIN_PER_TICK: f32 = 9.0;
 const RELEASE_RECOVERY_TICKS: usize = 14;
+const JAB_STATE: i32 = 200;
 
 fn roster() -> Vec<(NativeChar, Arc<CharDef>)> {
     let mut chars: Vec<NativeChar> = std::fs::read_dir("../../assets/chars").unwrap().filter_map(|entry| {
@@ -67,8 +67,7 @@ fn charging_stops_at_a_full_meter_and_a_hit_breaks_it() {
         for _ in 0..10 { m.tick(&[k::S, 0]); }
         face_off(&mut m, 30.0);
         let life = m.fighters[0].life;
-        let hit = HitDefData { hitflag: "MAF".into(), guardflag: "MA".into(), damage: 30.0, ..Default::default() };
-        m.apply_hit(1, 0, &hit, (0.0, -60.0), None);
+        enter(&mut m, 1, JAB_STATE);
         for _ in 0..40 { m.tick(&[k::S, 0]); }
         assert!(m.fighters[0].life < life, "{} was not hit while charging", nc.id);
         assert!(m.fighters[0].state_no != CHARGE_STATE || m.fighters[0].move_type == 'I', "{} state {}", nc.id, m.fighters[0].state_no);

@@ -64,17 +64,14 @@ pub fn load_mugen_char(
 
     // `stcommon` (normalmente common1.cns) traz os estados comuns E, em varios chars de
     // fullgames, o mapeamento comando -> ChangeState do [Statedef -1]. Sem ele o lutador
-    // carrega e anda, mas nunca ataca. So vale o arquivo dentro da pasta do char: o
-    // fallback global (`data/common1.cns`) aplicaria o common de um jogo a outro.
+    // carrega e anda, mas nunca ataca. A resolucao segue o M.U.G.E.N.: pasta do char,
+    // depois raiz do pacote e `data/<arquivo>`, entao fullgames que trazem o proprio
+    // common em subpasta continuam com o -1 deles.
     let common_name = unquote_str(fget("stcommon").unwrap_or_default());
-    if !common_name.is_empty()
-        && !common_name.contains("..")
-        && !common_name.contains('/')
-        && !common_name.contains('\\')
-    {
-        if let Some(b) = vfs.get(&norm_path(&format!("{base}/{common_name}"))) {
-            spans.track(common_name, || {
-                crate::zss::parse_state_file(common_name, &text(b), &mut states, false)
+    if !common_name.is_empty() && !common_name.contains("..") {
+        if let Some(b) = resolve(vfs, &base, &common_name) {
+            spans.track(&common_name, || {
+                crate::zss::parse_state_file(&common_name, &text(b), &mut states, false)
             });
         }
     }

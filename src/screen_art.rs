@@ -10,6 +10,8 @@ thread_local! {
     static VERSUS: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-versus.png"));
     static RECORDS: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-records.png"));
     static RESULTS: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-results.png"));
+    static MARKET: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-market.png"));
+    static ARCHIVE: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-archive.png"));
 }
 
 #[derive(Clone, Copy)]
@@ -20,6 +22,8 @@ pub(crate) enum ScreenArt {
     Versus,
     Results,
     Records,
+    Market,
+    Archive,
 }
 
 fn decode(data: &[u8]) -> Option<Texture2D> {
@@ -43,6 +47,8 @@ impl ScreenArt {
             Self::Versus => &VERSUS,
             Self::Results => &RESULTS,
             Self::Records => &RECORDS,
+            Self::Market => &MARKET,
+            Self::Archive => &ARCHIVE,
         };
         texture.with(|texture| {
             let Some(texture) = texture else {
@@ -50,7 +56,7 @@ impl ScreenArt {
             };
             let color = match self {
                 Self::Menu => Color::new(0.68, 0.67, 0.76, opacity),
-                Self::Loading | Self::Results | Self::Records => {
+                Self::Loading | Self::Results | Self::Records | Self::Market | Self::Archive => {
                     Color::new(0.62, 0.61, 0.7, opacity)
                 }
                 Self::Select => Color::new(0.65, 0.65, 0.74, opacity),

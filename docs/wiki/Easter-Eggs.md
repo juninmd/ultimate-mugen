@@ -114,3 +114,11 @@ Supported sections:
 
 ## Two-Part Rival Exchanges (`[[exchange]]`) & Full-Roster Taunts
 `assets/interactions.toml` also supports back-and-forth two-part `[[exchange]]` dialogues (Fighter A speaks, and Fighter B automatically replies `delay_ticks` later), plus `first_attack`, `transform`, and `round_win` triggers, and dedicated `taunt` lines for all 16 playable fighters.
+
+## Bleach-Inspired References (`assets/interactions.toml`)
+Ties directly into the three Bleach-inspired native fighters ([Bleach-Inspired Kits](Bleach-Inspired-Kits.md)) plus Oboro and imported M.U.G.E.N Bleach fighters, with 3 dedicated pixel-art sprites (`sakura_petals.png`, `hollow_mask.png`, `reiatsu_badge.png`) and 2 bespoke synthesized SFX (`easter_bankai`, `easter_shunpo`):
+- **Kaname (Byakuya-style)**: *Scatter! Thousand Petals!* (`super`), *Final Release — Bankai!* (`transform`), *Spirit Gate* resonance, and *Flash Step* exchange vs Suzume.
+- **Shion (Zaraki-style)**: *"I'll use both hands now!"* (`low_hp <= 45%`), *Reiatsu Overflow!* (`super`), and *Reiatsu vs Illusion* exchange vs Oboro.
+- **Suzume (Yoruichi-style)**: *Flash Step / Shunpo!* (`first_attack`) and *Shunko — Flash Lightning!* (`transform`).
+- **Oboro (Aizen-style)**: *All According to Plan — Since when were you not under my illusion?* (`super`).
+- **Imported M.U.G.E.N Bleach chars**: automatic `ichigo*` (*Bankai — Getsuga Tensho!*) and `aizen*` (*Shatter, Kyoka Suigetsu!*) reactions.

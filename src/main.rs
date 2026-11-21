@@ -46,9 +46,7 @@ mod tower;
 mod passive_fx; mod spring; mod texgen; mod tweaks; mod ui; mod ui_adapted; mod ui_adapted_panels; mod ui_progress; mod ui_tokens;
 mod update;
 #[cfg(target_arch = "wasm32")]
-mod web_panic;
-#[cfg(target_arch = "wasm32")]
-mod web_sprites;
+mod web_panic; mod web_sprites;
 #[cfg(not(target_arch = "wasm32"))]
 mod scan_report;
 mod vfx;

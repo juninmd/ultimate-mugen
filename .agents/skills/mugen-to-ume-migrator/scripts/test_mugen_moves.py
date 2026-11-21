@@ -32,6 +32,10 @@ class Moves(unittest.TestCase):
         ]
         self.assertEqual(routes(states, cmds), [(1000, "qcf_x", "~D, DF, F, x", "air", 0)])
 
+    def test_command_names_match_without_regard_to_case(self):
+        states = [ctrl("changestate", value="1000", triggerall='command = "special 1"', trigger1="statetype != a")]
+        self.assertEqual(routes(states, {"SPECIAL 1": ["~D, DF, F, a"]}), [(1000, "special 1", "~D, DF, F, a", "stand", 0)])
+
     def test_unconditional_state_chain_becomes_one_sequence(self):
         actions = {300: {"frames": FRAMES, "loop": None}, 301: {"frames": FRAMES, "loop": None}}
         states = {
@@ -46,6 +50,18 @@ class Moves(unittest.TestCase):
     def test_axis_outside_the_sprite_is_padded_in(self):
         image, axis = contain_axis(Image.new("RGBA", (40, 8)), (-10, 51))
         self.assertEqual((image.size, axis), ((50, 51), (0, 51)))
+
+    def test_explod_and_envshake_become_vfx_and_quake(self):
+        actions = {300: {"frames": FRAMES, "loop": None}, 7000: {"frames": FRAMES, "loop": None}}
+        states = {300: {"def": {"anim": "300"}, "ctrl": [
+            dict(ctrl("explod", anim="7000", pos="10, -40", removetime="20", bindtime="1", scale="1.5, 1.5", trigger1="AnimElem = 1"), at=[1]),
+            dict(ctrl("explod", anim="F0", trigger1="AnimElem = 1"), at=[1]),
+            dict(ctrl("envshake", time="12", ampl="-3", trigger1="AnimElem = 2"), at=[2]),
+        ]}}
+        move, wanted = build_move(300, states, actions, "burst", "x", "stand", 0)
+        self.assertEqual(move["vfx"], [{"at": 1, "anim": "a7000", "offset": [10.0, -40.0], "time": 20, "follow": True, "scale": 1.5}])
+        self.assertEqual(move["quake"], [{"at": 2, "time": 12, "amp": 3.0}])
+        self.assertIn(7000, wanted)
 
 
 def move_anim_number(move):

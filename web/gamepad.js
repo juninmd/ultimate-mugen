@@ -126,7 +126,8 @@
     }
     async function send(file) { const buf = new Uint8Array(await file.arrayBuffer()); const id = await accept(buf); if (id) store(id, buf); }
     window.umeImport = (files) => {
-      files = Array.from(files);
+      files = Array.from(files).filter((file) => /\.zip$/i.test(file.name));
+      if (!files.length) return;
       wasm.ume_import_begin();
       (async () => { try { for (const f of files) await send(f); } finally { wasm.ume_import_end(); } })();
     };

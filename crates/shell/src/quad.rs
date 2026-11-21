@@ -66,6 +66,8 @@ fn reset_atlas(f: &mut Frame) {
 
 pub fn reset_textures() { ATLAS_FULL.with(|a| a.set(true)); INDEX_FULL.with(|a| a.set(true)); }
 
+thread_local! { static POINTER_SWALLOWED: Cell<bool> = const { Cell::new(false) }; }
+
 fn with<R>(f: impl FnOnce(&mut Frame<'static>) -> R) -> R {
     let p = FRAME.with(|c| c.get());
     assert!(!p.is_null(), "ume_shell::quad called outside the frame loop");
@@ -80,6 +82,7 @@ impl Game for AsyncGame {
         if ATLAS_FULL.with(|a| a.get()) { reset_atlas(f); }
         if INDEX_FULL.with(|a| a.get()) { reset_index_atlas(f); }
         KEY_QUEUE.with(|q| { let mut q = q.borrow_mut(); q.clear(); q.extend(f.input.pressed_order.iter().filter_map(|k| KeyCode::from_winit(*k))); });
+        POINTER_SWALLOWED.with(|c| c.set(false));
         FRAME.with(|c| c.set(f as *mut Frame as *mut ()));
         let done = match self.main.as_mut() {
             Some(m) => m.as_mut().poll(&mut Context::from_waker(Waker::noop())).is_ready(),
@@ -441,8 +444,9 @@ pub fn get_last_key_pressed() -> Option<KeyCode> { KEY_QUEUE.with(|q| q.borrow_m
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MouseButton { Left }
 
-pub fn is_mouse_button_down(_: MouseButton) -> bool { with(|f| f.input.mouse_down) }
-pub fn is_mouse_button_pressed(_: MouseButton) -> bool { with(|f| f.input.mouse_pressed) }
+pub fn is_mouse_button_down(_: MouseButton) -> bool { with(|f| f.input.mouse_down) && !POINTER_SWALLOWED.with(|c| c.get()) }
+pub fn is_mouse_button_pressed(_: MouseButton) -> bool { with(|f| f.input.mouse_pressed) && !POINTER_SWALLOWED.with(|c| c.get()) }
+pub fn swallow_pointer() { POINTER_SWALLOWED.with(|c| c.set(true)) }
 pub fn mouse_position() -> (f32, f32) { with(|f| (f.input.mouse[0] * f.input.pointer_scale[0], f.input.mouse[1] * f.input.pointer_scale[1])) }
 
 pub type TouchPhase = Phase;

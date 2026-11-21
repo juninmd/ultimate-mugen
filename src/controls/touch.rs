@@ -76,6 +76,9 @@ impl TouchPad {
         self.toggle_down = false;
     }
     pub fn update(&mut self) {
+        if !touches().is_empty() {
+            self.enabled = true;
+        }
         if !self.enabled {
             self.reset();
             return;

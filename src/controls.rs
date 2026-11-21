@@ -6,6 +6,7 @@ mod touch;
 mod touch_layout;
 mod touch_style;
 mod touch_label;
+mod touch_nav;
 pub mod shortcuts;
 use crate::gfx::*;
 use crate::keybinds::KeyMap;
@@ -82,6 +83,7 @@ pub struct Controls {
     nav_repeat: nav_repeat::NavRepeat,
     pub menu_pressed: u32,
     pub touch: TouchPad,
+    pub nav: touch_nav::TouchNav,
     pub glyphs: Glyphs,
     pub shortcuts: Shortcuts,
 }
@@ -127,6 +129,7 @@ impl Controls {
             nav_repeat: Default::default(),
             menu_pressed: 0,
             touch: TouchPad::new(touch),
+            nav: Default::default(),
             shortcuts: Shortcuts::load(),
             glyphs: if touch {
                 Glyphs::Touch
@@ -142,6 +145,7 @@ impl Controls {
         let had_pads = !self.pad_info.is_empty();
         self.pad_info = self.pads.update();
         self.touch.update();
+        self.nav.update(self.touch.enabled);
         let fallback = if self.touch.enabled {
             Glyphs::Touch
         } else {
@@ -210,7 +214,7 @@ impl Controls {
                 m |= nav::START;
             }
         }
-        self.menu_pressed = self.nav_repeat.pressed(m, get_frame_time());
+        self.menu_pressed = self.nav_repeat.pressed(m | self.nav.held(), get_frame_time());
     }
     pub fn clear_macros(&mut self) {
         for q in self.touch.macro_q.iter_mut() {

@@ -36,4 +36,5 @@ pub(super) fn draw_boss_bar(ui: &Ui, g: &Gfx, boss: &Fighter) {
     let fill = if ratio < 0.25 { hex("#ffb02e") } else { hex("#ff3d5a") };
     rect(bx, by, bw * ratio, bh, fill);
     rect(bx, by, bw * ratio, bh * 0.4, Color::new(1.0, 1.0, 1.0, 0.28));
+    super::life_art::draw_boss_frame(&at, s, bx, by, bw, bh);
 }

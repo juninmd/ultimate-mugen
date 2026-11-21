@@ -42,11 +42,11 @@ pub(in crate) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_proj: boo
     s
 }
 
-pub(in crate) fn hitdef_projectile(damage: f32, lvl: Option<&str>, kb: Option<[f32; 2]>, launch: bool, attr: &str, element: Option<&str>, stun: Option<i32>) -> String {
+pub(in crate) fn hitdef_projectile(p: &super::ProjectileSpec, sm: f32, kb: Option<[f32; 2]>, attr: &str) -> String {
     let spec = HitSpec {
-        at: 0, damage, guard_damage: None, level: lvl.map(|s| s.into()), guard: None, knockback: kb, air_knockback: None,
-        launch: Some(launch), hitstop: None, hitstun: None, spark: None, shake: None, priority: Some(4), hitflag: None,
-        pausetime: None, cornerpush: None, hit_sound: None, guard_sound: None, spark_pos: None, ground_bounce: None, wall_bounce: None, element: element.map(|e| e.into()), stun,
+        at: 0, damage: p.damage * sm, guard_damage: p.guard_damage.map(|g| g * sm), level: Some(p.level.as_deref().unwrap_or("medium").into()), guard: None, knockback: kb, air_knockback: None,
+        launch: Some(p.launch.unwrap_or(false)), hitstop: None, hitstun: None, spark: None, shake: p.shake, priority: Some(4), hitflag: p.hitflag.clone(),
+        pausetime: p.pausetime, cornerpush: None, hit_sound: p.hit_sound, guard_sound: None, spark_pos: None, ground_bounce: None, wall_bounce: None, element: p.element.clone(), stun: p.stun,
     };
     hitdef_from_spec(&spec, 1.0, attr, true)
 }

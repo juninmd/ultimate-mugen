@@ -1,8 +1,7 @@
-"""Minimal MUGEN SFF v1/v2 reader that decodes sprites to RGBA numpy arrays."""
+"""Minimal MUGEN SFF v1/v2 reader that decodes sprites to RGBA PIL Images."""
 import io
 import struct
 
-import numpy as np
 from PIL import Image
 
 
@@ -36,9 +35,12 @@ def _pcx_decode(buf):
         else:
             out[j] = b
             j += 1
-    px = np.frombuffer(bytes(out), np.uint8).reshape(h, bpl)[:, :w]
+    if bpl == w:
+        px = bytes(out)
+    else:
+        px = b"".join(bytes(out[r * bpl:r * bpl + w]) for r in range(h))
     pal = buf[-768:] if len(buf) > 769 and buf[-769] == 12 else None
-    return px, pal
+    return (w, h, px), pal
 
 
 def _rle8(src, n):
@@ -181,38 +183,41 @@ class SFF:
             self.sprites.append(s)
 
     def rgba(self, sprite, palette=None):
-        """Decode a sprite to an RGBA array; index 0 is transparent."""
+        """Decode a sprite to an RGBA PIL Image; index 0 is transparent."""
         if self.version == 1:
-            px, own = _pcx_decode(sprite.data)
-            return _apply(px, palette or sprite.pal or own)
+            (w, h, px), own = _pcx_decode(sprite.data)
+            return _apply(w, h, px, palette or sprite.pal or own)
         n, src = sprite.w * sprite.h, sprite.data[4:]
         if sprite.fmt in (10, 11, 12):
             img = Image.open(io.BytesIO(src))
             if sprite.fmt == 10:
                 pal = palette or self.palettes[sprite.pal_index]
-                return _apply(np.array(img), pal)
-            return np.array(img.convert("RGBA"))
+                return _apply(img.width, img.height, img.tobytes(), pal)
+            return img.convert("RGBA")
         dec = {0: lambda b, m: b[:m], 2: _rle8, 3: _rle5, 4: _lz5}[sprite.fmt]
         buf = bytes(dec(sprite.data if sprite.fmt == 0 else src, n))
         buf = buf.ljust(n, b"\0")[:n]
-        px = np.frombuffer(buf, np.uint8).reshape(sprite.h, sprite.w)
-        return _apply(px, palette or self.palettes[sprite.pal_index])
+        return _apply(sprite.w, sprite.h, buf, palette or self.palettes[sprite.pal_index])
 
 
 def _pcx_decode_pal(buf):
     return buf[-768:] if len(buf) > 769 and buf[-769] == 12 else None
 
 
-def _apply(px, pal):
-    lut = np.zeros((256, 4), np.uint8)
-    if pal:
-        lut[:, :3] = np.frombuffer(bytes(pal).ljust(768, b"\0")[:768], np.uint8).reshape(256, 3)
-    lut[:, 3] = 255
-    lut[0, 3] = 0
-    return lut[px]
+def _apply(w, h, px, pal):
+    img = Image.frombytes("P", (w, h), px)
+    raw_pal = bytes(pal).ljust(768, b"\0")[:768] if pal else bytes(768)
+    img.putpalette(raw_pal)
+    rgba = img.convert("RGBA")
+    alpha = Image.frombytes("L", (w, h), px.translate(_ALPHA_LUT))
+    rgba.putalpha(alpha)
+    return rgba
+
+
+_ALPHA_LUT = bytes([0] + [255] * 255)
 
 
 def read_act(raw):
     """ACT files store colors in reverse order (index 255 first)."""
-    cols = np.frombuffer(raw[:768].ljust(768, b"\0"), np.uint8).reshape(256, 3)[::-1]
-    return cols.tobytes()
+    padded = raw[:768].ljust(768, b"\0")
+    return b"".join(padded[i:i + 3] for i in range(765, -1, -3))

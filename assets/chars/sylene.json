@@ -1064,15 +1064,60 @@
     "chain_ajab2": {"frames":["jumpTop*1",{"pose":"ajab","ticks":3,"hit":{"part":"handF","radius":10}},"akick*3","jumpTop*-1"]}
   },
   "moves": [
-    {"id":"jab","name":"Frost Palm","input":"x","kind":"normal","anim":"jab","hits":[{"at":2,"damage":26,"level":"light"}],"cancels":["lkick","strong","cjab","launcher","overhead","slide","string_a"]},
-    {"id":"strong","name":"Rime Burst","input":"y","kind":"normal","anim":"strong","hits":[{"at":3,"damage":66,"level":"heavy"}],"cancels":["spire","lance","embrace","blizzard","overhead"]},
-    {"id":"lkick","name":"Skate Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":30,"level":"light"}],"cancels":["hkick","strong","launcher","slide"]},
-    {"id":"hkick","name":"Aurora Heel","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":72,"level":"heavy"}],"cancels":["spire","lance","blizzard","embrace"]},
-    {"id":"cjab","name":"Low Palm","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":24,"level":"light"}]},
-    {"id":"clk","name":"Ice Step","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":25,"level":"light","guard":"low"}]},
-    {"id":"sweep","name":"Hoarfrost Sweep","input":"b","kind":"normal","anim":"sweep","when":"crouch","hits":[{"at":2,"damage":66,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-4]}]},
-    {"id":"ajab","name":"Snowfall Palm","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":30,"level":"light","guard":"high"}]},
-    {"id":"akick","name":"Glacial Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":58,"level":"medium","guard":"high"}]},
+    {
+      "id": "jab",
+      "name": "Frost Palm",
+      "input": "x",
+      "kind": "normal",
+      "anim": "jab",
+      "hits": [{"at":2,"damage":26,"level":"light"}],
+      "cancels": ["lkick","strong","cjab","launcher","overhead","slide","string_a"],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {
+      "id": "strong",
+      "name": "Rime Burst",
+      "input": "y",
+      "kind": "normal",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":66,"level":"heavy"}],
+      "cancels": ["spire","lance","embrace","blizzard","overhead"],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {
+      "id": "lkick",
+      "name": "Skate Kick",
+      "input": "a",
+      "kind": "normal",
+      "anim": "lkick",
+      "hits": [{"at":2,"damage":30,"level":"light"}],
+      "cancels": ["hkick","strong","launcher","slide"],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {
+      "id": "hkick",
+      "name": "Aurora Heel",
+      "input": "b",
+      "kind": "normal",
+      "anim": "hkick",
+      "hits": [{"at":3,"damage":72,"level":"heavy"}],
+      "cancels": ["spire","lance","blizzard","embrace"],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {"id":"cjab","name":"Low Palm","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":24,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"clk","name":"Ice Step","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":25,"level":"light","guard":"low"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {
+      "id": "sweep",
+      "name": "Hoarfrost Sweep",
+      "input": "b",
+      "kind": "normal",
+      "anim": "sweep",
+      "when": "crouch",
+      "hits": [{"at":2,"damage":66,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-4]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {"id":"ajab","name":"Snowfall Palm","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":30,"level":"light","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"akick","name":"Glacial Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":58,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
       "id": "lance",
       "name": "Frost Lance",
@@ -1080,7 +1125,8 @@
       "kind": "special",
       "anim": "lance",
       "simple": "sp1",
-      "projectile": {"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[5.2,0],"offset":[44,-70],"damage":66,"element":"ice"}
+      "projectile": {"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[5.2,0],"offset":[44,-70],"damage":66,"element":"ice"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "spire",
@@ -1091,7 +1137,8 @@
       "simple": "sp2",
       "invuln": [1,3],
       "projectile": {"at":3,"anim":"spireFx","hitAnim":"iceHit","speed":[0,0],"offset":[34,0],"damage":40,"hits":2,"removeTime":220,"level":"heavy","launch":true,"knockback":[-2,-8],"priority":3,"element":"ice"},
-      "cancels": ["winter","crown"]
+      "cancels": ["winter","crown"],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "glide",
@@ -1103,7 +1150,8 @@
       "fx": "aura",
       "moves": [{"at":2,"vel":[7,0]},{"at":3,"vel":[6,0]},{"at":4,"vel":[2,0]}],
       "hits": [{"at":2,"damage":66,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5],"element":"ice"}],
-      "armor": {"hits":1,"threshold":80}
+      "armor": {"hits":1,"threshold":80},
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "winter",
@@ -1160,7 +1208,8 @@
           "knockback": [0,0],
           "element": "ice"
         }
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "blizzard",
@@ -1168,9 +1217,10 @@
       "input": "~D, DB, B, b",
       "kind": "special",
       "anim": "blizzard",
-      "projectile": {"at":2,"anim":"lanceFx","hitAnim":"iceHit","speed":[1.4,0],"offset":[40,-50],"damage":14,"level":"light","hits":5,"removeTime":300,"element":"ice"}
+      "projectile": {"at":2,"anim":"lanceFx","hitAnim":"iceHit","speed":[1.4,0],"offset":[40,-50],"damage":14,"level":"light","hits":5,"removeTime":300,"element":"ice"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
-    {"id":"embrace","name":"Frozen Embrace","input":"F, D, DF, b","kind":"special","anim":"embrace","throw":{"damage":96,"bind":[30,0],"launch":[-3,-5],"at":1}},
+    {"id":"embrace","name":"Frozen Embrace","input":"F, D, DF, b","kind":"special","anim":"embrace","throw":{"damage":96,"bind":[30,0],"launch":[-3,-5],"at":1},"sounds":[{"at":1,"snd":[200,5]}]},
     {
       "id": "crown",
       "name": "Glacier Crown",
@@ -1182,7 +1232,8 @@
         {"at":3,"anim":"spireFx","hitAnim":"iceHit","speed":[3,0],"damage":34,"level":"medium","hits":4,"removeTime":180,"offset":[40,-20],"element":"ice"},
         {"at":3,"anim":"spireFx","hitAnim":"iceHit","speed":[3,0],"damage":34,"level":"medium","hits":4,"removeTime":180,"offset":[60,-20],"element":"ice"},
         {"at":3,"anim":"spireFx","hitAnim":"iceHit","speed":[3,0],"damage":34,"level":"medium","hits":4,"removeTime":180,"offset":[80,-20],"element":"ice"}
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "ex_lance",
@@ -1192,7 +1243,8 @@
       "anim": "lanceEx",
       "projectile": [{"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[6.5,0],"offset":[44,-70],"damage":85.8,"hits":2,"priority":2,"level":"heavy","element":"ice"}],
       "cost": 250,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ex_spire",
@@ -1204,7 +1256,8 @@
       "projectile": [{"at":3,"anim":"spireFx","hitAnim":"iceHit","speed":[0,0],"offset":[34,0],"damage":52,"hits":3,"removeTime":220,"level":"heavy","launch":true,"knockback":[-2,-8],"priority":4,"element":"ice"}],
       "cancels": ["winter","crown"],
       "cost": 500,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ult_crown",
@@ -1219,10 +1272,20 @@
         {"at":3,"anim":"spireFx","hitAnim":"iceHit","speed":[3,0],"damage":40.8,"level":"medium","hits":6,"removeTime":180,"offset":[80,-20],"element":"ice"}
       ],
       "cost": 3000,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
-    {"id":"overhead","name":"Frost Hammer","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":68.4,"level":"medium","guard":"high","hitstun":20}]},
-    {"id":"launcher","name":"Glacier Launcher","input":"y","kind":"normal","when":"crouch","anim":"strong","hits":[{"at":3,"damage":58,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22}]},
+    {"id":"overhead","name":"Frost Hammer","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":68.4,"level":"medium","guard":"high","hitstun":20}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {
+      "id": "launcher",
+      "name": "Glacier Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":58,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
     {
       "id": "divekick",
       "name": "Icicle Drop",
@@ -1231,7 +1294,8 @@
       "anim": "akick",
       "when": "air",
       "hits": [{"at":2,"damage":63.8,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}],
-      "moves": [{"at":1,"vel":[1.8,2.5]}]
+      "moves": [{"at":1,"vel":[1.8,2.5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "slide",
@@ -1241,7 +1305,8 @@
       "anim": "sweep",
       "when": "stand",
       "hits": [{"at":2,"damage":56.1,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5]}],
-      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}]
+      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "escape_burst",
@@ -1253,7 +1318,8 @@
       "cost": 500,
       "burst": true,
       "invuln": [1,3],
-      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}]
+      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "jab2",
@@ -1264,7 +1330,8 @@
       "hits": [{"at":2,"damage":23,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["lance","spire"],
-      "rekka": {"after":["jab"],"window":[1,22],"contact":true}
+      "rekka": {"after":["jab"],"window":[1,22],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab3",
@@ -1275,7 +1342,8 @@
       "hits": [{"at":2,"damage":59,"level":"medium","knockback":[-3,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["lance","spire"],
-      "rekka": {"after":["jab2"],"window":[1,13],"contact":true}
+      "rekka": {"after":["jab2"],"window":[1,13],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick2",
@@ -1286,7 +1354,8 @@
       "hits": [{"at":2,"damage":27,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["lance","spire"],
-      "rekka": {"after":["lkick"],"window":[1,22],"contact":true}
+      "rekka": {"after":["lkick"],"window":[1,22],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick3",
@@ -1297,7 +1366,8 @@
       "hits": [{"at":2,"damage":54,"level":"medium","knockback":[-3.5,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["lance","spire"],
-      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true}
+      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong2",
@@ -1308,7 +1378,8 @@
       "hits": [{"at":2,"damage":56,"level":"medium","knockback":[-4,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["lance","spire"],
-      "rekka": {"after":["strong"],"window":[6,36],"contact":true}
+      "rekka": {"after":["strong"],"window":[6,36],"contact":true},
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "cjab2",
@@ -1319,7 +1390,8 @@
       "hits": [{"at":2,"damage":22,"level":"light","knockback":[-0.5,0]}],
       "when": "crouch",
       "cancels": [],
-      "rekka": {"after":["cjab"],"window":[1,21],"contact":true}
+      "rekka": {"after":["cjab"],"window":[1,21],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "ajab2",
@@ -1330,7 +1402,8 @@
       "hits": [{"at":2,"damage":27,"level":"light","guard":"high"}],
       "when": "air",
       "cancels": [],
-      "rekka": {"after":["ajab"],"window":[1,21],"contact":true}
+      "rekka": {"after":["ajab"],"window":[1,21],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_a",
@@ -1340,7 +1413,8 @@
       "anim": "stringA",
       "hits": [{"at":2,"damage":20,"level":"light","knockback":[-0.5,0],"element":"ice"},{"at":4,"damage":30,"level":"light","element":"ice"}],
       "moves": [{"at":1,"vel":[2,0]},{"at":4,"vel":[0.5,0]}],
-      "cancels": ["string_b","string_c","lance","spire"]
+      "cancels": ["string_b","string_c","lance","spire"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_b",
@@ -1350,7 +1424,8 @@
       "anim": "stringB",
       "hits": [{"at":2,"damage":28,"level":"light","guard":"low","knockback":[-0.5,0],"element":"ice"},{"at":5,"damage":56,"level":"medium","element":"ice"}],
       "moves": [{"at":1,"vel":[1.5,0]},{"at":5,"vel":[0.5,0]}],
-      "cancels": ["string_c","lance","spire"]
+      "cancels": ["string_c","lance","spire"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_c",
@@ -1360,16 +1435,18 @@
       "anim": "stringC",
       "hits": [{"at":3,"damage":90,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22,"element":"ice"}],
       "moves": [{"at":1,"vel":[2.5,0]},{"at":3,"vel":[0.5,0]}],
-      "cancels": ["lance","spire"]
+      "cancels": ["lance","spire"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"hkick","hits":[{"at":3,"damage":65,"level":"heavy"}]},
+    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"hkick","hits":[{"at":3,"damage":65,"level":"heavy"}],"sounds":[{"at":2,"snd":[200,2]}]},
     {
       "id": "lance_slow",
       "name": "Frost Lance Slow",
       "input": "~D, DB, B, y",
       "kind": "special",
       "anim": "lance",
-      "projectile": {"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[2.86,0],"offset":[44,-70],"damage":89,"element":"ice","hits":2,"level":"heavy","removeTime":150,"priority":2}
+      "projectile": {"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[2.86,0],"offset":[44,-70],"damage":89,"element":"ice","hits":2,"level":"heavy","removeTime":150,"priority":2},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "lance_low",
@@ -1377,7 +1454,8 @@
       "input": "~D, DB, B, x",
       "kind": "special",
       "anim": "lance",
-      "projectile": {"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[7.02,0],"offset":[44,-30],"damage":50,"element":"ice"}
+      "projectile": {"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[7.02,0],"offset":[44,-30],"damage":50,"element":"ice"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "lance_barrage",
@@ -1385,7 +1463,8 @@
       "input": "~D, DF, F, b",
       "kind": "special",
       "anim": "lance",
-      "projectile": {"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[4.16,0],"offset":[44,-70],"damage":33,"element":"ice","hits":3,"level":"medium","removeTime":120}
+      "projectile": {"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[4.16,0],"offset":[44,-70],"damage":33,"element":"ice","hits":3,"level":"medium","removeTime":120},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "lance_high",
@@ -1393,7 +1472,8 @@
       "input": "~D, DF, B, y",
       "kind": "special",
       "anim": "lance",
-      "projectile": {"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[5.72,0],"offset":[44,-80],"damage":56,"element":"ice"}
+      "projectile": {"at":3,"anim":"lanceFx","hitAnim":"iceHit","speed":[5.72,0],"offset":[44,-80],"damage":56,"element":"ice"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
   "country": "Noruega",

@@ -40,8 +40,9 @@ fn test_trait_compilation_and_cns_generation() {
         timestop: None,
         throw: None,
         cancels: None,
+        sounds: vec![],
         rekka: None, blink: None, vfx: vec![], quake: vec![],
-        requires: None,
+        requires: None, ..Default::default()
     });
 
     // 2. Parry trait
@@ -70,8 +71,9 @@ fn test_trait_compilation_and_cns_generation() {
         timestop: None,
         throw: None,
         cancels: None,
+        sounds: vec![],
         rekka: None, blink: None, vfx: vec![], quake: vec![],
-        requires: None,
+        requires: None, ..Default::default()
     });
 
     // 3. TimeStop trait
@@ -100,8 +102,9 @@ fn test_trait_compilation_and_cns_generation() {
         timestop: Some(120),
         throw: None,
         cancels: None,
+        sounds: vec![],
         rekka: None, blink: None, vfx: vec![], quake: vec![],
-        requires: None,
+        requires: None, ..Default::default()
     });
 
     // 4. Burst trait
@@ -130,8 +133,9 @@ fn test_trait_compilation_and_cns_generation() {
         timestop: None,
         throw: None,
         cancels: None,
+        sounds: vec![],
         rekka: None, blink: None, vfx: vec![], quake: vec![],
-        requires: None,
+        requires: None, ..Default::default()
     });
 
     // 5. Flight trait
@@ -160,8 +164,9 @@ fn test_trait_compilation_and_cns_generation() {
         timestop: None,
         throw: None,
         cancels: None,
+        sounds: vec![],
         rekka: None, blink: None, vfx: vec![], quake: vec![],
-        requires: None,
+        requires: None, ..Default::default()
     });
 
     let def = compile_native(&nc, 1, false);
@@ -228,8 +233,9 @@ fn test_trait_runtime_match_simulation() {
         timestop: Some(90),
         throw: None,
         cancels: None,
+        sounds: vec![],
         rekka: None, blink: None, vfx: vec![], quake: vec![],
-        requires: None,
+        requires: None, ..Default::default()
     });
 
     let def = std::sync::Arc::new(compile_native(&nc, 1, false));

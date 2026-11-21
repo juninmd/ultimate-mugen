@@ -44,7 +44,7 @@ Sempre troque `anim` (e `projectile.anim`) pelas animações do próprio lutador
 
 ## Conversor
 
-`mugen2umf.py` converte `Explod` em `vfx` e `EnvShake` em `quake` (no máximo 3 e 2 por golpe) e compara nomes de `command` sem diferenciar caixa, como o MUGEN faz (`SPECIAL 1` no `.cmd`, `"special 1"` no gatilho). Antes da correção, um pacote assim ficava só com os normais: o Goku SS4 passou de 5 para 15 golpes.
+`mugen2umf.py` converte `Explod` em `explods` e `EnvShake` em `shake` (com `blink`, `vfx` e `quake` disponíveis para escrita manual) e compara nomes de `command` sem diferenciar caixa, como o MUGEN faz (`SPECIAL 1` no `.cmd`, `"special 1"` no gatilho). Antes da correção, um pacote assim ficava só com os normais: o Goku SS4 passou de 5 para 15 golpes.
 
 ## Regras práticas
 

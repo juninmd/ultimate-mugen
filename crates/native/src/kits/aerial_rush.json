@@ -1,0 +1,13 @@
+{
+  "format": "umf-kit/1",
+  "id": "aerial_rush",
+  "description": "Reusable aerial mobility kit with flight, super speed, double air-jump and air-dash.",
+  "stats": {
+    "airJumps": 2,
+    "airDashes": 1
+  },
+  "abilities": {
+    "fly": { "speed": 4.2, "cost": 40, "input": "a+b" },
+    "superSpeed": { "mul": 2.0, "cost": 100, "input": "a+c" }
+  }
+}

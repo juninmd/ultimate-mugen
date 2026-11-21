@@ -27,7 +27,7 @@ fn anim_of(anim_no: &HashMap<String, i32>, wanted: Option<&String>, fallbacks: &
 }
 
 pub(super) fn ability_code(spec: Option<&AbilitySpec>, anim_no: &HashMap<String, i32>) -> AbilityCode {
-    let mut code = super::charge::charge_code(anim_no);
+    let mut code = super::charge::charge_code(spec.and_then(|s| s.charge.as_ref()), anim_no);
     code.minus2 += &super::air_variant::reset_rule();
     let Some(spec) = spec else { return code };
     if let Some(fly) = &spec.fly {
@@ -38,22 +38,40 @@ pub(super) fn ability_code(spec: Option<&AbilitySpec>, anim_no: &HashMap<String,
         let fall_anim = anim_of(anim_no, None, &["flyEnd", "jumpDown"], 44);
         let fuel = if cost > 0.0 { "triggerall = power >= 1\n" } else { "" };
         let drain = if cost > 0.0 { format!("[State {FLY_STATE}, fuel]\ntype = PowerAdd\ntrigger1 = 1\nvalue = {}\n\n[State {FLY_STATE}, empty]\ntype = ChangeState\ntrigger1 = power < 1\nvalue = {FLY_FALL_STATE}\nctrl = 1\n\n", -cost / 60.0) } else { String::new() };
+        let mut dir_anims = String::new();
+        for (cmd, opt) in [("holdup", &fly.up_anim), ("holddown", &fly.down_anim), ("holdfwd", &fly.fwd_anim), ("holdback", &fly.back_anim)] {
+            if let Some(da) = opt.as_ref().and_then(|n| anim_no.get(n).copied()) {
+                dir_anims += &format!("[State {FLY_STATE}, anim_{cmd}]\ntype = ChangeAnim\ntrigger1 = command = \"{cmd}\" && Anim != {da}\nvalue = {da}\n\n");
+            }
+        }
+        if !dir_anims.is_empty() {
+            dir_anims += &format!("[State {FLY_STATE}, anim_idle]\ntype = ChangeAnim\ntrigger1 = command != \"holdup\" && command != \"holddown\" && command != \"holdfwd\" && command != \"holdback\" && Anim != {anim}\nvalue = {anim}\n\n");
+        }
+        let fly_snd = fly.sound.map(|s| format!("[State {FLY_STATE}, snd]\ntype = PlaySnd\ntrigger1 = Time = 0\nvalue = {}, {}\n\n", s[0], s[1])).unwrap_or_default();
         let mut fly_cmd = parse_command("fly_toggle", input, 1, 4); fly_cmd.pause_buffer = 4;
         code.commands.push(fly_cmd);
         code.movelist.push(entry("Fly (toggle)", input, "fly_toggle", cost, true));
         code.minus1 += &format!("[State -1, fly]\ntype = ChangeState\nvalue = {FLY_STATE}\ntriggerall = !IsHelper && command = \"fly_toggle\"\ntriggerall = stateno != {FLY_STATE}\n{fuel}trigger1 = ctrl && (statetype = S || statetype = A)\n\n");
-        code.states += &format!("[Statedef {FLY_STATE}]\ntype = A\nmovetype = I\nphysics = N\nanim = {anim}\nctrl = 1\nsprpriority = 1\n\n[State {FLY_STATE}, lift]\ntype = VelSet\ntrigger1 = Time = 0\ny = -3\n\n[State {FLY_STATE}, steer]\ntype = VelSet\ntrigger1 = Time > 0\nx = ifelse(command = \"holdfwd\", {speed}, ifelse(command = \"holdback\", -{speed}, 0))\ny = ifelse(command = \"holdup\", -{speed}, ifelse(command = \"holddown\", {speed}, 0))\n\n[State {FLY_STATE}, ceiling]\ntype = PosSet\ntrigger1 = Pos Y < -190\ny = -190\n\n[State {FLY_STATE}, land]\ntype = ChangeState\ntrigger1 = Time > 3 && Pos Y >= 0 && Vel Y >= 0\nvalue = 52\n\n[State {FLY_STATE}, off]\ntype = ChangeState\ntrigger1 = command = \"fly_toggle\" && Time > 8\nvalue = {FLY_FALL_STATE}\nctrl = 1\n\n{drain}[Statedef {FLY_FALL_STATE}]\ntype = A\nmovetype = I\nphysics = N\nanim = {fall_anim}\nctrl = 1\n\n[State {FLY_FALL_STATE}, grav]\ntype = VelAdd\ntrigger1 = 1\ny = const(movement.yaccel)\n\n[State {FLY_FALL_STATE}, land]\ntype = ChangeState\ntrigger1 = Pos Y >= 0 && Vel Y > 0\nvalue = 52\n\n");
+        code.states += &format!("[Statedef {FLY_STATE}]\ntype = A\nmovetype = I\nphysics = N\nanim = {anim}\nctrl = 1\nsprpriority = 1\n\n{fly_snd}[State {FLY_STATE}, lift]\ntype = VelSet\ntrigger1 = Time = 0\ny = -3\n\n[State {FLY_STATE}, steer]\ntype = VelSet\ntrigger1 = Time > 0\nx = ifelse(command = \"holdfwd\", {speed}, ifelse(command = \"holdback\", -{speed}, 0))\ny = ifelse(command = \"holdup\", -{speed}, ifelse(command = \"holddown\", {speed}, 0))\n\n{dir_anims}[State {FLY_STATE}, ceiling]\ntype = PosSet\ntrigger1 = Pos Y < -190\ny = -190\n\n[State {FLY_STATE}, land]\ntype = ChangeState\ntrigger1 = Time > 3 && Pos Y >= 0 && Vel Y >= 0\nvalue = 52\n\n[State {FLY_STATE}, off]\ntype = ChangeState\ntrigger1 = command = \"fly_toggle\" && Time > 8\nvalue = {FLY_FALL_STATE}\nctrl = 1\n\n{drain}[Statedef {FLY_FALL_STATE}]\ntype = A\nmovetype = I\nphysics = N\nanim = {fall_anim}\nctrl = 1\n\n[State {FLY_FALL_STATE}, grav]\ntype = VelAdd\ntrigger1 = 1\ny = const(movement.yaccel)\n\n[State {FLY_FALL_STATE}, land]\ntype = ChangeState\ntrigger1 = Pos Y >= 0 && Vel Y > 0\nvalue = 52\n\n");
     }
     if let Some(tp) = &spec.teleport {
         let input = tp.input.as_deref().unwrap_or("b+c");
         let cost = tp.cost.unwrap_or(0.0).max(0.0);
         let anim = anim_of(anim_no, tp.anim.as_ref(), &["teleport", "idle"], 0);
+        let custom = tp.anim.as_ref().is_some_and(|n| anim_no.contains_key(n));
+        let offset = tp.offset.unwrap_or(40.0);
+        let invuln = tp.invuln.unwrap_or(14);
+        let blink_trig = match tp.at { Some(f) if f > 0 => format!("AnimElem = {f}"), _ => "Time = 4".into() };
+        let done_trig = if custom { "AnimTime = 0" } else { "Time >= 12" };
+        let air_exit = if spec.fly.is_some() { FLY_FALL_STATE } else { 50 };
+        let turn_cns = if tp.turn.unwrap_or(true) { format!("[State {TELEPORT_STATE}, turn]\ntype = Turn\ntrigger1 = {blink_trig}\n\n") } else { String::new() };
+        let tp_snd = tp.sound.map(|s| format!("[State {TELEPORT_STATE}, snd]\ntype = PlaySnd\ntrigger1 = Time = 0\nvalue = {}, {}\n\n", s[0], s[1])).unwrap_or_default();
         let paid = if cost > 0.0 { format!("triggerall = power >= {cost}\n") } else { String::new() };
         let mut tp_cmd = parse_command("teleport_cmd", input, 1, 4); tp_cmd.pause_buffer = 4;
         code.commands.push(tp_cmd);
         code.movelist.push(entry("Teleport", input, "teleport_cmd", cost, false));
         code.minus1 += &format!("[State -1, teleport]\ntype = ChangeState\nvalue = {TELEPORT_STATE}\ntriggerall = !IsHelper && command = \"teleport_cmd\"\n{paid}trigger1 = ctrl && statetype != L\n\n");
-        code.states += &format!("[Statedef {TELEPORT_STATE}]\ntype = U\nmovetype = I\nphysics = N\nanim = {anim}\nctrl = 0\nvelset = 0, 0\npoweradd = {}\n\n[State {TELEPORT_STATE}, inv]\ntype = NotHitBy\ntrigger1 = Time = 0\nvalue = SCA\ntime = 14\n\n[State {TELEPORT_STATE}, blink]\ntype = PosAdd\ntrigger1 = Time = 4\nx = P2Dist X + 40\n\n[State {TELEPORT_STATE}, turn]\ntype = Turn\ntrigger1 = Time = 4\n\n[State {TELEPORT_STATE}, trail]\n{AFTER_IMAGE}trigger1 = Time = 0\n\n[State {TELEPORT_STATE}, ground]\ntype = ChangeState\ntrigger1 = Time >= 12 && Pos Y >= 0\nvalue = 0\nctrl = 1\n\n[State {TELEPORT_STATE}, air]\ntype = ChangeState\ntrigger1 = Time >= 12 && Pos Y < 0\nvalue = {FLY_FALL_STATE}\nctrl = 1\n\n", -cost);
+        code.states += &format!("[Statedef {TELEPORT_STATE}]\ntype = U\nmovetype = I\nphysics = N\nanim = {anim}\nctrl = 0\nvelset = 0, 0\npoweradd = {}\n\n{tp_snd}[State {TELEPORT_STATE}, inv]\ntype = NotHitBy\ntrigger1 = Time = 0\nvalue = SCA\ntime = {invuln}\n\n[State {TELEPORT_STATE}, blink]\ntype = PosAdd\ntrigger1 = {blink_trig}\nx = P2Dist X + {offset}\n\n{turn_cns}[State {TELEPORT_STATE}, trail]\n{AFTER_IMAGE}trigger1 = Time = 0\n\n[State {TELEPORT_STATE}, ground]\ntype = ChangeState\ntrigger1 = {done_trig} && Pos Y >= 0\nvalue = 0\nctrl = 1\n\n[State {TELEPORT_STATE}, air]\ntype = ChangeState\ntrigger1 = {done_trig} && Pos Y < 0\nvalue = {air_exit}\nctrl = 1\n\n", -cost);
     }
     if let Some(ss) = &spec.super_speed {
         let input = ss.input.as_deref().unwrap_or("a+c");

@@ -12,20 +12,47 @@ O motor já roda personagens MUGEN legados direto da pasta ou do zip. Migre para
 
 ## Conversor automático (recomendado)
 
-`python3 .agents/skills/mugen-to-ume-migrator/scripts/mugen2umf.py <pasta-mugen> <saida> --id <id> --name "<Nome>" [--extra extra.json]` gera um pacote UMF (`<id>.json` + `sprites/`) fiel ao original. Depende de `numpy` e `Pillow`.
+`python3 .agents/skills/mugen-to-ume-migrator/scripts/mugen2umf.py <pasta-mugen> <saida> --id <id> --name "<Nome>" [--extra extra.json] [--report]` gera um pacote UMF (`<id>.json` + `sprites/`) fiel ao original. Depende apenas de `Pillow` (sem `numpy`).
 
 - **Sprites**: cada `(grupo, índice)` usado vira `sprites/s{g}_{i}.png` sem reamostragem; `meta.json` guarda `axisX/axisY` do SFF e `refHeight` = altura do idle.
 - **Escala 1:1**: `stats.height` = `refHeight` (escala = 100/refHeight × height/100 = 1). Nunca use 100 nem outro valor, senão o lutador fica maior e borrado.
 - **Caixas**: `Clsn1` vira `hit.box` (união das caixas), `Clsn2` vira `hurt` por quadro, e `art.style.boxes = "exact"` desliga o recorte automático pela máscara do sprite.
-- **Golpes**: lidos do `Statedef -1` (`ChangeState` + `command`). Um grupo `triggerN` com `ctrl = 0` ou que só serve a outro estado é ignorado, e comandos só de segurar (`/x`) também. `statetype` define `when`, e `power >= N` define `cost`.
-- **Cadeias**: `ChangeState` sem `command` (ex.: 4010 → 4011 → 4012) é seguido até 4 estados e vira uma anim `seq<estado>`, com os `at` deslocados.
+- **Golpes e cancelamentos**: lidos do `Statedef -1` (`ChangeState` + `command`). Grupos `stateno = X` + `movecontact`/`movehit` viram `cancels: [...]`. Um grupo `triggerN` com `ctrl = 0` ou que só serve a outro estado é ignorado, e comandos só de segurar (`/x`) também. `statetype` define `when`, e `power >= N` define `cost`. `command` é comparado sem diferenciar caixa (`SPECIAL 1` no `.cmd` e `"special 1"` no gatilho); sem isso o pacote perde quase todos os especiais.
+- **Habilidades automáticas (`mugen_abilities.py`)**: detecta estados de voo (direcionais `holdfwd/back/up/down` → `abilities.fly` com `upAnim/downAnim/fwdAnim/backAnim`), carga de ki (`PowerAdd > 0` com loop → `abilities.charge` com `auraColor/shake/sound`) e teleporte puro (`abilities.teleport` com `at` sincronizado no quadro do `PosAdd` e encerramento em `AnimTime = 0`), removendo-os da lista de ataques para evitar travamentos (`ctrl = 0`).
+- **Cadeias e hit-confirm (`followUp`)**: `ChangeState` incondicional é seguido até 4 estados (`seq<estado>`) sem entrar em estados consumidos de voo/carga. Quando há transição condicional (`MoveHit = 1` / `MoveContact = 1`), o conversor divide em golpe de follow-up e emite `followUp: { to, on: "hit" | "contact" }`, evitando cinemáticas no whiff. Os `at` são deslocados.
 - **HitDef/Projectile/VelSet/PosAdd p2dist/PlaySnd** viram `hits`, `projectile`, `moves`, `teleport` e `sounds` no quadro certo (`AnimElem`, ou `Time` convertido em quadro).
-- **Sons**: o `.snd` é extraído para `sprites/snd_{g}_{i}.wav` e listado em `meta.json.sounds`; o motor carrega esses arquivos e toca `moves[].sounds` (`{at, snd:[g,i], fight?}`) no quadro indicado.
+- **FX, cinemática e teleportes multi-etapa**: `Explod` → `explods[]` (incluindo anims e sprites no pacote), `AfterImage` → `afterimage`, `EnvShake` → `shake`, `EnvColor` → `flash`, `SuperPause` → `superPause`, `NotHitBy` → `invuln`, e todos os `PosAdd` deduplicados da sequência → `teleport` único ou lista `[step1, step2]` (ex.: Super Genki Dama sobe `[-200, -100]`, lança e retorna `[125, 100]`). Golpes com teleporte que terminam com `Pos Y < 0` saem automaticamente para o estado aéreo `50` (`ctrl = 1`) em vez de flutuar travados no estado `0`.
 - **Super**: só com `SuperPause`, `poweradd <= -1000` ou custo ≥ 1000. Número de estado ≥ 3000 não basta, porque teleportes vivem lá.
-- **Efeitos**: `Explod` de animação vira `moves[].vfx` (até 3) e `EnvShake` vira `moves[].quake` (até 2). `command` é comparado sem diferenciar caixa (`SPECIAL 1` no `.cmd` e `"special 1"` no gatilho); sem isso o pacote perde quase todos os especiais.
-- **`--extra`**: um JSON mesclado por cima (moves, anims, abilities, helpers) para o que helpers e variáveis não expressam.
+- **Feixes de Ki (`Projectile`)**: preserva `projhits` (`hits`), `projmisstime` (`missTime`), `hitflag`, `guardDamage`, `pausetime`, `hitSound`, `accel`, `knockback` e `launch`.
+- **Agarrões e Wall Bounce**: `TargetBind` + `TargetLifeAdd` + `ChangeAnim2` viram `throw`; estados de P2 com `BackEdgeBodyDist` ativam `wallBounce: true` no `HitSpec`.
+- **Sons**: o `.snd` é extraído para `sprites/snd_{g}_{i}.wav` (inclusive sons de `abilities.charge` e `abilities.teleport`) e listado em `meta.json.sounds`; o motor carrega esses arquivos e toca `moves[].sounds` (`{at, snd:[g,i], fight?}`) no quadro indicado.
+- **Kits reutilizáveis**: para reduzir JSON em lutadores novos ou editados, use `"extends": ["core", "ki_fighter", "clone_arts", "aerial_rush"]` (`crates/native/src/kits/`).
+- **`--extra` e `--report`**: `--extra` mescla JSON por cima (incluindo `profile`, `intro`, `taunt`, `winQuote`, `rivals`); `--report` imprime o resumo de cobertura de features convertidas.
 
-Pegadinhas: o nome do `.act` pode ter outra caixa (a busca não diferencia maiúsculas); `[State N]` com número diferente do `Statedef` pertence ao `Statedef` corrente; a paleta 1 só vale para sprites `same_pal`.
+## Enriquecimento UME obrigatório (identidade, perfil e falas fiéis)
+
+Ao migrar um lutador M.U.G.E.N para o padrão UMF 2.0, **sempre preencha os metadados exclusivos do UME** (via `--extra` ou editando o JSON final) mantendo **100% de fidelidade ao personagem original**:
+
+- **Identidade**: `series` (obra/franquia original), `author` (criador original + crédito de conversão), `color` (cor assinatura em hex), `form` (nome da forma/despertar) e `description` (resumo curto fiel).
+- **Falas fiéis ao personagem**:
+  - `intro`: frase de entrada icônica do personagem antes da luta.
+  - `taunt`: provocação autêntica na personalidade do personagem.
+  - `winQuote`: frase de vitória clássica.
+  - `rivals`: interações específicas (`intro`, `taunt`) quando houver rivais no elenco.
+- **Bloco `profile` (`CharProfile`)** — preencher em `en`, `pt` e `es` nos campos `LocalText`:
+  - `country`: código/local (ex.: `"JP"`, `"Planet Vegeta"`).
+  - `nationality`: nacionalidade / raça (`{"en": "...", "pt": "...", "es": "..."}`).
+  - `origin`: origem / planeta / cidade (`{"en": "...", "pt": "...", "es": "..."}`).
+  - `title`: título / epíteto (ex.: `"Super Saiyan 4"`).
+  - `fightingStyle`: estilo de luta (ex.: `"Turtle School Martial Arts"`).
+  - `affiliation`: equipe / facção / clã (ex.: `"Z Fighters"`).
+  - `bio`: mini biografia fiel ao cânone do personagem (`{"en": "...", "pt": "...", "es": "..."}`).
+  - `element`: elemento principal (`"ki"`, `"fire"`, `"wind"`, `"lightning"`, `"ice"`, `"shadow"`, `"earth"`, `"light"`, `"water"`).
+  - `weakness`: elemento fraqueza (ex.: `"dark"`, `"ice"`, `"earth"`).
+  - `alignment`: alinhamento moral — `"hero"`, `"villain"`, `"anti-hero"` ou `"neutral"`.
+  - `tags`: arquétipos de gameplay (ex.: `["rushdown", "beam", "teleport", "aerial"]`).
+
+Pegadinhas aprendidas (estudo de caso Goku SSJ4): nunca siga `ChangeState` para o estado de voo (`3001`) em cadeias de ataque; remova `loop` e ticks `-1` de `intro`, `taunt` e ataques para `AnimTime = 0` disparar; preserve múltiplos `PosAdd` em `teleport[]` (ex.: subida e retorno da Genki Dama) e garanta saída aérea (`value = 50`) quando `Pos Y < 0`; em `ChangeAnim` de voo, cheque `command = "holdup"` (regex) e não substring `"holdup"` (senão casa `!= "holdup"`); o nome do `.act` pode ter outra caixa; `[State N]` com número diferente do `Statedef` pertence ao `Statedef` corrente; a paleta 1 só vale para sprites `same_pal`.
 
 ## Fluxo
 
@@ -64,7 +91,7 @@ Pegadinhas: o nome do `.act` pode ter outra caixa (a busca não diferencia maiú
 | `HitOverride` / super armor | `armor.hits` |
 | `SuperPause`, power `poweradd` | `kind: "super"` + `cost` |
 | `Pause`/time stop | `timestop` |
-| `Explod` de aura/flash, `EnvShake` | `moves[].vfx`, `moves[].quake` |
+| `Explod` de aura/flash, `EnvShake` | `moves[].explods`, `moves[].shake` |
 | Vários `Projectile` em sequência (rajada de ki) | `projectile.repeat {count, every, offsetStep, speedStep}` |
 | Voo `physics = N` | `abilities.fly` ou `flight: true` |
 | Teleporte (`PosSet` atrás do inimigo) | `abilities.teleport`, `moves[].teleport` ou `moves[].blink {to, gap}` |

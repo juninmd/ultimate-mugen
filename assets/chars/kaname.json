@@ -190,7 +190,8 @@
         "elbowB": 95,
         "thighF": -14.858467599395652,
         "kneeF": 63.5597877022942,
-        "kneeB": 58.85846759939565,
+        "thighB": 58.85846759939565,
+        "kneeB": 30,
         "lean": 26,
         "head": -20,
         "blade": -60,
@@ -309,6 +310,7 @@
         "head": -20,
         "thighF": 40,
         "kneeF": 50,
+        "thighB": 12,
         "kneeB": 45,
         "face": "hurt",
         "wind": 0.9,
@@ -326,6 +328,7 @@
         "head": -20,
         "thighF": 40,
         "kneeF": 50,
+        "thighB": 12,
         "kneeB": 45,
         "face": "hurt",
         "wind": 0.9,
@@ -391,9 +394,9 @@
         "hairWind": 0,
         "blade": 175
       },
-      "getUp1": {"lean":-30,"thighF":82,"kneeF":30,"kneeB":70,"kneeB":95,"shoulderF":40,"elbowF":70,"shoulderB":-40,"elbowB":5,"head":10,"handB":"open","face":"hurt","blade":100},
+      "getUp1": {"lean":-30,"thighF":82,"kneeF":30,"thighB":70,"kneeB":95,"shoulderF":40,"elbowF":70,"shoulderB":-40,"elbowB":5,"head":10,"handB":"open","face":"hurt","blade":100},
       "getUp2": {"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":30,"head":-14,"shoulderF":30,"elbowF":80,"shoulderB":10,"elbowB":70,"blade":128},
-      "getUp3": {"shoulderF":52,"elbowF":42,"shoulderB":38,"elbowB":95,"thighF":50,"kneeF":70,"kneeB":15,"kneeB":70,"lean":12,"head":-8,"blade":128},
+      "getUp3": {"shoulderF":52,"elbowF":42,"shoulderB":38,"elbowB":95,"thighF":50,"kneeF":70,"thighB":15,"kneeB":70,"lean":12,"head":-8,"blade":128},
       "dead": {
         "rot": -90,
         "thighF": 10,
@@ -422,7 +425,7 @@
         "elbowB": 110,
         "thighF": 78,
         "kneeF": 120,
-        "kneeB": 50,
+        "thighB": 50,
         "kneeB": 118,
         "lean": 20,
         "head": 20,
@@ -449,15 +452,15 @@
       "hk0": {"shoulderF":15,"elbowF":5,"shoulderB":38,"elbowB":95,"thighF":36,"kneeF":40,"thighB":-20,"kneeB":14,"lean":18,"head":-10,"blade":25,"phase":0},
       "hk1": {"shoulderF":128,"elbowF":6,"shoulderB":38,"elbowB":95,"thighF":26,"kneeF":14,"thighB":-22,"kneeB":8,"lean":-6,"head":-12,"blade":122,"phase":0,"face":"shout","wind":0.8},
       "cjab0": {"shoulderF":40,"elbowF":110,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":16,"head":-12,"blade":150},
-      "cjab1": {"shoulderF":86,"elbowF":4,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"kneeB":122,"lean":20,"head":-14,"blade":94},
+      "cjab1": {"shoulderF":86,"elbowF":4,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":20,"head":-14,"blade":94},
       "clk": {"shoulderF":57,"elbowF":42,"shoulderB":43,"elbowB":95,"thighF":88,"kneeF":2,"thighB":40,"kneeB":128,"lean":4,"head":-12,"blade":128,"ankleF":25},
-      "sweep0": {"shoulderF":120,"elbowF":40,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"kneeB":122,"lean":10,"head":-12,"blade":200},
-      "sweep1": {"shoulderF":70,"elbowF":2,"shoulderB":43,"elbowB":95,"thighF":80,"kneeF":110,"kneeB":122,"lean":34,"head":-24,"blade":82,"wind":0.9},
+      "sweep0": {"shoulderF":120,"elbowF":40,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":10,"head":-12,"blade":200},
+      "sweep1": {"shoulderF":70,"elbowF":2,"shoulderB":43,"elbowB":95,"thighF":80,"kneeF":110,"thighB":36,"kneeB":122,"lean":34,"head":-24,"blade":82,"wind":0.9},
       "ajab": {"shoulderF":80,"elbowF":4,"shoulderB":45,"elbowB":110,"thighF":78,"kneeF":120,"thighB":50,"kneeB":118,"lean":12,"head":-6,"blade":80,"ankleF":30,"ankleB":35,"wind":0.4},
-      "akick": {"shoulderF":60,"elbowF":0,"shoulderB":45,"elbowB":110,"thighF":78,"kneeF":120,"kneeB":118,"lean":20,"head":-10,"blade":45,"ankleF":30,"ankleB":35,"wind":0.8},
+      "akick": {"shoulderF":60,"elbowF":0,"shoulderB":45,"elbowB":110,"thighF":78,"kneeF":120,"thighB":50,"kneeB":118,"lean":20,"head":-10,"blade":45,"ankleF":30,"ankleB":35,"wind":0.8},
       "hk2": {"shoulderF":160,"elbowF":10,"shoulderB":38,"elbowB":95,"thighF":20,"kneeF":10,"thighB":-22,"kneeB":8,"lean":-14,"head":-14,"blade":168,"phase":0,"wind":0.8},
-      "akick0": {"shoulderF":165,"elbowF":20,"shoulderB":45,"elbowB":110,"thighF":78,"kneeF":120,"kneeB":118,"lean":-6,"head":-6,"blade":200,"ankleF":30,"ankleB":35,"wind":0.4},
-      "cr0": {"shoulderF":172,"elbowF":25,"shoulderB":150,"elbowB":45,"thighF":24,"kneeF":28,"kneeB":14,"lean":-10,"head":-6,"blade":205,"phase":0,"glow":true,"wind":0.6},
+      "akick0": {"shoulderF":165,"elbowF":20,"shoulderB":45,"elbowB":110,"thighF":78,"kneeF":120,"thighB":50,"kneeB":118,"lean":-6,"head":-6,"blade":200,"ankleF":30,"ankleB":35,"wind":0.4},
+      "cr0": {"shoulderF":172,"elbowF":25,"shoulderB":150,"elbowB":45,"thighF":24,"kneeF":28,"thighB":-20,"kneeB":14,"lean":-10,"head":-6,"blade":205,"phase":0,"glow":true,"wind":0.6},
       "cr1": {"shoulderF":72,"elbowF":2,"shoulderB":45,"elbowB":40,"thighF":44,"kneeF":36,"thighB":-30,"kneeB":4,"lean":24,"head":-16,"blade":62,"phase":0,"face":"shout","glow":true,"wind":1},
       "cr2": {"shoulderF":60,"elbowF":4,"shoulderB":40,"elbowB":40,"thighF":44,"kneeF":36,"thighB":-30,"kneeB":4,"lean":20,"head":-12,"blade":40,"phase":0,"glow":true},
       "mr0": {"shoulderF":10,"elbowF":10,"shoulderB":43,"elbowB":95,"thighF":72,"kneeF":118,"thighB":36,"kneeB":122,"lean":26,"head":-16,"blade":20,"glow":true},
@@ -468,7 +471,7 @@
         "elbowB": 40,
         "thighF": 35,
         "kneeF": 30,
-        "kneeB": -10,
+        "thighB": -10,
         "kneeB": 70,
         "lean": -6,
         "head": -16,
@@ -579,6 +582,7 @@
       "frames": [
         "crouch*3",
         {"pose":"clk","ticks":4,"hit":{"part":"footF","radius":9}},
+        {"pose":{"elbowF":42,"blade":128,"glow":true,"thighF":80,"head":-12,"ankleF":25,"kneeB":125,"elbowB":95,"lean":10,"shoulderB":43,"shoulderF":57,"kneeF":60,"thighB":38},"ticks":3},
         "crouch*4"
       ]
     },
@@ -587,6 +591,7 @@
       "frames": [
         "jumpTop*2",
         {"pose":"ajab","ticks":6,"hit":{"part":"weapon","radius":12}},
+        {"pose":{"elbowF":54.5,"blade":104,"thighF":78,"head":-6,"ankleF":30,"kneeB":118,"elbowB":110,"wind":0.4,"lean":8,"shoulderB":45,"shoulderF":70,"kneeF":120,"ankleB":35,"thighB":50},"ticks":6},
         "jumpTop*-1"
       ]
     },
@@ -690,18 +695,21 @@
     "needleBeam": {
       "frames": [
         {"pose":{"shoulderF":120,"elbowF":10,"shoulderB":60,"elbowB":50,"thighF":30,"kneeF":30,"thighB":-24,"kneeB":12,"lean":6,"head":-4,"blade":120,"phase":1,"glow":true},"ticks":8},
-        {"pose":{"shoulderF":92,"elbowF":0,"shoulderB":40,"elbowB":60,"thighF":44,"kneeF":34,"thighB":-32,"kneeB":8,"lean":14,"head":-10,"blade":90,"phase":2,"glow":true,"wind":0.8},"ticks":4},
-        {"pose": {"shoulderF":90,"elbowF":0,"shoulderB":38,"elbowB":62,"thighF":46,"kneeF":34,"thighB":-32,"kneeB":8,"lean":16,"head":-10,"blade":88,"phase":2,"glow":true,"wind":1},"ticks": 4,
-        "hit": {"part":"weapon","radius":5}
-      ],
-      "cr2*14",
-      "idle0*5"
+        {"pose":{"shoulderF":92,"elbowF":0,"shoulderB":40,"elbowB":60,"thighF":44,"kneeF":34,"thighB":-30,"kneeB":8,"lean":14,"head":-10,"blade":90,"phase":2,"glow":true,"wind":0.8},"ticks":4},
+        {
+          "pose": {"shoulderF":90,"elbowF":0,"shoulderB":38,"elbowB":62,"thighF":46,"kneeF":34,"thighB":-32,"kneeB":8,"lean":16,"head":-10,"blade":88,"phase":2,"glow":true,"wind":1},
+          "ticks": 4,
+          "hit": {"part":"weapon","radius":5}
+        },
+        "cr2*14",
+        "idle0*5"
+      ]
     },
     "crimsonCannon": {
       "frames": [
         {"pose":{"shoulderF":100,"elbowF":30,"shoulderB":100,"elbowB":30,"thighF":36,"kneeF":44,"thighB":-28,"kneeB":16,"lean":-4,"head":-8,"blade":70,"phase":1,"glow":true,"aura":true},"ticks":8},
         {
-          "pose": {"shoulderF":80,"elbowF":0,"shoulderB":78,"elbowB":0,"thighF":40,"kneeF":52,"thighB":-32,"kneeB":10,"lean":12,"head":-12,"blade":60,"phase":2,"glow":true,"aura":true,"face":"shout","wind":1},
+          "pose": {"shoulderF":80,"elbowF":0,"shoulderB":78,"elbowB":0,"thighF":40,"kneeF":50,"thighB":-32,"kneeB":10,"lean":12,"head":-12,"blade":60,"phase":2,"glow":true,"aura":true,"face":"shout","wind":1},
           "ticks": 4
         },
         {
@@ -883,6 +891,7 @@
       "kind": "super",
       "anim": "super",
       "cost": 1000,
+      "simple": "super",
       "invuln": [1,3],
       "projectile": [
         {
@@ -954,6 +963,7 @@
       "name": "Thousand Frost Iai",
       "input": "~D, DB, B, D, DB, B, y",
       "kind": "super",
+      "anim": "thousand",
       "invuln": [1,2],
       "moves": [{"at":2,"vel":[5,0]},{"at":7,"vel":[1,0]}],
       "hits": [
@@ -996,6 +1006,7 @@
       "name": "Winter Blade Ultimate",
       "input": "~D, DF, F, D, DF, F, x+y",
       "kind": "super",
+      "anim": "thousandUlt",
       "invuln": [1,6],
       "moves": [{"at":2,"vel":[5,0]},{"at":7,"vel":[1,0]}],
       "hits": [
@@ -1107,6 +1118,7 @@
         {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[5,-0.6],"offset":[30,-100],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]},
         {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[5.5,-0.3],"offset":[30,-85],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]},
         {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[6,0],"offset":[30,-70],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]},
+        {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[6,0],"offset":[30,-55],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]},
         {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[5.5,0.3],"offset":[30,-40],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]},
         {"at":3,"anim":"winterFangFx","hitAnim":"winterFangHit","speed":[5,0.6],"offset":[30,-25],"damage":28,"hits":6,"level":"medium","priority":6,"removeTime":80,"knockback":[0,0]}
       ]
@@ -1117,8 +1129,241 @@
       "input": "x",
       "kind": "normal",
       "anim": "chain_jab2",
-      "hits": [{"at":2,"damage":34,"level":"light"}],
-      "cancels": ["strong","launcher","slide"]
+      "hits": [{"at":2,"damage":31,"level":"light","knockback":[-0.6,0]}],
+      "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
+      "cancels": ["frostarc","blinkcut"],
+      "rekka": {"after":["jab"],"window":[1,19],"contact":true}
+    },
+    {
+      "id": "jab3",
+      "name": "Cross Finisher",
+      "input": "x",
+      "kind": "normal",
+      "anim": "chain_jab3",
+      "hits": [{"at":2,"damage":72,"level":"medium","knockback":[-3,0]}],
+      "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
+      "cancels": ["frostarc","blinkcut"],
+      "rekka": {"after":["jab2"],"window":[1,13],"contact":true}
+    },
+    {
+      "id": "lkick2",
+      "name": "Quick Kick",
+      "input": "a",
+      "kind": "normal",
+      "anim": "chain_lkick2",
+      "hits": [{"at":2,"damage":25,"level":"light","knockback":[-0.6,0]}],
+      "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
+      "cancels": ["frostarc","blinkcut"],
+      "rekka": {"after":["lkick"],"window":[1,21],"contact":true}
+    },
+    {
+      "id": "lkick3",
+      "name": "Rising Kick",
+      "input": "a",
+      "kind": "normal",
+      "anim": "chain_lkick3",
+      "hits": [{"at":2,"damage":56,"level":"medium","knockback":[-3.5,0]}],
+      "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
+      "cancels": ["frostarc","blinkcut"],
+      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true}
+    },
+    {
+      "id": "strong2",
+      "name": "Follow-up Strike",
+      "input": "y",
+      "kind": "normal",
+      "anim": "chain_strong2",
+      "hits": [{"at":2,"damage":68,"level":"medium","knockback":[-4,0]}],
+      "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
+      "cancels": ["frostarc","blinkcut"],
+      "rekka": {"after":["strong"],"window":[6,33],"contact":true}
+    },
+    {
+      "id": "cjab2",
+      "name": "Low Rapid Jab",
+      "input": "x",
+      "kind": "normal",
+      "anim": "chain_cjab2",
+      "hits": [{"at":2,"damage":26,"level":"light","knockback":[-0.5,0]}],
+      "when": "crouch",
+      "cancels": [],
+      "rekka": {"after":["cjab"],"window":[1,20],"contact":true}
+    },
+    {
+      "id": "ajab2",
+      "name": "Air Rapid Jab",
+      "input": "x",
+      "kind": "normal",
+      "anim": "chain_ajab2",
+      "hits": [{"at":2,"damage":32,"level":"light","guard":"high"}],
+      "when": "air",
+      "cancels": [],
+      "rekka": {"after":["ajab"],"window":[1,20],"contact":true}
+    },
+    {
+      "id": "string_a",
+      "name": "Iai Quick Draw",
+      "input": "B+x",
+      "kind": "normal",
+      "anim": "stringA",
+      "hits": [{"at":3,"damage":50,"level":"medium","knockback":[-0.5,0],"element":"ice"},{"at":5,"damage":24,"level":"light","element":"ice"}],
+      "moves": [{"at":1,"vel":[2,0]},{"at":5,"vel":[0.5,0]}],
+      "cancels": ["string_b","string_c","frostarc","blinkcut"]
+    },
+    {
+      "id": "string_b",
+      "name": "Frost Draw Chain",
+      "input": "B+a",
+      "kind": "normal",
+      "anim": "stringB",
+      "hits": [
+        {"at":2,"damage":20,"level":"light","knockback":[-0.5,0],"element":"ice"},
+        {"at":4,"damage":26,"level":"light","guard":"low","knockback":[-0.5,0],"element":"ice"},
+        {"at":7,"damage":50,"level":"medium","element":"ice"}
+      ],
+      "moves": [{"at":1,"vel":[1.5,0]},{"at":7,"vel":[0.5,0]}],
+      "cancels": ["string_c","frostarc","blinkcut"]
+    },
+    {
+      "id": "string_c",
+      "name": "Winter Sheath",
+      "input": "B+y",
+      "kind": "normal",
+      "anim": "stringC",
+      "hits": [{"at":3,"damage":96,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22,"element":"ice"}],
+      "moves": [{"at":1,"vel":[2.5,0]},{"at":3,"vel":[0.5,0]}],
+      "cancels": ["frostarc","blinkcut"]
+    },
+    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"strong","hits":[{"at":3,"damage":72,"level":"heavy"}]},
+    {
+      "id": "frostarc_slow",
+      "name": "Frostmoon Arc Slow",
+      "input": "~D, DB, B, y",
+      "kind": "special",
+      "anim": "frostArc",
+      "projectile": {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[3.3,0],"offset":[52,-52],"damage":97,"level":"heavy","element":"ice","hits":2,"removeTime":150,"priority":2}
+    },
+    {
+      "id": "frostarc_low",
+      "name": "Frostmoon Arc Low",
+      "input": "~D, DF, F, a",
+      "kind": "special",
+      "anim": "frostArc",
+      "projectile": {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[8.1,0],"offset":[52,-30],"damage":54,"level":"heavy","element":"ice"}
+    },
+    {
+      "id": "frostarc_barrage",
+      "name": "Frostmoon Arc Barrage",
+      "input": "~D, DF, F, b",
+      "kind": "special",
+      "anim": "frostArc",
+      "projectile": {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[4.8,0],"offset":[52,-52],"damage":36,"level":"medium","element":"ice","hits":3,"removeTime":120}
+    },
+    {
+      "id": "frostarc_high",
+      "name": "Frostmoon Arc High",
+      "input": "~D, DF, B, y",
+      "kind": "special",
+      "anim": "frostArc",
+      "projectile": {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6.6,0],"offset":[52,-80],"damage":61,"level":"heavy","element":"ice"}
     }
-  ]
+  ],
+  "palettes": [
+    {
+      "top": "#2a0e16",
+      "pants": "#1a0a10",
+      "top2": "#e8e0e0",
+      "undershirt": "#120608",
+      "cloth": "#1a1a22",
+      "belt": "#e04a4a",
+      "trim": "#e04a4a",
+      "hair": "#e8e4ee",
+      "eye": "#e04a4a",
+      "boot": "#1a1a22",
+      "energy": "#ff6a6a",
+      "aura": "#ff6a6a",
+      "hilt": "#e04a4a",
+      "accent": "#e04a4a"
+    },
+    {
+      "top": "#2a4a2a",
+      "pants": "#1a2a1a",
+      "top2": "#f2ead8",
+      "undershirt": "#102010",
+      "cloth": "#f2ead8",
+      "belt": "#8ae070",
+      "trim": "#8ae070",
+      "hair": "#4a2a18",
+      "eye": "#4aa83a",
+      "energy": "#a8ff8a",
+      "aura": "#a8ff8a",
+      "hilt": "#2a4a2a",
+      "accent": "#8ae070"
+    }
+  ],
+  "country": "Japão",
+  "stage": "spirit",
+  "passives": {"meterRegen":0.5,"stacks":{"defenceGain":0.03,"damageGain":0.02,"maxStacks":5,"decayTicks":360,"resetOnRound":true,"specials":true,"supers":true}},
+  "abilities": {
+    "fly": {"speed":4,"cost":45,"input":"b+c"},
+    "superSpeed": {"mul":1.7,"cost":60,"input":"a+c"},
+    "forms": [
+      {
+        "id": "kaname_awakened",
+        "name": "Lâmina Espiritual",
+        "cost": 1000,
+        "attack": 1.3,
+        "defense": 1.2,
+        "moves": [
+          {
+            "id": "awk_frostarc",
+            "name": "Triple Frost Arc",
+            "input": "~D, DF, F, a+b",
+            "kind": "special",
+            "anim": "frostArc",
+            "projectile": [
+              {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6,-1.2],"offset":[52,-52],"damage":64.8,"level":"heavy","hits":2,"element":"ice"},
+              {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6,0],"offset":[52,-52],"damage":64.8,"level":"heavy","hits":2,"element":"ice"},
+              {"at":3,"anim":"frostArcFx","hitAnim":"frostHit","speed":[6,1.2],"offset":[52,-52],"damage":64.8,"level":"heavy","hits":2,"element":"ice"}
+            ],
+            "cost": 300
+          }
+        ],
+        "replaceMoves": false
+      },
+      {
+        "id": "kaname_ascended",
+        "name": "Eternal Winter",
+        "cost": 2000,
+        "attack": 1.45,
+        "defense": 1.3,
+        "palette": {"colors":{"aura":"#fff3b0","energy":"#fff3b0"}},
+        "moves": [
+          {
+            "id": "asc_ult_thousand",
+            "name": "Thousand Year Frost",
+            "input": "~D, DF, F, D, DF, F, a+b",
+            "kind": "super",
+            "anim": "thousand",
+            "invuln": [1,6],
+            "moves": [{"at":2,"vel":[5,0]},{"at":7,"vel":[1,0]}],
+            "hits": [
+              {"at":2,"damage":63,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":3,"damage":63,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":4,"damage":63,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":5,"damage":63,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":6,"damage":63,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":7,"damage":63,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":8,"damage":63,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":9,"damage":63,"level":"light","hitstun":22,"knockback":[-1,0]},
+              {"at":10,"damage":285,"level":"heavy","launch":true,"knockback":[-3,-8]}
+            ],
+            "cost": 1000
+          }
+        ],
+        "replaceMoves": false
+      }
+    ]
+  },
+  "speed": 1.08
 }

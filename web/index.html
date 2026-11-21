@@ -65,16 +65,18 @@
     async function load() {
       const url = new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url);
       const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.body || typeof TransformStream !== 'function') return res;
       const encoded = !!res.headers.get('content-encoding');
       const total = encoded ? 0 : +res.headers.get('content-length') || 0;
       if (!total) barBox.classList.add('ind');
       let got = 0;
-      const body = res.body ? res.body.pipeThrough(new TransformStream({ transform(chunk, ctl) { got += chunk.length; if (total) setProgress(Math.min(95, got / total * 100)); ctl.enqueue(chunk); } })) : res.body;
+      const body = res.body.pipeThrough(new TransformStream({ transform(chunk, ctl) { got += chunk.length; if (total) setProgress(Math.min(95, got / total * 100)); ctl.enqueue(chunk); } }));
       msg.textContent = tx.download;
       return new Response(body, { headers: { 'content-type': 'application/wasm' } });
     }
     try {
-      await init({ module_or_path: await load().catch(() => new URL('./ultimate-mugen_bg.wasm?v=__BUILD__', import.meta.url)) });
+      await init({ module_or_path: await load() });
     } catch (e) { msg.textContent = tx.fail + ': ' + (e && e.message || e); throw e; }
     barBox.classList.remove('ind');
     setProgress(100);

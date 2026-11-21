@@ -72,7 +72,7 @@ impl App {
             .get(ch)
             .map(|c| c.name.clone())
             .unwrap_or_else(|| "-".into());
-        self.ui.background();
+        crate::screen_art::ScreenArt::Lab.background(&self.ui);
         self.ui.adapted_header(tr("AJUSTES DE PERSONAGEM", "CHARACTER TUNING"), &name, VW);
         let mut y = ROW_TOP - ROW_H;
         for (i, label) in std::iter::once(("Personagem", "Character"))

@@ -18,7 +18,7 @@ impl App {
         let reveal = (t * 3.0).min(1.0);
         let pulse = 0.72 + 0.28 * (t * 4.5).sin().abs();
 
-        self.ui.background();
+        crate::screen_art::ScreenArt::Tower.background(&self.ui);
         self.ui.motes(36, 1.1);
         self.ui.adapted_header(
             tr3("TORRE DIÁRIA", "DAILY TOWER", "TORRE DIARIA"),

@@ -269,6 +269,7 @@ def trigger_groups(ctrl):
 
 
 def routes(cmd_states, commands):
+    commands = {k.lower(): v for k, v in commands.items()}
     out = []
     for ctrl in cmd_states:
         if ctrl["type"] != "changestate":

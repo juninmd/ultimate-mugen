@@ -4,13 +4,15 @@ use std::collections::HashMap;
 use std::sync::{OnceLock, RwLock};
 
 pub const KIT_FORMAT: &str = "umf-kit/1";
+pub(super) const LIBRARY_MARK: &str = "library";
 const MAX_DEPTH: usize = 8;
 const PERSONAL_KEYS: [&str; 6] = ["name", "boss", "npc", "description", "author", "profile"];
-const BUILT_IN: [&str; 4] = [
+const BUILT_IN: [&str; 5] = [
     include_str!("kits/core.json"),
     include_str!("kits/ki_fighter.json"),
     include_str!("kits/clone_arts.json"),
     include_str!("kits/aerial_rush.json"),
+    include_str!("kits/abilities.json"),
 ];
 
 pub(super) struct Kit {
@@ -115,6 +117,14 @@ pub fn expand(value: Value) -> Result<Value, String> {
     resolve(value, 0)
 }
 
+fn tag_library(kit: &mut Map<String, Value>) {
+    for entry in kit.get_mut("moves").and_then(Value::as_array_mut).into_iter().flatten() {
+        if let Some(fields) = entry.as_object_mut() {
+            fields.insert(LIBRARY_MARK.to_string(), Value::Bool(true));
+        }
+    }
+}
+
 fn needs_expansion(object: &Map<String, Value>) -> bool {
     object.contains_key("extends")
         || object
@@ -148,6 +158,9 @@ fn resolve(value: Value, depth: usize) -> Result<Value, String> {
             kit.retain(|key, _| !PERSONAL_KEYS.contains(&key.as_str()));
         }
         kit.remove("id");
+        if kit.remove("library").and_then(|flag| flag.as_bool()) == Some(true) {
+            tag_library(&mut kit);
+        }
         base = layer(base, kit)?;
     }
     base.insert("format".to_string(), Value::String("umf/2".to_string()));

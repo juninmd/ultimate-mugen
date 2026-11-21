@@ -865,16 +865,44 @@
       "kind": "normal",
       "anim": "jab",
       "hits": [{"at":2,"damage":20,"level":"light","hitstun":10}],
-      "cancels": ["lkick","strong","launcher","overhead","slide","string_a"]
+      "cancels": ["lkick","strong","launcher","overhead","slide","string_a"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"strong","name":"Whirlwind Elbow","input":"y","kind":"normal","anim":"strong","hits":[{"at":3,"damage":46,"level":"medium"}],"cancels":["mirage","chakram","trap","gustdash","overhead"]},
-    {"id":"lkick","name":"Quick Shin","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":24,"level":"light"}],"cancels":["strong","gustdash","launcher","slide"]},
-    {"id":"hkick","name":"Pinwheel Kick","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":56,"level":"medium"}]},
-    {"id":"cjab","name":"Low Knuckle","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":20,"level":"light"}]},
-    {"id":"clk","name":"Ankle Tap","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":24,"level":"light","guard":"low"}]},
-    {"id":"sweep","name":"Leaf Sweep","input":"b","kind":"normal","anim":"sweep","when":"crouch","hits":[{"at":2,"damage":46,"level":"medium","guard":"low","launch":true,"knockback":[-2,-4]}]},
-    {"id":"ajab","name":"Hawk Dive Punch","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":30,"level":"light","guard":"high"}]},
-    {"id":"akick","name":"Gust Drop Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":50,"level":"medium","guard":"high"}]},
+    {
+      "id": "strong",
+      "name": "Whirlwind Elbow",
+      "input": "y",
+      "kind": "normal",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":46,"level":"medium"}],
+      "cancels": ["mirage","chakram","trap","gustdash","overhead"],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {
+      "id": "lkick",
+      "name": "Quick Shin",
+      "input": "a",
+      "kind": "normal",
+      "anim": "lkick",
+      "hits": [{"at":2,"damage":24,"level":"light"}],
+      "cancels": ["strong","gustdash","launcher","slide"],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {"id":"hkick","name":"Pinwheel Kick","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":56,"level":"medium"}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {"id":"cjab","name":"Low Knuckle","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":20,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"clk","name":"Ankle Tap","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":24,"level":"light","guard":"low"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {
+      "id": "sweep",
+      "name": "Leaf Sweep",
+      "input": "b",
+      "kind": "normal",
+      "anim": "sweep",
+      "when": "crouch",
+      "hits": [{"at":2,"damage":46,"level":"medium","guard":"low","launch":true,"knockback":[-2,-4]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {"id":"ajab","name":"Hawk Dive Punch","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":30,"level":"light","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"akick","name":"Gust Drop Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":50,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
       "id": "chakram",
       "name": "Gale Chakram",
@@ -882,7 +910,8 @@
       "kind": "special",
       "anim": "chakram",
       "simple": "sp1",
-      "projectile": {"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[7,0],"offset":[44,-70],"damage":30,"level":"light","hits":3,"removeTime":90,"element":"wind"}
+      "projectile": {"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[7,0],"offset":[44,-70],"damage":30,"level":"light","hits":3,"removeTime":90,"element":"wind"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "cyclone",
@@ -893,7 +922,8 @@
       "simple": "sp2",
       "invuln": [1,2],
       "moves": [{"at":2,"vel":[1.5,-9]},{"at":3,"vel":[-1,null]}],
-      "hits": [{"at":2,"damage":80,"level":"heavy","launch":true,"element":"wind"}]
+      "hits": [{"at":2,"damage":80,"level":"heavy","launch":true,"element":"wind"}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "mirage",
@@ -905,7 +935,8 @@
       "teleport": 3,
       "invuln": [2,3],
       "hits": [{"at":4,"damage":70,"level":"heavy","knockback":[-5,0]}],
-      "cancels": ["shadowslash"]
+      "cancels": ["shadowslash"],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "gustdash",
@@ -915,7 +946,8 @@
       "anim": "gustdash",
       "moves": [{"at":1,"vel":[8,0]},{"at":4,"vel":[2,0]}],
       "hits": [{"at":4,"damage":42,"level":"medium","hitstun":14,"knockback":[-5,-2],"element":"wind","wallBounce":true}],
-      "armor": {"hits":1,"threshold":70}
+      "armor": {"hits":1,"threshold":70},
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "trap",
@@ -923,9 +955,10 @@
       "input": "~D, DF, F, b",
       "kind": "special",
       "anim": "trap",
-      "projectile": {"at":3,"anim":"chakramFx","hitAnim":"windHit","speed":[2.2,0],"offset":[40,-60],"damage":16,"hits":5,"level":"light","removeTime":240}
+      "projectile": {"at":3,"anim":"chakramFx","hitAnim":"windHit","speed":[2.2,0],"offset":[40,-60],"damage":16,"hits":5,"level":"light","removeTime":240},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
-    {"id":"shadowhold","name":"Shadow Hold","input":"y+a","kind":"normal","anim":"shadowhold","throw":{"damage":86,"bind":[30,0],"launch":[-4,-6],"at":1}},
+    {"id":"shadowhold","name":"Shadow Hold","input":"y+a","kind":"normal","anim":"shadowhold","throw":{"damage":86,"bind":[30,0],"launch":[-4,-6],"at":1},"sounds":[{"at":1,"snd":[200,5]}]},
     {
       "id": "tempest",
       "name": "Hundred Mirage Tempest",
@@ -941,7 +974,8 @@
         {"at":4,"anim":"tempestFx","hitAnim":"windHit","speed":[8,2],"offset":[36,-60],"damage":40,"level":"medium","launch":false,"hits":3,"element":"wind"},
         {"at":5,"anim":"tempestFx","hitAnim":"windHit","speed":[8,1.7999999999999998],"offset":[36,-57],"damage":40,"level":"medium","launch":false,"hits":3,"element":"wind"},
         {"at":6,"anim":"tempestFx","hitAnim":"windHit","speed":[8,1.5999999999999999],"offset":[36,-54],"damage":40,"level":"medium","launch":true,"hits":3,"element":"wind"}
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "shadowslash",
@@ -961,7 +995,8 @@
         {"at":7,"damage":46,"level":"light"},
         {"at":8,"damage":46,"level":"light"},
         {"at":9,"damage":60,"level":"heavy","launch":true,"knockback":[-3,-8]}
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "ex_chakram",
@@ -971,7 +1006,8 @@
       "anim": "chakramEx",
       "projectile": [{"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[8.8,0],"offset":[44,-70],"damage":39,"level":"heavy","hits":4,"removeTime":90,"priority":2,"element":"wind"}],
       "cost": 250,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ex_cyclone",
@@ -983,7 +1019,8 @@
       "moves": [{"at":2,"vel":[1.5,-9]},{"at":3,"vel":[-1,null]}],
       "hits": [{"at":2,"damage":104,"level":"heavy","launch":true,"element":"wind"}],
       "cost": 500,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "ult_shadowslash",
@@ -1004,10 +1041,20 @@
         {"at":8,"damage":55.2,"level":"light"},
         {"at":9,"damage":72,"level":"heavy","launch":true,"knockback":[-3,-8]}
       ],
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
-    {"id":"overhead","name":"Scarf Whip","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":53.2,"level":"medium","guard":"high","hitstun":20}]},
-    {"id":"launcher","name":"Updraft Launcher","input":"y","kind":"normal","when":"crouch","anim":"strong","hits":[{"at":3,"damage":58,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22}]},
+    {"id":"overhead","name":"Scarf Whip","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":53.2,"level":"medium","guard":"high","hitstun":20}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {
+      "id": "launcher",
+      "name": "Updraft Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":58,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
     {
       "id": "divekick",
       "name": "Falcon Dive",
@@ -1016,7 +1063,8 @@
       "anim": "akick",
       "when": "air",
       "hits": [{"at":2,"damage":55,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}],
-      "moves": [{"at":1,"vel":[1.8,2.5]}]
+      "moves": [{"at":1,"vel":[1.8,2.5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "slide",
@@ -1026,7 +1074,8 @@
       "anim": "sweep",
       "when": "stand",
       "hits": [{"at":2,"damage":39.1,"level":"medium","guard":"low","launch":true,"knockback":[-2,-5]}],
-      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}]
+      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "gust_cross",
@@ -1036,7 +1085,8 @@
       "anim": "mirage",
       "teleport": 3,
       "hits": [{"at":4,"damage":52,"level":"medium","knockback":[-4,0]}],
-      "rekka": {"after":["gustdash"],"window":[6,20]}
+      "rekka": {"after":["gustdash"],"window":[6,20]},
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "escape_burst",
@@ -1048,7 +1098,8 @@
       "cost": 500,
       "burst": true,
       "invuln": [1,3],
-      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}]
+      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "lunge",
@@ -1057,9 +1108,20 @@
       "kind": "normal",
       "anim": "strong",
       "moves": [{"at":1,"vel":[5.5,0]},{"at":3,"vel":[1.5,0]}],
-      "hits": [{"at":3,"damage":52.9,"level":"heavy","knockback":[-3,-1]}]
+      "hits": [{"at":3,"damage":52.9,"level":"heavy","knockback":[-3,-1]}],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"falcondive","name":"Falcon Dive","input":"F+b","kind":"normal","when":"air","anim":"akick","moves":[{"at":1,"vel":[4.5,2.2]}],"hits":[{"at":2,"damage":55,"level":"medium","guard":"high"}]},
+    {
+      "id": "falcondive",
+      "name": "Falcon Dive",
+      "input": "F+b",
+      "kind": "normal",
+      "when": "air",
+      "anim": "akick",
+      "moves": [{"at":1,"vel":[4.5,2.2]}],
+      "hits": [{"at":2,"damage":55,"level":"medium","guard":"high"}],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
     {
       "id": "jab2",
       "name": "Rapid Jab",
@@ -1069,7 +1131,8 @@
       "hits": [{"at":2,"damage":18,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["chakram","gustdash"],
-      "rekka": {"after":["jab"],"window":[1,17],"contact":true}
+      "rekka": {"after":["jab"],"window":[1,17],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab3",
@@ -1080,7 +1143,8 @@
       "hits": [{"at":2,"damage":41,"level":"medium","knockback":[-3,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["chakram","gustdash"],
-      "rekka": {"after":["jab2"],"window":[1,13],"contact":true}
+      "rekka": {"after":["jab2"],"window":[1,13],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick2",
@@ -1091,7 +1155,8 @@
       "hits": [{"at":2,"damage":22,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["chakram","gustdash"],
-      "rekka": {"after":["lkick"],"window":[1,17],"contact":true}
+      "rekka": {"after":["lkick"],"window":[1,17],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick3",
@@ -1102,7 +1167,8 @@
       "hits": [{"at":2,"damage":42,"level":"medium","knockback":[-3.5,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["chakram","gustdash"],
-      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true}
+      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong2",
@@ -1113,7 +1179,8 @@
       "hits": [{"at":2,"damage":39,"level":"medium","knockback":[-4,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["chakram","gustdash"],
-      "rekka": {"after":["strong"],"window":[2,25],"contact":true}
+      "rekka": {"after":["strong"],"window":[2,25],"contact":true},
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "cjab2",
@@ -1124,7 +1191,8 @@
       "hits": [{"at":2,"damage":18,"level":"light","knockback":[-0.5,0]}],
       "when": "crouch",
       "cancels": [],
-      "rekka": {"after":["cjab"],"window":[1,16],"contact":true}
+      "rekka": {"after":["cjab"],"window":[1,16],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "ajab2",
@@ -1135,7 +1203,8 @@
       "hits": [{"at":2,"damage":27,"level":"light","guard":"high"}],
       "when": "air",
       "cancels": [],
-      "rekka": {"after":["ajab"],"window":[1,18],"contact":true}
+      "rekka": {"after":["ajab"],"window":[1,18],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_a",
@@ -1145,7 +1214,8 @@
       "anim": "stringA",
       "hits": [{"at":2,"damage":16,"level":"light","knockback":[-0.5,0]},{"at":4,"damage":16,"level":"light","knockback":[-0.5,0]},{"at":6,"damage":24,"level":"light"}],
       "moves": [{"at":1,"vel":[2.8,0]},{"at":6,"vel":[0.5,0]}],
-      "cancels": ["string_b","string_c","chakram","gustdash"]
+      "cancels": ["string_b","string_c","chakram","gustdash"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_b",
@@ -1155,7 +1225,8 @@
       "anim": "stringB",
       "hits": [{"at":2,"damage":24,"level":"light","knockback":[-0.5,0]},{"at":4,"damage":28,"level":"light"}],
       "moves": [{"at":1,"vel":[2.2,0]},{"at":4,"vel":[0.5,0]}],
-      "cancels": ["string_c","chakram","gustdash"]
+      "cancels": ["string_c","chakram","gustdash"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_c",
@@ -1165,16 +1236,18 @@
       "anim": "stringC",
       "hits": [{"at":3,"damage":80,"level":"heavy","groundBounce":true,"launch":true,"knockback":[-1,4],"hitstun":22}],
       "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[0.5,0]}],
-      "cancels": ["chakram","gustdash"]
+      "cancels": ["chakram","gustdash"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"hkick","hits":[{"at":3,"damage":50,"level":"medium"}]},
+    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"hkick","hits":[{"at":3,"damage":50,"level":"medium"}],"sounds":[{"at":2,"snd":[200,2]}]},
     {
       "id": "chakram_slow",
       "name": "Gale Chakram Slow",
       "input": "~D, DB, B, y",
       "kind": "special",
       "anim": "chakram",
-      "projectile": {"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[3.85,0],"offset":[44,-70],"damage":41,"level":"heavy","hits":3,"removeTime":150,"element":"wind","priority":2}
+      "projectile": {"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[3.85,0],"offset":[44,-70],"damage":41,"level":"heavy","hits":3,"removeTime":150,"element":"wind","priority":2},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "chakram_low",
@@ -1182,7 +1255,8 @@
       "input": "~D, DB, B, x",
       "kind": "special",
       "anim": "chakram",
-      "projectile": {"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[9.45,0],"offset":[44,-30],"damage":23,"level":"light","hits":3,"removeTime":90,"element":"wind"}
+      "projectile": {"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[9.45,0],"offset":[44,-30],"damage":23,"level":"light","hits":3,"removeTime":90,"element":"wind"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "chakram_barrage",
@@ -1190,7 +1264,8 @@
       "input": "~D, DB, B, b",
       "kind": "special",
       "anim": "chakram",
-      "projectile": {"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[5.6,0],"offset":[44,-70],"damage":15,"level":"medium","hits":3,"removeTime":120,"element":"wind"}
+      "projectile": {"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[5.6,0],"offset":[44,-70],"damage":15,"level":"medium","hits":3,"removeTime":120,"element":"wind"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "chakram_high",
@@ -1198,7 +1273,8 @@
       "input": "~D, DF, B, y",
       "kind": "special",
       "anim": "chakram",
-      "projectile": {"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[7.7,0],"offset":[44,-80],"damage":26,"level":"light","hits":3,"removeTime":90,"element":"wind"}
+      "projectile": {"at":2,"anim":"chakramFx","hitAnim":"windHit","speed":[7.7,0],"offset":[44,-80],"damage":26,"level":"light","hits":3,"removeTime":90,"element":"wind"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
   "palettes": [

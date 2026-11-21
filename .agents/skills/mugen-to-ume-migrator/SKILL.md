@@ -17,13 +17,15 @@ O motor já roda personagens MUGEN legados direto da pasta ou do zip. Migre para
 - **Sprites**: cada `(grupo, índice)` usado vira `sprites/s{g}_{i}.png` sem reamostragem; `meta.json` guarda `axisX/axisY` do SFF e `refHeight` = altura do idle.
 - **Escala 1:1**: `stats.height` = `refHeight` (escala = 100/refHeight × height/100 = 1). Nunca use 100 nem outro valor, senão o lutador fica maior e borrado.
 - **Caixas**: `Clsn1` vira `hit.box` (união das caixas), `Clsn2` vira `hurt` por quadro, e `art.style.boxes = "exact"` desliga o recorte automático pela máscara do sprite.
+- **Golpes e cancelamentos**: lidos do `Statedef -1` (`ChangeState` + `command`). Grupos `stateno = X` + `movecontact`/`movehit` viram `cancels: [...]`. Um grupo `triggerN` com `ctrl = 0` ou que só serve a outro estado é ignorado, e comandos só de segurar (`/x`) também. `statetype` define `when`, e `power >= N` define `cost`. `command` é comparado sem diferenciar caixa (`SPECIAL 1` no `.cmd` e `"special 1"` no gatilho); sem isso o pacote perde quase todos os especiais.
 - **Habilidades automáticas (`mugen_abilities.py`)**: detecta estados de voo (direcionais `holdfwd/back/up/down` → `abilities.fly` com `upAnim/downAnim/fwdAnim/backAnim`), carga de ki (`PowerAdd > 0` com loop → `abilities.charge` com `auraColor/shake/sound`) e teleporte puro (`abilities.teleport` com `at` sincronizado no quadro do `PosAdd` e encerramento em `AnimTime = 0`), removendo-os da lista de ataques para evitar travamentos (`ctrl = 0`).
-- **Golpes e cancelamentos**: lidos do `Statedef -1` (`ChangeState` + `command`). Grupos `stateno = X` + `movecontact`/`movehit` viram `cancels: [...]`.
-- **Cadeias e hit-confirm (`followUp`)**: `ChangeState` incondicional é seguido até 4 estados (`seq<estado>`) sem entrar em estados consumidos de voo/carga. Quando há transição condicional (`MoveHit = 1` / `MoveContact = 1`), o conversor divide em golpe de follow-up e emite `followUp: { to, on: "hit" | "contact" }`, evitando cinemáticas no whiff.
+- **Cadeias e hit-confirm (`followUp`)**: `ChangeState` incondicional é seguido até 4 estados (`seq<estado>`) sem entrar em estados consumidos de voo/carga. Quando há transição condicional (`MoveHit = 1` / `MoveContact = 1`), o conversor divide em golpe de follow-up e emite `followUp: { to, on: "hit" | "contact" }`, evitando cinemáticas no whiff. Os `at` são deslocados.
+- **HitDef/Projectile/VelSet/PosAdd p2dist/PlaySnd** viram `hits`, `projectile`, `moves`, `teleport` e `sounds` no quadro certo (`AnimElem`, ou `Time` convertido em quadro).
 - **FX, cinemática e teleportes multi-etapa**: `Explod` → `explods[]` (incluindo anims e sprites no pacote), `AfterImage` → `afterimage`, `EnvShake` → `shake`, `EnvColor` → `flash`, `SuperPause` → `superPause`, `NotHitBy` → `invuln`, e todos os `PosAdd` deduplicados da sequência → `teleport` único ou lista `[step1, step2]` (ex.: Super Genki Dama sobe `[-200, -100]`, lança e retorna `[125, 100]`). Golpes com teleporte que terminam com `Pos Y < 0` saem automaticamente para o estado aéreo `50` (`ctrl = 1`) em vez de flutuar travados no estado `0`.
+- **Super**: só com `SuperPause`, `poweradd <= -1000` ou custo ≥ 1000. Número de estado ≥ 3000 não basta, porque teleportes vivem lá.
 - **Feixes de Ki (`Projectile`)**: preserva `projhits` (`hits`), `projmisstime` (`missTime`), `hitflag`, `guardDamage`, `pausetime`, `hitSound`, `accel`, `knockback` e `launch`.
 - **Agarrões e Wall Bounce**: `TargetBind` + `TargetLifeAdd` + `ChangeAnim2` viram `throw`; estados de P2 com `BackEdgeBodyDist` ativam `wallBounce: true` no `HitSpec`.
-- **Sons**: o `.snd` é extraído para `sprites/snd_{g}_{i}.wav` (inclusive sons de `abilities.charge` e `abilities.teleport`) e listado em `meta.json.sounds`.
+- **Sons**: o `.snd` é extraído para `sprites/snd_{g}_{i}.wav` (inclusive sons de `abilities.charge` e `abilities.teleport`) e listado em `meta.json.sounds`; o motor carrega esses arquivos e toca `moves[].sounds` (`{at, snd:[g,i], fight?}`) no quadro indicado.
 - **Kits reutilizáveis**: para reduzir JSON em lutadores novos ou editados, use `"extends": ["core", "ki_fighter", "clone_arts", "aerial_rush"]` (`crates/native/src/kits/`).
 - **`--extra` e `--report`**: `--extra` mescla JSON por cima (incluindo `profile`, `intro`, `taunt`, `winQuote`, `rivals`); `--report` imprime o resumo de cobertura de features convertidas.
 
@@ -89,8 +91,10 @@ Pegadinhas aprendidas (estudo de caso Goku SSJ4): nunca siga `ChangeState` para 
 | `HitOverride` / super armor | `armor.hits` |
 | `SuperPause`, power `poweradd` | `kind: "super"` + `cost` |
 | `Pause`/time stop | `timestop` |
+| `Explod` de aura/flash, `EnvShake` | `moves[].explods`, `moves[].shake` |
+| Vários `Projectile` em sequência (rajada de ki) | `projectile.repeat {count, every, offsetStep, speedStep}` |
 | Voo `physics = N` | `abilities.fly` ou `flight: true` |
-| Teleporte (`PosSet` atrás do inimigo) | `abilities.teleport` ou `moves[].teleport` |
+| Teleporte (`PosSet` atrás do inimigo) | `abilities.teleport`, `moves[].teleport` ou `moves[].blink {to, gap}` |
 | `ChangeState` de transformação | `abilities.forms[]` |
 | Raiva, regeneração, buffs por var | `passives` (`rage`, `enrageTime`, `stacks`, `lifeRegen`, `meterRegen`) |
 | `life <= lifemax/2`, `p2life <= ...` no gatilho do comando | `requires.life` / `requires.enemyLife` (`min`/`max` em fração da vida) |
@@ -103,6 +107,10 @@ Lua/ZSS arbitrário, helpers com lógica própria, `Statedef -2/-3` customizados
 ## Regras do repositório
 
 Sem comentários em código; arquivos de código até 250 linhas; PR com título `type: description`; teste de fumaça no navegador (wasm) antes de entregar.
+
+## Biblioteca de habilidades
+
+Antes de copiar controladores para um lutador, veja `docs/wiki/pt-BR/Biblioteca-de-Habilidades.md`: blocos (`blink`, `vfx`, `quake`, `projectile.repeat`) e o kit `abilities` (`"extends": ["abilities"]` + `"use": "ki_barrage"`) deixam o JSON do lutador curto. Padrão repetido em duas conversões vira bloco novo no motor, com teste.
 
 ## Aprender antes de migrar
 

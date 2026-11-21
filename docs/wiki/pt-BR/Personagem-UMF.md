@@ -342,3 +342,7 @@ Um zip (ou pasta `mugen/`) com um `.json` UMF ao lado de uma pasta `sprites/` co
 - `stats.height` igual ao `refHeight` do `meta.json` desenha os sprites 1:1, no tamanho original.
 - `art.style.boxes: "exact"` usa `hit.box` (Clsn1) e o `hurt` de cada quadro (Clsn2) como escritos, sem recorte automático.
 - `moves[].sounds: [{ "at": 3, "snd": [2, 1] }]` toca `sprites/snd_2_1.wav` no quadro 3 (listado em `sounds` do `meta.json`); `"fight": true` toca dos sons de luta do motor.
+
+## Elemento do lutador
+
+O campo opcional `element` aceita `fire`, `ice`, `lightning`, `water`, `earth`, `wind` ou `neutral`. O HUD exibe o elemento ao lado do retrato do lutador, com texto localizado quando o ícone não estiver disponível. O campo não altera o dano nem as regras da luta.

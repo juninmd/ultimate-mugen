@@ -35,7 +35,8 @@ mod survival;
 mod update_banner;
 mod results_stats;
 mod select_category;
-mod select_grid; mod select_cursor;
+mod select_grid;
+mod select_roster; mod select_cursor;
 mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_tags; mod select_view; mod text_fit; mod select_marks; mod select_author;
 mod versus; mod versus_compare; mod vs_epic; mod vs_emblem;
 mod menu_view; mod menu_icons;
@@ -1075,16 +1076,8 @@ impl App {
         let gw = cols as f32 * cw + (cols as f32 - 1.0) * gap;
         let gx = (VW - gw) / 2.0;
         let gy = select_grid::GRID_Y;
-        let gh = self.grid_rows() as f32 * (ch + gap) - gap;
-        crate::menu_art::glass(&self.ui, gx - 12.0, gy - 12.0, gw + 24.0, gh + 24.0, 1.0);
-        self.ui.rect_lines(
-            gx - 12.0,
-            gy - 12.0,
-            gw + 24.0,
-            gh + 24.0,
-            1.0,
-            Color::new(1.0, 1.0, 1.0, 0.14),
-        );
+        let gh = m.div_ceil(cols).saturating_sub(self.sel_row).clamp(1, self.grid_rows()) as f32 * (ch + gap) - gap;
+        self.draw_roster_panel(gx, gy, gw, gh, picking);
         let mut click = None;
         let first = self.sel_row * cols;
         let last = ((self.sel_row + self.grid_rows()) * cols).min(m);
@@ -1102,11 +1095,7 @@ impl App {
                 (e.color, e.mugen, e.broken.get())
             };
             let col = rgb(ecol);
-            self.ui
-                .rect(cx, cy, cw, ch, Color::new(0.06, 0.04, 0.12, 0.92));
-            self.ui.rect(cx, cy, cw, ch * 0.62, alpha(col, 0.5));
-            self.ui
-                .rect(cx, cy + ch * 0.62, cw, ch * 0.38, alpha(col, 0.18));
+            self.draw_roster_tile(cx, cy, cw, ch, col);
             self.draw_tile_force(cx, cy, cw, ch, i);
             let mut got = self.reg.chars[i].peek(1);
             let tile_thumb = if emugen { None } else { self.reg.chars[i].tile_portrait(1) };

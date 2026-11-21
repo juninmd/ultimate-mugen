@@ -32,6 +32,10 @@ class Moves(unittest.TestCase):
         ]
         self.assertEqual(routes(states, cmds), [(1000, "qcf_x", "~D, DF, F, x", "air", 0)])
 
+    def test_command_names_match_without_regard_to_case(self):
+        states = [ctrl("changestate", value="1000", triggerall='command = "special 1"', trigger1="statetype != a")]
+        self.assertEqual(routes(states, {"SPECIAL 1": ["~D, DF, F, a"]}), [(1000, "special 1", "~D, DF, F, a", "stand", 0)])
+
     def test_unconditional_state_chain_becomes_one_sequence(self):
         actions = {300: {"frames": FRAMES, "loop": None}, 301: {"frames": FRAMES, "loop": None}}
         states = {
@@ -80,6 +84,18 @@ class Moves(unittest.TestCase):
         self.assertEqual(move["shake"]["time"], 30)
         self.assertEqual(move["flash"]["under"], True)
         self.assertIn(9990, extra)
+
+    def test_explod_and_envshake_become_fx_and_shake(self):
+        actions = {300: {"frames": FRAMES, "loop": None}, 7000: {"frames": FRAMES, "loop": None}}
+        states = {300: {"def": {"anim": "300"}, "ctrl": [
+            ctrl("explod", anim="7000", pos="10, -40", removetime="20", bindtime="1", scale="1.5, 1.5", trigger1="AnimElem = 1"),
+            ctrl("explod", anim="F0", trigger1="AnimElem = 1"),
+            ctrl("envshake", time="12", ampl="-3", trigger1="AnimElem = 2"),
+        ]}}
+        move, wanted = build_move(300, states, actions, "burst", "x", "stand", 0)
+        self.assertEqual(move["explods"], [{"at": 1, "anim": "a7000", "pos": [10.0, -40.0], "bind": 1, "removeTime": 20, "scale": [1.5, 1.5]}])
+        self.assertEqual(move["shake"], {"at": 2, "time": 12, "ampl": 3.0})
+        self.assertIn(7000, wanted)
 
     def test_multi_step_teleport_keeps_both_warps(self):
         actions = {47800: {"frames": FRAMES, "loop": None}, 7825: {"frames": FRAMES, "loop": None}}

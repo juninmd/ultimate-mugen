@@ -61,7 +61,8 @@ fn hit_problems(m: &Value, anims: &Map<String, Value>, problems: &mut Vec<String
             problems.push(format!("{id}: projectile anim {} missing", text(p, "anim")));
         }
     }
-    if text(m, "kind") != "normal" && !truthy(m.get("hits")) && !truthy(m.get("projectile")) && !truthy(m.get("throw")) {
+    let evasive = truthy(m.get("blink"));
+    if text(m, "kind") != "normal" && !evasive && !truthy(m.get("hits")) && !truthy(m.get("projectile")) && !truthy(m.get("throw")) {
         problems.push(format!("{id}: special has no damage source"));
     }
 }

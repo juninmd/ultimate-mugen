@@ -1,6 +1,7 @@
 {
   "format": "umf/2",
   "id": "volta",
+  "element": "lightning",
   "name": "VX-9 Volta",
   "series": "Protocolo Grade Neon",
   "author": "Ultimate MUGEN",
@@ -721,6 +722,38 @@
     "chain_ajab2": {"frames":["jumpTop*1",{"pose":"ajab","ticks":3,"hit":{"part":"handF","radius":12}},"akick*3","jumpTop*-1"]}
   },
   "moves": [
+    {
+      "id": "volt_blink",
+      "name": "Volt Blink",
+      "input": "B, F, x",
+      "kind": "special",
+      "anim": "strong",
+      "cost": 250,
+      "invuln": [1,2],
+      "blink": {"at":2,"to":"behind","gap":36},
+      "hits": [{"at":3,"damage":48,"level":"heavy","element":"lightning"}],
+      "vfx": [{"at":2,"anim":"boltHit","offset":[0,-50],"time":8}]
+    },
+    {
+      "id": "arc_salvo",
+      "name": "Arc Salvo",
+      "input": "~D, DF, F, a",
+      "kind": "special",
+      "anim": "arcbolt",
+      "cost": 250,
+      "projectile": {
+        "at": 3,
+        "anim": "boltFx",
+        "hitAnim": "boltHit",
+        "element": "lightning",
+        "speed": [6,0],
+        "offset": [44,-78],
+        "damage": 22,
+        "level": "light",
+        "removeTime": 70,
+        "repeat": {"count":5,"every":1,"offsetStep":[0,8],"speedStep":[0.4,0]}
+      }
+    },
     {"id":"jab","name":"Piston Jab","input":"x","kind":"normal","anim":"jab","hits":[{"at":2,"damage":26,"level":"light"}],"cancels":["strong","lkick","launcher","overhead","slide","string_a"]},
     {"id":"strong","name":"Rail Cross","input":"y","kind":"normal","anim":"strong","hits":[{"at":3,"damage":70,"level":"heavy"}],"cancels":["arcbolt","chain","overhead"]},
     {"id":"lkick","name":"Servo Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":30,"level":"light"}]},

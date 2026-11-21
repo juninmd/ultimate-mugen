@@ -423,7 +423,7 @@ impl App {
     }
 
     pub(super) fn market_screen(&mut self) {
-        self.ui.background();
+        crate::screen_art::ScreenArt::Market.background(&self.ui);
         self.ui.adapted_header(mt("MERCADO · REPOSITÓRIOS GITHUB"), "", VW);
         self.ui.text(
             mt("Importe personagens, cenários e músicas de qualquer repositório público do GitHub"),

@@ -38,6 +38,7 @@ Guia para jogadores e criadores que querem customizar a engine: instalar, config
 | [Estudo de screenpacks](Estudo-Screenpacks.md) | Criadores | Diferenciais de screenpacks e o que o motor adotou |
 | [Dissecação de quatro lutadores](Dissecacao-MUGEN.md) | Desenvolvedores | Aizen, Gogeta, Goku SSJ e SSJ4: arquivos, comandos, normais e padrões de golpe |
 | [Recriar um lutador M.U.G.E.N](Recriar-um-Lutador-MUGEN.md) | Criadores | Receita e mapeamento para UMF, com a reconstrução do Captain Marlow Reyes |
+| [Biblioteca de habilidades](Biblioteca-de-Habilidades.md) | Criadores | Blocos reutilizáveis (`blink`, `vfx`, `quake`, `projectile.repeat`, kit `abilities`) e o mapa de lacunas do MUGEN |
 | [Importar sprite atlas](Importacao-Sprite-Atlas.md) | Criadores | Transformar uma folha de sprites em lutador |
 | [Ferramentas de desenvolvimento](Ferramentas-de-Desenvolvimento.md) | Contribuidores | Ferramentas Rust de build e auditoria (`ume-tools`) |
 | [Ferramentas de sprites](Ferramentas-de-Sprites.md) | Criadores | Fatiar folhas, variantes de paleta, caixas de colisão automáticas |

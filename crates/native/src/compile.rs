@@ -168,6 +168,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         }
         if let Some(inv) = m.invuln { cns += &format!("[State {sid}, inv]\ntype = NotHitBy\ntrigger1 = AnimElemNo(0) = [{}, {}]\nvalue = SCA\ntime = 1\n\n", inv[0], inv[1]); }
         if let Some(tp) = m.teleport { cns += &format!("[State {sid}, tp]\ntype = PosAdd\ntrigger1 = AnimElem = {tp}\nx = p2dist x + 40\n\n[State {sid}, tpt]\ntype = Turn\ntrigger1 = AnimElem = {tp}\n\n"); }
+        cns += &super::blocks::states(m, sid, &anim_no);
         for v in &m.moves {
             cns += &format!("[State {sid}, vel]\ntype = VelSet\ntrigger1 = AnimElem = {}\n{}{}\n", v.at, v.vel[0].map(|x| format!("x = {x}\n")).unwrap_or_default(), v.vel[1].map(|y| format!("y = {y}\n")).unwrap_or_default());
         }
@@ -181,7 +182,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
                 extras::hitdef_from_spec(h, sm, &attr, false));
         }
         let mut pid = sid;
-        for p in m.projectile.as_ref().map(|p| p.to_vec()).unwrap_or_default() {
+        for p in super::blocks::projectiles(m, nc.anims.get(&m.anim).map_or(0, |a| a.frames.len())) {
             let pa = anim_no.get(&p.anim).copied().unwrap_or(0);
             let ph2 = p.hit_anim.as_ref().and_then(|h| anim_no.get(h)).map(|h| format!("projhitanim = {h}\nprojremanim = {h}\n")).unwrap_or_default();
             let pattr = format!("{st}, {}P", if m.kind == "super" { "H" } else { "S" });

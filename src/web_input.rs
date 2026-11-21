@@ -16,3 +16,13 @@ pub fn is_touch() -> bool {
 pub fn safe_insets() -> [f32; 4] {
     [0, 1, 2, 3].map(ume_safe_inset)
 }
+
+#[wasm_bindgen::prelude::wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console, js_name = error)]
+    fn console_error(message: &str);
+}
+
+pub fn install_panic_hook() {
+    std::panic::set_hook(Box::new(|info| console_error(&format!("panic: {info}"))));
+}

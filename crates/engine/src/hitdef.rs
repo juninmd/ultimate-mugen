@@ -147,20 +147,17 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
             None
         }
     };
-    let target_palfx = if has("palfx.time", 0) || has("palfx.add", 0) || has("palfx.mul", 0) {
-        Some(PalFx::new(
+    let target_palfx = if has("palfx.time", 0) || has("palfx.add", 0) || has("palfx.mul", 0) || has("palfx.sinadd", 0) || has("palfx.invertall", 0) || has("palfx.color", 0) {
+        let mut p = PalFx::new(
             num("palfx.time", 0.0, 0) as i32,
-            [
-                num("palfx.add", 0.0, 0),
-                num("palfx.add", 0.0, 1),
-                num("palfx.add", 0.0, 2),
-            ],
-            [
-                num("palfx.mul", 256.0, 0),
-                num("palfx.mul", 256.0, 1),
-                num("palfx.mul", 256.0, 2),
-            ],
-        ))
+            [num("palfx.add", 0.0, 0), num("palfx.add", 0.0, 1), num("palfx.add", 0.0, 2)],
+            [num("palfx.mul", 256.0, 0), num("palfx.mul", 256.0, 1), num("palfx.mul", 256.0, 2)],
+        );
+        p.sin_add = [num("palfx.sinadd", 0.0, 0), num("palfx.sinadd", 0.0, 1), num("palfx.sinadd", 0.0, 2)];
+        p.sin_period = num("palfx.sinadd", 0.0, 3) as i32;
+        p.invert_all = num("palfx.invertall", 0.0, 0) != 0.0;
+        p.color = num("palfx.color", 256.0, 0);
+        Some(p)
     } else {
         None
     };
@@ -216,7 +213,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         ground_hit_time: ght,
         guard_hit_time,
         air_hit_time: num("air.hittime", 20.0, 0) as i32,
-        guard_ctrl_time,
+        guard_ctrl_time, air_guard_ctrl_time: if has("airguard.ctrltime", 0) { num("airguard.ctrltime", 0.0, 0) as i32 } else { guard_ctrl_time },
         guard_dist: num("guard.dist", f.c("size.attack.dist", 160.0) as f64, 0),
         yaccel: num("yaccel", f.c("movement.yaccel", 0.44) as f64, 0) * l,
         ground_vel: [gvx, gvy],
@@ -237,7 +234,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         } else {
             [guard_vel * 1.5, gvy / 2.0]
         },
-        p1sprpriority: num("p1sprpriority", 1.0, 0) as i32,
+        p1sprpriority: if has("p1sprpriority", 0) { num("p1sprpriority", 1.0, 0) as i32 } else { num("sprpriority", 1.0, 0) as i32 },
         p2sprpriority: num("p2sprpriority", 0.0, 0) as i32,
         p1facing: num("p1facing", 0.0, 0) as i32,
         p2facing: num("p2facing", 0.0, 0) as i32,
@@ -259,6 +256,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         } else {
             fall
         },
+        force_no_fall: num("forcenofall", 0.0, 0) != 0.0,
         fall_xvel: if has("fall.xvelocity", 0) {
             Some(num("fall.xvelocity", 0.0, 0) * l)
         } else {
@@ -295,14 +293,9 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         chain_id: Some(num("chainid", -1.0, 0) as i32).filter(|v| *v >= 0),
         envshake_time: num("envshake.time", 0.0, 0) as i32,
         num_hits: num("numhits", 1.0, 0) as i32,
-        juggle: f
-            .st_def
-            .states
-            .get(&f.state_no)
-            .and_then(|sd| sd.param("juggle"))
-            .and_then(|p| p.exprs.first())
-            .map(|e| m.ev(i, e) as i32)
-            .unwrap_or(0),
+        juggle: if has("air.juggle", 0) { num("air.juggle", 0.0, 0) as i32 } else {
+            f.st_def.states.get(&f.state_no).and_then(|sd| sd.param("juggle")).and_then(|p| p.exprs.first()).map(|e| m.ev(i, e) as i32).unwrap_or(0)
+        },
         no_chain_id: [0, 1].map(|k| Some(num("nochainid", -1.0, k) as i32).filter(|v| *v >= 0)),
         hit_once: num(
             "hitonce",
@@ -359,6 +352,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
         } else {
             ground_corner_push
         },
+        down_corner_push: if has("down.cornerpush.veloff", 0) { num("down.cornerpush.veloff", 0.0, 0) * l } else { 0.0 },
         target_palfx,
         dizzy_points: num(
             "dizzypoints",

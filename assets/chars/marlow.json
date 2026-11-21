@@ -776,7 +776,8 @@
       "kind": "normal",
       "anim": "jab",
       "hits": [{"at":2,"damage":26,"level":"light","pausetime":[6,7],"hitstun":12}],
-      "cancels": ["strong","lkick","launcher","overhead","slide","string_a"]
+      "cancels": ["strong","lkick","launcher","overhead","slide","string_a"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong",
@@ -785,15 +786,51 @@
       "kind": "normal",
       "anim": "strong",
       "hits": [{"at":3,"damage":84,"level":"heavy","pausetime":[11,12],"hitstun":15}],
-      "cancels": ["riptide","ebb","overhead"]
+      "cancels": ["riptide","ebb","overhead"],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
-    {"id":"lkick","name":"Boarding Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":28,"level":"light","pausetime":[6,7],"hitstun":12}]},
-    {"id":"hkick","name":"Mast Splitter","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":78,"level":"heavy","launch":true,"knockback":[-3,-7],"pausetime":[11,12],"hitstun":15}]},
-    {"id":"cjab","name":"Deck Cut","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":24,"level":"light","pausetime":[6,7],"hitstun":12}]},
-    {"id":"clk","name":"Shin Kick","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":27,"level":"light","guard":"low","pausetime":[6,7],"hitstun":12}]},
-    {"id":"sweep","name":"Keelhaul Sweep","input":"b","kind":"normal","anim":"sweep","when":"crouch","hits":[{"at":2,"damage":60,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5]}]},
-    {"id":"ajab","name":"Rigging Slash","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":34,"level":"light","guard":"high"}]},
-    {"id":"akick","name":"Plunder Dive","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":70,"level":"medium","guard":"high"}]},
+    {"id":"lkick","name":"Boarding Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":28,"level":"light","pausetime":[6,7],"hitstun":12}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {
+      "id": "hkick",
+      "name": "Mast Splitter",
+      "input": "b",
+      "kind": "normal",
+      "anim": "hkick",
+      "hits": [{"at":3,"damage":78,"level":"heavy","launch":true,"knockback":[-3,-7],"pausetime":[11,12],"hitstun":15}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {
+      "id": "cjab",
+      "name": "Deck Cut",
+      "input": "x",
+      "kind": "normal",
+      "anim": "cjab",
+      "when": "crouch",
+      "hits": [{"at":2,"damage":24,"level":"light","pausetime":[6,7],"hitstun":12}],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {
+      "id": "clk",
+      "name": "Shin Kick",
+      "input": "a",
+      "kind": "normal",
+      "anim": "clk",
+      "when": "crouch",
+      "hits": [{"at":2,"damage":27,"level":"light","guard":"low","pausetime":[6,7],"hitstun":12}],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {
+      "id": "sweep",
+      "name": "Keelhaul Sweep",
+      "input": "b",
+      "kind": "normal",
+      "anim": "sweep",
+      "when": "crouch",
+      "hits": [{"at":2,"damage":60,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {"id":"ajab","name":"Rigging Slash","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":34,"level":"light","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"akick","name":"Plunder Dive","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":70,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
       "id": "riptide",
       "name": "Riptide Slash",
@@ -802,7 +839,8 @@
       "anim": "riptide",
       "simple": "sp1",
       "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[4.2,0],"offset":[50,-56],"damage":70,"element":"water"},
-      "cancels": ["spout"]
+      "cancels": ["spout"],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "spout",
@@ -814,7 +852,8 @@
       "invuln": [1,3],
       "moves": [{"at":2,"vel":[2,-8.4]}],
       "hits": [{"at":2,"damage":76,"level":"heavy","launch":true,"hitstun":24,"knockback":[-1,-3],"element":"water"},{"at":3,"damage":42,"level":"heavy","launch":true,"knockback":[-3,-8],"element":"water"}],
-      "cancels": ["maelstrom"]
+      "cancels": ["maelstrom"],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "lunge",
@@ -826,7 +865,8 @@
       "fx": "aura",
       "moves": [{"at":2,"vel":[10,0]},{"at":3,"vel":[6,0]}],
       "hits": [{"at":2,"damage":80,"level":"heavy","knockback":[-6,0],"element":"water"}],
-      "armor": {"hits":1,"threshold":80}
+      "armor": {"hits":1,"threshold":80},
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "maelstrom",
@@ -837,7 +877,8 @@
       "cost": 1000,
       "simple": "super",
       "invuln": [1,3],
-      "projectile": {"at":3,"anim":"maelstromFx","hitAnim":"splash","speed":[3.6,0],"offset":[56,-50],"damage":56,"hits":6,"level":"heavy","launch":true,"priority":6,"removeTime":90,"element":"water"}
+      "projectile": {"at":3,"anim":"maelstromFx","hitAnim":"splash","speed":[3.6,0],"offset":[56,-50],"damage":56,"hits":6,"level":"heavy","launch":true,"priority":6,"removeTime":90,"element":"water"},
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "ebb",
@@ -846,7 +887,8 @@
       "kind": "special",
       "anim": "ebb",
       "projectile": {"at":2,"anim":"riptideFx","hitAnim":"splash","speed":[1.4,0],"offset":[40,-40],"damage":22,"hits":3,"level":"light","removeTime":200,"element":"water"},
-      "cancels": ["lunge"]
+      "cancels": ["lunge"],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "riposte",
@@ -855,9 +897,10 @@
       "kind": "special",
       "anim": "riposte",
       "parry": {"window":[2,6]},
-      "hits": [{"at":7,"damage":90,"level":"heavy","launch":true,"knockback":[-4,-4],"element":"water"}]
+      "hits": [{"at":7,"damage":90,"level":"heavy","launch":true,"knockback":[-4,-4],"element":"water"}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
-    {"id":"keelhaul","name":"Keelhaul","input":"y+b","kind":"normal","when":"stand","anim":"keelhaul","throw":{"damage":95,"bind":[32,0],"launch":[-4,-6],"at":1}},
+    {"id":"keelhaul","name":"Keelhaul","input":"y+b","kind":"normal","when":"stand","anim":"keelhaul","throw":{"damage":95,"bind":[32,0],"launch":[-4,-6],"at":1},"sounds":[{"at":1,"snd":[200,5]}]},
     {
       "id": "kraken",
       "name": "Kraken Anchor",
@@ -873,7 +916,8 @@
         {"at":5,"damage":60,"level":"light","knockback":[0,0],"element":"water"},
         {"at":6,"damage":60,"level":"light","knockback":[0,0],"element":"water"},
         {"at":7,"damage":110,"level":"heavy","launch":true,"knockback":[-5,-6],"element":"water"}
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "ex_riptide",
@@ -884,7 +928,8 @@
       "projectile": [{"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[5.2,0],"offset":[50,-56],"damage":91,"hits":2,"priority":2,"level":"heavy","element":"water"}],
       "cancels": ["spout"],
       "cost": 250,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ex_spout",
@@ -900,7 +945,8 @@
       ],
       "cancels": ["maelstrom"],
       "cost": 500,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ult_kraken",
@@ -918,10 +964,28 @@
         {"at":6,"damage":72,"level":"light","knockback":[0,0],"element":"water"},
         {"at":7,"damage":132,"level":"heavy","launch":true,"knockback":[-5,-6],"element":"water"}
       ],
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
-    {"id":"overhead","name":"Cutlass Chop","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":74.1,"level":"medium","launch":true,"knockback":[-3,-7],"guard":"high","hitstun":20}]},
-    {"id":"launcher","name":"Anchor Launcher","input":"y","kind":"normal","when":"crouch","anim":"strong","hits":[{"at":3,"damage":58,"level":"heavy","launch":true,"hitstun":22,"knockback":[-1,-6]}]},
+    {
+      "id": "overhead",
+      "name": "Cutlass Chop",
+      "input": "x+b",
+      "kind": "normal",
+      "anim": "hkick",
+      "hits": [{"at":3,"damage":74.1,"level":"medium","launch":true,"knockback":[-3,-7],"guard":"high","hitstun":20}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {
+      "id": "launcher",
+      "name": "Anchor Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":58,"level":"heavy","launch":true,"hitstun":22,"knockback":[-1,-6]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
     {
       "id": "divekick",
       "name": "Crow Nest Drop",
@@ -930,7 +994,8 @@
       "anim": "akick",
       "when": "air",
       "hits": [{"at":2,"damage":77,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}],
-      "moves": [{"at":1,"vel":[1.8,2.5]}]
+      "moves": [{"at":1,"vel":[1.8,2.5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "slide",
@@ -940,7 +1005,8 @@
       "anim": "sweep",
       "when": "stand",
       "hits": [{"at":2,"damage":51,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5]}],
-      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}]
+      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "escape_burst",
@@ -952,7 +1018,8 @@
       "cost": 500,
       "burst": true,
       "invuln": [1,3],
-      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}]
+      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "jab2",
@@ -963,7 +1030,8 @@
       "hits": [{"at":2,"damage":23,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["riptide","spout"],
-      "rekka": {"after":["jab"],"window":[1,20],"contact":true}
+      "rekka": {"after":["jab"],"window":[1,20],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab3",
@@ -974,7 +1042,8 @@
       "hits": [{"at":2,"damage":76,"level":"medium","knockback":[-3,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["riptide","spout"],
-      "rekka": {"after":["jab2"],"window":[1,13],"contact":true}
+      "rekka": {"after":["jab2"],"window":[1,13],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick2",
@@ -985,7 +1054,8 @@
       "hits": [{"at":2,"damage":25,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["riptide","spout"],
-      "rekka": {"after":["lkick"],"window":[1,20],"contact":true}
+      "rekka": {"after":["lkick"],"window":[1,20],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick3",
@@ -996,7 +1066,8 @@
       "hits": [{"at":2,"damage":59,"level":"medium","knockback":[-3.5,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["riptide","spout"],
-      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true}
+      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong2",
@@ -1007,7 +1078,8 @@
       "hits": [{"at":2,"damage":71,"level":"medium","knockback":[-4,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["riptide","spout"],
-      "rekka": {"after":["strong"],"window":[5,32],"contact":true}
+      "rekka": {"after":["strong"],"window":[5,32],"contact":true},
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "cjab2",
@@ -1018,7 +1090,8 @@
       "hits": [{"at":2,"damage":22,"level":"light","knockback":[-0.5,0]}],
       "when": "crouch",
       "cancels": [],
-      "rekka": {"after":["cjab"],"window":[1,19],"contact":true}
+      "rekka": {"after":["cjab"],"window":[1,19],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "ajab2",
@@ -1029,7 +1102,8 @@
       "hits": [{"at":2,"damage":31,"level":"light","guard":"high"}],
       "when": "air",
       "cancels": [],
-      "rekka": {"after":["ajab"],"window":[1,20],"contact":true}
+      "rekka": {"after":["ajab"],"window":[1,20],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_a",
@@ -1039,7 +1113,8 @@
       "anim": "stringA",
       "hits": [{"at":3,"damage":54,"level":"medium","knockback":[-0.5,0],"element":"water"},{"at":5,"damage":26,"level":"light","element":"water"}],
       "moves": [{"at":1,"vel":[2,0]},{"at":5,"vel":[0.5,0]}],
-      "cancels": ["string_b","string_c","riptide","spout"]
+      "cancels": ["string_b","string_c","riptide","spout"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_b",
@@ -1049,7 +1124,8 @@
       "anim": "stringB",
       "hits": [{"at":2,"damage":22,"level":"light","knockback":[-0.5,0],"element":"water"},{"at":5,"damage":58,"level":"medium","element":"water"}],
       "moves": [{"at":1,"vel":[1.5,0]},{"at":5,"vel":[0.5,0]}],
-      "cancels": ["string_c","riptide","spout"]
+      "cancels": ["string_c","riptide","spout"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_c",
@@ -1059,16 +1135,18 @@
       "anim": "stringC",
       "hits": [{"at":3,"damage":98,"level":"heavy","wallBounce":true,"knockback":[-5,-2],"hitstun":22,"element":"water"}],
       "moves": [{"at":1,"vel":[2.5,0]},{"at":3,"vel":[0.5,0]}],
-      "cancels": ["riptide","spout"]
+      "cancels": ["riptide","spout"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"strong","hits":[{"at":3,"damage":76,"level":"heavy"}]},
+    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"strong","hits":[{"at":3,"damage":76,"level":"heavy"}],"sounds":[{"at":2,"snd":[200,2]}]},
     {
       "id": "riptide_slow",
       "name": "Riptide Slash Slow",
       "input": "~D, DB, B, y",
       "kind": "special",
       "anim": "riptide",
-      "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[2.31,0],"offset":[50,-56],"damage":95,"element":"water","hits":2,"level":"heavy","removeTime":150,"priority":2}
+      "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[2.31,0],"offset":[50,-56],"damage":95,"element":"water","hits":2,"level":"heavy","removeTime":150,"priority":2},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "riptide_low",
@@ -1076,7 +1154,8 @@
       "input": "~D, DF, F, y",
       "kind": "special",
       "anim": "riptide",
-      "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[5.67,0],"offset":[50,-30],"damage":53,"element":"water"}
+      "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[5.67,0],"offset":[50,-30],"damage":53,"element":"water"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "riptide_barrage",
@@ -1084,7 +1163,8 @@
       "input": "~D, DF, F, b",
       "kind": "special",
       "anim": "riptide",
-      "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[3.36,0],"offset":[50,-56],"damage":35,"element":"water","hits":3,"level":"medium","removeTime":120}
+      "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[3.36,0],"offset":[50,-56],"damage":35,"element":"water","hits":3,"level":"medium","removeTime":120},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "riptide_high",
@@ -1092,7 +1172,8 @@
       "input": "~D, DB, B, b",
       "kind": "special",
       "anim": "riptide",
-      "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[4.62,0],"offset":[50,-80],"damage":60,"element":"water"}
+      "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[4.62,0],"offset":[50,-80],"damage":60,"element":"water"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "tide_step",
@@ -1104,7 +1185,8 @@
       "invuln": [1,3],
       "cost": 200,
       "hits": [{"at":3,"damage":58,"level":"heavy","knockback":[-4,0],"element":"water","pausetime":[11,12]}],
-      "cancels": ["riptide","spout"]
+      "cancels": ["riptide","spout"],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "flurry",
@@ -1121,7 +1203,8 @@
         {"at":6,"damage":22,"level":"light","knockback":[-0.3,0],"pausetime":[4,5]},
         {"at":7,"damage":46,"level":"heavy","launch":true,"knockback":[-4,-6],"pausetime":[11,12]}
       ],
-      "cancels": ["spout"]
+      "cancels": ["spout"],
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "broadside",
@@ -1129,7 +1212,8 @@
       "input": "~B, F, x",
       "kind": "special",
       "anim": "broadside",
-      "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[6.2,0],"offset":[50,-56],"damage":52,"hits":3,"level":"heavy","priority":2,"removeTime":90,"element":"water"}
+      "projectile": {"at":3,"anim":"riptideFx","hitAnim":"splash","speed":[6.2,0],"offset":[50,-56],"damage":52,"hits":3,"level":"heavy","priority":2,"removeTime":90,"element":"water"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
   "country": "Espanha",

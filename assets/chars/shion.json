@@ -934,7 +934,16 @@
     "chain_ajab2": {"frames":["jumpTop*1",{"pose":"ajab","ticks":3,"hit":{"part":"weapon","radius":12}},"akick*3","jumpTop*-1"]}
   },
   "moves": [
-    {"id":"jab","name":"Hilt Cut","input":"x","kind":"normal","anim":"jab","hits":[{"at":2,"damage":28,"level":"light"}],"cancels":["cjab","strong","launcher","overhead","slide","string_a"]},
+    {
+      "id": "jab",
+      "name": "Hilt Cut",
+      "input": "x",
+      "kind": "normal",
+      "anim": "jab",
+      "hits": [{"at":2,"damage":28,"level":"light"}],
+      "cancels": ["cjab","strong","launcher","overhead","slide","string_a"],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
     {
       "id": "strong",
       "name": "Moonfall Cleave",
@@ -942,12 +951,23 @@
       "kind": "normal",
       "anim": "strong",
       "hits": [{"at":3,"damage":96,"level":"heavy","hitstop":14}],
-      "cancels": ["crescent","shadowstep","silentparry","yoke","overhead"]
+      "cancels": ["crescent","shadowstep","silentparry","yoke","overhead"],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
-    {"id":"lkick","name":"Push Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":34,"level":"light"}]},
-    {"id":"hkick","name":"Rising Edge","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":86,"level":"heavy","launch":true,"knockback":[-2,-6]}]},
-    {"id":"cjab","name":"Low Slice","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":24,"level":"light"}],"cancels":["sweep","strong"]},
-    {"id":"clk","name":"Ankle Kick","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":30,"level":"light","guard":"low"}]},
+    {"id":"lkick","name":"Push Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":34,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"hkick","name":"Rising Edge","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":86,"level":"heavy","launch":true,"knockback":[-2,-6]}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {
+      "id": "cjab",
+      "name": "Low Slice",
+      "input": "x",
+      "kind": "normal",
+      "anim": "cjab",
+      "when": "crouch",
+      "hits": [{"at":2,"damage":24,"level":"light"}],
+      "cancels": ["sweep","strong"],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {"id":"clk","name":"Ankle Kick","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":30,"level":"light","guard":"low"}],"sounds":[{"at":1,"snd":[200,0]}]},
     {
       "id": "sweep",
       "name": "Reaper Sweep",
@@ -956,10 +976,11 @@
       "anim": "sweep",
       "when": "crouch",
       "hits": [{"at":2,"damage":70,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-4]}],
-      "cancels": ["cleave","moonrise"]
+      "cancels": ["cleave","moonrise"],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
-    {"id":"ajab","name":"Sky Slice","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":39,"level":"light","guard":"high"}]},
-    {"id":"akick","name":"Eclipse Drop","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":58,"level":"medium","guard":"high"}]},
+    {"id":"ajab","name":"Sky Slice","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":39,"level":"light","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"akick","name":"Eclipse Drop","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":58,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
       "id": "crescent",
       "name": "Crescent Reaver",
@@ -967,7 +988,8 @@
       "kind": "special",
       "anim": "crescent",
       "simple": "sp1",
-      "projectile": {"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[5,0],"offset":[52,-52],"damage":40,"level":"heavy","hits":2,"element":"ice"}
+      "projectile": {"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[5,0],"offset":[52,-52],"damage":40,"level":"heavy","hits":2,"element":"ice"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "moonrise",
@@ -978,7 +1000,8 @@
       "simple": "sp2",
       "invuln": [1,3],
       "moves": [{"at":2,"vel":[2,-8.4]}],
-      "hits": [{"at":2,"damage":66,"level":"heavy","launch":true,"element":"ice"},{"at":3,"damage":36,"level":"heavy","element":"ice"}]
+      "hits": [{"at":2,"damage":66,"level":"heavy","launch":true,"element":"ice"},{"at":3,"damage":36,"level":"heavy","element":"ice"}],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "shadowstep",
@@ -989,7 +1012,8 @@
       "simple": "sp3",
       "fx": "aura",
       "moves": [{"at":1,"vel":[4.5,0]}],
-      "hits": [{"at":2,"damage":74,"level":"heavy","knockback":[-5,0],"guard":"low"}]
+      "hits": [{"at":2,"damage":74,"level":"heavy","knockback":[-5,0],"guard":"low"}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "requiem",
@@ -1000,7 +1024,8 @@
       "cost": 1000,
       "simple": "super",
       "invuln": [1,3],
-      "projectile": {"at":3,"anim":"requiemFx","hitAnim":"requiemHit","speed":[4.5,0],"offset":[56,-52],"damage":60,"hits":7,"level":"heavy","launch":true,"priority":6,"removeTime":70,"element":"ice"}
+      "projectile": {"at":3,"anim":"requiemFx","hitAnim":"requiemHit","speed":[4.5,0],"offset":[56,-52],"damage":60,"hits":7,"level":"heavy","launch":true,"priority":6,"removeTime":70,"element":"ice"},
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "cleave",
@@ -1011,10 +1036,20 @@
       "armor": {"hits":1,"threshold":80},
       "moves": [{"at":2,"vel":[3.5,0]}],
       "hits": [{"at":3,"damage":80,"level":"heavy","knockback":[-5,-2],"element":"ice","wallBounce":true}],
-      "cancels": ["eclipse"]
+      "cancels": ["eclipse"],
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
-    {"id":"silentparry","name":"Silent Parry","input":"D, D, b","kind":"special","anim":"silentParry","parry":{"window":[2,5]},"hits":[{"at":3,"damage":64,"level":"heavy"}]},
-    {"id":"yoke","name":"Moon Yoke","input":"x+a","kind":"normal","when":"stand","anim":"moonYoke","throw":{"damage":100,"at":2,"bind":[30,0],"launch":[-3,-6]}},
+    {
+      "id": "silentparry",
+      "name": "Silent Parry",
+      "input": "D, D, b",
+      "kind": "special",
+      "anim": "silentParry",
+      "parry": {"window":[2,5]},
+      "hits": [{"at":3,"damage":64,"level":"heavy"}],
+      "sounds": [{"at":1,"snd":[200,5]}]
+    },
+    {"id":"yoke","name":"Moon Yoke","input":"x+a","kind":"normal","when":"stand","anim":"moonYoke","throw":{"damage":100,"at":2,"bind":[30,0],"launch":[-3,-6]},"sounds":[{"at":1,"snd":[200,5]}]},
     {
       "id": "eclipse",
       "name": "Eclipse Cleave",
@@ -1030,7 +1065,8 @@
         {"at":4,"damage":60,"level":"heavy","knockback":[0.5,0],"element":"ice"},
         {"at":5,"damage":60,"level":"heavy","knockback":[0.5,0],"element":"ice"},
         {"at":6,"damage":60,"level":"heavy","launch":true,"knockback":[-3,-6],"element":"ice"}
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "ex_crescent",
@@ -1040,7 +1076,8 @@
       "anim": "crescentEx",
       "projectile": [{"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[6.2,0],"offset":[52,-52],"damage":52,"level":"heavy","hits":3,"priority":2,"element":"ice"}],
       "cost": 250,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ex_moonrise",
@@ -1052,7 +1089,8 @@
       "moves": [{"at":2,"vel":[2,-8.4]}],
       "hits": [{"at":2,"damage":85.8,"level":"heavy","launch":true,"element":"ice"},{"at":3,"damage":46.8,"level":"heavy","element":"ice"}],
       "cost": 500,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ult_eclipse",
@@ -1071,7 +1109,8 @@
         {"at":6,"damage":72,"level":"heavy","launch":true,"knockback":[-3,-6],"element":"ice"}
       ],
       "invuln": [1,7],
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "overhead",
@@ -1079,9 +1118,19 @@
       "input": "x+b",
       "kind": "normal",
       "anim": "hkick",
-      "hits": [{"at":3,"damage":81.7,"level":"medium","launch":true,"knockback":[-2,-6],"guard":"high","hitstun":20}]
+      "hits": [{"at":3,"damage":81.7,"level":"medium","launch":true,"knockback":[-2,-6],"guard":"high","hitstun":20}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
-    {"id":"launcher","name":"Waxing Launcher","input":"y","kind":"normal","when":"crouch","anim":"strong","hits":[{"at":3,"damage":58,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22}]},
+    {
+      "id": "launcher",
+      "name": "Waxing Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":58,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
     {
       "id": "divekick",
       "name": "Lunar Plunge",
@@ -1090,7 +1139,8 @@
       "anim": "akick",
       "when": "air",
       "hits": [{"at":2,"damage":63.8,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}],
-      "moves": [{"at":1,"vel":[1.8,2.5]}]
+      "moves": [{"at":1,"vel":[1.8,2.5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "slide",
@@ -1100,7 +1150,8 @@
       "anim": "sweep",
       "when": "stand",
       "hits": [{"at":2,"damage":59.5,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5]}],
-      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}]
+      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "escape_burst",
@@ -1112,7 +1163,8 @@
       "cost": 500,
       "burst": true,
       "invuln": [1,3],
-      "hits": [{"at":3,"damage":30,"level":"heavy","hitstop":12,"launch":true,"knockback":[-6,-4]}]
+      "hits": [{"at":3,"damage":30,"level":"heavy","hitstop":12,"launch":true,"knockback":[-6,-4]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "reckless",
@@ -1123,7 +1175,8 @@
       "armor": {"hits":2,"threshold":140},
       "moves": [{"at":2,"vel":[2.5,0]}],
       "hits": [{"at":3,"damage":108,"level":"heavy","launch":true,"knockback":[-3,-6]}],
-      "cost": 200
+      "cost": 200,
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "jab2",
@@ -1134,7 +1187,8 @@
       "hits": [{"at":2,"damage":25,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["crescent","cleave"],
-      "rekka": {"after":["jab"],"window":[1,22],"contact":true}
+      "rekka": {"after":["jab"],"window":[1,22],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab3",
@@ -1145,7 +1199,8 @@
       "hits": [{"at":2,"damage":86,"level":"medium","hitstop":14,"knockback":[-3,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["crescent","cleave"],
-      "rekka": {"after":["jab2"],"window":[1,13],"contact":true}
+      "rekka": {"after":["jab2"],"window":[1,13],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick2",
@@ -1156,7 +1211,8 @@
       "hits": [{"at":2,"damage":31,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["crescent","cleave"],
-      "rekka": {"after":["lkick"],"window":[1,21],"contact":true}
+      "rekka": {"after":["lkick"],"window":[1,21],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick3",
@@ -1167,7 +1223,8 @@
       "hits": [{"at":2,"damage":65,"level":"medium","knockback":[-3.5,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["crescent","cleave"],
-      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true}
+      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong2",
@@ -1178,7 +1235,8 @@
       "hits": [{"at":2,"damage":82,"level":"medium","hitstop":14,"knockback":[-4,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["crescent","cleave"],
-      "rekka": {"after":["strong"],"window":[9,41],"contact":true}
+      "rekka": {"after":["strong"],"window":[9,41],"contact":true},
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "cjab2",
@@ -1189,7 +1247,8 @@
       "hits": [{"at":2,"damage":22,"level":"light","knockback":[-0.5,0]}],
       "when": "crouch",
       "cancels": [],
-      "rekka": {"after":["cjab"],"window":[1,22],"contact":true}
+      "rekka": {"after":["cjab"],"window":[1,22],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "ajab2",
@@ -1200,7 +1259,8 @@
       "hits": [{"at":2,"damage":35,"level":"light","guard":"high"}],
       "when": "air",
       "cancels": [],
-      "rekka": {"after":["ajab"],"window":[1,21],"contact":true}
+      "rekka": {"after":["ajab"],"window":[1,21],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_a",
@@ -1210,7 +1270,8 @@
       "anim": "stringA",
       "hits": [{"at":3,"damage":64,"level":"medium"}],
       "moves": [{"at":1,"vel":[1.5,0]},{"at":3,"vel":[0.5,0]}],
-      "cancels": ["string_b","string_c","crescent","cleave"]
+      "cancels": ["string_b","string_c","crescent","cleave"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_b",
@@ -1220,7 +1281,8 @@
       "anim": "stringB",
       "hits": [{"at":2,"damage":24,"level":"light","knockback":[-0.5,0]},{"at":5,"damage":66,"level":"medium"}],
       "moves": [{"at":1,"vel":[1.2,0]},{"at":5,"vel":[0.5,0]}],
-      "cancels": ["string_c","crescent","cleave"]
+      "cancels": ["string_c","crescent","cleave"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_c",
@@ -1230,16 +1292,18 @@
       "anim": "stringC",
       "hits": [{"at":3,"damage":108,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22}],
       "moves": [{"at":1,"vel":[2,0]},{"at":3,"vel":[0.5,0]}],
-      "cancels": ["crescent","cleave"]
+      "cancels": ["crescent","cleave"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"strong","hits":[{"at":3,"damage":86,"level":"heavy","hitstop":14}]},
+    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"strong","hits":[{"at":3,"damage":86,"level":"heavy","hitstop":14}],"sounds":[{"at":2,"snd":[200,2]}]},
     {
       "id": "crescent_slow",
       "name": "Crescent Reaver Slow",
       "input": "~D, DB, B, y",
       "kind": "special",
       "anim": "crescent",
-      "projectile": {"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[2.75,0],"offset":[52,-52],"damage":54,"level":"heavy","hits":2,"element":"ice","removeTime":150,"priority":2}
+      "projectile": {"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[2.75,0],"offset":[52,-52],"damage":54,"level":"heavy","hits":2,"element":"ice","removeTime":150,"priority":2},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "crescent_low",
@@ -1247,7 +1311,8 @@
       "input": "~D, DB, B, x",
       "kind": "special",
       "anim": "crescent",
-      "projectile": {"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[6.75,0],"offset":[52,-30],"damage":30,"level":"heavy","hits":2,"element":"ice"}
+      "projectile": {"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[6.75,0],"offset":[52,-30],"damage":30,"level":"heavy","hits":2,"element":"ice"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "crescent_barrage",
@@ -1255,7 +1320,8 @@
       "input": "~D, DF, F, b",
       "kind": "special",
       "anim": "crescent",
-      "projectile": {"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[4,0],"offset":[52,-52],"damage":20,"level":"medium","hits":3,"element":"ice","removeTime":120}
+      "projectile": {"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[4,0],"offset":[52,-52],"damage":20,"level":"medium","hits":3,"element":"ice","removeTime":120},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "crescent_high",
@@ -1263,7 +1329,8 @@
       "input": "~D, DF, B, y",
       "kind": "special",
       "anim": "crescent",
-      "projectile": {"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[5.5,0],"offset":[52,-80],"damage":34,"level":"heavy","hits":2,"element":"ice"}
+      "projectile": {"at":3,"anim":"crescentFx","hitAnim":"crescentHit","speed":[5.5,0],"offset":[52,-80],"damage":34,"level":"heavy","hits":2,"element":"ice"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
   "country": "Japão",

@@ -1,6 +1,6 @@
 use super::Vfx;
 use ume_engine::matchs::Match;
-use ume_engine::native::throw::is_victim_state;
+use ume_native::throw::is_victim_state;
 
 const GRAB_COLOR: [f32; 3] = [1.0, 0.55, 0.2];
 const COMBO_COLOR: [f32; 3] = [1.0, 0.85, 0.3];

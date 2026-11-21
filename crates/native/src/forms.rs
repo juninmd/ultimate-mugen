@@ -1,7 +1,7 @@
 use super::ability_spec::FormSpec;
 use super::lookup::find_native;
 use super::types::{NativeChar, NativeMove};
-use crate::chardef::FormInfo;
+use ume_engine::chardef::FormInfo;
 use serde_json::Value;
 use std::sync::Arc;
 

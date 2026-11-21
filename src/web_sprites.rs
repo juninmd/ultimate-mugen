@@ -59,7 +59,7 @@ pub fn prefetch_menu(ids: Vec<String>) {
         wasm_bindgen_futures::spawn_local(async move {
             let promise = ume_fetch_asset(&format!("assets/chars/sprites/{id}.menu.pack"));
             let stored = match js_sys::futures::JsFuture::from(promise).await {
-                Ok(data) => ume_engine::native::insert_menu_sprite_pack(
+                Ok(data) => ume_native::insert_menu_sprite_pack(
                     &id,
                     &js_sys::Uint8Array::new(&data).to_vec(),
                 ),
@@ -85,7 +85,7 @@ pub fn ready(entry: &crate::registry::CharEntry) -> Result<bool, String> {
     }
     let character = pack_name(entry);
     let character = character.as_str();
-    if ume_engine::native::has_full_sprite_pack(character) {
+    if ume_native::has_full_sprite_pack(character) {
         return Ok(true);
     }
     let request = REQUESTS.with(|requests| requests.borrow().get(character).cloned());
@@ -113,7 +113,7 @@ pub async fn prepare(character: String) -> Result<bool, String> {
             format!("sprite pack: invalid character id {character:?}"),
         );
     }
-    if ume_engine::native::has_full_sprite_pack(&character) {
+    if ume_native::has_full_sprite_pack(&character) {
         return Ok(false);
     }
     let request = REQUESTS.with(|requests| requests.borrow().get(&character).cloned());
@@ -138,7 +138,7 @@ pub async fn prepare(character: String) -> Result<bool, String> {
         }
     };
     let bytes = js_sys::Uint8Array::new(&data).to_vec();
-    match ume_engine::native::insert_sprite_pack(&character, &bytes) {
+    match ume_native::insert_sprite_pack(&character, &bytes) {
         Ok(()) => {
             REQUESTS.with(|requests| {
                 requests.borrow_mut().remove(&character);

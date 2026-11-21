@@ -84,4 +84,4 @@ effective defence = defenceMul * superDefenceMul * (1 + defenceGain * stacks)
 
 ## Code
 
-`crates/engine/src/passives.rs` (rules, state, `Fighter::effective_attack`), `crates/engine/src/native/passive_spec.rs` (JSON), `src/hud/passive_meter.rs`, `src/passive_fx.rs`, `crates/engine/src/passive_time.rs`. Tests: `crates/engine/tests/passives.rs`, `crates/engine/tests/passive_time.rs`. Screenshots: `UME_TOUR=passives ultimate-mugen --shots <dir>`.
+`crates/engine/src/passives.rs` (rules, state, `Fighter::effective_attack`), `crates/native/src/passive_spec.rs` (JSON), `src/hud/passive_meter.rs`, `src/passive_fx.rs`, `crates/engine/src/passive_time.rs`. Tests: `crates/engine/tests/passives.rs`, `crates/engine/tests/passive_time.rs`. Screenshots: `UME_TOUR=passives ultimate-mugen --shots <dir>`.

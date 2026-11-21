@@ -4,7 +4,7 @@ use support::*;
 use ume_engine::chardef::CharDef;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const AIR_STATE_OFFSET: i32 = 20000;
 const GAPS: [f32; 8] = [24.0, 44.0, 64.0, 90.0, 120.0, 160.0, 220.0, 300.0];

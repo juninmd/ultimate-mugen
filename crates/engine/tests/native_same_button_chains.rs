@@ -4,7 +4,7 @@ use support::*;
 use ume_engine::chardef::CharDef;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const GAPS: [f32; 8] = [14.0, 24.0, 34.0, 44.0, 54.0, 64.0, 76.0, 90.0];
 

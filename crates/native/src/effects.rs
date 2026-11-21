@@ -3,7 +3,7 @@
 #[path = "effects/dragon.rs"] mod dragon;
 use super::types::Box4;
 type B4 = [f64; 4];
-use crate::chardef::ImageData;
+use ume_engine::chardef::ImageData;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::rc::Rc;

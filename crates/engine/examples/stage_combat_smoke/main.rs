@@ -9,7 +9,7 @@ use ume_engine::ai::Ai;
 use ume_engine::common::common_def;
 use ume_engine::input::InputSource;
 use ume_engine::matchs::{CameraParams, Event, Match, StageInfo};
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 use ume_engine::stage_bg::BgState;
 use ume_formats::stage::{load_stage, MugenStage};
 use ume_formats::vfs::{add_dir, Vfs};

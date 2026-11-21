@@ -3,21 +3,27 @@ use crate::commands::CommandDef;
 use crate::common::{common_def, flat_stage};
 use crate::fighter::Fighter;
 use crate::matchs::Match;
-use crate::native::{compile_native, NativeChar};
+use crate::chardef::{CharDef, MoveInfo};
+use crate::commands::parse_command;
 use std::sync::Arc;
 
+fn listed(name: &str, cost: f32) -> MoveInfo {
+    MoveInfo { name: name.into(), input: String::new(), command: name.into(), cost, drain: false, forms: 0, state: 0 }
+}
+
 fn arena() -> Match {
-    let nc: NativeChar =
-        serde_json::from_str(&std::fs::read_to_string("../../assets/chars/kaito.json").unwrap())
-            .unwrap();
-    let def = Arc::new(compile_native(&nc, 1, true));
+    let mut cd = CharDef::empty("tactician");
+    cd.commands.push(parse_command("m_typhoon", "~D, DF, F, x", 1, 1));
+    cd.commands.push(parse_command("m_ex_gale", "~D, DF, F, y", 1, 1));
+    cd.commands.push(parse_command("m_rise", "~F, D, DF, x", 1, 1));
+    cd.commands.push(parse_command("m_gale", "~D, DF, F, z", 1, 1));
+    cd.movelist.push(listed("m_typhoon", 1000.0));
+    cd.movelist.push(listed("m_ex_gale", 300.0));
+    let def = Arc::new(cd);
     let mut m = Match::new(common_def(), None, flat_stage());
     m.add_player(def.clone(), 0, 0, 1);
     m.add_player(def, 1, 0, 2);
-    m.start_round();
-    while m.round_state != 2 {
-        m.tick(&[0, 0]);
-    }
+    m.round_state = 2;
     m
 }
 

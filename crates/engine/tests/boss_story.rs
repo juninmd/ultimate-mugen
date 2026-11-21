@@ -4,7 +4,7 @@ use ume_engine::chardef::CharDef;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::input::InputSource;
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 fn load_native(id: &str) -> Arc<CharDef> {
     let p = format!("{}/../../assets/chars/{id}.json", env!("CARGO_MANIFEST_DIR"));

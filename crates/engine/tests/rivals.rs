@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use ume_engine::chardef::CharDef;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 use ume_engine::rivals::{ATTACK_MAX, ATTACK_MIN};
 
 fn def(id: &str) -> Arc<CharDef> {

@@ -1,4 +1,4 @@
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 #[test]
 fn every_special_and_super_points_at_a_real_state() {

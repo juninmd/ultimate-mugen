@@ -1,6 +1,6 @@
 use super::compile::compile_native_with;
 use super::types::NativeChar;
-use crate::chardef::CharDef;
+use ume_engine::chardef::CharDef;
 
 const MENU_ANIMS: [i32; 2] = [0, 181];
 

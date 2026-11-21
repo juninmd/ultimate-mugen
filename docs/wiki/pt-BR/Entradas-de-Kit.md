@@ -21,7 +21,7 @@ Um golpe só começa a partir de outro declarando `rekka` no JSON do personagem:
 {"id":"gust_cross","name":"Gust Crossup","input":"b","kind":"special","anim":"mirage","rekka":{"after":["gustdash"],"window":[6,20]}}
 ```
 
-`after` lista os ids dos golpes de origem, `window` é o intervalo de tempo de estado (ticks dentro do golpe de origem, a pausa de acerto não conta) em que o comando é aceito, e `contact: true` exige também que a origem acerte ou seja defendida. Sem isso a continuação funciona também no erro. A continuação nunca começa do neutro, então pode reaproveitar um botão simples já usado por um normal. Código: `crates/engine/src/native/rekka.rs`.
+`after` lista os ids dos golpes de origem, `window` é o intervalo de tempo de estado (ticks dentro do golpe de origem, a pausa de acerto não conta) em que o comando é aceito, e `contact: true` exige também que a origem acerte ou seja defendida. Sem isso a continuação funciona também no erro. A continuação nunca começa do neutro, então pode reaproveitar um botão simples já usado por um normal. Código: `crates/native/src/rekka.rs`.
 
 Em uso: Lian (Flowing Silk Kicks, depois `y`), Kaito (Storm Rush, depois `x`) e Jin (Gust Dash, depois `b`).
 

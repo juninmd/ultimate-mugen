@@ -109,8 +109,8 @@ fn rgb(hex: &str) -> Option<[f32; 3]> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::native::pixel::try_load;
-    use crate::native::types::{NativeChar, NativeFrame};
+    use crate::pixel::try_load;
+    use crate::types::{NativeChar, NativeFrame};
 
     #[test]
     fn awakening_hair_is_confined_to_the_authored_region() {
@@ -152,7 +152,7 @@ mod tests {
 
     #[test]
     fn palette_swap_keeps_the_silhouette_and_replaces_the_gi() {
-        let fighter: NativeChar = serde_json::from_str(include_str!("../../../../assets/chars/kaito.json")).unwrap();
+        let fighter: NativeChar = serde_json::from_str(include_str!("../../../assets/chars/kaito.json")).unwrap();
         let frame: NativeFrame = serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
         let base = try_load(&fighter, &frame, None).unwrap().image.unwrap();
         let swapped = try_load(&fighter, &frame, Some(&fighter.palettes[0])).unwrap().image.unwrap();
@@ -168,7 +168,7 @@ mod tests {
 
     #[test]
     fn palette_swap_without_overrides_decodes_the_same_pixels() {
-        let fighter: NativeChar = serde_json::from_str(include_str!("../../../../assets/chars/kaito.json")).unwrap();
+        let fighter: NativeChar = serde_json::from_str(include_str!("../../../assets/chars/kaito.json")).unwrap();
         let frame: NativeFrame = serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
         let plain = try_load(&fighter, &frame, None).unwrap().image.unwrap();
         let empty = serde_json::json!({});

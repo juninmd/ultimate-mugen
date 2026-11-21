@@ -3,7 +3,7 @@
 mod support;
 use std::sync::Arc;
 use support::*;
-use ume_engine::native::{compile_native, register_native, NativeChar};
+use ume_native::{compile_native, register_native, NativeChar};
 
 fn suzume() -> NativeChar {
     let raw = include_str!("../../../assets/chars/suzume.json");

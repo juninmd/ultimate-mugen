@@ -2,7 +2,7 @@ use std::sync::Arc;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::input::k::*;
 use ume_engine::matchs::{Event, Match};
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const IDS: [&str; 6] = ["kaito", "shion", "akio", "suzume", "bruno", "sylene"];
 

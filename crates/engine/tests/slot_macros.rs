@@ -1,5 +1,5 @@
 use ume_engine::commands::input_macro;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 fn chars() -> Vec<(String, NativeChar)> {
     let dir = format!("{}/../../assets/chars", env!("CARGO_MANIFEST_DIR"));

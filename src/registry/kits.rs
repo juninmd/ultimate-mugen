@@ -19,10 +19,10 @@ pub(super) fn register_dir(dir: &Path) {
         let Ok(text) = std::fs::read_to_string(&file) else {
             continue;
         };
-        if !ume_engine::native::is_kit_text(&text) {
+        if !ume_native::is_kit_text(&text) {
             continue;
         }
-        if let Err(error) = ume_engine::native::register_kit(&text) {
+        if let Err(error) = ume_native::register_kit(&text) {
             eprintln!("umf kit {}: {error}", file.display());
         }
     }

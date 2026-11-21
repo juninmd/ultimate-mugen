@@ -10,7 +10,7 @@ pub(super) fn level(l: Option<&str>) -> Lv {
 }
 pub(super) fn guardflag(g: Option<&str>) -> &'static str { match g.unwrap_or("mid") { "high" => "HA", "low" => "L", "unblockable" => "", _ => "MA" } }
 
-pub(in crate::native) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_proj: bool) -> String {
+pub(in crate) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_proj: bool) -> String {
     let damage = h.damage * sm;
     let gd = h.guard_damage.map(|g| g * sm).unwrap_or((damage / 8.0).round());
     let lv = level(h.level.as_deref());
@@ -18,7 +18,7 @@ pub(in crate::native) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_p
     let launch = h.launch.unwrap_or(false);
     let air = h.air_knockback.unwrap_or([kb[0] * 0.8, if launch { -6.0 } else { -3.5 }]);
     let stop = h.hitstop.unwrap_or(lv.stop);
-    let stun = h.hitstun.unwrap_or(lv.stun) + crate::native::element::extra_stun(h.element.as_deref(), h.stun);
+    let stun = h.hitstun.unwrap_or(lv.stun) + crate::element::extra_stun(h.element.as_deref(), h.stun);
     let spark = h.spark.unwrap_or(match h.level.as_deref() { Some("heavy") => 2, Some("light") => 0, _ => 1 });
     let prio = h.priority.unwrap_or(4);
     let hflag = h.hitflag.as_deref().unwrap_or("MAF");
@@ -35,14 +35,14 @@ pub(in crate::native) fn hitdef_from_spec(h: &HitSpec, sm: f32, attr: &str, is_p
         launch as i32, (launch || h.level.as_deref() == Some("heavy")) as i32,
         (damage * 1.2).round(), (damage * 0.5).round(), (damage * 0.6).round(), (damage * 0.3).round());
     if let Some(t) = h.shake { s += &format!("envshake.time = {t}\n"); }
-    s += &crate::native::element::hitdef_lines(h.element.as_deref(), h.stun, h.shake);
+    s += &crate::element::hitdef_lines(h.element.as_deref(), h.stun, h.shake);
     if let Some(cp) = h.cornerpush { s += &format!("ground.cornerpush.veloff = {cp}\n"); }
     if h.ground_bounce.unwrap_or(false) { s += "fall.damage = 15\nfall.envshake.time = 8\ndown.bounce = 1\n"; }
     if h.wall_bounce.unwrap_or(false) { s += "fall.damage = 15\nfall.envshake.time = 8\nwall.bounce = 1\n"; }
     s
 }
 
-pub(in crate::native) fn hitdef_projectile(damage: f32, lvl: Option<&str>, kb: Option<[f32; 2]>, launch: bool, attr: &str, element: Option<&str>, stun: Option<i32>) -> String {
+pub(in crate) fn hitdef_projectile(damage: f32, lvl: Option<&str>, kb: Option<[f32; 2]>, launch: bool, attr: &str, element: Option<&str>, stun: Option<i32>) -> String {
     let spec = HitSpec {
         at: 0, damage, guard_damage: None, level: lvl.map(|s| s.into()), guard: None, knockback: kb, air_knockback: None,
         launch: Some(launch), hitstop: None, hitstun: None, spark: None, shake: None, priority: Some(4), hitflag: None,
@@ -102,10 +102,10 @@ pub(super) fn awakening_palette(nc: &NativeChar, palette: Option<&Value>) -> Opt
 
 pub(super) fn insert_voices(d: &mut CharDef, nc: &NativeChar) {
     if nc.id != "kaito" { return; }
-    d.sounds.insert((1000, 0), include_bytes!("../../../../assets/chars/voices/kaito/dragon.wav").to_vec());
-    d.sounds.insert((1000, 1), include_bytes!("../../../../assets/chars/voices/kaito/rush.wav").to_vec());
-    d.sounds.insert((1000, 2), include_bytes!("../../../../assets/chars/voices/kaito/gale.wav").to_vec());
-    d.sounds.insert((1000, 3), include_bytes!("../../../../assets/chars/voices/kaito/awake.wav").to_vec());
+    d.sounds.insert((1000, 0), include_bytes!("../../../assets/chars/voices/kaito/dragon.wav").to_vec());
+    d.sounds.insert((1000, 1), include_bytes!("../../../assets/chars/voices/kaito/rush.wav").to_vec());
+    d.sounds.insert((1000, 2), include_bytes!("../../../assets/chars/voices/kaito/gale.wav").to_vec());
+    d.sounds.insert((1000, 3), include_bytes!("../../../assets/chars/voices/kaito/awake.wav").to_vec());
 }
 
 pub(super) fn anim_numbers(nc: &NativeChar) -> std::collections::HashMap<String, i32> {
@@ -132,18 +132,18 @@ pub(super) fn append_exotic(
     nc: &NativeChar,
     anim_no: &std::collections::HashMap<String, i32>,
     move_states: &std::collections::HashMap<String, i32>,
-    commands: &mut Vec<crate::commands::CommandDef>,
-    movelist: &mut Vec<crate::chardef::MoveInfo>,
+    commands: &mut Vec<ume_engine::commands::CommandDef>,
+    movelist: &mut Vec<ume_engine::chardef::MoveInfo>,
     minus1: &mut String,
     minus2: &mut String,
     cns: &mut String,
 ) {
-    let comp = crate::native::companions::compile(nc.helpers.as_ref(), anim_no, move_states, &nc.moves);
+    let comp = crate::companions::compile(nc.helpers.as_ref(), anim_no, move_states, &nc.moves);
     commands.extend(comp.commands);
     *minus1 += &comp.minus1;
     *minus2 += &comp.minus2;
     *cns += &comp.states;
     movelist.extend(comp.movelist);
-    crate::native::scripts::script_commands(nc.scripts.as_ref(), commands, movelist);
-    *cns += &crate::native::boss_ui::boss_ui_cns(nc.boss_rules.as_ref());
+    crate::scripts::script_commands(nc.scripts.as_ref(), commands, movelist);
+    *cns += &crate::boss_ui::boss_ui_cns(nc.boss_rules.as_ref());
 }

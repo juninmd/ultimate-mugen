@@ -2,7 +2,7 @@ use std::sync::Arc;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::input::k::*;
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar, STANDARD_ANIMS};
+use ume_native::{compile_native, NativeChar, STANDARD_ANIMS};
 
 const IDS: [&str; 15] = ["kaito", "shion", "akio", "suzume", "bruno", "sylene", "volta", "lian", "garan", "marlow", "kaname", "jin", "daichi", "valdric", "haruki"];
 fn load(id: &str) -> NativeChar {
@@ -61,7 +61,7 @@ fn smoke(p1: &str, p2: &str) {
 
 #[test]
 fn preview_is_light_and_art_res_scales() {
-    use ume_engine::native::{compile_native_preview, effects::{art_res, set_art_res}};
+    use ume_native::{compile_native_preview, effects::{art_res, set_art_res}};
     let nc = load("kaito");
     let full = compile_native(&nc, 1, true);
     let pv = compile_native_preview(&nc, 1);

@@ -5,7 +5,7 @@ use ume_engine::chardef::CharDef;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::input::k;
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const JAB_STATE: i32 = 200;
 const AIR_HIT_STATE: i32 = 5030;

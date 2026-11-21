@@ -2,7 +2,7 @@ use super::stages::STAGES;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
-use ume_engine::native::LocalText;
+use ume_native::LocalText;
 
 const BUNDLED_TEXT: &str = include_str!("../../assets/story/epilogues.json");
 pub const FILE: &str = "story-epilogues.json";

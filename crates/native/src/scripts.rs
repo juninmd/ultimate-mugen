@@ -1,8 +1,8 @@
 use super::types::OneOrMany;
-use crate::chardef::{MoveInfo, StateDef};
-use crate::cns::parse_states;
-use crate::commands::{parse_command, CommandDef};
-use crate::zss::parse_state_file;
+use ume_engine::chardef::{MoveInfo, StateDef};
+use ume_engine::cns::parse_states;
+use ume_engine::commands::{parse_command, CommandDef};
+use ume_engine::zss::parse_state_file;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

@@ -1,7 +1,7 @@
 use crate::registry::{CharEntry, Src};
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
-use ume_engine::native::CharProfile;
+use ume_native::CharProfile;
 
 #[cfg(test)]
 mod tests;

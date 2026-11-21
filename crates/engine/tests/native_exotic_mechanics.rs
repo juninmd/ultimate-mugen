@@ -4,7 +4,7 @@ use std::sync::Arc;
 use support::*;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::PauseState;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 fn base_with(patch: serde_json::Value) -> NativeChar {
     let mut v: serde_json::Value =

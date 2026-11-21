@@ -4,7 +4,7 @@ use support::*;
 use ume_engine::chardef::CharDef;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar, PassiveSpec, RageSpec, StackSpec};
+use ume_native::{compile_native, NativeChar, PassiveSpec, RageSpec, StackSpec};
 use ume_engine::passives::{RageRule, TOTAL_ATTACK_CAP};
 
 fn native(id: &str) -> NativeChar {

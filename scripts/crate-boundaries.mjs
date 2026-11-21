@@ -7,7 +7,8 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 export const FORBIDDEN = {
   formats: ['ume-engine', 'ume-render', 'ume-shell', 'ume-netplay', 'ume-market', 'wgpu', 'winit', 'ggrs'],
-  engine: ['ume-render', 'ume-shell', 'ume-netplay', 'ume-market', 'wgpu', 'winit', 'ggrs'],
+  engine: ['ume-native', 'ume-render', 'ume-shell', 'ume-netplay', 'ume-market', 'wgpu', 'winit', 'ggrs'],
+  native: ['ume-render', 'ume-shell', 'ume-netplay', 'ume-market', 'wgpu', 'winit', 'ggrs'],
   render: ['ume-engine', 'ume-shell', 'ume-netplay', 'ume-market', 'winit', 'ggrs'],
   shell: ['ume-engine', 'ume-netplay', 'ume-market', 'ggrs'],
   netplay: ['ume-render', 'ume-shell', 'ume-market', 'wgpu', 'winit'],

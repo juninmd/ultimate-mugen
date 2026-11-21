@@ -4,7 +4,7 @@ use ume_engine::chardef::CharDef;
 use ume_engine::input::InputSource;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const NPCS: [(&str, &str); 5] = [
     ("npc_brute", "bruno"),
@@ -42,7 +42,7 @@ fn every_npc_has_its_own_sprites_and_palettes() {
     for (id, base) in NPCS {
         let (npc, origin) = (load(id), load(base));
         assert_eq!(npc.sprite_dir(), id, "{id} must use its own sprite set");
-        let report = ume_engine::native::audit_native_sprite_frames(&npc);
+        let report = ume_native::audit_native_sprite_frames(&npc);
         assert_eq!(report["avatar"], true, "{id} must have its own portrait");
         for anim in report["animations"].as_array().unwrap() {
             for frame in anim["frames"].as_array().unwrap() {

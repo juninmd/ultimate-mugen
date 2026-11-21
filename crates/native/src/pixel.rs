@@ -2,7 +2,7 @@ use super::pack::read_sprite;
 use super::recolor::Recolor;
 use super::effects::{art_res, FrameArt};
 use super::types::{NativeChar, NativeFrame};
-use crate::chardef::ImageData;
+use ume_engine::chardef::ImageData;
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 
@@ -197,7 +197,7 @@ mod tests {
 
     #[test]
     fn declared_height_scales_body_and_hurtboxes_together() {
-        let mut fighter: NativeChar = serde_json::from_str(include_str!("../../../../assets/chars/bruno.json")).unwrap();
+        let mut fighter: NativeChar = serde_json::from_str(include_str!("../../../assets/chars/bruno.json")).unwrap();
         let frame: NativeFrame = serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
         fighter.stats.height = Some(100.0);
         let baseline = try_load(&fighter, &frame, None).unwrap();
@@ -211,7 +211,7 @@ mod tests {
 
     #[test]
     fn effect_frames_do_not_fall_back_to_fighter_idle() {
-        let fighter: NativeChar = serde_json::from_str(include_str!("../../../../assets/chars/bruno.json")).unwrap();
+        let fighter: NativeChar = serde_json::from_str(include_str!("../../../assets/chars/bruno.json")).unwrap();
         let frame: NativeFrame = serde_json::from_value(serde_json::json!({"effect": {"kind": "orb"}, "ticks": 1})).unwrap();
         assert!(try_load(&fighter, &frame, None).is_none());
     }

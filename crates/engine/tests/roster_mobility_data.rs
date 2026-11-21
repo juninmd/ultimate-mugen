@@ -1,4 +1,4 @@
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const DOUBLE_AIR_DASHERS: [&str; 2] = ["suzume", "jin"];
 const BOUNCERS: [(&str, &str); 9] = [

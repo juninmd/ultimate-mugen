@@ -2,7 +2,7 @@ use super::pack::read_sprite;
 use super::pixel::sprite_roots;
 use super::recolor::Recolor;
 use super::types::NativeChar;
-use crate::chardef::{ImageData, Sprite};
+use ume_engine::chardef::{ImageData, Sprite};
 use serde_json::Value;
 
 const MAX_PORTRAIT_EDGE: u32 = 256;

@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const STANDING_UNITS: f32 = 96.0;
 const MAX_NORMAL_REACH: f32 = 1.6;

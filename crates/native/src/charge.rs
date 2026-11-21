@@ -1,10 +1,10 @@
 use super::abilities::AbilityCode;
 use super::charge_ramp::gain_expression;
-use crate::chardef::MoveInfo;
-use crate::commands::parse_command;
+use ume_engine::chardef::MoveInfo;
+use ume_engine::commands::parse_command;
 use std::collections::HashMap;
 
-pub(crate) use crate::rules::{CHARGE_COMMAND, CHARGE_STATE};
+pub(crate) use ume_engine::rules::{CHARGE_COMMAND, CHARGE_STATE};
 const MINIMUM_CHARGE_TICKS: i32 = 6;
 const POWER_UP_ANIM: i32 = 196;
 

@@ -41,7 +41,7 @@ The file name states the responsibility: `collision.rs`, `hitdef.rs`, `palette.r
 A feature is a folder; the file next to it is its public face.
 
 ```
-crates/engine/src/native/
+crates/native/src/
   mod.rs            facade: declarations and re-exports only
   compile.rs        UMF JSON -> states
   pack.rs           sprite atlas packing
@@ -96,7 +96,7 @@ These files hold the most unrelated responsibilities and are the current source 
 
 | File | Lines | Suggested split |
 |---|---|---|
-| `crates/engine/src/native/effects.rs` | 1711 | `effects/canvas.rs`, `effects/raster.rs`, `effects/kinds.rs` |
+| `crates/native/src/effects.rs` | 1711 | `effects/canvas.rs`, `effects/raster.rs`, `effects/kinds.rs` |
 | `crates/engine/src/matchs.rs` | 1751 | `matchs/round.rs`, `matchs/collision.rs`, `matchs/camera.rs`, `matchs/tick.rs` |
 | `src/app.rs` | 2238 | Nine screens already live in `src/app/`; next are `select` (830 lines, split by grid, side panel and input) and `load_step_inner` |
 | `src/stages.rs` | 1069 | `stages/load.rs`, `stages/layers.rs`, `stages/motion.rs` |

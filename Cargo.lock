@@ -3001,6 +3001,7 @@ dependencies = [
  "ume-engine",
  "ume-formats",
  "ume-market",
+ "ume-native",
  "ume-netplay",
  "ume-shell",
  "ureq",
@@ -3028,6 +3029,7 @@ dependencies = [
  "ume-charforge",
  "ume-engine",
  "ume-formats",
+ "ume-native",
 ]
 
 [[package]]
@@ -3038,6 +3040,7 @@ dependencies = [
  "serde_json",
  "tiny-skia",
  "ume-formats",
+ "ume-native",
 ]
 
 [[package]]
@@ -3060,6 +3063,17 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "ume-native"
+version = "0.2.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tiny-skia",
+ "ume-engine",
+ "ume-formats",
 ]
 
 [[package]]

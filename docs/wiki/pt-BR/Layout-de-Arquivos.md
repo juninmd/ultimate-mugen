@@ -41,7 +41,7 @@ O nome do arquivo declara a responsabilidade: `collision.rs`, `hitdef.rs`, `pale
 Uma feature é uma pasta; o arquivo ao lado é a face pública dela.
 
 ```
-crates/engine/src/native/
+crates/native/src/
   mod.rs            fachada: declarações e reexports, só isso
   compile.rs        JSON UMF -> estados
   pack.rs           empacotamento de atlas
@@ -96,7 +96,7 @@ Estes arquivos concentram as responsabilidades mais independentes e são a orige
 
 | Arquivo | Linhas | Divisão sugerida |
 |---|---|---|
-| `crates/engine/src/native/effects.rs` | 1711 | `effects/canvas.rs`, `effects/raster.rs`, `effects/kinds.rs` |
+| `crates/native/src/effects.rs` | 1711 | `effects/canvas.rs`, `effects/raster.rs`, `effects/kinds.rs` |
 | `crates/engine/src/matchs.rs` | 1751 | `matchs/round.rs`, `matchs/collision.rs`, `matchs/camera.rs`, `matchs/tick.rs` |
 | `src/app.rs` | 2238 | Nove telas já vivem em `src/app/`; as próximas são `select` (830 linhas, dividir em grade, painel lateral e entrada) e `load_step_inner` |
 | `src/stages.rs` | 1069 | `stages/load.rs`, `stages/layers.rs`, `stages/motion.rs` |

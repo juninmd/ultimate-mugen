@@ -1,6 +1,6 @@
 # Criar personagem UMF
 
-UMF (*Ultimate Mugen Format*) descreve um lutador inteiro em **um arquivo JSON**. O compilador (`crates/engine/src/native/compile.rs`) gera comandos, estados, HitDefs, projéteis, super pause, cancelamentos e hitboxes. O resultado roda na mesma máquina de estados dos personagens M.U.G.E.N.
+UMF (*Ultimate Mugen Format*) descreve um lutador inteiro em **um arquivo JSON**. O compilador (`crates/native/src/compile.rs`) gera comandos, estados, HitDefs, projéteis, super pause, cancelamentos e hitboxes. O resultado roda na mesma máquina de estados dos personagens M.U.G.E.N.
 
 ## Passo a passo
 
@@ -62,7 +62,7 @@ Um lutador não precisa ser escrito do zero. Três recursos eliminam o copiar e 
 | `"use": "gale"` | dentro de um golpe | Clona outro golpe (de um pai ou de um golpe anterior do mesmo arquivo) com um novo `id`, mudando só os campos escritos. |
 | arquivo de kit | `"format": "umf-kit/1"` | Definição parcial (golpes, animações, poses, atributos) com um `id`, compartilhada por vários lutadores. O kit `core` já vem embutido com `launcher` e `escape_burst`. |
 
-Regras da mescla, aplicadas por `crates/engine/src/native/kit.rs` antes do parser UMF normal:
+Regras da mescla, aplicadas por `crates/native/src/kit.rs` antes do parser UMF normal:
 
 - Objetos (`stats`, `art`, `abilities`, `passives`) mesclam chave a chave: `"stats": { "life": 1080 }` muda um número só. Uma animação em `anims` substitui a herdada por inteiro. O valor `null` remove a chave herdada.
 - `moves` casam por `id`. Uma entrada com parte dos campos mantém o resto (`{ "id": "gale", "name": "Crimson Gale" }`), um texto simples (`"launcher"`) lista um golpe herdado sem mudanças e `{ "id": "slide", "remove": true }` remove um. Os golpes listados vêm primeiro, na sua ordem; os herdados não citados vêm depois.

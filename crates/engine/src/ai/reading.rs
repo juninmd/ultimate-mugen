@@ -106,8 +106,7 @@ mod tests {
 
     #[test]
     fn profile_notices_jumps_and_turtling() {
-        let nc: crate::native::NativeChar = serde_json::from_str(&std::fs::read_to_string("../../assets/chars/kaito.json").unwrap()).unwrap();
-        let def = std::sync::Arc::new(crate::native::compile_native(&nc, 1, true));
+        let def = std::sync::Arc::new(crate::chardef::CharDef::empty("reader"));
         let mut f = Fighter::new(0, def, 0, 1);
         let mut p = Profile::default();
         assert!(!p.turtles() && !p.jumps_a_lot());

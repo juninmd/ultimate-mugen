@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod tests {
     use super::super::{complete, AIR_DOWN_SPEED, AIR_FORWARD_SPEED, DOWN_LIGHT_KICK};
-    use crate::native::{air_normals, audit_native_sprite_frames, NativeChar};
+    use crate::{air_normals, audit_native_sprite_frames, NativeChar};
 
     fn akio() -> NativeChar {
-        serde_json::from_str(include_str!("../../../../../assets/chars/akio.json")).unwrap()
+        serde_json::from_str(include_str!("../../../../assets/chars/akio.json")).unwrap()
     }
 
     #[test]

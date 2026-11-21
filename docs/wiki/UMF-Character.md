@@ -1,6 +1,6 @@
 # Creating a UMF character
 
-UMF (*Ultimate Mugen Format*) describes a whole fighter in **one JSON file**. The compiler (`crates/engine/src/native/compile.rs`) generates commands, states, HitDefs, projectiles, super pause, cancels and hitboxes. The result runs on the same state machine as M.U.G.E.N characters.
+UMF (*Ultimate Mugen Format*) describes a whole fighter in **one JSON file**. The compiler (`crates/native/src/compile.rs`) generates commands, states, HitDefs, projectiles, super pause, cancels and hitboxes. The result runs on the same state machine as M.U.G.E.N characters.
 
 ## Step by step
 
@@ -64,7 +64,7 @@ A fighter does not have to be written from scratch. Three tools remove the copy 
 | `"use": "gale"` | inside a move | Clones another move (from a parent or from an earlier move of the same file) under a new `id`, changing only the fields you write. |
 | kit file | `"format": "umf-kit/1"` | A partial definition (moves, animations, poses, stats) with an `id`, shared by many fighters. `core` is built in and carries the universal `launcher` and `escape_burst`. |
 
-Rules of the merge, applied by `crates/engine/src/native/kit.rs` before the normal UMF parser runs:
+Rules of the merge, applied by `crates/native/src/kit.rs` before the normal UMF parser runs:
 
 - Objects (`stats`, `art`, `abilities`, `passives`) merge key by key, so `"stats": { "life": 1080 }` changes one number. An animation in `anims` replaces the inherited one as a whole. A value of `null` removes the inherited key.
 - `moves` are matched by `id`. An entry with only some fields keeps the rest (`{ "id": "gale", "name": "Crimson Gale" }`), a bare string (`"launcher"`) lists an inherited move unchanged, and `{ "id": "slide", "remove": true }` drops one. Moves you list come first, in your order; inherited moves you did not mention follow.

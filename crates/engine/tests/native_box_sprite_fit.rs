@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use ume_engine::chardef::CharDef;
-use ume_engine::native::pixel_fit::SpriteMask;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::pixel_fit::SpriteMask;
+use ume_native::{compile_native, NativeChar};
 
 const TOLERANCE: f32 = 0.75;
 const MIN_BOXES: usize = 3;

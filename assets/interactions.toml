@@ -784,3 +784,201 @@ line_a_es = "¡Campeón Bruno! ¡Enséñame ese golpe del Ring!"
 line_b_pt = "Primeiro aguenta meu direto, garoto!"
 line_b_en = "First survive my right hook, kid!"
 line_b_es = "¡Primero aguanta mi gancho derecho, chico!"
+
+[[stage_interaction]]
+id = "kaito_dojo"
+fighter = "kaito"
+stage_contains = ["dojo", "telhado", "rooftop"]
+speaker = "KAITO"
+style = "speech"
+sfx = "easter_banter"
+color = [0.22, 0.78, 0.86]
+title_pt = "O vento do pôr do sol sopra forte neste telhado."
+title_en = "The sunset wind blows strong on this rooftop."
+title_es = "El viento del atardecer sopla fuerte en esta azotea."
+
+[[stage_interaction]]
+id = "akio_dojo"
+fighter = "akio"
+stage_contains = ["dojo", "telhado", "rooftop"]
+style = "ribbon"
+sprite = "ramen_bowl"
+sfx = "easter_clash"
+color = [1.0, 0.36, 0.24]
+title_pt = "CHAMAS NO TELHADO!"
+title_en = "ROOFTOP FLAMES!"
+title_es = "¡LLAMAS EN LA AZOTEA!"
+sub_pt = "AKIO AQUECE O DOJO ANTES DO JANTAR"
+sub_en = "AKIO HEATS UP THE DOJO BEFORE DINNER"
+sub_es = "AKIO CALIENTA EL DOJO ANTES DE CENAR"
+
+[[stage_interaction]]
+id = "daichi_plateau"
+fighter = "daichi"
+stage_contains = ["planalto", "rochoso", "plateau", "mountain", "machu"]
+speaker = "DAICHI"
+style = "speech"
+sfx = "easter_clash"
+color = [0.24, 0.82, 0.42]
+title_pt = "Pedra firme sob os pés — parece a minha montanha!"
+title_en = "Solid stone underfoot—feels just like my mountain!"
+title_es = "Piedra firme bajo los pies—¡se siente como mi montaña!"
+
+[[stage_interaction]]
+id = "haruki_spirits"
+fighter = "haruki"
+stage_contains = ["espíritos", "espiritos", "spirit", "shrine", "temple"]
+speaker = "HARUKI"
+style = "speech"
+sfx = "easter_kitsune"
+color = [0.62, 0.44, 0.96]
+title_pt = "A tinta dos antigos ainda respira neste santuário."
+title_en = "The ink of the ancients still breathes in this shrine."
+title_es = "La tinta de los antiguos aún respira en este santuario."
+
+[[stage_interaction]]
+id = "jin_bamboo"
+fighter = "jin"
+stage_contains = ["bambuzal", "bamboo", "luar", "moon"]
+style = "ribbon"
+sprite = "origami_crane"
+sfx = "easter_kitsune"
+color = [0.16, 0.88, 0.82]
+title_pt = "VENTO NO BAMBUZAL!"
+title_en = "WIND IN THE BAMBOO!"
+title_es = "¡VIENTO EN EL BAMBUZAL!"
+sub_pt = "TERRENO PERFEITO PARA O CLÃ KAZAGURUMA"
+sub_en = "HOME TURF FOR THE KAZAGURUMA CLAN"
+sub_es = "TERRENO NATAL DEL CLAN KAZAGURUMA"
+
+[[stage_interaction]]
+id = "kaname_bamboo"
+fighter = "kaname"
+stage_contains = ["bambuzal", "bamboo", "luar", "moon"]
+speaker = "KANAME"
+style = "speech"
+sfx = "easter_kitsune"
+color = [0.42, 0.72, 1.0]
+title_pt = "A lua de inverno reflete limpa na lâmina."
+title_en = "The winter moon reflects cleanly on the blade."
+title_es = "La luna de invierno se refleja limpia en la hoja."
+
+[[stage_interaction]]
+id = "marlow_wonders"
+fighter = "marlow"
+stage_contains = ["cristo", "coliseu", "colosseum", "taj", "petra", "chich"]
+speaker = "MARLOW"
+style = "speech"
+sfx = "easter_parrot"
+color = [0.22, 0.62, 1.0]
+title_pt = "Já ancorei perto de sete maravilhas, mas essa merece um brinde!"
+title_en = "I've anchored by seven wonders, and this one deserves a toast!"
+title_es = "¡He anclado junto a siete maravillas y esta merece un brindis!"
+
+[[stage_interaction]]
+id = "oboro_spirits"
+fighter = "oboro"
+stage_contains = ["espíritos", "espiritos", "spirit", "luar", "moon"]
+style = "ribbon"
+sprite = "eclipse_moon"
+sfx = "easter_clash"
+color = [0.98, 0.16, 0.34]
+title_pt = "DOMÍNIO DO ECLIPSE!"
+title_en = "DOMAIN OF THE ECLIPSE!"
+title_es = "¡DOMINIO DEL ECLIPSE!"
+sub_pt = "OBORO CONTROLA ATÉ A LUZ DA LUA"
+sub_en = "OBORO BENDS EVEN THE MOONLIGHT"
+sub_es = "OBORO DOBLEGA INCLUSO LA LUZ LUNAR"
+
+[[stage_interaction]]
+id = "shion_moon"
+fighter = "shion"
+stage_contains = ["bambuzal", "luar", "moon", "espíritos"]
+speaker = "SHION"
+style = "speech"
+sfx = "easter_banter"
+color = [0.92, 0.24, 0.38]
+title_pt = "Sob esta lua pálida, minha lâmina não hesita."
+title_en = "Beneath this pale moon, my blade does not hesitate."
+title_es = "Bajo esta luna pálida, mi hoja no duda."
+
+[[stage_interaction]]
+id = "suzume_bamboo"
+fighter = "suzume"
+stage_contains = ["bambuzal", "bamboo", "luar"]
+speaker = "SUZUME"
+style = "speech"
+sfx = "easter_kitsune"
+color = [0.76, 0.36, 0.98]
+title_pt = "Cada sombra entre os bambus esconde um fio."
+title_en = "Every shadow between the bamboo hides a thread."
+title_es = "Cada sombra entre el bambú esconde un hilo."
+
+[[stage_interaction]]
+id = "sylene_plateau"
+fighter = "sylene"
+stage_contains = ["planalto", "rochoso", "plateau", "vulc", "volcano"]
+speaker = "SYLENE"
+style = "speech"
+sfx = "easter_banter"
+color = [0.46, 0.84, 1.0]
+title_pt = "Até esta rocha árida vai conhecer o inverno de Vashti."
+title_en = "Even this barren stone shall know the winter of Vashti."
+title_es = "Incluso esta piedra árida conocerá el invierno de Vashti."
+
+[[stage_interaction]]
+id = "valdric_colosseum"
+fighter = "valdric"
+stage_contains = ["coliseu", "colosseum", "planalto", "vulc", "volcano"]
+style = "ribbon"
+sprite = "crown_perfect"
+sfx = "easter_clash"
+color = [0.94, 0.22, 0.32]
+title_pt = "ARENA IMPERIAL!"
+title_en = "IMPERIAL ARENA!"
+title_es = "¡ARENA IMPERIAL!"
+sub_pt = "VALDRIC REIVINDICA O TRONO DO COMBATE"
+sub_en = "VALDRIC CLAIMS THE COMBAT THRONE"
+sub_es = "VALDRIC RECLAMA EL TRONO DEL COMBATE"
+
+[[fighter_trigger]]
+id = "valdric_low_hp"
+fighter = "valdric"
+trigger = "low_hp"
+threshold = 0.30
+per_round = false
+speaker = "VALDRIC"
+style = "speech"
+sfx = "easter_clash"
+color = [0.96, 0.24, 0.32]
+title_pt = "Um príncipe de Morn jamais se ajoelha!"
+title_en = "A prince of Morn never kneels!"
+title_es = "¡Un príncipe de Morn jamás se arrodilla!"
+
+[[fighter_trigger]]
+id = "garan_low_hp"
+fighter = "garan"
+trigger = "low_hp"
+threshold = 0.30
+per_round = false
+speaker = "GARAN"
+style = "speech"
+sfx = "easter_wonder"
+color = [0.78, 0.28, 1.0]
+title_pt = "As cinzas ardem mais forte perto do fim!"
+title_en = "The ashes burn hottest near the end!"
+title_es = "¡Las cenizas arden más fuerte cerca del final!"
+
+[[fighter_trigger]]
+id = "shion_low_hp"
+fighter = "shion"
+trigger = "low_hp"
+threshold = 0.30
+per_round = false
+speaker = "SHION"
+style = "speech"
+sfx = "easter_clash"
+color = [0.92, 0.24, 0.38]
+title_pt = "Agora sim... a lâmina acordou."
+title_en = "Now... the blade is finally awake."
+title_es = "Ahora sí... la hoja ha despertado."

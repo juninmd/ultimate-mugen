@@ -1423,5 +1423,6 @@
     "weakness": "lightning",
     "alignment": "hero",
     "tags": ["rushdown","shinobi","super-speed","aerial"]
-  }
+  },
+  "rivals": {"suzume":{"intro":"Suzume! Velocidade do vento contra sombras de Kagerou!","taunt":"Tenta acompanhar meu ciclone!"},"akio":{"intro":"Akio, quem piscar primeiro perde!","taunt":"Lento demais!"}}
 }

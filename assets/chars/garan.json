@@ -1726,5 +1726,6 @@
     "weakness": "light",
     "alignment": "villain",
     "tags": ["powerhouse","demon","armor","fire"]
-  }
+  },
+  "rivals": {"daichi":{"intro":"Mais um mortal da montanha... suas pedras viram cinzas.","taunt":"Mostre essa fúria!"},"oboro":{"intro":"Oboro... ninguém prende o Oni das Cinzas com ilusões.","attack":1.05}}
 }

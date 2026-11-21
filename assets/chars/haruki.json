@@ -1133,5 +1133,6 @@
     "weakness": "fire",
     "alignment": "hero",
     "tags": ["zoner","teleport","tactician","aerial"]
-  }
+  },
+  "rivals": {"oboro":{"intro":"Suas ilusões são apenas páginas rasgadas, Oboro.","taunt":"Já li seu próximo movimento."},"kaname":{"intro":"Kaname, vamos testar tinta contra gelo.","taunt":"Bela postura."}}
 }

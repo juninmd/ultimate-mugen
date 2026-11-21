@@ -1278,5 +1278,9 @@
     "weakness": "earth",
     "alignment": "hero",
     "tags": ["android","lightning","teleport","super-speed"]
+  },
+  "rivals": {
+    "oboro": {"intro":"Alvo identificado: Oboro. Ilusões não enganam meus sensores.","taunt":"Sobrecarga em 3... 2... 1..."},
+    "bruno": {"intro":"Força humana máxima registrada. Iniciando duelo, Bruno.","taunt":"Alta voltagem ativa!"}
   }
 }

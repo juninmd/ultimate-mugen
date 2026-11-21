@@ -508,5 +508,35 @@
         "es": "Algunos dijeron debilidad. Los callejones dijeron que fue la primera pelea honesta en años."
       }
     ]
+  },
+  "oboro": {
+    "scene": "temple",
+    "title": {
+      "en": "Crown of the Endless Eclipse",
+      "pt": "Coroa do Eclipse Infinito",
+      "es": "Corona del Eclipse Infinito"
+    },
+    "boss": {
+      "en": "Even my own shadow kneels when the scarlet moon reaches its zenith.",
+      "pt": "Até a minha própria sombra se ajoelha quando a lua escarlate atinge o zênite.",
+      "es": "Incluso mi propia sombra se arrodilla cuando la luna escarlata alcanza su cenit."
+    },
+    "reply": {
+      "en": "Three steps ahead is not arrogance—it is simply where I stand.",
+      "pt": "Três passos à frente não é arrogância — é apenas onde eu sempre estive.",
+      "es": "Tres pasos adelante no es arrogancia: es simplemente donde siempre estuve."
+    },
+    "pages": [
+      {
+        "en": "No challenger remained standing beneath the crimson sky. Oboro folded his fan and stepped back into the shifting mist.",
+        "pt": "Nenhum desafiante permaneceu de pé sob o céu carmesim. Oboro fechou o leque e retornou à névoa mutável.",
+        "es": "Ningún retador quedó en pie bajo el cielo carmesí. Oboro cerró su abanico y volvió a la niebla cambiante."
+      },
+      {
+        "en": "Yet somewhere on the Storm Road, new sparks already defied the dark—and Oboro smiled, eager for the next act.",
+        "pt": "Ainda assim, em algum ponto da Estrada da Tempestade, novas faíscas já desafiavam a escuridão — e Oboro sorriu, ansioso pelo próximo ato.",
+        "es": "Sin embargo, en algún punto del Camino de la Tormenta, nuevas chispas ya desafiaban la oscuridad, y Oboro sonrió esperando el siguiente acto."
+      }
+    ]
   }
 }

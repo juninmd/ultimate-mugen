@@ -1381,5 +1381,9 @@
     "weakness": "ice",
     "alignment": "hero",
     "tags": ["brawler","mountain","aerial","heavy"]
+  },
+  "rivals": {
+    "bruno": {"intro":"Bruno! Vamos ver se o cinturão aguenta o peso da montanha.","taunt":"Firme os pés, campeão!"},
+    "garan": {"intro":"Demônio das cinzas, você não vai queimar meus picos.","attack":1.05}
   }
 }

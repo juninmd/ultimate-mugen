@@ -48,7 +48,7 @@ impl App {
             (6, Glyphs::Keyboard) => Some("Esc / P".to_string()),
             (6, Glyphs::Touch) => Some("II".to_string()),
             (7, Glyphs::Keyboard | Glyphs::Touch) => None,
-            (7, _) => Some("-".to_string()),
+            (7, Glyphs::Pad(_)) => None,
             _ => None,
         };
         let xs = [60.0, 280.0, 520.0, 760.0, 1000.0];
@@ -90,6 +90,13 @@ impl App {
                         false,
                     );
                     continue;
+                }
+                if i == 7 {
+                    if let Glyphs::Pad(kind) = *g {
+                        let label = if kind == PadKind::PlayStation { "R3" } else { "RS" };
+                        self.ui.face(crate::ui::Face::chip(label, hex("#3b3552")), xs[j + 1], y + 44.0, 36.0);
+                        continue;
+                    }
                 }
                 let mut cx = xs[j + 1];
                 let bits: &[u32] = if *g == Glyphs::Touch && bits.contains(&k::W) {

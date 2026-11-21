@@ -985,8 +985,9 @@
       "simple": "super",
       "invuln": [1,3],
       "projectile": {"at":3,"anim":"novaBeam","hitAnim":"novaHit","speed":[0,0],"offset":[44,-68],"damage":48,"hits":7,"removeTime":44,"level":"heavy","launch":true,"priority":6,"element":"lightning"},
-      "sounds": [{"at":1,"snd":[200,4]}]
-    , "shake": {"at":2,"time":18,"ampl":5,"freq":75}},
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75}
+    },
     {
       "id": "cometstorm",
       "name": "Comet Storm",
@@ -1001,8 +1002,9 @@
         {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,0.6],"offset":[50,-60],"damage":36,"hits":3,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"},
         {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,1.2],"offset":[50,-50],"damage":36,"hits":3,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"}
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
-    , "shake": {"at":2,"time":18,"ampl":5,"freq":75}},
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75}
+    },
     {
       "id": "ex_starburst",
       "name": "Star Burst EX",
@@ -1046,8 +1048,9 @@
         {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,1.2],"offset":[50,-50],"damage":43.2,"hits":5,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"}
       ],
       "fx": "aura",
-      "sounds": [{"at":1,"snd":[200,4]}]
-    , "shake": {"at":2,"time":18,"ampl":5,"freq":75}},
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75}
+    },
     {
       "id": "overhead",
       "name": "Falling Star Chop",

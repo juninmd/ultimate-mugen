@@ -1092,7 +1092,8 @@
       "sounds": [{"at":1,"snd":[200,4]}],
       "shake": {"at":2,"time":18,"ampl":5,"freq":75},
       "flash": {"at":1,"time":12,"color":[10,20,40],"under":true,"superMove":true},
-      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[165,220,255]}
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[165,220,255]},
+      "timestop": 18
     },
     {
       "id": "overhead",

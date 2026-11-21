@@ -2,7 +2,7 @@ use super::compile::render_frame;
 use super::forms::form_palette;
 use super::effects::FrameArt;
 use super::types::{NativeChar, NativeFrame};
-use crate::chardef::Sprite;
+use ume_engine::chardef::Sprite;
 use serde_json::Value;
 use std::collections::HashMap;
 

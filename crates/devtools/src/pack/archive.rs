@@ -61,11 +61,11 @@ fn menu_files(sprites_root: &Path) -> BTreeMap<String, Vec<String>> {
     let mut wanted: BTreeMap<String, Vec<String>> = BTreeMap::new();
     let Some(chars) = sprites_root.parent().and_then(|dir| std::fs::read_dir(dir).ok()) else { return wanted };
     for file in chars.filter_map(Result::ok).filter(|e| e.path().extension().is_some_and(|ext| ext == "json")) {
-        let Some(character) = std::fs::read_to_string(file.path()).ok().and_then(|json| serde_json::from_str::<ume_engine::native::NativeChar>(&json).ok()) else { continue };
+        let Some(character) = std::fs::read_to_string(file.path()).ok().and_then(|json| serde_json::from_str::<ume_native::NativeChar>(&json).ok()) else { continue };
         let character = std::sync::Arc::new(character);
-        ume_engine::native::register_native(character.clone());
+        ume_native::register_native(character.clone());
         let files = wanted.entry(character.sprite_dir().to_string()).or_default();
-        for name in ume_engine::native::menu_sprite_files(&character) {
+        for name in ume_native::menu_sprite_files(&character) {
             if !files.contains(&name) {
                 files.push(name);
             }

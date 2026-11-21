@@ -1,6 +1,6 @@
 use super::effects::{art_res, FrameArt};
 use super::types::{Box4, NativeFrame};
-use crate::chardef::ImageData;
+use ume_engine::chardef::ImageData;
 
 const OPAQUE: u8 = 40;
 const MIN_SIDE: f32 = 16.0;

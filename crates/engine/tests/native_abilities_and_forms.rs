@@ -3,7 +3,7 @@
 mod support;
 use std::sync::Arc;
 use support::*;
-use ume_engine::native::{
+use ume_native::{
     compile_native, register_native, AbilitySpec, FlySpec, FormSpec, NativeChar,
     SuperSpeedSpec, TeleportSpec,
 };
@@ -200,7 +200,7 @@ fn test_form_palette_parts_alteration() {
         }
     });
 
-    let result = ume_engine::native::forms::form_palette(&form_parts, Some(&base_palette)).unwrap();
+    let result = ume_native::forms::form_palette(&form_parts, Some(&base_palette)).unwrap();
     let obj = result.as_object().unwrap();
     assert_eq!(obj.get("hair").unwrap(), "#ffff00");
     assert_eq!(obj.get("suit").unwrap(), "#222222");
@@ -223,7 +223,7 @@ fn test_form_palette_parts_alteration() {
         replace_moves: false,
     };
 
-    let result_full = ume_engine::native::forms::form_palette(&form_full, Some(&base_palette)).unwrap();
+    let result_full = ume_native::forms::form_palette(&form_full, Some(&base_palette)).unwrap();
     let obj_full = result_full.as_object().unwrap();
     assert_eq!(obj_full.get("hair").unwrap(), "#00ff00");
     assert_eq!(obj_full.get("suit").unwrap(), "#0000ff");

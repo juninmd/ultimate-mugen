@@ -161,7 +161,7 @@ pub struct NativeChar {
     pub color: String,
     #[serde(default)] pub stats: NativeStats,
     #[serde(default)] pub passives: Option<super::passive_spec::PassiveSpec>,
-    #[serde(default)] pub rivals: BTreeMap<String, crate::rivals::RivalLines>,
+    #[serde(default)] pub rivals: BTreeMap<String, ume_engine::rivals::RivalLines>,
     #[serde(default)] pub abilities: Option<super::ability_spec::AbilitySpec>,
     #[serde(default, alias = "companions")] pub helpers: Option<super::companions::CompanionsSpec>,
     #[serde(default, rename = "bossRules", alias = "ui")] pub boss_rules: Option<super::boss_ui::BossRulesSpec>,

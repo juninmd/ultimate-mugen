@@ -2,7 +2,7 @@ use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
-use ume_engine::native::{audit_native_sprite_frames, NativeChar};
+use ume_native::{audit_native_sprite_frames, NativeChar};
 
 fn character_files() -> Vec<PathBuf> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets/chars");

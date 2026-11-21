@@ -91,7 +91,7 @@ mod tests {
     use super::*;
 
     fn akio() -> NativeChar {
-        serde_json::from_str(include_str!("../../../../assets/chars/akio.json")).unwrap()
+        serde_json::from_str(include_str!("../../../assets/chars/akio.json")).unwrap()
     }
 
     #[test]

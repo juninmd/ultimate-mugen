@@ -1,6 +1,6 @@
 use super::ability_spec::AbilitySpec;
-use crate::chardef::MoveInfo;
-use crate::commands::{parse_command, CommandDef};
+use ume_engine::chardef::MoveInfo;
+use ume_engine::commands::{parse_command, CommandDef};
 use std::collections::HashMap;
 
 const FLY_STATE: i32 = 3900;

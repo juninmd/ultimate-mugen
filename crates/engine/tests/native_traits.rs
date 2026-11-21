@@ -1,7 +1,7 @@
 //! Homologation tests for UMF 2.0 declarative traits: armor, parry, timestop, burst, flight.
 mod support;
 use support::*;
-use ume_engine::native::{compile_native, NativeChar, NativeMove, ArmorSpec, ParrySpec};
+use ume_native::{compile_native, NativeChar, NativeMove, ArmorSpec, ParrySpec};
 
 fn base_char() -> NativeChar {
     let raw = include_str!("../../../assets/chars/kaito.json");

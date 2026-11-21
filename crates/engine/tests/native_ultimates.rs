@@ -5,7 +5,7 @@ use ume_engine::chardef::CharDef;
 use ume_engine::commands::CommandDef;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const ULTIMATE_COST: f32 = 3000.0;
 const FULL_METER: f32 = 3000.0;

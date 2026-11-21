@@ -1,6 +1,6 @@
 //! Times native-character compilation (`cargo run --release -p ume-engine --example load_bench`).
 use std::time::Instant;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 fn main() {
     let dir = std::env::args().nth(1).unwrap_or_else(|| format!("{}/../../assets/chars", env!("CARGO_MANIFEST_DIR")));
     let mut tot = 0.0;
@@ -12,7 +12,7 @@ fn main() {
         let d = compile_native(&nc, 1, true);
         let ms = t.elapsed().as_secs_f64() * 1000.0;
         let t = Instant::now();
-        let pv = ume_engine::native::compile_native_preview(&nc, 1);
+        let pv = ume_native::compile_native_preview(&nc, 1);
         let pms = t.elapsed().as_secs_f64() * 1000.0;
         tot += ms;
         println!("{:10} full {:6.0} ms ({} sprites) · preview {:5.0} ms ({} sprites)", nc.id, ms, d.sprites.len(), pms, pv.sprites.len());

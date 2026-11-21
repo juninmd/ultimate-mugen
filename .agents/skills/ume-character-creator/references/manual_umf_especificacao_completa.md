@@ -1,6 +1,6 @@
 # Manual de Especificação Técnica UMF 2.0 (Ultimate Mugen Format)
 
-O formato **UMF** (*Ultimate Mugen Format*) consolida toda a arquitetura de um lutador de combate 2D em um manifesto declarativo unificado (`JSON`). O compilador nativo do Ultimate MUGEN (`crates/engine/src/native/compile.rs`) traduz o documento em tempo de compilação ou carregamento para a máquina de estados determinística de 60 Hz compatível com M.U.G.E.N / IKEMEN.
+O formato **UMF** (*Ultimate Mugen Format*) consolida toda a arquitetura de um lutador de combate 2D em um manifesto declarativo unificado (`JSON`). O compilador nativo do Ultimate MUGEN (`crates/native/src/compile.rs`) traduz o documento em tempo de compilação ou carregamento para a máquina de estados determinística de 60 Hz compatível com M.U.G.E.N / IKEMEN.
 
 ---
 

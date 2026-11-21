@@ -1,6 +1,6 @@
 //! Validation test ensuring the example character bundled with the ume-character-creator skill
 //! compiles cleanly and respects all constraints.
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 #[test]
 fn test_skill_example_character_compilation() {

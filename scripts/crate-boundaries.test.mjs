@@ -20,3 +20,9 @@ test('the real workspace respects every boundary', async () => {
     assert.deepEqual(violations(crate, readFileSync(new URL(`../crates/${crate}/Cargo.toml`, import.meta.url), 'utf8')), []);
   }
 });
+
+test('the engine core cannot depend on the native compiler', () => {
+  const toml = '[dependencies]\nume-native = { path = "../native" }\n';
+  assert.deepEqual(violations('engine', toml), [{ crate: 'engine', dependency: 'ume-native' }]);
+  assert.deepEqual(violations('native', '[dependencies]\nume-engine = { path = "../engine" }\n'), []);
+});

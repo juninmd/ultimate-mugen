@@ -1,4 +1,4 @@
-use ume_engine::native::{compile_native, parse_char, register_kit, NativeChar};
+use ume_native::{compile_native, parse_char, register_kit, NativeChar};
 
 const KAITO: &str = include_str!("../../../assets/chars/kaito.json");
 const APPRENTICE: &str = include_str!("../../../docs/examples/umf/mika.json");

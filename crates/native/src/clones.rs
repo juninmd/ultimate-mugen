@@ -2,8 +2,8 @@ use super::abilities::AbilityCode;
 use super::compile::extras::{hitdef_from_spec, hitdef_projectile};
 use super::multihit::{glue, projectile_knockback};
 use super::types::NativeMove;
-use crate::chardef::MoveInfo;
-use crate::commands::parse_command;
+use ume_engine::chardef::MoveInfo;
+use ume_engine::commands::parse_command;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

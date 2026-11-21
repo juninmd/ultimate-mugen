@@ -1,6 +1,6 @@
-use crate::passive_time::TimeRule;
-use crate::signature::{risk_per_tick, SignatureRule, SignatureTier, SIGNATURE_METER_CAP, TIER_LIMIT};
-use crate::passives::{PassiveRules, RageRule, StackRule, RAGE_MULTIPLIER_CAP, STACK_LIMIT};
+use ume_engine::passive_time::TimeRule;
+use ume_engine::signature::{risk_per_tick, SignatureRule, SignatureTier, SIGNATURE_METER_CAP, TIER_LIMIT};
+use ume_engine::passives::{PassiveRules, RageRule, StackRule, RAGE_MULTIPLIER_CAP, STACK_LIMIT};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

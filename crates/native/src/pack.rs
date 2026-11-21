@@ -183,10 +183,10 @@ mod tests {
         pixmap.fill(tiny_skia::Color::from_rgba8(10, 200, 30, 255));
         let png = pixmap.encode_png().unwrap();
         insert("virtual-fighter", &pack("virtual-fighter", &[("idle0.png", &png)])).unwrap();
-        let mut fighter: super::super::types::NativeChar = serde_json::from_str(include_str!("../../../../assets/chars/kaito.json")).unwrap();
+        let mut fighter: super::super::types::NativeChar = serde_json::from_str(include_str!("../../../assets/chars/kaito.json")).unwrap();
         fighter.id = "virtual-fighter".into();
         let frame: super::super::types::NativeFrame = serde_json::from_value(serde_json::json!({"pose": "idle0", "ticks": 1})).unwrap();
-        let render = crate::native::pixel::try_load(&fighter, &frame, None).expect("sprite read from the pack");
+        let render = crate::pixel::try_load(&fighter, &frame, None).expect("sprite read from the pack");
         assert_eq!(render.image.unwrap().w, 8);
     }
 }

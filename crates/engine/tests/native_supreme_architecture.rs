@@ -1,7 +1,7 @@
 //! Homologation tests for UMF Supreme Architecture:
 //! Hit priority, asymmetric hitstop, OTG hitflag, ground bounce, cornerpush,
 //! custom sparks/sounds, throws/grabs, target combo cancels, and Statedef -2 passives.
-use ume_engine::native::{compile_native, HitSpec, NativeChar, NativeMove, PassiveSpec, ThrowSpec};
+use ume_native::{compile_native, HitSpec, NativeChar, NativeMove, PassiveSpec, ThrowSpec};
 
 fn base_char() -> NativeChar {
     let raw = include_str!("../../../assets/chars/kaito.json");

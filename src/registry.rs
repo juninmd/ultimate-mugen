@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use ume_engine::chardef::{CharDef, Sprite};
 use ume_engine::loader::{load_mugen_char, load_mugen_portrait};
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 use ume_formats::ini::{find_section, parse_ini, unquote};
 use ume_formats::stage::load_stage;
 use ume_formats::vfs::{char_key, find_char_defs, find_stage_defs, stage_key, text, Vfs};
@@ -349,10 +349,10 @@ impl Registry {
     pub fn new() -> Self {
         let mut chars = vec![];
         for (_, json) in BUILTIN.iter() {
-            match ume_engine::native::parse_char(json) {
+            match ume_native::parse_char(json) {
                 Ok(nc) => {
                     let arc = Arc::new(nc);
-                    ume_engine::native::register_native(arc.clone());
+                    ume_native::register_native(arc.clone());
                     chars.push(CharEntry {
                         key: format!("umf:{}", arc.id),
                         id: format!("umf:{}", arc.id),
@@ -411,7 +411,7 @@ impl Registry {
         }
     }
     pub fn add_native_json(&mut self, json: &str) -> Result<String, String> {
-        if ume_engine::native::is_kit_text(json) { return ume_engine::native::register_kit(json); } let nc: NativeChar = ume_engine::native::parse_char(json)?;
+        if ume_native::is_kit_text(json) { return ume_native::register_kit(json); } let nc: NativeChar = ume_native::parse_char(json)?;
         let id = format!("umf:{}", nc.id);
         if let Some(old) = self.chars.iter().find(|c| c.id == id) {
             eprintln!(
@@ -422,7 +422,7 @@ impl Registry {
         self.chars.retain(|c| c.id != id);
         let name = nc.name.clone();
         let arc = Arc::new(nc);
-        ume_engine::native::register_native(arc.clone());
+        ume_native::register_native(arc.clone());
         self.chars.push(CharEntry {
             key: id.clone(),
             id,

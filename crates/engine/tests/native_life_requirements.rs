@@ -3,7 +3,7 @@ use std::sync::Arc;
 use support::*;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const BUTTON_Z: u32 = 512;
 const LAST_RESORT_FIRST_STATE: i32 = 200;

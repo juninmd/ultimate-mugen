@@ -6,7 +6,7 @@ use ume_engine::common::{common_def, flat_stage};
 use ume_engine::fighter::HitDefData;
 use ume_engine::input::{k, InputSource};
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 fn kaito_match() -> Match {
     let nc: NativeChar =

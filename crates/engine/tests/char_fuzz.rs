@@ -97,7 +97,7 @@ fn fuzzed_duels_never_need_the_watchdog() {
 }
 
 fn native_roster() -> Vec<(String, std::sync::Arc<ume_engine::chardef::CharDef>)> {
-    let mut chars: Vec<ume_engine::native::NativeChar> = std::fs::read_dir("../../assets/chars")
+    let mut chars: Vec<ume_native::NativeChar> = std::fs::read_dir("../../assets/chars")
         .unwrap()
         .filter_map(|entry| {
             let path = entry.unwrap().path();
@@ -112,7 +112,7 @@ fn native_roster() -> Vec<(String, std::sync::Arc<ume_engine::chardef::CharDef>)
         .map(|nc| {
             (
                 nc.id.clone(),
-                std::sync::Arc::new(ume_engine::native::compile_native(nc, 1, true)),
+                std::sync::Arc::new(ume_native::compile_native(nc, 1, true)),
             )
         })
         .collect()

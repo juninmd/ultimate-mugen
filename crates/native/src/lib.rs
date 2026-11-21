@@ -32,7 +32,6 @@ mod power_normals;
 mod charge;
 mod ultimate;
 pub mod charge_ramp;
-pub(crate) use charge::{CHARGE_COMMAND, CHARGE_STATE};
 mod pixel_blank;
 mod pixel_hit;
 pub mod pixel_fit;

@@ -2,7 +2,7 @@ mod support;
 use serde_json::json;
 use std::sync::Arc;
 use support::*;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 fn fighter_with(moves: serde_json::Value, anims: serde_json::Value) -> NativeChar {
     let mut value: serde_json::Value = serde_json::from_str(include_str!("../../../assets/chars/kaito.json")).unwrap();

@@ -1,4 +1,4 @@
-use ume_engine::native::{compile_native, parse_char};
+use ume_native::{compile_native, parse_char};
 
 const KAITO: &str = include_str!("../../../assets/chars/kaito.json");
 const HELLO: &str = include_str!("../../../docs/examples/umf/hello-fighter.json");

@@ -31,7 +31,7 @@ A move can only start from another move by declaring `rekka` in the character JS
 {"id":"gust_cross","name":"Gust Crossup","input":"b","kind":"special","anim":"mirage","rekka":{"after":["gustdash"],"window":[6,20]}}
 ```
 
-`after` lists the source move ids, `window` is the range of state time (ticks inside the source move, hit pause does not count) where the follow-up input is accepted, and `contact: true` also requires the source to hit or be guarded. Without it the follow-up works on whiff too. The follow-up never starts from neutral, so it may reuse a plain button already used by a normal. Code: `crates/engine/src/native/rekka.rs`.
+`after` lists the source move ids, `window` is the range of state time (ticks inside the source move, hit pause does not count) where the follow-up input is accepted, and `contact: true` also requires the source to hit or be guarded. Without it the follow-up works on whiff too. The follow-up never starts from neutral, so it may reuse a plain button already used by a normal. Code: `crates/native/src/rekka.rs`.
 
 In use: Lian (Flowing Silk Kicks, then `y`), Kaito (Storm Rush, then `x`) and Jin (Gust Dash, then `b`).
 

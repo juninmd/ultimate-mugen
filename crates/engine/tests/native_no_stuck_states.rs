@@ -3,7 +3,7 @@ use ume_engine::ai::Ai;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::input::InputSource;
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const ROUND_TICKS: usize = 60 * 40;
 const LONGEST_HIT_STATE: i32 = 150;

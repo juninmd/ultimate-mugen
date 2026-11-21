@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use ume_engine::native::{audit_native_sprite_frames, NativeChar};
+use ume_native::{audit_native_sprite_frames, NativeChar};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../assets/chars");

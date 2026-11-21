@@ -5,7 +5,7 @@ use ume_engine::chardef::CharDef;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::input::k;
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const CHARGE_STATE: i32 = 3920;
 const HOLD_TICKS: usize = 100;
@@ -93,7 +93,7 @@ fn a_fighter_with_forms_charges_first_and_transforms_on_the_next_press() {
 
 #[test]
 fn charging_accelerates_with_hold_time_and_restarts_after_release() {
-    use ume_engine::native::charge_ramp::gain_at;
+    use ume_native::charge_ramp::gain_at;
     let (_, def) = roster().into_iter().next().unwrap();
     let mut m = arena(&def);
     let mut gains = vec![];

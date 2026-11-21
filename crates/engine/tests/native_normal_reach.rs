@@ -4,7 +4,7 @@ use std::sync::Arc;
 use support::*;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::matchs::Match;
-use ume_engine::native::{compile_native, NativeChar};
+use ume_native::{compile_native, NativeChar};
 
 const STAND_NORMAL_ANIMS: [&str; 4] = ["jab", "strong", "lkick", "hkick"];
 const MAX_GAP: i32 = 150;

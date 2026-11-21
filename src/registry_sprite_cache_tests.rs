@@ -37,7 +37,7 @@ fn late_sprite_packs_replace_cached_native_definitions() {
     assert!(entry.peek(1).is_some());
     assert!(entry.peek(2).is_some());
 
-    ume_engine::native::insert_sprite_pack(
+    ume_native::insert_sprite_pack(
         character,
         &sprite_pack(character, tiny_skia::Color::WHITE),
     )
@@ -58,11 +58,11 @@ fn late_sprite_packs_replace_cached_native_definitions() {
     );
 
     let other = "unrelated_sprite_cache_regression";
-    ume_engine::native::insert_sprite_pack(other, &sprite_pack(other, tiny_skia::Color::BLACK))
+    ume_native::insert_sprite_pack(other, &sprite_pack(other, tiny_skia::Color::BLACK))
         .unwrap();
     assert!(Arc::ptr_eq(&refreshed, &entry.peek(1).unwrap()));
 
-    ume_engine::native::insert_sprite_pack(
+    ume_native::insert_sprite_pack(
         character,
         &sprite_pack(character, tiny_skia::Color::BLACK),
     )

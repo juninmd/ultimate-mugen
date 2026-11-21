@@ -1677,7 +1677,7 @@ Resumo completo do estudo de kit em `docs/wiki/Fighter-Study.md` e em [`referenc
 3. **Falta de Tipagem e Validação**: Arquivos INI/CNS sem lint acumulam milhões de `StateNumberMismatch` e parâmetros duplicados (sanados pelo `--strict --lint` do `ume-engine`).
 
 #### Onde o Repositório (`ultimate-mugen`) Já Está Muito à Frente
-1. **Pipeline de Alto Nível Compilado em Rust**: O motor em Rust compila o formato UMF diretamente para structs em memória e bytecode determinístico (`crates/engine/src/native/compile.rs`).
+1. **Pipeline de Alto Nível Compilado em Rust**: O motor em Rust compila o formato UMF diretamente para structs em memória e bytecode determinístico (`crates/native/src/compile.rs`).
 2. **Renderização Moderna WGPU**: Shaders em WGSL, processamento de paleta diretamente na GPU sem alocar texturas RGBA redundantes para cada skin, e orçamento estrito de Texture Atlas (4096 no desktop / 2048 em mobile).
 3. **Ferramental Automatizado**: Exemplos em Rust como `mugen_check --strict --lint`, `native_sprite_audit`, `hover_check`, `sprite_mem` e `scaffold_char` que validam estaticamente e em runtime a integridade dos lutadores.
 
@@ -1719,7 +1719,7 @@ Em vez de forçar o autor a escrever 50 linhas de controladores para cada golpe 
   }
 }
 ```
-**O Ganho**: O compilador Rust (`crates/engine/src/native/compile.rs`) gera automaticamente os controladores `NotHitBy`, `VelSet`, `VelAdd`, `HitDef`, e a transição para a frame de pouso com `PosSet y = 0`. O autor escreve 15 linhas limpas em vez de 120 linhas arcaicas de CNS.
+**O Ganho**: O compilador Rust (`crates/native/src/compile.rs`) gera automaticamente os controladores `NotHitBy`, `VelSet`, `VelAdd`, `HitDef`, e a transição para a frame de pouso com `PosSet y = 0`. O autor escreve 15 linhas limpas em vez de 120 linhas arcaicas de CNS.
 
 ---
 
@@ -1831,7 +1831,7 @@ cargo run --release -p ume-engine --example auto_ground -- assets/chars/sprites/
 cargo run --release -p ume-engine --example auto_ground -- assets/chars/sprites/meu_char/ --json
 ```
 
-#### C. Traits Declarativos UMF 2.0 (`crates/engine/src/native/`)
+#### C. Traits Declarativos UMF 2.0 (`crates/native/src/`)
 Em vez de programar controladores complexos manualmente, adicione os atributos diretamente no JSON do golpe:
 ```json
 {

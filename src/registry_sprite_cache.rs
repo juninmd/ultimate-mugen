@@ -4,7 +4,7 @@ use ume_engine::chardef::CharDef;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use ume_engine::chardef::Sprite;
-use ume_engine::native::{compile_native_preview, select_portrait, sprite_pack_revision};
+use ume_native::{compile_native_preview, select_portrait, sprite_pack_revision};
 
 thread_local! {
     static TILE_PORTRAITS: RefCell<HashMap<(String, i32), (u64, Option<Sprite>)>> = RefCell::new(HashMap::new());
@@ -36,7 +36,7 @@ impl CharEntry {
     pub fn tile_art_ready(&self) -> bool {
         match &self.src {
             Src::Native(character) => {
-                !cfg!(target_arch = "wasm32") || ume_engine::native::has_sprite_pack(&character.id)
+                !cfg!(target_arch = "wasm32") || ume_native::has_sprite_pack(&character.id)
             }
             Src::Mugen { .. } => true,
         }

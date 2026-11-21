@@ -15,7 +15,10 @@ const SLIDE: f32 = 90.0;
 impl App {
     pub(super) fn menu_backdrop(&mut self, cur: usize) {
         self.menu_art.select(cur);
-        self.menu_art.draw(&self.ui);
+        draw_rectangle(0.0, 0.0, screen_width(), screen_height(), hex("#0b0715"));
+        if !crate::screen_art::ScreenArt::Menu.draw(&self.ui, 1.0) {
+            self.menu_art.draw(&self.ui);
+        }
         let (prev, now, e) = self.menu_art.transition();
         self.menu_fighter_load(now, e);
         if e < 1.0 {

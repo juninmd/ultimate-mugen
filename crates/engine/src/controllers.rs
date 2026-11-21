@@ -226,7 +226,7 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "targetbind" => {
             let (time, x, y) = (n(m, "time", 1.0) as i32, n2(m, "pos", 0.0, 0) as f32 * l, n2(m, "pos", 0.0, 1) as f32 * l);
             let me = m.fighters[i].id;
-            for t in target_indices(m, i, sc).into_iter().flatten() { m.fighters[t].bind = Some(Bind { to: me, time, x, y, kind: BindKind::Target }); m.update_bind(t); }
+            for t in target_indices(m, i, sc).into_iter().flatten() { m.fighters[t].bind = Some(Bind { to: me, time, x, y, kind: BindKind::Target, facing: 0 }); m.update_bind(t); }
         }
         "bindtotarget" | "bindtoparent" | "bindtoroot" => {
             let (time, x, y) = (n(m, "time", 1.0) as i32, n2(m, "pos", 0.0, 0) as f32 * l, n2(m, "pos", 0.0, 1) as f32 * l);
@@ -236,7 +236,8 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
                 "bindtoparent" => match f.parent { Some(p) => (p, BindKind::Parent), None => return },
                 _ => (f.root, BindKind::Root),
             };
-            m.fighters[i].bind = Some(Bind { to, time, x, y, kind });
+            let facing = if sc.has("facing", 0) { n(m, "facing", 0.0) as i32 } else { 0 };
+            m.fighters[i].bind = Some(Bind { to, time, x, y, kind, facing });
             m.update_bind(i);
         }
         "targetdrop" => { let keep = if sc.has("excludeid", 0) { n(m, "excludeid", -1.0) as i32 } else { -1 }; m.fighters[i].targets.retain(|t| keep >= 0 && t.1 == keep); }

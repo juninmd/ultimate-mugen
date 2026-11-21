@@ -47,8 +47,8 @@ fn buttons() -> Vec<Button> {
     });
     out.push(Button {
         bit: nav::BACK,
-        center: lay.pos[3],
-        radius: lay.radius[3],
+        center: lay.pos[2],
+        radius: lay.radius[2],
         label: crate::i18n::tr3("VOLTAR", "BACK", "VOLVER"),
         color: Color::new(1.0, 0.3, 0.4, 0.5),
     });

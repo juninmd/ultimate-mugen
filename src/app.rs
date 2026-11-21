@@ -558,13 +558,15 @@ impl App {
             let ft_ms = dt * 1000.0;
             self.ui.text(
                 &format!(
-                    "{} FPS ({:.1} ms) · {}T · {}×{} · art {:.1}×",
+                    "{} FPS ({:.1} ms) · {}T · {}×{} · art {:.1}× · touch {}/{}",
                     fps,
                     ft_ms,
                     threads,
                     (screen_width() * dpi_scale()) as i32,
                     Settings::physical_h() as i32,
-                    ume_native::effects::art_res()
+                    ume_native::effects::art_res(),
+                    u8::from(self.c.touch.enabled),
+                    touches().len()
                 ),
                 10.0,
                 20.0,

@@ -71,6 +71,7 @@ fn a_jumping_fighter_enters_air_guard_when_the_enemy_is_in_range() {
     m.fighters[0].move_type = 'A';
     m.fighters[0].hitdef_active = true;
     let mut hd = HitDefData::default();
+    hd.guardflag = "MA".into();
     hd.guard_dist = 200.0;
     m.fighters[0].hitdef = Some(hd);
     m.tick(&[0, k::R]);

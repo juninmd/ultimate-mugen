@@ -1502,7 +1502,7 @@ impl App {
                 };
                 self.sel = (t.members[0][0], t.members[1][0], self.sel.2);
                 self.team = Some(t);
-                self.screen = Screen::Stages { cur: 1 };
+                self.open_stages(1);
                 return;
             }
             picked[picking] = Some(cur[picking]); self.note_recent(cur[picking]);
@@ -1549,7 +1549,11 @@ impl App {
                 picking = 1;
             } else {
                 self.sel = (picked[0].unwrap(), picked[1].unwrap(), self.sel.2);
-                self.screen = if self.mode == Mode::PowerArena { Screen::Vs { t: 0.0, step: 0 } } else { Screen::Stages { cur: self.sel.2 + 1 } };
+                if self.mode == Mode::PowerArena {
+                    self.screen = Screen::Vs { t: 0.0, step: 0 };
+                } else {
+                    self.open_stages(self.sel.2 + 1);
+                }
 
                 return;
             }

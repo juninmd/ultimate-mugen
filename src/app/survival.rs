@@ -90,7 +90,7 @@ impl App {
         };
         self.team_pick.clear();
         self.ending_shown = false;
-        self.screen = Screen::Stages { cur: 1 };
+        self.open_stages(1);
     }
 
     /// Score earned by side 0 in the fight that just ended (deterministic: read from the simulation).

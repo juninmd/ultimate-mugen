@@ -41,8 +41,13 @@ impl App {
             hex("#12051f"),
             Align::Center,
         );
+        let hint = if self.c.touch.enabled {
+            crate::i18n::tr3("TOQUE PARA INICIAR", "TAP TO START", "TOCA PARA INICIAR")
+        } else {
+            "START / ENTER"
+        };
         self.ui.text(
-            "START / ENTER",
+            hint,
             VW / 2.0,
             685.0,
             14.0,

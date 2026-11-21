@@ -69,7 +69,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { shard: ui, scripts: "web-smoke.js web-story-smoke.js web-epilogue-smoke.js", match: "1/1" }
+          - { shard: ui, scripts: "web-smoke.js web-story-smoke.js web-epilogue-smoke.js web-touch-menu-smoke.js", match: "1/1" }
           - { shard: match-1, scripts: web-match-smoke.js, match: "1/2" }
           - { shard: match-2, scripts: web-match-smoke.js, match: "2/2" }
     steps:

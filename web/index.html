@@ -43,9 +43,9 @@
   <script type="module">
     import init, * as ume from './ultimate-mugen.js?v=__BUILD__';
     const TEXTS = {
-      pt: { fatal: 'O jogo parou: faltou memória ou ocorreu um erro interno.', reload: 'Recarregar', download: 'Baixando o jogo…', fail: 'Falha ao carregar', lost: 'Contexto gráfico perdido, recarregando…', rotate: 'Gire o aparelho para jogar na horizontal →', import: 'Importar M.U.G.E.N' },
-      es: { fatal: 'El juego se detuvo: se quedó sin memoria o tuvo un error interno.', reload: 'Recargar', download: 'Descargando el juego…', fail: 'Error al cargar', lost: 'Contexto gráfico perdido, recargando…', rotate: 'Gira el dispositivo para jugar en horizontal →', import: 'Importar M.U.G.E.N' },
-      en: { fatal: 'The game stopped: it ran out of memory or hit an internal error.', reload: 'Reload', download: 'Downloading the game…', fail: 'Failed to load', lost: 'Graphics context lost, reloading…', rotate: 'Rotate your device to play in landscape →', import: 'Import M.U.G.E.N' },
+      pt: { fatal: 'O jogo parou: faltou memória ou ocorreu um erro interno.', reload: 'Recarregar', download: 'Baixando o jogo…', fail: 'Falha ao carregar', lost: 'Contexto gráfico perdido, recarregando…', rotate: 'Gire o aparelho para jogar na horizontal →', import: 'Importar M.U.G.E.N', close: 'Fechar' },
+      es: { fatal: 'El juego se detuvo: se quedó sin memoria o tuvo un error interno.', reload: 'Recargar', download: 'Descargando el juego…', fail: 'Error al cargar', lost: 'Contexto gráfico perdido, recargando…', rotate: 'Gira el dispositivo para jugar en horizontal →', import: 'Importar M.U.G.E.N', close: 'Cerrar' },
+      en: { fatal: 'The game stopped: it ran out of memory or hit an internal error.', reload: 'Reload', download: 'Downloading the game…', fail: 'Failed to load', lost: 'Graphics context lost, reloading…', rotate: 'Rotate your device to play in landscape →', import: 'Import M.U.G.E.N', close: 'Close' },
     };
     const tx = TEXTS[(navigator.language || 'en').slice(0, 2)] || TEXTS.en;
     document.documentElement.lang = (navigator.language || 'en');
@@ -56,8 +56,9 @@
     document.getElementById('rottx').textContent = tx.rotate;
     const dismissRot = () => { rot.classList.add('off'); try { sessionStorage.setItem('ume-rot-dismissed', '1'); } catch (e) {} };
     if (rotSeen) rot.classList.add('off');
-    document.getElementById('rotx').addEventListener('click', dismissRot);
-    setTimeout(dismissRot, 6000);
+    const rotateClose = document.getElementById('rotx');
+    rotateClose.setAttribute('aria-label', tx.close);
+    rotateClose.addEventListener('click', dismissRot);
     document.getElementById('imp').setAttribute('aria-label', tx.import);
     const boot = document.getElementById('boot'), barBox = document.getElementById('bar'), bar = barBox.querySelector('i'), msg = document.getElementById('bootmsg');
     const setProgress = (pct) => { bar.style.width = pct + '%'; barBox.setAttribute('aria-valuenow', String(Math.round(pct))); };

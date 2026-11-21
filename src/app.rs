@@ -36,7 +36,7 @@ mod update_banner;
 mod results_stats;
 mod select_category;
 mod select_grid;
-mod select_roster; mod select_cursor;
+mod select_roster; mod select_cursor; mod select_scroll;
 mod select_palette; mod select_stats; mod select_search; mod select_mode; mod select_chips; mod select_profile; mod select_tags; mod select_view; mod text_fit; mod select_marks; mod select_author;
 mod versus; mod versus_compare; mod vs_epic; mod vs_emblem;
 mod menu_view; mod menu_icons;
@@ -1232,19 +1232,7 @@ impl App {
                 );
             }
         }
-        if total_rows > self.grid_rows() {
-            let bx = gx + gw + 3.0;
-            self.ui
-                .rect(bx, gy, 5.0, gh, Color::new(1.0, 1.0, 1.0, 0.1));
-            let th = (gh * self.grid_rows() as f32 / total_rows as f32).max(18.0);
-            self.ui.rect(
-                bx,
-                gy + (gh - th) * self.sel_row as f32 / (total_rows - self.grid_rows()) as f32,
-                5.0,
-                th,
-                hex("#ff4d6d"),
-            );
-        }
+        self.roster_scroll_thumb(gx, gy, gw, gh, total_rows);
         let pulse = 0.5 + 0.5 * (self.ui.t * 7.0).sin();
         for side in 0..2 {
             if !active[side] {

@@ -28,6 +28,7 @@ pub mod compile;
 mod frame_form;
 mod frame_raster;
 pub mod effects;
+mod decode_cache;
 mod pixel;
 mod air_variant;
 mod air_normals;

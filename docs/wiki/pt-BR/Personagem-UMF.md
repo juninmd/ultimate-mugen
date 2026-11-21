@@ -326,3 +326,11 @@ Os pacotes de sprites do navegador carregam de forma assíncrona. Um pacote novo
 ## Compartilhar um lutador como pacote
 
 Um zip (ou pasta `mugen/`) com um `.json` UMF ao lado de uma pasta `sprites/` com `01_idle.png`, os PNGs das poses e um `meta.json` opcional (`axisX`, `axisY`, `refHeight` por pose) é importado como lutador nativo, sem `.def`. O mercado instala como qualquer outro pacote. O [Goku SSJ4 UMF](https://github.com/juninmd/mugen-assets/tree/main/umf/Goku_SSJ4_UMF) é o exemplo de referência.
+
+### Paridade com M.U.G.E.N
+
+`.agents/skills/mugen-to-ume-migrator/scripts/mugen2umf.py` converte uma pasta M.U.G.E.N nesse pacote. Ele mantém o visual e o jogo do original com três campos:
+
+- `stats.height` igual ao `refHeight` do `meta.json` desenha os sprites 1:1, no tamanho original.
+- `art.style.boxes: "exact"` usa `hit.box` (Clsn1) e o `hurt` de cada quadro (Clsn2) como escritos, sem recorte automático.
+- `moves[].sounds: [{ "at": 3, "snd": [2, 1] }]` toca `sprites/snd_2_1.wav` no quadro 3 (listado em `sounds` do `meta.json`); `"fight": true` toca dos sons de luta do motor.

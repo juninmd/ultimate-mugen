@@ -866,15 +866,51 @@
     "chain_ajab2": {"frames":["jumpTop*1",{"pose":"ajab","ticks":3,"hit":{"part":"handF","radius":11}},"akick*3","jumpTop*-1"]}
   },
   "moves": [
-    {"id":"jab","name":"Gauntlet Jab","input":"x","kind":"normal","anim":"jab","hits":[{"at":2,"damage":28,"level":"light"}],"cancels":["lkick","strong","launcher","overhead","slide","string_a"]},
-    {"id":"strong","name":"Imperial Cross","input":"y","kind":"normal","anim":"strong","hits":[{"at":3,"damage":58,"level":"medium"}],"cancels":["royallance","bastion","seize","overhead"]},
-    {"id":"lkick","name":"Greave Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":32,"level":"light"}],"cancels":["strong","hkick","launcher","slide"]},
-    {"id":"hkick","name":"Crown Roundhouse","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":76,"level":"heavy"}]},
-    {"id":"cjab","name":"Low Gauntlet","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":25,"level":"light"}]},
-    {"id":"clk","name":"Heel Check","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":32,"level":"light","guard":"low"}]},
-    {"id":"sweep","name":"Royal Sweep","input":"b","kind":"normal","anim":"sweep","when":"crouch","hits":[{"at":2,"damage":68,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-4]}]},
-    {"id":"ajab","name":"Descending Fist","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":36,"level":"light","guard":"high"}]},
-    {"id":"akick","name":"Scepter Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":61,"level":"medium","guard":"high"}]},
+    {
+      "id": "jab",
+      "name": "Gauntlet Jab",
+      "input": "x",
+      "kind": "normal",
+      "anim": "jab",
+      "hits": [{"at":2,"damage":28,"level":"light"}],
+      "cancels": ["lkick","strong","launcher","overhead","slide","string_a"],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {
+      "id": "strong",
+      "name": "Imperial Cross",
+      "input": "y",
+      "kind": "normal",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":58,"level":"medium"}],
+      "cancels": ["royallance","bastion","seize","overhead"],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {
+      "id": "lkick",
+      "name": "Greave Kick",
+      "input": "a",
+      "kind": "normal",
+      "anim": "lkick",
+      "hits": [{"at":2,"damage":32,"level":"light"}],
+      "cancels": ["strong","hkick","launcher","slide"],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {"id":"hkick","name":"Crown Roundhouse","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":76,"level":"heavy"}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {"id":"cjab","name":"Low Gauntlet","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":25,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"clk","name":"Heel Check","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":32,"level":"light","guard":"low"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {
+      "id": "sweep",
+      "name": "Royal Sweep",
+      "input": "b",
+      "kind": "normal",
+      "anim": "sweep",
+      "when": "crouch",
+      "hits": [{"at":2,"damage":68,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-4]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {"id":"ajab","name":"Descending Fist","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":36,"level":"light","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"akick","name":"Scepter Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":61,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
       "id": "royallance",
       "name": "Crimson Royal Lance",
@@ -883,7 +919,8 @@
       "anim": "royalLance",
       "simple": "sp1",
       "projectile": {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[7.5,0],"offset":[46,-68],"damage":66,"element":"fire"},
-      "cancels": ["lancewall"]
+      "cancels": ["lancewall"],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "sovereign",
@@ -894,7 +931,8 @@
       "simple": "sp2",
       "invuln": [1,3],
       "moves": [{"at":2,"vel":[2.2,-9]}],
-      "hits": [{"at":2,"damage":70,"level":"heavy","launch":true,"element":"fire"},{"at":3,"damage":40,"level":"heavy","element":"fire"}]
+      "hits": [{"at":2,"damage":70,"level":"heavy","launch":true,"element":"fire"},{"at":3,"damage":40,"level":"heavy","element":"fire"}],
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "thronebreaker",
@@ -904,7 +942,8 @@
       "anim": "thronebreaker",
       "simple": "sp3",
       "moves": [{"at":2,"vel":[3.6,-6.4]}],
-      "hits": [{"at":3,"damage":84,"level":"heavy","guard":"high","shake":8,"element":"fire"}]
+      "hits": [{"at":3,"damage":84,"level":"heavy","guard":"high","shake":8,"element":"fire"}],
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "dominion",
@@ -915,7 +954,8 @@
       "cost": 1000,
       "simple": "super",
       "invuln": [1,3],
-      "projectile": {"at":3,"anim":"dominionBeam","hitAnim":"dominionHit","speed":[14,0],"offset":[44,-68],"damage":60,"hits":7,"removeTime":60,"level":"heavy","launch":true,"priority":6,"element":"fire"}
+      "projectile": {"at":3,"anim":"dominionBeam","hitAnim":"dominionHit","speed":[14,0],"offset":[44,-68],"damage":60,"hits":7,"removeTime":60,"level":"heavy","launch":true,"priority":6,"element":"fire"},
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "lancewall",
@@ -928,10 +968,20 @@
         {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[5,0],"offset":[40,-60],"damage":22,"level":"medium"},
         {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[5,0],"offset":[40,-90],"damage":22,"level":"medium"}
       ],
-      "cancels": ["dominion"]
+      "cancels": ["dominion"],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
-    {"id":"bastion","name":"Royal Counter","input":"D, D, b","kind":"special","anim":"royalCounter","parry":{"window":[2,6]},"hits":[{"at":4,"damage":62,"level":"heavy","guard":"mid"}]},
-    {"id":"seize","name":"Royal Seizure","input":"y+b","kind":"normal","when":"stand","anim":"seize","throw":{"damage":100,"at":2,"bind":[32,0],"launch":[-4,-6]}},
+    {
+      "id": "bastion",
+      "name": "Royal Counter",
+      "input": "D, D, b",
+      "kind": "special",
+      "anim": "royalCounter",
+      "parry": {"window":[2,6]},
+      "hits": [{"at":4,"damage":62,"level":"heavy","guard":"mid"}],
+      "sounds": [{"at":1,"snd":[200,5]}]
+    },
+    {"id":"seize","name":"Royal Seizure","input":"y+b","kind":"normal","when":"stand","anim":"seize","throw":{"damage":100,"at":2,"bind":[32,0],"launch":[-4,-6]},"sounds":[{"at":1,"snd":[200,5]}]},
     {
       "id": "barrage",
       "name": "Crimson Barrage",
@@ -946,7 +996,8 @@
         {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[7,0],"offset":[44,-68],"damage":60,"level":"heavy","removeTime":60,"priority":6,"element":"fire"},
         {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[7,0.6],"offset":[44,-80],"damage":60,"level":"heavy","removeTime":60,"priority":6,"element":"fire"},
         {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[7,1.2],"offset":[44,-92],"damage":60,"level":"heavy","removeTime":60,"priority":6,"element":"fire"}
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "ex_royallance",
@@ -957,7 +1008,8 @@
       "projectile": [{"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[9.4,0],"offset":[46,-68],"damage":85.8,"hits":2,"priority":2,"level":"heavy","element":"fire"}],
       "cancels": ["lancewall"],
       "cost": 250,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ex_sovereign",
@@ -969,7 +1021,8 @@
       "moves": [{"at":2,"vel":[2.2,-9]}],
       "hits": [{"at":2,"damage":91,"level":"heavy","launch":true,"element":"fire"},{"at":3,"damage":52,"level":"heavy","element":"fire"}],
       "cost": 500,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "ult_barrage",
@@ -986,10 +1039,20 @@
         {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[7,0.6],"offset":[44,-80],"damage":72,"level":"heavy","removeTime":60,"priority":6,"hits":3,"element":"fire"},
         {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[7,1.2],"offset":[44,-92],"damage":72,"level":"heavy","removeTime":60,"priority":6,"hits":3,"element":"fire"}
       ],
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
-    {"id":"overhead","name":"Crown Breaker","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":72.2,"level":"medium","guard":"high","hitstun":20}]},
-    {"id":"launcher","name":"Throne Launcher","input":"y","kind":"normal","when":"crouch","anim":"strong","hits":[{"at":3,"damage":58,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22}]},
+    {"id":"overhead","name":"Crown Breaker","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":72.2,"level":"medium","guard":"high","hitstun":20}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {
+      "id": "launcher",
+      "name": "Throne Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":58,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
     {
       "id": "divekick",
       "name": "Conqueror Drop",
@@ -998,7 +1061,8 @@
       "anim": "akick",
       "when": "air",
       "hits": [{"at":2,"damage":67.1,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}],
-      "moves": [{"at":1,"vel":[1.8,2.5]}]
+      "moves": [{"at":1,"vel":[1.8,2.5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "slide",
@@ -1008,7 +1072,8 @@
       "anim": "sweep",
       "when": "stand",
       "hits": [{"at":2,"damage":57.8,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5]}],
-      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}]
+      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "escape_burst",
@@ -1020,7 +1085,8 @@
       "cost": 500,
       "burst": true,
       "invuln": [1,3],
-      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}]
+      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "shoulder",
@@ -1030,7 +1096,8 @@
       "anim": "strong",
       "armor": {"hits":1},
       "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[0.8,0]}],
-      "hits": [{"at":3,"damage":69.6,"level":"heavy","wallBounce":true,"knockback":[-5,-2]}]
+      "hits": [{"at":3,"damage":69.6,"level":"heavy","wallBounce":true,"knockback":[-5,-2]}],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "meteordrop",
@@ -1040,7 +1107,8 @@
       "when": "air",
       "anim": "akick",
       "moves": [{"at":1,"vel":[1.2,3.5]}],
-      "hits": [{"at":2,"damage":79.3,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}]
+      "hits": [{"at":2,"damage":79.3,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab2",
@@ -1051,7 +1119,8 @@
       "hits": [{"at":2,"damage":25,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["royallance","sovereign"],
-      "rekka": {"after":["jab"],"window":[1,20],"contact":true}
+      "rekka": {"after":["jab"],"window":[1,20],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab3",
@@ -1062,7 +1131,8 @@
       "hits": [{"at":2,"damage":52,"level":"medium","knockback":[-3,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["royallance","sovereign"],
-      "rekka": {"after":["jab2"],"window":[1,13],"contact":true}
+      "rekka": {"after":["jab2"],"window":[1,13],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick2",
@@ -1073,7 +1143,8 @@
       "hits": [{"at":2,"damage":29,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["royallance","sovereign"],
-      "rekka": {"after":["lkick"],"window":[1,21],"contact":true}
+      "rekka": {"after":["lkick"],"window":[1,21],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick3",
@@ -1084,7 +1155,8 @@
       "hits": [{"at":2,"damage":57,"level":"medium","knockback":[-3.5,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["royallance","sovereign"],
-      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true}
+      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong2",
@@ -1095,7 +1167,8 @@
       "hits": [{"at":2,"damage":49,"level":"medium","knockback":[-4,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["royallance","sovereign"],
-      "rekka": {"after":["strong"],"window":[4,31],"contact":true}
+      "rekka": {"after":["strong"],"window":[4,31],"contact":true},
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "cjab2",
@@ -1106,7 +1179,8 @@
       "hits": [{"at":2,"damage":23,"level":"light","knockback":[-0.5,0]}],
       "when": "crouch",
       "cancels": [],
-      "rekka": {"after":["cjab"],"window":[1,18],"contact":true}
+      "rekka": {"after":["cjab"],"window":[1,18],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "ajab2",
@@ -1117,7 +1191,8 @@
       "hits": [{"at":2,"damage":32,"level":"light","guard":"high"}],
       "when": "air",
       "cancels": [],
-      "rekka": {"after":["ajab"],"window":[1,18],"contact":true}
+      "rekka": {"after":["ajab"],"window":[1,18],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_a",
@@ -1127,7 +1202,8 @@
       "anim": "stringA",
       "hits": [{"at":3,"damage":50,"level":"medium","knockback":[-0.5,0]},{"at":6,"damage":60,"level":"medium"}],
       "moves": [{"at":1,"vel":[1.3,0]},{"at":6,"vel":[0.5,0]}],
-      "cancels": ["string_b","string_c","royallance","sovereign"]
+      "cancels": ["string_b","string_c","royallance","sovereign"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_b",
@@ -1137,7 +1213,8 @@
       "anim": "stringB",
       "hits": [{"at":2,"damage":34,"level":"light","knockback":[-0.5,0]},{"at":5,"damage":76,"level":"medium","guard":"high"}],
       "moves": [{"at":1,"vel":[1,0]},{"at":5,"vel":[0.5,0]}],
-      "cancels": ["string_c","royallance","sovereign"]
+      "cancels": ["string_c","royallance","sovereign"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_c",
@@ -1148,16 +1225,18 @@
       "hits": [{"at":3,"damage":112,"level":"heavy","wallBounce":true,"knockback":[-5,-2],"hitstun":22}],
       "moves": [{"at":1,"vel":[2,0]},{"at":3,"vel":[0.5,0]}],
       "cancels": ["royallance","sovereign"],
-      "armor": {"hits":1,"threshold":80}
+      "armor": {"hits":1,"threshold":80},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"hkick","hits":[{"at":3,"damage":68,"level":"heavy"}]},
+    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"hkick","hits":[{"at":3,"damage":68,"level":"heavy"}],"sounds":[{"at":2,"snd":[200,2]}]},
     {
       "id": "royallance_slow",
       "name": "Crimson Royal Lance Slow",
       "input": "~D, DB, B, y",
       "kind": "special",
       "anim": "royalLance",
-      "projectile": {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[4.13,0],"offset":[46,-68],"damage":89,"element":"fire","hits":2,"level":"heavy","removeTime":150,"priority":2}
+      "projectile": {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[4.13,0],"offset":[46,-68],"damage":89,"element":"fire","hits":2,"level":"heavy","removeTime":150,"priority":2},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "royallance_low",
@@ -1165,7 +1244,8 @@
       "input": "~D, DB, B, x",
       "kind": "special",
       "anim": "royalLance",
-      "projectile": {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[10.13,0],"offset":[46,-30],"damage":50,"element":"fire"}
+      "projectile": {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[10.13,0],"offset":[46,-30],"damage":50,"element":"fire"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "royallance_barrage",
@@ -1173,7 +1253,8 @@
       "input": "~D, DF, F, b",
       "kind": "special",
       "anim": "royalLance",
-      "projectile": {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[6,0],"offset":[46,-68],"damage":33,"element":"fire","hits":3,"level":"medium","removeTime":120}
+      "projectile": {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[6,0],"offset":[46,-68],"damage":33,"element":"fire","hits":3,"level":"medium","removeTime":120},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "royallance_high",
@@ -1181,7 +1262,8 @@
       "input": "~D, DB, B, b",
       "kind": "special",
       "anim": "royalLance",
-      "projectile": {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[8.25,0],"offset":[46,-80],"damage":56,"element":"fire"}
+      "projectile": {"at":3,"anim":"royalFx","hitAnim":"royalHit","speed":[8.25,0],"offset":[46,-80],"damage":56,"element":"fire"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
   "palettes": [

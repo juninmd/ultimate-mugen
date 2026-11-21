@@ -11,3 +11,4 @@ pub mod umf_edit;
 pub mod homologate;
 pub mod homologate_run;
 pub mod mugen_census;
+pub mod roster_audit;

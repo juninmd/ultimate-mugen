@@ -27,8 +27,10 @@ fn arc(c: Vec2, r: f32, th: f32, a0: f32, a1: f32, col: Color) {
 pub(super) fn draw<P: Fn(f32, f32) -> Vec2>(p: &P, s: f32, gt: f32, ring: Ring) {
     let c = p(ring.cx, ring.cy);
     let r = ring.r * s;
-    poly::circle(c, r + 3.2 * s, Color::new(0.03, 0.02, 0.08, 0.55));
-    poly::ring(c, r + 3.2 * s, 0.35 * s, Color::new(1.0, 1.0, 1.0, 0.35));
+    if !super::art::draw_timer_crest(c, r) {
+        poly::circle(c, r + 3.2 * s, Color::new(0.03, 0.02, 0.08, 0.55));
+        poly::ring(c, r + 3.2 * s, 0.35 * s, Color::new(1.0, 1.0, 1.0, 0.35));
+    }
     poly::ring(c, r, 1.4 * s, Color::new(1.0, 1.0, 1.0, 0.12));
     let frac = ring.frac.clamp(0.0, 1.0);
     if frac <= 0.0 {

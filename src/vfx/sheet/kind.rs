@@ -1,4 +1,4 @@
-pub(super) const KINDS: usize = 15;
+pub(super) const KINDS: usize = 17;
 
 #[derive(Clone, Copy, PartialEq)]
 pub(in crate::vfx) enum SheetKind {
@@ -17,6 +17,8 @@ pub(in crate::vfx) enum SheetKind {
     FrostNova,
     AwakenBurst,
     SuperFlash,
+    CounterFlash,
+    GuardBreak,
 }
 
 pub(super) struct SheetSpec {
@@ -45,6 +47,8 @@ const SMOKEBOMB_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_smoke_bomb.
 const FROSTNOVA_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_frost_nova.png");
 const AWAKENBURST_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_awaken_burst.png");
 const SUPERFLASH_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_super_flash.png");
+const COUNTERFLASH_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_counter_flash.png");
+const GUARDBREAK_PNG: &[u8] = include_bytes!("../../../assets/fx/pvfx_guard_break.png");
 
 const fn spec(png: &'static [u8], cell: (f32, f32), pivot: (f32, f32), cols: usize, frames: usize, millis: u32, additive: bool) -> SheetSpec {
     SheetSpec { png, cell, pivot, cols, frames, seconds: millis as f32 / 1000.0, additive, pixel_art: !additive }
@@ -72,6 +76,8 @@ impl SheetKind {
             SheetKind::FrostNova => spec(FROSTNOVA_PNG, (120.0, 76.0), (60.0, 50.0), 8, 18, 1440, false),
             SheetKind::AwakenBurst => spec(AWAKENBURST_PNG, (96.0, 112.0), (48.0, 106.0), 4, 8, 720, false),
             SheetKind::SuperFlash => spec(SUPERFLASH_PNG, (96.0, 96.0), (48.0, 48.0), 4, 16, 640, false),
+            SheetKind::CounterFlash => spec(COUNTERFLASH_PNG, (96.0, 96.0), (48.0, 48.0), 4, 8, 480, false),
+            SheetKind::GuardBreak => spec(GUARDBREAK_PNG, (96.0, 96.0), (48.0, 48.0), 4, 8, 560, false),
         }
     }
 }

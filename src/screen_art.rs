@@ -71,9 +71,15 @@ impl ScreenArt {
             };
             let color = match self {
                 Self::Menu => Color::new(0.68, 0.67, 0.76, opacity),
-                Self::Loading | Self::Results | Self::Records | Self::Market | Self::Archive => {
-                Self::Loading | Self::Results | Self::Records | Self::Workshop | Self::Lab => {
-                Self::Loading | Self::Results | Self::Records | Self::Story | Self::Tower => {
+                Self::Loading
+                | Self::Results
+                | Self::Records
+                | Self::Market
+                | Self::Archive
+                | Self::Workshop
+                | Self::Lab
+                | Self::Story
+                | Self::Tower => {
                     Color::new(0.62, 0.61, 0.7, opacity)
                 }
                 Self::Select => Color::new(0.65, 0.65, 0.74, opacity),

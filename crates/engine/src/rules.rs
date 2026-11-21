@@ -1,5 +1,8 @@
 use crate::chardef::{CharDef, Source};
 
+pub const CHARGE_STATE: i32 = 3920;
+pub const CHARGE_COMMAND: &str = "charge_cmd";
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FighterRules {
     pub combo_damage_scaling: bool,

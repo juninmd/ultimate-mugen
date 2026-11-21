@@ -1,5 +1,5 @@
 use crate::matchs::Match;
-use crate::native::{CHARGE_COMMAND, CHARGE_STATE};
+use crate::rules::{CHARGE_COMMAND, CHARGE_STATE};
 
 const MINIMUM_LEVEL: i32 = 3;
 const CHARGE_BELOW_POWER: f32 = 700.0;

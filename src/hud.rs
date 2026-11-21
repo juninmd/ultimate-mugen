@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod elements; mod advantage; mod advantage_draw; mod announce_text; mod art; mod badge_art; mod combo_tier; mod danger; mod dialogue_art; mod energy; mod energy_art; mod guard; mod palette; mod opacity; mod life_art; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
+mod elements; mod advantage; mod advantage_draw; mod announce_text; mod art; mod badge_art; mod combo_tier; mod danger; mod dialogue_art; mod energy; mod energy_art; mod guard; mod palette; mod opacity; mod life_art; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod form_steps; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -439,6 +439,7 @@ impl Hud {
                         poly::outline(&chip, 0.5 * s, poly::with_a(col, if ready { 0.95 } else { 0.45 }));
                         text(&lbl, tx, cy + 0.95, 3.8, col, al, true);
                     }
+                    form_steps::draw(&form_steps::Row { p: &p, text: &text, s, gt, side, x: bx, y: py + ph2 + 1.2, w: bw, colors }, f);
                 }
             }
             let strip_y = 30.5;

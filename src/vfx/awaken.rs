@@ -119,7 +119,7 @@ impl Vfx {
         self.vig = 0.3;
         self.lines = 0.8;
         self.lines_col = col;
-        self.sfx.push("transform");
+        self.sfx.push(match m.fighters.iter().find(|f| f.id == fighter).map_or(1, |f| f.form) { 0..=1 => "transform", 2 => "transform2", _ => "transform3" });
     }
 
     fn on_potential(&mut self, f: &ume_engine::fighter::Fighter) {

@@ -969,13 +969,55 @@
       "simple": "super",
       "moves": [{"at":1,"vel":[0,-6]}],
       "projectile": [
-        {"at":2,"anim":"tempestFx","hitAnim":"windHit","speed":[8,2.4],"offset":[36,-66],"damage":40,"level":"medium","launch":false,"hits":3,"element":"wind"},
-        {"at":3,"anim":"tempestFx","hitAnim":"windHit","speed":[8,2.1999999999999997],"offset":[36,-63],"damage":40,"level":"medium","launch":false,"hits":3,"element":"wind"},
-        {"at":4,"anim":"tempestFx","hitAnim":"windHit","speed":[8,2],"offset":[36,-60],"damage":40,"level":"medium","launch":false,"hits":3,"element":"wind"},
-        {"at":5,"anim":"tempestFx","hitAnim":"windHit","speed":[8,1.7999999999999998],"offset":[36,-57],"damage":40,"level":"medium","launch":false,"hits":3,"element":"wind"},
-        {"at":6,"anim":"tempestFx","hitAnim":"windHit","speed":[8,1.5999999999999999],"offset":[36,-54],"damage":40,"level":"medium","launch":true,"hits":3,"element":"wind"}
+        {"at":2,"anim":"tempestFx","hitAnim":"windHit","speed":[8,2.4],"offset":[36,-66],"damage":40,"level":"medium","launch":false,"hits":3,"element":"wind","missTime":3,"hitflag":"MAFP"},
+        {
+          "at": 3,
+          "anim": "tempestFx",
+          "hitAnim": "windHit",
+          "speed": [8,2.1999999999999997],
+          "offset": [36,-63],
+          "damage": 40,
+          "level": "medium",
+          "launch": false,
+          "hits": 3,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {"at":4,"anim":"tempestFx","hitAnim":"windHit","speed":[8,2],"offset":[36,-60],"damage":40,"level":"medium","launch":false,"hits":3,"element":"wind","missTime":3,"hitflag":"MAFP"},
+        {
+          "at": 5,
+          "anim": "tempestFx",
+          "hitAnim": "windHit",
+          "speed": [8,1.7999999999999998],
+          "offset": [36,-57],
+          "damage": 40,
+          "level": "medium",
+          "launch": false,
+          "hits": 3,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 6,
+          "anim": "tempestFx",
+          "hitAnim": "windHit",
+          "speed": [8,1.5999999999999999],
+          "offset": [36,-54],
+          "damage": 40,
+          "level": "medium",
+          "launch": true,
+          "hits": 3,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[6,26,26],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[120,245,235]}
     },
     {
       "id": "shadowslash",
@@ -996,7 +1038,10 @@
         {"at":8,"damage":46,"level":"light"},
         {"at":9,"damage":60,"level":"heavy","launch":true,"knockback":[-3,-8]}
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[6,26,26],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[120,245,235]}
     },
     {
       "id": "ex_chakram",
@@ -1042,7 +1087,10 @@
         {"at":9,"damage":72,"level":"heavy","launch":true,"knockback":[-3,-8]}
       ],
       "fx": "aura",
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[6,26,26],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[120,245,235]}
     },
     {"id":"overhead","name":"Scarf Whip","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":53.2,"level":"medium","guard":"high","hitstun":20}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
@@ -1356,6 +1404,24 @@
         ],
         "replaceMoves": false
       }
-    ]
+    ],
+    "charge": {"auraColor":[25,105,100],"shake":true}
+  },
+  "profile": {
+    "country": "JP",
+    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "origin": {"en":"Windmill Village, Iga","pt":"Vila Moinho de Vento, Iga","es":"Aldea Molino de Viento, Iga"},
+    "title": {"en":"Crimson Scarf Shinobi","pt":"Shinobi do Cachecol Carmesim","es":"Shinobi de la Bufanda Carmesí"},
+    "fightingStyle": {"en":"Kazaguruma Wind Ninjutsu","pt":"Ninjutsu do Vento Kazaguruma","es":"Ninjutsu del Viento Kazaguruma"},
+    "affiliation": {"en":"Kazaguruma Clan","pt":"Clã Kazaguruma","es":"Clan Kazaguruma"},
+    "bio": {
+      "en": "A young red-scarved shinobi who spins wind chakrams and vanishes into cyclone afterimages.",
+      "pt": "Um jovem shinobi de cachecol vermelho que gira chakrams de vento e desaparece em miragens de ciclone.",
+      "es": "Un joven shinobi de bufanda roja que gira chakrams de viento y desaparece en espejismos ciclónicos."
+    },
+    "element": "wind",
+    "weakness": "lightning",
+    "alignment": "hero",
+    "tags": ["rushdown","shinobi","super-speed","aerial"]
   }
 }

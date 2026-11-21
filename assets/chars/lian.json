@@ -1019,7 +1019,10 @@
         {"at":7,"damage":36,"level":"light","hitstun":22,"knockback":[-1.2,0],"element":"wind"},
         {"at":8,"damage":110,"level":"heavy","launch":true,"knockback":[-3,-8],"shake":10,"element":"wind"}
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[8,28,18],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[130,250,190]}
     },
     {
       "id": "flow",
@@ -1055,11 +1058,56 @@
       "anim": "storm",
       "invuln": [1,2],
       "projectile": [
-        {"at":4,"anim":"petalFx","hitAnim":"petalHit","speed":[5,0],"damage":50,"level":"medium","hits":8,"removeTime":200,"offset":[40,-96],"knockback":[0,0],"element":"wind"},
-        {"at":4,"anim":"petalFx","hitAnim":"petalHit","speed":[5,0],"damage":50,"level":"medium","hits":8,"removeTime":200,"offset":[40,-60],"knockback":[0,0],"element":"wind"},
-        {"at":4,"anim":"petalFx","hitAnim":"petalHit","speed":[5,0],"damage":50,"level":"medium","hits":8,"removeTime":200,"offset":[40,-24],"knockback":[0,0],"element":"wind"}
+        {
+          "at": 4,
+          "anim": "petalFx",
+          "hitAnim": "petalHit",
+          "speed": [5,0],
+          "damage": 50,
+          "level": "medium",
+          "hits": 8,
+          "removeTime": 200,
+          "offset": [40,-96],
+          "knockback": [0,0],
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "petalFx",
+          "hitAnim": "petalHit",
+          "speed": [5,0],
+          "damage": 50,
+          "level": "medium",
+          "hits": 8,
+          "removeTime": 200,
+          "offset": [40,-60],
+          "knockback": [0,0],
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "petalFx",
+          "hitAnim": "petalHit",
+          "speed": [5,0],
+          "damage": 50,
+          "level": "medium",
+          "hits": 8,
+          "removeTime": 200,
+          "offset": [40,-24],
+          "knockback": [0,0],
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[8,28,18],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[130,250,190]}
     },
     {"id":"hurl","name":"Jade Hurl","input":"y+b","kind":"normal","when":"stand","anim":"hurl","throw":{"damage":84,"bind":[30,0],"launch":[-4,-5],"at":1},"sounds":[{"at":1,"snd":[200,5]}]},
     {
@@ -1094,13 +1142,58 @@
       "anim": "stormUlt",
       "invuln": [1,6],
       "projectile": [
-        {"at":4,"anim":"petalFx","hitAnim":"petalHit","speed":[5,0],"damage":60,"level":"medium","hits":10,"removeTime":200,"offset":[40,-96],"knockback":[0,0],"element":"wind"},
-        {"at":4,"anim":"petalFx","hitAnim":"petalHit","speed":[5,0],"damage":60,"level":"medium","hits":10,"removeTime":200,"offset":[40,-60],"knockback":[0,0],"element":"wind"},
-        {"at":4,"anim":"petalFx","hitAnim":"petalHit","speed":[5,0],"damage":60,"level":"medium","hits":10,"removeTime":200,"offset":[40,-24],"knockback":[0,0],"element":"wind"}
+        {
+          "at": 4,
+          "anim": "petalFx",
+          "hitAnim": "petalHit",
+          "speed": [5,0],
+          "damage": 60,
+          "level": "medium",
+          "hits": 10,
+          "removeTime": 200,
+          "offset": [40,-96],
+          "knockback": [0,0],
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "petalFx",
+          "hitAnim": "petalHit",
+          "speed": [5,0],
+          "damage": 60,
+          "level": "medium",
+          "hits": 10,
+          "removeTime": 200,
+          "offset": [40,-60],
+          "knockback": [0,0],
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "petalFx",
+          "hitAnim": "petalHit",
+          "speed": [5,0],
+          "damage": 60,
+          "level": "medium",
+          "hits": 10,
+          "removeTime": 200,
+          "offset": [40,-24],
+          "knockback": [0,0],
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
       "cost": 3000,
       "fx": "aura",
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[8,28,18],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[130,250,190]}
     },
     {
       "id": "overhead",
@@ -1397,7 +1490,25 @@
         ],
         "replaceMoves": false
       }
-    ]
+    ],
+    "charge": {"auraColor":[30,105,70],"shake":true}
   },
-  "speed": 1.12
+  "speed": 1.12,
+  "profile": {
+    "country": "CN",
+    "nationality": {"en":"Chinese","pt":"Chinesa","es":"China"},
+    "origin": {"en":"Jade Lantern Pavilion","pt":"Pavilhão Lanterna de Jade","es":"Pabellón Linterna de Jade"},
+    "title": {"en":"Youngest Master of Jade Lantern","pt":"Mestra mais Jovem da Lanterna de Jade","es":"Maestra más Joven de la Linterna de Jade"},
+    "fightingStyle": {"en":"Jade Lantern Kung Fu","pt":"Kung Fu Lanterna de Jade","es":"Kung Fu Linterna de Jade"},
+    "affiliation": {"en":"Jade Lantern School","pt":"Escola Lanterna de Jade","es":"Escuela Linterna de Jade"},
+    "bio": {
+      "en": "The youngest master of the Jade Lantern school, whose emerald kicks bend the wind itself.",
+      "pt": "A mestra mais jovem da escola Lanterna de Jade, cujos chutes dobram o próprio vento.",
+      "es": "La maestra más joven de la escuela Linterna de Jade, cuyas patadas doblan el viento."
+    },
+    "element": "wind",
+    "weakness": "ice",
+    "alignment": "hero",
+    "tags": ["kicker","jade","aerial","combo"]
+  }
 }

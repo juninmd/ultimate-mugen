@@ -67,9 +67,9 @@ pub fn tree_request(repo: &RepoRef, etag: Option<&str>, token: Option<&str>) -> 
     }
 }
 
-pub fn file_request(repo: &RepoRef, path: &str, max_bytes: u64) -> Request {
+pub fn file_request(repo: &RepoRef, path: &str, sha: &str, max_bytes: u64) -> Request {
     Request {
-        url: format!("https://raw.githubusercontent.com/{}/{}/{}/{}", repo.owner, repo.name, percent_encode_path(repo.git_ref()), percent_encode_path(path)),
+        url: format!("https://raw.githubusercontent.com/{}/{}/{}/{}{}", repo.owner, repo.name, percent_encode_path(repo.git_ref()), percent_encode_path(path), crate::version::cache_bust(sha)),
         etag: None,
         token: None,
         max_bytes: max_bytes.min(MAX_FILE_BYTES),
@@ -149,7 +149,7 @@ mod tests {
         let r = tree_request(&repo(), Some("\"abc\""), Some("tok"));
         assert_eq!(r.url, "https://api.github.com/repos/a/b/git/trees/HEAD?recursive=1");
         assert_eq!((r.etag.as_deref(), r.token.as_deref()), (Some("\"abc\""), Some("tok")));
-        let f = file_request(&RepoRef::parse("a/b/tree/dev/x").unwrap(), "chars/My Char/a#b.def", 10);
+        let f = file_request(&RepoRef::parse("a/b/tree/dev/x").unwrap(), "chars/My Char/a#b.def", "", 10);
         assert_eq!(f.url, "https://raw.githubusercontent.com/a/b/dev/chars/My%20Char/a%23b.def");
         assert!(f.token.is_none());
         assert!(check_request(&f).is_ok());

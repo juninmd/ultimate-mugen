@@ -8,6 +8,10 @@ use ume_market::bundle::{self, Files};
 use ume_market::ops::Progress;
 use ume_market::persist::{catalog_key, item_key, STATE_KEY};
 use ume_market::safety::lower_ext;
+mod describe;
+mod update;
+pub use describe::describe;
+use update::installed_notice;
 use ume_market::{Catalog, Installed, Item, Kind, MarketError, MarketState, Persist, RepoRef};
 
 pub const SUGGESTED: [(&str, &str); 1] = [(
@@ -44,30 +48,6 @@ type Queue = Arc<Mutex<VecDeque<Event>>>;
 fn push(queue: &Queue, e: Event) {
     if let Ok(mut q) = queue.lock() {
         q.push_back(e);
-    }
-}
-
-pub fn describe(e: &MarketError) -> String {
-    match e {
-        MarketError::Network(m) => format!("{}: {m}", crate::i18n::tr3("Falha de rede", "Network error", "Error de red")),
-        MarketError::NotFound => {
-            crate::i18n::tr3("Repositório ou arquivo não encontrado (repositórios privados não são suportados).", "Repository or file not found (private repositories are not supported).", "Repositorio o archivo no encontrado (los repositorios privados no son compatibles).").into()
-        }
-        MarketError::RateLimited {
-            reset_epoch: Some(t),
-        } => {
-            let wait = t.saturating_sub(ume_market::now_secs()).div_ceil(60);
-            crate::i18n::fill(crate::i18n::tr3("Limite de requisições do GitHub atingido; tente em ~{wait} min ou informe um token.", "GitHub rate limit reached; try again in ~{wait} min or provide a token.", "Límite de peticiones de GitHub alcanzado; prueba en ~{wait} min o indica un token."), &[("wait", &wait.to_string())])
-        }
-        MarketError::RateLimited { reset_epoch: None } => {
-            crate::i18n::tr3("Limite de requisições do GitHub atingido; tente mais tarde ou informe um token.", "GitHub rate limit reached; try again later or provide a token.", "Límite de peticiones de GitHub alcanzado; prueba más tarde o indica un token.").into()
-        }
-        MarketError::Forbidden => crate::i18n::tr3("Acesso negado pelo GitHub.", "Access denied by GitHub.", "Acceso denegado por GitHub.").into(),
-        MarketError::Http(c) => format!("{} (HTTP {c}).", crate::i18n::tr3("Resposta inesperada do GitHub", "Unexpected GitHub response", "Respuesta inesperada de GitHub")),
-        MarketError::TooLarge => crate::i18n::tr3("Download maior que o limite permitido.", "Download exceeds the allowed limit.", "La descarga supera el límite permitido.").into(),
-        MarketError::Invalid(m) => m.clone(),
-        MarketError::HostNotAllowed => crate::i18n::tr3("Bloqueado: só é permitido baixar de github.com.", "Blocked: downloads are only allowed from github.com.", "Bloqueado: solo se permite descargar de github.com.").into(),
-        MarketError::Cancelled => "Cancelado.".into(),
     }
 }
 
@@ -109,6 +89,7 @@ pub struct Market {
     track_cursor: usize,
     to_register: Vec<(String, Vfs)>,
     to_remove: Vec<String>,
+    auto_checked: u64,
     #[cfg(target_arch = "wasm32")]
     web: Arc<ume_market::web::WebPersist>,
 }
@@ -153,6 +134,7 @@ impl Market {
             track_cursor: 0,
             to_register: Vec::new(),
             to_remove: Vec::new(),
+            auto_checked: 0,
             #[cfg(target_arch = "wasm32")]
             web: Arc::new(ume_market::web::WebPersist::new()),
         }
@@ -246,7 +228,7 @@ impl Market {
             return;
         };
         let (repo, saved_etag) = (rec.repo.clone(), rec.etag.clone());
-        let etag = if self.catalog(key).is_some() {
+        let etag = if self.catalog(key).is_some_and(|c| !ume_market::version::has_unversioned(&c.items)) {
             saved_etag
         } else {
             None
@@ -470,6 +452,7 @@ impl Market {
         for e in events {
             self.handle(e);
         }
+        self.auto_check();
     }
 
     fn handle(&mut self, e: Event) {
@@ -488,6 +471,7 @@ impl Market {
                                 r.listed_at = ume_market::now_secs();
                             }
                             self.save_state();
+                            self.queue_updates(&repo_key);
                         } else {
                             if let Some(r) = self.state.repo_mut(&repo_key) {
                                 r.etag = None;
@@ -512,8 +496,9 @@ impl Market {
                         } else {
                             format!("{} itens encontrados.", catalog.items.len())
                         };
-                        self.catalogs.insert(repo_key, catalog);
+                        self.catalogs.insert(repo_key.clone(), catalog);
                         self.save_state();
+                        self.queue_updates(&repo_key);
                     }
                 }
             }
@@ -523,6 +508,7 @@ impl Market {
                 files,
             } => {
                 self.current = None;
+                let prior = self.prior_active(&repo_key, &item.id);
                 let entry = Installed {
                     repo_key: repo_key.clone(),
                     item_id: item.id.clone(),
@@ -530,8 +516,9 @@ impl Market {
                     name: item.name.clone(),
                     bytes: item.bytes,
                     files: files.len(),
-                    active: true,
+                    active: prior.unwrap_or(true),
                     installed_at: ume_market::now_secs(),
+                    version: item.version.clone(),
                 };
                 let tag = entry.tag();
                 self.registered.remove(&tag);
@@ -539,8 +526,8 @@ impl Market {
                 self.save_state();
                 self.requested.remove(&tag);
                 self.to_remove.push(tag.clone());
-                self.register(&tag, item.kind, files);
-                self.notice = format!("Instalado: {}", item.name);
+                self.register_if_active(&tag, item.kind, files, prior);
+                self.notice = installed_notice(prior, &item.name);
                 self.start_next();
             }
             Event::InstallFailed { name, error } => {
@@ -833,6 +820,7 @@ mod tests {
                 .map(|(p, d)| TreeEntry {
                     path: p.clone(),
                     size: d.len() as u64,
+                    ..Default::default()
                 })
                 .collect(),
             truncated: false,
@@ -938,6 +926,7 @@ mod tests {
                 entries: vec![TreeEntry {
                     path: format!("music/{name}.ogg"),
                     size: 5,
+                    ..Default::default()
                 }],
                 truncated: false,
             };

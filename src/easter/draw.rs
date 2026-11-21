@@ -1,3 +1,4 @@
+use super::particles;
 use super::sprite::draw_sprite;
 use super::{ActiveEgg, EggSprite, EggStyle};
 use crate::gfx::*;
@@ -40,6 +41,8 @@ fn draw_corner_pop(ui: &Ui, egg: &ActiveEgg) {
     let by = VH - 92.0 + (egg.t * 14.0).sin().abs() * -6.0;
     let alpha = exit;
 
+    particles::confetti_burst(ui, bx - 40.0, by - 40.0, egg.t, alpha, egg.color);
+
     let col = Color::new(egg.color[0], egg.color[1], egg.color[2], alpha);
     let tw = ui.measure(&egg.title, 26.0, true).max(ui.measure(&egg.sub, 14.0, false));
     let bw = (tw + 38.0).max(200.0);
@@ -47,6 +50,7 @@ fn draw_corner_pop(ui: &Ui, egg: &ActiveEgg) {
     let py = by - 58.0;
 
     ui.rect(px, py, bw, 62.0, Color::new(0.08, 0.05, 0.14, 0.92 * alpha));
+    particles::ribbon_shimmer(ui, px, py, bw, 62.0, egg.t, alpha);
     ui.rect_lines(px, py, bw, 62.0, 3.0, col);
     ui.text_bold(
         &egg.title,
@@ -73,6 +77,7 @@ fn draw_floor_roll(ui: &Ui, egg: &ActiveEgg) {
     let vy = VH - 88.0 - bounce * if is_roller { 26.0 } else { 8.0 };
     let rot = if is_roller { p * 14.0 * if egg.flip { -1.0 } else { 1.0 } } else { 0.0 };
 
+    particles::floor_trail(ui, vx, vy, egg, alpha);
     draw_sprite(egg.sprite, ui.x(vx), ui.y(vy), 84.0 * ui.s, egg.t, alpha, egg.flip, rot);
     draw_top_ribbon(ui, egg, 0);
 }
@@ -83,6 +88,7 @@ fn draw_flyby(ui: &Ui, egg: &ActiveEgg) {
     let vx = if egg.flip { VW + 80.0 - p * (VW + 160.0) } else { -80.0 + p * (VW + 160.0) };
     let vy = 210.0 + (p * std::f32::consts::PI * 4.0).sin() * 24.0;
 
+    particles::flyby_trail(ui, vx, vy, egg, alpha);
     draw_sprite(egg.sprite, ui.x(vx), ui.y(vy), 82.0 * ui.s, egg.t, alpha, egg.flip, 0.0);
     draw_top_ribbon(ui, egg, 0);
 }
@@ -98,7 +104,12 @@ fn draw_top_ribbon(ui: &Ui, egg: &ActiveEgg, slot: usize) {
     let y = 116.0 + slot as f32 * 58.0 + slide;
     let accent = Color::new(egg.color[0], egg.color[1], egg.color[2], alpha);
 
+    if egg.sprite == EggSprite::CrownPerfect {
+        particles::confetti_burst(ui, x + w * 0.5, y + h * 0.5, egg.t, alpha * 0.85, egg.color);
+    }
+
     ui.rect(x, y, w, h, Color::new(0.06, 0.05, 0.12, 0.86 * alpha));
+    particles::ribbon_shimmer(ui, x, y, w, h, egg.t, alpha);
     ui.rect(x, y, 5.0, h, accent);
     ui.rect_lines(x, y, w, h, 2.0, Color::new(egg.color[0], egg.color[1], egg.color[2], 0.85 * alpha));
 
@@ -133,6 +144,7 @@ fn draw_speech_bubble(ui: &Ui, egg: &ActiveEgg) {
     ui.rect(x, y, w, h, Color::new(0.07, 0.06, 0.14, 0.9 * alpha));
     ui.rect(x, y, w, 4.0, accent);
     ui.rect_lines(x, y, w, h, 2.0, Color::new(1.0, 1.0, 1.0, 0.32 * alpha));
+    particles::speech_tail(ui, x, y, w, h, egg.side, accent, alpha);
 
     let align = if egg.side == 0 { Align::Left } else { Align::Right };
     let tx = if egg.side == 0 { x + 16.0 } else { x + w - 16.0 };

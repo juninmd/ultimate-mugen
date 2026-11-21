@@ -18,8 +18,9 @@ async function run() {
       case 'start': return clock.round_state === 2;
       case 'approach': return player.x < -218;
       case 'land': return player.ground <= height && player.y === player.ground && player.state === 0;
-      case 'edge': return player.x < -350 && clock.round_state === 2;
-      case 'result': return clock.winner === 1 && !player.alive && player.x < -426;
+      case 'edge': return player.x < -510 && clock.round_state === 2;
+      case 'fall': return player.state === 19903 && player.alive && player.y > 12;
+      case 'result': return clock.winner === 1 && !player.alive && player.x < -554 && player.y >= 184;
       default: return false;
     }
   }, { step, height }, { timeout: 35000 });
@@ -30,7 +31,7 @@ async function run() {
     await match.page.keyboard.down('ArrowLeft');
     await wait('approach');
     await match.page.keyboard.up('ArrowLeft');
-    for (const [height, shot] of [[-50, 'platform'], [-96, 'second-tier']]) {
+    for (const [height, shot] of [[-50, 'platform'], [-102, 'second-tier']]) {
       await match.page.keyboard.down('ArrowUp');
       await match.page.waitForTimeout(120);
       await match.page.keyboard.up('ArrowUp');
@@ -40,6 +41,8 @@ async function run() {
     await match.page.keyboard.down('ArrowLeft');
     await wait('edge');
     await match.shot('edge');
+    await wait('fall');
+    await match.shot('fall');
     await wait('result');
     await match.page.keyboard.up('ArrowLeft');
     await match.shot('ring-out');

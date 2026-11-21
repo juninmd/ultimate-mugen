@@ -2,6 +2,7 @@ use super::*;
 
 impl Match {
     pub(super) fn run_minus4_paused(&mut self, i: usize) {
+        if self.power_arena && self.fighters[i].state_no == ENGINE_STATE_ARENA_EXIT { return; }
         let own = self.fighters[i].def.clone();
         if own.states.contains_key(&-4) {
             self.run_state(i, &own, -4, true);
@@ -9,6 +10,7 @@ impl Match {
     }
 
     pub(super) fn run_states(&mut self, i: usize) {
+        if self.power_arena && self.fighters[i].state_no == ENGINE_STATE_ARENA_EXIT { return; }
         let in_pause = self.fighters[i].hit_pause > 0 || self.fighters[i].hit_shake > 0;
         {
             let f = &mut self.fighters[i];

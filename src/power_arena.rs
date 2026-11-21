@@ -28,7 +28,7 @@ pub(crate) fn draw(g: &Gfx, battle: &Match, shx: f32, shy: f32) {
     let x = |world: f32| g.ox + (world - battle.camera.x + battle.view_w / 2.0 + shx) * scale;
     let y = |world: f32| g.oy + (world - battle.camera.y + battle.stage.zoffset + shy) * scale;
     PLATFORM.with(|platform| {
-        let sections = 6;
+        let sections = 8;
         let base_width = ARENA_HALF_WIDTH * 2.0 / sections as f32;
         for section in 0..sections {
             let left = -ARENA_HALF_WIDTH + section as f32 * base_width;

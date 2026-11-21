@@ -132,7 +132,7 @@
     const input = document.getElementById('ume-file');
     if (input) input.addEventListener('change', () => { window.umeImport(input.files); input.value = ''; });
     const imp = document.getElementById('imp');
-    window.addEventListener('keydown', (e) => { if (e.key === 'Enter' && imp && imp.style.display === 'block' && input) input.click(); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.repeat && !e.defaultPrevented && e.target !== input && imp && imp.style.display === 'block' && input) input.click(); });
     window.addEventListener('dragover', (e) => e.preventDefault());
     window.addEventListener('drop', (e) => { e.preventDefault(); window.umeImport(e.dataTransfer.files); });
   };

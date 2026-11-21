@@ -227,7 +227,7 @@ pub fn build(m: &Match, i: usize, sc: &Controller) -> HitDefData {
                 num("air.velocity", 0.0, 1) * l,
             ]
         } else {
-            [gvx, gvy]
+            [0.0, 0.0]
         },
         air_guard_vel: if has("airguard.velocity", 0) {
             [

@@ -18,6 +18,11 @@ thread_local! {
 }
 
 impl App {
+    pub(crate) fn open_stages(&mut self, cur: usize) {
+        self.set_stage_filter(0, "");
+        self.screen = Screen::Stages { cur };
+    }
+
     pub(super) fn stages(&mut self) {
         let Screen::Stages { mut cur } = self.screen else {
             return;
@@ -37,7 +42,10 @@ impl App {
         let view = self.stage_view();
         let n = view.len();
         let total_rows = n.div_ceil(COLS);
-        let mut pos = view.iter().position(|&v| v == cur).unwrap_or(0);
+        let mut pos = view
+            .iter()
+            .position(|&v| v == cur)
+            .unwrap_or(usize::from(n > 1));
         let old = pos;
         if !typing {
             if self.c.pressed(nav::RIGHT) {
@@ -197,7 +205,7 @@ impl App {
         }
         self.stage_footer(pos, n, total_rows);
         cur = view[pos];
-        if ok {
+        if ok && n > 1 {
             let pool: Vec<usize> = if view.len() > 1 {
                 view[1..].iter().map(|v| v - 1).collect()
             } else {

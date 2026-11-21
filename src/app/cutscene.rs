@@ -204,8 +204,11 @@ impl App {
     }
 
     pub(crate) fn cutscene_done(&mut self, kind: u8) {
+        if kind == 0 {
+            self.open_stages(1);
+            return;
+        }
         self.screen = match kind {
-            0 => Screen::Stages { cur: 1 },
             1 | 3 | 4 => Screen::Vs { t: 0.0, step: 0 },
             5 => Screen::Cutscene { kind: 2, page: 0, t: 0.0 },
             _ => {

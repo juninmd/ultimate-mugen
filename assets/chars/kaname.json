@@ -1,1 +1,29 @@
-"format":"umf/1", "run":{"frames":[{"pose":"run0","ticks":4,"sprite":"sg_run_run0_fx"},{"pose":"run1","ticks":4,"sprite":"sg_run_run1_fx"},{"pose":"run2","ticks":4,"sprite":"sg_run_run2_fx"},{"pose":"run3","ticks":4,"sprite":"sg_run_run3_fx"}]},
+{
+  "format": "umf/2",
+  "id": "kaname",
+  "name": "Kaname",
+  "series": "Original",
+  "author": "Ultimate MUGEN",
+  "description": "",
+  "color": "#ffffff",
+  "winQuote": "",
+  "poses": {},
+  "palettes": [{}],
+  "anims": {
+    "run": {
+      "frames": [
+        {"pose":"run0","ticks":4,"sprite":"sg_run_run0_fx"},
+        {"pose":"run1","ticks":4,"sprite":"sg_run_run1_fx"},
+        {"pose":"run2","ticks":4,"sprite":"sg_run_run2_fx"},
+        {"pose":"run3","ticks":4,"sprite":"sg_run_run3_fx"}
+      ],
+      "loop": 0
+    }
+  },
+  "moves": [],
+  "country": "",
+  "stage": "",
+  "speed": 1,
+  "passives": {},
+  "abilities": {}
+}

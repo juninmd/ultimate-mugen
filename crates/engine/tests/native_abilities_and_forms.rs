@@ -20,23 +20,10 @@ fn base_char(id: &str, name: &str) -> NativeChar {
 fn test_abilities_compilation_and_movelist() {
     let mut nc = base_char("ability_tester", "Ability Tester");
     nc.abilities = Some(AbilitySpec {
-        fly: Some(FlySpec {
-            speed: Some(4.0),
-            cost: Some(60.0),
-            input: Some("a+b".into()),
-            anim: None,
-        }),
-        teleport: Some(TeleportSpec {
-            cost: Some(300.0),
-            input: Some("b+c".into()),
-            anim: None,
-        }),
-        super_speed: Some(SuperSpeedSpec {
-            mul: Some(2.0),
-            cost: Some(120.0),
-            input: Some("a+c".into()),
-        }),
-        forms: vec![],
+        fly: Some(FlySpec { speed: Some(4.0), cost: Some(60.0), input: Some("a+b".into()), ..Default::default() }),
+        teleport: Some(TeleportSpec { cost: Some(300.0), input: Some("b+c".into()), ..Default::default() }),
+        super_speed: Some(SuperSpeedSpec { mul: Some(2.0), cost: Some(120.0), input: Some("a+c".into()) }),
+        ..Default::default()
     });
 
     let def = compile_native(&nc, 1, false);
@@ -66,9 +53,6 @@ fn test_abilities_compilation_and_movelist() {
 fn test_multi_transformations_sequential_and_buffs() {
     let mut nc = base_char("form_tester", "Form Tester");
     nc.abilities = Some(AbilitySpec {
-        fly: None,
-        teleport: None,
-        super_speed: None,
         forms: vec![
             FormSpec {
                 id: "form1".into(),
@@ -94,7 +78,7 @@ fn test_multi_transformations_sequential_and_buffs() {
                 moves: vec![],
                 replace_moves: false,
             },
-        ],
+        ], ..Default::default()
     });
 
     let def = Arc::new(compile_native(&nc, 1, false));
@@ -142,9 +126,6 @@ fn test_transformation_character_swap_and_move_swap() {
     swapped_move.name = "Alt Strike".into();
 
     nc.abilities = Some(AbilitySpec {
-        fly: None,
-        teleport: None,
-        super_speed: None,
         forms: vec![
             FormSpec {
                 id: "alt_char".into(),
@@ -158,7 +139,7 @@ fn test_transformation_character_swap_and_move_swap() {
                 moves: vec![],
                 replace_moves: false,
             },
-        ],
+        ], ..Default::default()
     });
 
     let def = Arc::new(compile_native(&nc, 1, false));

@@ -64,7 +64,7 @@ fn test_hit_priority_and_advanced_hitdef_flags() {
         timestop: None,
         throw: None,
         cancels: Some(vec!["gale".into()]),
-        requires: None,
+        requires: None, ..Default::default()
     });
 
     let def = compile_native(&nc, 1, false);
@@ -131,7 +131,7 @@ fn test_throw_and_passives_mechanics() {
             ..Default::default()
         }),
         cancels: None,
-        requires: None,
+        requires: None, ..Default::default()
     });
 
     let def = compile_native(&nc, 1, false);

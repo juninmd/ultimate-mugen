@@ -7,7 +7,13 @@ pub const KIT_FORMAT: &str = "umf-kit/1";
 pub(super) const LIBRARY_MARK: &str = "library";
 const MAX_DEPTH: usize = 8;
 const PERSONAL_KEYS: [&str; 6] = ["name", "boss", "npc", "description", "author", "profile"];
-const BUILT_IN: [&str; 2] = [include_str!("kits/core.json"), include_str!("kits/abilities.json")];
+const BUILT_IN: [&str; 5] = [
+    include_str!("kits/core.json"),
+    include_str!("kits/ki_fighter.json"),
+    include_str!("kits/clone_arts.json"),
+    include_str!("kits/aerial_rush.json"),
+    include_str!("kits/abilities.json"),
+];
 
 pub(super) struct Kit {
     pub value: Value,

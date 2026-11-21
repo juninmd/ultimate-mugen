@@ -1,0 +1,18 @@
+{
+  "format": "umf-kit/1",
+  "id": "clone_arts",
+  "description": "Reusable autonomous shadow-clone helper kit ready to attach to any fighter via extends.",
+  "helpers": {
+    "clones": {
+      "name": "Shadow Clones",
+      "input": "~D, DB, B, c",
+      "cost": 500,
+      "count": 1,
+      "maxActive": 2,
+      "duration": 300,
+      "walkSpeed": 3.4,
+      "attackRange": 68,
+      "oneHitPoof": true
+    }
+  }
+}

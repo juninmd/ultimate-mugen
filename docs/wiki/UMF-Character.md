@@ -359,3 +359,7 @@ A zip (or a `mugen/` folder) that holds one UMF `.json` next to a `sprites/` fol
 - `stats.height` equal to `meta.json` `refHeight` draws the sprites 1:1, at the original size.
 - `art.style.boxes: "exact"` uses `hit.box` (Clsn1) and per-frame `hurt` (Clsn2) as written, with no automatic trim.
 - `moves[].sounds: [{ "at": 3, "snd": [2, 1] }]` plays `sprites/snd_2_1.wav` on frame 3 (listed in `meta.json` `sounds`); `"fight": true` plays from the engine's fight sounds.
+
+## Fighter element
+
+The optional top-level `element` field accepts `fire`, `ice`, `lightning`, `water`, `earth`, `wind` or `neutral`. The fight HUD shows the assigned element beside the fighter portrait, with a localized text fallback. This metadata has no effect on damage or match rules.

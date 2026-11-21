@@ -15,7 +15,7 @@ impl App {
         let Some(mut ed) = self.key_edit.take() else {
             return;
         };
-        self.ui.background();
+        crate::screen_art::ScreenArt::Workshop.background(&self.ui);
         self.ui.text(
             "TECLADO · PERSONALIZAR",
             40.0,

@@ -143,8 +143,8 @@ impl Parser {
         if is_special && (self.is_op("=", 0) || self.is_op("!=", 0)) {
             let op = if self.next() == Tok::Op("=") { "=" } else { "!=" };
             let a = self.expr(8)?;
-            if self.is_op(",", 0) {
-                self.p += 1;
+            if self.is_op(",", 0) || (name == "animelem" && matches!(self.peek(0), Tok::Op("<" | "<=" | ">" | ">="))) {
+                if self.is_op(",", 0) { self.p += 1; }
                 let mut op2 = "=";
                 if let Tok::Op(o) = self.peek(0).clone() { if ["=", "!=", "<", "<=", ">", ">="].contains(&o) { op2 = o; self.p += 1; } }
                 let b = self.expr(8)?;

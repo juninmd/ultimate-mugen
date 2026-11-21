@@ -172,7 +172,7 @@ impl<'a> Host for Ctx<'a> {
         let f = self.f();
         if name == "animelem" {
             return match bb {
-                None => f.anim_elem_started(a as i32) != neg,
+                None => if neg { f.anim_elem_no_at(0) != a as i32 } else { f.anim_elem_started(a as i32) },
                 Some(t) => match f.anim_elem_time(a as i32) { Some(dt) => cmp(dt as f64, op2.unwrap_or("="), t) != neg, None => false },
             };
         }
@@ -202,7 +202,7 @@ impl<'a> Host for Ctx<'a> {
             "time" | "statetime" => f.state_time as f64,
             "animtime" => f.anim_time_trig() as f64,
             "anim" => f.anim_no as f64,
-            "animelemno" => f.anim_elem_no_at(a0() as i32) as f64,
+            "animelem" => f.anim_elem_no_at(0) as f64, "animelemno" => f.anim_elem_no_at(a0() as i32) as f64,
             "animelemtime" => f.anim_elem_time(a0() as i32).unwrap_or(-1) as f64,
             "animexist" | "selfanimexist" => b(f.def.anims.contains_key(&(a0() as i32))),
             "stateno" => f.state_no as f64,

@@ -1,79 +1,7 @@
 use crate::safety::{file_name, file_stem, lower_ext, parent_dir, safe_rel_path, MAX_FILE_BYTES, MAX_ITEM_BYTES, MAX_ITEM_FILES, MAX_TREE_ENTRIES};
-use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
-pub enum Kind {
-    Character,
-    Stage,
-    Music,
-    Pack,
-}
-
-impl Kind {
-    pub const ALL: [Kind; 4] = [Kind::Character, Kind::Stage, Kind::Music, Kind::Pack];
-
-    pub fn tag(self) -> &'static str {
-        match self {
-            Kind::Character => "char",
-            Kind::Stage => "stage",
-            Kind::Music => "music",
-            Kind::Pack => "pack",
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct TreeEntry {
-    pub path: String,
-    pub size: u64,
-}
-
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Tree {
-    pub entries: Vec<TreeEntry>,
-    pub truncated: bool,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct FileRef {
-    pub path: String,
-    pub size: u64,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Item {
-    pub id: String,
-    pub kind: Kind,
-    pub name: String,
-    pub files: Vec<FileRef>,
-    pub bytes: u64,
-    pub installable: bool,
-}
-
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Catalog {
-    pub items: Vec<Item>,
-    pub truncated: bool,
-    #[serde(default)]
-    pub support: Vec<TreeEntry>,
-}
-
-impl Catalog {
-    pub fn count(&self, kind: Kind) -> usize {
-        self.items.iter().filter(|i| i.kind == kind).count()
-    }
-
-    pub fn find(&self, id: &str) -> Option<&Item> {
-        self.items.iter().find(|i| i.id == id)
-    }
-
-    pub fn reference_entries(&self) -> Vec<TreeEntry> {
-        let mut out: Vec<TreeEntry> = self.items.iter().flat_map(|i| i.files.iter().map(|f| TreeEntry { path: f.path.clone(), size: f.size })).collect();
-        out.extend(self.support.iter().cloned());
-        out
-    }
-}
+pub use crate::model::{Catalog, FileRef, Item, Kind, Tree, TreeEntry};
 
 pub fn parse_tree(body: &str) -> Result<Tree, String> {
     let v: serde_json::Value = serde_json::from_str(body).map_err(|e| format!("invalid tree response: {e}"))?;
@@ -87,7 +15,7 @@ pub fn parse_tree(body: &str) -> Result<Tree, String> {
             continue;
         }
         let Some(path) = e.get("path").and_then(|p| p.as_str()).and_then(safe_rel_path) else { continue };
-        entries.push(TreeEntry { path, size: e.get("size").and_then(|s| s.as_u64()).unwrap_or(0) });
+        entries.push(TreeEntry { path, size: e.get("size").and_then(|s| s.as_u64()).unwrap_or(0), sha: e.get("sha").and_then(|s| s.as_str()).unwrap_or_default().to_string() });
     }
     Ok(Tree { entries, truncated: v.get("truncated").and_then(|t| t.as_bool()).unwrap_or(false) })
 }
@@ -127,8 +55,9 @@ fn ignored_def(path: &str) -> bool {
 
 fn make_item(kind: Kind, root: &str, name: String, files: Vec<FileRef>) -> Item {
     let bytes: u64 = files.iter().map(|f| f.size).sum();
+    let version = crate::version::item_version(&files);
     let installable = !files.is_empty() && bytes <= MAX_ITEM_BYTES && files.len() <= MAX_ITEM_FILES && files.iter().all(|f| f.size <= MAX_FILE_BYTES);
-    Item { id: format!("{}:{}", kind.tag(), if root.is_empty() { "." } else { root }), kind, name, files, bytes, installable }
+    Item { id: format!("{}:{}", kind.tag(), if root.is_empty() { "." } else { root }), kind, name, files, bytes, installable, version }
 }
 
 pub fn detect(tree: &Tree, subdir: &str, fallback_name: &str) -> Catalog {
@@ -169,7 +98,7 @@ pub fn detect(tree: &Tree, subdir: &str, fallback_name: &str) -> Catalog {
     for e in &scope {
         if let Some(dir) = ancestors(&e.path).find(|d| char_dirs.contains(d)) {
             claimed.insert(e.path.as_str(), dir);
-            char_files.entry(dir).or_default().push(FileRef { path: e.path.clone(), size: e.size });
+            char_files.entry(dir).or_default().push(FileRef { path: e.path.clone(), size: e.size, sha: e.sha.clone() });
         }
     }
 
@@ -199,12 +128,12 @@ pub fn detect(tree: &Tree, subdir: &str, fallback_name: &str) -> Catalog {
         let own_folder = !dir_is_stage_folder && dir != root_dir && !dir.is_empty() && defs_per_dir.get(dir) == Some(&1);
         let files: Vec<FileRef> = if own_folder {
             let dp = format!("{dir}/");
-            unclaimed.iter().filter(|x| x.path.starts_with(&dp) && !stage_claimed.contains(x.path.as_str())).map(|x| FileRef { path: x.path.clone(), size: x.size }).collect()
+            unclaimed.iter().filter(|x| x.path.starts_with(&dp) && !stage_claimed.contains(x.path.as_str())).map(|x| FileRef { path: x.path.clone(), size: x.size, sha: x.sha.clone() }).collect()
         } else {
             unclaimed
                 .iter()
                 .filter(|x| parent_dir(&x.path) == dir && file_stem(&x.path).eq_ignore_ascii_case(stem) && !stage_claimed.contains(x.path.as_str()))
-                .map(|x| FileRef { path: x.path.clone(), size: x.size })
+                .map(|x| FileRef { path: x.path.clone(), size: x.size, sha: x.sha.clone() })
                 .collect()
         };
         if files.is_empty() {
@@ -224,9 +153,9 @@ pub fn detect(tree: &Tree, subdir: &str, fallback_name: &str) -> Catalog {
     for e in unclaimed.iter().filter(|e| !stage_claimed.contains(e.path.as_str())) {
         let ext = lower_ext(&e.path);
         if ext == "zip" {
-            items.push(make_item(Kind::Pack, &e.path, file_stem(&e.path).to_string(), vec![FileRef { path: e.path.clone(), size: e.size }]));
+            items.push(make_item(Kind::Pack, &e.path, file_stem(&e.path).to_string(), vec![FileRef { path: e.path.clone(), size: e.size, sha: e.sha.clone() }]));
         } else if AUDIO_EXTS.contains(&ext.as_str()) && (ext != "wav" || e.size >= MIN_WAV_BYTES) {
-            items.push(make_item(Kind::Music, &e.path, file_stem(&e.path).to_string(), vec![FileRef { path: e.path.clone(), size: e.size }]));
+            items.push(make_item(Kind::Music, &e.path, file_stem(&e.path).to_string(), vec![FileRef { path: e.path.clone(), size: e.size, sha: e.sha.clone() }]));
         }
     }
 
@@ -245,7 +174,7 @@ mod tests {
     use super::*;
 
     fn tree(files: &[(&str, u64)]) -> Tree {
-        Tree { entries: files.iter().map(|(p, s)| TreeEntry { path: p.to_string(), size: *s }).collect(), truncated: false }
+        Tree { entries: files.iter().map(|(p, s)| TreeEntry { path: p.to_string(), size: *s, ..Default::default() }).collect(), truncated: false }
     }
 
     fn ids(c: &Catalog) -> Vec<String> {
@@ -262,7 +191,7 @@ mod tests {
             {"path":"sub","type":"commit"}]}"#;
         let t = parse_tree(body).unwrap();
         assert!(t.truncated);
-        assert_eq!(t.entries, vec![TreeEntry { path: "chars/kfm/kfm.def".into(), size: 120 }]);
+        assert_eq!(t.entries, vec![TreeEntry { path: "chars/kfm/kfm.def".into(), size: 120, ..Default::default() }]);
         assert!(parse_tree("{").is_err());
         assert!(parse_tree("{}").is_err());
     }

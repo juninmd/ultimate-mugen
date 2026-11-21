@@ -23,6 +23,8 @@ pub struct Installed {
     pub files: usize,
     pub active: bool,
     pub installed_at: u64,
+    #[serde(default)]
+    pub version: String,
 }
 
 impl Installed {
@@ -124,7 +126,7 @@ mod tests {
     use super::*;
 
     fn entry(repo: &str, id: &str, active: bool) -> Installed {
-        Installed { repo_key: repo.into(), item_id: id.into(), kind: Kind::Character, name: id.into(), bytes: 10, files: 2, active, installed_at: 1 }
+        Installed { repo_key: repo.into(), item_id: id.into(), kind: Kind::Character, name: id.into(), bytes: 10, files: 2, active, installed_at: 1, version: String::new() }
     }
 
     #[test]

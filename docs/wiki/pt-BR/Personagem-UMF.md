@@ -194,8 +194,14 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `projectile` | objeto ou lista | Projéteis |
 | `cost` | número | Barra consumida; `super` usa 1000 por padrão |
 | `invuln` | `[início, fim]` | Quadros invencíveis |
-| `teleport` | quadro | Reaparece atrás do oponente |
+| `teleport` | quadro, objeto ou lista de `{ "at", "mode", "offset", "turn" }` | Teleporte simples ou multi-etapa (`behind`, `front`, `above` ou `offset` `[x, y]`); sai naturalmente para queda aérea (`50`) se terminar com `Pos Y < 0` |
 | `fx` | `aura` | Efeito visual extra |
+| `explods` | `[{ "at", "anim", "pos", "postype", "bind", "removeTime", "priority", "scale", "superMove" }]` | Dispara efeitos visuais (esferas de ki, auras, overlays de super) |
+| `afterimage` | `{ "at", "time", "length", "framegap", "trans", "palBright", "palContrast", "palAdd", "palMul" }` | Customiza o rastro de AfterImage |
+| `shake` | `{ "at", "time", "ampl", "freq" }` (objeto ou lista) | Tremor de tela por golpe (`EnvShake`) |
+| `flash` | `{ "at", "time", "color", "under", "superMove" }` (objeto ou lista) | Flash ou escurecimento de fundo (`EnvColor`) |
+| `superPause` | `{ "at", "time", "pos", "anim", "darken" }` | Customiza a pausa de super |
+| `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "end", "at" }` | Transição hit-confirm para golpe cinemático |
 | `voice` | `1000, 0` | Grupo e índice do som do personagem tocado no início do golpe, quando o áudio estiver incluído |
 | `airPhysics` | `true` | Mantém a física aérea |
 | `cancels` | lista de ids | Este golpe pode ser cancelado **para** esses golpes em contato (acerto, defesa ou projétil que encosta). Declarar substitui o gatling automático a partir deste golpe |
@@ -206,6 +212,8 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `burst` | `true` | Quebra de combo usável ao apanhar |
 | `requires` | `{ "life": {"max": 0.5}, "enemyLife": {"min": 0.1, "max": 0.5} }` | Condição de vida: o golpe só inicia enquanto a vida do lutador (`life`) e/ou do rival (`enemyLife`) estiver entre `min` e `max`, como fração da vida máxima (0 a 1). Qualquer limite pode ser omitido. Compila para triggers `life <= lifemax * max` e `enemy,life <= enemy,lifemax * max` |
 | `flight` | `true` | Pairar em 8 direções enquanto o golpe dura |
+
+**Kits embutidos (`extends`).** Lutadores podem herdar blocos prontos via `"extends": ["core", "ki_fighter", "clone_arts", "aerial_rush"]` (`crates/native/src/kits/`): `core` entrega `launcher` e `escape_burst`; `ki_fighter` entrega `abilities.fly`, `abilities.teleport`, `abilities.superSpeed`, `abilities.charge` (com `auraColor`, `shake`, `sound`, `explod`) e o modelo de feixe multi-hit `ki_beam` (`missTime`, `hitflag`); `clone_arts` acopla clones autônomos (`helpers.clones`); `aerial_rush` adiciona voo, super velocidade e pulo aéreo duplo.
 
 **Finisher.** Um golpe com `"kind": "finisher"` (use `throw` ou `hits` para o efeito) só fica disponível após um nocaute (`RoundState = 3` e `WinKO`). Quando o round final termina em nocaute e o vencedor tem um finisher, o round espera até 6 segundos em "FINISH HIM" para o vencedor executá-lo; executar (ou o tempo acabar) encerra a espera. Elencos sem finisher não mudam.
 

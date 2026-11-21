@@ -1,5 +1,6 @@
 import re
 
+from mugen_abilities import detect_throw, detect_wall_bounce, extract_fx
 from mugen_parse import nums
 
 STANDARD = {
@@ -51,7 +52,7 @@ def pair(text, default=(0.0, 0.0)):
     return [round(values[0], 2), round(values[1], 2)]
 
 
-def hit_from(ctrl, at):
+def hit_from(ctrl, at, states=None):
     b = ctrl["body"]
     damage = nums(b.get("damage"), (0, 0))
     hit = {"at": at, "damage": max(round(damage[0]), 1)}
@@ -84,19 +85,39 @@ def hit_from(ctrl, at):
         hit["hitSound"] = [int(s[0]), int(s[1])]
     if b.get("hitflag"):
         hit["hitflag"] = b["hitflag"].strip().upper()
+    if states and detect_wall_bounce(ctrl, states):
+        hit["wallBounce"] = True
     return hit
 
 
 def projectile_from(ctrl, at, actions):
     b = ctrl["body"]
+    dmg = nums(b.get("damage"), (30, 0))
     proj = {"at": at, "anim": anim_name(int(nums(b.get("projanim"), (0,))[0])), "speed": pair(b.get("velocity"), (4, 0)),
-            "offset": pair(b.get("offset")), "damage": max(round(nums(b.get("damage"), (30,))[0]), 1)}
+            "offset": pair(b.get("offset")), "damage": max(round(dmg[0]), 1)}
+    if len(dmg) > 1 and dmg[1]:
+        proj["guardDamage"] = round(dmg[1])
     hit_anim = int(nums(b.get("projhitanim"), (-1,))[0])
     if hit_anim in actions:
         proj["hitAnim"] = anim_name(hit_anim)
-    for key, field in (("projhits", "hits"), ("projpriority", "priority"), ("projremovetime", "removeTime")):
+    for key, field in (("projhits", "hits"), ("projmisstime", "missTime"), ("projpriority", "priority"), ("projremovetime", "removeTime")):
         if b.get(key):
             proj[field] = int(nums(b[key], (1,))[0])
+    if b.get("accel"):
+        proj["accel"] = pair(b["accel"])
+    if b.get("ground.velocity"):
+        proj["knockback"] = pair(b["ground.velocity"])
+    if b.get("fall", "0").strip().startswith("1"):
+        proj["launch"] = True
+    if b.get("pausetime"):
+        p = nums(b["pausetime"], (0, 0))
+        proj["pausetime"] = [int(p[0]), int(p[1])]
+    if b.get("hitflag"):
+        proj["hitflag"] = b["hitflag"].strip().upper()
+    sound = b.get("hitsound", "").strip()
+    if sound and not sound.upper().startswith("S"):
+        s = nums(sound, (5, 0))
+        proj["hitSound"] = [int(s[0]), int(s[1])]
     level = LEVEL.get(b.get("animtype", "").strip().lower())
     if level:
         proj["level"] = level
@@ -121,19 +142,36 @@ def state_anim(state):
     return anim_no
 
 
-def chain(state_no, states, actions, limit=4):
-    out = [state_no]
+def chain(state_no, states, actions, limit=4, skip=frozenset()):
+    out, confirm = [state_no], None
     while len(out) < limit:
-        nxt = [int(nums(c["body"].get("value"), (0,))[0]) for c in states[out[-1]]["ctrl"] if c["type"] == "changestate" and "command" not in " ".join(triggers(c))]
-        nxt = [n for n in nxt if n >= 200 and n not in out and n in states and state_anim(states[n]) in actions]
-        if not nxt:
+        nxt_uncond, nxt_cond = [], []
+        for c in states[out[-1]]["ctrl"]:
+            if c["type"] != "changestate":
+                continue
+            t = " ".join(triggers(c))
+            if "command" in t:
+                continue
+            val = int(nums(c["body"].get("value"), (0,))[0])
+            if val < 200 or val in out or val in skip or val not in states or state_anim(states[val]) not in actions:
+                continue
+            if "movehit" in t or "movecontact" in t:
+                if "!= 1" not in t and "!movehit" not in t and "!movecontact" not in t:
+                    nxt_cond.append((val, "contact" if "movecontact" in t else "hit"))
+            else:
+                nxt_uncond.append(val)
+        if nxt_cond:
+            confirm = nxt_cond[0]
             break
-        out.append(nxt[0])
-    return out
+        if not nxt_uncond:
+            break
+        out.append(nxt_uncond[0])
+    return out, confirm
 
 
-def build_move(state_no, states, actions, label, cmd_input, when, cost):
-    links = [n for n in chain(state_no, states, actions) if state_anim(states[n]) in actions]
+def build_move(state_no, states, actions, label, cmd_input, when, cost, skip=frozenset()):
+    links, confirm = chain(state_no, states, actions, skip=skip)
+    links = [n for n in links if state_anim(states[n]) in actions]
     if not links:
         return None, []
     anim_no = state_anim(states[links[0]])
@@ -156,13 +194,11 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost):
     if when != "stand":
         move["when"] = when
     hits, projectiles, moves, sounds, extra = [], [], [], [], [anim_no]
-    super_pause = False
     for ctrl in state["ctrl"]:
-        at = ctrl["at"]
-        kind = ctrl["type"]
+        at, kind = ctrl["at"], ctrl["type"]
         if kind == "hitdef":
-            for a in at or [first_clsn1(frames)]:
-                hits.append(hit_from(ctrl, a))
+            for a in (at or [first_clsn1(frames)])[:6]:
+                hits.append(hit_from(ctrl, a, states))
         elif kind == "projectile":
             proj, anims = projectile_from(ctrl, (at or [1])[0], actions)
             projectiles.append(proj)
@@ -171,24 +207,40 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost):
             x = nums(ctrl["body"].get("x"), (0,))[0] if "x" in ctrl["body"] else None
             y = nums(ctrl["body"].get("y"), (0,))[0] if "y" in ctrl["body"] else None
             moves.append({"at": at[0], "vel": [x, y]})
-        elif kind in ("posadd", "posset") and "p2dist" in " ".join(ctrl["body"].values()).lower() and at:
-            move["teleport"] = at[0]
         elif kind == "playsnd":
             sounds.append(sound_from(ctrl, (at or [1])[0]))
-        elif kind == "superpause":
-            super_pause = True
-    if hits:
+    fx, fx_anims = extract_fx(state["ctrl"], actions, anim_name, frames)
+    extra += fx_anims
+    throw, throw_anims = detect_throw(state_no, states, actions, anim_name)
+    if throw:
+        move["throw"] = throw
+        extra += throw_anims
+    elif hits:
         move["hits"] = hits
     if projectiles:
         move["projectile"] = projectiles[0] if len(projectiles) == 1 else projectiles
     if moves:
         move["moves"] = moves
-    if "fly" in label:
-        move["flight"] = True
     if sounds:
         move["sounds"] = sounds
+    if fx["explods"]:
+        move["explods"] = fx["explods"]
+    if fx["afterimage"]:
+        move["afterimage"] = fx["afterimage"]
+    if fx["shakes"]:
+        move["shake"] = fx["shakes"][0] if len(fx["shakes"]) == 1 else fx["shakes"]
+    if fx["flashes"]:
+        move["flash"] = fx["flashes"][0] if len(fx["flashes"]) == 1 else fx["flashes"]
+    if fx["super_pause"]:
+        move["superPause"] = fx["super_pause"]
+    if fx["invuln"]:
+        move["invuln"] = fx["invuln"]
+    if fx["teleport"]:
+        move["teleport"] = fx["teleport"]
+    if confirm:
+        move["_followUpState"] = confirm
     power = nums(state["def"].get("poweradd"), (0,))[0]
-    if super_pause or power <= -1000 or cost >= 1000:
+    if fx["super_pause"] or power <= -1000 or cost >= 1000:
         move["kind"] = "super"
         move["cost"] = max(cost, 1000)
     elif "," in cmd_input or state_no >= 1000:

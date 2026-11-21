@@ -47,6 +47,56 @@ class Moves(unittest.TestCase):
         image, axis = contain_axis(Image.new("RGBA", (40, 8)), (-10, 51))
         self.assertEqual((image.size, axis), ((50, 51), (0, 51)))
 
+    def test_hit_confirm_chain_splits_into_followup(self):
+        actions = {300: {"frames": FRAMES, "loop": None}, 301: {"frames": FRAMES, "loop": None}}
+        states = {
+            300: {"def": {"anim": "300"}, "ctrl": [
+                ctrl("hitdef", trigger1="AnimElem = 2", damage="30"),
+                ctrl("changestate", value="301", trigger1="MoveHit = 1 && AnimTime = 0"),
+                ctrl("changestate", value="0", trigger1="MoveHit != 1 && AnimTime = 0"),
+            ]},
+            301: {"def": {"anim": "301"}, "ctrl": [ctrl("hitdef", trigger1="AnimElem = 2", damage="90")]},
+        }
+        move, _ = build_move(300, states, actions, "rush", "x", "stand", 0)
+        self.assertEqual(move.get("_followUpState"), (301, "hit"))
+        self.assertEqual(len(move["hits"]), 1)
+
+    def test_beam_projectile_and_fx_fields_are_extracted(self):
+        actions = {1700: {"frames": FRAMES, "loop": None}, 1701: {"frames": FRAMES, "loop": None}, 9990: {"frames": FRAMES, "loop": None}}
+        states = {
+            1700: {"def": {"anim": "1700", "poweradd": "-1000"}, "ctrl": [
+                ctrl("superpause", trigger1="Time = 0", time="45"),
+                ctrl("explod", trigger1="AnimElem = 1", anim="9990", pos="10, -40", bindtime="20"),
+                ctrl("envshake", trigger1="AnimElem = 2", time="30", ampl="6"),
+                ctrl("envcolor", trigger1="Time = 0", value="0, 0, 0", time="15", under="1"),
+                ctrl("projectile", trigger1="AnimElem = 2", projanim="1701", projhits="25", projmisstime="3", damage="15, 5", hitflag="MAFP"),
+            ]}
+        }
+        move, extra = build_move(1700, states, actions, "kamehameha", "~D, DF, F, a", "stand", 1000)
+        self.assertEqual(move["projectile"]["hits"], 25)
+        self.assertEqual(move["projectile"]["missTime"], 3)
+        self.assertEqual(move["projectile"]["hitflag"], "MAFP")
+        self.assertEqual(move["explods"][0]["anim"], "a9990")
+        self.assertEqual(move["shake"]["time"], 30)
+        self.assertEqual(move["flash"]["under"], True)
+        self.assertIn(9990, extra)
+
+    def test_multi_step_teleport_keeps_both_warps(self):
+        actions = {47800: {"frames": FRAMES, "loop": None}, 7825: {"frames": FRAMES, "loop": None}}
+        states = {
+            47800: {"def": {"anim": "47800"}, "ctrl": [
+                ctrl("posadd", trigger1="AnimElem = 2", x="-200", y="-100"),
+                ctrl("changestate", value="7825", trigger1="AnimTime = 0"),
+            ]},
+            7825: {"def": {"anim": "7825"}, "ctrl": [
+                ctrl("posadd", trigger1="AnimElem = 2", x="125", y="100"),
+            ]},
+        }
+        move, _ = build_move(47800, states, actions, "genkidama", "~B, D, c", "stand", 2000)
+        self.assertEqual(len(move["teleport"]), 2)
+        self.assertEqual(move["teleport"][0]["offset"], [-200.0, -100.0])
+        self.assertEqual(move["teleport"][1]["offset"], [125.0, 100.0])
+
 
 def move_anim_number(move):
     return 900000 + int(move["anim"][3:])

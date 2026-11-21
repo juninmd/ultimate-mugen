@@ -68,6 +68,12 @@ pub struct ProjectileSpec {
     #[serde(default)] pub priority: Option<i32>,
     #[serde(default)] pub element: Option<String>,
     #[serde(default)] pub stun: Option<i32>,
+    #[serde(default, rename = "missTime")] pub miss_time: Option<i32>,
+    #[serde(default, rename = "guardDamage")] pub guard_damage: Option<f32>,
+    #[serde(default, rename = "hitSound")] pub hit_sound: Option<[i32; 2]>,
+    #[serde(default)] pub pausetime: Option<[i32; 2]>,
+    #[serde(default)] pub hitflag: Option<String>,
+    #[serde(default)] pub shake: Option<i32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -115,7 +121,7 @@ pub struct MoveRequirements {
     #[serde(default, rename = "enemyState")] pub enemy_state: Option<String>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct NativeMove {
     pub id: String, pub name: String, pub input: String,
     #[serde(default)] pub simple: Option<String>,
@@ -129,7 +135,7 @@ pub struct NativeMove {
     #[serde(default)] pub invuln: Option<[i32; 2]>,
     #[serde(default, rename = "airPhysics")] pub air_physics: Option<bool>,
     #[serde(default)] pub note: Option<String>,
-    #[serde(default)] pub teleport: Option<i32>,
+    #[serde(default)] pub teleport: Option<OneOrMany<super::move_fx::TeleportStep>>,
     #[serde(default)] pub fx: Option<String>,
     #[serde(default)] pub voice: Option<String>,
     #[serde(default)] pub sounds: Vec<MoveSound>,
@@ -142,6 +148,12 @@ pub struct NativeMove {
     #[serde(default)] pub cancels: Option<Vec<String>>,
     #[serde(default)] pub rekka: Option<RekkaSpec>,
     #[serde(default)] pub requires: Option<MoveRequirements>,
+    #[serde(default)] pub explods: Vec<super::move_fx::ExplodSpec>,
+    #[serde(default)] pub afterimage: Option<super::move_fx::AfterImageSpec>,
+    #[serde(default)] pub shake: Option<OneOrMany<super::move_fx::ShakeSpec>>,
+    #[serde(default)] pub flash: Option<OneOrMany<super::move_fx::FlashSpec>>,
+    #[serde(default, rename = "superPause")] pub super_pause: Option<super::move_fx::SuperPauseSpec>,
+    #[serde(default, rename = "followUp")] pub follow_up: Option<super::move_fx::FollowUpSpec>,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]

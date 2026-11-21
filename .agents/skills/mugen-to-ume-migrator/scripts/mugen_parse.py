@@ -3,7 +3,6 @@ import os
 import re
 import struct
 
-import numpy as np
 from PIL import Image
 
 
@@ -139,7 +138,7 @@ def sprite_image(sff, pal, g, i):
     if s is None:
         return None, None
     p = pal if (pal is not None and (s.same_pal or s is sff.sprites[0])) else None
-    return Image.fromarray(np.asarray(sff.rgba(s, p)), "RGBA"), s.axis
+    return sff.rgba(s, p), s.axis
 
 
 def contain_axis(image, axis):

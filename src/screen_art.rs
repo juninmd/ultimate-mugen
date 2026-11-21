@@ -10,6 +10,8 @@ thread_local! {
     static VERSUS: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-versus.png"));
     static RECORDS: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-records.png"));
     static RESULTS: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-results.png"));
+    static MARKET: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-market.png"));
+    static ARCHIVE: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-archive.png"));
     static WORKSHOP: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-workshop.png"));
     static LAB: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-lab.png"));
     static STORY: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-story.png"));
@@ -25,6 +27,8 @@ pub(crate) enum ScreenArt {
     Versus,
     Results,
     Records,
+    Market,
+    Archive,
     Workshop,
     Lab,
     Story,
@@ -53,6 +57,8 @@ impl ScreenArt {
             Self::Versus => &VERSUS,
             Self::Results => &RESULTS,
             Self::Records => &RECORDS,
+            Self::Market => &MARKET,
+            Self::Archive => &ARCHIVE,
             Self::Workshop => &WORKSHOP,
             Self::Lab => &LAB,
             Self::Story => &STORY,
@@ -65,6 +71,7 @@ impl ScreenArt {
             };
             let color = match self {
                 Self::Menu => Color::new(0.68, 0.67, 0.76, opacity),
+                Self::Loading | Self::Results | Self::Records | Self::Market | Self::Archive => {
                 Self::Loading | Self::Results | Self::Records | Self::Workshop | Self::Lab => {
                 Self::Loading | Self::Results | Self::Records | Self::Story | Self::Tower => {
                     Color::new(0.62, 0.61, 0.7, opacity)

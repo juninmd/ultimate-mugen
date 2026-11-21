@@ -19,14 +19,14 @@ use state::{Action, Tab};
 pub(super) use state::PauseState;
 
 impl App {
-    pub(super) async fn pause_menu(&mut self, accept_back: bool) {
+    pub(super) async fn pause_menu(&mut self, accept_nav: bool) {
         self.pause.tick(get_frame_time());
         let ease = self.pause.ease();
         let def = self.session.as_ref().unwrap().m.fighters[0].def.clone();
         let (name, moves) = (def.display_name.clone(), &def.movelist[..]);
         let author = def.author.clone();
         let base = Layout::new(self.ui.s);
-        let outcome = self.pause_input(&base, &name, moves, accept_back);
+        let outcome = self.pause_input(&base, &name, moves, accept_nav);
         let lay = base.shifted((1.0 - ease) * 22.0);
         draw_rectangle(0.0, 0.0, screen_width(), screen_height(), Color::new(0.02, 0.01, 0.06, 0.55 * ease));
         self.pause_chrome(&lay, self.pause.tab, &name, &author, ease);

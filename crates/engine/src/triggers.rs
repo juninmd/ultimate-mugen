@@ -271,8 +271,8 @@ impl<'a> Host for Ctx<'a> {
             "const240p" => a0() * f.def.local_w as f64 / 320.0,
             "const480p" => a0() * f.def.local_w as f64 / 640.0,
             "const720p" => a0() * f.def.local_w as f64 / 1280.0, "const1080p" => a0() * f.def.local_w as f64 / 1920.0,
-            "random" => { let x = (m.game_time as u64).wrapping_mul(2654435761).wrapping_add(f.id as u64 * 40503 + f.state_time as u64 * 977 + m.rng as u64); ((x >> 7) % 1000) as f64 }
-            "randomrange" => { let (lo, hi) = (a0(), self.a(args, 1)); let x = (m.game_time as u64).wrapping_mul(2654435761).wrapping_add(m.rng as u64); lo + ((x >> 7) % ((hi - lo + 1.0).max(1.0) as u64)) as f64 }
+            "random" => (m.next_random() % 1000) as f64,
+            "randomrange" => { let (lo, hi) = (a0(), self.a(args, 1)); lo + (m.next_random() as f64 % (hi - lo + 1.0).max(1.0)) }
             "roundstate" => m.round_state as f64,
             "roundno" => m.round_no as f64,
             "roundsexisted" => (m.round_no - 1) as f64,

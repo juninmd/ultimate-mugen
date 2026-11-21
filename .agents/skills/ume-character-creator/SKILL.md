@@ -30,11 +30,13 @@ O formato **UMF** (*Ultimate Mugen Format*) é o padrão moderno de personagens 
 
 ---
 
+> UMF 2 (ADR 0007): `format` é `umf/2`, quadros só de pose usam `"pose*ticks"`, e `node scripts/umf2-migrate.mjs` grava o layout canônico antes do commit. O piso de qualidade fica em `native_quality_bar`.
+
 ## 2. Visão Geral da Anatomia de um Personagem UMF 2.0
 
 ```json
 {
-  "format": "umf/1",
+  "format": "umf/2",
   "id": "meu_lutador",
   "name": "Meu Lutador",
   "series": "Minha Série",

@@ -316,10 +316,10 @@ impl MatchRenderer {
         ui: &Ui,
     ) -> FxParams {
         g.fit(m.view_w, m.view_h);
-        let gain = g.fx_gain;
+        let (gain, reduce_motion) = (g.fx_gain, crate::tweaks::current().reduce_motion);
         clear_background(BLACK);
         let (mut shx, mut shy) = (0.0, 0.0);
-        if m.shake_time > 0 && !crate::tweaks::current().reduce_motion {
+        if m.shake_time > 0 && !reduce_motion {
             if m.shake_vertical() {
                 shy = m.shake_offset();
             }
@@ -327,7 +327,7 @@ impl MatchRenderer {
                 shx = (rand::gen_range(-0.5, 0.5)) * m.shake_ampl.abs() * 0.3;
             }
         }
-        let (tx, ty) = vfx.shake(if crate::tweaks::current().reduce_motion { 0.0 } else { gain });
+        let (tx, ty) = vfx.shake(if reduce_motion { 0.0 } else { gain });
         shx += tx;
         shy += ty;
         // cinematic camera: punch-in on hits, KO / super zoom about the action
@@ -341,7 +341,7 @@ impl MatchRenderer {
                 }
             })
             .collect();
-        let (zoom, focus) = vfx.camera(m, gain);
+        let (zoom, focus) = vfx.camera(m, if reduce_motion { 0.0 } else { gain });
         let (fvx, fvy) = (
             focus.0 - m.camera.x + m.view_w / 2.0,
             focus.1 - m.camera.y + m.stage.zoffset,

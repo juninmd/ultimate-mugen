@@ -23,7 +23,7 @@ impl App {
                 || is_key_pressed(KeyCode::P)
                 || (!s.paused && is_key_pressed(KeyCode::Enter))
         };
-        let (paused, accept_back) = pause_step(s.paused, pause_btn);
+        let (paused, accept_nav) = pause_step(s.paused, pause_btn);
         if pause_btn {
             self.pause.reset();
             self.audio.sfx(if paused { "pause" } else { "select" });
@@ -117,7 +117,7 @@ impl App {
         let s = self.session.as_mut().unwrap();
         if s.paused {
             if !replaying {
-                self.pause_menu(accept_back).await;
+                self.pause_menu(accept_nav).await;
             }
             return;
         }

@@ -644,16 +644,44 @@
       "kind": "normal",
       "anim": "jab",
       "hits": [{"at":2,"damage":24,"level":"light"}],
-      "cancels": ["lkick","strong","cjab","launcher","overhead","slide","string_a"]
+      "cancels": ["lkick","strong","cjab","launcher","overhead","slide","string_a"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"strong","name":"Footnote Palm","input":"y","kind":"normal","anim":"strong","hits":[{"at":3,"damage":58,"level":"medium"}],"cancels":["hkick","margin","sigil","theorem","overhead"]},
-    {"id":"lkick","name":"Library Step Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":30,"level":"light"}],"cancels":["strong","hkick","launcher","slide"]},
-    {"id":"hkick","name":"Turning Page Kick","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":74,"level":"heavy"}]},
-    {"id":"cjab","name":"Index Strike","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":22,"level":"light"}]},
-    {"id":"clk","name":"Low Margin Kick","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":26,"level":"light","guard":"low"}]},
-    {"id":"sweep","name":"Erasure Sweep","input":"b","kind":"normal","anim":"sweep","when":"crouch","hits":[{"at":2,"damage":70,"level":"heavy","guard":"low","launch":true,"knockback":[-3,-5]}]},
-    {"id":"ajab","name":"Quill Dive","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":30,"level":"light","guard":"high"}]},
-    {"id":"akick","name":"Chapter Drop","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":60,"level":"medium","guard":"high"}]},
+    {
+      "id": "strong",
+      "name": "Footnote Palm",
+      "input": "y",
+      "kind": "normal",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":58,"level":"medium"}],
+      "cancels": ["hkick","margin","sigil","theorem","overhead"],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {
+      "id": "lkick",
+      "name": "Library Step Kick",
+      "input": "a",
+      "kind": "normal",
+      "anim": "lkick",
+      "hits": [{"at":2,"damage":30,"level":"light"}],
+      "cancels": ["strong","hkick","launcher","slide"],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {"id":"hkick","name":"Turning Page Kick","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":74,"level":"heavy"}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {"id":"cjab","name":"Index Strike","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":22,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"clk","name":"Low Margin Kick","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":26,"level":"light","guard":"low"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {
+      "id": "sweep",
+      "name": "Erasure Sweep",
+      "input": "b",
+      "kind": "normal",
+      "anim": "sweep",
+      "when": "crouch",
+      "hits": [{"at":2,"damage":70,"level":"heavy","guard":"low","launch":true,"knockback":[-3,-5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {"id":"ajab","name":"Quill Dive","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":30,"level":"light","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"akick","name":"Chapter Drop","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":60,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
       "id": "sigil",
       "name": "Sealed Sigil Spark",
@@ -662,7 +690,8 @@
       "anim": "sigil",
       "simple": "sp1",
       "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.2,0],"offset":[44,-68],"damage":64,"level":"medium","removeTime":180,"element":"lightning"},
-      "cancels": ["sigilMark","proof"]
+      "cancels": ["sigilMark","proof"],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ascend",
@@ -673,7 +702,8 @@
       "simple": "sp2",
       "invuln": [1,3],
       "moves": [{"at":2,"vel":[2.4,-8.6]}],
-      "hits": [{"at":2,"damage":66,"level":"heavy","launch":true,"hitstun":24,"knockback":[-1,-3]},{"at":3,"damage":40,"level":"heavy","launch":true,"knockback":[-3,-8]}]
+      "hits": [{"at":2,"damage":66,"level":"heavy","launch":true,"hitstun":24,"knockback":[-1,-3]},{"at":3,"damage":40,"level":"heavy","launch":true,"knockback":[-3,-8]}],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "margin",
@@ -685,7 +715,8 @@
       "moves": [{"at":2,"vel":[7.5,0]},{"at":3,"vel":[6.5,0]},{"at":4,"vel":[2,0]}],
       "hits": [{"at":2,"damage":66,"level":"heavy","knockback":[-6,0]}],
       "armor": {"hits":1,"threshold":80},
-      "cancels": ["proof"]
+      "cancels": ["proof"],
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "unwritten",
@@ -705,16 +736,27 @@
         {"at":7,"damage":36,"level":"light","hitstun":22,"knockback":[-1.5,0],"element":"lightning"},
         {"at":8,"damage":36,"level":"light","hitstun":22,"knockback":[-1.5,0],"element":"lightning"},
         {"at":9,"damage":100,"level":"heavy","launch":true,"knockback":[-3,-8],"shake":10,"element":"lightning"}
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
-    {"id":"theorem","name":"Counter Theorem","input":"~D, DF, F, b","kind":"special","anim":"theorem","parry":{"window":[1,3]},"hits":[{"at":4,"damage":70,"level":"heavy","knockback":[-2,-4]}]},
+    {
+      "id": "theorem",
+      "name": "Counter Theorem",
+      "input": "~D, DF, F, b",
+      "kind": "special",
+      "anim": "theorem",
+      "parry": {"window":[1,3]},
+      "hits": [{"at":4,"damage":70,"level":"heavy","knockback":[-2,-4]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
+    },
     {
       "id": "sigilMark",
       "name": "Sealed Sigil Mark",
       "input": "D, D, x",
       "kind": "special",
       "anim": "sigilMark",
-      "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[0,0],"offset":[30,-40],"damage":22,"level":"light","hits":4,"removeTime":300,"element":"lightning"}
+      "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[0,0],"offset":[30,-40],"damage":22,"level":"light","hits":4,"removeTime":300,"element":"lightning"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "proof",
@@ -727,9 +769,19 @@
         {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":36,"level":"medium","hits":8,"removeTime":200,"at":4,"offset":[44,-100],"knockback":[0,0]},
         {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":36,"level":"medium","hits":8,"removeTime":200,"at":4,"offset":[44,-68],"knockback":[0,0]},
         {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":36,"level":"medium","hits":8,"removeTime":200,"at":4,"offset":[44,-36],"knockback":[0,0]}
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
-    {"id":"pageThrow","name":"Page Turn Throw","input":"y+b","kind":"normal","when":"stand","anim":"pageThrow","throw":{"damage":90,"bind":[32,0],"launch":[-4,-6],"at":1}},
+    {
+      "id": "pageThrow",
+      "name": "Page Turn Throw",
+      "input": "y+b",
+      "kind": "normal",
+      "when": "stand",
+      "anim": "pageThrow",
+      "throw": {"damage":90,"bind":[32,0],"launch":[-4,-6],"at":1},
+      "sounds": [{"at":1,"snd":[200,5]}]
+    },
     {
       "id": "ex_sigil",
       "name": "Sigil EX",
@@ -739,7 +791,8 @@
       "projectile": [{"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[5.2,0],"offset":[44,-68],"damage":83.2,"level":"heavy","removeTime":180,"hits":2,"priority":2,"element":"lightning"}],
       "cancels": ["sigilMark","proof"],
       "cost": 250,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ex_ascend",
@@ -751,7 +804,8 @@
       "moves": [{"at":2,"vel":[2.4,-8.6]}],
       "hits": [{"at":2,"damage":85.8,"level":"heavy","launch":true,"hitstun":24,"knockback":[-1,-3]},{"at":3,"damage":52,"level":"heavy","launch":true,"knockback":[-3,-8]}],
       "cost": 500,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ult_proof",
@@ -766,10 +820,20 @@
         {"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.5,0],"damage":43.2,"level":"medium","hits":10,"removeTime":200,"at":4,"offset":[44,-36],"knockback":[0,0]}
       ],
       "cost": 3000,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
-    {"id":"overhead","name":"Spine Strike","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":70.3,"level":"medium","guard":"high","hitstun":20}]},
-    {"id":"launcher","name":"Bookend Launcher","input":"y","kind":"normal","when":"crouch","anim":"strong","hits":[{"at":3,"damage":58,"level":"heavy","launch":true,"hitstun":22,"knockback":[-1,-6]}]},
+    {"id":"overhead","name":"Spine Strike","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":70.3,"level":"medium","guard":"high","hitstun":20}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {
+      "id": "launcher",
+      "name": "Bookend Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":58,"level":"heavy","launch":true,"hitstun":22,"knockback":[-1,-6]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
     {
       "id": "divekick",
       "name": "Page Slam",
@@ -778,7 +842,8 @@
       "anim": "akick",
       "when": "air",
       "hits": [{"at":2,"damage":66,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}],
-      "moves": [{"at":1,"vel":[1.8,2.5]}]
+      "moves": [{"at":1,"vel":[1.8,2.5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "slide",
@@ -788,7 +853,8 @@
       "anim": "sweep",
       "when": "stand",
       "hits": [{"at":2,"damage":59.5,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5]}],
-      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}]
+      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "escape_burst",
@@ -800,7 +866,8 @@
       "cost": 500,
       "burst": true,
       "invuln": [1,3],
-      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}]
+      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "lunge",
@@ -809,9 +876,20 @@
       "kind": "normal",
       "anim": "strong",
       "moves": [{"at":1,"vel":[5.5,0]},{"at":3,"vel":[1.5,0]}],
-      "hits": [{"at":3,"damage":66.7,"level":"heavy","knockback":[-3,-1]}]
+      "hits": [{"at":3,"damage":66.7,"level":"heavy","knockback":[-3,-1]}],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"falcondive","name":"Falcon Dive","input":"F+b","kind":"normal","when":"air","anim":"akick","moves":[{"at":1,"vel":[4.5,2.2]}],"hits":[{"at":2,"damage":66,"level":"medium","guard":"high"}]},
+    {
+      "id": "falcondive",
+      "name": "Falcon Dive",
+      "input": "F+b",
+      "kind": "normal",
+      "when": "air",
+      "anim": "akick",
+      "moves": [{"at":1,"vel":[4.5,2.2]}],
+      "hits": [{"at":2,"damage":66,"level":"medium","guard":"high"}],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
     {
       "id": "jab2",
       "name": "Rapid Jab",
@@ -821,7 +899,8 @@
       "hits": [{"at":2,"damage":22,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["sigil","theorem"],
-      "rekka": {"after":["jab"],"window":[1,16],"contact":true}
+      "rekka": {"after":["jab"],"window":[1,16],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab3",
@@ -832,7 +911,8 @@
       "hits": [{"at":2,"damage":52,"level":"medium","knockback":[-3,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["sigil","theorem"],
-      "rekka": {"after":["jab2"],"window":[1,13],"contact":true}
+      "rekka": {"after":["jab2"],"window":[1,13],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick2",
@@ -843,7 +923,8 @@
       "hits": [{"at":2,"damage":27,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["sigil","theorem"],
-      "rekka": {"after":["lkick"],"window":[1,19],"contact":true}
+      "rekka": {"after":["lkick"],"window":[1,19],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick3",
@@ -854,7 +935,8 @@
       "hits": [{"at":2,"damage":56,"level":"medium","knockback":[-3.5,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["sigil","theorem"],
-      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true}
+      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong2",
@@ -865,7 +947,8 @@
       "hits": [{"at":2,"damage":49,"level":"medium","knockback":[-4,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["sigil","theorem"],
-      "rekka": {"after":["strong"],"window":[3,27],"contact":true}
+      "rekka": {"after":["strong"],"window":[3,27],"contact":true},
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "cjab2",
@@ -876,7 +959,8 @@
       "hits": [{"at":2,"damage":20,"level":"light","knockback":[-0.5,0]}],
       "when": "crouch",
       "cancels": [],
-      "rekka": {"after":["cjab"],"window":[1,17],"contact":true}
+      "rekka": {"after":["cjab"],"window":[1,17],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "ajab2",
@@ -887,7 +971,8 @@
       "hits": [{"at":2,"damage":27,"level":"light","guard":"high"}],
       "when": "air",
       "cancels": [],
-      "rekka": {"after":["ajab"],"window":[1,18],"contact":true}
+      "rekka": {"after":["ajab"],"window":[1,18],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_a",
@@ -897,7 +982,8 @@
       "anim": "stringA",
       "hits": [{"at":2,"damage":20,"level":"light","knockback":[-0.5,0]},{"at":4,"damage":28,"level":"light"}],
       "moves": [{"at":1,"vel":[1.5,0]},{"at":4,"vel":[0.5,0]}],
-      "cancels": ["string_b","string_c","sigil","theorem"]
+      "cancels": ["string_b","string_c","sigil","theorem"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_b",
@@ -907,7 +993,8 @@
       "anim": "stringB",
       "hits": [{"at":2,"damage":28,"level":"light","guard":"low","knockback":[-0.5,0]},{"at":5,"damage":52,"level":"medium"}],
       "moves": [{"at":1,"vel":[1.2,0]},{"at":5,"vel":[0.5,0]}],
-      "cancels": ["string_c","sigil","theorem"]
+      "cancels": ["string_c","sigil","theorem"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_c",
@@ -917,16 +1004,18 @@
       "anim": "stringC",
       "hits": [{"at":3,"damage":84,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22}],
       "moves": [{"at":1,"vel":[2,0]},{"at":3,"vel":[0.5,0]}],
-      "cancels": ["sigil","theorem"]
+      "cancels": ["sigil","theorem"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"hkick","hits":[{"at":3,"damage":67,"level":"heavy"}]},
+    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"hkick","hits":[{"at":3,"damage":67,"level":"heavy"}],"sounds":[{"at":2,"snd":[200,2]}]},
     {
       "id": "sigil_slow",
       "name": "Sealed Sigil Spark Slow",
       "input": "~D, DB, B, y",
       "kind": "special",
       "anim": "sigil",
-      "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[2.31,0],"offset":[44,-68],"damage":86,"level":"heavy","removeTime":150,"element":"lightning","hits":2,"priority":2}
+      "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[2.31,0],"offset":[44,-68],"damage":86,"level":"heavy","removeTime":150,"element":"lightning","hits":2,"priority":2},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "sigil_low",
@@ -934,7 +1023,8 @@
       "input": "~D, DB, B, x",
       "kind": "special",
       "anim": "sigil",
-      "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[5.67,0],"offset":[44,-30],"damage":48,"level":"medium","removeTime":180,"element":"lightning"}
+      "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[5.67,0],"offset":[44,-30],"damage":48,"level":"medium","removeTime":180,"element":"lightning"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "sigil_barrage",
@@ -942,7 +1032,8 @@
       "input": "~D, DB, B, b",
       "kind": "special",
       "anim": "sigil",
-      "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[3.36,0],"offset":[44,-68],"damage":32,"level":"medium","removeTime":120,"element":"lightning","hits":3}
+      "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[3.36,0],"offset":[44,-68],"damage":32,"level":"medium","removeTime":120,"element":"lightning","hits":3},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "sigil_high",
@@ -950,7 +1041,8 @@
       "input": "~D, DF, B, y",
       "kind": "special",
       "anim": "sigil",
-      "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.62,0],"offset":[44,-80],"damage":54,"level":"medium","removeTime":180,"element":"lightning"}
+      "projectile": {"at":3,"anim":"sigilFx","hitAnim":"sigilHit","speed":[4.62,0],"offset":[44,-80],"damage":54,"level":"medium","removeTime":180,"element":"lightning"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
   "palettes": [

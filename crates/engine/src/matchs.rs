@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod unleash; mod walk;
+mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -408,7 +408,7 @@ impl Match {
     }
 
     fn physics_step(&mut self, i: usize) {
-        if self.fighters[i].pos_freeze { self.fighters[i].pos_freeze = false; self.update_bind(i); return; }
+        if self.power_arena && self.fighters[i].state_no == ENGINE_STATE_ARENA_EXIT { power_arena::step_arena_exit(&mut self.fighters[i]); return; } else if self.fighters[i].pos_freeze { self.fighters[i].pos_freeze = false; self.update_bind(i); return; }
         if self.fighters[i].bind.is_some() { self.update_bind(i); return; }
         let mut land = false;
         let gravity = self.mutators.gravity;
@@ -576,7 +576,7 @@ impl Match {
                     return;
                 }
                 let ko_disabled = self.global_asserts & gsf::GLOBALNOKO != 0;
-                let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| (self.power_arena && self.fighters[i].pos.x.abs() > ARENA_HALF_WIDTH) || (self.fighters[i].life <= 0.0 && !ko_disabled && !self.fighters[i].has_assert(asf::NOKO))).collect();
+                let mut dead: Vec<usize> = roots.iter().copied().filter(|&i| self.arena_exit_complete(i) || (self.fighters[i].life <= 0.0 && !ko_disabled && !self.fighters[i].has_assert(asf::NOKO))).collect();
                 let team_life = |m: &Match, s: usize| -> (f32, f32) { roots.iter().filter(|&&i| m.fighters[i].side == s).fold((0.0, 0.0), |a, &i| (a.0 + m.fighters[i].life.max(0.0), a.1 + m.fighters[i].life_max)) };
                 if self.team_simul || self.team_tag {
                     // a fallen teammate stays down; the round ends only when a whole team is KO'd
@@ -585,7 +585,7 @@ impl Match {
                     let (o0, o1) = (out(self, 0), out(self, 1));
                     dead = roots.iter().copied().filter(|&i| (self.fighters[i].side == 0 && o0) || (self.fighters[i].side == 1 && o1)).collect();
                 }
-                if !dead.is_empty() || self.timer <= 0 {
+                if !dead.is_empty() || (self.timer <= 0 && !self.arena_exit_pending()) {
                     self.round_state = 3; self.round_time = 0;
                     self.won_by_ko = !dead.is_empty();
                     if !dead.is_empty() {
@@ -594,8 +594,8 @@ impl Match {
                         self.winner_side = if sides_dead[0] && sides_dead[1] { -2 } else if sides_dead[0] { 1 } else { 0 };
                         let slow = self.global_asserts & gsf::NOKOSLOW == 0;
                         self.slow_mo = if slow { 75 } else { 0 };
-                        self.announce = Some(Announce { text: if sides_dead[0] && sides_dead[1] { "DOUBLE K.O.".into() } else if self.power_arena && self.fighters[dead[0]].pos.x.abs() > ARENA_HALF_WIDTH { "RING OUT".into() } else { "K.O.".into() }, time: 110, total: 110, kind: AnnounceKind::Ko });
-                        self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side, silent: self.global_asserts & gsf::NOKOSND != 0, slow }); self.finish_arm();
+                        self.announce = Some(Announce { text: if sides_dead[0] && sides_dead[1] { "DOUBLE K.O.".into() } else if dead.iter().any(|&i| self.arena_exit_complete(i)) { "RING OUT".into() } else { "K.O.".into() }, time: 110, total: 110, kind: AnnounceKind::Ko });
+                        self.events.push(Event::Ko { loser_side: self.fighters[dead[0]].side, silent: self.global_asserts & gsf::NOKOSND != 0, slow }); if !dead.iter().any(|&i| self.arena_exit_complete(i)) { self.finish_arm(); }
                     } else {
                         let (l0, l1) = (team_life(self, 0), team_life(self, 1));
                         let (r0, r1) = (l0.0 / l0.1.max(1.0), l1.0 / l1.1.max(1.0));
@@ -605,7 +605,7 @@ impl Match {
                 }
             }
             3 => {
-                let settled = self.roots().all(|f| f.ikemen.standby || if f.alive { f.move_type != 'H' && (f.ctrl || f.state_no == 0) } else { f.state_no == 5150 || f.state_no == 5110 });
+                let settled = self.roots().all(|f| f.ikemen.standby || if f.alive { f.move_type != 'H' && (f.ctrl || f.state_no == 0) } else { f.state_no == 5150 || f.state_no == 5110 || (self.power_arena && f.state_no == ENGINE_STATE_ARENA_EXIT) });
                 if ((settled && self.round_time > 90) || self.round_time > 300) && (self.global_asserts & crate::flags::gsf::ROUNDNOTOVER == 0 || self.round_time > 900) && !self.finish_holding() {
                     self.round_state = 4; self.round_time = 0;
                     let decides = self.winner_side >= 0 && self.wins[self.winner_side as usize] + 1 >= self.rounds_to_win;
@@ -613,7 +613,7 @@ impl Match {
                         if !self.fighters[i].alive {
                             // every KO plays its own defeat sequence: a different one each round, the longest on the match-deciding one
                             let v = if decides { 3 } else { (self.round_no as usize - 1 + k) % 3 };
-                            if self.fighters[i].def.anims.contains_key(&(197 + v as i32)) { let d = self.fighters[i].def.clone(); self.change_state(i, 5190 + v as i32, d); }
+                            if !self.arena_exit_complete(i) && self.fighters[i].def.anims.contains_key(&(197 + v as i32)) { let d = self.fighters[i].def.clone(); self.change_state(i, 5190 + v as i32, d); }
                             continue;
                         }
                         self.fighters[i].ctrl = false;
@@ -675,7 +675,7 @@ impl Match {
         let tagged = self.team_tag;
         for (fi, f) in self.fighters.iter_mut().enumerate() {
             if f.is_helper { continue; }
-            let mut bits = if f.has_assert(asf::NOINPUT) { 0 } else { inputs.get(k).copied().unwrap_or(0) };
+            let mut bits = if (self.power_arena && f.state_no == ENGINE_STATE_ARENA_EXIT) || f.has_assert(asf::NOINPUT) { 0 } else { inputs.get(k).copied().unwrap_or(0) };
             if tagged {
                 if bits & crate::input::k::TAG != 0 && tag_len < tag_requests.len() { tag_requests[tag_len] = fi; tag_len += 1; }
                 bits &= !crate::input::k::TAG;

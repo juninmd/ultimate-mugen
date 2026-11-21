@@ -58,6 +58,7 @@ pub fn checksum(m: &Match) -> u128 {
     h.u32(m.won_by_ko as u32); h.u32(m.power_arena as u32);
     h.i32(m.finish_window);
     h.u32(m.rng);
+    h.u32(m.rand_state.get());
     h.u32(m.next_id);
     h.u32(m.global_asserts);
     h.u32(m.match_over as u32);

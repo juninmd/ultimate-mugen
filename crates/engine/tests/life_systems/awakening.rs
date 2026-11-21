@@ -17,6 +17,7 @@ fn awakening_increases_open_hit_damage_but_not_guard_chip() {
         enter(battle, 1, 120);
         ticks(battle, 1);
         enter(battle, 1, 120);
+        battle.fighters[1].asserts |= asf::AUTOGUARD;
         battle.apply_hit(0, 1, &hd, (0.0, 0.0), None);
         assert!(battle.fighters[1].ghv.guarded);
         assert_eq!(battle.fighters[1].ghv.damage, 10.0);

@@ -110,6 +110,7 @@ fn five_guarded_hits_break_the_guard() {
     enter(&mut m, 1, 120);
     ticks(&mut m, 1);
     enter(&mut m, 1, 120);
+    m.fighters[1].asserts |= asf::AUTOGUARD;
     let mut hd = hit(5.0);
     hd.guard_damage = 1.0;
     hd.guard_points = 40.0;
@@ -238,6 +239,7 @@ fn constants_section_sets_the_multipliers() {
 fn guard_points_regenerate_passively_during_neutral() {
     let mut m = pair(&[("data.guardpoints", 200.0)]);
     enter(&mut m, 1, 120); ticks(&mut m, 1); enter(&mut m, 1, 120);
+    m.fighters[1].asserts |= asf::AUTOGUARD;
     let mut hd = hit(5.0); hd.guard_points = 50.0;
     m.apply_hit(0, 1, &hd, (0.0, 0.0), None);
     assert_eq!(m.fighters[1].ikemen.guard_points, 150.0);

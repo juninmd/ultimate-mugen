@@ -6,6 +6,7 @@ use crate::settings::{
 };
 
 mod touch_settings;
+mod pixel_controls;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum Act {
@@ -588,36 +589,18 @@ impl App {
                 Align::Left,
                 false,
             );
-            if let Some(v) = r.level {
-                let on = if self.settings.mute { 0 } else { v };
-                self.ui.adapted_level(x + w - 360.0, y + 17.0, VOLUME_STEPS as usize, on as usize);
-                self.ui.text(
-                    &r.value,
-                    x + w - 22.0,
-                    y + 35.0,
-                    20.0,
-                    WHITE,
-                    Align::Right,
-                    true,
-                );
-            } else if !r.value.is_empty() {
-                let shown = if matches!(r.act, Act::Keys | Act::CharTuning | Act::Guide | Act::CheckUpdate | Act::Reset) {
-                    r.value.clone()
-                } else if interactive {
-                    format!("‹ {} ›", r.value)
-                } else {
-                    r.value.clone()
-                };
-                self.ui.text(
-                    &shown,
-                    x + w - 22.0,
-                    y + 35.0,
-                    22.0,
-                    if f { WHITE } else { hex("#ffcc33") },
-                    Align::Right,
-                    true,
-                );
-            }
+            pixel_controls::draw_value(
+                &self.ui,
+                r.act,
+                &r.value,
+                r.level,
+                self.settings.mute,
+                x,
+                w,
+                y,
+                interactive,
+                f,
+            );
             y += (h + 8.0).min(504.0 / rows.len() as f32);
         }
 

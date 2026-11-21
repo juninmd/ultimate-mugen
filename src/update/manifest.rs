@@ -1,6 +1,6 @@
 use serde_json::Value;
 
-pub const MAX_BINARY_BYTES: u64 = 256 * 1024 * 1024;
+pub const MAX_BINARY_BYTES: u64 = 512 * 1024 * 1024;
 const MAX_NOTES_CHARS: usize = 600;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -170,6 +170,15 @@ mod tests {
             let update = parse_manifest(&manifest(entry), "0.3.0", Some("windows-x86_64")).unwrap();
             assert_eq!(update.binary, None, "{entry}");
         }
+    }
+
+    #[test]
+    fn a_release_binary_as_large_as_the_shipped_build_is_installable() {
+        let size = 350_000_000u64;
+        let entry = format!(r#""binary":{{"url":"https://github.com/o/r/app.exe","sha256":"0000000000000000000000000000000000000000000000000000000000000001","size":{size}}}"#);
+        let update = parse_manifest(&manifest(&entry), "0.3.0", Some("windows-x86_64")).unwrap();
+        assert_eq!(update.binary.expect("the shipped binary must be installable").size, size);
+        assert!(size > 256 * 1024 * 1024, "the released executables are bigger than the old 256 MiB cap");
     }
 
     #[test]

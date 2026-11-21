@@ -102,6 +102,7 @@ impl App {
             screen_height(),
             Color::new(0.02, 0.01, 0.06, 0.6),
         );
+        crate::screen_art::ScreenArt::Results.draw(&self.ui, 1.0);
         self.ui.motes(70, 1.6);
         let w = if winner == 0 { self.sel.0 } else { self.sel.1 };
         let e = &self.reg.chars[w];

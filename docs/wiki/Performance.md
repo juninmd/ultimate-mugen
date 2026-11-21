@@ -165,6 +165,10 @@ The folder fallback uses the ordered VFS map's range for the character directory
 
 On the cloud development machine, median normalization time decreased from 60.8 to 48.0 ns per operation, and median folder fallback time from 278.2 to 1.0 µs. These are microbenchmark results, not FPS or whole-game loading measurements. Missing files that require the global fallback can still scan the entire map.
 
+## PNG decode
+
+`cargo run --locked --release -p ume-formats --example png_bench -- assets/chars/sprites 7` decodes every PNG under a folder (2,610 files, 136 MB in the bundled characters) seven times and prints min, median and max plus a pixel checksum. Row unfiltering is specialized per pixel size (1 to 4 bytes) so Sub, Average and Paeth run without per-byte bounds and branch overhead, and the unused Adler-32 pass is skipped because the decoder only checks the output length. On the 4-core cloud machine the median went from 3,420 to 2,220 ms (three runs each, spread under 4%) with an identical checksum. `png_unfilter` tests compare every filter and pixel size against the spec formulas.
+
 ## Audio and UI allocation pressure
 
 `cargo run --locked --release --example audio_bench` decodes a generated 30-second, 44.1 kHz stereo WAV five times, counting allocations and reallocations during each decode. The decoder reuses its interleaved sample-conversion buffer while its capacity is sufficient; it grows when a later packet needs more samples. The written sample count still comes from the current packet, including partial final packets and mono input.

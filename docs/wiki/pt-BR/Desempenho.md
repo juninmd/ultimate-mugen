@@ -162,6 +162,10 @@ A busca alternativa na pasta usa o intervalo do mapa ordenado da VFS corresponde
 
 Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,8 para 48,0 ns por operação, e a da busca na pasta de 278,2 para 1,0 µs. São resultados de microbenchmark, não medidas de FPS ou de carregamento completo do jogo. Arquivos ausentes que exigem busca global ainda podem percorrer todo o mapa.
 
+## Decodificação de PNG
+
+`cargo run --locked --release -p ume-formats --example png_bench -- assets/chars/sprites 7` decodifica todos os PNGs de uma pasta (2.610 arquivos, 136 MB nos personagens incluídos) sete vezes e imprime mínimo, mediana, máximo e um checksum de pixels. O unfilter das linhas é especializado por tamanho de pixel (1 a 4 bytes), então Sub, Average e Paeth rodam sem a sobrecarga de bounds check e desvio por byte, e a passada de Adler-32 não usada é pulada porque o decoder só confere o tamanho da saída. Na máquina de nuvem com 4 núcleos a mediana caiu de 3.420 para 2.220 ms (três execuções cada, variação abaixo de 4%) com checksum idêntico. Os testes de `png_unfilter` comparam cada filtro e tamanho de pixel com as fórmulas da especificação.
+
 ## Alocações de áudio e interface
 
 `cargo run --locked --release --example audio_bench` decodifica cinco vezes um WAV estéreo gerado de 30 segundos a 44,1 kHz, contando alocações e realocações durante cada decodificação. O decodizador reutiliza o buffer de conversão de amostras intercaladas enquanto houver capacidade; ele cresce quando um pacote posterior precisa de mais amostras. A quantidade de amostras escritas continua vindo do pacote atual, inclusive em pacotes finais parciais e entrada mono.

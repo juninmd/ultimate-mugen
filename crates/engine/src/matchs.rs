@@ -1402,9 +1402,9 @@ impl Match {
     pub fn spawn_explod(&mut self, i: usize, sc: &Controller) {
         if self.explods.len() >= 512 { return; }
         let num = |m: &Match, k: &str, d: f64, idx: usize| m.num(i, sc, k, d, idx) as f32;
-        let anim_raw = sc.raw("anim").unwrap_or("0").trim().to_string();
-        let from_fx = anim_raw.starts_with(['f', 'F']);
-        let anim_no = anim_raw.trim_start_matches(['f', 'F', 's', 'S']).trim().parse::<i32>().unwrap_or_else(|_| num(self, "anim", 0.0, 0) as i32);
+        let (anim_value, anim_own) = crate::value_ref::eval(self, i, sc.raw("anim").unwrap_or("0"), true);
+        let from_fx = !anim_own;
+        let anim_no = anim_value as i32;
         let f = &self.fighters[i];
         let def = if from_fx { match self.fx.clone() { Some(x) => x, None => return } } else { f.def.clone() };
         if !def.anims.contains_key(&anim_no) { return; }

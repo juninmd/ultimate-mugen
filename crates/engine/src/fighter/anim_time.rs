@@ -15,6 +15,6 @@ impl Fighter {
                 .map(|f| f.time)
                 .sum()
         });
-        (self.anim_elapsed - finite).min(0)
+        self.anim_elapsed - finite
     }
 }

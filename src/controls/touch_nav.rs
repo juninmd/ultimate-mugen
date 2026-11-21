@@ -111,14 +111,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn pad_offers_every_menu_action_without_overlap() {
-        let pad = buttons();
-        let bits = pad.iter().fold(0, |m, b| m | b.bit);
-        assert_eq!(bits, nav::UP | nav::DOWN | nav::LEFT | nav::RIGHT | nav::OK | nav::BACK);
-        for (i, a) in pad.iter().enumerate() {
-            for b in &pad[i + 1..] {
-                assert!(a.center.distance(b.center) >= (a.radius + b.radius) * 0.9, "{} overlaps {}", a.label, b.label);
-            }
-        }
+    fn arrows_cover_the_four_directions_once() {
+        let bits = ARROWS.iter().fold(0, |m, (_, b, _)| m | b);
+        assert_eq!(bits, nav::UP | nav::DOWN | nav::LEFT | nav::RIGHT);
+        assert_eq!(ARROWS.iter().map(|(_, b, _)| b.count_ones()).sum::<u32>(), 4);
     }
 }

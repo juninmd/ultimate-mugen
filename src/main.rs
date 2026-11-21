@@ -46,7 +46,7 @@ mod tower;
 mod passive_fx; mod spring; mod texgen; mod tweaks; mod ui; mod ui_adapted; mod ui_adapted_panels; mod ui_progress; mod ui_tokens;
 mod update;
 #[cfg(target_arch = "wasm32")]
-mod web_panic; mod web_sprites;
+mod web_sprites;
 #[cfg(not(target_arch = "wasm32"))]
 mod scan_report;
 mod vfx;
@@ -220,7 +220,7 @@ async fn game() {
     let args: Vec<String> = std::env::args().collect();
     let has = |f: &str| args.iter().any(|a| a == f);
     #[cfg(target_arch = "wasm32")]
-    web_panic::install();
+    web_input::install_panic_hook();
     init_perf();
     let shots = args.iter().position(|a| a == "--shots").and_then(|i| args.get(i + 1)).cloned();
     #[cfg(target_arch = "wasm32")]

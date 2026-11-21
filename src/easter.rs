@@ -7,6 +7,8 @@ pub(crate) mod builders;
 pub(crate) mod catalog;
 mod combat;
 mod draw;
+mod lore;
+mod lore_catalog;
 pub(crate) mod sprite;
 mod stages;
 mod stages_catalog;
@@ -25,6 +27,7 @@ pub fn tick(m: &Match, stage_name: &str, audio: &mut Audio) {
         tracker.sync_match(m);
         combat::check(m, stage_name, &mut tracker, audio);
         stages::check(m, stage_name, &mut tracker, audio);
+        lore::check(m, stage_name, &mut tracker, audio);
         tracker.record_snapshot(m);
     });
 }

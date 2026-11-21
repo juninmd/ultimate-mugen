@@ -144,7 +144,7 @@ impl Fighter {
         let Some(a) = self.anim() else { return 0 };
         let mut t = self.anim_elapsed + off;
         let tot = a.total_time;
-        if tot > 0 && t >= tot {
+        if tot > 0 && t > tot {
             let ls = self.elem_start(self.anim_loop_start + 1);
             let ll = tot - ls;
             t = if ll > 0 { ls + (t - ls) % ll } else { ls };

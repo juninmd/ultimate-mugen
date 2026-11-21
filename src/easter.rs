@@ -7,6 +7,7 @@ pub(crate) mod builders;
 pub(crate) mod catalog;
 mod combat;
 mod draw;
+mod particles;
 pub(crate) mod sprite;
 mod stages;
 mod stages_catalog;

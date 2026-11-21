@@ -4,6 +4,7 @@
 //! 1/2/4/8), 4 (gray+alpha) and 6 (RGBA); 16-bit samples are reduced to their
 //! high byte. All five filter types.
 
+use crate::png_unfilter::unfilter;
 use crate::Reader;
 
 #[derive(Clone, Debug)]
@@ -30,7 +31,8 @@ pub(crate) fn inflate_zlib_exact(z: &[u8], expected: usize) -> Result<Vec<u8>, S
     let mut out = vec![0u8; expected];
     let mut st = DecompressorOxide::new();
     let flags = inflate_flags::TINFL_FLAG_PARSE_ZLIB_HEADER
-        | inflate_flags::TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF;
+        | inflate_flags::TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF
+        | inflate_flags::TINFL_FLAG_IGNORE_ADLER32;
     let (status, _, written) = decompress(&mut st, z, &mut out, 0, flags);
     if written < expected {
         return Err(format!("truncated image data (zlib: {status:?})"));
@@ -251,49 +253,6 @@ pub fn decode_png(buf: &[u8]) -> Result<DecodedPng, String> {
         palette: None,
         rgba: Some(rgba),
     })
-}
-
-fn unfilter(ft: u8, line: &mut [u8], prev: &[u8], bpp: usize) -> Result<(), String> {
-    let len = line.len();
-    let prev = &prev[..len];
-    match ft {
-        0 => {}
-        1 => {
-            for x in bpp..len {
-                line[x] = line[x].wrapping_add(line[x - bpp]);
-            }
-        }
-        2 => {
-            for (l, &p) in line.iter_mut().zip(prev) {
-                *l = l.wrapping_add(p);
-            }
-        }
-        3 => {
-            for x in 0..len {
-                let a = if x >= bpp { line[x - bpp] as u16 } else { 0 };
-                line[x] = line[x].wrapping_add(((a + prev[x] as u16) >> 1) as u8);
-            }
-        }
-        4 => {
-            for x in 0..len {
-                let a = if x >= bpp { line[x - bpp] as i16 } else { 0 };
-                let b = prev[x] as i16;
-                let c = if x >= bpp { prev[x - bpp] as i16 } else { 0 };
-                let pp = a + b - c;
-                let (pa, pb, pc) = ((pp - a).abs(), (pp - b).abs(), (pp - c).abs());
-                let pred = if pa <= pb && pa <= pc {
-                    a
-                } else if pb <= pc {
-                    b
-                } else {
-                    c
-                };
-                line[x] = line[x].wrapping_add(pred as u8);
-            }
-        }
-        _ => return Err(format!("PNG: bad filter type {ft}")),
-    }
-    Ok(())
 }
 
 /// Expand an indexed PNG through its own palette (alpha from tRNS).

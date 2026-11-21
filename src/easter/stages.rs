@@ -16,76 +16,76 @@ pub(crate) fn check(m: &Match, stage_name: &str, tr: &mut FightTracker, audio: &
 
     if name.contains("dojo") {
         if t == 260 {
-            tr.trigger(20, false, sc::dojo_crane(), audio, "tick");
+            tr.trigger(20, false, sc::dojo_crane(), audio, "easter_kitsune");
         }
         if heavy_hit {
-            tr.trigger(21, true, sc::dojo_roof_rumble(), audio, "land");
+            tr.trigger(21, true, sc::dojo_roof_rumble(), audio, "easter_clash");
         }
     } else if name.contains("neo-metr") || name.contains("neon") {
         if t == 240 {
-            tr.trigger(22, false, sc::neon_ufo(), audio, "unlock");
+            tr.trigger(22, false, sc::neon_ufo(), audio, "easter_ufo");
         }
         if super_fired {
-            tr.trigger(23, true, sc::neon_overload(), audio, "meter");
+            tr.trigger(23, true, sc::neon_overload(), audio, "easter_ufo");
         }
     } else if name.contains("bambu") {
         if max_combo >= 4 {
-            tr.trigger(24, true, sc::bamboo_spirits(), audio, "tick");
+            tr.trigger(24, true, sc::bamboo_spirits(), audio, "easter_kitsune");
         }
     } else if name.contains("planalto") || name.contains("plains") {
         if t == 300 {
-            tr.trigger(25, false, sc::plains_galleon(), audio, "tick");
+            tr.trigger(25, false, sc::plains_galleon(), audio, "easter_parrot");
         }
     } else if name.contains("espírit") || name.contains("espirit") || name.contains("spirit") {
         if super_fired || m.roots().any(|f| f.form > 0) {
-            tr.trigger(26, false, sc::spirit_kitsune(), audio, "transform");
+            tr.trigger(26, false, sc::spirit_kitsune(), audio, "easter_kitsune");
         }
     } else if name.contains("vulc") || name.contains("volcano") {
         if heavy_hit {
-            tr.trigger(27, true, sc::volcano_geyser(), audio, "burst");
+            tr.trigger(27, true, sc::volcano_geyser(), audio, "easter_wonder");
         }
     } else if name.contains("brasil") || name.contains("brazil") {
         if t == 220 {
-            tr.trigger(28, false, sc::brazil_capybara(), audio, "confirm");
+            tr.trigger(28, false, sc::brazil_capybara(), audio, "easter_capybara");
         }
         if m.round_no >= 2 && t == 140 {
-            tr.trigger(29, false, sc::brazil_caramelo(), audio, "unlock");
+            tr.trigger(29, false, sc::brazil_caramelo(), audio, "easter_capybara");
         }
     } else if name.contains("cristo") || name.contains("corcovado") || name.contains("christ") {
         if t == 240 {
-            tr.trigger(30, false, sc::christ_toucan(), audio, "confirm");
+            tr.trigger(30, false, sc::christ_toucan(), audio, "easter_bird");
         }
     } else if name.contains("muralha") || name.contains("great wall") {
         if t == 260 {
-            tr.trigger(31, false, sc::great_wall_kite(), audio, "tick");
+            tr.trigger(31, false, sc::great_wall_kite(), audio, "easter_kitsune");
         }
     } else if name.contains("petra") {
         if heavy_hit {
-            tr.trigger(32, true, sc::petra_scarab(), audio, "meter");
+            tr.trigger(32, true, sc::petra_scarab(), audio, "easter_wonder");
         }
     } else if name.contains("texas") {
         if t == 240 {
-            tr.trigger(33, false, sc::texas_noon(), audio, "tick");
+            tr.trigger(33, false, sc::texas_noon(), audio, "easter_tumbleweed");
         }
     } else if name.contains("chich") || name.contains("kukulc") {
         if super_fired {
-            tr.trigger(34, true, sc::chichen_serpent(), audio, "super");
+            tr.trigger(34, true, sc::chichen_serpent(), audio, "easter_wonder");
         }
     } else if name.contains("coliseu") || name.contains("colosseum") {
         if max_combo >= 6 {
-            tr.trigger(35, true, sc::colosseum_laurel(), audio, "crowd");
+            tr.trigger(35, true, sc::colosseum_laurel(), audio, "easter_crown");
         }
     } else if name.contains("taj") {
         if m.round_no >= 2 && t == 120 {
-            tr.trigger(36, false, sc::taj_doves(), audio, "unlock");
+            tr.trigger(36, false, sc::taj_doves(), audio, "easter_bird");
         }
     } else if name.contains("giz") || name.contains("pyramids") {
         if any_full_meter {
-            tr.trigger(37, true, sc::giza_horus(), audio, "meter");
+            tr.trigger(37, true, sc::giza_horus(), audio, "easter_wonder");
         }
     } else if name.contains("babil") || name.contains("hanging") {
         if max_combo >= 4 && m.roots().any(|f| f.state_type == 'A') {
-            tr.trigger(38, true, sc::babylon_peacock(), audio, "confirm");
+            tr.trigger(38, true, sc::babylon_peacock(), audio, "easter_bird");
         }
     } else {
         check_classical_wonders(&name, t, heavy_hit, super_fired, tr, audio);
@@ -103,7 +103,7 @@ fn check_classical_wonders(name: &str, t: i32, heavy: bool, super_fired: bool, t
                 [1.0, 0.86, 0.3],
             ),
             audio,
-            "super",
+            "easter_wonder",
         );
     } else if (name.contains("farol") || name.contains("alexandria")) && t == 250 {
         tr.trigger(
@@ -115,7 +115,7 @@ fn check_classical_wonders(name: &str, t: i32, heavy: bool, super_fired: bool, t
                 [0.98, 0.92, 0.62],
             ),
             audio,
-            "unlock",
+            "easter_wonder",
         );
     } else if (name.contains("ártemis") || name.contains("artemis")) && t == 250 {
         tr.trigger(
@@ -127,7 +127,7 @@ fn check_classical_wonders(name: &str, t: i32, heavy: bool, super_fired: bool, t
                 [0.64, 0.92, 1.0],
             ),
             audio,
-            "tick",
+            "easter_wonder",
         );
     } else if (name.contains("rodes") || name.contains("rhodes")) && heavy {
         tr.trigger(
@@ -139,7 +139,7 @@ fn check_classical_wonders(name: &str, t: i32, heavy: bool, super_fired: bool, t
                 [0.92, 0.66, 0.32],
             ),
             audio,
-            "crowd",
+            "easter_wonder",
         );
     } else if (name.contains("halicarnasso") || name.contains("mausol")) && t == 250 {
         tr.trigger(
@@ -151,7 +151,7 @@ fn check_classical_wonders(name: &str, t: i32, heavy: bool, super_fired: bool, t
                 [1.0, 0.78, 0.44],
             ),
             audio,
-            "unlock",
+            "easter_wonder",
         );
     }
 }

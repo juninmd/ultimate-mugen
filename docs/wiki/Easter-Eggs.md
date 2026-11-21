@@ -73,3 +73,18 @@ Ultimate MUGEN includes a presentation-only in-fight Easter Egg system (`src/eas
 58. **Akio vs Kaito**: Classic shonen rivalry — "Loser buys ramen!"
 59. **Marlow's Pirate Parrot**: *El Viento Salado*'s first mate swoops across the screen on Supers or 6+ hit combos.
 60. **Story Thug Bravado (`npc_*`)**: Gang members complain about their paycheck when caught in a 4+ hit combo.
+
+## Custom Synthesized Sound Effects (`src/audio/easter_sfx.rs`)
+All 60 Easter Eggs trigger one of 12 bespoke 32 kHz synthesized arcade SFX cues preloaded alongside the built-in sound bank (desktop, web/WASM, Android, iOS):
+- `easter_toasty` — Rising retro arcade vocal/brass stinger with slapback echo (*TOASTY!*, *Taunt to Get Bodied*, *Overkill*, *Buzzer Beater*).
+- `easter_coin` — Classic 2-note golden arcade coin / 1UP chime (*Max Meter*, *Sync Jump*, *Air Juggle*, *Speedrun K.O.*).
+- `easter_crown` — Shimmering major-7th victory arpeggio fanfare (*Flawless Perfect*, *Magic Pixel*, *Double K.O.*, *Limit Break Duel*, *Colosseum*).
+- `easter_clash` — Dual detuned metallic blade/energy clash (*Clash of Fates*, *Guard Fortress*, *Double Super Clash*, *Shion vs Kaname*, *Suzume vs Oboro*).
+- `easter_tumbleweed` — Spaghetti-western desert whistle with airy wind sweep (*High Noon Staredown*, *Texas*).
+- `easter_ufo` — Sci-fi theremin LFO saucer wobble (*Neo-Metrópole UFO*, *System Overload // 2099*, *Volta*).
+- `easter_kitsune` — Mystical shrine bell partials & wooden clack (*Spirit Gate Kitsune*, *Dojo Crane*, *Bamboo Spirits*, *Great Wall*, *Lian*).
+- `easter_capybara` — Warm tropical marimba/kalimba bounce (*Brazil Capybara*, *Caramelo*, *Bruno Home Crowd*, *Dance Party*).
+- `easter_bird` — Upward tropical bird chirp & wing trill (*Corcovado Toucan*, *Taj Mahal Doves*, *Hanging Gardens Peacock*, *Kaito vs Jin*).
+- `easter_parrot` — Expressive pirate parrot double-squawk (*Marlow's Parrot*, *El Viento Salado*).
+- `easter_wonder` — Ancient mythic pentatonic harp & deep bronze gong (*Pyramids*, *Petra*, *Chichén Itzá*, *Volcano*, *Classical Wonders*, *Garan*).
+- `easter_banter` — Snappy comic speech-bubble pop & chime (*Mirror Match*, *Haruki Apology*, *Marlow vs Valdric*, *Akio vs Kaito*, *Thug Complaint*).

@@ -39,50 +39,50 @@ pub(crate) fn check(m: &Match, stage_name: &str, tr: &mut FightTracker, audio: &
         let hp_ratio = if f.life_max > 0.0 { f.life / f.life_max } else { 1.0 };
 
         if id_is(f, "akio") && f.alive && hp_ratio <= 0.30 {
-            tr.trigger(46, false, lc::akio_fired_up(side), audio, "transform");
+            tr.trigger(46, false, lc::akio_fired_up(side), audio, "easter_crown");
         }
         if id_is(f, "haruki") && f.combo_count >= 5 {
-            tr.trigger(47, true, lc::haruki_apology(side), audio, "toggle");
+            tr.trigger(47, true, lc::haruki_apology(side), audio, "easter_banter");
         }
         if id_is(f, "marlow") && (super_fired || f.combo_count >= 6) {
-            tr.trigger(58, true, lc::marlow_parrot(side), audio, "unlock");
+            tr.trigger(58, true, lc::marlow_parrot(side), audio, "easter_parrot");
         }
         if f.def.id.starts_with("npc_") && opp.combo_count >= 4 {
-            tr.trigger(59, true, lc::thug_complaint(&f.def.display_name, side), audio, "counter");
+            tr.trigger(59, true, lc::thug_complaint(&f.def.display_name, side), audio, "easter_banter");
         }
     }
 }
 
 fn check_opening_matchups(p1: &Fighter, p2: &Fighter, stage: &str, tr: &mut FightTracker, audio: &mut Audio) {
     if p1.def.id.eq_ignore_ascii_case(&p2.def.id) && !p1.def.id.is_empty() {
-        tr.trigger(40, false, lc::mirror_match(&p1.def.display_name), audio, "confirm");
+        tr.trigger(40, false, lc::mirror_match(&p1.def.display_name), audio, "easter_banter");
         return;
     }
     if pair_is(p1, p2, "suzume", "oboro") {
-        tr.trigger(41, false, lc::suzume_oboro(), audio, "danger");
+        tr.trigger(41, false, lc::suzume_oboro(), audio, "easter_clash");
     } else if pair_is(p1, p2, "sylene", "garan") {
-        tr.trigger(42, false, lc::sylene_garan(), audio, "danger");
+        tr.trigger(42, false, lc::sylene_garan(), audio, "easter_clash");
     } else if pair_is(p1, p2, "kaito", "oboro") {
-        tr.trigger(43, false, lc::kaito_oboro(), audio, "super");
+        tr.trigger(43, false, lc::kaito_oboro(), audio, "easter_clash");
     } else if pair_is(p1, p2, "marlow", "valdric") {
         let side = if id_is(p1, "marlow") { 0 } else { 1 };
-        tr.trigger(48, false, lc::marlow_valdric(side), audio, "confirm");
+        tr.trigger(48, false, lc::marlow_valdric(side), audio, "easter_banter");
     } else if pair_is(p1, p2, "kaito", "jin") {
-        tr.trigger(49, false, lc::kaito_jin(), audio, "unlock");
+        tr.trigger(49, false, lc::kaito_jin(), audio, "easter_bird");
     } else if pair_is(p1, p2, "shion", "kaname") {
-        tr.trigger(50, false, lc::shion_kaname(), audio, "counter");
+        tr.trigger(50, false, lc::shion_kaname(), audio, "easter_clash");
     } else if pair_is(p1, p2, "bruno", "daichi") {
-        tr.trigger(52, false, lc::bruno_daichi(), audio, "crowd");
+        tr.trigger(52, false, lc::bruno_daichi(), audio, "easter_clash");
     } else if pair_is(p1, p2, "valdric", "oboro") {
-        tr.trigger(54, false, lc::valdric_oboro(), audio, "super");
+        tr.trigger(54, false, lc::valdric_oboro(), audio, "easter_clash");
     } else if pair_is(p1, p2, "suzume", "jin") {
-        tr.trigger(55, false, lc::suzume_jin(), audio, "dash");
+        tr.trigger(55, false, lc::suzume_jin(), audio, "easter_clash");
     } else if pair_is(p1, p2, "volta", "haruki") {
         let side = if id_is(p1, "volta") { 0 } else { 1 };
-        tr.trigger(56, false, lc::volta_haruki(side), audio, "confirm");
+        tr.trigger(56, false, lc::volta_haruki(side), audio, "easter_banter");
     } else if pair_is(p1, p2, "akio", "kaito") {
         let side = if id_is(p1, "akio") { 0 } else { 1 };
-        tr.trigger(57, false, lc::akio_kaito(side), audio, "unlock");
+        tr.trigger(57, false, lc::akio_kaito(side), audio, "easter_banter");
     } else {
         check_home_turf(p1, p2, stage, tr, audio);
     }
@@ -93,19 +93,19 @@ fn check_home_turf(p1: &Fighter, p2: &Fighter, stage: &str, tr: &mut FightTracke
     for side in 0..2 {
         let f = fighters[side];
         if id_is(f, "bruno") && (stage.contains("brasil") || stage.contains("brazil") || stage.contains("cristo") || stage.contains("corcovado")) {
-            tr.trigger(44, false, lc::bruno_home_crowd(side), audio, "crowd");
+            tr.trigger(44, false, lc::bruno_home_crowd(side), audio, "easter_capybara");
             return;
         }
         if id_is(f, "volta") && (stage.contains("neo-metr") || stage.contains("neon")) {
-            tr.trigger(45, false, lc::volta_neon(side), audio, "meter");
+            tr.trigger(45, false, lc::volta_neon(side), audio, "easter_ufo");
             return;
         }
         if id_is(f, "lian") && (stage.contains("muralha") || stage.contains("great wall")) {
-            tr.trigger(51, false, lc::lian_great_wall(side), audio, "unlock");
+            tr.trigger(51, false, lc::lian_great_wall(side), audio, "easter_kitsune");
             return;
         }
         if id_is(f, "garan") && (stage.contains("vulc") || stage.contains("volcano")) {
-            tr.trigger(53, false, lc::garan_volcano(side), audio, "danger");
+            tr.trigger(53, false, lc::garan_volcano(side), audio, "easter_wonder");
             return;
         }
     }

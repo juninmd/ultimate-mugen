@@ -3,45 +3,13 @@ use serde_json::json;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use support::duel::{load_spec, mean_ci, wilson};
 use support::render::{frame, sheet};
 use ume_engine::ai::Ai;
 use ume_engine::chardef::CharDef;
 use ume_engine::common::{common_def, flat_stage};
 use ume_engine::input::InputSource;
-use ume_engine::loader::load_mugen_char;
 use ume_engine::matchs::{Event, Match};
-use ume_formats::vfs::{add_dir, Vfs};
-
-fn load_spec(spec: &str) -> Arc<CharDef> {
-    let (kind, rest) = spec
-        .split_once(':')
-        .expect("spec is mugen:<dir>[:def] or native:<json>");
-    match kind {
-        "native" => {
-            let nc = serde_json::from_str(&std::fs::read_to_string(rest).unwrap()).unwrap();
-            Arc::new(ume_native::compile_native(&nc, 1, true))
-        }
-        _ => {
-            let (dir, def) = match rest.split_once(':') {
-                Some((d, f)) => (PathBuf::from(d), f.to_string()),
-                None => {
-                    let d = PathBuf::from(rest);
-                    let mut n: Vec<String> = std::fs::read_dir(&d)
-                        .unwrap()
-                        .filter_map(|e| e.ok())
-                        .map(|e| e.file_name().to_string_lossy().to_string())
-                        .filter(|n| n.to_lowercase().ends_with(".def"))
-                        .collect();
-                    n.sort();
-                    (d, n.remove(0))
-                }
-            };
-            let mut v = Vfs::new();
-            add_dir(&mut v, &dir, "g").unwrap();
-            Arc::new(load_mugen_char(&v, &format!("g/{def}"), 1, true).unwrap())
-        }
-    }
-}
 
 #[derive(Default, Clone)]
 struct Side {
@@ -183,22 +151,6 @@ fn play(defs: [&Arc<CharDef>; 2], level: i32, seeds: [u32; 2], shots: Option<&Pa
         }
     }
     g
-}
-
-fn wilson(score: f64, n: f64) -> [f64; 2] {
-    let z = 1.96;
-    let d = 1.0 + z * z / n;
-    let c = score + z * z / (2.0 * n);
-    let h = z * (score * (1.0 - score) / n + z * z / (4.0 * n * n)).sqrt();
-    [(c - h) / d, (c + h) / d]
-}
-
-fn mean_ci(v: &[f64]) -> [f64; 3] {
-    let n = v.len() as f64;
-    let mean = v.iter().sum::<f64>() / n;
-    let sd = (v.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / (n - 1.0).max(1.0)).sqrt();
-    let h = 1.96 * sd / n.sqrt();
-    [mean, mean - h, mean + h]
 }
 
 #[test]

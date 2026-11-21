@@ -5,6 +5,7 @@ use crate::hitdef::build;
 use crate::matchs::{Event, Match};
 use std::sync::Arc;
 
+mod hit_filter;
 mod hit_override;
 mod targets;
 use targets::{life_add, target_indices};
@@ -352,11 +353,10 @@ pub fn run(m: &mut Match, i: usize, sc: &Controller) {
         "angleadd" => { let v = n(m, "value", 0.0) as f32; m.fighters[i].angle += v; }
         "anglemul" => { let v = n(m, "value", 1.0) as f32; m.fighters[i].angle *= v; }
         "nothitby" | "hitby" => {
-            let attr = sc.raw("value").or(sc.raw("value2")).unwrap_or("").to_ascii_uppercase();
             let t = n(m, "time", 1.0) as i32;
-            let dst = if sc.kind == "nothitby" { &mut m.fighters[i].not_hit_by } else { &mut m.fighters[i].hit_by };
-            dst.clear();
-            dst.push((attr, t));
+            let one = sc.has("value", 0).then(|| sc.raw("value").unwrap_or("").to_ascii_uppercase());
+            let two = sc.has("value2", 0).then(|| sc.raw("value2").unwrap_or("").to_ascii_uppercase());
+            hit_filter::set(m, i, sc.kind == "nothitby", one, two, t);
         }
         "movehitreset" => { let f = &mut m.fighters[i]; f.move_contact = 0; f.move_hit = 0; f.move_guarded = 0; f.move_reversed = 0; }
         "hitadd" => { let v = n(m, "value", 0.0) as i32; m.fighters[i].hit_count += v; }

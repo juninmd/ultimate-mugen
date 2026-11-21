@@ -25,5 +25,9 @@ pub(crate) async fn run(app: &mut App, dir: &str) {
         s.hud.inject_last_combo(7, 214.0);
     }
     dummy_tape::stop_recording();
-    screen(app, dir, "training-tape-playback", 120).await;
+    screen(app, dir, "training-best-before", 120).await;
+    if let Some(s) = app.session.as_mut() {
+        s.hud = crate::hud::Hud::new();
+    }
+    screen(app, dir, "training-best-after", 30).await;
 }

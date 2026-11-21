@@ -28,7 +28,7 @@ impl App {
             return;
         };
         let typing = self.stage_typing();
-        self.ui.background();
+        crate::screen_art::ScreenArt::Select.background(&self.ui);
         self.ui.text(
             crate::i18n::t("select.choose_stage"),
             40.0,

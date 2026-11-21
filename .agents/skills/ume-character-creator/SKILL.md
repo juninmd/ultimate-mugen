@@ -125,8 +125,92 @@ O UME suporta múltiplos estágios de transformação, que podem alterar partes 
 - **FX por Golpe (`crates/native/src/move_fx.rs`)**: `explods[]` (`at`, `anim`, `pos`, `postype`, `bind`, `removeTime`, `priority`, `scale`, `superMove`), `afterimage` (`at`, `time`, `length`, `framegap`, `trans`, `palBright`, `palContrast`, `palAdd`, `palMul`), `shake` (`at`, `time`, `ampl`, `freq`), `flash` (`at`, `time`, `color`, `under`, `superMove`) e `superPause` (`at`, `time`, `pos`, `anim`, `darken`).
 - **Hit-Confirm (`moves[].followUp`)**: `{ "to": "<move_id>", "on": "hit" | "contact" | "end", "at": frame? }` — transita para o golpe cinemático somente quando conecta.
 - **Feixes Multi-Hit (`projectile`)**: além de `hits` e `removeTime`, suporta `missTime`, `guardDamage`, `hitSound`, `pausetime`, `hitflag` (`"MAFP"`), `shake` e `accel`.
-- **Perfil Rico UME (`profile`) e Falas Fiéis**: preencha `profile` com `country`, `nationality`, `origin`, `bio`, `title`, `fightingStyle`, `affiliation` (todos `LocalText` `en`/`pt`/`es`), `element` (elemento principal), `weakness` (fraqueza), `alignment` (`"hero"`, `"villain"`, `"anti-hero"` ou `"neutral"`) e `tags`, além de `intro`, `taunt`, `winQuote` e `description` fiéis ao personagem.
-- **Kits Nativos Reutilizáveis (`extends`)**: herde módulos prontos via `"extends": ["core", "ki_fighter", "clone_arts", "aerial_rush"]` (`crates/native/src/kits/`) e sobrescreva apenas o que mudar, reduzindo dezenas de linhas de JSON por lutador.
+- **Perfil Rico UME (`profile`) e Falas Fiéis**: preencha `profile` com `country` (código ISO minúsculo para bandeira no seletor, ex.: `"jp"`, `"br"`, `"cn"`, `"us"`, `"no"`, `"de"`, `"ph"`), `nationality`, `origin`, `bio`, `title`, `fightingStyle`, `affiliation` (todos `LocalText` `en`/`pt`/`es`), `element` (elemento principal), `weakness` (fraqueza), `alignment` (`"hero"`, `"villain"`, `"anti-hero"` ou `"neutral"`) e `tags`, além de `intro`, `taunt`, `winQuote` e `description` fiéis ao personagem. Para lutadores fixos do elenco, espelhe também em `assets/char_profiles.json`.
+- **Kits Nativos Reutilizáveis (`extends`)**: herde módulos prontos via `"extends": ["core", "abilities", "ki_fighter", "clone_arts", "aerial_rush"]` (`crates/native/src/kits/`) e sobrescreva apenas o que mudar, reduzindo dezenas de linhas de JSON por lutador.
+
+### 3.7 Interações com Outros Lutadores e Cenários (`rivals` + `assets/interactions.toml`)
+
+Um lutador UME completo reage aos seus rivais, aos cenários icônicos e a momentos-chave da luta:
+
+1. **Rivalidades diretas no JSON do lutador (`rivals`)**:
+   ```json
+   "rivals": {
+     "akio": {
+       "intro": "Akio. Sua estrela brilha, mas a tempestade não pede licença.",
+       "taunt": "Vamos ver quem aguenta mais, vento ou estrela.",
+       "attack": 1.06
+     }
+   }
+   ```
+2. **Interações dinâmicas in-fight em `assets/interactions.toml`**:
+   - **Lutador × Lutador (`[[matchup]]`)**: ativa banner (`style = "ribbon"`) ou balão (`style = "speech"`) quando dois personagens específicos (ou `mirror = true`) se enfrentam:
+     ```toml
+     [[matchup]]
+     id = "char_a_vs_char_b"
+     fighters = ["char_a", "char_b"]
+     style = "ribbon"
+     sprite = "eclipse_moon"
+     sfx = "easter_clash"
+     color = [0.98, 0.24, 0.42]
+     title_pt = "DUELO DE DESTINO!"
+     title_en = "DUEL OF FATE!"
+     title_es = "¡DUELO DEL DESTINO!"
+     sub_pt = "RIVAIS DE LONGA DATA"
+     sub_en = "LONGTIME RIVALS"
+     sub_es = "RIVALES DE LARGA DATA"
+     ```
+   - **Lutador × Cenário (`[[stage_interaction]]`)**: dispara fala ou banner temático quando o personagem luta num cenário compatível (`stage_contains` casa substrings do nome do stage):
+     ```toml
+     [[stage_interaction]]
+     id = "meu_char_stage_natal"
+     fighter = "meu_lutador"
+     stage_contains = ["dojo", "kyoto", "vulc", "volcano"]
+     speaker = "MEU LUTADOR"
+     style = "speech"
+     sfx = "easter_banter"
+     color = [0.28, 0.94, 1.0]
+     title_pt = "De volta ao lugar onde tudo começou..."
+     title_en = "Back where it all began..."
+     title_es = "De vuelta donde todo comenzó..."
+     ```
+   - **Gatilhos do Lutador (`[[fighter_trigger]]`)**: reações em `trigger = "taunt"` (`per_round = true`) ou `trigger = "low_hp"` (`threshold = 0.30`):
+     ```toml
+     [[fighter_trigger]]
+     id = "meu_char_taunt"
+     fighter = "meu_lutador"
+     trigger = "taunt"
+     per_round = true
+     speaker = "MEU LUTADOR"
+     style = "speech"
+     sfx = "easter_banter"
+     color = [1.0, 0.62, 0.24]
+     title_pt = "Pode vir com tudo!"
+     title_en = "Give me everything you've got!"
+     title_es = "¡Ven con todo!"
+     ```
+
+### 3.8 Storyboard, Epílogo e Modo História (`assets/story/epilogues.json`)
+
+Todo lutador completo possui seu próprio **storyboard de encerramento (epílogo)** em `assets/story/epilogues.json` (lido por `src/story/epilogue.rs`), contendo:
+- `scene`: identificador do cenário de fundo do epílogo (ex.: `"plains"`, `"dojo"`, `"city"`, `"temple"`, `"volcano"`).
+- `title`: título do capítulo final (`en`, `pt`, `es`).
+- `boss`: última fala do chefe derrotado na cobertura (`en`, `pt`, `es`).
+- `reply`: resposta final fiel à personalidade do lutador (`en`, `pt`, `es`).
+- `pages[]`: sequência de páginas/quadros narrativos do storyboard pós-vitória (`en`, `pt`, `es`).
+
+```json
+"meu_lutador": {
+  "scene": "plains",
+  "title": { "en": "Beyond the Horizon", "pt": "Além do Horizonte", "es": "Más Allá del Horizonte" },
+  "boss": { "en": "Impossible... defeated by a lone challenger?", "pt": "Impossível... derrotado por um desafiante solitário?", "es": "¿Imposible... derrotado por un retador solitario?" },
+  "reply": { "en": "Strength means nothing without purpose.", "pt": "Força não vale nada sem propósito.", "es": "La fuerza no vale nada sin propósito." },
+  "pages": [
+    { "en": "With the threat finally gone, peace returned to the skyline.", "pt": "Com a ameaça finalmente encerrada, a paz voltou ao horizonte.", "es": "Con la amenaza finalmente derrotada, la paz regresó al horizonte." },
+    { "en": "Yet a new challenge already called from afar.", "pt": "Mas um novo desafio já chamava à distância.", "es": "Pero un nuevo desafío ya llamaba desde lejos." }
+  ]
+}
+```
+Valide o storyboard com `UME_TOUR=epilogue` (desktop) ou `?e2e_epilogue=1` (web). Para adicionar o lutador em ondas/arcos do Modo História, veja também `assets/story/default.toml` e `assets/story/objects.toml`.
 
 ---
 
@@ -140,18 +224,22 @@ O painel de pausa do Ultimate MUGEN lê dinamicamente o atributo `cost` e `drain
 
 ---
 
-## 5. Fluxo de Criação Passo a Passo de um Lutador UME
+## 5. Checklist de Lutador Completo & Fluxo Passo a Passo
 
-1. Crie o arquivo `assets/chars/<seu_id>.json` copiando o modelo de `examples/exemplo_lutador_completo.json`.
-2. Configure a identidade (`id`, `name`, `series`, `author`, `color`).
-3. Adicione as habilidades core desejadas dentro do bloco `"abilities"`.
-4. Defina os golpes em `"moves"`, especificando `"cost"` para golpes que consomem barra.
-5. Registre o `<seu_id>` em `assets/chars/index.json` caso queira determinar a posição exata na tela de seleção.
-6. Valide a compilação e execute a suíte de testes do motor:
+1. Crie `assets/chars/<seu_id>.json` (ou herde kits via `"extends": ["core", "ki_fighter", ...]`).
+2. Preencha identidade completa: `id`, `name`, `series`, `author`, `color`, `form`, `description`, `intro`, `taunt`, `winQuote` e `rivals`.
+3. Preencha `profile` completo (`en`/`pt`/`es`): `country` (ISO minúsculo), `nationality`, `origin`, `title`, `fightingStyle`, `affiliation`, `bio`, `element`, `weakness`, `alignment` (`hero`/`villain`/`anti-hero`/`neutral`) e `tags` (e espelhe em `assets/char_profiles.json` se for fixo do elenco).
+4. Configure habilidades core (`abilities.{fly, teleport, superSpeed, charge, forms}`), `helpers` (`stand`/`clones`), `passives` e golpes (`moves`, FX declarativo, `followUp`, `cost`, `ult_*`).
+5. Adicione interações de lutador × lutador (`[[matchup]]`), lutador × cenário (`[[stage_interaction]]`) e gatilhos (`[[fighter_trigger]]`) em `assets/interactions.toml`.
+6. Adicione o storyboard/epílogo trilíngue em `assets/story/epilogues.json`.
+7. Registre `<seu_id>` em `assets/chars/index.json` e formate com `node scripts/umf2-migrate.mjs assets/chars`.
+8. Valide compilação, golpes, perfil e gates:
    ```bash
-   cargo test -p ume-engine --test native_abilities_and_forms
+   node scripts/file-size.mjs && node scripts/crate-boundaries.mjs
+   cargo test -p ume-native --release
+   cargo test -p ume-engine --release --test native_abilities_and_forms --test native_energy_charge --test native_combo_routes
    ```
-7. Inicie o jogo para teste prático em modo treino (`F2` ativa hurtboxes e hitboxes visíveis).
+9. Inicie o jogo em modo treino (`F2` ativa hurtboxes e hitboxes visíveis) e valide o epílogo (`?e2e_epilogue=1`).
 
 ---
 

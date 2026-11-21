@@ -38,7 +38,7 @@ mod pixel_hit;
 pub mod pixel_fit;
 mod pixel_hurt;
 mod pack;
-mod pack_build;
+mod pack_build; mod mugen_parity;
 mod recolor;
 mod portrait;
 mod preview;

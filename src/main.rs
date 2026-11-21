@@ -43,7 +43,7 @@ mod stages;
 mod storage;
 mod story;
 mod tower;
-mod passive_fx; mod spring; mod texgen; mod tweaks; mod ui; mod ui_adapted; mod ui_adapted_panels; mod ui_progress; mod ui_tokens;
+mod passive_fx; mod screen_art; mod spring; mod texgen; mod tweaks; mod ui; mod ui_adapted; mod ui_adapted_panels; mod ui_progress; mod ui_tokens;
 mod update;
 #[cfg(target_arch = "wasm32")]
 mod web_sprites;

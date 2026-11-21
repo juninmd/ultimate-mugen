@@ -1,17 +1,19 @@
 use ume_engine::fighter::Fighter;
 
-pub(super) fn label(fighter: &Fighter) -> String {
+pub(super) fn chip(fighter: &Fighter, ready: bool, mine: bool) -> String {
     let form = crate::i18n::tr3("FORMA", "FORM", "FORMA");
-    let current = fighter.form;
-    let total = fighter.form_count();
-    let next = fighter.next_form_cost().map_or_else(
-        || "MAX".to_owned(),
-        |cost| format!("T / {}", cost as u32),
-    );
-    if current == 0 {
-        return format!("{form} 0/{total} · {next}");
+    let total = fighter.form_count() + 1;
+    if ready && mine && fighter.alive {
+        return format!("T · {form} {}/{total}", usize::from(fighter.form) + 2);
     }
+    match fighter.next_form_cost() {
+        Some(cost) => format!("{form} {}/{total} · {}", usize::from(fighter.form) + 1, cost as u32),
+        None => format!("{form} {total}/{total} · MAX"),
+    }
+}
+
+pub(super) fn risk(fighter: &Fighter) -> Option<String> {
     let exposed = crate::i18n::tr3("SEM GUARDA", "UNGUARDED", "SIN GUARDIA");
     let risk = (fighter.exposed_damage_multiplier() - 1.0) * 100.0;
-    format!("{form} {current}/{total} · {next} · +{risk:.0}% {exposed}")
+    (risk >= 0.5).then(|| format!("+{risk:.0}% {exposed}"))
 }

@@ -36,6 +36,7 @@ impl App {
 
     pub(super) fn vs_backdrop(&self, sides: [Side; 2], split: f32, lean: f32) {
         clear_background(hex("#05030c"));
+        let base_alpha = if crate::screen_art::ScreenArt::Versus.draw(&self.ui, 1.0) { 0.5 } else { 1.0 };
         let t = self.ui.t;
         for (i, s) in sides.iter().enumerate() {
             let left = i == 0;
@@ -62,9 +63,9 @@ impl App {
                 ]
             };
             if left {
-                self.quad_h(q, with(deep, 1.0), with(rich, 1.0));
+                self.quad_h(q, with(deep, base_alpha), with(rich, base_alpha));
             } else {
-                self.quad_h(q, with(rich, 1.0), with(deep, 1.0));
+                self.quad_h(q, with(rich, base_alpha), with(deep, base_alpha));
             }
             let cx = if left { 330.0 + s.off } else { 950.0 + s.off };
             let spin = t * if left { 0.12 } else { -0.12 };

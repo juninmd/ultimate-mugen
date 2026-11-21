@@ -147,7 +147,7 @@ impl App {
         let Screen::SurvivalOver { score, rounds } = self.screen else {
             return;
         };
-        self.ui.background();
+        crate::screen_art::ScreenArt::Results.background(&self.ui);
         self.ui.motes(50, 1.4);
         self.ui.text_bold(
             crate::i18n::t("survival.over"),

@@ -912,7 +912,7 @@ impl App {
         }
         self.sel_row = self.sel_row.min(total_rows.saturating_sub(self.grid_rows()));
 
-        self.ui.background();
+        crate::screen_art::ScreenArt::Select.background(&self.ui);
         if self.mode.is_team() {
             if is_key_pressed(KeyCode::E) {
                 self.team_n = (self.team_n + 1).min(if self.mode == Mode::TeamTag { 3 } else { 5 });

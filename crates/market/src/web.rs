@@ -118,7 +118,7 @@ pub async fn list_repo(repo: &RepoRef, etag: Option<&str>, token: Option<&str>) 
 
 async fn download_one(repo: &RepoRef, f: &FileRef, cancel: &AtomicBool) -> Result<Vec<u8>, MarketError> {
     let limit = f.size.max(1).saturating_mul(2).max(1 << 20);
-    let resp = get_retry(&file_request(repo, &f.path, limit), cancel).await?;
+    let resp = get_retry(&file_request(repo, &f.path, &f.sha, limit), cancel).await?;
     interpret_file(&resp, limit)
 }
 

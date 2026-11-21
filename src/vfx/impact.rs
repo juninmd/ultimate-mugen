@@ -131,6 +131,7 @@ impl Vfx {
             self.glow(x, y, 10.0, 0.1, [0.5, 0.8, 1.0]);
             let frost_at = big.then_some((df.pos.x, df.pos.y + df.lane));
             self.sheets.guard(x, y, if big { 70.0 } else { 48.0 }, frost_at);
+            if df.ikemen.guard_break || df.state_no == 5400 { self.sheets.guard_break(x, y); }
             self.trauma = (self.trauma + if big { 0.09 } else { 0.05 }).min(1.0);
             self.tag(x, y - 14.0, "GUARD", [0.55, 0.8, 1.0]);
             return;
@@ -192,6 +193,7 @@ impl Vfx {
             self.sfx.push("counter");
             self.tag(x, y - 14.0, "COUNTER", [1.0, 0.45, 0.35]);
             self.ring(x, y, 18.0, 0.2, 1.2, [1.0, 0.45, 0.35]);
+            self.sheets.counter(x, y);
         }
     }
 

@@ -5,7 +5,7 @@ pub(crate) const GRID_W: f32 = 640.0;
 pub(crate) const GRID_GAP: f32 = 6.0;
 pub(crate) const GRID_Y: f32 = 98.0;
 const TILE_MAX: f32 = 96.0;
-const TILE_ASPECT: f32 = 1.17;
+const TILE_ASPECT: f32 = 1.08;
 const GRID_BOTTOM: f32 = 628.0;
 const GRID_BOTTOM_TEAM: f32 = 578.0;
 

@@ -215,7 +215,9 @@ impl LifeFx {
             let (a, z) = (p(tx, y + h * 0.6), p(tx, y + h - 0.8));
             draw_line(a.x, a.y, z.x, z.y, 0.6 * s, Color::new(0.0, 0.0, 0.0, 0.35));
         }
-        poly::outline(&cap(x, w), 0.55 * s, Color::new(1.0, 1.0, 1.0, 0.8));
+        if !super::life_art::draw_life_frame(p, s, x, y, w, h, side == 1) {
+            poly::outline(&cap(x, w), 0.55 * s, Color::new(1.0, 1.0, 1.0, 0.8));
+        }
         self.draw_sparks(p, s);
     }
 

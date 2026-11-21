@@ -1201,7 +1201,7 @@ impl Match {
                 let gc = fd.ghv.guardcount;
                 fd.ghv = GetHitVars::default();
                 let g = &mut fd.ghv;
-                g.guarded = true; g.hittime = guard::guard_hit_time(hd.guard_hit_time, fd.rush.perfect == crate::rush::PERFECT_FLASH); g.slidetime = guard::scaled_ticks(hd.guard_slide_time); g.ctrltime = guard::scaled_ticks(hd.guard_ctrl_time);
+                g.guarded = true; g.hittime = guard::guard_hit_time(hd.guard_hit_time, fd.rush.perfect == crate::rush::PERFECT_FLASH); g.slidetime = guard::scaled_ticks(hd.guard_slide_time); g.ctrltime = guard::scaled_ticks(if d_air { hd.air_guard_ctrl_time } else { hd.guard_ctrl_time });
                 g.xvel = (if fd.state_type == 'A' { hd.air_guard_vel[0] } else { hd.guard_vel }) * dir;
                 g.yvel = if fd.state_type == 'A' { hd.air_guard_vel[1] } else { 0.0 };
                 g.yaccel = hd.yaccel; g.damage = dmg; g.guardcount = gc + 1;
@@ -1245,7 +1245,7 @@ impl Match {
                 g.attacker_id = aid; g.damage = dmg; g.hitcount = prev_hc + 1;
                 g.animtype = if air { hd.air_animtype } else { hd.animtype };
                 g.groundtype = hd.ground_type; g.airtype = hd.air_type; g.kind = if air { 3 } else { hd.ground_type };
-                g.fall = (if air { hd.air_fall } else { hd.fall }) || (was_hit && prev_fall);
+                g.fall = !hd.force_no_fall && ((if air { hd.air_fall } else { hd.fall }) || (was_hit && prev_fall));
                 g.hittime = if down { hd.down_hit_time } else if air { hd.air_hit_time } else { hd.ground_hit_time };
                 g.slidetime = hd.ground_slide_time; g.ctrltime = hd.ground_hit_time;
                 let v = if down { hd.down_vel } else if air { hd.air_vel } else { hd.ground_vel };
@@ -1305,7 +1305,7 @@ impl Match {
             if let Some(s) = hd.hit_sound { self.sound(a, s.0, s.1, s.2, Some(if heavy { "hitheavy" } else { "hit" })); }
             if hd.env_shake.time > 0 { self.shake_with_dir(hd.env_shake.time, hd.env_shake.freq, hd.env_shake.ampl, hd.env_shake.phase, hd.env_shake.dir); }
             if let Some(p) = hd.target_palfx.clone() { self.fighters[d].palfx = Some(p); }
-            if cornered && self.fighters[a].def.rules().hitdef_corner_push && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if d_air { hd.air_corner_push } else { hd.ground_corner_push }; self.fighters[a].vel.x = corner_pushed; }
+            if cornered && self.fighters[a].def.rules().hitdef_corner_push && !self.fighters[a].has_assert(asf::NOCORNERPUSH) { corner_pushed = if st == 'L' { hd.down_corner_push } else if d_air { hd.air_corner_push } else { hd.ground_corner_push }; self.fighters[a].vel.x = corner_pushed; }
             self.place_target(a, d, hd);
             let droot = self.fighters[d].root;
             self.explods.retain(|e| !(e.remove_on_get_hit && self.fighters.iter().any(|f| f.id == e.owner && f.root == droot)));

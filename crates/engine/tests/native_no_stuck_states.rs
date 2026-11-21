@@ -20,6 +20,7 @@ fn roster() -> Vec<(String, Arc<ume_engine::chardef::CharDef>)> {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn no_fighter_idles_inside_a_hit_state() {
     let roster = roster();
     let mut stuck = Vec::new();

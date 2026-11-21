@@ -20,6 +20,7 @@ fn character_files() -> Vec<PathBuf> {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_native_attack_has_three_distinct_rendered_images() {
     let mut attacks = 0;
     let mut failures = Vec::new();
@@ -74,6 +75,7 @@ fn every_native_attack_has_three_distinct_rendered_images() {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_native_transformation_resolves_at_least_three_distinct_powerup_images() {
     let mut characters = 0;
     let mut failures = Vec::new();
@@ -114,6 +116,7 @@ fn every_native_transformation_resolves_at_least_three_distinct_powerup_images()
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_native_animation_family_avoids_idle_fallbacks() {
     let mut characters = 0;
     let mut failures = Vec::new();
@@ -149,6 +152,7 @@ fn every_native_animation_family_avoids_idle_fallbacks() {
 }
 
 #[test]
+#[ignore = "nightly: full-roster sweep"]
 fn every_native_combat_sprite_is_crisp_pixel_art() {
     let mut checked = 0;
     let sprite_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets/chars/sprites");

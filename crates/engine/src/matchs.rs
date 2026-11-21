@@ -1010,8 +1010,7 @@ impl Match {
         let ok = (st == 'S' && (gf.contains('H') || gf.contains('M'))) || (st == 'C' && (gf.contains('L') || gf.contains('M'))) || (st == 'A' && gf.contains('A'));
         if !ok { return false; }
         if (150..=155).contains(&f.state_no) && (f.hit_over_time > 0 || f.hit_pause > 0 || f.hit_shake > 0) { return true; }
-        let can_guard = matches!(f.state_no, 120..=122 | 130..=132 | 140..=142 | 150..=155) || (f.ctrl && f.move_type != 'H' && !f.is_helper) && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD) || f.guard_button);
-        return ok;
+        let can_guard = matches!(f.state_no, 120..=122 | 130..=132 | 140..=142 | 150..=155) || (f.ctrl && f.move_type != 'H' && !f.is_helper); can_guard && (self.has_command(d, "holdback") || f.has_assert(asf::AUTOGUARD) || f.guard_button)
     }
 
     fn detect_reversals(&mut self) {

@@ -10,6 +10,22 @@ description: >-
 
 O motor já roda personagens MUGEN legados direto da pasta ou do zip. Migre para UMF só quando quiser: um único JSON, habilidades declarativas (`fly`, `teleport`, `superSpeed`, `forms`, `passives`) e carga mais leve. Não migre arte de terceiros sem licença; sprites e stages do projeto são recriados pelo usuário, então a migração cobre dados (golpes, física, comandos), não arte.
 
+## Conversor automático (recomendado)
+
+`python3 .agents/skills/mugen-to-ume-migrator/scripts/mugen2umf.py <pasta-mugen> <saida> --id <id> --name "<Nome>" [--extra extra.json]` gera um pacote UMF (`<id>.json` + `sprites/`) fiel ao original. Depende de `numpy` e `Pillow`.
+
+- **Sprites**: cada `(grupo, índice)` usado vira `sprites/s{g}_{i}.png` sem reamostragem; `meta.json` guarda `axisX/axisY` do SFF e `refHeight` = altura do idle.
+- **Escala 1:1**: `stats.height` = `refHeight` (escala = 100/refHeight × height/100 = 1). Nunca use 100 nem outro valor, senão o lutador fica maior e borrado.
+- **Caixas**: `Clsn1` vira `hit.box` (união das caixas), `Clsn2` vira `hurt` por quadro, e `art.style.boxes = "exact"` desliga o recorte automático pela máscara do sprite.
+- **Golpes**: lidos do `Statedef -1` (`ChangeState` + `command`). Um grupo `triggerN` com `ctrl = 0` ou que só serve a outro estado é ignorado, e comandos só de segurar (`/x`) também. `statetype` define `when`, e `power >= N` define `cost`.
+- **Cadeias**: `ChangeState` sem `command` (ex.: 4010 → 4011 → 4012) é seguido até 4 estados e vira uma anim `seq<estado>`, com os `at` deslocados.
+- **HitDef/Projectile/VelSet/PosAdd p2dist/PlaySnd** viram `hits`, `projectile`, `moves`, `teleport` e `sounds` no quadro certo (`AnimElem`, ou `Time` convertido em quadro).
+- **Sons**: o `.snd` é extraído para `sprites/snd_{g}_{i}.wav` e listado em `meta.json.sounds`; o motor carrega esses arquivos e toca `moves[].sounds` (`{at, snd:[g,i], fight?}`) no quadro indicado.
+- **Super**: só com `SuperPause`, `poweradd <= -1000` ou custo ≥ 1000. Número de estado ≥ 3000 não basta, porque teleportes vivem lá.
+- **`--extra`**: um JSON mesclado por cima (moves, anims, abilities, helpers) para o que helpers e variáveis não expressam.
+
+Pegadinhas: o nome do `.act` pode ter outra caixa (a busca não diferencia maiúsculas); `[State N]` com número diferente do `Statedef` pertence ao `Statedef` corrente; a paleta 1 só vale para sprites `same_pal`.
+
 ## Fluxo
 
 1. **Auditar o original**: `cargo run --release -p ume-charforge -- check <pasta> --strict` lista controladores e triggers não suportados.

@@ -12,8 +12,17 @@
   window.addEventListener('pointerdown', keepCursor, true);
   // The engine reads pointerType/pointerId/offsetX from every pointer event, so a MouseEvent disguised
   // as a pointer event (pointerType undefined) crashes the wasm glue in passStringToWasm0.
-  function pointerUp() {
-    const init = { bubbles: true, cancelable: true, button: 0, buttons: 0, pointerId: 1, pointerType: 'mouse', isPrimary: true, clientX: cursor.x, clientY: cursor.y, screenX: cursor.x, screenY: cursor.y };
+  const touchPointers = new Map();
+  const trackTouch = (e) => {
+    if (e.pointerType === 'touch' && (e.target.id === 'glcanvas' || touchPointers.has(e.pointerId))) touchPointers.set(e.pointerId, e);
+  };
+  window.addEventListener('pointerdown', trackTouch, true);
+  window.addEventListener('pointermove', (e) => { if (touchPointers.has(e.pointerId)) trackTouch(e); }, true);
+  for (const type of ['pointerup', 'pointercancel']) {
+    window.addEventListener(type, (e) => touchPointers.delete(e.pointerId), true);
+  }
+  function pointerUp(source = cursor) {
+    const init = { bubbles: true, cancelable: true, button: 0, buttons: 0, pointerId: source.pointerId ?? 1, pointerType: source.pointerType ?? 'mouse', isPrimary: source.isPrimary ?? true, clientX: source.clientX ?? cursor.x, clientY: source.clientY ?? cursor.y };
     const e = typeof PointerEvent === 'function' ? new PointerEvent('pointerup', init) : new MouseEvent('pointerup', init);
     if (e.pointerType === undefined) Object.defineProperty(e, 'pointerType', { value: init.pointerType });
     if (e.pointerId === undefined) Object.defineProperty(e, 'pointerId', { value: init.pointerId });
@@ -25,6 +34,8 @@
     for (const [code, e] of held) c.dispatchEvent(new KeyboardEvent('keyup', { code, key: e.key, keyCode: e.keyCode, bubbles: true }));
     held.clear();
     try { c.dispatchEvent(new MouseEvent('mouseup', { button: 0, buttons: 0, bubbles: true })); } catch (e) {}
+    for (const pointer of touchPointers.values()) c.dispatchEvent(pointerUp(pointer));
+    touchPointers.clear();
     try { c.dispatchEvent(pointerUp()); } catch (e) {}
   }
   window.addEventListener('keydown', (e) => { if (e.code) held.set(e.code, { key: e.key, keyCode: e.keyCode }); }, true);

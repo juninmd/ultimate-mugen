@@ -29,20 +29,20 @@ pub(crate) fn check(m: &Match, _stage_name: &str, tr: &mut FightTracker, audio: 
         if took_dmg > 0.5 {
             tr.last_hit_tick[side] = now;
             if took_dmg >= 115.0 && (f.state_type == 'A' || f.vel.y < -4.0) {
-                tr.trigger(0, true, catalog::toasty(), audio, "combo6");
+                tr.trigger(0, true, catalog::toasty(), audio, "easter_toasty");
             }
             if now - tr.taunt_tick[side] <= 90 && tr.taunt_tick[side] > 0 {
-                tr.trigger(5, true, catalog::taunt_bodied(), audio, "counter");
+                tr.trigger(5, true, catalog::taunt_bodied(), audio, "easter_toasty");
             }
             if tr.corner_ticks[1 - side] >= 90 && took_dmg >= 70.0 {
-                tr.trigger(17, true, catalog::corner_escape(1 - side), audio, "confirm");
+                tr.trigger(17, true, catalog::corner_escape(1 - side), audio, "easter_crown");
             }
         }
 
         if f.state_no == 195 && tr.prev_state[side] != 195 {
             tr.taunt_tick[side] = now;
             if tr.taunt_tick[1 - side] > 0 && now - tr.taunt_tick[1 - side] <= 120 {
-                tr.trigger(6, true, catalog::honorable_taunt(), audio, "unlock");
+                tr.trigger(6, true, catalog::honorable_taunt(), audio, "easter_kitsune");
             }
         }
 
@@ -51,7 +51,7 @@ pub(crate) fn check(m: &Match, _stage_name: &str, tr: &mut FightTracker, audio: 
             if tr.jump_tick[1 - side] > 0 && (now - tr.jump_tick[1 - side]).abs() <= 4 {
                 tr.sync_jumps = tr.sync_jumps.saturating_add(1);
                 if tr.sync_jumps >= 2 {
-                    tr.trigger(7, true, catalog::sync_jump(), audio, "confirm");
+                    tr.trigger(7, true, catalog::sync_jump(), audio, "easter_coin");
                 }
             }
         }
@@ -64,48 +64,48 @@ pub(crate) fn check(m: &Match, _stage_name: &str, tr: &mut FightTracker, audio: 
             tr.crouch_count[side] = tr.crouch_count[side].saturating_add(1);
             if tr.crouch_count[side] >= 4 {
                 tr.crouch_count[side] = 0;
-                tr.trigger(8, true, catalog::crouch_party(side), audio, "toggle");
+                tr.trigger(8, true, catalog::crouch_party(side), audio, "easter_capybara");
             }
         }
 
         if (150..=155).contains(&f.state_no) && !(150..=155).contains(&tr.prev_state[side]) {
             tr.guard_streak[side] = tr.guard_streak[side].saturating_add(1);
             if tr.guard_streak[side] >= 6 {
-                tr.trigger(12, true, catalog::guard_fortress(side), audio, "guard");
+                tr.trigger(12, true, catalog::guard_fortress(side), audio, "easter_clash");
             }
         } else if f.move_type == 'H' && !(120..=155).contains(&f.state_no) {
             tr.guard_streak[side] = 0;
         }
 
         if f.state_no == 5300 && tr.prev_state[side] != 5300 {
-            tr.trigger(13, true, catalog::guard_shatter(side), audio, "guardbreak");
+            tr.trigger(13, true, catalog::guard_shatter(side), audio, "easter_clash");
         }
 
         if f.combo_count >= 5 && opp.state_type == 'A' {
-            tr.trigger(11, true, catalog::air_juggle(side), audio, "combo4");
+            tr.trigger(11, true, catalog::air_juggle(side), audio, "easter_coin");
         }
         if f.combo_count >= 15 {
-            tr.trigger(16, true, catalog::overkill_combo(), audio, "combo6");
+            tr.trigger(16, true, catalog::overkill_combo(), audio, "easter_toasty");
         }
 
         if f.power >= f.power_max.max(1.0) && tr.prev_power[side] < f.power_max.max(1.0) {
-            tr.trigger(19, true, catalog::max_meter_coin(side), audio, "meter");
+            tr.trigger(19, true, catalog::max_meter_coin(side), audio, "easter_coin");
         }
 
         if tr.prev_power[side] - f.power >= 950.0 {
             tr.super_tick[side] = now;
             if tr.super_tick[1 - side] > 0 && now - tr.super_tick[1 - side] <= 90 {
-                tr.trigger(14, true, catalog::double_super_clash(), audio, "super");
+                tr.trigger(14, true, catalog::double_super_clash(), audio, "easter_clash");
             }
             if f.life_max > 0.0 && f.life / f.life_max <= 0.06 && f.alive {
-                tr.trigger(2, true, catalog::magic_pixel(side), audio, "danger");
+                tr.trigger(2, true, catalog::magic_pixel(side), audio, "easter_crown");
             }
         }
 
         if f.form > tr.prev_form[side] {
             tr.awakened[side] = true;
             if tr.awakened[0] && tr.awakened[1] {
-                tr.trigger(15, false, catalog::awakening_duel(), audio, "transform");
+                tr.trigger(15, false, catalog::awakening_duel(), audio, "easter_crown");
             }
         }
 
@@ -118,7 +118,7 @@ pub(crate) fn check(m: &Match, _stage_name: &str, tr: &mut FightTracker, audio: 
     }
 
     if tr.last_hit_tick[0] > 0 && (tr.last_hit_tick[0] - tr.last_hit_tick[1]).abs() <= 3 && now - tr.last_hit_tick[0] <= 2 {
-        tr.trigger(4, true, catalog::mutual_clash(), audio, "counter");
+        tr.trigger(4, true, catalog::mutual_clash(), audio, "easter_clash");
     }
 
     let both_still = p1.vel.x.abs() < 0.05
@@ -131,7 +131,7 @@ pub(crate) fn check(m: &Match, _stage_name: &str, tr: &mut FightTracker, audio: 
     if both_still {
         tr.still_ticks += 1;
         if tr.still_ticks == 180 {
-            tr.trigger(18, true, catalog::staredown(), audio, "tick");
+            tr.trigger(18, true, catalog::staredown(), audio, "easter_tumbleweed");
         }
     } else {
         tr.still_ticks = 0;
@@ -144,7 +144,7 @@ fn check_round_outcomes(m: &Match, fighters: [&Fighter; 2], tr: &mut FightTracke
     }
     let [p1, p2] = fighters;
     if !p1.alive && !p2.alive {
-        tr.trigger(1, true, catalog::double_ko(), audio, "crowd");
+        tr.trigger(1, true, catalog::double_ko(), audio, "easter_crown");
         return;
     }
     for side in 0..2 {
@@ -152,16 +152,16 @@ fn check_round_outcomes(m: &Match, fighters: [&Fighter; 2], tr: &mut FightTracke
         let opp = fighters[1 - side];
         if f.alive && !opp.alive {
             if f.life >= f.life_max - 0.5 && f.life_max > 0.0 {
-                tr.trigger(3, true, catalog::flawless_perfect(side), audio, "perfect");
+                tr.trigger(3, true, catalog::flawless_perfect(side), audio, "easter_crown");
             } else if f.life_max > 0.0 && f.life / f.life_max <= 0.05 {
-                tr.trigger(2, true, catalog::magic_pixel(side), audio, "crowd");
+                tr.trigger(2, true, catalog::magic_pixel(side), audio, "easter_crown");
             }
             if m.round_ticks > 0 && m.round_ticks <= 600 {
-                tr.trigger(9, true, catalog::speedrun_ko(side), audio, "unlock");
+                tr.trigger(9, true, catalog::speedrun_ko(side), audio, "easter_coin");
             }
         }
     }
     if m.timer > 0 && m.timer <= 3 && m.round_state >= 3 {
-        tr.trigger(10, true, catalog::buzzer_beater(), audio, "crowd");
+        tr.trigger(10, true, catalog::buzzer_beater(), audio, "easter_toasty");
     }
 }

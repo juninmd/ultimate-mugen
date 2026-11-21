@@ -73,3 +73,18 @@ O Ultimate MUGEN inclui um sistema de Easter Eggs puramente de apresentação (`
 58. **Akio vs Kaito**: Rivalidade clássica — "Quem perder paga o ramen!"
 59. **Papagaio do Marlow**: O imediato do *El Viento Salado* cruza a tela em Supers ou combos de 6+ acertos.
 60. **Reclamação dos Capangas (`npc_*`)**: Os capangas do modo história reclamam do salário ao levar um combo de 4+ acertos.
+
+## Efeitos Sonoros Sintetizados (`src/audio/easter_sfx.rs`)
+Todos os 60 Easter Eggs disparam um dos 12 efeitos sonoros retrô sintetizados em 32 kHz e pré-carregados junto ao banco nativo (desktop, web/WASM, Android e iOS):
+- `easter_toasty` — Stinger ascendente de arcade com eco rápido (*QUENTINHO!*, *Provocou, Levou!*, *Overkill*, *No Estourar do Relógio*).
+- `easter_coin` — Clássico sino dourado de ficha / 1UP em duas notas (*Ficha Máxima*, *Sync Jump*, *Sem Gravidade*, *Speedrun K.O.*).
+- `easter_crown` — Fanfarra real em arpejo brilhante (*Intocável*, *Pixel Mágico*, *Empate Épico*, *Despertar Duplo*, *Coliseu*).
+- `easter_clash` — Choque metálico de lâminas e energia (*Choque de Titãs*, *Muralha de Ferro*, *Colisão de Supers*, *Shion vs Kaname*, *Suzume vs Oboro*).
+- `easter_tumbleweed` — Assobio clássico de faroeste com rajada de vento seco (*Duelo de Olhares*, *Texas*).
+- `easter_ufo` — Oscilação sci-fi de disco voador estilo theremin (*OVNI em Neo-Metrópole*, *Sobrecarga 2099*, *Volta*).
+- `easter_kitsune` — Sino místico de santuário japonês com estalo de madeira (*Aparição Kitsune*, *Grou de Origami*, *Bambuzal*, *Grande Muralha*, *Lian*).
+- `easter_capybara` — Melodia tropical leve estilo marimba (*Capivara de Boa*, *Caramelo*, *Torcida do Bruno*, *Agachamento Tático*).
+- `easter_bird` — Trinado alegre de pássaro tropical (*Tucano no Corcovado*, *Pombas de Agra*, *Plumas da Babilônia*, *Kaito vs Jin*).
+- `easter_parrot` — Grasnar duplo de papagaio pirata (*Papagaio do Marlow*, *El Viento Salado*).
+- `easter_wonder` — Harpa pentatônica mítica com gongo grave de bronze (*Pirâmides*, *Petra*, *Chichén Itzá*, *Vulcão*, *Maravilhas Antigas*, *Garan*).
+- `easter_banter` — Estalo de balão de fala cômico (*Mirror Match*, *Desculpas do Haruki*, *Marlow vs Valdric*, *Akio vs Kaito*, *Capangas*).

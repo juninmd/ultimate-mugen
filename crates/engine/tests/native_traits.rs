@@ -33,7 +33,6 @@ fn test_trait_compilation_and_cns_generation() {
         teleport: None,
         fx: None,
         voice: None,
-        sounds: vec![],
         armor: Some(ArmorSpec { hits: 1, threshold: Some(50.0) }),
         parry: None,
         burst: None,
@@ -41,8 +40,7 @@ fn test_trait_compilation_and_cns_generation() {
         timestop: None,
         throw: None,
         cancels: None,
-        rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        rekka: None, blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 
@@ -65,7 +63,6 @@ fn test_trait_compilation_and_cns_generation() {
         teleport: None,
         fx: None,
         voice: None,
-        sounds: vec![],
         armor: None,
         parry: Some(ParrySpec { window: [1, 8], spark: Some(5) }),
         burst: None,
@@ -73,8 +70,7 @@ fn test_trait_compilation_and_cns_generation() {
         timestop: None,
         throw: None,
         cancels: None,
-        rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        rekka: None, blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 
@@ -97,7 +93,6 @@ fn test_trait_compilation_and_cns_generation() {
         teleport: None,
         fx: None,
         voice: None,
-        sounds: vec![],
         armor: None,
         parry: None,
         burst: None,
@@ -105,8 +100,7 @@ fn test_trait_compilation_and_cns_generation() {
         timestop: Some(120),
         throw: None,
         cancels: None,
-        rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        rekka: None, blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 
@@ -129,7 +123,6 @@ fn test_trait_compilation_and_cns_generation() {
         teleport: None,
         fx: None,
         voice: None,
-        sounds: vec![],
         armor: None,
         parry: None,
         burst: Some(true),
@@ -137,8 +130,7 @@ fn test_trait_compilation_and_cns_generation() {
         timestop: None,
         throw: None,
         cancels: None,
-        rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        rekka: None, blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 
@@ -161,7 +153,6 @@ fn test_trait_compilation_and_cns_generation() {
         teleport: None,
         fx: None,
         voice: None,
-        sounds: vec![],
         armor: None,
         parry: None,
         burst: None,
@@ -169,8 +160,7 @@ fn test_trait_compilation_and_cns_generation() {
         timestop: None,
         throw: None,
         cancels: None,
-        rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        rekka: None, blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 
@@ -231,7 +221,6 @@ fn test_trait_runtime_match_simulation() {
         teleport: None,
         fx: None,
         voice: None,
-        sounds: vec![],
         armor: Some(ArmorSpec { hits: 1, threshold: None }),
         parry: None,
         burst: None,
@@ -239,8 +228,7 @@ fn test_trait_runtime_match_simulation() {
         timestop: Some(90),
         throw: None,
         cancels: None,
-        rekka: None,
-        blink: None, vfx: vec![], quake: vec![], sounds: vec![],
+        rekka: None, blink: None, vfx: vec![], quake: vec![],
         requires: None,
     });
 

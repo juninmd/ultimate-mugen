@@ -651,7 +651,8 @@
       "kind": "normal",
       "anim": "jab",
       "hits": [{"at":2,"damage":28,"level":"light","hitstun":13}],
-      "cancels": ["strong","gale","rise","tide","launcher","overhead","slide","string_a"]
+      "cancels": ["strong","gale","rise","tide","launcher","overhead","slide","string_a"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong",
@@ -660,15 +661,34 @@
       "kind": "normal",
       "anim": "strong",
       "hits": [{"at":3,"damage":66,"level":"heavy","hitstun":22}],
-      "cancels": ["rise","tide","gale","stormrush","overhead"]
+      "cancels": ["rise","tide","gale","stormrush","overhead"],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
-    {"id":"lkick","name":"Front Snap Kick","input":"a","kind":"normal","anim":"lkick","hits":[{"at":2,"damage":33,"level":"light"}],"cancels":["jab","launcher","slide"]},
-    {"id":"hkick","name":"Crescent Roundhouse","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":68,"level":"heavy","knockback":[-3,-1]}]},
-    {"id":"cjab","name":"Low Jab","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":24,"level":"light"}]},
-    {"id":"clk","name":"Shin Kick","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":30,"level":"light","guard":"low"}]},
-    {"id":"sweep","name":"Storm Sweep","input":"b","kind":"normal","anim":"sweep","when":"crouch","hits":[{"at":2,"damage":64,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-4]}]},
-    {"id":"ajab","name":"Air Jab","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":32,"level":"light","guard":"high"}]},
-    {"id":"akick","name":"Diving Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":56,"level":"medium","guard":"high"}]},
+    {
+      "id": "lkick",
+      "name": "Front Snap Kick",
+      "input": "a",
+      "kind": "normal",
+      "anim": "lkick",
+      "hits": [{"at":2,"damage":33,"level":"light"}],
+      "cancels": ["jab","launcher","slide"],
+      "sounds": [{"at":1,"snd":[200,0]}]
+    },
+    {"id":"hkick","name":"Crescent Roundhouse","input":"b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":68,"level":"heavy","knockback":[-3,-1]}],"sounds":[{"at":1,"snd":[200,1]}]},
+    {"id":"cjab","name":"Low Jab","input":"x","kind":"normal","anim":"cjab","when":"crouch","hits":[{"at":2,"damage":24,"level":"light"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"clk","name":"Shin Kick","input":"a","kind":"normal","anim":"clk","when":"crouch","hits":[{"at":2,"damage":30,"level":"light","guard":"low"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {
+      "id": "sweep",
+      "name": "Storm Sweep",
+      "input": "b",
+      "kind": "normal",
+      "anim": "sweep",
+      "when": "crouch",
+      "hits": [{"at":2,"damage":64,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-4]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {"id":"ajab","name":"Air Jab","input":"x","kind":"normal","anim":"ajab","when":"air","hits":[{"at":2,"damage":32,"level":"light","guard":"high"}],"sounds":[{"at":1,"snd":[200,0]}]},
+    {"id":"akick","name":"Diving Kick","input":"b","kind":"normal","anim":"akick","when":"air","hits":[{"at":2,"damage":56,"level":"medium","guard":"high"}],"sounds":[{"at":1,"snd":[200,1]}]},
     {
       "id": "gale",
       "name": "Gale Fist",
@@ -677,7 +697,8 @@
       "anim": "gale",
       "simple": "sp1",
       "projectile": {"at":3,"anim":"galeOrb","hitAnim":"galeHit","speed":[5.5,0],"offset":[44,-68],"damage":70,"level":"medium","element":"wind"},
-      "voice": "1000, 2"
+      "voice": "1000, 2",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "rise",
@@ -689,7 +710,8 @@
       "invuln": [1,3],
       "moves": [{"at":2,"vel":[2.4,-8.6]}],
       "hits": [{"at":2,"damage":70,"level":"heavy","launch":true,"hitstun":24,"knockback":[-1,-3],"element":"wind"},{"at":3,"damage":40,"level":"heavy","launch":true,"knockback":[-3,-8],"element":"wind"}],
-      "cancels": ["typhoon","triad"]
+      "cancels": ["typhoon","triad"],
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "tempest",
@@ -699,7 +721,8 @@
       "anim": "tempest",
       "simple": "sp3",
       "moves": [{"at":2,"vel":[7.5,0]},{"at":3,"vel":[6.5,0]},{"at":4,"vel":[2,0]}],
-      "hits": [{"at":2,"damage":64,"level":"heavy","knockback":[-6,-2],"element":"lightning","wallBounce":true,"launch":true}]
+      "hits": [{"at":2,"damage":64,"level":"heavy","knockback":[-6,-2],"element":"lightning","wallBounce":true,"launch":true}],
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "typhoon",
@@ -719,7 +742,8 @@
         {"at":7,"damage":34,"level":"light","hitstun":22,"knockback":[-1.5,0],"element":"wind"},
         {"at":8,"damage":34,"level":"light","hitstun":22,"knockback":[-1.5,0],"element":"wind"},
         {"at":9,"damage":90,"level":"heavy","launch":true,"knockback":[-3,-8],"shake":10,"element":"wind"}
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "triad",
@@ -733,7 +757,8 @@
         {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,-0.5],"offset":[44,-78],"damage":24,"hits":6,"level":"medium","removeTime":110,"priority":6,"element":"wind"},
         {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,0],"offset":[44,-68],"damage":24,"hits":6,"level":"medium","removeTime":110,"priority":6,"element":"wind"},
         {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,0.5],"offset":[44,-58],"damage":24,"hits":6,"level":"medium","removeTime":110,"priority":6,"element":"wind"}
-      ]
+      ],
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
     {
       "id": "dragon",
@@ -745,7 +770,8 @@
       "moves": [{"at":2,"vel":[3,0]}],
       "hits": [{"at":2,"damage":36,"level":"medium","knockback":[-2,0],"element":"lightning"}],
       "projectile": {"at":3,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[6.2,0],"offset":[42,-68],"damage":65,"level":"heavy","knockback":[-6,-3],"removeTime":45,"element":"lightning"},
-      "voice": "1000, 0"
+      "voice": "1000, 0",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "stormrush",
@@ -760,10 +786,20 @@
         {"at":5,"damage":52,"level":"heavy","knockback":[-5,0],"element":"lightning"}
       ],
       "voice": "1000, 1",
-      "armor": {"hits":1,"threshold":75}
+      "armor": {"hits":1,"threshold":75},
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
-    {"id":"tide","name":"Counter Tide","input":"~D, DB, B, b","kind":"special","anim":"tide","parry":{"window":[1,3]},"hits":[{"at":4,"damage":62,"level":"heavy","launch":true,"knockback":[-3,-6]}]},
-    {"id":"stormtoss","name":"Storm Toss","input":"x+a","kind":"normal","anim":"stormToss","throw":{"damage":88,"bind":[32,0],"launch":[-4,-6],"at":1}},
+    {
+      "id": "tide",
+      "name": "Counter Tide",
+      "input": "~D, DB, B, b",
+      "kind": "special",
+      "anim": "tide",
+      "parry": {"window":[1,3]},
+      "hits": [{"at":4,"damage":62,"level":"heavy","launch":true,"knockback":[-3,-6]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
+    },
+    {"id":"stormtoss","name":"Storm Toss","input":"x+a","kind":"normal","anim":"stormToss","throw":{"damage":88,"bind":[32,0],"launch":[-4,-6],"at":1},"sounds":[{"at":1,"snd":[200,5]}]},
     {
       "id": "ex_gale",
       "name": "Gale EX",
@@ -773,7 +809,8 @@
       "projectile": [{"at":3,"anim":"galeOrb","hitAnim":"galeHit","speed":[6.9,0],"offset":[44,-68],"damage":91,"level":"heavy","hits":2,"priority":2,"element":"wind"}],
       "voice": "1000, 2",
       "cost": 250,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ex_rise",
@@ -786,7 +823,8 @@
       "hits": [{"at":2,"damage":91,"level":"heavy","launch":true,"hitstun":24,"knockback":[-1,-3],"element":"wind"},{"at":3,"damage":52,"level":"heavy","launch":true,"knockback":[-3,-8],"element":"wind"}],
       "cancels": ["typhoon","triad"],
       "cost": 500,
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "ult_triad",
@@ -801,10 +839,28 @@
         {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,0],"offset":[44,-68],"damage":28.8,"hits":8,"level":"medium","removeTime":110,"priority":6,"element":"wind"},
         {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,0.5],"offset":[44,-58],"damage":28.8,"hits":8,"level":"medium","removeTime":110,"priority":6,"element":"wind"}
       ],
-      "fx": "aura"
+      "fx": "aura",
+      "sounds": [{"at":1,"snd":[200,4]}]
     },
-    {"id":"overhead","name":"Tempest Chop","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":64.6,"level":"medium","knockback":[-3,-1],"guard":"high","hitstun":20}]},
-    {"id":"launcher","name":"Whirl Launcher","input":"y","kind":"normal","when":"crouch","anim":"strong","hits":[{"at":3,"damage":58,"level":"heavy","launch":true,"hitstun":22,"knockback":[-1,-6]}]},
+    {
+      "id": "overhead",
+      "name": "Tempest Chop",
+      "input": "x+b",
+      "kind": "normal",
+      "anim": "hkick",
+      "hits": [{"at":3,"damage":64.6,"level":"medium","knockback":[-3,-1],"guard":"high","hitstun":20}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
+    {
+      "id": "launcher",
+      "name": "Whirl Launcher",
+      "input": "y",
+      "kind": "normal",
+      "when": "crouch",
+      "anim": "strong",
+      "hits": [{"at":3,"damage":58,"level":"heavy","launch":true,"hitstun":22,"knockback":[-1,-6]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
+    },
     {
       "id": "divekick",
       "name": "Thunder Drop",
@@ -813,7 +869,8 @@
       "anim": "akick",
       "when": "air",
       "hits": [{"at":2,"damage":61.6,"level":"heavy","guard":"high","groundBounce":true,"launch":true,"knockback":[-1,4]}],
-      "moves": [{"at":1,"vel":[1.8,2.5]}]
+      "moves": [{"at":1,"vel":[1.8,2.5]}],
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "slide",
@@ -823,7 +880,8 @@
       "anim": "sweep",
       "when": "stand",
       "hits": [{"at":2,"damage":54.4,"level":"heavy","guard":"low","launch":true,"knockback":[-2,-5]}],
-      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}]
+      "moves": [{"at":1,"vel":[3,0]},{"at":3,"vel":[1.2,0]}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "storm_end",
@@ -832,7 +890,8 @@
       "kind": "special",
       "anim": "tide",
       "hits": [{"at":4,"damage":56,"level":"heavy","launch":true,"knockback":[-3,-6],"element":"lightning"}],
-      "rekka": {"after":["stormrush"],"window":[5,18],"contact":true}
+      "rekka": {"after":["stormrush"],"window":[5,18],"contact":true},
+      "sounds": [{"at":2,"snd":[200,2]}]
     },
     {
       "id": "escape_burst",
@@ -844,7 +903,8 @@
       "cost": 500,
       "burst": true,
       "invuln": [1,3],
-      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}]
+      "hits": [{"at":3,"damage":30,"level":"heavy","launch":true,"knockback":[-6,-4],"hitstop":12}],
+      "sounds": [{"at":1,"snd":[200,5]}]
     },
     {
       "id": "lunge",
@@ -853,7 +913,8 @@
       "kind": "normal",
       "anim": "strong",
       "moves": [{"at":1,"vel":[5.5,0]},{"at":3,"vel":[1.5,0]}],
-      "hits": [{"at":3,"damage":75.9,"level":"heavy","hitstun":22,"knockback":[-3,-1]}]
+      "hits": [{"at":3,"damage":75.9,"level":"heavy","hitstun":22,"knockback":[-3,-1]}],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "falcondive",
@@ -863,7 +924,8 @@
       "when": "air",
       "anim": "akick",
       "moves": [{"at":1,"vel":[4.5,2.2]}],
-      "hits": [{"at":2,"damage":61.6,"level":"medium","guard":"high"}]
+      "hits": [{"at":2,"damage":61.6,"level":"medium","guard":"high"}],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab2",
@@ -874,7 +936,8 @@
       "hits": [{"at":2,"damage":25,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["gale","rise"],
-      "rekka": {"after":["jab"],"window":[1,18],"contact":true}
+      "rekka": {"after":["jab"],"window":[1,18],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "jab3",
@@ -885,7 +948,8 @@
       "hits": [{"at":2,"damage":59,"level":"medium","knockback":[-3,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["gale","rise"],
-      "rekka": {"after":["jab2"],"window":[1,13],"contact":true}
+      "rekka": {"after":["jab2"],"window":[1,13],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick2",
@@ -896,7 +960,8 @@
       "hits": [{"at":2,"damage":30,"level":"light","knockback":[-0.6,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["gale","rise"],
-      "rekka": {"after":["lkick"],"window":[1,20],"contact":true}
+      "rekka": {"after":["lkick"],"window":[1,20],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "lkick3",
@@ -907,7 +972,8 @@
       "hits": [{"at":2,"damage":51,"level":"medium","knockback":[-3.5,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["gale","rise"],
-      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true}
+      "rekka": {"after":["lkick2"],"window":[1,14],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "strong2",
@@ -918,7 +984,8 @@
       "hits": [{"at":2,"damage":56,"level":"medium","knockback":[-4,0]}],
       "moves": [{"at":1,"vel":[0.4,0]},{"at":3,"vel":[0.2,0]}],
       "cancels": ["gale","rise"],
-      "rekka": {"after":["strong"],"window":[3,28],"contact":true}
+      "rekka": {"after":["strong"],"window":[3,28],"contact":true},
+      "sounds": [{"at":1,"snd":[200,1]}]
     },
     {
       "id": "cjab2",
@@ -929,7 +996,8 @@
       "hits": [{"at":2,"damage":22,"level":"light","knockback":[-0.5,0]}],
       "when": "crouch",
       "cancels": [],
-      "rekka": {"after":["cjab"],"window":[1,17],"contact":true}
+      "rekka": {"after":["cjab"],"window":[1,17],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "ajab2",
@@ -940,7 +1008,8 @@
       "hits": [{"at":2,"damage":29,"level":"light","guard":"high"}],
       "when": "air",
       "cancels": [],
-      "rekka": {"after":["ajab"],"window":[1,18],"contact":true}
+      "rekka": {"after":["ajab"],"window":[1,18],"contact":true},
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_a",
@@ -950,7 +1019,8 @@
       "anim": "stringA",
       "hits": [{"at":2,"damage":26,"level":"light","knockback":[-0.5,0],"element":"wind"},{"at":5,"damage":56,"level":"medium","element":"wind"}],
       "moves": [{"at":1,"vel":[2,0]},{"at":5,"vel":[0.5,0]}],
-      "cancels": ["string_b","string_c","gale","rise"]
+      "cancels": ["string_b","string_c","gale","rise"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_b",
@@ -960,7 +1030,8 @@
       "anim": "stringB",
       "hits": [{"at":2,"damage":30,"level":"light","guard":"low","knockback":[-0.5,0],"element":"wind"},{"at":5,"damage":70,"level":"medium","element":"wind"}],
       "moves": [{"at":1,"vel":[1.5,0]},{"at":5,"vel":[0.5,0]}],
-      "cancels": ["string_c","gale","rise"]
+      "cancels": ["string_c","gale","rise"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
     {
       "id": "string_c",
@@ -970,16 +1041,26 @@
       "anim": "stringC",
       "hits": [{"at":3,"damage":95,"level":"heavy","launch":true,"knockback":[-1,-6],"hitstun":22,"element":"wind"}],
       "moves": [{"at":1,"vel":[2.5,0]},{"at":3,"vel":[0.5,0]}],
-      "cancels": ["gale","rise"]
+      "cancels": ["gale","rise"],
+      "sounds": [{"at":1,"snd":[200,0]}]
     },
-    {"id":"halfmoon","name":"Meia-Lua","input":"~B, DB, D, DF, F, a+x","kind":"special","anim":"hkick","hits":[{"at":3,"damage":61,"level":"heavy","knockback":[-3,-1]}]},
+    {
+      "id": "halfmoon",
+      "name": "Meia-Lua",
+      "input": "~B, DB, D, DF, F, a+x",
+      "kind": "special",
+      "anim": "hkick",
+      "hits": [{"at":3,"damage":61,"level":"heavy","knockback":[-3,-1]}],
+      "sounds": [{"at":2,"snd":[200,2]}]
+    },
     {
       "id": "gale_slow",
       "name": "Gale Fist Slow",
       "input": "~D, DB, B, y",
       "kind": "special",
       "anim": "gale",
-      "projectile": {"at":3,"anim":"galeOrb","hitAnim":"galeHit","speed":[3.03,0],"offset":[44,-68],"damage":95,"level":"heavy","element":"wind","hits":2,"removeTime":150,"priority":2}
+      "projectile": {"at":3,"anim":"galeOrb","hitAnim":"galeHit","speed":[3.03,0],"offset":[44,-68],"damage":95,"level":"heavy","element":"wind","hits":2,"removeTime":150,"priority":2},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "gale_low",
@@ -987,7 +1068,8 @@
       "input": "~D, DF, F, a",
       "kind": "special",
       "anim": "gale",
-      "projectile": {"at":3,"anim":"galeOrb","hitAnim":"galeHit","speed":[7.43,0],"offset":[44,-30],"damage":53,"level":"medium","element":"wind"}
+      "projectile": {"at":3,"anim":"galeOrb","hitAnim":"galeHit","speed":[7.43,0],"offset":[44,-30],"damage":53,"level":"medium","element":"wind"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "gale_barrage",
@@ -995,7 +1077,8 @@
       "input": "~D, DF, F, b",
       "kind": "special",
       "anim": "gale",
-      "projectile": {"at":3,"anim":"galeOrb","hitAnim":"galeHit","speed":[4.4,0],"offset":[44,-68],"damage":35,"level":"medium","element":"wind","hits":3,"removeTime":120}
+      "projectile": {"at":3,"anim":"galeOrb","hitAnim":"galeHit","speed":[4.4,0],"offset":[44,-68],"damage":35,"level":"medium","element":"wind","hits":3,"removeTime":120},
+      "sounds": [{"at":2,"snd":[200,3]}]
     },
     {
       "id": "gale_high",
@@ -1003,7 +1086,8 @@
       "input": "~D, DF, B, y",
       "kind": "special",
       "anim": "gale",
-      "projectile": {"at":3,"anim":"galeOrb","hitAnim":"galeHit","speed":[6.05,0],"offset":[44,-80],"damage":60,"level":"medium","element":"wind"}
+      "projectile": {"at":3,"anim":"galeOrb","hitAnim":"galeHit","speed":[6.05,0],"offset":[44,-80],"damage":60,"level":"medium","element":"wind"},
+      "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
   "country": "Japão",

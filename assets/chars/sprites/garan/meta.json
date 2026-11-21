@@ -1,15 +1,55 @@
 {
   "frames": {
-    "hitLowLightImpact": {"axisX": 200.0, "axisY": 392.0, "refHeight": 390.0},
-    "hitLowLightRecoil": {"axisX": 200.0, "axisY": 392.0, "refHeight": 390.0},
-    "hitCrouchImpact": {"axisX": 200.0, "axisY": 392.0, "refHeight": 390.0},
-    "hitCrouchRecoil": {"axisX": 200.0, "axisY": 392.0, "refHeight": 390.0},
-    "hitAir1": {"axisX": 228.0, "axisY": 400.0, "refHeight": 390.0},
-    "hitAir2": {"axisX": 228.0, "axisY": 400.0, "refHeight": 390.0},
-    "hitLightImpact": {"axisX": 200.0, "axisY": 392.0, "refHeight": 390.0},
-    "hitLightRecoil": {"axisX": 200.0, "axisY": 392.0, "refHeight": 390.0},
-    "taunt0": {"axisX": 200.0, "axisY": 392.0, "refHeight": 390},
-    "taunt1": {"axisX": 200.0, "axisY": 392.0, "refHeight": 390},
+    "hitLowLightImpact": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 390.0
+    },
+    "hitLowLightRecoil": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 390.0
+    },
+    "hitCrouchImpact": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 390.0
+    },
+    "hitCrouchRecoil": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 390.0
+    },
+    "hitAir1": {
+      "axisX": 228.0,
+      "axisY": 400.0,
+      "refHeight": 390.0
+    },
+    "hitAir2": {
+      "axisX": 228.0,
+      "axisY": 400.0,
+      "refHeight": 390.0
+    },
+    "hitLightImpact": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 390.0
+    },
+    "hitLightRecoil": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 390.0
+    },
+    "taunt0": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 390
+    },
+    "taunt1": {
+      "axisX": 200.0,
+      "axisY": 392.0,
+      "refHeight": 390
+    },
     "01_idle": {
       "axisX": 193.0,
       "axisY": 400.0,
@@ -85,7 +125,11 @@
       "axisY": 391.0,
       "refHeight": 390.0
     },
-    "powerup01": {"axisX": 198.8, "axisY": 391.0, "refHeight": 386.65},
+    "powerup01": {
+      "axisX": 198.8,
+      "axisY": 391.0,
+      "refHeight": 386.65
+    },
     "16_power1": {
       "axisX": 195.577,
       "axisY": 391.0,
@@ -552,5 +596,31 @@
       "refHeight": 360.0
     }
   },
-  "refHeight": 390
+  "refHeight": 390,
+  "sounds": [
+    [
+      200,
+      0
+    ],
+    [
+      200,
+      1
+    ],
+    [
+      200,
+      2
+    ],
+    [
+      200,
+      3
+    ],
+    [
+      200,
+      4
+    ],
+    [
+      200,
+      5
+    ]
+  ]
 }

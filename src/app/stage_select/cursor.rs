@@ -29,6 +29,7 @@ impl App {
             1.0,
             alpha(gold, 0.4 * pulse),
         );
+        self.draw_cursor_corners(gx, gy, TILE_W, TILE_H, 3.0 + pulse, 28.0, gold);
     }
 }
 

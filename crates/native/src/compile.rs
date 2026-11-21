@@ -168,6 +168,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         }
         if let Some(inv) = m.invuln { cns += &format!("[State {sid}, inv]\ntype = NotHitBy\ntrigger1 = AnimElemNo(0) = [{}, {}]\nvalue = SCA\ntime = 1\n\n", inv[0], inv[1]); }
         if let Some(tp) = m.teleport { cns += &format!("[State {sid}, tp]\ntype = PosAdd\ntrigger1 = AnimElem = {tp}\nx = p2dist x + 40\n\n[State {sid}, tpt]\ntype = Turn\ntrigger1 = AnimElem = {tp}\n\n"); }
+        cns += &super::blocks::states(m, sid, &anim_no);
         for v in &m.moves {
             cns += &format!("[State {sid}, vel]\ntype = VelSet\ntrigger1 = AnimElem = {}\n{}{}\n", v.at, v.vel[0].map(|x| format!("x = {x}\n")).unwrap_or_default(), v.vel[1].map(|y| format!("y = {y}\n")).unwrap_or_default());
         }
@@ -181,7 +182,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
                 extras::hitdef_from_spec(h, sm, &attr, false));
         }
         let mut pid = sid;
-        for p in m.projectile.as_ref().map(|p| p.to_vec()).unwrap_or_default() {
+        for p in super::blocks::projectiles(m, nc.anims.get(&m.anim).map_or(0, |a| a.frames.len())) {
             let pa = anim_no.get(&p.anim).copied().unwrap_or(0);
             let ph2 = p.hit_anim.as_ref().and_then(|h| anim_no.get(h)).map(|h| format!("projhitanim = {h}\nprojremanim = {h}\n")).unwrap_or_default();
             let pattr = format!("{st}, {}P", if m.kind == "super" { "H" } else { "S" });
@@ -213,7 +214,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     d.name = nc.name.clone(); d.display_name = nc.name.clone(); d.author = nc.author.clone(); d.source = Source::Native;
     d.constants = k; d.refresh_sizes(); d.sprites = sprites; d.anims = anims; d.commands = commands; d.states = states; d.portrait = portrait;
     d.ai_commands = movelist.iter().map(|m: &MoveInfo| m.command.clone()).collect(); d.movelist = movelist;
-    d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.description = nc.description.clone().unwrap_or_default();
+    d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.element = nc.element; d.description = nc.description.clone().unwrap_or_default();
     d.intro = nc.intro.clone().unwrap_or_default(); d.taunt = nc.taunt.clone().unwrap_or_default(); d.win_quote = nc.win_quote.clone().unwrap_or_default();
     d.form_name = nc.form.clone().unwrap_or_default(); d.forms = super::forms::build_forms(nc, pal_no, with_images); d.boss = nc.boss; d.passives = nc.passives.as_ref().map(|p| p.rules()).unwrap_or_default(); d.rivals = ume_engine::rivals::Rivals::new(&nc.id, &nc.rivals); extras::insert_voices(&mut d, nc);
     d

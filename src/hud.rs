@@ -8,7 +8,7 @@ use ume_engine::fighter::Fighter;
 use ume_engine::flags::{asf, gsf};
 use ume_engine::matchs::{Match, BASE_H, BASE_W};
 
-mod advantage; mod advantage_draw; mod announce_text; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_tint};
+mod advantage; mod advantage_draw; mod announce_text; mod combo_tier; mod danger; mod energy; mod energy_gem; mod guard; mod palette; mod opacity; mod life_bar; mod life_paint; mod passive_meter; mod form_status; mod rush_marker; mod story_hud; mod taunts; mod timer_ring; mod training_panel; pub mod debug_panel; use palette::{poly_pt, side_color, side_tint};
 
 pub struct Hud {
     pub replay: bool,
@@ -645,7 +645,7 @@ impl Hud {
                     w / 2.0 - 22.0,
                     34.0,
                     6.4,
-                    hex("#22e8ff"),
+                    side_color(0),
                     Align::Center,
                 );
                 outlined(
@@ -653,7 +653,7 @@ impl Hud {
                     w / 2.0 + 22.0,
                     34.0,
                     6.4,
-                    hex("#ff4d6d"),
+                    side_color(1),
                     Align::Center,
                 );
                 if human.len() == 1 && m.roots().filter(|f| f.side == 0 && f.alive).count() > 1 {
@@ -687,11 +687,7 @@ impl Hud {
                     x,
                     41.0,
                     5.2,
-                    if side == 0 {
-                        hex("#22e8ff")
-                    } else {
-                        hex("#ff4d6d")
-                    },
+                    side_color(side),
                     al,
                 );
             }

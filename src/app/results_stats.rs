@@ -1,4 +1,6 @@
 use super::*;
+
+mod actions;
 use crate::match_stats::{clock_text, snapshot};
 
 pub(crate) fn performance_rank(life_pct: i32, best_combo: i32, ticks: i64) -> (&'static str, Color) {
@@ -143,15 +145,8 @@ impl App {
             if on && k > 0.5 {
                 self.ui.adapted_highlight(("res.x", "res.y"), x, y, w, h);
             }
-            self.ui.text(
-                it,
-                x + w * 0.5,
-                y + 34.0,
-                20.0,
-                Color::new(1.0, 1.0, 1.0, if on { k } else { 0.82 * k }),
-                Align::Center,
-                true,
-            );
+            let icon = if items.len() == 3 && i > 0 { i + 1 } else { i };
+            actions::draw_label(&self.ui, icon, it, (x, y, w), if on { k } else { 0.82 * k });
         }
         (cur, clicked)
     }

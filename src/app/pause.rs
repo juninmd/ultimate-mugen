@@ -1,6 +1,7 @@
 use super::*;
 
 mod binding;
+mod action_icons;
 mod draw_chrome;
 mod draw_list;
 mod draw_slots;

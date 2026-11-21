@@ -137,8 +137,9 @@ impl App {
             pill(ui, r, 10.0, fade(top, a), fade(bot, a), edge);
             let (title, sub) = self.action_text(*act);
             let mid = y + row_h / 2.0;
-            ui.text(&title, x + 24.0, mid - 2.0, 24.0 * f, fade(hex(INK), a), Align::Left, false);
-            ui.text(sub, x + 24.0, mid + 20.0 * f, 15.0 * f, fade(if on { hex("#ffe3ea") } else { hex(MUTED) }, a), Align::Left, false);
+            super::action_icons::draw(ui, *act, x + 32.0, mid, 30.0 * f, a);
+            ui.text(&title, x + 64.0, mid - 2.0, 24.0 * f, fade(hex(INK), a), Align::Left, false);
+            ui.text(sub, x + 64.0, mid + 20.0 * f, 15.0 * f, fade(if on { hex("#ffe3ea") } else { hex(MUTED) }, a), Align::Left, false);
             if *act == Action::Hitboxes {
                 let on_off = self.session.as_ref().is_some_and(|s| s.r.debug);
                 let (txt, col) = if on_off { ("ON", hex("#3ddc97")) } else { ("OFF", hex(MUTED)) };

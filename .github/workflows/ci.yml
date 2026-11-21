@@ -84,6 +84,11 @@ jobs:
           SCRIPTS: ${{ matrix.scripts }}
           MATCH_SMOKE_SHARD: ${{ matrix.match }}
           WEB_SMOKE_SHOTS: web-smoke-shots
+      - run: node scripts/web-mugen-smoke.js web/dist assets/mugen/elecbyte.zip
+        if: matrix.shard == 'ui'
+        env:
+          MUGEN_SMOKE_CHAR: kfm
+          WEB_SMOKE_SHOTS: web-smoke-shots
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: failure()
         with:

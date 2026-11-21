@@ -1220,7 +1220,7 @@ async fn market_tour(app: &mut App, dir: &str) {
     let tree = Tree {
         entries: files
             .into_iter()
-            .map(|(path, size)| TreeEntry { path, size })
+            .map(|(path, size)| TreeEntry { path, size, ..Default::default() })
             .collect(),
         truncated: false,
     };
@@ -1246,6 +1246,7 @@ async fn market_tour(app: &mut App, dir: &str) {
             files: it.files.len(),
             active: it.name == "kfm",
             installed_at: 1,
+            version: String::new(),
         });
     }
     persist

@@ -1,12 +1,14 @@
 pub mod bundle;
 pub mod catalog;
 pub mod client;
+pub mod model;
 pub mod ops;
 pub mod persist;
 pub mod refs;
 pub mod repo;
 pub mod safety;
 pub mod state;
+pub mod version;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native;

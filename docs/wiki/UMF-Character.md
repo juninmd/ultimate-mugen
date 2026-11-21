@@ -16,7 +16,7 @@ UMF fighters also load from a folder without recompiling: drop the `.json` in `u
 
 ```json
 {
-  "format": "umf/1",
+  "format": "umf/2",
   "id": "mine",
   "name": "My Fighter",
   "series": "My Series",
@@ -40,7 +40,7 @@ UMF fighters also load from a folder without recompiling: drop the `.json` in `u
 
 | Field | Required | Description |
 |---|---|---|
-| `format` | yes | Always `umf/1` |
+| `format` | yes | `umf/2` (`umf/1` still loads) |
 | `extends` | no | Fighter or kit ids to inherit from, see [Reuse](#reuse-extends-use-and-kits). Required fields may then come from the parent |
 | `id`, `name`, `series`, `author`, `color` | yes | Identity; `color` is the select card color |
 | `boss` | no | `true` hides it from select and makes it the final Arcade boss |
@@ -76,7 +76,7 @@ A complete fighter in 20 lines ([`docs/examples/umf/mika.json`](../examples/umf/
 
 ```json
 {
-  "format": "umf/1",
+  "format": "umf/2",
   "id": "mika",
   "name": "Mika Arashi",
   "author": "Ultimate MUGEN",
@@ -143,6 +143,14 @@ Each animation is a list of frames:
   { "pose": "jab0", "ticks": 5 }
 ], "loop": 0 }
 ```
+
+A frame with only a pose and a tick count can be written as `"pose*ticks"`, and both forms mix in one list:
+
+```json
+"jab": { "frames": ["jab0*3", { "pose": "jab1", "ticks": 3, "hit": { "part": "handR", "radius": 10 } }, "jab0*5"], "loop": 0 }
+```
+
+Run `node scripts/umf2-migrate.mjs` before committing a shipped fighter: it writes the canonical layout that CI checks. See [ADR 0007](adr/0007-umf2-definitive-fighter-format.md).
 
 | Frame field | Description |
 |---|---|
@@ -339,3 +347,7 @@ cargo test --workspace --release
 Review fighter art with `ume-tools audit-sprites`, which lists missing and reused poses, or in the game itself.
 
 Browser sprite packs load asynchronously. A newly downloaded or replaced pack invalidates the affected native fighter’s cached previews and all palettes; other fighters keep their caches. Match loading waits for the chosen built-in fighters’ packs and reports download failures rather than starting with a cached procedural fallback. Imported native definitions without a bundled pack remain supported.
+
+## Share a fighter as a pack
+
+A zip (or a `mugen/` folder) that holds one UMF `.json` next to a `sprites/` folder with `01_idle.png`, the pose PNGs and an optional `meta.json` (`axisX`, `axisY`, `refHeight` per pose) is imported as a native fighter, with no `.def`. The marketplace installs it like any other pack. [Goku SSJ4 UMF](https://github.com/juninmd/mugen-assets/tree/main/umf/Goku_SSJ4_UMF) is the reference example.

@@ -230,7 +230,7 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
         }
         spr.palette_index = pal_idx as i32;
         if d_len == 0 {
-            links.push(Some(link).filter(|&l| l < i));
+            links.push(Some(link));
         } else {
             let start = (if flags & 1 == 0 { ldata } else { tdata }).saturating_add(d_ofs);
             let s = start.min(buf.len());
@@ -240,10 +240,21 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
         }
         sprites.push(spr);
     }
+    for (i, link) in links.iter_mut().enumerate() {
+        *link = link.filter(|&l| l != i && l < sprites.len());
+    }
     let mut needed: Vec<bool> = sprites.iter().map(|s| wanted(s.group, s.index)).collect();
-    for i in (0..sprites.len()).rev() {
-        if let (true, Some(l)) = (needed[i], links[i]) {
-            needed[l] = true;
+    let mut changed = true;
+    while changed {
+        changed = false;
+        for i in 0..sprites.len() {
+            if !needed[i] {
+                continue;
+            }
+            if let Some(l) = links[i].filter(|&l| !needed[l]) {
+                needed[l] = true;
+                changed = true;
+            }
         }
     }
     jobs.retain(|(i, ..)| needed[*i]);
@@ -264,20 +275,29 @@ fn decode_sff_v2(buf: &[u8], wanted: impl Fn(i32, i32) -> bool) -> DecodedSff {
         spr.rgba = d.rgba;
         spr.palette = d.palette;
     }
-    for i in 0..sprites.len() {
-        if let Some(l) = links[i] {
-            let (w, h, idx, rgba) = (
-                sprites[l].width,
-                sprites[l].height,
-                sprites[l].indexed.clone(),
-                sprites[l].rgba.clone(),
-            );
+    let mut waiting: Vec<usize> = (0..sprites.len()).filter(|&i| links[i].is_some()).collect();
+    while !waiting.is_empty() {
+        let mut progressed = false;
+        waiting.retain(|&i| {
+            let Some(l) = links[i] else { return false };
+            let target = &sprites[l];
+            if target.rgba.is_none() && target.indexed.is_none() {
+                return true;
+            }
+            let (w, h, idx, rgba) = (target.width, target.height, target.indexed.clone(), target.rgba.clone());
             let spr = &mut sprites[i];
             spr.width = w;
             spr.height = h;
             spr.indexed = idx;
             spr.rgba = rgba;
+            progressed = true;
+            false
+        });
+        if !progressed {
+            break;
         }
+    }
+    for i in 0..sprites.len() {
         let spr = &mut sprites[i];
         if spr.rgba.is_some() {
             spr.palette_index = -1;

@@ -877,8 +877,26 @@
       "cost": 1000,
       "simple": "super",
       "invuln": [1,3],
-      "projectile": {"at":3,"anim":"maelstromFx","hitAnim":"splash","speed":[3.6,0],"offset":[56,-50],"damage":56,"hits":6,"level":"heavy","launch":true,"priority":6,"removeTime":90,"element":"water"},
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "projectile": {
+        "at": 3,
+        "anim": "maelstromFx",
+        "hitAnim": "splash",
+        "speed": [3.6,0],
+        "offset": [56,-50],
+        "damage": 56,
+        "hits": 6,
+        "level": "heavy",
+        "launch": true,
+        "priority": 6,
+        "removeTime": 90,
+        "element": "water",
+        "missTime": 3,
+        "hitflag": "MAFP"
+      },
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[8,18,38],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[130,200,255]}
     },
     {
       "id": "ebb",
@@ -917,7 +935,10 @@
         {"at":6,"damage":60,"level":"light","knockback":[0,0],"element":"water"},
         {"at":7,"damage":110,"level":"heavy","launch":true,"knockback":[-5,-6],"element":"water"}
       ],
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[8,18,38],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[130,200,255]}
     },
     {
       "id": "ex_riptide",
@@ -965,7 +986,10 @@
         {"at":7,"damage":132,"level":"heavy","launch":true,"knockback":[-5,-6],"element":"water"}
       ],
       "fx": "aura",
-      "sounds": [{"at":1,"snd":[200,4]}]
+      "sounds": [{"at":1,"snd":[200,4]}],
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[8,18,38],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[130,200,255]}
     },
     {
       "id": "overhead",
@@ -1288,7 +1312,8 @@
         ],
         "replaceMoves": false
       }
-    ]
+    ],
+    "charge": {"auraColor":[30,75,130],"shake":true}
   },
   "helpers": {
     "clones": {
@@ -1311,5 +1336,22 @@
         {"id":"crew_slash","name":"Crew Broadside","input":"y","kind":"normal","anim":"strong","hits":[{"at":3,"damage":40,"level":"medium","pausetime":[9,10]}]}
       ]
     }
+  },
+  "profile": {
+    "country": "PH",
+    "nationality": {"en":"Filipino","pt":"Filipino","es":"Filipino"},
+    "origin": {"en":"Azure Horizon Fleet","pt":"Frota Horizonte Azul","es":"Flota Horizonte Azul"},
+    "title": {"en":"Sky & Sea Corsair Captain","pt":"Capitão dos Mares e Céus","es":"Capitán de los Mares y Cielos"},
+    "fightingStyle": {"en":"Tidal Cutlass & Mirage Clones","pt":"Sabre das Marés e Clones de Miragem","es":"Sable de Mareas y Clones de Espejismo"},
+    "affiliation": {"en":"Horizon Free Corsairs","pt":"Corsários Livres do Horizonte","es":"Corsarios Libres del Horizonte"},
+    "bio": {
+      "en": "A smiling captain of seas and skies whose cutlass was tempered inside a living maelstrom.",
+      "pt": "Um capitão sorridente dos mares e céus, cuja espada foi temperada numa tormenta oceânica.",
+      "es": "Un capitán sonriente de mares y cielos cuya espada fue templada en un torbellino vivo."
+    },
+    "element": "water",
+    "weakness": "lightning",
+    "alignment": "hero",
+    "tags": ["sword","clones","water","aerial"]
   }
 }

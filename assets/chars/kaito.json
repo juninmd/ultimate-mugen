@@ -744,7 +744,9 @@
         {"at":9,"damage":90,"level":"heavy","launch":true,"knockback":[-3,-8],"shake":10,"element":"wind"}
       ],
       "sounds": [{"at":1,"snd":[200,4]}],
-      "shake": {"at":2,"time":18,"ampl":5,"freq":75}
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[8,16,36],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[140,220,255]}
     },
     {
       "id": "triad",
@@ -755,12 +757,56 @@
       "cost": 1000,
       "invuln": [1,3],
       "projectile": [
-        {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,-0.5],"offset":[44,-78],"damage":24,"hits":6,"level":"medium","removeTime":110,"priority":6,"element":"wind"},
-        {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,0],"offset":[44,-68],"damage":24,"hits":6,"level":"medium","removeTime":110,"priority":6,"element":"wind"},
-        {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,0.5],"offset":[44,-58],"damage":24,"hits":6,"level":"medium","removeTime":110,"priority":6,"element":"wind"}
+        {
+          "at": 4,
+          "anim": "dragonSpirit",
+          "hitAnim": "galeHit",
+          "speed": [1.8,-0.5],
+          "offset": [44,-78],
+          "damage": 24,
+          "hits": 6,
+          "level": "medium",
+          "removeTime": 110,
+          "priority": 6,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "dragonSpirit",
+          "hitAnim": "galeHit",
+          "speed": [1.8,0],
+          "offset": [44,-68],
+          "damage": 24,
+          "hits": 6,
+          "level": "medium",
+          "removeTime": 110,
+          "priority": 6,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "dragonSpirit",
+          "hitAnim": "galeHit",
+          "speed": [1.8,0.5],
+          "offset": [44,-58],
+          "damage": 24,
+          "hits": 6,
+          "level": "medium",
+          "removeTime": 110,
+          "priority": 6,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
       "sounds": [{"at":1,"snd":[200,4]}],
-      "shake": {"at":2,"time":18,"ampl":5,"freq":75}
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[8,16,36],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[140,220,255]}
     },
     {
       "id": "dragon",
@@ -837,13 +883,57 @@
       "cost": 3000,
       "invuln": [1,7],
       "projectile": [
-        {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,-0.5],"offset":[44,-78],"damage":28.8,"hits":8,"level":"medium","removeTime":110,"priority":6,"element":"wind"},
-        {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,0],"offset":[44,-68],"damage":28.8,"hits":8,"level":"medium","removeTime":110,"priority":6,"element":"wind"},
-        {"at":4,"anim":"dragonSpirit","hitAnim":"galeHit","speed":[1.8,0.5],"offset":[44,-58],"damage":28.8,"hits":8,"level":"medium","removeTime":110,"priority":6,"element":"wind"}
+        {
+          "at": 4,
+          "anim": "dragonSpirit",
+          "hitAnim": "galeHit",
+          "speed": [1.8,-0.5],
+          "offset": [44,-78],
+          "damage": 28.8,
+          "hits": 8,
+          "level": "medium",
+          "removeTime": 110,
+          "priority": 6,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "dragonSpirit",
+          "hitAnim": "galeHit",
+          "speed": [1.8,0],
+          "offset": [44,-68],
+          "damage": 28.8,
+          "hits": 8,
+          "level": "medium",
+          "removeTime": 110,
+          "priority": 6,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "dragonSpirit",
+          "hitAnim": "galeHit",
+          "speed": [1.8,0.5],
+          "offset": [44,-58],
+          "damage": 28.8,
+          "hits": 8,
+          "level": "medium",
+          "removeTime": 110,
+          "priority": 6,
+          "element": "wind",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
       "fx": "aura",
       "sounds": [{"at":1,"snd":[200,4]}],
-      "shake": {"at":2,"time":18,"ampl":5,"freq":75}
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[8,16,36],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[140,220,255]}
     },
     {
       "id": "overhead",
@@ -1162,7 +1252,25 @@
         ],
         "replaceMoves": false
       }
-    ]
+    ],
+    "charge": {"auraColor":[35,90,120],"shake":true}
   },
-  "speed": 1.1
+  "speed": 1.1,
+  "profile": {
+    "country": "JP",
+    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "origin": {"en":"Storm Road, Hokkaido","pt":"Estrada da Tempestade, Hokkaido","es":"Camino de la Tormenta, Hokkaido"},
+    "title": {"en":"Wandering Eye of the Storm","pt":"Andarilho do Olho da Tempestade","es":"Errante del Ojo de la Tormenta"},
+    "fightingStyle": {"en":"Arashi Storm Karate","pt":"Karatê da Tempestade Arashi","es":"Karate de la Tormenta Arashi"},
+    "affiliation": {"en":"Storm Road Wanderers","pt":"Andarilhos da Estrada da Tempestade","es":"Errantes del Camino de la Tormenta"},
+    "bio": {
+      "en": "A wandering karateka who chases storms and trades his teal gi only for the next worthy bout.",
+      "pt": "Um karateca andarilho que segue as tempestades e troca seu kimono verde-água apenas pela próxima boa luta.",
+      "es": "Un karateka errante que persigue tormentas y solo busca el próximo combate digno."
+    },
+    "element": "wind",
+    "weakness": "earth",
+    "alignment": "hero",
+    "tags": ["shoto","balanced","wind","aerial"]
+  }
 }

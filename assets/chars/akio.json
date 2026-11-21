@@ -984,9 +984,26 @@
       "cost": 1000,
       "simple": "super",
       "invuln": [1,3],
-      "projectile": {"at":3,"anim":"novaBeam","hitAnim":"novaHit","speed":[0,0],"offset":[44,-68],"damage":48,"hits":7,"removeTime":44,"level":"heavy","launch":true,"priority":6,"element":"lightning"},
+      "projectile": {
+        "at": 3,
+        "anim": "novaBeam",
+        "hitAnim": "novaHit",
+        "speed": [0,0],
+        "offset": [44,-68],
+        "damage": 48,
+        "hits": 7,
+        "removeTime": 44,
+        "level": "heavy",
+        "launch": true,
+        "priority": 6,
+        "element": "lightning",
+        "missTime": 3,
+        "hitflag": "MAFP"
+      },
       "sounds": [{"at":1,"snd":[200,4]}],
-      "shake": {"at":2,"time":18,"ampl":5,"freq":75}
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[32,10,6],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,170,90]}
     },
     {
       "id": "cometstorm",
@@ -997,13 +1014,71 @@
       "cost": 1000,
       "invuln": [1,3],
       "projectile": [
-        {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,-0.6],"offset":[50,-80],"damage":36,"hits":3,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"},
-        {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,0],"offset":[50,-70],"damage":36,"hits":3,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"},
-        {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,0.6],"offset":[50,-60],"damage":36,"hits":3,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"},
-        {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,1.2],"offset":[50,-50],"damage":36,"hits":3,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"}
+        {
+          "at": 4,
+          "anim": "starOrb",
+          "hitAnim": "starHit",
+          "speed": [6,-0.6],
+          "offset": [50,-80],
+          "damage": 36,
+          "hits": 3,
+          "level": "heavy",
+          "removeTime": 70,
+          "priority": 6,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "starOrb",
+          "hitAnim": "starHit",
+          "speed": [6,0],
+          "offset": [50,-70],
+          "damage": 36,
+          "hits": 3,
+          "level": "heavy",
+          "removeTime": 70,
+          "priority": 6,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "starOrb",
+          "hitAnim": "starHit",
+          "speed": [6,0.6],
+          "offset": [50,-60],
+          "damage": 36,
+          "hits": 3,
+          "level": "heavy",
+          "removeTime": 70,
+          "priority": 6,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "starOrb",
+          "hitAnim": "starHit",
+          "speed": [6,1.2],
+          "offset": [50,-50],
+          "damage": 36,
+          "hits": 3,
+          "level": "heavy",
+          "removeTime": 70,
+          "priority": 6,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
       "sounds": [{"at":1,"snd":[200,4]}],
-      "shake": {"at":2,"time":18,"ampl":5,"freq":75}
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[32,10,6],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,170,90]}
     },
     {
       "id": "ex_starburst",
@@ -1042,14 +1117,72 @@
       "cost": 3000,
       "invuln": [1,7],
       "projectile": [
-        {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,-0.6],"offset":[50,-80],"damage":43.2,"hits":5,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"},
-        {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,0],"offset":[50,-70],"damage":43.2,"hits":5,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"},
-        {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,0.6],"offset":[50,-60],"damage":43.2,"hits":5,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"},
-        {"at":4,"anim":"starOrb","hitAnim":"starHit","speed":[6,1.2],"offset":[50,-50],"damage":43.2,"hits":5,"level":"heavy","removeTime":70,"priority":6,"element":"lightning"}
+        {
+          "at": 4,
+          "anim": "starOrb",
+          "hitAnim": "starHit",
+          "speed": [6,-0.6],
+          "offset": [50,-80],
+          "damage": 43.2,
+          "hits": 5,
+          "level": "heavy",
+          "removeTime": 70,
+          "priority": 6,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "starOrb",
+          "hitAnim": "starHit",
+          "speed": [6,0],
+          "offset": [50,-70],
+          "damage": 43.2,
+          "hits": 5,
+          "level": "heavy",
+          "removeTime": 70,
+          "priority": 6,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "starOrb",
+          "hitAnim": "starHit",
+          "speed": [6,0.6],
+          "offset": [50,-60],
+          "damage": 43.2,
+          "hits": 5,
+          "level": "heavy",
+          "removeTime": 70,
+          "priority": 6,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        },
+        {
+          "at": 4,
+          "anim": "starOrb",
+          "hitAnim": "starHit",
+          "speed": [6,1.2],
+          "offset": [50,-50],
+          "damage": 43.2,
+          "hits": 5,
+          "level": "heavy",
+          "removeTime": 70,
+          "priority": 6,
+          "element": "lightning",
+          "missTime": 3,
+          "hitflag": "MAFP"
+        }
       ],
       "fx": "aura",
       "sounds": [{"at":1,"snd":[200,4]}],
-      "shake": {"at":2,"time":18,"ampl":5,"freq":75}
+      "shake": {"at":2,"time":18,"ampl":5,"freq":75},
+      "flash": {"at":1,"time":12,"color":[32,10,6],"under":true,"superMove":true},
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,170,90]}
     },
     {
       "id": "overhead",
@@ -1338,6 +1471,24 @@
         ],
         "replaceMoves": false
       }
-    ]
+    ],
+    "charge": {"auraColor":[110,45,15],"shake":true}
+  },
+  "profile": {
+    "country": "JP",
+    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "origin": {"en":"Starfall Dojo, Kyoto","pt":"Dojo Queda Estelar, Kyoto","es":"Dojo Estrella Fugaz, Kioto"},
+    "title": {"en":"Crimson Star Prodigy","pt":"Prodígio da Estrela Carmesim","es":"Prodigio de la Estrella Carmesí"},
+    "fightingStyle": {"en":"Starflame Kenpo","pt":"Kenpo Chama Estelar","es":"Kenpo Llama Estelar"},
+    "affiliation": {"en":"Storm Road Alliance","pt":"Aliança da Estrada da Tempestade","es":"Alianza del Camino de la Tormenta"},
+    "bio": {
+      "en": "A hot-blooded martial prodigy whose crimson hair flares as his fighting spirit ignites.",
+      "pt": "Um prodígio de sangue quente cujo cabelo carmesim se arrepia e incendeia conforme seu espírito de luta desperta.",
+      "es": "Un prodigio marcial de sangre caliente cuyo cabello carmesí arde cuando su espíritu de lucha se enciende."
+    },
+    "element": "fire",
+    "weakness": "water",
+    "alignment": "hero",
+    "tags": ["rushdown","fire","aerial","super-speed"]
   }
 }

@@ -1,0 +1,743 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Desempenho - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="desempenho"><a class="header" href="#desempenho">Desempenho</a></h1>
+<p><a href="../Performance.html">English</a> · <strong>Português (BR)</strong></p>
+<p>Como a engine mantém o carregamento rápido e os quadros estáveis, e como medir.</p>
+<h2 id="carregamento"><a class="header" href="#carregamento">Carregamento</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Etapa</th><th>O que acontece</th><th>Threads</th></tr></thead><tbody>
+<tr><td>Decodificação SFF v1</td><td>Cabeçalhos de subarquivos escaneados; payloads PCX decodificados em paralelo entre núcleos; sprites ligados compartilham pixels de origem (<code>Arc</code>)</td><td>Todos os núcleos (máx. 32)</td></tr>
+<tr><td>Decodificação SFF v2</td><td>Os cabeçalhos são lidos em ordem; os dados LZ5, RLE5, RLE8 e PNG são decodificados em paralelo; sprites ligados compartilham os pixels de origem (<code>Arc</code>)</td><td>Todos os núcleos (máx. 32)</td></tr>
+<tr><td>Importação e Descompressão Zip</td><td>Diretório central escaneado, entradas descompactadas em paralelo com barra visual de progresso <code>ZipProgress</code> e indicador de threads de hardware</td><td>Todos os núcleos (máx. 32)</td></tr>
+<tr><td>Sprites do personagem</td><td>A conversão paleta para RGBA roda em paralelo, uma vez por buffer de pixels e paleta únicos; sprites ligados compartilham um <code>ImageData</code> e, portanto, um único upload na GPU</td><td>Todos os núcleos (máx. 8)</td></tr>
+<tr><td>Sprites do cenário</td><td>Mesma conversão RGBA em paralelo; o buffer RGBA é movido para o cenário, nunca copiado</td><td>Todos os núcleos (máx. 8)</td></tr>
+<tr><td>Cache e reuso de cenários</td><td><code>src::registry</code></td><td>Instâncias de <code>MugenStage</code> são cacheadas entre a prévia de seleção e o início da luta em <code>StageEntry</code>, reduzindo o carregamento do cenário de ~30 ms para 0,0 ms</td></tr>
+<tr><td>Parsing de cenário em passada única</td><td><code>ume_formats::stage</code></td><td>O <code>.def</code> do cenário é processado uma única vez com <code>parse_ini_no_lines</code> e compartilhado com a detecção de modelos 3D, eliminando passadas duplicadas e alocações de linhas</td></tr>
+<tr><td>Cache de estados comuns</td><td><code>ume_engine::common</code></td><td><code>common_def()</code> cacheado via <code>OnceLock&lt;Arc&lt;CharDef&gt;&gt;</code>, eliminando ~4 ms de parsing duplicado de <code>common1.cns</code> por partida</td></tr>
+<tr><td>Parsing CNS e CMD em passada única</td><td><code>ume_engine::loader</code>, <code>cns</code></td><td>Seções processadas uma única vez com <code>parse_ini_no_lines</code> e compartilhadas entre constantes e estados; evita passadas redundantes de INI</td></tr>
+<tr><td>Cache de bytecode de expressões e parâmetros</td><td><code>ume_engine::chardef</code></td><td><code>safe_expr</code> e <code>Param::new</code> cacheiam AST e bytecode compilados para triggers e parâmetros idênticos via armazenamento thread-local</td></tr>
+<tr><td>Consultas INI sem alocação</td><td><code>ume_formats::ini</code></td><td><code>Section::get</code> e <code>find_section</code> usam <code>eq_ignore_ascii_case</code> evitando alocações no heap; <code>strip_comment</code> atalha linhas sem comentário</td></tr>
+<tr><td>Retratos da tela de seleção</td><td><code>load_mugen_portrait</code> decodifica só os sprites 9000,0, 9000,1 e o primeiro quadro parado (mais as origens dos links) via <code>decode_sff_only</code></td><td>1</td></tr>
+<tr><td>Sprites e efeitos nativos (UMF)</td><td>Cada quadro único é decodificado ou rasterizado em paralelo</td><td>Todos os núcleos (máx. 8)</td></tr>
+<tr><td>Personagem inteiro</td><td>Carregado numa thread <code>char-load</code> enquanto a tela de VS aparece</td><td>1 thread em segundo plano</td></tr>
+</tbody></table>
+</div>
+<p>O auxiliar é <code>ume_formats::par::map</code>. Na web (<code>wasm32</code>) ele roda na própria thread, pois o build do navegador não tem threads.</p>
+<h2 id="quadros-estáveis"><a class="header" href="#quadros-estáveis">Quadros estáveis</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Técnica</th><th>Onde</th><th>Efeito</th></tr></thead><tbody>
+<tr><td>Ritmo de quadros</td><td><code>ume_shell::Pacer</code></td><td>Tempos de quadro a até 4% de uma taxa de atualização comum (30 a 240 Hz) viram o período exato; a sobra é devolvida quando soma um período inteiro, então o tempo de jogo segue o tempo real. Com vsync, isso dá exatamente um tick de 60 Hz por quadro, sem alternar entre 0 e 2</td></tr>
+<tr><td>Passo fixo</td><td><code>Session::update</code></td><td>Simulação a 60 Hz com tolerância mínima e no máximo 5 ticks por quadro (sem espiral de atraso)</td></tr>
+<tr><td>Pré-carga de texturas</td><td><code>Gfx::prefetch</code>, <code>Texture2D::prefetch</code></td><td>Os sprites dos lutadores sobem para o atlas no início da luta (até 50% do atlas), então o primeiro especial não faz upload no meio da partida</td></tr>
+<tr><td>Pré-aquecimento de sons</td><td><code>Audio::preload_match</code></td><td>Todos os sons dos lutadores são decodificados em paralelo na tela de VS; sons de personagens que saíram da partida são liberados</td></tr>
+<tr><td>VM de bytecode</td><td><code>ume_engine::bytecode</code></td><td>Expressões CNS/ZSS compilam para uma VM em pilha fixa (<code>[f64; 32]</code>) com redirecionamentos inline (<code>parent</code>, <code>root</code>, <code>helper</code>, <code>enemynear</code>), intrínsecos matemáticos, triggers de 0/1 argumento, <code>CmpStr</code>, <code>Special</code> (<code>animelem</code>, <code>timemod</code>) e atribuições <code>:=</code></td></tr>
+<tr><td>Caminhos críticos sem alocação</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td>Chaves de comando em <code>Arc&lt;str&gt;</code>, verificação ASCII de <code>HitDefAttr</code> sem alocação, buffers reutilizáveis de colisão Clsn1/Clsn2 (<code>fill_boxes</code>), seleção de golpes da IA em duas passagens e <code>RefCell::get_mut</code> evitam alocações no heap a cada tick</td></tr>
+<tr><td>Caminho rápido de batch de quads</td><td><code>ume_render::Batch</code>, <code>ume_shell::quad</code></td><td><code>push_quad_verts</code> dedicado insere índices contíguos de quad sem mapeamento por iterador; coordenadas de quad sem rotação evitam trigonometria (<code>sin_cos</code>)</td></tr>
+<tr><td>Caminhos críticos sem alocação</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td>Chaves de comando em <code>Arc&lt;str&gt;</code>, verificação ASCII de <code>HitDefAttr</code> sem alocação, seleção de golpes da IA em duas passagens e <code>RefCell::get_mut</code> evitam alocações no heap a cada tick</td></tr>
+<tr><td>Atalho de paleta identidade</td><td><code>ume_engine::palette</code></td><td>A verificação <code>is_identity()</code> pula trigonometria flutuante, multiplicações e clamp em paletas intocadas, além de atalho em <code>PalParams::combine</code> e lote em <code>apply_slice</code></td></tr>
+<tr><td>Caminhos críticos sem alocação</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td>Chaves de comando em <code>Arc&lt;str&gt;</code>, verificação ASCII de <code>HitDefAttr</code> sem alocação, buffers de rascunho de colisão (<code>fill_boxes</code>, <code>fill_proj_boxes</code>), array de pilha para projéteis congelados, explods <code>remove_on_get_hit</code> pré-filtrados e <code>RefCell::get_mut</code> evitam alocações no heap a cada tick</td></tr>
+<tr><td>Caminhos críticos sem alocação</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td>Chaves de comando em <code>Arc&lt;str&gt;</code>, verificação ASCII de <code>HitDefAttr</code> sem alocação, índices de alvos em array de pilha, persistência em vetor linear, avaliação de parâmetros <code>num_opt</code> em passagem única e <code>RefCell::get_mut</code> evitam alocações no heap a cada tick</td></tr>
+<tr><td>Caminhos críticos sem alocação</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td>Chaves de comando em <code>Arc&lt;str&gt;</code>, verificação ASCII de <code>HitDefAttr</code> sem alocação, <code>rel_dirs</code> sem desvios condicionais, verificação de botões recentes em ciclo único por operação bitwise e <code>RefCell::get_mut</code> evitam alocações no heap a cada tick</td></tr>
+<tr><td>Limites de resiliência</td><td><code>ume_formats</code>, <code>ume_engine::matchs</code></td><td>Decodificadores de imagem rejeitam cabeçalhos acima de <code>MAX_IMAGE_PIXELS</code> (<code>1 &lt;&lt; 26</code>) antes de alocar; partidas limitam helpers (60), explods (512), projéteis (256) e textos (128)</td></tr>
+</tbody></table>
+</div>
+<h2 id="memória-de-gpu"><a class="header" href="#memória-de-gpu">Memória de GPU</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Técnica</th><th>Onde</th><th>Efeito</th></tr></thead><tbody>
+<tr><td>Paleta no shader</td><td><code>Gfx::sprite_tex</code>, <code>IndexedTexture</code>, <code>Palette</code></td><td>Sprites M.U.G.E.N com pixels indexados vão para o atlas de índices de 8 bits e são coloridos por uma linha de paleta no shader: 4x menos upload e espaço de atlas que RGBA. <code>RemapPal</code> troca a linha de paleta em vez de gerar uma nova imagem RGBA</td></tr>
+<tr><td>Reinício separado dos atlas</td><td><code>ume_shell::quad</code></td><td>O atlas RGBA (UI, texto, sprites true-color) e o atlas de índices (+ linhas de paleta) reiniciam cada um por conta própria quando enchem, então encher um nunca obriga o outro a refazer uploads</td></tr>
+<tr><td>Caminhos rápidos da composição</td><td><code>post.wgsl</code> <code>fs_composite</code></td><td>Sem desfoque radial o passe em resolução total usa 1 amostra por pixel (3 com aberração cromática) em vez de 21, e painéis de vidro pulam pixels fora do alcance da sombra. Saída idêntica; tempo de quadro em GPU por software em <code>UME_TOUR=perf</code> caiu de 44 ms para 25 ms</td></tr>
+</tbody></table>
+</div>
+<h2 id="medindo"><a class="header" href="#medindo">Medindo</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Comando</th><th>Mede</th></tr></thead><tbody>
+<tr><td><code>cargo run --release -p ume-engine --example mugen_load_bench [zip] [execuções]</code></td><td>Tempo de carga de personagem M.U.G.E.N (padrão: <code>elecbyte.zip</code> embutido)</td></tr>
+<tr><td><code>cargo run --release -p ume-engine --example load_bench</code></td><td>Tempo de compilação nativa (UMF)</td></tr>
+<tr><td><code>cargo run --release -p ume-engine --example tick_bench -- [zip_ou_dir] [segundos] [por_lado]</code></td><td>Taxa de simulação (<code>ticks/s</code>) e percentis de latência (<code>p50</code>, <code>p99</code>, <code>max</code>, % do orçamento de 16,6 ms)</td></tr>
+<tr><td><code>cargo test -p ume-engine --release --test tick_alloc</code></td><td>Zero alocações por tick de simulação</td></tr>
+<tr><td><code>cargo test -p ume-formats --release --test fuzz_resilience</code></td><td>Fuzzing por mutação em decodificadores SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR e INI</td></tr>
+<tr><td><code>cargo test -p ume-engine --release --test stress_resilience</code></td><td>Expressões CNS hostis, floods recursivos de helper/explod/projétil e estresse 4v4 simul</td></tr>
+<tr><td><code>UME_TOUR=perf --shots &lt;dir&gt;</code></td><td>Laço de quadro real de uma luta CPU vs CPU: percentis de simulação e desenho, vértices, draw calls, uploads/preenchimento do atlas e RSS, uma vez por segundo</td></tr>
+</tbody></table>
+</div>
+<p>Referência (release): <code>kfm</code> caiu de 48,3 ms para 3,5 ms (13,8x mais rápido), <code>kfm720</code> de 60,1 ms para 7,8 ms (7,7x mais rápido). Taxa de simulação atinge 235.000+ ticks/s em p50 0,004 ms (0,1% do orçamento de frame).</p>
+<h2 id="profile-de-quadros-e-memória"><a class="header" href="#profile-de-quadros-e-memória">Profile de quadros e memória</a></h2>
+<p><code>UME_TOUR=perf</code> executa o <code>App</code> real (não um laço sintético) e imprime uma vez por segundo:</p>
+<pre><code>perf: 1s step p50 0.03 p99 0.11 max 0.21 · draw p50 0.09 p99 0.26 max 1.11 ·
+frame p50 5.52 p99 5.75 max 5.84 ms · 1661 v 2.0 dc 0 up 143 KB ·
+atlas 75%/0% · rss 379 MB
+</code></pre>
+<p><code>UME_PERF_SECONDS=&lt;n&gt;</code> define a duração, <code>UME_CHARS=a,b[,c,d…]</code> escolhe os lutadores (quatro ou mais ids viram time paralelo) e <code>UME_STAGE=&lt;id&gt;</code> escolhe o cenário. <code>UME_PERF_ROTATE=1</code> inicia uma luta para cada par nativo do roster e imprime o RSS após cada carga, expondo caches que nunca diminuem.</p>
+<p>Medido a 1280×720 (Windows, 16 núcleos lógicos, release, vsync):</p>
+<div class="table-wrapper"><table><thead><tr><th>Cenário</th><th>Passo p50</th><th>Desenho p50</th><th>Quadro p50</th><th>RSS após carregar</th></tr></thead><tbody>
+<tr><td>Kaito vs Shion</td><td>0,03 ms</td><td>0,09 ms</td><td>5,52 ms (vsync 180 Hz)</td><td>380 MB</td></tr>
+<tr><td>2v2 paralelo (4 lutadores nativos)</td><td>0,05 ms</td><td>0,13 ms</td><td>5,52 ms</td><td>533 MB</td></tr>
+</tbody></table>
+</div>
+<p>A simulação e a montagem do lote ficam muito abaixo de um quadro de 16,6 ms; o tempo de parede é a taxa do monitor. O que custa memória é a arte RGBA nativa: cada lutador nativo tem cerca de 90 MB de pixels descomprimidos a 720p. Três correções saíram desta passagem:</p>
+<div class="table-wrapper"><table><thead><tr><th>Correção</th><th>Onde</th><th>Efeito</th></tr></thead><tbody>
+<tr><td>Compartilhar o buffer RGBA entre <code>ImageData</code> e <code>Texture2D</code></td><td><code>chardef::ImageData</code>, <code>Texture2D::from_rgba_shared</code></td><td>Remove a segunda cópia completa de cada sprite nativo: o RSS de 1v1 caiu de 455 para 380 MB</td></tr>
+<tr><td>Descartar o cache de texturas da GPU quando o roster muda</td><td><code>App::warm_step</code> (<code>Gfx::trim(0)</code>)</td><td>Sprites e arte do cenário da luta anterior são liberados; uma revanche mantém os atlas já preenchidos</td></tr>
+<tr><td>Limitar definições nativas em cache</td><td><code>Registry::trim_cache</code> (<code>CAP_NATIVE = 4</code>)</td><td>Percorrer o roster somava ~150 MB por luta e chegava a 1,3 GB após sete lutas; com o limite o cache guarda o par atual mais dois recentes e o time atual nunca é descartado</td></tr>
+</tbody></table>
+</div>
+<p>Percorrer o roster nativo também mostra o atlas ciclando: quatro lutadores deixam o atlas RGBA em 83%, então uma animação que precisa de um quadro novo dispara um reset e reenvia só os sprites em tela (rajadas de algumas centenas de KB, pior quadro de desenho 1,4 ms). A arte M.U.G.E.N indexada não paga esse custo porque vive no atlas de 8 bits.</p>
+<h2 id="web-wasm"><a class="header" href="#web-wasm">Web (wasm)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Técnica</th><th>Onde</th><th>Efeito</th></tr></thead><tbody>
+<tr><td><code>ControlFlow::Wait</code> na web</td><td><code>ume_shell::run</code></td><td>O <code>Poll</code> do winit gira um laço <code>postTask</code>/<code>AbortController</code> ao lado do <code>requestAnimationFrame</code>; o profile mostrou cerca de 75% do tempo da main thread (mais GC) gasto aí. Os redraws são auto-solicitados, então <code>Wait</code> basta</td></tr>
+<tr><td>Zerar atlas</td><td><code>Renderer::new</code></td><td>Texturas de atlas e paleta são inicializadas uma vez, então <code>texSubImage2D</code> não força mais limpeza lazy (aviso do Firefox)</td></tr>
+<tr><td>Retry da surface</td><td><code>Shell::redraw</code></td><td>Falha em <code>get_current_texture</code> pede novo frame em vez de travar o laço (tela preta)</td></tr>
+<tr><td>Loader + cache</td><td><code>web/index.html</code>, <code>web/sw.js</code></td><td>Progresso do download do wasm, JS e wasm buscados como <code>?v=&lt;build&gt;</code> (carimbado pelo <code>build-web.sh</code>) e cacheados de forma imutável, então o cache nunca mistura dois builds e recarga automática se o contexto WebGL for perdido</td></tr>
+<tr><td>Pacotes de sprites sob demanda</td><td><code>src/web_sprites.rs</code>, <code>ume-tools pack-sprites</code></td><td>Cada lutador tem um <code>&lt;id&gt;.pack</code> completo e um <code>&lt;id&gt;.menu.pack</code> pequeno com exatamente os arquivos que o retrato da seleção e a prévia do menu leem (registrados por <code>ume_engine::native::menu_sprite_files</code>). O boot baixa só os pacotes de menu; o pacote completo é baixado quando o lutador recebe foco na seleção ou entra em uma luta. Os bytes baixados no boot foram de 37,2 MB para 17,0 MB</td></tr>
+<tr><td>Perfil de build <code>web</code></td><td><code>Cargo.toml</code> <code>[profile.web]</code>, <code>scripts/build-web.sh</code></td><td>O build do navegador usa LTO completo, uma unidade de codegen e <code>opt-level = "s"</code>, mantendo <code>opt-level = 3</code> nos crates quentes (<code>ume-engine</code>, <code>ume-formats</code>, <code>ume-render</code>, <code>tiny-skia</code>, <code>png</code>, <code>miniz_oxide</code>, <code>fdeflate</code>, <code>simd-adler32</code>). O wasm foi de 17,9 MB para 13,2 MB (7,6 MB para 6,7 MB com gzip)</td></tr>
+<tr><td>Laços de recolor e recorte</td><td><code>native::recolor</code>, <code>native::pixel_fit</code></td><td>O recolor de paleta usa um cache de cores de mapeamento direto e uma janela de cabelo por linha em vez de <code>HashMap</code> e teste de região por pixel; o recorte de sprites varre linhas em vez de colunas. Mesmos pixels (cobertos por testes de referência); o trabalho na thread principal do boot até a luta na sonda de perfil foi de 5,0 s para 4,0 s</td></tr>
+</tbody></table>
+</div>
+<p>Sonda: <code>NODE_PATH=$(npm root -g) node scripts/web-profile.js Enter Enter Enter</code> (Chromium headless, rode <code>./scripts/build-web.sh</code> antes).</p>
+<h2 id="carregamento-de-cenários-no-navegador"><a class="header" href="#carregamento-de-cenários-no-navegador">Carregamento de cenários no navegador</a></h2>
+<p>O WASM do navegador embute miniaturas de cenários de 240×135, em vez dos sete PNGs completos (21.858.090 bytes). A grade de seleção decodifica apenas as miniaturas solicitadas. Confirmar um cenário baixa <code>assets/stages/&lt;id&gt;.png</code> durante o carregamento da tela VS; erros HTTP e um limite de 30 segundos retornam ao menu. O cache em Rust do navegador retém apenas a última ilustração completa preparada; uma luta ativa ainda pode manter sua própria referência. O cache HTTP/service worker do navegador pode reutilizar arquivos já baixados.</p>
+<p>A versão nativa mantém as imagens completas embutidas, decodificando cada cenário separadamente no primeiro uso. As definições UMF e o pacote Elecbyte continuam dentro do WASM; esta alteração separa apenas a arte dos cenários. A compilação dos lutadores e a preparação de áudio continuam na thread principal do navegador.</p>
+<p><code>scripts/build-web.sh</code> copia os PNGs externos e <code>assets.js</code> para <code>web/dist/</code>. Publique o diretório inteiro, incluindo <code>assets/stages/</code>. Jogar offline exige que o cenário escolhido tenha sido baixado anteriormente. Ao substituir a arte de um cenário, regenere sua miniatura em <code>assets/stages/thumbs/</code> como PNG RGB de 240×135 com <code>python scripts/generate-stage-thumbnails.py</code> (exige Pillow).</p>
+<p>Execute <code>node scripts/web-smoke.js web/dist</code> após compilar a versão web (exige Playwright e Chromium). O teste rejeita downloads de cenários completos antes da confirmação e exige exatamente um na primeira luta. Isso verifica o escopo da transferência, não um percentil de latência nem um ganho de FPS.</p>
+<h2 id="orçamento-da-thread-principal-no-carregamento"><a class="header" href="#orçamento-da-thread-principal-no-carregamento">Orçamento da thread principal no carregamento</a></h2>
+<p>Regra: a thread de render nunca espera disco, decodificação, parsing ou síntese. No nativo esse trabalho roda em threads de trabalho e a UI consulta a conclusão; no wasm (thread única) continua fatiado em um passo por quadro.</p>
+<div class="table-wrapper"><table><thead><tr><th>Trabalho</th><th>Onde roda agora</th></tr></thead><tbody>
+<tr><td>Preview e retrato MUGEN na seleção</td><td><code>CharEntry::stream_preview</code> / <code>stream_portrait</code> (máx. 2 workers, coletados por <code>Registry::reap_streams</code>). Chamada ~0,1 ms contra 28 ms (KFM) e 84 ms (KFM HD) síncronos</td></tr>
+<tr><td>Importação de <code>.zip</code> (hash + descompressão)</td><td><code>registry::read_zip</code> em worker; só <code>finish_import</code> (~4 ms) roda na thread principal</td></tr>
+<tr><td>Decodificação dos sons da luta</td><td><code>Audio::preload_match</code> em worker; a barra do VS espera</td></tr>
+<tr><td>Síntese da música do cenário (17-31 ms)</td><td><code>Audio::music_ready</code> em worker</td></tr>
+<tr><td>Tela de vitória</td><td>usa a definição em cache (<code>peek</code>), nunca carrega</td></tr>
+</tbody></table>
+</div>
+<p>Watchdog de quadros: <code>UME_WATCHDOG=1</code> registra todo quadro acima de <code>UME_HITCH_MS</code> (padrão 50) com o bloco que segurou a CPU (<code>ume_shell::watchdog::label("load:stage")</code>) e, ao sair, um resumo com o pior quadro. Cada quadro é atribuído ao seu segmento mais lento, não ao último rótulo definido, então a contabilidade final não esconde um passo de carregamento lento. Rótulos em uso: <code>select:reap</code>, <code>select:preview</code>, <code>select:grid</code>, <code>load:character</code>, <code>load:stage</code>, <code>load:session</code>, <code>load:audio</code>, <code>load:sprites</code>, <code>fight:prefetch</code>, <code>import</code>.</p>
+<h2 id="inicialização-com-coleções-mugen-grandes"><a class="header" href="#inicialização-com-coleções-mugen-grandes">Inicialização com coleções M.U.G.E.N grandes</a></h2>
+<p>Abrir uma pasta lia todos os arquivos para a memória: uma coleção de 15.000 arquivos (4,5 GB de SFF, 3,4 GB de SND) levava 338 s e 10,2 GB de memória residente antes da tela de título, e o Windows marca uma janela como "não está respondendo" após 5 s sem bombear mensagens.</p>
+<div class="table-wrapper"><table><thead><tr><th>Técnica</th><th>Onde</th><th>Efeito</th></tr></thead><tbody>
+<tr><td>Índice de pasta preguiçoso</td><td><code>ume_formats::vfs::add_dir</code></td><td>Percorre só metadados (caminho + tamanho) e lê o arquivo quando ele é usado. Zips dentro da pasta são indexados pelo registro final e diretório central, nunca descompactados de antemão</td></tr>
+<tr><td>Cache de cargas pequenas</td><td><code>vfs::File</code></td><td>Leituras de até 4 MiB ficam para reuso (def, CNS, AIR); bancos de sprite e som são lidos uma vez por uso em vez de ficarem presos a sessão inteira</td></tr>
+<tr><td>Chave de conteúdo amostrada</td><td><code>vfs::File::signature</code></td><td>A identidade de personagem/cenário usa tamanho + amostras do início e do fim em vez do banco de sprites inteiro, então o mesmo lutador copiado para outra pasta continua sendo deduplicado</td></tr>
+<tr><td>Descoberta e chave em paralelo</td><td><code>find_char_defs</code>, <code>find_stage_defs</code>, <code>Registry::add_vfs_inner</code></td><td>Cabeçalhos de def e chaves de conteúdo são calculados com <code>ume_formats::par::map</code> (até 8 workers)</td></tr>
+<tr><td>Roster fora da thread principal</td><td><code>App::new</code></td><td><code>Registry::new</code> + <code>scan_folders</code> + <code>dedupe</code> + <code>sort_mugen</code> rodam na thread <code>registry-scan</code> enquanto a tela de boot continua desenhando quadros</td></tr>
+<tr><td>Deduplicação por conjunto</td><td><code>Registry::add_vfs_inner</code></td><td>Ids e chaves do roster ficam em <code>HashSet</code>; a varredura linear por lutador era quadrática</td></tr>
+<tr><td>Thumbnail de cenário assíncrono</td><td><code>Registry::stage_preview</code></td><td>O primeiro tile que precisa de um cenário MUGEN dispara um worker; antes o cenário inteiro (SFF + RGBA) era decodificado no quadro em que a grade rolava até ele</td></tr>
+<tr><td>Montagem do cenário fora da thread</td><td><code>Registry::prepare_stage</code></td><td>O cenário é carregado, o preview é gerado e o BGM é localizado no worker <code>stage-load</code>; a tela de VS consulta o resultado</td></tr>
+<tr><td>Liberação fora da thread</td><td><code>Registry::drop_off_thread</code></td><td>Descartar uma definição de lutador (centenas de MB de sprites) acontece no worker <code>char-free</code>, não dentro de um quadro</td></tr>
+<tr><td>Carregamento que bombeia quadros</td><td><code>App::start_fight</code></td><td>Revanche e tour desenham a tela de carregamento e bombeiam quadros enquanto os workers terminam, então a janela continua respondendo às mensagens do Windows</td></tr>
+</tbody></table>
+</div>
+<p><code>ultimate-mugen --scan-report</code> imprime o custo de inicialização sem janela (<code>bundled | scan | total | roster | RSS</code>).
+<code>cargo run --release -p ume-formats --example scan_bench -- &lt;mugen_dir&gt;</code> mede índice, descoberta e chave separadamente.</p>
+<p>Referência (Windows, 32 GB de RAM, cache do sistema aquecido): uma coleção de 15.053 entradas com 723 personagens e 137 cenários passou de <strong>338 s e 10.192 MB</strong> para <strong>0,89 s e 33 MB</strong>. Com o watchdog de quadros ligado, catalogar esse roster não registrou nenhum quadro acima de 100 ms; só a indexação caiu de 337,9 s para 0,83 s, a descoberta de 4,31 s para 0,02 s e a geração de chaves de 716 lutadores de 11,0 s para 0,19 s. Conteúdo MUGEN de pasta (210 <code>.def</code>, 4,5 GB de <code>.sff</code>) continua carregando e lutando: <code>mugen_check mugen/chars/Sukuna</code> reporta 1773 sprites em 232 ms.</p>
+<h2 id="busca-no-sistema-de-arquivos-virtual"><a class="header" href="#busca-no-sistema-de-arquivos-virtual">Busca no sistema de arquivos virtual</a></h2>
+<p><code>cargo run --locked --release -p ume-formats --example vfs_bench</code> mede normalização de caminhos e busca por nome com 50.000 arquivos não relacionados. Exibe cinco amostras por cenário. O benchmark sintético exclui acesso a disco, decodificação e renderização.</p>
+<p>A busca alternativa na pasta usa o intervalo do mapa ordenado da VFS correspondente ao diretório do personagem, evitando percorrer outros personagens. Os limites de diretório importam: <code>chars/kfm-extra</code> não pode substituir um arquivo de <code>chars/kfm</code>. A busca global por nome continua como última alternativa de compatibilidade. A normalização ASCII cria uma única string de saída; caminhos não ASCII mantêm as regras Unicode de minúsculas, inclusive sigma grego contextual.</p>
+<p>Na máquina de desenvolvimento na nuvem, a mediana da normalização caiu de 60,8 para 48,0 ns por operação, e a da busca na pasta de 278,2 para 1,0 µs. São resultados de microbenchmark, não medidas de FPS ou de carregamento completo do jogo. Arquivos ausentes que exigem busca global ainda podem percorrer todo o mapa.</p>
+<h2 id="alocações-de-áudio-e-interface"><a class="header" href="#alocações-de-áudio-e-interface">Alocações de áudio e interface</a></h2>
+<p><code>cargo run --locked --release --example audio_bench</code> decodifica cinco vezes um WAV estéreo gerado de 30 segundos a 44,1 kHz, contando alocações e realocações durante cada decodificação. O decodizador reutiliza o buffer de conversão de amostras intercaladas enquanto houver capacidade; ele cresce quando um pacote posterior precisa de mais amostras. A quantidade de amostras escritas continua vindo do pacote atual, inclusive em pacotes finais parciais e entrada mono.</p>
+<p>No ambiente de desenvolvimento na nuvem, as alocações após aquecimento caíram de 2.331 para 1.183 por decodificação. Os tempos variaram (aproximadamente 9–11 ms após aquecimento) e não demonstram ganho de velocidade. A mudança reduz alocações temporárias, não o tamanho final do PCM decodificado. O benchmark exclui reprodução e latência do dispositivo de áudio. Execute <code>cargo test --locked --release --example audio_bench</code> para os testes de preservação de amostras, mono/estéreo, cauda e demais operações PCM.</p>
+<p><code>Ui::quad</code> transforma os quatro vértices em um array fixo, eliminando uma alocação temporária por quadrilátero desenhado sem mudar a ordem dos triângulos ou suas coordenadas. Isso não comprova ganho de FPS.</p>
+<h2 id="decodificação-vetorizada-de-codecs-sffv2"><a class="header" href="#decodificação-vetorizada-de-codecs-sffv2">Decodificação Vetorizada de Codecs SFFv2</a></h2>
+<p><code>decode_rle5</code> e <code>decode_lz5</code> em <code>crates/formats/src/sff.rs</code> utilizam preenchimento contíguo de fatias (<code>out[j..e].fill(val)</code>) em vez de laços escalares de atribuição elemento a elemento. O LLVM traduz o preenchimento de fatias em instruções memset vetorizadas, acelerando corridas longas em folhas de sprites em alta definição (720p/1080p). Para <code>kfm720.def</code>, o tempo de carregamento caiu de 60,1 ms para 6,7 ms (8,97x mais rápido).</p>
+<h2 id="pipeline-paralelo-de-recursos-de-personagem"><a class="header" href="#pipeline-paralelo-de-recursos-de-personagem">Pipeline Paralelo de Recursos de Personagem</a></h2>
+<p><code>load_mugen_char</code> em <code>crates/engine/src/loader.rs</code> sobrepõe as fases de recursos do personagem entre núcleos de CPU utilizando <code>std::thread::scope</code>. Decodificação de sprites (<code>sff:decode</code>), análise de animação (<code>air:parse</code>) e decodificação de áudio (<code>snd:decode</code>) rodam simultaneamente em threads trabalhadoras enquanto constantes CNS, arquivos de estado e gatilhos CMD são analisados na thread chamadora. <code>par::workers</code> em <code>crates/formats/src/par.rs</code> escala até 32 threads de processamento paralelo em hardwares multithread. O tempo total de carregamento passa a ser limitado pela fase individual mais lenta em vez do acúmulo serial.</p>
+<h2 id="gatilhos-e-atribuições-de-variáveis-com-alocação-zero"><a class="header" href="#gatilhos-e-atribuições-de-variáveis-com-alocação-zero">Gatilhos e Atribuições de Variáveis com Alocação Zero</a></h2>
+<p>A avaliação de partidas em <code>crates/engine/src/matchs.rs</code>, <code>crates/engine/src/triggers.rs</code> e <code>crates/engine/src/hitdef.rs</code> elimina alocações na heap durante os ticks de estado:</p>
+<ul>
+<li><code>Match::assigns</code> registra mutações de variáveis usando o enum compacto <code>VarKind</code> (<code>Var</code>, <code>FVar</code>, <code>SysVar</code>, <code>SysFVar</code>) em vez de alocar chaves <code>String</code> dinâmicas por atribuição.</li>
+<li><code>state_mask</code>, <code>attr_kind_mask</code> e <code>guardflag_bits</code> processam fatias de string byte a byte com <code>to_ascii_uppercase()</code> em linha, eliminando alocações temporárias de <code>String</code> maiúscula em avaliações de <code>hitbyattr</code>.</li>
+<li>A taxa de simulação atingiu mais de 262.000 ticks/segundo com latência máxima por tick inferior a 0,053 ms.</li>
+</ul>
+<h2 id="conversão-de-sprites-para-rgba-sem-ramificação-via-lut-em-cache-l1"><a class="header" href="#conversão-de-sprites-para-rgba-sem-ramificação-via-lut-em-cache-l1">Conversão de Sprites para RGBA sem Ramificação via LUT em Cache L1</a></h2>
+<p><code>sprite_to_rgba</code> em <code>crates/formats/src/sff.rs</code> pré-popula uma tabela de busca de 256 entradas <code>lut: [[u8; 4]; 256]</code> em cache L1, mapeando índices de paleta de 8 bits diretamente para quads RGBA. O laço de pixels usa cópias de 4 bytes sem desvio condicional (<code>chunk.copy_from_slice(&amp;lut[c])</code>), eliminando desvios por pixel para transparência (<code>c != 0</code>) e reduzindo falhas de predição de desvio durante a decodificação de sprites. A fase de decodificação SFF executa em ~0,8 ms para folhas de sprites padrão de lutadores.</p>
+<h2 id="fila-de-comandos-de-entrada-da-ia-com-alocação-zero"><a class="header" href="#fila-de-comandos-de-entrada-da-ia-com-alocação-zero">Fila de Comandos de Entrada da IA com Alocação Zero</a></h2>
+<p><code>crates/engine/src/ai.rs</code> reutiliza a memória do buffer circular em <code>Ai.queue: VecDeque&lt;u32&gt;</code> por meio de <code>append_seq(&amp;mut queue, ...)</code> em vez de criar e descartar vetores temporários na heap <code>Vec&lt;u32&gt;</code> a cada decisão de movimento da IA. A latência máxima por tick caiu para 0,046 ms sob carga.</p>
+<h2 id="lotes-de-vértices-contíguos-e-rasterização-sem-multiplicação-prévia"><a class="header" href="#lotes-de-vértices-contíguos-e-rasterização-sem-multiplicação-prévia">Lotes de Vértices Contíguos e Rasterização sem Multiplicação Prévia</a></h2>
+<p><code>Batch::push</code> em <code>crates/render/src/batch.rs</code> substitui chamadas repetidas a <code>self.vertices.push()</code> por uma única cópia de fatia contígua (<code>self.vertices.extend_from_slice(&amp;[...])</code>), agrupando os quatro vértices do quadrilátero em uma única operação de memória. Em <code>crates/engine/src/raster.rs</code>, <code>pixmap_to_image</code> pré-dimensiona os buffers de pixel (<code>vec![0u8; pixels.len() * 4]</code>) e desmultiplica os canais straight-alpha usando <code>chunks_exact_mut(4)</code>, viabilizando auto-vetorização sobre superfícies e efeitos procedurais de cenários.</p>
+<h2 id="despacho-direto-de-gatilhos-em-bytecode"><a class="header" href="#despacho-direto-de-gatilhos-em-bytecode">Despacho Direto de Gatilhos em Bytecode</a></h2>
+<p>O trait <code>Host</code> em <code>crates/engine/src/expr.rs</code> e a máquina virtual em <code>crates/engine/src/bytecode.rs</code> introduzem ganchos de despacho direto <code>trigger0</code> e <code>trigger1</code>. Para avaliação de gatilhos unários (<code>Op::Trig1</code>), operandos na pilha avaliam diretamente na lógica do gatilho sem encapsulamento em arrays AST temporários <code>[Node::Num]</code> ou redirecionamento via <code>eval()</code>. Gatilhos críticos (<code>var</code>, <code>fvar</code>, <code>sysvar</code>, <code>animelemno</code>, <code>animelemtime</code>, <code>animexist</code>, <code>selfstatenoexist</code>) executam como índices e consultas inline em arrays, reduzindo a latência máxima de tick de simulação para 0,042 ms.</p>
+<h2 id="analisador-de-animações-air-com-alocação-zero"><a class="header" href="#analisador-de-animações-air-com-alocação-zero">Analisador de Animações AIR com Alocação Zero</a></h2>
+<p><code>parse_air</code> em <code>crates/formats/src/air.rs</code> opera diretamente sobre fatias de string de cada linha sem alocar instâncias <code>String</code> em minúsculas (<code>line.to_ascii_lowercase()</code>) para cada linha do arquivo de animação. O reconhecimento de seções e cabeçalhos (<code>parse_begin_action</code>, <code>parse_clsn_header</code>, <code>parse_clsn_box</code>) avalia fatias de bytes com insensibilidade a maiúsculas ASCII (<code>eq_ignore_ascii_case</code>), e as coordenadas de caixas de colisão são processadas em um array de pilha fixo <code>[f32; 4]</code> em vez de alocar um <code>Vec&lt;f32&gt;</code> na heap por caixa delimitadora.</p>
+<h2 id="cópia-pré-alocada-de-canais-de-Áudio-pcm"><a class="header" href="#cópia-pré-alocada-de-canais-de-Áudio-pcm">Cópia Pré-alocada de Canais de Áudio PCM</a></h2>
+<p>Em <code>src/sound_mix.rs:decode</code>, a decodificação de quadros de áudio calcula a capacidade do pacote antecipadamente e invoca <code>out.frames.reserve(count)</code>, eliminando realocações geométricas repetidas do vetor durante a leitura de amostras. Um fluxo dedicado para áudio mono (<code>ch == 1</code>) transfere quadros sem divisão de fatias, e a decodificação estéreo utiliza <code>chunks_exact(ch)</code> para eliminar verificações de limites. As alocações em execução aquecida caíram para 1.175 por fluxo de áudio de 30 segundos.</p>
+<ul>
+<li><strong>Onda 23 - Tabela de Jump Direta Inline do Bytecode e Dispatch com Host Fatiado</strong>:
+<ul>
+<li>Aplica inline das operações aritméticas e relacionais mais frequentes (Add, Sub, MulF, MulI, DivF, DivI, Eq, Ne, Lt, Le, Gt, Ge, BitAnd, BitOr, BitXor, Xor) diretamente no loop de casamento externo de
+run_slice, eliminando chamadas intermediárias de função e closures.</li>
+<li>Fatia self.host antecipadamente em
+run_slice, reduzindo overhead de desreferenciação de struct a cada resolução de gatilho e expressão.</li>
+</ul>
+</li>
+<li><strong>Onda 24 - Passo de Fundo de Cenário Sem Cópias e Retorno Rápido de Ondas</strong>:
+<ul>
+<li>Utiliza casamento de padrões disjunto (BgState { layers, def_time, ctrl_defs, stage } = self) em step(), eliminando incrementos atômicos de self.stage.clone() em Arc e alocações de std::mem::take a cada tick.</li>
+<li>Adiciona retorno rápido para amplitude zero s[0] == 0.0 em sin_wave(), evitando cálculos transcendentais de .sin() para camadas estáticas de fundo.</li>
+<li>Ignora a soma de quadros de início de repetição de animação quando .loop_start == 0.</li>
+</ul>
+</li>
+<li><strong>Onda 25 - Codificação Rápida de WAV e Reamostragem de Áudio em Taxa Identidade</strong>:
+<ul>
+<li>Substitui loops de extensão de fatia por amostra por redimensionamento em bloco de passagem única e escrita indexada direta em wav() e 	o_wav().</li>
+<li>Implementa caminho rápido vetorizável por SIMD para reprodução em taxa unitária ((rate - 1.0).abs() &lt; 1e-4) em Pcm::render, içando produtos de ganho constantes para fora do loop de mixagem.</li>
+</ul>
+</li>
+<li><strong>Onda 26 - Parser de HitDef Sem Alocações e Construção Estática de Shake</strong>:
+<ul>
+<li>Elimina formatação intermediária de strings e clones em hitdef::build utilizando Option&lt;&amp;str&gt; emprestado para parâmetros, casamento direto de bytes em ttr_bits, state_mask e guardflag_bits.</li>
+<li>Substitui formatação dinâmica de strings por consultas estáticas de campo para parâmetros de shake de tela/câmera.</li>
+<li>Ramo padrão com zero alocações para estado e tipos de ataque.</li>
+</ul>
+</li>
+<li><strong>Onda 27 - Caixas de Colisão In-Place e Início Rápido de Elemento de Animação</strong>:
+<ul>
+<li>Implementa Fighter::fill_boxes utilizando buffers scratch fornecidos pelo chamador, eliminando alocações contínuas de Vec<Box4> nos loops de detecção de reversals, golpes e projéteis.</li>
+<li>Substitui coleta de vetor na heap para verificação de caixa única p2clsnrequire por fatia em array na pilha com zero cópias.</li>
+<li>Adiciona saída antecipada if n &lt;= 1 { return 0; } em <code>elem_start</code> para ignorar instanciação de iteradores nas consultas mais frequentes de tempo de quadros de animação.
+Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes:</li>
+</ul>
+</li>
+<li>Substitui desvios aninhados em <code>input::rel_dirs</code> por deslocamento binário branchless <code>ud | (4 &lt;&lt; (is_back ^ 1))</code>.</li>
+<li>Substitui casamento de strings em <code>button_bit</code> por casamento em nível de byte na fatia, suportando insensibilidade a maiúsculas sem alocação.</li>
+<li>Implementa atribuição de direção branchless em <code>InputHistory::push</code>.</li>
+<li><strong>Onda 31 - Descompactação ZIP VFS Paralela Multi-Thread e HUD de Loading Cibernético</strong>:
+<ul>
+<li>Implementa descompressão em blocos com escopo multi-thread (<code>std::thread::scope</code>) aproveitando todo o paralelismo de CPU disponível para extração de arquivos ZIP em <code>add_zip</code>.</li>
+<li>Substitui descompressão sequencial por trabalho concorrente em lote, reduzindo a decodificação de recursos SFF de 222.6 ms para 88.7 ms (-60.1%).</li>
+<li>Adiciona HUD de carregamento cibernético com bordas brilhantes, pulso laser de dois tons ciano/branco e telemetria de pipeline paralelo.</li>
+</ul>
+</li>
+</ul>
+<h2 id="decodificação-simd-de-paletas-act-e-fast-path-de-limites-de-câmera"><a class="header" href="#decodificação-simd-de-paletas-act-e-fast-path-de-limites-de-câmera">Decodificação SIMD de paletas ACT e fast-path de limites de câmera</a></h2>
+<ul>
+<li>Decodificação vetorizada ACT: decode_act e <code>encode_act</code> utilizam s_chunks::&lt;3&gt;() e s_chunks_mut::&lt;4&gt;() para decodificar tripletos RGB para RGBA em lotes sem checagens redundantes de limites.</li>
+<li>Limites de câmera em passada única: Match::update_camera calcula os limites de todos os lutadores raiz (minx, maxx, highest) e dos lutadores vivos (lo, hi) em uma única iteração de self.roots(), eliminando filtragens redundantes.</li>
+<li>Checagens de sobreposição otimizadas: Match::overlap armazena as coordenadas de  em registradores escalares antes do laço interno de colisão contra  e substitui divisões por 2.0 por multiplicações * 0.5.</li>
+</ul>
+<h2 id="pipeline-de-avaliação-de-controladores-e-gatilhos-com-zero-alocações"><a class="header" href="#pipeline-de-avaliação-de-controladores-e-gatilhos-com-zero-alocações">Pipeline de avaliação de controladores e gatilhos com zero alocações</a></h2>
+<ul>
+<li>Indexação de alvos sem alocação no heap: <code>controllers::target_indices</code> retorna buffer em pilha <code>Vec&lt;usize&gt;</code> em vez de <code>Vec&lt;usize&gt;</code>, eliminando alocações em controladores de alvo (<code>targetstate</code>, <code>targetlifeadd</code>, <code>targetpoweradd</code>, <code>targetfacing</code>, <code>targetbind</code>, etc.).</li>
+<li>Resolução de flags AssertSpecial sem alocação: <code>flags::names_in</code> e <code>flags::lookup</code> operam diretamente em fatias <code>&amp;str</code> com comparação ASCII insensível a maiúsculas/minúsculas (<code>eq_ignore_ascii_case</code>), removendo alocações de strings a cada quadro.</li>
+<li>Constantes de velocidade em buffer na pilha: <code>triggers::Ctx::const_val</code> formata a chave em um buffer de 64 bytes para buscar sufixos <code>.x</code> sem alocação no heap via <code>format!("{k}.x")</code>.</li>
+<li>Atribuições de variáveis tipadas: <code>Match::assigns</code> armazena o enum <code>AssignKind</code> em vez de alocar uma <code>String</code> na atribuição de variáveis de gatilhos.</li>
+</ul>
+<h2 id="descompressão-rle-em-bloco-e-eliminação-de-escrita-redundante-de-zeros-no-sff-v2"><a class="header" href="#descompressão-rle-em-bloco-e-eliminação-de-escrita-redundante-de-zeros-no-sff-v2">Descompressão RLE em bloco e eliminação de escrita redundante de zeros no SFF v2</a></h2>
+<ul>
+<li>Eliminação de escrita de zeros em <code>decode_rle8</code>: Como <code>vec![0u8; size]</code> já aloca memória inicializada em zero, repetições de pixels transparentes (<code>val == 0</code>) e literais zero (<code>d == 0</code>) pulam escritas na memória e apenas avançam o índice <code>j</code>. Isso elimina esperas nos buffers de escrita e sujeira nas linhas de cache (geralmente 50-80% de transparência).</li>
+<li>Preenchimento em bloco no RLE5: Em <code>decode_rle5</code>, loops byte a byte foram substituídos por <code>.fill(c)</code> em fatias (ou avanço direto quando <code>c == 0</code>), transformando iterações individuais em memsets vetorizados.</li>
+<li>Cópia direta de fatias para paletas SFF v2: Em <code>decode_sff_v2</code>, paletas com limites válidos utilizam cópia em lote ou direta via <code>copy_from_slice</code>, eliminando checagens de limites e adições saturadas por cor.</li>
+</ul>
+<h2 id="saída-antecipada-de-caixas-de-colisão-fatiamento-de-alvos-sem-alocação-e-despacho-de-ia-indexado"><a class="header" href="#saída-antecipada-de-caixas-de-colisão-fatiamento-de-alvos-sem-alocação-e-despacho-de-ia-indexado">Saída antecipada de caixas de colisão, fatiamento de alvos sem alocação e despacho de IA indexado</a></h2>
+<ul>
+<li>Fast-path em caixas de colisão: Em <code>fighter::boxes()</code>, quadros sem caixas e sem modificadores ativos retornam imediatamente <code>vec![]</code> sem consultar tabelas de escala ou calcular fatores. Fatores de escala pré-multiplicados e inversão horizontal com XOR único (<code>flip = fr.flip_h ^ (self.facing &lt; 0.0)</code>) removem penalidades de ramificação em cada vértice.</li>
+<li>Fatiamento de alvo sem alocação em <code>p2clsnrequire</code>: Em <code>Match::tick</code>, alvos específicos emprestam a fatia <code>&amp;d_boxes[req..req + 1]</code> diretamente em vez de alocar um <code>Vec</code> no heap.</li>
+<li>Despacho de comandos de IA indexado: Em <code>ai::Ai</code>, comandos são indexados como <code>Vec&lt;usize&gt;</code> em <code>fighter.def.commands</code> em vez de clonar árvores <code>CommandDef</code>. Ataques próximos e à distância são separados na inicialização, tornando a seleção em <code>O(1)</code> sem varreduras lineares.</li>
+<li>Conversão vetorizada de pixmap para straight alpha: <code>raster::pixmap_to_image</code> evita divisões inteiras em pixels opacos (<code>alpha == 255</code>) e transparentes (<code>alpha == 0</code>) utilizando <code>as_chunks_mut::&lt;4&gt;()</code>.</li>
+</ul>
+<h2 id="decodificação-snd-pré-alocada-e-filtragem-de-comandos-sem-alocação"><a class="header" href="#decodificação-snd-pré-alocada-e-filtragem-de-comandos-sem-alocação">Decodificação SND pré-alocada e filtragem de comandos sem alocação</a></h2>
+<ul>
+<li>Tabelas hash pré-alocadas para sons SND: <code>snd::decode_snd_checked</code> limita a capacidade em <code>count.min(8192)</code> e pré-aloca as tabelas <code>out</code> e <code>seen</code>, eliminando redimensionamentos repetidos e rehashes durante a decodificação de áudio de personagens.</li>
+<li>Resolução estática de chaves de paleta no carregador: <code>loader::load_mugen_char</code> resolve substituições de paletas (<code>pal1</code>..<code>pal12</code>) usando uma tabela estática de fatias <code>PAL_KEYS</code> em vez de formatar 12 strings no heap por personagem.</li>
+<li>Deduplicação de sprites pré-alocada: Pré-dimensiona os vetores <code>seen</code> e <code>unique</code> para o tamanho de <code>sff.sprites.len()</code>.</li>
+<li>Extração de lista de golpes e comandos de IA com zero alocações: <code>loader::load_mugen_char</code> filtra comandos no local usando <code>eq_ignore_ascii_case</code> antes de clonar ou alocar strings, removendo dezenas de alocações no heap por personagem carregado.</li>
+<li><strong>Onda 27 - Caixas de Colisão In-Place e Início Rápido de Elemento de Animação</strong>:
+<ul>
+<li>Implementa Fighter::fill_boxes utilizando buffers scratch fornecidos pelo chamador, eliminando alocações contínuas de Vec<Box4> nos loops de detecção de reversals, golpes e projéteis.</li>
+<li>Substitui coleta de vetor na heap para verificação de caixa única p2clsnrequire por fatia em array na pilha com zero cópias.</li>
+<li>Adiciona saída antecipada if n &lt;= 1 { return 0; } em <code>elem_start</code> para ignorar instanciação de iteradores nas consultas mais frequentes de tempo de quadros de animação.</li>
+</ul>
+</li>
+<li><strong>Onda 30 - Direções Relativas de Entrada Sem Desvios e Tabela de Salto em Bytes</strong>:
+<ul>
+<li>Substitui desvios aninhados em <code>input::rel_dirs</code> por deslocamento binário branchless <code>ud | (4 &lt;&lt; (is_back ^ 1))</code>.</li>
+<li>Substitui casamento de strings em <code>button_bit</code> por casamento em nível de byte na fatia, suportando insensibilidade a maiúsculas sem alocação.</li>
+<li>Implementa atribuição de direção branchless em <code>InputHistory::push</code>.</li>
+</ul>
+</li>
+</ul>
+<h2 id="analisador-de-animação-e-colisão-air-no-local-sem-alocações-no-heap"><a class="header" href="#analisador-de-animação-e-colisão-air-no-local-sem-alocações-no-heap">Analisador de animação e colisão AIR no local sem alocações no heap</a></h2>
+<ul>
+<li>Eliminação de alocações <code>to_ascii_lowercase()</code> por linha: <code>air::parse_air</code> processa linhas de texto diretamente com comparação ASCII de bytes insensível a maiúsculas (<code>eq_ignore_ascii_case</code>), removendo de 5.000 a 20.000 alocações de string por arquivo <code>.air</code>.</li>
+<li>Analisador de caixas de colisão em pilha: <code>parse_clsn_box</code> analisa quatro coordenadas diretamente em um array fixo <code>[f32; 4]</code> na pilha, eliminando alocações de <code>Vec&lt;f32&gt;</code> por caixa de colisão.</li>
+<li>Tokenização de parâmetros de quadros em buffer de pilha: Linhas AnimFrame desempacotam até 11 parâmetros separados por vírgula em um array fixo <code>[&amp;str; 11]</code> sem alocar <code>Vec&lt;&amp;str&gt;</code>.</li>
+<li>Análise de flags de flip e blend no local: Flags <code>fl</code> e <code>bl</code> são avaliadas diretamente sem alocação de strings em maiúsculas.</li>
+</ul>
+<h2 id="parâmetros-de-shake-no-hitdef-sem-alocação-e-correspondência-de-tipos-no-local"><a class="header" href="#parâmetros-de-shake-no-hitdef-sem-alocação-e-correspondência-de-tipos-no-local">Parâmetros de shake no HitDef sem alocação e correspondência de tipos no local</a></h2>
+<ul>
+<li>Resolução de parâmetros de shake sem alocação: <code>hitdef::build</code> usa consultas diretas de strings estáticas (<code>parse_shake</code>) em vez de formatar 10 chaves dinâmicas no heap (<code>{prefix}.freq</code>, <code>{prefix}.time</code>, <code>{prefix}.ampl</code>, etc.) a cada instanciação de <code>HitDef</code>.</li>
+<li>Análise de <code>animtype</code> e <code>groundtype</code> no local: <code>hitdef::animtype</code> e <code>hitdef::groundtype</code> comparam tokens padrão de animação/chão do MUGEN usando <code>eq_ignore_ascii_case</code> diretamente em fatias <code>&amp;str</code> sem alocar strings em minúsculas.</li>
+</ul>
+<h2 id="consultas-de-seções-ini-sem-alocação-e-análise-de-constantes-cns-em-pilha"><a class="header" href="#consultas-de-seções-ini-sem-alocação-e-análise-de-constantes-cns-em-pilha">Consultas de seções INI sem alocação e análise de constantes CNS em pilha</a></h2>
+<ul>
+<li><code>Section::get</code> e <code>Section::get_all</code> sem alocação: <code>ini::Section::get</code> e <code>ini::Section::get_all</code> comparam chaves diretamente com <code>eq_ignore_ascii_case</code> sem alocar instâncias de <code>String</code> em minúsculas a cada consulta.</li>
+<li><code>find_section</code> sem alocação: <code>ini::find_section</code> utiliza <code>eq_ignore_ascii_case</code> diretamente no nome da seção sem alocar strings em minúsculas.</li>
+<li>Análise de constantes CNS em pilha: <code>cns::parse_constants</code> desempacota vetores numéricos separados por vírgula em um array <code>[f64; 4]</code> na pilha, eliminando alocações de <code>Vec&lt;f64&gt;</code> em cada linha de constantes.</li>
+<li>Vetor de comandos pré-alocado: <code>cns::parse_cmd</code> pré-aloca a capacidade de <code>cmds</code> para <code>secs.len()</code>.</li>
+</ul>
+<h2 id="fast-path-de-bytecode-de-operação-única-e-avaliação-sem-pilha"><a class="header" href="#fast-path-de-bytecode-de-operação-única-e-avaliação-sem-pilha">Fast-path de bytecode de operação única e avaliação sem pilha</a></h2>
+<ul>
+<li>Atalho de expressão com operação única: Em <code>bytecode::Code::run</code>, expressões com exatamente um opcode (<code>Op::Const(v)</code>, <code>Op::Trig0(i)</code>, <code>Op::Host(i)</code>) retornam imediatamente sem inicialização do array de pilha, avanço do program counter ou despacho no loop da máquina virtual.</li>
+<li>Consultas de constantes e parâmetros com custo zero: Números constantes e gatilhos sem argumentos (<code>Time</code>, <code>StateTime</code>, <code>AnimTime</code>, <code>StateNo</code>, etc.) executam em 1 ciclo de CPU sem overhead de frame de execução.</li>
+</ul>
+<h2 id="avanço-de-animação-em-consulta-única-e-atalho-na-limpeza-de-alvos"><a class="header" href="#avanço-de-animação-em-consulta-única-e-atalho-na-limpeza-de-alvos">Avanço de animação em consulta única e atalho na limpeza de alvos</a></h2>
+<ul>
+<li>
+<p>Desempacotamento de quadro de animação em consulta única em <code>advance_anim</code>: Desempacota <code>(total, loop_start, len, ft)</code> em uma única consulta a <code>self.anim()</code>, eliminando buscas repetidas em HashMap por lutador e explod animado a cada tick.</p>
+</li>
+<li>
+<p>Atalho para substituições de tamanho vazias: <code>fighter::c</code> consulta diretamente constantes do personagem quando <code>self.size_overrides.is_empty()</code>, pulando varreduras lineares na fatia.</p>
+</li>
+<li>
+<p>Limpeza de alvos obsoletos com atalho: <code>Match::tick</code> pula movimentações de vetores e chamadas de retenção sempre que <code>self.fighters[k].targets.is_empty()</code>.</p>
+</li>
+<li>
+<p><strong>Onda 42 - Caminho Rápido de Efeitos de Paleta, Buffers de Quadro em Pilha e Consultas Zero-Alloc</strong>:</p>
+<ul>
+<li>PalParams::apply: Caminho rápido para transformações idênticas e sem rotação de matiz/inversão, ignorando trigonometria e desenrolando canais de cores.</li>
+<li>PalFx::from_controller: Eliminação de alocações na heap para buscas de parâmetros de controladores usando chaves em buffer de pilha.</li>
+<li>Match::tick: Remoção de alocações dinâmicas de Vec<usize> por tick para waken e 	ag_requests através de arrays em pilha, unificando loops com
+etain_mut.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 43 - Carregador de Personagens Zero-Alloc e Unquote In-Place</strong>:</p>
+<ul>
+<li><code>ini::unquote_str</code>: Empréstimo in-place de fatias sem alocar novas instâncias de <code>String</code> para strings limpas ou entre aspas.</li>
+<li><code>loader::load_mugen_char</code>: Conversão de <code>fget</code> para retornar <code>Option&lt;&amp;str&gt;</code> ao invés de <code>Option&lt;String&gt;</code>, eliminando cerca de 20 alocações na heap por carregamento de lutador.</li>
+<li><code>loader::local_size</code>: Análise em pilha via <code>split_once(',')</code> substituindo a alocação dinâmica de <code>nums</code>.</li>
+<li><code>cns::parse_cmd</code>: <code>unquote_str</code> in-place para nome e comandos.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 44 - Despacho de Estado AssignKind Zero-Alloc e Máscaras de Bits Case-Insensitive</strong>:</p>
+<ul>
+<li><code>matchs::AssignKind</code>: Substituição de alocações dinâmicas de <code>String</code> em atribuições de variáveis por um enum de 1 byte <code>AssignKind</code>, reduzindo pela metade a memória da tupla e eliminando operações na heap.</li>
+<li><code>hitdef::state_mask</code> / <code>attr_kind_mask</code> / <code>guardflag_bits</code>: Processamento de bytes ASCII insensível a maiúsculas in-place sem alocação de strings.</li>
+<li><code>triggers::const_val</code>: Busca em buffer de pilha com zero alocações para constantes <code>velocity.*.x</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 45 - Cache de Explods em Array e Varredura Triangular de Colisão de Projéteis</strong>:</p>
+<ul>
+<li><code>Match::update_explods</code>: Pré-indexação de posições e estados de pausa dos lutadores em array compacto de 8 posições na pilha, eliminando varreduras lineares por explod.</li>
+<li><code>Match::update_projectiles</code>: Flags de congelamento em buffer de pilha para até 64 projéteis sem alocações na heap, e iteração triangular de pares <code>(a + 1)..n</code> reduzindo pela metade verificações de colisão entre projéteis.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 46 - Caminho Rápido de Caixas de Colisão e Geometria Pré-Escalada</strong>:</p>
+<ul>
+<li><code>Fighter::boxes</code>: Saída antecipada para listas vazias de caixas de colisão antes de calcular constantes ou fatores de escala (reduz drasticamente o trabalho em frames ociosos/movimento).</li>
+<li>Dimensões X e Y pré-escaladas (<code>sx * s</code> e <code>sy * s</code>), reduzindo as multiplicações de ponto flutuante por caixa de 8 para 4.</li>
+<li>Combinação de <code>flip_h != (facing &lt; 0.0)</code> em uma única condição booleana XOR branchless.</li>
+<li><code>Fighter::c</code>: Busca de fatia guardada por <code>!self.size_overrides.is_empty()</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 47 - Junção de Candidatos VFS em Buffer de Pilha e Casamento de Sufixo Zero-Alloc</strong>:</p>
+<ul>
+<li><code>vfs::resolve</code>: <code>with_joined</code> em buffer de pilha de 512 bytes para caminhos candidatos <code>base_dir/name</code> e <code>data/name</code>, eliminando alocações na heap no caminho direto de busca.</li>
+<li>Substituição de strings dinâmicas <code>format!("/{base}")</code> por predicado de bytes in-place <code>is_match</code>.</li>
+<li>Uso direto de <code>ini::unquote_str</code> sem alocar strings intermediárias.</li>
+<li>Fallback de pasta sub-microssegundo em 50k arquivos (0.9 us/op) e redução no tempo de carga de lutadores (<code>kfm.def</code> caiu para 6.7 ms).</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 48 - Pipeline de HUD Zero-Alloc e Quads de Textura Diretos</strong>:</p>
+<ul>
+<li><code>Hud::draw</code>: Otimização de <code>main_of</code> em varredura única de iterador sem alocar <code>Vec&lt;&amp;Fighter&gt;</code> por lado a cada quadro.</li>
+<li>Uso de array fixo em pilha <code>roots = [r0, r1]</code> substituindo vetores dinâmicos na heap.</li>
+<li>Eliminação de alocações de parceiros em partidas 1v1 convencionais.</li>
+<li>Substituição de vetores de malha/vértices/índices no desenho de retratos por chamadas diretas de <code>draw_texture_ex</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 49 - Curto-Circuito em Bytecode de Duas Operações e Contexto Único em Gatilhos</strong>:</p>
+<ul>
+<li><code>bytecode::Code::run</code>: Execução em caminho rápido para expressões de 2 operações (<code>!trigger</code>, <code>-const</code>, <code>!const</code>, <code>!host</code>), ignorando inicialização de pilha e loop do interpretador.</li>
+<li><code>Match::triggered</code>: Reutilização de instância única de <code>Ctx</code> entre <code>trigger_all</code> e grupos de gatilhos, eliminando recriações de contexto por controlador.</li>
+<li><code>Match::num</code>: Avaliação direta de expressão sem mapeamento intermediário de closure.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 50 - Pré-Alocação de SND, Deduplicação de Parsing de Estados e Filtros de Comando Zero-Alloc</strong>:</p>
+<ul>
+<li><code>snd::decode_snd_checked</code>: Pré-alocação do dicionário de sons e do conjunto de offsets visitados usando a contagem de sons do cabeçalho, com inserções in-place <code>Entry::Vacant</code> evitando realocações redundantes.</li>
+<li><code>loader::load_mugen_char</code>: Eliminação da segunda passagem redundante de parsing do <code>stcommon</code> durante o carregamento de personagens.</li>
+<li>Chaves de paletas estáticas pré-alocadas <code>PAL_KEYS</code> evitando 12 alocações de formatação de string dinâmica por carga.</li>
+<li>Pré-alocação de capacidade para <code>HashSet</code>, <code>sprites</code>, <code>indexed</code> e <code>counts</code> com base no número de sprites decodificados do SFF.</li>
+<li>Comparação de bytes ASCII insensível a maiúsculas (<code>eq_ignore_ascii_case</code>) nos filtros de <code>ai_commands</code> e <code>movelist</code>, eliminando strings temporárias na heap para nomes de comandos.</li>
+<li><code>loader::load_mugen_portrait</code>: Extração in-place de fatias de string em consultas de seção evitando clones de strings pertencidas.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 51 - Cache de Dimensões Comuns, Consulta Única de Sprites e Despacho Direto de Textura</strong>:</p>
+<ul>
+<li><code>CharDef</code>: Dimensões centrais e fatores de escala (<code>scale_x</code>, <code>scale_y</code>, <code>size_ground_back</code>, <code>size_ground_front</code>, <code>size_air_back</code>, <code>size_air_front</code>, <code>size_height</code>, <code>size_attack_dist</code>) em cache direto na estrutura via <code>refresh_sizes</code>.</li>
+<li><code>Fighter::c</code>: Casamento de padrões em caminho rápido para chaves <code>size.*</code>, evitando hashing de strings dinâmicas e consultas a <code>HashMap</code> a cada tick de física, colisão e avaliação de gatilhos.</li>
+<li><code>Gfx::sprite_tex_for</code>: Eliminação da consulta duplicada de <code>def.sprites.get</code> por quadro renderizado em todos os lutadores, sombras, ajudantes e explods.</li>
+<li><code>Gfx::draw_sprite</code>: Uso direto de <code>def.scale_x</code> e <code>def.scale_y</code>, removendo consultas repetidas à tabela <code>def.c(...)</code> a cada quadro.</li>
+<li>Redução no tempo de carregamento de <code>kfm.def</code> para 4.6 ms e taxa de simulação acelerada para 216k ticks/s.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 52 - Cache de Temporização de Animação e Atalhos em Bytecode de 3 Operações</strong>:</p>
+<ul>
+<li><code>Fighter</code>: Cache de <code>anim_total_time</code> e <code>anim_loop_start</code> em mudanças de animação, convertendo <code>anim_time_trig</code> (<code>animtime</code>) em uma subtração escalar direta sem consultas a mapas.</li>
+<li><code>Fighter::advance_anim</code>: Reutilização da consulta única de animação durante o avanço de quadros, eliminando chamadas repetidas a <code>self.anim()</code>.</li>
+<li><code>Fighter::anim_elem_time</code>: Retorno instantâneo para <code>animelemtime(1)</code> sem iteração de quadros.</li>
+<li><code>bytecode::Code::run</code>: Curto-circuito em caminho rápido para expressões de comparação de 3 operações (<code>[Trig0, Const, Cmp]</code> e <code>[Const, Trig0, Cmp]</code>), avaliando gatilhos diretamente via <code>Host::trigger0</code> e ignorando alocações na pilha da máquina virtual.</li>
+<li>Redução do tempo de carregamento de <code>kfm720.def</code> para 8.7 ms e de <code>kfm.def</code> para 4.4 ms.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 53 - Dicas de Índice de Lutadores, Acertos em Buffer de Pilha e Atalhos de Reversão</strong>:</p>
+<ul>
+<li><code>Match::idx_hint</code>: Resolução de índice direta em $O(1)$ baseada em dicas de posição da ordem de execução, substituindo varreduras lineares entre lutadores no pipeline de cada tick.</li>
+<li><code>Match::detect_reversals</code>: Saída rápida antecipada quando nenhum lutador possui estado ativo de reversão, além de buffers de pilha de tamanho fixo para reversões detectadas.</li>
+<li><code>Match::detect_hits</code>: Buffer fixo em pilha <code>pending</code> armazenando apenas índices e coordenadas de lutadores, eliminando clones prematuros na heap de <code>HitDefData</code> em frames sem impacto.</li>
+<li>Lista de <code>struck</code> migrada para buffers de pilha, eliminando alocações dinâmicas nos loops de física e detecção de acertos.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 54 - Índices de Alvo em Buffer de Pilha e Avaliação Direta de Expressões</strong>:</p>
+<ul>
+<li><code>controllers::target_indices</code>: Substituição de <code>Vec&lt;usize&gt;</code> alocado na heap por array fixo em pilha <code>[Option&lt;usize&gt;; 8]</code>, eliminando alocações repetidas em <code>TargetState</code>, <code>TargetLifeAdd</code>, <code>TargetPowerAdd</code>, <code>TargetFacing</code> e <code>TargetBind</code>.</li>
+<li><code>controllers::set_vars</code>: Avaliação direta de <code>param.exprs.first()</code> sem iterações duplicadas de busca por string <code>sc.param(...)</code>.</li>
+<li><code>controllers::run</code>: Substituição de checagens duplas de parâmetros em <code>changestate</code>/<code>selfstate</code> por consultas unificadas <code>opt(...)</code> para <code>ctrl</code> e <code>anim</code>.</li>
+<li>Vazão de simulação elevada para 226.415 ticks/s com p50 em 0.003 ms, e decodificação de retratos reduzida para 0.6 ms.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 55 - Decodificacao RGBA Alinhada em u32, Tabelas SFF Pre-Alocadas e Paletas PCX Sem Desvios</strong>:</p>
+<ul>
+<li>sff::sprite_to_rgba: Alocacao direta em Vec<u32> garantindo alinhamento de 4 bytes por hardware, eliminando loops de alinhamento de fatias e checagens de desvio, e convertendo para Vec<u8> via Vec::from_raw_parts com custo zero.</li>
+<li>pcx::read_rgb_palette: Conversao de blocos RGB de 768 bytes em [u32; 256] com u32::from_ne_bytes sem desvios condicionais e atribuicao direta de canal alfa constante.</li>
+<li>sff::decode_v1: Remocao do campo nao utilizado idx em V1Job e pre-alocacao do vetor jobs com count.min(8192).</li>
+<li>sff::decode_v2: Pre-alocacao das tabelas de palettes com pal_count.min(buf.len() / 16 + 1) e jobs com spr_count.min(buf.len() / 28 + 1).</li>
+<li>sff::decode_v2_image: Otimizacao de quadros RAW profundidade 32 com copia direta de fatias e profundidade 24 com chunks de 3 bytes em vez de consultas byte a byte.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 56 - Binds com Semantica Copy, Fallbacks Preguicosos e Animacoes Diretas</strong>:</p>
+<ul>
+<li><code>fighter::Bind</code>: Implementacao de <code>Copy</code> e <code>PartialEq</code>, convertendo verificacoes e atualizacoes em <code>rebind</code> e <code>update_bind</code> em copias binarias de pilha sem clones na heap.</li>
+<li><code>fighter::Fighter::change_anim_own</code>: Adicao de metodo auxiliar para troca de animacao propria, removendo clones externos de <code>def.clone()</code> em <code>changestate</code>, <code>changeanim</code> e transicoes de auto-turn.</li>
+<li><code>matchs::run_state</code>: Conversao da consulta a <code>common</code> em fallback preguicoso (<code>let fallback;</code>), ignorando clones de <code>self.common</code> em todos os estados negativos (-3, -2, -1) e estados definidos pelo personagem.</li>
+<li><code>matchs::change_state</code>: Substituicao do clone ansioso de <code>self.common</code> por igualdade de ponteiro <code>&amp;self.common</code> e fallback sob demanda.</li>
+<li><code>matchs::tick</code>: Eliminacao do clone por quadro de <code>f.st_def</code> no loop de override de fisica atraves de extracao escalar de <code>Option&lt;char&gt;</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 57 - Parsing INI Sem Alocacao de Linhas, Controladores e Estados Pre-Dimensionados</strong>:</p>
+<ul>
+<li><code>ini::parse_ini_no_lines</code>: Substituicao do parsing de INI que copiava linhas em <code>parse_states</code>, <code>parse_constants</code>, <code>parse_cmd</code> e na resolucao de DEF do <code>loader.rs</code> por <code>parse_ini_no_lines</code>, evitando dezenas de milhares de alocacoes de <code>String</code> descartadas por personagem.</li>
+<li><code>ini::parse_ini_opt</code>: Pre-alocacao do vetor de secoes com <code>text.len() / 256 + 4</code> e das entradas de cada secao com capacidade 8.</li>
+<li><code>cns::build_controller</code>: Pre-alocacao de <code>params</code> do controlador com a capacidade exata de <code>s.entries.len()</code>.</li>
+<li><code>cns::parse_states</code>: Pre-alocacao de <code>StateDef</code> com capacidade de 16 controladores e parametros dimensionados pelas entradas da secao, eliminando realocacoes dinamicas na compilacao de estados.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 58 - Normalizacao de Caminhos em Pilha, Atalhos Rapidos de Comandos e Simbolos Copy</strong>:</p>
+<ul>
+<li><code>vfs::with_norm_path</code>: Buffer de 512 bytes em pilha para normalizacao e remocao de aspas de caminhos, eliminando alocacoes na heap em todas as consultas de recursos de <code>vfs::resolve</code>.</li>
+<li><code>commands::CmdSymbol</code>: Implementacao de <code>Copy</code> e <code>PartialEq</code> para manipulacao binaria de simbolos de 20 bytes.</li>
+<li><code>commands::held</code>: Verificacao antecipada de mascara de botoes antes de consultas de direcao relativa e orientacao, descartando botoes inativos na primeira instrucao.</li>
+<li><code>commands::fires</code>: Avaliacao de <code>now &amp; !prev</code> antes de ler ticks anteriores do historico (<code>p2</code>, <code>p3</code>), evitando sondagens de historico em frames sem disparo.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 59 - Escala em Cache no Preenchimento de Caixas e Poda AABB Multicaixas</strong>:</p>
+<ul>
+<li><code>fighter::fill_boxes</code>: Ignoradas consultas dinamicas por string <code>size.*</code> quando nao ha overrides de tamanho, lendo <code>def.scale_x</code> e <code>def.scale_y</code> diretamente.</li>
+<li><code>matchs::overlap</code>: Adicionada saida antecipada por bounding box composto (AABB) em colisoes de grupos multicaixas (<code>a.len() &gt; 1 || b.len() &gt; 1</code>), eliminando testes $O(N 	imes M)$ em pares disjuntos.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 60 - Tokenizacao de Quadros AIR Sem Alocacao e Buffers Pre-Dimensionados</strong>:</p>
+<ul>
+<li><code>air::parse_air</code>: Substituicao da alocacao em heap de <code>Vec&lt;&amp;str&gt;</code> por quadro por um array fixo em pilha <code>[""; 12]</code>, eliminando alocacoes dinamicas de vetores em todos os quadros de animacao.</li>
+<li><code>air::parse_air</code>: Substituicao de alocacoes <code>String</code> via <code>to_ascii_uppercase()</code> para flags e modos de blend por inspecao em nivel de byte (<code>fl.as_bytes()</code>, <code>bl.as_bytes()</code>).</li>
+<li><code>air::parse_as_d</code>: Substituicao de busca por strings por varredura de bytes sem distincao de maiusculas/minusculas para parametros alfa <code>AS...D...</code>.</li>
+<li><code>air::parse_air</code>: Pre-alocacao do vetor de quadros com <code>Vec::with_capacity(8)</code> e do HashMap de animacoes com <code>text.len() / 512 + 16</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 61 - Despacho Dedicado de Gatilhos Sem Argumentos e Comparacao de Strings em Bytes</strong>:</p>
+<ul>
+<li><code>triggers::trigger0</code>: Desvio rapido para os 20 principais gatilhos sem argumentos (<code>time</code>, <code>animtime</code>, <code>stateno</code>, <code>prevstateno</code>, <code>anim</code>, <code>ctrl</code>, <code>alive</code>, <code>life</code>, <code>facing</code>, <code>roundstate</code>, <code>movecontact</code>, <code>movehit</code>, <code>vel</code>, <code>pos</code>) diretamente sem criacao de closures de argumentos ou passagem pelo match geral de 90 bracos.</li>
+<li><code>triggers::cmpstr</code>: Migracao da decodificacao de caracteres para inspecao de byte unico (<code>v0.as_bytes().first()</code>) para <code>statetype</code>, <code>movetype</code> e <code>physics</code>, e reutilizacao de fatias de string em checagens de <code>command</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 62 - Atalhos Rapidos na VM de Bytecode para Gatilhos de 1 Argumento e Comparacoes Aritmeticas</strong>:</p>
+<ul>
+<li><code>bytecode::Code::run</code>: Adicionados atalhos dedicados para instrucoes unarias de 2 ops de 1 argumento (<code>[Op::Const, Op::Trig1]</code>), gatilhos invertidos de 3 ops (<code>[Op::Const, Op::Trig1, Op::Not]</code>) e comparacoes de 4 ops (<code>[Op::Const, Op::Trig1, Op::Const, Op]</code>), ignorando o loop da pilha e indexacoes para expressoes como <code>var(X) = Y</code>, <code>fvar(X) &gt; Y</code> e <code>animelemtime(X) &gt;= Y</code>.</li>
+<li><code>bytecode::Code::run</code>: Expandidas comparacoes de 3 ops para suportar aritmetica (<code>Add</code>, <code>Sub</code>) e relacoes entre dois gatilhos (<code>[Op::Trig0, Op::Trig0, Op]</code>), eliminando o interpretador de pilha para expressoes como <code>anim = stateno</code> ou <code>time &gt; animtime</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 63 - Deteccao Lazy de Ciclos em SND e Tokenizacao Sem Alocacao de Glifos FNT</strong>:</p>
+<ul>
+<li><code>snd::decode_snd_checked</code>: Substituicao da alocacao antecipada de <code>HashSet&lt;usize&gt;</code> por arquivo SND por inicializacao preguicosa (<code>Option&lt;HashSet&lt;usize&gt;&gt;</code>) ativada somente quando offsets apontam para tras (<code>next &lt;= ofs</code>), eliminando alocacao em heap e hashing em todos os arquivos SND sequenciais padrao.</li>
+<li><code>fnt::decode_fnt_v1</code>: Substituicao da alocacao de <code>split_whitespace().collect::&lt;Vec&lt;&amp;str&gt;&gt;()</code> por linha de glifo por um iterador continuo lendo ate 3 tokens diretamente, eliminando centenas de alocacoes de vetor por fonte.</li>
+<li><code>fnt::decode_fnt_v2</code>: Migracao da analise do descritor de fonte para <code>parse_ini_no_lines</code>, evitando a coleta desnecessaria de <code>lines: Vec&lt;String&gt;</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Onda 64 - Analise de Carga de Comandos Sem Alocacao e Troca de Animacao com Guarda de Ponteiro</strong>:</p>
+<ul>
+<li><code>commands::parse_command</code>: Substituicao da coleta de <code>String</code> na heap em prefixos de comando de carga/liberacao (<code>~30</code>) por indexacao de fatias de bytes sem alocacao e correspondencia de bytes ASCII para prefixos (<code>/</code>, <code>$</code>, <code>&gt;</code>, <code>~</code>).</li>
+<li><code>fighter::change_anim</code>: Adicionada guarda <code>Arc::ptr_eq</code> evitando incremento de contagem de referencia quando <code>from</code> ja e a definicao ativa <code>anim_def</code>.</li>
+<li><code>fighter::change_anim_own</code>: Migracao para emprestimo direto por referencia imutavel de <code>self.def</code> sem clonar o contador atomico <code>Arc&lt;CharDef&gt;</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Tela de selecao na web</strong> (<code>scripts/web-frame-probe.js</code>, <code>scripts/web-profile.js</code>):</p>
+<ul>
+<li>Os quadros dos personagens nativos desenham <code>portrait.png</code> por <code>CharEntry::tile_portrait</code> (uma decodificacao pequena, em cache por revisao do pacote) em vez de compilar uma previa de idle e vitoria por quadro; a previa completa so e montada para o personagem em foco ou escolhido.</li>
+<li>As previas esperam o pacote de sprites chegar (<code>CharEntry::tile_art_ready</code>), entao nenhuma arte provisória é desenhada durante o download.</li>
+<li>Em <code>wasm32</code>, um personagem sem pacote previsualiza so o primeiro quadro de cada animacao do menu, e a resolucao automatica da arte fica limitada a 3.0.</li>
+<li><code>Recolor::apply_in_region</code> usa um hasher multiplicativo e memoria do ultimo tom no lugar de SipHash por pixel.</li>
+<li>O cache de pacotes guarda 64 pacotes, entao elencos acima de 24 personagens nao se expulsam mais.</li>
+<li>Medido com o profiler no Chromium headless (tela de selecao, 53 movimentos de cursor): tempo ocupado da thread principal caiu de cerca de 98 s para cerca de 2,5 s.</li>
+</ul>
+</li>
+</ul>
+<h2 id="efeitos-em-sprite-sheet"><a class="header" href="#efeitos-em-sprite-sheet">Efeitos em sprite-sheet</a></h2>
+<p><code>src/vfx/sheet.rs</code> toca sheets de efeito CC0 de <code>assets/fx/</code> (embutidas com <code>include_bytes!</code>, decodificadas e enviadas à GPU no primeiro desenho). Uma faísca de impacto toca em todo golpe não bloqueado; uma explosão toca em golpes de 150 de dano ou mais e no KO. No máximo 12 sprites de sheet ficam vivos, com blend aditivo, e são limpos ao iniciar o round. Sheets pixel-art do PVFX Foundry (filtro nearest, blend alpha) adicionam soco em golpes leves, crítico em golpes pesados, onda de choque e impacto no chão em golpes de 150+ de dano no chão, defesa em golpes bloqueados e poeira de dash. Raio e estática tocam nos supers, pilar de fogo nas transformações, bomba de fumaça no KO e explosão de gelo em defesas de golpes pesados. Sheets e créditos estão em <code>assets/fx/CREDITS.md</code>.</p>
+<h2 id="rasterização-paralela-das-variantes-de-sprite"><a class="header" href="#rasterização-paralela-das-variantes-de-sprite">Rasterização paralela das variantes de sprite</a></h2>
+<p>Compilar um lutador UMF rasterizava os frames base em paralelo e depois recoloria cada variante de forma e de despertar de cada frame em uma única thread, o que era 80 a 90% da carga. <code>native/frame_raster.rs</code> agora renderiza cada frame junto com suas variantes no mesmo pool de workers (<code>min(núcleos, 8)</code>, uma thread em <code>wasm32</code>), e as paletas de forma são montadas uma vez por lutador em vez de uma vez por frame.</p>
+<p><code>cargo run --release -p ume-engine --example load_bench</code> na máquina de nuvem de 4 núcleos, três execuções de cada:</p>
+<div class="table-wrapper"><table><thead><tr><th></th><th>Elenco inteiro (21 lutadores)</th><th>Oboro</th><th>Kaito</th><th>Suzume</th></tr></thead><tbody>
+<tr><td>Antes</td><td>11,40 / 11,76 / 11,79 s</td><td>1674 ms</td><td>1250 ms</td><td>900 ms</td></tr>
+<tr><td>Depois</td><td>4,70 / 4,46 / 4,54 s</td><td>551 ms</td><td>405 ms</td><td>319 ms</td></tr>
+</tbody></table>
+</div>
+<p>A saída não muda: um checksum de todos os sprites (pixels, tamanho, eixo, escala) e de todos os frames de animação dos 21 lutadores em duas paletas é idêntico antes e depois. Lutadores sem formas (<code>npc_*</code>) não mudam, pois não têm variantes para renderizar.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Decisoes-de-Compatibilidade.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Dissecacao-MUGEN.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Decisoes-de-Compatibilidade.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Dissecacao-MUGEN.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

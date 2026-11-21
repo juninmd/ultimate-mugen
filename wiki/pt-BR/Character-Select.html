@@ -1,0 +1,264 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Seleção de personagens - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="seleção-de-personagens"><a class="header" href="#seleção-de-personagens">Seleção de personagens</a></h1>
+<p>Resumo em português de <a href="../Character-Select.html">Character-Select</a>.</p>
+<ul>
+<li>Pesquisa: grade central compacta, cor por jogador (azul P1, vermelho P2), retrato grande do lutador sob o cursor, confirmação com feedback claro, slots de equipe, cenário na mesma tela, tamanho comparável entre lutadores.</li>
+<li>Design: painéis de vidro iguais ao menu e à HUD, retrato grande com brilho na cor do lutador, cursor suave com cantos e etiqueta P1/P2/CPU, até 5 slots de equipe, cenário no cabeçalho (<code>[</code> e <code>]</code>).</li>
+<li>Paletas: linha de 12 amostras numeradas sob cada painel; <code>,</code> / <code>.</code> trocam, <code>P</code> sorteia e o clique escolhe direto. Cada lado e cada membro de equipe guardam a própria paleta; a última paleta de cada jogador fica salva em <code>ultimate-mugen.cfg</code> (<code>pal1</code>, <code>pal2</code>) e nos replays.</li>
+<li>Navegação pela grade por coluna: <code>Cima</code> e <code>Baixo</code> mantêm a coluna e caem no quadro mais próximo da linha de destino, então uma última linha mais curta nunca trava nem pula o cursor. <code>PgUp</code>/<code>PgDn</code> andam uma página, <code>Home</code>/<code>End</code> vão aos extremos, a roda rola por linha e <code>R</code> sorteia um quadro.</li>
+<li>Tamanho uniforme: <code>draw_char_fit</code> encaixa a caixa envolvente da animação parada num quadro fixo, calculada uma vez por lutador. Sprites e cenários nunca são alterados.</li>
+</ul>
+<h2 id="força-vida-e-ordenação"><a class="header" href="#força-vida-e-ordenação">Força, vida e ordenação</a></h2>
+<p>Cada cartão tem uma barra dourada fina na borda inferior, que mostra a força. O painel lateral mostra três medidores acima da placa de nome: FOR (força), VID (vida) e VEL (velocidade de caminhada). Força = ataque × vida / 1000; vida e velocidade vêm dos dados do personagem, nativo ou M.U.G.E.N. A tecla <code>O</code> alterna a ordem: elenco, força, vida, velocidade e nome. Detalhes em <a href="../Character-Select.html">Character-Select</a>.</p>
+<h2 id="elencos-grandes-1000-lutadores-e-cenários"><a class="header" href="#elencos-grandes-1000-lutadores-e-cenários">Elencos grandes (1000+ lutadores e cenários)</a></h2>
+<ul>
+<li>A lista visível (filtro, busca e ordenação) é calculada uma vez e reaproveitada até mudar o filtro, a ordenação, o texto da busca ou o conjunto jogável (<code>src/app/select_view.rs</code>). Com 1017 lutadores, ordenar por nome custa cerca de 0,9 ms ao recalcular e 0,08 ms ao reaproveitar.</li>
+<li>A grade usa só as linhas que cabem acima do rodapé, ou acima dos espaços do time nos modos de equipe, então os espaços nunca cobrem a última linha (<code>src/app/select_grid.rs</code>).</li>
+<li>O selo do cursor (P1, P2, CPU) fica dentro do tile e não cobre mais o nome do tile de cima. Os nomes são cortados na largura do tile com reticências (<code>App::fit_label</code>).</li>
+<li>Uma pílula de busca abaixo do título mostra a busca atual e o número de resultados; <code>/</code> ou um clique abre a página de busca, <code>Esc</code> ou um clique limpa. A busca procura nome, id, autor e série. Na página de busca, as setas e <code>PgUp</code>/<code>PgDn</code> escolhem um resultado e <code>Enter</code> leva o cursor até ele.</li>
+<li>O rodapé mostra a página (<code>pág 3/15</code>) ao lado da posição.</li>
+<li><code>F</code> ou o botão de estrela marca o lutador sob o cursor como favorito; favoritos ganham uma estrela dourada no tile e são salvos (<code>favorites.txt</code>). Cada escolha entra nas 24 escolhas recentes (<code>recent.txt</code>). Os chips FAVORITOS e RECENTES mostram só esses lutadores, os recentes do mais novo ao mais antigo (<code>src/app/select_marks.rs</code>).</li>
+<li>O chip de autor (<code>U</code>, <code>Shift+U</code> ou clique) percorre os autores ordenados pelo número de lutadores e se combina com os outros filtros (<code>src/app/select_author.rs</code>).</li>
+<li>Em telas de toque a página de busca mostra um teclado na tela (letras, números, espaço, apagar, OK, fechar) e menos linhas de resultado; tocar num resultado o escolhe (<code>src/app/select_search/keyboard.rs</code>). <code>UME_OSK=1</code> força o teclado no desktop.</li>
+</ul>
+<h2 id="seleção-de-cenário"><a class="header" href="#seleção-de-cenário">Seleção de cenário</a></h2>
+<ul>
+<li>Chips de filtro (Todos, Originais, M.U.G.E.N), alternados com <code>Tab</code>, e caixa de busca aberta com <code>/</code> ou um clique; <code>Esc</code> limpa a busca.</li>
+<li>Nomes cortados na largura do tile com reticências; <code>Home</code>/<code>End</code> vão para as pontas; o rodapé mostra posição e página.</li>
+<li><code>Aleatório</code> sorteia entre os cenários que passam no filtro e na busca atuais.</li>
+<li>As prévias de cenários M.U.G.E.N só começam depois que o cursor para por 0,12 s, uma por quadro, e prévias a mais de seis linhas de distância são liberadas, então rolar por centenas de cenários M.U.G.E.N não mantém todos decodificados na memória.</li>
+</ul>
+<h2 id="modo-de-estresse"><a class="header" href="#modo-de-estresse">Modo de estresse</a></h2>
+<p><code>UME_STRESS=&lt;n&gt;</code> (desktop) ou <code>?stress=&lt;n&gt;</code> (web) adiciona <code>n</code> lutadores e <code>n</code> cenários gerados (até 5000), reaproveitando o conteúdo embutido com nomes, autores e séries gerados. É só um gancho de teste. <code>UME_STRESS=1000 UME_SHOTS_ONLY=roster ultimate-mugen --shots &lt;dir&gt; --res 1280x720 --mute</code> imprime linhas <code>roster-perf:</code> (custo da lista por ordenação, tempo de CPU por quadro andando na grade e na lista de cenários, memória) e salva screenshots da grade, da busca e dos filtros de cenário.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Cenarios.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Cobertura-MUGEN.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Cenarios.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Cobertura-MUGEN.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

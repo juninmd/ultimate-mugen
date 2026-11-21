@@ -1,0 +1,293 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Character select - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="character-select"><a class="header" href="#character-select">Character select</a></h1>
+<h2 id="research-summary"><a class="header" href="#research-summary">Research summary</a></h2>
+<p>Common traits of well-known fighting-game select screens (Street Fighter, Tekken, King of Fighters, Guilty Gear, Marvel vs. Capcom, Smash):</p>
+<ul>
+<li>A compact roster grid in the centre, with a highly visible cursor and the hovered fighter shown large on the side of the player who owns the cursor.</li>
+<li>Each player has a distinct colour (blue for P1, red for P2) used for the cursor, the name plate and the panel edge.</li>
+<li>The big portrait changes instantly on hover with a short slide and fade, never a hard pop.</li>
+<li>Confirming gives an immediate, clearly different response: flash, pose change, a "ready" mark and a sound.</li>
+<li>Team modes show a row of slots that fill in order, with the next slot highlighted.</li>
+<li>The stage is chosen on the same screen or right after it, with a thumbnail and name.</li>
+<li>Every fighter is shown at a comparable on-screen size so small characters are not lost.</li>
+</ul>
+<h2 id="design-adopted"><a class="header" href="#design-adopted">Design adopted</a></h2>
+<ul>
+<li>Glass panels, the same look as the menu and HUD: translucent body, light top edge, accent edge per side.</li>
+<li>Left and right panels with the hovered fighter in a large frame, a coloured glow from the fighter's own colour, a floor shadow, slide and fade on change, a flash and ring on confirm and the confirmation pose.</li>
+<li>Smoothly following cursor with pulsing fill, corner brackets and a P1/P2/CPU tag; non-hovered tiles are dimmed.</li>
+<li>Team slots (up to 5) with portrait, name and a numbered badge on the picked tiles.</li>
+<li>Stage chip in the header, cycled with <code>[</code> and <code>]</code> or by clicking the arrows; the stage grid still confirms it after the fighters.</li>
+<li>Palette row under each side panel: 12 numbered swatches with the current one highlighted. <code>,</code> / <code>.</code> cycle, <code>P</code> picks a random palette, clicking a swatch jumps to it; each side keeps its own palette and team members are stored independently. The last palette of each player is persisted in <code>ultimate-mugen.cfg</code> (<code>pal1</code>, <code>pal2</code>) and in replays.</li>
+<li>Keyboard, gamepad and touch/mouse use the same navigation as before.</li>
+<li>Grid navigation moves by column: <code>Up</code> and <code>Down</code> keep the current column and land on the closest tile of the target row, so a shorter last row never blocks or skips the cursor. <code>PgUp</code>/<code>PgDn</code> move a whole page, <code>Home</code>/<code>End</code> jump to the ends, the wheel scrolls by row and <code>R</code> picks a random tile.</li>
+</ul>
+<h2 id="uniform-character-size"><a class="header" href="#uniform-character-size">Uniform character size</a></h2>
+<p><code>draw_char_fit</code> scales a fighter so the union of the bounding boxes of all idle-animation frames fits a fixed frame, centred horizontally with the feet on the baseline. The extent is computed once per fighter and cached (<code>App::char_extent</code>). The same function is used by the select panels, the roster tiles that fall back to sprites, and the versus screen. Sprite and stage art files are never modified.</p>
+<h2 id="performance"><a class="header" href="#performance">Performance</a></h2>
+<ul>
+<li>Only visible tiles are drawn and decoded; one portrait is decoded per frame.</li>
+<li>Upper-case names and the stage/filter labels are cached or written into a reused buffer, so the screen allocates nothing per frame in steady state.</li>
+</ul>
+<h2 id="strength-life-and-sorting"><a class="header" href="#strength-life-and-sorting">Strength, life and sorting</a></h2>
+<p>Each tile has a thin gold bar at its bottom edge for strength. The side panel shows three gauges above the name plate: FOR (strength), VID (life) and VEL (walk speed).</p>
+<p>Definitions, read from each character's data (native and M.U.G.E.N alike):</p>
+<ul>
+<li><strong>Strength</strong> = <code>data.attack</code> × <code>data.life</code> / 1000 (defaults 100 and 1000, so an average character is 100). Gauge full at 200.</li>
+<li><strong>Life</strong> = <code>data.life</code> (default 1000). Gauge full at 2000.</li>
+<li><strong>Speed</strong> = <code>velocity.walk.fwd.x</code> (default 2.4). Gauge full at 6.0.</li>
+</ul>
+<p>Press <code>O</code> on the select screen to cycle the order: roster, strength, life, speed, name. The choice is saved as <code>sort=</code> in the config. Stats come from the character's cached preview and are computed once per character.</p>
+<p>Limitation: sorting by a stat loads the preview of every character in the view the first time, so a very large M.U.G.E.N roster can take a moment on that first press.</p>
+<h2 id="large-rosters-1000-fighters-and-stages"><a class="header" href="#large-rosters-1000-fighters-and-stages">Large rosters (1000+ fighters and stages)</a></h2>
+<ul>
+<li>The visible list (filter, search and sort) is computed once and reused until the filter, sort, search text or the playable set changes (<code>src/app/select_view.rs</code>). With 1017 fighters a name sort costs about 0.9 ms when rebuilt and 0.08 ms when reused.</li>
+<li>The grid only uses as many rows as fit above the footer, or above the team slots in team modes, so the slots never cover the last row (<code>src/app/select_grid.rs</code>).</li>
+<li>The cursor tag (P1, P2, CPU) is drawn inside the tile, so it no longer covers the name of the tile above. Tile names are cut to the tile width with an ellipsis (<code>App::fit_label</code>).</li>
+<li>A search pill under the title shows the current search and the number of results; <code>/</code> or a click opens the search page, <code>Esc</code> or a click clears it. Search matches name, id, author and series. On the search page the arrows and <code>PgUp</code>/<code>PgDn</code> choose a result and <code>Enter</code> moves the cursor to it.</li>
+<li>The footer shows the page (<code>page 3/15</code>) next to the position.</li>
+<li><code>F</code> or the star button marks the fighter under the cursor as a favorite; favorites show a gold star on their tile and are saved (<code>favorites.txt</code>). Every pick is recorded in the 24 most recent picks (<code>recent.txt</code>). The FAVORITES and RECENT filter chips show only those fighters, recent ones newest first (<code>src/app/select_marks.rs</code>).</li>
+<li>The author chip (<code>U</code>, <code>Shift+U</code> or a click) cycles through authors ordered by fighter count and combines with the other filters (<code>src/app/select_author.rs</code>).</li>
+<li>On touch devices the search page shows an on-screen keyboard (letters, digits, space, delete, OK, close) and fewer result rows; tapping a result picks it (<code>src/app/select_search/keyboard.rs</code>). <code>UME_OSK=1</code> forces it on desktop.</li>
+</ul>
+<h2 id="stage-select"><a class="header" href="#stage-select">Stage select</a></h2>
+<ul>
+<li>Filter chips (All, Originals, M.U.G.E.N), cycled with <code>Tab</code>, and a search box opened with <code>/</code> or a click; <code>Esc</code> clears the search.</li>
+<li>Names are cut to the tile width with an ellipsis; <code>Home</code>/<code>End</code> jump to the ends; the footer shows position and page.</li>
+<li><code>Random</code> picks among the stages that match the current filter and search.</li>
+<li>M.U.G.E.N stage previews start only after the cursor rests for 0.12 s, one per frame, and previews more than six rows away are released, so scrolling through hundreds of M.U.G.E.N stages does not keep every decoded stage in memory.</li>
+</ul>
+<h2 id="stress-mode"><a class="header" href="#stress-mode">Stress mode</a></h2>
+<p><code>UME_STRESS=&lt;n&gt;</code> (desktop) or <code>?stress=&lt;n&gt;</code> (web) adds <code>n</code> generated fighters and <code>n</code> generated stages (up to 5000) that reuse the bundled content with generated names, authors and series. It is a test hook only. <code>UME_STRESS=1000 UME_SHOTS_ONLY=roster ultimate-mugen --shots &lt;dir&gt; --res 1280x720 --mute</code> prints <code>roster-perf:</code> lines (view cost per sort, CPU time per frame while walking the grid and the stage list, memory) and saves screenshots of the grid, search and stage filters.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Audio.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Game-Modes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Audio.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Game-Modes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

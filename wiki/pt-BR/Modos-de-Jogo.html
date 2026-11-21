@@ -1,0 +1,337 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Modos de jogo - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="modos-de-jogo"><a class="header" href="#modos-de-jogo">Modos de jogo</a></h1>
+<p><a href="../Game-Modes.html">English</a> · <strong>Português (BR)</strong></p>
+<p>O menu principal oferece lutas individuais (Arcade, Versus CPU, 2 Jogadores, Treino, CPU vs CPU) e três modos de equipe. O tamanho da equipe é escolhido na seleção com <code>Q</code> / <code>E</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>Modo</th><th>Lutadores em campo</th><th>O round acaba quando</th></tr></thead><tbody>
+<tr><td>Equipe · Sequência</td><td>1 por lado, o próximo entra após um KO; o vencedor mantém a vida</td><td>um lado fica sem lutadores</td></tr>
+<tr><td>Equipe · Paralelo</td><td>a equipe inteira ao mesmo tempo (2 a 5); <code>Tab</code> passa o controle ao próximo</td><td>todos os membros de um lado caem</td></tr>
+<tr><td>Equipe · Tag</td><td>1 ativo + os demais em espera (2 ou 3 por lado)</td><td>todos os membros de um lado caem</td></tr>
+</tbody></table>
+</div>
+<h2 id="arcade--modo-história"><a class="header" href="#arcade--modo-história">Arcade / Modo História</a></h2>
+<p><code>Arcade</code> no menu principal executa a campanha narrativa do Torneio do Eclipse Escarlate com cutscenes completas, progressão dinâmica de vilões e desbloqueio de lutador secreto:</p>
+<ul>
+<li><strong>Prólogo (<code>Cutscene kind: 0</code>).</strong> Cada um dos 15 lutadores nativos possui sua própria introdução narrativa e juramento pessoal antes de iniciar a escada do torneio.</li>
+<li><strong>Rotação Dinâmica de Vilões Principais.</strong> O topo da escalada de 8 oponentes culmina em um confronto com cutscene pré-luta personalizada e arena temática do chefe:
+<ul>
+<li><strong>Tier 0 (Primeira Jornada):</strong> O vilão supremo <strong>Mikazuki Oboro</strong> (<code>oboro</code>) no Portão dos Espíritos (<code>spirit</code>).</li>
+<li><strong>Tier 1 (Após Derrotar Oboro):</strong> <strong>Garan, o Oni das Cinzas</strong> (<code>garan</code>) torna-se o novo vilão principal na Cratera Vulcânica (<code>volcano</code>).</li>
+<li><strong>Tier 2 (Após Derrotar Garan):</strong> <strong>Valdric Morn</strong> (<code>valdric</code>) assume o trono como o tirano imperial final em Neo-Metropolis (<code>neon</code>).</li>
+<li><strong>Zeradas Seguintes:</strong> Alterna ciclicamente entre os 3 vilões principais. Se o jogador escolher o próprio chefe da rodada, a engine seleciona outro vilão para evitar luta espelho no chefe final.</li>
+</ul>
+</li>
+<li><strong>Poderes de Chefe e Fases de Oboro.</strong> Ao assumirem o posto de chefe final do modo história, os vilões recebem atributos de chefe (<code>boss = true</code>, 2000 HP, 125% de ataque, IA agressiva de chefe, recarga contínua de super barra, aura visual e banner <code>CHEFE FINAL</code>). Ao enfrentar Oboro:
+<ul>
+<li><strong>Fase 1:</strong> Oboro utiliza voo, teletransporte sombrio, super velocidade e sua primeira forma (<strong>Véu Desperto</strong>, <code>form = 1</code>). Quando derrotado ao menos uma vez em um round, Oboro rompe seu selo no início do round seguinte (<code>Match::awaken_defeated_boss</code>).</li>
+<li><strong>Fase 2 (Despertar: Eclipse Absoluto - <code>Cutscene kind: 3</code>):</strong> Derrotar Oboro pela primeira vez dispara a cutscene <strong>Despertar: Eclipse Absoluto</strong> (<code>kind: 3</code>) e inicia a Fase 2 (<code>Match::awaken_boss_phase(2)</code>), na qual Oboro luta em <strong>Eclipse Absoluto</strong> (<code>form = 2</code>) com vida máxima ampliada (<code>1.15x</code>), regeneração contínua de vida, ganho acelerado de barra, IA nível 8 e golpes exclusivos (<em>Corte do Eclipse Carmesim</em>, <em>Chama do Eclipse Eterno</em> e <em>Julgamento do Eclipse Absoluto</em>).</li>
+<li><strong>Fase 3 (Cutscene de Duelo Clímax - <code>Cutscene kind: 4</code> e Despertar Supremo):</strong> Ao vencer a Fase 2, uma cutscene de combate acelerado com animações reais de golpes, faíscas de armas, linhas de velocidade e impactos (<code>src/app/cutscene/battle.rs</code>) retrata o herói e Oboro lutando em velocidade supersônica, culminando na ascensão cósmica de Oboro à forma suprema: <strong>Eclipse Primordial</strong> (<code>form = 3</code>). Na Fase 3 ele possui vida aumentada para 1.30x, dano 1.62x, defesa 1.48x, aura ciano/supernova e golpes exclusivos (<em>Colapso Primordial</em>, <em>Supernova do Eclipse Primordial</em>).</li>
+<li><strong>Cutscene do Golpe Decisivo (<code>Cutscene kind: 5</code>) e Alvorada Triunfante:</strong> Ao derrotar a forma suprema de Oboro, uma cutscene épica de finalização mostra o herói disparando em velocidade estelar para desferir o golpe decisivo, quebrando a katana lendária de Oboro e estilhaçando a lua negra em raios dourados de alvorada.</li>
+</ul>
+</li>
+<li><strong>Cutscene Final por Personagem (<code>Cutscene kind: 2</code>) e Desbloqueio de Oboro.</strong> Ao derrotar o chefe final, cada personagem exibe sua própria cutscene de encerramento em 5 páginas (<code>src/app/cutscene/endings.rs</code>). Ao concluir, <strong>Mikazuki Oboro</strong> é desbloqueado na seleção de personagens, a rotação de vilões é avançada e o jogo retorna diretamente à tela de seleção de personagens com anúncio em banner comemorativo e o novo chefe habilitado.</li>
+</ul>
+<h2 id="história-fases-de-pancadaria"><a class="header" href="#história-fases-de-pancadaria">História (fases de pancadaria)</a></h2>
+<p><code>História</code> no menu principal é uma campanha estilo Final Fight / Sengoku: cinco fases, cada uma com algumas <strong>ondas de capangas lutando ao mesmo tempo</strong> (1 contra 2 a 4, usando as regras de equipe simultânea) e fechada por um <strong>chefe de fase</strong>.</p>
+<ul>
+<li><strong>Estrutura e avanço para a direita.</strong> Fase = 4 ondas + 1 chefe ao longo de um cenário estendido (<code>assets/stages/story/&lt;arena&gt;.png</code>). Conforme cada onda de capangas é derrotada, o protagonista avança para a direita para a próxima parte do cenário enquanto a câmera acompanha suavemente (<code>Match::lane_scroll_step</code>, <code>App::story_advance_in_place</code>), até chegar ao final do cenário onde aguarda o <strong>chefe de fase</strong>. Cenários: Becos da Cidade (praça), Metrô (Neo-Metrópole), Bambuzal, Área Industrial (Cratera Vulcânica) e Cobertura do Chefão (Dojo). Chefes: Bruno, Marlow, Lian, Garan, Valdric. Se você escolher um chefe como lutador, entra o substituto (Daichi, Kaname, Shion, Haruki, Kaito).</li>
+<li><strong>Cenário animado em loop.</strong> O fundo da fase é animado em todos os segmentos. Com os 16 quadros do loop ambiente do cenário carregados, o renderizador remonta a faixa a partir do quadro atual a cada desenho: o primeiro segmento é a arena, os três do meio são cadeias espelhadas de uma janela da arena e o segmento do chefe é a arena invertida. A gradação de cor segue a mesma rampa da faixa estática e as emendas de 70 px recebem um crossfade com fatias espelhadas (um teste compara as duas versões pixel a pixel fora das emendas). O loop avança a cada quatro ticks, com o mesmo ciclo de 64 ticks do modo versus, e não consome textura extra. O layout fica em <code>src/stages/story_loop.rs</code> e o desenho em <code>src/render/story_loop.rs</code>; a faixa estática continua como reserva. Evidências em <code>screenshots/story-loop/</code>, geradas com <code>UME_TOUR=storyloop</code> (e <code>UME_TOUR_BURST=1</code> para os GIFs).</li>
+<li><strong>Vida dos vilões e chefes.</strong> Os capangas das ondas têm cerca de 10 % da vida máxima do protagonista (<code>9 %</code> a <code>12 %</code> via <code>villain_life_ratio</code> em <code>src/story/stages.rs</code>); já os chefes ao final da fase têm 150 % de vida e 110 % de ataque.</li>
+<li><strong>Vida acumulada.</strong> A barra que você termina uma onda é a que começa a próxima, mais 20 % após a onda e 60 % após a fase (as "comidas" dos arcades originais).</li>
+<li><strong>Quebráveis, comida e fases bônus.</strong> Toda luta tem caixotes ou barris que quebram ao serem golpeados e podem soltar comida (maçã +12 %, pizza +25 %, assado +50 % de vida), uma gema (pontos) ou uma bateria (energia). Depois dos chefes das fases 1 e 3 começa uma fase bônus no mesmo lugar: destrua o carro ou quebre todo o estoque antes do tempo acabar. Regras, arquivo de dados e arte: <a href="Objetos-de-Cenario.html">Objetos de cenário</a>.</li>
+<li><strong>Créditos.</strong> São 3 créditos; ao cair você pode <em>Continuar</em> (retoma a mesma luta com 60 % de vida) até acabarem.</li>
+<li><strong>Pontuação.</strong> <code>ScoreTotal</code> do motor mais bônus por onda (500 x fase, chefe x4).</li>
+<li><strong>Dificuldade.</strong> Nível da CPU sobe por fase e +2 nos chefes (máx. 8).</li>
+<li><strong>Faixas de profundidade (estilo Final Fight).</strong> O Story tem uma faixa de chão: dois botões extras andam para o fundo ou para a frente do cenário (P1 <code>Z</code> / <code>X</code>, P2 <code>Num -</code> / <code>Num +</code>, reconfiguráveis em Controles; os bits do motor são <code>LANE_UP</code> / <code>LANE_DOWN</code>). Só anda no chão e com controle, e cada fase limita a faixa ao chão real (<code>lane_far</code> / <code>lane_near</code> em <code>src/story/stages.rs</code>). O golpe só acerta, e os corpos só se empurram, quando os dois estão a até 14 unidades de profundidade; a CPU se alinha ao herói sozinha. Sprites, sombras, reflexos e efeitos acompanham a faixa e quem está mais perto desenha na frente. Os outros modos nunca ativam as faixas.</li>
+<li><strong>Botão de defesa.</strong> O Story tem um botão exclusivo de defesa (P1 <code>C</code>, P2 <code>Num *</code>, reconfigurável). Enquanto segurado, quem está no chão e com controle bloqueia como se segurasse para trás, sem recuar (com Baixo, defende agachado). Fora do Story é ignorado.</li>
+<li><strong>HUD do Story.</strong> Capangas não têm barra de vida nem ficha de equipe. O herói mantém o painel da esquerda, uma faixa inferior mostra fase, onda, pontos e créditos, e a luta de chefe ganha uma barra larga de <strong>Vilão da Fase</strong> (nome e vida) à direita.</li>
+<li><strong>Chefe final e epílogos.</strong> O chefe final é <strong>Valdric Morn</strong>, comandante do Império da Estrela Rubra e chefão por trás da gangue, na Cobertura do Chefão; quem joga com Valdric enfrenta <strong>Kaito Arashi</strong>. Ao vencê-lo, cada lutador do elenco tem o seu próprio epílogo em cutscene, em português, inglês e espanhol, com cinco páginas: o chefe caído fala com o lutador na cobertura à noite, o lutador responde em pose de vitória, duas páginas de narração no cenário de origem do lutador (amanhecer e depois dia claro) e o cartão <code>FIM</code> com o nome do lutador e o título do epílogo. O cenário é a ilustração de um cenário existente, com panorâmica lenta, partículas de luz, faixas de cinema, fade na troca de cena e texto digitado letra a letra. <code>OK</code> revela a fala e depois avança, <code>ESC</code> pula para o cartão final. Os textos ficam em <code>assets/story/epilogues.json</code>, por id de lutador (<code>scene</code>, <code>title</code>, <code>boss</code>, <code>reply</code>, <code>pages</code>); a chave <code>*</code> é a reserva para lutadores sem entrada, como os importados. Para trocar ou criar epílogos sem recompilar, salve um arquivo no mesmo formato como <code>story-epilogues.json</code> ao lado do executável (ou no armazenamento do navegador): as entradas dele substituem as embutidas lutador por lutador. Evidências em <code>screenshots/story-epilogues/</code>, geradas com <code>UME_TOUR=epilogue</code>; o teste no navegador é <code>node scripts/web-epilogue-smoke.js web/dist</code>.</li>
+<li><strong>Capangas (<code>assets/chars/npc_*.json</code>, gerados por <code>ume-tools gen-story-npcs</code>).</strong> Lutadores com sprites próprios em <code>assets/chars/sprites/npc_*/</code>, ocultos na seleção (<code>"npc": true</code>), escalados no Modo História para ~10 % da vida do protagonista, cada um com uma habilidade própria: Brute (11 % da vida do herói, golpes fortes com armadura), Razor (9 % da vida, 35 % mais rápido, chutes avançam), Spitfire (10 % da vida, jab lança orbe), Colossus (12 % da vida, armadura em todo golpe básico), Phantom (9 % da vida, rápido e invulnerável ao chutar). Os golpes usam lutadores jogáveis como base mecânica.Sua arte é só de sprites PNG: troque os arquivos em <code>assets/chars/sprites/npc_*/</code> e refaça os packs web com <code>ume-tools pack-sprites</code>.</li>
+</ul>
+<p>Captura de evidências: <code>UME_TOUR=storymode ultimate-mugen --shots &lt;dir&gt; --res 1280x720 --mute</code>.</p>
+<h2 id="sobrevivência"><a class="header" href="#sobrevivência">Sobrevivência</a></h2>
+<p><code>Sobrevivência</code> no menu principal é uma sequência sem fim contra o elenco inteiro:</p>
+<ul>
+<li><strong>Oponentes.</strong> Depois de escolher seu lutador, o jogo sorteia o adversário a cada rodada (nunca o chefe oculto, nunca um pacote quebrado). O cenário gira a cada rodada.</li>
+<li><strong>Escalada.</strong> O nível da CPU sobe a cada duas lutas, partindo da sua dificuldade e com teto 8.</li>
+<li><strong>A vida continua.</strong> A barra com que você termina uma luta é a mesma com que começa a próxima, mais a recuperação configurada em Jogabilidade › <em>Vida recuperada (Sobrevivência)</em> (0 / 20 / 35 / 50 / 100 %). Um KO encerra a sequência.</li>
+<li><strong>Pontuação.</strong> Cada vitória soma o <code>Score</code>/<code>ScoreTotal</code> da engine para o seu lado mais um bônus de <code>1000 × rodada</code>, então o número é determinístico e vem da própria simulação.</li>
+<li><strong>Fim de jogo.</strong> A tela final mostra a pontuação, quantas lutas você venceu e o recorde local; o recorde fica salvo em <code>ultimate-mugen.cfg</code> (<code>survival_best</code>) e um novo recorde é destacado.</li>
+<li><strong>Replays.</strong> A última luta é arquivada como qualquer outra e pode ser assistida pela tela de fim de jogo (botão R) ou pelo navegador de Replays; o replay guarda a vida inicial para a re-simulação bater exatamente.</li>
+</ul>
+<p>Estatísticas de pontuação usadas: <code>Fighter::score</code> e <code>Fighter::score_total</code>, preenchidas por <code>HitDef.score</code> e pelos controladores <code>ScoreAdd</code>/<code>TargetScoreAdd</code> e lidas pelos triggers <code>Score</code>/<code>ScoreTotal</code>.</p>
+<h2 id="cooperativo-de-2-jogadores-arcade-e-sobrevivência"><a class="header" href="#cooperativo-de-2-jogadores-arcade-e-sobrevivência">Cooperativo de 2 jogadores (Arcade e Sobrevivência)</a></h2>
+<p>Aperte <code>V</code> na tela de seleção (ou clique no botão <strong>CO-OP 2P</strong>) para começar Arcade ou Sobrevivência com dois
+jogadores humanos <strong>no mesmo lado</strong>:</p>
+<ul>
+<li>P1 e P2 escolhem um lutador cada; os dois ficam em campo juntos (2 contra 1) usando o suporte a equipe simultânea
+da engine, então pushboxes, mira e câmera normais valem.</li>
+<li>O lado só perde o round/sequência quando <strong>os dois</strong> lutadores caem (regra de KO <code>team_simul</code>).</li>
+<li>As entradas são independentes: P1 usa as teclas/controle do jogador 1, P2 as do jogador 2 (sem precisar de <code>Tab</code>).
+O HUD marca cada lutador como <code>P1</code> / <code>P2</code> pelo slot do piloto, não pelo lado.</li>
+<li>O Arcade mantém os dois lutadores pela escada e troca o oponente a cada rodada; a Sobrevivência faz o mesmo a cada onda.</li>
+<li>Replays gravam os dois slots, então uma luta cooperativa se repete exatamente.</li>
+</ul>
+<p>Chaves da engine: <code>Match::team_simul</code>. Os slots entram intercalados (<code>P1</code>, oponente, <code>P2</code>), então <code>roots()[0]</code> e
+<code>roots()[2]</code> são o par humano.</p>
+<h2 id="equipe-tag"><a class="header" href="#equipe-tag">Equipe Tag</a></h2>
+<p>Cada lado tem 2 ou 3 lutadores. No início de todo round só o primeiro está em campo; os outros esperam.</p>
+<ul>
+<li><strong>Troca.</strong> Aperte o botão Tag (<code>R</code> no P1, Num Enter no P2; configurável em Controles, ação "Troca (Tag)"). Em controle e toque a troca usa o botão de despertar (R3 / SELECT), porque o despertar fica desativado neste modo. A CPU troca sozinha quando o lutador está abaixo de 30 % de vida e o parceiro está bem mais saudável.</li>
+<li><strong>Recarga.</strong> Depois de cada troca o lado espera <code>tag_cooldown_max</code> ticks (padrão 180, três segundos). O HUD mostra uma barra e a marca <code>TAG</code> sob o retrato de cada parceiro.</li>
+<li><strong>Janela de tag cancel.</strong> A troca só é aceita quando o lutador ativo tem controle, ou nos primeiros <code>tag_cancel_window</code> ticks (padrão 30) depois de um golpe seu tocar o oponente (acerto ou bloqueio). Dá para cancelar a recuperação de um golpe que conectou no parceiro, mas não no meio de um golpe no ar nem enquanto se apanha.</li>
+<li><strong>Lutadores em espera.</strong> Ficam invisíveis, não podem ser acertados, empurrados nem alvejados (<code>enemy</code>, <code>P2</code>, <code>EnemyNear</code> os ignoram), não recebem entrada e mantêm a vida. Seguem a posição do lutador ativo, então entram exatamente onde a troca ocorreu, no estado 0 e com controle.</li>
+<li><strong>KO.</strong> Quando o ativo morre, o próximo parceiro vivo entra sozinho após 50 ticks (a recarga é ignorada). O round só acaba quando todos os membros de um lado ficam sem vida; o tempo esgotado decide pela soma da vida da equipe.</li>
+<li><strong>Vida e variáveis</strong> de quem saiu ficam intactas; todos começam o round seguinte com vida cheia.</li>
+<li><strong>Scripts.</strong> <code>TeamMode</code> retorna <code>3</code> neste modo. <code>TagOut</code> / <code>TagIn</code> trocam os lutadores de verdade (veja <a href="../Ikemen-Extensions.html">Extensões Ikemen</a>); <code>Standby</code> vale <code>1</code> para quem espera e <code>NumPartner</code> conta os parceiros.</li>
+<li><strong>Replays</strong> gravam o botão Tag como qualquer entrada, então uma luta Tag se repete exatamente.</li>
+</ul>
+<p>Chaves da engine (<code>Match</code>): <code>team_tag</code>, <code>tag_cooldown_max</code>, <code>tag_cancel_window</code>. Evento: <code>Event::Tag { side, fighter }</code>.</p>
+<h2 id="boneco-de-treino"><a class="header" href="#boneco-de-treino">Boneco de treino</a></h2>
+<p>No Treino, o menu de pausa (aba Jogo) tem a linha <strong>Comportamento do boneco</strong>. Confirmar alterna o plano, que vale na hora e é mantido ao reiniciar a luta:</p>
+<div class="table-wrapper"><table><thead><tr><th>Plano</th><th>O que o boneco segura</th></tr></thead><tbody>
+<tr><td>Parado</td><td>Nada</td></tr>
+<tr><td>Agachado</td><td>Baixo</td></tr>
+<tr><td>Pulando</td><td>Cima a cada aterrissagem</td></tr>
+<tr><td>Defendendo</td><td>Trás, só enquanto o rival ataca ou há projétil vivo (ele não sai andando)</td></tr>
+<tr><td>Defesa baixa</td><td>Baixo, mais trás enquanto ameaçado</td></tr>
+<tr><td>Gravar meus comandos</td><td>Nada; tudo que você aperta é gravado (até 10 s)</td></tr>
+<tr><td>Reproduzir gravação</td><td>Seus comandos gravados em loop, espelhados para o lado do boneco</td></tr>
+<tr><td>IA aprende você</td><td>Conta como você troca de ação (andar, agachar, pular, atacar) e responde à ação mais provável: defesa para trás se você vai atacar; ataque ao pular, andar ou agachar. Não zera ao trocar de plano</td></tr>
+</tbody></table>
+</div>
+<p>O plano fica em <code>Pilot::Dummy(DummyPlan)</code> (<code>src/session/dummy.rs</code>); o boneco aperta bits reais de entrada, então regras de defesa, empurrão e dano de chip são os da própria engine. A gravação fica em <code>src/session/dummy_tape.rs</code>; um painel à direita mostra o melhor combo e o tamanho da fita (<code>src/hud/training_panel.rs</code>). Capturas: <code>UME_SHOTS_ONLY=pause</code> grava <code>training-dummy-*.png</code> e <code>pause-training-dummy.png</code>; <code>UME_SHOTS_ONLY=training</code> grava <code>training-tape-playback.png</code>.</p>
+<h2 id="arena-do-poder"><a class="header" href="#arena-do-poder">Arena do Poder</a></h2>
+<p>Escolha <strong>Arena do Poder</strong> no menu principal e selecione os dois lutadores para enfrentar a CPU. Suba por 40 plataformas suspensas em oito níveis. Atravesse-as no salto e pouse nelas durante a descida. O lutador ainda pode voltar enquanto estiver acima da base. Ao cair pela borda, ele gira no ar e só é eliminado quando sai da arena. A câmera acompanha a altura e abre o enquadramento quando os lutadores se afastam na horizontal ou na vertical.</p>
+<p>Na versão web, abra uma luta diretamente com <code>?modo=arena&amp;p1=kaito&amp;p2=shion&amp;luta=1</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Mercado.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Mutadores.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Mercado.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Mutadores.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

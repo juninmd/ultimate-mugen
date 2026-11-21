@@ -1,0 +1,315 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Universo e Lore — A Grande Convergência - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="universo-e-lore--a-grande-convergência"><a class="header" href="#universo-e-lore--a-grande-convergência">Universo e Lore — A Grande Convergência</a></h1>
+<p>O universo de <strong>Ultimate MUGEN</strong> se passa na era da <strong>Grande Convergência</strong>, onde tempo, geografia e dimensões colidiram após o cataclismo provocado pelo despertar do <strong>Eclipse Escarlate</strong> (<em>Scarlet Eclipse</em>).</p>
+<hr />
+<h2 id="a-gênese-a-trama-astral-e-a-ruptura"><a class="header" href="#a-gênese-a-trama-astral-e-a-ruptura">A Gênese: A Trama Astral e a Ruptura</a></h2>
+<p>Por milênios, a história humana fluiu em correntes marciais e culturais isoladas. Guerreiros de santuários montanhosos no Japão, templos taoistas na China, fortalezas glaciais nórdicas, megacidades cyberpunk futuristas, planaltos agrestes da Mongólia e pacatas cidades históricas brasileiras treinavam em isolamento, sem suspeitar da existência de outras realidades.</p>
+<p>Sob o mundo material pulsava a <strong>Trama Astral</strong> (<em>The Astral Loom</em>) — uma rede metafísica de linhas de força cósmicas que regulava o equilíbrio espiritual, as forças da natureza e as energias primordiais.</p>
+<p>Esse equilíbrio milenar foi rompido quando <strong>Mikazuki Oboro</strong>, um feiticeiro imortal e mestre supremo das ilusões pertencente a uma dinastia esquecida, realizou o ritual proibido do <strong>Eclipse Escarlate</strong>. Canalizando chamas negras e o alinhamento de astros proibidos, Oboro fraturou o véu dimensional, arrastando épocas, níveis de tecnologia e territórios inteiros para um único plano compartilhado: o <strong>Domínio da Convergência</strong>.</p>
+<pre><code class="language-mermaid">flowchart TD
+    subgraph AstralSource ["A Trama Astral Primordial"]
+        Ki["Ki / Artes do Vento"]
+        Glacial["Essência do Gelo Glacial"]
+        Stellar["Ki Estelar &amp; Plasma"]
+        Cyber["Grade Neon &amp; Ciber-Drive"]
+        Shadow["Artes Sombrias &amp; Amaldiçoadas"]
+        Tao["Chi Taoista &amp; Equilíbrio"]
+    end
+
+    AstralSource --&gt; Eclipse["O Eclipse Escarlate (Mikazuki Oboro)"]
+
+    subgraph Factions ["Facções da Convergência"]
+        Heroes["Protetores da Convergência&lt;br/&gt;(Kaito, Daichi, Akio, Lian, Bruno, Jin, Haruki)"]
+        Rogues["Renegados, Exilados &amp; Espadachins Livres&lt;br/&gt;(Shion, Suzume, Volta, Marlow, Sylene, Kaname)"]
+        Villains["Emissários do Eclipse &amp; Conquista&lt;br/&gt;(Mikazuki Oboro, Garan the Ashen Oni, Valdric Morn)"]
+    end
+
+    Eclipse --&gt; Factions
+    Factions --&gt; Climax["O Confronto Ápice: A Caldeira Vulcânica &amp; o Portão dos Espíritos"]
+</code></pre>
+<hr />
+<h2 id="sistemas-de-energia-e-disciplinas-marciais"><a class="header" href="#sistemas-de-energia-e-disciplinas-marciais">Sistemas de Energia e Disciplinas Marciais</a></h2>
+<p>Os combatentes de Ultimate MUGEN canalizam sua determinação e poder através de vertentes energéticas distintas:</p>
+<ol>
+<li><strong>Ventos Primordiais (<em>Arashi-Ki</em>)</strong>: Canalizado por <strong>Kaito Arashi</strong> e <strong>Jin Kazaguruma</strong>. Extrai poder das correntes atmosféricas, ciclones e pressão do ar, permitindo aproximações instantâneas, golpes de vácuo cortante e rajadas de vento devastadoras.</li>
+<li><strong>Plasma Estelar (<em>Hoshi-No-Hikari</em>)</strong>: Dominado por <strong>Akio Hoshi</strong>. Absorve a radiação de meteoritos antigos caídos na Terra, manifestando-se em explosões incandescentes, punhos de plasma ardente e aceleração de supernovas.</li>
+<li><strong>Ki Lupino da Terra (<em>Ginrou-Ki</em>)</strong>: Despertado por <strong>Daichi Ginrou</strong>. Nascido do instinto selvagem de predador alfa e das correntes telúricas das montanhas, convertendo a empolgação do combate em uma aura dourada impenetrável.</li>
+<li><strong>Gelo Absoluto e Geada Espiritual (<em>Hyōketsu</em>)</strong>: Empunhado por <strong>Sylene Vashti</strong> e <strong>Kaname Fuyutsuki</strong>. Condensa a umidade do ar em lâminas cristalinas, barreiras glaciais e cortes congelantes capazes de ceifar a própria hesitação da alma.</li>
+<li><strong>Chi Taoista e Seda Aérea (<em>Yu-Chi</em>)</strong>: Praticado por <strong>Lian Feng</strong>. Focado na deflexão de forças, controle gravitacional e chutes circulares acrobáticos que dobram o ar com a fluidez da seda e a dureza do jade.</li>
+<li><strong>Supremacia Cinética do Ferro (<em>Punho de Ferro</em>)</strong>: Aperfeiçoado por <strong>Bruno "Bulldozer" Volk</strong>. Condicionamento físico humano levado ao limite absoluto, peso cinético devastador e boxe de curta distância potente o suficiente para despedaçar auras arcanas.</li>
+<li><strong>Ciber-Drive &amp; Sobrecarga (<em>Grade Neon</em>)</strong>: O núcleo biomecânico de <strong>VX-9 Volta</strong>. Capacitores dielétricos de alta voltagem, servomotores supercondutores e feixes de partículas digitais energizados por uma consciência sintética senciente.</li>
+<li><strong>Chamas Frias de Cinzas (<em>Oni-No-Hai</em>)</strong>: Erompidas por <strong>Garan the Ashen Oni</strong>. Fogo violeta e gélido forjado no portão do submundo, que consome a alma e a coragem dos mortais em vez de meramente queimar sua carne.</li>
+<li><strong>Aether dos Mares e Tempestades (<em>Vento Salgado</em>)</strong>: Canalizado pelo <strong>Capitão Marlow Reyes</strong>. Energia dos marinheiros celestes infundida com raios de tormenta e força das marés, disparada através de sua espada curta encantada.</li>
+<li><strong>Núcleo Imperial da Estrela Rubra (<em>Dominância Escarlate</em>)</strong>: Desenvolvido por <strong>Valdric Morn</strong>. Canhões de plasma escarlate de alta potência integrados em armaduras energéticas pesadas, projetados para subjugação militar em larga escala.</li>
+<li><strong>Titãs do Crepúsculo Selados (<em>Crepúsculo Selado</em>)</strong>: Aprisionados no corpo de <strong>Haruki Sumi</strong>. Poder arcano cataclísmico contido por pergaminhos e talismãs sagrados; quando o estudioso perde o controle, a fúria ancestral devasta o campo de batalha.</li>
+<li><strong>Réquiem da Lua Pálida (<em>Kurogane Tsuki</em>)</strong>: Conduzido por <strong>Shion Kurogane</strong>. A atração gravitacional e a melancolia da Lua Pálida fundidas em uma montante colossal que homem comum algum consegue erguer.</li>
+<li><strong>Miragem do Lótus Carmesim (<em>Kagerou-Ryu</em>)</strong>: Herdado por <strong>Suzume Kagerou</strong>. Deslocamento em pontos cegos sensoriais, clones ilusórios e adagas de assassinato velozes como o bater de asas de um pardal.</li>
+<li><strong>Véu Escarlate</strong>: O olho de ilusão supremo de <strong>Mikazuki Oboro</strong>. Distorce a percepção óptica, invoca corvos espectrais de pesadelo e reescreve as consequências da luta diretamente na mente do oponente.</li>
+</ol>
+<hr />
+<h2 id="as-três-grandes-facções-heróis-neutros-e-vilões"><a class="header" href="#as-três-grandes-facções-heróis-neutros-e-vilões">As Três Grandes Facções: Heróis, Neutros e Vilões</a></h2>
+<p>Os combatentes da Convergência dividem-se em três grandes posturas filosóficas perante o colapso dimensional:</p>
+<h3 id="1-os-protetores-da-convergência-heróis"><a class="header" href="#1-os-protetores-da-convergência-heróis">1. Os Protetores da Convergência (Heróis)</a></h3>
+<p>Guerreiros honrados empenhados em restaurar a Trama Astral, fechar as fendas dimensionais e defender vidas inocentes da tirania e da destruição:</p>
+<ul>
+<li><strong>Kaito Arashi</strong> (Japão): Karateca andarilho justo em busca de equilíbrio e evolução interior através da tempestade.</li>
+<li><strong>Daichi Ginrou</strong> (Mongólia): Guerreiro selvagem dos picos gelados cuja aura dourada protege os mais vulneráveis.</li>
+<li><strong>Akio Hoshi</strong> (Japão): Jovem prodígio da luz estelar cuja impetuosidade e coragem jamais se curvam diante da tirania.</li>
+<li><strong>Lian Feng</strong> (China): Grã-mestra da Lanterna de Jade dedicada à preservação do equilíbrio cósmico.</li>
+<li><strong>Bruno "Bulldozer" Volk</strong> (Brasil): Campeão invicto dos ringues, gigante gentil que luta pelo futuro de seu povo e de sua cidade natal.</li>
+<li><strong>Jin Kazaguruma</strong> (Japão): Shinobi veloz e bem-humorado que age como mensageiro da liberdade entre as vilas ocultas.</li>
+<li><strong>Haruki Sumi</strong> (Coreia do Sul): Bibliotecário erudito e guardião pacífico que suporta o terrível fardo de selos titânicos.</li>
+</ul>
+<h3 id="2-os-renegados-exilados--espadachins-livres-anti-heróis--força-neutra"><a class="header" href="#2-os-renegados-exilados--espadachins-livres-anti-heróis--força-neutra">2. Os Renegados, Exilados &amp; Espadachins Livres (Anti-Heróis / Força Neutra)</a></h3>
+<p>Guerreiros guiados por códigos de honra próprios, vinganças ancestrais, busca pela própria alma ou restauração de reinos perdidos:</p>
+<ul>
+<li><strong>Shion Kurogane</strong> (Japão): Exilado melancólico que carrega o luto de seu clã lunar e caça as sombras que maculam a noite.</li>
+<li><strong>Suzume Kagerou</strong> (Japão): Kunoichi sobrevivente que ataca na escuridão para exterminar os mandantes do massacre de seu clã.</li>
+<li><strong>VX-9 Volta</strong> (EUA / Neo-Metrópole): Androide de combate desertor que desafia seus programadores em busca do significado de possuir um coração.</li>
+<li><strong>Capitão Marlow Reyes</strong> (Espanha / Céus do Caribe): Corsário aéreo carismático que saqueia impérios tiranos em busca de mapas arcanos e glória.</li>
+<li><strong>Sylene Vashti</strong> (Noruega / Borealia Ártica): Princesa exilada do reino do gelo empenhada em reconquistar seu trono das mãos de cultistas das cinzas.</li>
+<li><strong>Kaname Fuyutsuki</strong> (Japão): Juiz estóico do Santuário das Neves cuja katana congela a hesitação e pune a corrupção sem piedade.</li>
+</ul>
+<h3 id="3-os-emissários-do-eclipse--conquista-inimigos--vilões"><a class="header" href="#3-os-emissários-do-eclipse--conquista-inimigos--vilões">3. Os Emissários do Eclipse &amp; Conquista (Inimigos / Vilões)</a></h3>
+<p>Forças malignas empenhadas na aniquilação da realidade, no retorno de demônios ancestrais ou na dominação militar tirânica:</p>
+<ul>
+<li><strong>Mikazuki Oboro</strong> (Dimensão do Eclipse — Chefe Final): Mestre ilusionista supremo que planeja consumir toda a existência em um sonho eterno de fogo negro.</li>
+<li><strong>Garan the Ashen Oni</strong> (Abismo Subterrâneo): Oni milenar libertado dos selos vulcânicos para devorar o medo e transformar a Terra em cinzas frias.</li>
+<li><strong>Valdric Morn</strong> (Império Estelar de Vane / Europa Central): Príncipe tecnocrata bélico que considera guerreiros espirituais "plebeus inferiores" que devem ser esmagados pelo poder do império.</li>
+</ul>
+<hr />
+<h2 id="o-torneio-Ápice-o-ponto-de-ruptura"><a class="header" href="#o-torneio-Ápice-o-ponto-de-ruptura">O Torneio Ápice: O Ponto de Ruptura</a></h2>
+<p>Para alimentar as fendas da realidade com a essência marcial dos seres vivos mais poderosos, Mikazuki Oboro manifestou o <strong>Cadinho Ápice</strong> (<em>The Apex Crucible</em>) — arenas de combate que entrelaçam templos ancestrais, terraços futuristas, bosques iluminados pela lua, planaltos desérticos, santuários de espíritos, caldeiras vulcânicas e praças ensolaradas.</p>
+<p>Cada embate aproxima os guerreiros do centro do vórtice dimensional. Somente superando suas próprias fraquezas e derrotando o arquiteto do Eclipse os combatentes poderão restaurar as linhas do mundo antes que o tecido da realidade se desfaça para sempre.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Layout-de-Arquivos.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Matriz-Formatos.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Layout-de-Arquivos.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Matriz-Formatos.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

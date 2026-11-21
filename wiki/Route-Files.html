@@ -1,0 +1,296 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Route and unlock files (TOML) - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="route-and-unlock-files-toml"><a class="header" href="#route-and-unlock-files-toml">Route and unlock files (TOML)</a></h1>
+<p>Data-driven replacement for the Lua arcade paths and <code>unlock</code> conditions of Ikemen GO. See <a href="Lua-Scripts.html">Lua scripts</a> for the reasoning. There is no scripting runtime: a route is a TOML file, and conditions use a small expression language checked when the file loads.</p>
+<h2 id="where-the-files-live"><a class="header" href="#where-the-files-live">Where the files live</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>File</th><th>Used for</th><th>Source</th></tr></thead><tbody>
+<tr><td><code>route_&lt;fighter id&gt;.toml</code></td><td>Arcade route of that fighter</td><td>Data folder (next to the executable, app storage on Android, browser storage on the web)</td></tr>
+<tr><td><code>unlocks.toml</code></td><td>Unlock and hide rules for fighters and stages</td><td>Same place; when absent the bundled <code>assets/routes/unlocks.toml</code> is used</td></tr>
+</tbody></table>
+</div>
+<p>A file with an error is reported on the console with the step or rule number and then ignored, so the game keeps its built-in behaviour.</p>
+<h2 id="arcade-route"><a class="header" href="#arcade-route">Arcade route</a></h2>
+<pre><code class="language-toml">[route]
+id = "kfm-arcade"
+
+[[step]]
+storyboard = "chars/kfm/intro.def"
+
+[[step]]
+repeat = 6
+fight = { order = 1 }
+
+[[step]]
+when = "consecutive_wins == 6"
+fight = { p2 = ["SuaveDude"] }
+else = { fight = { order = 3, winscreen = true } }
+
+[[step]]
+action = "clear"
+</code></pre>
+<p>Each <code>[[step]]</code> has exactly one of <code>fight</code>, <code>storyboard</code> or <code>action</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>fight</code></td><td><code>order</code> (1 picks the next regular opponent, 2 or more picks the boss), <code>p2</code> (fighter ids or names, first match wins), <code>stage</code>, <code>winscreen</code></td></tr>
+<tr><td><code>storyboard</code></td><td>Parsed and validated, not played yet: the engine reports it and continues</td></tr>
+<tr><td><code>action</code></td><td><code>clear</code> ends the route</td></tr>
+<tr><td><code>repeat</code></td><td>1 to 99 times; <code>when</code> is checked on every repetition</td></tr>
+<tr><td><code>when</code></td><td>Condition; the step runs only when true</td></tr>
+<tr><td><code>else</code></td><td>Same keys as a step body (<code>fight</code>, <code>storyboard</code>, <code>action</code>); runs when <code>when</code> is false</td></tr>
+</tbody></table>
+</div>
+<p>The route is planned when arcade starts, assuming the player wins every fight, which is the only path a run can take. A lost fight ends the run as usual.</p>
+<h2 id="conditions"><a class="header" href="#conditions">Conditions</a></h2>
+<p>Numbers, quoted text, <code>true</code>, <code>false</code>, variables, <code>== != &lt; &lt;= &gt; &gt;=</code>, <code>&amp;&amp;</code>, <code>||</code>, <code>!</code> and parentheses.</p>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Value</th></tr></thead><tbody>
+<tr><td><code>stats.arcade.clear</code></td><td>Arcade clears saved so far</td></tr>
+<tr><td><code>consecutive_wins</code>, <code>match_no</code></td><td>Fights already planned in this run</td></tr>
+<tr><td><code>mode</code></td><td><code>arcade</code>, <code>story</code>, <code>survival</code>, <code>cpu</code>, <code>versus</code>, <code>training</code>, <code>watch</code> or <code>team</code></td></tr>
+<tr><td><code>netplay</code></td><td>1 in an online match, else 0</td></tr>
+<tr><td><code>team_size</code></td><td>1 or 2 (routes only)</td></tr>
+<tr><td><code>player</code></td><td>Id of the fighter the player chose</td></tr>
+</tbody></table>
+</div>
+<p>An unknown variable is a load error that lists the known ones.</p>
+<h2 id="unlocks"><a class="header" href="#unlocks">Unlocks</a></h2>
+<pre><code class="language-toml">[[unlock]]
+target = "char:oboro"
+when = "stats.arcade.clear &gt;= 1"
+
+[[hide]]
+target = "char:oboro"
+when = "mode == \"bossrush\""
+</code></pre>
+<p>A target is <code>char:&lt;id&gt;</code> or <code>stage:&lt;id&gt;</code>. A target with <code>unlock</code> rules is available only while all of them are true; a target with <code>hide</code> rules is hidden while any is true. Targets without rules stay open. Fighter rules apply to the select screen; stage rules are parsed but not applied yet.</p>
+<h2 id="not-covered"><a class="header" href="#not-covered">Not covered</a></h2>
+<p>Arbitrary logic, per-round results (<code>perfect_rounds</code>), labels and <code>goto</code>, and story mode arcs are not part of this version.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Lua-Scripts.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Make-a-Character.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Lua-Scripts.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Make-a-Character.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

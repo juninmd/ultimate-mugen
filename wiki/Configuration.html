@@ -1,0 +1,365 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Configuration and controls - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="configuration-and-controls"><a class="header" href="#configuration-and-controls">Configuration and controls</a></h1>
+<h2 id="ultimate-mugencfg"><a class="header" href="#ultimate-mugencfg"><code>ultimate-mugen.cfg</code></a></h2>
+<p>Lives next to the executable and is written by the <strong>Settings</strong> menu (main menu or pause menu: Video, Audio, Controls, Gameplay, Language, About). It can be edited by hand. On the web the same text is kept in <code>localStorage</code>, on Android in the app's private storage.</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Values</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>fullscreen</code></td><td><code>0</code> / <code>1</code></td><td>Fullscreen</td></tr>
+<tr><td><code>res</code></td><td><code>0</code> 1280×720, <code>1</code> 1920×1080, <code>2</code> 2560×1440, <code>3</code> 3840×2160, <code>4</code> 5120×2880</td><td>Window size</td></tr>
+<tr><td><code>quality</code></td><td><code>0</code> automatic, <code>1</code> 3×, <code>2</code> 4.5×, <code>3</code> 6×</td><td>Vector art density</td></tr>
+<tr><td><code>fps</code></td><td><code>0</code> / <code>1</code></td><td>Show FPS</td></tr>
+<tr><td><code>fx</code></td><td><code>0</code> to <code>2</code></td><td>Post-processing (bloom, vignette, etc.)</td></tr>
+<tr><td><code>impact_lv</code></td><td><code>0</code> minimum (photosensitivity), <code>1</code> reduced, <code>2</code> normal, <code>3</code> intense</td><td>Impact effect strength</td></tr>
+<tr><td><code>version</code></td><td><code>2</code></td><td>File format version (older files without it still load)</td></tr>
+<tr><td><code>vsync</code></td><td><code>0</code> / <code>1</code></td><td>V-Sync (native)</td></tr>
+<tr><td><code>fps_cap</code></td><td><code>0</code> unlimited, <code>1</code> 30, <code>2</code> 60, <code>3</code> 120, <code>4</code> 144</td><td>Frame limiter (native)</td></tr>
+<tr><td><code>master</code> <code>music</code> <code>sfx</code></td><td><code>0</code> to <code>10</code></td><td>Volume steps</td></tr>
+<tr><td><code>mute</code></td><td><code>0</code> / <code>1</code></td><td>Silence everything</td></tr>
+<tr><td><code>difficulty</code></td><td><code>1</code> to <code>8</code></td><td>CPU level</td></tr>
+<tr><td><code>round_time</code></td><td><code>0</code> 99 s, <code>1</code> 60 s, <code>2</code> 30 s, <code>3</code> infinite</td><td>Round timer</td></tr>
+<tr><td><code>rounds</code></td><td><code>0</code> first to 1, <code>1</code> first to 2, <code>2</code> first to 3</td><td>Rounds needed to win</td></tr>
+<tr><td><code>life</code></td><td><code>0</code> 50%, <code>1</code> 75%, <code>2</code> 100%, <code>3</code> 150%, <code>4</code> 200%</td><td>Life bar multiplier</td></tr>
+<tr><td><code>lang</code></td><td><code>en</code> / <code>pt</code> / <code>es</code></td><td>Language of the whole interface</td></tr>
+<tr><td><code>keep_aspect</code></td><td><code>1</code> (default) / <code>0</code></td><td><code>1</code> letterboxes the 16:9 picture inside any window shape; <code>0</code> stretches it to fill the window</td></tr>
+<tr><td><code>filter</code></td><td><code>nearest</code> (default) / <code>linear</code></td><td>Sprite sampling when scaled: crisp pixels or bilinear smoothing</td></tr>
+<tr><td><code>window</code></td><td><code>WIDTHxHEIGHT</code>, <code>0x0</code> when unset</td><td>Windowed size, saved automatically about one second after you stop resizing; overrides <code>res</code> until you pick a size in the Video menu</td></tr>
+</tbody></table>
+</div>
+<h2 id="player-card-player-cardjson"><a class="header" href="#player-card-player-cardjson">Player card (<code>player-card.json</code>)</a></h2>
+<p>The Player card screen (main menu, <strong>Player card</strong>) stores the card, record, roster, rivals and achievements in <code>player-card.json</code>, next to the executable (browser: local storage). Training bouts do not count. The file stays on this device; there is no server sync.</p>
+<h2 id="resizable-window"><a class="header" href="#resizable-window">Resizable window</a></h2>
+<p>The window can be dragged to any size. The game draws into a fixed 16:9 logical space that is scaled to the window, so the fight area, HUD and menus stay consistent at every size and the window size is independent from the game resolution. With <strong>Keep aspect</strong> on, the unused strip is black; with it off, the picture is stretched and mouse and touch input are mapped back to the stretched space. The <code>--res WxH</code> flag still sets the starting window size and takes priority over the saved <code>window</code> value.</p>
+<h2 id="command-line"><a class="header" href="#command-line">Command line</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Flag</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>--res 2560x1440</code></td><td>Window resolution</td></tr>
+<tr><td><code>--4k</code></td><td>3840×2160 window</td></tr>
+<tr><td><code>--fullscreen</code></td><td>Fullscreen</td></tr>
+<tr><td><code>--touch</code></td><td>Force touch controls</td></tr>
+<tr><td><code>--mute</code></td><td>No audio</td></tr>
+<tr><td><code>--shots &lt;folder&gt;</code></td><td>Automatic tour saving screenshots</td></tr>
+<tr><td><code>--shots-audio</code></td><td>Enable sound during a screenshot tour; <code>--mute</code> still takes precedence</td></tr>
+<tr><td><code>--version</code></td><td>Print the version</td></tr>
+<tr><td><code>--check-update</code></td><td>Print whether a newer release exists and exit</td></tr>
+<tr><td><code>--update</code></td><td>Download, verify and install the newest release, then exit</td></tr>
+<tr><td><code>--no-auto-update</code> / <code>--no-update-check</code></td><td>Keep the notice, hide the update prompt / skip the update check</td></tr>
+</tbody></table>
+</div>
+<h2 id="environment-variables"><a class="header" href="#environment-variables">Environment variables</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>UME_MUGEN_DIR</code></td><td>Alternative M.U.G.E.N content folder</td></tr>
+<tr><td><code>UME_MARKET_HOME</code></td><td>Folder for <a href="Marketplace.html">marketplace</a> downloads and state</td></tr>
+<tr><td><code>UME_GITHUB_TOKEN</code> / <code>GITHUB_TOKEN</code></td><td>Optional GitHub token for the marketplace (raises the API rate limit)</td></tr>
+<tr><td><code>UME_NO_UPDATE_CHECK=1</code></td><td>Skip update checks</td></tr>
+<tr><td><code>UME_NO_AUTO_UPDATE=1</code></td><td>Keep the update notice but never download or install</td></tr>
+<tr><td><code>UME_NOFX=1</code></td><td>Disable the animated stage layer (performance testing)</td></tr>
+<tr><td><code>UME_TOUR=mugen</code> + <code>UME_CHARS=a,b</code> + <code>UME_STAGE=&lt;id&gt;</code></td><td>With <code>--shots</code>, photograph imported fighters</td></tr>
+</tbody></table>
+</div>
+<h2 id="language-and-localization"><a class="header" href="#language-and-localization">Language and localization</a></h2>
+<p>The UI ships three locales: <strong>English</strong> (default), <strong>Portuguese (Brazil)</strong> and <strong>Spanish</strong>. Settings › Language cycles through them at runtime and stores <code>lang=en|pt|es</code> in <code>ultimate-mugen.cfg</code>.</p>
+<ul>
+<li><code>src/i18n/catalog.rs</code> holds the keyed table (English and Portuguese) and <code>src/i18n/es_catalog.rs</code> the Spanish column; <code>i18n::t(key)</code> looks up current locale → English → the key name, so an incomplete catalog never shows a blank label.</li>
+<li>Inline strings use <code>i18n::tr3(pt, en, es)</code>; the older <code>i18n::tr(pt, en)</code> finds its Spanish text through <code>src/i18n/es_phrases.rs</code>, keyed by the English string. Placeholders use <code>i18n::fill("{name}", &amp;[("name", value)])</code>.</li>
+<li>A missing key is printed once to the log (<code>i18n: missing key '&lt;key&gt;'</code>).</li>
+<li>The catalogs are compiled in, so switching has no I/O cost and works on web/mobile.</li>
+<li>Unit tests keep the catalogs in sync and fail if the migrated screens go back to hardcoded Portuguese.</li>
+<li>Still Portuguese-only: story cutscenes and boss dialogue, fighter bios and stage names (content data).</li>
+<li>First launch (no saved config) picks the system language: <code>navigator.language</code> on the web, <code>LC_ALL</code>/<code>LC_MESSAGES</code>/<code>LANG</code> on desktop; English when unsupported.</li>
+</ul>
+<h2 id="importing-mugen-content"><a class="header" href="#importing-mugen-content">Importing M.U.G.E.N content</a></h2>
+<p>Main menu › <strong>Import M.U.G.E.N</strong> is the single entry point. On the web the button opens the browser file picker (the page overlays an invisible <code>&lt;label&gt;</code> exactly on the button so the click is a real user gesture) and <code>.zip</code> files can also be dropped on the window. On desktop the button opens the system file dialog (PowerShell on Windows, <code>osascript</code> on macOS, <code>zenity</code> or <code>kdialog</code> on Linux); folders under <code>chars/</code> and <code>stages/</code> are still scanned at start.</p>
+<h2 id="controls"><a class="header" href="#controls">Controls</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Action</th><th>Keyboard P1</th><th>Keyboard P2</th><th>Gamepad</th><th>Touch</th></tr></thead><tbody>
+<tr><td>Move</td><td>arrows</td><td><code>I</code> <code>K</code> <code>J</code> <code>L</code></td><td>D-pad / stick</td><td>virtual stick</td></tr>
+<tr><td>Punches <code>x</code> <code>y</code> <code>z</code></td><td><code>Q</code> <code>W</code> <code>E</code></td><td>Num <code>4</code> <code>5</code> <code>6</code></td><td>□ △</td><td>LP HP</td></tr>
+<tr><td>Kicks <code>a</code> <code>b</code> <code>c</code></td><td><code>A</code> <code>S</code> <code>D</code></td><td>Num <code>1</code> <code>2</code> <code>3</code></td><td>✕ ○</td><td>LK HK</td></tr>
+<tr><td>Quick specials</td><td><code>V</code> <code>B</code> <code>N</code></td><td>Num <code>7</code> <code>8</code> <code>9</code></td><td>—</td><td>ESPECIAL, SUPER</td></tr>
+<tr><td>Move shortcuts (slots 1-4)</td><td><code>1</code> <code>2</code> <code>3</code> <code>4</code></td><td>—</td><td>L1, L2, R1, R2</td><td>—</td></tr>
+<tr><td>Awakening (transform)</td><td><code>T</code></td><td>Num <code>0</code></td><td>L3 + R3 / SELECT</td><td>—</td></tr>
+<tr><td>Tag swap (Tag mode)</td><td><code>F</code></td><td>Num Enter</td><td>L3 + R3 / SELECT</td><td>awaken button</td></tr>
+<tr><td>Charge ki</td><td><code>R</code></td><td>Num Decimal</td><td>R3 (alone) / START</td><td>—</td></tr>
+<tr><td>Pause / hitboxes</td><td><code>Esc</code> / <code>F2</code></td><td><code>Esc</code> / <code>F2</code></td><td>START</td><td>❚❚</td></tr>
+<tr><td>Fullscreen / FPS</td><td><code>F11</code> / <code>F3</code></td><td>—</td><td>—</td><td>—</td></tr>
+</tbody></table>
+</div>
+<p>The names <code>x y z a b c</code> are the same ones used in character commands (<code>input</code>).</p>
+<p>While jumping, <code>x</code> <code>y</code> <code>a</code> <code>b</code> each throw an air normal, and down + <code>b</code> is the diving down kick (generated for every native fighter by <code>native/air_normals.rs</code>, reusing the fighter's own air animations).</p>
+<h2 id="move-shortcuts"><a class="header" href="#move-shortcuts">Move shortcuts</a></h2>
+<p>Open the pause menu, pick a move in the move list and press <code>1</code>-<code>4</code> (or L1, L2, R1, R2 on a gamepad) to bind it to that slot. Pressing the same slot again clears it. From then on the bound move is performed by one key or button press, with the right motion and buttons played for you. Bindings are stored per fighter in <code>ultimate-mugen.shortcuts</code> next to the executable. On the web the gamepad mapping follows the same layout.</p>
+<h2 id="button-prompts"><a class="header" href="#button-prompts">Button prompts</a></h2>
+<p>The pause move list and the Controls screen show the real key or button of the device you used last: keyboard keys, Xbox (A/B/X/Y, LB/LT/RB/RT) or PlayStation (✕ ○ □ △, L1/L2/R1/R2). On touch screens they show the virtual button names. Xbox pads are detected by name or by vendor ID <code>045E</code>, PlayStation pads by <code>054C</code>. Rumble works on both: Xbox through gilrs force feedback (and the Gamepad API on the web), DualShock 4 / DualSense through direct HID reports.</p>
+<h2 id="tweaks-tweakstoml"><a class="header" href="#tweaks-tweakstoml">Tweaks (<code>tweaks.toml</code>)</a></h2>
+<p>Created next to the executable on first run (localStorage on web) with the defaults. Edit and save: the game reloads it within about one second and shows a toast. Mistakes never stop the game; the affected value keeps its default and the toast and log name the key, with a "did you mean" hint and the line for syntax errors.</p>
+<div class="table-wrapper"><table><thead><tr><th>Section</th><th>Key</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>[theme]</code></td><td><code>background</code></td><td>Menu background base color</td></tr>
+<tr><td><code>[theme]</code></td><td><code>glow_bottom</code>, <code>glow_left</code>, <code>glow_right</code></td><td>Menu light glows</td></tr>
+<tr><td><code>[theme]</code></td><td><code>preset</code></td><td><code>"default"</code>, <code>"emerald"</code>, <code>"sunset"</code> or <code>"mono"</code>: sets background, glows, the five roles below, the life bar and the side tints at once. Any other key in the file still wins over the preset</td></tr>
+<tr><td><code>[theme]</code></td><td><code>accent</code></td><td>Selection colour: main-menu highlight, pause and settings buttons, sliders</td></tr>
+<tr><td><code>[theme]</code></td><td><code>title</code>, <code>info</code>, <code>muted</code>, <code>text</code></td><td>Headings and values (gold), hints and links (cyan), secondary text, body text, across every menu and the HUD</td></tr>
+<tr><td><code>[hud]</code></td><td><code>life</code>, <code>life_low</code>, <code>damage</code></td><td>Life bar fill, its colour under 25% life, and the trailing damage chunk. The top of each gradient is derived from the colour</td></tr>
+<tr><td><code>[music]</code></td><td><code>fight</code></td><td>Audio file played in every fight instead of the built-in theme (<code>.ogg</code>, <code>.mp3</code>, <code>.wav</code>, <code>.flac</code>). Paths are relative to the folder of <code>tweaks.toml</code>. Desktop only</td></tr>
+<tr><td><code>[music]</code></td><td><code>&lt;stage id&gt;</code> (<code>dojo</code>, <code>neon</code>, <code>bamboo</code>, <code>volcano</code>, <code>brazil</code>, ...)</td><td>Audio file for that stage; wins over <code>fight</code> and over the stage's own music</td></tr>
+<tr><td><code>[hud]</code></td><td><code>p1_tint</code>, <code>p2_tint</code></td><td>Lifebar accent color per side</td></tr>
+<tr><td><code>[hud]</code></td><td><code>bar_offset_y</code></td><td>Moves the lifebars down (-4 to 40)</td></tr>
+<tr><td><code>[accessibility]</code></td><td><code>hud_opacity</code></td><td>HUD opacity multiplier (0.3 to 1.0)</td></tr>
+<tr><td><code>[accessibility]</code></td><td><code>colorblind</code></td><td><code>true</code> uses blue/orange side colors instead of the tints</td></tr>
+<tr><td><code>[accessibility]</code></td><td><code>hud_scale</code></td><td>HUD size multiplier (0.8 to 1.25)</td></tr>
+<tr><td><code>[accessibility]</code></td><td><code>reduce_motion</code></td><td><code>true</code> turns off screen shake</td></tr>
+<tr><td><code>[touch]</code></td><td><code>scale</code></td><td>on-screen pad size, 0.7 to 1.5</td></tr>
+<tr><td><code>[touch]</code></td><td><code>opacity</code></td><td>on-screen pad opacity, 0.2 to 1.0</td></tr>
+<tr><td><code>[touch]</code></td><td><code>left_handed</code></td><td><code>true</code> mirrors the pad (stick right, buttons left)</td></tr>
+</tbody></table>
+</div>
+<p>The on-screen pad shows only the six attack buttons and the stick by default. The small <code>+</code> button opens the extra buttons (awakening, charge, quick skills, tag, third-character attacks, guard) and <code>x</code> closes them. The pad fades to 30% of <code>opacity</code> after 2.5 s without touches and stays clear of the notch and home-indicator safe areas on phones.
+| <code>[rules]</code> | <code>rounds_to_win</code> (1-9), <code>round_seconds</code> (0 = no limit, up to 999), <code>life_percent</code> (10-500), <code>game_speed</code> (0.5-2.0) | Override the Settings menu values for every match; remove the line to go back to the menu value |
+| <code>[menu]</code> | <code>arcade</code>, <code>story</code>, <code>survival</code>, <code>cpu</code>, <code>versus</code>, <code>training</code>, <code>watch</code>, <code>team_seq</code>, <code>team_simul</code>, <code>team_tag</code>, <code>mugen</code>, <code>market</code>, <code>controls</code>, <code>settings</code>, <code>replays</code>, <code>quit</code> | Text of that main-menu entry |</p>
+<p>Colors are <code>"#rrggbb"</code> or <code>"#rgb"</code>. Example of a full custom look:</p>
+<pre><code class="language-toml">[theme]
+preset = "mono"
+accent = "#7a3cff"
+title = "#b8ff5c"
+
+[hud]
+life = "#5cc8ff"
+life_low = "#ff5ca8"
+damage = "#7a3cff"
+
+[menu]
+arcade = "Fliperama"
+
+[music]
+fight = "music/my-theme.ogg"
+dojo = "music/dojo.ogg"
+</code></pre>
+<p>Screenshots of every preset are in <code>screenshots/themes/</code> (<code>UME_TOUR=themes</code>). Plan and comparison with other engines: <code>docs/research/customization-comparison.md</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Auto-Update.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="MUGEN-Content.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Auto-Update.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="MUGEN-Content.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

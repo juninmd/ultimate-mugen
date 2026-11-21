@@ -1,0 +1,524 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Creating a UMF character - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="creating-a-umf-character"><a class="header" href="#creating-a-umf-character">Creating a UMF character</a></h1>
+<p>UMF (<em>Ultimate Mugen Format</em>) describes a whole fighter in <strong>one JSON file</strong>. The compiler (<code>crates/native/src/compile.rs</code>) generates commands, states, HitDefs, projectiles, super pause, cancels and hitboxes. The result runs on the same state machine as M.U.G.E.N characters.</p>
+<h2 id="step-by-step"><a class="header" href="#step-by-step">Step by step</a></h2>
+<ol>
+<li>Copy a finished fighter as a base: <code>cp assets/chars/kaito.json assets/chars/mine.json</code>.</li>
+<li>Change <code>id</code> (unique, lowercase, no spaces), <code>name</code>, <code>series</code>, <code>author</code> and <code>color</code>.</li>
+<li>Optional: add the <code>id</code> to <code>assets/chars/index.json</code> to set its order in the select screen. Missing ones follow alphabetically.</li>
+<li>Run <code>cargo run --release</code>. <code>build.rs</code> embeds every <code>.json</code> in the folder into the executable.</li>
+<li>Test in <strong>Training</strong> with <code>F2</code> on to see hitboxes and hurtboxes.</li>
+</ol>
+<p>UMF fighters also load from a folder without recompiling: drop the <code>.json</code> in <code>umf/</code> next to the game (or in <code>mugen/umf/</code>, or in the folder named by <code>UME_UMF_DIR</code>). Kit files in the same folder are registered first, whatever their names.</p>
+<h2 id="file-skeleton"><a class="header" href="#file-skeleton">File skeleton</a></h2>
+<pre><code class="language-json">{
+  "format": "umf/2",
+  "id": "mine",
+  "name": "My Fighter",
+  "series": "My Series",
+  "author": "you",
+  "description": "Select screen text",
+  "color": "#e85d2a",
+  "winQuote": "Victory line",
+  "intro": "Line said at round 1 start",
+  "taunt": "Reply/provocation",
+  "form": "Awakened form name",
+  "boss": false,
+  "speed": 1.0,
+  "stats": {},
+  "art": { "type": "sprites", "style": {}, "poses": {} },
+  "palettes": [],
+  "awakeningPalette": { "hair": "#f6c83e" },
+  "anims": {},
+  "moves": []
+}
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>format</code></td><td>yes</td><td><code>umf/2</code> (<code>umf/1</code> still loads)</td></tr>
+<tr><td><code>extends</code></td><td>no</td><td>Fighter or kit ids to inherit from, see <a href="#reuse-extends-use-and-kits">Reuse</a>. Required fields may then come from the parent</td></tr>
+<tr><td><code>id</code>, <code>name</code>, <code>series</code>, <code>author</code>, <code>color</code></td><td>yes</td><td>Identity; <code>color</code> is the select card color</td></tr>
+<tr><td><code>boss</code></td><td>no</td><td><code>true</code> hides it from select and makes it the final Arcade boss</td></tr>
+<tr><td><code>npc</code></td><td>no</td><td><code>true</code> hides it from select and every random pool; used by Story mode thugs, no boss empowerment</td></tr>
+<tr><td><code>profile</code></td><td>no</td><td>Nationality and biography, see <a href="#profile-nationality-and-biography">Profile</a></td></tr>
+<tr><td><code>speed</code></td><td>no</td><td>Animation speed multiplier (&gt;1 = faster moves)</td></tr>
+<tr><td><code>stats</code></td><td>no</td><td>Attributes, table below</td></tr>
+<tr><td><code>art</code></td><td>yes</td><td>Art: <code>style.colors</code> drives palette recolouring of the PNG sprites, <code>poses</code> names the pose keys</td></tr>
+<tr><td><code>palettes</code></td><td>no</td><td>Alternate colors; each item overrides keys of <code>art.style.colors</code></td></tr>
+<tr><td><code>awakeningPalette</code></td><td>no</td><td>Color overrides applied on top of the selected palette while awakened; effect sprites are unchanged</td></tr>
+<tr><td><code>anims</code></td><td>yes</td><td>Animations by name</td></tr>
+<tr><td><code>moves</code></td><td>yes</td><td>Moves</td></tr>
+</tbody></table>
+</div>
+<h2 id="reuse-extends-use-and-kits"><a class="header" href="#reuse-extends-use-and-kits">Reuse: <code>extends</code>, <code>use</code> and kits</a></h2>
+<p>A fighter does not have to be written from scratch. Three tools remove the copy and paste that M.U.G.E.N packages need (see the numbers in <a href="MUGEN-Code-Study.html">M.U.G.E.N code study</a>):</p>
+<div class="table-wrapper"><table><thead><tr><th>Tool</th><th>Where</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>"extends": "kaito"</code></td><td>top level</td><td>Inherits everything from a loaded fighter or kit: stats, art, animations, moves. A list (<code>["kaito", "storm-kit"]</code>) layers several, left to right.</td></tr>
+<tr><td><code>"use": "gale"</code></td><td>inside a move</td><td>Clones another move (from a parent or from an earlier move of the same file) under a new <code>id</code>, changing only the fields you write.</td></tr>
+<tr><td>kit file</td><td><code>"format": "umf-kit/1"</code></td><td>A partial definition (moves, animations, poses, stats) with an <code>id</code>, shared by many fighters. <code>core</code> is built in and carries the universal <code>launcher</code> and <code>escape_burst</code>.</td></tr>
+</tbody></table>
+</div>
+<p>Rules of the merge, applied by <code>crates/native/src/kit.rs</code> before the normal UMF parser runs:</p>
+<ul>
+<li>Objects (<code>stats</code>, <code>art</code>, <code>abilities</code>, <code>passives</code>) merge key by key, so <code>"stats": { "life": 1080 }</code> changes one number. An animation in <code>anims</code> replaces the inherited one as a whole. A value of <code>null</code> removes the inherited key.</li>
+<li><code>moves</code> are matched by <code>id</code>. An entry with only some fields keeps the rest (<code>{ "id": "gale", "name": "Crimson Gale" }</code>), a bare string (<code>"launcher"</code>) lists an inherited move unchanged, and <code>{ "id": "slide", "remove": true }</code> drops one. Moves you list come first, in your order; inherited moves you did not mention follow.</li>
+<li>Identity is personal: <code>name</code>, <code>author</code>, <code>description</code>, <code>profile</code>, <code>boss</code> and <code>npc</code> are never inherited from a fighter.</li>
+<li><code>spriteSet</code> lets the new fighter reuse the parent's pixel-art pack. Recolour it with <code>palettes</code> and leave <code>art.style.colors</code> inherited: those are the reference colours of the pack.</li>
+<li>Mistakes name the culprit (<code>unknown kit or fighter</code>, <code>move x uses y, which no kit or earlier move defines</code>), and <code>extends</code> chains deeper than 8 are rejected.</li>
+</ul>
+<p>A complete fighter in 20 lines (<a href="../examples/umf/mika.json"><code>docs/examples/umf/mika.json</code></a>, which inherits a 39 KB definition and the kit <a href="../examples/umf/storm-kit.json"><code>storm-kit.json</code></a>):</p>
+<pre><code class="language-json">{
+  "format": "umf/2",
+  "id": "mika",
+  "name": "Mika Arashi",
+  "author": "Ultimate MUGEN",
+  "color": "#b8433a",
+  "extends": ["kaito", "storm-kit"],
+  "spriteSet": "kaito",
+  "stats": { "life": 1080, "attack": 104 },
+  "palettes": [{ "top": "#b8433a", "trim": "#6a1e1a", "hair": "#1a1a22" }],
+  "moves": [
+    { "id": "gale", "name": "Crimson Gale" },
+    { "id": "squall", "use": "gale", "name": "Squall Volley", "input": "~D, DF, F, x+a", "cost": 500, "fx": "aura" },
+    { "id": "slide", "remove": true }
+  ]
+}
+</code></pre>
+<p>Try it with <code>UME_UMF_DIR=docs/examples/umf cargo run --release</code>.</p>
+<h2 id="profile-nationality-and-biography"><a class="header" href="#profile-nationality-and-biography">Profile (nationality and biography)</a></h2>
+<p>Every fighter has a nationality and a short biography, written in English (<code>en</code>), Brazilian Portuguese (<code>pt</code>) and Spanish (<code>es</code>). A missing language falls back to <code>en</code>.</p>
+<pre><code class="language-json">"profile": {
+  "country": "jp",
+  "nationality": { "en": "Japanese", "pt": "Japonês", "es": "Japonés" },
+  "bio": { "en": "Two short sentences.", "pt": "Duas frases curtas.", "es": "Dos frases cortas." }
+}
+</code></pre>
+<ul>
+<li>Built-in fighters, the final boss and the Story mode thugs keep their profiles in <code>assets/char_profiles.json</code>, keyed by <code>id</code>. A <code>profile</code> field inside the fighter file wins over that table, so imported UMF fighters carry their own.</li>
+<li><code>country</code> picks the flag drawn next to the nationality: <code>jp</code>, <code>br</code>, <code>no</code>, <code>us</code>, <code>cn</code>, <code>es</code>, <code>mn</code>, <code>de</code>, <code>kr</code>, <code>ar</code>, <code>au</code>, <code>ru</code>, <code>fr</code>, plus the fictional <code>underworld</code> and <code>eclipse</code>. Flags are vector shapes in <code>src/flag/designs.rs</code> (no image files); add a new entry there for another country. An unknown code simply shows no flag. <code>UME_SHOTS_ONLY=flags</code> saves a sheet with every flag.</li>
+<li>The flag appears on the roster tile, on the fighter card, in the profile strip under the roster and on the Story mode stage card.</li>
+<li>Keep each biography under 260 characters: it must fit two lines of the select screen.</li>
+<li><code>tags</code> is an optional list of fighting-style tags (<code>"tags": ["rushdown", "zoner"]</code>). The select screen shows up to three as chips under the roster. Known keys are translated (<code>rushdown</code>, <code>grappler</code>, <code>zoner</code>, <code>balanced</code>, <code>aerial</code>, <code>trapper</code>, <code>counter</code>, <code>power</code>); any other key is shown uppercased (<code>storm-caller</code> becomes STORM CALLER). The list lives in <code>src/profile_tags.rs</code>.</li>
+<li>The select screen shows the nationality and the biography of the highlighted fighter under the roster (thugs and the boss appear with the Bosses filter). The Story mode stage card shows the profile of the stage boss.</li>
+<li>Fighters without a profile (M.U.G.E.N content) keep showing <code>description</code>.</li>
+<li><code>cargo test --release -p ultimate-mugen profile</code> checks that every fighter file of <code>assets/chars</code> has a complete profile in the three languages.</li>
+</ul>
+<h2 id="stats"><a class="header" href="#stats"><code>stats</code></a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Example</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>life</code></td><td><code>1000</code></td><td>Life</td></tr>
+<tr><td><code>power</code></td><td><code>3000</code></td><td>Max super meter (1000 per level)</td></tr>
+<tr><td><code>attack</code> / <code>defense</code></td><td><code>100</code></td><td>Multipliers in %</td></tr>
+<tr><td><code>walk</code></td><td><code>[2.4, 2.2]</code></td><td>Forward / backward walking speed</td></tr>
+<tr><td><code>run</code></td><td><code>[5.2, 4.6]</code></td><td>Run forward / back hop</td></tr>
+<tr><td><code>jump</code></td><td><code>[-8.4, -2.5, 0, 2.6]</code></td><td>Vertical speed, horizontal back, neutral and forward</td></tr>
+<tr><td><code>gravity</code></td><td>—</td><td>Vertical acceleration</td></tr>
+<tr><td><code>airJumps</code></td><td>—</td><td>Extra air jumps</td></tr>
+<tr><td><code>airDashes</code></td><td>1</td><td>Air dashes per jump (<code>movement.airdash.num</code>)</td></tr>
+<tr><td><code>height</code></td><td><code>100</code></td><td>Body height</td></tr>
+<tr><td><code>width</code></td><td><code>[16, 15]</code></td><td>Front / back width for pushing</td></tr>
+</tbody></table>
+</div>
+<h2 id="anims"><a class="header" href="#anims"><code>anims</code></a></h2>
+<p>Each animation is a list of frames:</p>
+<pre><code class="language-json">"jab": { "frames": [
+  { "pose": "jab0", "ticks": 3 },
+  { "pose": "jab1", "ticks": 3, "hit": { "part": "handR", "radius": 10 } },
+  { "pose": "jab0", "ticks": 5 }
+], "loop": 0 }
+</code></pre>
+<p>A frame with only a pose and a tick count can be written as <code>"pose*ticks"</code>, and both forms mix in one list:</p>
+<pre><code class="language-json">"jab": { "frames": ["jab0*3", { "pose": "jab1", "ticks": 3, "hit": { "part": "handR", "radius": 10 } }, "jab0*5"], "loop": 0 }
+</code></pre>
+<p>Run <code>node scripts/umf2-migrate.mjs</code> before committing a shipped fighter: it writes the canonical layout that CI checks. See <a href="adr/0007-umf2-definitive-fighter-format.html">ADR 0007</a>.</p>
+<div class="table-wrapper"><table><thead><tr><th>Frame field</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>pose</code></td><td>Name of a pose in <code>art.poses</code>, or an inline pose object</td></tr>
+<tr><td><code>ticks</code></td><td>Duration in ticks (60 per second); <code>-1</code> = forever</td></tr>
+<tr><td><code>hit</code></td><td>Active hitbox: <code>part</code> (limb or weapon) + <code>radius</code>, or <code>box</code> <code>[x1, y1, x2, y2]</code></td></tr>
+<tr><td><code>hurt</code></td><td><code>"none"</code> removes the hurtbox (invincible frame)</td></tr>
+<tr><td><code>effect</code></td><td>Draws an effect instead of the body (projectiles, sparks), see <a href="Effects.html">Effect frames</a></td></tr>
+<tr><td><code>offset</code></td><td>Drawing offset <code>[x, y]</code></td></tr>
+<tr><td><code>loop</code></td><td>Frame index where the loop restarts</td></tr>
+</tbody></table>
+</div>
+<h4 id="how-an-attack-frame-becomes-a-hit-box"><a class="header" href="#how-an-attack-frame-becomes-a-hit-box">How an attack frame becomes a hit box</a></h4>
+<p>Frames drawn from pixel sprites take their strike box from the explicit <code>box</code> when given, otherwise from a standard box seeded by the <code>hit</code> <code>part</code> (low for feet and knees, high for the head, middle otherwise) and <code>radius</code>, trimmed to the sprite silhouette. The compiler then reshapes it to the proportions measured on 605 M.U.G.E.N characters (<code>native/pixel_hit.rs</code>, <code>H</code> = standing height, 96 units for <code>height</code> 100):</p>
+<ul>
+<li>like a M.U.G.E.N <code>Clsn1</code>, the box spans from the body to the tip: it starts at most <code>0.10 H</code> in front of the origin and reaches at least <code>0.60 H</code> (the M.U.G.E.N median for punches is <code>0.72 H</code>, kicks <code>0.80 H</code>);</li>
+<li>at least <code>0.36 H</code> tall and never above <code>0.95 H</code> or below the floor (M.U.G.E.N punches sit between <code>-0.75 H</code> and <code>-0.33 H</code>, kicks down to <code>-0.05 H</code>);</li>
+<li>the standing hurtbox is <code>0.46 H</code> wide (M.U.G.E.N median <code>0.46 H</code>) and the crouching one <code>0.67 H</code> tall (M.U.G.E.N median <code>0.67 H</code>);</li>
+<li>an explicit <code>box</code> is used as written, so keep it inside those proportions; the audit fails otherwise.</li>
+</ul>
+<p><code>cargo test --release -p ume-engine --test native_hitbox_audit</code> checks every strike frame of the roster (height, reach, start, width, above the head, under the floor), and <code>native_normal_reach</code> prints and compares the reach and damage of the four stand normals of every fighter.</p>
+<h3 id="standard-names"><a class="header" href="#standard-names">Standard names</a></h3>
+<p>Animations with these names become the reserved M.U.G.E.N actions, so the common states work with no extra code.</p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Action</th><th>Name</th><th>Action</th></tr></thead><tbody>
+<tr><td><code>idle</code></td><td>0</td><td><code>guardHit</code></td><td>150</td></tr>
+<tr><td><code>turn</code></td><td>5</td><td><code>crouchGuardHit</code></td><td>152</td></tr>
+<tr><td><code>crouchTurn</code></td><td>6</td><td><code>airGuardHit</code></td><td>154</td></tr>
+<tr><td><code>crouchStart</code> / <code>crouch</code> / <code>crouchEnd</code></td><td>10 / 11 / 12</td><td><code>lose</code> / <code>draw</code> / <code>win</code></td><td>170 / 175 / 181</td></tr>
+<tr><td><code>walk</code> / <code>walkBack</code></td><td>20 / 21</td><td><code>intro</code></td><td>190</td></tr>
+<tr><td><code>jumpStart</code> / <code>jumpUp</code> / <code>jumpFwd</code> / <code>jumpBack</code> / <code>jumpDown</code></td><td>40–44</td><td><code>taunt</code> / <code>powerUp</code></td><td>195 / 196</td></tr>
+<tr><td><code>land</code></td><td>47</td><td><code>defeat1</code>…<code>defeat4</code></td><td>197–200</td></tr>
+<tr><td><code>run</code> / <code>hop</code></td><td>100 / 105</td><td><code>hitLight</code> / <code>hitMedium</code> / <code>hitHeavy</code></td><td>5000–5002</td></tr>
+<tr><td><code>guardStart</code> / <code>crouchGuardStart</code> / <code>airGuardStart</code></td><td>120–122</td><td><code>hitLowLight</code> / <code>hitLowMedium</code> / <code>hitLowHeavy</code></td><td>5010–5012</td></tr>
+<tr><td><code>guard</code> / <code>crouchGuard</code> / <code>airGuard</code></td><td>130–132</td><td><code>hitCrouch</code> / <code>hitAir</code></td><td>5020 / 5030</td></tr>
+<tr><td><code>guardEnd</code></td><td>140</td><td><code>airRecover</code> / <code>fall</code> / <code>trip</code></td><td>5040 / 5050 / 5070</td></tr>
+<tr><td></td><td></td><td><code>bounce</code> / <code>bounceAir</code> / <code>lieDown</code> / <code>getUp</code> / <code>dead</code></td><td>5100 / 5101 / 5110 / 5120 / 5150</td></tr>
+</tbody></table>
+</div>
+<p><code>taunt</code>, <code>powerUp</code> and <code>defeat*</code> have default versions if you do not define them. Other names get free numbers in file order.</p>
+<h2 id="moves"><a class="header" href="#moves"><code>moves</code></a></h2>
+<pre><code class="language-json">{ "id": "gale", "name": "Wind Wave", "input": "~D, DF, F, x", "simple": "sp1",
+  "kind": "special", "anim": "gale", "invuln": [1, 3],
+  "moves": [{ "at": 2, "vel": [2, -9] }],
+  "hits": [{ "at": 2, "damage": 90, "level": "heavy", "launch": true }],
+  "projectile": { "at": 3, "anim": "galeOrb", "hitAnim": "galeHit", "speed": [5, 0], "offset": [40, -60], "damage": 70 } }
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Values</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>id</code>, <code>name</code></td><td>text</td><td>Identifier and name in the move list</td></tr>
+<tr><td><code>input</code></td><td>command syntax, below</td><td>Command</td></tr>
+<tr><td><code>simple</code></td><td><code>sp1</code> <code>sp2</code> <code>sp3</code> <code>super</code></td><td>One-button shortcut (keys 1/2/3, touch)</td></tr>
+<tr><td><code>kind</code></td><td><code>normal</code> <code>special</code> <code>super</code></td><td>Priority and cancels: normal → special → super on hit or guard</td></tr>
+<tr><td><code>when</code></td><td><code>stand</code> (default) <code>crouch</code> <code>air</code></td><td>State the move starts from</td></tr>
+<tr><td><code>anim</code></td><td>name in <code>anims</code></td><td>Move animation</td></tr>
+<tr><td><code>hits</code></td><td>list</td><td>One HitDef per item</td></tr>
+<tr><td><code>moves</code></td><td><code>[{ "at": frame, "vel": [x, y] }]</code></td><td><code>VelSet</code> on the frame; use <code>null</code> to keep an axis</td></tr>
+<tr><td><code>projectile</code></td><td>object or list</td><td>Projectiles</td></tr>
+<tr><td><code>cost</code></td><td>number</td><td>Meter spent; <code>super</code> defaults to 1000</td></tr>
+<tr><td><code>invuln</code></td><td><code>[start, end]</code></td><td>Invincible frames</td></tr>
+<tr><td><code>teleport</code></td><td>frame</td><td>Reappears behind the opponent</td></tr>
+<tr><td><code>fx</code></td><td><code>aura</code></td><td>Extra visual effect</td></tr>
+<tr><td><code>voice</code></td><td><code>1000, 0</code></td><td>Character sound group and index played at move start, when that sample is bundled</td></tr>
+<tr><td><code>airPhysics</code></td><td><code>true</code></td><td>Keeps air physics</td></tr>
+<tr><td><code>cancels</code></td><td>list of move ids</td><td>This move may be cancelled <strong>into</strong> those moves on contact (hit, guard or projectile contact). Declaring it replaces the automatic gatling out of this move</td></tr>
+<tr><td><code>throw</code></td><td><code>{ "damage", "bind", "launch", "at" }</code></td><td>Grab: see <a href="#combat-traits">Combat traits</a></td></tr>
+<tr><td><code>armor</code></td><td><code>{ "hits", "threshold" }</code></td><td>Absorbs hits while the move is active</td></tr>
+<tr><td><code>parry</code></td><td><code>{ "window": [from, to], "spark" }</code></td><td>Returns attacks during the animation-element window</td></tr>
+<tr><td><code>timestop</code></td><td>ticks</td><td>Freezes everyone else</td></tr>
+<tr><td><code>burst</code></td><td><code>true</code></td><td>Combo breaker usable while being hit</td></tr>
+<tr><td><code>requires</code></td><td><code>{ "life": {"max": 0.5}, "enemyLife": {"min": 0.1, "max": 0.5} }</code></td><td>Life condition: the move only starts while the fighter's life (<code>life</code>) and/or the rival's (<code>enemyLife</code>) is inside <code>min</code>..<code>max</code>, as a fraction of max life (0 to 1). Either bound may be omitted. Compiles to <code>life &lt;= lifemax * max</code> and <code>enemy,life &lt;= enemy,lifemax * max</code> triggers</td></tr>
+<tr><td><code>flight</code></td><td><code>true</code></td><td>8-way hover while the move lasts</td></tr>
+</tbody></table>
+</div>
+<p><strong>Finisher.</strong> A move with <code>"kind": "finisher"</code> (use <code>throw</code> or <code>hits</code> for the effect) is only available after a KO (<code>RoundState = 3</code> and <code>WinKO</code>). When the final round ends by KO and the winner has a finisher, the round waits up to 6 seconds on "FINISH HIM" for the winner to perform it; performing it (or the timeout) ends the wait. Rosters with no finisher are unaffected.</p>
+<p><strong>Ultimate.</strong> A move whose <code>id</code> starts with <code>ult_</code> is the fighter's ultimate, and every native fighter declares one (the command is <code>~D, DF, F, D, DF, F, x+y</code>). The compiler spends the whole meter on it: <code>cost</code> defaults to <code>3000</code> (the three bars drawn by the HUD), the move gets a 70 % damage bonus where a normal <code>super</code> gets 30 %, and its super freeze lasts 75 ticks instead of 55. <code>cargo test --release -p ume-engine --test native_ultimates</code> fails when a fighter has no ultimate, when the cost is not three bars, when the ultimate does not start from its command or drains the meter, or when the measured damage is below 380 or not above every one of the fighter's supers.</p>
+<h3 id="combat-traits"><a class="header" href="#combat-traits">Combat traits</a></h3>
+<ul>
+<li><strong>Automatic gatling.</strong> A move without <code>cancels</code> follows the genre rules: a normal cancels into any <em>stronger</em> normal (<code>light</code> &lt; <code>medium</code> &lt; <code>heavy</code> by the strongest hit level, ties by declaration order, so strings can never loop), ground normals link into crouching ones, air normals chain with air normals, and every normal cancels into every special and super on contact. Specials cancel into other specials only through explicit <code>cancels</code>; supers cancel out of any move.</li>
+<li><strong>Explicit routes.</strong> <code>"cancels": ["strong", "rush"]</code> on <code>jab</code> makes <code>strong</code> and <code>rush</code> accept <code>jab</code> on contact. A projectile special can be cancelled once its projectile touches the opponent. An <code>air</code> special may start from a ground launcher that lists it (uppercut, then dive).</li>
+<li><strong><code>throw</code></strong> (<code>damage</code>, <code>bind</code> <code>[x, y]</code> in front of the thrower, <code>launch</code> <code>[vx, vy]</code>, <code>at</code> = grab frame, default 1). The grab HitDef fires on animation element <code>at</code> (give that frame a <code>hit</code> box), the victim is held on <code>at + 1</code>, takes the damage on <code>at + 2</code> and is launched, so the animation needs at least <code>at + 2</code> frames. Throws ignore guarding and whiff when the target is out of reach.</li>
+<li><strong><code>armor</code></strong> (<code>hits</code> absorbed, optional <code>threshold</code> = damage above which the armor breaks). From move start until the last hit frame the move takes 35 % chip damage and is not interrupted; once <code>hits</code> are spent the next hit staggers normally.</li>
+<li><strong>Multi-hit glue.</strong> Moves with three or more <code>hits</code> push the target away only a little on every hit except the last (so the whole string connects) and piercing projectiles (4+ hits) do not shove the target out of the beam. Set <code>knockback</code> explicitly to opt out.</li>
+</ul>
+<p>Validate with <code>cargo test --release --test native_roster_lab -- --nocapture</code> (every attack state must connect; prints damage and reach per move), <code>--test native_combo_routes</code> (every declared cancel chains end to end) and <code>python scripts/audit_native_moves.py</code>.</p>
+<h3 id="hits"><a class="header" href="#hits"><code>hits[]</code></a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>at</code></td><td>—</td><td>Frame (1 = first) where the HitDef activates</td></tr>
+<tr><td><code>damage</code></td><td>—</td><td>Damage</td></tr>
+<tr><td><code>guardDamage</code></td><td><code>damage / 8</code></td><td>Damage on block</td></tr>
+<tr><td><code>level</code></td><td><code>medium</code></td><td><code>light</code> (hitstop 9, hitstun 12), <code>medium</code> (11, 16), <code>heavy</code> (13, 20)</td></tr>
+<tr><td><code>guard</code></td><td><code>mid</code></td><td><code>high</code>, <code>low</code>, <code>mid</code> or <code>unblockable</code></td></tr>
+<tr><td><code>knockback</code> / <code>airKnockback</code></td><td>by level</td><td>Velocity <code>[x, y]</code> applied to the opponent</td></tr>
+<tr><td><code>launch</code></td><td><code>false</code></td><td>Knocks down</td></tr>
+<tr><td><code>hitstop</code>, <code>hitstun</code>, <code>spark</code>, <code>shake</code></td><td>by level</td><td>Fine tuning</td></tr>
+</tbody></table>
+</div>
+<h3 id="projectile"><a class="header" href="#projectile"><code>projectile</code></a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>at</code></td><td>Frame it is fired on</td></tr>
+<tr><td><code>anim</code> / <code>hitAnim</code></td><td>Flight / impact animation</td></tr>
+<tr><td><code>speed</code> / <code>accel</code></td><td>Velocity and acceleration <code>[x, y]</code></td></tr>
+<tr><td><code>offset</code></td><td>Spawn position <code>[x, y]</code> relative to the fighter</td></tr>
+<tr><td><code>damage</code>, <code>level</code>, <code>launch</code>, <code>knockback</code></td><td>As in <code>hits</code></td></tr>
+<tr><td><code>hits</code></td><td>Number of hits</td></tr>
+<tr><td><code>removeTime</code></td><td>Ticks until it disappears</td></tr>
+<tr><td><code>priority</code></td><td>Priority against other projectiles</td></tr>
+</tbody></table>
+</div>
+<h3 id="elements-and-stun"><a class="header" href="#elements-and-stun">Elements and stun</a></h3>
+<p><code>hits[]</code> and <code>projectile</code> accept <code>element</code> (<code>fire</code>, <code>ice</code>, <code>lightning</code>, <code>earth</code>, <code>wind</code>, <code>water</code>) and <code>stun</code> (extra hit-stun ticks). The compiler adds the element's hit-stun and shake and tints the victim for a moment (<code>PalFX</code>): <code>ice</code> freezes longest (+16), <code>lightning</code> shocks (+22 and a 8-tick shake), <code>fire</code> burns red, <code>earth</code> shakes the screen, <code>wind</code> and <code>water</code> add a short tint. <code>stun</code> stacks on top and adds a 5-tick shake when none is set. Unknown elements are ignored.</p>
+<h3 id="command-syntax"><a class="header" href="#command-syntax">Command syntax</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Symbol</th><th>Meaning</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>F B U D</code> / <code>DF DB UF UB</code></td><td>Directions (relative to facing)</td><td><code>D, DF, F, x</code></td></tr>
+<tr><td><code>x y z a b c</code></td><td>Buttons (<code>s</code> = start)</td><td><code>x</code></td></tr>
+<tr><td><code>,</code></td><td>In sequence</td><td><code>F, F</code></td></tr>
+<tr><td><code>+</code></td><td>At the same time</td><td><code>x+y</code></td></tr>
+<tr><td><code>~</code></td><td>Release</td><td><code>~D, DF, F, x</code></td></tr>
+<tr><td><code>/</code></td><td>Hold</td><td><code>/B, F, x</code></td></tr>
+<tr><td><code>$</code></td><td>Inclusive direction (<code>$D</code> accepts DB, D, DF)</td><td><code>$D, x</code></td></tr>
+<tr><td><code>&gt;</code></td><td>No other input between steps</td><td><code>F, &gt;F</code></td></tr>
+<tr><td><code>N</code></td><td>Neutral direction (no direction held)</td><td><code>N, x</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="power-normals-punch-3-and-kick-3"><a class="header" href="#power-normals-punch-3-and-kick-3">Power normals (Punch 3 and Kick 3)</a></h2>
+<p>Every native fighter that does not declare a move bound to <code>z</code> or <code>c</code> gets four extra normals at compile time (<code>native/power_normals.rs</code>): <code>power_punch</code> and <code>crouch_power_punch</code> on <code>z</code> (default key <strong>E</strong>, shown as <em>Punch 3</em>), <code>power_kick</code> and <code>crouch_power_kick</code> on <code>c</code> (default key <strong>D</strong>, shown as <em>Kick 3</em>). Each one reuses the animation, timing, guard height and <code>cancels</code> of the fighter's heaviest ground normal of that family (<code>y</code> then <code>x</code> for punches, <code>b</code> then <code>a</code> for kicks, crouching variants take the crouching normal), named <code>&lt;base name&gt; Max</code>. Hits deal 130 % damage, are promoted to <code>heavy</code>, gain 4 hit-stun and 2 hit-stop ticks when those are set, and push 25 % harder. Moves that cancel into the base normal also cancel into its power version, and the new moves appear in the pause move list. Declare your own <code>z</code> or <code>c</code> move to opt out. Air versions are not generated here.</p>
+<p>All native fighters also receive two down-light-kick normals at compile time (<code>native/low_normals.rs</code>): <code>lowkick</code> on <code>D+a</code> while crouching and <code>airlowkick</code> on <code>D+a</code> in the air. They use the character's existing crouch-light-kick and air-kick animations, respectively, keep their pixel-art frames, and use low guard. The aerial version moves forward and downward to close short gaps. A fighter that already declares a move with the same id or <code>D+a</code> state/input keeps its authored move.</p>
+<h2 id="energy-charge-every-fighter"><a class="header" href="#energy-charge-every-fighter">Energy charge (every fighter)</a></h2>
+<p>Every native fighter can charge its meter: hold <strong>R</strong> (the <code>s</code> / Start input; the pause key in a fight is <strong>Esc</strong> or <strong>P</strong>). The fighter enters state <code>3920</code>, plays its <code>powerUp</code> animation on a loop with a blue glow and gains 9 to 48 power per tick (<code>native/charge_ramp.rs</code>, filling a 1000-power super in about one second) until the button is released (after at least 6 ticks) or the meter is full. The state is <code>movetype = I</code>, so a hit interrupts it, and a form-capable fighter still transforms with <code>T</code> once the meter reaches the form cost. The command is <code>charge_cmd</code> (<code>/s</code>) and shows as <code>Charge Energy</code> in the move list. The built-in AI charges only at level 3 or above, with less than 700 power, when the rival is more than 190 units away and is not attacking.</p>
+<p><code>taunt</code>, <code>powerUp</code> and <code>defeat*</code> have default versions if you do not define them. Other names get free numbers in file order. Add <code>"id": 8801</code> to any animation entry to pin a fixed action number for custom scripts or <code>p2Anim</code>.</p>
+<h2 id="exotic-mechanics-helpers-cinematic-throw-bossrules-scripts"><a class="header" href="#exotic-mechanics-helpers-cinematic-throw-bossrules-scripts">Exotic mechanics (<code>helpers</code>, cinematic <code>throw</code>, <code>bossRules</code>, <code>scripts</code>)</a></h2>
+<p>Every Ikemen GO / M.U.G.E.N expressive pattern works declaratively inside a single UMF JSON without editing Rust:</p>
+<div class="table-wrapper"><table><thead><tr><th>Section</th><th>Replaces in M.U.G.E.N / ZSS</th><th>Key capabilities</th></tr></thead><tbody>
+<tr><td><code>helpers.stand</code></td><td>Manual <code>Helper(keyctrl=1)</code> + <code>BindToParent</code> + <code>HitOverride</code></td><td>Independent hitbox/hurtbox Stand fighting alongside parent (<code>input</code> or <code>triggerMove</code>), toggle summon/recall, optional meter <code>drain</code>, <code>lifeTransfer</code> to parent via <code>ModifyPlayer</code></td></tr>
+<tr><td><code>helpers.clones</code></td><td>Manual AI clone <code>Helper</code>s</td><td><em>Kage Bunshin</em> autonomous clones (<code>count</code>, <code>maxActive</code>, <code>duration</code>, <code>walkSpeed</code>, <code>attackRange</code>, <code>oneHitPoof</code>), chase + random AI attack selection, camera freedom (<code>ScreenBound movecamera = 0, 0</code>)</td></tr>
+<tr><td><code>moves[].throw</code> (cinematic)</td><td>Custom <code>TargetState</code> + <code>ChangeAnim2</code> choreography</td><td><code>p2Anim</code> (<code>ChangeAnim2</code>), <code>cameraFree</code>, <code>camera</code> (<code>zoom</code>, <code>time</code>, <code>lag</code>, <code>freeze</code>), beat-by-beat <code>steps[]</code> (<code>at</code>, <code>bind</code>, <code>p2Anim</code>, <code>p2State</code>, <code>damage</code>, <code>shake</code>, <code>facing</code>, <code>launch</code>), auto <code>!GetHitVar(IsBound)</code> failsafe</td></tr>
+<tr><td><code>bossRules</code></td><td>UI-breaking <code>[StateDef -4]</code> <code>AssertSpecial</code> / <code>Text</code> / <code>ModifyPlayer</code></td><td><code>hideHud</code>, <code>hideLifeBar</code>, <code>hidePowerBar</code>, <code>hideTimer</code>, <code>freezeTimer</code>, continuous or triggered HUD <code>texts[]</code>, <code>modifyPlayer[]</code> (self or <code>"enemy"</code>), <code>phases[]</code> (<code>lifeBelowRatio</code>, <code>when</code>, <code>once</code>, <code>attackMul</code>, <code>defenceMul</code>)</td></tr>
+<tr><td><code>scripts</code></td><td>Raw <code>.zss</code> / <code>.cns</code> files (<code>[StateDef -4]</code>, <code>map()</code>)</td><td>Inline <code>zss</code> and/or <code>cns</code> strings (supports <code>[StateDef -4]</code> running even during <code>SuperPause</code>, <code>map(k) := v</code>, <code>teamMap(k) := v</code>), custom <code>commands[]</code>, and <code>@anim(name)</code> / <code>@move(id)</code> macro expansion</td></tr>
+</tbody></table>
+</div>
+<h2 id="air-abilities-every-special-and-super"><a class="header" href="#air-abilities-every-special-and-super">Air abilities (every special and super)</a></h2>
+<p>Every <code>special</code> and <code>super</code> with <code>when</code> unset or <code>"stand"</code> also gets an air version (state <code>20000 + ground state</code>, label <code>State -1, air &lt;name&gt;</code>), entered with the same command while the fighter is airborne. The fighter hovers at the start of the move (drift kept at 40 %), gravity returns at 45 % after 12 ticks, the move ends into the jump fall state (<code>50</code>) with control, and touching the ground interrupts it with the landing state (<code>52</code>). Air versions deal 70 % of the ground damage, projectiles leave angled down (slope 0.85) so they reach a grounded rival, and each jump allows one air special (<code>var(57)</code>, cleared on landing). Throws, flight moves and moves that declare <code>when: "crouch"</code> or <code>"air"</code> keep their own rules.</p>
+<h2 id="pixel-art-sprites-optional"><a class="header" href="#pixel-art-sprites-optional">Pixel-art sprites (optional)</a></h2>
+<p>If <code>assets/chars/sprites/&lt;id&gt;/</code> exists, the fighter is drawn from PNG files, the same way M.U.G.E.N fighters are drawn from sprites. Use transparent PNGs facing right, with the feet on the bottom edge and the same canvas size (400×400 RGBA) for every file of one fighter. Generate missing combat PNGs using <code>generate_image</code> with a validated canonical pixel-art anchor of that fighter (procedural or code-generated fighter art is forbidden).</p>
+<div class="table-wrapper"><table><thead><tr><th>File</th><th>Poses that use it</th></tr></thead><tbody>
+<tr><td><code>01_idle</code></td><td><code>idle0</code>, walk, run, crouch, guard, jump and every pose with no art of its own</td></tr>
+<tr><td><code>02_attack1</code> … <code>06_victory</code></td><td>jab / punch, kick, special, projectile and victory / taunt poses</td></tr>
+<tr><td><code>07_idle1</code>, <code>08_idle2</code></td><td>the other breathing frames of <code>idle</code> (<code>idle3</code> reuses <code>07_idle1</code>)</td></tr>
+<tr><td><code>09_hit1</code>, <code>10_hit2</code>, <code>11_hit3</code></td><td><code>hitH1</code>, <code>hitH2</code>, <code>hitH3</code> (damage)</td></tr>
+<tr><td><code>12_fall1</code>, <code>13_fall2</code></td><td><code>hitAir1</code>/<code>fall1</code>/<code>trip</code> and <code>hitAir2</code>/<code>fall2</code>/<code>bounce</code> (knocked into the air)</td></tr>
+<tr><td><code>14_lie</code></td><td><code>lie</code>, <code>dead</code>, <code>lose</code> and every <code>df*</code> pose (knocked out, with a low and wide hurt box)</td></tr>
+<tr><td><code>15_power0</code>, <code>16_power1</code>, <code>17_power2</code></td><td><code>powerup0</code>, <code>powerup1</code>, <code>powerup2</code> (transformation, key <code>T</code>)</td></tr>
+</tbody></table>
+</div>
+<p><code>meta.json</code> holds <code>{"refHeight": N}</code>: the height in pixels of the standing body in <code>01_idle.png</code>. Every pose of the fighter is scaled so that body is 100 units tall, so a lying or crouching sprite keeps the same pixel size. Without it each PNG is scaled to 100 units by its own height.</p>
+<p>When <code>awakeningPalette</code> overrides <code>hair</code>, each sprite's <code>frames.&lt;stem&gt;.awakeningHair</code> supplies <code>[left, top, right, bottom]</code> in source pixels. Hair recoloring is confined to that rectangle; sprites without one retain their original hair. Web packing rescales these coordinates with the sprite.</p>
+<p>Palette entries also apply to these PNGs: each pixel is matched to the shading line of a colour declared in <code>art.style.colors</code>, and the matching palette colour replaces it at the same shade. A palette key with no matching <code>art.style.colors</code> entry, or a colour nothing in the art resembles, is left untouched.</p>
+<p>The web build does not read this folder from disk. <code>scripts/build-web.sh</code> runs <code>ume-tools pack-sprites</code> (<code>crates/devtools</code>), which writes one <code>assets/chars/sprites/&lt;id&gt;.pack</code> per fighter (images capped at 768 px, 256 colours, <code>meta.json</code> anchors rescaled) into <code>web/dist</code>; the browser fetches a pack when the fighter is focused on the select screen or loaded for the fight, and the engine reads it through the same virtual folder. A failed download leaves the fighter without art, so the match waits for the pack and reports the failure.</p>
+<h2 id="validate"><a class="header" href="#validate">Validate</a></h2>
+<pre><code class="language-bash">cargo test --workspace --release
+</code></pre>
+<p>Review fighter art with <code>ume-tools audit-sprites</code>, which lists missing and reused poses, or in the game itself.</p>
+<p>Browser sprite packs load asynchronously. A newly downloaded or replaced pack invalidates the affected native fighter’s cached previews and all palettes; other fighters keep their caches. Match loading waits for the chosen built-in fighters’ packs and reports download failures rather than starting with a cached procedural fallback. Imported native definitions without a bundled pack remain supported.</p>
+<h2 id="share-a-fighter-as-a-pack"><a class="header" href="#share-a-fighter-as-a-pack">Share a fighter as a pack</a></h2>
+<p>A zip (or a <code>mugen/</code> folder) that holds one UMF <code>.json</code> next to a <code>sprites/</code> folder with <code>01_idle.png</code>, the pose PNGs and an optional <code>meta.json</code> (<code>axisX</code>, <code>axisY</code>, <code>refHeight</code> per pose) is imported as a native fighter, with no <code>.def</code>. The marketplace installs it like any other pack. <a href="https://github.com/juninmd/mugen-assets/tree/main/umf/Goku_SSJ4_UMF">Goku SSJ4 UMF</a> is the reference example.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Remaking-a-MUGEN-Fighter.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Passives.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Remaking-a-MUGEN-Fighter.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Passives.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

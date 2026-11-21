@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Passives - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="passives"><a class="header" href="#passives">Passives</a></h1>
+<p>Native (UMF) fighters opt into passive systems through the <code>passives</code> object of their JSON. Nothing is hardcoded to a fighter name: M.U.G.E.N. characters and native fighters without these keys are not affected.</p>
+<pre><code class="language-json">"passives": {
+  "meterRegen": 0.35,
+  "lifeRegen": 0.04,
+  "rage": { "maxMultiplier": 4.0, "exponent": 1.0, "startRatio": 1.0, "fullRatio": 0.01 },
+  "enrageTime": { "maxMultiplier": 5.0, "startSeconds": 15, "rampSeconds": 105, "exponent": 1.0 },
+  "stacks": { "damageGain": 0.07, "defenceGain": 0.015, "speedGain": 0.015, "maxStacks": 10, "decayTicks": 420, "resetOnRound": true, "specials": true, "supers": true }
+}
+</code></pre>
+<h2 id="regeneration"><a class="header" href="#regeneration">Regeneration</a></h2>
+<p><code>meterRegen</code> adds power every tick and <code>lifeRegen</code> adds life every tick while a round is in progress (compiled into <code>[Statedef -2]</code>).</p>
+<h2 id="rage-damage-grows-as-life-drops"><a class="header" href="#rage-damage-grows-as-life-drops">Rage (damage grows as life drops)</a></h2>
+<p>Used by Bruno. With <code>r = life / lifemax</code>:</p>
+<pre><code>progress   = clamp((startRatio - r) / (startRatio - fullRatio), 0, 1)
+multiplier = 1 + (maxMultiplier - 1) * progress ^ exponent
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Default</th><th>Range</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>maxMultiplier</code></td><td>4.0</td><td>1 to 6</td><td>Damage multiplier reached at <code>fullRatio</code></td></tr>
+<tr><td><code>exponent</code></td><td>1.0</td><td>0.25 to 4</td><td>1 is linear, above 1 stays low longer then ramps, below 1 ramps early</td></tr>
+<tr><td><code>startRatio</code></td><td>1.0</td><td>0.05 to 1</td><td>Life share where the bonus starts (1.0 = from full life)</td></tr>
+<tr><td><code>fullRatio</code></td><td>0.01</td><td>0 to <code>startRatio</code> - 0.01</td><td>Life share where the maximum is reached</td></tr>
+</tbody></table>
+</div>
+<p>With the defaults the curve is 1.0x at 100%, about 2.5x at 50%, about 3.7x at 10% and 4.0x at 1%. It is continuous: no steps.</p>
+<h2 id="ability-stacks-stronger-with-every-special"><a class="header" href="#ability-stacks-stronger-with-every-special">Ability stacks (stronger with every special)</a></h2>
+<p>Used by Sylene. Each time the fighter enters a special state (1000 to 1999) or a super state (3000 to 3899), including the air variants (+20000), it gains one stack up to <code>maxStacks</code> (1 to 30). Normals, fly, teleport and super speed do not stack.</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Default</th><th>Effect per stack</th></tr></thead><tbody>
+<tr><td><code>damageGain</code></td><td>0.05</td><td>Damage multiplier <code>1 + damageGain * stacks</code></td></tr>
+<tr><td><code>defenceGain</code></td><td>0</td><td>Defence multiplier <code>1 + defenceGain * stacks</code> (capped at 3x)</td></tr>
+<tr><td><code>speedGain</code></td><td>0</td><td>Horizontal movement speed <code>1 + speedGain * stacks</code> (capped at 1.5x, not applied while being hit)</td></tr>
+<tr><td><code>maxStacks</code></td><td>10</td><td>Stack ceiling</td></tr>
+<tr><td><code>decayTicks</code></td><td>0</td><td>When above 0, one stack is lost after this many ticks without gaining one</td></tr>
+<tr><td><code>resetOnRound</code></td><td>true</td><td>Stacks are cleared when a round starts</td></tr>
+<tr><td><code>specials</code>, <code>supers</code></td><td>true</td><td>Which move kinds count</td></tr>
+</tbody></table>
+</div>
+<h2 id="enrage-over-time-stronger-the-longer-the-fight-lasts"><a class="header" href="#enrage-over-time-stronger-the-longer-the-fight-lasts">Enrage over time (stronger the longer the fight lasts)</a></h2>
+<p>Used by Garan, the Ashen Oni. Damage grows with the time spent fighting in the current round. The counter runs only while the round is live (not during intro, KO or victory), stops when the fighter dies and restarts at every round.</p>
+<pre><code>progress   = clamp((fightSeconds - startSeconds) / rampSeconds, 0, 1)
+multiplier = 1 + (maxMultiplier - 1) * progress ^ exponent
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Default</th><th>Range</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>maxMultiplier</code></td><td>5.0</td><td>1 to 6</td><td>Damage multiplier reached at the end of the ramp</td></tr>
+<tr><td><code>startSeconds</code></td><td>0</td><td>0 and up</td><td>Seconds of fight before the bonus starts</td></tr>
+<tr><td><code>rampSeconds</code></td><td>60</td><td>above 0</td><td>Seconds from the start to the maximum</td></tr>
+<tr><td><code>exponent</code></td><td>1.0</td><td>0.25 to 4</td><td>1 is linear, above 1 ramps late, below 1 ramps early</td></tr>
+</tbody></table>
+</div>
+<p>Garan uses 15 s of grace and 105 s of ramp: 1x until 0:15, 3x at 1:07, 5x from 2:00.</p>
+<h2 id="composition-rule-and-cap"><a class="header" href="#composition-rule-and-cap">Composition rule and cap</a></h2>
+<pre><code>effective attack  = min(attackMul * rage * time * (1 + damageGain * stacks), max(attackMul, 8.0))
+effective defence = defenceMul * superDefenceMul * (1 + defenceGain * stacks)
+</code></pre>
+<p><code>attackMul</code> already contains the base <code>stats.attack</code> and the awakened or ascended form multipliers (PR #415), so every source multiplies. A time enrage of 5x alone is never clipped (even with a 1.3x awakened form it stays under the ceiling); combined with a full rage the 8x ceiling applies. The global ceiling is 8x the base damage; a fighter whose own <code>attackMul</code> is already higher (for example a M.U.G.E.N. <code>AttackMulSet</code>) keeps it. Without a <code>rage</code> or <code>stacks</code> key the original multipliers are used unchanged.</p>
+<h2 id="hud-and-effects"><a class="header" href="#hud-and-effects">HUD and effects</a></h2>
+<ul>
+<li>A thin strip along the bottom of the health bar shows rage progress (orange to gold) and a row of pips shows stacks.</li>
+<li>A second strip (violet to red) above the rage strip shows the time enrage progress.</li>
+<li>The awakened-form aura is reused: it appears once rage or stacks pass 8% and grows with the largest of the three. Rage alone tints it red, time alone tints it violet.</li>
+<li>Stack state is part of the netplay checksum.</li>
+</ul>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<p><code>crates/engine/src/passives.rs</code> (rules, state, <code>Fighter::effective_attack</code>), <code>crates/native/src/passive_spec.rs</code> (JSON), <code>src/hud/passive_meter.rs</code>, <code>src/passive_fx.rs</code>, <code>crates/engine/src/passive_time.rs</code>. Tests: <code>crates/engine/tests/passives.rs</code>, <code>crates/engine/tests/passive_time.rs</code>. Screenshots: <code>UME_TOUR=passives ultimate-mugen --shots &lt;dir&gt;</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="UMF-Character.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Rush-Cancel.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="UMF-Character.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Rush-Cancel.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

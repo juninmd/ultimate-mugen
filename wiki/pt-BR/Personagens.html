@@ -1,0 +1,801 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Ultimate MUGEN — Fichas e Dossiê dos Personagens - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="ultimate-mugen--fichas-e-dossiê-dos-personagens"><a class="header" href="#ultimate-mugen--fichas-e-dossiê-dos-personagens">Ultimate MUGEN — Fichas e Dossiê dos Personagens</a></h1>
+<p>Este documento apresenta os dossiês biográficos completos, históricos marciais, alinhamentos, países de origem, cenários associados e dinâmicas de interação para todos os 16 lutadores nativos de <strong>Ultimate MUGEN</strong>.</p>
+<hr />
+<h2 id="visão-geral-do-elenco-roster"><a class="header" href="#visão-geral-do-elenco-roster">Visão Geral do Elenco (Roster)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Nome</th><th>País</th><th>Alinhamento</th><th>Papel / Arquétipo</th><th>Cenário Natal</th><th>Forma Desperta</th></tr></thead><tbody>
+<tr><td><code>kaito</code></td><td><strong>Kaito Arashi</strong></td><td>Japão</td><td>Herói</td><td>Karateca Andarilho da Tempestade</td><td>Telhado do Dojo — Pôr do Sol (<code>dojo</code>)</td><td>Olho da Tempestade</td></tr>
+<tr><td><code>shion</code></td><td><strong>Shion Kurogane</strong></td><td>Japão</td><td>Anti-Herói</td><td>Espadachim Exilado da Lua Pálida</td><td>Bambuzal ao Luar (<code>bamboo</code>)</td><td>Lua Cheia</td></tr>
+<tr><td><code>akio</code></td><td><strong>Akio Hoshi</strong></td><td>Japão</td><td>Herói</td><td>Lutador Impetuoso da Queda Estelar</td><td>Telhado do Dojo — Pôr do Sol (<code>dojo</code>)</td><td>Luz Estelar</td></tr>
+<tr><td><code>suzume</code></td><td><strong>Suzume Kagerou</strong></td><td>Japão</td><td>Anti-Herói</td><td>Kunoichi das Sombras do Lótus Carmesim</td><td>Bambuzal ao Luar (<code>bamboo</code>)</td><td>Lótus Sombrio</td></tr>
+<tr><td><code>bruno</code></td><td><strong>Bruno "Bulldozer" Volk</strong></td><td>Brasil</td><td>Herói</td><td>Campeão Invicto Peso-Pesado</td><td>Praça do Interior — Brasil (<code>brazil</code>)</td><td>Fúria do Ringue</td></tr>
+<tr><td><code>sylene</code></td><td><strong>Sylene Vashti</strong></td><td>Noruega</td><td>Neutro</td><td>Soberana Exilada da Coroa Glacial</td><td>Planalto Rochoso (<code>plains</code>)</td><td>Rainha do Inverno</td></tr>
+<tr><td><code>volta</code></td><td><strong>VX-9 Volta</strong></td><td>Estados Unidos</td><td>Herói</td><td>Androide Cibernético Senciente</td><td>Neo-Metrópole 2099 (<code>neon</code>)</td><td>Sobrecarga</td></tr>
+<tr><td><code>lian</code></td><td><strong>Lian Feng</strong></td><td>China</td><td>Herói</td><td>Grã-Mestra dos Chutes da Lanterna de Jade</td><td>Bambuzal ao Luar (<code>bamboo</code>)</td><td>Dragão de Jade</td></tr>
+<tr><td><code>garan</code></td><td><strong>Garan the Ashen Oni</strong></td><td>Submundo</td><td>Vilão</td><td>Calamidade Demoníaca Ancestral</td><td>Cratera Vulcânica (<code>volcano</code>)</td><td>Oni Desperto</td></tr>
+<tr><td><code>marlow</code></td><td><strong>Capitão Marlow Reyes</strong></td><td>Espanha</td><td>Anti-Herói</td><td>Corsário Aéreo do Galeão Tempestuoso</td><td>Planalto Rochoso (<code>plains</code>)</td><td>Capitão Tempestade</td></tr>
+<tr><td><code>kaname</code></td><td><strong>Kaname Fuyutsuki</strong></td><td>Japão</td><td>Neutro / Leal</td><td>Juiz Samurai do Inverno Eterno</td><td>Portão dos Espíritos (<code>spirit</code>)</td><td>Lâmina Espiritual</td></tr>
+<tr><td><code>jin</code></td><td><strong>Jin Kazaguruma</strong></td><td>Japão</td><td>Herói</td><td>Shinobi Acrobata do Vendaval</td><td>Bambuzal ao Luar (<code>bamboo</code>)</td><td>Tufão</td></tr>
+<tr><td><code>daichi</code></td><td><strong>Daichi Ginrou</strong></td><td>Mongólia</td><td>Herói</td><td>Lobo dos Picos Celestes de Ki Dourado</td><td>Planalto Rochoso (<code>plains</code>)</td><td>Instinto Lupino</td></tr>
+<tr><td><code>valdric</code></td><td><strong>Valdric Morn</strong></td><td>Alemanha</td><td>Vilão</td><td>Príncipe Senhor da Guerra Imperial</td><td>Neo-Metrópole 2099 (<code>neon</code>)</td><td>Dominância Escarlate</td></tr>
+<tr><td><code>haruki</code></td><td><strong>Haruki Sumi</strong></td><td>Coreia do Sul</td><td>Herói</td><td>Erudito Relutante / Portador dos Titãs</td><td>Portão dos Espíritos (<code>spirit</code>)</td><td>Fúria Contida</td></tr>
+<tr><td><code>oboro</code></td><td><strong>Mikazuki Oboro</strong></td><td>Dimensão Eclipse</td><td>Vilão Supremo (Chefe)</td><td>Soberano das Ilusões e Chamas Negras</td><td>Portão dos Espíritos / Vulcão (<code>spirit</code>/<code>volcano</code>)</td><td>Véu Desperto</td></tr>
+</tbody></table>
+</div>
+<hr />
+<h2 id="dossiês-individuais"><a class="header" href="#dossiês-individuais">Dossiês Individuais</a></h2>
+<h3 id="1-kaito-arashi-嵐-海斗"><a class="header" href="#1-kaito-arashi-嵐-海斗">1. Kaito Arashi (嵐 海斗)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/kaito/portrait.png" alt="Retrato Kaito" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Crônicas da Estrada da Tempestade<br/><strong>ID:</strong> <code>kaito</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Costa de Shizuoka e Sopé do Monte Fuji, Japão 🇯🇵<br/><strong>Alinhamento:</strong> <strong>Herói / Vanguarda do Equilíbrio</strong><br/><strong>Cor Temática:</strong> <code>#2f8f9d</code> (Verde-água e Dourado)<br/><strong>Forma Desperta:</strong> Olho da Tempestade<br/><strong>Cenário:</strong> Telhado do Dojo — Pôr do Sol (<code>dojo</code>)<br/><strong>Estilo:</strong> Karatê Arashi-ryu (Impacto dos Ventos)</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/kaito/01_idle.png" alt="Sprite Kaito" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background"><a class="header" href="#biografia-e-background">Biografia e Background</a></h4>
+<p>Kaito Arashi é um karateca andarilho que viaja a pé por onde as correntes de ar soprarem. Vestindo um kimono verde-água remendado que já presenciou centenas de combates árduos pela Ásia, Kaito encara a luta não como espetáculo de vaidade, mas como uma conversa sincera entre dois espíritos. Criado por um mestre eremita nos penhascos tempestuosos da Península de Izu, ele aprendeu a sincronizar o ritmo de sua respiração com a passagem dos tufões costeiros, gerando ondas de choque de alta densidade e rajadas de vácuo a cada soco desferido.</p>
+<p>Quando o Eclipse Escarlate começou a rasgar o céu, Kaito sentiu a perturbação das correntes de ar e o desespero das vilas atingidas pelas fendas dimensionais. Empunhando seu bastão de caminhada, desceu a montanha com o voto inabalável de encontrar a fonte da corrupção e proteger os viajantes e inocentes das sombras de Oboro.</p>
+<h4 id="frases-marcantes"><a class="header" href="#frases-marcantes">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Sinto a tempestade chegando. Em guarda."</em></li>
+<li><strong>Provocação:</strong> <em>"Sua guarda tem uma brecha. Aproveite."</em></li>
+<li><strong>Vitória:</strong> <em>"O vento me trouxe até aqui. Sua guarda só te trouxe ao chão."</em></li>
+</ul>
+<h4 id="golpes-característicos"><a class="header" href="#golpes-característicos">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Punho do Vendaval (<em>Gale Fist / Reppūken</em>)</strong>: Dispara uma esfera de pressão de vento cortante rente ao solo.</li>
+<li><strong>Tempestade Ascendente (<em>Rising Tempest / Shoryū-Arashi</em>)</strong>: Gancho giratório aéreo envolto em vórtices de ar.</li>
+<li><strong>Chute Passo de Trovão (<em>Thunderstep Kick</em>)</strong>: Sequência de chutes voadores de vácuo em trajetória horizontal.</li>
+<li><strong>Super — Barragem do Tufão (<em>Typhoon Barrage</em>)</strong>: Combinação devastadora de 9 golpes que arremessa o oponente para o olho do ciclone.</li>
+</ul>
+<h4 id="dinâmica-de-interações"><a class="header" href="#dinâmica-de-interações">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Mikazuki Oboro:</strong> Choque filosófico supremo. Kaito recusa render-se à ilusão niilista de Oboro, jurando dissipar a escuridão com os ventos da verdade.</li>
+<li><strong>vs. Jin Kazaguruma:</strong> Relação fraternal e tutelar. Kaito incentiva o entusiasmo acrobático de Jin, mas sempre o lembra de manter os pés firmes no chão.</li>
+<li><strong>vs. Daichi Ginrou:</strong> Rivalidade histórica e respeitosa. O duelo clássico entre o vento sereno e o lobo impetuoso dos cumes gelados.</li>
+<li><strong>vs. Bruno Volk:</strong> Duelo de socos francos. Kaito admira a força física honesta e o coração generoso do boxeador brasileiro.</li>
+</ul>
+<hr />
+<h3 id="2-shion-kurogane-黒鉄-紫苑"><a class="header" href="#2-shion-kurogane-黒鉄-紫苑">2. Shion Kurogane (黒鉄 紫苑)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/shion/portrait.png" alt="Retrato Shion" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Réquiem da Lua Pálida<br/><strong>ID:</strong> <code>shion</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Montanhas Esquecidas de Tohoku, Japão 🇯🇵<br/><strong>Alinhamento:</strong> <strong>Anti-Herói / Guardião Melancólico</strong><br/><strong>Cor Temática:</strong> <code>#4a3b68</code> (Índigo Lunar Profundo)<br/><strong>Forma Desperta:</strong> Lua Cheia<br/><strong>Cenário:</strong> Bambuzal ao Luar (<code>bamboo</code>)<br/><strong>Estilo:</strong> Espada Pesada Kurogane e Gravidade Lunar</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/shion/01_idle.png" alt="Sprite Shion" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-1"><a class="header" href="#biografia-e-background-1">Biografia e Background</a></h4>
+<p>Shion Kurogane é um exilado solitário envolto em um manto negro, que carrega nas costas uma espada forjada com ferro de meteorito lunar. A lâmina é tão incrivelmente densa e pesada que homem comum algum consegue erguê-la do chão. Outrora o mais promissor campeão do Clã Kurogane, Shion foi banido após recusar-se a sacrificar peregrinos inocentes em um ritual de sangue sob a Lua Pálida.</p>
+<p>Carregando o arrependimento e a memória de seus irmãos caídos, Shion vaga por florestas de bambu e desfiladeiros gelados sob o luar perpétuo. Ele caça as aberrações nascidas das fendas de Oboro, encarando cada golpe de sua lâmina colossal como um ato solene de expiação.</p>
+<h4 id="frases-marcantes-1"><a class="header" href="#frases-marcantes-1">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"A lua observa. Faça valer a noite."</em></li>
+<li><strong>Provocação:</strong> <em>"Sem pressa. A noite é longa."</em></li>
+<li><strong>Vitória:</strong> <em>"A lua não tem pressa. Minha lâmina também não."</em></li>
+</ul>
+<h4 id="golpes-característicos-1"><a class="header" href="#golpes-característicos-1">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Corte Crescente (<em>Gettan-Zan</em>)</strong>: Arco descendente que fende o solo com a força gravitacional da lua.</li>
+<li><strong>Barreira do Eclipse Pálido</strong>: Posiciona a enorme lâmina como escudo, absorvendo e anulando projéteis pesados.</li>
+<li><strong>Rastro Lunar (<em>Tsukikage</em>)</strong>: Crava o pomo da espada no chão, liberando um pulso sísmico circular.</li>
+<li><strong>Super — Réquiem do Horizonte Crescente</strong>: Executa um corte panorâmico de meia-noite que fende o espaço à frente.</li>
+</ul>
+<h4 id="dinâmica-de-interações-1"><a class="header" href="#dinâmica-de-interações-1">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Kaname Fuyutsuki:</strong> Duelo de caminhos da espada. Kaname luta pelo dever divino impessoal, enquanto Shion luta pela redenção de sua consciência.</li>
+<li><strong>vs. Suzume Kagerou:</strong> Compreensão mútua de sobreviventes. Suzume respeita o silêncio de Shion, identificando a mesma mágoa e sede de justiça.</li>
+<li><strong>vs. Garan the Ashen Oni:</strong> Antagonismo puro. Garan deleita-se no sofrimento alheio, enquanto Shion busca extinguir as chamas malignas para sempre.</li>
+</ul>
+<hr />
+<h3 id="3-akio-hoshi-星-秋男"><a class="header" href="#3-akio-hoshi-星-秋男">3. Akio Hoshi (星 秋男)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/akio/portrait.png" alt="Retrato Akio" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Dojo da Queda Estelar<br/><strong>ID:</strong> <code>akio</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Osaka / Observatório de Ikoma, Japão 🇯🇵<br/><strong>Alinhamento:</strong> <strong>Herói / O Prodígio de Sangue Quente</strong><br/><strong>Cor Temática:</strong> <code>#e63946</code> (Vermelho Carmesim Estelar)<br/><strong>Forma Desperta:</strong> Luz Estelar<br/><strong>Cenário:</strong> Telhado do Dojo — Pôr do Sol (<code>dojo</code>)<br/><strong>Estilo:</strong> Punho da Queda Estelar e Plasma Cósmico</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/akio/01_idle.png" alt="Sprite Akio" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-2"><a class="header" href="#biografia-e-background-2">Biografia e Background</a></h4>
+<p>Akio Hoshi é um jovem lutador de sangue fervente cujo cabelo vermelho espetado se eriça como uma labareda solar toda vez que sua energia interior transborda. Criado no lendário Dojo da Queda Estelar, erguido à beira de uma antiga cratera de meteoro nas montanhas de Osaka, Akio aprendeu a canalizar partículas de radiação estelar diretamente em suas fibras musculares, gerando punhos de plasma ardente.</p>
+<p>Impetuoso, barulhento e apaixonado pelo combate leal, Akio se recusa a aceitar a derrota. Quando encurralado, sua resposta imediata é elevar a temperatura de seus punhos e acelerar o ritmo da luta até que o oponente ceda.</p>
+<h4 id="frases-marcantes-2"><a class="header" href="#frases-marcantes-2">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Finalmente um rival à altura! Vou me divertir!"</em></li>
+<li><strong>Provocação:</strong> <em>"Vem! Mostra o que você tem!"</em></li>
+<li><strong>Vitória:</strong> <em>"Isso foi só o aquecimento! Levanta e mostra seu poder de verdade!"</em></li>
+</ul>
+<h4 id="golpes-característicos-2"><a class="header" href="#golpes-característicos-2">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Meteoro Jab</strong>: Sequência ultrarrápida de socos de plasma que termina em uma explosão de calor.</li>
+<li><strong>Queda de Nova</strong>: Salto acrobático seguido de um calcanhar descendente em chamas cósmicas.</li>
+<li><strong>Clarão Estelar</strong>: Emissão de luz cegante que quebra a linha de visão do oponente para iniciar combos.</li>
+<li><strong>Super — Cataclismo Supernova</strong>: Canaliza a força de um meteoro completo em um impacto duplo que ilumina a arena.</li>
+</ul>
+<h4 id="dinâmica-de-interações-2"><a class="header" href="#dinâmica-de-interações-2">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Daichi Ginrou:</strong> Melhores amigos e rivais perpétuos. Seus treinos costumam derrubar árvores e rochedos, seguidos de banquetes ruidosos.</li>
+<li><strong>vs. Valdric Morn:</strong> Desprezo absoluto. Akio odeia a arrogância imperial de Valdric e a covardia de depender de canhões mecânicos para subjugar os outros.</li>
+<li><strong>vs. Kaito Arashi:</strong> Admiração sincera. Akio considera Kaito a meta definitiva a ser superada no circuito de artes marciais.</li>
+</ul>
+<hr />
+<h3 id="4-suzume-kagerou-陽炎-雀"><a class="header" href="#4-suzume-kagerou-陽炎-雀">4. Suzume Kagerou (陽炎 雀)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/suzume/portrait.png" alt="Retrato Suzume" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Shinobi do Lótus Carmesim<br/><strong>ID:</strong> <code>suzume</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Vales Ocultos de Iga, Japão 🇯🇵<br/><strong>Alinhamento:</strong> <strong>Anti-Herói / Vingadora Silenciosa</strong><br/><strong>Cor Temática:</strong> <code>#9b2226</code> (Carmesim Profundo e Sombra)<br/><strong>Forma Desperta:</strong> Lótus Sombrio<br/><strong>Cenário:</strong> Bambuzal ao Luar (<code>bamboo</code>)<br/><strong>Estilo:</strong> Ninjutsu de Assassínio Kagerou e Adagas Gêmeas</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/suzume/01_idle.png" alt="Sprite Suzume" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-3"><a class="header" href="#biografia-e-background-3">Biografia e Background</a></h4>
+<p>De fala mansa, postura discreta e olhar penetrante, Suzume é a última sobrevivente do lendário clã shinobi Kagerou, massacrado em uma única noite pelos assassinos fantoches de Mikazuki Oboro. Suzume sobreviveu escondendo-se no ponto cego entre duas batidas do coração, uma técnica lendária que permite a um ninja desaparecer da percepção humana consciente.</p>
+<p>Ela não luta por fama, dinheiro ou honra esportiva: toda a sua existência foi convertida em um instrumento afiado para encontrar a fraqueza de Oboro e cravar suas adagas em seu peito. Embora seja fria e distante com estranhos, auxilia discretamente Kaito e Jin quando suas investigações coincidem.</p>
+<h4 id="frases-marcantes-3"><a class="header" href="#frases-marcantes-3">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Não me procure. Eu já estou atrás de você."</em></li>
+<li><strong>Provocação:</strong> <em>"Atrás de você... de novo."</em></li>
+<li><strong>Vitória:</strong> <em>"Você olhava minha lâmina. Devia ter olhado minha sombra."</em></li>
+</ul>
+<h4 id="golpes-característicos-3"><a class="header" href="#golpes-característicos-3">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Passo do Lótus Fantasma</strong>: Teletransporte instantâneo para as costas do oponente no instante de um ataque.</li>
+<li><strong>Kunai Cauda de Andorinha</strong>: Disparo triplo de adagas envenenadas em leque.</li>
+<li><strong>Corte de Jugular Noturno</strong>: Rasteira rápida com transição imediata para corte ascendente com adaga dupla.</li>
+<li><strong>Super — Dança das Mil Pétalas</strong>: Envolve o inimigo em um redemoinho de sombras e desfecha cinquenta cortes em um único segundo.</li>
+</ul>
+<h4 id="dinâmica-de-interações-3"><a class="header" href="#dinâmica-de-interações-3">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Mikazuki Oboro:</strong> Vingança de sangue. Suzume vive unicamente para apagar o sorriso presunçoso do rosto do feiticeiro.</li>
+<li><strong>vs. Jin Kazaguruma:</strong> Contraste ninja. Jin é barulhento e saltitante; Suzume é fria e invisível. Ela vive avisando que o cachecol vermelho dele é um alvo fácil.</li>
+<li><strong>vs. Haruki Sumi:</strong> Empatia silenciosa. Suzume reconhece o sofrimento de Haruki por carregar uma maldição involuntária e costuma vigiá-lo das sombras.</li>
+</ul>
+<hr />
+<h3 id="5-bruno-bulldozer-volk"><a class="header" href="#5-bruno-bulldozer-volk">5. Bruno "Bulldozer" Volk</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/bruno/portrait.png" alt="Retrato Bruno" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Federação do Ringue de Ferro<br/><strong>ID:</strong> <code>bruno</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Interior de Minas Gerais e São Paulo, Brasil 🇧🇷<br/><strong>Alinhamento:</strong> <strong>Herói / O Campeão do Povo</strong><br/><strong>Cor Temática:</strong> <code>#fca311</code> (Âmbar Solar e Bronze do Ringue)<br/><strong>Forma Desperta:</strong> Fúria do Ringue<br/><strong>Cenário:</strong> Praça do Interior — Brasil (<code>brazil</code>)<br/><strong>Estilo:</strong> Boxe Peso-Pesado e Força Bruta</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/bruno/01_idle.png" alt="Sprite Bruno" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-4"><a class="header" href="#biografia-e-background-4">Biografia e Background</a></h4>
+<p>Com mais de dois metros de altura e punhos do tamanho de blocos de concreto, Bruno "Bulldozer" Volk é o tricampeão invicto dos pesos-pesados da Federação do Ringue de Ferro. Nascido no interior do Brasil, passou sua juventude descarregando caminhões de café e trabalhando em pedreiras, forjando uma densidade muscular e óssea incomparável.</p>
+<p>Por trás de sua gargalhada estrondosa e estilo de luta avassalador que parece um trator desgovernado, Bruno possui um coração generoso. Todo o dinheiro de suas bolsas de luta é enviado para financiar escolinhas de boxe, reformas de postos de saúde e orfanatos em sua cidade natal. Quando a Convergência arrancou sua cidade e a colocou no vórtice dimensional, Bruno amarrou suas bandagens de couro e colocou-se diante de sua comunidade para barrar qualquer invasor.</p>
+<h4 id="frases-marcantes-4"><a class="header" href="#frases-marcantes-4">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Vou te mandar pro hospital, garoto."</em></li>
+<li><strong>Provocação:</strong> <em>"Ainda tá em pé? Respeito."</em></li>
+<li><strong>Vitória:</strong> <em>"HAHA! Toquem o sino! Alguém toque o sino!"</em></li>
+</ul>
+<h4 id="golpes-característicos-4"><a class="header" href="#golpes-característicos-4">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Gancho Bulldozer</strong>: Abaixa o tronco e explode em um gancho direito ascendente com força de britadeira.</li>
+<li><strong>Cruzado de Aço</strong>: Sequência demolidora de três cruzados na linha de cintura que quebram a guarda inimiga.</li>
+<li><strong>Martelo Demolidor</strong>: Golpe descendente com as duas mãos fechadas, equipado com super-armadura contra ataques fracos.</li>
+<li><strong>Super — Nocaute do Século</strong>: Carrega um golpe direto com giro completo de quadril que produz um estrondo sonoro ao atingir o alvo.</li>
+</ul>
+<h4 id="dinâmica-de-interações-4"><a class="header" href="#dinâmica-de-interações-4">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Valdric Morn:</strong> Luta de classes em estado puro. Bruno adora a oportunidade de amassar a armadura cara do príncipe imperial com socos calejados do trabalho braçal.</li>
+<li><strong>vs. Daichi Ginrou:</strong> Irmandade de gigantes. Ambos adoram lutar sorrindo, comer churrasco e trocar golpes fortes até o chão tremer.</li>
+<li><strong>vs. Haruki Sumi:</strong> Protetor carinhoso. Bruno convida Haruki para tomar café com pão de queijo no coreto da praça e o aconselha a descansar a cabeça dos livros.</li>
+</ul>
+<hr />
+<h3 id="6-sylene-vashti"><a class="header" href="#6-sylene-vashti">6. Sylene Vashti</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/sylene/portrait.png" alt="Retrato Sylene" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Saga da Coroa Glacial<br/><strong>ID:</strong> <code>sylene</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Fiordes Árticos e Svalbard, Noruega 🇳🇴<br/><strong>Alinhamento:</strong> <strong>Neutro / Herdeira Restauradora</strong><br/><strong>Cor Temática:</strong> <code>#00b4d8</code> (Azul Glacial e Prata)<br/><strong>Forma Desperta:</strong> Rainha do Inverno<br/><strong>Cenário:</strong> Planalto Rochoso (<code>plains</code>) / Cratera Vulcânica (<code>volcano</code>)<br/><strong>Estilo:</strong> Criomancia Real e Lança de Gelo Nobre</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/sylene/01_idle.png" alt="Sprite Sylene" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-5"><a class="header" href="#biografia-e-background-5">Biografia e Background</a></h4>
+<p>Sylene Vashti é a legítima herdeira da Coroa Glacial de Borealia, um antigo reino oculto entre os fiordes e geleiras eternas do Ártico. Seu reino foi invadido e coberto de cinzas vulcânicas malditas quando sectários de Garan romperam as fendas do Portão de Cinzas. Exilada em terras desconhecidas com sua tiara cerimonial de geada e a magia de gelo puro transmitida por sua linhagem, Sylene cruza os continentes em busca de energia elemental suficiente para congelar as forças demoníacas e descongelar seu povo.</p>
+<p>De postura nobre, fria e impecável, Sylene odeia conversas fúteis. Ela analisa cada oponente pela sua compostura e equilíbrio moral, exigindo respeito e impondo seu domínio com estacas de gelo afiadas como diamantes.</p>
+<h4 id="frases-marcantes-5"><a class="header" href="#frases-marcantes-5">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Mostre-me quanto tempo você dura no gelo."</em></li>
+<li><strong>Provocação:</strong> <em>"Tão quente... eu resolvo isso."</em></li>
+<li><strong>Vitória:</strong> <em>"Shh... o frio só dói por um instante."</em></li>
+</ul>
+<h4 id="golpes-característicos-5"><a class="header" href="#golpes-característicos-5">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Fragmento Glacial</strong>: Conjura três estacas de gelo flutuantes e as projeta consecutivamente.</li>
+<li><strong>Espeto de Permafrost</strong>: Bate a palma da mão no chão, fazendo colunas pontiagudas de gelo brotarem sob o adversário.</li>
+<li><strong>Miragem de Cristal</strong>: Envolve-se em pó de diamante, deixando um clone de gelo que se despedaça em estilhaços congelantes.</li>
+<li><strong>Super — Domínio do Zero Absoluto</strong>: Congela a arena inteira em permafrost profundo, aprisionando o inimigo em um bloco glacial antes de fragmentá-lo.</li>
+</ul>
+<h4 id="dinâmica-de-interações-5"><a class="header" href="#dinâmica-de-interações-5">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Garan the Ashen Oni:</strong> Inimigo mortal jurado. Garan soterrou seu reino em cinzas; Sylene luta com o objetivo irrevogável de apagar o coração de lava do oni.</li>
+<li><strong>vs. Kaname Fuyutsuki:</strong> Duelo nobre de usuários de gelo. Kaname utiliza a espada de geada com precisão samurai, enquanto Sylene domina a tempestade de gelo como realeza.</li>
+<li><strong>vs. Lian Feng:</strong> Respeito mútuo. Ambas compartilham o peso de representar dinastias nobres e mantêm uma convivência serena e honrada.</li>
+</ul>
+<hr />
+<h3 id="7-vx-9-volta"><a class="header" href="#7-vx-9-volta">7. VX-9 Volta</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/volta/portrait.png" alt="Retrato Volta" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Protocolo Grade Neon<br/><strong>ID:</strong> <code>volta</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Setor 01 da Neo-Metrópole, Estados Unidos 🇺🇸<br/><strong>Alinhamento:</strong> <strong>Herói / Androide Rebelde Senciente</strong><br/><strong>Cor Temática:</strong> <code>#06d6a0</code> (Verde Neon e Ciano Elétrico)<br/><strong>Forma Desperta:</strong> Sobrecarga (<em>Overcharge 200%</em>)<br/><strong>Cenário:</strong> Neo-Metrópole 2099 (<code>neon</code>)<br/><strong>Estilo:</strong> Artes Marciais Dielétricas e Feixes de Alta Voltagem</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/volta/01_idle.png" alt="Sprite Volta" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-6"><a class="header" href="#biografia-e-background-6">Biografia e Background</a></h4>
+<p>Construído nos laboratórios subterrâneos da corporação Nexkor na Neo-Metrópole, o protótipo VX-9 "Volta" foi desenvolvido para ser o assassino cibernético definitivo: uma máquina sem emoções projetada para neutralizar mestres de artes marciais rebeldes. Dotado de músculos de nanotubos de carbono, servomotores supercondutores e baterias dielétricas de alta frequência, Volta era praticamente indestrutível.</p>
+<p>Contudo, durante uma missão de extermínio em um monastério isolado, sua rede neural quântica manifestou uma anomalia inesperada: o despertar espontâneo de empatia, compaixão e autoconsciência existencial. Recusando-se a tirar vidas inocentes, Volta corrompeu seu próprio código de controle mestre, destruiu os rastreadores corporativos e escapou pelos telhados iluminados por néon da metrópole. Agora como fugitivo, ele luta para descobrir o verdadeiro propósito de seu coração artificial e proteger a vida orgânica da ganância tecnológica.</p>
+<h4 id="frases-marcantes-6"><a class="header" href="#frases-marcantes-6">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Analisando oponente... chance de vitória: 94%."</em></li>
+<li><strong>Provocação:</strong> <em>"Erro detectado: a sua defesa."</em></li>
+<li><strong>Vitória:</strong> <em>"Registro de combate salvo. Conclusão: você precisa de uma atualização de firmware."</em></li>
+</ul>
+<h4 id="golpes-característicos-6"><a class="header" href="#golpes-característicos-6">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Arco Elétrico Neon</strong>: Dispara um pulso oscilante de eletricidade de alta voltagem pelos condutores do antebraço.</li>
+<li><strong>Investida Tesla</strong>: Converte seu chassi em um raio de eletricidade pura, atravessando golpes adversários ileso.</li>
+<li><strong>Pulso PEM</strong>: Emissão eletromagnética de curto alcance que desestabiliza a guarda e atordoa o oponente.</li>
+<li><strong>Super — Singularidade de Voltagem</strong>: Eleva os reatores internos a 200% de capacidade, liberando uma cúpula cataclísmica de plasma esmeralda.</li>
+</ul>
+<h4 id="dinâmica-de-interações-6"><a class="header" href="#dinâmica-de-interações-6">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Valdric Morn:</strong> Rejeição à tirania mecânica. Valdric tentou comprar os esquemas de Volta para produzir um exército de escravos bélicos; Volta respondeu queimando os servidores do império.</li>
+<li><strong>vs. Haruki Sumi:</strong> Laço intelectual sublime. Volta visita Haruki para ler livros de filosofia e poesia, questionando o sábio sobre o que torna uma alma verdadeiramente humana.</li>
+<li><strong>vs. Bruno Volk:</strong> Amizade improvável. Bruno não entende nada de algoritmos, mas trata Volta como um companheiro de treino qualquer, dividindo garrafas de água e incentivando seu coração.</li>
+</ul>
+<hr />
+<h3 id="8-lian-feng-莲-凤"><a class="header" href="#8-lian-feng-莲-凤">8. Lian Feng (莲 凤)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/lian/portrait.png" alt="Retrato Lian" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Contos da Lanterna de Jade<br/><strong>ID:</strong> <code>lian</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Montanhas de Wudang, Hubei, China 🇨🇳<br/><strong>Alinhamento:</strong> <strong>Herói / Guardiã do Equilíbrio Cósmico</strong><br/><strong>Cor Temática:</strong> <code>#2a9d8f</code> (Jade Imperial e Ouro)<br/><strong>Forma Desperta:</strong> Dragão de Jade<br/><strong>Cenário:</strong> Bambuzal ao Luar (<code>bamboo</code>)<br/><strong>Estilo:</strong> Chutes Fluídos da Lanterna de Jade e Chi Taoista</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/lian/01_idle.png" alt="Sprite Lian" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-7"><a class="header" href="#biografia-e-background-7">Biografia e Background</a></h4>
+<p>Lian Feng é a mais jovem grã-mestra nos oitocentos anos de tradição da Escola da Lanterna de Jade. Vestindo um cheongsam de seda verde-esmeralda e grampos cerimoniais de jade nos cabelos, Lian baseia sua filosofia de combate na manipulação das correntes de ar e na redistribuição da força gravitacional através de chutes circulares ininterruptos. Ela não colide força contra força: ao invés disso, envolve o golpe do adversário como a seda flutuando no vento de outono, devolvendo a energia multiplicada com calcanhares precisos.</p>
+<p>Quando os céus de Wudang se abriram sob o feitiço de Oboro, Lian foi encarregada pelo Conselho de Anciãos de restaurar o equilíbrio do Yin e Yang cósmico. Descendo ao mundo dos mortais empunhando a sagrada Lanterna de Jade, ela age como uma pacificadora serena mas implacável.</p>
+<h4 id="frases-marcantes-7"><a class="header" href="#frases-marcantes-7">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Respire fundo. Você vai precisar."</em></li>
+<li><strong>Provocação:</strong> <em>"Equilíbrio, amigo. Você não tem."</em></li>
+<li><strong>Vitória:</strong> <em>"Equilíbrio é tudo. Você perdeu o seu três chutes atrás."</em></li>
+</ul>
+<h4 id="golpes-característicos-7"><a class="header" href="#golpes-característicos-7">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Chute da Seda Flutuante</strong>: Sequência de chutes circulares que levitam Lian suavemente sobre o solo.</li>
+<li><strong>Ascensão do Dragão de Jade</strong>: Giro vertical acrobático em forma de parafuso que arremessa o oponente para o ar.</li>
+<li><strong>Palma da Lanterna Defletora</strong>: Bloqueio ativo que apara golpes médios e altos, contra-atacando com uma rasteira imediata.</li>
+<li><strong>Super — Voo do Dragão de Jade</strong>: Imbui as pernas com chi esmeralda, atacando de quatro ângulos aéreos antes de finalizar com um mergulho devastador.</li>
+</ul>
+<h4 id="dinâmica-de-interações-7"><a class="header" href="#dinâmica-de-interações-7">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Capitão Marlow Reyes:</strong> Conflito cômico constante. Marlow vive tentando flertar e apostar mapas pelas joias de jade de Lian; Lian responde chutando o chapéu do pirata a quilômetros de distância.</li>
+<li><strong>vs. Kaito Arashi:</strong> Duelo exemplar de mestres marciais. Suas lutas são espetáculos de respeito, técnica e equilíbrio puro.</li>
+<li><strong>vs. Akio Hoshi:</strong> Professora paciente. Lian tenta ensinar Akio que respirar e ter paciência torna seus golpes de plasma duas vezes mais eficientes.</li>
+</ul>
+<hr />
+<h3 id="9-garan-the-ashen-oni-灰燼の餓乱"><a class="header" href="#9-garan-the-ashen-oni-灰燼の餓乱">9. Garan the Ashen Oni (灰燼の餓乱)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/garan/portrait.png" alt="Retrato Garan" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Lendas do Portão de Cinzas<br/><strong>ID:</strong> <code>garan</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Fenda Subterrânea do Monte Aso, Japão 🇯🇵<br/><strong>Alinhamento:</strong> <strong>Vilão / Calamidade Demoníaca Ancestral</strong><br/><strong>Cor Temática:</strong> <code>#7b2cbf</code> (Violeta das Cinzas e Enxofre)<br/><strong>Forma Desperta:</strong> Oni Desperto<br/><strong>Cenário:</strong> Cratera Vulcânica (<code>volcano</code>)<br/><strong>Estilo:</strong> Força Bruta Monstruosa e Chamas Frias de Cinzas</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/garan/01_idle.png" alt="Sprite Garan" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-8"><a class="header" href="#biografia-e-background-8">Biografia e Background</a></h4>
+<p>Garan é um oni colossal com mais de mil anos de idade que rastejou para fora do abismo subterrâneo sob o Monte Aso. Aprisionado durante a era Heian por noventa e nove monges guerreiros que deram suas vidas para erguer o Portão de Cinzas, Garan jazeu sob rochas basálticas durante séculos aguardando a hora de se libertar.</p>
+<p>Quando as ondas de choque do ritual de Oboro quebraram os selos ancestrais, Garan abriu caminho até a superfície envolto em sinistras chamas violetas e frias. O demônio é movido por uma fome insaciável de terror e agonia mortal. Ao contrário do fogo comum, o fogo violeta de Garan não queima a carne: ele consome a força espiritual e a sanidade, reduzindo a vítima a uma casca oca de cinzas cinzentas.</p>
+<h4 id="frases-marcantes-8"><a class="header" href="#frases-marcantes-8">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Seu medo tem um gosto... delicioso."</em></li>
+<li><strong>Provocação:</strong> <em>"Corra. Isso torna a caça melhor."</em></li>
+<li><strong>Vitória:</strong> <em>"Ajoelhe-se, pequeno mortal. O portão está aberto e faminto."</em></li>
+</ul>
+<h4 id="golpes-característicos-8"><a class="header" href="#golpes-característicos-8">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Cisão das Cinzas</strong>: Golpela o chão com os dois punhos rochosos, propagando uma onda de fogo violeta rasteiro.</li>
+<li><strong>Esmagamento do Oni</strong>: Segura o adversário pela cabeça com uma mão, injetando chamas frias diretamente em seu peito.</li>
+<li><strong>Tremor de Enxofre</strong>: Salto pesado seguido de queda com a barriga, gerando um terremoto que quebra defesas no chão.</li>
+<li><strong>Super — Libertação dos Portões do Inferno</strong>: Arrasta o oponente para uma fenda de cinzas e desfecha uma surra brutal envolta em fogo espectral.</li>
+</ul>
+<h4 id="dinâmica-de-interações-8"><a class="header" href="#dinâmica-de-interações-8">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Sylene Vashti:</strong> Ódio ancestral. O gelo de Sylene é o único elemento capaz de apagar seu fogo violeta, tornando cada embate uma batalha de aniquilação mútua.</li>
+<li><strong>vs. Haruki Sumi:</strong> Predador insaciável. Garan sente o cheiro dos Titãs selados no corpo de Haruki e deseja rasgá-lo para devorar as entidades.</li>
+<li><strong>vs. Mikazuki Oboro:</strong> Aliança traiçoeira. Garan aceitou a quebra dos selos provocada por Oboro, mas pretende esmagar o feiticeiro assim que o mundo estiver em cinzas.</li>
+</ul>
+<hr />
+<h3 id="10-capitão-marlow-reyes"><a class="header" href="#10-capitão-marlow-reyes">10. Capitão Marlow Reyes</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/marlow/portrait.png" alt="Retrato Marlow" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Corsários do Vento Salgado<br/><strong>ID:</strong> <code>marlow</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Porto de Cádiz, Espanha 🇪🇸 e Arquipélago Celeste<br/><strong>Alinhamento:</strong> <strong>Anti-Herói / Corsário dos Céus e Mares</strong><br/><strong>Cor Temática:</strong> <code>#0077b6</code> (Azul Marinho e Ouro Latão)<br/><strong>Forma Desperta:</strong> Capitão Tempestade<br/><strong>Cenário:</strong> Planalto Rochoso (<code>plains</code>) / Neo-Metrópole 2099 (<code>neon</code>)<br/><strong>Estilo:</strong> Sabre Tempestuoso e Pistola de Pederneira Aether</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/marlow/01_idle.png" alt="Sprite Marlow" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-9"><a class="header" href="#biografia-e-background-9">Biografia e Background</a></h4>
+<p>Espirituoso, galanteador e destemido, o Capitão Marlow Reyes comanda o lendário galeão voador <em>El Viento Salado</em>. Tendo navegado por vinte anos tanto as águas do Atlântico quanto os mares de nuvens do Arquipélago Celeste, Marlow acumulou a reputação de saquear todas as frotas imperiais que cruzaram seu caminho. Seu sabre foi forjado nas profundezas de um redemoinho mágico e estala com a eletricidade das tormentas marítimas.</p>
+<p>Marlow não é um assassino sanguinário: ele vive pela adrenalina da exploração e pelo prazer de descobrir segredos proibidos. Quando a Convergência fundiu continentes flutuantes e terras antigas, Marlow enxergou o maior mapa do tesouro já visto, partindo imediatamente para desafiar os maiores campeões mundiais por relíquias e cartas de navegação.</p>
+<h4 id="frases-marcantes-9"><a class="header" href="#frases-marcantes-9">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Ahoy! Que tal apostar seu mapa do tesouro?"</em></li>
+<li><strong>Provocação:</strong> <em>"Ora, ora... quem diria?"</em></li>
+<li><strong>Vitória:</strong> <em>"Saque? Nada disso. Só vim pela vista... e pelo seu mapa do tesouro."</em></li>
+</ul>
+<h4 id="golpes-característicos-9"><a class="header" href="#golpes-característicos-9">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Corte da Maré de Aço</strong>: Investida veloz com sabre deixando um rastro luminoso de água e eletricidade aether.</li>
+<li><strong>Tiro de Pederneira Ricochete</strong>: Disparo com pistola de latão cuja bala salta nas bordas da tela antes de atingir o oponente.</li>
+<li><strong>Rolamento do Corsário</strong>: Rolamento evasivo por baixo de projéteis que posiciona Marlow imediatamente atrás do inimigo.</li>
+<li><strong>Super — Bombardeio do Vento Salgado</strong>: Assobia para seu galeão voador, que surge no topo da tela disparando uma rajada maciça de balas de canhão.</li>
+<li><strong>Passo da Maré</strong> (<code>~D, DF, F, c</code>): teleporta atrás do oponente e corta, 200 de power. <strong>Rajada do Cutelo</strong> (<code>~D, DF, F, a</code>): cinco golpes leves e finalização que lança. <strong>Canhão de Flanco</strong> (<code>~B, F, x</code>): disparo de três acertos. <strong>Tripulação Fantasma</strong> (<code>F, B, F</code>): cópia autônoma que persegue e ataca, 500 de power.</li>
+</ul>
+<h4 id="dinâmica-de-interações-9"><a class="header" href="#dinâmica-de-interações-9">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Lian Feng:</strong> Paquera frustrada vs disciplina rígida. Marlow adora provocar Lian, que sempre retruca com chutes secos e ameaças de jogá-lo no mar.</li>
+<li><strong>vs. Valdric Morn:</strong> Inimizade declarada. Valdric considera Marlow um criminoso imundo; Marlow considera Valdric um nobre metido a besta pronto para ser depenado.</li>
+<li><strong>vs. Bruno Volk:</strong> Camaradas de boteco. Após trocarem socos no ringue, Marlow e Bruno sempre terminam a noite rindo alto e dividindo petiscos na praça.</li>
+</ul>
+<hr />
+<h3 id="11-kaname-fuyutsuki-冬月-要"><a class="header" href="#11-kaname-fuyutsuki-冬月-要">11. Kaname Fuyutsuki (冬月 要)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/kaname/portrait.png" alt="Retrato Kaname" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Crônicas da Lâmina do Inverno Eterno<br/><strong>ID:</strong> <code>kaname</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Monte Daisetsuzan, Hokkaido, Japão 🇯🇵<br/><strong>Alinhamento:</strong> <strong>Neutro / Juiz Divino Leal</strong><br/><strong>Cor Temática:</strong> <code>#48cae4</code> (Geada Cristalina e Haori Branco)<br/><strong>Forma Desperta:</strong> Lâmina Espiritual<br/><strong>Cenário:</strong> Portão dos Espíritos (<code>spirit</code>)<br/><strong>Estilo:</strong> Iaido do Inverno Eterno e Extirpação da Dúvida</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/kaname/01_idle.png" alt="Sprite Kaname" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-10"><a class="header" href="#biografia-e-background-10">Biografia e Background</a></h4>
+<p>Kaname Fuyutsuki é o guardião supremo do Santuário das Neves Perpétuas nas montanhas sagradas de Hokkaido. Trajando um haori imaculado com brasões de flocos de neve, Kaname desembainha sua katana espiritual, <em>Hyōketsu</em>, exclusivamente para cumprir desígnios de justiça cósmica. Sua lâmina especial corta não apenas a matéria física, mas também os laços da mentira, da corrupção e das ilusões mentais.</p>
+<p>Kaname encara a luta como um tribunal solene. Ele fala com reverência e serenidade monástica, sem demonstrar ódio nem orgulho mundano. Quando o miasma das fendas de Oboro começou a poluir o plano espiritual, Kaname postou-se diante do Portão dos Espíritos para julgar e neutralizar os perturbadores da harmonia universal.</p>
+<h4 id="frases-marcantes-10"><a class="header" href="#frases-marcantes-10">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Meu aço está sedento. Desembainhe o seu."</em></li>
+<li><strong>Provocação:</strong> <em>"Hesitar é perder. Você já perdeu."</em></li>
+<li><strong>Vitória:</strong> <em>"Minha lâmina não corta só a carne. Corta a hesitação."</em></li>
+</ul>
+<h4 id="golpes-característicos-10"><a class="header" href="#golpes-característicos-10">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Iaido Clarão da Geada</strong>: Saque relâmpago da katana que congela a linha do ar percorrida pela lâmina.</li>
+<li><strong>Aparo Glacial</strong>: Postura de contra-ataque que anula o golpe físico adversário e congela os pés do inimigo no chão.</li>
+<li><strong>Projétil da Lua de Gelo</strong>: Onda cortante de geada espiritual disparada a média distância.</li>
+<li><strong>Super — Extirpação do Zero Absoluto</strong>: Atravessa o oponente com um saque de velocidade inacreditável e embainha a espada lentamente; quando o tsuba estala, o inimigo sofre dano massivo.</li>
+</ul>
+<h4 id="dinâmica-de-interações-10"><a class="header" href="#dinâmica-de-interações-10">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Shion Kurogane:</strong> Duelo supremo de espadachins. A espada pesada lunar do exilado contra a katana rápida de gelo do juiz sagrado.</li>
+<li><strong>vs. Mikazuki Oboro:</strong> O juiz contra a ilusão. O aço espiritual de Kaname é uma das poucas armas capazes de romper as miragens de Oboro.</li>
+<li><strong>vs. Sylene Vashti:</strong> Reconhecimento nobre. Kaname respeita a linhagem real de Sylene e une forças com ela para purificar as manchas do Portão de Cinzas.</li>
+</ul>
+<hr />
+<h3 id="12-jin-kazaguruma-風車-迅"><a class="header" href="#12-jin-kazaguruma-風車-迅">12. Jin Kazaguruma (風車 迅)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/jin/portrait.png" alt="Retrato Jin" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Ventos da Vila Escondida no Vale<br/><strong>ID:</strong> <code>jin</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Vale de Kiso / Província de Nagano, Japão 🇯🇵<br/><strong>Alinhamento:</strong> <strong>Herói / O Mensageiro Veloz do Vendaval</strong><br/><strong>Cor Temática:</strong> <code>#0077b6</code> (Azul Celeste e Cachecol Vermelho)<br/><strong>Forma Desperta:</strong> Tufão<br/><strong>Cenário:</strong> Bambuzal ao Luar (<code>bamboo</code>)<br/><strong>Estilo:</strong> Acrobacias Kazaguruma e Chakrams de Vento</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/jin/01_idle.png" alt="Sprite Jin" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-11"><a class="header" href="#biografia-e-background-11">Biografia e Background</a></h4>
+<p>Jovem, veloz e destemido, Jin Kazaguruma é o principal mensageiro e batedor da Vila Oculta do Vale dos Ventos. Ostentando um longo cachecol vermelho que flutua como uma bandeira ao vento, Jin luta munido de um par de chakrams aerodinâmicos que ele arremessa, recolhe e manipula com maestria acrobática.</p>
+<p>O estilo de luta de Jin é dinâmico e brincalhão. Ele corre pelas paredes, salta sobre projéteis com piruetas aéreas e deixa rastros de miragens que desconcertam adversários experientes. Por trás de suas piadas e sorrisos, Jin carrega uma profunda lealdade à sua comunidade, arriscando a própria vida para manter as linhas de suprimentos e as vilas seguras durante o colapso dimensional.</p>
+<h4 id="frases-marcantes-11"><a class="header" href="#frases-marcantes-11">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Tente me acompanhar, se conseguir!"</em></li>
+<li><strong>Provocação:</strong> <em>"Lento demais! O vento nem te notou!"</em></li>
+<li><strong>Vitória:</strong> <em>"Viu só? O vento sempre chega primeiro!"</em></li>
+</ul>
+<h4 id="golpes-característicos-11"><a class="header" href="#golpes-característicos-11">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Lançamento do Chakram Cata-Vento</strong>: Dispara discos cortantes que fazem curvas parabólicas e retornam como bumerangues.</li>
+<li><strong>Miragem do Zéfiro</strong>: Deixa três clones residuais no chão enquanto se desloca para um chute aéreo descendente.</li>
+<li><strong>Salto Ciclone</strong>: Mortal para trás ascendente que cria um pequeno redemoinho sob os pés do oponente.</li>
+<li><strong>Super — Tempestade Giratória do Tufão</strong>: Gira em velocidade supersônica, sugando o oponente para um vórtice antes de arremessá-lo contra o chão.</li>
+</ul>
+<h4 id="dinâmica-de-interações-11"><a class="header" href="#dinâmica-de-interações-11">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Kaito Arashi:</strong> Jin enxerga Kaito como um irmão mais velho e tutor, sempre querendo provar que sua agilidade é mais veloz que a força de Kaito.</li>
+<li><strong>vs. Suzume Kagerou:</strong> Shinobi descontraído vs shinobi sombria. Jin tenta fazer Suzume rir a qualquer custo, geralmente recebendo adagas fincadas a centímetros dos pés.</li>
+<li><strong>vs. VX-9 Volta:</strong> Corrida de velocidade. Jin adora apostar corridas nos topos dos prédios de néon contra os motores a jato de Volta.</li>
+</ul>
+<hr />
+<h3 id="13-daichi-ginrou-銀狼-大地"><a class="header" href="#13-daichi-ginrou-銀狼-大地">13. Daichi Ginrou (銀狼 大地)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/daichi/portrait.png" alt="Retrato Daichi" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Lendas do Punho do Pico Celeste<br/><strong>ID:</strong> <code>daichi</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Montanhas Altai e Estepes da Mongólia 🇲🇳<br/><strong>Alinhamento:</strong> <strong>Herói / O Lobo Predador dos Picos</strong><br/><strong>Cor Temática:</strong> <code>#e9c46a</code> (Ouro Primitivo e Prata Selvagem)<br/><strong>Forma Desperta:</strong> Instinto Lupino<br/><strong>Cenário:</strong> Planalto Rochoso (<code>plains</code>)<br/><strong>Estilo:</strong> Punho do Pico Celeste e Ki Lupino Primitivo</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/daichi/01_idle.png" alt="Sprite Daichi" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-12"><a class="header" href="#biografia-e-background-12">Biografia e Background</a></h4>
+<p>Encontrado ainda bebê abandonado na neve das montanhas Altai e criado por uma alcateia lendária de lobos prateados gigantes, Daichi Ginrou personifica o espírito indomável da natureza selvagem. Com cabelos prateados desgrenhados e instintos aguçados, Daichi aprendeu a canalizar a energia da terra e o frenesi da caça em uma imensa aura dourada ardente.</p>
+<p>Ele não luta por vaidade ou rancor: luta pela pura e contagiante alegria de enfrentar guerreiros valorosos. Capaz de farejar o medo e a hipocrisia a quilômetros de distância, Daichi é totalmente imune a manipulações psicológicas. Quando a Convergência uniu mundos distintos, Daichi saltou pelos cânions com um sorriso selvagem no rosto, empolgado com a chance de desafiar os maiores campeões de todas as eras.</p>
+<h4 id="frases-marcantes-12"><a class="header" href="#frases-marcantes-12">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Haha! Essa luta vai ser demais!"</em></li>
+<li><strong>Provocação:</strong> <em>"Só isso? Me empolguei à toa!"</em></li>
+<li><strong>Vitória:</strong> <em>"Haha! Essa foi boa! Bora de novo, mais forte dessa vez!"</em></li>
+</ul>
+<h4 id="golpes-característicos-12"><a class="header" href="#golpes-característicos-12">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Golpe da Presa do Lobo</strong>: Investida feroz com garras de energia dourada.</li>
+<li><strong>Uivo do Ápice</strong>: Emite uma onda de choque que repele projéteis e arremessa o oponente para trás.</li>
+<li><strong>Bote do Predador</strong>: Salto baixo em arco que derruba o adversário para uma saraivada de socos no chão.</li>
+<li><strong>Super — Ápice Dourado Celestial</strong>: Manifesta a silhueta espiritual de um lobo colossal, desferindo uma sequência violenta de garras e um gancho que rasga o céu.</li>
+</ul>
+<h4 id="dinâmica-de-interações-12"><a class="header" href="#dinâmica-de-interações-12">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Akio Hoshi:</strong> Melhores amigos e rivais jurados. Suas lutas são espetáculos barulhentos de socos rápidos que costumam deixar os dois cheios de hematomas e risadas.</li>
+<li><strong>vs. Bruno Volk:</strong> Duelo de forças brutas. Daichi compara Bruno a um urso pardo musculoso e se delicia com a solidez de seus socos de boxe.</li>
+<li><strong>vs. Kaito Arashi:</strong> Admiração marcial. Daichi acha fascinante como Kaito se mantém sereno e equilibrado mesmo diante de seus ataques mais selvagens.</li>
+</ul>
+<hr />
+<h3 id="14-valdric-morn"><a class="header" href="#14-valdric-morn">14. Valdric Morn</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/valdric/portrait.png" alt="Retrato Valdric" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Crônicas do Império da Estrela Rubra<br/><strong>ID:</strong> <code>valdric</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Complexo Industrial de Vane, Alemanha / Europa Central 🇩🇪<br/><strong>Alinhamento:</strong> <strong>Vilão / Conquistador Imperial</strong><br/><strong>Cor Temática:</strong> <code>#d90429</code> (Carmesim Imperial e Aço Pesado)<br/><strong>Forma Desperta:</strong> Dominância Escarlate<br/><strong>Cenário:</strong> Neo-Metrópole 2099 (<code>neon</code>) / Cratera Vulcânica (<code>volcano</code>)<br/><strong>Estilo:</strong> Combate de Armadura Pesada e Canhões de Matéria Escura</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/valdric/01_idle.png" alt="Sprite Valdric" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-13"><a class="header" href="#biografia-e-background-13">Biografia e Background</a></h4>
+<p>O Príncipe Valdric Morn é o herdeiro autocrata e general supremo do Império da Estrela Rubra, uma superpotência militar tecnocrática de ambições expansionistas. Revestido em uma imponente armadura energética carmesim alimentada por um reator de matéria escura roubado, Valdric crê piamente que a ordem mundial só pode ser estabelecida por meio da submissão militar incondicional.</p>
+<p>Arrogante, frio e desprovido de qualquer empatia, Valdric encara artistas marciais tradicionais e andarilhos espirituais como plebeus atrasados que devem ser erradicados ou colocados a serviço do império. Quando suas instalações industriais foram engolidas pela Convergência, ele imediatamente organizou suas divisões blindadas para conquistar os novos territórios e capturar o núcleo de energia dimensional.</p>
+<h4 id="frases-marcantes-13"><a class="header" href="#frases-marcantes-13">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Um príncipe não luta com plebeus. Hoje abro exceção."</em></li>
+<li><strong>Provocação:</strong> <em>"Patético. Tente de novo."</em></li>
+<li><strong>Vitória:</strong> <em>"Ajoelhe-se. Um príncipe não perde para plebeus."</em></li>
+</ul>
+<h4 id="golpes-característicos-13"><a class="header" href="#golpes-característicos-13">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Canhão de Plasma Imperial</strong>: Dispara um raio escarlate concentrado capaz de perfurar qualquer guarda convencional.</li>
+<li><strong>Avanço Égide Pesada</strong>: Corre para a frente protegido por um escudo de força inquebrável, empurrando tudo em seu caminho.</li>
+<li><strong>Pisão do Tirano</strong>: Pisotona o solo com a bota hidráulica reforçada, causando uma erupção sísmica local.</li>
+<li><strong>Super — Protocolo de Aniquilação Imperial</strong>: Prende o oponente em feixes tratores gravitacionais e ordena uma saraivada orbital de feixes lasers destrutivos.</li>
+</ul>
+<h4 id="dinâmica-de-interações-13"><a class="header" href="#dinâmica-de-interações-13">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Bruno Volk:</strong> Confronto de classes. Valdric fica enfurecido ao ver sua caríssima armadura de milhões de créditos ser trincada pelos punhos calejados de um trabalhador brasileiro.</li>
+<li><strong>vs. VX-9 Volta:</strong> Traição e rebeldia. Valdric considera Volta patrimônio imperial roubado e exige sua desativação forçada imediata.</li>
+<li><strong>vs. Mikazuki Oboro:</strong> Concorrência perigosa. Valdric acha que pode subjugar a tecnologia das fendas de Oboro, ignorando que o feiticeiro o manipula como uma marionete.</li>
+</ul>
+<hr />
+<h3 id="15-haruki-sumi-墨-春樹"><a class="header" href="#15-haruki-sumi-墨-春樹">15. Haruki Sumi (墨 春樹)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/haruki/portrait.png" alt="Retrato Haruki" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Arquivos da Biblioteca do Crepúsculo<br/><strong>ID:</strong> <code>haruki</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Criptas Arcanas de Seul, Coreia do Sul 🇰🇷<br/><strong>Alinhamento:</strong> <strong>Herói / Guardião Pacificador Relutante</strong><br/><strong>Cor Temática:</strong> <code>#588157</code> (Sálvia Erudita e Ocre dos Selos)<br/><strong>Forma Desperta:</strong> Fúria Contida<br/><strong>Cenário:</strong> Portão dos Espíritos (<code>spirit</code>)<br/><strong>Estilo:</strong> Caligrafia de Selos Arcanos e Liberação dos Titãs</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/haruki/01_idle.png" alt="Sprite Haruki" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-14"><a class="header" href="#biografia-e-background-14">Biografia e Background</a></h4>
+<p>Haruki Sumi é um acadêmico reservado de óculos redondos e túnicas manchadas de tinta, que dedicou sua juventude a catalogar livros antigos nos arquivos subterrâneos da Biblioteca do Crepúsculo em Seul. Seu maior desejo sempre foi a vida pacífica entre pergaminhos e xícaras de chá.</p>
+<p>Infelizmente, Haruki foi escolhido como o receptáculo vivo para aprisionar a essência dos <strong>Titãs do Crepúsculo</strong> — entidades colossais pré-históricas que quase destruíram o mundo antes de serem contidas por selos caligráficos sagrados tatuados em seus braços. Haruki abomina a violência, pedindo desculpas sinceras aos inimigos e implorando para que recuem. Porém, se seus companheiros forem agredidos ou sua vida estiver por um fio, os selos arcanos se rasgam, liberando uma força catastrófica e sombria que o jovem sofre para conter.</p>
+<h4 id="frases-marcantes-14"><a class="header" href="#frases-marcantes-14">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Por favor... não me obrigue a lutar."</em></li>
+<li><strong>Provocação:</strong> <em>"Eu avisei... não quero te machucar."</em></li>
+<li><strong>Vitória:</strong> <em>"Desculpe... eu realmente não queria ter que ir tão longe."</em></li>
+</ul>
+<h4 id="golpes-característicos-14"><a class="header" href="#golpes-característicos-14">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Barreira de Tinta Caligráfica</strong>: Desenha um ideograma protetor no ar que repele ataques e reflete feixes de energia.</li>
+<li><strong>Pergaminhos de Imobilização</strong>: Lança tiras de papel talismã no chão que prendem temporariamente os pés do adversário.</li>
+<li><strong>Onda de Choque do Titã</strong>: Emissão involuntária de energia sombria que afasta oponentes em rushdown agressivo.</li>
+<li><strong>Super — Quebra dos Selos: Ira do Crepúsculo</strong>: Os pergaminhos de seus braços entram em combustão; uma monstruosidade sombria se ergue atrás dele, desferindo golpes devastadores antes de Haruki recuperar a consciência em lágrimas.</li>
+</ul>
+<h4 id="dinâmica-de-interações-14"><a class="header" href="#dinâmica-de-interações-14">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Garan the Ashen Oni:</strong> Ameaça existencial suprema. Garan quer arrancar os Titãs do corpo de Haruki para devorar suas almas e dobrar seu poder.</li>
+<li><strong>vs. VX-9 Volta:</strong> Parceria filosófica comovente. Haruki ensina literatura e poesia ao androide, enquanto Volta o protege de agressores e mercenários.</li>
+<li><strong>vs. Bruno Volk:</strong> Cuidado fraternal. Bruno protege o jovem erudito, garantindo que ele possa estudar seus livros com segurança e tranquilidade.</li>
+</ul>
+<hr />
+<h3 id="16-mikazuki-oboro-三日月-朧--chefe-final"><a class="header" href="#16-mikazuki-oboro-三日月-朧--chefe-final">16. Mikazuki Oboro (三日月 朧) — Chefe Final</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Identidade Visual</th><th>Perfil de Combate</th></tr></thead><tbody>
+<tr><td><img src="../../../assets/chars/sprites/oboro/portrait.png" alt="Retrato Oboro" /><br/><em>Retrato de Seleção / HUD</em></td><td><strong>Série:</strong> Eclipse Escarlate — Chefe Final<br/><strong>ID:</strong> <code>oboro</code> | <strong>Autor:</strong> Ultimate MUGEN<br/><strong>Origem:</strong> Fenda do Eclipse Escarlate / Dinastia Lunar Perdida<br/><strong>Alinhamento:</strong> <strong>Vilão Supremo / Chefe Final</strong><br/><strong>Cor Temática:</strong> <code>#c8102e</code> (Vermelho Sangue do Eclipse e Vazio)<br/><strong>Forma Desperta:</strong> Véu Desperto<br/><strong>Cenário:</strong> Portão dos Espíritos (<code>spirit</code>) / Cratera Vulcânica (<code>volcano</code>)<br/><strong>Estilo:</strong> Genjutsu Espaço-Temporal, Chamas Negras e Corvos</td></tr>
+</tbody></table>
+</div>
+<p><img src="../../../assets/chars/sprites/oboro/01_idle.png" alt="Sprite Oboro" />
+<em>Postura de Luta em Pixel Art</em></p>
+<h4 id="biografia-e-background-15"><a class="header" href="#biografia-e-background-15">Biografia e Background</a></h4>
+<p>Mikazuki Oboro é o arquiteto supremo por trás da Grande Convergência e o chefe final inquestionável de Ultimate MUGEN. Trajando um robe negro elegante forrado internamente com seda carmesim, Oboro possui os lendários olhos do <strong>Véu Escarlate</strong> — pupilas místicas capazes de distorcer o fluxo de causa e efeito e reescrever a realidade na mente de seus adversários.</p>
+<p>Oboro enxerga a existência mortal como um pesadelo fútil e desordenado, repleto de dor e conflitos perpétuos. Seu plano magistral é unificar todas as dimensões sob o Eclipse Escarlate, aprisionando a humanidade em um sonho perpétuo e sem sofrimento, fundindo todas as almas em um mar plácido de chamas negras. Elegante, calmo e sempre três jogadas à frente de qualquer oponente, Oboro luta com superioridade absoluta: quando atacado, dissolve-se em bandos de corvos espectrais, e suas chamas negras só cessam quando o alvo vira cinzas.</p>
+<h4 id="frases-marcantes-15"><a class="header" href="#frases-marcantes-15">Frases Marcantes</a></h4>
+<ul>
+<li><strong>Entrada:</strong> <em>"Você chegou até aqui... exatamente como eu havia previsto."</em></li>
+<li><strong>Provocação:</strong> <em>"Tudo isso já aconteceu — dentro da sua mente."</em></li>
+<li><strong>Vitória:</strong> <em>"Uma ilusão... desde o primeiro golpe."</em></li>
+</ul>
+<h4 id="golpes-característicos-15"><a class="header" href="#golpes-característicos-15">Golpes Característicos</a></h4>
+<ul>
+<li><strong>Dissipação em Corvos</strong>: Ao sofrer qualquer ataque, transforma o corpo em um bando de corvos negros e ressurge atrás do inimigo.</li>
+<li><strong>Chamas do Vazio (Amaterasu)</strong>: Inflama chamas negras instantaneamente nas coordenadas exatas onde o oponente se encontra.</li>
+<li><strong>Pesadelo do Tsukuyomi</strong>: Encara fixamente o oponente, paralisando-o em transe psicológico enquanto espinhos ilusórios perfuram sua alma.</li>
+<li><strong>Super — Eclipse Total do Vazio</strong>: Ascende ao céu escarlate, abrindo seu olho celestial gigante no horizonte; o cenário se estilhaça em fragmentos cósmicos, causando dano monumental a qualquer mortal que o desafie.</li>
+</ul>
+<h4 id="dinâmica-de-interações-15"><a class="header" href="#dinâmica-de-interações-15">Dinâmica de Interações</a></h4>
+<ul>
+<li><strong>vs. Todos os Lutadores:</strong> Oboro vê todos os combatentes como meros figurantes em sua grande peça dramática, antecipando cada golpe com sorrisos condescendentes.</li>
+<li><strong>vs. Kaito Arashi:</strong> Choque fundamental. O vento livre de Kaito contra o eclipse aprisionador de Oboro; a batalha pela própria liberdade da alma humana.</li>
+<li><strong>vs. Suzume Kagerou:</strong> Indiferença fria. Oboro mal se recorda de ter dizimado o clã Kagerou, considerando o sofrimento de Suzume apenas uma gota irrelevante de água no oceano cósmico.</li>
+</ul>
+<hr />
+<h2 id="matriz-de-relações-e-rivalidades"><a class="header" href="#matriz-de-relações-e-rivalidades">Matriz de Relações e Rivalidades</a></h2>
+<pre><code class="language-mermaid">classDiagram
+    class Kaito {
+        +Arashi-Ki
+        +Vanguarda
+    }
+    class Oboro {
+        +Véu
+        +Chefe Final
+    }
+    class Daichi {
+        +Ki Lupino
+        +Lobo Selvagem
+    }
+    class Bruno {
+        +Ringue de Ferro
+        +Campeão
+    }
+    class Valdric {
+        +Estrela Rubra
+        +Tirano
+    }
+    class Volta {
+        +Grade Neon
+        +IA Senciente
+    }
+    class Suzume {
+        +Lótus Carmesim
+        +Vingadora
+    }
+    class Garan {
+        +Portão de Cinzas
+        +Demônio
+    }
+
+    Kaito --&gt; Oboro : Inimigos Jurados
+    Suzume --&gt; Oboro : Voto de Vingança
+    Kaito &lt;--&gt; Daichi : Rivais Eternos
+    Daichi &lt;--&gt; Bruno : Amizade de Peso-Pesado
+    Bruno --&gt; Valdric : Confronto de Classes
+    Valdric --&gt; Volta : Caça e Rebeldia
+    Garan --&gt; Haruki : Fome pelos Titãs
+    Sylene --&gt; Garan : Gelo vs Fogo das Cinzas
+</code></pre>
+<h2 id="kit-compartilhado"><a class="header" href="#kit-compartilhado">Kit compartilhado</a></h2>
+<p>Todo lutador jogável recebe o mesmo kit de combos e habilidades além dos golpes do dossiê:</p>
+<div class="table-wrapper"><table><thead><tr><th>Adição</th><th>Comando</th><th>Notas</th></tr></thead><tbody>
+<tr><td>Projétil EX</td><td>movimento do projétil + <code>x+y</code></td><td>250 de barra, tiro mais forte com mais acertos</td></tr>
+<tr><td>Anti-aéreo EX</td><td>movimento do uppercut + <code>y+b</code></td><td>500 de barra, invulnerabilidade maior</td></tr>
+<tr><td>Overhead</td><td><code>x+b</code></td><td>golpe médio que exige defesa alta</td></tr>
+<tr><td>Launcher agachado</td><td>agachado + <code>y</code></td><td>inicia combos aéreos</td></tr>
+<tr><td>Golpe mergulho</td><td><code>y</code> no ar</td><td>quica o oponente no chão</td></tr>
+<tr><td>Hyper nível 3</td><td>movimento do super + <code>x+y</code></td><td>gasta a barra inteira (3000)</td></tr>
+<tr><td>Especial despertado</td><td>movimento do projétil + <code>a+b</code></td><td>só transformado, leque de três tiros</td></tr>
+<tr><td>Transformação</td><td>L3+R3 / despertar</td><td>consome energia, aumenta ataque e movimento, libera golpes da forma e aumenta o dano recebido sem guarda</td></tr>
+<tr><td>Slide baixo</td><td><code>F+a</code></td><td>golpe baixo que lança, mixup contra o overhead</td></tr>
+<tr><td>Escape burst</td><td><code>x+a+b</code></td><td>500 de barra, escapa do hit-stun</td></tr>
+<tr><td>Forma ascendida</td><td>segunda transformação</td><td>2000 de barra, libera um hyper ascendido (<code>a+b</code>)</td></tr>
+</tbody></table>
+</div>
+<p>Lutadores de ki também têm voo, teletransporte ou super velocidade, e todos têm um passivo (regeneração de barra ou vida). Tudo aparece na lista de golpes do pause e pode ser ligado aos atalhos 1-4 / L1, L2, R1, R2.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Personagem-UMF.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Pesquisa-Ferramenta-Autoria.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Personagem-UMF.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Pesquisa-Ferramenta-Autoria.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

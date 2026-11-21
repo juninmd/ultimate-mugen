@@ -1,0 +1,300 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Mercado GitHub - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="mercado-github"><a class="header" href="#mercado-github">Mercado GitHub</a></h1>
+<p><a href="../Marketplace.html">English</a> · <strong>Português (BR)</strong></p>
+<p>Instale personagens, cenários e músicas direto de qualquer repositório público do GitHub. Abra <strong>Mercado GitHub</strong> no menu principal.</p>
+<h2 id="como-usar"><a class="header" href="#como-usar">Como usar</a></h2>
+<ol>
+<li>Aperte <code>U</code> (ou clique em <strong>+ Adicionar</strong>) e informe o link: <code>https://github.com/dono/repo</code>, <code>dono/repo</code> ou link de subpasta como <code>https://github.com/dono/repo/tree/main/mugen</code>.</li>
+<li>O jogo lê a árvore do repositório e mostra tudo o que encontrou.</li>
+<li>Marque os itens desejados (<code>Espaço</code>, clique ou <strong>Todos</strong>) e aperte <strong>Instalar</strong> (<code>I</code>). Os downloads rodam em paralelo com barra de progresso.</li>
+<li>O conteúdo instalado fica ativo na hora. Use <strong>Ativar</strong> (<code>E</code>) e <strong>Desativar</strong> (<code>O</code>) em qualquer seleção, inclusive em lote, ou <strong>Remover</strong> (<code>X</code>) para apagar do aparelho.</li>
+</ol>
+<p>Tudo fica salvo localmente: a lista de repositórios, os itens instalados e o estado de ativação continuam lá na próxima abertura.</p>
+<h2 id="repositórios-sugeridos"><a class="header" href="#repositórios-sugeridos">Repositórios sugeridos</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Repositório</th><th>Personagens</th><th>Stages</th><th>Músicas</th><th>Packs</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/juninmd/ultimate-mugen">juninmd/ultimate-mugen</a></td><td>—</td><td>—</td><td>—</td><td><a href="https://github.com/juninmd/ultimate-mugen/blob/master/assets/mugen/elecbyte.zip">elecbyte.zip</a></td></tr>
+<tr><td><a href="https://github.com/Carlmundo/NooksVsCrans">Carlmundo/NooksVsCrans</a></td><td><a href="https://github.com/Carlmundo/NooksVsCrans/tree/master/chars">chars</a></td><td><a href="https://github.com/Carlmundo/NooksVsCrans/tree/master/stages">stages</a></td><td><a href="https://github.com/Carlmundo/NooksVsCrans/tree/master/sound">sound</a></td><td><a href="https://github.com/Carlmundo/NooksVsCrans/blob/master/chars/Rayman.zip">Rayman.zip</a></td></tr>
+</tbody></table>
+</div>
+<p>Só <code>juninmd/ultimate-mugen</code> está na lista de sugestões do jogo (<code>SUGGESTED</code> em <code>src/market.rs</code>). A outra linha é uma referência: os links abrem cada pasta no GitHub. Para adicioná-la no mercado, digite <code>owner/repo</code>.</p>
+<h2 id="o-que-é-detectado"><a class="header" href="#o-que-é-detectado">O que é detectado</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Tipo</th><th>Regra</th><th>O que é instalado</th></tr></thead><tbody>
+<tr><td>Personagem</td><td>pasta com <code>.def</code> e <code>.sff</code>, <code>.air</code> e <code>.cns</code>/<code>.cmd</code> na árvore</td><td>a pasta inteira, mais arquivos declarados no <code>[Files]</code> que estejam em outras partes do repositório</td></tr>
+<tr><td>Cenário</td><td><code>.def</code> com <code>.sff</code> de mesmo nome, ou qualquer <code>.def</code> dentro de pasta <code>stages/</code></td><td>os arquivos do cenário, o sprite <code>spr</code> e a música <code>bgmusic</code></td></tr>
+<tr><td>Música</td><td><code>.ogg</code>, <code>.mp3</code>, <code>.flac</code>, <code>.wav</code> (wav menor que 32 KB é ignorado como efeito sonoro)</td><td>o arquivo de áudio</td></tr>
+<tr><td>Pacote</td><td><code>.zip</code></td><td>o arquivo compactado, descompactado em memória como na importação manual</td></tr>
+</tbody></table>
+</div>
+<p>Arquivos de screenpack (<code>system.def</code>, <code>select.def</code>, <code>fight.def</code>, ...) nunca viram cenários nem personagens. Arquivos dentro de pastas ocultas (<code>.git</code>, <code>.github</code>) são ignorados.</p>
+<p>Músicas ativas tocam como trilha da luta em revezamento sempre que o cenário não tiver música própria. Cenários M.U.G.E.N com <code>bgmusic</code> continuam tocando a própria faixa.</p>
+<h2 id="onde-os-dados-ficam-salvos"><a class="header" href="#onde-os-dados-ficam-salvos">Onde os dados ficam salvos</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Plataforma</th><th>Estado e downloads</th></tr></thead><tbody>
+<tr><td>Linux</td><td><code>$XDG_DATA_HOME/ultimate-mugen/market</code> (padrão <code>~/.local/share/ultimate-mugen/market</code>)</td></tr>
+<tr><td>macOS</td><td><code>~/Library/Application Support/ultimate-mugen/market</code></td></tr>
+<tr><td>Windows</td><td><code>%APPDATA%\ultimate-mugen\market</code></td></tr>
+<tr><td>Android</td><td>armazenamento interno do app, pasta <code>market/</code></td></tr>
+<tr><td>Web</td><td>banco IndexedDB <code>ultimate-mugen-market</code></td></tr>
+</tbody></table>
+</div>
+<p>Defina <code>UME_MARKET_HOME</code> para trocar a pasta no computador. Cada item instalado é gravado em um pacote único; a lista de repositórios, itens instalados, o ETag de cada listagem e o token opcional ficam em <code>state.json</code>. Os nomes dos pacotes passam por percent-encoding só com minúsculas, então itens e pastas que diferem apenas por maiúsculas/minúsculas nunca dividem o mesmo arquivo no Windows ou no macOS.</p>
+<h2 id="limites-da-api-token-e-cache"><a class="header" href="#limites-da-api-token-e-cache">Limites da API, token e cache</a></h2>
+<p>A listagem usa a API do GitHub (60 requisições por hora sem token) e os downloads usam <code>raw.githubusercontent.com</code>, que não tem essa trava. As listagens guardam o ETag recebido: se o repositório não mudou, o GitHub devolve <code>304</code> e a listagem vem do cache local. Um repositório é atualizado ao abrir se o cache tiver mais de 10 minutos, ou manualmente com <code>R</code>.</p>
+<p>Para aumentar o limite, aperte <code>T</code> e cole um personal access token (não precisa de permissões para repositórios públicos), ou defina <code>UME_GITHUB_TOKEN</code> / <code>GITHUB_TOKEN</code> no computador. O token só é enviado para <code>api.github.com</code>.</p>
+<h2 id="limites-de-segurança"><a class="header" href="#limites-de-segurança">Limites de segurança</a></h2>
+<ul>
+<li>Só links <code>https</code> para <code>github.com</code>, <code>api.github.com</code>, <code>raw.githubusercontent.com</code>, <code>media.githubusercontent.com</code> e <code>codeload.github.com</code> são acessados. Redirecionamentos para outros hosts são bloqueados.</li>
+<li>Caminhos vindos do repositório são validados: sem <code>..</code>, caminhos absolutos, barras invertidas, letras de unidade, caracteres de controle, espaços no início ou nomes de dispositivo reservados do Windows (<code>CON</code>, <code>PRN</code>, <code>AUX</code>, <code>NUL</code>, <code>COM1-9</code>, <code>LPT1-9</code>). Entradas inseguras somem da listagem.</li>
+<li>Limites: 64 MB por arquivo, 256 MB e 4000 arquivos por item, 48 MB para a listagem. Itens acima disso aparecem como "grande demais" e não podem ser instalados.</li>
+<li>O conteúdo nunca é executado como código. Os personagens passam pelos mesmos leitores da importação manual.</li>
+<li>Respeite a licença de cada autor. Baixar de um repositório não dá direito de redistribuir.</li>
+</ul>
+<h2 id="observações-por-plataforma"><a class="header" href="#observações-por-plataforma">Observações por plataforma</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Plataforma</th><th>Adicionar repositório</th></tr></thead><tbody>
+<tr><td>Desktop</td><td>digitar no próprio jogo (colar não funciona na janela do jogo; digite <code>dono/repo</code>)</td></tr>
+<tr><td>Web e celular</td><td>prompt nativo do navegador, com colar</td></tr>
+</tbody></table>
+</div>
+<h2 id="repositório-em-destaque-zinclee123mugen_chars"><a class="header" href="#repositório-em-destaque-zinclee123mugen_chars">Repositório em destaque: zinclee123/mugen_chars</a></h2>
+<p>Coleção comunitária de personagens M.U.G.E.N. Cole o link da pasta no <strong>Mercado GitHub</strong> (<code>U</code>) para instalar um personagem.</p>
+<div class="table-wrapper"><table><thead><tr><th>Tipo</th><th>Link</th></tr></thead><tbody>
+<tr><td>Repositório</td><td><a href="https://github.com/zinclee123/mugen_chars">zinclee123/mugen_chars</a></td></tr>
+<tr><td>Personagens</td><td><a href="https://github.com/zinclee123/mugen_chars/tree/master/Hinako">Hinako</a> · <a href="https://github.com/zinclee123/mugen_chars/tree/master/K&#x27;">K'</a> · <a href="https://github.com/zinclee123/mugen_chars/tree/master/Lin">Lin</a> · <a href="https://github.com/zinclee123/mugen_chars/tree/master/MasterRyu">MasterRyu</a> · <a href="https://github.com/zinclee123/mugen_chars/tree/master/Rugal2nd">Rugal2nd</a> · <a href="https://github.com/zinclee123/mugen_chars/tree/master/kusanagi-XIII">kusanagi-XIII</a></td></tr>
+<tr><td>Stages</td><td>nenhum no repositório</td></tr>
+<tr><td>Músicas</td><td>nenhuma no repositório</td></tr>
+<tr><td>Packs</td><td>nenhum instalável (o <code>.rar</code> do repositório não é um pack do marketplace)</td></tr>
+</tbody></table>
+</div>
+<p><code>98-kim</code> e <code>yujiro</code> são patches de IA sem sprites: não aparecem como personagens e exigem o personagem original instalado antes. <code>MasterRyu</code> traz quatro lutadores (Ryu, NormalRyu, EvilRyu, MasterRyu) em uma pasta só, então os quatro aparecem após instalá-la.</p>
+<p>Resultados do smoke test e evidências: <a href="../../evidence/mugen-chars-smoke">docs/evidence/mugen-chars-smoke</a>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Medidor-de-Assinatura.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Modos-de-Jogo.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Medidor-de-Assinatura.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Modos-de-Jogo.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

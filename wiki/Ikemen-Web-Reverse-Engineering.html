@@ -1,0 +1,458 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Reverse engineering a browser M.U.G.E.N port - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="reverse-engineering-a-browser-mugen-port"><a class="header" href="#reverse-engineering-a-browser-mugen-port">Reverse engineering a browser M.U.G.E.N port</a></h1>
+<p><strong>English</strong> · <a href="pt-BR/Engenharia-Reversa-Ikemen-Web.html">Português (BR)</a></p>
+<p>What <a href="https://w8.snokido.com/games/html5/dbz-vs-marvel-vs-capcom/">https://w8.snokido.com/games/html5/dbz-vs-marvel-vs-capcom/</a> does with a 78-fighter M.U.G.E.N roster, how its animation system works, why it holds 60 fps, and what of all that we should copy — or not — in Ultimate MUGEN.</p>
+<p>Everything below was measured or read from the shipped artifacts. The scripts that produced it live in <a href="../../research/ikemen-web/"><code>docs/research/ikemen-web/</code></a>, so every number can be re-run.</p>
+<h2 id="1-what-the-page-is"><a class="header" href="#1-what-the-page-is">1. What the page is</a></h2>
+<p>The public page is a 11 KB shell: menus, character select, versus splash and the options screens are plain DOM (that part is the snokido/<code>runtime-ui.js</code> UI layer). The fight itself is a separate document, <code>frame.html</code>, inside an iframe, and the engine there is <strong>not</strong> JavaScript: it is a Go program compiled to WebAssembly.</p>
+<div class="table-wrapper"><table><thead><tr><th>Artifact</th><th>Size</th><th>Role</th></tr></thead><tbody>
+<tr><td><code>index.html</code></td><td>11 KB</td><td>shell: boot, menu, select, options</td></tr>
+<tr><td><code>local-runtime.js</code></td><td>342 KB</td><td>obfuscated bootstrap: holds the Go <code>wasm_exec</code> glue and the frame module <strong>as strings</strong>, plus the content catalog</td></tr>
+<tr><td><code>runtime-ui.js</code></td><td>420 KB</td><td>the DOM UI (obfuscated, digest-gated)</td></tr>
+<tr><td><code>frame.html</code></td><td>2.2 KB</td><td>engine host: one <code>&lt;canvas id="ikemen-canvas"&gt;</code></td></tr>
+<tr><td><code>runtime-engine.bin</code></td><td>5,887,387 B</td><td>gzip of a <strong>25,343,508 B</strong> WebAssembly module</td></tr>
+<tr><td><code>content/catalog.shvd.json</code></td><td>265 KB</td><td>78 characters, 74 stages, pack URLs, sha256, sizes</td></tr>
+<tr><td><code>content/packs/*.zip</code></td><td>1–24 MB each</td><td>unmodified M.U.G.E.N files, one zip per character/stage</td></tr>
+</tbody></table>
+</div>
+<p>The bootstrap posts <code>{frameJs, wasmExec, descriptor, gzipBytes}</code> to <code>frame.html</code>, which installs <code>wasm_exec.js</code> from a string, imports the engine module from a Blob URL and gates it on a SHA-256 of the values it was handed. That is copy protection, not engine design.</p>
+<pre><code class="language-console">$ node docs/research/ikemen-web/wasm-artifacts.js runtime-engine.bin
+module bytes: 25343508
+[imports "gojs"] 25
+  runtime.scheduleTimeoutEvent:function
+  runtime.wasmExit:function
+  syscall/js.valueGet:function
+  syscall/js.copyBytesToJS:function
+  mem:memory
+[exports] run:function resume:function getsp:function mem:memory
+[build info] ikemen-GO v0.0.0-20260927200105-cae6cd63ba4a+dirty
+[go source files named by the symbol table] ... render_webgl.go render_webgl_cmdbuf.go system_js.go audio_js.go input_js.go loadyield_js.go ...
+</code></pre>
+<p><code>gojs</code> imports plus <code>run</code>/<code>resume</code>/<code>getsp</code> exports are the Go runtime's WebAssembly ABI, and the Go symbol table keeps every source path. The engine is <strong>Ikemen-GO</strong> (the open Go reimplementation of M.U.G.E.N) with a WebGL2 backend added for the browser: <code>render_webgl.go</code>, <code>render_webgl_cmdbuf.go</code>, <code>system_js.go</code>, <code>audio_js.go</code>, <code>input_js.go</code>, <code>pause_js.go</code>, <code>platform_js.go</code>, <code>loadyield_js.go</code>, <code>font_webgl.go</code>, <code>netplay_js.go</code>.</p>
+<p>The catalog names its own provenance, which is how the backend source was located and cross-checked against the binary:</p>
+<pre><code class="language-json">"source": { "components": [
+  { "name": "ikemen-go-web",      "url": "https://github.com/energyjp/ikemen-go-web",             "revision": "54305ec917c3e995f433004e2e8f7c8902bff96a" },
+  { "name": "Ikemen-GO-Screenpack","url": "https://github.com/ikemen-engine/Ikemen-GO-Screenpack", "revision": "87f348a5f6e01e878a62ae865c6ee7d3281f8c98" } ] }
+</code></pre>
+<p>Upstream <code>ikemen-engine/Ikemen-GO</code> has no WebGL backend; <code>energyjp/ikemen-go-web</code> does. The checked-out source matches the binary exactly (opcode table, GLSL, symbol names, canvas id), so the "how" below is verified against both.</p>
+<h2 id="2-content-no-re-encoding-just-zips"><a class="header" href="#2-content-no-re-encoding-just-zips">2. Content: no re-encoding, just zips</a></h2>
+<p>The packs contain the original M.U.G.E.N files — <code>.def</code>, <code>.sff</code>, <code>.snd</code>, <code>.air</code>, <code>.cns</code>, <code>.zss</code>, <code>.act</code> — untouched. Verified on the Goku pack (24,319,368 B, sha256 matches the catalog): <code>files/goku.sff</code> 9.6 MB, <code>files/goku-jap-en-bl.snd</code> 20.7 MB, <code>files/goku.air</code> 287 KB, 21 palette <code>.png</code>/<code>.act</code> files, plus the character's own movelist HTML.</p>
+<p>So the browser downloads <strong>raw M.U.G.E.N content</strong> and the WASM engine parses SFF/SND by itself. Nothing is pre-baked into spritesheets, and only the <em>front-end</em> media (portraits, icons, stage thumbnails) is pre-encoded to WebP with content-addressed names (<code>collections/shvd/media/&lt;sha256&gt;.webp</code>).</p>
+<p><code>core</code> (7.0 MB zip → 9.7 MB) is the screenpack and system data, and every other pack declares <code>"dependencies": ["core"]</code>. A match loads: <code>core</code> + one pack per fighter + one pack per stage.</p>
+<h2 id="3-animation-mugen-semantics-unchanged"><a class="header" href="#3-animation-mugen-semantics-unchanged">3. Animation: M.U.G.E.N semantics, unchanged</a></h2>
+<p>Animations are <code>.air</code> files parsed into the same structures M.U.G.E.N uses (<code>src/anim.go</code>):</p>
+<div class="table-wrapper"><table><thead><tr><th>Structure</th><th>Fields that matter</th></tr></thead><tbody>
+<tr><td><code>Animation</code></td><td><code>frames</code>, <code>loopstart</code>, <code>curtime</code>, <code>curelem</code>, <code>totaltime</code>, <code>looptime</code>, <code>interpolate_offset/scale/angle/blend</code>, <code>mask</code>, <code>transType</code>, <code>srcAlpha</code>/<code>dstAlpha</code></td></tr>
+<tr><td><code>AnimFrame</code></td><td><code>Group</code>, <code>Number</code>, <code>Xoffset</code>, <code>Yoffset</code>, <code>Time</code> (ticks), <code>Xscale</code>/<code>Yscale</code>, <code>Angle</code>, <code>TransType</code>, <code>Clsn1</code>/<code>Clsn2</code></td></tr>
+<tr><td><code>Anim</code> (instance)</td><td><code>anim</code>, <code>x</code>/<code>y</code>, <code>xscl</code>/<code>yscl</code>, <code>window</code>, <code>xshear</code>, <code>rot</code>, <code>palfx</code>, <code>layerno</code>, <code>localcoord</code></td></tr>
+</tbody></table>
+</div>
+<p>The per-tick path is deliberately cheap:</p>
+<ol>
+<li><code>Animation.Action()</code> advances <code>curtime</code>; at <code>totaltime</code> it jumps to <code>loopstart</code> and sets <code>newframe</code>.</li>
+<li><code>Animation.UpdateSprite()</code> runs every tick but only does work when <code>newframe</code> is set — that is where the sprite is resolved, with one map lookup: <code>a.spr = a.sff.GetSprite(uint16(group), uint16(number))</code> (<code>anim.go:702</code>), after applying the character's <code>Remap</code> presets.</li>
+<li>Rendering reads <code>frames[drawidx]</code> for the transform and the cached <code>spr</code> for the texture. Nothing is re-looked-up per tick, and nothing is interpolated.</li>
+</ol>
+<p>So there is <strong>no tweening and no sub-tick interpolation</strong>: frames change on the 60 Hz tick, exactly like M.U.G.E.N. The perceived smoothness comes from the tick rate, from <code>interpolate offset/scale/angle/blend</code> (which animate transforms <em>between</em> AIR frames), and from the shader doing all colour work in one pass.</p>
+<h3 id="colour-is-a-shader-feature-not-a-bake"><a class="header" href="#colour-is-a-shader-feature-not-a-bake">Colour is a shader feature, not a bake</a></h3>
+<p>Two things that would normally cost uploads are pushed into the fragment shader (<code>src/shaders/sprite.frag.glsl</code>, which is also embedded in the WASM as a string):</p>
+<pre><code class="language-glsl">c = COMPAT_TEXTURE(tex, uv);
+if (isRgba) { ... } else {
+    c = COMPAT_TEXTURE(pal, vec2(c.r*0.9966, 0.5));   // palette lookup from the red channel
+}
+if (hue  != 0.0) c.rgb = hue_shift(c.rgb, hue);
+if (neg)         c.rgb = neg_base - c.rgb;
+c.rgb = mix(vec3((c.r+g.c+b)/3.0), c.rgb, 1.0 - gray);
+c.rgb += final_add;
+c *= final_mul;
+if (!isFlat) c.rgb = mix(c.rgb, tint.rgb * c.a, tint.a);
+</code></pre>
+<ul>
+<li><strong>Palettes</strong>: an indexed sprite keeps its 8-bit pixels as the texture and is coloured through a <code>256×1</code> palette texture (<code>newPaletteTexture()</code> → <code>newTexture(256, 1, 32, false)</code>). Changing <code>pal1…pal12</code> or <code>RemapPal</code> re-uploads <strong>1 KB</strong>, not the sprite. <code>Sprite::CachePalTex</code> (<code>image.go:1336</code>) compares the 256 colour words and only re-uploads on change, so a palette swap costs one <code>texSubImage2D</code> per sprite that actually changes.</li>
+<li><strong><code>palFX</code></strong> (<code>add</code>, <code>mul</code>, <code>color</code>, <code>hue</code>, <code>invertall</code>) is per-sprite uniforms on the same draw — no second pass, no <code>RenderMode</code> shader switching.</li>
+<li><strong>Trapezoid distortion</strong> (floor shadows / <code>xscale</code> skew) is computed in the same shader from <code>gl_FragCoord</code>, not by re-projecting vertices.</li>
+</ul>
+<p>One shader covers flat quads, RGBA sprites, indexed sprites, trapezoids and the whole <code>palFX</code> chain. M.U.G.E.N's "one more shader per effect" problem simply does not exist there.</p>
+<h2 id="4-how-it-stays-fast"><a class="header" href="#4-how-it-stays-fast">4. How it stays fast</a></h2>
+<p>The interesting part. Measured on the shipped build (headless Chromium, ANGLE/SwiftShader so the GPU numbers are software-rendered, 1280×720 CSS, two runs on a loaded machine):</p>
+<div class="table-wrapper"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>
+<tr><td>Canvas backing store</td><td><strong>640×480</strong> (CSS 1280×720, <code>object-fit: contain</code>)</td></tr>
+<tr><td><code>drawArrays</code> per rAF</td><td>p50 <strong>82–105</strong>, p95 113–163, max 172–224</td></tr>
+<tr><td><code>bufferData</code> per rAF</td><td>82–125 (one small upload per sprite; runs of text share one)</td></tr>
+<tr><td>Uniform calls per rAF</td><td>322–397</td></tr>
+<tr><td><code>useProgram</code> per second</td><td>30–76 (a handful per frame)</td></tr>
+<tr><td><code>bindTexture</code> per second</td><td>1.4k–6.2k</td></tr>
+<tr><td>Engine frames per rAF</td><td><strong>0.78–0.89</strong> (fixed 60 Hz, gated)</td></tr>
+<tr><td>JS heap in a match</td><td>9–74 MB</td></tr>
+<tr><td>Boot → menu</td><td>1.9 s</td></tr>
+<tr><td>Menu → select</td><td>4.0 s</td></tr>
+<tr><td>Select → first fight</td><td><strong>37 s</strong> (core + 2 fighter packs + stage over the network, then SFF decode)</td></tr>
+<tr><td>Long tasks during a match</td><td>50–90 ms, recurring (asset decode / GC on the main thread)</td></tr>
+</tbody></table>
+</div>
+<h3 id="41-the-scene-renders-at-640480-into-an-fbo-then-gets-blitted"><a class="header" href="#41-the-scene-renders-at-640480-into-an-fbo-then-gets-blitted">4.1 The scene renders at 640×480 into an FBO, then gets blitted</a></h3>
+<p><code>Init()</code> creates an RGBA texture + a <code>DEPTH_COMPONENT24</code> renderbuffer at <code>sys.scrrect</code> (640×480) and draws the whole scene there; <code>EndFrame()</code> runs the external post shaders through two ping-pong FBOs and only then does <strong>one</strong> <code>drawArrays(TRIANGLE_STRIP, 0, 4)</code> to the default framebuffer with a letterboxed viewport and <code>NEAREST</code> (or <code>LINEAR</code> if the user picked smoothed scaling). Every sprite is rasterized at 640×480 regardless of window size.</p>
+<h3 id="42-one-js-crossing-per-frame-instead-of-one-per-gl-call"><a class="header" href="#42-one-js-crossing-per-frame-instead-of-one-per-gl-call">4.2 One JS crossing per frame instead of one per GL call</a></h3>
+<p>This is the headline trick (<code>render_webgl_cmdbuf.go</code>). GL calls are not issued from Go; they are <strong>encoded into a byte stream</strong>:</p>
+<pre><code class="language-go">// GL command buffer: batches the browser build's per-frame WebGL commands into a shared ArrayBuffer
+// that a JS-side interpreter drains in ONE syscall/js crossing per flush, instead of one crossing
+// per GL command.
+//
+// Why: profiling the shipped (v0.9) build showed hundreds of `gl.Call` crossings per frame; each
+// crossing boxes its arguments through syscall/js.makeValue (~450MB/30s of JS garbage) and pays the
+// wasm-&gt;JS context switch.
+</code></pre>
+<ul>
+<li>256 KB staging buffer (<code>wglCmdBufBytes = 1 &lt;&lt; 18</code>), 23 opcodes (<code>useProgram</code>, <code>uniform*</code>, <code>activeTexture+bindTexture</code>, <code>bufferData</code>, <code>drawArrays</code>, <code>enable/disable</code>, <code>blendFunc</code>, <code>scissor</code>, <code>depthMask</code>, <code>bindVertexArray</code>, <code>texParameteri</code>, …).</li>
+<li>GL objects (textures, programs, uniform locations, VAOs, buffers) are registered once into a JS array and referenced by integer handle.</li>
+<li><code>flushCmds()</code> does one <code>js.CopyBytesToJS</code> + one <code>Invoke</code> of a JS interpreter built with the <code>Function</code> constructor.</li>
+<li>Every direct GL call goes through <code>glc()</code>, which flushes first, so command order is preserved by construction.</li>
+</ul>
+<h3 id="43-uniform-and-state-deduplication-on-the-go-side"><a class="header" href="#43-uniform-and-state-deduplication-on-the-go-side">4.3 Uniform and state deduplication on the Go side</a></h3>
+<p><code>SetUniformISub</code>/<code>SetUniformFSub</code> keep per-program caches keyed by <code>(programID &lt;&lt; 16) | uniformIndex</code> and emit nothing when the value is unchanged. <code>EnableBlending</code>, <code>SetDepthTest</code>, <code>SetDepthMask</code>, <code>EnableScissor</code> and <code>ChangeProgram</code> do the same for GL state. That is why ~14 uniforms per sprite collapse to ~4 on average, and why <code>useProgram</code> is only 30–50 calls <em>per second</em>.</p>
+<h3 id="44-zero-allocation-in-the-draw-path"><a class="header" href="#44-zero-allocation-in-the-draw-path">4.4 Zero allocation in the draw path</a></h3>
+<p>The same file documents the measured cost of the naive version: passing a local <code>[16]float32</code> to an interface method made it escape, allocating vertices + uniform + modelview <strong>per quad</strong>, and <code>drawQuads</code> alone allocated <strong>&gt;1 GB per 30 s</strong> of heap. The fix is package-level scratch arrays reused per call (the render path is single-threaded and each buffer is consumed synchronously).</p>
+<h3 id="45-raf-gating-to-the-games-framerate"><a class="header" href="#45-raf-gating-to-the-games-framerate">4.5 rAF gating to the game's framerate</a></h3>
+<p><code>system_js.go</code> does not run a frame per <code>requestAnimationFrame</code>; it runs at most one per <code>1000/Video.Framerate</code>:</p>
+<pre><code class="language-go">// Browsers fire rAF at the DISPLAY's refresh rate - 120/144/240Hz on high-refresh screens. ...
+// Releasing a frame on every rAF therefore runs the whole loop 2-4x more often than the game is
+// authored for, multiplying allocation and forcing far more frequent GC pauses (the 200-500ms
+// mark stalls high-refresh users saw) for zero visual benefit.
+</code></pre>
+<p><code>SwapBuffers()</code> then parks the main goroutine on a channel until the next released frame — which also yields the JS event loop so input, network and audio callbacks run.</p>
+<h3 id="46-sprites-are-not-atlased-fonts-are"><a class="header" href="#46-sprites-are-not-atlased-fonts-are">4.6 Sprites are not atlased; fonts are</a></h3>
+<p>Every sprite keeps its own texture. There is no sprite atlas and no eviction policy, so a match can never hit an atlas-full cliff. The 16 texture units are used as an <strong>LRU cache</strong> (<code>texCacheTexSerial</code>/<code>texCacheLastUsed</code>) so consecutive sprites from the same sheet do not re-bind.</p>
+<p>Only <strong>text</strong> uses a <code>TextureAtlas</code>: 256×256, skyline packing with edge extrusion, and glyph quads batched per atlas so a run of text is one draw.</p>
+<h3 id="47-one-draw-call-per-sprite-by-design"><a class="header" href="#47-one-draw-call-per-sprite-by-design">4.7 One draw call per sprite, by design</a></h3>
+<p><code>SetVertexData(...16 floats...)</code> + <code>RenderQuad()</code> → <code>bufferData(STATIC_DRAW)</code> followed by <code>drawArrays(TRIANGLE_STRIP, 0, 4)</code>. Per sprite: 1 <code>bufferData</code>, 1 <code>drawArrays</code>, ~4 uniforms, ≤1 texture bind — all inside the command buffer, so the Go side pays only a few <code>emitI</code>/<code>emitF</code> per sprite. At 82–172 sprites per frame that is 5–10 k GL calls/s, which is exactly what a software rasterizer in headless Chromium can absorb.</p>
+<h2 id="5-what-we-already-do-better"><a class="header" href="#5-what-we-already-do-better">5. What we already do better</a></h2>
+<p>Ultimate MUGEN does not need the command buffer: our shell talks to wgpu, which already packs a frame into a few submissions. And our sprite path is architecturally ahead of theirs:</p>
+<div class="table-wrapper"><table><thead><tr><th>Concern</th><th>Ikemen web build</th><th>Ultimate MUGEN</th></tr></thead><tbody>
+<tr><td>Draw calls</td><td>1 per sprite (82–172/frame)</td><td>batched: quads merged per blend state + scissor into one vertex/index buffer</td></tr>
+<tr><td>Bind state</td><td>per-sprite texture binds, 16-unit LRU</td><td>one bind group; atlases + palette texture bound once</td></tr>
+<tr><td>Palette</td><td><code>256×1</code> texture per sprite, per-sprite upload on change</td><td>1024 palette rows in one texture, row index per vertex, <code>RemapPal</code> swaps the row</td></tr>
+<tr><td>Atlas</td><td>none for sprites (per-sprite textures)</td><td>RGBA atlas + 8-bit index atlas, reset independently</td></tr>
+<tr><td>Simulation</td><td>whole fighter state machine in WASM</td><td><code>hotpath_bench</code> (below)</td></tr>
+<tr><td>Frame pacing</td><td>rAF gate at <code>Video.Framerate</code></td><td><code>ume_shell::Pacer</code> + fixed 60 Hz step (≤5 ticks/frame)</td></tr>
+</tbody></table>
+</div>
+<p>Our simulation cost, so the frame budget is not the issue:</p>
+<pre><code class="language-console">$ cargo run --release -p ume-engine --example hotpath_bench
+sff decode                   mean      829.6 us
+air parse                    mean      493.5 us
+cns parse+compile            mean     3680.8 us
+char load (no images)        mean     7388.2 us
+match tick (2 fighters)      mean        4.2 us   p99  9.0
+match tick (6 fighters)      mean       11.3 us   p99 17.6
+match tick (10 fighters)     mean       20.1 us   p99 33.5
+</code></pre>
+<p>4–20 µs per tick against a 16.7 ms frame: 0.03–0.12 %. The fight is spent in the renderer and the loader, which is exactly where the browser port spent its effort too.</p>
+<h2 id="6-what-we-changed"><a class="header" href="#6-what-we-changed">6. What we changed</a></h2>
+<p>The port's own bug reports (<code>&gt;1 GB/30 s</code> of GC from per-quad allocations, <code>450 MB/30 s</code> from per-call boxing, 200–500 ms stalls from oversimulating at 144 Hz) all have the same shape: <strong>a whole match's work paid inside one frame</strong>. We had the same shape in one place: the sprite warm-up.</p>
+<p><code>App::finish_fight</code> uploaded fighter sprites in the single frame that switched to the fight:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>self.g.trim(4000);
+for f in &amp;sess.m.fighters { if !self.g.prefetch(&amp;f.def, 0.5) { break; } }
+<span class="boring">}</span></code></pre></pre>
+<p>How much art a fighter carries (new <code>sprite_mem</code> example):</p>
+<pre><code class="language-console">$ cargo run --release -p ume-engine --example sprite_mem -- mugen/chars/BuuZ2 mugen/chars/cell mugen/chars/frieza
+mugen:c/buuz2.def   sprites=2510  indexed=2510 | index atlas  33.71 MB | total  33.86 MB | largest spr 5202 KB
+mugen:c/cell.def    sprites=631   indexed=631  | index atlas   9.91 MB | total   9.99 MB | largest spr  818 KB
+mugen:c/frieza.def  sprites=673   indexed=673  | index atlas   8.67 MB | total   8.74 MB | largest spr  682 KB
+</code></pre>
+<p>A DBZ pair is 43.6 MB of index sheets across 3,141 sprites, and the largest single sprite is 1.3 MB.</p>
+<h3 id="61-pay-the-warm-up-per-frame-not-per-match"><a class="header" href="#61-pay-the-warm-up-per-frame-not-per-match">6.1 Pay the warm-up per frame, not per match</a></h3>
+<p><code>App::warm_step</code> + <code>Gfx::prefetch_step</code>: a load step of its own that copies at most <code>WARM_BUDGET</code> = 512 KiB per call. Behind the VS screen it is one chunk per frame (the splash lasts at least 1.8 s), and the blocking <code>start_fight</code> path (rematch from the pause menu or the results screen, netplay start, the scripted tours) now yields a frame between chunks instead of freezing.</p>
+<p>Measured on the same machine, same tour, same fighters, with <code>UME_WATCHDOG=1</code>:</p>
+<div class="table-wrapper"><table><thead><tr><th></th><th>Damaging frame</th></tr></thead><tbody>
+<tr><td>before</td><td><code>212.8 ms in 'fight:prefetch'</code> (one frame)</td></tr>
+<tr><td>after</td><td><code>2.3 / 2.4 / 2.5 / 2.1 / 8.8 ms in 'load:sprites'</code> (one chunk per frame)</td></tr>
+</tbody></table>
+</div>
+<p>A rematch with the same roster no longer flushes the texture cache at all (see 6.3), so its warm-up copies nothing.</p>
+<h3 id="62-palette-rows-are-shared-by-content"><a class="header" href="#62-palette-rows-are-shared-by-content">6.2 Palette rows are shared by content</a></h3>
+<p><code>ume_render::PaletteRows</code> keeps one row per <em>distinct</em> 256-colour palette instead of one row per palette object: a mirror match, a <code>RemapPal</code> that lands on an existing palette, and a re-warm after an atlas reset all reuse the row and skip the upload. Unit-tested in <code>crates/render/src/palette.rs</code> (50 lookups of the same colours → one row; a full atlas reports failure instead of overwriting a row in use).</p>
+<h3 id="63-a-rematch-keeps-the-atlases-it-already-filled"><a class="header" href="#63-a-rematch-keeps-the-atlases-it-already-filled">6.3 A rematch keeps the atlases it already filled</a></h3>
+<p>The warm-up keys on the roster (<code>def.id</code> of both fighters). If the key matches the last warm-up, <code>Gfx::trim</code> is skipped, so the atlas generation does not change and <code>prefetch_step</code> finds every sprite already resident: the second fight of a marathon starts with zero uploads.</p>
+<h3 id="64-a-draw-call-budget-that-fails-the-build"><a class="header" href="#64-a-draw-call-budget-that-fails-the-build">6.4 A draw-call budget that fails the build</a></h3>
+<p><code>ume_render::DRAW_CALL_BUDGET = 24</code> with <code>batch::tests::a_fight_screen_stays_within_the_draw_call_budget</code>: a synthetic fight frame (stage layers, a subtractive reflection pass, two fighters, additive hit sparks, a two-region HUD overlay) must stay under the ceiling, and <code>a_flat_run_of_quads_is_one_call</code> pins the 300-quads-one-call property. Break the batching and CI says so.</p>
+<h3 id="65-hitch-labels-that-point-at-the-right-phase"><a class="header" href="#65-hitch-labels-that-point-at-the-right-phase">6.5 Hitch labels that point at the right phase</a></h3>
+<p><code>ume_shell::watchdog::label</code> now sticks to the first phase named in a frame. Before, the trailing <code>label("import")</code> at the end of <code>App::frame</code> overwrote everything, so a slow loading step was reported as an import; that is why the <code>load:sprites</code> numbers above are visible at all. Unit-tested.</p>
+<h3 id="66-what-the-numbers-also-told-us"><a class="header" href="#66-what-the-numbers-also-told-us">6.6 What the numbers also told us</a></h3>
+<p><code>prefetch_step</code> logs where it stops: for a native (RGBA, high-resolution) fighter the 50 % atlas cap fits <strong>8 of 116 sprites</strong>, after which the warm-up gives up and the rest stream lazily during the fight — one upload at draw time, which is what the browser port does for every sprite. For indexed DBZ art the same cap fits a few hundred. So the bulk warm-up is bounded by the atlas, not by the roster, and the next step (backlog 5) is to give the <em>lazy</em> path a per-frame upload budget instead of trying to pre-load more.</p>
+<h2 id="7-backlog-in-priority-order"><a class="header" href="#7-backlog-in-priority-order">7. Backlog, in priority order</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>#</th><th>Idea from the port</th><th>State here</th><th>How to verify</th></tr></thead><tbody>
+<tr><td>1</td><td>Never pay a whole match inside one frame</td><td>done: <code>App::warm_step</code> + <code>Gfx::prefetch_step</code>, 512 KiB per frame, VS step and <code>start_fight</code> both spread</td><td><code>UME_WATCHDOG=1</code> label <code>load:sprites</code>; F3 <code>up</code>/<code>KB</code></td></tr>
+<tr><td>2</td><td>Keep the transition frame free in the paths with no VS screen</td><td>done: <code>start_fight</code> yields a frame per chunk</td><td><code>UME_WATCHDOG=1</code> worst frame at the transition</td></tr>
+<tr><td>3</td><td>Draw-call budget is a first-class number</td><td>done: <code>DRAW_CALL_BUDGET</code> + batch test</td><td><code>cargo test -p ume-render</code></td></tr>
+<tr><td>4</td><td>Palette rows as a scarce resource</td><td>done for duplicates: <code>PaletteRows</code> shares rows by content</td><td><code>cargo test -p ume-render</code></td></tr>
+<tr><td>5</td><td>Sprites are never atlased on the web build</td><td><strong>not copied</strong> (our atlas is why we draw in a handful of calls). Follow-up: per-frame upload budget in the lazy path, because a 50 % cap only holds 8 native sprites</td><td><code>atlas {}</code> fill in the F3 overlay</td></tr>
+<tr><td>6</td><td>One shader for every sprite effect</td><td>already true (<code>sprite.wgsl</code>: flat/RGBA/indexed/palFX/tint in one pass)</td><td><code>cargo test -p ume-render --test shader</code></td></tr>
+<tr><td>7</td><td>Yield while decoding</td><td><code>load:character</code> already runs one character per step; keep new decoders inside that budget</td><td><code>UME_WATCHDOG=1</code> worst frame during load</td></tr>
+</tbody></table>
+</div>
+<h2 id="7b-are-we-better-than-them"><a class="header" href="#7b-are-we-better-than-them">7b. Are we better than them?</a></h2>
+<p>On the things this investigation measured, yes — and on the things it did not measure, no. Being precise matters more than the headline.</p>
+<p>Better:</p>
+<div class="table-wrapper"><table><thead><tr><th></th><th>Browser port</th><th>Ultimate MUGEN</th></tr></thead><tbody>
+<tr><td>Draw calls for the same kind of scene</td><td>one per sprite, 82–105 per frame</td><td>merged by blend + scissor, budget 24, test-enforced</td></tr>
+<tr><td>Palette changes</td><td>1 KB upload per sprite that changes palette</td><td>palette rows deduplicated by content, shared across fighters</td></tr>
+<tr><td>Simulation cost</td><td>whole state machine inside one WASM thread</td><td>4–20 µs per tick (0.03–0.12 % of a frame)</td></tr>
+<tr><td>Warm-up / transition</td><td>uploads spread by luck (per-sprite textures)</td><td>explicitly budgeted per frame, rematch copies nothing</td></tr>
+<tr><td>Hitch observability</td><td>none</td><td><code>UME_WATCHDOG=1</code> with per-phase labels, F3 with uploads/KB and atlas fill</td></tr>
+<tr><td>Content licensing/portability</td><td>bundles third-party M.U.G.E.N characters</td><td>loads the player's own <code>mugen/</code> folder, UMF, or the marketplace</td></tr>
+</tbody></table>
+</div>
+<p>Not better (yet):</p>
+<div class="table-wrapper"><table><thead><tr><th></th><th>Browser port</th><th>Ultimate MUGEN</th></tr></thead><tbody>
+<tr><td>Shipped in a browser</td><td>yes, 78 fighters, 74 stages, netplay via GGPO rollback</td><td>wasm build exists but the roster ships as packs; no equivalent catalogue</td></tr>
+<tr><td>Content volume</td><td>78 fighters, 74 stages, per-match lazy packs</td><td>whatever the player installs</td></tr>
+<tr><td>Cross-device reach</td><td>phones, tablets, desktop</td><td>desktop, Android build, browser build</td></tr>
+</tbody></table>
+</div>
+<p>So: a better <em>engine</em> on the measured axes, and a smaller <em>product</em> than theirs. The PR that follows implements every item of section 7 that was still open.</p>
+<h2 id="8-reproducing"><a class="header" href="#8-reproducing">8. Reproducing</a></h2>
+<pre><code class="language-console"># artifacts, request order, sizes, frame list
+NODE_PATH="$(npm root -g)" node docs/research/ikemen-web/capture.js capture
+
+# what the engine module needs, exports, and which Go files it was built from
+NODE_PATH="$(npm root -g)" node docs/research/ikemen-web/wasm-artifacts.js capture/runtime-engine.bin
+
+# per-frame WebGL counters from inside frame.html
+NODE_PATH="$(npm root -g)" node docs/research/ikemen-web/frame-stats.js
+</code></pre>
+<p><code>capture/</code> then holds the gzipped engine, the UI bundles, the catalog and the content packs used above. Playwright and Chromium are required; nothing is pulled from a third-party package registry beyond them.</p>
+<p>Two measurement caveats: the numbers come from <strong>headless Chromium with SwiftShader</strong> (a software rasterizer), so treat the frame times as a floor, not a GPU result; and the 37 s select→fight time is dominated by the download of ~50 MB of content in that sandbox, not by the engine's own parsing.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Authoring-Tool-Survey.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Character-Tuning.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Authoring-Tool-Survey.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Character-Tuning.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

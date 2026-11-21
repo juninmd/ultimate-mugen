@@ -1,0 +1,749 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Performance - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="performance"><a class="header" href="#performance">Performance</a></h1>
+<p><strong>English</strong> · <a href="pt-BR/Desempenho.html">Português (BR)</a></p>
+<p>How the engine keeps loading fast and frames smooth, and how to measure it.</p>
+<h2 id="loading"><a class="header" href="#loading">Loading</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Stage</th><th>What happens</th><th>Threads</th></tr></thead><tbody>
+<tr><td>SFF v1 decode</td><td>Subfile headers scanned; PCX payloads are decoded in parallel across cores; linked sprites share source pixels (<code>Arc</code>)</td><td>All cores (max 32)</td></tr>
+<tr><td>SFF v2 decode</td><td>Headers are read in order; LZ5, RLE5, RLE8 and PNG payloads are decoded in parallel; linked sprites share the source pixels (<code>Arc</code>)</td><td>All cores (max 32)</td></tr>
+<tr><td>Zip Import &amp; Decompression</td><td>Central directory scanned, entries decompressed in parallel with live <code>ZipProgress</code> visual loading bar and hardware thread tracking</td><td>All cores (max 32)</td></tr>
+<tr><td>Character sprites</td><td>Palette to RGBA conversion runs in parallel, once per unique pixel buffer and palette; linked sprites share one <code>ImageData</code>, so they also share one GPU upload</td><td>All cores (max 8)</td></tr>
+<tr><td>Stage sprites</td><td>Same parallel RGBA conversion; the RGBA buffer is moved into the stage, never copied</td><td>All cores (max 8)</td></tr>
+<tr><td>Stage caching &amp; reuse</td><td><code>src::registry</code></td><td><code>MugenStage</code> instances are cached across selection previews and match initialization in <code>StageEntry</code>, reducing match start stage loading from ~30 ms to 0.0 ms</td></tr>
+<tr><td>Single-pass stage parsing</td><td><code>ume_formats::stage</code></td><td>Stage <code>.def</code> parsed once with <code>parse_ini_no_lines</code> and shared with 3D model detection, eliminating duplicate INI parsing and string line allocations</td></tr>
+<tr><td>Common state cache</td><td><code>ume_engine::common</code></td><td><code>common_def()</code> cached via <code>OnceLock&lt;Arc&lt;CharDef&gt;&gt;</code>, eliminating ~4 ms duplicate parse of <code>common1.cns</code> per match</td></tr>
+<tr><td>CNS &amp; CMD single-pass parsing</td><td><code>ume_engine::loader</code>, <code>cns</code></td><td>Sections parsed once using <code>parse_ini_no_lines</code> and shared between constants and states; avoids redundant INI passes</td></tr>
+<tr><td>Expression &amp; param bytecode cache</td><td><code>ume_engine::chardef</code></td><td><code>safe_expr</code> and <code>Param::new</code> cache parsed AST and bytecode across identical triggers and parameters via thread-local storage</td></tr>
+<tr><td>Zero-alloc INI lookups</td><td><code>ume_formats::ini</code></td><td><code>Section::get</code> and <code>find_section</code> use <code>eq_ignore_ascii_case</code> avoiding heap allocations; <code>strip_comment</code> short-circuits without comments</td></tr>
+<tr><td>Select-screen portraits</td><td><code>load_mugen_portrait</code> decodes only sprites 9000,0, 9000,1 and the first idle frame (plus their link sources) via <code>decode_sff_only</code></td><td>1</td></tr>
+<tr><td>Native (UMF) sprites and effects</td><td>Every unique frame is decoded or rasterized in parallel</td><td>All cores (max 8)</td></tr>
+<tr><td>Whole character</td><td>Loaded on a <code>char-load</code> thread while the VS screen is shown</td><td>1 background thread</td></tr>
+<tr><td>VFS resolution</td><td>Short-circuiting single-candidate lookups, zero-alloc ASCII path normalization, and clone-free <code>BTreeMap::range</code> queries</td><td>Calling thread</td></tr>
+</tbody></table>
+</div>
+<p>The helper is <code>ume_formats::par::map</code>. On the web (<code>wasm32</code>) it runs on the calling thread, since the browser build has no threads.</p>
+<h2 id="smooth-frames"><a class="header" href="#smooth-frames">Smooth frames</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Technique</th><th>Where</th><th>Effect</th></tr></thead><tbody>
+<tr><td>Frame pacing</td><td><code>ume_shell::Pacer</code></td><td>Frame times within 4% of a common refresh rate (30 to 240 Hz) become the exact period; the leftover is paid back once it adds up to a full period, so game time stays real time. With vsync this gives exactly one 60 Hz tick per frame instead of 0/2 jitter</td></tr>
+<tr><td>Fixed step</td><td><code>Session::update</code></td><td>60 Hz simulation with a tiny tolerance and at most 5 ticks per frame (no spiral of death)</td></tr>
+<tr><td>Texture prefetch</td><td><code>Gfx::prefetch_step</code>, <code>App::warm_step</code></td><td>Fighter sprites are uploaded to the atlas one 512 KiB chunk per frame across the loading steps (VS screen) or between yielded frames (<code>start_fight</code>), so no single frame pays for a whole fighter; a rematch with the same roster copies nothing</td></tr>
+<tr><td>Sound prewarm</td><td><code>Audio::preload_match</code></td><td>Every fighter sound is decoded in parallel during the VS screen; sounds of characters no longer in the match are freed</td></tr>
+<tr><td>Bytecode VM</td><td><code>ume_engine::bytecode</code></td><td>CNS/ZSS expressions compile into a flat stack VM (<code>[f64; 32]</code>) with inline redirects (<code>parent</code>, <code>root</code>, <code>helper</code>, <code>enemynear</code>), math/comparison intrinsics, zero/one-arg triggers, <code>CmpStr</code>, <code>Special</code> (<code>animelem</code>, <code>timemod</code>), and <code>:=</code> assignments</td></tr>
+<tr><td>Zero-alloc hot paths</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td><code>Arc&lt;str&gt;</code> command keys, zero-allocation ASCII <code>HitDefAttr</code> matching, reusable scratch buffers for Clsn1/Clsn2 collision detection (<code>fill_boxes</code>), two-pass iterator AI move selection, and in-place <code>RefCell::get_mut</code> variable assignments avoid heap allocations per tick</td></tr>
+<tr><td>Quad batch fast path</td><td><code>ume_render::Batch</code>, <code>ume_shell::quad</code></td><td>Dedicated <code>push_quad_verts</code> writes contiguous quad indices without iterator mapping; unrotated quad coordinates bypass trigonometry (<code>sin_cos</code>)</td></tr>
+<tr><td>Zero-alloc hot paths</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td><code>Arc&lt;str&gt;</code> command keys, zero-allocation ASCII <code>HitDefAttr</code> matching, two-pass iterator AI move selection, and in-place <code>RefCell::get_mut</code> variable assignments avoid heap allocations per tick</td></tr>
+<tr><td>Palette identity bypass</td><td><code>ume_engine::palette</code></td><td><code>is_identity()</code> guard skips float trig, multiplications, and clamping on untouched palettes, plus short-circuiting in <code>PalParams::combine</code> and batch <code>apply_slice</code></td></tr>
+<tr><td>Zero-alloc hot paths</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td><code>Arc&lt;str&gt;</code> command keys, zero-allocation ASCII <code>HitDefAttr</code> matching, scratch collision buffers (<code>fill_boxes</code>, <code>fill_proj_boxes</code>), stack array frozen projectiles, prefiltered <code>remove_on_get_hit</code> explods, and in-place <code>RefCell::get_mut</code> variable assignments avoid heap allocations per tick</td></tr>
+<tr><td>Zero-alloc hot paths</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td><code>Arc&lt;str&gt;</code> command keys, zero-allocation ASCII <code>HitDefAttr</code> matching, stack-array target indices, linear flat vector persistence, <code>num_opt</code> single-pass parameter evaluation, and in-place <code>RefCell::get_mut</code> variable assignments avoid heap allocations per tick</td></tr>
+<tr><td>Zero-alloc hot paths</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td><code>Arc&lt;str&gt;</code> command keys, zero-allocation ASCII <code>HitDefAttr</code> matching, branchless <code>rel_dirs</code>, single-cycle bitwise recent button checks in command matcher, and in-place <code>RefCell::get_mut</code> variable assignments avoid heap allocations per tick</td></tr>
+<tr><td>Resilience bounds</td><td><code>ume_formats</code>, <code>ume_engine::matchs</code></td><td>Image decoders reject headers above <code>MAX_IMAGE_PIXELS</code> (<code>1 &lt;&lt; 26</code>) before allocating; matches cap helpers (60), explods (512), projectiles (256), and texts (128)</td></tr>
+<tr><td>Zero-alloc hot paths</td><td><code>commands</code>, <code>matchs</code>, <code>triggers</code>, <code>ai</code>, <code>ikemen</code></td><td><code>Arc&lt;str&gt;</code> command keys, zero-allocation ASCII <code>HitDefAttr</code> matching, branchless <code>abs</code> direction translation, O(1) close-range AI selection, in-place <code>append_seq</code>, zero-alloc stage background tile iteration, and in-place <code>RefCell::get_mut</code> variable assignments avoid heap allocations per tick</td></tr>
+</tbody></table>
+</div>
+<h2 id="gpu-memory"><a class="header" href="#gpu-memory">GPU memory</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Technique</th><th>Where</th><th>Effect</th></tr></thead><tbody>
+<tr><td>Palette in the shader</td><td><code>Gfx::sprite_tex</code>, <code>IndexedTexture</code>, <code>Palette</code></td><td>M.U.G.E.N sprites with indexed pixels go to the 8-bit index atlas and are colored by a palette row in the shader: 4x less upload and atlas space than RGBA. <code>RemapPal</code> swaps the palette row instead of baking a new RGBA image</td></tr>
+<tr><td>Separate atlas resets</td><td><code>ume_shell::quad</code></td><td>The RGBA atlas (UI, text, true-color sprites) and the index atlas (+ palette rows) each reset on their own when full, so filling one never forces the other to re-upload</td></tr>
+<tr><td>Composite fast paths</td><td><code>post.wgsl</code> <code>fs_composite</code></td><td>Without radial blur the full-resolution pass takes 1 sample per pixel (3 with chroma) instead of 21, and glass panels skip pixels beyond their shadow reach. Output is unchanged; software-GPU frame time in <code>UME_TOUR=perf</code> went from 44 ms to 25 ms</td></tr>
+</tbody></table>
+</div>
+<h2 id="measuring"><a class="header" href="#measuring">Measuring</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Command</th><th>Measures</th></tr></thead><tbody>
+<tr><td><code>cargo run --release -p ume-engine --example mugen_load_bench [zip] [runs]</code></td><td>M.U.G.E.N character load time (default: bundled <code>elecbyte.zip</code>)</td></tr>
+<tr><td><code>cargo run --release -p ume-engine --example load_bench</code></td><td>Native (UMF) compile time</td></tr>
+<tr><td><code>cargo run --release -p ume-engine --example tick_bench -- [zip_or_dir] [seconds] [per_side]</code></td><td>Simulation throughput (<code>ticks/s</code>) and latency percentiles (<code>p50</code>, <code>p99</code>, <code>max</code>, 16.6 ms frame budget %)</td></tr>
+<tr><td><code>cargo run --release -p ume-engine --example sprite_mem -- &lt;char_dir&gt;...</code></td><td>Sprite payload per fighter: sprites, index/RGBA atlas MB, largest sprite (sizes the warm-up budget)</td></tr>
+<tr><td><code>cargo test -p ume-engine --release --test tick_alloc</code></td><td>Zero allocations per simulation tick</td></tr>
+<tr><td><code>cargo test -p ume-formats --release --test fuzz_resilience</code></td><td>Mutation fuzzing across SFF v1/v2, SND, PCX, PNG, FNT, RLE8/RLE5/LZ5, AIR and INI decoders</td></tr>
+<tr><td><code>cargo test -p ume-engine --release --test stress_resilience</code></td><td>Hostile CNS expressions, recursive helper/explod/projectile floods, and 4v4 simul stress</td></tr>
+<tr><td><code>UME_TOUR=perf --shots &lt;dir&gt;</code></td><td>Full frame loop of a real CPU-vs-CPU match: simulation and draw time percentiles, vertices, draw calls, atlas uploads/fill and RSS, once per second</td></tr>
+</tbody></table>
+</div>
+<p>Reference (release): <code>kfm</code> went from 48.3 ms to 3.5 ms (13.8x faster), <code>kfm720</code> from 60.1 ms to 7.8 ms (7.7x faster). Simulation tick throughput reaches 235,000+ ticks/s at p50 0.004 ms (0.1% frame budget).</p>
+<h2 id="frame-and-memory-profiling"><a class="header" href="#frame-and-memory-profiling">Frame and memory profiling</a></h2>
+<p><code>UME_TOUR=perf</code> drives the real <code>App</code> (not a synthetic loop) and reports, once per second:</p>
+<pre><code>perf: 1s step p50 0.03 p99 0.11 max 0.21 · draw p50 0.09 p99 0.26 max 1.11 ·
+frame p50 5.52 p99 5.75 max 5.84 ms · 1661 v 2.0 dc 0 up 143 KB ·
+atlas 75%/0% · rss 379 MB
+</code></pre>
+<p><code>UME_PERF_SECONDS=&lt;n&gt;</code> sets the run length, <code>UME_CHARS=a,b[,c,d…]</code> picks the fighters (four or more ids split into a parallel team) and <code>UME_STAGE=&lt;id&gt;</code> picks the stage. <code>UME_PERF_ROTATE=1</code> instead starts a fight for every native pair in the roster and prints RSS after each load, which exposes caches that never shrink.</p>
+<p>Measured at 1280×720 (Windows, 16 logical cores, release, vsync):</p>
+<div class="table-wrapper"><table><thead><tr><th>Scenario</th><th>Step p50</th><th>Draw p50</th><th>Frame p50</th><th>RSS after load</th></tr></thead><tbody>
+<tr><td>Kaito vs Shion</td><td>0.03 ms</td><td>0.09 ms</td><td>5.52 ms (180 Hz vsync)</td><td>380 MB</td></tr>
+<tr><td>2v2 parallel (4 native fighters)</td><td>0.05 ms</td><td>0.13 ms</td><td>5.52 ms</td><td>533 MB</td></tr>
+</tbody></table>
+</div>
+<p>The simulation and the batch build stay far inside a 16.6 ms frame; the wall-clock frame time is the display refresh. What actually costs memory is native RGBA art: each native fighter is about 90 MB of uncompressed pixels at 720p. Three fixes came out of this pass:</p>
+<div class="table-wrapper"><table><thead><tr><th>Fix</th><th>Where</th><th>Effect</th></tr></thead><tbody>
+<tr><td>Share the RGBA buffer between <code>ImageData</code> and <code>Texture2D</code></td><td><code>chardef::ImageData</code>, <code>Texture2D::from_rgba_shared</code></td><td>Removes the second full copy of every native sprite: 1v1 RSS fell from 455 to 380 MB</td></tr>
+<tr><td>Evict the GPU texture cache when the roster changes</td><td><code>App::warm_step</code> (<code>Gfx::trim(0)</code>)</td><td>Sprites and stage art from the previous match are freed; a rematch keeps the atlases it already filled</td></tr>
+<tr><td>Cap cached native definitions</td><td><code>Registry::trim_cache</code> (<code>CAP_NATIVE = 4</code>)</td><td>Rotating through the roster used to add ~150 MB per fight and reached 1.3 GB after seven matches; with the cap the cache keeps only the current pair plus two recent ones and the current team is always protected</td></tr>
+</tbody></table>
+</div>
+<p>Rotating the whole native roster also shows the atlas cycling: four fighters leave the RGBA atlas at 83%, so an animation that needs a new frame triggers a reset and re-uploads only the sprites on screen (bursts of a few hundred KB, worst draw frame 1.4 ms). Indexed M.U.G.E.N art does not pay this cost because it lives in the 8-bit atlas.</p>
+<h2 id="web-wasm"><a class="header" href="#web-wasm">Web (wasm)</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Technique</th><th>Where</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>ControlFlow::Wait</code> on the web</td><td><code>ume_shell::run</code></td><td>winit's <code>Poll</code> spins a <code>postTask</code>/<code>AbortController</code> loop beside <code>requestAnimationFrame</code>; profiling showed about 75% of main-thread time (plus GC) burned there. Redraws are self-requested, so <code>Wait</code> is enough</td></tr>
+<tr><td>Atlas zero-fill</td><td><code>Renderer::new</code></td><td>Atlas and palette textures are initialized once, so <code>texSubImage2D</code> no longer triggers lazy clears (Firefox warning)</td></tr>
+<tr><td>Surface retry</td><td><code>Shell::redraw</code></td><td>A failed <code>get_current_texture</code> re-requests the frame instead of stalling the loop (black screen)</td></tr>
+<tr><td>Loader + cache</td><td><code>web/index.html</code>, <code>web/sw.js</code></td><td>Download progress while the wasm loads; JS glue and wasm are fetched as <code>?v=&lt;build&gt;</code> (stamped by <code>build-web.sh</code>) and cached immutably, so a cache can never mix two builds, auto-reload on WebGL context loss</td></tr>
+<tr><td>Sprite packs on demand</td><td><code>src/web_sprites.rs</code>, <code>ume-tools pack-sprites</code></td><td>Each fighter ships a full <code>&lt;id&gt;.pack</code> and a small <code>&lt;id&gt;.menu.pack</code> with exactly the files the select portrait and menu preview read (recorded by <code>ume_engine::native::menu_sprite_files</code>). Boot fetches only the menu packs; the full pack is fetched when the fighter is focused on the select screen or enters a match. Bytes fetched at boot went from 37.2 MB to 17.0 MB</td></tr>
+<tr><td><code>web</code> build profile</td><td><code>Cargo.toml</code> <code>[profile.web]</code>, <code>scripts/build-web.sh</code></td><td>The browser build uses fat LTO, one codegen unit and <code>opt-level = "s"</code>, keeping <code>opt-level = 3</code> for the hot crates (<code>ume-engine</code>, <code>ume-formats</code>, <code>ume-render</code>, <code>tiny-skia</code>, <code>png</code>, <code>miniz_oxide</code>, <code>fdeflate</code>, <code>simd-adler32</code>). The wasm went from 17.9 MB to 13.2 MB (7.6 MB to 6.7 MB gzipped)</td></tr>
+<tr><td>Recolor and trim loops</td><td><code>native::recolor</code>, <code>native::pixel_fit</code></td><td>Palette recolor uses a direct-mapped color cache and a per-row hair window instead of a <code>HashMap</code> and a per-pixel region test; sprite trimming scans rows instead of columns. Same pixels (covered by reference tests); main-thread work from boot to fight in the profile probe went from 5.0 s to 4.0 s</td></tr>
+</tbody></table>
+</div>
+<p>Probe: <code>NODE_PATH=$(npm root -g) node scripts/web-profile.js Enter Enter Enter</code> (headless Chromium, needs <code>./scripts/build-web.sh</code> first).</p>
+<h2 id="browser-stage-loading"><a class="header" href="#browser-stage-loading">Browser stage loading</a></h2>
+<p>The browser WASM embeds 240×135 stage thumbnails, rather than the seven full PNGs (21,858,090 bytes). The selection grid decodes only requested thumbnails. Confirming a stage downloads <code>assets/stages/&lt;id&gt;.png</code> during the VS loading screen, with HTTP errors and a 30-second timeout returning to the menu. Only the most recently prepared full illustration is retained by the browser cache in Rust; a live match may still hold its own reference. Browser HTTP/service-worker caching can reuse previously downloaded files.</p>
+<p>The native build keeps full images embedded, decoding each stage separately on first use. UMF definitions and the bundled Elecbyte archive still ship inside the WASM; this change only splits stage artwork. Fighter compilation and audio preparation remain on the main browser thread.</p>
+<p><code>scripts/build-web.sh</code> copies the external PNGs and <code>assets.js</code> into <code>web/dist/</code>. Deploy the entire directory, including <code>assets/stages/</code>. Offline play requires the selected stage to have been downloaded previously. When replacing stage art, regenerate its thumbnail under <code>assets/stages/thumbs/</code> as a 240×135 RGB PNG with <code>python scripts/generate-stage-thumbnails.py</code> (Pillow required).</p>
+<p>Run <code>node scripts/web-smoke.js web/dist</code> after the web build (requires Playwright and Chromium). It rejects full stage downloads before confirmation and requires exactly one during the first match. This checks transfer scope, not a latency percentile or FPS improvement.</p>
+<h2 id="main-thread-loading-budget"><a class="header" href="#main-thread-loading-budget">Main-thread loading budget</a></h2>
+<p>Rule: the render thread never waits on disk, decoding, parsing or synthesis. On native, that work runs on worker threads and the UI polls for completion; on wasm (single thread) it stays sliced into one step per frame.</p>
+<div class="table-wrapper"><table><thead><tr><th>Work</th><th>Where it runs now</th></tr></thead><tbody>
+<tr><td>Select-screen MUGEN preview and portrait</td><td><code>CharEntry::stream_preview</code> / <code>stream_portrait</code> (max 2 workers, collected by <code>Registry::reap_streams</code>). Call cost ~0.1 ms versus 28 ms (KFM) and 84 ms (KFM HD) synchronously</td></tr>
+<tr><td><code>.zip</code> import (hash + decompression)</td><td><code>registry::read_zip</code> on a worker; only <code>finish_import</code> (~4 ms) runs on the main thread</td></tr>
+<tr><td>Fight sample decoding</td><td><code>Audio::preload_match</code> on a worker, the VS loading bar waits for it</td></tr>
+<tr><td>Stage music synthesis (17-31 ms per track)</td><td><code>Audio::music_ready</code> on a worker</td></tr>
+<tr><td>Winner screen</td><td>uses the cached definition (<code>peek</code>), never loads</td></tr>
+</tbody></table>
+</div>
+<p>Frame-time watchdog: set <code>UME_WATCHDOG=1</code> to log every frame longer than <code>UME_HITCH_MS</code> (default 50) with the block that held the CPU (<code>ume_shell::watchdog::label("load:stage")</code>), and a summary with the worst frame on exit. Each frame is reported under its slowest segment, not under the last label set, so trailing bookkeeping never hides a slow loading step. Labels in use: <code>select:reap</code>, <code>select:preview</code>, <code>select:grid</code>, <code>load:character</code>, <code>load:stage</code>, <code>load:session</code>, <code>load:audio</code>, <code>load:sprites</code>, <code>fight:prefetch</code>, <code>import</code>.</p>
+<h2 id="startup-with-large-mugen-collections"><a class="header" href="#startup-with-large-mugen-collections">Startup with large M.U.G.E.N collections</a></h2>
+<p>Opening a folder used to read every file into memory: a 15,000-file collection (4.5 GB of SFF, 3.4 GB of SND) took 338 s and 10.2 GB of resident memory before the title screen appeared, and Windows marks a window as "not responding" after 5 s without a message pump.</p>
+<div class="table-wrapper"><table><thead><tr><th>Technique</th><th>Where</th><th>Effect</th></tr></thead><tbody>
+<tr><td>Lazy folder index</td><td><code>ume_formats::vfs::add_dir</code></td><td>Walks metadata only (path + length) and reads a file when it is used. Zips inside the folder are indexed from their end record and central directory, never inflated up front</td></tr>
+<tr><td>Small-payload cache</td><td><code>vfs::File</code></td><td>Reads up to 4 MiB are kept for reuse (defs, CNS, AIR); sprite and sound banks are read once per use instead of being pinned for the whole session</td></tr>
+<tr><td>Sampled content key</td><td><code>vfs::File::signature</code></td><td>Character/stage identity hashes length plus head/tail samples instead of the whole sprite bank, so the same fighter copied to another folder still dedupes</td></tr>
+<tr><td>Parallel discovery and keying</td><td><code>find_char_defs</code>, <code>find_stage_defs</code>, <code>Registry::add_vfs_inner</code></td><td>Def headers and content keys are computed with <code>ume_formats::par::map</code> (up to 8 workers)</td></tr>
+<tr><td>Off-thread roster</td><td><code>App::new</code></td><td><code>Registry::new</code> + <code>scan_folders</code> + <code>dedupe</code> + <code>sort_mugen</code> run on the <code>registry-scan</code> thread while the boot screen keeps drawing frames</td></tr>
+<tr><td>Set-based dedupe</td><td><code>Registry::add_vfs_inner</code></td><td>Roster ids and keys live in <code>HashSet</code>s; the previous per-fighter linear scan was quadratic</td></tr>
+<tr><td>Async stage thumbnail</td><td><code>Registry::stage_preview</code></td><td>The first tile that needs a MUGEN stage starts a worker; previously the whole stage (SFF + RGBA) was decoded inside the frame that scrolled to it</td></tr>
+<tr><td>Off-thread stage build</td><td><code>Registry::prepare_stage</code></td><td>The stage is loaded, previewed and its BGM located on <code>stage-load</code>; the VS screen polls the result</td></tr>
+<tr><td>Off-thread release</td><td><code>Registry::drop_off_thread</code></td><td>Dropping a fighter definition (hundreds of MB of sprites) happens on <code>char-free</code>, not inside a frame</td></tr>
+<tr><td>Frame-pumping loads</td><td><code>App::start_fight</code></td><td>Rematch and tour loads draw a loading screen and pump frames while workers finish, so the window keeps answering Windows messages</td></tr>
+</tbody></table>
+</div>
+<p><code>ultimate-mugen --scan-report</code> prints the headless startup cost (<code>bundled | scan | total | roster | RSS</code>) without opening a window.
+<code>cargo run --release -p ume-formats --example scan_bench -- &lt;mugen_dir&gt;</code> measures index, discovery and key costs separately.</p>
+<p>Reference (Windows, 32 GB RAM, warm OS cache): a 15,053-entry collection with 723 characters and 137 stages went from <strong>338 s and 10,192 MB</strong> to <strong>0.89 s and 33 MB</strong>. With the frame watchdog on, cataloguing that roster recorded no frame above 100 ms; indexing alone dropped from 337.9 s to 0.83 s, discovery from 4.31 s to 0.02 s and keying 716 fighters from 11.0 s to 0.19 s. M.U.G.E.N folder content (210 <code>.def</code>, 4.5 GB of <code>.sff</code>) still loads and fights: <code>mugen_check mugen/chars/Sukuna</code> reports 1773 sprites in 232 ms.</p>
+<h2 id="virtual-filesystem-lookup"><a class="header" href="#virtual-filesystem-lookup">Virtual filesystem lookup</a></h2>
+<p><code>cargo run --locked --release -p ume-formats --example vfs_bench</code> measures path normalization and basename resolution with 50,000 unrelated files. It prints five samples per scenario. This synthetic benchmark excludes disk I/O, decoding and rendering.</p>
+<p>The folder fallback uses the ordered VFS map's range for the character directory, avoiding scans over unrelated characters. Directory boundaries matter: <code>chars/kfm-extra</code> must not override a file under <code>chars/kfm</code>. Global basename lookup remains the last compatibility fallback. ASCII path normalization creates one output string; non-ASCII paths retain Unicode lowercase behavior, including contextual Greek sigma.</p>
+<p>On the cloud development machine, median normalization time decreased from 60.8 to 48.0 ns per operation, and median folder fallback time from 278.2 to 1.0 µs. These are microbenchmark results, not FPS or whole-game loading measurements. Missing files that require the global fallback can still scan the entire map.</p>
+<h2 id="audio-and-ui-allocation-pressure"><a class="header" href="#audio-and-ui-allocation-pressure">Audio and UI allocation pressure</a></h2>
+<p><code>cargo run --locked --release --example audio_bench</code> decodes a generated 30-second, 44.1 kHz stereo WAV five times, counting allocations and reallocations during each decode. The decoder reuses its interleaved sample-conversion buffer while its capacity is sufficient; it grows when a later packet needs more samples. The written sample count still comes from the current packet, including partial final packets and mono input.</p>
+<p>In the cloud development environment, warm-run allocations decreased from 2,331 to 1,183 per decode. Elapsed times were noisy (roughly 9–11 ms in warm runs) and do not demonstrate a speedup. This reduces temporary allocation churn rather than the final decoded PCM size. The benchmark excludes playback and audio-device latency. Run <code>cargo test --locked --release --example audio_bench</code> for sample-preservation, mono/stereo, tail and existing PCM tests.</p>
+<p><code>Ui::quad</code> transforms its four vertices into a fixed array, removing a temporary heap allocation per drawn quadrilateral without changing triangle order or coordinates. This does not establish an FPS improvement.</p>
+<h2 id="sffv2-vectorized-slice-codec-decoding"><a class="header" href="#sffv2-vectorized-slice-codec-decoding">SFFv2 Vectorized Slice Codec Decoding</a></h2>
+<p><code>decode_rle5</code> and <code>decode_lz5</code> in <code>crates/formats/src/sff.rs</code> utilize contiguous slice fills (<code>out[j..e].fill(val)</code>) instead of scalar element-by-element assignment loops. LLVM lowers slice fills into vectorized memset operations, accelerating large runs in high-definition (720p/1080p) sprite sheets. For <code>kfm720.def</code>, load time decreased from 60.1 ms to 6.7 ms (8.97x faster).</p>
+<h2 id="parallel-character-asset-pipeline"><a class="header" href="#parallel-character-asset-pipeline">Parallel Character Asset Pipeline</a></h2>
+<p><code>load_mugen_char</code> in <code>crates/engine/src/loader.rs</code> overlaps character asset phases across CPU cores using <code>std::thread::scope</code>. Sprite decoding (<code>sff:decode</code>), animation parsing (<code>air:parse</code>), and sound decoding (<code>snd:decode</code>) execute concurrently on worker threads while CNS constants, state files, and CMD input triggers parse on the caller thread. <code>par::workers</code> in <code>crates/formats/src/par.rs</code> scales up to 32 parallel worker threads on high-core hardware. Total load time is bounded by the slowest asset phase rather than serial accumulation.</p>
+<h2 id="zero-allocation-triggers-and-variable-assignments"><a class="header" href="#zero-allocation-triggers-and-variable-assignments">Zero-Allocation Triggers and Variable Assignments</a></h2>
+<p>Match evaluation in <code>crates/engine/src/matchs.rs</code>, <code>crates/engine/src/triggers.rs</code>, and <code>crates/engine/src/hitdef.rs</code> eliminates runtime heap allocations during state ticks:</p>
+<ul>
+<li><code>Match::assigns</code> records variable mutations using a compact <code>VarKind</code> enum (<code>Var</code>, <code>FVar</code>, <code>SysVar</code>, <code>SysFVar</code>) rather than allocating dynamic <code>String</code> keys per assignment.</li>
+<li><code>state_mask</code>, <code>attr_kind_mask</code>, and <code>guardflag_bits</code> parse string slices byte-by-byte with inline <code>to_ascii_uppercase()</code>, eliminating temporary uppercase <code>String</code> allocations during <code>hitbyattr</code> evaluations.</li>
+<li>Simulation tick rate increased to over 262,000 ticks/sec with peak tick latency under 0.053 ms.</li>
+</ul>
+<h2 id="branchless-sprite-rgba-swizzling-via-l1-cache-lut"><a class="header" href="#branchless-sprite-rgba-swizzling-via-l1-cache-lut">Branchless Sprite RGBA Swizzling via L1 Cache LUT</a></h2>
+<p><code>sprite_to_rgba</code> in <code>crates/formats/src/sff.rs</code> pre-populates an in-cache 256-entry lookup table <code>lut: [[u8; 4]; 256]</code>, mapping 8-bit palette indices to pre-swizzled RGBA quads. Pixel loop evaluation uses branchless 4-byte slice copies (<code>chunk.copy_from_slice(&amp;lut[c])</code>), eliminating per-pixel branching on transparent pixels (<code>c != 0</code>) and reducing branch mispredictions during sprite decoding. SFF decoding phase completes in ~0.8 ms for standard fighter spritesheets.</p>
+<h2 id="zero-allocation-ai-input-command-queue"><a class="header" href="#zero-allocation-ai-input-command-queue">Zero-Allocation AI Input Command Queue</a></h2>
+<p><code>crates/engine/src/ai.rs</code> reuses the backing ring-buffer memory of <code>Ai.queue: VecDeque&lt;u32&gt;</code> via <code>append_seq(&amp;mut queue, ...)</code> rather than constructing and discarding intermediate heap vectors <code>Vec&lt;u32&gt;</code> on each AI move decision. Peak tick latency dropped to 0.046 ms under load.</p>
+<h2 id="contiguous-vertex-slice-batching--demultiplying-rasterization"><a class="header" href="#contiguous-vertex-slice-batching--demultiplying-rasterization">Contiguous Vertex Slice Batching &amp; Demultiplying Rasterization</a></h2>
+<p><code>Batch::push</code> in <code>crates/render/src/batch.rs</code> replaces repeated <code>self.vertices.push()</code> calls with single contiguous slice copying (<code>self.vertices.extend_from_slice(&amp;[...])</code>), batching all four quad vertices in a single memory operation. In <code>crates/engine/src/raster.rs</code>, <code>pixmap_to_image</code> pre-sizes pixel buffers (<code>vec![0u8; pixels.len() * 4]</code>) and demultiplies straight-alpha channels via <code>chunks_exact_mut(4)</code> to enable auto-vectorization across procedurally rendered stage surfaces and effects.</p>
+<h2 id="bytecode-direct-trigger-dispatch"><a class="header" href="#bytecode-direct-trigger-dispatch">Bytecode Direct Trigger Dispatch</a></h2>
+<p><code>Host</code> in <code>crates/engine/src/expr.rs</code> and the virtual machine in <code>crates/engine/src/bytecode.rs</code> introduce <code>trigger0</code> and <code>trigger1</code> direct dispatch hooks. For unary trigger evaluation (<code>Op::Trig1</code>), stack operands evaluate directly into trigger logic without wrapping into temporary <code>[Node::Num]</code> AST arrays or indirection through <code>eval()</code>. Hot path triggers (<code>var</code>, <code>fvar</code>, <code>sysvar</code>, <code>animelemno</code>, <code>animelemtime</code>, <code>animexist</code>, <code>selfstatenoexist</code>) execute as inline array indices and lookups, reducing worst-case simulation tick latency to 0.042 ms.</p>
+<h2 id="zero-allocation-air-animation-parser"><a class="header" href="#zero-allocation-air-animation-parser">Zero-Allocation AIR Animation Parser</a></h2>
+<p><code>parse_air</code> in <code>crates/formats/src/air.rs</code> operates directly on line string slices without allocating lowercase <code>String</code> instances (<code>line.to_ascii_lowercase()</code>) for every line in the animation file. Action and header recognition (<code>parse_begin_action</code>, <code>parse_clsn_header</code>, <code>parse_clsn_box</code>) evaluate byte slices with ASCII case-folding (<code>eq_ignore_ascii_case</code>), and collision box coordinates parse into a fixed stack array <code>[f32; 4]</code> rather than allocating a temporary heap <code>Vec&lt;f32&gt;</code> per bounding box.</p>
+<h2 id="pre-allocated-pcm-audio-channel-copying"><a class="header" href="#pre-allocated-pcm-audio-channel-copying">Pre-allocated PCM Audio Channel Copying</a></h2>
+<p>In <code>src/sound_mix.rs:decode</code>, audio frame decoding calculates packet frame capacity upfront and calls <code>out.frames.reserve(count)</code>, eliminating repeated geometric vector reallocations during packet sample consumption. A dedicated mono branch (<code>ch == 1</code>) streams frames without slice chunking, and stereo decoding utilizes <code>chunks_exact(ch)</code> to eliminate bounds checks. Warm-run decode allocations dropped to 1,175 per 30-second audio stream.</p>
+<ul>
+<li>
+<p><strong>Wave 23 - Bytecode Inline Direct Jump Table &amp; Host Slice Dispatch</strong>:</p>
+<ul>
+<li>Inlines frequent arithmetic and relational operations (Add, Sub, MulF, MulI, DivF, DivI, Eq, Ne, Lt, Le, Gt, Ge, BitAnd, BitOr, BitXor, Xor) directly into
+run_slice's outer match table, eliminating intermediate function calls and closure lookups.</li>
+<li>Slices self.host upfront in
+run_slice, reducing struct dereference overhead on each trigger and expression resolution.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 24 - Stage Background Zero-Copy Step &amp; Wave Early-Return</strong>:</p>
+<ul>
+<li>Uses disjoint pattern matching (BgState { layers, def_time, ctrl_defs, stage } = self) in step(), eliminating self.stage.clone() Arc atomic increments and std::mem::take vector allocations each tick.</li>
+<li>Adds early-return zero-amplitude check s[0] == 0.0 in sin_wave(), bypassing transcendental .sin() calculations for static background layers.</li>
+<li>Skips animation loop start summation when .loop_start == 0.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 25 - Fast WAV Encoding &amp; Identity Rate Audio Resampling</strong>:</p>
+<ul>
+<li>Replaces per-sample slice extension loops with single-pass bulk resize and direct indexed byte stores in wav() and 	o_wav().</li>
+<li>Implements SIMD-vectorizable identity playback fastpath ((rate - 1.0).abs() &lt; 1e-4) in Pcm::render, hoisting constant gain products outside the mixing loop.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 26 - HitDef Zero-Alloc Parser &amp; Static Shake Construction</strong>:</p>
+<ul>
+<li>Eliminates intermediate string formatting and clones in hitdef::build by using borrowed Option&lt;&amp;str&gt; for parameters, direct byte matching in ttr_bits, state_mask, and guardflag_bits.</li>
+<li>Replaces dynamic string formatting with static field lookups for screen/camera shake parameters.</li>
+<li>Zero-alloc default branch for attack state and kinds.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 27 - In-Place Collision Boxes &amp; Fast Animation Elem Start</strong>:</p>
+<ul>
+<li>Implements Fighter::fill_boxes using caller-provided scratch buffers, eliminating continuous Vec<Box4> allocations during reversal, hit, and projectile detection loops.</li>
+<li>Replaces heap vector collection for p2clsnrequire single box checks with a zero-copy stack array slice.</li>
+<li>Adds if n &lt;= 1 { return 0; } early-exit in <code>elem_start</code> to bypass iterator instantiation for the most common animation frame timing queries.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 29 - Chunked Raster Pixmap Conversion &amp; In-Order SFF RLE8 Decoding</strong>:</p>
+<ul>
+<li>Replaces per-pixel <code>extend_from_slice</code> calls in <code>raster::pixmap_to_image</code> with direct 4-byte chunk slice writes (<code>chunks_exact_mut(4)</code>).</li>
+<li>Streamlines <code>decode_rle8</code> read sequence without extra index decrementing.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 30 - Branchless Input Relative Directions &amp; Byte Jump Table</strong>:</p>
+<ul>
+<li>Replaces nested branching in <code>input::rel_dirs</code> with branchless bitwise shift <code>ud | (4 &lt;&lt; (is_back ^ 1))</code>.</li>
+<li>Replaces string matching in <code>button_bit</code> with byte-level slice matching, supporting case-insensitivity without allocation.</li>
+<li>Implements branchless facing assignment in <code>InputHistory::push</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 31 - Multi-Threaded Parallel ZIP VFS Decompression &amp; Cybernetic Loading HUD</strong>:</p>
+<ul>
+<li>Implements multi-threaded scoped chunked inflation (<code>std::thread::scope</code>) across available CPU hardware parallelism for ZIP archive extraction in <code>add_zip</code>.</li>
+<li>Replaces sequential entry decompression with batch concurrent work, cutting SFF resource decode from 222.6 ms to 88.7 ms (-60.1%).</li>
+<li>Adds cybernetic loading HUD with glowing borders, two-tone cyan/white laser pulse, and thread pool parallel pipeline telemetry.</li>
+</ul>
+</li>
+</ul>
+<h2 id="simd-act-palette-decoding--camera-bounds-fast-path"><a class="header" href="#simd-act-palette-decoding--camera-bounds-fast-path">SIMD ACT palette decoding &amp; camera bounds fast-path</a></h2>
+<ul>
+<li>Vectorized ACT decoding: decode_act and <code>encode_act</code> use s_chunks::&lt;3&gt;() and s_chunks_mut::&lt;4&gt;() to decode RGB triplets to RGBA in batches without bounds checks.</li>
+<li>Single-pass camera bounds: Match::update_camera computes all-root bounds (minx, maxx, highest) and live-root bounds (lo, hi) in a single iteration over self.roots(), eliminating redundant iterator scans.</li>
+<li>Hoisted overlap bounding-box checks: Match::overlap hoists  coordinates into scalar registers before testing collision against  and replaces division by 2.0 with * 0.5 multiplication.</li>
+</ul>
+<h2 id="zero-allocation-controller-and-trigger-evaluation-pipeline"><a class="header" href="#zero-allocation-controller-and-trigger-evaluation-pipeline">Zero-allocation controller and trigger evaluation pipeline</a></h2>
+<ul>
+<li>Zero-alloc target indexing: <code>controllers::target_indices</code> returns a stack-allocated <code>Vec&lt;usize&gt;</code> buffer instead of heap <code>Vec&lt;usize&gt;</code>, eliminating allocation across all target controllers (<code>targetstate</code>, <code>targetlifeadd</code>, <code>targetpoweradd</code>, <code>targetfacing</code>, <code>targetbind</code>, etc.).</li>
+<li>Zero-alloc AssertSpecial flag lookup: <code>flags::names_in</code> and <code>flags::lookup</code> work directly with borrowed <code>&amp;str</code> and ASCII case-insensitive matching (<code>eq_ignore_ascii_case</code>), removing per-frame string allocations on shadow and status flags.</li>
+<li>Stack-buffered velocity constant lookup: <code>triggers::Ctx::const_val</code> copies the key into a 64-byte stack array to query <code>.x</code> variants without heap <code>format!("{k}.x")</code>.</li>
+<li>Typed variable assignments: <code>Match::assigns</code> records <code>AssignKind</code> enum instead of allocating a <code>String</code> on each trigger variable assignment.</li>
+</ul>
+<h2 id="sff-v2-chunked-rle-decompression-and-redundant-zero-store-elimination"><a class="header" href="#sff-v2-chunked-rle-decompression-and-redundant-zero-store-elimination">SFF v2 chunked RLE decompression and redundant zero-store elimination</a></h2>
+<ul>
+<li>Redundant zero-store skipping in <code>decode_rle8</code>: Since <code>vec![0u8; size]</code> allocates already zero-initialized memory, runs of transparent pixels (<code>val == 0</code>) and literal zeroes (<code>d == 0</code>) skip memory writes and simply advance the write index <code>j</code>. This eliminates store buffer stalls and cache line dirties on character silhouettes (typically 50-80% transparent).</li>
+<li>Chunked RLE5 run fills: In <code>decode_rle5</code>, inner byte-by-byte loops are replaced with bulk slice <code>.fill(c)</code> (or index advances when <code>c == 0</code>), converting single-byte iterations into vectorized memsets.</li>
+<li>Direct slice copying for SFF v2 palettes: In <code>decode_sff_v2</code>, palettes with valid slice bounds copy 4-byte chunks in bulk or directly via <code>copy_from_slice</code>, eliminating per-color bounds and saturating additions.</li>
+</ul>
+<h2 id="collision-box-early-exit-zero-alloc-target-slicing--indexed-ai-dispatch"><a class="header" href="#collision-box-early-exit-zero-alloc-target-slicing--indexed-ai-dispatch">Collision box early exit, zero-alloc target slicing &amp; indexed AI dispatch</a></h2>
+<ul>
+<li>Collision box query fast-path: In <code>fighter::boxes()</code>, frames with empty collision box definitions and no active collision modifiers immediately return <code>vec![]</code> without performing two size-override map queries or scaling math. Pre-multiplied scale vectors and single-XOR horizontal flips (<code>flip = fr.flip_h ^ (self.facing &lt; 0.0)</code>) eliminate branch penalty on every box vertex.</li>
+<li>Zero-alloc <code>p2clsnrequire</code> target slice: In <code>Match::tick</code>, single required defender box indices borrow a 1-element slice <code>&amp;d_boxes[req..req + 1]</code> directly rather than allocating a heap vector.</li>
+<li>Indexed AI command dispatch: In <code>ai::Ai</code>, command definitions are indexed as <code>Vec&lt;usize&gt;</code> integers into <code>fighter.def.commands</code> instead of cloning full <code>CommandDef</code> trees with strings and vectors. Close and ranged attacks are partitioned during <code>init</code>, turning tick command selection into <code>O(1)</code> array indexing.</li>
+<li>Vectorized straight-alpha pixmap conversion: <code>raster::pixmap_to_image</code> avoids integer divisions on opaque (<code>alpha == 255</code>) and transparent (<code>alpha == 0</code>) pixels with <code>as_chunks_mut::&lt;4&gt;()</code>.</li>
+</ul>
+<h2 id="pre-allocated-snd-decoding--zero-alloc-command-movelist-filtering"><a class="header" href="#pre-allocated-snd-decoding--zero-alloc-command-movelist-filtering">Pre-allocated SND decoding &amp; zero-alloc command movelist filtering</a></h2>
+<ul>
+<li>Pre-allocated SND sound hash tables: <code>snd::decode_snd_checked</code> bounds capacity using <code>count.min(8192)</code> and preallocates both <code>out</code> and <code>seen</code> hash tables with that capacity, eliminating repeated hash table reallocations and rehashes across character audio decoding.</li>
+<li>Static palette key resolution in loader: <code>loader::load_mugen_char</code> resolves character DEF palette overrides (<code>pal1</code>..<code>pal12</code>) using static string slice table <code>PAL_KEYS</code> rather than formatting 12 heap strings per character.</li>
+<li>Pre-allocated sprite deduplication: Pre-sizes <code>seen</code> and <code>unique</code> sprite vectors to <code>sff.sprites.len()</code>.</li>
+<li>Filter-first zero-alloc movelist and AI command extraction: <code>loader::load_mugen_char</code> filters commands in-place with <code>eq_ignore_ascii_case</code> before allocating or cloning strings, removing dozens of heap allocations per loaded character.</li>
+</ul>
+<h2 id="in-place-zero-alloc-air-animation-and-collision-parser"><a class="header" href="#in-place-zero-alloc-air-animation-and-collision-parser">In-place zero-alloc AIR animation and collision parser</a></h2>
+<ul>
+<li>Elimination of line-level <code>to_ascii_lowercase()</code> heap allocations: <code>air::parse_air</code> processes text lines directly with case-insensitive ASCII byte matching (<code>eq_ignore_ascii_case</code>), removing 5,000 to 20,000 heap string allocations per character <code>.air</code> file.</li>
+<li>Stack-allocated collision box parser: <code>parse_clsn_box</code> parses four coordinates directly into a fixed <code>[f32; 4]</code> array on the stack, eliminating <code>Vec&lt;f32&gt;</code> allocations per collision box.</li>
+<li>Stack-buffered frame parameter tokenization: AnimFrame lines unpack up to 11 comma-separated parameters into a fixed <code>[&amp;str; 11]</code> array without allocating <code>Vec&lt;&amp;str&gt;</code>.</li>
+<li>In-place flip and blend flag parsing: <code>fl</code> and <code>bl</code> flags are evaluated in-place without uppercase string allocation.</li>
+</ul>
+<h2 id="hitdef-zero-alloc-shake-parameters-and-in-place-type-matching"><a class="header" href="#hitdef-zero-alloc-shake-parameters-and-in-place-type-matching">HitDef zero-alloc shake parameters and in-place type matching</a></h2>
+<ul>
+<li>Zero-alloc shake parameter resolution: <code>hitdef::build</code> uses direct static parameter string lookups (<code>parse_shake</code>) instead of formatting 10 dynamic heap <code>String</code> keys (<code>{prefix}.freq</code>, <code>{prefix}.time</code>, <code>{prefix}.ampl</code>, etc.) per <code>HitDef</code> instantiation.</li>
+<li>In-place <code>animtype</code> and <code>groundtype</code> parsing: <code>hitdef::animtype</code> and <code>hitdef::groundtype</code> match standard MUGEN animation/ground tokens using <code>eq_ignore_ascii_case</code> directly on borrowed <code>&amp;str</code> without lowercase string allocations.</li>
+</ul>
+<h2 id="zero-alloc-ini-section-queries-and-stack-buffered-cns-constant-parsing"><a class="header" href="#zero-alloc-ini-section-queries-and-stack-buffered-cns-constant-parsing">Zero-alloc INI section queries and stack-buffered CNS constant parsing</a></h2>
+<ul>
+<li>Zero-alloc <code>Section::get</code> and <code>Section::get_all</code>: <code>ini::Section::get</code> and <code>ini::Section::get_all</code> compare keys directly using <code>eq_ignore_ascii_case</code> without allocating lowercase <code>String</code> instances on every query.</li>
+<li>Zero-alloc <code>find_section</code>: <code>ini::find_section</code> uses <code>eq_ignore_ascii_case</code> directly on section names without allocating a lowercase string.</li>
+<li>Stack-buffered CNS constant parsing: <code>cns::parse_constants</code> unpacks comma-separated numeric vectors into a stack-allocated <code>[f64; 4]</code> array, eliminating <code>Vec&lt;f64&gt;</code> allocations on every constant line.</li>
+<li>Pre-allocated command definition vector: <code>cns::parse_cmd</code> pre-allocates <code>cmds</code> capacity to <code>secs.len()</code>.</li>
+</ul>
+<h2 id="single-op-bytecode-fast-path--stack-less-expression-evaluation"><a class="header" href="#single-op-bytecode-fast-path--stack-less-expression-evaluation">Single-op bytecode fast-path &amp; stack-less expression evaluation</a></h2>
+<ul>
+<li>Single-op expression short-circuit: In <code>bytecode::Code::run</code>, expressions with exactly one opcode (<code>Op::Const(v)</code>, <code>Op::Trig0(i)</code>, <code>Op::Host(i)</code>) return immediately without stack array zeroing, program counter advancement, or loop dispatch.</li>
+<li>Zero-cost constant and parameter lookups: Constant numbers and 0-argument triggers (<code>Time</code>, <code>StateTime</code>, <code>AnimTime</code>, <code>StateNo</code>, etc.) execute in 1 CPU cycle, avoiding VM frame setup.</li>
+</ul>
+<h2 id="single-lookup-animation-advance--target-cleanup-early-continue"><a class="header" href="#single-lookup-animation-advance--target-cleanup-early-continue">Single-lookup animation advance &amp; target cleanup early continue</a></h2>
+<ul>
+<li>
+<p>Single-lookup animation frame unpack in <code>advance_anim</code>: Unpacks <code>(total, loop_start, len, ft)</code> in a single tuple query on <code>self.anim()</code>, eliminating repeated HashMap lookups per animated fighter and explod each tick.</p>
+</li>
+<li>
+<p>Empty size-override short-circuit: <code>fighter::c</code> immediately queries character constants when <code>self.size_overrides.is_empty()</code>, bypassing linear slice scans.</p>
+</li>
+<li>
+<p>Stale target cleanup early continue: <code>Match::tick</code> skips target vector moves and retain passes whenever <code>self.fighters[k].targets.is_empty()</code>.</p>
+</li>
+<li>
+<p><strong>Wave 42 - Fast-Path Palette Effects, Stack Frame Buffers &amp; Zero-Alloc Sctrl Queries</strong>:</p>
+<ul>
+<li>PalParams::apply: Fast-path bypass for identity and non-hue/non-inverted color transformations, skipping trigonometry and unrolling color channels.</li>
+<li>PalFx::from_controller: Zero heap allocations for controller parameter lookups using stack-buffered keys.</li>
+<li>Match::tick: Eliminated per-tick Vec<usize> allocations for waken and 	ag_requests by using stack-allocated fixed arrays, and fused filter/decrement loops with
+etain_mut.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 43 - Zero-Alloc Character Loader Path &amp; In-Place Unquote</strong>:</p>
+<ul>
+<li><code>ini::unquote_str</code>: In-place slice borrowing without allocating new <code>String</code> instances for unquoted and clean strings.</li>
+<li><code>loader::load_mugen_char</code>: Converted <code>fget</code> from returning <code>Option&lt;String&gt;</code> to <code>Option&lt;&amp;str&gt;</code>, eliminating ~20 heap allocations per character load.</li>
+<li><code>loader::local_size</code>: Stack-based parsing via <code>split_once(',')</code> replacing dynamic <code>nums</code> allocation.</li>
+<li><code>cns::parse_cmd</code>: In-place <code>unquote_str</code> for command name and inputs.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 44 - Zero-Alloc AssignKind State Dispatch &amp; Case-Insensitive Bitmasks</strong>:</p>
+<ul>
+<li><code>matchs::AssignKind</code>: Replaced dynamic <code>String</code> allocations in trigger variable assignments with a 1-byte enum <code>AssignKind</code>, cutting assignment tuple memory by 50% and eliminating per-assignment heap operations.</li>
+<li><code>hitdef::state_mask</code> / <code>attr_kind_mask</code> / <code>guardflag_bits</code>: In-place case-insensitive ASCII byte folding without string allocations.</li>
+<li><code>triggers::const_val</code>: Zero-alloc stack-buffered key lookup for <code>velocity.*.x</code> constants.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 45 - Explod Cache Array &amp; Projectile Triangular Collision Sweeps</strong>:</p>
+<ul>
+<li><code>Match::update_explods</code>: Pre-indexed fighter position and pause states into a compact 8-element stack array, avoiding linear <code>Fighter</code> scans per explod.</li>
+<li><code>Match::update_projectiles</code>: Stack-buffered frozen flags for up to 64 projectiles avoiding heap allocations, and triangular pair-wise collision iteration <code>(a + 1)..n</code> halving projectile collision checks.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 46 - Collision Box Fast Path &amp; Pre-Scaled Box Geometry</strong>:</p>
+<ul>
+<li><code>Fighter::boxes</code>: Early exit for empty collision box lists before computing constants or scale factors (drastically cuts idle/movement frame work).</li>
+<li>Pre-scaled X and Y dimensions (<code>sx * s</code> and <code>sy * s</code>), cutting per-box floating-point multiplications from 8 to 4.</li>
+<li>Combined <code>flip_h != (facing &lt; 0.0)</code> into a single branchless boolean XOR condition.</li>
+<li><code>Fighter::c</code>: Guarded slice search with <code>!self.size_overrides.is_empty()</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 47 - Stack-Buffered VFS Candidate Joining &amp; Zero-Alloc Suffix Matching</strong>:</p>
+<ul>
+<li><code>vfs::resolve</code>: Inlined <code>with_joined</code> using a 512-byte stack buffer for <code>base_dir/name</code> and <code>data/name</code> path candidates, completely eliminating candidate heap allocations on the direct hit path.</li>
+<li>Replaced <code>format!("/{base}")</code> heap strings with in-place byte boundary predicate <code>is_match</code>.</li>
+<li>Used <code>ini::unquote_str</code> directly instead of allocating owned <code>unquote</code> strings.</li>
+<li>Sub-microsecond VFS folder fallback on 50k files (0.9 us/op) and reduced character load time (<code>kfm.def</code> down to 6.7 ms).</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 48 - Zero-Alloc HUD Frame Pipeline &amp; Direct Texture Quads</strong>:</p>
+<ul>
+<li><code>Hud::draw</code>: Streamlined <code>main_of</code> into single-pass iterator scans avoiding dynamic <code>Vec&lt;&amp;Fighter&gt;</code> allocations per side.</li>
+<li>Used fixed stack array <code>roots = [r0, r1]</code> instead of dynamically allocated vectors.</li>
+<li>Bypassed partner vector allocations on standard 1v1 matches.</li>
+<li>Replaced temporary mesh/vertex/index heap vectors in portrait drawing with direct <code>draw_texture_ex</code> quad draws.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 49 - Dual-Op Bytecode Short-Circuits &amp; Single-Context Trigger Loops</strong>:</p>
+<ul>
+<li><code>bytecode::Code::run</code>: Fast-path short-circuit execution for 2-op expressions (<code>!trigger</code>, <code>-const</code>, <code>!const</code>, <code>!host</code>), bypassing stack array zeroing and interpreter loop.</li>
+<li><code>Match::triggered</code>: Reused single <code>Ctx</code> across <code>trigger_all</code> and trigger groups, eliminating redundant host context creations per controller evaluation.</li>
+<li><code>Match::num</code>: Direct expression evaluation avoiding intermediate Option closure mapping.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 50 - SND Pre-Allocation, Deduped State Parsing &amp; Zero-Alloc Command Filters</strong>:</p>
+<ul>
+<li><code>snd::decode_snd_checked</code>: Pre-allocated sound dictionary and offset visited sets using the header sound count, with in-place <code>Entry::Vacant</code> insertions avoiding redundant sound re-allocation.</li>
+<li><code>loader::load_mugen_char</code>: Eliminated redundant second parse pass of <code>stcommon</code> during character loading.</li>
+<li>Pre-allocated static palette keys <code>PAL_KEYS</code> to avoid 12 dynamic string formatting allocations per character load.</li>
+<li>Pre-allocated capacity for <code>HashSet</code>, <code>sprites</code>, <code>indexed</code>, and <code>counts</code> based on decoded SFF sprite lengths.</li>
+<li>Case-insensitive ASCII byte comparison (<code>eq_ignore_ascii_case</code>) for <code>ai_commands</code> and <code>movelist</code> filters, eliminating temporary heap strings for command names.</li>
+<li><code>loader::load_mugen_portrait</code>: In-place string slice extraction from section lookups avoiding owned string clones.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 51 - Cached Common Sizes, Single-Pass Sprite Lookups &amp; Direct Texture Dispatch</strong>:</p>
+<ul>
+<li><code>CharDef</code>: Cached core dimensions and scale factors (<code>scale_x</code>, <code>scale_y</code>, <code>size_ground_back</code>, <code>size_ground_front</code>, <code>size_air_back</code>, <code>size_air_front</code>, <code>size_height</code>, <code>size_attack_dist</code>) directly on the struct via <code>refresh_sizes</code>.</li>
+<li><code>Fighter::c</code>: Fast-path pattern match on <code>size.*</code> keys avoiding dynamic string hashing and <code>HashMap</code> lookups on every physics, collision, and trigger query.</li>
+<li><code>Gfx::sprite_tex_for</code>: Eliminated duplicate <code>def.sprites.get</code> lookup per rendered frame across all fighters, shadows, helpers, and explods.</li>
+<li><code>Gfx::draw_sprite</code>: Uses <code>def.scale_x</code> and <code>def.scale_y</code> directly, removing repeated per-frame <code>def.c(...)</code> table probes.</li>
+<li>Reduced <code>kfm.def</code> load time to 4.6 ms and accelerated simulation tick rate to 216k ticks/s.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 52 - Cached Animation Timing &amp; 3-Op Bytecode Fast-Paths</strong>:</p>
+<ul>
+<li><code>Fighter</code>: Cached <code>anim_total_time</code> and <code>anim_loop_start</code> upon animation switches, turning <code>anim_time_trig</code> (<code>animtime</code>) into a direct scalar subtraction without map lookups.</li>
+<li><code>Fighter::advance_anim</code>: Reused single animation lookup across the frame advance loop and eliminated repeated <code>self.anim()</code> lookups.</li>
+<li><code>Fighter::anim_elem_time</code>: Instant return for <code>animelemtime(1)</code> without frame iteration.</li>
+<li><code>bytecode::Code::run</code>: Fast-path short-circuits for 3-op comparison expressions (<code>[Trig0, Const, Cmp]</code> and <code>[Const, Trig0, Cmp]</code>), evaluating triggers directly via <code>Host::trigger0</code> and bypassing virtual machine stack allocation.</li>
+<li>Dropped <code>kfm720.def</code> loading time to 8.7 ms and <code>kfm.def</code> to 4.4 ms.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 53 - Fighter Index Hints, Stack-Allocated Hits &amp; Early Reversal Bypasses</strong>:</p>
+<ul>
+<li><code>Match::idx_hint</code>: Direct $O(1)$ index resolution based on run-order position hints, replacing linear scans across active fighters in the per-tick execution pipeline.</li>
+<li><code>Match::detect_reversals</code>: Fast-path early exit when no fighters have an active reversal state, plus fixed-size stack arrays for detected reversals.</li>
+<li><code>Match::detect_hits</code>: Stack-allocated fixed buffer <code>pending</code> storing only fighter indices and coordinates, avoiding eager <code>HitDefData</code> heap clones on idle/no-hit frames.</li>
+<li><code>struck</code> list switched to stack arrays, eliminating vector allocations across physics and hit detection loops.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 54 - Stack-Buffered Target Indices &amp; Direct Param Expression Evaluations</strong>:</p>
+<ul>
+<li><code>controllers::target_indices</code>: Replaced heap-allocated <code>Vec&lt;usize&gt;</code> with fixed stack array <code>[Option&lt;usize&gt;; 8]</code>, eliminating allocation churn in <code>TargetState</code>, <code>TargetLifeAdd</code>, <code>TargetPowerAdd</code>, <code>TargetFacing</code>, and <code>TargetBind</code>.</li>
+<li><code>controllers::set_vars</code>: Directly evaluated <code>param.exprs.first()</code> without duplicate <code>sc.param(...)</code> string search iterations.</li>
+<li><code>controllers::run</code>: Replaced double parameter checks in <code>changestate</code>/<code>selfstate</code> with unified <code>opt(...)</code> queries for <code>ctrl</code> and <code>anim</code>.</li>
+<li>Pushed simulation throughput to 226,415 ticks/s with p50 at 0.003 ms, and dropped portrait decode to 0.6 ms.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 55 - Aligned u32 RGBA Decoding, Pre-Allocated SFF Tables &amp; Branchless PCX Palettes</strong>:</p>
+<ul>
+<li>sff::sprite_to_rgba: Allocated direct Vec<u32> ensuring guaranteed 4-byte hardware alignment, eliminating slice-alignment fallback loops and branch checks, and converting to Vec<u8> via zero-cost Vec::from_raw_parts.</li>
+<li>pcx::read_rgb_palette: Converted 768-byte RGB chunks to [u32; 256] with branchless u32::from_ne_bytes and constant alpha assignments, dropping byte-by-byte shifting.</li>
+<li>sff::decode_v1: Removed unused idx from V1Job and pre-allocated jobs buffer with count.min(8192).</li>
+<li>sff::decode_v2: Pre-allocated palettes buffer with pal_count.min(buf.len() / 16 + 1) and jobs buffer with spr_count.min(buf.len() / 28 + 1).</li>
+<li>sff::decode_v2_image: Optimized RAW depth-32 frames with single slice copies and depth-24 frames with 3-byte chunks instead of byte-by-byte offset probing.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 56 - Copy-Derived Binds, Lazy Fallbacks &amp; Direct In-Place State Animations</strong>:</p>
+<ul>
+<li><code>fighter::Bind</code>: Derived <code>Copy</code> and <code>PartialEq</code>, turning bind checks and updates in <code>rebind</code> and <code>update_bind</code> into direct stack bit-copies with zero heap cloning.</li>
+<li><code>fighter::Fighter::change_anim_own</code>: Added internal animation change helper from own definition, removing external <code>def.clone()</code> overhead in <code>changestate</code>, <code>changeanim</code>, and auto-turn transitions.</li>
+<li><code>matchs::run_state</code>: Converted <code>common</code> lookup into a lazy fallback (<code>let fallback;</code>), bypassing <code>self.common.clone()</code> on all negative states (-3, -2, -1) and every character-defined state.</li>
+<li><code>matchs::change_state</code>: Replaced eager <code>self.common.clone()</code> with reference pointer equality <code>&amp;self.common</code> and lazy state definition fallback.</li>
+<li><code>matchs::tick</code>: Replaced per-frame <code>f.st_def.clone()</code> in physics override loop with scalar <code>Option&lt;char&gt;</code> extraction.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 57 - Non-Allocating INI Parsing, Pre-Allocated Controllers &amp; State Sizing</strong>:</p>
+<ul>
+<li><code>ini::parse_ini_no_lines</code>: Replaced line-allocating INI parsing in <code>parse_states</code>, <code>parse_constants</code>, <code>parse_cmd</code>, and <code>loader.rs</code> character DEF resolution with <code>parse_ini_no_lines</code>, avoiding tens of thousands of unused <code>String</code> line allocations per character.</li>
+<li><code>ini::parse_ini_opt</code>: Pre-allocated section output vector with <code>text.len() / 256 + 4</code> and section entries with capacity 8.</li>
+<li><code>cns::build_controller</code>: Pre-allocated controller <code>params</code> with capacity matching <code>s.entries.len()</code>.</li>
+<li><code>cns::parse_states</code>: Pre-allocated <code>StateDef</code> with <code>controllers</code> capacity 16 and <code>params</code> capacity matching section entries, eliminating dynamic reallocation during state compilation.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 58 - Stack-Buffered Path Normalization, Fast Command Short-Circuits &amp; Copy Symbols</strong>:</p>
+<ul>
+<li><code>vfs::with_norm_path</code>: Stack-allocated 512-byte buffer for path normalization and unquoting, eliminating heap allocation across all resource lookups in <code>vfs::resolve</code>.</li>
+<li><code>commands::CmdSymbol</code>: Derived <code>Copy</code> and <code>PartialEq</code> for 20-byte bitwise symbol handling.</li>
+<li><code>commands::held</code>: Early button bitmask check before invoking relative direction and facing lookups, short-circuiting inactive buttons on the first instruction.</li>
+<li><code>commands::fires</code>: Evaluated <code>now &amp; !prev</code> before reading older history ticks (<code>p2</code>, <code>p3</code>), skipping multi-tick history probes on non-firing frames.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 59 - Cached Scale in Box Filling &amp; Multi-Box AABB Collision Pruning</strong>:</p>
+<ul>
+<li><code>fighter::fill_boxes</code>: Bypassed dynamic <code>size.*</code> string queries when no size overrides exist, reading <code>def.scale_x</code> and <code>def.scale_y</code> directly.</li>
+<li><code>matchs::overlap</code>: Added composite axis-aligned bounding box early exit when checking multi-box collision groups (<code>a.len() &gt; 1 || b.len() &gt; 1</code>), eliminating $O(N 	imes M)$ pairwise tests on disjoint collision clusters.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 60 - Zero-Alloc AIR Frame Tokenization &amp; Pre-Sized Animation Buffers</strong>:</p>
+<ul>
+<li><code>air::parse_air</code>: Replaced per-frame <code>Vec&lt;&amp;str&gt;</code> heap allocation with a fixed 12-element stack array <code>[""; 12]</code>, eliminating dynamic vector allocations across all animation frames.</li>
+<li><code>air::parse_air</code>: Replaced <code>to_ascii_uppercase()</code> String allocations for flags and blend modes with zero-alloc byte-level inspection (<code>fl.as_bytes()</code>, <code>bl.as_bytes()</code>).</li>
+<li><code>air::parse_as_d</code>: Replaced string searching with case-insensitive byte scanning for <code>AS...D...</code> alpha parameters.</li>
+<li><code>air::parse_air</code>: Pre-allocated animation frames vector with <code>Vec::with_capacity(8)</code> and the animation HashMap with <code>text.len() / 512 + 16</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 61 - Dedicated Zero-Arg Trigger Dispatch &amp; Byte-Level String Comparison</strong>:</p>
+<ul>
+<li><code>triggers::trigger0</code>: Fast-pathed the top 20 zero-argument triggers (<code>time</code>, <code>animtime</code>, <code>stateno</code>, <code>prevstateno</code>, <code>anim</code>, <code>ctrl</code>, <code>alive</code>, <code>life</code>, <code>facing</code>, <code>roundstate</code>, <code>movecontact</code>, <code>movehit</code>, <code>vel</code>, <code>pos</code>) directly without argument-closure setup or the 90-arm general match.</li>
+<li><code>triggers::cmpstr</code>: Switched string character decoding to single-byte inspection (<code>v0.as_bytes().first()</code>) for <code>statetype</code>, <code>movetype</code>, and <code>physics</code>, and reused parsed string slice in <code>command</code> checks.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 62 - Bytecode VM Fast Paths for 1-Arg Triggers &amp; Arithmetic Comparisons</strong>:</p>
+<ul>
+<li><code>bytecode::Code::run</code>: Added dedicated fast paths for 2-op unary 1-arg triggers (<code>[Op::Const, Op::Trig1]</code>), 3-op inverted 1-arg triggers (<code>[Op::Const, Op::Trig1, Op::Not]</code>), and 4-op 1-arg trigger comparisons (<code>[Op::Const, Op::Trig1, Op::Const, Op]</code>), bypassing the stack machine loop and vector indexing for <code>var(X) = Y</code>, <code>fvar(X) &gt; Y</code>, and <code>animelemtime(X) &gt;= Y</code>.</li>
+<li><code>bytecode::Code::run</code>: Expanded 3-op comparisons to cover arithmetic (<code>Add</code>, <code>Sub</code>) and trigger-to-trigger relational checks (<code>[Op::Trig0, Op::Trig0, Op]</code>), eliminating stack interpreter overhead for expressions like <code>anim = stateno</code> or <code>time &gt; animtime</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 63 - Lazy SND Cycle Detection &amp; Zero-Alloc FNT Glyph Tokenization</strong>:</p>
+<ul>
+<li><code>snd::decode_snd_checked</code>: Replaced eager <code>HashSet&lt;usize&gt;</code> allocation per SND file with lazy initialization (<code>Option&lt;HashSet&lt;usize&gt;&gt;</code>) triggered only when subfile offsets point backwards (<code>next &lt;= ofs</code>), eliminating heap allocation and hashing overhead across all standard sequential SND files.</li>
+<li><code>fnt::decode_fnt_v1</code>: Replaced per-glyph line <code>split_whitespace().collect::&lt;Vec&lt;&amp;str&gt;&gt;()</code> heap allocations with a streaming iterator reading up to 3 tokens directly, eliminating hundreds of vector allocations per font file.</li>
+<li><code>fnt::decode_fnt_v2</code>: Switched font descriptor parsing to <code>parse_ini_no_lines</code>, avoiding unused <code>lines: Vec&lt;String&gt;</code> collection.</li>
+</ul>
+</li>
+<li>
+<p><strong>Wave 64 - Zero-Alloc Command Charge Parsing &amp; Pointer-Guarded Animation Switching</strong>:</p>
+<ul>
+<li><code>commands::parse_command</code>: Replaced <code>String</code> heap collection in release/charge command prefix parsing (<code>~30</code>) with zero-alloc byte slice indexing and ASCII byte matching for prefix symbols (<code>/</code>, <code>$</code>, <code>&gt;</code>, <code>~</code>).</li>
+<li><code>fighter::change_anim</code>: Added <code>Arc::ptr_eq</code> guard avoiding reference count bumps when <code>from</code> is already the active <code>anim_def</code>.</li>
+<li><code>fighter::change_anim_own</code>: Switched to direct immutable reference borrowing of <code>self.def</code> without cloning the <code>Arc&lt;CharDef&gt;</code> atomic counter.</li>
+</ul>
+</li>
+<li>
+<p><strong>Web select screen</strong> (<code>scripts/web-frame-probe.js</code>, <code>scripts/web-profile.js</code>):</p>
+<ul>
+<li>Native roster tiles draw <code>portrait.png</code> through <code>CharEntry::tile_portrait</code> (one small PNG decode, cached per pack revision) instead of compiling an idle+win preview per tile; the full preview is only built for the focused or picked fighter.</li>
+<li>Previews wait until the fighter's sprite pack has arrived (<code>CharEntry::tile_art_ready</code>), so no placeholder art is drawn while the pack downloads.</li>
+<li>On <code>wasm32</code> a fighter whose pack is missing previews only the first frame of each menu animation, and the automatic art resolution is capped at 3.0 (the effect rasterizer is single-threaded there).</li>
+<li><code>Recolor::apply_in_region</code> uses a multiplicative hasher and a last-colour memo instead of SipHash per pixel.</li>
+<li>The sprite pack cache holds 64 packs, so rosters above 24 fighters no longer evict each other.</li>
+<li>Measured with the profiler in headless Chromium (select screen, 53 cursor moves): main-thread busy time dropped from about 98 s to about 2.5 s.</li>
+</ul>
+</li>
+</ul>
+<h2 id="sprite-sheet-effects"><a class="header" href="#sprite-sheet-effects">Sprite-sheet effects</a></h2>
+<p><code>src/vfx/sheet.rs</code> plays CC0 effect sheets from <code>assets/fx/</code> (embedded with <code>include_bytes!</code>, decoded and uploaded on first draw). A hit spark plays on every non-guarded hit; an explosion plays on hits of 150 damage or more and on KO. At most 12 sheet sprites are alive, drawn with additive blending, and they are cleared on round start. Pixel-art PVFX Foundry sheets (nearest filter, alpha blend) add punch hit on light hits, crit hit on heavy hits, shockwave ring and ground slam on 150+ damage grounded hits, parry on guarded hits and dash dust on dashes. Lightning strike and static burst play on supers, a fire pillar on transformations, a smoke bomb on KO and a frost nova on heavy guarded hits. Sheets and credits are listed in <code>assets/fx/CREDITS.md</code>.</p>
+<h2 id="parallel-variant-sprite-raster"><a class="header" href="#parallel-variant-sprite-raster">Parallel variant sprite raster</a></h2>
+<p>Compiling a UMF fighter rasterized the base frames in parallel and then recolored every form and awakening variant of every frame on one thread, which was 80 to 90% of the load. <code>native/frame_raster.rs</code> now renders each frame together with its variants inside the same worker pool (<code>min(cores, 8)</code>, one thread on <code>wasm32</code>), and the form palettes are built once per fighter instead of once per frame.</p>
+<p><code>cargo run --release -p ume-engine --example load_bench</code> on the 4-core cloud machine, three runs each:</p>
+<div class="table-wrapper"><table><thead><tr><th></th><th>Whole roster (21 fighters)</th><th>Oboro</th><th>Kaito</th><th>Suzume</th></tr></thead><tbody>
+<tr><td>Before</td><td>11.40 / 11.76 / 11.79 s</td><td>1674 ms</td><td>1250 ms</td><td>900 ms</td></tr>
+<tr><td>After</td><td>4.70 / 4.46 / 4.54 s</td><td>551 ms</td><td>405 ms</td><td>319 ms</td></tr>
+</tbody></table>
+</div>
+<p>The output is unchanged: a checksum of every sprite (pixels, size, axis, scale) and every animation frame of the 21 fighters in two palettes is identical before and after. Fighters without forms (<code>npc_*</code>) do not change, since they have no variants to render.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Dev-Tools.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Web-Match-Smoke.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Dev-Tools.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Web-Match-Smoke.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

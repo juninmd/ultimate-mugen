@@ -1,0 +1,430 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Scripts CNS - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="scripts-cns"><a class="header" href="#scripts-cns">Scripts CNS</a></h1>
+<p>Toda lógica de luta, inclusive a dos lutadores UMF, roda como CNS: estados (<code>[Statedef]</code>), controllers (<code>[State]</code>) e triggers. Para programar um lutador à mão, use o formato M.U.G.E.N (pasta com <code>.def</code>, <code>.cns</code>, <code>.cmd</code>) e coloque em <code>mugen/chars/</code>.</p>
+<p>Sintaxe moderna ZSS (do Ikemen-GO): <strong>planejado</strong>, compilando para o mesmo bytecode.</p>
+<h2 id="arquivo-def"><a class="header" href="#arquivo-def">Arquivo <code>.def</code></a></h2>
+<pre><code class="language-ini">[Info]
+name = "Meu Lutador"
+displayname = "Meu Lutador"
+author = "você"
+localcoord = 320, 240
+
+[Files]
+cmd = meu.cmd
+cns = meu.cns
+st = meu.st
+stcommon = common1.cns
+sprite = meu.sff
+anim = meu.air
+sound = meu.snd
+pal1 = meu1.act
+</code></pre>
+<p><code>localcoord = 1280, 720</code> marca personagem HD; a engine escala sozinha.</p>
+<h2 id="exemplo-de-estado"><a class="header" href="#exemplo-de-estado">Exemplo de estado</a></h2>
+<pre><code class="language-ini">[Statedef 1000]
+type = S
+movetype = A
+physics = S
+anim = 1000
+ctrl = 0
+velset = 0, 0
+poweradd = 30
+
+[State 1000, golpe]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = S, SA
+damage = 90, 10
+animtype = Heavy
+guardflag = MA
+pausetime = 12, 12
+sparkno = 2
+ground.type = High
+ground.hittime = 18
+ground.velocity = -5
+air.velocity = -4, -6
+fall = 1
+
+[State 1000, fim]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+</code></pre>
+<p>E no <code>.cmd</code>:</p>
+<pre><code class="language-ini">[Command]
+name = "hadou"
+command = ~D, DF, F, x
+time = 20
+
+[Statedef -1]
+
+[State -1, hadou]
+type = ChangeState
+value = 1000
+triggerall = command = "hadou"
+trigger1 = statetype = S &amp;&amp; ctrl
+</code></pre>
+<p>Extras de comando (Ikemen GO 1.0):</p>
+<div class="table-wrapper"><table><thead><tr><th>Recurso</th><th>Comportamento</th></tr></thead><tbody>
+<tr><td>Passo <code>N</code></td><td>Direção neutra: nenhuma direção pressionada (<code>command = N, x</code>, <code>~D, N, x</code>, <code>N+x</code>). O passo neutro é um estado mantido, como <code>/</code>, e vale enquanto nenhuma direção está pressionada</td></tr>
+<tr><td><code>pausebuffer</code></td><td><code>[Command]</code> (ou <code>command.pausebuffer</code> em <code>[Defaults]</code>) mantém ativo por esse número de ticks extras um comando disparado durante hit pause, hit shake ou pause/super pause, para que possa ser lido quando a pausa terminar. Também aceita <code>buffer.pausetime</code>. Padrão 0</td></tr>
+<tr><td>Estados customizados</td><td>Quando um jogador roda um estado de outro personagem (<code>TargetState</code>, <code>p2getp1state</code>), <code>Command</code> usa os comandos do dono do estado contra a entrada do jogador no estado</td></tr>
+</tbody></table>
+</div>
+<h2 id="state-controllers-suportados"><a class="header" href="#state-controllers-suportados">State controllers suportados</a></h2>
+<p><code>AfterImage</code> <code>AfterImageTime</code> <code>AllPalFX</code> <code>AngleAdd</code> <code>AngleDraw</code> <code>AngleMul</code> <code>AngleSet</code> <code>AppendToClipboard</code> <code>AssertSpecial</code> <code>AttackDist</code> <code>AttackMulSet</code> <code>BGPalFX</code> <code>BindToParent</code> <code>BindToRoot</code> <code>BindToTarget</code> <code>ChangeAnim</code> <code>ChangeAnim2</code> <code>ChangeState</code> <code>ClearClipboard</code> <code>CtrlSet</code> <code>DefenceMulSet</code> <code>DestroySelf</code> <code>DisplayToClipboard</code> <code>DizzyPointsAdd</code> <code>DizzyPointsSet</code> <code>DizzySet</code> <code>EnvColor</code> <code>EnvShake</code> <code>Explod</code> <code>ExplodBindTime</code> <code>FallEnvShake</code> <code>ForceFeedback</code> <code>GameMakeAnim</code> <code>Gravity</code> <code>GuardBreakSet</code> <code>GuardPointsAdd</code> <code>GuardPointsSet</code> <code>Helper</code> <code>HitAdd</code> <code>HitBy</code> <code>HitDef</code> <code>HitFallDamage</code> <code>HitFallSet</code> <code>HitFallVel</code> <code>HitOverride</code> <code>HitVelSet</code> <code>LifeAdd</code> <code>LifeSet</code> <code>MakeDust</code> <code>MapAdd</code> <code>MapReset</code> <code>MapSet</code> <code>ModifyExplod</code> <code>ModifyProjectile</code> <code>ModifySnd</code> <code>MoveHitReset</code> <code>NotHitBy</code> <code>Null</code> <code>Offset</code> <code>PalFX</code> <code>ParentVarAdd</code> <code>ParentVarSet</code> <code>Pause</code> <code>PlayerPush</code> <code>PlaySnd</code> <code>PosAdd</code> <code>PosFreeze</code> <code>PosSet</code> <code>PowerAdd</code> <code>PowerSet</code> <code>Projectile</code> <code>RedLifeAdd</code> <code>RedLifeSet</code> <code>RemapPal</code> <code>RemoveExplod</code> <code>RemoveText</code> <code>ReversalDef</code> <code>RootVarAdd</code> <code>RootVarSet</code> <code>ScreenBound</code> <code>SelfState</code> <code>SndPan</code> <code>SprPriority</code> <code>StateTypeSet</code> <code>StopSnd</code> <code>SuperPause</code> <code>TagIn</code> <code>TagOut</code> <code>TargetBind</code> <code>TargetDrop</code> <code>TargetFacing</code> <code>TargetLifeAdd</code> <code>TargetPowerAdd</code> <code>TargetState</code> <code>TargetVelAdd</code> <code>TargetVelSet</code> <code>Text</code> <code>Trans</code> <code>Turn</code> <code>VarAdd</code> <code>VarRandom</code> <code>VarRangeSet</code> <code>VarSet</code> <code>VelAdd</code> <code>VelMul</code> <code>VelSet</code> <code>VictoryQuote</code> <code>Width</code></p>
+<p>Também suportados: <code>Zoom</code> <code>Camera</code> <code>GroundLevelOffset</code> <code>Depth</code> <code>DepthBound</code> <code>ReversalDef</code> <code>HitOverride</code> <code>FallEnvShake</code> <code>RemapPal</code> <code>StopSnd</code> <code>SndPan</code> <code>VictoryQuote</code> <code>FinishDone</code> <code>ForceFeedback</code> <code>Offset</code> <code>Null</code> <code>DisplayToClipboard</code> <code>AppendToClipboard</code> <code>ClearClipboard</code>.
+Limites dos controladores mais simples: <code>Offset</code> desloca somente o sprite desenhado, nunca as caixas de colisão nem a posição; <code>Null</code> não faz nada; <code>VictoryQuote</code> guarda o seu <code>value</code> no lutador para a apresentação da frase de vitória; <code>ForceFeedback</code> vira um evento de vibração para o personagem (<code>self = 1</code>) ou para o oponente; <code>StopSnd</code> e <code>SndPan</code> agem nos canais de som iniciados pelo personagem; <code>DisplayToClipboard</code>, <code>AppendToClipboard</code> e <code>ClearClipboard</code> guardam as últimas 10 linhas no lutador (<code>%d</code>, <code>%i</code>, <code>%f</code>, <code>%%</code>, <code>\n</code> e <code>\t</code> no texto, até 5 <code>params</code>).</p>
+<p>Notas de tremor e som: <code>EnvShake</code> (e os parâmetros <code>envshake.*</code> / <code>fall.envshake.*</code> do HitDef) aceitam <code>dir</code>: <code>0</code> (padrão) balança o cenário nos dois eixos, <code>1</code> só na horizontal e <code>2</code> só na vertical; valores acima de 2 contam como 2. <code>PlaySnd</code> aceita <code>stopongethit</code> e <code>stoponchangestate</code>. Um som marcado é interrompido quando o personagem que o iniciou apanha (ou defende) ou entra em outro state; um novo <code>PlaySnd</code> no mesmo <code>channel</code> substitui as marcas anteriores, e <code>StopSnd</code> continua parando o canal. As marcas viajam junto com o evento de som: a engine só as informa e quem interrompe é a interface.</p>
+<p>Notas sobre Explod: <code>ignorehitpause</code> vale 1 por padrão (use 0 para congelar junto com o hit pause do dono). <code>postype = left/right/front/back</code> e <code>space = screen</code> mantêm o explod fixo na tela enquanto a câmera se move. <code>ModifyExplod</code> aceita <code>vel</code>, <code>accel</code>, <code>pos</code>, <code>scale</code>, <code>bindtime</code>, <code>removetime</code>, <code>sprpriority</code>, <code>ontop</code>, <code>under</code>, <code>removeongethit</code>, <code>ignorehitpause</code>, <code>facing</code>, <code>vfacing</code>, <code>supermovetime</code>, <code>pausemovetime</code> e <code>trans</code>; <code>facing</code> é relativo ao dono. <code>ExplodBindTime</code> só altera o tempo de vínculo.</p>
+<p>Efeitos de paleta empilham nesta ordem: <code>BGPalFX</code> do cenário, depois <code>AllPalFX</code>, depois o <code>PalFX</code> do próprio lutador. Eles valem no tick em que mudam (sem quadro de atraso), e um trans <code>Sub</code> ignora o tom da paleta enquanto o trans aditivo o mantém. <code>hue</code> (graus) gira as cores em torno do eixo cinza e <code>sinhue</code> oscila essa rotação usando o período do <code>sinadd</code>; os dois funcionam nos três controllers de paleta.</p>
+<p>Canais de som: <code>PlaySnd</code> aceita <code>loop</code>, <code>loopstart</code>/<code>loopend</code> (milissegundos), <code>loopcount</code> (0 = infinito), <code>stopongethit</code>, <code>stoponchangestate</code>, <code>pan</code>/<code>abspan</code>, <code>volumescale</code> e <code>freqmul</code>; <code>ModifySnd</code> reajusta <code>channel</code>, <code>pan</code>, <code>volumescale</code> e <code>loopstart</code>/<code>loopend</code> de um canal vivo. Formato de música não suportado gera aviso e cai para a trilha embutida (trackers são rejeitados por decisão, veja <a href="Decisoes-de-Compatibilidade.html">decisões de compatibilidade</a>).</p>
+<p>Parâmetros de vida do HitDef: <code>redlife</code> é subtraído do red life do defensor (a faixa entre <code>Life</code> e <code>RedLife</code> é a parte do dano que ele não cobre), <code>dizzypoints</code> e <code>guardpoints</code> drenam os medidores de tontura e guarda (zero ativa <code>Dizzy</code>/<code>GuardBreak</code> e entra no estado de tontura 5300 ou no de quebra de defesa 5400, veja <a href="Sistemas-de-Vida.html">Sistemas de vida</a>), <code>score</code> alimenta o placar do atacante e do defensor, <code>sparkscale</code> escala o spark do golpe, <code>missonoverride</code> mostra o texto <code>MISS</code> quando um <code>HitOverride</code> absorve o golpe, <code>unhittabletime</code> dá N ticks de invencibilidade ao defensor (a contagem pausa durante o hit pause) e <code>xaccel</code> desloca o defensor na horizontal enquanto estiver no estado de dano. <code>attack.depth</code> é lido e ignorado (a engine é 2D). <code>p2clsncheck = 0</code> deixa o golpe conectar sem caixas do defensor e <code>p2clsnrequire = n</code> exige a caixa Clsn2 <code>n</code> do defensor (índice -1 = qualquer).</p>
+<p>Notas de helper: um helper congela durante <code>Pause</code> e <code>SuperPause</code>, a menos que ainda tenha ticks de <code>pausemovetime</code> / <code>supermovetime</code> ou tenha nascido com <code>pausebool = 1</code>, que o faz ignorar qualquer pausa. Helpers com <code>keyctrl = 1</code> só recebem os comandos do root enquanto o round é lutado; decidido o round, não recebem nenhum. Um helper roda o próprio <code>-1</code> (só com <code>keyctrl = 1</code>), mas nunca o <code>-2</code> ou <code>-3</code> do root. Na tela de vitória (estado de round 4) os helpers ficam congelados e ocultos.</p>
+<h2 id="controllers-ikemen-de-cenário-e-de-jogador"><a class="header" href="#controllers-ikemen-de-cenário-e-de-jogador">Controllers Ikemen, de cenário e de jogador</a></h2>
+<p><code>PlayBGM</code> <code>StopBGM</code> <code>ModifyBGM</code> <code>ModifyStageVar</code> <code>ModifyStageBG</code> <code>ModifyBGCtrl</code> <code>ModifyPlayer</code> <code>PrintToConsole</code> <code>RunState</code> <code>Height</code> <code>GetHitVarSet</code> <code>ModifyHitDef</code> <code>ModifyReversalDef</code> <code>OverrideClsn</code> <code>ResizeClsn</code> <code>TransformClsn</code> <code>TargetAdd</code> <code>TargetScoreAdd</code> <code>TargetRedLifeAdd</code> <code>TargetDizzyPointsAdd</code> <code>TargetGuardPointsAdd</code> <code>ScoreAdd</code> <code>RoundTimeSet</code> <code>RoundTimeAdd</code> <code>AssertCommand</code> <code>AssertInput</code> <code>ShiftInput</code> <code>RemapSprite</code> <code>TransformSprite</code> <code>MatchRestart</code></p>
+<p>Faltam (planejado ou rejeitado por decisão, interpretados e ignorados com um aviso): <code>Storyboard</code> <code>RemoveStoryboard</code> <code>Dialogue</code> <code>SaveState</code> <code>LoadState</code> <code>LifebarAction</code> <code>ChangeMovelist</code> <code>LoadFile</code> <code>SaveFile</code> <code>ShaderSet</code></p>
+<p>Parâmetros e comportamento em <a href="../Ikemen-Extensions.html">Ikemen extensions</a>.</p>
+<h2 id="triggers-suportados"><a class="header" href="#triggers-suportados">Triggers suportados</a></h2>
+<p><code>Abs</code> <code>ACos</code> <code>AILevel</code> <code>Alive</code> <code>Anim</code> <code>AnimElem</code> <code>AnimElemNo</code> <code>AnimElemTime</code> <code>AnimElemVar</code> <code>AnimExist</code> <code>AnimLength</code> <code>AnimPlayerNo</code> <code>AnimTime</code> <code>ASin</code> <code>ATan</code> <code>AuthorName</code> <code>BackEdge</code> <code>BackEdgeBodyDist</code> <code>BackEdgeDist</code> <code>BottomEdge</code> <code>CameraPos</code> <code>CameraZoom</code> <code>CanRecover</code> <code>Ceil</code> <code>Clamp</code> <code>ClsnOverlap</code> <code>ClsnVar</code> <code>Command</code> <code>Cond</code> <code>Const</code> <code>Const240p</code> <code>Const480p</code> <code>Const720p</code> <code>Cos</code> <code>Ctrl</code> <code>DisplayName</code> <code>Dizzy</code> <code>DizzyPoints</code> <code>DizzyPointsMax</code> <code>DrawGame</code> <code>E</code> <code>Exp</code> <code>ExplodVar</code> <code>facing</code> <code>Floor</code> <code>Form</code> <code>FrontEdge</code> <code>FrontEdgeBodyDist</code> <code>FrontEdgeDist</code> <code>FVar</code> <code>form</code> <code>GameHeight</code> <code>GameTime</code> <code>GameWidth</code> <code>GetHitVar</code> <code>GuardBreak</code> <code>GuardPoints</code> <code>GuardPointsMax</code> <code>HelperIndexExist</code> <code>HelperVar</code> <code>HitCount</code> <code>HitDefAttr</code> <code>HitFall</code> <code>HitOver</code> <code>HitPauseTime</code> <code>HitShakeOver</code> <code>ID</code> <code>IfElse</code> <code>IkemenVersion</code> <code>Index</code> <code>InGuardDist</code> <code>InputTime</code> <code>IsHelper</code> <code>IsHomeTeam</code> <code>LeftEdge</code> <code>Life</code> <code>LifeMax</code> <code>Ln</code> <code>Log</code> <code>Lose</code> <code>LoseKO</code> <code>LoseTime</code> <code>MajorVersion</code> <code>Map</code> <code>MatchNo</code> <code>MatchOver</code> <code>Max</code> <code>Min</code> <code>MoveContact</code> <code>MoveGuarded</code> <code>MoveHit</code> <code>MoveReversed</code> <code>MoveType</code> <code>MugenVersion</code> <code>Name</code> <code>NumEnemy</code> <code>NumExplod</code> <code>NumHelper</code> <code>NumPartner</code> <code>NumProj</code> <code>NumProjID</code> <code>NumTarget</code> <code>NumText</code> <code>P1Dist</code> <code>P1Name</code> <code>P2BodyDist</code> <code>P2Command</code> <code>P2Ctrl</code> <code>P2Dist</code> <code>P2Life</code> <code>P2MoveType</code> <code>P2Name</code> <code>P2Power</code> <code>P2StateNo</code> <code>P2StateType</code> <code>P3Name</code> <code>P4Name</code> <code>P5Name</code> <code>P6Name</code> <code>P7Name</code> <code>P8Name</code> <code>PalFXVar</code> <code>PalNo</code> <code>ParentDist</code> <code>Physics</code> <code>Pi</code> <code>PlayerIDExist</code> <code>pos</code> <code>Power</code> <code>PowerMax</code> <code>PrevStateNo</code> <code>ProjCancelTime</code> <code>ProjClsnOverlap</code> <code>ProjContact</code> <code>ProjContactTime</code> <code>ProjGuarded</code> <code>ProjGuardedTime</code> <code>ProjHit</code> <code>ProjHitTime</code> <code>ProjVar</code> <code>Random</code> <code>RandomRange</code> <code>RedLife</code> <code>RightEdge</code> <code>RootDist</code> <code>RoundNo</code> <code>RoundsExisted</code> <code>RoundState</code> <code>RunOrder</code> <code>ScreenPos</code> <code>SelfAnimExist</code> <code>SelfCommand</code> <code>Sign</code> <code>Sin</code> <code>SpritePlayerNo</code> <code>SpriteVar</code> <code>Sqrt</code> <code>Standby</code> <code>StateNo</code> <code>StateTime</code> <code>StateType</code> <code>SysFVar</code> <code>SysVar</code> <code>Tan</code> <code>TeamMap</code> <code>TeamMode</code> <code>TeamSide</code> <code>TicksPerSecond</code> <code>Time</code> <code>TimeMod</code> <code>TopEdge</code> <code>UniqHitCount</code> <code>Var</code> <code>vel</code> <code>Win</code> <code>WinKO</code> <code>WinPerfect</code> <code>WinTime</code> <code>AirJumpCount</code> <code>Alpha</code> <code>Angle</code> <code>BotBoundBodyDist</code> <code>BotBoundDist</code> <code>Const1080p</code> <code>HitByAttr</code> <code>HitDefVar</code> <code>HitOverridden</code> <code>HitVel</code> <code>InCustomAnim</code> <code>InCustomState</code> <code>InRunState</code> <code>IntroState</code> <code>IsAsserted</code> <code>JugglePoints</code> <code>LastPlayerID</code> <code>LayerNo</code> <code>LocalCoord</code> <code>MemberNo</code> <code>MoveCountered</code> <code>MoveHitVar</code> <code>NumPlayer</code> <code>NumStageBG</code> <code>OutroState</code> <code>ParentExist</code> <code>PlayerIndexExist</code> <code>PlayerNo</code> <code>PrevAnim</code> <code>PrevMoveType</code> <code>PrevStateType</code> <code>Scale</code> <code>ScreenHeight</code> <code>ScreenWidth</code> <code>SelfStateNoExist</code> <code>SprPriority</code> <code>StageBackEdgeDist</code> <code>StageBGVar</code> <code>StageConst</code> <code>StageFrontEdgeDist</code> <code>StageVar</code> <code>TeamLeader</code> <code>TeamSize</code> <code>TopBoundBodyDist</code> <code>TopBoundDist</code> <code>XAngle</code> <code>XShear</code> <code>YAngle</code> <code>ZoomVar</code> <code>Attack</code> <code>Defence</code> <code>AttackMul</code> <code>DefenceMul</code> <code>ReceivedDamage</code> <code>ReceivedHits</code> <code>ComboCount</code> <code>Score</code> <code>ScoreTotal</code> <code>Round</code> <code>RoundTime</code> <code>TimeRemaining</code> <code>TimeElapsed</code> <code>TimeTotal</code> <code>FightTime</code> <code>RoundsWon</code> <code>FirstAttack</code> <code>DecisiveRound</code></p>
+<p><code>form</code> retorna o índice da forma de transformação UMF nativa ativa (<code>0</code> na forma base); personagens M.U.G.E.N legados retornam <code>0</code>.</p>
+<p>Notas de projétil: o projétil guarda o lado do time e o jogador raiz no momento em que nasce. Virar, ou o dono mudar de lado depois, não altera quem ele pode acertar. <code>NumProj</code> e <code>NumProjID</code> contam todos os projéteis do root do jogador, inclusive os disparados por helpers, e continuam contando depois que o helper é destruído. Um projétil cujo helper sumiu ainda acerta e é creditado ao root.</p>
+<p>Faltam (planejado): <code>PlayerID</code>.</p>
+<h2 id="triggers-de-borda-da-tela"><a class="header" href="#triggers-de-borda-da-tela">Triggers de borda da tela</a></h2>
+<p><code>LeftEdge</code> e <code>RightEdge</code> são absolutos: sempre devolvem a borda esquerda e a direita da tela. <code>FrontEdge</code> e <code>BackEdge</code> dependem de <code>Facing</code>: quem olha para a direita lê <code>FrontEdge = RightEdge</code> e <code>BackEdge = LeftEdge</code>, e quem olha para a esquerda lê o contrário. Os quatro usam as unidades do <code>localcoord</code> do personagem e as mesmas bordas de <code>FrontEdgeDist</code> e <code>BackEdgeDist</code>, então <code>(FrontEdge - X) * Facing</code> é igual a <code>FrontEdgeDist</code> (com <code>X</code> a posição do personagem no mundo).</p>
+<h2 id="distâncias-entre-localcoords-diferentes"><a class="header" href="#distâncias-entre-localcoords-diferentes">Distâncias entre localcoords diferentes</a></h2>
+<p>Todo trigger de posição e distância converte o resultado do espaço do mundo para o localcoord do personagem que o avalia (<code>P2Dist</code>, <code>P2BodyDist</code>, <code>RootDist</code>, <code>ParentDist</code>, <code>ScreenPos</code>, <code>LeftEdge</code>/<code>RightEdge</code>/<code>FrontEdge</code>/<code>BackEdge</code> e a família <code>...EdgeDist</code>). Numa luta 1280x720 contra 320x240, o mesmo vão aparece 4 vezes maior para o personagem HD. <code>P2BodyDist</code> subtrai as larguras frontais dos dois depois de convertê-las para o mundo, então vale 0 quando as caixas se tocam, seja qual for o localcoord de cada personagem. <code>P2Dist</code> e <code>P2BodyDist</code> dependem apenas das duas posições: a câmera nunca interfere, inclusive nos estados customizados de um arremesso.</p>
+<h2 id="zoom-da-câmera"><a class="header" href="#zoom-da-câmera">Zoom da câmera</a></h2>
+<p><code>Zoom</code> muda a escala da câmera (1 = normal, acima de 1 = mais perto). A câmera é determinística: avança um passo por tick, sem relógio.</p>
+<div class="table-wrapper"><table><thead><tr><th>Parâmetro</th><th>Padrão</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>scale</code></td><td>1</td><td>Escala pedida</td></tr>
+<tr><td><code>time</code></td><td>1</td><td>Ticks em que o pedido continua ativo; dispare a cada tick para mantê-lo</td></tr>
+<tr><td><code>delta</code></td><td>0</td><td>Somado à escala pedida a cada tick do pedido (uma rampa)</td></tr>
+<tr><td><code>pos</code></td><td>0, 0</td><td>Deslocamento do foco da câmera no localcoord do jogador</td></tr>
+<tr><td><code>lag</code></td><td>0</td><td>0 vai à escala pedida em um tick; valores próximos de 1 suavizam (<code>1 - lag</code> da distância restante por tick)</td></tr>
+<tr><td><code>zoomindelay</code></td><td>0</td><td>Ticks de espera antes de um zoom-in (<code>scale &gt; 1</code>) começar</td></tr>
+<tr><td><code>bound</code></td><td>1</td><td>1 mantém a escala dentro dos limites do cenário (<code>zoomin</code> como maior escala, <code>1 / zoomout</code> como menor, ampliada pelo zoom-out de equipes) e o deslocamento dentro dos limites do cenário; 0 só limita a escala a 0.25..4 e ignora os limites do cenário</td></tr>
+</tbody></table>
+</div>
+<p>Quando o pedido termina, a câmera volta à escala normal usando <code>zoominspeed</code> / <code>zoomoutspeed</code> do cenário.</p>
+<p><code>CameraZoom</code> devolve a escala atual da câmera. <code>ZoomVar(&lt;nome&gt;)</code> expõe o estado do zoom: <code>scale</code> (atual), <code>target</code> (escala pedida), <code>active</code>, <code>time</code> (ticks restantes), <code>posx</code>, <code>posy</code>, <code>lag</code>, <code>delta</code>, <code>delay</code>, <code>bound</code>, <code>min</code> e <code>max</code> (limites de escala permitidos pelo cenário agora). Todos os nomes valem 0 (ou a escala atual em <code>target</code>) quando nenhum <code>Zoom</code> está ativo.</p>
+<h2 id="controladores-de-câmera-e-nível-do-chão"><a class="header" href="#controladores-de-câmera-e-nível-do-chão">Controladores de câmera e nível do chão</a></h2>
+<p>O motor é 2D, então não há eixo Z: <code>Pos Z</code>, <code>Vel Z</code> e os outros componentes Z sempre valem 0.</p>
+<ul>
+<li><code>Camera</code> (<code>pos</code>, <code>zoom</code>, <code>bound</code>, <code>lag</code>, <code>time</code>): move o foco da câmera por <code>pos</code> (localcoord do jogador) e, opcionalmente, define a escala da câmera com <code>zoom</code>. Usa o mesmo mecanismo do <code>Zoom</code> (veja acima): <code>bound = 1</code> mantém o deslocamento dentro dos limites do cenário e a escala dentro dos limites de zoom do cenário, <code>lag</code> suaviza o zoom, <code>time</code> é o número de ticks em que o pedido fica ativo. Sem <code>zoom</code>, a escala atual é mantida.</li>
+<li><code>GroundLevelOffset value = n</code>: eleva em <code>n</code> pixels o chão sob este personagem (negativo cava), que passa a ficar sobre o chão elevado com pouso, física de chão e detecção de golpe no chão/ar normais. <code>Pos Y</code> é medido a partir do chão do próprio personagem (0 enquanto está sobre ele); <code>ScreenPos Y</code> e a altura de criação de projéteis, explods e helpers incluem o deslocamento. O deslocamento zera no início do round.</li>
+<li><code>Depth</code> e <code>DepthBound</code> são aceitos mas ignorados (Z está fora do escopo); o primeiro uso imprime um aviso (<code>depth is accepted but ignored: the engine has no Z axis</code>) e o personagem não é alterado.</li>
+</ul>
+<h2 id="triggers-de-tela-câmera-e-cenário"><a class="header" href="#triggers-de-tela-câmera-e-cenário">Triggers de tela, câmera e cenário</a></h2>
+<p>Todas as distâncias e tamanhos usam o localcoord do jogador que avalia. Triggers "relativos ao zoom" mudam quando a câmera dá zoom (o zoom-out de 5v5, <code>Zoom</code>, <code>Camera</code>).</p>
+<div class="table-wrapper"><table><thead><tr><th>Trigger</th><th>Relativo ao zoom</th><th>Significado</th></tr></thead><tbody>
+<tr><td><code>ScreenWidth</code>, <code>ScreenHeight</code></td><td>sim</td><td>Tamanho da área visível (<code>GameWidth</code> / <code>GameHeight</code> continuam devolvendo o tamanho bruto da vista em pixels do jogo)</td></tr>
+<tr><td><code>TopBoundDist</code></td><td>sim</td><td>Distância da posição do jogador até o ponto mais alto que o cenário deixa a câmera mostrar (<code>boundhigh</code>, elevado por <code>dynamicboundhigh</code>)</td></tr>
+<tr><td><code>TopBoundBodyDist</code></td><td>sim</td><td>O mesmo, menos o <code>size.height</code> do jogador (cabeça até o teto)</td></tr>
+<tr><td><code>BotBoundDist</code>, <code>BotBoundBodyDist</code></td><td>sim</td><td>Distância dos pés até o ponto mais baixo que a câmera mostra (<code>boundlow</code> mais a altura da vista); iguais porque a origem fica nos pés</td></tr>
+<tr><td><code>StageFrontEdgeDist</code>, <code>StageBackEdgeDist</code></td><td>sim</td><td>Distância até os limites laterais do cenário (<code>boundleft</code> / <code>boundright</code> ampliados por meia vista) à frente / atrás do jogador, conforme <code>Facing</code></td></tr>
+<tr><td><code>NumStageBG</code> / <code>NumStageBG(id)</code></td><td>não</td><td>Número de camadas de fundo do cenário, opcionalmente só as com o <code>id</code> dado</td></tr>
+<tr><td><code>StageBGVar(id, nome)</code></td><td>não</td><td>Valor atual da primeira camada com esse <code>id</code>: <code>pos.x</code>, <code>pos.y</code> (início mais rolagem e senoide), <code>start.x/y</code>, <code>delta.x/y</code>, <code>velocity.x/y</code>, <code>tile.x/y</code>, <code>layerno</code>, <code>id</code>, <code>visible</code>, <code>enabled</code>, <code>sprite.group</code>, <code>sprite.index</code>; id ou nome desconhecido dá 0</td></tr>
+<tr><td><code>StageConst(nome)</code></td><td>não</td><td>Número do grupo <code>[Constants]</code> do cenário (0 se faltar ou nos cenários nativos)</td></tr>
+<tr><td><code>Const1080p(n)</code></td><td>não</td><td><code>n</code> convertido de um desenho com 1920 pixels de largura para o localcoord do jogador</td></tr>
+<tr><td><code>LocalCoord X</code> / <code>LocalCoord Y</code></td><td>não</td><td>Largura / altura do localcoord do jogador</td></tr>
+<tr><td><code>Angle</code>, <code>Scale X/Y</code>, <code>Alpha X/Y</code>, <code>SprPriority</code>, <code>LayerNo</code></td><td>não</td><td>O estado de desenho atual do jogador (<code>Alpha</code> é origem / destino, 256 / 0 quando opaco). <code>XAngle</code>, <code>YAngle</code> e <code>XShear</code> valem 0: o renderizador 2D não tem inclinação nem cisalhamento</td></tr>
+<tr><td><code>ZoomVar(nome)</code>, <code>CameraZoom</code></td><td>sim</td><td>Veja "Zoom da câmera"</td></tr>
+</tbody></table>
+</div>
+<h2 id="redirecionamentos"><a class="header" href="#redirecionamentos">Redirecionamentos</a></h2>
+<p><code>parent</code> <code>root</code> <code>helper</code> <code>target</code> <code>partner</code> <code>enemy</code> <code>enemynear</code> <code>playerid</code> <code>p2</code> <code>stateowner</code></p>
+<p><code>helper(id)</code> e <code>target(id)</code> aceitam um ID opcional; <code>partner(n)</code> é o n-ésimo outro jogador não-helper do mesmo lado (padrão 0; um helper redireciona pelo seu root; NaN quando não existe); <code>enemy(n)</code> e <code>enemynear(n)</code> escolhem o n-ésimo oponente. Exemplo: <code>trigger1 = enemynear, life &lt; 200</code>.</p>
+<h2 id="expressões"><a class="header" href="#expressões">Expressões</a></h2>
+<ul>
+<li>Inteiro vs. float como no M.U.G.E.N: <code>7 / 2 = 3</code>, <code>7.0 / 2 = 3.5</code>.</li>
+<li>Intervalos: <code>stateno = [200, 299]</code>, <code>(200, 299]</code>.</li>
+<li>Operadores: <code>+ - * / % ** ! &amp;&amp; || ^^ &amp; | ^ ~ = != &lt; &lt;= &gt; &gt;=</code> e <code>:=</code> em <code>var(n) := valor</code>.</li>
+</ul>
+<h2 id="regras-de-pausa-e-congelamento"><a class="header" href="#regras-de-pausa-e-congelamento">Regras de pausa e congelamento</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Entidade</th><th>Hit pause (atacante) / hit shake (defensor)</th><th><code>Pause</code></th><th><code>SuperPause</code></th></tr></thead><tbody>
+<tr><td>Lutador ou helper</td><td>Animação, <code>Time</code>, física e timers param; só rodam controllers com <code>ignorehitpause = 1</code></td><td>Congelado, exceto quem pausou durante <code>movetime</code> e helpers com ticks de <code>pausemovetime</code> restantes</td><td>Congelado, exceto quem pausou durante <code>movetime</code> e helpers com ticks de <code>supermovetime</code> restantes</td></tr>
+<tr><td>Explod</td><td>Continua com <code>ignorehitpause = 1</code> (padrão); com <code>0</code> para enquanto o dono está em hit pause ou hit shake, inclusive o vínculo de posição</td><td>Congelado, salvo ticks de <code>pausemovetime</code> restantes</td><td>Congelado, salvo ticks de <code>supermovetime</code> restantes</td></tr>
+<tr><td>Projétil</td><td>Não é afetado pelo hit pause do dono</td><td>Congelado, salvo ticks de <code>pausemovetime</code> restantes</td><td>Congelado, salvo ticks de <code>supermovetime</code> restantes</td></tr>
+</tbody></table>
+</div>
+<ul>
+<li>O orçamento de <code>pausemovetime</code>/<code>supermovetime</code> gasta um tick por frame congelado e só pelo seu próprio tipo de pausa.</li>
+<li><code>AnimTime</code>, <code>AnimElemTime</code>, <code>AnimElemNo</code> e <code>Time</code> mantêm o valor durante todo o hit pause ou shake e voltam no primeiro tick livre.</li>
+<li><code>HitPauseTime</code> é o hit pause restante do atacante; <code>GetHitVar(hitshaketime)</code> e <code>HitShakeOver</code> descrevem o shake do defensor. Os demais campos de <code>GetHitVar</code> são uma captura feita no momento do golpe e não mudam durante o shake; o relógio de recuperação (<code>HitOver</code>) também espera o fim do shake.</li>
+<li>Testes de regressão: <code>crates/engine/tests/freeze_rules.rs</code>.</li>
+</ul>
+<h2 id="depurar"><a class="header" href="#depurar">Depurar</a></h2>
+<ul>
+<li><code>F2</code> no treino mostra hitboxes.</li>
+<li><code>cargo run --release -p ume-engine --example mugen_check -- &lt;pasta&gt;</code> lista estados e expressões com erro.</li>
+</ul>
+<h2 id="diagnóstico-no-carregamento"><a class="header" href="#diagnóstico-no-carregamento">Diagnóstico no carregamento</a></h2>
+<p>Cada carregamento de personagem confere os controladores, triggers e parâmetros lidos com o que a engine realmente implementa. Não há lista fixa: cada nome desconhecido é executado uma vez numa partida descartável e marcado quando o despacho não o trata, então o relatório acompanha a engine conforme controladores e triggers são adicionados.</p>
+<p>O relatório indica, por arquivo e estado (<code>.cns</code>, <code>.cmd</code>, <code>.st</code>, <code>.zss</code>):</p>
+<div class="table-wrapper"><table><thead><tr><th>Achado</th><th>Significado</th></tr></thead><tbody>
+<tr><td>controlador não suportado</td><td>o <code>type</code> não tem implementação</td></tr>
+<tr><td>trigger desconhecido</td><td>o nome do trigger não é avaliado pela engine</td></tr>
+<tr><td>redirecionamento / trigger de texto não suportado</td><td>um tipo de redirecionamento (<code>partner</code>, ...) ou comparação de texto (<code>p3name = ...</code>) que a engine não resolve</td></tr>
+<tr><td>parâmetro desconhecido</td><td>nenhum caminho do controlador lê esse parâmetro</td></tr>
+<tr><td>flag de AssertSpecial desconhecida</td><td>a flag não é reconhecida</td></tr>
+</tbody></table>
+</div>
+<p>Cada carga imprime um resumo no stderr (<code>n controladores não suportados, m triggers desconhecidos, ...</code>), sem repetição por nome; <code>TRACE=1</code> acrescenta os nomes com os arquivos e estados que os usam. Defina <code>UME_QUIET_DIAGNOSTICS=1</code> para silenciar.</p>
+<p>O <code>mugen_check</code> imprime o resumo de cada personagem e, com <code>--strict</code>, imprime os detalhes e termina com código diferente de zero se algum personagem tiver achados:</p>
+<pre><code class="language-bash">cargo run --release -p ume-engine --example mugen_check -- --strict mugen/chars/kfm
+</code></pre>
+<p>O CI roda com <code>--strict</code> sobre <code>crates/engine/tests/data/chars</code>; um recurso usado pelos personagens de teste que a engine não implementa quebra o build. No código, <code>ume_engine::diagnostics::audit_cns(arquivo, texto)</code> devolve os achados de um trecho e <code>CharDef::diagnostics()</code> os de um personagem carregado.</p>
+<h2 id="triggers-de-introspecção"><a class="header" href="#triggers-de-introspecção">Triggers de introspecção</a></h2>
+<p>Triggers que leem de volta o que o personagem criou ou o que ele está desenhando. O último argumento é o nome da variável escrito sem aspas, como no Ikemen GO; um eixo é uma segunda palavra (<code>pos x</code>). Uma consulta que não encontra nada (explod, projétil ou caixa inexistente) é indefinida (NaN): qualquer comparação com ela continua indefinida e conta como falsa, então teste a existência com <code>NumExplod</code>, <code>NumProj</code> ou <code>HelperIndexExist</code> quando a diferença importar. Posições e velocidades usam as coordenadas do próprio personagem; as posições seguem a convenção de <code>Pos</code> (<code>x</code> relativo à câmera, <code>y</code> relativo ao chão).</p>
+<div class="table-wrapper"><table><thead><tr><th>Trigger</th><th>Variáveis</th></tr></thead><tbody>
+<tr><td><code>ExplodVar(id, índice, var)</code></td><td><code>id</code> <code>time</code> <code>removetime</code> <code>bindtime</code> <code>bindid</code> <code>anim</code> <code>animelem</code> <code>animelemtime</code> <code>animtime</code> <code>animplayerno</code> <code>spriteplayerno</code> <code>facing</code> <code>ignorehitpause</code> <code>layerno</code> <code>pausemovetime</code> <code>supermovetime</code> <code>sprpriority</code> <code>pos x/y/z</code> <code>vel x/y/z</code> <code>accel x/y/z</code> <code>scale x/y</code>. Lê o <code>índice</code>-ésimo explod do chamador com esse <code>id</code> (<code>id</code> abaixo de 0 vale qualquer um)</td></tr>
+<tr><td><code>ProjVar(id, índice, var)</code></td><td><code>projid</code> <code>time</code> <code>projremovetime</code> <code>projhits</code> <code>projmisstime</code> <code>projpriority</code> <code>projsprpriority</code> <code>projedgebound</code> <code>projstagebound</code> <code>lowbound</code> <code>highbound</code> <code>projhitanim</code> <code>projremanim</code> <code>projcancelanim</code> <code>projremove</code> <code>anim</code> <code>animelem</code> <code>facing</code> <code>teamside</code> <code>pausemovetime</code> <code>supermovetime</code> <code>pos x/y/z</code> <code>vel x/y/z</code> <code>accel x/y/z</code> <code>velmul x/y</code> <code>remvelocity x/y/z</code> <code>scale x/y</code>. Lê o <code>índice</code>-ésimo projétil vivo do chamador com esse <code>id</code></td></tr>
+<tr><td><code>PalFXVar(var)</code></td><td><code>time</code> (ticks restantes) <code>add.r/g/b</code> <code>mul.r/g/b</code> <code>color</code> <code>invertall</code>; prefixo <code>bg.</code> ou <code>all.</code> para os efeitos de fundo e global. Sem efeito ativo vale a identidade (<code>add</code> 0, <code>mul</code> 256, <code>color</code> 256)</td></tr>
+<tr><td><code>ClsnVar(tipo, índice, borda)</code></td><td><code>tipo</code> é <code>clsn1</code>, <code>clsn2</code>, <code>size</code> ou <code>dummy</code>; <code>borda</code> é <code>back</code>, <code>front</code>, <code>top</code> ou <code>bottom</code>, relativa ao personagem e à sua direção. <code>size</code> é a caixa de corpo de <code>size.ground.back/front</code> e <code>size.height</code>; <code>dummy</code> não tem caixas</td></tr>
+<tr><td><code>ClsnOverlap(tipo, playerid, tipo)</code></td><td>agora aceita <code>size</code> (nos dois lados) e <code>dummy</code> (no primeiro, nunca sobrepõe) além de <code>clsn1</code> e <code>clsn2</code></td></tr>
+<tr><td><code>ProjClsnOverlap(índice, playerid, tipo)</code></td><td>a caixa de ataque do <code>índice</code>-ésimo projétil do chamador contra uma caixa daquele jogador</td></tr>
+<tr><td><code>HelperVar(var)</code></td><td>num helper: <code>id</code> <code>helpertype</code> <code>keyctrl</code> <code>ownpal</code> <code>preserve</code>; indefinido fora de um helper</td></tr>
+<tr><td><code>SpriteVar(var)</code></td><td>o sprite atual: <code>group</code> <code>image</code> <code>width</code> <code>height</code> <code>xoffset</code> <code>yoffset</code></td></tr>
+<tr><td><code>AnimElemVar(var)</code></td><td>o elemento atual da animação: <code>group</code> <code>image</code> <code>time</code> <code>hflip</code> <code>vflip</code> <code>xoffset</code> <code>yoffset</code> <code>xscale</code> <code>yscale</code> <code>angle</code> <code>alphasource</code> <code>alphadest</code> <code>numclsn1</code> <code>numclsn2</code></td></tr>
+<tr><td><code>InputTime(tecla)</code></td><td>ticks em que a tecla está pressionada: <code>U</code> <code>D</code> <code>L</code> <code>R</code>, relativas <code>F</code> <code>B</code>, <code>N</code> (nada pressionado) e os botões <code>a</code> <code>b</code> <code>c</code> <code>x</code> <code>y</code> <code>z</code> <code>s</code> (maiúscula importa: <code>B</code> é trás, <code>b</code> é o botão)</td></tr>
+<tr><td><code>AnimLength</code> <code>AnimPlayerNo</code> <code>SpritePlayerNo</code></td><td>total de ticks da animação (-1 se nunca termina); número do jogador dono da animação e dos sprites</td></tr>
+<tr><td><code>Index</code> <code>RunOrder</code> <code>HelperIndexExist(n)</code></td><td>posição do personagem entre o root e seus helpers (o root é 0); ordem de atualização na partida, começando em 1; se o root tem o <code>n</code>-ésimo helper (base 0)</td></tr>
+<tr><td><code>IkemenVersion(major)</code> <code>IkemenVersion(minor)</code></td><td>versão do comportamento do Ikemen GO seguida: 1 e 0</td></tr>
+<tr><td><code>DisplayName = "x"</code> <code>SelfCommand = "x"</code></td><td>comparações de texto com o nome de exibição e com o buffer de comandos do próprio personagem</td></tr>
+</tbody></table>
+</div>
+<p>Ainda não implementados, e apontados pelo diagnóstico de carregamento: <code>BGMVar</code>, <code>SoundVar</code> (o núcleo da engine não guarda estado de áudio), <code>AnimLoopCount</code>, <code>AnimPrefix</code>, <code>HelperName</code>, as variáveis <code>angle</code>, <code>friction</code>, <code>xshear</code>, <code>drawpal.*</code> e <code>shader</code> de <code>ExplodVar</code>, e <code>attr</code>, <code>guardflag</code>, <code>hitflag</code>, <code>shadow</code> de <code>ProjVar</code>. Um nome de variável desconhecido é apontado uma vez por carregamento como <code>explodvar(nome)</code> e vale 0.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../pt-BR/Screenpacks.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../pt-BR/Scripts-Lua.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../pt-BR/Screenpacks.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../pt-BR/Scripts-Lua.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

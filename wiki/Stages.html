@@ -1,0 +1,652 @@
+<!DOCTYPE HTML>
+<html lang="en" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Creating stages - Ultimate MUGEN Wiki</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Guides for players, creators and contributors of Ultimate MUGEN">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Ultimate MUGEN Wiki</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/juninmd/ultimate-mugen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="creating-stages"><a class="header" href="#creating-stages">Creating stages</a></h1>
+<p>There are two paths: a M.U.G.E.N stage (<code>.def</code> + <code>.sff</code> files, no programming) or a native stage (Rust code, with procedural layers and reactive effects).</p>
+<h2 id="mugen-stage"><a class="header" href="#mugen-stage">M.U.G.E.N stage</a></h2>
+<p>Put <code>my_stage.def</code> and <code>my_stage.sff</code> in <code>mugen/stages/</code>.</p>
+<pre><code class="language-ini">[Info]
+name = "My Stage"
+displayname = "My Stage"
+
+[Camera]
+startx = 0
+starty = 0
+boundleft = -150
+boundright = 150
+boundhigh = -25
+boundlow = 0
+verticalfollow = .2
+tension = 50
+
+[PlayerInfo]
+p1startx = -70
+p2startx = 70
+
+[StageInfo]
+zoffset = 210
+localcoord = 320, 240
+
+[BGdef]
+spr = my_stage.sff
+
+[BG Sky]
+type = normal
+spriteno = 0, 0
+layerno = 0
+start = 0, 0
+delta = .2, .2
+tile = 1, 0
+velocity = .1, 0
+
+[BG Floor]
+type = normal
+spriteno = 1, 0
+start = 0, 160
+delta = 1, 1
+mask = 1
+
+[BG Flag]
+type = anim
+actionno = 10
+start = 80, 60
+delta = .8, .8
+
+[Begin Action 10]
+2,0, 0,0, 6
+2,1, 0,0, 6
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>Section</th><th>Supported keys</th></tr></thead><tbody>
+<tr><td><code>[Info]</code></td><td><code>name</code>, <code>displayname</code></td></tr>
+<tr><td><code>[Camera]</code></td><td><code>startx</code>, <code>boundleft</code>, <code>boundright</code>, <code>boundhigh</code>, <code>boundlow</code>, <code>verticalfollow</code>, <code>tension</code></td></tr>
+<tr><td><code>[PlayerInfo]</code></td><td><code>p1startx</code>, <code>p2startx</code></td></tr>
+<tr><td><code>[StageInfo]</code></td><td><code>zoffset</code>, <code>localcoord</code></td></tr>
+<tr><td><code>[BGdef]</code></td><td><code>spr</code></td></tr>
+<tr><td><code>[BG ...]</code></td><td><code>type</code> (<code>normal</code>, <code>anim</code>, <code>parallax</code>), <code>spriteno</code>, <code>actionno</code>, <code>layerno</code> (0 behind, 1 in front), <code>start</code>, <code>delta</code>, <code>tile</code>, <code>tilespacing</code>, <code>velocity</code>, <code>trans</code>, <code>mask</code>, <code>scalestart</code>, <code>scaledelta</code>, <code>angle</code>, <code>xshear</code>, <code>window</code>, <code>maskwindow</code>, <code>windowdelta</code>, <code>spacing</code></td></tr>
+</tbody></table>
+</div>
+<p>Layer transform parameters (Ikemen / M.U.G.E.N 1.1), applied by both the live renderer and the stage-select preview:</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>scalestart = x, y</code></td><td>Base scale of the sprite, anchored at its axis (default <code>1, 1</code>).</td></tr>
+<tr><td><code>scaledelta = x, y</code></td><td>Scale change per stage unit of camera movement, multiplied by <code>delta</code>: <code>scale = scalestart + scaledelta * camera * delta</code>, so the layer grows or shrinks as the camera moves (default <code>0, 0</code>).</td></tr>
+<tr><td><code>angle</code></td><td>Rotation in degrees around the sprite axis, counter-clockwise for positive values.</td></tr>
+<tr><td><code>xshear</code></td><td>Horizontal shear: each row is shifted by <code>xshear</code> times its distance from the axis.</td></tr>
+<tr><td><code>window = x1, y1, x2, y2</code></td><td>Clipping rectangle in stage units.</td></tr>
+<tr><td><code>maskwindow = x1, y1, x2, y2</code></td><td>Second clipping rectangle; when both are present the layer is clipped to their intersection.</td></tr>
+<tr><td><code>windowdelta = x, y</code></td><td>How fast the clipping window scrolls with the camera (defaults to the layer <code>delta</code>).</td></tr>
+<tr><td><code>spacing = x, y</code></td><td>Gap between tiles; used when <code>tilespacing</code> is absent (<code>tilespacing</code> wins when both are set).</td></tr>
+</tbody></table>
+</div>
+<p>Planned: configurable shadows and reflections.</p>
+<h2 id="music-sky-and-parallax"><a class="header" href="#music-sky-and-parallax">Music, sky and parallax</a></h2>
+<p><code>[Music]</code> plays the stage track when the fight starts (it replaces the default track; without it the fight uses the usual music). The file is resolved relative to the .def, then from the root of the content folder.</p>
+<pre><code class="language-ini">[Music]
+bgmusic = sound/my_theme.ogg
+bgmvolume = 80
+bgmloopstart = 0
+bgmloopend = 0
+</code></pre>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Default</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>bgmusic</code></td><td>none</td><td>Track file (<code>.ogg</code>, <code>.mp3</code>, <code>.flac</code> or <code>.wav</code>)</td></tr>
+<tr><td><code>bgmvolume</code></td><td>100</td><td>Percent of the normal music volume</td></tr>
+<tr><td><code>bgmloopstart</code>, <code>bgmloopend</code></td><td>0</td><td>Loop points in samples; both 0 loops the whole file</td></tr>
+</tbody></table>
+</div>
+<p><code>type = parallax</code> is a layer that repeats without end on the X axis and drifts with its <code>velocity</code>, without <code>tile = 1, 0</code>. Use it for a sky strip, far hills or clouds. <code>delta</code> still sets how much the layer follows the camera.</p>
+<pre><code class="language-ini">[BG Ridge]
+type = parallax
+spriteno = 2, 0
+layerno = 0
+start = 0, 140
+delta = 0.8, 1
+velocity = 0.1, 0
+</code></pre>
+<p><code>[Sky]</code> draws an animated sky behind the fighters, on top of the first background layer. It works for every stage, including those that come from a .def. <code>type</code> is one of:</p>
+<div class="table-wrapper"><table><thead><tr><th>Type</th><th>Look</th></tr></thead><tbody>
+<tr><td><code>aurora</code></td><td>Green-blue bands of light that drift sideways over the top of the screen</td></tr>
+<tr><td><code>godrays</code></td><td>Light rays fanning out from the top centre</td></tr>
+<tr><td><code>stars</code></td><td>A starfield that twinkles</td></tr>
+<tr><td><code>clouds</code></td><td>Soft clouds that drift across the upper part of the screen</td></tr>
+</tbody></table>
+</div><div class="table-wrapper"><table><thead><tr><th>Key</th><th>Default</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>color</code></td><td><code>255, 255, 255</code></td><td>Tint, <code>r, g, b</code> from 0 to 255</td></tr>
+<tr><td><code>intensity</code></td><td>0.6</td><td>Opacity at its brightest, 0 to 1</td></tr>
+<tr><td><code>speed</code></td><td>1</td><td>Speed of the drift and pulse, 0 to 8</td></tr>
+</tbody></table>
+</div>
+<pre><code class="language-ini">[Sky]
+type = aurora
+color = 120, 255, 200
+intensity = 0.5
+speed = 1
+</code></pre>
+<p>The bundled example stage <code>assets/stages/data/example/</code> uses all three.</p>
+<h2 id="reading-the-stage-from-scripts"><a class="header" href="#reading-the-stage-from-scripts">Reading the stage from scripts</a></h2>
+<p><code>StageVar(&lt;name&gt;)</code> returns the stage value in the stage's own <code>localcoord</code> units. The section prefix is optional: <code>StageVar(camera.boundleft)</code> and <code>StageVar(boundleft)</code> are the same query.</p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Value</th></tr></thead><tbody>
+<tr><td><code>info.name</code>, <code>info.displayname</code>, <code>info.author</code>, <code>info.mugenversion</code></td><td>text, compared with <code>StageVar(info.author) = "name"</code> (case-insensitive)</td></tr>
+<tr><td><code>camera.startx</code>, <code>camera.starty</code>, <code>camera.boundleft</code>, <code>camera.boundright</code>, <code>camera.boundhigh</code>, <code>camera.boundlow</code></td><td>numbers</td></tr>
+<tr><td><code>camera.verticalfollow</code>, <code>camera.tension</code>, <code>camera.zoomin</code>, <code>camera.zoomout</code></td><td>numbers</td></tr>
+<tr><td><code>playerinfo.p1startx</code>, <code>playerinfo.p2startx</code>, <code>playerinfo.leftbound</code>, <code>playerinfo.rightbound</code></td><td>numbers</td></tr>
+<tr><td><code>playerinfo.autoturn</code></td><td>1 unless the stage sets <code>autoturn = 0</code></td></tr>
+<tr><td><code>stageinfo.zoffset</code>, <code>stageinfo.localcoord.x</code>, <code>stageinfo.localcoord.y</code>, <code>stageinfo.roundtime</code></td><td>numbers (<code>localcoord</code> alone means the width; <code>roundtime</code> is -1 when the stage does not set it)</td></tr>
+<tr><td><code>shadow.intensity</code>, <code>shadow.yscale</code>, <code>reflection.intensity</code></td><td>numbers</td></tr>
+</tbody></table>
+</div>
+<p>Text queries evaluate to 0 when used as a number. Unknown names evaluate to 0 and print one warning when the expression is compiled. On the built-in flat and native stages the values come from the engine defaults.</p>
+<h2 id="camera-parameters"><a class="header" href="#camera-parameters">Camera parameters</a></h2>
+<p>The <code>[Camera]</code> group accepts these extra keys. Every key is optional and its default reproduces the previous camera, so a stage that omits them behaves exactly as before.</p>
+<div class="table-wrapper"><table><thead><tr><th>Key</th><th>Default</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>verticalfollow</code></td><td>0.2</td><td>Fraction of the highest fighter's height the camera follows upward</td></tr>
+<tr><td><code>tension</code></td><td>50</td><td>Horizontal dead zone: the camera only pans when a fighter comes closer than this to a screen edge, so a cornered fighter stays put while the opponent walks in</td></tr>
+<tr><td><code>verticalfollowdelta</code></td><td>0</td><td>Dead zone in stage pixels: the vertical target only changes when it moved at least this much, which stops small jumps from shaking the camera</td></tr>
+<tr><td><code>yscrollspeed</code></td><td>0.3</td><td>Share of the remaining vertical distance covered per tick (clamped to 0..1)</td></tr>
+<tr><td><code>zoominspeed</code>, <code>zoomoutspeed</code></td><td>0.04</td><td>Share of the remaining zoom difference covered per tick when the camera zooms in or out (clamped to 0..1; 0 holds the zoom, 1 snaps in one tick)</td></tr>
+<tr><td><code>lowestcap</code></td><td>0</td><td>When 1 the camera never sinks below <code>starty</code></td></tr>
+<tr><td><code>dynamicboundhigh</code></td><td>0</td><td>When 1 <code>boundhigh</code> is raised by <code>boundhighdelta</code> for every unit of zoom-out above 1x, so the sky stays reachable while zoomed out</td></tr>
+<tr><td><code>boundhighdelta</code></td><td>0</td><td>Used by <code>dynamicboundhigh</code></td></tr>
+</tbody></table>
+</div>
+<p><code>autoturn</code> in <code>[PlayerInfo]</code> (default 1) controls whether fighters turn around by themselves when the opponent crosses over them in the stand, walk and crouch states. <code>autoturn = 0</code> keeps their facing until a controller changes it (<code>AssertSpecial flag = noautoturn</code> still disables it per character). <code>StageVar(camera.&lt;key&gt;)</code> and <code>StageVar(playerinfo.autoturn)</code> read all of these.</p>
+<h2 id="built-in-stage-from-data-only"><a class="header" href="#built-in-stage-from-data-only">Built-in stage from data only</a></h2>
+<p>A built-in stage does not need Rust. Create a folder <code>assets/stages/data/&lt;id&gt;/</code> with a <code>stage.def</code> and the sprite file it names (for example <code>example.sff</code>). At build time every folder there is embedded in the binary (<code>build.rs</code>), appears in the stage selector as a built-in stage, and is loaded like any MUGEN stage, including <code>[Music]</code>, <code>[Sky]</code> and parallax layers. The display name comes from <code>[Info] displayname</code>.</p>
+<pre><code>assets/stages/data/example/
+  stage.def
+  example.sff
+</code></pre>
+<p>The <code>example</code> folder is a working stage with an aurora sky and a parallax ridge. <code>scripts/make-example-stage.py</code> regenerates it. Rebuild after adding or changing files, because the files are embedded.</p>
+<p>Native stages in Rust remain available for procedural art and reactive effects (see below).</p>
+<h2 id="native-stage"><a class="header" href="#native-stage">Native stage</a></h2>
+<p>Native stages live in <code>src/stages.rs</code> and their animated effects in <code>src/stagefx.rs</code>.</p>
+<ol>
+<li>Write a <code>fn mine() -&gt; Stage</code> that builds layers with <code>lay(...)</code> and the primitives from <code>ume_engine::raster</code> (<code>rect</code>, <code>lin</code>, gradients) and <code>texgen</code> (<code>blobs</code>, <code>grain</code>, <code>haze</code>). Use <code>dojo()</code> as a model.</li>
+<li>Register it in <code>builtin()</code>:</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>StageEntry { id: "mine".into(), name: "My Stage".into(), thumb: [[10, 10, 30], [40, 40, 90], [200, 120, 60]], build: Box::new(mine) },
+<span class="boring">}</span></code></pre></pre>
+<ol start="3">
+<li>For reactive effects (dust, crowds, water), add a <code>StageKind</code> variant and handle it in <code>stagefx.rs</code>.</li>
+<li>Capture screenshots to review: <code>UME_SHOTS_ONLY=stages UME_STAGE=mine cargo run --release -- --shots out/</code>.</li>
+</ol>
+<p>Each <code>Layer</code> has <code>delta</code> (parallax), <code>y</code>, <code>front</code> (drawn in front of the fighters) and <code>dynamic</code> (no bitmap, drawn by <code>stagefx</code>).</p>
+<h2 id="built-in-pixel-art"><a class="header" href="#built-in-pixel-art">Built-in pixel art</a></h2>
+<p>The twenty-one native arenas use embedded full-color PNG artwork in <code>assets/stages/</code>: seven core realms (<code>dojo.png</code>, <code>neon.png</code>, <code>bamboo.png</code>, <code>plains.png</code>, <code>spirit.png</code>, <code>volcano.png</code> and <code>brazil.png</code>), seven world landmarks (<code>great_wall.png</code>, <code>petra.png</code>, <code>christ_redeemer.png</code>, <code>texas.png</code>, <code>chichen_itza.png</code>, <code>colosseum.png</code>, <code>taj_mahal.png</code>), and seven Ancient Wonders of the World (<code>pyramids_giza.png</code>, <code>hanging_gardens.png</code>, <code>temple_artemis.png</code>, <code>statue_zeus.png</code>, <code>mausoleum_halicarnassus.png</code>, <code>colossus_rhodes.png</code>, <code>lighthouse_alexandria.png</code>). Generation prompts and tool provenance are recorded in <code>assets/stages/prompts.json</code>. No external image service or filesystem access is needed at runtime.</p>
+<p><code>StageArt::Illustrated</code> draws the background with nearest-neighbor filtering, aligns the fighting floor at 85% of the image height, and clamps horizontal camera movement to the image edges. Team zoom retains the native ground proportion. Fighter shadows, reflections and combat effects remain active; the old procedural prop animations are exclusive to procedural artwork.</p>
+<p>All twenty-one built-in stages have eight ambient animation phases under <code>assets/stages/animation/&lt;stage_id&gt;/</code>. Each 1672×941 transparent PNG adds stage-specific petals, leaves, embers, rain, dust, or spirit motes while preserving the original artwork and fight floor. The game composites the overlays once when a stage loads, then advances the loop every eight simulation ticks. Native builds embed the small overlays; the web build fetches them only for the selected stage. Regenerate the overlays with <code>python tools/gen_stage_loops.py</code>; prompts and event descriptions are recorded in <code>assets/stages/prompts.json</code>.</p>
+<h3 id="living-layers"><a class="header" href="#living-layers">Living layers</a></h3>
+<p>Every illustrated stage also carries an <strong>ambience profile</strong> (<code>src/stages/ambience.rs</code>, data in <code>src/stages/ambience/profiles/</code>): translucent mist banks that drift sideways, particles (petals, embers, fireflies, dust, leaves, sparks, birds), additive light pools anchored to lanterns, windows, fire and sun, and slanted god rays. They are drawn every frame with vertex-coloured polygons over the flat artwork (<code>front: true</code> layers pass in front of the fighters), react to camera parallax, use <code>Match::game_time</code> for motion and scale their particle count with the effects setting. A unit test caps every profile at 420 polygons per frame and checks every value range. To animate a new illustrated stage add a <code>Profile</code> for its id in <code>profiles/classic.rs</code> or <code>profiles/wonders.rs</code>; unknown ids fall back to a few drifting dust motes.</p>
+<p>The stage selector displays the same artwork, cropped to each tile without changing its aspect ratio. Random selection and imported M.U.G.E.N stages retain their existing gradient tiles. Imported stages keep their own artwork during combat.</p>
+<p>Set <code>UME_STAGE_ART=procedural</code> to compare the original procedural stages. The selector continues to show the default pixel-art illustrations. Capture the selector with <code>UME_SHOTS_ONLY=stage-select ultimate-mugen --shots out/ --res 1280x720 --mute</code>, or all seven fights with <code>UME_SHOTS_ONLY=stages</code>.</p>
+<hr />
+<h2 id="native-arenas-lore--character-affinities"><a class="header" href="#native-arenas-lore--character-affinities">Native Arenas, Lore &amp; Character Affinities</a></h2>
+<p>Each native arena in <strong>Ultimate MUGEN</strong> represents a critical focal point in the convergence of dimensions. Below is the full guide to the seven native battlegrounds, their world lore, and the fighters who call them home.</p>
+<h3 id="1-sunset-dojo-roof-dojo--telhado-do-dojo--pôr-do-sol"><a class="header" href="#1-sunset-dojo-roof-dojo--telhado-do-dojo--pôr-do-sol">1. Sunset Dojo Roof (<code>dojo</code>) — <em>Telhado do Dojo — Pôr do Sol</em></a></h3>
+<p><img src="../../assets/stages/dojo.png" alt="Sunset Dojo Roof" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> An ancient mountain pagoda dojo perched above misty valleys at golden hour. Cherry blossom branches frame the weathered timber deck, with warm paper lanterns flickering against amber-rose clouds.</li>
+<li><strong>Native Fighters (Home Stage):</strong>
+<ul>
+<li><strong>Kaito Arashi:</strong> The sacred training grounds where Kaito completed his Arashi-ryu mastery before beginning his wandering journey.</li>
+<li><strong>Akio Hoshi:</strong> Neighboring mountain summit where the Starfall Dojo observes the evening sky.</li>
+</ul>
+</li>
+<li><strong>Key Challengers &amp; Story Battles:</strong>
+<ul>
+<li><strong>Lian Feng:</strong> Travels from Mount Wudang for an exhibition duel between Chinese flowing silk kicks and Japanese storm karate.</li>
+<li><strong>Jin Kazaguruma:</strong> Arrives via the rooftops to test his wind chakrams against Kaito's gale fist.</li>
+</ul>
+</li>
+<li><strong>Narrative Context:</strong> Represents traditional martial honor, disciplined breathing, and the tranquil purity of combat before cosmic corruption touches the world.</li>
+</ul>
+<hr />
+<h3 id="2-neo-metropolis-2099-neon--neo-metrópole-2099"><a class="header" href="#2-neo-metropolis-2099-neon--neo-metrópole-2099">2. Neo-Metropolis 2099 (<code>neon</code>) — <em>Neo-Metrópole 2099</em></a></h3>
+<p><img src="../../assets/stages/neon.png" alt="Neo-Metropolis 2099" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> The rain-slicked rooftop of a mega-skyscraper in a cyberpunk metropolis. Towering holographic ads in cyan and magenta glow through the midnight mist, while aerial cruisers drift between neon-lit towers.</li>
+<li><strong>Native Fighters (Home Stage):</strong>
+<ul>
+<li><strong>VX-9 Volta:</strong> The cybernetic testing ground and rooftop escape route where Volta severed his corporate telemetry.</li>
+<li><strong>Valdric Morn:</strong> The industrial command sector where the Red Star Empire deploys heavy mechanized garrison units.</li>
+</ul>
+</li>
+<li><strong>Key Challengers &amp; Story Battles:</strong>
+<ul>
+<li><strong>Captain Marlow Reyes:</strong> Raids corporate data servers with his sky-galleon, dueling security units on the helicopter deck.</li>
+<li><strong>Akio Hoshi:</strong> Climbs the mega-towers to challenge Valdric's cold military technology with pure stellar plasma.</li>
+</ul>
+</li>
+<li><strong>Narrative Context:</strong> Symbolizes the collision of rampant technocracy with human spirit, where high-voltage capacitors and corporate tyrants clash with rogue awakenings.</li>
+</ul>
+<hr />
+<h3 id="3-moonlit-bamboo-grove-bamboo--bambuzal-ao-luar"><a class="header" href="#3-moonlit-bamboo-grove-bamboo--bambuzal-ao-luar">3. Moonlit Bamboo Grove (<code>bamboo</code>) — <em>Bambuzal ao Luar</em></a></h3>
+<p><img src="../../assets/stages/bamboo.png" alt="Moonlit Bamboo Grove" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> An ancient, whispering jade bamboo forest illuminated by a radiant full moon. Deep teal shadows, a murmuring mountain brook, glowing fireflies, and weathered stone lanterns create an aura of silent danger.</li>
+<li><strong>Native Fighters (Home Stage):</strong>
+<ul>
+<li><strong>Shion Kurogane:</strong> Shion's secluded sanctuary where he meditates under the pale moon, practicing his heavy lunar sword forms.</li>
+<li><strong>Suzume Kagerou:</strong> The shadow corridor through which Suzume stalks her targets, moving silently between bamboo stalks.</li>
+<li><strong>Lian Feng:</strong> Sacred groves surrounding the lower slopes of the Jade Lantern sanctuaries.</li>
+<li><strong>Jin Kazaguruma:</strong> The high canopy highways where Jin leaps between bamboo tips with his gale chakrams.</li>
+</ul>
+</li>
+<li><strong>Key Challengers &amp; Story Battles:</strong>
+<ul>
+<li><strong>Kaname Fuyutsuki:</strong> Dueling Shion under the full moon to determine whether sorrow or divine duty wields the truer blade.</li>
+<li><strong>Mikazuki Oboro:</strong> The shadows twist into nightmare ravens as Oboro sends phantom assassins to eliminate the surviving clan heirs.</li>
+</ul>
+</li>
+<li><strong>Narrative Context:</strong> The battleground of stealth, patience, and poetic stillness, where a single rustle of bamboo leaves heralds a lethal strike.</li>
+</ul>
+<hr />
+<h3 id="4-rocky-plateau-plains--planalto-rochoso"><a class="header" href="#4-rocky-plateau-plains--planalto-rochoso">4. Rocky Plateau (<code>plains</code>) — <em>Planalto Rochoso</em></a></h3>
+<p><img src="../../assets/stages/plains.png" alt="Rocky Plateau" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> Immense sandstone mesas and sun-baked canyon terraces beneath a luminous azure sky. Golden steppe grasses sway along weathered geological strata, offering an expansive, unobstructed natural arena.</li>
+<li><strong>Native Fighters (Home Stage):</strong>
+<ul>
+<li><strong>Daichi Ginrou:</strong> The rugged canyon perimeter where Daichi runs with silver wolves and tests his golden ki against solid stone.</li>
+<li><strong>Akio Hoshi:</strong> Ancient meteorite impact sites where Akio meditates on fallen cosmic stones.</li>
+<li><strong>Captain Marlow Reyes:</strong> The open desert canyons where Marlow grounds his sky-galleon for repairs and duels.</li>
+<li><strong>Sylene Vashti:</strong> A windswept highland where Sylene practices freezing the arid air into protective glacial walls.</li>
+</ul>
+</li>
+<li><strong>Key Challengers &amp; Story Battles:</strong>
+<ul>
+<li><strong>Bruno Volk vs. Daichi Ginrou:</strong> A clash of titans where heavy boxing punches collide with lupine claws, shaking the mesa.</li>
+<li><strong>Marlow Reyes vs. Lian Feng:</strong> A high-stakes duel over ancient maps found within the sandstone ruins.</li>
+</ul>
+</li>
+<li><strong>Narrative Context:</strong> Represents raw, untamed natural vitality, geological endurance, and the honest joy of physical combat beneath the open sun.</li>
+</ul>
+<hr />
+<h3 id="5-gate-of-spirits-spirit--portão-dos-espíritos"><a class="header" href="#5-gate-of-spirits-spirit--portão-dos-espíritos">5. Gate of Spirits (<code>spirit</code>) — <em>Portão dos Espíritos</em></a></h3>
+<p><img src="../../assets/stages/spirit.png" alt="Gate of Spirits" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> Weathered vermilion torii gates standing sentinel over an ancient mist-shrouded shrine courtyard. Turquoise spirit motes drift between mossy stone lanterns and colossal sacred camphor trees beneath a quiet night sky.</li>
+<li><strong>Native Fighters (Home Stage):</strong>
+<ul>
+<li><strong>Kaname Fuyutsuki:</strong> The sacred gateway protected by Kaname's Everwinter blade, serving as the border between the mortal and spirit realms.</li>
+<li><strong>Haruki Sumi:</strong> The ancient shrine vaults where Haruki studies forgotten sealing texts and prays to keep the Twilight Titans asleep.</li>
+</ul>
+</li>
+<li><strong>Key Challengers &amp; Story Battles:</strong>
+<ul>
+<li><strong>Mikazuki Oboro:</strong> Manifests his shadow illusions directly at the torii gate, seeking to tear open the veil between the living and the dead.</li>
+<li><strong>Garan the Ashen Oni:</strong> Stalks the shrine perimeter, seeking to shatter Haruki's paper talismans and consume the spirits within.</li>
+<li><strong>Suzume Kagerou:</strong> Infiltrates the sacred grounds to intercept Oboro's disciples before they desecrate ancestral graves.</li>
+</ul>
+</li>
+<li><strong>Narrative Context:</strong> The metaphysical heart of the world, where divine judgments are passed and the spiritual fabric of reality is either defended or corrupted.</li>
+</ul>
+<hr />
+<h3 id="6-volcanic-crater-volcano--cratera-vulcânica"><a class="header" href="#6-volcanic-crater-volcano--cratera-vulcânica">6. Volcanic Crater (<code>volcano</code>) — <em>Cratera Vulcânica</em></a></h3>
+<p><img src="../../assets/stages/volcano.png" alt="Volcanic Crater" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> An active basalt caldera glowing with incandescent rivers of orange magma. Crimson volcanic smoke, floating embers, and intense amber rim lighting illuminate a solid obsidian fighting terrace laced with glowing fissures.</li>
+<li><strong>Native Fighters (Home Stage):</strong>
+<ul>
+<li><strong>Garan the Ashen Oni:</strong> The hellish subterranean threshold from which Garan crawled into the mortal realm.</li>
+<li><strong>Mikazuki Oboro:</strong> The convergence apex where the ritual of the Scarlet Eclipse focuses planetary cosmic energy.</li>
+<li><strong>Valdric Morn:</strong> The industrial geothermal smelting foundries where the Red Star Empire manufactures heavy warmachines.</li>
+</ul>
+</li>
+<li><strong>Key Challengers &amp; Story Battles:</strong>
+<ul>
+<li><strong>Sylene Vashti:</strong> Sylene ventures into the burning caldera to freeze the molten veins and avenge her frozen homeland.</li>
+<li><strong>Kaito Arashi:</strong> The climactic final confrontation against Oboro and Garan to disperse the crimson clouds with the Eye of the Storm.</li>
+</ul>
+</li>
+<li><strong>Narrative Context:</strong> The domain of primordial chaos, destruction, and ultimate stakes. The final testing ground where the fate of all converging realities is decided.</li>
+</ul>
+<hr />
+<h3 id="7-hinterland-plaza--brazil-brazil--praça-do-interior--brasil"><a class="header" href="#7-hinterland-plaza--brazil-brazil--praça-do-interior--brasil">7. Hinterland Plaza — Brazil (<code>brazil</code>) — <em>Praça do Interior — Brasil</em></a></h3>
+<p><img src="../../assets/stages/brazil.png" alt="Hinterland Plaza" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> A warm, charming small town square in the Brazilian interior (inspired by historic Minas Gerais and São Paulo countryside) at golden hour. Pastel colonial stucco houses with aged wooden shutters, a cream-and-blue church in the background, a traditional bandstand (<em>coreto</em>), flowering ipê and jacarandá trees, and classic Portuguese stone paving (<em>calçada portuguesa</em>).</li>
+<li><strong>Native Fighters (Home Stage):</strong>
+<ul>
+<li><strong>Bruno "Bulldozer" Volk:</strong> The beloved town square where Bruno grew up, works out at the local gym, and protects his neighbors.</li>
+</ul>
+</li>
+<li><strong>Key Challengers &amp; Story Battles:</strong>
+<ul>
+<li><strong>Haruki Sumi:</strong> Arrives seeking quiet shelter and warm hospitality, welcomed by Bruno with fresh coffee and cheese bread (<em>pão de queijo</em>).</li>
+<li><strong>Daichi Ginrou:</strong> Enters the town with a wide grin, drawn by rumors of an unbeatable heavyweight champion who fights with bare fists.</li>
+<li><strong>Valdric Morn:</strong> An imperial scouting squad attempts to annex the town for raw resources, only to be met by Bruno and an outraged community.</li>
+</ul>
+</li>
+<li><strong>Narrative Context:</strong> Represents the warmth of community, the resilience of everyday working people, and the peaceful mortal lives that the heroes are fighting to protect. It uses the plains theme music and has no legacy procedural counterpart.</li>
+</ul>
+<hr />
+<h2 id="the-7-modern-wonders-of-the-world"><a class="header" href="#the-7-modern-wonders-of-the-world">The 7 Modern Wonders of the World</a></h2>
+<h3 id="8-great-wall-of-china-great_wall--grande-muralha-da-china"><a class="header" href="#8-great-wall-of-china-great_wall--grande-muralha-da-china">8. Great Wall of China (<code>great_wall</code>) — <em>Grande Muralha da China</em></a></h3>
+<p><img src="../../assets/stages/great_wall.png" alt="Great Wall of China" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> An ancient stone fortification winding across rugged mist-shrouded green mountain ridges at sunrise. Imposing brick watchtowers frame the battlement fighting deck, with golden morning sunlight breaking through soft clouds and fluttering imperial banners.</li>
+<li><strong>Lore &amp; Affinities:</strong> Sacred bastion where martial artists of the East test their endurance and footwork. Lian Feng and Jin Kazaguruma hold exhibition clashes along the winding ramparts.</li>
+</ul>
+<hr />
+<h3 id="9-petra--al-khazneh-petra--petra--al-khazneh"><a class="header" href="#9-petra--al-khazneh-petra--petra--al-khazneh">9. Petra — Al-Khazneh (<code>petra</code>) — <em>Petra — Al-Khazneh</em></a></h3>
+<p><img src="../../assets/stages/petra.png" alt="Petra" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> The monumental rose-red rock-cut Hellenistic temple facade of The Treasury carved into towering sandstone canyon walls of the Siq. Warm desert sunlight, glowing bronze braziers, and a level sandstone arena floor.</li>
+<li><strong>Lore &amp; Affinities:</strong> Hidden desert sanctuary of forgotten merchant princes and desert nomads. Daichi Ginrou and Marlow Reyes duel for ancient relics stored within the rock-cut vaults.</li>
+</ul>
+<hr />
+<h3 id="10-christ-the-redeemer-christ_redeemer--cristo-redentor--corcovado"><a class="header" href="#10-christ-the-redeemer-christ_redeemer--cristo-redentor--corcovado">10. Christ the Redeemer (<code>christ_redeemer</code>) — <em>Cristo Redentor — Corcovado</em></a></h3>
+<p><img src="../../assets/stages/christ_redeemer.png" alt="Christ the Redeemer" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> Perched atop Mount Corcovado in Rio de Janeiro at golden sunset. The colossal Art Deco statue opens its arms over Guanabara Bay and Sugarloaf Mountain far below as twilight colors wash across the sky and city lights flicker to life.</li>
+<li><strong>Lore &amp; Affinities:</strong> A beacon of divine grace and sanctuary overlooking the metropolis. Bruno Volk and Haruki Sumi clash under the sacred silhouette at dusk.</li>
+</ul>
+<hr />
+<h3 id="11-inland-town--texas-usa-texas--cidade-do-interior--texas-eua"><a class="header" href="#11-inland-town--texas-usa-texas--cidade-do-interior--texas-eua">11. Inland Town — Texas, USA (<code>texas</code>) — <em>Cidade do Interior — Texas, EUA</em></a></h3>
+<p><img src="../../assets/stages/texas.png" alt="Inland Town — Texas" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> A historic frontier small town in inland West Texas at dusty golden sunset. Weathered wooden clapboard saloon and general store with covered boardwalk porches, an old red brick courthouse with a bell tower cupola, a spinning steel windmill water tower, telegraph poles with drooping wires, the Texas Lone Star flag fluttering in the breeze, saguaro and prickly pear cactus framing the edges, and a broad level packed sand and dirt fighting road.</li>
+<li><strong>Lore &amp; Affinities:</strong> The rugged heartland of lone wanderers, brawlers, and frontier lawmen. Bruno Volk and Captain Marlow Reyes duel in high-noon brawls along the dusty thoroughfare.</li>
+</ul>
+<hr />
+<h3 id="12-chichén-itzá-chichen_itza--chichén-itzá--templo-de-kukulcán"><a class="header" href="#12-chichén-itzá-chichen_itza--chichén-itzá--templo-de-kukulcán">12. Chichén Itzá (<code>chichen_itza</code>) — <em>Chichén Itzá — Templo de Kukulcán</em></a></h3>
+<p><img src="../../assets/stages/chichen_itza.png" alt="Chichén Itzá" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> The grand Mesoamerican step-pyramid of El Castillo under a deep purple twilight sky scattered with ancient Mayan constellations. Carved feathered serpent heads flank the stone balustrades amid lush tropical jungle foliage.</li>
+<li><strong>Lore &amp; Affinities:</strong> Nexus of celestial alignments and feathered serpent deity worship. Mikazuki Oboro and Garan invoke eclipse magic on the ceremonial plaza.</li>
+</ul>
+<hr />
+<h3 id="13-colosseum-of-rome-colosseum--coliseu-de-roma"><a class="header" href="#13-colosseum-of-rome-colosseum--coliseu-de-roma">13. Colosseum of Rome (<code>colosseum</code>) — <em>Coliseu de Roma</em></a></h3>
+<p><img src="../../assets/stages/colosseum.png" alt="Colosseum of Rome" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> The monumental Roman amphitheater in late golden-hour afternoon. Multi-tiered travertine arches, weathered Corinthian columns, imperial red vexillum banners, and packed golden fighting sand.</li>
+<li><strong>Lore &amp; Affinities:</strong> Legendary epicenter of gladiator combat and martial glory. Bruno Volk, Daichi Ginrou, and Valdric Morn clash in ruthless exhibition duels before the imperial banners.</li>
+</ul>
+<hr />
+<h3 id="14-taj-mahal-taj_mahal--taj-mahal--palácio-de-mármore"><a class="header" href="#14-taj-mahal-taj_mahal--taj-mahal--palácio-de-mármore">14. Taj Mahal (<code>taj_mahal</code>) — <em>Taj Mahal — Palácio de Mármore</em></a></h3>
+<p><img src="../../assets/stages/taj_mahal.png" alt="Taj Mahal" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> The radiant ivory-white marble mausoleum reflected in the tranquil Yamuna reflecting pool at pink-gold dawn. Slender cypress trees, lotus pools, and intricate carved marble jali screens frame the polished fighting deck.</li>
+<li><strong>Lore &amp; Affinities:</strong> Eternal monument of love and perfection. Akio Hoshi and Lian Feng exchange harmonious ki strikes across the pristine marble terrace.</li>
+</ul>
+<hr />
+<h2 id="the-7-ancient-wonders-of-the-world"><a class="header" href="#the-7-ancient-wonders-of-the-world">The 7 Ancient Wonders of the World</a></h2>
+<h3 id="15-great-pyramids-of-giza-pyramids_giza--pirâmides-de-gizé"><a class="header" href="#15-great-pyramids-of-giza-pyramids_giza--pirâmides-de-gizé">15. Great Pyramids of Giza (<code>pyramids_giza</code>) — <em>Pirâmides de Gizé</em></a></h3>
+<p><img src="../../assets/stages/pyramids_giza.png" alt="Great Pyramids of Giza" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> Colossal limestone pyramids of Khufu and Khafre rising against a burning desert sunset. The limestone profile of the Great Sphinx and distant date palm silhouettes gaze over the level sandstone terrace.</li>
+<li><strong>Lore &amp; Affinities:</strong> Primordial tomb complex where Pharaohs attained immortality. Garan and Marlow Reyes search for forbidden astral relics beneath the shifting dunes.</li>
+</ul>
+<hr />
+<h3 id="16-hanging-gardens-of-babylon-hanging_gardens--jardins-suspensos-da-babilônia"><a class="header" href="#16-hanging-gardens-of-babylon-hanging_gardens--jardins-suspensos-da-babilônia">16. Hanging Gardens of Babylon (<code>hanging_gardens</code>) — <em>Jardins Suspensos da Babilônia</em></a></h3>
+<p><img src="../../assets/stages/hanging_gardens.png" alt="Hanging Gardens of Babylon" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> Monumental multi-tiered palace terraces cascading with tropical blossoms, date palms, weeping willows, and aqueduct waterfalls. Lapis lazuli glazed brick walls with gold lion reliefs overlook the Euphrates.</li>
+<li><strong>Lore &amp; Affinities:</strong> Mesopotamian wonder built by royal love. Haruki Sumi and Sylene Vashti duel amid fragrant jasmine and cascading mountain waters.</li>
+</ul>
+<hr />
+<h3 id="17-temple-of-artemis-at-ephesus-temple_artemis--templo-de-Ártemis-em-Éfeso"><a class="header" href="#17-temple-of-artemis-at-ephesus-temple_artemis--templo-de-Ártemis-em-Éfeso">17. Temple of Artemis at Ephesus (<code>temple_artemis</code>) — <em>Templo de Ártemis em Éfeso</em></a></h3>
+<p><img src="../../assets/stages/temple_artemis.png" alt="Temple of Artemis at Ephesus" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> Colossal Greek temple colonnade of fluted Ionic marble columns under a starry Aegean night sky. Glowing bronze sacrificial braziers, olive groves, and coastal hills frame the polished marble courtyard.</li>
+<li><strong>Lore &amp; Affinities:</strong> Sacred sanctuary of the huntress goddess. Suzume Kagerou and Shion Kurogane cross blades under the cool lunar light.</li>
+</ul>
+<hr />
+<h3 id="18-statue-of-zeus-at-olympia-statue_zeus--estátua-de-zeus-em-olímpia"><a class="header" href="#18-statue-of-zeus-at-olympia-statue_zeus--estátua-de-zeus-em-olímpia">18. Statue of Zeus at Olympia (<code>statue_zeus</code>) — <em>Estátua de Zeus em Olímpia</em></a></h3>
+<p><img src="../../assets/stages/statue_zeus.png" alt="Statue of Zeus at Olympia" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> Sanctuary interior housing the colossal chryselephantine seated Zeus on an ornate cedarwood throne. Ivory skin, golden robes, winged Nike, and burning bronze cauldrons casting dramatic shadows across mosaic marble.</li>
+<li><strong>Lore &amp; Affinities:</strong> The seat of Olympian authority and thunderous power. Kaito Arashi and Valdric Morn test storm energy against imperial authority.</li>
+</ul>
+<hr />
+<h3 id="19-mausoleum-at-halicarnassus-mausoleum_halicarnassus--mausoléu-de-halicarnasso"><a class="header" href="#19-mausoleum-at-halicarnassus-mausoleum_halicarnassus--mausoléu-de-halicarnasso">19. Mausoleum at Halicarnassus (<code>mausoleum_halicarnassus</code>) — <em>Mausoléu de Halicarnasso</em></a></h3>
+<p><img src="../../assets/stages/mausoleum_halicarnassus.png" alt="Mausoleum at Halicarnassus" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> Monumental marble tomb with sculpted Amazonomachy friezes, 36 slender Ionic columns, a stepped pyramid roof, and a crowning marble four-horse chariot overlooking the turquoise Aegean harbor.</li>
+<li><strong>Lore &amp; Affinities:</strong> Splendor of Anatolian and Hellenic artistry. Kaname Fuyutsuki and Akio Hoshi duel beneath the guardian marble lions.</li>
+</ul>
+<hr />
+<h3 id="20-colossus-of-rhodes-colossus_rhodes--colosso-de-rodes"><a class="header" href="#20-colossus-of-rhodes-colossus_rhodes--colosso-de-rodes">20. Colossus of Rhodes (<code>colossus_rhodes</code>) — <em>Colosso de Rodes</em></a></h3>
+<p><img src="../../assets/stages/colossus_rhodes.png" alt="Colossus of Rhodes" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> Titanic bronze statue of Helios crowned with a spiked solar halo standing tall over the stormy twilight harbor entrance. A blazing beacon brazier pierces violet tempest clouds while turquoise waves crash against the pier.</li>
+<li><strong>Lore &amp; Affinities:</strong> Guardian of the Mediterranean sea routes. VX-9 Volta and Marlow Reyes clash on the rain-swept harbor pier beneath the beacon flames.</li>
+</ul>
+<hr />
+<h3 id="21-lighthouse-of-alexandria-lighthouse_alexandria--farol-de-alexandria--pharos"><a class="header" href="#21-lighthouse-of-alexandria-lighthouse_alexandria--farol-de-alexandria--pharos">21. Lighthouse of Alexandria (<code>lighthouse_alexandria</code>) — <em>Farol de Alexandria — Pharos</em></a></h3>
+<p><img src="../../assets/stages/lighthouse_alexandria.png" alt="Lighthouse of Alexandria" /></p>
+<ul>
+<li><strong>Atmosphere:</strong> The monumental three-tiered Pharos tower projecting a brilliant golden light beam over churning Mediterranean waves at midnight. White limestone battlements and royal Ptolemaic banners frame the ramparts.</li>
+<li><strong>Lore &amp; Affinities:</strong> Guiding light across dangerous seas and cosmic crossroads. Kaito Arashi, Shion Kurogane, and Jin Kazaguruma meet at the midnight ramparts as the beacon sweeps the horizon.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="Make-a-Stage.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="Visual-Effects.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="Make-a-Stage.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="Visual-Effects.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

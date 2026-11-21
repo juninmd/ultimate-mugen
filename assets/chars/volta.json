@@ -1,6 +1,7 @@
 {
   "format": "umf/2",
   "id": "volta",
+  "element": "lightning",
   "name": "VX-9 Volta",
   "series": "Protocolo Grade Neon",
   "author": "Ultimate MUGEN",

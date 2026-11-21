@@ -126,6 +126,8 @@ Criado ao lado do executável na primeira execução (localStorage na web) com o
 | `[touch]` | `scale` | tamanho do controle na tela, 0,7 a 1,5 |
 | `[touch]` | `opacity` | opacidade do controle na tela, 0,2 a 1,0 |
 | `[touch]` | `left_handed` | `true` espelha o controle (direcional à direita, botões à esquerda) |
+
+Por padrão o controle mostra só os seis botões de ataque e o direcional. O botão pequeno `+` abre os botões extras (despertar, carregar, golpes rápidos, troca, ataques do terceiro lutador, defesa) e `x` fecha. O controle esmaece para 30% da `opacity` após 2,5 s sem toques e respeita as áreas seguras (notch e barra inferior) nos celulares.
 | `[rules]` | `rounds_to_win` (1-9), `round_seconds` (0 = sem limite, até 999), `life_percent` (10-500), `game_speed` (0.5-2.0) | Sobrescrevem os valores do menu Settings em toda luta; remova a linha para voltar ao valor do menu |
 | `[menu]` | `arcade`, `story`, `survival`, `cpu`, `versus`, `training`, `watch`, `team_seq`, `team_simul`, `team_tag`, `mugen`, `market`, `controls`, `settings`, `replays`, `quit` | Texto dessa entrada do menu principal |
 

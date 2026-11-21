@@ -68,6 +68,18 @@
   window.ume_dpr = () => window.devicePixelRatio || 1;
   window.ume_is_touch = () => (('ontouchstart' in window) || navigator.maxTouchPoints > 0 || /[?&]touch=1/.test(location.search)) ? 1 : 0;
 
+  let insets = null;
+  const readInsets = () => {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+    document.body.appendChild(probe);
+    const cs = getComputedStyle(probe);
+    insets = [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].map((v) => parseFloat(v) || 0);
+    probe.remove();
+  };
+  window.addEventListener('resize', () => { insets = null; });
+  window.ume_safe_inset = (i) => { if (!insets) readInsets(); return insets[i]; };
+
   window.umeStartImports = function (wasm) {
     const DB = 'ultimate-mugen', ST = 'packs';
     function db() { return new Promise((res, rej) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(ST); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }

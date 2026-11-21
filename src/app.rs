@@ -473,6 +473,7 @@ impl App {
         set_keep_aspect(self.settings.keep_aspect);
         set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;
+        self.c.nav.active = !matches!(self.screen, Screen::Fight);
         self.c.update();
         self.preview_t += get_frame_time();
         let dt = get_frame_time();
@@ -506,6 +507,7 @@ impl App {
             Screen::PlayerCard { .. } => self.player_card_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
         }
+        self.c.nav.draw(self.c.touch.enabled);
         crate::e2e::publish(self);
         if is_key_pressed(KeyCode::F11) {
             self.toggle_fullscreen();

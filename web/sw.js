@@ -4,7 +4,7 @@
 const CACHE = 'ume-v5';
 const SHELL = /(\/|\.html|\.js|\.webmanifest|\.svg|\.menu\.pack)$/;
 self.addEventListener('install', () => { self.skipWaiting(); });
-self.addEventListener('activate', (e) => { e.waitUntil((async () => { for (const k of await caches.keys()) if (k !== CACHE) await caches.delete(k); await self.clients.claim(); })()); });
+self.addEventListener('activate', (e) => { e.waitUntil((async () => { for (const k of await caches.keys()) if (/^ume-v\d+$/.test(k) && k !== CACHE) await caches.delete(k); await self.clients.claim(); })()); });
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   const url = new URL(req.url);

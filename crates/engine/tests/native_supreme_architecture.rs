@@ -4,7 +4,7 @@
 use ume_native::{compile_native, HitSpec, NativeChar, NativeMove, PassiveSpec, ThrowSpec};
 
 fn base_char() -> NativeChar {
-    let raw = include_str!("../../../assets/chars/kaito.json");
+    let raw = include_str!("../../../assets/chars/kaito/kaito.json");
     serde_json::from_str(raw).expect("valid kaito template")
 }
 
@@ -55,6 +55,7 @@ fn test_hit_priority_and_advanced_hitdef_flags() {
         teleport: None,
         fx: None,
         voice: None,
+        sounds: vec![],
         armor: None,
         parry: None,
         rekka: None,
@@ -114,6 +115,7 @@ fn test_throw_and_passives_mechanics() {
         teleport: None,
         fx: None,
         voice: None,
+        sounds: vec![],
         armor: None,
         parry: None,
         rekka: None,

@@ -347,3 +347,7 @@ cargo test --workspace --release
 Review fighter art with `ume-tools audit-sprites`, which lists missing and reused poses, or in the game itself.
 
 Browser sprite packs load asynchronously. A newly downloaded or replaced pack invalidates the affected native fighter’s cached previews and all palettes; other fighters keep their caches. Match loading waits for the chosen built-in fighters’ packs and reports download failures rather than starting with a cached procedural fallback. Imported native definitions without a bundled pack remain supported.
+
+## Share a fighter as a pack
+
+A zip (or a `mugen/` folder) that holds one UMF `.json` next to a `sprites/` folder with `01_idle.png`, the pose PNGs and an optional `meta.json` (`axisX`, `axisY`, `refHeight` per pose) is imported as a native fighter, with no `.def`. The marketplace installs it like any other pack. [Goku SSJ4 UMF](https://github.com/juninmd/mugen-assets/tree/main/umf/Goku_SSJ4_UMF) is the reference example.

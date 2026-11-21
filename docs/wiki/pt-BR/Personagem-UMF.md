@@ -322,3 +322,7 @@ cargo test --workspace --release
 Revise a arte dos lutadores com `ume-tools audit-sprites`, que lista poses ausentes e reaproveitadas, ou no próprio jogo.
 
 Os pacotes de sprites do navegador carregam de forma assíncrona. Um pacote novo ou substituído invalida as prévias e todas as paletas em cache do lutador afetado; os demais mantêm seus caches. O carregamento da luta aguarda os pacotes dos lutadores nativos escolhidos e informa falhas de download, em vez de iniciar com uma aparência procedural antiga. Definições nativas importadas sem pacote integrado continuam compatíveis.
+
+## Compartilhar um lutador como pacote
+
+Um zip (ou pasta `mugen/`) com um `.json` UMF ao lado de uma pasta `sprites/` com `01_idle.png`, os PNGs das poses e um `meta.json` opcional (`axisX`, `axisY`, `refHeight` por pose) é importado como lutador nativo, sem `.def`. O mercado instala como qualquer outro pacote. O [Goku SSJ4 UMF](https://github.com/juninmd/mugen-assets/tree/main/umf/Goku_SSJ4_UMF) é o exemplo de referência.

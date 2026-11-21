@@ -24,6 +24,7 @@ mod quarantine;
 pub use quarantine::{reason_counts, reason_label, Quarantined};
 mod progress;
 mod register;
+mod umf_bundle;
 mod stage_job;
 
 pub use import::{read_zip, read_zip_with_progress};

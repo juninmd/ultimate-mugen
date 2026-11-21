@@ -8,6 +8,7 @@ use std::f32::consts::PI;
 use ume_engine::matchs::BgmAction;
 
 mod score; mod wav; mod voice; mod ui_sfx; mod easter_sfx;
+mod preload;
 use score::music;
 use wav::wav;
 
@@ -400,6 +401,10 @@ struct Music {
 
 pub struct Audio {
     pub enabled: bool,
+    /// Master gain is zero: decode nothing, the samples would never be heard.
+    silent: bool,
+    #[cfg(target_arch = "wasm32")]
+    preload_queue: Vec<(SampleKey, Vec<u8>)>,
     builtin: HashMap<&'static str, Vec<Sound>>,
     builtin_pcm: HashMap<(&'static str, u32), Pcm>,
     builtin_pan: HashMap<(&'static str, u32, i8), Option<Sound>>,
@@ -434,6 +439,7 @@ impl Audio {
     pub async fn new(enabled: bool) -> Self {
         let mut a = Audio {
             enabled,
+            silent: !enabled,
             builtin: HashMap::new(),
             builtin_pcm: HashMap::new(),
             builtin_pan: HashMap::new(),
@@ -451,6 +457,8 @@ impl Audio {
             music_wav: HashMap::new(),
             music_job: None,
             preload_job: None,
+            #[cfg(target_arch = "wasm32")]
+            preload_queue: Vec::new(),
             playing: None,
             music_files: HashMap::new(),
             pending_bgm: vec![],
@@ -510,6 +518,7 @@ impl Audio {
         a
     }
     pub fn set_levels(&mut self, master: f32, music: f32, sfx: f32) {
+        self.silent = master <= 0.0;
         self.volume = master * sfx;
         self.music_volume = master * music;
         for v in self.channels.values() {
@@ -603,7 +612,7 @@ impl Audio {
     }
     /// Decodes the match's samples off the render thread (inline on wasm). Returns true once everything is in `sources`.
     pub fn preload_match(&mut self, chars: &[CharSounds]) -> bool {
-        if !self.enabled {
+        if !self.enabled || self.silent {
             return true;
         }
         if let Some(h) = self.preload_job.take() {
@@ -617,47 +626,41 @@ impl Audio {
             }
             return true;
         }
-        self.sources
-            .retain(|k, _| chars.iter().any(|(id, _)| *id == k.0));
-        self.voices
-            .retain(|k, _| chars.iter().any(|(id, _)| *id == k.0 .0));
-        let todo: Vec<(SampleKey, Vec<u8>)> = chars
-            .iter()
-            .flat_map(|(id, sounds)| {
-                sounds
-                    .iter()
-                    .map(move |(k, b)| ((id.to_string(), k.0, k.1), b))
-            })
-            .filter(|(k, _)| !self.sources.contains_key(k))
-            .map(|(k, b)| (k, b.clone()))
-            .collect();
+        #[cfg(target_arch = "wasm32")]
+        {
+            if !self.preload_queue.is_empty() {
+                return preload::drain(&mut self.sources, &mut self.preload_queue);
+            }
+        }
+        self.sources.retain(|k, _| chars.iter().any(|(id, _)| *id == k.0));
+        self.voices.retain(|k, _| chars.iter().any(|(id, _)| *id == k.0 .0));
+        let todo = preload::missing(chars, &self.sources);
         if todo.is_empty() {
             return true;
         }
-        let work = move || {
-            let decoded = ume_formats::par::map(&todo, |(_, b)| decode(b));
-            todo.into_iter()
-                .zip(decoded)
-                .map(|((k, b), pcm)| (k, pcm.ok_or(b)))
-                .collect::<Vec<_>>()
-        };
-        #[cfg(not(target_arch = "wasm32"))]
-        if let Ok(h) = std::thread::Builder::new()
-            .name("sfx-decode".into())
-            .spawn(work)
-        {
-            self.preload_job = Some(h);
-            false
-        } else {
-            true
-        }
         #[cfg(target_arch = "wasm32")]
         {
-            for (key, r) in work() {
-                self.sources
-                    .insert(key, Some(r.map(Source::Pcm).unwrap_or_else(Source::Raw)));
+            self.preload_queue = todo;
+            preload::drain(&mut self.sources, &mut self.preload_queue)
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let work = move || {
+                let decoded = ume_formats::par::map(&todo, |(_, b)| decode(b));
+                todo.into_iter()
+                    .zip(decoded)
+                    .map(|((k, b), pcm)| (k, pcm.ok_or(b)))
+                    .collect::<Vec<_>>()
+            };
+            if let Ok(h) = std::thread::Builder::new()
+                .name("sfx-decode".into())
+                .spawn(work)
+            {
+                self.preload_job = Some(h);
+                false
+            } else {
+                true
             }
-            true
         }
     }
     fn start(&mut self, s: &Sound, secs: f64, o: SoundOpts, key: Option<SampleKey>) {
@@ -851,7 +854,7 @@ impl Audio {
     }
     /// Synthesizes the track off the render thread (inline on wasm). Returns true once `prepare_music` is cheap.
     pub fn music_ready(&mut self, id: u32) -> bool {
-        if !self.enabled || self.music.contains_key(&id) || self.music_wav.contains_key(&id) {
+        if !self.enabled || self.silent || self.music.contains_key(&id) || self.music_wav.contains_key(&id) {
             return true;
         }
         #[cfg(not(target_arch = "wasm32"))]
@@ -884,7 +887,7 @@ impl Audio {
         true
     }
     pub async fn prepare_music(&mut self, id: u32) {
-        if !self.enabled || self.music.contains_key(&id) {
+        if !self.enabled || self.silent || self.music.contains_key(&id) {
             return;
         }
         let bytes = self
@@ -896,7 +899,7 @@ impl Audio {
         }
     }
     pub async fn play_music(&mut self, id: u32) {
-        if !self.enabled {
+        if !self.enabled || self.silent {
             return;
         }
         self.stop_music();

@@ -109,6 +109,6 @@ O plano fica em `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); o boneco ape
 
 ## Arena do Poder
 
-Escolha **Arena do Poder** no menu principal e selecione os dois lutadores para enfrentar a CPU. Salte por baixo das plataformas suspensas e pouse nelas durante a descida. Cruzar qualquer borda âmbar da plataforma principal elimina o lutador do round. A câmera abre o enquadramento à medida que os lutadores se afastam e mostra as duas bordas na distância máxima.
+Escolha **Arena do Poder** no menu principal e selecione os dois lutadores para enfrentar a CPU. Suba por 20 plataformas suspensas em cinco níveis. Atravesse-as no salto e pouse nelas durante a descida. Cruzar qualquer borda da plataforma principal elimina o lutador do round. A câmera acompanha a altura e abre o enquadramento quando os lutadores se afastam na horizontal ou na vertical.
 
 Na versão web, abra uma luta diretamente com `?modo=arena&p1=kaito&p2=shion&luta=1`.

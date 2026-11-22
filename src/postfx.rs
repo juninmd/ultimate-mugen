@@ -54,7 +54,7 @@ impl PostFx {
             vignette: p.vignette * l.vignette,
             bloom: if self.level >= l.bloom_level { p.bloom * l.bloom } else { 0.0 },
             grain: l.grain,
-            saturation: p.saturation,
+            saturation: p.saturation * l.saturation,
             contrast: 1.07,
             flash: p.flash,
             time: (t * 60.0).floor() % 97.0,

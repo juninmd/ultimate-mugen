@@ -57,6 +57,14 @@ pub fn key_label(raw: &'static str) -> &'static str {
     }
 }
 
+pub fn move_keys(ids: [&str; 4]) -> String {
+    if ids == ["Up", "Down", "Left", "Right"] {
+        tr3("Setas", "Arrow keys", "Flechas").to_string()
+    } else {
+        ids.join(" ")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -66,6 +74,11 @@ mod tests {
         let labels: std::collections::BTreeSet<&str> =
             (0..super::super::ACTIONS.len()).map(action_label).collect();
         assert_eq!(labels.len(), super::super::ACTIONS.len());
+    }
+
+    #[test]
+    fn custom_move_keys_are_listed() {
+        assert_eq!(move_keys(["W", "S", "A", "D"]), "W S A D");
     }
 
     #[test]

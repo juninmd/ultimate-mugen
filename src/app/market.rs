@@ -3,7 +3,9 @@ use super::market_text::mt;
 use crate::market::{ask_text, typing_supported, SUGGESTED};
 use ume_market::Kind;
 
+mod actions;
 mod badges;
+mod confirm;
 mod grid;
 mod items;
 mod list;
@@ -33,6 +35,12 @@ enum Act {
     SetFormat(Option<ume_market::view::Format>),
     ToggleOutdated,
     ToggleLayout,
+    ToggleMissing,
+    InstallAll,
+    UpdateAll,
+    AskRemoveAll,
+    ConfirmRemove,
+    CancelRemove,
 }
 
 const REPO_ROWS: usize = 9;
@@ -110,35 +118,16 @@ impl App {
         self.market_ui.cur = 0;
         self.market_ui.scroll = 0;
     }
+    fn market_remove(&mut self, pairs: Vec<(String, String)>) {
+        for (a, b) in &pairs {
+            self.market.uninstall(a, b);
+        }
+        self.market.notice = format!("{} item(ns) removido(s) deste aparelho.", pairs.len());
+        self.market_ui.marked.clear();
+    }
     pub(crate) fn market_ui_view_installed(&mut self) {
         self.market_ui.view = View::Installed;
         self.market_ui.cur = 0;
-    }
-
-    fn market_button(&self, x: f32, y: f32, w: f32, label: &str, key: &str, accent: Color) -> bool {
-        let hover = self.hover_rect(x, y, w, 48.0);
-        self.ui.adapted_plate(x, y, w, 48.0, Some(alpha(accent, if hover { 0.9 } else { 0.55 })));
-        self.ui.text(
-            label,
-            x + w / 2.0,
-            y + 25.0,
-            19.0,
-            WHITE,
-            Align::Center,
-            true,
-        );
-        if !key.is_empty() {
-            self.ui.text(
-                key,
-                x + w / 2.0,
-                y + 42.0,
-                12.0,
-                Color::new(1.0, 1.0, 1.0, 0.7),
-                Align::Center,
-                false,
-            );
-        }
-        self.clicked_rect(x, y, w, 48.0)
     }
 
     fn market_entry_modal(&mut self) {
@@ -255,6 +244,7 @@ impl App {
                 "OK",
                 "Enter",
                 hex("#2ecc71"),
+                true,
             );
         let cancel = is_key_pressed(KeyCode::Escape)
             || self.market_button(
@@ -264,6 +254,7 @@ impl App {
                 mt("Cancelar"),
                 "Esc",
                 hex("#ff4d6d"),
+                true,
             );
         if ok {
             let text = if e.buf.trim().is_empty() && !e.token {
@@ -361,7 +352,7 @@ impl App {
                 }
             }
         }
-        let modal = self.market_ui.entry.is_some();
+        let modal = self.market_ui.entry.is_some() || self.market_ui.confirm.is_some();
         let n_repos = self.market.state.repos.len();
         self.market_ui.repo = self.market_ui.repo.min(n_repos.saturating_sub(1));
         let rows = self.market_rows();
@@ -595,6 +586,8 @@ impl App {
                 Align::Left,
                 false,
             );
+        } else if let Some(line) = self.market_contents_line(&rows) {
+            self.ui.text(&short(&line, 110), px, py + 20.0, 16.0, hex("#c9c3dd"), Align::Left, false);
         } else {
             self.ui.text(
                 &crate::i18n::fill(
@@ -610,32 +603,17 @@ impl App {
             );
         }
         let by = 640.0;
-        let mut x = rx;
-        let buttons: [(&str, &str, Color, Act); 7] = [
-            (mt("Todos"), "M", hex("#5865f2"), Act::MarkAll),
-            (mt("Nenhum"), "N", hex("#5865f2"), Act::ClearMarks),
-            (mt("Instalar"), "I", hex("#2ecc71"), Act::Install),
-            (mt("Ativar"), "E", hex("#22b8cf"), Act::Enable),
-            (mt("Desativar"), "O", hex("#f59f00"), Act::Disable),
-            (mt("Remover"), "X", hex("#ff4d6d"), Act::Remove),
-            (mt("Atualizar"), "R", hex("#8a2be2"), Act::Refresh),
-        ];
-        for (label, key, col, act) in buttons {
-            let w = 114.0;
-            if self.market_button(x, by, w, label, key, col) && !modal {
-                acts.push(act);
-            }
-            x += w + 8.0;
-        }
+        self.market_action_bar(&rows, rx, rw, modal, &mut acts);
         self.market_links(rows.get(self.market_ui.cur).map(|r| (r.repo_key.clone(), r.id.clone())), modal);
         self.ui.adapted_plate(40.0, by, 330.0, 48.0, Some(crate::tweaks::accent(0.9)));
         self.ui.text(mt("Voltar"), 205.0, by + 32.0, 26.0, WHITE, Align::Center, true);
         if self.clicked_rect(40.0, by, 330.0, 48.0) && !modal {
             acts.push(Act::Back);
         }
-        self.ui.text(mt("U adicionar · T token · Tab explorar/instalados · F tipo · J formato · P desatualizados · V lista/grade · Espaço marca · Enter/Start aplica"), 40.0, 702.0, 15.0, hex("#a79fc4"), Align::Left, false);
+        self.ui.text(mt("U adicionar · T token · Tab explorar/instalados · F tipo · J formato · P desatualizados · K não instalados · V lista/grade · Espaço marca · Enter/Start aplica"), 40.0, 712.0, 14.0, hex("#a79fc4"), Align::Left, false);
 
         self.market_entry_modal();
+        self.market_confirm_modal(&mut acts);
         if !modal {
             let geo = self.market_geo();
             let last = total.saturating_sub(1);
@@ -717,6 +695,11 @@ impl App {
             }
             if is_key_pressed(KeyCode::P) {
                 acts.push(Act::ToggleOutdated);
+            }
+            for (code, act) in [(KeyCode::K, Act::ToggleMissing), (KeyCode::Z, Act::InstallAll), (KeyCode::Y, Act::UpdateAll), (KeyCode::B, Act::AskRemoveAll)] {
+                if is_key_pressed(code) {
+                    acts.push(act);
+                }
             }
             if is_key_pressed(KeyCode::V) || self.c.pressed(nav::AUX) {
                 acts.push(Act::ToggleLayout);
@@ -866,18 +849,41 @@ impl App {
                         if on { mt("ativado(s)") } else { mt("desativado(s)") }
                     );
                 }
-                Act::Remove => {
-                    let pairs: Vec<(String, String)> = targets
-                        .iter()
-                        .filter(|r| r.installed.is_some())
-                        .map(|r| (r.repo_key.clone(), r.id.clone()))
-                        .collect();
-                    for (a, b) in &pairs {
-                        self.market.uninstall(a, b);
+                Act::Remove | Act::AskRemoveAll => {
+                    let source = if act == Act::Remove { &targets } else { &rows };
+                    let pairs: Vec<(String, String)> = source.iter().filter(|r| r.installed.is_some()).map(Row::pair).collect();
+                    if pairs.len() > 1 {
+                        self.market_ui.confirm = Some(pairs);
+                    } else {
+                        self.market_remove(pairs);
                     }
-                    self.market.notice =
-                        format!("{} item(ns) removido(s) deste aparelho.", pairs.len());
-                    self.market_ui.marked.clear();
+                }
+                Act::ConfirmRemove => {
+                    let pairs = self.market_ui.confirm.take().unwrap_or_default();
+                    self.market_remove(pairs);
+                }
+                Act::CancelRemove => self.market_ui.confirm = None,
+                Act::ToggleMissing => {
+                    self.market_ui.missing_only = !self.market_ui.missing_only;
+                    self.market_ui.cur = 0;
+                    self.market_ui.scroll = 0;
+                }
+                Act::InstallAll => {
+                    self.audio.sfx("purchase");
+                    let ids: Vec<String> = rows.iter().filter(|r| r.installed.is_none() && r.installable).map(|r| r.id.clone()).collect();
+                    let n = cur_repo.as_ref().map_or(0, |k| self.market.queue_install(k, &ids));
+                    self.market.notice = format!("{n} {}", mt("item(ns) na fila de download."));
+                }
+                Act::UpdateAll => {
+                    self.audio.sfx("purchase");
+                    let mut keys: Vec<&str> = rows.iter().filter(|r| r.outdated).map(|r| r.repo_key.as_str()).collect();
+                    keys.dedup();
+                    let mut n = 0;
+                    for key in keys {
+                        let ids: Vec<String> = rows.iter().filter(|r| r.outdated && r.repo_key == key).map(|r| r.id.clone()).collect();
+                        n += self.market.queue_install(key, &ids);
+                    }
+                    self.market.notice = format!("{n} {}", mt("item(ns) na fila de download."));
                 }
                 Act::RemoveRepo => {
                     if let Some(k) = cur_repo.clone() {

@@ -17,7 +17,7 @@ impl App {
         let marked = self.market_ui.marked.contains(&row.pair());
         self.market_checkbox(x + 12.0, y + 6.0, 20.0, marked);
         self.ui.rect(x + 44.0, y + 8.0, 96.0, 18.0, alpha(kind_color(row.kind), 0.35));
-        self.ui.text(kind_label(row.kind), x + 92.0, y + 22.0, 12.0, WHITE, Align::Center, true);
+        self.ui.text(&self.market_kind_label(row), x + 92.0, y + 22.0, 12.0, WHITE, Align::Center, true);
         if let Some(f) = row.format {
             self.market_format_badge(f, x + 148.0, y + 8.0, 60.0, 18.0);
         }

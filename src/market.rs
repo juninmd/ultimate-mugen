@@ -9,6 +9,7 @@ use ume_market::ops::Progress;
 use ume_market::persist::{catalog_key, item_key, STATE_KEY};
 use ume_market::safety::lower_ext;
 mod describe;
+mod inspect;
 mod portrait;
 mod update;
 pub use describe::describe;
@@ -44,6 +45,7 @@ pub enum Event {
         result: Result<Files, String>,
     },
     Portrait(portrait::Loaded),
+    PackInfo(inspect::Probed),
 }
 
 type Queue = Arc<Mutex<VecDeque<Event>>>;
@@ -94,6 +96,7 @@ pub struct Market {
     to_remove: Vec<String>,
     auto_checked: u64,
     portraits: portrait::Portraits,
+    inspected: inspect::Inspected,
     #[cfg(target_arch = "wasm32")]
     web: Arc<ume_market::web::WebPersist>,
 }
@@ -140,6 +143,7 @@ impl Market {
             to_remove: Vec::new(),
             auto_checked: 0,
             portraits: portrait::new_cache(),
+            inspected: inspect::new_cache(),
             #[cfg(target_arch = "wasm32")]
             web: Arc::new(ume_market::web::WebPersist::new()),
         }
@@ -215,6 +219,7 @@ impl Market {
             self.persist.delete(&catalog_key(key));
             self.catalogs.remove(key);
             self.portraits.forget(key);
+            self.inspected.forget(key);
             self.save_state();
         }
     }
@@ -465,6 +470,7 @@ impl Market {
         match e {
             Event::Progress(p) => self.progress = p,
             Event::Portrait(p) => portrait::finish(&mut self.portraits, p),
+            Event::PackInfo(p) => inspect::finish(&mut self.inspected, p),
             Event::Listed { repo_key, result } => {
                 self.listing.remove(&repo_key);
                 match result {
@@ -505,6 +511,7 @@ impl Market {
                         };
                         self.catalogs.insert(repo_key.clone(), catalog);
                         self.portraits.forget(&repo_key);
+                        self.inspected.forget(&repo_key);
                         self.save_state();
                         self.queue_updates(&repo_key);
                     }

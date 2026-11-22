@@ -3,6 +3,7 @@ pub mod catalog;
 pub mod client;
 pub mod model;
 pub mod ops;
+pub mod packinfo;
 pub mod persist;
 pub mod portrait_cache;
 pub mod refs;
@@ -10,10 +11,13 @@ pub mod repo;
 pub mod safety;
 pub mod state;
 pub mod version;
+pub mod zipdir;
 pub mod view;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod probe;
 #[cfg(target_arch = "wasm32")]
 pub mod web;
 

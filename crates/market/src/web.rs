@@ -1,6 +1,7 @@
 use crate::bundle::Files;
-use crate::catalog::{detect, Catalog, FileRef, Item};
-use crate::client::{check_request, file_request, interpret_file, interpret_tree, is_transient, tree_request, MarketError, RateLimit, Request, Response, TreeOutcome};
+use crate::catalog::{detect, Catalog, FileRef, Item, TreeEntry};
+use crate::zipdir::{from_directory, from_tail, tail_range, Step};
+use crate::client::{check_request, file_request, interpret_file, interpret_range, interpret_tree, is_transient, range_request, tree_request, MarketError, RateLimit, Request, Response, TreeOutcome};
 use crate::ops::{InstallJob, Progress, PARALLEL_DOWNLOADS};
 use crate::repo::RepoRef;
 use crate::safety::url_allowed;
@@ -54,6 +55,9 @@ pub async fn get(req: &Request) -> Result<Response, MarketError> {
             headers.set("Authorization", &format!("Bearer {t}")).map_err(js_err)?;
         }
     }
+    if let (Some((a, b)), false) = (req.range, req.url.starts_with("https://api.github.com/")) {
+        headers.set("Range", &format!("bytes={a}-{b}")).map_err(js_err)?;
+    }
     let init = RequestInit::new();
     init.set_method("GET");
     init.set_mode(RequestMode::Cors);
@@ -71,7 +75,7 @@ pub async fn get(req: &Request) -> Result<Response, MarketError> {
         _ => None,
     };
     let mut out = Response { status, etag: header("etag"), body: Vec::new(), rate, retry_after_secs: header("retry-after").and_then(|v| v.parse().ok()), location: None };
-    if status != 200 {
+    if status != 200 && status != 206 {
         return Ok(out);
     }
     if header("content-length").and_then(|v| v.parse::<u64>().ok()).is_some_and(|n| n > req.max_bytes) {
@@ -120,6 +124,20 @@ async fn download_one(repo: &RepoRef, f: &FileRef, cancel: &AtomicBool) -> Resul
     let limit = f.size.max(1).saturating_mul(2).max(1 << 20);
     let resp = get_retry(&file_request(repo, &f.path, &f.sha, limit), cancel).await?;
     interpret_file(&resp, limit)
+}
+
+async fn fetch_range(repo: &RepoRef, f: &FileRef, start: u64, end: u64) -> Result<Vec<u8>, MarketError> {
+    let resp = get_retry(&range_request(repo, &f.path, &f.sha, start, end), &AtomicBool::new(false)).await?;
+    interpret_range(&resp, start, end)
+}
+
+pub async fn probe_zip(repo: &RepoRef, f: &FileRef) -> Result<Vec<TreeEntry>, MarketError> {
+    let (start, end) = tail_range(f.size).ok_or_else(|| MarketError::Invalid("not a zip".into()))?;
+    let tail = fetch_range(repo, f, start, end).await?;
+    match from_tail(&tail, start).map_err(MarketError::Invalid)? {
+        Step::Done(entries) => Ok(entries),
+        Step::Fetch { start, end, count } => from_directory(&fetch_range(repo, f, start, end).await?, count).map_err(MarketError::Invalid),
+    }
 }
 
 pub async fn download_files(repo: &RepoRef, wanted: &[FileRef], cancel: &AtomicBool, on_file: &dyn Fn(u64)) -> Result<Files, MarketError> {

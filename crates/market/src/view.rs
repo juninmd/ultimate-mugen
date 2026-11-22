@@ -51,11 +51,12 @@ pub struct Filter {
     pub kind: Option<Kind>,
     pub format: Option<Format>,
     pub outdated_only: bool,
+    pub missing_only: bool,
 }
 
 impl Filter {
-    pub fn accepts(&self, kind: Kind, format: Option<Format>, outdated: bool) -> bool {
-        self.kind.is_none_or(|k| k == kind) && self.format.is_none_or(|f| format == Some(f)) && (!self.outdated_only || outdated)
+    pub fn accepts(&self, kind: Kind, format: Option<Format>, outdated: bool, installed: bool) -> bool {
+        self.kind.is_none_or(|k| k == kind) && self.format.is_none_or(|f| format == Some(f)) && (!self.outdated_only || outdated) && (!self.missing_only || !installed)
     }
 
     pub fn is_default(&self) -> bool {
@@ -144,11 +145,14 @@ mod tests {
     #[test]
     fn filter_combines_kind_format_and_outdated() {
         let f = Filter { format: Some(Format::Umf), outdated_only: true, ..Default::default() };
-        assert!(f.accepts(Kind::Pack, Some(Format::Umf), true));
-        assert!(!f.accepts(Kind::Pack, Some(Format::Mugen), true));
-        assert!(!f.accepts(Kind::Pack, Some(Format::Umf), false));
-        assert!(!f.accepts(Kind::Music, None, true));
-        assert!(Filter::default().accepts(Kind::Music, None, false));
+        assert!(f.accepts(Kind::Pack, Some(Format::Umf), true, true));
+        assert!(!f.accepts(Kind::Pack, Some(Format::Mugen), true, true));
+        assert!(!f.accepts(Kind::Pack, Some(Format::Umf), false, true));
+        assert!(!f.accepts(Kind::Music, None, true, true));
+        assert!(Filter::default().accepts(Kind::Music, None, false, false));
+        let missing = Filter { missing_only: true, ..Default::default() };
+        assert!(missing.accepts(Kind::Pack, None, false, false));
+        assert!(!missing.accepts(Kind::Pack, None, false, true));
         assert_eq!(next_format(next_format(next_format(None))), None);
     }
 

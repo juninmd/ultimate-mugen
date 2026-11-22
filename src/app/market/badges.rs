@@ -1,5 +1,6 @@
 use super::rows::Row;
 use super::*;
+use ume_market::packinfo::Shape;
 use ume_market::view::Format;
 
 pub(super) fn format_color(f: Format) -> Color {
@@ -14,6 +15,24 @@ pub(super) fn kind_initials(name: &str) -> String {
 }
 
 impl App {
+    pub(super) fn market_kind_label(&self, row: &Row) -> String {
+        match row.info.as_ref().map(|i| i.shape()) {
+            Some(Shape::Multi(n)) => format!("{} · {n}", mt("PACOTE")),
+            Some(Shape::Single(_)) => mt("PERSONAGEM").to_string(),
+            Some(Shape::Stages(_)) => mt("CENÁRIO").to_string(),
+            _ => kind_label(row.kind).to_string(),
+        }
+    }
+
+    pub(super) fn market_contents_line(&self, rows: &[Row]) -> Option<String> {
+        let row = rows.get(self.market_ui.cur)?;
+        match row.info.as_ref()?.shape() {
+            Shape::Multi(n) => Some(format!("{} ({n}): {}", mt("Contém"), row.info.as_ref()?.summary(6))),
+            Shape::Single(name) => Some(format!("{}: {name}", mt("PERSONAGEM"))),
+            _ => None,
+        }
+    }
+
     pub(super) fn market_format_badge(&self, f: Format, x: f32, y: f32, w: f32, h: f32) {
         self.ui.rect(x, y, w, h, alpha(format_color(f), 0.9));
         self.ui.text(f.label(), x + w / 2.0, y + h - 5.0, 13.0, hex("#0b0716"), Align::Center, true);

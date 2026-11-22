@@ -8,6 +8,7 @@ use ume_market::{Installed, MarketState, RepoRef};
 
 const MUGEN: [&str; 12] = ["Aquaman", "Batman_Rebirth", "BlackPanther", "BlackWidow", "CaptainAmerica", "Cell_Perfect_Form", "Goku_SS4", "Deadpool", "Ironman", "Spiderman", "Thanos", "Storm"];
 const UMF: [&str; 2] = ["BlackWidow_UMF", "Goku_SSJ4_UMF"];
+const SQUAD: [&str; 3] = ["Ryu", "Ken", "Chun_Li"];
 const STAGES: [&str; 2] = ["Academia_Ninja", "Campo3"];
 
 fn tree() -> Tree {
@@ -20,6 +21,7 @@ fn tree() -> Tree {
         add(format!("chars/{n}.zip"), 6_000_000);
         add(format!("previews/chars/{n}.png"), 40_000);
     }
+    add("chars/StreetPack.zip".into(), 30_000_000);
     for n in UMF {
         add(format!("umf/{n}.zip"), 9_000_000);
         add(format!("previews/umf/{n}.png"), 40_000);
@@ -45,6 +47,11 @@ fn seed(app: &mut App) -> String {
         state.upsert_installed(Installed { repo_key: repo.key(), item_id: it.id.clone(), kind: it.kind, name: it.name.clone(), bytes: it.bytes, files: 1, active, installed_at: 1, version: version.map_or(it.version.clone(), str::to_string) });
     }
     state.grid_view = true;
+    let info = |fighters: &[&str]| ume_market::packinfo::PackInfo { fighters: fighters.iter().map(|n| n.to_string()).collect(), stages: vec![] };
+    for it in catalog.items.iter().filter(|i| i.kind == ume_market::Kind::Pack && i.id.ends_with(".zip") && !i.id.starts_with("pack:stages/")) {
+        let fighters = if it.name == "StreetPack" { SQUAD.to_vec() } else { vec![it.name.as_str()] };
+        persist.write(&format!("zipinfo/{}/{}", repo.key(), it.version), &serde_json::to_vec(&info(&fighters)).unwrap()).unwrap();
+    }
     if let Ok(dir) = std::env::var("UME_MARKET_PREVIEWS") {
         for e in catalog.support.iter().filter(|e| e.path.starts_with("previews/")) {
             if let Ok(bytes) = std::fs::read(format!("{dir}/{}", e.path.trim_start_matches("previews/"))) {
@@ -69,6 +76,9 @@ pub(crate) async fn run(app: &mut App, dir: &str) {
     screen(app, dir, "market-grid-umf", 20).await;
     app.market_ui_filter(None, true);
     screen(app, dir, "market-grid-outdated", 20).await;
+    app.market_ui_filter(None, false);
+    app.market_ui_mark(&key, "pack:chars/StreetPack.zip");
+    screen(app, dir, "market-grid-marked", 20).await;
     app.market_ui_filter(None, false);
     app.market.state.grid_view = false;
     screen(app, dir, "market-list", 20).await;

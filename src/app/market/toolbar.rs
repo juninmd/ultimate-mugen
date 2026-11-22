@@ -32,6 +32,10 @@ impl App {
         if self.market_chip(x, y, 178.0, &label, self.market_ui.outdated_only, hex("#ff9e3d")) && !modal {
             acts.push(Act::ToggleOutdated);
         }
+        x += 186.0;
+        if self.market_chip(x, y, 150.0, mt("Não instalados"), self.market_ui.missing_only, hex("#2ecc71")) && !modal {
+            acts.push(Act::ToggleMissing);
+        }
         let grid = self.market.state.grid_view;
         let (w, gx) = (76.0, rx + rw - 12.0 - 152.0);
         for (i, (label, is_grid)) in [(mt("Lista"), false), (mt("Grade"), true)].into_iter().enumerate() {

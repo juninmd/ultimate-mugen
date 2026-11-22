@@ -18,7 +18,7 @@ impl App {
             self.market_format_badge(f, x + CARD_W - 70.0, y + 10.0, 60.0, 20.0);
         }
         self.ui.text(&short(&row.name, 22), x + 10.0, y + ART_H + 26.0, 17.0, WHITE, Align::Left, true);
-        self.ui.text(kind_label(row.kind), x + 10.0, y + ART_H + 46.0, 12.0, kind_color(row.kind), Align::Left, true);
+        self.ui.text(&self.market_kind_label(row), x + 10.0, y + ART_H + 46.0, 12.0, kind_color(row.kind), Align::Left, true);
         self.ui.text(&fmt_bytes(row.bytes), x + CARD_W - 10.0, y + ART_H + 46.0, 13.0, hex("#a49cc0"), Align::Right, false);
         let (label, color) = self.market_status(row, downloading);
         self.ui.text(label, x + 10.0, y + ART_H + 66.0, 14.0, color, Align::Left, true);

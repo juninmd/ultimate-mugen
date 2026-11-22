@@ -1,5 +1,7 @@
 use super::*;
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
+use ume_market::packinfo::{PackInfo, Shape};
 use ume_market::view::{display_key, format_of, Filter, Format};
 
 #[derive(Clone)]
@@ -13,6 +15,8 @@ pub(super) struct Row {
     pub installed: Option<bool>,
     pub format: Option<Format>,
     pub outdated: bool,
+    pub listed_kind: Kind,
+    pub info: Option<Arc<PackInfo>>,
 }
 
 impl Row {
@@ -23,7 +27,7 @@ impl Row {
 
 impl App {
     pub(super) fn market_filter(&self) -> Filter {
-        Filter { kind: self.market_ui.filter, format: self.market_ui.format, outdated_only: self.market_ui.outdated_only }
+        Filter { kind: self.market_ui.filter, format: self.market_ui.format, outdated_only: self.market_ui.outdated_only, missing_only: self.market_ui.missing_only }
     }
 
     pub(super) fn market_rows(&mut self) -> Vec<Row> {
@@ -48,6 +52,8 @@ impl App {
                         installed: Some(i.active),
                         format: format_of(i.kind, &i.item_id, &i.name),
                         outdated: outdated.get(&i.repo_key).is_some_and(|set| set.contains(&i.item_id)),
+                        listed_kind: i.kind,
+                        info: None,
                     })
                     .collect()
             }
@@ -73,14 +79,24 @@ impl App {
                         installed: installed.get(i.id.as_str()).copied(),
                         format: format_of(i.kind, &i.id, &i.name),
                         outdated: stale.contains(&i.id),
+                        listed_kind: i.kind,
+                        info: None,
                     })
                     .collect()
             }
         };
+        for row in rows.iter_mut().filter(|r| r.kind == Kind::Pack) {
+            row.info = self.market.pack_info(&row.repo_key, &row.id);
+            row.kind = match row.info.as_ref().map(|i| i.shape()) {
+                Some(Shape::Single(_)) => Kind::Character,
+                Some(Shape::Stages(_)) => Kind::Stage,
+                _ => Kind::Pack,
+            };
+        }
         self.market_ui.outdated_total = rows.iter().filter(|r| r.outdated).count();
         self.market_ui.unfiltered = rows.len();
-        rows.retain(|r| filter.accepts(r.kind, r.format, r.outdated));
-        rows.sort_by_cached_key(|r| display_key(r.kind, &r.name, r.format));
+        rows.retain(|r| filter.accepts(r.kind, r.format, r.outdated, r.installed.is_some()));
+        rows.sort_by_cached_key(|r| display_key(r.listed_kind, &r.name, r.format));
         rows
     }
 }

@@ -401,7 +401,12 @@ impl App {
             pal_pick: 1,
             team_pal: vec![],
             updater: crate::update::Updater::start(&std::env::args().collect::<Vec<_>>()),
-        }; app.boot_mosaic().await; app
+        };
+        #[cfg(not(target_arch = "wasm32"))]
+        if !ume_native::sprite_assets_found("kaito") {
+            eprintln!("native fighter sprites not found: copy assets/chars/sprites next to the executable (or run from the repository root)");
+        }
+        app.boot_mosaic().await; app
     }
 
     /// Re-rasterize art when the effective quality changes (resolution switch, fullscreen, setting change).

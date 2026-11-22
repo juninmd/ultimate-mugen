@@ -5,6 +5,8 @@ pub mod passive_spec;
 pub mod profile;
 mod abilities;
 mod pixel_crop;
+mod sprite_assets;
+mod embedded;
 mod armor;
 mod element;
 mod requires;
@@ -66,5 +68,6 @@ pub use kit_parse::parse_char;
 pub use portrait::select_portrait;
 
 pub use pixel::{audit_native_sprite_frames, native_frame_sprite_key};
+pub use sprite_assets::sprite_assets_found;
 pub use pack_build::encode_pack as encode_sprite_pack;
 pub use pack::{complete as has_full_sprite_pack, contains as has_sprite_pack, insert as insert_sprite_pack, insert_menu as insert_menu_sprite_pack, revision as sprite_pack_revision};

@@ -45,3 +45,7 @@ GL por software é lento: mantenha `--jobs` em 1 ou 2 localmente. Para uma pági
 2. Inclua em `scripts/web-qa.json` com um shard, ou liste em `excluded` com o motivo (rede, ferramenta manual).
 
 `scripts/web-qa.test.mjs` falha quando um `web-*-smoke.js` não está coberto nem excluído, ou quando os shards do manifesto e do `ci.yml` divergem.
+
+## Tour visual
+
+`node scripts/web-tour.js web/dist <saida>` percorre título, menu, todas as telas utilitárias, seleção, cenários, VS, luta e pausa com teclas reais e salva um print numerado por passo (`TOUR_MOBILE=1` usa um celular na horizontal, `TOUR_LANG=pt-BR` define o idioma do navegador). Só falha em panic ou se a luta não começar; os prints servem para revisão e evidência de PR.

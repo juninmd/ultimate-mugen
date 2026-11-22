@@ -3,15 +3,15 @@ use super::{ActiveEgg, EggSprite, EggStyle};
 use crate::gfx::*;
 use crate::ui::{Align, Ui, VH, VW};
 
-pub(crate) fn render_all(ui: &Ui, eggs: &[ActiveEgg]) {
+pub(crate) fn render_all(ui: &Ui, eggs: &[ActiveEgg], ribbon_top: f32) {
     let mut ribbon_slot = 0;
     for egg in eggs {
         match egg.style {
             EggStyle::CornerPop => draw_corner_pop(ui, egg),
-            EggStyle::FloorRoll => draw_floor_roll(ui, egg),
-            EggStyle::Flyby => draw_flyby(ui, egg),
+            EggStyle::FloorRoll => draw_floor_roll(ui, egg, ribbon_top),
+            EggStyle::Flyby => draw_flyby(ui, egg, ribbon_top),
             EggStyle::TopRibbon => {
-                draw_top_ribbon(ui, egg, ribbon_slot);
+                draw_top_ribbon(ui, egg, ribbon_top, ribbon_slot);
                 ribbon_slot += 1;
             }
             EggStyle::SpeechBubble => draw_speech_bubble(ui, egg),
@@ -64,7 +64,7 @@ fn draw_corner_pop(ui: &Ui, egg: &ActiveEgg) {
     draw_sprite(egg.sprite, ui.x(bx), ui.y(by), 144.0 * ui.s, egg.t, alpha, egg.flip, 0.0);
 }
 
-fn draw_floor_roll(ui: &Ui, egg: &ActiveEgg) {
+fn draw_floor_roll(ui: &Ui, egg: &ActiveEgg, ribbon_top: f32) {
     let p = (egg.t / egg.dur).clamp(0.0, 1.0);
     let alpha = envelope(egg.t, egg.dur);
     let vx = if egg.flip { VW + 60.0 - p * (VW + 120.0) } else { -60.0 + p * (VW + 120.0) };
@@ -74,20 +74,20 @@ fn draw_floor_roll(ui: &Ui, egg: &ActiveEgg) {
     let rot = if is_roller { p * 14.0 * if egg.flip { -1.0 } else { 1.0 } } else { 0.0 };
 
     draw_sprite(egg.sprite, ui.x(vx), ui.y(vy), 84.0 * ui.s, egg.t, alpha, egg.flip, rot);
-    draw_top_ribbon(ui, egg, 0);
+    draw_top_ribbon(ui, egg, ribbon_top, 0);
 }
 
-fn draw_flyby(ui: &Ui, egg: &ActiveEgg) {
+fn draw_flyby(ui: &Ui, egg: &ActiveEgg, ribbon_top: f32) {
     let p = (egg.t / egg.dur).clamp(0.0, 1.0);
     let alpha = envelope(egg.t, egg.dur);
     let vx = if egg.flip { VW + 80.0 - p * (VW + 160.0) } else { -80.0 + p * (VW + 160.0) };
     let vy = 210.0 + (p * std::f32::consts::PI * 4.0).sin() * 24.0;
 
     draw_sprite(egg.sprite, ui.x(vx), ui.y(vy), 82.0 * ui.s, egg.t, alpha, egg.flip, 0.0);
-    draw_top_ribbon(ui, egg, 0);
+    draw_top_ribbon(ui, egg, ribbon_top, 0);
 }
 
-fn draw_top_ribbon(ui: &Ui, egg: &ActiveEgg, slot: usize) {
+fn draw_top_ribbon(ui: &Ui, egg: &ActiveEgg, top: f32, slot: usize) {
     let alpha = envelope(egg.t, egg.dur);
     let slide = (1.0 - ease_out_back((egg.t / 0.24).clamp(0.0, 1.0))) * -48.0;
     let tw = ui.measure(&egg.title, 20.0, true).max(ui.measure(&egg.sub, 13.0, false));
@@ -95,7 +95,7 @@ fn draw_top_ribbon(ui: &Ui, egg: &ActiveEgg, slot: usize) {
     let w = (tw + if has_icon { 92.0 } else { 44.0 }).max(240.0);
     let h = 50.0;
     let x = VW * 0.5 - w * 0.5;
-    let y = 116.0 + slot as f32 * 58.0 + slide;
+    let y = top + slot as f32 * 58.0 + slide;
     let accent = Color::new(egg.color[0], egg.color[1], egg.color[2], alpha);
 
     ui.rect(x, y, w, h, Color::new(0.06, 0.05, 0.12, 0.86 * alpha));

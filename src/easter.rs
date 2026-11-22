@@ -34,10 +34,10 @@ pub fn tick(m: &Match, stage_name: &str, audio: &mut Audio) {
     });
 }
 
-pub fn draw(ui: &Ui, dt: f32) {
+pub fn draw(ui: &Ui, dt: f32, ribbon_top: f32) {
     TRACKER.with(|cell| {
         let mut tracker = cell.borrow_mut();
         tracker.advance(dt);
-        draw::render_all(ui, &tracker.active);
+        draw::render_all(ui, &tracker.active, ribbon_top);
     });
 }

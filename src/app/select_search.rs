@@ -45,6 +45,7 @@ impl App {
         [&e.name, &e.id, &e.author, &e.series]
             .iter()
             .any(|field| field.to_lowercase().contains(&q))
+            || crate::profile::of(e).is_some_and(|p| crate::profile::matches_query(p, &q))
     }
 
     pub(crate) fn search_label(&self) -> String {

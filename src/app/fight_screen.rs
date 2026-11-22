@@ -78,6 +78,7 @@ impl App {
         let framing = if replaying { ume_engine::replay_camera::frame(&mut s.m) } else { None };
         crate::power_arena::dock_above_touch_pad(self.c.touch.enabled); s.draw(&mut self.g, &self.ui);
         if !s.paused { crate::easter::draw(&self.ui, dt, s.vfx.below_banners(if self.c.touch.enabled { 146.0 } else { 116.0 })); }
+        let paused_now = s.paused;
         if let Some(saved) = framing {
             ume_engine::replay_camera::unframe(&mut s.m, saved);
         }
@@ -92,7 +93,7 @@ impl App {
             self.story_hud();
         }
         self.c.touch.draw();
-        if self.c.touch.enabled {
+        if self.c.touch.enabled && !paused_now {
             self.ui.rect(pb.0, pb.1, pb.2, pb.3, Color::new(0.08, 0.04, 0.16, 0.8));
             self.ui.rect_lines(pb.0, pb.1, pb.2, pb.3, 2.0, Color::new(1.0, 0.8, 0.2, 0.9));
             self.ui.text(

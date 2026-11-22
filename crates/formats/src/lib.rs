@@ -20,6 +20,7 @@ pub mod air;
 pub mod fnt;
 pub mod health;
 pub mod ini;
+pub mod lz4_sprite;
 pub mod num;
 pub mod par;
 pub mod pcx;
@@ -30,6 +31,7 @@ pub mod sff;
 pub mod screenpack;
 pub mod snd;
 pub mod stage;
+pub mod umsff;
 pub mod vfs;
 
 pub const MAX_IMAGE_PIXELS: u64 = 1 << 26;

@@ -108,6 +108,9 @@ pub fn decode_sff_only(
     buf: &[u8],
     wanted: impl Fn(i32, i32) -> bool,
 ) -> Result<DecodedSff, String> {
+    if crate::umsff::is_umsff(buf) {
+        return crate::umsff::decode_umsff(buf, wanted);
+    }
     if buf.len() < SIGNATURE.len() || &buf[..12] != SIGNATURE {
         return Err("SFF: invalid signature (expected ElecbyteSpr)".into());
     }

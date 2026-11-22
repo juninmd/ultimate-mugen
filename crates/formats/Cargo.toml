@@ -10,4 +10,5 @@ name = "ume_formats"
 path = "src/lib.rs"
 
 [dependencies]
+lz4_flex = { version = "0.14", default-features = false, features = ["std", "safe-encode", "safe-decode"] }
 miniz_oxide = "0.9"

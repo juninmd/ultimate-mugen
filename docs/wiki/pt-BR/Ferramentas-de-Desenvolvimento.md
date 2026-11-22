@@ -6,7 +6,8 @@ As ferramentas de build e auditoria do repositório são binários Rust, não sc
 
 | Comando | Substitui | O que faz |
 |---|---|---|
-| `ume-tools pack-sprites [out] [--sprites dir]` | `scripts/pack_sprites.py` | Empacota `assets/chars/sprites/<id>/` em `<out>/assets/chars/sprites/<id>.pack` para o build web (limite de 768 px, 256 cores, âncoras do `meta.json` reescaladas, em paralelo). Chamado por `scripts/build-web.sh` |
+| `ume-tools pack-sprites [out] [--sprites dir]` | `scripts/pack_sprites.py` | Empacota `assets/chars/sprites/<id>/` em `<out>/assets/chars/sprites/<id>.pack` para o build web (limite de 768 px, 256 cores em sprites LZ4, âncoras do `meta.json` reescaladas, em paralelo). Chamado por `scripts/build-web.sh` |
+| `ume-tools cook-sff <in.sff> <out.sff>` | - | Reempacota um `.sff` como `UMSF` LZ4 e falha se algum sprite decodificar diferente. Veja [Container de Sprites](Container-de-Sprites.md) |
 | `ume-tools stage-thumbs [stages]` | `scripts/generate-stage-thumbnails.py` | Grava miniaturas 240x135 (Lanczos) em `<stages>/thumbs` |
 | `ume-tools audit-moves [dir] [--json]` | `scripts/audit_native_moves.py` | Auditoria estática do elenco: inputs, cancels, throws, hit boxes |
 | `ume-tools audit-sprites --out report.json` | `scripts/audit_native_sprites.py` | Inventário de PNGs por arquivo com limites alfa |

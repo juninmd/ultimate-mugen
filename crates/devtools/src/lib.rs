@@ -4,6 +4,7 @@ pub mod story_npcs;
 pub mod audit_moves;
 pub mod audit_sprites;
 pub mod pack;
+pub mod sff_cook;
 pub mod thumbnails;
 pub mod ability_reel;
 pub mod reel_font;

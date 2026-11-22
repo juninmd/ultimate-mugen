@@ -1,6 +1,6 @@
 use super::quantize::quantize;
 use super::resize::{lanczos_resize, Image};
-use ume_charforge::spritekit::encode_palette_png;
+use ume_formats::lz4_sprite::encode_indexed;
 use ume_formats::png::{decode_png, png_indexed_to_rgba};
 
 pub const MAX_EDGE: usize = 768;
@@ -22,5 +22,6 @@ pub fn encode_sprite(name: &str, data: &[u8]) -> Result<(Vec<u8>, f64), String> 
         image = lanczos_resize(&image, width, height);
     }
     let (palette, indices) = quantize(&image.rgba, COLORS);
-    Ok((encode_palette_png(image.width, image.height, &indices, &palette, 9), scale))
+    let flat: Vec<u8> = palette.iter().flatten().copied().collect();
+    Ok((encode_indexed(image.width as u32, image.height as u32, &indices, &flat).map_err(|e| format!("{name}: {e}"))?, scale))
 }

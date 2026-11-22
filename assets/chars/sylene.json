@@ -12,7 +12,7 @@
   "intro": "Mostre-me quanto tempo você dura no gelo.",
   "taunt": "Tão quente... eu resolvo isso.",
   "form": "Rainha do Inverno",
-  "stats": {"life":940,"power":3000,"attack":132,"defense":94,"walk":[3.72,2.1],"run":[6.16,4.4],"jump":[-8.6,-2.5,0,2.6],"height":100,"width":[14,14]},
+  "stats": {"life":940,"power":3000,"attack":132,"defense":94,"walk":[3.72,2.1],"run":[6.16,4.4],"jump":[-8.6,-2.5,0,2.6],"height":100,"width":[14,14],"airDashes":1},
   "art": {
     "type": "sprites",
     "style": {
@@ -1288,7 +1288,8 @@
       "sounds": [{"at":1,"snd":[200,4]}],
       "shake": {"at":2,"time":18,"ampl":5,"freq":75},
       "flash": {"at":1,"time":12,"color":[12,26,38],"under":true,"superMove":true},
-      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[175,235,255]}
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[175,235,255]},
+      "timestop": 18
     },
     {"id":"overhead","name":"Frost Hammer","input":"x+b","kind":"normal","anim":"hkick","hits":[{"at":3,"damage":68.4,"level":"medium","guard":"high","hitstun":20}],"sounds":[{"at":1,"snd":[200,1]}]},
     {

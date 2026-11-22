@@ -6,6 +6,7 @@ pub mod profile;
 mod abilities;
 mod pixel_crop;
 mod sprite_assets;
+mod embedded;
 mod armor;
 mod element;
 mod requires;

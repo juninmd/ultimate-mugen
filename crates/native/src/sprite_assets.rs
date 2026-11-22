@@ -1,7 +1,7 @@
 use super::pixel::sprite_roots;
 
 pub fn sprite_assets_found(id: &str) -> bool {
-    sprite_roots(id).iter().any(|root| root.is_dir())
+    super::embedded::has(id) || sprite_roots(id).iter().any(|root| root.is_dir())
 }
 
 #[cfg(test)]

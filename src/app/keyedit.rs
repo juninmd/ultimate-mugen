@@ -16,15 +16,7 @@ impl App {
             return;
         };
         crate::screen_art::ScreenArt::Workshop.background(&self.ui);
-        self.ui.text(
-            crate::i18n::tr3("TECLADO · PERSONALIZAR", "KEYBOARD · CUSTOMIZE", "TECLADO · PERSONALIZAR"),
-            40.0,
-            56.0,
-            30.0,
-            hex("#ffcc33"),
-            Align::Left,
-            true,
-        );
+        self.ui.adapted_title(40.0, 56.0, crate::i18n::tr3("TECLADO · PERSONALIZAR", "KEYBOARD · CUSTOMIZE", "TECLADO · PERSONALIZAR"));
         let n = ACTIONS.len();
         let mut close = false;
         if ed.waiting {
@@ -68,6 +60,8 @@ impl App {
         }
         for slot in 0..2 {
             let x = 40.0 + slot as f32 * 620.0;
+            let accent = hex(if slot == 0 { "#22e8ff" } else { "#ff4d6d" });
+            self.ui.adapted_glass(x - 16.0, 86.0, 596.0, 584.0, accent, if ed.slot == slot { 1.0 } else { 0.7 });
             self.ui.text(
                 &format!("{} {}", crate::i18n::tr3("Jogador", "Player", "Jugador"), slot + 1),
                 x,
@@ -88,13 +82,8 @@ impl App {
                     while get_last_key_pressed().is_some() {}
                 }
                 if sel {
-                    self.ui.rect(
-                        x - 6.0,
-                        y,
-                        572.0,
-                        30.0,
-                        Color::new(1.0, 0.8, 0.2, if ed.waiting { 0.35 } else { 0.18 }),
-                    );
+                    self.ui.adapted_row(x - 6.0, y + 2.0, 572.0, 28.0, true);
+                    self.ui.rect(x - 6.0, y + 2.0, 4.0, 28.0, if ed.waiting { hex("#ffcc33") } else { accent });
                 }
                 let kc = self.c.keys.slots[slot][i];
                 let shown = if sel && ed.waiting {

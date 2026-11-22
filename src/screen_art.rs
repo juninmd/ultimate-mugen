@@ -3,21 +3,42 @@ use std::sync::Arc;
 use crate::gfx::*;
 use crate::ui::{Ui, VH, VW};
 
+#[cfg(not(target_arch = "wasm32"))]
+macro_rules! deferred {
+    ($file:literal) => {
+        decode(include_bytes!(concat!("../assets/ui/", $file)))
+    };
+}
+
+#[cfg(target_arch = "wasm32")]
+macro_rules! deferred {
+    ($file:literal) => {
+        None
+    };
+}
+
 thread_local! {
     static MENU: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-menu.png"));
     static LOADING: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-loading.png"));
-    static SELECT: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-select.png"));
-    static VERSUS: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-versus.png"));
-    static RECORDS: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-records.png"));
-    static RESULTS: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-results.png"));
-    static MARKET: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-market.png"));
-    static ARCHIVE: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-archive.png"));
-    static WORKSHOP: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-workshop.png"));
-    static LAB: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-lab.png"));
-    static STORY: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-story.png"));
-    static TOWER: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-tower.png"));
-    static CUTSCENE: Option<Texture2D> = decode(include_bytes!("../assets/ui/arcade-cutscene.png"));
+    static SELECT: Option<Texture2D> = deferred!("arcade-select.png");
+    static VERSUS: Option<Texture2D> = deferred!("arcade-versus.png");
+    static RECORDS: Option<Texture2D> = deferred!("arcade-records.png");
+    static RESULTS: Option<Texture2D> = deferred!("arcade-results.png");
+    static MARKET: Option<Texture2D> = deferred!("arcade-market.png");
+    static ARCHIVE: Option<Texture2D> = deferred!("arcade-archive.png");
+    static WORKSHOP: Option<Texture2D> = deferred!("arcade-workshop.png");
+    static LAB: Option<Texture2D> = deferred!("arcade-lab.png");
+    static STORY: Option<Texture2D> = deferred!("arcade-story.png");
+    static TOWER: Option<Texture2D> = deferred!("arcade-tower.png");
+    static CUTSCENE: Option<Texture2D> = deferred!("arcade-cutscene.png");
 }
+
+#[cfg(target_arch = "wasm32")]
+const DEFERRED: [&str; 11] = [
+    "arcade-select.png", "arcade-versus.png", "arcade-results.png", "arcade-records.png",
+    "arcade-market.png", "arcade-archive.png", "arcade-workshop.png", "arcade-lab.png",
+    "arcade-story.png", "arcade-tower.png", "arcade-cutscene.png",
+];
 
 #[derive(Clone, Copy)]
 pub(crate) enum ScreenArt {
@@ -50,6 +71,7 @@ fn decode(data: &[u8]) -> Option<Texture2D> {
 
 impl ScreenArt {
     pub(crate) fn draw(self, ui: &Ui, opacity: f32) -> bool {
+        self.warm();
         let texture = match self {
             Self::Menu => &MENU,
             Self::Loading => &LOADING,
@@ -65,10 +87,14 @@ impl ScreenArt {
             Self::Tower => &TOWER,
             Self::Cutscene => &CUTSCENE,
         };
-        texture.with(|texture| {
-            let Some(texture) = texture else {
-                return false;
-            };
+        let Some(texture) = texture.with(|texture| texture.clone()).or_else(|| self.fetched()) else {
+            return false;
+        };
+        self.paint(ui, opacity, &texture)
+    }
+
+    fn paint(self, ui: &Ui, opacity: f32, texture: &Texture2D) -> bool {
+        {
             let color = match self {
                 Self::Menu => Color::new(0.68, 0.67, 0.76, opacity),
                 Self::Loading
@@ -112,7 +138,41 @@ impl ScreenArt {
                 },
             );
             true
-        })
+        }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn fetched(self) -> Option<Texture2D> {
+        let file = match self {
+            Self::Select => "arcade-select.png",
+            Self::Versus => "arcade-versus.png",
+            Self::Results => "arcade-results.png",
+            Self::Records => "arcade-records.png",
+            Self::Market => "arcade-market.png",
+            Self::Archive => "arcade-archive.png",
+            Self::Workshop => "arcade-workshop.png",
+            Self::Lab => "arcade-lab.png",
+            Self::Story => "arcade-story.png",
+            Self::Tower => "arcade-tower.png",
+            Self::Cutscene => "arcade-cutscene.png",
+            Self::Menu | Self::Loading => return None,
+        };
+        crate::screen_art_fetch::get(file, decode)
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn warm(self) {
+        if matches!(self, Self::Menu) {
+            crate::screen_art_fetch::warm(&DEFERRED, decode);
+        }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    fn warm(self) {}
+
+    #[cfg(not(target_arch = "wasm32"))]
+    fn fetched(self) -> Option<Texture2D> {
+        None
     }
 
     pub(crate) fn background(self, ui: &Ui) {

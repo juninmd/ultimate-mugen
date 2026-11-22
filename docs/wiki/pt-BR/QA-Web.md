@@ -48,4 +48,4 @@ GL por software é lento: mantenha `--jobs` em 1 ou 2 localmente. Para uma pági
 
 ## Tour visual
 
-`node scripts/web-tour.js web/dist <saida>` percorre título, menu, todas as telas utilitárias, seleção, cenários, VS, luta e pausa com teclas reais e salva um print numerado por passo (`TOUR_MOBILE=1` usa um celular na horizontal, `TOUR_LANG=pt-BR` define o idioma do navegador). Só falha em panic ou se a luta não começar; os prints servem para revisão e evidência de PR.
+`node scripts/web-tour.js web/dist <saida>` percorre título, menu, todas as telas utilitárias, seleção, cenários, VS, luta e pausa com teclas reais e salva um print numerado por passo (`TOUR_MOBILE=1` usa um celular na horizontal, `TOUR_LANG=pt-BR` define o idioma do navegador). Falha em panic, erro de navegação ou do navegador, ou se a luta não começar; os prints servem para revisão e evidência de PR.

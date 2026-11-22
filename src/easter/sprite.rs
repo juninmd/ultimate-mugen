@@ -2,7 +2,7 @@ use crate::gfx::*;
 use std::cell::OnceCell;
 use ume_formats::png::decode_png;
 
-pub(crate) const SPRITE_COUNT: usize = 16;
+pub(crate) const SPRITE_COUNT: usize = 19;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum EggSprite {
@@ -23,6 +23,9 @@ pub(crate) enum EggSprite {
     RamenBowl,
     CrossedBlades,
     EclipseMoon,
+    SakuraPetals,
+    HollowMask,
+    ReiatsuBadge,
 }
 
 pub(crate) struct SpriteSpec {
@@ -48,6 +51,9 @@ const PARROT_PNG: &[u8] = include_bytes!("../../assets/easter/pirate_parrot.png"
 const RAMEN_PNG: &[u8] = include_bytes!("../../assets/easter/ramen_bowl.png");
 const BLADES_PNG: &[u8] = include_bytes!("../../assets/easter/crossed_blades.png");
 const ECLIPSE_PNG: &[u8] = include_bytes!("../../assets/easter/eclipse_moon.png");
+const SAKURA_PNG: &[u8] = include_bytes!("../../assets/easter/sakura_petals.png");
+const HOLLOW_PNG: &[u8] = include_bytes!("../../assets/easter/hollow_mask.png");
+const REIATSU_PNG: &[u8] = include_bytes!("../../assets/easter/reiatsu_badge.png");
 
 impl EggSprite {
     pub(crate) fn index(self) -> Option<usize> {
@@ -69,6 +75,9 @@ impl EggSprite {
             EggSprite::RamenBowl => Some(13),
             EggSprite::CrossedBlades => Some(14),
             EggSprite::EclipseMoon => Some(15),
+            EggSprite::SakuraPetals => Some(16),
+            EggSprite::HollowMask => Some(17),
+            EggSprite::ReiatsuBadge => Some(18),
         }
     }
 
@@ -91,6 +100,9 @@ impl EggSprite {
             EggSprite::RamenBowl => Some(SpriteSpec { png: RAMEN_PNG, cell: (32.0, 32.0), frames: 2, fps: 4.0 }),
             EggSprite::CrossedBlades => Some(SpriteSpec { png: BLADES_PNG, cell: (32.0, 32.0), frames: 2, fps: 6.0 }),
             EggSprite::EclipseMoon => Some(SpriteSpec { png: ECLIPSE_PNG, cell: (32.0, 32.0), frames: 2, fps: 4.0 }),
+            EggSprite::SakuraPetals => Some(SpriteSpec { png: SAKURA_PNG, cell: (32.0, 32.0), frames: 2, fps: 6.0 }),
+            EggSprite::HollowMask => Some(SpriteSpec { png: HOLLOW_PNG, cell: (32.0, 32.0), frames: 2, fps: 5.0 }),
+            EggSprite::ReiatsuBadge => Some(SpriteSpec { png: REIATSU_PNG, cell: (32.0, 32.0), frames: 2, fps: 6.0 }),
         }
     }
 }

@@ -114,3 +114,11 @@ Seções suportadas:
 
 ## Diálogos em Duas Partes (`[[exchange]]`) e Provocações de Todo o Elenco
 `assets/interactions.toml` também suporta diálogos de ida e volta `[[exchange]]` (o lutador A fala e o lutador B responde automaticamente após `delay_ticks`), além dos gatilhos `first_attack`, `transform` e `round_win` e falas dedicadas de provocação (`taunt`) para todos os 16 lutadores jogáveis.
+
+## Referências a Bleach (`assets/interactions.toml`)
+Conectadas diretamente aos lutadores nativos com kits inspirados em Bleach ([Kits inspirados em Bleach](Kits-Inspirados-em-Bleach.md)), além do Oboro e de personagens de Bleach importados do M.U.G.E.N, com 3 sprites pixel-art inéditos (`sakura_petals.png`, `hollow_mask.png`, `reiatsu_badge.png`) e 2 SFX sintetizados (`easter_bankai`, `easter_shunpo`):
+- **Kaname (estilo Byakuya)**: *Disperse-se! Mil Pétalas!* (`super`), *Liberação Final — Bankai!* (`transform`), ressonância no *Portão dos Espíritos* e diálogo de *Shunpo* contra Suzume.
+- **Shion (estilo Zaraki)**: *"Agora vou usar as duas mãos!"* (`low_hp <= 45%`), *Pressão Espiritual no Máximo!* (`super`) e diálogo *Reiatsu vs Ilusão* contra Oboro.
+- **Suzume (estilo Yoruichi)**: *Shunpo!* (`first_attack`) e *Shunko — Relâmpago Veloz!* (`transform`).
+- **Oboro (estilo Aizen)**: *Tudo conforme o plano — Desde quando achou que não era uma ilusão?* (`super`).
+- **Personagens de Bleach importados do M.U.G.E.N**: reações automáticas para `ichigo*` (*Bankai — Getsuga Tensho!*) e `aizen*` (*Kyoka Suigetsu!*).

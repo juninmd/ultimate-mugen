@@ -111,6 +111,8 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     if let Some(v) = s.air_jumps { set("movement.airjump.num", v); } if let Some(v) = s.air_dashes { set("movement.airdash.num", v); }
     if let Some(v) = s.height { set("size.height", v); }
     if let Some(w) = s.width { set("size.ground.front", w[0]); set("size.ground.back", w[1]); }
+    if let Some(v) = s.guard_max { set("data.guardpoints", v); } if let Some(v) = s.dizzy_max { set("data.dizzypoints", v); }
+    if let Some(v) = s.weight { set("movement.weight", v); } if let Some(v) = s.chip_defense { set("data.chip.defence", v); }
 
     let mut commands = vec![
         parse_command("holdfwd", "/$F", 1, 1), parse_command("holdback", "/$B", 1, 1), parse_command("holdup", "/$U", 1, 1), parse_command("holddown", "/$D", 1, 1),
@@ -219,6 +221,7 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
     d.color = [(cv >> 16) as u8, (cv >> 8) as u8, cv as u8]; d.series = nc.series.clone(); d.element = nc.element; d.description = nc.description.clone().unwrap_or_default();
     d.intro = nc.intro.clone().unwrap_or_default(); d.taunt = nc.taunt.clone().unwrap_or_default(); d.win_quote = nc.win_quote.clone().unwrap_or_default();
     d.form_name = nc.form.clone().unwrap_or_default(); d.forms = super::forms::build_forms(nc, pal_no, with_images); d.boss = nc.boss; d.passives = nc.passives.as_ref().map(|p| p.rules()).unwrap_or_default(); d.rivals = ume_engine::rivals::Rivals::new(&nc.id, &nc.rivals); extras::insert_voices(&mut d, nc);
+    if let Some(p) = &nc.profile { d.element = d.element.or_else(|| p.element.as_deref().and_then(ume_engine::element::Element::parse)); d.weakness = p.weakness.as_deref().and_then(ume_engine::element::Element::parse); }
     d
 }
 

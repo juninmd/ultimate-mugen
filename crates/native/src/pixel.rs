@@ -94,12 +94,12 @@ pub fn audit_native_sprite_frames(character: &NativeChar) -> Value {
 fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool, recolor: Option<&Recolor>) -> Option<FrameArt> {
     let bytes = read_sprite(root, &format!("{name}.png"))?;
     let dec = super::decode_cache::png(root, name, &bytes)?;
-    let mut rgba = match &dec.rgba { Some(rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&dec) };
+    let mut rgba = dec.rgba.clone();
     let res = art_res().max(0.1);
     let meta = read_sprite(root, "meta.json").map_or_else(|| Arc::new(Value::Null), |bytes| super::decode_cache::meta(root, &bytes));
     let frame = meta.get("frames").and_then(|frames| frames.get(name)).unwrap_or(&Value::Null);
     let hair_region = frame.get("awakeningHair").and_then(|value| serde_json::from_value::<[u32; 4]>(value.clone()).ok());
-    if let Some(recolor) = recolor { recolor.apply_in_region(&mut rgba, dec.width, hair_region); }
+    if let Some(recolor) = recolor { recolor.apply_in_region(Arc::make_mut(&mut rgba).as_mut_slice(), dec.width, hair_region); }
     let positive = |value: Option<&Value>| value.and_then(Value::as_f64).filter(|number| number.is_finite() && *number > 0.0 && *number <= f32::MAX as f64).map(|number| number as f32);
     let units = positive(frame.get("refHeight")).or_else(|| positive(meta.get("refHeight"))).unwrap_or(dec.height as f32).max(1.0);
     let axis = |key: &str, default: f32, limit: f32| frame.get(key).and_then(Value::as_f64).filter(|number| number.is_finite() && *number >= 0.0 && *number <= limit as f64).map_or(default, |number| number as f32);

@@ -1423,5 +1423,6 @@
     "weakness": "lightning",
     "alignment": "hero",
     "tags": ["rushdown","shinobi","super-speed","aerial"]
-  }
+  },
+  "helpers": {"clones":{"name":"Kazaguruma Wind Clone","input":"~D, DB, B, y+b","cost":500,"count":1,"maxActive":2,"duration":260,"walkSpeed":3.6,"attackRange":68,"oneHitPoof":true}}
 }

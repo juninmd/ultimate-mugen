@@ -14,6 +14,8 @@ pub const KINDS: &[(&str, u32)] = &[
     ("easter_parrot", 1),
     ("easter_wonder", 1),
     ("easter_banter", 1),
+    ("easter_bankai", 1),
+    ("easter_shunpo", 1),
 ];
 
 fn sec(s: f32) -> usize {
@@ -158,6 +160,17 @@ pub fn render(kind: &str) -> Vec<f32> {
         "easter_banter" => {
             sweep(&mut out, 0.0, 480.0, 960.0, 0.07, 0.24, 1);
             sweep(&mut out, 0.07, 880.0, 1174.66, 0.16, 0.22, 0);
+        }
+        "easter_bankai" => {
+            sweep(&mut out, 0.0, 160.0, 52.0, 0.62, 0.34, 2);
+            sweep(&mut out, 0.04, 880.0, 1760.0, 0.32, 0.16, 0);
+            noise_puff(&mut out, 0.0, 0.36, 0.24, 0xB44C_4100);
+            echo(&mut out, 0.11, 0.38);
+        }
+        "easter_shunpo" => {
+            sweep(&mut out, 0.0, 1900.0, 420.0, 0.11, 0.24, 1);
+            sweep(&mut out, 0.05, 620.0, 2600.0, 0.14, 0.22, 0);
+            noise_puff(&mut out, 0.0, 0.14, 0.28, 0x5404_9000);
         }
         _ => return Vec::new(),
     }

@@ -1,5 +1,6 @@
 mod boot;
 mod fight;
+mod flow;
 mod modes;
 mod screens;
 
@@ -30,4 +31,7 @@ pub const ALL: &[Feature] = &[
     feature!("training", "Training mode", modes::training),
     feature!("team_5v5", "Team 5v5", modes::team),
     feature!("story", "Story mode", modes::story),
+    feature!("versus_flow", "Versus screen to fight", flow::versus),
+    feature!("arena_flow", "Power Arena from versus screen", flow::arena),
+    feature!("team7_flow", "Team 7v7 from versus screen", flow::team7),
 ];

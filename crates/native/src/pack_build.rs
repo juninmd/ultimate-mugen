@@ -31,4 +31,13 @@ mod tests {
         let pack = SpritePack::parse(&bytes).unwrap();
         assert_eq!(pack.character, "hero");
     }
+
+    #[test]
+    fn full_size_fighters_above_sixteen_mib_still_load() {
+        let big = vec![7u8; 21 << 20];
+        let bytes = encode_pack("goku_sized", &[("a.png".to_string(), big)]).unwrap();
+        assert!(SpritePack::parse(&bytes).is_ok());
+        let hostile = vec![0u8; crate::pack::MAX_PACK_BYTES + 1];
+        assert!(SpritePack::parse(&hostile).is_err());
+    }
 }

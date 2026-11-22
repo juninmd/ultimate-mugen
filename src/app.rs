@@ -486,6 +486,7 @@ impl App {
             }
         }
         self.updater.poll(); self.menu_bgm_tick().await;
+        self.back_chip_input();
         match &mut self.screen {
             Screen::Title => self.title(),
             Screen::Menu { .. } => self.menu(),
@@ -506,6 +507,7 @@ impl App {
             Screen::PlayerCard { .. } => self.player_card_screen(),
             Screen::Cutscene { .. } => self.cutscene(),
         }
+        self.back_chip_draw();
         self.c.nav.draw(self.c.touch.enabled);
         crate::e2e::publish(self);
         if is_key_pressed(KeyCode::F11) {

@@ -434,8 +434,8 @@ impl App {
         if let Some(first) = self.replay_problems.first() {
             self.ui.text(
                 &format!("{} {}: {first}", self.replay_problems.len(), crate::i18n::tr3("replay(s) ilegível(is)", "unreadable replay(s)", "repetición(es) ilegible(s)")),
-                60.0,
-                686.0,
+                156.0,
+                652.0,
                 15.0,
                 hex("#ff9e6d"),
                 Align::Left,
@@ -447,25 +447,24 @@ impl App {
             (crate::i18n::t("replays.rename"), "R"),
             (crate::i18n::t("replays.delete"), "Del"),
             (crate::i18n::t("replays.sort"), "S"),
-            (crate::i18n::t("replays.back"), "Esc"),
         ];
         let mut action = None;
         for (i, (label, key)) in buttons.iter().enumerate() {
-            let x = 60.0 + i as f32 * 236.0;
-            let hover = self.hover_rect(x, 668.0, 220.0, 44.0);
-            self.ui.adapted_plate(x, 668.0, 220.0, 44.0, hover.then(|| crate::tweaks::accent(0.9)));
+            let x = 156.0 + i as f32 * 216.0;
+            let hover = self.hover_rect(x, 668.0, 200.0, 44.0);
+            self.ui.adapted_plate(x, 668.0, 200.0, 44.0, hover.then(|| crate::tweaks::accent(0.9)));
             self.ui
-                .text(label, x + 110.0, 690.0, 17.0, WHITE, Align::Center, true);
+                .text(label, x + 100.0, 690.0, 17.0, WHITE, Align::Center, true);
             self.ui.text(
                 key,
-                x + 110.0,
+                x + 100.0,
                 707.0,
                 13.0,
                 Color::new(1.0, 1.0, 1.0, 0.78),
                 Align::Center,
                 false,
             );
-            if self.clicked_rect(x, 668.0, 220.0, 44.0) {
+            if self.clicked_rect(x, 668.0, 200.0, 44.0) {
                 action = Some(i);
             }
         }

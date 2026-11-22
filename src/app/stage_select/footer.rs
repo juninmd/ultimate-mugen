@@ -30,7 +30,7 @@ impl App {
             tr("buscar", "search", "buscar"),
         );
         self.ui
-            .text(&text, 40.0, 700.0, 15.0, hex("#a79fc4"), Align::Left, false);
+            .text(&text, 156.0, 700.0, 15.0, hex("#a79fc4"), Align::Left, false);
         if n == 1 {
             let msg = tr(
                 "Nenhum cenário encontrado",

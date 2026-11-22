@@ -179,11 +179,7 @@ impl App {
             self.ui.text(badge, rx + rw - 34.0, y + 58.0, 14.0, if active { accent } else { hex("#a49cc0") }, Align::Right, active);
         }
 
-        let back = self.clicked_rect(56.0, 668.0, 150.0, 40.0);
-        let back_hot = self.hover_rect(56.0, 668.0, 150.0, 40.0);
-        self.ui.adapted_button(56.0, 668.0, 150.0, 40.0, tr3("Voltar", "Back", "Volver"), back_hot);
-
-        if back || self.c.pressed(nav::BACK) || is_key_pressed(KeyCode::Escape) {
+        if self.c.pressed(nav::BACK) || is_key_pressed(KeyCode::Escape) {
             self.tower_quit();
             return;
         }

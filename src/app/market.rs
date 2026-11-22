@@ -851,12 +851,7 @@ impl App {
             x += w + 8.0;
         }
         self.market_links(rows.get(self.market_ui.cur).map(|r| (r.repo_key.clone(), r.id.clone())), modal);
-        self.ui.adapted_plate(40.0, by, 330.0, 48.0, Some(crate::tweaks::accent(0.9)));
-        self.ui.text(mt("Voltar"), 205.0, by + 32.0, 26.0, WHITE, Align::Center, true);
-        if self.clicked_rect(40.0, by, 330.0, 48.0) && !modal {
-            acts.push(Act::Back);
-        }
-        self.ui.text(mt("U adicionar · T token · Tab explorar/instalados · F filtro · Espaço marca · Enter/Start aplica"), 40.0, 702.0, 15.0, hex("#a79fc4"), Align::Left, false);
+        self.ui.text(mt("U adicionar · T token · Tab explorar/instalados · F filtro · Espaço marca · Enter/Start aplica"), 156.0, 702.0, 15.0, hex("#a79fc4"), Align::Left, false);
 
         self.market_entry_modal();
         if !modal {

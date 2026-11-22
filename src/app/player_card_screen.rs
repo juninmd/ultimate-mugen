@@ -11,9 +11,9 @@ const TAB_Y: f32 = 130.0;
 const TAB_W: f32 = 220.0;
 const TAB_H: f32 = 44.0;
 const TAB_STEP: f32 = 236.0;
-pub(super) const EDIT_X: f32 = 60.0;
+pub(super) const EDIT_X: f32 = 156.0;
 pub(super) const EDIT_Y: f32 = 652.0;
-pub(super) const EDIT_W: f32 = 380.0;
+pub(super) const EDIT_W: f32 = 300.0;
 pub(super) const EDIT_H: f32 = 36.0;
 const MENU_INDEX: usize = 9;
 

@@ -162,16 +162,7 @@ impl App {
             self.adjust_touch(cur - 1, step);
             self.audio.sfx("select");
         }
-        let back = self.clicked_rect(56.0, 668.0, 150.0, 40.0) || self.c.pressed(nav::BACK);
-        let hot = self.hover_rect(56.0, 668.0, 150.0, 40.0);
-        self.ui.adapted_button(
-            56.0,
-            668.0,
-            150.0,
-            40.0,
-            tr3("Voltar", "Back", "Volver"),
-            hot,
-        );
+        let back = self.c.pressed(nav::BACK);
         let note = if from_fight {
             tr3(
                 "As alterações aparecem na luta atual",

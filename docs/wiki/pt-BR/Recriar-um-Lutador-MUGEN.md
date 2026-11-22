@@ -4,7 +4,7 @@ Receita usada na reconstrução do Captain Marlow Reyes, baseada na [dissecaçã
 
 ## Passos
 
-1. Dissecar o pacote: `python3 tools/mugen2umf inspect <pasta>` para arquivos, comandos, estados e controllers, e `... hitdefs <arquivo.cns>` para a tabela de normais.
+1. Dissecar o pacote: `cargo run --release -p mugen2umf -- inspect <pasta-ou-zip>` para arquivos, comandos, estados e controllers, e `... hitdefs <pasta-ou-zip>` para todas as HitDefs.
 2. Listar as features, não o código: normais e cadeias, um projétil por botão, anti-aéreo, agarrão, contra-ataque, teleporte, helper ou clone, forma, supers.
 3. Escolher os frames: só poses com PNG em `assets/chars/sprites/<id>/`. Um frame dado como pose de juntas inline é arte procedural e não é permitido nas anims.
 4. Escrever as anims como `{pose, ticks, hit?}` com os ticks da tabela da dissecação e depois os golpes. `at` é o frame (base 1) que carrega o acerto, projétil ou velocidade.

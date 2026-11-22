@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 pub mod duel;
 pub mod gogeta;
-pub mod parity;
 pub mod render;
 use std::collections::HashMap;
 use std::sync::Arc;

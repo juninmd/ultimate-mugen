@@ -35,6 +35,7 @@
     "bossRules": { "$ref": "#/$defs/bossRules" },
     "ui": { "$ref": "#/$defs/bossRules" },
     "scripts": { "$ref": "#/$defs/scripts" },
+    "mugen": { "$ref": "#/$defs/mugen" },
     "art": { "$ref": "#/$defs/art" },
     "palettes": { "type": "array", "items": { "$ref": "#/$defs/palette" } },
     "awakeningPalette": { "$ref": "#/$defs/palette" },
@@ -224,11 +225,53 @@
       },
       "additionalProperties": false
     },
+    "mugenFile": {
+      "type": "object",
+      "required": ["name", "text"],
+      "properties": { "name": { "type": "string" }, "text": { "type": "string" } },
+      "additionalProperties": false
+    },
+    "mugenFrame": {
+      "type": "object",
+      "required": ["g", "i", "t"],
+      "properties": {
+        "g": { "type": "integer" }, "i": { "type": "integer" }, "x": { "type": "number" }, "y": { "type": "number" }, "t": { "type": "integer" },
+        "flip": { "enum": ["H", "V", "HV"] }, "blend": { "enum": ["A", "A1", "S"] }, "alpha": { "$ref": "#/$defs/ivec2" },
+        "scale": { "$ref": "#/$defs/vec2" }, "angle": { "type": "number" },
+        "clsn1": { "type": "array", "items": { "$ref": "#/$defs/box4" } }, "clsn2": { "type": "array", "items": { "$ref": "#/$defs/box4" } }
+      },
+      "additionalProperties": false
+    },
+    "mugen": {
+      "type": "object",
+      "description": "Exact M.U.G.E.N migration (tools/mugen2umf): the original states, commands and animations, loaded by the same code path as a M.U.G.E.N character, so behavior is identical. UMF fields (profile, quotes, scripts) are layered on top.",
+      "required": ["cns", "cmd", "anims"],
+      "properties": {
+        "info": { "type": "object", "additionalProperties": { "type": "string" }, "description": "The original .def [Info] section." },
+        "mugenVersion": { "type": "string" },
+        "localcoord": { "type": "string" },
+        "stcommon": { "$ref": "#/$defs/mugenFile" },
+        "cns": { "$ref": "#/$defs/mugenFile" },
+        "st": { "type": "array", "items": { "$ref": "#/$defs/mugenFile" } },
+        "cmd": { "$ref": "#/$defs/mugenFile" },
+        "anims": {
+          "type": "object",
+          "description": "Action number -> animation.",
+          "additionalProperties": {
+            "type": "object", "required": ["frames"],
+            "properties": { "loop": { "type": "integer", "minimum": 0 }, "frames": { "type": "array", "items": { "$ref": "#/$defs/mugenFrame" } } },
+            "additionalProperties": false
+          }
+        },
+        "names": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Command name -> move name shown in the move list." }
+      },
+      "additionalProperties": false
+    },
     "art": {
       "type": "object",
-      "description": "type 'sprites' = PNG files in assets/chars/sprites/<id>/ (or a pack). 'rig' is the deprecated procedural rig. poses and style are open: they are interpreted by crates/native/src/pixel*.rs and recolor.rs.",
+      "description": "type 'sprites' = PNG files in assets/chars/sprites/<id>/ (or a pack). 'mugen' = exact sprite pack written by tools/mugen2umf (indexed PNGs, SFF palettes, meta.json), used with the `mugen` block. 'rig' is the deprecated procedural rig. poses and style are open: they are interpreted by crates/native/src/pixel*.rs and recolor.rs.",
       "properties": {
-        "type": { "enum": ["sprites", "rig"] },
+        "type": { "enum": ["sprites", "mugen", "rig"] },
         "style": { "type": "object", "properties": { "colors": { "$ref": "#/$defs/palette" }, "boxes": { "enum": ["exact", "fit"] } } },
         "poses": { "type": "object", "additionalProperties": { "type": ["string", "object"] } }
       },

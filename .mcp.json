@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "mugen2umf": {
-      "command": "python3",
-      "args": ["tools/mugen2umf", "mcp"]
+      "command": "cargo",
+      "args": ["run", "--quiet", "--release", "-p", "mugen2umf", "--", "mcp"]
     }
   }
 }

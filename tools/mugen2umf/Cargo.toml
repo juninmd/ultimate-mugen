@@ -1,0 +1,18 @@
+[package]
+name = "mugen2umf"
+version = "0.3.0"
+edition = "2021"
+description = "M.U.G.E.N to UMF converter: exact migration, parity report, profile filling, CLI and MCP server"
+license = "MIT"
+
+[[bin]]
+name = "mugen2umf"
+path = "src/main.rs"
+
+[dependencies]
+ume-formats = { path = "../../crates/formats" }
+ume-engine = { path = "../../crates/engine" }
+ume-native = { path = "../../crates/native" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tiny-skia = "0.11"

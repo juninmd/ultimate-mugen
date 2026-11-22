@@ -368,7 +368,7 @@ impl MatchRenderer {
         if gain > 0.0 {
             vfx.draw_back(g, m, shx, shy);
         }
-        let global_noshadow = m.global_asserts & ume_engine::flags::gsf::GLOBALNOSHADOW != 0;
+        let global_noshadow = m.global_asserts & ume_engine::flags::gsf::GLOBALNOSHADOW != 0 || !crate::lite::shadows();
         // soft contact shadows (3 layered ellipses)
         for f in m.fighters.iter().filter(|_| {
             matches!(
@@ -808,7 +808,7 @@ impl MatchRenderer {
         if f.has_assert(ume_engine::flags::asf::INVISIBLE) {
             return;
         }
-        if let Some(ai) = &f.after_image {
+        if let Some(ai) = f.after_image.as_ref().filter(|_| crate::lite::afterimage()) {
             let shown = ai.params.shown(ai.trail.len(), ai.length);
             for (k, &i) in shown.iter().enumerate().rev() {
                 let t = &ai.trail[i];
@@ -1016,7 +1016,7 @@ impl MatchRenderer {
         let s = g.view_scale;
         match &st.art {
             StageArt::Procedural { back, tint, .. } => {
-                let animated = self.fx.active();
+                let animated = self.fx.active() && crate::lite::backdrop();
                 let cx = Ctx::new(g, m, back, shx, shy);
                 let draw_layer = |g: &mut Gfx, l: &crate::stages::Layer| {
                     if l.dynamic {

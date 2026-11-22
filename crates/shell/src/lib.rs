@@ -117,6 +117,7 @@ pub struct Frame<'a> {
     pub fullscreen: Option<bool>,
     pub vsync: Option<bool>,
     pub frame_cap: Option<u32>,
+    pub render_scale: Option<f32>,
     pub screenshot: Option<String>,
     pub quit: bool,
 }
@@ -149,7 +150,7 @@ pub fn logical_size(surface: [f32; 2], stretch: Option<f32>) -> [f32; 2] {
     match stretch { Some(aspect) => [surface[1] * aspect, surface[1]], None => surface }
 }
 
-struct Shell<G: Game> { stretch: Option<f32>, linear: bool, cfg: Config, game: G, live: Option<Live>, pending: Option<Pending>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String>, pacer: Pacer, frame_cap: u32, watchdog: watchdog::Watchdog }
+struct Shell<G: Game> { stretch: Option<f32>, linear: bool, cfg: Config, game: G, live: Option<Live>, pending: Option<Pending>, input: Input, start: Instant, last: Instant, frames: u64, error: Option<String>, pacer: Pacer, frame_cap: u32, render_scale: f32, watchdog: watchdog::Watchdog }
 
 #[derive(Default)]
 pub struct Pacer { debt: f32 }
@@ -263,11 +264,12 @@ impl<G: Game> Shell<G> {
         let size = logical_size(surface, self.stretch);
         let correction = pointer_correction();
         self.input.pointer_scale = [size[0] / surface[0] / correction, size[1] / surface[1] / correction];
-        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, scale: live.window.scale_factor() as f32, window: surface, stretch: self.stretch, linear: self.linear, resize: None, fullscreen: None, vsync: None, frame_cap: None, screenshot: None, quit: false };
+        let mut f = Frame { gpu: &mut live.gpu, canvas: &mut live.canvas, input: &self.input, size, dt, time: (now - self.start).as_secs_f64(), clear: [0.0, 0.0, 0.0, 1.0], post: None, scale: live.window.scale_factor() as f32, window: surface, stretch: self.stretch, linear: self.linear, resize: None, fullscreen: None, vsync: None, frame_cap: None, render_scale: None, screenshot: None, quit: false };
         self.game.frame(&mut f);
         let (verts, calls) = (f.canvas.batch.vertices.len(), f.canvas.batch.calls.len());
-        let (quit, c, post, resize, fullscreen, shot, vsync, cap) = (f.quit, f.clear, f.post, f.resize, f.fullscreen, f.screenshot.take(), f.vsync, f.frame_cap);
+        let (quit, c, post, resize, fullscreen, shot, vsync, cap, scale) = (f.quit, f.clear, f.post, f.resize, f.fullscreen, f.screenshot.take(), f.vsync, f.frame_cap, f.render_scale);
         if let Some(c) = cap { self.frame_cap = c; }
+        if let Some(k) = scale { self.render_scale = k.clamp(0.25, 1.0); }
         (self.stretch, self.linear) = (f.stretch, f.linear);
         quad::publish_stats(verts, calls, live.gpu.rgba_atlas.occupancy(), live.gpu.index_atlas.occupancy());
         let size = logical_size(surface, self.stretch);
@@ -286,9 +288,13 @@ impl<G: Game> Shell<G> {
         for v in std::iter::once(&view).chain(offscreen_view.as_ref()) {
             match post {
                 Some(p) => {
-                    let scene = live.post.scene_view(&gpu.device, [live.config.width, live.config.height]).clone();
+                    let k = self.render_scale;
+                    let scene_px = [((live.config.width as f32 * k).round() as u32).max(16), ((live.config.height as f32 * k).round() as u32).max(16)];
+                    let scene = live.post.scene_view(&gpu.device, scene_px).clone();
                     let batch = &live.canvas.batch;
+                    gpu.renderer.set_scissor_scale([surface[0] / size[0] * k, surface[1] / size[1] * k]);
                     gpu.renderer.draw_calls(&gpu.device, &gpu.queue, &mut enc, Target { view: &scene, size, clear }, batch, 0..batch.split());
+                    gpu.renderer.set_scissor_scale([surface[0] / size[0], surface[1] / size[1]]);
                     live.post.apply(&gpu.queue, &mut enc, v, &p);
                     gpu.renderer.draw_calls(&gpu.device, &gpu.queue, &mut enc, Target { view: v, size, clear: None }, batch, batch.split()..batch.calls.len());
                 }
@@ -411,7 +417,7 @@ pub fn run<G: Game + 'static>(cfg: Config, game: G) -> Result<u64, String> {
     // on the web `Poll` makes winit spin a postTask/AbortController loop next to requestAnimationFrame (GC churn, starved frames); redraws are already self-requested
     event_loop.set_control_flow(if cfg!(target_arch = "wasm32") { ControlFlow::Wait } else { ControlFlow::Poll });
     let now = Instant::now();
-    let mut shell = Shell { stretch: None, linear: false, cfg, game, live: None, pending: None, input: Input { pointer_scale: [1.0, 1.0], ..Input::default() }, start: now, last: now, frames: 0, error: None, pacer: Pacer::default(), frame_cap: 0, watchdog: watchdog::Watchdog::from_env() };
+    let mut shell = Shell { stretch: None, linear: false, cfg, game, live: None, pending: None, input: Input { pointer_scale: [1.0, 1.0], ..Input::default() }, start: now, last: now, frames: 0, error: None, pacer: Pacer::default(), frame_cap: 0, render_scale: 1.0, watchdog: watchdog::Watchdog::from_env() };
     #[cfg(target_arch = "wasm32")]
     {
         use winit::platform::web::EventLoopExtWebSys;

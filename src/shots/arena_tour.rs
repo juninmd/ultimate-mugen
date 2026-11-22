@@ -85,6 +85,9 @@ pub(crate) async fn run(app: &mut App, dir: &str) {
         s.m.fighters.len()
     );
     screen(app, dir, "arena-fight", 1).await;
+    app.c.touch.enabled = true;
+    screen(app, dir, "arena-fight-touch", 1).await;
+    app.c.touch.enabled = false;
     {
         let App { session, .. } = app;
         let s = session.as_mut().unwrap();

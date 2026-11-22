@@ -8,13 +8,18 @@ mod tests;
 
 pub use window::{parse_res_arg, WindowWatch};
 
-pub const RESOLUTIONS: [(u32, u32, &str); 5] = [
+pub const RESOLUTIONS: [(u32, u32, &str); 9] = [
+    (640, 360, "640×360 (nHD)"),
+    (854, 480, "854×480 (FWVGA)"),
+    (960, 540, "960×540 (qHD)"),
+    (1024, 576, "1024×576 (PAL)"),
     (1280, 720, "1280×720 (HD)"),
     (1920, 1080, "1920×1080 (Full HD)"),
     (2560, 1440, "2560×1440 (QHD)"),
     (3840, 2160, "3840×2160 (4K UHD)"),
     (5120, 2880, "5120×2880 (5K)"),
 ];
+pub const DEFAULT_RES: usize = 5;
 pub const FX_LEVELS: [&str; 3] = ["Desligado", "Médio", "Alto (bloom)"];
 pub const IMPACT: [(f32, &str); 4] = [
     (0.0, "Mínimo (fotossensibilidade)"),
@@ -82,13 +87,14 @@ pub struct Settings {
     pub show_boxes: bool,
     pub story_enabled: bool,
     pub lang: crate::i18n::Lang,
+    pub lite: crate::lite::Lite,
 }
 
 impl Default for Settings {
     fn default() -> Self {
         Settings {
             fullscreen: false,
-            res: 1,
+            res: DEFAULT_RES,
             quality: 0,
             fps: false,
             fx: 2,
@@ -122,6 +128,7 @@ impl Default for Settings {
             show_boxes: false,
             story_enabled: true,
             lang: crate::i18n::Lang::En,
+            lite: crate::lite::Lite::default(),
         }
     }
 }

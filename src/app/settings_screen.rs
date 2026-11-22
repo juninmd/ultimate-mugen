@@ -10,9 +10,11 @@ mod pixel_controls;
 mod knockdown_label;
 use knockdown_label::knockdown_label;
 mod row_scroll;
+mod lite_rows; use lite_rows::LiteAct;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum Act {
+    Lite(LiteAct),
     Fullscreen,
     Res,
     Quality,
@@ -58,13 +60,14 @@ struct Row {
     level: Option<u8>,
 }
 
-const TABS: [(&str, &str, &str); 7] = [
+const TABS: [(&str, &str, &str); 8] = [
     ("VÍDEO", "VIDEO", "VÍDEO"),
     ("ÁUDIO", "AUDIO", "AUDIO"),
     ("CONTROLES", "CONTROLS", "CONTROLES"),
     ("JOGABILIDADE", "GAMEPLAY", "JUGABILIDAD"),
     ("IDIOMA", "LANGUAGE", "IDIOMA"),
     ("SOBRE", "ABOUT", "ACERCA DE"),
+    ("DESEMPENHO", "PERFORMANCE", "RENDIMIENTO"),
     ("TOQUE", "TOUCH", "TÁCTIL"),
 ];
 
@@ -114,8 +117,8 @@ impl App {
                         tr("Resolução da janela", "Window resolution"),
                         RESOLUTIONS[s.res.min(RESOLUTIONS.len() - 1)].2,
                         tr(
-                            "Até 5K · a imagem escala para qualquer tamanho",
-                            "Up to 5K · the picture scales to any size",
+                            "De 640×360 até 5K · a imagem escala para qualquer tamanho",
+                            "From 640×360 up to 5K · the picture scales to any size",
                         ),
                     ));
                 }
@@ -346,6 +349,7 @@ impl App {
                 row(Act::ShowBoxes, tr3("Exibir Hitboxes / Hurtboxes", "Show Hitboxes / Hurtboxes", "Mostrar Hitboxes / Hurtboxes"), on_off(s.show_boxes), tr3("Mostra caixas de ataque e colisão durante as lutas", "Displays attack and body collision boxes during fights", "Muestra cajas de ataque y colisión durante los combates")),
                 row(Act::StoryEnabled, tr3("Modo História (TOML)", "Story mode (TOML)", "Modo Historia (TOML)"), on_off(s.story_enabled && crate::story::active_script().campaign.enabled), tr3("Ative/desative ou personalize em story/campaign.toml", "Enable/disable or customize via story/campaign.toml", "Activa/desactiva o personaliza en story/campaign.toml")),
             ],
+            6 => lite_rows::rows(s),
             4 => vec![row(
                 Act::Language,
                 tr("Idioma", "Language"),
@@ -400,11 +404,9 @@ impl App {
         let s = &mut self.settings;
         let mut changed = true;
         match act {
+            Act::Lite(a) if go => lite_rows::adjust(s, a, step),
             Act::Fullscreen if go => s.fullscreen = !s.fullscreen,
-            Act::Res if go => {
-                s.res = cycle(s.res, step, RESOLUTIONS.len());
-                s.fullscreen = false;
-            }
+            Act::Res if go => s.step_resolution(step),
             Act::Quality if go => s.quality = cycle(s.quality, step, QUALITY.len()),
             Act::Fx if go => s.fx = cycle(s.fx, step, FX_LEVELS.len()),
             Act::Impact if go => s.impact = cycle(s.impact, step, IMPACT.len()),

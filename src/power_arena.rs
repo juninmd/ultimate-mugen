@@ -1,7 +1,8 @@
 use crate::gfx::*;
 use crate::render::Gfx;
 use crate::ui::hex;
-use crate::ui::{alpha, Ui, VW};
+use crate::ui::{alpha, Ui, VH, VW};
+use std::cell::Cell;
 use ume_engine::matchs::{Match, ARENA_HALF_WIDTH, ARENA_PLATFORMS};
 
 thread_local! {
@@ -69,9 +70,17 @@ fn draw_platform(texture: Option<&Texture2D>, x: f32, y: f32, width: f32, depth:
     }
 }
 
-const MAP_W: f32 = 440.0;
-const MAP_H: f32 = 58.0;
+const MAP_W: f32 = 230.0;
+const MAP_H: f32 = 34.0;
+const MARGIN: f32 = 14.0;
+const TOUCH_BOTTOM: f32 = VH * 0.55;
 const ROOF: f32 = -420.0;
+
+thread_local! { static TOUCH_DOCK: Cell<bool> = const { Cell::new(false) }; }
+
+pub(crate) fn dock_above_touch_pad(on: bool) {
+    TOUCH_DOCK.with(|dock| dock.set(on));
+}
 
 pub(crate) fn minimap(ui: &Ui, battle: &Match, human: &[u32]) {
     if battle.swarm.is_none() {
@@ -81,21 +90,22 @@ pub(crate) fn minimap(ui: &Ui, battle: &Match, human: &[u32]) {
     if span <= battle.view_w * 1.1 {
         return;
     }
-    let (left, top) = ((VW - MAP_W) / 2.0, 146.0);
-    ui.rect(left - 4.0, top - 4.0, MAP_W + 8.0, MAP_H + 8.0, Color::new(0.02, 0.03, 0.08, 0.72));
-    ui.rect(left, top + MAP_H - 3.0, MAP_W, 3.0, alpha(hex("#a5f0f3"), 0.5));
+    let bottom = if TOUCH_DOCK.with(Cell::get) { TOUCH_BOTTOM } else { VH - MARGIN };
+    let (left, top) = (VW - MARGIN - MAP_W, bottom - MAP_H);
+    ui.rect(left - 4.0, top - 4.0, MAP_W + 8.0, MAP_H + 8.0, Color::new(0.02, 0.03, 0.08, 0.42));
+    ui.rect(left, top + MAP_H - 3.0, MAP_W, 3.0, alpha(hex("#a5f0f3"), 0.35));
     let at = |world: f32| left + ((world + battle.arena_half) / span).clamp(0.0, 1.0) * MAP_W;
     let row = |world_y: f32| top + 4.0 + ((world_y - ROOF) / -ROOF).clamp(0.0, 1.0) * (MAP_H - 10.0);
     let view_l = at(battle.camera.x - battle.view_w / 2.0);
     let view_r = at(battle.camera.x + battle.view_w / 2.0);
-    ui.rect_lines(view_l, top, (view_r - view_l).max(3.0), MAP_H, 2.0, hex("#ffcc33"));
+    ui.rect_lines(view_l, top, (view_r - view_l).max(3.0), MAP_H, 1.5, alpha(hex("#ffcc33"), 0.8));
     for fighter in battle.roots().filter(|f| f.alive && !f.destroyed) {
         let foe = fighter.side != 0;
         let you = human.contains(&fighter.id);
         let (size, color) = match (foe, you) {
-            (true, _) => (4.0, hex("#ff4d6d")),
-            (false, true) => (8.0, hex("#ffffff")),
-            (false, false) => (6.0, hex("#22e8ff")),
+            (true, _) => (3.0, alpha(hex("#ff4d6d"), 0.9)),
+            (false, true) => (5.0, hex("#ffffff")),
+            (false, false) => (4.0, alpha(hex("#22e8ff"), 0.9)),
         };
         ui.rect(at(fighter.pos.x) - size / 2.0, row(fighter.pos.y) - size / 2.0, size, size, color);
     }

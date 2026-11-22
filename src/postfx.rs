@@ -45,7 +45,11 @@ impl PostFx {
 
     pub fn end(&mut self, p: &FxParams, t: f32) {
         if self.level == 0 {
-            ume_shell::waves::take();
+            if crate::lite::scale() < 1.0 {
+                set_post(Some(PostParams::default()));
+            } else {
+                ume_shell::waves::take();
+            }
             return;
         }
         let l = &self.look;

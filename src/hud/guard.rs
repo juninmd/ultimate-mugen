@@ -69,17 +69,13 @@ pub(super) fn draw<
     if f.ikemen.guard_break || f.state_no == 5400 {
         let pulse = 0.8 + 0.2 * (gt * 18.0).sin().abs();
         let (cw, ch) = (48.0, 7.5);
-        let cx = if side == 0 { bx + 4.0 } else { bx + bw - cw - 4.0 };
-        let cy = by - 7.5;
-        let c_bg = poly::slanted(cx, cy, cw, ch, 2.5);
-        let sp_c: Vec<Vec2> = c_bg.into_iter().map(|q| p(q.x, q.y)).collect();
-        poly::solid(&sp_c, Color::new(0.05, 0.08, 0.16, 0.92));
-        poly::grad_h(
-            &sp_c,
-            Color::new(0.08, 0.75, 1.0, 0.9 * pulse),
-            Color::new(0.2, 0.95, 1.0, 0.9 * pulse),
-        );
-        poly::outline(&sp_c, 0.75 * s, Color::new(1.0, 1.0, 1.0, 0.95 * pulse));
+        let cx = if side == 0 { bx + 16.0 } else { bx + bw - cw - 16.0 };
+        let cy = (by - ch).max(0.8);
+        if !super::badge_art::draw_rush_plate(p, s, cx, cy, cw, ch, pulse, side != 0) {
+            let plate = rect(p, s, cx, cy, cw, ch);
+            poly::solid(&plate, Color::new(0.05, 0.08, 0.16, 0.92));
+            poly::outline(&plate, 0.75 * s, Color::new(0.2, 0.95, 1.0, pulse));
+        }
         let label = crate::i18n::tr3("QUEBRA DE GUARDA", "GUARD CRUSH", "GUARD CRUSH");
         text(label, cx + cw / 2.0, cy + 5.5, 4.5, WHITE, Align::Center, true);
     }

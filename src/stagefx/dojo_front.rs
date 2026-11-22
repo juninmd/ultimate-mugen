@@ -15,39 +15,42 @@ impl StageReact {
             let fl = self.flick(100 + k);
             seg(top, c, 0.6 * s, hx(0x1a0c0a, 1.0), hx(0x1a0c0a, 1.0));
             let (rx, ry) = (11.0 * s, 15.0 * s);
-            fan(
-                c + vec2(0.0, ry),
-                rx,
-                ry,
-                16,
-                lerpc(
-                    hx(0xffd890, 1.0),
-                    hx(0xff6a30, 1.0),
-                    0.45 * (1.0 - fl * 0.5),
-                ),
-                hx(0xb81c18, 1.0),
-            );
-            for r in 1..5 {
-                let f = r as f32 / 5.0 - 0.1;
-                let yy = (f - 0.5) * 2.0;
-                let w = (1.0 - yy * yy).sqrt() * rx;
-                seg(
-                    c + vec2(-w, ry + yy * ry * 0.98),
-                    c + vec2(w, ry + yy * ry * 0.98),
-                    0.5 * s,
-                    hx(0x701410, 0.6),
-                    hx(0x701410, 0.6),
+            let warm = Color::new(0.94 + 0.06 * fl, 0.82 + 0.18 * fl, 0.75 + 0.25 * fl, 1.0);
+            if !dojo_lantern::draw(c + vec2(0.0, ry), rx * 2.0, ry * 2.0, warm) {
+                fan(
+                    c + vec2(0.0, ry),
+                    rx,
+                    ry,
+                    16,
+                    lerpc(
+                        hx(0xffd890, 1.0),
+                        hx(0xff6a30, 1.0),
+                        0.45 * (1.0 - fl * 0.5),
+                    ),
+                    hx(0xb81c18, 1.0),
+                );
+                for r in 1..5 {
+                    let f = r as f32 / 5.0 - 0.1;
+                    let yy = (f - 0.5) * 2.0;
+                    let w = (1.0 - yy * yy).sqrt() * rx;
+                    seg(
+                        c + vec2(-w, ry + yy * ry * 0.98),
+                        c + vec2(w, ry + yy * ry * 0.98),
+                        0.5 * s,
+                        hx(0x701410, 0.6),
+                        hx(0x701410, 0.6),
+                    );
+                }
+                qd(
+                    [
+                        c + vec2(-rx * 0.5, 0.0),
+                        c + vec2(rx * 0.5, 0.0),
+                        c + vec2(rx * 0.5, 1.6 * s),
+                        c + vec2(-rx * 0.5, 1.6 * s),
+                    ],
+                    [hx(0x140808, 1.0); 4],
                 );
             }
-            qd(
-                [
-                    c + vec2(-rx * 0.5, 0.0),
-                    c + vec2(rx * 0.5, 0.0),
-                    c + vec2(rx * 0.5, 1.6 * s),
-                    c + vec2(-rx * 0.5, 1.6 * s),
-                ],
-                [hx(0x140808, 1.0); 4],
-            );
             seg(
                 c + vec2(0.0, 2.0 * ry),
                 c + vec2(0.0, 2.0 * ry + 6.0 * s),

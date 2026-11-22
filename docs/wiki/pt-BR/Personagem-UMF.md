@@ -145,7 +145,7 @@ Um quadro só com pose e duração pode ser escrito `"pose*ticks"`, e as duas fo
 "jab": { "frames": ["jab0*3", { "pose": "jab1", "ticks": 3, "hit": { "part": "handR", "radius": 10 } }, "jab0*5"], "loop": 0 }
 ```
 
-Rode `node scripts/umf2-migrate.mjs` antes de commitar um lutador do jogo: ele grava o layout canônico que o CI confere. Veja o [ADR 0007](../adr/0007-umf2-definitive-fighter-format.md).
+Rode `node scripts/umf2-migrate.mjs` antes de commitar um lutador do jogo: ele grava o layout canônico que o CI confere. Veja o [ADR 0007](../adr/0007-umf2-definitive-fighter-format.md). O formato também é um JSON Schema conferido no CI: [Esquema UMF](Esquema-UMF.md).
 
 | Campo do quadro | Descrição |
 |---|---|

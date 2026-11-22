@@ -168,7 +168,7 @@ A frame with only a pose and a tick count can be written as `"pose*ticks"`, and 
 "jab": { "frames": ["jab0*3", { "pose": "jab1", "ticks": 3, "hit": { "part": "handR", "radius": 10 } }, "jab0*5"], "loop": 0 }
 ```
 
-Run `node scripts/umf2-migrate.mjs` before committing a shipped fighter: it writes the canonical layout that CI checks. See [ADR 0007](adr/0007-umf2-definitive-fighter-format.md).
+Run `node scripts/umf2-migrate.mjs` before committing a shipped fighter: it writes the canonical layout that CI checks. See [ADR 0007](adr/0007-umf2-definitive-fighter-format.md). The format is also a JSON Schema checked in CI: [UMF schema](UMF-Schema.md).
 
 | Frame field | Description |
 |---|---|

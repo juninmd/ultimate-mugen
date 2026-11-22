@@ -21,7 +21,7 @@ impl Mode {
             Mode::Survival => "mode.survival",
             Mode::Cpu => "mode.cpu",
             Mode::Versus => "mode.versus",
-            Mode::PowerArena => return crate::i18n::tr3("Arena do Poder", "Power Arena", "Arena del Poder"),
+            Mode::PowerArena => return crate::i18n::tr3("ARENA DO PODER", "POWER ARENA", "ARENA DEL PODER"),
             Mode::Tower => "mode.tower",
             Mode::Training => "mode.training",
             Mode::Watch => "mode.watch",

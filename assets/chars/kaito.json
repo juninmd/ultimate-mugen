@@ -419,13 +419,7 @@
   },
   "palettes": [{"top":"#b8433a","trim":"#6a1e1a","top2":"#f4f0e6","pants":"#3a2a2a","hair":"#1a1a22"},{"top":"#e8e2d2","trim":"#a8a090","top2":"#3a68d8","pants":"#e8e2d2","hair":"#c0c6d0","skin":"#f0c8a0"}],
   "anims": {
-    "kangarooKick": {"id":1090,"frames":[
-      "crouch0*4",
-      "jumpTuck*3",
-      {"pose":"akick","sprite":"kangarooKickImpact","ticks":5,"hit":{"part":"footF","radius":12}},
-      "jumpTuck*7",
-      "land*7"
-    ]},
+    "kangarooKick": {"id":1090,"frames":["crouch0*4","jumpTuck*3",{"pose":"akick","sprite":"kangarooKickImpact","ticks":5,"hit":{"part":"footF","radius":12}},"jumpTuck*7","land*7"]},
     "powerUp": {"frames":["powerup0*3","powerup01*3","powerup1*3","powerup12*3","powerup2*6"],"loop":0},
     "idle": {"frames":["idle0*10","idle1*8","idle2*10","idle3*8","idle2*10","idle1*8"]},
     "turn": {"frames":["turn*3","turn*3"]},

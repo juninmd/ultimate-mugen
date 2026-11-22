@@ -37,6 +37,7 @@ pub struct Layout {
     pub slots: [Rect; 4],
     pub heading_y: f32,
     pub list: Rect,
+    pub preview: Rect,
     pub footer: Rect,
     pub row_h: f32,
     pub pitch: f32,
@@ -77,6 +78,7 @@ impl Layout {
             slots,
             heading_y,
             list,
+            preview: Rect::new(0.0, 0.0, 0.0, 0.0),
             footer,
             row_h,
             pitch: row_h + 4.0,
@@ -93,6 +95,7 @@ impl Layout {
             slots: self.slots.map(mv),
             heading_y: self.heading_y + dy,
             list: mv(self.list),
+            preview: mv(self.preview),
             footer: mv(self.footer),
             ..self.clone()
         }

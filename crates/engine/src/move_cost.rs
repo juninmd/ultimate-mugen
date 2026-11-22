@@ -2,7 +2,7 @@ use crate::chardef::{Controller, StateDef};
 use crate::expr::Node;
 use std::collections::{HashMap, HashSet};
 
-pub fn cost_of(states: &HashMap<i32, StateDef>, command: &str) -> f32 {
+pub fn target_state(states: &HashMap<i32, StateDef>, command: &str) -> Option<i32> {
     let mut targets = HashSet::new();
     for sd in states.iter().filter(|(id, _)| **id < 0).map(|(_, s)| s) {
         for c in sd.controllers.iter().filter(|c| c.kind == "changestate") {
@@ -18,13 +18,25 @@ pub fn cost_of(states: &HashMap<i32, StateDef>, command: &str) -> f32 {
         }
     }
     if targets.len() != 1 {
-        return 0.0;
+        return None;
     }
-    let target = targets.into_iter().next().unwrap_or(-1);
+    targets.into_iter().next()
+}
+
+pub fn cost_of(states: &HashMap<i32, StateDef>, command: &str) -> f32 {
+    let Some(target) = target_state(states, command) else {
+        return 0.0;
+    };
     let Some(sd) = states.get(&target) else {
         return 0.0;
     };
-    let spent: f64 = sd
+    let declared = sd
+        .param("poweradd")
+        .and_then(|p| p.exprs.first())
+        .and_then(|e| literal(&e.node))
+        .filter(|v| *v < 0.0)
+        .unwrap_or(0.0);
+    let entry: f64 = sd
         .controllers
         .iter()
         .filter(|c| c.kind == "poweradd" && at_entry(c))
@@ -35,7 +47,7 @@ pub fn cost_of(states: &HashMap<i32, StateDef>, command: &str) -> f32 {
         })
         .filter(|v| *v < 0.0)
         .sum();
-    (-spent) as f32
+    (-(declared + entry)) as f32
 }
 
 fn names_command(c: &Controller, command: &str) -> bool {
@@ -51,7 +63,7 @@ fn contains_command(n: &Node, command: &str) -> bool {
             name,
             neg: false,
             values,
-        } => name == "command" && values.iter().any(|v| v == command),
+        } => name.eq_ignore_ascii_case("command") && values.iter().any(|v| v.eq_ignore_ascii_case(command)),
         Node::Bin(_, a, b) => contains_command(a, command) || contains_command(b, command),
         Node::Un(_, a) => contains_command(a, command),
         _ => false,
@@ -75,7 +87,7 @@ fn is_time_zero(n: &Node) -> bool {
     }
 }
 
-fn literal(n: &Node) -> Option<f64> {
+pub(crate) fn literal(n: &Node) -> Option<f64> {
     match n {
         Node::Num(v, _) => Some(*v),
         Node::Un("-", a) => literal(a).map(|v| -v),
@@ -98,6 +110,12 @@ mod tests {
         let s = states("[Statedef -1]\n[State -1, a]\ntype = ChangeState\ntrigger1 = command = \"QCF_x\"\nvalue = 200\nctrl = 1\n\n[Statedef 200]\ntype = S\nctrl = 0\n[State 200, p]\ntype = PowerAdd\ntrigger1 = Time = 0\nvalue = -1000\n");
         assert_eq!(cost_of(&s, "QCF_x"), 1000.0);
         assert_eq!(cost_of(&s, "QCF_y"), 0.0);
+    }
+
+    #[test]
+    fn cost_reads_the_statedef_poweradd_and_ignores_command_case() {
+        let s = states("[Statedef -1]\n[State -1, a]\ntype = ChangeState\ntrigger1 = command = \"SPECIAL 3\"\nvalue = 1200\n\n[Statedef 1200]\ntype = S\nanim = 1200\npoweradd = -1500\n");
+        assert_eq!(cost_of(&s, "SPECIAL 3"), 1500.0);
     }
 
     #[test]

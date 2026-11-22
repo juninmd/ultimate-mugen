@@ -9,6 +9,7 @@ mod glide;
 mod input;
 mod input_fit;
 mod labels;
+mod preview;
 mod layout;
 mod skin;
 mod state;
@@ -27,6 +28,7 @@ impl App {
         let (name, moves) = (def.display_name.clone(), &def.movelist[..]);
         let author = def.author.clone();
         let base = Layout::new(self.ui.s);
+        let base = if self.pause.tab == Tab::Moves { base.with_preview() } else { base };
         let outcome = self.pause_input(&base, &name, moves, accept_nav);
         let lay = base.shifted((1.0 - ease) * 22.0);
         draw_rectangle(0.0, 0.0, screen_width(), screen_height(), Color::new(0.02, 0.01, 0.06, 0.55 * ease));
@@ -46,6 +48,7 @@ impl App {
         if self.pause.tab == Tab::Moves {
             let slot_of = |command: &str| self.c.shortcuts.slot_of(&name, command);
             self.pause_moves_list(&lay, moves, &slot_of, ease);
+            self.pause_move_preview(&lay, &def, moves.get(self.pause.move_cur), ease);
         } else {
             self.pause_actions_list(&lay, self.pause.tab.actions(self.mode == Mode::Training), ease);
         }

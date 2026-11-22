@@ -1,0 +1,76 @@
+[Statedef -2]
+
+[State -2, Afterimage Ryu Ken]
+type = AfterImage
+trigger1 = StateNo = 3000 && Time = 30
+time = 60
+length = 8
+framegap = 2
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Shunkan Ido]
+type = AfterImage
+trigger1 = StateNo = 1300 && Time = 1
+time = 25
+length = 8
+framegap = 2
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Kamehameha x10]
+type = AfterImage
+trigger1 = StateNo = 1400 && Time = 1
+time = 60
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Super Energy Blast]
+type = AfterImage
+trigger1 = StateNo = 1500 && Time = 1
+time = 45
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Explosive Wave]
+type = AfterImage
+trigger1 = StateNo = 1600 && Time = 1
+time = 45
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Instant Kamehameha]
+type = AfterImage
+trigger1 = StateNo = 1700 && Time = 1
+time = 45
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Super Kamehameha]
+type = AfterImage
+trigger1 = StateNo = 1800 && Time = 1
+time = 60
+length = 8
+framegap = 3
+trans = add
+palbright = 10,10,10
+palcontrast = 225,255,255
+
+[State -2, Afterimage Clear on Hit]
+type = AfterImageTime
+trigger1 = MoveType = H
+time = 0

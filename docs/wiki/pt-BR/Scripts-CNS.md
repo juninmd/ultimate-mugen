@@ -178,9 +178,9 @@ Todas as distâncias e tamanhos usam o localcoord do jogador que avalia. Trigger
 
 ## Redirecionamentos
 
-`parent` `root` `helper` `target` `partner` `enemy` `enemynear` `playerid` `p2` `stateowner`
+`parent` `root` `helper` `target` `partner` `enemy` `enemynear` `playerid` `p2` `stateowner` `nearestfoe`
 
-`helper(id)` e `target(id)` aceitam um ID opcional; `partner(n)` é o n-ésimo outro jogador não-helper do mesmo lado (padrão 0; um helper redireciona pelo seu root; NaN quando não existe); `enemy(n)` e `enemynear(n)` escolhem o n-ésimo oponente. Exemplo: `trigger1 = enemynear, life < 200`.
+`helper(id)` e `target(id)` aceitam um ID opcional; `partner(n)` é o n-ésimo outro jogador não-helper do mesmo lado (padrão 0; um helper redireciona pelo seu root; NaN quando não existe); `enemy(n)` e `enemynear(n)` escolhem o n-ésimo oponente. Exemplo: `trigger1 = enemynear, life < 200`. `nearestfoe` (extensão do motor) escolhe o oponente vivo e fora de standby mais próximo em 2D (x e y), útil em lutas de equipe; cai para `enemy(0)` quando ninguém está vivo. Exemplo de busca: `x = (NearestFoe,Pos X - Pos X) * Facing`.
 
 ## Expressões
 
@@ -252,3 +252,7 @@ Triggers que leem de volta o que o personagem criou ou o que ele está desenhand
 | `DisplayName = "x"` `SelfCommand = "x"` | comparações de texto com o nome de exibição e com o buffer de comandos do próprio personagem |
 
 Ainda não implementados, e apontados pelo diagnóstico de carregamento: `BGMVar`, `SoundVar` (o núcleo da engine não guarda estado de áudio), `AnimLoopCount`, `AnimPrefix`, `HelperName`, as variáveis `angle`, `friction`, `xshear`, `drawpal.*` e `shader` de `ExplodVar`, e `attr`, `guardflag`, `hitflag`, `shadow` de `ProjVar`. Um nome de variável desconhecido é apontado uma vez por carregamento como `explodvar(nome)` e vale 0.
+
+## Overlays para lutadores migrados
+
+`tools/mugen2umf/overlays/` guarda patches CNS aplicados sobre uma migração exata via `--extra` (`scripts.cns`, com `override: true` para patches que substituem um estado inteiro). `goku_ssj4_ryuken.cns` troca o helper do dragão Ryu Ken (estado 3050) por uma versão teleguiada: mira o `NearestFoe` com curva suavizada, usa `Turn` quando o alvo está atrás, inclina com `AngleDraw` e desacelera no contato. `goku_ssj4_afterimage.cns` adiciona rastros `AfterImage` às habilidades do Goku por `[Statedef -2]`, que acrescenta ao original sem substituí-lo.

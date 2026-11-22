@@ -178,9 +178,9 @@ All distances and sizes are in the evaluating player's localcoord. "Zoom-relativ
 
 ## Redirections
 
-`parent` `root` `helper` `target` `partner` `enemy` `enemynear` `playerid` `p2` `stateowner`
+`parent` `root` `helper` `target` `partner` `enemy` `enemynear` `playerid` `p2` `stateowner` `nearestfoe`
 
-`helper(id)` and `target(id)` take an optional ID; `partner(n)` is the n-th other non-helper player on the same side (default 0; a helper redirects through its root; NaN when there is none); `enemy(n)` and `enemynear(n)` pick the n-th opponent. Example: `trigger1 = enemynear, life < 200`.
+`helper(id)` and `target(id)` take an optional ID; `partner(n)` is the n-th other non-helper player on the same side (default 0; a helper redirects through its root; NaN when there is none); `enemy(n)` and `enemynear(n)` pick the n-th opponent. Example: `trigger1 = enemynear, life < 200`. `nearestfoe` (engine extension) picks the living, non-standby opponent closest in 2D (x and y), which matters in team fights; it falls back to `enemy(0)` when nobody is alive. Homing example: `x = (NearestFoe,Pos X - Pos X) * Facing`.
 
 ## Expressions
 
@@ -252,3 +252,7 @@ Triggers that read back what a character created or what it is drawing. The last
 | `DisplayName = "x"` `SelfCommand = "x"` | string comparisons against the display name and the character's own command buffer |
 
 Not implemented yet, and reported by the load diagnostics: `BGMVar`, `SoundVar` (the engine core holds no audio state), `AnimLoopCount`, `AnimPrefix`, `HelperName`, the `angle`, `friction`, `xshear`, `drawpal.*` and `shader` variables of `ExplodVar`, and the `attr`, `guardflag`, `hitflag`, `shadow` variables of `ProjVar`. An unknown variable name is reported once per character load as `explodvar(name)` and evaluates to 0.
+
+## Overlays for migrated fighters
+
+`tools/mugen2umf/overlays/` holds CNS patches layered on an exact migration through `--extra` (`scripts.cns`, with `override: true` for patches that replace a whole state). `goku_ssj4_ryuken.cns` replaces the Ryu Ken dragon helper (state 3050) with a homing version: it steers toward `NearestFoe` with a smoothed turn, flips with `Turn` when the target is behind, tilts with `AngleDraw` and slows on contact. `goku_ssj4_afterimage.cns` adds `AfterImage` trails to the Goku skills through `[Statedef -2]`, which appends to the original instead of replacing it.

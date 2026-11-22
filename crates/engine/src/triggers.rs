@@ -115,7 +115,7 @@ impl<'a> Host for Ctx<'a> {
             "root" => m.idx(f.root)?,
             "helper" => { let id = arg.map(|a| a as i32).unwrap_or(-1); m.fighters.iter().position(|h| h.is_helper && h.root == f.root && !h.destroyed && (id < 0 || h.helper_id == id))? }
             "target" => { let id = arg.map(|a| a as i32).unwrap_or(-1); let t = f.targets.iter().find(|t| id < 0 || t.1 == id)?; m.idx(t.0)? }
-            "enemy" | "enemynear" | "p2" => m.enemy(self.i, arg.unwrap_or(0.0) as usize)?,
+            "enemy" | "enemynear" | "p2" => m.enemy(self.i, arg.unwrap_or(0.0) as usize)?, "nearestfoe" => m.nearest_foe(self.i)?,
             "partner" => m.partner(if f.is_helper { m.idx(f.root)? } else { self.i }, arg.map(|a| a.max(0.0) as usize).unwrap_or(0))?,
             "playerid" => { let id = arg?; if id <= 0.0 || !id.is_finite() { return None; } m.idx(id as u32)? },
             "stateowner" => f.state_giver.and_then(|id| m.idx(id)).unwrap_or(self.i),

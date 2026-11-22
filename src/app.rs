@@ -1741,7 +1741,7 @@ impl App {
             Align::Center,
         );
         self.ui.text(
-            &crate::credit_line::truncate(&e.series, 30),
+            &crate::credit_line::truncate(crate::i18n::fighter_lines::shown(&e.series), 30),
             cx,
             by + 70.0,
             14.0,

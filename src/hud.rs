@@ -1132,11 +1132,11 @@ impl Hud {
 /// Round-start line of a fighter: its own `intro` (first speaker) / `taunt` (answer), or a generic one.
 fn face_off_line(f: &Fighter, other: &Fighter, answer: bool) -> String {
     if let Some(line) = f.base_def.rivals.line_against(&other.base_def.rivals.id, answer) {
-        return line.to_string();
+        return crate::i18n::fighter_lines::shown(line).to_string();
     }
     let own = if answer { &f.def.taunt } else { &f.def.intro };
     if !own.is_empty() {
-        return own.clone();
+        return crate::i18n::fighter_lines::shown(own).to_string();
     }
     let h = f
         .def

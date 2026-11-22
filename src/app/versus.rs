@@ -214,7 +214,7 @@ impl App {
                 al,
             );
             self.ui.text(
-                &self.reg.chars[id].series,
+                crate::i18n::fighter_lines::shown(&self.reg.chars[id].series),
                 tx,
                 y + 74.0,
                 18.0,

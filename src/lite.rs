@@ -7,7 +7,11 @@ pub use flags::{afterimage, apply, backdrop, crt, glass, scale, shadows};
 
 use crate::settings::Settings;
 
+<<<<<<< HEAD
 pub const SCALES: [f32; 5] = [1.0, 0.75, 0.5, 0.35, 0.25];
+=======
+pub const SCALES: [f32; 3] = [1.0, 0.75, 0.5];
+>>>>>>> origin/master
 pub const PRESET_COUNT: usize = 4;
 pub const CUSTOM: usize = PRESET_COUNT;
 

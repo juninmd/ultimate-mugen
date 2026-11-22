@@ -496,4 +496,4 @@ Measured on the 4-core cloud machine with software rendering (lavapipe for deskt
 
 Settings, VIDEO tab (desktop): window resolution now starts at 640x360, then 854x480, 960x540, 1024x576, 1280x720 and up to 5K. The cfg stores `res_px=WxH`; old `res=<index>` files are migrated to the same size. Picking a resolution clears the remembered window size so the choice always applies. On web and mobile the window follows the page, so use Render scale (down to 25%) instead.
 
-Desktop, software rendering, perf tour (Kaito vs Shion): 1280x720 31.5 ms, 854x480 15.1 ms, 640x360 10.5 ms per frame.
+Desktop, software rendering, perf tour (Kaito vs Shion): 1280x720 31.5 ms, 854x480 15.1 ms, 640x360 10.5 ms per frame. Web render scale 50% / 35% / 25%: 21.5 / 22.0 / 23.4 fps (CPU bound below 50%).

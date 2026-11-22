@@ -34,17 +34,24 @@ fn particles_name(p: u8) -> &'static str {
     }
 }
 
+<<<<<<< HEAD
 fn scale_label(k: f32) -> String {
     let (w, h) = ume_shell::quad::window_size();
     format!("{}% · {}×{}", (k * 100.0).round() as u32, (w * k).round() as u32, (h * k).round() as u32)
 }
 
+=======
+>>>>>>> origin/master
 pub(super) fn rows(s: &Settings) -> Vec<Row> {
     let l = &s.lite;
     let t = tr3;
     vec![
         row(Act::Lite(LiteAct::Preset), t("Predefinição gráfica", "Graphics preset", "Preajuste gráfico"), preset_name(s.preset()), t("Ajusta todas as opções abaixo de uma vez", "Sets every option below at once", "Ajusta todas las opciones de abajo")),
+<<<<<<< HEAD
         row(Act::Lite(LiteAct::Scale), t("Escala de renderização", "Render scale", "Escala de renderizado"), scale_label(l.render_scale()), t("Resolução interna da luta; menor é mais rápido", "Internal fight resolution; lower is faster", "Resolución interna del combate; menor es más rápido")),
+=======
+        row(Act::Lite(LiteAct::Scale), t("Escala de renderização", "Render scale", "Escala de renderizado"), format!("{}%", (l.render_scale() * 100.0) as u32), t("Resolução interna da luta; menor é mais rápido", "Internal fight resolution; lower is faster", "Resolución interna del combate; menor es más rápido")),
+>>>>>>> origin/master
         row(Act::Fx, t("Pós-processamento", "Post-processing", "Posprocesado"), crate::settings_labels::fx_level(s.fx), t("Bloom, vinheta e correção de cor", "Bloom, vignette and colour grading", "Bloom, viñeta y corrección de color")),
         row(Act::Quality, t("Qualidade da arte", "Art quality", "Calidad del arte"), crate::settings_labels::art_quality(s.quality), t("Menos memória e GPU em máquinas fracas", "Less memory and GPU on weak machines", "Menos memoria y GPU en equipos lentos")),
         row(Act::Lite(LiteAct::Particles), t("Partículas e efeitos", "Particles and effects", "Partículas y efectos"), particles_name(l.particles), t("Faíscas, poeira e brilhos de impacto", "Sparks, dust and impact flashes", "Chispas, polvo y destellos de impacto")),

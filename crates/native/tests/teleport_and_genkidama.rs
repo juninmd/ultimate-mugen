@@ -20,16 +20,16 @@ fn converted_goku_teleports_and_genkidama_execute_accurately() {
     m.fighters[1].pos.x = 60.0;
     m.fighters[0].facing = 1.0;
     m.fighters[0].power = 3000.0;
-    m.change_state(0, 3910, def.clone());
+    let tp_sid = def.movelist.iter().find(|mv| mv.command == "m_teleport_a").unwrap().state;
+    m.change_state(0, tp_sid, def.clone());
     for _ in 0..80 {
         m.tick(&[0, 0]);
     }
     println!(
-        "ABILITIES.TELEPORT: x={:.1} y={:.1} facing={} state={} ctrl={}",
-        m.fighters[0].pos.x, m.fighters[0].pos.y, m.fighters[0].facing, m.fighters[0].state_no, m.fighters[0].ctrl
+        "TELEPORT_A: x={:.1} y={:.1} state={} ctrl={}",
+        m.fighters[0].pos.x, m.fighters[0].pos.y, m.fighters[0].state_no, m.fighters[0].ctrl
     );
-    assert!(m.fighters[0].pos.x > 60.0, "expected blink behind opponent");
-    assert_eq!(m.fighters[0].facing, -1.0, "expected Turn after blink");
+    assert!(m.fighters[0].pos.x < -150.0, "expected the original backward teleport (x = -250)");
     assert_eq!(m.fighters[0].state_no, 0, "expected clean return to idle");
     assert!(m.fighters[0].ctrl);
 

@@ -49,7 +49,7 @@ pub struct HitSpec {
     #[serde(default, rename = "groundBounce")] pub ground_bounce: Option<bool>,
     #[serde(default, rename = "wallBounce")] pub wall_bounce: Option<bool>,
     #[serde(default)] pub element: Option<String>,
-    #[serde(default)] pub stun: Option<i32>,
+    #[serde(default)] pub stun: Option<i32>, #[serde(default)] pub recover: Option<bool>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -68,7 +68,7 @@ pub struct ProjectileSpec {
     #[serde(default)] pub priority: Option<i32>,
     #[serde(default)] pub element: Option<String>,
     #[serde(default)] pub stun: Option<i32>,
-    #[serde(default, rename = "missTime")] pub miss_time: Option<i32>,
+    #[serde(default, rename = "missTime")] pub miss_time: Option<i32>, #[serde(default)] pub recover: Option<bool>,
     #[serde(default, rename = "guardDamage")] pub guard_damage: Option<f32>,
     #[serde(default, rename = "hitSound")] pub hit_sound: Option<[i32; 2]>,
     #[serde(default)] pub pausetime: Option<[i32; 2]>,
@@ -143,7 +143,7 @@ pub struct NativeMove {
     #[serde(default)] pub armor: Option<ArmorSpec>,
     #[serde(default)] pub parry: Option<ParrySpec>,
     #[serde(default)] pub burst: Option<bool>,
-    #[serde(default)] pub flight: Option<bool>,
+    #[serde(default)] pub flight: Option<bool>, #[serde(default, rename = "landAt")] pub land_at: Option<i32>,
     #[serde(default)] pub timestop: Option<i32>,
     #[serde(default)] pub throw: Option<ThrowSpec>,
     #[serde(default)] pub cinematic: Option<super::cinematic::CinematicSpec>,

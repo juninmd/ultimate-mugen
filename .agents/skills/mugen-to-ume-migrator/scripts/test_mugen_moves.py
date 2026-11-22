@@ -3,7 +3,8 @@ import unittest
 from PIL import Image
 
 from mugen_parse import contain_axis
-from mugen_moves import build_move, convert_input, frame_at, routes
+from mugen_moves import build_move, frame_at
+from mugen_routes import convert_input, routes
 
 
 def ctrl(kind, **body):

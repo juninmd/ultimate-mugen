@@ -51,6 +51,10 @@ pub struct ChargeSpec {
     #[serde(default)] pub shake: Option<bool>,
     #[serde(default)] pub sound: Option<[u16; 2]>,
     #[serde(default)] pub explod: Option<String>,
+    #[serde(default, rename = "soundAt")] pub sound_at: Vec<i32>,
+    #[serde(default, rename = "startAnim")] pub start_anim: Option<String>,
+    #[serde(default, rename = "startSound")] pub start_sound: Option<[u16; 2]>,
+    #[serde(default, rename = "endAnim")] pub end_anim: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

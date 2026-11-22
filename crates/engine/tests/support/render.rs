@@ -40,26 +40,17 @@ fn blit(
     let ground = H as f32 - 36.0;
     let sx = (W as f32 / 2.0) + (pos.0 - camx) * scale;
     let sy = ground + pos.1 * scale;
-    let (ax, ay) = (sp.axis_x, sp.axis_y);
-    let base = if fr.flip_h == (facing >= 0.0) {
-        -(img.w as f32 - ax)
+    let unit = if sp.scale > 0.0 { sp.scale } else { 1.0 };
+    let pix = if sp.width > 0.0 { sp.width * unit / img.w as f32 } else { 1.0 };
+    let (ax, ay, w) = (sp.axis_x * unit, sp.axis_y * unit, img.w as f32 * pix);
+    let base = if fr.flip_h == (facing >= 0.0) { -(w - ax) } else { -ax };
+    let wx = sx + (fr.x * facing.signum() + base) * scale;
+    let wy = sy + (fr.y - ay) * scale;
+    let ss = pix * scale;
+    let t = if (facing >= 0.0) == fr.flip_h {
+        Transform::from_row(-ss, 0.0, 0.0, ss, wx + w * scale, wy)
     } else {
-        -ax
-    };
-    let ox = base + fr.x * facing.signum();
-    let oy = -ay + fr.y;
-    let mirror = (facing >= 0.0) == fr.flip_h;
-    let t = if mirror {
-        Transform::from_row(
-            -scale,
-            0.0,
-            0.0,
-            scale,
-            sx + (ox + img.w as f32) * scale,
-            sy + oy * scale,
-        )
-    } else {
-        Transform::from_row(scale, 0.0, 0.0, scale, sx + ox * scale, sy + oy * scale)
+        Transform::from_row(ss, 0.0, 0.0, ss, wx, wy)
     };
     let mut pp = PixmapPaint::default();
     pp.opacity = alpha;

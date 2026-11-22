@@ -138,9 +138,9 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         let simple_btn = m.input.trim().split('+').all(|t| ["a", "b", "c", "x", "y", "z"].contains(&t.trim()));
         let mut cdef = parse_command(&cname, &m.input, if m.kind == "super" { 30 } else if m.kind == "special" || m.kind == "finisher" { 20 } else { 15 }, if simple_btn { 1 } else { 4 });
         cdef.pause_buffer = if m.kind == "super" { 8 } else if m.kind == "special" || m.kind == "finisher" { 6 } else if simple_btn { 0 } else { 4 };
-        commands.push(cdef);
+        let listed = !m.input.trim().is_empty(); if listed { commands.push(cdef); }
         let cost = m.cost.unwrap_or(if super::ultimate::is(&m.id) { super::ultimate::COST } else if m.kind == "super" { 1000.0 } else { 0.0 });
-        movelist.push(MoveInfo { name: m.name.clone(), input: m.input.clone(), command: cname.clone(), cost, drain: false, forms: forms_mask, state: sid });
+        if listed { movelist.push(MoveInfo { name: m.name.clone(), input: m.input.clone(), command: cname.clone(), cost, drain: false, forms: forms_mask, state: sid }); }
         let mut simple_cmd = String::new();
         if let Some(sp) = &m.simple {
             let sc = format!("simple_{sp}_{}", m.id);
@@ -150,16 +150,17 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
             simple_cmd = format!(" || command = \"{sc}\"");
         }
         let air_entry = format!("statetype = A{}", plan.air_entry_states(index));
-        let state_cond = match when { "air" => air_entry.as_str(), "crouch" => "statetype = C || (statetype = S && command = \"holddown\")", _ => "statetype = S || statetype = C && command != \"holddown\"" };
+        let fly_entry = format!("stateno = {}", super::abilities::FLY_STATE);
+        let state_cond = match when { "air" => air_entry.as_str(), "fly" => fly_entry.as_str(), "crouch" => "statetype = C || (statetype = S && command = \"holddown\")", _ => "statetype = S || statetype = C && command != \"holddown\"" };
         let crouch_ok = match when { "crouch" => "\ntriggerall = command = \"holddown\"", "stand" => "\ntriggerall = command != \"holddown\" || statetype = S", _ => "" };
         let cancel = super::rekka::lead(m, &plan, index);
         let form_line = form_cond.as_ref().map(|fc| format!("triggerall = {fc}\n")).unwrap_or_default();
         let cost_line = if cost > 0.0 { format!("triggerall = power >= {cost}\n") } else { String::new() } + &super::requires::trigger_lines(m);
-        minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = !IsHelper && (command = \"{cname}\"{simple_cmd})\ntriggerall = {state_cond}{crouch_ok}\n{form_line}{cost_line}{cancel}{}\n\n", m.name, if m.burst == Some(true) { "\ntrigger2 = movetype = H && stateno != [5100, 5150]" } else { "" });
+        if listed { minus1 += &format!("[State -1, {}]\ntype = ChangeState\nvalue = {sid}\ntriggerall = !IsHelper && (command = \"{cname}\"{simple_cmd})\ntriggerall = {state_cond}{crouch_ok}\n{form_line}{cost_line}{cancel}{}\n\n", m.name, if m.burst == Some(true) { "\ntrigger2 = movetype = H && stateno != [5100, 5150]" } else { "" }); }
         let anim = anim_no.get(&m.anim).copied().unwrap_or(0);
-        let st = match when { "air" => 'A', "crouch" => 'C', _ => 'S' };
+        let st = match when { "air" | "fly" => 'A', "crouch" => 'C', _ => 'S' };
         let jumps = m.moves.iter().any(|v| v.vel[1].is_some_and(|y| y != 0.0));
-        let ph = match when { "air" => 'A', "crouch" => 'C', _ => if jumps || m.flight == Some(true) { 'N' } else { 'S' } };
+        let ph = match when { "air" => 'A', "fly" => 'N', "crouch" => 'C', _ => if jumps || m.flight == Some(true) { 'N' } else { 'S' } };
         let pa = if cost > 0.0 { -cost } else if m.kind == "special" { 30.0 } else { 15.0 };
         cns += &format!("[Statedef {sid}]\ntype = {st}\nmovetype = A\nphysics = {ph}\nanim = {anim}\nctrl = 0\n{}poweradd = {pa}\nsprpriority = 2\n\n", if when == "air" { "" } else { "velset = 0, 0\n" }); cns += &super::armor::armor_state(nc, m, sid); cns += &extras::voice_and_traits_state(m, sid); let (throw_cns, throw_def) = super::throw::throw_states(m, sid, &anim_no); cns += &throw_cns; throw_defs += &throw_def; cns += &super::requires::finisher_done(m, sid);
         let freeze = if super::ultimate::is(&m.id) { super::ultimate::FREEZE } else { 55 };
@@ -172,8 +173,8 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         for v in &m.moves {
             cns += &format!("[State {sid}, vel]\ntype = VelSet\ntrigger1 = AnimElem = {}\n{}{}\n", v.at, v.vel[0].map(|x| format!("x = {x}\n")).unwrap_or_default(), v.vel[1].map(|y| format!("y = {y}\n")).unwrap_or_default());
         }
-        if ph == 'N' && when != "air" {
-            cns += &format!("[State {sid}, grav]\ntype = VelAdd\ntrigger1 = Pos Y < 0 || Vel Y < 0\ny = const(movement.yaccel)\n\n[State {sid}, land]\ntype = ChangeState\ntrigger1 = Pos Y >= 0 && Vel Y > 0\nvalue = 52\n\n[State {sid}, fix]\ntype = PosSet\ntrigger1 = Pos Y > 0\ny = 0\n\n");
+        if ph == 'N' && !matches!(when, "air" | "fly") {
+            cns += &format!("[State {sid}, grav]\ntype = VelAdd\ntrigger1 = Pos Y < 0 || Vel Y < 0\ny = const(movement.yaccel)\n\n{}[State {sid}, fix]\ntype = PosSet\ntrigger1 = Pos Y > 0\ny = 0\n\n", super::move_fx::land_cns(m.land_at, sid, anim));
         }
         let sm = if super::ultimate::is(&m.id) { super::ultimate::DAMAGE } else if m.kind == "super" { 1.3 } else { 1.0 };
         let attr = format!("{st}, {}A", match m.kind.as_str() { "normal" => "N", "special" | "finisher" => "S", _ => "H" });
@@ -194,10 +195,10 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         }
         cns += &super::move_fx::follow_up_cns(m, sid, m.follow_up.as_ref().and_then(|f| plan.sid_of(&f.to)));
         if when != "air" {
-            if m.teleport.is_some() { cns += &format!("[State {sid}, end_air]\ntype = ChangeState\ntrigger1 = AnimTime = 0 && Pos Y < 0\nvalue = 50\nctrl = 1\n\n"); }
-            cns += &format!("[State {sid}, end]\ntype = ChangeState\ntrigger1 = AnimTime = 0\nvalue = {}\nctrl = 1\n\n", if when == "crouch" { 11 } else { 0 });
+            if m.teleport.is_some() && when != "fly" { cns += &format!("[State {sid}, end_air]\ntype = ChangeState\ntrigger1 = AnimTime = 0 && Pos Y < 0\nvalue = 50\nctrl = 1\n\n"); }
+            cns += &format!("[State {sid}, end]\ntype = ChangeState\ntrigger1 = AnimTime = 0\nvalue = {}\nctrl = 1\n\n", match when { "crouch" => 11, "fly" => super::abilities::FLY_STATE, _ => 0 });
         }
-        if super::air_variant::eligible(m, when) {
+        if listed && super::air_variant::eligible(m, when) {
             let (entry, body) = (super::air_variant::entry(&minus1[minus1_start..], sid, &format!("{state_cond}{crouch_ok}")), super::air_variant::body(&cns[cns_start..], sid));
             minus1 += &entry; cns += &body;
         }

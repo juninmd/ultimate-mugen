@@ -678,13 +678,10 @@ impl Session {
         g.post.begin();
         let p = self.r.draw(g, &self.m, &self.stage, &mut self.vfx, ui);
         g.post.end(&p, ui.t);
+        if self.hud.hidden { return; }
         let human = self.human_ids();
         self.hud.replay = self.is_replay;
-        self.hud.inputs = if self.m.training {
-            self.inputs.clone()
-        } else {
-            vec![]
-        };
+        self.hud.inputs = if self.m.training { self.inputs.clone() } else { vec![] };
         self.vfx.draw_cinema_bars(ui);
         let cpu = self.cpu_ids();
         self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human, &cpu);

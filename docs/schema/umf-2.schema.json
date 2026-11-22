@@ -265,7 +265,7 @@
         "knockback": { "$ref": "#/$defs/vec2" }, "airKnockback": { "$ref": "#/$defs/vec2" }, "launch": { "type": "boolean" },
         "hitstop": { "type": "integer" }, "hitstun": { "type": "integer" }, "spark": { "type": "integer" }, "shake": { "type": "integer" }, "priority": { "type": "integer" },
         "hitflag": { "type": "string" }, "pausetime": { "$ref": "#/$defs/ivec2" }, "cornerpush": { "type": "number" },
-        "hitSound": { "$ref": "#/$defs/snd" }, "guardSound": { "$ref": "#/$defs/snd" }, "sparkPos": { "$ref": "#/$defs/vec2" },
+        "hitSound": { "$ref": "#/$defs/snd" }, "ownSound": { "type": "boolean" }, "guardSound": { "$ref": "#/$defs/snd" }, "sparkPos": { "$ref": "#/$defs/vec2" },
         "groundBounce": { "type": "boolean" }, "wallBounce": { "type": "boolean" }, "element": { "$ref": "#/$defs/element" }, "stun": { "type": "integer" }, "recover": { "type": "boolean" }
       },
       "required": ["at", "damage"],
@@ -278,7 +278,7 @@
         "at": { "type": "integer" }, "anim": { "type": "string" }, "hitAnim": { "type": "string" }, "speed": { "$ref": "#/$defs/vec2" }, "accel": { "$ref": "#/$defs/vec2" }, "offset": { "$ref": "#/$defs/vec2" },
         "hits": { "type": "integer" }, "damage": { "type": "number" }, "level": { "enum": ["light", "medium", "heavy"] }, "launch": { "type": "boolean" }, "knockback": { "$ref": "#/$defs/vec2" },
         "removeTime": { "type": "integer" }, "priority": { "type": "integer" }, "element": { "$ref": "#/$defs/element" }, "stun": { "type": "integer" }, "recover": { "type": "boolean" }, "missTime": { "type": "integer" },
-        "guardDamage": { "type": "number" }, "hitSound": { "$ref": "#/$defs/snd" }, "pausetime": { "$ref": "#/$defs/ivec2" }, "hitflag": { "type": "string" }, "shake": { "type": "integer" },
+        "guardDamage": { "type": "number" }, "hitSound": { "$ref": "#/$defs/snd" }, "ownSound": { "type": "boolean" }, "pausetime": { "$ref": "#/$defs/ivec2" }, "hitflag": { "type": "string" }, "shake": { "type": "integer" },
         "repeat": { "type": "object", "properties": { "count": { "type": "integer", "minimum": 1 }, "every": { "type": "integer" }, "offsetStep": { "$ref": "#/$defs/vec2" }, "speedStep": { "$ref": "#/$defs/vec2" }, "damageStep": { "type": "number" } }, "required": ["count"], "additionalProperties": false }
       },
       "required": ["at", "anim", "speed", "offset", "damage"],
@@ -392,7 +392,7 @@
         "shake": { "oneOf": [{ "$ref": "#/$defs/shake" }, { "type": "array", "items": { "$ref": "#/$defs/shake" } }] },
         "flash": { "oneOf": [{ "$ref": "#/$defs/flash" }, { "type": "array", "items": { "$ref": "#/$defs/flash" } }] },
         "superPause": { "type": "object", "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "pos": { "$ref": "#/$defs/vec2" }, "anim": { "type": "integer" }, "darken": { "type": "boolean" } }, "additionalProperties": false },
-        "followUp": { "type": "object", "properties": { "to": { "type": "string" }, "on": { "enum": ["hit", "contact", "hitNow", "end"] }, "at": { "type": "integer" } }, "required": ["to"], "additionalProperties": false },
+        "followUp": { "type": "object", "properties": { "to": { "type": "string" }, "on": { "enum": ["hit", "contact", "hitNow", "end", "command", "release"] }, "at": { "type": "integer" }, "command": { "type": "string" } }, "required": ["to"], "additionalProperties": false },
         "blink": {
           "oneOf": [{ "$ref": "#/$defs/blink" }, { "type": "array", "items": { "$ref": "#/$defs/blink" } }]
         },
@@ -402,7 +402,8 @@
         "velAdd": { "type": "array", "items": { "type": "object", "properties": { "from": { "type": "integer" }, "to": { "type": "integer" }, "x": { "type": "number" }, "y": { "type": "number" } }, "additionalProperties": false } },
         "posFreeze": { "type": "array", "items": { "type": "object", "properties": { "from": { "type": "integer" }, "to": { "type": "integer" } }, "additionalProperties": false } },
         "posSet": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "x": { "type": "number" }, "y": { "type": "number" } }, "additionalProperties": false } },
-        "palFx": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "add": { "$ref": "#/$defs/rgbDelta" }, "mul": { "type": "array", "items": { "type": "integer" }, "minItems": 3, "maxItems": 3 }, "sinAdd": { "type": "array", "items": { "type": "integer" }, "minItems": 4, "maxItems": 4 }, "color": { "type": "number" }, "invertAll": { "type": "boolean" } }, "required": ["time"], "additionalProperties": false } }
+        "palFx": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "add": { "$ref": "#/$defs/rgbDelta" }, "mul": { "type": "array", "items": { "type": "integer" }, "minItems": 3, "maxItems": 3 }, "sinAdd": { "type": "array", "items": { "type": "integer" }, "minItems": 4, "maxItems": 4 }, "color": { "type": "number" }, "invertAll": { "type": "boolean" } }, "required": ["time"], "additionalProperties": false } },
+        "spawn": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "state": { "type": "integer" }, "id": { "type": "integer" }, "name": { "type": "string" }, "pos": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }, "postype": { "type": "string" }, "facing": { "type": "integer" }, "ownPal": { "type": "integer" }, "superMoveTime": { "type": "integer" }, "pauseMoveTime": { "type": "integer" } }, "required": ["state"], "additionalProperties": false } }
       },
       "required": ["id"],
       "additionalProperties": false

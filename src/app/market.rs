@@ -605,12 +605,9 @@ impl App {
         let by = 640.0;
         self.market_action_bar(&rows, rx, rw, modal, &mut acts);
         self.market_links(rows.get(self.market_ui.cur).map(|r| (r.repo_key.clone(), r.id.clone())), modal);
-        self.ui.adapted_plate(40.0, by, 330.0, 48.0, Some(crate::tweaks::accent(0.9)));
-        self.ui.text(mt("Voltar"), 205.0, by + 32.0, 26.0, WHITE, Align::Center, true);
-        if self.clicked_rect(40.0, by, 330.0, 48.0) && !modal {
-            acts.push(Act::Back);
+        for (k, line) in [mt("U adicionar · T token · Tab abas · F tipo"), mt("J formato · P desatualizados · K não instalados"), mt("V lista/grade · Espaço marca · Enter aplica")].into_iter().enumerate() {
+            self.ui.text(line, 40.0, 606.0 + k as f32 * 16.0, 13.0, hex("#a79fc4"), Align::Left, false);
         }
-        self.ui.text(mt("U adicionar · T token · Tab explorar/instalados · F tipo · J formato · P desatualizados · K não instalados · V lista/grade · Espaço marca · Enter/Start aplica"), 40.0, 712.0, 14.0, hex("#a79fc4"), Align::Left, false);
 
         self.market_entry_modal();
         self.market_confirm_modal(&mut acts);

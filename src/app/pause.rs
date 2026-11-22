@@ -8,7 +8,7 @@ mod draw_slots;
 mod glide;
 mod input;
 mod input_fit;
-mod labels;
+pub(super) mod labels;
 mod preview;
 mod layout;
 mod skin;

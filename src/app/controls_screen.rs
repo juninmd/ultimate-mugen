@@ -150,9 +150,6 @@ impl App {
                 self.c.rumble(i, 0.8, 0.8, 300);
             }
         }
-        self.ui
-            .adapted_button(60.0, 610.0, 200.0, 60.0, crate::i18n::t("controls.back"), true);
-        let back = self.clicked_rect(60.0, 610.0, 200.0, 60.0);
         if !touch {
             let hot = self.hover_rect(300.0, 610.0, 360.0, 60.0);
             self.ui.adapted_button(300.0, 610.0, 360.0, 60.0, crate::i18n::t("controls.customize"), hot);
@@ -165,7 +162,7 @@ impl App {
                 });
             }
         }
-        if back || self.c.pressed(nav::BACK) {
+        if self.c.pressed(nav::BACK) {
             self.screen = match self.settings_back.take() {
                 Some((tab, from_fight)) => Screen::Settings {
                     tab,

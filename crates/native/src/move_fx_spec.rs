@@ -118,4 +118,6 @@ pub struct FollowUpSpec {
     pub on: Option<String>,
     #[serde(default)]
     pub at: Option<i32>,
+    #[serde(default)]
+    pub command: Option<String>,
 }

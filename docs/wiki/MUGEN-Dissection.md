@@ -1,6 +1,6 @@
 # Dissection of four M.U.G.E.N fighters
 
-Read-only study of four public packs, taken apart file by file with `.agents/skills/mugen-dissector/scripts/dissect.py`: Aizen TYBW (Fighter Factory Ultimate, SFF v2), Gogeta SSJ4 (Pocket_Danyell and Sarevok), Goku SSJ GT (Yamcha Z) and Goku SSJ4 (_Vision). The packs are third-party files: nothing from them is committed, only what we learned. Companion studies: [M.U.G.E.N code study](MUGEN-Code-Study.md) and [Fighter study](Fighter-Study.md).
+Read-only study of four public packs, taken apart file by file with `tools/mugen2umf`: Aizen TYBW (Fighter Factory Ultimate, SFF v2), Gogeta SSJ4 (Pocket_Danyell and Sarevok), Goku SSJ GT (Yamcha Z) and Goku SSJ4 (_Vision). The packs are third-party files: nothing from them is committed, only what we learned. Companion studies: [M.U.G.E.N code study](MUGEN-Code-Study.md) and [Fighter study](Fighter-Study.md).
 
 ## Size of each pack
 

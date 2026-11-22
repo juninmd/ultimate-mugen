@@ -239,7 +239,7 @@ O painel de pausa do Ultimate MUGEN lê dinamicamente o atributo `cost` e `drain
    cargo test -p ume-native --release
    cargo test -p ume-engine --release --test native_abilities_and_forms --test native_energy_charge --test native_combo_routes
    ```
-9. Inicie o jogo em modo treino (`F2` ativa hurtboxes e hitboxes visíveis) e valide o epílogo (`?e2e_epilogue=1`).
+9. Inicie o jogo em modo treino (`F2` abre a ferramenta de debug com hitboxes/pushbox/pivô/vetores; `F4` alterna abas `Overview`/`Vars & Maps`/`Clipboard`/`Console`; `F5` pausa; `F6`/`.` avança `+1 frame`; `F7` ajusta velocidade; `F8` alterna camadas), ou rode `ume-tools debug-fight <char> --frames 180` para frame data e trace determinístico, e valide o epílogo (`?e2e_epilogue=1`).
 
 ---
 

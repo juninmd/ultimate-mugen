@@ -42,3 +42,27 @@ pub fn unsupported_depth(m: &mut Match, sc: &Controller) {
     let message = format!("{} is accepted but ignored: the engine has no Z axis", sc.kind);
     m.warn_once(&message);
 }
+
+pub fn slowmo(m: &mut Match, i: usize, sc: &Controller) {
+    let ticks = m.num(i, sc, "time", 0.0, 0).max(0.0) as i32;
+    if ticks > 0 {
+        m.slow_mo = m.slow_mo.max(ticks);
+    }
+}
+
+pub fn cinema(m: &mut Match, i: usize, sc: &Controller) {
+    let bars = m.num(i, sc, "bars", 1.0, 0).clamp(0.0, 1.0) as f32;
+    let slow = m.num(i, sc, "slow", 0.0, 0).max(0.0) as i32;
+    let invert = m.num(i, sc, "invert", 0.0, 0) != 0.0;
+    let lines = m.num(i, sc, "lines", 0.0, 0).clamp(0.0, 1.0) as f32;
+    let flash = [
+        m.num(i, sc, "flash", 0.0, 0).clamp(0.0, 255.0) as u8,
+        m.num(i, sc, "flash", 0.0, 1).clamp(0.0, 255.0) as u8,
+        m.num(i, sc, "flash", 0.0, 2).clamp(0.0, 255.0) as u8,
+    ];
+    if slow > 0 {
+        m.slow_mo = m.slow_mo.max(slow);
+    }
+    let fighter = m.fighters[i].root;
+    m.events.push(crate::matchs::Event::Cinema { fighter, bars, slow, invert, lines, flash });
+}

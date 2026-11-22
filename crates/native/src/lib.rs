@@ -14,6 +14,7 @@ pub mod move_fx;
 pub mod move_fx_spec;
 pub mod blocks;
 pub mod throw;
+pub mod cinematic;
 pub mod boss_ui;
 pub mod clones;
 pub mod companions;

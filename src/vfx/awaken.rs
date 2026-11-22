@@ -35,6 +35,7 @@ impl Vfx {
                 self.cracks(f.pos.x, feet, -1.0, 54.0);
             }
             self.sfx.push("super");
+            self.cinema.trigger_cutin(fighter, f.side, gold, 0.92);
             let nm = f.def.display_name.to_uppercase();
             self.tag(x, y - 46.0, &format!("SUPER · {nm}"), gold);
         }
@@ -100,6 +101,9 @@ impl Vfx {
                 if nm.is_empty() { crate::i18n::tr3("DESPERTAR", "AWAKEN", "DESPERTAR") } else { &nm },
                 col,
             );
+            if f.def.boss || f.form >= 2 {
+                self.cinema.trigger_cutin(fighter, f.side, col, 0.96);
+            }
             if f.def.boss && f.form >= 3 {
                 self.banner(crate::i18n::tr3("ECLIPSE PRIMORDIAL", "PRIMORDIAL ECLIPSE", "ECLIPSE PRIMORDIAL"), crate::i18n::tr3("FORMA SUPREMA DE MIKAZUKI OBORO", "SUPREME FORM OF MIKAZUKI OBORO", "FORMA SUPREMA DE MIKAZUKI OBORO"), col);
             } else if f.def.boss && f.form >= 2 {

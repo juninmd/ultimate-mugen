@@ -102,6 +102,7 @@ pub enum Event {
     Bgm(BgmAction),
     /// a tag-team swap: `fighter` (root id) just stepped in for `side`
     Tag { side: usize, fighter: u32 },
+    Cinema { fighter: u32, bars: f32, slow: i32, invert: bool, lines: f32, flash: [u8; 3] },
     RoundStart(i32), Fight, RoundEnd(i32), MatchOver(usize),
 }
 

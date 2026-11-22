@@ -146,6 +146,7 @@ pub struct NativeMove {
     #[serde(default)] pub flight: Option<bool>,
     #[serde(default)] pub timestop: Option<i32>,
     #[serde(default)] pub throw: Option<ThrowSpec>,
+    #[serde(default)] pub cinematic: Option<super::cinematic::CinematicSpec>,
     #[serde(default)] pub cancels: Option<Vec<String>>,
     #[serde(default)] pub rekka: Option<RekkaSpec>,
     #[serde(default)] pub requires: Option<MoveRequirements>,

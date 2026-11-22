@@ -278,13 +278,8 @@ impl App {
     pub(crate) fn survival_hud(&self) {
         let Some(s) = self.survival else { return };
         let best = self.settings.survival_best;
-        self.ui.rect(
-            VW / 2.0 - 210.0,
-            6.0,
-            420.0,
-            44.0,
-            Color::new(0.02, 0.01, 0.06, 0.6),
-        );
+        self.ui
+            .adapted_glass(VW / 2.0 - 210.0, 652.0, 420.0, 44.0, hex("#ffcc33"), 1.0);
         self.ui.text(
             &crate::i18n::tf(
                 "survival.hud",
@@ -294,7 +289,7 @@ impl App {
                 ],
             ),
             VW / 2.0,
-            28.0,
+            674.0,
             17.0,
             hex("#ffcc33"),
             Align::Center,
@@ -303,7 +298,7 @@ impl App {
         self.ui.text(
             &crate::i18n::tf("survival.record", &[("{best}", &best.to_string())]),
             VW / 2.0,
-            43.0,
+            690.0,
             12.0,
             hex("#a49cc0"),
             Align::Center,

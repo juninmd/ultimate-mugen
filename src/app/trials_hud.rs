@@ -40,7 +40,7 @@ impl App {
             return;
         }
         let (w, h) = (330.0, 54.0);
-        let (x, y) = ((VW - w) / 2.0, if self.c.touch.enabled { 146.0 } else { 100.0 });
+        let (x, y) = ((VW - w) / 2.0, if self.c.touch.enabled { 232.0 } else { 186.0 });
         self.ui.rect(x, y, w, h, PANEL);
         let title = format!("{} {}/{}", tr3("DESAFIO", "TRIAL", "DESAFÍO"), (t.cleared + 1).min(trials::LADDER.len()), trials::LADDER.len());
         let Some(goal) = t.goal() else {

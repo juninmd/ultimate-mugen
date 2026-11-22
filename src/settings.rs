@@ -82,6 +82,7 @@ pub struct Settings {
     pub show_boxes: bool,
     pub story_enabled: bool,
     pub lang: crate::i18n::Lang,
+    pub lite: crate::lite::Lite,
 }
 
 impl Default for Settings {
@@ -122,6 +123,7 @@ impl Default for Settings {
             show_boxes: false,
             story_enabled: true,
             lang: crate::i18n::Lang::En,
+            lite: crate::lite::Lite::default(),
         }
     }
 }

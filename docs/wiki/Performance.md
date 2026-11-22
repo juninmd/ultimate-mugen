@@ -465,3 +465,29 @@ Compiling a UMF fighter rasterized the base frames in parallel and then recolore
 | After | 4.70 / 4.46 / 4.54 s | 551 ms | 405 ms | 319 ms |
 
 The output is unchanged: a checksum of every sprite (pixels, size, axis, scale) and every animation frame of the 21 fighters in two palettes is identical before and after. Fighters without forms (`npc_*`) do not change, since they have no variants to render.
+
+## Graphics presets for slow machines
+
+Settings, tab PERFORMANCE: one preset (High, Medium, Low, Minimum, or Custom once any option differs) plus individual options. Everything is visual only; `Match::tick`, rollback and replays never read these values.
+
+| Option | High | Medium | Low | Minimum |
+|---|---|---|---|---|
+| Render scale (fight scene, HUD stays sharp) | 100% | 100% | 75% | 50% |
+| Post-processing (`fx`) | High | Medium | Off | Off |
+| Particles and effects | Full | Reduced | Reduced | Minimal |
+| After image, glass HUD, animated backdrop, CRT | on | on (CRT off) | off | off |
+| Shadows | on | on | on | off |
+
+- Render scale draws the scene into a smaller target and the post pass upsamples it to the window (`ume_shell::quad::set_render_scale`, `PostFx::scene_view`). With post-processing off and scale below 100% a neutral post pass is still used.
+- Runtime flags live in `src/lite/flags.rs`; render code reads `crate::lite::shadows()`, `afterimage()`, `backdrop()`, `glass()`, `crt()`.
+- Auto adjust (default on for the web build): `lite::Monitor` averages frame time over 4 s of fight after a 3 s warm-up; above 24 ms it moves one preset lighter, saves the settings and shows a toast. It never raises quality again by itself.
+- Measure with `UME_PRESET=0..3 UME_TOUR=perf` (desktop) or the `?e2e=1&modo=watch` match in Chromium (web).
+
+Measured on the 4-core cloud machine with software rendering (lavapipe for desktop, SwiftShader for web, 1280x720, Kaito vs Shion):
+
+| Preset | Desktop frame avg | Web fps |
+|---|---|---|
+| High | 28.7 ms | 10.5 |
+| Medium | 28.9 ms | 11.5 |
+| Low | 19.5 ms | 18.7 |
+| Minimum | 15.8 ms | 21.8 |

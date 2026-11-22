@@ -687,6 +687,7 @@ impl Session {
         self.vfx.draw_cinema_bars(ui);
         let cpu = self.cpu_ids();
         self.hud.draw(ui, g, &self.m, ui.t, self.team.as_ref(), &human, &cpu);
+        crate::power_arena::minimap(ui, &self.m, &human);
         if !self.paused { self.vfx.draw_cutin(ui, g, &self.m); self.vfx.draw_banners(ui); }
     }
 }

@@ -108,9 +108,9 @@ impl App {
                     )
                     .into();
                 }
-                0..=4 | 10 | 11 => {
+                10 => self.open_arena_setup(),
+                0..=4 | 11 => {
                     self.set_mode(match i {
-                        10 => Mode::PowerArena,
                         11 => Mode::Tower,
                         _ => mode[i],
                     });

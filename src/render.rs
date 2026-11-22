@@ -505,8 +505,9 @@ impl MatchRenderer {
                 ord += 1;
             }
         }
+        let near = |x: f32| !m.power_arena || (x - m.camera.x).abs() < m.view_w * 0.5 + 160.0;
         for (i, f) in m.fighters.iter().enumerate() {
-            if !f.destroyed {
+            if !f.destroyed && near(f.pos.x) {
                 items.push((
                     f.spr_priority + (f.lane / 6.0) as i32
                         - if f.has_assert(ume_engine::flags::asf::DRAWUNDER) {

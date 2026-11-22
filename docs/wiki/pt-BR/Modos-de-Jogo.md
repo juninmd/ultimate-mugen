@@ -109,6 +109,18 @@ O plano fica em `Pilot::Dummy(DummyPlan)` (`src/session/dummy.rs`); o boneco ape
 
 ## Arena do Poder
 
-Escolha **Arena do Poder** no menu principal e selecione os dois lutadores para enfrentar a CPU. Suba por 40 plataformas suspensas em oito níveis. Atravesse-as no salto e pouse nelas durante a descida. O lutador ainda pode voltar enquanto estiver acima da base. Ao cair pela borda, ele gira no ar e só é eliminado quando sai da arena. A câmera acompanha a altura e abre o enquadramento quando os lutadores se afastam na horizontal ou na vertical.
+Escolha **Arena do Poder** no menu principal, ajuste a partida e escolha seus lutadores para enfrentar a CPU. Suba por 40 plataformas suspensas em oito níveis. Atravesse-as no salto e pouse nelas durante a descida. O lutador ainda pode voltar enquanto estiver acima da base. Ao cair pela borda, ele gira no ar e só é eliminado quando sai da arena. A câmera acompanha a altura e abre o enquadramento quando os lutadores se afastam na horizontal ou na vertical.
+
+### Time contra enxame (1 a 5 contra até 100)
+
+A entrada do menu abre uma tela de ajuste antes da seleção: **seu time** (1 a 5 lutadores), **inimigos** (1, 5, 10, 25, 50 ou 100) e o **tipo** de inimigo (lutadores aleatórios ou um lutador escolhido, repetido). Funciona com mouse, toque, teclado e controle.
+
+- Só um número limitado de inimigos fica em campo ao mesmo tempo (16 no desktop, 12 no navegador, 8 no Android/iOS). Quando um cai, outro entra depois de um instante em um ponto aleatório do cenário (chão ou plataforma), longe do seu time, até o total escolhido acabar. O round termina quando o último inimigo cai ou quando seu time inteiro cai.
+- Inimigos aleatórios vêm de no máximo 8 lutadores distintos (6 no navegador, 3 no celular) que compartilham sprites, então atlas e memória não crescem com a quantidade de inimigos.
+- O mapa cresce com a multidão: usa um número ímpar de blocos da arena original de 1.108 px (1, 3, 5 ou 7), repetindo as plataformas. As bordas de queda acompanham o mapa maior.
+- A câmera segue só o seu time, então inimigos distantes não esticam o zoom. Lutadores fora da tela não são desenhados.
+- Um **minimapa** aparece abaixo do HUD sempre que o mapa é mais largo que a tela: pontos verdes e ciano são seu time, vermelhos são os inimigos e a moldura amarela é a câmera. O HUD mostra os inimigos restantes sobre o total.
+
+Código: simulação em `crates/engine/src/matchs/swarm.rs`, tela de ajuste em `src/app/arena_setup.rs` e `arena_pick.rs`, minimapa e plataformas em bloco em `src/power_arena.rs`.
 
 Na versão web, abra uma luta diretamente com `?modo=arena&p1=kaito&p2=shion&luta=1`.

@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod spawn; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod types; mod unleash; mod walk;
+mod spawn; mod swarm; pub use swarm::{arena_tiles, Swarm, SWARM_MAX_TOTAL}; mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -35,7 +35,7 @@ pub struct Match {
     /// side that landed the first hit of the round (None until someone connects)
     pub first_attack: Option<usize>,
     /// Simultaneous 2v2 ("simul"): a team loses the round only when all its members are KO'd.
-    pub team_simul: bool, pub power_arena: bool,
+    pub team_simul: bool, pub power_arena: bool, pub arena_half: f32, pub swarm: Option<Swarm>,
     pub team_tag: bool,
     pub lanes: crate::lane::LaneRules, pub objects: crate::stage_objects::StageObjects,
     /// MUGEN-style pushbox: an attacking fighter does not get pushed back by the defender; off = symmetric split.
@@ -81,7 +81,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            power_arena: false, team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, knockdown: KnockdownRule::default(), mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            power_arena: false, arena_half: ARENA_HALF_WIDTH, swarm: None, team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, knockdown: KnockdownRule::default(), mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, rand_state: Cell::new(DEFAULT_SEED), next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
@@ -412,14 +412,14 @@ impl Match {
     }
 
     fn physics_step(&mut self, i: usize) {
-        if self.power_arena && self.fighters[i].state_no == ENGINE_STATE_ARENA_EXIT { power_arena::step_arena_exit(&mut self.fighters[i]); return; } else if self.fighters[i].pos_freeze { self.fighters[i].pos_freeze = false; self.update_bind(i); return; }
+        if self.power_arena && self.fighters[i].state_no == ENGINE_STATE_ARENA_EXIT { power_arena::step_arena_exit(&mut self.fighters[i], self.arena_half); return; } else if self.fighters[i].pos_freeze { self.fighters[i].pos_freeze = false; self.update_bind(i); return; }
         if self.fighters[i].bind.is_some() { self.update_bind(i); return; }
         let mut land = false;
         let gravity = self.mutators.gravity;
         {
             let f = &mut self.fighters[i];
             f.pos.x += f.vel.x * f.facing * f.passive_speed();
-            if self.power_arena { f.ground_level = power_arena::platform_floor(f.pos.x, f.pos.y, f.vel.y); }
+            if self.power_arena { f.ground_level = power_arena::platform_floor(f.pos.x, f.pos.y, f.vel.y, self.arena_half); }
             f.pos.y += f.vel.y;
             let physics = if f.physics == 'N' && f.move_type == 'H' && f.state_type == 'A' { 'A' } else { f.physics };
             match physics {
@@ -587,7 +587,7 @@ impl Match {
                 if self.team_simul || self.team_tag {
                     // a fallen teammate stays down; the round ends only when a whole team is KO'd
                     for &i in &dead { self.fighters[i].alive = false; }
-                    let out = |m: &Match, s: usize| roots.iter().filter(|&&i| m.fighters[i].side == s).all(|&i| m.fighters[i].life <= 0.0 && !m.fighters[i].has_assert(asf::NOKO));
+                    let out = |m: &Match, s: usize| !(s == 1 && m.swarm_pending()) && roots.iter().filter(|&&i| m.fighters[i].side == s).all(|&i| m.fighters[i].life <= 0.0 && !m.fighters[i].has_assert(asf::NOKO));
                     let (o0, o1) = (out(self, 0), out(self, 1));
                     dead = roots.iter().copied().filter(|&i| (self.fighters[i].side == 0 && o0) || (self.fighters[i].side == 1 && o1)).collect();
                 }
@@ -758,7 +758,7 @@ impl Match {
         self.push_and_bound();
         self.rebind();
         self.orphan_custom_states();
-        self.detect_hits(); self.stage_objects_step(); self.power_arena_ring_outs();
+        self.detect_hits(); self.stage_objects_step(); self.power_arena_ring_outs(); self.swarm_step();
         self.bound_fighters();
         crate::ikemen::life::maintain(self);
         for f in self.fighters.iter_mut() {

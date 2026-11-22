@@ -25,6 +25,7 @@
     { "name": "mugen-import", "shard": "loading", "script": "web-mugen-smoke.js", "args": ["{dist}", "assets/mugen/elecbyte.zip"], "env": { "MUGEN_SMOKE_CHAR": "kfm" } },
     { "name": "native-awakening", "shard": "loading", "script": "web-awakening-smoke.js", "args": ["{dist}"] },
     { "name": "power-arena", "shard": "loading", "script": "web-power-arena-smoke.js", "args": ["{dist}"], "knownFail": "arena: o oponente derruba o jogador (estado 5110) antes de ele alcançar a primeira plataforma - ver issue #926" },
+    { "name": "arena-swarm", "shard": "loading", "script": "web-arena-swarm-smoke.js", "args": ["{dist}"] },
     { "name": "audio-unlock", "shard": "loading", "script": "web-audio-smoke.js", "args": ["{dist}"] },
     { "name": "fatal-trap", "shard": "loading", "script": "web-fatal-smoke.js", "args": ["{dist}"], "expectFatal": true },
     { "name": "preflight-mobile", "shard": "mobile", "script": "web-preflight-smoke.js", "args": ["{dist}"] }

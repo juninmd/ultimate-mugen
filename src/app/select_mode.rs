@@ -24,6 +24,9 @@ impl App {
     }
 
     pub(crate) fn adjust_team_n(&mut self, delta: isize) {
+        if self.mode == Mode::PowerArena {
+            return;
+        }
         let cap = if self.mode == Mode::TeamTag { TAG_MAX } else { TEAM_MAX };
         let next = (self.team_n as isize + delta).clamp(2, cap as isize) as usize;
         self.team_n = next.max(self.team_pick.len() + 1).min(cap);

@@ -150,11 +150,12 @@ impl App {
         let info_y = 470.0;
         crate::menu_art::glass(&self.ui, 120.0, info_y, VW - 240.0, 110.0, 1.0);
         let line = |a: &str, b: &str, c: &str| tr3(a, b, c).to_string();
+        let (foe_pt, foe_en, foe_es) = if slots == 1 { ("inimigo", "enemy", "enemigo") } else { ("inimigos", "enemies", "enemigos") };
         let lines = [
             line(
-                &format!("No máximo {slots} inimigos ao mesmo tempo: quando um cai, outro entra em um ponto aleatório do cenário."),
-                &format!("Up to {slots} enemies at once: when one falls another enters at a random spot of the stage."),
-                &format!("Hasta {slots} enemigos a la vez: cuando uno cae, otro entra en un punto al azar del escenario."),
+                &format!("No máximo {slots} {foe_pt} ao mesmo tempo: quando um cai, outro entra em um ponto aleatório do cenário."),
+                &format!("Up to {slots} {foe_en} at once: when one falls another enters at a random spot of the stage."),
+                &format!("Hasta {slots} {foe_es} a la vez: cuando uno cae, otro entra en un punto al azar del escenario."),
             ),
             line(
                 &format!("Mapa {}x mais largo ({} px). O minimapa mostra quem está fora da tela.", tiles, (ARENA_HALF_WIDTH * 2.0) as u32 * tiles),

@@ -17,7 +17,7 @@ impl App {
         };
         crate::screen_art::ScreenArt::Workshop.background(&self.ui);
         self.ui.text(
-            "TECLADO · PERSONALIZAR",
+            crate::i18n::tr3("TECLADO · PERSONALIZAR", "KEYBOARD · CUSTOMIZE", "TECLADO · PERSONALIZAR"),
             40.0,
             56.0,
             30.0,
@@ -30,13 +30,13 @@ impl App {
         if ed.waiting {
             if is_key_pressed(KeyCode::Escape) {
                 ed.waiting = false;
-                ed.msg = "Cancelado.".into();
+                ed.msg = crate::i18n::tr3("Cancelado.", "Cancelled.", "Cancelado.").into();
             } else if let Some(kc) = get_last_key_pressed() {
                 if keybinds::id(kc).is_some() {
                     let conflicts = self.c.keys.conflicts(ed.slot, ed.cur, kc);
                     self.c.keys.assign(ed.slot, ed.cur, kc);
                     self.c.keys.save();
-                    ed.msg = format!("{}: {}{}", ACTIONS[ed.cur].0, keybinds::label(kc), conflict_note(conflicts));
+                    ed.msg = format!("{}: {}{}", keybinds::action_label(ed.cur), keybinds::label(kc), conflict_note(conflicts));
                     ed.waiting = false;
                 } else {
                     ed.msg = crate::i18n::tr3("Essa tecla não pode ser usada. Tente outra (Esc cancela).", "That key cannot be used. Try another (Esc cancels).", "Esa tecla no se puede usar. Prueba otra (Esc cancela).").into();
@@ -69,7 +69,7 @@ impl App {
         for slot in 0..2 {
             let x = 40.0 + slot as f32 * 620.0;
             self.ui.text(
-                &format!("Jogador {}", slot + 1),
+                &format!("{} {}", crate::i18n::tr3("Jogador", "Player", "Jugador"), slot + 1),
                 x,
                 112.0,
                 24.0,
@@ -103,7 +103,7 @@ impl App {
                     keybinds::label(kc)
                 };
                 self.ui
-                    .text(ACTIONS[i].0, x, y + 22.0, 19.0, WHITE, Align::Left, false);
+                    .text(keybinds::action_label(i), x, y + 22.0, 19.0, WHITE, Align::Left, false);
                 self.ui.text(
                     shown,
                     x + 540.0,

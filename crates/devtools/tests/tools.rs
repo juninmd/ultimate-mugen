@@ -44,12 +44,12 @@ fn encoded_sprites_decode_with_at_most_256_colors_and_keep_transparency() {
     let source = gradient(900, 300);
     let (encoded, scale) = encode_sprite("pose.png", &png_bytes(&source)).unwrap();
     assert!((scale - 768.0 / 900.0).abs() < 1e-9);
-    let decoded = decode_png(&encoded).unwrap();
+    let decoded = ume_formats::lz4_sprite::decode(&encoded).unwrap();
     assert_eq!((decoded.width, decoded.height), (768, 256));
-    let palette = decoded.palette.as_ref().unwrap();
-    let used: std::collections::HashSet<u8> = decoded.indexed.as_ref().unwrap().iter().copied().collect();
-    assert!(used.len() <= 256 && palette.len() == 1024);
-    let rgba = png_indexed_to_rgba(&decoded);
+    let ume_formats::lz4_sprite::Pixels::Indexed { indices, palette } = decoded.pixels else { panic!("not indexed") };
+    let used: std::collections::HashSet<u8> = indices.iter().copied().collect();
+    assert!(used.len() <= 256 && palette.len() <= 1024);
+    let (_, _, rgba) = ume_formats::lz4_sprite::decode_rgba(&encoded).unwrap();
     assert_eq!(rgba[3], 0);
     assert_eq!(rgba[(100 * 768 + 400) * 4 + 3], 255);
 }
@@ -58,7 +58,7 @@ fn encoded_sprites_decode_with_at_most_256_colors_and_keep_transparency() {
 fn portraits_are_capped_at_256() {
     let (encoded, scale) = encode_sprite("portrait.png", &png_bytes(&gradient(512, 512))).unwrap();
     assert_eq!(scale, 0.5);
-    assert_eq!(decode_png(&encoded).unwrap().width, 256);
+    assert_eq!(ume_formats::lz4_sprite::decode(&encoded).unwrap().width, 256);
 }
 
 #[test]

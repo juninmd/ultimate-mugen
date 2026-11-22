@@ -21,3 +21,4 @@ An ADR records one decision that changes a crate boundary, a dependency or a dat
 | [0006](0006-content-is-data-first.md) | Content is data first, with a documented extension table | Accepted |
 | [0007](0007-umf2-definitive-fighter-format.md) | UMF 2: JSON kept, compact frames, canonical layout, quality floor | Accepted |
 | [0008](0008-umf-schema-and-storage-review.md) | UMF JSON Schema checked in CI; JSON + PNG kept after measuring alternatives | Accepted / Proposed |
+| [0009](0009-lz4-sprite-container.md) | LZ4 sprite container for native and M.U.G.E.N. sprites | Accepted |

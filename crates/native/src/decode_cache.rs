@@ -26,21 +26,28 @@ fn cached<T>(store: &'static OnceLock<Mutex<HashMap<Key, Entry<T>>>>, root: &Pat
     Some(value)
 }
 
+fn sprite_rgba(bytes: &[u8]) -> Option<(u32, u32, Vec<u8>)> {
+    if ume_formats::lz4_sprite::is_lz4_sprite(bytes) {
+        return ume_formats::lz4_sprite::decode_rgba(bytes).ok();
+    }
+    let dec = ume_formats::png::decode_png(bytes).ok()?;
+    let rgba = match dec.rgba { Some(ref rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&dec) };
+    Some((dec.width, dec.height, rgba))
+}
+
 pub(super) fn png(root: &Path, name: &str, bytes: &Arc<Vec<u8>>) -> Option<Arc<Decoded>> {
     static STORE: OnceLock<Mutex<HashMap<Key, Entry<Decoded>>>> = OnceLock::new();
     cached(&STORE, root, name, bytes, |b| {
-        let dec = ume_formats::png::decode_png(b).ok()?;
-        let rgba = match dec.rgba { Some(ref rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&dec) };
-        Some(Decoded { width: dec.width, height: dec.height, rgba: Arc::new(rgba) })
+        let (width, height, rgba) = sprite_rgba(b)?;
+        Some(Decoded { width, height, rgba: Arc::new(rgba) })
     })
 }
 
 pub(super) fn thumbnail(root: &Path, name: &str, bytes: &Arc<Vec<u8>>, shrink: impl FnOnce(u32, u32, &[u8]) -> (u32, u32, Vec<u8>)) -> Option<Arc<Decoded>> {
     static STORE: OnceLock<Mutex<HashMap<Key, Entry<Decoded>>>> = OnceLock::new();
     cached(&STORE, root, name, bytes, |b| {
-        let dec = ume_formats::png::decode_png(b).ok()?;
-        let full = match dec.rgba { Some(ref rgba) => rgba.clone(), None => ume_formats::png::png_indexed_to_rgba(&dec) };
-        let (width, height, rgba) = shrink(dec.width, dec.height, &full);
+        let (full_width, full_height, full) = sprite_rgba(b)?;
+        let (width, height, rgba) = shrink(full_width, full_height, &full);
         Some(Decoded { width, height, rgba: Arc::new(rgba) })
     })
 }

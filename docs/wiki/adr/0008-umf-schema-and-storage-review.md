@@ -1,6 +1,6 @@
 # ADR 0008: UMF schema in CI, and JSON + PNG storage reviewed
 
-- Status: Accepted for the schema and for keeping JSON; Proposed for the cooked texture pack
+- Status: Accepted for the schema and for keeping JSON; Proposed for the cooked texture pack (superseded by [ADR 0009](0009-lz4-sprite-container.md): LZ4 instead of QOI)
 - Date: 2026-11-22
 
 ## Context

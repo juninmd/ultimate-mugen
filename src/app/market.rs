@@ -766,6 +766,7 @@ impl App {
             );
         }
 
+        self.market_holo_overlay(rx, ry, rw);
         let (px, py) = (rx, ry + 492.0);
         if self.market.busy() {
             let p = &self.market.progress;

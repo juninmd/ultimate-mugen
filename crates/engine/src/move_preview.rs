@@ -26,7 +26,16 @@ pub fn anim_id(def: &CharDef, mv: &MoveInfo) -> Option<i32> {
     let state = if mv.state >= 0 {
         mv.state
     } else {
-        target_state(&def.states, &mv.command)?
+        target_state(&def.states, &mv.command)
+            .filter(|&s| def.states.contains_key(&s))
+            .unwrap_or(0)
+    };
+    // Se o estado caiu para 0, certifique-se de que ele existe; caso contrário, tente o próximo estado válido
+    let state = if state == 0 && !def.states.contains_key(&0) {
+        // Procura pelo primeiro estado positivo presente
+        def.states.keys().find(|&&s| s > 0).copied().unwrap_or(0)
+    } else {
+        state
     };
     state_anim(def.states.get(&state)?)
 }

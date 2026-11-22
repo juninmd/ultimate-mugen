@@ -68,6 +68,7 @@ impl App {
         if is_key_pressed(KeyCode::Tab) && !s.paused && !replaying {
             s.switch_control();
         }
+        s.vfx.banner_top = if self.c.touch.enabled { 170.0 } else { 124.0 };
         s.update(dt, &mut self.c, &mut self.audio);
         self.trials_step(dt);
         let s = self.session.as_mut().unwrap();
@@ -76,7 +77,7 @@ impl App {
         }
         let framing = if replaying { ume_engine::replay_camera::frame(&mut s.m) } else { None };
         s.draw(&mut self.g, &self.ui);
-        crate::easter::draw(&self.ui, if s.paused { 0.0 } else { dt });
+        if !s.paused { crate::easter::draw(&self.ui, dt, if self.c.touch.enabled { 146.0 } else { 116.0 }); }
         if let Some(saved) = framing {
             ume_engine::replay_camera::unframe(&mut s.m, saved);
         }

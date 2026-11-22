@@ -441,7 +441,7 @@ impl Hud {
                         let chip = sp(poly::chamfer(cx, cy, tw, 5.4, 1.8));
                         poly::solid(&chip, Color::new(0.02, 0.03, 0.08, 0.78));
                         poly::outline(&chip, 0.5 * s, poly::with_a(col, if ready { 0.95 } else { 0.45 }));
-                        text(&lbl, tx, cy + 0.95, 3.8, col, al, true);
+                        text(&lbl, tx, cy + 4.0, 3.8, col, al, true);
                     }
                     form_steps::draw(&form_steps::Row { p: &p, text: &text, s, gt, side, x: bx, y: by - 6.4, w: bw, colors }, f);
                 }

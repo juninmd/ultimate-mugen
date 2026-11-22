@@ -94,14 +94,14 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
     let meta = read_sprite(root, "meta.json").map_or_else(|| Arc::new(Value::Null), |bytes| super::decode_cache::meta(root, &bytes));
     let frame = meta.get("frames").and_then(|frames| frames.get(name)).unwrap_or(&Value::Null);
     let hair_region = frame.get("awakeningHair").and_then(|value| serde_json::from_value::<[u32; 4]>(value.clone()).ok());
-    if let Some(recolor) = recolor { recolor.apply_in_region(Arc::make_mut(&mut rgba).as_mut_slice(), dec.width, hair_region); }
+    if let Some(recolor) = recolor.filter(|_| fit) { recolor.apply_in_region(Arc::make_mut(&mut rgba).as_mut_slice(), dec.width, hair_region); }
     let positive = |value: Option<&Value>| value.and_then(Value::as_f64).filter(|number| number.is_finite() && *number > 0.0 && *number <= f32::MAX as f64).map(|number| number as f32);
     let units = positive(frame.get("refHeight")).or_else(|| positive(meta.get("refHeight"))).unwrap_or(dec.height as f32).max(1.0);
     let axis = |key: &str, default: f32, limit: f32| frame.get(key).and_then(Value::as_f64).filter(|number| number.is_finite() && *number >= 0.0 && *number <= limit as f64).map_or(default, |number| number as f32);
     let axis_x = axis("axisX", dec.width as f32 / 2.0, dec.width as f32);
     let axis_y = axis("axisY", dec.height as f32, dec.height as f32);
     let hurt = fit.then(|| super::pixel_hurt::fit_body(hurtbox(lower, stem), stem, &rgba, dec.width, dec.height, [axis_x, axis_y], STAND_UNITS / units));
-    let c = super::pixel_crop::crop(dec.width, dec.height, rgba);
+    let c = super::pixel_crop::crop_art(dec.width, dec.height, rgba, recolor.filter(|_| !fit), hair_region);
     Some(FrameArt {
         width: c.image.w as f32 * res,
         height: c.image.h as f32 * res,

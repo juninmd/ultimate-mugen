@@ -46,12 +46,18 @@ impl Recolor {
     }
 
     fn apply_row(&self, row: &mut [u8], cache: &mut [(u32, [u8; 3])], allow: bool, hair: std::ops::Range<usize>) {
+        let mut last = (u32::MAX, [0u8; 3]);
         for (x, pixel) in row.chunks_exact_mut(4).enumerate() {
             if pixel[3] == 0 { continue; }
             let allow_hair = allow || hair.contains(&x);
             let packed = u32::from_le_bytes([pixel[0], pixel[1], pixel[2], allow_hair as u8]);
+            if packed == last.0 {
+                pixel[..3].copy_from_slice(&last.1);
+                continue;
+            }
             let slot = &mut cache[(packed.wrapping_mul(0x9E37_79B1) >> (32 - SLOT_BITS)) as usize];
             if slot.0 != packed { *slot = (packed, self.swap([pixel[0], pixel[1], pixel[2]], allow_hair)); }
+            last = *slot;
             pixel[..3].copy_from_slice(&slot.1);
         }
     }
@@ -72,23 +78,14 @@ impl Recolor {
                 if swap.is_none_or(|(score, _, _, _)| residual < score) { swap = Some((residual, *target, shade, *is_hair)); }
             }
         }
-        let mut untouched = f32::INFINITY;
-        for source in &self.keep {
-            if let Some((residual, _)) = fit(source) {
-                if residual < untouched { untouched = residual; }
-            }
-        }
-        match swap {
-            Some((residual, target, shade, is_hair)) if residual <= untouched => {
-                let shade = if self.restrict_hair && is_hair { (0.35 + shade * 0.8).min(1.0) } else { shade };
-                [
-                (target[0] * shade).round().clamp(0.0, 255.0) as u8,
-                (target[1] * shade).round().clamp(0.0, 255.0) as u8,
-                (target[2] * shade).round().clamp(0.0, 255.0) as u8,
-                ]
-            },
-            _ => [r, g, b],
-        }
+        let Some((residual, target, shade, is_hair)) = swap else { return [r, g, b] };
+        if self.keep.iter().any(|source| fit(source).is_some_and(|(kept, _)| kept < residual)) { return [r, g, b]; }
+        let shade = if self.restrict_hair && is_hair { (0.35 + shade * 0.8).min(1.0) } else { shade };
+        [
+            (target[0] * shade).round().clamp(0.0, 255.0) as u8,
+            (target[1] * shade).round().clamp(0.0, 255.0) as u8,
+            (target[2] * shade).round().clamp(0.0, 255.0) as u8,
+        ]
     }
 }
 

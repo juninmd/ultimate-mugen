@@ -1,3 +1,4 @@
+use super::recolor::Recolor;
 use std::sync::Arc;
 use ume_engine::chardef::ImageData;
 
@@ -24,6 +25,31 @@ pub(super) fn crop(width: u32, height: u32, rgba: Arc<Vec<u8>>) -> Cropped {
         out.extend_from_slice(&rgba[(row * w + x0) * 4..(row * w + x1) * 4]);
     }
     Cropped { image: ImageData::new((x1 - x0) as u32, (y1 - y0) as u32, out), left: x0 as f32, top: y0 as f32 }
+}
+
+pub(super) fn crop_art(width: u32, height: u32, rgba: Arc<Vec<u8>>, recolor: Option<&Recolor>, hair_region: Option<[u32; 4]>) -> Cropped {
+    match recolor {
+        Some(recolor) => crop_recolored(width, height, &rgba, recolor, hair_region),
+        None => crop(width, height, rgba),
+    }
+}
+
+fn crop_recolored(width: u32, height: u32, rgba: &[u8], recolor: &Recolor, hair_region: Option<[u32; 4]>) -> Cropped {
+    let (w, h) = (width as usize, height as usize);
+    let [x0, y0, x1, y1] = padded_box(w, h, rgba).unwrap_or([0, 0, w, h]);
+    let mut out = Vec::with_capacity((x1 - x0) * (y1 - y0) * 4);
+    for row in y0..y1 {
+        out.extend_from_slice(&rgba[(row * w + x0) * 4..(row * w + x1) * 4]);
+    }
+    let shift = |value: u32, by: usize| value.saturating_sub(by as u32);
+    let region = hair_region.map(|[rx1, ry1, rx2, ry2]| [shift(rx1, x0), shift(ry1, y0), shift(rx2, x0), shift(ry2, y0)]);
+    recolor.apply_in_region(&mut out, (x1 - x0) as u32, region);
+    Cropped { image: ImageData::new((x1 - x0) as u32, (y1 - y0) as u32, out), left: x0 as f32, top: y0 as f32 }
+}
+
+fn padded_box(w: usize, h: usize, rgba: &[u8]) -> Option<[usize; 4]> {
+    let [x0, y0, x1, y1] = content_box(w, h, rgba)?;
+    Some([x0.saturating_sub(MARGIN), y0.saturating_sub(MARGIN), (x1 + MARGIN).min(w), (y1 + MARGIN).min(h)])
 }
 
 fn content_box(w: usize, h: usize, rgba: &[u8]) -> Option<[usize; 4]> {

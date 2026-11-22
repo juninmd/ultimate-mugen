@@ -64,7 +64,7 @@ Os combatentes da Convergência dividem-se em três grandes posturas filosófica
 
 ### 1. Os Protetores da Convergência (Heróis)
 Guerreiros honrados empenhados em restaurar a Trama Astral, fechar as fendas dimensionais e defender vidas inocentes da tirania e da destruição:
-- **Kaito Arashi** (Japão): Karateca andarilho justo em busca de equilíbrio e evolução interior através da tempestade.
+- **Kaito Arashi** (Austrália): Karateca andarilho justo em busca de equilíbrio e evolução interior através da tempestade.
 - **Daichi Ginrou** (Mongólia): Guerreiro selvagem dos picos gelados cuja aura dourada protege os mais vulneráveis.
 - **Akio Hoshi** (Japão): Jovem prodígio da luz estelar cuja impetuosidade e coragem jamais se curvam diante da tirania.
 - **Lian Feng** (China): Grã-mestra da Lanterna de Jade dedicada à preservação do equilíbrio cósmico.

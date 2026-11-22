@@ -687,7 +687,7 @@ fn finish_install(
                 events,
                 Event::InstallFailed {
                     name: item.name,
-                    error: format!("não foi possível salvar: {e}"),
+                    error: format!("{}: {e}", crate::i18n::tr3("não foi possível salvar", "could not save", "no se pudo guardar")),
                 },
             ),
         },

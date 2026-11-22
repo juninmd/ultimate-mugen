@@ -25,6 +25,7 @@ mod menu_fighters;
 mod mugen_catalog;
 mod mugen_gallery;
 mod replay_browser;
+mod lite_tick;
 mod settings_screen;
 mod char_tuning_screen;
 mod story;
@@ -474,7 +475,8 @@ impl App {
             );
             self.applied = Some(self.settings);
         }
-        self.g.post.level = crate::vfx::quality::set(self.settings.fx);
+        self.g.post.level = crate::lite::apply(&self.settings);
+        self.lite_tick();
         set_keep_aspect(self.settings.keep_aspect);
         set_linear_filter(self.settings.linear);
         self.g.fx_gain = IMPACT[self.settings.impact.min(IMPACT.len() - 1)].0;

@@ -3,7 +3,7 @@ use crate::i18n::tr3;
 use crate::ui::{hex, Align, VW};
 mod preview;
 
-const TOUCH_TAB: usize = 6;
+const TOUCH_TAB: usize = 7;
 const TOUCH_SCALE_MIN: f32 = 0.7;
 const TOUCH_SCALE_MAX: f32 = 1.5;
 const TOUCH_OPACITY_MIN: f32 = 0.2;

@@ -15,7 +15,7 @@ impl App {
         let mut cards = vec![];
         for (k, &(side, _, r)) in plan.iter().enumerate() {
             let e = &self.reg.chars[r];
-            if e.mugen {
+            if e.mugen && k <= step + 6 {
                 e.ensure_portrait();
             }
             let por = if e.mugen {
@@ -47,23 +47,25 @@ impl App {
     }
 
     pub(crate) fn holo_loading_screen(&mut self, step: u8, p: f32, label: &str) {
-        crate::screen_art::ScreenArt::Loading.background(&self.ui);
-        self.ui.logo(VW / 2.0, 170.0, 96.0);
         let plan = self.load_plan();
-        let cards = self.holo_card_data(&plan, step as usize);
-        let n = cards.len().max(1) as f32;
-        let w = (190.0f32).min((VW - 160.0) / n - 16.0);
-        let h = w * 1.25;
-        let gap = 16.0;
-        let total = n * w + (n - 1.0) * gap;
-        let mut x = VW / 2.0 - total / 2.0;
-        for c in &cards {
-            self.holo_paint(c, x, 250.0, w, h, true);
-            x += w + gap;
+        self.holo_mosaic_screen(&plan, step as usize, p, label);
+    }
+
+    pub(crate) fn holo_mosaic_screen(&mut self, plan: &[(usize, usize, usize)], step: usize, p: f32, label: &str) {
+        crate::screen_art::ScreenArt::Loading.background(&self.ui);
+        self.ui.logo(VW / 2.0, 150.0, 84.0);
+        let shown = holo::revealed(step, plan.len());
+        let cards = self.holo_card_data(&plan[..shown], step);
+        let (ax, ay, aw, ah) = (60.0, 215.0, VW - 120.0, 340.0);
+        let m = holo::mosaic(cards.len(), aw, ah, 190.0);
+        for (i, c) in cards.iter().enumerate() {
+            let (x, y) = holo::origin(&m, i, cards.len(), ax, ay, aw, ah);
+            self.holo_paint(c, x, y, m.w, m.h, m.labels);
         }
-        let tip = crate::loading_tips::tip((self.ui.t / 3.5) as usize);
-        self.ui.text(tip, VW / 2.0, 250.0 + h + 80.0, 18.0, hex("#a49cc0"), Align::Center, false);
-        self.ui.progress_bar(VW / 2.0 - 260.0, 250.0 + h + 108.0, 520.0, p, label);
+        let done = plan.len().min(step);
+        let count = format!("{done} / {}", plan.len());
+        self.ui.text(&count, VW / 2.0, 574.0, 16.0, hex("#a49cc0"), Align::Center, false);
+        self.ui.progress_bar(VW / 2.0 - 260.0, 600.0, 520.0, p, label);
         let tweaks = crate::tweaks::current();
         if tweaks.title_crt {
             crate::title_crt::draw(&self.ui, self.ui.t, !tweaks.reduce_motion);

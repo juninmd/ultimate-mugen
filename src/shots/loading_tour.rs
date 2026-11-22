@@ -22,4 +22,13 @@ pub(super) async fn run(app: &mut App, dir: &str) {
             next_frame().await;
         }
     }
+    let total = app.reg.chars.len().max(1);
+    let plan: Vec<(usize, usize, usize)> = (0..120).map(|k| (k % 2, 0, k % total)).collect();
+    for (name, step) in [("mosaic-0", 0usize), ("mosaic-30", 30), ("mosaic-80", 80), ("mosaic-120", 120)] {
+        snap(app, dir, name, |app| {
+            app.ui.begin();
+            app.holo_mosaic_screen(&plan, step, step as f32 / 120.0, "Carregando…");
+        })
+        .await;
+    }
 }

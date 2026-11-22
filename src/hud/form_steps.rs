@@ -40,9 +40,9 @@ pub(super) fn draw<P: Fn(f32, f32) -> Vec2, T: Fn(&str, f32, f32, f32, Color, Al
     let step_w = SQUARE + LABEL_W + GAP;
     let total = steps as f32 * step_w;
     let origin = if row.side == 0 {
-        row.x
-    } else {
         row.x + row.w - total
+    } else {
+        row.x
     };
     let next = usize::from(f.form);
     let affordable = f.next_form_cost().is_some_and(|cost| f.power >= cost);

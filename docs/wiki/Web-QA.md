@@ -45,3 +45,7 @@ Software GL is slow: keep `--jobs` at 1 or 2 locally. For a one-off page add `?d
 2. Add it to `scripts/web-qa.json` with a shard, or list it under `excluded` with the reason (network, manual tool).
 
 `scripts/web-qa.test.mjs` fails when a `web-*-smoke.js` is neither covered nor excluded, or when the shards in the manifest and in `ci.yml` differ.
+
+## Visual tour
+
+`node scripts/web-tour.js web/dist <out>` walks title, menu, every utility screen, select, stages, VS, fight and pause with real keys and saves a numbered screenshot per step (`TOUR_MOBILE=1` uses a phone in landscape, `TOUR_LANG=pt-BR` sets the browser locale). It fails only on panics or a fight that never starts; the screenshots are for review and PR evidence.

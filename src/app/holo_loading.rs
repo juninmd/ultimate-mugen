@@ -37,12 +37,16 @@ impl App {
     pub(super) fn holo_chips(&mut self, step: u8, cy: f32, w: f32, h: f32) {
         let plan = self.load_plan();
         let cards = self.holo_card_data(&plan, step as usize);
-        let gap = 14.0;
-        let total = cards.len() as f32 * w + (cards.len().saturating_sub(1)) as f32 * gap;
-        let mut x = VW / 2.0 - total / 2.0;
-        for c in &cards {
-            self.holo_paint(c, x, cy, w, h, false);
-            x += w + gap;
+        let gap = 10.0;
+        let header_half = 246.0;
+        for side in 0..2 {
+            let group: Vec<&Card> = cards.iter().filter(|c| c.side == side).collect();
+            let total = group.len() as f32 * (w + gap) - gap;
+            let mut x = if side == 0 { VW / 2.0 - header_half - total } else { VW / 2.0 + header_half };
+            for c in group {
+                self.holo_paint(c, x, cy, w, h, false);
+                x += w + gap;
+            }
         }
     }
 

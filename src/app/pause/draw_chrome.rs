@@ -71,7 +71,7 @@ impl App {
         if lay.compact {
             let text = match tab {
                 Tab::Moves => crate::i18n::tr("Toque num golpe e depois num slot para atribuir", "Tap a move, then a slot to bind it"),
-                _ => crate::i18n::tr("Toque numa opcao", "Tap an option"),
+                _ => crate::i18n::tr("Toque numa opção", "Tap an option"),
             };
             ui.text(text, r.x, base - 4.0, 19.0 * lay.font, muted, Align::Left, false);
             return;

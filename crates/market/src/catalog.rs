@@ -1,6 +1,5 @@
-use crate::safety::{file_name, file_stem, lower_ext, parent_dir, safe_rel_path, MAX_FILE_BYTES, MAX_ITEM_BYTES, MAX_ITEM_FILES, MAX_TREE_ENTRIES};
+use crate::{safety::{file_name, file_stem, lower_ext, parent_dir, safe_rel_path, MAX_FILE_BYTES, MAX_ITEM_BYTES, MAX_ITEM_FILES, MAX_TREE_ENTRIES}, sfx_filter::is_fighter_sfx};
 use std::collections::{HashMap, HashSet};
-
 pub use crate::model::{Catalog, FileRef, Item, Kind, Tree, TreeEntry};
 
 pub fn parse_tree(body: &str) -> Result<Tree, String> {
@@ -150,11 +149,12 @@ pub fn detect(tree: &Tree, subdir: &str, fallback_name: &str) -> Catalog {
     }
     items.extend(stage_items);
 
+    let sprite_dirs: HashSet<&str> = unclaimed.iter().filter(|e| file_name(&e.path).eq_ignore_ascii_case("meta.json")).map(|e| parent_dir(&e.path)).collect();
     for e in unclaimed.iter().filter(|e| !stage_claimed.contains(e.path.as_str())) {
         let ext = lower_ext(&e.path);
         if ext == "zip" {
             items.push(make_item(Kind::Pack, &e.path, file_stem(&e.path).to_string(), vec![FileRef { path: e.path.clone(), size: e.size, sha: e.sha.clone() }]));
-        } else if AUDIO_EXTS.contains(&ext.as_str()) && (ext != "wav" || e.size >= MIN_WAV_BYTES) {
+        } else if AUDIO_EXTS.contains(&ext.as_str()) && (ext != "wav" || e.size >= MIN_WAV_BYTES) && !is_fighter_sfx(&e.path, &sprite_dirs) {
             items.push(make_item(Kind::Music, &e.path, file_stem(&e.path).to_string(), vec![FileRef { path: e.path.clone(), size: e.size, sha: e.sha.clone() }]));
         }
     }

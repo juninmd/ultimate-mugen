@@ -8,7 +8,7 @@
   "description": "O Ilusionista do Eclipse: calmo, sorridente e sempre três passos à frente. Seus olhos escarlates reescrevem a realidade, seus corvos carregam pesadelos e a chama negra não se apaga até que o alvo vire cinza.",
   "color": "#c8102e",
   "winQuote": "Uma ilusão... desde o primeiro golpe.",
-  "stats": {"life":2300,"power":3000,"attack":128,"defense":116,"walk":[5.3,2.9],"run":[8.6,6.4],"jump":[-9.4,-2.7,0,2.7],"height":106,"width":[16,15]},
+  "stats": {"life":2300,"power":3000,"attack":128,"defense":116,"walk":[5.3,2.9],"run":[8.6,6.4],"jump":[-9.4,-2.7,0,2.7],"height":106,"width":[16,15],"airDashes":1},
   "art": {
     "type": "sprites",
     "style": {
@@ -1170,7 +1170,8 @@
       "sounds": [{"at":1,"snd":[200,4]}],
       "shake": {"at":2,"time":18,"ampl":5,"freq":75},
       "flash": {"at":1,"time":12,"color":[34,4,14],"under":true,"superMove":true},
-      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,110,150]}
+      "afterimage": {"time":45,"length":10,"framegap":2,"trans":"add","palContrast":[255,110,150]},
+      "timestop": 22
     },
     {
       "id": "escape_burst",
@@ -1525,5 +1526,12 @@
     "weakness": "light",
     "alignment": "villain",
     "tags": ["boss","illusion","teleport","super-speed"]
-  }
+  },
+  "bossRules": {
+    "phases": [
+      {"id":"eclipse_phase_2","lifeBelowRatio":0.65,"once":true,"attackMul":1.12,"defenceMul":1.06,"texts":[{"text":"ECLIPSE PHASE II","pos":[160,42],"color":[255,70,110],"time":90}]},
+      {"id":"eclipse_final","lifeBelowRatio":0.3,"once":true,"attackMul":1.25,"defenceMul":1.12,"texts":[{"text":"TOTAL ECLIPSE","pos":[160,42],"color":[255,30,80],"time":110}]}
+    ]
+  },
+  "helpers": {"clones":{"name":"Eclipse Mirage","input":"~D, DB, B, y+b","cost":500,"count":1,"maxActive":2,"duration":280,"walkSpeed":3.8,"attackRange":72,"oneHitPoof":true}}
 }

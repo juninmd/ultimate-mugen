@@ -67,7 +67,7 @@ UMF fighters also load from a folder without recompiling: drop the `.json` in `u
 | `speed` | no | Animation speed multiplier (>1 = faster moves) |
 | `stats` | no | Attributes, table below |
 | `art` | yes | Art: `style.colors` drives palette recolouring of the PNG sprites, `poses` names the pose keys |
-| `palettes` | no | Alternate colors; each item overrides keys of `art.style.colors` |
+| `palettes` | no | Alternate colors; each item overrides keys of `art.style.colors`, or carries an `exact` map of `"#rrggbb": "#rrggbb"` pairs that swaps only those exact pixel colours (used by converted M.U.G.E.N `.act` palettes) |
 | `awakeningPalette` | no | Color overrides applied on top of the selected palette while awakened; effect sprites are unchanged |
 | `anims` | yes | Animations by name |
 | `moves` | yes | Moves |
@@ -329,6 +329,8 @@ All native fighters also receive two down-light-kick normals at compile time (`n
 
 Every native fighter can charge its meter: hold **R** (the `s` / Start input; the pause key in a fight is **Esc** or **P**). The fighter enters state `3920`, plays its `powerUp` animation on a loop with a blue glow and gains 9 to 48 power per tick (`native/charge_ramp.rs`, filling a 1000-power super in about one second) until the button is released (after at least 6 ticks) or the meter is full. The state is `movetype = I`, so a hit interrupts it, and a form-capable fighter still transforms with `T` once the meter reaches the form cost. The command is `charge_cmd` (`/s`) and shows as `Charge Energy` in the move list. The built-in AI charges only at level 3 or above, with less than 700 power, when the rival is more than 190 units away and is not attacking.
 
+A fighter can set its own ramp with `abilities.charge.gain` = `{ "start", "growth", "max" }` (power per tick: `min(max, start + held ticks * growth)`). Every field is optional and falls back to the built-in 9 / 0.24 / 48, and a missing or invalid `gain` keeps the built-in ramp. A flat gain is `start` = `max` with `growth` 0. `mugen2umf.py` fills it from the `PowerAdd` of the original charge loop.
+
 `taunt`, `powerUp` and `defeat*` have default versions if you do not define them. Other names get free numbers in file order. Add `"id": 8801` to any animation entry to pin a fixed action number for custom scripts or `p2Anim`.
 
 ## Exotic mechanics (`helpers`, cinematic `throw`, `bossRules`, `scripts`)
@@ -371,7 +373,7 @@ If `assets/chars/sprites/<id>/` exists, the fighter is drawn from PNG files, the
 
 When `awakeningPalette` overrides `hair`, each sprite's `frames.<stem>.awakeningHair` supplies `[left, top, right, bottom]` in source pixels. Hair recoloring is confined to that rectangle; sprites without one retain their original hair. Web packing rescales these coordinates with the sprite.
 
-Palette entries also apply to these PNGs: each pixel is matched to the shading line of a colour declared in `art.style.colors`, and the matching palette colour replaces it at the same shade. A palette key with no matching `art.style.colors` entry, or a colour nothing in the art resembles, is left untouched.
+An `exact` palette swaps pixels whose colour is a key of the map and leaves everything else untouched, so grey ramps and near colours never bleed into each other; transparent pixels are skipped. Other palette entries also apply to these PNGs: each pixel is matched to the shading line of a colour declared in `art.style.colors`, and the matching palette colour replaces it at the same shade. A palette key with no matching `art.style.colors` entry, or a colour nothing in the art resembles, is left untouched.
 
 The web build does not read this folder from disk. `scripts/build-web.sh` runs `ume-tools pack-sprites` (`crates/devtools`), which writes one `assets/chars/sprites/<id>.pack` per fighter (images capped at 768 px, 256 colours stored as LZ4 sprites, see [Sprite Container](Sprite-Container.md), `meta.json` anchors rescaled) into `web/dist`; the browser fetches a pack when the fighter is focused on the select screen or loaded for the fight, and the engine reads it through the same virtual folder. A failed download leaves the fighter without art, so the match waits for the pack and reports the failure.
 

@@ -12,6 +12,7 @@ from mugen_moves import STANDARD, anim_name, build_move
 from mugen_routes import convert_input, routes
 from mugen_coverage import coverage
 from mugen_scripts import passthrough
+from mugen_palettes import exact_palettes
 from mugen_parse import contain_axis, nums, png_bytes, read_air, read_commands, read_def, read_snd, read_states, sections, read_text, sprite_image
 from sff_decode import SFF, read_act
 
@@ -154,6 +155,10 @@ def convert(src, out, fighter_id, name, extra):
         "stats": stats_from(c, ref), "art": {"type": "sprites", "style": {"boxes": "exact"}, "poses": {}},
         "anims": anims, "moves": moves,
     }
+    if pal is not None and d["pals"]:
+        palettes = exact_palettes(open(d["pal"], "rb").read(), d["pals"])
+        if palettes:
+            fighter["palettes"] = palettes
     if abilities:
         fighter["abilities"] = abilities
     if scripts:

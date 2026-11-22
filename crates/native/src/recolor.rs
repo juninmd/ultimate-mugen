@@ -1,9 +1,12 @@
 use serde_json::Value;
 
-pub(super) struct Recolor { pairs: Vec<([[f32; 3]; 2], bool)>, keep: Vec<[f32; 3]>, restrict_hair: bool }
+pub(super) struct Recolor { pairs: Vec<([[f32; 3]; 2], bool)>, keep: Vec<[f32; 3]>, restrict_hair: bool, exact: Option<super::recolor_exact::ExactMap> }
 
 impl Recolor {
     pub(super) fn new(colors: Option<&Value>, palette: &Value) -> Option<Self> {
+        if let Some(exact) = super::recolor_exact::exact_map(palette) {
+            return Some(Recolor { pairs: vec![], keep: vec![], restrict_hair: false, exact: Some(exact) });
+        }
         let base = colors?.as_object()?;
         let overrides = palette.get("colors").unwrap_or(palette).as_object()?;
         let mut keys: Vec<&String> = base.keys().collect();
@@ -25,7 +28,7 @@ impl Recolor {
         keep.retain(|color| !overridden.contains(color));
         keep.truncate(256);
         let restrict_hair = palette.get("_awakening").and_then(Value::as_bool).unwrap_or(false);
-        (!pairs.is_empty()).then_some(Recolor { pairs, keep, restrict_hair })
+        (!pairs.is_empty()).then_some(Recolor { pairs, keep, restrict_hair, exact: None })
     }
 
     pub(super) fn apply(&self, rgba: &mut [u8]) {
@@ -33,6 +36,10 @@ impl Recolor {
     }
 
     pub(super) fn apply_in_region(&self, rgba: &mut [u8], width: u32, region: Option<[u32; 4]>) {
+        if let Some(exact) = &self.exact {
+            super::recolor_exact::apply_exact(exact, rgba);
+            return;
+        }
         let mut cache = vec![(u32::MAX, [0u8; 3]); SLOTS];
         let window = region.filter(|_| self.restrict_hair && width > 0);
         let Some([x1, y1, x2, y2]) = window else {

@@ -11,21 +11,24 @@ O que o `mugen2umf.py` (skill `mugen-to-ume-migrator`) leva de um lutador M.U.G.
 | Animações e caixas | `.air` com `Clsn1`, `Clsn2`, `Clsn1Default` | todas as actions |
 | Comandos e golpes | rotas do `Statedef -1`, `when` stand/crouch/air/fly, `cost`, `cancels` | 86 golpes |
 | Intro, vitória e provocação | estados 170-199 como `scripts.cns` verbatim, `Statedef 190` próprio no início do round | texto e som da intro iguais |
-| Carga de ki | `abilities.charge` no **R** (Start) com anim e som de início, loop e fim | sons iguais |
+| Carga de ki | `abilities.charge` no **R** (Start) com anim e som de início, loop e fim, mais `gain` lido do `PowerAdd` do loop (poder por tick) | sons iguais, poder 858 contra 930 em 150 ticks |
 | Voo e golpes de voo | `abilities.fly` mais golpes com `when: "fly"` | normais de voo 300-340 |
 | Teleportes | `teleport` em etapas, ou `abilities.teleport` quando usa `p2dist` | deslocamento a 3 px |
 | Cinemáticas longas | cadeias de até 12 estados, saídas por tempo, `landAt`, `followUp` hit/contact/hitNow | Meteoro toca os 6 sons |
 | HitDef e projéteis | hits sem limite, `recover`, `missTime`, guarda, pausa, faíscas | ok |
 | FX | Explod, AfterImage, EnvShake, EnvColor, SuperPause, NotHitBy | ok |
 | Movimento e paleta | `VelMul`, `VelAdd` por tick (gravidade própria, sem somar a nativa), `PosFreeze`, `PosSet`, `PalFX` como `velMul`, `velAdd`, `posFreeze`, `posSet`, `palFx` | pulo do Meteoro -103 = original |
+| Paletas | arquivos `.act` `pal2`..`palN` como `palettes[]` com mapa de cores `exact` contra a `pal1` (uma entrada por índice que muda) | 4 paletas no Goku (pal4 e pal5 iguais à pal1) |
+| Agarrões | janelas de `TargetBind`, `PlaySnd`, `TargetLifeAdd`, a liberação `TargetState` e o `VelSet`/`LifeAdd` dela como `throw.steps`; a animação do agarrão (`p1stateno`) entra depois da animação de início | dano 156 contra 138, som igual |
 | Extras | `--extra` mescla sem apagar habilidades detectadas e soma formas (Limit Breaker), clones, passivos, falas | ok |
 
 ## Parcial ou aproximado
 
-- Estados de agarrão próprios (Goku 616, 810, 820, 821, 1025-1028) são trocados pelo bloco `throw` do UMF.
-- A velocidade da carga segue a rampa nativa (0 a 3000 em 150 ticks, o original chega a 930).
+- Os agarrões mantêm a coreografia de `TargetBind`/`TargetState` como `throw.steps`; `Turn`, `PosAdd` na vítima e os estados 1025-1028 (cadeia de quicar na parede) ainda usam o padrão do motor.
+- O ganho de carga é constante por tick, medido no loop. O original dá uma rajada de 13 ticks a cada 24 de animação: a barra enche no mesmo tempo, mas não nos mesmos degraus.
+- A paleta só recolore sprites que usam a `pal1` compartilhada. Sprites com paleta própria mantêm as cores, e dois índices com a mesma cor na `pal1` seguem o alvo do primeiro índice.
 - O dano fica em 59-74 % do original porque a proração de combo nativa escala os hits.
-- Gatilhos `AnimElem` em animação com loop só mapeiam a primeira volta.
+- Gatilhos `AnimElem` em animação com loop se repetem a cada volta só para sons, Explods e tremores; um `HitDef` repetido não é adivinhado.
 
 ## Ainda não migra
 

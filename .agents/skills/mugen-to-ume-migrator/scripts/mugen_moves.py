@@ -1,10 +1,11 @@
 import re
 
-from mugen_abilities import detect_throw, detect_wall_bounce
-from mugen_chain import chain, lands, segment, state_anim, triggers
+from mugen_abilities import detect_wall_bounce
+from mugen_chain import chain, lands, repeat_elems, segment, state_anim, triggers
 from mugen_fx import extract_fx
 from mugen_motion import motion
 from mugen_parse import nums
+from mugen_throw import detect_throw, splice_grab
 
 STANDARD = {
     0: "idle", 5: "turn", 6: "crouchTurn", 10: "crouchStart", 11: "crouch", 12: "crouchEnd", 20: "walk", 21: "walkBack",
@@ -15,6 +16,7 @@ STANDARD = {
     5011: "hitLowMedium", 5012: "hitLowHeavy", 5020: "hitCrouch", 5030: "hitAir", 5040: "airRecover", 5050: "fall",
     5070: "trip", 5100: "bounce", 5101: "bounceAir", 5110: "lieDown", 5120: "getUp", 5150: "dead",
 }
+REPEATABLE = {"playsnd", "explod", "envshake"}
 LEVEL = {"light": "light", "medium": "medium", "med": "medium", "hard": "heavy", "heavy": "heavy", "back": "heavy", "up": "heavy", "diagup": "heavy"}
 
 
@@ -155,6 +157,8 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost, skip=fro
             seg = segment(states[n], actions[state_anim(states[n])], links[k + 1] if k + 1 < len(links) else None)
             for c in states[n]["ctrl"]:
                 elems = frame_at(c, actions[state_anim(states[n])]["frames"])
+                if c["type"] in REPEATABLE and any("animelem" in t for t in triggers(c)):
+                    elems = repeat_elems(elems, actions[state_anim(states[n])], len(seg))
                 ctrl.append(dict(c, at=[e + base for e in elems], span=(base + 1, base + len(seg))))
             frames += seg
         anim_no = 900000 + state_no
@@ -186,8 +190,12 @@ def build_move(state_no, states, actions, label, cmd_input, when, cost, skip=fro
     extra += fx_anims
     throw, throw_anims = detect_throw(state_no, states, actions, anim_name)
     if throw:
+        grab_hit = next((c for c in state["ctrl"] if c["type"] == "hitdef" and c["body"].get("p1stateno")), None)
+        spliced = splice_grab(move, throw, frames, (grab_hit["at"] or [first_clsn1(frames)])[0] if grab_hit else 1, states, actions, anim_name, state_anim, state_no)
         move["throw"] = throw
         extra += throw_anims
+        if spliced:
+            extra[extra.index(anim_no)] = spliced
     elif hits:
         move["hits"] = hits
     if projectiles:

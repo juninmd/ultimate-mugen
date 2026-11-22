@@ -72,13 +72,27 @@ fn charge(d: &Arc<CharDef>, held: u32) -> Run {
 }
 
 fn command(d: &Arc<CharDef>, name: &str, ticks: usize) -> Run {
+    command_at(d, name, ticks, 160.0)
+}
+
+fn command_at(d: &Arc<CharDef>, name: &str, ticks: usize, gap: f32) -> Run {
     let c = d.commands.iter().find(|c| c.name == name).unwrap_or_else(|| panic!("command {name} missing"));
-    let mut r = Duel::new(d.clone(), 160.0);
+    let mut r = Duel::new(d.clone(), gap);
     r.m.fighters[0].pos.x = 0.0;
-    r.m.fighters[1].pos.x = 160.0;
+    r.m.fighters[1].pos.x = gap;
     let mut run = new_run(&r);
     r.push(0, &synth(c));
     observe(&mut r, ticks, ticks / 6, &mut run);
+    run
+}
+
+fn grab(d: &Arc<CharDef>, gap: f32, inputs: &[u32]) -> Run {
+    let mut r = Duel::new(d.clone(), gap);
+    r.m.fighters[0].pos.x = 0.0;
+    r.m.fighters[1].pos.x = gap;
+    let mut run = new_run(&r);
+    r.push(0, inputs);
+    observe(&mut r, 150, 25, &mut run);
     run
 }
 
@@ -133,13 +147,14 @@ fn original_vs_umf_parity() {
     let out = std::path::PathBuf::from(std::env::var("UME_EVIDENCE_DIR").unwrap_or_else(|_| "target/umf-parity".into()));
     std::fs::create_dir_all(&out).unwrap();
     let mut report = String::from("| scenario | side | states | min (x, y) | power | damage | sounds | sounds without data | end (state, ctrl, y) |\n|---|---|---|---|---|---|---|---|---|\n");
-    let scenarios: [(&str, Run, Run); 6] = [
+    let scenarios: [(&str, Run, Run); 7] = [
         ("intro", intro(&orig), intro(&conv)),
         ("charge", charge(&orig, k::A | k::B), charge(&conv, k::S)),
         ("genki_dama", command(&orig, "supergenkidama", 420), command(&conv, "m_supergenkidama", 420)),
         ("teleport", command(&orig, "teleport_a", 90), command(&conv, "m_teleport_a", 90)),
         ("meteor", forced(&orig, 4010, 900), forced(&conv, move_state(&conv, "m_m_atack"), 900)),
         ("kamehameha", command(&orig, "airkamehameha", 240), command(&conv, "m_airkamehameha", 240)),
+        ("throw", grab(&orig, 28.0, &[k::L, k::L, k::L | k::A, k::L | k::A]), grab(&conv, 28.0, &[0, k::L | k::A, k::L | k::A, k::L | k::A])),
     ];
     for (name, a, b) in &scenarios {
         row(&mut report, name, "original", a);
@@ -148,7 +163,7 @@ fn original_vs_umf_parity() {
     }
     std::fs::write(out.join("parity.md"), &report).unwrap();
     println!("{report}");
-    let [intro_s, charge_s, genki, tele, meteor, kame] = &scenarios;
+    let [intro_s, charge_s, genki, tele, meteor, kame, throw] = &scenarios;
     assert_eq!(meteor.1.sounds.difference(&meteor.1.missing).count(), meteor.2.sounds.len(), "Meteor must play every original sound");
     assert_eq!(kame.1.sounds.difference(&kame.1.missing).count(), kame.2.sounds.len(), "Kamehameha must play every original sound");
     assert!(intro_s.2.states.contains(&190), "UMF must run its own intro state");
@@ -160,4 +175,6 @@ fn original_vs_umf_parity() {
     assert!((tele.2.min.0 - tele.1.min.0).abs() < 20.0, "teleport must travel like the original");
     assert!((meteor.2.min.1 - meteor.1.min.1).abs() < 5.0, "Meteor must jump as high as the original (VelAdd/VelMul)");
     assert!(charge_s.1.power.1 > 0.0, "original charge reference did not run");
+    assert!((charge_s.2.power.1 - charge_s.1.power.1).abs() <= charge_s.1.power.1 * 0.2, "UMF charge gain must follow the original ramp");
+    assert!(throw.1.damage > 0.0 && (throw.2.damage - throw.1.damage).abs() <= throw.1.damage * 0.25, "grab damage must match the original");
 }

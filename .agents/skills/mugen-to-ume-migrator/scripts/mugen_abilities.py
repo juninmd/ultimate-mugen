@@ -115,40 +115,6 @@ def detect_abilities(states, cmd_routes, actions, anim_name_fn):
     return abilities, consumed, extra_anims
 
 
-def detect_throw(state_no, states, actions, anim_name_fn):
-    st = states.get(state_no)
-    if not st:
-        return None, []
-    for c in st["ctrl"]:
-        if c["type"] != "hitdef":
-            continue
-        p1 = int(nums(c["body"].get("p1stateno"), (-1,))[0])
-        p2 = int(nums(c["body"].get("p2stateno"), (-1,))[0])
-        if p1 not in states:
-            continue
-        p1_st = states[p1]
-        binds = [x for x in p1_st["ctrl"] if x["type"] == "targetbind"]
-        if not binds:
-            continue
-        pos = nums(binds[0]["body"].get("pos"), (30, 0))
-        dmg = 80
-        for x in p1_st["ctrl"]:
-            if x["type"] == "targetlifeadd":
-                dmg = max(1, abs(round(nums(x["body"].get("value"), (-80,))[0])))
-        throw = {"damage": dmg, "bind": [round(pos[0], 1), round(pos[1], 1)], "launch": [-4.5, -5.5]}
-        extra = []
-        if p2 in states:
-            for x in states[p2]["ctrl"]:
-                if x["type"] == "changeanim2":
-                    an = int(nums(x["body"].get("value"), (-1,))[0])
-                    if an in actions:
-                        throw["p2Anim"] = anim_name_fn(an)
-                        extra.append(an)
-                        break
-        return throw, extra
-    return None, []
-
-
 def detect_wall_bounce(ctrl, states):
     p2 = int(nums(ctrl["body"].get("p2stateno"), (-1,))[0])
     seen, queue = set(), [p2] if p2 in states else []

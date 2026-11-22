@@ -55,6 +55,14 @@ pub struct ChargeSpec {
     #[serde(default, rename = "startAnim")] pub start_anim: Option<String>,
     #[serde(default, rename = "startSound")] pub start_sound: Option<[u16; 2]>,
     #[serde(default, rename = "endAnim")] pub end_anim: Option<String>,
+    #[serde(default)] pub gain: Option<ChargeGain>,
+}
+
+#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize)]
+pub struct ChargeGain {
+    #[serde(default)] pub start: Option<f32>,
+    #[serde(default)] pub growth: Option<f32>,
+    #[serde(default)] pub max: Option<f32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

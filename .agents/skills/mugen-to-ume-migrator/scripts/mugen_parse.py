@@ -44,8 +44,9 @@ def read_def(folder):
     listing = {f.lower(): f for f in os.listdir(folder)}
     path = lambda key: os.path.join(folder, listing.get(files[key].strip('"').lower(), files[key].strip('"'))) if files.get(key) else None
     cns = [path(k) for k in ("cns", "st", "st1", "st2", "st3", "st4") if path(k)]
+    extra = sorted((int(k[3:]), path(k)) for k in files if re.fullmatch(r"pal\d+", k) and int(k[3:]) > 1)
     return {"info": get.get("info", {}), "cmd": path("cmd"), "cns": list(dict.fromkeys(cns)), "sprite": path("sprite"),
-            "anim": path("anim"), "sound": path("sound"), "pal": path("pal1")}
+            "anim": path("anim"), "sound": path("sound"), "pal": path("pal1"), "pals": [p for _, p in extra]}
 
 
 def read_air(path):

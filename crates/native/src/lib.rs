@@ -48,6 +48,7 @@ mod pixel_hurt;
 mod pack;
 mod pack_build; mod mugen_parity;
 mod recolor;
+mod recolor_exact;
 mod portrait;
 mod preview;
 mod sprite_set;

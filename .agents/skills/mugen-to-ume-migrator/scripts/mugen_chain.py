@@ -74,3 +74,15 @@ def segment(state, action, nxt):
         total += t
         k = k + 1 if k + 1 < len(frames) else loop
     return out
+
+
+def repeat_elems(elems, action, seg_len):
+    start = action.get("loop") or 0
+    cycle = len(action["frames"]) - start
+    if seg_len <= len(action["frames"]) or cycle <= 0:
+        return elems
+    out = set(elems)
+    for e in elems:
+        if e > start:
+            out.update(range(e + cycle, seg_len + 1, cycle))
+    return sorted(out)

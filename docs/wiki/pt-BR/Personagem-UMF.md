@@ -65,7 +65,7 @@ Lutadores UMF também carregam de uma pasta, sem recompilar: coloque o `.json` e
 | `speed` | não | Multiplicador de velocidade das animações (>1 = golpes mais rápidos) |
 | `stats` | não | Atributos, tabela abaixo |
 | `art` | sim | Arte: `style.colors` guia a recoloração das paletas nos sprites PNG e `poses` nomeia as chaves de pose |
-| `palettes` | não | Cores alternativas; cada item sobrescreve chaves de `art.style.colors` |
+| `palettes` | não | Cores alternativas; cada item sobrescreve chaves de `art.style.colors`, ou traz um mapa `exact` de pares `"#rrggbb": "#rrggbb"` que troca só essas cores exatas de pixel (usado pelas paletas `.act` do M.U.G.E.N convertidas) |
 | `awakeningPalette` | não | Cores aplicadas sobre a paleta selecionada durante o despertar; sprites de efeitos não mudam |
 | `anims` | sim | Animações por nome |
 | `moves` | sim | Golpes |
@@ -305,6 +305,8 @@ Todos os lutadores nativos também recebem dois chutes baixos normais na compila
 
 Todo lutador nativo pode carregar o medidor: segure **R** (a entrada `s` / Start; para pausar a luta use **Esc** ou **P**). O lutador entra no estado `3920`, repete a animação `powerUp` com um brilho azul e ganha de 9 a 48 de energia por tick (`native/charge_ramp.rs`, enchendo um super de 1000 em cerca de um segundo) até soltar o botão (depois de pelo menos 6 ticks) ou encher o medidor. O estado é `movetype = I`, então um golpe o interrompe, e um lutador com formas ainda se transforma com `T` quando o medidor chega ao custo da forma. O comando é `charge_cmd` (`/s`) e aparece como `Charge Energy` na lista de golpes. A IA embutida só carrega no nível 3 ou mais, com menos de 700 de energia, quando o rival está a mais de 190 unidades e não está atacando.
 
+Um lutador pode definir a própria rampa com `abilities.charge.gain` = `{ "start", "growth", "max" }` (poder por tick: `min(max, start + ticks segurados * growth)`). Todo campo é opcional e cai no padrão 9 / 0,24 / 48; um `gain` ausente ou inválido mantém a rampa padrão. Ganho fixo é `start` = `max` com `growth` 0. O `mugen2umf.py` preenche o campo a partir do `PowerAdd` do loop de carga original.
+
 ## Habilidades no ar (todo especial e super)
 
 Todo `special` e `super` com `when` ausente ou `"stand"` ganha também uma versão aérea (estado `20000 + estado de chão`, rótulo `State -1, air <nome>`), acionada pelo mesmo comando com o lutador no ar. O lutador flutua no começo do golpe (mantém 40 % do deslize), a gravidade volta a 45 % depois de 12 ticks, o golpe termina no estado de queda do salto (`50`) com controle, e tocar o chão o interrompe com o estado de pouso (`52`). As versões aéreas causam 70 % do dano de chão, os projéteis saem inclinados para baixo (inclinação 0,85) para alcançar um rival no chão, e cada salto permite um especial aéreo (`var(57)`, zerada ao pousar). Agarrões, golpes de voo e golpes com `when: "crouch"` ou `"air"` mantêm suas próprias regras.
@@ -345,7 +347,7 @@ Se existir `assets/chars/sprites/<id>/`, o lutador é desenhado com arquivos PNG
 
 Quando `awakeningPalette` altera `hair`, cada sprite define `frames.<nome>.awakeningHair` como `[esquerda, topo, direita, baixo]` em pixels da imagem original. A troca de cabelo fica limitada a esse retângulo; sprites sem retângulo mantêm o cabelo original. O empacotamento web redimensiona essas coordenadas junto com a imagem.
 
-As entradas de `palettes` também valem para esses PNGs: cada pixel é casado com a linha de sombreamento de uma cor declarada em `art.style.colors` e a cor da paleta substitui no mesmo tom. Uma chave de paleta sem entrada correspondente em `art.style.colors`, ou uma cor que nada na arte lembra, fica intocada.
+Uma paleta `exact` troca os pixels cuja cor é chave do mapa e deixa o resto intocado, então rampas de cinza e cores próximas não se misturam; pixels transparentes são ignorados. As demais entradas de `palettes` também valem para esses PNGs: cada pixel é casado com a linha de sombreamento de uma cor declarada em `art.style.colors` e a cor da paleta substitui no mesmo tom. Uma chave de paleta sem entrada correspondente em `art.style.colors`, ou uma cor que nada na arte lembra, fica intocada.
 
 O build web não lê essa pasta do disco. `scripts/build-web.sh` roda `ume-tools pack-sprites` (`crates/devtools`), que grava um `assets/chars/sprites/<id>.pack` por lutador (imagens limitadas a 768 px, 256 cores gravadas como sprites LZ4, veja [Container de Sprites](Container-de-Sprites.md), âncoras do `meta.json` reescaladas) em `web/dist`; o navegador baixa o pack quando o lutador ganha foco na seleção ou é carregado para a luta, e o engine lê pelo mesmo diretório virtual. Se o download falhar, o lutador fica sem arte: a partida espera o pacote e informa a falha.
 

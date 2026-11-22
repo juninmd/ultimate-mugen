@@ -1,6 +1,6 @@
 use super::abilities::AbilityCode;
 use super::ability_spec::ChargeSpec;
-use super::charge_ramp::gain_expression;
+use super::charge_ramp::gain_expression_for;
 use ume_engine::chardef::MoveInfo;
 use ume_engine::commands::parse_command;
 use std::collections::HashMap;
@@ -48,7 +48,26 @@ pub(super) fn charge_code(spec: Option<&ChargeSpec>, anim_no: &HashMap<String, i
          [State {CHARGE_STATE}, glow]\ntype = PalFX\ntrigger1 = 1\ntime = 2\nadd = {}, {}, {}\nsinadd = 40, 40, 70, 14\n\n\
          {shake}{start_sound}{sound}{explod}\
          [State {CHARGE_STATE}, done]\ntype = ChangeState\ntrigger1 = Time >= {MINIMUM_CHARGE_TICKS} && command != \"{CHARGE_COMMAND}\"\ntrigger2 = power >= powermax\nvalue = {exit}\nctrl = {}\n\n{end_state}",
-        start.unwrap_or(anim), gain_expression(), color[0], color[1], color[2], i32::from(end.is_none())
+        start.unwrap_or(anim), gain_expression_for(spec.and_then(|s| s.gain.as_ref())), color[0], color[1], color[2], i32::from(end.is_none())
     );
     code
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use super::super::ability_spec::ChargeGain;
+
+    #[test]
+    fn custom_gain_reaches_the_generated_power_controller() {
+        let spec = ChargeSpec { gain: Some(ChargeGain { start: Some(6.2), growth: Some(0.0), max: Some(6.2) }), ..Default::default() };
+        let code = charge_code(Some(&spec), &HashMap::new());
+        assert!(code.states.contains("value = min(6.2, 6.2 + Time * 0.0)"), "{}", code.states);
+    }
+
+    #[test]
+    fn default_charge_keeps_the_built_in_ramp() {
+        let code = charge_code(None, &HashMap::new());
+        assert!(code.states.contains("value = min(48.0, 9.0 + Time * 0.24)"), "{}", code.states);
+    }
 }

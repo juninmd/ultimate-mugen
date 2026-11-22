@@ -8,18 +8,18 @@ Este documento apresenta os dossiês biográficos completos, históricos marciai
 
 | ID | Nome | País | Alinhamento | Papel / Arquétipo | Cenário Natal | Forma Desperta |
 |---|---|---|---|---|---|---|
-| `kaito` | **Kaito Arashi** | Austrália | Herói | Karateca Andarilho da Tempestade | Telhado do Dojo — Pôr do Sol (`dojo`) | Olho da Tempestade |
-| `shion` | **Shion Kurogane** | Japão | Anti-Herói | Espadachim Exilado da Lua Pálida | Bambuzal ao Luar (`bamboo`) | Lua Cheia |
-| `akio` | **Akio Hoshi** | Japão | Herói | Lutador Impetuoso da Queda Estelar | Telhado do Dojo — Pôr do Sol (`dojo`) | Luz Estelar |
-| `suzume` | **Suzume Kagerou** | Japão | Anti-Herói | Kunoichi das Sombras do Lótus Carmesim | Bambuzal ao Luar (`bamboo`) | Lótus Sombrio |
+| `kaito` | **Kaito Arashi** | Japão | Herói | Karateca Andarilho da Tempestade | Telhado do Dojo — Pôr do Sol (`dojo`) | Olho da Tempestade |
+| `shion` | **Shion Kurogane** | Egito | Anti-Herói | Espadachim Exilado da Lua Pálida | Bambuzal ao Luar (`bamboo`) | Lua Cheia |
+| `akio` | **Akio Hoshi** | México | Herói | Lutador Impetuoso da Queda Estelar | Telhado do Dojo — Pôr do Sol (`dojo`) | Luz Estelar |
+| `suzume` | **Suzume Kagerou** | Vietnã | Anti-Herói | Kunoichi das Sombras do Lótus Carmesim | Bambuzal ao Luar (`bamboo`) | Lótus Sombrio |
 | `bruno` | **Bruno "Bulldozer" Volk** | Brasil | Herói | Campeão Invicto Peso-Pesado | Praça do Interior — Brasil (`brazil`) | Fúria do Ringue |
 | `sylene` | **Sylene Vashti** | Noruega | Neutro | Soberana Exilada da Coroa Glacial | Planalto Rochoso (`plains`) | Rainha do Inverno |
 | `volta` | **VX-9 Volta** | Estados Unidos | Herói | Androide Cibernético Senciente | Neo-Metrópole 2099 (`neon`) | Sobrecarga |
 | `lian` | **Lian Feng** | China | Herói | Grã-Mestra dos Chutes da Lanterna de Jade | Bambuzal ao Luar (`bamboo`) | Dragão de Jade |
 | `garan` | **Garan the Ashen Oni** | Submundo | Vilão | Calamidade Demoníaca Ancestral | Cratera Vulcânica (`volcano`) | Oni Desperto |
 | `marlow` | **Capitão Marlow Reyes** | Espanha | Anti-Herói | Corsário Aéreo do Galeão Tempestuoso | Planalto Rochoso (`plains`) | Capitão Tempestade |
-| `kaname` | **Kaname Fuyutsuki** | Japão | Neutro / Leal | Juiz Samurai do Inverno Eterno | Portão dos Espíritos (`spirit`) | Lâmina Espiritual |
-| `jin` | **Jin Kazaguruma** | Japão | Herói | Shinobi Acrobata do Vendaval | Bambuzal ao Luar (`bamboo`) | Tufão |
+| `kaname` | **Kaname Fuyutsuki** | Suíça | Neutro / Leal | Juiz Samurai do Inverno Eterno | Portão dos Espíritos (`spirit`) | Lâmina Espiritual |
+| `jin` | **Jin Kazaguruma** | Jamaica | Herói | Shinobi Acrobata do Vendaval | Bambuzal ao Luar (`bamboo`) | Tufão |
 | `daichi` | **Daichi Ginrou** | Mongólia | Herói | Lobo dos Picos Celestes de Ki Dourado | Planalto Rochoso (`plains`) | Instinto Lupino |
 | `valdric` | **Valdric Morn** | Alemanha | Vilão | Príncipe Senhor da Guerra Imperial | Neo-Metrópole 2099 (`neon`) | Dominância Escarlate |
 | `haruki` | **Haruki Sumi** | Coreia do Sul | Herói | Erudito Relutante / Portador dos Titãs | Portão dos Espíritos (`spirit`) | Fúria Contida |
@@ -33,13 +33,13 @@ Este documento apresenta os dossiês biográficos completos, históricos marciai
 
 | Identidade Visual | Perfil de Combate |
 |---|---|
-| ![Retrato Kaito](../../../assets/chars/sprites/kaito/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Crônicas da Estrada da Tempestade<br/>**ID:** `kaito` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Tasmânia, Austrália 🇦🇺<br/>**Alinhamento:** **Herói / Vanguarda do Equilíbrio**<br/>**Cor Temática:** `#2f8f9d` (Verde-água e Dourado)<br/>**Forma Desperta:** Olho da Tempestade<br/>**Cenário:** Telhado do Dojo — Pôr do Sol (`dojo`)<br/>**Estilo:** Karatê Arashi-ryu (Impacto dos Ventos) |
+| ![Retrato Kaito](../../../assets/chars/sprites/kaito/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Crônicas da Estrada da Tempestade<br/>**ID:** `kaito` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Estrada da Tempestade, Izu, Japão 🇯🇵<br/>**Alinhamento:** **Herói / Vanguarda do Equilíbrio**<br/>**Cor Temática:** `#2f8f9d` (Verde-água e Dourado)<br/>**Forma Desperta:** Olho da Tempestade<br/>**Cenário:** Telhado do Dojo — Pôr do Sol (`dojo`)<br/>**Estilo:** Karatê Arashi-ryu (Impacto dos Ventos) |
 
 ![Sprite Kaito](../../../assets/chars/sprites/kaito/01_idle.png)
 *Postura de Luta em Pixel Art*
 
 #### Biografia e Background
-Kaito Arashi é um karateca andarilho que viaja a pé por onde as correntes de ar soprarem. Vestindo um kimono verde-água remendado que já presenciou centenas de combates árduos pela Ásia, Kaito encara a luta não como espetáculo de vaidade, mas como uma conversa sincera entre dois espíritos. Criado na Tasmânia e treinado por um mestre eremita na Península de Izu, ele aprendeu a sincronizar o ritmo de sua respiração com a passagem dos tufões costeiros, gerando ondas de choque de alta densidade e rajadas de vácuo a cada soco desferido.
+Kaito Arashi é um karateca andarilho que viaja a pé por onde as correntes de ar soprarem. Vestindo um kimono verde-água remendado que já presenciou centenas de combates árduos pela Ásia, Kaito encara a luta não como espetáculo de vaidade, mas como uma conversa sincera entre dois espíritos. Criado nos penhascos de Izu e treinado por um mestre eremita na Península de Izu, ele aprendeu a sincronizar o ritmo de sua respiração com a passagem dos tufões costeiros, gerando ondas de choque de alta densidade e rajadas de vácuo a cada soco desferido.
 
 Quando o Eclipse Escarlate começou a rasgar o céu, Kaito sentiu a perturbação das correntes de ar e o desespero das vilas atingidas pelas fendas dimensionais. Empunhando seu bastão de caminhada, desceu a montanha com o voto inabalável de encontrar a fonte da corrupção e proteger os viajantes e inocentes das sombras de Oboro.
 
@@ -67,7 +67,7 @@ Quando o Eclipse Escarlate começou a rasgar o céu, Kaito sentiu a perturbaçã
 
 | Identidade Visual | Perfil de Combate |
 |---|---|
-| ![Retrato Shion](../../../assets/chars/sprites/shion/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Réquiem da Lua Pálida<br/>**ID:** `shion` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Montanhas Esquecidas de Tohoku, Japão 🇯🇵<br/>**Alinhamento:** **Anti-Herói / Guardião Melancólico**<br/>**Cor Temática:** `#4a3b68` (Índigo Lunar Profundo)<br/>**Forma Desperta:** Lua Cheia<br/>**Cenário:** Bambuzal ao Luar (`bamboo`)<br/>**Estilo:** Espada Pesada Kurogane e Gravidade Lunar |
+| ![Retrato Shion](../../../assets/chars/sprites/shion/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Réquiem da Lua Pálida<br/>**ID:** `shion` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Vale da Lua Negra, Egito 🇪🇬<br/>**Alinhamento:** **Anti-Herói / Guardião Melancólico**<br/>**Cor Temática:** `#4a3b68` (Índigo Lunar Profundo)<br/>**Forma Desperta:** Lua Cheia<br/>**Cenário:** Bambuzal ao Luar (`bamboo`)<br/>**Estilo:** Espada Pesada Kurogane e Gravidade Lunar |
 
 ![Sprite Shion](../../../assets/chars/sprites/shion/01_idle.png)
 *Postura de Luta em Pixel Art*
@@ -99,7 +99,7 @@ Carregando o arrependimento e a memória de seus irmãos caídos, Shion vaga por
 
 | Identidade Visual | Perfil de Combate |
 |---|---|
-| ![Retrato Akio](../../../assets/chars/sprites/akio/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Dojo da Queda Estelar<br/>**ID:** `akio` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Osaka / Observatório de Ikoma, Japão 🇯🇵<br/>**Alinhamento:** **Herói / O Prodígio de Sangue Quente**<br/>**Cor Temática:** `#e63946` (Vermelho Carmesim Estelar)<br/>**Forma Desperta:** Luz Estelar<br/>**Cenário:** Telhado do Dojo — Pôr do Sol (`dojo`)<br/>**Estilo:** Punho da Queda Estelar e Plasma Cósmico |
+| ![Retrato Akio](../../../assets/chars/sprites/akio/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Dojo da Queda Estelar<br/>**ID:** `akio` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Dojo Queda Estelar, Mérida / Cratera de Chicxulub, México 🇲🇽<br/>**Alinhamento:** **Herói / O Prodígio de Sangue Quente**<br/>**Cor Temática:** `#e63946` (Vermelho Carmesim Estelar)<br/>**Forma Desperta:** Luz Estelar<br/>**Cenário:** Telhado do Dojo — Pôr do Sol (`dojo`)<br/>**Estilo:** Punho da Queda Estelar e Plasma Cósmico |
 
 ![Sprite Akio](../../../assets/chars/sprites/akio/01_idle.png)
 *Postura de Luta em Pixel Art*
@@ -131,7 +131,7 @@ Impetuoso, barulhento e apaixonado pelo combate leal, Akio se recusa a aceitar a
 
 | Identidade Visual | Perfil de Combate |
 |---|---|
-| ![Retrato Suzume](../../../assets/chars/sprites/suzume/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Shinobi do Lótus Carmesim<br/>**ID:** `suzume` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Vales Ocultos de Iga, Japão 🇯🇵<br/>**Alinhamento:** **Anti-Herói / Vingadora Silenciosa**<br/>**Cor Temática:** `#9b2226` (Carmesim Profundo e Sombra)<br/>**Forma Desperta:** Lótus Sombrio<br/>**Cenário:** Bambuzal ao Luar (`bamboo`)<br/>**Estilo:** Ninjutsu de Assassínio Kagerou e Adagas Gêmeas |
+| ![Retrato Suzume](../../../assets/chars/sprites/suzume/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Shinobi do Lótus Carmesim<br/>**ID:** `suzume` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Vila Kagerou Caída, Huế, Vietnã 🇻🇳<br/>**Alinhamento:** **Anti-Herói / Vingadora Silenciosa**<br/>**Cor Temática:** `#9b2226` (Carmesim Profundo e Sombra)<br/>**Forma Desperta:** Lótus Sombrio<br/>**Cenário:** Bambuzal ao Luar (`bamboo`)<br/>**Estilo:** Ninjutsu de Assassínio Kagerou e Adagas Gêmeas |
 
 ![Sprite Suzume](../../../assets/chars/sprites/suzume/01_idle.png)
 *Postura de Luta em Pixel Art*
@@ -291,7 +291,7 @@ Quando os céus de Wudang se abriram sob o feitiço de Oboro, Lian foi encarrega
 
 | Identidade Visual | Perfil de Combate |
 |---|---|
-| ![Retrato Garan](../../../assets/chars/sprites/garan/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Lendas do Portão de Cinzas<br/>**ID:** `garan` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Fenda Subterrânea do Monte Aso, Japão 🇯🇵<br/>**Alinhamento:** **Vilão / Calamidade Demoníaca Ancestral**<br/>**Cor Temática:** `#7b2cbf` (Violeta das Cinzas e Enxofre)<br/>**Forma Desperta:** Oni Desperto<br/>**Cenário:** Cratera Vulcânica (`volcano`)<br/>**Estilo:** Força Bruta Monstruosa e Chamas Frias de Cinzas |
+| ![Retrato Garan](../../../assets/chars/sprites/garan/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Lendas do Portão de Cinzas<br/>**ID:** `garan` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Caldeira Subterrânea / Portão Selado das Cinzas, Submundo 🌋<br/>**Alinhamento:** **Vilão / Calamidade Demoníaca Ancestral**<br/>**Cor Temática:** `#7b2cbf` (Violeta das Cinzas e Enxofre)<br/>**Forma Desperta:** Oni Desperto<br/>**Cenário:** Cratera Vulcânica (`volcano`)<br/>**Estilo:** Força Bruta Monstruosa e Chamas Frias de Cinzas |
 
 ![Sprite Garan](../../../assets/chars/sprites/garan/01_idle.png)
 *Postura de Luta em Pixel Art*
@@ -356,13 +356,13 @@ Marlow não é um assassino sanguinário: ele vive pela adrenalina da exploraç�
 
 | Identidade Visual | Perfil de Combate |
 |---|---|
-| ![Retrato Kaname](../../../assets/chars/sprites/kaname/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Crônicas da Lâmina do Inverno Eterno<br/>**ID:** `kaname` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Monte Daisetsuzan, Hokkaido, Japão 🇯🇵<br/>**Alinhamento:** **Neutro / Juiz Divino Leal**<br/>**Cor Temática:** `#48cae4` (Geada Cristalina e Haori Branco)<br/>**Forma Desperta:** Lâmina Espiritual<br/>**Cenário:** Portão dos Espíritos (`spirit`)<br/>**Estilo:** Iaido do Inverno Eterno e Extirpação da Dúvida |
+| ![Retrato Kaname](../../../assets/chars/sprites/kaname/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Crônicas da Lâmina do Inverno Eterno<br/>**ID:** `kaname` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Santuário da Lua de Inverno, Alpes Suíços, Suíça 🇨🇭<br/>**Alinhamento:** **Neutro / Juiz Divino Leal**<br/>**Cor Temática:** `#48cae4` (Geada Cristalina e Haori Branco)<br/>**Forma Desperta:** Lâmina Espiritual<br/>**Cenário:** Portão dos Espíritos (`spirit`)<br/>**Estilo:** Iaido do Inverno Eterno e Extirpação da Dúvida |
 
 ![Sprite Kaname](../../../assets/chars/sprites/kaname/01_idle.png)
 *Postura de Luta em Pixel Art*
 
 #### Biografia e Background
-Kaname Fuyutsuki é o guardião supremo do Santuário das Neves Perpétuas nas montanhas sagradas de Hokkaido. Trajando um haori imaculado com brasões de flocos de neve, Kaname desembainha sua katana espiritual, *Hyōketsu*, exclusivamente para cumprir desígnios de justiça cósmica. Sua lâmina especial corta não apenas a matéria física, mas também os laços da mentira, da corrupção e das ilusões mentais.
+Kaname Fuyutsuki é o guardião supremo do Santuário das Neves Perpétuas nas montanhas sagradas dos Alpes Suíços. Trajando um haori imaculado com brasões de flocos de neve, Kaname desembainha sua katana espiritual, *Hyōketsu*, exclusivamente para cumprir desígnios de justiça cósmica. Sua lâmina especial corta não apenas a matéria física, mas também os laços da mentira, da corrupção e das ilusões mentais.
 
 Kaname encara a luta como um tribunal solene. Ele fala com reverência e serenidade monástica, sem demonstrar ódio nem orgulho mundano. Quando o miasma das fendas de Oboro começou a poluir o plano espiritual, Kaname postou-se diante do Portão dos Espíritos para julgar e neutralizar os perturbadores da harmonia universal.
 
@@ -388,7 +388,7 @@ Kaname encara a luta como um tribunal solene. Ele fala com reverência e serenid
 
 | Identidade Visual | Perfil de Combate |
 |---|---|
-| ![Retrato Jin](../../../assets/chars/sprites/jin/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Ventos da Vila Escondida no Vale<br/>**ID:** `jin` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Vale de Kiso / Província de Nagano, Japão 🇯🇵<br/>**Alinhamento:** **Herói / O Mensageiro Veloz do Vendaval**<br/>**Cor Temática:** `#0077b6` (Azul Celeste e Cachecol Vermelho)<br/>**Forma Desperta:** Tufão<br/>**Cenário:** Bambuzal ao Luar (`bamboo`)<br/>**Estilo:** Acrobacias Kazaguruma e Chakrams de Vento |
+| ![Retrato Jin](../../../assets/chars/sprites/jin/portrait.png)<br/>*Retrato de Seleção / HUD* | **Série:** Ventos da Vila Escondida no Vale<br/>**ID:** `jin` \| **Autor:** Ultimate MUGEN<br/>**Origem:** Vila Moinho de Vento, Montanhas Azuis, Jamaica 🇯🇲<br/>**Alinhamento:** **Herói / O Mensageiro Veloz do Vendaval**<br/>**Cor Temática:** `#0077b6` (Azul Celeste e Cachecol Vermelho)<br/>**Forma Desperta:** Tufão<br/>**Cenário:** Bambuzal ao Luar (`bamboo`)<br/>**Estilo:** Acrobacias Kazaguruma e Chakrams de Vento |
 
 ![Sprite Jin](../../../assets/chars/sprites/jin/01_idle.png)
 *Postura de Luta em Pixel Art*

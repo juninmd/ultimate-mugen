@@ -8,18 +8,18 @@ This document presents the complete biographical dossiers, martial backgrounds, 
 
 | ID | Name | Country | Alignment | Role / Archetype | Home Stage | Awakened Form |
 |---|---|---|---|---|---|---|
-| `kaito` | **Kaito Arashi** | Australia | Hero | Wandering Storm Karateka | Sunset Dojo Roof (`dojo`) | Eye of the Storm |
-| `shion` | **Shion Kurogane** | Japan | Anti-Hero | Exiled Pale Moon Greatswordsman | Moonlit Bamboo Grove (`bamboo`) | Full Moon |
-| `akio` | **Akio Hoshi** | Japan | Hero | Hot-Blooded Starfall Striker | Sunset Dojo Roof (`dojo`) | Starlight |
-| `suzume` | **Suzume Kagerou** | Japan | Anti-Hero | Shadow Kunoichi of the Crimson Lotus | Moonlit Bamboo Grove (`bamboo`) | Dark Lotus |
+| `kaito` | **Kaito Arashi** | Japan | Hero | Wandering Storm Karateka | Sunset Dojo Roof (`dojo`) | Eye of the Storm |
+| `shion` | **Shion Kurogane** | Egypt | Anti-Hero | Exiled Pale Moon Greatswordsman | Moonlit Bamboo Grove (`bamboo`) | Full Moon |
+| `akio` | **Akio Hoshi** | Mexico | Hero | Hot-Blooded Starfall Striker | Sunset Dojo Roof (`dojo`) | Starlight |
+| `suzume` | **Suzume Kagerou** | Vietnam | Anti-Hero | Shadow Kunoichi of the Crimson Lotus | Moonlit Bamboo Grove (`bamboo`) | Dark Lotus |
 | `bruno` | **Bruno "Bulldozer" Volk** | Brazil | Hero | Undefeated Heavyweight Brawler | Hinterland Plaza — Brazil (`brazil`) | Ring Fury |
 | `sylene` | **Sylene Vashti** | Norway | Neutral | Exiled Glacial Crown Sovereign | Rocky Plateau (`plains`) | Winter Queen |
 | `volta` | **VX-9 Volta** | United States | Hero | Sentient Cybernetic Android | Neo-Metropolis 2099 (`neon`) | Overcharge |
 | `lian` | **Lian Feng** | China | Hero | Jade Lantern Kick Grandmaster | Moonlit Bamboo Grove (`bamboo`) | Jade Dragon |
 | `garan` | **Garan the Ashen Oni** | Netherworld | Villain | Ancient Demonic Calamity | Volcanic Crater (`volcano`) | Awakened Oni |
 | `marlow` | **Captain Marlow Reyes** | Spain | Anti-Hero | Swashbuckling Sky Galleon Buccaneer | Rocky Plateau (`plains`) | Captain Tempest |
-| `kaname` | **Kaname Fuyutsuki** | Japan | Neutral / Lawful | Everwinter Frost Samurai Judge | Gate of Spirits (`spirit`) | Spiritual Blade |
-| `jin` | **Jin Kazaguruma** | Japan | Hero | Swift Gale Shinobi Acrobat | Moonlit Bamboo Grove (`bamboo`) | Typhoon |
+| `kaname` | **Kaname Fuyutsuki** | Switzerland | Neutral / Lawful | Everwinter Frost Samurai Judge | Gate of Spirits (`spirit`) | Spiritual Blade |
+| `jin` | **Jin Kazaguruma** | Jamaica | Hero | Swift Gale Shinobi Acrobat | Moonlit Bamboo Grove (`bamboo`) | Typhoon |
 | `daichi` | **Daichi Ginrou** | Mongolia | Hero | Celestial Peak Golden Ki Wolf | Rocky Plateau (`plains`) | Lupine Instinct |
 | `valdric` | **Valdric Morn** | Germany | Villain | Technocratic Imperial Warlord Prince | Neo-Metropolis 2099 (`neon`) | Scarlet Dominance |
 | `haruki` | **Haruki Sumi** | South Korea | Hero | Reluctant Archivist / Sealed Calamity | Gate of Spirits (`spirit`) | Contained Fury |
@@ -33,13 +33,13 @@ This document presents the complete biographical dossiers, martial backgrounds, 
 
 | Visual Identity | Combat Profile |
 |---|---|
-| ![Kaito Portrait](../../assets/chars/sprites/kaito/portrait.png)<br/>*Avatar Portrait* | **Series:** Chronicles of the Storm Road (*Crônicas da Estrada da Tempestade*)<br/>**ID:** `kaito` \| **Author:** Ultimate MUGEN<br/>**Origin:** Tasmania, Australia 🇦🇺<br/>**Alignment:** **Hero / Vanguard of Balance**<br/>**Theme Color:** `#2f8f9d` (Teal / Sea-green)<br/>**Awakened Form:** Eye of the Storm (*Olho da Tempestade*)<br/>**Home Stage:** Sunset Dojo Roof (`dojo`)<br/>**Fighting Style:** Arashi-ryu Karate (Wind & Gale Striking) |
+| ![Kaito Portrait](../../assets/chars/sprites/kaito/portrait.png)<br/>*Avatar Portrait* | **Series:** Chronicles of the Storm Road (*Crônicas da Estrada da Tempestade*)<br/>**ID:** `kaito` \| **Author:** Ultimate MUGEN<br/>**Origin:** Storm Road, Izu, Japan 🇯🇵<br/>**Alignment:** **Hero / Vanguard of Balance**<br/>**Theme Color:** `#2f8f9d` (Teal / Sea-green)<br/>**Awakened Form:** Eye of the Storm (*Olho da Tempestade*)<br/>**Home Stage:** Sunset Dojo Roof (`dojo`)<br/>**Fighting Style:** Arashi-ryu Karate (Wind & Gale Striking) |
 
 ![Kaito Battle Sprite](../../assets/chars/sprites/kaito/01_idle.png)
 *Standard In-Game Combat Stance*
 
 #### Biography & Background
-Kaito Arashi is a wandering martial artist who journeys wherever the trade winds blow. Clad in a sea-green kimono that has witnessed hundreds of grueling matches across Asia, Kaito considers fighting not a sport of vanity, but a profound form of spiritual communication. Raised in Tasmania and trained by an ascetic master on the Izu Peninsula, he learned to synchronize his breathing with coastal typhoons, generating sonic shockwaves and gale-force momentum through disciplined fist thrusts.
+Kaito Arashi is a wandering martial artist who journeys wherever the trade winds blow. Clad in a sea-green kimono that has witnessed hundreds of grueling matches across Asia, Kaito considers fighting not a sport of vanity, but a profound form of spiritual communication. Raised on the cliffs of Izu and trained by an ascetic master on the Izu Peninsula, he learned to synchronize his breathing with coastal typhoons, generating sonic shockwaves and gale-force momentum through disciplined fist thrusts.
 
 When the Scarlet Eclipse fractured reality, Kaito was among the first to witness the sky bleeding crimson. Sensing the spiritual disharmony tearing the world apart, he took up his walking staff and descended from the mountains, determined to confront Mikazuki Oboro and safeguard the mortal realm.
 
@@ -67,7 +67,7 @@ When the Scarlet Eclipse fractured reality, Kaito was among the first to witness
 
 | Visual Identity | Combat Profile |
 |---|---|
-| ![Shion Portrait](../../assets/chars/sprites/shion/portrait.png)<br/>*Avatar Portrait* | **Series:** Requiem of the Pale Moon (*Réquiem da Lua Pálida*)<br/>**ID:** `shion` \| **Author:** Ultimate MUGEN<br/>**Origin:** Forgotten Tohoku Mountains, Japan 🇯🇵<br/>**Alignment:** **Anti-Hero / Melancholic Guardian**<br/>**Theme Color:** `#4a3b68` (Deep Lunar Indigo)<br/>**Awakened Form:** Full Moon (*Lua Cheia*)<br/>**Home Stage:** Moonlit Bamboo Grove (`bamboo`)<br/>**Fighting Style:** Kurogane Lunar Greatsword Severance |
+| ![Shion Portrait](../../assets/chars/sprites/shion/portrait.png)<br/>*Avatar Portrait* | **Series:** Requiem of the Pale Moon (*Réquiem da Lua Pálida*)<br/>**ID:** `shion` \| **Author:** Ultimate MUGEN<br/>**Origin:** Black Moon Valley, Egypt 🇪🇬<br/>**Alignment:** **Anti-Hero / Melancholic Guardian**<br/>**Theme Color:** `#4a3b68` (Deep Lunar Indigo)<br/>**Awakened Form:** Full Moon (*Lua Cheia*)<br/>**Home Stage:** Moonlit Bamboo Grove (`bamboo`)<br/>**Fighting Style:** Kurogane Lunar Greatsword Severance |
 
 ![Shion Battle Sprite](../../assets/chars/sprites/shion/01_idle.png)
 *Standard In-Game Combat Stance*
@@ -99,7 +99,7 @@ Haunted by the ghosts of his fallen kin, Shion wanders between the bamboo forest
 
 | Visual Identity | Combat Profile |
 |---|---|
-| ![Akio Portrait](../../assets/chars/sprites/akio/portrait.png)<br/>*Avatar Portrait* | **Series:** Starfall Dojo (*Dojo da Queda Estelar*)<br/>**ID:** `akio` \| **Author:** Ultimate MUGEN<br/>**Origin:** Osaka / Mt. Ikoma Observatory, Japan 🇯🇵<br/>**Alignment:** **Hero / Fiery Striker**<br/>**Theme Color:** `#e63946` (Starlight Crimson)<br/>**Awakened Form:** Starlight (*Luz Estelar*)<br/>**Home Stage:** Sunset Dojo Roof (`dojo`)<br/>**Fighting Style:** Hoshi-ryu Starlight Striking & Plasma Ki |
+| ![Akio Portrait](../../assets/chars/sprites/akio/portrait.png)<br/>*Avatar Portrait* | **Series:** Starfall Dojo (*Dojo da Queda Estelar*)<br/>**ID:** `akio` \| **Author:** Ultimate MUGEN<br/>**Origin:** Starfall Dojo, Mérida / Chicxulub Crater, Mexico 🇲🇽<br/>**Alignment:** **Hero / Fiery Striker**<br/>**Theme Color:** `#e63946` (Starlight Crimson)<br/>**Awakened Form:** Starlight (*Luz Estelar*)<br/>**Home Stage:** Sunset Dojo Roof (`dojo`)<br/>**Fighting Style:** Hoshi-ryu Starlight Striking & Plasma Ki |
 
 ![Akio Battle Sprite](../../assets/chars/sprites/akio/01_idle.png)
 *Standard In-Game Combat Stance*
@@ -131,7 +131,7 @@ Brash, loud, and bursting with optimism, Akio treats every tournament match as t
 
 | Visual Identity | Combat Profile |
 |---|---|
-| ![Suzume Portrait](../../assets/chars/sprites/suzume/portrait.png)<br/>*Avatar Portrait* | **Series:** Shinobi of the Crimson Lotus (*Shinobi do Lótus Carmesim*)<br/>**ID:** `suzume` \| **Author:** Ultimate MUGEN<br/>**Origin:** Hidden Iga Valleys, Japan 🇯🇵<br/>**Alignment:** **Anti-Hero / Lone Avenger**<br/>**Theme Color:** `#9b2226` (Crimson Lotus & Shadow Black)<br/>**Awakened Form:** Dark Lotus (*Lótus Sombrio*)<br/>**Home Stage:** Moonlit Bamboo Grove (`bamboo`)<br/>**Fighting Style:** Kagerou Shadow Assassination & Kunai Arts |
+| ![Suzume Portrait](../../assets/chars/sprites/suzume/portrait.png)<br/>*Avatar Portrait* | **Series:** Shinobi of the Crimson Lotus (*Shinobi do Lótus Carmesim*)<br/>**ID:** `suzume` \| **Author:** Ultimate MUGEN<br/>**Origin:** Fallen Kagerou Village, Huế, Vietnam 🇻🇳<br/>**Alignment:** **Anti-Hero / Lone Avenger**<br/>**Theme Color:** `#9b2226` (Crimson Lotus & Shadow Black)<br/>**Awakened Form:** Dark Lotus (*Lótus Sombrio*)<br/>**Home Stage:** Moonlit Bamboo Grove (`bamboo`)<br/>**Fighting Style:** Kagerou Shadow Assassination & Kunai Arts |
 
 ![Suzume Battle Sprite](../../assets/chars/sprites/suzume/01_idle.png)
 *Standard In-Game Combat Stance*
@@ -291,7 +291,7 @@ When the dimensional fissures opened above Mount Wudang, Lian recognized the wor
 
 | Visual Identity | Combat Profile |
 |---|---|
-| ![Garan Portrait](../../assets/chars/sprites/garan/portrait.png)<br/>*Avatar Portrait* | **Series:** Legends of the Ashen Gate (*Lendas do Portão de Cinzas*)<br/>**ID:** `garan` \| **Author:** Ultimate MUGEN<br/>**Origin:** Subterranean Caldera / Mt. Aso Abysm, Japan 🇯🇵<br/>**Alignment:** **Villain / Primordial Calamity**<br/>**Theme Color:** `#7b2cbf` (Cold Ashen Violet & Brimstone)<br/>**Awakened Form:** Awakened Oni (*Oni Desperto*)<br/>**Home Stage:** Volcanic Crater (`volcano`)<br/>**Fighting Style:** Primordial Demonic Brute Force & Violet Ashen Flames |
+| ![Garan Portrait](../../assets/chars/sprites/garan/portrait.png)<br/>*Avatar Portrait* | **Series:** Legends of the Ashen Gate (*Lendas do Portão de Cinzas*)<br/>**ID:** `garan` \| **Author:** Ultimate MUGEN<br/>**Origin:** Subterranean Caldera / Sealed Gate of Ash, Underworld 🌋<br/>**Alignment:** **Villain / Primordial Calamity**<br/>**Theme Color:** `#7b2cbf` (Cold Ashen Violet & Brimstone)<br/>**Awakened Form:** Awakened Oni (*Oni Desperto*)<br/>**Home Stage:** Volcanic Crater (`volcano`)<br/>**Fighting Style:** Primordial Demonic Brute Force & Violet Ashen Flames |
 
 ![Garan Battle Sprite](../../assets/chars/sprites/garan/01_idle.png)
 *Standard In-Game Combat Stance*
@@ -356,13 +356,13 @@ Marlow is not a cruel killer; he lives for adventure, high stakes, and the thril
 
 | Visual Identity | Combat Profile |
 |---|---|
-| ![Kaname Portrait](../../assets/chars/sprites/kaname/portrait.png)<br/>*Avatar Portrait* | **Series:** Chronicles of the Everwinter Blade (*Crônicas da Lâmina do Inverno Eterno*)<br/>**ID:** `kaname` \| **Author:** Ultimate MUGEN<br/>**Origin:** Mt. Daisetsuzan, Hokkaido, Japan 🇯🇵<br/>**Alignment:** **Neutral / Lawful Divine Judge**<br/>**Theme Color:** `#48cae4` (Pristine Frost & Haori White)<br/>**Awakened Form:** Spiritual Blade (*Lâmina Espiritual*)<br/>**Home Stage:** Gate of Spirits (`spirit`)<br/>**Fighting Style:** Everwinter Iaido & Spiritual Severance |
+| ![Kaname Portrait](../../assets/chars/sprites/kaname/portrait.png)<br/>*Avatar Portrait* | **Series:** Chronicles of the Everwinter Blade (*Crônicas da Lâmina do Inverno Eterno*)<br/>**ID:** `kaname` \| **Author:** Ultimate MUGEN<br/>**Origin:** Winter Moon Shrine, Swiss Alps, Switzerland 🇨🇭<br/>**Alignment:** **Neutral / Lawful Divine Judge**<br/>**Theme Color:** `#48cae4` (Pristine Frost & Haori White)<br/>**Awakened Form:** Spiritual Blade (*Lâmina Espiritual*)<br/>**Home Stage:** Gate of Spirits (`spirit`)<br/>**Fighting Style:** Everwinter Iaido & Spiritual Severance |
 
 ![Kaname Battle Sprite](../../assets/chars/sprites/kaname/01_idle.png)
 *Standard In-Game Combat Stance*
 
 #### Biography & Background
-Kaname Fuyutsuki is the supreme guardian of the Sanctuary of Everlasting Snows on the sacred peaks of Hokkaido. Dressed in a spotless white haori adorned with snowflake heraldry, Kaname draws his spirit katana, *Hyōketsu*, only in the pursuit of absolute righteousness. His blade does not merely cut flesh and bone; it cuts through hesitation, dark sorcery, and spiritual illusions.
+Kaname Fuyutsuki is the supreme guardian of the Sanctuary of Everlasting Snows on the sacred peaks of the Swiss Alps. Dressed in a spotless white haori adorned with snowflake heraldry, Kaname draws his spirit katana, *Hyōketsu*, only in the pursuit of absolute righteousness. His blade does not merely cut flesh and bone; it cuts through hesitation, dark sorcery, and spiritual illusions.
 
 Kaname views combat not as a pastime or a sport, but as a solemn ritual of judgment. He speaks with measured formality, displaying neither malice nor pride. When Oboro’s dimensional tampering began bleeding dark miasma into the spirit world, Kaname descended to the Gate of Spirits to pass judgment upon the violators of cosmic order.
 
@@ -388,7 +388,7 @@ Kaname views combat not as a pastime or a sport, but as a solemn ritual of judgm
 
 | Visual Identity | Combat Profile |
 |---|---|
-| ![Jin Portrait](../../assets/chars/sprites/jin/portrait.png)<br/>*Avatar Portrait* | **Series:** Winds of the Hidden Valley Village (*Ventos da Vila Escondida no Vale*)<br/>**ID:** `jin` \| **Author:** Ultimate MUGEN<br/>**Origin:** Kiso Valley / Nagano, Japan 🇯🇵<br/>**Alignment:** **Hero / Zephyr Acrobat**<br/>**Theme Color:** `#0077b6` (Sky Blue & Crimson Scarf)<br/>**Awakened Form:** Typhoon (*Tufão*)<br/>**Home Stage:** Moonlit Bamboo Grove (`bamboo`)<br/>**Fighting Style:** Kazaguruma Wind Acrobatics & Twin Gale Chakrams |
+| ![Jin Portrait](../../assets/chars/sprites/jin/portrait.png)<br/>*Avatar Portrait* | **Series:** Winds of the Hidden Valley Village (*Ventos da Vila Escondida no Vale*)<br/>**ID:** `jin` \| **Author:** Ultimate MUGEN<br/>**Origin:** Windmill Village, Blue Mountains, Jamaica 🇯🇲<br/>**Alignment:** **Hero / Zephyr Acrobat**<br/>**Theme Color:** `#0077b6` (Sky Blue & Crimson Scarf)<br/>**Awakened Form:** Typhoon (*Tufão*)<br/>**Home Stage:** Moonlit Bamboo Grove (`bamboo`)<br/>**Fighting Style:** Kazaguruma Wind Acrobatics & Twin Gale Chakrams |
 
 ![Jin Battle Sprite](../../assets/chars/sprites/jin/01_idle.png)
 *Standard In-Game Combat Stance*

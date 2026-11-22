@@ -366,13 +366,17 @@ Os pacotes de sprites do navegador carregam de forma assíncrona. Um pacote novo
 
 Um zip (ou pasta `mugen/`) com um `.json` UMF ao lado de uma pasta `sprites/` com `01_idle.png`, os PNGs das poses e um `meta.json` opcional (`axisX`, `axisY`, `refHeight` por pose) é importado como lutador nativo, sem `.def`. O mercado instala como qualquer outro pacote. O [Goku SSJ4 UMF](https://github.com/juninmd/mugen-assets/tree/main/umf/Goku_SSJ4_UMF) é o exemplo de referência.
 
-### Paridade com M.U.G.E.N
+### Paridade com M.U.G.E.N (migração exata)
 
-`tools/mugen2umf` converte uma pasta M.U.G.E.N nesse pacote. Ele mantém o visual e o jogo do original com três campos:
+`tools/mugen2umf convert` transforma uma pasta ou zip M.U.G.E.N nesse pacote com comportamento idêntico. O json leva um bloco `mugen` e `art.type: "mugen"`:
 
-- `stats.height` igual ao `refHeight` do `meta.json` desenha os sprites 1:1, no tamanho original.
-- `art.style.boxes: "exact"` usa `hit.box` (Clsn1) e o `hurt` de cada quadro (Clsn2) como escritos, sem recorte automático.
-- `moves[].sounds: [{ "at": 3, "snd": [2, 1] }]` toca `sprites/snd_2_1.wav` no quadro 3 (listado em `sounds` do `meta.json`); `"fight": true` toca dos sons de luta do motor.
+- `mugen.cns`, `mugen.st`, `mugen.stcommon`, `mugen.cmd`: os arquivos de estados e comandos originais, sem alteração.
+- `mugen.anims`: cada action do AIR pelo número, com sprite, offset, ticks, flip, blend e alpha, escala, ângulo e todas as caixas Clsn1/Clsn2.
+- `mugen.info`, `mugen.mugenVersion`, `mugen.localcoord`: o `[Info]` do `.def` original.
+- `mugen.names`: nomes opcionais dos golpes na lista, pela chave do comando.
+- `sprites/`: um PNG indexado por sprite do SFF (índices e paleta exatos), `sffpal_<k>.png` com as paletas do SFF, `pal1.act`..`pal12.act`, todos os sons como `snd_g_i.wav` e `meta.json` (eixos, tamanhos e paleta de cada sprite na ordem do SFF).
+
+O motor monta o lutador com o mesmo código de um personagem M.U.G.E.N (`ume_engine::loader::assemble_mugen_char`), então estados, comandos, constantes, animações, paletas e sons são os mesmos. Os campos UMF (`profile`, `series`, falas, `rivals`, `scripts`) ficam por cima. `mugen2umf parity` prova golpe a golpe.
 
 ## Elemento do lutador
 

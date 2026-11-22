@@ -22,6 +22,7 @@ pub mod boss_ui;
 pub mod clones;
 pub mod companions;
 pub mod scripts;
+pub mod exact;
 pub mod stand;
 pub mod forms;
 pub mod lookup;

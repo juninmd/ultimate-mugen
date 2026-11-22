@@ -392,13 +392,17 @@ Browser sprite packs load asynchronously. A newly downloaded or replaced pack in
 
 A zip (or a `mugen/` folder) that holds one UMF `.json` next to a `sprites/` folder with `01_idle.png`, the pose PNGs and an optional `meta.json` (`axisX`, `axisY`, `refHeight` per pose) is imported as a native fighter, with no `.def`. The marketplace installs it like any other pack. [Goku SSJ4 UMF](https://github.com/juninmd/mugen-assets/tree/main/umf/Goku_SSJ4_UMF) is the reference example.
 
-### M.U.G.E.N parity
+### M.U.G.E.N parity (exact migration)
 
-`tools/mugen2umf` converts a M.U.G.E.N folder into such a pack. It keeps the original look and feel with three fields:
+`tools/mugen2umf convert` turns a M.U.G.E.N folder or zip into such a pack with identical behavior. The json carries a `mugen` block and `art.type: "mugen"`:
 
-- `stats.height` equal to `meta.json` `refHeight` draws the sprites 1:1, at the original size.
-- `art.style.boxes: "exact"` uses `hit.box` (Clsn1) and per-frame `hurt` (Clsn2) as written, with no automatic trim.
-- `moves[].sounds: [{ "at": 3, "snd": [2, 1] }]` plays `sprites/snd_2_1.wav` on frame 3 (listed in `meta.json` `sounds`); `"fight": true` plays from the engine's fight sounds.
+- `mugen.cns`, `mugen.st`, `mugen.stcommon`, `mugen.cmd`: the original state and command files, verbatim.
+- `mugen.anims`: every AIR action by number, with sprite, offset, ticks, flip, blend and alpha, scale, angle and every Clsn1/Clsn2 box.
+- `mugen.info`, `mugen.mugenVersion`, `mugen.localcoord`: the original `.def` `[Info]`.
+- `mugen.names`: optional move names for the move list, keyed by command name.
+- `sprites/`: one indexed PNG per SFF sprite (exact indices and palette), `sffpal_<k>.png` for the SFF palettes, `pal1.act`..`pal12.act`, every sound as `snd_g_i.wav`, and `meta.json` (axes, sizes and palette of each sprite in SFF order).
+
+The engine builds the fighter from these with the same code as a M.U.G.E.N character (`ume_engine::loader::assemble_mugen_char`), so states, commands, constants, animations, palettes and sounds are the same. UMF fields (`profile`, `series`, quotes, `rivals`, `scripts`) are layered on top. `mugen2umf parity` proves it move by move.
 
 ## Fighter element
 

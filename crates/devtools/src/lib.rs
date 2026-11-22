@@ -14,3 +14,4 @@ pub mod homologate_run;
 pub mod mugen_census;
 pub mod roster_audit;
 pub mod debug_fight;
+pub mod knockdown_rate;

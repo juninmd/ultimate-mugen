@@ -39,6 +39,7 @@ fn test_hit_priority_and_advanced_hitdef_flags() {
             pausetime: Some([7, 14]),
             cornerpush: Some(-4.5),
             hit_sound: Some([5, 3]),
+            own_sound: false,
             guard_sound: Some([6, 1]),
             spark_pos: Some([35.0, -55.0]),
             ground_bounce: Some(true),

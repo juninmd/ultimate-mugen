@@ -1,24 +1,11 @@
 mod support;
-use std::collections::BTreeSet;
-use std::fmt::Write as _;
 use std::sync::Arc;
 use support::gogeta::{load, synth, Duel};
-use support::render::{frame, sheet};
-use tiny_skia::Pixmap;
+use support::parity::{forced, move_state, observe, row, save, sounds, Run};
+use support::render::frame;
 use ume_engine::chardef::CharDef;
 use ume_engine::input::k;
-use ume_engine::matchs::{Event, Match};
-
-struct Run {
-    shots: Vec<Pixmap>,
-    sounds: BTreeSet<(i32, i32)>,
-    missing: BTreeSet<(i32, i32)>,
-    states: BTreeSet<i32>,
-    min: (f32, f32),
-    power: (f32, f32),
-    end: (i32, bool, f32),
-    damage: f32,
-}
+use ume_engine::matchs::Match;
 
 fn umf() -> Option<Arc<CharDef>> {
     let path = std::env::var("UME_TEST_UMF_JSON").ok()?;
@@ -26,43 +13,10 @@ fn umf() -> Option<Arc<CharDef>> {
     Some(Arc::new(ume_native::compile_native(&nc, 1, true)))
 }
 
-fn sounds(m: &mut Match, run: &mut Run) {
-    for ev in m.events.drain(..) {
-        if let Event::Sound { def: Some(def), group, index, own: true, .. } = ev {
-            run.sounds.insert((group, index));
-            if !def.sounds.contains_key(&(group, index)) {
-                run.missing.insert((group, index));
-            }
-        }
-    }
-}
-
-fn observe(r: &mut Duel, ticks: usize, every: usize, run: &mut Run) {
-    let life = r.m.fighters[1].life;
-    for t in 0..ticks {
-        r.tick(1);
-        sounds(&mut r.m, run);
-        let f = &r.m.fighters[0];
-        run.states.insert(f.state_no);
-        run.min = (run.min.0.min(f.pos.x), run.min.1.min(f.pos.y));
-        if t % every == every - 1 && run.shots.len() < 6 {
-            run.shots.push(frame(&r.m, false));
-        }
-    }
-    let f = &r.m.fighters[0];
-    run.end = (f.state_no, f.ctrl, f.pos.y);
-    run.damage += life - r.m.fighters[1].life;
-}
-
-fn new_run(r: &Duel) -> Run {
-    let f = &r.m.fighters[0];
-    Run { shots: vec![], sounds: BTreeSet::new(), missing: BTreeSet::new(), states: BTreeSet::new(), min: (f.pos.x, f.pos.y), power: (f.power, f.power), end: (0, false, 0.0), damage: 0.0 }
-}
-
 fn charge(d: &Arc<CharDef>, held: u32) -> Run {
     let mut r = Duel::new(d.clone(), 140.0);
     r.m.fighters[0].power = 0.0;
-    let mut run = new_run(&r);
+    let mut run = Run::start(&r);
     run.power.0 = 0.0;
     r.push(0, &vec![held; 150]);
     observe(&mut r, 150, 25, &mut run);
@@ -80,7 +34,7 @@ fn command_at(d: &Arc<CharDef>, name: &str, ticks: usize, gap: f32) -> Run {
     let mut r = Duel::new(d.clone(), gap);
     r.m.fighters[0].pos.x = 0.0;
     r.m.fighters[1].pos.x = gap;
-    let mut run = new_run(&r);
+    let mut run = Run::start(&r);
     r.push(0, &synth(c));
     observe(&mut r, ticks, ticks / 6, &mut run);
     run
@@ -90,22 +44,10 @@ fn grab(d: &Arc<CharDef>, gap: f32, inputs: &[u32]) -> Run {
     let mut r = Duel::new(d.clone(), gap);
     r.m.fighters[0].pos.x = 0.0;
     r.m.fighters[1].pos.x = gap;
-    let mut run = new_run(&r);
+    let mut run = Run::start(&r);
     r.push(0, inputs);
     observe(&mut r, 150, 25, &mut run);
     run
-}
-
-fn forced(d: &Arc<CharDef>, state: i32, ticks: usize) -> Run {
-    let mut r = Duel::new(d.clone(), 50.0);
-    let mut run = new_run(&r);
-    r.m.change_state(0, state, d.clone());
-    observe(&mut r, ticks, ticks / 6, &mut run);
-    run
-}
-
-fn move_state(d: &Arc<CharDef>, command: &str) -> i32 {
-    d.movelist.iter().find(|mv| mv.command == command).map(|mv| mv.state).unwrap_or_else(|| panic!("move {command} missing"))
 }
 
 fn intro(d: &Arc<CharDef>) -> Run {
@@ -114,7 +56,7 @@ fn intro(d: &Arc<CharDef>) -> Run {
     m.add_player(d.clone(), 1, 0, 2);
     m.intro_ticks = 170;
     m.start_round();
-    let mut run = Run { shots: vec![], sounds: BTreeSet::new(), missing: BTreeSet::new(), states: BTreeSet::new(), min: (0.0, 0.0), power: (0.0, 0.0), end: (0, false, 0.0), damage: 0.0 };
+    let mut run = Run::empty();
     for t in 0..460 {
         m.tick(&[0, 0]);
         sounds(&mut m, &mut run);
@@ -129,18 +71,6 @@ fn intro(d: &Arc<CharDef>) -> Run {
     run
 }
 
-fn row(report: &mut String, name: &str, side: &str, r: &Run) {
-    let _ = writeln!(report, "| {name} | {side} | {:?} | ({:.0}, {:.0}) | {:.0} -> {:.0} | {:.0} | {:?} | {:?} | {:?} |",
-        r.states, r.min.0, r.min.1, r.power.0, r.power.1, r.damage, r.sounds, r.missing, r.end);
-}
-
-fn save(out: &std::path::Path, name: &str, a: &Run, b: &Run) {
-    let mut all: Vec<Pixmap> = a.shots.clone();
-    all.resize_with(6, || frame(&Match::new(ume_engine::common::common_def(), None, ume_engine::common::flat_stage()), false));
-    all.extend(b.shots.iter().cloned());
-    sheet(&all, 6).save_png(out.join(format!("{name}.png"))).unwrap();
-}
-
 #[test]
 fn original_vs_umf_parity() {
     let (Some(orig), Some(conv)) = (load(1), umf()) else { return };
@@ -152,7 +82,7 @@ fn original_vs_umf_parity() {
         ("charge", charge(&orig, k::A | k::B), charge(&conv, k::S)),
         ("genki_dama", command(&orig, "supergenkidama", 420), command(&conv, "m_supergenkidama", 420)),
         ("teleport", command(&orig, "teleport_a", 90), command(&conv, "m_teleport_a", 90)),
-        ("meteor", forced(&orig, 4010, 900), forced(&conv, move_state(&conv, "m_m_atack"), 900)),
+        ("meteor", forced(&orig, 4010, 900, false), forced(&conv, move_state(&conv, "m_m_atack").expect("move m_m_atack"), 900, false)),
         ("kamehameha", command(&orig, "airkamehameha", 240), command(&conv, "m_airkamehameha", 240)),
         ("throw", grab(&orig, 28.0, &[k::L, k::L, k::L | k::A, k::L | k::A]), grab(&conv, 28.0, &[0, k::L | k::A, k::L | k::A, k::L | k::A])),
     ];

@@ -9,7 +9,7 @@ use std::sync::Arc;
 
 pub const DEFAULT_SEED: u32 = 0x2545_f491;
 
-mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod minus4; mod priority; mod types; mod unleash; mod walk;
+mod power_arena; pub use power_arena::{ARENA_HALF_WIDTH, ARENA_PLATFORMS, ENGINE_STATE_ARENA_EXIT}; mod air_dash; mod armor; mod award; mod bounds; mod forms; mod guard; mod knockdown; pub use knockdown::{KnockdownRule, KnockdownScope, DEFAULT_KNOCKDOWN_PRESET, KNOCKDOWN_PRESETS}; mod minus4; mod priority; mod types; mod unleash; mod walk;
 pub use types::*;
 
 #[derive(Clone)]
@@ -39,7 +39,7 @@ pub struct Match {
     pub team_tag: bool,
     pub lanes: crate::lane::LaneRules, pub objects: crate::stage_objects::StageObjects,
     /// MUGEN-style pushbox: an attacking fighter does not get pushed back by the defender; off = symmetric split.
-    pub classic_pushbox: bool,
+    pub classic_pushbox: bool, pub knockdown: KnockdownRule,
     pub mutators: crate::mutators::Mutators,
     pub tag_cooldown: [i32; 2],
     pub tag_cooldown_max: i32,
@@ -81,7 +81,7 @@ impl Match {
     pub fn new(common: Arc<CharDef>, fx: Option<Arc<CharDef>>, stage: StageInfo) -> Self {
         Match {
             fighters: vec![], explods: vec![], projectiles: vec![], common, fx, stage, camera: V2::default(), camera_target_y: 0.0, zoom_request: None, warnings: vec![], view_w: BASE_W, view_h: BASE_H, zoom: 1.0, zoom_min: 1.0, zoom_max: 1.0, zoffset0: 0.0, ground_k: 0.5,
-            power_arena: false, team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
+            power_arena: false, team_simul: false, team_tag: false, lanes: Default::default(), objects: Default::default(), classic_pushbox: true, knockdown: KnockdownRule::default(), mutators: Default::default(), tag_cooldown: [0; 2], tag_cooldown_max: crate::tag::DEFAULT_COOLDOWN, tag_cancel_window: crate::tag::DEFAULT_CANCEL_WINDOW, tag_ko_timer: [0; 2], team_turns: false, team_size: [0, 0], team_member: [0, 0], team_lead: [String::new(), String::new()], won_by_ko: false, finish_window: 0, corner_pushes: 0, intro_ticks: 0, game_time: 0, round_state: 0, round_no: 1, round_time: 0, first_attack: None, timer: 99 * 60, round_ticks: 99 * 60, wins: [0, 0], rounds_to_win: 2, winner_side: -1,
             match_over: false, training: false, global_asserts: 0, pause: None, shake_time: 0, shake_ampl: 0.0, shake_freq: 60.0, shake_phase: 0.0, shake_elapsed: 0, shake_dir: 0, flash: None, all_palfx: None, bg_palfx: None, bg: None, slow_mo: 0,
             events: vec![], texts: vec![], team_maps: Default::default(), console: Default::default(), restart_pending: false, announce: None, rng: DEFAULT_SEED, rand_state: Cell::new(DEFAULT_SEED), next_id: 56, assigns: RefCell::new(vec![]), tick_ids: vec![],
             scratch_c1: Vec::with_capacity(16), scratch_c2: Vec::with_capacity(16),
@@ -1226,7 +1226,7 @@ impl Match {
             let mut dmg = (hd.damage * attack_mul * scale / self.fighters[d].exposed_defence().max(0.01)).round();
             if hd.damage > 0.0 { dmg = dmg.max(1.0); }
             if self.fighters[d].has_assert(asf::NOHITDAMAGE) { dmg = 0.0; }
-            let prev_fall = self.fighters[d].ghv.fall;
+            let prev_fall = self.fighters[d].ghv.fall; let standing_push = self.standing_push(a, d, hd, dmg, was_hit);
             let ko_global_off = self.global_asserts & gsf::GLOBALNOKO != 0;
             if was_hit && prev_fall && (self.fighters[d].state_type == 'A' || self.fighters[d].air_height() < -1.0) { { let key = self.juggle_source(a); self.fighters[d].add_juggle(key, hd.juggle); } }
             {
@@ -1243,12 +1243,12 @@ impl Match {
                 g.attacker_id = aid; g.damage = dmg; g.hitcount = prev_hc + 1;
                 g.animtype = if air { hd.air_animtype } else { hd.animtype };
                 g.groundtype = hd.ground_type; g.airtype = hd.air_type; g.kind = if air { 3 } else { hd.ground_type };
-                g.fall = !hd.force_no_fall && ((if air { hd.air_fall } else { hd.fall }) || (was_hit && prev_fall));
+                g.fall = standing_push.is_none() && !hd.force_no_fall && ((if air { hd.air_fall } else { hd.fall }) || (was_hit && prev_fall));
                 g.hittime = if down { hd.down_hit_time } else if air { hd.air_hit_time } else { hd.ground_hit_time };
                 g.slidetime = hd.ground_slide_time; g.ctrltime = hd.ground_hit_time;
                 let v = if down { hd.down_vel } else if air { hd.air_vel } else { hd.ground_vel };
                 g.hit_id = hd.id; g.fall_env_shake = hd.fall_env_shake; g.down_bounce = hd.down_bounce; g.wall_bounce = hd.wall_bounce; g.wall_bounced = false;
-                g.xvel = v[0] * dir; g.yvel = v[1]; g.yaccel = hd.yaccel; g.xaccel = hd.xaccel * dir;
+                g.xvel = v[0] * dir * standing_push.unwrap_or(1.0); g.yvel = if standing_push.is_some() { 0.0 } else { v[1] }; g.yaccel = hd.yaccel; g.xaccel = hd.xaccel * dir;
                 g.fall_xvel = hd.fall_xvel.map(|x| x * dir).unwrap_or(g.xvel); g.fall_yvel = hd.fall_yvel;
                 g.fall_recover = hd.fall_recover; g.fall_recover_time = hd.fall_recover_time; g.fall_damage = hd.fall_damage; g.fall_kill = hd.fall_kill; g.kill = hd.kill;
                 g.chainid = hd.chain_id.unwrap_or(-1);

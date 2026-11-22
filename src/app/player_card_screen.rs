@@ -11,9 +11,9 @@ const TAB_Y: f32 = 130.0;
 const TAB_W: f32 = 220.0;
 const TAB_H: f32 = 44.0;
 const TAB_STEP: f32 = 236.0;
-pub(super) const EDIT_X: f32 = 60.0;
+pub(super) const EDIT_X: f32 = 156.0;
 pub(super) const EDIT_Y: f32 = 652.0;
-pub(super) const EDIT_W: f32 = 380.0;
+pub(super) const EDIT_W: f32 = 300.0;
 pub(super) const EDIT_H: f32 = 36.0;
 const MENU_INDEX: usize = 9;
 
@@ -108,7 +108,7 @@ impl App {
         crate::screen_art::ScreenArt::Records.background(&self.ui);
         self.ui.motes(30, 0.8);
         self.ui.adapted_header(
-            tr3("Ficha do Jogador", "Player card", "Ficha del jugador"),
+            tr3("FICHA DO JOGADOR", "PLAYER CARD", "FICHA DEL JUGADOR"),
             tr3("Salva neste aparelho", "Saved on this device", "Guardada en este dispositivo"),
             VW,
         );
@@ -127,7 +127,7 @@ impl App {
         }
         self.card_edit_draw();
         self.ui.text(
-            tr3("Esq/Dir abas · OK editar card · Esc voltar", "Left/Right tabs · OK edit card · Esc back", "Izq/Der pestañas · OK editar ficha · Esc volver"),
+            tr3("Esq/Dir abas · OK editar ficha · Esc voltar", "Left/Right tabs · OK edit card · Esc back", "Izq/Der pestañas · OK editar ficha · Esc volver"),
             VW / 2.0,
             VH - 16.0,
             16.0,

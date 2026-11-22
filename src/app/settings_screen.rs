@@ -7,6 +7,8 @@ use crate::settings::{
 
 mod touch_settings;
 mod pixel_controls;
+mod knockdown_label;
+use knockdown_label::knockdown_label;
 mod row_scroll;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -35,6 +37,7 @@ enum Act {
     Life,
     SingleRound,
     ClassicPushbox,
+    Knockdown,
     TeamLifeShare,
     GameSpeed,
     SurvivalRecovery,
@@ -295,6 +298,16 @@ impl App {
                     ),
                 ),
                 row(
+                    Act::Knockdown,
+                    tr3("Quedas ao apanhar", "Knockdowns on hit", "Caídas al recibir golpes"),
+                    knockdown_label(s.knockdown),
+                    tr3(
+                        "Golpes fracos só empurram; só golpes fortes, supers e combos longos derrubam",
+                        "Light hits only push back; only strong hits, supers and long combos knock down",
+                        "Los golpes débiles solo empujan; solo los fuertes, supers y combos largos derriban",
+                    ),
+                ),
+                row(
                     Act::TeamLifeShare,
                     tr("Vida compartilhada em equipe", "Shared team life"),
                     on_off(s.team_life_share),
@@ -414,6 +427,7 @@ impl App {
             Act::Life if go => s.life = cycle(s.life, step, LIFE_PERCENT.len()),
             Act::SingleRound if go => s.single_round = !s.single_round,
             Act::ClassicPushbox if go => s.classic_pushbox = !s.classic_pushbox,
+            Act::Knockdown if go => s.knockdown = cycle(s.knockdown, step, ume_engine::matchs::KNOCKDOWN_PRESETS.len()),
             Act::TeamLifeShare if go => s.team_life_share = !s.team_life_share,
             Act::GameSpeed if go => s.game_speed = cycle(s.game_speed, step, GAME_SPEEDS.len()),
             Act::SurvivalRecovery if go => {
@@ -642,10 +656,6 @@ impl App {
             }
         }
 
-        let back = self.clicked_rect(56.0, 668.0, 150.0, 40.0);
-        let hot = self.hover_rect(56.0, 668.0, 150.0, 40.0);
-        self.ui
-            .adapted_button(56.0, 668.0, 150.0, 40.0, tr("Voltar", "Back"), hot);
         let note = if from_fight {
             tr(
                 "Em luta: regras de jogabilidade valem na próxima luta",
@@ -689,7 +699,7 @@ impl App {
             self.settings_back = Some((tab, from_fight));
             return;
         }
-        if back || self.c.pressed(nav::BACK) {
+        if self.c.pressed(nav::BACK) {
             self.screen = if from_fight {
                 Screen::Fight
             } else {

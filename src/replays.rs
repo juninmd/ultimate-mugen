@@ -57,16 +57,8 @@ pub struct StoredReplay {
     pub runs: Vec<(u32, Vec<u32>)>,
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct StoredRules {
-    pub rounds_to_win: i32,
-    pub round_ticks: i32,
-    pub life_percent: u32,
-    pub single_round: bool,
-    pub classic_pushbox: bool,
-    pub team_life_share: bool,
-    pub game_speed: f32,
-}
+mod stored_rules;
+pub use stored_rules::StoredRules;
 
 impl StoredReplay {
     pub fn frames(&self) -> u32 {
@@ -124,15 +116,7 @@ impl StoredReplay {
             "teams": teams,
             "simul": self.simul,
             "tag": self.tag,
-            "rules": {
-                "rounds_to_win": self.rules.rounds_to_win,
-                "round_ticks": self.rules.round_ticks,
-                "life_percent": self.rules.life_percent,
-                "single_round": self.rules.single_round,
-                "classic_pushbox": self.rules.classic_pushbox,
-                "team_life_share": self.rules.team_life_share,
-                "game_speed": self.rules.game_speed,
-            },
+            "rules": self.rules.to_json(),
             "inputs": flat,
         })
         .to_string()
@@ -194,16 +178,7 @@ impl StoredReplay {
             }
             _ => return Err("Replay inválido: equipe malformada".into()),
         };
-        let r = o.get("rules").and_then(Value::as_object);
-        let rules = StoredRules {
-            rounds_to_win: field_i32(r, "rounds_to_win", 2),
-            round_ticks: field_i32(r, "round_ticks", 99 * 60),
-            life_percent: field_i32(r, "life_percent", 100).max(0) as u32,
-            single_round: field_bool(r, "single_round", false),
-            classic_pushbox: field_bool(r, "classic_pushbox", true),
-            team_life_share: field_bool(r, "team_life_share", true),
-            game_speed: r.and_then(|r| r.get("game_speed")).and_then(Value::as_f64).map(|f| f as f32).unwrap_or(1.0),
-        };
+        let rules = StoredRules::from_json(o.get("rules").and_then(Value::as_object));
         Ok(StoredReplay {
             label: o.get("label").and_then(Value::as_str).unwrap_or("Replay").to_string(),
             saved_at: o.get("saved_at").and_then(Value::as_u64).unwrap_or(0),
@@ -438,6 +413,7 @@ mod tests {
                 life_percent: 100,
                 single_round: false,
                 classic_pushbox: true,
+                knockdown: ume_engine::matchs::KnockdownRule::default(),
                 team_life_share: true,
                 game_speed: 1.0,
             },

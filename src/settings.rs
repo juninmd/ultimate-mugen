@@ -67,6 +67,7 @@ pub struct Settings {
     pub life: usize,
     pub single_round: bool,
     pub classic_pushbox: bool,
+    pub knockdown: usize,
     pub team_life_share: bool,
     pub game_speed: usize,
     /// Survival: life recovered between fights (index into `SURVIVAL_RECOVERY`) and the local best score
@@ -108,6 +109,7 @@ impl Default for Settings {
             life: 2,
             single_round: false,
             classic_pushbox: true,
+            knockdown: ume_engine::matchs::DEFAULT_KNOCKDOWN_PRESET,
             team_life_share: true,
             game_speed: 2,
             survival_recovery: 2,
@@ -131,6 +133,7 @@ pub struct Rules {
     pub life_percent: u32,
     pub single_round: bool,
     pub classic_pushbox: bool,
+    pub knockdown: ume_engine::matchs::KnockdownRule,
     pub team_life_share: bool,
     pub game_speed: f32,
 }
@@ -143,6 +146,7 @@ impl Default for Rules {
             life_percent: 100,
             single_round: false,
             classic_pushbox: true,
+            knockdown: ume_engine::matchs::KnockdownRule::default(),
             team_life_share: true,
             game_speed: 1.0,
         }
@@ -178,6 +182,7 @@ impl Settings {
             life_percent: LIFE_PERCENT[self.life.min(LIFE_PERCENT.len() - 1)],
             single_round: self.single_round,
             classic_pushbox: self.classic_pushbox,
+            knockdown: ume_engine::matchs::KNOCKDOWN_PRESETS[self.knockdown.min(ume_engine::matchs::KNOCKDOWN_PRESETS.len() - 1)],
             team_life_share: self.team_life_share,
             game_speed: GAME_SPEEDS[self.game_speed.min(GAME_SPEEDS.len() - 1)],
         })

@@ -14,6 +14,7 @@ const ARROWS: [(&str, u32, Vec2); 4] = [
 pub struct TouchNav {
     pub active: bool,
     held: u32,
+    pending: u32,
     touch_seen: bool,
 }
 
@@ -64,8 +65,12 @@ impl TouchNav {
         self.held
     }
 
+    pub fn press(&mut self, bit: u32) {
+        self.pending |= bit;
+    }
+
     pub fn update(&mut self, enabled: bool) {
-        self.held = 0;
+        self.held = std::mem::take(&mut self.pending);
         if !enabled || !self.active {
             return;
         }

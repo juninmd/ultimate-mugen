@@ -103,7 +103,7 @@ impl App {
         );
         if !self.osk_shown() {
             self.ui
-                .text(tip, 40.0, 700.0, 15.0, hex("#a79fc4"), Align::Left, false);
+                .text(tip, 156.0, 700.0, 15.0, hex("#a79fc4"), Align::Left, false);
         }
     }
 }

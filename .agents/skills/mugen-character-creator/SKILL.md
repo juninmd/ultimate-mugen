@@ -1960,4 +1960,4 @@ Documentação técnica completa e compatibilidade validada com [`crates/engine/
 
 ## 12. Dissecação de pacotes reais (Aizen, Gogeta, Goku SSJ e SSJ4)
 
-Antes de criar ou modificar um lutador imitando outro, use a skill `mugen-dissector` (`scripts/dissect.py`) e a tabela de números de referência em `docs/wiki/pt-BR/Dissecacao-MUGEN.md`: pausa e hit time dos normais, padrões de projétil, rush, agarrão, clone por helper, teleporte, contra-ataque e forma por `var`.
+Antes de criar ou modificar um lutador imitando outro, use a skill `mugen-dissector` (`tools/mugen2umf inspect`) e a tabela de números de referência em `docs/wiki/pt-BR/Dissecacao-MUGEN.md`: pausa e hit time dos normais, padrões de projétil, rush, agarrão, clone por helper, teleporte, contra-ataque e forma por `var`.

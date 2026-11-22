@@ -115,6 +115,64 @@
 - Review candidates next to the fighter's canonical art, prior target, and neighboring poses at native and enlarged sizes. Check identity, pose readability, silhouette, scale, alpha edges, and unintended effects independently. Keep candidates separate until approved; after integration, rebuild and inspect the labeled contact sheet. Structural coverage does not prove visual quality.
 - See `.agents/skills/ume-character-creator/references/guia_sprites_e_pixel.md` for the prompt template, identity-reference hierarchy, normalization, portrait exception, and full review workflow.
 
+## Module Map (where to look)
+Verified by grep; line numbers drift, search the symbol.
+
+### Screens (`src/app/`)
+- `Screen` enum: `src/app/screen.rs`. Frame dispatcher: `App::frame` in `src/app.rs` (`match &mut self.screen`). Mode labels and keys: `src/app/mode.rs`. i18n helpers: `tr`, `tr3` in `src/i18n.rs`.
+- Variant to handler: Title `title()`, Menu `menu()`, Select `select()` (inline in `app.rs`), Stages `stages()`, Vs `vs()`, Settings `settings_screen()`, Fight `fight()`, Results `results()`, Controls `controls_screen()`, CharTuning `char_tuning_screen()`, Mugen `mugen_screen()` then `mugen_catalog()`, Market `market_screen()`, Story `story_screen()`, Tower `tower_screen()`, SurvivalOver `survival_over_screen()`, Replays `replays_screen()`, PlayerCard `player_card_screen()`, Cutscene `cutscene()`.
+
+| Area | Files in `src/app/` |
+|---|---|
+| Menu | `title_screen`, `menu_screen`, `menu_view`, `menu_focus`, `menu_fighters`, `menu_icons`, `menu_bgm`, `update_banner` |
+| Select | `select_*` (chips, search, grid, marks, palette, profile, roster, stats, tags, view), `stage_select` |
+| Fight glue | `fight_screen`, `fighter_draw`, `load_plan`, `loading`, `holo_loading`, `vs_*`, `versus*`, `pause` and `pause/`, `trials_hud`, `netplay_session`, `photo_mode`, `photo_overlay`, `results_screen`, `results_stats` |
+| Story / arcade | `story`, `story_screen`, `story/` (advance, bonus, epilogue, hud), `arcade`, `arcade/`, `cutscene` and `cutscene/` (story, climax, endings, battle, skip), `survival`, `tower`, `tower_screen` |
+| Settings | `settings_screen` and `settings_screen/`, `controls_screen`, `keyedit`, `keyedit_note`, `char_tuning_screen` |
+| Market / import | `market`, `market_text` (`mt()`), `market_holo`, `market_links`, `empty_art`, `web_import`, `mugen_catalog` and `mugen_catalog/tabs.rs`, `mugen_gallery` |
+| Player card / replays | `player_card_screen`, `player_card_card`, `player_card_edit`, `player_card_lists`, `replay_browser` |
+
+### Cross-cutting (`src/`)
+- HUD: `hud.rs` and `hud/` (life bar, energy, form chip `form_status.rs`, passive meter). Fight VFX, banners, impact: `vfx.rs` and `vfx/` (`banner_stack.rs` keeps ribbons under banners). Easter eggs and achievement ribbons: `easter/`.
+- Text and i18n: `i18n/` (`catalog.rs`, `es_*`, `fighter_lines.rs`, `cutscene_lines.rs` with `assets/i18n/*.json`). Keyboard bindings: `keybinds.rs` and `keybinds/names.rs`. Gamepad: `gamepad.rs`. Replays: `replays.rs`. Marketplace glue: `market.rs`.
+- Screenshot and QA tours: `shots.rs` and `shots/`, `e2e.rs` (web test hooks), `smoke.rs`.
+
+### Top-level modules (`src/*.rs`)
+| Concern | Modules |
+|---|---|
+| Fight runtime | `session.rs` (60 Hz sim, inputs, events), `render.rs` (`Gfx`, `MatchRenderer`), `hud/`, `vfx/`, `voice.rs`, `match_stats.rs`, `passive_fx.rs`, `postfx.rs`, `photo.rs` |
+| Stages | `stages.rs` (`Stage`, MUGEN adapter), `stage_data.rs`, `stagefx.rs`, `stagelook.rs`, `stageprops.rs`, `texgen.rs`, `power_arena.rs` |
+| Modes | `story.rs`, `tower.rs`, `trials.rs`, `route/mod.rs` (arcade route), `boss.rs`, `netlink.rs` (ggrs link) |
+| UI toolkit | `ui.rs` (1280x720 layout, `Ui`), `ui_adapted.rs` and `ui_adapted_panels.rs` (Adaptado widgets), `ui_progress.rs`, `ui_tokens.rs`, `spring.rs`, `glow.rs`, `poly.rs`, `title_crt.rs`, `menu_art.rs`, `screen_art.rs` |
+| Input | `controls.rs`, `gamepad.rs`, `keybinds.rs`, `web_input.rs`, `import_button.rs` |
+| Data and persistence | `registry.rs` (chars and stages), `registry_sprite_cache.rs`, `settings.rs`, `settings_labels.rs`, `storage.rs` (file or localStorage), `player_card.rs`, `profile.rs`, `char_tuning.rs`, `tweaks.rs`, `update.rs` |
+| Web | `web_sprites.rs`, `webimport.rs`, `panic_report.rs`, `e2e.rs`, `screen_art_fetch.rs` |
+| Audio | `audio.rs`, `sound_mix.rs` |
+| QA tours (`--shots`) | `shots.rs` and `shots/`, `moves_tour.rs`, `mugen_tour.rs`, `pixel_tour.rs`, `perf_tour.rs`, `stage_tour.rs`, `smoke.rs`, `scan_report.rs` |
+
+### Engine and crates
+| Task | Where |
+|---|---|
+| Add a trigger | `crates/engine/src/triggers.rs` (`trigger0` / `trigger1`), accessors in `triggers/vars.rs`, `triggers/hitvars.rs` |
+| Add a controller | `crates/engine/src/controllers.rs` `run()`, then `sctrl/mod.rs`, parsing in `cns.rs` |
+| HitDef | `crates/engine/src/hitdef.rs` `build()`; guard, priority and armor in `matchs/` |
+| Round state machine | `crates/engine/src/matchs.rs` `start_round`, `round_logic` |
+| Input buffer and commands | `crates/engine/src/input.rs` (`InputHistory`), `commands.rs` (`match_command`) |
+| Fighter state | `crates/engine/src/fighter.rs` and `fighter/` |
+| Passives | `crates/engine/src/passives.rs`, `passive_time.rs` |
+| Atlas | `crates/render/src/atlas.rs`, `crates/shell/src/quad/zone.rs`, `crates/shell/src/sprites.rs` |
+| Sprite batch, PalFx | `crates/render/src/batch.rs`, `palette.rs`, `sprite.wgsl` |
+| Window, input, quad API | `crates/shell/src/lib.rs`, `platform.rs`, `quad.rs`, `quad/` |
+| UMF compile | `crates/native/src/` (`compile*.rs`, `kits/`, `blocks.rs`) |
+| Rollback, replay file | `crates/netplay/src/` (`rollback`, `checksum`, `replay`) |
+| File decoders | `crates/formats/src/` (`sff/`, `air/`, `snd`, `stage/`, `vfs/`) |
+| CLI tools | `crates/devtools` (`ume-tools`), `crates/charforge` |
+
+### Search recipes
+- Find where a string is shown: `rg -n "<text>" src --glob '!src/i18n/**'`; if it is in a catalog, search the key.
+- Find a screen's draw code: start at its handler in the table above, then `rg -n "fn <handler>" src/app`.
+- Before adding a UI string: use `tr3(pt, en, es)`; fighter and cutscene lines go in `assets/i18n/*.json` (guarded by tests in `src/i18n/`).
+
 ## Repository Map
 - `docs/wiki/` (EN) and `docs/wiki/pt-BR/` (PT): the wiki, indexed by `Home.md`, published at https://juninmd.github.io/ultimate-mugen/wiki/ by `scripts/build-wiki.sh` (mdBook, sections in `scripts/wiki-book.mjs`). `docs/wiki/Architecture.md` is the crate map and `docs/wiki/adr/` holds decision records; `CONTRIBUTING.md` is the contributor entry point. `docs/assets/` holds README media; `docs/evidence/` and `docs/research/` hold audit output.
 - `.agents/skills/`: agent skills (`mugen-character-creator`, `mugen-dissector`, `mugen-to-ume-migrator`, `ume-character-creator`, `ume-stage-creator`, `ume-media-capture`). One copy only; do not duplicate them elsewhere.

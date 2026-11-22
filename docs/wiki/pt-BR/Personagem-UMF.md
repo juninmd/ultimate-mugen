@@ -223,7 +223,8 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `posFreeze` | `[{ "from", "to" }]` | Prende o lutador entre esses elementos (`PosFreeze`) |
 | `posSet` | `[{ "at", "x", "y" }]` | Define a posição absoluta num elemento (`PosSet`) |
 | `palFx` | `[{ "at", "time", "add", "mul", "sinAdd", "color", "invertAll" }]` | Flash de cor no lutador (`PalFX`) |
-| `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "end", "at" }` | Transição hit-confirm para golpe cinemático |
+| `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "hitNow" \| "end" \| "command" \| "release", "command", "at" }` | Transição para golpe de continuação: no acerto, no fim, enquanto `command` está segurado (`command`) ou quando é solto (`release`) |
+| `spawn` | `[{ "at", "state", "id", "name", "pos", "postype", "facing", "ownPal", "superMoveTime", "pauseMoveTime" }]` | Cria um helper que roda um estado de `scripts.cns` (`Helper`) no elemento `at` da animação |
 | `voice` | `1000, 0` | Grupo e índice do som do personagem tocado no início do golpe, quando o áudio estiver incluído |
 | `airPhysics` | `true` | Mantém a física aérea |
 | `cancels` | lista de ids | Este golpe pode ser cancelado **para** esses golpes em contato (acerto, defesa ou projétil que encosta). Declarar substitui o gatling automático a partir deste golpe |
@@ -280,6 +281,8 @@ Valide com `cargo test --release --test native_roster_lab -- --nocapture` (todo 
 ### Elementos e atordoamento
 
 `hits[]` e `projectile` aceitam `element` (`fire`, `ice`, `lightning`, `earth`, `wind`, `water`) e `stun` (ticks extras de hit-stun). O compilador soma o hit-stun e o tremor do elemento e tinge a vítima por um instante (`PalFX`): `ice` congela por mais tempo (+16), `lightning` eletrocuta (+22 e tremor de 8 ticks), `fire` queima em vermelho, `earth` treme a tela, `wind` e `water` aplicam um tom curto. `stun` soma por cima e adiciona tremor de 5 ticks quando não há outro. Elementos desconhecidos são ignorados.
+
+`hits[]` e `projectile` também aceitam `ownSound: true`: o `hitSound` toca do banco de sons do próprio lutador (prefixo `S` no M.U.G.E.N) em vez do banco comum de luta.
 
 ### Sintaxe de comando
 
@@ -367,7 +370,7 @@ Um zip (ou pasta `mugen/`) com um `.json` UMF ao lado de uma pasta `sprites/` co
 
 ### Paridade com M.U.G.E.N
 
-`.agents/skills/mugen-to-ume-migrator/scripts/mugen2umf.py` converte uma pasta M.U.G.E.N nesse pacote. Ele mantém o visual e o jogo do original com três campos:
+`tools/mugen2umf` converte uma pasta M.U.G.E.N nesse pacote. Ele mantém o visual e o jogo do original com três campos:
 
 - `stats.height` igual ao `refHeight` do `meta.json` desenha os sprites 1:1, no tamanho original.
 - `art.style.boxes: "exact"` usa `hit.box` (Clsn1) e o `hurt` de cada quadro (Clsn2) como escritos, sem recorte automático.

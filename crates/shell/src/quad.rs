@@ -27,9 +27,9 @@ thread_local! {
 
 /// Per-frame counters for the F3 overlay: what the last frame cost on the CPU/GPU upload path.
 #[derive(Clone, Copy, Debug, Default)]
-pub struct FrameStats { pub vertices: u32, pub draw_calls: u32, pub uploads: u32, pub upload_kb: u32, pub rgba_fill: f32, pub index_fill: f32 }
+pub struct FrameStats { pub vertices: u32, pub draw_calls: u32, pub uploads: u32, pub upload_kb: u32, pub rgba_fill: f32, pub index_fill: f32, pub rgba_resets: u32, pub transient_resets: u32 }
 
-impl FrameStats { pub const EMPTY: FrameStats = FrameStats { vertices: 0, draw_calls: 0, uploads: 0, upload_kb: 0, rgba_fill: 0.0, index_fill: 0.0 }; }
+impl FrameStats { pub const EMPTY: FrameStats = FrameStats { vertices: 0, draw_calls: 0, uploads: 0, upload_kb: 0, rgba_fill: 0.0, index_fill: 0.0, rgba_resets: 0, transient_resets: 0 }; }
 
 pub fn stats() -> FrameStats { STATS.with(|s| s.get()) }
 
@@ -41,7 +41,7 @@ fn note_upload(bytes: u64) {
 /// Called by the shell once the frame is drawn, so the next frame can report it.
 pub fn publish_stats(vertices: usize, draw_calls: usize, rgba_fill: f32, index_fill: f32) {
     let (uploads, kb) = (UPLOAD_COUNT.with(|c| c.get()), (UPLOAD_BYTES.with(|b| b.get()) / 1024) as u32);
-    STATS.with(|s| s.set(FrameStats { vertices: vertices.min(u32::MAX as usize) as u32, draw_calls: draw_calls.min(u32::MAX as usize) as u32, uploads, upload_kb: kb, rgba_fill, index_fill }));
+    STATS.with(|s| s.set(FrameStats { vertices: vertices.min(u32::MAX as usize) as u32, draw_calls: draw_calls.min(u32::MAX as usize) as u32, uploads, upload_kb: kb, rgba_fill, index_fill, rgba_resets: generation(), transient_resets: zone::transient_resets() }));
     UPLOAD_BYTES.with(|b| b.set(0));
     UPLOAD_COUNT.with(|c| c.set(0));
 }
@@ -60,7 +60,7 @@ fn reset_index_atlas(f: &mut Frame) {
 fn reset_atlas(f: &mut Frame) {
     f.gpu.rgba_atlas.clear();
     if let Some(c) = ume_render::Canvas::new(&f.gpu.renderer, &f.gpu.queue, &mut f.gpu.rgba_atlas) { *f.canvas = c; }
-    GENERATION.with(|g| g.set(g.get().wrapping_add(1)));
+    GENERATION.with(|g| g.set(g.get().wrapping_add(1))); zone::bump();
     ATLAS_FULL.with(|a| a.set(false));
 }
 
@@ -79,7 +79,7 @@ struct AsyncGame { main: Option<Pin<Box<dyn Future<Output = ()>>>> }
 impl Game for AsyncGame {
     fn init(&mut self, _: &mut crate::Gpu) { reset_textures(); }
     fn frame(&mut self, f: &mut Frame) {
-        if ATLAS_FULL.with(|a| a.get()) { reset_atlas(f); }
+        if ATLAS_FULL.with(|a| a.get()) { reset_atlas(f); } else { zone::reset_if_full(f); }
         if INDEX_FULL.with(|a| a.get()) { reset_index_atlas(f); }
         KEY_QUEUE.with(|q| { let mut q = q.borrow_mut(); q.clear(); q.extend(f.input.pressed_order.iter().filter_map(|k| KeyCode::from_winit(*k))); });
         POINTER_SWALLOWED.with(|c| c.set(false));
@@ -197,7 +197,7 @@ pub fn draw_ellipse(x: f32, y: f32, w: f32, h: f32, rotation: f32, c: Color) { d
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FilterMode { Linear, Nearest }
 
-struct TexInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Arc<Vec<u8>>, w: u32, h: u32 }
+struct TexInner { slot: Cell<Option<(u32, ume_render::Rect)>>, pixels: Arc<Vec<u8>>, w: u32, h: u32, transient: bool }
 
 #[derive(Clone)]
 pub struct Texture2D(Rc<TexInner>);
@@ -217,13 +217,13 @@ impl Texture2D {
             v.resize(needed, 0);
             Arc::new(v)
         };
-        Texture2D(Rc::new(TexInner { slot: Cell::new(None), pixels, w, h }))
+        Texture2D(Rc::new(TexInner { slot: Cell::new(None), pixels, w, h, transient: false }))
     }
 
     fn rect(&self, f: &mut Frame) -> Option<ume_render::Rect> {
-        let gen = generation();
+        let gen = zone::generation(self.0.transient);
         if let Some((g, r)) = self.0.slot.get() { if g == gen { return Some(r); } }
-        let Some(r) = f.gpu.rgba_atlas.alloc(self.0.w, self.0.h) else { ATLAS_FULL.with(|a| a.set(true)); return None };
+        let r = zone::alloc(f, &self.0)?;
         f.gpu.renderer.upload_rgba(&f.gpu.queue, r, &self.0.pixels);
         note_upload((self.0.w as u64) * (self.0.h as u64) * 4);
         self.0.slot.set(Some((gen, r)));
@@ -238,7 +238,7 @@ impl Texture2D {
     pub fn height(&self) -> f32 { self.0.h as f32 }
     pub fn size(&self) -> Vec2 { vec2(self.width(), self.height()) }
     pub fn set_filter(&self, _: FilterMode) {}
-    pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == generation()) }
+    pub fn is_resident(&self) -> bool { self.0.slot.get().is_some_and(|(g, _)| g == zone::generation(self.0.transient)) }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -325,7 +325,7 @@ impl IndexedTexture {
     }
 }
 
-mod palette; mod large;
+mod palette; mod large; mod zone;
 mod shapes;
 pub use shapes::*;
 

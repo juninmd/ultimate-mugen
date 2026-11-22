@@ -2,7 +2,6 @@ use super::pack::read_sprite;
 use super::recolor::Recolor;
 use super::effects::{art_res, FrameArt};
 use super::types::{NativeChar, NativeFrame};
-use ume_engine::chardef::ImageData;
 use serde_json::Value;
 use std::{path::{Path, PathBuf}, sync::Arc};
 
@@ -102,12 +101,13 @@ fn read_render(root: &Path, name: &str, lower: &str, stem: &str, striking: bool,
     let axis_x = axis("axisX", dec.width as f32 / 2.0, dec.width as f32);
     let axis_y = axis("axisY", dec.height as f32, dec.height as f32);
     let hurt = fit.then(|| super::pixel_hurt::fit_body(hurtbox(lower, stem), stem, &rgba, dec.width, dec.height, [axis_x, axis_y], STAND_UNITS / units));
+    let c = super::pixel_crop::crop(dec.width, dec.height, rgba);
     Some(FrameArt {
-        image: Some(ImageData::new(dec.width, dec.height, rgba)),
-        width: dec.width as f32 * res,
-        height: dec.height as f32 * res,
-        axis_x: axis_x * res,
-        axis_y: axis_y * res,
+        width: c.image.w as f32 * res,
+        height: c.image.h as f32 * res,
+        axis_x: (axis_x - c.left) * res,
+        axis_y: (axis_y - c.top) * res,
+        image: Some(c.image),
         scale: STAND_UNITS / units / res,
         hurt: hurt.into_iter().collect(),
         hit: if striking { vec![STRIKE_BOX] } else { vec![] },

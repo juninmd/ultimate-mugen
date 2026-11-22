@@ -53,6 +53,17 @@ fn ignored_def(path: &str) -> bool {
     IGNORED_DEF_STEMS.contains(&stem.as_str())
 }
 
+fn is_fighter_sfx(path: &str, sprite_dirs: &HashSet<&str>) -> bool {
+    let stem = file_stem(path).to_ascii_lowercase();
+    let numbered = stem.strip_prefix("snd_").is_some_and(|r| !r.is_empty() && r.split('_').all(|n| !n.is_empty() && n.bytes().all(|b| b.is_ascii_digit())));
+    numbered || sprite_dirs.contains(parent_dir(path))
+}
+
+/// Installed music entries saved before sfx were excluded from the catalog.
+pub fn is_stale_fighter_sfx_music(kind: Kind, item_id: &str) -> bool {
+    kind == Kind::Music && is_fighter_sfx(item_id.strip_prefix("music:").unwrap_or(item_id), &HashSet::new())
+}
+
 fn make_item(kind: Kind, root: &str, name: String, files: Vec<FileRef>) -> Item {
     let bytes: u64 = files.iter().map(|f| f.size).sum();
     let version = crate::version::item_version(&files);
@@ -150,11 +161,12 @@ pub fn detect(tree: &Tree, subdir: &str, fallback_name: &str) -> Catalog {
     }
     items.extend(stage_items);
 
+    let sprite_dirs: HashSet<&str> = unclaimed.iter().filter(|e| file_name(&e.path).eq_ignore_ascii_case("meta.json")).map(|e| parent_dir(&e.path)).collect();
     for e in unclaimed.iter().filter(|e| !stage_claimed.contains(e.path.as_str())) {
         let ext = lower_ext(&e.path);
         if ext == "zip" {
             items.push(make_item(Kind::Pack, &e.path, file_stem(&e.path).to_string(), vec![FileRef { path: e.path.clone(), size: e.size, sha: e.sha.clone() }]));
-        } else if AUDIO_EXTS.contains(&ext.as_str()) && (ext != "wav" || e.size >= MIN_WAV_BYTES) {
+        } else if AUDIO_EXTS.contains(&ext.as_str()) && (ext != "wav" || e.size >= MIN_WAV_BYTES) && !is_fighter_sfx(&e.path, &sprite_dirs) {
             items.push(make_item(Kind::Music, &e.path, file_stem(&e.path).to_string(), vec![FileRef { path: e.path.clone(), size: e.size, sha: e.sha.clone() }]));
         }
     }

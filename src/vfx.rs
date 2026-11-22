@@ -136,6 +136,7 @@ pub struct Vfx {
     rings: Vec<Ring>,
     floats: Vec<Float>,
     pub banners: Vec<Banner>,
+    pub banner_top: f32,
     pub trauma: f32,
     punch: f32,
     ko_t: f32,
@@ -195,6 +196,7 @@ impl Vfx {
             rings: vec![],
             floats: vec![],
             banners: vec![],
+            banner_top: 124.0,
             trauma: 0.0,
             punch: 0.0,
             ko_t: 0.0,
@@ -1298,7 +1300,7 @@ impl Vfx {
             } else {
                 (t / 0.08).min(1.0)
             };
-            let y = 124.0 + i as f32 * 44.0;
+            let y = self.banner_top + i as f32 * 44.0;
             let hw = 190.0 * (0.6 + 0.4 * (t / 0.15).min(1.0));
             ui.rect(
                 640.0 - hw,

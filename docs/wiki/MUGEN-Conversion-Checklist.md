@@ -17,6 +17,7 @@ What `mugen2umf.py` (skill `mugen-to-ume-migrator`) carries from a M.U.G.E.N fig
 | Long cinematics | chains up to 12 states, timed exits, `landAt`, `followUp` hit/contact/hitNow | Meteor plays all 6 sounds |
 | HitDef and projectiles | hits without cap, `recover`, `missTime`, guard, pause, sparks | ok |
 | FX | Explod, AfterImage, EnvShake, EnvColor, SuperPause, NotHitBy | ok |
+| Motion and palette | `VelMul`, per-tick `VelAdd` (own gravity, native gravity skipped), `PosFreeze`, `PosSet`, `PalFX` as `velMul`, `velAdd`, `posFreeze`, `posSet`, `palFx` | Meteor jump -103 = original |
 | Extras | `--extra` deep merge keeps detected abilities and adds forms (Limit Breaker), clones, passives, quotes | ok |
 
 ## Partial or approximated
@@ -28,12 +29,7 @@ What `mugen2umf.py` (skill `mugen-to-ume-migrator`) carries from a M.U.G.E.N fig
 
 ## Not migrated yet
 
-| Controller | Effect of the gap |
-|---|---|
-| `VelMul` | jumps in long cinematics go higher (Meteor -132 vs -103) |
-| `PosFreeze` | the fighter is not pinned during a few frames |
-| `PosSet` | absolute repositioning inside a move |
-| `PalFX` | colour flash inside a move |
+Controllers with a condition the converter cannot pin to a frame (for example `PosSet` when `Pos Y < -175`) are listed in `coverage.md` as dropped. Goku SSJ4 has none inside its moves.
 
 Dead code (states no command reaches) and shadowed states (a command already taken by an earlier route, so the state never fires in M.U.G.E.N either) are listed in `coverage.md` and skipped on purpose.
 

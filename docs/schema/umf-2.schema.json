@@ -397,7 +397,12 @@
           "oneOf": [{ "$ref": "#/$defs/blink" }, { "type": "array", "items": { "$ref": "#/$defs/blink" } }]
         },
         "vfx": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "anim": { "type": "string" }, "offset": { "$ref": "#/$defs/vec2" }, "time": { "type": "integer" }, "scale": { "type": "number" }, "follow": { "type": "boolean" }, "behind": { "type": "boolean" } }, "required": ["at", "anim"], "additionalProperties": false } },
-        "quake": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "amp": { "type": "number" } }, "required": ["at"], "additionalProperties": false } }
+        "quake": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "amp": { "type": "number" } }, "required": ["at"], "additionalProperties": false } },
+        "velMul": { "type": "array", "items": { "type": "object", "properties": { "from": { "type": "integer" }, "to": { "type": "integer" }, "x": { "type": "number" }, "y": { "type": "number" } }, "additionalProperties": false } },
+        "velAdd": { "type": "array", "items": { "type": "object", "properties": { "from": { "type": "integer" }, "to": { "type": "integer" }, "x": { "type": "number" }, "y": { "type": "number" } }, "additionalProperties": false } },
+        "posFreeze": { "type": "array", "items": { "type": "object", "properties": { "from": { "type": "integer" }, "to": { "type": "integer" } }, "additionalProperties": false } },
+        "posSet": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "x": { "type": "number" }, "y": { "type": "number" } }, "additionalProperties": false } },
+        "palFx": { "type": "array", "items": { "type": "object", "properties": { "at": { "type": "integer" }, "time": { "type": "integer" }, "add": { "$ref": "#/$defs/rgbDelta" }, "mul": { "type": "array", "items": { "type": "integer" }, "minItems": 3, "maxItems": 3 }, "sinAdd": { "type": "array", "items": { "type": "integer" }, "minItems": 4, "maxItems": 4 }, "color": { "type": "number" }, "invertAll": { "type": "boolean" } }, "required": ["time"], "additionalProperties": false } }
       },
       "required": ["id"],
       "additionalProperties": false

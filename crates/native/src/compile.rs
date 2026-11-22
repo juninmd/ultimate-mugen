@@ -173,11 +173,8 @@ pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only
         if let Some(inv) = m.invuln { cns += &format!("[State {sid}, inv]\ntype = NotHitBy\ntrigger1 = AnimElemNo(0) = [{}, {}]\nvalue = SCA\ntime = 1\n\n", inv[0], inv[1]); }
         if let Some(tp) = &m.teleport { for step in tp.to_vec() { cns += &super::move_fx::teleport_cns(&step, sid); } }
         cns += &super::blocks::states(m, sid, &anim_no);
-        for v in &m.moves {
-            cns += &format!("[State {sid}, vel]\ntype = VelSet\ntrigger1 = AnimElem = {}\n{}{}\n", v.at, v.vel[0].map(|x| format!("x = {x}\n")).unwrap_or_default(), v.vel[1].map(|y| format!("y = {y}\n")).unwrap_or_default());
-        }
         if ph == 'N' && !matches!(when, "air" | "fly") {
-            cns += &format!("[State {sid}, grav]\ntype = VelAdd\ntrigger1 = Pos Y < 0 || Vel Y < 0\ny = const(movement.yaccel)\n\n{}[State {sid}, fix]\ntype = PosSet\ntrigger1 = Pos Y > 0\ny = 0\n\n", super::move_fx::land_cns(m.land_at, sid, anim));
+            cns += &format!("[State {sid}, grav]\ntype = VelAdd\n{}trigger1 = Pos Y < 0 || Vel Y < 0\ny = const(movement.yaccel)\n\n{}[State {sid}, fix]\ntype = PosSet\ntrigger1 = Pos Y > 0\ny = 0\n\n", super::move_motion::own_gravity(m), super::move_fx::land_cns(m.land_at, sid, anim));
         }
         let sm = if super::ultimate::is(&m.id) { super::ultimate::DAMAGE } else if m.kind == "super" { 1.3 } else { 1.0 };
         let attr = format!("{st}, {}A", match m.kind.as_str() { "normal" => "N", "special" | "finisher" => "S", _ => "H" });

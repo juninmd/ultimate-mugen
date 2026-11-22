@@ -77,7 +77,7 @@ impl App {
         ui.text(seek, 262.0, 385.0, 16.0, WHITE, Align::Left, false);
 
         ui.text(
-            &format!("{} {}", rank_name(rk.index), rk.index + 1),
+            &format!("{} {} · {}", tr3("Nível", "Level", "Nivel"), rk.index + 1, rank_name(rk.index)),
             60.0,
             430.0,
             20.0,
@@ -98,7 +98,7 @@ impl App {
         }
         self.ui.adapted_row(EDIT_X, EDIT_Y, EDIT_W, EDIT_H, true);
         self.ui.text(
-            tr3("Editar card", "Edit card", "Editar ficha"),
+            tr3("Editar ficha", "Edit card", "Editar ficha"),
             EDIT_X + EDIT_W / 2.0,
             EDIT_Y + EDIT_H * 0.7,
             18.0,
@@ -138,12 +138,12 @@ impl App {
             self.ui.text(&format!("{fighter}  vs  {rival}"), RIGHT_X + 140.0, y + 23.0, 19.0, WHITE, Align::Left, false);
         }
 
-        self.ui.text(tr3("Medalhas", "Medals", "Medallas"), RIGHT_X, 626.0, 22.0, hex("#ffcc33"), Align::Left, true);
+        self.ui.text(tr3("Medalhas", "Medals", "Medallas"), RIGHT_X, 618.0, 22.0, hex("#ffcc33"), Align::Left, true);
         for (i, (medal, level)) in medals.iter().enumerate() {
             let x = RIGHT_X + i as f32 * 153.5;
-            self.ui.adapted_glass(x, 638.0, 146.0, 56.0, crate::tweaks::accent(0.6), 1.0);
-            self.ui.text(medal, x + 12.0, 660.0, 14.0, WHITE, Align::Left, true);
-            self.ui.adapted_level(x + 12.0, 668.0, 3, *level);
+            self.ui.adapted_glass(x, 628.0, 146.0, 56.0, crate::tweaks::accent(0.6), 1.0);
+            self.ui.text(medal, x + 12.0, 650.0, 14.0, WHITE, Align::Left, true);
+            self.ui.adapted_level(x + 12.0, 658.0, 3, *level);
         }
     }
 }

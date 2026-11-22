@@ -242,6 +242,10 @@ Animations with these names become the reserved M.U.G.E.N actions, so the common
 | `shake` | `{ "at", "time", "ampl", "freq" }` (object or list) | Move-level screen shake (`EnvShake`) |
 | `flash` | `{ "at", "time", "color", "under", "superMove" }` (object or list) | Screen flash / background darken (`EnvColor`) |
 | `superPause` | `{ "at", "time", "pos", "anim", "darken" }` | Customizes the super freeze |
+| `velMul` / `velAdd` | `[{ "from", "to", "x", "y" }]` | Multiplies or adds velocity every tick between animation elements `from` and `to` (`to` 0 = until the end). A `velAdd` in y is the move's own gravity, so native gravity is skipped there (`VelMul`, `VelAdd`) |
+| `posFreeze` | `[{ "from", "to" }]` | Pins the fighter between those elements (`PosFreeze`) |
+| `posSet` | `[{ "at", "x", "y" }]` | Sets the absolute position on an element (`PosSet`) |
+| `palFx` | `[{ "at", "time", "add", "mul", "sinAdd", "color", "invertAll" }]` | Colour flash on the fighter (`PalFX`) |
 | `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "end", "at" }` | Hit-confirm transition into a cinematic follow-up move |
 | `cinematic` | `{ "letterbox", "hideUi", "freeze", "title", "camera", "cuts", "finishSlow" }` | Multi-beat movie direction (`Zoom`, `Camera`, `EnvColor`, `EnvShake`, `Cinema`, `SlowMo`, `AssertSpecial(NoBarDisplay)`) |
 | `voice` | `1000, 0` | Character sound group and index played at move start, when that sample is bundled |

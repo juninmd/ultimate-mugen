@@ -214,7 +214,7 @@ impl App {
                 al,
             );
             self.ui.text(
-                &self.reg.chars[id].series,
+                crate::i18n::fighter_lines::shown(&self.reg.chars[id].series),
                 tx,
                 y + 74.0,
                 18.0,
@@ -252,7 +252,7 @@ impl App {
             Color::new(0.0, 0.0, 0.0, 0.6),
             Color::new(0.0, 0.0, 0.0, 0.0),
         );
-        let stage_name = self.reg.stages[self.sel.2].name.clone();
+        let stage_name = crate::i18n::stage_names::shown(&self.reg.stages[self.sel.2].name).to_string();
         self.glass(
             VW / 2.0 - 230.0,
             18.0 - (1.0 - tk) * 80.0,

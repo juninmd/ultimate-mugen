@@ -17,6 +17,7 @@ O que o `mugen2umf.py` (skill `mugen-to-ume-migrator`) leva de um lutador M.U.G.
 | Cinemáticas longas | cadeias de até 12 estados, saídas por tempo, `landAt`, `followUp` hit/contact/hitNow | Meteoro toca os 6 sons |
 | HitDef e projéteis | hits sem limite, `recover`, `missTime`, guarda, pausa, faíscas | ok |
 | FX | Explod, AfterImage, EnvShake, EnvColor, SuperPause, NotHitBy | ok |
+| Movimento e paleta | `VelMul`, `VelAdd` por tick (gravidade própria, sem somar a nativa), `PosFreeze`, `PosSet`, `PalFX` como `velMul`, `velAdd`, `posFreeze`, `posSet`, `palFx` | pulo do Meteoro -103 = original |
 | Extras | `--extra` mescla sem apagar habilidades detectadas e soma formas (Limit Breaker), clones, passivos, falas | ok |
 
 ## Parcial ou aproximado
@@ -28,12 +29,7 @@ O que o `mugen2umf.py` (skill `mugen-to-ume-migrator`) leva de um lutador M.U.G.
 
 ## Ainda não migra
 
-| Controlador | Efeito da falta |
-|---|---|
-| `VelMul` | pulos em cinemáticas longas sobem mais (Meteoro -132 vs -103) |
-| `PosFreeze` | o lutador não fica preso por alguns quadros |
-| `PosSet` | reposicionamento absoluto dentro do golpe |
-| `PalFX` | flash de cor dentro do golpe |
+Controladores com condição que o conversor não consegue fixar num quadro (por exemplo `PosSet` quando `Pos Y < -175`) aparecem no `coverage.md` como descartados. O Goku SSJ4 não tem nenhum dentro dos golpes.
 
 Código morto (estados que nenhum comando alcança) e estados sombreados (comando já tomado por uma rota anterior, então nunca disparam nem no M.U.G.E.N) aparecem no `coverage.md` e ficam de fora de propósito.
 

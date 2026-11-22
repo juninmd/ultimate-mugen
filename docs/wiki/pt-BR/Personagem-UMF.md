@@ -219,6 +219,10 @@ Animações com estes nomes viram as ações reservadas do M.U.G.E.N, então os 
 | `shake` | `{ "at", "time", "ampl", "freq" }` (objeto ou lista) | Tremor de tela por golpe (`EnvShake`) |
 | `flash` | `{ "at", "time", "color", "under", "superMove" }` (objeto ou lista) | Flash ou escurecimento de fundo (`EnvColor`) |
 | `superPause` | `{ "at", "time", "pos", "anim", "darken" }` | Customiza a pausa de super |
+| `velMul` / `velAdd` | `[{ "from", "to", "x", "y" }]` | Multiplica ou soma a velocidade a cada tick entre os elementos `from` e `to` da animação (`to` 0 = até o fim). `velAdd` em y é a gravidade própria do golpe, então a gravidade nativa fica desligada nesse trecho (`VelMul`, `VelAdd`) |
+| `posFreeze` | `[{ "from", "to" }]` | Prende o lutador entre esses elementos (`PosFreeze`) |
+| `posSet` | `[{ "at", "x", "y" }]` | Define a posição absoluta num elemento (`PosSet`) |
+| `palFx` | `[{ "at", "time", "add", "mul", "sinAdd", "color", "invertAll" }]` | Flash de cor no lutador (`PalFX`) |
 | `followUp` | `{ "to": "move_id", "on": "hit" \| "contact" \| "end", "at" }` | Transição hit-confirm para golpe cinemático |
 | `voice` | `1000, 0` | Grupo e índice do som do personagem tocado no início do golpe, quando o áudio estiver incluído |
 | `airPhysics` | `true` | Mantém a física aérea |

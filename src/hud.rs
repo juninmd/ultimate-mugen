@@ -12,6 +12,7 @@ mod elements; mod advantage; mod advantage_draw; mod announce_text; mod art; mod
 
 pub struct Hud {
     pub replay: bool,
+    pub hidden: bool,
     pub inputs: Vec<(u32, u16)>,
     life: life_bar::LifeFx,
     combo: [(i32, f32, i32); 2],
@@ -27,6 +28,7 @@ impl Hud {
         training_panel::reset();
         Hud {
             replay: false,
+            hidden: false,
             inputs: vec![],
             life: Default::default(),
             combo: [(0, 0.0, 0); 2],

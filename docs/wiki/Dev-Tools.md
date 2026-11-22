@@ -6,7 +6,8 @@ Repository build and audit tools are Rust binaries, not scripts. `crates/devtool
 
 | Command | Replaces | What it does |
 |---|---|---|
-| `ume-tools pack-sprites [out] [--sprites dir]` | `scripts/pack_sprites.py` | Packs `assets/chars/sprites/<id>/` into `<out>/assets/chars/sprites/<id>.pack` for the web build (768 px cap, 256 colours, `meta.json` anchors rescaled, parallel). Run by `scripts/build-web.sh` |
+| `ume-tools pack-sprites [out] [--sprites dir]` | `scripts/pack_sprites.py` | Packs `assets/chars/sprites/<id>/` into `<out>/assets/chars/sprites/<id>.pack` for the web build (768 px cap, 256 colours as LZ4 sprites, `meta.json` anchors rescaled, parallel). Run by `scripts/build-web.sh` |
+| `ume-tools cook-sff <in.sff> <out.sff>` | - | Repacks an `.sff` as LZ4 `UMSF` and fails unless every sprite decodes identically. See [Sprite Container](Sprite-Container.md) |
 | `ume-tools stage-thumbs [stages]` | `scripts/generate-stage-thumbnails.py` | Writes 240x135 Lanczos thumbnails to `<stages>/thumbs` |
 | `ume-tools audit-moves [dir] [--json]` | `scripts/audit_native_moves.py` | Static roster audit: inputs, cancels, throws, hit boxes |
 | `ume-tools audit-sprites --out report.json` | `scripts/audit_native_sprites.py` | Exact-file PNG inventory with alpha bounds |

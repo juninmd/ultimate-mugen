@@ -1,8 +1,9 @@
 use std::path::{Path, PathBuf};
-use ume_devtools::{ability_reel, audit_moves, audit_sprites, debug_fight, homologate, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
+use ume_devtools::{sff_cook, ability_reel, audit_moves, audit_sprites, debug_fight, homologate, motion, mugen_census, pack, roster_audit, story_npcs, thumbnails};
 
 const USAGE: &str = "usage: ume-tools <command>\n\
   pack-sprites [out_root=web/dist] [--sprites dir]  pack assets/chars/sprites into web .pack files\n\
+  cook-sff <in.sff> <out.sff>             repack an .sff as LZ4 UMSF and verify it decodes to the same sprites\n\
   stage-thumbs [stages=assets/stages]    write 240x135 thumbnails to <stages>/thumbs\n\
   audit-moves [dir=assets/chars] [--json] static roster audit (inputs, cancels, throws, hit boxes)\n\
   audit-sprites --out <report.json> [--root <repo>]  native PNG inventory\n\
@@ -27,6 +28,11 @@ fn run(args: &[String]) -> Result<(), String> {
                 println!("  {id}.pack {:.2} MB", *size as f64 / 1048576.0);
             }
             println!("OK: {} ({:.1} MB)", out.join("assets/chars/sprites").display(), total as f64 / 1048576.0);
+        }
+        Some("cook-sff") => {
+            let (Some(source), Some(target)) = (positional.first(), positional.get(1)) else { return Err(USAGE.to_string()) };
+            let r = sff_cook::cook(Path::new(source.as_str()), Path::new(target.as_str()))?;
+            println!("OK: {} sprites, {} -> {} bytes, decode {:.1} -> {:.1} ms", r.sprites, r.source_bytes, r.cooked_bytes, r.source_ms, r.cooked_ms);
         }
         Some("stage-thumbs") => {
             let count = thumbnails::make_thumbnails(Path::new(positional.first().map(|s| s.as_str()).unwrap_or("assets/stages")))?;

@@ -31,6 +31,16 @@ pub(super) async fn run(app: &mut App, dir: &str) {
         })
         .await;
     }
+    for (name, p, label) in [("gate-import", 0.4, "Importando recursos MUGEN · pack.zip (5/12)"), ("gate-warm", 1.0, "Preparando lutadores…")] {
+        snap(app, dir, name, |app| {
+            app.ui.begin();
+            app.holo_gate_draw(p, label);
+        })
+        .await;
+        for _ in 0..30 {
+            next_frame().await;
+        }
+    }
 }
 
 pub(super) async fn market_download(app: &mut App, dir: &str, repo: &str, ids: &[String]) {

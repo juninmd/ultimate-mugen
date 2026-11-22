@@ -661,27 +661,7 @@ impl App {
                 self.import_progress = None;
             }
         }
-        if !self.import_jobs.is_empty() {
-            let (done, total, cur_file) = if let Some(p) = &self.import_progress {
-                let d = p.done.load(std::sync::atomic::Ordering::Relaxed);
-                let t = p.total.load(std::sync::atomic::Ordering::Relaxed);
-                let cur = p.current_name.lock().map(|s| s.clone()).unwrap_or_default();
-                (d, t, cur)
-            } else {
-                (0, 0, String::new())
-            };
-            let ratio = if total > 0 { (done as f32 / total as f32).clamp(0.0, 1.0) } else { 0.15 + 0.15 * (self.ui.t * 3.0).sin().abs() };
-            let banner_h = 68.0;
-            self.ui.rect(0.0, VH - banner_h, VW, banner_h, Color::new(0.04, 0.03, 0.08, 0.94));
-            self.ui.rect(0.0, VH - banner_h, VW, 2.0, hex("#00f0ff"));
-            let label = if !cur_file.is_empty() {
-                format!("{}: {} ({}/{})", crate::i18n::tr3("IMPORTANDO RECURSOS MUGEN", "IMPORTING MUGEN RESOURCES", "IMPORTANDO RECURSOS MUGEN"), cur_file, done, total)
-            } else {
-                format!("{} ({}/{})", crate::i18n::tr3("IMPORTANDO RECURSOS MUGEN", "IMPORTING MUGEN RESOURCES", "IMPORTANDO RECURSOS MUGEN"), done, total)
-            };
-            self.ui.progress_bar(80.0, VH - banner_h + 12.0, VW - 160.0, ratio, &label);
-            let hw = format!("⚡ PIPELINE: {} {} · SIMD", ume_formats::par::workers(total.max(1)), crate::i18n::tr3("THREADS PARALELAS", "PARALLEL THREADS", "HILOS PARALELOS"));
-            self.ui.text(&hw, VW - 80.0, VH - banner_h + 8.0, 13.0, hex("#00f0ff"), Align::Right, true);
+        if self.holo_gate_frame() {
         } else if !self.msg.is_empty() {
             self.ui
                 .rect(0.0, VH - 36.0, VW, 36.0, Color::new(0.0, 0.0, 0.0, 0.7));
@@ -702,6 +682,7 @@ impl App {
     }
 
     fn after_registry_change(&mut self) {
+        boot_holo::request_warm();
         let (nc, ns) = (self.reg.chars.len().max(1), self.reg.stages.len().max(1));
         self.sel = (
             self.sel.0.min(nc - 1),
@@ -2102,6 +2083,7 @@ impl App {
                 self.msg = crate::i18n::tr3("Pacote já importado", "Pack already imported", "Paquete ya importado").into()
             }
             Ok(r) => {
+                boot_holo::request_warm();
                 self.reg.sort_mugen();
                 self.sel = (
                     self.sel.0.min(self.reg.chars.len() - 1),

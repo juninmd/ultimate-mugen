@@ -101,32 +101,12 @@ impl App {
         };
         let total_packs = state.packs_done + queued + usize::from(state.job.is_some() || state.ready.is_some());
         let label = format!("{} {}/{}", tr("pacote", "pack"), (state.packs_done + 1).min(total_packs.max(1)), total_packs.max(1));
-        clear_background(hex("#05030c"));
-        self.ui.rect(0.0, 0.0, VW, VH, Color::new(0.015, 0.01, 0.04, 0.9));
-        self.ui.text_bold(
-            tr("IMPORTANDO RECURSOS MUGEN", "IMPORTING MUGEN RESOURCES"),
-            VW / 2.0,
-            VH / 2.0 - 56.0,
-            36.0,
-            WHITE,
-            BLACK,
-            Align::Center,
-        );
-        self.ui.text(&label, VW / 2.0, VH / 2.0 - 14.0, 22.0, hex("#d8d0f0"), Align::Center, false);
-        let (w, x, y) = (460.0, VW / 2.0 - 230.0, VH / 2.0 + 8.0);
-        self.ui.rect(x, y, w, 14.0, Color::new(1.0, 1.0, 1.0, 0.12));
-        if state.job.is_some() || state.registering {
-            self.ui.rect(x, y, w * ratio.clamp(0.0, 1.0), 14.0, hex("#22e8ff"));
-        } else {
-            let phase = (self.ui.t * 0.55).fract();
-            self.ui.rect(x + (w - 140.0) * phase, y, 140.0, 14.0, hex("#22e8ff"));
-        }
-        self.ui.rect(x, y, w, 2.0, Color::new(0.13, 0.91, 1.0, 0.65));
-        self.ui.text(&detail, VW / 2.0, VH / 2.0 + 44.0, 16.0, hex("#a49cc0"), Align::Center, false);
+        let full = format!("{} · {label} · {detail}", tr("IMPORTANDO", "IMPORTING"));
+        self.holo_gate_draw(ratio.clamp(0.0, 1.0), &full);
         self.ui.text(
             tr("ESC cancela · o jogo volta sozinho ao terminar", "ESC cancels · the game returns when done"),
             VW / 2.0,
-            VH / 2.0 + 72.0,
+            VH - 40.0,
             16.0,
             hex("#8a82a8"),
             Align::Center,

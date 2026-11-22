@@ -8,6 +8,10 @@ pub fn installed_notice(prior: Option<bool>, name: &str) -> String {
 }
 
 impl Market {
+    pub fn loading_installed(&self) -> bool {
+        !self.ready || !self.requested.is_empty() || self.has_registry_work()
+    }
+
     pub fn outdated(&self, repo_key: &str) -> Vec<String> {
         let Some(catalog) = self.catalogs.get(repo_key) else {
             return Vec::new();

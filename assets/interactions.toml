@@ -784,3 +784,192 @@ line_a_es = "¡Campeón Bruno! ¡Enséñame ese golpe del Ring!"
 line_b_pt = "Primeiro aguenta meu direto, garoto!"
 line_b_en = "First survive my right hook, kid!"
 line_b_es = "¡Primero aguanta mi gancho derecho, chico!"
+
+[[stage_interaction]]
+id = "kaname_spirit_gate"
+fighter = "kaname"
+stage_contains = ["espírit", "espirit", "spirit"]
+style = "ribbon"
+sprite = "reiatsu_badge"
+sfx = "easter_bankai"
+color = [0.64, 0.88, 1.0]
+title_pt = "PRESSÃO ESPIRITUAL NO PORTÃO!"
+title_en = "SPIRITUAL PRESSURE AT THE GATE!"
+title_es = "¡PRESIÓN ESPIRITUAL EN EL PORTAL!"
+sub_pt = "KANAME DESPERTA A GUARDA DOS ESPÍRITOS"
+sub_en = "KANAME RESONATES WITH THE SPIRIT GATE"
+sub_es = "KANAME RESUENA CON EL PORTAL ESPIRITUAL"
+
+[[fighter_trigger]]
+id = "kaname_senbonzakura"
+fighter = "kaname"
+trigger = "super"
+per_round = true
+style = "flyby"
+sprite = "sakura_petals"
+sfx = "easter_bankai"
+color = [1.0, 0.58, 0.78]
+title_pt = "DISPERSE-SE! MIL PÉTALAS!"
+title_en = "SCATTER! THOUSAND PETALS!"
+title_es = "¡DISPÉRSATE! ¡MIL PÉTALOS!"
+sub_pt = "TEMPESTADE DE PÉTALAS DE KANAME"
+sub_en = "KANAME'S CHERRY BLOSSOM BLADE STORM"
+sub_es = "TORMENTA DE PÉTALOS DE KANAME"
+
+[[fighter_trigger]]
+id = "kaname_bankai"
+fighter = "kaname"
+trigger = "transform"
+per_round = false
+style = "ribbon"
+sprite = "sakura_petals"
+sfx = "easter_bankai"
+color = [1.0, 0.54, 0.76]
+title_pt = "LIBERAÇÃO FINAL — BANKAI!"
+title_en = "FINAL RELEASE — BANKAI!"
+title_es = "¡LIBERACIÓN FINAL — BANKAI!"
+sub_pt = "A VERDADEIRA FORMA DA LÂMINA DESPERTA"
+sub_en = "THE TRUE FORM OF THE BLADE AWAKENS"
+sub_es = "LA VERDADERA FORMA DE LA HOJA DESPIERTA"
+
+[[fighter_trigger]]
+id = "shion_eyepatch"
+fighter = "shion"
+trigger = "low_hp"
+threshold = 0.45
+per_round = false
+speaker = "SHION"
+style = "speech"
+sfx = "easter_bankai"
+color = [1.0, 0.82, 0.28]
+title_pt = "Haha! Chega de brincar — agora vou usar as duas mãos!"
+title_en = "Haha! Done holding back — I'll use both hands now!"
+title_es = "¡Jaja! Basta de jugar — ¡ahora usaré ambas manos!"
+
+[[fighter_trigger]]
+id = "shion_reiatsu"
+fighter = "shion"
+trigger = "super"
+per_round = true
+style = "ribbon"
+sprite = "reiatsu_badge"
+sfx = "easter_bankai"
+color = [1.0, 0.76, 0.24]
+title_pt = "PRESSÃO ESPIRITUAL NO MÁXIMO!"
+title_en = "REIATSU OVERFLOW!"
+title_es = "¡PRESIÓN ESPIRITUAL AL MÁXIMO!"
+sub_pt = "SHION LIBERA TODA A FÚRIA DA LÂMINA"
+sub_en = "SHION UNLEASHES PURE SPIRITUAL PRESSURE"
+sub_es = "SHION LIBERA TODA SU PRESIÓN ESPIRITUAL"
+
+[[fighter_trigger]]
+id = "suzume_shunpo"
+fighter = "suzume"
+trigger = "first_attack"
+per_round = true
+speaker = "SUZUME"
+style = "speech"
+sfx = "easter_shunpo"
+color = [0.98, 0.36, 0.62]
+title_pt = "Shunpo! Lento demais — eu já estava atrás de você!"
+title_en = "Flash Step! Too slow — I was already behind you!"
+title_es = "¡Shunpo! Demasiado lento — ¡ya estaba detrás de ti!"
+
+[[fighter_trigger]]
+id = "suzume_shunko"
+fighter = "suzume"
+trigger = "transform"
+per_round = false
+style = "ribbon"
+sprite = "reiatsu_badge"
+sfx = "easter_shunpo"
+color = [0.78, 0.42, 1.0]
+title_pt = "SHUNKO — RELÂMPAGO VELOZ!"
+title_en = "SHUNKO — FLASH LIGHTNING!"
+title_es = "¡SHUNKO — RELÁMPAGO VELOZ!"
+sub_pt = "SUZUME ROMPE A BARREIRA DA VELOCIDADE"
+sub_en = "SUZUME BREAKS THE FLASH-STEP BARRIER"
+sub_es = "SUZUME ROMPE LA BARRERA DE VELOCIDAD"
+
+[[fighter_trigger]]
+id = "oboro_keikaku"
+fighter = "oboro"
+trigger = "super"
+per_round = true
+style = "ribbon"
+sprite = "hollow_mask"
+sfx = "easter_bankai"
+color = [0.94, 0.24, 0.42]
+title_pt = "TUDO CONFORME O PLANO..."
+title_en = "ALL ACCORDING TO PLAN..."
+title_es = "TODO SEGÚN EL PLAN..."
+sub_pt = "DESDE QUANDO ACHOU QUE NÃO ERA UMA ILUSÃO?"
+sub_en = "SINCE WHEN WERE YOU NOT UNDER MY ILLUSION?"
+sub_es = "¿DESDE CUÁNDO CREÍSTE QUE NO ERA ILUSIÓN?"
+
+[[fighter_trigger]]
+id = "mugen_ichigo_bankai"
+fighter_prefix = "ichigo"
+trigger = "super_or_combo"
+threshold = 6.0
+per_round = true
+style = "ribbon"
+sprite = "hollow_mask"
+sfx = "easter_bankai"
+color = [1.0, 0.38, 0.22]
+title_pt = "BANKAI — GETSUGA TENSHO!"
+title_en = "BANKAI — GETSUGA TENSHO!"
+title_es = "¡BANKAI — GETSUGA TENSHO!"
+sub_pt = "O SUBSTITUTO SHINIGAMI LIBERA O PODER"
+sub_en = "THE SUBSTITUTE SOUL REAPER UNLEASHES POWER"
+sub_es = "EL SHINIGAMI SUSTITUTO LIBERA SU PODER"
+
+[[fighter_trigger]]
+id = "mugen_aizen_kyoka"
+fighter_prefix = "aizen"
+trigger = "super"
+per_round = true
+style = "ribbon"
+sprite = "hollow_mask"
+sfx = "easter_bankai"
+color = [0.78, 0.32, 1.0]
+title_pt = "KYOKA SUIGETSU!"
+title_en = "SHATTER, KYOKA SUIGETSU!"
+title_es = "¡QUIÉBRATE, KYOKA SUIGETSU!"
+sub_pt = "HIPNOSE COMPLETA ATIVADA"
+sub_en = "COMPLETE HYPNOSIS ENGAGED"
+sub_es = "HIPNOSIS COMPLETA ACTIVADA"
+
+[[exchange]]
+id = "ex_kaname_suzume_shunpo"
+fighters = ["kaname", "suzume"]
+first_id = "suzume"
+first_speaker = "SUZUME"
+second_speaker = "KANAME"
+delay_ticks = 128
+sfx = "easter_shunpo"
+color_a = [0.98, 0.36, 0.62]
+color_b = [1.0, 0.62, 0.82]
+line_a_pt = "Ainda tentando alcançar o meu Shunpo, Kaname?"
+line_a_en = "Still trying to catch my Flash Step, Kaname?"
+line_a_es = "¿Aún intentando alcanzar mi Shunpo, Kaname?"
+line_b_pt = "Você continua tão imprudente quanto antes, Suzume."
+line_b_en = "You remain as reckless as ever, Suzume."
+line_b_es = "Sigues siendo tan imprudente como siempre, Suzume."
+
+[[exchange]]
+id = "ex_shion_oboro_reiatsu"
+fighters = ["shion", "oboro"]
+first_id = "oboro"
+first_speaker = "OBORO"
+second_speaker = "SHION"
+delay_ticks = 132
+sfx = "easter_bankai"
+color_a = [0.94, 0.24, 0.42]
+color_b = [1.0, 0.8, 0.28]
+line_a_pt = "Força bruta nunca alcança quem lê o futuro."
+line_a_en = "Brute force never reaches one who reads the future."
+line_a_es = "La fuerza bruta nunca alcanza a quien lee el futuro."
+line_b_pt = "Se eu cortar tudo pela frente, sua ilusão cai junto!"
+line_b_en = "If I cut everything in front of me, your illusion falls too!"
+line_b_es = "¡Si corto todo al frente, tu ilusión cae también!"

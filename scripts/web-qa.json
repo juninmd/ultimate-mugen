@@ -18,6 +18,7 @@
     { "name": "team-7v7-touch", "shard": "mobile", "script": "web-team-smoke.js", "args": ["{dist}"], "env": { "TEAM_MOBILE": "1" } },
     { "name": "touch-menu", "shard": "mobile", "script": "web-touch-menu-smoke.js", "args": ["{dist}"] },
     { "name": "touch-fight", "shard": "mobile", "script": "web-touch-smoke.js", "args": ["{dist}"] },
+    { "name": "touch-pad", "shard": "mobile", "script": "web-touch-pad-smoke.js", "args": ["{dist}"] },
     { "name": "engine-smoke-mobile", "shard": "mobile", "script": "smoke-web.js", "args": ["{dist}", "{out}"], "env": { "SMOKE_MOBILE": "1" } },
     { "name": "engine-smoke", "shard": "engine", "script": "smoke-web.js", "args": ["{dist}", "{out}"] },
     { "name": "match-1", "shard": "match-1", "script": "web-match-smoke.js", "args": ["{dist}"], "env": { "MATCH_SMOKE_SHARD": "1/2" } },

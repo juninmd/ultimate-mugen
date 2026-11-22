@@ -123,10 +123,11 @@ pub fn populate(m: &mut Match, stage: &Stage) {
     if !enabled() || m.training || m.power_arena || !m.objects.is_idle() {
         return;
     }
-    let supported = matches!(
-        stage.art,
-        StageArt::Procedural { .. } | StageArt::Illustrated { span, .. } if span <= 0.0
-    );
+    let supported = match &stage.art {
+        StageArt::Procedural { .. } => true,
+        StageArt::Illustrated { span, .. } => *span <= 0.0,
+        StageArt::Mugen(_) => false,
+    };
     if !supported || stage.kind == StageKind::Custom {
         return;
     }

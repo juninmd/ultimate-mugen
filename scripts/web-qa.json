@@ -5,7 +5,8 @@
     "web-import-probe": "needs a pack path argument, latency probe",
     "web-frame-probe": "manual profiling tool, not a pass/fail check",
     "web-sprite-readiness": "no CLI entry for the wasm dist, covered by cargo tests",
-    "web-story-playthrough": "long manual playthrough, not part of the PR gate"
+    "web-story-playthrough": "long manual playthrough, not part of the PR gate",
+    "web-tour": "manual visual tour that screenshots every screen on desktop and phone for review"
   },
   "scenarios": [
     { "name": "web-flow", "shard": "ui", "script": "web-smoke.js", "args": ["{dist}"] },

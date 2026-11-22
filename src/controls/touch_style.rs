@@ -86,7 +86,7 @@ pub fn draw_button(p: Vec2, rr: f32, label: &str, base: Color, pressed: bool) {
         draw_circle_lines(p.x, p.y, rr, 2.0, Color::new(1.0, 1.0, 1.0, 0.55));
     }
     let mut fs = (rr * 0.5) as u16;
-    while fs > 6 && measure_text(label, None, fs, 1.0).width > rr * 1.8 {
+    while fs > 6 && measure_text(label, None, fs, 1.0).width > rr * 1.45 {
         fs -= 1;
     }
     let d = measure_text(label, None, fs, 1.0);

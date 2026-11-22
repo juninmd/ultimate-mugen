@@ -117,13 +117,14 @@ impl App {
         };
         if let Some(d) = e.peek(pal) {
             let t = self.preview_t;
-            self.draw_char(
+            self.draw_char_fit(
                 &d,
                 if d.anims.contains_key(&181) { 181 } else { 0 },
                 t,
-                330.0,
-                480.0,
-                260.0,
+                310.0,
+                585.0,
+                300.0,
+                430.0,
                 false,
             );
         }

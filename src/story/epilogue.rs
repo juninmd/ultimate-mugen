@@ -1,8 +1,12 @@
 use super::stages::STAGES;
 use serde::Deserialize;
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
 use ume_native::LocalText;
+
+#[path = "epilogue_tale.rs"]
+mod epilogue_tale;
 
 const BUNDLED_TEXT: &str = include_str!("../../assets/story/epilogues.json");
 pub const FILE: &str = "story-epilogues.json";
@@ -108,6 +112,23 @@ pub fn final_boss(player_id: &str) -> &'static str {
     } else {
         last.boss
     }
+}
+
+pub fn pick_named<'a>(table: &'a Table, fighter_id: &str, name: &str) -> Option<Cow<'a, Epilogue>> {
+    let id = fighter_id.strip_prefix("umf:").unwrap_or(fighter_id);
+    match table.get(id) {
+        Some(own) => Some(Cow::Borrowed(own)),
+        None => epilogue_tale::tale_for(table, id, name)
+            .map(Cow::Owned)
+            .or_else(|| table.get(FALLBACK).map(Cow::Borrowed)),
+    }
+}
+
+pub fn of_named(fighter_id: &str, name: &str, mercy: Option<bool>) -> Option<Cow<'static, Epilogue>> {
+    if mercy == Some(true) {
+        return of_with(fighter_id, mercy).map(Cow::Borrowed);
+    }
+    pick_named(table(), fighter_id, name)
 }
 
 #[cfg(test)]

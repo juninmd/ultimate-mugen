@@ -22,3 +22,4 @@ An ADR records one decision that changes a crate boundary, a dependency or a dat
 | [0007](0007-umf2-definitive-fighter-format.md) | UMF 2: JSON kept, compact frames, canonical layout, quality floor | Accepted |
 | [0008](0008-umf-schema-and-storage-review.md) | UMF JSON Schema checked in CI; JSON + PNG kept after measuring alternatives | Accepted / Proposed |
 | [0009](0009-lz4-sprite-container.md) | LZ4 sprite container for native and M.U.G.E.N. sprites | Accepted |
+| [0010](0010-exact-mugen-migration.md) | Exact M.U.G.E.N. migration: original data in UMF, same load path, parity tool | Accepted |

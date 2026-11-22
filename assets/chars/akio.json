@@ -1414,7 +1414,7 @@
       "sounds": [{"at":2,"snd":[200,3]}]
     }
   ],
-  "country": "Japão",
+  "country": "México",
   "stage": "dojo",
   "speed": 1.15,
   "passives": {"meterRegen":0.45,"rage":{"maxMultiplier":1.4,"exponent":1.15,"startRatio":0.35,"fullRatio":0.05}},
@@ -1475,9 +1475,9 @@
     "charge": {"auraColor":[110,45,15],"shake":true}
   },
   "profile": {
-    "country": "JP",
-    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
-    "origin": {"en":"Starfall Dojo, Kyoto","pt":"Dojo Queda Estelar, Kyoto","es":"Dojo Estrella Fugaz, Kioto"},
+    "country": "MX",
+    "nationality": {"en":"Mexican","pt":"Mexicano","es":"Mexicano"},
+    "origin": {"en":"Starfall Dojo, Mérida","pt":"Dojo Queda Estelar, Mérida","es":"Dojo Estrella Fugaz, Mérida"},
     "title": {"en":"Crimson Star Prodigy","pt":"Prodígio da Estrela Carmesim","es":"Prodigio de la Estrella Carmesí"},
     "fightingStyle": {"en":"Starflame Kenpo","pt":"Kenpo Chama Estelar","es":"Kenpo Llama Estelar"},
     "affiliation": {"en":"Storm Road Alliance","pt":"Aliança da Estrada da Tempestade","es":"Alianza del Camino de la Tormenta"},

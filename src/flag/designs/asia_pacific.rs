@@ -190,4 +190,11 @@ pub(super) const FLAGS: &[(&str, &[Shape])] = &[
             star(0.8, 0.55, 0.03, 5, 0xFFFFFF),
         ],
     ),
+    (
+        "vn",
+        &[
+            rect(0.0, 0.0, 1.0, 1.0, 0xDA251D),
+            star(0.5, 0.5, 0.3, 5, 0xFFFF00),
+        ],
+    ),
 ];

@@ -1511,8 +1511,8 @@
   },
   "passives": {"meterRegen":0.4},
   "profile": {
-    "country": "JP",
-    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
+    "country": "ECLIPSE",
+    "nationality": {"en":"Forgotten Moon Dynasty","pt":"Dinastia da Lua Esquecida","es":"Dinastía de la Luna Olvidada"},
     "origin": {"en":"Eclipse Citadel","pt":"Cidadela do Eclipse","es":"Ciudadela del Eclipse"},
     "title": {"en":"Illusionist of the Eclipse","pt":"O Ilusionista do Eclipse","es":"El Ilusionista del Eclipse"},
     "fightingStyle": {"en":"Mikazuki Eclipse Arts","pt":"Artes do Eclipse Mikazuki","es":"Artes del Eclipse Mikazuki"},

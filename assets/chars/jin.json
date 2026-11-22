@@ -1329,7 +1329,7 @@
     {"top":"#e86a1a","top2":"#1a2440","trim":"#1a2440","pants":"#1a2440","cloth":"#f0f0f0","hair":"#3a2414","eye":"#e86a1a","legs":"#1a2440","boot":"#1a2440","energy":"#ffb05a","aura":"#ffb05a"},
     {"top":"#3a3a48","top2":"#e8e4f0","trim":"#e8e4f0","pants":"#e8e4f0","cloth":"#7a3ad8","hair":"#d8dce8","eye":"#7a3ad8","legs":"#e8e4f0","boot":"#3a3a48","energy":"#c08aff","aura":"#c08aff"}
   ],
-  "country": "Japão",
+  "country": "Jamaica",
   "stage": "bamboo",
   "speed": 1.18,
   "passives": {
@@ -1408,9 +1408,9 @@
     "charge": {"auraColor":[25,105,100],"shake":true}
   },
   "profile": {
-    "country": "JP",
-    "nationality": {"en":"Japanese","pt":"Japonês","es":"Japonés"},
-    "origin": {"en":"Windmill Village, Iga","pt":"Vila Moinho de Vento, Iga","es":"Aldea Molino de Viento, Iga"},
+    "country": "JM",
+    "nationality": {"en":"Jamaican","pt":"Jamaicano","es":"Jamaicano"},
+    "origin": {"en":"Windmill Village, Blue Mountains","pt":"Vila Moinho de Vento, Montanhas Azuis","es":"Aldea Molino de Viento, Montañas Azules"},
     "title": {"en":"Crimson Scarf Shinobi","pt":"Shinobi do Cachecol Carmesim","es":"Shinobi de la Bufanda Carmesí"},
     "fightingStyle": {"en":"Kazaguruma Wind Ninjutsu","pt":"Ninjutsu do Vento Kazaguruma","es":"Ninjutsu del Viento Kazaguruma"},
     "affiliation": {"en":"Kazaguruma Clan","pt":"Clã Kazaguruma","es":"Clan Kazaguruma"},

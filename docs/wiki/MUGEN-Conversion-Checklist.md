@@ -1,63 +1,30 @@
 # MUGEN to UMF conversion checklist
 
-What `tools/mugen2umf` (skill `mugen-to-ume-migrator`) carries from a M.U.G.E.N fighter into a native UMF fighter, checked against Goku SSJ4. Every run writes `coverage.md` next to the JSON with the fate of each `Statedef`.
+`tools/mugen2umf` (Rust crate, skill `mugen-to-ume-migrator`) migrates a M.U.G.E.N fighter to a UMF bundle with identical behavior. It no longer rewrites states as native UMF moves: the bundle carries the original data and the engine loads it through the same code as a M.U.G.E.N character (`ume_engine::loader::assemble_mugen_char`). See [UMF Character](UMF-Character.md#mugen-parity-exact-migration) for the format.
 
-## Migrates today
+## What is carried
 
-| Area | How it lands in UMF | Checked |
-|---|---|---|
-| Sprites | every SFF sprite as PNG, 1:1 scale, axis kept | 198/198 |
-| Sounds | the whole `.snd` as WAV | 19/19 |
-| Animations and boxes | `.air` with `Clsn1`, `Clsn2`, `Clsn1Default` | all actions |
-| Commands and moves | `Statedef -1` routes, `when` stand/crouch/air/fly, `cost`, `cancels` | 86 moves |
-| Intro, win and taunt | states 170-199 as verbatim `scripts.cns`, own `Statedef 190` at round start | intro text and sound identical |
-| Ki charge | `abilities.charge` on **R** (Start) with start, loop and end animations and sounds | sounds identical |
-| Flight and fly moves | `abilities.fly` plus moves with `when: "fly"` | fly normals 300-340 |
-| Teleports | multi-step `teleport`, or `abilities.teleport` when `p2dist` is used | travel within 3 px |
-| Long cinematics | chains up to 12 states, timed exits, `landAt`, `followUp` hit/contact/hitNow | Meteor plays all 6 sounds |
-| HitDef and projectiles | hits without cap, `recover`, `missTime`, guard, pause, sparks | ok |
-| FX | Explod, AfterImage, EnvShake, EnvColor, SuperPause, NotHitBy | ok |
-| Motion and palette | `VelMul`, per-tick `VelAdd` (own gravity, native gravity skipped), `PosFreeze`, `PosSet`, `PalFX` as `velMul`, `velAdd`, `posFreeze`, `posSet`, `palFx` | Meteor jump -103 = original |
-| Extras | `--extra` deep merge keeps detected abilities and adds forms (Limit Breaker), clones, passives, quotes; a move with an existing `id` only patches the fields it lists | ok |
-| Helpers | `Helper` → `spawn`; the helper state and everything it calls (`ChangeState`, `HitOverride`, `HitDef p1stateno/p2stateno`) passes verbatim, renumbered from 70000 | ok |
-| Global states | `Statedef -2` / `-3` verbatim; `Parent,StateNo = N` pointing at a converted move becomes `@move(id)` | ok |
-| Rekka / hold / release | in-move `ChangeState` on `command` → child move with `rekka`, or `followUp on: "command"` / `"release"` | ok |
-| Ground/air controllers | a controller only valid in the air (`StateType = A`) is left out of the ground move and the other way round | ok |
-| Own hit sounds | `hitsound = S g,i` → `hitSound` + `ownSound: true` | ok |
-| SFF v1 shared palettes | `mugenversion = 1.x`: shared sprites follow the previous sprite's palette (super backgrounds, effects); WinMUGEN keeps the `.act` rule | ok |
-| Commented-out routes | `mugenRoutes` in the extra file unlocks a state the `.cmd` left commented (Black Widow S.H.I.E.L.D. hyper) | ok |
+| Area | In the bundle |
+|---|---|
+| States and controllers | `mugen.cns`, `mugen.st`, `mugen.stcommon` verbatim (CNS and ZSS), including helpers, `Statedef -2/-3`, AI and custom throws |
+| Commands | `mugen.cmd` verbatim: `[Defaults]`, every `[Command]` and the `Statedef -1` routes |
+| Constants | parsed from the original `[Data]`, `[Size]`, `[Velocity]`, `[Movement]` with the same `localcoord` scaling |
+| Animations | `mugen.anims`: every action with offset, ticks, flip, blend and alpha, scale, angle, every Clsn1/Clsn2 box, loopstart |
+| Sprites | one indexed PNG per SFF sprite (same indices and palette), true color as RGBA, SFF order and duplicates kept for palette selection |
+| Palettes | SFF palettes (`sffpal_<k>.png`) and `pal1.act`..`pal12.act`: palette swaps and `RemapPal`/`PalFX` see the same colors |
+| Sounds | every `.snd` entry as `snd_g_i.wav` |
+| UMF-only fields | `profile` (country, nationality, origin, bio, title, fighting style, affiliation in en/pt/es), `series`, quotes, `rivals`: `profile_facts` gathers the facts, the skill writes, `set_profile` validates |
+| Improvements | `--extra`: move names (`mugen.names`), `mugenRoutes` for states the `.cmd` left without a command, new moves as `scripts` (CNS/ZSS) |
 
-## Partial or approximated
+## Proof
 
-- Custom throw states (Goku 616, 810, 820, 821, 1025-1028) are replaced by the UMF `throw` block.
-- Charge speed follows the native gain ramp (0 to 3000 in 150 ticks, the original reaches 930).
-- Damage is 59-74 % of the original because native combo proration scales hits.
-- `AnimElem` triggers on looping animations map only the first loop (Black Widow Eat Lead fires 2 bursts instead of the whole loop).
-- Black Widow: 32 of 43 routes match the original sounds and damage; the rest are the hypers' looping cinematics, the jump-back Widow's Strike chain and the custom throw.
+`mugen2umf parity <original> <bundle>` (also run by `convert`) compares:
 
-## Not migrated yet
+- data: states, commands, constants, animations, sprites (pixels and axes), indexed sprites and palettes, sounds, sizes;
+- behavior: every `Statedef -1` command is played from its real input on the original and on the bundle, 150 ticks in the same match, and every tick of every fighter (state, animation, frame, position, velocity, control, life, power, helpers, sounds) must match.
 
-Controllers with a condition the converter cannot pin to a frame (for example `PosSet` when `Pos Y < -175`) are listed in `coverage.md` as dropped. Goku SSJ4 has none inside its moves.
+The verdict is `IDENTICAL` or the first tick where they part. `cargo test --release -p mugen2umf` converts Kung Fu Man from `assets/mugen/elecbyte.zip` and requires `IDENTICAL`.
 
-Dead code (states no command reaches) and shadowed states (a command already taken by an earlier route, so the state never fires in M.U.G.E.N either) are listed in `coverage.md` and skipped on purpose.
+## Limits
 
-## Evidence
-
-Run the original and the UMF side by side:
-
-```sh
-UME_CHAR_DIR=<mugen-folder> UME_TEST_UMF_JSON=<out>/<id>.json UME_EVIDENCE_DIR=<dir> \
-  cargo test --release -p ume-engine --test umf_parity_evidence -- --nocapture
-```
-
-Results for Goku SSJ4 are in `docs/evidence/umf-converter/` (`parity.md` and one sheet per scenario: top row original, bottom row UMF).
-
-Every listed move, original state against the UMF move (`routes.json` written by `convert`), plus moves that exist only in the UMF:
-
-```sh
-UME_CHAR_DIR=<mugen-folder> UME_TEST_UMF_JSON=<out>/<id>.json UME_EVIDENCE_DIR=<dir> \
-  UME_EVIDENCE_MOVES=qcf_x,qcb_x UME_EVIDENCE_EXTRA=new_move \
-  cargo test --release -p ume-engine --test umf_route_parity -- --nocapture
-```
-
-Black Widow results are in `docs/evidence/umf-converter/black-widow/` (`route_parity.md` and sheets).
+What the engine does not support from M.U.G.E.N is listed in the bundle's `report.md` (engine diagnostics). It affects the original and the bundle the same way: fix it in the engine, not in the converter.

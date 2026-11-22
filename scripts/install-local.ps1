@@ -83,6 +83,15 @@ foreach ($f in 'LICENSE-ELECBYTE.txt') {
     if (Test-Path -LiteralPath $src) { Copy-Item -LiteralPath $src -Destination (Join-Path $mugenDst $f) -Force }
 }
 
+# Sprites dos lutadores nativos (lidos do disco em runtime).
+$spritesSrc = Join-Path $root 'assets\chars\sprites'
+$spritesDst = Join-Path $InstallDir 'assets\chars\sprites'
+if (Test-Path -LiteralPath $spritesSrc) {
+    New-Item -ItemType Directory -Force -Path $spritesDst | Out-Null
+    Copy-Item -Path (Join-Path $spritesSrc '*') -Destination $spritesDst -Recurse -Force
+    Write-Host "  sprites dos lutadores copiados"
+}
+
 # Pastas de conteudo do usuario (personagens e cenarios MUGEN).
 New-Item -ItemType Directory -Force -Path (Join-Path $InstallDir 'mugen\chars') | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $InstallDir 'mugen\stages') | Out-Null

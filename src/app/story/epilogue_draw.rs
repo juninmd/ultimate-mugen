@@ -3,6 +3,7 @@ use crate::gfx::*;
 use crate::i18n::tr3;
 use crate::poly;
 use crate::story::epilogue::{Beat, Epilogue, Speaker};
+use crate::story::epilogue_pose::{self, Pose};
 use crate::ui::*;
 
 const BAR: f32 = 58.0;
@@ -67,7 +68,7 @@ impl App {
             );
         }
         self.ui.motes(if home { 30 } else { 45 }, 0.9);
-        self.epilogue_cast(beat, home, closing, t, boss);
+        self.epilogue_cast(beat, (home, closing, page == first_home), t, boss);
         if beat.is_none() {
             self.ui
                 .rect(0.0, 0.0, VW, 720.0, Color::new(0.0, 0.0, 0.0, 0.45));
@@ -168,8 +169,7 @@ impl App {
     fn epilogue_cast(
         &mut self,
         beat: Option<&Beat>,
-        home: bool,
-        closing: bool,
+        (home, closing, arrival): (bool, bool, bool),
         t: f32,
         boss: Option<usize>,
     ) {
@@ -181,10 +181,16 @@ impl App {
             .peek(1)
             .or_else(|| self.reg.chars[hero].load_preview(1).ok());
         if home {
-            let anim = if closing { 181 } else { 0 };
             self.char_tint = WHITE;
             if let Some(def) = &hero_def {
-                self.draw_char(def, anim, time, 380.0 - slide, FLOOR, 400.0, false);
+                let owns = |no: i32| def.anims.contains_key(&no);
+                let (pose, x) = match (closing, arrival && epilogue_pose::arriving(t)) {
+                    (_, true) => (Pose::Arrive, epilogue_pose::arrival_x(t, 380.0)),
+                    (true, _) => (Pose::Win, 380.0 - slide),
+                    _ => (Pose::Idle, 380.0 - slide),
+                };
+                let anim = epilogue_pose::anim(pose, owns);
+                self.draw_char(def, anim, time, x, FLOOR, 400.0, false);
             }
             return;
         }
@@ -194,11 +200,12 @@ impl App {
             WHITE
         };
         if let Some(def) = &hero_def {
-            let anim = if speaker == Some(Speaker::Hero) {
-                181
+            let pose = if speaker == Some(Speaker::Hero) {
+                Pose::Reply
             } else {
-                0
+                Pose::Idle
             };
+            let anim = epilogue_pose::anim(pose, |no| def.anims.contains_key(&no));
             self.draw_char(def, anim, time, 360.0 - slide, FLOOR, 400.0, false);
         }
         self.char_tint = if speaker == Some(Speaker::Hero) {

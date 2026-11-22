@@ -56,6 +56,7 @@ pub(super) fn with_defaults(nc: &NativeChar) -> NativeChar {
 }
 
 pub fn compile_native_with(nc: &NativeChar, pal_no: i32, with_images: bool, only: Option<&[i32]>) -> CharDef {
+    if let Some(spec) = &nc.mugen { return super::exact::compile_exact(nc, spec, pal_no, with_images, only); }
     let nc = &super::power_normals::with_power_normals(with_defaults(nc));
     let palette = if pal_no > 1 && !nc.palettes.is_empty() { Some(&nc.palettes[(pal_no as usize - 2) % nc.palettes.len()]) } else { None };
     let mut sprites = HashMap::new();

@@ -17,8 +17,6 @@ jobs:
       - run: node --test scripts/*.test.mjs
       - run: node scripts/file-size.mjs
       - run: node scripts/crate-boundaries.mjs
-      - run: python3 -m pip install --quiet --disable-pip-version-check pillow==12.3.0
-      - run: python3 -m unittest discover -s tools/mugen2umf/tests -t tools
   wiki:
     runs-on: ubuntu-latest
     timeout-minutes: 10

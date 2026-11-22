@@ -51,7 +51,7 @@ impl App {
                     2 => s.mugen,
                     _ => true,
                 })
-                .filter(|(_, s)| q.is_empty() || s.name.to_lowercase().contains(q.as_str()))
+                .filter(|(_, s)| q.is_empty() || s.name.to_lowercase().contains(q.as_str()) || crate::i18n::stage_names::shown(&s.name).to_lowercase().contains(q.as_str()))
                 .map(|(i, _)| i + 1),
         );
         VIEW.with(|c| *c.borrow_mut() = Some((key, v.clone())));

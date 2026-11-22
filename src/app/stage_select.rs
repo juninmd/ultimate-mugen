@@ -120,7 +120,7 @@ impl App {
                 )
             } else {
                 let s = &self.reg.stages[i - 1];
-                (s.name.clone(), s.thumb, s.mugen)
+                (crate::i18n::stage_names::shown(&s.name).to_string(), s.thumb, s.mugen)
             };
             self.ui
                 .gradient_v(x, y, TILE_W, TILE_H * 0.5, rgb(th[0]), rgb(th[1]));

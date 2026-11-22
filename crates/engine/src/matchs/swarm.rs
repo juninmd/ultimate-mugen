@@ -144,6 +144,7 @@ impl Match {
     }
 
     fn place_foe(&mut self, i: usize, x: f32, y: f32) {
+        self.elixir_release(i);
         let toward = self.roots().filter(|f| f.side == 0 && f.alive).map(|f| f.pos.x).min_by(|a, b| (a - x).abs().total_cmp(&(b - x).abs())).unwrap_or(0.0);
         let in_play = self.round_state == 2;
         {

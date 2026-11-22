@@ -97,4 +97,25 @@ pub(crate) async fn run(app: &mut App, dir: &str) {
         }
     }
     screen(app, dir, "arena-far-edge", 40).await;
+    {
+        let App { session, .. } = app;
+        let s = session.as_mut().unwrap();
+        let e = s.m.elixir.as_ref().unwrap().clone();
+        let f = &mut s.m.fighters[0];
+        f.pos.x = e.x - 90.0;
+        f.pos.y = e.y;
+        f.unhittable = 600;
+    }
+    screen(app, dir, "arena-elixir", 60).await;
+    {
+        let App { session, .. } = app;
+        let s = session.as_mut().unwrap();
+        let (x, y) = { let e = s.m.elixir.as_ref().unwrap(); (e.x, e.y) };
+        let f = &mut s.m.fighters[0];
+        f.pos.x = x;
+        f.pos.y = y;
+        println!("arena: life_max before {}", f.life_max);
+    }
+    screen(app, dir, "arena-elixir-taken", 6).await;
+    println!("arena: life_max after {}", app.session.as_ref().unwrap().m.fighters[0].life_max);
 }

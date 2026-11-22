@@ -55,7 +55,7 @@ pub fn checksum(m: &Match) -> u128 {
     h.i32(m.intro_ticks);
     h.i32(m.rounds_to_win);
     h.u32(m.corner_pushes);
-    h.u32(m.won_by_ko as u32); h.u32(m.power_arena as u32); h.u32(m.swarm.as_ref().map_or(0, |s| s.kills ^ (s.spawned << 8)));
+    h.u32(m.won_by_ko as u32); h.u32(m.power_arena as u32); h.u32(m.elixir.as_ref().map_or(0, |e| 1 + e.taken() as u32)); h.u32(m.swarm.as_ref().map_or(0, |s| s.kills ^ (s.spawned << 8)));
     h.i32(m.finish_window);
     h.u32(m.rng);
     h.u32(m.rand_state.get());

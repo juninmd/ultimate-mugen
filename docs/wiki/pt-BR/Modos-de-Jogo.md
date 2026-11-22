@@ -121,6 +121,8 @@ A entrada do menu abre uma tela de ajuste antes da seleção: **seu time** (1 a 
 - A câmera segue só o seu time, então inimigos distantes não esticam o zoom. Lutadores fora da tela não são desenhados.
 - Um **minimapa** aparece abaixo do HUD sempre que o mapa é mais largo que a tela: pontos verdes e ciano são seu time, vermelhos são os inimigos e a moldura amarela é a câmera. O HUD mostra os inimigos restantes sobre o total.
 
+- **Elixir do poder:** um frasco brilhante flutua na plataforma mais alta (marcado em dourado no minimapa). Quem chegar primeiro, seu lutador ou qualquer inimigo, dobra a vida máxima e a preenche por completo. Existe uma vez por round e é devolvido quando o próximo round começa. Código: `crates/engine/src/matchs/elixir.rs`, desenho em `src/power_arena_elixir.rs`.
+
 Código: simulação em `crates/engine/src/matchs/swarm.rs`, tela de ajuste em `src/app/arena_setup.rs` e `arena_pick.rs`, minimapa e plataformas em bloco em `src/power_arena.rs`.
 
 Na versão web, abra uma luta diretamente com `?modo=arena&p1=kaito&p2=shion&luta=1`.

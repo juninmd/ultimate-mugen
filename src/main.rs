@@ -47,8 +47,6 @@ mod tower;
 mod passive_fx; mod title_crt; mod screen_art; mod spring; mod texgen; mod tweaks; mod ui; mod ui_adapted; mod ui_adapted_panels; mod ui_progress; mod ui_tokens;
 mod update;
 #[cfg(target_arch = "wasm32")]
-mod screen_art_fetch;
-#[cfg(target_arch = "wasm32")]
 mod web_sprites;
 #[cfg(not(target_arch = "wasm32"))]
 mod scan_report;

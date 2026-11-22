@@ -9,6 +9,7 @@ pub mod portrait_cache;
 pub mod refs;
 pub mod repo;
 pub mod safety;
+mod sfx_filter;
 pub mod state;
 pub mod version;
 pub mod zipdir;

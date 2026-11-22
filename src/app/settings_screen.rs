@@ -634,7 +634,7 @@ impl App {
         if tab == 5 {
             let (nm, nn) = (
                 self.reg.chars.iter().filter(|c| c.mugen).count(),
-                self.reg.chars.len(),
+                self.playable().len(),
             );
             let lines = [
                 format!("{} v{}", tr("Versão da engine", "Engine version"), crate::update::VERSION),
